@@ -42,10 +42,19 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   public static final String MW_PHRASE_TAG = "MW_PHRASE?";
 
   public static final String EMPTY_LEAF_VALUE = "=NONE=";
+  public static final String LEFT_PARENTHESIS = "=LRB=";
+  public static final String RIGHT_PARENTHESIS = "=RRB=";
 
   private static final Map<String, String> spellingFixes = new HashMap<String, String>() {{
       put("jucio", "juicio"); // 4800_2000406.tbf-5
       put("tambien", "también"); // 41_19991002.tbf-8
+
+      // Hack: these aren't exactly spelling mistakes, but we need to
+      // run a search-and-replace across the entire corpus with them, so
+      // they should be treated just like spelling mistakes for our
+      // purposes
+      put("(", LEFT_PARENTHESIS);
+      put(")", RIGHT_PARENTHESIS);
     }};
 
   /**
