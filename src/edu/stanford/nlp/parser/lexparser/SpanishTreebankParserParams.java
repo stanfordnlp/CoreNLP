@@ -129,7 +129,8 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
 
     // +___ F1
     annotations.put("-markCoordinatedNPs", new Pair(
-      "@sn <, (@sn $+ (@conj < /^(cc|grup\\\\.cc)/ $+ @sn=last)) <` =last",
+      "@sn <, (/^(sn|grup\\.nom)/ $+ (@conj < /^(cc|grup\\.cc)/ $+ /^(sn|grup\\.nom)/=last))" +
+        "<` =last",
       new SimpleStringFunction("-coord")));
 
     compileAnnotations(headFinder);
