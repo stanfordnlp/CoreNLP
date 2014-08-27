@@ -53,7 +53,6 @@ public class AnCoraProcessor {
   private final Properties options;
 
   private final TwoDimensionalCounter<String, String> unigramTagger;
-  private final boolean buildTagger;
 
   @SuppressWarnings("unchecked")
   public AnCoraProcessor(List<File> inputFiles, Properties options)
@@ -66,10 +65,8 @@ public class AnCoraProcessor {
       ObjectInputStream ois = new ObjectInputStream(new FileInputStream(options.getProperty
         ("unigramTagger")));
       unigramTagger = (TwoDimensionalCounter<String, String>) ois.readObject();
-      buildTagger = false;
     } else {
       unigramTagger = new TwoDimensionalCounter<String, String>();
-      buildTagger = true;
     }
   }
 
@@ -102,9 +99,8 @@ public class AnCoraProcessor {
     for (File file : inputFiles) {
       Pair<TwoDimensionalCounter<String, String>, List<Tree>> ret = processTreeFile(file, trf,
                                                                                     encoding);
-      if (buildTagger)
-        Counters.addInPlace(unigramTagger, ret.first());
 
+      Counters.addInPlace(unigramTagger, ret.first());
       trees.addAll(ret.second());
     }
 
