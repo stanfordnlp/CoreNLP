@@ -165,6 +165,7 @@ public final class MultiWordPreprocessor {
         put("pique", "ncms000");
         put("pos", "ncms000");
         put("postre", "ncms000");
+        put("pro", "ncms000");
         put("ralentí", "ncms000");
         put("ras", "ncms000");
         put("rebato", "ncms000");
@@ -243,10 +244,20 @@ public final class MultiWordPreprocessor {
       else if (pPronounDeterminers.matcher(word).matches() && containingPhrase.endsWith(word))
         // Determiners tailing a phrase are pronouns: "sobre todo," "al otro", etc.
         return "pi000000";
-      else if ((word.equals("contra") && containingPhrase.endsWith(word)))
+      else if (word.equals("cuando") && containingPhrase.endsWith(word))
+        return "pi000000";
+      else if ((word.equalsIgnoreCase("contra") && containingPhrase.endsWith(word)))
         return "nc0s000";
       else if (word.equals("salvo") && containingPhrase.endsWith("salvo"))
         return "aq0000";
+      else if (word.equals("mira") && containingPhrase.endsWith(word))
+        return "nc0s000";
+      else if (word.equals("pro") && containingPhrase.startsWith("en pro"))
+        return "nc0s000";
+      else if (word.equals("espera") && containingPhrase.endsWith("espera de"))
+        return "nc0s000";
+      else if (word.equals("Paso") && containingPhrase.equals("El Paso"))
+        return "np00000";
 
       if (word.equals("Al")) {
         // "Al" is sometimes a part of name phrases: Arabic names, Al Gore, etc.
@@ -262,7 +273,8 @@ public final class MultiWordPreprocessor {
 
       if (word.equals("sino") && containingPhrase.endsWith(word))
         return "nc0s000";
-      else if (word.equals("mañana"))
+      else if (word.equals("mañana") || word.equals("paso") || word.equals("monta") || word.equals("deriva")
+        || word.equals("visto"))
         return "nc0s000";
       else if (word.equals("frente") && containingPhrase.startsWith("al frente"))
         return "nc0s000";
