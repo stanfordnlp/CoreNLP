@@ -29,6 +29,7 @@ package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.international.french.FrenchUnknownWordSignatures;
 import edu.stanford.nlp.international.spanish.SpanishUnknownWordSignatures;
+import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -204,9 +205,15 @@ public class ExtractorFramesRare {
   private static final ExtractorSpanishImperfectErIrSuffix cWordSpanishImperfectErIrSuffix =
     new ExtractorSpanishImperfectErIrSuffix();
 
+  /**
+   * Extracts stripped forms of Spanish verbs.
+   */
+  private static final ExtractorSpanishStrippedVerb cWordSpanishStrippedVerb =
+    new ExtractorSpanishStrippedVerb();
+
   private static final Extractor[] spanish_unknown_extractors = {
     cWordSpanishGender, cWordSpanishConditionalSuffix,
-    cWordSpanishImperfectErIrSuffix
+    cWordSpanishImperfectErIrSuffix, cWordSpanishStrippedVerb
   };
 
 
@@ -1585,5 +1592,23 @@ class ExtractorSpanishImperfectErIrSuffix extends CWordBooleanExtractor {
   @Override
   boolean extractFeature(String cword) {
     return SpanishUnknownWordSignatures.hasImperfectErIrSuffix(cword);
+  }
+}
+
+
+class ExtractorSpanishStrippedVerb extends RareExtractor {
+
+  private static final long serialVersionUID = -4780144226395772354L;
+
+  @Override
+  String extract(History h, PairsHolder pH) {
+    String word = pH.getWord(h, 0);
+    if (SpanishVerbStripper.isStrippable(word)) {
+      return SpanishVerbStripper.stripVerb(word);
+    } else {
+      // TODO experiment with different policies: return word unmodified
+      // in this case, or return empty string?
+      return "";
+    }
   }
 }
