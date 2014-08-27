@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeFactory;
+import edu.stanford.nlp.trees.TreeNormalizer;
+import edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
@@ -335,7 +338,7 @@ public class MultiWordTreeExpander {
    * perform the expansions. See the class documentation for more
    * information.
    */
-  public static Tree expandPhrases(Tree t) {
+  public static Tree expandPhrases(Tree t, TreeNormalizer tn, TreeFactory tf) {
     // Keep running this sequence of patterns until no changes are
     // affected. We need this for nested expressions like "para tratar
     // de regresar al empleo." This first step produces lots of
@@ -349,6 +352,10 @@ public class MultiWordTreeExpander {
     // Now clean up intermediate tree structures
     t = Tsurgeon.processPatternsOnTree(intermediateExpansions, t);
 
+    // Normalize first to allow for contraction expansion, etc.
+    t = tn.normalizeWholeTree(t, tf);
+
+    // Final cleanup
     t = Tsurgeon.processPatternsOnTree(finalCleanup, t);
 
     return t;
@@ -369,3 +376,11 @@ public class MultiWordTreeExpander {
 // Eliécer . Hurtado ("salir al paso")
 // /300/ . dólares ("en base a")
 // otro . vicepresidente ("está al caer")
+// o . coacción ("a favor del PRI")
+// ¿ . (no . estabais) (weird grup.nom leaf?? mistagging of "contra" here leads to string of three prepositions, which messes up our heuristics)
+// Nílton . Petrone ("en compañía del abogado y el fisioterapeuta..")
+// Ernesto . Zedillo ("a partir del 1 de diciembre próximo")
+// yo . (no . volvería) ("por nada del mundo")
+// harakiri . a ("en vez del": prepositional phrase  functioning as conjunction)
+// teatral . catalán (range phrase)
+// Wiranto . ha ("al frente de")

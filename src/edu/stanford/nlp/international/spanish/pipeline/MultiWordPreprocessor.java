@@ -449,7 +449,7 @@ public final class MultiWordPreprocessor {
 
         // Now "decompress" further the expanded trees formed by
         // multiword token splitting
-        t = MultiWordTreeExpander.expandPhrases(t);
+        t = MultiWordTreeExpander.expandPhrases(t, tn, tf);
 
         if (tn != null)
           t = tn.normalizeWholeTree(t, tf);
