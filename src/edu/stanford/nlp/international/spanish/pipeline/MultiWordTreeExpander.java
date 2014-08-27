@@ -285,6 +285,25 @@ public class MultiWordTreeExpander {
   private static TregexPattern adjectiveSpanInNominalGroup
     = TregexPattern.compile("/^grup\\.nom/=ng <, aq0000=left <` aq0000=right !< /^[^a]/");
 
+  /**
+   * Match dependent clauses mistakenly held under nominal groups ("lo que X")
+   */
+  private static TregexPattern clauseInNominalGroup
+    = TregexPattern.compile("lo . (que > (pr000000=pr >, /^grup\\.nom/=ng $+ (/^v/=vb >` =ng)))");
+
+  private static TsurgeonPattern labelClause
+    = Tsurgeon.parseOperation("[relabel ng S] [adjoinF (relatiu foot@) pr] [adjoinF (grup.verb foot@) vb]");
+
+  /**
+   * Infinitive clause mistakenly held under nominal group
+   */
+  private static TregexPattern clauseInNominalGroup2 = TregexPattern.compile("/^grup\\.nom/=gn $- spec <: /^vmn/");
+  private static TsurgeonPattern labelClause2 = Tsurgeon.parseOperation("[adjoin (S (infinitiu@)) gn]");
+
+  private static TregexPattern clauseInNominalGroup3 = TregexPattern.compile("sn=sn <, (/^vmn/=inf $+ (sp >` =sn))");
+  private static TsurgeonPattern labelClause3
+    = Tsurgeon.parseOperation("[relabel sn S] [adjoinF (infinitiu foot@) inf]");
+
   private static TsurgeonPattern groupAdjectives = Tsurgeon.parseOperation("createSubtree (s.a grup.a@) left right");
 
   private static TregexPattern alMenos
@@ -379,6 +398,9 @@ public class MultiWordTreeExpander {
       add(new Pair(nominalGroupSubstantives, makeNominalGroup));
       add(new Pair(adverbNominalGroups, replaceAdverbNominalGroup));
       add(new Pair(adjectiveSpanInNominalGroup, groupAdjectives));
+      add(new Pair(clauseInNominalGroup, labelClause));
+      add(new Pair(clauseInNominalGroup2, labelClause2));
+      add(new Pair(clauseInNominalGroup3, labelClause3));
 
       // Special fix: "a lo menos"
       add(new Pair(alMenos, fixAlMenos));
@@ -444,6 +466,8 @@ public class MultiWordTreeExpander {
 // harakiri . a ("en vez del": prepositional phrase  functioning as conjunction)
 // teatral . catalán (range phrase)
 // Wiranto . ha ("al frente de")
-// Claro . (que . cuando) (grup.nom.inter leaf caused by phrase "del todo")
+// Claro . (que . cuando) (grup.nom.inter leaf caused by phrase "del todo"; "a lo que parece")
 // fundamentalmente . andaluza ("sobre todo", "todo" must not be marked as determiner here)
 // etarras . perseguidos ("a salvo")
+// José . Vicente ("de vez en cuando")
+// PSC . (/^-$/ . PSOE) ("por lo que respecta")
