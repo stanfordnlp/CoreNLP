@@ -269,6 +269,8 @@ public class ExtractorFrames {
         int lWindow = Extractor.getParenthesizedNum(arg, 1);
         int rWindow = Extractor.getParenthesizedNum(arg, 2);
         extrs.add(new ExtractorWordShapeConjunction(lWindow, rWindow, "chris4"));
+      } else if (arg.equalsIgnoreCase("spanishauxiliaries")) {
+        extrs.add(new ExtractorSpanishAuxiliaryTag());
       } else if (arg.equalsIgnoreCase("naacl2003unknowns") ||
                  arg.equalsIgnoreCase("lnaacl2003unknowns") ||
                  arg.equalsIgnoreCase("caselessnaacl2003unknowns") ||
@@ -768,5 +770,31 @@ class ExtractorWordShapeConjunction extends Extractor {
 
   @Override public boolean isLocal() { return false; }
   @Override public boolean isDynamic() { return false; }
+
+}
+
+
+/**
+ * Extracts a boolean indicating whether the given word is preceded by
+ * an auxiliary verb.
+ */
+class ExtractorSpanishAuxiliaryTag extends Extractor {
+
+  public ExtractorSpanishAuxiliaryTag() {
+    super(-1, true);
+  }
+
+  @Override
+  String extract(History h, PairsHolder pH) {
+    String tag = super.extract(h, pH);
+    boolean isAux = tag.length() >= 2 && tag.substring(0, 2).equals("va");
+
+    return isAux ? "1" : "0";
+  }
+
+  @Override
+  public String toString() {
+    return "ExtractorSpanishAuxiliaryTag";
+  }
 
 }
