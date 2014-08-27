@@ -98,25 +98,14 @@ public class AnCoraProcessor {
 
     final SpanishXMLTreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true, ner, false);
 
-    MulticoreWrapper<File, Pair<TwoDimensionalCounter<String, String>, List<Tree>>>
-      wrapper = new MulticoreWrapper<File, Pair<TwoDimensionalCounter<String, String>,
-      List<Tree>>>(Runtime.getRuntime().availableProcessors(),
-                     new XMLTreeProcessor(trf, encoding), false);
-
-    // Set up processing futures
-    for (final File file : inputFiles)
-      wrapper.put(file);
-
-    wrapper.join();
-
     List<Tree> trees = new ArrayList<Tree>();
-    while (wrapper.peek()) {
-      Pair<TwoDimensionalCounter<String, String>, List<Tree>> result = wrapper.poll();
-
+    for (File file : inputFiles) {
+      Pair<TwoDimensionalCounter<String, String>, List<Tree>> ret = processTreeFile(file, trf,
+                                                                                    encoding);
       if (buildTagger)
-        Counters.addInPlace(unigramTagger, result.first());
+        Counters.addInPlace(unigramTagger, ret.first());
 
-      trees.addAll(result.second());
+      trees.addAll(ret.second());
     }
 
     return trees;
@@ -126,73 +115,51 @@ public class AnCoraProcessor {
    * Processes a single file containing AnCora XML trees. Returns MWE statistics for the trees in
    * the file and the actual parsed trees.
    */
-  private class XMLTreeProcessor implements
-    ThreadsafeProcessor<File, Pair<TwoDimensionalCounter<String, String>,
-        List<Tree>>> {
-    private final SpanishXMLTreeReaderFactory trf;
-    private final String encoding;
+  private static Pair<TwoDimensionalCounter<String, String>, List<Tree>> processTreeFile(
+    File file, SpanishXMLTreeReaderFactory trf, String encoding) {
 
-    /**
-     * Collects unigram tag counts which will be aggregated for use in tag inference later
-     */
-    private final TwoDimensionalCounter<String, String> unigramTagger =
-      new TwoDimensionalCounter<String,
-      String>();
+    TwoDimensionalCounter<String, String> tagger = new TwoDimensionalCounter<String, String>();
 
-    private XMLTreeProcessor(SpanishXMLTreeReaderFactory trf, String encoding) {
-      this.trf = trf;
-      this.encoding = encoding;
-    }
+    try {
+      Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(file),
+                                                           encoding));
+      TreeReader tr = trf.newTreeReader(file.getPath(), in);
 
-    @Override
-    public Pair<TwoDimensionalCounter<String, String>, List<Tree>> process(File file) {
-      try {
-        Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(file),
-                                                             encoding));
-        TreeReader tr = trf.newTreeReader(file.getPath(), in);
+      List<Tree> trees = new ArrayList<Tree>();
+      Tree t, splitPoint;
 
-        List<Tree> trees = new ArrayList<Tree>();
-        Tree t, splitPoint;
+      while ((t = tr.readTree()) != null) {
+        // We may need to split the current tree into multiple parts.
+        // (If not, a call to `split` with a `null` split-point is a
+        // no-op
+        do {
+          splitPoint = findSplitPoint(t);
+          Pair<Tree, Tree> split = split(t, splitPoint);
 
-        while ((t = tr.readTree()) != null) {
-          // We may need to split the current tree into multiple parts.
-          // (If not, a call to `split` with a `null` split-point is a
-          // no-op
-          do {
-            splitPoint = findSplitPoint(t);
-            Pair<Tree, Tree> split = split(t, splitPoint);
+          Tree toAdd = split.first();
+          t = split.second();
 
-            Tree toAdd = split.first();
-            t = split.second();
-
-            trees.add(toAdd);
-            updateTagger(toAdd);
-          } while (splitPoint != null);
-        }
-
-        tr.close();
-
-        return new Pair<TwoDimensionalCounter<String, String>, List<Tree>>(unigramTagger, trees);
-      } catch (IOException e) {
-        e.printStackTrace();
-        return null;
+          trees.add(toAdd);
+          updateTagger(tagger, toAdd);
+        } while (splitPoint != null);
       }
+
+      tr.close();
+
+      return new Pair<TwoDimensionalCounter<String, String>, List<Tree>>(tagger, trees);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
     }
+  }
 
-    @Override
-    public ThreadsafeProcessor<File, Pair<TwoDimensionalCounter<String, String>,
-      List<Tree>>> newInstance() {
-      return this;
-    }
+  private static void updateTagger(TwoDimensionalCounter<String, String> tagger, Tree t) {
+    List<CoreLabel> yield = t.taggedLabeledYield();
+    for (CoreLabel label : yield) {
+      if (label.tag().equals(SpanishTreeNormalizer.MW_TAG))
+        continue;
 
-    private void updateTagger(Tree t) {
-      List<CoreLabel> yield = t.taggedLabeledYield();
-      for (CoreLabel label : yield) {
-        if (label.tag().equals(SpanishTreeNormalizer.MW_TAG))
-          continue;
-
-        unigramTagger.incrementCount(label.word(), label.tag());
-      }
+      tagger.incrementCount(label.word(), label.tag());
     }
   }
 
