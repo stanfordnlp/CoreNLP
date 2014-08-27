@@ -165,7 +165,7 @@ public class MultiWordTreeExpander {
    * phrase given their children.
    */
   private static TregexPattern intermediateNounPhraseConjunct =
-    TregexPattern.compile("/^grup\\.nom\\.inter2$/=target < /^s[pn]/");
+    TregexPattern.compile("/^grup\\.nom\\.inter2$/=target < /^s[pn]$/");
 
   private static TsurgeonPattern expandIntermediateNounPhraseConjunct =
     Tsurgeon.parseOperation("[relabel target sn]");
@@ -194,7 +194,7 @@ public class MultiWordTreeExpander {
     TregexPattern.compile("/^d[ai]/=d >, (/^grup.nom/=ng !> sn)");
 
   private static TsurgeonPattern expandArticleInsideOrphanedNominalGroup =
-    Tsurgeon.parseOperation("[adjoinF (sn=sn foot@) ng] [move d >0 sn]");
+    Tsurgeon.parseOperation("[adjoinF (sn=sn spec=spec foot@) ng] [move d >0 spec]");
 
   private static TregexPattern determinerInsideNominalGroup =
     TregexPattern.compile("/^d[^n]/=det >, (/^grup\\.nom/=ng > sn) $ __");
@@ -212,6 +212,10 @@ public class MultiWordTreeExpander {
   // (hard mode: /^da/=art > /^grup\.nom\.inter$/ !>1 /^grup\.nom\.inter$/)
 
   // TODO date phrases
+
+  private static TregexPattern terminalPrepositions = TregexPattern.compile("sp000=sp < de >- (/^grup\\.nom/ > sn=sn)");
+  private static TsurgeonPattern extractTerminalPrepositions = Tsurgeon.parseOperation(
+    "[insert (prep=prep) $- sn] [move sp >0 prep]");
 
   /**
    * Expands flat structures into intermediate forms which will
@@ -252,6 +256,16 @@ public class MultiWordTreeExpander {
       add(new Pair(intermediateAdjectiveConjunct, expandIntermediateAdjectiveConjunct));
       add(new Pair(intermediateNounPhraseConjunct, expandIntermediateNounPhraseConjunct));
       add(new Pair(intermediateNominalGroupConjunct, expandIntermediateNominalGroupConjunct));
+    }};
+
+  /**
+   * Last-minute cleanup of leftover grammar mistakes
+   */
+  @SuppressWarnings("unchecked")
+  private static List<Pair<TregexPattern, TsurgeonPattern>> finalCleanup =
+    new ArrayList<Pair<TregexPattern, TsurgeonPattern>>() {{
+      add(new Pair(terminalPrepositions, extractTerminalPrepositions));
+      // TODO group nominal groups directly beneath `sn` constituents in `grup.nom` constituents
     }};
 
   /**
