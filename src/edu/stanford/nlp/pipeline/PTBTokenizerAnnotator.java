@@ -8,6 +8,7 @@ import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.Tokenizer;
+import edu.stanford.nlp.process.WhitespaceTokenizer;
 
 import edu.stanford.nlp.international.spanish.process.SpanishTokenizer;
 import edu.stanford.nlp.international.french.process.FrenchTokenizer;
@@ -36,8 +37,10 @@ public class PTBTokenizerAnnotator extends TokenizerAnnotator {
 	public static final String EN = "en";
 
   public static final String DEFAULT_OPTIONS_EN = "invertible,ptb3Escaping=true";
-	public static final String DEFAULT_OPTIONS_ES = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitAll=true";
+	public static final String DEFAULT_OPTIONS_ES = "";
 	public static final String DEFAULT_OPTIONS_FR = "";
+
+	public static final String EOL_PROPERTY = "tokenize.keepeol";
     
 	public PTBTokenizerAnnotator() {
 		this(true);
@@ -60,6 +63,11 @@ public class PTBTokenizerAnnotator extends TokenizerAnnotator {
 		case French:
 			options = (options == null) ? DEFAULT_OPTIONS_ES : options;
 			factory = FrenchTokenizer.factory(new CoreLabelTokenFactory(), options);
+			break;
+		case Whitespace:
+			boolean eolIsSignificant = Boolean.valueOf(props.getProperty(EOL_PROPERTY, "false"));
+			eolIsSignificant = eolIsSignificant || Boolean.valueOf(props.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
+			factory = new WhitespaceTokenizer.WhitespaceTokenizerFactory<CoreLabel> (new CoreLabelTokenFactory(), eolIsSignificant);
 			break;
 		default:
       options = (options == null) ? DEFAULT_OPTIONS_EN : options;
