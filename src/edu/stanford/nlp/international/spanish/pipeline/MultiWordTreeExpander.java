@@ -427,7 +427,7 @@ public class MultiWordTreeExpander {
       add(new Pair(redundantNominalRewrite, fixRedundantNominalRewrite));
       add(new Pair(redundantPrepositionGroupRewrite, fixRedundantPrepositionGroupRewrite));
       add(new Pair(redundantPrepositionGroupRewrite2, fixRedundantPrepositionGroupRewrite2));
-      //add(new Pair(leftoverIntermediates, makeNominalGroup));
+      add(new Pair(leftoverIntermediates, makeNominalGroup));
     }};
 
   /**
