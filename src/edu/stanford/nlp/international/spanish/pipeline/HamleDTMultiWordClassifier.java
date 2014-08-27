@@ -63,7 +63,7 @@ public class HamleDTMultiWordClassifier {
       add(new LeadingPOSFeatureFunction("V")); // verbs
       add(new LeadingPOSFeatureFunction("S")); // prepositions
       add(new HasMultipleOfPOSFeatureFunction("S", "D")); // phrase-y things
-      add(new HasMultipleOFPOSFeatureFunctions("A", "N")); // compound-y things
+      add(new HasMultipleOfPOSFeatureFunction("A", "N")); // compound-y things
       add(new CharacterNGramFeatureFunction(2, 4));
       add(new WordShapeFeatureFunction());
     }};
