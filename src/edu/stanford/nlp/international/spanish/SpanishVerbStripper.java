@@ -137,7 +137,7 @@ public class SpanishVerbStripper {
     return (pStrippable.matcher(word).find() || pIrregulars.matcher(word).find());
   }
 
-  public static String removeAccents(String word) {
+  private static String removeAccents(String word) {
     if (accentedInfinitives.contains(word))
       return word;
 
