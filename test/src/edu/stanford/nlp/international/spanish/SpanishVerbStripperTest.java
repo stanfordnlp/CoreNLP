@@ -30,8 +30,6 @@ public class SpanishVerbStripperTest extends TestCase {
     assertTrue(SpanishVerbStripper.isStrippable("vestíos"));
     assertTrue(SpanishVerbStripper.isStrippable("cómprelos"));
     assertTrue(SpanishVerbStripper.isStrippable("házmelo"));
-    assertTrue(SpanishVerbStripper.isStrippable("sentémonos"));
-    assertTrue(SpanishVerbStripper.isStrippable("escribámosela"));
   }
 
   @SuppressWarnings("unchecked")
@@ -96,8 +94,6 @@ public class SpanishVerbStripperTest extends TestCase {
     assertEquals("compre", SpanishVerbStripper.stripVerb("cómprelos"));
     assertEquals("haz", SpanishVerbStripper.stripVerb("házmelo"));
     assertEquals("oír", SpanishVerbStripper.stripVerb("oírse"));
-    assertEquals("escribamo", SpanishVerbStripper.stripVerb("escribámosela"));
-    assertEquals("sentemo", SpanishVerbStripper.stripVerb("sentémonos"));
   }
 
 }

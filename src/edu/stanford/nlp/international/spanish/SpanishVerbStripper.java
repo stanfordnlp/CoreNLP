@@ -21,8 +21,7 @@ public class SpanishVerbStripper {
   //   - Affirmative imperatives
 
   /* TODO: FIGURE THIS OUT!! */
-    //  private static final String DICT_PATH = "data/edu/stanford/nlp/international/spanish/enclitic-inflections.data";
-    private static final String DICT_PATH = "data/enclitic-inflections.data";
+  private static final String DICT_PATH = "data/edu/stanford/nlp/international/spanish/enclitic-inflections.data";
 
   private static HashMap<String, String> dict;
 
@@ -40,7 +39,7 @@ public class SpanishVerbStripper {
    * Original: Pattern.compile("(?:[aeiáéí]r|[áé]ndo)" + PATTERN_ATTACHED_PRONOUNS);
    */
   private static final Pattern pStrippable =
-    Pattern.compile("(?:[aeiáéí]r|[áé]ndo|[aeáé]n?|[aeáé]mos?|[aeiáéí](?:d(?!os)|(?=os)))" + PATTERN_ATTACHED_PRONOUNS);
+    Pattern.compile("(?:[aeiáéí]r|[áé]ndo|[aeáé]n?|[aeiáéí](?:d(?!os)|(?=os)))" + PATTERN_ATTACHED_PRONOUNS);
 
   /**
    * Matches irregular imperatives:
@@ -139,13 +138,36 @@ public class SpanishVerbStripper {
    * <tt>(sentad, os)</tt>.
    */
   private static boolean validateVerbPair(Pair<String, List<String>> pair) {
+    // Catch: if we have a second-person plural imperative with the
+    // pronoun 'os' attached, the terminal 'd' of the imperative *must*
+    // be elided. (Words like "sentados" look like imperatives if we
+    // don't enforce this rule!)
+    List<String> pronouns = pair.second();
+    boolean hasOs = pronouns.size() > 0 && pronouns.get(0).equalsIgnoreCase("os");
 
-      String stripped = pair.first().toLowerCase();
-      String firstPron = pair.second().get(0).toLowerCase();
+    String stripped = pair.first().toLowerCase();
+    String verbPos = dict.get(stripped);
+    if (verbPos != null) {
+      if (verbPos.equals("VMM02P0") && hasOs)
+        // Not possible!
+        return false;
 
-      return (isVerb(stripped)
-	      || firstPron.matches("os") && isVerb(stripped + 'd')
-	      || firstPron.matches("nos|se") && isVerb(stripped + 's'));
+      return true;
+    }
+
+    // Try `word + 'd'` as well for cases like 'sentaos'; stripped this
+    // becomes 'senta', and we only have the form 'sentad' in the
+    // dictionary
+    if (hasOs) {
+      verbPos = dict.get(stripped + 'd');
+      if (verbPos != null && verbPos.equals("VMM02P0")) {
+        // Write the change to the original pair
+        pair.setFirst(stripped + 'd');
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**

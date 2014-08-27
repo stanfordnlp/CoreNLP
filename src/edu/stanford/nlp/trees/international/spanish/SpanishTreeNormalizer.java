@@ -10,7 +10,10 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
-import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.trees.BobChrisTreeNormalizer;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeFactory;
+import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
@@ -89,28 +92,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     }
   };
 
-  /**
-   * Resolves some inconsistencies in constituent naming:
-   *
-   * - "sa" and "s.a" are equivalent -- merge to "s.a"
-   */
-  private static final TreeTransformer constituentRenamer = new TreeTransformer() {
-    @Override
-    public Tree transformTree(Tree t) {
-      if (t.isLeaf())
-        return t;
-
-      String value = t.value();
-      if (value == null)
-        return t;
-
-      if (value.equals("sa"))
-        t.setValue("s.a");
-
-      return t;
-    }
-  };
-
   @SuppressWarnings("unchecked")
   private static final Pair<String, String>[] cleanupStrs = new Pair[] {
     new Pair("sp < (sp=sp <: prep=prep)", "replace sp prep"),
@@ -169,9 +150,8 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
-    // Begin with some basic transformations
-    tree = tree.prune(emptyFilter).spliceOut(aOverAFilter)
-      .transform(constituentRenamer);
+    // First filter out nodes we don't like
+    tree = tree.prune(emptyFilter).spliceOut(aOverAFilter);
 
     // Now start some simple cleanup
     tree = Tsurgeon.processPatternsOnTree(cleanup, tree);
@@ -283,7 +263,14 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    */
   private static final String VERB_LEAF_WITH_PRONOUNS_TREGEX =
     // Match a leaf that looks like it has a clitic pronoun
-    "/(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$/=vb " +
+
+    // Match suffixes of regular forms which may carry attached
+    // pronouns (imperative, gerund, infinitive)
+    "/(?:(?:[aeiáéí]r|[áé]ndo|[aeáé]n?|[aeiáéí](?:d(?!os)|(?=os)))" +
+      // Match irregular imperative stems
+      "|^(?:d[ií]|h[aá]z|v[eé]|p[oó]n|s[aá]l|sé|t[eé]n|v[eé]n|(?:id(?=os$))))" +
+      // Match attached pronouns
+      "(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$/=vb " +
       // It should actually be a verb (gerund, imperative or
       // infinitive)
       "> /^vm[gmn]0000$/";
@@ -330,15 +317,14 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
     TregexMatcher matcher = verbWithCliticPronouns.matcher(t);
     while (matcher.find()) {
-      Tree clause = matcher.getNode("clause");
-      Tree target = matcher.getNode("target");
-      Tree verb = matcher.getNode("vb");
+      Tree verbNode = matcher.getNode("vb");
+      String verb = verbNode.value();
 
-      // Calculate index at which to insert pronominal phrase
-      int idx = clause.objectIndexOf(target) + 1;
+      if (!SpanishVerbStripper.isStrippable(verb))
+        continue;
 
       Pair<String, List<String>> split =
-        SpanishVerbStripper.separatePronouns(verb.value());
+        SpanishVerbStripper.separatePronouns(verb);
       if (split == null)
         continue;
 
