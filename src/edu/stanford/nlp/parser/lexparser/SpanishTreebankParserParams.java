@@ -110,7 +110,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     annotations.put("-markDominatesVerb", new Pair("__ << (/^(v|participi$)/ < __)",
                                                    new SimpleStringFunction("-dominatesV")));
 
-    // +___ F1
+    // Negative F1 -- not used by default
     annotations.put("-markNonRecSPs", new Pair("@sp !<< @sp", new SimpleStringFunction("-nonRec")));
 
     compileAnnotations(headFinder);
@@ -145,7 +145,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       "-markSingleChildNPs", "-markBaseNPs", /* "-markPronounNPs", */
 
       // prepositional phrase annotations
-      "-markNonRecSPs",
+      // "-markNonRecSPs", negative F1!
       // "-markPPHeads", negative F1!
 
       // clause annotations
