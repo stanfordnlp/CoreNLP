@@ -36,35 +36,19 @@ public final class MultiWordPreprocessor {
 
   private static class ManualUWModel {
 
-    private static final Set<String> commonNouns = Generics.newHashSet();
-    private static final String commonNounStr =
-      "acecho";
+    private static Map<String, String> posMap = new HashMap<String, String>() {{
+        put("acecho", "ncms000");
+        put("bordo", "ncms000");
+        put("cápita", "ncms000");
+        put("ciento", "ncms000");
 
-    private static final Set<String> commonPluralNouns = Generics.newHashSet();
-    private static final String commonPluralNounStr =
-      "abuelos";
+        put("creces", "ncfp000");
+        put("abuelo", "ncmp000");
 
-    // "A. Alezais alfa Annick Appliances Ardenne Artois baptiste Bargue Bellanger Bregenz clefs Coeurs ...conomie consumer " +
-      // "contrôleur Coopérative Coppée cuisson dédoublement demandeuse défraie Domestic dépistage Elektra Elettrodomestici " +
-      // "Essonnes Fair Finparcom Gelisim gorge Happy Indesit Italia jockey Lawrence leone Levi machinisme Mc.Donnel MD Merloni " +
-      // "Meydan ménagers Muenchener Parcel Prost R. sam Sara Siège silos SPA Stateman Valley Vanity VF Vidal Vives Yorker Young Zemment";
+        put("formaba", "vmii000");
+      }};
 
-    private static final Set<String> adjectives = Generics.newHashSet();
-    private static final String aStr = ""; // TODO "astral bis bovin gracieux intégrante italiano sanguin sèche";
-
-    private static final Set<String> preps = Generics.newHashSet();
-    private static final String pStr = ""; // TODO "c o t";
-
-    private static int nUnknownWordTypes;
-
-    static {
-      commonNouns.addAll(Arrays.asList(commonNounStr.split("\\s+")));
-      commonPluralNouns.addAll(Arrays.asList(commonPluralNounStr.split("\\s+")));
-      adjectives.addAll(Arrays.asList(aStr.split("\\s+")));
-      preps.addAll(Arrays.asList(pStr.split("\\s+")));
-      nUnknownWordTypes = // nouns.size() +
-        adjectives.size() + preps.size();
-    }
+    private static int nUnknownWordTypes = posMap.size();
 
     private static final Pattern digit = Pattern.compile("\\d+");
     private static final Pattern participle = Pattern.compile("[ai]d[oa]$");
@@ -80,14 +64,8 @@ public final class MultiWordPreprocessor {
 
       if(digit.matcher(word).find())
         return "z0";
-      else if(commonNouns.contains(word))
-        return "ncms000";
-      else if(commonPluralNouns.contains(word))
-        return "ncmp000";
-      else if(adjectives.contains(word))
-        return "aq0000";
-      else if(preps.contains(word))
-        return "sp000";
+      else if (posMap.containsKey(word))
+        return posMap.get(word);
 
       // Fallbacks
       if (participle.matcher(word).find())
