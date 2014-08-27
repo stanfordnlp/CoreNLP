@@ -60,7 +60,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   private List<CoreLabel> compoundBuffer;
 
   // Produces the tokenization for parsing used by AnCora (fixed) */
-  public static final String DEFAULT_OPTS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitAll=true";
+  public static final String ANCORA_OPTS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitAll=true";
 
   /**
    * Constructor.
@@ -217,7 +217,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     protected boolean splitContractionOption = false;
 
     public static TokenizerFactory<CoreLabel> newCoreLabelTokenizerFactory() {
-      return new SpanishTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory(), DEFAULT_OPTS);
+      return new SpanishTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory(), " ");
     }
 
 		/**
@@ -237,7 +237,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 		/** Make a factory for SpanishTokenizers, default options */
     private SpanishTokenizerFactory(LexedTokenFactory<T> factory) {
       this.factory = factory;
-			setOptions(DEFAULT_OPTS);
+			setOptions(" ");
     }
 
 		/** Make a factory for SpanishTokenizers, options passed in */
@@ -311,7 +311,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       return getTokenizer(r);
     }
 
-  } // end static class FrenchTokenizerFactory
+  } // end static class SpanishTokenizerFactory
 
 
 
@@ -321,7 +321,6 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     sb.append(String.format("Usage: java %s [OPTIONS] < file%n%n", SpanishTokenizer.class.getName()));
     sb.append("Options:").append(nl);
     sb.append("   -help          : Print this message.").append(nl);
-    // sb.append("   -ftb           : Tokenization for experiments in Green et al. (2011).").append(nl);
     sb.append("   -ancora        : Tokenization style of AnCora (fixed).").append(nl);
     sb.append("   -lowerCase     : Apply lowercasing.").append(nl);
     sb.append("   -encoding type : Encoding format.").append(nl);
@@ -333,7 +332,6 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     Map<String,Integer> argOptionDefs = Generics.newHashMap();
     argOptionDefs.put("help", 0);
     argOptionDefs.put("ftb", 0);
-    argOptionDefs.put("ancora", 0);
     argOptionDefs.put("lowerCase", 0);
     argOptionDefs.put("encoding", 1);
     argOptionDefs.put("orthoOpts", 1);
@@ -341,7 +339,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   }
 
   /**
-   * A fast, rule-based tokenizer for Modern Standard French.
+   * A fast, rule-based tokenizer for Spanish based on AnCora.
    * Performs punctuation splitting and light tokenization by default.
    * <p>
    * Currently, this tokenizer does not do line splitting. It assumes that the input
@@ -360,6 +358,8 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
     // Lexer options
     final TokenizerFactory<CoreLabel> tf = SpanishTokenizer.coreLabelFactory();
+		if (options.containsKey("ancora")) 
+			tf.setOptions(ANCORA_OPTS);
     String orthoOptions = options.getProperty("orthoOpts", "");
     tf.setOptions(orthoOptions);
 
