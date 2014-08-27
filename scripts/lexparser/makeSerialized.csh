@@ -178,8 +178,8 @@ java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA
 ########
 set mydir=`pwd`
 set data_dir=/u/nlp/data/lexparser/trees
-set tree_pipe=$JAVANLP_HOME/projects/core/scripts/run-tb-preproc
-set train_sh=$JAVANLP_HOME/projects/core/scripts/lexparser-lang-train-test.sh
+set tree_pipe=$JAVANLP_HOME/projects/core/scripts/lexparser/run-tb-preproc
+set train_sh=$JAVANLP_HOME/projects/core/scripts/lexparser/lexparser-lang-train-test.sh
 
 if( ! -e $data_dir ) then
   mkdir $data_dir
