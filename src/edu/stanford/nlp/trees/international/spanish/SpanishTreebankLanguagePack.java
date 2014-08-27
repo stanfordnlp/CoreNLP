@@ -57,6 +57,9 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   @Override
   public String basicCategory(String category) {
+    if (category == null)
+      return null;
+
     if (pPOSTag.matcher(category).matches()) {
       if (category.charAt(0) == 'v')
         return category.substring(0, 2);
