@@ -128,6 +128,11 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   /**
    * Handles contractions like del and al, marked by the lexer
+	 * 
+	 * del => de + l => de + el
+	 * al => a + l => a + el
+	 * con[mts]igo => con + [mts]i
+	 *
    */
   private CoreLabel processContraction(CoreLabel cl) {
 		cl.remove(ParentAnnotation.class);
@@ -157,7 +162,12 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   }
 
   /**
-   * Handles verbs with attached suffixes, marked by the lexer
+   * Handles verbs with attached suffixes, marked by the lexer:
+	 *
+	 * Escribamosela => Escribamo + se + la => escribamos + se + la
+	 * Sentaos => senta + os => sentad + os
+	 * Damelo => da + me + lo
+	 *
    */
   private CoreLabel processVerb(CoreLabel cl) {
     cl.remove(ParentAnnotation.class);
