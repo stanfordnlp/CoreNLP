@@ -31,7 +31,7 @@ class SimpleCharStream
   protected int maxNextCharInd = 0;
   protected int inBuf = 0;
   protected int tabSize = 8;
-  protected boolean trackLineColumn = false;
+  protected boolean trackLineColumn = true;
 
   public void setTabSize(int i) { tabSize = i; }
   public int getTabSize() { return tabSize; }
@@ -469,6 +469,6 @@ class SimpleCharStream
   }
 
   boolean getTrackLineColumn() { return trackLineColumn; }
-  void setTrackLineColumn(boolean trackLineColumn) { this.trackLineColumn = trackLineColumn; }
+  void setTrackLineColumn(boolean tlc) { trackLineColumn = tlc; }
 }
-/* JavaCC - OriginalChecksum=fc570321b171b242457bee3a0c553ac8 (do not edit this line) */
+/* JavaCC - OriginalChecksum=cd671612e8ea5c491d82613650ae5e27 (do not edit this line) */
