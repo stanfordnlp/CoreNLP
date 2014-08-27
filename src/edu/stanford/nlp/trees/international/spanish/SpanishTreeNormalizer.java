@@ -21,12 +21,12 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
    * Tag provided to words which are extracted from a multi-word token
    * into their own independent nodes
    */
-  private static final String MW_TAG = "MW?";
+  public static final String MW_TAG = "MW?";
 
   /**
    * Tag provided to constituents which contain words from MW tokens
    */
-  private static final String MW_PHRASE_TAG = "MW_PHRASE?";
+  public static final String MW_PHRASE_TAG = "MW_PHRASE?";
 
   private boolean simplifiedTagset;
   private boolean aggressiveNormalization;
@@ -44,19 +44,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       new TwoDimensionalCounter<String, String>();
 
     for (Tree t : tree) {
-      // Collect part-of-speech statistics
-      if (t.isPreTerminal()) {
-        String pos = t.value();
-
-        String word = t.firstChild().value();
-        if (word.indexOf('_') != -1)
-          // Multi-word token -- ignore tag for our purposes
-          continue;
-
-        unigramTagger.incrementCount(word, pos);
-      }
-
-      if (t.isPreTerminal() && simplifiedTagset) {
+      if (simplifiedTagset && t.isPreTerminal()) {
         // This is a part of speech tag. Remove extra morphological
         // information.
         CoreLabel label = (CoreLabel) t.label();
@@ -65,7 +53,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
         pos = simplifyPOSTag(pos).intern();
         label.setValue(pos);
         label.setTag(pos);
-      } else if (t.isPrePreTerminal() && aggressiveNormalization) {
+      } else if (aggressiveNormalization && isMultiWordCandidate(t)) {
         // Expand multi-word token if necessary
         normalizeForMultiWord(t, tf);
       }
@@ -126,6 +114,20 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       //   retain all
       return pos;
     }
+  }
+
+  /**
+   * Determine whether the given tree node is a multi-word token
+   * expansion candidate. (True if the node has at least one grandchild
+   * which is a leaf node.)
+   */
+  boolean isMultiWordCandidate(Tree t) {
+    for (Tree child : t.children())
+      for (Tree grandchild : child.children())
+        if (grandchild.isLeaf())
+          return true;
+
+    return false;
   }
 
   /**
