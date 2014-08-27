@@ -127,7 +127,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     annotations.put("-markNumericNPs", new Pair("@sn << (/^z/ < __) !<< @sn",
                                                 new SimpleStringFunction("-num")));
 
-    // +___ F1
+    // Negative F1 -- not used by default
     annotations.put("-markCoordinatedNPs", new Pair(
       "@sn <, (/^(sn|grup\\.nom)/ $+ (@conj < /^(cc|grup\\.cc)/ $+ /^(sn|grup\\.nom)/=last))" +
         "<` =last",
@@ -190,7 +190,8 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       "-markInf", "-markGer", "-markRightRecVPPrefixes",
 
       // noun phrase annotations
-      "-markSingleChildNPs", "-markBaseNPs", "-markPronounNPs", "-markCoordinatedNPs",
+      "-markSingleChildNPs", "-markBaseNPs", "-markPronounNPs",
+      // "-markCoordinatedNPs",
       // "-markParentheticalNPs",
       // "-markNumericNPs",
 
