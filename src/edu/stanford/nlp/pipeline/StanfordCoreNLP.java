@@ -343,25 +343,17 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        if (Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"))) {
-          return annotatorImplementation.whitespaceTokenizer(properties);
-        } else {
-          String options = properties.getProperty("tokenize.options", null);
-          boolean keepNewline = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
-
-          // If they
-          if (properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
-            keepNewline = true;
-          }
-          // If the user specifies "tokenizeNLs=false" in tokenize.options, then this default will
-          // be overridden.
-          if (keepNewline) {
-            options = "tokenizeNLs," + options;
-          }
-          return annotatorImplementation.ptbTokenizer(properties, false, options);
-        }
-      }
-
+				String extraOptions = null;
+				boolean keepNewline = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
+				if (properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
+					keepNewline = true;
+				}
+				if(keepNewline) {
+					extraOptions = "tokenizeNLs,";
+				}
+				return annotatorImplementation.ptbTokenizer(properties, false, extraOptions);
+			}
+		
       @Override
       public String additionalSignature() {
         // keep track of all relevant properties for this annotator here!
@@ -370,12 +362,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 properties.getProperty("tokenize.whitespace", "false"));
         if (properties.getProperty("tokenize.options") != null) {
           os.append(":tokenize.options:" + properties.getProperty("tokenize.options"));
-        }
-        if (properties.getProperty("tokenize.language") != null) {
-          os.append(":tokenize.language:" + properties.getProperty("tokenize.language"));
-        }
-        if (properties.getProperty("tokenize.class") != null) {
-          os.append(":tokenize.class:" + properties.getProperty("tokenize.class"));
         }
         if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
                 "false"))) {

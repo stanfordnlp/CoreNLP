@@ -41,7 +41,6 @@ import edu.stanford.nlp.dcoref.Dictionaries.Gender;
 import edu.stanford.nlp.dcoref.Dictionaries.MentionType;
 import edu.stanford.nlp.dcoref.Dictionaries.Number;
 import edu.stanford.nlp.dcoref.Dictionaries.Person;
-import edu.stanford.nlp.ling.AbstractCoreLabel;
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -1165,18 +1164,18 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       components[1] = headWord.lemma();
       components[2] = headWord.lemma();
     } else if(premodifiers.size() == 1){
-      ArrayList<AbstractCoreLabel> premod = Generics.newArrayList();
+      ArrayList<CoreLabel> premod = new ArrayList<CoreLabel>();
       premod.addAll(premodifiers.get(premodifiers.size()-1));
       premod.add(headWord);
       components[1] = getPattern(premod);
       components[2] = getPattern(premod);
     } else {
-      ArrayList<AbstractCoreLabel> premod1 = Generics.newArrayList();
+      ArrayList<CoreLabel> premod1 = new ArrayList<CoreLabel>();
       premod1.addAll(premodifiers.get(premodifiers.size()-1));
       premod1.add(headWord);
       components[1] = getPattern(premod1);
 
-      ArrayList<AbstractCoreLabel> premod2 = Generics.newArrayList();
+      ArrayList<CoreLabel> premod2 = new ArrayList<CoreLabel>();
       for(ArrayList<IndexedWord> premodifier : premodifiers){
         premod2.addAll(premodifier);
       }
@@ -1190,7 +1189,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   public String getPattern(){
 
-    ArrayList<AbstractCoreLabel> pattern = Generics.newArrayList();
+    ArrayList<CoreLabel> pattern = new ArrayList<CoreLabel>();
     for(ArrayList<IndexedWord> premodifier : getPremodifiers()){
       pattern.addAll(premodifier);
     }
@@ -1201,11 +1200,11 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return getPattern(pattern);
   }
 
-  public String getPattern(List<AbstractCoreLabel> pTokens){
+  public String getPattern(List<CoreLabel> pTokens){
 
     ArrayList<String> phrase_string = new ArrayList<String>();
     String ne = "";
-    for(AbstractCoreLabel token : pTokens){
+    for(CoreLabel token : pTokens){
       if(token.index() == headWord.index()){
         phrase_string.add(token.lemma());
         ne = "";
@@ -1242,16 +1241,16 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return false;
   }
 
-  private static List<String> getContextHelper(List<? extends AbstractCoreLabel> words) {
-    List<List<AbstractCoreLabel>> namedEntities = Generics.newArrayList();
-    List<AbstractCoreLabel> ne = Generics.newArrayList();
+  private static List<String> getContextHelper(List<? extends CoreLabel> words) {
+    List<List<CoreLabel>> namedEntities = new ArrayList<List<CoreLabel>>();
+    List<CoreLabel> ne = new ArrayList<CoreLabel>();
     String previousNEType = "";
     int previousNEIndex = -1;
     for (int i = 0; i < words.size(); i++) {
-      AbstractCoreLabel word = words.get(i);
+      CoreLabel word = words.get(i);
       if(!word.ner().equals("O")) {
         if (!word.ner().equals(previousNEType) || previousNEIndex != i-1) {
-          ne = Generics.newArrayList();
+          ne = new ArrayList<CoreLabel>();
           namedEntities.add(ne);
         }
         ne.add(word);
@@ -1262,7 +1261,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     List<String> neStrings = new ArrayList<String>();
     Set<String> hs = Generics.newHashSet();
-    for (List<AbstractCoreLabel> namedEntity : namedEntities) {
+    for (List<CoreLabel> namedEntity : namedEntities) {
       String ne_str = StringUtils.joinWords(namedEntity, " ");
       hs.add(ne_str);
     }

@@ -12,7 +12,7 @@ import edu.stanford.nlp.util.Pair;
  * Provides a utility function for removing attached pronouns from
  * Spanish verb forms.
  */
-public class SpanishVerbStripper {
+public final class SpanishVerbStripper {
 
   // The following three classes of verb forms can carry attached
   // pronouns:
@@ -21,10 +21,12 @@ public class SpanishVerbStripper {
   //   - Gerunds
   //   - Affirmative imperatives
 
-  private static final String DEFAULT_DICT =
-    "edu/stanford/nlp/international/spanish/enclitic-inflections.data";
+	/* Hashmap of singleton instances */
+	private static final Map<String, SpanishVerbStripper> instances = new HashMap<String, SpanishVerbStripper>();
 
-  private HashMap<String, String> dict;
+	private final Map<String, String> dict;
+
+  private static final String DEFAULT_DICT = "/u/nlp/data/spanish/enclitic-inflections.data";
 
   private static final String PATTERN_ATTACHED_PRONOUNS =
     "(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$";
@@ -58,9 +60,9 @@ public class SpanishVerbStripper {
 	 *
 	 * @param dictPath the path to the dictionary file
 	 */  
-  private void setupDictionary(String dictPath) {
+  private Map<String, String> setupDictionary(String dictPath) {
+		Map<String, String> dict = new HashMap<String, String>();
     try {
-      dict = new HashMap<String, String>();
       BufferedReader br = new BufferedReader(new InputStreamReader(
         IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(dictPath), "UTF-8"));
       String line = br.readLine();
@@ -78,6 +80,7 @@ public class SpanishVerbStripper {
     } catch (IOException e) {
       throw new RuntimeException("Could not load Spanish data file " + dictPath);
     }
+		return dict;
   }
 
   /**
@@ -103,12 +106,36 @@ public class SpanishVerbStripper {
 
 	// CONSTRUCTORS
 
-	public SpanishVerbStripper() {
+	private SpanishVerbStripper() {
 		this(DEFAULT_DICT);
 	}
 
-	public SpanishVerbStripper(String dictPath) {
-		setupDictionary(dictPath);
+	private SpanishVerbStripper(String dictPath) {
+		dict = setupDictionary(dictPath);
+	}
+
+	// SINGLETON FUNCTIONS
+
+	/**
+	 * Singleton pattern function for getting a default verb stripper
+	 */
+	public static SpanishVerbStripper getInstance() {
+		return getInstance(DEFAULT_DICT);
+	}
+
+	/**
+	 * Singleton pattern function for getting a verb stripper based on 
+	 * the dictionary at dictPath.
+	 *
+	 * @param dictPath the path to the dictionary for this verb stripper.
+	 */
+	public static SpanishVerbStripper getInstance(String dictPath) {
+		SpanishVerbStripper svs = instances.get(dictPath);
+		if (svs == null) {
+			svs = new SpanishVerbStripper(dictPath);
+			instances.put(dictPath, svs);
+		}
+		return svs;
 	}
 
   /**
@@ -138,7 +165,7 @@ public class SpanishVerbStripper {
     return (pStrippable.matcher(word).find() || pIrregulars.matcher(word).find());
   }
 
-  private static String removeAccents(String word) {
+  public static String removeAccents(String word) {
     if (accentedInfinitives.contains(word))
       return word;
 
@@ -172,43 +199,24 @@ public class SpanishVerbStripper {
    * <tt>(sentad, os)</tt>.
    */
   private boolean validateVerbPair(Pair<String, List<String>> pair) {
-    String stripped = pair.first().toLowerCase();
-    String firstPron = pair.second().get(0).toLowerCase();
+      String stripped = pair.first().toLowerCase();
+      
+      String firstPron = pair.second().get(0).toLowerCase();
 
-    String pos = dict.get(stripped);
-
-    if (pos != null) {
-      if (pos.equals("VMM02P0") && firstPron.equalsIgnoreCase("os")) {
-        // Invalid combination of verb root and pronoun.
-        // (If we combine a second-person plural imperative and the
-        // second person plural object pronoun, we expect to see an
-        // elided verb root, not the normal one that's in the
-        // dictionary.)
-        return false;
+      if (dict.containsKey(stripped))
+				return true;
+			
+      if (firstPron.matches("os") && dict.containsKey(stripped + 'd')) {
+				pair.setFirst(pair.first() + getCase(pair.first(), 'd'));
+				return true;
       }
-
-      return true;
-    }
-
-    // Special case: de-elide elided verb root in the case of a second
-    // person plural imperative + second person object pronoun
-    //
-    // (e.g., given (senta, os), return (sentad, os))
-    if (firstPron.equalsIgnoreCase("os") && dict.containsKey(stripped + 'd')) {
-      pair.setFirst(pair.first() + getCase(pair.first(), 'd'));
-      return true;
-    }
-
-    // Special case: de-elide elided verb root in the case of a first
-    // person plural imperative + object pronoun
-    //
-    // (vámo, nos) -> (vámos, nos)
-    if (firstPron.matches("nos|se") && dict.containsKey(stripped + 's')) {
-      pair.setFirst(pair.first() + getCase(pair.first(), 's'));
-      return true;
-    }
-
-    return false;
+			
+      if (firstPron.matches("nos|se") && dict.containsKey(stripped +'s')) {
+				pair.setFirst(pair.first() + getCase(pair.first(), 's'));
+				return true;
+      }
+			
+      return false;
   }
 	
   /**
@@ -223,7 +231,7 @@ public class SpanishVerbStripper {
   private static Pair<String, List<String>> stripSuffix(String word,
                                                         Pattern pSuffix) {
     Matcher m = pSuffix.matcher(word);
-    if (m.find()) {
+    if(m.find()) {
       String stripped = word.substring(0, m.start());
       stripped = removeAccents(stripped);
 

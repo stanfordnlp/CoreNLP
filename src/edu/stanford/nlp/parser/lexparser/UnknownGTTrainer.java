@@ -1,6 +1,7 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,11 +30,11 @@ public class UnknownGTTrainer {
   ClassicCounter<String> r1 = new ClassicCounter<String>(); // for each tag, # of words seen once
   ClassicCounter<String> r0 = new ClassicCounter<String>(); // for each tag, # of words not seen
   Set<String> seenWords = Generics.newHashSet();
-
+  
   double tokens = 0;
-
+  
   Map<String,Float> unknownGT = Generics.newHashMap();
-
+  
   public void train(Collection<Tree> trees) {
     train(trees, 1.0);
   }
@@ -58,29 +59,29 @@ public class UnknownGTTrainer {
     tokens = tokens + weight;
     String word = tw.word();
     String tag = tw.tag();
-
-    // TaggedWord has crummy equality conditions
+          
+    // TaggedWord has crummy equality conditions            
     Pair<String,String> wt = new Pair<String,String>(word, tag);
     wtCount.incrementCount(wt, weight);
-
+          
     tagCount.incrementCount(tag, weight);
     seenWords.add(word);
   }
-
+  
   public void finishTraining() {
     // testing: get some stats here
     System.err.println("Total tokens: " + tokens);
     System.err.println("Total WordTag types: " + wtCount.keySet().size());
     System.err.println("Total tag types: " + tagCount.keySet().size());
     System.err.println("Total word types: " + seenWords.size());
-
+    
     /* find # of once-seen words for each tag */
     for (Pair<String,String> wt : wtCount.keySet()) {
       if (wtCount.getCount(wt) == 1) {
         r1.incrementCount(wt.second());
       }
     }
-
+    
     /* find # of unseen words for each tag */
     for (String tag : tagCount.keySet()) {
       for (String word : seenWords) {
@@ -90,14 +91,14 @@ public class UnknownGTTrainer {
         }
       }
     }
-
+    
     /* set unseen word probability for each tag */
     for (String tag : tagCount.keySet()) {
       float logprob = (float) Math.log(r1.getCount(tag) / (tagCount.getCount(tag) * r0.getCount(tag)));
       unknownGT.put(tag, Float.valueOf(logprob));
     }
-
+    
   }
-
+  
 }
 

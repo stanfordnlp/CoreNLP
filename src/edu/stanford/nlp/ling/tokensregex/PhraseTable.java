@@ -12,6 +12,7 @@ import edu.stanford.nlp.util.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.Normalizer;
 import java.util.*;
 import java.util.regex.Pattern;
 

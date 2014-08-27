@@ -29,7 +29,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author dramage
  * @author rafferty
  */
-public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWord, HasTag, HasCategory, HasLemma, HasContext, HasIndex, HasOffset {
+public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, HasCategory, HasLemma, HasContext, HasIndex, HasOffset {
 
   private static final long serialVersionUID = 2L;
 
@@ -277,7 +277,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
    * @return "" if the key is not in the map or has the value <code>null</code>
    *     and the String value of the key otherwise
    */
-  @Override
   public <KEY extends Key<String>> String getString(Class<KEY> key) {
     String value = get(key);
     if (value == null) {
@@ -542,13 +541,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
     set(CoreAnnotations.CharacterOffsetEndAnnotation.class, endPos);
   }
 
-  public int copyCount() {
-    Integer copy = get(CoreAnnotations.CopyAnnotation.class);
-    if (copy == null)
-      return 0;
-    return copy;
-  }
-
   /**
    * Tag separator to use by default
    */
@@ -620,7 +612,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
       buf.append(toPrimes());
     } else if (format.equals(VALUE_TAG_FORMAT)) {
       buf.append(value());
-      buf.append(toPrimes());
       String tag = tag();
       if (tag != null) {
         buf.append(TAG_SEPARATOR).append(tag);
@@ -672,7 +663,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
   }
 
   public String toPrimes() {
-    return StringUtils.repeat('\'', copyCount());
+    Integer copy = get(CoreAnnotations.CopyAnnotation.class);
+    if (copy == null || copy == 0)
+      return "";
+    return StringUtils.repeat('\'', copy);
   }
 
   private static final Comparator<Class<?>> asClassComparator = new Comparator<Class<?>>() {
