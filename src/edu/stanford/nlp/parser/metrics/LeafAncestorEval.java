@@ -205,45 +205,12 @@ public class LeafAncestorEval {
     return sb.toString();
   }
 
-  /**
-   * Ensure that we are ready to output evaluation information.
-   */
-  private void checkState() {
-    if (corpusNum == 0)
-      throw new IllegalStateException("No trees have been successfully evaluated");
-  }
-
-  /**
-   * @return Average edit distance of token analysis between guess and gold (micro-average)
-   */
-  public double getAvgCorpusDistance() {
-    checkState();
-    return corpusAvg / corpusNum;
-  }
-
-  /**
-   * @return Average of sentence-average edit distance of token analysis (macro-average)
-   */
-  public double getAvgSentenceDistance() {
-    checkState();
-    return sentAvg / sentNum;
-  }
-
-  /**
-   * @return The percentage of sentences whose analyses in the guess corpus exactly match those
-   *         in the gold corpus
-   */
-  public double getExactSentencePercentage() {
-    checkState();
-    return 100.0 * sentExact / sentNum;
-  }
-
   public void display(boolean verbose, PrintWriter pw) {
     final Random rand = new Random();
 
-    double corpusLevel = getAvgCorpusDistance();
-    double sentLevel = getAvgSentenceDistance();
-    double sentEx = getExactSentencePercentage();
+    double corpusLevel = corpusAvg / corpusNum;
+    double sentLevel = sentAvg / sentNum;
+    double sentEx = 100.0 * sentExact / sentNum;
 
     if(verbose) {
       Map<Double,List<CoreLabel>> avgMap = new TreeMap<Double,List<CoreLabel>>();
