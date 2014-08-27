@@ -425,7 +425,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   /**
    * Characters which may separate words in a single token.
    */
-  private static final String WORD_SEPARATORS = ",-_¡!¿?()";
+  private static final String WORD_SEPARATORS = ",-_¡!¿?()/";
 
   /**
    * Word separators which should not be treated as separate "words" and
