@@ -9,9 +9,11 @@ import junit.framework.TestCase;
 import java.io.StringReader;
 
 /**
+ * Needs to be an "itest" because the VerbStripper loads data from the models jar.
+ *
  * @author Ishita Prasad
  */
-public class SpanishTokenizerTest extends TestCase {
+public class SpanishTokenizerITest extends TestCase {
 
   private final String[] ptbInputs = {
       "Esta es una oración.",
