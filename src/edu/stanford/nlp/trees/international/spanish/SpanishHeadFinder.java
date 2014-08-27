@@ -86,15 +86,19 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
       {"leftdis", "grup.adv"}});
 
     // verb phrases
-    String[][] verbRules = new String[][] {insertVerbs(new String[] {"left"}, new String[] {})};
-    nonTerminalInfo.put("grup.verb", verbRules);
+    nonTerminalInfo.put("grup.verb", new String[][] {insertVerbs(new String[] {"left"}, new String[] {})});
     nonTerminalInfo.put("infinitiu", new String[][] {insertVerbs(new String[] {"left"}, new String[] {"infinitiu"})});
     nonTerminalInfo.put("gerundi", new String[][] {{"left", "vmg0000", "vag0000", "vsg0000", "gerundi"}});
     nonTerminalInfo.put("participi", new String[][] {{"left", "aq", "vmp0000", "vap0000", "vsp0000", "grup.a"}});
 
     // specifiers
     nonTerminalInfo.put("spec", new String[][] {
-        {"left", "d", "p", "z", "grup.z", "w", "grup.w", "r", "grup.adv", "grup.prep", "spec", "conj", "n"}});
+      {"left", "conj", "spec"}, // entre A y B
+      {"leftdis", "da0000", "de0000", "di0000", "dd0000", "dp0000", "dn0000", "dt0000"},
+      {"leftdis", "z0", "grup.z"},
+      {"left", "rg", "rn"},
+      {"leftdis", "pt000000", "pe000000", "pd000000", "pp000000", "pi000000", "pn000000", "pr000000"},
+      {"left", "grup.adv", "w"}});
 
     // etc.
     nonTerminalInfo.put("conj", new String[][] {
@@ -102,9 +106,9 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
       {"leftdis", "grup.cc", "grup.cs"},
       {"left", "sp"}});
     nonTerminalInfo.put("interjeccio", new String[][] {
-      {"leftdis", "i", "nc0s000", "nc0p000", "nc00000", "np00000"},
+      {"leftdis", "i", "nc0s000", "nc0p000", "nc00000", "np00000", "pi000000"},
       {"left", "interjeccio"}});
-    nonTerminalInfo.put("relatiu", new String[][] {{"left", "p"}});
+    nonTerminalInfo.put("relatiu", new String[][] {{"left", "pr000000"}});
 
     // prepositional phrases
     nonTerminalInfo.put("sp", new String[][] {{"left", "prep", "sp"}});
@@ -112,11 +116,13 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
 
     // custom categories
     nonTerminalInfo.put("grup.cc", new String[][] {{"left", "cs"}});
-    nonTerminalInfo.put("grup.cs", new String[][] {{"left", "cs"}}); // TODO ?? "de forma que," "ya que"
+    nonTerminalInfo.put("grup.cs", new String[][] {{"left", "cs"}});
     nonTerminalInfo.put("grup.prep", new String[][] {{"left", "prep", "grup.prep", "s"}});
     nonTerminalInfo.put("grup.pron", new String[][] {{"rightdis", "px000000"}});
     nonTerminalInfo.put("grup.w", new String[][] {{"right", "w"}, {"leftdis", "z0"}, {"left"}});
-    nonTerminalInfo.put("grup.z", new String[][] {{"left", "z"}, {"right", "n", "s"}, {"left"}});
+    nonTerminalInfo.put("grup.z", new String[][] {
+      {"leftdis", "z0", "zu", "zp", "zd", "zm"},
+      {"right", "nc0s000", "nc0p000", "nc00000", "np00000"}});
   }
 
   /**
@@ -146,9 +152,9 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
       public void visitTree(Tree pt) {
         // pt.percolateHeads(chf);
 
-        pt.pennPrint();
+        //pt.pennPrint();
         Tree head = pt.headTerminal(chf);
-        System.out.println("======== " + head.label());
+        //System.out.println("======== " + head.label());
       }
     });
   }

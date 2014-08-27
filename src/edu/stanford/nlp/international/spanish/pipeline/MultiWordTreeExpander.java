@@ -531,3 +531,4 @@ public class MultiWordTreeExpander {
 // historia . despiadada ("darse cuenta")
 // Imagínense . /./
 // jugadores . (de . Aíto) ("en rehacerse")
+// sólo . (los . espectadores) ("miles" has a ROOT tag???)
