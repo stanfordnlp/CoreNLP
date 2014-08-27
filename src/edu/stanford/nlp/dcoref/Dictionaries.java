@@ -370,40 +370,19 @@ public class Dictionaries {
 
   /**
    * Load Bergsma and Lin (2006) gender and number list.
-   *
+   * <br>
+   * The list is converted from raw text and numbers to a serialized
+   * map, which saves quite a bit of time loading.  
+   * See edu.stanford.nlp.dcoref.util.ConvertGenderFile
    */
   private void loadGenderNumber(String file, String neutralWordsFile) {
     try {
       getWordsFromFile(neutralWordsFile, neutralWords, false);
-      BufferedReader reader = IOUtils.readerFromString(file);
-      for (String line; (line = reader.readLine()) != null; ) {
-        String[] split = line.split("\t");
-        String[] countStr = split[1].split(" ");
-        
-        int male = Integer.parseInt(countStr[0]);
-        int female = Integer.parseInt(countStr[1]);
-        int neutral = Integer.parseInt(countStr[2]);
-
-        Gender gender = Gender.UNKNOWN;
-        if (male * 0.5 > female + neutral && male > 2) {
-          gender = Gender.MALE;
-        } else if (female * 0.5 > male + neutral && female > 2) {
-          gender = Gender.FEMALE;
-        } else if (neutral * 0.5 > male + female && neutral > 2) {
-          gender = Gender.NEUTRAL;
-        }
-
-        if (gender == Gender.UNKNOWN) {
-          continue;
-        }
-
-        String[] words = split[0].split(" ");
-        List<String> tokens = Arrays.asList(words);
-
-        genderNumber.put(tokens, gender);
-      }
-      reader.close();
+      Map<List<String>, Gender> temp = IOUtils.readObjectFromURLOrClasspathOrFileSystem(file);
+      genderNumber.putAll(temp);
     } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    } catch (ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
   }

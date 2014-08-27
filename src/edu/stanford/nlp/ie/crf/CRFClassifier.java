@@ -952,7 +952,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    *
    * @param info The input data
    * @param loc The position to build a datum at
-   * @param featureFactory The FeatureFactory to use to extract features
+   * @param featureFactories The FeatureFactories to use to extract features
    * @return The constructed CRFDatum
    */
   public CRFDatum<List<String>, CRFLabel> makeDatum(List<IN> info, int loc,

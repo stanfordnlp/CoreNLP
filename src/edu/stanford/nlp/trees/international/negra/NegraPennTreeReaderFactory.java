@@ -2,6 +2,7 @@ package edu.stanford.nlp.trees.international.negra;
 
 import java.io.*;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.PennTreeReader;
 import edu.stanford.nlp.trees.Tree;
@@ -23,6 +24,10 @@ public class NegraPennTreeReaderFactory implements TreeReaderFactory, Serializab
   private final boolean treeNormalizerInsertNPinPP; // = false;
 
 
+  public NegraPennTreeReaderFactory() {
+    this(2, false, true, new NegraPennLanguagePack());
+  }
+
   public NegraPennTreeReaderFactory(TreebankLanguagePack tlp) {
     this(0, false, false, tlp);
   }
@@ -34,6 +39,7 @@ public class NegraPennTreeReaderFactory implements TreeReaderFactory, Serializab
     this.tlp = tlp;
   }
 
+  @Override
   public TreeReader newTreeReader(Reader in) {
     final NegraPennTreeNormalizer tn = new NegraPennTreeNormalizer(tlp, nodeCleanup);
     if (treeNormalizerInsertNPinPP)
@@ -41,29 +47,29 @@ public class NegraPennTreeReaderFactory implements TreeReaderFactory, Serializab
 
     return new PennTreeReader(in, new LabeledScoredTreeFactory(), tn, new NegraPennTokenizer(in));
   }
-  
+
   /**
-   * 
-   * @param args
+   *
+   * @param args File to run on
    */
   public static void main(String[] args) {
     if(args.length < 1) {
-      System.out.printf("Usage: java %s tree_file\n", NegraPennTreeReaderFactory.class.getName());
-      System.exit(-1);
+      System.out.printf("Usage: java %s tree_file%n", NegraPennTreeReaderFactory.class.getName());
+      return;
     }
-    
+
     TreebankLanguagePack tlp = new NegraPennLanguagePack();
     TreeReaderFactory trf = new NegraPennTreeReaderFactory(2,false,false,tlp);
-    
+
     try {
-      TreeReader tr = trf.newTreeReader(new InputStreamReader(new BufferedInputStream(new FileInputStream(new File(args[0]))),tlp.getEncoding()));
-      
-      Tree t;
-      while((t = tr.readTree()) != null)
+      TreeReader tr = trf.newTreeReader(IOUtils.readerFromString(args[0], tlp.getEncoding()));
+
+      for (Tree t; (t = tr.readTree()) != null; ) {
         t.pennPrint();
-      
+      }
+
       tr.close();
-    
+
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
     } catch (FileNotFoundException e) {
@@ -72,4 +78,5 @@ public class NegraPennTreeReaderFactory implements TreeReaderFactory, Serializab
       e.printStackTrace();
     }
   }
+
 }

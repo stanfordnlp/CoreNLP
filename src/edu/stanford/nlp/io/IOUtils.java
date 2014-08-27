@@ -1873,5 +1873,119 @@ public class IOUtils {
    */
   public static void cp(File source, File target) throws IOException { cp(source, target, false); }
 
+  /**
+   * A Java implementation of the Unix tail functionality.
+   * That is, read the last n lines of the input file f.
+   * @param f The file to read the last n lines from
+   * @param n The number of lines to read from the end of the file.
+   * @param encoding The encoding to read the file in.
+   * @return The read lines, one String per line.
+   * @throws IOException if the file could not be read.
+   */
+  public static String[] tail(File f, int n, String encoding) throws IOException {
+    if (n == 0) { return new String[0]; }
+    // Variables
+    RandomAccessFile raf = new RandomAccessFile(f, "r");
+    int linesRead = 0;
+    List<Byte> bytes = new ArrayList<Byte>();
+    List<String> linesReversed = new ArrayList<String>();
+    // Seek to end of file
+    long length = raf.length() - 1;
+    raf.seek(length);
+    // Read backwards
+    for(long seek = length; seek >= 0; --seek){
+      // Seek back
+      raf.seek(seek);
+      // Read the next character
+      byte c = raf.readByte();
+      if(c == '\n'){
+        // If it's a newline, handle adding the line
+        byte[] str = new byte[bytes.size()];
+        for (int i = 0; i < str.length; ++i) {
+          str[i] = bytes.get(str.length - i - 1);
+        }
+        linesReversed.add(new String(str, encoding));
+        bytes = new ArrayList<Byte>();
+        linesRead += 1;
+        if (linesRead == n){
+          break;
+        }
+      } else {
+        // Else, register the character for later
+        bytes.add(c);
+      }
+    }
+    // Add any remaining lines
+    if (linesRead < n && bytes.size() > 0) {
+      byte[] str = new byte[bytes.size()];
+      for (int i = 0; i < str.length; ++i) {
+        str[i] = bytes.get(str.length - i - 1);
+      }
+      linesReversed.add(new String(str, encoding));
+    }
+    // Create output
+    String[] rtn = new String[linesReversed.size()];
+    for (int i = 0; i < rtn.length; ++i) {
+      rtn[i] = linesReversed.get(rtn.length - i - 1);
+    }
+    return rtn;
+  }
+
+  /** @see edu.stanford.nlp.io.IOUtils#tail(java.io.File, int, String) */
+  public static String[] tail(File f, int n) throws IOException { return tail(f, n, "utf-8"); }
+
+  /** Bare minimum sanity checks */
+  private static Set<String> blacklistedPathsToRemove = new HashSet<String>(){{
+    add("/");
+    add("/u"); add("/u/");
+    add("/u/nlp"); add("/u/nlp/");
+    add("/u/nlp/data"); add("/u/nlp/data/");
+    add("/scr"); add("/scr/");
+    add("/scr/nlp/data"); add("/scr/nlp/data/");
+  }};
+
+  /**
+   * Delete this file; or, if it is a directory, delete this directory and all its contents.
+   * This is a somewhat dangerous function to call from code, and so a few safety features have been
+   * implemented (though you should not rely on these!):
+   *
+   * <ul>
+   *   <li>Certain directories are prohibited from being removed.</li>
+   *   <li>More than 100 files cannot be removed with this function.</li>
+   *   <li>More than 10GB cannot be removed with this function.</li>
+   * </ul>
+   *
+   * @param file The file or directory to delete.
+   */
+  public static void deleteRecursively(File file) {
+    // Sanity checks
+    if (blacklistedPathsToRemove.contains(file.getPath())) {
+      throw new IllegalArgumentException("You're trying to delete " + file + "! I _really_ don't think you want to do that...");
+    }
+    int count = 0;
+    long size = 0;
+    for (File f : iterFilesRecursive(file)) {
+      count += 1;
+      size += f.length();
+    }
+    if (count > 100) {
+      throw new IllegalArgumentException("Deleting more than 100 files; you should do this manually");
+    }
+    if (size > 10000000000L) {  // 10 GB
+      throw new IllegalArgumentException("Deleting more than 10GB; you should do this manually");
+    }
+    // Do delete
+    if (file.isDirectory()) {
+      File[] children = file.listFiles();
+      if (children != null) {
+        for (File child : children) {
+          deleteRecursively(child);
+        }
+      }
+    }
+    //noinspection ResultOfMethodCallIgnored
+    file.delete();
+  }
+
 
 }

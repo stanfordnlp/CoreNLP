@@ -27,7 +27,6 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
@@ -113,6 +112,11 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   @Override
   public String[] defaultCoreNLPFlags() {
     return getTLPParams().defaultCoreNLPFlags();
+  }
+
+  @Override
+  public boolean requiresTags() {
+    return false;
   }
 
   private static final String SERIALIZED_PARSER_PROPERTY = "edu.stanford.nlp.SerializedLexicalizedParser";

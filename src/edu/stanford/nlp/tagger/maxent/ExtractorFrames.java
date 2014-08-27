@@ -43,7 +43,9 @@ import java.util.*;
  * <table>
  * <tr><td>Name</td><td>Args</td><td>Effect</td></tr>
  * <tr><td>words</td><td>begin, end</td>
- *     <td>Individual features for words begin ... end</td></tr>
+ *     <td>Individual features for words begin ... end.
+ *     If just one argument words(-2) is given, then end is taken as 0. If
+ *     begin is not less than or equal to end, no features are made.</td></tr>
  * <tr><td>tags</td><td>begin, end</td>
  *     <td>Individual features for tags begin ... end</td></tr>
  * <tr><td>biword</td><td>w1, w2</td>

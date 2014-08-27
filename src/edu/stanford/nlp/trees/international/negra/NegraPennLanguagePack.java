@@ -18,7 +18,7 @@ public class NegraPennLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final long serialVersionUID = 9081305982861675328L;
 
-  //Grammatical function parameters
+  /** Grammatical function parameters.  If this is true, keep subj, obj, iobj functional tags, only. */
   private boolean leaveGF = false;
 
   private static String[] gfToKeepArray = {"SB", "OA", "DA"};
@@ -29,6 +29,13 @@ public class NegraPennLanguagePack extends AbstractTreebankLanguagePack {
    */
   public NegraPennLanguagePack() {
     this(false, AbstractTreebankLanguagePack.DEFAULT_GF_CHAR);
+  }
+
+  /**
+   * Gives a handle to the TreebankLanguagePack
+   */
+  public NegraPennLanguagePack(boolean leaveGF) {
+    this(leaveGF, AbstractTreebankLanguagePack.DEFAULT_GF_CHAR);
   }
 
   /**
@@ -60,7 +67,7 @@ public class NegraPennLanguagePack extends AbstractTreebankLanguagePack {
    * The first 3 are used by the Penn Treebank; # is used by the
    * BLLIP corpus, and ^ and ~ are used by Klein's lexparser.
    */
-  private static char[] annotationIntroducingChars = {'%', '=', '|', '#', '^', '~'};
+  private static char[] annotationIntroducingChars = {'-', '%', '=', '|', '#', '^', '~'};
 
   /**
    * This is valid for "BobChrisTreeNormalizer" conventions only.
@@ -114,12 +121,16 @@ public class NegraPennLanguagePack extends AbstractTreebankLanguagePack {
 //wsg2010: Disabled limited grammatical functions for now, which decrease F1 by ~10.0.
   @Override
   public String basicCategory(String category) {
-    String basicCat = super.basicCategory(category);
-    if(!leaveGF) {
-      basicCat = stripGF(basicCat);
+    String basicCat;
+    if (leaveGF) {
+      basicCat = stripGF(category);
+    } else {
+      basicCat = super.basicCategory(category);
     }
+    // System.err.println("NPLP stripping " + category + " with leaveGF = " + leaveGF + " gives " + basicCat);
     return basicCat;
   }
+
   @Override
   public String stripGF(String category) {
     if(category == null) {

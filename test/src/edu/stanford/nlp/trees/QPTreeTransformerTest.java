@@ -8,12 +8,20 @@ import junit.framework.TestCase;
  * @author John Bauer
  */
 public class QPTreeTransformerTest extends TestCase {
+  public void testMoney() {
+    String input = "(ROOT (S (NP (DT This)) (VP (VBZ costs) (NP (QP ($ $) (CD 1) (CD million)))) (. .)))";
+    String output = "(ROOT (S (NP (DT This)) (VP (VBZ costs) (NP (QP ($ $) (QP (CD 1) (CD million))))) (. .)))";
+    runTest(input, output);    
+  }
+
   public void testMoneyOrMore() {
-    String input = "(ROOT (S (NP (DT This)) (VP (VBZ costs) (NP (QP ($ $) (CD 1) (CD million)) (QP (CC or) (JJR more)))) (. .)))";
-    // First it gets flattened, then the CC gets broken up
-    // TODO: the end result of NP on the left side should be QP with internal structure
+    String input = "(ROOT (S (NP (DT This)) (VP (VBZ costs) (NP (QP ($ $) (CD 1) (CD million) (CC or) (JJR more)))) (. .)))";
     // TODO: NP for the right?
-    String output = "(ROOT (S (NP (DT This)) (VP (VBZ costs) (NP (QP (NP ($ $) (CD 1) (CD million)) (CC or) (NP (JJR more))))) (. .)))";
+    String output = "(ROOT (S (NP (DT This)) (VP (VBZ costs) (NP (QP (QP ($ $) (QP (CD 1) (CD million))) (CC or) (NP (JJR more))))) (. .)))";
+    runTest(input, output);
+
+    // First it gets flattened, then the CC gets broken up, but the overall result should be the same
+    input = "(ROOT (S (NP (DT This)) (VP (VBZ costs) (NP (QP ($ $) (CD 1) (CD million)) (QP (CC or) (JJR more)))) (. .)))";
     runTest(input, output);
   }
 

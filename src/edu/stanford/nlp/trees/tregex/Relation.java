@@ -390,13 +390,12 @@ abstract class Relation implements Serializable {
     Iterator<Tree> searchNodeIterator(final Tree t,
                                       final TregexMatcher matcher) {
       return new SearchNodeIterator() {
-        int nextNum; // subtle bug warning here: if we use int nextNum=0;
-
-        // instead,
-
-        // we get the first daughter twice because the assignment occurs after
-        // advance() has already been
-        // called once by the constructor of SearchNodeIterator.
+        // subtle bug warning here: if we use 
+        //   int nextNum=0;
+        // instead, we get the first daughter twice because the
+        // assignment occurs after advance() has already been called
+        // once by the constructor of SearchNodeIterator.
+        int nextNum;
 
         @Override
         public void advance() {
