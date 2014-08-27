@@ -59,7 +59,7 @@ public class SpanishVerbStripper {
       for(; line != null; line = br.readLine()) {
         String[] words = line.trim().split("\\s");
         if(words.length < 3) {
-          System.err.printf("SpanishVerbStripper: addings words to dict, missing word, ignoring line\n");
+          System.err.printf("SpanishVerbStripper: addings words to dict, missing word, ignoring line");
         }
         dict.put(words[0], words[2]);
       }
@@ -129,12 +129,6 @@ public class SpanishVerbStripper {
     return stripped;
   }
 
-    private static char getCase(String original, char letter) {
-	if (Character.isUpperCase(original.charAt(original.length()-1)))
-	    return Character.toUpperCase(letter);
-	else return Character.toLowerCase(letter);
-    }
-
   /**
    * Examines the given verb pair and returns <tt>true</tt> if it is a
    * valid pairing of verb form and clitic pronoun(s).
@@ -145,24 +139,13 @@ public class SpanishVerbStripper {
    * <tt>(sentad, os)</tt>.
    */
   private static boolean validateVerbPair(Pair<String, List<String>> pair) {
+
       String stripped = pair.first().toLowerCase();
-      
       String firstPron = pair.second().get(0).toLowerCase();
 
-      if (dict.containsKey(stripped))
-	  return true;
-
-      if (firstPron.matches("os") && dict.containsKey(stripped + 'd')) {
-	  pair.setFirst(pair.first() + getCase(pair.first(), 'd'));
-	  return true;
-      }
-
-      if (firstPron.matches("nos|se") && dict.containsKey(stripped +'s')) {
-          pair.setFirst(pair.first() + getCase(pair.first(), 's'));
-          return true;
-      }
-
-      return false;
+      return (isVerb(stripped)
+	      || firstPron.matches("os") && isVerb(stripped + 'd')
+	      || firstPron.matches("nos|se") && isVerb(stripped + 's'));
   }
 
   /**

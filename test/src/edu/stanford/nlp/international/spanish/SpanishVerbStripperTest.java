@@ -58,7 +58,7 @@ public class SpanishVerbStripperTest extends TestCase {
       SpanishVerbStripper.separatePronouns("aplicárseles"));
 
     // Don't treat plural past participles as 2nd-person commands!
-    //    assertNull(SpanishVerbStripper.separatePronouns("sentados"));
+    assertNull(SpanishVerbStripper.separatePronouns("sentados"));
     pronouns.clear();
     pronouns.add("os");
     assertEquals(new Pair("sentad", pronouns),
@@ -96,8 +96,8 @@ public class SpanishVerbStripperTest extends TestCase {
     assertEquals("compre", SpanishVerbStripper.stripVerb("cómprelos"));
     assertEquals("haz", SpanishVerbStripper.stripVerb("házmelo"));
     assertEquals("oír", SpanishVerbStripper.stripVerb("oírse"));
-    assertEquals("escribamos", SpanishVerbStripper.stripVerb("escribámosela"));
-    assertEquals("sentemos", SpanishVerbStripper.stripVerb("sentémonos"));
+    assertEquals("escribamo", SpanishVerbStripper.stripVerb("escribámosela"));
+    assertEquals("sentemo", SpanishVerbStripper.stripVerb("sentémonos"));
   }
 
 }
