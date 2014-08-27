@@ -142,7 +142,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     // "Lift up" sentence-final periods which have been nested within
     // constituents (convention in AnCora is to have sentence-final
     // periods as final right children of the `sentence` constituent)
-    new Pair("__=N <<` (fp=fp <: (/^\\.$/ !. __)) > sentence=sentence",
+    new Pair("__=N <<` (fp|fs=fp <: (/^\\.$/ !. __)) > sentence=sentence",
              "move fp $- N"),
 
     // AnCora has a few weird parses of "nada que ver" and related

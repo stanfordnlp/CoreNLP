@@ -60,7 +60,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   private List<CoreLabel> compoundBuffer;
 
   // Produces the tokenization for parsing used by AnCora (fixed) */
-  public static final String DEFAULT_OPTS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitAll=true";
+  public static final String ANCORA_OPTIONS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitAll=true";
 
   /**
    * Constructor.
@@ -128,44 +128,31 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * Handles contractions like del and al, marked by the lexer
    */
   private CoreLabel processContraction(CoreLabel cl) {
-		cl.remove(ParentAnnotation.class);
-    String word = cl.word();
-		String first;
-		String second;
+      cl.remove(ParentAnnotation.class);
+      String word = cl.word();
+      String first = word.substring(0, word.length()-1);
+      String second;
+      char lastChar = word.charAt(word.length()-1);
 
-		switch (word.toLowerCase()) {
-		case "del": 
-		case "al":
-		  first = word.substring(0, word.length()-1);
-			char lastChar = word.charAt(word.length()-1);
-			if(Character.isLowerCase(lastChar))
-				second = "el";
-			else second = "EL";
-			break;
-
-		case "conmigo": 
-		case "contigo":
-		case "consigo":
-		default:
-			first = word.substring(0, 3);
-			second = word.substring(3, 5);
-		}
+      if(Character.isLowerCase(lastChar))
+	  second = "el";
+      else second = "EL";
    
-    compoundBuffer.add(copyCoreLabel(cl, second));
-    return copyCoreLabel(cl, first);
+      compoundBuffer.add(copyCoreLabel(cl, second));
+      return copyCoreLabel(cl, first);
   }
 
   /**
    * Handles verbs with attached suffixes, marked by the lexer
    */
   private CoreLabel processVerb(CoreLabel cl) {
-    cl.remove(ParentAnnotation.class);
-    Pair<String, List<String>> parts = SpanishVerbStripper.separatePronouns(cl.word());
+      cl.remove(ParentAnnotation.class);
+      Pair<String, List<String>> parts = SpanishVerbStripper.separatePronouns(cl.word());
       if (parts == null)
-				return cl;
-    for(String pronoun : parts.second())
-	    compoundBuffer.add(copyCoreLabel(cl, pronoun));
-    return copyCoreLabel(cl, parts.first());
+	  return cl;
+      for(String pronoun : parts.second())
+	  compoundBuffer.add(copyCoreLabel(cl, pronoun));
+      return copyCoreLabel(cl, parts.first());
   }
 
   /**
@@ -184,20 +171,6 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     return compoundBuffer.remove(0);
   }
 
-	/**
-	 * a factory that vends CoreLabel tokens with default tokenization.
-	 */
-	public static TokenizerFactory<CoreLabel> coreLabelFactory() {
-		return SpanishTokenizerFactory.newCoreLabelTokenizerFactory();
-	}
-
-	/**
-	 * recommended factory method
-	 */
-	public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory, String options) {
-		return new SpanishTokenizerFactory<T>(factory, options);
-	}
-
   /**
    * A factory for Spanish tokenizer instances.
    *
@@ -211,41 +184,38 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
     protected final LexedTokenFactory<T> factory;
     protected Properties lexerProperties = new Properties();
-
     protected boolean splitCompoundOption = false;
     protected boolean splitVerbOption = false;
     protected boolean splitContractionOption = false;
 
-    public static TokenizerFactory<CoreLabel> newCoreLabelTokenizerFactory() {
-      return new SpanishTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory(), DEFAULT_OPTS);
+    public static TokenizerFactory<CoreLabel> newTokenizerFactory() {
+      return new SpanishTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory());
     }
 
-		/**
-		 * Contructs a new SpanishTokenizer that returns T objects and uses the options passed in.
-		 *
-		 * @oaram factory a factory for the token type that the tokenizer will return
-		 * @param options a String of options, separated by commas
-		 * @return A TokenizerFactory that returns the right token types
-		 */
-		public static <T extends HasWord> SpanishTokenizerFactory<T> newSpanishTokenizerFactory(LexedTokenFactory<T> factory, 
-																																														String options) {
-			return new SpanishTokenizerFactory<T>(factory, options);
-		}
+    /**
+     * Constructs a new PTBTokenizer that returns Word objects and
+     * uses the options passed in.
+     * THIS METHOD IS INVOKED BY REFLECTION BY SOME OF THE JAVANLP
+     * CODE TO LOAD A TOKENIZER FACTORY.  IT SHOULD BE PRESENT IN A
+     * TokenizerFactory.
+     * todo [cdm 2013]: But we should change it to a method that can return any kind of Label and return CoreLabel here
+     *
+     * @param options A String of options
+     * @return A TokenizerFactory that returns Word objects
+     */
+    public static TokenizerFactory<Word> newWordTokenizerFactory(String options) {
+      return new SpanishTokenizerFactory<Word>(new WordTokenFactory(), options);
+    }
 
-		// Constructors 
 
-		/** Make a factory for SpanishTokenizers, default options */
     private SpanishTokenizerFactory(LexedTokenFactory<T> factory) {
       this.factory = factory;
-			setOptions(DEFAULT_OPTS);
     }
 
-		/** Make a factory for SpanishTokenizers, options passed in */
     private SpanishTokenizerFactory(LexedTokenFactory<T> factory, String options) {
-      this.factory = factory;
+      this(factory);
       setOptions(options);
     }
-
 
     @Override
     public Iterator<T> getIterator(Reader r) {
@@ -314,6 +284,23 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   } // end static class FrenchTokenizerFactory
 
 
+  /**
+   * Returns a factory for FrenchTokenizer.
+   * THIS IS NEEDED FOR CREATION BY REFLECTION.
+   */
+  public static TokenizerFactory<CoreLabel> factory() {
+    return SpanishTokenizerFactory.newTokenizerFactory();
+  }
+
+
+  /** Returns a factory for SpanishTokenizer that replicates the tokenization of
+   * AnCora (fixed).
+   */
+  public static TokenizerFactory<CoreLabel> ancoraFactory() {
+      TokenizerFactory<CoreLabel> tf = SpanishTokenizerFactory.newTokenizerFactory();
+      tf.setOptions(ANCORA_OPTIONS);
+      return tf;
+  }
 
   private static String usage() {
     StringBuilder sb = new StringBuilder();
@@ -359,7 +346,8 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     }
 
     // Lexer options
-    final TokenizerFactory<CoreLabel> tf = SpanishTokenizer.coreLabelFactory();
+    final TokenizerFactory<CoreLabel> tf = options.containsKey("ancora") ?
+        SpanishTokenizer.ancoraFactory() : SpanishTokenizer.factory();
     String orthoOptions = options.getProperty("orthoOpts", "");
     tf.setOptions(orthoOptions);
 
@@ -386,7 +374,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
           printSpace = false;
           System.out.println();
         } else {
-          if (printSpace) System.out.println();
+          if (printSpace) System.out.print(" ");
           String outputToken = toLower ? word.toLowerCase(Locale.FRENCH) : word;
           System.out.print(outputToken);
           printSpace = true;
