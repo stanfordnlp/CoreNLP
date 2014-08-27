@@ -120,8 +120,7 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   /** {@inheritDoc} */
   public HeadFinder headFinder() {
-    // TODO need custom head finder?
-    return new CollinsHeadFinder(this);
+    return new SpanishHeadFinder(this);
   }
 
   /** {@inheritDoc} */

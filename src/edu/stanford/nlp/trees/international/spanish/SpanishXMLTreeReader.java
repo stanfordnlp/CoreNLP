@@ -50,7 +50,9 @@ public class SpanishXMLTreeReader implements TreeReader {
   private InputStream stream;
   private final TreeNormalizer treeNormalizer;
   private final TreeFactory treeFactory;
+
   private boolean simplifiedTagset;
+  private boolean detailedAnnotations;
 
   private static final String NODE_SENT = "sentence";
 
@@ -64,6 +66,10 @@ public class SpanishXMLTreeReader implements TreeReader {
   private static final String ATTR_PUNCT = "punct";
   private static final String ATTR_GENDER = "gen";
   private static final String ATTR_NUMBER = "num";
+
+  // Constituent annotations
+  private static final String ATTR_COORDINATING = "coord";
+  private static final String ATTR_CLAUSE_TYPE = "clausetype";
 
   private NodeList sentences;
   private int sentIdx;
@@ -83,13 +89,17 @@ public class SpanishXMLTreeReader implements TreeReader {
    * @param retainNER Retain NER information in preterminals (for later
    *          use in `MultiWordPreprocessor) and add NER-specific
    *          parents to single-word NE tokens
+   * @param detailedAnnotations Retain detailed tree node annotations. These
+   *          annotations on parse tree constituents may be useful for
+   *          e.g. training a parser.
    */
   public SpanishXMLTreeReader(String filename, Reader in, boolean simplifiedTagset,
                               boolean aggressiveNormalization,
-                              boolean retainNER) {
+                              boolean retainNER, boolean detailedAnnotations) {
     TreebankLanguagePack tlp = new SpanishTreebankLanguagePack();
 
     this.simplifiedTagset = simplifiedTagset;
+    this.detailedAnnotations = detailedAnnotations;
 
     stream = new ReaderInputStream(in, tlp.getEncoding());
     treeFactory = new LabeledScoredTreeFactory();
@@ -270,22 +280,19 @@ public class SpanishXMLTreeReader implements TreeReader {
       return buildEllipticNode(eRoot);
     } else {
       List<Tree> kids = new ArrayList<Tree>();
-      for(Node childNode = eRoot.getFirstChild(); childNode != null;
-          childNode = childNode.getNextSibling()) {
-        if(childNode.getNodeType() != Node.ELEMENT_NODE) continue;
+      for (Node childNode = eRoot.getFirstChild(); childNode != null;
+           childNode = childNode.getNextSibling()) {
+        if (childNode.getNodeType() != Node.ELEMENT_NODE) continue;
+
         Tree t = getTreeFromXML(childNode);
-        if(t == null) {
-          System.err.printf("%s: Discarding empty tree (root: %s)%n", this.getClass().getName(),childNode.getNodeName());
+        if (t == null) {
+          System.err.printf("%s: Discarding empty tree (root: %s)%n", this.getClass().getName(), childNode.getNodeName());
         } else {
           kids.add(t);
         }
       }
 
-      String rootLabel = eRoot.getNodeName().trim();
-
-      Tree t = (kids.size() == 0) ? null : treeFactory.newTreeNode(treeNormalizer.normalizeNonterminal(rootLabel), kids);
-
-      return t;
+      return (kids.size() == 0) ? null : buildConstituentNode(eRoot, kids);
     }
   }
 
@@ -335,6 +342,27 @@ public class SpanishXMLTreeReader implements TreeReader {
     Tree t = treeFactory.newTreeNode(constituentStr, kids);
 
     return t;
+  }
+
+  /**
+   * Build a parse tree node corresponding to a constituent.
+   *
+   * @param root Node describing the constituent
+   * @param children Collected child nodes, already parsed
+   */
+  private Tree buildConstituentNode(Node root, List<Tree> children) {
+    Element eRoot = (Element) root;
+    String label = eRoot.getNodeName().trim();
+
+    if (detailedAnnotations) {
+      if (eRoot.getAttribute(ATTR_COORDINATING).equals("yes")) {
+        label += "-coord";
+      } else if (eRoot.hasAttribute(ATTR_CLAUSE_TYPE)) {
+        label += '-' + eRoot.getAttribute(ATTR_CLAUSE_TYPE);
+      }
+    }
+
+    return treeFactory.newTreeNode(treeNormalizer.normalizeNonterminal(label), children);
   }
 
   /**
@@ -411,6 +439,7 @@ public class SpanishXMLTreeReader implements TreeReader {
     sb.append("Options:").append(nl);
     sb.append("   -help: Print this message").append(nl);
     sb.append("   -ner: Add NER-specific information to trees").append(nl);
+    sb.append("   -detailedAnnotations: Retain detailed annotations on tree constituents (useful for making treebank for parser, etc.)").append(nl);
     sb.append("   -plain: Output corpus in plaintext rather than as trees").append(nl);
     sb.append("   -searchPos posRegex: Only print sentences which contain a token whose part of speech matches the given regular expression").append(nl);
     sb.append("   -searchWord wordRegex: Only print sentences which contain a token which matches the given regular expression").append(nl);
@@ -422,7 +451,9 @@ public class SpanishXMLTreeReader implements TreeReader {
     Map<String, Integer> argOptionDefs = Generics.newHashMap();
     argOptionDefs.put("help", 0);
     argOptionDefs.put("ner", 0);
+    argOptionDefs.put("detailedAnnotations", 0);
     argOptionDefs.put("plain", 0);
+
     argOptionDefs.put("searchPos", 1);
     argOptionDefs.put("searchWord", 1);
     return argOptionDefs;
@@ -441,13 +472,14 @@ public class SpanishXMLTreeReader implements TreeReader {
       ? Pattern.compile(options.getProperty("searchWord")) : null;
     final boolean plainPrint = PropertiesUtils.getBool(options, "plain", false);
     final boolean ner = PropertiesUtils.getBool(options, "ner", false);
+    final boolean detailedAnnotations = PropertiesUtils.getBool(options, "detailedAnnotations", false);
 
     String[] remainingArgs = options.getProperty("").split(" ");
     List<File> fileList = new ArrayList<File>();
     for(int i = 0; i < remainingArgs.length; i++)
       fileList.add(new File(remainingArgs[i]));
 
-    final SpanishXMLTreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true, ner);
+    final SpanishXMLTreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true, ner, detailedAnnotations);
     ExecutorService pool =
       Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
