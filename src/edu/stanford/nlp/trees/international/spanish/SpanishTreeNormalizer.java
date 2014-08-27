@@ -308,7 +308,11 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       "(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$/=vb " +
       // It should actually be a verb (gerund, imperative or
       // infinitive)
-      "> /^vm[gmn]0000$/";
+      //
+      // (Careful: other code that uses this pattern requires that this
+      // node be at the end, with parens so that it can be named /
+      // modified. See e.g. #verbWithCliticPronounAndSiblings)
+      "> (/^vm[gmn]0000$/";
 
   /**
    * Matches verbs (infinitives, gerunds and imperatives) which have
@@ -316,6 +320,9 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    */
   private static final TregexPattern verbWithCliticPronouns =
     TregexPattern.compile(VERB_LEAF_WITH_PRONOUNS_TREGEX +
+                          // Verb tag should not have siblings in verb
+                          // phrase
+                          " !$ __)" +
                           // Locate the clause which contains it, and
                           // the child just below that clause
                           ">+(/^[^S]/) (/^(infinitiu|gerundi|grup\\.verb)$/=target " +
@@ -327,6 +334,26 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
                           "!<< (/^(infinitiu|gerundi|grup\\.verb)$/ << =vb))");
 
   /**
+   * Matches verbs (infinitives, gerunds and imperatives) which have
+   * attached pronouns and siblings within their containing verb
+   * phrases
+   */
+  private static final TregexPattern verbWithCliticPronounsAndSiblings =
+    TregexPattern.compile(VERB_LEAF_WITH_PRONOUNS_TREGEX +
+        // Name the matched verb tag as the target for insertion;
+        // require that it have siblings
+        "=target $ __) " +
+        // Locate the clause which contains it, and
+        // the child just below that clause
+        ">+(/^[^S]/) (/^(infinitiu|gerundi|grup\\.verb)$/ " +
+        "> /^(sentence|S|grup\\.verb|infinitiu|gerundi)$/=clause << =vb " +
+        // Make sure we're not up too far in the tree:
+        // there should be no infinitive / gerund /
+        // verb phrase between the located ancestor
+        // and the verb
+        "!<< (/^(infinitiu|gerundi|grup\\.verb)$/ << =vb))");
+
+  /**
    * Matches verbs which really should be in a clause, but were
    * squeezed into an infinitive constituent (because the pronoun was
    * attached to the verb, we could just pretend it wasn't a clause..
@@ -334,7 +361,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    */
   private static final TregexPattern clauselessVerbWithCliticPronouns = TregexPattern.compile(
     VERB_LEAF_WITH_PRONOUNS_TREGEX +
-      "> (/^vmn/ > (/^infinitiu$/=target > /^sp$/))"
+      ") > (/^vmn/ > (/^infinitiu$/=target > /^sp$/))"
   );
   private static final TsurgeonPattern clausifyVerbWithCliticPronouns =
     Tsurgeon.parseOperation("adjoinF (S foot@) target");
@@ -350,7 +377,19 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     t = Tsurgeon.processPattern(clauselessVerbWithCliticPronouns,
       clausifyVerbWithCliticPronouns, t);
 
-    TregexMatcher matcher = verbWithCliticPronouns.matcher(t);
+    // Run two separate stages: one for only-child VPs, then another
+    // for VP children which have siblings
+    t = expandCliticPronounsInner(t, verbWithCliticPronouns);
+    t = expandCliticPronounsInner(t, verbWithCliticPronounsAndSiblings);
+
+    return t;
+  }
+
+  /**
+   * Expand clitic pronouns on verbs matching the given pattern.
+   */
+  private static Tree expandCliticPronounsInner(Tree t, TregexPattern pattern) {
+    TregexMatcher matcher = pattern.matcher(t);
     while (matcher.find()) {
       Tree verbNode = matcher.getNode("vb");
       String verb = verbNode.value();
@@ -375,8 +414,8 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
           : "(sn (grup.nom (pp000000 %s)))";
 
         String patternString = "[insert " + String.format(newTreeStr, pronoun) + " $- target]";
-        TsurgeonPattern pattern = Tsurgeon.parseOperation(patternString);
-        t = pattern.evaluate(t, matcher);
+        TsurgeonPattern insertPattern = Tsurgeon.parseOperation(patternString);
+        t = insertPattern.evaluate(t, matcher);
       }
 
       TsurgeonPattern relabelOperation =
