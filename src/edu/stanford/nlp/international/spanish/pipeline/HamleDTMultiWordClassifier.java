@@ -352,6 +352,9 @@ public class HamleDTMultiWordClassifier {
       int count = 0;
       for (String word : words) {
         String pos = dictionary.get(word);
+        if (pos == null)
+          continue;
+        
         for (String candPos : partsOfSpeech) {
           if (candPos.startsWith(pos)) {
             count++;
