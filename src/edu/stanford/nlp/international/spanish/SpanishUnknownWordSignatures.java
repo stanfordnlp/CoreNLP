@@ -41,6 +41,11 @@ public class SpanishUnknownWordSignatures {
     "(?<!últ|máx|mín|án|próx|ís|cént|[np]ón|prést|gít|ínt|pár" +
       "|^extr|^supr|^tr?|^[Rr]?|gr)[eia]mos$");
 
+  private static final Pattern pGerund = Pattern.compile(
+    "(?i)((?<!^([bmn]|bl|com|contrab|cu|[fh]ern))a" +
+      "|(?<!^(asci|ati|atu|compr|condesci|conti|desati|desci|desenti|disti|divid|enci|enti|estup" +
+      "|exti|fi|hi|malenti|pret|refer|rever|sobreenti|subti|ti|transci|trasci|trem))e)ndo$");
+
   private SpanishUnknownWordSignatures() {} // static methods
 
   public static boolean hasMasculineSuffix(String s) {
@@ -73,6 +78,10 @@ public class SpanishUnknownWordSignatures {
 
   public static boolean hasVerbFirstPersonPluralSuffix(String s) {
     return pVerbFirstPersonPlural.matcher(s).find();
+  }
+
+  public static boolean hasGerundSuffix(String s) {
+    return pGerund.matcher(s).find();
   }
 
   // The *Suffix methods are used by the SpanishUnknownWordModel to

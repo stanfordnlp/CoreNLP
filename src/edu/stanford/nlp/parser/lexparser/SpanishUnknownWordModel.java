@@ -108,10 +108,10 @@ public class SpanishUnknownWordModel extends BaseUnknownWordModel {
 
         // Broad coverage patterns -- only apply if we haven't yet matched at all
         if (sb.toString().equals(BASE_LABEL)) {
-          boolean verb1p = SpanishUnknownWordSignatures.hasVerbFirstPersonPluralSuffix(word);
-
-          if (verb1p) {
+          if (SpanishUnknownWordSignatures.hasVerbFirstPersonPluralSuffix(word)) {
             sb.append("-vb1p");
+          } else if (SpanishUnknownWordSignatures.hasGerundSuffix(word)) {
+            sb.append("-ger");
           } else if (word.endsWith("s")) {
             sb.append("-s");
           }
