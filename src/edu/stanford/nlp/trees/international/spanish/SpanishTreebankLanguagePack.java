@@ -18,28 +18,34 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final long serialVersionUID = -7059939700276532428L;
 
-  //wsg2011: The distributed treebank is encoding in ISO8859_1, but
-  //the current FrenchTreebankParserParams is currently configured to
-  //read UTF-8, PTB style trees that have been extracted from the XML
-  //files.
-  public static final String FTB_ENCODING = "ISO8859_1";
+  // The AnCora treebank is distributed in ISO 8859-1 XML, but the
+  // processed treebank (PTB-style) is UTF-8
+  public static final String STB_ENCODING = "ISO8859_1";
 
-  //The raw treebank uses "PONCT". Change to LDC convention.
-  private static final String[] frenchPunctTags = {"PUNC"};
+  private static final String[] punctTags = {
+    "faa", "fat", "fc", "fca", "fct", "fd", "fe", "fg", "fh", "fia", "fit",
+    "fla", "flt", "fp", "fpa", "fpt", "fra", "frc", "fs", "ft", "fx", "fz",
+    "f0"
+  };
 
-  private static final String[] frenchSFPunctTags = {"PUNC"};
+  private static final String[] sentenceFinalPunctTags = {
+    "fat", "fit", "fp", "fs"
+  };
 
-  private static final String[] frenchPunctWords = {"=","*","/","\\","]","[","\"","''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";", "&quot;"};
+  private static final String[] punctWords = {
+    "¡", "!", ",", "[", "]", ":", "\"", "-", "/", "¿", "?", "{", "}", ".",
+    "=LRB=", "=RRB=", "«", "»", "…", "...", "%", ";", "_", "+", "=", "&", "@"
+  };
 
-  private static final String[] frenchSFPunctWords = {".", "!", "?"};
+  private static final String[] sentenceFinalPunctWords = {
+    "!", "?", ".", "…", "..."
+  };
 
-  private static final char[] annotationIntroducingChars = {'-', '=', '|', '#', '^', '~'};
-
-  private static final String[] frenchStartSymbols = {"ROOT"};
+  private static final String[] startSymbols = {"ROOT"};
 
   @Override
   public String getEncoding() {
-    return FTB_ENCODING;
+    return STB_ENCODING;
   }
 
   /**
@@ -49,7 +55,7 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
    */
   @Override
   public String[] punctuationTags() {
-    return frenchPunctTags;
+    return punctTags;
   }
 
 
@@ -60,7 +66,7 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
    */
   @Override
   public String[] punctuationWords() {
-    return frenchPunctWords;
+    return punctWords;
   }
 
 
@@ -72,7 +78,7 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
    */
   @Override
   public String[] sentenceFinalPunctuationTags() {
-    return frenchSFPunctTags;
+    return sentenceFinalPunctTags;
   }
 
   /**
@@ -82,23 +88,7 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
    * @return The sentence final punctuation tags
    */
   public String[] sentenceFinalPunctuationWords() {
-    return frenchSFPunctWords;
-  }
-
-
-  /**
-   * Return an array of characters at which a String should be
-   * truncated to give the basic syntactic category of a label.
-   * The idea here is that French treebank style labels follow a syntactic
-   * category with various functional and crossreferencing information
-   * introduced by special characters (such as "NP-SUBJ").  This would
-   * be truncated to "NP" by the array containing '-'.
-   *
-   * @return An array of characters that set off label name suffixes
-   */
-  @Override
-  public char[] labelAnnotationIntroducingCharacters() {
-    return annotationIntroducingChars;
+    return sentenceFinalPunctWords;
   }
 
 
@@ -109,7 +99,7 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
    */
   @Override
   public String[] startSymbols() {
-    return frenchStartSymbols;
+    return startSymbols;
   }
 
 

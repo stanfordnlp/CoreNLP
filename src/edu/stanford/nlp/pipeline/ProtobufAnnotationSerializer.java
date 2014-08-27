@@ -692,7 +692,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       // Populate the tokens from the sentence
       for (CoreNLPProtos.Sentence sentence : proto.getSentenceList()) {
         // It's conceivable that the sentences are not contiguous -- pad this with nulls
-        while (sentence.hasTokenOffsetBegin() && tokens.size() < sentence.getTokenOffsetEnd()) {
+        while (sentence.hasTokenOffsetBegin() && tokens.size() < sentence.getTokenOffsetBegin()) {
           tokens.add(null);
         }
         // Read the sentence
@@ -700,8 +700,17 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           CoreLabel coreLabel = fromProto(token);
           // Set docid
           if (proto.hasDocID()) { coreLabel.setDocID(proto.getDocID()); }
-          for (int i = token.getTokenBeginIndex(); i < token.getTokenEndIndex(); ++i) {
-            tokens.set(token.getTokenBeginIndex(), coreLabel);
+          if (token.hasTokenBeginIndex() && token.hasTokenEndIndex()) {
+            // This is usually true, if enough annotators are defined
+            while (tokens.size() < sentence.getTokenOffsetEnd()) {
+              tokens.add(null);
+            }
+            for (int i = token.getTokenBeginIndex(); i < token.getTokenEndIndex(); ++i) {
+              tokens.set(token.getTokenBeginIndex(), coreLabel);
+            }
+          } else {
+            // Assume this token spans a single token, and just add it to the tokens list
+            tokens.add(coreLabel);
           }
         }
       }

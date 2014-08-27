@@ -165,6 +165,7 @@ public final class MultiWordPreprocessor {
         put("pique", "ncms000");
         put("pos", "ncms000");
         put("postre", "ncms000");
+        put("pro", "ncms000");
         put("ralentí", "ncms000");
         put("ras", "ncms000");
         put("rebato", "ncms000");
@@ -199,19 +200,27 @@ public final class MultiWordPreprocessor {
     private static final Pattern participle = Pattern.compile("[ai]d[oa]$");
 
     /**
-     * Names which would be mistakenly marked as function words by unigram tagger (and which never appear as function words
-     * in multi-word tokens)
+     * Names which would be mistakenly marked as function words by
+     * unigram tagger (and which never appear as function words in
+     * multi-word tokens)
      */
     private static final Set<String> actuallyNames = new HashSet<String>() {{
       add("A");
-      add("Al");
+      add("Avenida");
       add("Contra");
       add("Gracias"); // interjection
+      add("in"); // preposition; only appears in corpus as "in extremis" (preposition)
+      add("Mercado");
       add("Jesús"); // interjection
       add("Salvo");
       add("Sin");
       add("Van"); // verb
     }};
+
+    private static final Pattern otherNamePattern = Pattern.compile("\\b(Al\\w+|A[^l]\\w*|[B-Z]\\w+)");
+
+    // Determiners which may also appear as pronouns
+    private static final Pattern pPronounDeterminers = Pattern.compile("(tod|otr|un)[oa]s?");
 
     public static String getOverrideTag(String word, String containingPhrase) {
       if (containingPhrase == null)
@@ -219,17 +228,66 @@ public final class MultiWordPreprocessor {
 
       if (word.equalsIgnoreCase("este") && !containingPhrase.startsWith(word))
         return "np00000";
-      else if (word.equals("Al") && containingPhrase.startsWith("Al fin"))
-        return "sp000";
       else if (word.equals("Sin") && containingPhrase.startsWith("Sin embargo"))
         return "sp000";
+      else if (word.equals("contra")
+        && (containingPhrase.startsWith("en contra") || containingPhrase.startsWith("En contra")))
+        return "nc0s000";
+      else if (word.equals("total") && containingPhrase.startsWith("ese"))
+        return "nc0s000";
+      else if (word.equals("DEL"))
+        // Uses of "Del" in corpus are proper nouns, but uses of "DEL" are
+        // prepositions.. convenient for our purposes
+        return "sp000";
+      else if (word.equals("sí") && containingPhrase.contains("por sí")
+        || containingPhrase.contains("fuera de sí"))
+        return "pp000000";
+      else if (pPronounDeterminers.matcher(word).matches() && containingPhrase.endsWith(word))
+        // Determiners tailing a phrase are pronouns: "sobre todo," "al otro", etc.
+        return "pi000000";
+      else if (word.equals("cuando") && containingPhrase.endsWith(word))
+        return "pi000000";
+      else if ((word.equalsIgnoreCase("contra") && containingPhrase.endsWith(word)))
+        return "nc0s000";
+      else if (word.equals("salvo") && containingPhrase.endsWith("salvo"))
+        return "aq0000";
+      else if (word.equals("mira") && containingPhrase.endsWith(word))
+        return "nc0s000";
+      else if (word.equals("pro") && containingPhrase.startsWith("en pro"))
+        return "nc0s000";
+      else if (word.equals("espera") && containingPhrase.endsWith("espera de"))
+        return "nc0s000";
+      else if (word.equals("Paso") && containingPhrase.equals("El Paso"))
+        return "np00000";
+      else if (word.equals("medio") && (containingPhrase.endsWith("medio de") || containingPhrase.endsWith("ambiente")
+        || containingPhrase.endsWith("por medio") || containingPhrase.contains("por medio")
+        || containingPhrase.endsWith("medio")))
+        return "nc0s000";
+      else if (word.equals("Medio") && containingPhrase.contains("Ambiente"))
+        return "nc0s000";
+      else if (word.equals("Medio") && containingPhrase.equals("Oriente Medio"))
+        return "aq0000";
+      else if (word.equals("media") && containingPhrase.equals("mass media"))
+        return "nc0n000";
+
+      if (word.equals("Al")) {
+        // "Al" is sometimes a part of name phrases: Arabic names, Al Gore, etc.
+        // Mark it a noun if its containing phrase has some other capitalized word
+        if (otherNamePattern.matcher(containingPhrase).find())
+          return "np00000";
+        else
+          return "sp000";
+      }
 
       if (actuallyNames.contains(word))
         return "np00000";
 
       if (word.equals("sino") && containingPhrase.endsWith(word))
         return "nc0s000";
-      else if (word.equals("mañana"))
+      else if (word.equals("mañana") || word.equals("paso") || word.equals("monta") || word.equals("deriva")
+        || word.equals("visto"))
+        return "nc0s000";
+      else if (word.equals("frente") && containingPhrase.startsWith("al frente"))
         return "nc0s000";
 
       return null;
@@ -433,7 +491,7 @@ public final class MultiWordPreprocessor {
 
         // Now "decompress" further the expanded trees formed by
         // multiword token splitting
-        t = MultiWordTreeExpander.expandPhrases(t);
+        t = MultiWordTreeExpander.expandPhrases(t, tn, tf);
 
         if (tn != null)
           t = tn.normalizeWholeTree(t, tf);
