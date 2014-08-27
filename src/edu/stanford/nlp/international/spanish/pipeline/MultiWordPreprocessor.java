@@ -38,21 +38,126 @@ public final class MultiWordPreprocessor {
   private static class ManualUWModel {
 
     private static Map<String, String> posMap = new HashMap<String, String>() {{
+        // i.e., "metros cúbicos"
+        put("cúbico", "aq0000");
+        put("cúbicos", "aq0000");
+        put("diagonal", "aq0000");
+        put("diestro", "aq0000");
+        put("llevados", "aq0000"); // llevados a cabo
+        put("llevadas", "aq0000"); // llevadas a cabo
+        put("menudo", "aq0000");
+        put("obstante", "aq0000");
+        put("rapadas", "aq0000"); // cabezas rapadas
+        put("rasa", "aq0000");
+        put("súbito", "aq0000");
+
+        put("tuya", "px000000");
+
+        // foreign words
+        put("alter", "nc0s000");
+        put("ego", "nc0s000");
+        put("Jet", "nc0s000");
+        put("lag", "nc0s000");
+        put("line", "nc0s000");
+        put("lord", "nc0s000");
+        put("model", "nc0s000");
+        put("mortem", "nc0s000"); // post-mortem
+        put("pater", "nc0s000"); // pater familias
+        put("pipe", "nc0s000");
+        put("play", "nc0s000");
+        put("pollastre", "nc0s000");
+        put("post", "nc0s000");
+        put("power", "nc0s000");
+        put("priori", "nc0s000");
+        put("rock", "nc0s000");
+        put("roll", "nc0s000");
+        put("salubritatis", "nc0s000");
+        put("savoir", "nc0s000");
+        put("service", "nc0s000");
+        put("status", "nc0s000");
+        put("stem", "nc0s000");
+        put("street", "nc0s000");
+        put("task", "nc0s000");
+        put("trio", "nc0s000");
+        put("zigzag", "nc0s000");
+
+        // foreign words (invariable)
+        put("mass", "nc0n000");
+        put("media", "nc0n000");
+
+        // foreign words (plural)
+        put("options", "nc0p000");
+
+        // compound words, other invariables
+        put("regañadientes", "nc0n000");
+        put("sabiendas", "nc0n000"); // a sabiendas (de)
+
+        // common gender
+        put("virgen", "nc0s000");
+
+        put("merced", "ncfs000");
+        put("miel", "ncfs000");
+        put("torera", "ncfs000");
+        put("ultranza", "ncfs000");
+        put("vísperas", "ncfs000");
+
         put("acecho", "ncms000");
+        put("alzamiento", "ncms000");
         put("bordo", "ncms000");
         put("cápita", "ncms000");
         put("ciento", "ncms000");
+        put("cuño", "ncms000");
+        put("pairo", "ncms000");
+        put("pese", "ncms000"); // pese a
+        put("pique", "ncms000");
+        put("pos", "ncms000");
+        put("postre", "ncms000");
+        put("ralentí", "ncms000");
+        put("ras", "ncms000");
+        put("rebato", "ncms000");
+        put("torno", "ncms000");
+        put("través", "ncms000");
 
         put("creces", "ncfp000");
-        put("abuelo", "ncmp000");
+        put("cuestas", "ncfp000");
+        put("oídas", "ncfp000");
+        put("tientas", "ncfp000");
+        put("trizas", "ncfp000");
+        put("veras", "ncfp000");
+
+        put("abuelos", "ncmp000");
+        put("ambages", "ncmp000");
+        put("modos", "ncmp000");
+        put("pedazos", "ncmp000");
+
+        put("amén", "rg"); // amén de
 
         put("formaba", "vmii000");
+        put("perece", "vmip000");
+        put("tardar", "vmn0000");
+
+        put("seiscientas", "z0");
+        put("trescientas", "z0");
       }};
 
     private static int nUnknownWordTypes = posMap.size();
 
     private static final Pattern digit = Pattern.compile("\\d+");
     private static final Pattern participle = Pattern.compile("[ai]d[oa]$");
+
+    /**
+     * Match phrases for which unknown words should be assumed to be
+     * common nouns
+     *
+     * - a trancas y barrancas
+     * - en vez de, en pos de
+     * - sin embargo
+     * - merced a
+     * - pese a que
+     */
+    private static final Pattern commonPattern =
+      Pattern.compile("^al? |^en .+ de$|sin | al?$| que$",
+                      Pattern.CASE_INSENSITIVE);
 
     public static String getTag(String word, String containingPhrase) {
       // Exact matches
@@ -72,10 +177,14 @@ public final class MultiWordPreprocessor {
       if (participle.matcher(word).find())
         return "aq0000";
 
-      System.err.println("No POS tag for " + word);
+      // One last hint: is the phrase one which we have designated to
+      // contain mostly common nouns?
+      if (commonPattern.matcher(word).matches())
+        return "ncms000";
 
-      return Character.isUpperCase(word.codePointAt(0))
-        ? "np00000" : "ncms000";
+      // Now make an educated guess.
+      System.err.println("No POS tag for " + word);
+      return "np00000";
     }
   }
 
