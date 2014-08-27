@@ -88,6 +88,7 @@ public final class MultiWordPreprocessor {
       put("z", "grup.z");
       put("z0", "grup.z");
       put("zp", "grup.z");
+      put("zu", "grup.z");
     }};
 
   private static class ManualUWModel {
@@ -195,6 +196,9 @@ public final class MultiWordPreprocessor {
 
         put("seiscientas", "z0");
         put("trescientas", "z0");
+
+        put("km", "zu");
+        put("kms", "zu");
       }};
 
     private static int nUnknownWordTypes = posMap.size();
@@ -274,6 +278,8 @@ public final class MultiWordPreprocessor {
         return "nc0n000";
       else if (word.equals("cuenta")) // tomar en cuenta, darse cuenta de, ...
         return "nc0s000";
+      else if (word.equals("h") && containingPhrase.startsWith("km"))
+        return "zu";
 
       if (word.equals("Al")) {
         // "Al" is sometimes a part of name phrases: Arabic names, Al Gore, etc.
