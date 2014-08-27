@@ -106,6 +106,9 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     annotations.put("-markVerbless", new Pair("@S|sentence !<< /^(v|participi$)/",
                                               new SimpleStringFunction("-verbless")));
 
+    annotations.put("-markDominatesVerb", new Pair("__ << (/^(v|participi$)/ < __)",
+                                                   new SimpleStringFunction("-dominatesV")));
+
     compileAnnotations(headFinder);
   }
 
@@ -151,7 +154,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       "-markConjTypes",
 
       // sentence annotations
-      "-markVerbless",
+      "-markVerbless", "-markDominatesVerb",
     };
   }
 
