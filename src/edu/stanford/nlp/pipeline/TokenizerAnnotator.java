@@ -129,7 +129,6 @@ public class TokenizerAnnotator implements Annotator {
     Properties props = new Properties();
     props.setProperty("tokenize.language", lang);
 		System.out.println(props.getProperty("tokenize.language", "banana"));
->>>>>>> eb23195a486a3bf4951e43e98d50759ddf347e54
 
     TokenizerType type = TokenizerType.getTokenizerType(props);
     factory = initFactory(type, props, options);
