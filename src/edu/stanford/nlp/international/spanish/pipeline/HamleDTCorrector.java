@@ -78,7 +78,7 @@ public class HamleDTCorrector {
     Iterator<CoreLabel> iHam = hamledtSentence.iterator(), iAnc = ancoraSentence.iterator();
     CoreLabel hamWord = iHam.next(), ancWord = iAnc.next();
     for (; iHam.hasNext() && iAnc.hasNext(); hamWord = iHam.next(), ancWord = iAnc.next()) {
-      ret.add(correctWord(hamWord, ancWord));
+      ret.add(correctWord(hamWord, ancWord, hamledtSentence, ancoraSentence));
     }
 
     return ret;
@@ -87,8 +87,14 @@ public class HamleDTCorrector {
   /**
    * Correct a HamleDT-output word in isolation with the given AnCora
    * word as context. May modify {@code hamledtWord} in place.
+   *
+   * @param hamledtWord A particular word drawn from {@code hamledtSentence}
+   * @param ancoraWord Corresponding word drawn from {@code ancoraSentence}
+   * @param hamledtSentence Originating sentence in HamleDT corpus
+   * @param ancoraSentence Corresponding originating sentenc in AnCora corpus
    */
-  private CoreLabel correctWord(CoreLabel hamledtWord, CoreLabel ancoraWord) {
+  private CoreLabel correctWord(CoreLabel hamledtWord, CoreLabel ancoraWord,
+                                List<CoreLabel> hamledtSentence, List<CoreLabel> ancoraSentence) {
     if (!hamledtWord.word().equals(ancoraWord.word()))
       throw new RuntimeException(String.format(
         "Treebank line mismatch: HamleDT '%s' does not match AnCora line's '%s'",
@@ -100,8 +106,17 @@ public class HamleDTCorrector {
     // Correct conjunctions which are given as roots of sentence
     int hParent = hamledtWord.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class);
     int aParent = ancoraWord.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class);
-    if (hParent == 0 && aParent != 0)
-      hamledtWord.set(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, aParent);
+    if (hParent == 0 && aParent != 0) {
+      // If aParent is a copula, find its head in the HamleDT parse -- this is the item of which
+      // the conjunction should be a dependent
+      CoreLabel aParentLabel = hamledtSentence.get(aParent - 1);
+      int newParent = (aParentLabel.get(CoreAnnotations.CoNLLDepTypeAnnotation.class).equals("cop"))
+        ? aParentLabel.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class)
+        : aParent;
+
+      hamledtWord.set(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, newParent);
+      hamledtWord.set(CoreAnnotations.CoNLLDepTypeAnnotation.class, "cc");
+    }
 
     return hamledtWord;
   }
