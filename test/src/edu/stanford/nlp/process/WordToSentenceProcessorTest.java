@@ -15,7 +15,7 @@ import junit.framework.TestCase;
 
 public class WordToSentenceProcessorTest extends TestCase {
 
-  private static final Annotator ptb = new TokenizerAnnotator(false);
+  private static final Annotator ptb = new TokenizerAnnotator(false, "en");
   private static final Annotator ptbNL = new TokenizerAnnotator(false, "en", "invertible,ptb3Escaping=true,tokenizeNLs=true");
   private static final WordToSentenceProcessor<CoreLabel> wts = new WordToSentenceProcessor<CoreLabel>();
   private static final WordToSentenceProcessor<CoreLabel> wtsNull =

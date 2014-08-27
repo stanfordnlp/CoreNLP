@@ -27,7 +27,7 @@ public class MorphaAnnotatorITest extends TestCase {
     synchronized(MorphaAnnotatorITest.class) {
       if (fullPipeline == null) {
         fullPipeline = new AnnotationPipeline();
-        fullPipeline.addAnnotator(new TokenizerAnnotator(false));
+        fullPipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
         fullPipeline.addAnnotator(new WordsToSentencesAnnotator(false));
         fullPipeline.addAnnotator(new POSTaggerAnnotator(false));
         fullPipeline.addAnnotator(new MorphaAnnotator(false));
