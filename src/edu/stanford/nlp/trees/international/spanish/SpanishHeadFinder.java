@@ -3,6 +3,7 @@ package edu.stanford.nlp.trees.international.spanish;
 import edu.stanford.nlp.ling.CategoryWordTag;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -14,10 +15,23 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
 
   private static final long serialVersionUID = 7710457835992590620L;
 
+  private static final String[] allVerbs = new String[] {
+    "vmip000", "vmii000", "vmif000", "vmis000", "vmic000",
+    "vmsp000", "vmsi000",
+    "vmm0000", "vmn0000", "vmg0000", "vmp0000",
+
+    "vaip000", "vaii000", "vaif000", "vais000", "vaic000",
+    "vasp000", "vasi000",
+    "vam0000", "van0000", "vag0000", "vap0000",
+
+    "vsip000", "vsii000", "vsis000", "vsif000", "vsic000",
+    "vssp000", "vssi000",
+    "vsm0000", "vsn0000", "vsg0000", "vsp0000"
+  };
+
   public SpanishHeadFinder() {
     this(new SpanishTreebankLanguagePack());
   }
-
 
   public SpanishHeadFinder(TreebankLanguagePack tlp) {
     super(tlp);
@@ -28,9 +42,10 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
     String[][] rootRules = new String[][] {
       {"right", "grup.verb", "s.a", "sn"},
       {"left", "S"},
-      {"right", "grup.adv", "i", "grup.prep"},
-      {"rightdis", "vm", "n", "r"},
-      {"right"}};
+      {"right", "sadv", "grup.adv", "i", "sp", "grup.prep"},
+      insertVerbs(new String[] {"rightdis"},
+        new String[] {"nc0s000", "nc0p000", "nc00000", "np00000", "rg", "rn"})};
+
     nonTerminalInfo.put(tlp.startSymbol(), rootRules);
     nonTerminalInfo.put("S", rootRules);
     nonTerminalInfo.put("sentence", rootRules);
@@ -44,7 +59,7 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
     nonTerminalInfo.put("sa", adjectivePhraseRules);
     nonTerminalInfo.put("grup.a", new String[][] {
         {"right", "a"},
-        {"right", "vm"},
+        insertVerbs(new String[] {"right"}, new String[] {}),
         {"right", "r"}});
 
     // adverbial phrases
@@ -56,19 +71,23 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
     // nonTerminalInfo.put("COORD", new String[][]{{"leftdis", "C", "CC", "CS"}, {"left"}});
 
     // noun phrases
-    nonTerminalInfo.put("sn", new String[][] {{"left", "grup.nom", "grup.w", "grup.z", "sn"}});
+    nonTerminalInfo.put("sn", new String[][] {
+      {"leftdis", "nc0s000", "nc0p000", "nc00000"},
+      {"left", "grup.nom", "grup.w", "grup.z", "sn"}});
     nonTerminalInfo.put("grup.nom", new String[][] {
-        {"left", "n", "p", "grup.nom"},
-        {"leftdis", "a"},
-        {"left", "grup.a", "i", "grup.verb"},
-        {"leftdis", "grup.adv", "d"}});
+      {"leftdis", "nc0s000", "nc0p000", "nc00000", "np00000"},
+      {"leftdis", "pi000000"},
+      {"left", "grup.nom", "sp"},
+      {"leftdis", "pn000000", "aq0000", "ao0000"},
+      {"left", "grup.a", "i", "grup.verb"},
+      {"leftdis", "grup.adv"}});
 
     // verb phrases
-    String[][] verbRules = new String[][] {{"right", "vm", "va", "vs", "vg"}};
+    String[][] verbRules = new String[][] {insertVerbs(new String[] {"left"}, new String[] {})};
     nonTerminalInfo.put("grup.verb", verbRules);
-    nonTerminalInfo.put("infinitiu", new String[][] {{"left", "vm", "va", "vs", "infinitiu"}});
-    nonTerminalInfo.put("gerundi", new String[][] {{"left", "vg", "gerundi"}});
-    nonTerminalInfo.put("participi", new String[][] {{"left", "aq", "vm", "grup.a"}});
+    nonTerminalInfo.put("infinitiu", new String[][] {insertVerbs(new String[] {"left"}, new String[] {"infinitiu"})});
+    nonTerminalInfo.put("gerundi", new String[][] {{"left", "vmg0000", "vag0000", "vsg0000", "gerundi"}});
+    nonTerminalInfo.put("participi", new String[][] {{"left", "aq", "vmp0000", "vap0000", "vsp0000", "grup.a"}});
 
     // specifiers
     nonTerminalInfo.put("spec", new String[][] {
@@ -80,8 +99,8 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
     nonTerminalInfo.put("relatiu", new String[][] {{"left", "p"}});
 
     // prepositional phrases
-    nonTerminalInfo.put("sp", new String[][] {{"left", "prep"}});
-    nonTerminalInfo.put("prep", new String[][] {{"leftdis", "s", "prep", "grup.prep"}});
+    nonTerminalInfo.put("sp", new String[][] {{"left", "prep", "sp"}});
+    nonTerminalInfo.put("prep", new String[][] {{"leftdis", "sp000", "prep", "grup.prep"}});
 
     // custom categories
     nonTerminalInfo.put("grup.cc", new String[][] {{"left", "c", "s"}});
@@ -93,6 +112,14 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
     nonTerminalInfo.put("grup.z", new String[][] {{"left", "z"}, {"right", "n", "s"}, {"left"}});
   }
 
+  /**
+   * Build a list of head rules containing all of the possible verb
+   * tags. The verbs are inserted in between <tt>toLeft</tt> and
+   * <tt>toRight</tt>.
+   */
+  private String[] insertVerbs(String[] toLeft, String[] toRight) {
+    return ArrayUtils.concatenate(toLeft, ArrayUtils.concatenate(allVerbs, toRight));
+  }
 
   /**
    * Go through trees and determine their heads and print them.
