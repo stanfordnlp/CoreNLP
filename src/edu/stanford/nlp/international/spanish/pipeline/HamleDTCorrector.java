@@ -106,7 +106,7 @@ public class HamleDTCorrector {
     // Correct conjunctions which are given as roots of sentence
     int hParent = hamledtWord.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class);
     int aParent = ancoraWord.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class);
-    if (hParent == 0 && aParent != 0) {
+    if (hamledtWord.tag().equals("CONJ") && hParent == 0 && aParent != 0) {
       // If aParent is a copula, find its head in the HamleDT parse -- this is the item of which
       // the conjunction should be a dependent
       CoreLabel aParentLabel = hamledtSentence.get(aParent - 1);
