@@ -326,15 +326,20 @@ public class MultiWordTreeExpander {
     = Tsurgeon.parseOperation("replace ga (grup.adv (sp (prep (sp000 a)) (sn (spec (da0000 lo)) (grup.nom (s.a (grup.a (aq0000 menos)))))))");
 
   /**
-   * The corpus marks entire multiword tokens like "teniendo en cuenta"
-   * as gerunds (by heading them with a constituent "gerundiu"). Now
-   * that we've split into separate words, transfer this gerund
-   * designation so that it heads the verb only.
+   * The corpus marks entire multiword verb tokens like "teniendo en
+   * cuenta" as gerunds / infinitives (by heading them with a
+   * constituent "gerundi" / "infinitiu"). Now that we've split into
+   * separate words, transfer this gerund designation so that it heads
+   * the verb only.
    */
   private static TregexPattern floppedGerund
     = TregexPattern.compile("/^grup\\.verb$/=grup >: gerundi=ger < (/^vmg/=vb !$ /^vmg/)");
   private static TsurgeonPattern unflopFloppedGerund
     = Tsurgeon.parseOperation("[adjoinF (gerundi foot@) vb] [replace ger grup]");
+  private static TregexPattern floppedInfinitive
+    = TregexPattern.compile("/^grup\\.verb$/=grup >: infinitiu=inf < (/^vmn/=vb !$ /^vmn/)");
+  private static TsurgeonPattern unflopFloppedInfinitive
+    = Tsurgeon.parseOperation("[adjoinF (infinitiu foot@) vb] [replace inf grup]");
 
   /**
    * Match `sn` constituents which can (should) be rewritten as nominal groups
@@ -430,6 +435,7 @@ public class MultiWordTreeExpander {
       add(new Pair(loneAdjectiveInNominalGroup, labelAdjective));
 
       add(new Pair(floppedGerund, unflopFloppedGerund));
+      add(new Pair(floppedInfinitive, unflopFloppedInfinitive));
 
       // Special fix: "a lo menos"
       add(new Pair(alMenos, fixAlMenos));
