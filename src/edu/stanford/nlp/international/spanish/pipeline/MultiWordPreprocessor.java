@@ -17,6 +17,8 @@ import edu.stanford.nlp.trees.tregex.ParseException;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Clean up an AnCora treebank which has been processed to expand multi-word
@@ -103,8 +105,9 @@ public final class MultiWordPreprocessor {
 
 
   public static void traverseAndFix(Tree t,
-      TwoDimensionalCounter<String, String> pretermLabel,
-      TwoDimensionalCounter<String, String> unigramTagger) {
+                                    TwoDimensionalCounter<String, String> pretermLabel,
+                                    TwoDimensionalCounter<String, String> unigramTagger,
+                                    boolean retainNER) {
     if(t.isPreTerminal()) {
       if(t.value().equals(SpanishTreeNormalizer.MW_TAG)) {
         nMissingPOS++;
@@ -118,13 +121,13 @@ public final class MultiWordPreprocessor {
     }
 
     for(Tree kid : t.children())
-      traverseAndFix(kid,pretermLabel,unigramTagger);
+      traverseAndFix(kid, pretermLabel, unigramTagger, retainNER);
 
     // Post-order visit
     if(t.value().startsWith(SpanishTreeNormalizer.MW_PHRASE_TAG)) {
       nMissingPhrasal++;
 
-      String phrasalCat = inferPhrasalCategory(t, pretermLabel);
+      String phrasalCat = inferPhrasalCategory(t, pretermLabel, retainNER);
       if (phrasalCat != null)
         t.setValue(phrasalCat);
     }
@@ -135,15 +138,35 @@ public final class MultiWordPreprocessor {
    * heads words which were expanded from a multi-word token.
    */
   private static String inferPhrasalCategory(Tree t,
-                                             TwoDimensionalCounter<String, String> pretermLabel) {
+                                             TwoDimensionalCounter<String, String> pretermLabel,
+                                             boolean retainNER) {
+    String phraseValue = t.value();
+
     // Retrieve the part-of-speech assigned to the original multi-word
     // token
-    String originalPos = t.value().substring(t.value().lastIndexOf('_') + 1);
+    String originalPos = phraseValue.substring(phraseValue.lastIndexOf('_') + 1);
     // TODO account for CLI flag
-    if (originalPos.length() > 0 && originalPos.charAt(0) == 'n')
+    if (originalPos.length() > 0 && originalPos.charAt(0) == 'n') {
       // TODO may lead to some funky trees if a child somehow gets an
       // incorrect tag -- e.g. we may have a `grup.nom` head a `vmis000`
-      return "grup.nom";
+
+      if (!retainNER)
+        return "grup.nom";
+
+      char nerTag = phraseValue.charAt(phraseValue.length() - 1);
+      switch (nerTag) {
+      case 'l':
+        return "grup.nom.lug";
+      case 'o':
+        return "grup.nom.org";
+      case 'p':
+        return "grup.nom.pers";
+      case '0':
+        return "grup.nom.otros";
+      default:
+        return "grup.nom";
+      }
+    }
 
     // Fallback: try to infer based on part-of-speech sequence formed by
     // constituents
@@ -162,8 +185,9 @@ public final class MultiWordPreprocessor {
   }
 
   private static void resolveDummyTags(File treeFile,
-      TwoDimensionalCounter<String, String> pretermLabel,
-      TwoDimensionalCounter<String, String> unigramTagger) {
+                                       TwoDimensionalCounter<String, String> pretermLabel,
+                                       TwoDimensionalCounter<String, String> unigramTagger,
+                                       boolean retainNER) {
 
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));
@@ -174,7 +198,7 @@ public final class MultiWordPreprocessor {
 
       int nTrees = 0;
       for(Tree t; (t = tr.readTree()) != null;nTrees++) {
-        traverseAndFix(t, pretermLabel, unigramTagger);
+        traverseAndFix(t, pretermLabel, unigramTagger, retainNER);
         pw.println(t.toString());
       }
       pw.close();
@@ -220,18 +244,38 @@ public final class MultiWordPreprocessor {
     }
   }
 
+  private static String usage() {
+    StringBuilder sb = new StringBuilder();
+    String nl = System.getProperty("line.separator");
+    sb.append(String.format("Usage: java %s [OPTIONS] treebank-file%n",
+                            MultiWordPreprocessor.class.getName()));
+    sb.append("Options:").append(nl);
+    sb.append("   -help: Print this message").append(nl);
+    sb.append("   -ner: Retain NER information in tree constituents").append(nl);
+    return sb.toString();
+  }
+
+  private static Map<String, Integer> argOptionDefs;
+  static {
+    argOptionDefs = Generics.newHashMap();
+    argOptionDefs.put("help", 0);
+    argOptionDefs.put("ner", 0);
+  }
 
   /**
    *
    * @param args
    */
   public static void main(String[] args) {
-    if(args.length != 1) {
-      System.err.printf("Usage: java %s file%n", MultiWordPreprocessor.class.getName());
-      System.exit(-1);
+    Properties options = StringUtils.argsToProperties(args, argOptionDefs);
+    if(!options.containsKey("") || options.containsKey("help")) {
+      System.err.println(usage());
+      return;
     }
 
-    final File treeFile = new File(args[0]);
+    boolean retainNER = PropertiesUtils.getBool(options, "ner", false);
+
+    final File treeFile = new File(options.getProperty(""));
     TwoDimensionalCounter<String,String> labelTerm =
       new TwoDimensionalCounter<String,String>();
     TwoDimensionalCounter<String,String> termLabel =
@@ -256,7 +300,7 @@ public final class MultiWordPreprocessor {
       tr.close(); //Closes the underlying reader
 
       System.out.println("Resolving DUMMY tags");
-      resolveDummyTags(treeFile, pretermLabel, unigramTagger);
+      resolveDummyTags(treeFile, pretermLabel, unigramTagger, retainNER);
 
       System.out.println("#Unknown Word Types: " + ManualUWModel.nUnknownWordTypes);
       System.out.println("#Missing POS: " + nMissingPOS);
