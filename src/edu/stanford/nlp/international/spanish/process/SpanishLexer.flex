@@ -397,10 +397,17 @@ APOSETCETERA = {APOS}|[\u0091\u2018\u201B]
 WORD2 = {WORD}(({NUM}|{APOSETCETERA}){WORD}?)+
 WORD_NUM = {NUM}({WORD}|{WORD2})
 
+/* all types of "words" */
+ANYWORD = ({WORD})|({WORD_NUM})|({WORD2})
+
 /* common units abbreviated - to differentiate between WORD_NUM
  * as WORD_NUMs shouldn't be split but these should. */
 UNIT_PREF = [dcm\u00B5\uO3BCnpfazyhkMGTPEZY]|da
 UNIT = ({UNIT_PREF})?m|kg|s|[A]|[K]|mol|rad|[H]z|N|Pa|J|W|C|V
+
+/* prefixed compounds that shouldn't be split off */
+PREFIX = (anti|co|ex|meso|neo|pre|pro|quasi|re|semi|sub){HYPHEN}
+COMPOUND_NOSPLIT = {PREFIX}{ANYWORD}
 
 /* spanish compounds */
 COMPOUND = {WORD}({HYPHEN}{WORD})+
@@ -518,6 +525,8 @@ cannot			{ yypushback(3) ; return getNext(); }
 {VB_2PP_PRON}           { final String origTxt = yytext();
                           return getNext(origTxt, origTxt, VB_PRON_ANNOTATION); 
 			}
+
+{COMPOUND_NOSPLIT}      { return getNext(); }
 
 {COMPOUND}              { final String origTxt = yytext();
                           return getNext(asciiDash(origTxt), origTxt, COMPOUND_ANNOTATION);

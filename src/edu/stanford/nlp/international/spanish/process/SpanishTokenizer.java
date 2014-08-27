@@ -59,9 +59,6 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   private final boolean splitAny;
   private List<CoreLabel> compoundBuffer;
 
-  // Produces the tokenization for parsing used by Green, de Marneffe, and Manning (2011)
-  public static final String FTB_OPTIONS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitCompounds=true";
-
   // Produces the tokenization for parsing used by AnCora (fixed) */
   public static final String ANCORA_OPTIONS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitAll=true";
 
@@ -108,14 +105,6 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 	    else if (splitContractions && cl.get(ParentAnnotation.class).equals(SpanishLexer.CONTR_ANNOTATION))
 		nextToken = (T) processContraction(cl);
 	}
-	/*
-        if (splitCompounds && cl.containsKey(ParentAnnotation.class) 
-	    && cl.get(ParentAnnotation.class).equals(SpanishLexer.COMPOUND_ANNOTATION)) {
-	    nextToken = (T) processCompound(cl);
-        } else if(splitVerbs && cl.containsKey(ParentAnnotation.class) 
-		  && cl.get(ParentAnnotation.class).equals(SpanishLexer.VB_PRON_ANNOTATION)) {
-	    nextToken = (T) processEncliticPronouns(cl);
-	    } else if(splitContractions &&*/
       }
 
       return nextToken;
@@ -125,6 +114,8 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     }
   }
 
+
+  /* Copies the CoreLabel cl with the new word part */
   private CoreLabel copyCoreLabel(CoreLabel cl, String part) {
       CoreLabel newLabel = new CoreLabel(cl);
       newLabel.setWord(part);
@@ -133,6 +124,9 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       return newLabel;
   }
 
+  /**
+   * Handles contractions like del and al, marked by the lexer
+   */
   private CoreLabel processContraction(CoreLabel cl) {
       cl.remove(ParentAnnotation.class);
       String word = cl.word();
@@ -148,6 +142,9 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       return copyCoreLabel(cl, first);
   }
 
+  /**
+   * Handles verbs with attached suffixes, marked by the lexer
+   */
   private CoreLabel processVerb(CoreLabel cl) {
       cl.remove(ParentAnnotation.class);
       Pair<String, List<String>> parts = SpanishVerbStripper.separatePronouns(cl.word());
@@ -295,16 +292,6 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     return SpanishTokenizerFactory.newTokenizerFactory();
   }
 
-
-  /**
-   * Returns a factory for FrenchTokenizer that replicates the tokenization of
-   * Green, de Marneffe, and Manning (2011).
-   */
-  public static TokenizerFactory<CoreLabel> ftbFactory() {
-    TokenizerFactory<CoreLabel> tf = SpanishTokenizerFactory.newTokenizerFactory();
-    tf.setOptions(FTB_OPTIONS);
-    return tf;
-  }
 
   /** Returns a factory for SpanishTokenizer that replicates the tokenization of
    * AnCora (fixed).
