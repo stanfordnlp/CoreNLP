@@ -17,18 +17,18 @@ public class SpanishXMLTreeReaderFactory implements TreeReaderFactory, Serializa
 
   private final boolean simplifiedTagset;
   private final boolean aggressiveNormalization;
-  private final boolean retainNER;
 
   public SpanishXMLTreeReaderFactory(boolean simplifiedTagset,
-                                     boolean aggressiveNormalization,
-                                     boolean retainNER) {
+                                     boolean aggressiveNormalization) {
     this.simplifiedTagset = simplifiedTagset;
     this.aggressiveNormalization = aggressiveNormalization;
-    this.retainNER = retainNER;
   }
 
   public TreeReader newTreeReader(Reader in) {
-    return new SpanishXMLTreeReader(in, simplifiedTagset, aggressiveNormalization,
-                                    retainNER);
+    return new SpanishXMLTreeReader(null, in, simplifiedTagset, aggressiveNormalization);
+  }
+
+  public TreeReader newTreeReader(String path, Reader in) {
+    return new SpanishXMLTreeReader(path, in, simplifiedTagset, aggressiveNormalization);
   }
 }

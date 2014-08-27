@@ -1,13 +1,10 @@
 package edu.stanford.nlp.international.spanish;
 
-import java.util.ArrayList;
-import java.util.List;
+import edu.stanford.nlp.util.Pair;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.HashMap;
 import java.io.*;
-
-import edu.stanford.nlp.util.Pair;
 
 /**
  * Provides a utility function for removing attached pronouns from
@@ -23,18 +20,18 @@ public class SpanishVerbStripper {
   //   - Affirmative imperatives
 
   /* TODO: FIGURE THIS OUT!! */
-  private static final String DICT_PATH = "data/edu/stanford/nlp/international/spanish/enclitic-inflections.data";
-
+  private static final String DICT_PATH = "data/enclitic-inflections.data";
+ 
   private static HashMap<String, String> dict;
 
   private static final String PATTERN_ATTACHED_PRONOUNS =
     "(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$";
 
   private static final Pattern pTwoAttachedPronouns =
-    Pattern.compile("(?:([mts]e|n?os|les?)(l[oa]s?)?)$");
+    Pattern.compile("(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)$");
 
   private static final Pattern pOneAttachedPronoun =
-    Pattern.compile("([mts]e|n?os|les?|l[oa]s?)$");
+    Pattern.compile("(?:[mts]e|n?os|les?|l[oa]s?)$");
 
   /**
    * Matches infinitives and gerunds with attached pronouns.
@@ -67,9 +64,9 @@ public class SpanishVerbStripper {
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
     } catch (FileNotFoundException e) {
-      throw new RuntimeException("Could not load Spanish data file " + DICT_PATH);
+      e.printStackTrace();
     } catch (IOException e) {
-      throw new RuntimeException("Could not load Spanish data file " + DICT_PATH);
+      e.printStackTrace();
     }
   }
 
@@ -117,63 +114,16 @@ public class SpanishVerbStripper {
   }
 
   /**
-   * Separate attached pronouns from the given verb.
-   *
-   * @param word A valid Spanish verb with clitic pronouns attached.
-   * @param pSuffix A pattern to match these attached pronouns.
-   * @return A pair containing the verb (pronouns removed by the given
-   *           pattern) and a list of the pronouns which were attached
-   *           to the verb.
+   * Strips the suffix matched by @pSuffix off of @word and returns
+   * the stripped word, null if unable to strip.
    */
-  private static Pair<String, List<String>> stripSuffix(String word,
-                                                        Pattern pSuffix) {
+  private static String stripSuffix(String word, Pattern pSuffix) {
     Matcher m = pSuffix.matcher(word);
     if(m.find()) {
       String stripped = word.substring(0, m.start());
-      stripped = removeAccents(stripped);
-
-      List<String> attached = new ArrayList<String>();
-      for (int i = 0; i < m.groupCount(); i++)
-        attached.add(m.group(i + 1));
-
-      return new Pair<String, List<String>>(stripped, attached);
+      System.out.println(m.start());
+      return removeAccents(stripped);
     }
-
-    return null;
-  }
-
-  /**
-   * Attempt to separate attached pronouns from the given verb.
-   *
-   * @param word Spanish verb
-   * @return A pair containing the verb (pronouns removed) and a list of
-   *           the pronouns which were attached to the verb, or
-   *           <tt>null</tt> if no pronouns could be located and
-   *           separated.
-   */
-  public static Pair<String, List<String>> separatePronouns(String verb) {
-    Pair<String, List<String>> separated;
-
-    // Try to strip just one pronoun first
-    separated = stripSuffix(verb, pOneAttachedPronoun);
-    // Try `word + 'd'` as well for cases like 'sentaos'; stripped this
-    // becomes 'senta', and we only have the form 'sentad' in the
-    // dictionary
-    if (separated != null) {
-      String stripped = separated.first().toLowerCase();
-
-      if (isVerb(stripped) || isVerb(stripped + 'd'))
-        return separated;
-    }
-
-    separated = stripSuffix(verb, pTwoAttachedPronouns);
-    if (separated != null) {
-      String stripped = separated.first().toLowerCase();
-
-      if (isVerb(stripped) || isVerb(stripped + 'd'))
-        return separated;
-    }
-
     return null;
   }
 
@@ -188,16 +138,18 @@ public class SpanishVerbStripper {
    *   - mudarse -> mudar
    *   - contándolos -> contando
    *   - hazlo -> haz
-   *
-   * @return A verb form stripped of attached pronouns, or <tt>null</tt>
-   *           if no pronouns were located / stripped.
    */
   public static String stripVerb(String verb) {
-    Pair<String, List<String>> separated = separatePronouns(verb);
-    if (separated != null)
-      return separated.first();
-
-    return null;
+    String stripped = stripSuffix(verb, pOneAttachedPronoun);
+    if(stripped == null || (!isVerb(stripped) && !isVerb(stripped + "d"))) {
+      System.out.println(stripped);
+      stripped = stripSuffix(verb, pTwoAttachedPronouns);
+      if(stripped == null || (!isVerb(stripped) && !isVerb(stripped + "d"))) {
+        System.out.println(stripped);
+        return null;
+      }
+    }
+    return stripped;
   }
 
 }

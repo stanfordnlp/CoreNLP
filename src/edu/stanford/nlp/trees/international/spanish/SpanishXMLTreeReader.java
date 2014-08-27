@@ -69,6 +69,7 @@ public class SpanishXMLTreeReader implements TreeReader {
   /**
    * Read parse trees from a Reader.
    *
+   * @param filename
    * @param in The <code>Reader</code>
    * @param simplifiedTagset If `true`, convert part-of-speech labels to a
    *          simplified version of the EAGLES tagset, where the tags do not
@@ -77,13 +78,9 @@ public class SpanishXMLTreeReader implements TreeReader {
    *          on the trees read from the provided corpus documents:
    *          split multi-word tokens into their constituent words (and
    *          infer parts of speech of the constituent words).
-   * @param retainNER Retain NER information in preterminals (for later
-   *          use in `MultiWordPreprocessor) and add NER-specific
-   *          parents to single-word NE tokens
    */
-  public SpanishXMLTreeReader(Reader in, boolean simplifiedTagset,
-                              boolean aggressiveNormalization,
-                              boolean retainNER) {
+  public SpanishXMLTreeReader(String filename, Reader in, boolean simplifiedTagset,
+                              boolean aggressiveNormalization) {
     TreebankLanguagePack tlp = new SpanishTreebankLanguagePack();
 
     this.simplifiedTagset = simplifiedTagset;
@@ -93,7 +90,9 @@ public class SpanishXMLTreeReader implements TreeReader {
     treeNormalizer =
       new SpanishTreeNormalizer(simplifiedTagset,
                                 aggressiveNormalization,
-                                retainNER);
+                                true // retain NER information in
+                                     // preterminals
+                                );
 
     DocumentBuilder parser = XMLUtils.getXmlParser();
     try {
@@ -103,6 +102,7 @@ public class SpanishXMLTreeReader implements TreeReader {
       sentIdx = 0;
 
     } catch (SAXException e) {
+      System.err.println("Parse exception while reading " + filename);
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
@@ -154,24 +154,9 @@ public class SpanishXMLTreeReader implements TreeReader {
   private String getPOS(Element node) {
     String pos = node.getAttribute(ATTR_POS);
 
-    String namedAttribute = node.getAttribute(ATTR_NAMED_ENTITY);
-    if (pos.startsWith("np") && pos.length() == 7
-        && pos.charAt(pos.length() - 1) == '0') {
-      // Some nouns are missing a named entity annotation in the final
-      // character of their POS tags, but still have a proper named
-      // entity annotation in the `ne` attribute. Fix this:
-      char annotation = '0';
-      if (namedAttribute.equals("location")) {
-        annotation = 'l';
-      } else if (namedAttribute.equals("person")) {
-        annotation = 'p';
-      } else if (namedAttribute.equals("organization")) {
-        annotation = 'o';
-      }
-
-      pos = pos.substring(0, 6) + annotation;
-    } else if (pos.equals("")) {
-      // Make up for some missing part-of-speech tags
+    // Make up for some missing part-of-speech tags
+    if (pos.equals("")) {
+      String namedAttribute = node.getAttribute(ATTR_NAMED_ENTITY);
       if (namedAttribute.equals("date")) {
         return "w";
       } else if (namedAttribute.equals("number")) {
@@ -202,10 +187,6 @@ public class SpanishXMLTreeReader implements TreeReader {
         // broad inferences
         if (tagName.equals("a")) {
           return "aq0000";
-        } else if (posType.equals("proper")) {
-          return "np00000";
-        } else if (posType.equals("common")) {
-          return "nc0s000";
         }
       }
 
@@ -370,22 +351,18 @@ public class SpanishXMLTreeReader implements TreeReader {
   private static String usage() {
     StringBuilder sb = new StringBuilder();
     String nl = System.getProperty("line.separator");
-
     sb.append(String.format("Usage: java %s [OPTIONS] file(s)%n%n", SpanishXMLTreeReader.class.getName()));
     sb.append("Options:").append(nl);
     sb.append("   -help: Print this message").append(nl);
-    sb.append("   -ner: Add NER-specific information to trees").append(nl);
     sb.append("   -plain: Output corpus in plaintext rather than as trees").append(nl);
     sb.append("   -searchPos posRegex: Only print sentences which contain a token whose part of speech matches the given regular expression").append(nl);
     sb.append("   -searchWord wordRegex: Only print sentences which contain a token which matches the given regular expression").append(nl);
-
     return sb.toString();
   }
 
   private static Map<String, Integer> argOptionDefs() {
     Map<String, Integer> argOptionDefs = Generics.newHashMap();
     argOptionDefs.put("help", 0);
-    argOptionDefs.put("ner", 0);
     argOptionDefs.put("plain", 0);
     argOptionDefs.put("searchPos", 1);
     argOptionDefs.put("searchWord", 1);
@@ -404,14 +381,13 @@ public class SpanishXMLTreeReader implements TreeReader {
     final Pattern wordPattern = options.containsKey("searchWord")
       ? Pattern.compile(options.getProperty("searchWord")) : null;
     final boolean plainPrint = PropertiesUtils.getBool(options, "plain", false);
-    final boolean ner = PropertiesUtils.getBool(options, "ner", false);
 
     String[] remainingArgs = options.getProperty("").split(" ");
     List<File> fileList = new ArrayList<File>();
     for(int i = 0; i < remainingArgs.length; i++)
       fileList.add(new File(remainingArgs[i]));
 
-    final TreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true, ner);
+    final SpanishXMLTreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true);
     ExecutorService pool =
       Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
@@ -419,7 +395,8 @@ public class SpanishXMLTreeReader implements TreeReader {
       pool.execute(new Runnable() {
           public void run() {
             try {
-              TreeReader tr = trf.newTreeReader(new BufferedReader(new InputStreamReader(new FileInputStream(file), "ISO-8859-1")));
+              Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "ISO-8859-1"));
+              TreeReader tr = trf.newTreeReader(file.getPath(), in);
               process(file, tr, posPattern, wordPattern, plainPrint);
               tr.close();
             } catch (FileNotFoundException e) {
