@@ -54,7 +54,7 @@ public class MultiWordTreeExpander {
                             // Headed by a group that was generated from
                             // multi-word token expansion and that we
                             // wish to expand further
-                            " > (/(^grup\\.(c[cs]|[iwz]|nom|pron)|\\.inter)/ <- __=right)" +
+                            " > (/(^grup\\.(adv|c[cs]|[iwz]|nom|pron)|\\.inter)/ <- __=right)" +
                             // With an NP on the left (-> this is a
                             // prep. phrase) and not preceded by any
                             // other prepositions
@@ -67,7 +67,7 @@ public class MultiWordTreeExpander {
                             // was generated from multi-word token
                             // expansion and that we wish to expand
                             // further
-                            " >, (/(^grup\\.(c[cs]|[iwz]|nom|pron)|\\.inter)/ <- __=right)" +
+                            " >, (/(^grup\\.(adv|c[cs]|[iwz]|nom|pron)|\\.inter)/ <- __=right)" +
                             // With an NP on the left (-> this is a
                             // prep. phrase) and not preceded by any
                             // other prepositions
@@ -328,3 +328,5 @@ public class MultiWordTreeExpander {
 // triunfo . sitúa (periods in names at end)
 // Diez . Minutos (new rule for terminal prepositions?)
 // Abogados . y (parenthetical should be separated into its own clause)
+// totalmente . evitables ("en opinion del" at end)
+// hábitat . tradicional ("en cuerpo y alma" phrase)
