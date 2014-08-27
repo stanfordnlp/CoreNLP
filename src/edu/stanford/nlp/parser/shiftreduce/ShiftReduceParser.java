@@ -854,11 +854,12 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       devTreebank = readTreebank(devTreebankPath.first(), devTreebankPath.second());
     }
 
-    double bestScore = Double.MIN_VALUE;
+    double bestScore = Double.MAX_VALUE;
     int bestIteration = 0;
     PriorityQueue<ScoredObject<ShiftReduceParser>> bestModels = null;
     if (op.trainOptions().averagedModels > 0) {
-      bestModels = new PriorityQueue<ScoredObject<ShiftReduceParser>>(op.trainOptions().averagedModels + 1, ScoredComparator.ASCENDING_COMPARATOR);
+      bestModels = new PriorityQueue<ScoredObject<ShiftReduceParser>>(op.trainOptions().averagedModels + 1,
+                                                                      ScoredComparator.DESCENDING_COMPARATOR);
     }
 
     List<Integer> indices = Generics.newArrayList();
@@ -922,13 +923,10 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         EvaluateTreebank evaluator = new EvaluateTreebank(op, null, this, tagger);
         evaluator.testOnTreebank(devTreebank);
 
-        // Negate the edit distance so that we can plug this into a maximizer and have it work
-        // correctly!
-        evaluation = -evaluator.getLACorpusDistance();
-        System.err.println("Negative corpus-level LA after " + iteration + " iterations: " +
-                             evaluation);
+        evaluation = evaluator.getLACorpusDistance();
+        System.err.println("Corpus-level LA after " + iteration + " iterations: " + evaluation);
 
-        if (evaluation > bestScore) {
+        if (evaluation < bestScore) {
           System.err.println("New best dev score (previous best " + bestScore + ")");
           bestScore = evaluation;
           bestIteration = iteration;
