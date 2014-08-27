@@ -319,11 +319,17 @@ public class MultiWordTreeExpander {
 
   private static TsurgeonPattern groupAdjectives = Tsurgeon.parseOperation("createSubtree (s.a grup.a@) left right");
 
+  /**
+   * Some brute-force fixes:
+   */
   private static TregexPattern alMenos
     = TregexPattern.compile("/(?i)^al$/ . /(?i)^menos$/ > (sp000 $+ rg > /^grup\\.adv$/=ga)");
-
   private static TsurgeonPattern fixAlMenos
     = Tsurgeon.parseOperation("replace ga (grup.adv (sp (prep (sp000 a)) (sn (spec (da0000 lo)) (grup.nom (s.a (grup.a (aq0000 menos)))))))");
+  private static TregexPattern todoLoContrario
+    = TregexPattern.compile("(__=ttodo < /(?i)^todo$/) $+ (__=tlo < /(?i)^lo$/ $+ (__=tcon < /(?i)^contrario$/))");
+  private static TsurgeonPattern fixTodoLoContrario
+    = Tsurgeon.parseOperation("[adjoin (sn (grup.nom (pp000000@))) tlo] [adjoin (grup.a (aq0000@)) tcon]");
 
   /**
    * Mark infinitives within verb groups ("hacer ver", etc.)
@@ -446,8 +452,9 @@ public class MultiWordTreeExpander {
       add(new Pair(floppedGerund, unflopFloppedGerund));
       add(new Pair(floppedInfinitive, unflopFloppedInfinitive));
 
-      // Special fix: "a lo menos"
+      // Fixes for specific common phrases
       add(new Pair(alMenos, fixAlMenos));
+      add(new Pair(todoLoContrario, fixTodoLoContrario));
 
       // Lastly..
       //
