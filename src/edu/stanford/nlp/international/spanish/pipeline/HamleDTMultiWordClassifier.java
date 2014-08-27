@@ -1,9 +1,6 @@
 package edu.stanford.nlp.international.spanish.pipeline;
 
-import edu.stanford.nlp.classify.Classifier;
-import edu.stanford.nlp.classify.Dataset;
-import edu.stanford.nlp.classify.GeneralDataset;
-import edu.stanford.nlp.classify.NBLinearClassifierFactory;
+import edu.stanford.nlp.classify.*;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.ling.Datum;
@@ -56,10 +53,13 @@ public class HamleDTMultiWordClassifier {
 
   private Classifier<String, String> classifier;
   private Classifier<String, String> makeClassifier(GeneralDataset<String, String> trainDataset) {
-    double sigma = 0.0; // TODO
+//    double sigma = 0.0; // TODO
+//
+//    return new NBLinearClassifierFactory<String, String>(sigma)
+//      .trainClassifier(trainDataset);
 
-    return new NBLinearClassifierFactory<String, String>(sigma)
-      .trainClassifier(trainDataset);
+    LinearClassifierFactory<String, String> lcf = new LinearClassifierFactory<String, String>();
+    return lcf.trainClassifier(trainDataset);
   }
 
   public void trainClassifier(String datasetPath) {
