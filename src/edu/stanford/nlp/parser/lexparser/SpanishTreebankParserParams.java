@@ -20,27 +20,24 @@ import java.util.List;
  * @author Jon Gauthier
  *
  */
-public class SpanishTreebankParserParams extends AbstractTreebankParserParams {
+public class SpanishTreebankParserParams extends TregexPoweredTreebankParserParams {
 
   private static final long serialVersionUID = -8734165273482119424L;
 
   private final StringBuilder optionsString;
 
-  private HeadFinder headFinder = new SpanishHeadFinder();
+  private HeadFinder headFinder;
 
   public SpanishTreebankParserParams() {
     super(new SpanishTreebankLanguagePack());
 
     setInputEncoding("UTF-8");
+    setHeadFinder(new SpanishHeadFinder());
 
     optionsString = new StringBuilder();
     optionsString.append(getClass().getSimpleName() + "\n");
-  }
 
-  @Override
-  public Tree transformTree(Tree t, Tree root) {
-    // TODO
-    return t;
+    // TODO Make annotations
   }
 
   @Override
@@ -95,9 +92,10 @@ public class SpanishTreebankParserParams extends AbstractTreebankParserParams {
   public int setOptionFlag(String[] args, int i) {
     if (args[i].equalsIgnoreCase("-headFinder") && (i + 1 < args.length)) {
       try {
-        headFinder = (HeadFinder) Class.forName(args[i + 1]).newInstance();
-        optionsString.append("HeadFinder: " + args[i + 1] + "\n");
+        HeadFinder hf = (HeadFinder) Class.forName(args[i + 1]).newInstance();
+        setHeadFinder(hf);
 
+        optionsString.append("HeadFinder: " + args[i + 1] + "\n");
       } catch (Exception e) {
         System.err.println(e);
         System.err.println(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
@@ -120,6 +118,13 @@ public class SpanishTreebankParserParams extends AbstractTreebankParserParams {
   @Override
   public void display() {
     System.err.println(optionsString.toString());
+  }
+
+  public void setHeadFinder(HeadFinder hf) {
+    headFinder = hf;
+
+    // Regenerate annotation patterns
+    compileAnnotations(headFinder);
   }
 
 }
