@@ -106,6 +106,7 @@ public final class MultiWordPreprocessor {
         put("rapadas", "aq0000"); // cabezas rapadas
         put("rasa", "aq0000");
         put("súbito", "aq0000");
+        put("temática", "aq0000");
 
         put("tuya", "px000000");
 
@@ -200,6 +201,7 @@ public final class MultiWordPreprocessor {
         put("Forman", "vmip000");
         put("perece", "vmip000");
         put("PONE", "vmip000");
+        put("suicídate", "vmm0000");
         put("tardar", "vmn0000");
 
         put("seiscientas", "z0");
