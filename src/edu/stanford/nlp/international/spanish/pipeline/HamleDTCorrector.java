@@ -74,9 +74,9 @@ public class HamleDTCorrector {
     List<CoreLabel> ret = new ArrayList<CoreLabel>(hamledtSentence.size());
 
     // First perform individual word corrections
-    CoreLabel hamWord = null, ancWord = null;
-    for (Iterator<CoreLabel> iHam = hamledtSentence.iterator(), iAnc = ancoraSentence.iterator();
-      iHam.hasNext() && iAnc.hasNext(); hamWord = iHam.next(), ancWord = iAnc.next()) {
+    Iterator<CoreLabel> iHam = hamledtSentence.iterator(), iAnc = ancoraSentence.iterator();
+    CoreLabel hamWord = iHam.next(), ancWord = iAnc.next();
+    for (; iHam.hasNext() && iAnc.hasNext(); hamWord = iHam.next(), ancWord = iAnc.next()) {
       ret.add(correctWord(hamWord, ancWord));
     }
 
