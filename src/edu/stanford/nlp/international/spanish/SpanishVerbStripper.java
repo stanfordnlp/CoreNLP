@@ -152,7 +152,7 @@ public class SpanishVerbStripper {
    *           <tt>null</tt> if no pronouns could be located and
    *           separated.
    */
-  static Pair<String, List<String>> separatePronouns(String verb) {
+  public static Pair<String, List<String>> separatePronouns(String verb) {
     Pair<String, List<String>> separated;
 
     // Try to strip just one pronoun first

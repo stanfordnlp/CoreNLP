@@ -11,6 +11,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
@@ -19,6 +20,7 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreeNormalizer;
+import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
@@ -137,8 +139,9 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       }
     }
 
-    // Now attack elisions: 'al' and 'del'
-    expandElisions(tree, tf);
+    // More tregex-powered fixes
+    tree = expandElisions(tree);
+    tree = expandCliticPronouns(tree);
 
     return tree;
   }
@@ -204,6 +207,66 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       //   retain all
       return pos;
     }
+  }
+
+  /**
+   * Matches verbs (infinitives, gerunds and imperatives) which have
+   * attached pronouns, and the clauses which contain them
+   */
+  private static final TregexPattern verbWithCliticPronouns =
+    TregexPattern.compile(// Match a leaf that looks like it has a
+                          // clitic pronoun
+                          "/(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$/=vb " +
+                          // It should actually be a verb (gerund,
+                          // imperative or infinitive)
+                          "> /^vm[gmn]0000$/ " +
+                          // Locate the clause which contains it, and
+                          // the child just below that clause
+                          ">+(/^[^S]/) (/infinitiu|gerundiu|grup\\.verb/=target " +
+                          "> S=clause << =vb " +
+                          // Make sure we're not up too far in the tree:
+                          // there should be no infinitive / gerund /
+                          // verb phrase between the located ancestor
+                          // and the verb
+                          "!<< /infinitiu|gerundiu|grup\\.verb/)");
+
+  /**
+   * Separate clitic pronouns into their own tokens in the given tree.
+   * (The clitic pronouns are attached under new `grup.nom` constituents
+   * which follow the verbs to which they were formerly attached.)
+   */
+  private static Tree expandCliticPronouns(Tree t) {
+    TregexMatcher matcher = verbWithCliticPronouns.matcher(t);
+    while (matcher.find()) {
+      Tree clause = matcher.getNode("clause");
+      Tree target = matcher.getNode("target");
+      Tree verb = matcher.getNode("vb");
+
+      // Calculate index at which to insert pronominal phrase
+      int idx = clause.objectIndexOf(target) + 1;
+
+      Pair<String, List<String>> split =
+        SpanishVerbStripper.separatePronouns(verb.value());
+      if (split == null)
+        continue;
+
+      // Insert clitic pronouns as leaves of pronominal phrases which are
+      // siblings of `target`. Iterate in reverse order since pronouns are
+      // attached to immediate right of `target`
+      List<String> pronouns = split.second();
+      for (int i = pronouns.size() - 1; i >= 0; i--) {
+        String pronoun = pronouns.get(i);
+        String patternString = String.format("[insert (sn (grup.nom (pp000000 %s))) $- target]", pronoun);
+        TsurgeonPattern pattern = Tsurgeon.parseOperation(patternString);
+        t = pattern.evaluate(t, matcher);
+      }
+
+      TsurgeonPattern relabelOperation =
+        Tsurgeon.parseOperation(String.format("[relabel vb /%s/]", split.first()));
+      t = relabelOperation.evaluate(t, matcher);
+    }
+
+    return t;
   }
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> markSimpleNEs;
@@ -434,10 +497,9 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
    * should be placed in the case of elision.
    *
    * @param t Tree representing an entire sentence
-   * @param tf
    */
-  private void expandElisions(Tree t, TreeFactory tf) {
-    Tsurgeon.processPatternsOnTree(elisionExpansions, t);
+  private Tree expandElisions(Tree t) {
+    return Tsurgeon.processPatternsOnTree(elisionExpansions, t);
   }
 
   @SuppressWarnings("unchecked")
