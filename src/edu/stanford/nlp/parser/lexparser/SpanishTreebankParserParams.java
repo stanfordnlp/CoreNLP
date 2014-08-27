@@ -93,10 +93,14 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     annotations.put("-markSentenceInitialClauses", new Pair("S !, __",
                                                             new SimpleStringFunction("-init")));
 
-    // +___ F1
+    // No effect on F1
     annotations.put("-markPoder", new Pair(
       String.format("/^(infinitiu|gerundi|grup\\.verb)$/ <<: /%s/", PODER_FORM),
       new SimpleStringFunction("-poder")));
+
+    // +____ F1
+    annotations.put("-markBaseNPs", new Pair("/^grup\\.nom/ !< (__ < (__ < __))",
+                                             new SimpleStringFunction("-base")));
 
     compileAnnotations(headFinder);
   }
@@ -127,7 +131,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       "-markInf", "-markGer",
 
       // noun phrase annotations
-      "-markSingleChildNPs", /* "-markPronounNPs", */
+      "-markSingleChildNPs", "-markBaseNPs", /* "-markPronounNPs", */
 
       // prepositional phrase annotations
       // "-markPPHeads", negative F1!
