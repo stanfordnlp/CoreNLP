@@ -72,7 +72,7 @@ public class MultiWordTreeExpander {
                             // With an NP on the left (-> this is a
                             // prep. phrase) and not preceded by any
                             // other prepositions
-                            " $+ /^([adnswz]|pi)/=left !$-- sp000");
+                            " $+ /^([adnswz]|p[ip])/=left !$-- sp000");
 
   private static TregexPattern leadingPrepositionalPhrase
     = TregexPattern.compile(// Match candidate preposition
@@ -85,7 +85,7 @@ public class MultiWordTreeExpander {
                             // With an NP on the left (-> this is a
                             // prep. phrase) and not preceded by any
                             // other prepositions
-                            " $+ /^([adnswz]|pi)/=left !$-- sp000");
+                            " $+ /^([adnswz]|p[ip])/=left !$-- sp000");
 
   /**
    * First step in expanding prepositional phrases: group NP to right of
@@ -445,3 +445,5 @@ public class MultiWordTreeExpander {
 // teatral . catalán (range phrase)
 // Wiranto . ha ("al frente de")
 // Claro . (que . cuando) (grup.nom.inter leaf caused by phrase "del todo")
+// fundamentalmente . andaluza ("sobre todo", "todo" must not be marked as determiner here)
+// etarras . perseguidos ("a salvo")

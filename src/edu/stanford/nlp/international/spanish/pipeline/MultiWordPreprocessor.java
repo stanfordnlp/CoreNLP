@@ -208,6 +208,7 @@ public final class MultiWordPreprocessor {
       add("Avenida");
       add("Contra");
       add("Gracias"); // interjection
+      add("in"); // preposition; only appears in corpus as "in extremis" (preposition)
       add("Jesús"); // interjection
       add("Salvo");
       add("Sin");
@@ -215,6 +216,9 @@ public final class MultiWordPreprocessor {
     }};
 
     private static final Pattern otherNamePattern = Pattern.compile("\\b(Al\\w+|A[^l]\\w*|[B-Z]\\w+)");
+
+    // Determiners which may also appear as pronouns
+    private static final Pattern pPronounDeterminers = Pattern.compile("(tod|otr|un)[oa]s?");
 
     public static String getOverrideTag(String word, String containingPhrase) {
       if (containingPhrase == null)
@@ -224,7 +228,8 @@ public final class MultiWordPreprocessor {
         return "np00000";
       else if (word.equals("Sin") && containingPhrase.startsWith("Sin embargo"))
         return "sp000";
-      else if (word.equals("contra") && containingPhrase.startsWith("en contra"))
+      else if (word.equals("contra")
+        && (containingPhrase.startsWith("en contra") || containingPhrase.startsWith("En contra")))
         return "nc0s000";
       else if (word.equals("total") && containingPhrase.startsWith("ese"))
         return "nc0s000";
@@ -232,6 +237,16 @@ public final class MultiWordPreprocessor {
         // Uses of "Del" in corpus are proper nouns, but uses of "DEL" are
         // prepositions.. convenient for our purposes
         return "sp000";
+      else if (word.equals("sí") && containingPhrase.contains("por sí")
+        || containingPhrase.contains("fuera de sí"))
+        return "pp000000";
+      else if (pPronounDeterminers.matcher(word).matches() && containingPhrase.endsWith(word))
+        // Determiners tailing a phrase are pronouns: "sobre todo," "al otro", etc.
+        return "pi000000";
+      else if ((word.equals("contra") && containingPhrase.endsWith(word)))
+        return "nc0s000";
+      else if (word.equals("salvo") && containingPhrase.endsWith("salvo"))
+        return "aq0000";
 
       if (word.equals("Al")) {
         // "Al" is sometimes a part of name phrases: Arabic names, Al Gore, etc.
