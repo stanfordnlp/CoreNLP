@@ -198,11 +198,27 @@ public final class MultiWordPreprocessor {
     private static final Pattern digit = Pattern.compile("\\d+");
     private static final Pattern participle = Pattern.compile("[ai]d[oa]$");
 
+    /**
+     * Names which would be mistakenly marked as function words by unigram tagger (and which never appear as function words
+     * in multi-word tokens)
+     */
+    private static final Set<String> actuallyNames = new HashSet<String>() {{
+      add("A");
+      add("Al");
+      add("Contra");
+      add("Gracias"); // interjection
+      add("Jesús"); // interjection
+      add("Salvo");
+      add("Sin");
+      add("Van"); // verb
+    }};
+
     public static String getOverrideTag(String word, String containingPhrase) {
       if (containingPhrase == null)
         return null;
 
-      if (word.equalsIgnoreCase("este") && !containingPhrase.startsWith(word))
+      if ((word.equalsIgnoreCase("este") && !containingPhrase.startsWith(word))
+        || (actuallyNames.contains(word)))
         return "np00000";
 
       return null;
