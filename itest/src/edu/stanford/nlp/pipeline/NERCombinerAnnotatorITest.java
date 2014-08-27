@@ -46,13 +46,13 @@ public class NERCombinerAnnotatorITest extends TestCase {
         NERCombinerAnnotator threaded4Annotator = new NERCombinerAnnotator(ner, false, 4, -1);
 
         threaded4Pipeline = new AnnotationPipeline();
-        threaded4Pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+        threaded4Pipeline.addAnnotator(new TokenizerAnnotator(false));
         threaded4Pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
         threaded4Pipeline.addAnnotator(threaded4Annotator);
 
         NERCombinerAnnotator unthreadedAnnotator = new NERCombinerAnnotator(ner, false, 1, -1);
         unthreadedPipeline = new AnnotationPipeline();
-        unthreadedPipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+        unthreadedPipeline.addAnnotator(new TokenizerAnnotator(false));
         unthreadedPipeline.addAnnotator(new WordsToSentencesAnnotator(false));
         unthreadedPipeline.addAnnotator(unthreadedAnnotator);
       }

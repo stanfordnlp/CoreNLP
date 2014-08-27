@@ -21,7 +21,7 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
   public void setUp() throws Exception {
     synchronized(DeterministicCorefAnnotatorITest.class) {
       pipeline = new AnnotationPipeline();
-      pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+      pipeline.addAnnotator(new TokenizerAnnotator(false));
       pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
       pipeline.addAnnotator(new POSTaggerAnnotator(false));
       pipeline.addAnnotator(new MorphaAnnotator(false));

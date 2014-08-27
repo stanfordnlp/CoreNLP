@@ -23,7 +23,7 @@ public class NumberNormalizerITest extends TestCase {
     synchronized(NumberNormalizerITest.class) {
       if (pipeline == null) {
         pipeline = new AnnotationPipeline();
-        pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+        pipeline.addAnnotator(new TokenizerAnnotator(false));
         pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
         pipeline.addAnnotator(new POSTaggerAnnotator(DefaultPaths.DEFAULT_POS_MODEL, false));
       }
