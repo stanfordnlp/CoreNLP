@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
@@ -21,6 +22,7 @@ import edu.stanford.nlp.trees.tregex.ParseException;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -415,6 +417,18 @@ public final class MultiWordPreprocessor {
     String overrideTag = ManualUWModel.getOverrideTag(word, containingPhraseStr);
     if (overrideTag != null)
       return overrideTag;
+
+    Set<String> unigramTaggerKeys = unigramTagger.firstKeySet();
+
+    // Try treating this word as a verb and stripping any clitic
+    // pronouns. If the stripped version exists in the unigram
+    // tagger, then stick with the verb hypothesis
+    Pair<String, List<String>> strippedVerb = SpanishVerbStripper.separatePronouns(word);
+    if (strippedVerb != null && unigramTaggerKeys.contains(strippedVerb.first())) {
+      String pos = Counters.argmax(unigramTagger.getCounter(strippedVerb.first()));
+      if (pos.startsWith("v"))
+        return pos;
+    }
 
     if (unigramTagger.firstKeySet().contains(word))
       return Counters.argmax(unigramTagger.getCounter(word));
