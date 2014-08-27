@@ -57,11 +57,6 @@ public class SpanishTreeNormalizerTest extends TestCase {
     // Don't bork when we see a bound morpheme without following hyphen
     new Pair("(a (b co) (b promotora))",
              "(a (b co) (b promotora))"),
-
-    // Don't treat commas as multiword separators if they are part of a
-    // decimal number expression
-    new Pair("(a (b 8,39))", "(a (b 8,39))"),
-    new Pair("(a (b 28,91%))", "(a (MW_PHRASE?_b (MW? 28,91) (MW? %)))"),
   };
 
   public void testMultiWordNormalization() {

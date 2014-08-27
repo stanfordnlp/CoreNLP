@@ -8,7 +8,6 @@ import edu.stanford.nlp.util.StringUtils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -80,9 +79,7 @@ public class CRFFeatureExporter<IN extends CoreMap> {
 
       List<List<String>> features = d.asFeatures();
       for (Collection<String> cliqueFeatures : features) {
-        List<String> sortedFeatures = new ArrayList<String>(cliqueFeatures);
-        Collections.sort(sortedFeatures);
-        for (String feat : sortedFeatures) {
+        for (String feat : cliqueFeatures) {
           feat = ubPrefixFeatureString(feat);
           sb.append(delimiter);
           sb.append(feat);

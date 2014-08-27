@@ -347,8 +347,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                           "false"))) {
           return annotatorImplementation.whitespaceTokenizer(properties);
         } else {
-          String options = properties.getProperty("tokenize.options", PTBTokenizerAnnotator.DEFAULT_OPTIONS);
+          String options = properties.getProperty("tokenize.options", null);
           boolean keepNewline = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
+
           // If they
           if (properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
             keepNewline = true;
