@@ -191,7 +191,7 @@ public class MultiWordTreeExpander {
     Tsurgeon.parseOperation("[insert (spec=target) $+ ng] [move art >0 target]");
 
   private static TregexPattern articleInsideOrphanedNominalGroup =
-    TregexPattern.compile("/^d[ai]/=d >, (/^grup.nom/=ng !> sn)");
+    TregexPattern.compile("/^d[ai]/=d >, (/^grup\\.nom/=ng !> sn)");
 
   private static TsurgeonPattern expandArticleInsideOrphanedNominalGroup =
     Tsurgeon.parseOperation("[adjoinF (sn=sn spec=spec foot@) ng] [move d >0 spec]");
@@ -205,17 +205,36 @@ public class MultiWordTreeExpander {
   // TODO intermediate adjectival conjunct
   // TODO intermediate verb conjunct
 
-  // TODO fix articles
-  //
-  // /^da/=art > /^grup\.nom\.inter$/
-  //
-  // (hard mode: /^da/=art > /^grup\.nom\.inter$/ !>1 /^grup\.nom\.inter$/)
-
   // TODO date phrases
+
+  // ---------
+
+  // Final cleanup operations
 
   private static TregexPattern terminalPrepositions = TregexPattern.compile("sp000=sp < de >- (/^grup\\.nom/ > sn=sn)");
   private static TsurgeonPattern extractTerminalPrepositions = Tsurgeon.parseOperation(
     "[insert (prep=prep) $- sn] [move sp >0 prep]");
+
+  private static TregexPattern adverbNominalGroups = TregexPattern.compile("/^grup\\.nom./=ng <: /^r[gn]/=r");
+  private static TsurgeonPattern replaceAdverbNominalGroup = Tsurgeon.parseOperation("replace ng r");
+
+  /**
+   * Match `sn` constituents which can (should) be rewritten as nominal groups
+   */
+  private static TregexPattern nominalGroupSubstantives =
+    TregexPattern.compile("sn=target < /^[adnwz]/ !< /^([^adnswz]|neg)/");
+
+  private static TregexPattern leftoverIntermediates =
+    TregexPattern.compile("/^grup\\.nom\\.inter/=target");
+
+  private static TsurgeonPattern makeNominalGroup =
+    Tsurgeon.parseOperation("[relabel target /grup.nom/]");
+
+  private static TregexPattern redundantNominalRewrite =
+    TregexPattern.compile("/^grup\\.nom$/ <: sn=child >: sn=parent");
+
+  private static TsurgeonPattern fixRedundantNominalRewrite =
+    Tsurgeon.parseOperation("[replace parent child]");
 
   /**
    * Expands flat structures into intermediate forms which will
@@ -265,7 +284,14 @@ public class MultiWordTreeExpander {
   private static List<Pair<TregexPattern, TsurgeonPattern>> finalCleanup =
     new ArrayList<Pair<TregexPattern, TsurgeonPattern>>() {{
       add(new Pair(terminalPrepositions, extractTerminalPrepositions));
-      // TODO group nominal groups directly beneath `sn` constituents in `grup.nom` constituents
+      add(new Pair(nominalGroupSubstantives, makeNominalGroup));
+      add(new Pair(adverbNominalGroups, replaceAdverbNominalGroup));
+
+      // Lastly..
+      //
+      // These final fixes are not at all linguistically motivated -- just need to make the trees less dirty
+      add(new Pair(redundantNominalRewrite, fixRedundantNominalRewrite));
+      //add(new Pair(leftoverIntermediates, makeNominalGroup));
     }};
 
   /**
@@ -287,6 +313,8 @@ public class MultiWordTreeExpander {
     // Now clean up intermediate tree structures
     t = Tsurgeon.processPatternsOnTree(intermediateExpansions, t);
 
+    t = Tsurgeon.processPatternsOnTree(finalCleanup, t);
+
     return t;
   }
 
@@ -298,5 +326,5 @@ public class MultiWordTreeExpander {
 // espejo . deformante (article fun at start)
 // menor . coste (watch "Comisión del Mercado" thing at end)
 // triunfo . sitúa (periods in names at end)
-// Inzaghi . empuja (worrying fpa, fpt leaves)
 // Diez . Minutos (new rule for terminal prepositions?)
+// Abogados . y (parenthetical should be separated into its own clause)

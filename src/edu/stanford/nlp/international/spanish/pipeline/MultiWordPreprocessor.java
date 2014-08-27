@@ -220,6 +220,8 @@ public final class MultiWordPreprocessor {
       if ((word.equalsIgnoreCase("este") && !containingPhrase.startsWith(word))
         || (actuallyNames.contains(word)))
         return "np00000";
+      else if (word.equals("mañana"))
+        return "nc0s000";
 
       return null;
     }
