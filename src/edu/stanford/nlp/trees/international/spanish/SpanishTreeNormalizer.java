@@ -460,12 +460,12 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
         String patternString = "[insert " + String.format(newTreeStr, pronoun) + " $- target]";
         TsurgeonPattern insertPattern = Tsurgeon.parseOperation(patternString);
-        t = insertPattern.evaluate(t, matcher);
+        t = insertPattern.matcher().evaluate(t, matcher);
       }
 
       TsurgeonPattern relabelOperation =
         Tsurgeon.parseOperation(String.format("[relabel vb /%s/]", split.first()));
-      t = relabelOperation.evaluate(t, matcher);
+      t = relabelOperation.matcher().evaluate(t, matcher);
     }
 
     return t;
@@ -929,7 +929,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
           "[adjoinF (sp (prep (sp000 con)) foot@) sn]",
         newPronoun);
       TsurgeonPattern pattern = Tsurgeon.parseOperation(tsurgeon);
-      t = pattern.evaluate(t, matcher);
+      t = pattern.matcher().evaluate(t, matcher);
     }
 
     return t;
