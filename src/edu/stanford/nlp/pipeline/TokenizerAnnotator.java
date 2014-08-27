@@ -83,9 +83,8 @@ public class TokenizerAnnotator implements Annotator {
           return English;
         } else if (tokClass.equals("WhitespaceTokenizer")) {
           return Whitespace;
-        }
-        else {
-          System.err.println("TokenizerAnnotator: unknown tokenize.class property");
+        } else {
+          throw new IllegalArgumentException("TokenizerAnnotator: unknown tokenize.class property " + tokClass);
         }
       }
       
@@ -103,12 +102,10 @@ public class TokenizerAnnotator implements Annotator {
         } else if (language.equals(ENGLISH) || language.equals(EN) ||
                    language.equals(GERMAN) || language.equals(DE)) {
           return English;
-          
         } else if (language.equals(WHITESPACE)) {
-          return Whitespace;
-          
+          return Whitespace;          
         } else {
-          System.err.println("TokenizerAnnotator: unknown tokenize.language property");
+          throw new IllegalArgumentException("TokenizerAnnotator: unknown tokenize.language property " + language);
         }
       }
       
