@@ -656,7 +656,7 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useDictionaryConjunctions;
   public boolean expandMidDot;
 
-  public int printFeaturesUpto; // = 0;
+  public int printFeaturesUpto = Integer.MAX_VALUE;
 
   public boolean useDictionaryConjunctions3;
   public boolean useWordUTypeConjunctions2;
@@ -1021,10 +1021,16 @@ public class SeqClassifierFlags implements Serializable {
 
   public boolean useRandomSeed = false;
   public boolean terminateOnAvgImprovement = false;
+
+  public boolean strictGoodCoNLL = false;
+  public boolean removeStrictGoodCoNLLDuplicates = false;
+
   // "ADD VARIABLES ABOVE HERE"
+
 
   public transient List<String> phraseGazettes = null;
   public transient Properties props = null;
+
 
   public SeqClassifierFlags() {
   }
@@ -1107,6 +1113,7 @@ public class SeqClassifierFlags implements Serializable {
           normalizeTimex = true;
         }
       } else if (key.equalsIgnoreCase("goodCoNLL")) {
+        // This was developed for CMMClassifier after the original 2003 CoNLL work. It isn't right for CRFClassifier.
         if (Boolean.parseBoolean(val)) {
           // featureFactory = "edu.stanford.nlp.ie.NERFeatureFactory";
           readerAndWriter = "edu.stanford.nlp.sequences.CoNLLDocumentReaderAndWriter";
@@ -1138,7 +1145,7 @@ public class SeqClassifierFlags implements Serializable {
           useLastRealWord = true;
           useNextRealWord = true;
           // smooth
-          sigma = 50.0; // increased Aug 2006 from 20; helpful with less feats
+          sigma = 50.0; // increased Aug 2006 from 20; helpful with less features
           // normalize
           normalize = true;
           normalizeTimex = true;
@@ -1148,8 +1155,9 @@ public class SeqClassifierFlags implements Serializable {
           useBoundarySequences = true;
           useLemmas = true; // no-op except for German
           usePrevNextLemmas = true; // no-op except for German
-          inputEncoding = "iso-8859-1"; // needed for CoNLL German files
-          // opt
+          strictGoodCoNLL = true; // don't add some CpC features added later
+          inputEncoding = "iso-8859-1"; // needed for CoNLL German and Spanish files
+          // optimization
           useQN = true;
           QNsize = 15;
         }
@@ -2524,6 +2532,10 @@ public class SeqClassifierFlags implements Serializable {
         useRandomSeed = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("terminateOnAvgImprovement")){
         terminateOnAvgImprovement = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("strictGoodCoNLL")) {
+        strictGoodCoNLL = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("removeStrictGoodCoNLLDuplicates")) {
+        removeStrictGoodCoNLLDuplicates = Boolean.parseBoolean(val);
 
         // ADD VALUE ABOVE HERE
       } else if (key.length() > 0 && !key.equals("prop")) {

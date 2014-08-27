@@ -13,7 +13,6 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-
 /**
  * Provides convenient multicore processing for threadsafe objects. Objects that can
  * be wrapped by MulticoreWrapper must implement the ThreadsafeProcessor interface.
@@ -21,8 +20,7 @@ import java.util.concurrent.TimeUnit;
  * See edu.stanford.nlp.util.concurrent.MulticoreWrapperTest and
  * edu.stanford.nlp.tagger.maxent.documentation.MulticoreWrapperDemo for examples of use.
  *
- * TODO(spenceg): Handle exceptions gracefully in the queue.
- * TODO(spenceg): This code does not support multiple consumers, i.e., multi-threaded calls
+ * TODO(spenceg): This code does **not** support multiple consumers, i.e., multi-threaded calls
  * to peek() and poll().
  *
  * @author Spence Green
@@ -32,20 +30,17 @@ import java.util.concurrent.TimeUnit;
  */
 public class MulticoreWrapper<I,O> {
 
-  // Default: never time out
-  private long maxBlockTime = -1;
-
-  private final int nThreads;
-  private int submittedItemCounter = 0;
+  final int nThreads;
+  int submittedItemCounter = 0;
   // Which id was the last id returned.  Only meaningful in the case
   // of a queue where output order matters.
   private int returnedItemCounter = -1;
   private final boolean orderResults;
 
   private final Map<Integer,O> outputQueue;
-  private final ThreadPoolExecutor threadPool;
+  final ThreadPoolExecutor threadPool;
 //  private final ExecutorCompletionService<Integer> queue;
-  private final BlockingQueue<Integer> idleProcessors;
+  final BlockingQueue<Integer> idleProcessors;
   private final List<ThreadsafeProcessor<I,O>> processorList;
   private final JobCallback<O> callback;
 
@@ -73,8 +68,8 @@ public class MulticoreWrapper<I,O> {
     nThreads = numThreads <= 0 ? Runtime.getRuntime().availableProcessors() : numThreads;
     this.orderResults = orderResults;
     outputQueue = new ConcurrentHashMap<Integer,O>(2*nThreads);
-    threadPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(nThreads);
-//    queue = new ExecutorCompletionService<Integer>(threadPool);
+    threadPool = buildThreadPool(nThreads);
+    //    queue = new ExecutorCompletionService<Integer>(threadPool);
     idleProcessors = new ArrayBlockingQueue<Integer>(nThreads, false);
     callback = new JobCallback<O>() {
       @Override
@@ -100,13 +95,9 @@ public class MulticoreWrapper<I,O> {
     processorList = Collections.unmodifiableList(procList);
   }
 
-  /**
-   * Maximum amount of time to block on a call to put() in milliseconds.
-   * Default is to never time out.
-   *
-   * @param t
-   */
-  public void setMaxBlockTime(long t) { maxBlockTime = t; }
+  protected ThreadPoolExecutor buildThreadPool(int nThreads) {
+    return (ThreadPoolExecutor) Executors.newFixedThreadPool(nThreads);
+  }
 
   /**
    * Return status information about the underlying threadpool.
@@ -122,7 +113,7 @@ public class MulticoreWrapper<I,O> {
         outputQueue.size(),
         idleProcessors.size());
   }
-
+  
   /**
    * Allocate instance to a process and return. This call blocks until item
    * can be assigned to a thread.
@@ -134,21 +125,25 @@ public class MulticoreWrapper<I,O> {
    * 
    */
   public synchronized void put(I item) throws RejectedExecutionException {
-    Integer procId;
-    try {
-      procId = maxBlockTime < 0 ? idleProcessors.take() :
-        idleProcessors.poll(maxBlockTime, TimeUnit.MILLISECONDS);
-      if (procId == null) {
-        throw new RejectedExecutionException("Couldn't submit item to threadpool: " + item.toString());
-      }
-    
-    } catch (InterruptedException e) {
-      throw new RejectedExecutionException("Exception in threadpool: " + e.toString());
+    Integer procId = getProcessor();
+    if (procId == null) {
+      throw new RejectedExecutionException("Couldn't submit item to threadpool: " + item.toString());
     }
     final int itemId = submittedItemCounter++;
-    CallableJob<I,O> job = new CallableJob<I,O>(item, itemId, processorList.get(procId), procId,
-        callback);
+    CallableJob<I,O> job = new CallableJob<I,O>(item, itemId, processorList.get(procId), procId, callback);
     threadPool.submit(job);
+  }
+
+  /**
+   * Returns the next available thread id.  Subclasses may wish to
+   * override this, for example if they implement a timeout
+   */
+  Integer getProcessor() {
+    try {
+      return idleProcessors.take();
+    } catch (InterruptedException e) {
+      return null;
+    }
   }
   
   /**
@@ -187,33 +182,6 @@ public class MulticoreWrapper<I,O> {
         throw new RuntimeException(e);
       }
     }
-  }
-
-  /**
-   * Calls shutdownNow on the underlying ThreadPool.  In order for
-   * this to be useful, the jobs need to look for their thread being
-   * interrupted.  The job the thread is running needs to occasionally
-   * check Thread.interrupted() and throw an exception or otherwise
-   * clean up.
-   * <br>
-   * Note that because we only put jobs on a processor when one is
-   * available, there actually shouldn't be any jobs in the threadpool
-   * which had never started.  Therefore, even though shutdownNow
-   * theoretically returns a list of jobs which have never been
-   * started, that list should always be empty, so this method doesn't
-   * return anything.
-   */
-  public void shutdownNow() {
-    threadPool.shutdownNow();
-  }
-
-  /**
-   * After a shutdown request, await for the final termination of all
-   * threads.  Note that if the threads don't actually obey the
-   * interruption, this may take some time.
-   */
-  public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-    return threadPool.awaitTermination(timeout, unit);
   }
 
 
@@ -262,8 +230,8 @@ public class MulticoreWrapper<I,O> {
    * @param <I>
    * @param <O>
    */
-  private static class CallableJob<I,O> implements Callable<Integer> {
-    private final I item;
+  static class CallableJob<I,O> implements Callable<Integer> {
+    final I item;
     private final int itemId;
     private final ThreadsafeProcessor<I,O> processor;
     private final int processorId;
