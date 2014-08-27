@@ -207,7 +207,7 @@ public class HamleDTMultiWordClassifier {
     }
 
     if (options.containsKey("dev")) {
-      classifier.testClassifier(options.getProperty("test"));
+      classifier.testClassifier(options.getProperty("dev"));
     }
 
     // TODO support eval
