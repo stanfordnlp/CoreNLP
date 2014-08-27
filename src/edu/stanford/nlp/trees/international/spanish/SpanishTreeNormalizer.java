@@ -431,10 +431,21 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
     }};
 
   /**
+   * Prepare the given token for multi-word detection / extraction.
+   *
+   * This method makes up for some various oddities in corpus annotations.
+   */
+  private String prepareForMultiWordExtraction(String token) {
+    return token.replaceAll("-fpa-", "(").replaceAll("-fpt-", ")");
+  }
+
+  /**
    * Return the (single or multiple) words which make up the given
    * token.
    */
   private String[] getMultiWords(String token) {
+    token = prepareForMultiWordExtraction(token);
+
     Matcher quoteMatcher = pQuoted.matcher(token);
     if (quoteMatcher.matches()) {
       String[] ret = new String[3];
