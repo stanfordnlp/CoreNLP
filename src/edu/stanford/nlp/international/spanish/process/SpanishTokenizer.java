@@ -58,6 +58,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   private final boolean splitContractions;
   private final boolean splitAny;
   private List<CoreLabel> compoundBuffer;
+	private SpanishVerbStripper verbStripper;
 
   // Produces the tokenization for parsing used by AnCora (fixed) */
   public static final String ANCORA_OPTS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitAll=true";
@@ -78,6 +79,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     this.splitAny = (splitCompounds || splitVerbs || splitContractions);
 
     if (splitAny) compoundBuffer = Generics.newLinkedList();
+		verbStripper = new SpanishVerbStripper();
   }
 
   @Override
@@ -147,7 +149,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 		case "contigo":
 		case "consigo":
 		default:
-			first = word.substring(0, 3);
+			First = word.substring(0, 3);
 			second = word.substring(3, 5);
 		}
    
@@ -160,7 +162,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    */
   private CoreLabel processVerb(CoreLabel cl) {
     cl.remove(ParentAnnotation.class);
-    Pair<String, List<String>> parts = SpanishVerbStripper.separatePronouns(cl.word());
+    Pair<String, List<String>> parts = verbStripper.separatePronouns(cl.word());
       if (parts == null)
 				return cl;
     for(String pronoun : parts.second())
@@ -370,7 +372,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     tf.setOptions("tokenizeNLs");
 
     // Other options
-		final bool lines = options.containsKey("lines");
+		final boolean lines = options.containsKey("lines");
     final String encoding = options.getProperty("encoding", "UTF-8");
     final boolean toLower = PropertiesUtils.getBool(options, "lowerCase", false);
 		final Locale es = new Locale("es");
