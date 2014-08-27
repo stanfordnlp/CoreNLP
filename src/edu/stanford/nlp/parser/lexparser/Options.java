@@ -749,12 +749,6 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-fastFactoredCandidateAddend")) {
       testOptions.fastFactoredCandidateAddend = Integer.parseInt(args[i + 1]);
       i += 2;
-    } else if (args[i].equalsIgnoreCase("-quietEvaluation")) {
-      testOptions.quietEvaluation = true;
-      i += 1;
-    } else if (args[i].equalsIgnoreCase("-noquietEvaluation")) {
-      testOptions.quietEvaluation = false;
-      i += 1;
     } else if (args[i].equalsIgnoreCase("-simpleBinarizedLabels")) {
       trainOptions.simpleBinarizedLabels = true;
       i += 1;

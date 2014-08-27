@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
@@ -34,8 +35,6 @@ public class ShiftReduceParserQuery implements ParserQuery {
 
   final ShiftReduceParser parser;
 
-  List<ParserConstraint> constraints = null;
-
   public ShiftReduceParserQuery(ShiftReduceParser parser) {
     this.parser = parser;
   }
@@ -54,7 +53,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   }
 
   private boolean parseInternal() {
-    final int maxBeamSize = Math.max(parser.op.testOptions().beamSize, 1);
+    final int maxBeamSize = parser.op.testOptions().beamSize;
 
     success = true;
     unparsable = false;
@@ -70,7 +69,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
       State bestState = null;
       for (State state : oldBeam) {
         List<String> features = parser.featureFactory.featurize(state);
-        Collection<ScoredObject<Integer>> predictedTransitions = parser.findHighestScoringTransitions(state, features, true, maxBeamSize, constraints);
+        Collection<ScoredObject<Integer>> predictedTransitions = parser.findHighestScoringTransitions(state, features, true, maxBeamSize);
         // System.err.println("Examining state: " + state);
         for (ScoredObject<Integer> predictedTransition : predictedTransitions) {
           Transition transition = parser.transitionIndex.get(predictedTransition.object());
@@ -94,7 +93,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
         // This will probably result in a bad parse, but at least it
         // will result in some sort of parse.
         for (State state : oldBeam) {
-          Transition transition = parser.findEmergencyTransition(state, constraints);
+          Transition transition = parser.findEmergencyTransition(state);
           if (transition != null) {
             State newState = transition.apply(state);
             if (bestState == null || bestState.score() < newState.score()) {
@@ -177,7 +176,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   @Override
   public List<ScoredObject<Tree>> getBestPCFGParses() {
     ScoredObject<Tree> parse = new ScoredObject<Tree>(debinarized, finalState.score);
-    return Collections.singletonList(parse);
+    return Collections.singletonList(parse);    
   }
 
   @Override
@@ -215,14 +214,15 @@ public class ShiftReduceParserQuery implements ParserQuery {
 
   @Override
   public void setConstraints(List<ParserConstraint> constraints) {
-    this.constraints = constraints;
+    // TODO
+    throw new UnsupportedOperationException("Unable to set constraints on the shift reduce parser (yet)");
   }
 
   @Override
   public boolean saidMemMessage() {
     return false;
   }
-
+  
   @Override
   public boolean parseSucceeded() {
     return success;

@@ -91,7 +91,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   // Branching limit for searching with back tracking
   int branchLimit = 2;
 
-  protected SequenceMatcher(SequencePattern<T> pattern, List<? extends T> elements)
+  protected SequenceMatcher(SequencePattern pattern, List<? extends T> elements)
   {
     this.pattern = pattern;
     // NOTE: It is important elements DO NOT change as we do matches
@@ -101,8 +101,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       throw new IllegalArgumentException("Cannot match against null elements");
     }
     this.regionEnd = elements.size();
-    this.priority = pattern.priority;
-    this.score = pattern.weight;
+    this.score = pattern.priority;
     this.varGroupBindings = pattern.varGroupBindings;
     matchedGroups = new MatchedGroup[pattern.totalGroups];
   }
@@ -486,9 +485,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       cStates = todo.pop();
       int s = cStates.curPosition+1;
       for(int i = s; i < regionEnd; i++){
-        if (Thread.interrupted()) {
-          throw new RuntimeInterruptedException();
-        }
         boolean match = cStates.match(i);
         if (cStates == null || cStates.size() == 0) {
           break;

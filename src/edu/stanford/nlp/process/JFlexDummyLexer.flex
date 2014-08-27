@@ -1,5 +1,9 @@
 package edu.stanford.nlp.process;
 
+import java.util.*;
+import java.io.*;
+import edu.stanford.nlp.trees.*;
+
 
 %%
 

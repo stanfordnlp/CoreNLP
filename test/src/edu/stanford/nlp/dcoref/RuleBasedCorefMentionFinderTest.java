@@ -2,6 +2,10 @@ package edu.stanford.nlp.dcoref;
 
 import junit.framework.TestCase;
 
+import java.util.List;
+
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.Tree;
 
 /**
@@ -18,5 +22,5 @@ public class RuleBasedCorefMentionFinderTest extends TestCase {
 
     subtree = RuleBasedCorefMentionFinder.findTreeWithSmallestSpan(tree, 0, 1);
     assertEquals("My", subtree.toString());
-  }
+  }  
 }

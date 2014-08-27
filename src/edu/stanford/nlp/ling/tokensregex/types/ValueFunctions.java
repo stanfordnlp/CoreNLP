@@ -1002,7 +1002,7 @@ public class ValueFunctions {
       if (tags == null) {
         cm.set(Tags.TagsAnnotation.class, tags = new Tags());
       }
-      tags.setTag(tag, tagValue);
+      tags.addTag(tag, tagValue);
     }
 
     @Override
@@ -1101,7 +1101,7 @@ public class ValueFunctions {
       String tag = (String) in.get(1).get();
       if (in.size() >= 3) {
         Value tagValue = in.get(2);
-        tags.setTag(tag, tagValue);
+        tags.addTag(tag, tagValue);
       }
       return tags.getTag(tag);
     }
@@ -1138,7 +1138,7 @@ public class ValueFunctions {
       }
       String tag = (String) in.get(1).get();
       Value tagValue = (in.size() >= 3)? in.get(2):null;
-      tags.setTag(tag, tagValue);
+      tags.addTag(tag, tagValue);
       return v;
     }
   };

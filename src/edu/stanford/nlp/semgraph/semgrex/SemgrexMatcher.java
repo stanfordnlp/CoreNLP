@@ -21,6 +21,9 @@ public abstract class SemgrexMatcher {
   Map<String, String> namesToRelations;
   VariableStrings variableStrings;
 
+  LinkedList<IndexedWord> nodesToCheck;
+  List<IndexedWord> seenNodes;
+
   IndexedWord node;
 
   // to be used for patterns involving "@"
@@ -48,6 +51,9 @@ public abstract class SemgrexMatcher {
     this.namesToNodes = namesToNodes;
     this.namesToRelations = namesToRelations;
     this.variableStrings = variableStrings;
+    nodesToCheck = new LinkedList<IndexedWord>();
+    nodesToCheck.add(sg.getFirstRoot());
+    seenNodes = new ArrayList<IndexedWord>();
   }
   
   SemgrexMatcher(SemanticGraph sg,
@@ -65,6 +71,7 @@ public abstract class SemgrexMatcher {
     findIterator = null;
     namesToNodes.clear();
     namesToRelations.clear();
+    seenNodes.clear();
   }
 
   /**

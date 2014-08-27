@@ -1174,7 +1174,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    *  loc.
    *  @param info A List of IN objects
    *  @param loc  The position in the info list to focus feature creation on
-   *  @param featureFactories The factory that constructs features out of the item
+   *  @param featureFactory The factory that constructs features out of the item
    *  @return A Datum (BasicDatum) representing this data instance
    */
   public Datum<String, String> makeDatum(List<IN> info, int loc, List<FeatureFactory<IN>> featureFactories) {
@@ -1592,15 +1592,16 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     }
 
     if (testFile != null) {
-      cmm.classifyAndWriteAnswers(testFile, cmm.makeReaderAndWriter(), true);
+      cmm.classifyAndWriteAnswers(testFile, cmm.makeReaderAndWriter());
     } else if (cmm.flags.testFiles != null) {
-      cmm.classifyAndWriteAnswers(cmm.flags.baseTestDir, cmm.flags.testFiles, cmm.makeReaderAndWriter(), true);
+      cmm.classifyAndWriteAnswers(cmm.flags.baseTestDir, cmm.flags.testFiles,
+                                  cmm.makeReaderAndWriter());
     }
 
     if (textFile != null) {
       DocumentReaderAndWriter<CoreLabel> readerAndWriter =
         new PlainTextDocumentReaderAndWriter<CoreLabel>();
-      cmm.classifyAndWriteAnswers(textFile, readerAndWriter, false);
+      cmm.classifyAndWriteAnswers(textFile, readerAndWriter);
     }
   } // end main
 

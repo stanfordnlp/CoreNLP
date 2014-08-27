@@ -1,10 +1,11 @@
 package edu.stanford.nlp.ie;
 
-import edu.stanford.nlp.sequences.ListeningSequenceModel;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.math.ArrayMath;
+import edu.stanford.nlp.sequences.SequenceModel;
+import edu.stanford.nlp.sequences.SequenceListener;
 import edu.stanford.nlp.ling.CoreAnnotations;
 
 import java.util.List;
@@ -14,20 +15,20 @@ import java.util.Arrays;
 /**
  * This class keeps track of all labeled entities and updates the
  * its list whenever the label at a point gets changed.  This allows
- * you to not have to regenerate the list every time, which can be quite
+ * you to not have to regereate the list everytime, which can be quite
  * inefficient.
  *
  * @author Mengqiu Wang
  **/
-public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap> implements ListeningSequenceModel {
+public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap> implements SequenceModel, SequenceListener {
 
   protected int[] sequence;
-  protected final int backgroundSymbol;
-  protected final int numClasses;
-  protected final int[] possibleValues;
-  protected final Index<String> classIndex;
-  protected final Index<String> tagIndex;
-  private final List<String> wordDoc;
+  protected int backgroundSymbol;
+  protected int numClasses;
+  protected int[] possibleValues;
+  protected Index<String> classIndex;
+  protected Index<String> tagIndex;
+  private List<String> wordDoc;
 
   public EntityCachingAbstractSequencePriorBIO(String backgroundSymbol, Index<String> classIndex, Index<String> tagIndex, List<IN> doc) {
     this.classIndex = classIndex;
@@ -48,22 +49,18 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
 
   EntityBIO[] entities;
 
-  @Override
   public int leftWindow() {
     return Integer.MAX_VALUE; // not Markovian!
   }
 
-  @Override
   public int rightWindow() {
     return Integer.MAX_VALUE; // not Markovian!
   }
 
-  @Override
   public int[] getPossibleValues(int position) {
     return possibleValues;
   }
 
-  @Override
   public double scoreOf(int[] sequence, int pos) {
     return scoresOf(sequence, pos)[sequence[pos]];
   }
@@ -71,7 +68,6 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
   /**
    * @return the length of the sequence
    */
-  @Override
   public int length() {
     return wordDoc.size();
   }
@@ -91,13 +87,12 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
     return probs;
   }
 
-  @Override
   public  double[] scoresOf (int[] sequence, int position) {
     double[] probs = new double[numClasses];
     int origClass = sequence[position];
     int oldVal = origClass;
     // if (BisequenceEmpiricalNERPrior.debugIndices.indexOf(position) != -1)
-    //  EmpiricalNERPriorBIO.DEBUG = true;
+    //  EmpiricalNERPriorBIO.DEBUG = true;  
     for (int label = 0; label < numClasses; label++) {
       if (label != origClass) {
         sequence[position] = label;
@@ -115,15 +110,16 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
     return probs;
   }
 
-  @Override
   public void setInitialSequence(int[] initialSequence) {
     this.sequence = initialSequence;
     entities = new EntityBIO[initialSequence.length];
     Arrays.fill(entities, null);
+    String rawTag = null;
+    String[] parts = null;
     for (int i = 0; i < initialSequence.length; i++) {
       if (initialSequence[i] != backgroundSymbol) {
-        String rawTag = classIndex.get(sequence[i]);
-        String[] parts = rawTag.split("-");
+        rawTag = classIndex.get(sequence[i]);
+        parts = rawTag.split("-");
         //TODO(mengqiu) this needs to be updated, so that initial can be I as well
         if (parts[0].equals("B")) { // B-
           EntityBIO entity = extractEntity(initialSequence, i, parts[1]);
@@ -152,9 +148,11 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
     entity.words = new ArrayList<String>();
     entity.words.add(wordDoc.get(position));
     int pos = position + 1;
+    String rawTag = null;
+    String[] parts = null;
     for ( ; pos < sequence.length; pos++) {
-      String rawTag = classIndex.get(sequence[pos]);
-      String[] parts = rawTag.split("-");
+      rawTag = classIndex.get(sequence[pos]);
+      parts = rawTag.split("-");
       if (parts[0].equals("I") && parts[1].equals(tag)) {
       	String word = wordDoc.get(pos);
         entity.words.add(word);
@@ -206,7 +204,6 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
     return false;
   }
 
-  @Override
   public void updateSequenceElement(int[] sequence, int position, int oldVal) {
     this.sequence = sequence;
 
@@ -242,7 +239,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
           for (int i=0 ; i < oldLen - offset; i++) {
             entities[position+i] = null;
           }
-          if (VERBOSE && position > 0)
+          if (VERBOSE && position > 0) 
             System.err.println("position:" + position +", entities[position-1] = " + entities[position-1].toString(tagIndex));
         } // otherwise, non-entity part I-xxx -> O, no enitty affected
       }
@@ -313,7 +310,7 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
                 addEntityToEntitiesArray(entity);
               }
             }
-          } else { // was a differnt I-xxx,
+          } else { // was a differnt I-xxx, 
             if (entities[position] != null) { // shorten the previous one, remove any additional parts
               EntityBIO oldEntity = entities[position];
               int oldLen = oldEntity.words.size();
@@ -345,37 +342,37 @@ public abstract class EntityCachingAbstractSequencePriorBIO <IN extends CoreMap>
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
+    StringBuffer sb = new StringBuffer();
     for (int i = 0; i < entities.length; i++) {
       sb.append(i);
-      sb.append('\t');
+      sb.append("\t");
       String word = wordDoc.get(i);
       sb.append(word);
-      sb.append('\t');
+      sb.append("\t");
       sb.append(classIndex.get(sequence[i]));
       if (entities[i] != null) {
-        sb.append('\t');
+        sb.append("\t");
         sb.append(entities[i].toString(tagIndex));
       }
-      sb.append('\n');
+      sb.append("\n");
     }
     return sb.toString();
   }
 
   public String toString(int pos) {
-    StringBuilder sb = new StringBuilder();
+    StringBuffer sb = new StringBuffer();
     for (int i = Math.max(0, pos - 3); i < Math.min(entities.length, pos + 3); i++) {
       sb.append(i);
-      sb.append('\t');
+      sb.append("\t");
       String word = wordDoc.get(i);
       sb.append(word);
-      sb.append('\t');
+      sb.append("\t");
       sb.append(classIndex.get(sequence[i]));
       if (entities[i] != null) {
-        sb.append('\t');
+        sb.append("\t");
         sb.append(entities[i].toString(tagIndex));
       }
-      sb.append('\n');
+      sb.append("\n");
     }
     return sb.toString();
   }
@@ -387,14 +384,14 @@ class EntityBIO {
   public int type;
 
   /**
-   * the beginning index of other locations where this sequence of
+   * the begining index of other locations where this sequence of
    * words appears.
    */
   public int[] otherOccurrences;
 
   public String toString(Index<String> tagIndex) {
-    StringBuilder sb = new StringBuilder();
-    sb.append('"');
+    StringBuffer sb = new StringBuffer();
+    sb.append("\"");
     sb.append(StringUtils.join(words, " "));
     sb.append("\" start: ");
     sb.append(startPosition);
@@ -404,5 +401,4 @@ class EntityBIO {
     sb.append(Arrays.toString(otherOccurrences));
     return sb.toString();
   }
-
 }

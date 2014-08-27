@@ -4,7 +4,7 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.lexparser.EvaluateTreebank;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
@@ -49,7 +49,7 @@ public class CrossValidateTestOptions {
       testTreebank = lexparser.getOp().tlpParams.memoryTreebank();;
       testTreebank.loadPath(testTreebankPath, testTreebankFilter);
       System.err.println("Read in " + testTreebank.size() + " trees for testing");
-    }
+    }     
 
     double[] labelResults = new double[weights.length];
     double[] tagResults = new double[weights.length];

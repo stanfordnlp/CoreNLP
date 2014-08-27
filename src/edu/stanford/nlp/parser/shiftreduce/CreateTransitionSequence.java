@@ -1,8 +1,6 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.Tree;
@@ -14,51 +12,37 @@ public class CreateTransitionSequence {
   // we could change this if we wanted to include options.
   private CreateTransitionSequence() {}
 
-  public static List<List<Transition>> createTransitionSequences(List<Tree> binarizedTrees, boolean compoundUnary, Set<String> rootStates, Set<String> rootOnlyStates) {
-    List<List<Transition>> transitionLists = Generics.newArrayList();
-    for (Tree tree : binarizedTrees) {
-      List<Transition> transitions = createTransitionSequence(tree, compoundUnary, rootStates, rootOnlyStates);
-      transitionLists.add(transitions);
-    }
-    return transitionLists;
-  }
-
-  public static List<Transition> createTransitionSequence(Tree tree) {
-    return createTransitionSequence(tree, true, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
-  }
-
-  public static List<Transition> createTransitionSequence(Tree tree, boolean compoundUnary, Set<String> rootStates, Set<String> rootOnlyStates) {
+  public static List<Transition> createTransitionSequence(Tree tree, boolean compoundUnary) {
     List<Transition> transitions = Generics.newArrayList();
 
-    createTransitionSequenceHelper(transitions, tree, compoundUnary, rootOnlyStates);
-    transitions.add(new FinalizeTransition(rootStates));
+    createTransitionSequenceHelper(transitions, tree, compoundUnary, true);
+    transitions.add(new FinalizeTransition());
     transitions.add(new IdleTransition());
 
     return transitions;
   }
 
-  private static void createTransitionSequenceHelper(List<Transition> transitions, Tree tree, boolean compoundUnary, Set<String> rootOnlyStates) {
+  private static void createTransitionSequenceHelper(List<Transition> transitions, Tree tree, boolean compoundUnary, boolean isRoot) {
     if (tree.isLeaf()) {
       // do nothing
     } else if (tree.isPreTerminal()) {
       transitions.add(new ShiftTransition());
     } else if (tree.children().length == 1) {
-      boolean isRoot = rootOnlyStates.contains(tree.label().value());
       if (compoundUnary) {
         List<String> labels = Generics.newArrayList();
         while (tree.children().length == 1 && !tree.isPreTerminal()) {
           labels.add(tree.label().value());
           tree = tree.children()[0];
         }
-        createTransitionSequenceHelper(transitions, tree, compoundUnary, rootOnlyStates);
+        createTransitionSequenceHelper(transitions, tree, compoundUnary, false);
         transitions.add(new CompoundUnaryTransition(labels, isRoot));
       } else {
-        createTransitionSequenceHelper(transitions, tree.children()[0], compoundUnary, rootOnlyStates);
+        createTransitionSequenceHelper(transitions, tree.children()[0], compoundUnary, false);
         transitions.add(new UnaryTransition(tree.label().value(), isRoot));
       }
     } else if (tree.children().length == 2) {
-      createTransitionSequenceHelper(transitions, tree.children()[0], compoundUnary, rootOnlyStates);
-      createTransitionSequenceHelper(transitions, tree.children()[1], compoundUnary, rootOnlyStates);
+      createTransitionSequenceHelper(transitions, tree.children()[0], compoundUnary, false);
+      createTransitionSequenceHelper(transitions, tree.children()[1], compoundUnary, false);
 
       // This is the tricky part... need to decide if the binary
       // transition is a left or right transition.  This is done by

@@ -1,7 +1,8 @@
 package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.sequences.ListeningSequenceModel;
+import edu.stanford.nlp.sequences.SequenceListener;
+import edu.stanford.nlp.sequences.SequenceModel;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.GeneralizedCounter;
@@ -18,7 +19,7 @@ import java.util.List;
  * @param <E> The type of the label (usually String in our uses)
  * @author Jenny Finkel
  */
-public class CRFCliqueTree<E> implements ListeningSequenceModel {
+public class CRFCliqueTree<E> implements SequenceModel, SequenceListener {
 
   protected final FactorTable[] factorTables;
   protected final double z; // norm constant

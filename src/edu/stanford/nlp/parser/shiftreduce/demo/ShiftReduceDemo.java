@@ -19,8 +19,8 @@ import edu.stanford.nlp.trees.Tree;
  */
 public class ShiftReduceDemo {
   public static void main(String[] args) {
-    String modelPath = "edu/stanford/nlp/models/srparser/englishSR.ser.gz";
-    String taggerPath = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger";
+    String modelPath = "/u/nlp/data/srparser/englishSR.ser.gz";
+    String taggerPath = "/u/nlp/data/pos-tagger/distrib/english-left3words-distsim.tagger";
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equals("-tagger")) {

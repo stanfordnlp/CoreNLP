@@ -95,7 +95,9 @@ public class LatticeXMLReader implements Iterable<Lattice> {
             assert nodeName % NODE_OFFSET == 0;
             lastBoundaryNode = realNodeIdx;
           } else if(nodeName % NODE_OFFSET == 0) {
-            ParserConstraint c = new ParserConstraint(lastBoundaryNode, realNodeIdx, ".*");
+            ParserConstraint c = new ParserConstraint();
+            c.start = lastBoundaryNode;
+            c.end = realNodeIdx;
             lattice.addConstraint(c);
           }
 

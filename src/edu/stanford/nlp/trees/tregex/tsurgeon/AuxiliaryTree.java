@@ -15,7 +15,7 @@ class AuxiliaryTree {
 
   private final String originalTreeString;
   final Tree tree;
-  Tree foot;
+  final Tree foot;
   private final IdentityHashMap<Tree,String> nodesToNames; // no one else should be able to get this one.
   private final Map<String,Tree> namesToNodes; // this one has a getter.
 
@@ -50,14 +50,14 @@ class AuxiliaryTree {
   }
 
   /**
-   * Copies the Auxiliary tree.  Also, puts the new names->nodes map in the TsurgeonMatcher that called copy.
+   * Copies the Auxiliary tree.  Also, puts the new names->nodes map in the TsurgeonPattern that called copy.
    */
-  public AuxiliaryTree copy(TsurgeonMatcher matcher) {
+  public AuxiliaryTree copy(TsurgeonPattern p) {
     Map<String,Tree> newNamesToNodes = Generics.newHashMap();
     Pair<Tree,Tree> result = copyHelper(tree,newNamesToNodes);
     //if(! result.first().dominates(result.second()))
       //System.err.println("Error -- aux tree copy doesn't dominate foot copy.");
-    matcher.newNodeNames.putAll(newNamesToNodes);
+    p.root.newNodeNames.putAll(newNamesToNodes);
     return new AuxiliaryTree(result.first(), result.second(), newNamesToNodes, originalTreeString);
   }
 
@@ -85,11 +85,10 @@ class AuxiliaryTree {
         }
       }
       clone = node.treeFactory().newTreeNode(node.label().labelFactory().newLabel(node.label()),newChildren);
+      if (nodesToNames.containsKey(node)) {
+        newNamesToNodes.put(nodesToNames.get(node),clone);
+      }
     }
-
-    if (nodesToNames.containsKey(node))
-      newNamesToNodes.put(nodesToNames.get(node),clone);
-
     return new Pair<Tree,Tree>(clone,newFoot);
   }
 
@@ -115,14 +114,10 @@ class AuxiliaryTree {
     Tree footNode = findFootNodeHelper(t);
     Tree result = footNode;
     if (footNode != null) {
-      Tree newFootNode = footNode.treeFactory().newTreeNode(footNode.label(), new ArrayList<Tree>());
-
       Tree parent = footNode.parent(t);
-      if (parent != null) {
-        int i = parent.objectIndexOf(footNode);
-        parent.setChild(i, newFootNode);
-      }
-
+      int i = parent.objectIndexOf(footNode);
+      Tree newFootNode = footNode.treeFactory().newTreeNode(footNode.label(), new ArrayList<Tree>());
+      parent.setChild(i, newFootNode);
       result = newFootNode;
     }
     return result;
@@ -177,8 +172,8 @@ class AuxiliaryTree {
     for (Tree node : t.subTreeList()) {
       Matcher m = namePattern.matcher(node.label().value());
       if (m.find()) {
-        namesToNodes.put(m.group(2), node);
-        nodesToNames.put(node, m.group(2));
+        namesToNodes.put(m.group(1),node);
+        nodesToNames.put(node,m.group(1));
         node.label().setValue(m.group(1));
       }
       node.label().setValue(unescape(node.label().value()));

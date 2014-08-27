@@ -6,6 +6,8 @@ import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.BufferedReader;
@@ -117,14 +119,21 @@ public class CoordinationTransformer implements TreeTransformer {
   private static TregexPattern rearrangeNowThatTregex =
     TregexPattern.compile("ADVP=advp <1 (RB < /^(?i:now)$/) <2 (SBAR=sbar <1 (IN < /^(?i:that)$/))");
 
-  private static TsurgeonPattern rearrangeNowThatTsurgeon = 
-    Tsurgeon.parseOperation("[relabel advp SBAR] [excise sbar sbar]");
+  private static TsurgeonPattern[] rearrangeNowThatTsurgeon = {
+    Tsurgeon.parseOperation("relabel advp SBAR"),
+    Tsurgeon.parseOperation("excise sbar sbar"),
+  };
 
   public Tree rearrangeNowThat(Tree t) {
     if (t == null) {
       return t;
     }
-    return Tsurgeon.processPattern(rearrangeNowThatTregex, rearrangeNowThatTsurgeon, t);
+    TregexMatcher matcher = rearrangeNowThatTregex.matcher(t);
+    while (matcher.find()) {
+      t = rearrangeNowThatTsurgeon[0].evaluate(t, matcher);
+      t = rearrangeNowThatTsurgeon[1].evaluate(t, matcher);
+    }
+    return t;
   }
 
 
@@ -155,9 +164,9 @@ public class CoordinationTransformer implements TreeTransformer {
     // generally add the "not" to the following tree with moveRB, or
     // should we make "and not" a CONJP?
     // also, perhaps look at ADVP
-    TregexPattern.compile("/^(S|PP|VP)/ < (/^(S|PP|VP)/ $++ (CC=start $+ (RB|ADVP $+ /^(S|PP|VP)/) " +
+    TregexPattern.compile("/^(S|PP|VP)/ < (/^(S|PP|VP)/ $++ (CC=start $+ (RB|ADVP $+ /^(S|PP|VP)/) " + 
                           "[ (< and $+ (RB=end < yet)) | " +  // TODO: what should be the head of "and yet"?
-                          "  (< and $+ (RB=end < so)) | " +
+                          "  (< and $+ (RB=end < so)) | " + 
                           "  (< and $+ (ADVP=end < (RB|IN < so))) ] ))"); // TODO: this structure needs a dependency
 
   private static TsurgeonPattern addConjpTsurgeon =
@@ -194,19 +203,19 @@ public class CoordinationTransformer implements TreeTransformer {
   //
   // TODO: maybe we want to catch more complicated tree structures
   // with something in between the WH and the actual question.
-  private static TregexPattern flattenSQTregex =
-    TregexPattern.compile("SBARQ < ((WHNP=what < WP) $+ (SQ=sq < (/^VB/=verb < " + EnglishGrammaticalRelations.copularWordRegex + ") " +
+  private static TregexPattern flattenSQTregex = 
+    TregexPattern.compile("SBARQ < ((WHNP=what < WP) $+ (SQ=sq < (/^VB/=verb < " + EnglishGrammaticalRelations.copularWordRegex + ") " + 
                           // match against "is running" if the verb is under just a VBG
-                          " !< (/^VB/ < !" + EnglishGrammaticalRelations.copularWordRegex + ") " +
+                          " !< (/^VB/ < !" + EnglishGrammaticalRelations.copularWordRegex + ") " + 
                           // match against "is running" if the verb is under a VP - VBG
-                          " !< (/^V/ < /^VB/ < !" + EnglishGrammaticalRelations.copularWordRegex + ") " +
+                          " !< (/^V/ < /^VB/ < !" + EnglishGrammaticalRelations.copularWordRegex + ") " + 
                           // match against "What is on the test?"
-                          " !< (PP $- =verb) " +
+                          " !< (PP $- =verb) " + 
                           // match against "is there"
                           " !<, (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $+ (NP < (EX < there)))))");
 
   private static TsurgeonPattern flattenSQTsurgeon = Tsurgeon.parseOperation("excise sq sq");
-
+  
   /**
    * Removes the SQ structure under a WHNP question, such as "Who am I
    * to judge?".  We do this so that it is easier to pick out the head
@@ -227,35 +236,35 @@ public class CoordinationTransformer implements TreeTransformer {
     return Tsurgeon.processPattern(flattenSQTregex, flattenSQTsurgeon, t);
   }
 
-  private static TregexPattern removeXOverXTregex =
+  private static TregexPattern removeXOverXTregex = 
     TregexPattern.compile("__=repeat <: (~repeat < __)");
 
   private static TsurgeonPattern removeXOverXTsurgeon = Tsurgeon.parseOperation("excise repeat repeat");
 
   public static Tree removeXOverX(Tree t) {
-    return Tsurgeon.processPattern(removeXOverXTregex, removeXOverXTsurgeon, t);
+    return Tsurgeon.processPattern(removeXOverXTregex, removeXOverXTsurgeon, t);    
   }
 
-  // UCP (JJ ...) -> ADJP
-  // UCP (DT JJ ...) -> ADJP
-  // UCP (... (ADJP (JJR older|younger))) -> ADJP
-  // UCP (N ...) -> NP
-  // UCP ADVP -> ADVP
-  // Might want to look for ways to include RB for flatter structures,
-  // but then we have to watch out for (RB not) for example
-  // Note that the order of OR expressions means the older|younger
-  // pattern takes precedence
-  // By searching for everything at once, then using one tsurgeon
-  // which fixes everything at once, we can save quite a bit of time
-  private static final TregexPattern ucpRenameTregex =
-    TregexPattern.compile("/^UCP/=ucp [ <, /^JJ|ADJP/=adjp | ( <1 DT <2 /^JJ|ADJP/=adjp ) |" +
-                          " <- (ADJP=adjp < (JJR < /^(?i:younger|older)$/)) |" +
+  private static final TregexPattern[] matchPatterns = {
+    // UCP (JJ ...) -> ADJP
+    // UCP (DT JJ ...) -> ADJP
+    // UCP (... (ADJP (JJR older|younger))) -> ADJP
+    // UCP (N ...) -> NP
+    // UCP ADVP -> ADVP
+    // Might want to look for ways to include RB for flatter structures,
+    // but then we have to watch out for (RB not) for example
+    // Note that the order of OR expressions means the older|younger
+    // pattern takes precedence
+    TregexPattern.compile("/^UCP/=ucp [ <, /^JJ|ADJP/=adjp | ( <1 DT <2 /^JJ|ADJP/=adjp ) |" + 
+                          " <- (ADJP=adjp < (JJR < /^(?i:younger|older)$/)) |" + 
                           " <, /^N/=np | ( <1 DT <2 /^N/=np ) | " +
-                          " <, /^ADVP/=advp ]");
+                          " <, /^ADVP/=advp ]"),
+  };
 
-  // TODO: this turns UCP-TMP into ADVP instead of ADVP-TMP.  What do we actually want?
-  private static final TsurgeonPattern ucpRenameTsurgeon =
-    Tsurgeon.parseOperation("[if exists adjp relabel ucp /^UCP(.*)$/ADJP$1/] [if exists np relabel ucp /^UCP(.*)$/NP$1/] [if exists advp relabel ucp /^UCP(.*)$/ADVP/]");
+  private static final TsurgeonPattern[] operations = {
+    // TODO: this turns UCP-TMP into ADVP instead of ADVP-TMP.  What do we actually want?
+    Tsurgeon.parseOperation("[if exists adjp relabel ucp /^UCP(.*)$/ADJP$1/] [if exists np relabel ucp /^UCP(.*)$/NP$1/] [if exists advp relabel ucp /^UCP(.*)$/ADVP/]"),
+  };
 
   /**
    * Transforms t if it contains an UCP, it will change the UCP tag
@@ -271,7 +280,20 @@ public class CoordinationTransformer implements TreeTransformer {
     if (t == null) {
       return null;
     }
-    return Tsurgeon.processPattern(ucpRenameTregex, ucpRenameTsurgeon, t);
+    Tree firstChild = t.firstChild();
+    if (firstChild != null) {
+      // TODO: precompile the patterns, check to see whether this or
+      // calling for each pattern is more efficient
+      List<Pair<TregexPattern,TsurgeonPattern>> ops = Generics.newArrayList();
+
+      for (int i = 0; i < operations.length; i++) {
+        ops.add(Generics.newPair(matchPatterns[i], operations[i]));
+      }
+
+      return Tsurgeon.processPatternsOnTree(ops, t);
+    } else {
+      return t;
+    }
   }
 
 

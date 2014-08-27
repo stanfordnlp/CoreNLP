@@ -67,11 +67,6 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
 
   public abstract void setOptionFlags(String ... flags);  
 
-  /**
-   * The model requires text to be pretagged
-   */
-  public abstract boolean requiresTags();
-
   public static ParserGrammar loadModel(String path, String ... extraFlags) {
     ParserGrammar parser;
     try {

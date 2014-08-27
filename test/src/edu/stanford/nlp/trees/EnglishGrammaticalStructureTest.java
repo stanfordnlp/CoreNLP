@@ -176,7 +176,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         "det(man-2, The-1)\n" + "nsubj(is-3, man-2)\n" + "root(ROOT-0, is-3)\n" + "advmod(is-3, here-4)\n",
         "prep(live-6, In-1)\n" + "det(city-3, which-2)\n" + "pobj(In-1, city-3)\n" + "aux(live-6, do-4)\n" + "nsubj(live-6, you-5)\n" + "root(ROOT-0, live-6)\n",
         "dobj(invent-5, What-1)\n" + "aux(invent-5, did-2)\n" + "nn(Babbage-4, Charles-3)\n" + "nsubj(invent-5, Babbage-4)\n" + "root(ROOT-0, invent-5)\n",
-        "pobj(for-6, What-1)\n" + "auxpass(used-5, is-2)\n" + "det(esophagus-4, the-3)\n" + "nsubjpass(used-5, esophagus-4)\n" + "root(ROOT-0, used-5)\n" + "prep(used-5, for-6)\n",
+        "dep(used-5, What-1)\n" + "auxpass(used-5, is-2)\n" + "det(esophagus-4, the-3)\n" + "nsubjpass(used-5, esophagus-4)\n" + "root(ROOT-0, used-5)\n" + "prep(used-5, for-6)\n",
         "predet(boys-3, All-1)\n" + "det(boys-3, the-2)\n" + "nsubj(are-4, boys-3)\n" + "root(ROOT-0, are-4)\n" + "advmod(are-4, here-5)\n",
         "preconj(boys-3, Both-1)\n" + "det(boys-3, the-2)\n" + "nsubj(are-7, boys-3)\n" + "cc(boys-3, and-4)\n" + "det(girls-6, the-5)\n" + "conj(boys-3, girls-6)\n" + "root(ROOT-0, are-7)\n" + "advmod(are-7, here-8)\n",
         "nsubj(shut-2, They-1)\n" + "root(ROOT-0, shut-2)\n" + "prt(shut-2, down-3)\n" + "det(station-5, the-4)\n" + "dobj(shut-2, station-5)\n",
@@ -605,13 +605,13 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "nn(pilots-6, Eastern-4)\n" +
                 "nn(pilots-6, Airlines-5)\n" +
                 "iobj(awarded-3, pilots-6)\n" +
-                "quantmod($-8, between-7)\n" +
+                "amod($-8, between-7)\n" +
                 "dobj(awarded-3, $-8)\n" +
-                "number(million-10, 60-9)\n" +
+                "num($-8, 60-9)\n" +
                 "num($-8, million-10)\n" +
                 "cc($-8, and-11)\n" +
                 "conj($-8, $-12)\n" +
-                "number(million-14, 100-13)\n" +
+                "num($-12, 100-13)\n" +
                 "num($-12, million-14)\n" +
                 "prep($-8, in-15)\n" +
                 "amod(pay-17, back-16)\n" +
@@ -1014,7 +1014,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "dobj(expecting-5, pizza-6)\n",
 
         "nsubj(going-3, Who-1)\n" +
-                "nsubj(carry-5, Who-1)\n" +
+                "xsubj(carry-5, Who-1)\n" +
                 "aux(going-3, is-2)\n" +
                 "root(ROOT-0, going-3)\n" +
                 "aux(carry-5, to-4)\n" +
@@ -1311,12 +1311,12 @@ public class EnglishGrammaticalStructureTest extends TestCase {
 
     // the expected dependency answers (basic + extra)
     String[] testAnswers = {
-        "nsubj(like-2, I-1)\n" + "nsubj(swim-4, I-1)\n" + "root(ROOT-0, like-2)\n" + "aux(swim-4, to-3)\n" + "xcomp(like-2, swim-4)\n",
-        "nsubj(says-2, He-1)\n" + "root(ROOT-0, says-2)\n" + "mark(like-5, that-3)\n" + "nsubj(like-5, you-4)\n" + "nsubj(swim-7, you-4)\n" + "ccomp(says-2, like-5)\n" + "aux(swim-7, to-6)\n" + "xcomp(like-5, swim-7)\n",
+        "nsubj(like-2, I-1)\n" + "xsubj(swim-4, I-1)\n" + "root(ROOT-0, like-2)\n" + "aux(swim-4, to-3)\n" + "xcomp(like-2, swim-4)\n",
+        "nsubj(says-2, He-1)\n" + "root(ROOT-0, says-2)\n" + "mark(like-5, that-3)\n" + "nsubj(like-5, you-4)\n" + "xsubj(swim-7, you-4)\n" + "ccomp(says-2, like-5)\n" + "aux(swim-7, to-6)\n" + "xcomp(like-5, swim-7)\n",
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "ref(man-4, who-5)\n" + "dobj(love-7, who-5)\n" + "nsubj(love-7, you-6)\n" + "rcmod(man-4, love-7)\n",
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "ref(man-4, whose-5)\n" + "poss(wife-6, whose-5)\n" + "dobj(love-8, wife-6)\n" + "nsubj(love-8, you-7)\n" + "rcmod(man-4, love-8)\n",
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(book-4, the-3)\n" + "dobj(saw-2, book-4)\n" + "ref(book-4, which-5)\n" + "dobj(bought-7, which-5)\n" + "nsubj(bought-7, you-6)\n" + "rcmod(book-4, bought-7)\n",
-        "pobj(for-6, What-1)\n" + "auxpass(used-5, is-2)\n" + "det(esophagus-4, the-3)\n" + "nsubjpass(used-5, esophagus-4)\n" + "root(ROOT-0, used-5)\n" + "prep(used-5, for-6)\n",
+        "dep(used-5, What-1)\n" + "pobj(for-6, What-1)\n" + "auxpass(used-5, is-2)\n" + "det(esophagus-4, the-3)\n" + "nsubjpass(used-5, esophagus-4)\n" + "root(ROOT-0, used-5)\n" + "prep(used-5, for-6)\n",
         "nsubj(saw-2, I-1)\n" +
                     "root(ROOT-0, saw-2)\n" +
                     "det(woman-4, the-3)\n" +
@@ -1361,7 +1361,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
 
     // the expected dependency answers (basic + extra)
     String[] testAnswers = {
-        "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" + "aux(swim-4, to-3)\n" + "xcomp(like-2, swim-4)\n" + "======\n" + "nsubj(swim-4, I-1)\n",
+        "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" + "aux(swim-4, to-3)\n" + "xcomp(like-2, swim-4)\n" + "======\n" + "xsubj(swim-4, I-1)\n",
 
     };
 
@@ -1424,11 +1424,11 @@ public class EnglishGrammaticalStructureTest extends TestCase {
     String[] testAnswers = {
         "nsubjpass(defeated-3, Dole-1)\n" + "auxpass(defeated-3, was-2)\n" + "root(ROOT-0, defeated-3)\n" + "agent(defeated-3, Clinton-5)\n",
         "mark(lied-3, That-1)\n" + "nsubj(lied-3, she-2)\n" + "csubjpass(suspected-5, lied-3)\n" + "auxpass(suspected-5, was-4)\n" + "root(ROOT-0, suspected-5)\n" + "agent(suspected-5, everyone-7)\n",
-        "nsubj(like-2, I-1)\n" + "nsubj(swim-4, I-1)\n" + "root(ROOT-0, like-2)\n" + "aux(swim-4, to-3)\n" + "xcomp(like-2, swim-4)\n",
+        "nsubj(like-2, I-1)\n" + "xsubj(swim-4, I-1)\n" + "root(ROOT-0, like-2)\n" + "aux(swim-4, to-3)\n" + "xcomp(like-2, swim-4)\n",
         "nsubj(sat-2, I-1)\n" + "root(ROOT-0, sat-2)\n" + "det(chair-5, the-4)\n" + "prep_on(sat-2, chair-5)\n",
         "nsubj(have-2, We-1)\n" + "root(ROOT-0, have-2)\n" + "neg(information-5, no-3)\n" + "amod(information-5, useful-4)\n" + "dobj(have-2, information-5)\n" + "mark(are-9, whether-7)\n" + "nsubj(are-9, users-8)\n" + "prepc_on(information-5, are-9)\n" + "prep_at(are-9, risk-11)\n",
         "nsubj(heard-2, They-1)\n" + "root(ROOT-0, heard-2)\n" + "prep_about(heard-2, asbestos-4)\n" + "xcomp(heard-2, having-5)\n" + "amod(properties-7, questionable-6)\n" + "dobj(having-5, properties-7)\n",
-        "nsubj(says-2, He-1)\n" + "root(ROOT-0, says-2)\n" + "mark(like-5, that-3)\n" + "nsubj(like-5, you-4)\n" + "nsubj(swim-7, you-4)\n" + "ccomp(says-2, like-5)\n" + "aux(swim-7, to-6)\n" + "xcomp(like-5, swim-7)\n",
+        "nsubj(says-2, He-1)\n" + "root(ROOT-0, says-2)\n" + "mark(like-5, that-3)\n" + "nsubj(like-5, you-4)\n" + "xsubj(swim-7, you-4)\n" + "ccomp(says-2, like-5)\n" + "aux(swim-7, to-6)\n" + "xcomp(like-5, swim-7)\n",
         "nn(forces-2, U.S.-1)\n" + "nsubjpass(engaged-5, forces-2)\n" + "aux(engaged-5, have-3)\n" + "auxpass(engaged-5, been-4)\n" + "root(ROOT-0, engaged-5)\n" + "amod(fighting-8, intense-7)\n" + "prep_in(engaged-5, fighting-8)\n" + "mark(launched-11, after-9)\n" + "nsubj(launched-11, insurgents-10)\n" + "advcl(engaged-5, launched-11)\n" + "amod(attacks-13, simultaneous-12)\n" + "dobj(launched-11, attacks-13)\n",
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "dobj(love-7, man-4)\n" + "nsubj(love-7, you-6)\n" + "rcmod(man-4, love-7)\n",
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "poss(wife-6, man-4)\n" + "dobj(love-8, wife-6)\n" + "nsubj(love-8, you-7)\n" + "rcmod(man-4, love-8)\n",

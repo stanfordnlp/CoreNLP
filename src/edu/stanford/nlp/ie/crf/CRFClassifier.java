@@ -32,6 +32,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.math.ArrayMath;
+import edu.stanford.nlp.util.ConvertByteArray;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.optimization.*;
 import edu.stanford.nlp.optimization.Function;
@@ -673,7 +674,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     try {
       String enc = flags.inputEncoding;
       if (flags.inputEncoding == null) {
-        System.err.println("flags.inputEncoding doesn't exist, using UTF-8 as default");
+        System.err.println("flags.inputEncoding doesn't exist, Use UTF-8 as default");
         enc = "UTF-8";
       }
 
@@ -951,7 +952,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    *
    * @param info The input data
    * @param loc The position to build a datum at
-   * @param featureFactories The FeatureFactories to use to extract features
+   * @param featureFactory The FeatureFactory to use to extract features
    * @return The constructed CRFDatum
    */
   public CRFDatum<List<String>, CRFLabel> makeDatum(List<IN> info, int loc,
@@ -1101,24 +1102,14 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   @Override
-  public void dumpFeatures(Collection<List<IN>> docs) {
-    if (flags.exportFeatures != null) {
-      Timing timer = new Timing();
-      timer.start();
-      CRFFeatureExporter<IN> featureExporter = new CRFFeatureExporter<IN>(this);
-      featureExporter.printFeatures(flags.exportFeatures, docs);
-      long elapsedMs = timer.stop();
-      System.err.println("Time to export features: " + Timing.toSecondsString(elapsedMs) + " seconds");
-    }
-  }
-
-  @Override
   public List<IN> classify(List<IN> document) {
     if (flags.doGibbs) {
       try {
         return classifyGibbs(document);
       } catch (Exception e) {
-        throw new RuntimeException("Error running testGibbs inference!", e);
+        System.err.println("Error running testGibbs inference!");
+        e.printStackTrace();
+        return null;
       }
     } else if (flags.crfType.equalsIgnoreCase("maxent")) {
       return classifyMaxEnt(document);
@@ -1132,7 +1123,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       try {
         return classifyGibbs(document, documentDataAndLabels);
       } catch (Exception e) {
-        throw new RuntimeException("Error running testGibbs inference!", e);
+        System.err.println("Error running testGibbs inference!");
+        e.printStackTrace();
+        return null;
       }
     } else if (flags.crfType.equalsIgnoreCase("maxent")) {
       return classifyMaxEnt(document, documentDataAndLabels);
@@ -1277,16 +1270,44 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     CRFCliqueTree<? extends CharSequence> cliqueTree = getCliqueTree(documentDataAndLabels);
 
-    PriorModelFactory<IN> pmf = (PriorModelFactory<IN>) Class.forName(flags.priorModelFactory).newInstance();
-    ListeningSequenceModel prior = pmf.getInstance(flags.backgroundSymbol, classIndex, tagIndex, newDocument, entityMatrices, flags);
+    SequenceModel model = cliqueTree;
+    SequenceListener listener = cliqueTree;
 
-    if (flags.useUniformPrior) {
+    SequenceModel priorModel = null;
+    SequenceListener priorListener = null;
+
+    if (flags.useNERPrior) {
+      EntityCachingAbstractSequencePrior<IN> prior = new EmpiricalNERPrior<IN>(flags.backgroundSymbol, classIndex,
+          newDocument);
+      // SamplingNERPrior prior = new SamplingNERPrior(flags.backgroundSymbol,
+      // classIndex, newDocument);
+      priorModel = prior;
+      priorListener = prior;
+    } else if (flags.useNERPriorBIO) {
+      EntityCachingAbstractSequencePriorBIO<IN> prior = new EmpiricalNERPriorBIO<IN>(flags.backgroundSymbol, classIndex, tagIndex, newDocument, entityMatrices, flags);
+      priorModel = prior;
+      priorListener = prior;
+    } else if (flags.useAcqPrior) {
+      EntityCachingAbstractSequencePrior<IN> prior = new AcquisitionsPrior<IN>(flags.backgroundSymbol, classIndex,
+          newDocument);
+      priorModel = prior;
+      priorListener = prior;
+    } else if (flags.useSemPrior) {
+      EntityCachingAbstractSequencePrior<IN> prior = new SeminarsPrior<IN>(flags.backgroundSymbol, classIndex,
+          newDocument);
+      priorModel = prior;
+      priorListener = prior;
+    } else if (flags.useUniformPrior) {
+      // System.err.println("Using uniform prior!");
+      UniformPrior<IN> uniPrior = new UniformPrior<IN>(flags.backgroundSymbol, classIndex, newDocument);
+      priorModel = uniPrior;
+      priorListener = uniPrior;
     } else {
       throw new RuntimeException("no prior specified");
     }
 
-    SequenceModel model = new FactoredSequenceModel(cliqueTree, prior);
-    SequenceListener listener = new FactoredSequenceListener(cliqueTree, prior);
+    model = new FactoredSequenceModel(model, priorModel);
+    listener = new FactoredSequenceListener(listener, priorListener);
 
     SequenceGibbsSampler sampler = new SequenceGibbsSampler(0, 0, listener);
     int[] sequence = new int[cliqueTree.length()];
@@ -1578,7 +1599,11 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
 
     if (flags.exportFeatures != null) {
-      dumpFeatures(docs);
+      timer.start();
+      CRFFeatureExporter<IN> featureExporter = new CRFFeatureExporter<IN>(this);
+      featureExporter.printFeatures(flags.exportFeatures, docs);
+      elapsedMs = timer.stop();
+      System.err.println("Time to export features: " + Timing.toSecondsString(elapsedMs) + " seconds");
     }
 
     for (int i = 0; i <= flags.numTimesPruneFeatures; i++) {
@@ -2311,8 +2336,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     // System.err.println("DEBUG: in loadTextClassifier");
     System.err.println("Loading Text Classifier from " + text);
     try {
-      BufferedReader br = IOUtils.readerFromString(text);
+      BufferedReader br = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(text))));
+
       loadTextClassifier(br);
+
       br.close();
     } catch (Exception ex) {
       System.err.println("Exception in loading text classifier from " + text);
@@ -2543,13 +2570,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       oos.writeObject(flags);
       if (flags.useEmbedding)
         oos.writeObject(embeddings);
-      // For some reason, writing out the array of FeatureFactory
-      // objects doesn't seem to work.  The resulting classifier
-      // doesn't have the lexicon (distsim object) correctly saved.
-      oos.writeObject(featureFactories.size());
-      for (FeatureFactory ff : featureFactories) {
-        oos.writeObject(ff);
-      }
+      oos.writeObject(featureFactories);
       oos.writeInt(windowSize);
       oos.writeObject(weights);
       // oos.writeObject(WordShapeClassifier.getKnownLowerCaseWords());
@@ -2601,16 +2622,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } else if (featureFactory instanceof FeatureFactory) {
       featureFactories = Generics.newArrayList();
       featureFactories.add((FeatureFactory) featureFactory);
-    } else if (featureFactory instanceof Integer) {
-      int size = (Integer) featureFactory;
-      featureFactories = Generics.newArrayList();
-      for (int i = 0; i < size; ++i) {
-        featureFactory = ois.readObject();
-        if (!(featureFactory instanceof FeatureFactory)) {
-          throw new RuntimeIOException();
-        }
-        featureFactories.add((FeatureFactory) featureFactory);
-      }
     }
 
     if (props != null) {
@@ -2963,7 +2974,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       } else if (crf.flags.printLabelValue) {
         crf.printLabelInformation(testFile, readerAndWriter);
       } else {
-        crf.classifyAndWriteAnswers(testFile, readerAndWriter, true);
+        crf.classifyAndWriteAnswers(testFile, readerAndWriter);
       }
     }
 
@@ -2972,7 +2983,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       for (String filename : testFiles.split(",")) {
         files.add(new File(filename));
       }
-      crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter(), true);
+      crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter());
     }
 
     if (textFile != null) {

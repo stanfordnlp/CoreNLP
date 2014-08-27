@@ -316,6 +316,9 @@ public final class SplitCanditoTrees {
 
   /**
    * Converts a tree to the Morfette training format.
+   * 
+   * @param tree
+   * @return
    */
   private static String treeToMorfette(Tree tree) {
     StringBuilder sb = new StringBuilder();

@@ -29,7 +29,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author dramage
  * @author rafferty
  */
-public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWord, HasTag, HasCategory, HasLemma, HasContext, HasIndex, HasOffset {
+public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, HasCategory, HasLemma, HasContext, HasIndex, HasOffset {
 
   private static final long serialVersionUID = 2L;
 
@@ -277,7 +277,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
    * @return "" if the key is not in the map or has the value <code>null</code>
    *     and the String value of the key otherwise
    */
-  @Override
   public <KEY extends Key<String>> String getString(Class<KEY> key) {
     String value = get(key);
     if (value == null) {
@@ -324,13 +323,9 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
    */
   @Override
   public void setWord(String word) {
-    String originalWord = get(CoreAnnotations.TextAnnotation.class);
     set(CoreAnnotations.TextAnnotation.class, word);
     // pado feb 09: if you change the word, delete the lemma.
-    // gabor dec 2012: check if there was a real change -- this remove is actually rather expensive if it gets called a lot
-    if (word != null && !word.equals(originalWord) && containsKey(CoreAnnotations.LemmaAnnotation.class)) {
-      remove(CoreAnnotations.LemmaAnnotation.class);
-    }
+    remove(CoreAnnotations.LemmaAnnotation.class);
   }
 
   /**
@@ -542,33 +537,12 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
     set(CoreAnnotations.CharacterOffsetEndAnnotation.class, endPos);
   }
 
-  public int copyCount() {
-    Integer copy = get(CoreAnnotations.CopyAnnotation.class);
-    if (copy == null)
-      return 0;
-    return copy;
-  }
-
-  public void setCopyCount(int count) {
-    set(CoreAnnotations.CopyAnnotation.class, count);
-  }
-
   /**
    * Tag separator to use by default
    */
   public static final String TAG_SEPARATOR = "/";
 
   public static final String DEFAULT_FORMAT = "value-index";
-
-  public static final String VALUE_FORMAT = "value";
-
-  public static final String VALUE_TAG_FORMAT = "value-tag";
-
-  public static final String VALUE_TAG_INDEX_FORMAT = "value-tag-index";
-
-  public static final String MAP_FORMAT = "{map}";
-
-  public static final String WORD_FORMAT = "word";
 
   @Override
   public String toString() {
@@ -587,8 +561,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
    * <li>"value-index": extracts a value and an integer index from
    * the contained map using keys  <code>INDEX_KEY</code>,
    * respectively, and prints them with a hyphen in between</li>
-   * <li>"value-tag"
-   * <li>"value-tag-index"
    * <li>"value-index{map}": a combination of the above; the index is
    * displayed first and then not shown in the map that is displayed</li>
    * <li>"word": Just the value of HEAD_WORD_KEY in the map</li>
@@ -599,9 +571,9 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
   @SuppressWarnings("unchecked")
   public String toString(String format) {
     StringBuilder buf = new StringBuilder();
-    if (format.equals(VALUE_FORMAT)) {
+    if (format.equals("value")) {
       buf.append(value());
-    } else if (format.equals(MAP_FORMAT)) {
+    } else if (format.equals("{map}")) {
       Map map2 = new TreeMap();
       for(Class key : this.keySet()) {
         map2.put(key.getName(), get(key));
@@ -622,14 +594,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
         buf.append('-').append((index).intValue());
       }
       buf.append(toPrimes());
-    } else if (format.equals(VALUE_TAG_FORMAT)) {
-      buf.append(value());
-      buf.append(toPrimes());
-      String tag = tag();
-      if (tag != null) {
-        buf.append(TAG_SEPARATOR).append(tag);
-      }
-    } else if (format.equals(VALUE_TAG_INDEX_FORMAT)) {
+    } else if (format.equals("value-tag-index")) {
       buf.append(value());
       String tag = tag();
       if (tag != null) {
@@ -661,8 +626,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
       if (!map2.isEmpty()) {
         buf.append(map2);
       }
-    } else if (format.equals(WORD_FORMAT)) {
-      // TODO: we should unify word() and value()
+    } else if (format.equals("word")) {
       buf.append(word());
     } else if (format.equals("text-index")) {
       buf.append(this.get(CoreAnnotations.TextAnnotation.class));
@@ -676,7 +640,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
   }
 
   public String toPrimes() {
-    return StringUtils.repeat('\'', copyCount());
+    Integer copy = get(CoreAnnotations.CopyAnnotation.class);
+    if (copy == null || copy == 0)
+      return "";
+    return StringUtils.repeat('\'', copy);
   }
 
   private static final Comparator<Class<?>> asClassComparator = new Comparator<Class<?>>() {

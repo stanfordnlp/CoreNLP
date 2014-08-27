@@ -1,11 +1,13 @@
 package edu.stanford.nlp.parser.dvparser;
 
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -15,6 +17,7 @@ import java.util.regex.Pattern;
 import org.ejml.simple.SimpleMatrix;
 import org.ejml.data.DenseMatrix64F;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.neural.Embedding;
 import edu.stanford.nlp.neural.NeuralUtils;
 import edu.stanford.nlp.parser.lexparser.BinaryGrammar;
@@ -23,9 +26,11 @@ import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.lexparser.UnaryGrammar;
 import edu.stanford.nlp.parser.lexparser.UnaryRule;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.Maps;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.TwoDimensionalMap;
 import edu.stanford.nlp.util.TwoDimensionalSet;

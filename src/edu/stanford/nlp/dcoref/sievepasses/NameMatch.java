@@ -3,6 +3,7 @@ package edu.stanford.nlp.dcoref.sievepasses;
 import edu.stanford.nlp.dcoref.*;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ReflectionLoading;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.util.Properties;
 import java.util.Set;
@@ -32,7 +33,6 @@ public class NameMatch extends DeterministicCorefSieve {
     supportedNerTypes.add("MISC");
   }
 
-  @Override
   public void init(Properties props) {
     // TODO: Can get custom mention matcher
     mentionMatcher = ReflectionLoading.loadByReflection("edu.stanford.nlp.kbp.entitylinking.classify.namematcher.RuleBasedNameMatcher",
@@ -43,7 +43,6 @@ public class NameMatch extends DeterministicCorefSieve {
     return m.mentionType == Dictionaries.MentionType.PROPER;
   }
 
-  @Override
   public boolean checkEntityMatch(
           Document document,
           CorefCluster mentionCluster,

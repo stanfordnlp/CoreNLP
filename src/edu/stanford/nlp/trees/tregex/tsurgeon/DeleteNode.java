@@ -1,7 +1,6 @@
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
 import java.util.List;
-import java.util.Map;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
@@ -19,29 +18,19 @@ class DeleteNode extends TsurgeonPattern {
     this(children.toArray(new TsurgeonPattern[children.size()]));
   }
 
+
   @Override
-  public TsurgeonMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
-    return new Matcher(newNodeNames, coindexer);
-  }
-
-  private class Matcher extends TsurgeonMatcher {
-    public Matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
-      super(DeleteNode.this, newNodeNames, coindexer);
-    }
-
-    @Override
-    public Tree evaluate(Tree tree, TregexMatcher tregex) {
-      Tree result = tree;
-      for (TsurgeonMatcher child : childMatcher) {
-        Tree nodeToDelete = child.evaluate(tree, tregex);
-        if (nodeToDelete == tree) {
-          result = null;
-        }
-        Tree parent = nodeToDelete.parent(tree);
-        parent.removeChild(Trees.objectEqualityIndexOf(parent,nodeToDelete));
+  public Tree evaluate(Tree t, TregexMatcher m) {
+    Tree result = t;
+    for (TsurgeonPattern child : children) {
+      Tree nodeToDelete = child.evaluate(t, m);
+      if (nodeToDelete == t) {
+        result = null;
       }
-      return result;
+      Tree parent = nodeToDelete.parent(t);
+      parent.removeChild(Trees.objectEqualityIndexOf(parent,nodeToDelete));
     }
+    return result;
   }
 
 }
