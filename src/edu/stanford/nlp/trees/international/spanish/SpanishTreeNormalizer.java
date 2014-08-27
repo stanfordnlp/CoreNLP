@@ -2,7 +2,10 @@ package edu.stanford.nlp.trees.international.spanish;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,7 +72,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   }
 
   @Override
-  public Tree normalizeTerminal(String word) {
+  public String normalizeTerminal(String word) {
     if (spellingFixes.containsKey(word))
       return spellingFixes.get(word);
     return word;
@@ -196,6 +199,17 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   private static final Pattern pQuoted = Pattern.compile("\"(.+)\"");
 
   /**
+   * Characters which may separate words in a single token.
+   */
+  private static final String WORD_SEPARATORS = ",-_";
+
+  /**
+   * Word separators which should not be treated as separate "words" and
+   * dropped from a multi-word token.
+   */
+  private static final String WORD_SEPARATORS_DROP = "_";
+
+  /**
    * Return the (single or multiple) words which make up the given
    * token.
    */
@@ -210,7 +224,23 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       return ret;
     }
 
-    return token.split("_");
+    // Confusing: we are using a tokenizer to split a token into its
+    // constituent words
+    StringTokenizer splitter = new StringTokenizer(token, WORD_SEPARATORS,
+                                                   true);
+
+    List<String> words = new ArrayList<String>();
+    while (splitter.hasMoreTokens()) {
+      String word = splitter.nextToken();
+      if (word.length() == 1
+          && WORD_SEPARATORS_DROP.indexOf(word.charAt(0)) != -1)
+        // This is a delimiter that we should drop
+        continue;
+
+      words.add(word);
+    }
+
+    return words.toArray(new String[words.size()]);
   }
 
 }
