@@ -70,6 +70,14 @@ public final class MultiWordPreprocessor {
     private static final Pattern participle = Pattern.compile("[ai]d[oa]$");
 
     public static String getTag(String word) {
+      // Exact matches
+      if (word.equals("%"))
+        return "ft";
+      else if (word.equals("+"))
+        return "fz";
+      else if (word.equals("&") || word.equals("@"))
+        return "f0";
+
       if(digit.matcher(word).find())
         return "z0";
       else if(commonNouns.contains(word))
