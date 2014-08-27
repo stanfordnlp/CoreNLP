@@ -125,13 +125,26 @@ public class MultiWordTreeExpander {
    * substantive
    */
   private static TregexPattern intermediateSubstantiveConjunct =
-    TregexPattern.compile("grup.nom.inter2=target <: /^[dnpw]/");
+    TregexPattern.compile("/grup\\.nom\\.inter2/=target <: /^[dnpw]/");
 
   /**
    * Rename simple intermediate conjunct as a `grup.nom`
    */
   private static TsurgeonPattern expandIntermediateSubstantiveConjunct =
     Tsurgeon.parseOperation("[relabel target /grup.nom/]");
+
+  /**
+   * Simple intermediate conjunct: a constituent which heads a single
+   * adjective
+   */
+  private static TregexPattern intermediateAdjectiveConjunct =
+    TregexPattern.compile("/grup\\.nom\\.inter2/=target <: /^a/");
+
+  /**
+   * Rename simple intermediate adjective conjunct as a `grup.a`
+   */
+  private static TsurgeonPattern expandIntermediateAdjectiveConjunct =
+    Tsurgeon.parseOperation("[relabel target /grup.a/]");
 
   // TODO intermediate adjectival conjunct
   // TODO intermediate verb conjunct
@@ -168,6 +181,7 @@ public class MultiWordTreeExpander {
       add(new Pair(intermediatePrepositionalPhrase, expandPrepositionalPhrase2));
       add(new Pair(intermediatePrepositionalVP, expandPrepositionalVP2));
       add(new Pair(intermediateSubstantiveConjunct, expandIntermediateSubstantiveConjunct));
+      add(new Pair(intermediateAdjectiveConjunct, expandIntermediateAdjectiveConjunct));
     }};
 
   /**
