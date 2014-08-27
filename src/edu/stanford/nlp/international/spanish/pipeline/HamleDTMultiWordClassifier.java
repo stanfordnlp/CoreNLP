@@ -62,9 +62,10 @@ public class HamleDTMultiWordClassifier {
     ArrayList<Function<String, List<String>>>() {{
       add(new LeadingPOSFeatureFunction("V")); // verbs
       add(new LeadingPOSFeatureFunction("S")); // prepositions
+      add(new TrailingPOSFeatureFunction("S")); // trailing prepositions
       add(new HasMultipleOfPOSFeatureFunction("S", "D")); // phrase-y things
       add(new HasMultipleOfPOSFeatureFunction("A", "N")); // compound-y things
-      add(new CharacterNGramFeatureFunction(2, 4));
+      add(new CharacterNGramFeatureFunction(4, 4));
       add(new WordShapeFeatureFunction());
     }};
 
@@ -327,6 +328,35 @@ public class HamleDTMultiWordClassifier {
 
   }
 
+  private static class TrailingPOSFeatureFunction implements Function<String, List<String>> {
+
+    private final Set<String> allowedWords = new HashSet<String>();
+
+    private final List<String> positiveRet;
+    private final List<String> negativeRet;
+
+    public TrailingPOSFeatureFunction(String posPrefix) {
+      for (Map.Entry<String, String> lex : dictionary.entrySet()) {
+        // Add only verbs to set
+        if (lex.getValue().startsWith(posPrefix))
+          allowedWords.add(lex.getKey());
+      }
+
+      positiveRet = Arrays.asList("*trailingPOS[" + posPrefix + "]:");
+      negativeRet = Arrays.asList("*noTrailingPOS[" + posPrefix + "]:");
+    }
+
+    @Override
+    public List<String> apply(String mwe) {
+      String[] words = mwe.split("_");
+
+      if (allowedWords.contains(words[words.length - 1].toLowerCase()))
+        return positiveRet;
+      return negativeRet;
+    }
+
+  }
+
   private static class HasMultipleOfPOSFeatureFunction implements Function<String, List<String>> {
 
     private final List<String> positiveRet;
@@ -354,7 +384,7 @@ public class HamleDTMultiWordClassifier {
         String pos = dictionary.get(word);
         if (pos == null)
           continue;
-        
+
         for (String candPos : partsOfSpeech) {
           if (candPos.startsWith(pos)) {
             count++;
