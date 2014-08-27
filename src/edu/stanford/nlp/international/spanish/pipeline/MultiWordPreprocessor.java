@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
@@ -22,7 +21,6 @@ import edu.stanford.nlp.trees.tregex.ParseException;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -167,7 +165,6 @@ public final class MultiWordPreprocessor {
         put("pique", "ncms000");
         put("pos", "ncms000");
         put("postre", "ncms000");
-        put("pro", "ncms000");
         put("ralentí", "ncms000");
         put("ras", "ncms000");
         put("rebato", "ncms000");
@@ -188,7 +185,6 @@ public final class MultiWordPreprocessor {
 
         put("amén", "rg"); // amén de
 
-        put("Teniendo", "vmg0000");
         put("formaba", "vmii000");
         put("perece", "vmip000");
         put("tardar", "vmn0000");
@@ -203,27 +199,19 @@ public final class MultiWordPreprocessor {
     private static final Pattern participle = Pattern.compile("[ai]d[oa]$");
 
     /**
-     * Names which would be mistakenly marked as function words by
-     * unigram tagger (and which never appear as function words in
-     * multi-word tokens)
+     * Names which would be mistakenly marked as function words by unigram tagger (and which never appear as function words
+     * in multi-word tokens)
      */
     private static final Set<String> actuallyNames = new HashSet<String>() {{
       add("A");
-      add("Avenida");
+      add("Al");
       add("Contra");
       add("Gracias"); // interjection
-      add("in"); // preposition; only appears in corpus as "in extremis" (preposition)
-      add("Mercado");
       add("Jesús"); // interjection
       add("Salvo");
       add("Sin");
       add("Van"); // verb
     }};
-
-    private static final Pattern otherNamePattern = Pattern.compile("\\b(Al\\w+|A[^l]\\w*|[B-Z]\\w+)");
-
-    // Determiners which may also appear as pronouns
-    private static final Pattern pPronounDeterminers = Pattern.compile("(tod|otr|un)[oa]s?");
 
     public static String getOverrideTag(String word, String containingPhrase) {
       if (containingPhrase == null)
@@ -231,68 +219,17 @@ public final class MultiWordPreprocessor {
 
       if (word.equalsIgnoreCase("este") && !containingPhrase.startsWith(word))
         return "np00000";
+      else if (word.equals("Al") && containingPhrase.startsWith("Al fin"))
+        return "sp000";
       else if (word.equals("Sin") && containingPhrase.startsWith("Sin embargo"))
         return "sp000";
-      else if (word.equals("contra")
-        && (containingPhrase.startsWith("en contra") || containingPhrase.startsWith("En contra")))
-        return "nc0s000";
-      else if (word.equals("total") && containingPhrase.startsWith("ese"))
-        return "nc0s000";
-      else if (word.equals("DEL"))
-        // Uses of "Del" in corpus are proper nouns, but uses of "DEL" are
-        // prepositions.. convenient for our purposes
-        return "sp000";
-      else if (word.equals("sí") && containingPhrase.contains("por sí")
-        || containingPhrase.contains("fuera de sí"))
-        return "pp000000";
-      else if (pPronounDeterminers.matcher(word).matches() && containingPhrase.endsWith(word))
-        // Determiners tailing a phrase are pronouns: "sobre todo," "al otro", etc.
-        return "pi000000";
-      else if (word.equals("cuando") && containingPhrase.endsWith(word))
-        return "pi000000";
-      else if ((word.equalsIgnoreCase("contra") && containingPhrase.endsWith(word)))
-        return "nc0s000";
-      else if (word.equals("salvo") && containingPhrase.endsWith("salvo"))
-        return "aq0000";
-      else if (word.equals("mira") && containingPhrase.endsWith(word))
-        return "nc0s000";
-      else if (word.equals("pro") && containingPhrase.startsWith("en pro"))
-        return "nc0s000";
-      else if (word.equals("espera") && containingPhrase.endsWith("espera de"))
-        return "nc0s000";
-      else if (word.equals("Paso") && containingPhrase.equals("El Paso"))
-        return "np00000";
-      else if (word.equals("medio") && (containingPhrase.endsWith("medio de") || containingPhrase.endsWith("ambiente")
-        || containingPhrase.endsWith("por medio") || containingPhrase.contains("por medio")
-        || containingPhrase.endsWith("medio")))
-        return "nc0s000";
-      else if (word.equals("Medio") && containingPhrase.contains("Ambiente"))
-        return "nc0s000";
-      else if (word.equals("Medio") && containingPhrase.equals("Oriente Medio"))
-        return "aq0000";
-      else if (word.equals("media") && containingPhrase.equals("mass media"))
-        return "nc0n000";
-      else if (word.equals("cuenta")) // tomar en cuenta, darse cuenta de, ...
-        return "nc0s000";
-
-      if (word.equals("Al")) {
-        // "Al" is sometimes a part of name phrases: Arabic names, Al Gore, etc.
-        // Mark it a noun if its containing phrase has some other capitalized word
-        if (otherNamePattern.matcher(containingPhrase).find())
-          return "np00000";
-        else
-          return "sp000";
-      }
 
       if (actuallyNames.contains(word))
         return "np00000";
 
       if (word.equals("sino") && containingPhrase.endsWith(word))
         return "nc0s000";
-      else if (word.equals("mañana") || word.equals("paso") || word.equals("monta") || word.equals("deriva")
-        || word.equals("visto"))
-        return "nc0s000";
-      else if (word.equals("frente") && containingPhrase.startsWith("al frente"))
+      else if (word.equals("mañana"))
         return "nc0s000";
 
       return null;
@@ -418,18 +355,6 @@ public final class MultiWordPreprocessor {
     if (overrideTag != null)
       return overrideTag;
 
-    Set<String> unigramTaggerKeys = unigramTagger.firstKeySet();
-
-    // Try treating this word as a verb and stripping any clitic
-    // pronouns. If the stripped version exists in the unigram
-    // tagger, then stick with the verb hypothesis
-    Pair<String, List<String>> strippedVerb = SpanishVerbStripper.separatePronouns(word);
-    if (strippedVerb != null && unigramTaggerKeys.contains(strippedVerb.first())) {
-      String pos = Counters.argmax(unigramTagger.getCounter(strippedVerb.first()));
-      if (pos.startsWith("v"))
-        return pos;
-    }
-
     if (unigramTagger.firstKeySet().contains(word))
       return Counters.argmax(unigramTagger.getCounter(word));
 
@@ -508,7 +433,7 @@ public final class MultiWordPreprocessor {
 
         // Now "decompress" further the expanded trees formed by
         // multiword token splitting
-        t = MultiWordTreeExpander.expandPhrases(t, tn, tf);
+        t = MultiWordTreeExpander.expandPhrases(t);
 
         if (tn != null)
           t = tn.normalizeWholeTree(t, tf);

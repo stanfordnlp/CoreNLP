@@ -59,10 +59,10 @@ public class SpanishVerbStripper {
       String line = br.readLine();
       for(; line != null; line = br.readLine()) {
         String[] words = line.trim().split("\\s");
-        if(words.length < 3) {
+        if(words.length < 2) {
           System.err.printf("SpanishVerbStripper: addings words to dict, missing word, ignoring line");
         }
-        dict.put(words[0], words[2]);
+        dict.put(words[0], words[1]);
       }
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
@@ -114,45 +114,10 @@ public class SpanishVerbStripper {
   }
 
   /**
-   * Examines the given verb pair and returns <tt>true</tt> if it is a
-   * valid pairing of verb form and clitic pronoun(s).
-   *
-   * May modify <tt>pair</tt> in place in order to make the pair valid.
-   * For example, if the pair <tt>(senta, os)</tt> is provided, this
-   * method will return <tt>true</tt> and modify the pair to be
-   * <tt>(sentad, os)</tt>.
+   * Returns whether @word is a valid form of a valid dictionary verb.
    */
-  private static boolean validateVerbPair(Pair<String, List<String>> pair) {
-    // Catch: if we have a second-person plural imperative with the
-    // pronoun 'os' attached, the terminal 'd' of the imperative *must*
-    // be elided. (Words like "sentados" look like imperatives if we
-    // don't enforce this rule!)
-    List<String> pronouns = pair.second();
-    boolean hasOs = pronouns.size() > 0 && pronouns.get(0).equalsIgnoreCase("os");
-
-    String stripped = pair.first().toLowerCase();
-    String verbPos = dict.get(stripped);
-    if (verbPos != null) {
-      if (verbPos.equals("VMM02P0") && hasOs)
-        // Not possible!
-        return false;
-
-      return true;
-    }
-
-    // Try `word + 'd'` as well for cases like 'sentaos'; stripped this
-    // becomes 'senta', and we only have the form 'sentad' in the
-    // dictionary
-    if (hasOs) {
-      verbPos = dict.get(stripped + 'd');
-      if (verbPos != null && verbPos.equals("VMM02P0")) {
-        // Write the change to the original pair
-        pair.setFirst(stripped + 'd');
-        return true;
-      }
-    }
-
-    return false;
+  private static boolean isVerb(String word) {
+    return dict.containsKey(word);
   }
 
   /**
@@ -195,13 +160,23 @@ public class SpanishVerbStripper {
 
     // Try to strip just one pronoun first
     separated = stripSuffix(verb, pOneAttachedPronoun);
-    if (separated != null && validateVerbPair(separated))
-      return separated;
+    // Try `word + 'd'` as well for cases like 'sentaos'; stripped this
+    // becomes 'senta', and we only have the form 'sentad' in the
+    // dictionary
+    if (separated != null) {
+      String stripped = separated.first().toLowerCase();
 
-    // Now two
+      if (isVerb(stripped) || isVerb(stripped + 'd'))
+        return separated;
+    }
+
     separated = stripSuffix(verb, pTwoAttachedPronouns);
-    if (separated != null && validateVerbPair(separated))
-      return separated;
+    if (separated != null) {
+      String stripped = separated.first().toLowerCase();
+
+      if (isVerb(stripped) || isVerb(stripped + 'd'))
+        return separated;
+    }
 
     return null;
   }

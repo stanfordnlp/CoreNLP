@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeFactory;
-import edu.stanford.nlp.trees.TreeNormalizer;
-import edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
@@ -40,13 +37,7 @@ public class MultiWordTreeExpander {
   private static final String CANDIDATE_GROUPS = "(^grup\\.(adv|c[cs]|[iwz]|nom|prep|pron|verb)|\\.inter)";
 
   private static final String PREPOSITIONS =
-    "(por|para|pro|al?|del?|con(?:tra)?|sobre|en(?:tre)?|hacia|sin|según|hasta|bajo)";
-
-  private static TregexPattern parentheticalExpression = TregexPattern.compile(
-    "fpa=left > /^grup\\.nom$/ " + "$++ fpt=right");
-
-  private static TsurgeonPattern groupParentheticalExpression
-    = Tsurgeon.parseOperation("createSubtree grup.nom.inter4 left right");
+    "(por|para|al?|del?|con(?:tra)?|sobre|en(?:tre)?|hacia|sin|según|hasta)";
 
   /**
    * Yes, some multiword tokens contain multiple clauses..
@@ -72,7 +63,7 @@ public class MultiWordTreeExpander {
                             // With an NP on the left (-> this is a
                             // prep. phrase) and not preceded by any
                             // other prepositions
-                            " $+ /^([adnswz]|p[ipr])/=left !$-- sp000");
+                            " $+ /^[adnswz]/=left !$-- sp000");
 
   private static TregexPattern leadingPrepositionalPhrase
     = TregexPattern.compile(// Match candidate preposition
@@ -85,7 +76,7 @@ public class MultiWordTreeExpander {
                             // With an NP on the left (-> this is a
                             // prep. phrase) and not preceded by any
                             // other prepositions
-                            " $+ /^([adnswz]|p[ipr])/=left !$-- sp000");
+                            " $+ /^[adnswz]/=left !$-- sp000");
 
   /**
    * First step in expanding prepositional phrases: group NP to right of
@@ -113,7 +104,7 @@ public class MultiWordTreeExpander {
                             "[delete preptag]");
 
   private static TregexPattern prepositionalVP =
-    TregexPattern.compile("sp000=tag < /(?i)^(para|al?|del?)$/" +
+    TregexPattern.compile("sp000=tag < /^(para|al?|del?)$/" +
                           " > (/" + CANDIDATE_GROUPS + "/ <- __=right)" +
                           " $+ vmn0000=left !$-- sp000");
 
@@ -185,15 +176,6 @@ public class MultiWordTreeExpander {
     Tsurgeon.parseOperation("[relabel target sn]");
 
   /**
-   * Intermediate conjunct: verb
-   */
-  private static TregexPattern intermediateVerbConjunct =
-    TregexPattern.compile("/^grup\\.nom\\.inter2$/=gn <: /^vmi/");
-
-  private static TsurgeonPattern expandIntermediateVerbConjunct =
-    Tsurgeon.parseOperation("[adjoin (S (grup.verb@)) gn]");
-
-  /**
    * Match parts of an expanded conjunct which should be labeled as
    * nominal groups.
    */
@@ -208,13 +190,13 @@ public class MultiWordTreeExpander {
    * that they can be moved out
    */
   private static TregexPattern articleLeadingNominalGroup =
-    TregexPattern.compile("/^d[aip]/=art >, (/^grup\\.nom$/=ng > sn)");
+    TregexPattern.compile("/^d[ai]/=art >, (/^grup\\.nom$/=ng > sn)");
 
   private static TsurgeonPattern expandArticleLeadingNominalGroup =
     Tsurgeon.parseOperation("[insert (spec=target) $+ ng] [move art >0 target]");
 
   private static TregexPattern articleInsideOrphanedNominalGroup =
-    TregexPattern.compile("/^d[aip]/=d >, (/^grup\\.nom/=ng !> sn)");
+    TregexPattern.compile("/^d[ai]/=d >, (/^grup\\.nom/=ng !> sn)");
 
   private static TsurgeonPattern expandArticleInsideOrphanedNominalGroup =
     Tsurgeon.parseOperation("[adjoinF (sn=sn spec=spec foot@) ng] [move d >0 spec]");
@@ -234,16 +216,16 @@ public class MultiWordTreeExpander {
     = Tsurgeon.parseOperation("[relabel contraction /l//] [adjoinF (sn (spec (da0000 el)) foot@) ng]");
 
   private static TregexPattern contractionInSpecifier
-    = TregexPattern.compile("sp000=parent < /(?i)^(a|de)l$/=contraction > spec");
+    = TregexPattern.compile("sp000=parent < /^(a|de)l$/=contraction > spec");
 
   private static TregexPattern delTodo = TregexPattern.compile("del=contraction . todo > sp000=parent");
 
   // "del X al Y"
   private static TregexPattern contractionInRangePhrase
-    = TregexPattern.compile("sp000 < /(?i)^(a|de)l$/=contraction >: (conj $+ (/^grup\\.(w|nom)/=group))");
+    = TregexPattern.compile("sp000 < del=contraction >: (conj $+ (/^grup\\.(w|nom)/=group))");
 
   private static TsurgeonPattern expandContractionInRangePhrase
-    = Tsurgeon.parseOperation("[relabel contraction /(?i)l//] [adjoinF (sn (spec (da0000 el)) foot@) group]");
+    = Tsurgeon.parseOperation("[relabel contraction de] [adjoinF (sn (spec (da0000 el)) foot@) group]");
 
   /**
    * Operation to extract article from contraction and just put it next to the container
@@ -260,86 +242,12 @@ public class MultiWordTreeExpander {
 
   // Final cleanup operations
 
-  private static TregexPattern terminalPrepositions
-    = TregexPattern.compile("sp000=sp < /" + PREPOSITIONS + "/ >- (/^grup\\.nom/ >+(/^grup\\.nom/) sn=sn >>- =sn)");
-
+  private static TregexPattern terminalPrepositions = TregexPattern.compile("sp000=sp < de >- (/^grup\\.nom/ > sn=sn)");
   private static TsurgeonPattern extractTerminalPrepositions = Tsurgeon.parseOperation(
     "[insert (prep=prep) $- sn] [move sp >0 prep]");
 
-  /**
-   * Match terminal prepositions in prepositional phrases: "a lo largo de"
-   */
-  private static TregexPattern terminalPrepositions2
-    = TregexPattern.compile("prep=prep >` (/^grup\\.nom$/ >: (sn=sn > /^(grup\\.prep|sp)$/))");
-
-  private static TsurgeonPattern extractTerminalPrepositions2
-    = Tsurgeon.parseOperation("move prep $- sn");
-
-  /**
-   * Match terminal prepositions in infinitive clause within prepositional phrase: "a partir de," etc.
-   */
-  private static TregexPattern terminalPrepositions3
-    = TregexPattern.compile("sp000=sp $- infinitiu >` (S=S >` /^(grup\\.prep|sp)$/)");
-
-  private static TsurgeonPattern extractTerminalPrepositions3
-    = Tsurgeon.parseOperation("[insert (prep=prep) $- S] [move sp >0 prep]");
-
   private static TregexPattern adverbNominalGroups = TregexPattern.compile("/^grup\\.nom./=ng <: /^r[gn]/=r");
   private static TsurgeonPattern replaceAdverbNominalGroup = Tsurgeon.parseOperation("replace ng r");
-
-  /**
-   * Match blocks of only adjectives (one or more) with a nominal group parent. These constituents should be rewritten
-   * beneath an adjectival group constituent.
-   */
-  private static TregexPattern adjectiveSpanInNominalGroup
-    = TregexPattern.compile("/^grup\\.nom/=ng <, aq0000=left <` aq0000=right !< /^[^a]/");
-
-  /**
-   * Match dependent clauses mistakenly held under nominal groups ("lo que X")
-   */
-  private static TregexPattern clauseInNominalGroup
-    = TregexPattern.compile("lo . (que > (pr000000=pr >, /^grup\\.nom/=ng $+ (/^v/=vb >` =ng)))");
-
-  private static TsurgeonPattern labelClause
-    = Tsurgeon.parseOperation("[relabel ng S] [adjoinF (relatiu foot@) pr] [adjoinF (grup.verb foot@) vb]");
-
-  /**
-   * Infinitive clause mistakenly held under nominal group
-   */
-  private static TregexPattern clauseInNominalGroup2 = TregexPattern.compile("/^grup\\.nom/=gn $- spec <: /^vmn/");
-  private static TsurgeonPattern labelClause2 = Tsurgeon.parseOperation("[adjoin (S (infinitiu@)) gn]");
-
-  private static TregexPattern clauseInNominalGroup3 = TregexPattern.compile("sn=sn <, (/^vmn/=inf $+ (sp >` =sn))");
-  private static TsurgeonPattern labelClause3
-    = Tsurgeon.parseOperation("[relabel sn S] [adjoinF (infinitiu foot@) inf]");
-
-  private static TregexPattern loneAdjectiveInNominalGroup
-    = TregexPattern.compile("/^a/=a > /^grup\\.nom/ $ /^([snwz]|p[ipr])/ !$ /^a/");
-  private static TsurgeonPattern labelAdjective = Tsurgeon.parseOperation("[adjoinF (s.a (grup.a foot@)) a]");
-
-  private static TsurgeonPattern groupAdjectives = Tsurgeon.parseOperation("createSubtree (s.a grup.a@) left right");
-
-  private static TregexPattern alMenos
-    = TregexPattern.compile("/(?i)^al$/ . /(?i)^menos$/ > (sp000 $+ rg > /^grup\\.adv$/=ga)");
-
-  private static TsurgeonPattern fixAlMenos
-    = Tsurgeon.parseOperation("replace ga (grup.adv (sp (prep (sp000 a)) (sn (spec (da0000 lo)) (grup.nom (s.a (grup.a (aq0000 menos)))))))");
-
-  /**
-   * The corpus marks entire multiword verb tokens like "teniendo en
-   * cuenta" as gerunds / infinitives (by heading them with a
-   * constituent "gerundi" / "infinitiu"). Now that we've split into
-   * separate words, transfer this gerund designation so that it heads
-   * the verb only.
-   */
-  private static TregexPattern floppedGerund
-    = TregexPattern.compile("/^grup\\.verb$/=grup >: gerundi=ger < (/^vmg/=vb !$ /^vmg/)");
-  private static TsurgeonPattern unflopFloppedGerund
-    = Tsurgeon.parseOperation("[adjoinF (gerundi foot@) vb] [replace ger grup]");
-  private static TregexPattern floppedInfinitive
-    = TregexPattern.compile("/^grup\\.verb$/=grup >: infinitiu=inf < (/^vmn/=vb !$ /^vmn/)");
-  private static TsurgeonPattern unflopFloppedInfinitive
-    = Tsurgeon.parseOperation("[adjoinF (infinitiu foot@) vb] [replace inf grup]");
 
   /**
    * Match `sn` constituents which can (should) be rewritten as nominal groups
@@ -359,15 +267,6 @@ public class MultiWordTreeExpander {
   private static TsurgeonPattern fixRedundantNominalRewrite =
     Tsurgeon.parseOperation("[replace parent child]");
 
-  private static TregexPattern redundantPrepositionGroupRewrite =
-    TregexPattern.compile("/^grup\\.prep$/=parent <: sp=child >: prep");
-
-  private static TsurgeonPattern fixRedundantPrepositionGroupRewrite =
-    Tsurgeon.parseOperation("[relabel child /grup.prep/] [replace parent child]");
-
-  private static TregexPattern redundantPrepositionGroupRewrite2 = TregexPattern.compile("/^grup\\.prep$/=gp <: sp=sp");
-  private static TsurgeonPattern fixRedundantPrepositionGroupRewrite2 = Tsurgeon.parseOperation("replace gp sp");
-
   /**
    * Expands flat structures into intermediate forms which will
    * eventually become deep phrase structures.
@@ -376,7 +275,6 @@ public class MultiWordTreeExpander {
   private static List<Pair<TregexPattern, TsurgeonPattern>> firstStepExpansions =
     new ArrayList<Pair<TregexPattern, TsurgeonPattern>>() {{
       // Should be first-ish
-      add(new Pair(parentheticalExpression, groupParentheticalExpression));
       add(new Pair(multipleClauses, expandMultipleClauses));
 
       add(new Pair(leadingPrepositionalPhrase, expandPrepositionalPhrase1));
@@ -412,7 +310,6 @@ public class MultiWordTreeExpander {
       add(new Pair(intermediateSubstantiveConjunct, expandIntermediateSubstantiveConjunct));
       add(new Pair(intermediateAdjectiveConjunct, expandIntermediateAdjectiveConjunct));
       add(new Pair(intermediateNounPhraseConjunct, expandIntermediateNounPhraseConjunct));
-      add(new Pair(intermediateVerbConjunct, expandIntermediateVerbConjunct));
       add(new Pair(intermediateNominalGroupConjunct, expandIntermediateNominalGroupConjunct));
     }};
 
@@ -423,30 +320,14 @@ public class MultiWordTreeExpander {
   private static List<Pair<TregexPattern, TsurgeonPattern>> finalCleanup =
     new ArrayList<Pair<TregexPattern, TsurgeonPattern>>() {{
       add(new Pair(terminalPrepositions, extractTerminalPrepositions));
-      add(new Pair(terminalPrepositions2, extractTerminalPrepositions2));
-      add(new Pair(terminalPrepositions3, extractTerminalPrepositions3));
-
       add(new Pair(nominalGroupSubstantives, makeNominalGroup));
       add(new Pair(adverbNominalGroups, replaceAdverbNominalGroup));
-      add(new Pair(adjectiveSpanInNominalGroup, groupAdjectives));
-      add(new Pair(clauseInNominalGroup, labelClause));
-      add(new Pair(clauseInNominalGroup2, labelClause2));
-      add(new Pair(clauseInNominalGroup3, labelClause3));
-      add(new Pair(loneAdjectiveInNominalGroup, labelAdjective));
-
-      add(new Pair(floppedGerund, unflopFloppedGerund));
-      add(new Pair(floppedInfinitive, unflopFloppedInfinitive));
-
-      // Special fix: "a lo menos"
-      add(new Pair(alMenos, fixAlMenos));
 
       // Lastly..
       //
       // These final fixes are not at all linguistically motivated -- just need to make the trees less dirty
       add(new Pair(redundantNominalRewrite, fixRedundantNominalRewrite));
-      add(new Pair(redundantPrepositionGroupRewrite, fixRedundantPrepositionGroupRewrite));
-      add(new Pair(redundantPrepositionGroupRewrite2, fixRedundantPrepositionGroupRewrite2));
-      add(new Pair(leftoverIntermediates, makeNominalGroup));
+      //add(new Pair(leftoverIntermediates, makeNominalGroup));
     }};
 
   /**
@@ -454,7 +335,7 @@ public class MultiWordTreeExpander {
    * perform the expansions. See the class documentation for more
    * information.
    */
-  public static Tree expandPhrases(Tree t, TreeNormalizer tn, TreeFactory tf) {
+  public static Tree expandPhrases(Tree t) {
     // Keep running this sequence of patterns until no changes are
     // affected. We need this for nested expressions like "para tratar
     // de regresar al empleo." This first step produces lots of
@@ -468,10 +349,6 @@ public class MultiWordTreeExpander {
     // Now clean up intermediate tree structures
     t = Tsurgeon.processPatternsOnTree(intermediateExpansions, t);
 
-    // Normalize first to allow for contraction expansion, etc.
-    t = tn.normalizeWholeTree(t, tf);
-
-    // Final cleanup
     t = Tsurgeon.processPatternsOnTree(finalCleanup, t);
 
     return t;
@@ -487,29 +364,8 @@ public class MultiWordTreeExpander {
 // triunfo . sitúa (periods in names at end)
 // Diez . Minutos (new rule for terminal prepositions?)
 // Abogados . y (parenthetical should be separated into its own clause)
-  // Team . /^2000$/ (same as above)
 // totalmente . evitables ("en opinion del" at end)
 // hábitat . tradicional ("en cuerpo y alma" phrase)
 // Eliécer . Hurtado ("salir al paso")
 // /300/ . dólares ("en base a")
 // otro . vicepresidente ("está al caer")
-// o . coacción ("a favor del PRI")
-// ¿ . (no . estabais) (weird grup.nom leaf?? mistagging of "contra" here leads to string of three prepositions, which messes up our heuristics)
-// Nílton . Petrone ("en compañía del abogado y el fisioterapeuta..")
-// Ernesto . Zedillo ("a partir del 1 de diciembre próximo")
-// yo . (no . volvería) ("por nada del mundo")
-// harakiri . a ("en vez del": prepositional phrase  functioning as conjunction)
-// teatral . catalán (range phrase)
-// Wiranto . ha ("al frente de")
-// Claro . (que . cuando) (grup.nom.inter leaf caused by phrase "del todo"; "a lo que parece")
-// fundamentalmente . andaluza ("sobre todo", "todo" must not be marked as determiner here)
-// etarras . perseguidos ("a salvo")
-// José . Vicente ("de vez en cuando")
-// PSC . (/^-$/ . PSOE) ("por lo que respecta")
-// científicos . (americanos . /,/) ("publica o perece")
-// Mediante . gruesas ("en su defecto")
-
-// TODO
-// recogida . (de . firmas) ("teniendo en cuenta")
-// según . Cruells ("haciéndose cargo")
-// historia . despiadada ("darse cuenta")
