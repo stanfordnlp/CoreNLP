@@ -15,13 +15,16 @@ public class SpanishXMLTreeReaderFactory implements TreeReaderFactory, Serializa
 
   private static final long serialVersionUID = 2019486878175311263L;
 
-  private final boolean ccTagset;
+  private final boolean simplifiedTagset;
+  private final boolean aggressiveNormalization;
 
-  public SpanishXMLTreeReaderFactory(boolean ccTagset) {
-    this.ccTagset = ccTagset;
+  public SpanishXMLTreeReaderFactory(boolean simplifiedTagset,
+                                     boolean aggressiveNormalization) {
+    this.simplifiedTagset = simplifiedTagset;
+    this.aggressiveNormalization = aggressiveNormalization;
   }
 
   public TreeReader newTreeReader(Reader in) {
-    return new SpanishXMLTreeReader(in, ccTagset);
+    return new SpanishXMLTreeReader(in, simplifiedTagset, aggressiveNormalization);
   }
 }

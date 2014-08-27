@@ -20,10 +20,19 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
    */
   private static final String MW_TAG = "MW?";
 
+  private boolean simplifiedTagset;
+  private boolean aggressiveNormalization;
+
+  public SpanishTreeNormalizer(boolean simplifiedTagset,
+                               boolean aggressiveNormalization) {
+    this.simplifiedTagset = simplifiedTagset;
+    this.aggressiveNormalization = aggressiveNormalization;
+  }
+
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
     for (Tree t : tree) {
-      if (t.isPreTerminal()) {
+      if (simplifiedTagset && t.isPreTerminal()) {
         // This is a part of speech tag. Remove extra morphological
         // information.
         CoreLabel label = (CoreLabel) t.label();
@@ -32,7 +41,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
         pos = simplifyPOSTag(pos).intern();
         label.setValue(pos);
         label.setTag(pos);
-      } else if (t.isPrePreTerminal()) {
+      } else if (aggressiveNormalization && t.isPrePreTerminal()) {
         normalizeForMultiWord(t, tf);
       }
     }

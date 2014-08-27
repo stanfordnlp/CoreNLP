@@ -21,7 +21,7 @@ public class SpanishTreeNormalizerTest extends TestCase {
 
   public void setUp() {
     tf = new LabeledScoredTreeFactory();
-    tn = new SpanishTreeNormalizer();
+    tn = new SpanishTreeNormalizer(true, true);
   }
 
   @SuppressWarnings("unchecked")

@@ -72,16 +72,21 @@ public class SpanishXMLTreeReader implements TreeReader {
    * @param simplifiedTagset If `true`, convert part-of-speech labels to a
    *          simplified version of the EAGLES tagset, where the tags do not
    *          include extensive morphological analysis
+   * @param aggressiveNormalization Perform aggressive "normalization"
+   *          on the trees read from the provided corpus documents:
+   *          split multi-word tokens into their constituent words (and
+   *          infer parts of speech of the constituent words).
    */
-  public SpanishXMLTreeReader(Reader in, boolean simplifiedTagset) {
+  public SpanishXMLTreeReader(Reader in, boolean simplifiedTagset,
+                              boolean aggressiveNormalization) {
     TreebankLanguagePack tlp = new SpanishTreebankLanguagePack();
 
     this.simplifiedTagset = simplifiedTagset;
 
     stream = new ReaderInputStream(in, tlp.getEncoding());
     treeFactory = new LabeledScoredTreeFactory();
-    treeNormalizer = simplifiedTagset
-      ? new SpanishTreeNormalizer() : new TreeNormalizer();
+    treeNormalizer = new SpanishTreeNormalizer(simplifiedTagset,
+                                               aggressiveNormalization);
 
     DocumentBuilder parser = XMLUtils.getXmlParser();
     try {
@@ -353,7 +358,7 @@ public class SpanishXMLTreeReader implements TreeReader {
     for(int i = 0; i < remainingArgs.length; i++)
       fileList.add(new File(remainingArgs[i]));
 
-    TreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true);
+    TreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true);
     int totalTrees = 0;
     Set<String> morphAnalyses = Generics.newHashSet();
     try {
