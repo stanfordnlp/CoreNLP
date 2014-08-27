@@ -372,8 +372,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         }
         if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
                 "false"))) {
-          os.append(WhitespaceTokenizerAnnotator.EOL_PROPERTY + ":" +
-                  properties.getProperty(WhitespaceTokenizerAnnotator.EOL_PROPERTY,
+          os.append(TokenizerAnnotator.EOL_PROPERTY + ":" +
+                  properties.getProperty(TokenizerAnnotator.EOL_PROPERTY,
                           "false"));
           os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ":" +
                   properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
