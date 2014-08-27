@@ -19,7 +19,10 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.Generics;
 
 /**
- * Infer missing part-of-speech tags for multi-word tokens in a treebank.
+ * Clean up an AnCora treebank which has been processed to expand multi-word
+ * tokens into separate leaves. (This prior splitting task is performed by
+ * {@link SpanishTreeNormalizer} through the {@link SpanishXMLTreeReader}
+ * class).
  *
  * @author Jon Gauthier
  * @author Spence Green (original French version)
@@ -117,23 +120,46 @@ public final class MultiWordPreprocessor {
     for(Tree kid : t.children())
       traverseAndFix(kid,pretermLabel,unigramTagger);
 
-    //Post-order visit
+    // Post-order visit
     if(t.value().startsWith(SpanishTreeNormalizer.MW_PHRASE_TAG)) {
       nMissingPhrasal++;
-      StringBuilder sb = new StringBuilder();
-      for(Tree kid : t.children())
-        sb.append(kid.value()).append(" ");
 
-      String posSequence = sb.toString().trim();
-      if(pretermLabel.firstKeySet().contains(posSequence)) {
-        String phrasalCat = Counters.argmax(pretermLabel.getCounter(posSequence));
+      String phrasalCat = inferPhrasalCategory(t, pretermLabel);
+      if (phrasalCat != null)
         t.setValue(phrasalCat);
-      } else {
-        System.out.println("No phrasal cat for: " + posSequence);
-      }
     }
   }
 
+  /**
+   * Attempt to infer the phrasal category of the given node, which
+   * heads words which were expanded from a multi-word token.
+   */
+  private static String inferPhrasalCategory(Tree t,
+                                             TwoDimensionalCounter<String, String> pretermLabel) {
+    // Retrieve the part-of-speech assigned to the original multi-word
+    // token
+    String originalPos = t.value().substring(t.value().lastIndexOf('_') + 1);
+    // TODO account for CLI flag
+    if (originalPos.length() > 0 && originalPos.charAt(0) == 'n')
+      // TODO may lead to some funky trees if a child somehow gets an
+      // incorrect tag -- e.g. we may have a `grup.nom` head a `vmis000`
+      return "grup.nom";
+
+    // Fallback: try to infer based on part-of-speech sequence formed by
+    // constituents
+    StringBuilder sb = new StringBuilder();
+    for(Tree kid : t.children())
+      sb.append(kid.value()).append(" ");
+
+    String posSequence = sb.toString().trim();
+    if(pretermLabel.firstKeySet().contains(posSequence))
+      return Counters.argmax(pretermLabel.getCounter(posSequence));
+    else
+      System.err.println("No phrasal cat for: " + posSequence);
+
+    // Give up.
+    return null;
+  }
 
   private static void resolveDummyTags(File treeFile,
       TwoDimensionalCounter<String, String> pretermLabel,
@@ -148,7 +174,6 @@ public final class MultiWordPreprocessor {
 
       int nTrees = 0;
       for(Tree t; (t = tr.readTree()) != null;nTrees++) {
-        System.err.println(t);
         traverseAndFix(t, pretermLabel, unigramTagger);
         pw.println(t.toString());
       }
