@@ -127,7 +127,15 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     // Adverbial phrases should always have adverb group children
     // -- we see about 50 exceptions in the corpus..
     new Pair("sadv !< /^grup\\.adv$/ <: /^(rg|neg)$/=adv",
-      "adjoinF (grup.adv foot@) adv")
+      "adjoinF (grup.adv foot@) adv"),
+
+    // 'z' tag should be 'z0'
+    new Pair("z=z <: (__ !< __)", "relabel z z0"),
+
+    // Conjunction groups aren't necessary if they head single
+    // prepositional phrases (we already see a `conj < sp` pattern;
+    // replicate that
+    new Pair("/^grup\\.c/=grup > conj <: sp=sp", "replace grup sp"),
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> cleanup
