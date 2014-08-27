@@ -45,7 +45,7 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final String[] startSymbols = {"ROOT"};
 
-  private static final char[] annotationIntroducingChars = {'^', '['};
+  private static final char[] annotationIntroducingChars = {'^', '[', '-'};
 
   /**
    * Return the input Charset encoding for the Treebank. See
