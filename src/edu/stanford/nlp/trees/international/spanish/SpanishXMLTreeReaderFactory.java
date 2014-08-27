@@ -28,15 +28,11 @@ public class SpanishXMLTreeReaderFactory implements TreeReaderFactory, Serializa
   }
 
   public TreeReader newTreeReader(Reader in) {
-<<<<<<< HEAD
-    return new SpanishXMLTreeReader(in, simplifiedTagset, aggressiveNormalization,
+    return new SpanishXMLTreeReader(null, in, simplifiedTagset, aggressiveNormalization,
                                     retainNER);
-=======
-    return new SpanishXMLTreeReader(null, in, simplifiedTagset, aggressiveNormalization);
   }
 
   public TreeReader newTreeReader(String path, Reader in) {
-    return new SpanishXMLTreeReader(path, in, simplifiedTagset, aggressiveNormalization);
->>>>>>> spanish
+    return new SpanishXMLTreeReader(path, in, simplifiedTagset, aggressiveNormalization, retainNER);
   }
 }
