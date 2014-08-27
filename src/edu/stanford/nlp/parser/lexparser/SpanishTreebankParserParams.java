@@ -111,7 +111,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
                                                    new SimpleStringFunction("-dominatesV")));
 
     // +___ F1
-    annotations.put("-markNonRecSPs", new Pair("@sp !<< @sp", new SimpleStringFunction("nonRec")));
+    annotations.put("-markNonRecSPs", new Pair("@sp !<< @sp", new SimpleStringFunction("-nonRec")));
 
     compileAnnotations(headFinder);
   }
