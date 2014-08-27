@@ -32,7 +32,7 @@ import edu.stanford.nlp.util.Pair;
 public class MultiWordTreeExpander {
 
   private static String PREPOSITIONS =
-    "(por|para|al?|del?|con|sobre|en(?:tre)?|hacia)";
+    "(por|para|al?|del?|con(?:tra)?|sobre|en(?:tre)?|hacia|sin|según|hasta)";
 
   /**
    * Yes, some multiword tokens contain multiple clauses..
@@ -58,7 +58,7 @@ public class MultiWordTreeExpander {
                             // With an NP on the left (-> this is a
                             // prep. phrase) and not preceded by any
                             // other prepositions
-                            " $+ /^[adnsw]/=left !$-- sp000");
+                            " $+ /^[adnswz]/=left !$-- sp000");
 
   private static TregexPattern leadingPrepositionalPhrase
     = TregexPattern.compile(// Match candidate preposition
@@ -71,7 +71,7 @@ public class MultiWordTreeExpander {
                             // With an NP on the left (-> this is a
                             // prep. phrase) and not preceded by any
                             // other prepositions
-                            " $+ /^[adnsw]/=left !$-- sp000");
+                            " $+ /^[adnswz]/=left !$-- sp000");
 
   /**
    * First step in expanding prepositional phrases: group NP to right of
@@ -284,3 +284,5 @@ public class MultiWordTreeExpander {
 // espejo . deformante (article fun at start)
 // menor . coste (watch "Comisión del Mercado" thing at end)
 // triunfo . sitúa (periods in names at end)
+// Inzaghi . empuja (worrying fpa, fpt leaves)
+// Diez . Minutos (new rule for terminal prepositions?)
