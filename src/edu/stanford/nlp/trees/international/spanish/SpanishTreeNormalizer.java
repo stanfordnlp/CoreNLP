@@ -48,17 +48,18 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   public static final String RIGHT_PARENTHESIS = "=RRB=";
 
   private static final Map<String, String> spellingFixes = new HashMap<String, String>() {{
-      put("jucio", "juicio"); // 4800_2000406.tbf-5
-      put("reirse", "reírse"); // 140_20011102.tbf-13
-      put("tambien", "también"); // 41_19991002.tbf-8
+    put("jucio", "juicio"); // 4800_2000406.tbf-5
+    put("méxico", "México"); // 111_C-3.tbf-17
+    put("reirse", "reírse"); // 140_20011102.tbf-13
+    put("tambien", "también"); // 41_19991002.tbf-8
 
-      // Hack: these aren't exactly spelling mistakes, but we need to
-      // run a search-and-replace across the entire corpus with them, so
-      // they should be treated just like spelling mistakes for our
-      // purposes
-      put("(", LEFT_PARENTHESIS);
-      put(")", RIGHT_PARENTHESIS);
-    }};
+    // Hack: these aren't exactly spelling mistakes, but we need to
+    // run a search-and-replace across the entire corpus with them, so
+    // they should be treated just like spelling mistakes for our
+    // purposes
+    put("(", LEFT_PARENTHESIS);
+    put(")", RIGHT_PARENTHESIS);
+  }};
 
   /**
    * A filter which rejects preterminal nodes that contain "empty" leaf
@@ -72,6 +73,14 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       return true;
     }
   };
+
+  @SuppressWarnings("unchecked")
+  private static final Pair<String, String>[] cleanupStrs = new Pair[] {
+    new Pair("sp < (sp=sp <: prep=prep)", "replace sp prep"),
+  };
+
+  private static final List<Pair<TregexPattern, TsurgeonPattern>> cleanup
+    = compilePatterns(cleanupStrs);
 
   /**
    * If one of the constituents in this set has a single child has a
@@ -115,6 +124,9 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
     // First filter out nodes we don't like
     tree = tree.prune(emptyFilter);
+
+    // Now start some simple cleanup
+    tree = Tsurgeon.processPatternsOnTree(cleanup, tree);
 
     // Find all named entities which are not multi-word tokens and nest
     // them within named entity NP groups
