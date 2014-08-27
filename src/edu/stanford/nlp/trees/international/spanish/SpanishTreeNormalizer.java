@@ -56,6 +56,20 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
     }
   };
 
+  /**
+   * If one of the constituents in this set has a single child has a
+   * multi-word token, it should be replaced by a node heading the
+   * expanded word leaves rather than simply receive that node as a
+   * child.
+   *
+   * Note that this is only the case for constituents with a *single*
+   * child which is a multi-word token.
+   */
+  private static final Set<String> mergeWithConstituentWhenPossible =
+    new HashSet<String>() {{
+      add("grup.nom");
+    }};
+
   // Customization
   private boolean simplifiedTagset;
   private boolean aggressiveNormalization;
@@ -194,9 +208,9 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       if (words.length == 1)
         continue;
 
-      // Leaf is a multi-word token; build new pre-terminal nodes for
-      // each of its constituent words
-      List<Tree> newPreterminals = new ArrayList<Tree>(words.length);
+      // Leaf is a multi-word token; build new nodes for each of its
+      // constituent words
+      List<Tree> newNodes = new ArrayList<Tree>(words.length);
       for (int j = 0; j < words.length; j++) {
         String word = words[j];
 
@@ -204,19 +218,33 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
         if (newLeaf.label() instanceof HasWord)
           ((HasWord) newLeaf.label()).setWord(word);
 
-        Tree newPreterminal = tf.newTreeNode(MW_TAG, Arrays.asList(newLeaf));
-        if (newPreterminal.label() instanceof HasTag)
-          ((HasTag) newPreterminal.label()).setTag(MW_TAG);
+        Tree newNode = tf.newTreeNode(MW_TAG, Arrays.asList(newLeaf));
+        if (newNode.label() instanceof HasTag)
+          ((HasTag) newNode.label()).setTag(MW_TAG);
 
-        newPreterminals.add(newPreterminal);
+        newNodes.add(newNode);
       }
 
-      // Now create a dummy phrase containing the new preterminals.
-      // Maintain the value of the old preterminal in its label value.
+      // Value of the phrase which should head these preterminals. Mark
+      // that this was created from a multiword token, and also retain
+      // the original parts of speech.
       String phraseValue = MW_PHRASE_TAG + "_"
         + simplifyPOSTag(preterminals[i].value());
-      Tree newPrePreTerminal = tf.newTreeNode(phraseValue, newPreterminals);
-      t.setChild(i, newPrePreTerminal);
+
+      // Should we insert these new nodes as children of the parent `t`
+      // (i.e., "merge" the multi-word token phrase into its parent), or
+      // head them with a new node and set that as a child of the
+      // parent?
+      boolean shouldMerge = preterminals.length == 1
+        && mergeWithConstituentWhenPossible.contains(t.value());
+
+      if (shouldMerge) {
+        t.setChildren(newNodes);
+        t.setValue(phraseValue);
+      } else {
+        Tree newHead = tf.newTreeNode(phraseValue, newNodes);
+        t.setChild(i, newHead);
+      }
     }
   }
 
