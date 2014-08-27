@@ -241,6 +241,9 @@ public final class MultiWordPreprocessor {
     }
   }
 
+  /**
+   * Source training data for a unigram tagger from the given tree.
+   */
   public static void updateTagger(TwoDimensionalCounter<String,String> tagger,
                                   Tree t) {
     List<CoreLabel> yield = t.taggedLabeledYield();
@@ -251,7 +254,6 @@ public final class MultiWordPreprocessor {
       tagger.incrementCount(cl.word(), cl.tag());
     }
   }
-
 
   public static void traverseAndFix(Tree t,
                                     Tree parent,
@@ -379,6 +381,10 @@ public final class MultiWordPreprocessor {
       int nTrees = 0;
       for(Tree t; (t = tr.readTree()) != null;nTrees++) {
         traverseAndFix(t, null, pretermLabel, unigramTagger, retainNER);
+
+        // Now "decompress" further the expanded trees formed by
+        // multiword token splitting
+        t = MultiWordTreeExpander.expandPhrases(t);
 
         if (tn != null)
           t = tn.normalizeWholeTree(t, tf);
