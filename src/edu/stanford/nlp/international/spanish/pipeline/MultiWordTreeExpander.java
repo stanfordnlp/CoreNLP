@@ -526,3 +526,4 @@ public class MultiWordTreeExpander {
 // Por . qué .. pregunta (sn - grup.nom - sn unary rewrite.. shouldn't happen)
 // intentaba . alisar ("intentaba" never attaches infinitive in this way)
 // epígrafe . Arte (flat!)
+// debería .. encima ("por encima de" parse, coordinated NP)
