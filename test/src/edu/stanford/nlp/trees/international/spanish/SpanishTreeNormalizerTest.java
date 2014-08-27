@@ -62,9 +62,6 @@ public class SpanishTreeNormalizerTest extends TestCase {
     // decimal number expression
     new Pair("(a (b 8,39))", "(a (b 8,39))"),
     new Pair("(a (b 28,91%))", "(a (MW_PHRASE?_b (MW? 28,91) (MW? %)))"),
-
-    // But do treat commas as multiword separators otherwise
-    new Pair("(a (b entonces,_yo))", "(a (MW_PHRASE?_b (MW? entonces) (MW? ,) (MW? yo)))"),
   };
 
   public void testMultiWordNormalization() {
