@@ -1,10 +1,13 @@
 package edu.stanford.nlp.trees.international.spanish;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreeNormalizer;
@@ -20,6 +23,11 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
    */
   private static final String MW_TAG = "MW?";
 
+  /**
+   * Tag provided to constituents which contain words from MW tokens
+   */
+  private static final String MW_PHRASE_TAG = "MW_PHRASE?";
+
   private boolean simplifiedTagset;
   private boolean aggressiveNormalization;
 
@@ -31,8 +39,24 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
 
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
+    // Counter for part-of-speech statistics
+    TwoDimensionalCounter<String, String> unigramTagger =
+      new TwoDimensionalCounter<String, String>();
+
     for (Tree t : tree) {
-      if (simplifiedTagset && t.isPreTerminal()) {
+      // Collect part-of-speech statistics
+      if (t.isPreTerminal()) {
+        String pos = t.value();
+
+        String word = t.firstChild().value();
+        if (word.indexOf('_') != -1)
+          // Multi-word token -- ignore tag for our purposes
+          continue;
+
+        unigramTagger.incrementCount(word, pos);
+      }
+
+      if (t.isPreTerminal() && simplifiedTagset) {
         // This is a part of speech tag. Remove extra morphological
         // information.
         CoreLabel label = (CoreLabel) t.label();
@@ -41,7 +65,8 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
         pos = simplifyPOSTag(pos).intern();
         label.setValue(pos);
         label.setTag(pos);
-      } else if (aggressiveNormalization && t.isPrePreTerminal()) {
+      } else if (t.isPrePreTerminal() && aggressiveNormalization) {
+        // Expand multi-word token if necessary
         normalizeForMultiWord(t, tf);
       }
     }
@@ -113,10 +138,6 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   void normalizeForMultiWord(Tree t, TreeFactory tf) {
     Tree[] preterminals = t.children();
 
-    // Loop accumulator: number of tokens which have been inserted to
-    // the left of the current preterminal thus far
-    int shift = 0;
-
     for (int i = 0; i < preterminals.length; i++) {
       Tree leaf = preterminals[i].firstChild();
       String leafValue = ((CoreLabel) leaf.label()).value();
@@ -127,7 +148,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       // Leaf is a multi-word token; build new pre-terminal nodes for
       // each of its constituent words
       String[] words = leafValue.split("_");
-      Tree[] newPreterminals = new Tree[words.length];
+      List<Tree> newPreterminals = new ArrayList<Tree>(words.length);
       for (int j = 0; j < words.length; j++) {
         String word = words[j];
 
@@ -139,20 +160,12 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
         if (newPreterminal.label() instanceof HasTag)
           ((HasTag) newPreterminal.label()).setTag(MW_TAG);
 
-        newPreterminals[j] = newPreterminal;
+        newPreterminals.add(newPreterminal);
       }
 
-      // Now insert each of the new preterminals and remove the old
-      // multi-word token
-      //
-      // Current preterminal is at index `i + shift` of the preterminals
-      t.removeChild(i + shift);
-      for (int k = 0; k < newPreterminals.length; k++)
-        t.addChild(i + shift + k, newPreterminals[k]);
-
-      // Later preterminals must take into account the (possibly) larger
-      // amount of preceding siblings
-      shift += words.length - 1;
+      // Now create a dummy phrase containing the new preterminals
+      Tree newPrePreTerminal = tf.newTreeNode(MW_PHRASE_TAG, newPreterminals);
+      t.setChild(i, newPrePreTerminal);
     }
   }
 

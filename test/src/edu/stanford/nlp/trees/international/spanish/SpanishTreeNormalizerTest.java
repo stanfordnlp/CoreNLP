@@ -27,14 +27,14 @@ public class SpanishTreeNormalizerTest extends TestCase {
   @SuppressWarnings("unchecked")
   Pair<String, String>[] multiWordTestCases = new Pair[] {
     new Pair("(grup.nom (np00000 Josep_Maria_Ollé))",
-             "(grup.nom (MW? Josep) (MW? Maria) (MW? Ollé))"),
+             "(grup.nom (MW_PHRASE? (MW? Josep) (MW? Maria) (MW? Ollé)))"),
 
     new Pair("(grup.nom (grup.nom (nc0p000 productos)) (sp (prep (sp000 de)) (sn (grup.nom (np00000 American_Online)))))",
-             "(grup.nom (grup.nom (nc0p000 productos)) (sp (prep (sp000 de)) (sn (grup.nom (MW? American) (MW? Online)))))"),
+             "(grup.nom (grup.nom (nc0p000 productos)) (sp (prep (sp000 de)) (sn (grup.nom (MW_PHRASE? (MW? American) (MW? Online))))))"),
 
     // Two multi-word tokens as siblings
     new Pair("(a (b c_d) (b e_f))",
-             "(a (MW? c) (MW? d) (MW? e) (MW? f))"),
+             "(a (MW_PHRASE? (MW? c) (MW? d)) (MW_PHRASE? (MW? e) (MW? f)))"),
   };
 
   public void testMultiWordNormalization() {
