@@ -10,10 +10,12 @@ FRENCH_TEST = format=TREES,/u/nlp/data/lexparser/trees/French/FTB-Test.utf8.txt
 
 GERMAN_TEST = /u/nlp/data/pos-tagger/german/german-dev.txt
 
+SPANISH_TEST = /u/nlp/data/spanish/ancora/ancora.test
+
 .SECONDEXPANSION:
 
-all: arabic chinese english french german testing wsj
-.PHONY: all arabic chinese english french german testing wsj
+all: arabic chinese english french german spanish testing wsj
+.PHONY: all arabic chinese english french german spanish testing wsj
 
 arabic: arabic.tagger  arabic-train.tagger 
 
@@ -56,6 +58,14 @@ german-dewac.tagger german-fast.tagger german-fast-caseless.tagger german-hgc.ta
 	@echo Will test on $(GERMAN_TEST) 
 	java -mx6g edu.stanford.nlp.tagger.maxent.MaxentTagger -props $@.props > $@.out 2>&1
 	java -mx6g edu.stanford.nlp.tagger.maxent.MaxentTagger -model $@ -testFile $(GERMAN_TEST)  -verboseResults false >> $@.out 2>&1
+
+spanish: spanish.tagger
+
+spanish.tagger: $$@.props
+	@echo Training $@
+	@echo Will test on $(SPANISH_TEST)
+	java -mx6g edu.stanford.nlp.tagger.maxent.MaxentTagger -props $@.props > $@.out 2>&1
+	java -mx6g edu.stanford.nlp.tagger.maxent.MaxentTagger -model $@ -testFile $(SPANISH_TEST) -verboseResults false >> $@.out 2>&1
 
 testing: testing.tagger
 

@@ -191,8 +191,6 @@ public final class MultiWordPreprocessor {
 
         put("amén", "rg"); // amén de
 
-        put("Bailando", "vmg0000");
-        put("Soñando", "vmg0000");
         put("Teniendo", "vmg0000");
         put("echaremos", "vmif000");
         put("formaba", "vmii000");

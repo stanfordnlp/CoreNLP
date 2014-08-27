@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.io.*;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -20,9 +21,7 @@ public class SpanishVerbStripper {
   //   - Gerunds
   //   - Affirmative imperatives
 
-  /* TODO: FIGURE THIS OUT!! */
-    //  private static final String DICT_PATH = "data/edu/stanford/nlp/international/spanish/enclitic-inflections.data";
-    private static final String DICT_PATH = "data/enclitic-inflections.data";
+  private static final String DICT_PATH = "edu/stanford/nlp/international/spanish/enclitic-inflections.data";
 
   private static HashMap<String, String> dict;
 
@@ -54,7 +53,8 @@ public class SpanishVerbStripper {
   static {
     try {
       dict = new HashMap<String, String>();
-      BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(DICT_PATH), "UTF-8"));
+      BufferedReader br = new BufferedReader(new InputStreamReader(
+        IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(DICT_PATH), "UTF-8"));
       String line = br.readLine();
       for(; line != null; line = br.readLine()) {
         String[] words = line.trim().split("\\s");
