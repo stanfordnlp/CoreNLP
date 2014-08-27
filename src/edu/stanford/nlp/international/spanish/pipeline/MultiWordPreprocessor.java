@@ -58,8 +58,6 @@ public final class MultiWordPreprocessor {
   private static Map<String, String> phrasalCategoryMap = new HashMap<String, String>() {{
       put("ao0000", "grup.a");
       put("aq0000", "grup.a");
-      put("dn0000", "spec");
-      put("dt0000", "spec");
       put("rg", "grup.adv");
       put("rn", "grup.adv"); // no sólo
       put("vmg0000", "grup.verb");
@@ -241,9 +239,6 @@ public final class MultiWordPreprocessor {
     }
   }
 
-  /**
-   * Source training data for a unigram tagger from the given tree.
-   */
   public static void updateTagger(TwoDimensionalCounter<String,String> tagger,
                                   Tree t) {
     List<CoreLabel> yield = t.taggedLabeledYield();
@@ -254,6 +249,7 @@ public final class MultiWordPreprocessor {
       tagger.incrementCount(cl.word(), cl.tag());
     }
   }
+
 
   public static void traverseAndFix(Tree t,
                                     Tree parent,
@@ -278,6 +274,9 @@ public final class MultiWordPreprocessor {
       traverseAndFix(kid, t, pretermLabel, unigramTagger, retainNER);
 
     // Post-order visit
+    //
+    // TODO merge unnecessarily deep trees (maybe the job for a separate
+    // tree normalizer?)
     if(t.value().startsWith(SpanishTreeNormalizer.MW_PHRASE_TAG)) {
       nMissingPhrasal++;
 
@@ -381,10 +380,6 @@ public final class MultiWordPreprocessor {
       int nTrees = 0;
       for(Tree t; (t = tr.readTree()) != null;nTrees++) {
         traverseAndFix(t, null, pretermLabel, unigramTagger, retainNER);
-
-        // Now "decompress" further the expanded trees formed by
-        // multiword token splitting
-        t = MultiWordTreeExpander.expandPhrases(t);
 
         if (tn != null)
           t = tn.normalizeWholeTree(t, tf);
