@@ -8,10 +8,9 @@ import edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreebankLanguagePack;
 import edu.stanford.nlp.trees.international.spanish.SpanishXMLTreeReader;
 import edu.stanford.nlp.trees.international.spanish.SpanishXMLTreeReaderFactory;
-import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.util.*;
 
 import java.io.*;
 import java.util.*;
