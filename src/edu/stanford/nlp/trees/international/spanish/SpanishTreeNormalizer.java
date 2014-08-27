@@ -490,8 +490,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       String word = splitter.nextToken();
       remainingTokens--;
 
-      if (word.length() == 1
-          && WORD_SEPARATORS_DROP.indexOf(word.charAt(0)) != -1)
+      if (shouldDropWord(word))
         // This is a delimiter that we should drop
         continue;
 
@@ -503,7 +502,10 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
           // Ouch. We expected a hyphen here. Clean things up and keep
           // moving.
           words.add(word);
-          words.add(hyphen);
+
+          if (!shouldDropWord(hyphen))
+            words.add(hyphen);
+
           continue;
         }
 
@@ -519,6 +521,15 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
     }
 
     return words.toArray(new String[words.size()]);
+  }
+
+  /**
+   * Determine if the given "word" which is part of a multiword token
+   * should be dropped.
+   */
+  private boolean shouldDropWord(String word) {
+    return word.length() == 1
+      && WORD_SEPARATORS_DROP.indexOf(word.charAt(0)) != -1;
   }
 
   /**
