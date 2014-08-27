@@ -326,6 +326,29 @@ public class MultiWordTreeExpander {
     = Tsurgeon.parseOperation("replace ga (grup.adv (sp (prep (sp000 a)) (sn (spec (da0000 lo)) (grup.nom (s.a (grup.a (aq0000 menos)))))))");
 
   /**
+   * Mark infinitives within verb groups ("hacer ver", etc.)
+   */
+  private static TregexPattern infinitiveInVerbGroup
+    = TregexPattern.compile("/^grup\\.verb$/=grup < (/^v/ !$-- /^v/ $++ (/^vmn/=target !$++ /^vmn/))");
+  private static TsurgeonPattern markInfinitive = Tsurgeon.parseOperation("[adjoinF (infinitiu foot@) target]");
+
+  /**
+   * The corpus marks entire multiword verb tokens like "teniendo en
+   * cuenta" as gerunds / infinitives (by heading them with a
+   * constituent "gerundi" / "infinitiu"). Now that we've split into
+   * separate words, transfer this gerund designation so that it heads
+   * the verb only.
+   */
+  private static TregexPattern floppedGerund
+    = TregexPattern.compile("/^grup\\.verb$/=grup >: gerundi=ger < (/^vmg/=vb !$ /^vmg/)");
+  private static TsurgeonPattern unflopFloppedGerund
+    = Tsurgeon.parseOperation("[adjoinF (gerundi foot@) vb] [replace ger grup]");
+  private static TregexPattern floppedInfinitive
+    = TregexPattern.compile("/^grup\\.verb$/=grup >: infinitiu=inf < (/^vmn/=vb !$ /^vmn/)");
+  private static TsurgeonPattern unflopFloppedInfinitive
+    = Tsurgeon.parseOperation("[adjoinF (infinitiu foot@) vb] [replace inf grup]");
+
+  /**
    * Match `sn` constituents which can (should) be rewritten as nominal groups
    */
   private static TregexPattern nominalGroupSubstantives =
@@ -418,6 +441,11 @@ public class MultiWordTreeExpander {
       add(new Pair(clauseInNominalGroup3, labelClause3));
       add(new Pair(loneAdjectiveInNominalGroup, labelAdjective));
 
+      // Verb phrase-related cleanup.. order is important!
+      add(new Pair(infinitiveInVerbGroup, markInfinitive));
+      add(new Pair(floppedGerund, unflopFloppedGerund));
+      add(new Pair(floppedInfinitive, unflopFloppedInfinitive));
+
       // Special fix: "a lo menos"
       add(new Pair(alMenos, fixAlMenos));
 
@@ -489,3 +517,10 @@ public class MultiWordTreeExpander {
 // PSC . (/^-$/ . PSOE) ("por lo que respecta")
 // científicos . (americanos . /,/) ("publica o perece")
 // Mediante . gruesas ("en su defecto")
+
+// TODO
+// recogida . (de . firmas) ("teniendo en cuenta")
+// según . Cruells ("haciéndose cargo")
+// historia . despiadada ("darse cuenta")
+// Imagínense . /./
+// jugadores . (de . Aíto) ("en rehacerse")

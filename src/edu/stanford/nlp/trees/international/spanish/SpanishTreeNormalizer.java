@@ -10,7 +10,10 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
-import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.trees.BobChrisTreeNormalizer;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeFactory;
+import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
@@ -43,6 +46,8 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     put("méxico", "México"); // 111_C-3.tbf-17
     put("reirse", "reírse"); // 140_20011102.tbf-13
     put("tambien", "también"); // 41_19991002.tbf-8
+
+    put("Intitute", "Institute"); // 22863_20001129.tbf-16
 
     // Hack: these aren't exactly spelling mistakes, but we need to
     // run a search-and-replace across the entire corpus with them, so
@@ -84,28 +89,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
         return true;
 
       return !value.equals(tree.getChild(0).value());
-    }
-  };
-
-  /**
-   * Resolves some inconsistencies in constituent naming:
-   *
-   * - "sa" and "s.a" are equivalent -- merge to "s.a"
-   */
-  private static final TreeTransformer constituentRenamer = new TreeTransformer() {
-    @Override
-    public Tree transformTree(Tree t) {
-      if (t.isLeaf())
-        return t;
-
-      String value = t.value();
-      if (value == null)
-        return t;
-
-      if (value.equals("sa"))
-        t.setValue("s.a");
-
-      return t;
     }
   };
 
@@ -167,9 +150,8 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
-    // Begin with some basic transformations
-    tree = tree.prune(emptyFilter).spliceOut(aOverAFilter)
-      .transform(constituentRenamer);
+    // First filter out nodes we don't like
+    tree = tree.prune(emptyFilter).spliceOut(aOverAFilter);
 
     // Now start some simple cleanup
     tree = Tsurgeon.processPatternsOnTree(cleanup, tree);
@@ -276,25 +258,44 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   }
 
   /**
+   * Matches a verb with attached pronouns; used in several following
+   * Tregex expressions
+   */
+  private static final String VERB_LEAF_WITH_PRONOUNS_TREGEX =
+    // Match a leaf that looks like it has a clitic pronoun
+    "/(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$/=vb " +
+      // It should actually be a verb (gerund, imperative or
+      // infinitive)
+      "> /^vm[gmn]0000$/";
+
+  /**
    * Matches verbs (infinitives, gerunds and imperatives) which have
    * attached pronouns, and the clauses which contain them
    */
   private static final TregexPattern verbWithCliticPronouns =
-    TregexPattern.compile(// Match a leaf that looks like it has a
-                          // clitic pronoun
-                          "/(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$/=vb " +
-                          // It should actually be a verb (gerund,
-                          // imperative or infinitive)
-                          "> /^vm[gmn]0000$/ " +
+    TregexPattern.compile(VERB_LEAF_WITH_PRONOUNS_TREGEX +
                           // Locate the clause which contains it, and
                           // the child just below that clause
-                          ">+(/^[^S]/) (/infinitiu|gerundiu|grup\\.verb/=target " +
-                          "> S=clause << =vb " +
+                          ">+(/^[^S]/) (/^(infinitiu|gerundi|grup\\.verb)$/=target " +
+                          "> /^(sentence|S|grup\\.verb|infinitiu|gerundi)$/=clause << =vb " +
                           // Make sure we're not up too far in the tree:
                           // there should be no infinitive / gerund /
                           // verb phrase between the located ancestor
                           // and the verb
-                          "!<< /infinitiu|gerundiu|grup\\.verb/)");
+                          "!<< (/^(infinitiu|gerundi|grup\\.verb)$/ << =vb))");
+
+  /**
+   * Matches verbs which really should be in a clause, but were
+   * squeezed into an infinitive constituent (because the pronoun was
+   * attached to the verb, we could just pretend it wasn't a clause..
+   * not anymore!)
+   */
+  private static final TregexPattern clauselessVerbWithCliticPronouns = TregexPattern.compile(
+    VERB_LEAF_WITH_PRONOUNS_TREGEX +
+      "> (/^vmn/ > (/^infinitiu$/=target > /^sp$/))"
+  );
+  private static final TsurgeonPattern clausifyVerbWithCliticPronouns =
+    Tsurgeon.parseOperation("adjoinF (S foot@) target");
 
   /**
    * Separate clitic pronouns into their own tokens in the given tree.
@@ -302,6 +303,11 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    * which follow the verbs to which they were formerly attached.)
    */
   private static Tree expandCliticPronouns(Tree t) {
+    // Perform some cleanup first -- we want to match as many
+    // clitic-attached verbs as possible..
+    t = Tsurgeon.processPattern(clauselessVerbWithCliticPronouns,
+      clausifyVerbWithCliticPronouns, t);
+
     TregexMatcher matcher = verbWithCliticPronouns.matcher(t);
     while (matcher.find()) {
       Tree clause = matcher.getNode("clause");
@@ -322,7 +328,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       List<String> pronouns = split.second();
       for (int i = pronouns.size() - 1; i >= 0; i--) {
         String pronoun = pronouns.get(i);
-        String patternString = String.format("[insert (sn (grup.nom (pp000000 %s))) $- target]", pronoun);
+        String patternString = String.format("[insert (morfema.pronominal (pp000000 %s)) $- target]", pronoun);
         TsurgeonPattern pattern = Tsurgeon.parseOperation(patternString);
         t = pattern.evaluate(t, matcher);
       }

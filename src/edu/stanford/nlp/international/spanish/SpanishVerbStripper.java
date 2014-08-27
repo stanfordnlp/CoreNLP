@@ -1,10 +1,8 @@
 package edu.stanford.nlp.international.spanish;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import java.util.HashMap;
 import java.io.*;
 
 import edu.stanford.nlp.util.Pair;
@@ -59,10 +57,10 @@ public class SpanishVerbStripper {
       String line = br.readLine();
       for(; line != null; line = br.readLine()) {
         String[] words = line.trim().split("\\s");
-        if(words.length < 2) {
+        if(words.length < 3) {
           System.err.printf("SpanishVerbStripper: addings words to dict, missing word, ignoring line");
         }
-        dict.put(words[0], words[1]);
+        dict.put(words[0], words[2]);
       }
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
@@ -95,6 +93,24 @@ public class SpanishVerbStripper {
   };
 
   /**
+   * The verbs in this set have accents in their infinitive forms;
+   * don't remove the accents when stripping pronouns!
+   */
+  private static final Set<String> accentedInfinitives = new HashSet<String>() {{
+    add("desleír");
+    add("desoír");
+    add("embaír");
+    add("engreír");
+    add("entreoír");
+    add("freír");
+    add("oír");
+    add("refreír");
+    add("reír");
+    add("sofreír");
+    add("sonreír");
+  }};
+
+  /**
    * Determine if the given word is a verb which needs to be stripped.
    */
   public static boolean isStrippable(String word) {
@@ -102,8 +118,7 @@ public class SpanishVerbStripper {
   }
 
   public static String removeAccents(String word) {
-    // Special case: oír
-    if (word.equalsIgnoreCase("oír"))
+    if (accentedInfinitives.contains(word))
       return word;
 
     String stripped = word;
@@ -114,10 +129,45 @@ public class SpanishVerbStripper {
   }
 
   /**
-   * Returns whether @word is a valid form of a valid dictionary verb.
+   * Examines the given verb pair and returns <tt>true</tt> if it is a
+   * valid pairing of verb form and clitic pronoun(s).
+   *
+   * May modify <tt>pair</tt> in place in order to make the pair valid.
+   * For example, if the pair <tt>(senta, os)</tt> is provided, this
+   * method will return <tt>true</tt> and modify the pair to be
+   * <tt>(sentad, os)</tt>.
    */
-  private static boolean isVerb(String word) {
-    return dict.containsKey(word);
+  private static boolean validateVerbPair(Pair<String, List<String>> pair) {
+    // Catch: if we have a second-person plural imperative with the
+    // pronoun 'os' attached, the terminal 'd' of the imperative *must*
+    // be elided. (Words like "sentados" look like imperatives if we
+    // don't enforce this rule!)
+    List<String> pronouns = pair.second();
+    boolean hasOs = pronouns.size() > 0 && pronouns.get(0).equalsIgnoreCase("os");
+
+    String stripped = pair.first().toLowerCase();
+    String verbPos = dict.get(stripped);
+    if (verbPos != null) {
+      if (verbPos.equals("VMM02P0") && hasOs)
+        // Not possible!
+        return false;
+
+      return true;
+    }
+
+    // Try `word + 'd'` as well for cases like 'sentaos'; stripped this
+    // becomes 'senta', and we only have the form 'sentad' in the
+    // dictionary
+    if (hasOs) {
+      verbPos = dict.get(stripped + 'd');
+      if (verbPos != null && verbPos.equals("VMM02P0")) {
+        // Write the change to the original pair
+        pair.setFirst(stripped + 'd');
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -160,23 +210,13 @@ public class SpanishVerbStripper {
 
     // Try to strip just one pronoun first
     separated = stripSuffix(verb, pOneAttachedPronoun);
-    // Try `word + 'd'` as well for cases like 'sentaos'; stripped this
-    // becomes 'senta', and we only have the form 'sentad' in the
-    // dictionary
-    if (separated != null) {
-      String stripped = separated.first().toLowerCase();
+    if (separated != null && validateVerbPair(separated))
+      return separated;
 
-      if (isVerb(stripped) || isVerb(stripped + 'd'))
-        return separated;
-    }
-
+    // Now two
     separated = stripSuffix(verb, pTwoAttachedPronouns);
-    if (separated != null) {
-      String stripped = separated.first().toLowerCase();
-
-      if (isVerb(stripped) || isVerb(stripped + 'd'))
-        return separated;
-    }
+    if (separated != null && validateVerbPair(separated))
+      return separated;
 
     return null;
   }
