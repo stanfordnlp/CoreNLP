@@ -21,16 +21,22 @@ public class SpanishTreeNormalizerTest extends TestCase {
 
   public void setUp() {
     tf = new LabeledScoredTreeFactory();
-    tn = new SpanishTreeNormalizer(true, true);
+    tn = new SpanishTreeNormalizer(true, true, true);
   }
 
   @SuppressWarnings("unchecked")
   Pair<String, String>[] multiWordTestCases = new Pair[] {
-    new Pair("(grup.nom (np00000 Josep_Maria_Ollé))",
-             "(grup.nom (MW_PHRASE?_np00000 (MW? Josep) (MW? Maria) (MW? Ollé)))"),
+    // Simplest case
+    new Pair("(a (b c_d))",
+             "(a (MW_PHRASE?_b (MW? c) (MW? d)))"),
 
+    // New MW phrase should merge with grup.nom head
+    new Pair("(grup.nom (np00000 Josep_Maria_Ollé))",
+             "(MW_PHRASE?_np00000 (MW? Josep) (MW? Maria) (MW? Ollé))"),
+
+    // Likewise here: new MW phrase should merge with grup.nom head
     new Pair("(grup.nom (grup.nom (nc0p000 productos)) (sp (prep (sp000 de)) (sn (grup.nom (np00000 American_Online)))))",
-             "(grup.nom (grup.nom (nc0p000 productos)) (sp (prep (sp000 de)) (sn (grup.nom (MW_PHRASE?_np00000 (MW? American) (MW? Online))))))"),
+             "(grup.nom (grup.nom (nc0p000 productos)) (sp (prep (sp000 de)) (sn (MW_PHRASE?_np00000 (MW? American) (MW? Online)))))"),
 
     // Two multi-word tokens as siblings
     new Pair("(a (b c_d) (b e_f))",
@@ -39,6 +45,18 @@ public class SpanishTreeNormalizerTest extends TestCase {
     // Quotation mark "words" should be separated
     new Pair("(a (b \"cde\"))",
              "(a (MW_PHRASE?_b (MW? \") (MW? cde) (MW? \")))"),
+
+    // Hyphenated expression should be separated, with hyphen retained
+    new Pair("(a (b tecno-pop))",
+             "(a (MW_PHRASE?_b (MW? tecno) (MW? -) (MW? pop)))"),
+
+    // Hyphenated expression with bound morpheme should not be separated
+    new Pair("(a (b co-promotora))",
+             "(a (b co-promotora))"),
+
+    // Don't bork when we see a bound morpheme without following hyphen
+    new Pair("(a (b co) (b promotora))",
+             "(a (b co) (b promotora))"),
   };
 
   public void testMultiWordNormalization() {

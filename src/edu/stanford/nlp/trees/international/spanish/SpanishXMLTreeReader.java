@@ -2,6 +2,9 @@ package edu.stanford.nlp.trees.international.spanish;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -60,8 +63,6 @@ public class SpanishXMLTreeReader implements TreeReader {
   private static final String ATTR_ELLIPTIC = "elliptic";
   private static final String ATTR_PUNCT = "punct";
 
-  private static final String EMPTY_LEAF = "-NONE-";
-
   private NodeList sentences;
   private int sentIdx;
 
@@ -85,8 +86,12 @@ public class SpanishXMLTreeReader implements TreeReader {
 
     stream = new ReaderInputStream(in, tlp.getEncoding());
     treeFactory = new LabeledScoredTreeFactory();
-    treeNormalizer = new SpanishTreeNormalizer(simplifiedTagset,
-                                               aggressiveNormalization);
+    treeNormalizer =
+      new SpanishTreeNormalizer(simplifiedTagset,
+                                aggressiveNormalization,
+                                true // retain NER information in
+                                     // preterminals
+                                );
 
     DocumentBuilder parser = XMLUtils.getXmlParser();
     try {
@@ -194,7 +199,7 @@ public class SpanishXMLTreeReader implements TreeReader {
   private String getWord(Element node) {
     String word = node.getAttribute(ATTR_WORD);
     if (word.equals(""))
-      return EMPTY_LEAF;
+      return SpanishTreeNormalizer.EMPTY_LEAF_VALUE;
 
     return word.trim();
   }
@@ -265,9 +270,9 @@ public class SpanishXMLTreeReader implements TreeReader {
     String constituentStr = eRoot.getNodeName();
 
     List<Tree> kids = new ArrayList<Tree>();
-    Tree leafNode = treeFactory.newLeaf(EMPTY_LEAF);
+    Tree leafNode = treeFactory.newLeaf(SpanishTreeNormalizer.EMPTY_LEAF_VALUE);
     if (leafNode.label() instanceof HasWord)
-      ((HasWord) leafNode.label()).setWord(EMPTY_LEAF);
+      ((HasWord) leafNode.label()).setWord(SpanishTreeNormalizer.EMPTY_LEAF_VALUE);
 
     kids.add(leafNode);
     Tree t = treeFactory.newTreeNode(constituentStr, kids);
@@ -314,6 +319,33 @@ public class SpanishXMLTreeReader implements TreeReader {
     return sb.toString();
   }
 
+  /**
+   * Read trees from the given file and output their processed forms to
+   * standard output.
+   */
+  private static void process(File file, TreeReader tr,
+                              Pattern posPattern, Pattern wordPattern,
+                              boolean plainPrint) throws IOException {
+    Tree t;
+    int numTrees = 0, numTreesRetained = 0;
+    String canonicalFileName = file.getName().substring(0, file.getName().lastIndexOf('.'));
+
+    while ((t = tr.readTree()) != null) {
+      numTrees++;
+      if (!shouldPrintTree(t, posPattern, wordPattern))
+        continue;
+      numTreesRetained++;
+
+      String ftbID = ((CoreLabel) t.label()).get(CoreAnnotations.SentenceIDAnnotation.class);
+      String output = toString(t, plainPrint);
+
+      System.out.printf("%s-%s\t%s%n", canonicalFileName, ftbID, output);
+    }
+
+    System.err.printf("%s: %d trees, %d matched and printed%n", file.getName(),
+                      numTrees, numTreesRetained);
+  }
+
   private static String usage() {
     StringBuilder sb = new StringBuilder();
     String nl = System.getProperty("line.separator");
@@ -335,11 +367,6 @@ public class SpanishXMLTreeReader implements TreeReader {
     return argOptionDefs;
   }
 
-  /**
-   * For debugging.
-   *
-   * @param args
-   */
   public static void main(String[] args) {
     final Properties options = StringUtils.argsToProperties(args, argOptionDefs());
     if(args.length < 1 || options.containsKey("help")) {
@@ -347,58 +374,41 @@ public class SpanishXMLTreeReader implements TreeReader {
       return;
     }
 
-    Pattern posPattern = options.containsKey("searchPos")
+    final Pattern posPattern = options.containsKey("searchPos")
       ? Pattern.compile(options.getProperty("searchPos")) : null;
-    Pattern wordPattern = options.containsKey("searchWord")
+    final Pattern wordPattern = options.containsKey("searchWord")
       ? Pattern.compile(options.getProperty("searchWord")) : null;
-    boolean plainPrint = PropertiesUtils.getBool(options, "plain", false);
+    final boolean plainPrint = PropertiesUtils.getBool(options, "plain", false);
 
     String[] remainingArgs = options.getProperty("").split(" ");
     List<File> fileList = new ArrayList<File>();
     for(int i = 0; i < remainingArgs.length; i++)
       fileList.add(new File(remainingArgs[i]));
 
-    TreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true);
-    int totalTrees = 0;
-    Set<String> morphAnalyses = Generics.newHashSet();
-    try {
-      for(File file : fileList) {
-        TreeReader tr = trf.newTreeReader(new BufferedReader(new InputStreamReader(new FileInputStream(file), "ISO-8859-1")));
+    final TreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true);
+    ExecutorService pool =
+      Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-        Tree t;
-        int numTrees;
-        String canonicalFileName = file.getName().substring(0, file.getName().lastIndexOf('.'));
-
-        for(numTrees = 0; (t = tr.readTree()) != null; numTrees++) {
-          if (!shouldPrintTree(t, posPattern, wordPattern))
-            continue;
-
-          String ftbID = ((CoreLabel) t.label()).get(CoreAnnotations.SentenceIDAnnotation.class);
-          String output = toString(t, plainPrint);
-
-          System.out.printf("%s-%s\t%s%n", canonicalFileName, ftbID, output);
-          List<Label> leaves = t.yield();
-          for(Label label : leaves) {
-            if(label instanceof CoreLabel)
-              morphAnalyses.add(((CoreLabel) label).originalText());
+    for (final File file : fileList) {
+      pool.execute(new Runnable() {
+          public void run() {
+            try {
+              TreeReader tr = trf.newTreeReader(new BufferedReader(new InputStreamReader(new FileInputStream(file), "ISO-8859-1")));
+              process(file, tr, posPattern, wordPattern, plainPrint);
+              tr.close();
+            } catch (FileNotFoundException e) {
+              e.printStackTrace();
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
           }
-        }
+        });
+    }
 
-        tr.close();
-        System.err.printf("%s: %d trees%n",file.getName(),numTrees);
-        totalTrees += numTrees;
-      }
-
-//wsg2011: Print out the observed morphological analyses
-//      for(String analysis : morphAnalyses)
-//        System.err.println(analysis);
-
-      System.err.printf("%nRead %d trees%n",totalTrees);
-
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-
-    } catch (IOException e) {
+    pool.shutdown();
+    try {
+      pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+    } catch (InterruptedException e) {
       e.printStackTrace();
     }
   }
