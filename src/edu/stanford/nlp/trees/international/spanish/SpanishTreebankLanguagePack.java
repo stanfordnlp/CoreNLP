@@ -45,6 +45,8 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final String[] startSymbols = {"ROOT"};
 
+  private static final char[] annotationIntroducingChars = {'^', '['};
+
   /**
    * Return the input Charset encoding for the Treebank. See
    * documentation for the <code>Charset</code> class.
@@ -99,6 +101,19 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
     return sentenceFinalPunctWords;
   }
 
+  /**
+   * Return an array of characters at which a String should be truncated to give the basic syntactic
+   * category of a label. The idea here is that Penn treebank style labels follow a syntactic
+   * category with various functional and crossreferencing information introduced by special
+   * characters (such as "NP-SBJ=1").  This would be truncated to "NP" by the array containing '-'
+   * and "=".
+   *
+   * @return An array of characters that set off label name suffixes
+   */
+  @Override
+  public char[] labelAnnotationIntroducingCharacters() {
+    return annotationIntroducingChars;
+  }
 
   /**
    * Returns a String array of treebank start symbols.
@@ -109,7 +124,6 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
   public String[] startSymbols() {
     return startSymbols;
   }
-
 
   /**
    * Returns the extension of treebank files for this treebank.

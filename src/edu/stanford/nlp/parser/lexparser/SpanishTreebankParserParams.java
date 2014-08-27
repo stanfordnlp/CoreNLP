@@ -2,10 +2,14 @@ package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.process.SerializableFunction;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.spanish.SpanishHeadFinder;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreebankLanguagePack;
+import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.Pair;
 
 import java.util.List;
 
@@ -31,13 +35,94 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
   public SpanishTreebankParserParams() {
     super(new SpanishTreebankLanguagePack());
 
-    setInputEncoding("UTF-8");
+    setInputEncoding(treebankLanguagePack().getEncoding());
     setHeadFinder(new SpanishHeadFinder());
 
     optionsString = new StringBuilder();
     optionsString.append(getClass().getSimpleName() + "\n");
 
-    // TODO Make annotations
+    buildAnnotations();
+  }
+
+  @SuppressWarnings("unchecked")
+  private void buildAnnotations() {
+    // +.25 F1
+    annotations.put("-markInf", new Pair("/^(S|grup\\.verb|infinitiu|gerundi)/ < @infinitiu",
+                                         new SimpleStringFunction("-infinitive")));
+    annotations.put("-markGer", new Pair("/^(S|grup\\.verb|infinitiu|gerundi)/ < @gerundi",
+                                         new SimpleStringFunction("-gerund")));
+
+    // +.04 F1
+    annotations.put("-markRelative", new Pair("@S <, @relatiu",
+                                              new SimpleStringFunction("-relative")));
+
+    // Negative F1; unused in default config
+    annotations.put("-markPPHeads", new Pair("@sp",
+                                             new AnnotateHeadFunction(headFinder)));
+
+    // +.1 F1
+    annotations.put("-markComo", new Pair("@cs < /(?i)^como$/",
+                                          new SimpleStringFunction("[como]")));
+    annotations.put("-markSpecHeads", new Pair("@spec", new AnnotateHeadFunction(headFinder)));
+
+    // +.32 F1
+    annotations.put("-markSingleChildNPs", new Pair("/^(sn|grup\\.nom)/ <: __",
+                                                    new SimpleStringFunction("-singleChild")));
+
+    // +.05 F1
+    annotations.put("-markPPFriendlyVerbs", new Pair("/^v/ > /^grup\\.prep/",
+                                                     new SimpleStringFunction("-PPFriendly")));
+
+    // +.46 F1
+    annotations.put("-markConjTypes", new Pair("@conj <: /^c[cs]/=c", new MarkConjTypeFunction()));
+
+    // Negative F1; unused in default config
+    annotations.put("-markPronounNPs", new Pair("@sn <: (/^grup\\.nom/ <: /^pp/)",
+                                                new SimpleStringFunction("-pronoun")));
+
+    compileAnnotations(headFinder);
+  }
+
+  /**
+   * Mark `conj` constituents with their `cc` / `cs` child.
+   */
+  private class MarkConjTypeFunction implements SerializableFunction<TregexMatcher, String> {
+
+    private static final long serialVersionUID = 403406212736445856L;
+
+    public String apply(TregexMatcher m) {
+      String type = m.getNode("c").value().toUpperCase();
+      return "-conj" + type;
+    }
+
+  }
+
+  /**
+   * Features which should be enabled by default.
+   *
+   * @see #buildAnnotations()
+   */
+  @Override
+  protected String[] baselineAnnotationFeatures() {
+    return new String[] {
+      // verb phrase annotations
+      "-markInf", "-markGer",
+
+      // noun phrase annotations
+      "-markSingleChildNPs", /* "-markPronounNPs", */
+
+      // prepositional phrase annotations
+      // "-markPPHeads", negative F1!
+
+      // clause annotations
+      "-markRelative",
+
+      // lexical / word- or tag-level annotations
+      "-markComo", "-markSpecHeads", "-markPPFriendlyVerbs",
+
+      // conjunction annotations
+      "-markConjTypes",
+    };
   }
 
   @Override
@@ -49,6 +134,16 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
   public HeadFinder typedDependencyHeadFinder() {
     // Not supported
     return null;
+  }
+
+  @Override
+  public Lexicon lex(Options op, Index<String> wordIndex, Index<String> tagIndex) {
+    // Override unknown word model
+    if (op.lexOptions.uwModelTrainer == null)
+      op.lexOptions.uwModelTrainer =
+        "edu.stanford.nlp.parser.lexparser.SpanishUnknownWordModelTrainer";
+
+    return new BaseLexicon(op, wordIndex, tagIndex);
   }
 
   @Override
@@ -118,6 +213,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
   @Override
   public void display() {
     System.err.println(optionsString.toString());
+    super.display();
   }
 
   public void setHeadFinder(HeadFinder hf) {
