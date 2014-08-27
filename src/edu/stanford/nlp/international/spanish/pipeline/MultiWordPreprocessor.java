@@ -217,9 +217,16 @@ public final class MultiWordPreprocessor {
       if (containingPhrase == null)
         return null;
 
-      if ((word.equalsIgnoreCase("este") && !containingPhrase.startsWith(word))
-        || (actuallyNames.contains(word)))
+      if (word.equalsIgnoreCase("este") && !containingPhrase.startsWith(word))
         return "np00000";
+      else if (word.equals("Al") && containingPhrase.startsWith("Al fin"))
+        return "sp000";
+
+      if (actuallyNames.contains(word))
+        return "np00000";
+
+      if (word.equals("sino") && containingPhrase.endsWith(word))
+        return "nc0s000";
       else if (word.equals("mañana"))
         return "nc0s000";
 
