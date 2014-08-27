@@ -2,6 +2,7 @@ package edu.stanford.nlp.trees.international.spanish;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -17,6 +18,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasCategory;
 import edu.stanford.nlp.ling.HasContext;
 import edu.stanford.nlp.ling.HasIndex;
+import edu.stanford.nlp.ling.HasLemma;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
@@ -29,6 +31,8 @@ import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.XMLUtils;
 
 /**
@@ -236,9 +240,8 @@ public class SpanishXMLTreeReader implements TreeReader {
     Tree leafNode = treeFactory.newLeaf(leafStr);
     if (leafNode.label() instanceof HasWord)
       ((HasWord) leafNode.label()).setWord(leafStr);
-    if (leafNode.label() instanceof CoreLabel && lemma != null) {
-      ((CoreLabel) leafNode.label()).setLemma(lemma);
-    }
+    if (leafNode.label() instanceof HasLemma && lemma != null)
+      ((HasLemma) leafNode.label()).setLemma(lemma);
 
     List<Tree> kids = new ArrayList<Tree>();
     kids.add(leafNode);
@@ -268,20 +271,87 @@ public class SpanishXMLTreeReader implements TreeReader {
   }
 
   /**
+   * Determine if the given tree contains a leaf which matches the
+   * part-of-speech and lexical criteria.
+   *
+   * @param pos Regular expression to match part of speech (may be null,
+   *     in which case any POS is allowed)
+   * @param pos Regular expression to match word (may be null, in which
+   *     case any word is allowed)
+   */
+  public static boolean shouldPrintTree(Tree tree, Pattern pos, Pattern word) {
+    for(Tree t : tree) {
+      if(t.isPreTerminal()) {
+        CoreLabel label = (CoreLabel) t.label();
+        String tpos = label.value();
+
+        Tree wordNode = t.firstChild();
+        CoreLabel wordLabel = (CoreLabel) wordNode.label();
+        String tword = wordLabel.value();
+
+        if((pos == null || pos.matcher(tpos).find())
+           && (word == null || word.matcher(tword).find()))
+          return true;
+      }
+    }
+    return false;
+  }
+
+  private static String toString(Tree tree, boolean plainPrint) {
+    if (!plainPrint)
+      return tree.toString();
+
+    StringBuilder sb = new StringBuilder();
+    List<Tree> leaves = tree.getLeaves();
+    for (Tree leaf : leaves)
+      sb.append(((CoreLabel) leaf.label()).value()).append(" ");
+
+    return sb.toString();
+  }
+
+  private static String usage() {
+    StringBuilder sb = new StringBuilder();
+    String nl = System.getProperty("line.separator");
+    sb.append(String.format("Usage: java %s [OPTIONS] file(s)%n%n", SpanishXMLTreeReader.class.getName()));
+    sb.append("Options:").append(nl);
+    sb.append("   -help: Print this message").append(nl);
+    sb.append("   -plain: Output corpus in plaintext rather than as trees").append(nl);
+    sb.append("   -searchPos posRegex: Only print sentences which contain a token whose part of speech matches the given regular expression").append(nl);
+    sb.append("   -searchWord wordRegex: Only print sentences which contain a token which matches the given regular expression").append(nl);
+    return sb.toString();
+  }
+
+  private static Map<String, Integer> argOptionDefs() {
+    Map<String, Integer> argOptionDefs = Generics.newHashMap();
+    argOptionDefs.put("help", 0);
+    argOptionDefs.put("plain", 0);
+    argOptionDefs.put("searchPos", 1);
+    argOptionDefs.put("searchWord", 1);
+    return argOptionDefs;
+  }
+
+  /**
    * For debugging.
    *
    * @param args
    */
   public static void main(String[] args) {
-    if(args.length < 1) {
-      System.err.printf("Usage: java %s tree_file(s)%n%n",
-                        SpanishXMLTreeReader.class.getName());
-      System.exit(-1);
+    final Properties options = StringUtils.argsToProperties(args, argOptionDefs());
+    if(args.length < 1 || options.containsKey("help")) {
+      System.err.println(usage());
+      return;
     }
 
+    Pattern posPattern = options.containsKey("searchPos")
+      ? Pattern.compile(options.getProperty("searchPos")) : null;
+    Pattern wordPattern = options.containsKey("searchWord")
+      ? Pattern.compile(options.getProperty("searchWord")) : null;
+    boolean plainPrint = PropertiesUtils.getBool(options, "plain", false);
+
+    String[] remainingArgs = options.getProperty("").split(" ");
     List<File> fileList = new ArrayList<File>();
-    for(int i = 0; i < args.length; i++)
-      fileList.add(new File(args[i]));
+    for(int i = 0; i < remainingArgs.length; i++)
+      fileList.add(new File(remainingArgs[i]));
 
     TreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true);
     int totalTrees = 0;
@@ -295,8 +365,13 @@ public class SpanishXMLTreeReader implements TreeReader {
         String canonicalFileName = file.getName().substring(0, file.getName().lastIndexOf('.'));
 
         for(numTrees = 0; (t = tr.readTree()) != null; numTrees++) {
+          if (!shouldPrintTree(t, posPattern, wordPattern))
+            continue;
+
           String ftbID = ((CoreLabel) t.label()).get(CoreAnnotations.SentenceIDAnnotation.class);
-          System.out.printf("%s-%s\t%s%n",canonicalFileName, ftbID, t.toString());
+          String output = toString(t, plainPrint);
+
+          System.out.printf("%s-%s\t%s%n", canonicalFileName, ftbID, output);
           List<Label> leaves = t.yield();
           for(Label label : leaves) {
             if(label instanceof CoreLabel)
