@@ -42,10 +42,19 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   public static final String MW_PHRASE_TAG = "MW_PHRASE?";
 
   public static final String EMPTY_LEAF_VALUE = "=NONE=";
+  public static final String LEFT_PARENTHESIS = "=LRB=";
+  public static final String RIGHT_PARENTHESIS = "=RRB=";
 
   private static final Map<String, String> spellingFixes = new HashMap<String, String>() {{
       put("jucio", "juicio"); // 4800_2000406.tbf-5
       put("tambien", "también"); // 41_19991002.tbf-8
+
+      // Hack: these aren't exactly spelling mistakes, but we need to
+      // run a search-and-replace across the entire corpus with them, so
+      // they should be treated just like spelling mistakes for our
+      // purposes
+      put("(", LEFT_PARENTHESIS);
+      put(")", RIGHT_PARENTHESIS);
     }};
 
   /**
@@ -72,7 +81,13 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
    */
   private static final Set<String> mergeWithConstituentWhenPossible =
     new HashSet<String>() {{
+      add("grup.adv");
       add("grup.nom");
+      add("grup.nom.loc");
+      add("grup.nom.org");
+      add("grup.nom.otros");
+      add("grup.nom.pers");
+      add("spec");
     }};
 
   // Customization
@@ -96,6 +111,11 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
     // First filter out nodes we don't like
     tree = tree.prune(emptyFilter);
+
+    // Find all named entities which are not multi-word tokens and nest
+    // them within named entity NP groups
+    if (retainNER)
+      markSimpleNamedEntities(tree);
 
     // Counter for part-of-speech statistics
     TwoDimensionalCounter<String, String> unigramTagger =
@@ -186,6 +206,59 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
     }
   }
 
+  private static final List<Pair<TregexPattern, TsurgeonPattern>> markSimpleNEs;
+
+  // Generate some reusable patterns for four different NE groups
+  static {
+    @SuppressWarnings("unchecked")
+    Pair<String, String>[] patternTemplates = new Pair[] {
+      // NE as only child of a `grup.nom`
+      new Pair("/^grup\\.nom$/=target <: (/np0000%c/ < __)",
+               "[relabel target /grup.nom.%s/]"),
+
+      // NE as child with a right sibling in a `grup.nom`
+      new Pair("/^grup\\.nom$/ < ((/np0000%c/=target < __) $+ __)",
+               "[adjoinF (grup.nom.%s foot@) target]"),
+
+      // NE as child with a left sibling in a `grup.nom`
+      new Pair("/^grup\\.nom$/ < ((/np0000%c/=target < __) $- __)",
+               "[adjoinF (grup.nom.%s foot@) target]")
+    };
+
+    // Pairs tagset annotation codes with the annotations used in our
+    // constituents
+    @SuppressWarnings("unchecked")
+    Pair<Character, String>[] namedEntityTypes = new Pair[] {
+      new Pair('0', "otros"), // other
+      new Pair('l', "lug"), // place
+      new Pair('o', "org"), // location
+      new Pair('p', "pers"), // person
+    };
+
+    markSimpleNEs =
+      new ArrayList<Pair<TregexPattern, TsurgeonPattern>>(patternTemplates.length * namedEntityTypes.length);
+    for (Pair<String, String> template : patternTemplates) {
+      for (Pair<Character, String> namedEntityType : namedEntityTypes) {
+        String tregex = String.format(template.first(), namedEntityType.first());
+        String tsurgeon = String.format(template.second(), namedEntityType.second());
+
+        markSimpleNEs.add(new Pair<TregexPattern, TsurgeonPattern>(TregexPattern.compile(tregex),
+                                                                   Tsurgeon.parseOperation(tsurgeon)));
+      }
+    }
+  };
+
+  /**
+   * Find all named entities which are not multi-word tokens and nest
+   * them in named entity NP groups (`grup.nom.{lug,org,pers,otros}`).
+   *
+   * Do this only for "simple" NEs: the multi-word NEs have to be done
+   * at a later step in `MultiWordPreprocessor`.
+   */
+  void markSimpleNamedEntities(Tree t) {
+    Tsurgeon.processPatternsOnTree(markSimpleNEs, t);
+  }
+
   /**
    * Determine whether the given tree node is a multi-word token
    * expansion candidate. (True if the node has at least one grandchild
@@ -226,7 +299,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       // constituent words
       List<Tree> newNodes = new ArrayList<Tree>(words.length);
       for (int j = 0; j < words.length; j++) {
-        String word = words[j];
+        String word = normalizeTerminal(words[j]);
 
         Tree newLeaf = tf.newLeaf(word);
         if (newLeaf.label() instanceof HasWord)
@@ -267,7 +340,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   /**
    * Characters which may separate words in a single token.
    */
-  private static final String WORD_SEPARATORS = ",-_¡!¿?";
+  private static final String WORD_SEPARATORS = ",-_¡!¿?()";
 
   /**
    * Word separators which should not be treated as separate "words" and
@@ -369,13 +442,12 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
 
   @SuppressWarnings("unchecked")
   private static final Pair<String, String>[] elisionExpansionStrs = new Pair[] {
-    // Elided forms with an ancestor which has an `sn` phrase as a right
-    // sibling
-    new Pair(// Search for right-hand `sn` ancestor sibling
-             "sp000 < /^(del|al)$/=elided >> (__=ancestor $+ sn=sn) " +
-             // Make sure this is the deepest ancestor
-             // sibling possible
-             ": (=ancestor !<< (__ << =elided $+ sn))",
+    // Elided forms with a `prep` ancestor which has an `sn` phrase as a
+    // right sibling
+
+    new Pair(// Search for `sn` which is right sibling of closest `prep`
+             // ancestor to the elided node
+             "/^(prep|sadv|conj)$/ <+(/^grup\\.(adv|prep)$/) (sp000 < /^(del|al)$/=elided) $+ sn=sn",
 
              // Insert the 'el' specifier as a constituent in adjacent
              // noun phrase
@@ -450,20 +522,28 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
              "[adjoinF (sn (spec (da0000 lo)) foot@) target]"),
 
     // "del" used within specifier; e.g. "más del 30 por ciento"
-    new Pair("spec < (sp000 < del=elided) > sn $+ /grup\\.nom/=target",
+    new Pair("spec < (sp000=target < del=elided) > sn $+ /grup\\.nom/",
 
              "[relabel elided /l//] " +
-             "[insert (spec (da0000 el)) >0 target]"),
+             "[insert (da0000 el) $- target]"),
+
+    // "del," "al" in date phrases: "1 de enero del 2001"
+    new Pair("sp000=kill < /^(del|al)$/ $+ w=target",
+
+             "[delete kill] " +
+             "[adjoinF (sp (prep (sp000 de)) (sn (spec (da0000 el)) foot@)) target]"),
   };
 
-  private static final List<Pair<TregexPattern, TsurgeonPattern>> elisionExpansions;
+  private static final List<Pair<TregexPattern, TsurgeonPattern>> elisionExpansions =
+    compilePatterns(elisionExpansionStrs);
 
-  static {
-    elisionExpansions =
-      new ArrayList<Pair<TregexPattern, TsurgeonPattern>>(elisionExpansionStrs.length);
-    for (Pair<String, String> expansion : elisionExpansionStrs)
-      elisionExpansions.add(new Pair<TregexPattern, TsurgeonPattern>(TregexPattern.compile(expansion.first()),
-                                                                     Tsurgeon.parseOperation(expansion.second())));
+  private static List<Pair<TregexPattern, TsurgeonPattern>> compilePatterns(Pair<String, String>[] patterns) {
+    List<Pair<TregexPattern, TsurgeonPattern>> ret = new ArrayList<Pair<TregexPattern, TsurgeonPattern>>(patterns.length);
+    for (Pair<String, String> pattern : patterns)
+      ret.add(new Pair<TregexPattern, TsurgeonPattern>(TregexPattern.compile(pattern.first()),
+                                                       Tsurgeon.parseOperation(pattern.second())));
+
+    return ret;
   }
 
 }
