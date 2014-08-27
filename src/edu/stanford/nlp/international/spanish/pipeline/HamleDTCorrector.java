@@ -1,11 +1,16 @@
 package edu.stanford.nlp.international.spanish.pipeline;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.StringUtils;
 
+import java.io.File;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * We generate a USD-style dependency treebank from the original AnCora
@@ -31,53 +36,80 @@ public class HamleDTCorrector {
   }
 
   public List<String> correct() {
-    List<String> hamledtLines = IOUtils.linesFromFile(hamledtPath);
-    List<String> ancoraLines = IOUtils.linesFromFile(ancoraPath);
-    if (hamledtLines.size() != ancoraLines.size())
-      throw new RuntimeException("Provided files do not have the same number of lines -- check " +
-                                   "that these are the same treebank!");
+    Iterator<List<CoreLabel>> hamledtSentences = new CoNLLXReader(new File(hamledtPath));
+    Iterator<List<CoreLabel>> ancoraSentences = new CoNLL2009Reader(new File(ancoraPath));
 
-    List<String> ret = new ArrayList<String>(ancoraLines.size());
+    List<String> ret = new ArrayList<String>();
 
-    String hamledtLine = null, ancoraLine = null;
-    for (Iterator<String> iHamledt = hamledtLines.iterator(), iAncora = ancoraLines.iterator();
-      iHamledt.hasNext() && iAncora.hasNext();
-      hamledtLine = iHamledt.next(), ancoraLine = iAncora.next()) {
-      // TODO handle multi-word expressions
+    List<CoreLabel> hamledtSentence = null, ancoraSentence = null;
+    for (; hamledtSentences.hasNext() && ancoraSentences.hasNext();
+      hamledtSentence = hamledtSentences.next(), ancoraSentence = ancoraSentences.next()) {
 
-      ret.add(correctLine(hamledtLine, ancoraLine));
+      if (hamledtSentence == null || ancoraSentence == null)
+        throw new RuntimeException("Parse exception");
+
+      if (hamledtSentence.size() != ancoraSentence.size()) {
+        throw new RuntimeException(String.format(
+          "Treebank mismatch: HamleDT sentence aligned with AnCora sentence of different length%n" +
+            "\tHamleDT sentence: " + StringUtils.joinWords(hamledtSentence, " ") + "%n" +
+            "\tAnCora sentence: " + StringUtils.joinWords(ancoraSentence, " ")));
+      }
+
+      List<CoreLabel> corrected = correctSentence(hamledtSentence, ancoraSentence);
+      ret.addAll(toCoNLLXString(corrected));
     }
 
     return ret;
   }
 
-  private String correctLine(String hamledtLine, String ancoraLine) {
-    if (hamledtLine.equals("") && ancoraLine.equals(""))
-      return "";
+  /**
+   * Correct the given HamleDT-output sentence with the given AnCora
+   * sentence as extra context.
+   *
+   * @return A corrected form of {@code hamledtSentence}.
+   */
+  private List<CoreLabel> correctSentence(List<CoreLabel> hamledtSentence,
+                                          List<CoreLabel> ancoraSentence) {
+    List<CoreLabel> ret = new ArrayList<CoreLabel>(hamledtSentence.size());
 
-    String[] hFields = hamledtLine.split("\t");
-    String[] aFields = ancoraLine.split("\t");
+    // First perform individual word corrections
+    CoreLabel hamWord = null, ancWord = null;
+    for (Iterator<CoreLabel> iHam = hamledtSentence.iterator(), iAnc = ancoraSentence.iterator();
+      iHam.hasNext() && iAnc.hasNext(); hamWord = iHam.next(), ancWord = iAnc.next()) {
+      ret.add(correctWord(hamWord, ancWord));
+    }
 
-    String hWord = hFields[1];
-    String aWord = aFields[1];
-    if (!hWord.equals(aWord))
+    return ret;
+  }
+
+  /**
+   * Correct a HamleDT-output word in isolation with the given AnCora
+   * word as context. May modify {@code hamledtWord} in place.
+   */
+  private CoreLabel correctWord(CoreLabel hamledtWord, CoreLabel ancoraWord) {
+    if (!hamledtWord.word().equals(ancoraWord.word()))
       throw new RuntimeException(String.format(
-        "Treebank line mismatch: HamleDT '%s' does not match AnCora line '%s'",
-        hWord, aWord));
+        "Treebank line mismatch: HamleDT '%s' does not match AnCora line's '%s'",
+        hamledtWord.word(), ancoraWord.word()));
 
-    String hDepRel = hFields[7];
-    hFields[7] = correctDepRel(hDepRel, aFields);
+    String depRel = correctDepRel(hamledtWord, ancoraWord);
+    hamledtWord.set(CoreAnnotations.CoNLLDepTypeAnnotation.class, depRel);
 
-    return StringUtils.join(hFields, "\t");
+    return hamledtWord;
   }
 
   /**
    * Fix the HamleDT-produced dependency relation label given the
    * AnCora line from which it was sourced.
+   *
+   * @return Corrected dependency relation
    */
-  private String correctDepRel(String depRel, String[] ancoraFields) {
+  private String correctDepRel(CoreLabel hamledtWord, CoreLabel ancoraWord) {
     // Original dependency relation label
-    String aDepRel = ancoraFields[5];
+    String aDepRel = ancoraWord.get(CoreAnnotations.CoNLLDepTypeAnnotation.class);
+
+    // HamleDT dependency relation label
+    String depRel = hamledtWord.get(CoreAnnotations.CoNLLDepTypeAnnotation.class);
 
     // Vocative
     if (aDepRel.equals("voc"))
@@ -87,7 +119,7 @@ public class HamleDTCorrector {
 
     // Distinguish dative and accusative objects
     if (depRel.equals("obj")) {
-      if (isDative(ancoraFields))
+      if (isDative(ancoraWord))
         // "dative" annotation retained in Stanford output as "case=dat"
         return "nmod";
       else
@@ -97,8 +129,28 @@ public class HamleDTCorrector {
     return depRel;
   }
 
-  private boolean isDative(String[] ancoraFields) {
-    return ancoraFields[7].contains("case=dative");
+  /**
+   * Return true if the given label read from an AnCora-CoNLL corpus
+   * is in the dative case.
+   */
+  private boolean isDative(CoreLabel word) {
+    return word.get(CoreAnnotations.ValueAnnotation.class).contains("case=dative");
+  }
+
+  private List<String> toCoNLLXString(List<CoreLabel> sentence) {
+    List<String> ret = new ArrayList<String>(sentence.size());
+
+    for (CoreLabel l : sentence) {
+      ret.add(String.format(
+        "%d\t%s\t%s\t%s\t%s\t%s\t%d\t%s\t_\t_",
+        l.index(), l.word(), l.lemma(), l.tag(), l.get(CoreAnnotations.CoarseTagAnnotation.class),
+        l.get(CoreAnnotations.ValueAnnotation.class),
+        l.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class),
+        l.get(CoreAnnotations.CoNLLDepTypeAnnotation.class)
+      ));
+    }
+
+    return ret;
   }
 
   private static final String usage = String.format(
@@ -117,6 +169,129 @@ public class HamleDTCorrector {
 
     for (String line : corrected)
       System.out.println(line);
+  }
+
+  /**
+   * Reads AnCora sentences from a CoNLL-style dependency treebank.
+   */
+  private abstract static class CoNLLReader implements Iterator<List<CoreLabel>> {
+
+    private final Iterator<String> fileIterator;
+
+    public CoNLLReader(File file) {
+      fileIterator = IOUtils.readLines(file).iterator();
+    }
+
+    @Override
+    public boolean hasNext() {
+      return fileIterator.hasNext();
+    }
+
+    @Override
+    public List<CoreLabel> next() {
+      if (!hasNext())
+        throw new NoSuchElementException("No more sentences");
+
+      List<CoreLabel> sentence = new ArrayList<CoreLabel>();
+      String line;
+
+      while (fileIterator.hasNext() && !(line = fileIterator.next()).equals("")) {
+        try {
+          sentence.add(makeCoreLabel(line));
+        } catch (ParseException e) {
+          System.err.println(e.getMessage());
+          return null;
+        }
+      }
+
+      return sentence;
+    }
+
+    protected abstract CoreLabel makeCoreLabel(String line) throws ParseException;
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private static class CoNLLXReader extends CoNLLReader {
+
+    public CoNLLXReader(File file) {
+      super(file);
+    }
+
+    protected CoreLabel makeCoreLabel(String line) throws ParseException {
+      CoreLabel ret = new CoreLabel();
+
+      String[] fields = line.split("\t");
+      if (fields.length != 10)
+        throw new ParseException("Line does not have 10 fields as CoNLL-X format specifies:'" +
+                                   line + "'");
+
+      ret.setIndex(Integer.parseInt(fields[0]));
+      ret.setWord(fields[1]);
+      ret.setLemma(fields[2]);
+      ret.setTag(fields[3]);
+      ret.set(CoreAnnotations.CoarseTagAnnotation.class, fields[4]);
+
+      // Stick arbitrary features in value annotation
+      ret.set(CoreAnnotations.ValueAnnotation.class, fields[5]);
+
+      ret.set(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, Integer.parseInt(fields[6]));
+      ret.set(CoreAnnotations.CoNLLDepTypeAnnotation.class, fields[7]);
+
+      // Ignore projective head / projective head relation fields --
+      // these are null for AnCora
+
+      return ret;
+    }
+
+  }
+
+  private static class CoNLL2009Reader extends CoNLLReader {
+
+    public CoNLL2009Reader(File file) {
+      super(file);
+    }
+
+    protected CoreLabel makeCoreLabel(String line) throws ParseException {
+      CoreLabel ret = new CoreLabel();
+
+      String[] fields = line.split("\t");
+      if (fields.length != 18)
+        throw new ParseException("Line does not have 18 fields as CoNLL-09 format specifies:'" +
+                                   line + "'");
+
+      ret.setIndex(Integer.parseInt(fields[0]));
+      ret.setWord(fields[1]);
+      ret.setLemma(fields[2]);
+      // Skip predicted lemma field (3)
+      ret.setTag(fields[4]);
+      // Skip predicted POS field (5)
+
+      // Stick arbitrary features in value annotation
+      ret.set(CoreAnnotations.ValueAnnotation.class, fields[6]);
+      // Skip predicted features field (7)
+
+      ret.set(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, Integer.parseInt(fields[8]));
+      // Skip predicted parent index field (9)
+      ret.set(CoreAnnotations.CoNLLDepTypeAnnotation.class, fields[10]);
+      // Skip predicted relation type field (11)
+
+      // Ignore all other argument fields (12-18)
+
+      return ret;
+    }
+
+  }
+
+  static class ParseException extends Exception {
+
+    public ParseException(String msg) {
+      super(msg);
+    }
+
   }
 
 }
