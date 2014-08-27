@@ -186,6 +186,7 @@ public final class MultiWordPreprocessor {
 
         put("amén", "rg"); // amén de
 
+        put("Teniendo", "vmg0000");
         put("formaba", "vmii000");
         put("perece", "vmip000");
         put("tardar", "vmn0000");
@@ -269,6 +270,8 @@ public final class MultiWordPreprocessor {
         return "aq0000";
       else if (word.equals("media") && containingPhrase.equals("mass media"))
         return "nc0n000";
+      else if (word.equals("cuenta") && containingPhrase.endsWith("en cuenta"))
+        return "nc0s000";
 
       if (word.equals("Al")) {
         // "Al" is sometimes a part of name phrases: Arabic names, Al Gore, etc.

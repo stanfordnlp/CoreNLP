@@ -365,10 +365,10 @@ public class MetaClassTest {
 
   @Test
   public void testCastSimple() {
-    assertEquals(new Double(1.0), MetaClass.cast("1.0", Double.class));
-    assertEquals(new Integer(1), MetaClass.cast("1", Integer.class));
-    assertEquals(new Integer(1), MetaClass.cast("1.0", Integer.class));
-    assertEquals(new Long(1L), MetaClass.cast("1.0", Long.class));
+    assertEquals(1.0, MetaClass.cast("1.0", Double.class));
+    assertEquals(1, MetaClass.cast("1", Integer.class));
+    assertEquals(1, MetaClass.cast("1.0", Integer.class));
+    assertEquals(1L, MetaClass.cast("1.0", Long.class));
     assertEquals(new Short((short) 1), MetaClass.cast("1.0", Short.class));
     assertEquals(new Byte((byte) 1), MetaClass.cast("1.0", Byte.class));
     assertEquals("Hello", MetaClass.cast("Hello", String.class));
