@@ -10,7 +10,6 @@ import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.stats.*;
 import edu.stanford.nlp.util.Function;
-import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.File;
@@ -52,7 +51,7 @@ public class HamleDTMultiWordClassifier {
   private static final List<Function<String, List<String>>> featureFunctions = new
     ArrayList<Function<String, List<String>>>() {{
       add(new LeadingVerbFeatureFunction());
-      add(new NGramFeatureFunction(2, 4));
+      add(new CharacterNGramFeatureFunction(2, 4));
     }};
 
   private Classifier<String, String> classifier;
@@ -216,22 +215,21 @@ public class HamleDTMultiWordClassifier {
 
   // -- Feature function definitions -- //
 
-  private static class NGramFeatureFunction implements Function<String, List<String>> {
+  private static class CharacterNGramFeatureFunction implements Function<String, List<String>> {
 
     private static final String featurePrefix = "#";
 
     private final int MIN_SIZE;
     private final int MAX_SIZE;
 
-    public NGramFeatureFunction(int MIN_SIZE, int MAX_SIZE) {
+    public CharacterNGramFeatureFunction(int MIN_SIZE, int MAX_SIZE) {
       this.MIN_SIZE = MIN_SIZE;
       this.MAX_SIZE = MAX_SIZE;
     }
 
     @Override
     public List<String> apply(String mwe) {
-      List<String> words = Arrays.asList(mwe.split("_"));
-      Collection<String> ngrams = StringUtils.getNgrams(words, MIN_SIZE, MAX_SIZE);
+      Collection<String> ngrams = StringUtils.getCharacterNgrams(mwe, MIN_SIZE, MAX_SIZE);
       return new ArrayList<String>(ngrams);
     }
 
