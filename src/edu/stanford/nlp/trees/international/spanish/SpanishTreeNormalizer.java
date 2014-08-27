@@ -191,8 +191,9 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
 
       // Now create a dummy phrase containing the new preterminals.
       // Maintain the value of the old preterminal in its label value.
-      String phraseType = MW_PHRASE_TAG + "_" + preterminals[i].value();
-      Tree newPrePreTerminal = tf.newTreeNode(phraseType, newPreterminals);
+      String phraseValue = MW_PHRASE_TAG + "_"
+        + simplifyPOSTag(preterminals[i].value());
+      Tree newPrePreTerminal = tf.newTreeNode(phraseValue, newPreterminals);
       t.setChild(i, newPrePreTerminal);
     }
   }
