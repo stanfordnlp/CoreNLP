@@ -31,7 +31,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
   public SpanishTreebankParserParams() {
     super(new SpanishTreebankLanguagePack());
 
-    setInputEncoding("UTF-8");
+    setInputEncoding(treebankLanguagePack().getEncoding());
     setHeadFinder(new SpanishHeadFinder());
 
     optionsString = new StringBuilder();
