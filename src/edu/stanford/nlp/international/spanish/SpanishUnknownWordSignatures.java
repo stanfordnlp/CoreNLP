@@ -35,6 +35,12 @@ public class SpanishUnknownWordSignatures {
 
   private static final Pattern pAdverb = Pattern.compile("mente$");
 
+  // Most of the words disguised as first-person plural verb forms have
+  // contrastive stress.. yay, easy to match!
+  private static final Pattern pVerbFirstPersonPlural = Pattern.compile(
+    "(?<!últ|máx|mín|án|próx|ís|cént|[np]ón|prést|gít|ínt|pár" +
+      "|^extr|^supr|^tr?|^[Rr]?|gr)[eia]mos$");
+
   private SpanishUnknownWordSignatures() {} // static methods
 
   public static boolean hasMasculineSuffix(String s) {
@@ -63,6 +69,10 @@ public class SpanishUnknownWordSignatures {
 
   public static boolean hasAdverbSuffix(String s) {
     return pAdverb.matcher(s).find();
+  }
+
+  public static boolean hasVerbFirstPersonPluralSuffix(String s) {
+    return pVerbFirstPersonPlural.matcher(s).find();
   }
 
   // The *Suffix methods are used by the SpanishUnknownWordModel to
