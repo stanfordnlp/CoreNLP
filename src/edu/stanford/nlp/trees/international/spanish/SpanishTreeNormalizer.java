@@ -533,8 +533,9 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
     // right sibling
 
     new Pair(// Search for `sn` which is right sibling of closest `prep`
-             // ancestor to the elided node
-             "/^(prep|sadv|conj)$/ <+(/^grup\\.(adv|prep)$/) (sp000 < /(?i)^(del|al)$/=elided) $+ sn=sn",
+             // ancestor to the elided node; cascade down tree to lowest `sn`
+             "/^(prep|sadv|conj)$/ <+(/^(prep|grup\\.(adv|cc|prep))$/) (sp000=sp < /(?i)^(del|al)$/=elided) <<` =sp " +
+               "$+ (sn > (__ <+(sn) (sn=sn !< sn) << =sn) !$- sn)",
 
              // Insert the 'el' specifier as a constituent in adjacent
              // noun phrase
@@ -558,13 +559,13 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
 
     // "del que golpea:" insert 'el' as specifier into adjacent relative
     // phrase
-    new Pair("sp < (prep=prep < (sp000 < /(?i)^del$/=elided)) " +
-             ": (__ $- prep) << relatiu=relatiu",
+    new Pair("sp < (prep=prep < (sp000 < /(?i)^(a|de)l$/=elided) $+ " +
+      "(S=S <<, relatiu))",
 
              // Build a noun phrase in the neighboring relative clause
              // containing the 'el' specifier
              "[relabel elided /(?i)l//] " +
-             "[adjoinF (sn (spec (da0000 el)) foot@) relatiu]"),
+             "[adjoinF (sn (spec (da0000 el)) (grup.nom foot@)) S]"),
 
     // "al" + infinitive phrase
     new Pair("prep < (sp000 < /(?i)^(al|del)$/=elided) $+ " +
@@ -619,6 +620,59 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
 
              "[delete kill] " +
              "[adjoinF (sp (prep (sp000 de)) (sn (spec (da0000 el)) foot@)) target]"),
+
+    // "a favor del X," "en torno al Y": very common (and somewhat
+    // complex) phrase structure that we can match
+    new Pair("sp000 < /(?i)^(a|de)l$/=contraction >: (prep >` (/^grup\\.prep$/ " +
+      ">` (prep=prep > sp $+ (sn=sn <, /^grup\\.(nom|[wz])/))))",
+
+      "[relabel contraction /(?i)l//] [insert (spec (da0000 el)) >0 sn]"),
+
+    // "en vez del X": same as above, except prepositional phrase
+    // functions as conjunction (and is labeled as such)
+    new Pair("sp000 < /(?i)^(a|de)l$/=contraction >: (prep >` (sp >: (conj $+ (sn=sn <, /^grup\\.(nom|[wz])/))))",
+
+      "[relabel contraction /(?i)l//] [insert (spec (da0000 el)) >0 sn]"),
+
+    // "a favor del X," "en torno al Y" where X, Y are doubly nested
+    // substantives
+    new Pair("sp000 < /(?i)^(a|de)l$/=contraction >: (prep >` (/^grup\\.prep$/ " +
+      ">` (prep=prep > sp $+ (sn <, (sn=sn <, /^grup\\.(nom|[wz])/)))))",
+
+      "[relabel contraction /(?i)l//] [insert (spec (da0000 el)) >0 sn]"),
+
+    // "a favor del X," "en torno al Y" where X, Y already have
+    // leading specifiers
+    new Pair("sp000 < /(?i)^(a|de)l$/=contraction >: (prep >` (/^grup\\.prep$/ " +
+      ">` (prep > sp $+ (sn=sn <, spec=spec))))",
+
+      "[relabel contraction /(?i)l//] [insert (da0000 el) >0 spec]"),
+
+    // "a favor del X," "en torno al Y" where X, Y are nominal
+    // groups (not substantives)
+    new Pair("sp000 < /(?i)^(a|de)l$/=contraction >: (prep >` (/^grup\\.prep$/ " +
+      ">` (prep > sp $+ /^grup\\.(nom|[wz])$/=ng)))",
+
+      "[adjoinF (sn (spec (da0000 el)) foot@) ng] [relabel contraction /(?i)l//]"),
+
+    // "al," "del" as part of coordinating conjunction: "frente al,"
+    // "además del"
+    //
+    // (nearby noun phrase labeled as nominal group)
+    new Pair("sp000 < /(?i)^(de|a)l$/=elided >` (/^grup\\.cc$/ >: (conj $+ /^grup\\.nom/=gn))",
+      "[relabel elided /(?i)l//] [adjoinF (sn (spec (da0000 el)) foot@) gn]"),
+
+    // "al" + participle in adverbial phrase: "al contado," "al descubierto"
+    new Pair("sp000=sp < /(?i)^al$/=elided $+ /^vmp/",
+      "[relabel elided /(?i)l//] [insert (da0000 el) $- sp]"),
+
+    // über-special case: 15021_20000218.tbf-5
+    //
+    // intentional: article should bind all of quoted phrase, even
+    // though there are multiple clauses (kind of a crazy sentence)
+    new Pair("prep < (sp000 < /(?i)^(al|del)$/=elided) $+ (S=S <+(S) (/^f/=punct $+ (S <+(S) (S <, infinitiu))))",
+      "[relabel elided /(?i)l//] [adjoinF (sn (spec (da0000 el)) (grup.nom foot@)) S]"),
+
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> elisionExpansions =
