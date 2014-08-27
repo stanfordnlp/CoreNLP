@@ -43,6 +43,7 @@ public class SpanishXMLTreeReader implements TreeReader {
   private InputStream stream;
   private final TreeNormalizer treeNormalizer;
   private final TreeFactory treeFactory;
+  private boolean simplifiedTagset;
 
   private static final String NODE_SENT = "sentence";
 
@@ -51,6 +52,7 @@ public class SpanishXMLTreeReader implements TreeReader {
   private static final String ATTR_FUNC = "func";
   private static final String ATTR_NAMED_ENTITY = "ne";
   private static final String ATTR_POS = "pos";
+  private static final String ATTR_POSTYPE = "postype";
   private static final String ATTR_ELLIPTIC = "elliptic";
   private static final String ATTR_PUNCT = "punct";
 
@@ -63,24 +65,19 @@ public class SpanishXMLTreeReader implements TreeReader {
    * Read parse trees from a Reader.
    *
    * @param in The <code>Reader</code>
+   * @param simplifiedTagset If `true`, convert part-of-speech labels to a
+   *          simplified version of the EAGLES tagset, where the tags do not
+   *          include extensive morphological analysis
    */
-  public SpanishXMLTreeReader(Reader in, boolean ccTagset) {
-    this(in, new LabeledScoredTreeFactory(), new SpanishTreeNormalizer());
-  }
-
-  /**
-   * Read parse trees from a Reader.
-   *
-   * @param in Reader
-   * @param tf TreeFactory -- factory to create some kind of Tree
-   * @param tn the method of normalizing trees
-   */
-  public SpanishXMLTreeReader(Reader in, TreeFactory tf, TreeNormalizer tn) {
+  public SpanishXMLTreeReader(Reader in, boolean simplifiedTagset) {
     TreebankLanguagePack tlp = new SpanishTreebankLanguagePack();
 
-    stream = new ReaderInputStream(in,tlp.getEncoding());
-    treeFactory = tf;
-    treeNormalizer = tn;
+    this.simplifiedTagset = simplifiedTagset;
+
+    stream = new ReaderInputStream(in, tlp.getEncoding());
+    treeFactory = new LabeledScoredTreeFactory();
+    treeNormalizer = simplifiedTagset
+      ? new SpanishTreeNormalizer() : new TreeNormalizer();
 
     DocumentBuilder parser = XMLUtils.getXmlParser();
     try {
@@ -157,12 +154,33 @@ public class SpanishXMLTreeReader implements TreeReader {
       String tagName = node.getTagName();
       if (tagName.equals("i")) {
         return "i";
+      } else if (tagName.equals("r")) {
+        return "rg";
       } else if (tagName.equals("z")) {
         return "z0";
       }
 
-      if (node.hasAttribute(ATTR_PUNCT))
+      // Handle icky issues related to "que"
+      String posType = node.getAttribute(ATTR_POSTYPE);
+      String word = getWord(node);
+      if (tagName.equals("c") && posType.equals("subordinating")) {
+        return "cs";
+      } else if (tagName.equals("p") && posType.equals("relative")
+                 && word.equalsIgnoreCase("que")) {
+        return "pr0cn000";
+      }
+
+      if (simplifiedTagset) {
+        // If we are using the simplfied tagset, we can make some more
+        // broad inferences
+        if (tagName.equals("a")) {
+          return "aq0000";
+        }
+      }
+
+      if (node.hasAttribute(ATTR_PUNCT)) {
         return "f";
+      }
     }
 
     return pos;
@@ -279,7 +297,7 @@ public class SpanishXMLTreeReader implements TreeReader {
     for(int i = 0; i < args.length; i++)
       fileList.add(new File(args[i]));
 
-    TreeReaderFactory trf = new SpanishXMLTreeReaderFactory(false);
+    TreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true);
     int totalTrees = 0;
     Set<String> morphAnalyses = Generics.newHashSet();
     try {
