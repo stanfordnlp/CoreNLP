@@ -49,8 +49,8 @@ public class HamleDTMultiWordClassifier {
 
   private static final List<Function<String, List<String>>> featureFunctions = new
     ArrayList<Function<String, List<String>>>() {{
-      add(new LeadingPOSFeatureFunction("v")); // verbs
-      add(new LeadingPOSFeatureFunction("s")); // prepositions
+      add(new LeadingPOSFeatureFunction("V")); // verbs
+      add(new LeadingPOSFeatureFunction("S")); // prepositions
       add(new CharacterNGramFeatureFunction(2, 4));
       add(new WordShapeFeatureFunction());
     }};
@@ -133,9 +133,10 @@ public class HamleDTMultiWordClassifier {
   private void outputTestExample(Datum<String, String> datum, String answer,
                                  Counter<String> logScores,
                                  Distribution<String> scoreDist) {
-    List<String> classes = Counters.toSortedList(logScores);
-
-    // TODO output per-example information
+    String line = datum.label() + '\t' + answer + '\t'
+      + nf.format(scoreDist.probabilityOf(answer)) + '\t'
+      + nf.format(scoreDist.probabilityOf(datum.label()));
+    System.out.println(line);
   }
 
   private void outputTestSummary(Collection<String> labels, GeneralDataset<String, String> test,
