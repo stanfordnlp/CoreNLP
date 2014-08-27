@@ -448,9 +448,26 @@ public final class MultiWordPreprocessor {
     }
 
     if (unigramTagger.firstKeySet().contains(word))
-      return Counters.argmax(unigramTagger.getCounter(word));
+      return Counters.argmax(unigramTagger.getCounter(word), new POSTieBreaker());
 
     return ManualUWModel.getTag(word, containingPhraseStr);
+  }
+
+  /**
+   * Resolves "ties" between candidate part-of-speech tags encountered by the unigram tagger.
+   */
+  private static class POSTieBreaker implements Comparator<String> {
+    @Override
+    public int compare(String o1, String o2) {
+      // Prefer nouns over everything
+      if (o1.startsWith("n"))
+        return -1;
+      else if (o2.startsWith("n"))
+        return 1;
+
+      // No other policies at the moment
+      return 0;
+    }
   }
 
   /**
