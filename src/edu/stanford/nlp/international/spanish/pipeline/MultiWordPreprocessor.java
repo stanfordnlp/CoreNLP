@@ -210,6 +210,7 @@ public final class MultiWordPreprocessor {
       add("Contra");
       add("Gracias"); // interjection
       add("in"); // preposition; only appears in corpus as "in extremis" (preposition)
+      add("Mercado");
       add("Jesús"); // interjection
       add("Salvo");
       add("Sin");
@@ -258,6 +259,16 @@ public final class MultiWordPreprocessor {
         return "nc0s000";
       else if (word.equals("Paso") && containingPhrase.equals("El Paso"))
         return "np00000";
+      else if (word.equals("medio") && (containingPhrase.endsWith("medio de") || containingPhrase.endsWith("ambiente")
+        || containingPhrase.endsWith("por medio") || containingPhrase.contains("por medio")
+        || containingPhrase.endsWith("medio")))
+        return "nc0s000";
+      else if (word.equals("Medio") && containingPhrase.contains("Ambiente"))
+        return "nc0s000";
+      else if (word.equals("Medio") && containingPhrase.equals("Oriente Medio"))
+        return "aq0000";
+      else if (word.equals("media") && containingPhrase.equals("mass media"))
+        return "nc0n000";
 
       if (word.equals("Al")) {
         // "Al" is sometimes a part of name phrases: Arabic names, Al Gore, etc.

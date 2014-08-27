@@ -471,3 +471,5 @@ public class MultiWordTreeExpander {
 // etarras . perseguidos ("a salvo")
 // José . Vicente ("de vez en cuando")
 // PSC . (/^-$/ . PSOE) ("por lo que respecta")
+// científicos . (americanos . /,/) ("publica o perece")
+// Mediante . gruesas ("en su defecto")
