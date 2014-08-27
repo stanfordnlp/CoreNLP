@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 
 
 /** @author Christopher Manning */
-public class PTBTokenizerAnnotatorTest extends TestCase {
+public class TokenizerAnnotatorTest extends TestCase {
 
   private static final String text = "She'll prove it ain't so.";
   private static List<String> tokenWords = Arrays.asList(new String[] {
@@ -30,7 +30,7 @@ public class PTBTokenizerAnnotatorTest extends TestCase {
 
   public void testNewVersion() {
     Annotation ann = new Annotation(text);
-    Annotator annotator = new PTBTokenizerAnnotator();
+    Annotator annotator = new TokenizerAnnotator();
     annotator.annotate(ann);
     Iterator<String> it = tokenWords.iterator();
     for (CoreLabel word : ann.get(CoreAnnotations.TokensAnnotation.class)) {

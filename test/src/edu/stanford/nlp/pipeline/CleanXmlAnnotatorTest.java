@@ -34,11 +34,11 @@ public class CleanXmlAnnotatorTest extends TestCase {
     synchronized(CleanXmlAnnotatorTest.class) {
       if (ptbInvertible == null) {
         ptbInvertible =
-          new PTBTokenizerAnnotator(false, "invertible,ptb3Escaping=true");
+          new TokenizerAnnotator(false, "invertible,ptb3Escaping=true");
       }
       if (ptbNotInvertible == null) {
         ptbNotInvertible =
-          new PTBTokenizerAnnotator(false,
+          new TokenizerAnnotator(false,
                                     "invertible=false,ptb3Escaping=true");
       }
       if (cleanXmlAllTags == null) {

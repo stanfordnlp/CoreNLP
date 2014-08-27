@@ -4,7 +4,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.pipeline.PTBTokenizerAnnotator;
+import edu.stanford.nlp.pipeline.TokenizerAnnotator;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,8 +15,8 @@ import junit.framework.TestCase;
 
 public class WordToSentenceProcessorTest extends TestCase {
 
-  private static final Annotator ptb = new PTBTokenizerAnnotator(false);
-  private static final Annotator ptbNL = new PTBTokenizerAnnotator(false, "invertible,ptb3Escaping=true,tokenizeNLs=true");
+  private static final Annotator ptb = new TokenizerAnnotator(false);
+  private static final Annotator ptbNL = new TokenizerAnnotator(false, "invertible,ptb3Escaping=true,tokenizeNLs=true");
   private static final WordToSentenceProcessor<CoreLabel> wts = new WordToSentenceProcessor<CoreLabel>();
   private static final WordToSentenceProcessor<CoreLabel> wtsNull =
           new WordToSentenceProcessor<CoreLabel>(true); // treat input as one sentence

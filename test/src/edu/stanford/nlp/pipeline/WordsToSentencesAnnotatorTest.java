@@ -25,7 +25,7 @@ public class WordsToSentencesAnnotatorTest extends TestCase {
     Annotation doc = new Annotation(text);
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit");
-    //Annotator annotator = new PTBTokenizerAnnotator();
+    //Annotator annotator = new TokenizerAnnotator();
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     pipeline.annotate(doc);
 
