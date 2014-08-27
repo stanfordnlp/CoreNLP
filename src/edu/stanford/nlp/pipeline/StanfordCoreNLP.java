@@ -363,6 +363,12 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         if (properties.getProperty("tokenize.options") != null) {
           os.append(":tokenize.options:" + properties.getProperty("tokenize.options"));
         }
+        if (properties.getProperty("tokenize.language") != null) {
+          os.append(":tokenize.language:" + properties.getProperty("tokenize.language"));
+        }
+        if (properties.getProperty("tokenize.class") != null) {
+          os.append(":tokenize.class:" + properties.getProperty("tokenize.class"));
+        }
         if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
                 "false"))) {
           os.append(WhitespaceTokenizerAnnotator.EOL_PROPERTY + ":" +

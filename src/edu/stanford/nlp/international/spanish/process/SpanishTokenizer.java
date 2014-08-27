@@ -135,23 +135,22 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 		String first;
 		String second;
 
-		switch (word.toLowerCase()) {
-		case "del": 
-		case "al":
-		  first = word.substring(0, word.length()-1);
-			char lastChar = word.charAt(word.length()-1);
-			if(Character.isLowerCase(lastChar))
-				second = "el";
-			else second = "EL";
-			break;
-
-		case "conmigo": 
-		case "contigo":
-		case "consigo":
-		default:
+    String lowered = word.toLowerCase();
+    if (lowered.equals("del") || lowered.equals("al")) {
+      first = word.substring(0, lowered.length() - 1);
+      char lastChar = word.charAt(lowered.length() - 1);
+      if (Character.isLowerCase(lastChar))
+        second = "el";
+      else second = "EL";
+    } else if (lowered.equals("conmigo") || lowered.equals("consigo")) {
 			first = word.substring(0, 3);
-			second = word.substring(3, 5);
-		}
+			second = word.charAt(3) + "í";
+		} else if (lowered.equals("contigo")) {
+      first = word.substring(0, 3);
+      second = word.substring(3, 5);
+    } else {
+      throw new IllegalArgumentException("Invalid contraction provided to processContraction");
+    }
    
     compoundBuffer.add(copyCoreLabel(cl, second));
     return copyCoreLabel(cl, first);

@@ -8,6 +8,8 @@ import edu.stanford.nlp.trees.international.spanish.*;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
+import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 import java.io.*;
 import java.util.*;
@@ -95,24 +97,31 @@ public class AnCoraProcessor {
     final String encoding = new SpanishTreebankLanguagePack().getEncoding();
 
     final SpanishXMLTreeReaderFactory trf = new SpanishXMLTreeReaderFactory(true, true, ner, false);
-    ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-    List<Future<Pair<TwoDimensionalCounter<String, String>, List<Tree>>>> readFutures = new
-      ArrayList<Future<Pair<TwoDimensionalCounter<String, String>, List<Tree>>>>();
+    MulticoreWrapper<File, Pair<TwoDimensionalCounter<String, String>, List<Tree>>>
+      wrapper = new MulticoreWrapper<File, Pair<TwoDimensionalCounter<String, String>,
+      List<Tree>>>(Runtime.getRuntime().availableProcessors(),
+                     new XMLTreeProcessor(trf, encoding));
 
     // Set up processing futures
-    for (final File file : inputFiles)
-      readFutures.add(pool.submit(new XMLTreeProcessor(trf, file, encoding)));
+    for (final File file : inputFiles) {
+      wrapper.put(file);
 
-    // OK, now merge results from each thread
-    for (Future<Pair<TwoDimensionalCounter<String, String>, List<Tree>>> future : readFutures) {
-      Pair<TwoDimensionalCounter<String, String>, List<Tree>> result = future.get();
+      while (wrapper.peek()) {
+        Pair<TwoDimensionalCounter<String, String>, List<Tree>> result = wrapper.poll();
+        unigramTagger = Counters.add(unigramTagger, result.first());
+        trees.addAll(result.second());
+      }
+    }
 
-      Counters.addInPlace(unigramTagger, result.first());
+    wrapper.join();
+
+    while (wrapper.peek()) {
+      Pair<TwoDimensionalCounter<String, String>, List<Tree>> result = wrapper.poll();
+      unigramTagger = Counters.add(unigramTagger, result.first());
       trees.addAll(result.second());
     }
 
-    pool.shutdown();
     return trees;
   }
 
@@ -120,26 +129,26 @@ public class AnCoraProcessor {
    * Processes a single file containing AnCora XML trees. Returns MWE statistics for the trees in
    * the file and the actual parsed trees.
    */
-  private class XMLTreeProcessor implements Callable<Pair<TwoDimensionalCounter<String, String>,
-    List<Tree>>> {
-    private SpanishXMLTreeReaderFactory trf;
-    private File file;
-    private String encoding;
+  private class XMLTreeProcessor implements
+    ThreadsafeProcessor<File, Pair<TwoDimensionalCounter<String, String>,
+        List<Tree>>> {
+    private final SpanishXMLTreeReaderFactory trf;
+    private final String encoding;
 
     /**
      * Collects unigram tag counts which will be aggregated for use in tag inference later
      */
-    private TwoDimensionalCounter<String, String> unigramTagger = new TwoDimensionalCounter<String,
+    private final TwoDimensionalCounter<String, String> unigramTagger =
+      new TwoDimensionalCounter<String,
       String>();
 
-    private XMLTreeProcessor(SpanishXMLTreeReaderFactory trf, File file, String encoding) {
+    private XMLTreeProcessor(SpanishXMLTreeReaderFactory trf, String encoding) {
       this.trf = trf;
-      this.file = file;
       this.encoding = encoding;
     }
 
     @Override
-    public Pair<TwoDimensionalCounter<String, String>, List<Tree>> call() {
+    public Pair<TwoDimensionalCounter<String, String>, List<Tree>> process(File file) {
       try {
         Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(file),
                                                              encoding));
@@ -171,6 +180,12 @@ public class AnCoraProcessor {
         e.printStackTrace();
         return null;
       }
+    }
+
+    @Override
+    public ThreadsafeProcessor<File, Pair<TwoDimensionalCounter<String, String>,
+      List<Tree>>> newInstance() {
+      return this;
     }
 
     private void updateTagger(Tree t) {
@@ -349,57 +364,92 @@ public class AnCoraProcessor {
     return null;
   }
 
+  private class MultiWordProcessor implements ThreadsafeProcessor<Collection<Tree>,
+    Collection<Tree>> {
+
+    private final TreeNormalizer tn;
+    private final Factory<TreeNormalizer> tnf;
+    private final TreeFactory tf;
+
+    private final boolean ner;
+
+    // NB: TreeNormalizer is not thread-safe, and so we need to accept + store a
+    // TreeNormalizer factory instead
+    public MultiWordProcessor(Factory<TreeNormalizer> tnf, TreeFactory tf,
+                              boolean ner) {
+      this.tnf = tnf;
+      this.tn = tnf.create();
+      this.tf = tf;
+      this.ner = ner;
+    }
+
+    @Override
+    public Collection<Tree> process(Collection<Tree> coll) {
+      List<Tree> ret = new ArrayList<Tree>();
+
+      // Apparently TsurgeonPatterns are not thread safe
+      MultiWordTreeExpander expander = new MultiWordTreeExpander();
+
+      for (Tree t : coll) {
+        // Begin with basic POS / phrasal category inference
+        MultiWordPreprocessor
+          .traverseAndFix(t, null, AnCoraProcessor.this.unigramTagger, ner);
+
+        // Now "decompress" further the expanded trees formed by multiword token splitting
+        t = expander.expandPhrases(t, tn, tf);
+
+        t = tn.normalizeWholeTree(t, tf);
+
+        ret.add(t);
+      }
+
+      return ret;
+    }
+
+    @Override
+    public ThreadsafeProcessor<Collection<Tree>, Collection<Tree>> newInstance() {
+      return new MultiWordProcessor(tnf, tf, ner);
+    }
+  }
+
   /**
    * Fix tree structure, phrasal categories and part-of-speech labels in newly expanded
    * multi-word tokens.
    */
   private List<Tree> fixMultiWordTokens() throws InterruptedException, ExecutionException {
-    final boolean ner = PropertiesUtils.getBool(options, "ner", false);
+    boolean ner = PropertiesUtils.getBool(options, "ner", false);
 
     // Shared resources
-    final TreeNormalizer tn = new SpanishTreeNormalizer(true, false, false);
-    final TreeFactory tf = new LabeledScoredTreeFactory();
+    Factory<TreeNormalizer> tnf = new Factory<TreeNormalizer>() {
+      @Override public TreeNormalizer create() {
+        return new SpanishTreeNormalizer(true, false, false);
+      }
+    };
+    TreeFactory tf = new LabeledScoredTreeFactory();
+
+    ThreadsafeProcessor<Collection<Tree>, Collection<Tree>> processor =
+      new MultiWordProcessor(tnf, tf, ner);
 
     int availableProcessors = Runtime.getRuntime().availableProcessors();
-    ExecutorService pool = Executors.newFixedThreadPool(availableProcessors);
+    MulticoreWrapper<Collection<Tree>, Collection<Tree>> wrapper =
+      new MulticoreWrapper<Collection<Tree>, Collection<Tree>>(availableProcessors, processor);
 
     // Chunk our work so that parallelization is actually worth it
     int numChunks = availableProcessors * 20;
     List<Collection<Tree>> chunked = CollectionUtils.partitionIntoFolds(trees, numChunks);
-    List<Future<List<Tree>>> futures = new ArrayList<Future<List<Tree>>>();
+    List<Tree> ret = new ArrayList<Tree>();
 
     for (final Collection<Tree> coll : chunked) {
-      futures.add(pool.submit(new Callable<List<Tree>>() {
-        @Override
-        public List<Tree> call() {
-          List<Tree> ret = new ArrayList<Tree>();
+      wrapper.put(coll);
 
-          // Apparently TsurgeonPatterns are not thread safe
-          MultiWordTreeExpander expander = new MultiWordTreeExpander();
-
-          for (Tree t : coll) {
-            // Begin with basic POS / phrasal category inference
-            MultiWordPreprocessor
-              .traverseAndFix(t, null, unigramTagger, ner);
-
-            // Now "decompress" further the expanded trees formed by multiword token splitting
-            t = expander.expandPhrases(t, tn, tf);
-
-            t = tn.normalizeWholeTree(t, tf);
-
-            ret.add(t);
-          }
-
-          return ret;
-        }
-      }));
+      while (wrapper.peek())
+        ret.addAll(wrapper.poll());
     }
 
-    List<Tree> ret = new ArrayList<Tree>();
-    for (Future<List<Tree>> future : futures)
-      ret.addAll(future.get());
+    wrapper.join();
 
-    pool.shutdown();
+    while (wrapper.peek())
+      ret.addAll(wrapper.poll());
 
     return ret;
   }

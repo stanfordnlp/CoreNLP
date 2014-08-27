@@ -22,6 +22,12 @@ public class PTBTokenizerAnnotatorTest extends TestCase {
           "."
   });
 
+  private static List<String> spanishTokens = Arrays.asList(new String[] {
+          "Da",
+          "me",
+          "lo",
+    });
+
   public void testNewVersion() {
     Annotation ann = new Annotation(text);
     Annotator annotator = new PTBTokenizerAnnotator();
@@ -39,4 +45,42 @@ public class PTBTokenizerAnnotatorTest extends TestCase {
     assertFalse("Too few tokens in new CoreLabel usage", it2.hasNext());
   }
 
+  public void testSpanish() {
+    Annotation ann = new Annotation("Damelo");
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize");
+    props.setProperty("tokenize.language", "es");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(ann);
+
+    Iterator<String> it = spanishTokens.iterator();
+    for (CoreLabel word : ann.get(CoreAnnotations.TokensAnnotation.class)) {
+      assertEquals("Bung token in new CoreLabel usage", it.next(), word.get(CoreAnnotations.TextAnnotation.class));
+    }
+    assertFalse("Too few tokens in new CoreLabel usage", it.hasNext());
+  }
+
+  public void testNotSpanish() {
+    Annotation ann = new Annotation("Damelo");
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize");
+    props.setProperty("tokenize.language", "english");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(ann);
+
+    assertEquals(1, ann.get(CoreAnnotations.TokensAnnotation.class).size());
+    assertEquals("Damelo", ann.get(CoreAnnotations.TokensAnnotation.class).get(0).word());
+  }
+
+  public void testBadLanguage() {
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize");
+    props.setProperty("tokenize.language", "notalanguage");
+    try {
+      StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+      throw new RuntimeException("Should have failed");
+    } catch (IllegalArgumentException e) {
+      // yay, passed
+    }
+  }
 }

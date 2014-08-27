@@ -675,7 +675,25 @@ public abstract class GrammaticalStructure implements Serializable {
    * @return The typed dependencies of this grammatical structure
    */
   public List<TypedDependency> typedDependencies(boolean includeExtras) {
-    List<TypedDependency> deps = new ArrayList<TypedDependency>(includeExtras ? allTypedDependencies : typedDependencies);
+    List<TypedDependency> deps;
+    // This copy has to be done because of the broken way
+    // TypedDependency objects can be mutated by downstream methods
+    // such as collapseDependencies.  Without the copy here it is
+    // possible for two consecutive calls to
+    // typedDependenciesCollapsed to get different results.  For
+    // example, the English dependencies rename existing objects KILL
+    // to note that they should be removed.
+    if (includeExtras) {
+      deps = new ArrayList<TypedDependency>(allTypedDependencies.size());
+      for (TypedDependency dep : allTypedDependencies) {
+        deps.add(new TypedDependency(dep));
+      }
+    } else {
+      deps = new ArrayList<TypedDependency>(typedDependencies.size());
+      for (TypedDependency dep : typedDependencies) {
+        deps.add(new TypedDependency(dep));
+      }
+    }
     correctDependencies(deps);
     return deps;
   }
