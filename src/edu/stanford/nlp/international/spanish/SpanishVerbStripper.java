@@ -1,16 +1,29 @@
 package edu.stanford.nlp.international.spanish;
 
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.io.*;
-
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Pair;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Provides a utility function for removing attached pronouns from
  * Spanish verb forms.
+ *
+ * @author Jon Gauthier
+ * @author Ishita Prasad
  */
 public final class SpanishVerbStripper {
 

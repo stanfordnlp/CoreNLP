@@ -1,43 +1,18 @@
 package edu.stanford.nlp.international.spanish.scripts;
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.Pattern;
-
-import javax.xml.parsers.DocumentBuilder;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
-import edu.stanford.nlp.io.ReaderInputStream;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.HasCategory;
-import edu.stanford.nlp.ling.HasContext;
-import edu.stanford.nlp.ling.HasIndex;
-import edu.stanford.nlp.ling.HasLemma;
-import edu.stanford.nlp.ling.HasTag;
-import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.Sentence;
-import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeFactory;
-import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
-import edu.stanford.nlp.trees.TreebankLanguagePack;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.XMLUtils;import java.io.*;
-import java.util.*;
-import java.util.regex.Pattern;
-
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeReaderFactory;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.regex.Pattern;
 
 /**
  * This script converts a PTB tree into TSV suitable for NER classification. The

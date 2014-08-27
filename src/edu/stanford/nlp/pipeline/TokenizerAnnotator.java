@@ -225,7 +225,7 @@ public class TokenizerAnnotator implements Annotator {
                                          "Use -tokenize.language, -tokenize.class, or -tokenize.whitespace \n" +
                                          "to specify a tokenizer.");
       
-		}
+    }
     return factory;
   }
 

@@ -1,40 +1,47 @@
 package edu.stanford.nlp.international.spanish.scripts;
 
 import edu.stanford.nlp.util.ConfusionMatrix;
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 public class ConfusionMatrixTSV {
-    
+
   public static void main(String[] args) {
-    if(args.length < 1) {
+    if (args.length < 1) {
       System.err.printf("Usage: java %s answers_file%n", ConfusionMatrix.class.getName());
       System.exit(-1);
     }
 
     try {
       ConfusionMatrix<String> cm = new ConfusionMatrix<String>();
-      
+
       String answersFile = args[0];
-      BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(answersFile), "UTF-8"));
-      
+      BufferedReader br = new BufferedReader(
+        new InputStreamReader(new FileInputStream(answersFile), "UTF-8"));
+
       String line = br.readLine();
-      for(; line != null; line = br.readLine()) {
-	String[] tokens = line.split("\\s");
-	if(tokens.length != 3){
-	  System.err.printf("ignoring bad line");
-	  continue;
-	  //System.exit(-1);
-	}
-	cm.add(tokens[2], tokens[1]);
+      for (; line != null; line = br.readLine()) {
+        String[] tokens = line.split("\\s");
+        if (tokens.length != 3) {
+          System.err.printf("ignoring bad line");
+          continue;
+          //System.exit(-1);
+        }
+        cm.add(tokens[2], tokens[1]);
       }
-      
+
       System.out.println(cm.toString());
     } catch (UnsupportedEncodingException e) {
-	e.printStackTrace();
+      e.printStackTrace();
     } catch (FileNotFoundException e) {
-	e.printStackTrace();
+      e.printStackTrace();
     } catch (IOException e) {
-	e.printStackTrace();
+      e.printStackTrace();
     }
   }
 }

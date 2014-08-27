@@ -343,18 +343,18 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-				String extraOptions = null;
-				boolean keepNewline = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
-				if (properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
-					keepNewline = true;
-				}
-				if(keepNewline) {
-					extraOptions = "tokenizeNLs,";
-				}
-				System.err.println(properties.getProperty("tokenize.language"));
-				return annotatorImplementation.tokenizer(properties, false, extraOptions);
-			}
-		
+        String extraOptions = null;
+        boolean keepNewline = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY,
+                                                                     "false"));
+        if (properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
+          keepNewline = true;
+        }
+        if (keepNewline) {
+          extraOptions = "tokenizeNLs,";
+        }
+        return annotatorImplementation.tokenizer(properties, false, extraOptions);
+      }
+
       @Override
       public String additionalSignature() {
         // keep track of all relevant properties for this annotator here!

@@ -13,7 +13,7 @@ import edu.stanford.nlp.process.LexedTokenFactory;
 /**
  *  A tokenizer for Spanish. Adapted from PTBTokenizer and
  *  FrenchTokenizer, but with extra rules for Spanish orthography.
-
+ *
  *  @author Ishita Prasad
  */
 

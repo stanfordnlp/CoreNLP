@@ -128,17 +128,17 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   /**
    * Handles contractions like del and al, marked by the lexer
-	 * 
-	 * del => de + l => de + el
-	 * al => a + l => a + el
-	 * con[mts]igo => con + [mts]i
-	 *
+   *
+   * del => de + l => de + el
+   * al => a + l => a + el
+   * con[mts]igo => con + [mts]i
+   *
    */
   private CoreLabel processContraction(CoreLabel cl) {
 		cl.remove(ParentAnnotation.class);
     String word = cl.word();
-		String first;
-		String second;
+    String first;
+    String second;
 
     String lowered = word.toLowerCase();
     if (lowered.equals("del") || lowered.equals("al")) {
@@ -163,11 +163,11 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   /**
    * Handles verbs with attached suffixes, marked by the lexer:
-	 *
-	 * Escribamosela => Escribamo + se + la => escribamos + se + la
-	 * Sentaos => senta + os => sentad + os
-	 * Damelo => da + me + lo
-	 *
+   *
+   * Escribamosela => Escribamo + se + la => escribamos + se + la
+   * Sentaos => senta + os => sentad + os
+   * Damelo => da + me + lo
+   *
    */
   private CoreLabel processVerb(CoreLabel cl) {
     cl.remove(ParentAnnotation.class);
@@ -195,19 +195,19 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     return compoundBuffer.remove(0);
   }
 
-	/**
-	 * a factory that vends CoreLabel tokens with default tokenization.
-	 */
-	public static TokenizerFactory<CoreLabel> coreLabelFactory() {
-		return SpanishTokenizerFactory.newCoreLabelTokenizerFactory();
-	}
+  /**
+   * a factory that vends CoreLabel tokens with default tokenization.
+   */
+  public static TokenizerFactory<CoreLabel> coreLabelFactory() {
+    return SpanishTokenizerFactory.newCoreLabelTokenizerFactory();
+  }
 
-	/**
-	 * recommended factory method
-	 */
-	public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory, String options) {
-		return new SpanishTokenizerFactory<T>(factory, options);
-	}
+  /**
+   * recommended factory method
+   */
+  public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory, String options) {
+    return new SpanishTokenizerFactory<T>(factory, options);
+  }
 
   public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory) {
     return new SpanishTokenizerFactory<T>(factory, ANCORA_OPTS);
@@ -236,28 +236,28 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     }
 
 
-		/**
-		 * Contructs a new SpanishTokenizer that returns T objects and uses the options passed in.
-		 *
-		 * @oaram factory a factory for the token type that the tokenizer will return
-		 * @param options a String of options, separated by commas
-		 * @return A TokenizerFactory that returns the right token types
-		 */
-		public static <T extends HasWord> SpanishTokenizerFactory<T> newSpanishTokenizerFactory(LexedTokenFactory<T> factory, 
-																																														String options) {
-			return new SpanishTokenizerFactory<T>(factory, options);
-		}
-
-
-		// Constructors 
-
-		/** Make a factory for SpanishTokenizers, default options */
-    private SpanishTokenizerFactory(LexedTokenFactory<T> factory) {
-      this.factory = factory;
-			setOptions(ANCORA_OPTS);
+    /**
+     * Contructs a new SpanishTokenizer that returns T objects and uses the options passed in.
+     *
+     * @param options a String of options, separated by commas
+     * @return A TokenizerFactory that returns the right token types
+     * @oaram factory a factory for the token type that the tokenizer will return
+     */
+    public static <T extends HasWord> SpanishTokenizerFactory<T> newSpanishTokenizerFactory(
+      LexedTokenFactory<T> factory, String options) {
+      return new SpanishTokenizerFactory<T>(factory, options);
     }
 
-		/** Make a factory for SpanishTokenizers, options passed in */
+
+    // Constructors
+
+    /** Make a factory for SpanishTokenizers, default options */
+    private SpanishTokenizerFactory(LexedTokenFactory<T> factory) {
+      this.factory = factory;
+      setOptions(ANCORA_OPTS);
+    }
+
+    /** Make a factory for SpanishTokenizers, options passed in */
     private SpanishTokenizerFactory(LexedTokenFactory<T> factory, String options) {
       this.factory = factory;
       setOptions(options);
@@ -281,42 +281,40 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
      */
     @Override
     public void setOptions(String options) {
-			if (options == null) return;
+      if (options == null) return;
 
       String[] optionList = options.split(",");
       for (String option : optionList) {
         String[] fields = option.split("=");
         if (fields.length == 1) {
-	  if (fields[0].equals("splitAll")) {
-	    splitCompoundOption = true;
-	    splitVerbOption = true;
-	    splitContractionOption = true;
-	  } else if (fields[0].equals("splitCompounds")) {
-	      splitCompoundOption = true;
-          } else if (fields[0].equals("splitVerbs")){
-	      splitVerbOption = true;
-	  } else if (fields[0].equals("splitContractions")) {
-	      splitContractionOption = true;
-	  } else {
+          if (fields[0].equals("splitAll")) {
+            splitCompoundOption = true;
+            splitVerbOption = true;
+            splitContractionOption = true;
+          } else if (fields[0].equals("splitCompounds")) {
+            splitCompoundOption = true;
+          } else if (fields[0].equals("splitVerbs")) {
+            splitVerbOption = true;
+          } else if (fields[0].equals("splitContractions")) {
+            splitContractionOption = true;
+          } else {
             lexerProperties.put(option, "true");
           }
 
         } else if (fields.length == 2) {
-	    if (fields[0].equals("splitAll")) {
-	      splitCompoundOption = Boolean.valueOf(fields[1]);
-	      splitVerbOption = Boolean.valueOf(fields[1]);
-	      splitContractionOption = Boolean.valueOf(fields[1]);
-	  } else if (fields[0].equals("splitCompounds")) {
-	      splitCompoundOption = Boolean.valueOf(fields[1]);
-	  } else if (fields[0].equals("splitVerbs")){
-	      splitVerbOption = Boolean.valueOf(fields[1]);
-	  } else if (fields[0].equals("splitContractions")) {
-	      splitContractionOption = Boolean.valueOf(fields[1]);
-	  } else {
-	      lexerProperties.put(fields[0], fields[1]);
+          if (fields[0].equals("splitAll")) {
+            splitCompoundOption = Boolean.valueOf(fields[1]);
+            splitVerbOption = Boolean.valueOf(fields[1]);
+            splitContractionOption = Boolean.valueOf(fields[1]);
+          } else if (fields[0].equals("splitCompounds")) {
+            splitCompoundOption = Boolean.valueOf(fields[1]);
+          } else if (fields[0].equals("splitVerbs")) {
+            splitVerbOption = Boolean.valueOf(fields[1]);
+          } else if (fields[0].equals("splitContractions")) {
+            splitContractionOption = Boolean.valueOf(fields[1]);
+          } else {
+            lexerProperties.put(fields[0], fields[1]);
           }
-
-	  /* TODOS ALL OVER THE PLACE */
 
         } else {
           System.err.printf("%s: Bad option %s%n", this.getClass().getName(), option);
@@ -355,7 +353,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     argOptionDefs.put("lowerCase", 0);
     argOptionDefs.put("encoding", 1);
     argOptionDefs.put("orthoOpts", 1);
-		argOptionDefs.put("lines", 0);
+    argOptionDefs.put("lines", 0);
     return argOptionDefs;
   }
 
@@ -379,8 +377,8 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
     // Lexer options
     final TokenizerFactory<CoreLabel> tf = SpanishTokenizer.coreLabelFactory();
-		if (options.containsKey("ancora")) 
-			tf.setOptions(ANCORA_OPTS);
+    if (options.containsKey("ancora"))
+      tf.setOptions(ANCORA_OPTS);
     String orthoOptions = options.getProperty("orthoOpts", "");
     tf.setOptions(orthoOptions);
 
@@ -410,9 +408,9 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
           System.out.println();
         } else {
           if (printSpace) {
-						if (lines) System.out.print(" "); 
-						else System.out.println();
-					}
+            if (lines) System.out.print(" ");
+            else System.out.println();
+          }
           String outputToken = toLower ? word.toLowerCase(es) : word;
           System.out.print(outputToken);
           printSpace = true;

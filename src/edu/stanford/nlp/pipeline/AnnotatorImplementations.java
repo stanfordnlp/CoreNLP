@@ -20,13 +20,6 @@ import java.util.*;
 public class AnnotatorImplementations {
 
   /**
-   * Tokenize, according to whitespace only
-   */
-  // public Annotator whitespaceTokenizer(Properties properties) {
-  //   return new WhitespaceTokenizerAnnotator(properties);
-  // }
-
-  /**
    * Tokenize, emulating the Penn Treebank
    */
   public Annotator tokenizer(Properties properties, boolean verbose, String options) {
