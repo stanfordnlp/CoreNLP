@@ -4,6 +4,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Properties;
 
@@ -17,6 +18,7 @@ import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.international.spanish.process.SpanishTokenizer;
 import edu.stanford.nlp.international.french.process.FrenchTokenizer;
 
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
@@ -38,27 +40,50 @@ public class TokenizerAnnotator implements Annotator {
    * and add a clause in getTokenizerType to identify it.
    */
   public enum TokenizerType {
-    Unspecified("invertible,ptb3Escaping=true"),
-    Unknown (""),
-    Spanish ("invertible,ptb3Escaping=true,splitAll=true"),
-    English ("invertible,ptb3Escaping=true"),
-    German ("invertible,ptb3Escaping=true"),
-    French (""),
-    Whitespace ("");
+    Unspecified(null, null, "invertible,ptb3Escaping=true"),
+    Spanish    ("es", "SpanishTokenizer", "invertible,ptb3Escaping=true,splitAll=true"),
+    English    ("en", "PTBTokenizer", "invertible,ptb3Escaping=true"),
+    German     ("de", null, "invertible,ptb3Escaping=true"),
+    French     ("fr", "FrenchTokenizer", ""),
+    Whitespace (null, "WhitespaceTokenizer", "");
 		
-    private String defaultOptions;
+    private final String abbreviation;
+    private final String className;
+    private final String defaultOptions;
 
-    // constructors
-    private TokenizerType() {
-      defaultOptions = null;
-    }
-
-    private TokenizerType(String defaultOptions) {
+    private TokenizerType(String abbreviation, String className, String defaultOptions) {
+      this.abbreviation = abbreviation;
+      this.className = className;
       this.defaultOptions = defaultOptions;
     }
 
     public String getDefaultOptions() {
       return defaultOptions;
+    }
+
+    private static final Map<String, TokenizerType> nameToTokenizerMap = initializeNameMap();
+
+    private static Map<String, TokenizerType> initializeNameMap() {
+      Map<String, TokenizerType> map = Generics.newHashMap();
+      for (TokenizerType type : TokenizerType.values()) {
+        if (type.abbreviation != null) {
+          map.put(type.abbreviation.toUpperCase(), type);
+        }
+        map.put(type.toString().toUpperCase(), type);
+      }
+      return Collections.unmodifiableMap(map);
+    }
+
+    private static final Map<String, TokenizerType> classToTokenizerMap = initializeClassMap();
+
+    private static Map<String, TokenizerType> initializeClassMap() {
+      Map<String, TokenizerType> map = Generics.newHashMap();
+      for (TokenizerType type : TokenizerType.values()) {
+        if (type.className != null) {
+          map.put(type.className.toUpperCase(), type);
+        }
+      }
+      return Collections.unmodifiableMap(map);
     }
 
     /***
@@ -69,60 +94,30 @@ public class TokenizerAnnotator implements Annotator {
       boolean whitespace = Boolean.valueOf(props.getProperty("tokenize.whitespace", "false"));
       String language = props.getProperty("tokenize.language", null);
       
-      // nothing specified
-      if (tokClass == null && whitespace == false && language == null) {
-        return Unspecified;
-      }
-      
-      if (tokClass != null) {
-        if (tokClass.equals("SpanishTokenizer")) {
-          return Spanish;
-        } else if (tokClass.equals("FrenchTokenizer")) {
-          return French;
-        } else if (tokClass.equals("PTBTokenizer")) {
-          return English;
-        } else if (tokClass.equals("WhitespaceTokenizer")) {
-          return Whitespace;
-        } else {
-          throw new IllegalArgumentException("TokenizerAnnotator: unknown tokenize.class property " + tokClass);
-        }
-      }
-      
       if(whitespace) {
         return Whitespace;
       }
 
-      if(language != null) {
-        if (language.equals(SPANISH) || language.equals(ES)) {
-          return Spanish;
-          
-        } else if (language.equals(FRENCH) || language.equals(FR)) {
-          return French;
-          
-        } else if (language.equals(ENGLISH) || language.equals(EN) ||
-                   language.equals(GERMAN) || language.equals(DE)) {
-          return English;
-        } else if (language.equals(WHITESPACE)) {
-          return Whitespace;          
-        } else {
-          throw new IllegalArgumentException("TokenizerAnnotator: unknown tokenize.language property " + language);
+      if (tokClass != null) {
+        TokenizerType type = classToTokenizerMap.get(tokClass.toUpperCase());
+        if (type == null) {
+          throw new IllegalArgumentException("TokenizerAnnotator: unknown tokenize.class property " + tokClass);
         }
+        return type;
       }
       
-      // specified but specified wrongly
-      return Unknown;
+      if (language != null) {
+        TokenizerType type = nameToTokenizerMap.get(language.toUpperCase());
+        if (type == null) {
+          throw new IllegalArgumentException("TokenizerAnnotator: unknown tokenize.language property " + language);
+        }
+        return type;
+      }
+
+      return Unspecified;
     }
   } // end enum TokenizerType
   
-  public static final String SPANISH = "spanish";
-  public static final String ES = "es";
-  public static final String FRENCH = "french";
-  public static final String FR = "fr";
-  public static final String ENGLISH = "english";
-  public static final String EN = "en";
-  public static final String GERMAN = "german";
-  public static final String DE = "de";
-  public static final String WHITESPACE = "whitespace";
   public static final String EOL_PROPERTY = "tokenize.keepeol";
   
   private final boolean VERBOSE;
@@ -135,12 +130,16 @@ public class TokenizerAnnotator implements Annotator {
   }
   
   public TokenizerAnnotator(boolean verbose) {
-    this(verbose, EN);
+    this(verbose, TokenizerType.English);
   } 
   
   public TokenizerAnnotator(String lang) {
     this(true, lang, null);
   }
+  
+  public TokenizerAnnotator(boolean verbose, TokenizerType lang) {
+    this(verbose, lang.toString());
+  } 
   
   public TokenizerAnnotator(boolean verbose, String lang) {
     this(verbose, lang, null);
