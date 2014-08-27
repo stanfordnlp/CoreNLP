@@ -40,7 +40,12 @@ import java.util.concurrent.*;
  * - Miscellaneous cleanup of parse trees, spelling fixes, parsing
  *   error corrections (see {@link SpanishTreeNormalizer})
  *
- * For invocation options, see {@link #main(String[])}.
+ * Apart from raw corpus data, this processor depends upon unigram
+ * part-of-speech tag data. If not provided explicitly to the
+ * processor, the data will be collected from the given files. (You can
+ * pre-compute POS data from AnCora XML using {@link AnCoraPOSStats}.)
+ *
+ * For invocation options, execute the class with no arguments.
  *
  * @author Jon Gauthier
  */
@@ -49,13 +54,23 @@ public class AnCoraProcessor {
   private List<File> inputFiles;
   private Properties options;
 
-  private final TwoDimensionalCounter<String, String> unigramTagger =
-    new TwoDimensionalCounter<String, String>();
+  private TwoDimensionalCounter<String, String> unigramTagger;
   private List<Tree> trees;
 
-  public AnCoraProcessor(List<File> inputFiles, Properties options) {
+  @SuppressWarnings("unchecked")
+  public AnCoraProcessor(List<File> inputFiles, Properties options)
+    throws IOException, ClassNotFoundException {
+
     this.inputFiles = inputFiles;
     this.options = options;
+
+    if (options.containsKey("unigramTagger")) {
+      ObjectInputStream ois = new ObjectInputStream(new FileInputStream(options.getProperty
+        ("unigramTagger")));
+      unigramTagger = (TwoDimensionalCounter<String, String>) ois.readObject();
+    } else {
+      unigramTagger = new TwoDimensionalCounter<String, String>();
+    }
   }
 
   public List<Tree> process() throws
@@ -220,20 +235,22 @@ public class AnCoraProcessor {
   private static final String usage =
     String.format("Usage: java %s [OPTIONS] file(s)%n%n", AnCoraProcessor.class.getName()) +
       "Options:\n" +
+      "    -unigramTagger <tagger_path>: Path to a serialized `TwoDimensionalCounter` which\n" +
+      "        should be used for unigram tagging in multi-word token expansion. If this option\n" +
+      "        is not provided, a unigram tagger will be built from the provided corpus data.\n" +
+      "        (This option is useful if you are processing splits of the corpus separately but\n" +
+      "        want each step to benefit from a complete tagger.)\n" +
       "    -ner: Add NER-specific information to trees\n";
 
   private static final Map<String, Integer> argOptionDefs = new HashMap<String, Integer>() {{
+    put("unigramTagger", 1);
     put("ner", 0);
   }};
 
-  /**
-   * TODO document invocation options
-   */
   public static void main(String[] args)
-    throws InterruptedException, IOException, ExecutionException {
-    if (args.length < 1) {
+    throws InterruptedException, IOException, ExecutionException, ClassNotFoundException {
+    if (args.length < 1)
       System.err.println(usage);
-    }
 
     Properties options = StringUtils.argsToProperties(args, argOptionDefs);
     String[] remainingArgs = options.getProperty("").split(" ");

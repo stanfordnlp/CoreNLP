@@ -20,6 +20,11 @@ public class SpanishXMLTreeReaderFactory implements TreeReaderFactory, Serializa
   private final boolean retainNER;
   private final boolean detailedAnnotations;
 
+  // Initialize with default options
+  public SpanishXMLTreeReaderFactory() {
+    this(true, true, false, false);
+  }
+
   public SpanishXMLTreeReaderFactory(boolean simplifiedTagset,
                                      boolean aggressiveNormalization,
                                      boolean retainNER,
