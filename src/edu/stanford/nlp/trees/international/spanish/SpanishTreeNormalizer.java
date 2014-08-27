@@ -3,6 +3,8 @@ package edu.stanford.nlp.trees.international.spanish;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
@@ -148,12 +150,12 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       Tree leaf = preterminals[i].firstChild();
       String leafValue = ((CoreLabel) leaf.label()).value();
 
-      if (leafValue.indexOf('_') == -1)
+      String[] words = getMultiWords(leafValue);
+      if (words.length == 1)
         continue;
 
       // Leaf is a multi-word token; build new pre-terminal nodes for
       // each of its constituent words
-      String[] words = leafValue.split("_");
       List<Tree> newPreterminals = new ArrayList<Tree>(words.length);
       for (int j = 0; j < words.length; j++) {
         String word = words[j];
@@ -173,6 +175,26 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       Tree newPrePreTerminal = tf.newTreeNode(MW_PHRASE_TAG, newPreterminals);
       t.setChild(i, newPrePreTerminal);
     }
+  }
+
+  private static final Pattern pQuoted = Pattern.compile("\".+\"");
+
+  /**
+   * Return the (single or multiple) words which make up the given
+   * token.
+   */
+  private String[] getMultiWords(String token) {
+    Matcher quoteMatcher = pQuoted.matcher(token);
+    if (quoteMatcher.matches()) {
+      String[] ret = new String[3];
+      ret[0] = "\"";
+      ret[1] = quoteMatcher.group(0);
+      ret[2] = "\"";
+
+      return ret;
+    }
+
+    return token.split("_");
   }
 
 }

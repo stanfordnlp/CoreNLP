@@ -35,6 +35,10 @@ public class SpanishTreeNormalizerTest extends TestCase {
     // Two multi-word tokens as siblings
     new Pair("(a (b c_d) (b e_f))",
              "(a (MW_PHRASE? (MW? c) (MW? d)) (MW_PHRASE? (MW? e) (MW? f)))"),
+
+    // Quotation mark "words" should be separated
+    new Pair("(a (b \"cde\"))",
+             "(a (MW_PHRASE? (MW? \") (MW? cde) (MW? \")))"),
   };
 
   public void testMultiWordNormalization() {
