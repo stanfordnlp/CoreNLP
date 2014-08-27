@@ -82,7 +82,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     annotations.put("-markConjTypes", new Pair("@conj <: /^c[cs]/=c", new MarkConjTypeFunction()));
 
     // +___ F1
-    annotations.put("-markPronounNPs", new Pair("/^grup\\.nom/ <: /^p[0p]/",
+    annotations.put("-markPronounNPs", new Pair("/^(sn|grup\\.nom)/ <<: /^p[0p]/",
                                                 new SimpleStringFunction("-pronoun")));
 
     // +1.24 F1
