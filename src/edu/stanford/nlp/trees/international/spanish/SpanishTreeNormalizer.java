@@ -71,28 +71,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   };
 
   /**
-   * A filter which rejects "A over A" nodes: node pairs A, B which are
-   * unary rewrites with equal labels.
-   *
-   * (This is implemented in
-   * {@link edu.stanford.nlp.trees.BobChrisTreeNormalizer}, but we need
-   * to have special handling here so as to not destroy multiword
-   * tokens.)
-   */
-  private static final Filter<Tree> aOverAFilter = new Filter<Tree>() {
-    public boolean accept(Tree tree) {
-      if (tree.isLeaf() || tree.isPreTerminal() || tree.numChildren() != 1)
-        return true;
-
-      String value = tree.value();
-      if (value == null || value.startsWith("MW"))
-        return true;
-
-      return !value.equals(tree.getChild(0).value());
-    }
-  };
-
-  /**
    * Resolves some inconsistencies in constituent naming:
    *
    * - "sa" and "s.a" are equivalent -- merge to "s.a"
