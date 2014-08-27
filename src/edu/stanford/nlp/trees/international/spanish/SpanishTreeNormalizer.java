@@ -408,6 +408,8 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   private static final TsurgeonPattern clausifyVerbWithCliticPronouns =
     Tsurgeon.parseOperation("adjoinF (S foot@) target");
 
+  private static final SpanishVerbStripper verbStripper = new SpanishVerbStripper();
+
   /**
    * Separate clitic pronouns into their own tokens in the given tree.
    * (The clitic pronouns are attached under new `grup.nom` constituents
@@ -439,8 +441,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       if (!SpanishVerbStripper.isStrippable(verb))
         continue;
 
-      Pair<String, List<String>> split =
-        SpanishVerbStripper.separatePronouns(verb);
+      Pair<String, List<String>> split = verbStripper.separatePronouns(verb);
       if (split == null)
         continue;
 
