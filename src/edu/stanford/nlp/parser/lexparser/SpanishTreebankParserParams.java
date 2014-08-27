@@ -89,22 +89,14 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     annotations.put("-markParticipleAdjs", new Pair("@aq0000 < /[aeií]d[oa]s?$/",
                                                     new SimpleStringFunction("-part")));
 
-    // Negative F1; unused in default config
-    annotations.put("-markSentenceInitialClauses", new Pair("@S !, __",
+    // No effect on F1; unused in default config
+    annotations.put("-markSentenceInitialClauses", new Pair("S !, __",
                                                             new SimpleStringFunction("-init")));
 
-    // Insignificant F1; unused in default config
+    // +___ F1
     annotations.put("-markPoder", new Pair(
-      String.format("/^(infinitiu|gerundi|grup\\.verb)/ <<: /%s/", PODER_FORM),
+      String.format("/^(infinitiu|gerundi|grup\\.verb)$/ <<: /%s/", PODER_FORM),
       new SimpleStringFunction("-poder")));
-
-    // +.29 F1
-    annotations.put("-markBaseNPs", new Pair("/^grup\\.nom/ !< (__ < (__ < __))",
-                                             new SimpleStringFunction("-base")));
-
-    // +.17 F1
-    annotations.put("-markVerbless", new Pair("@S|sentence !<< /^(v|participi$)/",
-                                              new SimpleStringFunction("-verbless")));
 
     compileAnnotations(headFinder);
   }
@@ -135,7 +127,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       "-markInf", "-markGer",
 
       // noun phrase annotations
-      "-markSingleChildNPs", "-markBaseNPs", /* "-markPronounNPs", */
+      "-markSingleChildNPs", /* "-markPronounNPs", */
 
       // prepositional phrase annotations
       // "-markPPHeads", negative F1!
@@ -144,14 +136,10 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       "-markRelative", /* "-markSentenceInitialClauses", */
 
       // lexical / word- or tag-level annotations
-      "-markComo", "-markSpecHeads", "-markPPFriendlyVerbs", "-markParticipleAdjs",
-      /* "-markPoder", */
+      "-markComo", "-markSpecHeads", "-markPPFriendlyVerbs", "-markParticipleAdjs", "-markPoder",
 
       // conjunction annotations
       "-markConjTypes",
-
-      // sentence annotations
-      "-markVerbless",
     };
   }
 

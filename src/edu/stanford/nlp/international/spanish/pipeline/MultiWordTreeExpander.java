@@ -537,4 +537,3 @@ public class MultiWordTreeExpander {
 // Nada . (que . ver) (infinitiu < grup.pron construction is .. wrong)
 // Fermina . Daza ("tiene nada que ver")
 // plantillas .. (temporada . pasada) ("Nada que ver" weird parse)
-// Por . qué .. pregunta (sn - grup.nom - sn unary rewrite.. shouldn't happen)

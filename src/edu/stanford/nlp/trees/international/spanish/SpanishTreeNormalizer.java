@@ -150,9 +150,9 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     //     (grup.nom (pi000000 X) (S (relatiu (pr000000 que))
     //                               (infinitiu (vmn0000 Y))))
     new Pair("(pi000000 <: __ !$+ S >` (/^grup\\.nom/=gn >` sn=sn))" +
-               ". ((que >: (__=queTag $- =sn)) . (__=vb >>: (__=vbContainer $- =queTag)))",
+               ". ((que >: (__=queTag $- =sn)) . (__=vb !< __ >>: (__=vbContainer $- =queTag)))",
 
-             "[insert (S (relatiu (pr000000 que)) (infinitiu=vbFoot)) >-1 gn]" +
+             "[insert (S (relatiu (pr000000 que)) (infinitiu vmn0000=vbFoot)) >-1 gn]" +
                "[move vb >0 vbFoot]" +
                "[delete queTag]" +
                "[delete vbContainer]"),
@@ -160,10 +160,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     // Remove date lead-ins
     new Pair("sentence <<, (sn=sn <, (/^grup\\.w$/ $+ fp))",
              "delete sn"),
-
-    // Shed "conj" parents of periods in the middle of trees so that
-    // our splitter can identify sentence boundaries properly
-    new Pair("conj=conj <: fp=fp", "replace conj fp"),
 
     // Fix mis-tagging of inverted question mark
     new Pair("fit=fit <: ¿", "relabel fit fia"),

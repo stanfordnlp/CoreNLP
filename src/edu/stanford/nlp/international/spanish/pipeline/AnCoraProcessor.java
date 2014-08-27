@@ -4,7 +4,10 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.*;
-import edu.stanford.nlp.trees.international.spanish.*;
+import edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer;
+import edu.stanford.nlp.trees.international.spanish.SpanishTreebankLanguagePack;
+import edu.stanford.nlp.trees.international.spanish.SpanishXMLTreeReader;
+import edu.stanford.nlp.trees.international.spanish.SpanishXMLTreeReaderFactory;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.*;
@@ -184,7 +187,7 @@ public class AnCoraProcessor {
     }
   }
 
-  private static TreeNormalizer splittingNormalizer = new SpanishSplitTreeNormalizer();
+  private static TreeNormalizer splittingNormalizer = new SpanishTreeNormalizer();
   private static TreeFactory splittingTreeFactory = new LabeledScoredTreeFactory();
 
   /**
