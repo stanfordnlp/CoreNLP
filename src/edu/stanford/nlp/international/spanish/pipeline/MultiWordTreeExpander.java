@@ -138,13 +138,33 @@ public class MultiWordTreeExpander {
    * adjective
    */
   private static TregexPattern intermediateAdjectiveConjunct =
-    TregexPattern.compile("/grup\\.nom\\.inter2/=target <: /^a/");
+    TregexPattern.compile("/^grup\\.nom\\.inter2$/=target <: /^a/");
 
   /**
    * Rename simple intermediate adjective conjunct as a `grup.a`
    */
   private static TsurgeonPattern expandIntermediateAdjectiveConjunct =
     Tsurgeon.parseOperation("[relabel target /grup.a/]");
+
+  /**
+   * Match parts of an expanded conjunct which must be labeled as a noun
+   * phrase given their children.
+   */
+  private static TregexPattern intermediateNounPhraseConjunct =
+    TregexPattern.compile("/^grup\\.nom\\.inter2$/=target < /^s[pn]/");
+
+  private static TsurgeonPattern expandIntermediateNounPhraseConjunct =
+    Tsurgeon.parseOperation("[relabel target sn]");
+
+  /**
+   * Match parts of an expanded conjunct which should be labeled as
+   * nominal groups.
+   */
+  private static TregexPattern intermediateNominalGroupConjunct =
+    TregexPattern.compile("/^grup\\.nom\\.inter2$/=target !< /^[^n]/");
+
+  private static TsurgeonPattern expandIntermediateNominalGroupConjunct =
+    Tsurgeon.parseOperation("[relabel target /grup.nom/]");
 
   // TODO intermediate adjectival conjunct
   // TODO intermediate verb conjunct
@@ -180,8 +200,11 @@ public class MultiWordTreeExpander {
     new ArrayList<Pair<TregexPattern, TsurgeonPattern>>() {{
       add(new Pair(intermediatePrepositionalPhrase, expandPrepositionalPhrase2));
       add(new Pair(intermediatePrepositionalVP, expandPrepositionalVP2));
+
       add(new Pair(intermediateSubstantiveConjunct, expandIntermediateSubstantiveConjunct));
       add(new Pair(intermediateAdjectiveConjunct, expandIntermediateAdjectiveConjunct));
+      add(new Pair(intermediateNounPhraseConjunct, expandIntermediateNounPhraseConjunct));
+      add(new Pair(intermediateNominalGroupConjunct, expandIntermediateNominalGroupConjunct));
     }};
 
   /**
