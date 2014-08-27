@@ -93,7 +93,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     annotations.put("-markSentenceInitialClauses", new Pair("@S !, __",
                                                             new SimpleStringFunction("-init")));
 
-    // +___
+    // Insignificant F1; unused in default config
     annotations.put("-markPoder", new Pair(
       String.format("/^(infinitiu|gerundi|grup\\.verb)/ <<: /%s/", PODER_FORM),
       new SimpleStringFunction("-poder")));
@@ -144,7 +144,8 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       "-markRelative", /* "-markSentenceInitialClauses", */
 
       // lexical / word- or tag-level annotations
-      "-markComo", "-markSpecHeads", "-markPPFriendlyVerbs", "-markParticipleAdjs", "-markPoder",
+      "-markComo", "-markSpecHeads", "-markPPFriendlyVerbs", "-markParticipleAdjs",
+      /* "-markPoder", */
 
       // conjunction annotations
       "-markConjTypes",
