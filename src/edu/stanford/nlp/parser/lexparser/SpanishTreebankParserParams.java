@@ -113,6 +113,13 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     // Negative F1 -- not used by default
     annotations.put("-markNonRecSPs", new Pair("@sp !<< @sp", new SimpleStringFunction("-nonRec")));
 
+    // In right-recursive verb phrases, mark the prefix of the first verb on its tag.
+    // This annotation tries to capture the fact that only a few roots are ever really part of
+    // these constructions: poder, deber, ir, etc.
+    annotations.put("-markRightRecVPPrefixes",
+                    new Pair("/^v/ $+ @infinitiu|gerundi >, /^(grup.verb|infinitiu|gerundi)/",
+                             new MarkPrefixFunction(3)));
+
     compileAnnotations(headFinder);
   }
 
@@ -131,6 +138,34 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
   }
 
   /**
+   * Mark a tag with a prefix of its constituent word.
+   */
+  private class MarkPrefixFunction implements SerializableFunction<TregexMatcher, String> {
+
+    private static final long serialVersionUID = -3275700521562916350L;
+
+    private static final int DEFAULT_PREFIX_LENGTH = 3;
+    private final int prefixLength;
+
+    public MarkPrefixFunction() {
+      this(DEFAULT_PREFIX_LENGTH);
+    }
+
+    public MarkPrefixFunction(int prefixLength) {
+      this.prefixLength = prefixLength;
+    }
+
+    public String apply(TregexMatcher m) {
+      Tree tagNode = m.getMatch();
+
+      String yield = tagNode.firstChild().value();
+      String prefix = yield.substring(0, Math.min(yield.length(), prefixLength));
+      return "[p," + prefix + ']';
+    }
+
+  }
+
+  /**
    * Features which should be enabled by default.
    *
    * @see #buildAnnotations()
@@ -139,7 +174,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
   protected String[] baselineAnnotationFeatures() {
     return new String[] {
       // verb phrase annotations
-      "-markInf", "-markGer",
+      "-markInf", "-markGer", "-markRightRecVPPrefixes",
 
       // noun phrase annotations
       "-markSingleChildNPs", "-markBaseNPs", /* "-markPronounNPs", */
