@@ -66,7 +66,7 @@ public class MultiWordTreeExpander {
                             // With an NP on the left (-> this is a
                             // prep. phrase) and not preceded by any
                             // other prepositions
-                            " $+ /^[adnswz]/=left !$-- sp000");
+                            " $+ /^([adnswz]|pi)/=left !$-- sp000");
 
   private static TregexPattern leadingPrepositionalPhrase
     = TregexPattern.compile(// Match candidate preposition
@@ -79,7 +79,7 @@ public class MultiWordTreeExpander {
                             // With an NP on the left (-> this is a
                             // prep. phrase) and not preceded by any
                             // other prepositions
-                            " $+ /^[adnswz]/=left !$-- sp000");
+                            " $+ /^([adnswz]|pi)/=left !$-- sp000");
 
   /**
    * First step in expanding prepositional phrases: group NP to right of
@@ -107,7 +107,7 @@ public class MultiWordTreeExpander {
                             "[delete preptag]");
 
   private static TregexPattern prepositionalVP =
-    TregexPattern.compile("sp000=tag < /^(para|al?|del?)$/" +
+    TregexPattern.compile("sp000=tag < /(?i)^(para|al?|del?)$/" +
                           " > (/" + CANDIDATE_GROUPS + "/ <- __=right)" +
                           " $+ vmn0000=left !$-- sp000");
 
@@ -219,16 +219,16 @@ public class MultiWordTreeExpander {
     = Tsurgeon.parseOperation("[relabel contraction /l//] [adjoinF (sn (spec (da0000 el)) foot@) ng]");
 
   private static TregexPattern contractionInSpecifier
-    = TregexPattern.compile("sp000=parent < /^(a|de)l$/=contraction > spec");
+    = TregexPattern.compile("sp000=parent < /(?i)^(a|de)l$/=contraction > spec");
 
   private static TregexPattern delTodo = TregexPattern.compile("del=contraction . todo > sp000=parent");
 
   // "del X al Y"
   private static TregexPattern contractionInRangePhrase
-    = TregexPattern.compile("sp000 < del=contraction >: (conj $+ (/^grup\\.(w|nom)/=group))");
+    = TregexPattern.compile("sp000 < /(?i)^(a|de)l$/=contraction >: (conj $+ (/^grup\\.(w|nom)/=group))");
 
   private static TsurgeonPattern expandContractionInRangePhrase
-    = Tsurgeon.parseOperation("[relabel contraction de] [adjoinF (sn (spec (da0000 el)) foot@) group]");
+    = Tsurgeon.parseOperation("[relabel contraction /(?i)l//] [adjoinF (sn (spec (da0000 el)) foot@) group]");
 
   /**
    * Operation to extract article from contraction and just put it next to the container
@@ -245,12 +245,38 @@ public class MultiWordTreeExpander {
 
   // Final cleanup operations
 
-  private static TregexPattern terminalPrepositions = TregexPattern.compile("sp000=sp < de >- (/^grup\\.nom/ > sn=sn)");
+  private static TregexPattern terminalPrepositions
+    = TregexPattern.compile("sp000=sp < /" + PREPOSITIONS + "/ >- (/^grup\\.nom/ > sn=sn)");
+
   private static TsurgeonPattern extractTerminalPrepositions = Tsurgeon.parseOperation(
     "[insert (prep=prep) $- sn] [move sp >0 prep]");
 
+  /**
+   * Match terminal prepositions in prepositional phrases: "a lo largo de"
+   */
+  private static TregexPattern terminalPrepositions2
+    = TregexPattern.compile("prep=prep >` (/^grup\\.nom$/ >: (sn=sn > /^(grup\\.prep|sp)$/))");
+
+  private static TsurgeonPattern extractTerminalPrepositions2
+    = Tsurgeon.parseOperation("move prep $- sn");
+
+  /**
+   * Match terminal prepositions in infinitive clause within prepositional phrase: "a partir de," etc.
+   */
+  private static TregexPattern terminalPrepositions3
+    = TregexPattern.compile("sp000=sp $- infinitiu >` (S=S >` /^(grup\\.prep|sp)$/)");
+
+  private static TsurgeonPattern extractTerminalPrepositions3
+    = Tsurgeon.parseOperation("[insert (prep=prep) $- S] [move sp >0 prep]");
+
   private static TregexPattern adverbNominalGroups = TregexPattern.compile("/^grup\\.nom./=ng <: /^r[gn]/=r");
   private static TsurgeonPattern replaceAdverbNominalGroup = Tsurgeon.parseOperation("replace ng r");
+
+  private static TregexPattern alMenos
+    = TregexPattern.compile("/(?i)^al$/ . /(?i)^menos$/ > (sp000 $+ rg > /^grup\\.adv$/=ga)");
+
+  private static TsurgeonPattern fixAlMenos
+    = Tsurgeon.parseOperation("replace ga (grup.adv (sp (prep (sp000 a)) (sn (spec (da0000 lo)) (grup.nom (s.a (grup.a (aq0000 menos)))))))");
 
   /**
    * Match `sn` constituents which can (should) be rewritten as nominal groups
@@ -269,6 +295,15 @@ public class MultiWordTreeExpander {
 
   private static TsurgeonPattern fixRedundantNominalRewrite =
     Tsurgeon.parseOperation("[replace parent child]");
+
+  private static TregexPattern redundantPrepositionGroupRewrite =
+    TregexPattern.compile("/^grup\\.prep$/=parent <: sp=child >: prep");
+
+  private static TsurgeonPattern fixRedundantPrepositionGroupRewrite =
+    Tsurgeon.parseOperation("[relabel child /grup.prep/] [replace parent child]");
+
+  private static TregexPattern redundantPrepositionGroupRewrite2 = TregexPattern.compile("/^grup\\.prep$/=gp <: sp=sp");
+  private static TsurgeonPattern fixRedundantPrepositionGroupRewrite2 = Tsurgeon.parseOperation("replace gp sp");
 
   /**
    * Expands flat structures into intermediate forms which will
@@ -323,13 +358,20 @@ public class MultiWordTreeExpander {
   private static List<Pair<TregexPattern, TsurgeonPattern>> finalCleanup =
     new ArrayList<Pair<TregexPattern, TsurgeonPattern>>() {{
       add(new Pair(terminalPrepositions, extractTerminalPrepositions));
+      add(new Pair(terminalPrepositions2, extractTerminalPrepositions2));
+      add(new Pair(terminalPrepositions3, extractTerminalPrepositions3));
       add(new Pair(nominalGroupSubstantives, makeNominalGroup));
       add(new Pair(adverbNominalGroups, replaceAdverbNominalGroup));
+
+      // Special fix: "a lo menos"
+      add(new Pair(alMenos, fixAlMenos));
 
       // Lastly..
       //
       // These final fixes are not at all linguistically motivated -- just need to make the trees less dirty
       add(new Pair(redundantNominalRewrite, fixRedundantNominalRewrite));
+      add(new Pair(redundantPrepositionGroupRewrite, fixRedundantPrepositionGroupRewrite));
+      add(new Pair(redundantPrepositionGroupRewrite2, fixRedundantPrepositionGroupRewrite2));
       //add(new Pair(leftoverIntermediates, makeNominalGroup));
     }};
 
