@@ -42,7 +42,8 @@ public class SpanishTokenizerTest extends TestCase {
       "3g",
       "sp3",
       "12km",
-      "12km/h"
+      "12km/h",
+      "Los hombres sentados están muy guapos."
   };
 
   private final String[][] ptbGold = {
@@ -65,7 +66,8 @@ public class SpanishTokenizerTest extends TestCase {
       { "3g" },
       { "sp3" },
       { "12", "km" },
-      { "12", "km", "/", "h" }
+      { "12", "km", "/", "h" },
+      { "Los", "hombres", "sentados", "están", "muy", "guapos", "." }
   };
 
  public void testSpanishTokenizerWord() {
