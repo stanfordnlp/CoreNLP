@@ -32,7 +32,7 @@ import edu.stanford.nlp.util.Pair;
 public class MultiWordTreeExpander {
 
   private static String PREPOSITIONS =
-    "(para|al?|del?|con|sobre|en(?:tre)?)";
+    "(por|para|al?|del?|con|sobre|en(?:tre)?)";
 
   private static TregexPattern prepositionalPhrase
     = TregexPattern.compile(// Match candidate preposition
@@ -171,10 +171,22 @@ public class MultiWordTreeExpander {
    * that they can be moved out
    */
   private static TregexPattern articleInsideNominalGroup =
-    TregexPattern.compile("/^da/=art > (/^grup\\.nom$/=ng > sn)");
+    TregexPattern.compile("/^d[ai]/=art > (/^grup\\.nom$/=ng > sn)");
 
   private static TsurgeonPattern expandArticleInsideNominalGroup =
     Tsurgeon.parseOperation("[insert (spec=target) $+ ng] [move art >0 target]");
+
+  private static TregexPattern articleInsideOrphanedNominalGroup =
+    TregexPattern.compile("/^d[ai]/=d >, (/^grup.nom/=ng !> sn)");
+
+  private static TsurgeonPattern expandArticleInsideOrphanedNominalGroup =
+    Tsurgeon.parseOperation("[adjoinF (sn=sn foot@) ng] [move d >0 sn]");
+
+  private static TregexPattern determinerInsideNominalGroup =
+    TregexPattern.compile("/^d[^n]/=det >, (/^grup\\.nom/=ng > sn) $ __");
+
+  private static TsurgeonPattern expandDeterminerInsideNominalGroup =
+    Tsurgeon.parseOperation("[insert (spec=target) $+ ng] [move det >0 target]");
 
   // TODO intermediate adjectival conjunct
   // TODO intermediate verb conjunct
@@ -198,6 +210,14 @@ public class MultiWordTreeExpander {
       add(new Pair(conjunctPhrase, expandConjunctPhrase));
       add(new Pair(prepositionalPhrase, expandPrepositionalPhrase1));
       add(new Pair(prepositionalVP, expandPrepositionalVP1));
+
+      // Should not happen until the last moment! The function words
+      // being targeted have weaker "scope" than others earlier
+      // targeted, and so we don't want to clump things around them
+      // until we know we have the right to clump
+      add(new Pair(articleInsideNominalGroup, expandArticleInsideNominalGroup));
+      add(new Pair(articleInsideOrphanedNominalGroup, expandArticleInsideOrphanedNominalGroup));
+      add(new Pair(determinerInsideNominalGroup, expandDeterminerInsideNominalGroup));
     }};
 
   /**
