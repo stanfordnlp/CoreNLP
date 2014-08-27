@@ -62,6 +62,8 @@ public class HamleDTMultiWordClassifier {
     ArrayList<Function<String, List<String>>>() {{
       add(new LeadingPOSFeatureFunction("V")); // verbs
       add(new LeadingPOSFeatureFunction("S")); // prepositions
+      add(new HasMultipleOfPOSFeatureFunction("S", "D")); // phrase-y things
+      add(new HasMultipleOFPOSFeatureFunctions("A", "N")); // compound-y things
       add(new CharacterNGramFeatureFunction(2, 4));
       add(new WordShapeFeatureFunction());
     }};
@@ -321,6 +323,47 @@ public class HamleDTMultiWordClassifier {
       if (allowedWords.contains(words[0].toLowerCase()))
         return positiveRet;
       return negativeRet;
+    }
+
+  }
+
+  private static class HasMultipleOfPOSFeatureFunction implements Function<String, List<String>> {
+
+    private final List<String> positiveRet;
+    private final List<String> negativeRet;
+
+    private final String[] partsOfSpeech;
+
+    public HasMultipleOfPOSFeatureFunction(String... partsOfSpeech) {
+      this.partsOfSpeech = partsOfSpeech;
+
+      String posString = StringUtils.join(partsOfSpeech, ",");
+      positiveRet = Arrays.asList("*hasMultOfPOS[" + posString + "]:");
+      negativeRet = Arrays.asList("*noHasMultOfPOS[" + posString + "]:");
+    }
+
+    @Override
+    public List<String> apply(String mwe) {
+      String[] words = mwe.split("_");
+
+      if (words.length < 2)
+        return negativeRet;
+
+      int count = 0;
+      for (String word : words) {
+        String pos = dictionary.get(word);
+        for (String candPos : partsOfSpeech) {
+          if (candPos.startsWith(pos)) {
+            count++;
+            break;
+          }
+        }
+
+        if (count > 1)
+          break;
+      }
+
+      return count > 1 ? positiveRet : negativeRet;
     }
 
   }
