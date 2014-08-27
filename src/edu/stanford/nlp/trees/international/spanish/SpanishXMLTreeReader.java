@@ -141,7 +141,7 @@ public class SpanishXMLTreeReader implements TreeReader {
   }
 
   private boolean isWordNode(Element node) {
-    return node.hasAttribute(ATTR_WORD);
+    return node.hasAttribute(ATTR_WORD) && !node.hasChildNodes();
   }
 
   private boolean isEllipticNode(Element node) {
