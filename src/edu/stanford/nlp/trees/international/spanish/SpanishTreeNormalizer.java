@@ -39,6 +39,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   public static final String RIGHT_PARENTHESIS = "=RRB=";
 
   private static final Map<String, String> spellingFixes = new HashMap<String, String>() {{
+    put("embargp", "embargo"); // 18381_20000322.tbf-4
     put("jucio", "juicio"); // 4800_2000406.tbf-5
     put("méxico", "México"); // 111_C-3.tbf-17
     put("reirse", "reírse"); // 140_20011102.tbf-13
