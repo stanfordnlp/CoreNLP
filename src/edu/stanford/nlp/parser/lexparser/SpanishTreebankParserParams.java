@@ -2,10 +2,12 @@ package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.process.SerializableFunction;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.spanish.SpanishHeadFinder;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreebankLanguagePack;
+import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.List;
@@ -61,7 +63,32 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
                                           new SimpleStringFunction("[como]")));
     annotations.put("-markSpecHeads", new Pair("@spec", new AnnotateHeadFunction(headFinder)));
 
+    // +.32 F1
+    annotations.put("-markSingleChildNPs", new Pair("/^(sn|grup\\.nom)/ <: __",
+                                                    new SimpleStringFunction("-singleChild")));
+
+    // +.05 F1
+    annotations.put("-markPPFriendlyVerbs", new Pair("/^v/ > /^grup\\.prep/",
+                                                     new SimpleStringFunction("-PPFriendly")));
+
+    // +.46 F1
+    annotations.put("-markConjTypes", new Pair("@conj <: /^c[cs]/=c", new MarkConjTypeFunction()));
+
     compileAnnotations(headFinder);
+  }
+
+  /**
+   * Mark `conj` constituents with their `cc` / `cs` child.
+   */
+  private class MarkConjTypeFunction implements SerializableFunction<TregexMatcher, String> {
+
+    private static final long serialVersionUID = 403406212736445856L;
+
+    public String apply(TregexMatcher m) {
+      String type = m.getNode("c").value().toUpperCase();
+      return "-conj" + type;
+    }
+
   }
 
   /**
@@ -75,14 +102,20 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       // verb phrase annotations
       "-markInf", "-markGer",
 
+      // noun phrase annotations
+      "-markSingleChildNPs",
+
       // prepositional phrase annotations
       // "-markPPHeads", negative F1!
 
       // clause annotations
       "-markRelative",
 
-      // lexical annotations
-      "-markComo", "-markSpecHeads",
+      // lexical / word- or tag-level annotations
+      "-markComo", "-markSpecHeads", "-markPPFriendlyVerbs",
+
+      // conjunction annotations
+      "-markConjTypes",
     };
   }
 
