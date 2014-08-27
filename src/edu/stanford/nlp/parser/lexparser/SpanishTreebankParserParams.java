@@ -95,7 +95,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
 
     // +___ F1
     annotations.put("-markPoder", new Pair(
-      String.format("/^(infinitiu|gerundi|grup\\.verb)$/ <<: %s", PODER_FORM),
+      String.format("/^(infinitiu|gerundi|grup\\.verb)$/ <<: /%s/", PODER_FORM),
       new SimpleStringFunction("-poder")));
 
     compileAnnotations(headFinder);
