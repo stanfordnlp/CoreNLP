@@ -528,3 +528,8 @@ public class MultiWordTreeExpander {
 // epígrafe . Arte (flat!)
 // debería .. encima ("por encima de" parse, coordinated NP)
 // manía .. catalán ("castellana" parsed as being under a participi constituent)
+// /[ae]ndo$/=s !>> gerundi : =s !== /(?i)comando|Fernando|cuando|referendo|Comprendo|Nando/
+//     (quite a few gerunds in the dev set being mis-tagged)
+
+// NEEDS CORPUS FIX
+// recuperar .. tranvía ("escribiendo" missing gerundi parent constituent)
