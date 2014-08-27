@@ -39,6 +39,10 @@ public class SpanishVerbStripperTest extends TestCase {
     assertEquals(new Pair("decir", pronouns),
                  SpanishVerbStripper.separatePronouns("decirme"));
 
+    // Should match capitalized verbs as well
+    assertEquals(new Pair("Decir", pronouns),
+      SpanishVerbStripper.separatePronouns("Decirme"));
+
     pronouns.clear();
     pronouns.add("se");
     pronouns.add("lo");

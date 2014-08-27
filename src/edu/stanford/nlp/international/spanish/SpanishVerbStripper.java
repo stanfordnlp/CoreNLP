@@ -130,7 +130,6 @@ public class SpanishVerbStripper {
     Matcher m = pSuffix.matcher(word);
     if(m.find()) {
       String stripped = word.substring(0, m.start());
-      System.out.println(m.start());
       stripped = removeAccents(stripped);
 
       List<String> attached = new ArrayList<String>();
@@ -160,14 +159,20 @@ public class SpanishVerbStripper {
     // Try `word + 'd'` as well for cases like 'sentaos'; stripped this
     // becomes 'senta', and we only have the form 'sentad' in the
     // dictionary
-    if (separated != null && (isVerb(separated.first())
-                              || isVerb(separated.first() + "d")))
-      return separated;
+    if (separated != null) {
+      String stripped = separated.first().toLowerCase();
+
+      if (isVerb(stripped) || isVerb(stripped + 'd'))
+        return separated;
+    }
 
     separated = stripSuffix(verb, pTwoAttachedPronouns);
-    if (separated != null && (isVerb(separated.first())
-                              || isVerb(separated.first() + "d")))
-      return separated;
+    if (separated != null) {
+      String stripped = separated.first().toLowerCase();
+
+      if (isVerb(stripped) || isVerb(stripped + 'd'))
+        return separated;
+    }
 
     return null;
   }
