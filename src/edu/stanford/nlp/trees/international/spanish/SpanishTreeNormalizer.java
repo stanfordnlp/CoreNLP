@@ -677,6 +677,9 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
     new Pair("prep < (sp000 < /(?i)^(al|del)$/=elided) $+ (S=S <+(S) (/^f/=punct $+ (S <+(S) (S <, infinitiu))))",
       "[relabel elided /(?i)l//] [adjoinF (sn (spec (da0000 el)) (grup.nom foot@)) S]"),
 
+    // special case: "del todo" -> "de el todo" (flat)
+    new Pair("__=sp < del=contraction >, __=parent $+ (__ < todo >` =parent)",
+      "[relabel contraction de] [insert (da0000 el) $- sp]"),
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> elisionExpansions =

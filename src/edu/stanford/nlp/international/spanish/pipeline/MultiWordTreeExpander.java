@@ -278,6 +278,15 @@ public class MultiWordTreeExpander {
   private static TregexPattern adverbNominalGroups = TregexPattern.compile("/^grup\\.nom./=ng <: /^r[gn]/=r");
   private static TsurgeonPattern replaceAdverbNominalGroup = Tsurgeon.parseOperation("replace ng r");
 
+  /**
+   * Match blocks of only adjectives (one or more) with a nominal group parent. These constituents should be rewritten
+   * beneath an adjectival group constituent.
+   */
+  private static TregexPattern adjectiveSpanInNominalGroup
+    = TregexPattern.compile("/^grup\\.nom/=ng <, aq0000=left <` aq0000=right !< /^[^a]/");
+
+  private static TsurgeonPattern groupAdjectives = Tsurgeon.parseOperation("createSubtree (s.a grup.a@) left right");
+
   private static TregexPattern alMenos
     = TregexPattern.compile("/(?i)^al$/ . /(?i)^menos$/ > (sp000 $+ rg > /^grup\\.adv$/=ga)");
 
@@ -369,6 +378,7 @@ public class MultiWordTreeExpander {
       add(new Pair(terminalPrepositions3, extractTerminalPrepositions3));
       add(new Pair(nominalGroupSubstantives, makeNominalGroup));
       add(new Pair(adverbNominalGroups, replaceAdverbNominalGroup));
+      add(new Pair(adjectiveSpanInNominalGroup, groupAdjectives));
 
       // Special fix: "a lo menos"
       add(new Pair(alMenos, fixAlMenos));
