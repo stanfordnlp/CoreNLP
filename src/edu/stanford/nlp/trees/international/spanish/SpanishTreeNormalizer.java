@@ -90,6 +90,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       add("grup.nom.org");
       add("grup.nom.otros");
       add("grup.nom.pers");
+      add("grup.verb");
       add("spec");
     }};
 

@@ -221,6 +221,8 @@ public final class MultiWordPreprocessor {
         return "np00000";
       else if (word.equals("Al") && containingPhrase.startsWith("Al fin"))
         return "sp000";
+      else if (word.equals("Sin") && containingPhrase.startsWith("Sin embargo"))
+        return "sp000";
 
       if (actuallyNames.contains(word))
         return "np00000";

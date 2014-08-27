@@ -31,7 +31,12 @@ import edu.stanford.nlp.util.Pair;
  */
 public class MultiWordTreeExpander {
 
-  private static String PREPOSITIONS =
+  /**
+   * Regular expression to match groups inside which we want to expand things
+   */
+  private static final String CANDIDATE_GROUPS = "(^grup\\.(adv|c[cs]|[iwz]|nom|prep|pron|verb)|\\.inter)";
+
+  private static final String PREPOSITIONS =
     "(por|para|al?|del?|con(?:tra)?|sobre|en(?:tre)?|hacia|sin|según|hasta)";
 
   /**
@@ -54,7 +59,7 @@ public class MultiWordTreeExpander {
                             // Headed by a group that was generated from
                             // multi-word token expansion and that we
                             // wish to expand further
-                            " > (/(^grup\\.(adv|c[cs]|[iwz]|nom|pron)|\\.inter)/ <- __=right)" +
+                            " > (/" + CANDIDATE_GROUPS + "/ <- __=right)" +
                             // With an NP on the left (-> this is a
                             // prep. phrase) and not preceded by any
                             // other prepositions
@@ -67,7 +72,7 @@ public class MultiWordTreeExpander {
                             // was generated from multi-word token
                             // expansion and that we wish to expand
                             // further
-                            " >, (/(^grup\\.(adv|c[cs]|[iwz]|nom|pron)|\\.inter)/ <- __=right)" +
+                            " >, (/" + CANDIDATE_GROUPS + "/ <- __=right)" +
                             // With an NP on the left (-> this is a
                             // prep. phrase) and not preceded by any
                             // other prepositions
@@ -100,7 +105,7 @@ public class MultiWordTreeExpander {
 
   private static TregexPattern prepositionalVP =
     TregexPattern.compile("sp000=tag < /^(para|al?|del?)$/" +
-                          " > (/^grup\\.(c[cs]|[iwz]|nom|pron)/ <- __=right)" +
+                          " > (/" + CANDIDATE_GROUPS + "/ <- __=right)" +
                           " $+ vmn0000=left !$-- sp000");
 
   private static TsurgeonPattern expandPrepositionalVP1 =
@@ -111,7 +116,7 @@ public class MultiWordTreeExpander {
     TregexPattern.compile("sp000=preptag $+ /^S\\.inter$/=si");
 
   private static TsurgeonPattern expandPrepositionalVP2 =
-    Tsurgeon.parseOperation("[adjoin (sp=target S@) si] [move preptag >0 target]");
+    Tsurgeon.parseOperation("[adjoin (sp prep=target S@) si] [move preptag >0 target]");
 
   private static TregexPattern conjunctPhrase =
     TregexPattern.compile("cc=cc" +
@@ -361,3 +366,6 @@ public class MultiWordTreeExpander {
 // Abogados . y (parenthetical should be separated into its own clause)
 // totalmente . evitables ("en opinion del" at end)
 // hábitat . tradicional ("en cuerpo y alma" phrase)
+// Eliécer . Hurtado ("salir al paso")
+// /300/ . dólares ("en base a")
+// otro . vicepresidente ("está al caer")
