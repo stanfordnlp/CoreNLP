@@ -1,13 +1,6 @@
 package edu.stanford.nlp.international;
 
-import edu.stanford.nlp.parser.lexparser.ArabicTreebankParserParams;
-import edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams;
-import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
-import edu.stanford.nlp.parser.lexparser.FrenchTreebankParserParams;
-import edu.stanford.nlp.parser.lexparser.HebrewTreebankParserParams;
-import edu.stanford.nlp.parser.lexparser.NegraPennTreebankParserParams;
-import edu.stanford.nlp.parser.lexparser.SpanishTreebankParserParams;
-import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
+import edu.stanford.nlp.parser.lexparser.*;
 
 /**
  * Constants and parameters for multilingual parsing.

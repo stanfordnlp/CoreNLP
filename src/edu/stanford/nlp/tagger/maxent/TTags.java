@@ -217,32 +217,32 @@ public class TTags {
       closed.add(Tagger.EOS_TAG);
 
       // conjunctions
-      closed.add("cc");
-      closed.add("cs");
+      closed.add("CC");
+      closed.add("CS");
 
       // punctuation
-      closed.add("faa");
-      closed.add("fat");
-      closed.add("fc");
-      closed.add("fca");
-      closed.add("fct");
-      closed.add("fd");
-      closed.add("fe");
-      closed.add("fg");
-      closed.add("fh");
-      closed.add("fia");
-      closed.add("fit");
-      closed.add("fla");
-      closed.add("flt");
-      closed.add("fp");
-      closed.add("fpa");
-      closed.add("fpt");
-      closed.add("fra");
-      closed.add("frc");
-      closed.add("fs");
-      closed.add("ft");
-      closed.add("fx");
-      closed.add("fz");
+      closed.add("Faa");
+      closed.add("Fat");
+      closed.add("Fc");
+      closed.add("Fca");
+      closed.add("Fct");
+      closed.add("Fd");
+      closed.add("Fe");
+      closed.add("Fg");
+      closed.add("Fh");
+      closed.add("Fia");
+      closed.add("Fit");
+      closed.add("Fla");
+      closed.add("Flt");
+      closed.add("Fp");
+      closed.add("Fpa");
+      closed.add("Fpt");
+      closed.add("Fra");
+      closed.add("Frc");
+      closed.add("Fs");
+      closed.add("Ft");
+      closed.add("Fx");
+      closed.add("Fz");
 
       isEnglish = false;
     } else if (language.equalsIgnoreCase("medpost")) {

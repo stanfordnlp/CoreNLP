@@ -85,9 +85,11 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     annotations.put("-markPronounNPs", new Pair("/^(sn|grup\\.nom)/ <<: /^p[0p]/",
                                                 new SimpleStringFunction("-pronoun")));
 
-    // +1.24 F1
-    annotations.put("-markParticipleAdjs", new Pair("@aq0000 < /[aeií]d[oa]s?$/",
-                                                    new SimpleStringFunction("-part")));
+    // +1.39 F1
+    annotations.put("-markParticipleAdjs", new Pair(
+      "@aq0000 < /(?i)([aeií]d|puest|biert|vist|(ben|mal)dit|[fh]ech|scrit|muert|[sv]uelt|[rl]ect|"
+        + "frit|^(rot|dich|impres|desnud|sujet|exent))[oa]s?$/",
+      new SimpleStringFunction("-part")));
 
     // Negative F1; unused in default config
     annotations.put("-markSentenceInitialClauses", new Pair("@S !, __",
@@ -121,11 +123,17 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
                              new MarkPrefixFunction(3)));
 
 
-    // +___ F1
+    // Negative F1 -- not used by default
     annotations.put("-markParentheticalNPs", new Pair("@sn <<, fpa <<` fpt",
                                                       new SimpleStringFunction("-paren")));
     annotations.put("-markNumericNPs", new Pair("@sn << (/^z/ < __) !<< @sn",
                                                 new SimpleStringFunction("-num")));
+
+    // Negative F1 -- not used by default
+    annotations.put("-markCoordinatedNPs", new Pair(
+      "@sn <, (/^(sn|grup\\.nom)/ $+ (@conj < /^(cc|grup\\.cc)/ $+ /^(sn|grup\\.nom)/=last))" +
+        "<` =last",
+      new SimpleStringFunction("-coord")));
 
     compileAnnotations(headFinder);
   }
@@ -184,8 +192,10 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       "-markInf", "-markGer", "-markRightRecVPPrefixes",
 
       // noun phrase annotations
-      "-markSingleChildNPs", "-markBaseNPs", "-markPronounNPs", "-markParentheticalNPs",
-      "-markNumericNPs",
+      "-markSingleChildNPs", "-markBaseNPs", "-markPronounNPs",
+      // "-markCoordinatedNPs",
+      // "-markParentheticalNPs",
+      // "-markNumericNPs",
 
       // prepositional phrase annotations
       // "-markNonRecSPs", negative F1!

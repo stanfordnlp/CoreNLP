@@ -35,6 +35,8 @@ public class Trees {
     if (leftEdge(t, root, i)) {
       return i.intValue();
     } else {
+      System.err.println(t);
+      System.err.println(root);
       throw new RuntimeException("Tree is not a descendant of root.");
 //      return -1;
     }
