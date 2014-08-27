@@ -265,7 +265,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    * Get the parent for the current node.
    */
   @Override
-  public Tree parent() {
+  public TreeGraphNode parent() {
     return parent;
   }
 
@@ -445,7 +445,10 @@ public class TreeGraphNode extends Tree implements HasParent {
     if (arcLabels == null) {
       return null;
     }
-    return (new ArrayList<Class<? extends GrammaticalRelationAnnotation>>(arcLabels)).get(0);
+    if (arcLabels.size() == 0) {
+      return null;
+    }
+    return arcLabels.iterator().next();
   }
 
   /**
