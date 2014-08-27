@@ -38,7 +38,7 @@ public class PTBTokenizerAnnotator extends TokenizerAnnotator {
 	public static final String EN = "en";
 
   public static final String DEFAULT_OPTIONS_EN = "invertible,ptb3Escaping=true";
-	public static final String DEFAULT_OPTIONS_ES = "";
+	public static final String DEFAULT_OPTIONS_ES = "invertible,ptb3Escaping=true,splitAll=true" ;
 	public static final String DEFAULT_OPTIONS_FR = "";
 
 	public static final String EOL_PROPERTY = "tokenize.keepeol";
