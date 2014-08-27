@@ -66,15 +66,20 @@ public class TokenizerAnnotator implements Annotator {
 		public static TokenizerType getTokenizerType(Properties props) {
 			String tokClass = props.getProperty("tokenize.class", null);
 			if (tokClass != null) {
-				if (tokClass.equals("SpanishTokenizer"))
+				if (tokClass.equals("SpanishTokenizer")) {
 					return Spanish;
-				else if (tokClass.equals("FrenchTokenizer"))
+				} else if (tokClass.equals("FrenchTokenizer")) {
 					return French;
-				else if (tokClass.equals("PTBTokenizer"))
+				} else if (tokClass.equals("PTBTokenizer")) {
 					return English;
+				} else if (tokClass.equals("WhitespaceTokenizer")) {
+					return Whitespace;
+				}
 			}
-			if(Boolean.valueOf(props.getProperty("tokenize.whitespace", "false")))
+
+			if(Boolean.valueOf(props.getProperty("tokenize.whitespace", "false"))) {
 				return Whitespace;
+			}
 
 			String language = props.getProperty("tokenize.language", "").toLowerCase();
 
@@ -88,6 +93,8 @@ public class TokenizerAnnotator implements Annotator {
 								 language.equals(GERMAN) || language.equals(DE)) {
 				return English;
 
+			} else if (language.equals(WHITESPACE)) {
+				return Whitespace;
 			}
 			return Unknown;
 		}
@@ -101,6 +108,7 @@ public class TokenizerAnnotator implements Annotator {
 	public static final String EN = "en";
 	public static final String GERMAN = "german";
 	public static final String DE = "de";
+	public static final String WHITESPACE = "whitespace";
 	public static final String EOL_PROPERTY = "tokenize.keepeol";
 
 	private final boolean VERBOSE;
