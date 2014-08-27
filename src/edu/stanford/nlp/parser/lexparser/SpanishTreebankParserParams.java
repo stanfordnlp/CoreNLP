@@ -3,6 +3,7 @@ package edu.stanford.nlp.parser.lexparser;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.trees.international.spanish.SpanishHeadFinder;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreebankLanguagePack;
 
@@ -37,8 +38,7 @@ public class SpanishTreebankParserParams extends AbstractTreebankParserParams {
 
   @Override
   public HeadFinder headFinder() {
-    // TODO introduce Spanish head finder
-    return new LeftHeadFinder();
+    return new SpanishHeadFinder(tlp);
   }
 
   @Override
