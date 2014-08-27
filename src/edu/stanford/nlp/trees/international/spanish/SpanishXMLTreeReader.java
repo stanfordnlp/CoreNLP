@@ -305,8 +305,6 @@ public class SpanishXMLTreeReader implements TreeReader {
   private Tree buildWordNode(Node root) {
     Element eRoot = (Element) root;
 
-    // TODO make sure there are no children as well?
-
     String posStr = getPOS(eRoot);
     posStr = treeNormalizer.normalizeNonterminal(posStr);
 
