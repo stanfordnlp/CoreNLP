@@ -5,7 +5,7 @@ import java.util.concurrent.RejectedExecutionException;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
+import edu.stanford.nlp.util.concurrent.InterruptibleMulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 /**
@@ -36,11 +36,8 @@ public abstract class SentenceAnnotator implements Annotator {
     }
   }
 
-  private MulticoreWrapper<CoreMap, CoreMap> buildWrapper(Annotation annotation) {
-    MulticoreWrapper<CoreMap, CoreMap> wrapper = new MulticoreWrapper<CoreMap, CoreMap>(nThreads(), new AnnotatorProcessor(annotation));
-    if (maxTime() > 0) {
-      wrapper.setMaxBlockTime(maxTime());
-    }
+  private InterruptibleMulticoreWrapper<CoreMap, CoreMap> buildWrapper(Annotation annotation) {
+    InterruptibleMulticoreWrapper<CoreMap, CoreMap> wrapper = new InterruptibleMulticoreWrapper<CoreMap, CoreMap>(nThreads(), new AnnotatorProcessor(annotation), true, maxTime());
     return wrapper;
   }
 
@@ -48,16 +45,24 @@ public abstract class SentenceAnnotator implements Annotator {
   public void annotate(Annotation annotation) {
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       if (nThreads() != 1 || maxTime() > 0) {
-        MulticoreWrapper<CoreMap, CoreMap> wrapper = buildWrapper(annotation);
+        InterruptibleMulticoreWrapper<CoreMap, CoreMap> wrapper = buildWrapper(annotation);
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+          boolean success = false;
+          // We iterate twice for each sentence so that if we fail for
+          // a sentence once, we start a new queue and try again.  
+          // If the sentence fails a second time we give up.
           for (int attempt = 0; attempt < 2; ++attempt) {
             try {
               wrapper.put(sentence);
+              success = true;
               break;
             } catch (RejectedExecutionException e) {
               // If we time out, for now, we just throw away all jobs which were running at the time.
               // Note that in order for this to be useful, the underlying job needs to handle Thread.interrupted()
-              wrapper.shutdownNow();
+              List<CoreMap> failedSentences = wrapper.joinWithTimeout();
+              for (CoreMap failed : failedSentences) {
+                doOneFailedSentence(annotation, failed);
+              }
               // We don't wait for termination here, and perhaps this
               // is a mistake.  If the processor used does not respect
               // interruption, we could easily create many threads
@@ -69,13 +74,21 @@ public abstract class SentenceAnnotator implements Annotator {
               wrapper = buildWrapper(annotation);
             }
           }
+          if (!success) {
+            doOneFailedSentence(annotation, sentence);
+          }
           while (wrapper.peek()) {
             wrapper.poll();
           }
         }
-        wrapper.join();
+        List<CoreMap> failedSentences = wrapper.joinWithTimeout();
         while (wrapper.peek()) {
           wrapper.poll();
+        }
+        if (failedSentences != null) {
+          for (CoreMap failed : failedSentences) {
+            doOneFailedSentence(annotation, failed);
+          }
         }
       } else {
         for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
@@ -93,5 +106,11 @@ public abstract class SentenceAnnotator implements Annotator {
 
   /** annotation is included in case there is global information we care about */
   protected abstract void doOneSentence(Annotation annotation, CoreMap sentence);
+
+  /** 
+   * Fills in empty annotations for trees, tags, etc if the annotator
+   * failed or timed out.  Not supposed to do major processing.
+   */
+  protected abstract void doOneFailedSentence(Annotation annotation, CoreMap sentence);
 }
 

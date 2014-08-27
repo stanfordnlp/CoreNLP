@@ -393,11 +393,12 @@ APOSETCETERA = {APOS}|[\u0091\u2018\u201B]
 /* Includes words with numbers, eg. sp3 */
 /* Includes words with apostrophes in the middle (french, english,
    catalan loanwords) */
-WORD2 = {WORD}(({NUM}|{APOSETCETERA}){WORD}?)+{WORD}
-WORD3 = {NUM}?({WORD}|{WORD2}){NUM}?
+/* WORD_NUM includes words that start with numbers, eg. 4X4 or 3G. */
+WORD2 = {WORD}(({NUM}|{APOSETCETERA}){WORD}?)+
+WORD_NUM = {NUM}({WORD}|{WORD2})
 
 /* all types of "words" */
-ANYWORD = (({WORD})|({WORD2})|({WORD3}))
+ANYWORD = ({WORD})|({WORD_NUM})|({WORD2})
 
 /* common units abbreviated - to differentiate between WORD_NUM
  * as WORD_NUMs shouldn't be split but these should. */
@@ -426,7 +427,7 @@ VB_2PP_PRON = ({CHAR}*)[aeiáéí]((d{ATTACHED_PRON})|{OS})
 VB_ATTACHED_PRON = ({VB_PREF}){ATTACHED_PRON}|{OS}
 
 /* Spanish contractions */
-CONTRACTION = del|al|con[mts]igo
+CONTRACTION = del|al
 
 /* URLs, email, and Twitter handles
    Technically, Twitter names should be capped at 15 characters.
@@ -500,43 +501,40 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 
 cannot			{ yypushback(3) ; return getNext(); }
 {SGML}			{ if (!noSGML) {
-             	 return getNext();
-					    }
-            }
+                            return getNext();
+			  }
+                        }
 {SPMDASH}		{ if (ptb3Dashes) {
-                return getNext(ptbmdash, yytext()); }
-              else {
-                return getNext();
-              }
-            }
-
+                            return getNext(ptbmdash, yytext()); }
+                          else {
+                            return getNext();
+                          }
+                        }
 {ORDINAL}/{SPACE}       { return getNext(); }
-{SPAMP}			            { return getNormalizedAmpNext(); }
+{SPAMP}			{ return getNormalizedAmpNext(); }
 {SPPUNC} |
 {TIMEXP}                { return getNext(); }
 
 {CONTRACTION}           { final String origTxt = yytext();
-												  return getNext(origTxt, origTxt, CONTR_ANNOTATION);
-												}
+			  return getNext(origTxt, origTxt, CONTR_ANNOTATION);
+			}
+
+// {CONTR_PREF}/{CONTR2}   { return getNext(); }
 
 {VB_ATTACHED_PRON} |
 {VB_2PP_PRON}           { final String origTxt = yytext();
                           return getNext(origTxt, origTxt, VB_PRON_ANNOTATION); 
-												}
+			}
 
-{COMPOUND_NOSPLIT}      { final String origTxt = yytext(); 
-												  return getNext(asciiQuotes(asciiDash(origTxt)), origTxt); 
-											  }
+{COMPOUND_NOSPLIT}      { return getNext(); }
 
 {COMPOUND}              { final String origTxt = yytext();
-                          return getNext(asciiQuotes(asciiDash(origTxt)), origTxt, COMPOUND_ANNOTATION);
-												}
+                          return getNext(asciiDash(origTxt), origTxt, COMPOUND_ANNOTATION);
+			}
 
 {NUM}/{UNIT}            { return getNext(); }
 
-{WORD2}|{WORD3}         { final String origTxt = yytext();
-										      return getNext (asciiQuotes(origTxt), origTxt);
-											  }
+{WORD2}|{WORD_NUM}      { return getNext(); }
 
 {WORD}			{ return getNext(); }
 

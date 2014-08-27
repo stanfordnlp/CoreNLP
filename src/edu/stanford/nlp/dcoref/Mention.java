@@ -50,6 +50,8 @@ import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.CollectionUtils;
@@ -1051,31 +1053,17 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
   }
 
   private static Pair<IndexedWord, String> findDependentVerb(Mention m) {
-    Pair<IndexedWord, String> ret = new Pair<IndexedWord, String>();
-    int headIndex = m.headIndex+1;
-    try {
-      IndexedWord w = m.dependency.getNodeByIndex(headIndex);
-      if(w==null) return ret;
-      while (true) {
-        IndexedWord p = null;
-        for(Pair<GrammaticalRelation,IndexedWord> parent : m.dependency.parentPairs(w)){
-          if(ret.second()==null) {
-            String relation = parent.first().getShortName();
-            ret.setSecond(relation);
-          }
-          p = parent.second();
-        }
-        if(p==null || p.get(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("V")) {
-          ret.setFirst(p);
-          break;
-        }
-        if(w==p) return ret;
-        w = p;
-      }
-    } catch (Exception e) {
-      return ret;
+    if (m.dependency.getRoots().size() == 0) {
+      return new Pair<IndexedWord, String>();
     }
-    return ret;
+    // would be nice to condense this pattern, but sadly =reln
+    // always uses the last relation in the sequence, not the first
+    SemgrexPattern pattern = SemgrexPattern.compile("{idx:" + (m.headIndex+1) + "} [ <=reln {tag:/^V.*/}=verb | <=reln ({} << {tag:/^V.*/}=verb) ]");
+    SemgrexMatcher matcher = pattern.matcher(m.dependency);
+    while (matcher.find()) {
+      return Pair.makePair(matcher.getNode("verb"), matcher.getRelnString("reln"));
+    }
+    return new Pair<IndexedWord, String>();
   }
 
   public boolean insideIn(Mention m){
