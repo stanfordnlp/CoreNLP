@@ -122,6 +122,11 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     // Nominal groups where adjectival groups belong
     new Pair("/^s\\.a$/ <: (/^grup\\.nom$/=gn <: /^a/)",
       "relabel gn /grup.a/"),
+
+    // Adverbial phrases should always have adverb group children
+    // -- we see about 50 exceptions in the corpus..
+    new Pair("sadv !< /^grup\\.adv$/ <: /^(rg|neg)$/=adv",
+      "adjoinF (grup.adv foot@) adv")
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> cleanup
