@@ -3,11 +3,8 @@ package edu.stanford.nlp.parser.shiftreduce;
 import java.util.Arrays;
 import java.util.List;
 
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.parser.common.ParserConstraint;
-import edu.stanford.nlp.trees.LabeledScoredTreeNode;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.TreeShapedStack;
 
 
@@ -20,14 +17,14 @@ import edu.stanford.nlp.util.TreeShapedStack;
  */
 public class CompoundUnaryTransition implements Transition {
   /**
-   * labels[0] is the top of the unary chain.  
-   * A unary chain that results in a ROOT will have labels[0] == ROOT, for example. 
+   * labels[0] is the top of the unary chain.
+   * A unary chain that results in a ROOT will have labels[0] == ROOT, for example.
    */
   public final String[] labels;
 
   /** root transitions are illegal in the middle of the tree, naturally */
   public final boolean isRoot;
-  
+
   public CompoundUnaryTransition(List<String> labels, boolean isRoot) {
     this.labels = new String[labels.size()];
     for (int i = 0; i < labels.size(); ++i) {
@@ -96,7 +93,7 @@ public class CompoundUnaryTransition implements Transition {
     }
 
     return true;
-  } 
+  }
 
   /**
    * Add a unary node to the existing node on top of the stack
@@ -141,6 +138,6 @@ public class CompoundUnaryTransition implements Transition {
     return "CompoundUnary" + (isRoot ? "*" : "") + "(" + Arrays.asList(labels).toString() + ")";
   }
 
-  private static final long serialVersionUID = 1;  
+  private static final long serialVersionUID = 1;
 
 }

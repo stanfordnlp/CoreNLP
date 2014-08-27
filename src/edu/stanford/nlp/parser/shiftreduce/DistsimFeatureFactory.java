@@ -4,7 +4,6 @@ import java.util.List;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.tagger.maxent.Distsim;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Featurizes words based only on their distributional similarity classes.

@@ -18,11 +18,10 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
-import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReaderFactory;
 
 /**
  * Places predicted morphological analyses in the leaves of gold FTB parse trees.
- * 
+ *
  * @author Spence Green
  *
  */
@@ -33,7 +32,7 @@ public final class MungeTreesWithMorfetteAnalyses {
     private BufferedReader reader;
     private List<CoreLabel> nextList;
     private int lineId = 0;
-    
+
     public MorfetteFileIterator(String filename) {
       try {
         reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));
@@ -44,7 +43,7 @@ public final class MungeTreesWithMorfetteAnalyses {
         e.printStackTrace();
       }
     }
-    
+
     private void primeNext() {
       try {
         nextList = new ArrayList<CoreLabel>(40);
@@ -71,13 +70,13 @@ public final class MungeTreesWithMorfetteAnalyses {
           cl.setTag(tag);
           nextList.add(cl);
         }
-        
+
         // File is exhausted
         if (nextList.size() == 0) {
           reader.close();
           nextList = null;
         }
-        
+
       } catch (IOException e) {
         System.err.printf("Problem reading file at line %d%n", lineId);
         e.printStackTrace();
@@ -125,7 +124,7 @@ public final class MungeTreesWithMorfetteAnalyses {
         List<CoreLabel> analysis = morfetteItr.next();
         List<Label> yield = tree.yield();
         assert analysis.size() == yield.size();
-        
+
         int yieldLen = yield.size();
         for (int i = 0; i < yieldLen; ++i) {
           CoreLabel tokenAnalysis = analysis.get(i);
@@ -140,13 +139,13 @@ public final class MungeTreesWithMorfetteAnalyses {
         }
         System.out.println(tree.toString());
       }
-      
+
       if (tr.readTree() != null || morfetteItr.hasNext()) {
         System.err.println("WARNING: Uneven input files!");
       }
-      
+
       tr.close();
-    
+
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
     } catch (FileNotFoundException e) {
@@ -165,7 +164,7 @@ public final class MungeTreesWithMorfetteAnalyses {
     boolean isPunc = pIsPunct.matcher(rawToken).matches();
     if (isParen || isPunc || isAllUpper) {
       return rawToken;
-    } 
+    }
     if (isUpper) {
       Character firstChar = Character.toUpperCase(lemma.charAt(0));
       lemma = firstChar + lemma.substring(1, lemma.length());

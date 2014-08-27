@@ -1360,7 +1360,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if(dependency.getRoots().isEmpty()) return null;
     // root relation
     if(dependency.getFirstRoot().equals(headIndexedWord)) return "root";
-    if(!dependency.vertexSet().contains(dependency.getParent(headIndexedWord))) return null;
+    if(!dependency.containsVertex(dependency.getParent(headIndexedWord))) return null;
     GrammaticalRelation relation = dependency.reln(dependency.getParent(headIndexedWord), headIndexedWord);
 
     // adjunct relations
@@ -1411,21 +1411,22 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     if(!nerString.equals("O")) return "definite";
 
-    List<IndexedWord> quant = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.DETERMINER);
-    List<IndexedWord> poss = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.POSSESSION_MODIFIER);
-    String det = "";
-    if(!quant.isEmpty()) {
-      det = quant.get(0).lemma();
-      if(dict.determiners.contains(det)) {
-        return "definite";
+    Set<IndexedWord> quant = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.DETERMINER);
+    Set<IndexedWord> poss = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.POSSESSION_MODIFIER);
+    if (!quant.isEmpty()) {
+      for (IndexedWord word : quant) {
+        String det = word.lemma();
+        if (dict.determiners.contains(det)) {
+          return "definite";
+        } else if (dict.quantifiers2.contains(det)) {
+          return "quantified";
+        }
       }
-    }
-    else if(!poss.isEmpty()) {
+    } else if (!poss.isEmpty()) {
       return "definite";
-    }
-    else {
+    } else {
       quant = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.NUMERIC_MODIFIER);
-      if(dict.quantifiers2.contains(det) || !quant.isEmpty()) {
+      if (!quant.isEmpty()) {
         return "quantified";
       }
     }
@@ -1443,8 +1444,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     }
 
     // or has a sibling
-    Collection<IndexedWord> siblings = dependency.getSiblings(headIndexedWord);
-    for(IndexedWord sibling : siblings) {
+    for(IndexedWord sibling : dependency.getSiblings(headIndexedWord)) {
       if(dict.negations.contains(sibling.lemma()) && !dependency.hasParentWithReln(headIndexedWord, EnglishGrammaticalRelations.NOMINAL_SUBJECT)) return 1;
     }
     // check the parent
@@ -1491,8 +1491,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if(headIndexedWord == null) return 0;
 
     // check adverbial clause with marker "as"
-    Collection<IndexedWord> siblings = dependency.getSiblings(headIndexedWord);
-    for(IndexedWord sibling : siblings) {
+    for(IndexedWord sibling : dependency.getSiblings(headIndexedWord)) {
       if(dict.reportVerb.contains(sibling.lemma()) && dependency.hasParentWithReln(sibling,EnglishGrammaticalRelations.ADV_CLAUSE_MODIFIER)) {
         IndexedWord marker = dependency.getChildWithReln(sibling,EnglishGrammaticalRelations.MARKER);
         if (marker != null && marker.lemma().equals("as")) {

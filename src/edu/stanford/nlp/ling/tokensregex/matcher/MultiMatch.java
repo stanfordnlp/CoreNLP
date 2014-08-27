@@ -1,7 +1,6 @@
 package edu.stanford.nlp.ling.tokensregex.matcher;
 
 import edu.stanford.nlp.util.HasInterval;
-import edu.stanford.nlp.util.Interval;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.ArrayList;

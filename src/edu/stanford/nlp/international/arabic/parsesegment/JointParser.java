@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.zip.GZIPInputStream;
@@ -17,7 +16,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
- * 
+ *
  * @author Spence Green
  *
  */
@@ -44,9 +43,9 @@ public final class JointParser {
     optionArgDefs.put("o", 0);
     return optionArgDefs;
   }
-  
+
   /**
-   * 
+   *
    * @param args
    */
   public static void main(String[] args) {
@@ -77,7 +76,7 @@ public final class JointParser {
     parsingModel.setVerbose(VERBOSE);
     parsingModel.setMaxEvalSentLen(maxGoldSentLen);
     parsingModel.setSerInput(SER_INPUT);
-    
+
     //WSGDEBUG -- Some stuff for eclipse debugging
     InputStream inputStream = null;
     try {
@@ -90,7 +89,7 @@ public final class JointParser {
     } catch (FileNotFoundException e) {
       e.printStackTrace();
       System.exit(-1);
-      
+
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(-1);

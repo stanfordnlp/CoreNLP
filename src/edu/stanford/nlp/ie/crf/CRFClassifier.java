@@ -32,7 +32,6 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.util.ConvertByteArray;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.optimization.*;
 import edu.stanford.nlp.optimization.Function;
@@ -2576,7 +2575,13 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       oos.writeObject(flags);
       if (flags.useEmbedding)
         oos.writeObject(embeddings);
-      oos.writeObject(featureFactories);
+      // For some reason, writing out the array of FeatureFactory
+      // objects doesn't seem to work.  The resulting classifier
+      // doesn't have the lexicon (distsim object) correctly saved.
+      oos.writeObject(featureFactories.size());
+      for (FeatureFactory ff : featureFactories) {
+        oos.writeObject(ff);
+      }
       oos.writeInt(windowSize);
       oos.writeObject(weights);
       // oos.writeObject(WordShapeClassifier.getKnownLowerCaseWords());
@@ -2628,6 +2633,16 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } else if (featureFactory instanceof FeatureFactory) {
       featureFactories = Generics.newArrayList();
       featureFactories.add((FeatureFactory) featureFactory);
+    } else if (featureFactory instanceof Integer) {
+      int size = (Integer) featureFactory;
+      featureFactories = Generics.newArrayList();
+      for (int i = 0; i < size; ++i) {
+        featureFactory = ois.readObject();
+        if (!(featureFactory instanceof FeatureFactory)) {
+          throw new RuntimeIOException();
+        }
+        featureFactories.add((FeatureFactory) featureFactory);
+      }
     }
 
     if (props != null) {

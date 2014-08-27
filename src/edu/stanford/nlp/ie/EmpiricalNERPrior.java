@@ -2,7 +2,6 @@ package edu.stanford.nlp.ie;
 
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.ling.CoreLabel;
 
 import java.util.List;
 
@@ -21,7 +20,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
   public EmpiricalNERPrior(String backgroundSymbol, Index<String> classIndex, List<IN> doc) {
     super(backgroundSymbol, classIndex, doc);
   }
-  
+
   protected double p1 = -Math.log(0.01);
 
   protected double dem1 = 6631.0;
@@ -29,7 +28,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
   protected double p3 = -Math.log(188 / dem1)/2.0;
   protected double p4 = -Math.log(4 / dem1)/2.0;
   protected double p5 = -Math.log(3 / dem1)/2.0;
-  
+
   protected double dem2 = 3169.0;
   protected double p6 = -Math.log(188.0 / dem2)/2.0;
   protected double p7 = -Math.log(2975 / dem2)/2.0;
@@ -41,31 +40,31 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
   protected double p11 = -Math.log(5 / dem3)/2.0;
   protected double p12 = -Math.log(3141 / dem3)/2.0;
   protected double p13 = -Math.log(1 / dem3)/2.0;
-  
+
   protected double dem4 = 2035.0;
   protected double p14 = -Math.log(3.0 / dem4)/2.0;
   protected double p15 = -Math.log(1 / dem4)/2.0;
   protected double p16 = -Math.log(1 / dem4)/2.0;
   protected double p17 = -Math.log(2030 / dem4)/2.0;
-  
+
   protected double dem5 = 724.0;
   protected double p18 = -Math.log(167.0 / dem5);
   protected double p19 = -Math.log(328.0 / dem5);
   protected double p20 = -Math.log(5.0 / dem5);
   protected double p21 = -Math.log(224.0 / dem5);
-  
+
   protected double dem6 = 834.0;
   protected double p22 = -Math.log(6.0 / dem6);
   protected double p23 = -Math.log(819.0 / dem6);
   protected double p24 = -Math.log(2.0 / dem6);
   protected double p25 = -Math.log(7.0 / dem6);
-  
+
   protected double dem7 = 1978.0;
   protected double p26 = -Math.log(1.0 / dem7);
   protected double p27 = -Math.log(22.0 / dem7);
   protected double p28 = -Math.log(1941.0 / dem7);
   protected double p29 = -Math.log(14.0 / dem7);
-  
+
   protected double dem8 = 622.0;
   protected double p30 = -Math.log(63.0 / dem8);
   protected double p31 = -Math.log(191.0 / dem8);
@@ -92,8 +91,8 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
 
           Entity otherEntity = null;
           for (int k = other[j]; k < other[j]+length && k < entities.length; k++) {
-            otherEntity = entities[k]; 
-            if (otherEntity != null) { 
+            otherEntity = entities[k];
+            if (otherEntity != null) {
 //               if (k > other[j]) {
 //                 System.err.println(entity.words+" "+otherEntity.words);
 //               }
@@ -138,7 +137,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
                 // shorter
                 p -= (oLength + length) * p1;
               }
-            } 
+            }
             if (tag1 == (LOC)) {
               if (tag2 == (LOC)) {
                 //p -= length * Math.log(6436.0 / dem);
@@ -152,7 +151,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
               } else if (tag2 == (MISC)) {
                 //p -= length * Math.log(3 / dem);
                 p -= length * p5;
-              } 
+              }
             } else if (tag1 == (ORG)) {
               //double dem = 3169.0;
               if (tag2 == (LOC)) {
@@ -167,7 +166,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
               } else if (tag2 == (MISC)) {
                 //p -= length * Math.log(1 / dem);
                 p -= length * p9;
-              } 
+              }
             } else if (tag1 == (PER)) {
               //double dem = 3151.0;
               if (tag2 == (LOC)) {
@@ -214,7 +213,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
               } else if (tag2 == (MISC)) {
                 //p -= length * Math.log(224.0 / dem);
                 p -= length * p21;
-              } 
+              }
             } else if (tag1 == (ORG)) {
               //double dem = 834.0;
               if (tag2 == (LOC)) {
@@ -229,7 +228,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
               } else if (tag2 == (MISC)) {
                 //p -= length * Math.log(7.0 / dem);
                 p -= length * p25;
-              } 
+              }
             } else if (tag1 == (PER)) {
               //double dem = 1978.0;
               if (tag2 == (LOC)) {
@@ -262,7 +261,7 @@ public class EmpiricalNERPrior<IN extends CoreMap> extends EntityCachingAbstract
               }
             }
           }
-          
+
 //           if (tag1 == PER) {
 //             int personIndex = classIndex.indexOf(PER);
 //             String lastName = entity.words.get(entity.words.size()-1);

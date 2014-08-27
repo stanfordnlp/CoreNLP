@@ -548,6 +548,16 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
 
   public static final String DEFAULT_FORMAT = "value-index";
 
+  public static final String VALUE_FORMAT = "value";
+
+  public static final String VALUE_TAG_FORMAT = "value-tag";
+
+  public static final String VALUE_TAG_INDEX_FORMAT = "value-tag-index";
+
+  public static final String MAP_FORMAT = "{map}";
+
+  public static final String WORD_FORMAT = "word";
+
   @Override
   public String toString() {
     return toString(DEFAULT_FORMAT);
@@ -565,6 +575,8 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    * <li>"value-index": extracts a value and an integer index from
    * the contained map using keys  <code>INDEX_KEY</code>,
    * respectively, and prints them with a hyphen in between</li>
+   * <li>"value-tag"
+   * <li>"value-tag-index"
    * <li>"value-index{map}": a combination of the above; the index is
    * displayed first and then not shown in the map that is displayed</li>
    * <li>"word": Just the value of HEAD_WORD_KEY in the map</li>
@@ -575,9 +587,9 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
   @SuppressWarnings("unchecked")
   public String toString(String format) {
     StringBuilder buf = new StringBuilder();
-    if (format.equals("value")) {
+    if (format.equals(VALUE_FORMAT)) {
       buf.append(value());
-    } else if (format.equals("{map}")) {
+    } else if (format.equals(MAP_FORMAT)) {
       Map map2 = new TreeMap();
       for(Class key : this.keySet()) {
         map2.put(key.getName(), get(key));
@@ -598,7 +610,13 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
         buf.append('-').append((index).intValue());
       }
       buf.append(toPrimes());
-    } else if (format.equals("value-tag-index")) {
+    } else if (format.equals(VALUE_TAG_FORMAT)) {
+      buf.append(value());
+      String tag = tag();
+      if (tag != null) {
+        buf.append(TAG_SEPARATOR).append(tag);
+      }
+    } else if (format.equals(VALUE_TAG_INDEX_FORMAT)) {
       buf.append(value());
       String tag = tag();
       if (tag != null) {
@@ -630,7 +648,8 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
       if (!map2.isEmpty()) {
         buf.append(map2);
       }
-    } else if (format.equals("word")) {
+    } else if (format.equals(WORD_FORMAT)) {
+      // TODO: we should unify word() and value()
       buf.append(word());
     } else if (format.equals("text-index")) {
       buf.append(this.get(CoreAnnotations.TextAnnotation.class));

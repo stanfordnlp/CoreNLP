@@ -150,6 +150,44 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     }
   }
 
+  /**
+   * Retains the given features in the Dataset.  All features that
+   * do not occur in features are expunged.
+   */
+  public void retainFeatures(Set<F> features) {
+    //float[] counts = getFeatureCounts();
+    Index<F> newFeatureIndex = new HashIndex<F>();
+
+    int[] featMap = new int[featureIndex.size()];
+    for (int i = 0; i < featMap.length; i++) {
+      F feat = featureIndex.get(i);
+      if (features.contains(feat)) {
+        int newIndex = newFeatureIndex.size();
+        newFeatureIndex.add(feat);
+        featMap[i] = newIndex;
+      } else {
+        featMap[i] = -1;
+      }
+      // featureIndex.remove(feat);
+    }
+
+    featureIndex = newFeatureIndex;
+    // counts = null; // This is unnecessary; JVM can clean it up
+
+    for (int i = 0; i < size; i++) {
+      List<Integer> featList = new ArrayList<Integer>(data[i].length);
+      for (int j = 0; j < data[i].length; j++) {
+        if (featMap[data[i][j]] >= 0) {
+          featList.add(featMap[data[i][j]]);
+        }
+      }
+      data[i] = new int[featList.size()];
+      for (int j = 0; j < data[i].length; j++) {
+        data[i][j] = featList.get(j);
+      }
+    }
+  }
+
 
   /**
    * Applies a max feature count threshold to the Dataset.  All features that
