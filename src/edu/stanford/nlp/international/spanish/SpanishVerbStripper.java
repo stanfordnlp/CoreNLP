@@ -27,7 +27,7 @@ public final class SpanishVerbStripper {
 	private HashMap<String, String> dict;
 
   private static final String DEFAULT_DICT =
-    "data/edu/stanford/nlp/international/spanish/enclitic-inflections.data";
+    "edu/stanford/nlp/international/spanish/enclitic-inflections.data";
 
   private static final String PATTERN_ATTACHED_PRONOUNS =
     "(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$";
