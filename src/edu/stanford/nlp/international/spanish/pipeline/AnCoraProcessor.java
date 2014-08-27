@@ -149,11 +149,22 @@ public class AnCoraProcessor {
         TreeReader tr = trf.newTreeReader(file.getPath(), in);
 
         List<Tree> trees = new ArrayList<Tree>();
-        Tree t;
+        Tree t, splitPoint;
 
         while ((t = tr.readTree()) != null) {
-          trees.add(t);
-          updateTagger(t);
+          // We may need to split the current tree into multiple parts.
+          // (If not, a call to `split` with a `null` split-point is a
+          // no-op
+          do {
+            splitPoint = findSplitPoint(t);
+            Pair<Tree, Tree> split = split(t, splitPoint);
+
+            Tree toAdd = split.first();
+            t = split.second();
+
+            trees.add(toAdd);
+            updateTagger(toAdd);
+          } while (splitPoint != null);
         }
 
         tr.close();
@@ -182,7 +193,7 @@ public class AnCoraProcessor {
   /**
    * Split the given tree based on a split point such that the
    * terminals leading up to the split point are in the left returned
-   * tree and those following the are in the right returned tree.
+   * tree and those following the are in the left returned tree.
    *
    * @param t Tree from which to extract a subtree. This may be
    *          modified during processing.
@@ -196,7 +207,7 @@ public class AnCoraProcessor {
    */
   static Pair<Tree, Tree> split(Tree t, Tree splitPoint) {
     if (splitPoint == null)
-      return new Pair<Tree, Tree>(null, t);
+      return new Pair<Tree, Tree>(t, null);
 
     Tree left = t.prune(new LeftOfFilter(splitPoint, t));
     Tree right = t.prune(new RightOfExclusiveFilter(splitPoint, t));
