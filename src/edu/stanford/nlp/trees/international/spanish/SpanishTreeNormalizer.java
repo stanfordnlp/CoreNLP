@@ -1,6 +1,13 @@
 package edu.stanford.nlp.trees.international.spanish;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,7 +17,6 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
-import edu.stanford.nlp.trees.BobChrisTreeNormalizer;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreeNormalizer;
@@ -24,7 +30,7 @@ import edu.stanford.nlp.util.Pair;
 /**
  * Normalize trees read from the AnCora Spanish corpus.
  */
-public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
+public class SpanishTreeNormalizer extends TreeNormalizer {
 
   /**
    * Tag provided to words which are extracted from a multi-word token
@@ -42,20 +48,17 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   public static final String RIGHT_PARENTHESIS = "=RRB=";
 
   private static final Map<String, String> spellingFixes = new HashMap<String, String>() {{
-    put("jucio", "juicio"); // 4800_2000406.tbf-5
-    put("méxico", "México"); // 111_C-3.tbf-17
-    put("reirse", "reírse"); // 140_20011102.tbf-13
-    put("tambien", "también"); // 41_19991002.tbf-8
+      put("jucio", "juicio"); // 4800_2000406.tbf-5
+      put("reirse", "reírse"); // 140_20011102.tbf-13
+      put("tambien", "también"); // 41_19991002.tbf-8
 
-    put("Intitute", "Institute"); // 22863_20001129.tbf-16
-
-    // Hack: these aren't exactly spelling mistakes, but we need to
-    // run a search-and-replace across the entire corpus with them, so
-    // they should be treated just like spelling mistakes for our
-    // purposes
-    put("(", LEFT_PARENTHESIS);
-    put(")", RIGHT_PARENTHESIS);
-  }};
+      // Hack: these aren't exactly spelling mistakes, but we need to
+      // run a search-and-replace across the entire corpus with them, so
+      // they should be treated just like spelling mistakes for our
+      // purposes
+      put("(", LEFT_PARENTHESIS);
+      put(")", RIGHT_PARENTHESIS);
+    }};
 
   /**
    * A filter which rejects preterminal nodes that contain "empty" leaf
@@ -69,44 +72,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       return true;
     }
   };
-
-  /**
-   * A filter which rejects "A over A" nodes: node pairs A, B which are
-   * unary rewrites with equal labels.
-   *
-   * (This is implemented in
-   * {@link edu.stanford.nlp.trees.BobChrisTreeNormalizer}, but we need
-   * to have special handling here so as to not destroy multiword
-   * tokens.)
-   */
-  private static final Filter<Tree> aOverAFilter = new Filter<Tree>() {
-    public boolean accept(Tree tree) {
-      if (tree.isLeaf() || tree.isPreTerminal() || tree.numChildren() != 1)
-        return true;
-
-      String value = tree.value();
-      if (value == null || value.startsWith("MW"))
-        return true;
-
-      return !value.equals(tree.getChild(0).value());
-    }
-  };
-
-  @SuppressWarnings("unchecked")
-  private static final Pair<String, String>[] cleanupStrs = new Pair[] {
-    new Pair("sp < (sp=sp <: prep=prep)", "replace sp prep"),
-
-    // Left and right parentheses should be at same depth
-    new Pair("fpa > __=grandparent $++ (__=ancestor <<` fpt=fpt >` =grandparent)",
-      "move fpt $- ancestor"),
-
-    // Nominal groups where adjectival groups belong
-    new Pair("/^s\\.a$/ <: (/^grup\\.nom$/=gn <: /^a/)",
-      "relabel gn /grup.a/"),
-  };
-
-  private static final List<Pair<TregexPattern, TsurgeonPattern>> cleanup
-    = compilePatterns(cleanupStrs);
 
   /**
    * If one of the constituents in this set has a single child has a
@@ -137,8 +102,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   public SpanishTreeNormalizer(boolean simplifiedTagset,
                                boolean aggressiveNormalization,
                                boolean retainNER) {
-    super(new SpanishTreebankLanguagePack());
-
     if (retainNER && !simplifiedTagset)
       throw new IllegalArgumentException("retainNER argument only valid when " +
                                          "simplified tagset is used");
@@ -151,10 +114,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
     // First filter out nodes we don't like
-    tree = tree.prune(emptyFilter).spliceOut(aOverAFilter);
-
-    // Now start some simple cleanup
-    tree = Tsurgeon.processPatternsOnTree(cleanup, tree);
+    tree = tree.prune(emptyFilter);
 
     // Find all named entities which are not multi-word tokens and nest
     // them within named entity NP groups
@@ -184,12 +144,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     // More tregex-powered fixes
     tree = expandElisions(tree);
     tree = expandCliticPronouns(tree);
-
-    // Make sure the tree has a top-level unary rewrite; the root
-    // should have a proper root label
-    String rootLabel = tlp.startSymbol();
-    if (!tree.value().equals(rootLabel))
-      tree = tf.newTreeNode(rootLabel, Collections.singletonList(tree));
 
     return tree;
   }
@@ -451,7 +405,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   /**
    * Characters which may separate words in a single token.
    */
-  private static final String WORD_SEPARATORS = ",-_¡!¿?()/";
+  private static final String WORD_SEPARATORS = ",-_¡!¿?()";
 
   /**
    * Word separators which should not be treated as separate "words" and
@@ -516,7 +470,8 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       String word = splitter.nextToken();
       remainingTokens--;
 
-      if (shouldDropWord(word))
+      if (word.length() == 1
+          && WORD_SEPARATORS_DROP.indexOf(word.charAt(0)) != -1)
         // This is a delimiter that we should drop
         continue;
 
@@ -528,10 +483,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
           // Ouch. We expected a hyphen here. Clean things up and keep
           // moving.
           words.add(word);
-
-          if (!shouldDropWord(hyphen))
-            words.add(hyphen);
-
+          words.add(hyphen);
           continue;
         }
 
@@ -547,15 +499,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     }
 
     return words.toArray(new String[words.size()]);
-  }
-
-  /**
-   * Determine if the given "word" which is part of a multiword token
-   * should be dropped.
-   */
-  private boolean shouldDropWord(String word) {
-    return word.length() == 1
-      && WORD_SEPARATORS_DROP.indexOf(word.charAt(0)) != -1;
   }
 
   /**
@@ -578,9 +521,8 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     // right sibling
 
     new Pair(// Search for `sn` which is right sibling of closest `prep`
-             // ancestor to the elided node; cascade down tree to lowest `sn`
-             "/^(prep|sadv|conj)$/ <+(/^(prep|grup\\.(adv|cc|prep))$/) (sp000=sp < /(?i)^(del|al)$/=elided) <<` =sp " +
-               "$+ (sn > (__ <+(sn) (sn=sn !< sn) << =sn) !$- sn)",
+             // ancestor to the elided node
+             "/^(prep|sadv|conj)$/ <+(/^grup\\.(adv|prep)$/) (sp000 < /(?i)^(del|al)$/=elided) $+ sn=sn",
 
              // Insert the 'el' specifier as a constituent in adjacent
              // noun phrase
@@ -604,13 +546,13 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
     // "del que golpea:" insert 'el' as specifier into adjacent relative
     // phrase
-    new Pair("sp < (prep=prep < (sp000 < /(?i)^(a|de)l$/=elided) $+ " +
-      "(S=S <<, relatiu))",
+    new Pair("sp < (prep=prep < (sp000 < /(?i)^del$/=elided)) " +
+             ": (__ $- prep) << relatiu=relatiu",
 
              // Build a noun phrase in the neighboring relative clause
              // containing the 'el' specifier
              "[relabel elided /(?i)l//] " +
-             "[adjoinF (sn (spec (da0000 el)) (grup.nom foot@)) S]"),
+             "[adjoinF (sn (spec (da0000 el)) foot@) relatiu]"),
 
     // "al" + infinitive phrase
     new Pair("prep < (sp000 < /(?i)^(al|del)$/=elided) $+ " +
@@ -665,62 +607,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
              "[delete kill] " +
              "[adjoinF (sp (prep (sp000 de)) (sn (spec (da0000 el)) foot@)) target]"),
-
-    // "a favor del X," "en torno al Y": very common (and somewhat
-    // complex) phrase structure that we can match
-    new Pair("sp000 < /(?i)^(a|de)l$/=contraction >: (prep >` (/^grup\\.prep$/ " +
-      ">` (prep=prep > sp $+ (sn=sn <, /^grup\\.(nom|[wz])/))))",
-
-      "[relabel contraction /(?i)l//] [insert (spec (da0000 el)) >0 sn]"),
-
-    // "en vez del X": same as above, except prepositional phrase
-    // functions as conjunction (and is labeled as such)
-    new Pair("sp000 < /(?i)^(a|de)l$/=contraction >: (prep >` (sp >: (conj $+ (sn=sn <, /^grup\\.(nom|[wz])/))))",
-
-      "[relabel contraction /(?i)l//] [insert (spec (da0000 el)) >0 sn]"),
-
-    // "a favor del X," "en torno al Y" where X, Y are doubly nested
-    // substantives
-    new Pair("sp000 < /(?i)^(a|de)l$/=contraction >: (prep >` (/^grup\\.prep$/ " +
-      ">` (prep=prep > sp $+ (sn <, (sn=sn <, /^grup\\.(nom|[wz])/)))))",
-
-      "[relabel contraction /(?i)l//] [insert (spec (da0000 el)) >0 sn]"),
-
-    // "a favor del X," "en torno al Y" where X, Y already have
-    // leading specifiers
-    new Pair("sp000 < /(?i)^(a|de)l$/=contraction >: (prep >` (/^grup\\.prep$/ " +
-      ">` (prep > sp $+ (sn=sn <, spec=spec))))",
-
-      "[relabel contraction /(?i)l//] [insert (da0000 el) >0 spec]"),
-
-    // "a favor del X," "en torno al Y" where X, Y are nominal
-    // groups (not substantives)
-    new Pair("sp000 < /(?i)^(a|de)l$/=contraction >: (prep >` (/^grup\\.prep$/ " +
-      ">` (prep > sp $+ /^grup\\.(nom|[wz])$/=ng)))",
-
-      "[adjoinF (sn (spec (da0000 el)) foot@) ng] [relabel contraction /(?i)l//]"),
-
-    // "al," "del" as part of coordinating conjunction: "frente al,"
-    // "además del"
-    //
-    // (nearby noun phrase labeled as nominal group)
-    new Pair("sp000 < /(?i)^(de|a)l$/=elided >` (/^grup\\.cc$/ >: (conj $+ /^grup\\.nom/=gn))",
-      "[relabel elided /(?i)l//] [adjoinF (sn (spec (da0000 el)) foot@) gn]"),
-
-    // "al" + participle in adverbial phrase: "al contado," "al descubierto"
-    new Pair("sp000=sp < /(?i)^al$/=elided $+ /^vmp/",
-      "[relabel elided /(?i)l//] [insert (da0000 el) $- sp]"),
-
-    // über-special case: 15021_20000218.tbf-5
-    //
-    // intentional: article should bind all of quoted phrase, even
-    // though there are multiple clauses (kind of a crazy sentence)
-    new Pair("prep < (sp000 < /(?i)^(al|del)$/=elided) $+ (S=S <+(S) (/^f/=punct $+ (S <+(S) (S <, infinitiu))))",
-      "[relabel elided /(?i)l//] [adjoinF (sn (spec (da0000 el)) (grup.nom foot@)) S]"),
-
-    // special case: "del todo" -> "de el todo" (flat)
-    new Pair("__=sp < del=contraction >, __=parent $+ (__ < todo >` =parent)",
-      "[relabel contraction de] [insert (da0000 el) $- sp]"),
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> elisionExpansions =
