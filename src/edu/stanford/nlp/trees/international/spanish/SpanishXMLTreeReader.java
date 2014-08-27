@@ -114,13 +114,9 @@ public class SpanishXMLTreeReader implements TreeReader {
       if(t != null) {
         t = treeNormalizer.normalizeWholeTree(t, treeFactory);
 
-        // TODO calculate sentence IDs -- why can't we just use sentIdx?
-        if(t.label() instanceof CoreLabel) {
-          //   String ftbId = ((Element) sentRoot).getAttribute(ATTR_NUMBER);
-          //   ((CoreLabel) t.label()).set(CoreAnnotations.SentenceIDAnnotation.class, ftbId);
+        if(t.label() instanceof CoreLabel)
           ((CoreLabel) t.label()).set(CoreAnnotations.SentenceIDAnnotation.class,
                                       Integer.toString(thisSentenceId));
-        }
       }
     }
     return t;
@@ -236,10 +232,6 @@ public class SpanishXMLTreeReader implements TreeReader {
     String lemma = eRoot.getAttribute(ATTR_LEMMA);
     String word = getWord(eRoot);
 
-    // TODO
-    // String morph = getMorph(eRoot);
-    // String subcat = getSubcat(eRoot);
-
     String leafStr = treeNormalizer.normalizeTerminal(word);
     Tree leafNode = treeFactory.newLeaf(leafStr);
     if (leafNode.label() instanceof HasWord)
@@ -247,13 +239,7 @@ public class SpanishXMLTreeReader implements TreeReader {
     if (leafNode.label() instanceof CoreLabel && lemma != null) {
       ((CoreLabel) leafNode.label()).setLemma(lemma);
     }
-    // TODO
-    // if (leafNode.label() instanceof HasContext) {
-    //   ((HasContext) leafNode.label()).setOriginalText(morph);
-    // }
-    // if (leafNode.label() instanceof HasCategory) {
-    //   ((HasCategory) leafNode.label()).setCategory(subcat);
-    // }
+
     List<Tree> kids = new ArrayList<Tree>();
     kids.add(leafNode);
 
