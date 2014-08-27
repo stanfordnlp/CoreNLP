@@ -56,6 +56,11 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     annotations.put("-markPPHeads", new Pair("@sp",
                                              new AnnotateHeadFunction(headFinder)));
 
+    // +.1 F1
+    annotations.put("-markComo", new Pair("@cs < /(?i)^como$/",
+                                          new SimpleStringFunction("[como]")));
+    annotations.put("-markSpecHeads", new Pair("@spec", new AnnotateHeadFunction(headFinder)));
+
     compileAnnotations(headFinder);
   }
 
@@ -71,10 +76,13 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       "-markInf", "-markGer",
 
       // prepositional phrase annotations
-      "-markPPHeads",
+      // "-markPPHeads", negative F1!
 
       // clause annotations
       "-markRelative",
+
+      // lexical annotations
+      "-markComo", "-markSpecHeads",
     };
   }
 
