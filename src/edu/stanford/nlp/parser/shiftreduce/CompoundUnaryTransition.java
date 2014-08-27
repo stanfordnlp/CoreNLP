@@ -19,7 +19,10 @@ import edu.stanford.nlp.util.TreeShapedStack;
  * @author John Bauer
  */
 public class CompoundUnaryTransition implements Transition {
-  /** labels[0] is the top of the unary chain */
+  /**
+   * labels[0] is the top of the unary chain.  
+   * A unary chain that results in a ROOT will have labels[0] == ROOT, for example. 
+   */
   public final String[] labels;
 
   /** root transitions are illegal in the middle of the tree, naturally */

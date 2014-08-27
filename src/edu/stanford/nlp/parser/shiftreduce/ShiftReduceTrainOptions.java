@@ -18,7 +18,7 @@ public class ShiftReduceTrainOptions extends TrainOptions {
   public boolean cvAveragedModels = true;
 
   public enum TrainingMethod {
-    EARLY_TERMINATION, GOLD, ORACLE, BEAM;
+    EARLY_TERMINATION, GOLD, ORACLE, REORDER_ORACLE, BEAM;
   };
   public TrainingMethod trainingMethod = TrainingMethod.EARLY_TERMINATION;
 
@@ -29,6 +29,9 @@ public class ShiftReduceTrainOptions extends TrainOptions {
 
   /** Saves intermediate models, but that takes up a lot of space */
   public boolean saveIntermediateModels = false;
+
+  /** If we cut off features with featureFrequencyCutoff, this retrains with only the existing features */
+  public boolean retrainAfterCutoff = true;
 
   // version id randomly chosen by forgetting to set the version id when serializing models
   private static final long serialVersionUID = -8158249539308373819L;

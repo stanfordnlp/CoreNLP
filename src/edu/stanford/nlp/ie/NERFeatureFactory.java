@@ -1709,7 +1709,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
             featuresCpC.add(pWord + "-PSEQpW"); // added later after goodCoNLL
           }
 
-          if (true) { // TODO [cdm Jul 2014]: should really be if (flags.useDistSim) but fixing current itest....
+          if (flags.useDistSim) {
             featuresCpC.add(pDS + "-PSEQpDS");
             featuresCpC.add(cDS + "-PSEQcDS");
             featuresCpC.add(pDS+ '-' +cDS + "-PSEQpcDS");

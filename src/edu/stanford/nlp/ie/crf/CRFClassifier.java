@@ -2980,7 +2980,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       } else if (crf.flags.printLabelValue) {
         crf.printLabelInformation(testFile, readerAndWriter);
       } else {
-        crf.classifyAndWriteAnswers(testFile, readerAndWriter);
+        crf.classifyAndWriteAnswers(testFile, readerAndWriter, true);
       }
     }
 
@@ -2989,7 +2989,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       for (String filename : testFiles.split(",")) {
         files.add(new File(filename));
       }
-      crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter());
+      crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter(), true);
     }
 
     if (textFile != null) {

@@ -165,12 +165,15 @@ public class Sighan2005DocumentReaderAndWriter implements DocumentReaderAndWrite
           if (index == 0) { // first character of a sentence (a line)
             wi.set(CoreAnnotations.AnswerAnnotation.class, "1");
             wi.set(CoreAnnotations.SpaceBeforeAnnotation.class, "1");
+            wi.set(CoreAnnotations.GoldAnswerAnnotation.class, "1");
           } else if (Character.isWhitespace(line.charAt(index - 1)) || Character.isISOControl(line.charAt(index - 1))) {
             wi.set(CoreAnnotations.AnswerAnnotation.class, "1");
             wi.set(CoreAnnotations.SpaceBeforeAnnotation.class, "1");
+            wi.set(CoreAnnotations.GoldAnswerAnnotation.class, "1");
           } else {
             wi.set(CoreAnnotations.AnswerAnnotation.class, "0");
             wi.set(CoreAnnotations.SpaceBeforeAnnotation.class, "0");
+            wi.set(CoreAnnotations.GoldAnswerAnnotation.class, "0");
           }
           wi.set(CoreAnnotations.PositionAnnotation.class, intern(String.valueOf((position))));
           position++;
