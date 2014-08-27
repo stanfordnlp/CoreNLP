@@ -118,7 +118,7 @@ public class HamleDTMultiWordClassifier {
 
   private void outputTestSummary(Collection<String> labels, GeneralDataset<String, String> test,
                                  IntCounter<String> contingency) {
-    System.err.printf("%n%i examples in test set", test.size());
+    System.err.printf("%n%d examples in test set", test.size());
 
     double microAccuracy = 0.0, macroF1 = 0.0;
     for (String label : labels) {
