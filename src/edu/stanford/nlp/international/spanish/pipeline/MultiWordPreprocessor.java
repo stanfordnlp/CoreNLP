@@ -334,7 +334,7 @@ public final class MultiWordPreprocessor {
     List<Label> phraseYield = parent.yield();
     StringBuilder containingPhrase = new StringBuilder();
     for (Label l : phraseYield)
-      containingPhrase.append(l).append(" ");
+      containingPhrase.append(l.value()).append(" ");
 
     return containingPhrase.toString().substring(0, containingPhrase.length() - 1);
   }
