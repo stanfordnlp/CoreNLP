@@ -200,6 +200,10 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 		return new SpanishTokenizerFactory<T>(factory, options);
 	}
 
+  public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory) {
+    return new SpanishTokenizerFactory<T>(factory, ANCORA_OPTS);
+  }
+
   /**
    * A factory for Spanish tokenizer instances.
    *
@@ -219,8 +223,9 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     protected boolean splitContractionOption = false;
 
     public static TokenizerFactory<CoreLabel> newCoreLabelTokenizerFactory() {
-      return new SpanishTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory(), " ");
+      return new SpanishTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory(), ANCORA_OPTS);
     }
+
 
 		/**
 		 * Contructs a new SpanishTokenizer that returns T objects and uses the options passed in.
@@ -234,12 +239,13 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 			return new SpanishTokenizerFactory<T>(factory, options);
 		}
 
+
 		// Constructors 
 
 		/** Make a factory for SpanishTokenizers, default options */
     private SpanishTokenizerFactory(LexedTokenFactory<T> factory) {
       this.factory = factory;
-			setOptions(" ");
+			setOptions(ANCORA_OPTS);
     }
 
 		/** Make a factory for SpanishTokenizers, options passed in */
@@ -266,6 +272,8 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
      */
     @Override
     public void setOptions(String options) {
+			if (options == null) return;
+
       String[] optionList = options.split(",");
       for (String option : optionList) {
         String[] fields = option.split("=");
