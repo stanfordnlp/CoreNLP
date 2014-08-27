@@ -8,6 +8,7 @@ import edu.stanford.nlp.trees.international.spanish.SpanishHeadFinder;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreebankLanguagePack;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.List;
@@ -133,6 +134,16 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
   public HeadFinder typedDependencyHeadFinder() {
     // Not supported
     return null;
+  }
+
+  @Override
+  public Lexicon lex(Options op, Index<String> wordIndex, Index<String> tagIndex) {
+    // Override unknown word model
+    if (op.lexOptions.uwModelTrainer == null)
+      op.lexOptions.uwModelTrainer =
+        "edu.stanford.nlp.parser.lexparser.SpanishUnknownWordModelTrainer";
+
+    return new BaseLexicon(op, wordIndex, tagIndex);
   }
 
   @Override
