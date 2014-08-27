@@ -199,11 +199,13 @@ public final class MultiWordPreprocessor {
     private static final Pattern participle = Pattern.compile("[ai]d[oa]$");
 
     /**
-     * Names which would be mistakenly marked as function words by unigram tagger (and which never appear as function words
-     * in multi-word tokens)
+     * Names which would be mistakenly marked as function words by
+     * unigram tagger (and which never appear as function words in
+     * multi-word tokens)
      */
     private static final Set<String> actuallyNames = new HashSet<String>() {{
       add("A");
+      add("Avenida");
       add("Contra");
       add("Gracias"); // interjection
       add("Jesús"); // interjection
@@ -223,6 +225,8 @@ public final class MultiWordPreprocessor {
       else if (word.equals("Sin") && containingPhrase.startsWith("Sin embargo"))
         return "sp000";
       else if (word.equals("contra") && containingPhrase.startsWith("en contra"))
+        return "nc0s000";
+      else if (word.equals("total") && containingPhrase.startsWith("ese"))
         return "nc0s000";
       else if (word.equals("DEL"))
         // Uses of "Del" in corpus are proper nouns, but uses of "DEL" are

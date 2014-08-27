@@ -81,6 +81,10 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
     // Left and right parentheses should be at same depth
     new Pair("fpa > __=grandparent $++ (__=ancestor <<` fpt=fpt >` =grandparent)",
       "move fpt $- ancestor"),
+
+    // Nominal groups where adjectival groups belong
+    new Pair("/^s\\.a$/ <: (/^grup\\.nom$/=gn <: /^a/)",
+      "relabel gn /grup.a/"),
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> cleanup
