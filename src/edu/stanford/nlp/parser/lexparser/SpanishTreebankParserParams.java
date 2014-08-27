@@ -55,6 +55,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     annotations.put("-markRelative", new Pair("@S <, @relatiu",
                                               new SimpleStringFunction("-relative")));
 
+    // Negative F1; unused in default config
     annotations.put("-markPPHeads", new Pair("@sp",
                                              new AnnotateHeadFunction(headFinder)));
 
@@ -73,6 +74,10 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
 
     // +.46 F1
     annotations.put("-markConjTypes", new Pair("@conj <: /^c[cs]/=c", new MarkConjTypeFunction()));
+
+    // Negative F1; unused in default config
+    annotations.put("-markPronounNPs", new Pair("@sn <: (/^grup\\.nom/ <: /^pp/)",
+                                                new SimpleStringFunction("-pronoun")));
 
     compileAnnotations(headFinder);
   }
@@ -103,7 +108,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       "-markInf", "-markGer",
 
       // noun phrase annotations
-      "-markSingleChildNPs",
+      "-markSingleChildNPs", /* "-markPronounNPs", */
 
       // prepositional phrase annotations
       // "-markPPHeads", negative F1!
