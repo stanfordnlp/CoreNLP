@@ -4,10 +4,12 @@ import junit.framework.TestCase;
 
 public class SpanishPronounDisambiguatorTest extends TestCase {
 
+  private final SpanishVerbStripper verbStripper = new SpanishVerbStripper();
+
   private void runTest(SpanishPronounDisambiguator.PersonalPronounType expected, String verb,
                        int i) {
     assertEquals(expected,
-      SpanishPronounDisambiguator.disambiguatePersonalPronoun(SpanishVerbStripper
+      SpanishPronounDisambiguator.disambiguatePersonalPronoun(verbStripper
                                                                 .separatePronouns(verb), i, ""));
   }
 
