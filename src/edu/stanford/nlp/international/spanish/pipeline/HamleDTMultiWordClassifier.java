@@ -133,7 +133,7 @@ public class HamleDTMultiWordClassifier {
           if (next.equals(guess))
             contingency.incrementCount(next + "|FP");
           else
-            contingency.incrementCount(next + "|FN");
+            contingency.incrementCount(next + "|TN");
         }
       }
 
