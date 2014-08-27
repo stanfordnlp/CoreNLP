@@ -22,7 +22,7 @@ public class SpanishVerbStripper {
 
   /* TODO: FIGURE THIS OUT!! */
     //  private static final String DICT_PATH = "data/edu/stanford/nlp/international/spanish/enclitic-inflections.data";
-    private static final String DICT_PATH = "data/enclitic-inflections.data";
+  private static final String DICT_PATH = "data/enclitic-inflections.data";
 
   private static HashMap<String, String> dict;
 

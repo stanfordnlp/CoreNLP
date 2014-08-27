@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.international.spanish.SpanishPronounDisambiguator;
 import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
@@ -18,7 +17,6 @@ import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Normalize trees read from the AnCora Spanish corpus.
@@ -41,7 +39,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   public static final String RIGHT_PARENTHESIS = "=RRB=";
 
   private static final Map<String, String> spellingFixes = new HashMap<String, String>() {{
-    put("embargp", "embargo"); // 18381_20000322.tbf-4
     put("jucio", "juicio"); // 4800_2000406.tbf-5
     put("méxico", "México"); // 111_C-3.tbf-17
     put("reirse", "reírse"); // 140_20011102.tbf-13
@@ -125,45 +122,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     // Nominal groups where adjectival groups belong
     new Pair("/^s\\.a$/ <: (/^grup\\.nom$/=gn <: /^a/)",
       "relabel gn /grup.a/"),
-
-    // Adverbial phrases should always have adverb group children
-    // -- we see about 50 exceptions in the corpus..
-    new Pair("sadv !< /^grup\\.adv$/ <: /^(rg|neg)$/=adv",
-      "adjoinF (grup.adv foot@) adv"),
-
-    // 'z' tag should be 'z0'
-    new Pair("z=z <: (__ !< __)", "relabel z z0"),
-
-    // Conjunction groups aren't necessary if they head single
-    // prepositional phrases (we already see a `conj < sp` pattern;
-    // replicate that
-    new Pair("/^grup\\.c/=grup > conj <: sp=sp", "replace grup sp"),
-
-    // "Lift up" sentence-final periods which have been nested within
-    // constituents (convention in AnCora is to have sentence-final
-    // periods as final right children of the `sentence` constituent)
-    new Pair("__=N <<` (fp=fp <: (/^\\.$/ !. __)) > sentence=sentence",
-             "move fp $- N"),
-
-    // AnCora has a few weird parses of "nada que ver" and related
-    // phrases. Normalize them:
-    //
-    //     (grup.nom (pi000000 X) (S (relatiu (pr000000 que))
-    //                               (infinitiu (vmn0000 Y))))
-    new Pair("(pi000000 <: __ !$+ S >` (/^grup\\.nom/=gn >` sn=sn))" +
-               ". ((que >: (__=queTag $- =sn)) . (__=vb !< __ >>: (__=vbContainer $- =queTag)))",
-
-             "[insert (S (relatiu (pr000000 que)) (infinitiu vmn0000=vbFoot)) >-1 gn]" +
-               "[move vb >0 vbFoot]" +
-               "[delete queTag]" +
-               "[delete vbContainer]"),
-
-    // Remove date lead-ins
-    new Pair("sentence <<, (sn=sn <, (/^grup\\.w$/ $+ fp))",
-             "delete sn"),
-
-    // Fix mis-tagging of inverted question mark
-    new Pair("fit=fit <: ¿", "relabel fit fia"),
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> cleanup
@@ -195,10 +153,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   private boolean aggressiveNormalization;
   private boolean retainNER;
 
-  public SpanishTreeNormalizer() {
-    this(true, false, false);
-  }
-
   public SpanishTreeNormalizer(boolean simplifiedTagset,
                                boolean aggressiveNormalization,
                                boolean retainNER) {
@@ -221,9 +175,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
     // Now start some simple cleanup
     tree = Tsurgeon.processPatternsOnTree(cleanup, tree);
-
-    // That might've produced some more A-over-As
-    tree = tree.spliceOut(aOverAFilter);
 
     // Find all named entities which are not multi-word tokens and nest
     // them within named entity NP groups
@@ -252,7 +203,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
     // More tregex-powered fixes
     tree = expandElisions(tree);
-    tree = expandConmigo(tree);
     tree = expandCliticPronouns(tree);
 
     // Make sure the tree has a top-level unary rewrite; the root
@@ -343,11 +293,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       "(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$/=vb " +
       // It should actually be a verb (gerund, imperative or
       // infinitive)
-      //
-      // (Careful: other code that uses this pattern requires that this
-      // node be at the end, with parens so that it can be named /
-      // modified. See e.g. #verbWithCliticPronounAndSiblings)
-      "> (/^vm[gmn]0000$/";
+      "> /^vm[gmn]0000$/";
 
   /**
    * Matches verbs (infinitives, gerunds and imperatives) which have
@@ -355,9 +301,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    */
   private static final TregexPattern verbWithCliticPronouns =
     TregexPattern.compile(VERB_LEAF_WITH_PRONOUNS_TREGEX +
-                          // Verb tag should not have siblings in verb
-                          // phrase
-                          " !$ __)" +
                           // Locate the clause which contains it, and
                           // the child just below that clause
                           ">+(/^[^S]/) (/^(infinitiu|gerundi|grup\\.verb)$/=target " +
@@ -369,26 +312,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
                           "!<< (/^(infinitiu|gerundi|grup\\.verb)$/ << =vb))");
 
   /**
-   * Matches verbs (infinitives, gerunds and imperatives) which have
-   * attached pronouns and siblings within their containing verb
-   * phrases
-   */
-  private static final TregexPattern verbWithCliticPronounsAndSiblings =
-    TregexPattern.compile(VERB_LEAF_WITH_PRONOUNS_TREGEX +
-        // Name the matched verb tag as the target for insertion;
-        // require that it have siblings
-        "=target $ __) " +
-        // Locate the clause which contains it, and
-        // the child just below that clause
-        ">+(/^[^S]/) (/^(infinitiu|gerundi|grup\\.verb)$/ " +
-        "> /^(sentence|S|grup\\.verb|infinitiu|gerundi)$/=clause << =vb " +
-        // Make sure we're not up too far in the tree:
-        // there should be no infinitive / gerund /
-        // verb phrase between the located ancestor
-        // and the verb
-        "!<< (/^(infinitiu|gerundi|grup\\.verb)$/ << =vb))");
-
-  /**
    * Matches verbs which really should be in a clause, but were
    * squeezed into an infinitive constituent (because the pronoun was
    * attached to the verb, we could just pretend it wasn't a clause..
@@ -396,7 +319,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    */
   private static final TregexPattern clauselessVerbWithCliticPronouns = TregexPattern.compile(
     VERB_LEAF_WITH_PRONOUNS_TREGEX +
-      ") > (/^vmn/ > (/^infinitiu$/=target > /^sp$/))"
+      "> (/^vmn/ > (/^infinitiu$/=target > /^sp$/))"
   );
   private static final TsurgeonPattern clausifyVerbWithCliticPronouns =
     Tsurgeon.parseOperation("adjoinF (S foot@) target");
@@ -412,19 +335,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     t = Tsurgeon.processPattern(clauselessVerbWithCliticPronouns,
       clausifyVerbWithCliticPronouns, t);
 
-    // Run two separate stages: one for only-child VPs, then another
-    // for VP children which have siblings
-    t = expandCliticPronounsInner(t, verbWithCliticPronouns);
-    t = expandCliticPronounsInner(t, verbWithCliticPronounsAndSiblings);
-
-    return t;
-  }
-
-  /**
-   * Expand clitic pronouns on verbs matching the given pattern.
-   */
-  private static Tree expandCliticPronounsInner(Tree t, TregexPattern pattern) {
-    TregexMatcher matcher = pattern.matcher(t);
+    TregexMatcher matcher = verbWithCliticPronouns.matcher(t);
     while (matcher.find()) {
       Tree verbNode = matcher.getNode("vb");
       String verb = verbNode.value();
@@ -437,44 +348,15 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       if (split == null)
         continue;
 
-      // Retrieve some context for the pronoun disambiguator: take the
-      // matched clause and walk (at most) two constituents up
-      StringBuilder clauseYieldBuilder = new StringBuilder();
-      for (Label label : matcher.getNode("clause").yield())
-        clauseYieldBuilder.append(label.value()).append(" ");
-      String clauseYield = clauseYieldBuilder.toString();
-      clauseYield = clauseYield.substring(0, clauseYield.length() - 1);
-
       // Insert clitic pronouns as leaves of pronominal phrases which are
       // siblings of `target`. Iterate in reverse order since pronouns are
       // attached to immediate right of `target`
       List<String> pronouns = split.second();
       for (int i = pronouns.size() - 1; i >= 0; i--) {
         String pronoun = pronouns.get(i);
-
-        String newTreeStr = null;
-        if (SpanishPronounDisambiguator.isAmbiguous(pronoun)) {
-          SpanishPronounDisambiguator.PersonalPronounType type =
-            SpanishPronounDisambiguator.disambiguatePersonalPronoun(split, i, clauseYield);
-
-          switch (type) {
-            case OBJECT:
-              newTreeStr = "(sn (grup.nom (pp000000 %s)))"; break;
-            case REFLEXIVE:
-              newTreeStr = "(morfema.pronominal (pp000000 %s))"; break;
-            case UNKNOWN:
-              // Mark for manual disambiguation
-              newTreeStr = "(PRONOUN? (pp000000 %s))"; break;
-          }
-        } else {
-          // Unambiguous clitic pronouns are all indirect / direct
-          // object pronouns.. convenient!
-          newTreeStr = "(sn (grup.nom (pp000000 %s)))";
-        }
-
-        String patternString = "[insert " + String.format(newTreeStr, pronoun) + " $- target]";
-        TsurgeonPattern insertPattern = Tsurgeon.parseOperation(patternString);
-        t = insertPattern.evaluate(t, matcher);
+        String patternString = String.format("[insert (morfema.pronominal (pp000000 %s)) $- target]", pronoun);
+        TsurgeonPattern pattern = Tsurgeon.parseOperation(patternString);
+        t = pattern.evaluate(t, matcher);
       }
 
       TsurgeonPattern relabelOperation =
@@ -619,7 +501,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   /**
    * Characters which may separate words in a single token.
    */
-  private static final String WORD_SEPARATORS = ",-_¡!¿?()/%";
+  private static final String WORD_SEPARATORS = ",-_¡!¿?()/";
 
   /**
    * Word separators which should not be treated as separate "words" and
@@ -658,8 +540,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   /**
    * Return the (single or multiple) words which make up the given
    * token.
-   *
-   * TODO can't SpanishTokenizer handle most of this?
    */
   private String[] getMultiWords(String token) {
     token = prepareForMultiWordExtraction(token);
@@ -710,24 +590,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
         words.add(word + hyphen + freeMorpheme);
         continue;
-      } else if (word.equals(",") && remainingTokens >= 1 && words.size() > 0) {
-        int prevIndex = words.size() - 1;
-        String prevWord = words.get(prevIndex);
-
-        if (StringUtils.isNumeric(prevWord)) {
-          String nextWord = splitter.nextToken();
-          remainingTokens--;
-
-          if (StringUtils.isNumeric(nextWord)) {
-            words.set(prevIndex, prevWord + ',' + nextWord);
-          } else {
-            // Expected a number here.. clean up and move on
-            words.add(word);
-            words.add(nextWord);
-          }
-
-          continue;
-        }
       }
 
       // Otherwise..
@@ -913,41 +775,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> elisionExpansions =
     compilePatterns(elisionExpansionStrs);
-
-  private static TregexPattern conmigoPattern =
-    TregexPattern.compile("/(?i)^con[mst]igo$/=conmigo > (/^pp/ > (/^grup\\.nom$/ > sn=sn))");
-
-  /**
-   * ¡Venga, expand conmigo!
-   */
-  private static Tree expandConmigo(Tree t) {
-    TregexMatcher matcher = conmigoPattern.matcher(t);
-
-    while (matcher.find()) {
-      Tree conmigoNode = matcher.getNode("conmigo");
-      String word = conmigoNode.value();
-
-      String newPronoun = null;
-      if (word.equalsIgnoreCase("conmigo"))
-        newPronoun = "mí";
-      else if (word.equalsIgnoreCase("contigo"))
-        newPronoun = "ti";
-      else if (word.equalsIgnoreCase("consigo"))
-        newPronoun = "sí";
-
-      if (word.charAt(0) == 'C')
-        newPronoun = newPronoun.toUpperCase();
-
-      String tsurgeon = String.format(
-        "[relabel conmigo /%s/]" +
-          "[adjoinF (sp (prep (sp000 con)) foot@) sn]",
-        newPronoun);
-      TsurgeonPattern pattern = Tsurgeon.parseOperation(tsurgeon);
-      t = pattern.evaluate(t, matcher);
-    }
-
-    return t;
-  }
 
   private static List<Pair<TregexPattern, TsurgeonPattern>> compilePatterns(Pair<String, String>[] patterns) {
     List<Pair<TregexPattern, TsurgeonPattern>> ret = new ArrayList<Pair<TregexPattern, TsurgeonPattern>>(patterns.length);

@@ -1052,18 +1052,11 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
             IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true), readerWriter);
   }
 
-  /** Does nothing by default.  Children classes can override if necessary */
-  public void dumpFeatures(Collection<List<IN>> documents) {}
-
   public void classifyAndWriteAnswers(Collection<List<IN>> documents,
                                       PrintWriter printWriter,
                                       DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
-    if (flags.exportFeatures != null) {
-      dumpFeatures(documents);
-    }
-
     Timing timer = new Timing();
 
     Counter<String> entityTP = new ClassicCounter<String>();
@@ -1772,7 +1765,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *          serialized file, such as the DocumentReaderAndWriter. You can pass
    *          in <code>null</code> to override nothing.
    */
-  // todo [cdm 2014]: This method overlaps functionality in loadStreamFromClasspath
   public void loadJarClassifier(String modelName, Properties props) {
     Timing.startDoing("Loading JAR-internal classifier " + modelName);
     try {

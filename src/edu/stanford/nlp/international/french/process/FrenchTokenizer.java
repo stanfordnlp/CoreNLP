@@ -218,6 +218,10 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     return FrenchTokenizerFactory.newTokenizerFactory();
   }
 
+	public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory, String options) {
+		return new FrenchTokenizerFactory<T>(factory, options);
+	}
+
 
   /**
    * Returns a factory for FrenchTokenizer that replicates the tokenization of
