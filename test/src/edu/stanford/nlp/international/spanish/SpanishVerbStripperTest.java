@@ -49,6 +49,12 @@ public class SpanishVerbStripperTest extends TestCase {
     assertEquals(new Pair("contando", pronouns),
                  SpanishVerbStripper.separatePronouns("contándoselo"));
 
+    pronouns.clear();
+    pronouns.add("se");
+    pronouns.add("les");
+    assertEquals(new Pair("aplicar", pronouns),
+      SpanishVerbStripper.separatePronouns("aplicárseles"));
+
     // Looks like a verb with a clitic pronoun.. but it's not! There are
     // a *lot* of these in Spanish.
     assertNull(SpanishVerbStripper.separatePronouns("címbalo"));

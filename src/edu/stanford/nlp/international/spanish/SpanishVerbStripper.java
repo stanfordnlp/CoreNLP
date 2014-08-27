@@ -31,7 +31,7 @@ public class SpanishVerbStripper {
     "(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$";
 
   private static final Pattern pTwoAttachedPronouns =
-    Pattern.compile("(?:([mts]e|n?os|les?)(l[oa]s?)?)$");
+    Pattern.compile("(?:([mts]e|n?os|les?)(l[eoa]s?)?)$");
 
   private static final Pattern pOneAttachedPronoun =
     Pattern.compile("([mts]e|n?os|les?|l[oa]s?)$");
