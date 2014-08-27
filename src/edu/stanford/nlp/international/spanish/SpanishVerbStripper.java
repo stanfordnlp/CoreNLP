@@ -102,6 +102,10 @@ public class SpanishVerbStripper {
   }
 
   public static String removeAccents(String word) {
+    // Special case: oír
+    if (word.equalsIgnoreCase("oír"))
+      return word;
+
     String stripped = word;
     for (Pair<Pattern, String> accentFix : accentFixes)
       stripped = accentFix.first().matcher(stripped)
@@ -145,7 +149,7 @@ public class SpanishVerbStripper {
   /**
    * Attempt to separate attached pronouns from the given verb.
    *
-   * @param word Spanish verb
+   * @param verb Spanish verb
    * @return A pair containing the verb (pronouns removed) and a list of
    *           the pronouns which were attached to the verb, or
    *           <tt>null</tt> if no pronouns could be located and

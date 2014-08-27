@@ -80,6 +80,7 @@ public class SpanishVerbStripperTest extends TestCase {
     assertEquals("vesti", SpanishVerbStripper.stripVerb("vestíos"));
     assertEquals("compre", SpanishVerbStripper.stripVerb("cómprelos"));
     assertEquals("haz", SpanishVerbStripper.stripVerb("házmelo"));
+    assertEquals("oír", SpanishVerbStripper.stripVerb("oírse"));
   }
 
   public static void main(String[] args) {
