@@ -8,6 +8,7 @@ import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.*;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -31,6 +32,16 @@ import java.util.*;
  * @author Jon Gauthier
  */
 public class HamleDTMultiWordClassifier {
+
+  /**
+   * Column index of label assigned to expression in train / test files
+   */
+  private static final int FIELD_INDEX_LABEL = 0;
+
+  /**
+   * Column index of input expression in train / test files
+   */
+  private static final int FIELD_INDEX_INPUT = 1;
 
   private static final NumberFormat nf = new DecimalFormat("0.000");
 
@@ -68,7 +79,7 @@ public class HamleDTMultiWordClassifier {
 
   public void trainClassifier(String datasetPath) {
     // Build dataset and output basic information
-    GeneralDataset<String, String> dataset = readDataset(datasetPath);
+    GeneralDataset<String, String> dataset = readDataset(datasetPath).first();
     dataset.summaryStatistics();
 
     classifier = makeClassifier(dataset);
@@ -97,12 +108,15 @@ public class HamleDTMultiWordClassifier {
   public void testClassifier(String datasetPath) {
     checkClassifier();
 
-    GeneralDataset<String, String> test = readDataset(datasetPath);
+    Pair<GeneralDataset<String, String>, List<String[]>> test = readDataset(datasetPath, true);
+    GeneralDataset<String, String> testDataset = test.first();
+    List<String[]> inputFields = test.second();
 
     // Count TPs, TNs, FPs, FNs
     IntCounter<String> contingency = new IntCounter<String>();
 
-    for (Datum<String, String> datum : test) {
+    int i = 0;
+    for (Datum<String, String> datum : testDataset) {
       Counter<String> logScores = classifier.scoresOf(datum);
 
       String guess = classifier.classOf(datum);
@@ -124,16 +138,17 @@ public class HamleDTMultiWordClassifier {
       }
 
       Distribution<String> scoreDist = Distribution.distributionFromLogisticCounter(logScores);
-      outputTestExample(datum, guess, logScores, scoreDist);
+      outputTestExample(inputFields.get(i), datum, guess, logScores, scoreDist);
+      i++;
     }
 
-    outputTestSummary(classifier.labels(), test, contingency);
+    outputTestSummary(classifier.labels(), testDataset, contingency);
   }
 
-  private void outputTestExample(Datum<String, String> datum, String answer,
+  private void outputTestExample(String[] inputFields, Datum<String, String> datum, String answer,
                                  Counter<String> logScores,
                                  Distribution<String> scoreDist) {
-    String line = datum.label() + '\t' + answer + '\t'
+    String line = inputFields[FIELD_INDEX_INPUT] + '\t' + datum.label() + '\t' + answer + '\t'
       + nf.format(scoreDist.probabilityOf(answer)) + '\t'
       + nf.format(scoreDist.probabilityOf(datum.label()));
     System.out.println(line);
@@ -172,20 +187,37 @@ public class HamleDTMultiWordClassifier {
     System.err.println("Macro-averaged F1: " + nf2.format(macroF1));
   }
 
-  private GeneralDataset<String, String> readDataset(String path) {
-    GeneralDataset<String, String> dataset = new Dataset<String, String>();
-
-    for (String line : ObjectBank.getLineIterator(new File(path))) {
-      dataset.add(makeDatumFromLine(line));
-    }
-
-    return dataset;
+  private Pair<GeneralDataset<String, String>, List<String[]>> readDataset(String path) {
+    return readDataset(path, false);
   }
 
-  private Datum<String, String> makeDatumFromLine(String line) {
-    String[] fields = line.split("\t");
-    String gold = fields[0];
-    String expression = fields[1];
+  /**
+   * Read a dataset from the given path.
+   *
+   * @param path
+   * @param includeOrig If true, return a list of the original file lines (split into fields) in
+   *                    the second item of the pair. If false, the value of the second item of the
+   *                    pair is undefined.
+   */
+  private Pair<GeneralDataset<String, String>, List<String[]>> readDataset(String path,
+                                                                         boolean includeOrig) {
+    GeneralDataset<String, String> dataset = new Dataset<String, String>();
+    List<String[]> lines = includeOrig ? new ArrayList<String[]>() : null;
+
+    for (String line : ObjectBank.getLineIterator(new File(path))) {
+      String[] fields = line.split("\t");
+      dataset.add(makeDatumFromLine(fields));
+
+      if (includeOrig)
+        lines.add(fields);
+    }
+
+    return new Pair<GeneralDataset<String, String>, List<String[]>>(dataset, lines);
+  }
+
+  private Datum<String, String> makeDatumFromLine(String[] fields) {
+    String gold = fields[FIELD_INDEX_LABEL];
+    String expression = fields[FIELD_INDEX_INPUT];
 
     List<String> features = new ArrayList<String>();
 
