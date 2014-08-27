@@ -152,9 +152,24 @@ public class SpanishXMLTreeReader implements TreeReader {
   private String getPOS(Element node) {
     String pos = node.getAttribute(ATTR_POS);
 
-    // Make up for some missing part-of-speech tags
-    if (pos.equals("")) {
-      String namedAttribute = node.getAttribute(ATTR_NAMED_ENTITY);
+    String namedAttribute = node.getAttribute(ATTR_NAMED_ENTITY);
+    if (pos.startsWith("np") && pos.length() == 7
+        && pos.charAt(pos.length() - 1) == '0') {
+      // Some nouns are missing a named entity annotation in the final
+      // character of their POS tags, but still have a proper named
+      // entity annotation in the `ne` attribute. Fix this:
+      char annotation = '0';
+      if (namedAttribute.equals("location")) {
+        annotation = 'l';
+      } else if (namedAttribute.equals("person")) {
+        annotation = 'p';
+      } else if (namedAttribute.equals("organization")) {
+        annotation = 'o';
+      }
+
+      pos = pos.substring(0, 6) + annotation;
+    } else if (pos.equals("")) {
+      // Make up for some missing part-of-speech tags
       if (namedAttribute.equals("date")) {
         return "w";
       } else if (namedAttribute.equals("number")) {
