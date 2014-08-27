@@ -1,13 +1,6 @@
 package edu.stanford.nlp.trees.international.spanish;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -187,6 +180,12 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     // More tregex-powered fixes
     tree = expandElisions(tree);
     tree = expandCliticPronouns(tree);
+
+    // Make sure the tree has a top-level unary rewrite; the root
+    // should have a proper root label
+    String rootLabel = tlp.startSymbol();
+    if (!tree.value().equals(rootLabel))
+      tree = tf.newTreeNode(rootLabel, Collections.singletonList(tree));
 
     return tree;
   }
