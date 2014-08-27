@@ -10,6 +10,7 @@ import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.stats.*;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.File;
@@ -106,7 +107,6 @@ public class HamleDTMultiWordClassifier {
     }
 
     outputTestSummary(classifier.labels(), test, contingency);
-    // TODO output test summary (see writeResultsSummary)
   }
 
   private void outputTestExample(Datum<String, String> datum, String answer,
@@ -121,6 +121,7 @@ public class HamleDTMultiWordClassifier {
                                  IntCounter<String> contingency) {
     System.err.printf("%n%i examples in test set", test.size());
 
+    double microAccuracy = 0.0, macroF1 = 0.0;
     for (String label : labels) {
       int tp = contingency.getIntCount(label + "|TP");
       int tn = contingency.getIntCount(label + "|TN");
@@ -129,7 +130,24 @@ public class HamleDTMultiWordClassifier {
 
       double precision = (tp + fp == 0) ? 1.0 : ((double) tp) / (tp + fp);
       double recall = (tp + fn == 0) ? 1.0 : ((double) tp) / (tp + fn);
+      double f1 = (precision == 0.0 && recall == 0.0)
+                  ? 0.0 : 2 * precision * recall / (precision + recall);
+      double accuracy = ((double) tp + tn) / test.size();
+
+      macroF1 += f1;
+      microAccuracy += tp;
+
+      System.err.println("Cls " + label + ": TP=" + tp + " FN=" + fn + " FP=" + fp + " TN=" + tn +
+                           "; Acc " + nf.format(accuracy) + " P " + nf.format(precision) + " R "
+                           + nf.format(recall) + " F1 " + nf.format(f1));
     }
+
+    microAccuracy = microAccuracy / test.size();
+    macroF1 = macroF1 / labels.size();
+
+    NumberFormat nf2 = new DecimalFormat("0.00000");
+    System.err.println("Accuracy/micro-averaged F1: " + nf2.format(microAccuracy));
+    System.err.println("Macro-averaged F1: " + nf2.format(macroF1));
   }
 
   private GeneralDataset<String, String> readDataset(String path) {
@@ -153,6 +171,45 @@ public class HamleDTMultiWordClassifier {
       features.addAll(featureFunction.apply(expression));
 
     return new BasicDatum<String, String>(features, gold);
+  }
+
+  private static final String USAGE = String.format(
+    "Usage: java %s [-train trainFile [-dev devFile] -saveSerialized serializedPath]%n" +
+      "               [-loadSerialized serializedPath -eval evalFile]");
+  private static Map<String, Integer> argOptionDefs = new HashMap<String, Integer>() {{
+    put("train", 1);
+    put("dev", 1);
+    put("eval", 1);
+
+    put("saveSerialized", 0);
+    put("loadSerialized", 0);
+  }};
+
+  public static void main(String[] args) {
+    Properties options = StringUtils.argsToProperties(args, argOptionDefs);
+    if (!(options.containsKey("train") || options.containsKey("eval"))) {
+      System.err.println(USAGE);
+      System.exit(1);
+    }
+
+    // TODO support load serialized
+    HamleDTMultiWordClassifier classifier = options.containsKey("loadSerialized")
+      ? null : new HamleDTMultiWordClassifier();
+
+    if (options.containsKey("train")) {
+      if (options.containsKey("loadSerialized"))
+        throw new RuntimeException("Can't re-train a pre-loaded serialized classifier -- exiting");
+
+      classifier.trainClassifier(options.getProperty("train"));
+
+      // TODO save serialized
+    }
+
+    if (options.containsKey("dev")) {
+      classifier.testClassifier(options.getProperty("test"));
+    }
+
+    // TODO support eval
   }
 
   // -- Feature function definitions -- //
