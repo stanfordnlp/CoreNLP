@@ -177,6 +177,160 @@ public class AnCoraProcessor {
     }
   }
 
+  private static TreeNormalizer splittingNormalizer = new SpanishTreeNormalizer();
+  private static TreeFactory splittingTreeFactory = new LabeledScoredTreeFactory();
+
+  /**
+   * Split the given tree based on a split point such that the
+   * terminals leading up to the split point are in the left returned
+   * tree and those following the are in the right returned tree.
+   *
+   * @param t Tree from which to extract a subtree. This may be
+   *          modified during processing.
+   * @param splitPoint Point up to which to extract. If {@code null},
+   *                   {@code t} is returned unchanged in the place of
+   *                   the right tree.
+   * @return A pair where the left tree contains every terminal leading
+   *         up to and including {@code extractPoint} and the right tree
+   *         contains every terminal following {@code extractPoint}.
+   *         Both trees may be normalized before return.
+   */
+  static Pair<Tree, Tree> split(Tree t, Tree splitPoint) {
+    if (splitPoint == null)
+      return new Pair<Tree, Tree>(null, t);
+
+    Tree left = t.prune(new LeftOfFilter(splitPoint, t));
+    Tree right = t.prune(new RightOfExclusiveFilter(splitPoint, t));
+
+    left = splittingNormalizer.normalizeWholeTree(left, splittingTreeFactory);
+    right = splittingNormalizer.normalizeWholeTree(right, splittingTreeFactory);
+
+    return new Pair<Tree, Tree>(left, right);
+  }
+
+  /**
+   * Accepts any tree node to the left of the provided node (or the
+   * provided node itself).
+   */
+  private static class LeftOfFilter implements Filter<Tree> {
+
+    private static final long serialVersionUID = -5146948439247427344L;
+
+    private Tree reference;
+    private Tree root;
+
+    /**
+     * @param reference Node to which nodes provided to this filter
+     *                  should be compared
+     * @param root Root of the tree which contains the reference node
+     *             and all nodes which may be provided to the filter
+     */
+    private LeftOfFilter(Tree reference, Tree root) {
+      this.reference = reference;
+      this.root = root;
+    }
+
+    @Override
+    public boolean accept(Tree obj) {
+      if (obj == reference || obj.dominates(reference) || reference.dominates(obj))
+        return true;
+
+      Tree rightmostDescendant = getRightmostDescendant(obj);
+      return Trees.rightEdge(rightmostDescendant, root) <= Trees.leftEdge(reference, root);
+    }
+
+    private Tree getRightmostDescendant(Tree t) {
+      if (t.isLeaf()) return t;
+      else return getRightmostDescendant(t.children()[t.children().length - 1]);
+    }
+  }
+
+  /**
+   * Accepts any tree node to the right of the provided node.
+   */
+  private static class RightOfExclusiveFilter implements Filter<Tree> {
+
+    private static final long serialVersionUID = 8283161954004080591L;
+
+    private Tree root;
+
+    // This should be the leftmost terminal node of the filtered tree
+    private Tree firstToKeep;
+
+    /**
+     * @param reference Node to which nodes provided to this filter
+     *                  should be compared
+     * @param root Root of the tree which contains the reference node
+     *             and all nodes which may be provided to the filter
+     */
+    private RightOfExclusiveFilter(Tree reference, Tree root) {
+      this.root = root;
+
+      firstToKeep = getFollowingTerminal(reference, root);
+    }
+
+    @Override
+    public boolean accept(Tree obj) {
+      if (obj.dominates(firstToKeep))
+        return true;
+
+      Tree leftmostDescendant = getLeftmostDescendant(obj);
+      return Trees.rightEdge(leftmostDescendant, root) > Trees.leftEdge(firstToKeep, root);
+    }
+
+    /**
+     * Get the terminal node which immediately follows the given node.
+     */
+    private Tree getFollowingTerminal(Tree terminal, Tree root) {
+      Tree sibling = getRightSiblingOrRightAncestor(terminal, root);
+      if (sibling == null)
+        return null;
+      return getLeftmostDescendant(sibling);
+    }
+
+    /**
+     * Get the right sibling of the given node, or some node which is
+     * the right sibling of an ancestor of the given node.
+     *
+     * If no such node can be found, this method returns {@code null}.
+     */
+    private Tree getRightSiblingOrRightAncestor(Tree t, Tree root) {
+      Tree parent = t.parent(root);
+      if (parent == null) return null;
+
+      int idxWithinParent = parent.objectIndexOf(t);
+      if (idxWithinParent < parent.numChildren() - 1)
+        // Easy case: just return the immediate right sibling
+        return parent.getChild(idxWithinParent + 1);
+
+      return getRightSiblingOrRightAncestor(parent, root);
+    }
+
+    private Tree getLeftmostDescendant(Tree t) {
+      if (t.isLeaf()) return t;
+      else return getLeftmostDescendant(t.children()[0]);
+    }
+  }
+
+  private static final TregexPattern pSplitPoint =
+    TregexPattern.compile("fp $+ /^[^f]/ > S|sentence");
+
+  /**
+   * Find the next point (preterminal) at which the given tree should
+   * be split.
+   *
+   * @param t
+   * @return The endpoint of a subtree which should be extracted, or
+   *         {@code null} if there are no subtrees which need to be
+   *         extracted.
+   */
+  static Tree findSplitPoint(Tree t) {
+    TregexMatcher m = pSplitPoint.matcher(t);
+    if (m.find())
+      return m.getMatch();
+    return null;
+  }
+
   /**
    * Fix tree structure, phrasal categories and part-of-speech labels in newly expanded
    * multi-word tokens.

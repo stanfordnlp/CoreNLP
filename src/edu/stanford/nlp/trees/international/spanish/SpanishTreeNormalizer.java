@@ -168,6 +168,10 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   private boolean aggressiveNormalization;
   private boolean retainNER;
 
+  public SpanishTreeNormalizer() {
+    this(true, false, false);
+  }
+
   public SpanishTreeNormalizer(boolean simplifiedTagset,
                                boolean aggressiveNormalization,
                                boolean retainNER) {
