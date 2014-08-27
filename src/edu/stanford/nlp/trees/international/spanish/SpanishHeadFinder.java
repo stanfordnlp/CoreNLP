@@ -42,7 +42,7 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
     String[][] rootRules = new String[][] {
       {"right", "grup.verb", "s.a", "sn"},
       {"left", "S"},
-      {"right", "sadv", "grup.adv", "i", "sp", "grup.prep"},
+      {"right", "sadv", "grup.adv", "neg", "interjeccio", "i", "sp", "grup.prep"},
       insertVerbs(new String[] {"rightdis"},
         new String[] {"nc0s000", "nc0p000", "nc00000", "np00000", "rg", "rn"})};
 
@@ -53,19 +53,21 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
 
     // adjectival phrases
     String[][] adjectivePhraseRules = new String[][] {
-      {"leftdis", "grup.a", "s.a", "spec"},
-      {"right"}};
+      {"leftdis", "grup.a", "s.a", "spec"}};
     nonTerminalInfo.put("s.a", adjectivePhraseRules);
     nonTerminalInfo.put("sa", adjectivePhraseRules);
     nonTerminalInfo.put("grup.a", new String[][] {
-        {"right", "a"},
-        insertVerbs(new String[] {"right"}, new String[] {}),
-        {"right", "r"}});
+      {"rightdis", "aq0000", "ao0000"},
+      insertVerbs(new String[] {"right"}, new String[] {}),
+      {"right", "rg", "rn"}});
 
     // adverbial phrases
-    nonTerminalInfo.put("sadv", new String[][] {{"left", "grup.adv"}});
-    nonTerminalInfo.put("grup.adv", new String[][] {{"right", "r"}});
-    nonTerminalInfo.put("neg", new String[][] {{"left", "r"}});
+    nonTerminalInfo.put("sadv", new String[][] {{"left", "grup.adv", "sadv"}});
+    nonTerminalInfo.put("grup.adv", new String[][] {
+      {"left", "conj"},
+      {"rightdis", "rg", "rn", "neg", "grup.adv"},
+      {"rightdis", "pr000000", "pi000000", "nc0s000", "nc0p000", "nc00000", "np00000"}});
+    nonTerminalInfo.put("neg", new String[][] {{"leftdis", "rg", "rn"}});
 
     // // coordinated phrases
     // nonTerminalInfo.put("COORD", new String[][]{{"leftdis", "C", "CC", "CS"}, {"left"}});
@@ -73,10 +75,11 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
     // noun phrases
     nonTerminalInfo.put("sn", new String[][] {
       {"leftdis", "nc0s000", "nc0p000", "nc00000"},
-      {"left", "grup.nom", "grup.w", "grup.z", "sn"}});
+      {"left", "grup.nom", "grup.w", "grup.z", "sn"},
+      {"leftdis", "spec"}});
     nonTerminalInfo.put("grup.nom", new String[][] {
-      {"leftdis", "nc0s000", "nc0p000", "nc00000", "np00000"},
-      {"leftdis", "pi000000"},
+      {"leftdis", "nc0s000", "nc0p000", "nc00000", "np00000", "w", "grup.w"},
+      {"leftdis", "pi000000", "pd000000"},
       {"left", "grup.nom", "sp"},
       {"leftdis", "pn000000", "aq0000", "ao0000"},
       {"left", "grup.a", "i", "grup.verb"},
@@ -94,8 +97,13 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
         {"left", "d", "p", "z", "grup.z", "w", "grup.w", "r", "grup.adv", "grup.prep", "spec", "conj", "n"}});
 
     // etc.
-    nonTerminalInfo.put("conj", new String[][] {{"leftdis", "c", "s", "grup.cc"}});
-    nonTerminalInfo.put("interjeccio", new String[][] {{"left", "i", "grup.i"}});
+    nonTerminalInfo.put("conj", new String[][] {
+      {"leftdis", "cs", "cc"},
+      {"leftdis", "grup.cc", "grup.cs"},
+      {"left", "sp"}});
+    nonTerminalInfo.put("interjeccio", new String[][] {
+      {"leftdis", "i", "nc0s000", "nc0p000", "nc00000", "np00000"},
+      {"left", "interjeccio"}});
     nonTerminalInfo.put("relatiu", new String[][] {{"left", "p"}});
 
     // prepositional phrases
@@ -103,12 +111,11 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
     nonTerminalInfo.put("prep", new String[][] {{"leftdis", "sp000", "prep", "grup.prep"}});
 
     // custom categories
-    nonTerminalInfo.put("grup.cc", new String[][] {{"left", "c", "s"}});
+    nonTerminalInfo.put("grup.cc", new String[][] {{"left", "cs"}});
     nonTerminalInfo.put("grup.cs", new String[][] {{"left", "cs"}}); // TODO ?? "de forma que," "ya que"
-    nonTerminalInfo.put("grup.i", new String[][] {{"left", "i", "n", "a", "p", "d", "v"}});
     nonTerminalInfo.put("grup.prep", new String[][] {{"left", "prep", "grup.prep", "s"}});
-    nonTerminalInfo.put("grup.pron", new String[][] {{"right", "d", "p"}});
-    nonTerminalInfo.put("grup.w", new String[][] {{"right", "w"}, {"left", "z"}, {"left"}});
+    nonTerminalInfo.put("grup.pron", new String[][] {{"rightdis", "px000000"}});
+    nonTerminalInfo.put("grup.w", new String[][] {{"right", "w"}, {"leftdis", "z0"}, {"left"}});
     nonTerminalInfo.put("grup.z", new String[][] {{"left", "z"}, {"right", "n", "s"}, {"left"}});
   }
 
