@@ -187,13 +187,14 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
   }
 
   /**
-   * Output a description of the current annotation configuration.
+   * Output a description of the current annotation configuration to
+   * standard error.
    */
   @Override
   public void display() {
     for (String feature : features)
-      System.out.printf("%s ", feature);
-    System.out.println();
+      System.err.printf("%s ", feature);
+    System.err.println();
   }
 
   /**

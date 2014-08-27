@@ -89,14 +89,36 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     annotations.put("-markParticipleAdjs", new Pair("@aq0000 < /[aeií]d[oa]s?$/",
                                                     new SimpleStringFunction("-part")));
 
-    // No effect on F1; unused in default config
-    annotations.put("-markSentenceInitialClauses", new Pair("S !, __",
+    // Negative F1; unused in default config
+    annotations.put("-markSentenceInitialClauses", new Pair("@S !, __",
                                                             new SimpleStringFunction("-init")));
 
-    // +___ F1
+    // Insignificant F1; unused in default config
     annotations.put("-markPoder", new Pair(
-      String.format("/^(infinitiu|gerundi|grup\\.verb)$/ <<: /%s/", PODER_FORM),
+      String.format("/^(infinitiu|gerundi|grup\\.verb)/ <<: /%s/", PODER_FORM),
       new SimpleStringFunction("-poder")));
+
+    // +.29 F1
+    annotations.put("-markBaseNPs", new Pair("/^grup\\.nom/ !< (__ < (__ < __))",
+                                             new SimpleStringFunction("-base")));
+
+    // +.17 F1
+    annotations.put("-markVerbless", new Pair("@S|sentence !<< /^(v|participi$)/",
+                                              new SimpleStringFunction("-verbless")));
+
+    // +.23 F1
+    annotations.put("-markDominatesVerb", new Pair("__ << (/^(v|participi$)/ < __)",
+                                                   new SimpleStringFunction("-dominatesV")));
+
+    // Negative F1 -- not used by default
+    annotations.put("-markNonRecSPs", new Pair("@sp !<< @sp", new SimpleStringFunction("-nonRec")));
+
+    // In right-recursive verb phrases, mark the prefix of the first verb on its tag.
+    // This annotation tries to capture the fact that only a few roots are ever really part of
+    // these constructions: poder, deber, ir, etc.
+    annotations.put("-markRightRecVPPrefixes",
+                    new Pair("/^v/ $+ @infinitiu|gerundi >, /^(grup.verb|infinitiu|gerundi)/",
+                             new MarkPrefixFunction(3)));
 
     compileAnnotations(headFinder);
   }
@@ -116,6 +138,34 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
   }
 
   /**
+   * Mark a tag with a prefix of its constituent word.
+   */
+  private class MarkPrefixFunction implements SerializableFunction<TregexMatcher, String> {
+
+    private static final long serialVersionUID = -3275700521562916350L;
+
+    private static final int DEFAULT_PREFIX_LENGTH = 3;
+    private final int prefixLength;
+
+    public MarkPrefixFunction() {
+      this(DEFAULT_PREFIX_LENGTH);
+    }
+
+    public MarkPrefixFunction(int prefixLength) {
+      this.prefixLength = prefixLength;
+    }
+
+    public String apply(TregexMatcher m) {
+      Tree tagNode = m.getMatch();
+
+      String yield = tagNode.firstChild().value();
+      String prefix = yield.substring(0, Math.min(yield.length(), prefixLength));
+      return "[p," + prefix + ']';
+    }
+
+  }
+
+  /**
    * Features which should be enabled by default.
    *
    * @see #buildAnnotations()
@@ -124,22 +174,27 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
   protected String[] baselineAnnotationFeatures() {
     return new String[] {
       // verb phrase annotations
-      "-markInf", "-markGer",
+      "-markInf", "-markGer", "-markRightRecVPPrefixes",
 
       // noun phrase annotations
-      "-markSingleChildNPs", /* "-markPronounNPs", */
+      "-markSingleChildNPs", "-markBaseNPs", /* "-markPronounNPs", */
 
       // prepositional phrase annotations
+      // "-markNonRecSPs", negative F1!
       // "-markPPHeads", negative F1!
 
       // clause annotations
       "-markRelative", /* "-markSentenceInitialClauses", */
 
       // lexical / word- or tag-level annotations
-      "-markComo", "-markSpecHeads", "-markPPFriendlyVerbs", "-markParticipleAdjs", "-markPoder",
+      "-markComo", "-markSpecHeads", "-markPPFriendlyVerbs", "-markParticipleAdjs",
+      /* "-markPoder", */
 
       // conjunction annotations
       "-markConjTypes",
+
+      // sentence annotations
+      "-markVerbless", "-markDominatesVerb",
     };
   }
 
