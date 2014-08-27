@@ -7,6 +7,7 @@ import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.stats.*;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.File;
@@ -71,9 +72,27 @@ public class HamleDTMultiWordClassifier {
     // TODO serialize
   }
 
-  public void testClassifier(String datasetPath) {
+  private void checkClassifier() {
     if (classifier == null)
       throw new IllegalStateException("No classifier has been trained or loaded");
+  }
+
+  public void outputHighWeights(int numWeights) {
+    checkClassifier();
+
+    String cString;
+    if (classifier instanceof LinearClassifier<?, ?>) {
+      cString = ((LinearClassifier<?, ?>) classifier).toString("HighWeight", numWeights);
+    } else {
+      cString = classifier.toString();
+    }
+
+    System.err.println("Highest classifier weights:");
+    System.err.println(cString);
+  }
+
+  public void testClassifier(String datasetPath) {
+    checkClassifier();
 
     GeneralDataset<String, String> test = readDataset(datasetPath);
 
@@ -184,6 +203,7 @@ public class HamleDTMultiWordClassifier {
 
     put("saveSerialized", 0);
     put("loadSerialized", 0);
+    put("printClassifierHighWeights", 0);
   }};
 
   public static void main(String[] args) {
@@ -205,6 +225,11 @@ public class HamleDTMultiWordClassifier {
 
       // TODO save serialized
     }
+
+    boolean printHighWeights = PropertiesUtils.getBool(options, "printClassifierHighWeights",
+                                                       false);
+    if (printHighWeights)
+      classifier.outputHighWeights(50);
 
     if (options.containsKey("dev")) {
       classifier.testClassifier(options.getProperty("dev"));
