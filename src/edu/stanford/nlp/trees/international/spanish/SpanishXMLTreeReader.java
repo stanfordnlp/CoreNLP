@@ -62,6 +62,8 @@ public class SpanishXMLTreeReader implements TreeReader {
   private static final String ATTR_POSTYPE = "postype";
   private static final String ATTR_ELLIPTIC = "elliptic";
   private static final String ATTR_PUNCT = "punct";
+  private static final String ATTR_GENDER = "gen";
+  private static final String ATTR_NUMBER = "num";
 
   private NodeList sentences;
   private int sentIdx;
@@ -174,6 +176,10 @@ public class SpanishXMLTreeReader implements TreeReader {
       pos = pos.substring(0, 6) + annotation;
     } else if (pos.equals("")) {
       // Make up for some missing part-of-speech tags
+      String word = getWord(node);
+      if (word.equals("."))
+        return "fp";
+
       if (namedAttribute.equals("date")) {
         return "w";
       } else if (namedAttribute.equals("number")) {
@@ -191,7 +197,6 @@ public class SpanishXMLTreeReader implements TreeReader {
 
       // Handle icky issues related to "que"
       String posType = node.getAttribute(ATTR_POSTYPE);
-      String word = getWord(node);
       if (tagName.equals("c") && posType.equals("subordinating")) {
         return "cs";
       } else if (tagName.equals("p") && posType.equals("relative")
@@ -199,15 +204,44 @@ public class SpanishXMLTreeReader implements TreeReader {
         return "pr0cn000";
       }
 
+      if (tagName.equals("s") && (word.equalsIgnoreCase("de") || word.equalsIgnoreCase("del")
+        || word.equalsIgnoreCase("en"))) {
+        return "sps00";
+      } else if (word.equals("REGRESA")) {
+        return "vmip3s0";
+      }
+
       if (simplifiedTagset) {
-        // If we are using the simplfied tagset, we can make some more
+        // If we are using the simplified tagset, we can make some more
         // broad inferences
-        if (tagName.equals("a")) {
+        if (word.equals("verme")) {
+          return "vmn0000";
+        } else if (tagName.equals("a")) {
           return "aq0000";
         } else if (posType.equals("proper")) {
           return "np00000";
         } else if (posType.equals("common")) {
           return "nc0s000";
+        } else if (tagName.equals("d") && posType.equals("numeral")) {
+          return "dn0000";
+        } else if (tagName.equals("d")
+          && (posType.equals("article") || word.equalsIgnoreCase("el") || word.equalsIgnoreCase("la"))) {
+          return "da0000";
+        } else if (tagName.equals("p") && posType.equals("relative")) {
+          return "pr000000";
+        } else if (tagName.equals("p") && posType.equals("personal")) {
+          return "pp000000";
+        } else if (tagName.equals("p") && posType.equals("indefinite")) {
+          return "pi000000";
+        } else if (tagName.equals("s") && word.equalsIgnoreCase("como")) {
+          return "sp000";
+        } else if (tagName.equals("n")) {
+          String gen = node.getAttribute(ATTR_GENDER);
+          String num = node.getAttribute(ATTR_NUMBER);
+
+          char genCode = gen == null ? '0' : gen.charAt(0);
+          char numCode = num == null ? '0' : num.charAt(0);
+          return 'n' + genCode + '0' + numCode + "000";
         }
       }
 
