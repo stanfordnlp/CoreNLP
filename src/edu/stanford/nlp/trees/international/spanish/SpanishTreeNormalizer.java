@@ -18,6 +18,7 @@ import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Normalize trees read from the AnCora Spanish corpus.
@@ -618,7 +619,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   /**
    * Characters which may separate words in a single token.
    */
-  private static final String WORD_SEPARATORS = ",-_¡!¿?()/";
+  private static final String WORD_SEPARATORS = ",-_¡!¿?()/%";
 
   /**
    * Word separators which should not be treated as separate "words" and
@@ -657,6 +658,8 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   /**
    * Return the (single or multiple) words which make up the given
    * token.
+   *
+   * TODO can't SpanishTokenizer handle most of this?
    */
   private String[] getMultiWords(String token) {
     token = prepareForMultiWordExtraction(token);
@@ -707,6 +710,24 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
         words.add(word + hyphen + freeMorpheme);
         continue;
+      } else if (word.equals(",") && remainingTokens >= 1 && words.size() > 0) {
+        int prevIndex = words.size() - 1;
+        String prevWord = words.get(prevIndex);
+
+        if (StringUtils.isNumeric(prevWord)) {
+          String nextWord = splitter.nextToken();
+          remainingTokens--;
+
+          if (StringUtils.isNumeric(nextWord)) {
+            words.set(prevIndex, prevWord + ',' + nextWord);
+          } else {
+            // Expected a number here.. clean up and move on
+            words.add(word);
+            words.add(nextWord);
+          }
+
+          continue;
+        }
       }
 
       // Otherwise..
