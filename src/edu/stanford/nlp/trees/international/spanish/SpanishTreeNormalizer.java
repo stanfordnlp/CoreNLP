@@ -39,22 +39,23 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   public static final String LEFT_PARENTHESIS = "=LRB=";
   public static final String RIGHT_PARENTHESIS = "=RRB=";
 
-  private static final Map<String, String> spellingFixes = new HashMap<String, String>() {{
-    put("embargp", "embargo"); // 18381_20000322.tbf-4
-    put("jucio", "juicio"); // 4800_2000406.tbf-5
-    put("méxico", "México"); // 111_C-3.tbf-17
-    put("reirse", "reírse"); // 140_20011102.tbf-13
-    put("tambien", "también"); // 41_19991002.tbf-8
+  private static final Map<String, String> spellingFixes = new HashMap<String, String>();
+  static {
+    spellingFixes.put("embargp", "embargo"); // 18381_20000322.tbf-4
+    spellingFixes.put("jucio", "juicio"); // 4800_2000406.tbf-5
+    spellingFixes.put("méxico", "México"); // 111_C-3.tbf-17
+    spellingFixes.put("reirse", "reírse"); // 140_20011102.tbf-13
+    spellingFixes.put("tambien", "también"); // 41_19991002.tbf-8
 
-    put("Intitute", "Institute"); // 22863_20001129.tbf-16
+    spellingFixes.put("Intitute", "Institute"); // 22863_20001129.tbf-16
 
     // Hack: these aren't exactly spelling mistakes, but we need to
     // run a search-and-replace across the entire corpus with them, so
     // they should be treated just like spelling mistakes for our
     // purposes
-    put("(", LEFT_PARENTHESIS);
-    put(")", RIGHT_PARENTHESIS);
-  }};
+    spellingFixes.put("(", LEFT_PARENTHESIS);
+    spellingFixes.put(")", RIGHT_PARENTHESIS);
+  }
 
   /**
    * A filter which rejects preterminal nodes that contain "empty" leaf
@@ -188,17 +189,17 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    * Note that this is only the case for constituents with a *single*
    * child which is a multi-word token.
    */
-  private static final Set<String> mergeWithConstituentWhenPossible =
-    new HashSet<String>() {{
-      add("grup.adv");
-      add("grup.nom");
-      add("grup.nom.loc");
-      add("grup.nom.org");
-      add("grup.nom.otros");
-      add("grup.nom.pers");
-      add("grup.verb");
-      add("spec");
-    }};
+  private static final Set<String> mergeWithConstituentWhenPossible = new HashSet<String>(
+    Arrays.asList(
+      "grup.adv",
+      "grup.nom",
+      "grup.nom.loc",
+      "grup.nom.org",
+      "grup.nom.otros",
+      "grup.nom.pers",
+      "grup.verb",
+      "spec"
+    ));
 
   // Customization
   private boolean simplifiedTagset;
@@ -639,19 +640,19 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    * which they are joined by hyphen.
    */
   // TODO how to handle clitics? chino-japonés
-  private static final Set<String> hyphenBoundMorphemes = new HashSet<String>() {{
-      add("anti"); // anti-Gil
-      add("co"); // co-promotora
-      add("ex"); // ex-diputado
-      add("meso"); // meso-americano
-      add("neo"); // neo-proteccionismo
-      add("pre"); // pre-presidencia
-      add("pro"); // pro-indonesias
-      add("quasi"); // quasi-unidimensional
-      add("re"); // re-flotamiento
-      add("semi"); // semi-negro
-      add("sub"); // sub-18
-    }};
+  private static final Set<String> hyphenBoundMorphemes = new HashSet<String>(Arrays.asList(
+      "anti", // anti-Gil
+      "co", // co-promotora
+      "ex", // ex-diputado
+      "meso", // meso-americano
+      "neo", // neo-proteccionismo
+      "pre", // pre-presidencia
+      "pro", // pro-indonesias
+      "quasi", // quasi-unidimensional
+      "re", // re-flotamiento
+      "semi", // semi-negro
+      "sub" // sub-18
+  ));
 
   /**
    * Prepare the given token for multi-word detection / extraction.
