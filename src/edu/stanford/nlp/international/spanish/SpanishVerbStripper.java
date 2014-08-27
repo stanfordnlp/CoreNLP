@@ -172,24 +172,43 @@ public class SpanishVerbStripper {
    * <tt>(sentad, os)</tt>.
    */
   private boolean validateVerbPair(Pair<String, List<String>> pair) {
-      String stripped = pair.first().toLowerCase();
-      
-      String firstPron = pair.second().get(0).toLowerCase();
+    String stripped = pair.first().toLowerCase();
+    String firstPron = pair.second().get(0).toLowerCase();
 
-      if (dict.containsKey(stripped))
-				return true;
-			
-      if (firstPron.matches("os") && dict.containsKey(stripped + 'd')) {
-				pair.setFirst(pair.first() + getCase(pair.first(), 'd'));
-				return true;
+    String pos = dict.get(stripped);
+
+    if (pos != null) {
+      if (pos.equals("VMM02P0") && firstPron.equalsIgnoreCase("os")) {
+        // Invalid combination of verb root and pronoun.
+        // (If we combine a second-person plural imperative and the
+        // second person plural object pronoun, we expect to see an
+        // elided verb root, not the normal one that's in the
+        // dictionary.)
+        return false;
       }
-			
-      if (firstPron.matches("nos|se") && dict.containsKey(stripped +'s')) {
-				pair.setFirst(pair.first() + getCase(pair.first(), 's'));
-				return true;
-      }
-			
-      return false;
+
+      return true;
+    }
+
+    // Special case: de-elide elided verb root in the case of a second
+    // person plural imperative + second person object pronoun
+    //
+    // (e.g., given (senta, os), return (sentad, os))
+    if (firstPron.equalsIgnoreCase("os") && dict.containsKey(stripped + 'd')) {
+      pair.setFirst(pair.first() + getCase(pair.first(), 'd'));
+      return true;
+    }
+
+    // Special case: de-elide elided verb root in the case of a first
+    // person plural imperative + object pronoun
+    //
+    // (vámo, nos) -> (vámos, nos)
+    if (firstPron.matches("nos|se") && dict.containsKey(stripped + 's')) {
+      pair.setFirst(pair.first() + getCase(pair.first(), 's'));
+      return true;
+    }
+
+    return false;
   }
 	
   /**
@@ -204,7 +223,7 @@ public class SpanishVerbStripper {
   private static Pair<String, List<String>> stripSuffix(String word,
                                                         Pattern pSuffix) {
     Matcher m = pSuffix.matcher(word);
-    if(m.find()) {
+    if (m.find()) {
       String stripped = word.substring(0, m.start());
       stripped = removeAccents(stripped);
 
