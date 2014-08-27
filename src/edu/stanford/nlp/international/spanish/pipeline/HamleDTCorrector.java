@@ -3,6 +3,7 @@ package edu.stanford.nlp.international.spanish.pipeline;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.File;
@@ -41,10 +42,11 @@ public class HamleDTCorrector {
 
     List<String> ret = new ArrayList<String>();
 
-    List<CoreLabel> hamledtSentence = hamledtSentences.next(),
-      ancoraSentence = ancoraSentences.next();
-    for (; hamledtSentences.hasNext() && ancoraSentences.hasNext();
-      hamledtSentence = hamledtSentences.next(), ancoraSentence = ancoraSentences.next()) {
+    for (Pair<List<CoreLabel>, List<CoreLabel>> pair :
+      new ZipIterable<List<CoreLabel>, List<CoreLabel>>(hamledtSentences, ancoraSentences)) {
+
+      List<CoreLabel> hamledtSentence = pair.first();
+      List<CoreLabel> ancoraSentence = pair.second();
 
       if (hamledtSentence == null || ancoraSentence == null)
         throw new RuntimeException("Parse exception");
@@ -75,10 +77,9 @@ public class HamleDTCorrector {
     List<CoreLabel> ret = new ArrayList<CoreLabel>(hamledtSentence.size());
 
     // First perform individual word corrections
-    Iterator<CoreLabel> iHam = hamledtSentence.iterator(), iAnc = ancoraSentence.iterator();
-    CoreLabel hamWord = iHam.next(), ancWord = iAnc.next();
-    for (; iHam.hasNext() && iAnc.hasNext(); hamWord = iHam.next(), ancWord = iAnc.next()) {
-      ret.add(correctWord(hamWord, ancWord, hamledtSentence, ancoraSentence));
+    for (Pair<CoreLabel, CoreLabel> pair :
+      new ZipIterable<CoreLabel, CoreLabel>(hamledtSentence, ancoraSentence)) {
+      ret.add(correctWord(pair.first(), pair.second(), hamledtSentence, ancoraSentence));
     }
 
     return ret;
@@ -315,6 +316,58 @@ public class HamleDTCorrector {
       super(msg);
     }
 
+  }
+
+  private static class ZipIterable<T1, T2> implements Iterable<Pair<T1, T2>> {
+
+    private Iterator<T1> i1;
+    private Iterator<T2> i2;
+
+    public ZipIterable(Iterable<T1> it1, Iterable<T2> it2) {
+      this.i1 = it1.iterator();
+      this.i2 = it2.iterator();
+    }
+
+    public ZipIterable(Iterator<T1> i1, Iterator<T2> i2) {
+      this.i1 = i1;
+      this.i2 = i2;
+    }
+
+    /**
+     * Returns an iterator over a set of elements of type T.
+     *
+     * @return an Iterator.
+     */
+    @Override
+    public Iterator<Pair<T1, T2>> iterator() {
+      return new ZipIterator<T1, T2>(i1, i2);
+    }
+
+    private static class ZipIterator<T1, T2> implements Iterator<Pair<T1, T2>> {
+
+      private final Iterator<T1> i1;
+      private final Iterator<T2> i2;
+
+      public ZipIterator(Iterator<T1> i1, Iterator<T2> i2) {
+        this.i1 = i1;
+        this.i2 = i2;
+      }
+
+      @Override
+      public boolean hasNext() {
+        return i1.hasNext() && i2.hasNext();
+      }
+
+      @Override
+      public Pair<T1, T2> next() {
+        return new Pair<T1, T2>(i1.next(), i2.next());
+      }
+
+      @Override
+      public void remove() {
+        throw new UnsupportedOperationException();
+      }
+    }
   }
 
 }
