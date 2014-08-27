@@ -231,6 +231,10 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
     return label.copyCount();
   }
 
+  public void setCopyCount(int count) {
+    label.setCopyCount(count);
+  }
+
   /**
    * This .equals is dependent only on docID, sentenceIndex, and index.
    * It doesn't consider the actual word value, but assumes that it is

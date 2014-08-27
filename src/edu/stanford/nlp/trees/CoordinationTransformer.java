@@ -117,21 +117,14 @@ public class CoordinationTransformer implements TreeTransformer {
   private static TregexPattern rearrangeNowThatTregex =
     TregexPattern.compile("ADVP=advp <1 (RB < /^(?i:now)$/) <2 (SBAR=sbar <1 (IN < /^(?i:that)$/))");
 
-  private static TsurgeonPattern[] rearrangeNowThatTsurgeon = {
-    Tsurgeon.parseOperation("relabel advp SBAR"),
-    Tsurgeon.parseOperation("excise sbar sbar"),
-  };
+  private static TsurgeonPattern rearrangeNowThatTsurgeon = 
+    Tsurgeon.parseOperation("[relabel advp SBAR] [excise sbar sbar]");
 
   public Tree rearrangeNowThat(Tree t) {
     if (t == null) {
       return t;
     }
-    TregexMatcher matcher = rearrangeNowThatTregex.matcher(t);
-    while (matcher.find()) {
-      t = rearrangeNowThatTsurgeon[0].evaluate(t, matcher);
-      t = rearrangeNowThatTsurgeon[1].evaluate(t, matcher);
-    }
-    return t;
+    return Tsurgeon.processPattern(rearrangeNowThatTregex, rearrangeNowThatTsurgeon, t);
   }
 
 
