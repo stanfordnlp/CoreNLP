@@ -6,6 +6,7 @@ import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.spanish.SpanishHeadFinder;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreebankLanguagePack;
+import edu.stanford.nlp.util.Pair;
 
 import java.util.List;
 
@@ -31,13 +32,58 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
   public SpanishTreebankParserParams() {
     super(new SpanishTreebankLanguagePack());
 
-    setInputEncoding("UTF-8");
+    setInputEncoding(treebankLanguagePack().getEncoding());
     setHeadFinder(new SpanishHeadFinder());
 
     optionsString = new StringBuilder();
     optionsString.append(getClass().getSimpleName() + "\n");
 
-    // TODO Make annotations
+    buildAnnotations();
+  }
+
+  @SuppressWarnings("unchecked")
+  private void buildAnnotations() {
+    // +.25 F1
+    annotations.put("-markInf", new Pair("/^(S|grup\\.verb|infinitiu|gerundi)/ < @infinitiu",
+                                         new SimpleStringFunction("-infinitive")));
+    annotations.put("-markGer", new Pair("/^(S|grup\\.verb|infinitiu|gerundi)/ < @gerundi",
+                                         new SimpleStringFunction("-gerund")));
+
+    // +.04 F1
+    annotations.put("-markRelative", new Pair("@S <, @relatiu",
+                                              new SimpleStringFunction("-relative")));
+
+    annotations.put("-markPPHeads", new Pair("@sp",
+                                             new AnnotateHeadFunction(headFinder)));
+
+    // +.1 F1
+    annotations.put("-markComo", new Pair("@cs < /(?i)^como$/",
+                                          new SimpleStringFunction("[como]")));
+    annotations.put("-markSpecHeads", new Pair("@spec", new AnnotateHeadFunction(headFinder)));
+
+    compileAnnotations(headFinder);
+  }
+
+  /**
+   * Features which should be enabled by default.
+   *
+   * @see #buildAnnotations()
+   */
+  @Override
+  protected String[] baselineAnnotationFeatures() {
+    return new String[] {
+      // verb phrase annotations
+      "-markInf", "-markGer",
+
+      // prepositional phrase annotations
+      // "-markPPHeads", negative F1!
+
+      // clause annotations
+      "-markRelative",
+
+      // lexical annotations
+      "-markComo", "-markSpecHeads",
+    };
   }
 
   @Override
