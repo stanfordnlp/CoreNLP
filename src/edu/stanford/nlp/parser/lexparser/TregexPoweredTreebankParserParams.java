@@ -187,6 +187,16 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
   }
 
   /**
+   * Output a description of the current annotation configuration.
+   */
+  @Override
+  public void display() {
+    for (String feature : features)
+      System.out.printf("%s ", feature);
+    System.out.println();
+  }
+
+  /**
    * Annotates all nodes that match the tregex query with some string.
    */
   protected static class SimpleStringFunction implements SerializableFunction<TregexMatcher,

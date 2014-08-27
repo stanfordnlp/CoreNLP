@@ -202,6 +202,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
   @Override
   public void display() {
     System.err.println(optionsString.toString());
+    super.display();
   }
 
   public void setHeadFinder(HeadFinder hf) {
