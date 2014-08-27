@@ -24,10 +24,17 @@ public class SpanishTreebankParserParams extends AbstractTreebankParserParams {
 
   private static final long serialVersionUID = -8734165273482119424L;
 
+  private final StringBuilder optionsString;
+
+  private HeadFinder headFinder = new SpanishHeadFinder();
+
   public SpanishTreebankParserParams() {
     super(new SpanishTreebankLanguagePack());
 
     setInputEncoding("UTF-8");
+
+    optionsString = new StringBuilder();
+    optionsString.append(getClass().getSimpleName() + "\n");
   }
 
   @Override
@@ -38,7 +45,7 @@ public class SpanishTreebankParserParams extends AbstractTreebankParserParams {
 
   @Override
   public HeadFinder headFinder() {
-    return new SpanishHeadFinder(tlp);
+    return headFinder;
   }
 
   @Override
@@ -72,6 +79,35 @@ public class SpanishTreebankParserParams extends AbstractTreebankParserParams {
     return new MemoryTreebank(treeReaderFactory(), inputEncoding);
   }
 
+  /**
+   * Set language-specific options according to flags. This routine should process the option starting in args[i] (which
+   * might potentially be several arguments long if it takes arguments). It should return the index after the last index
+   * it consumed in processing.  In particular, if it cannot process the current option, the return value should be i.
+   * <p/>
+   * Generic options are processed separately by {@link edu.stanford.nlp.parser.lexparser.Options#setOption(String[], int)}, and implementations of this
+   * method do not have to worry about them. The Options class handles routing options. TreebankParserParams that extend
+   * this class should call super when overriding this method.
+   *
+   * @param args
+   * @param i
+   */
+  @Override
+  public int setOptionFlag(String[] args, int i) {
+    if (args[i].equalsIgnoreCase("-headFinder") && (i + 1 < args.length)) {
+      try {
+        headFinder = (HeadFinder) Class.forName(args[i + 1]).newInstance();
+        optionsString.append("HeadFinder: " + args[i + 1] + "\n");
+
+      } catch (Exception e) {
+        System.err.println(e);
+        System.err.println(this.getClass().getName() + ": Could not load head finder " + args[i + 1]);
+      }
+      i += 2;
+    }
+
+    return i;
+  }
+
   public TreeReaderFactory treeReaderFactory() {
     return new SpanishTreeReaderFactory();
   }
@@ -83,7 +119,7 @@ public class SpanishTreebankParserParams extends AbstractTreebankParserParams {
 
   @Override
   public void display() {
-    System.err.println(getClass().getName());
+    System.err.println(optionsString.toString());
   }
 
 }

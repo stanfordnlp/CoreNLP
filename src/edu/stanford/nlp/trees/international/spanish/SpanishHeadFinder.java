@@ -7,13 +7,11 @@ import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.Generics;
 
 /**
- * Based on {@link DybroFrenchHeadFinder}.
- *
  * @author Jon Gauthier
  */
 public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
 
-  private static final long serialVersionUID = 7710457835992590620L;
+  private static final long serialVersionUID = -841219428125220698L;
 
   private static final String[] allVerbs = new String[] {
     "vmip000", "vmii000", "vmif000", "vmis000", "vmic000",
@@ -68,9 +66,6 @@ public class SpanishHeadFinder extends AbstractCollinsHeadFinder {
       {"rightdis", "rg", "rn", "neg", "grup.adv"},
       {"rightdis", "pr000000", "pi000000", "nc0s000", "nc0p000", "nc00000", "np00000"}});
     nonTerminalInfo.put("neg", new String[][] {{"leftdis", "rg", "rn"}});
-
-    // // coordinated phrases
-    // nonTerminalInfo.put("COORD", new String[][]{{"leftdis", "C", "CC", "CS"}, {"left"}});
 
     // noun phrases
     nonTerminalInfo.put("sn", new String[][] {
