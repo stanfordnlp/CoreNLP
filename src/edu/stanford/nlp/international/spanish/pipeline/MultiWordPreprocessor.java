@@ -434,7 +434,7 @@ public final class MultiWordPreprocessor {
     return containingPhrase.toString().substring(0, containingPhrase.length() - 1);
   }
 
-  private static final SpanishVerbStripper verbStripper = SpanishVerbStripper.getInstance();
+  private static final SpanishVerbStripper verbStripper = new SpanishVerbStripper();
 
   /**
    * Attempt to infer the part of speech of the given preterminal node, which

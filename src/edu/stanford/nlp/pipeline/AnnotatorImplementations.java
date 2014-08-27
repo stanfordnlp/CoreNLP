@@ -30,7 +30,7 @@ public class AnnotatorImplementations {
    * Tokenize, emulating the Penn Treebank
    */
   public Annotator ptbTokenizer(Properties properties, boolean verbose, String options) {
-    return new PTBTokenizerAnnotator(verbose, properties, options);
+    return new PTBTokenizerAnnotator(verbose, properties);
   }
 
   /**

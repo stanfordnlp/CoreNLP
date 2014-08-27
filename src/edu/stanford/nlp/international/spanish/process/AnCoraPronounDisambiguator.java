@@ -1,9 +1,13 @@
-package edu.stanford.nlp.international.spanish;
+package edu.stanford.nlp.international.spanish.process;
 
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A utility for preprocessing the AnCora Spanish corpus.
@@ -27,7 +31,7 @@ import java.util.*;
  * @author Jon Gauthier
  * @see edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer
  */
-public class SpanishPronounDisambiguator {
+public class AnCoraPronounDisambiguator {
 
   public static enum PersonalPronounType {OBJECT, REFLEXIVE, UNKNOWN}
 

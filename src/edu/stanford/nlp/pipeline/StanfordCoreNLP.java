@@ -343,18 +343,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-				String extraOptions = null;
-				boolean keepNewline = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
-				if (properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
-					keepNewline = true;
-				}
-				if(keepNewline) {
-					extraOptions = "tokenizeNLs,";
-				}
-				return annotatorImplementation.ptbTokenizer(properties, false, extraOptions);
-			}
-		
-			/*    if (Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"))) {
+        if (Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"))) {
           return annotatorImplementation.whitespaceTokenizer(properties);
         } else {
           String options = properties.getProperty("tokenize.options", null);
@@ -371,7 +360,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           }
           return annotatorImplementation.ptbTokenizer(properties, false, options);
         }
-				}*/
+      }
 
       @Override
       public String additionalSignature() {

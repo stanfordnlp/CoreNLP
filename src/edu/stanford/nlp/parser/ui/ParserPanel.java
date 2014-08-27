@@ -28,9 +28,7 @@ package edu.stanford.nlp.parser.ui;
 
 import edu.stanford.nlp.io.ui.OpenPageDialog;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.parser.common.ParserQuery;
-import edu.stanford.nlp.parser.lexparser.ChineseLexiconAndWordSegmenter;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.process.*;
 import edu.stanford.nlp.swing.FontDetector;
@@ -294,7 +292,7 @@ public class ParserPanel extends JPanel {
       setChineseFont();
     } else {
       textPane.setFont(new Font("Sans Serif", Font.PLAIN, 14));
-      treePanel.setFont(new Font("Sans Serif", Font.PLAIN, 14));      
+      treePanel.setFont(new Font("Sans Serif", Font.PLAIN, 14));
     }
   }
 
@@ -310,7 +308,7 @@ public class ParserPanel extends JPanel {
       treePanel.setFont(new Font("Watanabe Mincho", Font.PLAIN, 14));
     } else {
       textPane.setFont(new Font("Sans Serif", Font.PLAIN, 14));
-      treePanel.setFont(new Font("Sans Serif", Font.PLAIN, 14));      
+      treePanel.setFont(new Font("Sans Serif", Font.PLAIN, 14));
     }
   }
 

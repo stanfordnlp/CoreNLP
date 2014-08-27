@@ -12,7 +12,7 @@ import edu.stanford.nlp.util.Pair;
  */
 public class SpanishVerbStripperTest extends TestCase {
 
-  private final SpanishVerbStripper verbStripper = SpanishVerbStripper.getInstance();
+  private final SpanishVerbStripper verbStripper = new SpanishVerbStripper();
 
   public static void testStrippable() {
     assertTrue(SpanishVerbStripper.isStrippable("decirme"));
@@ -60,7 +60,7 @@ public class SpanishVerbStripperTest extends TestCase {
       verbStripper.separatePronouns("aplicárseles"));
 
     // Don't treat plural past participles as 2nd-person commands!
-    //    assertNull(verbStripper.separatePronouns("sentados"));
+    assertNull(verbStripper.separatePronouns("sentados"));
     pronouns.clear();
     pronouns.add("os");
     assertEquals(new Pair("sentad", pronouns),
@@ -70,6 +70,19 @@ public class SpanishVerbStripperTest extends TestCase {
     pronouns.add("se");
     assertEquals(new Pair("Imaginen", pronouns),
       verbStripper.separatePronouns("Imagínense"));
+
+    // Match elided 1P verb forms
+    pronouns.clear();
+    pronouns.add("nos");
+    assertEquals(new Pair("vamos", pronouns),
+                 verbStripper.separatePronouns("vámonos"));
+
+    // Let's write it to her
+    pronouns.clear();
+    pronouns.add("se");
+    pronouns.add("la");
+    assertEquals(new Pair("escribamos", pronouns),
+                 verbStripper.separatePronouns("escribámosela"));
 
     // Looks like a verb with a clitic pronoun.. but it's not! There are
     // a *lot* of these in Spanish.

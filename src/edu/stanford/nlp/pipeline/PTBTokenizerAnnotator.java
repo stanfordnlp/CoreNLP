@@ -58,20 +58,17 @@ public class PTBTokenizerAnnotator extends TokenizerAnnotator {
 		if (options != null)
 			props.setProperty("tokenize.options", options);
 
-		factory = initFactory(Language.English, props, null);
+		factory = initFactory(Language.English, props);
 	}
 
-	public PTBTokenizerAnnotator(boolean verbose, Properties props, String extraOptions) {
+	public PTBTokenizerAnnotator(boolean verbose, Properties props) {
 		super(verbose);
+
 		if (props == null)
 			props = new Properties();
 
 		Language type = getLangType(props);
-		factory = initFactory(type, props, extraOptions);
-	}
-
-	public PTBTokenizerAnnotator(boolean verbose, Properties props) {
-		this(verbose, props, null);
+		factory = initFactory(type, props);
 
 		/*		switch(type) {
 		case Spanish:			
@@ -93,15 +90,8 @@ public class PTBTokenizerAnnotator extends TokenizerAnnotator {
 			}*/
 	}
 
-	private TokenizerFactory<CoreLabel> initFactory(Language type, Properties props, String extraOptions) {
+	private TokenizerFactory<CoreLabel> initFactory(Language type, Properties props) {
 		String options = props.getProperty("tokenize.options", null);
-
-		// set it to the equivalent of both extraOptions and options, unless both are nulls
-		if (options == null)
-			options = extraOptions;
-		else if (extraOptions != null)
-			options = extraOptions + options;
-
 		TokenizerFactory<CoreLabel> factory;
 
 		switch(type) {

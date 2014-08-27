@@ -29,7 +29,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author dramage
  * @author rafferty
  */
-public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, HasCategory, HasLemma, HasContext, HasIndex, HasOffset {
+public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWord, HasTag, HasCategory, HasLemma, HasContext, HasIndex, HasOffset {
 
   private static final long serialVersionUID = 2L;
 
@@ -277,6 +277,7 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    * @return "" if the key is not in the map or has the value <code>null</code>
    *     and the String value of the key otherwise
    */
+  @Override
   public <KEY extends Key<String>> String getString(Class<KEY> key) {
     String value = get(key);
     if (value == null) {
