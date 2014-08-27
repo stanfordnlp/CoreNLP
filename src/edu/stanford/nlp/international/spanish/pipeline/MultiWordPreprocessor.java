@@ -193,7 +193,10 @@ public final class MultiWordPreprocessor {
 
         put("Teniendo", "vmg0000");
         put("formaba", "vmii000");
+        put("Formabas", "vmii000");
+        put("Forman", "vmii000");
         put("perece", "vmip000");
+        put("PONE", "vmii000");
         put("tardar", "vmn0000");
 
         put("seiscientas", "z0");
@@ -222,7 +225,6 @@ public final class MultiWordPreprocessor {
       add("Mercado");
       add("Jesús"); // interjection
       add("Salvo");
-      add("Sin");
       add("Van"); // verb
     }};
 
@@ -240,8 +242,6 @@ public final class MultiWordPreprocessor {
 
       if (word.equalsIgnoreCase("este") && !containingPhrase.startsWith(word))
         return "np00000";
-      else if (word.equals("Sin") && containingPhrase.startsWith("Sin embargo"))
-        return "sp000";
       else if (word.equals("contra")
         && (containingPhrase.startsWith("en contra") || containingPhrase.startsWith("En contra")))
         return "nc0s000";
@@ -287,6 +287,10 @@ public final class MultiWordPreprocessor {
         return "zu";
       else if (word.equals("A") && (containingPhrase.contains("-") || containingPhrase.contains(",")
         || otherNamePattern2.matcher(containingPhrase).find() || containingPhrase.equals("terminal A")))
+        return "np00000";
+      else if (word.equals("forma") && containingPhrase.startsWith("forma parte"))
+        return "vmip000";
+      else if (word.equals("Sin") && containingPhrase.contains("Jaime"))
         return "np00000";
 
       if (word.equals("Al")) {
