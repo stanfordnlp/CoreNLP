@@ -166,6 +166,16 @@ public class MultiWordTreeExpander {
   private static TsurgeonPattern expandIntermediateNominalGroupConjunct =
     Tsurgeon.parseOperation("[relabel target /grup.nom/]");
 
+  /**
+   * Match articles contained within nominal groups of substantives so
+   * that they can be moved out
+   */
+  private static TregexPattern articleInsideNominalGroup =
+    TregexPattern.compile("/^da/=art > (/^grup\\.nom$/=ng > sn)");
+
+  private static TsurgeonPattern expandArticleInsideNominalGroup =
+    Tsurgeon.parseOperation("[insert (spec=target) $+ ng] [move art >0 target]");
+
   // TODO intermediate adjectival conjunct
   // TODO intermediate verb conjunct
 
