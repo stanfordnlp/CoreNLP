@@ -98,7 +98,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       String.format("/^(infinitiu|gerundi|grup\\.verb)$/ <<: /%s/", PODER_FORM),
       new SimpleStringFunction("-poder")));
 
-    // +____ F1
+    // +.29 F1
     annotations.put("-markBaseNPs", new Pair("/^grup\\.nom/ !< (__ < (__ < __))",
                                              new SimpleStringFunction("-base")));
 
