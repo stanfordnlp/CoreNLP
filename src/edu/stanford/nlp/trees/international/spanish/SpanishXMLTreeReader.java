@@ -259,7 +259,18 @@ public class SpanishXMLTreeReader implements TreeReader {
       }
 
       if (node.hasAttribute(ATTR_PUNCT)) {
-        return "f";
+        if (word.equals("\""))
+          return "fe";
+        else if (word.equals("'"))
+          return "fz";
+        else if (word.equals("-"))
+          return "fg";
+        else if (word.equals("("))
+          return "fpa";
+        else if (word.equals(")"))
+          return "fpt";
+
+        return "fz";
       }
     }
 
