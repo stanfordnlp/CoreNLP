@@ -318,7 +318,7 @@ public class HamleDTMultiWordClassifier {
     public List<String> apply(String mwe) {
       String[] words = mwe.split("_");
 
-      if (allowedWords.contains(words[0]))
+      if (allowedWords.contains(words[0].toLowerCase()))
         return positiveRet;
       return negativeRet;
     }
