@@ -527,3 +527,4 @@ public class MultiWordTreeExpander {
 // intentaba . alisar ("intentaba" never attaches infinitive in this way)
 // epígrafe . Arte (flat!)
 // debería .. encima ("por encima de" parse, coordinated NP)
+// manía .. catalán ("castellana" parsed as being under a participi constituent)
