@@ -80,6 +80,9 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     annotations.put("-markPronounNPs", new Pair("@sn <: (/^grup\\.nom/ <: /^pp/)",
                                                 new SimpleStringFunction("-pronoun")));
 
+    annotations.put("-markParticipleAdjs", new Pair("@aq0000 < /[aeií]d[oa]s?$/",
+                                                    new SimpleStringFunction("-part")));
+
     compileAnnotations(headFinder);
   }
 
@@ -118,7 +121,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       "-markRelative",
 
       // lexical / word- or tag-level annotations
-      "-markComo", "-markSpecHeads", "-markPPFriendlyVerbs",
+      "-markComo", "-markSpecHeads", "-markPPFriendlyVerbs", "-markParticipleAdjs",
 
       // conjunction annotations
       "-markConjTypes",
