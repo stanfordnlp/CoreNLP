@@ -6,6 +6,7 @@ import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.spanish.SpanishHeadFinder;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreebankLanguagePack;
+import edu.stanford.nlp.util.Pair;
 
 import java.util.List;
 
@@ -37,7 +38,29 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     optionsString = new StringBuilder();
     optionsString.append(getClass().getSimpleName() + "\n");
 
-    // TODO Make annotations
+    buildAnnotations();
+  }
+
+  @SuppressWarnings("unchecked")
+  private void buildAnnotations() {
+    annotations.put("-markInf", new Pair("/^(S|grup\\.verb|infinitiu|gerundi)/ < @infinitiu",
+                                         new SimpleStringFunction("-infinitive")));
+    annotations.put("-markGer", new Pair("/^(S|grup\\.verb|infinitiu|gerundi)/ < @gerundi",
+                                         new SimpleStringFunction("-gerund")));
+
+    compileAnnotations(headFinder);
+  }
+
+  /**
+   * Features which should be enabled by default.
+   *
+   * @see #buildAnnotations()
+   */
+  @Override
+  protected String[] baselineAnnotationFeatures() {
+    return new String[] {
+      "-markInf", "-markGer"
+    };
   }
 
   @Override

@@ -534,3 +534,4 @@ public class MultiWordTreeExpander {
 // sólo . (los . espectadores) ("miles" has a ROOT tag???)
 // sentido . generoso (conmigo)
 // estrené . Lisboa (conmigo)
+// Nada . (que . ver) (infinitiu < grup.pron construction is .. wrong)

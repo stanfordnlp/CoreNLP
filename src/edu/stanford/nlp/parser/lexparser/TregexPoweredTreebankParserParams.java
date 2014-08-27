@@ -1,6 +1,7 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.ling.HasTag;
+import edu.stanford.nlp.process.SerializableFunction;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
@@ -12,7 +13,6 @@ import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +36,14 @@ import java.util.Map;
  * annotation functions.
  *
  * @see #annotations
+ * @see SimpleStringFunction
  *
  * @author Jon Gauthier
  * @author Spence Green
  */
 public abstract class TregexPoweredTreebankParserParams extends AbstractTreebankParserParams {
+
+  private static final long serialVersionUID = -1985603901694682420L;
 
   /**
    * This data structure dictates how an arbitrary tree should be
@@ -71,6 +74,7 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
    * which the matched subtree should be given.
    *
    * @see #annotationPatterns
+   * @see SimpleStringFunction
    */
   protected final Map<String, Pair<String, Function<TregexMatcher, String>>> annotations
     = Generics.newHashMap();
@@ -78,7 +82,7 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
   /**
    * Features which should be enabled by default.
    */
-  protected final String[] baselineFeatures = {};
+  protected abstract String[] baselineAnnotationFeatures();
 
   /**
    * Extra features which have been requested. Use
@@ -89,7 +93,7 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
   public TregexPoweredTreebankParserParams(TreebankLanguagePack tlp) {
     super(tlp);
 
-    features = Arrays.asList(baselineFeatures);
+    features = Arrays.asList(baselineAnnotationFeatures());
   }
 
   /**
@@ -181,4 +185,29 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
 
     return annotationStr.toString();
   }
+
+  /**
+   * Annotates all nodes that match the tregex query with some string.
+   */
+  protected static class SimpleStringFunction implements SerializableFunction<TregexMatcher,
+    String> {
+
+    private static final long serialVersionUID = 6958776731059724396L;
+    private String annotationMark;
+
+    public SimpleStringFunction(String annotationMark) {
+      this.annotationMark = annotationMark;
+    }
+
+    public String apply(TregexMatcher matcher) {
+      return annotationMark;
+    }
+
+    @Override
+    public String toString() {
+      return "SimpleStringFunction[" + annotationMark + ']';
+    }
+
+  }
+
 }
