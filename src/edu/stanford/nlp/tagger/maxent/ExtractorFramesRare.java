@@ -1613,11 +1613,13 @@ class ExtractorSpanishStrippedVerb extends RareExtractor {
   String extract(History h, PairsHolder pH) {
     String word = pH.getWord(h, 0);
     if (SpanishVerbStripper.isStrippable(word)) {
-      return SpanishVerbStripper.stripVerb(word);
-    } else {
-      // TODO experiment with different policies: return word unmodified
-      // in this case, or return empty string?
-      return "";
+      String stripped = SpanishVerbStripper.stripVerb(word);
+      if (stripped != null)
+        return stripped;
     }
+
+    // TODO experiment with different policies: return word unmodified
+    // in this case, or return empty string?
+    return "";
   }
 }
