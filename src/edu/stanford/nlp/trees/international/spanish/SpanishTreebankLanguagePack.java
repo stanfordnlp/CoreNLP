@@ -1,5 +1,7 @@
 package edu.stanford.nlp.trees.international.spanish;
 
+import java.util.regex.Pattern;
+
 import edu.stanford.nlp.international.spanish.SpanishMorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.ling.HasWord;
@@ -43,6 +45,12 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final String[] startSymbols = {"ROOT"};
 
+  /**
+   * Return the input Charset encoding for the Treebank. See
+   * documentation for the <code>Charset</code> class.
+   *
+   * @return Name of Charset
+   */
   @Override
   public String getEncoding() {
     return STB_ENCODING;

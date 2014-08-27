@@ -5,6 +5,8 @@ import java.util.regex.Pattern;
 /**
  * Contains patterns for matching certain word types in Spanish, such
  * as common suffices for nouns, verbs, adjectives and adverbs.
+ *
+ * @author Jon Gauthier
  */
 public class SpanishUnknownWordSignatures {
 

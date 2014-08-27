@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.international.spanish.SpanishPronounDisambiguator;
 import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
@@ -39,6 +40,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   public static final String RIGHT_PARENTHESIS = "=RRB=";
 
   private static final Map<String, String> spellingFixes = new HashMap<String, String>() {{
+    put("embargp", "embargo"); // 18381_20000322.tbf-4
     put("jucio", "juicio"); // 4800_2000406.tbf-5
     put("méxico", "México"); // 111_C-3.tbf-17
     put("reirse", "reírse"); // 140_20011102.tbf-13
@@ -122,6 +124,19 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     // Nominal groups where adjectival groups belong
     new Pair("/^s\\.a$/ <: (/^grup\\.nom$/=gn <: /^a/)",
       "relabel gn /grup.a/"),
+
+    // Adverbial phrases should always have adverb group children
+    // -- we see about 50 exceptions in the corpus..
+    new Pair("sadv !< /^grup\\.adv$/ <: /^(rg|neg)$/=adv",
+      "adjoinF (grup.adv foot@) adv"),
+
+    // 'z' tag should be 'z0'
+    new Pair("z=z <: (__ !< __)", "relabel z z0"),
+
+    // Conjunction groups aren't necessary if they head single
+    // prepositional phrases (we already see a `conj < sp` pattern;
+    // replicate that
+    new Pair("/^grup\\.c/=grup > conj <: sp=sp", "replace grup sp"),
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> cleanup
@@ -354,7 +369,12 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       List<String> pronouns = split.second();
       for (int i = pronouns.size() - 1; i >= 0; i--) {
         String pronoun = pronouns.get(i);
-        String patternString = String.format("[insert (morfema.pronominal (pp000000 %s)) $- target]", pronoun);
+
+        String newTreeStr = SpanishPronounDisambiguator.isAmbiguous(pronoun)
+          ? "(PRONOUN? (pp000000 %s))"
+          : "(sn (grup.nom (pp000000 %s)))";
+
+        String patternString = "[insert " + String.format(newTreeStr, pronoun) + " $- target]";
         TsurgeonPattern pattern = Tsurgeon.parseOperation(patternString);
         t = pattern.evaluate(t, matcher);
       }
