@@ -179,7 +179,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
           }
           semaphore.release();
         } catch (InterruptedException e) {
-          throw new RuntimeException(e);
+          throw new RuntimeInterruptedException(e);
         }
       } else {
         return -1;

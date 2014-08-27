@@ -226,6 +226,11 @@ public class ParserAnnotator extends SentenceAnnotator {
     // the sentence is longer than the max length
     if (tree == null) {
       tree = ParserUtils.xTree(words);
+      for (CoreLabel word : words) {
+        if (word.tag() == null) {
+          word.setTag("X");
+        }
+      }
     }
 
     if (treeMap != null) {

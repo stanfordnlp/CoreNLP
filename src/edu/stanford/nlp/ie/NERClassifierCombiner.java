@@ -10,6 +10,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
@@ -114,6 +115,8 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
         // note: requires TextAnnotation, PartOfSpeechTagAnnotation, and AnswerAnnotation
         // note: this sets AnswerAnnotation!
         recognizeNumberSequences(output, document, sentence);
+      } catch (RuntimeInterruptedException e) {
+        throw e;
       } catch (Exception e) {
         System.err.println("Ignored an exception in NumberSequenceClassifier: (result is that some numbers were not classified)");
         System.err.println("Tokens: " + StringUtils.joinWords(tokens, " "));
