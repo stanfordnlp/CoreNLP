@@ -63,7 +63,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
 
   private static final boolean PRINT_DEBUGGING = System.getProperty("GrammaticalStructure", null) != null;
 
-  protected final Set<Dependency<Label, Label, Object>> dependencies;
   protected final List<TypedDependency> typedDependencies;
   protected final List<TypedDependency> allTypedDependencies;
 
@@ -99,7 +98,7 @@ public abstract class GrammaticalStructure extends TreeGraph {
     this.puncFilter = puncFilter;
     NoPunctFilter puncDepFilter = new NoPunctFilter(puncFilter);
     NoPunctTypedDependencyFilter puncTypedDepFilter = new NoPunctTypedDependencyFilter(puncFilter);
-    dependencies = root.dependencies(puncDepFilter, null);
+    Set<Dependency<Label, Label, Object>> dependencies = root.dependencies(puncDepFilter, null);
     for (Dependency<Label, Label, Object> p : dependencies) {
       //System.err.println("dep found " + p);
       TreeGraphNode gov = (TreeGraphNode) p.governor();
@@ -119,8 +118,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
       }
     }
     // add typed dependencies
-    typedDependencies = getDeps(false, puncTypedDepFilter);
-    allTypedDependencies = getDeps(true, puncTypedDepFilter);
+    typedDependencies = getDeps(false, puncTypedDepFilter, dependencies);
+    allTypedDependencies = getDeps(true, puncTypedDepFilter, dependencies);
   }
 
 
@@ -217,10 +216,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
     super(root);
     this.puncFilter = Filters.acceptFilter();
     allTypedDependencies = typedDependencies = new ArrayList<TypedDependency>(projectiveDependencies);
-    dependencies = Generics.newHashSet();
-    for (TypedDependency tdep : projectiveDependencies) {
-      dependencies.add(new NamedDependency(tdep.gov().toString(), tdep.dep().toString(), tdep.reln()));
-    }
   }
 
   public GrammaticalStructure(Tree t, Collection<GrammaticalRelation> relations,
@@ -268,16 +263,14 @@ public abstract class GrammaticalStructure extends TreeGraph {
    * @param getExtra If true, the list of typed dependencies will contain extra ones.
    *              If false, the list of typed dependencies will respect the tree structure.
    */
-  private List<TypedDependency> getDeps(boolean getExtra, Filter<TypedDependency> puncTypedDepFilter) {
+  private List<TypedDependency> getDeps(boolean getExtra, Filter<TypedDependency> puncTypedDepFilter, Set<Dependency<Label, Label, Object>> dependencies) {
     List<TypedDependency> basicDep = Generics.newArrayList();
 
-    for (Dependency<Label, Label, Object> d : dependencies()) {
+    for (Dependency<Label, Label, Object> d : dependencies) {
       TreeGraphNode gov = (TreeGraphNode) d.governor();
       TreeGraphNode dep = (TreeGraphNode) d.dependent();
       GrammaticalRelation reln = getGrammaticalRelation(gov, dep);
-      // System.err.print("Gov: " + gov);
-      // System.err.print("  Dep: " + dep);
-      // System.err.println("  Reln: " + reln);
+      // System.err.println("  Gov: " + gov + " Dep: " + dep + " Reln: " + reln);
       basicDep.add(new TypedDependency(reln, gov, dep));
     }
 
@@ -449,16 +442,6 @@ public abstract class GrammaticalStructure extends TreeGraph {
     private static final long serialVersionUID = -2872766864289207468L;
   } // end static class NoPunctTypedDependencyFilter
 
-
-  /**
-   * Returns the set of (governor, dependent) dependencies in this
-   * <code>GrammaticalStructure</code>.
-   * @return The set of (governor, dependent) dependencies in this
-   * <code>GrammaticalStructure</code>.
-   */
-  public Set<Dependency<Label, Label, Object>> dependencies() {
-    return dependencies;
-  }
 
   /**
    * Get GrammaticalRelation between gov and dep, and null if gov  is not the
