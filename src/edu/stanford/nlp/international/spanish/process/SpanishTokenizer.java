@@ -149,7 +149,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       first = "con";
       second = "ti";
     } else {
-      return null;
+      throw new IllegalArgumentException("Invalid contraction provided to processContraction");
     }
    
     compoundBuffer.add(copyCoreLabel(cl, second));
