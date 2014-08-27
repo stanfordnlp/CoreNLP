@@ -46,29 +46,14 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
   private static final String[] startSymbols = {"ROOT"};
 
   /**
-   * Match tree node labels which correspond to part-of-speech tags.
+   * Return the input Charset encoding for the Treebank. See
+   * documentation for the <code>Charset</code> class.
+   *
+   * @return Name of Charset
    */
-  private static final Pattern pPOSTag = Pattern.compile("^(?:a[qo]|r[gn]|d[dpteia0]|n[cp]|v[mas]|p[pdxitre0]|c[cs]|sp[sc0]|f|z[dmpu0]|[iw]$)");
-
   @Override
   public String getEncoding() {
     return STB_ENCODING;
-  }
-
-  @Override
-  public String basicCategory(String category) {
-    if (category == null)
-      return null;
-
-    if (pPOSTag.matcher(category).find()) {
-      if (category.charAt(0) == 'v')
-        return category.substring(0, 2);
-      else
-        // Return "category" field only
-        return category.substring(0, 1);
-    }
-
-    return category;
   }
 
   /**
