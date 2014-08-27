@@ -81,6 +81,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
    */
   private static final Set<String> mergeWithConstituentWhenPossible =
     new HashSet<String>() {{
+      add("grup.adv");
       add("grup.nom");
       add("spec");
     }};
