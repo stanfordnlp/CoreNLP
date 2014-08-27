@@ -854,7 +854,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       devTreebank = readTreebank(devTreebankPath.first(), devTreebankPath.second());
     }
 
-    double bestScore = 0.0;
+    double bestScore = Double.MIN_VALUE;
     int bestIteration = 0;
     PriorityQueue<ScoredObject<ShiftReduceParser>> bestModels = null;
     if (op.trainOptions().averagedModels > 0) {
