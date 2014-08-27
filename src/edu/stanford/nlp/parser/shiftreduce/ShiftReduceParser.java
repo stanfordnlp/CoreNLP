@@ -920,7 +920,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
       double evaluation = 0.0;
       if (devTreebank != null) {
-        op.testOptions.evals.setProperty("pcfgLA", "true");
         EvaluateTreebank evaluator = new EvaluateTreebank(op, null, this, tagger);
         evaluator.testOnTreebank(devTreebank);
 
