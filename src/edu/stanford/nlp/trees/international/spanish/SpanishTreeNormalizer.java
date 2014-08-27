@@ -83,6 +83,10 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
     new HashSet<String>() {{
       add("grup.adv");
       add("grup.nom");
+      add("grup.nom.loc");
+      add("grup.nom.org");
+      add("grup.nom.otros");
+      add("grup.nom.pers");
       add("spec");
     }};
 
@@ -107,6 +111,11 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
     // First filter out nodes we don't like
     tree = tree.prune(emptyFilter);
+
+    // Find all named entities which are not multi-word tokens and nest
+    // them within named entity NP groups
+    if (retainNER)
+      markSimpleNamedEntities(tree);
 
     // Counter for part-of-speech statistics
     TwoDimensionalCounter<String, String> unigramTagger =
@@ -195,6 +204,59 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       //   retain all
       return pos;
     }
+  }
+
+  private static final List<Pair<TregexPattern, TsurgeonPattern>> markSimpleNEs;
+
+  // Generate some reusable patterns for four different NE groups
+  static {
+    @SuppressWarnings("unchecked")
+    Pair<String, String>[] patternTemplates = new Pair[] {
+      // NE as only child of a `grup.nom`
+      new Pair("/^grup\\.nom$/=target <: (/np0000%c/ < __)",
+               "[relabel target /grup.nom.%s/]"),
+
+      // NE as child with a right sibling in a `grup.nom`
+      new Pair("/^grup\\.nom$/ < ((/np0000%c/=target < __) $+ __)",
+               "[adjoinF (grup.nom.%s foot@) target]"),
+
+      // NE as child with a left sibling in a `grup.nom`
+      new Pair("/^grup\\.nom$/ < ((/np0000%c/=target < __) $- __)",
+               "[adjoinF (grup.nom.%s foot@) target]")
+    };
+
+    // Pairs tagset annotation codes with the annotations used in our
+    // constituents
+    @SuppressWarnings("unchecked")
+    Pair<Character, String>[] namedEntityTypes = new Pair[] {
+      new Pair('0', "otros"), // other
+      new Pair('l', "lug"), // place
+      new Pair('o', "org"), // location
+      new Pair('p', "pers"), // person
+    };
+
+    markSimpleNEs =
+      new ArrayList<Pair<TregexPattern, TsurgeonPattern>>(patternTemplates.length * namedEntityTypes.length);
+    for (Pair<String, String> template : patternTemplates) {
+      for (Pair<Character, String> namedEntityType : namedEntityTypes) {
+        String tregex = String.format(template.first(), namedEntityType.first());
+        String tsurgeon = String.format(template.second(), namedEntityType.second());
+
+        markSimpleNEs.add(new Pair<TregexPattern, TsurgeonPattern>(TregexPattern.compile(tregex),
+                                                                   Tsurgeon.parseOperation(tsurgeon)));
+      }
+    }
+  };
+
+  /**
+   * Find all named entities which are not multi-word tokens and nest
+   * them in named entity NP groups (`grup.nom.{lug,org,pers,otros}`).
+   *
+   * Do this only for "simple" NEs: the multi-word NEs have to be done
+   * at a later step in `MultiWordPreprocessor`.
+   */
+  void markSimpleNamedEntities(Tree t) {
+    Tsurgeon.processPatternsOnTree(markSimpleNEs, t);
   }
 
   /**
@@ -467,14 +529,16 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
              "[insert (spec (da0000 el)) >0 target]"),
   };
 
-  private static final List<Pair<TregexPattern, TsurgeonPattern>> elisionExpansions;
+  private static final List<Pair<TregexPattern, TsurgeonPattern>> elisionExpansions =
+    compilePatterns(elisionExpansionStrs);
 
-  static {
-    elisionExpansions =
-      new ArrayList<Pair<TregexPattern, TsurgeonPattern>>(elisionExpansionStrs.length);
-    for (Pair<String, String> expansion : elisionExpansionStrs)
-      elisionExpansions.add(new Pair<TregexPattern, TsurgeonPattern>(TregexPattern.compile(expansion.first()),
-                                                                     Tsurgeon.parseOperation(expansion.second())));
+  private static List<Pair<TregexPattern, TsurgeonPattern>> compilePatterns(Pair<String, String>[] patterns) {
+    List<Pair<TregexPattern, TsurgeonPattern>> ret = new ArrayList<Pair<TregexPattern, TsurgeonPattern>>(patterns.length);
+    for (Pair<String, String> pattern : patterns)
+      ret.add(new Pair<TregexPattern, TsurgeonPattern>(TregexPattern.compile(pattern.first()),
+                                                       Tsurgeon.parseOperation(pattern.second())));
+
+    return ret;
   }
 
 }

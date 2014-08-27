@@ -276,9 +276,6 @@ public final class MultiWordPreprocessor {
       traverseAndFix(kid, t, pretermLabel, unigramTagger, retainNER);
 
     // Post-order visit
-    //
-    // TODO merge unnecessarily deep trees (maybe the job for a separate
-    // tree normalizer?)
     if(t.value().startsWith(SpanishTreeNormalizer.MW_PHRASE_TAG)) {
       nMissingPhrasal++;
 
