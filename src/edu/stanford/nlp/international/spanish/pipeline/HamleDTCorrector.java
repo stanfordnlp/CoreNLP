@@ -96,6 +96,12 @@ public class HamleDTCorrector {
     String depRel = correctDepRel(hamledtWord, ancoraWord);
     hamledtWord.set(CoreAnnotations.CoNLLDepTypeAnnotation.class, depRel);
 
+    // Correct conjunctions which are given as roots of sentence
+    int hParent = hamledtWord.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class);
+    int aParent = ancoraWord.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class);
+    if (hParent == 0 && aParent != 0)
+      hamledtWord.set(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, aParent);
+
     return hamledtWord;
   }
 
