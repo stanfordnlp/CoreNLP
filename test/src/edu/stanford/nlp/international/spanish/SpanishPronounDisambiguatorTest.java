@@ -4,9 +4,11 @@ import junit.framework.TestCase;
 
 public class SpanishPronounDisambiguatorTest extends TestCase {
 
-  private void runTest(SpanishPronounDisambiguator.PersonalPronounType expected, String verb, int i) {
+  private void runTest(SpanishPronounDisambiguator.PersonalPronounType expected, String verb,
+                       int i) {
     assertEquals(expected,
-      SpanishPronounDisambiguator.disambiguatePersonalPronoun(SpanishVerbStripper.separatePronouns(verb), i));
+      SpanishPronounDisambiguator.disambiguatePersonalPronoun(SpanishVerbStripper
+                                                                .separatePronouns(verb), i, ""));
   }
 
   public void testDisambiguation() {
