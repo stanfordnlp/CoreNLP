@@ -104,14 +104,20 @@ public class AnCoraProcessor {
                      new XMLTreeProcessor(trf, encoding));
 
     // Set up processing futures
-    for (final File file : inputFiles)
+    for (final File file : inputFiles) {
       wrapper.put(file);
+
+      while (wrapper.peek()) {
+        Pair<TwoDimensionalCounter<String, String>, List<Tree>> result = wrapper.poll();
+        Counters.addInPlace(unigramTagger, result.first());
+        trees.addAll(result.second());
+      }
+    }
+
     wrapper.join();
 
-    // OK, now merge results from each thread
     while (wrapper.peek()) {
       Pair<TwoDimensionalCounter<String, String>, List<Tree>> result = wrapper.poll();
-
       Counters.addInPlace(unigramTagger, result.first());
       trees.addAll(result.second());
     }
@@ -431,12 +437,16 @@ public class AnCoraProcessor {
     // Chunk our work so that parallelization is actually worth it
     int numChunks = availableProcessors * 20;
     List<Collection<Tree>> chunked = CollectionUtils.partitionIntoFolds(trees, numChunks);
-
-    for (final Collection<Tree> coll : chunked)
-      wrapper.put(coll);
-    wrapper.join();
-
     List<Tree> ret = new ArrayList<Tree>();
+
+    for (final Collection<Tree> coll : chunked) {
+      wrapper.put(coll);
+
+      while (wrapper.peek())
+        ret.addAll(wrapper.poll());
+    }
+
+    wrapper.join();
 
     while (wrapper.peek())
       ret.addAll(wrapper.poll());
