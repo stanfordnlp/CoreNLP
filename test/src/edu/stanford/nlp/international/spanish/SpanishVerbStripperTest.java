@@ -12,7 +12,7 @@ import edu.stanford.nlp.util.Pair;
  */
 public class SpanishVerbStripperTest extends TestCase {
 
-  private final SpanishVerbStripper verbStripper = new SpanishVerbStripper();
+  private final SpanishVerbStripper verbStripper = SpanishVerbStripper.getInstance();
 
   public static void testStrippable() {
     assertTrue(SpanishVerbStripper.isStrippable("decirme"));

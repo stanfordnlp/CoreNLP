@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 
 public class SpanishPronounDisambiguatorTest extends TestCase {
 
-  private final SpanishVerbStripper verbStripper = new SpanishVerbStripper();
+  private final SpanishVerbStripper verbStripper = SpanishVerbStripper.getInstance();
 
   private void runTest(SpanishPronounDisambiguator.PersonalPronounType expected, String verb,
                        int i) {

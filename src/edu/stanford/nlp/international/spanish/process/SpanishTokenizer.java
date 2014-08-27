@@ -79,7 +79,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     this.splitAny = (splitCompounds || splitVerbs || splitContractions);
 
     if (splitAny) compoundBuffer = Generics.newLinkedList();
-		verbStripper = new SpanishVerbStripper();
+		verbStripper = SpanishVerbStripper.getInstance();
   }
 
   @Override
