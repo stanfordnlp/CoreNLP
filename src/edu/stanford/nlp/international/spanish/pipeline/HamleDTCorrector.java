@@ -58,6 +58,7 @@ public class HamleDTCorrector {
 
       List<CoreLabel> corrected = correctSentence(hamledtSentence, ancoraSentence);
       ret.addAll(toCoNLLXString(corrected));
+      ret.add("");
     }
 
     return ret;
