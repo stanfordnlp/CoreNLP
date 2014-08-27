@@ -17,6 +17,7 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
+import edu.stanford.nlp.trees.BobChrisTreeNormalizer;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreeNormalizer;
@@ -30,7 +31,7 @@ import edu.stanford.nlp.util.Pair;
 /**
  * Normalize trees read from the AnCora Spanish corpus.
  */
-public class SpanishTreeNormalizer extends TreeNormalizer {
+public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
   /**
    * Tag provided to words which are extracted from a multi-word token
@@ -71,6 +72,28 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
           && tree.firstChild().value().equals(EMPTY_LEAF_VALUE))
         return false;
       return true;
+    }
+  };
+
+  /**
+   * A filter which rejects "A over A" nodes: node pairs A, B which are
+   * unary rewrites with equal labels.
+   *
+   * (This is implemented in
+   * {@link edu.stanford.nlp.trees.BobChrisTreeNormalizer}, but we need
+   * to have special handling here so as to not destroy multiword
+   * tokens.)
+   */
+  private static final Filter<Tree> aOverAFilter = new Filter<Tree>() {
+    public boolean accept(Tree tree) {
+      if (tree.isLeaf() || tree.isPreTerminal() || tree.numChildren() != 1)
+        return true;
+
+      String value = tree.value();
+      if (value == null || value.startsWith("MW"))
+        return true;
+
+      return !value.equals(tree.getChild(0).value());
     }
   };
 
@@ -131,7 +154,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
     // First filter out nodes we don't like
-    tree = tree.prune(emptyFilter);
+    tree = tree.prune(emptyFilter).spliceOut(aOverAFilter);
 
     // Now start some simple cleanup
     tree = Tsurgeon.processPatternsOnTree(cleanup, tree);
