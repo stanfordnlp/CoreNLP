@@ -58,17 +58,15 @@ public class HamleDTMultiWordClassifier {
     }
   }
 
-  private static final List<Function<String, List<String>>> featureFunctions = new
-    ArrayList<Function<String, List<String>>>() {{
-      add(new LeadingPOSFeatureFunction("V")); // verbs
-      add(new LeadingPOSFeatureFunction("S")); // prepositions
-      add(new TrailingPOSFeatureFunction("S")); // trailing prepositions
-      add(new HasMultipleOfPOSFeatureFunction("S", "D")); // phrase-y things
-      add(new HasMultipleOfPOSFeatureFunction("A", "N")); // compound-y things
-      add(new CharacterNGramFeatureFunction(4, 4));
-      add(new WordShapeFeatureFunction());
-      add(new DeFollowedByNonWordFeatureFunction());
-    }};
+  private static final List<Function<String, List<String>>> featureFunctions = Arrays.asList(
+    new LeadingPOSFeatureFunction("V"), // verbs
+    new LeadingPOSFeatureFunction("S"), // prepositions
+    new TrailingPOSFeatureFunction("S"), // trailing prepositions
+    new HasMultipleOfPOSFeatureFunction("S", "D"), // phrase-y things
+    new HasMultipleOfPOSFeatureFunction("A", "N"), // compound-y things
+    new CharacterNGramFeatureFunction(4, 4),
+    new WordShapeFeatureFunction(),
+    new DeFollowedByNonWordFeatureFunction());
 
   private Classifier<String, String> classifier;
   private Classifier<String, String> makeClassifier(GeneralDataset<String, String> trainDataset) {
@@ -236,15 +234,16 @@ public class HamleDTMultiWordClassifier {
       "               [-loadSerialized serializedPath -eval evalFile]",
     HamleDTMultiWordClassifier.class.getName());
   
-  private static Map<String, Integer> argOptionDefs = new HashMap<String, Integer>() {{
-    put("train", 1);
-    put("dev", 1);
-    put("eval", 1);
+  private static Map<String, Integer> argOptionDefs = new HashMap<String, Integer>();
+  static {
+    argOptionDefs.put("train", 1);
+    argOptionDefs.put("dev", 1);
+    argOptionDefs.put("eval", 1);
 
-    put("saveSerialized", 0);
-    put("loadSerialized", 0);
-    put("printClassifierHighWeights", 0);
-  }};
+    argOptionDefs.put("saveSerialized", 0);
+    argOptionDefs.put("loadSerialized", 0);
+    argOptionDefs.put("printClassifierHighWeights", 0);
+  }
 
   public static void main(String[] args) {
     Properties options = StringUtils.argsToProperties(args, argOptionDefs);

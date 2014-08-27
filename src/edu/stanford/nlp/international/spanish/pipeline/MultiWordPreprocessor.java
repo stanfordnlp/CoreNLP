@@ -57,160 +57,162 @@ public final class MultiWordPreprocessor {
    *
    *     (grup.adv (rg cerca) (sp000 de))
    */
-  private static Map<String, String> phrasalCategoryMap = new HashMap<String, String>() {{
-      put("ao0000", "grup.a");
-      put("aq0000", "grup.a");
-      put("dn0000", "spec");
-      put("dt0000", "spec");
-      put("i", "interjeccio");
-      put("rg", "grup.adv");
-      put("rn", "grup.adv"); // no sólo
-      put("vmg0000", "grup.verb");
-      put("vmic000", "grup.verb");
-      put("vmii000", "grup.verb");
-      put("vmif000", "grup.verb");
-      put("vmip000", "grup.verb");
-      put("vmis000", "grup.verb");
-      put("vmn0000", "grup.verb");
-      put("vmp0000", "grup.verb");
-      put("vmsi000", "grup.verb");
-      put("vmsp000", "grup.verb");
-      put("zm", "grup.nom");
+  private static Map<String, String> phrasalCategoryMap = new HashMap<String, String>();
+  static {
+    phrasalCategoryMap.put("ao0000", "grup.a");
+    phrasalCategoryMap.put("aq0000", "grup.a");
+    phrasalCategoryMap.put("dn0000", "spec");
+    phrasalCategoryMap.put("dt0000", "spec");
+    phrasalCategoryMap.put("i", "interjeccio");
+    phrasalCategoryMap.put("rg", "grup.adv");
+    phrasalCategoryMap.put("rn", "grup.adv"); // no sólo
+    phrasalCategoryMap.put("vmg0000", "grup.verb");
+    phrasalCategoryMap.put("vmic000", "grup.verb");
+    phrasalCategoryMap.put("vmii000", "grup.verb");
+    phrasalCategoryMap.put("vmif000", "grup.verb");
+    phrasalCategoryMap.put("vmip000", "grup.verb");
+    phrasalCategoryMap.put("vmis000", "grup.verb");
+    phrasalCategoryMap.put("vmn0000", "grup.verb");
+    phrasalCategoryMap.put("vmp0000", "grup.verb");
+    phrasalCategoryMap.put("vmsi000", "grup.verb");
+    phrasalCategoryMap.put("vmsp000", "grup.verb");
+    phrasalCategoryMap.put("zm", "grup.nom");
 
-      // New groups (not from AnCora specification)
-      put("cc", "grup.cc");
-      put("cs", "grup.cs");
-      put("pr000000", "grup.pron");
-      put("pt000000", "grup.pron");
-      put("px000000", "grup.pron");
-      put("sp000", "grup.prep");
-      put("w", "grup.w");
-      put("z", "grup.z");
-      put("z0", "grup.z");
-      put("zp", "grup.z");
-      put("zu", "grup.z");
-    }};
+    // New groups (not from AnCora specification)
+    phrasalCategoryMap.put("cc", "grup.cc");
+    phrasalCategoryMap.put("cs", "grup.cs");
+    phrasalCategoryMap.put("pr000000", "grup.pron");
+    phrasalCategoryMap.put("pt000000", "grup.pron");
+    phrasalCategoryMap.put("px000000", "grup.pron");
+    phrasalCategoryMap.put("sp000", "grup.prep");
+    phrasalCategoryMap.put("w", "grup.w");
+    phrasalCategoryMap.put("z", "grup.z");
+    phrasalCategoryMap.put("z0", "grup.z");
+    phrasalCategoryMap.put("zp", "grup.z");
+    phrasalCategoryMap.put("zu", "grup.z");
+  }
 
   private static class ManualUWModel {
 
-    private static Map<String, String> posMap = new HashMap<String, String>() {{
-        // i.e., "metros cúbicos"
-        put("cúbico", "aq0000");
-        put("cúbicos", "aq0000");
-        put("diagonal", "aq0000");
-        put("diestro", "aq0000");
-        put("llevados", "aq0000"); // llevados a cabo
-        put("llevadas", "aq0000"); // llevadas a cabo
-        put("menudo", "aq0000");
-        put("obstante", "aq0000");
-        put("rapadas", "aq0000"); // cabezas rapadas
-        put("rasa", "aq0000");
-        put("súbito", "aq0000");
-        put("temática", "aq0000");
+    private static Map<String, String> posMap = new HashMap<String, String>();
+    static {
+      // i.e., "metros cúbicos"
+      posMap.put("cúbico", "aq0000");
+      posMap.put("cúbicos", "aq0000");
+      posMap.put("diagonal", "aq0000");
+      posMap.put("diestro", "aq0000");
+      posMap.put("llevados", "aq0000"); // llevados a cabo
+      posMap.put("llevadas", "aq0000"); // llevadas a cabo
+      posMap.put("menudo", "aq0000");
+      posMap.put("obstante", "aq0000");
+      posMap.put("rapadas", "aq0000"); // cabezas rapadas
+      posMap.put("rasa", "aq0000");
+      posMap.put("súbito", "aq0000");
+      posMap.put("temática", "aq0000");
 
-        put("tuya", "px000000");
+      posMap.put("tuya", "px000000");
 
-        // foreign words
-        put("alter", "nc0s000");
-        put("ego", "nc0s000");
-        put("Jet", "nc0s000");
-        put("lag", "nc0s000");
-        put("line", "nc0s000");
-        put("lord", "nc0s000");
-        put("model", "nc0s000");
-        put("mortem", "nc0s000"); // post-mortem
-        put("pater", "nc0s000"); // pater familias
-        put("pipe", "nc0s000");
-        put("play", "nc0s000");
-        put("pollastre", "nc0s000");
-        put("post", "nc0s000");
-        put("power", "nc0s000");
-        put("priori", "nc0s000");
-        put("rock", "nc0s000");
-        put("roll", "nc0s000");
-        put("salubritatis", "nc0s000");
-        put("savoir", "nc0s000");
-        put("service", "nc0s000");
-        put("status", "nc0s000");
-        put("stem", "nc0s000");
-        put("street", "nc0s000");
-        put("task", "nc0s000");
-        put("trio", "nc0s000");
-        put("zigzag", "nc0s000");
+      // foreign words
+      posMap.put("alter", "nc0s000");
+      posMap.put("ego", "nc0s000");
+      posMap.put("Jet", "nc0s000");
+      posMap.put("lag", "nc0s000");
+      posMap.put("line", "nc0s000");
+      posMap.put("lord", "nc0s000");
+      posMap.put("model", "nc0s000");
+      posMap.put("mortem", "nc0s000"); // post-mortem
+      posMap.put("pater", "nc0s000"); // pater familias
+      posMap.put("pipe", "nc0s000");
+      posMap.put("play", "nc0s000");
+      posMap.put("pollastre", "nc0s000");
+      posMap.put("post", "nc0s000");
+      posMap.put("power", "nc0s000");
+      posMap.put("priori", "nc0s000");
+      posMap.put("rock", "nc0s000");
+      posMap.put("roll", "nc0s000");
+      posMap.put("salubritatis", "nc0s000");
+      posMap.put("savoir", "nc0s000");
+      posMap.put("service", "nc0s000");
+      posMap.put("status", "nc0s000");
+      posMap.put("stem", "nc0s000");
+      posMap.put("street", "nc0s000");
+      posMap.put("task", "nc0s000");
+      posMap.put("trio", "nc0s000");
+      posMap.put("zigzag", "nc0s000");
 
-        // foreign words (invariable)
-        put("mass", "nc0n000");
-        put("media", "nc0n000");
+      // foreign words (invariable)
+      posMap.put("mass", "nc0n000");
+      posMap.put("media", "nc0n000");
 
-        // foreign words (plural)
-        put("options", "nc0p000");
+      // foreign words (plural)
+      posMap.put("options", "nc0p000");
 
-        // compound words, other invariables
-        put("regañadientes", "nc0n000");
-        put("sabiendas", "nc0n000"); // a sabiendas (de)
+      // compound words, other invariables
+      posMap.put("regañadientes", "nc0n000");
+      posMap.put("sabiendas", "nc0n000"); // a sabiendas (de)
 
-        // common gender
-        put("virgen", "nc0s000");
+      // common gender
+      posMap.put("virgen", "nc0s000");
 
-        put("merced", "ncfs000");
-        put("miel", "ncfs000");
-        put("torera", "ncfs000");
-        put("ultranza", "ncfs000");
-        put("vísperas", "ncfs000");
+      posMap.put("merced", "ncfs000");
+      posMap.put("miel", "ncfs000");
+      posMap.put("torera", "ncfs000");
+      posMap.put("ultranza", "ncfs000");
+      posMap.put("vísperas", "ncfs000");
 
-        put("acecho", "ncms000");
-        put("alzamiento", "ncms000");
-        put("bordo", "ncms000");
-        put("cápita", "ncms000");
-        put("ciento", "ncms000");
-        put("cuño", "ncms000");
-        put("pairo", "ncms000");
-        put("pese", "ncms000"); // pese a
-        put("pique", "ncms000");
-        put("pos", "ncms000");
-        put("postre", "ncms000");
-        put("pro", "ncms000");
-        put("ralentí", "ncms000");
-        put("ras", "ncms000");
-        put("rebato", "ncms000");
-        put("torno", "ncms000");
-        put("través", "ncms000");
+      posMap.put("acecho", "ncms000");
+      posMap.put("alzamiento", "ncms000");
+      posMap.put("bordo", "ncms000");
+      posMap.put("cápita", "ncms000");
+      posMap.put("ciento", "ncms000");
+      posMap.put("cuño", "ncms000");
+      posMap.put("pairo", "ncms000");
+      posMap.put("pese", "ncms000"); // pese a
+      posMap.put("pique", "ncms000");
+      posMap.put("pos", "ncms000");
+      posMap.put("postre", "ncms000");
+      posMap.put("pro", "ncms000");
+      posMap.put("ralentí", "ncms000");
+      posMap.put("ras", "ncms000");
+      posMap.put("rebato", "ncms000");
+      posMap.put("torno", "ncms000");
+      posMap.put("través", "ncms000");
 
-        put("creces", "ncfp000");
-        put("cuestas", "ncfp000");
-        put("oídas", "ncfp000");
-        put("tientas", "ncfp000");
-        put("trizas", "ncfp000");
-        put("veras", "ncfp000");
+      posMap.put("creces", "ncfp000");
+      posMap.put("cuestas", "ncfp000");
+      posMap.put("oídas", "ncfp000");
+      posMap.put("tientas", "ncfp000");
+      posMap.put("trizas", "ncfp000");
+      posMap.put("veras", "ncfp000");
 
-        put("abuelos", "ncmp000");
-        put("ambages", "ncmp000");
-        put("modos", "ncmp000");
-        put("pedazos", "ncmp000");
+      posMap.put("abuelos", "ncmp000");
+      posMap.put("ambages", "ncmp000");
+      posMap.put("modos", "ncmp000");
+      posMap.put("pedazos", "ncmp000");
 
-        put("A", "sps00");
+      posMap.put("A", "sps00");
 
-        put("amén", "rg"); // amén de
+      posMap.put("amén", "rg"); // amén de
 
-        put("Bailando", "vmg0000");
-        put("Soñando", "vmg0000");
-        put("Teniendo", "vmg0000");
-        put("echaremos", "vmif000");
-        put("formaba", "vmii000");
-        put("Formabas", "vmii000");
-        put("Forman", "vmip000");
-        put("perece", "vmip000");
-        put("PONE", "vmip000");
-        put("suicídate", "vmm0000");
-        put("tardar", "vmn0000");
+      posMap.put("Bailando", "vmg0000");
+      posMap.put("Soñando", "vmg0000");
+      posMap.put("Teniendo", "vmg0000");
+      posMap.put("echaremos", "vmif000");
+      posMap.put("formaba", "vmii000");
+      posMap.put("Formabas", "vmii000");
+      posMap.put("Forman", "vmip000");
+      posMap.put("perece", "vmip000");
+      posMap.put("PONE", "vmip000");
+      posMap.put("suicídate", "vmm0000");
+      posMap.put("tardar", "vmn0000");
 
-        put("seiscientas", "z0");
-        put("trescientas", "z0");
+      posMap.put("seiscientas", "z0");
+      posMap.put("trescientas", "z0");
 
-        put("cc", "zu");
-        put("km", "zu");
-        put("kms", "zu");
-      }};
+      posMap.put("cc", "zu");
+      posMap.put("km", "zu");
+      posMap.put("kms", "zu");
+    }
 
     private static int nUnknownWordTypes = posMap.size();
 
@@ -222,16 +224,16 @@ public final class MultiWordPreprocessor {
      * unigram tagger (and which never appear as function words in
      * multi-word tokens)
      */
-    private static final Set<String> actuallyNames = new HashSet<String>() {{
-      add("Avenida");
-      add("Contra");
-      add("Gracias"); // interjection
-      add("in"); // preposition; only appears in corpus as "in extremis" (preposition)
-      add("Mercado");
-      add("Jesús"); // interjection
-      add("Salvo");
-      add("Van"); // verb
-    }};
+    private static final Set<String> actuallyNames = new HashSet<String>(Arrays.asList(
+      "Avenida",
+      "Contra",
+      "Gracias", // interjection
+      "in", // preposition; only appears in corpus as "in extremis" (preposition)
+      "Mercado",
+      "Jesús", // interjection
+      "Salvo",
+      "Van" // verb
+    ));
 
     // Name-looking word that isn't "Al"
     private static final Pattern otherNamePattern = Pattern.compile("\\b(Al\\w+|A[^l]\\w*|[B-Z]\\w+)");

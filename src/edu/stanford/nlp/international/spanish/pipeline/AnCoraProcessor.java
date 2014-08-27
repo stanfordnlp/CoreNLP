@@ -414,10 +414,11 @@ public class AnCoraProcessor {
       "        want each step to benefit from a complete tagger.)\n" +
       "    -ner: Add NER-specific information to trees\n";
 
-  private static final Map<String, Integer> argOptionDefs = new HashMap<String, Integer>() {{
-    put("unigramTagger", 1);
-    put("ner", 0);
-  }};
+  private static final Map<String, Integer> argOptionDefs = new HashMap<String, Integer>();
+  static {
+    argOptionDefs.put("unigramTagger", 1);
+    argOptionDefs.put("ner", 0);
+  }
 
   public static void main(String[] args)
     throws InterruptedException, IOException, ExecutionException, ClassNotFoundException {

@@ -97,19 +97,19 @@ public class SpanishVerbStripper {
    * The verbs in this set have accents in their infinitive forms;
    * don't remove the accents when stripping pronouns!
    */
-  private static final Set<String> accentedInfinitives = new HashSet<String>() {{
-    add("desleír");
-    add("desoír");
-    add("embaír");
-    add("engreír");
-    add("entreoír");
-    add("freír");
-    add("oír");
-    add("refreír");
-    add("reír");
-    add("sofreír");
-    add("sonreír");
-  }};
+  private static final Set<String> accentedInfinitives = new HashSet<String>(Arrays.asList(
+    "desleír",
+    "desoír",
+    "embaír",
+    "engreír",
+    "entreoír",
+    "freír",
+    "oír",
+    "refreír",
+    "reír",
+    "sofreír",
+    "sonreír"
+  ));
 
   /**
    * Determine if the given word is a verb which needs to be stripped.

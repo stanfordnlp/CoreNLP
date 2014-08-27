@@ -68,9 +68,10 @@ public class AnCoraPOSStats {
   private static final String usage =
     String.format("Usage: java %s -o <output_path> file(s)%n%n", AnCoraPOSStats.class.getName());
 
-  private static final Map<String, Integer> argOptionDefs = new HashMap<String, Integer>() {{
-    put("o", 1);
-  }};
+  private static final Map<String, Integer> argOptionDefs = new HashMap<String, Integer>();
+  static {
+    argOptionDefs.put("o", 1);
+  }
 
   public static void main(String[] args) throws IOException {
     if (args.length < 1) {
