@@ -202,6 +202,32 @@ public class MultiWordTreeExpander {
   private static TsurgeonPattern expandDeterminerInsideNominalGroup =
     Tsurgeon.parseOperation("[insert (spec=target) $+ ng] [move det >0 target]");
 
+  // "en opinion del X," "además del Y"
+  private static TregexPattern contractionTrailingIdiomBeforeNominalGroup
+    = TregexPattern.compile("sp000 >` (/^grup\\.prep$/ > (__ $+ /^grup\\.nom/=ng)) < /^(de|a)l$/=contraction");
+
+  // -> "(en opinion de) (el X)," "(además de) (el Y)"
+  private static TsurgeonPattern joinArticleWithNominalGroup
+    = Tsurgeon.parseOperation("[relabel contraction /l//] [adjoinF (sn (spec (da0000 el)) foot@) ng]");
+
+  private static TregexPattern contractionInSpecifier
+    = TregexPattern.compile("sp000=parent < /^(a|de)l$/=contraction > spec");
+
+  private static TregexPattern delTodo = TregexPattern.compile("del=contraction . todo > sp000=parent");
+
+  // "del X al Y"
+  private static TregexPattern contractionInRangePhrase
+    = TregexPattern.compile("sp000 < del=contraction >: (conj $+ (/^grup\\.(w|nom)/=group))");
+
+  private static TsurgeonPattern expandContractionInRangePhrase
+    = Tsurgeon.parseOperation("[relabel contraction de] [adjoinF (sn (spec (da0000 el)) foot@) group]");
+
+  /**
+   * Operation to extract article from contraction and just put it next to the container
+   */
+  private static TsurgeonPattern extendContraction
+    = Tsurgeon.parseOperation("[relabel contraction /l//] [insert (da0000 el) $- parent]");
+
   // TODO intermediate adjectival conjunct
   // TODO intermediate verb conjunct
 
@@ -250,6 +276,11 @@ public class MultiWordTreeExpander {
       add(new Pair(conjunctPhrase, expandConjunctPhrase));
       add(new Pair(prepositionalPhrase, expandPrepositionalPhrase1));
       add(new Pair(prepositionalVP, expandPrepositionalVP1));
+
+      add(new Pair(contractionTrailingIdiomBeforeNominalGroup, joinArticleWithNominalGroup));
+      add(new Pair(contractionInSpecifier, extendContraction));
+      add(new Pair(delTodo, extendContraction));
+      add(new Pair(contractionInRangePhrase, expandContractionInRangePhrase));
 
       // Should not happen until the last moment! The function words
       // being targeted have weaker "scope" than others earlier
