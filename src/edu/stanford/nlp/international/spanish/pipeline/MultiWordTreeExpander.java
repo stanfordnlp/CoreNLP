@@ -532,3 +532,5 @@ public class MultiWordTreeExpander {
 // Imagínense . /./
 // jugadores . (de . Aíto) ("en rehacerse")
 // sólo . (los . espectadores) ("miles" has a ROOT tag???)
+// sentido . generoso (conmigo)
+// estrené . Lisboa (conmigo)

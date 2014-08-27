@@ -218,6 +218,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
     // More tregex-powered fixes
     tree = expandElisions(tree);
+    tree = expandConmigo(tree);
     tree = expandCliticPronouns(tree);
 
     // Make sure the tree has a top-level unary rewrite; the root
@@ -834,6 +835,41 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> elisionExpansions =
     compilePatterns(elisionExpansionStrs);
+
+  private static TregexPattern conmigoPattern =
+    TregexPattern.compile("/(?i)^con[mst]igo$/=conmigo > (/^pp/ > (/^grup\\.nom$/ > sn=sn))");
+
+  /**
+   * ¡Venga, expand conmigo!
+   */
+  private static Tree expandConmigo(Tree t) {
+    TregexMatcher matcher = conmigoPattern.matcher(t);
+
+    while (matcher.find()) {
+      Tree conmigoNode = matcher.getNode("conmigo");
+      String word = conmigoNode.value();
+
+      String newPronoun = null;
+      if (word.equalsIgnoreCase("conmigo"))
+        newPronoun = "mí";
+      else if (word.equalsIgnoreCase("contigo"))
+        newPronoun = "ti";
+      else if (word.equalsIgnoreCase("consigo"))
+        newPronoun = "sí";
+
+      if (word.charAt(0) == 'C')
+        newPronoun = newPronoun.toUpperCase();
+
+      String tsurgeon = String.format(
+        "[relabel conmigo /%s/]" +
+          "[adjoinF (sp (prep (sp000 con)) foot@) sn]",
+        newPronoun);
+      TsurgeonPattern pattern = Tsurgeon.parseOperation(tsurgeon);
+      t = pattern.evaluate(t, matcher);
+    }
+
+    return t;
+  }
 
   private static List<Pair<TregexPattern, TsurgeonPattern>> compilePatterns(Pair<String, String>[] patterns) {
     List<Pair<TregexPattern, TsurgeonPattern>> ret = new ArrayList<Pair<TregexPattern, TsurgeonPattern>>(patterns.length);
