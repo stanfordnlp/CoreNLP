@@ -30,7 +30,7 @@ import edu.stanford.nlp.util.PropertiesUtils;
  * @author Christopher Manning
  * @author Ishita Prasad
  */
-public class PTBTokenizerAnnotator implements Annotator {
+public class TokenizerAnnotator implements Annotator {
 
 	/**
 	 * Enum to identify the different TokenizerTypes. To add a new
@@ -109,23 +109,23 @@ public class PTBTokenizerAnnotator implements Annotator {
 
 	// CONSTRUCTORS
     
-	public PTBTokenizerAnnotator() {
+	public TokenizerAnnotator() {
 		this(true);
   }
     
-	public PTBTokenizerAnnotator(boolean verbose) {
+	public TokenizerAnnotator(boolean verbose) {
 		this(verbose, new Properties());
   }
 
-	public PTBTokenizerAnnotator(boolean verbose, String options) {
+	public TokenizerAnnotator(boolean verbose, String options) {
 		this(verbose, null, options);
 	}
 
-  public PTBTokenizerAnnotator(boolean verbose, Properties props) {
+  public TokenizerAnnotator(boolean verbose, Properties props) {
     this(verbose, props, null);
   }
 
-	public PTBTokenizerAnnotator(boolean verbose, Properties props, String extraOptions) {
+	public TokenizerAnnotator(boolean verbose, Properties props, String extraOptions) {
 		VERBOSE = verbose;
 		if (props == null) {
 			props = new Properties();
@@ -217,10 +217,6 @@ public class PTBTokenizerAnnotator implements Annotator {
 			// don't wrap in BufferedReader.  It gives you nothing for in memory String unless you need the readLine() method	!
 
 			List<CoreLabel> tokens = getTokenizer(r).tokenize();
-			// cdm 2010-05-15: This is now unnecessary, as it is done in CoreLabelTokenFactory
-			// for (CoreLabel token: tokens) {
-			// token.set(CoreAnnotations.TextAnnotation.class, token.get(CoreAnnotations.TextAnnotation.class));
-			// }
 
 			annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
 			if (VERBOSE) {

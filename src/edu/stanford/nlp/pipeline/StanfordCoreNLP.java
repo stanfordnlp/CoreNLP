@@ -51,7 +51,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 /**
  * This is a pipeline that takes in a string and returns various analyzed
  * linguistic forms.
- * The String is tokenized via a tokenizer (such as PTBTokenizerAnnotator), and
+ * The String is tokenized via a tokenizer (using a TokenizerAnnotator), and
  * then other sequence model style annotation can be used to add things like
  * lemmas, POS tags, and named entities.  These are returned as a list of CoreLabels.
  * Other analysis components build and store parse trees, dependency graphs, etc.
@@ -351,7 +351,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 				if(keepNewline) {
 					extraOptions = "tokenizeNLs,";
 				}
-				return annotatorImplementation.ptbTokenizer(properties, false, extraOptions);
+				return annotatorImplementation.tokenizer(properties, false, extraOptions);
 			}
 		
       @Override

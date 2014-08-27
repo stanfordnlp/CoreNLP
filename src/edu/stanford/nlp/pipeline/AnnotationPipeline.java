@@ -226,7 +226,7 @@ public class AnnotationPipeline implements Annotator {
     Timing tim = new Timing();
     AnnotationPipeline ap = new AnnotationPipeline();
     boolean verbose = false;
-    ap.addAnnotator(new PTBTokenizerAnnotator(verbose));
+    ap.addAnnotator(new TokenizerAnnotator(verbose));
     ap.addAnnotator(new WordsToSentencesAnnotator(verbose));
     // ap.addAnnotator(new NERCombinerAnnotator(verbose));
     // ap.addAnnotator(new OldNERAnnotator(verbose));
