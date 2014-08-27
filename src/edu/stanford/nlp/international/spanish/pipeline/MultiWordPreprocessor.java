@@ -58,8 +58,6 @@ public final class MultiWordPreprocessor {
   private static Map<String, String> phrasalCategoryMap = new HashMap<String, String>() {{
       put("ao0000", "grup.a");
       put("aq0000", "grup.a");
-      put("dn0000", "spec");
-      put("dt0000", "spec");
       put("rg", "grup.adv");
       put("rn", "grup.adv"); // no sólo
       put("vmg0000", "grup.verb");
@@ -199,43 +197,6 @@ public final class MultiWordPreprocessor {
     private static final Pattern participle = Pattern.compile("[ai]d[oa]$");
 
     /**
-     * Names which would be mistakenly marked as function words by unigram tagger (and which never appear as function words
-     * in multi-word tokens)
-     */
-    private static final Set<String> actuallyNames = new HashSet<String>() {{
-      add("A");
-      add("Al");
-      add("Contra");
-      add("Gracias"); // interjection
-      add("Jesús"); // interjection
-      add("Salvo");
-      add("Sin");
-      add("Van"); // verb
-    }};
-
-    public static String getOverrideTag(String word, String containingPhrase) {
-      if (containingPhrase == null)
-        return null;
-
-      if (word.equalsIgnoreCase("este") && !containingPhrase.startsWith(word))
-        return "np00000";
-      else if (word.equals("Al") && containingPhrase.startsWith("Al fin"))
-        return "sp000";
-      else if (word.equals("Sin") && containingPhrase.startsWith("Sin embargo"))
-        return "sp000";
-
-      if (actuallyNames.contains(word))
-        return "np00000";
-
-      if (word.equals("sino") && containingPhrase.endsWith(word))
-        return "nc0s000";
-      else if (word.equals("mañana"))
-        return "nc0s000";
-
-      return null;
-    }
-
-    /**
      * Match phrases for which unknown words should be assumed to be
      * common nouns
      *
@@ -278,9 +239,6 @@ public final class MultiWordPreprocessor {
     }
   }
 
-  /**
-   * Source training data for a unigram tagger from the given tree.
-   */
   public static void updateTagger(TwoDimensionalCounter<String,String> tagger,
                                   Tree t) {
     List<CoreLabel> yield = t.taggedLabeledYield();
@@ -291,6 +249,7 @@ public final class MultiWordPreprocessor {
       tagger.incrementCount(cl.word(), cl.tag());
     }
   }
+
 
   public static void traverseAndFix(Tree t,
                                     Tree parent,
@@ -315,6 +274,9 @@ public final class MultiWordPreprocessor {
       traverseAndFix(kid, t, pretermLabel, unigramTagger, retainNER);
 
     // Post-order visit
+    //
+    // TODO merge unnecessarily deep trees (maybe the job for a separate
+    // tree normalizer?)
     if(t.value().startsWith(SpanishTreeNormalizer.MW_PHRASE_TAG)) {
       nMissingPhrasal++;
 
@@ -327,37 +289,25 @@ public final class MultiWordPreprocessor {
   }
 
   /**
-   * Get a string representation of the immediate phrase which contains the given node.
-   */
-  private static String getContainingPhrase(Tree t, Tree parent) {
-    if (parent == null)
-      return null;
-
-    List<Label> phraseYield = parent.yield();
-    StringBuilder containingPhrase = new StringBuilder();
-    for (Label l : phraseYield)
-      containingPhrase.append(l.value()).append(" ");
-
-    return containingPhrase.toString().substring(0, containingPhrase.length() - 1);
-  }
-
-  /**
    * Attempt to infer the part of speech of the given preterminal node, which
    * was created during the expansion of a multi-word token.
    */
   private static String inferPOS(Tree t, Tree parent,
                                  TwoDimensionalCounter<String, String> unigramTagger) {
     String word = t.firstChild().value();
-    String containingPhraseStr = getContainingPhrase(t, parent);
-
-    // Overrides: let the manual POS model handle a few special cases first
-    String overrideTag = ManualUWModel.getOverrideTag(word, containingPhraseStr);
-    if (overrideTag != null)
-      return overrideTag;
-
     if (unigramTagger.firstKeySet().contains(word))
       return Counters.argmax(unigramTagger.getCounter(word));
 
+    if (parent == null)
+      return null;
+
+    List<Label> phraseYield = parent.yield();
+    StringBuilder containingPhrase = new StringBuilder();
+    for (Label l : phraseYield)
+      containingPhrase.append(l).append(" ");
+
+    String containingPhraseStr =
+      containingPhrase.toString().substring(0, containingPhrase.length() - 1);
     return ManualUWModel.getTag(word, containingPhraseStr);
   }
 
@@ -430,10 +380,6 @@ public final class MultiWordPreprocessor {
       int nTrees = 0;
       for(Tree t; (t = tr.readTree()) != null;nTrees++) {
         traverseAndFix(t, null, pretermLabel, unigramTagger, retainNER);
-
-        // Now "decompress" further the expanded trees formed by
-        // multiword token splitting
-        t = MultiWordTreeExpander.expandPhrases(t);
 
         if (tn != null)
           t = tn.normalizeWholeTree(t, tf);
