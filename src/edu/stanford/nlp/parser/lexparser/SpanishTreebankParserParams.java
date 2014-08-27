@@ -49,6 +49,11 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       "pod(?:e[dr]|ido|[ea]mos|[éá]is|r(?:é(?:is)?|á[sn]?|emos)|r?ía(?:s|mos|is|n)?)|" +
       "pud(?:[eo]|i(?:ste(?:is)?|mos|eron|er[ea](?:[sn]|is)?|ér[ea]mos|endo)))$";
 
+  /**
+   * Forms of hacer which may lead time expressions
+   */
+  private static final String HACER_TIME_FORM = "(?i)^(?:hac(?:er|ía))$";
+
   @SuppressWarnings("unchecked")
   private void buildAnnotations() {
     // +.25 F1
@@ -135,6 +140,10 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
         "<` =last",
       new SimpleStringFunction("-coord")));
 
+    annotations.put("-markHacerTime", new Pair(
+      String.format("/^vm/ < /%s/ $+ /^d/", HACER_TIME_FORM),
+      new SimpleStringFunction("-hacerTime")));
+
     compileAnnotations(headFinder);
   }
 
@@ -206,6 +215,7 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
 
       // lexical / word- or tag-level annotations
       "-markComo", "-markSpecHeads", "-markPPFriendlyVerbs", "-markParticipleAdjs",
+      "-markHacerTime",
       /* "-markPoder", */
 
       // conjunction annotations
