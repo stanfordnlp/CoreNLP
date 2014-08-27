@@ -80,6 +80,10 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
     return curTrie;
   }
 
+  public Map<K, TrieMap<K, V>> getChildren() {
+    return children;
+  }
+
   public V getValue() {
     return value;
   }
