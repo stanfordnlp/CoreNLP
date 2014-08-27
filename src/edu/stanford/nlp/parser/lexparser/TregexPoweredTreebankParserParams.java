@@ -210,4 +210,49 @@ public abstract class TregexPoweredTreebankParserParams extends AbstractTreebank
 
   }
 
+  /**
+   * Annotate a tree constituent with its lexical head.
+   */
+  protected static class AnnotateHeadFunction implements SerializableFunction<TregexMatcher,
+    String> {
+
+    private static final long serialVersionUID = -4213299755069618322L;
+
+    private final HeadFinder headFinder;
+    private boolean lowerCase;
+
+    public AnnotateHeadFunction(HeadFinder hf) {
+      this(hf, true);
+    }
+
+    public AnnotateHeadFunction(HeadFinder hf, boolean lowerCase) {
+      headFinder = hf;
+      this.lowerCase = lowerCase;
+    }
+
+    public String apply(TregexMatcher matcher) {
+      Tree matchedTree = matcher.getMatch();
+
+      Tree head = headFinder.determineHead(matchedTree);
+      if (!head.isPrePreTerminal())
+        return "";
+
+      Tree lexicalHead = head.firstChild().firstChild();
+      String headValue = lexicalHead.value();
+
+      if (headValue != null) {
+        if (lowerCase) headValue = headValue.toLowerCase();
+        return '[' + headValue + ']';
+      } else {
+        return "";
+      }
+    }
+
+    @Override
+    public String toString() {
+      return "AnnotateHeadFunction[" + headFinder.getClass().getName() + ']';
+    }
+
+  }
+
 }

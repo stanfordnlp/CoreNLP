@@ -43,14 +43,18 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
 
   @SuppressWarnings("unchecked")
   private void buildAnnotations() {
+    // +.25 F1
     annotations.put("-markInf", new Pair("/^(S|grup\\.verb|infinitiu|gerundi)/ < @infinitiu",
                                          new SimpleStringFunction("-infinitive")));
     annotations.put("-markGer", new Pair("/^(S|grup\\.verb|infinitiu|gerundi)/ < @gerundi",
                                          new SimpleStringFunction("-gerund")));
 
-    // relative clause
+    // +.04 F1
     annotations.put("-markRelative", new Pair("@S <, @relatiu",
                                               new SimpleStringFunction("-relative")));
+
+    annotations.put("-markPPHeads", new Pair("@sp",
+                                             new AnnotateHeadFunction(headFinder)));
 
     compileAnnotations(headFinder);
   }
@@ -66,8 +70,11 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
       // verb phrase annotations
       "-markInf", "-markGer",
 
+      // prepositional phrase annotations
+      "-markPPHeads",
+
       // clause annotations
-      "-markRelative"
+      "-markRelative",
     };
   }
 
