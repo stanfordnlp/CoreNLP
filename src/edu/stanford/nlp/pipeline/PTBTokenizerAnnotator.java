@@ -217,10 +217,6 @@ public class TokenizerAnnotator implements Annotator {
 			// don't wrap in BufferedReader.  It gives you nothing for in memory String unless you need the readLine() method	!
 
 			List<CoreLabel> tokens = getTokenizer(r).tokenize();
-			// cdm 2010-05-15: This is now unnecessary, as it is done in CoreLabelTokenFactory
-			// for (CoreLabel token: tokens) {
-			// token.set(CoreAnnotations.TextAnnotation.class, token.get(CoreAnnotations.TextAnnotation.class));
-			// }
 
 			annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
 			if (VERBOSE) {
