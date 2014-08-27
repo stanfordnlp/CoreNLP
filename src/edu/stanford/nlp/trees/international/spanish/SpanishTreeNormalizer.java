@@ -143,6 +143,19 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     // periods as final right children of the `sentence` constituent)
     new Pair("__=N <<` (fp=fp <: (/^\\.$/ !. __)) > sentence=sentence",
              "move fp $- N"),
+
+    // AnCora has a few weird parses of "nada que ver" and related
+    // phrases. Normalize them:
+    //
+    //     (grup.nom (pi000000 X) (S (relatiu (pr000000 que))
+    //                               (infinitiu (vmn0000 Y))))
+    new Pair("(pi000000 <: __ !$+ S >` (/^grup\\.nom/=gn >` sn=sn))" +
+               ". ((que >: (__=queTag $- =sn)) . (__=vb >>: (__=vbContainer $- =queTag)))",
+
+             "[insert (S (relatiu (pr000000 que)) (infinitiu=vbFoot)) >-1 gn]" +
+               "[move vb >0 vbFoot]" +
+               "[delete queTag]" +
+               "[delete vbContainer]"),
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> cleanup
