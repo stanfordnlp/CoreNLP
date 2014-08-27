@@ -19,22 +19,22 @@ public class ConfusionMatrixTSV {
       
       String line = br.readLine();
       for(; line != null; line = br.readLine()) {
-				String[] tokens = line.split("\\s");
-				if(tokens.length != 3){
-					System.err.printf("ignoring bad line");
-					continue;
-					//System.exit(-1);
-				}
-				cm.add(tokens[2], tokens[1]);
+	String[] tokens = line.split("\\s");
+	if(tokens.length != 3){
+	  System.err.printf("ignoring bad line");
+	  continue;
+	  //System.exit(-1);
+	}
+	cm.add(tokens[2], tokens[1]);
       }
       
       System.out.println(cm.toString());
     } catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+	e.printStackTrace();
     } catch (FileNotFoundException e) {
-			e.printStackTrace();
+	e.printStackTrace();
     } catch (IOException e) {
-			e.printStackTrace();
+	e.printStackTrace();
     }
   }
 }

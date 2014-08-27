@@ -12,7 +12,7 @@ import edu.stanford.nlp.util.Pair;
  * Provides a utility function for removing attached pronouns from
  * Spanish verb forms.
  */
-public final class SpanishVerbStripper {
+public class SpanishVerbStripper {
 
   // The following three classes of verb forms can carry attached
   // pronouns:
@@ -21,12 +21,9 @@ public final class SpanishVerbStripper {
   //   - Gerunds
   //   - Affirmative imperatives
 
-	/* Hashmap of singleton instances */
-	private static final Map<String, SpanishVerbStripper> instances = new HashMap<String, SpanishVerbStripper>();
-
-	private final Map<String, String> dict;
-
   private static final String DEFAULT_DICT = "/u/nlp/data/spanish/enclitic-inflections.data";
+
+  private HashMap<String, String> dict;
 
   private static final String PATTERN_ATTACHED_PRONOUNS =
     "(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$";
@@ -60,9 +57,9 @@ public final class SpanishVerbStripper {
 	 *
 	 * @param dictPath the path to the dictionary file
 	 */  
-  private Map<String, String> setupDictionary(String dictPath) {
-		Map<String, String> dict = new HashMap<String, String>();
+  private void setupDictionary(String dictPath) {
     try {
+      dict = new HashMap<String, String>();
       BufferedReader br = new BufferedReader(new InputStreamReader(
         IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(dictPath), "UTF-8"));
       String line = br.readLine();
@@ -80,7 +77,6 @@ public final class SpanishVerbStripper {
     } catch (IOException e) {
       throw new RuntimeException("Could not load Spanish data file " + dictPath);
     }
-		return dict;
   }
 
   /**
@@ -106,36 +102,12 @@ public final class SpanishVerbStripper {
 
 	// CONSTRUCTORS
 
-	private SpanishVerbStripper() {
+	public SpanishVerbStripper() {
 		this(DEFAULT_DICT);
 	}
 
-	private SpanishVerbStripper(String dictPath) {
-		dict = setupDictionary(dictPath);
-	}
-
-	// SINGLETON FUNCTIONS
-
-	/**
-	 * Singleton pattern function for getting a default verb stripper
-	 */
-	public static SpanishVerbStripper getInstance() {
-		return getInstance(DEFAULT_DICT);
-	}
-
-	/**
-	 * Singleton pattern function for getting a verb stripper based on 
-	 * the dictionary at dictPath.
-	 *
-	 * @param dictPath the path to the dictionary for this verb stripper.
-	 */
-	public static SpanishVerbStripper getInstance(String dictPath) {
-		SpanishVerbStripper svs = instances.get(dictPath);
-		if (svs == null) {
-			svs = new SpanishVerbStripper(dictPath);
-			instances.put(dictPath, svs);
-		}
-		return svs;
+	public SpanishVerbStripper(String dictPath) {
+		setupDictionary(dictPath);
 	}
 
   /**
