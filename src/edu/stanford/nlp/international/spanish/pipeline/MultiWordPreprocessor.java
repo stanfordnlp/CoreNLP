@@ -118,7 +118,7 @@ public final class MultiWordPreprocessor {
       traverseAndFix(kid,pretermLabel,unigramTagger);
 
     //Post-order visit
-    if(t.value().equals(SpanishTreeNormalizer.MW_PHRASE_TAG)) {
+    if(t.value().startsWith(SpanishTreeNormalizer.MW_PHRASE_TAG)) {
       nMissingPhrasal++;
       StringBuilder sb = new StringBuilder();
       for(Tree kid : t.children())

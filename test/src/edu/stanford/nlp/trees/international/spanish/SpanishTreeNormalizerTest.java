@@ -27,18 +27,18 @@ public class SpanishTreeNormalizerTest extends TestCase {
   @SuppressWarnings("unchecked")
   Pair<String, String>[] multiWordTestCases = new Pair[] {
     new Pair("(grup.nom (np00000 Josep_Maria_Ollé))",
-             "(grup.nom (MW_PHRASE? (MW? Josep) (MW? Maria) (MW? Ollé)))"),
+             "(grup.nom (MW_PHRASE?_np00000 (MW? Josep) (MW? Maria) (MW? Ollé)))"),
 
     new Pair("(grup.nom (grup.nom (nc0p000 productos)) (sp (prep (sp000 de)) (sn (grup.nom (np00000 American_Online)))))",
-             "(grup.nom (grup.nom (nc0p000 productos)) (sp (prep (sp000 de)) (sn (grup.nom (MW_PHRASE? (MW? American) (MW? Online))))))"),
+             "(grup.nom (grup.nom (nc0p000 productos)) (sp (prep (sp000 de)) (sn (grup.nom (MW_PHRASE?_np00000 (MW? American) (MW? Online))))))"),
 
     // Two multi-word tokens as siblings
     new Pair("(a (b c_d) (b e_f))",
-             "(a (MW_PHRASE? (MW? c) (MW? d)) (MW_PHRASE? (MW? e) (MW? f)))"),
+             "(a (MW_PHRASE?_b (MW? c) (MW? d)) (MW_PHRASE?_b (MW? e) (MW? f)))"),
 
     // Quotation mark "words" should be separated
     new Pair("(a (b \"cde\"))",
-             "(a (MW_PHRASE? (MW? \") (MW? cde) (MW? \")))"),
+             "(a (MW_PHRASE?_b (MW? \") (MW? cde) (MW? \")))"),
   };
 
   public void testMultiWordNormalization() {
