@@ -185,6 +185,15 @@ public class MultiWordTreeExpander {
     Tsurgeon.parseOperation("[relabel target sn]");
 
   /**
+   * Intermediate conjunct: verb
+   */
+  private static TregexPattern intermediateVerbConjunct =
+    TregexPattern.compile("/^grup\\.nom\\.inter2$/=gn <: /^vmi/");
+
+  private static TsurgeonPattern expandIntermediateVerbConjunct =
+    Tsurgeon.parseOperation("[adjoin (S (grup.verb@)) gn]");
+
+  /**
    * Match parts of an expanded conjunct which should be labeled as
    * nominal groups.
    */
@@ -199,13 +208,13 @@ public class MultiWordTreeExpander {
    * that they can be moved out
    */
   private static TregexPattern articleLeadingNominalGroup =
-    TregexPattern.compile("/^d[ai]/=art >, (/^grup\\.nom$/=ng > sn)");
+    TregexPattern.compile("/^d[aip]/=art >, (/^grup\\.nom$/=ng > sn)");
 
   private static TsurgeonPattern expandArticleLeadingNominalGroup =
     Tsurgeon.parseOperation("[insert (spec=target) $+ ng] [move art >0 target]");
 
   private static TregexPattern articleInsideOrphanedNominalGroup =
-    TregexPattern.compile("/^d[ai]/=d >, (/^grup\\.nom/=ng !> sn)");
+    TregexPattern.compile("/^d[aip]/=d >, (/^grup\\.nom/=ng !> sn)");
 
   private static TsurgeonPattern expandArticleInsideOrphanedNominalGroup =
     Tsurgeon.parseOperation("[adjoinF (sn=sn spec=spec foot@) ng] [move d >0 spec]");
@@ -304,6 +313,10 @@ public class MultiWordTreeExpander {
   private static TsurgeonPattern labelClause3
     = Tsurgeon.parseOperation("[relabel sn S] [adjoinF (infinitiu foot@) inf]");
 
+  private static TregexPattern loneAdjectiveInNominalGroup
+    = TregexPattern.compile("/^a/=a > /^grup\\.nom/ $ /^([snwz]|p[ipr])/ !$ /^a/");
+  private static TsurgeonPattern labelAdjective = Tsurgeon.parseOperation("[adjoinF (s.a (grup.a foot@)) a]");
+
   private static TsurgeonPattern groupAdjectives = Tsurgeon.parseOperation("createSubtree (s.a grup.a@) left right");
 
   private static TregexPattern alMenos
@@ -383,6 +396,7 @@ public class MultiWordTreeExpander {
       add(new Pair(intermediateSubstantiveConjunct, expandIntermediateSubstantiveConjunct));
       add(new Pair(intermediateAdjectiveConjunct, expandIntermediateAdjectiveConjunct));
       add(new Pair(intermediateNounPhraseConjunct, expandIntermediateNounPhraseConjunct));
+      add(new Pair(intermediateVerbConjunct, expandIntermediateVerbConjunct));
       add(new Pair(intermediateNominalGroupConjunct, expandIntermediateNominalGroupConjunct));
     }};
 
@@ -395,12 +409,14 @@ public class MultiWordTreeExpander {
       add(new Pair(terminalPrepositions, extractTerminalPrepositions));
       add(new Pair(terminalPrepositions2, extractTerminalPrepositions2));
       add(new Pair(terminalPrepositions3, extractTerminalPrepositions3));
+
       add(new Pair(nominalGroupSubstantives, makeNominalGroup));
       add(new Pair(adverbNominalGroups, replaceAdverbNominalGroup));
       add(new Pair(adjectiveSpanInNominalGroup, groupAdjectives));
       add(new Pair(clauseInNominalGroup, labelClause));
       add(new Pair(clauseInNominalGroup2, labelClause2));
       add(new Pair(clauseInNominalGroup3, labelClause3));
+      add(new Pair(loneAdjectiveInNominalGroup, labelAdjective));
 
       // Special fix: "a lo menos"
       add(new Pair(alMenos, fixAlMenos));
