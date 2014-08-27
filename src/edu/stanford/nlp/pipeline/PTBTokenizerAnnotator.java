@@ -10,6 +10,7 @@ import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
 
+import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.international.spanish.process.SpanishTokenizer;
 import edu.stanford.nlp.international.french.process.FrenchTokenizer;
 
@@ -49,6 +50,10 @@ public class PTBTokenizerAnnotator extends TokenizerAnnotator {
 	public PTBTokenizerAnnotator(boolean verbose) {
 		this(verbose, new Properties());
   }
+
+	public PTBTokenizerAnnotator(boolean verbose, String propString) {
+		this(verbose, PropertiesUtils.fromString(propString));
+	}
 
 	public PTBTokenizerAnnotator(boolean verbose, Properties props) {
 		super(verbose);
