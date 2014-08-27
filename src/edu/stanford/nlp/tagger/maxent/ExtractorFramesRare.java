@@ -1609,7 +1609,7 @@ class ExtractorSpanishStrippedVerb extends RareExtractor {
 
   private static final long serialVersionUID = -4780144226395772354L;
 
-  private static final SpanishVerbStripper verbStripper = new SpanishVerbStripper();
+  private static final SpanishVerbStripper verbStripper = SpanishVerbStripper.getInstance();
 
   @Override
   String extract(History h, PairsHolder pH) {

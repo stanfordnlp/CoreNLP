@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 
 public class AnCoraPronounDisambiguatorTest extends TestCase {
 
-  private final SpanishVerbStripper verbStripper = new SpanishVerbStripper();
+  private final SpanishVerbStripper verbStripper = SpanishVerbStripper.getInstance();
 
   private void runTest(AnCoraPronounDisambiguator.PersonalPronounType expected, String verb,
                        int i) {

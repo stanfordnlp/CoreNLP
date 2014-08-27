@@ -408,7 +408,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
   private static final TsurgeonPattern clausifyVerbWithCliticPronouns =
     Tsurgeon.parseOperation("adjoinF (S foot@) target");
 
-  private static final SpanishVerbStripper verbStripper = new SpanishVerbStripper();
+  private static final SpanishVerbStripper verbStripper = SpanishVerbStripper.getInstance();
 
   /**
    * Separate clitic pronouns into their own tokens in the given tree.
