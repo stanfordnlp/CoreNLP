@@ -109,7 +109,7 @@ public class AnCoraProcessor {
 
       while (wrapper.peek()) {
         Pair<TwoDimensionalCounter<String, String>, List<Tree>> result = wrapper.poll();
-        Counters.addInPlace(unigramTagger, result.first());
+        unigramTagger = Counters.add(unigramTagger, result.first());
         trees.addAll(result.second());
       }
     }
@@ -118,7 +118,7 @@ public class AnCoraProcessor {
 
     while (wrapper.peek()) {
       Pair<TwoDimensionalCounter<String, String>, List<Tree>> result = wrapper.poll();
-      Counters.addInPlace(unigramTagger, result.first());
+      unigramTagger = Counters.add(unigramTagger, result.first());
       trees.addAll(result.second());
     }
 
