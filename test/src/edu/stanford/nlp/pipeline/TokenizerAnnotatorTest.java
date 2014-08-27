@@ -30,7 +30,7 @@ public class TokenizerAnnotatorTest extends TestCase {
 
   public void testNewVersion() {
     Annotation ann = new Annotation(text);
-    Annotator annotator = new TokenizerAnnotator();
+    Annotator annotator = new TokenizerAnnotator("en");
     annotator.annotate(ann);
     Iterator<String> it = tokenWords.iterator();
     for (CoreLabel word : ann.get(CoreAnnotations.TokensAnnotation.class)) {

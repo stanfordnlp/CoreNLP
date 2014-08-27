@@ -88,9 +88,8 @@ public class TokenizerAnnotator implements Annotator {
 								 language.equals(GERMAN) || language.equals(DE)) {
 				return English;
 
-			} else {
-				return Unknown;
 			}
+			return Unknown;
 		}
 	} // end enum TokenizerType
 
@@ -114,11 +113,25 @@ public class TokenizerAnnotator implements Annotator {
   }
     
 	public TokenizerAnnotator(boolean verbose) {
-		this(verbose, new Properties());
-  }
+		this(verbose, EN);
+	}
 
-	public TokenizerAnnotator(boolean verbose, String options) {
-		this(verbose, null, options);
+	public TokenizerAnnotator(String lang) {
+		this(true, lang, null);
+	}
+
+	public TokenizerAnnotator(boolean verbose, String lang) {
+		this(verbose, lang, null);
+	}
+
+	public TokenizerAnnotator(boolean verbose, String lang, String options) {
+    VERBOSE = verbose;
+    Properties props = new Properties();
+    props.setProperty("tokenize.language", lang);
+		System.out.println(props.getProperty("tokenize.language", "banana"));
+
+    TokenizerType type = TokenizerType.getTokenizerType(props);
+    factory = initFactory(type, props, options);
 	}
 
   public TokenizerAnnotator(boolean verbose, Properties props) {
@@ -132,6 +145,7 @@ public class TokenizerAnnotator implements Annotator {
 		}
 
 		TokenizerType type = TokenizerType.getTokenizerType(props);
+		System.err.println(type.name());
 		factory = initFactory(type, props, extraOptions);
 	}
 
@@ -145,8 +159,8 @@ public class TokenizerAnnotator implements Annotator {
 	 * @param type the properties file
 	 * @param extraOptions extra things that should be passed into the tokenizer constructor
 	 */
-	private TokenizerFactory<CoreLabel> initFactory(TokenizerType type, Properties props, String extraOptions) {
-		TokenizerFactory<CoreLabel> factory = null;
+	private TokenizerFactory<CoreLabel> initFactory(TokenizerType type, Properties props, String extraOptions) throws IllegalArgumentException{
+		TokenizerFactory<CoreLabel> factory;
 		String options = props.getProperty("tokenize.options", null);
 
 		// set it to the equivalent of both extraOptions and options, unless both are nulls
@@ -160,7 +174,6 @@ public class TokenizerAnnotator implements Annotator {
 		if (options == null) {
 			options = type.getDefaultOptions();
 		}
-		try {
 			switch(type) {
 			case Spanish:
 				factory = SpanishTokenizer.factory(new CoreLabelTokenFactory(), options);
@@ -178,19 +191,21 @@ public class TokenizerAnnotator implements Annotator {
 				factory = PTBTokenizer.factory(new CoreLabelTokenFactory(), options);
 				break;
 			default:
-				throw new IllegalArgumentException("No valid tokenizer type provided.");
-			}
+				throw new IllegalArgumentException("No valid tokenizer type provided.\n" +
+																					 "Use -tokenize.language, -tokenize.class, or -tokenize.whitespace \n" +
+																					 "to specify a tokenizer.");
+		 
 		}
-		catch (IllegalArgumentException e) {
+		/*		catch (IllegalArgumentException e) {
 			System.err.println("Illegal Argument Exception: " + e.getMessage());
 			System.err.println("Use -tokenize.language, -tokenize.class, or -tokenizer.whitespace \n" +
 												 "to specify a tokenizer type.");
 			System.err.println("Using PTBTokenizer as default tokenizer.");
-		}
+			}*/
 
-		if (factory == null) {
+		/*		if (factory == null) {
 			factory = PTBTokenizer.factory(new CoreLabelTokenFactory(), options);
-		}
+			}*/
 		return factory;
 	}
 
