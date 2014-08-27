@@ -403,6 +403,14 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       if (split == null)
         continue;
 
+      // Retrieve some context for the pronoun disambiguator: take the
+      // matched clause and walk (at most) two constituents up
+      StringBuilder clauseYieldBuilder = new StringBuilder();
+      for (Label label : matcher.getNode("clause").yield())
+        clauseYieldBuilder.append(label.value()).append(" ");
+      String clauseYield = clauseYieldBuilder.toString();
+      clauseYield = clauseYield.substring(0, clauseYield.length() - 1);
+
       // Insert clitic pronouns as leaves of pronominal phrases which are
       // siblings of `target`. Iterate in reverse order since pronouns are
       // attached to immediate right of `target`
@@ -410,9 +418,25 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       for (int i = pronouns.size() - 1; i >= 0; i--) {
         String pronoun = pronouns.get(i);
 
-        String newTreeStr = SpanishPronounDisambiguator.isAmbiguous(pronoun)
-          ? "(PRONOUN? (pp000000 %s))"
-          : "(sn (grup.nom (pp000000 %s)))";
+        String newTreeStr = null;
+        if (SpanishPronounDisambiguator.isAmbiguous(pronoun)) {
+          SpanishPronounDisambiguator.PersonalPronounType type =
+            SpanishPronounDisambiguator.disambiguatePersonalPronoun(split, i, clauseYield);
+
+          switch (type) {
+            case OBJECT:
+              newTreeStr = "(sn (grup.nom (pp000000 %s)))"; break;
+            case REFLEXIVE:
+              newTreeStr = "(morfema.pronominal (pp000000 %s))"; break;
+            case UNKNOWN:
+              // Mark for manual disambiguation
+              newTreeStr = "(PRONOUN? (pp000000 %s))"; break;
+          }
+        } else {
+          // Unambiguous clitic pronouns are all indirect / direct
+          // object pronouns.. convenient!
+          newTreeStr = "(sn (grup.nom (pp000000 %s)))";
+        }
 
         String patternString = "[insert " + String.format(newTreeStr, pronoun) + " $- target]";
         TsurgeonPattern insertPattern = Tsurgeon.parseOperation(patternString);
