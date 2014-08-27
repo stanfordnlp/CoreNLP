@@ -4,7 +4,6 @@ package edu.stanford.nlp.semgraph.semgrex;
 // all generated classes are in this package
 
 //imports
-import java.io.StringReader;
 import java.util.*;
 import edu.stanford.nlp.util.Generics;
 
