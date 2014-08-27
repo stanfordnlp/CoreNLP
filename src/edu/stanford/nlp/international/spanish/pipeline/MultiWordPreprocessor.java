@@ -204,7 +204,6 @@ public final class MultiWordPreprocessor {
      */
     private static final Set<String> actuallyNames = new HashSet<String>() {{
       add("A");
-      add("Al");
       add("Contra");
       add("Gracias"); // interjection
       add("Jesús"); // interjection
@@ -213,16 +212,31 @@ public final class MultiWordPreprocessor {
       add("Van"); // verb
     }};
 
+    private static final Pattern otherNamePattern = Pattern.compile("\\b(Al\\w+|A[^l]\\w*|[B-Z]\\w+)");
+
     public static String getOverrideTag(String word, String containingPhrase) {
       if (containingPhrase == null)
         return null;
 
       if (word.equalsIgnoreCase("este") && !containingPhrase.startsWith(word))
         return "np00000";
-      else if (word.equals("Al") && containingPhrase.startsWith("Al fin"))
-        return "sp000";
       else if (word.equals("Sin") && containingPhrase.startsWith("Sin embargo"))
         return "sp000";
+      else if (word.equals("contra") && containingPhrase.startsWith("en contra"))
+        return "nc0s000";
+      else if (word.equals("DEL"))
+        // Uses of "Del" in corpus are proper nouns, but uses of "DEL" are
+        // prepositions.. convenient for our purposes
+        return "sp000";
+
+      if (word.equals("Al")) {
+        // "Al" is sometimes a part of name phrases: Arabic names, Al Gore, etc.
+        // Mark it a noun if its containing phrase has some other capitalized word
+        if (otherNamePattern.matcher(containingPhrase).find())
+          return "np00000";
+        else
+          return "sp000";
+      }
 
       if (actuallyNames.contains(word))
         return "np00000";
@@ -230,6 +244,8 @@ public final class MultiWordPreprocessor {
       if (word.equals("sino") && containingPhrase.endsWith(word))
         return "nc0s000";
       else if (word.equals("mañana"))
+        return "nc0s000";
+      else if (word.equals("frente") && containingPhrase.startsWith("al frente"))
         return "nc0s000";
 
       return null;
