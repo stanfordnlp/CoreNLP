@@ -1,6 +1,11 @@
 package edu.stanford.nlp.international.spanish;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.TestCase;
+
+import edu.stanford.nlp.util.Pair;
 
 /**
  * @author Jon Gauthier
@@ -25,7 +30,26 @@ public class SpanishVerbStripperTest extends TestCase {
     assertTrue(SpanishVerbStripper.isStrippable("vestíos"));
     assertTrue(SpanishVerbStripper.isStrippable("cómprelos"));
     assertTrue(SpanishVerbStripper.isStrippable("házmelo"));
-    
+  }
+
+  @SuppressWarnings("unchecked")
+  public static void testSeparatePronouns() {
+    List<String> pronouns = new ArrayList<String>();
+    pronouns.add("me");
+    assertEquals(new Pair("decir", pronouns),
+                 SpanishVerbStripper.separatePronouns("decirme"));
+
+    pronouns.clear();
+    pronouns.add("se");
+    pronouns.add("lo");
+    assertEquals(new Pair("contando", pronouns),
+                 SpanishVerbStripper.separatePronouns("contándoselo"));
+
+    // Looks like a verb with a clitic pronoun.. but it's not! There are
+    // a *lot* of these in Spanish.
+    assertNull(SpanishVerbStripper.separatePronouns("címbalo"));
+
+    assertNull(SpanishVerbStripper.separatePronouns("contando"));
   }
 
   public static void testStripVerb() {
