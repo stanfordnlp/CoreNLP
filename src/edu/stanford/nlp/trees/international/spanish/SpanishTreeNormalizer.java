@@ -227,7 +227,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       // constituent words
       List<Tree> newNodes = new ArrayList<Tree>(words.length);
       for (int j = 0; j < words.length; j++) {
-        String word = words[j];
+        String word = normalizeTerminal(words[j]);
 
         Tree newLeaf = tf.newLeaf(word);
         if (newLeaf.label() instanceof HasWord)
