@@ -156,6 +156,10 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
                "[move vb >0 vbFoot]" +
                "[delete queTag]" +
                "[delete vbContainer]"),
+
+    // Remove date lead-ins
+    new Pair("sentence <<, (sn=sn <, (/^grup\\.w$/ $+ fp))",
+             "delete sn"),
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> cleanup

@@ -534,6 +534,5 @@ public class MultiWordTreeExpander {
 // sólo . (los . espectadores) ("miles" has a ROOT tag???)
 // sentido . generoso (conmigo)
 // estrené . Lisboa (conmigo)
-// Nada . (que . ver) (infinitiu < grup.pron construction is .. wrong)
 // Fermina . Daza ("tiene nada que ver")
 // plantillas .. (temporada . pasada) ("Nada que ver" weird parse)
