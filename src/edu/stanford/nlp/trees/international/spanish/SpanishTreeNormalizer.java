@@ -4,13 +4,12 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.international.spanish.SpanishPronounDisambiguator;
+import edu.stanford.nlp.international.spanish.process.AnCoraPronounDisambiguator;
 import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
@@ -461,9 +460,9 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
         String pronoun = pronouns.get(i);
 
         String newTreeStr = null;
-        if (SpanishPronounDisambiguator.isAmbiguous(pronoun)) {
-          SpanishPronounDisambiguator.PersonalPronounType type =
-            SpanishPronounDisambiguator.disambiguatePersonalPronoun(split, i, clauseYield);
+        if (AnCoraPronounDisambiguator.isAmbiguous(pronoun)) {
+          AnCoraPronounDisambiguator.PersonalPronounType type =
+            AnCoraPronounDisambiguator.disambiguatePersonalPronoun(split, i, clauseYield);
 
           switch (type) {
             case OBJECT:
