@@ -391,12 +391,13 @@ APOS = ['\u0092\u2019]|&apos;
 APOSETCETERA = {APOS}|[\u0091\u2018\u201B]
 
 /* Includes words with numbers, eg. sp3 */
+WORD2 = {WORD}(({NUM}|{APOSETCETERA}){WORD}?)+{WORD}
+
 /* Includes words with apostrophes in the middle (french, english,
    catalan loanwords) */
-WORD2 = {WORD}(({NUM}|{APOSETCETERA}){WORD}?)+{WORD}
 WORD3 = {NUM}?({WORD}|{WORD2}){NUM}?
 
-/* all types of "words" */
+/* all types of "words" (word, word2, word3) */
 ANYWORD = (({WORD})|({WORD2})|({WORD3}))
 
 /* common units abbreviated - to differentiate between WORD_NUM
@@ -412,20 +413,38 @@ COMPOUND_NOSPLIT = {PREFIX}{ANYWORD}
 COMPOUND = {WORD}({HYPHEN}{WORD})+
 
 /* Spanish enclitic pronouns attached at the end of infinitive, gerund,
- * and imperative verbs */
+ * and imperative verbs should be split:
+ * 
+ * cómpremelos => cómpre + me + los (buy + me + it)
+ * házmelo => ház + me + lo (do it (for) me)
+ * Escribámosela => Escribámo + se + la (write her it)
+ *
+ */
+
+/* Patterns to help identify the various types of verb+enclitics */
 OS = os(l[oa]s?)?
 ATTACHED_PRON = ((me|te|se|nos|les?)(l[oa]s?)?)|l[oa]s?
 VB_IRREG = d[ií]|h[aá]z|v[eé]|p[oó]n|s[aá]l|sé|t[eé]n|v[eé]n
 VB_REG = {WORD}([aeiáéí]r|[áé]ndo|[aeáé]n?|[aeáé]mos?)
 VB_PREF = {VB_IRREG}|({VB_REG})
 
-/* Handles second person plural imperatives */
+/* Handles second person plural imperatives:
+ * 
+ * Sentaos => Senta + os (seat + yourselves)
+ * Vestíos => Vestí + os (dress + yourselves)
+ */
 VB_2PP_PRON = ({CHAR}*)[aeiáéí]((d{ATTACHED_PRON})|{OS})
 
-/* Handles all other verbs with attached pronouns */
+/* Handles all other verbs with attached pronouns  */
 VB_ATTACHED_PRON = ({VB_PREF}){ATTACHED_PRON}|{OS}
 
-/* Spanish contractions */
+/* Spanish contractions:
+ *
+ * al => a + l (to the)
+ * del => de + l (of the)
+ * conmigo/contigo/consigo => con + migo/tigo/sigo (with me/you/them)
+ *
+ */
 CONTRACTION = del|al|con[mts]igo
 
 /* URLs, email, and Twitter handles
