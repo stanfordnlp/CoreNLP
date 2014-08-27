@@ -41,7 +41,8 @@ public class HamleDTCorrector {
 
     List<String> ret = new ArrayList<String>();
 
-    List<CoreLabel> hamledtSentence = null, ancoraSentence = null;
+    List<CoreLabel> hamledtSentence = hamledtSentences.next(),
+      ancoraSentence = ancoraSentences.next();
     for (; hamledtSentences.hasNext() && ancoraSentences.hasNext();
       hamledtSentence = hamledtSentences.next(), ancoraSentence = ancoraSentences.next()) {
 
