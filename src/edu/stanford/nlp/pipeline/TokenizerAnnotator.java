@@ -38,8 +38,7 @@ public class TokenizerAnnotator implements Annotator {
 	 * and add a clause in getTokenizerType to identify it.
 	 */
 	public enum TokenizerType {
-		Unspecified("invertible,ptb3Escaping=true"),
-		Unknown (""),
+		Unknown ("invertible,ptb3Escaping=true"),
 		Spanish ("invertible,ptb3Escaping=true,splitAll=true"),
 		English ("invertible,ptb3Escaping=true"),
 		German ("invertible,ptb3Escaping=true"),
@@ -61,19 +60,11 @@ public class TokenizerAnnotator implements Annotator {
 			return defaultOptions;
 		}
 
-		/***
+		/**
 		 * Get TokenizerType based on what's in the properties
 		 */
 		public static TokenizerType getTokenizerType(Properties props) {
 			String tokClass = props.getProperty("tokenize.class", null);
-			boolean whitespace = Boolean.valueOf(props.getProperty("tokenize.whitespace", "false"));
-			String language = props.getProperty("tokenize.language", null);
-
-			// nothing specified
-			if (tokClass == null && whitespace == false && language == null) {
-				return Unspecified;
-			}
-
 			if (tokClass != null) {
 				if (tokClass.equals("SpanishTokenizer")) {
 					return Spanish;
@@ -84,35 +75,27 @@ public class TokenizerAnnotator implements Annotator {
 				} else if (tokClass.equals("WhitespaceTokenizer")) {
 					return Whitespace;
 				}
-				else {
-					System.err.println("TokenizerAnnotator: unknown tokenize.class property");
-				}
 			}
 
-			if(whitespace) {
+			if(Boolean.valueOf(props.getProperty("tokenize.whitespace", "false"))) {
 				return Whitespace;
 			}
 
-		  if(language != null) {
-				if (language.equals(SPANISH) || language.equals(ES)) {
-					return Spanish;
-					
-				} else if (language.equals(FRENCH) || language.equals(FR)) {
-					return French;
-					
-				} else if (language.equals(ENGLISH) || language.equals(EN) ||
-									 language.equals(GERMAN) || language.equals(DE)) {
-					return English;
-					
-				} else if (language.equals(WHITESPACE)) {
-					return Whitespace;
+			String language = props.getProperty("tokenize.language", "").toLowerCase();
 
-        } else {
-					System.err.println("TokenizerAnnotator: unknown tokenize.language property");
-				}
+			if (language.equals(SPANISH) || language.equals(ES)) {
+				return Spanish;
+
+			} else if (language.equals(FRENCH) || language.equals(FR)) {
+				return French;
+
+			} else if (language.equals(ENGLISH) || language.equals(EN) ||
+								 language.equals(GERMAN) || language.equals(DE)) {
+				return English;
+
+			} else if (language.equals(WHITESPACE)) {
+				return Whitespace;
 			}
-				
-			// specified but specified wrongly
 			return Unknown;
 		}
 	} // end enum TokenizerType
@@ -133,13 +116,13 @@ public class TokenizerAnnotator implements Annotator {
 
 	// CONSTRUCTORS
     
-	public TokenizerAnnotator() {
+/*	public TokenizerAnnotator() {
 		this(true);
   }
     
 	public TokenizerAnnotator(boolean verbose) {
-		this(verbose, EN);
-  } 
+		this(verbose, new Properties());
+  } */
 
 	public TokenizerAnnotator(String lang) {
 		this(true, lang, null);
@@ -152,9 +135,8 @@ public class TokenizerAnnotator implements Annotator {
 	public TokenizerAnnotator(boolean verbose, String lang, String options) {
     VERBOSE = verbose;
     Properties props = new Properties();
-		if (lang != null) {
-			props.setProperty("tokenize.language", lang);
-		}
+    props.setProperty("tokenize.language", lang);
+		System.out.println(props.getProperty("tokenize.language", "banana"));
 
     TokenizerType type = TokenizerType.getTokenizerType(props);
     factory = initFactory(type, props, options);
@@ -164,14 +146,15 @@ public class TokenizerAnnotator implements Annotator {
     this(verbose, props, null);
   }
 
-	public TokenizerAnnotator(boolean verbose, Properties props, String options) {
+	public TokenizerAnnotator(boolean verbose, Properties props, String extraOptions) {
 		VERBOSE = verbose;
 		if (props == null) {
 			props = new Properties();
 		}
 
 		TokenizerType type = TokenizerType.getTokenizerType(props);
-		factory = initFactory(type, props, options);
+		System.err.println(type.name());
+		factory = initFactory(type, props, extraOptions);
 	}
 
 	/** 
@@ -203,30 +186,34 @@ public class TokenizerAnnotator implements Annotator {
 			case Spanish:
 				factory = SpanishTokenizer.factory(new CoreLabelTokenFactory(), options);
 				break;
-
 			case French:
 				factory = FrenchTokenizer.factory(new CoreLabelTokenFactory(), options);
 				break;
-
 			case Whitespace:
 				boolean eolIsSignificant = Boolean.valueOf(props.getProperty(EOL_PROPERTY, "false"));
 				eolIsSignificant = eolIsSignificant || Boolean.valueOf(props.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
 				factory = new WhitespaceTokenizer.WhitespaceTokenizerFactory<CoreLabel> (new CoreLabelTokenFactory(), eolIsSignificant);
 				break;
-
-			case Unspecified:
-				System.err.println("TokenizerAnnotator: No tokenizer type provided. Defaulting to PTBTokenizer.");
 			case English: 
 			case German:
 				factory = PTBTokenizer.factory(new CoreLabelTokenFactory(), options);
 				break;
-				
 			default:
 				throw new IllegalArgumentException("No valid tokenizer type provided.\n" +
 																					 "Use -tokenize.language, -tokenize.class, or -tokenize.whitespace \n" +
 																					 "to specify a tokenizer.");
 		 
 		}
+		/*		catch (IllegalArgumentException e) {
+			System.err.println("Illegal Argument Exception: " + e.getMessage());
+			System.err.println("Use -tokenize.language, -tokenize.class, or -tokenizer.whitespace \n" +
+												 "to specify a tokenizer type.");
+			System.err.println("Using PTBTokenizer as default tokenizer.");
+			}*/
+
+		/*		if (factory == null) {
+			factory = PTBTokenizer.factory(new CoreLabelTokenFactory(), options);
+			}*/
 		return factory;
 	}
 
