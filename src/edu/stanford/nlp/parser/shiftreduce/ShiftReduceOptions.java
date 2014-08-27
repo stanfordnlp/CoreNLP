@@ -69,6 +69,12 @@ public class ShiftReduceOptions extends Options {
     } else if (args[i].equalsIgnoreCase("-nosaveIntermediateModels")) {
       trainOptions().saveIntermediateModels = false;
       i++;
+    } else if (args[i].equalsIgnoreCase("-oracleShiftToBinary")) {
+      trainOptions().oracleShiftToBinary = true;
+      i++;
+    } else if (args[i].equalsIgnoreCase("-oracleBinaryToShift")) {
+      trainOptions().oracleBinaryToShift = true;
+      i++;
     } else if (args[i].equalsIgnoreCase("-recordBinarized")) {
       testOptions().recordBinarized = args[i + 1];
       i += 2;

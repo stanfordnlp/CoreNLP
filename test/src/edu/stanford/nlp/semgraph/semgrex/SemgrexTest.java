@@ -627,6 +627,7 @@ public class SemgrexTest extends TestCase {
     runTest("{idx:2}", graph, "muffins");
     runTest("{idx:3}", graph, "blueberry");
     runTest("{idx:4}", graph);
+    System.err.println(graph);
   }
 
   public void testLemma() {

@@ -1232,39 +1232,43 @@ public class SemanticGraph implements Serializable {
    */
   @Override
   public String toString() {
+    return toString(IndexedWord.WORD_TAG_FORMAT);
+  }
+
+  public String toString(String wordFormat) {
     Collection<IndexedWord> rootNodes = getRoots();
     if (rootNodes.isEmpty()) {
       // Shouldn't happen, but return something!
-      return toString("readable");
+      return toString(OutputFormat.READABLE);
     }
 
     StringBuilder sb = new StringBuilder();
     Set<IndexedWord> used = Generics.newHashSet();
     for (IndexedWord root : rootNodes) {
-      sb.append("-> ").append(root).append(" (root)\n");
-      recToString(root, sb, 1, used);
+      sb.append("-> ").append(root.toString(wordFormat)).append(" (root)\n");
+      recToString(root, wordFormat, sb, 1, used);
     }
     Set<IndexedWord> nodes = Generics.newHashSet(vertexSet());
     nodes.removeAll(used);
     while (!nodes.isEmpty()) {
       IndexedWord node = nodes.iterator().next();
-      sb.append(node).append("\n");
-      recToString(node, sb, 1, used);
+      sb.append(node.toString(wordFormat)).append("\n");
+      recToString(node, wordFormat, sb, 1, used);
       nodes.removeAll(used);
     }
     return sb.toString();
   }
 
   // helper for toString()
-  private void recToString(IndexedWord curr, StringBuilder sb, int offset, Set<IndexedWord> used) {
+  private void recToString(IndexedWord curr, String wordFormat, StringBuilder sb, int offset, Set<IndexedWord> used) {
     used.add(curr);
     List<SemanticGraphEdge> edges = outgoingEdgeList(curr);
     Collections.sort(edges);
     for (SemanticGraphEdge edge : edges) {
       IndexedWord target = edge.getTarget();
-      sb.append(space(2 * offset)).append("-> ").append(target).append(" (").append(edge.getRelation()).append(")\n");
+      sb.append(space(2 * offset)).append("-> ").append(target.toString(wordFormat)).append(" (").append(edge.getRelation()).append(")\n");
       if (!used.contains(target)) { // recurse
-        recToString(target, sb, offset + 1, used);
+        recToString(target, wordFormat, sb, offset + 1, used);
       }
     }
   }
@@ -1354,12 +1358,16 @@ public class SemanticGraph implements Serializable {
     return StringUtils.join(uncompressedList, " ");
   }
 
+  public enum OutputFormat {
+    LIST, XML, READABLE, RECURSIVE
+  };
+
   /**
    * Returns a String representation of the result of this set of typed
-   * dependencies in a user-specified format. Currently, three formats are
-   * supported:
+   * dependencies in a user-specified format. Currently, four formats are
+   * supported ({@link OutputFormat}):
    * <dl>
-   * <dt>"plain"</dt>
+   * <dt>list</dt>
    * <dd>(Default.) Formats the dependencies as logical relations, as
    * exemplified by the following:
    *
@@ -1369,7 +1377,7 @@ public class SemanticGraph implements Serializable {
    * </pre>
    *
    * </dd>
-   * <dt>"readable"</dt>
+   * <dt>readable</dt>
    * <dd>Formats the dependencies as a table with columns <code>dependent</code>, <code>relation</code>, and <code>governor</code>, as exemplified by the
    * following:
    *
@@ -1379,7 +1387,7 @@ public class SemanticGraph implements Serializable {
    * </pre>
    *
    * </dd>
-   * <dt>"xml"</dt>
+   * <dt>xml</dt>
    * <dd>Formats the dependencies as XML, as exemplified by the following:
    *
    * <pre>
@@ -1394,8 +1402,13 @@ public class SemanticGraph implements Serializable {
    *    &lt;/dep&gt;
    *  &lt;/dependencies&gt;
    * </pre>
-   *
    * </dd>
+   *
+   * <dt>recursive</dt>
+   * <dd>
+   * The default output for {@link toString()}
+   * </dd>
+   *
    * </dl>
    *
    * @param format
@@ -1403,13 +1416,18 @@ public class SemanticGraph implements Serializable {
    * @return a <code>String</code> representation of the typed dependencies in
    *         this <code>GrammaticalStructure</code>
    */
-  public String toString(String format) {
-    if (format != null && format.equals("xml")) {
+  public String toString(OutputFormat format) {
+    switch(format) {
+    case XML:
       return toXMLString();
-    } else if (format != null && format.equals("readable")) {
+    case READABLE:
       return toReadableString();
-    } else {
+    case LIST:
       return toList();
+    case RECURSIVE:
+      return toString();
+    default:
+      throw new IllegalArgumentException("Unsupported format " + format);
     }
   }
 
