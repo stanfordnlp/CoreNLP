@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
@@ -53,7 +54,7 @@ public final class MultiWordPreprocessor {
     private static final Pattern digit = Pattern.compile("\\d+");
     private static final Pattern participle = Pattern.compile("[ai]d[oa]$");
 
-    public static String getTag(String word) {
+    public static String getTag(String word, String containingPhrase) {
       // Exact matches
       if (word.equals("%"))
         return "ft";
@@ -91,23 +92,24 @@ public final class MultiWordPreprocessor {
 
 
   public static void traverseAndFix(Tree t,
+                                    Tree parent,
                                     TwoDimensionalCounter<String, String> pretermLabel,
                                     TwoDimensionalCounter<String, String> unigramTagger,
                                     boolean retainNER) {
     if(t.isPreTerminal()) {
       if(t.value().equals(SpanishTreeNormalizer.MW_TAG)) {
         nMissingPOS++;
-        String word = t.firstChild().value();
-        String tag = (unigramTagger.firstKeySet().contains(word)) ?
-          Counters.argmax(unigramTagger.getCounter(word)) : ManualUWModel.getTag(word);
-        t.setValue(tag);
+
+        String pos = inferPOS(t, parent, unigramTagger);
+        if (pos != null)
+          t.setValue(pos);
       }
 
       return;
     }
 
     for(Tree kid : t.children())
-      traverseAndFix(kid, pretermLabel, unigramTagger, retainNER);
+      traverseAndFix(kid, t, pretermLabel, unigramTagger, retainNER);
 
     // Post-order visit
     if(t.value().startsWith(SpanishTreeNormalizer.MW_PHRASE_TAG)) {
@@ -117,6 +119,29 @@ public final class MultiWordPreprocessor {
       if (phrasalCat != null)
         t.setValue(phrasalCat);
     }
+  }
+
+  /**
+   * Attempt to infer the part of speech of the given preterminal node, which
+   * was created during the expansion of a multi-word token.
+   */
+  private static String inferPOS(Tree t, Tree parent,
+                                 TwoDimensionalCounter<String, String> unigramTagger) {
+    String word = t.firstChild().value();
+    if (unigramTagger.firstKeySet().contains(word))
+      return Counters.argmax(unigramTagger.getCounter(word));
+
+    if (parent == null)
+      return null;
+
+    List<Label> phraseYield = parent.yield();
+    StringBuilder containingPhrase = new StringBuilder();
+    for (Label l : phraseYield)
+      containingPhrase.append(l).append(" ");
+
+    String containingPhraseStr =
+      containingPhrase.toString().substring(0, containingPhrase.length() - 1);
+    return ManualUWModel.getTag(word, containingPhraseStr);
   }
 
   /**
@@ -184,7 +209,7 @@ public final class MultiWordPreprocessor {
 
       int nTrees = 0;
       for(Tree t; (t = tr.readTree()) != null;nTrees++) {
-        traverseAndFix(t, pretermLabel, unigramTagger, retainNER);
+        traverseAndFix(t, null, pretermLabel, unigramTagger, retainNER);
         pw.println(t.toString());
       }
       pw.close();
