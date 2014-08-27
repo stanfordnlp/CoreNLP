@@ -5,6 +5,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.objectbank.ObjectBank;
+import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.*;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.PropertiesUtils;
@@ -50,6 +51,7 @@ public class HamleDTMultiWordClassifier {
     ArrayList<Function<String, List<String>>>() {{
       add(new LeadingVerbFeatureFunction());
       add(new CharacterNGramFeatureFunction(2, 4));
+      add(new WordShapeFeatureFunction());
     }};
 
   private Classifier<String, String> classifier;
@@ -281,6 +283,29 @@ public class HamleDTMultiWordClassifier {
       if (verbs.contains(words[0]))
         return POSITIVE_RET;
       return NEGATIVE_RET;
+    }
+
+  }
+
+  private static class WordShapeFeatureFunction implements Function<String, List<String>> {
+
+    private static final int WORD_SHAPER = WordShapeClassifier.WORDSHAPECHRIS4;
+
+    private static final String FEATURE_PREFIX_WHOLE = "*shape:";
+    private static final String FEATURE_PREFIX_PART = "*shape_prt:";
+
+    @Override
+    public List<String> apply(String mwe) {
+      List<String> features = new ArrayList<String>();
+
+      // One feature for entire MWE shape
+      features.add(FEATURE_PREFIX_WHOLE + WordShapeClassifier.wordShape(mwe, WORD_SHAPER));
+
+      String[] words = mwe.split("_");
+      for (String word : words)
+        features.add(FEATURE_PREFIX_PART + WordShapeClassifier.wordShape(word, WORD_SHAPER));
+
+      return features;
     }
 
   }
