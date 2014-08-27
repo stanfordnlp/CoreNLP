@@ -434,6 +434,8 @@ public final class MultiWordPreprocessor {
     return containingPhrase.toString().substring(0, containingPhrase.length() - 1);
   }
 
+  private static final SpanishVerbStripper verbStripper = new SpanishVerbStripper();
+
   /**
    * Attempt to infer the part of speech of the given preterminal node, which
    * was created during the expansion of a multi-word token.
@@ -453,7 +455,7 @@ public final class MultiWordPreprocessor {
     // Try treating this word as a verb and stripping any clitic
     // pronouns. If the stripped version exists in the unigram
     // tagger, then stick with the verb hypothesis
-    Pair<String, List<String>> strippedVerb = SpanishVerbStripper.separatePronouns(word);
+    Pair<String, List<String>> strippedVerb = verbStripper.separatePronouns(word);
     if (strippedVerb != null && unigramTaggerKeys.contains(strippedVerb.first())) {
       String pos = Counters.argmax(unigramTagger.getCounter(strippedVerb.first()));
       if (pos.startsWith("v"))
