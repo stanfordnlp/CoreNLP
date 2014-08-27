@@ -489,3 +489,7 @@ public class MultiWordTreeExpander {
 // PSC . (/^-$/ . PSOE) ("por lo que respecta")
 // científicos . (americanos . /,/) ("publica o perece")
 // Mediante . gruesas ("en su defecto")
+
+// TODO
+// recogida . (de . firmas) ("teniendo en cuenta")
+// según . Cruells ("haciéndose cargo")
