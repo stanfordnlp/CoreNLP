@@ -62,6 +62,7 @@ public final class MultiWordPreprocessor {
       put("aq0000", "grup.a");
       put("dn0000", "spec");
       put("dt0000", "spec");
+      put("i", "interjeccio");
       put("rg", "grup.adv");
       put("rn", "grup.adv"); // no sólo
       put("vmg0000", "grup.verb");
@@ -79,7 +80,6 @@ public final class MultiWordPreprocessor {
       // New groups (not from AnCora specification)
       put("cc", "grup.cc");
       put("cs", "grup.cs");
-      put("i", "grup.i");
       put("pr000000", "grup.pron");
       put("pt000000", "grup.pron");
       put("px000000", "grup.pron");
