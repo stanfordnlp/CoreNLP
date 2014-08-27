@@ -64,8 +64,7 @@ public class SpanishXMLTreeReader implements TreeReader {
    * @param in The <code>Reader</code>
    */
   public SpanishXMLTreeReader(Reader in, boolean ccTagset) {
-    // TODO custom tree normalization a la French reader?
-    this(in, new LabeledScoredTreeFactory(), new TreeNormalizer());
+    this(in, new LabeledScoredTreeFactory(), new SpanishTreeNormalizer());
   }
 
   /**
