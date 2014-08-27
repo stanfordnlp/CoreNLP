@@ -39,6 +39,18 @@ public class SpanishTreeNormalizerTest extends TestCase {
     // Quotation mark "words" should be separated
     new Pair("(a (b \"cde\"))",
              "(a (MW_PHRASE?_b (MW? \") (MW? cde) (MW? \")))"),
+
+    // Hyphenated expression should be separated, with hyphen retained
+    new Pair("(a (b tecno-pop))",
+             "(a (MW_PHRASE?_b (MW? tecno) (MW? -) (MW? pop)))"),
+
+    // Hyphenated expression with bound morpheme should not be separated
+    new Pair("(a (b co-promotora))",
+             "(a (b co-promotora))"),
+
+    // Don't bork when we see a bound morpheme without following hyphen
+    new Pair("(a (b co) (b promotora))",
+             "(a (b co) (b promotora))"),
   };
 
   public void testMultiWordNormalization() {

@@ -3,8 +3,10 @@ package edu.stanford.nlp.trees.international.spanish;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -212,6 +214,25 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   private static final String WORD_SEPARATORS_DROP = "_";
 
   /**
+   * These bound morphemes should not be separated from the words with
+   * which they are joined by hyphen.
+   */
+  // TODO how to handle clitics? chino-japonés
+  private static final Set<String> hyphenBoundMorphemes = new HashSet<String>() {{
+      add("anti"); // anti-Gil
+      add("co"); // co-promotora
+      add("ex"); // ex-diputado
+      add("meso"); // meso-americano
+      add("neo"); // neo-proteccionismo
+      add("pre"); // pre-presidencia
+      add("pro"); // pro-indonesias
+      add("quasi"); // quasi-unidimensional
+      add("re"); // re-flotamiento
+      add("semi"); // semi-negro
+      add("sub"); // sub-18
+    }};
+
+  /**
    * Return the (single or multiple) words which make up the given
    * token.
    */
@@ -230,15 +251,39 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
     // constituent words
     StringTokenizer splitter = new StringTokenizer(token, WORD_SEPARATORS,
                                                    true);
+    int remainingTokens = splitter.countTokens();
 
     List<String> words = new ArrayList<String>();
+
     while (splitter.hasMoreTokens()) {
       String word = splitter.nextToken();
+      remainingTokens--;
+
       if (word.length() == 1
           && WORD_SEPARATORS_DROP.indexOf(word.charAt(0)) != -1)
         // This is a delimiter that we should drop
         continue;
 
+      if (remainingTokens >= 2 && hyphenBoundMorphemes.contains(word)) {
+        String hyphen = splitter.nextToken();
+        remainingTokens--;
+
+        if (!hyphen.equals("-")) {
+          // Ouch. We expected a hyphen here. Clean things up and keep
+          // moving.
+          words.add(word);
+          words.add(hyphen);
+          continue;
+        }
+
+        String freeMorpheme = splitter.nextToken();
+        remainingTokens--;
+
+        words.add(word + hyphen + freeMorpheme);
+        continue;
+      }
+
+      // Otherwise..
       words.add(word);
     }
 
