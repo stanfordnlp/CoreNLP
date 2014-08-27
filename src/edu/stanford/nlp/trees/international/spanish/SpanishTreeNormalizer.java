@@ -141,6 +141,10 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
     Tree[] preterminals = t.children();
 
     for (int i = 0; i < preterminals.length; i++) {
+      // This particular child is not actually a preterminal --- skip
+      if (!preterminals[i].isPreTerminal())
+        continue;
+
       Tree leaf = preterminals[i].firstChild();
       String leafValue = ((CoreLabel) leaf.label()).value();
 
