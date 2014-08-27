@@ -194,9 +194,9 @@ public final class MultiWordPreprocessor {
         put("Teniendo", "vmg0000");
         put("formaba", "vmii000");
         put("Formabas", "vmii000");
-        put("Forman", "vmii000");
+        put("Forman", "vmip000");
         put("perece", "vmip000");
-        put("PONE", "vmii000");
+        put("PONE", "vmip000");
         put("tardar", "vmn0000");
 
         put("seiscientas", "z0");
@@ -292,6 +292,10 @@ public final class MultiWordPreprocessor {
         return "vmip000";
       else if (word.equals("Sin") && containingPhrase.contains("Jaime"))
         return "np00000";
+      else if (word.equals("di") && containingPhrase.contains("di cuenta"))
+        return "vmis000";
+      else if (word.equals("demos") && containingPhrase.contains("demos cuenta"))
+        return "vmsp000";
 
       if (word.equals("Al")) {
         // "Al" is sometimes a part of name phrases: Arabic names, Al Gore, etc.
@@ -459,10 +463,13 @@ public final class MultiWordPreprocessor {
   private static class POSTieBreaker implements Comparator<String> {
     @Override
     public int compare(String o1, String o2) {
+      boolean firstIsNoun = o1.startsWith("n");
+      boolean secondIsNoun = o2.startsWith("n");
+
       // Prefer nouns over everything
-      if (o1.startsWith("n"))
+      if (firstIsNoun && !secondIsNoun)
         return -1;
-      else if (o2.startsWith("n"))
+      else if (secondIsNoun && !firstIsNoun)
         return 1;
 
       // No other policies at the moment
