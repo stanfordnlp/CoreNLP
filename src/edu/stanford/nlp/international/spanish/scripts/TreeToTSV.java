@@ -39,6 +39,12 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeReaderFactory;
 
+/**
+ * This script converts a PTB tree into TSV suitable for NER classification. The
+ * input is an AnCora treebank file with NER tags, and the output is a TSV file
+ * with tab-seperated word-class pairs, one word per file. These can be used with
+ * the CRFClassifier for training or testing. 
+ */
 public class TreeToTSV {
 
   public static void main(String[] args) {

@@ -21,9 +21,9 @@ public class SpanishVerbStripper {
   //   - Gerunds
   //   - Affirmative imperatives
 
-  private static final String DICT_PATH = "/u/nlp/data/spanish/enclitic-inflections.data";
+  private static final String DEFAULT_DICT = "/u/nlp/data/spanish/enclitic-inflections.data";
 
-  private static HashMap<String, String> dict;
+  private HashMap<String, String> dict;
 
   private static final String PATTERN_ATTACHED_PRONOUNS =
     "(?:(?:(?:[mts]e|n?os|les?)(?:l[oa]s?)?)|l[oa]s?)$";
@@ -50,11 +50,18 @@ public class SpanishVerbStripper {
   private static final Pattern pIrregulars =
     Pattern.compile("^(?:d[ií]|h[aá]z|v[eé]|p[oó]n|s[aá]l|sé|t[eé]n|v[eé]n|(?:id(?=os$)))" + PATTERN_ATTACHED_PRONOUNS);
 
-  static {
+	/**
+	 * Sets up dictionary of valid verbs and their POS info from an input file.
+	 * The input file must be a list of tab-seperated verb-POS pairs, one verb
+	 * per line.
+	 *
+	 * @param dictPath the path to the dictionary file
+	 */  
+  private void setupDictionary(String dictPath) {
     try {
       dict = new HashMap<String, String>();
       BufferedReader br = new BufferedReader(new InputStreamReader(
-        IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(DICT_PATH), "UTF-8"));
+        IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(dictPath), "UTF-8"));
       String line = br.readLine();
       for(; line != null; line = br.readLine()) {
         String[] words = line.trim().split("\\s");
@@ -66,9 +73,9 @@ public class SpanishVerbStripper {
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
     } catch (FileNotFoundException e) {
-      throw new RuntimeException("Could not load Spanish data file " + DICT_PATH);
+      throw new RuntimeException("Could not load Spanish data file " + dictPath);
     } catch (IOException e) {
-      throw new RuntimeException("Could not load Spanish data file " + DICT_PATH);
+      throw new RuntimeException("Could not load Spanish data file " + dictPath);
     }
   }
 
@@ -93,6 +100,16 @@ public class SpanishVerbStripper {
     new Pair(Pattern.compile("ú"), "u")
   };
 
+	// CONSTRUCTORS
+
+	public SpanishVerbStripper() {
+		this(DEFAULT_DICT);
+	}
+
+	public SpanishVerbStripper(String dictPath) {
+		setupDictionary(dictPath);
+	}
+
   /**
    * The verbs in this set have accents in their infinitive forms;
    * don't remove the accents when stripping pronouns!
@@ -110,6 +127,8 @@ public class SpanishVerbStripper {
     "sofreír",
     "sonreír"
   ));
+
+	// STATIC FUNCTIONS
 
   /**
    * Determine if the given word is a verb which needs to be stripped.
@@ -129,11 +148,18 @@ public class SpanishVerbStripper {
     return stripped;
   }
 
-    private static char getCase(String original, char letter) {
-	if (Character.isUpperCase(original.charAt(original.length()-1)))
-	    return Character.toUpperCase(letter);
-	else return Character.toLowerCase(letter);
-    }
+	/**
+	 * Determines the case of the letter as if it had been part of the
+	 * original string
+	 * 
+	 * @param letter The character whose case must be determined
+	 * @param original The string we are modelling the case on
+	 */
+  private static char getCase(String original, char letter) {
+		if (Character.isUpperCase(original.charAt(original.length()-1)))
+			return Character.toUpperCase(letter);
+		else return Character.toLowerCase(letter);
+	}
 
   /**
    * Examines the given verb pair and returns <tt>true</tt> if it is a
@@ -144,27 +170,27 @@ public class SpanishVerbStripper {
    * method will return <tt>true</tt> and modify the pair to be
    * <tt>(sentad, os)</tt>.
    */
-  private static boolean validateVerbPair(Pair<String, List<String>> pair) {
+  private boolean validateVerbPair(Pair<String, List<String>> pair) {
       String stripped = pair.first().toLowerCase();
       
       String firstPron = pair.second().get(0).toLowerCase();
 
       if (dict.containsKey(stripped))
-	  return true;
-
+				return true;
+			
       if (firstPron.matches("os") && dict.containsKey(stripped + 'd')) {
-	  pair.setFirst(pair.first() + getCase(pair.first(), 'd'));
-	  return true;
+				pair.setFirst(pair.first() + getCase(pair.first(), 'd'));
+				return true;
       }
-
+			
       if (firstPron.matches("nos|se") && dict.containsKey(stripped +'s')) {
-          pair.setFirst(pair.first() + getCase(pair.first(), 's'));
-          return true;
+				pair.setFirst(pair.first() + getCase(pair.first(), 's'));
+				return true;
       }
-
+			
       return false;
   }
-
+	
   /**
    * Separate attached pronouns from the given verb.
    *
@@ -200,7 +226,7 @@ public class SpanishVerbStripper {
    *           <tt>null</tt> if no pronouns could be located and
    *           separated.
    */
-  public static Pair<String, List<String>> separatePronouns(String verb) {
+  public Pair<String, List<String>> separatePronouns(String verb) {
     Pair<String, List<String>> separated;
 
     // Try to strip just one pronoun first
@@ -231,7 +257,7 @@ public class SpanishVerbStripper {
    * @return A verb form stripped of attached pronouns, or <tt>null</tt>
    *           if no pronouns were located / stripped.
    */
-  public static String stripVerb(String verb) {
+  public String stripVerb(String verb) {
     Pair<String, List<String>> separated = separatePronouns(verb);
     if (separated != null)
       return separated.first();

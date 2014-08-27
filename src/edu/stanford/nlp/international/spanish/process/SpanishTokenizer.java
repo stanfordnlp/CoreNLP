@@ -325,6 +325,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     sb.append("   -lowerCase     : Apply lowercasing.").append(nl);
     sb.append("   -encoding type : Encoding format.").append(nl);
     sb.append("   -orthoOpts str : Orthographic options (see SpanishLexer.java)").append(nl);
+		sb.append("   -lines         : Keep tokens as space-separated, not line separated.").append(nl);
     return sb.toString();
   }
 
@@ -335,6 +336,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     argOptionDefs.put("lowerCase", 0);
     argOptionDefs.put("encoding", 1);
     argOptionDefs.put("orthoOpts", 1);
+		argOptionDefs.put("lines", 0);
     return argOptionDefs;
   }
 
@@ -368,8 +370,10 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     tf.setOptions("tokenizeNLs");
 
     // Other options
+		final bool lines = options.containsKey("lines");
     final String encoding = options.getProperty("encoding", "UTF-8");
     final boolean toLower = PropertiesUtils.getBool(options, "lowerCase", false);
+		final Locale es = new Locale("es");
 
     // Read the file from stdin
     int nLines = 0;
@@ -386,8 +390,11 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
           printSpace = false;
           System.out.println();
         } else {
-          if (printSpace) System.out.println();
-          String outputToken = toLower ? word.toLowerCase(Locale.FRENCH) : word;
+          if (printSpace) {
+						if (lines) System.out.print(" "); 
+						else System.out.println();
+					}
+          String outputToken = toLower ? word.toLowerCase(es) : word;
           System.out.print(outputToken);
           printSpace = true;
         }
