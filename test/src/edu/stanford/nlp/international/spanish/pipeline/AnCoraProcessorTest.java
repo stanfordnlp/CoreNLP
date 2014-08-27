@@ -2,6 +2,7 @@ package edu.stanford.nlp.international.spanish.pipeline;
 
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.trees.international.spanish.SpanishSplitTreeNormalizer;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer;
 import edu.stanford.nlp.util.Pair;
 import junit.framework.TestCase;
@@ -12,13 +13,16 @@ import java.io.StringReader;
 public class AnCoraProcessorTest extends TestCase {
 
   private static final TreeFactory treeFactory = new LabeledScoredTreeFactory();
-  private static final TreeNormalizer treeNormalizer = new SpanishTreeNormalizer();
+  private static final TreeNormalizer treeNormalizer = new SpanishSplitTreeNormalizer();
 
   private Tree t1;
   private Tree t1First, t1Second;
 
   private Tree t2;
   private Tree t2First, t2Intermediate, t2Second, t2Third;
+
+  private Tree t3;
+  private Tree t3First, t3Intermediate, t3Second, t3Third;
 
   @Override
   public void setUp() {
@@ -585,7 +589,7 @@ public class AnCoraProcessorTest extends TestCase {
                                 "        (sn\n" +
                                 "          (grup.nom (pp000000 me)))\n" +
                                 "        (grup.verb (vmip000 tienen)))\n" +
-                                "      (conj (fp .))\n" +
+                                "      (fp .)\n" +
                                 "      (S\n" +
                                 "        (sn\n" +
                                 "          (grup.nom (pp000000 Yo)))\n" +
@@ -605,7 +609,8 @@ public class AnCoraProcessorTest extends TestCase {
                                 "      (grup.nom (np00000 Al) (np00000 Gore)))\n" +
                                 "    (fp .)))");
 
-    t3Second = readTree("      (S\n" +
+    t3Second = readTree("    (ROOT\n" +
+                          "      (sentence\n" +
                           "        (S\n" +
                           "          (conj (cs Si))\n" +
                           "          (grup.verb (vmip000 quieren))\n" +
@@ -622,10 +627,30 @@ public class AnCoraProcessorTest extends TestCase {
                           "          (grup.adv (rg aquí)))\n" +
                           "        (sn\n" +
                           "          (grup.nom (pp000000 me)))\n" +
-                          "        (grup.verb (vmip000 tienen)))\n" +
-                          "      (conj (fp .))");
+                          "        (grup.verb (vmip000 tienen))\n" +
+                          "      (fp .)))");
 
-    t3Third = Trees.readTree("");
+    t3Third = Trees.readTree("(ROOT\n" +
+                               "  (sentence\n" +
+                               "    (S\n" +
+                               "      (S\n" +
+                               "        (sn\n" +
+                               "          (grup.nom (pp000000 Yo)))\n" +
+                               "        (grup.verb (vmip000 estoy))\n" +
+                               "        (S\n" +
+                               "          (participi (aq0000 dispuesto))\n" +
+                               "          (sp\n" +
+                               "            (prep (sp000 a))\n" +
+                               "            (S\n" +
+                               "              (infinitiu (vmn0000 hacer))\n" +
+                               "              (sn\n" +
+                               "                (grup.nom (pp000000 lo)))))))\n" +
+                               "      (fe \"))\n" +
+                               "    (fc ,)\n" +
+                               "    (grup.verb (vmis000 afirmó))\n" +
+                               "    (sn\n" +
+                               "      (grup.nom (np00000 Al) (np00000 Gore)))\n" +
+                               "    (fp .)))\n");
   }
 
   public void testFindSplitPoint() {
@@ -666,6 +691,25 @@ public class AnCoraProcessorTest extends TestCase {
     temp = t2Intermediate.deepCopy();
     splitPoint = AnCoraProcessor.findSplitPoint(temp);
     expectedSplit = new Pair<Tree, Tree>(t2Second, t2Third);
+    split = AnCoraProcessor.split(temp, splitPoint);
+
+    assertEquals(expectedSplit.first(), split.first());
+    assertEquals(expectedSplit.second(), split.second());
+  }
+
+  // Some AnCora trees hold periods underneath "conj" constituents.. I guess this makes some sense
+  public void testSplitThreeSentencesWithConj() {
+    Tree temp = t3.deepCopy();
+    Tree splitPoint = AnCoraProcessor.findSplitPoint(temp);
+    Pair<Tree, Tree> expectedSplit = new Pair<Tree, Tree>(t3First, t3Intermediate);
+    Pair<Tree, Tree> split = AnCoraProcessor.split(temp, splitPoint);
+
+    assertEquals(expectedSplit.first(), split.first());
+    assertEquals(expectedSplit.second(), split.second());
+
+    temp = t3Intermediate.deepCopy();
+    splitPoint = AnCoraProcessor.findSplitPoint(temp);
+    expectedSplit = new Pair<Tree, Tree>(t3Second, t3Third);
     split = AnCoraProcessor.split(temp, splitPoint);
 
     assertEquals(expectedSplit.first(), split.first());

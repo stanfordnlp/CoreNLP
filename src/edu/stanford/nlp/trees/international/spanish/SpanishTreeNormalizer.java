@@ -160,6 +160,10 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     // Remove date lead-ins
     new Pair("sentence <<, (sn=sn <, (/^grup\\.w$/ $+ fp))",
              "delete sn"),
+
+    // Shed "conj" parents of periods in the middle of trees so that
+    // our splitter can identify sentence boundaries properly
+    new Pair("conj=conj <: fp=fp", "replace conj fp"),
   };
 
   private static final List<Pair<TregexPattern, TsurgeonPattern>> cleanup
