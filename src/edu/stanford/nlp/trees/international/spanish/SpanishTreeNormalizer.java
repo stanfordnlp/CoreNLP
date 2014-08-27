@@ -49,6 +49,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
 
   private static final Map<String, String> spellingFixes = new HashMap<String, String>() {{
       put("jucio", "juicio"); // 4800_2000406.tbf-5
+      put("reirse", "reírse"); // 140_20011102.tbf-13
       put("tambien", "también"); // 41_19991002.tbf-8
 
       // Hack: these aren't exactly spelling mistakes, but we need to
