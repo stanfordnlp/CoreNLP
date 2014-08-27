@@ -18,6 +18,7 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreeNormalizer;
+import edu.stanford.nlp.util.Filter;
 
 /**
  * Normalize trees read from the AnCora Spanish corpus.
@@ -35,11 +36,27 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
    */
   public static final String MW_PHRASE_TAG = "MW_PHRASE?";
 
-  private static Map<String, String> spellingFixes = new HashMap<String, String>() {{
+  public static final String EMPTY_LEAF_VALUE = "=NONE=";
+
+  private static final Map<String, String> spellingFixes = new HashMap<String, String>() {{
       put("jucio", "juicio"); // 4800_2000406.tbf-5
       put("tambien", "también"); // 41_19991002.tbf-8
     }};
 
+  /**
+   * A filter which rejects preterminal nodes that contain "empty" leaf
+   * nodes.
+   */
+  private static final Filter<Tree> emptyFilter = new Filter<Tree>() {
+    public boolean accept(Tree tree) {
+      if (tree.isPreTerminal()
+          && tree.firstChild().value().equals(EMPTY_LEAF_VALUE))
+        return false;
+      return true;
+    }
+  };
+
+  // Customization
   private boolean simplifiedTagset;
   private boolean aggressiveNormalization;
 
@@ -51,6 +68,9 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
 
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
+    // First filter out nodes we don't like
+    tree = tree.prune(emptyFilter);
+
     // Counter for part-of-speech statistics
     TwoDimensionalCounter<String, String> unigramTagger =
       new TwoDimensionalCounter<String, String>();

@@ -63,8 +63,6 @@ public class SpanishXMLTreeReader implements TreeReader {
   private static final String ATTR_ELLIPTIC = "elliptic";
   private static final String ATTR_PUNCT = "punct";
 
-  private static final String EMPTY_LEAF = "=NONE=";
-
   private NodeList sentences;
   private int sentIdx;
 
@@ -197,7 +195,7 @@ public class SpanishXMLTreeReader implements TreeReader {
   private String getWord(Element node) {
     String word = node.getAttribute(ATTR_WORD);
     if (word.equals(""))
-      return EMPTY_LEAF;
+      return SpanishTreeNormalizer.EMPTY_LEAF_VALUE;
 
     return word.trim();
   }
@@ -268,9 +266,9 @@ public class SpanishXMLTreeReader implements TreeReader {
     String constituentStr = eRoot.getNodeName();
 
     List<Tree> kids = new ArrayList<Tree>();
-    Tree leafNode = treeFactory.newLeaf(EMPTY_LEAF);
+    Tree leafNode = treeFactory.newLeaf(SpanishTreeNormalizer.EMPTY_LEAF_VALUE);
     if (leafNode.label() instanceof HasWord)
-      ((HasWord) leafNode.label()).setWord(EMPTY_LEAF);
+      ((HasWord) leafNode.label()).setWord(SpanishTreeNormalizer.EMPTY_LEAF_VALUE);
 
     kids.add(leafNode);
     Tree t = treeFactory.newTreeNode(constituentStr, kids);
