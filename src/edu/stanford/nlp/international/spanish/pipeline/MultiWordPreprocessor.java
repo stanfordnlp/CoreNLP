@@ -58,6 +58,8 @@ public final class MultiWordPreprocessor {
   private static Map<String, String> phrasalCategoryMap = new HashMap<String, String>() {{
       put("ao0000", "grup.a");
       put("aq0000", "grup.a");
+      put("dn0000", "spec");
+      put("dt0000", "spec");
       put("rg", "grup.adv");
       put("rn", "grup.adv"); // no sólo
       put("vmg0000", "grup.verb");

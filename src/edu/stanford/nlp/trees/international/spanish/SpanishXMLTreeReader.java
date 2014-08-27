@@ -185,6 +185,10 @@ public class SpanishXMLTreeReader implements TreeReader {
         // broad inferences
         if (tagName.equals("a")) {
           return "aq0000";
+        } else if (posType.equals("proper")) {
+          return "np00000";
+        } else if (posType.equals("common")) {
+          return "nc0s000";
         }
       }
 

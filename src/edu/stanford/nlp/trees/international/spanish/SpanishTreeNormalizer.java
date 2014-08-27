@@ -73,6 +73,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   private static final Set<String> mergeWithConstituentWhenPossible =
     new HashSet<String>() {{
       add("grup.nom");
+      add("spec");
     }};
 
   // Customization
@@ -267,7 +268,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   /**
    * Characters which may separate words in a single token.
    */
-  private static final String WORD_SEPARATORS = ",-_¡!¿?";
+  private static final String WORD_SEPARATORS = ",-_¡!¿?()";
 
   /**
    * Word separators which should not be treated as separate "words" and
