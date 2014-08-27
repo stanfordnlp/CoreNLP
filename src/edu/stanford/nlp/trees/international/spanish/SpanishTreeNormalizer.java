@@ -97,7 +97,10 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       // noun
       //   retain category, type, number, NER label
       //   drop type, gender, classification
-      return pos.substring(0, 2) + '0' + pos.charAt(3) + "00" + pos.charAt(6);
+
+      // Some tags are randomly missing the NER label..
+      char ner = pos.length() == 7 ? pos.charAt(6) : '0';
+      return pos.substring(0, 2) + '0' + pos.charAt(3) + "00" + ner;
     case 'v':
       // verb
       //   retain category, type, mood, tense
