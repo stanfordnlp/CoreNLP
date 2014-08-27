@@ -102,6 +102,9 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
     annotations.put("-markBaseNPs", new Pair("/^grup\\.nom/ !< (__ < (__ < __))",
                                              new SimpleStringFunction("-base")));
 
+    annotations.put("-markVerbless", new Pair("S|sentence !<< /^(v|participi$)/",
+                                              new SimpleStringFunction("-verbless")));
+
     compileAnnotations(headFinder);
   }
 
@@ -144,6 +147,9 @@ public class SpanishTreebankParserParams extends TregexPoweredTreebankParserPara
 
       // conjunction annotations
       "-markConjTypes",
+
+      // sentence annotations
+      "-markVerbless",
     };
   }
 
