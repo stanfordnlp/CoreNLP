@@ -9,7 +9,7 @@ import java.util.Set;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.Tokenizer;
-import edu.stanford.nlp.util.Timing;
+
 
 /**
  * This is an abstract base class for any annotator class that uses a
@@ -38,7 +38,7 @@ public abstract class TokenizerAnnotator implements Annotator {
   /**
    * Abstract: returns a tokenizer
    */
-  abstract public Tokenizer<CoreLabel> getTokenizer(Reader r);
+  public abstract Tokenizer<CoreLabel> getTokenizer(Reader r);
 
   /**
    * Does the actual work of splitting TextAnnotation into CoreLabels,
@@ -46,11 +46,7 @@ public abstract class TokenizerAnnotator implements Annotator {
    */
   @Override
   public void annotate(Annotation annotation) {
-    Timing timer = null;
-
     if (VERBOSE) {
-      timer = new Timing();
-      timer.start();
       System.err.print("Tokenizing ... ");
     }
 
@@ -64,12 +60,11 @@ public abstract class TokenizerAnnotator implements Annotator {
       // }
       annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
       if (VERBOSE) {
-        timer.stop("done.");
-        System.err.println("output: " + annotation.get(CoreAnnotations.TokensAnnotation.class));
-        System.err.println();
+        System.err.println("done.");
+        System.err.println("Tokens: " + annotation.get(CoreAnnotations.TokensAnnotation.class));
       }
     } else {
-      throw new RuntimeException("unable to find text in annotation: " + annotation);
+      throw new RuntimeException("Tokenizer unable to find text in annotation: " + annotation);
     }
   }
 
@@ -83,4 +78,5 @@ public abstract class TokenizerAnnotator implements Annotator {
   public Set<Requirement> requirementsSatisfied() {
     return Collections.singleton(TOKENIZE_REQUIREMENT);
   }
+
 }

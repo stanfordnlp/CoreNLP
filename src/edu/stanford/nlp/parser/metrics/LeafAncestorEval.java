@@ -28,7 +28,7 @@ import edu.stanford.nlp.util.StringUtils;
  * <p>
  * This implementation assumes that the guess/gold input files are of equal length, and have one tree per
  * line.
- * <p> 
+ * <p>
  * TODO (spenceg): This implementation doesn't insert the "boundary symbols" as described by both
  * Sampson and Clegg. Need to add those.
  *
@@ -64,14 +64,14 @@ public class LeafAncestorEval {
   /**
    * Depth-first (post-order) search through the tree, recording the stack state as the
    * lineage every time a terminal is reached.
-   * 
+   *
    * This implementation uses the Index annotation to store depth. If CoreLabels are
    * not present in the trees (or at least something that implements HasIndex), an exception will result.
-   * 
+   *
    * @param t The tree
    * @return A list of lineages
    */
-  private List<List<CoreLabel>> makeLineages(final Tree t) {
+  private static List<List<CoreLabel>> makeLineages(final Tree t) {
     if(t == null) return null;
 
     ((HasIndex) t.label()).setIndex(0);
@@ -89,7 +89,7 @@ public class LeafAncestorEval {
     while(!treeStack.isEmpty()) {
       Tree node = treeStack.pop();
       int nodeDepth = ((HasIndex) node.label()).index();
-      while(!labelStack.isEmpty() && labelStack.peek().index() != nodeDepth - 1) 
+      while(!labelStack.isEmpty() && labelStack.peek().index() != nodeDepth - 1)
         labelStack.pop();
 
       if(node.isPreTerminal()) {
@@ -174,11 +174,11 @@ public class LeafAncestorEval {
 
   /**
    * Computes Levenshtein edit distance between two lists of labels;
-   * 
+   *
    * @param l1
    * @param l2
    */
-  private int editDistance(final List<CoreLabel> l1, final List<CoreLabel> l2) {
+  private static int editDistance(final List<CoreLabel> l1, final List<CoreLabel> l2) {
     int[][] m = new int[l1.size()+1][l2.size()+1];
     for(int i = 1; i <= l1.size(); i++)
       m[i][0] = i;
@@ -195,7 +195,7 @@ public class LeafAncestorEval {
     return m[l1.size()][l2.size()];
   }
 
-  private String toString(final List<CoreLabel> lineage) {
+  private static String toString(final List<CoreLabel> lineage) {
     StringBuilder sb = new StringBuilder();
     for(CoreLabel cl : lineage) {
       sb.append(cl.value());
@@ -211,7 +211,7 @@ public class LeafAncestorEval {
     double corpusLevel = corpusAvg / corpusNum;
     double sentLevel = sentAvg / sentNum;
     double sentEx = 100.0 * sentExact / sentNum;
-    
+
     if(verbose) {
       Map<Double,List<CoreLabel>> avgMap = new TreeMap<Double,List<CoreLabel>>();
       for (List<CoreLabel> lineage : catAvg.keySet()) {
@@ -243,23 +243,20 @@ public class LeafAncestorEval {
       }
 
       pw.println("============================================================");
-    
+
     } else {
       pw.printf("%s summary: corpus: %.3f sent: %.3f sent-ex: %.2f%n", name,corpusLevel,sentLevel,sentEx);
     }
   }
 
 
-  private static StringBuilder usage = new StringBuilder();
-  static {
-    usage.append(String.format("Usage: java %s [OPTS] goldFile guessFile\n\n",LeafAncestorEval.class.getName()));
-    usage.append("Options:\n");
-    usage.append("  -l lang   : Language name " + Languages.listOfLanguages() + "\n");
-    usage.append("  -y num    : Skip gold trees with yields longer than num.\n");
-    usage.append("  -v        : Verbose output\n");
-  }
+  private static final String USAGE =
+    String.format("Usage: java %s [OPTS] goldFile guessFile%n%nOptions:%n  -l lang   : Language name %s%n" +
+            "  -y num    : Skip gold trees with yields longer than num.%n  -v        : Verbose output%n",
+            LeafAncestorEval.class.getName(),
+            Languages.listOfLanguages());
 
-  private final static int MIN_ARGS = 2;
+  private static final int MIN_ARGS = 2;
 
   //Command line options
   private static boolean VERBOSE = false;
@@ -275,29 +272,29 @@ public class LeafAncestorEval {
     optionArgDefs.put("-l", 1);
     optionArgDefs.put("-v", 0);
   }
-  
+
   private static boolean validateCommandLine(String[] args) {
     Map<String, String[]> argsMap = StringUtils.argsToMap(args,optionArgDefs);
-    
+
     for(Map.Entry<String, String[]> opt : argsMap.entrySet()) {
       String key = opt.getKey();
       if(key == null) {
         continue;
-      
+
       } else if(key.equals("-y")) {
         MAX_GOLD_YIELD = Integer.valueOf(opt.getValue()[0]);
-      
+
       } else if(key.equals("-l")) {
         LANGUAGE = Language.valueOf(opt.getValue()[0]);
-      
+
       } else if(key.equals("-v")) {
         VERBOSE = true;
-      
+
       } else {
         return false;
       }
     }
-    
+
     //Regular arguments
     String[] rest = argsMap.get(null);
     if(rest == null || rest.length != MIN_ARGS) {
@@ -306,10 +303,10 @@ public class LeafAncestorEval {
       goldFile = new File(rest[0]);
       guessFile = new File(rest[1]);
     }
-    
+
     return true;
   }
-  
+
 
   /**
    * Execute with no arguments for usage.
@@ -317,7 +314,7 @@ public class LeafAncestorEval {
   public static void main(String[] args) {
 
     if(!validateCommandLine(args)) {
-      System.err.println(usage);
+      System.err.println(USAGE);
       System.exit(-1);
     }
 
@@ -371,20 +368,21 @@ public class LeafAncestorEval {
         skippedGuessTrees++;
         continue;
       }
-      
+
       final Tree evalGuess = tc.transformTree(guessTree);
       final Tree evalGold = tc.transformTree(goldTree);
 
       metric.evaluate(evalGuess, evalGold, ((VERBOSE) ? pwOut : null));
     }
-    
+
     if(guessItr.hasNext() || goldItr.hasNext()) {
       System.err.printf("Guess/gold files do not have equal lengths (guess: %d gold: %d)%n.", guessLineId, goldLineId);
     }
-    
+
     pwOut.println("================================================================================");
     if(skippedGuessTrees != 0) pwOut.printf("%s %d guess trees\n", "Unable to evaluate", skippedGuessTrees);
     metric.display(true, pwOut);
     pwOut.close();
   }
+
 }
