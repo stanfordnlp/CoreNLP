@@ -187,6 +187,8 @@ public final class MultiWordPreprocessor {
         put("modos", "ncmp000");
         put("pedazos", "ncmp000");
 
+        put("A", "sps00");
+
         put("amén", "rg"); // amén de
 
         put("Teniendo", "vmg0000");
@@ -197,6 +199,7 @@ public final class MultiWordPreprocessor {
         put("seiscientas", "z0");
         put("trescientas", "z0");
 
+        put("cc", "zu");
         put("km", "zu");
         put("kms", "zu");
       }};
@@ -212,7 +215,6 @@ public final class MultiWordPreprocessor {
      * multi-word tokens)
      */
     private static final Set<String> actuallyNames = new HashSet<String>() {{
-      add("A");
       add("Avenida");
       add("Contra");
       add("Gracias"); // interjection
@@ -224,7 +226,10 @@ public final class MultiWordPreprocessor {
       add("Van"); // verb
     }};
 
+    // Name-looking word that isn't "Al"
     private static final Pattern otherNamePattern = Pattern.compile("\\b(Al\\w+|A[^l]\\w*|[B-Z]\\w+)");
+    // Name-looking word that isn't "A"
+    private static final Pattern otherNamePattern2 = Pattern.compile("\\b(A\\w+|[B-Z]\\w+)");
 
     // Determiners which may also appear as pronouns
     private static final Pattern pPronounDeterminers = Pattern.compile("(tod|otr|un)[oa]s?");
@@ -280,6 +285,9 @@ public final class MultiWordPreprocessor {
         return "nc0s000";
       else if (word.equals("h") && containingPhrase.startsWith("km"))
         return "zu";
+      else if (word.equals("A") && (containingPhrase.contains("-") || containingPhrase.contains(",")
+        || otherNamePattern2.matcher(containingPhrase).find() || containingPhrase.equals("terminal A")))
+        return "np00000";
 
       if (word.equals("Al")) {
         // "Al" is sometimes a part of name phrases: Arabic names, Al Gore, etc.
