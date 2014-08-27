@@ -39,7 +39,10 @@ import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.XMLUtils;
 
 /**
- * A reader for XML format Spanish Treebank files.
+ * A reader for XML format AnCora treebank files.
+ *
+ * This reader makes AnCora-specific fixes; see
+ * {@link #getPOS(Element)}.
  *
  * @author Jon Gauthier
  * @author Spence Green (original French XML reader)
@@ -408,9 +411,9 @@ public class SpanishXMLTreeReader implements TreeReader {
    * Read trees from the given file and output their processed forms to
    * standard output.
    */
-  private static void process(File file, TreeReader tr,
-                              Pattern posPattern, Pattern wordPattern,
-                              boolean plainPrint) throws IOException {
+  public static void process(File file, TreeReader tr,
+                             Pattern posPattern, Pattern wordPattern,
+                             boolean plainPrint) throws IOException {
     Tree t;
     int numTrees = 0, numTreesRetained = 0;
     String canonicalFileName = file.getName().substring(0, file.getName().lastIndexOf('.'));

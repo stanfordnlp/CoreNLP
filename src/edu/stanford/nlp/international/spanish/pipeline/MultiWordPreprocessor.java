@@ -354,7 +354,7 @@ public final class MultiWordPreprocessor {
         return "ncms000";
 
       // Now make an educated guess.
-      System.err.println("No POS tag for " + word);
+      //System.err.println("No POS tag for " + word);
       return "np00000";
     }
   }
@@ -375,7 +375,6 @@ public final class MultiWordPreprocessor {
 
   public static void traverseAndFix(Tree t,
                                     Tree parent,
-                                    TwoDimensionalCounter<String, String> pretermLabel,
                                     TwoDimensionalCounter<String, String> unigramTagger,
                                     boolean retainNER) {
     if(t.isPreTerminal()) {
@@ -393,13 +392,13 @@ public final class MultiWordPreprocessor {
     }
 
     for(Tree kid : t.children())
-      traverseAndFix(kid, t, pretermLabel, unigramTagger, retainNER);
+      traverseAndFix(kid, t, unigramTagger, retainNER);
 
     // Post-order visit
     if(t.value().startsWith(SpanishTreeNormalizer.MW_PHRASE_TAG)) {
       nMissingPhrasal++;
 
-      String phrasalCat = inferPhrasalCategory(t, pretermLabel, retainNER);
+      String phrasalCat = inferPhrasalCategory(t, retainNER);
       if (phrasalCat != null) {
         t.setValue(phrasalCat);
         nFixedPhrasal++;
@@ -458,9 +457,7 @@ public final class MultiWordPreprocessor {
    * Attempt to infer the phrasal category of the given node, which
    * heads words which were expanded from a multi-word token.
    */
-  private static String inferPhrasalCategory(Tree t,
-                                             TwoDimensionalCounter<String, String> pretermLabel,
-                                             boolean retainNER) {
+  private static String inferPhrasalCategory(Tree t, boolean retainNER) {
     String phraseValue = t.value();
 
     // Retrieve the part-of-speech assigned to the original multi-word
@@ -496,22 +493,18 @@ public final class MultiWordPreprocessor {
     StringBuilder sb = new StringBuilder();
     for(Tree kid : t.children())
       sb.append(kid.value()).append(" ");
-
     String posSequence = sb.toString().trim();
-    if(pretermLabel.firstKeySet().contains(posSequence))
-      return Counters.argmax(pretermLabel.getCounter(posSequence));
-    else
-      System.err.println("No phrasal cat for: " + posSequence);
+    System.err.println("No phrasal cat for: " + posSequence);
 
     // Give up.
     return null;
   }
 
   private static void resolveDummyTags(File treeFile,
-                                       TwoDimensionalCounter<String, String> pretermLabel,
                                        TwoDimensionalCounter<String, String> unigramTagger,
                                        boolean retainNER, TreeNormalizer tn) {
     TreeFactory tf = new LabeledScoredTreeFactory();
+    MultiWordTreeExpander expander = new MultiWordTreeExpander();
 
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));
@@ -522,11 +515,11 @@ public final class MultiWordPreprocessor {
 
       int nTrees = 0;
       for(Tree t; (t = tr.readTree()) != null;nTrees++) {
-        traverseAndFix(t, null, pretermLabel, unigramTagger, retainNER);
+        traverseAndFix(t, null, unigramTagger, retainNER);
 
         // Now "decompress" further the expanded trees formed by
         // multiword token splitting
-        t = MultiWordTreeExpander.expandPhrases(t, tn, tf);
+        t = expander.expandPhrases(t, tn, tf);
 
         if (tn != null)
           t = tn.normalizeWholeTree(t, tf);
@@ -545,35 +538,6 @@ public final class MultiWordPreprocessor {
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
-    }
-  }
-
-  static final TregexPattern pMWE = TregexPattern.compile("/^MW/");
-
-  static public void countMWEStatistics(Tree t,
-      TwoDimensionalCounter<String, String> unigramTagger,
-      TwoDimensionalCounter<String, String> labelPreterm,
-      TwoDimensionalCounter<String, String> pretermLabel,
-      TwoDimensionalCounter<String, String> labelTerm,
-      TwoDimensionalCounter<String, String> termLabel)
-  {
-    updateTagger(unigramTagger,t);
-
-    //Count MWE statistics
-    TregexMatcher m = pMWE.matcher(t);
-    while (m.findNextMatchingNode()) {
-      Tree match = m.getMatch();
-      String label = match.value();
-      if(label.equals(SpanishTreeNormalizer.MW_PHRASE_TAG))
-        continue;
-
-      String preterm = Sentence.listToString(match.preTerminalYield());
-      String term = Sentence.listToString(match.yield());
-
-      labelPreterm.incrementCount(label,preterm);
-      pretermLabel.incrementCount(preterm,label);
-      labelTerm.incrementCount(label,term);
-      termLabel.incrementCount(term, label);
     }
   }
 
@@ -630,13 +594,12 @@ public final class MultiWordPreprocessor {
       TreeReader tr = trf.newTreeReader(br);
 
       for(Tree t; (t = tr.readTree()) != null;) {
-        countMWEStatistics(t, unigramTagger,
-                           labelPreterm, pretermLabel, labelTerm, termLabel);
+        updateTagger(unigramTagger, t);
       }
       tr.close(); //Closes the underlying reader
 
       System.out.println("Resolving DUMMY tags");
-      resolveDummyTags(treeFile, pretermLabel, unigramTagger, retainNER,
+      resolveDummyTags(treeFile, unigramTagger, retainNER,
                        normalize ? new SpanishTreeNormalizer(true, false, false) : null);
 
       System.out.println("#Unknown Word Types: " + ManualUWModel.nUnknownWordTypes);
