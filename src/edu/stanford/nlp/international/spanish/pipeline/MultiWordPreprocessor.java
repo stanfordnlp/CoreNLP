@@ -299,6 +299,8 @@ public final class MultiWordPreprocessor {
         return "vmis000";
       else if (word.equals("demos") && containingPhrase.contains("demos cuenta"))
         return "vmsp000";
+      else if ((word.equals("van") || word.equals("den")) && containingPhrase.contains("van den"))
+        return "np00000";
 
       if (word.equals("Al")) {
         // "Al" is sometimes a part of name phrases: Arabic names, Al Gore, etc.
