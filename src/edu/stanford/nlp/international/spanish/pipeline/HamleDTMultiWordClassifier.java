@@ -34,12 +34,6 @@ import java.util.*;
  */
 public class HamleDTMultiWordClassifier {
 
-  private static final List<Function<String, List<String>>> featureFunctions = new
-    ArrayList<Function<String, List<String>>>() {{
-      add(new LeadingVerbFeatureFunction());
-      add(new NGramFeatureFunction(2, 4));
-    }};
-
   private static final NumberFormat nf = new DecimalFormat("0.000");
 
   // Path to FreeLing dictionary
@@ -54,6 +48,12 @@ public class HamleDTMultiWordClassifier {
       dictionary.put(word, pos);
     }
   }
+
+  private static final List<Function<String, List<String>>> featureFunctions = new
+    ArrayList<Function<String, List<String>>>() {{
+      add(new LeadingVerbFeatureFunction());
+      add(new NGramFeatureFunction(2, 4));
+    }};
 
   private Classifier<String, String> classifier;
   private Classifier<String, String> makeClassifier(GeneralDataset<String, String> trainDataset) {
@@ -175,7 +175,9 @@ public class HamleDTMultiWordClassifier {
 
   private static final String USAGE = String.format(
     "Usage: java %s [-train trainFile [-dev devFile] -saveSerialized serializedPath]%n" +
-      "               [-loadSerialized serializedPath -eval evalFile]");
+      "               [-loadSerialized serializedPath -eval evalFile]",
+    HamleDTMultiWordClassifier.class.getName());
+  
   private static Map<String, Integer> argOptionDefs = new HashMap<String, Integer>() {{
     put("train", 1);
     put("dev", 1);
