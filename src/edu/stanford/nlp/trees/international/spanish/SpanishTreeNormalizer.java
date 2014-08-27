@@ -35,7 +35,8 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
 
   private static Map<String, String> spellingFixes = new HashMap<String, String>() {{
       put("jucio", "juicio"); // 4800_2000406.tbf-5
-    }}
+      put("tambien", "también"); // 41_19991002.tbf-8
+    }};
 
   private boolean simplifiedTagset;
   private boolean aggressiveNormalization;
