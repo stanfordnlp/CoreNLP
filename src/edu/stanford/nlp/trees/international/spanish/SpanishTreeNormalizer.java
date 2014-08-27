@@ -95,9 +95,9 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       return pos.substring(0, 3) + "000";
     case 'n':
       // noun
-      //   retain category, type, number
-      //   drop type, gender, classification, other
-      return pos.substring(0, 2) + '0' + pos.charAt(3) + "000";
+      //   retain category, type, number, NER label
+      //   drop type, gender, classification
+      return pos.substring(0, 2) + '0' + pos.charAt(3) + "00" + pos.charAt(6);
     case 'v':
       // verb
       //   retain category, type, mood, tense
