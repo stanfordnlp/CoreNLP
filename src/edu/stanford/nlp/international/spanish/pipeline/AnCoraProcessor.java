@@ -49,11 +49,11 @@ import java.util.concurrent.*;
  */
 public class AnCoraProcessor {
 
-  private List<File> inputFiles;
-  private Properties options;
+  private final List<File> inputFiles;
+  private final Properties options;
 
-  private TwoDimensionalCounter<String, String> unigramTagger;
-  private List<Tree> trees;
+  private final TwoDimensionalCounter<String, String> unigramTagger;
+  private final boolean buildTagger;
 
   @SuppressWarnings("unchecked")
   public AnCoraProcessor(List<File> inputFiles, Properties options)
@@ -66,20 +66,20 @@ public class AnCoraProcessor {
       ObjectInputStream ois = new ObjectInputStream(new FileInputStream(options.getProperty
         ("unigramTagger")));
       unigramTagger = (TwoDimensionalCounter<String, String>) ois.readObject();
+      buildTagger = false;
     } else {
       unigramTagger = new TwoDimensionalCounter<String, String>();
+      buildTagger = true;
     }
   }
 
   public List<Tree> process() throws
     InterruptedException, IOException, ExecutionException {
 
-    trees = new ArrayList<Tree>();
-
     // Each of the following subroutines are multithreaded; there is a bottleneck between the
     // method calls
-    trees = loadTrees();
-    trees = fixMultiWordTokens();
+    List<Tree> trees = loadTrees();
+    trees = fixMultiWordTokens(trees);
 
     return trees;
   }
@@ -104,21 +104,18 @@ public class AnCoraProcessor {
                      new XMLTreeProcessor(trf, encoding), false);
 
     // Set up processing futures
-    for (final File file : inputFiles) {
+    for (final File file : inputFiles)
       wrapper.put(file);
-
-      while (wrapper.peek()) {
-        Pair<TwoDimensionalCounter<String, String>, List<Tree>> result = wrapper.poll();
-        unigramTagger = Counters.add(unigramTagger, result.first());
-        trees.addAll(result.second());
-      }
-    }
 
     wrapper.join();
 
+    List<Tree> trees = new ArrayList<Tree>();
     while (wrapper.peek()) {
       Pair<TwoDimensionalCounter<String, String>, List<Tree>> result = wrapper.poll();
-      unigramTagger = Counters.add(unigramTagger, result.first());
+
+      if (buildTagger)
+        Counters.addInPlace(unigramTagger, result.first());
+
       trees.addAll(result.second());
     }
 
@@ -416,7 +413,8 @@ public class AnCoraProcessor {
    * Fix tree structure, phrasal categories and part-of-speech labels in newly expanded
    * multi-word tokens.
    */
-  private List<Tree> fixMultiWordTokens() throws InterruptedException, ExecutionException {
+  private List<Tree> fixMultiWordTokens(List<Tree> trees)
+    throws InterruptedException, ExecutionException {
     boolean ner = PropertiesUtils.getBool(options, "ner", false);
 
     // Shared resources
