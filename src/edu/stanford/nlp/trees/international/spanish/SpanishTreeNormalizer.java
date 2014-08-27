@@ -73,11 +73,18 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
   // Customization
   private boolean simplifiedTagset;
   private boolean aggressiveNormalization;
+  private boolean retainNER;
 
   public SpanishTreeNormalizer(boolean simplifiedTagset,
-                               boolean aggressiveNormalization) {
+                               boolean aggressiveNormalization,
+                               boolean retainNER) {
+    if (retainNER && !simplifiedTagset)
+      throw new IllegalArgumentException("retainNER argument only valid when " +
+                                         "simplified tagset is used");
+
     this.simplifiedTagset = simplifiedTagset;
     this.aggressiveNormalization = aggressiveNormalization;
+    this.retainNER = retainNER;
   }
 
   @Override
@@ -149,8 +156,7 @@ public class SpanishTreeNormalizer extends TreeNormalizer {
       //   retain category, type, number, NER label
       //   drop type, gender, classification
 
-      // Some tags are randomly missing the NER label..
-      char ner = pos.length() == 7 ? pos.charAt(6) : '0';
+      char ner = retainNER && pos.length() == 7 ? pos.charAt(6) : '0';
       return pos.substring(0, 2) + '0' + pos.charAt(3) + "00" + ner;
     case 'v':
       // verb

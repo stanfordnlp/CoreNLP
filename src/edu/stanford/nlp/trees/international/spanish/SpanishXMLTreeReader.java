@@ -86,8 +86,12 @@ public class SpanishXMLTreeReader implements TreeReader {
 
     stream = new ReaderInputStream(in, tlp.getEncoding());
     treeFactory = new LabeledScoredTreeFactory();
-    treeNormalizer = new SpanishTreeNormalizer(simplifiedTagset,
-                                               aggressiveNormalization);
+    treeNormalizer =
+      new SpanishTreeNormalizer(simplifiedTagset,
+                                aggressiveNormalization,
+                                true // retain NER information in
+                                     // preterminals
+                                );
 
     DocumentBuilder parser = XMLUtils.getXmlParser();
     try {

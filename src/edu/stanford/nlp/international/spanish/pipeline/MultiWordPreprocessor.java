@@ -9,7 +9,10 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
+import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeFactory;
+import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.international.spanish.SpanishTreeReaderFactory;
@@ -364,7 +367,8 @@ public final class MultiWordPreprocessor {
   private static void resolveDummyTags(File treeFile,
                                        TwoDimensionalCounter<String, String> pretermLabel,
                                        TwoDimensionalCounter<String, String> unigramTagger,
-                                       boolean retainNER) {
+                                       boolean retainNER, TreeNormalizer tn) {
+    TreeFactory tf = new LabeledScoredTreeFactory();
 
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));
@@ -376,8 +380,13 @@ public final class MultiWordPreprocessor {
       int nTrees = 0;
       for(Tree t; (t = tr.readTree()) != null;nTrees++) {
         traverseAndFix(t, null, pretermLabel, unigramTagger, retainNER);
+
+        if (tn != null)
+          t = tn.normalizeWholeTree(t, tf);
+
         pw.println(t.toString());
       }
+
       pw.close();
       tr.close();
 
@@ -428,7 +437,8 @@ public final class MultiWordPreprocessor {
                             MultiWordPreprocessor.class.getName()));
     sb.append("Options:").append(nl);
     sb.append("   -help: Print this message").append(nl);
-    sb.append("   -ner: Retain NER information in tree constituents").append(nl);
+    sb.append("   -ner: Retain NER information in tree constituents (pre-pre-terminal nodes)").append(nl);
+    sb.append("   -normalize {true, false}: Run the Spanish tree normalizer (non-aggressive) on the output of the main routine (true by default)").append(nl);
     return sb.toString();
   }
 
@@ -437,6 +447,7 @@ public final class MultiWordPreprocessor {
     argOptionDefs = Generics.newHashMap();
     argOptionDefs.put("help", 0);
     argOptionDefs.put("ner", 0);
+    argOptionDefs.put("normalize", 1);
   }
 
   /**
@@ -451,6 +462,7 @@ public final class MultiWordPreprocessor {
     }
 
     boolean retainNER = PropertiesUtils.getBool(options, "ner", false);
+    boolean normalize = PropertiesUtils.getBool(options, "normalize", true);
 
     final File treeFile = new File(options.getProperty(""));
     TwoDimensionalCounter<String,String> labelTerm =
@@ -477,7 +489,8 @@ public final class MultiWordPreprocessor {
       tr.close(); //Closes the underlying reader
 
       System.out.println("Resolving DUMMY tags");
-      resolveDummyTags(treeFile, pretermLabel, unigramTagger, retainNER);
+      resolveDummyTags(treeFile, pretermLabel, unigramTagger, retainNER,
+                       normalize ? new SpanishTreeNormalizer(true, false, false) : null);
 
       System.out.println("#Unknown Word Types: " + ManualUWModel.nUnknownWordTypes);
       System.out.println(String.format("#Missing POS: %d (fixed: %d, %.2f%%)",
