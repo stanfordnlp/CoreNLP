@@ -10,10 +10,7 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
-import edu.stanford.nlp.trees.BobChrisTreeNormalizer;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeFactory;
-import edu.stanford.nlp.trees.TreeNormalizer;
+import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
@@ -46,8 +43,6 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
     put("méxico", "México"); // 111_C-3.tbf-17
     put("reirse", "reírse"); // 140_20011102.tbf-13
     put("tambien", "también"); // 41_19991002.tbf-8
-
-    put("Intitute", "Institute"); // 22863_20001129.tbf-16
 
     // Hack: these aren't exactly spelling mistakes, but we need to
     // run a search-and-replace across the entire corpus with them, so
@@ -89,6 +84,28 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
         return true;
 
       return !value.equals(tree.getChild(0).value());
+    }
+  };
+
+  /**
+   * Resolves some inconsistencies in constituent naming:
+   *
+   * - "sa" and "s.a" are equivalent -- merge to "s.a"
+   */
+  private static final TreeTransformer constituentRenamer = new TreeTransformer() {
+    @Override
+    public Tree transformTree(Tree t) {
+      if (t.isLeaf())
+        return t;
+
+      String value = t.value();
+      if (value == null)
+        return t;
+
+      if (value.equals("sa"))
+        t.setValue("s.a");
+
+      return t;
     }
   };
 
@@ -150,8 +167,9 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
 
   @Override
   public Tree normalizeWholeTree(Tree tree, TreeFactory tf) {
-    // First filter out nodes we don't like
-    tree = tree.prune(emptyFilter).spliceOut(aOverAFilter);
+    // Begin with some basic transformations
+    tree = tree.prune(emptyFilter).spliceOut(aOverAFilter)
+      .transform(constituentRenamer);
 
     // Now start some simple cleanup
     tree = Tsurgeon.processPatternsOnTree(cleanup, tree);
@@ -304,7 +322,7 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
       List<String> pronouns = split.second();
       for (int i = pronouns.size() - 1; i >= 0; i--) {
         String pronoun = pronouns.get(i);
-        String patternString = String.format("[insert (morfema.pronominal (pp000000 %s)) $- target]", pronoun);
+        String patternString = String.format("[insert (sn (grup.nom (pp000000 %s))) $- target]", pronoun);
         TsurgeonPattern pattern = Tsurgeon.parseOperation(patternString);
         t = pattern.evaluate(t, matcher);
       }
