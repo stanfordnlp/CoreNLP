@@ -1,8 +1,5 @@
 package edu.stanford.nlp.international.spanish;
 
-import edu.stanford.nlp.parser.lexparser.SpanishUnknownWordModel;
-import edu.stanford.nlp.tagger.maxent.ExtractorFramesRare;
-
 import java.util.regex.Pattern;
 
 /**
