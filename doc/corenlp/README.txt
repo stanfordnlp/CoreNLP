@@ -42,6 +42,8 @@ LICENSE
 CHANGES
 ---------------------------------
 
+2014-08-27    3.4.1     Add Spanish models 
+
 2014-06-16      3.4     Add shift reduce parser 
 
 2014-01-04    3.3.1     Bugfix release

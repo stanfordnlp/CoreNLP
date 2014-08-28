@@ -41,6 +41,8 @@ set ctb=/afs/ir/data/linguistic-data/Chinese-Treebank/6/data/utf8/bracketed
 set ctb7train=/u/nlp/data/chinese/ctb7/train.mrg
 set ctb7test=/u/nlp/data/chinese/ctb7/test.mrg
 set negra=/u/nlp/data/GermanACL08/negra/penn-format-train-dev-test
+set ancoraTrain=/u/nlp/data/spanish/ancora/ancora.train
+set ancoraTest=/u/nlp/data/spanish/ancora/ancora.test
 
 set host=`hostname | cut -d. -f1`
 
@@ -167,6 +169,8 @@ java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA
 # This requires normalizing the dependency output to strip boundary symbol.
 # ( echo "Running germanDep on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.NegraPennTreebankParserParams -dep -hMarkov 1 -maxLength 40 -saveToSerializedFile germanDep.ser.gz -train $negra 1 -test $negra 3 ) >>& ./serializedParsers.log
 
+# Spanish PCFG
+( echo "Running spanishPCFG on $host -server" ; time java -server -mx6g edu.stanford.nlp.parser.lexparser.LexicalizedParser -v -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.SpanishTreebankParserParams -PCFG -vMarkov 3 -uwm 1 -vSelSplitCutoff 100 -rightRec -train $ancoraTrain -test $ancoraTest -saveToSerializedFile spanishPCFG.ser.gz ) >>& ./serializedParsers.log
 
 
 ########
@@ -174,8 +178,8 @@ java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA
 ########
 set mydir=`pwd`
 set data_dir=/u/nlp/data/lexparser/trees
-set tree_pipe=$JAVANLP_HOME/projects/core/scripts/run-tb-preproc
-set train_sh=$JAVANLP_HOME/projects/core/scripts/lexparser-lang-train-test.sh
+set tree_pipe=$JAVANLP_HOME/projects/core/scripts/lexparser/run-tb-preproc
+set train_sh=$JAVANLP_HOME/projects/core/scripts/lexparser/lexparser-lang-train-test.sh
 
 if( ! -e $data_dir ) then
   mkdir $data_dir

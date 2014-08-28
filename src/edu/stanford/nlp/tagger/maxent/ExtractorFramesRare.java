@@ -28,6 +28,8 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.international.french.FrenchUnknownWordSignatures;
+import edu.stanford.nlp.international.spanish.SpanishUnknownWordSignatures;
+import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -187,6 +189,35 @@ public class ExtractorFramesRare {
 
   private static final Extractor[] french_unknown_extractors = { cWordFrenchNounSuffix, cWordFrenchAdvSuffix, cWordFrenchVerbSuffix, cWordFrenchAdjSuffix, cWordFrenchPluralSuffix };
 
+  /**
+   * Extracts Spanish gender patterns.
+   */
+  private static final ExtractorSpanishGender cWordSpanishGender =
+    new ExtractorSpanishGender();
+
+  /**
+   * Matches conditional-tense verb suffixes.
+   */
+  private static final ExtractorSpanishConditionalSuffix cWordSpanishConditionalSuffix =
+    new ExtractorSpanishConditionalSuffix();
+
+  /**
+   * Matches imperfect-tense verb suffixes (-er, -ir verbs).
+   */
+  private static final ExtractorSpanishImperfectErIrSuffix cWordSpanishImperfectErIrSuffix =
+    new ExtractorSpanishImperfectErIrSuffix();
+
+  /**
+   * Extracts stripped forms of Spanish verbs.
+   */
+  private static final ExtractorSpanishStrippedVerb cWordSpanishStrippedVerb =
+    new ExtractorSpanishStrippedVerb();
+
+  private static final Extractor[] spanish_unknown_extractors = {
+    cWordSpanishGender, cWordSpanishConditionalSuffix,
+    cWordSpanishImperfectErIrSuffix, cWordSpanishStrippedVerb
+  };
+
 
   private ExtractorFramesRare() {
   }
@@ -249,6 +280,8 @@ public class ExtractorFramesRare {
         extrs.addAll(Arrays.asList(naacl2003Conjunctions()));
       } else if ("frenchunknowns".equalsIgnoreCase(arg)) {
         extrs.addAll(Arrays.asList(french_unknown_extractors));
+      } else if ("spanishunknowns".equalsIgnoreCase(arg)) {
+        extrs.addAll(Arrays.asList(spanish_unknown_extractors));
       } else if (arg.startsWith("wordshapes(")) {
         int lWindow = Extractor.getParenthesizedNum(arg, 1);
         int rWindow = Extractor.getParenthesizedNum(arg, 2);
@@ -1529,5 +1562,66 @@ class ExtractorFrenchPluralSuffix extends CWordBooleanExtractor {
   @Override
   boolean extractFeature(String cword) {
     return FrenchUnknownWordSignatures.hasPossiblePlural(cword);
+  }
+}
+
+
+class ExtractorSpanishGender extends RareExtractor {
+
+  private static final long serialVersionUID = -7359312929174070404L;
+
+  @Override
+  String extract(History h, PairsHolder pH) {
+    String cword = pH.getWord(h, 0);
+    if (SpanishUnknownWordSignatures.hasMasculineSuffix(cword))
+      return "m";
+    else if (SpanishUnknownWordSignatures.hasFeminineSuffix(cword))
+      return "f";
+    else
+      return "";
+  }
+}
+
+
+class ExtractorSpanishConditionalSuffix extends CWordBooleanExtractor {
+
+  private static final long serialVersionUID = 4383251116043848632L;
+
+  @Override
+  boolean extractFeature(String cword) {
+    return SpanishUnknownWordSignatures.hasConditionalSuffix(cword);
+  }
+}
+
+
+class ExtractorSpanishImperfectErIrSuffix extends CWordBooleanExtractor {
+
+  private static final long serialVersionUID = -5804047931816433075L;
+
+  @Override
+  boolean extractFeature(String cword) {
+    return SpanishUnknownWordSignatures.hasImperfectErIrSuffix(cword);
+  }
+}
+
+
+class ExtractorSpanishStrippedVerb extends RareExtractor {
+
+  private static final long serialVersionUID = -4780144226395772354L;
+
+  private static final SpanishVerbStripper verbStripper = SpanishVerbStripper.getInstance();
+
+  @Override
+  String extract(History h, PairsHolder pH) {
+    String word = pH.getWord(h, 0);
+    if (SpanishVerbStripper.isStrippable(word)) {
+      String stripped = verbStripper.stripVerb(word);
+      if (stripped != null)
+        return stripped;
+    }
+
+    // TODO experiment with different policies: return word unmodified
+    // in this case, or return empty string?
+    return "";
   }
 }
