@@ -1,4 +1,4 @@
-Stanford Lexicalized Parser v3.4.1 - 2014-08-27
+Stanford Lexicalized Parser v3.4 - 2014-06-16
 -----------------------------------------------
 
 Copyright (c) 2002-2012 The Board of Trustees of The Leland Stanford Junior
@@ -205,8 +205,6 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
-
-2014-08-27    3.4.1     Add Spanish models 
 
 2014-06-16      3.4     Shift-reduce parser 
 

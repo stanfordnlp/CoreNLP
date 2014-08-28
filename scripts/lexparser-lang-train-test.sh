@@ -38,7 +38,7 @@ shift 5
 # Language-specific configuration
 scriptdir=`dirname $0`
 echo $JAVANLP_HOME
-source $JAVANLP_HOME/projects/core/scripts/lexparser/lexparser_lang.def
+source $JAVANLP_HOME/projects/core/scripts/lexparser_lang.def
 
 # Setting classpath
 #CLASSPATH="$CLASSPATH":"$scriptdir/*"
