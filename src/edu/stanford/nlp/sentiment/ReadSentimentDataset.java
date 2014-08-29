@@ -109,6 +109,8 @@ public class ReadSentimentDataset {
     }
   }
 
+  private ReadSentimentDataset() {} // static class
+
   public static Tree convertTree(List<Integer> parentPointers, List<String> sentence, Map<List<String>, Integer> phraseIds, Map<Integer, Double> sentimentScores, PTBEscapingProcessor escaper) {
     int maxNode = 0;
     for (Integer parent : parentPointers) {

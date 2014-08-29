@@ -3,6 +3,7 @@ package edu.stanford.nlp.sentiment;
 import java.io.Serializable;
 
 public class RNNTrainOptions implements Serializable {
+
   public int batchSize = 27;
 
   /** Number of times through all the trees */
@@ -34,7 +35,7 @@ public class RNNTrainOptions implements Serializable {
 
   /** Regularization cost for the transform matrix  */
   public double regTransformMatrix = 0.001;
-  
+
   /** Regularization cost for the classification matrices */
   public double regClassification = 0.0001;
 
@@ -46,7 +47,7 @@ public class RNNTrainOptions implements Serializable {
    */
   public double initialAdagradWeight = 0.0;
 
-  /** 
+  /**
    * How many epochs between resets of the adagrad learning rates.
    * Set to 0 to never reset.
    */
@@ -54,7 +55,7 @@ public class RNNTrainOptions implements Serializable {
 
   /** Regularization cost for the transform tensor  */
   public double regTransformTensor = 0.001;
-  
+
   @Override
   public String toString() {
     StringBuilder result = new StringBuilder();
@@ -86,47 +87,47 @@ public class RNNTrainOptions implements Serializable {
 
   public int setOption(String[] args, int argIndex) {
     if (args[argIndex].equalsIgnoreCase("-batchSize")) {
-      batchSize = Integer.valueOf(args[argIndex + 1]);
+      batchSize = Integer.parseInt(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-epochs")) {
-      epochs = Integer.valueOf(args[argIndex + 1]);
+      epochs = Integer.parseInt(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-debugOutputEpochs")) {
-      debugOutputEpochs = Integer.valueOf(args[argIndex + 1]);
+      debugOutputEpochs = Integer.parseInt(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-maxTrainTimeSeconds")) {
-      maxTrainTimeSeconds = Integer.valueOf(args[argIndex + 1]);
+      maxTrainTimeSeconds = Integer.parseInt(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-learningRate")) {
-      learningRate = Double.valueOf(args[argIndex + 1]);
+      learningRate = Double.parseDouble(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-scalingForInit")) {
-      scalingForInit = Double.valueOf(args[argIndex + 1]);
+      scalingForInit = Double.parseDouble(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-regTransformMatrix")) {
-      regTransformMatrix = Double.valueOf(args[argIndex + 1]);
+      regTransformMatrix = Double.parseDouble(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-regTransformTensor")) {
-      regTransformTensor = Double.valueOf(args[argIndex + 1]);
+      regTransformTensor = Double.parseDouble(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-regClassification")) {
-      regClassification = Double.valueOf(args[argIndex + 1]);
+      regClassification = Double.parseDouble(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-regWordVector")) {
-      regWordVector = Double.valueOf(args[argIndex + 1]);
+      regWordVector = Double.parseDouble(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-initialAdagradWeight")) {
-      initialAdagradWeight = Double.valueOf(args[argIndex + 1]);
+      initialAdagradWeight = Double.parseDouble(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-adagradResetFrequency")) {
-      adagradResetFrequency = Integer.valueOf(args[argIndex + 1]);
+      adagradResetFrequency = Integer.parseInt(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-classWeights")) {
       String classWeightString = args[argIndex + 1];
       String[] pieces = classWeightString.split(",");
       classWeights = new double[pieces.length];
       for (int i = 0; i < pieces.length; ++i) {
-        classWeights[i] = Double.valueOf(pieces[i]);
+        classWeights[i] = Double.parseDouble(pieces[i]);
       }
       return argIndex + 2;
     } else {

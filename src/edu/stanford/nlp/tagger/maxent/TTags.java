@@ -42,7 +42,7 @@ public class TTags {
    *  a closed class - purposely conservative.
    * TODO: make this an option you can set; need to pass in TaggerConfig object and then can say = config.getClosedTagThreshold());
    */
-  private final int closedTagThreshold = Integer.valueOf(TaggerConfig.CLOSED_CLASS_THRESHOLD);
+  private final int closedTagThreshold = Integer.parseInt(TaggerConfig.CLOSED_CLASS_THRESHOLD);
 
   /** If true, when a model is trained, all tags that had fewer tokens than
    *  closedTagThreshold will be considered closed.
