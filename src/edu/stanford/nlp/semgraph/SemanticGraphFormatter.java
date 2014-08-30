@@ -212,7 +212,7 @@ public class SemanticGraphFormatter {
       }
     }
     if (showAnnos) {
-      s += node.toString(CoreLabel.MAP_FORMAT);
+      s += node.toString(CoreLabel.OutputFormat.MAP);
     }
     return s;
   }
