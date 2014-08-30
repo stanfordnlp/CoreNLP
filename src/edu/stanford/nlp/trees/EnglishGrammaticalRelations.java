@@ -815,8 +815,8 @@ public class EnglishGrammaticalRelations {
 
   /**
    * The "adverbial clause modifier" grammatical relation.  An adverbial clause
-   * modifier of a VP or (inverted) sentence is a clause modifying the verb (temporal clauses,
-   * consequences, conditional clauses, etc.).
+   * modifier of some predicates, such as a VP or (inverted) sentence is a clause modifying the verb
+   * (temporal clauses, consequences, conditional clauses, etc.).
    * <p/>
    * Examples: <br/>
    * "The accident happened as the night was falling" &rarr;
@@ -826,7 +826,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation ADV_CLAUSE_MODIFIER =
     new GrammaticalRelation(Language.English, "advcl", "adverbial clause modifier",
-        MODIFIER, "VP|S|SQ|SINV|SBARQ|NP", tregexCompiler,
+        MODIFIER, "VP|S|SQ|SINV|SBARQ|NP|ADVP", tregexCompiler,
             "VP < (@SBAR=target <= (@SBAR [ < (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (RB|IN < so|now) < (IN < that) | <1 (ADVP < (RB < now)) <2 (IN < that) ] ))",
             "S|SQ|SINV < (SBAR|SBAR-TMP=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?).*$/ !$+ VP)",
             // to get "rather than"
@@ -856,7 +856,11 @@ public class EnglishGrammaticalRelations {
             //   // which contains empties
             //   // Example: "with the way his split-fingered fastball is behaving"
             //   "!($-- @NP|WHNP|NML > @NP|WHNP <: (S !< (VP < TO)))",
-            "NP < (NP $++ (SBAR=target < (IN < /^(?i:than)$/) !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !<: (S !< (VP < TO))) !$++ (CC $++ =target))");
+            "NP < (NP $++ (SBAR=target < (IN < /^(?i:than)$/) !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !<: (S !< (VP < TO))) !$++ (CC $++ =target))",
+            // this is for comparative or as ... as complements: sold more quickly [than they had expected]
+            // available as long [as they install a crash barrier]
+            "ADVP < ADVP < SBAR=target"
+);
 
 
   /*
