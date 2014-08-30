@@ -1168,10 +1168,10 @@ public class SemanticGraph implements Serializable {
    */
   @Override
   public String toString() {
-    return toString(CoreLabel.OutputFormat.VALUE_TAG);
+    return toString(CoreLabel.VALUE_TAG_FORMAT);
   }
 
-  public String toString(CoreLabel.OutputFormat wordFormat) {
+  public String toString(String wordFormat) {
     Collection<IndexedWord> rootNodes = getRoots();
     if (rootNodes.isEmpty()) {
       // Shouldn't happen, but return something!
@@ -1197,7 +1197,7 @@ public class SemanticGraph implements Serializable {
   }
 
   // helper for toString()
-  private void recToString(IndexedWord curr, CoreLabel.OutputFormat wordFormat, StringBuilder sb, int offset, Set<IndexedWord> used) {
+  private void recToString(IndexedWord curr, String wordFormat, StringBuilder sb, int offset, Set<IndexedWord> used) {
     used.add(curr);
     List<SemanticGraphEdge> edges = outgoingEdgeList(curr);
     Collections.sort(edges);
@@ -1587,10 +1587,10 @@ public class SemanticGraph implements Serializable {
    * with the dependency.
    */
   public String toDotFormat(String graphname) {
-    return toDotFormat(graphname, CoreLabel.OutputFormat.VALUE_TAG_INDEX);
+    return toDotFormat(graphname, CoreLabel.VALUE_TAG_INDEX_FORMAT);
   }
 
-  public String toDotFormat(String graphname, CoreLabel.OutputFormat indexedWordFormat) {
+  public String toDotFormat(String graphname, String indexedWordFormat) {
     StringBuilder output = new StringBuilder();
     output.append("digraph " + graphname + " {\n");
     for (IndexedWord word : graph.getAllVertices()) {

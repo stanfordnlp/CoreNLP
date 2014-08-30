@@ -351,10 +351,10 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
    */
   @Override
   public String toString() {
-    return label.toString(CoreLabel.OutputFormat.VALUE_TAG);
+    return label.toString(CoreLabel.VALUE_TAG_FORMAT);
   }
 
-  public String toString(CoreLabel.OutputFormat format) {
+  public String toString(String format) {
     return label.toString(format);
   }
 

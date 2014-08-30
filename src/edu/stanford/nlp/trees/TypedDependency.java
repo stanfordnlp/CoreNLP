@@ -2,8 +2,6 @@ package edu.stanford.nlp.trees;
 
 import java.io.Serializable;
 
-import edu.stanford.nlp.ling.CoreLabel;
-
 /**
  * A <code>TypedDependency</code> is a relation between two words in a
  * <code>GrammaticalStructure</code>.  Each <code>TypedDependency</code>
@@ -111,7 +109,7 @@ public class TypedDependency implements Comparable<TypedDependency>, Serializabl
     return reln + "(" + gov + ", " + dep + ")";
   }
 
-  public String toString(CoreLabel.OutputFormat format) {
+  public String toString(String format) {
     return reln + "(" + gov.toString(format) + ", " + dep.toString(format) + ")";
   }
 

@@ -93,7 +93,7 @@ public class SemanticGraphPrinter {
         System.out.println("dot ----------------------------");
         System.out.println(g1.toDotFormat());
         System.out.println("dot (simple) ----------------------------");
-        System.out.println(g1.toDotFormat("Simple", CoreLabel.OutputFormat.VALUE));
+        System.out.println(g1.toDotFormat("Simple", CoreLabel.VALUE_FORMAT));
 
         // System.out.println(" graph ----------------------------");
         // System.out.println(t.allTypedDependenciesCCProcessed(false));
