@@ -49,9 +49,10 @@ public abstract class TsurgeonMatcher {
    * Evaluates the surgery pattern against a {@link Tree} and a {@link TregexMatcher}
    * that has been successfully matched against the tree.
    *
-   * @param t The {@link Tree} that has been matched upon; typically this tree will be destructively modified.
-   * @param m The successfully matched {@link TregexMatcher}.
+   * @param tree The {@link Tree} that has been matched upon; typically this tree will be destructively modified.
+   * @param tregex The successfully matched {@link TregexMatcher}.
    * @return Some node in the tree; depends on implementation and use of the specific subclass.
    */
   public abstract Tree evaluate(Tree tree, TregexMatcher tregex);
+
 }
