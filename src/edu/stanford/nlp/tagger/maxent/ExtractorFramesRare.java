@@ -207,15 +207,9 @@ public class ExtractorFramesRare {
   private static final ExtractorSpanishImperfectErIrSuffix cWordSpanishImperfectErIrSuffix =
     new ExtractorSpanishImperfectErIrSuffix();
 
-  /**
-   * Extracts stripped forms of Spanish verbs.
-   */
-  private static final ExtractorSpanishStrippedVerb cWordSpanishStrippedVerb =
-    new ExtractorSpanishStrippedVerb();
-
   private static final Extractor[] spanish_unknown_extractors = {
     cWordSpanishGender, cWordSpanishConditionalSuffix,
-    cWordSpanishImperfectErIrSuffix, cWordSpanishStrippedVerb
+    cWordSpanishImperfectErIrSuffix
   };
 
 
@@ -282,6 +276,12 @@ public class ExtractorFramesRare {
         extrs.addAll(Arrays.asList(french_unknown_extractors));
       } else if ("spanishunknowns".equalsIgnoreCase(arg)) {
         extrs.addAll(Arrays.asList(spanish_unknown_extractors));
+        String dictPath = Extractor.getParenthesizedArg(arg, 1);
+        if (dictPath == null) {
+          extrs.add(new ExtractorSpanishStrippedVerb());
+        } else {
+          extrs.add(new ExtractorSpanishStrippedVerb(dictPath));
+        }
       } else if (arg.startsWith("wordshapes(")) {
         int lWindow = Extractor.getParenthesizedNum(arg, 1);
         int rWindow = Extractor.getParenthesizedNum(arg, 2);
@@ -1609,7 +1609,15 @@ class ExtractorSpanishStrippedVerb extends RareExtractor {
 
   private static final long serialVersionUID = -4780144226395772354L;
 
-  private static final SpanishVerbStripper verbStripper = SpanishVerbStripper.getInstance();
+  private final SpanishVerbStripper verbStripper;
+
+  public ExtractorSpanishStrippedVerb() {
+    verbStripper = SpanishVerbStripper.getInstance();
+  }
+
+  public ExtractorSpanishStrippedVerb(String path) {
+    verbStripper = SpanishVerbStripper.getInstance(path);
+  }
 
   @Override
   String extract(History h, PairsHolder pH) {
