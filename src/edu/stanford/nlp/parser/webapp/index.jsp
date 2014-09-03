@@ -68,7 +68,9 @@ ParserPack loadParserPack(String parser, ServletContext application)
   pp.tLP = pp.parser.getOp().tlpParams.treebankLanguagePack();
   pp.tagPrint = new TreePrint("wordsAndTags", pp.tLP);
   pp.pennPrint = new TreePrint("penn", pp.tLP);
-  if (!parser.equals("Arabic")) {
+
+  // Enable typed dependencies if supported
+  if (!(parser.equals("Arabic") || parser.equals("Spanish"))) {
      pp.typDepPrint = new TreePrint("typedDependencies", "basicDependencies", pp.tLP);
      pp.typDepColPrint = new TreePrint("typedDependencies", pp.tLP);  // default is now CCprocessed
   }
@@ -118,13 +120,16 @@ static {
   nameToParserSer.put("English", "englishPCFG.ser.gz");
   nameToParserSer.put("Chinese", "xinhuaFactored.ser.gz");
   nameToParserSer.put("Arabic",  "arabicFactored.ser.gz");
+  nameToParserSer.put("Spanish", "spanishPCFG.ser.gz");
   nameToEscaper.put("English", "edu.stanford.nlp.process.PTBEscapingProcessor");
   nameToEscaper.put("Chinese",
      "edu.stanford.nlp.trees.international.pennchinese.ChineseEscaper"); 
   nameToEscaper.put("Arabic", "edu.stanford.nlp.process.PTBEscapingProcessor");
+  nameToEscaper.put("Spanish", "edu.stanford.nlp.process.PTBEscapingProcessor");
   defaultQuery.put("English", "My dog also likes eating sausage.");
   defaultQuery.put("Chinese", "猴子喜欢吃香蕉。");
   defaultQuery.put("Arabic", "هذا الرجل هو سعيد.");
+  defaultQuery.put("Spanish", "El reino canta muy bien.");
 }
 
 private String treeToString(Tree t, TreePrint tp) { 
@@ -386,7 +391,7 @@ if (pp == null) {
           %></pre>
           </div>
 
-	        <% if (!parserSelect.equals("Arabic")) { %>
+	        <% if (!(parserSelect.equals("Arabic") || parserSelect.equals("Spanish"))) { %>
 
           <h3>Typed dependencies</h3>
           <div class="parserOutput">
