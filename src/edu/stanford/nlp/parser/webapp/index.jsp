@@ -54,7 +54,7 @@ class ParserPack {
   Function<List<HasWord>, List<HasWord>> escaper;
 }
 
-static ParserPack loadParserPack(String parser, ServletContext application)
+ParserPack loadParserPack(String parser, ServletContext application)
    throws Exception {
   String SerializedParserPath =
      application.getRealPath("/WEB-INF/data") + File.separator +

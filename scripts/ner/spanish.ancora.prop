@@ -1,11 +1,13 @@
 
-trainFile = /u/nlp/data/spanish/ner/ancora.ner.train.tsv
-testFile = /u/nlp/data/spanish/ner/ancora.ner.dev.tsv
+trainFile = /u/nlp/data/spanish/ner/ancora-train.tsv
+testFile = /u/nlp/data/spanish/ner/ancora-test.tsv
 serializeTo = spanish.ancora.crf.ser.gz
 
 useDistSim = false
 
 map = word=0,answer=1
+
+saveFeatureIndexToDisk = true
 
 useTitle = true
 useSpanishTitle = true
@@ -32,8 +34,6 @@ disjunctionWidth=5
 #useDisjunctiveShapeInteraction=true
 
 type=crf
-
-saveFeatureIndexToDisk = true
 
 readerAndWriter=edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter
 
