@@ -45,7 +45,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
  * root of the graph, so there may be no node without a parent node. You can
  * better get at the root(s) via the variable and methods provided.
  * <br>
- * There is no mechanism for returning all edges at once (eg <code>edgeSet()</code>).
+ * There is no mechanism for returning all edges at once (eg <code>edgeSet()</code>).  
  * This is intentional.  Use <code>edgeIterable()</code> to iterate over the edges if necessary.
  *
  * @author Christopher Cox
@@ -467,7 +467,10 @@ public class SemanticGraph implements Serializable {
   }
 
   public boolean hasChildren(IndexedWord vertex) {
-    return outgoingEdgeIterator(vertex).hasNext();
+    for (SemanticGraphEdge edge : outgoingEdgeIterable(vertex)) {
+      return true;
+    }
+    return false;
   }
 
   public List<SemanticGraphEdge> getIncomingEdgesSorted(IndexedWord vertex) {
@@ -519,7 +522,7 @@ public class SemanticGraph implements Serializable {
   }
 
   /**
-   * Helper function for the public function with the same name.
+   * Helper function for the public function with the same name.  
    * <br>
    * Builds up the list backwards.
    */
@@ -1305,12 +1308,12 @@ public class SemanticGraph implements Serializable {
    */
   private void insertSpecificIntoList(String specific, IndexedWord relnTgtNode, List<IndexedWord> tgtList) {
     int currIndex = tgtList.indexOf(relnTgtNode);
-    Set<IndexedWord> descendants = descendants(relnTgtNode);
+    Set<IndexedWord> descendents = descendants(relnTgtNode);
     IndexedWord specificNode = new IndexedWord();
     specificNode.set(CoreAnnotations.LemmaAnnotation.class, specific);
     specificNode.set(CoreAnnotations.TextAnnotation.class, specific);
     specificNode.set(CoreAnnotations.OriginalTextAnnotation.class, specific);
-    while ((currIndex >= 1) && descendants.contains(tgtList.get(currIndex - 1))) {
+    while ((currIndex >= 1) && descendents.contains(tgtList.get(currIndex - 1))) {
       currIndex--;
     }
     tgtList.add(currIndex, specificNode);
@@ -1320,7 +1323,7 @@ public class SemanticGraph implements Serializable {
 
   public enum OutputFormat {
     LIST, XML, READABLE, RECURSIVE
-  }
+  };
 
   /**
    * Returns a String representation of the result of this set of typed
@@ -1366,7 +1369,7 @@ public class SemanticGraph implements Serializable {
    *
    * <dt>recursive</dt>
    * <dd>
-   * The default output for {@link #toString()}
+   * The default output for {@link toString()}
    * </dd>
    *
    * </dl>
@@ -1674,7 +1677,7 @@ public class SemanticGraph implements Serializable {
   public SemanticGraph(Collection<TypedDependency> dependencies) {
     graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>(outerMapFactory, innerMapFactory);
     roots = wordMapFactory.newSet();
-
+    
     for (TypedDependency d : dependencies) {
       TreeGraphNode gov = d.gov();
       TreeGraphNode dep = d.dep();

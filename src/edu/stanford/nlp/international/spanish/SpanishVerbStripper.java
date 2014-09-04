@@ -7,7 +7,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +25,7 @@ import java.util.regex.Pattern;
  * @author Jon Gauthier
  * @author Ishita Prasad
  */
-public final class SpanishVerbStripper implements Serializable {
+public final class SpanishVerbStripper {
 
   // The following three classes of verb forms can carry attached
   // pronouns:
@@ -314,5 +313,4 @@ public final class SpanishVerbStripper implements Serializable {
     return null;
   }
 
-  private static final long serialVersionUID = -4780144226395772354L;
 }
