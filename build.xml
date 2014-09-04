@@ -305,7 +305,11 @@
     <buildjsp webapp.path="edu/stanford/nlp/parser/webapp"
               webapp.war="parser.war"
               webapp.jar="javanlp-core.jar">
-      <webapp.lib/> <!-- don't need anything! -->
+      <webapp.lib>
+        <lib dir="/u/nlp/data/StanfordCoreNLPModels">
+          <include name="stanford-spanish-corenlp-models-current.jar"/>
+        </lib>
+      </webapp.lib>
       <webapp.data>
         <zipfileset prefix="WEB-INF/data"
                     file="/u/nlp/data/lexparser/englishPCFG.ser.gz"/>
@@ -317,6 +321,8 @@
                     file="/u/nlp/data/gale/segtool/stanford-seg/classifiers-2010/05202008-ctb6.processed-chris6.lex.gz"/>
         <zipfileset prefix="WEB-INF/data/chinesesegmenter"
                     dir="/u/nlp/data/gale/segtool/stanford-seg/releasedata"/>
+        <zipfileset prefix="WEB-INF/data"
+                    file="/u/nlp/data/lexparser/spanishPCFG.ser.gz"/>
         <zipfileset file="${data.path}/webapps/favicon.ico"/>
       </webapp.data>
     </buildjsp>

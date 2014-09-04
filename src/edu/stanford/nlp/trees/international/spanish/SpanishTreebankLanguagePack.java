@@ -67,7 +67,8 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
    */
   @Override
   public TokenizerFactory<? extends HasWord> getTokenizerFactory() {
-    return SpanishTokenizer.factory(new CoreLabelTokenFactory(), null);
+    return SpanishTokenizer.factory(new CoreLabelTokenFactory(),
+        "invertible,ptb3Escaping=true,splitAll=true");
   }
 
   /**

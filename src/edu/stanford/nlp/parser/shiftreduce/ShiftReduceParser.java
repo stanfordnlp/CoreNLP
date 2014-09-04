@@ -473,19 +473,32 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     for (int index = 0; index < words.size(); ++index) {
       HasWord hw = words.get(index);
 
-      CoreLabel wordLabel = new CoreLabel();
-      // Index from 1.  Tools downstream from the parser expect that
-      wordLabel.setIndex(index + 1);
-      wordLabel.setValue(hw.word());
-      if (!(hw instanceof HasTag)) {
-        throw new RuntimeException("Expected tagged words");
+      CoreLabel wordLabel;
+      String tag;
+      if (hw instanceof CoreLabel) {
+        wordLabel = (CoreLabel) hw;
+        tag = wordLabel.tag();
+      } else {
+        wordLabel = new CoreLabel();
+        wordLabel.setValue(hw.word());
+        wordLabel.setWord(hw.word());
+        if (!(hw instanceof HasTag)) {
+          throw new IllegalArgumentException("Expected tagged words");
+        }
+        tag = ((HasTag) hw).tag();
+        wordLabel.setTag(tag);
       }
-      String tag = ((HasTag) hw).tag();
       if (tag == null) {
-        throw new RuntimeException("Word is not tagged");
+        throw new IllegalArgumentException("Input word not tagged");
       }
       CoreLabel tagLabel = new CoreLabel();
-      tagLabel.setValue(((HasTag) hw).tag());
+      tagLabel.setValue(tag);
+
+      // Index from 1.  Tools downstream from the parser expect that
+      // Internally this parser uses the index, so we have to
+      // overwrite incorrect indices if the label is already indexed
+      wordLabel.setIndex(index + 1);
+      tagLabel.setIndex(index + 1);
 
       LabeledScoredTreeNode wordNode = new LabeledScoredTreeNode(wordLabel);
       LabeledScoredTreeNode tagNode = new LabeledScoredTreeNode(tagLabel);
