@@ -243,8 +243,8 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
   public MaxentTagger(TaggerConfig config) {
-    // todo: maybe this shouldn't do this but replace the zero arg constructor.
-    // i.e., call init() not readModelAndInit(). This method is currently UNUSUED. Make non-public.
+    // maybe this shouldn't do this but replace the zero arg constructor.
+    // i.e., call init() not readModelAndInit()
     this(config.getModel(), config);
   }
 
@@ -320,10 +320,6 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
 
   public String getTag(int index) {
     return tags.getTag(index);
-  }
-
-  public Set<String> tagSet() {
-    return tags.tagSet();
   }
 
   private LambdaSolveTagger prob;
@@ -744,7 +740,8 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
   /** This reads the complete tagger from a single model stored in a file, at a URL,
-   *  or as a resource in a jar file, and inits the tagger using a
+   *  or as a resource
+   *  in a jar file, and inits the tagger using a
    *  combination of the properties passed in and parameters from the file.
    *  <p>
    *  <i>Note for the future:</i> This assumes that the TaggerConfig in the file
@@ -899,6 +896,11 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     return dict.sum(word) < rareWordThresh;
   }
 
+  // todo: clean this up. It seems like we'd be better off without this method. Used once in (MT's) PrefixTagger
+  public TTags getTags() {
+    return tags;
+  }
+
   /**
    * Tags the tokenized input string and returns the tagged version.
    * This method requires the input to already be tokenized.
@@ -933,12 +935,12 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
   /**
-   * Expects a sentence and returns a tagged sentence.
+   * Expects a sentence and returns a tagged sentence.  The input Sentence items
    *
-   * @param in This needs to be a sentence (List of words)
-   * @return A sentence of TaggedWord
+   *
+   * @param in This needs to be a Sentence
+   * @return A Sentence of TaggedWord
    */
-  @Override
   public List<TaggedWord> apply(List<? extends HasWord> in) {
     TestSentence testSentence = new TestSentence(this);
     return testSentence.tagSentence(in, false);
@@ -986,7 +988,6 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * want to tag a single List instead of a List of Lists.  If you
    * supply tagSentence with a List of HasTag, and set reuseTags to
    * true, the tagger will reuse the supplied tags.
-   *
    * @param sentence sentence to tag
    * @param reuseTags whether or not to reuse the given tag
    * @return tagged sentence
@@ -1660,7 +1661,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     printErrWordsPerSec(millis, numWords);
   }
 
-  public  <X extends HasWord> void runTagger(Iterable<List<X>> document,
+  public <X extends HasWord> void runTagger(Iterable<List<X>> document,
                                             BufferedWriter writer,
                                             OutputStyle outputStyle)
     throws IOException

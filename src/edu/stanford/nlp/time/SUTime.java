@@ -1622,11 +1622,9 @@ public class SUTime {
 
     @Override
     public Time offset(Duration offset, int offsetFlags) {
-      if ((offsetFlags & RELATIVE_OFFSET_INEXACT) != 0) {
+      if ((offsetFlags | RELATIVE_OFFSET_INEXACT) != 0)
         return new RelativeTime(this, TemporalOp.OFFSET, offset);
-      } else {
-        return new RelativeTime(this, TemporalOp.OFFSET_EXACT, offset);
-      }
+      else return new RelativeTime(this, TemporalOp.OFFSET_EXACT, offset);
     }
 
     @Override
