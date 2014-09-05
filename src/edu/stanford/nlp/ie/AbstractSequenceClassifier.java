@@ -181,7 +181,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
     if (!flags.useKnownLCWords) {
       knownLCWords = Collections.emptySet();
-    } else if (knownLCWords == null || knownLCWords.size() == 0) {
+    } else if (knownLCWords == null || knownLCWords.isEmpty()) {
       knownLCWords = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
     }
   }
@@ -1731,7 +1731,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void loadClassifierNoExceptions(String loadPath, Properties props) {
     InputStream is;
     // ms, 10-04-2010: check first is this path exists in our CLASSPATH. This
-    // takes priority over the file system.
+    // takes priority over the file system. todo [cdm 2014]: change this to use IOUtils stuff that much code now uses
     if ((is = loadStreamFromClasspath(loadPath)) != null) {
       Timing.startDoing("Loading classifier from " + loadPath);
       loadClassifierNoExceptions(is, props);
