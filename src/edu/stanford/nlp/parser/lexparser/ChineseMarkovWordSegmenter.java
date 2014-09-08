@@ -239,7 +239,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
         int end = start + diff;
         for (int split = start + 1; split < end && split - start <= 10; split++) {
           for (String tag : POSes) {
-            int tagNum = tagIndex.addToIndex(tag);
+            int tagNum = tagIndex.indexOf(tag, true);
             if (splitBacktrace[start][split][tagNum] != split) {
               continue;
             }
@@ -248,7 +248,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
               continue; // this happens with "*" POS
             }
             for (String rTag : POSes) {
-              int rTagNum = tagIndex.addToIndex(rTag);
+              int rTagNum = tagIndex.indexOf(rTag, true);
               double newScore = scores[start][split][tagNum] + scores[split][end][rTagNum] + Math.log(rTagDist.probabilityOf(rTag));
               if (newScore > scores[start][end][tagNum]) {
                 scores[start][end][tagNum] = newScore;

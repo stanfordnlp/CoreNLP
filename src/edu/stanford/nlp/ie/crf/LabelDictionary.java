@@ -14,7 +14,7 @@ import edu.stanford.nlp.util.Index;
 
 /**
  * Constrains test-time inference to labels observed in training.
- *
+ * 
  * @author Spence Green
  *
  */
@@ -47,7 +47,7 @@ public class LabelDictionary implements Serializable {
 
   /**
    * Increment counts for an observation/label pair.
-   *
+   * 
    * @param observation
    * @param label
    */
@@ -71,7 +71,7 @@ public class LabelDictionary implements Serializable {
 
   /**
    * Get the allowed label set for an observation.
-   *
+   * 
    * @param observation
    * @return The allowed label set, or null if the observation is unconstrained.
    */
@@ -82,9 +82,9 @@ public class LabelDictionary implements Serializable {
 
   /**
    * Setup the constrained label sets and free bookkeeping resources.
-   *
+   * 
    * @param threshold
-   * @param labelIndex
+   * @param labelIndex 
    */
   public void lock(int threshold, Index<String> labelIndex) {
     if (labelDictionary != null) throw new RuntimeException("Label dictionary is already locked");
@@ -95,7 +95,7 @@ public class LabelDictionary implements Serializable {
     labelDictionary = new int[constrainedObservations.size()][];
     observationIndex = new HashIndex<String>(constrainedObservations.size());
     for (String observation : constrainedObservations) {
-      int i = observationIndex.addToIndex(observation);
+      int i = observationIndex.indexOf(observation, true);
       assert i < labelDictionary.length;
       Set<String> allowedLabels = observedLabels.get(observation);
       labelDictionary[i] = new int[allowedLabels.size()];
@@ -109,7 +109,7 @@ public class LabelDictionary implements Serializable {
     }
     observationIndex.lock();
     System.err.printf("#constraints: %d%n", labelDictionary.length);
-
+    
     // Free bookkeeping data structures
     observationCounts = null;
     observedLabels = null;
