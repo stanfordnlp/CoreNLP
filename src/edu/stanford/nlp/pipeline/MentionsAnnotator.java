@@ -2,8 +2,12 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.time.TimeAnnotations;
+import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Pair;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,13 +42,36 @@ public class MentionsAnnotator implements Annotator {
     this();
   }
 
+  private static Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = new Function<Pair<CoreLabel, CoreLabel>, Boolean>() {
+    @Override
+    public Boolean apply(Pair<CoreLabel, CoreLabel> in) {
+      // First argument is the current token
+      CoreLabel cur = in.first;
+      // Second argument the previous token
+      CoreLabel prev = in.second;
+      if (cur == null || prev == null) {
+        return false;
+      }
+      Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
+      Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
+      String tid1 = (timex1 != null)? timex1.tid():null;
+      String tid2 = (timex2 != null)? timex2.tid():null;
+      if (tid1 == null || tid2 == null) {
+        return tid1 == tid2;
+      } else {
+        return tid1.equals(tid2);
+      }
+    }
+  };
+
   @Override
   public void annotate(Annotation annotation) {
+
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
     Integer annoTokenBegin = annotation.get(CoreAnnotations.TokenBeginAnnotation.class);
     if (annoTokenBegin == null) { annoTokenBegin = 0; }
     List<CoreMap> chunks = chunkIdentifier.getAnnotatedChunks(tokens, annoTokenBegin,
-            CoreAnnotations.TextAnnotation.class, CoreAnnotations.NamedEntityTagAnnotation.class);
+            CoreAnnotations.TextAnnotation.class, CoreAnnotations.NamedEntityTagAnnotation.class, IS_TOKENS_COMPATIBLE);
     annotation.set(CoreAnnotations.MentionsAnnotation.class, chunks);
 
     // By now entity mentions have been annotated and TextAnnotation and NamedEntityAnnotation marked
@@ -52,8 +79,9 @@ public class MentionsAnnotator implements Annotator {
     List<CoreMap> mentions = annotation.get(CoreAnnotations.MentionsAnnotation.class);
     if (mentions != null) {
       for (CoreMap mention: mentions) {
+        List<CoreLabel> mentionTokens = mention.get(CoreAnnotations.TokensAnnotation.class);
         String name = (String) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
-                CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, mention.get(CoreAnnotations.TokensAnnotation.class));
+                CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, mentionTokens);
         if (name == null) {
           name = mention.get(CoreAnnotations.TextAnnotation.class);
         } else {
@@ -62,6 +90,13 @@ public class MentionsAnnotator implements Annotator {
         //mention.set(CoreAnnotations.EntityNameAnnotation.class, name);
         String type = mention.get(CoreAnnotations.NamedEntityTagAnnotation.class);
         mention.set(CoreAnnotations.EntityTypeAnnotation.class, type);
+
+        // Take first non nil as timex for the mention
+        Timex timex = (Timex) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
+            TimeAnnotations.TimexAnnotation.class, mentionTokens);
+        if (timex != null) {
+          mention.set(TimeAnnotations.TimexAnnotation.class, timex);
+        }
       }
     }
   }

@@ -2,6 +2,8 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +65,21 @@ public class LabeledChunkIdentifier {
     return getAnnotatedChunks(tokens, totalTokensOffset, textKey, labelKey, null, null);
   }
 
+  @SuppressWarnings("unchecked")
+  public List<CoreMap> getAnnotatedChunks(List<CoreLabel> tokens, int totalTokensOffset, Class textKey, Class labelKey,
+                                          Function<Pair<CoreLabel, CoreLabel>, Boolean> checkTokensCompatible)
+  {
+    return getAnnotatedChunks(tokens, totalTokensOffset, textKey, labelKey, null, null, checkTokensCompatible);
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<CoreMap> getAnnotatedChunks(List<CoreLabel> tokens, int totalTokensOffset,
+                                          Class textKey, Class labelKey,
+                                          Class tokenChunkKey, Class tokenLabelKey)
+  {
+    return getAnnotatedChunks(tokens, totalTokensOffset, textKey, labelKey, tokenChunkKey, tokenLabelKey, null);
+  }
+
   /**
    * Find and annotate chunks.  Returns list of CoreMap (Annotation) objects
    * each representing a chunk with the following annotations set:
@@ -78,12 +95,14 @@ public class LabeledChunkIdentifier {
    * @param textKey - Key to use to find the token text
    * @param tokenChunkKey - If not null, each token is annotated with the chunk using this key
    * @param tokenLabelKey - If not null, each token is annotated with the text associated with the chunk using this key
+   * @param checkTokensCompatible - If not null, additional check to see if this token and the previous are compatible
    * @return List of annotations (each as a CoreMap) representing the chunks of tokens
    */
   @SuppressWarnings("unchecked")
   public List<CoreMap> getAnnotatedChunks(List<CoreLabel> tokens, int totalTokensOffset,
                                           Class textKey, Class labelKey,
-                                          Class tokenChunkKey, Class tokenLabelKey)
+                                          Class tokenChunkKey, Class tokenLabelKey,
+                                          Function<Pair<CoreLabel, CoreLabel>, Boolean> checkTokensCompatible)
   {
     List<CoreMap> chunks = new ArrayList();
     LabelTagType prevTagType = null;
@@ -92,15 +111,26 @@ public class LabeledChunkIdentifier {
       CoreLabel token = tokens.get(i);
       String label = (String) token.get(labelKey);
       LabelTagType curTagType = getTagType(label);
-      if (isEndOfChunk(prevTagType, curTagType)) {
-        int tokenEnd = i;
-        CoreMap chunk = ChunkAnnotationUtils.getAnnotatedChunk(tokens, tokenBegin, tokenEnd, totalTokensOffset,
-                                                               tokenChunkKey, textKey, tokenLabelKey);
-        chunk.set(labelKey, prevTagType.type);
-        chunks.add(chunk);
-        tokenBegin = -1;
+      boolean isCompatible = true;
+      if (checkTokensCompatible != null) {
+        CoreLabel prev = null;
+        if (i > 0) {
+          prev = tokens.get(i-1);
+        }
+        Pair<CoreLabel,CoreLabel> p = Pair.makePair(token, prev);
+        isCompatible = checkTokensCompatible.apply(p);
       }
-      if (isStartOfChunk(prevTagType, curTagType)) {
+      if (isEndOfChunk(prevTagType, curTagType) || !isCompatible) {
+        int tokenEnd = i;
+        if (tokenBegin >= 0 && tokenEnd > tokenBegin) {
+          CoreMap chunk = ChunkAnnotationUtils.getAnnotatedChunk(tokens, tokenBegin, tokenEnd, totalTokensOffset,
+              tokenChunkKey, textKey, tokenLabelKey);
+          chunk.set(labelKey, prevTagType.type);
+          chunks.add(chunk);
+          tokenBegin = -1;
+        }
+      }
+      if (isStartOfChunk(prevTagType, curTagType) || (!isCompatible && isChunk(curTagType))) {
         if (tokenBegin >= 0) {
           throw new RuntimeException("New chunk started, prev chunk not ended yet!");
         }
@@ -110,7 +140,7 @@ public class LabeledChunkIdentifier {
     }
     if (tokenBegin >= 0) {
       CoreMap chunk = ChunkAnnotationUtils.getAnnotatedChunk(tokens, tokenBegin, tokens.size(), totalTokensOffset,
-                                                             tokenChunkKey, textKey, tokenLabelKey);
+          tokenChunkKey, textKey, tokenLabelKey);
       chunk.set(labelKey, prevTagType.type);
       chunks.add(chunk);
     }
@@ -200,6 +230,10 @@ public class LabeledChunkIdentifier {
     } else {
       return isStartOfChunk(prev.tag, prev.type, cur.tag, cur.type);
     }
+  }
+
+  public static boolean isChunk(LabelTagType cur) {
+    return (!"O".equals(cur.tag) && !".".equals(cur.tag));
   }
 
   private static Pattern labelPattern = Pattern.compile("^([^-]*)-(.*)$");
