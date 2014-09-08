@@ -150,11 +150,6 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     return indexOf(o, false);
   }
 
-  @Override
-  public int addToIndex(E o) {
-    return indexOf(o, true);
-  }
-
   /**
    * Takes an Object and returns the integer index of the Object,
    * perhaps adding it to the index first.
