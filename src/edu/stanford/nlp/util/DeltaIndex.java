@@ -154,12 +154,6 @@ public class DeltaIndex<E> extends AbstractCollection<E> implements Index<E> {
   }
 
   @Override
-  public <T> T[] toArray(T[] a) {
-    List<E> results = objectsList();
-    return results.toArray(a);
-  }
-
-  @Override
   public boolean add(E e) {
     if (backingIndex.contains(e))
       return false;
