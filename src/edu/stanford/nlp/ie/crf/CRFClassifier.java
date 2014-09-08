@@ -875,7 +875,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           }
           groupSuffix += "-c:"+i;
 
-          int groupIndex = templateGroupIndex.indexOf(groupSuffix, true);
+          int groupIndex = templateGroupIndex.addToIndex(groupSuffix);
           featureIndexToTemplateIndex.put(index, groupIndex);
         }
       }
@@ -1746,12 +1746,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     for (int i = beginIndex; i < endIndex; i++) {
       int oldIndex = nodeFeatureOriginalIndices.get(i);
       String f = featureIndex.get(oldIndex);
-      int index = newFeatureIndex.indexOf(f, true);
+      int index = newFeatureIndex.addToIndex(f);
       newNodeFeatureIndex.add(index);
     }
     for (Integer edgeFIndex: edgeFeatureOriginalIndices) {
       String f = featureIndex.get(edgeFIndex);
-      int index = newFeatureIndex.indexOf(f, true);
+      int index = newFeatureIndex.addToIndex(f);
       newEdgeFeatureIndex.add(index);
     }
 
