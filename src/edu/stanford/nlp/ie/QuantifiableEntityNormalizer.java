@@ -1285,7 +1285,7 @@ public class QuantifiableEntityNormalizer {
       if (!compatible) return compatible;
     }
 
-    if ("TIME".equals(tag) || "SET".equals(tag) || "DATE".equals(tag)) {
+    if ("TIME".equals(tag) || "SET".equals(tag) || "DATE".equals(tag) || "DURATION".equals(tag)) {
       // Check timex...
       Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
       Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
@@ -1342,7 +1342,7 @@ public class QuantifiableEntityNormalizer {
       E wprev = (i > 0)? list.get(i-1):null;
       // if the current wi is a non-continuation and the last one was a
       // quantity, we close and process the last segment.
-      if ((currNerTag == null || ! currNerTag.equals(prevNerTag) || !isCompatible(currNerTag, wprev, wi)) && quantifiable.contains(prevNerTag)) {
+      if ((currNerTag == null || ! currNerTag.equals(prevNerTag) || !isCompatible(prevNerTag, wprev, wi)) && quantifiable.contains(prevNerTag)) {
         String compModifier = null;
         // special handling of TIME
         if (prevNerTag.equals("TIME")) {
