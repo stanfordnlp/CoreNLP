@@ -20,7 +20,7 @@ import edu.stanford.nlp.util.Index;
 /**
  * A fast threadsafe index that supports constant-time lookup in both directions. This
  * index is tuned for circumstances in which readers significantly outnumber writers.
- * 
+ *
  * @author Spence Green
  *
  * @param <E>
@@ -36,17 +36,17 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   private int indexSize;
   private final ReentrantLock lock;
   private final AtomicReference<Object[]> index2Item;
-  
+
   /**
    * Constructor.
    */
   public ConcurrentHashIndex() {
     this(DEFAULT_INITIAL_CAPACITY);
   }
-  
+
   /**
    * Constructor.
-   * 
+   *
    * @param initialCapacity
    */
   public ConcurrentHashIndex(int initialCapacity) {
@@ -76,19 +76,24 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   }
 
   @Override
+  public int addToIndex(E o) {
+    return indexOf(o, true);
+  }
+
+  @Override
   public int indexOf(E o, boolean add) {
     Integer index = item2Index.get(o);
     if (index != null) {
       return index;
     }
-    
+
     if (add) {
       lock.lock();
       try {
         // Recheck state
         if (item2Index.containsKey(o)) {
           return item2Index.get(o);
-        
+
         } else {
           final int newIndex = indexSize++;
           Object[] arr = index2Item.get();
@@ -107,7 +112,7 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
       } finally {
         lock.unlock();
       }
-    
+
     } else {
       return UNKNOWN_ID;
     }

@@ -168,14 +168,14 @@ public class IntTaggedWord implements Serializable, Comparable<IntTaggedWord> {
     } else if (wordString.equals(STOP)) {
       word = STOP_WORD_INT;
     } else {
-      word = wordIndex.indexOf(wordString, true);
+      word = wordIndex.addToIndex(wordString);
     }
     if (tagString.equals(ANY)) {
       tag = (short) ANY_TAG_INT;
     } else if (tagString.equals(STOP)) {
       tag = (short) STOP_TAG_INT;
     } else {
-      tag = (short) tagIndex.indexOf(tagString, true);
+      tag = (short) tagIndex.addToIndex(tagString);
     }
   }
 

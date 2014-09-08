@@ -51,9 +51,9 @@ public class BinaryRule implements Rule, Comparable<BinaryRule>, Serializable {
   public BinaryRule(String s, Index<String> index) {
     String[] fields = StringUtils.splitOnCharWithQuoting(s, ' ', '\"', '\\');
     //    System.out.println("fields:\n" + fields[0] + "\n" + fields[2] + "\n" + fields[3] + "\n" + fields[4]);
-    this.parent = index.indexOf(fields[0], true);
-    this.leftChild = index.indexOf(fields[2], true);
-    this.rightChild = index.indexOf(fields[3], true);
+    this.parent = index.addToIndex(fields[0]);
+    this.leftChild = index.addToIndex(fields[2]);
+    this.rightChild = index.addToIndex(fields[3]);
     this.score = Float.parseFloat(fields[4]);
   }
 
