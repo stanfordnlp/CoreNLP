@@ -3,8 +3,10 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.classify.ColumnDataClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.Datum;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.util.Collections;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -23,6 +25,7 @@ public class ColumnDataClassifierAnnotator implements Annotator {
   public ColumnDataClassifierAnnotator(String propFile) {
     cdcClassifier = new ColumnDataClassifier(propFile);
   }
+  public ColumnDataClassifierAnnotator(Properties props) { cdcClassifier = new ColumnDataClassifier(props); }
 
   public ColumnDataClassifierAnnotator(String propFile, boolean verbose) {
     cdcClassifier = new ColumnDataClassifier(propFile);
@@ -63,14 +66,17 @@ public class ColumnDataClassifierAnnotator implements Annotator {
     return Collections.emptySet();
   }
 
+  //test - run from your top javanlp directory to get the files etc.
   public static void main(String[] args) {
-    ColumnDataClassifierAnnotator annotator =
-            new ColumnDataClassifierAnnotator("projects/core/src/edu/stanford/nlp/classify/mood.prop",true);
+
+    Properties props = StringUtils.propFileToProperties("projects/core/src/edu/stanford/nlp/classify/mood.prop");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
     Annotation happyAnnotation = new Annotation("I am so glad this is awesome");
-    annotator.annotate(happyAnnotation);
+    pipeline.annotate(happyAnnotation);
     Annotation sadAnnotation = new Annotation("I am so gloomy and depressed");
-    annotator.annotate(sadAnnotation);
+    pipeline.annotate(sadAnnotation);
     Annotation bothAnnotation = new Annotation("I am so gloomy gloomy gloomy gloomy glad");
-    annotator.annotate(bothAnnotation);
+    pipeline.annotate(bothAnnotation);
   }
 }

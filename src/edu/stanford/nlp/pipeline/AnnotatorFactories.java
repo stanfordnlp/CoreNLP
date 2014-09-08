@@ -499,6 +499,22 @@ public class AnnotatorFactories {
     };
   }
 
+  public static AnnotatorFactory columnDataClassifier(Properties properties, final AnnotatorImplementations annotatorImpls) {
+    return new AnnotatorFactory(properties, annotatorImpls) {
+      @Override
+      public Annotator create() {
+        if(!properties.containsKey("loadClassifier"))
+          throw new RuntimeException("Must load a classifier when creating a column data classifier annotator");
+        return new ColumnDataClassifierAnnotator(properties);
+      }
+
+      @Override
+      protected String additionalSignature() {
+        return "classifier="+properties.get("loadClassifier="+properties.get("loadClassifier"));
+      }
+    };
+  }
+
 
 
 
