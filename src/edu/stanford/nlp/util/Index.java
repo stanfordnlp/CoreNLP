@@ -62,7 +62,9 @@ public interface Index<E> extends Iterable<E>, Serializable {
    * @param add Whether it is okay to add new items to the index
    * @return the index of the Object argument.  Returns -1 if the object is not in the index
    *     or if the Index is locked.
+   * @deprecated You should use either the addToIndex(E) or indexOf(E) methods instead
    */
+  @Deprecated
   public abstract int indexOf(E o, boolean add);
 
 

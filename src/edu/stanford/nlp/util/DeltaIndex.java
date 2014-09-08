@@ -59,26 +59,44 @@ public class DeltaIndex<E> extends AbstractCollection<E> implements Index<E> {
 
   @Override
   public int indexOf(E o) {
-    return indexOf(o, false);
-  }
-
-  @Override
-  public int addToIndex(E o) {
-    return indexOf(o, true);
-  }
-
-  @Override
-  public int indexOf(E o, boolean add) {
-    int index = backingIndex.indexOf(o, false);
+    int index = backingIndex.indexOf(o);
     if (index >= 0) {
       return index;
     }
 
-    index = spilloverIndex.indexOf(o, add && !locked);
+    index = spilloverIndex.indexOf(o);
     if (index >= 0) {
       return index + backingIndexSize;
     }
-    return index;
+    return index; // i.e., return -1
+  }
+
+  @Override
+  public int addToIndex(E o) {
+    int index = backingIndex.indexOf(o);
+    if (index >= 0) {
+      return index;
+    }
+
+    if (locked) {
+      index = spilloverIndex.indexOf(o);
+    } else {
+      index = spilloverIndex.addToIndex(o);
+    }
+    if (index >= 0) {
+      return index + backingIndexSize;
+    }
+    return index; // i.e., return -1
+  }
+
+  @Override
+  @Deprecated
+  public int indexOf(E o, boolean add) {
+    if (add) {
+      return addToIndex(o);
+    } else {
+      return indexOf(o);
+    }
   }
 
   @Override
