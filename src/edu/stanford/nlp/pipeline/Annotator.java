@@ -1,9 +1,9 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.util.ArraySet;
+
 import java.util.Collections;
 import java.util.Set;
-
-import edu.stanford.nlp.util.ArraySet;
 
 /**
  * This is an interface for adding annotations to a fully annotated
@@ -130,6 +130,7 @@ public interface Annotator {
   public static final Requirement NUMBER_REQUIREMENT = new Requirement("number");
   public static final Requirement TIME_WORDS_REQUIREMENT = new Requirement("timewords");
   public static final Requirement QUANTIFIABLE_ENTITY_NORMALIZATION_REQUIREMENT = new Requirement("quantifiable_entity_normalization");
+  public static final Requirement COLUMN_DATA_CLASSIFIER = new Requirement("column_data_classifer");
 
   /**
    * The Stanford Parser can produce this if it is specifically requested

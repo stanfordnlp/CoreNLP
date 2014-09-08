@@ -20,7 +20,7 @@ import edu.stanford.nlp.util.Index;
 /**
  * A fast threadsafe index that supports constant-time lookup in both directions. This
  * index is tuned for circumstances in which readers significantly outnumber writers.
- * 
+ *
  * @author Spence Green
  *
  * @param <E>
@@ -36,17 +36,17 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   private int indexSize;
   private final ReentrantLock lock;
   private final AtomicReference<Object[]> index2Item;
-  
+
   /**
    * Constructor.
    */
   public ConcurrentHashIndex() {
     this(DEFAULT_INITIAL_CAPACITY);
   }
-  
+
   /**
    * Constructor.
-   * 
+   *
    * @param initialCapacity
    */
   public ConcurrentHashIndex(int initialCapacity) {
@@ -76,46 +76,51 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   }
 
   @Override
-  public int indexOf(E o, boolean add) {
+  public int addToIndex(E o) {
     Integer index = item2Index.get(o);
     if (index != null) {
       return index;
     }
-    
-    if (add) {
-      lock.lock();
-      try {
-        // Recheck state
-        if (item2Index.containsKey(o)) {
-          return item2Index.get(o);
-        
-        } else {
-          final int newIndex = indexSize++;
-          Object[] arr = index2Item.get();
-          assert newIndex <= arr.length;
-          if (newIndex == arr.length) {
-            // Increase size of array if necessary
-            Object[] newArr = new Object[2*newIndex];
-            System.arraycopy(arr, 0, newArr, 0, arr.length);
-            arr = newArr;
-          }
-          arr[newIndex] = o;
-          index2Item.set(arr);
-          item2Index.put(o, newIndex);
-          return newIndex;
+
+    lock.lock();
+    try {
+      // Recheck state
+      if (item2Index.containsKey(o)) {
+        return item2Index.get(o);
+
+      } else {
+        final int newIndex = indexSize++;
+        Object[] arr = index2Item.get();
+        assert newIndex <= arr.length;
+        if (newIndex == arr.length) {
+          // Increase size of array if necessary
+          Object[] newArr = new Object[2*newIndex];
+          System.arraycopy(arr, 0, newArr, 0, arr.length);
+          arr = newArr;
         }
-      } finally {
-        lock.unlock();
+        arr[newIndex] = o;
+        index2Item.set(arr);
+        item2Index.put(o, newIndex);
+        return newIndex;
       }
-    
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  @Override
+  @Deprecated
+  public int indexOf(E o, boolean add) {
+    if (add) {
+      return addToIndex(o);
     } else {
-      return UNKNOWN_ID;
+      return indexOf(o);
     }
   }
 
   @Override
   public boolean add(E o) {
-    return indexOf(o, true) != UNKNOWN_ID;
+    return addToIndex(o) != UNKNOWN_ID;
   }
 
   @Override
@@ -152,10 +157,14 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   }
 
   @Override
-  public void lock() {}
+  public void lock() {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
-  public void unlock() {}
+  public void unlock() {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public void saveToWriter(Writer out) throws IOException {
