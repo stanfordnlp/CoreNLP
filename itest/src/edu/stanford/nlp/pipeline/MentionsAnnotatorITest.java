@@ -105,7 +105,7 @@ public class MentionsAnnotatorITest extends TestCase {
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
-    // TODO: Fixme - separate out the two mentions of July 3rd!!!
+    // TODO: Fixme!!!
     String[] expectedMentions = {
         "[Text=July 3rd July 3rd CharacterOffsetBegin=0 CharacterOffsetEnd=17 Tokens=[July-1, 3rd-2, July-3, 3rd-4] TokenBegin=0 TokenEnd=4 NamedEntityTag=DATE NormalizedNamedEntityTag=XXXX-07-03 EntityType=DATE Timex=<TIMEX3 tid=\"t1\" type=\"DATE\" value=\"XXXX-07-03\">July 3rd July 3rd</TIMEX3>]",
         "[Text=two CharacterOffsetBegin=22 CharacterOffsetEnd=25 Tokens=[two-6] TokenBegin=5 TokenEnd=6 NamedEntityTag=NUMBER NormalizedNamedEntityTag=2.0 EntityType=NUMBER]"
@@ -127,39 +127,5 @@ public class MentionsAnnotatorITest extends TestCase {
         "[Text=five CharacterOffsetBegin=19 CharacterOffsetEnd=23 Tokens=[five-5] TokenBegin=4 TokenEnd=5 NamedEntityTag=NUMBER NormalizedNamedEntityTag=5.0 EntityType=NUMBER]"
     };
     compareMentions("testNumbers", expectedMentions, mentions);
-  }
-
-  public void testNewsText() {
-    Annotation doc = createDocument("Duke of Cambridge, Prince William, unveiled a new China Center in the University of Oxford Monday.\n" +
-        "Covering an area nearly 5,500 square meters, the new Dickson Poon University of Oxford China Center in St Hugh's College cost about 21 million pounds.\n" +
-        "Dickson Poon, a philanthropist from Hong Kong, China, is the one of the major donors of the center, who contributed 10 million British pounds (16.14 million U.S. dollars).");
-
-    MentionsAnnotator annotator = getMentionsAnnotator();
-
-    annotator.annotate(doc);
-    List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
-    // TODO: "Duke of Cambridge" should be one mention, "Prince William" should be one mention
-    //       "nearly 5,500 square meters"? "10 million British pounds", "16.14 million U.S. dollars"
-    String[] expectedMentions = {
-        "[Text=Duke CharacterOffsetBegin=0 CharacterOffsetEnd=4 Tokens=[Duke-1] TokenBegin=0 TokenEnd=1 NamedEntityTag=PERSON EntityType=PERSON]",
-        "[Text=Cambridge CharacterOffsetBegin=8 CharacterOffsetEnd=17 Tokens=[Cambridge-3] TokenBegin=2 TokenEnd=3 NamedEntityTag=LOCATION EntityType=LOCATION]",
-        "[Text=William CharacterOffsetBegin=26 CharacterOffsetEnd=33 Tokens=[William-6] TokenBegin=5 TokenEnd=6 NamedEntityTag=PERSON EntityType=PERSON]",
-        "[Text=China Center CharacterOffsetBegin=50 CharacterOffsetEnd=62 Tokens=[China-11, Center-12] TokenBegin=10 TokenEnd=12 NamedEntityTag=ORGANIZATION EntityType=ORGANIZATION]",
-        "[Text=University of Oxford CharacterOffsetBegin=70 CharacterOffsetEnd=90 Tokens=[University-15, of-16, Oxford-17] TokenBegin=14 TokenEnd=17 NamedEntityTag=ORGANIZATION EntityType=ORGANIZATION]",
-        "[Text=Monday CharacterOffsetBegin=91 CharacterOffsetEnd=97 Tokens=[Monday-18] TokenBegin=17 TokenEnd=18 NamedEntityTag=DATE NormalizedNamedEntityTag=XXXX-WXX-1 EntityType=DATE Timex=<TIMEX3 tid=\"t1\" type=\"DATE\" value=\"XXXX-WXX-1\">Monday</TIMEX3>]",
-        "[Text=5,500 CharacterOffsetBegin=123 CharacterOffsetEnd=128 Tokens=[5,500-5] TokenBegin=23 TokenEnd=24 NamedEntityTag=NUMBER NormalizedNamedEntityTag=~5500.0 EntityType=NUMBER]",
-        "[Text=Dickson Poon University of Oxford China Center CharacterOffsetBegin=152 CharacterOffsetEnd=198 Tokens=[Dickson-11, Poon-12, University-13, of-14, Oxford-15, China-16, Center-17] TokenBegin=29 TokenEnd=36 NamedEntityTag=ORGANIZATION EntityType=ORGANIZATION]",
-        "[Text=St Hugh 's College CharacterOffsetBegin=202 CharacterOffsetEnd=219 Tokens=[St-19, Hugh-20, 's-21, College-22] TokenBegin=37 TokenEnd=41 NamedEntityTag=ORGANIZATION EntityType=ORGANIZATION]",
-        "[Text=21 million pounds CharacterOffsetBegin=231 CharacterOffsetEnd=248 Tokens=[21-25, million-26, pounds-27] TokenBegin=43 TokenEnd=46 NamedEntityTag=MONEY NormalizedNamedEntityTag=~£2.1E7 EntityType=MONEY]",
-        "[Text=Dickson Poon CharacterOffsetBegin=250 CharacterOffsetEnd=262 Tokens=[Dickson-1, Poon-2] TokenBegin=47 TokenEnd=49 NamedEntityTag=PERSON EntityType=PERSON]",
-        "[Text=Hong Kong CharacterOffsetBegin=286 CharacterOffsetEnd=295 Tokens=[Hong-7, Kong-8] TokenBegin=53 TokenEnd=55 NamedEntityTag=LOCATION EntityType=LOCATION]",
-        "[Text=China CharacterOffsetBegin=297 CharacterOffsetEnd=302 Tokens=[China-10] TokenBegin=56 TokenEnd=57 NamedEntityTag=LOCATION EntityType=LOCATION]",
-        "[Text=one CharacterOffsetBegin=311 CharacterOffsetEnd=314 Tokens=[one-14] TokenBegin=60 TokenEnd=61 NamedEntityTag=NUMBER NormalizedNamedEntityTag=1.0 EntityType=NUMBER]",
-        "[Text=10 million CharacterOffsetBegin=366 CharacterOffsetEnd=376 Tokens=[10-25, million-26] TokenBegin=71 TokenEnd=73 NamedEntityTag=NUMBER NormalizedNamedEntityTag=1.0E7 EntityType=NUMBER]",
-        "[Text=British CharacterOffsetBegin=377 CharacterOffsetEnd=384 Tokens=[British-27] TokenBegin=73 TokenEnd=74 NamedEntityTag=MISC EntityType=MISC]",
-        "[Text=16.14 million CharacterOffsetBegin=393 CharacterOffsetEnd=406 Tokens=[16.14-30, million-31] TokenBegin=76 TokenEnd=78 NamedEntityTag=NUMBER NormalizedNamedEntityTag=1.614E7 EntityType=NUMBER]",
-        "[Text=U.S. CharacterOffsetBegin=407 CharacterOffsetEnd=411 Tokens=[U.S.-32] TokenBegin=78 TokenEnd=79 NamedEntityTag=LOCATION EntityType=LOCATION]"
-    };
-    compareMentions("testNewsText", expectedMentions, mentions);
   }
 }
