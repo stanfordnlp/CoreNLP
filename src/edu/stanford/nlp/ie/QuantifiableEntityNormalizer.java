@@ -1276,20 +1276,26 @@ public class QuantifiableEntityNormalizer {
     }
   }
 
-  public static <E extends CoreMap> boolean isCompatible(E prev, E cur) {
-    // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
-    Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
-    Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
-    boolean compatible = checkNumbers(n1,n2);
-    if (!compatible) return compatible;
+  public static <E extends CoreMap> boolean isCompatible(String tag, E prev, E cur) {
+    if ("NUMBER".equals(tag) || "ORDINAL".equals(tag)) {
+      // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
+      Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+      Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+      boolean compatible = checkNumbers(n1,n2);
+      if (!compatible) return compatible;
+    }
 
-    // Check timex...
-    Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
-    Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
-    String tid1 = (timex1 != null)? timex1.tid():null;
-    String tid2 = (timex2 != null)? timex2.tid():null;
-    compatible = checkStrings(tid1,tid2);
-    return compatible;
+    if ("TIME".equals(tag) || "SET".equals(tag) || "DATE".equals(tag)) {
+      // Check timex...
+      Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
+      Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
+      String tid1 = (timex1 != null)? timex1.tid():null;
+      String tid2 = (timex2 != null)? timex2.tid():null;
+      boolean compatible = checkStrings(tid1,tid2);
+      if (!compatible) return compatible;
+    }
+
+    return true;
   }
 
   /**
@@ -1336,7 +1342,7 @@ public class QuantifiableEntityNormalizer {
       E wprev = (i > 0)? list.get(i-1):null;
       // if the current wi is a non-continuation and the last one was a
       // quantity, we close and process the last segment.
-      if ((currNerTag == null || ! currNerTag.equals(prevNerTag) || !isCompatible(wprev, wi)) && quantifiable.contains(prevNerTag)) {
+      if ((currNerTag == null || ! currNerTag.equals(prevNerTag) || !isCompatible(currNerTag, wprev, wi)) && quantifiable.contains(prevNerTag)) {
         String compModifier = null;
         // special handling of TIME
         if (prevNerTag.equals("TIME")) {
