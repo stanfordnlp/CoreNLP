@@ -1,7 +1,6 @@
 package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.util.ArrayUtils;
 
 import java.io.Serializable;
 
@@ -11,11 +10,8 @@ import java.io.Serializable;
  *
  * @author Galen Andrew
  */
-public class LogPrior  implements Serializable {
-  
-  /**
-   * 
-   */
+public class LogPrior implements Serializable {
+
   private static final long serialVersionUID = 7826853908892790965L;
 
   public enum LogPriorType { NULL, QUADRATIC, HUBER, QUARTIC, COSH, ADAPT, MULTIPLE_QUADRATIC }
@@ -27,7 +23,7 @@ public class LogPrior  implements Serializable {
     else if (name.equalsIgnoreCase("quartic")) { return LogPriorType.QUARTIC; }
     else if (name.equalsIgnoreCase("cosh")) { return LogPriorType.COSH; }
 //    else if (name.equalsIgnoreCase("multiple")) { return LogPriorType.MULTIPLE; }
-    else { throw new RuntimeException("Unknown LogPriorType: "+name); }
+    else { throw new RuntimeException("Unknown LogPriorType: " + name); }
   }
 
   // these fields are just for the ADAPT prior -
@@ -46,7 +42,7 @@ public class LogPrior  implements Serializable {
     return type;
   }
 
-  public final LogPriorType type;
+  private final LogPriorType type;
 
   public LogPrior() {
     this(LogPriorType.QUADRATIC);
@@ -86,10 +82,10 @@ public class LogPrior  implements Serializable {
 
   // this is the C variable in CSFoo's MM paper C = 1/\sigma^2
 //  private double[] regularizationHyperparameters = null;
-  
+
   private double[] sigmaSqM = null;
   private double[] sigmaQuM = null;
-  
+
 
 //  public double[] getRegularizationHyperparameters() {
 //    return regularizationHyperparameters;
@@ -116,7 +112,7 @@ public class LogPrior  implements Serializable {
 //    this.regularizationHyperparameters = regularizationHyperparameters;
   }
 
-  
+
 //  private double sigma;
   private double sigmaSq;
   private double sigmaQu;
@@ -144,9 +140,9 @@ public class LogPrior  implements Serializable {
     } else {
       throw new RuntimeException("LogPrior.getSigmaSquaredM is undefined for any prior but MULTIPLE_QUADRATIC" + this);
     }
-  }  
-  
-  
+  }
+
+
   public double getEpsilon() {
     if (type == LogPriorType.ADAPT) {
       return otherPrior.getEpsilon();
@@ -169,23 +165,23 @@ public class LogPrior  implements Serializable {
 //      //    this.sigma = Math.sqrt(sigmaSq);
 //      double[] sigmaSqM = new double[sigmaM.length];
 //      double[] sigmaQuM = new double[sigmaM.length];
-//      
+//
 //      for (int i = 0;i<sigmaM.length;i++){
-//        sigmaSqM[i] = sigmaM[i] * sigmaM[i];  
-//      }      
+//        sigmaSqM[i] = sigmaM[i] * sigmaM[i];
+//      }
 //      this.sigmaSqM = sigmaSqM;
-//      
+//
 //      for (int i = 0;i<sigmaSqM.length;i++){
-//        sigmaQuM[i] = sigmaSqM[i] * sigmaSqM[i];  
+//        sigmaQuM[i] = sigmaSqM[i] * sigmaSqM[i];
 //      }
 //      this.sigmaQuM = sigmaQuM;
-//      
+//
 //    } else {
 //      throw new RuntimeException("LogPrior.getSigmaSquaredM is undefined for any prior but MULTIPLE_QUADRATIC" + this);
-//    }      
-//  }  
-  
-  
+//    }
+//  }
+
+
   public void setSigmaSquared(double sigmaSq) {
     if (type == LogPriorType.ADAPT) { otherPrior.setSigmaSquared(sigmaSq); }
     else {
@@ -194,7 +190,7 @@ public class LogPrior  implements Serializable {
       this.sigmaQu = sigmaSq * sigmaSq;
     }
   }
-  
+
   public void setSigmaSquaredM(double[] sigmaSq) {
     if (type == LogPriorType.ADAPT) { otherPrior.setSigmaSquaredM(sigmaSq); }
     if (type == LogPriorType.MULTIPLE_QUADRATIC) {
@@ -202,15 +198,15 @@ public class LogPrior  implements Serializable {
       this.sigmaSqM = sigmaSq.clone();
       double[] sigmaQuM = new double[sigmaSq.length];
       for (int i = 0;i<sigmaSq.length;i++){
-        sigmaQuM[i] = sigmaSqM[i] * sigmaSqM[i];  
+        sigmaQuM[i] = sigmaSqM[i] * sigmaSqM[i];
       }
       this.sigmaQuM = sigmaQuM;
-      
+
     } else {
       throw new RuntimeException("LogPrior.getSigmaSquaredM is undefined for any prior but MULTIPLE_QUADRATIC" + this);
-    }         
+    }
   }
-    
+
   public void setEpsilon(double epsilon) {
     if (type == LogPriorType.ADAPT) { otherPrior.setEpsilon(epsilon); }
     else {
@@ -223,28 +219,28 @@ public class LogPrior  implements Serializable {
       double[] newX = ArrayMath.pairwiseSubtract(x, means);
       return otherPrior.computeStochastic(newX, grad, fractionOfData);
     } else if (type == LogPriorType.MULTIPLE_QUADRATIC) {
-      
+
       double[] sigmaSquaredOld = getSigmaSquaredM();
-      double[] sigmaSquaredTemp = sigmaSquaredOld.clone(); 
+      double[] sigmaSquaredTemp = sigmaSquaredOld.clone();
       for (int i = 0; i < x.length; i++) {
         sigmaSquaredTemp[i] /= fractionOfData;
       }
       setSigmaSquaredM(sigmaSquaredTemp);
-      
+
       double val = compute(x, grad);
       setSigmaSquaredM(sigmaSquaredOld);
       return val;
-      
+
     } else {
       double sigmaSquaredOld = getSigmaSquared();
       setSigmaSquared(sigmaSquaredOld / fractionOfData);
-      
+
       double val = compute(x, grad);
       setSigmaSquared(sigmaSquaredOld);
       return val;
     }
   }
-  
+
   /**
    * Adjust the given grad array by adding the prior's gradient component
    * and return the value of the logPrior
@@ -253,7 +249,7 @@ public class LogPrior  implements Serializable {
    * @return the value
    */
   public double compute(double[] x, double[] grad) {
-    
+
     double val = 0.0;
 
     switch (type) {
@@ -317,18 +313,16 @@ public class LogPrior  implements Serializable {
 //          val += x[i] * x[i]* 1/2 * regularizationHyperparameters[i];
 //          grad[i] += x[i] * regularizationHyperparameters[i];
 //        }
-        
+
         for (int i = 0; i < x.length; i++) {
           val += x[i] * x[i] / 2.0 / sigmaSqM[i];
           grad[i] += x[i] / sigmaSqM[i];
         }
-        
-        
+
         return val;
       default:
         throw new RuntimeException("LogPrior.valueAt is undefined for prior of type " + this);
     }
   }
-
 
 }

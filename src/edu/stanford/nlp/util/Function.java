@@ -1,8 +1,6 @@
 package edu.stanford.nlp.util;
 
 
-import java.io.Serializable;
-
 /**
  * An interface for classes that act as a function transforming one object
  * to another.

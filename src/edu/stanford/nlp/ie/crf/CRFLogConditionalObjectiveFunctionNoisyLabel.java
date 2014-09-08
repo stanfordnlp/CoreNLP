@@ -1,11 +1,6 @@
 package edu.stanford.nlp.ie.crf;
 
-import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.optimization.AbstractStochasticCachingDiffUpdateFunction;
-import edu.stanford.nlp.optimization.HasFeatureGrouping;
-import edu.stanford.nlp.util.concurrent.*;
 import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.Pair;
 
 import java.util.*;
 
@@ -18,7 +13,7 @@ public class CRFLogConditionalObjectiveFunctionNoisyLabel extends CRFLogConditio
   protected final double[][] errorMatrix;
 
   CRFLogConditionalObjectiveFunctionNoisyLabel(int[][][][] data, int[][] labels, int window, Index<String> classIndex, List<Index<CRFLabel>> labelIndices, int[] map, String priorType, String backgroundSymbol, double sigma, double[][][][] featureVal, int multiThreadGrad, double[][] errorMatrix) {
-    
+
     super(data, labels, window, classIndex, labelIndices, map, priorType, backgroundSymbol, sigma, featureVal, multiThreadGrad, false);
     this.errorMatrix = errorMatrix;
   }
@@ -29,7 +24,7 @@ public class CRFLogConditionalObjectiveFunctionNoisyLabel extends CRFLogConditio
   }
 
   public void setWeights(double[][] weights) {
-    super.setWeights(weights); 
+    super.setWeights(weights);
   }
 
   @Override

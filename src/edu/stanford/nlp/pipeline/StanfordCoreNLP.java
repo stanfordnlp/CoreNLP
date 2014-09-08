@@ -51,7 +51,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 /**
  * This is a pipeline that takes in a string and returns various analyzed
  * linguistic forms.
- * The String is tokenized via a tokenizer (such as PTBTokenizerAnnotator), and
+ * The String is tokenized via a tokenizer (using a TokenizerAnnotator), and
  * then other sequence model style annotation can be used to add things like
  * lemmas, POS tags, and named entities.  These are returned as a list of CoreLabels.
  * Other analysis components build and store parse trees, dependency graphs, etc.
@@ -243,9 +243,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   }
 
   public boolean getPrintSingletons() {
-    return PropertiesUtils.getBool(properties, "output.printSingletonEntities", false); 
+    return PropertiesUtils.getBool(properties, "output.printSingletonEntities", false);
   }
-   
+
 
   public static boolean isXMLOutputPresent() {
     try {
@@ -343,23 +343,16 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
-                          "false"))) {
-          return annotatorImplementation.whitespaceTokenizer(properties);
-        } else {
-          String options = properties.getProperty("tokenize.options", PTBTokenizerAnnotator.DEFAULT_OPTIONS);
-          boolean keepNewline = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
-          // If they
-          if (properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
-            keepNewline = true;
-          }
-          // If the user specifies "tokenizeNLs=false" in tokenize.options, then this default will
-          // be overridden.
-          if (keepNewline) {
-            options = "tokenizeNLs," + options;
-          }
-          return annotatorImplementation.ptbTokenizer(properties, false, options);
+        String extraOptions = null;
+        boolean keepNewline = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY,
+                                                                     "false"));
+        if (properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
+          keepNewline = true;
         }
+        if (keepNewline) {
+          extraOptions = "tokenizeNLs,";
+        }
+        return annotatorImplementation.tokenizer(properties, false, extraOptions);
       }
 
       @Override
@@ -371,10 +364,16 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         if (properties.getProperty("tokenize.options") != null) {
           os.append(":tokenize.options:" + properties.getProperty("tokenize.options"));
         }
+        if (properties.getProperty("tokenize.language") != null) {
+          os.append(":tokenize.language:" + properties.getProperty("tokenize.language"));
+        }
+        if (properties.getProperty("tokenize.class") != null) {
+          os.append(":tokenize.class:" + properties.getProperty("tokenize.class"));
+        }
         if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
                 "false"))) {
-          os.append(WhitespaceTokenizerAnnotator.EOL_PROPERTY + ":" +
-                  properties.getProperty(WhitespaceTokenizerAnnotator.EOL_PROPERTY,
+          os.append(TokenizerAnnotator.EOL_PROPERTY + ":" +
+                  properties.getProperty(TokenizerAnnotator.EOL_PROPERTY,
                           "false"));
           os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ":" +
                   properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
@@ -1110,7 +1109,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     return ObjectBank.getLineIterator(fileName, new ObjectBank.PathToFileFunction());
   }
 
-  private AnnotationSerializer loadSerializer(String serializerClass, String name, Properties properties) {
+  private static AnnotationSerializer loadSerializer(String serializerClass, String name, Properties properties) {
     AnnotationSerializer serializer = null;
     try {
       // Try loading with properties

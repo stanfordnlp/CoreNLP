@@ -28,8 +28,11 @@
 
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
+import java.util.Map;
+
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.util.Generics;
 
 
 /**
@@ -42,9 +45,16 @@ public abstract class TsurgeonPattern {
 
   static final TsurgeonPattern[] EMPTY_TSURGEON_PATTERN_ARRAY = new TsurgeonPattern[0];
 
-  TsurgeonPatternRoot root;
   final String label;
   final TsurgeonPattern[] children;
+
+  TsurgeonPattern root; // TODO: can remove?
+  protected void setRoot(TsurgeonPatternRoot root) {
+    this.root = root;
+    for (TsurgeonPattern child : children) {
+      child.setRoot(root);
+    }
+  }
 
   /**
    * In some cases, the order of the children has special meaning.
@@ -55,13 +65,6 @@ public abstract class TsurgeonPattern {
   TsurgeonPattern(String label, TsurgeonPattern[] children) {
     this.label = label;
     this.children = children;
-  }
-
-  protected void setRoot(TsurgeonPatternRoot root) {
-    this.root = root;
-    for (TsurgeonPattern child : children) {
-      child.setRoot(root);
-    }
   }
 
   @Override
@@ -81,14 +84,9 @@ public abstract class TsurgeonPattern {
     return resultSB.toString();
   }
 
-  /**
-   * Evaluates the surgery pattern against a {@link Tree} and a {@link TregexMatcher}
-   * that has been successfully matched against the tree.
-   *
-   * @param t The {@link Tree} that has been matched upon; typically this tree will be destructively modified.
-   * @param m The successfully matched {@link TregexMatcher}.
-   * @return Some node in the tree; depends on implementation and use of the specific subclass.
-   */
-  public abstract Tree evaluate(Tree t, TregexMatcher m);
-
+  public TsurgeonMatcher matcher() {
+    throw new UnsupportedOperationException("Only the root node can produce the top level matcher");
+  }
+  
+  public abstract TsurgeonMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer);
 }

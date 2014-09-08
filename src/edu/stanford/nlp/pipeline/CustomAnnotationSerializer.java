@@ -15,7 +15,6 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
-import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.PennTreeReader;
 import edu.stanford.nlp.trees.Tree;
@@ -48,86 +47,6 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
   }
 
 
-  private static final Object LOCK = new Object();
-
-  static SemanticGraph convertIntermediateGraph(IntermediateSemanticGraph ig, List<CoreLabel> sentence) {
-    SemanticGraph graph = new SemanticGraph();
-
-    // first construct the actual nodes; keep them indexed by their index
-    Map<Integer, IndexedWord> nodes = Generics.newHashMap();
-    for(IntermediateNode in: ig.nodes){
-      CoreLabel token = sentence.get(in.index - 1); // index starts at 1!
-      IndexedWord word = new IndexedWord(in.docId, in.sentIndex, in.index, token);
-      word.set(CoreAnnotations.ValueAnnotation.class, word.get(CoreAnnotations.TextAnnotation.class));
-      if(in.copyAnnotation >= 0){
-        word.set(CoreAnnotations.CopyAnnotation.class, in.copyAnnotation);
-      }
-      nodes.put(word.index(), word);
-    }
-    for(IndexedWord node: nodes.values()){
-      graph.addVertex(node);
-    }
-
-    // add all edges to the actual graph
-    for(IntermediateEdge ie: ig.edges){
-      IndexedWord source = nodes.get(ie.source);
-      assert(source != null);
-      IndexedWord target = nodes.get(ie.target);
-      assert(target != null);
-      synchronized (LOCK) {
-        // this is not thread-safe: there are static fields in GrammaticalRelation
-        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.dep);
-        graph.addEdge(source, target, rel, 1.0, ie.isExtra);
-      }
-    }
-
-    // compute root nodes if non-empty
-    if( ! graph.isEmpty()){
-      graph.resetRoots();
-    }
-
-    return graph;
-  }
-
-  /**
-   * This stores the loaded SemanticGraph *before* we could convert the nodes to IndexedWords
-   * This conversion take places later, after we load all sentence tokens
-   */
-  private static class IntermediateSemanticGraph {
-    List<IntermediateNode> nodes;
-    List<IntermediateEdge> edges;
-    IntermediateSemanticGraph() {
-      nodes = new ArrayList<IntermediateNode>();
-      edges = new ArrayList<IntermediateEdge>();
-    }
-  }
-
-  private static class IntermediateNode {
-    String docId;
-    int sentIndex;
-    int index;
-    int copyAnnotation;
-    IntermediateNode(String docId, int sentIndex, int index, int copy) {
-      this.docId = docId;
-      this.sentIndex = sentIndex;
-      this.index = index;
-      this.copyAnnotation = copy;
-    }
-  }
-
-  private static class IntermediateEdge {
-    int source;
-    int target;
-    String dep;
-    boolean isExtra;
-    IntermediateEdge(String dep, int source, int target, boolean isExtra) {
-      this.dep = dep;
-      this.source = source;
-      this.target = target;
-      this.isExtra = isExtra;
-    }
-  }
-
   private static IntermediateSemanticGraph loadDependencyGraph(BufferedReader reader) throws IOException {
     IntermediateSemanticGraph graph = new IntermediateSemanticGraph();
 
@@ -142,15 +61,19 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
       int sentIndex = Integer.valueOf(bits[1]);
       for(int i = 2; i < bits.length; i ++){
         String bit = bits[i];
-        String [] bbits = bit.split("-");
+        String[] bbits = bit.split("-");
         int copyAnnotation = -1;
-        if(bbits.length > 2){
+        boolean isRoot = false;
+        if(bbits.length > 3){
           throw new RuntimeException("ERROR: Invalid format for dependency graph: " + line);
         } else if(bbits.length == 2){
           copyAnnotation = Integer.valueOf(bbits[1]);
+        } else if(bbits.length == 3){
+          copyAnnotation = Integer.valueOf(bbits[1]);
+          isRoot = bbits[2].equals("R");
         }
         int index = Integer.valueOf(bbits[0]);
-        graph.nodes.add(new IntermediateNode(docId, sentIndex, index, copyAnnotation));
+        graph.nodes.add(new IntermediateNode(docId, sentIndex, index, copyAnnotation, isRoot));
       }
     }
 
@@ -160,14 +83,16 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
       String [] bits = line.split("\t");
       for(String bit: bits){
         String [] bbits = bit.split(" ");
-        if(bbits.length < 3 || bbits.length > 4){
+        if(bbits.length < 3 || bbits.length > 6){
           throw new RuntimeException("ERROR: Invalid format for dependency graph: " + line);
         }
         String dep = bbits[0];
         int source = Integer.valueOf(bbits[1]);
         int target = Integer.valueOf(bbits[2]);
         boolean isExtra = (bbits.length == 4) ? Boolean.valueOf(bbits[3]) : false;
-        graph.edges.add(new IntermediateEdge(dep, source, target, isExtra));
+        int sourceCopy = (bbits.length > 4) ? Integer.valueOf(bbits[4]) : 0;
+        int targetCopy = (bbits.length > 5) ? Integer.valueOf(bbits[5]) : 0;
+        graph.edges.add(new IntermediateEdge(dep, source, sourceCopy, target, targetCopy, isExtra));
       }
     }
 
@@ -208,6 +133,13 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
         pw.print(node.get(CoreAnnotations.CopyAnnotation.class));
         // System.out.println("FOUND COPY ANNOTATION: " + node.get(CoreAnnotations.CopyAnnotation.class));
       }
+      if (graph.getRoots().contains(node)) {
+        if (node.containsKey(CoreAnnotations.CopyAnnotation.class)) {
+          pw.print("-R");
+        } else {
+          pw.print("-0-R");
+        }
+      }
     }
     pw.println();
 
@@ -224,9 +156,13 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
       pw.print(edge.getSource().index());
       pw.print(" ");
       pw.print(edge.getTarget().index());
-      if (edge.isExtra()) {
+      if (edge.isExtra() || edge.getSource().copyCount() > 0 || edge.getTarget().copyCount() > 0) {
         pw.print(" ");
         pw.print(edge.isExtra());
+        pw.print(" ");
+        pw.print(edge.getSource().copyCount());
+        pw.print(" ");
+        pw.print(edge.getTarget().copyCount());
       }
       first = false;
     }
@@ -515,11 +451,11 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
       sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
 
       // convert the intermediate graph to an actual SemanticGraph
-      SemanticGraph collapsedDeps = convertIntermediateGraph(intermCollapsedDeps, tokens);
+      SemanticGraph collapsedDeps = intermCollapsedDeps.convertIntermediateGraph(tokens);
       sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, collapsedDeps);
-      SemanticGraph uncollapsedDeps = convertIntermediateGraph(intermUncollapsedDeps, tokens);
+      SemanticGraph uncollapsedDeps = intermUncollapsedDeps.convertIntermediateGraph(tokens);
       sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
-      SemanticGraph ccDeps = convertIntermediateGraph(intermCcDeps, tokens);
+      SemanticGraph ccDeps = intermCcDeps.convertIntermediateGraph(tokens);
       sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
 
       sentences.add(sentence);
@@ -539,6 +475,7 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
     // word
     String word = bits[0].replaceAll(SPACE_HOLDER, " ");
     token.set(CoreAnnotations.TextAnnotation.class, word);
+    token.set(CoreAnnotations.ValueAnnotation.class, word);
     // if(word.length() == 0) System.err.println("FOUND 0-LENGTH TOKEN!");
 
     // lemma
@@ -575,6 +512,9 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
    */
   private static void saveToken(CoreLabel token, boolean haveExplicitAntecedent, PrintWriter pw) {
     String word = token.get(CoreAnnotations.TextAnnotation.class);
+    if (word == null) {
+      word = token.get(CoreAnnotations.ValueAnnotation.class);
+    }
     if(word != null){
       word = word.replaceAll("\\s+", SPACE_HOLDER); // spaces are used for formatting
       pw.print(word);

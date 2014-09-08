@@ -32,8 +32,7 @@ public class TestThreadedCRFClassifier {
   String runClassifier(CRFClassifier crf, String testFile) {
     try {
       ByteArrayOutputStream output = new ByteArrayOutputStream();
-      crf.classifyAndWriteAnswers(testFile, output, 
-                                  crf.makeReaderAndWriter());
+      crf.classifyAndWriteAnswers(testFile, output, crf.makeReaderAndWriter(), true);
       return output.toString(inputEncoding);
     } catch (IOException e) {
       throw new RuntimeException(e);

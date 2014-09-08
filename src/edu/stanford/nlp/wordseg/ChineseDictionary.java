@@ -1,7 +1,6 @@
 package edu.stanford.nlp.wordseg;
 
 import java.io.*;
-import java.io.BufferedInputStream;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -11,11 +10,11 @@ import edu.stanford.nlp.process.ChineseDocumentToSentenceProcessor;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
-import java.util.zip.GZIPInputStream;
 
 /** This class provides a main method that loads various dictionaries, and
- *  saves them in a serialized version, and runtime compiles them into a word list used as a feature in the segmenter, and
- * @author Pi-Chuan Chang
+ *  saves them in a serialized version, and runtime compiles them into a word list used as a feature in the segmenter.
+ *
+ *  @author Pi-Chuan Chang
  */
 
 public class ChineseDictionary {

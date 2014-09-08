@@ -117,36 +117,14 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   private static final Filter<TypedDependency> extraTreeDepFilter = new ExtraTreeDepFilter();
 
 
-  /**
-   * Tries to return a node representing the <code>SUBJECT</code> (whether
-   * nominal or clausal) of the given node <code>t</code>. Probably, node
-   * <code>t</code> should represent a clause or verb phrase.
-   *
-   * @param t A node in this <code>GrammaticalStructure</code>
-   * @return A node which is the subject of node <code>t</code>, or else
-   *         <code>null</code>
-   */
-  public static TreeGraphNode getSubject(TreeGraphNode t) {
-    TreeGraphNode subj = t.getNodeInRelation(NOMINAL_SUBJECT);
-    if (subj != null) {
-      return subj;
-    }
-    subj = t.getNodeInRelation(CLAUSAL_SUBJECT);
-    if (subj != null) {
-      return subj;
-    } else {
-      return t.getNodeInRelation(NOMINAL_PASSIVE_SUBJECT);
-    }
-  }
-
   @Override
   protected void correctDependencies(Collection<TypedDependency> list) {
     if (DEBUG) {
       printListSorted("At correctDependencies:", list);
     }
-    correctSubjPassAndPoss(list);
+    correctSubjPass(list);
     if (DEBUG) {
-      printListSorted("After correctSubjPassAndPoss:", list);
+      printListSorted("After correctSubjPass:", list);
     }
     removeExactDuplicates(list);
     if (DEBUG) {
@@ -178,9 +156,9 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       printListSorted("After adding ref:", list);
     }
 
-    addXSubj(list);
+    addExtraNSubj(list);
     if (DEBUG) {
-      printListSorted("After adding xsubj:", list);
+      printListSorted("After adding extra nsubj:", list);
     }
 
     addStrandedPobj(list);
@@ -203,8 +181,8 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   //   SemgrexMatcher matcher = strandedPobjSemgrex.matcher(graph);
   //   TreeGraphNode[] nodeToWords = null;
   //   while (matcher.find()) {
-  //     IndexedWord gov = matcher.getNode("prepdep");
-  //     IndexedWord dep = matcher.getNode("head");
+  //     CoreLabel gov = matcher.getNode("prepdep");
+  //     CoreLabel dep = matcher.getNode("head");
   //
   //     if (nodeToWords == null) {
   //       nodeToWords = getNodesToWords(list);
@@ -457,9 +435,14 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     }
 
     if (includeExtras) {
-      addXSubj(list);
+      addExtraNSubj(list);
       if (DEBUG) {
-        printListSorted("After adding xsubj:", list);
+        printListSorted("After adding extra nsubj:", list);
+      }
+
+      correctSubjPass(list);
+      if (DEBUG) {
+        printListSorted("After correctSubjPass:", list);
       }
     }
 
@@ -834,24 +817,24 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   }
 
   /**
-   * Add xsubj dependencies when collapsing basic dependencies.
+   * Add extra nsubj dependencies when collapsing basic dependencies.
    * <br>
    * In the general case, we look for an aux modifier under an xcomp
    * modifier, and assuming there aren't already associated nsubj
    * dependencies as daughters of the original xcomp dependency, we
-   * add xsubj dependencies for each nsubj daughter of the aux.
+   * add nsubj dependencies for each nsubj daughter of the aux.
    * <br>
    * There is also a special case for "to" words, in which case we add
    * a dependency if and only if there is no nsubj associated with the
    * xcomp and there is no other aux dependency.  This accounts for
    * sentences such as "he decided not to" with no following verb.
    */
-  private static void addXSubj(Collection<TypedDependency> list) {
+  private static void addExtraNSubj(Collection<TypedDependency> list) {
     List<TypedDependency> newDeps = new ArrayList<TypedDependency>();
 
     for (TypedDependency xcomp : list) {
       if (xcomp.reln() != XCLAUSAL_COMPLEMENT) {
-        // we only add xsubj dependencies to some xcomp dependencies
+        // we only add extra nsubj dependencies to some xcomp dependencies
         continue;
       }
 
@@ -873,7 +856,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
           hasAux = true;
         }
 
-        // TODO: create an xsubjpass to go with the NOMINAL_PASSIVE_SUBJECT
         if ((dep.reln() == NOMINAL_SUBJECT || dep.reln() == NOMINAL_PASSIVE_SUBJECT) && dep.gov() == head) {
           subjects.add(dep.dep());
         }
@@ -883,7 +865,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         }
       }
 
-      // if we already have an nsubj dependency, no need to add an xsubj
+      // if we already have an nsubj dependency, no need to add an extra nsubj
       if (hasSubjectDaughter) {
         continue;
       }
@@ -894,19 +876,19 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       }
 
       // In general, we find that the objects of the verb are better
-      // for xsubj than the original nsubj of the verb.  For example,
+      // for extra nsubj than the original nsubj of the verb.  For example,
       // "Many investors wrote asking the SEC to require ..."
-      // There is no nsubj of asking, but the dobj, SEC, is the xsubj of require.
+      // There is no nsubj of asking, but the dobj, SEC, is the extra nsubj of require.
       // Similarly, "The law tells them when to do so"
-      // Instead of xsubj(do, law) we want xsubj(do, them)
+      // Instead of nsubj(do, law) we want nsubj(do, them)
       if (objects.size() > 0) {
         for (TreeGraphNode object : objects) {
-          TypedDependency newDep = new TypedDependency(CONTROLLING_SUBJECT, modifier, object);
+          TypedDependency newDep = new TypedDependency(NOMINAL_SUBJECT, modifier, object);
           newDeps.add(newDep);
         }
       } else {
         for (TreeGraphNode subject : subjects) {
-          TypedDependency newDep = new TypedDependency(CONTROLLING_SUBJECT, modifier, subject);
+          TypedDependency newDep = new TypedDependency(NOMINAL_SUBJECT, modifier, subject);
           newDeps.add(newDep);
         }
       }
@@ -922,12 +904,11 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
   /**
    * This method corrects subjects of verbs for which we identified an auxpass,
-   * but didn't identify the subject as passive. It also corrects the possessive
-   * relations for PRP$ and WP$ which weren't retrieved.
+   * but didn't identify the subject as passive.
    *
    * @param list List of typedDependencies to work on
    */
-  private static void correctSubjPassAndPoss(Collection<TypedDependency> list) {
+  private static void correctSubjPass(Collection<TypedDependency> list) {
     // put in a list verbs having an auxpass
     List<TreeGraphNode> list_auxpass = new ArrayList<TreeGraphNode>();
     for (TypedDependency td : list) {
@@ -1247,6 +1228,8 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         // we add a "copy" entry in the CoreLabel
         // existence of copy key is checked at printing (toString method of
         // TypedDependency)
+        // FIXME: this is copying the entire branch of the tree via
+        // the TreeGraphNode constructor.  Is that really appropriate?
         TreeGraphNode copy = new TreeGraphNode(td1.gov());
         CoreLabel label = new CoreLabel(td1.gov().label());
         label.set(CoreAnnotations.CopyAnnotation.class, copyNumber);

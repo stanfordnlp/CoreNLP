@@ -4,6 +4,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,13 +26,13 @@ import edu.stanford.nlp.util.concurrent.SynchronizedInterner;
  * painful and verbose.  For example, rather than declaring
  *
  * <pre>
- * {@code Map<String, List<Pair<IndexedWord, GrammaticalRelation>>> = new HashMap<String, List<Pair<IndexedWord, GrammaticalRelation>>>()}
+ * {@code  Map<String,ClassicCounter<List<String>>> = new HashMap<String,ClassicCounter<List<String>>>()}
  * </pre>
  *
  * you just call <code>Generics.newHashMap()</code>:
  *
  * <pre>
- * {@code Map<String, List<Pair<IndexedWord, GrammaticalRelation>>> = Generics.newHashMap()}
+ * {@code Map<String,ClassicCounter<List<String>>> = Generics.newHashMap()}
  * </pre>
  *
  * Java type-inference will almost always just <em>do the right thing</em>
@@ -220,6 +221,10 @@ public class Generics {
 
   public static <K,V> IdentityHashMap<K,V> newIdentityHashMap() {
     return new IdentityHashMap<K,V>();
+  }
+
+  public static <K> Set<K> newIdentityHashSet() {
+    return Collections.newSetFromMap(Generics.<K, Boolean>newIdentityHashMap());
   }
 
   public static <K,V> WeakHashMap<K,V> newWeakHashMap() {

@@ -453,12 +453,13 @@ public class IOUtils {
     }
 
     if (textFileOrUrl.endsWith(".gz")) {
-      // gunzip it if necessary. Since a GZIPInputStream has a buffer in it, don't need a second level of buffering
+      // gunzip it if necessary
       in = new GZIPInputStream(in, GZIP_FILE_BUFFER_SIZE);
-    } else {
-      // buffer this stream
-      in = new BufferedInputStream(in);
-    }
+    } 
+
+    // buffer this stream.  even gzip streams benefit from buffering,
+    // such as for the shift reduce parser
+    in = new BufferedInputStream(in);
 
     return in;
   }
@@ -1966,6 +1967,7 @@ public class IOUtils {
     for (int i = 0; i < rtn.length; ++i) {
       rtn[i] = linesReversed.get(rtn.length - i - 1);
     }
+    raf.close();
     return rtn;
   }
 

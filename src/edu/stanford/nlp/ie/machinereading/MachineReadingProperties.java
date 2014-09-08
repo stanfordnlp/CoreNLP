@@ -66,7 +66,7 @@ public class MachineReadingProperties {
   protected static String serializedRelationExtractionResults = null;
   
   @Option(name="relationFeatureFactoryClass",gloss="FeatureFactory class to use for generating features from relations for relation extraction")
-  static public Class<RelationFeatureFactory> relationFeatureFactoryClass = edu.stanford.nlp.ie.machinereading.RelationFeatureFactory.class;
+  static public Class<? extends RelationFeatureFactory> relationFeatureFactoryClass = edu.stanford.nlp.ie.machinereading.BasicRelationFeatureFactory.class;
 
   @Option(name="relationMentionFactoryClass",gloss="relation mention factory class to use.")
   static public Class<RelationMentionFactory> relationMentionFactoryClass =  edu.stanford.nlp.ie.machinereading.structure.RelationMentionFactory.class;
@@ -98,7 +98,10 @@ public class MachineReadingProperties {
   
   @Option(name="relationExtractionPostProcessorClass",gloss="additional (probably domain-dependent) annotator to postprocess relations")
   static public Class<Extractor> relationExtractionPostProcessorClass;
-  
+
+  @Option(name="relationClassifier",gloss="relation extractor class to use")
+  static public Class<? extends BasicRelationExtractor> relationClassifier = edu.stanford.nlp.ie.machinereading.BasicRelationExtractor.class;
+
   /*
    * event extraction options
    */
@@ -184,4 +187,24 @@ public class MachineReadingProperties {
   @Option(name="percentageOfTrain",gloss="Pct of train partition to use for training (e.g. for RELMS experiment)")
   static public double percentageOfTrain = 1.0;
 
+  /**
+   * Additional features, may not necessarily be used in the public release
+   */
+  @Option(name="featureSimilarityThreshold")
+  static public double featureSimilarityThreshold = 0.2;
+
+  @Option(name="computeFeatSimilarity")
+  static public boolean computeFeatSimilarity = true;
+
+  @Option(name="featureSelectionNumFeaturesRatio")
+  static public double featureSelectionNumFeaturesRatio = 0.7;
+
+  @Option(name="L1Reg")
+  static public boolean L1Reg = false;
+
+  @Option(name="L2Reg")
+  static public boolean L2Reg = true;
+
+  @Option(name="L1RegLambda")
+  static public double L1RegLambda = 1.0;
 }

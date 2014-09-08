@@ -41,7 +41,7 @@ import edu.stanford.nlp.util.Pair;
 public class ChineseGrammaticalStructureTest extends TestCase {
   // Return a string which is the concatenation of |items|, with a new line after each line.
   // "a", "b" => "a\nb\n"
-  private String C(String... items) {
+  private static String C(String... items) {
     StringBuilder out = new StringBuilder();
     for (String x : items) {
       out.append(x);
@@ -51,11 +51,11 @@ public class ChineseGrammaticalStructureTest extends TestCase {
   }
 
   // Create a new example
-  Pair<String, String> T(String tree, String ans) {
+  private static Pair<String, String> T(String tree, String ans) {
     return new Pair<String, String>(tree, ans);
   }
 
-  List<Pair<String, String>> Examples(Pair<String, String>... examples) {
+  private static List<Pair<String, String>> Examples(Pair<String, String>... examples) {
     return Arrays.asList(examples);
   }
 
@@ -96,6 +96,34 @@ public class ChineseGrammaticalStructureTest extends TestCase {
       T("(IP (VP (VP (ADVP (AD 一)) (VP (VV 出现))) (VP (ADVP (AD 就)) (VP (SB 被) (VP (VV 纳入) (NP (NN 法制) (NN 轨道)))))))))))",
         C("advmod(出现-2, 一-1)", "root(ROOT-0, 出现-2)", "advmod(纳入-5, 就-3)", "auxpass(纳入-5, 被-4)", "dep(出现-2, 纳入-5)", "nn(轨道-7, 法制-6)", "dobj(纳入-5, 轨道-7)")),
 
+      T("(IP (NP (NP (NR 格林柯尔)) (NP (NN 制冷剂)) (PRN (PU （) (NP (NR 中国)) (PU ）)) (ADJP (JJ 有限)) (NP (NN 公司))) (VP (VC 是) (NP (CP (CP (IP (NP (NP (NR 格林柯尔) (NN 集团) (NR 北美) (NN 公司)) (CC 与) (NP (NP (NR 中国) (NR 天津)) (NP (NN 开发区)) (ADJP (JJ 总)) (NP (NN 公司))) (CC 和) (NP (NP (NR 中国)) (NP (NR 南方)) (NP (NN 证券)) (ADJP (JJ 有限)) (NP (NN 公司)))) (VP (VV 合建))) (DEC 的))) (ADJP (JJ 合资)) (NP (NN 企业)))) (PU 。))",
+        C("nn(公司-7, 格林柯尔-1)",
+                "nn(公司-7, 制冷剂-2)",
+                "prnmod(公司-7, 中国-4)",
+                "amod(公司-7, 有限-6)",
+                "nsubj(企业-28, 公司-7)",
+                "cop(企业-28, 是-8)",
+                "nn(公司-12, 格林柯尔-9)",
+                "nn(公司-12, 集团-10)",
+                "nn(公司-12, 北美-11)",
+                "conj(公司-24, 公司-12)",
+                "cc(公司-24, 与-13)",
+                "nn(天津-15, 中国-14)",
+                "nn(公司-18, 天津-15)",
+                "nn(公司-18, 开发区-16)",
+                "amod(公司-18, 总-17)",
+                "conj(公司-24, 公司-18)",
+                "cc(公司-24, 和-19)",
+                "nn(公司-24, 中国-20)",
+                "nn(公司-24, 南方-21)",
+                "nn(公司-24, 证券-22)",
+                "amod(公司-24, 有限-23)",
+                "nsubj(合建-25, 公司-24)",
+                "relcl(企业-28, 合建-25)",
+                "mark(合建-25, 的-26)",
+                "amod(企业-28, 合资-27)",
+                "root(ROOT-0, 企业-28)")),
+
       // TODO(pliang): add more test cases for all the relations not covered (see WARNING below)
     };
 
@@ -130,4 +158,5 @@ public class ChineseGrammaticalStructureTest extends TestCase {
   public static void main(String[] args) {
     new ChineseGrammaticalStructureTest().testBasicRelations();
   }
+
 }

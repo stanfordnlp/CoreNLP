@@ -51,7 +51,7 @@ echo "-------------------------------" >&2
 BASEDIR=`dirname $0`
 DATADIR=$BASEDIR/data
 #LEXDIR=$DATADIR/lexicons
-JAVACMD="java -mx2g -cp $BASEDIR/seg.jar edu.stanford.nlp.ie.crf.CRFClassifier -sighanCorporaDict $DATADIR -testFile $file -inputEncoding $enc -sighanPostProcessing true $ARGS"
+JAVACMD="java -mx2g -cp $BASEDIR/*: edu.stanford.nlp.ie.crf.CRFClassifier -sighanCorporaDict $DATADIR -textFile $file -inputEncoding $enc -sighanPostProcessing true $ARGS"
 DICTS=$DATADIR/dict-chris6.ser.gz
 KBESTCMD=""
 
@@ -60,7 +60,7 @@ if [ $kBest != "0" ]; then
 fi
 
 if [ $lang = "ctb" ]; then
-		$JAVACMD -loadClassifier $DATADIR/ctb.gz -serDictionary $DICTS $KBESTCMD
+  $JAVACMD -loadClassifier $DATADIR/ctb.gz -serDictionary $DICTS $KBESTCMD
 elif [ $lang = "pku" ]; then
-		$JAVACMD -loadClassifier $DATADIR/pku.gz -serDictionary $DICTS $KBESTCMD
+  $JAVACMD -loadClassifier $DATADIR/pku.gz -serDictionary $DICTS $KBESTCMD
 fi

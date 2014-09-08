@@ -9,7 +9,6 @@ import edu.stanford.nlp.trees.Constituent;
 import edu.stanford.nlp.trees.LabeledConstituent;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
-import edu.stanford.nlp.util.Pair;
 
 /**
  * Provides a method for deciding how similar two trees are.
