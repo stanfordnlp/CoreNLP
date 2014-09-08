@@ -1535,7 +1535,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
   /**
    * Load auxiliary data to be used in constructing features and labels
-   * Intended to be overriden by subclasses
+   * Intended to be overridden by subclasses
    */
   protected Collection<List<IN>> loadAuxiliaryData(Collection<List<IN>> docs, DocumentReaderAndWriter<IN> readerAndWriter) {
     return docs;
