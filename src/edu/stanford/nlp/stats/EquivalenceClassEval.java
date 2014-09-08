@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -64,7 +66,7 @@ public class EquivalenceClassEval<IN, OUT> {
       return null;
     }
   };
-
+  
   public static final  <T,U> EquivalenceClasser<T,U> nullEquivalenceClasser() {
     return ErasureUtils.<EquivalenceClasser<T,U>>uncheckedCast(NULL_EQUIVALENCE_CLASSER);
   }
@@ -481,7 +483,7 @@ public class EquivalenceClassEval<IN, OUT> {
       return o1.equals(o2);
     }
   };
-
+  
   @SuppressWarnings("unchecked")
   public static final <T> EqualityChecker<T> defaultChecker() {
     return DEFAULT_CHECKER;

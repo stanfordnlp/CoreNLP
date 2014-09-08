@@ -19,7 +19,7 @@ public class PipelineITest extends TestCase {
   public void testPipeline() throws Exception {
     // create pipeline
     AnnotationPipeline pipeline = new AnnotationPipeline();
-    pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+    pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
     pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
     pipeline.addAnnotator(new POSTaggerAnnotator(false));
     pipeline.addAnnotator(new MorphaAnnotator(false));

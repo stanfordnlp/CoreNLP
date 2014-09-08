@@ -26,6 +26,7 @@
 
 package edu.stanford.nlp.trees;
 
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
@@ -110,7 +111,7 @@ import java.util.regex.Pattern;
  *
  * @author Bill MacCartney
  * @author Galen Andrew (refactoring English-specific stuff)
- * @author Ilya Sherman (refactoring annotation-relation pairing, which is now gone)
+ * @author Ilya Sherman (refactoring annotation-relation pairing)
  */
 public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Serializable {
 
@@ -118,6 +119,16 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
   private static final boolean DEBUG = System.getProperty("GrammaticalRelation", null) != null;
 
+  public abstract static class GrammaticalRelationAnnotation implements CoreAnnotation<Set<TreeGraphNode>> {
+    @Override
+    @SuppressWarnings({"unchecked", "RedundantCast"})
+    public Class<Set<TreeGraphNode>> getType() {  return (Class) Set.class; }
+  }
+
+  private static final Map<Class<? extends GrammaticalRelationAnnotation>, GrammaticalRelation>
+    annotationsToRelations = Generics.newHashMap();
+  private static final Map<GrammaticalRelation, Class<? extends GrammaticalRelationAnnotation>>
+    relationsToAnnotations = Generics.newHashMap();
   private static final EnumMap<Language, Map<String, GrammaticalRelation>>
     stringsToRelations = new EnumMap<Language, Map<String, GrammaticalRelation>>(Language.class);
 
@@ -127,8 +138,9 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    * Example: "the red car" &rarr; <code>gov</code>(red, car)
    */
   public static final GrammaticalRelation GOVERNOR =
-    new GrammaticalRelation(Language.Any, "gov", "governor", null);
+    new GrammaticalRelation(Language.Any, "gov", "governor", GovernorGRAnnotation.class, null);
 
+  public static class GovernorGRAnnotation extends GrammaticalRelationAnnotation { }
 
   /**
    * The "dependent" grammatical relation, which is the inverse of "governor".<p>
@@ -136,22 +148,35 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    * Example: "the red car" &rarr; <code>dep</code>(car, red)
    */
   public static final GrammaticalRelation DEPENDENT =
-    new GrammaticalRelation(Language.Any, "dep", "dependent", null);
+    new GrammaticalRelation(Language.Any, "dep", "dependent", DependentGRAnnotation.class, null);
 
+  public static class DependentGRAnnotation extends GrammaticalRelationAnnotation{ }
 
   /**
    *  The "root" grammatical relation between a faked "ROOT" node, and the root of the sentence.
    */
   public static final GrammaticalRelation ROOT =
-    new GrammaticalRelation(Language.Any, "root", "root", null);
+    new GrammaticalRelation(Language.Any, "root", "root", RootGRAnnotation.class, null);
 
+  public static class RootGRAnnotation extends GrammaticalRelationAnnotation{ }
 
   /**
    * Dummy relation, used while collapsing relations, in English &amp; Chinese GrammaticalStructure
    */
   public static final GrammaticalRelation KILL =
-    new GrammaticalRelation(Language.Any, "KILL", "dummy relation kill", null);
+    new GrammaticalRelation(Language.Any, "KILL", "dummy relation kill", KillGRAnnotation.class, null);
 
+  public static class KillGRAnnotation extends GrammaticalRelationAnnotation { }
+
+  public static Class<? extends GrammaticalRelationAnnotation>
+  getAnnotationClass(GrammaticalRelation relation) {
+    return relationsToAnnotations.get(relation);
+  }
+
+  public static GrammaticalRelation
+  getRelation(Class<? extends GrammaticalRelationAnnotation> annotation) {
+    return annotationsToRelations.get(annotation);
+  }
 
   /**
    * Returns the GrammaticalRelation having the given string
@@ -207,7 +232,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
         name = s;
         specific = null;
       }
-      reln = new GrammaticalRelation(language, name, null, null, specific);
+      reln = new GrammaticalRelation(language, name, null, null, null, specific);
 
     }
     return reln;
@@ -257,6 +282,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   private GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
+                             Class<? extends GrammaticalRelationAnnotation> annotation,
                              GrammaticalRelation parent,
                              String sourcePattern,
                              TregexPatternCompiler tregexCompiler,
@@ -270,6 +296,15 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
     if (parent != null) {
       parent.addChild(this);
+    }
+
+    if (annotation != null) {
+      if (GrammaticalRelation.annotationsToRelations.put(annotation, this) != null) {
+        throw new IllegalArgumentException("Adding '" + shortName + "' failed: Annotation cannot be associated with more than one relation!");
+      }
+      if (GrammaticalRelation.relationsToAnnotations.put(this, annotation) != null) {
+        throw new IllegalArgumentException("Adding '" + shortName + "' failed: There should only ever be one instance of each relation!");
+      }
     }
 
     if (sourcePattern != null) {
@@ -313,26 +348,29 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   public GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
+                             Class<? extends GrammaticalRelationAnnotation> annotation,
                              GrammaticalRelation parent,
                              String sourcePattern,
                              TregexPatternCompiler tregexCompiler,
                              String... targetPatterns) {
-    this(language, shortName, longName, parent, sourcePattern, tregexCompiler, targetPatterns, null);
+    this(language, shortName, longName, annotation, parent, sourcePattern, tregexCompiler, targetPatterns, null);
   }
 
   public GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
+                             Class<? extends GrammaticalRelationAnnotation> annotation,
                              GrammaticalRelation parent) {
-    this(language, shortName, longName, parent, null, null, StringUtils.EMPTY_STRING_ARRAY, null);
+    this(language, shortName, longName, annotation, parent, null, null, StringUtils.EMPTY_STRING_ARRAY, null);
   }
 
   public GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
+                             Class<? extends GrammaticalRelationAnnotation> annotation,
                              GrammaticalRelation parent,
                              String specificString) {
-    this(language, shortName, longName, parent, null, null, StringUtils.EMPTY_STRING_ARRAY, specificString);
+    this(language, shortName, longName, annotation, parent, null, null, StringUtils.EMPTY_STRING_ARRAY, specificString);
   }
 
   private void addChild(GrammaticalRelation child) {
@@ -433,12 +471,13 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    * <code>indentLevel</code>.
    *
    * @param indentLevel how many levels to indent (0 for root node)
+   *
    */
   private void toPrettyString(int indentLevel, StringBuilder buf) {
     for (int i = 0; i < indentLevel; i++) {
       buf.append("  ");
     }
-    buf.append(shortName).append(" (").append(longName).append("): ").append(targetPatterns);
+    buf.append(shortName + " (" + longName + ")").append(": ").append(targetPatterns);
     for (GrammaticalRelation child : children) {
       buf.append('\n');
       child.toPrettyString(indentLevel + 1, buf);

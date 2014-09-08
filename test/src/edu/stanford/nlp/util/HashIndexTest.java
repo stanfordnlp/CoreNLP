@@ -85,8 +85,8 @@ public class HashIndexTest extends TestCase  {
     HashIndex<String> index5 = new HashIndex<String>();
     index5.addAll(list);
     assertEquals("Equality failure", index4, index5);
-    index5.addToIndex("D");
-    index5.addToIndex("E");
+    index5.indexOf("D", true);
+    index5.indexOf("E", true);
     index5.indexOf("F");
     index5.addAll(list);
     assertEquals(5, index5.size());
@@ -103,7 +103,7 @@ public class HashIndexTest extends TestCase  {
     assertEquals(1, index4u.indexOf("B"));
     assertEquals(2, index4u.indexOf("C"));
     assertEquals("A", index4u.get(0));
-    assertEquals(-1, index4u.addToIndex("D"));
+    assertEquals(-1, index4u.indexOf("D", true));
     boolean okay = false;
     try {
       index4u.unlock();

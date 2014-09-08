@@ -23,59 +23,52 @@ public class SemanticGraphFactory {
   private static final boolean INCLUDE_PUNCTUATION_DEPENDENCIES = false;
 
   public enum Mode {
-    COLLAPSED_TREE,
-    /** collapse: Whether to do "collapsing" of pairs of dependencies into
-     *  single dependencies, e.g., for prepositions and conjunctions.
-     */
-    COLLAPSED,
-    /** ccProcess: Whether to do processing of CC complements resulting from
-     *  collapsing.  This argument is ignored unless <code>collapse</code> is
-     * <code>true</code>.
-     */
-    CCPROCESSED,
+    COLLAPSED_TREE, 
+    COLLAPSED, 
+    CCPROCESSED, 
     BASIC
-  }
+  };
 
-  /**
+  /** 
    * Produces an Uncollapsed SemanticGraph with no extras.
    */
   public static SemanticGraph generateUncollapsedDependencies(Tree tree) {
     return makeFromTree(tree, Mode.BASIC, false, true);
   }
 
-  /**
+  /** 
    * Produces a Collapsed SemanticGraph with no extras.
    */
   public static SemanticGraph generateCollapsedDependencies(Tree tree) {
     return makeFromTree(tree, Mode.COLLAPSED, false, true);
   }
 
-  /**
+  /** 
    * Produces a CCProcessed SemanticGraph with no extras.
    */
   public static SemanticGraph generateCCProcessedDependencies(Tree tree) {
     return makeFromTree(tree, Mode.CCPROCESSED, false, true);
   }
 
-  /**
+  /** 
    * Produces an Uncollapsed SemanticGraph with no extras.
    */
-  public static SemanticGraph generateUncollapsedDependencies(GrammaticalStructure gs) {
-    return makeFromTree(gs, Mode.BASIC, false, true, null);
+  public static SemanticGraph generateUncollapsedDependencies(GrammaticalStructure gs, String docID, int index) {
+    return makeFromTree(gs, Mode.BASIC, false, true, null, docID, index);
   }
 
-  /**
+  /** 
    * Produces a Collapsed SemanticGraph with no extras.
    */
-  public static SemanticGraph generateCollapsedDependencies(GrammaticalStructure gs) {
-    return makeFromTree(gs, Mode.COLLAPSED, false, true, null);
+  public static SemanticGraph generateCollapsedDependencies(GrammaticalStructure gs, String docID, int index) {
+    return makeFromTree(gs, Mode.COLLAPSED, false, true, null, docID, index);
   }
 
-  /**
+  /** 
    * Produces a CCProcessed SemanticGraph with no extras.
    */
-  public static SemanticGraph generateCCProcessedDependencies(GrammaticalStructure gs) {
-    return makeFromTree(gs, Mode.CCPROCESSED, false, true, null);
+  public static SemanticGraph generateCCProcessedDependencies(GrammaticalStructure gs, String docID, int index) {
+    return makeFromTree(gs, Mode.CCPROCESSED, false, true, null, docID, index);
   }
 
 
@@ -95,8 +88,14 @@ public class SemanticGraphFactory {
    * {@link GrammaticalStructure}. <p/>
    *
    * @param tree A tree representing a phrase structure parse
+   * @param collapse Whether to do "collapsing" of pairs of dependencies into
+   * single dependencies, e.g., for prepositions and conjunctions
+   * @param ccProcess Whether to do processing of CC complements resulting from
+   * collapsing.  This argument is ignored unless <code>collapse</code> is
+   * <code>true</code>
    * @param includeExtras Whether to include extra dependencies, which may
    * result in a non-tree
+   * @param lemmatize Whether to compute lemma for each node
    * @param threadSafe Whether to make sure processing is thread-safe
    * @param filter A filter to exclude certain dependencies; ignored if null
    * @return A SemanticGraph
@@ -106,6 +105,45 @@ public class SemanticGraphFactory {
                                            boolean includeExtras,
                                            boolean threadSafe,
                                            Filter<TypedDependency> filter) {
+    return makeFromTree(tree, mode, includeExtras,
+                        threadSafe, filter, "", 0);
+  }
+
+  /**
+   * Returns a new <code>SemanticGraph</code> constructed from a given {@link
+   * Tree} with given options. <p/>
+   *
+   * This factory method is intended to replace a profusion of highly similar
+   * factory methods, such as
+   * <code>typedDependencies()</code>,
+   * <code>typedDependenciesCollapsed()</code>,
+   * <code>allTypedDependencies()</code>,
+   * <code>allTypedDependenciesCollapsed()</code>, etc. <p/>
+   *
+   * For a fuller explanation of the meaning of the boolean arguments, see
+   * {@link GrammaticalStructure}. <p/>
+   *
+   * @param tree A tree representing a phrase structure parse
+   * @param collapse Whether to do "collapsing" of pairs of dependencies into
+   * single dependencies, e.g., for prepositions and conjunctions
+   * @param ccProcess Whether to do processing of CC complements resulting from
+   * collapsing.  This argument is ignored unless <code>collapse</code> is
+   * <code>true</code>
+   * @param includeExtras Whether to include extra dependencies, which may
+   * result in a non-tree
+   * @param lemmatize Whether to compute lemma for each node
+   * @param threadSafe Whether to make sure processing is thread-safe
+   * @param filter A filter to exclude certain dependencies; ignored if null
+   * @param docID The docID that the tree came from
+   * @param sentIndex The sentence number of the tree in the document
+   * @return A SemanticGraph
+   */
+  public static SemanticGraph makeFromTree(Tree tree,
+                                           Mode mode,
+                                           boolean includeExtras,
+                                           boolean threadSafe,
+                                           Filter<TypedDependency> filter,
+                                           String docID, int sentIndex) {
     Filter<String> wordFilt;
     if (INCLUDE_PUNCTUATION_DEPENDENCIES) {
       wordFilt = Filters.acceptFilter();
@@ -117,7 +155,7 @@ public class SemanticGraphFactory {
             new SemanticHeadFinder(true),
             threadSafe);
     return makeFromTree(gs, mode, includeExtras,
-                        threadSafe, filter);
+                        threadSafe, filter, docID, sentIndex);
   }
 
 
@@ -127,7 +165,8 @@ public class SemanticGraphFactory {
                                            Mode mode,
                                            boolean includeExtras,
                                            boolean threadSafe,
-                                           Filter<TypedDependency> filter) {
+                                           Filter<TypedDependency> filter,
+                                           String docID, int sentIndex) {
     addProjectedCategoriesToGrammaticalStructure(gs);
     Collection<TypedDependency> deps;
     switch(mode) {
@@ -164,12 +203,14 @@ public class SemanticGraphFactory {
     // See also the SemanticGraph constructor.
 
     //System.err.println(deps.toString());
-    return new SemanticGraph(deps);
+    return new SemanticGraph(deps, docID, sentIndex);
   }
 
 
-  public static SemanticGraph makeFromTree(GrammaticalStructure structure) {
-    return makeFromTree(structure, Mode.BASIC, false, false, null);
+  public static SemanticGraph makeFromTree(GrammaticalStructure structure,
+      String docID, int sentIndex) {
+    return makeFromTree(structure, Mode.BASIC, false,
+                        false, null, docID, sentIndex);
   }
 
 
@@ -177,7 +218,8 @@ public class SemanticGraphFactory {
                                            Mode mode,
                                            boolean includeExtras,
                                            Filter<TypedDependency> filter) {
-    return makeFromTree(tree, mode, includeExtras, false, filter);
+    return makeFromTree(tree, mode, includeExtras,
+                        false, filter);
   }
 
 
@@ -185,8 +227,18 @@ public class SemanticGraphFactory {
                                            Mode mode,
                                            boolean includeExtras,
                                            boolean threadSafe) {
-    return makeFromTree(tree, mode, includeExtras, threadSafe, null);
+    return makeFromTree(tree, mode, includeExtras,
+                        threadSafe, null);
   }
+
+  public static SemanticGraph makeFromTree(GrammaticalStructure gs,
+                                           Mode mode,
+                                           boolean includeExtras,
+                                           boolean threadSafe) {
+    return makeFromTree(gs, mode, includeExtras,
+                        threadSafe, null, "", 0);
+  }
+
 
   /**
    * Returns a new SemanticGraph constructed from the given tree.  Dependencies are collapsed
@@ -281,6 +333,7 @@ public class SemanticGraphFactory {
    * Note: CDM changed the return of this from a List to a Set in 2011. This seemed more
    * sensible.  Hopefully it doesn't break anything....
    */
+  // XXX why is this a List rather than a Set (i.e. are the duplicates useful)?
   public static Set<IndexedWord> getVerticesFromEdgeSet(Iterable<SemanticGraphEdge> edges) {
     Set<IndexedWord> retSet = Generics.newHashSet();
     for (SemanticGraphEdge edge : edges) {

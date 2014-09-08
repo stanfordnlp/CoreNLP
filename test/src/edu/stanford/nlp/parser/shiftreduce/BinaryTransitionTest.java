@@ -10,6 +10,7 @@ import edu.stanford.nlp.ling.TaggedWord;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Test a couple transition operations and their effects
@@ -21,7 +22,7 @@ public class BinaryTransitionTest extends TestCase {
   // test states where BinaryTransition could not apply (eg stack too small)
   // test compound transitions
 
-  public static State buildState(int shifts) {
+  public State buildState(int shifts) {
     String[] words = { "This", "is", "a", "short", "test", "." };
     String[] tags = { "DT", "VBZ", "DT", "JJ", "NN", "." };
     assertEquals(words.length, tags.length);

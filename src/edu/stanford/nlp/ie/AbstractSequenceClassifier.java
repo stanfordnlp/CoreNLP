@@ -127,7 +127,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     // Thang Sep13: allow for multiple feature factories.
     this.featureFactories = Generics.newArrayList();
     if (flags.featureFactory != null) {
-      FeatureFactory<IN> factory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs); // for compatibility
+      FeatureFactory factory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs); // for compatibility
       featureFactories.add(factory);
     }
     if(flags.featureFactories!=null){
@@ -181,7 +181,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
     if (!flags.useKnownLCWords) {
       knownLCWords = Collections.emptySet();
-    } else if (knownLCWords == null || knownLCWords.isEmpty()) {
+    } else if (knownLCWords == null || knownLCWords.size() == 0) {
       knownLCWords = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
     }
   }
@@ -970,7 +970,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       if (flags.keepEmptySentences && documents.size() == 0) {
         documents = Collections.<List<IN>>singletonList(Collections.<IN>emptyList());
       }
-      classifyAndWriteAnswers(documents, readerWriter, false);
+      classifyAndWriteAnswers(documents, readerWriter);
     }
   }
 
@@ -986,7 +986,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void classifyAndWriteAnswers(String testFile)
     throws IOException
   {
-    classifyAndWriteAnswers(testFile, plainTextReaderAndWriter, false);
+    classifyAndWriteAnswers(testFile, plainTextReaderAndWriter);
   }
 
   /**
@@ -998,13 +998,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * @param readerWriter A reader and writer to use for the output
    */
   public void classifyAndWriteAnswers(String testFile,
-                                      DocumentReaderAndWriter<IN> readerWriter,
-                                      boolean outputScores)
+                                      DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromFile(testFile, readerWriter);
-    classifyAndWriteAnswers(documents, readerWriter, outputScores);
+    classifyAndWriteAnswers(documents, readerWriter);
   }
 
   /** If the flag
@@ -1012,48 +1011,45 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * character encoding, otherwise in the system default character encoding.
    */
   public void classifyAndWriteAnswers(String testFile, OutputStream outStream,
-                                      DocumentReaderAndWriter<IN> readerWriter, boolean outputScores)
+                                      DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromFile(testFile, readerWriter);
     PrintWriter pw = IOUtils.encodedOutputStreamPrintWriter(outStream, flags.outputEncoding, true);
-    classifyAndWriteAnswers(documents, pw, readerWriter, outputScores);
+    classifyAndWriteAnswers(documents, pw, readerWriter);
   }
 
   public void classifyAndWriteAnswers(String baseDir, String filePattern,
-                                      DocumentReaderAndWriter<IN> readerWriter,
-                                      boolean outputScores)
+                                      DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromFiles(baseDir, filePattern, readerWriter);
-    classifyAndWriteAnswers(documents, readerWriter, outputScores);
+    classifyAndWriteAnswers(documents, readerWriter);
   }
 
   public void classifyFilesAndWriteAnswers(Collection<File> testFiles)
     throws IOException
   {
-    classifyFilesAndWriteAnswers(testFiles, plainTextReaderAndWriter, false);
+    classifyFilesAndWriteAnswers(testFiles, plainTextReaderAndWriter);
   }
 
   public void classifyFilesAndWriteAnswers(Collection<File> testFiles,
-                                           DocumentReaderAndWriter<IN> readerWriter, boolean outputScores)
+                                           DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromFiles(testFiles, readerWriter);
-    classifyAndWriteAnswers(documents, readerWriter, outputScores);
+    classifyAndWriteAnswers(documents, readerWriter);
   }
 
   private void classifyAndWriteAnswers(Collection<List<IN>> documents,
-                                       DocumentReaderAndWriter<IN> readerWriter,
-                                       boolean outputScores)
+                                       DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
     classifyAndWriteAnswers(documents,
-                            IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true),
-                            readerWriter, outputScores);
+            IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true), readerWriter);
   }
 
   /** Does nothing by default.  Children classes can override if necessary */
@@ -1061,8 +1057,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   public void classifyAndWriteAnswers(Collection<List<IN>> documents,
                                       PrintWriter printWriter,
-                                      DocumentReaderAndWriter<IN> readerWriter,
-                                      boolean outputScores)
+                                      DocumentReaderAndWriter<IN> readerWriter)
     throws IOException
   {
     if (flags.exportFeatures != null) {
@@ -1074,7 +1069,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     Counter<String> entityTP = new ClassicCounter<String>();
     Counter<String> entityFP = new ClassicCounter<String>();
     Counter<String> entityFN = new ClassicCounter<String>();
-    boolean resultsCounted = outputScores;
+    boolean resultsCounted = true;
     int numWords = 0;
     int numDocs = 0;
 
@@ -1259,42 +1254,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     } else if (flags.iobTags) {
       bg = flags.backgroundSymbol;
       return countResultsIOB(doc, entityTP, entityFP, entityFN, bg);
-    } else if (flags.sighanPostProcessing) {
-      // TODO: this is extremely indicative of being a Chinese Segmenter,
-      // but it would still be better to have something more concrete
-      return countResultsSegmenter(doc, entityTP, entityFP, entityFN);
     } else {
       return countResults(doc, entityTP, entityFP, entityFN, bg);
     }
   }
-
-  // TODO: could make this a parameter for the model
-  public static final String CUT_LABEL = "Cut";
-
-  public static boolean countResultsSegmenter(List<? extends CoreMap> doc,
-                                              Counter<String> entityTP,
-                                              Counter<String> entityFP,
-                                              Counter<String> entityFN) {
-    // count from 1 because each label represents cutting or
-    // not cutting at a word, so we don't count the first word
-    for (int i = 1; i < doc.size(); ++i) {
-      CoreMap word = doc.get(i);
-      String gold = word.get(CoreAnnotations.GoldAnswerAnnotation.class);
-      String guess = word.get(CoreAnnotations.AnswerAnnotation.class);
-      if (gold == null || guess == null) {
-        return false;
-      }
-      if (gold.equals("1") && guess.equals("1")) {
-        entityTP.incrementCount(CUT_LABEL, 1.0);
-      } else if (gold.equals("0") && guess.equals("1")) {
-        entityFP.incrementCount(CUT_LABEL, 1.0);
-      } else if (gold.equals("1") && guess.equals("0")) {
-        entityFN.incrementCount(CUT_LABEL, 1.0);
-      }
-    }
-    return true;
-  }
-
 
   public static boolean countResultsIOB2(List<? extends CoreMap> doc,
                                          Counter<String> entityTP,
@@ -1731,7 +1694,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void loadClassifierNoExceptions(String loadPath, Properties props) {
     InputStream is;
     // ms, 10-04-2010: check first is this path exists in our CLASSPATH. This
-    // takes priority over the file system. todo [cdm 2014]: change this to use IOUtils stuff that much code now uses
+    // takes priority over the file system.
     if ((is = loadStreamFromClasspath(loadPath)) != null) {
       Timing.startDoing("Loading classifier from " + loadPath);
       loadClassifierNoExceptions(is, props);

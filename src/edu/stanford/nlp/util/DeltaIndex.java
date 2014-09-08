@@ -48,7 +48,6 @@ public class DeltaIndex<E> extends AbstractCollection<E> implements Index<E> {
     return backingIndex.size() + spilloverIndex.size();
   }
 
-  @Override
   public E get(int i) {
     if (i < backingIndexSize) {
       return backingIndex.get(i);
@@ -57,49 +56,23 @@ public class DeltaIndex<E> extends AbstractCollection<E> implements Index<E> {
     }
   }
 
-  @Override
   public int indexOf(E o) {
-    int index = backingIndex.indexOf(o);
-    if (index >= 0) {
-      return index;
-    }
-
-    index = spilloverIndex.indexOf(o);
-    if (index >= 0) {
-      return index + backingIndexSize;
-    }
-    return index; // i.e., return -1
+    return indexOf(o, false);
   }
 
-  @Override
-  public int addToIndex(E o) {
-    int index = backingIndex.indexOf(o);
-    if (index >= 0) {
-      return index;
-    }
-
-    if (locked) {
-      index = spilloverIndex.indexOf(o);
-    } else {
-      index = spilloverIndex.addToIndex(o);
-    }
-    if (index >= 0) {
-      return index + backingIndexSize;
-    }
-    return index; // i.e., return -1
-  }
-
-  @Override
-  @Deprecated
   public int indexOf(E o, boolean add) {
-    if (add) {
-      return addToIndex(o);
-    } else {
-      return indexOf(o);
+    int index = backingIndex.indexOf(o, false);
+    if (index >= 0) {
+      return index;
     }
+
+    index = spilloverIndex.indexOf(o, add && !locked);
+    if (index >= 0) {
+      return index + backingIndexSize;
+    }
+    return index;
   }
 
-  @Override
   public List<E> objectsList() {
     List<E> result = new ArrayList<E>();
     if (result.size() > backingIndexSize) {
@@ -113,7 +86,6 @@ public class DeltaIndex<E> extends AbstractCollection<E> implements Index<E> {
     return Collections.unmodifiableList(result);
   }
 
-  @Override
   public Collection<E> objects(int[] indices) {
     List<E> result = new ArrayList<E>();
     for (int index : indices) {
@@ -122,28 +94,23 @@ public class DeltaIndex<E> extends AbstractCollection<E> implements Index<E> {
     return result;
   }
 
-  @Override
   public boolean isLocked() {
     return locked;
   }
 
-  @Override
   public void lock() {
     locked = true;
   }
 
-  @Override
   public void unlock() {
     locked = false;
   }
 
 
-  @Override
   public void saveToWriter(Writer out) {
     throw new UnsupportedOperationException();
   }
 
-  @Override
   public void saveToFilename(String s) {
     throw new UnsupportedOperationException();
   }
@@ -203,12 +170,10 @@ public class DeltaIndex<E> extends AbstractCollection<E> implements Index<E> {
       Iterator<E> backingIterator = backingIndex.iterator();
       Iterator<E> spilloverIterator = spilloverIndex.iterator();
 
-      @Override
       public boolean hasNext() {
         return backingIterator.hasNext() || spilloverIterator.hasNext();
       }
 
-      @Override
       public E next() {
         if (backingIterator.hasNext()) {
           return backingIterator.next();
@@ -217,7 +182,6 @@ public class DeltaIndex<E> extends AbstractCollection<E> implements Index<E> {
         }
       }
 
-      @Override
       public void remove() {
         throw new UnsupportedOperationException();
       }

@@ -33,7 +33,7 @@ public class HistoryTable {
   }
 
   int add(History h) {
-    return idx.addToIndex(h);
+    return idx.indexOf(h,true);
   }
 
   History getHistory(int index) {

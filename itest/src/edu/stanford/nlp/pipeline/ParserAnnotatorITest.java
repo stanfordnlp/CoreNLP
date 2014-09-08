@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import edu.stanford.nlp.dcoref.Constants;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
@@ -17,7 +18,7 @@ import edu.stanford.nlp.util.CoreMap;
 
 /**
  * A really weak-sauce test for the ParserAnnotator.
- *
+ * 
  * @author dramage
  */
 public class ParserAnnotatorITest extends TestCase {
@@ -44,18 +45,18 @@ public class ParserAnnotatorITest extends TestCase {
 
       parser = new ParserAnnotator(false, -1);
       pipeline = new AnnotationPipeline();
-      pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+      pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
       pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
       pipeline.addAnnotator(new POSTaggerAnnotator(false));
       pipeline.addAnnotator(parser);
 
       noPOSPipeline = new AnnotationPipeline();
-      noPOSPipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+      noPOSPipeline.addAnnotator(new PTBTokenizerAnnotator(false));
       noPOSPipeline.addAnnotator(new WordsToSentencesAnnotator(false));
       noPOSPipeline.addAnnotator(parser);
 
       noParserPipeline = new AnnotationPipeline();
-      noParserPipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+      noParserPipeline.addAnnotator(new PTBTokenizerAnnotator(false));
       noParserPipeline.addAnnotator(new WordsToSentencesAnnotator(false));
 
       parserOnlyPipeline = new AnnotationPipeline();
@@ -103,9 +104,9 @@ public class ParserAnnotatorITest extends TestCase {
   }
 
   public void testParserAnnotator() {
-    Annotation document = new Annotation(TEXT);
+    Annotation document = new Annotation(TEXT);    
     pipeline.annotate(document);
-
+    
     int i = 0;
     for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
       Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
@@ -117,7 +118,7 @@ public class ParserAnnotatorITest extends TestCase {
     Annotation document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
     threaded4Pipeline.annotate(document);
     verifyAnswers(document, ANSWER);
-
+    
     document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
     threaded3Pipeline.annotate(document);
     verifyAnswers(document, ANSWER);
@@ -178,7 +179,7 @@ public class ParserAnnotatorITest extends TestCase {
    * opposed to null trees or not timing out
    */
   public void testTimeout() {
-    Annotation document = new Annotation(TEXT);
+    Annotation document = new Annotation(TEXT);    
     timeoutPipeline.annotate(document);
     verifyAnswers(document, XPARSES);
   }
@@ -204,7 +205,7 @@ public class ParserAnnotatorITest extends TestCase {
 
   private void assertParseOK(ParserAnnotator parser) {
     AnnotationPipeline pipeline = new AnnotationPipeline();
-    pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+    pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
     pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
     pipeline.addAnnotator(parser);
     Annotation document = new Annotation("John Bauer works at Stanford.");
@@ -246,7 +247,7 @@ public class ParserAnnotatorITest extends TestCase {
       Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
       assertFalse("Sentence " + i + " was null", parse == null);
       assertEquals(expected[i++ % expected.length], parse.toString());
-    }
+    } 
   }
 
 
@@ -262,9 +263,9 @@ public class ParserAnnotatorITest extends TestCase {
   };
 
   static final String[] XPARSES = {
-    "(X (XX I) (XX saw) (XX him) (XX ordering) (XX them) (XX to) (XX saw) (XX .))",
-    "(X (XX Jack) (XX 's) (XX father) (XX has) (XX n't) (XX played) (XX golf) (XX since) (XX 20) (XX years) (XX ago) (XX .))",
-    "(X (XX I) (XX 'm) (XX going) (XX to) (XX the) (XX bookstore) (XX to) (XX return) (XX a) (XX book) (XX Jack) (XX and) (XX his) (XX friends) (XX bought) (XX me) (XX .))"
+    "(X (X I) (X saw) (X him) (X ordering) (X them) (X to) (X saw) (X .))",
+    "(X (X Jack) (X 's) (X father) (X has) (X n't) (X played) (X golf) (X since) (X 20) (X years) (X ago) (X .))",
+    "(X (X I) (X 'm) (X going) (X to) (X the) (X bookstore) (X to) (X return) (X a) (X book) (X Jack) (X and) (X his) (X friends) (X bought) (X me) (X .))"
   };
 }
 

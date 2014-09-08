@@ -2,10 +2,12 @@ package edu.stanford.nlp.parser.dvparser;
 
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.parser.common.ArgUtils;
+import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.lexparser.EvaluateTreebank;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.Options;
@@ -21,12 +23,11 @@ import edu.stanford.nlp.util.Pair;
  * @author John Bauer
  */
 public class CombineDVModels {
-
   public static void main(String[] args)
     throws IOException, ClassNotFoundException
   {
     String modelPath = null;
-
+    
     List<String> baseModelPaths = null;
 
     String testTreebankPath = null;

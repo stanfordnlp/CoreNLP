@@ -41,7 +41,6 @@ import edu.stanford.nlp.dcoref.Dictionaries.Gender;
 import edu.stanford.nlp.dcoref.Dictionaries.MentionType;
 import edu.stanford.nlp.dcoref.Dictionaries.Number;
 import edu.stanford.nlp.dcoref.Dictionaries.Person;
-import edu.stanford.nlp.ling.AbstractCoreLabel;
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -1165,18 +1164,18 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       components[1] = headWord.lemma();
       components[2] = headWord.lemma();
     } else if(premodifiers.size() == 1){
-      ArrayList<AbstractCoreLabel> premod = Generics.newArrayList();
+      ArrayList<CoreLabel> premod = new ArrayList<CoreLabel>();
       premod.addAll(premodifiers.get(premodifiers.size()-1));
       premod.add(headWord);
       components[1] = getPattern(premod);
       components[2] = getPattern(premod);
     } else {
-      ArrayList<AbstractCoreLabel> premod1 = Generics.newArrayList();
+      ArrayList<CoreLabel> premod1 = new ArrayList<CoreLabel>();
       premod1.addAll(premodifiers.get(premodifiers.size()-1));
       premod1.add(headWord);
       components[1] = getPattern(premod1);
 
-      ArrayList<AbstractCoreLabel> premod2 = Generics.newArrayList();
+      ArrayList<CoreLabel> premod2 = new ArrayList<CoreLabel>();
       for(ArrayList<IndexedWord> premodifier : premodifiers){
         premod2.addAll(premodifier);
       }
@@ -1190,7 +1189,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   public String getPattern(){
 
-    ArrayList<AbstractCoreLabel> pattern = Generics.newArrayList();
+    ArrayList<CoreLabel> pattern = new ArrayList<CoreLabel>();
     for(ArrayList<IndexedWord> premodifier : getPremodifiers()){
       pattern.addAll(premodifier);
     }
@@ -1201,11 +1200,11 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return getPattern(pattern);
   }
 
-  public String getPattern(List<AbstractCoreLabel> pTokens){
+  public String getPattern(List<CoreLabel> pTokens){
 
     ArrayList<String> phrase_string = new ArrayList<String>();
     String ne = "";
-    for(AbstractCoreLabel token : pTokens){
+    for(CoreLabel token : pTokens){
       if(token.index() == headWord.index()){
         phrase_string.add(token.lemma());
         ne = "";
@@ -1242,16 +1241,16 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     return false;
   }
 
-  private static List<String> getContextHelper(List<? extends AbstractCoreLabel> words) {
-    List<List<AbstractCoreLabel>> namedEntities = Generics.newArrayList();
-    List<AbstractCoreLabel> ne = Generics.newArrayList();
+  private static List<String> getContextHelper(List<? extends CoreLabel> words) {
+    List<List<CoreLabel>> namedEntities = new ArrayList<List<CoreLabel>>();
+    List<CoreLabel> ne = new ArrayList<CoreLabel>();
     String previousNEType = "";
     int previousNEIndex = -1;
     for (int i = 0; i < words.size(); i++) {
-      AbstractCoreLabel word = words.get(i);
+      CoreLabel word = words.get(i);
       if(!word.ner().equals("O")) {
         if (!word.ner().equals(previousNEType) || previousNEIndex != i-1) {
-          ne = Generics.newArrayList();
+          ne = new ArrayList<CoreLabel>();
           namedEntities.add(ne);
         }
         ne.add(word);
@@ -1262,7 +1261,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     List<String> neStrings = new ArrayList<String>();
     Set<String> hs = Generics.newHashSet();
-    for (List<AbstractCoreLabel> namedEntity : namedEntities) {
+    for (List<CoreLabel> namedEntity : namedEntities) {
       String ne_str = StringUtils.joinWords(namedEntity, " ");
       hs.add(ne_str);
     }
@@ -1361,14 +1360,14 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if(dependency.getRoots().isEmpty()) return null;
     // root relation
     if(dependency.getFirstRoot().equals(headIndexedWord)) return "root";
-    if(!dependency.containsVertex(dependency.getParent(headIndexedWord))) return null;
+    if(!dependency.vertexSet().contains(dependency.getParent(headIndexedWord))) return null;
     GrammaticalRelation relation = dependency.reln(dependency.getParent(headIndexedWord), headIndexedWord);
 
     // adjunct relations
     if(relation.toString().startsWith("prep") || relation == EnglishGrammaticalRelations.PREPOSITIONAL_OBJECT || relation == EnglishGrammaticalRelations.TEMPORAL_MODIFIER || relation == EnglishGrammaticalRelations.ADV_CLAUSE_MODIFIER || relation == EnglishGrammaticalRelations.ADVERBIAL_MODIFIER || relation == EnglishGrammaticalRelations.PREPOSITIONAL_COMPLEMENT) return "adjunct";
 
     // subject relations
-    if(relation == EnglishGrammaticalRelations.NOMINAL_SUBJECT || relation == EnglishGrammaticalRelations.CLAUSAL_SUBJECT) return "subject";
+    if(relation == EnglishGrammaticalRelations.NOMINAL_SUBJECT || relation == EnglishGrammaticalRelations.CLAUSAL_SUBJECT || relation == EnglishGrammaticalRelations.CONTROLLING_SUBJECT) return "subject";
     if(relation == EnglishGrammaticalRelations.NOMINAL_PASSIVE_SUBJECT || relation == EnglishGrammaticalRelations.CLAUSAL_PASSIVE_SUBJECT) return "subject";
 
     // verbal argument relations
@@ -1412,22 +1411,21 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     if(!nerString.equals("O")) return "definite";
 
-    Set<IndexedWord> quant = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.DETERMINER);
-    Set<IndexedWord> poss = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.POSSESSION_MODIFIER);
-    if (!quant.isEmpty()) {
-      for (IndexedWord word : quant) {
-        String det = word.lemma();
-        if (dict.determiners.contains(det)) {
-          return "definite";
-        } else if (dict.quantifiers2.contains(det)) {
-          return "quantified";
-        }
+    List<IndexedWord> quant = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.DETERMINER);
+    List<IndexedWord> poss = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.POSSESSION_MODIFIER);
+    String det = "";
+    if(!quant.isEmpty()) {
+      det = quant.get(0).lemma();
+      if(dict.determiners.contains(det)) {
+        return "definite";
       }
-    } else if (!poss.isEmpty()) {
+    }
+    else if(!poss.isEmpty()) {
       return "definite";
-    } else {
+    }
+    else {
       quant = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.NUMERIC_MODIFIER);
-      if (!quant.isEmpty()) {
+      if(dict.quantifiers2.contains(det) || !quant.isEmpty()) {
         return "quantified";
       }
     }
@@ -1445,7 +1443,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     }
 
     // or has a sibling
-    for(IndexedWord sibling : dependency.getSiblings(headIndexedWord)) {
+    Collection<IndexedWord> siblings = dependency.getSiblings(headIndexedWord);
+    for(IndexedWord sibling : siblings) {
       if(dict.negations.contains(sibling.lemma()) && !dependency.hasParentWithReln(headIndexedWord, EnglishGrammaticalRelations.NOMINAL_SUBJECT)) return 1;
     }
     // check the parent
@@ -1492,7 +1491,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if(headIndexedWord == null) return 0;
 
     // check adverbial clause with marker "as"
-    for(IndexedWord sibling : dependency.getSiblings(headIndexedWord)) {
+    Collection<IndexedWord> siblings = dependency.getSiblings(headIndexedWord);
+    for(IndexedWord sibling : siblings) {
       if(dict.reportVerb.contains(sibling.lemma()) && dependency.hasParentWithReln(sibling,EnglishGrammaticalRelations.ADV_CLAUSE_MODIFIER)) {
         IndexedWord marker = dependency.getChildWithReln(sibling,EnglishGrammaticalRelations.MARKER);
         if (marker != null && marker.lemma().equals("as")) {

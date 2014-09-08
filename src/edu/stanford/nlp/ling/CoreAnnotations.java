@@ -1,11 +1,15 @@
 package edu.stanford.nlp.ling;
 
-import edu.stanford.nlp.util.*;
-
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.IntPair;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Triple;
 
 /**
  * <p>
@@ -1622,9 +1626,5 @@ public class CoreAnnotations {
    public Class<Double> getType(){
      return Double.class;
    }
-  }
-
-  public static class ColumnDataClassifierAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() { return String.class; }
   }
 }

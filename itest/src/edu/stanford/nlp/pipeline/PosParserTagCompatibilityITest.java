@@ -12,8 +12,6 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
  */
 public class PosParserTagCompatibilityITest extends TestCase {
 
-  // todo: rename to TaggerParserPosCompatibility.  Add other models.
-
   private static final String[] englishTaggers = {
     "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger",
     "edu/stanford/nlp/models/pos-tagger/english-bidirectional/english-bidirectional-distsim.tagger",
@@ -33,7 +31,7 @@ public class PosParserTagCompatibilityITest extends TestCase {
     Set<String> tagSet = lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction());
     for (String name : englishTaggers) {
       MaxentTagger tagger = new MaxentTagger(name);
-      assertEquals("English PCFG parser/" + name + " tag set mismatch", tagSet, tagger.tagSet());
+      assertEquals("English PCFG parser/" + name + " tag set mismatch", tagSet, tagger.getTags().tagSet());
     }
     for (String name : englishParsers) {
       LexicalizedParser lp2 = LexicalizedParser.loadModel(name);
@@ -63,11 +61,11 @@ public class PosParserTagCompatibilityITest extends TestCase {
     Set<String> tagSet = lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction());
     for (String name : germanTaggers) {
       MaxentTagger tagger = new MaxentTagger(name);
-      assertEquals("German PCFG parser/tagger tag set mismatch", tagSet, tagger.tagSet());
+      assertEquals("German PCFG parser/tagger tag set mismatch", tagSet, tagger.getTags().tagSet());
     }
     LexicalizedParser lp2 = LexicalizedParser.loadModel(germanParsers[1]);
     assertEquals("German (PCFG/factored) parsers tag set mismatch",
-                 lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()),
+                 lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()), 
                  lp2.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()));
   }
   */
@@ -77,7 +75,7 @@ public class PosParserTagCompatibilityITest extends TestCase {
     LexicalizedParser lp = LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/chineseFactored.ser.gz");
     MaxentTagger tagger = new MaxentTagger("edu/stanford/nlp/models/pos-tagger/chinese-distsim/chinese-distsim.tagger");
     assertEquals("Chinese (Fact/distsim) parser/tagger tag set mismatch",
-            lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()), tagger.tagSet());
+            lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()), tagger.getTags().tagSet());
   }
 
 }

@@ -54,7 +54,30 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import javax.swing.*;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
+import javax.swing.UIManager;
 
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.swing.FontDetector;
@@ -70,8 +93,8 @@ import edu.stanford.nlp.util.ReflectionLoading;
  * Main class for creating a tregex gui.  Manages the components and holds the menu bar.
  * A tregex gui (Interactive Tregex) allows users to perform tregex searches in a gui interface
  * and view the results of those searches.  Search results may be saved.
- *
  * @author Anna Rafferty
+ *
  */
 @SuppressWarnings("serial")
 public class TregexGUI extends JFrame implements ActionListener, MatchesPanelListener {
@@ -85,7 +108,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   private JMenuItem saveHistory;
   private JMenuItem loadTsurgeon;
   private JMenuItem tDiff;
-  private JMenuItem quit; //for when we're not running on a mac
+  private JMenuItem quit;//for when we're not running on a mac
   private JMenuItem copy;
   private JMenuItem searchMenuItem;
   private JMenuItem prevMatch;
@@ -307,7 +330,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     super("Tregex");
     TregexGUI.instance = this;
     setDefaultLookAndFeelDecorated(true);
-    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
     String transformerClass = props.getProperty(TRANSFORMER, null);
     if (transformerClass == null) {
@@ -411,7 +434,6 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     chooser.setCurrentDirectory(chooserFile);
 
     chooser.addActionListener( new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand().equals("ApproveSelection")) {
           chooserFile = chooser.getSelectedFile();
@@ -548,7 +570,6 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       manager.addPropertyChangeListener("permanentFocusOwner", this);
     }
 
-    @Override
     public void propertyChange(PropertyChangeEvent e) {
       Object o = e.getNewValue();
       if (o instanceof JComponent) {
@@ -558,7 +579,6 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       }
     }
 
-    @Override
     public void actionPerformed(ActionEvent e) {
       if (focusOwner == null)
         return;
@@ -606,7 +626,6 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
 
     final JDialog dialog = fileFilterDialog.createDialog(null, "Set file filters...");
     okay.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent arg0) {
         // first check if we have a file range option and make sure it's valid
         final EnumMap<FilterType,String> filters = getFilters(fileFilterPanel);
@@ -624,14 +643,12 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       }
     });
     add.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         fileFilterPanel.add(getNewFilter());
         dialog.pack();
       }
     });
     cancel.addActionListener(new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
        dialog.setVisible(false);
 
@@ -650,7 +667,6 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
         FilePanel.getInstance().loadFiles(filters, cFiles);
         SwingUtilities.invokeLater(new Runnable() {
 
-          @Override
           public void run() {
               clearFileList.setEnabled(true);
           }
@@ -718,15 +734,15 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     if(chooser == null)
       chooser = createFileChooser();
     int status = chooser.showSaveDialog(this);
-    if (status == JFileChooser.APPROVE_OPTION) {
+    if(status == JFileChooser.APPROVE_OPTION) {
       Thread t = new Thread() {
         @Override
         public void run() {
           try {
             //FileWriter out = new FileWriter(chooser.getSelectedFile());
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(chooser.getSelectedFile()), FileTreeModel.getCurEncoding()));
-            String str = MatchesPanel.getInstance().getMatches();
-            out.write(str);
+            StringBuffer sb = MatchesPanel.getInstance().getMatches();
+            out.write(sb.toString());
             out.flush();
             out.close();
           } catch(Exception e) {
@@ -752,8 +768,8 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
         public void run() {
           try {
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(chooser.getSelectedFile()), FileTreeModel.getCurEncoding()));
-            String str = MatchesPanel.getInstance().getMatchedSentences();
-            out.write(str);
+            StringBuffer sb = MatchesPanel.getInstance().getMatchedSentences();
+            out.write(sb.toString());
             out.flush();
             out.close();
           } catch(Exception e) {
@@ -793,6 +809,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       t.start();
     }
   }
+
 
 
   private void loadTsurgeonScript() {
@@ -941,5 +958,6 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     aboutBox.setResizable(false);
     aboutBox.setVisible(true);
   }
+
 
 }

@@ -59,15 +59,6 @@ public class ShiftReduceOptions extends Options {
       i++;
     } else if (args[i].equalsIgnoreCase("-trainingMethod")) {
       trainOptions().trainingMethod = ShiftReduceTrainOptions.TrainingMethod.valueOf(args[i + 1].toUpperCase());
-      if (trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM ||
-          trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM) {
-        if (trainOptions().beamSize <= 0) {
-          trainOptions().beamSize = ShiftReduceTrainOptions.DEFAULT_BEAM_SIZE;
-        }
-        if (testOptions().beamSize <= 0) {
-          testOptions().beamSize = trainOptions().beamSize;
-        }
-      }
       i += 2;
     } else if (args[i].equalsIgnoreCase("-featureFrequencyCutoff")) {
       trainOptions().featureFrequencyCutoff = Integer.valueOf(args[i + 1]);
@@ -77,12 +68,6 @@ public class ShiftReduceOptions extends Options {
       i++;
     } else if (args[i].equalsIgnoreCase("-nosaveIntermediateModels")) {
       trainOptions().saveIntermediateModels = false;
-      i++;
-    } else if (args[i].equalsIgnoreCase("-oracleShiftToBinary")) {
-      trainOptions().oracleShiftToBinary = true;
-      i++;
-    } else if (args[i].equalsIgnoreCase("-oracleBinaryToShift")) {
-      trainOptions().oracleBinaryToShift = true;
       i++;
     } else if (args[i].equalsIgnoreCase("-recordBinarized")) {
       testOptions().recordBinarized = args[i + 1];

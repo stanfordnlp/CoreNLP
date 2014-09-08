@@ -1907,12 +1907,6 @@ public class ColumnDataClassifier {
     return new Pair<Double,Double>(averageAccuracy, averageMacroF1);
   }
 
-  public String classOf(Datum<String,String> example) {
-    if(classifier==null)
-      throw new RuntimeException("Classifier is not initialized");
-    return classifier.classOf(example);
-  }
-
   static class Flags implements Serializable {
 
     // PLEASE ADD NEW FLAGS AT THE END OF THIS CLASS (SO AS TO NOT UNNECESSARILY BREAK SERIALIZED CLASSIFIERS)

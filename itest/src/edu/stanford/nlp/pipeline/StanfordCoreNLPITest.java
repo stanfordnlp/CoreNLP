@@ -15,6 +15,8 @@ import junit.framework.TestCase;
 import java.io.*;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StanfordCoreNLPITest extends TestCase {
 
@@ -33,28 +35,28 @@ public class StanfordCoreNLPITest extends TestCase {
     props.setProperty("annotators", "tokenize,ssplit,parse,lemma,ner");
     new StanfordCoreNLP(props);
   }
-
+  
   public void test() throws Exception {
     // create a properties that enables all the anotators
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
-
+    
     // run an annotation through the pipeline
     String text = "Dan Ramage is working for\nMicrosoft. He's in Seattle! \n";
     Annotation document = new Annotation(text);
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     pipeline.annotate(document);
-
+    
     // check that tokens are present
     List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
     Assert.assertNotNull(tokens);
     Assert.assertEquals(12, tokens.size());
-
+    
     // check that sentences are present
     List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
     Assert.assertNotNull(sentences);
     Assert.assertEquals(2, sentences.size());
-
+    
     // check that pos, lemma and ner and parses are present
     for (CoreMap sentence: sentences) {
       List<CoreLabel> sentenceTokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
@@ -64,17 +66,17 @@ public class StanfordCoreNLPITest extends TestCase {
         Assert.assertNotNull(token.get(CoreAnnotations.LemmaAnnotation.class));
         Assert.assertNotNull(token.get(CoreAnnotations.NamedEntityTagAnnotation.class));
       }
-
+      
       // check for parse tree
       Assert.assertNotNull(sentence.get(TreeCoreAnnotations.TreeAnnotation.class));
     }
-
+    
     // test pretty print
     StringWriter stringWriter = new StringWriter();
     pipeline.prettyPrint(document, new PrintWriter(stringWriter));
     String result = stringWriter.getBuffer().toString();
     Assert.assertTrue("Tokens are wrong in " + result,
-            StringUtils.find(result, "\\[Text=Dan .*PartOfSpeech=NNP Lemma=Dan NamedEntityTag=PERSON\\]"));
+        this.contains(result, "\\[Text=Dan .*PartOfSpeech=NNP Lemma=Dan NamedEntityTag=PERSON\\]"));
     Assert.assertTrue("Parses are wrong in " + result,
         result.contains("(NP (PRP He))"));
     Assert.assertTrue("Parses are wrong in " + result,
@@ -93,20 +95,21 @@ public class StanfordCoreNLPITest extends TestCase {
     Assert.assertTrue("XML root is wrong in " + result,
         result.contains("<?xml-stylesheet href=\"CoreNLP-to-HTML.xsl\" type=\"text/xsl\"?>"));
     Assert.assertTrue("XML word info is wrong in " + result,
-            StringUtils.find(result, "<token id=\"2\">\\s*" +
-                    "<word>Ramage</word>\\s*" +
-                    "<lemma>Ramage</lemma>\\s*" +
-                    "<CharacterOffsetBegin>4</CharacterOffsetBegin>\\s*" +
-                    "<CharacterOffsetEnd>10</CharacterOffsetEnd>\\s*" +
-                    "<POS>NNP</POS>\\s*" +
-                    "<NER>PERSON</NER>"));
+        this.contains(result,
+            "<token id=\"2\">\\s*" +
+            "<word>Ramage</word>\\s*" +
+            "<lemma>Ramage</lemma>\\s*" +
+            "<CharacterOffsetBegin>4</CharacterOffsetBegin>\\s*" +
+            "<CharacterOffsetEnd>10</CharacterOffsetEnd>\\s*" +
+            "<POS>NNP</POS>\\s*" +
+            "<NER>PERSON</NER>"));
     Assert.assertTrue("XML dependencies are wrong in " + result,
-            StringUtils.find(result, "<dep type=\"nn\">\\s*<governor idx=\"2\">" +
-                    "Ramage</governor>\\s*<dependent idx=\"1\">Dan</dependent>\\s*</dep>"));
+        this.contains(result, "<dep type=\"nn\">\\s*<governor idx=\"2\">" +
+        "Ramage</governor>\\s*<dependent idx=\"1\">Dan</dependent>\\s*</dep>"));
   }
 
 
-  private static void checkNer(String message, String[][][] expected, CoreMap coremap, String coremapOutput) {
+  private void checkNer(String message, String[][][] expected, CoreMap coremap, String coremapOutput) {
     List<CoreMap> sentences = coremap.get(CoreAnnotations.SentencesAnnotation.class);
     assertEquals(message + ": number of sentences for\n" + coremapOutput, expected.length, sentences.size());
     for (int i = 0; i < expected.length; i++) {
@@ -167,7 +170,7 @@ public class StanfordCoreNLPITest extends TestCase {
 
     checkNer("testRegexNer", expected, document, result);
   }
-
+  
   public void testRelationExtractor() throws Exception {
     // Check the regexner is integrated with the StanfordCoreNLP
     Properties props = new Properties();
@@ -185,9 +188,9 @@ public class StanfordCoreNLPITest extends TestCase {
 //    String result = stringWriter.getBuffer().toString();
 //    System.out.println(result);
   }
-
-
-
+  
+  
+  
   /* This test no longer supported. Do not mess with AnnotatorPool outside of StanfordCoreNLP */
   /*
   public void testAnnotatorPool() throws Exception {
@@ -204,7 +207,7 @@ public class StanfordCoreNLPITest extends TestCase {
     new StanfordCoreNLP(pool, properties);
     Assert.assertEquals(1, Tokenize.N);
   }
-
+  
   private static class Tokenize implements Annotator {
     public static int N = 0;
     public Tokenize() {
@@ -213,7 +216,7 @@ public class StanfordCoreNLPITest extends TestCase {
     public void annotate(Annotation annotation) {
     }
   }
-
+  
   private Properties newProperties(String desc) {
     Properties properties = new Properties();
     for (String nameValue: desc.split("\\s*,\\s*")) {
@@ -226,8 +229,14 @@ public class StanfordCoreNLPITest extends TestCase {
     return properties;
   }
   */
-
-  public void testSerialization()
+  
+  private boolean contains(String string, String regexp) {
+    Pattern pattern = Pattern.compile(regexp);
+    Matcher matcher = pattern.matcher(string);
+    return matcher.find();
+  }
+  
+  public void testSerialization() 
     throws Exception
   {
     // Test that an annotation can be serialized and deserialized
@@ -250,7 +259,7 @@ public class StanfordCoreNLPITest extends TestCase {
     assertTrue(document.equals(newDocument));
   }
 
-  public static Object processSerialization(Object input)
+  public Object processSerialization(Object input) 
     throws Exception
   {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();

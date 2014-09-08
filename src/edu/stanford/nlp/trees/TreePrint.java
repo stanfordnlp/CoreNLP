@@ -1,6 +1,7 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseEnglishWordMap;
 import edu.stanford.nlp.util.*;
@@ -932,7 +933,7 @@ public class TreePrint {
    *         typed dependencies
    */
   private static String toString(Collection<TypedDependency> dependencies, boolean extraSep, boolean includeTags) {
-    CoreLabel.OutputFormat labelFormat = (includeTags) ? CoreLabel.OutputFormat.VALUE_TAG_INDEX : CoreLabel.OutputFormat.VALUE_INDEX;
+    String labelFormat = (includeTags) ? "value-tag-index" : "value-index";
     StringBuilder buf = new StringBuilder();
     if (extraSep) {
       List<TypedDependency> extraDeps =  new ArrayList<TypedDependency>();
