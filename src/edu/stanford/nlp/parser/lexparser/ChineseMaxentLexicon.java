@@ -167,7 +167,7 @@ public class ChineseMaxentLexicon implements Lexicon {
   }
 
   private String getTag(String word) {
-    int iW = wordIndex.indexOf(word, true);
+    int iW = wordIndex.addToIndex(word);
     ensureProbs(iW, false);
     return Counters.argmax(logProbs);
   }

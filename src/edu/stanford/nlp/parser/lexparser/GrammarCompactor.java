@@ -279,17 +279,17 @@ public abstract class GrammarCompactor {
     newStateIndex = new HashIndex<String>();
     for (UnaryRule rule : unaryRules) {
       String parent = stateIndex.get(rule.parent);
-      rule.parent = newStateIndex.indexOf(parent, true);
+      rule.parent = newStateIndex.addToIndex(parent);
       String child = stateIndex.get(rule.child);
-      rule.child = newStateIndex.indexOf(child, true);
+      rule.child = newStateIndex.addToIndex(child);
     }
     for (BinaryRule rule : binaryRules) {
       String parent = stateIndex.get(rule.parent);
-      rule.parent = newStateIndex.indexOf(parent, true);
+      rule.parent = newStateIndex.addToIndex(parent);
       String leftChild = stateIndex.get(rule.leftChild);
-      rule.leftChild = newStateIndex.indexOf(leftChild, true);
+      rule.leftChild = newStateIndex.addToIndex(leftChild);
       String rightChild = stateIndex.get(rule.rightChild);
-      rule.rightChild = newStateIndex.indexOf(rightChild, true);
+      rule.rightChild = newStateIndex.addToIndex(rightChild);
     }
 
     // now go through the graphs and add the rules
@@ -304,11 +304,11 @@ public abstract class GrammarCompactor {
         double output = ((Double) arc.getOutput()).doubleValue();
         if (source.equals(startNode)) {
           // make a UnaryRule
-          UnaryRule ur = new UnaryRule(newStateIndex.indexOf(target, true), newStateIndex.indexOf(inputString, true), smartNegate(output));
+          UnaryRule ur = new UnaryRule(newStateIndex.addToIndex(target), newStateIndex.addToIndex(inputString), smartNegate(output));
           unaryRules.add(ur);
         } else if (inputString.equals(END) || inputString.equals(EPSILON)) {
           // make a UnaryRule
-          UnaryRule ur = new UnaryRule(newStateIndex.indexOf(target, true), newStateIndex.indexOf(source, true), smartNegate(output));
+          UnaryRule ur = new UnaryRule(newStateIndex.addToIndex(target), newStateIndex.addToIndex(source), smartNegate(output));
           unaryRules.add(ur);
         } else {
           // make a BinaryRule
@@ -318,9 +318,9 @@ public abstract class GrammarCompactor {
           inputString = inputString.substring(0, length - 1);
           BinaryRule br;
           if (leftOrRight == '<' || leftOrRight == '[') {
-            br = new BinaryRule(newStateIndex.indexOf(target, true), newStateIndex.indexOf(inputString, true), newStateIndex.indexOf(source, true), smartNegate(output));
+            br = new BinaryRule(newStateIndex.addToIndex(target), newStateIndex.addToIndex(inputString), newStateIndex.addToIndex(source), smartNegate(output));
           } else if (leftOrRight == '>' || leftOrRight == ']') {
-            br = new BinaryRule(newStateIndex.indexOf(target, true), newStateIndex.indexOf(source, true), newStateIndex.indexOf(inputString, true), smartNegate(output));
+            br = new BinaryRule(newStateIndex.addToIndex(target), newStateIndex.addToIndex(source), newStateIndex.addToIndex(inputString), smartNegate(output));
           } else {
             throw new RuntimeException("Arc input is in unexpected format: " + arc);
           }

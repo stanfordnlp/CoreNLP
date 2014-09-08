@@ -310,7 +310,7 @@ public class TTags {
   }
 
   protected int add(String tag) {
-    return index.indexOf(tag, true);
+    return index.addToIndex(tag);
   }
 
   public String getTag(int i) {
