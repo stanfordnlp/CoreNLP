@@ -42,6 +42,22 @@ public class MentionsAnnotator implements Annotator {
     this();
   }
 
+  private static boolean checkStrings(String s1, String s2) {
+    if (s1 == null || s2 == null) {
+      return s1 == s2;
+    } else {
+      return s1.equals(s2);
+    }
+  }
+
+  private static boolean checkNumbers(Number n1, Number n2) {
+    if (n1 == null || n2 == null) {
+      return n1 == n2;
+    } else {
+      return n1.equals(n2);
+    }
+  }
+
   private static Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = new Function<Pair<CoreLabel, CoreLabel>, Boolean>() {
     @Override
     public Boolean apply(Pair<CoreLabel, CoreLabel> in) {
@@ -52,15 +68,27 @@ public class MentionsAnnotator implements Annotator {
       if (cur == null || prev == null) {
         return false;
       }
-      Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
-      Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
-      String tid1 = (timex1 != null)? timex1.tid():null;
-      String tid2 = (timex2 != null)? timex2.tid():null;
-      if (tid1 == null || tid2 == null) {
-        return tid1 == tid2;
-      } else {
-        return tid1.equals(tid2);
-      }
+
+      // Get NormalizedNamedEntityTag and say two entities are incompatible if they are different
+      String v1 = cur.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+      String v2 = prev.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+      boolean compatible = checkStrings(v1,v2);
+      if (!compatible) return compatible;
+      return true;
+
+//      // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
+//      Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+//      Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+//      compatible = checkNumbers(n1,n2);
+//      if (!compatible) return compatible;
+//
+//      // Check timex...
+//      Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
+//      Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
+//      String tid1 = (timex1 != null)? timex1.tid():null;
+//      String tid2 = (timex2 != null)? timex2.tid():null;
+//      compatible = checkStrings(tid1,tid2);
+//      return compatible;
     }
   };
 

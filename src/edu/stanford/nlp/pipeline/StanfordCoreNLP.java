@@ -26,21 +26,24 @@
 
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.ie.NERClassifierCombiner;
+import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.io.FileSequentialCollection;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.objectbank.ObjectBank;
+import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
 
 import java.io.*;
+import java.util.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
 import java.util.regex.Pattern;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
@@ -345,7 +348,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool.register(STANFORD_DETERMINISTIC_COREF, AnnotatorFactories.coref(properties, annotatorImplementation));
     pool.register(STANFORD_RELATION, AnnotatorFactories.relation(properties, annotatorImplementation));
     pool.register(STANFORD_SENTIMENT, AnnotatorFactories.sentiment(properties, annotatorImplementation));
-    pool.register(STANFORD_COLUMN_DATA_CLASSIFIER,AnnotatorFactories.columnDataClassifier(properties,annotatorImplementation));
     // Add more annotators here
 
 

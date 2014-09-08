@@ -93,7 +93,7 @@ public class MentionsAnnotatorITest extends TestCase {
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
     String[] expectedMentions = {
         "[Text=July 3rd CharacterOffsetBegin=0 CharacterOffsetEnd=8 Tokens=[July-1, 3rd-2] TokenBegin=0 TokenEnd=2 NamedEntityTag=DATE NormalizedNamedEntityTag=XXXX-07-03 EntityType=DATE Timex=<TIMEX3 tid=\"t1\" type=\"DATE\" value=\"XXXX-07-03\">July 3rd</TIMEX3>]",
-        "[Text=July 4th CharacterOffsetBegin=9 CharacterOffsetEnd=17 Tokens=[July-3, 4th-4] TokenBegin=2 TokenEnd=4 NamedEntityTag=DATE NormalizedNamedEntityTag=XXXX-07-03 EntityType=DATE Timex=<TIMEX3 tid=\"t2\" type=\"DATE\" value=\"XXXX-07-04\">July 4th</TIMEX3>]",
+        "[Text=July 4th CharacterOffsetBegin=9 CharacterOffsetEnd=17 Tokens=[July-3, 4th-4] TokenBegin=2 TokenEnd=4 NamedEntityTag=DATE NormalizedNamedEntityTag=XXXX-07-04 EntityType=DATE Timex=<TIMEX3 tid=\"t2\" type=\"DATE\" value=\"XXXX-07-04\">July 4th</TIMEX3>]",
         "[Text=two CharacterOffsetBegin=22 CharacterOffsetEnd=25 Tokens=[two-6] TokenBegin=5 TokenEnd=6 NamedEntityTag=NUMBER NormalizedNamedEntityTag=2.0 EntityType=NUMBER]"
     };
     compareMentions("testDates", expectedMentions, mentions);
@@ -111,5 +111,21 @@ public class MentionsAnnotatorITest extends TestCase {
         "[Text=two CharacterOffsetBegin=22 CharacterOffsetEnd=25 Tokens=[two-6] TokenBegin=5 TokenEnd=6 NamedEntityTag=NUMBER NormalizedNamedEntityTag=2.0 EntityType=NUMBER]"
     };
     compareMentions("testDates2", expectedMentions, mentions);
+  }
+
+  public void testNumbers() {
+    Annotation doc = createDocument("one two three four five");
+    MentionsAnnotator annotator = getMentionsAnnotator();
+
+    annotator.annotate(doc);
+    List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
+    String[] expectedMentions = {
+        "[Text=one CharacterOffsetBegin=0 CharacterOffsetEnd=3 Tokens=[one-1] TokenBegin=0 TokenEnd=1 NamedEntityTag=NUMBER NormalizedNamedEntityTag=1.0 EntityType=NUMBER]",
+        "[Text=two CharacterOffsetBegin=4 CharacterOffsetEnd=7 Tokens=[two-2] TokenBegin=1 TokenEnd=2 NamedEntityTag=NUMBER NormalizedNamedEntityTag=2.0 EntityType=NUMBER]",
+        "[Text=three CharacterOffsetBegin=8 CharacterOffsetEnd=13 Tokens=[three-3] TokenBegin=2 TokenEnd=3 NamedEntityTag=NUMBER NormalizedNamedEntityTag=3.0 EntityType=NUMBER]",
+        "[Text=four CharacterOffsetBegin=14 CharacterOffsetEnd=18 Tokens=[four-4] TokenBegin=3 TokenEnd=4 NamedEntityTag=NUMBER NormalizedNamedEntityTag=4.0 EntityType=NUMBER]",
+        "[Text=five CharacterOffsetBegin=19 CharacterOffsetEnd=23 Tokens=[five-5] TokenBegin=4 TokenEnd=5 NamedEntityTag=NUMBER NormalizedNamedEntityTag=5.0 EntityType=NUMBER]"
+    };
+    compareMentions("testNumbers", expectedMentions, mentions);
   }
 }

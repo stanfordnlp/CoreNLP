@@ -102,7 +102,6 @@ public interface Annotator {
   public static final String STANFORD_DETERMINISTIC_COREF = "dcoref";
   public static final String STANFORD_RELATION = "relation";
   public static final String STANFORD_SENTIMENT = "sentiment";
-  public static final String STANFORD_COLUMN_DATA_CLASSIFIER = "cdc";
 
 
   public static final Requirement TOKENIZE_REQUIREMENT = new Requirement(STANFORD_TOKENIZE);

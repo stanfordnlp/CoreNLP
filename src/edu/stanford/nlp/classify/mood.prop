@@ -18,6 +18,3 @@ prior=no
 
 trainFile=projects/core/src/edu/stanford/nlp/classify/mood.train
 testFile=projects/core/src/edu/stanford/nlp/classify/mood.test
-
-# for the pipeline
-annotators=cdc
