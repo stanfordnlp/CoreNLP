@@ -527,13 +527,13 @@ public class SemanticGraph implements Serializable {
     used.add(vertex);
 
     // TODO: Apparently the order of the nodes in the path to the root
-    // makes a different for the RTE system.  Look into this some more
+    // makes a difference for the RTE system.  Look into this some more
     List<IndexedWord> parents = getParentList(vertex);
     // Set<IndexedWord> parents = wordMapFactory.newSet();
     // parents.addAll(getParents(vertex));
     parents.removeAll(used);
 
-    if (roots.contains(vertex) || (parents.size() == 0)) {
+    if (roots.contains(vertex) || (parents.isEmpty())) {
       used.remove(used.size() - 1);
       if (roots.contains(vertex))
         return Generics.newArrayList();
@@ -888,7 +888,7 @@ public class SemanticGraph implements Serializable {
 
 
   /**
-   * Does the given <code>vertex</code> have at least one child with the given <code>reln<code> and the lemma <code>childLemma</code>?
+   * Does the given <code>vertex</code> have at least one child with the given {@code reln} and the lemma <code>childLemma</code>?
    */
   public boolean hasChild(IndexedWord vertex, GrammaticalRelation reln, String childLemma) {
     if (!containsVertex(vertex)) {
@@ -905,7 +905,7 @@ public class SemanticGraph implements Serializable {
   }
 
   /**
-   * Does the given <code>vertex</code> have at least one child with the given <code>reln<code>?
+   * Does the given <code>vertex</code> have at least one child with the given {@code reln}?
    */
   public boolean hasChildWithReln(IndexedWord vertex, GrammaticalRelation reln) {
     if (!containsVertex(vertex)) {
