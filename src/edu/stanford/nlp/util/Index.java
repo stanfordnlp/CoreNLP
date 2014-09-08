@@ -123,15 +123,11 @@ public interface Index<E> extends Iterable<E>, Serializable {
   public void saveToFilename(String s);
 
 
-  // Subset of the Collection interface.  These come from old uses of HashIndex. Particularly avoid using these.
+  // Subset of the Collection interface.  These come from old uses of HashIndex. Avoid using these.
 
   public boolean contains(Object o);   // cdm: keep this, it seems reasonable
 
-  public <T> T[] toArray(T[] a);   // cdm: delete this (you can do objectsList().toArray() if you're desperate
-
   public boolean add(E e);  // cdm: Many, many uses; could be replaced with indexOf, but why bother?
-
-  // public boolean remove(Object o);
 
   public boolean addAll(Collection<? extends E> c);  // okay to have.
 

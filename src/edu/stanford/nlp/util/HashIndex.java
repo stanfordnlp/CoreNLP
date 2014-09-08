@@ -25,6 +25,7 @@ import java.util.concurrent.Semaphore;
  * @since 1.0
  * @author <a href="mailto:yeh1@stanford.edu">Eric Yeh</a> (added write to/load from buffer)
  */
+// todo [cdm 2014]: Delete "extends AbstractCollection<E>" but this will break serialization....
 public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, RandomAccess {
 
   // these variables are also used in IntArrayIndex
@@ -465,16 +466,6 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     };
     newIndex.lock();
     return newIndex;
-  }
-
-  @Override
-  public boolean remove(Object o){
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public boolean removeAll(Collection<?> e){
-    throw new UnsupportedOperationException();
   }
 
   /**

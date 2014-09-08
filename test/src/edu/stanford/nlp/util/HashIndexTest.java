@@ -69,7 +69,7 @@ public class HashIndexTest extends TestCase  {
 
   public void testToArray() {
     String[] strs = new String[2];
-    strs = index.toArray(strs);
+    strs = index.objectsList().toArray(strs);
     assertEquals("The", strs[0]);
     assertEquals("Beast", strs[1]);
     assertEquals(2, strs.length);
