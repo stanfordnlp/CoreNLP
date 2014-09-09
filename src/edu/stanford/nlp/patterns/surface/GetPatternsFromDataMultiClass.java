@@ -2037,6 +2037,42 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     writer.close();
   }
 
+  public void writeColumnOutput(String outFile) throws IOException, ClassNotFoundException {
+    BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
+    if (!constVars.batchProcessSents) {
+      this.writeColumnOutputSents(Data.sents, writer);
+    } else {
+      for (File f : Data.sentsFiles) {
+        Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
+        this.writeColumnOutputSents(sents, writer);
+      }
+    }
+    writer.close();
+  }
+
+  private void writeColumnOutputSents(Map<String, List<CoreLabel>> sents, BufferedWriter writer) throws IOException {
+    for (Entry<String, List<CoreLabel>> sent : sents.entrySet()) {
+
+      //writer.write("###"+sent.getKey() + "\n");
+
+      for (CoreLabel s : sent.getValue()) {
+        writer.write(s.word()+"\t");
+        Set<String> labels = new HashSet<String>();
+        for (Entry<String, Class<? extends TypesafeMap.Key<String>>> as : constVars.getAnswerClass().entrySet()) {
+          String label = as.getKey();
+          if (s.get(as.getValue()).equals(label)) {
+            labels.add(label);
+          }
+        }
+        if(labels.isEmpty())
+          writer.write("O\n");
+        else
+          writer.write(StringUtils.join(labels,",")+"\n");
+      }
+      writer.write("\n");
+    }
+  }
+
   // public Map<String, List<CoreLabel>> loadJavaNLPAnnotatorLabeledFile(String
   // labeledFile, Properties props) throws FileNotFoundException {
   // System.out.println("Loading evaluate file " + labeledFile);
@@ -2506,6 +2542,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if (model.constVars.markedOutputTextFile != null) {
         model.writeLabeledData(model.constVars.markedOutputTextFile);
       }
+
+      if(model.constVars.columnOutputFile != null)
+        model.writeColumnOutput(model.constVars.columnOutputFile);
 
       boolean savePatternsWordsDir = Boolean.parseBoolean(props.getProperty("savePatternsWordsDir"));
 

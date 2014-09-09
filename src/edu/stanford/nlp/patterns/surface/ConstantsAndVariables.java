@@ -156,6 +156,12 @@ public class ConstantsAndVariables implements Serializable{
   String markedOutputTextFile = null;
 
   /**
+   * If you want output of form "word\tlabels-separated-by-comma" in newlines
+   */
+  @Option(name="columnOutputFile")
+  String columnOutputFile = null;
+
+  /**
    * Use lemma instead of words for the context tokens
    */
   @Option(name = "useLemmaContextTokens")
