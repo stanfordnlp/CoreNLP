@@ -74,21 +74,28 @@ public class MentionsAnnotator implements Annotator {
       String v2 = prev.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
       boolean compatible = checkStrings(v1,v2);
       if (!compatible) return compatible;
-      return true;
 
-//      // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
-//      Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
-//      Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
-//      compatible = checkNumbers(n1,n2);
-//      if (!compatible) return compatible;
-//
-//      // Check timex...
-//      Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
-//      Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
-//      String tid1 = (timex1 != null)? timex1.tid():null;
-//      String tid2 = (timex2 != null)? timex2.tid():null;
-//      compatible = checkStrings(tid1,tid2);
-//      return compatible;
+      // This duplicates logic in the QuantifiableEntityNormalizer (but maybe we will get rid of that class)
+      String nerTag = cur.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+      if ("NUMBER".equals(nerTag) || "ORDINAL".equals(nerTag)) {
+        // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
+        Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+        Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+        compatible = checkNumbers(n1,n2);
+        if (!compatible) return compatible;
+      }
+
+      // Check timex...
+      if ("TIME".equals(nerTag) || "SET".equals(nerTag) || "DATE".equals(nerTag) || "DURATION".equals(nerTag)) {
+        Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
+        Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
+        String tid1 = (timex1 != null)? timex1.tid():null;
+        String tid2 = (timex2 != null)? timex2.tid():null;
+        compatible = checkStrings(tid1,tid2);
+        if (!compatible) return compatible;
+      }
+
+      return compatible;
     }
   };
 
