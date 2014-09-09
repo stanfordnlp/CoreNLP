@@ -365,19 +365,10 @@ public class MentionExtractor {
         }
         for(Pair<Integer, Integer> foundPair: foundPairs){
           if((foundPair.first == m1.headIndex && foundPair.second == m2.headIndex)){
-            switch (flag) {
-              case "APPOSITION":
-                m2.addApposition(m1);
-                break;
-              case "PREDICATE_NOMINATIVE":
-                m2.addPredicateNominatives(m1);
-                break;
-              case "RELATIVE_PRONOUN":
-                m2.addRelativePronoun(m1);
-                break;
-              default:
-                throw new RuntimeException("check flag in markMentionRelation (dcoref/MentionExtractor.java)");
-            }
+            if(flag.equals("APPOSITION")) m2.addApposition(m1);
+            else if(flag.equals("PREDICATE_NOMINATIVE")) m2.addPredicateNominatives(m1);
+            else if(flag.equals("RELATIVE_PRONOUN")) m2.addRelativePronoun(m1);
+            else throw new RuntimeException("check flag in markMentionRelation (dcoref/MentionExtractor.java)");
           }
         }
       }

@@ -808,8 +808,11 @@ public class SemanticGraphUtils {
     if(!orderedNodes){
      edgeIter = sg.outgoingEdgeIterable(vertice); 
     } else{
-      edgeIter = CollectionUtils.sorted(sg.outgoingEdgeList(vertice), (arg0, arg1) -> 
-        (arg0.getRelation().toString().compareTo(arg1.getRelation().toString())));
+      edgeIter = CollectionUtils.sorted(sg.outgoingEdgeIterable(vertice), new Comparator<SemanticGraphEdge>(){
+        @Override
+        public int compare(SemanticGraphEdge arg0, SemanticGraphEdge arg1) {
+          return (arg0.getRelation().toString().compareTo(arg1.getRelation().toString()));      
+        }});
     }
       
     

@@ -122,13 +122,12 @@ public class UnnamedDependency implements Dependency<Label, Label, Object> {
    * Otherwise the default toString() is used.
    */
   public String toString(String format) {
-    switch (format) {
-      case "xml":
-        return "  <dep>\n    <governor>" + XMLUtils.escapeXML(governor().value()) + "</governor>\n    <dependent>" + XMLUtils.escapeXML(dependent().value()) + "</dependent>\n  </dep>";
-      case "predicate":
-        return "dep(" + governor() + "," + dependent() + ")";
-      default:
-        return toString();
+    if ("xml".equals(format)) {
+      return "  <dep>\n    <governor>" + XMLUtils.escapeXML(governor().value()) + "</governor>\n    <dependent>" + XMLUtils.escapeXML(dependent().value()) + "</dependent>\n  </dep>";
+    } else if ("predicate".equals(format)) {
+      return "dep(" + governor() + "," + dependent() + ")";
+    } else {
+      return toString();
     }
   }
   

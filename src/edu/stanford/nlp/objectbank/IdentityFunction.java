@@ -1,6 +1,6 @@
 package edu.stanford.nlp.objectbank;
 
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 
 /** An Identity function that returns its argument.

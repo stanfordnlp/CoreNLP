@@ -2,8 +2,6 @@ package edu.stanford.nlp.util;
 
 import junit.framework.TestCase;
 
-import java.util.function.Function;
-
 
 /**
  * Tests Functions utility class

@@ -14,7 +14,7 @@ import edu.stanford.nlp.util.Pair;
 /**
  * @author Jon Gauthier
  */
-public class SpanishTreeNormalizerITest extends TestCase {
+public class SpanishTreeNormalizerTest extends TestCase {
 
   private TreeFactory tf;
   private SpanishTreeNormalizer tn;

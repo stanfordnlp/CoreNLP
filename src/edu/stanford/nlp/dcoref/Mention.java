@@ -807,26 +807,22 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
             return false;
           }
         } else {  // ACE w/o gold NE or MUC
-          switch (m.nerString) {
-            case "O":
-              return true;
-            case "MISC":
-              return true;
-            case "ORGANIZATION":
-              return dict.organizationPronouns.contains(headString);
-            case "PERSON":
-              return dict.personPronouns.contains(headString);
-            case "LOCATION":
-              return dict.locationPronouns.contains(headString);
-            case "DATE":
-            case "TIME":
-              return dict.dateTimePronouns.contains(headString);
-            case "MONEY":
-            case "PERCENT":
-            case "NUMBER":
-              return dict.moneyPercentNumberPronouns.contains(headString);
-            default:
-              return false;
+          if (m.nerString.equals("O")) {
+            return true;
+          } else if (m.nerString.equals("MISC")) {
+            return true;
+          } else if (m.nerString.equals("ORGANIZATION")) {
+            return dict.organizationPronouns.contains(headString);
+          } else if (m.nerString.equals("PERSON")) {
+            return dict.personPronouns.contains(headString);
+          } else if (m.nerString.equals("LOCATION")) {
+            return dict.locationPronouns.contains(headString);
+          } else if (m.nerString.equals("DATE") || m.nerString.equals("TIME")) {
+            return dict.dateTimePronouns.contains(headString);
+          } else if (m.nerString.equals("MONEY") || m.nerString.equals("PERCENT") || m.nerString.equals("NUMBER")) {
+            return dict.moneyPercentNumberPronouns.contains(headString);
+          } else {
+            return false;
           }
         }
       }

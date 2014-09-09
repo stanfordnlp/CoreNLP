@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Function;
 
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -495,7 +494,12 @@ public class CollectionUtils {
   }
 
   public static <C extends Comparable<C>> Comparator<List<C>> getListComparator() {
-    return (list1, list2) -> compareLists(list1, list2);
+    return new Comparator<List<C>>() {
+      @Override
+      public int compare(List<C> list1, List<C> list2) {
+        return compareLists(list1, list2);
+      }
+    };
   }
 
   /**

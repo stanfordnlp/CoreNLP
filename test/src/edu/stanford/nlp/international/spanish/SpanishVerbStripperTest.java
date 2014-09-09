@@ -10,7 +10,7 @@ import edu.stanford.nlp.util.Pair;
 /**
  * @author Jon Gauthier
  */
-public class SpanishVerbStripperITest extends TestCase {
+public class SpanishVerbStripperTest extends TestCase {
 
   private final SpanishVerbStripper verbStripper = SpanishVerbStripper.getInstance();
 

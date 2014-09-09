@@ -103,7 +103,8 @@ public class AnnotationLookup {
       try {
        keyClass = Class.forName(className);
       } catch(ClassNotFoundException e) {
-        GenericAnnotation<Object> newKey = () -> Object.class;
+        GenericAnnotation<Object> newKey = new GenericAnnotation<Object>() {
+          public Class<Object> getType() { return Object.class;} };
         keyClass = newKey.getClass();
       }
       this.coreKey = ErasureUtils.uncheckedCast(keyClass);

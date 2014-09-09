@@ -34,8 +34,6 @@ message Sentence {
   optional DependencyGraph collapsedCCProcessedDependencies    = 10;
   optional uint32          paragraph                           = 11;
 
-  optional string          text                                = 12;
-
   // Fields set by other annotators in CoreNLP
   optional bool            hasRelationAnnotations              = 51;
   repeated Entity          entity                              = 52;

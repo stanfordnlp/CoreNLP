@@ -438,19 +438,14 @@ public class TTags {
       for (String tag : tags) {
         char ch = tag.charAt(0);
         if (ch == 'V') {
-          switch (tag) {
-            case "VBD":
-              seenVBD = true;
-              break;
-            case "VBN":
-              seenVBN = true;
-              break;
-            case "VB":
-              seenVB = true;
-              break;
-            case "VBP":
-              seenVBP = true;
-              break;
+          if ("VBD".equals(tag)) {
+            seenVBD = true;
+          } else if ("VBN".equals(tag)) {
+            seenVBN = true;
+          } else if ("VB".equals(tag)) {
+            seenVB = true;
+          } else if ("VBP".equals(tag)) {
+            seenVBP = true;
           }
         }
       }

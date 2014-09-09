@@ -123,7 +123,11 @@ public class OpenPageDialog extends javax.swing.JDialog {
         enableOpenButton();
       }
     });
-    urlTextField.addActionListener(evt -> urlTextFieldActionPerformed(evt));
+    urlTextField.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        urlTextFieldActionPerformed(evt);
+      }
+    });
 
     jPanel3.add(urlTextField);
 
@@ -133,17 +137,29 @@ public class OpenPageDialog extends javax.swing.JDialog {
 
     openButton.setText("Open");
     openButton.setEnabled(false);
-    openButton.addActionListener(evt -> openButtonActionPerformed(evt));
+    openButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        openButtonActionPerformed(evt);
+      }
+    });
 
     jPanel2.add(openButton);
 
     cancelButton.setText("Cancel");
-    cancelButton.addActionListener(evt -> cancelButtonActionPerformed(evt));
+    cancelButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        cancelButtonActionPerformed(evt);
+      }
+    });
 
     jPanel2.add(cancelButton);
 
     browseButton.setText("Browse");
-    browseButton.addActionListener(evt -> browseButtonActionPerformed(evt));
+    browseButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        browseButtonActionPerformed(evt);
+      }
+    });
 
     jPanel2.add(browseButton);
 

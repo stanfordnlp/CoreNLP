@@ -7,7 +7,7 @@ import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import org.joda.time.*;
 import org.joda.time.format.*;
@@ -363,11 +363,13 @@ public class TimeFormatter {
     }
   }
 
-  private static final Comparator<String> STRING_LENGTH_REV_COMPARATOR = (o1, o2) -> {
-    if (o1.length() > o2.length()) return -1;
-    else if (o1.length() < o2.length()) return 1;
-    else {
-      return o1.compareToIgnoreCase(o2);
+  private static final Comparator<String> STRING_LENGTH_REV_COMPARATOR = new Comparator<String>()  {
+    public int compare(String o1, String o2) {
+      if (o1.length() > o2.length()) return -1;
+      else if (o1.length() < o2.length()) return 1;
+      else {
+        return o1.compareToIgnoreCase(o2);
+      }
     }
   };
 

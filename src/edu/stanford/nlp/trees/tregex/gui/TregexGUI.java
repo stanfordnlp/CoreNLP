@@ -410,9 +410,12 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     }
     chooser.setCurrentDirectory(chooserFile);
 
-    chooser.addActionListener(e -> {
-      if(e.getActionCommand().equals("ApproveSelection")) {
-        chooserFile = chooser.getSelectedFile();
+    chooser.addActionListener( new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if(e.getActionCommand().equals("ApproveSelection")) {
+          chooserFile = chooser.getSelectedFile();
+        }
       }
     });
     chooser.setMultiSelectionEnabled(true);
@@ -602,20 +605,23 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     fileFilterDialog.setOptions(options);
 
     final JDialog dialog = fileFilterDialog.createDialog(null, "Set file filters...");
-    okay.addActionListener(arg0 -> {
-      // first check if we have a file range option and make sure it's valid
-      final EnumMap<FilterType,String> filters = getFilters(fileFilterPanel);
-      if (filters.containsKey(FilterType.isInRange)) {
-        try {
-          // if we can creat it, then it's not invalid!
-          new NumberRangesFileFilter(filters.get(FilterType.isInRange), false);
-        } catch(Exception e) {
-          JOptionPane.showMessageDialog(dialog, new JLabel("<html>Please check the range you specified for the file number.  Ranges must be numerical, and disjoint <br>ranges should be separated by commas.  For example \"1-200,250-375\" is a valid range.</html>"), "Error in File Number Range", JOptionPane.ERROR_MESSAGE);
-          return;
+    okay.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+        // first check if we have a file range option and make sure it's valid
+        final EnumMap<FilterType,String> filters = getFilters(fileFilterPanel);
+        if (filters.containsKey(FilterType.isInRange)) {
+          try {
+            // if we can creat it, then it's not invalid!
+            new NumberRangesFileFilter(filters.get(FilterType.isInRange), false);
+          } catch(Exception e) {
+            JOptionPane.showMessageDialog(dialog, new JLabel("<html>Please check the range you specified for the file number.  Ranges must be numerical, and disjoint <br>ranges should be separated by commas.  For example \"1-200,250-375\" is a valid range.</html>"), "Error in File Number Range", JOptionPane.ERROR_MESSAGE);
+            return;
+          }
         }
+        dialog.setVisible(false);
+        startFileLoadingThread(filters, cFiles);
       }
-      dialog.setVisible(false);
-      startFileLoadingThread(filters, cFiles);
     });
     add.addActionListener(new ActionListener() {
       @Override
@@ -631,7 +637,6 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
 
       }
     });
-    cancel.addActionListener(e -> dialog.setVisible(false));
     dialog.getRootPane().setDefaultButton(okay);
     dialog.pack();
     dialog.setLocationRelativeTo(this);
@@ -643,7 +648,14 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       @Override
       public void run() {
         FilePanel.getInstance().loadFiles(filters, cFiles);
-        SwingUtilities.invokeLater(() -> clearFileList.setEnabled(true));
+        SwingUtilities.invokeLater(new Runnable() {
+
+          @Override
+          public void run() {
+              clearFileList.setEnabled(true);
+          }
+
+        });
       }
     };
     t.start();
@@ -795,7 +807,11 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
             BufferedReader reader = new BufferedReader(new FileReader(chooser.getSelectedFile().toString()));
             final String tregexPatternString = Tsurgeon.getTregexPatternFromReader(reader);
             final String tsurgeonOperationsString = Tsurgeon.getTsurgeonTextFromReader(reader);
-            SwingUtilities.invokeLater(() -> InputPanel.getInstance().setScriptAndPattern(tregexPatternString, tsurgeonOperationsString));
+            SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                InputPanel.getInstance().setScriptAndPattern(tregexPatternString, tsurgeonOperationsString);
+              }
+            });
           } catch (IOException e) {
             System.out.println("Error parsing Tsurgeon file");
             //e.printStackTrace();

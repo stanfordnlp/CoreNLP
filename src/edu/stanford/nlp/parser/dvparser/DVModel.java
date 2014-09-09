@@ -23,7 +23,7 @@ import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.lexparser.UnaryGrammar;
 import edu.stanford.nlp.parser.lexparser.UnaryRule;
 import edu.stanford.nlp.trees.Tree;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
@@ -71,9 +71,19 @@ public class DVModel implements Serializable {
   static final String START_WORD = "*START*";
   static final String END_WORD = "*END*";
 
-  private static final Function<SimpleMatrix, DenseMatrix64F> convertSimpleMatrix = matrix -> matrix.getMatrix();
+  private static final Function<SimpleMatrix, DenseMatrix64F> convertSimpleMatrix = new Function<SimpleMatrix, DenseMatrix64F>() {
+    @Override
+    public DenseMatrix64F apply(SimpleMatrix matrix) {
+      return matrix.getMatrix();
+    }
+  };
 
-  private static final Function<DenseMatrix64F, SimpleMatrix> convertDenseMatrix = matrix -> SimpleMatrix.wrap(matrix);
+  private static final Function<DenseMatrix64F, SimpleMatrix> convertDenseMatrix = new Function<DenseMatrix64F, SimpleMatrix>() {
+    @Override
+    public SimpleMatrix apply(DenseMatrix64F matrix) {
+      return SimpleMatrix.wrap(matrix);
+    }
+  };
 
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     in.defaultReadObject();

@@ -80,13 +80,20 @@ public class JarFileChooser {
     JButton okay = new javax.swing.JButton();
     okay.setText("Okay");
     okay.setToolTipText("Okay");
-    okay.addActionListener(evt -> dialog.setVisible(false));
+    okay.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        dialog.setVisible(false);
+      }
+    });
+
     JButton cancel = new javax.swing.JButton();
     cancel.setText("Cancel");
     cancel.setToolTipText("Cancel");
-    cancel.addActionListener(evt -> {
-      fileList.clearSelection();
-      dialog.setVisible(false);
+    cancel.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        fileList.clearSelection();
+        dialog.setVisible(false);
+      }
     });
 
     GridBagLayout gridbag = new GridBagLayout();

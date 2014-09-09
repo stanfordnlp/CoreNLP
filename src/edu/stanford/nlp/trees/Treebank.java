@@ -235,9 +235,11 @@ public abstract class Treebank extends AbstractCollection<Tree> {
   @Override
   public String toString() {
     final StringBuilder sb = new StringBuilder();
-    apply(t -> {
-      sb.append(t.toString());
-      sb.append('\n');
+    apply(new TreeVisitor() {
+      public void visitTree(Tree t) {
+        sb.append(t.toString());
+        sb.append('\n');
+      }
     });
     return sb.toString();
   }

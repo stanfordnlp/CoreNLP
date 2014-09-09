@@ -43,7 +43,7 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.MultiClassAccuracyStats;
 import edu.stanford.nlp.stats.Scorer;
 import edu.stanford.nlp.util.*;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 /**
  * Builds various types of linear classifiers, with functionality for
@@ -365,10 +365,12 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
 
   public void useHybridMinimizer(final double initialSMDGain, final int stochasticBatchSize,
                                  final StochasticCalculateMethods stochasticMethod, final int cutoffIteration){
-    this.minimizerCreator = () -> {
-      Minimizer<DiffFunction> firstMinimizer = new SMDMinimizer<DiffFunction>(initialSMDGain, stochasticBatchSize,stochasticMethod,cutoffIteration);
-      Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
-      return new HybridMinimizer(firstMinimizer,secondMinimizer,cutoffIteration);
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      public Minimizer<DiffFunction> create() {
+        Minimizer<DiffFunction> firstMinimizer = new SMDMinimizer<DiffFunction>(initialSMDGain, stochasticBatchSize,stochasticMethod,cutoffIteration);
+        Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
+        return new HybridMinimizer(firstMinimizer,secondMinimizer,cutoffIteration);
+      }
     };
   }
 
@@ -704,8 +706,10 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     labelIndex = dataset.labelIndex;
 
     final CrossValidator<L, F> crossValidator = new CrossValidator<L, F>(dataset,kfold);
-    final Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> scoreFn =
-        fold -> {
+    final Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> score =
+      new Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> ()
+      {
+        public Double apply (Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState> fold) {
           GeneralDataset<L, F> trainSet = fold.first();
           GeneralDataset<L, F> devSet   = fold.second();
 
@@ -722,17 +726,21 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
           //System.out.println("score: "+score);
           System.out.print(".");
           return score;
-        };
+        }
+      };
 
     Function<Double,Double> negativeScorer =
-        sigmaToTry -> {
+      new Function<Double,Double> ()
+      {
+        public Double apply(Double sigmaToTry) {
           //sigma = sigmaToTry;
           setSigma(sigmaToTry);
-          Double averageScore = crossValidator.computeAverage(scoreFn);
+          Double averageScore = crossValidator.computeAverage(score);
           System.err.print("##sigma = "+getSigma()+" ");
           System.err.println("-> average Score: "+averageScore);
           return -averageScore;
-        };
+        }
+      };
 
     double bestSigma = minimizer.minimize(negativeScorer);
     System.err.println("##best sigma: " + bestSigma);

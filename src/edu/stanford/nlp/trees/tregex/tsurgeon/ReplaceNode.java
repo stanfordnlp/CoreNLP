@@ -6,7 +6,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.CollectionUtils;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 /**
  * @author Roger Levy (rog@stanford.edu)
@@ -21,7 +21,9 @@ class ReplaceNode extends TsurgeonPattern {
     this(oldNode, CollectionUtils.transformAsList(trees, convertAuxiliaryToHold).toArray(new TsurgeonPattern[trees.size()]));
   }
 
-  private static final Function<AuxiliaryTree, HoldTreeNode> convertAuxiliaryToHold = t -> new HoldTreeNode(t);
+  private static final Function<AuxiliaryTree, HoldTreeNode> convertAuxiliaryToHold = new Function<AuxiliaryTree, HoldTreeNode>() {
+      public HoldTreeNode apply(AuxiliaryTree t) { return new HoldTreeNode(t); }
+    };
 
   @Override
   public TsurgeonMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {

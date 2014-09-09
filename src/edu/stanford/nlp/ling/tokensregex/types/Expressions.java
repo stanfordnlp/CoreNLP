@@ -749,31 +749,22 @@ public class Expressions {
     }
 
     public ConditionalExpression(String op, Expression expr1, Expression expr2) {
-      switch (op) {
-        case ">=":
-          expr = new FunctionCallExpression("GE", Arrays.asList(expr1, expr2));
-          break;
-        case "<=":
-          expr = new FunctionCallExpression("LE", Arrays.asList(expr1, expr2));
-          break;
-        case ">":
-          expr = new FunctionCallExpression("GT", Arrays.asList(expr1, expr2));
-          break;
-        case "<":
-          expr = new FunctionCallExpression("LT", Arrays.asList(expr1, expr2));
-          break;
-        case "==":
-          expr = new FunctionCallExpression("EQ", Arrays.asList(expr1, expr2));
-          break;
-        case "!=":
-          expr = new FunctionCallExpression("NE", Arrays.asList(expr1, expr2));
-          break;
-        case "=~":
-          expr = new FunctionCallExpression("Match", Arrays.asList(expr1, expr2));
-          break;
-        case "!~":
-          expr = new NotExpression(new FunctionCallExpression("Match", Arrays.asList(expr1, expr2)));
-          break;
+      if (">=".equals(op)) {
+        expr = new FunctionCallExpression("GE", Arrays.asList(expr1, expr2));
+      } else if ("<=".equals(op))  {
+        expr = new FunctionCallExpression("LE", Arrays.asList(expr1, expr2));
+      } else if (">".equals(op)) {
+        expr = new FunctionCallExpression("GT", Arrays.asList(expr1, expr2));
+      } else if ("<".equals(op)) {
+        expr = new FunctionCallExpression("LT", Arrays.asList(expr1, expr2));
+      } else if ("==".equals(op)) {
+        expr = new FunctionCallExpression("EQ", Arrays.asList(expr1, expr2));
+      } else if ("!=".equals(op)) {
+        expr = new FunctionCallExpression("NE", Arrays.asList(expr1, expr2));
+      } else if ("=~".equals(op)) {
+        expr = new FunctionCallExpression("Match", Arrays.asList(expr1, expr2));
+      } else if ("!~".equals(op)) {
+        expr = new NotExpression(new FunctionCallExpression("Match", Arrays.asList(expr1, expr2)));
       }
     }
 
@@ -1290,45 +1281,42 @@ public class Expressions {
           // Predefined types:
           Expression valueField = cv.value.get("value");
           Value value = valueField.evaluate(env, args);
-          switch (typeName) {
-            case TYPE_ANNOTATION_KEY: {
-              String className = (String) value.get();
-              try {
-                return new PrimitiveValue<Class>(TYPE_ANNOTATION_KEY, Class.forName(className));
-              } catch (ClassNotFoundException ex) {
-                throw new RuntimeException("Unknown class " + className, ex);
-              }
+          if (TYPE_ANNOTATION_KEY.equals(typeName)) {
+            String className = (String) value.get();
+            try {
+              return new PrimitiveValue<Class>(TYPE_ANNOTATION_KEY, Class.forName(className));
+            } catch (ClassNotFoundException ex) {
+              throw new RuntimeException("Unknown class " + className, ex);
             }
-            case TYPE_CLASS: {
-              String className = (String) value.get();
-              try {
-                return new PrimitiveValue<Class>(TYPE_CLASS, Class.forName(className));
-              } catch (ClassNotFoundException ex) {
-                throw new RuntimeException("Unknown class " + className, ex);
-              }
+          } else if (TYPE_CLASS.equals(typeName)) {
+            String className = (String) value.get();
+            try {
+              return new PrimitiveValue<Class>(TYPE_CLASS, Class.forName(className));
+            } catch (ClassNotFoundException ex) {
+              throw new RuntimeException("Unknown class " + className, ex);
             }
-            case TYPE_STRING:
-              return new PrimitiveValue<String>(TYPE_STRING, (String) value.get());
-            case TYPE_REGEX:
-              return new RegexValue((String) value.get());
+          } else if (TYPE_STRING.equals(typeName)) {
+            return new PrimitiveValue<String>(TYPE_STRING, (String) value.get());
+          } else if (TYPE_REGEX.equals(typeName)) {
+            return new RegexValue((String) value.get());
             /* } else if (TYPE_TOKEN_REGEX.equals(type)) {
        return new PrimitiveValue<TokenSequencePattern>(TYPE_TOKEN_REGEX, (TokenSequencePattern) value.get()); */
-            case TYPE_NUMBER:
-              if (value.get() instanceof Number) {
-                return new PrimitiveValue<Number>(TYPE_NUMBER, (Number) value.get());
-              } else if (value.get() instanceof String) {
-                String str = (String) value.get();
-                if (str.contains(".")) {
-                  return new PrimitiveValue<Number>(TYPE_NUMBER, Double.valueOf(str));
-                } else {
-                  return new PrimitiveValue<Number>(TYPE_NUMBER, Long.valueOf(str));
-                }
+          } else if (TYPE_NUMBER.equals(typeName)) {
+            if (value.get() instanceof Number) {
+              return new PrimitiveValue<Number>(TYPE_NUMBER, (Number) value.get());
+            } else if (value.get() instanceof String){
+              String str = (String) value.get();
+              if (str.contains(".")) {
+                return new PrimitiveValue<Number>(TYPE_NUMBER, Double.valueOf(str));
               } else {
-                throw new IllegalArgumentException("Invalid value " + value + " for type " + typeName);
+                return new PrimitiveValue<Number>(TYPE_NUMBER, Long.valueOf(str));
               }
-            default:
-              // TODO: support other types
-              return new PrimitiveValue(typeName, value.get());
+            } else {
+              throw new IllegalArgumentException("Invalid value " + value + " for type " + typeName);
+            }
+          } else {
+            // TODO: support other types
+            return new PrimitiveValue(typeName, value.get());
             //throw new UnsupportedOperationException("Cannot convert type " + typeName);
           }
         }

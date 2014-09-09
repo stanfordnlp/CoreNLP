@@ -24,10 +24,6 @@ import edu.stanford.nlp.util.*;
 /**
  * Serializes Annotation objects using our own format.
  *
- * Note[gabor]: This is a lossy serialization! For similar performance, and
- * lossless (or less lossy) serialization see,
- * {@link edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer}.
- *
  * @author Mihai
  */
 public class CustomAnnotationSerializer extends AnnotationSerializer {

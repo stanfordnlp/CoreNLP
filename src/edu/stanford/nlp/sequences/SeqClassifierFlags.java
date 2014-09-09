@@ -3,7 +3,7 @@ package edu.stanford.nlp.sequences;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.optimization.StochasticCalculateMethods;
 import edu.stanford.nlp.process.WordShapeClassifier;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.ReflectionLoading;
 
 import java.io.Serializable;

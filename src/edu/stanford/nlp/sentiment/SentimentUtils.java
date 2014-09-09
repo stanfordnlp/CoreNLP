@@ -48,9 +48,11 @@ public class SentimentUtils {
     return trees;
   }
 
-  static final Filter<Tree> UNKNOWN_ROOT_FILTER = tree -> {
-    int gold = RNNCoreAnnotations.getGoldClass(tree);
-    return gold != -1;
+  static final Filter<Tree> UNKNOWN_ROOT_FILTER = new Filter<Tree>() {
+    public boolean accept(Tree tree) {
+      int gold = RNNCoreAnnotations.getGoldClass(tree);
+      return gold != -1;
+    }
   };
 
   public static List<Tree> filterUnknownRoots(List<Tree> trees) {

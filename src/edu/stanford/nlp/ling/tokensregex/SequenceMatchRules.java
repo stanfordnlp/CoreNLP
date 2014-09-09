@@ -7,7 +7,6 @@ import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.util.*;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -216,46 +215,35 @@ public class SequenceMatchRules {
     public void update(Env env, Map<String, Object> attributes) {
       for (String key:attributes.keySet()) {
         Object obj = attributes.get(key);
-        switch (key) {
-          case "name":
-            name = (String) Expressions.asObject(env, obj);
-            break;
-          case "priority":
-            priority = ((Number) Expressions.asObject(env, obj)).doubleValue();
-            break;
-          case "stage":
-            stage = ((Number) Expressions.asObject(env, obj)).intValue();
-            break;
-          case "weight":
-            weight = ((Number) Expressions.asObject(env, obj)).doubleValue();
-            break;
-          case "over":
-            Object annoKey = Expressions.asObject(env, obj);
-            if (annoKey instanceof Class) {
-              annotationField = (Class) annoKey;
-            } else if (annoKey instanceof String) {
-              annotationField = EnvLookup.lookupAnnotationKey(env, (String) annoKey);
-            } else if (annotationField == null) {
-              annotationField = CoreMap.class;
-            } else {
-              throw new IllegalArgumentException("Invalid annotation key " + annoKey);
-            }
-            break;
-          case "active":
-            active = (Boolean) Expressions.asObject(env, obj);
-            break;
-          case "ruleType":
-            ruleType = (String) Expressions.asObject(env, obj);
-            break;
-          case "matchFindType":
-            matchFindType = SequenceMatcher.FindType.valueOf((String) Expressions.asObject(env, obj));
-            break;
-          case "matchWithResults":
-            matchWithResults = ((Boolean) Expressions.asObject(env, obj)).booleanValue();
-            break;
-          case "matchedExpressionGroup":
-            matchedExpressionGroup = ((Number) Expressions.asObject(env, obj)).intValue();
-            break;
+        if ("name".equals(key)) {
+          name = (String) Expressions.asObject(env, obj);
+        } else if ("priority".equals(key)) {
+          priority = ((Number) Expressions.asObject(env, obj)).doubleValue();
+        } else if ("stage".equals(key)) {
+          stage = ((Number) Expressions.asObject(env, obj)).intValue();
+        } else if ("weight".equals(key)) {
+          weight = ((Number) Expressions.asObject(env, obj)).doubleValue();
+        } else if ("over".equals(key)) {
+          Object annoKey = Expressions.asObject(env, obj);
+          if (annoKey instanceof Class) {
+            annotationField = (Class) annoKey;
+          } else if (annoKey instanceof String) {
+            annotationField = EnvLookup.lookupAnnotationKey(env, (String) annoKey);
+          } else if (annotationField == null) {
+            annotationField = CoreMap.class;
+          } else {
+            throw new IllegalArgumentException("Invalid annotation key " + annoKey);
+          }
+        } else if ("active".equals(key)) {
+          active = (Boolean) Expressions.asObject(env, obj);
+        } else if ("ruleType".equals(key)) {
+          ruleType = (String) Expressions.asObject(env, obj);
+        } else if ("matchFindType".equals(key)) {
+          matchFindType = SequenceMatcher.FindType.valueOf((String) Expressions.asObject(env, obj));
+        } else if ("matchWithResults".equals(key)) {
+          matchWithResults = ((Boolean) Expressions.asObject(env, obj)).booleanValue();
+        } else if ("matchedExpressionGroup".equals(key)) {
+          matchedExpressionGroup = ((Number) Expressions.asObject(env, obj)).intValue();
         }
       }
     }
