@@ -53,6 +53,7 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
@@ -127,7 +128,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     // Thang Sep13: allow for multiple feature factories.
     this.featureFactories = Generics.newArrayList();
     if (flags.featureFactory != null) {
-      FeatureFactory factory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs); // for compatibility
+      FeatureFactory<IN> factory = new MetaClass(flags.featureFactory).createInstance(flags.featureFactoryArgs); // for compatibility
       featureFactories.add(factory);
     }
     if(flags.featureFactories!=null){
@@ -181,7 +182,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
     if (!flags.useKnownLCWords) {
       knownLCWords = Collections.emptySet();
-    } else if (knownLCWords == null || knownLCWords.size() == 0) {
+    } else if (knownLCWords == null || knownLCWords.isEmpty()) {
       knownLCWords = Collections.newSetFromMap(new ConcurrentHashMap<String,Boolean>());
     }
   }
@@ -1047,12 +1048,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   private void classifyAndWriteAnswers(Collection<List<IN>> documents,
-                                       DocumentReaderAndWriter<IN> readerWriter, 
+                                       DocumentReaderAndWriter<IN> readerWriter,
                                        boolean outputScores)
     throws IOException
   {
     classifyAndWriteAnswers(documents,
-                            IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true), 
+                            IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true),
                             readerWriter, outputScores);
   }
 
@@ -1061,7 +1062,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   public void classifyAndWriteAnswers(Collection<List<IN>> documents,
                                       PrintWriter printWriter,
-                                      DocumentReaderAndWriter<IN> readerWriter, 
+                                      DocumentReaderAndWriter<IN> readerWriter,
                                       boolean outputScores)
     throws IOException
   {
@@ -1260,7 +1261,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       bg = flags.backgroundSymbol;
       return countResultsIOB(doc, entityTP, entityFP, entityFN, bg);
     } else if (flags.sighanPostProcessing) {
-      // TODO: this is extremely indicative of being a Chinese Segmenter, 
+      // TODO: this is extremely indicative of being a Chinese Segmenter,
       // but it would still be better to have something more concrete
       return countResultsSegmenter(doc, entityTP, entityFP, entityFN);
     } else {
@@ -1275,7 +1276,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
                                               Counter<String> entityTP,
                                               Counter<String> entityFP,
                                               Counter<String> entityFN) {
-    // count from 1 because each label represents cutting or 
+    // count from 1 because each label represents cutting or
     // not cutting at a word, so we don't count the first word
     for (int i = 1; i < doc.size(); ++i) {
       CoreMap word = doc.get(i);
@@ -1294,7 +1295,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     }
     return true;
   }
-                                              
+
 
   public static boolean countResultsIOB2(List<? extends CoreMap> doc,
                                          Counter<String> entityTP,
@@ -1731,7 +1732,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void loadClassifierNoExceptions(String loadPath, Properties props) {
     InputStream is;
     // ms, 10-04-2010: check first is this path exists in our CLASSPATH. This
-    // takes priority over the file system.
+    // takes priority over the file system. todo [cdm 2014]: change this to use IOUtils stuff that much code now uses
     if ((is = loadStreamFromClasspath(loadPath)) != null) {
       Timing.startDoing("Loading classifier from " + loadPath);
       loadClassifierNoExceptions(is, props);

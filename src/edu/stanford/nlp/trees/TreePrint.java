@@ -1,7 +1,6 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseEnglishWordMap;
 import edu.stanford.nlp.util.*;
@@ -9,6 +8,7 @@ import edu.stanford.nlp.util.XMLUtils;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.Function;
 
 
 /**
@@ -412,20 +412,18 @@ public class TreePrint {
     }
 
     if (transChinese) {
-      TreeTransformer tt = new TreeTransformer() {
-        public Tree transformTree(Tree t) {
-          t = t.treeSkeletonCopy();
-          for (Tree subtree : t) {
-            if (subtree.isLeaf()) {
-              Label oldLabel = subtree.label();
-              String translation = ChineseEnglishWordMap.getInstance().getFirstTranslation(oldLabel.value());
-              if (translation == null) translation = "[UNK]";
-              Label newLabel = new StringLabel(oldLabel.value() + ':' + translation);
-              subtree.setLabel(newLabel);
-            }
+      TreeTransformer tt = t1 -> {
+        t1 = t1.treeSkeletonCopy();
+        for (Tree subtree : t1) {
+          if (subtree.isLeaf()) {
+            Label oldLabel = subtree.label();
+            String translation = ChineseEnglishWordMap.getInstance().getFirstTranslation(oldLabel.value());
+            if (translation == null) translation = "[UNK]";
+            Label newLabel = new StringLabel(oldLabel.value() + ':' + translation);
+            subtree.setLabel(newLabel);
           }
-          return t;
         }
+        return t1;
       };
       outputPSTree = tt.transformTree(outputPSTree);
     }
@@ -844,11 +842,7 @@ public class TreePrint {
       if (argsMap.keySet().contains("-useTLPTreeReader")) {
         trf = tlp.treeReaderFactory();
       } else {
-        trf = new TreeReaderFactory() {
-          public TreeReader newTreeReader(Reader in) {
-            return new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new TreeNormalizer());
-          }
-        };
+        trf = in -> new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new TreeNormalizer());
       }
       trees = new DiskTreebank(trf);
       trees.loadPath(args[0]);
@@ -933,7 +927,7 @@ public class TreePrint {
    *         typed dependencies
    */
   private static String toString(Collection<TypedDependency> dependencies, boolean extraSep, boolean includeTags) {
-    String labelFormat = (includeTags) ? "value-tag-index" : "value-index";
+    CoreLabel.OutputFormat labelFormat = (includeTags) ? CoreLabel.OutputFormat.VALUE_TAG_INDEX : CoreLabel.OutputFormat.VALUE_INDEX;
     StringBuilder buf = new StringBuilder();
     if (extraSep) {
       List<TypedDependency> extraDeps =  new ArrayList<TypedDependency>();

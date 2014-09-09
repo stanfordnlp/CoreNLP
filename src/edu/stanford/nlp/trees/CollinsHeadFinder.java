@@ -109,13 +109,10 @@ public class CollinsHeadFinder extends AbstractCollinsHeadFinder {
     CategoryWordTag.suppressTerminalDetails = true;
     treebank.loadPath(args[0]);
     final HeadFinder chf = new CollinsHeadFinder();
-    treebank.apply(new TreeVisitor() {
-      @Override
-      public void visitTree(Tree pt) {
-        pt.percolateHeads(chf);
-        pt.pennPrint();
-        System.out.println();
-      }
+    treebank.apply(pt -> {
+      pt.percolateHeads(chf);
+      pt.pennPrint();
+      System.out.println();
     });
   }
 

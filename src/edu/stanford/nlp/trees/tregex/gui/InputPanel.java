@@ -407,13 +407,11 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
    */
   public void updateFoundStats(final String pattern, final int treeMatches, final int totalMatches) {
     final String txt = "<html>Match stats: " + treeMatches + " unique trees found with " + totalMatches + " total matches.</html>";
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        foundStats.setPreferredSize(foundStats.getSize());
-        foundStats.setText(txt);
-        if(pattern != null)
-          addToHistoryList(pattern, treeMatches, totalMatches);
-      }
+    SwingUtilities.invokeLater(() -> {
+      foundStats.setPreferredSize(foundStats.getSize());
+      foundStats.setText(txt);
+      if(pattern != null)
+        addToHistoryList(pattern, treeMatches, totalMatches);
     });
   }
 
@@ -561,14 +559,10 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
           }
           updateProgressBar(multiplier*(i+1));
         }
-        SwingUtilities.invokeLater(new Runnable() {
-
-          public void run() {
-            MatchesPanel.getInstance().setMatches(trees, null);
-            MatchesPanel.getInstance().focusOnList();
-            useProgressBar(false);
-          }
-
+        SwingUtilities.invokeLater(() -> {
+          MatchesPanel.getInstance().setMatches(trees, null);
+          MatchesPanel.getInstance().focusOnList();
+          useProgressBar(false);
         });//end SwingUtilities.invokeLater
 
       } //end run
@@ -586,30 +580,24 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
       @Override
       public void run() {
         final String text = tregexPattern.getText().intern();
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            InputPanel.this.addRecentTregexPattern(text);
-            useProgressBar(true);
-          }
+        SwingUtilities.invokeLater(() -> {
+          InputPanel.this.addRecentTregexPattern(text);
+          useProgressBar(true);
         });
         final TRegexGUITreeVisitor visitor = getMatchTreeVisitor(text,this);
         if (visitor != null) {
 
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              useProgressBar(false);
-              updateFoundStats(text, visitor.getMatches().size(), visitor.numUniqueMatches());
-              //addToHistoryList(text, visitor.getMatches().size(), visitor.numUniqueMatches());
-              MatchesPanel.getInstance().setMatches(visitor.getMatches(), visitor.getMatchedParts());
-              MatchesPanel.getInstance().focusOnList();
-            }
+          SwingUtilities.invokeLater(() -> {
+            useProgressBar(false);
+            updateFoundStats(text, visitor.getMatches().size(), visitor.numUniqueMatches());
+            //addToHistoryList(text, visitor.getMatches().size(), visitor.numUniqueMatches());
+            MatchesPanel.getInstance().setMatches(visitor.getMatches(), visitor.getMatchedParts());
+            MatchesPanel.getInstance().focusOnList();
           });
         }
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            setTregexState(false);
-            InputPanel.this.searchThread = null;
-          }
+        SwingUtilities.invokeLater(() -> {
+          setTregexState(false);
+          InputPanel.this.searchThread = null;
         });
 
       }
@@ -644,11 +632,9 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
           TsurgeonPattern operation = Tsurgeon.getTsurgeonOperationsFromReader(reader);
 
           final String text = tregexPattern.getText().intern();
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              InputPanel.this.addRecentTregexPattern(text);
-              useProgressBar(true);
-            }
+          SwingUtilities.invokeLater(() -> {
+            InputPanel.this.addRecentTregexPattern(text);
+            useProgressBar(true);
           });
           final TRegexGUITreeVisitor visitor = getMatchTreeVisitor(text,this);
           if (visitor == null) return; //means the tregex errored out
@@ -670,12 +656,10 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
           returnToValidState(text, visitor, modifiedTrees);
         } catch (Exception e) {
           doError("Sorry, there was an error compiling or running the Tsurgeon script.  Please press Help if you need assistance.", e);
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              setTregexState(false);
-              setTsurgeonState(false);
-              InputPanel.this.searchThread = null;
-            }
+          SwingUtilities.invokeLater(() -> {
+            setTregexState(false);
+            setTsurgeonState(false);
+            InputPanel.this.searchThread = null;
           });
         }
       }
@@ -684,17 +668,15 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   }
 
   private void returnToValidState(final String pattern, final TRegexGUITreeVisitor visitor, final List<TreeFromFile> trees) {
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        int numUniqueMatches = 0;
-        if (trees.size() > 0) {
-          numUniqueMatches = visitor.numUniqueMatches();
-        }
-        updateFoundStats(pattern, trees.size(), numUniqueMatches);
-        MatchesPanel.getInstance().setMatches(trees, visitor.getMatchedParts());
-        useProgressBar(false);
-        setTsurgeonState(false);
+    SwingUtilities.invokeLater(() -> {
+      int numUniqueMatches = 0;
+      if (trees.size() > 0) {
+        numUniqueMatches = visitor.numUniqueMatches();
       }
+      updateFoundStats(pattern, trees.size(), numUniqueMatches);
+      MatchesPanel.getInstance().setMatches(trees, visitor.getMatchedParts());
+      useProgressBar(false);
+      setTsurgeonState(false);
     });
   }
 
@@ -752,11 +734,9 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
         if (t.isInterrupted()) { //get out as quickly as possible if interrupted
           t.interrupt();
           // cdm 2008: I added here resetting the buttons or else it didn't seem to happen; not quite sure this is the right place to do it but.
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              setTregexState(false);
-              InputPanel.this.searchThread = null;
-            }
+          SwingUtilities.invokeLater(() -> {
+            setTregexState(false);
+            InputPanel.this.searchThread = null;
           });
           return vis;
         }
@@ -781,14 +761,12 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
    * @param e The exception that caused the problem
    */
   public void doError(final String txt, final Throwable e) {
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        String extraData = e.getLocalizedMessage() != null ? e.getLocalizedMessage(): (e.getClass() != null) ? e.getClass().toString(): "";
-        JOptionPane.showMessageDialog(InputPanel.this, txt + '\n' + extraData, "Tregex Error", JOptionPane.ERROR_MESSAGE);
-        e.printStackTrace(); // send to stderr for debugging
-        useProgressBar(false);
-        updateFoundStats(null, 0, 0);
-      }
+    SwingUtilities.invokeLater(() -> {
+      String extraData = e.getLocalizedMessage() != null ? e.getLocalizedMessage(): (e.getClass() != null) ? e.getClass().toString(): "";
+      JOptionPane.showMessageDialog(InputPanel.this, txt + '\n' + extraData, "Tregex Error", JOptionPane.ERROR_MESSAGE);
+      e.printStackTrace(); // send to stderr for debugging
+      useProgressBar(false);
+      updateFoundStats(null, 0, 0);
     });
   }
 
@@ -799,11 +777,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   public void updateProgressBar(final double progress) {
     if(progressBar == null)
       return;
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        progressBar.setValue((int) progress);
-      }
-    });
+    SwingUtilities.invokeLater(() -> progressBar.setValue((int) progress));
   }
 
 

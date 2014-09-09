@@ -21,7 +21,7 @@ import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
@@ -232,11 +232,10 @@ public class ParserAnnotator extends SentenceAnnotator {
   @Override
   public void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
     final List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    // TODO: xTree should use existing tags if there are any (?)
     Tree tree = ParserUtils.xTree(words);
     for (CoreLabel word : words) {
       if (word.tag() == null) {
-        word.setTag("X");
+        word.setTag("XX");
       }
     }
     finishSentence(sentence, tree);

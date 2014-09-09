@@ -50,14 +50,14 @@ class AuxiliaryTree {
   }
 
   /**
-   * Copies the Auxiliary tree.  Also, puts the new names->nodes map in the TsurgeonPattern that called copy.
+   * Copies the Auxiliary tree.  Also, puts the new names->nodes map in the TsurgeonMatcher that called copy.
    */
-  public AuxiliaryTree copy(TsurgeonPattern p) {
+  public AuxiliaryTree copy(TsurgeonMatcher matcher) {
     Map<String,Tree> newNamesToNodes = Generics.newHashMap();
     Pair<Tree,Tree> result = copyHelper(tree,newNamesToNodes);
     //if(! result.first().dominates(result.second()))
       //System.err.println("Error -- aux tree copy doesn't dominate foot copy.");
-    p.root.newNodeNames.putAll(newNamesToNodes);
+    matcher.newNodeNames.putAll(newNamesToNodes);
     return new AuxiliaryTree(result.first(), result.second(), newNamesToNodes, originalTreeString);
   }
 

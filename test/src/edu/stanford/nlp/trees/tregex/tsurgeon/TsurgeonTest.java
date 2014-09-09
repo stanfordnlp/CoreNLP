@@ -51,7 +51,7 @@ public class TsurgeonTest extends TestCase {
     TregexMatcher matcher = tregex.matcher(tree);
     assertTrue(matcher.find());
     assertEquals("(B 1 2)", matcher.getNode("foo").toString());
-    Tree updated = tsurgeon.evaluate(tree, matcher);
+    Tree updated = tsurgeon.matcher().evaluate(tree, matcher);
     assertEquals("(A (FOO (BAR 1 2)))", updated.toString());
     // TODO: do we want the tsurgeon to implicitly update the matched node?
     // System.err.println(matcher.getNode("foo"));
@@ -69,7 +69,7 @@ public class TsurgeonTest extends TestCase {
     TregexMatcher matcher = tregex.matcher(tree);
     assertTrue(matcher.find());
     assertEquals("(B 1 2)", matcher.getNode("foo").toString());
-    Tree updated = tsurgeon.evaluate(tree, matcher);
+    Tree updated = tsurgeon.matcher().evaluate(tree, matcher);
     assertEquals("(A (B (BAR 1 2)))", updated.toString());
     assertEquals("(B (BAR 1 2))", matcher.getNode("foo").toString());
     assertFalse(matcher.find());
@@ -87,7 +87,7 @@ public class TsurgeonTest extends TestCase {
     TregexMatcher matcher = tregex.matcher(tree);
     assertTrue(matcher.find());
     assertEquals("(B 1 2)", matcher.getNode("foo").toString());
-    Tree updated = tsurgeon.evaluate(tree, matcher);
+    Tree updated = tsurgeon.matcher().evaluate(tree, matcher);
     assertEquals("(A (FOO (B 1 2)))", updated.toString());
     assertEquals("(B 1 2)", matcher.getNode("foo").toString());
     assertFalse(matcher.find());

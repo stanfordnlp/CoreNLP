@@ -4,6 +4,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.util.Pair;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -14,49 +15,68 @@ class TreeLocation {
 
   private final String relation;
 
-  private final TsurgeonPattern p;
+  private final TsurgeonPattern child;
 
   public TreeLocation(String relation, TsurgeonPattern p) {
     this.relation = relation;
-    this.p = p;
+    this.child = p;
   }
 
   void setRoot(TsurgeonPatternRoot root) {
-    p.setRoot(root);
+    child.setRoot(root);
   }
 
   private static final Pattern daughterPattern = Pattern.compile(">-?([0-9]+)");
 
-  Pair<Tree,Integer> evaluate(Tree t, TregexMatcher tm) {
-    int newIndex = -1;
-    Tree parent = null;
-    Tree relativeNode = p.evaluate(t,tm);
-    Matcher m = daughterPattern.matcher(relation);
-    if (m.matches()) {
-      newIndex = Integer.parseInt(m.group(1))-1;
-      parent = relativeNode;
-      if(relation.charAt(1)=='-') // backwards.
-        newIndex = parent.children().length - newIndex;
-    } else {
-      parent = relativeNode.parent(t);
-      if (parent == null) {
-        throw new RuntimeException("Error: looking for a non-existent parent in tree " + t + " for \"" + toString() + "\"");
-      }
-      int index = parent.objectIndexOf(relativeNode);
-      if (relation.equals("$+")) {
-        newIndex = index;
-      } else if (relation.equals("$-")) {
-        newIndex = index+1;
-      } else {
-        throw new RuntimeException("Error: Haven't dealt with relation " + relation + " yet.");
-      }
+  public LocationMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
+    return new LocationMatcher(newNodeNames, coindexer);
+  }  
+
+  /** TODO: it would be nice to refactor this with TsurgeonMatcher somehow */
+  class LocationMatcher {
+    Map<String,Tree> newNodeNames;
+    CoindexationGenerator coindexer;
+
+    TsurgeonMatcher childMatcher;
+
+    LocationMatcher(Map<String, Tree> newNodeNames, CoindexationGenerator coindexer) {
+      this.newNodeNames = newNodeNames;
+      this.coindexer = coindexer;
+      
+      this.childMatcher = child.matcher(newNodeNames, coindexer);
     }
-    return new Pair<Tree,Integer>(parent,newIndex);
+
+    Pair<Tree,Integer> evaluate(Tree tree, TregexMatcher tregex) {
+      int newIndex = -1;
+      Tree parent = null;
+      Tree relativeNode = childMatcher.evaluate(tree, tregex);
+      Matcher m = daughterPattern.matcher(relation);
+      if (m.matches()) {
+        newIndex = Integer.parseInt(m.group(1))-1;
+        parent = relativeNode;
+        if(relation.charAt(1)=='-') // backwards.
+          newIndex = parent.children().length - newIndex;
+      } else {
+        parent = relativeNode.parent(tree);
+        if (parent == null) {
+          throw new RuntimeException("Error: looking for a non-existent parent in tree " + tree + " for \"" + toString() + "\"");
+        }
+        int index = parent.objectIndexOf(relativeNode);
+        if (relation.equals("$+")) {
+          newIndex = index;
+        } else if (relation.equals("$-")) {
+          newIndex = index+1;
+        } else {
+          throw new RuntimeException("Error: Haven't dealt with relation " + relation + " yet.");
+        }
+      }
+      return new Pair<Tree,Integer>(parent,newIndex);
+    }
   }
 
   @Override
   public String toString() {
-    return relation + " " + p;
+    return relation + " " + child;
   }
 
 }

@@ -4,7 +4,6 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Generics;
 
 import java.io.*;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,7 +11,7 @@ import java.util.Set;
 
 public class CTBunkDict {
 
-  private final static String defaultFilename = "ctb_amb";
+  private static final String defaultFilename = "ctb_amb";
   private static CTBunkDict CTBunkDictSingleton = null;
 
   private static Map<String, Set<String>> CTBunk_dict;

@@ -1,6 +1,7 @@
 package edu.stanford.nlp.util;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * An interval tree maintains a tree so that all intervals to the left start
@@ -793,24 +794,14 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   public static <T extends HasInterval<E>, E extends Comparable<E>> List<T> getNonOverlapping(
           List<? extends T> items, Comparator<? super T> compareFunc)
   {
-    Function<T,Interval<E>> toIntervalFunc = new Function<T, Interval<E>>() {
-      @Override
-      public Interval<E> apply(T in) {
-        return in.getInterval();
-      }
-    };
+    Function<T,Interval<E>> toIntervalFunc = in -> in.getInterval();
     return getNonOverlapping(items, toIntervalFunc, compareFunc);
   }
 
   public static <T extends HasInterval<E>, E extends Comparable<E>> List<T> getNonOverlapping(
           List<? extends T> items)
   {
-    Function<T,Interval<E>> toIntervalFunc = new Function<T, Interval<E>>() {
-      @Override
-      public Interval<E> apply(T in) {
-        return in.getInterval();
-      }
-    };
+    Function<T,Interval<E>> toIntervalFunc = in -> in.getInterval();
     return getNonOverlapping(items, toIntervalFunc);
   }
 
@@ -889,12 +880,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   public static <T extends HasInterval<E>, E extends Comparable<E>> List<T> getNonOverlappingMaxScore(
       List<? extends T> items, Function<? super T, Double> scoreFunc)
   {
-    Function<T,Interval<E>> toIntervalFunc = new Function<T, Interval<E>>() {
-      @Override
-      public Interval<E> apply(T in) {
-        return in.getInterval();
-      }
-    };
+    Function<T,Interval<E>> toIntervalFunc = in -> in.getInterval();
     return getNonOverlappingMaxScore(items, toIntervalFunc, scoreFunc);
   }
 

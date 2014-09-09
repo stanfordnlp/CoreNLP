@@ -14,7 +14,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Iterables;
 
 public class TimexTreeAnnotator implements Annotator {
@@ -43,34 +43,28 @@ public class TimexTreeAnnotator implements Annotator {
           
           // only use trees that match exactly
         case ExactMatch:
-          possibleMatches = Iterables.filter(tree, new Function<Tree, Boolean>() {
-              public Boolean apply(Tree tree) {
-                int treeBegin = beginOffset(tree, tokens);
-                int treeEnd = endOffset(tree, tokens);
-                return treeBegin == timexBegin && timexEnd == treeEnd;
-              }
-            });
+          possibleMatches = Iterables.filter(tree, tree1 -> {
+            int treeBegin = beginOffset(tree, tokens);
+            int treeEnd = endOffset(tree, tokens);
+            return treeBegin == timexBegin && timexEnd == treeEnd;
+          });
           Iterator<Tree> treeIter = possibleMatches.iterator();
           subtree = treeIter.hasNext() ? treeIter.next() : null;
           break;
           
           // select the smallest enclosing tree
         case SmallestEnclosing:
-          possibleMatches = Iterables.filter(tree, new Function<Tree, Boolean>() {
-              public Boolean apply(Tree tree) {
-                int treeBegin = beginOffset(tree, tokens);
-                int treeEnd = endOffset(tree, tokens);
-                return treeBegin <= timexBegin && timexEnd <= treeEnd;
-              }
-            });
+          possibleMatches = Iterables.filter(tree, tree1 -> {
+            int treeBegin = beginOffset(tree, tokens);
+            int treeEnd = endOffset(tree, tokens);
+            return treeBegin <= timexBegin && timexEnd <= treeEnd;
+          });
           List<Tree> sortedMatches = CollectionUtils.toList(possibleMatches);
-          Collections.sort(sortedMatches, new Comparator<Tree>() {
-              public int compare(Tree tree1, Tree tree2) {
-                Integer width1 = endOffset(tree1, tokens) - beginOffset(tree1, tokens);
-                Integer width2 = endOffset(tree2, tokens) - endOffset(tree2, tokens);
-                return width1.compareTo(width2);
-              }
-            });
+          Collections.sort(sortedMatches, (tree1, tree2) -> {
+            Integer width1 = endOffset(tree1, tokens) - beginOffset(tree1, tokens);
+            Integer width2 = endOffset(tree2, tokens) - endOffset(tree2, tokens);
+            return width1.compareTo(width2);
+          });
           subtree = sortedMatches.get(0);
           break;
           

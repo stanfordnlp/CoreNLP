@@ -1,7 +1,7 @@
 package edu.stanford.nlp.process;
 
 
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 
 import java.io.Serializable;
 

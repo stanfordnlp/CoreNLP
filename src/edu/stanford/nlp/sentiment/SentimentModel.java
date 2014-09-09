@@ -2,7 +2,6 @@ package edu.stanford.nlp.sentiment;
 
 import java.io.Serializable;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -81,7 +80,7 @@ public class SentimentModel implements Serializable {
    */
   transient SimpleMatrix identity;
 
-  /** 
+  /**
    * A random number generator - keeping it here lets us reproduce results
    */
   final Random rand;
@@ -97,7 +96,7 @@ public class SentimentModel implements Serializable {
   // An example of how you could read in old models with readObject to fix the serialization
   // You would first read in the old model, then reserialize it
   private void readObject(ObjectInputStream in)
-    throws IOException, ClassNotFoundException 
+    throws IOException, ClassNotFoundException
   {
     ObjectInputStream.GetField fields = in.readFields();
     binaryTransform = ErasureUtils.uncheckedCast(fields.get("binaryTransform", null));
@@ -221,7 +220,7 @@ public class SentimentModel implements Serializable {
 
     numUnaryMatrices = unaryClassification.size();
     unaryClassificationSize = numClasses * (numHid + 1);
-    
+
     rand = new Random(op.randomSeed);
 
     identity = SimpleMatrix.identity(numHid);
@@ -277,7 +276,7 @@ public class SentimentModel implements Serializable {
     binaryTransform = TwoDimensionalMap.treeMap();
     binaryTensors = TwoDimensionalMap.treeMap();
     binaryClassification = TwoDimensionalMap.treeMap();
-    
+
     // When making a flat model (no symantic untying) the
     // basicCategory function will return the same basic category for
     // all labels, so all entries will map to the same matrix
@@ -305,7 +304,7 @@ public class SentimentModel implements Serializable {
     binaryClassificationSize = (op.combineClassification) ? 0 : numClasses * (numHid + 1);
 
     unaryClassification = Generics.newTreeMap();
-    
+
     // When making a flat model (no symantic untying) the
     // basicCategory function will return the same basic category for
     // all labels, so all entries will map to the same matrix
@@ -332,7 +331,7 @@ public class SentimentModel implements Serializable {
     SimpleTensor tensor = SimpleTensor.random(numHid * 2, numHid * 2, numHid, -range, range, rand);
     return tensor.scale(op.trainOptions.scalingForInit);
   }
-  
+
   SimpleMatrix randomTransformMatrix() {
     SimpleMatrix binary = new SimpleMatrix(numHid, numHid * 2 + 1);
     // bias column values are initialized zero
@@ -415,7 +414,7 @@ public class SentimentModel implements Serializable {
     totalSize += wordVectors.size() * numHid;
     return totalSize;
   }
-  
+
   public double[] paramsToVector() {
     int totalSize = totalParamSize();
     return NeuralUtils.paramsToVector(totalSize, binaryTransform.valueIterator(), binaryClassification.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensors.valueIterator()), unaryClassification.values().iterator(), wordVectors.values().iterator());
@@ -432,7 +431,7 @@ public class SentimentModel implements Serializable {
       String leftBasic = basicCategory(leftLabel);
       String rightLabel = node.children()[1].value();
       String rightBasic = basicCategory(rightLabel);
-      return binaryTransform.get(leftBasic, rightBasic);      
+      return binaryTransform.get(leftBasic, rightBasic);
     } else if (node.children().length == 1) {
       throw new AssertionError("No unary transform matrices, only unary classification");
     } else {
@@ -449,7 +448,7 @@ public class SentimentModel implements Serializable {
       String leftBasic = basicCategory(leftLabel);
       String rightLabel = node.children()[1].value();
       String rightBasic = basicCategory(rightLabel);
-      return binaryTensors.get(leftBasic, rightBasic);      
+      return binaryTensors.get(leftBasic, rightBasic);
     } else if (node.children().length == 1) {
       throw new AssertionError("No unary transform matrices, only unary classification");
     } else {
@@ -465,7 +464,7 @@ public class SentimentModel implements Serializable {
       String leftBasic = basicCategory(leftLabel);
       String rightLabel = node.children()[1].value();
       String rightBasic = basicCategory(rightLabel);
-      return binaryClassification.get(leftBasic, rightBasic);      
+      return binaryClassification.get(leftBasic, rightBasic);
     } else if (node.children().length == 1) {
       String unaryLabel = node.children()[0].value();
       String unaryBasic = basicCategory(unaryLabel);

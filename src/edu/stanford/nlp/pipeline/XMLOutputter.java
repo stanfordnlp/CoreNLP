@@ -15,6 +15,7 @@ import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.stats.Counters;
@@ -33,54 +34,40 @@ import edu.stanford.nlp.util.StringUtils;
 import nu.xom.*;
 
 
-public class XMLOutputter {
+/**
+ * An outputter to XML format.
+ * This is not intended to be de-serialized back into annotations; for that,
+ * see {@link edu.stanford.nlp.pipeline.AnnotationSerializer}; e.g.,
+ * {@link edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer}.
+ */
+public class XMLOutputter extends AnnotationOutputter {
   // the namespace is set in the XSLT file
   private static final String NAMESPACE_URI = null;
   private static final String STYLESHEET_NAME = "CoreNLP-to-HTML.xsl";
 
-  private static final TreePrint DEFAULT_CONSTITUENT_TREE_PRINTER = new TreePrint("penn");
-  private static final Options DEFAULT_OPTIONS = new Options();
+  public XMLOutputter() {}
 
-  public static class Options {
-    /** Should the document text be included as part of the XML output */
-    public boolean includeText = false;
-    /** Should a small window of context be provided with each coreference mention */
-    public int coreferenceContextSize = 0;
-    public double relationsBeam = 0.0;
-    public String encoding = "UTF-8";
-    /** How to print a constituent tree */
-    public TreePrint constituentTreePrinter = DEFAULT_CONSTITUENT_TREE_PRINTER;
-    /** If false, will print only non-singleton entities*/
-    public boolean printSingletons = false;
-  }
-
-  /**
-   * Populates options from StanfordCoreNLP pipeline
-   */
-  public static Options getOptions(StanfordCoreNLP pipeline) {
-    Options options = new Options();
-    options.relationsBeam = pipeline.getBeamPrintingOption();
-    options.constituentTreePrinter = pipeline.getConstituentTreePrinter();
-    options.encoding = pipeline.getEncoding();
-    options.printSingletons = pipeline.getPrintSingletons();
-    return options;
-  }
-
-  public static void xmlPrint(Annotation annotation, OutputStream os) throws IOException {
-    xmlPrint(annotation, os, DEFAULT_OPTIONS);
-  }
-
-  public static void xmlPrint(Annotation annotation, OutputStream os, StanfordCoreNLP pipeline) throws IOException {
-    xmlPrint(annotation, os, getOptions(pipeline));
-  }
-
-  public static void xmlPrint(Annotation annotation, OutputStream os, Options options) throws IOException {
+  /** {@inheritDoc} */
+  @Override
+  public void print(Annotation annotation, OutputStream os, Options options) throws IOException {
     Document xmlDoc = annotationToDoc(annotation, options);
     Serializer ser = new Serializer(os, options.encoding);
     ser.setIndent(2);
     ser.setMaxLength(0);
     ser.write(xmlDoc);
     ser.flush();
+  }
+
+  public static void xmlPrint(Annotation annotation, OutputStream os) throws IOException {
+    new XMLOutputter().print(annotation, os);
+  }
+
+  public static void xmlPrint(Annotation annotation, OutputStream os, StanfordCoreNLP pipeline) throws IOException {
+    new XMLOutputter().print(annotation, os, pipeline);
+  }
+
+  public static void xmlPrint(Annotation annotation, OutputStream os, Options options) throws IOException {
+    new XMLOutputter().print(annotation, os, options);
   }
 
   /**
@@ -242,7 +229,7 @@ public class XMLOutputter {
       depInfo.addAttribute(new Attribute("type", dependencyType));
       // The SemanticGraph doesn't explicitly encode the ROOT node,
       // so we print that out ourselves
-      for (CoreLabel root : graph.getRoots()) {
+      for (IndexedWord root : graph.getRoots()) {
         String rel = GrammaticalRelation.ROOT.getLongName();
         rel = rel.replaceAll("\\s+", ""); // future proofing
         int source = 0;

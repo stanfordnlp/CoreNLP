@@ -1,7 +1,6 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import java.io.*;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 

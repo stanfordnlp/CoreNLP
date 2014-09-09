@@ -9,7 +9,7 @@ import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Interval;
 
 import java.util.Collections;
@@ -66,16 +66,14 @@ public class TimeExpression extends MatchedExpression {
     super(charOffsets, tokenOffsets, getSingleAnnotationExtractor(temporalFunc), priority, weight);
   }
 
-  protected static final Function<MatchedExpression, TimeExpression> TimeExpressionConverter = new Function<MatchedExpression, TimeExpression>() {
-    public TimeExpression apply(MatchedExpression in) {
-      if (in == null) return null;
-      if (in instanceof TimeExpression) return (TimeExpression) in;
-      TimeExpression newExpr = new TimeExpression(in);
-      if (newExpr.getAnnotation().get(TimeExpression.Annotation.class) == in) {
-        newExpr.getAnnotation().set(TimeExpression.Annotation.class, newExpr);
-      }
-      return newExpr;
+  protected static final Function<MatchedExpression, TimeExpression> TimeExpressionConverter = in -> {
+    if (in == null) return null;
+    if (in instanceof TimeExpression) return (TimeExpression) in;
+    TimeExpression newExpr = new TimeExpression(in);
+    if (newExpr.getAnnotation().get(Annotation.class) == in) {
+      newExpr.getAnnotation().set(Annotation.class, newExpr);
     }
+    return newExpr;
   };
 
   private static SingleAnnotationExtractor getSingleAnnotationExtractor(final Function<CoreMap, SUTime.Temporal> temporalFunc)

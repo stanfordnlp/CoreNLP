@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 
 /**
  * Escapes an Arabic string by replacing ATB reserved words with the appropriate

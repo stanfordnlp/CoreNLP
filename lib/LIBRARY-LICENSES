@@ -23,7 +23,8 @@ ejml.jar
 
 URL: http://code.google.com/p/efficient-java-matrix-library/
 
-Gnu lesser general public license
+Gnu Lesser General Public License v.3 (through v 0.23; version 0.24 on is Apache 2.0)
+
 -----------------------------------------------------------------
 
 
@@ -32,4 +33,5 @@ javax.json.jar
 URL: https://json-processing-spec.java.net/
 
 GNU GPLv2 with Classpath Exception
+
 -----------------------------------------------------------------

@@ -18,7 +18,7 @@ public class ShiftReduceTrainOptions extends TrainOptions {
   public boolean cvAveragedModels = true;
 
   public enum TrainingMethod {
-    EARLY_TERMINATION, GOLD, ORACLE, REORDER_ORACLE, BEAM;
+    EARLY_TERMINATION, GOLD, ORACLE, REORDER_ORACLE, BEAM, REORDER_BEAM;
   };
   public TrainingMethod trainingMethod = TrainingMethod.EARLY_TERMINATION;
 

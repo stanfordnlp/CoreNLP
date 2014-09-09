@@ -26,38 +26,21 @@
 
 package edu.stanford.nlp.ie.crf;
 
-import edu.stanford.nlp.ie.*;
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.util.ConvertByteArray;
 import edu.stanford.nlp.objectbank.ObjectBank;
-import edu.stanford.nlp.optimization.*;
-import edu.stanford.nlp.optimization.Function;
 import edu.stanford.nlp.sequences.*;
-import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.*;
 
-import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.*;
-import java.util.regex.*;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
- * Subclass of CRFClassifier that performs dropout feature-noisying training 
+ * Subclass of CRFClassifier that performs dropout feature-noising training.
  *
  * @author Mengqiu Wang
  */
 public class CRFClassifierWithDropout<IN extends CoreMap> extends CRFClassifier<IN> {
 
-  private List<List<IN>> unsupDocs = null;
+  private List<List<IN>> unsupDocs;
 
   public CRFClassifierWithDropout(SeqClassifierFlags flags) {
     super(flags);
@@ -87,7 +70,7 @@ public class CRFClassifierWithDropout<IN extends CoreMap> extends CRFClassifier<
       totalDocs.addAll(docs);
       totalDocs.addAll(unsupDocs);
       return totalDocs;
-    } else 
+    } else
       return docs;
   }
 
@@ -108,4 +91,5 @@ public class CRFClassifierWithDropout<IN extends CoreMap> extends CRFClassifier<
     return new CRFLogConditionalObjectiveFunctionWithDropout(data, labels, windowSize, classIndex,
       labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.dropoutRate, flags.dropoutScale, flags.multiThreadGrad, flags.dropoutApprox, flags.unsupDropoutScale, unsupDropoutData);
   }
-} // end class CRFClassifier
+
+} // end class CRFClassifierWithDropout
