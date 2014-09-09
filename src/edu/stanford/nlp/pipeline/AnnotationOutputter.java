@@ -23,8 +23,8 @@ import java.io.OutputStream;
  * @author Gabor Angeli
  */
 public abstract class AnnotationOutputter {
-  private static final Options DEFAULT_OPTIONS = new Options();
   private static final TreePrint DEFAULT_CONSTITUENT_TREE_PRINTER = new TreePrint("penn");
+  private static final Options DEFAULT_OPTIONS = new Options(); // IMPORTANT: must come after DEFAULT_CONSTITUENCY_TREE_PRINTER
 
   public static class Options {
     /** Should the document text be included as part of the XML output */
