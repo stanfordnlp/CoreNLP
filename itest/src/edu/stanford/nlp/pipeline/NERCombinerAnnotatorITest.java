@@ -1,22 +1,31 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.sequences.ColumnTabDocumentReaderWriter;
+import edu.stanford.nlp.util.CoreMap;
 import junit.framework.TestCase;
 
 import java.io.StringReader;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 
-/** @author Angel Chang */
+/** 
+ * @author Angel Chang
+ * @author John Bauer
+ */
 public class NERCombinerAnnotatorITest extends TestCase {
 
-  static NERCombinerAnnotator nerAnnotator = null;
   public static final String NER_3CLASS = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL;
   public static final String NER_7CLASS = DefaultPaths.DEFAULT_NER_MUC_MODEL;
   public static final String NER_MISCCLASS = DefaultPaths.DEFAULT_NER_CONLL_MODEL;
+
+  static NERCombinerAnnotator nerAnnotator = null;
+  static AnnotationPipeline unthreadedPipeline = null;
+  static AnnotationPipeline threaded4Pipeline = null;
 
   /**
    * Creates the tagger annotator if it isn't already created
@@ -28,9 +37,66 @@ public class NERCombinerAnnotatorITest extends TestCase {
     synchronized(NERCombinerAnnotatorITest.class) {
       if (nerAnnotator == null) {
         nerAnnotator = new NERCombinerAnnotator(false, NER_3CLASS, NER_7CLASS, NER_MISCCLASS);
+
+        Properties props = new Properties();
+        props.setProperty("ner.applyNumericClassifiers", "false");
+        props.setProperty("ner.useSUTime", "false");
+        props.setProperty("ner.model", NER_3CLASS);
+        NERClassifierCombiner ner = NERCombinerAnnotator.createNERClassifierCombiner("ner", props);
+        NERCombinerAnnotator threaded4Annotator = new NERCombinerAnnotator(ner, false, 4, -1);
+
+        threaded4Pipeline = new AnnotationPipeline();
+        threaded4Pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+        threaded4Pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
+        threaded4Pipeline.addAnnotator(threaded4Annotator);
+
+        NERCombinerAnnotator unthreadedAnnotator = new NERCombinerAnnotator(ner, false, 1, -1);
+        unthreadedPipeline = new AnnotationPipeline();
+        unthreadedPipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+        unthreadedPipeline.addAnnotator(new WordsToSentencesAnnotator(false));
+        unthreadedPipeline.addAnnotator(unthreadedAnnotator);
       }
     }
   }
+
+  public void testPipelineAnnotator() {
+    Annotation document = new Annotation(TEXT);
+    unthreadedPipeline.annotate(document);
+    verifyAnswers(ANSWERS, document);
+  }
+
+  public void testThreadedAnnotator() {
+    Annotation document = new Annotation(TEXT);
+    threaded4Pipeline.annotate(document);
+    verifyAnswers(ANSWERS, document);
+
+    document = new Annotation(TEXT + TEXT + TEXT);
+    threaded4Pipeline.annotate(document);
+    verifyAnswers(ANSWERS, document);
+  }
+
+  public void verifyAnswers(String[][] expected, Annotation document) {
+    int sentenceIndex = 0;
+    for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
+      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+      assertEquals(expected[sentenceIndex % expected.length].length, tokens.size());
+
+      int token = 0;
+      for (CoreLabel word : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+        assertEquals(expected[sentenceIndex % expected.length][token], word.ner());
+        ++token;
+      }
+      ++sentenceIndex;
+    }
+  }
+
+  public static final String TEXT = "John Bauer used to work at Stanford.  He worked there for 4 years.  John left in August 2014.  ";
+
+  public static final String[][] ANSWERS = {
+    { "PERSON", "PERSON", "O", "O", "O", "O", "ORGANIZATION", "O" },
+    { "O", "O", "O", "O", "O", "O", "O" },
+    { "PERSON", "O", "O", "O", "O", "O" }
+  };
 
   private static Iterator<Annotation> getTestData(String inputString, boolean includeAnswer)
   {
@@ -60,7 +126,7 @@ public class NERCombinerAnnotatorITest extends TestCase {
       for (int i = 0; i < goldTokens.size(); i++) {
         CoreLabel goldToken = goldTokens.get(i);
         CoreLabel testToken = testTokens.get(i);
-        System.err.println("POS: " + testToken.get(CoreAnnotations.PartOfSpeechAnnotation.class));
+        //System.err.println("POS: " + testToken.get(CoreAnnotations.PartOfSpeechAnnotation.class));
         String goldNer = goldToken.get(CoreAnnotations.AnswerAnnotation.class);
         String testNer = testToken.get(CoreAnnotations.NamedEntityTagAnnotation.class);
         //System.err.println("Ner tag for token " + i + " doc " + k +", GOLD: " + goldNer + ", TEST:" + testNer);

@@ -1200,9 +1200,10 @@ public class StringUtils {
    * splitChar.  However, it provides a quoting facility: it is possible to
    * quote strings with the quoteChar.
    * If the quoteChar occurs within the quotedExpression, it must be prefaced
-   * by the escapeChar
+   * by the escapeChar.
+   * This routine can be useful for processing a line of a CSV file.
    *
-   * @param s         The String to split
+   * @param s         The String to split into fields. Cannot be null.
    * @param splitChar The character to split on
    * @param quoteChar The character to quote items with
    * @param escapeChar The character to escape the quoteChar with
@@ -1217,10 +1218,11 @@ public class StringUtils {
       char curr = s.charAt(i);
       if (curr == splitChar) {
         // add last buffer
-        if (b.length() > 0) {
-          result.add(b.toString());
-          b = new StringBuilder();
-        }
+        // cdm 2014: Do this even if the field is empty!
+        // if (b.length() > 0) {
+        result.add(b.toString());
+        b = new StringBuilder();
+        // }
         i++;
       } else if (curr == quoteChar) {
         // find next instance of quoteChar
@@ -1245,6 +1247,7 @@ public class StringUtils {
         i++;
       }
     }
+    // RFC 4180 disallows final comma. At any rate, don't produce a field after it unless non-empty
     if (b.length() > 0) {
       result.add(b.toString());
     }

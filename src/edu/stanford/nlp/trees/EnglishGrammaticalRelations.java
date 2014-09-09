@@ -30,6 +30,7 @@ import edu.stanford.nlp.trees.GrammaticalRelation.GrammaticalRelationAnnotation;
 import edu.stanford.nlp.trees.GrammaticalRelation.Language;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -116,9 +117,9 @@ public class EnglishGrammaticalRelations {
   // TODO: remove everything but "to be".  Must do this carefully to
   // make sure we like all the dependency changes that happen
   static final String copularWordRegex =
-    "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|seem|seems|seemed|seeming|appear|appears|appeared|stay|stays|stayed|remain|remains|remained|resemble|resembles|resembled|resembling|become|becomes|became|becoming)$/";
+    "/^(?i:" + StringUtils.join(SemanticHeadFinder.copulaVerbs, "|") + ")$/";
   static final String clausalComplementRegex =
-    "/^(?i:seem|seems|seemed|seeming|resemble|resembles|resembled|resembling|become|becomes|became|becoming)$/";
+    "/^(?i:seem|seems|seemed|seeming|resemble|resembles|resembled|resembling|become|becomes|became|becoming|remain|remains|remained|remaining)$/";
   private static final String passiveAuxWordRegex =
     "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|seem|seems|seemed|seeming|appear|appears|appeared|become|becomes|became|becoming|get|got|getting|gets|gotten|remains|remained|remain)$/";
   private static final String beAuxiliaryRegex =
@@ -518,7 +519,7 @@ public class EnglishGrammaticalRelations {
         new String[] {
           // basic direct object cases: last non-temporal NP of (non-copula) clause.  This case is good.
           // You can't exclude "lot" in this case since people can "sell a lot" though it sometimes wrongly matches what should be an advmod like "He's done a lot" (even for the second instance, the one case admitted on PTB3 WSJ is good).
-          "VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] ) " +
+          "VP !< (/^(?:VB|AUX)/ [ < " + copularWordRegex + " | < " + clausalComplementRegex + " ]) < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] ) " +
               // The next qualification eliminates parentheticals that
               // come after the actual dobj
               " <# (__ !$++ (NP $++ (/^[:]$/ $++ =target))) ",
@@ -786,7 +787,10 @@ public class EnglishGrammaticalRelations {
           // Detects xcomp(becoming, requirement) in "Hand-holding is becoming an investment banking job requirement"
           // Also, xcomp(becoming, problem) in "Why is Dave becoming a problem?"
           "(VP $-- (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (/^VB/ < " + clausalComplementRegex + ") < NP=target)",
-
+          "VP < (/^(?:VB|AUX)/ < " + clausalComplementRegex + ") < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] ) " +
+              // The next qualification eliminates parentheticals that
+              // come after the actual dobj
+              " <# (__ !$++ (NP $++ (/^[:]$/ $++ =target))) ",
           // The old attr relation, used here to recover xcomp relations instead.
           "VP=vp < NP=target <(/^(?:VB|AUX)/ < " + copularWordRegex + " >># =vp) !$ (NP < EX)",
           // "Such a great idea this was" if "was" is the root, eg -makeCopulaHead
@@ -866,7 +870,11 @@ public class EnglishGrammaticalRelations {
           // The second half of the expression leaves out relations
           // which should be xcomp because they are actually
           // passivized verbs
-          "VP [ < ADJP=target | ( < (/^VB/ $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S))) !$-- (/^VB/ < " + copularWordRegex + " )) ]",
+          // Phrases such as "remained banned" "seem headed down" etc
+          // are captured by (clausalComplementRegex $++ VP)
+          // We combine them all into one tregex expression to save a
+          // few milliseconds of runtime
+          "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]",
         });
   public static class AdjectivalComplementGRAnnotation extends GrammaticalRelationAnnotation { }
 

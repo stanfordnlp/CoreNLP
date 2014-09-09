@@ -363,7 +363,6 @@ public class ColumnDataClassifier {
    *  words with features like useSplitWords.
    */
   private static final Pattern tab = Pattern.compile("\\t");
-  private static final Pattern comma = Pattern.compile(",");
 
 
   /** Read a data set from a file and convert it into a Dataset object.
@@ -439,9 +438,9 @@ public class ColumnDataClassifier {
   //Split according to whether we are using tsv file (default) or csv files
   private String[] splitLineToFields(String line) {
     if(globalFlags.csvFormat) {
-      String[] strings = comma.split(line);
-      for(int i = 0; i < strings.length; ++i) {
-        if(strings[i].startsWith("\"") && strings[i].endsWith("\""))
+      String[] strings = StringUtils.splitOnCharWithQuoting(line, ',', '"', '"');
+      for (int i = 0; i < strings.length; ++i) {
+        if (strings[i].startsWith("\"") && strings[i].endsWith("\""))
           strings[i] = strings[i].substring(1,strings[i].length()-1);
       }
       return strings;

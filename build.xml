@@ -405,8 +405,9 @@
              classpath="lib/appbundler-1.0.jar" />
 
     <bundleapp outputdirectory="."
-               name="Tregex GUI"
-               displayname="Tregex GUI"
+               name="Stanford Tregex"
+               displayname="Stanford Tregex"
+               icon="doc/tregex/nlp-logo-6x6.icns"
                identifier="edu.stanford.nlp.trees.tregex.gui.TregexGUI"
                mainclassname="edu.stanford.nlp.trees.tregex.gui.TregexGUI">
       <runtime dir="${env.JAVA_HOME}" />
