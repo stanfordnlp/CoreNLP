@@ -2,7 +2,6 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
-import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -55,14 +54,14 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
     }
   }
 
-  public NERCombinerAnnotator(boolean verbose) 
-    throws IOException, ClassNotFoundException 
+  public NERCombinerAnnotator(boolean verbose)
+    throws IOException, ClassNotFoundException
   {
     this(new NERClassifierCombiner(new Properties()), verbose);
   }
 
-  public NERCombinerAnnotator(boolean verbose, String... classifiers) 
-    throws IOException, ClassNotFoundException 
+  public NERCombinerAnnotator(boolean verbose, String... classifiers)
+    throws IOException, ClassNotFoundException
   {
     this(new NERClassifierCombiner(classifiers), verbose);
   }
@@ -79,7 +78,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
   }
 
   public NERCombinerAnnotator(String name, Properties properties) {
-    this(createNERClassifierCombiner(name, properties), false, 
+    this(createNERClassifierCombiner(name, properties), false,
          PropertiesUtils.getInt(properties, name + ".nthreads", PropertiesUtils.getInt(properties, "nthreads", 1)),
          PropertiesUtils.getLong(properties, name + ".maxtime", -1));
   }
@@ -120,7 +119,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
 
     return nerCombiner;
   }
-  
+
   @Override
   protected int nThreads() {
     return nThreads;
@@ -129,7 +128,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
   @Override
   protected long maxTime() {
     return maxTime;
-  };  
+  };
 
   @Override
   public void annotate(Annotation annotation) {

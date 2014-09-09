@@ -3,7 +3,6 @@ package edu.stanford.nlp.trees;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +34,7 @@ public class Dependencies {
       tagRejectFilter = trf;
     }
 
+    @Override
     public boolean accept(Dependency<G, D, N> d) {
       /*
       System.err.println("DRF: Checking " + d + ": hasTag?: " +
@@ -71,6 +71,7 @@ public class Dependencies {
       wordRejectFilter = wrf;
     }
 
+    @Override
     public boolean accept(Dependency<G, D, N> d) {
       /*
       System.err.println("DRF: Checking " + d + ": hasWord?: " +
@@ -101,6 +102,7 @@ public class Dependencies {
 
     private static class DependencyIdxComparator implements Comparator<Dependency> {
 
+      @Override
       public int compare(Dependency dep1, Dependency dep2) {
         CoreMap dep1lab = (CoreMap) dep1.dependent();
         CoreMap dep2lab = (CoreMap) dep2.dependent();
@@ -114,26 +116,26 @@ public class Dependencies {
     private static final Comparator<Dependency> dc = new DependencyIdxComparator();
 
   }
-  
+
   public static Map<TreeGraphNode,List<TypedDependency>> govToDepMap(List<TypedDependency> deps) {
     Map<TreeGraphNode,List<TypedDependency>> govToDepMap = Generics.newHashMap();
     for (TypedDependency dep : deps) {
       TreeGraphNode gov = dep.gov();
-      
+
       List<TypedDependency> depList = govToDepMap.get(gov);
       if (depList == null) {
-        depList = new ArrayList<TypedDependency>();        
+        depList = new ArrayList<TypedDependency>();
         govToDepMap.put(gov, depList);
       }
       depList.add(dep);
     }
     return govToDepMap;
   }
-  
+
   private static Set<List<TypedDependency>> getGovMaxChains(Map<TreeGraphNode,List<TypedDependency>> govToDepMap, TreeGraphNode gov, int depth) {
     Set<List<TypedDependency>> depLists = Generics.newHashSet();
     List<TypedDependency> children = govToDepMap.get(gov);
-    
+
     if (depth > 0 && children != null) {
       for (TypedDependency child : children) {
         TreeGraphNode childNode = child.dep();
@@ -153,22 +155,22 @@ public class Dependencies {
     }
     return depLists;
   }
-  
+
   public static Counter<List<TypedDependency>> getTypedDependencyChains(List<TypedDependency> deps, int maxLength) {
     Map<TreeGraphNode,List<TypedDependency>> govToDepMap = govToDepMap(deps);
     Counter<List<TypedDependency>> tdc = new ClassicCounter<List<TypedDependency>>();
-    for (TreeGraphNode gov : govToDepMap.keySet()) {      
+    for (TreeGraphNode gov : govToDepMap.keySet()) {
       Set<List<TypedDependency>> maxChains = getGovMaxChains(govToDepMap, gov, maxLength);
       for (List<TypedDependency> maxChain : maxChains) {
          for (int i = 1; i <= maxChain.size(); i++) {
-           List<TypedDependency> chain = maxChain.subList(0, i); 
+           List<TypedDependency> chain = maxChain.subList(0, i);
            tdc.incrementCount(chain);
          }
-      }     
+      }
     }
     return tdc;
   }
-  
+
   /** A Comparator for Dependencies based on their dependent annotation.
    *  It will only work if the Labels at the ends of Dependencies have
    *  an index().

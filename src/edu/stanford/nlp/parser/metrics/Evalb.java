@@ -7,7 +7,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -184,7 +183,7 @@ public class Evalb extends AbstractEval {
     }
     String goldFile = parsedArgs[0];
     String guessFile = parsedArgs[1];
-  
+
     // Command-line has been parsed. Configure the metric for evaluation.
     tlpp.setInputEncoding(encoding);
     final PrintWriter pwOut = tlpp.pw();
@@ -236,7 +235,7 @@ public class Evalb extends AbstractEval {
         skippedGuessTrees++;
         continue;
       }
-      
+
       final Tree evalGuess = tc.transformTree(guessTree);
       final Tree evalGold = tc.transformTree(goldTree);
 
@@ -245,7 +244,7 @@ public class Evalb extends AbstractEval {
       if(doCatLevel) evalbCat.evaluate(evalGuess, evalGold, ((VERBOSE) ? pwOut : null));
       if(sortByF1) storeTrees(queue,guessTree,goldTree,metric.getLastF1());
     }
-    
+
     if(guessItr.hasNext() || goldItr.hasNext()) {
       System.err.printf("Guess/gold files do not have equal lengths (guess: %d gold: %d)%n.", guessLineId, goldLineId);
     }

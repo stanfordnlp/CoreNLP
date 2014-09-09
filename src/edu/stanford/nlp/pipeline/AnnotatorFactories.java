@@ -20,64 +20,61 @@ import java.util.Set;
  */
 public class AnnotatorFactories {
 
-  public static AnnotatorFactory tokenize(Properties properties, AnnotatorImplementations annotatorImplementation){
+  public static AnnotatorFactory tokenize(Properties properties, AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
-            "false"))) {
-          return annotatorImplementation.whitespaceTokenizer(properties);
-        } else {
-          String options = properties.getProperty("tokenize.options", PTBTokenizerAnnotator.DEFAULT_OPTIONS);
-          boolean keepNewline = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
-          // If they
-          if (properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
-            keepNewline = true;
-          }
-          // If the user specifies "tokenizeNLs=false" in tokenize.options, then this default will
-          // be overridden.
-          if (keepNewline) {
-            options = "tokenizeNLs," + options;
-          }
-          return annotatorImplementation.ptbTokenizer(properties, false, options);
+        String extraOptions = null;
+        boolean keepNewline = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
+            "false"));
+        if (properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
+          keepNewline = true;
         }
-      };
+        if (keepNewline) {
+          extraOptions = "tokenizeNLs,";
+        }
+        return annotatorImplementation.tokenizer(properties, false, extraOptions);
+      }
 
       @Override
       public String additionalSignature() {
         // keep track of all relevant properties for this annotator here!
         StringBuilder os = new StringBuilder();
-        os.append("tokenize.whitespace:" +
-            properties.getProperty("tokenize.whitespace", "false"));
+        os.append("tokenize.whitespace:").append(properties.getProperty("tokenize.whitespace", "false"));
         if (properties.getProperty("tokenize.options") != null) {
-          os.append(":tokenize.options:" + properties.getProperty("tokenize.options"));
+          os.append(":tokenize.options:").append(properties.getProperty("tokenize.options"));
+        }
+        if (properties.getProperty("tokenize.language") != null) {
+          os.append(":tokenize.language:").append(properties.getProperty("tokenize.language"));
+        }
+        if (properties.getProperty("tokenize.class") != null) {
+          os.append(":tokenize.class:").append(properties.getProperty("tokenize.class"));
         }
         if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
             "false"))) {
-          os.append(WhitespaceTokenizerAnnotator.EOL_PROPERTY + ":" +
-              properties.getProperty(WhitespaceTokenizerAnnotator.EOL_PROPERTY,
-                  "false"));
-          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ":" +
-              properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
-                  "false"));
+          os.append(TokenizerAnnotator.EOL_PROPERTY + ":").append(properties.getProperty(TokenizerAnnotator.EOL_PROPERTY,
+              "false"));
+          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ":").append(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
+              "false"));
           return os.toString();
         } else {
-          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ":" +
-              Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
-                  "false")));
-          os.append(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ":" +
-              properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
+          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ":").append(Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
+              "false")));
+          os.append(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ":").append(properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
         }
         return os.toString();
       }
     };
   }
 
+
+
+
+
   public static AnnotatorFactory cleanXML(Properties properties, AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
-
       @Override
       public Annotator create() {
         String xmlTags =
@@ -191,9 +188,9 @@ public class AnnotatorFactories {
   public static AnnotatorFactory sentenceSplit(Properties properties, AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
-
       @Override
       public Annotator create() {
+        System.err.println(signature());
         boolean nlSplitting = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
         if (nlSplitting) {
           boolean whitespaceTokenization = Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"));
@@ -222,8 +219,8 @@ public class AnnotatorFactories {
           // Discard these tokens without marking them as sentence boundaries
           String tokenPatternsToDiscardProp = properties.getProperty("ssplit.tokenPatternsToDiscard");
           Set<String> tokenRegexesToDiscard = null;
-          if (tokenPatternsToDiscardProp != null) {
-            String[] toks = tokenPatternsToDiscardProp.split(",");
+          if (tokenPatternsToDiscardProp != null){
+            String [] toks = tokenPatternsToDiscardProp.split(",");
             tokenRegexesToDiscard = Generics.newHashSet(Arrays.asList(toks));
           }
           // regular boundaries
@@ -233,17 +230,18 @@ public class AnnotatorFactories {
           // newline boundaries which are discarded.
           String bounds = properties.getProperty("ssplit.boundariesToDiscard");
           if (bounds != null) {
-            String[] toks = bounds.split(",");
+            String [] toks = bounds.split(",");
             boundariesToDiscard = Generics.newHashSet(Arrays.asList(toks));
           }
           Set<String> htmlElementsToDiscard = null;
           // HTML boundaries which are discarded
           bounds = properties.getProperty("ssplit.htmlBoundariesToDiscard");
           if (bounds != null) {
-            String[] elements = bounds.split(",");
+            String [] elements = bounds.split(",");
             htmlElementsToDiscard = Generics.newHashSet(Arrays.asList(elements));
           }
-          String nlsb = properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK);
+          String nlsb = properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY,
+              StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK);
 
           return annotatorImplementation.wordToSentences(properties,
               false, boundaryTokenRegex, boundariesToDiscard, htmlElementsToDiscard,
@@ -272,7 +270,6 @@ public class AnnotatorFactories {
   public static AnnotatorFactory posTag(Properties properties, AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
-
       @Override
       public Annotator create() {
         try {
@@ -296,7 +293,6 @@ public class AnnotatorFactories {
   public static AnnotatorFactory lemma(Properties properties, AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
-
       @Override
       public Annotator create() {
         return annotatorImplementation.morpha(properties, false);
@@ -317,7 +313,6 @@ public class AnnotatorFactories {
   public static AnnotatorFactory nerTag(Properties properties, AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
-
       @Override
       public Annotator create() {
         try {
@@ -348,7 +343,6 @@ public class AnnotatorFactories {
   public static AnnotatorFactory regexNER(Properties properties, AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
-
       @Override
       public Annotator create() {
         return annotatorImplementation.tokensRegexNER(properties, "regexner");
@@ -368,7 +362,6 @@ public class AnnotatorFactories {
   public static AnnotatorFactory gender(Properties properties, AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
-
       @Override
       public Annotator create() {
         return annotatorImplementation.gender(properties, false);
@@ -391,7 +384,6 @@ public class AnnotatorFactories {
   public static AnnotatorFactory truecase(Properties properties, AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
-
       @Override
       public Annotator create() {
         String model = properties.getProperty("truecase.model", DefaultPaths.DEFAULT_TRUECASE_MODEL);

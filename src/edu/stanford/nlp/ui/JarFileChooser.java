@@ -11,7 +11,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import java.awt.Frame;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -46,7 +45,7 @@ public class JarFileChooser {
     try {
       files = getFiles(jarFile);
     } catch (Exception e) {
-      // Something went wrong reading the file.  
+      // Something went wrong reading the file.
       JOptionPane.showMessageDialog(panel, "Filename " + jarFile + " had an error:\n" + e, null, JOptionPane.ERROR_MESSAGE);
       return null;
     }
@@ -82,7 +81,6 @@ public class JarFileChooser {
     okay.setText("Okay");
     okay.setToolTipText("Okay");
     okay.addActionListener(evt -> dialog.setVisible(false));
-    
     JButton cancel = new javax.swing.JButton();
     cancel.setText("Cancel");
     cancel.setToolTipText("Cancel");
@@ -93,7 +91,7 @@ public class JarFileChooser {
 
     GridBagLayout gridbag = new GridBagLayout();
     GridBagConstraints constraints = new GridBagConstraints();
-    
+
     dialog.setLayout(gridbag);
 
     constraints.gridwidth = GridBagConstraints.REMAINDER;
@@ -122,7 +120,7 @@ public class JarFileChooser {
     return files.get(fileList.getSelectedIndex());
   }
 
-  public List<String> getFiles(File jarFile) 
+  public List<String> getFiles(File jarFile)
     throws ZipException, IOException
   {
     //System.out.println("Looking at " + jarFile);

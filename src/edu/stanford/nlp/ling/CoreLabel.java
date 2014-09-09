@@ -29,7 +29,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author dramage
  * @author rafferty
  */
-public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, HasCategory, HasLemma, HasContext, HasIndex, HasOffset {
+public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWord, HasTag, HasCategory, HasLemma, HasContext, HasIndex, HasOffset {
 
   private static final long serialVersionUID = 2L;
 
@@ -277,6 +277,7 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    * @return "" if the key is not in the map or has the value <code>null</code>
    *     and the String value of the key otherwise
    */
+  @Override
   public <KEY extends Key<String>> String getString(Class<KEY> key) {
     String value = get(key);
     if (value == null) {
@@ -541,12 +542,27 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
     set(CoreAnnotations.CharacterOffsetEndAnnotation.class, endPos);
   }
 
+  public int copyCount() {
+    Integer copy = get(CoreAnnotations.CopyAnnotation.class);
+    if (copy == null)
+      return 0;
+    return copy;
+  }
+
+  public void setCopyCount(int count) {
+    set(CoreAnnotations.CopyAnnotation.class, count);
+  }
+
   /**
    * Tag separator to use by default
    */
   public static final String TAG_SEPARATOR = "/";
 
-  public static final String DEFAULT_FORMAT = "value-index";
+  public enum OutputFormat {
+    VALUE_INDEX, VALUE, VALUE_TAG, VALUE_TAG_INDEX, MAP, VALUE_MAP, VALUE_INDEX_MAP, WORD, WORD_INDEX
+  };
+
+  public static final OutputFormat DEFAULT_FORMAT = OutputFormat.VALUE_INDEX;
 
   @Override
   public String toString() {
@@ -565,6 +581,8 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    * <li>"value-index": extracts a value and an integer index from
    * the contained map using keys  <code>INDEX_KEY</code>,
    * respectively, and prints them with a hyphen in between</li>
+   * <li>"value-tag"
+   * <li>"value-tag-index"
    * <li>"value-index{map}": a combination of the above; the index is
    * displayed first and then not shown in the map that is displayed</li>
    * <li>"word": Just the value of HEAD_WORD_KEY in the map</li>
@@ -573,98 +591,112 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    * Map is printed in alphabetical order of keys.
    */
   @SuppressWarnings("unchecked")
-  public String toString(String format) {
+  public String toString(OutputFormat format) {
     StringBuilder buf = new StringBuilder();
-    switch (format) {
-      case "value":
-        buf.append(value());
-        break;
-      case "{map}": {
-        Map map2 = new TreeMap();
-        for (Class key : this.keySet()) {
-          map2.put(key.getName(), get(key));
+    switch(format) {
+    case VALUE:
+      buf.append(value());
+      break;
+    case MAP: {
+      Map map2 = new TreeMap();
+      for(Class key : this.keySet()) {
+        map2.put(key.getName(), get(key));
+      }
+      buf.append(map2);
+      break;
+    }
+    case VALUE_MAP: {
+      buf.append(value());
+      Map map2 = new TreeMap(asClassComparator);
+      for(Class key : this.keySet()) {
+        map2.put(key, get(key));
+      }
+      map2.remove(CoreAnnotations.ValueAnnotation.class);
+      buf.append(map2);
+      break;
+    }
+    case VALUE_INDEX: {
+      buf.append(value());
+      Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
+      if (index != null) {
+        buf.append('-').append((index).intValue());
+      }
+      buf.append(toPrimes());
+      break;
+    }
+    case VALUE_TAG: {
+      buf.append(value());
+      buf.append(toPrimes());
+      String tag = tag();
+      if (tag != null) {
+        buf.append(TAG_SEPARATOR).append(tag);
+      }
+      break;
+    }
+    case VALUE_TAG_INDEX: {
+      buf.append(value());
+      String tag = tag();
+      if (tag != null) {
+        buf.append(TAG_SEPARATOR).append(tag);
+      }
+      Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
+      if (index != null) {
+        buf.append('-').append((index).intValue());
+      }
+      buf.append(toPrimes());
+      break;
+    }
+    case VALUE_INDEX_MAP: {
+      buf.append(value());
+      Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
+      if (index != null) {
+        buf.append('-').append((index).intValue());
+      }
+      Map<String,Object> map2 = new TreeMap<String,Object>();
+      for(Class key : this.keySet()) {
+        String cls = key.getName();
+        // special shortening of all the Annotation classes
+        int idx = cls.indexOf('$');
+        if (idx >= 0) {
+          cls = cls.substring(idx + 1);
         }
+        map2.put(cls, this.get(key));
+      }
+      map2.remove("IndexAnnotation");
+      map2.remove("ValueAnnotation");
+      if (!map2.isEmpty()) {
         buf.append(map2);
-        break;
       }
-      case "value{map}": {
-        buf.append(value());
-        Map map2 = new TreeMap(asClassComparator);
-        for (Class key : this.keySet()) {
-          map2.put(key, get(key));
-        }
-        map2.remove(CoreAnnotations.ValueAnnotation.class);
-        buf.append(map2);
-        break;
+      break;
+    }
+    case WORD:
+      // TODO: we should unify word() and value()
+      buf.append(word());
+      break;
+    case WORD_INDEX: {
+      buf.append(this.get(CoreAnnotations.TextAnnotation.class));
+      Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
+      if (index != null) {
+        buf.append('-').append((index).intValue());
       }
-      case "value-index": {
-        buf.append(value());
-        Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
-        if (index != null) {
-          buf.append('-').append((index).intValue());
-        }
-        buf.append(toPrimes());
-        break;
-      }
-      case "value-tag-index": {
-        buf.append(value());
-        String tag = tag();
-        if (tag != null) {
-          buf.append(TAG_SEPARATOR).append(tag);
-        }
-        Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
-        if (index != null) {
-          buf.append('-').append((index).intValue());
-        }
-        buf.append(toPrimes());
-        break;
-      }
-      case "value-index{map}": {
-        buf.append(value());
-        Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
-        if (index != null) {
-          buf.append('-').append((index).intValue());
-        }
-        Map<String, Object> map2 = new TreeMap<String, Object>();
-        for (Class key : this.keySet()) {
-          String cls = key.getName();
-          // special shortening of all the Annotation classes
-          int idx = cls.indexOf('$');
-          if (idx >= 0) {
-            cls = cls.substring(idx + 1);
-          }
-          map2.put(cls, this.get(key));
-        }
-        map2.remove("IndexAnnotation");
-        map2.remove("ValueAnnotation");
-        if (!map2.isEmpty()) {
-          buf.append(map2);
-        }
-        break;
-      }
-      case "word":
-        buf.append(word());
-        break;
-      case "text-index": {
-        buf.append(this.get(CoreAnnotations.TextAnnotation.class));
-        Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
-        if (index != null) {
-          buf.append('-').append((index).intValue());
-        }
-        buf.append(toPrimes());
-        break;
-      }
+      buf.append(toPrimes());
+      break;
+    }
+    default:
+      throw new IllegalArgumentException("Unknown format " + format);
     }
     return buf.toString();
   }
 
   public String toPrimes() {
-    Integer copy = get(CoreAnnotations.CopyAnnotation.class);
-    if (copy == null || copy == 0)
-      return "";
-    return StringUtils.repeat('\'', copy);
+    return StringUtils.repeat('\'', copyCount());
   }
 
-  private static final Comparator<Class<?>> asClassComparator = (o1, o2) -> o1.getName().compareTo(o2.getName());
+  private static final Comparator<Class<?>> asClassComparator = new Comparator<Class<?>>() {
+    @Override
+    public int compare(Class<?> o1, Class<?> o2) {
+      return o1.getName().compareTo(o2.getName());
+    }
+  };
 
 }

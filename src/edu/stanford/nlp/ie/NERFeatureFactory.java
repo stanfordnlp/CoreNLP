@@ -185,6 +185,9 @@ import edu.stanford.nlp.util.Timing;
  * <tr><td> useLastRealWord</td><td>boolean</td><td>false</td><td>Iff the prev word is of length 3 or less, add an extra feature that combines the word two back and the current word's shape. <i>Weird!</i></td></tr>
  * <tr><td> useNextRealWord</td><td>boolean</td><td>false</td><td>Iff the next word is of length 3 or less, add an extra feature that combines the word after next and the current word's shape. <i>Weird!</i></td></tr>
  * <tr><td> useTitle</td><td>boolean</td><td>false</td><td>Match a word against a list of name titles (Mr, Mrs, etc.)</td></tr>
+ * <tr><td> useDistSim</td><td>boolean</td><td>false</td><td>Load a file of distributional similarity classes (specified by <code>distSimLexicon</code>) and use it for features</td></tr>
+ * <tr><td> distSimLexicon</td><td>String</td><td></td><td>The file to be loaded for distsim classes.</td></tr>
+ * <tr><td> distSimFileFormat</td><td>String</td><td>alexclark</td><td>Files should be formatted as tab separated rows where each row is a word/class pair.  alexclark=word first, terrykoo=class first</td></tr>
  * <tr><td> useOccurrencePatterns</td><td>boolean</td><td>false</td><td>This is a very engineered feature designed to capture multiple references to names.  If the current word isn't capitalized, followed by a non-capitalized word, and preceded by a word with alphabetic characters, it returns NO-OCCURRENCE-PATTERN.  Otherwise, if the previous word is a capitalized NNP, then if in the next 150 words you find this PW-W sequence, you get XY-NEXT-OCCURRENCE-XY, else if you find W you get XY-NEXT-OCCURRENCE-Y.  Similarly for backwards and XY-PREV-OCCURRENCE-XY and XY-PREV-OCCURRENCE-Y.  Else (if the previous word isn't a capitalized NNP), under analogous rules you get one or more of X-NEXT-OCCURRENCE-YX, X-NEXT-OCCURRENCE-XY, X-NEXT-OCCURRENCE-X, X-PREV-OCCURRENCE-YX, X-PREV-OCCURRENCE-XY, X-PREV-OCCURRENCE-X.</td></tr>
  * <tr><td> useTypeySequences</td><td>boolean</td><td>false</td><td>Some first order word shape patterns.</td></tr>
  * <tr><td> useGenericFeatures</td><td>boolean</td><td>false</td><td>If true, any features you include in the map will be incorporated into the model with values equal to those given in the file; values are treated as strings unless you use the "realValued" option (described below)</td></tr>
@@ -1709,7 +1712,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
             featuresCpC.add(pWord + "-PSEQpW"); // added later after goodCoNLL
           }
 
-          if (true) { // TODO [cdm Jul 2014]: should really be if (flags.useDistSim) but fixing current itest....
+          if (flags.useDistSim) {
             featuresCpC.add(pDS + "-PSEQpDS");
             featuresCpC.add(cDS + "-PSEQcDS");
             featuresCpC.add(pDS+ '-' +cDS + "-PSEQpcDS");

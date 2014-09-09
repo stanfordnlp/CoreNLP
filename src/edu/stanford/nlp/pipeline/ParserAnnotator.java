@@ -235,7 +235,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     Tree tree = ParserUtils.xTree(words);
     for (CoreLabel word : words) {
       if (word.tag() == null) {
-        word.setTag("X");
+        word.setTag("XX");
       }
     }
     finishSentence(sentence, tree);
@@ -265,8 +265,14 @@ public class ParserAnnotator extends SentenceAnnotator {
     Tree tree = null;
     try {
       tree = pq.getBestParse();
-      // -10000 denotes unknown words
-      tree.setScore(pq.getPCFGScore() % -10000.0);
+      if (tree == null) {
+        System.err.println("WARNING: Parsing of sentence failed.  " +
+                         "Will ignore and continue: " +
+                         Sentence.listToString(words));
+      } else {
+        // -10000 denotes unknown words
+        tree.setScore(pq.getPCFGScore() % -10000.0);
+      }
     } catch (OutOfMemoryError e) {
       System.err.println("WARNING: Parsing of sentence ran out of memory.  " +
                          "Will ignore and continue: " +

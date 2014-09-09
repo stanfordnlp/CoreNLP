@@ -414,7 +414,7 @@ public abstract class SemgrexPattern implements Serializable {
         continue;
       }
       System.err.println("Matched graph:");
-      System.err.println(graph.toString("plain"));
+      System.err.println(graph.toString(SemanticGraph.OutputFormat.LIST));
       boolean found = true;
       while (found) {
         System.err.println("Matches at: " + matcher.getMatch().value() + "-" + matcher.getMatch().index());

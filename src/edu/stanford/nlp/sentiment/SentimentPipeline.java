@@ -15,7 +15,6 @@ import java.util.Properties;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
@@ -26,7 +25,6 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 
@@ -222,7 +220,7 @@ public class SentimentPipeline {
           trees.add(tree);
         }
       }
-      
+
       List<Annotation> annotations = Generics.newArrayList();
       for (Tree tree : trees) {
         CoreMap sentence = new Annotation(Sentence.listToString(tree.yield()));
@@ -393,7 +391,7 @@ public class SentimentPipeline {
           System.out.println("");
         }
       }
-      
+
     }
   }
 }

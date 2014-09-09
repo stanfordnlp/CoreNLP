@@ -1,6 +1,5 @@
 package edu.stanford.nlp.dcoref;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.math.NumberMatchingRegex;
 
 import java.util.LinkedHashSet;
@@ -18,10 +17,10 @@ public class SpeakerInfo {
   private String[] speakerNameStrings; // tokenized speaker name
   private String speakerDesc;
   private Set<Mention> mentions = new LinkedHashSet<Mention>();  // Mentions that corresponds to the speaker...
-  private Mention originalMention;            // the mention used when creating this SpeakerInfo
+  // private Mention originalMention;            // the mention used when creating this SpeakerInfo
   private boolean speakerIdIsNumber;          // speaker id is a number (probably mention id)
   private boolean speakerIdIsAutoDetermined;  // speaker id was auto determined by system
-  private Mention mainMention;
+  // private Mention mainMention;
 
   // TODO: keep track of speaker utterances?
 

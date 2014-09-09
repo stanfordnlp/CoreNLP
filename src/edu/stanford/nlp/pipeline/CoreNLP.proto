@@ -111,10 +111,12 @@ message DependencyGraph {
   }
 
   message Edge {
-    required uint32 source  = 1;
-    required uint32 target  = 2;
-    optional string dep     = 3;
-    optional bool   isExtra = 4;
+    required uint32 source     = 1;
+    required uint32 target     = 2;
+    optional string dep        = 3;
+    optional bool   isExtra    = 4;
+    optional uint32 sourceCopy = 5;
+    optional uint32 targetCopy = 6;
   }
   
   repeated Node   node = 1;

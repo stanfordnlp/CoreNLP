@@ -7,7 +7,6 @@ import edu.stanford.nlp.optimization.HasFeatureGrouping;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
 
 import java.util.*;
@@ -16,7 +15,7 @@ import java.util.*;
  * @author Mengqiu Wang
  */
 
-public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCachingDiffFunction implements 
+public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCachingDiffFunction implements
     HasCliquePotentialFunction, HasFeatureGrouping, HasRegularizerParamRange {
 
   public static final int NO_PRIOR = 0;
@@ -161,7 +160,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
     return domainDimension;
   }
 
-  @Override 
+  @Override
   //TODO(mengqiu) initialize edge feature weights to be weights from CRF
   public double[] initial() {
     double[] initial = new double[domainDimension()];
@@ -257,7 +256,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
       int[] docLabels = labels[m];
       int[] windowLabels = new int[window];
       Arrays.fill(windowLabels, classIndex.indexOf(backgroundSymbol));
-      
+
       if (docLabels.length>docData.length) { // only true for self-training
         // fill the windowLabel array with the extra docLabels
         System.arraycopy(docLabels, 0, windowLabels, 0, windowLabels.length);
@@ -330,7 +329,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
         if (useOutputLayer) {
           if (flags.hardcodeSoftmaxOutputWeights)
             outputLayerWeights[i][j] = 1.0 / numHiddenUnits;
-          else 
+          else
             outputLayerWeights[i][j] = x[index++];
         } else
           outputLayerWeights[i][j] = 1;
@@ -343,8 +342,8 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
   public CliquePotentialFunction getCliquePotentialFunction(double[] x) {
     Triple<double[][], double[][], double[][]> allParams = separateWeights(x);
     double[][] linearWeights = allParams.first();
-    double[][] W = allParams.second(); // inputLayerWeights 
-    double[][] U = allParams.third(); // outputLayerWeights 
+    double[][] W = allParams.second(); // inputLayerWeights
+    double[][] U = allParams.third(); // outputLayerWeights
     return new NonLinearCliquePotentialFunction(linearWeights, W, U, flags);
   }
 
@@ -357,7 +356,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
     double prob = 0.0; // the log prob of the sequence given the model, which is the negation of value at this point
     Triple<double[][], double[][], double[][]> allParams = separateWeights(x);
     double[][] linearWeights = allParams.first();
-    double[][] W = allParams.second(); // inputLayerWeights 
+    double[][] W = allParams.second(); // inputLayerWeights
     double[][] U = allParams.third(); // outputLayerWeights
 
     double[][] Y = null;
@@ -385,7 +384,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
       double[][][] featureVal3DArr = null;
       if (featureVal != null)
         featureVal3DArr = featureVal[m];
-    
+
       if (DEBUG) System.err.println("processing doc " + m);
 
       NonLinearCliquePotentialFunction cliquePotentialFunction = new NonLinearCliquePotentialFunction(linearWeights, W, U, flags);
@@ -450,9 +449,9 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
             double fD = 0;
             for (int q = 0; q < inputLayerSize; q++) {
               if (useSigmoid) {
-                fD = As[q] * (1 - As[q]); 
+                fD = As[q] * (1 - As[q]);
               } else {
-                fD = 1 - As[q] * As[q]; 
+                fD = 1 - As[q] * As[q];
               }
               fDeriv[q] = fD;
             }
@@ -768,7 +767,7 @@ public class CRFNonLinearLogConditionalObjectiveFunction extends AbstractCaching
       double y = 0;
       double mean = 1.0 / numHiddenUnits;
       int count = 0;
-      for (int i = 0; i < U.length; i++) {  
+      for (int i = 0; i < U.length; i++) {
         for (int j = 0; j < U[i].length; j++) {
           y = U[i][j];
           value += (y-mean) * (y-mean) * softmaxLambda;

@@ -51,7 +51,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 /**
  * This is a pipeline that takes in a string and returns various analyzed
  * linguistic forms.
- * The String is tokenized via a tokenizer (such as PTBTokenizerAnnotator), and
+ * The String is tokenized via a tokenizer (using a TokenizerAnnotator), and
  * then other sequence model style annotation can be used to add things like
  * lemmas, POS tags, and named entities.  These are returned as a list of CoreLabels.
  * Other analysis components build and store parse trees, dependency graphs, etc.
@@ -243,9 +243,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   }
 
   public boolean getPrintSingletons() {
-    return PropertiesUtils.getBool(properties, "output.printSingletonEntities", false); 
+    return PropertiesUtils.getBool(properties, "output.printSingletonEntities", false);
   }
-   
+
 
   public static boolean isXMLOutputPresent() {
     try {
@@ -348,12 +348,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool.register(STANFORD_DETERMINISTIC_COREF, AnnotatorFactories.coref(properties, annotatorImplementation));
     pool.register(STANFORD_RELATION, AnnotatorFactories.relation(properties, annotatorImplementation));
     pool.register(STANFORD_SENTIMENT, AnnotatorFactories.sentiment(properties, annotatorImplementation));
+    // Add more annotators here
+    
     //
-    // add more annotators here!
-    //
-
-
-
     // add annotators loaded via reflection from classnames specified
     // in the properties
     for (Object propertyKey : inputProps.stringPropertyNames()) {
@@ -675,7 +672,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     return ObjectBank.getLineIterator(fileName, new ObjectBank.PathToFileFunction());
   }
 
-  private AnnotationSerializer loadSerializer(String serializerClass, String name, Properties properties) {
+  private static AnnotationSerializer loadSerializer(String serializerClass, String name, Properties properties) {
     AnnotationSerializer serializer = null;
     try {
       // Try loading with properties
