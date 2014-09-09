@@ -617,19 +617,9 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       dialog.setVisible(false);
       startFileLoadingThread(filters, cFiles);
     });
-    add.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        fileFilterPanel.add(getNewFilter());
-        dialog.pack();
-      }
-    });
-    cancel.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-       dialog.setVisible(false);
-
-      }
+    add.addActionListener(e -> {
+      fileFilterPanel.add(getNewFilter());
+      dialog.pack();
     });
     cancel.addActionListener(e -> dialog.setVisible(false));
     dialog.getRootPane().setDefaultButton(okay);
