@@ -9,7 +9,7 @@ import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.TwoDimensionalMap;
@@ -138,39 +138,19 @@ public class AverageDVModels {
     }
 
     List<TwoDimensionalMap<String, String, SimpleMatrix>> binaryTransformMaps =
-      CollectionUtils.transformAsList(models, new Function<DVModel, TwoDimensionalMap<String, String, SimpleMatrix>>() {
-          public TwoDimensionalMap<String, String, SimpleMatrix> apply(DVModel model) {
-            return model.binaryTransform;
-          }
-        });
+      CollectionUtils.transformAsList(models, model -> model.binaryTransform);
 
     List<TwoDimensionalMap<String, String, SimpleMatrix>> binaryScoreMaps =
-      CollectionUtils.transformAsList(models, new Function<DVModel, TwoDimensionalMap<String, String, SimpleMatrix>>() {
-          public TwoDimensionalMap<String, String, SimpleMatrix> apply(DVModel model) {
-            return model.binaryScore;
-          }
-        });
+      CollectionUtils.transformAsList(models, model -> model.binaryScore);
 
     List<Map<String, SimpleMatrix>> unaryTransformMaps =
-      CollectionUtils.transformAsList(models, new Function<DVModel, Map<String, SimpleMatrix>>() {
-          public Map<String, SimpleMatrix> apply(DVModel model) {
-            return model.unaryTransform;
-          }
-        });
+      CollectionUtils.transformAsList(models, model -> model.unaryTransform);
 
     List<Map<String, SimpleMatrix>> unaryScoreMaps =
-      CollectionUtils.transformAsList(models, new Function<DVModel, Map<String, SimpleMatrix>>() {
-          public Map<String, SimpleMatrix> apply(DVModel model) {
-            return model.unaryScore;
-          }
-        });
+      CollectionUtils.transformAsList(models, model -> model.unaryScore);
 
     List<Map<String, SimpleMatrix>> wordMaps =
-      CollectionUtils.transformAsList(models, new Function<DVModel, Map<String, SimpleMatrix>>() {
-          public Map<String, SimpleMatrix> apply(DVModel model) {
-            return model.wordVectors;
-          }
-        });
+      CollectionUtils.transformAsList(models, model -> model.wordVectors);
 
     TwoDimensionalMap<String, String, SimpleMatrix> binaryTransformAverages = averageBinaryMatrices(binaryTransformMaps);
     TwoDimensionalMap<String, String, SimpleMatrix> binaryScoreAverages = averageBinaryMatrices(binaryScoreMaps);

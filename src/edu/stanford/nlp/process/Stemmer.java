@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 
 
 import edu.stanford.nlp.ling.Word;

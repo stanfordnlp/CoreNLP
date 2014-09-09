@@ -59,12 +59,8 @@ public class EquivalenceClassEval<IN, OUT> {
    * Maps all objects to the equivalence class <code>null</code>
    */
   @SuppressWarnings("unchecked")
-  public static final EquivalenceClasser NULL_EQUIVALENCE_CLASSER = new EquivalenceClasser() {
-    public Object equivalenceClass(Object o) {
-      return null;
-    }
-  };
-
+  public static final EquivalenceClasser NULL_EQUIVALENCE_CLASSER = o -> null;
+  
   public static final  <T,U> EquivalenceClasser<T,U> nullEquivalenceClasser() {
     return ErasureUtils.<EquivalenceClasser<T,U>>uncheckedCast(NULL_EQUIVALENCE_CLASSER);
   }
@@ -428,25 +424,21 @@ public class EquivalenceClassEval<IN, OUT> {
     final Pattern p = Pattern.compile("^([^:]*):(.*)$");
     Collection<String> guesses = Arrays.asList(new String[]{"S:a", "S:b", "VP:c", "VP:d", "S:a"});
     Collection<String> golds = Arrays.asList(new String[]{"S:a", "S:b", "S:b", "VP:d", "VP:a"});
-    EqualityChecker<String> e = new EqualityChecker<String>() {
-      public boolean areEqual(String o1, String o2) {
-        Matcher m1 = p.matcher(o1);
-        m1.find();
-        String s1 = m1.group(2);
-        System.out.println(s1);
-        Matcher m2 = p.matcher(o2);
-        m2.find();
-        String s2 = m2.group(2);
-        System.out.println(s2);
-        return s1.equals(s2);
-      }
+    EqualityChecker<String> e = (o1, o2) -> {
+      Matcher m1 = p.matcher(o1);
+      m1.find();
+      String s1 = m1.group(2);
+      System.out.println(s1);
+      Matcher m2 = p.matcher(o2);
+      m2.find();
+      String s2 = m2.group(2);
+      System.out.println(s2);
+      return s1.equals(s2);
     };
-    EquivalenceClasser<String, String> eq = new EquivalenceClasser<String, String>() {
-      public String equivalenceClass(String o) {
-        Matcher m = p.matcher(o);
-        m.find();
-        return m.group(1);
-      }
+    EquivalenceClasser<String, String> eq = o -> {
+      Matcher m = p.matcher(o);
+      m.find();
+      return m.group(1);
     };
     EquivalenceClassEval<String, String> eval = new EquivalenceClassEval<String, String>(eq, e, "testing");
     eval.setBagEval(false);

@@ -101,12 +101,16 @@ public class LexicalizedParserServer {
     if (arg != null) {
       System.err.println(" ... with argument " + arg);
     }
-    if (command.equals("quit")) {
-      handleQuit();
-    } else if (command.equals("parse")) {
-      handleParse(arg, clientSocket.getOutputStream());
-    } else if (command.equals("tree")) {
-      handleTree(arg, clientSocket.getOutputStream());
+    switch (command) {
+      case "quit":
+        handleQuit();
+        break;
+      case "parse":
+        handleParse(arg, clientSocket.getOutputStream());
+        break;
+      case "tree":
+        handleTree(arg, clientSocket.getOutputStream());
+        break;
     }
 
     System.err.println("Handled request");

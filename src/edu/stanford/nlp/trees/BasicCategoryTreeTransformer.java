@@ -1,7 +1,7 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 
 /**
  * Transforms trees by turning the labels into their basic categories

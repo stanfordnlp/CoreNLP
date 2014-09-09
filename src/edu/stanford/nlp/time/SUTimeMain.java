@@ -19,6 +19,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.logging.LogManager;
 import java.util.regex.Pattern;
 
@@ -241,12 +242,9 @@ public class SUTimeMain {
   private static void processTimebankCsvSent(AnnotationPipeline pipeline, TimebankSent sent, PrintWriter pw, EvalStats evalStats)
   {
     if (sent != null) {
-      Collections.sort(sent.timexes, new Comparator<TimebankTimex>() {
-        @Override
-        public int compare(TimebankTimex o1, TimebankTimex o2) {
-          if (o1.tid == o2.tid) { return 0; }
-          else return (o1.tid < o2.tid)? -1:1;
-        }
+      Collections.sort(sent.timexes, (o1, o2) -> {
+        if (o1.tid == o2.tid) { return 0; }
+        else return (o1.tid < o2.tid)? -1:1;
       });
       pw.println();
       for (String item:sent.origItems) {
@@ -379,12 +377,7 @@ public class SUTimeMain {
   }
 
   public static String joinWordTags(List<? extends CoreMap> l, String glue, int start, int end) {
-    return StringUtils.join(l, glue, new Function<CoreMap, String>() {
-      @Override
-      public String apply(CoreMap in) {
-        return in.get(CoreAnnotations.TextAnnotation.class) + "/" + in.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-      }
-    }, start, end);
+    return StringUtils.join(l, glue, in -> in.get(CoreAnnotations.TextAnnotation.class) + "/" + in.get(CoreAnnotations.PartOfSpeechAnnotation.class), start, end);
   }
 
   private static void processTempEval2Doc(AnnotationPipeline pipeline, Annotation docAnnotation,
@@ -703,15 +696,18 @@ public class SUTimeMain {
       assert(timex.sentIndex == sentNo);
       assert(timex.tokenStart <= tokenNo && timex.tokenEnd > tokenNo);
 
-      if ("type".equals(attrname)) {
-        assert(timex.type == null || timex.type.equals(attrvalue));
-        timex.type = attrvalue;
-      } else if ("value".equals(attrname)) {
-        assert(timex.value == null || timex.value.equals(attrvalue));
-        timex.value = attrvalue;
-      } else {
-        throw new RuntimeException("Error processing " + attrsFile + ":" +
-                "Unknown attribute " + attrname + ": from line " + line);
+      switch (attrname) {
+        case "type":
+          assert (timex.type == null || timex.type.equals(attrvalue));
+          timex.type = attrvalue;
+          break;
+        case "value":
+          assert (timex.value == null || timex.value.equals(attrvalue));
+          timex.value = attrvalue;
+          break;
+        default:
+          throw new RuntimeException("Error processing " + attrsFile + ":" +
+              "Unknown attribute " + attrname + ": from line " + line);
       }
     }
     attrBr.close();
@@ -894,16 +890,20 @@ public class SUTimeMain {
 //    pipeline.addAnnotator(new NumberAnnotator(false));
 //    pipeline.addAnnotator(new QuantifiableEntityNormalizingAnnotator(false, false));
     String timeAnnotator = props.getProperty("timeAnnotator", "sutime");
-    if ("gutime".equals(timeAnnotator)) {
-      useGUTime = true;
-      pipeline.addAnnotator(new GUTimeAnnotator());
-    } else if ("heideltime".equals(timeAnnotator)) {
-      requiredDocDateFormat = "yyyy-MM-dd";
-      pipeline.addAnnotator(new HeidelTimeAnnotator("heideltime", props));
-    } else if ("sutime".equals(timeAnnotator)){
-      pipeline.addAnnotator(new TimeAnnotator("sutime", props));
-    } else {
-      throw new IllegalArgumentException("Unknown timeAnnotator: " + timeAnnotator);
+    switch (timeAnnotator) {
+      case "gutime":
+        useGUTime = true;
+        pipeline.addAnnotator(new GUTimeAnnotator());
+        break;
+      case "heideltime":
+        requiredDocDateFormat = "yyyy-MM-dd";
+        pipeline.addAnnotator(new HeidelTimeAnnotator("heideltime", props));
+        break;
+      case "sutime":
+        pipeline.addAnnotator(new TimeAnnotator("sutime", props));
+        break;
+      default:
+        throw new IllegalArgumentException("Unknown timeAnnotator: " + timeAnnotator);
     }
     return pipeline;
   }

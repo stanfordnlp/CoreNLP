@@ -515,9 +515,4 @@ public class AnnotatorFactories {
     };
   }
 
-
-
-
-
-
 }

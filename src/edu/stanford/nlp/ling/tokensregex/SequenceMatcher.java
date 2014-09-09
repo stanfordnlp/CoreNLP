@@ -1295,11 +1295,9 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
         curBidSet.add(state.bid);
       }
       List<Integer> bids = new ArrayList<Integer>(curBidSet);
-      Collections.sort(bids, new Comparator<Integer>() {
-        public int compare(Integer o1, Integer o2) {
-          int res = compareMatches(o1, o2);
-          return res;
-        }
+      Collections.sort(bids, (o1, o2) -> {
+        int res = compareMatches(o1, o2);
+        return res;
       });
 
       MatchedStates<T> newStates = new MatchedStates<T>(matcher, branchStates);

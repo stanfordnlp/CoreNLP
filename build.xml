@@ -15,8 +15,8 @@
   <property name="compile.debug"       value="true"/>
   <property name="compile.deprecation" value="false"/>
   <property name="compile.optimize"    value="true"/>
-  <property name="compile.source"      value="1.7" />
-  <property name="compile.target"      value="1.7" />
+  <property name="compile.source"      value="1.8" />
+  <property name="compile.target"      value="1.8" />
   <property name="compile.encoding"    value="utf-8" />
 
   <target name="classpath" description="Sets the classpath">
@@ -378,6 +378,7 @@
       <!-- note for John: c:/Users/John Bauer/nlp/stanford-releases -->
       <lib dir="/u/nlp/data/StanfordCoreNLPModels">
         <include name="stanford-corenlp-models-current.jar"/>
+        <include name="stanford-chinese-corenlp-models-current.jar"/>
       </lib>
       <classes dir="${source.path}/edu/stanford/nlp/pipeline">
         <include name="StanfordCoreNLP.properties"/>

@@ -10,7 +10,7 @@ import junit.framework.TestCase;
 import java.io.IOException;
 import java.io.StringReader;
 
-public class AnCoraProcessorTest extends TestCase {
+public class AnCoraProcessorITest extends TestCase {
 
   private static final TreeFactory treeFactory = new LabeledScoredTreeFactory();
   private static final TreeNormalizer treeNormalizer = new SpanishSplitTreeNormalizer();

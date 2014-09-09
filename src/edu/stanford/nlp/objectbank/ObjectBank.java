@@ -1,7 +1,7 @@
 package edu.stanford.nlp.objectbank;
 
 import edu.stanford.nlp.util.AbstractIterator;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 
 import java.util.List;
 import java.util.ArrayList;

@@ -369,14 +369,17 @@ public class FrenchTreebankParserParams extends TregexPoweredTreebankParserParam
 
       final String punc = m.getNode(key).value();
 
-      if (punc.equals("."))
-        return "-fs";
-      else if (punc.equals("?"))
-        return "-quest";
-      else if (punc.equals(","))
-        return "-comma";
-      else if (punc.equals(":") || punc.equals(";"))
-        return "-colon";
+      switch (punc) {
+        case ".":
+          return "-fs";
+        case "?":
+          return "-quest";
+        case ",":
+          return "-comma";
+        case ":":
+        case ";":
+          return "-colon";
+      }
 //      else if (punc.equals("-LRB-"))
 //        return "-lrb";
 //      else if (punc.equals("-RRB-"))

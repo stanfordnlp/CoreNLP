@@ -2,7 +2,7 @@ package edu.stanford.nlp.process;
 
 import java.io.Serializable;
 
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 
 public class LowercaseAndAmericanizeFunction implements Function<String, String>, Serializable {
   public String apply(String input) {

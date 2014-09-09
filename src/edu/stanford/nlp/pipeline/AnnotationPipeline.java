@@ -7,6 +7,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 
 
 /**
@@ -103,10 +104,7 @@ public class AnnotationPipeline implements Annotator {
    * @param numThreads The number of threads to run on
    */
   public void annotate(final Iterable<Annotation> annotations, int numThreads) {
-    annotate(annotations, numThreads, new Function<Annotation, Object>() {
-      @Override
-      public Object apply(Annotation in) { return null; }
-    });
+    annotate(annotations, numThreads, in -> null);
   }
 
   /**
@@ -141,19 +139,16 @@ public class AnnotationPipeline implements Annotator {
               throw new NoSuchElementException();
             }
             final Annotation input = iter.next();
-            return new Runnable() {
-              @Override
-              public void run() {
-                //(logging)
-                String beginningOfDocument = input.toString().substring(0,Math.min(50,input.toString().length()));
-                Redwood.startTrack("Annotating \"" + beginningOfDocument + "...\"");
-                //(annotate)
-                annotate(input);
-                //(callback)
-                callback.apply(input);
-                //(logging again)
-                Redwood.endTrack("Annotating \"" + beginningOfDocument + "...\"");
-              }
+            return () -> {
+              //(logging)
+              String beginningOfDocument = input.toString().substring(0,Math.min(50,input.toString().length()));
+              Redwood.startTrack("Annotating \"" + beginningOfDocument + "...\"");
+              //(annotate)
+              annotate(input);
+              //(callback)
+              callback.apply(input);
+              //(logging again)
+              Redwood.endTrack("Annotating \"" + beginningOfDocument + "...\"");
             };
           }
           @Override

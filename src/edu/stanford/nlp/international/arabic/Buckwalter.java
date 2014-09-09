@@ -225,16 +225,20 @@ public class Buckwalter implements SerializableFunction<String,String> {
 		File inputFile = null;
 		for(int i = 0; i < args.length; i++) {
 			if(args[i].startsWith("-")) {
-				if(args[i].equals("-u2b"))
-					unicodeToBuck = true;
-				else if(args[i].equals("-o"))
-					outputUnicodeValues = false;
-				else if(args[i].equals("-d"))
-					DEBUG = true;
-				else {
-					System.out.println(usage.toString());
-					return;					
-				}
+        switch (args[i]) {
+          case "-u2b":
+            unicodeToBuck = true;
+            break;
+          case "-o":
+            outputUnicodeValues = false;
+            break;
+          case "-d":
+            DEBUG = true;
+            break;
+          default:
+            System.out.println(usage.toString());
+            return;
+        }
 
 			} else if(i != args.length) {
 				inputFile = new File(args[i]);

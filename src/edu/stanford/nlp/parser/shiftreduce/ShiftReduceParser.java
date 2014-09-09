@@ -73,7 +73,8 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.ArrayUtils;
 import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.ErasureUtils;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
@@ -230,7 +231,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
     System.err.println();
 
-    List<ShiftReduceParser> models = CollectionUtils.transformAsList(scoredModels, new Function<ScoredObject<ShiftReduceParser>, ShiftReduceParser>() { public ShiftReduceParser apply(ScoredObject<ShiftReduceParser> object) { return object.object(); }});
+    List<ShiftReduceParser> models = CollectionUtils.transformAsList(scoredModels, object -> object.object());
     return averageModels(models);
 
   }

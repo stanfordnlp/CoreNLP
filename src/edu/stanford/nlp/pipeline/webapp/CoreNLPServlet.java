@@ -6,12 +6,15 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.pipeline.AnnotationOutputter;
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Nodes;
@@ -99,12 +102,22 @@ public class CoreNLPServlet extends HttpServlet {
       outputFormat = this.defaultFormat;
     }
 
-    if ("xml".equals(outputFormat)) {
-      outputXml(out, annotation);
-    } else if ("pretty".equals(outputFormat)) {
-      outputPretty(out, annotation);
-    } else {
-      outputVisualise(out, annotation);
+    switch (outputFormat) {
+      case "xml":
+        outputXml(out, annotation);
+        break;
+      case "json":
+        outputJson(out, annotation);
+        break;
+      case "conll":
+        outputCoNLL(out, annotation);
+        break;
+      case "pretty":
+        outputPretty(out, annotation);
+        break;
+      default:
+        outputVisualise(out, annotation);
+        break;
     }
   }
 
@@ -200,15 +213,14 @@ public class CoreNLPServlet extends HttpServlet {
       throw new ServletException(e);
     }
   }
-   
-  public void outputXml(PrintWriter out, Annotation annotation) 
-    throws IOException
-  {
-    StringWriter xmlOutput = new StringWriter();
-    pipeline.xmlPrint(annotation, xmlOutput);
-    xmlOutput.flush();
 
-    String escapedXml = StringEscapeUtils.escapeHtml4(xmlOutput.toString());
+  public void outputByWriter(Consumer<StringWriter> printer,
+                             PrintWriter out) throws IOException {
+    StringWriter output = new StringWriter();
+    printer.accept(output);
+    output.flush();
+
+    String escapedXml = StringEscapeUtils.escapeHtml4(output.toString());
     String[] lines = escapedXml.split("\n");
     out.print("<div>");
     for (String line : lines) {
@@ -221,5 +233,35 @@ public class CoreNLPServlet extends HttpServlet {
       out.print("<br>\n");
     }
     out.print("</div>");
+  }
+   
+  public void outputXml(PrintWriter out, Annotation annotation) throws IOException {
+    outputByWriter(writer -> {
+      try {
+        pipeline.xmlPrint(annotation, writer);
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+    }, out);
+  }
+
+  public void outputJson(PrintWriter out, Annotation annotation) throws IOException {
+    outputByWriter(writer -> {
+      try {
+        pipeline.jsonPrint(annotation, writer);
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+    }, out);
+  }
+
+  public void outputCoNLL(PrintWriter out, Annotation annotation) throws IOException {
+    outputByWriter(writer -> {
+      try {
+        pipeline.conllPrint(annotation, writer);
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+    }, out);
   }
 }

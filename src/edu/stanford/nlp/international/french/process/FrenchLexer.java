@@ -12025,58 +12025,75 @@ class FrenchLexer {
     for (String key : props.stringPropertyNames()) {
       String value = props.getProperty(key);
       boolean val = Boolean.valueOf(value);
-      if ("".equals(key)) {
-        // allow an empty item
-      } else if ("noSGML".equals(key)) {
-        noSGML = val;
-      } else if ("invertible".equals(key)) {
-        invertible = val;
-      } else if ("tokenizeNLs".equals(key)) {
-        tokenizeNLs = val;
-      } else if ("ptb3Escaping".equals(key)) {
-        normalizeAmpersandEntity = val;
-        normalizeFractions = val;
-        normalizeParentheses = val;
-        normalizeOtherBrackets = val;
-        ptb3Ellipsis = val;
-        unicodeEllipsis = val;
-        ptb3Dashes = val;
-      } else if ("normalizeAmpersandEntity".equals(key)) {
-        normalizeAmpersandEntity = val;
-      } else if ("normalizeFractions".equals(key)) {
-        normalizeFractions = val;
-      } else if ("normalizeParentheses".equals(key)) {
-        normalizeParentheses = val;
-      } else if ("normalizeOtherBrackets".equals(key)) {
-        normalizeOtherBrackets = val;
-      } else if ("ptb3Ellipsis".equals(key)) {
-        ptb3Ellipsis = val;
-      } else if ("unicodeEllipsis".equals(key)) {
-        unicodeEllipsis = val;
-      } else if ("ptb3Dashes".equals(key)) {
-        ptb3Dashes = val;
-      } else if ("escapeForwardSlashAsterisk".equals(key)) {
-        escapeForwardSlashAsterisk = val;
-      } else if ("untokenizable".equals(key)) {
-	if (value.equals("noneDelete")) {
-	  untokenizable = UntokenizableOptions.NONE_DELETE;
-	} else if (value.equals("firstDelete")) {
-	  untokenizable = UntokenizableOptions.FIRST_DELETE;
-	} else if (value.equals("allDelete")) {
-	  untokenizable = UntokenizableOptions.ALL_DELETE;
-	} else if (value.equals("noneKeep")) {
-	  untokenizable = UntokenizableOptions.NONE_KEEP;
-	} else if (value.equals("firstKeep")) {
-	  untokenizable = UntokenizableOptions.FIRST_KEEP;
-	} else if (value.equals("allKeep")) {
-	  untokenizable = UntokenizableOptions.ALL_KEEP;
-	} else {
-        throw new IllegalArgumentException("FrenchLexer: Invalid option value in constructor: " + key + ": " + value);
-	}
-      } else if ("strictTreebank3".equals(key)) {
-        strictTreebank3 = val;
-      } else {
-        System.err.printf("%s: Invalid options key in constructor: %s%n", this.getClass().getName(), key);
+      switch (key) {
+        case "":
+          // allow an empty item
+          break;
+        case "noSGML":
+          noSGML = val;
+          break;
+        case "invertible":
+          invertible = val;
+          break;
+        case "tokenizeNLs":
+          tokenizeNLs = val;
+          break;
+        case "ptb3Escaping":
+          normalizeAmpersandEntity = val;
+          normalizeFractions = val;
+          normalizeParentheses = val;
+          normalizeOtherBrackets = val;
+          ptb3Ellipsis = val;
+          unicodeEllipsis = val;
+          ptb3Dashes = val;
+          break;
+        case "normalizeAmpersandEntity":
+          normalizeAmpersandEntity = val;
+          break;
+        case "normalizeFractions":
+          normalizeFractions = val;
+          break;
+        case "normalizeParentheses":
+          normalizeParentheses = val;
+          break;
+        case "normalizeOtherBrackets":
+          normalizeOtherBrackets = val;
+          break;
+        case "ptb3Ellipsis":
+          ptb3Ellipsis = val;
+          break;
+        case "unicodeEllipsis":
+          unicodeEllipsis = val;
+          break;
+        case "ptb3Dashes":
+          ptb3Dashes = val;
+          break;
+        case "escapeForwardSlashAsterisk":
+          escapeForwardSlashAsterisk = val;
+          break;
+        case "untokenizable":
+          if (value.equals("noneDelete")) {
+            untokenizable = UntokenizableOptions.NONE_DELETE;
+          } else if (value.equals("firstDelete")) {
+            untokenizable = UntokenizableOptions.FIRST_DELETE;
+          } else if (value.equals("allDelete")) {
+            untokenizable = UntokenizableOptions.ALL_DELETE;
+          } else if (value.equals("noneKeep")) {
+            untokenizable = UntokenizableOptions.NONE_KEEP;
+          } else if (value.equals("firstKeep")) {
+            untokenizable = UntokenizableOptions.FIRST_KEEP;
+          } else if (value.equals("allKeep")) {
+            untokenizable = UntokenizableOptions.ALL_KEEP;
+          } else {
+            throw new IllegalArgumentException("FrenchLexer: Invalid option value in constructor: " + key + ": " + value);
+          }
+          break;
+        case "strictTreebank3":
+          strictTreebank3 = val;
+          break;
+        default:
+          System.err.printf("%s: Invalid options key in constructor: %s%n", this.getClass().getName(), key);
+          break;
       }
     }
     // this.seenUntokenizableCharacter = false; // unnecessary, it's default initialized

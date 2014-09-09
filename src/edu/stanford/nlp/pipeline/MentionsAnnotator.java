@@ -6,11 +6,11 @@ import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.Properties;
 import java.util.Set;
 
@@ -74,28 +74,21 @@ public class MentionsAnnotator implements Annotator {
       String v2 = prev.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
       boolean compatible = checkStrings(v1,v2);
       if (!compatible) return compatible;
+      return true;
 
-      // This duplicates logic in the QuantifiableEntityNormalizer (but maybe we will get rid of that class)
-      String nerTag = cur.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-      if ("NUMBER".equals(nerTag) || "ORDINAL".equals(nerTag)) {
-        // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
-        Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
-        Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
-        compatible = checkNumbers(n1,n2);
-        if (!compatible) return compatible;
-      }
-
-      // Check timex...
-      if ("TIME".equals(nerTag) || "SET".equals(nerTag) || "DATE".equals(nerTag) || "DURATION".equals(nerTag)) {
-        Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
-        Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
-        String tid1 = (timex1 != null)? timex1.tid():null;
-        String tid2 = (timex2 != null)? timex2.tid():null;
-        compatible = checkStrings(tid1,tid2);
-        if (!compatible) return compatible;
-      }
-
-      return compatible;
+//      // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
+//      Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+//      Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+//      compatible = checkNumbers(n1,n2);
+//      if (!compatible) return compatible;
+//
+//      // Check timex...
+//      Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
+//      Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
+//      String tid1 = (timex1 != null)? timex1.tid():null;
+//      String tid2 = (timex2 != null)? timex2.tid():null;
+//      compatible = checkStrings(tid1,tid2);
+//      return compatible;
     }
   };
 

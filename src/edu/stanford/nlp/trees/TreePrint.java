@@ -8,6 +8,7 @@ import edu.stanford.nlp.util.XMLUtils;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.Function;
 
 
 /**
@@ -411,20 +412,18 @@ public class TreePrint {
     }
 
     if (transChinese) {
-      TreeTransformer tt = new TreeTransformer() {
-        public Tree transformTree(Tree t) {
-          t = t.treeSkeletonCopy();
-          for (Tree subtree : t) {
-            if (subtree.isLeaf()) {
-              Label oldLabel = subtree.label();
-              String translation = ChineseEnglishWordMap.getInstance().getFirstTranslation(oldLabel.value());
-              if (translation == null) translation = "[UNK]";
-              Label newLabel = new StringLabel(oldLabel.value() + ':' + translation);
-              subtree.setLabel(newLabel);
-            }
+      TreeTransformer tt = t1 -> {
+        t1 = t1.treeSkeletonCopy();
+        for (Tree subtree : t1) {
+          if (subtree.isLeaf()) {
+            Label oldLabel = subtree.label();
+            String translation = ChineseEnglishWordMap.getInstance().getFirstTranslation(oldLabel.value());
+            if (translation == null) translation = "[UNK]";
+            Label newLabel = new StringLabel(oldLabel.value() + ':' + translation);
+            subtree.setLabel(newLabel);
           }
-          return t;
         }
+        return t1;
       };
       outputPSTree = tt.transformTree(outputPSTree);
     }
@@ -843,11 +842,7 @@ public class TreePrint {
       if (argsMap.keySet().contains("-useTLPTreeReader")) {
         trf = tlp.treeReaderFactory();
       } else {
-        trf = new TreeReaderFactory() {
-          public TreeReader newTreeReader(Reader in) {
-            return new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new TreeNormalizer());
-          }
-        };
+        trf = in -> new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new TreeNormalizer());
       }
       trees = new DiskTreebank(trf);
       trees.loadPath(args[0]);

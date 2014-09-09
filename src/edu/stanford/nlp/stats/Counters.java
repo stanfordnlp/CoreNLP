@@ -64,7 +64,7 @@ import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Factory;
 import edu.stanford.nlp.util.FixedPrioritiesPriorityQueue;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
@@ -875,11 +875,7 @@ public class Counters {
    * @return A Comparator using this ordering
    */
   public static <E> Comparator<E> toComparator(final Counter<E> counter) {
-    return new Comparator<E>() {
-      public int compare(E o1, E o2) {
-        return Double.compare(counter.getCount(o1), counter.getCount(o2));
-      }
-    };
+    return (o1, o2) -> Double.compare(counter.getCount(o1), counter.getCount(o2));
   }
 
   /**
@@ -894,14 +890,12 @@ public class Counters {
    * @return A Comparator using this ordering
    */
   public static <E extends Comparable<E>> Comparator<E> toComparatorWithKeys(final Counter<E> counter) {
-    return new Comparator<E>() {
-      public int compare(E o1, E o2) {
-        int res = Double.compare(counter.getCount(o1), counter.getCount(o2));
-        if (res == 0) {
-          return o1.compareTo(o2);
-        } else {
-          return res;
-        }
+    return (o1, o2) -> {
+      int res = Double.compare(counter.getCount(o1), counter.getCount(o2));
+      if (res == 0) {
+        return o1.compareTo(o2);
+      } else {
+        return res;
       }
     };
   }
@@ -918,11 +912,7 @@ public class Counters {
    * @return A Comparator using this ordering
    */
   public static <E> Comparator<E> toComparatorDescending(final Counter<E> counter) {
-    return new Comparator<E>() {
-      public int compare(E o1, E o2) {
-        return Double.compare(counter.getCount(o2), counter.getCount(o1));
-      }
-    };
+    return (o1, o2) -> Double.compare(counter.getCount(o2), counter.getCount(o1));
   }
 
   /**
@@ -943,21 +933,19 @@ public class Counters {
    * </pre>
    */
   public static <E> Comparator<E> toComparator(final Counter<E> counter, final boolean ascending, final boolean useMagnitude) {
-    return new Comparator<E>() {
-      public int compare(E o1, E o2) {
-        if (ascending) {
-          if (useMagnitude) {
-            return Double.compare(Math.abs(counter.getCount(o1)), Math.abs(counter.getCount(o2)));
-          } else {
-            return Double.compare(counter.getCount(o1), counter.getCount(o2));
-          }
+    return (o1, o2) -> {
+      if (ascending) {
+        if (useMagnitude) {
+          return Double.compare(Math.abs(counter.getCount(o1)), Math.abs(counter.getCount(o2)));
         } else {
-          // Descending
-          if (useMagnitude) {
-            return Double.compare(Math.abs(counter.getCount(o2)), Math.abs(counter.getCount(o1)));
-          } else {
-            return Double.compare(counter.getCount(o2), counter.getCount(o1));
-          }
+          return Double.compare(counter.getCount(o1), counter.getCount(o2));
+        }
+      } else {
+        // Descending
+        if (useMagnitude) {
+          return Double.compare(Math.abs(counter.getCount(o2)), Math.abs(counter.getCount(o1)));
+        } else {
+          return Double.compare(counter.getCount(o2), counter.getCount(o1));
         }
       }
     };
@@ -1087,11 +1075,7 @@ public class Counters {
       l.add(new Pair<E, Double>(e, c.getCount(e)));
     }
     // descending order
-    Collections.sort(l, new Comparator<Pair<E, Double>>() {
-      public int compare(Pair<E, Double> a, Pair<E, Double> b) {
-        return Double.compare(b.second, a.second);
-      }
-    });
+    Collections.sort(l, (a, b) -> Double.compare(b.second, a.second));
     return l;
   }
 

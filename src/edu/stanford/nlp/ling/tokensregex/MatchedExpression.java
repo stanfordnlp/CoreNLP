@@ -6,7 +6,7 @@ import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
 import edu.stanford.nlp.util.Comparators;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Interval;
 import edu.stanford.nlp.util.IntervalTree;
@@ -390,24 +390,14 @@ public class MatchedExpression {
 
   @SuppressWarnings("unused")
   public static final Function<CoreMap, Interval<Integer>> COREMAP_TO_TOKEN_OFFSETS_INTERVAL_FUNC =
-    new Function<CoreMap, Interval<Integer>>() {
-      @Override
-      public Interval<Integer> apply(CoreMap in) {
-        return Interval.toInterval(
-              in.get(CoreAnnotations.TokenBeginAnnotation.class),
-              in.get(CoreAnnotations.TokenEndAnnotation.class));
-      }
-    };
+      in -> Interval.toInterval(
+            in.get(CoreAnnotations.TokenBeginAnnotation.class),
+            in.get(CoreAnnotations.TokenEndAnnotation.class));
 
   public static final Function<CoreMap, Interval<Integer>> COREMAP_TO_CHAR_OFFSETS_INTERVAL_FUNC =
-          new Function<CoreMap, Interval<Integer>>() {
-            @Override
-            public Interval<Integer> apply(CoreMap in) {
-              return Interval.toInterval(
-                      in.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
-                      in.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
-            }
-          };
+      in -> Interval.toInterval(
+              in.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
+              in.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
 
   public static final Function<MatchedExpression, Interval<Integer>> EXPR_TO_TOKEN_OFFSETS_INTERVAL_FUNC =
     new Function<MatchedExpression, Interval<Integer>>() {
@@ -418,32 +408,26 @@ public class MatchedExpression {
     };
 
   public static final Comparator<MatchedExpression> EXPR_PRIORITY_COMPARATOR =
-    new Comparator<MatchedExpression>() {
-    @Override
-    public int compare(MatchedExpression e1, MatchedExpression e2) {
-      double s1 = e1.getPriority();
-      double s2 = e2.getPriority();
-      if (s1 == s2) {
-        return 0;
-      } else {
-        return (s1 > s2)? -1:1;
-      }
-    }
-  };
+      (e1, e2) -> {
+        double s1 = e1.getPriority();
+        double s2 = e2.getPriority();
+        if (s1 == s2) {
+          return 0;
+        } else {
+          return (s1 > s2)? -1:1;
+        }
+      };
 
   public static final Comparator<MatchedExpression> EXPR_ORDER_COMPARATOR =
-    new Comparator<MatchedExpression>() {
-    @Override
-    public int compare(MatchedExpression e1, MatchedExpression e2) {
-      int s1 = e1.getOrder();
-      int s2 = e2.getOrder();
-      if (s1 == s2) {
-        return 0;
-      } else {
-        return (s1 < s2)? -1:1;
-      }
-    }
-  };
+      (e1, e2) -> {
+        int s1 = e1.getOrder();
+        int s2 = e2.getOrder();
+        if (s1 == s2) {
+          return 0;
+        } else {
+          return (s1 < s2)? -1:1;
+        }
+      };
 
   // Compares two matched expressions.
   // Use to order matched expressions by:

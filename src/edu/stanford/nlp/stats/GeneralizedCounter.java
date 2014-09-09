@@ -843,30 +843,33 @@ public class GeneralizedCounter<K> implements Serializable {
   }
 
   public String toString(String param) {
-    if (param.equals("contingency")) {
-      StringBuilder sb = new StringBuilder();
-      for (K obj: ErasureUtils.sortedIfPossible(topLevelKeySet())) {
-        sb.append(obj);
-        sb.append(" = ");
-        GeneralizedCounter<K> gc = conditionalizeOnce(obj);
-        sb.append(gc);
-        sb.append("\n");
+    switch (param) {
+      case "contingency": {
+        StringBuilder sb = new StringBuilder();
+        for (K obj : ErasureUtils.sortedIfPossible(topLevelKeySet())) {
+          sb.append(obj);
+          sb.append(" = ");
+          GeneralizedCounter<K> gc = conditionalizeOnce(obj);
+          sb.append(gc);
+          sb.append("\n");
+        }
+        return sb.toString();
       }
-      return sb.toString();
-    } else if (param.equals("sorted")) {
-      StringBuilder sb = new StringBuilder();
-      sb.append("{\n");
-      for (K obj: ErasureUtils.sortedIfPossible(topLevelKeySet())) {
-        sb.append(obj);
-        sb.append(" = ");
-        GeneralizedCounter<K> gc = conditionalizeOnce(obj);
-        sb.append(gc);
-        sb.append("\n");
+      case "sorted": {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\n");
+        for (K obj : ErasureUtils.sortedIfPossible(topLevelKeySet())) {
+          sb.append(obj);
+          sb.append(" = ");
+          GeneralizedCounter<K> gc = conditionalizeOnce(obj);
+          sb.append(gc);
+          sb.append("\n");
+        }
+        sb.append("}\n");
+        return sb.toString();
       }
-      sb.append("}\n");
-      return sb.toString();
-    } else {
-      return toString();
+      default:
+        return toString();
     }
   }
 
