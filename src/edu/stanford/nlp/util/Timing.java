@@ -4,6 +4,8 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 /**
  * A class for measuring how long things take.  For backward

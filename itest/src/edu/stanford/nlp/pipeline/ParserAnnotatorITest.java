@@ -76,14 +76,38 @@ public class ParserAnnotatorITest extends TestCase {
   }
 
   public void testParserAnnotator() throws Exception {    
-    Annotation document = new Annotation(text);    
+    Annotation document = new Annotation(TEXT);    
     pipeline.annotate(document);
     
     int i = 0;
     for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
       Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
-      assertEquals(parse.toString(), answer[i++]);
+      assertEquals(parse.toString(), ANSWER[i++]);
     }
+  }
+
+  public void testMaxLen() {
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize, ssplit, parse");
+    props.setProperty("parse.maxlen", "7");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    Annotation document = new Annotation(TEXT);
+    pipeline.annotate(document);
+    
+    int i = 0;
+    for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
+      Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+      assertEquals(XPARSES[i++], parse.toString());
+    } 
+
+    props.setProperty("parse.maxlen", "8");
+    pipeline = new StanfordCoreNLP(props);
+    document = new Annotation(TEXT);
+    pipeline.annotate(document);
+
+    assertEquals(ANSWER[0], document.get(CoreAnnotations.SentencesAnnotation.class).get(0).get(TreeCoreAnnotations.TreeAnnotation.class).toString());
+    assertEquals(XPARSES[1], document.get(CoreAnnotations.SentencesAnnotation.class).get(1).get(TreeCoreAnnotations.TreeAnnotation.class).toString());
+    assertEquals(XPARSES[2], document.get(CoreAnnotations.SentencesAnnotation.class).get(2).get(TreeCoreAnnotations.TreeAnnotation.class).toString());
   }
 
   /**
@@ -141,9 +165,7 @@ public class ParserAnnotatorITest extends TestCase {
    */
   public void testAnnotatorConstructors() {
     assertParseOK(new ParserAnnotator(false, -1));
-    assertParseOK(new ParserAnnotator(true, -1));
     assertParseOK(new ParserAnnotator(false, 100));
-    assertParseOK(new ParserAnnotator(true, 100));
 
     Properties props = new Properties();
     props.setProperty("annotators", "parse");
@@ -151,15 +173,21 @@ public class ParserAnnotatorITest extends TestCase {
 
   }
 
-  static final String text = "I saw him ordering them to saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .";
+  static final String TEXT = "I saw him ordering them to saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .";
 
-  static final String[] answer = {
+  static final String[] ANSWER = {
       // TODO: this is actually the wrong parse!
       "(ROOT (S (NP (PRP I)) (VP (VBD saw) (S (NP (PRP him)) (VP (VBG ordering) (NP (PRP them)) (PP (TO to) (NP (NN saw)))))) (. .)))",
 
       "(ROOT (S (NP (NP (NNP Jack) (POS 's)) (NN father)) (VP (VBZ has) (RB n't) (VP (VBN played) (NP (NN golf)) (PP (IN since) (ADVP (NP (CD 20) (NNS years)) (RB ago))))) (. .)))",
 
       "(ROOT (S (NP (PRP I)) (VP (VBP 'm) (VP (VBG going) (PP (TO to) (NP (DT the) (NN bookstore))) (S (VP (TO to) (VP (VB return) (NP (NP (DT a) (NN book)) (SBAR (S (NP (NP (NNP Jack)) (CC and) (NP (PRP$ his) (NNS friends))) (VP (VBD bought) (NP (PRP me))))))))))) (. .)))"
+  };
+
+  static final String[] XPARSES = {
+    "(X (X I) (X saw) (X him) (X ordering) (X them) (X to) (X saw) (X .))",
+    "(X (X Jack) (X 's) (X father) (X has) (X n't) (X played) (X golf) (X since) (X 20) (X years) (X ago) (X .))",
+    "(X (X I) (X 'm) (X going) (X to) (X the) (X bookstore) (X to) (X return) (X a) (X book) (X Jack) (X and) (X his) (X friends) (X bought) (X me) (X .))"
   };
 }
 
