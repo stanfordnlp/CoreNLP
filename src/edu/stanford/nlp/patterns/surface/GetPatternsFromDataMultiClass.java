@@ -2395,7 +2395,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               numFile++;
               Redwood.log(Redwood.DBG, "Annotating text in " + f + ". Num file " + numFile);
               List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(new BufferedReader(new FileReader(f)), seedWords.keySet(),
-                  setClassForTheseLabels, true, splitOnPunct, lowercase, f.getName());
+                  setClassForTheseLabels, true, f.getName());
               evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath, useTargetNERRestriction || useContextNERRestriction, "",
                   useTargetParserParentRestriction, props.getProperty("numThreads")));
             }
