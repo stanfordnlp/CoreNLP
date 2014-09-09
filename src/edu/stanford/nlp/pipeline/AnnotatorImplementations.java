@@ -103,10 +103,12 @@ public class AnnotatorImplementations {
 
     String[] loadPaths = models.toArray(new String[models.size()]);
 
-    NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
-        useSUTime, properties,
-        loadPaths);
-    return new NERCombinerAnnotator(nerCombiner, verbose);
+    NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, useSUTime, properties, loadPaths);
+
+    int nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
+    long maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
+
+    return new NERCombinerAnnotator(nerCombiner, verbose, nThreads, maxTime);
   }
 
   /**

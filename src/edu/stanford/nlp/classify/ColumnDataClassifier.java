@@ -31,6 +31,18 @@
 
 package edu.stanford.nlp.classify;
 
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.BasicDatum;
+import edu.stanford.nlp.ling.Datum;
+import edu.stanford.nlp.ling.RVFDatum;
+import edu.stanford.nlp.objectbank.ObjectBank;
+import edu.stanford.nlp.optimization.DiffFunction;
+import edu.stanford.nlp.optimization.Minimizer;
+import edu.stanford.nlp.process.WordShapeClassifier;
+import edu.stanford.nlp.stats.*;
+import edu.stanford.nlp.util.*;
+
 import java.io.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -39,28 +51,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.BasicDatum;
-import edu.stanford.nlp.ling.Datum;
-import edu.stanford.nlp.ling.RVFDatum;
-import edu.stanford.nlp.optimization.DiffFunction;
-import edu.stanford.nlp.optimization.Minimizer;
-import edu.stanford.nlp.process.WordShapeClassifier;
-import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.stats.Counters;
-import edu.stanford.nlp.stats.Distribution;
-import edu.stanford.nlp.stats.TwoDimensionalCounter;
-import edu.stanford.nlp.objectbank.ObjectBank;
-import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.ReflectionLoading;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.Timing;
-import edu.stanford.nlp.util.Triple;
 
 
 /**
@@ -220,6 +210,7 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td>crossValidationFolds</td><td>int</td><td>-1</td><td>If positive, the training data is divided in to this many folds and cross-validation is done on the training data (prior to testing on test data, if it is also specified)</td></tr>
  * <tr><td>shuffleTrainingData</td><td>boolean</td><td>false</td><td>If true, the training data is shuffled prior to training and cross-validation. This is vital in cross-validation if the training data is otherwise sorted by class.</td></tr>
  * <tr><td>shuffleSeed</td><td>long</td><td>0</td><td>If non-zero, and the training data is being shuffled, this is used as the seed for the Random. Otherwise, System.nanoTime() is used.</td></tr>
+ * <tr><td>csvFormat</td><td>boolean</td><td>false</td><td>If true, reads train and test file in csv format, with support for quoted fields.</td></tr>
  * </table>
  *
  * @author Christopher Manning
@@ -366,6 +357,7 @@ public class ColumnDataClassifier {
    *  words with features like useSplitWords.
    */
   private static final Pattern tab = Pattern.compile("\\t");
+  private static final Pattern comma = Pattern.compile(",");
 
 
   /** Read a data set from a file and convert it into a Dataset object.
@@ -409,7 +401,7 @@ public class ColumnDataClassifier {
         int maxColumns = 0;
         for (String line : ObjectBank.getLineIterator(new File(filename), Flags.encoding)) {
           lineNo++;
-          String[] strings = tab.split(line);
+          String[] strings = splitLineToFields(line);
           if (strings.length < 2) {
             throw new RuntimeException("Line format error at line " + lineNo + ": " + line);
           }
@@ -438,6 +430,19 @@ public class ColumnDataClassifier {
     return new Pair<GeneralDataset<String,String>,List<String[]>>(dataset, lineInfos);
   }
 
+  //Split according to whether we are using tsv file (default) or csv files
+  private String[] splitLineToFields(String line) {
+    if(globalFlags.csvFormat) {
+      String[] strings = comma.split(line);
+      for(int i = 0; i < strings.length; ++i) {
+        if(strings[i].startsWith("\"") && strings[i].endsWith("\""))
+          strings[i] = strings[i].substring(1,strings[i].length()-1);
+      }
+      return strings;
+    }
+    else
+      return tab.split(line);
+  }
 
   /**
    * Write summary statistics about a group of answers.
@@ -1657,6 +1662,9 @@ public class ColumnDataClassifier {
         myFlags[col].shuffleTrainingData = Boolean.parseBoolean(val);
       } else if (key.equals("shuffleSeed")) {
         myFlags[col].shuffleSeed = Long.parseLong(val);
+      } else if (key.equals("csvFormat")) {
+        myFlags[col].csvFormat=true;
+
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
       }
@@ -2006,6 +2014,7 @@ public class ColumnDataClassifier {
     int crossValidationFolds = -1;
     boolean shuffleTrainingData = false;
     long shuffleSeed = 0;
+    static boolean csvFormat = false; //train and test files are in csv format
 
     @Override
     public String toString() {

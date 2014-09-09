@@ -187,6 +187,34 @@ public class MulticoreWrapper<I,O> {
   }
 
   /**
+   * Calls shutdownNow on the underlying ThreadPool.  In order for
+   * this to be useful, the jobs need to look for their thread being
+   * interrupted.  The job the thread is running needs to occasionally
+   * check Thread.interrupted() and throw an exception or otherwise
+   * clean up.
+   * <br>
+   * Note that because we only put jobs on a processor when one is
+   * available, there actually shouldn't be any jobs in the threadpool
+   * which had never started.  Therefore, even though shutdownNow
+   * theoretically returns a list of jobs which have never been
+   * started, that list should always be empty, so this method doesn't
+   * return anything.
+   */
+  public void shutdownNow() {
+    threadPool.shutdownNow();
+  }
+
+  /**
+   * After a shutdown request, await for the final termination of all
+   * threads.  Note that if the threads don't actually obey the
+   * interruption, this may take some time.
+   */
+  public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+    return threadPool.awaitTermination(timeout, unit);
+  }
+
+
+  /**
    * Indicates whether or not a new result is available.
    *
    * @return true if a new result is available, false otherwise.
