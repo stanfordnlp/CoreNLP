@@ -487,13 +487,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       Class clazz = Class.forName("edu.stanford.nlp.pipeline.XMLOutputter");
       Method method = clazz.getMethod("xmlPrint", Annotation.class, OutputStream.class, StanfordCoreNLP.class);
       method.invoke(null, annotation, os, this);
-    } catch (NoSuchMethodException e) {
-      throw new RuntimeException(e);
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
-    } catch (InvocationTargetException e) {
+    } catch (NoSuchMethodException | IllegalAccessException | ClassNotFoundException | InvocationTargetException e) {
       throw new RuntimeException(e);
     }
   }
