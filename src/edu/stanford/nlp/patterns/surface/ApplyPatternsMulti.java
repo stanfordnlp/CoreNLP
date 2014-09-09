@@ -1,9 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
@@ -71,6 +68,11 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
         for (int i = s; i < e; i++) {
           CoreLabel l = sent.get(i);
           l.set(PatternsAnnotations.MatchedPattern.class, true);
+
+          if(!l.containsKey(PatternsAnnotations.MatchedPatterns.class))
+            l.set(PatternsAnnotations.MatchedPatterns.class, new HashSet<SurfacePattern>());
+          l.get(PatternsAnnotations.MatchedPatterns.class).add(matchedPat);
+
           // if (restrictToMatched) {
           // tokensMatchedPattern.add(sentid, i);
           // }

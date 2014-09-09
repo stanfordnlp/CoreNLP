@@ -1535,6 +1535,21 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     }
   }
 
+
+  public void iterateExtractApply() throws IllegalAccessException, InterruptedException, ExecutionException, IOException, InstantiationException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException {
+    iterateExtractApply(null, null, null, null, null, null);
+  }
+
+  /**
+   *
+   * @param p0 Null in most cases. only used for BPB
+   * @param p0Set Null in most cases
+   * @param wordsOutputFile If null, output is in the output directory
+   * @param sentsOutFile
+   * @param patternsOutFile
+   * @param ignorePatterns
+   *
+   */
   public void iterateExtractApply(Map<String, SurfacePattern> p0, Map<String, Counter<String>> p0Set, String wordsOutputFile, String sentsOutFile,
       String patternsOutFile, Map<String, Set<SurfacePattern>> ignorePatterns) throws ClassNotFoundException, IOException, InterruptedException,
       ExecutionException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
@@ -1565,9 +1580,13 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     for (String label : constVars.getLabelDictionary().keySet()) {
       IOUtils.ensureDir(new File(constVars.outDir + "/" + constVars.identifier + "/" + label));
-      String wordsOutputFileLabel = wordsOutputFile + "_" + label;
+
+      String wordsOutputFileLabel;
       if (wordsOutputFile == null)
         wordsOutputFileLabel = constVars.outDir + "/" + constVars.identifier + "/" + label + "/learnedwords.txt";
+      else
+        wordsOutputFileLabel = wordsOutputFile + "_" + label;
+
       wordsOutput.put(label, new BufferedWriter(new FileWriter(wordsOutputFileLabel)));
       Redwood.log(ConstantsAndVariables.minimaldebug, "Saving the learned words for label " + label + " in " + wordsOutputFileLabel);
 
@@ -2387,7 +2406,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             saveEvalSentencesSerFileFile = new File(saveEvalSentencesSerFile);
 
           Map setClassForTheseLabels = new HashMap<String, Class>();
-          boolean splitOnPunct = Boolean.parseBoolean(props.getProperty("splitOnPunct", "true"));
+          //boolean splitOnPunct = Boolean.parseBoolean(props.getProperty("splitOnPunct", "true"));
           List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(evalFileWithGoldLabels);
           int numFile = 0;
           String evalFileFormat = props.getProperty("evalFileFormat");
