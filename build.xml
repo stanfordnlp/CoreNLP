@@ -375,6 +375,7 @@
       <!-- note for John: c:/Users/John Bauer/nlp/stanford-releases -->
       <lib dir="/u/nlp/data/StanfordCoreNLPModels">
         <include name="stanford-corenlp-models-current.jar"/>
+        <include name="stanford-chinese-corenlp-models-current.jar"/>
       </lib>
       <classes dir="${source.path}/edu/stanford/nlp/pipeline">
         <include name="StanfordCoreNLP.properties"/>
