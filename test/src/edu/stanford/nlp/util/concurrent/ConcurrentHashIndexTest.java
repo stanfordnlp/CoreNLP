@@ -69,15 +69,16 @@ public class ConcurrentHashIndexTest extends TestCase  {
 
   public void testToArray() {
     String[] strs = new String[2];
-    strs = index.toArray(strs);
-    assertEquals("The", strs[0]);
-    assertEquals("Beast", strs[1]);
+    strs = index.objectsList().toArray(strs);
     assertEquals(2, strs.length);
+    assertTrue(index.contains(strs[0]));
+    assertTrue(index.contains(strs[1]));
   }
-  
+
   public void testObjects() {
     List<String> foo = (List<String>) index2.objects(new int[] {0, 3});
     assertEquals("Beauty", foo.get(0));
     assertEquals("Beast", foo.get(1));
   }
+
 }

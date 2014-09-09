@@ -60,7 +60,7 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar {
           continue;
         }
 
-        Pair<Integer, String> iTW = new Pair<Integer, String>(wordIndex.indexOf(m.group(1), true), m.group(2));
+        Pair<Integer, String> iTW = new Pair<Integer, String>(wordIndex.addToIndex(m.group(1)), m.group(2));
         double score = Double.parseDouble(m.group(5));
 
         List<Triple<Integer, String, Double>> tripleList = hashMap.get(iTW);
@@ -69,7 +69,7 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar {
           hashMap.put(iTW, tripleList);
         }
 
-        tripleList.add(new Triple<Integer, String, Double>(wordIndex.indexOf(m.group(3), true), m.group(4), score));
+        tripleList.add(new Triple<Integer, String, Double>(wordIndex.addToIndex(m.group(3)), m.group(4), score));
       }
     } catch (IOException e) {
       throw new RuntimeException("Problem reading similar words file!");

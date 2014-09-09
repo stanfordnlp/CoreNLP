@@ -69,7 +69,7 @@ public abstract class AnnotationOutputter {
   /**
    * Populates options from StanfordCoreNLP pipeline
    */
-  protected static Options getOptions(StanfordCoreNLP pipeline) {
+  public static Options getOptions(StanfordCoreNLP pipeline) {
     Options options = new Options();
     options.relationsBeam = pipeline.getBeamPrintingOption();
     options.constituentTreePrinter = pipeline.getConstituentTreePrinter();
