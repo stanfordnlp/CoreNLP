@@ -40,6 +40,7 @@ bottom: 0px;
         <option value="visualise" <%=SELECTED("visualise".equals(format))%> >Visualise</option>
         <option value="pretty" <%=SELECTED("pretty".equals(format))%> >Pretty print</option>
         <option value="xml" <%=SELECTED("xml".equals(format))%> >XML</option>
+        <option value="json" <%=SELECTED("json".equals(format))%> >JSON</option>
       </select>
     </td></tr>
   

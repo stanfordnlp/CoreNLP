@@ -103,6 +103,9 @@ public class CoreNLPServlet extends HttpServlet {
       case "xml":
         outputXml(out, annotation);
         break;
+      case "json":
+        outputJson(out, annotation);
+        break;
       case "pretty":
         outputPretty(out, annotation);
         break;
@@ -213,6 +216,28 @@ public class CoreNLPServlet extends HttpServlet {
     xmlOutput.flush();
 
     String escapedXml = StringEscapeUtils.escapeHtml4(xmlOutput.toString());
+    String[] lines = escapedXml.split("\n");
+    out.print("<div>");
+    for (String line : lines) {
+      int numSpaces = 0;
+      while (numSpaces < line.length() && line.charAt(numSpaces) == ' ') {
+        out.print("&nbsp;");
+        ++numSpaces;
+      }
+      out.print(line.substring(numSpaces));
+      out.print("<br>\n");
+    }
+    out.print("</div>");
+  }
+
+  public void outputJson(PrintWriter out, Annotation annotation)
+      throws IOException
+  {
+    StringWriter jsonOutput = new StringWriter();
+    pipeline.jsonPrint(annotation, jsonOutput);
+    jsonOutput.flush();
+
+    String escapedXml = StringEscapeUtils.escapeHtml4(jsonOutput.toString());
     String[] lines = escapedXml.split("\n");
     out.print("<div>");
     for (String line : lines) {
