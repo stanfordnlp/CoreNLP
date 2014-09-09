@@ -23,10 +23,7 @@ import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScori
 import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.EditDistance;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.TypesafeMap;
+import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.TypesafeMap.Key;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -600,7 +597,7 @@ public class ConstantsAndVariables implements Serializable{
     if (alreadySetUp) {
       return;
     }
-
+    Execution.fillOptions(this, props);
     if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty())
       ignoreWordRegex = Pattern.compile(wordIgnoreRegex);
     for (String label : labelDictionary.keySet()) {
