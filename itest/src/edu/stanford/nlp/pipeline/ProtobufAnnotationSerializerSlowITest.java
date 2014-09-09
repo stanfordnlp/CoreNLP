@@ -191,7 +191,8 @@ public class ProtobufAnnotationSerializerSlowITest {
     Set<String> annotators = new HashSet<String>();
     for (Field f : Annotator.class.getDeclaredFields()) {
       if (f.getName().toLowerCase().startsWith("stanford") &&
-          (f.getModifiers() & Modifier.STATIC) != 0) {
+          (f.getModifiers() & Modifier.STATIC) != 0 &&
+          !f.getName().toUpperCase().equals("STANFORD_COLUMN_DATA_CLASSIFIER")) { // ignore the column data classifier
         try {
           annotators.add((String) f.get(null));
         } catch (IllegalAccessException e) {
