@@ -876,7 +876,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         // if patterns for each token null
         if (constVars.computeAllPatterns) {
           Redwood.log(Redwood.DBG, "Computing all patterns");
-          this.patternsForEachToken = createPats.getAllPatterns(label, Data.sents);
+          this.patternsForEachToken = createPats.getAllPatterns(Data.sents);
           constVars.computeAllPatterns =false;
         } else {
           // read from the saved file
@@ -901,7 +901,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         if (constVars.computeAllPatterns) {
           if (this.patternsForEachToken == null)
             this.patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>();
-          pats4File = createPats.getAllPatterns(label, sents);
+          pats4File = createPats.getAllPatterns(sents);
           this.patternsForEachToken.putAll(pats4File);
         } else {
           if (this.patternsForEachToken == null) {
@@ -1806,6 +1806,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     return this.learnedPatterns.get(label);
   }
 
+  public Map<String, Counter<SurfacePattern>> getLearnedPatterns() {
+    return this.learnedPatterns;
+  }
+
   public void setLearnedWords(Counter<String> words, String label) {
     this.learnedWords.put(label, words);
   }
@@ -2297,311 +2301,326 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     return (1 + betasq) * precision * recall / (betasq * precision + recall);
   }
 
-  @SuppressWarnings({ "rawtypes" })
-  public static void main(String[] args) {
-    try {
-      Properties props = StringUtils.argsToPropertiesWithResolve(args);
+  public static Map<String, Set<String>> readSeedWords(Properties props) {
+    return readSeedWords(props.getProperty("seedWordsFiles"));
+  }
 
-      Map<String, Set<SurfacePattern>> ignorePatterns = new HashMap<String, Set<SurfacePattern>>();
-      Map<String, SurfacePattern> p0 = new HashMap<String, SurfacePattern>();
-      Map<String, Counter<String>> p0Set = new HashMap<String, Counter<String>>();
+  public static Map<String, Set<String>> readSeedWords(String seedWordsFiles){
+    Map<String, Set<String>> seedWords  = new HashMap<String, Set<String>>();
 
-      String fileFormat = props.getProperty("fileFormat");
 
-      Map<String, Set<String>> seedWords = new HashMap<String, Set<String>>();
-
-      String seedWordsFiles = props.getProperty("seedWordsFiles");
-      if (seedWordsFiles == null) {
-        throw new RuntimeException(
-            "Needs both seedWordsFiles and file parameters to run this class!\nseedWordsFiles has format: label1,filewithlistofwords1;label2,filewithlistofwords2;...");
+    if (seedWordsFiles == null) {
+      throw new RuntimeException(
+        "Needs both seedWordsFiles and file parameters to run this class!\nseedWordsFiles has format: label1,filewithlistofwords1;label2,filewithlistofwords2;...");
+    }
+    for (String seedFile : seedWordsFiles.split(";")) {
+      String[] t = seedFile.split(",");
+      String label = t[0];
+      String seedWordsFile = t[1];
+      Set<String> seedWords4Label = new HashSet<String>();
+      for (String line : IOUtils.readLines(seedWordsFile)) {
+        line = line.trim();
+        if (line.isEmpty() || line.startsWith("#")) {
+          continue;
+        }
+        seedWords4Label.add(line);
       }
-      for (String seedFile : seedWordsFiles.split(";")) {
-        String[] t = seedFile.split(",");
+      seedWords.put(label, seedWords4Label);
+      Redwood.log(ConstantsAndVariables.minimaldebug, "Number of seed words for label " + label + " is " + seedWords4Label.size());
+    }
+    return seedWords;
+  }
+  /**
+   * Execute the system give a properties file or object. Returns the model created
+   * @param props
+   */
+  public static GetPatternsFromDataMultiClass run(Properties props) throws IOException, ClassNotFoundException, IllegalAccessException, InterruptedException, ExecutionException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+    Map<String, Set<SurfacePattern>> ignorePatterns = new HashMap<String, Set<SurfacePattern>>();
+    Map<String, SurfacePattern> p0 = new HashMap<String, SurfacePattern>();
+    Map<String, Counter<String>> p0Set = new HashMap<String, Counter<String>>();
+
+    String fileFormat = props.getProperty("fileFormat");
+
+    Map<String, Set<String>> seedWords = readSeedWords(props);
+
+    Map<String, Class> answerClasses = new HashMap<String, Class>();
+    String ansClasses = props.getProperty("answerClasses");
+    if (ansClasses != null) {
+      for (String l : ansClasses.split(";")) {
+        String[] t = l.split(",");
         String label = t[0];
-        String seedWordsFile = t[1];
-        Set<String> seedWords4Label = new HashSet<String>();
-        for (String line : IOUtils.readLines(seedWordsFile)) {
-          line = line.trim();
-          if (line.isEmpty() || line.startsWith("#")) {
-            continue;
-          }
-          seedWords4Label.add(line);
-        }
-        seedWords.put(label, seedWords4Label);
-        Redwood.log(ConstantsAndVariables.minimaldebug, "Number of seed words for label " + label + " is " + seedWords4Label.size());
+        String cl = t[1];
+        Class answerClass = ClassLoader.getSystemClassLoader().loadClass(cl);
+        answerClasses.put(label, answerClass);
+      }
+    }
+
+    Map<String, List<CoreLabel>> sents = null;
+    boolean batchProcessSents = Boolean.parseBoolean(props.getProperty("batchProcessSents", "false"));
+    int numMaxSentencesPerBatchFile = Integer.parseInt(props.getProperty("numMaxSentencesPerBatchFile", String.valueOf(Integer.MAX_VALUE)));
+
+    if (!batchProcessSents)
+      sents = new HashMap<String, List<CoreLabel>>();
+    else
+      Data.sentsFiles = new ArrayList<File>();
+
+    String file = props.getProperty("file");
+
+    String posModelPath = props.getProperty("posModelPath");
+    boolean lowercase = Boolean.parseBoolean(props.getProperty("lowercaseText"));
+    boolean useTargetNERRestriction = Boolean.parseBoolean(props.getProperty("useTargetNERRestriction"));
+    boolean useTargetParserParentRestriction = Boolean.parseBoolean(props.getProperty("useTargetParserParentRestriction"));
+    boolean useContextNERRestriction = Boolean.parseBoolean(props.getProperty("useContextNERRestriction"));
+
+    boolean evaluate = Boolean.parseBoolean(props.getProperty("evaluate"));
+    boolean addEvalSentsToTrain = Boolean.parseBoolean(props.getProperty("addEvalSentsToTrain"));
+    String evalFileWithGoldLabels = props.getProperty("evalFileWithGoldLabels");
+
+    if (file == null && (evalFileWithGoldLabels == null || addEvalSentsToTrain == false)) {
+      throw new RuntimeException("No training data! file is " + file + " and evalFileWithGoldLabels is " + evalFileWithGoldLabels
+        + " and addEvalSentsToTrain is " + addEvalSentsToTrain);
+    }
+
+    String saveSentencesSerDir = null;
+    boolean usingDirForSentsInIndex = true;
+    // Read training file
+    if (file != null) {
+      saveSentencesSerDir = props.getProperty("saveSentencesSerDir");
+      File saveSentencesSerDirFile = null;
+      if (saveSentencesSerDir != null) {
+        saveSentencesSerDirFile = new File(saveSentencesSerDir);
+        IOUtils.ensureDir(saveSentencesSerDirFile);
+        IOUtils.writeObjectToFile(sents, saveSentencesSerDir + "/sents_all.ser");
+      } else {
+        String systemdir = System.getProperty("java.io.tmpdir");
+        saveSentencesSerDirFile = File.createTempFile("sents", ".tmp", new File(systemdir));
+        saveSentencesSerDirFile.deleteOnExit();
+        saveSentencesSerDir = saveSentencesSerDirFile.getAbsolutePath();
+        saveSentencesSerDirFile.delete();
+        saveSentencesSerDirFile.mkdir();
       }
 
-      Map<String, Class> answerClasses = new HashMap<String, Class>();
-      String ansClasses = props.getProperty("answerClasses");
-      if (ansClasses != null) {
-        for (String l : ansClasses.split(";")) {
-          String[] t = l.split(",");
-          String label = t[0];
-          String cl = t[1];
-          Class answerClass = ClassLoader.getSystemClassLoader().loadClass(cl);
-          answerClasses.put(label, answerClass);
-        }
-      }
+      List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(file);
+      int numFilesTillNow = 0;
+      if (fileFormat == null || fileFormat.equalsIgnoreCase("text") || fileFormat.equalsIgnoreCase("txt")) {
+        Map<String, List<CoreLabel>> sentsthis = new HashMap<String, List<CoreLabel>>();
+        for (File f : allFiles) {
+          Redwood.log(Redwood.DBG, "Annotating text in " + f);
 
-      Map<String, List<CoreLabel>> sents = null;
-      boolean batchProcessSents = Boolean.parseBoolean(props.getProperty("batchProcessSents", "false"));
-      int numMaxSentencesPerBatchFile = Integer.parseInt(props.getProperty("numMaxSentencesPerBatchFile", String.valueOf(Integer.MAX_VALUE)));
+          String text = IOUtils.stringFromFile(f.getAbsolutePath());
 
-      if (!batchProcessSents)
-        sents = new HashMap<String, List<CoreLabel>>();
-      else
-        Data.sentsFiles = new ArrayList<File>();
-
-      String file = props.getProperty("file");
-
-      String posModelPath = props.getProperty("posModelPath");
-      boolean lowercase = Boolean.parseBoolean(props.getProperty("lowercaseText"));
-      boolean useTargetNERRestriction = Boolean.parseBoolean(props.getProperty("useTargetNERRestriction"));
-      boolean useTargetParserParentRestriction = Boolean.parseBoolean(props.getProperty("useTargetParserParentRestriction"));
-      boolean useContextNERRestriction = Boolean.parseBoolean(props.getProperty("useContextNERRestriction"));
-
-      boolean evaluate = Boolean.parseBoolean(props.getProperty("evaluate"));
-      boolean addEvalSentsToTrain = Boolean.parseBoolean(props.getProperty("addEvalSentsToTrain"));
-      String evalFileWithGoldLabels = props.getProperty("evalFileWithGoldLabels");
-
-      if (file == null && (evalFileWithGoldLabels == null || addEvalSentsToTrain == false)) {
-        throw new RuntimeException("No training data! file is " + file + " and evalFileWithGoldLabels is " + evalFileWithGoldLabels
-            + " and addEvalSentsToTrain is " + addEvalSentsToTrain);
-      }
-
-      String saveSentencesSerDir = null;
-      boolean usingDirForSentsInIndex = true;
-      // Read training file
-      if (file != null) {
-        saveSentencesSerDir = props.getProperty("saveSentencesSerDir");
-        File saveSentencesSerDirFile = null;
-        if (saveSentencesSerDir != null) {
-          saveSentencesSerDirFile = new File(saveSentencesSerDir);
-          IOUtils.ensureDir(saveSentencesSerDirFile);
-          IOUtils.writeObjectToFile(sents, saveSentencesSerDir + "/sents_all.ser");
-        } else {
-          String systemdir = System.getProperty("java.io.tmpdir");
-          saveSentencesSerDirFile = File.createTempFile("sents", ".tmp", new File(systemdir));
-          saveSentencesSerDirFile.deleteOnExit();
-          saveSentencesSerDir = saveSentencesSerDirFile.getAbsolutePath();
-          saveSentencesSerDirFile.delete();
-          saveSentencesSerDirFile.mkdir();
-        }
-
-        List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(file);
-        int numFilesTillNow = 0;
-        if (fileFormat == null || fileFormat.equalsIgnoreCase("text") || fileFormat.equalsIgnoreCase("txt")) {
-          Map<String, List<CoreLabel>> sentsthis = new HashMap<String, List<CoreLabel>>();
-          for (File f : allFiles) {
-            Redwood.log(Redwood.DBG, "Annotating text in " + f);
-
-            String text = IOUtils.stringFromFile(f.getAbsolutePath());
-
-            numFilesTillNow = tokenize(text, posModelPath, lowercase, useTargetNERRestriction || useContextNERRestriction, f.getName() + "-",
-                useTargetParserParentRestriction, props.getProperty("numThreads"), batchProcessSents, numMaxSentencesPerBatchFile,
-                saveSentencesSerDirFile, sentsthis, numFilesTillNow);
-            if (!batchProcessSents) {
-              sents.putAll(sentsthis);
-            }
-          }
-
+          numFilesTillNow = tokenize(text, posModelPath, lowercase, useTargetNERRestriction || useContextNERRestriction, f.getName() + "-",
+            useTargetParserParentRestriction, props.getProperty("numThreads"), batchProcessSents, numMaxSentencesPerBatchFile,
+            saveSentencesSerDirFile, sentsthis, numFilesTillNow);
           if (!batchProcessSents) {
-            IOUtils.writeObjectToFile(sents, saveSentencesSerDirFile + "/sents_" + numFilesTillNow);
+            sents.putAll(sentsthis);
+          }
+        }
+
+        if (!batchProcessSents) {
+          IOUtils.writeObjectToFile(sents, saveSentencesSerDirFile + "/sents_" + numFilesTillNow);
+        }
+
+      } else if (fileFormat.equalsIgnoreCase("ser")) {
+        usingDirForSentsInIndex = false;
+        for (File f : allFiles) {
+          if (!batchProcessSents)
+            sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
+          else{
+            File newf = new File(saveSentencesSerDir + "/" + f.getAbsolutePath().replaceAll(Pattern.quote("/"), "_"));
+            IOUtils.cp(f, newf);
+            Data.sentsFiles.add(newf);
+          }
+        }
+      } else {
+        throw new RuntimeException(
+          "Cannot identify the file format. Valid values are text (or txt) and ser, where the serialized file is of the type Map<String, List<CoreLabel>>.");
+      }
+    }
+
+    Map<String, List<CoreLabel>> evalsents = new HashMap<String, List<CoreLabel>>();
+    File saveEvalSentencesSerFileFile = null;
+
+    // Read Evaluation File
+    if (evaluate) {
+      if (evalFileWithGoldLabels != null) {
+
+        String saveEvalSentencesSerFile = props.getProperty("saveEvalSentencesSerFile");
+        if (saveEvalSentencesSerFile == null) {
+          String systemdir = System.getProperty("java.io.tmpdir");
+          saveEvalSentencesSerFileFile = File.createTempFile("evalsents", ".tmp", new File(systemdir));
+        } else
+          saveEvalSentencesSerFileFile = new File(saveEvalSentencesSerFile);
+
+        Map setClassForTheseLabels = new HashMap<String, Class>();
+        //boolean splitOnPunct = Boolean.parseBoolean(props.getProperty("splitOnPunct", "true"));
+        List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(evalFileWithGoldLabels);
+        int numFile = 0;
+        String evalFileFormat = props.getProperty("evalFileFormat");
+        if (evalFileFormat == null || evalFileFormat.equalsIgnoreCase("text") || evalFileFormat.equalsIgnoreCase("txt")) {
+          for (File f : allFiles) {
+            numFile++;
+            Redwood.log(Redwood.DBG, "Annotating text in " + f + ". Num file " + numFile);
+            List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(new BufferedReader(new FileReader(f)), seedWords.keySet(),
+              setClassForTheseLabels, true, f.getName());
+            evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath, useTargetNERRestriction || useContextNERRestriction, "",
+              useTargetParserParentRestriction, props.getProperty("numThreads")));
           }
 
         } else if (fileFormat.equalsIgnoreCase("ser")) {
-          usingDirForSentsInIndex = false;
           for (File f : allFiles) {
-            if (!batchProcessSents)
-              sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
-            else{
-              File newf = new File(saveSentencesSerDir + "/" + f.getAbsolutePath().replaceAll(Pattern.quote("/"), "_"));
-              IOUtils.cp(f, newf);
-              Data.sentsFiles.add(newf);
-            }
+            evalsents.putAll((Map<? extends String, ? extends List<CoreLabel>>) IOUtils.readObjectFromFile(f));
           }
-        } else {
-          throw new RuntimeException(
-              "Cannot identify the file format. Valid values are text (or txt) and ser, where the serialized file is of the type Map<String, List<CoreLabel>>.");
         }
+        // if (addEvalSentsToTrain) {
+        Redwood.log(Redwood.DBG, "Adding " + evalsents.size() + " eval sents to the training set");
+
+        // }
+
+        IOUtils.writeObjectToFile(evalsents, saveEvalSentencesSerFileFile);
+
+        if (batchProcessSents) {
+          if (Data.sentsFiles == null)
+            Data.sentsFiles = new ArrayList<File>();
+          Data.sentsFiles.add(saveEvalSentencesSerFileFile);
+        } else
+          sents.putAll(evalsents);
       }
+    }
 
-      Map<String, List<CoreLabel>> evalsents = new HashMap<String, List<CoreLabel>>();
-      File saveEvalSentencesSerFileFile = null;
+    boolean learn = Boolean.parseBoolean(props.getProperty("learn", "true"));
 
-      // Read Evaluation File
-      if (evaluate) {
-        if (evalFileWithGoldLabels != null) {
+    boolean labelUsingSeedSets = Boolean.parseBoolean(props.getProperty("labelUsingSeedSets", "true"));
 
-          String saveEvalSentencesSerFile = props.getProperty("saveEvalSentencesSerFile");
-          if (saveEvalSentencesSerFile == null) {
-            String systemdir = System.getProperty("java.io.tmpdir");
-            saveEvalSentencesSerFileFile = File.createTempFile("evalsents", ".tmp", new File(systemdir));
-          } else
-            saveEvalSentencesSerFileFile = new File(saveEvalSentencesSerFile);
+    GetPatternsFromDataMultiClass model = new GetPatternsFromDataMultiClass(props, sents, seedWords, labelUsingSeedSets);
 
-          Map setClassForTheseLabels = new HashMap<String, Class>();
-          //boolean splitOnPunct = Boolean.parseBoolean(props.getProperty("splitOnPunct", "true"));
-          List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(evalFileWithGoldLabels);
-          int numFile = 0;
-          String evalFileFormat = props.getProperty("evalFileFormat");
-          if (evalFileFormat == null || evalFileFormat.equalsIgnoreCase("text") || evalFileFormat.equalsIgnoreCase("txt")) {
-            for (File f : allFiles) {
-              numFile++;
-              Redwood.log(Redwood.DBG, "Annotating text in " + f + ". Num file " + numFile);
-              List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(new BufferedReader(new FileReader(f)), seedWords.keySet(),
-                  setClassForTheseLabels, true, f.getName());
-              evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath, useTargetNERRestriction || useContextNERRestriction, "",
-                  useTargetParserParentRestriction, props.getProperty("numThreads")));
-            }
+    model.constVars.usingDirForSentsInIndex = usingDirForSentsInIndex;
+    model.constVars.saveSentencesSerDir = saveSentencesSerDir;
 
-          } else if (fileFormat.equalsIgnoreCase("ser")) {
-            for (File f : allFiles) {
-              evalsents.putAll((Map<? extends String, ? extends List<CoreLabel>>) IOUtils.readObjectFromFile(f));
-            }
-          }
-          // if (addEvalSentsToTrain) {
-          Redwood.log(Redwood.DBG, "Adding " + evalsents.size() + " eval sents to the training set");
+    Execution.fillOptions(model, props);
 
-          // }
+    // Redwood.log(ConstantsAndVariables.minimaldebug,
+    // "Total number of training sentences " + Data.sents.size());
 
-          IOUtils.writeObjectToFile(evalsents, saveEvalSentencesSerFileFile);
+    String sentsOutFile = props.getProperty("sentsOutFile");
 
-          if (batchProcessSents) {
-            if (Data.sentsFiles == null)
-              Data.sentsFiles = new ArrayList<File>();
-            Data.sentsFiles.add(saveEvalSentencesSerFileFile);
-          } else
-            sents.putAll(evalsents);
+    String wordsOutputFile = props.getProperty("wordsOutputFile");
+
+    String patternOutFile = props.getProperty("patternOutFile");
+
+    // If you want to reuse patterns and words learned previously (may be on
+    // another dataset etc)
+    boolean loadSavedPatternsWordsDir = Boolean.parseBoolean(props.getProperty("loadSavedPatternsWordsDir"));
+    String patternsWordsDir = props.getProperty("patternsWordsDir");
+
+    if (loadSavedPatternsWordsDir) {
+      for (String label : model.constVars.getLabelDictionary().keySet()) {
+        assert (new File(patternsWordsDir + "/" + label).exists());
+        File patf = new File(patternsWordsDir + "/" + label + "/patterns.ser");
+        if (patf.exists()) {
+          Counter<SurfacePattern> patterns = IOUtils.readObjectFromFile(patf);
+          model.setLearnedPatterns(patterns, label);
+          Redwood.log(Redwood.DBG, "Loaded " + patterns.size() + " patterns from " + patf);
         }
-      }
-
-      boolean learn = Boolean.parseBoolean(props.getProperty("learn", "true"));
-
-      boolean labelUsingSeedSets = Boolean.parseBoolean(props.getProperty("labelUsingSeedSets", "true"));
-
-      GetPatternsFromDataMultiClass model = new GetPatternsFromDataMultiClass(props, sents, seedWords, labelUsingSeedSets);
-
-      model.constVars.usingDirForSentsInIndex = usingDirForSentsInIndex;
-      model.constVars.saveSentencesSerDir = saveSentencesSerDir;
-
-      Execution.fillOptions(model, props);
-
-      // Redwood.log(ConstantsAndVariables.minimaldebug,
-      // "Total number of training sentences " + Data.sents.size());
-
-      String sentsOutFile = props.getProperty("sentsOutFile");
-
-      String wordsOutputFile = props.getProperty("wordsOutputFile");
-
-      String patternOutFile = props.getProperty("patternOutFile");
-
-      // If you want to reuse patterns and words learned previously (may be on
-      // another dataset etc)
-      boolean loadSavedPatternsWordsDir = Boolean.parseBoolean(props.getProperty("loadSavedPatternsWordsDir"));
-      String patternsWordsDir = props.getProperty("patternsWordsDir");
-
-      if (loadSavedPatternsWordsDir) {
-        for (String label : model.constVars.getLabelDictionary().keySet()) {
-          assert (new File(patternsWordsDir + "/" + label).exists());
-          File patf = new File(patternsWordsDir + "/" + label + "/patterns.ser");
-          if (patf.exists()) {
-            Counter<SurfacePattern> patterns = IOUtils.readObjectFromFile(patf);
-            model.setLearnedPatterns(patterns, label);
-            Redwood.log(Redwood.DBG, "Loaded " + patterns.size() + " patterns from " + patf);
-          }
-          File wordf = new File(patternsWordsDir + "/" + label + "/phrases.txt");
-          if (wordf.exists()) {
-            Counter<String> words = model.readLearnedWordsFromFile(wordf);
-            model.setLearnedWords(words, label);
-            Redwood.log(Redwood.DBG, "Loaded " + words.size() + " from " + patf);
-          }
-          CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat = null;
-
-          if (model.constVars.restrictToMatched) {
-            TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, SurfacePattern>();
-            model.scorePhrases.applyPats(model.getLearnedPatterns(label), label, false, wordsandLemmaPatExtracted, matchedTokensByPat);
-          }
-
-          if (model.constVars.batchProcessSents) {
-            for (File f : Data.sentsFiles) {
-              Redwood.log(Redwood.DBG, "labeling sentences from " + f + " with the already learned words");
-              Map<String, List<CoreLabel>> sentsf = IOUtils.readObjectFromFile(f);
-              assert sentsf != null : "Why are sents null";
-              model.labelWords(label, sentsf, model.getLearnedWords(label).keySet(), model.getLearnedPatterns(label).keySet(), sentsOutFile, matchedTokensByPat);
-              IOUtils.writeObjectToFile(sentsf, f);
-            }
-          } else
-            model.labelWords(label, Data.sents, model.getLearnedWords(label).keySet(), model.getLearnedPatterns(label).keySet(), sentsOutFile, matchedTokensByPat);
+        File wordf = new File(patternsWordsDir + "/" + label + "/phrases.txt");
+        if (wordf.exists()) {
+          Counter<String> words = model.readLearnedWordsFromFile(wordf);
+          model.setLearnedWords(words, label);
+          Redwood.log(Redwood.DBG, "Loaded " + words.size() + " from " + patf);
         }
-      }
+        CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat = null;
 
-      if (learn)
-        model.iterateExtractApply(p0, p0Set, wordsOutputFile, sentsOutFile, patternOutFile, ignorePatterns);
-
-      if (model.constVars.markedOutputTextFile != null) {
-        model.writeLabeledData(model.constVars.markedOutputTextFile);
-      }
-
-      if(model.constVars.columnOutputFile != null)
-        model.writeColumnOutput(model.constVars.columnOutputFile);
-
-      boolean savePatternsWordsDir = Boolean.parseBoolean(props.getProperty("savePatternsWordsDir"));
-
-      if (savePatternsWordsDir) {
-        for (String label : model.constVars.getLabelDictionary().keySet()) {
-          IOUtils.ensureDir(new File(patternsWordsDir + "/" + label));
-          IOUtils.writeObjectToFile(model.getLearnedPatterns(label), patternsWordsDir + "/" + label + "/patterns.ser");
-          BufferedWriter w = new BufferedWriter(new FileWriter(patternsWordsDir + "/" + label + "/phrases.txt"));
-          model.writeWordsToFile(model.getLearnedWords(label), w);
-          w.close();
-        }
-      }
-
-      if (evaluate) {
-        // The format of goldEntitiesEvalFiles is assumed same as
-        // seedwordsfiles: label,file;label2,file2;...
-        // Each file of gold entities consists of each entity in newline with
-        // incorrect entities marked with "#" at the end of the entity.
-        // Learned entities not present in the gold file are considered
-        // negative.
-        String goldEntitiesEvalFiles = props.getProperty("goldEntitiesEvalFiles");
-        if (goldEntitiesEvalFiles != null) {
-          for (String gfile : goldEntitiesEvalFiles.split(";")) {
-            String[] t = gfile.split(",");
-            String label = t[0];
-            String goldfile = t[1];
-            Map<String, Boolean> goldWords4Label = new HashMap<String, Boolean>();
-            for (String line : IOUtils.readLines(goldfile)) {
-              line = line.trim();
-              if (line.isEmpty())
-                continue;
-
-              if (line.endsWith("#"))
-                goldWords4Label.put(line.substring(0, line.length() - 1), false);
-              else
-                goldWords4Label.put(line, true);
-            }
-            Pair<Double, Double> pr = model.getPrecisionRecall(label, goldWords4Label);
-            Redwood.log(ConstantsAndVariables.minimaldebug,
-                "\nFor label " + label + ": Number of gold entities is " + goldWords4Label.size() + ", Precision is " + model.df.format(pr.first() * 100)
-                    + ", Recall is " + model.df.format(pr.second() * 100) + ", F1 is " + model.df.format(model.FScore(pr.first(), pr.second(), 1.0) * 100)
-                    + "\n\n");
-          }
-
-        }
-        if (saveEvalSentencesSerFileFile != null && saveEvalSentencesSerFileFile.exists()) {
-          if (batchProcessSents)
-            evalsents = IOUtils.readObjectFromFile(saveEvalSentencesSerFileFile);
-          boolean evalPerEntity = Boolean.parseBoolean(props.getProperty("evalPerEntity", "true"));
-          model.evaluate(evalsents, evalPerEntity);
+        if (model.constVars.restrictToMatched) {
+          TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, SurfacePattern>();
+          model.scorePhrases.applyPats(model.getLearnedPatterns(label), label, false, wordsandLemmaPatExtracted, matchedTokensByPat);
         }
 
-        if (evalsents.size() == 0 && goldEntitiesEvalFiles == null)
-          System.err.println("No eval sentences or list of gold entities provided to evaluate! Make sure evalFileWithGoldLabels or goldEntitiesEvalFiles is set, or turn off the evaluate flag");
+        if (model.constVars.batchProcessSents) {
+          for (File f : Data.sentsFiles) {
+            Redwood.log(Redwood.DBG, "labeling sentences from " + f + " with the already learned words");
+            Map<String, List<CoreLabel>> sentsf = IOUtils.readObjectFromFile(f);
+            assert sentsf != null : "Why are sents null";
+            model.labelWords(label, sentsf, model.getLearnedWords(label).keySet(), model.getLearnedPatterns(label).keySet(), sentsOutFile, matchedTokensByPat);
+            IOUtils.writeObjectToFile(sentsf, f);
+          }
+        } else
+          model.labelWords(label, Data.sents, model.getLearnedWords(label).keySet(), model.getLearnedPatterns(label).keySet(), sentsOutFile, matchedTokensByPat);
+      }
+    }
+
+    if (learn)
+      model.iterateExtractApply(p0, p0Set, wordsOutputFile, sentsOutFile, patternOutFile, ignorePatterns);
+
+    if (model.constVars.markedOutputTextFile != null) {
+      model.writeLabeledData(model.constVars.markedOutputTextFile);
+    }
+
+    if(model.constVars.columnOutputFile != null)
+      model.writeColumnOutput(model.constVars.columnOutputFile);
+
+    boolean savePatternsWordsDir = Boolean.parseBoolean(props.getProperty("savePatternsWordsDir"));
+
+    if (savePatternsWordsDir) {
+      for (String label : model.constVars.getLabelDictionary().keySet()) {
+        IOUtils.ensureDir(new File(patternsWordsDir + "/" + label));
+        IOUtils.writeObjectToFile(model.getLearnedPatterns(label), patternsWordsDir + "/" + label + "/patterns.ser");
+        BufferedWriter w = new BufferedWriter(new FileWriter(patternsWordsDir + "/" + label + "/phrases.txt"));
+        model.writeWordsToFile(model.getLearnedWords(label), w);
+        w.close();
+      }
+    }
+
+    if (evaluate) {
+      // The format of goldEntitiesEvalFiles is assumed same as
+      // seedwordsfiles: label,file;label2,file2;...
+      // Each file of gold entities consists of each entity in newline with
+      // incorrect entities marked with "#" at the end of the entity.
+      // Learned entities not present in the gold file are considered
+      // negative.
+      String goldEntitiesEvalFiles = props.getProperty("goldEntitiesEvalFiles");
+      if (goldEntitiesEvalFiles != null) {
+        for (String gfile : goldEntitiesEvalFiles.split(";")) {
+          String[] t = gfile.split(",");
+          String label = t[0];
+          String goldfile = t[1];
+          Map<String, Boolean> goldWords4Label = new HashMap<String, Boolean>();
+          for (String line : IOUtils.readLines(goldfile)) {
+            line = line.trim();
+            if (line.isEmpty())
+              continue;
+
+            if (line.endsWith("#"))
+              goldWords4Label.put(line.substring(0, line.length() - 1), false);
+            else
+              goldWords4Label.put(line, true);
+          }
+          Pair<Double, Double> pr = model.getPrecisionRecall(label, goldWords4Label);
+          Redwood.log(ConstantsAndVariables.minimaldebug,
+            "\nFor label " + label + ": Number of gold entities is " + goldWords4Label.size() + ", Precision is " + model.df.format(pr.first() * 100)
+              + ", Recall is " + model.df.format(pr.second() * 100) + ", F1 is " + model.df.format(model.FScore(pr.first(), pr.second(), 1.0) * 100)
+              + "\n\n");
+        }
 
       }
+      if (saveEvalSentencesSerFileFile != null && saveEvalSentencesSerFileFile.exists()) {
+        if (batchProcessSents)
+          evalsents = IOUtils.readObjectFromFile(saveEvalSentencesSerFileFile);
+        boolean evalPerEntity = Boolean.parseBoolean(props.getProperty("evalPerEntity", "true"));
+        model.evaluate(evalsents, evalPerEntity);
+      }
 
+      if (evalsents.size() == 0 && goldEntitiesEvalFiles == null)
+        System.err.println("No eval sentences or list of gold entities provided to evaluate! Make sure evalFileWithGoldLabels or goldEntitiesEvalFiles is set, or turn off the evaluate flag");
+
+    }
+    return model;
+  }
+
+
+  public static void main(String[] args) {
+    try {
+      Properties props = StringUtils.argsToPropertiesWithResolve(args);
+      GetPatternsFromDataMultiClass.run(props);
     } catch (OutOfMemoryError e) {
       System.out.println("Out of memory! Either change the memory alloted by running as java -mx20g ... for example if you want to allot 20G. Or consider using batchProcessSents and numMaxSentencesPerBatchFile flags");
       e.printStackTrace();
