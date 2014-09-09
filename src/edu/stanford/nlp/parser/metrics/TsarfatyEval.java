@@ -107,32 +107,26 @@ public class TsarfatyEval extends AbstractEval {
 
       if(args[i].startsWith("-")) {
 
-        switch (args[i]) {
-          case "-l":
-            Language lang = Language.valueOf(args[++i].trim());
-            tlpp = Languages.getLanguageParams(lang);
+        if(args[i].equals("-l")) {
+          Language lang = Language.valueOf(args[++i].trim());
+          tlpp = Languages.getLanguageParams(lang);
 
-            break;
-          case "-y":
-            maxGoldYield = Integer.parseInt(args[++i].trim());
+        } else if(args[i].equals("-y")) {
+          maxGoldYield = Integer.parseInt(args[++i].trim());
 
-            break;
-          case "-t":
-            tagMode = true;
+        } else if(args[i].equals("-t")) {
+          tagMode = true;
 
-            break;
-          case "-v":
-            VERBOSE = true;
+        } else if(args[i].equals("-v")) {
+          VERBOSE = true;
 
-            break;
-          case "-g":
-            maxGuessYield = Integer.parseInt(args[++i].trim());
-            skipGuess = true;
+        } else if(args[i].equals("-g")) {
+          maxGuessYield = Integer.parseInt(args[++i].trim());
+          skipGuess = true;
 
-            break;
-          default:
-            System.out.println(usage.toString());
-            System.exit(-1);
+        } else {
+          System.out.println(usage.toString());
+          System.exit(-1);
         }
 
       } else {

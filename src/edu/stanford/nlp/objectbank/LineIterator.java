@@ -3,7 +3,7 @@ package edu.stanford.nlp.objectbank;
 import java.io.*;
 import java.util.*;
 
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.AbstractIterator;
 
 

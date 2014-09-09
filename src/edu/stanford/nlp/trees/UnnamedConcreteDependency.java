@@ -87,15 +87,14 @@ public class UnnamedConcreteDependency extends UnnamedDependency {
    */
   @Override
   public String toString(String format) {
-    switch (format) {
-      case "xml":
-        String govIdxStr = " idx=\"" + headIndex + "\"";
-        String depIdxStr = " idx=\"" + depIndex + "\"";
-        return "  <dep>\n    <governor" + govIdxStr + ">" + XMLUtils.escapeXML(governor().value()) + "</governor>\n    <dependent" + depIdxStr + ">" + XMLUtils.escapeXML(dependent().value()) + "</dependent>\n  </dep>";
-      case "predicate":
-        return "dep(" + governor() + "," + dependent() + ")";
-      default:
-        return toString();
+    if ("xml".equals(format)) {
+      String govIdxStr = " idx=\"" + headIndex + "\"";
+      String depIdxStr = " idx=\"" + depIndex + "\"";
+      return "  <dep>\n    <governor" + govIdxStr + ">" + XMLUtils.escapeXML(governor().value()) + "</governor>\n    <dependent" + depIdxStr + ">" + XMLUtils.escapeXML(dependent().value()) + "</dependent>\n  </dep>";
+    } else if ("predicate".equals(format)) {
+      return "dep(" + governor() + "," + dependent() + ")";
+    } else {
+      return toString();
     }
   }
 

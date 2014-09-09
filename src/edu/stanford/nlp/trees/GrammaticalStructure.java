@@ -16,22 +16,26 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
+import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
 
 import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
+import static edu.stanford.nlp.trees.GrammaticalRelation.GOVERNOR;
 import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 
 
 
 
 /**
- * A {@code GrammaticalStructure} stores dependency relations between
- * nodes in a tree.  A new <code>GrammaticalStructure</code> is constructed
+ * A {@code GrammaticalStructure} is a {@link TreeGraph
+ * <code>TreeGraph</code>} (that is, a tree with additional labeled
+ * arcs between nodes) for representing the grammatical relations in a
+ * parse tree.  A new <code>GrammaticalStructure</code> is constructed
  * from an existing parse tree with the help of {@link
  * GrammaticalRelation <code>GrammaticalRelation</code>}, which
  * defines a hierarchy of grammatical relations, along with
@@ -41,10 +45,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
  * labeled grammatical relations as it can.  Once constructed, the new
  * <code>GrammaticalStructure</code> can be printed in various
  * formats, or interrogated using the interface methods in this
- * class. Internally, this uses a representation via a {@code TreeGraphNode},
- * that is, a tree with additional labeled
- * arcs between nodes, for representing the grammatical relations in a
- * parse tree.
+ * class.
  * <p/>
  * <b>Caveat emptor!</b> This is a work in progress.
  * Nothing in here should be relied upon to function perfectly.
@@ -336,8 +337,8 @@ public abstract class GrammaticalStructure implements Serializable {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append(root.toPrettyString(0).substring(1));
-    sb.append("Typed Dependencies:\n");
-    sb.append(typedDependencies);
+    sb.append("Typed Dependencies:");
+    sb.append("\n" + typedDependencies);
     return sb.toString();
   }
 
@@ -357,7 +358,7 @@ public abstract class GrammaticalStructure implements Serializable {
     }
     for (TreeGraphNode kid : t.children()) {
       attachStrandedNodes(kid, root, (kid.headWordNode() != t.headWordNode()), puncFilter, basicGraph);
-    }
+    }    
   }
 
   // cdm dec 2009: I changed this to automatically fail on preterminal nodes, since they shouldn't match for GR parent patterns.  Should speed it up.
@@ -378,7 +379,7 @@ public abstract class GrammaticalStructure implements Serializable {
             // If there are two patterns that add dependencies, X --> Z and Y --> Z, and X dominates Y, then the dependency Y --> Z is not added to the basic graph to prevent unwanted duplication.
             // Similarly, if there is already a path from X --> Y, and an expression would trigger Y --> X somehow, we ignore that
             Set<TreeGraphNode> parents = basicGraph.getParents(uHigh);
-            if ((parents == null || parents.size() == 0 || parents.contains(tHigh)) &&
+            if ((parents == null || parents.size() == 0 || parents.contains(tHigh)) && 
                 basicGraph.getShortestPath(uHigh, tHigh, true) == null) {
               // System.err.println("Adding " + egr.getShortName() + " from " + t + " to " + u + " tHigh=" + tHigh + "(" + tHigh.headWordNode() + ") uHigh=" + uHigh + "(" + uHigh.headWordNode() + ")");
               basicGraph.add(tHigh, uHigh, egr);
@@ -401,8 +402,11 @@ public abstract class GrammaticalStructure implements Serializable {
   }
 
   /**
-   * Helps the constructor build a list of typed dependencies using
-   * information from a {@code GrammaticalStructure}.
+   * The constructor builds a list of typed dependencies using
+   * information from a <code>GrammaticalStructure</code>.
+   *
+   * @param getExtra If true, the list of typed dependencies will contain extra ones.
+   *              If false, the list of typed dependencies will respect the tree structure.
    */
   private List<TypedDependency> getDeps(Filter<TypedDependency> puncTypedDepFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph) {
     List<TypedDependency> basicDep = Generics.newArrayList();
@@ -675,25 +679,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * @return The typed dependencies of this grammatical structure
    */
   public List<TypedDependency> typedDependencies(boolean includeExtras) {
-    List<TypedDependency> deps;
-    // This copy has to be done because of the broken way
-    // TypedDependency objects can be mutated by downstream methods
-    // such as collapseDependencies.  Without the copy here it is
-    // possible for two consecutive calls to
-    // typedDependenciesCollapsed to get different results.  For
-    // example, the English dependencies rename existing objects KILL
-    // to note that they should be removed.
-    if (includeExtras) {
-      deps = new ArrayList<TypedDependency>(allTypedDependencies.size());
-      for (TypedDependency dep : allTypedDependencies) {
-        deps.add(new TypedDependency(dep));
-      }
-    } else {
-      deps = new ArrayList<TypedDependency>(typedDependencies.size());
-      for (TypedDependency dep : typedDependencies) {
-        deps.add(new TypedDependency(dep));
-      }
-    }
+    List<TypedDependency> deps = new ArrayList<TypedDependency>(includeExtras ? allTypedDependencies : typedDependencies);
     correctDependencies(deps);
     return deps;
   }

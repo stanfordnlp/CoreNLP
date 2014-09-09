@@ -145,10 +145,6 @@ public class ClassicCounter<E> implements Serializable, Counter<E>, Iterable<E> 
     }
   }
 
-  public static <E> ClassicCounter<E> identityHashMapCounter() {
-    return new ClassicCounter<E>(MapFactory.<E, MutableDouble>identityHashMapFactory());
-  }
-
 
   // STANDARD ACCESS MODIFICATION METHODS
 

@@ -89,7 +89,7 @@ public class ArabicUnknownWordModel extends BaseUnknownWordModel {
   @Override
   public int getSignatureIndex(int index, int sentencePosition, String word) {
     String uwSig = getSignature(word, sentencePosition);
-    int sig = wordIndex.addToIndex(uwSig);
+    int sig = wordIndex.indexOf(uwSig, true);
     return sig;
   }
 

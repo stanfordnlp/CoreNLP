@@ -202,7 +202,7 @@ public class ExhaustiveDependencyParser implements Scorer, KBestViterbiParser {
     boolean[][] hasTag = new boolean[length][numTags];
     for (int i = 0; i < length; i++) {
       //if (wordIndex.contains(sentence.get(i).toString()))
-      words[i] = wordIndex.addToIndex(sentence.get(i).word());
+      words[i] = wordIndex.indexOf(sentence.get(i).word(), true);
       //else
       //words[i] = wordIndex.indexOf(Lexicon.UNKNOWN_WORD);
     }

@@ -14,7 +14,6 @@ import java.lang.reflect.Method;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -228,7 +227,11 @@ public class StringUtils {
   }
 
   public static String joinWords(List<? extends HasWord> l, String glue, int start, int end) {
-    return join(l, glue, in -> in.word(), start, end);
+    return join(l, glue, new Function<HasWord, String>() {
+      public String apply(HasWord in) {
+        return in.word();
+      }
+    }, start, end);
   }
 
   public static final Function<Object,String> DEFAULT_TOSTRING = new Function<Object, String>() {

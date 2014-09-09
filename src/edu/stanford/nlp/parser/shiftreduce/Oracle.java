@@ -6,8 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.Trees;
+import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -84,7 +87,7 @@ class Oracle {
    * unary transition to the top of the unary chain.
    *
    * If the first item is the entire tree, with no remaining unary
-   * transitions, then we need to finalize.
+   * transitions, then we need to finalize.  
    *
    * If the first item is a correct span, with or without a correct
    * label, and there are no unary transitions to be added, then we
@@ -92,11 +95,11 @@ class Oracle {
    * we return a shift transition.  If it has the same right side,
    * then we look at the next subtree on the stack (which must exist).
    * If it is also correct, then the transition is to combine the two
-   * subtrees with the correct label and side.
+   * subtrees with the correct label and side.  
    *
    * TODO: suppose the correct label is not either child label and the
    * children are binarized states?  We should see what the
-   * debinarizer does in that case.  Perhaps a post-processing step
+   * debinarizer does in that case.  Perhaps a post-processing step 
    *
    * If the previous stack item is too small, then any binary reduce
    * action is legal, with no gold transition.  TODO: can this be improved?
@@ -198,10 +201,10 @@ class Oracle {
   }
 
   static boolean spansEqual(Tree subtree, Tree goldSubtree) {
-    return ((ShiftReduceUtils.leftIndex(subtree) == ShiftReduceUtils.leftIndex(goldSubtree)) &&
+    return ((ShiftReduceUtils.leftIndex(subtree) == ShiftReduceUtils.leftIndex(goldSubtree)) && 
             (ShiftReduceUtils.rightIndex(subtree) == ShiftReduceUtils.rightIndex(goldSubtree)));
   }
-
+    
   static OracleTransition getUnaryTransition(Tree S0, Tree enclosingS0, Map<Tree, Tree> parents, boolean compoundUnaries) {
     if (!spansEqual(S0, enclosingS0)) {
       return null;
@@ -218,7 +221,7 @@ class Oracle {
     // TODO: go up the parent chain
     // What we want is:
     // If the top of the stack is part of the unary chain, then parent should point to that subtree's parent.
-    // If the top of the stack is not part of the unary chain,
+    // If the top of the stack is not part of the unary chain, 
     if (!enclosingS0.value().equals(value)) {
       while (true) {
         enclosingS0 = parent;
@@ -233,7 +236,7 @@ class Oracle {
             break;
           }
         } else if (parent == null) {
-          // We went to the root without finding a match.
+          // We went to the root without finding a match.  
           // Treat the root as the unary transition to be made
           // TODO: correct logic?
           parent = enclosingS0;

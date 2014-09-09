@@ -4,7 +4,6 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -221,10 +220,6 @@ public class Generics {
 
   public static <K,V> IdentityHashMap<K,V> newIdentityHashMap() {
     return new IdentityHashMap<K,V>();
-  }
-
-  public static <K> Set<K> newIdentityHashSet() {
-    return Collections.newSetFromMap(Generics.<K, Boolean>newIdentityHashMap());
   }
 
   public static <K,V> WeakHashMap<K,V> newWeakHashMap() {

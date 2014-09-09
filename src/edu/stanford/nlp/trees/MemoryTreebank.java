@@ -474,7 +474,11 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
    */
   public static void main(String[] args) {
     Timing.startTime();
-    Treebank treebank = new MemoryTreebank(in -> new PennTreeReader(in));
+    Treebank treebank = new MemoryTreebank(new TreeReaderFactory() {
+      public TreeReader newTreeReader(Reader in) {
+        return new PennTreeReader(in);
+      }
+    });
     treebank.loadPath(args[0]);
     Timing.endTime();
     System.out.println(treebank);

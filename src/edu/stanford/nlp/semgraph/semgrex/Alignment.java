@@ -1,6 +1,5 @@
 package edu.stanford.nlp.semgraph.semgrex;
 
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.util.Generics;
@@ -91,7 +90,7 @@ public class Alignment {
   private static String iwToString(IndexedWord iw) {
     if (iw == null || iw.equals(IndexedWord.NO_WORD))
       return "_";
-    return iw.toString(CoreLabel.OutputFormat.VALUE);
+    return iw.toString(IndexedWord.WORD_FORMAT);
   }
 
   /**

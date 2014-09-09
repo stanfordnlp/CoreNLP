@@ -59,8 +59,7 @@ public class ShiftReduceOptions extends Options {
       i++;
     } else if (args[i].equalsIgnoreCase("-trainingMethod")) {
       trainOptions().trainingMethod = ShiftReduceTrainOptions.TrainingMethod.valueOf(args[i + 1].toUpperCase());
-      if (trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM ||
-          trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM) {
+      if (trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM) {
         if (trainOptions().beamSize <= 0) {
           trainOptions().beamSize = ShiftReduceTrainOptions.DEFAULT_BEAM_SIZE;
         }

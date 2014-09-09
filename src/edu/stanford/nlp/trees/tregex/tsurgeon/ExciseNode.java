@@ -1,7 +1,5 @@
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
-import java.util.Map;
-
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
@@ -26,43 +24,32 @@ class ExciseNode extends TsurgeonPattern {
   }
 
   @Override
-  public TsurgeonMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
-    return new Matcher(newNodeNames, coindexer);
-  }
-
-  private class Matcher extends TsurgeonMatcher {
-    public Matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
-      super(ExciseNode.this, newNodeNames, coindexer);
+  public Tree evaluate(Tree t, TregexMatcher m) {
+    Tree topNode = children[0].evaluate(t,m);
+    Tree bottomNode = children[1].evaluate(t,m);
+    if(Tsurgeon.verbose) {
+      System.err.println("Excising...original tree:");
+      t.pennPrint(System.err);
+      System.err.println("top: " + topNode + "\nbottom:" + bottomNode);
     }
-
-    @Override
-    public Tree evaluate(Tree tree, TregexMatcher tregex) {
-      Tree topNode = childMatcher[0].evaluate(tree, tregex);
-      Tree bottomNode = childMatcher[1].evaluate(tree, tregex);
-      if(Tsurgeon.verbose) {
-        System.err.println("Excising...original tree:");
-        tree.pennPrint(System.err);
-        System.err.println("top: " + topNode + "\nbottom:" + bottomNode);
+    if (topNode == t) {
+      if (bottomNode.children().length == 1) {
+        return bottomNode.children()[0];
+      } else {
+        return null;
       }
-      if (topNode == tree) {
-        if (bottomNode.children().length == 1) {
-          return bottomNode.children()[0];
-        } else {
-          return null;
-        }
-      }
-      Tree parent = topNode.parent(tree);
-      if(Tsurgeon.verbose)
-        System.err.println("Parent: " + parent);
-      int i = Trees.objectEqualityIndexOf(parent,topNode);
-      parent.removeChild(i);
-      for(Tree child : bottomNode.children()) {
-        parent.addChild(i,child);
-        i++;
-      }
-      if(Tsurgeon.verbose)
-        tree.pennPrint(System.err);
-      return tree;
     }
+    Tree parent = topNode.parent(t);
+    if(Tsurgeon.verbose)
+      System.err.println("Parent: " + parent);
+    int i = Trees.objectEqualityIndexOf(parent,topNode);
+    parent.removeChild(i);
+    for(Tree child : bottomNode.children()) {
+      parent.addChild(i,child);
+      i++;
+    }
+    if(Tsurgeon.verbose)
+      t.pennPrint(System.err);
+    return t;
   }
 }

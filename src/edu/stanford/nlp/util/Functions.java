@@ -1,9 +1,7 @@
 package edu.stanford.nlp.util;
 
-import java.util.function.Function;
-
-/**
- * Utility code for {@link java.util.function.Function}.
+/** 
+ * Utility code for {@link Function}.
  * 
  * @author Roger Levy (rog@stanford.edu)
  * @author javanlp
@@ -36,7 +34,11 @@ public class Functions {
   }
 
   public static <T> Function<T,T> identityFunction() {
-    return t -> t;
+    return new Function<T,T>() {
+      public T apply(T t) {
+        return t;
+      }
+    };
   }
 
   private static class InvertedBijection<T1,T2> implements BijectiveFunction<T2,T1> {

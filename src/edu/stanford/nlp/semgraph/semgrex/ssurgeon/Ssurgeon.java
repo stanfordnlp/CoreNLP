@@ -276,41 +276,32 @@ public class Ssurgeon {
     SsurgeonArgs argsBox = new SsurgeonArgs();
 
     for (int argIndex = 0; argIndex < argsArray.length; ++argIndex) {
-      switch (argsArray[argIndex]) {
-        case GOV_NODENAME_ARG:
-          argsBox.govNodeName = argsArray[argIndex + 1];
-          argIndex += 2;
-          break;
-        case DEP_NODENAME_ARG:
-          argsBox.dep = argsArray[argIndex + 1];
-          argIndex += 2;
-          break;
-        case EDGE_NAME_ARG:
-          argsBox.edge = argsArray[argIndex + 1];
-          argIndex += 2;
-          break;
-        case RELN_ARG:
-          argsBox.reln = argsArray[argIndex + 1];
-          argIndex += 2;
-          break;
-        case NODENAME_ARG:
-          argsBox.node = argsArray[argIndex + 1];
-          argIndex += 2;
-          break;
-        case NODE_PROTO_ARG:
-          argsBox.nodeString = argsArray[argIndex + 1];
-          argIndex += 2;
-          break;
-        case WEIGHT_ARG:
-          argsBox.weight = Double.valueOf(argsArray[argIndex + 1]);
-          argIndex += 2;
-          break;
-        case NAME_ARG:
-          argsBox.name = argsArray[argIndex + 1];
-          argIndex += 2;
-          break;
-        default:
-          throw new IllegalArgumentException("Parsing Ssurgeon args: unknown flag " + argsArray[argIndex]);
+      if (argsArray[argIndex].equals(GOV_NODENAME_ARG)) {
+        argsBox.govNodeName = argsArray[argIndex + 1];
+        argIndex += 2;
+      } else if (argsArray[argIndex].equals(DEP_NODENAME_ARG)) {
+        argsBox.dep = argsArray[argIndex + 1];
+        argIndex += 2;
+      } else if (argsArray[argIndex].equals(EDGE_NAME_ARG)) {
+        argsBox.edge = argsArray[argIndex + 1];
+        argIndex += 2;
+      } else if (argsArray[argIndex].equals(RELN_ARG)) {
+        argsBox.reln = argsArray[argIndex + 1];
+        argIndex += 2;
+      } else if (argsArray[argIndex].equals(NODENAME_ARG)) {
+        argsBox.node = argsArray[argIndex + 1];
+        argIndex += 2;
+      } else if (argsArray[argIndex].equals(NODE_PROTO_ARG)) {
+        argsBox.nodeString = argsArray[argIndex + 1];
+        argIndex += 2;
+      } else if (argsArray[argIndex].equals(WEIGHT_ARG)) {
+        argsBox.weight = Double.valueOf(argsArray[argIndex + 1]);
+        argIndex += 2;
+      } else if (argsArray[argIndex].equals(NAME_ARG)) {
+        argsBox.name = argsArray[argIndex + 1];
+        argIndex += 2;
+      } else {
+        throw new IllegalArgumentException("Parsing Ssurgeon args: unknown flag " + argsArray[argIndex]);
       }
     }
     
@@ -483,7 +474,8 @@ public class Ssurgeon {
     if (!dir.isDirectory()) throw new Exception("Given path not a directory, path="+dir.getAbsolutePath());
     if (VERBOSE)
       System.out.println("Reading Ssurgeon patterns from directory = "+dir.getAbsolutePath());
-    File[] files = dir.listFiles((dir1, name) -> name.toLowerCase().endsWith(".xml"));
+    File[] files = dir.listFiles(new FilenameFilter() {
+        public boolean accept(File dir, String name) { return name.toLowerCase().endsWith(".xml");}} );
     List<SsurgeonPattern> patterns = new ArrayList<SsurgeonPattern>();
     for (File file : files) {
       try {
@@ -534,36 +526,32 @@ public class Ssurgeon {
    */
   public static SsurgPred assemblePredFromXML(Element elt) throws Exception {
     String eltName = elt.getTagName();
-    switch (eltName) {
-      case SsurgeonPattern.PREDICATE_AND_TAG:
-        SsurgAndPred andPred = new SsurgAndPred();
-        for (Element childElt : getChildElements(elt)) {
-          SsurgPred childPred = assemblePredFromXML(childElt);
-          andPred.add(childPred);
-          return andPred;
-        }
-        break;
-      case SsurgeonPattern.PREDICATE_OR_TAG:
-        SsurgOrPred orPred = new SsurgOrPred();
-        for (Element childElt : getChildElements(elt)) {
-          SsurgPred childPred = assemblePredFromXML(childElt);
-          orPred.add(childPred);
-          return orPred;
-        }
-        break;
-      case SsurgeonPattern.PRED_WORDLIST_TEST_TAG:
-        String id = elt.getAttribute(SsurgeonPattern.PRED_ID_ATTR);
-        String resourceID = elt.getAttribute("resourceID");
-        String typeStr = elt.getAttribute("type");
-        String matchName = getEltText(elt).trim(); // node name to match on
-
-        if (matchName == null) {
-          throw new Exception("Could not find match name for " + elt.toString());
-        }
-        if (id == null) {
-          throw new Exception("No ID attribute for element = " + elt.toString());
-        }
-        return new WordlistTest(id, resourceID, typeStr, matchName);
+    if (eltName.equals(SsurgeonPattern.PREDICATE_AND_TAG)) {
+      SsurgAndPred andPred = new SsurgAndPred();
+      for (Element childElt : getChildElements(elt)) {
+        SsurgPred childPred = assemblePredFromXML(childElt);
+        andPred.add(childPred);
+        return andPred;
+      }
+    } else if (eltName.equals(SsurgeonPattern.PREDICATE_OR_TAG)) {
+      SsurgOrPred orPred = new SsurgOrPred();
+      for (Element childElt : getChildElements(elt)) {
+        SsurgPred childPred = assemblePredFromXML(childElt);
+        orPred.add(childPred);
+        return orPred;
+      }
+    } else if (eltName.equals(SsurgeonPattern.PRED_WORDLIST_TEST_TAG)) {
+      String id = elt.getAttribute(SsurgeonPattern.PRED_ID_ATTR);
+      String resourceID = elt.getAttribute("resourceID");
+      String typeStr = elt.getAttribute("type");
+      String matchName = getEltText(elt).trim(); // node name to match on
+      if (matchName == null) {
+        throw new Exception("Could not find match name for "+elt.toString());
+      }
+      if (id == null) {
+        throw new Exception("No ID attribute for element = "+elt.toString());
+      }
+      return new WordlistTest(id, resourceID, typeStr, matchName);
     }
     
     // Not a valid node, error out!

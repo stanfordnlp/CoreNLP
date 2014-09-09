@@ -3,7 +3,7 @@ package edu.stanford.nlp.sequences;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.optimization.StochasticCalculateMethods;
 import edu.stanford.nlp.process.WordShapeClassifier;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.ReflectionLoading;
 
 import java.io.Serializable;
@@ -59,7 +59,7 @@ import java.util.*;
  * <td>boolean</td>
  * <td>false</td>
  * <td>Use SGD (tweaking weights in place) to find minimum (more efficient than
- * the old SGD, faster to converge than Quasi-Newton if there are very large of
+ * the old SGD, faster to converge than Quasi-Newtown if there are very large of
  * samples). Implemented for CRFClassifier. NOTE: Remember to set useQN to false
  * </td>
  * </tr>
@@ -477,10 +477,13 @@ public class SeqClassifierFlags implements Serializable {
   public boolean removeBackgroundSingletonFeatures = false;
   public boolean doGibbs = false;
   public int numSamples = 100;
-  public boolean useNERPrior = false; // todo [cdm 2014]: Disused, to be deleted, use priorModelFactory
-  public boolean useAcqPrior = false; // todo [cdm 2014]: Disused, to be deleted, use priorModelFactory
-
-  public boolean useUniformPrior = false; // todo [cdm 2014]: Disused, to be deleted, use priorModelFactory
+  public boolean useNERPrior = false;
+  public boolean useAcqPrior = false;
+  /**
+   * If true and doGibbs also true, will do generic Gibbs inference without any
+   * priors
+   */
+  public boolean useUniformPrior = false;
   public boolean useMUCFeatures = false;
   public double annealingRate = 0.0;
   public String annealingType = null;
@@ -492,7 +495,7 @@ public class SeqClassifierFlags implements Serializable {
 
   public boolean checkNameList = false;
 
-  public boolean useSemPrior = false; // todo [cdm 2014]: Disused, to be deleted, use priorModelFactory
+  public boolean useSemPrior = false;
   public boolean useFirstWord = false;
 
   public boolean useNumberFeature = false;
@@ -897,7 +900,7 @@ public class SeqClassifierFlags implements Serializable {
   public boolean addBiasToEmbedding = false;
   public boolean hardcodeSoftmaxOutputWeights = false;
 
-  public boolean useNERPriorBIO = false; // todo [cdm 2014]: Disused, to be deleted, use priorModelFactory
+  public boolean useNERPriorBIO = false;
   public String entityMatrix = null;
   public int multiThreadClassifier = 0;
   public boolean useDualDecomp = false;
@@ -1022,14 +1025,8 @@ public class SeqClassifierFlags implements Serializable {
   public boolean strictGoodCoNLL = false;
   public boolean removeStrictGoodCoNLLDuplicates = false;
 
-  /** A class name for a factory that vends a prior NER model that
-   *  implements both SequenceModel and SequenceListener, and which
-   *  is used in the Gibbs sampling sequence model inference.
-   */
-  public String priorModelFactory;
-
-
   // "ADD VARIABLES ABOVE HERE"
+
 
   public transient List<String> phraseGazettes = null;
   public transient Properties props = null;
@@ -1875,6 +1872,12 @@ public class SeqClassifierFlags implements Serializable {
         removeBackgroundSingletonFeatures = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("doGibbs")) {
         doGibbs = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useNERPrior")) {
+        useNERPrior = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useAcqPrior")) {
+        useAcqPrior = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useSemPrior")) {
+        useSemPrior = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useMUCFeatures")) {
         useMUCFeatures = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("initViterbi")) {
@@ -2305,6 +2308,8 @@ public class SeqClassifierFlags implements Serializable {
         addBiasToEmbedding = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("hardcodeSoftmaxOutputWeights")) {
         hardcodeSoftmaxOutputWeights = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useNERPriorBIO")) {
+        useNERPriorBIO = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("entityMatrix")) {
         entityMatrix = val;
       } else if (key.equalsIgnoreCase("multiThreadClassifier")) {
@@ -2531,11 +2536,9 @@ public class SeqClassifierFlags implements Serializable {
         strictGoodCoNLL = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("removeStrictGoodCoNLLDuplicates")) {
         removeStrictGoodCoNLLDuplicates = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("priorModelFactory")) {
-        priorModelFactory = val;
 
         // ADD VALUE ABOVE HERE
-      } else if ( ! key.isEmpty() && ! key.equals("prop")) {
+      } else if (key.length() > 0 && !key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
       }
     }
@@ -2555,9 +2558,8 @@ public class SeqClassifierFlags implements Serializable {
     stringRep = sb.toString();
   } // end setProperties()
 
-
   // Thang Sep13: refactor to be used for multiple factories.
-  private static String getFeatureFactory(String val){
+  private String getFeatureFactory(String val){
     if (val.equalsIgnoreCase("SuperSimpleFeatureFactory")) {
       val = "edu.stanford.nlp.sequences.SuperSimpleFeatureFactory";
     } else if (val.equalsIgnoreCase("NERFeatureFactory")) {

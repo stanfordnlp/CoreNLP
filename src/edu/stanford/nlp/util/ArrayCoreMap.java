@@ -636,7 +636,12 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
     // sort keys by class name
     List<Class> sortedKeys = new ArrayList<Class>(this.keySet());
     Collections.sort(sortedKeys,
-        (a, b) -> a.getCanonicalName().compareTo(b.getCanonicalName()));
+        new Comparator<Class>(){
+      @Override
+      public int compare(Class a, Class b) {
+        return a.getCanonicalName().compareTo(b.getCanonicalName());
+      }
+    });
 
     // log key/value pairs
     for (Class key : sortedKeys) {

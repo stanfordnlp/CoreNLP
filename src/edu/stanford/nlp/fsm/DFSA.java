@@ -30,15 +30,10 @@ public final class DFSA<T,S> implements Scored {
     this.score = Double.NaN;
   }
 
-  private double score;
+  public double score;
 
-  @Override
   public double score() {
     return score;
-  }
-
-  public void setScore(double score) {
-    this.score = score;
   }
 
   public DFSAState<T,S> initialState() {
@@ -154,5 +149,4 @@ public final class DFSA<T,S> implements Scored {
   public static <T, S> void printTrieAsRules(DFSA<T, S> dfsa, Writer w) throws IOException {
     printTrieAsRulesHelper(dfsa.initialState(), dfsa.dfsaID.toString(), w);
   }
-
 }

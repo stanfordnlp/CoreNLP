@@ -35,8 +35,12 @@ public class SemgrexDemo {
     GrammaticalStructureFactory gsf = params.treebankLanguagePack().grammaticalStructureFactory(params.treebankLanguagePack().punctuationWordRejectFilter(), params.typedDependencyHeadFinder());
 
     GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
+    // Same graph, but with a DocId and an index included
+    SemanticGraph graph2 = SemanticGraphFactory.generateUncollapsedDependencies(gs, "demo", 0);
 
+    // Note the result is the same
     System.err.println(graph);
+    System.err.println(graph2);
 
     SemgrexPattern semgrex = SemgrexPattern.compile("{}=A <<nsubj {}=B");
     SemgrexMatcher matcher = semgrex.matcher(graph);

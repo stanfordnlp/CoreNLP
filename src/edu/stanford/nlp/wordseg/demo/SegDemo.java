@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Properties;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
+import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 
 
 /** This is a very simple demo of calling the Chinese Word Segmenter

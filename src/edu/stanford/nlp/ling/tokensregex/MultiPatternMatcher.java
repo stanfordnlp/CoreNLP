@@ -3,7 +3,6 @@ package edu.stanford.nlp.ling.tokensregex;
 import edu.stanford.nlp.util.*;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * Matcher that takes in multiple patterns

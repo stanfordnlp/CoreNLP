@@ -22,7 +22,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Iterables;
 
 
@@ -41,7 +41,12 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
   public Iterator<Annotation> iterator() {
     return new Iterator<Annotation>() {
       private Iterator<BufferedReader> readers = Iterables.transform(files,
-          file -> IOUtils.readerFromFile(file)).iterator();
+          new Function<File, BufferedReader>() {
+            @Override
+            public BufferedReader apply(File file) {
+              return IOUtils.readerFromFile(file);
+            }
+      }).iterator();
 
       private BufferedReader reader = findReader();
       private Annotation annotation = findAnnotation();

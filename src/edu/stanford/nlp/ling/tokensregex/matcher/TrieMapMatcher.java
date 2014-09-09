@@ -3,7 +3,6 @@ package edu.stanford.nlp.ling.tokensregex.matcher;
 import edu.stanford.nlp.util.*;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * The <code>TrieMapMatcher</code> provides functions to match against a trie.
@@ -557,7 +556,12 @@ public class TrieMapMatcher<K,V> {
     protected final int maxSize;
     protected final double maxCost;
 
-    public final Function<PartialApproxMatch<K,V>, Double> MATCH_COST_FUNCTION = in -> in.cost;
+    public final Function<PartialApproxMatch<K,V>, Double> MATCH_COST_FUNCTION = new Function<PartialApproxMatch<K,V>, Double>() {
+      @Override
+      public Double apply(PartialApproxMatch<K,V> in) {
+        return in.cost;
+      }
+    };
 
     public MatchQueue(int maxSize, double maxCost) {
       this.maxSize = maxSize;
@@ -675,42 +679,45 @@ public class TrieMapMatcher<K,V> {
   }
   private static final MatchCostFunction DEFAULT_COST = new ExactMatchCost();
 
-  private static final Comparator<PartialApproxMatch> PARTIAL_MATCH_COMPARATOR = (o1, o2) -> {
-    if (o1.cost == o2.cost) {
-      if (o1.matched.size() == o2.matched.size()) {
-        int m1 = (o1.multimatches != null)? o1.multimatches.size():0;
-        int m2 = (o2.multimatches != null)? o2.multimatches.size():0;
-        if (m1 == m2) {
-          if (o1.begin == o2.begin) {
-            if (o1.end == o2.end) {
-              for (int i = 0; i < o1.matched.size(); i++) {
-                Object x1 = o1.matched.get(i);
-                Object x2 = o2.matched.get(i);
-                if (x1 != null && x2 != null) {
-                  if (x1 instanceof Comparable) {
-                    int comp = ((Comparable) x1).compareTo(x2);
-                    if (comp != 0) return comp;
+  private static final Comparator<PartialApproxMatch> PARTIAL_MATCH_COMPARATOR = new Comparator<PartialApproxMatch>() {
+    @Override
+    public int compare(PartialApproxMatch o1, PartialApproxMatch o2) {
+      if (o1.cost == o2.cost) {
+        if (o1.matched.size() == o2.matched.size()) {
+          int m1 = (o1.multimatches != null)? o1.multimatches.size():0;
+          int m2 = (o2.multimatches != null)? o2.multimatches.size():0;
+          if (m1 == m2) {
+            if (o1.begin == o2.begin) {
+              if (o1.end == o2.end) {
+                for (int i = 0; i < o1.matched.size(); i++) {
+                  Object x1 = o1.matched.get(i);
+                  Object x2 = o2.matched.get(i);
+                  if (x1 != null && x2 != null) {
+                    if (x1 instanceof Comparable) {
+                      int comp = ((Comparable) x1).compareTo(x2);
+                      if (comp != 0) return comp;
+                    }
                   }
                 }
-              }
-              if (o1.multimatches != null && o2.multimatches != null) {
-                for (int i = 0; i < o1.multimatches.size(); i++) {
-                  Match mm1 = (Match) o1.multimatches.get(i);
-                  Match mm2 = (Match) o2.multimatches.get(i);
-                  return mm1.getInterval().compareTo(mm2.getInterval());
+                if (o1.multimatches != null && o2.multimatches != null) {
+                  for (int i = 0; i < o1.multimatches.size(); i++) {
+                    Match mm1 = (Match) o1.multimatches.get(i);
+                    Match mm2 = (Match) o2.multimatches.get(i);
+                    return mm1.getInterval().compareTo(mm2.getInterval());
+                  }
                 }
+                return 0;
               }
-              return 0;
-            }
-            return (o1.end < o2.end)? -1:1;
-          } else return (o1.begin < o2.begin)? -1:1;
-        } else return (m1 < m2)? -1:1;
-      } else return (o1.matched.size() < o2.matched.size())? -1:1;
-    } else if (Double.isNaN(o1.cost)) {
-      return -1;
-    } else if (Double.isNaN(o2.cost)) {
-      return 1;
-    } else return (o1.cost < o2.cost)? -1:1;
+              return (o1.end < o2.end)? -1:1;
+            } else return (o1.begin < o2.begin)? -1:1;
+          } else return (m1 < m2)? -1:1;
+        } else return (o1.matched.size() < o2.matched.size())? -1:1;
+      } else if (Double.isNaN(o1.cost)) {
+        return -1;
+      } else if (Double.isNaN(o2.cost)) {
+        return 1;
+      } else return (o1.cost < o2.cost)? -1:1;
+    }
   };
 
 

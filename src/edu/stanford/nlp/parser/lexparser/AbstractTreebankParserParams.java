@@ -513,10 +513,13 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
    *  @return An Equivalence class for typed dependencies
    */
   public static EquivalenceClasser<List<String>, String> typedDependencyClasser() {
-    return s -> {
-      if(s.get(5).equals(leftHeaded))
-        return s.get(2) + '(' + s.get(3) + "->" + s.get(4) + ')';
-      return s.get(2) + '(' + s.get(4) + "<-" + s.get(3) + ')';
+    return new EquivalenceClasser<List<String>, String>() {
+      @Override
+      public String equivalenceClass(List<String> s) {
+        if(s.get(5).equals(leftHeaded))
+          return s.get(2) + '(' + s.get(3) + "->" + s.get(4) + ')';
+        return s.get(2) + '(' + s.get(4) + "<-" + s.get(3) + ')';
+      }
     };
   }
 

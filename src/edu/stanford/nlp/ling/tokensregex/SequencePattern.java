@@ -3,7 +3,6 @@ package edu.stanford.nlp.ling.tokensregex;
 import edu.stanford.nlp.util.*;
 
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * Generic Sequence Pattern for regular expressions.

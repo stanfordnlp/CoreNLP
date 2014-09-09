@@ -71,9 +71,12 @@ public class MulticoreWrapper<I,O> {
     threadPool = buildThreadPool(nThreads);
     //    queue = new ExecutorCompletionService<Integer>(threadPool);
     idleProcessors = new ArrayBlockingQueue<Integer>(nThreads, false);
-    callback = (result, processorId) -> {
-      outputQueue.put(result.id, result.item);
-      idleProcessors.add(processorId);
+    callback = new JobCallback<O>() {
+      @Override
+      public void call(QueueItem<O> result, int processorId) {
+        outputQueue.put(result.id, result.item);
+        idleProcessors.add(processorId);
+      }
     };
 
     // Sanity check: Fixed thread pool so prevent timeouts.

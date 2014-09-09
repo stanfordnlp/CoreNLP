@@ -8,7 +8,7 @@ import java.util.regex.*;
 import edu.stanford.nlp.international.arabic.pipeline.DefaultLexicalMapper;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.trees.international.arabic.ATBTreeUtils;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 
 /**

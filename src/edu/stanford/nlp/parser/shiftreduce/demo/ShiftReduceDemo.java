@@ -23,17 +23,14 @@ public class ShiftReduceDemo {
     String taggerPath = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger";
 
     for (int argIndex = 0; argIndex < args.length; ) {
-      switch (args[argIndex]) {
-        case "-tagger":
-          taggerPath = args[argIndex + 1];
-          argIndex += 2;
-          break;
-        case "-model":
-          modelPath = args[argIndex + 1];
-          argIndex += 2;
-          break;
-        default:
-          throw new RuntimeException("Unknown argument " + args[argIndex]);
+      if (args[argIndex].equals("-tagger")) {
+        taggerPath = args[argIndex + 1];
+        argIndex += 2;
+      } else if (args[argIndex].equals("-model")) {
+        modelPath = args[argIndex + 1];
+        argIndex += 2;
+      } else {
+        throw new RuntimeException("Unknown argument " + args[argIndex]);
       }
     }
 

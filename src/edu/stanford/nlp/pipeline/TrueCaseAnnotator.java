@@ -103,22 +103,17 @@ public class TrueCaseAnnotator implements Annotator {
     String trueCase = l.getString(CoreAnnotations.TrueCaseAnnotation.class);
     String text = l.word();
     String trueCaseText = text;
-
-    switch (trueCase) {
-      case "UPPER":
-        trueCaseText = text.toUpperCase();
-        break;
-      case "LOWER":
-        trueCaseText = text.toLowerCase();
-        break;
-      case "INIT_UPPER":
-        trueCaseText = text.substring(0, 1).toUpperCase() + text.substring(1);
-        break;
-      case "O":
-        // The model predicted mixed case, so lookup the map:
-        if (mixedCaseMap.containsKey(text))
-          trueCaseText = mixedCaseMap.get(text);
-        break;
+    
+    if (trueCase.equals("UPPER")) {
+      trueCaseText = text.toUpperCase();
+    } else if (trueCase.equals("LOWER")) {
+      trueCaseText = text.toLowerCase();
+    } else if (trueCase.equals("INIT_UPPER")) {
+      trueCaseText = text.substring(0,1).toUpperCase() + text.substring(1);
+    } else if (trueCase.equals("O")) {
+      // The model predicted mixed case, so lookup the map:
+      if(mixedCaseMap.containsKey(text))
+        trueCaseText = mixedCaseMap.get(text);
     }
     
     l.set(CoreAnnotations.TrueCaseTextAnnotation.class, trueCaseText);

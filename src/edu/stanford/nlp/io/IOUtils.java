@@ -1967,7 +1967,6 @@ public class IOUtils {
     for (int i = 0; i < rtn.length; ++i) {
       rtn[i] = linesReversed.get(rtn.length - i - 1);
     }
-    raf.close();
     return rtn;
   }
 

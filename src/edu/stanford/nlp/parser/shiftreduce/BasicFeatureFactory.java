@@ -2,9 +2,11 @@ package edu.stanford.nlp.parser.shiftreduce;
 
 import java.util.List;
 
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.TreeShapedStack;
 
 public class BasicFeatureFactory extends FeatureFactory {
@@ -36,8 +38,8 @@ public class BasicFeatureFactory extends FeatureFactory {
     features.add(wtFeature + tag + "-" + word);
   }
 
-  public static void addBinaryFeatures(List<String> features,
-                                       String name1, CoreLabel label1, FeatureComponent feature11, FeatureComponent feature12,
+  public static void addBinaryFeatures(List<String> features, 
+                                       String name1, CoreLabel label1, FeatureComponent feature11, FeatureComponent feature12, 
                                        String name2, CoreLabel label2, FeatureComponent feature21, FeatureComponent feature22) {
     if (label1 == null) {
       if (label2 == null) {
@@ -302,7 +304,7 @@ public class BasicFeatureFactory extends FeatureFactory {
     CoreLabel qP1Label = getQueueLabel(sentence, tokenPosition, -1); // previous location in queue
     CoreLabel qP2Label = getQueueLabel(sentence, tokenPosition, -2); // two locations prior in queue
 
-    // It's kind of unpleasant having this magic order of feature names.
+    // It's kind of unpleasant having this magic order of feature names.  
     // On the other hand, it does save some time with string concatenation.
     addUnaryStackFeatures(features, s0Label, "S0C-", "S0WT-", "S0T-", "S0WC-", "S0TC-");
     addUnaryStackFeatures(features, s1Label, "S1C-", "S1WT-", "S1T-", "S1WC-", "S1TC-");
@@ -380,6 +382,6 @@ public class BasicFeatureFactory extends FeatureFactory {
     return features;
   }
 
-  private static final long serialVersionUID = 1;
+  private static final long serialVersionUID = 1;  
 }
 

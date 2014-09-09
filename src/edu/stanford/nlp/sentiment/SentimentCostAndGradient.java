@@ -12,6 +12,7 @@ import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.TwoDimensionalMap;
 
 // TODO: get rid of the word Sentiment everywhere
