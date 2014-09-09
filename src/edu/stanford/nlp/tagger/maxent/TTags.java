@@ -179,7 +179,7 @@ public class TTags {
       closed.add("$,");
       closed.add("$.");
       closed.add("$(");
-      closed.add("--");
+      closed.add("--"); // this shouldn't be a tag of the dataset, but was a conversion bug!
       closed.add(Tagger.EOS_TAG);
       closed.add("KOKOM");
       closed.add("PPOSS");
@@ -278,6 +278,15 @@ public class TTags {
     else {
       throw new RuntimeException("unknown language: " + language);
     }
+  }
+
+
+  /** Return the Set of tags used by this tagger (available after training the tagger).
+   *
+   * @return The Set of tags used by this tagger
+   */
+  public Set<String> tagSet() {
+    return new HashSet<String>(index.objectsList());
   }
 
 

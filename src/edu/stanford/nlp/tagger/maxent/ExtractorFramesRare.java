@@ -41,9 +41,11 @@ import java.util.*;
  * <table>
  * <tr><td>Name</td><td>Args</td><td>Effect</td></tr>
  * <tr><td>wordshapes</td><td>left, right</td>
- *     <td>Word shape features, eg transform Foo5 into Xxx#
+ *     <td>Word shape features, e.g., transform Foo5 into Xxx#
  *         (not exactly like that, but that general idea).
  *         Creates individual features for each word left ... right.
+ *         If just one argument wordshapes(-2) is given, then end is taken as 0.
+  *        If left is not less than or equal to right, no features are made.
  *         Fairly English-specific.</td></tr>
  * <tr><td>unicodeshapes</td><td>left, right</td>
  *     <td>Same thing, but works for unicode characters generally.</td></tr>
@@ -60,8 +62,8 @@ import java.util.*;
  *     <td>Features for concatenated prefix and suffix.  One feature for
  *         each of length 1 ... length.</td></tr>
  * <tr><td>capitalizationsuffix</td><td>length</td>
- *     <td>Current word only.  Combines the suffix with a binary value
- *         for whether the word contains any capital letters.</td></tr>
+ *     <td>Current word only.  Combines character suffixes up to size length with a
+ *         binary value for whether the word contains any capital letters.</td></tr>
  * <tr><td>distsim</td><td>filename, left, right</td>
  *     <td>Individual features for each position left ... right.
  *         Compares that word with the dictionary in filename.</td></tr>
@@ -1228,8 +1230,8 @@ class ExtractorWordPref extends RareExtractor {
 
 class ExtractorsConjunction extends RareExtractor {
 
-  private Extractor extractor1;
-  private Extractor extractor2;
+  private final Extractor extractor1;
+  private final Extractor extractor2;
 
   volatile boolean isLocal, isDynamic;
 
@@ -1263,6 +1265,13 @@ class ExtractorsConjunction extends RareExtractor {
 
   @Override public boolean isLocal() { return isLocal; }
   @Override public boolean isDynamic() { return isDynamic; }
+
+  @Override
+  public String toString() {
+    return StringUtils.getShortClassName(this) + '(' + extractor1 + ',' + extractor2 + ')';
+  }
+
+
 }
 
 

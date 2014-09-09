@@ -389,5 +389,29 @@
     </war>
   </target>
 
-</project>
+  <property environment="env" />
 
+  <condition property="version1.7">
+    <equals arg1="${ant.java.version}" arg2="1.7" />
+  </condition>
+
+  <target name="tregex-osx" if="version1.7" depends="jar"
+          description="Build an OS X app for TregexGUI">
+    <fail unless="env.JAVA_HOME"
+          message="Environment variable JAVA_HOME not set." />
+
+    <taskdef name="bundleapp"
+             classname="com.oracle.appbundler.AppBundlerTask"
+             classpath="lib/appbundler-1.0.jar" />
+
+    <bundleapp outputdirectory="."
+               name="Tregex GUI"
+               displayname="Tregex GUI"
+               identifier="edu.stanford.nlp.trees.tregex.gui.TregexGUI"
+               mainclassname="edu.stanford.nlp.trees.tregex.gui.TregexGUI">
+      <runtime dir="${env.JAVA_HOME}" />
+      <classpath file="javanlp-core.jar" />
+    </bundleapp>
+  </target>
+
+</project>
