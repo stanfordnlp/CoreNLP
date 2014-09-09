@@ -37,6 +37,8 @@ public abstract class AnnotationOutputter {
     public TreePrint constituentTreePrinter = DEFAULT_CONSTITUENT_TREE_PRINTER;
     /** If false, will print only non-singleton entities*/
     public boolean printSingletons = false;
+
+    public double beamPrintingOption = 0.0;
   }
 
 
@@ -75,6 +77,7 @@ public abstract class AnnotationOutputter {
     options.constituentTreePrinter = pipeline.getConstituentTreePrinter();
     options.encoding = pipeline.getEncoding();
     options.printSingletons = pipeline.getPrintSingletons();
+    options.beamPrintingOption = pipeline.getBeamPrintingOption();
     return options;
   }
 
