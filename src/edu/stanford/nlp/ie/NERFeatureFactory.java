@@ -185,9 +185,6 @@ import edu.stanford.nlp.util.Timing;
  * <tr><td> useLastRealWord</td><td>boolean</td><td>false</td><td>Iff the prev word is of length 3 or less, add an extra feature that combines the word two back and the current word's shape. <i>Weird!</i></td></tr>
  * <tr><td> useNextRealWord</td><td>boolean</td><td>false</td><td>Iff the next word is of length 3 or less, add an extra feature that combines the word after next and the current word's shape. <i>Weird!</i></td></tr>
  * <tr><td> useTitle</td><td>boolean</td><td>false</td><td>Match a word against a list of name titles (Mr, Mrs, etc.)</td></tr>
- * <tr><td> useDistSim</td><td>boolean</td><td>false</td><td>Load a file of distributional similarity classes (specified by <code>distSimLexicon</code>) and use it for features</td></tr>
- * <tr><td> distSimLexicon</td><td>String</td><td></td><td>The file to be loaded for distsim classes.</td></tr>
- * <tr><td> distSimFileFormat</td><td>String</td><td>alexclark</td><td>Files should be formatted as tab separated rows where each row is a word/class pair.  alexclark=word first, terrykoo=class first</td></tr>
  * <tr><td> useOccurrencePatterns</td><td>boolean</td><td>false</td><td>This is a very engineered feature designed to capture multiple references to names.  If the current word isn't capitalized, followed by a non-capitalized word, and preceded by a word with alphabetic characters, it returns NO-OCCURRENCE-PATTERN.  Otherwise, if the previous word is a capitalized NNP, then if in the next 150 words you find this PW-W sequence, you get XY-NEXT-OCCURRENCE-XY, else if you find W you get XY-NEXT-OCCURRENCE-Y.  Similarly for backwards and XY-PREV-OCCURRENCE-XY and XY-PREV-OCCURRENCE-Y.  Else (if the previous word isn't a capitalized NNP), under analogous rules you get one or more of X-NEXT-OCCURRENCE-YX, X-NEXT-OCCURRENCE-XY, X-NEXT-OCCURRENCE-X, X-PREV-OCCURRENCE-YX, X-PREV-OCCURRENCE-XY, X-PREV-OCCURRENCE-X.</td></tr>
  * <tr><td> useTypeySequences</td><td>boolean</td><td>false</td><td>Some first order word shape patterns.</td></tr>
  * <tr><td> useGenericFeatures</td><td>boolean</td><td>false</td><td>If true, any features you include in the map will be incorporated into the model with values equal to those given in the file; values are treated as strings unless you use the "realValued" option (described below)</td></tr>
@@ -1706,26 +1703,18 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         if (flags.useSequences && flags.usePrevSequences) {
           featuresCpC.add("PSEQ");
           featuresCpC.add(cWord + "-PSEQW");
+          featuresCpC.add(pWord+ '-' +cWord + "-PSEQW2");
 
-          if ( ! flags.strictGoodCoNLL) {
-            featuresCpC.add(pWord+ '-' +cWord + "-PSEQW2");  // added later after goodCoNLL
-            featuresCpC.add(pWord + "-PSEQpW"); // added later after goodCoNLL
-          }
+          featuresCpC.add(pWord + "-PSEQpW");
 
-          if (flags.useDistSim) {
-            featuresCpC.add(pDS + "-PSEQpDS");
-            featuresCpC.add(cDS + "-PSEQcDS");
-            featuresCpC.add(pDS+ '-' +cDS + "-PSEQpcDS");
-          }
+          featuresCpC.add(pDS + "-PSEQpDS");
+          featuresCpC.add(cDS + "-PSEQcDS");
+          featuresCpC.add(pDS+ '-' +cDS + "-PSEQpcDS");
 
           if (((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) || flags.useShapeStrings)) {
-            if ( ! flags.strictGoodCoNLL) {     // These ones were added later after goodCoNLL
-              featuresCpC.add(pShape + "-PSEQpS");
-              featuresCpC.add(cShape + "-PSEQcS");
-            }
-            if (flags.strictGoodCoNLL && ! flags.removeStrictGoodCoNLLDuplicates) {
-              featuresCpC.add(pShape + '-' + cShape + "-PSEQpcS"); // Duplicate (in goodCoNLL orig, see -TYPES below)
-            }
+            featuresCpC.add(pShape + "-PSEQpS");
+            featuresCpC.add(cShape + "-PSEQcS");
+            featuresCpC.add(pShape+ '-' +cShape + "-PSEQpcS");
           }
         }
       }
@@ -1737,7 +1726,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
           featuresCpC.add(pShape + '-' + cShape + '-' + n.get(CoreAnnotations.ShapeAnnotation.class) + "-PCNSHAPES");
         }
         if (flags.useTypeSeqs2) {
-          featuresCpC.add(pShape + '-' + cShape + "-TYPES");  // this duplicates PSEQpcS above
+          featuresCpC.add(pShape + '-' + cShape + "-TYPES");
         }
 
         if (flags.useYetMoreCpCShapes) {
@@ -1750,7 +1739,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       if (flags.useTypeySequences) {
         featuresCpC.add(cShape + "-TPS2");
         featuresCpC.add(n.get(CoreAnnotations.ShapeAnnotation.class) + "-TNS1");
-        // featuresCpC.add(pShape) + "-" + cShape) + "-TPS"); // duplicates -TYPES, so now omitted; you may need to slightly increase sigma to duplicate previous results, however.
+        // featuresCpC.add(pShape) + "-" + cShape) + "-TPS"); // duplicates -TYPES, so now omitted; you may need to slighly increase sigma to duplicate previous results, however.
       }
 
       if (flags.useTaggySequences) {
@@ -1971,8 +1960,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
 
     if (flags.useInternal && flags.useExternal) {
 
-      if (flags.strictGoodCoNLL && ! flags.removeStrictGoodCoNLLDuplicates && flags.useTypeySequences && flags.maxLeft >= 2) {
-        // this feature duplicates -TYPETYPES below, so probably don't include it, but it was in original tests of CMM goodCoNLL
+      if (false && flags.useTypeySequences && flags.maxLeft >= 2) {  // this feature duplicates -TYPETYPES one below, so don't include it (hurts to duplicate)!!!
         featuresCpCp2C.add(p2.get(CoreAnnotations.ShapeAnnotation.class) + '-' + p.get(CoreAnnotations.ShapeAnnotation.class) + '-' + c.get(CoreAnnotations.ShapeAnnotation.class) + "-TTPS");
       }
 

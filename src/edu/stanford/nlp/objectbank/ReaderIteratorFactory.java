@@ -1,11 +1,12 @@
 package edu.stanford.nlp.objectbank;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.AbstractIterator;
+import edu.stanford.nlp.io.EncodingFileReader;
 
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.zip.*;
 
 /**
  * A ReaderIteratorFactory provides a means of getting an Iterator
@@ -31,7 +32,7 @@ import java.util.*;
  * @author <A HREF="mailto:jrfinkel@stanford.edu">Jenny Finkel</A>
  * @version 1.0
  */
-//TODO: does this always store the same kind of thing in a given instance,
+//TODO: does this always store the same kind of thing in a given instance, 
 //or do you want to allow having some Files, some Strings, etc.?
 public class ReaderIteratorFactory implements Iterable<Reader> {
 
@@ -77,7 +78,7 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
   /**
    * The underlying Collection of input sources.  Currently supported
    * input sources are: Files, Strings, URLs and Readers.   The
-   * implementation automatically determines the type of input and
+   * implementation automatically  determines the type of input and
    * produces a java.util.Reader accordingly.
    */
   protected Collection<Object> c;
@@ -93,7 +94,6 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
    *
    * @return an Iterator over the input sources in the underlying Collection.
    */
-  @Override
   public Iterator<Reader> iterator() {
     return new ReaderIterator();
   }
@@ -173,7 +173,7 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
       }
 
       Object o = iter.next();
-
+      
       try {
         if (o instanceof File) {
           File file = (File) o;
@@ -186,7 +186,12 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
             iter = l.iterator();
             file = (File) iter.next();
           }
-          nextObject = IOUtils.readerFromFile(file, enc);
+          if (file.getName().endsWith(".gz")) {
+            nextObject = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file)), enc));
+          } else {
+            nextObject = new BufferedReader(new EncodingFileReader(file, enc));
+          }
+          //nextObject = new BufferedReader(new FileReader(file));
         } else if (o instanceof String) {
 //           File file = new File((String)o);
 //           if (file.exists()) {

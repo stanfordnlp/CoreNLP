@@ -5,10 +5,13 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.TwoDimensionalSet;
 
 public class SentimentTraining {
 
@@ -30,9 +33,9 @@ public class SentimentTraining {
     for (int feature = 0; feature<gradf.length;feature++ ) {
       sumGradSquare[feature] = sumGradSquare[feature] + gradf[feature]*gradf[feature];
       theta[feature] = theta[feature] - (model.op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
-    }
+    } 
 
-    model.vectorToParams(theta);
+    model.vectorToParams(theta);    
   }
 
   public static void train(SentimentModel model, String modelPath, List<Tree> trainingTrees, List<Tree> devTrees) {
@@ -44,14 +47,14 @@ public class SentimentTraining {
     // train using AdaGrad (seemed to work best during the dvparser project)
     double[] sumGradSquare = new double[model.totalParamSize()];
     Arrays.fill(sumGradSquare, model.op.trainOptions.initialAdagradWeight);
-
+    
     int numBatches = trainingTrees.size() / model.op.trainOptions.batchSize + 1;
     System.err.println("Training on " + trainingTrees.size() + " trees in " + numBatches + " batches");
     System.err.println("Times through each training batch: " + model.op.trainOptions.epochs);
     for (int epoch = 0; epoch < model.op.trainOptions.epochs; ++epoch) {
       System.err.println("======================================");
       System.err.println("Starting epoch " + epoch);
-      if (epoch > 0 && model.op.trainOptions.adagradResetFrequency > 0 &&
+      if (epoch > 0 && model.op.trainOptions.adagradResetFrequency > 0 && 
           (epoch % model.op.trainOptions.adagradResetFrequency == 0)) {
         System.err.println("Resetting adagrad weights to " + model.op.trainOptions.initialAdagradWeight);
         Arrays.fill(sumGradSquare, model.op.trainOptions.initialAdagradWeight);
@@ -62,7 +65,7 @@ public class SentimentTraining {
       for (int batch = 0; batch < numBatches; ++batch) {
         System.err.println("======================================");
         System.err.println("Epoch " + epoch + " batch " + batch);
-
+      
         // Each batch will be of the specified batch size, except the
         // last batch will include any leftover trees at the end of
         // the list
@@ -71,7 +74,7 @@ public class SentimentTraining {
         if (endTree + model.op.trainOptions.batchSize > shuffledSentences.size()) {
           endTree = shuffledSentences.size();
         }
-
+        
         executeOneTrainingBatch(model, shuffledSentences.subList(startTree, endTree), sumGradSquare);
 
         long totalElapsed = timing.report();
@@ -108,17 +111,17 @@ public class SentimentTraining {
         }
       }
       long totalElapsed = timing.report();
-
+      
       if (maxTrainTimeMillis > 0 && totalElapsed > maxTrainTimeMillis) {
         System.err.println("Max training time exceeded, exiting");
         break;
       }
-    }
+    }    
   }
 
   public static boolean runGradientCheck(SentimentModel model, List<Tree> trees) {
     SentimentCostAndGradient gcFunc = new SentimentCostAndGradient(model, trees);
-    return gcFunc.gradientCheck(model.totalParamSize(), 50, model.paramsToVector());
+    return gcFunc.gradientCheck(model.totalParamSize(), 50, model.paramsToVector());    
   }
 
   public static void main(String[] args) {
@@ -199,7 +202,7 @@ public class SentimentTraining {
     // component of the accepted training rules to build up the "unk"
     // parameter in case there are no rules that don't meet the
     // threshold
-
+    
     if (runGradientCheck) {
       runGradientCheck(model, trainingTrees);
     }

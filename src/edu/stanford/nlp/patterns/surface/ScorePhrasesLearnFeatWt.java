@@ -164,7 +164,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
       Set<String> negativeWords, Map<Class, Object> otherIgnoreClasses, double perSelectRand, double perSelectNeg, TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted,
       Counter<SurfacePattern> allSelectedPatterns) {
     // TODO: check whats happening with candidate terms for this iteration. do
-    // not count them as negative!!! -- I think this comment is not valid anymore.
+    // not count them as negative!!!
     Random r = new Random(10);
     Random rneg = new Random(10);
     RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();

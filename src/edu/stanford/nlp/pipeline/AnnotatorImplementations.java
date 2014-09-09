@@ -20,10 +20,17 @@ import java.util.*;
 public class AnnotatorImplementations {
 
   /**
+   * Tokenize, according to whitespace only
+   */
+  public Annotator whitespaceTokenizer(Properties properties) {
+    return new WhitespaceTokenizerAnnotator(properties);
+  }
+
+  /**
    * Tokenize, emulating the Penn Treebank
    */
-  public Annotator tokenizer(Properties properties, boolean verbose, String options) {
-    return new TokenizerAnnotator(verbose, properties, options);
+  public Annotator ptbTokenizer(Properties properties, boolean verbose, String options) {
+    return new PTBTokenizerAnnotator(verbose, options);
   }
 
   /**
@@ -96,12 +103,10 @@ public class AnnotatorImplementations {
 
     String[] loadPaths = models.toArray(new String[models.size()]);
 
-    NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, useSUTime, properties, loadPaths);
-
-    int nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
-    long maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
-
-    return new NERCombinerAnnotator(nerCombiner, verbose, nThreads, maxTime);
+    NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
+        useSUTime, properties,
+        loadPaths);
+    return new NERCombinerAnnotator(nerCombiner, verbose);
   }
 
   /**

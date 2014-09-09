@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -27,22 +28,16 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 public class ReadSentimentDataset {
-  static final Function<Tree, String> TRANSFORM_TREE_TO_WORD = new Function<Tree, String>() {
-    public String apply(Tree tree) {
-      return tree.label().value();
-    }
-  };
+  static final Function<Tree, String> TRANSFORM_TREE_TO_WORD = tree -> tree.label().value();
 
-  static final Function<String, String> TRANSFORM_PARENS = new Function<String, String>() {
-    public String apply(String word) {
-      if (word.equals("(")) {
-        return "-LRB-";
-      }
-      if (word.equals(")")) {
-        return "-RRB-";
-      }
-      return word;
+  static final Function<String, String> TRANSFORM_PARENS = word -> {
+    if (word.equals("(")) {
+      return "-LRB-";
     }
+    if (word.equals(")")) {
+      return "-RRB-";
+    }
+    return word;
   };
 
   // A bunch of trees have some funky tokenization which we can
@@ -109,8 +104,6 @@ public class ReadSentimentDataset {
     }
   }
 
-  private ReadSentimentDataset() {} // static class
-
   public static Tree convertTree(List<Integer> parentPointers, List<String> sentence, Map<List<String>, Integer> phraseIds, Map<Integer, Double> sentimentScores, PTBEscapingProcessor escaper) {
     int maxNode = 0;
     for (Integer parent : parentPointers) {
@@ -156,7 +149,7 @@ public class ReadSentimentDataset {
       List<String> words = CollectionUtils.transformAsList(leaves, TRANSFORM_TREE_TO_WORD);
       // First we look for a copy of the phrase with -LRB- -RRB-
       // instead of ().  The sentiment trees sometimes have both, and
-      // the escaped versions seem to have more reasonable scores.
+      // the escaped versions seem to have more reasonable scores.  
       // If a particular phrase doesn't have -LRB- -RRB- we fall back
       // to the unescaped versions.
       Integer phraseId = phraseIds.get(CollectionUtils.transformAsList(words, TRANSFORM_PARENS));
@@ -208,7 +201,7 @@ public class ReadSentimentDataset {
     try {
       FileOutputStream fos = new FileOutputStream(filename);
       BufferedWriter bout = new BufferedWriter(new OutputStreamWriter(fos));
-
+      
       for (Integer id : treeIds) {
         bout.write(trees.get(id).toString());
         bout.write("\n");
@@ -335,9 +328,7 @@ public class ReadSentimentDataset {
     List<Tree> trees = Generics.newArrayList();
     for (String line : IOUtils.readLines(parseFilename, "utf-8")) {
       String[] pieces = line.split("\\|");
-      List<Integer> parentPointers = CollectionUtils.transformAsList(Arrays.asList(pieces), new Function<String, Integer>() {
-          public Integer apply(String arg) { return Integer.valueOf(arg) - 1; }
-        });
+      List<Integer> parentPointers = CollectionUtils.transformAsList(Arrays.asList(pieces), arg -> Integer.valueOf(arg) - 1);
       Tree tree = convertTree(parentPointers, sentences.get(index), phraseIds, sentimentScores, escaper);
       ++index;
       trees.add(tree);

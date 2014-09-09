@@ -97,7 +97,7 @@ public class PennTreeReader implements TreeReader {
     String first = (st.hasNext() ? st.peek() : null);
     if (first != null && first.startsWith("*x*x*x")) {
       if (DEBUG) {
-        System.err.printf("%s: Skipping past whacked out header (%s)%n",this.getClass().getName(),first);
+        System.err.printf("%s: Skipping past whacked out header (%s)\n",this.getClass().getName(),first);
       }
       int foundCount = 0;
       while (foundCount < 4 && st.hasNext()) {
@@ -109,7 +109,7 @@ public class PennTreeReader implements TreeReader {
     }
 
     if (DEBUG) {
-      System.err.printf("%s: Built from%n %s ", this.getClass().getName(), in.getClass().getName());
+      System.err.printf("%s: Built from\n %s ", this.getClass().getName(), in.getClass().getName());
       System.err.println(' ' + ((tf == null) ? "no tf" : tf.getClass().getName()));
       System.err.println(' ' + ((tn == null) ? "no tn" : tn.getClass().getName()));
       System.err.println(' ' + ((st == null) ? "no st" : st.getClass().getName()));
@@ -170,71 +170,78 @@ public class PennTreeReader implements TreeReader {
     int wordIndex = 1;
 
     // FSA
+    label:
     while (tokenizer.hasNext()) {
       String token = tokenizer.next();
 
-      if (token.equals(leftParen)) {
+      switch (token) {
+        case leftParen:
 
-        // cdm 20100225: This next line used to have "" instead of null, but the traditional and current tree normalizers depend on the label being null not "" when there is no label on a tree (like the outermost English PTB level)
-        String label = (tokenizer.peek().equals(leftParen)) ? null : tokenizer.next();
-        if (rightParen.equals(label)) {//Skip past empty trees
-          continue;
-        } else if (treeNormalizer != null) {
-          label = treeNormalizer.normalizeNonterminal(label);
-        }
+          // cdm 20100225: This next line used to have "" instead of null, but the traditional and current tree normalizers depend on the label being null not "" when there is no label on a tree (like the outermost English PTB level)
+          String label = (tokenizer.peek().equals(leftParen)) ? null : tokenizer.next();
+          if (rightParen.equals(label)) {//Skip past empty trees
+            continue;
+          } else if (treeNormalizer != null) {
+            label = treeNormalizer.normalizeNonterminal(label);
+          }
 
-        if (label != null) {
-          label = STAR_PATTERN.matcher(label).replaceAll("*");
-          label = SLASH_PATTERN.matcher(label).replaceAll("/");
-        }
+          if (label != null) {
+            label = STAR_PATTERN.matcher(label).replaceAll("*");
+            label = SLASH_PATTERN.matcher(label).replaceAll("/");
+          }
 
-        Tree newTree = treeFactory.newTreeNode(label, null); // dtrs are added below
-        if(currentTree == null)
-          stack.add(newTree);
-        else {
-          currentTree.addChild(newTree);
-          stack.add(currentTree);
-        }
+          Tree newTree = treeFactory.newTreeNode(label, null); // dtrs are added below
 
-        currentTree = newTree;
+          if (currentTree == null)
+            stack.add(newTree);
+          else {
+            currentTree.addChild(newTree);
+            stack.add(currentTree);
+          }
 
-      } else if(token.equals(rightParen)) {
-        if (stack.isEmpty()) {
-          // Warn that file has too many right parens
-          System.err.println("PennTreeReader: warning: file has extra non-matching right parenthesis [ignored]");
+          currentTree = newTree;
+
           break;
-        }
+        case rightParen:
+          if (stack.isEmpty()) {
+            // Warn that file has too many right parens
+            System.err.println("PennTreeReader: warning: file has extra non-matching right parenthesis [ignored]");
+            break label;
+          }
 
-        //Accept
-        currentTree = stack.remove(stack.size() - 1);  // i.e., stack.pop()
-        if (stack.isEmpty()) return currentTree;
+          //Accept
+          currentTree = stack.remove(stack.size() - 1);  // i.e., stack.pop()
 
-      } else {
+          if (stack.isEmpty()) return currentTree;
 
-        if (currentTree == null) {
-          // A careful Reader should warn here, but it's kind of useful to
-          // suppress this because then the TreeReader doesn't print a ton of
-          // messages if there is a README file in a directory of Trees.
-          // System.err.println("PennTreeReader: warning: file has extra token not in a s-expression tree: " + token + " [ignored]");
           break;
-        }
+        default:
 
-        String terminal = (treeNormalizer == null) ? token : treeNormalizer.normalizeTerminal(token);
-        terminal = STAR_PATTERN.matcher(terminal).replaceAll("*");
-        terminal = SLASH_PATTERN.matcher(terminal).replaceAll("/");
-        Tree leaf = treeFactory.newLeaf(terminal);
-        if(leaf.label() instanceof HasIndex) {
-          HasIndex hi = (HasIndex) leaf.label();
-          hi.setIndex(wordIndex);
-        }
-        if(leaf.label() instanceof HasWord) {
-          HasWord hw = (HasWord) leaf.label();
-          hw.setWord(leaf.label().value());
-        }
-        wordIndex++;
+          if (currentTree == null) {
+            // A careful Reader should warn here, but it's kind of useful to
+            // suppress this because then the TreeReader doesn't print a ton of
+            // messages if there is a README file in a directory of Trees.
+            // System.err.println("PennTreeReader: warning: file has extra token not in a s-expression tree: " + token + " [ignored]");
+            break label;
+          }
 
-        currentTree.addChild(leaf);
-        // cdm: Note: this implementation just isn't as efficient as the old recursive descent parser (see 2008 code), where all the daughters are gathered before the tree is made....
+          String terminal = (treeNormalizer == null) ? token : treeNormalizer.normalizeTerminal(token);
+          terminal = STAR_PATTERN.matcher(terminal).replaceAll("*");
+          terminal = SLASH_PATTERN.matcher(terminal).replaceAll("/");
+          Tree leaf = treeFactory.newLeaf(terminal);
+          if (leaf.label() instanceof HasIndex) {
+            HasIndex hi = (HasIndex) leaf.label();
+            hi.setIndex(wordIndex);
+          }
+          if (leaf.label() instanceof HasWord) {
+            HasWord hw = (HasWord) leaf.label();
+            hw.setWord(leaf.label().value());
+          }
+          wordIndex++;
+
+          currentTree.addChild(leaf);
+          // cdm: Note: this implementation just isn't as efficient as the old recursive descent parser (see 2008 code), where all the daughters are gathered before the tree is made....
+          break;
       }
     }
 

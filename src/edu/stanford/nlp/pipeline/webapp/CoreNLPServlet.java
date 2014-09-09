@@ -99,12 +99,16 @@ public class CoreNLPServlet extends HttpServlet {
       outputFormat = this.defaultFormat;
     }
 
-    if ("xml".equals(outputFormat)) {
-      outputXml(out, annotation);
-    } else if ("pretty".equals(outputFormat)) {
-      outputPretty(out, annotation);
-    } else {
-      outputVisualise(out, annotation);
+    switch (outputFormat) {
+      case "xml":
+        outputXml(out, annotation);
+        break;
+      case "pretty":
+        outputPretty(out, annotation);
+        break;
+      default:
+        outputVisualise(out, annotation);
+        break;
     }
   }
 

@@ -33,6 +33,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 public class ConstantsAndVariables implements Serializable{
 
+  
   private static final long serialVersionUID = 1L;
 
   /**
@@ -174,7 +175,7 @@ public class ConstantsAndVariables implements Serializable{
    */
   @Option(name = "useTargetNERRestriction")
   public boolean useTargetNERRestriction = false;
-
+  
   /**
    * Initials of all POS tags to use if
    * <code>usePOS4Pattern</code> is true, separated by comma.
@@ -183,17 +184,17 @@ public class ConstantsAndVariables implements Serializable{
   public String targetAllowedTagsInitialsStr = null;
 
   public Map<String, Set<String>> allowedTagsInitials = null;
-
+  
   /**
    * Allowed NERs for labels. Format is label1,NER1,NER11;label2,NER2,NER21,NER22;label3,...
    * <code>useTargetNERRestriction</code> flag should be true
    */
   @Option(name = "targetAllowedNERs")
   public String targetAllowedNERs = null;
-
+  
 
   public Map<String, Set<String>> allowedNERsforLabels = null;
-
+  
   /**
    * Adds the parent's tag from the parse tree to the target phrase in the patterns
    */
@@ -258,7 +259,7 @@ public class ConstantsAndVariables implements Serializable{
    * List of dictionary phrases that are negative for all labels to be learned.
    * Format is file_1,file_2,... where file_i has each phrase in a different
    * line
-   *
+   * 
    */
   @Option(name = "otherSemanticClassesFiles")
   public String otherSemanticClassesFiles = null;
@@ -270,7 +271,7 @@ public class ConstantsAndVariables implements Serializable{
    * Seed dictionary, set in the class that uses this class
    */
   private Map<String, Set<String>> labelDictionary = new HashMap<String, Set<String>>();
-
+  
   public Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass = null;
 
   /**
@@ -329,13 +330,13 @@ public class ConstantsAndVariables implements Serializable{
   public Pattern ignoreWordRegex = Pattern.compile("a^");
 
   /**
-   *
+   * 
    */
   @Option(name = "removeStopWordsFromSelectedPhrases")
   public boolean removeStopWordsFromSelectedPhrases = false;
 
   /**
-   *
+   * 
    */
   @Option(name = "removePhrasesWithStopWords")
   public boolean removePhrasesWithStopWords = false;
@@ -390,11 +391,11 @@ public class ConstantsAndVariables implements Serializable{
   public int minPosPhraseSupportForPat = 1;
 
   /**
-   * For example, if positive seed dict contains "cancer" and "breast cancer" then "breast" is included as negative
+   * For example, if positive seed dict contains "cancer" and "breast cancer" then "breast" is included as negative 
    */
   @Option(name="addIndvWordsFromPhrasesExceptLastAsNeg")
   public boolean addIndvWordsFromPhrasesExceptLastAsNeg = false;
-
+  
   /**
    * Cached files
    */
@@ -421,7 +422,7 @@ public class ConstantsAndVariables implements Serializable{
   private ConcurrentHashMap<String, String> editDistanceFromThisClassMatches = new ConcurrentHashMap<String, String>();
 
   private Map<String, Counter<String>> wordShapesForLabels = new HashMap<String, Counter<String>>();
-
+  
 
 
   String channelNameLogger = "settingUp";
@@ -431,9 +432,9 @@ public class ConstantsAndVariables implements Serializable{
 
   public enum ScorePhraseMeasures {
     DISTSIM, GOOGLENGRAM, PATWTBYFREQ, EDITDISTSAME, EDITDISTOTHER, DOMAINNGRAM, SEMANTICODDS, WORDSHAPE
-  }
+  };
 
-
+  
   /**
    * Only works if you have single label. And the word classes are given.
    */
@@ -477,54 +478,54 @@ public class ConstantsAndVariables implements Serializable{
    */
   @Option(name = "usePhraseEvalEditDistOther")
   public boolean usePhraseEvalEditDistOther = false;
-
+  
   @Option(name = "usePhraseEvalWordShape")
   public boolean usePhraseEvalWordShape = false;
 
   /**
-   * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
+   * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
    * <code>PhEvalInPat</code>. See usePhrase* for meanings.
    */
   @Option(name = "usePatternEvalWordClass")
   public boolean usePatternEvalWordClass = false;
 
   /**
-   * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
+   * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
    * <code>PhEvalInPat</code>. See usePhrase* for meanings.
    */
   @Option(name = "usePatternEvalWordShape")
   public boolean usePatternEvalWordShape = false;
-
+  
   /**
-   * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
+   * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
    * <code>PhEvalInPat</code>. See usePhrase* for meanings.
    */
   @Option(name = "usePatternEvalGoogleNgram")
   public boolean usePatternEvalGoogleNgram = false;
 
   /**
-   * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
+   * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
    * <code>PhEvalInPat</code>. See usePhrase* for meanings.
    */
   @Option(name = "usePatternEvalDomainNgram")
   public boolean usePatternEvalDomainNgram = false;
 
   /**
-   * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
+   * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
    * <code>PhEvalInPat</code>. See usePhrase* for meanings.
    */
   @Option(name = "usePatternEvalSemanticOdds")
   public boolean usePatternEvalSemanticOdds = false;
 
   /**
-   * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
+   * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
    * <code>PhEvalInPat</code>. See usePhrase* for meanings.
    */
   @Option(name = "usePatternEvalEditDistSame")
   public boolean usePatternEvalEditDistSame = false;
 
   /**
-   * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
+   * Used only if {@link patternScoring} is <code>PhEvalInPat</code> or
    * <code>PhEvalInPat</code>. See usePhrase* for meanings.
    */
   @Option(name = "usePatternEvalEditDistOther")
@@ -550,19 +551,19 @@ public class ConstantsAndVariables implements Serializable{
    */
   @Option(name = "doNotExtractPhraseAnyWordLabeledOtherClass")
   public boolean doNotExtractPhraseAnyWordLabeledOtherClass = true;
-
+  
   // /**
   // * Use FileBackedCache for the inverted index -- use if memory is limited
   // */
   // @Option(name="diskBackedInvertedIndex")
   // public boolean diskBackedInvertedIndex = false;
-
+  
   /**
    * You can save the inverted index to this file
    */
   @Option(name="saveInvertedIndexDir")
   public String saveInvertedIndexDir  = null;
-
+  
   /**
    * You can load the inv index using this file
    */
@@ -570,26 +571,26 @@ public class ConstantsAndVariables implements Serializable{
   public String loadInvertedIndexDir  = null;
 
   /**
-   * Directory where to save the sentences ser files.
+   * Directory where to save the sentences ser files. 
    */
   @Option(name="saveSentencesSerDir")
   public String saveSentencesSerDir = null;
-
+  
   public boolean usingDirForSentsInIndex = false;
-
+  
   // @Option(name = "wekaOptions")
   // public String wekaOptions = "";
 
-  public String backgroundSymbol = "O";
-
+  String backgroundSymbol = "O";
+  
   int wordShaper = WordShapeClassifier.WORDSHAPECHRIS2;
   private Map<String, String> wordShapeCache = new HashMap<String, String>();
-
+  
   public InvertedIndexByTokens invertedIndex;
-
+  
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";
-
+  
   Properties props;
 
   @SuppressWarnings("rawtypes")
@@ -693,10 +694,10 @@ public class ConstantsAndVariables implements Serializable{
         Set<String> st = new HashSet<String>();
         for(int j = 1; j < t.length; j++)
           st.add(t[j]);
-        allowedTagsInitials.put(t[0], st);
-      }
+        allowedTagsInitials.put(t[0], st);    
+      }      
     }
-
+    
     if(useTargetNERRestriction && targetAllowedNERs !=null){
       allowedNERsforLabels = new HashMap<String, Set<String>>();
       for(String labelstr : targetAllowedNERs.split(";")){
@@ -705,7 +706,7 @@ public class ConstantsAndVariables implements Serializable{
         for(int j = 1; j < t.length; j++)
           st.add(t[j]);
         allowedNERsforLabels.put(t[0], st);
-
+        
       }
     }
     alreadySetUp = true;
@@ -742,31 +743,31 @@ public class ConstantsAndVariables implements Serializable{
        ws = WordShapeClassifier.wordShape(w, wordShaper);
        wordShapeCache.put(w, ws);
       }
-
+      
       wordShapesForLabels.get(label).incrementCount(ws);
-
+      
     }
   }
-
+  
   public void setLabelDictionary(Map<String, Set<String>> seedSets) {
     this.labelDictionary = seedSets;
-
+    
     if(usePhraseEvalWordShape || usePatternEvalWordShape){
       this.wordShapesForLabels.clear();
      for(Entry<String, Set<String>> en: seedSets.entrySet())
-       addWordShapes(en.getKey(), en.getValue());
+       addWordShapes(en.getKey(), en.getValue()); 
     }
   }
 
   public Map<String, Set<String>> getLabelDictionary() {
     return this.labelDictionary;
   }
-
+  
   public void addLabelDictionary(String label, Set<String> words) {
     this.labelDictionary.get(label).addAll(words);
-
+    
     if(usePhraseEvalWordShape || usePatternEvalWordShape)
-      addWordShapes(label, words);
+      addWordShapes(label, words); 
   }
 
   public Set<String> getEnglishWords() {
@@ -814,7 +815,7 @@ public class ConstantsAndVariables implements Serializable{
   double editDistMax = 100;
 
   /**
-   * Use this option if you are limited by memory ; ignored if fileFormat is ser.
+   * Use this option if you are limited by memory ; ignored if fileFormat is ser. 
    */
   @Option(name="batchProcessSents")
   public boolean batchProcessSents = false;
@@ -933,7 +934,7 @@ public class ConstantsAndVariables implements Serializable{
 
   /**
    * 1 if lies in edit distance, 0 if not close to any words
-   *
+   * 
    * @param g
    * @return
    */

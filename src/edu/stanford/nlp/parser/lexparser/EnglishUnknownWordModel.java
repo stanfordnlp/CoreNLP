@@ -138,7 +138,7 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
   @Override
   public int getSignatureIndex(int index, int sentencePosition, String word) {
     String uwSig = getSignature(word, sentencePosition);
-    int sig = wordIndex.addToIndex(uwSig);
+    int sig = wordIndex.indexOf(uwSig, true);
     if (DEBUG_UWM) {
       System.err.println("Signature (" + unknownLevel + "): mapped " + word +
                          " (" + index + ") to " + uwSig + " (" + sig + ")");

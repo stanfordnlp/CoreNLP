@@ -40,7 +40,7 @@ public abstract class AnnotatorFactory implements Factory<Annotator> {
    * the same annotator type but with different parameters.
    */
   public String signature() {
-    return this.implementations.getClass().getName() + ":" + additionalSignature();
+    return "" + this.implementations.getClass().getName() + ":" + additionalSignature();
   }
 
   protected abstract String additionalSignature();

@@ -93,24 +93,31 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
           int flags = (env != null)? env.defaultStringPatternFlags: 0;
           p.add(c, newStringRegexPattern(regex, flags));
         } else if (value.startsWith("::")) {
-          if (value.equals("::IS_NIL") || value.equals("::NOT_EXISTS")) {
-            p.add(c, new NilAnnotationPattern());
-          } else if (value.equals("::EXISTS") || value.equals("::NOT_NIL")) {
-            p.add(c, new NotNilAnnotationPattern());
-          } else if (value.equals("::IS_NUM")) {
-            p.add(c, new NumericAnnotationPattern(0, NumericAnnotationPattern.CmpType.IS_NUM));
-          } else {
-            boolean ok = false;
-            if (env != null) {
-              Object custom = env.get(value);
-              if (custom != null) {
-                p.add(c, (NodePattern) custom);
-                ok = true;
+          switch (value) {
+            case "::IS_NIL":
+            case "::NOT_EXISTS":
+              p.add(c, new NilAnnotationPattern());
+              break;
+            case "::EXISTS":
+            case "::NOT_NIL":
+              p.add(c, new NotNilAnnotationPattern());
+              break;
+            case "::IS_NUM":
+              p.add(c, new NumericAnnotationPattern(0, NumericAnnotationPattern.CmpType.IS_NUM));
+              break;
+            default:
+              boolean ok = false;
+              if (env != null) {
+                Object custom = env.get(value);
+                if (custom != null) {
+                  p.add(c, (NodePattern) custom);
+                  ok = true;
+                }
               }
-            }
-            if (!ok) {
-              throw new IllegalArgumentException("Invalid value " + value + " for key: " + attr);
-            }
+              if (!ok) {
+                throw new IllegalArgumentException("Invalid value " + value + " for key: " + attr);
+              }
+              break;
           }
         } else if (value.startsWith("<=")) {
           Double v = Double.parseDouble(value.substring(2));

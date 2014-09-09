@@ -1,7 +1,5 @@
 package edu.stanford.nlp.util;
 
-import java.util.Locale;
-
 import junit.framework.TestCase;
 
 /**
@@ -9,25 +7,19 @@ import junit.framework.TestCase;
  */
 public class TimingTest extends TestCase {
 
-  @Override
-  protected void setUp() {
-    Locale.setDefault(Locale.US);
-  }
-
   /** There's a lot of time slop in these tests so they don't fire by mistake.
-   *  You definitely get them more than 30% off sometimes. :(
-   *  And then we got a test failure that was over 70% off on the first test. :(
+   *  You definitely get them more than 10% off sometimes. :(
    */
   public void testTiming() {
     Timing t = new Timing();
     sleepTen();
     long val2 = t.reportNano();
-    assertEquals("Wrong nanosleep", 10000000, val2, 10000000);
+    assertEquals("Wrong nanosleep", 10000000, val2, 2000000);
     // System.err.println(val2);
     sleepTen();
     long val = t.report();
     // System.err.println(val);
-    assertEquals("Wrong sleep", 20, val, 8);
+    assertEquals("Wrong sleep", 20, val, 4);
     for (int i = 0; i < 8; i++) {
       sleepTen();
     }

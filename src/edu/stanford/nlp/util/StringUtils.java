@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -227,11 +228,7 @@ public class StringUtils {
   }
 
   public static String joinWords(List<? extends HasWord> l, String glue, int start, int end) {
-    return join(l, glue, new Function<HasWord, String>() {
-      public String apply(HasWord in) {
-        return in.word();
-      }
-    }, start, end);
+    return join(l, glue, in -> in.word(), start, end);
   }
 
   public static final Function<Object,String> DEFAULT_TOSTRING = new Function<Object, String>() {
@@ -1203,10 +1200,9 @@ public class StringUtils {
    * splitChar.  However, it provides a quoting facility: it is possible to
    * quote strings with the quoteChar.
    * If the quoteChar occurs within the quotedExpression, it must be prefaced
-   * by the escapeChar.
-   * This routine can be useful for processing a line of a CSV file.
+   * by the escapeChar
    *
-   * @param s         The String to split into fields. Cannot be null.
+   * @param s         The String to split
    * @param splitChar The character to split on
    * @param quoteChar The character to quote items with
    * @param escapeChar The character to escape the quoteChar with
@@ -1221,11 +1217,10 @@ public class StringUtils {
       char curr = s.charAt(i);
       if (curr == splitChar) {
         // add last buffer
-        // cdm 2014: Do this even if the field is empty!
-        // if (b.length() > 0) {
-        result.add(b.toString());
-        b = new StringBuilder();
-        // }
+        if (b.length() > 0) {
+          result.add(b.toString());
+          b = new StringBuilder();
+        }
         i++;
       } else if (curr == quoteChar) {
         // find next instance of quoteChar
@@ -1250,7 +1245,6 @@ public class StringUtils {
         i++;
       }
     }
-    // RFC 4180 disallows final comma. At any rate, don't produce a field after it unless non-empty
     if (b.length() > 0) {
       result.add(b.toString());
     }
@@ -2033,24 +2027,6 @@ public class StringUtils {
    */
   public static Collection<String> getNgramsString(String s, int minSize, int maxSize){
     return getNgrams(Arrays.asList(s.split("\\s+")), minSize, maxSize);
-  }
-
-  /**
-   * Build a list of character-based ngrams from the given string.
-   */
-  public static Collection<String> getCharacterNgrams(String s, int minSize, int maxSize) {
-    Collection<String> ngrams = new ArrayList<String>();
-    int len = s.length();
-
-    for (int i = 0; i < len; i++) {
-      for (int ngramSize = minSize;
-           ngramSize > 0 && ngramSize <= maxSize && i + ngramSize <= len;
-           ngramSize++) {
-        ngrams.add(s.substring(i, i + ngramSize));
-      }
-    }
-
-    return ngrams;
   }
 
   private static Pattern diacriticalMarksPattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}");

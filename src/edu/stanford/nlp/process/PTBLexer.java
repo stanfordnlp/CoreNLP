@@ -24057,82 +24057,104 @@ class PTBLexer {
       String key = (String) item.getKey();
       String value = (String) item.getValue();
       boolean val = Boolean.valueOf(value);
-      if ("".equals(key)) {
-        // allow an empty item
-      } else if ("invertible".equals(key)) {
-        invertible = val;
-      } else if ("tokenizeNLs".equals(key)) {
-        tokenizeNLs = val;
-      } else if ("ptb3Escaping".equals(key)) {
-        normalizeSpace = val;
-        normalizeAmpersandEntity = val;
-        normalizeCurrency = val;
-        normalizeFractions = val;
-        normalizeParentheses = val;
-        normalizeOtherBrackets = val;
-        latexQuotes = val;
-        unicodeQuotes = val;
-        asciiQuotes = val;
-        ptb3Ellipsis = val;
-        unicodeEllipsis = val;
-        ptb3Dashes = val;
-      } else if ("americanize".equals(key)) {
-        americanize = val;
-      } else if ("normalizeSpace".equals(key)) {
-        normalizeSpace = val;
-      } else if ("normalizeAmpersandEntity".equals(key)) {
-        normalizeAmpersandEntity = val;
-      } else if ("normalizeCurrency".equals(key)) {
-        normalizeCurrency = val;
-      } else if ("normalizeFractions".equals(key)) {
-        normalizeFractions = val;
-      } else if ("normalizeParentheses".equals(key)) {
-        normalizeParentheses = val;
-      } else if ("normalizeOtherBrackets".equals(key)) {
-        normalizeOtherBrackets = val;
-      } else if ("latexQuotes".equals(key)) {
-        latexQuotes = val;
-      } else if ("unicodeQuotes".equals(key)) {
-        unicodeQuotes = val;
-        if (val) {
-          latexQuotes = false; // need to override default
-        }
-      } else if ("asciiQuotes".equals(key)) {
-        asciiQuotes = val;
-        if (val) {
-          latexQuotes = false; // need to override default
-          unicodeQuotes = false;
-        }
-      } else if ("splitAssimilations".equals(key)) {
-        splitAssimilations = val;
-      } else if ("ptb3Ellipsis".equals(key)) {
-        ptb3Ellipsis = val;
-      } else if ("unicodeEllipsis".equals(key)) {
-        unicodeEllipsis = val;
-      } else if ("ptb3Dashes".equals(key)) {
-        ptb3Dashes = val;
-      } else if ("escapeForwardSlashAsterisk".equals(key)) {
-        escapeForwardSlashAsterisk = val;
-      } else if ("untokenizable".equals(key)) {
-        if (value.equals("noneDelete")) {
-          untokenizable = UntokenizableOptions.NONE_DELETE;
-        } else if (value.equals("firstDelete")) {
-          untokenizable = UntokenizableOptions.FIRST_DELETE;
-        } else if (value.equals("allDelete")) {
-          untokenizable = UntokenizableOptions.ALL_DELETE;
-        } else if (value.equals("noneKeep")) {
-          untokenizable = UntokenizableOptions.NONE_KEEP;
-        } else if (value.equals("firstKeep")) {
-          untokenizable = UntokenizableOptions.FIRST_KEEP;
-        } else if (value.equals("allKeep")) {
-          untokenizable = UntokenizableOptions.ALL_KEEP;
-        } else {
-        throw new IllegalArgumentException("PTBLexer: Invalid option value in constructor: " + key + ": " + value);
-        }
-      } else if ("strictTreebank3".equals(key)) {
-        strictTreebank3 = val;
-      } else {
-        throw new IllegalArgumentException("PTBLexer: Invalid options key in constructor: " + key);
+      switch (key) {
+        case "":
+          // allow an empty item
+          break;
+        case "invertible":
+          invertible = val;
+          break;
+        case "tokenizeNLs":
+          tokenizeNLs = val;
+          break;
+        case "ptb3Escaping":
+          normalizeSpace = val;
+          normalizeAmpersandEntity = val;
+          normalizeCurrency = val;
+          normalizeFractions = val;
+          normalizeParentheses = val;
+          normalizeOtherBrackets = val;
+          latexQuotes = val;
+          unicodeQuotes = val;
+          asciiQuotes = val;
+          ptb3Ellipsis = val;
+          unicodeEllipsis = val;
+          ptb3Dashes = val;
+          break;
+        case "americanize":
+          americanize = val;
+          break;
+        case "normalizeSpace":
+          normalizeSpace = val;
+          break;
+        case "normalizeAmpersandEntity":
+          normalizeAmpersandEntity = val;
+          break;
+        case "normalizeCurrency":
+          normalizeCurrency = val;
+          break;
+        case "normalizeFractions":
+          normalizeFractions = val;
+          break;
+        case "normalizeParentheses":
+          normalizeParentheses = val;
+          break;
+        case "normalizeOtherBrackets":
+          normalizeOtherBrackets = val;
+          break;
+        case "latexQuotes":
+          latexQuotes = val;
+          break;
+        case "unicodeQuotes":
+          unicodeQuotes = val;
+          if (val) {
+            latexQuotes = false; // need to override default
+          }
+          break;
+        case "asciiQuotes":
+          asciiQuotes = val;
+          if (val) {
+            latexQuotes = false; // need to override default
+            unicodeQuotes = false;
+          }
+          break;
+        case "splitAssimilations":
+          splitAssimilations = val;
+          break;
+        case "ptb3Ellipsis":
+          ptb3Ellipsis = val;
+          break;
+        case "unicodeEllipsis":
+          unicodeEllipsis = val;
+          break;
+        case "ptb3Dashes":
+          ptb3Dashes = val;
+          break;
+        case "escapeForwardSlashAsterisk":
+          escapeForwardSlashAsterisk = val;
+          break;
+        case "untokenizable":
+          if (value.equals("noneDelete")) {
+            untokenizable = UntokenizableOptions.NONE_DELETE;
+          } else if (value.equals("firstDelete")) {
+            untokenizable = UntokenizableOptions.FIRST_DELETE;
+          } else if (value.equals("allDelete")) {
+            untokenizable = UntokenizableOptions.ALL_DELETE;
+          } else if (value.equals("noneKeep")) {
+            untokenizable = UntokenizableOptions.NONE_KEEP;
+          } else if (value.equals("firstKeep")) {
+            untokenizable = UntokenizableOptions.FIRST_KEEP;
+          } else if (value.equals("allKeep")) {
+            untokenizable = UntokenizableOptions.ALL_KEEP;
+          } else {
+            throw new IllegalArgumentException("PTBLexer: Invalid option value in constructor: " + key + ": " + value);
+          }
+          break;
+        case "strictTreebank3":
+          strictTreebank3 = val;
+          break;
+        default:
+          throw new IllegalArgumentException("PTBLexer: Invalid options key in constructor: " + key);
       }
     }
     // this.seenUntokenizableCharacter = false; // unnecessary, it's default initialized

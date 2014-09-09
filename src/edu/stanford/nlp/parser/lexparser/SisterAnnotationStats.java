@@ -232,14 +232,12 @@ public class SisterAnnotationStats implements TreeVisitor {
 		    
       System.out.println("----");
       System.out.println("Sorted descending support * KL");
-      Collections.sort(answers, new Comparator() {
-        public int compare(Object o1, Object o2) {
-          Pair p1 = (Pair) o1;
-          Pair p2 = (Pair) o2;
-          Double p12 = (Double) p1.second();
-          Double p22 = (Double) p2.second();
-          return p22.compareTo(p12);
-        }
+      Collections.sort(answers, (o1, o2) -> {
+        Pair p1 = (Pair) o1;
+        Pair p2 = (Pair) o2;
+        Double p12 = (Double) p1.second();
+        Double p22 = (Double) p2.second();
+        return p22.compareTo(p12);
       });
       for (int i = 0, size = answers.size(); i < size; i++) {
         Pair p = (Pair) answers.get(i);
@@ -259,14 +257,12 @@ public class SisterAnnotationStats implements TreeVisitor {
     }
 
 
-    Collections.sort(topScores, new Comparator() {
-      public int compare(Object o1, Object o2) {
-        Pair p1 = (Pair) o1;
-        Pair p2 = (Pair) o2;
-        Double p12 = (Double) p1.second();
-        Double p22 = (Double) p2.second();
-        return p22.compareTo(p12);
-      }
+    Collections.sort(topScores, (o1, o2) -> {
+      Pair p1 = (Pair) o1;
+      Pair p2 = (Pair) o2;
+      Double p12 = (Double) p1.second();
+      Double p22 = (Double) p2.second();
+      return p22.compareTo(p12);
     });
     String outString = "All enriched categories, sorted by score\n";
     for (int i = 0, size = topScores.size(); i < size; i++) {
@@ -343,11 +339,7 @@ public class SisterAnnotationStats implements TreeVisitor {
       System.out.println("Usage: ParentAnnotationStats treebankPath");
     } else {
       SisterAnnotationStats pas = new SisterAnnotationStats();
-      Treebank treebank = new DiskTreebank(new TreeReaderFactory() {
-        public TreeReader newTreeReader(Reader in) {
-          return new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new BobChrisTreeNormalizer());
-        }
-      }, encoding);
+      Treebank treebank = new DiskTreebank(in -> new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new BobChrisTreeNormalizer()), encoding);
       treebank.loadPath(args[0]);
       treebank.apply(pas);
       pas.printStats();

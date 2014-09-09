@@ -72,7 +72,6 @@ public abstract class TregexMatcher {
     findIterator = null;
     findCurrent = null;
     namesToNodes.clear();
-    variableStrings.reset();
   }
 
   /**
@@ -159,7 +158,7 @@ public abstract class TregexMatcher {
    */
   public boolean findAt(Tree node) {
     if (findCurrent != null && findCurrent != node) {
-      throw new AssertionError("Error: must call reset() before changing nodes for a call to findAt");
+      throw new AssertionError("Error: must call reset() before changing nodes for a call to findRootedAt");
     }
     if (findCurrent != null) {
       return matches();

@@ -51,7 +51,7 @@ public class TsurgeonTest extends TestCase {
     TregexMatcher matcher = tregex.matcher(tree);
     assertTrue(matcher.find());
     assertEquals("(B 1 2)", matcher.getNode("foo").toString());
-    Tree updated = tsurgeon.matcher().evaluate(tree, matcher);
+    Tree updated = tsurgeon.evaluate(tree, matcher);
     assertEquals("(A (FOO (BAR 1 2)))", updated.toString());
     // TODO: do we want the tsurgeon to implicitly update the matched node?
     // System.err.println(matcher.getNode("foo"));
@@ -69,7 +69,7 @@ public class TsurgeonTest extends TestCase {
     TregexMatcher matcher = tregex.matcher(tree);
     assertTrue(matcher.find());
     assertEquals("(B 1 2)", matcher.getNode("foo").toString());
-    Tree updated = tsurgeon.matcher().evaluate(tree, matcher);
+    Tree updated = tsurgeon.evaluate(tree, matcher);
     assertEquals("(A (B (BAR 1 2)))", updated.toString());
     assertEquals("(B (BAR 1 2))", matcher.getNode("foo").toString());
     assertFalse(matcher.find());
@@ -87,31 +87,10 @@ public class TsurgeonTest extends TestCase {
     TregexMatcher matcher = tregex.matcher(tree);
     assertTrue(matcher.find());
     assertEquals("(B 1 2)", matcher.getNode("foo").toString());
-    Tree updated = tsurgeon.matcher().evaluate(tree, matcher);
+    Tree updated = tsurgeon.evaluate(tree, matcher);
     assertEquals("(A (FOO (B 1 2)))", updated.toString());
     assertEquals("(B 1 2)", matcher.getNode("foo").toString());
     assertFalse(matcher.find());
-  }
-
-  public void testAdjoinWithNamedNode() {
-    TsurgeonPattern tsurgeon =
-      Tsurgeon.parseOperation("[adjoinF (D (E=target foot@)) bar] " +
-                              "[insert (G 1) $+ target]");
-    TregexPattern tregex = TregexPattern.compile("B=bar !>> D");
-    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (G 1) (E (B C))))");
-
-    tsurgeon =
-      Tsurgeon.parseOperation("[adjoinF (D (E=target foot@)) bar] " +
-                              "[insert (G 1) >0 target]");
-    tregex = TregexPattern.compile("B=bar !>> D");
-    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (E (G 1) (B C))))");
-
-    // Named leaf
-    tsurgeon =
-      Tsurgeon.parseOperation("[adjoinF (D (E foot@) F=target) bar] " +
-                              "[insert (G 1) >0 target]");
-    tregex = TregexPattern.compile("B=bar !>> D");
-    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (E (B C)) (F (G 1))))");
   }
 
   public void testAuxiliaryTreeErrors() {
@@ -192,69 +171,6 @@ public class TsurgeonTest extends TestCase {
     }
   }
 
-  // Extended syntax for createSubtree: support arbitrary tree literals
-  public void testCreateSubtreesExtended() {
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("createSubtree (F (G 1) H@ I) left right");
-
-    TregexPattern tregex = TregexPattern.compile("A < B=left < C=right");
-    // Verify when there are only two nodes
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2))", "(A (F (G 1) (H (B 1) (C 2)) I))");
-    // We allow backwards nodes as well
-    runTest(tregex, tsurgeon, "(A (C 1) (B 2))", "(A (F (G 1) (H (C 1) (B 2)) I))");
-    // Check nodes in between
-    runTest(tregex, tsurgeon, "(A (B 1) (D 3) (C 2))", "(A (F (G 1) (H (B 1) (D 3) (C 2)) I))");
-    // Check nodes outside the span
-    runTest(tregex, tsurgeon, "(A (D 3) (B 1) (C 2))", "(A (D 3) (F (G 1) (H (B 1) (C 2)) I))");
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2) (D 3))", "(A (F (G 1) (H (B 1) (C 2)) I) (D 3))");
-    runTest(tregex, tsurgeon, "(A (D 3) (B 1) (C 2) (E 4))", "(A (D 3) (F (G 1) (H (B 1) (C 2)) I) (E 4))");
-
-    // Check when the two endpoints are the same
-    tregex = TregexPattern.compile("A < B=left < B=right");
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2))", "(A (F (G 1) (H (B 1)) I) (C 2))");
-
-    // Check double operation - should make two F nodes and then stop
-    runTest(tregex, tsurgeon, "(A (B 1) (B 2))", "(A (F (G 1) (H (B 1)) I) (F (G 1) (H (B 2)) I))");
-
-    // Check when we only have one argument to createSubtree
-    tsurgeon = Tsurgeon.parseOperation("createSubtree (F (G 1) H@ I) child");
-    tregex = TregexPattern.compile("A < B=child");
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2))", "(A (F (G 1) (H (B 1)) I) (C 2))");
-    runTest(tregex, tsurgeon, "(A (B 1) (B 2))", "(A (F (G 1) (H (B 1)) I) (F (G 1) (H (B 2)) I))");
-
-    // Check that incorrectly formatted operations don't successfully parse
-    try {
-      tsurgeon = Tsurgeon.parseOperation("createSubtree (F (G 1) H@ I)");
-      throw new AssertionError("Expected to fail parsing");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-
-    try {
-      tsurgeon = Tsurgeon.parseOperation("createSubtree (F (G 1) H@ I) a b c");
-      throw new AssertionError("Expected to fail parsing");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-
-    // Missing foot
-    try {
-      tsurgeon = Tsurgeon.parseOperation("createSubtree (F (G 1) H I) a b c");
-      throw new AssertionError("Expected to fail parsing");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-
-    // Verify that it fails when the parents are different
-    tsurgeon = Tsurgeon.parseOperation("createSubtree (F (G 1) H@ I) left right");
-    tregex = TregexPattern.compile("A << B=left << C=right");
-    try {
-      runTest(tregex, tsurgeon, "(A (B 1) (D (C 2)))", "(A (B 1) (D (C 2)))");
-      throw new AssertionError("Expected a runtime failure");
-    } catch (TsurgeonRuntimeException e) {
-      // yay
-    }
-  }
-
   public void testDelete() {
     TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("delete bob");
 
@@ -320,24 +236,6 @@ public class TsurgeonTest extends TestCase {
     tsurgeon = Tsurgeon.parseOperation("insert (D (E\\\\=blah 6)) >0 bar");
     tregex = TregexPattern.compile("B=bar !<D");
     runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A (B (D (E\\ 6)) 0) (C 1))");
-  }
-
-  public void testInsertWithNamedNode() {
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("[insert (D=target E) $+ bar] " +
-                                                       "[insert (F 1) >0 target]");
-    TregexPattern tregex = TregexPattern.compile("B=bar !$- D");
-    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (F 1) E) (B C))");
-
-    tsurgeon = Tsurgeon.parseOperation("[insert (D=target E) $+ bar] " +
-                                       "[insert (F 1) $+ target]");
-    tregex = TregexPattern.compile("B=bar !$- D");
-    runTest(tregex, tsurgeon, "(A (B C))", "(A (F 1) (D E) (B C))");
-
-    // Named leaf
-    tsurgeon = Tsurgeon.parseOperation("[insert (D E=target) $+ bar] " +
-                                       "[insert (F 1) $+ target]");
-    tregex = TregexPattern.compile("B=bar !$- D");
-    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (F 1) E) (B C))");
   }
 
   public void testRelabel() {
@@ -552,20 +450,6 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, "(A (B foo))", "(A (BAR foo))");
     runTest(tregex, tsurgeon, "(A (C foo))", "(A (BAZ foo))");
     runTest(tregex, tsurgeon, "(A (B foo) (C foo))", "(A (BAR foo) (BAZ foo))");
-  }
-
-  public void testExcise() {
-    // TODO: needs more meat to this test
-    TregexPattern tregex = TregexPattern.compile("__=repeat <: (~repeat < __)");
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("excise repeat repeat");
-    runTest(tregex, tsurgeon, "(A (B (B foo)))", "(A (B foo))");
-    // Test that if a deleted root is excised down to a level that has
-    // just one child, that one child gets returned as the new tree
-    runTest(tregex, tsurgeon, "(B (B foo))", "(B foo)");
-
-    tregex = TregexPattern.compile("A=root");
-    tsurgeon = Tsurgeon.parseOperation("excise root root");
-    runTest(tregex, tsurgeon, "(A (B bar) (C foo))", null);
   }
 
   public static void runTest(TregexPattern tregex, TsurgeonPattern tsurgeon,

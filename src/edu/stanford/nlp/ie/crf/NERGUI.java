@@ -232,47 +232,64 @@ public class NERGUI {
     public void actionPerformed(ActionEvent e) {
       String com = e.getActionCommand();
 
-      if (com.equals("Open File")) {
-        File file = getFile(true);
-        if (file != null) {
-          openFile(file);
+      switch (com) {
+        case "Open File": {
+          File file = getFile(true);
+          if (file != null) {
+            openFile(file);
+          }
+          break;
         }
-      } else if (com.equals("Load URL")) {
-        String url = getURL();
-        if (url != null) {
-          openURL(url);
+        case "Load URL":
+          String url = getURL();
+          if (url != null) {
+            openURL(url);
+          }
+          break;
+        case "Exit":
+          exit();
+          break;
+        case "Clear":
+          clearDocument();
+          break;
+        case "Cut":
+          cutDocument();
+          break;
+        case "Copy":
+          copyDocument();
+          break;
+        case "Paste":
+          pasteDocument();
+          break;
+        case "Load CRF From File": {
+          File file = getFile(true);
+          if (file != null) {
+            loadClassifier(file);
+          }
+          break;
         }
-      } else if (com.equals("Exit")) {
-        exit();
-      } else if (com.equals("Clear")) {
-        clearDocument();
-      } else if (com.equals("Cut")) {
-        cutDocument();
-      } else if (com.equals("Copy")) {
-        copyDocument();
-      } else if (com.equals("Paste")) {
-        pasteDocument();
-      } else if (com.equals("Load CRF From File")) {
-        File file = getFile(true);
-        if (file != null) {
-          loadClassifier(file);
-        }
-      } else if (com.equals("Load Default CRF")) {
-        loadClassifier(null);
-      } else if (com.equals("Run NER")) {
-        extract();
-      } else if (com.equals("Save Untagged File")) {
-        saveUntaggedContents(loadedFile);
-      } else if (com.equals("Save Untagged File As ...")) {
-        saveUntaggedContents(getFile(false));
-      } else if (com.equals("Save Tagged File As ...")) {
-        File f = getFile(false);
-        if (f != null) {
-          // i.e., they didn't cancel out of the file dialog
-          saveFile (f, taggedContents);
-        }
-      } else {
-        System.err.println("Unknown Action: "+e);
+        case "Load Default CRF":
+          loadClassifier(null);
+          break;
+        case "Run NER":
+          extract();
+          break;
+        case "Save Untagged File":
+          saveUntaggedContents(loadedFile);
+          break;
+        case "Save Untagged File As ...":
+          saveUntaggedContents(getFile(false));
+          break;
+        case "Save Tagged File As ...":
+          File f = getFile(false);
+          if (f != null) {
+            // i.e., they didn't cancel out of the file dialog
+            saveFile(f, taggedContents);
+          }
+          break;
+        default:
+          System.err.println("Unknown Action: " + e);
+          break;
       }
     }
   }
@@ -780,13 +797,10 @@ public class NERGUI {
     if (isMacOSX()) {
       System.setProperty("apple.laf.useScreenMenuBar", "true");
     }
-    SwingUtilities.invokeLater(new Runnable() {
-        @Override
-        public void run() {
-          NERGUI gui = new NERGUI();
-          gui.createAndShowGUI();
-        }
-      });
+    SwingUtilities.invokeLater(() -> {
+      NERGUI gui = new NERGUI();
+      gui.createAndShowGUI();
+    });
   }
 
 }

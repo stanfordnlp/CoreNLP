@@ -2,12 +2,12 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
+import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
 import edu.stanford.nlp.util.Timing;
 
 import java.io.FileNotFoundException;
@@ -28,15 +28,12 @@ import java.util.*;
  * @author Jenny Finkel
  * @author Mihai Surdeanu (modified it to work with the new NERClassifierCombiner)
  */
-public class NERCombinerAnnotator extends SentenceAnnotator {
+public class NERCombinerAnnotator implements Annotator {
 
   private final NERClassifierCombiner ner;
 
   private final Timing timer = new Timing();
   private boolean VERBOSE = true;
-
-  private final long maxTime;
-  private final int nThreads;
 
   public NERCombinerAnnotator() throws IOException, ClassNotFoundException {
     this(true);
@@ -54,36 +51,31 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
     }
   }
 
-  public NERCombinerAnnotator(boolean verbose)
-    throws IOException, ClassNotFoundException
-  {
-    this(new NERClassifierCombiner(new Properties()), verbose);
+  public NERCombinerAnnotator(boolean verbose) throws IOException, ClassNotFoundException {
+    VERBOSE = verbose;
+    timerStart("Loading NER combiner model...");
+    ner = new NERClassifierCombiner(new Properties());
+    timerStop();
   }
 
   public NERCombinerAnnotator(boolean verbose, String... classifiers)
-    throws IOException, ClassNotFoundException
-  {
-    this(new NERClassifierCombiner(classifiers), verbose);
+  throws IOException, ClassNotFoundException {
+    VERBOSE = verbose;
+    timerStart("Loading NER combiner model...");
+    ner = new NERClassifierCombiner(classifiers);
+    timerStop();
   }
 
   public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose) {
-    this(ner, verbose, 1, 0);
-  }
-
-  public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime) {
     VERBOSE = verbose;
     this.ner = ner;
-    this.maxTime = maxTime;
-    this.nThreads = nThreads;
   }
 
   public NERCombinerAnnotator(String name, Properties properties) {
-    this(createNERClassifierCombiner(name, properties), false,
-         PropertiesUtils.getInt(properties, name + ".nthreads", PropertiesUtils.getInt(properties, "nthreads", 1)),
-         PropertiesUtils.getLong(properties, name + ".maxtime", -1));
+    this(createNERClassifierCombiner(name, properties), false);
   }
 
-  final static NERClassifierCombiner createNERClassifierCombiner(String name, Properties properties) {
+  private final static NERClassifierCombiner createNERClassifierCombiner(String name, Properties properties) {
     // TODO: Move function into NERClassifierCombiner?
     List<String> models = new ArrayList<String>();
     String prefix = (name != null)? name + ".": "ner.";
@@ -115,43 +107,27 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
               models.toArray(new String[models.size()]));
     } catch (FileNotFoundException e) {
       throw new RuntimeIOException(e);
-    }
+   }
+   return nerCombiner;
+ }
 
-    return nerCombiner;
-  }
-
-  @Override
-  protected int nThreads() {
-    return nThreads;
-  }
-
-  @Override
-  protected long maxTime() {
-    return maxTime;
-  };
-
-  @Override
-  public void annotate(Annotation annotation) {
+public void annotate(Annotation annotation) {
     timerStart("Adding NER Combiner annotation...");
-
-    super.annotate(annotation);
-
-    this.ner.finalizeAnnotation(annotation);
-    timerStop();
+    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
+      // classify tokens for each sentence
+      for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+        doOneSentence(annotation, sentence);
+      }
+      this.ner.finalizeAnnotation(annotation);
+    } else {
+      throw new RuntimeException("unable to find sentences in: " + annotation);
+    }
+    //timerStop("done.");
   }
 
-  @Override
-  public void doOneSentence(Annotation annotation, CoreMap sentence) {
+  public CoreMap doOneSentence(Annotation annotation, CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    List<CoreLabel> output = null;
-    try {
-      output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
-    } catch (RuntimeInterruptedException e) {
-      // If we get interrupted, set the NER labels to the background
-      // symbol if they are not already set, then exit.
-      doOneFailedSentence(annotation, sentence);
-      return;
-    }
+    List<CoreLabel> output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
     if (VERBOSE) {
       boolean first = true;
       System.err.print("NERCombinerAnnotator direct output: [");
@@ -180,16 +156,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
       }
       System.err.println(']');
     }
-  }
-
-  @Override
-  public void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
-    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    for (int i = 0; i < tokens.size(); ++i) {
-      if (tokens.get(i).ner() == null) {
-        tokens.get(i).setNER(this.ner.backgroundSymbol());
-      }
-    }
+    return sentence;
   }
 
   @Override

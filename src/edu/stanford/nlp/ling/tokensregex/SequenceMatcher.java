@@ -55,7 +55,7 @@ import static edu.stanford.nlp.ling.tokensregex.SequenceMatcher.FindType.FIND_NO
  *
  * <p>
  * NOTE: When find is used, matches are attempted starting from the specified start index of the sequence
- *   The match with the earliest starting index is returned.
+ *   The match with the earliest starting index is returned. 
  * </p>
  *
  * @author Angel Chang
@@ -95,7 +95,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   {
     this.pattern = pattern;
     // NOTE: It is important elements DO NOT change as we do matches
-    // TODO: Should we just make a copy of the elements?
+    // TODO: Should we just make a copy of the elements?  
     this.elements = elements;
     if (elements == null) {
       throw new IllegalArgumentException("Cannot match against null elements");
@@ -486,9 +486,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       cStates = todo.pop();
       int s = cStates.curPosition+1;
       for(int i = s; i < regionEnd; i++){
-        if (Thread.interrupted()) {
-          throw new RuntimeInterruptedException();
-        }
         boolean match = cStates.match(i);
         if (cStates == null || cStates.size() == 0) {
           break;
@@ -570,7 +567,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       throw new IndexOutOfBoundsException("Invalid region end=" + end + ", need to be between 0 and " + elements.size());
     }
     if (start > end) {
-      throw new IndexOutOfBoundsException("Invalid region end=" + end + ", need to be larger then start=" + start);
+      throw new IndexOutOfBoundsException("Invalid region end=" + end + ", need to be larger then start=" + start);      
     }
     this.regionStart = start;
     this.nextMatchStart = start;
@@ -888,7 +885,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
 
     protected int newBid(int parent, int child)
     {
-      return bidIndex.addToIndex(new Pair<Integer,Integer>(parent,child));
+      return bidIndex.indexOf(new Pair<Integer,Integer>(parent,child), true);
     }
 
     protected int size()
@@ -1295,11 +1292,9 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
         curBidSet.add(state.bid);
       }
       List<Integer> bids = new ArrayList<Integer>(curBidSet);
-      Collections.sort(bids, new Comparator<Integer>() {
-        public int compare(Integer o1, Integer o2) {
-          int res = compareMatches(o1, o2);
-          return res;
-        }
+      Collections.sort(bids, (o1, o2) -> {
+        int res = compareMatches(o1, o2);
+        return res;
       });
 
       MatchedStates<T> newStates = new MatchedStates<T>(matcher, branchStates);
@@ -1377,7 +1372,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
             matched0 = true;
           }
         }
-        done = !matched0;
+        done = !matched0; 
       }
 
       branchStates.condense();
@@ -1531,7 +1526,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     {
       this.states.add(new State(bid, state));
     }
-
+    
     private void clean()
     {
       branchStates.unlink(this);

@@ -8,7 +8,7 @@ import edu.stanford.nlp.sequences.Clique;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 import edu.stanford.nlp.util.StringUtils;
@@ -183,7 +183,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
         int k = crf.flags.kBest;
         crf.classifyAndWriteAnswersKBest(testFile, k, readerAndWriter);
       } else {
-        crf.classifyAndWriteAnswers(testFile, readerAndWriter, true);
+        crf.classifyAndWriteAnswers(testFile, readerAndWriter);
       }
     }
   } // end main

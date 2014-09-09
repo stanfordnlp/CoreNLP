@@ -1,6 +1,6 @@
 package edu.stanford.nlp.optimization;
 
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import junit.framework.TestCase;
 
 public class GoldenSectionLineSearchTest extends TestCase {

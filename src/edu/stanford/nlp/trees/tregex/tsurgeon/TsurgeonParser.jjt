@@ -9,8 +9,10 @@ PARSER_BEGIN(TsurgeonParser)
 
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
+import java.io.StringReader;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
 import java.util.*;
 
 
@@ -72,7 +74,7 @@ TOKEN:
 { < NAME: ( ~[" ","\n","\r","[","]","(",")",":"] )+ > : DEFAULT }
 
 <OPERATION> TOKEN:
-{
+{ 
   < CLOSE_BRACKET: "]" >
 | < SELECTION: "#rightmost" | "#leftmost" >
 | < GENERAL_RELABEL: "/" ("\\/"|~["\n","\r"])* "/" ( ("=" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("%" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("/" ("\\/"|"\\]"|"\\\\"|~["\n","\r","]","\\"])* "/") )+ >
@@ -96,7 +98,7 @@ TsurgeonPatternRoot Root() :
 }
 {
   result = Operation()
-  { return new TsurgeonPatternRoot(result); }
+  { return new TsurgeonPatternRoot(result); } 
  | LOOKAHEAD(2)
   ( <IF> <EXISTS> name = <NAME> result = Root() )
   { return new TsurgeonPatternRoot(new IfExistsNode(name.image, false, result.children)); }
@@ -156,7 +158,7 @@ TsurgeonPattern Operation() :
     { return new ReplaceNode(child1,child2); }
 | LOOKAHEAD(3)
   operator = <REPLACE> child1 = NodeSelection() treeList = TreeList(false)
-    { return new ReplaceNode(child1,treeList); }
+    { return new ReplaceNode(child1,treeList); } 
 |  operator = <MOVE> child1 = NodeSelection() loc = Location()
     { return new MoveNode(child1, loc); }
 | LOOKAHEAD(3)
@@ -165,11 +167,11 @@ TsurgeonPattern Operation() :
 | LOOKAHEAD(3)
   operator = <INSERT> tree = TreeRoot(false) loc = Location()
     { return new InsertNode(tree, loc); }
-| operator = <CREATE_SUBTREE> tree = TreeRoot(false) nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())
+| operator = <CREATE_SUBTREE> (( newLabel = <IDENTIFIER> ) | ( newLabel = <TREE_NODE_TERMINAL_LABEL> )) nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())
     { if (nodeSelections.size() == 1) {
-        return new CreateSubtreeNode(nodeSelections.get(0), tree);
+        return new CreateSubtreeNode(nodeSelections.get(0), newLabel.image);
       } else if (nodeSelections.size() == 2) {
-        return new CreateSubtreeNode(nodeSelections.get(0), nodeSelections.get(1), tree);
+        return new CreateSubtreeNode(nodeSelections.get(0), nodeSelections.get(1), newLabel.image);
       } else {
         throw new ParseException("Illegal number of nodes given to createSubtree (" + nodeSelections.size() + ")");
       }
@@ -200,7 +202,7 @@ List<TsurgeonPattern> NodeSelectionList(List<TsurgeonPattern> l) :
   TsurgeonPattern result;
 }
 {
- ( ( result = NodeSelection() ) { l.add(result); }
+ ( ( result = NodeSelection() ) { l.add(result); } 
  ( ( result = NodeSelection() ) {l.add(result); } )* )
    { return l; }
 }
@@ -216,8 +218,8 @@ TsurgeonPattern NodeSelection() :
   { return result; }
 }
 
-TsurgeonPattern NodeName() :
-{
+TsurgeonPattern NodeName() : 
+{ 
   Token t;
 }
 {
@@ -231,11 +233,11 @@ List<AuxiliaryTree> TreeList(boolean requiresFoot) :
   AuxiliaryTree tree;
 }
 {
- ( ( tree = TreeRoot(requiresFoot) ) { trees.add(tree); }
+ ( ( tree = TreeRoot(requiresFoot) ) { trees.add(tree); } 
  ( ( tree = TreeRoot(requiresFoot) ) { trees.add(tree); } )* )
    { return trees; }
 }
-
+ 
 
 // the argument says whether there must be a foot node on the aux tree.
 AuxiliaryTree TreeRoot(boolean requiresFoot) :

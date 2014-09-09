@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
 * Trigger for CoreMap Node Patterns.  Allows for fast identification of which patterns
@@ -29,21 +30,18 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
     this.patterns = patterns;
 
     Function<NodePattern<CoreMap>, Triple<Class,String,Boolean>> textTriggerFilter =
-            new Function<NodePattern<CoreMap>, Triple<Class,String,Boolean>>() {
-      @Override
-      public Triple<Class,String,Boolean> apply(NodePattern<CoreMap> in) {
-        if (in instanceof CoreMapNodePattern) {
-          CoreMapNodePattern p = (CoreMapNodePattern) in;
-          for (Pair<Class,NodePattern> v:p.getAnnotationPatterns()) {
-            if (v.first == CoreAnnotations.TextAnnotation.class && v.second instanceof CoreMapNodePattern.StringAnnotationPattern) {
-              return Triple.makeTriple(v.first, ((CoreMapNodePattern.StringAnnotationPattern) v.second).target,
-                      ((CoreMapNodePattern.StringAnnotationPattern) v.second).ignoreCase());
+        in -> {
+          if (in instanceof CoreMapNodePattern) {
+            CoreMapNodePattern p = (CoreMapNodePattern) in;
+            for (Pair<Class,NodePattern> v:p.getAnnotationPatterns()) {
+              if (v.first == CoreAnnotations.TextAnnotation.class && v.second instanceof CoreMapNodePattern.StringAnnotationPattern) {
+                return Triple.makeTriple(v.first, ((CoreMapNodePattern.StringAnnotationPattern) v.second).target,
+                        ((CoreMapNodePattern.StringAnnotationPattern) v.second).ignoreCase());
+              }
             }
           }
-        }
-        return null;
-      }
-    };
+          return null;
+        };
 
     for (SequencePattern<CoreMap> pattern:patterns) {
       // Look for first string...

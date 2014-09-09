@@ -27,6 +27,7 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
@@ -40,7 +41,7 @@ import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;

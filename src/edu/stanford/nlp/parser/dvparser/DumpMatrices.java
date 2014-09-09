@@ -1,6 +1,7 @@
 package edu.stanford.nlp.parser.dvparser;
 
 import edu.stanford.nlp.io.FileSystem;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.util.TwoDimensionalMap;
 
@@ -49,7 +50,7 @@ public class DumpMatrices {
   public static void main(String[] args) throws IOException {
     String modelPath = null;
     String outputDir = null;
-
+    
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-model")) {
         modelPath = args[argIndex + 1];

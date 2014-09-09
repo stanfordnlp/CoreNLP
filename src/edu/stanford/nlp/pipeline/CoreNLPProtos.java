@@ -7404,14 +7404,6 @@ public final class CoreNLPProtos {
       // optional bool isExtra = 4;
       boolean hasIsExtra();
       boolean getIsExtra();
-      
-      // optional uint32 sourceCopy = 5;
-      boolean hasSourceCopy();
-      int getSourceCopy();
-      
-      // optional uint32 targetCopy = 6;
-      boolean hasTargetCopy();
-      int getTargetCopy();
     }
     public static final class Edge extends
         com.google.protobuf.GeneratedMessage
@@ -7504,33 +7496,11 @@ public final class CoreNLPProtos {
         return isExtra_;
       }
       
-      // optional uint32 sourceCopy = 5;
-      public static final int SOURCECOPY_FIELD_NUMBER = 5;
-      private int sourceCopy_;
-      public boolean hasSourceCopy() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
-      }
-      public int getSourceCopy() {
-        return sourceCopy_;
-      }
-      
-      // optional uint32 targetCopy = 6;
-      public static final int TARGETCOPY_FIELD_NUMBER = 6;
-      private int targetCopy_;
-      public boolean hasTargetCopy() {
-        return ((bitField0_ & 0x00000020) == 0x00000020);
-      }
-      public int getTargetCopy() {
-        return targetCopy_;
-      }
-      
       private void initFields() {
         source_ = 0;
         target_ = 0;
         dep_ = "";
         isExtra_ = false;
-        sourceCopy_ = 0;
-        targetCopy_ = 0;
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -7564,12 +7534,6 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000008) == 0x00000008)) {
           output.writeBool(4, isExtra_);
         }
-        if (((bitField0_ & 0x00000010) == 0x00000010)) {
-          output.writeUInt32(5, sourceCopy_);
-        }
-        if (((bitField0_ & 0x00000020) == 0x00000020)) {
-          output.writeUInt32(6, targetCopy_);
-        }
         getUnknownFields().writeTo(output);
       }
       
@@ -7594,14 +7558,6 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000008) == 0x00000008)) {
           size += com.google.protobuf.CodedOutputStream
             .computeBoolSize(4, isExtra_);
-        }
-        if (((bitField0_ & 0x00000010) == 0x00000010)) {
-          size += com.google.protobuf.CodedOutputStream
-            .computeUInt32Size(5, sourceCopy_);
-        }
-        if (((bitField0_ & 0x00000020) == 0x00000020)) {
-          size += com.google.protobuf.CodedOutputStream
-            .computeUInt32Size(6, targetCopy_);
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -7735,10 +7691,6 @@ public final class CoreNLPProtos {
           bitField0_ = (bitField0_ & ~0x00000004);
           isExtra_ = false;
           bitField0_ = (bitField0_ & ~0x00000008);
-          sourceCopy_ = 0;
-          bitField0_ = (bitField0_ & ~0x00000010);
-          targetCopy_ = 0;
-          bitField0_ = (bitField0_ & ~0x00000020);
           return this;
         }
         
@@ -7793,14 +7745,6 @@ public final class CoreNLPProtos {
             to_bitField0_ |= 0x00000008;
           }
           result.isExtra_ = isExtra_;
-          if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
-            to_bitField0_ |= 0x00000010;
-          }
-          result.sourceCopy_ = sourceCopy_;
-          if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
-            to_bitField0_ |= 0x00000020;
-          }
-          result.targetCopy_ = targetCopy_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -7828,12 +7772,6 @@ public final class CoreNLPProtos {
           }
           if (other.hasIsExtra()) {
             setIsExtra(other.getIsExtra());
-          }
-          if (other.hasSourceCopy()) {
-            setSourceCopy(other.getSourceCopy());
-          }
-          if (other.hasTargetCopy()) {
-            setTargetCopy(other.getTargetCopy());
           }
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
@@ -7892,16 +7830,6 @@ public final class CoreNLPProtos {
               case 32: {
                 bitField0_ |= 0x00000008;
                 isExtra_ = input.readBool();
-                break;
-              }
-              case 40: {
-                bitField0_ |= 0x00000010;
-                sourceCopy_ = input.readUInt32();
-                break;
-              }
-              case 48: {
-                bitField0_ |= 0x00000020;
-                targetCopy_ = input.readUInt32();
                 break;
               }
             }
@@ -8005,48 +7933,6 @@ public final class CoreNLPProtos {
         public Builder clearIsExtra() {
           bitField0_ = (bitField0_ & ~0x00000008);
           isExtra_ = false;
-          onChanged();
-          return this;
-        }
-        
-        // optional uint32 sourceCopy = 5;
-        private int sourceCopy_ ;
-        public boolean hasSourceCopy() {
-          return ((bitField0_ & 0x00000010) == 0x00000010);
-        }
-        public int getSourceCopy() {
-          return sourceCopy_;
-        }
-        public Builder setSourceCopy(int value) {
-          bitField0_ |= 0x00000010;
-          sourceCopy_ = value;
-          onChanged();
-          return this;
-        }
-        public Builder clearSourceCopy() {
-          bitField0_ = (bitField0_ & ~0x00000010);
-          sourceCopy_ = 0;
-          onChanged();
-          return this;
-        }
-        
-        // optional uint32 targetCopy = 6;
-        private int targetCopy_ ;
-        public boolean hasTargetCopy() {
-          return ((bitField0_ & 0x00000020) == 0x00000020);
-        }
-        public int getTargetCopy() {
-          return targetCopy_;
-        }
-        public Builder setTargetCopy(int value) {
-          bitField0_ |= 0x00000020;
-          targetCopy_ = value;
-          onChanged();
-          return this;
-        }
-        public Builder clearTargetCopy() {
-          bitField0_ = (bitField0_ & ~0x00000020);
-          targetCopy_ = 0;
           onChanged();
           return this;
         }
@@ -13914,17 +13800,16 @@ public final class CoreNLPProtos {
       "\200\002\"\216\001\n\tParseTree\0223\n\005child\030\001 \003(\0132$.edu.st" +
       "anford.nlp.pipeline.ParseTree\022\r\n\005value\030\002" +
       " \001(\t\022\027\n\017yieldBeginIndex\030\003 \001(\r\022\025\n\ryieldEn",
-      "dIndex\030\004 \001(\r\022\r\n\005score\030\005 \001(\001\"\325\002\n\017Dependen" +
+      "dIndex\030\004 \001(\r\022\r\n\005score\030\005 \001(\001\"\255\002\n\017Dependen" +
       "cyGraph\022=\n\004node\030\001 \003(\0132/.edu.stanford.nlp" +
       ".pipeline.DependencyGraph.Node\022=\n\004edge\030\002" +
       " \003(\0132/.edu.stanford.nlp.pipeline.Depende" +
       "ncyGraph.Edge\022\020\n\004root\030\003 \003(\rB\002\020\001\032D\n\004Node\022" +
       "\025\n\rsentenceIndex\030\001 \002(\r\022\r\n\005index\030\002 \002(\r\022\026\n" +
-      "\016copyAnnotation\030\003 \001(\r\032l\n\004Edge\022\016\n\006source\030" +
+      "\016copyAnnotation\030\003 \001(\r\032D\n\004Edge\022\016\n\006source\030" +
       "\001 \002(\r\022\016\n\006target\030\002 \002(\r\022\013\n\003dep\030\003 \001(\t\022\017\n\007is" +
-      "Extra\030\004 \001(\010\022\022\n\nsourceCopy\030\005 \001(\r\022\022\n\ntarge" +
-      "tCopy\030\006 \001(\r\"\306\002\n\nCorefChain\022\017\n\007chainID\030\001 ",
-      "\002(\005\022C\n\007mention\030\002 \003(\01322.edu.stanford.nlp." +
+      "Extra\030\004 \001(\010\"\306\002\n\nCorefChain\022\017\n\007chainID\030\001 " +
+      "\002(\005\022C\n\007mention\030\002 \003(\01322.edu.stanford.nlp.",
       "pipeline.CorefChain.CorefMention\022\026\n\016repr" +
       "esentative\030\003 \002(\r\032\311\001\n\014CorefMention\022\021\n\tmen" +
       "tionID\030\001 \001(\005\022\023\n\013mentionType\030\002 \001(\t\022\016\n\006num" +
@@ -13933,8 +13818,8 @@ public final class CoreNLPProtos {
       "\022\021\n\theadIndex\030\t \001(\r\022\025\n\rsentenceIndex\030\n \001" +
       "(\r\022\020\n\010position\030\013 \001(\r\"w\n\005Timex\022\r\n\005value\030\001" +
       " \001(\t\022\020\n\010altValue\030\002 \001(\t\022\014\n\004text\030\003 \001(\t\022\014\n\004" +
-      "type\030\004 \001(\t\022\013\n\003tid\030\005 \001(\t\022\022\n\nbeginPoint\030\006 ",
-      "\001(\r\022\020\n\010endPoint\030\007 \001(\r\"\333\001\n\006Entity\022\021\n\thead" +
+      "type\030\004 \001(\t\022\013\n\003tid\030\005 \001(\t\022\022\n\nbeginPoint\030\006 " +
+      "\001(\r\022\020\n\010endPoint\030\007 \001(\r\"\333\001\n\006Entity\022\021\n\thead",
       "Start\030\006 \001(\r\022\017\n\007headEnd\030\007 \001(\r\022\023\n\013mentionT" +
       "ype\030\010 \001(\t\022\026\n\016normalizedName\030\t \001(\t\022\026\n\016hea" +
       "dTokenIndex\030\n \001(\r\022\017\n\007corefID\030\013 \001(\t\022\020\n\010ob" +
@@ -13943,114 +13828,111 @@ public final class CoreNLPProtos {
       "\001(\t\"\267\001\n\010Relation\022\017\n\007argName\030\006 \003(\t\022.\n\003arg" +
       "\030\007 \003(\0132!.edu.stanford.nlp.pipeline.Entit" +
       "y\022\021\n\tsignature\030\010 \001(\t\022\020\n\010objectID\030\001 \001(\t\022\023" +
-      "\n\013extentStart\030\002 \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014",
-      "\n\004type\030\004 \001(\t\022\017\n\007subtype\030\005 \001(\tB*\n\031edu.sta" +
+      "\n\013extentStart\030\002 \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014" +
+      "\n\004type\030\004 \001(\t\022\017\n\007subtype\030\005 \001(\tB*\n\031edu.sta",
       "nford.nlp.pipelineB\rCoreNLPProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
-        public com.google.protobuf.ExtensionRegistry assignDescriptors(
-            com.google.protobuf.Descriptors.FileDescriptor root) {
+        root -> {
           descriptor = root;
           internal_static_edu_stanford_nlp_pipeline_Document_descriptor =
             getDescriptor().getMessageTypes().get(0);
           internal_static_edu_stanford_nlp_pipeline_Document_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_Document_descriptor,
-              new java.lang.String[] { "Text", "Sentence", "CorefChain", "DocID", "SentencelessToken", },
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Document.class,
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Document.Builder.class);
+              new String[] { "Text", "Sentence", "CorefChain", "DocID", "SentencelessToken", },
+              Document.class,
+              Document.Builder.class);
           internal_static_edu_stanford_nlp_pipeline_Sentence_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_edu_stanford_nlp_pipeline_Sentence_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_Sentence_descriptor,
-              new java.lang.String[] { "Token", "TokenOffsetBegin", "TokenOffsetEnd", "SentenceIndex", "CharacterOffsetBegin", "CharacterOffsetEnd", "ParseTree", "BasicDependencies", "CollapsedDependencies", "CollapsedCCProcessedDependencies", "Paragraph", "HasRelationAnnotations", "Entity", "Relation", "HasNumerizedTokensAnnotation", },
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.class,
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence.Builder.class);
+              new String[] { "Token", "TokenOffsetBegin", "TokenOffsetEnd", "SentenceIndex", "CharacterOffsetBegin", "CharacterOffsetEnd", "ParseTree", "BasicDependencies", "CollapsedDependencies", "CollapsedCCProcessedDependencies", "Paragraph", "HasRelationAnnotations", "Entity", "Relation", "HasNumerizedTokensAnnotation", },
+              Sentence.class,
+              Sentence.Builder.class);
           internal_static_edu_stanford_nlp_pipeline_Token_descriptor =
             getDescriptor().getMessageTypes().get(2);
           internal_static_edu_stanford_nlp_pipeline_Token_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_Token_descriptor,
-              new java.lang.String[] { "Word", "Pos", "Value", "Category", "Before", "After", "OriginalText", "Ner", "NormalizedNER", "Lemma", "BeginChar", "EndChar", "Utterance", "Speaker", "BeginIndex", "EndIndex", "TokenBeginIndex", "TokenEndIndex", "TimexValue", "HasXmlContext", "XmlContext", "CorefClusterID", "Answer", "Gender", "TrueCase", "TrueCaseText", },
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Token.class,
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Token.Builder.class);
+              new String[] { "Word", "Pos", "Value", "Category", "Before", "After", "OriginalText", "Ner", "NormalizedNER", "Lemma", "BeginChar", "EndChar", "Utterance", "Speaker", "BeginIndex", "EndIndex", "TokenBeginIndex", "TokenEndIndex", "TimexValue", "HasXmlContext", "XmlContext", "CorefClusterID", "Answer", "Gender", "TrueCase", "TrueCaseText", },
+              Token.class,
+              Token.Builder.class);
           internal_static_edu_stanford_nlp_pipeline_ParseTree_descriptor =
             getDescriptor().getMessageTypes().get(3);
           internal_static_edu_stanford_nlp_pipeline_ParseTree_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_ParseTree_descriptor,
-              new java.lang.String[] { "Child", "Value", "YieldBeginIndex", "YieldEndIndex", "Score", },
-              edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.class,
-              edu.stanford.nlp.pipeline.CoreNLPProtos.ParseTree.Builder.class);
+              new String[] { "Child", "Value", "YieldBeginIndex", "YieldEndIndex", "Score", },
+              ParseTree.class,
+              ParseTree.Builder.class);
           internal_static_edu_stanford_nlp_pipeline_DependencyGraph_descriptor =
             getDescriptor().getMessageTypes().get(4);
           internal_static_edu_stanford_nlp_pipeline_DependencyGraph_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_DependencyGraph_descriptor,
-              new java.lang.String[] { "Node", "Edge", "Root", },
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.class,
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Builder.class);
+              new String[] { "Node", "Edge", "Root", },
+              DependencyGraph.class,
+              DependencyGraph.Builder.class);
           internal_static_edu_stanford_nlp_pipeline_DependencyGraph_Node_descriptor =
             internal_static_edu_stanford_nlp_pipeline_DependencyGraph_descriptor.getNestedTypes().get(0);
           internal_static_edu_stanford_nlp_pipeline_DependencyGraph_Node_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_DependencyGraph_Node_descriptor,
-              new java.lang.String[] { "SentenceIndex", "Index", "CopyAnnotation", },
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node.class,
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Node.Builder.class);
+              new String[] { "SentenceIndex", "Index", "CopyAnnotation", },
+              DependencyGraph.Node.class,
+              DependencyGraph.Node.Builder.class);
           internal_static_edu_stanford_nlp_pipeline_DependencyGraph_Edge_descriptor =
             internal_static_edu_stanford_nlp_pipeline_DependencyGraph_descriptor.getNestedTypes().get(1);
           internal_static_edu_stanford_nlp_pipeline_DependencyGraph_Edge_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_DependencyGraph_Edge_descriptor,
-              new java.lang.String[] { "Source", "Target", "Dep", "IsExtra", "SourceCopy", "TargetCopy", },
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge.class,
-              edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge.Builder.class);
+              new String[] { "Source", "Target", "Dep", "IsExtra", },
+              DependencyGraph.Edge.class,
+              DependencyGraph.Edge.Builder.class);
           internal_static_edu_stanford_nlp_pipeline_CorefChain_descriptor =
             getDescriptor().getMessageTypes().get(5);
           internal_static_edu_stanford_nlp_pipeline_CorefChain_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_CorefChain_descriptor,
-              new java.lang.String[] { "ChainID", "Mention", "Representative", },
-              edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.class,
-              edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.Builder.class);
+              new String[] { "ChainID", "Mention", "Representative", },
+              CorefChain.class,
+              CorefChain.Builder.class);
           internal_static_edu_stanford_nlp_pipeline_CorefChain_CorefMention_descriptor =
             internal_static_edu_stanford_nlp_pipeline_CorefChain_descriptor.getNestedTypes().get(0);
           internal_static_edu_stanford_nlp_pipeline_CorefChain_CorefMention_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_CorefChain_CorefMention_descriptor,
-              new java.lang.String[] { "MentionID", "MentionType", "Number", "Gender", "Animacy", "StartIndex", "EndIndex", "HeadIndex", "SentenceIndex", "Position", },
-              edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention.class,
-              edu.stanford.nlp.pipeline.CoreNLPProtos.CorefChain.CorefMention.Builder.class);
+              new String[] { "MentionID", "MentionType", "Number", "Gender", "Animacy", "StartIndex", "EndIndex", "HeadIndex", "SentenceIndex", "Position", },
+              CorefChain.CorefMention.class,
+              CorefChain.CorefMention.Builder.class);
           internal_static_edu_stanford_nlp_pipeline_Timex_descriptor =
             getDescriptor().getMessageTypes().get(6);
           internal_static_edu_stanford_nlp_pipeline_Timex_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_Timex_descriptor,
-              new java.lang.String[] { "Value", "AltValue", "Text", "Type", "Tid", "BeginPoint", "EndPoint", },
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.class,
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Timex.Builder.class);
+              new String[] { "Value", "AltValue", "Text", "Type", "Tid", "BeginPoint", "EndPoint", },
+              Timex.class,
+              Timex.Builder.class);
           internal_static_edu_stanford_nlp_pipeline_Entity_descriptor =
             getDescriptor().getMessageTypes().get(7);
           internal_static_edu_stanford_nlp_pipeline_Entity_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_Entity_descriptor,
-              new java.lang.String[] { "HeadStart", "HeadEnd", "MentionType", "NormalizedName", "HeadTokenIndex", "CorefID", "ObjectID", "ExtentStart", "ExtentEnd", "Type", "Subtype", },
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.class,
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Entity.Builder.class);
+              new String[] { "HeadStart", "HeadEnd", "MentionType", "NormalizedName", "HeadTokenIndex", "CorefID", "ObjectID", "ExtentStart", "ExtentEnd", "Type", "Subtype", },
+              Entity.class,
+              Entity.Builder.class);
           internal_static_edu_stanford_nlp_pipeline_Relation_descriptor =
             getDescriptor().getMessageTypes().get(8);
           internal_static_edu_stanford_nlp_pipeline_Relation_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_Relation_descriptor,
-              new java.lang.String[] { "ArgName", "Arg", "Signature", "ObjectID", "ExtentStart", "ExtentEnd", "Type", "Subtype", },
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Relation.class,
-              edu.stanford.nlp.pipeline.CoreNLPProtos.Relation.Builder.class);
+              new String[] { "ArgName", "Arg", "Signature", "ObjectID", "ExtentStart", "ExtentEnd", "Type", "Subtype", },
+              Relation.class,
+              Relation.Builder.class);
           return null;
-        }
-      };
+        };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {

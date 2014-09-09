@@ -163,19 +163,27 @@ public class IntTaggedWord implements Serializable, Comparable<IntTaggedWord> {
    */
   public IntTaggedWord(String wordString, String tagString,
                        Index<String> wordIndex, Index<String> tagIndex) {
-    if (wordString.equals(ANY)) {
-      word = ANY_WORD_INT;
-    } else if (wordString.equals(STOP)) {
-      word = STOP_WORD_INT;
-    } else {
-      word = wordIndex.addToIndex(wordString);
+    switch (wordString) {
+      case ANY:
+        word = ANY_WORD_INT;
+        break;
+      case STOP:
+        word = STOP_WORD_INT;
+        break;
+      default:
+        word = wordIndex.indexOf(wordString, true);
+        break;
     }
-    if (tagString.equals(ANY)) {
-      tag = (short) ANY_TAG_INT;
-    } else if (tagString.equals(STOP)) {
-      tag = (short) STOP_TAG_INT;
-    } else {
-      tag = (short) tagIndex.addToIndex(tagString);
+    switch (tagString) {
+      case ANY:
+        tag = (short) ANY_TAG_INT;
+        break;
+      case STOP:
+        tag = (short) STOP_TAG_INT;
+        break;
+      default:
+        tag = (short) tagIndex.indexOf(tagString, true);
+        break;
     }
   }
 
