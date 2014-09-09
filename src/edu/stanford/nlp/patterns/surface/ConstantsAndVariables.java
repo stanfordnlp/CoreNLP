@@ -266,8 +266,15 @@ public class ConstantsAndVariables implements Serializable{
    * Seed dictionary, set in the class that uses this class
    */
   private Map<String, Set<String>> labelDictionary = new HashMap<String, Set<String>>();
-  
-  public Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass = null;
+
+  /**
+   * Just the set of labels
+   */
+  private Set<String> labels = new HashSet<String>();
+
+
+  private Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass = null;
+
 
   /**
    * Can be used only when using the API - using the appropriate constructor.
@@ -275,7 +282,7 @@ public class ConstantsAndVariables implements Serializable{
    * though this variable says object) will be ignored.
    */
   @SuppressWarnings("rawtypes")
-  public Map<String, Map<Class, Object>> ignoreWordswithClassesDuringSelection = null;
+  private Map<String, Map<Class, Object>> ignoreWordswithClassesDuringSelection = null;
 
   /**
    * These classes will be generalized. It can only be used via the API using
@@ -424,6 +431,7 @@ public class ConstantsAndVariables implements Serializable{
 
   public Map<String, Counter<Integer>> distSimWeights = new HashMap<String, Counter<Integer>>();
   public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
+
 
   public enum ScorePhraseMeasures {
     DISTSIM, GOOGLENGRAM, PATWTBYFREQ, EDITDISTSAME, EDITDISTOTHER, DOMAINNGRAM, SEMANTICODDS, WORDSHAPE
@@ -588,7 +596,35 @@ public class ConstantsAndVariables implements Serializable{
   
   Properties props;
 
-  public ConstantsAndVariables(Properties props) throws IOException {
+  public ConstantsAndVariables(Properties props, Set<String> labels, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
+                               Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
+    this.labels = labels;
+    this.answerClass = answerClass;
+    this.generalizeClasses = generalizeClasses;
+    this.ignoreWordswithClassesDuringSelection = ignoreClasses;
+    setUp(props);
+  }
+
+  public ConstantsAndVariables(Properties props, Map<String, Set<String>> labelDictionary, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
+                               Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
+    this.labelDictionary= labelDictionary;
+    this.labels = labelDictionary.keySet();
+    this.answerClass = answerClass;
+    this.generalizeClasses = generalizeClasses;
+    this.ignoreWordswithClassesDuringSelection = ignoreClasses;
+    setUp(props);
+  }
+
+  public ConstantsAndVariables(Properties props, Set<String> labels,  Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass) throws IOException {
+    this.labels = labels;
+    this.answerClass = answerClass;
+    setUp(props);
+  }
+
+  public ConstantsAndVariables(Properties props, Set<String> labels,  Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass, Map<String, Class> generalizeClasses) throws IOException {
+    this.labels = labels;
+    this.answerClass = answerClass;
+    this.generalizeClasses = generalizeClasses;
     setUp(props);
   }
 
@@ -600,7 +636,8 @@ public class ConstantsAndVariables implements Serializable{
     Execution.fillOptions(this, props);
     if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty())
       ignoreWordRegex = Pattern.compile(wordIgnoreRegex);
-    for (String label : labelDictionary.keySet()) {
+
+    for (String label : labels) {
       env.put(label, TokenSequencePattern.getNewEnv());
       // env.get(label).bind("answer", answerClass.get(label));
       for (Entry<String, Class<? extends Key<String>>> en : this.answerClass
@@ -658,7 +695,7 @@ public class ConstantsAndVariables implements Serializable{
       i++;
     }
     stopStr += "/";
-    for (String label : labelDictionary.keySet()) {
+    for (String label : labels) {
       env.get(label).bind("$FILLER",
           "/" + StringUtils.join(fillerWords, "|") + "/");
       env.get(label).bind("$STOPWORD", stopStr);
@@ -1004,4 +1041,13 @@ public class ConstantsAndVariables implements Serializable{
     return wordShapeCache;
   }
 
+
+  public Map<String, Class<? extends Key<String>>> getAnswerClass() {
+    return answerClass;
+  }
+
+
+  public Map<String, Map<Class, Object>> getIgnoreWordswithClassesDuringSelection() {
+    return ignoreWordswithClassesDuringSelection;
+  }
 }

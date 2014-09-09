@@ -126,7 +126,7 @@ public class CreatePatterns {
     String strgeneric = "";
     String strOriginal = "";
     boolean isLabeledO = true;
-    for (Entry<String, Class<? extends TypesafeMap.Key<String>>> e : constVars.answerClass.entrySet()) {
+    for (Entry<String, Class<? extends TypesafeMap.Key<String>>> e : constVars.getAnswerClass().entrySet()) {
       if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
         isLabeledO = false;
         if (strgeneric.isEmpty()) {

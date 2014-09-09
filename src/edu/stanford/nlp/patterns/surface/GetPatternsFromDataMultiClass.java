@@ -292,12 +292,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     Data.sents = sents;
     Execution.fillOptions(Data.class, props);
-    constVars = new ConstantsAndVariables(props);
-    Execution.fillOptions(constVars, props);
-    constVars.answerClass = answerClass;
-    constVars.ignoreWordswithClassesDuringSelection = ignoreClasses;
-    constVars.addGeneralizeClasses(generalizeClasses);
-    constVars.setLabelDictionary(seedSets);
+    constVars = new ConstantsAndVariables(props, seedSets, answerClass, generalizeClasses, ignoreClasses);
+    //Execution.fillOptions(constVars, props);
+    //constVars.ignoreWordswithClassesDuringSelection = ignoreClasses;
+    //constVars.addGeneralizeClasses(generalizeClasses);
+    //constVars.setLabelDictionary(seedSets);
 
     if (constVars.writeMatchedTokensFiles && constVars.batchProcessSents) {
       throw new RuntimeException(
@@ -397,12 +396,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           }
           Redwood.log(Redwood.DBG, "Initializing sents from " + f + " with " + sentsf.size()
               + " sentences, either by labeling with the seed set or just setting the right classes");
-          for (String l : constVars.answerClass.keySet()) {
+          for (String l : constVars.getAnswerClass().keySet()) {
 
             Set<String> seed = seedSets == null || !labelUsingSeedSets ? new HashSet<String>() : (seedSets.containsKey(l) ? seedSets.get(l)
                 : new HashSet<String>());
 
-            runLabelSeedWords(sentsf, constVars.answerClass.get(l), l, seed, constVars);
+            runLabelSeedWords(sentsf, constVars.getAnswerClass().get(l), l, seed, constVars);
 
             Set<String> otherseed = constVars.getOtherSemanticClasses() == null || !labelUsingSeedSets ? new HashSet<String>() : constVars
                 .getOtherSemanticClasses();
@@ -433,12 +432,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       Redwood.log(Redwood.DBG, "Initializing sents " + Data.sents.size()
           + " sentences, either by labeling with the seed set or just setting the right classes");
-      for (String l : constVars.answerClass.keySet()) {
+      for (String l : constVars.getAnswerClass().keySet()) {
 
         Set<String> seed = seedSets == null || !labelUsingSeedSets ? new HashSet<String>() : (seedSets.containsKey(l) ? seedSets.get(l)
             : new HashSet<String>());
 
-        runLabelSeedWords(Data.sents, constVars.answerClass.get(l), l, seed, constVars);
+        runLabelSeedWords(Data.sents, constVars.getAnswerClass().get(l), l, seed, constVars);
 
         Set<String> otherseed = constVars.getOtherSemanticClasses() == null || !labelUsingSeedSets ? new HashSet<String>() : constVars
             .getOtherSemanticClasses();
@@ -1258,7 +1257,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       TwoDimensionalCounter<SurfacePattern, String> unLabeledPatternsandWords4Label,
       TwoDimensionalCounter<SurfacePattern, String> negandUnLabeledPatternsandWords4Label) {
     // calculating the sufficient statistics
-    Class answerClass4Label = constVars.answerClass.get(label);
+    Class answerClass4Label = constVars.getAnswerClass().get(label);
 
     for (Entry<String, List<CoreLabel>> sentEn : sents.entrySet()) {
       Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>> pat4Sent = patternsForEachToken.get(sentEn.getKey());
@@ -1350,7 +1349,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         } else {
           // Negative or unlabeled
           boolean negToken = false;
-          Map<Class, Object> ignore = constVars.ignoreWordswithClassesDuringSelection.get(label);
+          Map<Class, Object> ignore = constVars.getIgnoreWordswithClassesDuringSelection().get(label);
           for (Class igCl : ignore.keySet())
             if ((Boolean) token.get(igCl)) {
               negToken = true;
@@ -1508,7 +1507,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               int index = idx + j;
               CoreLabel l = sentEn.getValue().get(index);
               if (constVars.usePatternResultAsLabel) {
-                l.set(constVars.answerClass.get(label), label);
+                l.set(constVars.getAnswerClass().get(label), label);
                 Set<String> matched = new HashSet<String>();
                 matched.add(StringUtils.join(ph, " "));
                 l.set(PatternsAnnotations.MatchedPhrases.class, matched);
@@ -1997,7 +1996,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         //to first finish labels before starting
         List<String> startingLabels = new ArrayList<String>();
         
-        for (Entry<String, Class<? extends TypesafeMap.Key<String>>> as : constVars.answerClass.entrySet()) {
+        for (Entry<String, Class<? extends TypesafeMap.Key<String>>> as : constVars.getAnswerClass().entrySet()) {
           String label = as.getKey();
           boolean lastwordlabeled = lastWordLabeled.get(label);
           if (s.get(as.getValue()).equals(label)) {
@@ -2147,7 +2146,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   public void evaluate(Map<String, List<CoreLabel>> testSentences, boolean evalPerEntity) throws IOException {
 
-    for (Entry<String, Class<? extends Key<String>>> anscl : constVars.answerClass.entrySet()) {
+    for (Entry<String, Class<? extends Key<String>>> anscl : constVars.getAnswerClass().entrySet()) {
       String label = anscl.getKey();
       Counter<String> entityTP = new ClassicCounter<String>();
       Counter<String> entityFP = new ClassicCounter<String>();

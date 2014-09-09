@@ -76,7 +76,7 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
           // if (restrictToMatched) {
           // tokensMatchedPattern.add(sentid, i);
           // }
-          for (Entry<Class, Object> ig : constVars.ignoreWordswithClassesDuringSelection.get(label).entrySet()) {
+          for (Entry<Class, Object> ig : constVars.getIgnoreWordswithClassesDuringSelection().get(label).entrySet()) {
             if (l.containsKey(ig.getKey()) && l.get(ig.getKey()).equals(ig.getValue())) {
               doNotUse = true;
             }
@@ -87,7 +87,7 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
           } else {
             if (!containsStop || !removeStopWordsFromSelectedPhrases) {
               
-              if (label == null || l.get(constVars.answerClass.get(label)) == null || !l.get(constVars.answerClass.get(label)).equals(label.toString())) {
+              if (label == null || l.get(constVars.getAnswerClass().get(label)) == null || !l.get(constVars.getAnswerClass().get(label)).equals(label.toString())) {
                 useWordNotLabeled = true;
               }
               phrase += " " + l.word();
