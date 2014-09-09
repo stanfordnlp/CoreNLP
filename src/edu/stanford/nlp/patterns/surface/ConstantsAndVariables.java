@@ -214,8 +214,6 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name = "numWordsToAdd")
   public int numWordsToAdd = 10;
 
-  @Option(name = "weightDomainFreq")
-  public int weightDomainFreq = 10;
 
   @Option(name = "thresholdNumPatternsApplied")
   public double thresholdNumPatternsApplied = 2;
@@ -592,6 +590,10 @@ public class ConstantsAndVariables implements Serializable{
   public static String minimaldebug = "minimaldebug";
   
   Properties props;
+
+  public ConstantsAndVariables(Properties props) throws IOException {
+    setUp(props);
+  }
 
   @SuppressWarnings("rawtypes")
   public void setUp(Properties props) throws IOException {

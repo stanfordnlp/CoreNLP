@@ -170,7 +170,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   Properties props;
   public ScorePhrases scorePhrases;
-  public ConstantsAndVariables constVars = new ConstantsAndVariables();
+  public ConstantsAndVariables constVars;
   public CreatePatterns createPats;
 
   DecimalFormat df = new DecimalFormat("#.##");
@@ -292,6 +292,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     Data.sents = sents;
     Execution.fillOptions(Data.class, props);
+    constVars = new ConstantsAndVariables(props);
     Execution.fillOptions(constVars, props);
     constVars.answerClass = answerClass;
     constVars.ignoreWordswithClassesDuringSelection = ignoreClasses;
@@ -303,7 +304,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           "writeMatchedTokensFiles and batchProcessSents cannot be true at the same time (not implemented; also doesn't make sense to save a large sentences json file)");
     }
 
-    constVars.setUp(props);
+    //constVars.setUp(props);
     if (constVars.debug < 1) {
       Redwood.hideChannelsEverywhere(ConstantsAndVariables.minimaldebug);
     }
