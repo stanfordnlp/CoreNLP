@@ -607,7 +607,6 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   }
 
   public ClassicCounter<L> numDatumsPerLabel(){
-    labels = trimToSize(labels);
     ClassicCounter<L> numDatums = new ClassicCounter<L>();
     for(int i : labels){
       numDatums.incrementCount(labelIndex.get(i));

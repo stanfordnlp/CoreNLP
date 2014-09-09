@@ -23,7 +23,10 @@ import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScori
 import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.EditDistance;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.TypesafeMap;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.TypesafeMap.Key;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -155,12 +158,6 @@ public class ConstantsAndVariables implements Serializable{
   String markedOutputTextFile = null;
 
   /**
-   * If you want output of form "word\tlabels-separated-by-comma" in newlines
-   */
-  @Option(name="columnOutputFile")
-  String columnOutputFile = null;
-
-  /**
    * Use lemma instead of words for the context tokens
    */
   @Option(name = "useLemmaContextTokens")
@@ -216,6 +213,8 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name = "numWordsToAdd")
   public int numWordsToAdd = 10;
 
+  @Option(name = "weightDomainFreq")
+  public int weightDomainFreq = 10;
 
   @Option(name = "thresholdNumPatternsApplied")
   public double thresholdNumPatternsApplied = 2;
@@ -272,14 +271,7 @@ public class ConstantsAndVariables implements Serializable{
    */
   private Map<String, Set<String>> labelDictionary = new HashMap<String, Set<String>>();
 
-  /**
-   * Just the set of labels
-   */
-  private Set<String> labels = new HashSet<String>();
-
-
-  private Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass = null;
-
+  public Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass = null;
 
   /**
    * Can be used only when using the API - using the appropriate constructor.
@@ -287,7 +279,7 @@ public class ConstantsAndVariables implements Serializable{
    * though this variable says object) will be ignored.
    */
   @SuppressWarnings("rawtypes")
-  private Map<String, Map<Class, Object>> ignoreWordswithClassesDuringSelection = null;
+  public Map<String, Map<Class, Object>> ignoreWordswithClassesDuringSelection = null;
 
   /**
    * These classes will be generalized. It can only be used via the API using
@@ -436,7 +428,6 @@ public class ConstantsAndVariables implements Serializable{
 
   public Map<String, Counter<Integer>> distSimWeights = new HashMap<String, Counter<Integer>>();
   public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
-
 
   public enum ScorePhraseMeasures {
     DISTSIM, GOOGLENGRAM, PATWTBYFREQ, EDITDISTSAME, EDITDISTOTHER, DOMAINNGRAM, SEMANTICODDS, WORDSHAPE
@@ -601,48 +592,15 @@ public class ConstantsAndVariables implements Serializable{
 
   Properties props;
 
-  public ConstantsAndVariables(Properties props, Set<String> labels, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
-                               Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
-    this.labels = labels;
-    this.answerClass = answerClass;
-    this.generalizeClasses = generalizeClasses;
-    this.ignoreWordswithClassesDuringSelection = ignoreClasses;
-    setUp(props);
-  }
-
-  public ConstantsAndVariables(Properties props, Map<String, Set<String>> labelDictionary, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
-                               Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
-    this.labelDictionary= labelDictionary;
-    this.labels = labelDictionary.keySet();
-    this.answerClass = answerClass;
-    this.generalizeClasses = generalizeClasses;
-    this.ignoreWordswithClassesDuringSelection = ignoreClasses;
-    setUp(props);
-  }
-
-  public ConstantsAndVariables(Properties props, Set<String> labels,  Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass) throws IOException {
-    this.labels = labels;
-    this.answerClass = answerClass;
-    setUp(props);
-  }
-
-  public ConstantsAndVariables(Properties props, Set<String> labels,  Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass, Map<String, Class> generalizeClasses) throws IOException {
-    this.labels = labels;
-    this.answerClass = answerClass;
-    this.generalizeClasses = generalizeClasses;
-    setUp(props);
-  }
-
   @SuppressWarnings("rawtypes")
   public void setUp(Properties props) throws IOException {
     if (alreadySetUp) {
       return;
     }
-    Execution.fillOptions(this, props);
+
     if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty())
       ignoreWordRegex = Pattern.compile(wordIgnoreRegex);
-
-    for (String label : labels) {
+    for (String label : labelDictionary.keySet()) {
       env.put(label, TokenSequencePattern.getNewEnv());
       // env.get(label).bind("answer", answerClass.get(label));
       for (Entry<String, Class<? extends Key<String>>> en : this.answerClass
@@ -700,7 +658,7 @@ public class ConstantsAndVariables implements Serializable{
       i++;
     }
     stopStr += "/";
-    for (String label : labels) {
+    for (String label : labelDictionary.keySet()) {
       env.get(label).bind("$FILLER",
           "/" + StringUtils.join(fillerWords, "|") + "/");
       env.get(label).bind("$STOPWORD", stopStr);
@@ -1046,13 +1004,4 @@ public class ConstantsAndVariables implements Serializable{
     return wordShapeCache;
   }
 
-
-  public Map<String, Class<? extends Key<String>>> getAnswerClass() {
-    return answerClass;
-  }
-
-
-  public Map<String, Map<Class, Object>> getIgnoreWordswithClassesDuringSelection() {
-    return ignoreWordswithClassesDuringSelection;
-  }
 }

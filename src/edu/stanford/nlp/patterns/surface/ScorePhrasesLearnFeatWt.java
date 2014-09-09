@@ -72,15 +72,15 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
         Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
         if(computeRawFreq)
           Data.computeRawFreqIfNull(sents, constVars.numWordsCompound);
-        dataset.addAll(choosedatums(label, forLearningPatterns, sents, constVars.getAnswerClass().get(label), label,
-            constVars.getOtherSemanticClasses(), constVars.getIgnoreWordswithClassesDuringSelection().get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
+        dataset.addAll(choosedatums(label, forLearningPatterns, sents, constVars.answerClass.get(label), label,
+            constVars.getOtherSemanticClasses(), constVars.ignoreWordswithClassesDuringSelection.get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
             allSelectedPatterns));
       }
     } else{
       if(computeRawFreq)
         Data.computeRawFreqIfNull(Data.sents, constVars.numWordsCompound);
-      dataset.addAll(choosedatums(label, forLearningPatterns, Data.sents, constVars.getAnswerClass().get(label), label,
-        constVars.getOtherSemanticClasses(), constVars.getIgnoreWordswithClassesDuringSelection().get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
+      dataset.addAll(choosedatums(label, forLearningPatterns, Data.sents, constVars.answerClass.get(label), label,
+        constVars.getOtherSemanticClasses(), constVars.ignoreWordswithClassesDuringSelection.get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
         allSelectedPatterns));
     }
     edu.stanford.nlp.classify.Classifier classifier;
