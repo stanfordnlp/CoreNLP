@@ -3,7 +3,6 @@ package edu.stanford.nlp.pipeline;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -138,13 +137,6 @@ public class TextOutputter extends AnnotationOutputter {
     Map<Integer, CorefChain> corefChains =
         annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class);
     if (corefChains != null && sentences != null) {
-      List<List<CoreLabel>> sents = new ArrayList<List<CoreLabel>>();
-      for (CoreMap sentence : sentences) {
-        List<CoreLabel> tokens =
-            sentence.get(CoreAnnotations.TokensAnnotation.class);
-        sents.add(tokens);
-      }
-
       for (CorefChain chain : corefChains.values()) {
         CorefChain.CorefMention representative =
             chain.getRepresentativeMention();

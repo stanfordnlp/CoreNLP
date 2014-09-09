@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component inheritJdk="true">
+<component LANGUAGE_LEVEL="JDK_1_6" inheritJdk="true">
 	<exclude-output/>
 	<contentEntry url="file://$MODULE_DIR$">
 		<testFolder url="file://$MODULE_DIR$/test/src"/>

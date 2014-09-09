@@ -160,7 +160,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * </p>
    *
    * @return A class which specifies the actual implementation of each of the annotators called
-   *         when creating the annotator pool. The canonical annotators are defaulted to in
+   *         when creating the annotator pool. The cannonical annotators are defaulted to in
    *         {@link edu.stanford.nlp.pipeline.AnnotatorImplementations}.
    */
   protected AnnotatorImplementations getAnnotatorImplementations() {
