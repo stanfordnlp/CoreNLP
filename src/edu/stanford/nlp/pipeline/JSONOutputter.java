@@ -2,6 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -106,13 +107,24 @@ public class JSONOutputter extends AnnotationOutputter {
   @SuppressWarnings("RedundantCast")  // It's lying; we need the "redundant" casts (as of 2014-09-08)
   private static Object buildDependencyTree(SemanticGraph graph) {
     if(graph != null) {
-      return graph.edgeListSorted().stream().map( (SemanticGraphEdge edge) -> (Consumer<Writer>) (Writer dep) -> {
-        dep.set("dep", edge.getRelation());
-        dep.set("governor", Integer.toString(edge.getGovernor().index()));
-        dep.set("governorGloss", edge.getGovernor().word());
-        dep.set("dependent", Integer.toString(edge.getDependent().index()));
-        dep.set("dependentGloss", edge.getDependent().word());
-      });
+      return Stream.concat(
+          // Roots
+          graph.getRoots().stream().map( (IndexedWord root) -> (Consumer<Writer>) dep -> {
+            dep.set("dep", "ROOT");
+            dep.set("governor", "0");
+            dep.set("governorGloss", "ROOT");
+            dep.set("dependent", Integer.toString(root.index()));
+            dep.set("dependentGloss", root.word());
+          }),
+          // Regular edges
+          graph.edgeListSorted().stream().map( (SemanticGraphEdge edge) -> (Consumer<Writer>) (Writer dep) -> {
+            dep.set("dep", edge.getRelation().toString());
+            dep.set("governor", Integer.toString(edge.getGovernor().index()));
+            dep.set("governorGloss", edge.getGovernor().word());
+            dep.set("dependent", Integer.toString(edge.getDependent().index()));
+            dep.set("dependentGloss", edge.getDependent().word());
+          })
+      );
     } else {
       return null;
     }

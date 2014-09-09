@@ -80,7 +80,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 public class StanfordCoreNLP extends AnnotationPipeline {
 
-  enum OutputFormat { TEXT, XML, JSON, SERIALIZED }
+  enum OutputFormat { TEXT, XML, JSON, CONLL, SERIALIZED }
 
   // other constants
   public static final String CUSTOM_ANNOTATOR_PREFIX = "customAnnotatorClass.";
@@ -487,6 +487,19 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   }
 
   /**
+   * Displays the output of many annotators in CoNLL format.
+   * @param annotation Contains the output of all annotators
+   * @param w The Writer to send the output to
+   * @throws IOException
+   */
+  public void conllPrint(Annotation annotation, Writer w) throws IOException {
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    CoNLLOutputter.conllPrint(annotation, os, this);
+    w.write(new String(os.toByteArray(), getEncoding()));
+    w.flush();
+  }
+
+  /**
    * Displays the output of all annotators in XML format.
    * @param annotation Contains the output of all annotators
    * @param os The output stream
@@ -866,6 +879,12 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             case JSON: {
               OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
               new JSONOutputter().print(annotation, fos);
+              fos.close();
+              break;
+            }
+            case CONLL: {
+              OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+              new CoNLLOutputter().print(annotation, fos);
               fos.close();
               break;
             }
