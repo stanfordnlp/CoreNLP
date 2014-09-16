@@ -18,8 +18,7 @@ import java.util.Set;
 
 /**
  * Implementation of Generalized Expectation Objective function for
- * an I.I.D. log-linear model. See Mann and McCallum, ACL 2008 for GE in CRFs.
- * This code, however, is just for log-linear model
+ * an I.I.D. log-linear model. See Mann and McCallum, ACL 2008.
  * IMPORTANT: the current implementation is only correct as long as
  * the labeled features passed to GE are binary.
  * However, other features are allowed to be real valued.
