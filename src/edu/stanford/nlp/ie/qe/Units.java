@@ -121,7 +121,7 @@ public class Units {
     List<Unit> list = new ArrayList<Unit>();
     while ((line = br.readLine()) != null) {
       String[] fields = commaPattern.split(line);
-      Unit unit = new Unit(fields[iName], fields[iSymbol], fields[iType]);
+      Unit unit = new Unit(fields[iName], fields[iSymbol], fields[iType].toUpperCase());
       unit.system = fields[iSystem];
       if (fields.length > iPrefix) {
         unit.prefixSystem = fields[iPrefix];
