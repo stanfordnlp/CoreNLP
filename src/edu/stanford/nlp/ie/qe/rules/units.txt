@@ -1,6 +1,7 @@
-unit,symbol,system,type,prefix
+unit,symbol,system,type,prefix,defaultUnit,defaultUnitScale
 meter,m,SI,length,SI
-gram,g,SI,weight,SI
+gram,g,SI,weight,SI,kilogram,0.001
+kilogram,kg,SI,weight,
 second,s,SI,time,SI
 ampere,A,SI,current,SI
 kelvin,K,SI,temperature,

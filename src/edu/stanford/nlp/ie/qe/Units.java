@@ -3,6 +3,8 @@ package edu.stanford.nlp.ie.qe;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -117,8 +119,12 @@ public class Units {
     int iSymbol = headerIndex.get("symbol");
     int iType = headerIndex.get("type");
     int iSystem = headerIndex.get("system");
+    int iDefaultUnit = headerIndex.get("defaultUnit");
+    int iDefaultUnitScale = headerIndex.get("defaultUnitScale");
     String line;
     List<Unit> list = new ArrayList<Unit>();
+    Map<String,Unit> unitsByName = new HashMap<String,Unit>();
+    Map<String,Pair<String,Double>> unitToDefaultUnits = new HashMap<String,Pair<String,Double>>();
     while ((line = br.readLine()) != null) {
       String[] fields = commaPattern.split(line);
       Unit unit = new Unit(fields[iName], fields[iSymbol], fields[iType].toUpperCase());
@@ -126,7 +132,25 @@ public class Units {
       if (fields.length > iPrefix) {
         unit.prefixSystem = fields[iPrefix];
       }
+      if (fields.length > iDefaultUnit) {
+        double scale = 1.0;
+        if (fields.length > iDefaultUnitScale) {
+          scale = Double.parseDouble(fields[iDefaultUnitScale]);
+        }
+        unitToDefaultUnits.put(unit.getName(), Pair.makePair(fields[iDefaultUnit], scale));
+      }
+      unitsByName.put(unit.getName(), unit);
       list.add(unit);
+    }
+    for (Map.Entry<String, Pair<String,Double>> entry: unitToDefaultUnits.entrySet()) {
+      Unit unit = unitsByName.get(entry.getKey());
+      Unit defaultUnit = unitsByName.get(entry.getValue().first);
+      if (defaultUnit != null) {
+        unit.defaultUnit = defaultUnit;
+        unit.defaultUnitScale = entry.getValue().second;
+      } else {
+        Redwood.Util.warn("Unknown default unit " + entry.getValue().first + " for " + entry.getKey());
+      }
     }
     br.close();
     return list;
