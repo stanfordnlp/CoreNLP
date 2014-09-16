@@ -6,6 +6,7 @@
 /euros?/	MONEY_EURO
 /yuan/	MONEY_YUAN
 /meters?/	LENGTH_METER
+/metres?/	LENGTH_METER
 /miles?/	LENGTH_MILE
 /yards?/	LENGTH_YARD
 /foot|feet/	LENGTH_FOOT
@@ -17,7 +18,8 @@
 /°F/	TEMPERATURE_FAHRENHEIT
 /°C/	TEMPERATURE_CELSIUS
 /acres?/	AREA_ACRE
-/litres?/	VOLUME_LITRE
+/litres?/	VOLUME_LITER
+/liters?/	VOLUME_LITER
 /tablespoons?/	VOLUME_TABLESPOON
 /teaspoons?/	VOLUME_TEASPOON
 /grams?/	WEIGHT_GRAM

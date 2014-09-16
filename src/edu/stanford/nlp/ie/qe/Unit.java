@@ -10,6 +10,7 @@ public class Unit {
   protected String symbol;
   protected String type;
   protected String system;
+  protected String prefixSystem;
 
   // What unit should be used to express this unit
   protected Unit defaultUnit;

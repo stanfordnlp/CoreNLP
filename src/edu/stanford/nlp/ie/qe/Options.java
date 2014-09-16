@@ -13,8 +13,10 @@ public class Options {
   static final String RULES_DIR = "C:\\code\\NLP\\javanlp\\projects\\core\\src\\edu\\stanford\\nlp\\ie\\qe\\rules";
   static final String[] DEFAULT_GRAMMAR_FILES = {RULES_DIR + "/english.qe.txt"};
   static final String DEFAULT_PREFIX_FILE = RULES_DIR + "/prefixes.txt";
+  static final String DEFAULT_UNITS_FILE = RULES_DIR + "/units.txt";
   String prefixFilename = DEFAULT_PREFIX_FILE;
   String prefixRulesFilename = RULES_DIR + "/prefixes.rules.txt";
+  String unitsFilename = DEFAULT_UNITS_FILE;
   String unitsRulesFilename = RULES_DIR + "/english.units.rules.txt";
   String text2UnitMapping = RULES_DIR + "/english.units.txt";
   String grammarFilename = StringUtils.join(new String[]{RULES_DIR + "/defs.qe.txt", prefixRulesFilename, unitsRulesFilename}, ",") + "," +

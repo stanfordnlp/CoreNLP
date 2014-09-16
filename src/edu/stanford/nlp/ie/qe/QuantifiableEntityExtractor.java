@@ -76,7 +76,11 @@ public class QuantifiableEntityExtractor {
     // Do case insensitive matching
     env.setDefaultStringMatchFlags(Pattern.CASE_INSENSITIVE);
     env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
-    Units.registerUnits(env);
+    try {
+      Units.registerUnits(env, options.unitsFilename);
+    } catch (IOException ex)  {
+      throw new RuntimeException("Error loading units from " + options.unitsFilename, ex);
+    }
     try {
       UnitPrefix.registerPrefixes(env, options.prefixFilename);
     } catch (IOException ex)  {
@@ -115,9 +119,33 @@ public class QuantifiableEntityExtractor {
     pw.close();
   }
 
-  public static void generateUnitsStage0Rules(String infile, String outfile) throws IOException {
+  public static void generateUnitsStage0Rules(String unitsFiles, String infile, String outfile) throws IOException {
     Pattern tabPattern = Pattern.compile("\t");
     PrintWriter pw = IOUtils.getPrintWriter(outfile);
+
+    List<Unit> units = Units.loadUnits(unitsFiles);
+    pw.println("SI_UNIT_MAP = {");
+    List<String> items = new ArrayList<String>();
+    for (Unit unit:units) {
+      if ("SI".equals(unit.prefixSystem)) {
+        items.add("\"" + unit.name + "\": " + (unit.getType() + "_" + unit.getName()).toUpperCase());
+      }
+    }
+    pw.println(StringUtils.join(items, ",\n"));
+    pw.println("}");
+    pw.println("$SiUnits = CreateRegex(Keys(SI_UNIT_MAP))");
+    pw.println();
+    pw.println("SI_SYM_UNIT_MAP = {");
+    items.clear();
+    for (Unit unit:units) {
+      if ("SI".equals(unit.prefixSystem)) {
+        items.add("\"" + unit.symbol + "\": " + (unit.getType() + "_" + unit.getName()).toUpperCase());
+      }
+    }
+    pw.println(StringUtils.join(items, ",\n"));
+    pw.println("}");
+    pw.println("$SiSymUnits = CreateRegex(Keys(SI_SYM_UNIT_MAP))");
+
     BufferedReader br = IOUtils.getBufferedFileReader(infile);
     String line;
     pw.println("ENV.defaults[\"stage\"] = 0");
@@ -134,6 +162,6 @@ public class QuantifiableEntityExtractor {
     Properties props = StringUtils.argsToProperties(args);
     Options options = new Options("qe", props);
     generatePrefixDefs(options.prefixFilename, options.prefixRulesFilename);
-    generateUnitsStage0Rules(options.text2UnitMapping, options.unitsRulesFilename);
+    generateUnitsStage0Rules(options.unitsFilename, options.text2UnitMapping, options.unitsRulesFilename);
   }
 }

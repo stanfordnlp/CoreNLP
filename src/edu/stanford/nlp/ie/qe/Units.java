@@ -1,10 +1,18 @@
 package edu.stanford.nlp.ie.qe;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.util.ErasureUtils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * List of units
@@ -12,22 +20,6 @@ import java.lang.reflect.Modifier;
  * @author Angel Chang
  */
 public class Units {
-  public static void generateUnitMappings(Env env) {
-    // TODO: Read table of mappings to units
-    // TODO: Register mappings with tokensregex
-  }
-
-  public static void registerUnits(Env env) {
-    registerUnit(env, Currencies.class);
-    registerUnit(env, Lengths.class);
-    registerUnit(env, Areas.class);
-    registerDerivedUnit(env, Lengths.class, Areas.TYPE, "SQ", "2");
-    registerUnit(env, Volumes.class);
-    registerDerivedUnit(env, Lengths.class, Volumes.TYPE, "CB", "3");
-    registerUnit(env, Weights.class);
-    registerUnit(env, Temperatures.class);
-  }
-
   public static void registerDerivedUnit(Env env, Class clazz, String derivedType, String suffix, String symbolSuffix) {
     Field[] fields = clazz.getDeclaredFields();
     for (Field field:fields) {
@@ -64,7 +56,7 @@ public class Units {
   }
 
   public static void registerUnit(Env env, Unit unit) {
-    env.bind(unit.getType() + "_" + unit.getName().toUpperCase(), unit);
+    env.bind((unit.getType() + "_" + unit.getName()).toUpperCase(), unit);
   }
 
   public static class MoneyUnit extends Unit {
@@ -95,39 +87,48 @@ public class Units {
     public static Unit WON = new MoneyUnit("won", "\u20A9");
   }
 
-  public static class Areas {
-    public static final String TYPE = "AREA";
-    public static Unit ACRE = new Unit("acre", "acre", TYPE);
+  public static void registerUnits(Env env, String filename) throws IOException {
+    List<Unit> units = loadUnits(filename);
+    registerUnits(env, units);
+    registerUnit(env, Currencies.class);
   }
 
-  public static class Volumes {
-    public static final String TYPE = "VOLUME";
-    public static Unit LITRE = new Unit("litre", "l", TYPE);
-    public static Unit TEASPOON = new Unit("teaspoon", "tsp", TYPE);
-    public static Unit TABLESPOON = new Unit("tablespoon", "Tbsp", TYPE);
+  public static void registerUnits(Env env, List<Unit> units) {
+    for (Unit unit: units) {
+      registerUnit(env, unit);
+      if ("LENGTH".equals(unit.getType())) {
+        registerDerivedUnit(env, unit, "AREA", "2", "2");
+        registerDerivedUnit(env, unit, "VOLUME", "3", "3");
+      }
+    }
   }
 
-  public static class Lengths {
-    public static final String TYPE = "LENGTH";
-    public static Unit METER = new Unit("meter", "m", TYPE);
-    public static Unit MILE = new Unit("mile", "mi", TYPE);
-    public static Unit FOOT = new Unit("foot", "'", TYPE);
-    public static Unit INCH = new Unit("inch", "''", TYPE);
-    public static Unit YARD = new Unit("yard", "y", TYPE);
+  public static List<Unit> loadUnits(String filename) throws IOException {
+    Pattern commaPattern = Pattern.compile("\\s*,\\s*");
+    BufferedReader br = IOUtils.getBufferedFileReader(filename);
+    String headerString = br.readLine();
+    String[] header = commaPattern.split(headerString);
+    Map<String,Integer> headerIndex = new HashMap<String,Integer>();
+    for (int i = 0; i < header.length; i++) {
+      headerIndex.put(header[i], i);
+    }
+    int iName = headerIndex.get("unit");
+    int iPrefix = headerIndex.get("prefix");
+    int iSymbol = headerIndex.get("symbol");
+    int iType = headerIndex.get("type");
+    int iSystem = headerIndex.get("system");
+    String line;
+    List<Unit> list = new ArrayList<Unit>();
+    while ((line = br.readLine()) != null) {
+      String[] fields = commaPattern.split(line);
+      Unit unit = new Unit(fields[iName], fields[iSymbol], fields[iType]);
+      unit.system = fields[iSystem];
+      if (fields.length > iPrefix) {
+        unit.prefixSystem = fields[iPrefix];
+      }
+      list.add(unit);
+    }
+    br.close();
+    return list;
   }
-
-  public static class Weights {
-    public static final String TYPE = "WEIGHT";
-    public static Unit POUND = new Unit("pound", "lb", TYPE);
-    public static Unit OUNCE = new Unit("ounce", "oz", TYPE);
-    public static Unit GRAM = new Unit("gram", "g", TYPE);
-  }
-
-  public static class Temperatures {
-    public static final String TYPE = "TEMPERATURE";
-    public static Unit CELSIUS = new Unit("celsius", "°C", TYPE);
-    public static Unit FAHRENHEIT = new Unit("fahrenheit", "°F", TYPE);
-    public static Unit KELVIN = new Unit("kelvin", "K", TYPE);
-  }
-
 }

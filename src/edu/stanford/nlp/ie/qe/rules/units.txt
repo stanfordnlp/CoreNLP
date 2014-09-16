@@ -1,10 +1,10 @@
 unit,symbol,system,type,prefix
-metre,m,SI,length,SI
+meter,m,SI,length,SI
 gram,g,SI,weight,SI
 second,s,SI,time,SI
 ampere,A,SI,current,SI
 kelvin,K,SI,temperature,
-litre,l,SI,volume,SI
+liter,l,SI,volume,SI
 acre,acre,US,area,
 teaspoon,tsp,US,volume,
 tablespoon,Tbsp,US,volume,
