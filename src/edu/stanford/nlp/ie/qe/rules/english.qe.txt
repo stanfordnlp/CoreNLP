@@ -1,13 +1,5 @@
 ENV.defaults["stage.limitIters"] = 50
 
-SYM_UNIT_MAP = {
-    "ft": LENGTH_FOOT,
-    "mi": LENGTH_MILE,
-    "m": LENGTH_METER,
-    "g": WEIGHT_GRAM
-}
-$SymUnits = CreateRegex(Keys(SYM_UNIT_MAP))
-
 ENV.defaults["stage"] = 1
 
 $Unit = ( [ {{ tags["Unit"] }} ] ); 
@@ -23,20 +15,20 @@ $Unit = ( [ {{ tags["Unit"] }} ] );
     SI_UNIT_MAP[Lowercase($$2.matchResults[0].word.group(2))]) 
 }
   
-{ pattern: ( ($NUM) (/($SiSymPrefixes)($SymSiUnits)s?/) ),
+{ pattern: ( ($NUM) (/($SiSymPrefixes)($SiSymUnits)s?/) ),
   matchWithResults: TRUE,
   result: QuantifiableEntity(
     Multiply($1[0].numcompvalue, 
     SI_SYM_PREFIX_MAP[Lowercase($$2.matchResults[0].word.group(1))].scale), 
-    SYM_SI_UNIT_MAP[Lowercase($$2.matchResults[0].word.group(2))]) 
+    SI_SYM_UNIT_MAP[Lowercase($$2.matchResults[0].word.group(2))]) 
 }
   
-{ pattern: ( (/(\d+|\d*.\d+)($SiSymPrefixes)($SymSiUnits)s?/) ),
+{ pattern: ( (/(\d+|\d*.\d+)($SiSymPrefixes)($SiSymUnits)s?/) ),
   matchWithResults: TRUE,
   result: QuantifiableEntity(
     Multiply( { type: "NUMBER", value: $$1.matchResults[0].word.group(1) }, 
     SI_SYM_PREFIX_MAP[Lowercase($$1.matchResults[0].word.group(2))].scale), 
-    SYM_SI_UNIT_MAP[Lowercase($$1.matchResults[0].word.group(3))]) 
+    SI_SYM_UNIT_MAP[Lowercase($$1.matchResults[0].word.group(3))]) 
 }
   
 { pattern: ( (/(\d+|\d*.\d+)($SymUnits)s?/) ),

@@ -135,6 +135,7 @@ public class QuantifiableEntityExtractor {
     pw.println("}");
     pw.println("$SiUnits = CreateRegex(Keys(SI_UNIT_MAP))");
     pw.println();
+
     pw.println("SI_SYM_UNIT_MAP = {");
     items.clear();
     for (Unit unit:units) {
@@ -145,6 +146,17 @@ public class QuantifiableEntityExtractor {
     pw.println(StringUtils.join(items, ",\n"));
     pw.println("}");
     pw.println("$SiSymUnits = CreateRegex(Keys(SI_SYM_UNIT_MAP))");
+    pw.println();
+
+    pw.println("SYM_UNIT_MAP = {");
+    items.clear();
+    for (Unit unit:units) {
+      items.add("\"" + unit.symbol + "\": " + (unit.getType() + "_" + unit.getName()).toUpperCase());
+    }
+    pw.println(StringUtils.join(items, ",\n"));
+    pw.println("}");
+    pw.println("$SymUnits = CreateRegex(Keys(SYM_UNIT_MAP))");
+    pw.println();
 
     BufferedReader br = IOUtils.getBufferedFileReader(infile);
     String line;
