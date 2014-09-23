@@ -191,7 +191,7 @@ public class ScorePhrases {
     List<String> notAllowedClasses = new ArrayList<String>();
     
     if(constVars.doNotExtractPhraseAnyWordLabeledOtherClass){
-      for(String l: constVars.answerClass.keySet()){
+      for(String l: constVars.getAnswerClass().keySet()){
         if(!l.equals(label)){
           notAllowedClasses.add(l+":"+l);
         }

@@ -10,7 +10,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Iterables;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -19,7 +19,7 @@ public class PipelineITest extends TestCase {
   public void testPipeline() throws Exception {
     // create pipeline
     AnnotationPipeline pipeline = new AnnotationPipeline();
-    pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+    pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
     pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
     pipeline.addAnnotator(new POSTaggerAnnotator(false));
     pipeline.addAnnotator(new MorphaAnnotator(false));

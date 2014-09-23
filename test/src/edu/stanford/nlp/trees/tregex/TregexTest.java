@@ -8,7 +8,7 @@ import java.util.IdentityHashMap;
 import java.util.Set;
 
 import edu.stanford.nlp.trees.*;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 
 public class TregexTest extends TestCase {
 

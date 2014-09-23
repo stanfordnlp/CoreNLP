@@ -232,16 +232,16 @@ public class SUTime {
       return temporalFuncIndex.add(t);
     }
 
-    public int indexOfTemporalExpr(TimeExpression t, boolean add) {
-      return temporalExprIndex.indexOf(t, add);
+    public int addToIndexTemporalExpr(TimeExpression t) {
+      return temporalExprIndex.addToIndex(t);
     }
 
-    public int indexOfTemporal(Temporal t, boolean add) {
-      return temporalIndex.indexOf(t, add);
+    public int addToIndexTemporal(Temporal t) {
+      return temporalIndex.addToIndex(t);
     }
 
-    public int indexOfTemporalFunc(Temporal t, boolean add) {
-      return temporalFuncIndex.indexOf(t, add);
+    public int addToIndexTemporalFunc(Temporal t) {
+      return temporalFuncIndex.addToIndex(t);
     }
   }
 
@@ -366,7 +366,7 @@ public class SUTime {
 
     // TIMEX related functions
     public int getTid(TimeIndex timeIndex) {
-      return timeIndex.indexOfTemporal(this, true);
+      return timeIndex.addToIndexTemporal(this);
     }
 
     public String getTidString(TimeIndex timeIndex) {
@@ -374,7 +374,7 @@ public class SUTime {
     }
 
     public int getTfid(TimeIndex timeIndex) {
-      return timeIndex.indexOfTemporalFunc(this, true);
+      return timeIndex.addToIndexTemporalFunc(this);
     }
 
     public String getTfidString(TimeIndex timeIndex) {
@@ -1622,9 +1622,11 @@ public class SUTime {
 
     @Override
     public Time offset(Duration offset, int offsetFlags) {
-      if ((offsetFlags | RELATIVE_OFFSET_INEXACT) != 0)
+      if ((offsetFlags & RELATIVE_OFFSET_INEXACT) != 0) {
         return new RelativeTime(this, TemporalOp.OFFSET, offset);
-      else return new RelativeTime(this, TemporalOp.OFFSET_EXACT, offset);
+      } else {
+        return new RelativeTime(this, TemporalOp.OFFSET_EXACT, offset);
+      }
     }
 
     @Override

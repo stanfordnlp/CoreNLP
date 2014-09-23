@@ -480,7 +480,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           .setSource(edge.getSource().index())
           .setTarget(edge.getTarget().index())
           .setDep(edge.getRelation().toString())
-          .setIsExtra(edge.isExtra()));
+          .setIsExtra(edge.isExtra())
+          .setSourceCopy(edge.getSource().copyCount())
+          .setTargetCopy(edge.getTarget().copyCount()));
     }
     // Return
     return builder.build();
@@ -861,7 +863,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       min = in.getIndex() < min ? in.getIndex() : min;
       max = in.getIndex() > max ? in.getIndex() : max;
     }
-    IndexedWord[] nodes = new IndexedWord[max - min >= 0 ? max - min + 1 : 0];
+    TwoDimensionalMap<Integer, Integer, IndexedWord> nodes = TwoDimensionalMap.hashMap();
     for(CoreNLPProtos.DependencyGraph.Node in: proto.getNodeList()){
       CoreLabel token = sentence.get(in.getIndex() - 1); // index starts at 1!
       IndexedWord word;
@@ -886,17 +888,15 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }      
 
       assert in.getIndex() == word.index();
-      nodes[in.getIndex() - min] = word;
-    }
-    for (IndexedWord node : nodes) {
-      if (node != null) { graph.addVertex(node); }
+      nodes.put(in.getIndex(), in.getCopyAnnotation(), word);
+      graph.addVertex(word);
     }
 
     // add all edges to the actual graph
     for(CoreNLPProtos.DependencyGraph.Edge ie: proto.getEdgeList()){
-      IndexedWord source = nodes[ie.getSource() - min];
+      IndexedWord source = nodes.get(ie.getSource(), ie.getSourceCopy());
       assert(source != null);
-      IndexedWord target = nodes[ie.getTarget() - min];
+      IndexedWord target = nodes.get(ie.getTarget(), ie.getTargetCopy());
       assert(target != null);
       synchronized (globalLock) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
@@ -909,7 +909,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.getRootCount() > 0) {
       Collection<IndexedWord> roots = new ArrayList<IndexedWord>();
       for(int rootI : proto.getRootList()){
-        roots.add(nodes[rootI - min]);
+        roots.add(nodes.get(rootI, 0)); // copies should never be roots...
       }
       graph.setRoots(roots);
     } else {

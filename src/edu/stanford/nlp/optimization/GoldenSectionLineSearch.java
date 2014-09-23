@@ -1,6 +1,6 @@
 package edu.stanford.nlp.optimization;
 
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 
 import java.text.DecimalFormat;
@@ -197,25 +197,12 @@ public class GoldenSectionLineSearch implements LineSearcher {
   public static void main(String[] args) {
     GoldenSectionLineSearch min =
         new GoldenSectionLineSearch(true, 0.00001, 0.001, 121.0);
-    Function<Double, Double> f1 = new Function<Double, Double>() {
-      public Double apply(Double x) {
-        return Math.log(x * x - x + 1);
-      }
-    };
+    Function<Double, Double> f1 = x -> Math.log(x * x - x + 1);
     System.out.println(min.minimize(f1));
     System.out.println();
 
     min = new GoldenSectionLineSearch(false, 0.00001, 0.0, 1.0);
-    Function<Double,Double> f2 = new Function<Double,Double>() {
-       public Double apply(Double x) {
-         // this function used to fail in Galen's version; min should be 0.2
-         // return - x * (2 * x - 1) * (x - 0.8);
-         // this function fails if you don't find an initial bracketing
-         return x < 0.1 ? 0.0: (x > 0.2 ? 0.0: (x - 0.1) * (x - 0.2));
-         // return - Math.sin(x * Math.PI);
-         // return -(3 + 6 * x - 4 * x * x);
-       }
-    };
+    Function<Double,Double> f2 = x -> x < 0.1 ? 0.0: (x > 0.2 ? 0.0: (x - 0.1) * (x - 0.2));
 
     System.out.println(min.minimize(f2));
   } // end main

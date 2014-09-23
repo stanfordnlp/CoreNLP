@@ -45,7 +45,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
  * root of the graph, so there may be no node without a parent node. You can
  * better get at the root(s) via the variable and methods provided.
  * <br>
- * There is no mechanism for returning all edges at once (eg <code>edgeSet()</code>).  
+ * There is no mechanism for returning all edges at once (eg <code>edgeSet()</code>).
  * This is intentional.  Use <code>edgeIterable()</code> to iterate over the edges if necessary.
  *
  * @author Christopher Cox
@@ -467,10 +467,7 @@ public class SemanticGraph implements Serializable {
   }
 
   public boolean hasChildren(IndexedWord vertex) {
-    for (SemanticGraphEdge edge : outgoingEdgeIterable(vertex)) {
-      return true;
-    }
-    return false;
+    return outgoingEdgeIterator(vertex).hasNext();
   }
 
   public List<SemanticGraphEdge> getIncomingEdgesSorted(IndexedWord vertex) {
@@ -522,7 +519,7 @@ public class SemanticGraph implements Serializable {
   }
 
   /**
-   * Helper function for the public function with the same name.  
+   * Helper function for the public function with the same name.
    * <br>
    * Builds up the list backwards.
    */
@@ -530,13 +527,13 @@ public class SemanticGraph implements Serializable {
     used.add(vertex);
 
     // TODO: Apparently the order of the nodes in the path to the root
-    // makes a different for the RTE system.  Look into this some more
+    // makes a difference for the RTE system.  Look into this some more
     List<IndexedWord> parents = getParentList(vertex);
     // Set<IndexedWord> parents = wordMapFactory.newSet();
     // parents.addAll(getParents(vertex));
     parents.removeAll(used);
 
-    if (roots.contains(vertex) || (parents.size() == 0)) {
+    if (roots.contains(vertex) || (parents.isEmpty())) {
       used.remove(used.size() - 1);
       if (roots.contains(vertex))
         return Generics.newArrayList();
@@ -891,7 +888,7 @@ public class SemanticGraph implements Serializable {
 
 
   /**
-   * Does the given <code>vertex</code> have at least one child with the given <code>reln<code> and the lemma <code>childLemma</code>?
+   * Does the given <code>vertex</code> have at least one child with the given {@code reln} and the lemma <code>childLemma</code>?
    */
   public boolean hasChild(IndexedWord vertex, GrammaticalRelation reln, String childLemma) {
     if (!containsVertex(vertex)) {
@@ -908,7 +905,7 @@ public class SemanticGraph implements Serializable {
   }
 
   /**
-   * Does the given <code>vertex</code> have at least one child with the given <code>reln<code>?
+   * Does the given <code>vertex</code> have at least one child with the given {@code reln}?
    */
   public boolean hasChildWithReln(IndexedWord vertex, GrammaticalRelation reln) {
     if (!containsVertex(vertex)) {
@@ -1168,10 +1165,10 @@ public class SemanticGraph implements Serializable {
    */
   @Override
   public String toString() {
-    return toString(CoreLabel.VALUE_TAG_FORMAT);
+    return toString(CoreLabel.OutputFormat.VALUE_TAG);
   }
 
-  public String toString(String wordFormat) {
+  public String toString(CoreLabel.OutputFormat wordFormat) {
     Collection<IndexedWord> rootNodes = getRoots();
     if (rootNodes.isEmpty()) {
       // Shouldn't happen, but return something!
@@ -1197,7 +1194,7 @@ public class SemanticGraph implements Serializable {
   }
 
   // helper for toString()
-  private void recToString(IndexedWord curr, String wordFormat, StringBuilder sb, int offset, Set<IndexedWord> used) {
+  private void recToString(IndexedWord curr, CoreLabel.OutputFormat wordFormat, StringBuilder sb, int offset, Set<IndexedWord> used) {
     used.add(curr);
     List<SemanticGraphEdge> edges = outgoingEdgeList(curr);
     Collections.sort(edges);
@@ -1308,12 +1305,12 @@ public class SemanticGraph implements Serializable {
    */
   private void insertSpecificIntoList(String specific, IndexedWord relnTgtNode, List<IndexedWord> tgtList) {
     int currIndex = tgtList.indexOf(relnTgtNode);
-    Set<IndexedWord> descendents = descendants(relnTgtNode);
+    Set<IndexedWord> descendants = descendants(relnTgtNode);
     IndexedWord specificNode = new IndexedWord();
     specificNode.set(CoreAnnotations.LemmaAnnotation.class, specific);
     specificNode.set(CoreAnnotations.TextAnnotation.class, specific);
     specificNode.set(CoreAnnotations.OriginalTextAnnotation.class, specific);
-    while ((currIndex >= 1) && descendents.contains(tgtList.get(currIndex - 1))) {
+    while ((currIndex >= 1) && descendants.contains(tgtList.get(currIndex - 1))) {
       currIndex--;
     }
     tgtList.add(currIndex, specificNode);
@@ -1323,7 +1320,7 @@ public class SemanticGraph implements Serializable {
 
   public enum OutputFormat {
     LIST, XML, READABLE, RECURSIVE
-  };
+  }
 
   /**
    * Returns a String representation of the result of this set of typed
@@ -1369,7 +1366,7 @@ public class SemanticGraph implements Serializable {
    *
    * <dt>recursive</dt>
    * <dd>
-   * The default output for {@link toString()}
+   * The default output for {@link #toString()}
    * </dd>
    *
    * </dl>
@@ -1587,10 +1584,10 @@ public class SemanticGraph implements Serializable {
    * with the dependency.
    */
   public String toDotFormat(String graphname) {
-    return toDotFormat(graphname, CoreLabel.VALUE_TAG_INDEX_FORMAT);
+    return toDotFormat(graphname, CoreLabel.OutputFormat.VALUE_TAG_INDEX);
   }
 
-  public String toDotFormat(String graphname, String indexedWordFormat) {
+  public String toDotFormat(String graphname, CoreLabel.OutputFormat indexedWordFormat) {
     StringBuilder output = new StringBuilder();
     output.append("digraph " + graphname + " {\n");
     for (IndexedWord word : graph.getAllVertices()) {
@@ -1677,7 +1674,7 @@ public class SemanticGraph implements Serializable {
   public SemanticGraph(Collection<TypedDependency> dependencies) {
     graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>(outerMapFactory, innerMapFactory);
     roots = wordMapFactory.newSet();
-    
+
     for (TypedDependency d : dependencies) {
       TreeGraphNode gov = d.gov();
       TreeGraphNode dep = d.dep();

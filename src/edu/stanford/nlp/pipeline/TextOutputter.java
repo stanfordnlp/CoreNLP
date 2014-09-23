@@ -3,7 +3,6 @@ package edu.stanford.nlp.pipeline;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,23 +23,22 @@ import edu.stanford.nlp.util.CoreMap;
 /**
  * @author John Bauer
  */
-public class TextOutputter {
+public class TextOutputter extends AnnotationOutputter {
 
-  private TextOutputter() {} // currently static. todo: fix this, make implement an interface
+  public TextOutputter() {}
 
-  public static void prettyPrint(Annotation annotation, OutputStream stream, StanfordCoreNLP pipeline) {
-    try {
-      PrintWriter os = new PrintWriter(IOUtils.encodedOutputStreamWriter(stream, pipeline.getEncoding()));
-      prettyPrint(annotation, os, pipeline);
-      // already flushed
-      // don't close, might not want to close underlying stream
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public void print(Annotation annotation, OutputStream stream, Options options) throws IOException {
+    PrintWriter os = new PrintWriter(IOUtils.encodedOutputStreamWriter(stream, options.encoding));
+    print(annotation, os, options);
   }
 
-  public static void prettyPrint(Annotation annotation, PrintWriter os, StanfordCoreNLP pipeline) {
-    double beam = pipeline.getBeamPrintingOption();
+  /**
+   * The meat of the outputter
+   */
+  private void print(Annotation annotation, PrintWriter os, Options options) throws IOException {
+    double beam = options.beamPrintingOption;
 
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
@@ -89,7 +87,7 @@ public class TextOutputter {
 
         // display the token-level annotations
         String[] tokenAnnotations = {
-                "Text", "PartOfSpeech", "Lemma", "Answer", "NamedEntityTag", "CharacterOffsetBegin", "CharacterOffsetEnd", "NormalizedNamedEntityTag", "Timex", "TrueCase", "TrueCaseText" };
+            "Text", "PartOfSpeech", "Lemma", "Answer", "NamedEntityTag", "CharacterOffsetBegin", "CharacterOffsetEnd", "NormalizedNamedEntityTag", "Timex", "TrueCase", "TrueCaseText" };
         for (CoreLabel token: tokens) {
           os.print(token.toShorterString(tokenAnnotations));
           os.print(' ');
@@ -99,7 +97,7 @@ public class TextOutputter {
         // display the parse tree for this sentence
         Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
         if (tree != null){
-          pipeline.getConstituentTreePrinter().printTree(tree, os);
+          options.constituentTreePrinter.printTree(tree, os);
           // It is possible turn off the semantic graphs, in which
           // case we don't want to recreate them using the dependency
           // printer.  This might be relevant if using corenlp for a
@@ -137,18 +135,11 @@ public class TextOutputter {
 
     // display the new-style coreference graph
     Map<Integer, CorefChain> corefChains =
-      annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class);
+        annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class);
     if (corefChains != null && sentences != null) {
-      List<List<CoreLabel>> sents = new ArrayList<List<CoreLabel>>();
-      for (CoreMap sentence : sentences) {
-        List<CoreLabel> tokens =
-          sentence.get(CoreAnnotations.TokensAnnotation.class);
-        sents.add(tokens);
-      }
-
       for (CorefChain chain : corefChains.values()) {
         CorefChain.CorefMention representative =
-          chain.getRepresentativeMention();
+            chain.getRepresentativeMention();
         boolean outputHeading = false;
         for (CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
           if (mention == representative)
@@ -173,6 +164,22 @@ public class TextOutputter {
     }
 
     os.flush();
+
   }
 
+  /** Static helper */
+  public static void prettyPrint(Annotation annotation, OutputStream stream, StanfordCoreNLP pipeline) {
+    prettyPrint(annotation, new PrintWriter(stream), pipeline);
+  }
+
+  /** Static helper */
+  public static void prettyPrint(Annotation annotation, PrintWriter os, StanfordCoreNLP pipeline) {
+    try {
+      new TextOutputter().print(annotation, os, getOptions(pipeline));
+      // already flushed
+      // don't close, might not want to close underlying stream
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+  }
 }

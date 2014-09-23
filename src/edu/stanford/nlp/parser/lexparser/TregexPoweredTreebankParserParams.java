@@ -10,11 +10,11 @@ import edu.stanford.nlp.trees.tregex.TregexParseException;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.Collection;
+import java.util.function.Function;
 import java.util.Map;
 
 /**
@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * The "search" in this process is conducted via Tregex, and the
  * actual annotation is done through execution of an arbitrary
- * {@link edu.stanford.nlp.util.Function} provided by the user.
+ * {@link java.util.function.Function} provided by the user.
  * This class carries as inner several classes several useful common
  * annotation functions.
  *

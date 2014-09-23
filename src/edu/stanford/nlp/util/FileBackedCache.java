@@ -889,10 +889,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
     final FileSemaphore lock = acquireFileLock(f);
     final ObjectInputStream rtn = new ObjectInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(f))));
     return new Pair<ObjectInputStream, CloseAction>(rtn,
-        new CloseAction(){
-          @Override
-          public void apply() throws IOException { lock.release(); rtn.close();  }
-        });
+        () -> { lock.release(); rtn.close();  });
   }
 
   /**
@@ -912,10 +909,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
         ? new AppendingObjectOutputStream(new GZIPOutputStream(new BufferedOutputStream(stream)))
         : new ObjectOutputStream(new GZIPOutputStream(new BufferedOutputStream(stream)));
     return new Pair<ObjectOutputStream, CloseAction>(rtn,
-        new CloseAction(){
-          @Override
-          public void apply() throws IOException { rtn.flush(); lock.release(); rtn.close(); }
-        });
+        () -> { rtn.flush(); lock.release(); rtn.close(); });
   }
 
   /**

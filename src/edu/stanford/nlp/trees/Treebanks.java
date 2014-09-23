@@ -179,12 +179,7 @@ public class Treebanks {
     minLength = minL;
     Treebank treebank;
     if (trf == null) {
-      trf = new TreeReaderFactory() {
-          @Override
-          public TreeReader newTreeReader(Reader in) {
-            return new PennTreeReader(in, new LabeledScoredTreeFactory());
-          }
-        };
+      trf = in -> new PennTreeReader(in, new LabeledScoredTreeFactory());
     }
     if (normalized) {
       treebank = new DiskTreebank();
@@ -229,52 +224,40 @@ public class Treebanks {
     }
 
     if (pennPrintTrees) {
-      treebank.apply(new TreeVisitor() {
-          @Override
-          public void visitTree(Tree tree) {
-            int length = tree.yield().size();
-            if (length >= minLength && length <= maxLength) {
-              tree.pennPrint(pw);
-              pw.println();
-            }
-          }
-        });
+      treebank.apply(tree -> {
+        int length = tree.yield().size();
+        if (length >= minLength && length <= maxLength) {
+          tree.pennPrint(pw);
+          pw.println();
+        }
+      });
     }
 
     if (oneLinePrint) {
-      treebank.apply(new TreeVisitor() {
-          @Override
-          public void visitTree(Tree tree) {
-            int length = tree.yield().size();
-            if (length >= minLength && length <= maxLength) {
-              pw.println(tree);
-            }
-          }
-        });
+      treebank.apply(tree -> {
+        int length = tree.yield().size();
+        if (length >= minLength && length <= maxLength) {
+          pw.println(tree);
+        }
+      });
     }
 
     if (printWords) {
       final TreeNormalizer tn = new BobChrisTreeNormalizer();
-      treebank.apply(new TreeVisitor() {
-        @Override
-        public void visitTree(Tree tree) {
-          Tree tPrime = tn.normalizeWholeTree(tree, tree.treeFactory());
-          int length = tPrime.yield().size();
-          if (length >= minLength && length <= maxLength) {
-            pw.println(Sentence.listToString(tPrime.taggedYield()));
-          }
+      treebank.apply(tree -> {
+        Tree tPrime = tn.normalizeWholeTree(tree, tree.treeFactory());
+        int length = tPrime.yield().size();
+        if (length >= minLength && length <= maxLength) {
+          pw.println(Sentence.listToString(tPrime.taggedYield()));
         }
       });
     }
 
     if (printTaggedWords) {
       final TreeNormalizer tn = new BobChrisTreeNormalizer();
-      treebank.apply(new TreeVisitor() {
-        @Override
-        public void visitTree(Tree tree) {
-          Tree tPrime = tn.normalizeWholeTree(tree, tree.treeFactory());
-          pw.println(Sentence.listToString(tPrime.taggedYield(), false, "_"));
-        }
+      treebank.apply(tree -> {
+        Tree tPrime = tn.normalizeWholeTree(tree, tree.treeFactory());
+        pw.println(Sentence.listToString(tPrime.taggedYield(), false, "_"));
       });
     }
 
@@ -283,15 +266,12 @@ public class Treebanks {
     }
 
     if (yield) {
-      treebank.apply(new TreeVisitor() {
-          @Override
-          public void visitTree(Tree tree) {
-            int length = tree.yield().size();
-            if (length >= minLength && length <= maxLength) {
-              pw.println(Sentence.listToString(tree.yield()));
-            }
-          }
-        });
+      treebank.apply(tree -> {
+        int length = tree.yield().size();
+        if (length >= minLength && length <= maxLength) {
+          pw.println(Sentence.listToString(tree.yield()));
+        }
+      });
     }
 
     if (decimate) {
@@ -338,14 +318,11 @@ public class Treebanks {
 
   private static void countTaggings(Treebank tb, final PrintWriter pw) {
     final TwoDimensionalCounter<String,String> wtc = new TwoDimensionalCounter<String,String>();
-    tb.apply(new TreeVisitor() {
-        @Override
-        public void visitTree(Tree tree) {
-          List<TaggedWord> tags = tree.taggedYield();
-          for (TaggedWord tag : tags)
-            wtc.incrementCount(tag.word(), tag.tag());
-        }
-      });
+    tb.apply(tree -> {
+      List<TaggedWord> tags = tree.taggedYield();
+      for (TaggedWord tag : tags)
+        wtc.incrementCount(tag.word(), tag.tag());
+    });
     for (String key : wtc.firstKeySet()) {
       pw.print(key);
       pw.print('\t');

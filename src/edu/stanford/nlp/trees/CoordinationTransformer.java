@@ -2,7 +2,6 @@ package edu.stanford.nlp.trees;
 
 
 import edu.stanford.nlp.ling.LabelFactory;
-import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
@@ -26,13 +25,14 @@ import java.util.Properties;
  * <li> Removes empty nodes and simplifies many tags (<code>DependencyTreeTransformer</code>)
  * <li> Relabels UCP phrases to either ADVP or NP depending on their content
  * <li> Turn flat CC structures into structures with an intervening node
- * <li> Add extra structure to QP phrases - combine "well over", unflatted structures with CC (<code>QPTreeTransformer</code>)
+ * <li> Add extra structure to QP phrases - combine "well over", unflattened structures with CC (<code>QPTreeTransformer</code>)
  * <li> Flatten SQ structures to get the verb as the head
  * <li> Rearrange structures that appear to be dates
  * <li> Flatten X over only X structures
  * <li> Turn some fixed conjunction phrases into CONJP, such as "and yet", etc
  * <li> Attach RB such as "not" to the next phrase to get the RB headed by the phrase it modifies
  * <li> Turn SBAR to PP if parsed as SBAR in phrases such as "The day after the airline was planning ..."
+ * <li> Rearrange "now that" into an SBAR phrase if it was misparsed as ADVP
  * </ul>
  *
  * @author Marie-Catherine de Marneffe
@@ -117,21 +117,14 @@ public class CoordinationTransformer implements TreeTransformer {
   private static TregexPattern rearrangeNowThatTregex =
     TregexPattern.compile("ADVP=advp <1 (RB < /^(?i:now)$/) <2 (SBAR=sbar <1 (IN < /^(?i:that)$/))");
 
-  private static TsurgeonPattern[] rearrangeNowThatTsurgeon = {
-    Tsurgeon.parseOperation("relabel advp SBAR"),
-    Tsurgeon.parseOperation("excise sbar sbar"),
-  };
+  private static TsurgeonPattern rearrangeNowThatTsurgeon =
+    Tsurgeon.parseOperation("[relabel advp SBAR] [excise sbar sbar]");
 
-  public Tree rearrangeNowThat(Tree t) {
+  private static Tree rearrangeNowThat(Tree t) {
     if (t == null) {
       return t;
     }
-    TregexMatcher matcher = rearrangeNowThatTregex.matcher(t);
-    while (matcher.find()) {
-      t = rearrangeNowThatTsurgeon[0].evaluate(t, matcher);
-      t = rearrangeNowThatTsurgeon[1].evaluate(t, matcher);
-    }
-    return t;
+    return Tsurgeon.processPattern(rearrangeNowThatTregex, rearrangeNowThatTsurgeon, t);
   }
 
 
@@ -149,7 +142,7 @@ public class CoordinationTransformer implements TreeTransformer {
    * SBAR, either by the parser or in the treebank, we fix that here.
    */
 
-  public Tree changeSbarToPP(Tree t) {
+  private static Tree changeSbarToPP(Tree t) {
     if (t == null) {
       return null;
     }
@@ -170,14 +163,14 @@ public class CoordinationTransformer implements TreeTransformer {
   private static TsurgeonPattern addConjpTsurgeon =
     Tsurgeon.parseOperation("createSubtree CONJP start end");
 
-  public Tree combineConjp(Tree t) {
+  private static Tree combineConjp(Tree t) {
     if (t == null) {
       return null;
     }
     return Tsurgeon.processPattern(findFlatConjpTregex, addConjpTsurgeon, t);
   }
 
-  private static TregexPattern moveRBTregex[] = {
+  private static TregexPattern[] moveRBTregex = {
     TregexPattern.compile("/^S|PP|VP|NP/ < (/^(S|PP|VP|NP)/ $++ (/^(,|CC|CONJP)$/ [ $+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB) ])) : (=adv $+ /^(S|PP|VP|NP)/=dest) "),
     TregexPattern.compile("/^ADVP/ < (/^ADVP/ $++ (/^(,|CC|CONJP)$/ [$+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB)])) : (=adv $+ /^NP-ADV|ADVP|PP/=dest)"),
     TregexPattern.compile("/^FRAG/ < (ADVP|RB=adv $+ VP=dest)"),
@@ -186,7 +179,7 @@ public class CoordinationTransformer implements TreeTransformer {
   private static TsurgeonPattern moveRBTsurgeon =
     Tsurgeon.parseOperation("move adv >0 dest");
 
-  public Tree moveRB(Tree t) {
+  private static Tree moveRB(Tree t) {
     if (t == null) {
       return null;
     }

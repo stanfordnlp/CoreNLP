@@ -26,7 +26,7 @@ import edu.stanford.nlp.sequences.LatticeWriter;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
 import edu.stanford.nlp.util.Characters;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.util.StringUtils;

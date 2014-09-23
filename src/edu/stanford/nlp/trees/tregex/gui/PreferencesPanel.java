@@ -260,12 +260,7 @@ public class PreferencesPanel extends JDialog {
 
     });
 
-    cancel.addActionListener(new ActionListener() {
-
-      public void actionPerformed(ActionEvent arg0) {
-        PreferencesPanel.this.setVisible(false);
-      }
-    });
+    cancel.addActionListener(arg0 -> PreferencesPanel.this.setVisible(false));
 
   }
 
@@ -363,26 +358,18 @@ public class PreferencesPanel extends JDialog {
     fileFilterDialog.setOptions(options);
 
     final JDialog dialog = fileFilterDialog.createDialog(null, "Default encoding changed...");
-    useNewEncoding.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent arg0) {
-        FileTreeModel.setCurEncoding(encoding);
-        if(setEncoding == null)
-          System.out.println("encoding null!!");
-        setEncoding.setText(encoding);
-        dialog.setVisible(false);
-      }
+    useNewEncoding.addActionListener(arg0 -> {
+      FileTreeModel.setCurEncoding(encoding);
+      if(setEncoding == null)
+        System.out.println("encoding null!!");
+      setEncoding.setText(encoding);
+      dialog.setVisible(false);
     });
-    useOldEncoding.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        dialog.setVisible(false);
-      }
-    });
-    useAnotherEncoding.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        //need to prompt for an encoding
-        dialog.setVisible(false);
-        alternateEncodingPrompt(encoding);
-      }
+    useOldEncoding.addActionListener(e -> dialog.setVisible(false));
+    useAnotherEncoding.addActionListener(e -> {
+      //need to prompt for an encoding
+      dialog.setVisible(false);
+      alternateEncodingPrompt(encoding);
     });
     dialog.getRootPane().setDefaultButton(useNewEncoding);
     dialog.pack();
@@ -429,14 +416,11 @@ public class PreferencesPanel extends JDialog {
   public static JButton makeColorButton(final String promptText, Color iconColor, final JPanel parent) {
     final ColorIcon icon = new ColorIcon(iconColor);
     final JButton button = new JButton(icon);
-    button.addActionListener(new ActionListener() {
-
-      public void actionPerformed(ActionEvent arg0) {
-        Color newColor = JColorChooser.showDialog(parent,promptText, icon.getColor());
-        if (newColor != null) {
-          icon.setColor(newColor);
-          parent.repaint();
-        }
+    button.addActionListener(arg0 -> {
+      Color newColor = JColorChooser.showDialog(parent,promptText, icon.getColor());
+      if (newColor != null) {
+        icon.setColor(newColor);
+        parent.repaint();
       }
     });
     return button;

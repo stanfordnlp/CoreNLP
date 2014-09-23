@@ -484,9 +484,9 @@ public class TreeGraphNode extends Tree implements HasParent {
       buf.append("  ");
     }
     if (children == null || children.length == 0) {
-      buf.append(label.toString("value-index{map}"));
+      buf.append(label.toString(CoreLabel.OutputFormat.VALUE_INDEX_MAP));
     } else {
-      buf.append('(').append(label.toString("value-index{map}"));
+      buf.append('(').append(label.toString(CoreLabel.OutputFormat.VALUE_INDEX_MAP));
       for (TreeGraphNode child : children) {
         buf.append(' ').append(child.toPrettyString(indentLevel + 1));
       }
@@ -516,11 +516,7 @@ public class TreeGraphNode extends Tree implements HasParent {
   }
 
   public String toPrimes() {
-    Integer integer = label().get(CoreAnnotations.CopyAnnotation.class);
-    int copy = 0;
-    if (integer != null) {
-      copy = integer;
-    }
+    int copy = label().copyCount();
     return StringUtils.repeat('\'', copy);
   }
 
@@ -529,7 +525,7 @@ public class TreeGraphNode extends Tree implements HasParent {
     return label.toString();
   }
 
-  public String toString(String format) {
+  public String toString(CoreLabel.OutputFormat format) {
     return label.toString(format);
   }
 

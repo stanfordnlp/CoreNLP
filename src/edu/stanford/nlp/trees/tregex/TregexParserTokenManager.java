@@ -3,7 +3,7 @@
 package edu.stanford.nlp.trees.tregex;
 // all generated classes are in this package
 
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.trees.HeadFinder;

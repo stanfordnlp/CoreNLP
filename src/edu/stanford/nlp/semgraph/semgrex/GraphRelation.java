@@ -825,21 +825,24 @@ abstract class GraphRelation implements Serializable {
     if (!isKnownRelation(reln)) {
       throw new ParseException("Unknown relation " + reln);
     }
-    if (reln.equals(">"))
-      return new GOVERNER(type, name);
-    else if (reln.equals("<"))
-      return new DEPENDENT(type, name);
-    else if (reln.equals(">>"))
-      return new GRANDPARENT(type, name);
-    else if (reln.equals("<<"))
-      return new GRANDKID(type, name);
-    else if (reln.equals("=="))
-      return new EQUALS(type, name);
-    else if (reln.equals("@"))
-      return new ALIGNMENT();
-    else //error
-      throw new ParseException("Relation " + reln + 
-                               " not handled by getRelation");
+    switch (reln) {
+      case ">":
+        return new GOVERNER(type, name);
+      case "<":
+        return new DEPENDENT(type, name);
+      case ">>":
+        return new GRANDPARENT(type, name);
+      case "<<":
+        return new GRANDKID(type, name);
+      case "==":
+        return new EQUALS(type, name);
+      case "@":
+        return new ALIGNMENT();
+      default:
+//error
+        throw new ParseException("Relation " + reln +
+            " not handled by getRelation");
+    }
   }
 	  
   public static GraphRelation getRelation(String reln,

@@ -18,7 +18,7 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -27,22 +27,16 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 public class ReadSentimentDataset {
-  static final Function<Tree, String> TRANSFORM_TREE_TO_WORD = new Function<Tree, String>() {
-    public String apply(Tree tree) {
-      return tree.label().value();
-    }
-  };
+  static final Function<Tree, String> TRANSFORM_TREE_TO_WORD = tree -> tree.label().value();
 
-  static final Function<String, String> TRANSFORM_PARENS = new Function<String, String>() {
-    public String apply(String word) {
-      if (word.equals("(")) {
-        return "-LRB-";
-      }
-      if (word.equals(")")) {
-        return "-RRB-";
-      }
-      return word;
+  static final Function<String, String> TRANSFORM_PARENS = word -> {
+    if (word.equals("(")) {
+      return "-LRB-";
     }
+    if (word.equals(")")) {
+      return "-RRB-";
+    }
+    return word;
   };
 
   // A bunch of trees have some funky tokenization which we can
@@ -108,6 +102,8 @@ public class ReadSentimentDataset {
       throw new RuntimeException("Expected the same number of tregex and tsurgeon when initializing");
     }
   }
+
+  private ReadSentimentDataset() {} // static class
 
   public static Tree convertTree(List<Integer> parentPointers, List<String> sentence, Map<List<String>, Integer> phraseIds, Map<Integer, Double> sentimentScores, PTBEscapingProcessor escaper) {
     int maxNode = 0;
@@ -333,9 +329,7 @@ public class ReadSentimentDataset {
     List<Tree> trees = Generics.newArrayList();
     for (String line : IOUtils.readLines(parseFilename, "utf-8")) {
       String[] pieces = line.split("\\|");
-      List<Integer> parentPointers = CollectionUtils.transformAsList(Arrays.asList(pieces), new Function<String, Integer>() {
-          public Integer apply(String arg) { return Integer.valueOf(arg) - 1; }
-        });
+      List<Integer> parentPointers = CollectionUtils.transformAsList(Arrays.asList(pieces), arg -> Integer.valueOf(arg) - 1);
       Tree tree = convertTree(parentPointers, sentences.get(index), phraseIds, sentimentScores, escaper);
       ++index;
       trees.add(tree);
