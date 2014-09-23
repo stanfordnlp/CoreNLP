@@ -16,7 +16,6 @@ import edu.stanford.nlp.stats.*;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -168,7 +167,7 @@ public class ChineseMaxentLexicon implements Lexicon {
   }
 
   private String getTag(String word) {
-    int iW = wordIndex.addToIndex(word);
+    int iW = wordIndex.indexOf(word, true);
     ensureProbs(iW, false);
     return Counters.argmax(logProbs);
   }

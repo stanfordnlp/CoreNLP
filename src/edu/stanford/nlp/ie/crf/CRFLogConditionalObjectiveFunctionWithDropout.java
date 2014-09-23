@@ -28,7 +28,9 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
   private List<List<Set<Integer>>> dataFeatureHash;
   private List<Map<Integer, List<Integer>>> condensedMap;
   private int[][] dataFeatureHashByDoc;
+  private Index<CRFLabel> edgeLabelIndex;
   private int edgeLabelIndexSize;
+  private Index<CRFLabel> nodeLabelIndex;
   private int nodeLabelIndexSize;
   private int[][] edgeLabels;
   private Map<Integer, List<Integer>> currPrevLabelsMap;
@@ -74,9 +76,9 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
   private void initEdgeLabels() {
     if (labelIndices.size() < 2)
       return;
-    Index<CRFLabel> edgeLabelIndex = labelIndices.get(1);
+    edgeLabelIndex = labelIndices.get(1);
     edgeLabelIndexSize = edgeLabelIndex.size();
-    Index<CRFLabel> nodeLabelIndex = labelIndices.get(0);
+    nodeLabelIndex = labelIndices.get(0);
     nodeLabelIndexSize = nodeLabelIndex.size();
     currPrevLabelsMap = new HashMap<Integer, List<Integer>>();
     currNextLabelsMap = new HashMap<Integer, List<Integer>>();
@@ -312,9 +314,10 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
         int[] representFeatures = new int[aDoc.length];
         Arrays.fill(representFeatures, -1);
 
+        int key, pos = 0;
         for (Map.Entry<Integer, Integer> entry: occurPos.entrySet()) {
-          int key = entry.getKey();
-          int pos = entry.getValue();
+          key = entry.getKey();
+          pos = entry.getValue();
           if (pos != -1) {
             if (representFeatures[pos] == -1) { // use this as representFeatures
               representFeatures[pos] = key;
@@ -463,12 +466,13 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
       }
       // computing FBeta
       int docDataLen = docData.length;
+      boolean nextFeaturePresent = false;
       for (int i = docDataLen-2; i >= 0; i--) {
         Set<Integer> docDataHashIPlusOne = docDataHash.get(i+1);
         // for each possible clique at this position
         for (int fIndexPos = 0; fIndexPos < activeFeatures.length; fIndexPos++) {
           fIndex = activeFeatures[fIndexPos];
-          boolean nextFeaturePresent = docDataHashIPlusOne.contains(fIndex);
+          nextFeaturePresent = docDataHashIPlusOne.contains(fIndex);
           int j = map[fIndex];
           Index<CRFLabel> labelIndex = labelIndices.get(j);
           int labelIndexSize = labelIndex.size();
@@ -525,6 +529,8 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
     long eTiming = 0;
     long dropoutTiming= 0;
 
+    double PtYYp, PtYYpTimesOneMinusPtYYp, oneMinus2PtYYp, USum, theta, VarUp, VarU, VarUTimesOneMinus2PtYYp = 0.0;
+    int fIndex, valIndex = 0;
     boolean containsFeature = false;
     // iterate over the positions in this document
     for (int i = 1; i < docData.length; i++) {
@@ -546,20 +552,17 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
         // if it's a node clique, and label index is 2, if we don't use int[]{2} but just pass 2,
         // cliqueTree is going to treat it as index of the edge clique labels, and convert 2
         // into int[]{0,2}, and return the edge prob marginal instead of node marginal
-        double PtYYp = cliqueTree.prob(i, label);
-        double PtYYpTimesOneMinusPtYYp = PtYYp * (1.0 - PtYYp);
-        double oneMinus2PtYYp = (1.0 - 2 * PtYYp);
-        double USum = 0;
-        int fIndex;
+        PtYYp = cliqueTree.prob(i, label); // probability of these labels occurring in this clique with these features
+        PtYYpTimesOneMinusPtYYp = PtYYp * (1.0-PtYYp);
+        oneMinus2PtYYp = (1.0 - 2 * PtYYp);
+        USum = 0;
         for (int jjj=0; jjj<labelIndices.size(); jjj++) {
           for (int n = 0; n < docData[i][jjj].length; n++) {
             fIndex = docData[i][jjj][n];
-            int valIndex;
             if (jjj == 1)
               valIndex = k;
             else
               valIndex = yP;
-            double theta;
             try {
               theta = weights[fIndex][valIndex];
             }catch (Exception ex) {
@@ -570,7 +573,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
             USum += weightSquare[fIndex][valIndex];
 
             // first half of derivative: VarU' * PtYYp * (1-PtYYp)
-            double VarUp = deltaDivByOneMinusDelta * theta;
+            VarUp = deltaDivByOneMinusDelta * theta;
             increScoreAllowNull(dropoutPriorGradFirstHalf, fIndex, valIndex, VarUp * PtYYpTimesOneMinusPtYYp);
           }
         }
@@ -579,33 +582,32 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
           eTiming += innerTimer.stop();
           innerTimer.start();
         }
-        double VarU = 0.5 * deltaDivByOneMinusDelta * USum;
+        VarU = 0.5 * deltaDivByOneMinusDelta * USum;
 
         // update function objective
         priorValue += VarU * PtYYpTimesOneMinusPtYYp;
 
-        double VarUTimesOneMinus2PtYYp = VarU * oneMinus2PtYYp;
+        VarUTimesOneMinus2PtYYp = VarU * oneMinus2PtYYp;
 
         // second half of derivative: VarU * PtYYp' * (1 - 2 * PtYYp)
-        // boolean prevFeaturePresent = false;
-        // boolean nextFeaturePresent = false;
+        int jj = 0;
+        int[] fLabel = null;
+        double alpha, beta, fCount, condE, PtYYpPrime = 0;
+        boolean prevFeaturePresent = false;
+        boolean nextFeaturePresent = false;
         for (int fIndexPos = 0; fIndexPos < activeFeatures.length; fIndexPos++) {
           fIndex = activeFeatures[fIndexPos];
           containsFeature = docDataHashI.contains(fIndex);
 
           // if (!containsFeature) continue;
-          int jj = map[fIndex];
+          jj = map[fIndex];
           Index<CRFLabel> fLabelIndex = labelIndices.get(jj);
           for (int kk = 0; kk < fLabelIndex.size(); kk++) { // for all parameter \theta
-            int[] fLabel = fLabelIndex.get(kk).getLabel();
+            fLabel = fLabelIndex.get(kk).getLabel();
             // if (FAlpha[i] != null)
             //   System.err.println("fIndex: " + fIndex+", FAlpha[i].size:"+FAlpha[i].length);
-            double fCount = containsFeature && ((jj == 0 && fLabel[0] == yP) || (jj == 1 && k == kk)) ? 1 : 0;
+            fCount = containsFeature && ((jj == 0 && fLabel[0] == yP) || (jj == 1 && k == kk)) ? 1 : 0;
 
-            double alpha;
-            double beta;
-            double condE;
-            double PtYYpPrime;
             if (!dropoutApprox) {
               alpha = ((FAlpha[i][fIndexPos] == null || FAlpha[i][fIndexPos][y] == null) ? 0 : FAlpha[i][fIndexPos][y][kk]);
               beta = ((FBeta[i][fIndexPos] == null || FBeta[i][fIndexPos][yP] == null) ? 0 : FBeta[i][fIndexPos][yP][kk]);
@@ -661,11 +663,12 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
       System.err.println("]");
     }
 
+    double[] target, source = null;
     for (Map.Entry<Integer, double[]> entry: dropoutPriorGrad.entrySet()) {
       Integer key = entry.getKey();
-      double[] target = entry.getValue();
+      target = entry.getValue();
       if (dropoutPriorGradFirstHalf.containsKey(key)) {
-        double[] source = dropoutPriorGradFirstHalf.get(key);
+        source = dropoutPriorGradFirstHalf.get(key);
         for (int i=0; i<target.length; i++) {
           target[i] += source[i];
         }
@@ -697,9 +700,10 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
       for (int i = 0; i < weights.length; i++)
         weightSquare[i] = new double[weights[i].length];
     }
+    double w = 0;
     for (int i = 0; i < weights.length; i++) {
       for (int j=0; j < weights[i].length; j++) {
-        double w = weights[i][j];
+        w = weights[i][j];
         weightSquare[i][j] = w * w;
       }
     }
@@ -802,7 +806,7 @@ public class CRFLogConditionalObjectiveFunctionWithDropout extends CRFLogConditi
         derivative[index] = (E[i][j] - Ehat[i][j]);
         derivative[index] += dropoutScale * dropoutPriorGradTotal[i][j];
         if (VERBOSE) {
-          System.err.println("deriv(" + i + ',' + j + ") = " + E[i][j] + " - " + Ehat[i][j] + " = " + derivative[index]);
+          System.err.println("deriv(" + i + "," + j + ") = " + E[i][j] + " - " + Ehat[i][j] + " = " + derivative[index]);
         }
         index++;
       }

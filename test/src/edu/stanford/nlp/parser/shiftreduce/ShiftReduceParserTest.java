@@ -14,7 +14,7 @@ import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.CollectionUtils;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 public class ShiftReduceParserTest extends TestCase {
   String commaTreeString = "(ROOT (FRAG (NP (DT A) (@NP (ADJP (JJ short) (@ADJP (, ,) (JJ simple))) (NN test)))))";

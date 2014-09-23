@@ -562,7 +562,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         "(NP (NP (NN nothing)) (PP (CC but) (NP (PRP$ their) (NNS scratches))))",
         // You'd like this one to come out with an nsubjpass, but there are many other cases that are tagging mistakes. Decide what to do
         // "( (S-HLN (NP-SBJ-1 (NN ABORTION) (NN RULING)) (VP (VBN UPHELD) (NP (-NONE- *-1))) (: :)))",
-        "(FRAG (ADVP (ADVP (RB So) (RB long)) (SBAR (IN as) (S (NP-SBJ (PRP you)) (VP (VBP do) (RB n't) (VP (VB look) (ADVP-DIR (RB down))))))) (. .))",
     };
 
     // the expected dependency answers (basic)
@@ -665,14 +664,6 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         // "nn(RULING-2, ABORTION-1)\n" +
         //         "nsubjpass(UPHELD-3, RULING-2)\n" +
         //         "root(ROOT-0, UPHELD-3)\n",
-        "advmod(long-2, So-1)\n" +
-                "root(ROOT-0, long-2)\n" +
-                "mark(look-7, as-3)\n" +
-                "nsubj(look-7, you-4)\n" +
-                "aux(look-7, do-5)\n" +
-                "neg(look-7, n't-6)\n" +
-                "advcl(long-2, look-7)\n" +
-                "advmod(look-7, down-8)\n",
     };
 
     assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);

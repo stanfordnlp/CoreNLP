@@ -225,12 +225,8 @@ public final class SloppyMath {
   static final double LOGTOLERANCE = 30.0;
   static final float LOGTOLERANCE_F = 20.0f;
 
-
-  /** Approximation to gamma function.  See e.g., http://www.rskey.org/CMS/index.php/the-library/11 .
-   *  Fairly accurate, especially for n greater than 8.
-   */
   public static double gamma(double n) {
-    return Math.sqrt(2.0*Math.PI/n) * Math.pow((n/Math.E)*Math.sqrt(n*Math.sinh((1.0/n)+(1/(810*Math.pow(n,6))))),n);
+    return Math.sqrt(2.0*Math.PI/n) * Math.pow((n/Math.E)*Math.sqrt(n*Math.sinh((1.0/n)+(1/810*Math.pow(n,6)))),n);
   }
 
   /**

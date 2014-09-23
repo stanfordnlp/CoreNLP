@@ -5,7 +5,7 @@ import java.io.StringWriter;
 
 import junit.framework.TestCase;
 import edu.stanford.nlp.util.StringUtils;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.objectbank.IdentityFunction;
 
 

@@ -1444,7 +1444,7 @@ public class SplittingGrammarExtractor {
     stateIndex = new HashIndex<String>();
     for (String key : stateSplitCounts.keySet()) {
       for (int i = 0; i < stateSplitCounts.getIntCount(key); ++i) {
-        stateIndex.addToIndex(state(key, i));
+        stateIndex.indexOf(state(key, i), true);
       }
     }
   }

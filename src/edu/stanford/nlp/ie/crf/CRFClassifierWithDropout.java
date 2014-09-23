@@ -34,13 +34,13 @@ import edu.stanford.nlp.util.*;
 import java.util.*;
 
 /**
- * Subclass of CRFClassifier that performs dropout feature-noising training.
+ * Subclass of CRFClassifier that performs dropout feature-noisying training
  *
  * @author Mengqiu Wang
  */
 public class CRFClassifierWithDropout<IN extends CoreMap> extends CRFClassifier<IN> {
 
-  private List<List<IN>> unsupDocs;
+  private List<List<IN>> unsupDocs = null;
 
   public CRFClassifierWithDropout(SeqClassifierFlags flags) {
     super(flags);
@@ -91,5 +91,4 @@ public class CRFClassifierWithDropout<IN extends CoreMap> extends CRFClassifier<
     return new CRFLogConditionalObjectiveFunctionWithDropout(data, labels, windowSize, classIndex,
       labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.dropoutRate, flags.dropoutScale, flags.multiThreadGrad, flags.dropoutApprox, flags.unsupDropoutScale, unsupDropoutData);
   }
-
-} // end class CRFClassifierWithDropout
+} // end class CRFClassifier

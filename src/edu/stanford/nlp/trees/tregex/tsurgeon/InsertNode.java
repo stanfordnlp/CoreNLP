@@ -1,7 +1,5 @@
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
-import java.util.Map;
-
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.util.Pair;
@@ -11,7 +9,7 @@ import edu.stanford.nlp.util.Pair;
  */
 class InsertNode extends TsurgeonPattern {
 
-  TreeLocation location;
+  TreeLocation l;
 
   /**
    * Does the item being inserted need to be deep-copied before
@@ -21,13 +19,13 @@ class InsertNode extends TsurgeonPattern {
 
   public InsertNode(TsurgeonPattern child, TreeLocation l) {
     super("insert", new TsurgeonPattern[] { child });
-    this.location = l;
+    this.l = l;
   }
 
   @Override
   protected void setRoot(TsurgeonPatternRoot root) {
     super.setRoot(root);
-    location.setRoot(root);
+    l.setRoot(root);
   }
 
   public InsertNode(AuxiliaryTree t, TreeLocation l) {
@@ -38,31 +36,17 @@ class InsertNode extends TsurgeonPattern {
   }
 
   @Override
-  public TsurgeonMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
-    return new Matcher(newNodeNames, coindexer);
-  }
-
-  private class Matcher extends TsurgeonMatcher {
-    TreeLocation.LocationMatcher locationMatcher;
-
-    public Matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
-      super(InsertNode.this, newNodeNames, coindexer);
-      locationMatcher = location.matcher(newNodeNames, coindexer);
-    }
-
-    @Override
-    public Tree evaluate(Tree tree, TregexMatcher tregex) {
-      Tree nodeToInsert = childMatcher[0].evaluate(tree, tregex);
-      Pair<Tree,Integer> position = locationMatcher.evaluate(tree, tregex);
-      position.first().insertDtr(needsCopy ? nodeToInsert.deepCopy() : nodeToInsert, 
-                                 position.second());
-      return tree;
-    }
+  public Tree evaluate(Tree t, TregexMatcher m) {
+    Tree nodeToInsert = children[0].evaluate(t,m);
+    Pair<Tree,Integer> position = l.evaluate(t,m);
+    position.first().insertDtr(needsCopy ? nodeToInsert.deepCopy() : nodeToInsert,
+                               position.second());
+    return t;
   }
 
   @Override
   public String toString() {
-    return label + '(' + children[0] + ',' + location + ')';
+    return label + '(' + children[0] + ',' + l + ')';
   }
 
 

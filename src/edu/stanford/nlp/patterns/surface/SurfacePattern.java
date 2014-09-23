@@ -88,13 +88,13 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
       String tok = tokenj.lemma();
       if (lowerCaseContext)
         tok = tok.toLowerCase();
-      str = "[{lemma:/" + Pattern.quote(tok.replaceAll("/", "\\\\/"))+ "/}] ";
+      str = "[{lemma:/" + Pattern.quote(tok)+ "/}] ";
       //str = "[{lemma:/\\Q" + tok.replaceAll("/", "\\\\/") + "\\E/}] ";
     } else {
       String tok = tokenj.word();
       if (lowerCaseContext)
         tok = tok.toLowerCase();
-      str = "[{word:/" + Pattern.quote(tok.replaceAll("/", "\\\\/")) + "/}] ";
+      str = "[{word:/" + Pattern.quote(tok) + "/}] ";
       //str = "[{word:/\\Q" + tok.replaceAll("/", "\\\\/") + "\\E/}] ";
 
     }
@@ -102,7 +102,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
   }
 
   public static String getContextStr(String w) {
-    String str = "[/" + Pattern.quote(w.replaceAll("/", "\\\\/")) + "/] ";
+    String str = "[/" + Pattern.quote(w) + "/] ";
     //String str = "[/\\Q" + w.replaceAll("/", "\\\\/") + "\\E/] ";
     return str;
   }

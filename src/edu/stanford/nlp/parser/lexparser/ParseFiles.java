@@ -23,7 +23,7 @@ import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.DocumentPreprocessor.DocType;
 import edu.stanford.nlp.trees.*;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;

@@ -128,12 +128,14 @@ public class SynchronizedInterner<T> {
   public static void main(final String[] args) throws InterruptedException {
     final Thread[] threads = new Thread[100];
     for (int i = 0; i < threads.length; i++) {
-      threads[i] = new Thread(() -> {
-        for (String str : args) {
-          String interned = SynchronizedInterner.globalIntern(str);
-          Thread.yield();
-          if (interned != str)
-            throw new AssertionError("Interning failed for " + str);
+      threads[i] = new Thread(new Runnable(){
+        public void run() {
+          for (String str : args) {
+            String interned = SynchronizedInterner.globalIntern(str);
+            Thread.yield();
+            if (interned != str)
+              throw new AssertionError("Interning failed for " + str);
+          }
         }
       });
     }

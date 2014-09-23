@@ -264,18 +264,20 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
    * For example, in the sentence "It is hands down the best dessert ...", 
    * we want to avoid using "hands down" as the head.
    */
-  static final Filter<Tree> REMOVE_TMP_AND_ADV = tree -> {
-    if (tree == null)
-      return false;
-    Label label = tree.label();
-    if (label == null)
-      return false;
-    if (label.value().contains("-TMP") || label.value().contains("-ADV"))
-      return false;
-    if (label.value().startsWith("VP") && noVerbOverTempTregex.matcher(tree).matches()) {
-      return false;
+  static final Filter<Tree> REMOVE_TMP_AND_ADV = new Filter<Tree>() {
+    public boolean accept(Tree tree) {
+      if (tree == null) 
+        return false;
+      Label label = tree.label();
+      if (label == null) 
+        return false;
+      if (label.value().contains("-TMP") || label.value().contains("-ADV"))
+        return false;
+      if (label.value().startsWith("VP") && noVerbOverTempTregex.matcher(tree).matches()) {
+        return false;
+      }
+      return true;
     }
-    return true;
   };
     
   /**

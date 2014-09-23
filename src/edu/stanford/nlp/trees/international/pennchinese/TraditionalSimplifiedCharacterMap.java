@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.io.RuntimeIOException;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 
 /**

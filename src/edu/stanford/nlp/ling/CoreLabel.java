@@ -549,20 +549,22 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
     return copy;
   }
 
-  public void setCopyCount(int count) {
-    set(CoreAnnotations.CopyAnnotation.class, count);
-  }
-
   /**
    * Tag separator to use by default
    */
   public static final String TAG_SEPARATOR = "/";
 
-  public enum OutputFormat {
-    VALUE_INDEX, VALUE, VALUE_TAG, VALUE_TAG_INDEX, MAP, VALUE_MAP, VALUE_INDEX_MAP, WORD, WORD_INDEX
-  };
+  public static final String DEFAULT_FORMAT = "value-index";
 
-  public static final OutputFormat DEFAULT_FORMAT = OutputFormat.VALUE_INDEX;
+  public static final String VALUE_FORMAT = "value";
+
+  public static final String VALUE_TAG_FORMAT = "value-tag";
+
+  public static final String VALUE_TAG_INDEX_FORMAT = "value-tag-index";
+
+  public static final String MAP_FORMAT = "{map}";
+
+  public static final String WORD_FORMAT = "word";
 
   @Override
   public String toString() {
@@ -591,21 +593,17 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
    * Map is printed in alphabetical order of keys.
    */
   @SuppressWarnings("unchecked")
-  public String toString(OutputFormat format) {
+  public String toString(String format) {
     StringBuilder buf = new StringBuilder();
-    switch(format) {
-    case VALUE:
+    if (format.equals(VALUE_FORMAT)) {
       buf.append(value());
-      break;
-    case MAP: {
+    } else if (format.equals(MAP_FORMAT)) {
       Map map2 = new TreeMap();
       for(Class key : this.keySet()) {
         map2.put(key.getName(), get(key));
       }
       buf.append(map2);
-      break;
-    }
-    case VALUE_MAP: {
+    } else if (format.equals("value{map}")) {
       buf.append(value());
       Map map2 = new TreeMap(asClassComparator);
       for(Class key : this.keySet()) {
@@ -613,27 +611,21 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
       }
       map2.remove(CoreAnnotations.ValueAnnotation.class);
       buf.append(map2);
-      break;
-    }
-    case VALUE_INDEX: {
+    } else if (format.equals("value-index")) {
       buf.append(value());
       Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
       if (index != null) {
         buf.append('-').append((index).intValue());
       }
       buf.append(toPrimes());
-      break;
-    }
-    case VALUE_TAG: {
+    } else if (format.equals(VALUE_TAG_FORMAT)) {
       buf.append(value());
       buf.append(toPrimes());
       String tag = tag();
       if (tag != null) {
         buf.append(TAG_SEPARATOR).append(tag);
       }
-      break;
-    }
-    case VALUE_TAG_INDEX: {
+    } else if (format.equals(VALUE_TAG_INDEX_FORMAT)) {
       buf.append(value());
       String tag = tag();
       if (tag != null) {
@@ -644,9 +636,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
         buf.append('-').append((index).intValue());
       }
       buf.append(toPrimes());
-      break;
-    }
-    case VALUE_INDEX_MAP: {
+    } else if (format.equals("value-index{map}")) {
       buf.append(value());
       Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
       if (index != null) {
@@ -667,23 +657,16 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
       if (!map2.isEmpty()) {
         buf.append(map2);
       }
-      break;
-    }
-    case WORD:
+    } else if (format.equals(WORD_FORMAT)) {
       // TODO: we should unify word() and value()
       buf.append(word());
-      break;
-    case WORD_INDEX: {
+    } else if (format.equals("text-index")) {
       buf.append(this.get(CoreAnnotations.TextAnnotation.class));
       Integer index = this.get(CoreAnnotations.IndexAnnotation.class);
       if (index != null) {
         buf.append('-').append((index).intValue());
       }
       buf.append(toPrimes());
-      break;
-    }
-    default:
-      throw new IllegalArgumentException("Unknown format " + format);
     }
     return buf.toString();
   }

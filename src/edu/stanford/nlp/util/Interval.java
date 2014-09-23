@@ -2,7 +2,6 @@ package edu.stanford.nlp.util;
 
 import java.io.Serializable;
 import java.util.Comparator;
-import java.util.function.Function;
 
 /**
  * Represents a interval of a generic type E that is comparable.
@@ -901,9 +900,12 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return ErasureUtils.uncheckedCast(LENGTH_SCORER);
   }
 
-  public static final Function<HasInterval<Integer>, Double> LENGTH_SCORER = in -> {
-    Interval<Integer> interval = in.getInterval();
-    return (double) (interval.getEnd() - interval.getBegin());
+  public static final Function<HasInterval<Integer>, Double> LENGTH_SCORER = new Function<HasInterval<Integer>,Double>() {
+    @Override
+    public Double apply(HasInterval<Integer> in) {
+      Interval<Integer> interval = in.getInterval();
+      return (double) (interval.getEnd() - interval.getBegin());
+    }
   };
 
   private static final long serialVersionUID = 1;

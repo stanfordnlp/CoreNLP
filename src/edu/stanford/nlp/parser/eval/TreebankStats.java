@@ -194,7 +194,11 @@ public class TreebankStats {
       makeVocab = true;
       for(String path : pathNames) {
         DiskTreebank tb = tlpp.diskTreebank();
-        tb.loadPath(path, pathname -> true);
+        tb.loadPath(path, new FileFilter() {
+          public boolean accept(File pathname) {
+            return true;
+          }
+        });
 
         ObservedCorpusStats stats = gatherStats(tb, languageName.toString() + "  " + path.toString());
         display(stats, displayWords, displayOOV);
@@ -205,7 +209,9 @@ public class TreebankStats {
       trainVocab = Generics.newHashSet();
       DiskTreebank tb = tlpp.diskTreebank();
       for(String path : pathNames)
-        tb.loadPath(path, pathname -> !pathname.isDirectory());
+        tb.loadPath(path, new FileFilter() {
+          public boolean accept(File pathname) { return !pathname.isDirectory(); }
+        });
 
       ObservedCorpusStats allStats = gatherStats(tb, languageName.toString());
       display(allStats, displayWords, displayOOV);

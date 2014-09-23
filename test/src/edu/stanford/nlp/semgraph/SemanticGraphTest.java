@@ -21,7 +21,7 @@ import edu.stanford.nlp.util.Generics;
  */
 public class SemanticGraphTest extends TestCase {
 
-  private SemanticGraph graph;
+  SemanticGraph graph;
 
   @Override
     public void setUp() {
@@ -32,7 +32,7 @@ public class SemanticGraphTest extends TestCase {
     }
   }
 
-  private static SemanticGraph makeGraph() {
+  public SemanticGraph makeGraph() {
     Tree tree;
 
     try {
@@ -141,30 +141,30 @@ public class SemanticGraphTest extends TestCase {
   }
 
   public void testTopologicalSort() {
-    SemanticGraph gr = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
-    verifyTopologicalSort(gr);
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    verifyTopologicalSort(graph);
 
-    List<IndexedWord> vertices = gr.vertexListSorted();
-    gr.addEdge(vertices.get(1), vertices.get(2), EnglishGrammaticalRelations.DIRECT_OBJECT, 1.0, false);
-    verifyTopologicalSort(gr);
+    List<IndexedWord> vertices = graph.vertexListSorted();
+    graph.addEdge(vertices.get(1), vertices.get(2), EnglishGrammaticalRelations.DIRECT_OBJECT, 1.0, false);
+    verifyTopologicalSort(graph);
 
-    gr = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
-    vertices = gr.vertexListSorted();
-    gr.addEdge(vertices.get(2), vertices.get(1), EnglishGrammaticalRelations.DIRECT_OBJECT, 1.0, false);
-    verifyTopologicalSort(gr);
+    graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    vertices = graph.vertexListSorted();
+    graph.addEdge(vertices.get(2), vertices.get(1), EnglishGrammaticalRelations.DIRECT_OBJECT, 1.0, false);
+    verifyTopologicalSort(graph);
 
-    gr = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
-    vertices = gr.vertexListSorted();
-    gr.addEdge(vertices.get(1), vertices.get(3), EnglishGrammaticalRelations.DIRECT_OBJECT, 1.0, false);
-    verifyTopologicalSort(gr);
+    graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    vertices = graph.vertexListSorted();
+    graph.addEdge(vertices.get(1), vertices.get(3), EnglishGrammaticalRelations.DIRECT_OBJECT, 1.0, false);
+    verifyTopologicalSort(graph);
 
     // now create a graph with a directed loop, which we should not
     // be able to topologically sort
-    gr = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
-    vertices = gr.vertexListSorted();
-    gr.addEdge(vertices.get(3), vertices.get(0), EnglishGrammaticalRelations.DIRECT_OBJECT, 1.0, false);
+    graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    vertices = graph.vertexListSorted();
+    graph.addEdge(vertices.get(3), vertices.get(0), EnglishGrammaticalRelations.DIRECT_OBJECT, 1.0, false);
     try {
-      verifyTopologicalSort(gr);
+      verifyTopologicalSort(graph);
       throw new RuntimeException("Expected to fail");
     } catch (IllegalStateException e) {
       // yay, correctly caught error
@@ -176,7 +176,7 @@ public class SemanticGraphTest extends TestCase {
    * for each node that it appears in the sort and all of its children
    * occur later in the sort
    */
-  private static void verifyTopologicalSort(SemanticGraph graph) {
+  public void verifyTopologicalSort(SemanticGraph graph) {
     List<IndexedWord> sorted = graph.topologicalSort();
 
     Map<IndexedWord, Integer> indices = Generics.newHashMap();
@@ -201,7 +201,7 @@ public class SemanticGraphTest extends TestCase {
     verifyPath(graph.getPathToRoot(graph.getNodeByIndex(34)), 35, 28, 10);
   }
 
-  private static void verifyPath(List<IndexedWord> path, int ... expected) {
+  public void verifyPath(List<IndexedWord> path, int ... expected) {
     assertEquals(expected.length, path.size());
     for (int i = 0; i < expected.length; ++i) {
       assertEquals(expected[i], path.get(i).index());
@@ -214,7 +214,7 @@ public class SemanticGraphTest extends TestCase {
     verifySet(graph.getSiblings(graph.getNodeByIndex(42)), 43, 44, 48);
   }
 
-  private static void verifySet(Collection<IndexedWord> nodes, int ... expected) {
+  public void verifySet(Collection<IndexedWord> nodes, int ... expected) {
     Set<Integer> results = Generics.newTreeSet();
     for (IndexedWord node : nodes) {
       results.add(node.index());
@@ -234,18 +234,4 @@ public class SemanticGraphTest extends TestCase {
     assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(10)));
     assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(45), graph.getNodeByIndex(42)));
   }
-
-  public void testHasChildren() {
-    SemanticGraph gr = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
-
-    List<IndexedWord> vertices = gr.vertexListSorted();
-    for (IndexedWord word : vertices) {
-      if (word.word().equals("ate") || word.word().equals("muffins")) {
-        assertTrue(gr.hasChildren(word));
-      } else {
-        assertFalse(gr.hasChildren(word));
-      }
-    }
-  }
-
 }

@@ -81,8 +81,6 @@ public class InvertedIndexByTokens implements Serializable{
         if (convertToLowercase)
           w = w.toLowerCase();
 
-        w = w.replaceAll("/", "\\\\/");
-
         Hashtable<String, Set<String>> t = index.get(w);
         if (t == null)
           t = new Hashtable<String, Set<String>>();

@@ -8,7 +8,7 @@ import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 
 /**

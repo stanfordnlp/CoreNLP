@@ -32,7 +32,6 @@ public class EmpiricalNERPriorBIO<IN extends CoreMap> extends EntityCachingAbstr
     LOCIndex = tagIndex.indexOf("LOC");
   }
 
-  @Override
   public double scoreOf(int[] sequence) {
     double p = 0.0;
     for (int i = 0; i < entities.length; i++) {
@@ -43,10 +42,10 @@ public class EmpiricalNERPriorBIO<IN extends CoreMap> extends EntityCachingAbstr
         // String tag1 = classIndex.get(entity.type);
 
         int[] other = entities[i].otherOccurrences;
-        for (int otherOccurrence : other) {
+        for (int j = 0; j < other.length; j++) {
 
           EntityBIO otherEntity = null;
-          for (int k = otherOccurrence; k < otherOccurrence + length && k < entities.length; k++) {
+          for (int k = other[j]; k < other[j]+length && k < entities.length; k++) {
             otherEntity = entities[k];
             if (otherEntity != null) {
               break;
@@ -64,26 +63,25 @@ public class EmpiricalNERPriorBIO<IN extends CoreMap> extends EntityCachingAbstr
           // exact match??
           boolean exact = false;
           int[] oOther = otherEntity.otherOccurrences;
-          for (int index : oOther) {
-            if (index >= i && index <= i + length - 1) {
+          for (int k = 0; k < oOther.length; k++) {
+            if (oOther[k] >= i && oOther[k] <= i+length-1) {
               exact = true;
               break;
             }
           }
 
-          double factor; // initialized in 2 cases below
+          double factor = 0;
           if (exact) {
-            if (DEBUG) {
+            if (DEBUG)
               System.err.print("Exact match of tag1=" + tagIndex.get(tag1) + ", tag2=" + tagIndex.get(tag2));
-            }
             // entity not complete
             if (length != oLength) {
               // if (DEBUG)
               //   System.err.println("Entity Not Complete");
               if (tag1 == tag2) {
                 p += Math.abs(oLength - length) * p1;
-              } else if (!(tag1 == ORGIndex && tag2 == LOCIndex) &&
-                      !(tag1 == LOCIndex && tag2 == ORGIndex)) {
+              } else if (!(tag1 == ORGIndex && tag2 == LOCIndex ) &&
+                         !(tag1 == LOCIndex && tag2 == ORGIndex)) {
                 // shorter
                 p += (oLength + length) * p1;
               }
@@ -109,5 +107,4 @@ public class EmpiricalNERPriorBIO<IN extends CoreMap> extends EntityCachingAbstr
     }
     return p;
   }
-
 }

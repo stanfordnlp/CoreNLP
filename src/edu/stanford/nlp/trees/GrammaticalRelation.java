@@ -527,18 +527,17 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     case English: {
       GrammaticalRelation rel = EnglishGrammaticalRelations.valueOf(toString());
       if (rel == null) {
-        switch (shortName) {
-          case "conj":
-            return EnglishGrammaticalRelations.getConj(specific);
-          case "prep":
-            return EnglishGrammaticalRelations.getPrep(specific);
-          case "prepc":
-            return EnglishGrammaticalRelations.getPrepC(specific);
-          default:
-            // TODO: we need to figure out what to do with relations
-            // which were serialized and then deprecated.  Perhaps there
-            // is a good way to make them singletons
-            return this;
+        if (shortName.equals("conj")) {
+          return EnglishGrammaticalRelations.getConj(specific);
+        } else if (shortName.equals("prep")) {
+          return EnglishGrammaticalRelations.getPrep(specific);
+        } else if (shortName.equals("prepc")) {
+          return EnglishGrammaticalRelations.getPrepC(specific);
+        } else {
+          // TODO: we need to figure out what to do with relations
+          // which were serialized and then deprecated.  Perhaps there
+          // is a good way to make them singletons
+          return this;
           //throw new RuntimeException("Unknown English relation " + this);
         }
       } else {

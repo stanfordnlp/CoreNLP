@@ -3,13 +3,10 @@ package edu.stanford.nlp.semgraph;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 import java.util.Properties;
 
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
@@ -57,13 +54,15 @@ public class SemanticGraphPrinter {
       LexicalizedParser lp = LexicalizedParser.loadModel("/u/nlp/data/lexparser/englishPCFG.ser.gz", options);
       BufferedReader reader = null;
       try {
-        reader = IOUtils.readerFromString(sentFileName);
-      } catch (IOException e) {
-        throw new RuntimeIOException("Cannot find or open " + sentFileName, e);
+        reader = new BufferedReader(new FileReader(sentFileName));
+      } catch (FileNotFoundException e) {
+        System.err.println("Cannot find " + sentFileName);
+        System.exit(1);
       }
       try {
         System.out.println("Processing sentence file " + sentFileName);
-        for  (String line; (line = reader.readLine()) != null; ) {
+        String line;
+        while ((line = reader.readLine()) != null) {
           System.out.println("Processing sentence: " + line);
           PTBTokenizer<Word> ptb = PTBTokenizer.newPTBTokenizer(new StringReader(line));
           List<Word> words = ptb.tokenize();
@@ -94,7 +93,7 @@ public class SemanticGraphPrinter {
         System.out.println("dot ----------------------------");
         System.out.println(g1.toDotFormat());
         System.out.println("dot (simple) ----------------------------");
-        System.out.println(g1.toDotFormat("Simple", CoreLabel.OutputFormat.VALUE));
+        System.out.println(g1.toDotFormat("Simple", CoreLabel.VALUE_FORMAT));
 
         // System.out.println(" graph ----------------------------");
         // System.out.println(t.allTypedDependenciesCCProcessed(false));

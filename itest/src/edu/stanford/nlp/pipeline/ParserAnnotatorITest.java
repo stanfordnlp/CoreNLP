@@ -44,18 +44,18 @@ public class ParserAnnotatorITest extends TestCase {
 
       parser = new ParserAnnotator(false, -1);
       pipeline = new AnnotationPipeline();
-      pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+      pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
       pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
       pipeline.addAnnotator(new POSTaggerAnnotator(false));
       pipeline.addAnnotator(parser);
 
       noPOSPipeline = new AnnotationPipeline();
-      noPOSPipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+      noPOSPipeline.addAnnotator(new PTBTokenizerAnnotator(false));
       noPOSPipeline.addAnnotator(new WordsToSentencesAnnotator(false));
       noPOSPipeline.addAnnotator(parser);
 
       noParserPipeline = new AnnotationPipeline();
-      noParserPipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+      noParserPipeline.addAnnotator(new PTBTokenizerAnnotator(false));
       noParserPipeline.addAnnotator(new WordsToSentencesAnnotator(false));
 
       parserOnlyPipeline = new AnnotationPipeline();
@@ -204,7 +204,7 @@ public class ParserAnnotatorITest extends TestCase {
 
   private void assertParseOK(ParserAnnotator parser) {
     AnnotationPipeline pipeline = new AnnotationPipeline();
-    pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+    pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
     pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
     pipeline.addAnnotator(parser);
     Annotation document = new Annotation("John Bauer works at Stanford.");

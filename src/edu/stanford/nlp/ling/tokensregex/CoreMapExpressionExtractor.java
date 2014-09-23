@@ -13,7 +13,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -309,9 +308,12 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
     }
     final Integer startTokenOffsetFinal = startTokenOffset;
     List<CoreMap> merged = CollectionUtils.mergeListWithSortedMatchedPreAggregated(
-            (List<CoreMap>) annotation.get(tokensAnnotationKey), res, in -> Interval.toInterval(in.get(CoreAnnotations.TokenBeginAnnotation.class) - startTokenOffsetFinal,
-                    in.get(CoreAnnotations.TokenEndAnnotation.class) - startTokenOffsetFinal)
-    );
+            (List<CoreMap>) annotation.get(tokensAnnotationKey), res, new Function<CoreMap, Interval<Integer>>() {
+      public Interval<Integer> apply(CoreMap in) {
+        return Interval.toInterval(in.get(CoreAnnotations.TokenBeginAnnotation.class) - startTokenOffsetFinal,
+                in.get(CoreAnnotations.TokenEndAnnotation.class) - startTokenOffsetFinal);
+      }
+    });
     return merged;
   }
 

@@ -91,7 +91,7 @@ public class Alignment {
   private static String iwToString(IndexedWord iw) {
     if (iw == null || iw.equals(IndexedWord.NO_WORD))
       return "_";
-    return iw.toString(CoreLabel.OutputFormat.VALUE);
+    return iw.toString(CoreLabel.VALUE_FORMAT);
   }
 
   /**

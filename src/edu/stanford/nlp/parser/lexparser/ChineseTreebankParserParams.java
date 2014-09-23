@@ -1183,7 +1183,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
       return new MLEDependencyGrammarExtractor(op, wordIndex, tagIndex) {
         @Override
         public MLEDependencyGrammar formResult() {
-          wordIndex.addToIndex(Lexicon.UNKNOWN_WORD);
+          wordIndex.indexOf(Lexicon.UNKNOWN_WORD, true);
           ChineseSimWordAvgDepGrammar dg = new ChineseSimWordAvgDepGrammar(tlpParams, directional, useDistance, useCoarseDistance, op.trainOptions.basicCategoryTagsInDependencyGrammar, op, wordIndex, tagIndex);
           if (lex == null) {
             throw new RuntimeException("Attempt to create ChineseSimWordAvgDepGrammar before Lexicon!!!");

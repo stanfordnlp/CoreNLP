@@ -98,9 +98,12 @@ public class Execution {
     private int toReturn = -1;
 
     public LazyFileIterator(File path, final String filter) {
-      this(path, (file, name) -> {
-        String filePath = (file.getPath() + "/" + name);
-        return new File(filePath).isDirectory() || filePath.matches(filter);
+      this(path, new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String name) {
+          String path = (dir.getPath() + "/" + name);
+          return new File(path).isDirectory() || path.matches(filter);
+        }
       });
     }
 

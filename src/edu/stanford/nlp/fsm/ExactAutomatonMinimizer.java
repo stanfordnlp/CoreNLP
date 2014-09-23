@@ -35,7 +35,7 @@ public class ExactAutomatonMinimizer implements AutomatonMinimizer {
     return unminimizedFA;
   }
 
-  protected Collection<?> getSymbols() {
+  protected Collection<? extends Object> getSymbols() {
     return getUnminimizedFA().getInputs();
   }
 
