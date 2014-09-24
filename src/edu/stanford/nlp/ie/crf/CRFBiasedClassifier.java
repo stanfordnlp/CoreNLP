@@ -183,7 +183,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
         int k = crf.flags.kBest;
         crf.classifyAndWriteAnswersKBest(testFile, k, readerAndWriter);
       } else {
-        crf.classifyAndWriteAnswers(testFile, readerAndWriter);
+        crf.classifyAndWriteAnswers(testFile, readerAndWriter, true);
       }
     }
   } // end main

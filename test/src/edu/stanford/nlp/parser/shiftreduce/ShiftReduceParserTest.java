@@ -3,6 +3,7 @@ package edu.stanford.nlp.parser.shiftreduce;
 import junit.framework.TestCase;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import edu.stanford.nlp.ling.Sentence;
@@ -39,7 +40,7 @@ public class ShiftReduceParserTest extends TestCase {
   public void testUnaryTransitions() {
     for (String treeText : treeStrings) {
       Tree tree = convertTree(treeText);
-      List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, false);
+      List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, false, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
       State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       for (Transition transition : transitions) {
         state = transition.apply(state);
@@ -54,7 +55,7 @@ public class ShiftReduceParserTest extends TestCase {
   public void testCompoundUnaryTransitions() {
     for (String treeText : treeStrings) {
       Tree tree = convertTree(treeText);
-      List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, true);
+      List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, true, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
       State state = ShiftReduceParser.initialStateFromGoldTagTree(tree);
       for (Transition transition : transitions) {
         state = transition.apply(state);
@@ -74,7 +75,7 @@ public class ShiftReduceParserTest extends TestCase {
 
   public void testSeparators() {
     Tree tree = convertTree(commaTreeString);
-    List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, true);
+    List<Transition> transitions = CreateTransitionSequence.createTransitionSequence(tree, true, Collections.singleton("ROOT"), Collections.singleton("ROOT"));
     List<String> expectedTransitions = Arrays.asList(new String[] { "Shift", "Shift", "Shift", "Shift", "RightBinary(@ADJP)", "RightBinary(ADJP)", "Shift", "RightBinary(@NP)", "RightBinary(NP)", "CompoundUnary*([ROOT, FRAG])", "Finalize", "Idle" });
     assertEquals(expectedTransitions, CollectionUtils.transformAsList(transitions, new Function<Transition, String>() { public String apply(Transition t) { return t.toString(); } }));
 

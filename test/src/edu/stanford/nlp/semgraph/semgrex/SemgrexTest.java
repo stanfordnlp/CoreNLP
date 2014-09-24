@@ -13,7 +13,9 @@ import java.util.Set;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
+import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.semgraph.semgrex.*;
 
 /**
@@ -625,6 +627,26 @@ public class SemgrexTest extends TestCase {
     runTest("{idx:2}", graph, "muffins");
     runTest("{idx:3}", graph, "blueberry");
     runTest("{idx:4}", graph);
+  }
+
+  public void testLemma() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    for (IndexedWord word : graph.vertexSet()) {
+      word.setLemma(word.word());
+    }
+    runTest("{lemma:ate}", graph, "ate");
+
+    Tree tree = Tree.valueOf("(ROOT (S (NP (PRP I)) (VP (VBP love) (NP (DT the) (NN display))) (. .)))");
+    graph = SemanticGraphFactory.generateCCProcessedDependencies(tree);
+    for (IndexedWord word : graph.vertexSet()) {
+      word.setLemma(word.word());
+    }
+    // This set of three tests also provides some coverage for a
+    // bizarre error a user found where multiple copies of the same
+    // IndexedWord were created
+    runTest("{}=Obj <dobj {lemma:love}=Pred", graph, "display-NN");
+    runTest("{}=Obj <dobj {}=Pred", graph, "display-NN");
+    runTest("{lemma:love}=Pred >dobj {}=Obj ", graph, "love-VBP");
   }
 
   public void testNamedRelation() {
