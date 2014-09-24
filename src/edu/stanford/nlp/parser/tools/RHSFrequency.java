@@ -47,16 +47,19 @@ public class RHSFrequency {
     
     for(int i = 0; i < args.length; i++) {
       if(args[i].startsWith("-")) {
-        if(args[i].equals("-l")) {
-          Language lang = Language.valueOf(args[++i].trim());
-          tlpp = Languages.getLanguageParams(lang);
+        switch (args[i]) {
+          case "-l":
+            Language lang = Language.valueOf(args[++i].trim());
+            tlpp = Languages.getLanguageParams(lang);
 
-        } else if(args[i].equals("-e")) {
-          encoding = args[++i];
+            break;
+          case "-e":
+            encoding = args[++i];
 
-        } else {
-          System.out.println(usage.toString());
-          System.exit(-1);
+            break;
+          default:
+            System.out.println(usage.toString());
+            System.exit(-1);
         }
 
       } else {

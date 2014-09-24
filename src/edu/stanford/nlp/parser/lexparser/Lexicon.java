@@ -11,7 +11,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 
 
 /**

@@ -433,13 +433,12 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    * <code>indentLevel</code>.
    *
    * @param indentLevel how many levels to indent (0 for root node)
-   *
    */
   private void toPrettyString(int indentLevel, StringBuilder buf) {
     for (int i = 0; i < indentLevel; i++) {
       buf.append("  ");
     }
-    buf.append(shortName + " (" + longName + ")").append(": ").append(targetPatterns);
+    buf.append(shortName).append(" (").append(longName).append("): ").append(targetPatterns);
     for (GrammaticalRelation child : children) {
       buf.append('\n');
       child.toPrettyString(indentLevel + 1, buf);
@@ -528,17 +527,18 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     case English: {
       GrammaticalRelation rel = EnglishGrammaticalRelations.valueOf(toString());
       if (rel == null) {
-        if (shortName.equals("conj")) {
-          return EnglishGrammaticalRelations.getConj(specific);
-        } else if (shortName.equals("prep")) {
-          return EnglishGrammaticalRelations.getPrep(specific);
-        } else if (shortName.equals("prepc")) {
-          return EnglishGrammaticalRelations.getPrepC(specific);
-        } else {
-          // TODO: we need to figure out what to do with relations
-          // which were serialized and then deprecated.  Perhaps there
-          // is a good way to make them singletons
-          return this;
+        switch (shortName) {
+          case "conj":
+            return EnglishGrammaticalRelations.getConj(specific);
+          case "prep":
+            return EnglishGrammaticalRelations.getPrep(specific);
+          case "prepc":
+            return EnglishGrammaticalRelations.getPrepC(specific);
+          default:
+            // TODO: we need to figure out what to do with relations
+            // which were serialized and then deprecated.  Perhaps there
+            // is a good way to make them singletons
+            return this;
           //throw new RuntimeException("Unknown English relation " + this);
         }
       } else {

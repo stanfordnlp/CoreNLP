@@ -26,9 +26,7 @@
 
 package edu.stanford.nlp.ie.crf;
 
-import edu.stanford.nlp.ie.*;
 import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.util.ConvertByteArray;
 import edu.stanford.nlp.optimization.*;
 import edu.stanford.nlp.sequences.*;
 import edu.stanford.nlp.util.*;
@@ -36,10 +34,9 @@ import edu.stanford.nlp.util.*;
 import java.io.*;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
- * Subclass of CRFClassifier that performs dropout feature-noisying training 
+ * Subclass of CRFClassifier that performs dropout feature-noisying training
  *
  * @author Mengqiu Wang
  */

@@ -1,7 +1,6 @@
 package edu.stanford.nlp.semgraph.semgrex.ssurgeon;
 
 import java.io.StringWriter;
-import java.util.ArrayList;
 
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
@@ -32,12 +31,12 @@ public class RemoveEdge extends SsurgeonEdit {
   public String toEditString() {
     StringWriter buf = new StringWriter();
     buf.write(LABEL); buf.write("\t");
-    buf.write(Ssurgeon.RELN_ARG);buf.write(" ");    
+    buf.write(Ssurgeon.RELN_ARG);buf.write(" ");
     buf.write(relation.toString()); buf.write("\t");
     buf.write(Ssurgeon.GOV_NODENAME_ARG);buf.write(" ");
     buf.write(govName); buf.write("\t");
     buf.write(Ssurgeon.DEP_NODENAME_ARG);buf.write(" ");
-    buf.write(depName); 
+    buf.write(depName);
     return buf.toString();
   }
 
@@ -51,7 +50,7 @@ public class RemoveEdge extends SsurgeonEdit {
     IndexedWord depNode =getNamedNode(depName, sm);
 
     if (govNode != null && depNode != null) {
-      SemanticGraphEdge edge = sg.getEdge(govNode, depNode, relation);    
+      SemanticGraphEdge edge = sg.getEdge(govNode, depNode, relation);
       if (edge != null) {
         @SuppressWarnings("unused")
         boolean successFlag = sg.removeEdge(edge);
@@ -72,7 +71,7 @@ public class RemoveEdge extends SsurgeonEdit {
       }
     }
   }
-    
+
 
     public String getDepName() {
       return depName;

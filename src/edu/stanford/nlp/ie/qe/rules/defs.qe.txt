@@ -1,0 +1,8 @@
+Unit = { type: "CLASS", value: "edu.stanford.nlp.ie.qe.Unit" }
+UnitPrefix = { type: "CLASS", value: "edu.stanford.nlp.ie.qe.UnitPrefix" }
+QuantifiableEntity = { type: "CLASS", value: "edu.stanford.nlp.ie.qe.SimpleQuantifiableEntity" }
+
+tokens = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$TokensAnnotation" }
+numtokens = { type: "CLASS", value: "edu.stanford.nlp.ling.CoreAnnotations$NumerizedTokensAnnotation" }
+
+$NUM = ( [ { numcomptype:NUMBER } ] );

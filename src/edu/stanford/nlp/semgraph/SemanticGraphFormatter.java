@@ -1,6 +1,6 @@
 package edu.stanford.nlp.semgraph;
 
-//import edu.stanford.nlp.ling.IndexedFeatureLabel;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
@@ -212,7 +212,7 @@ public class SemanticGraphFormatter {
       }
     }
     if (showAnnos) {
-      s += node.toString(IndexedWord.COMPLETE_FORMAT);
+      s += node.toString(CoreLabel.OutputFormat.MAP);
     }
     return s;
   }

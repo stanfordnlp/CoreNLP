@@ -1,7 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.util.CoreMap;
 import junit.framework.TestCase;
 
@@ -16,7 +15,7 @@ public class ChunkAnnotationUtilsTest extends TestCase {
   public void testMergeChunks() throws Exception {
     // Create 4 sentences
     String text = "I have created sentence1.  And then sentence2.  Now sentence3. Finally sentence4.";
-    Annotator tokenizer = new PTBTokenizerAnnotator();
+    Annotator tokenizer = new TokenizerAnnotator("en");
     Annotator ssplit = new WordsToSentencesAnnotator();
     Annotation annotation = new Annotation(text);
     tokenizer.annotate(annotation);

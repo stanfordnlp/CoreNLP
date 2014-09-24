@@ -10,6 +10,7 @@ import edu.stanford.nlp.optimization.LineSearcher;
 import java.io.*;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -249,9 +250,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
 
     final CrossValidator<L, F> crossValidator = new CrossValidator<L, F>(dataset,numFolds);
     final Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> score =
-      new Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> ()
-      {
-        public Double apply (Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState> fold) {
+        fold -> {
           GeneralDataset<L, F> trainSet = fold.first();
           GeneralDataset<L, F> devSet = fold.second();
           alphaFile = (File)fold.third().state;
@@ -259,20 +258,16 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
           SVMLightClassifier<L, F> classifier = trainClassifierBasic(trainSet);
           fold.third().state = alphaFile;
           return scorer.score(classifier,devSet);
-        }
-      };
+        };
 
     Function<Double,Double> negativeScorer =
-      new Function<Double,Double> ()
-      {
-        public Double apply(Double cToTry) {
+        cToTry -> {
           C = cToTry;
           if (verbose) { System.out.print("C = "+cToTry+" "); }
           Double averageScore = crossValidator.computeAverage(score);
           if (verbose) { System.out.println(" -> average Score: "+averageScore); }
           return -averageScore;
-        }
-      };
+        };
 
     C = minimizer.minimize(negativeScorer);
 
@@ -298,15 +293,12 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
     useSigmoid = false;
 
     Function<Double,Double> negativeScorer =
-      new Function<Double,Double> ()
-      {
-        public Double apply(Double cToTry) {
+        cToTry -> {
           C = cToTry;
           SVMLightClassifier<L, F> classifier = trainClassifierBasic(trainSet);
           double score = scorer.score(classifier,devSet);
           return -score;
-        }
-      };
+        };
 
     C = minimizer.minimize(negativeScorer);
 

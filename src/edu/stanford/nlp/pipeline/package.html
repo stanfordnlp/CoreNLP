@@ -47,7 +47,7 @@ of the package:
   public void testPipeline(String text) throws Exception {
     // create pipeline
     AnnotationPipeline pipeline = new AnnotationPipeline();
-    pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+    pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
     pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
     pipeline.addAnnotator(new POSTaggerAnnotator(false));
     pipeline.addAnnotator(new MorphaAnnotator(false));
@@ -84,7 +84,7 @@ of the package:
 There already exist Annotators for many common tasks, all of which include
 default model locations, so they can just be used off the shelf.  They are:
 <ul>
-  <li>PTBTokenizerAnnotator - tokenizes the text following Penn Treebank conventions </li>
+  <li>TokenizerAnnotator - tokenizes the text based on language or Tokenizer class specifications </li>
   <li>WordsToSentencesAnnotator - splits a sequence of words into a sequence of sentences</li>
   <li>POSTaggerAnnotator - annotates the text with part-of-speech tags </li>
   <li>MorphaAnnotator - morphological normalizer (generates lemmas)</li>
@@ -559,7 +559,7 @@ To construct a pipeline object from a given set of properties, use StanfordCoreN
 This method creates the pipeline using the annotators given in the "annotators" property (see above for the complete list of properties).
 Currently, we support the following options for the "annotators" property:
 <ul>
-<li> tokenize - Tokenizes the text using PTBTokenizingAnnotator. This annotator is required by all following annotators!</li>
+<li> tokenize - Tokenizes the text using TokenizingAnnotator. This annotator is required by all following annotators!</li>
 <li> ssplit - Splits the sequence of tokens into sentences using WordToSentenceAnnotator. This annotator is required if the input text contains multiple sentences, e.g., it is an entire document.</li>
 <li> pos - Runs the POS tagger using POSTaggerAnnotator</li>
 <li> lemma - Generates the lemmas for all tokens using MorphaAnnotator</li>

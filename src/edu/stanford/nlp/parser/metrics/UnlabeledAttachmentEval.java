@@ -1,7 +1,6 @@
 package edu.stanford.nlp.parser.metrics;
 
 import java.io.PrintWriter;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,36 +22,36 @@ import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
-/** 
+/**
  *  Dependency unlabeled attachment score.
  *  <p>
  *  If Collinization has not been performed prior to evaluation, then
- *  it is customary (for reporting results) to pass in a filter that rejects 
+ *  it is customary (for reporting results) to pass in a filter that rejects
  *  dependencies with punctuation dependents.
- *  
+ *
  *  @author Spence Green
- *  
+ *
  */
 public class UnlabeledAttachmentEval extends AbstractEval {
 
   private final HeadFinder headFinder;
-  
+
   private final Filter<String> punctRejectWordFilter;
   private final Filter<Dependency<Label, Label, Object>> punctRejectFilter;
-  
-  /** 
+
+  /**
    * @param headFinder If a headFinder is provided, then head percolation will be done
    * for trees. Otherwise, it must be called separately.
    */
   public UnlabeledAttachmentEval(String str, boolean runningAverages, HeadFinder headFinder) {
     this(str, runningAverages, headFinder, Filters.<String>acceptFilter());
   }
-  
+
   public UnlabeledAttachmentEval(String str, boolean runningAverages, HeadFinder headFinder, Filter<String> punctRejectFilter) {
     super(str, runningAverages);
     this.headFinder = headFinder;
     this.punctRejectWordFilter = punctRejectFilter;
- 
+
     this.punctRejectFilter = new Filter<Dependency<Label,Label,Object>>() {
       private static final long serialVersionUID = 649358302237611081L;
       // Semantics of this method are weird. If accept() returns true, then the dependent is
@@ -79,7 +78,7 @@ public class UnlabeledAttachmentEval extends AbstractEval {
 
     super.evaluate(guess, gold, pw);
   }
-  
+
   /**
    * Build the set of dependencies for evaluation.  This set excludes
    * all dependencies for which the argument is a punctuation tag.
@@ -93,11 +92,11 @@ public class UnlabeledAttachmentEval extends AbstractEval {
     if (headFinder != null) {
       tree.percolateHeads(headFinder);
     }
-    
+
     Set<Dependency<Label, Label, Object>> deps = tree.dependencies(punctRejectFilter);
     return deps;
   }
-  
+
   private static final int minArgs = 2;
   private static final StringBuilder usage = new StringBuilder();
   static {
@@ -213,7 +212,7 @@ public class UnlabeledAttachmentEval extends AbstractEval {
         skippedGuessTrees++;
         continue;
       }
-      
+
       final Tree evalGuess = tc.transformTree(guessTree);
       evalGuess.indexLeaves(true);
       final Tree evalGold = tc.transformTree(goldTree);
@@ -221,7 +220,7 @@ public class UnlabeledAttachmentEval extends AbstractEval {
 
       metric.evaluate(evalGuess, evalGold, ((VERBOSE) ? pwOut : null));
     }
-    
+
     if(guessItr.hasNext() || goldItr.hasNext()) {
       System.err.printf("Guess/gold files do not have equal lengths (guess: %d gold: %d)%n.", guessLineId, goldLineId);
     }
@@ -229,7 +228,7 @@ public class UnlabeledAttachmentEval extends AbstractEval {
     pwOut.println("================================================================================");
     if(skippedGuessTrees != 0) pwOut.printf("%s %d guess trees\n", "Unable to evaluate", skippedGuessTrees);
     metric.display(true, pwOut);
-    
+
     pwOut.println();
     pwOut.close();
   }
