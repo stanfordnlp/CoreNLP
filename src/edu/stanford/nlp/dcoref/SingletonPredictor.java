@@ -81,10 +81,12 @@ public class SingletonPredictor {
           // Ignore verbal mentions
           if(mention.headWord.tag().startsWith("V")) continue;
 
-          IndexedWord head = mention.dependency.getNodeByIndexSafe(mention.headWord.index());
+          IndexedWord head = mention.dependency.
+              getNodeByIndexSafe(mention.headWord.index());
           if(head == null) continue;          
           ArrayList<String> feats = mention.getSingletonFeatures(dict);
-          dataset.add(new BasicDatum<String, String>(feats, "1"));
+          dataset.add(new BasicDatum<String, String>(
+              feats, "1"));
         }       
       }
 
@@ -96,7 +98,7 @@ public class SingletonPredictor {
       for(Mention predicted_men : document.allPredictedMentions.values()){
         SemanticGraph dep = predicted_men.dependency;
         IndexedWord head = dep.getNodeByIndexSafe(predicted_men.headWord.index());
-        if(head == null) continue;
+        if(head == null || !dep.vertexSet().contains(head)) continue;
 
         // Ignore verbal mentions
         if(predicted_men.headWord.tag().startsWith("V")) continue;

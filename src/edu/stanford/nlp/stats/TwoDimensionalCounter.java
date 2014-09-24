@@ -431,10 +431,6 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
     total = 0.0;
   }
 
-  public static <K1, K2> TwoDimensionalCounter<K1, K2> identityHashMapCounter() {
-    return new TwoDimensionalCounter<K1, K2>(MapFactory.<K1, ClassicCounter<K2>>identityHashMapFactory(), MapFactory.<K2, MutableDouble>identityHashMapFactory());
-  }
-
   public void recomputeTotal(){
     total = 0;
     for(Entry<K1, ClassicCounter<K2>> c: map.entrySet()){

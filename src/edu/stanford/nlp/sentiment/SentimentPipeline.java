@@ -15,6 +15,7 @@ import java.util.Properties;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
@@ -25,6 +26,7 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 
@@ -36,11 +38,8 @@ import edu.stanford.nlp.util.Generics;
  * <code>-parserModel</code> Which parser model to use, defaults to englishPCFG.ser.gz <br>
  * <code>-sentimentModel</code> Which sentiment model to use, defaults to sentiment.ser.gz <br>
  * <code>-file</code> Which file to process. <br>
- * <code>-fileList</code> A comma separated list of files to process. <br>
  * <code>-stdin</code> Read one line at a time from stdin. <br>
- * <code>-output</code> pennTrees: Output trees with scores at each binarized node.  vectors: Number tree nodes and print out the vectors.  probabilities: Output the scores for different labels for each node. Defaults to printing just the root. <br>
- * <code>-filterUnknown</code> remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels <br>
- * <code>-help</code> Print out help <br>
+ * <code>-output</code> pennTrees: Output trees with scores at each binarized node.  vectors: Number tree nodes and print out the vectors.  Defaults to printing just the root. <br>
  *
  * @author John Bauer
  */
@@ -220,7 +219,7 @@ public class SentimentPipeline {
           trees.add(tree);
         }
       }
-
+      
       List<Annotation> annotations = Generics.newArrayList();
       for (Tree tree : trees) {
         CoreMap sentence = new Annotation(Sentence.listToString(tree.yield()));
@@ -391,7 +390,7 @@ public class SentimentPipeline {
           System.out.println("");
         }
       }
-
+      
     }
   }
 }

@@ -1592,15 +1592,16 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     }
 
     if (testFile != null) {
-      cmm.classifyAndWriteAnswers(testFile, cmm.makeReaderAndWriter(), true);
+      cmm.classifyAndWriteAnswers(testFile, cmm.makeReaderAndWriter());
     } else if (cmm.flags.testFiles != null) {
-      cmm.classifyAndWriteAnswers(cmm.flags.baseTestDir, cmm.flags.testFiles, cmm.makeReaderAndWriter(), true);
+      cmm.classifyAndWriteAnswers(cmm.flags.baseTestDir, cmm.flags.testFiles,
+                                  cmm.makeReaderAndWriter());
     }
 
     if (textFile != null) {
       DocumentReaderAndWriter<CoreLabel> readerAndWriter =
         new PlainTextDocumentReaderAndWriter<CoreLabel>();
-      cmm.classifyAndWriteAnswers(textFile, readerAndWriter, false);
+      cmm.classifyAndWriteAnswers(textFile, readerAndWriter);
     }
   } // end main
 

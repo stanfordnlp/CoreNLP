@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import edu.stanford.nlp.ie.machinereading.GenericDataSetReader;
+import edu.stanford.nlp.ie.machinereading.MachineReadingProperties;
 import edu.stanford.nlp.ie.machinereading.structure.AnnotationUtils;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
@@ -22,11 +23,15 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
- *
+ * 
  * @author Mihai, David McClosky, and agusev
  * @author Sonal Gupta (sonalg@stanford.edu)
  *
@@ -41,7 +46,6 @@ public class RothCONLL04Reader extends GenericDataSetReader {
     logger.setLevel(Level.SEVERE);
   }
 
-  @Override
   public Annotation read(String path) throws IOException {
     Annotation doc = new Annotation("");
 
@@ -72,7 +76,7 @@ public class RothCONLL04Reader extends GenericDataSetReader {
       return "OTHER";
     throw new RuntimeException("Cannot normalize ner tag " + ner);
   }
-
+  
   private static Annotation readSentence(Annotation doc, String docId, Iterator<String> lineIterator) {
     Annotation sentence = new Annotation("");
     sentence.set(CoreAnnotations.DocIDAnnotation.class, docId);
@@ -153,7 +157,7 @@ public class RothCONLL04Reader extends GenericDataSetReader {
           indexToEntityMention.put(index, entity);
         }
 
-        // int i =0;
+        int i =0;
         for (String word : words) {
           CoreLabel label = new CoreLabel();
           label.setWord(word);
@@ -163,7 +167,7 @@ public class RothCONLL04Reader extends GenericDataSetReader {
           // we don't set TokenBeginAnnotation or TokenEndAnnotation since we're
           // not keeping track of character offsets
           tokens.add(label);
-          // i++;
+          i++;
         }
 
         textContent.append(text);

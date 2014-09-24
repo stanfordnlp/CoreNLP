@@ -3,6 +3,7 @@ package edu.stanford.nlp.graph;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.util.CollectionUtils;
@@ -11,7 +12,7 @@ import edu.stanford.nlp.util.Generics;
 /**
  * Finds connected components in the graph, currently uses inefficient list for
  * variable 'verticesLeft'. It might give a problem for big graphs
- *
+ * 
  * @author sonalg 08/08/11
  */
 public class ConnectedComponents<V, E> {

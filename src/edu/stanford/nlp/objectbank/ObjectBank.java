@@ -1,7 +1,7 @@
 package edu.stanford.nlp.objectbank;
 
 import edu.stanford.nlp.util.AbstractIterator;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -261,7 +261,7 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
 
   /**
    * If you are keeping the contents in memory,
-   * this will clear the memory, and they will be
+   * this will clear hte memory, and they will be
    * recomputed the next time iterator() is
    * called.
    */

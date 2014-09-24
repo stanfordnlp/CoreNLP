@@ -3,7 +3,7 @@ package edu.stanford.nlp.sequences;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.StringUtils;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.objectbank.LineIterator;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
 

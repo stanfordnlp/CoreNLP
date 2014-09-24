@@ -2,7 +2,7 @@ package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

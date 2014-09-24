@@ -1,7 +1,5 @@
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
-import java.util.Map;
-
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 
@@ -18,19 +16,8 @@ class HoldTreeNode extends TsurgeonPattern {
   }
 
   @Override
-  public TsurgeonMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
-    return new Matcher(newNodeNames, coindexer);
-  }
-
-  private class Matcher extends TsurgeonMatcher {
-    public Matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
-      super(HoldTreeNode.this, newNodeNames, coindexer);
-    }
-
-    @Override
-    public Tree evaluate(Tree tree, TregexMatcher tregex) {
-      return subTree.copy(this).tree;
-    }
+  public Tree evaluate(Tree t, TregexMatcher m) {
+    return subTree.copy(this).tree;
   }
 
   @Override

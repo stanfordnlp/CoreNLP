@@ -75,7 +75,7 @@ public abstract class MapFactory<K,V> implements Serializable {
     return WEAK_HASH_MAP_FACTORY;
   }
 
-  /** Return a MapFactory that returns a TreeMap.
+  /** Return a MapFactory that returns an TreeMap.
    *  <i>Implementation note: This method uses the same trick as the methods
    *  like emptyMap() introduced in the Collections class in JDK1.5 where
    *  callers can call this method with apparent type safety because this
@@ -86,13 +86,6 @@ public abstract class MapFactory<K,V> implements Serializable {
   @SuppressWarnings("unchecked")
   public static <K,V> MapFactory<K,V> treeMapFactory() {
     return TREE_MAP_FACTORY;
-  }
-
-  /** 
-   * Return a MapFactory that returns a TreeMap with the given Comparator.
-   */
-  public static <K,V> MapFactory<K,V> treeMapFactory(Comparator<? super K> comparator) {
-    return new TreeMapFactory<K,V>(comparator);
   }
 
   /** Return a MapFactory that returns an LinkedHashMap.
@@ -138,11 +131,6 @@ public abstract class MapFactory<K,V> implements Serializable {
     }
 
     @Override
-    public Set<K> newSet() {
-      return Generics.newHashSet();
-    }
-
-    @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map) {
       map = Generics.newHashMap();
       return map;
@@ -169,11 +157,6 @@ public abstract class MapFactory<K,V> implements Serializable {
     @Override
     public Map<K,V> newMap(int initCapacity) {
       return new IdentityHashMap<K,V>(initCapacity);
-    }
-
-    @Override
-    public Set<K> newSet() {
-      return Collections.newSetFromMap(new IdentityHashMap<K, Boolean>());
     }
 
     @Override
@@ -205,11 +188,6 @@ public abstract class MapFactory<K,V> implements Serializable {
       return new WeakHashMap<K,V>(initCapacity);
     }
 
-    @Override
-    public Set<K> newSet() {
-      return Collections.newSetFromMap(new WeakHashMap<K, Boolean>());
-    }
-
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map) {
@@ -230,19 +208,9 @@ public abstract class MapFactory<K,V> implements Serializable {
 
     private static final long serialVersionUID = -9138736068025818670L;
 
-    private final Comparator<? super K> comparator;
-
-    public TreeMapFactory() {
-      this.comparator = null;
-    }
-
-    public TreeMapFactory(Comparator<? super K> comparator) {
-      this.comparator = comparator;
-    }
-
     @Override
     public Map<K,V> newMap() {
-      return comparator == null ? new TreeMap<K,V>() : new TreeMap<K,V>(comparator);
+      return new TreeMap<K,V>();
     }
 
     @Override
@@ -250,31 +218,21 @@ public abstract class MapFactory<K,V> implements Serializable {
       return newMap();
     }
 
-    @Override
-    public Set<K> newSet() {
-      return comparator == null ? new TreeSet<K>() : new TreeSet<K>(comparator);
-    }
-
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map) {
-      if (comparator == null) {
-        throw new UnsupportedOperationException();
-      }
       map = new TreeMap<K1,V1>();
       return map;
     }
 
     @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map, int initCapacity) {
-      if (comparator == null) {
-        throw new UnsupportedOperationException();
-      }
       map = new TreeMap<K1,V1>();
       return map;
     }
 
   } // end class TreeMapFactory
+
 
   private static class LinkedHashMapFactory<K,V> extends MapFactory<K,V> {
 
@@ -288,11 +246,6 @@ public abstract class MapFactory<K,V> implements Serializable {
     @Override
     public Map<K,V> newMap(int initCapacity) {
       return newMap();
-    }
-
-    @Override
-    public Set<K> newSet() {
-      return new LinkedHashSet<K>();
     }
 
 
@@ -326,11 +279,6 @@ public abstract class MapFactory<K,V> implements Serializable {
     }
 
     @Override
-    public Set<K> newSet() {
-      return new ArraySet<K>();
-    }
-
-    @Override
     public <K1, V1> Map<K1, V1> setMap(Map<K1, V1> map) {
       return new ArrayMap<K1,V1>();
     }
@@ -358,11 +306,6 @@ public abstract class MapFactory<K,V> implements Serializable {
    * @return A new non-parameterized map of a particular sort with an initial capacity
    */
   public abstract Map<K,V> newMap(int initCapacity);
-
-  /**
-   * A set with the same <code>K</code> parameterization of the Maps.
-   */
-  public abstract Set<K> newSet();
 
   /**
    * A method to get a parameterized (genericized) map out.

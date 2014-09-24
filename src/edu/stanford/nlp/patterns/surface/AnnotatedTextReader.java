@@ -33,7 +33,7 @@ public class AnnotatedTextReader {
       BufferedReader reader,
       Set<String> categoriesAllowed,
       Map<String, Class<? extends TypesafeMap.Key<String>>> setClassForTheseLabels,
-      boolean setGoldClass, String sentIDprefix)
+      boolean setGoldClass, boolean splitOnPunct, boolean lowercase, String sentIDprefix)
       throws IOException {
 
     Pattern startingLabelToken = Pattern.compile("<("

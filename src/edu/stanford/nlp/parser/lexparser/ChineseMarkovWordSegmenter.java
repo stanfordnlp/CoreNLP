@@ -10,6 +10,7 @@ import edu.stanford.nlp.stats.GeneralizedCounter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.DeltaIndex;
+import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.process.WordSegmenter;
@@ -31,7 +32,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
   private final Index<String> wordIndex;
   private final Index<String> tagIndex;
 
-  public ChineseMarkovWordSegmenter(ChineseCharacterBasedLexicon lex,
+  public ChineseMarkovWordSegmenter(ChineseCharacterBasedLexicon lex, 
                                     Index<String> wordIndex,
                                     Index<String> tagIndex) {
     this.lex = lex;
@@ -74,7 +75,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
   @Override
   public void train(List<TaggedWord> sentence) {
     lex.train(sentence, 1.0);
-
+    
     String last = null;
     for (TaggedWord tagLabel : sentence) {
       String tag = tagLabel.tag();
@@ -239,7 +240,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
         int end = start + diff;
         for (int split = start + 1; split < end && split - start <= 10; split++) {
           for (String tag : POSes) {
-            int tagNum = tagIndex.addToIndex(tag);
+            int tagNum = tagIndex.indexOf(tag, true);
             if (splitBacktrace[start][split][tagNum] != split) {
               continue;
             }
@@ -248,7 +249,7 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
               continue; // this happens with "*" POS
             }
             for (String rTag : POSes) {
-              int rTagNum = tagIndex.addToIndex(rTag);
+              int rTagNum = tagIndex.indexOf(rTag, true);
               double newScore = scores[start][split][tagNum] + scores[split][end][rTagNum] + Math.log(rTagDist.probabilityOf(rTag));
               if (newScore > scores[start][end][tagNum]) {
                 scores[start][end][tagNum] = newScore;

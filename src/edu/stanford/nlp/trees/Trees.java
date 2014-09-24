@@ -1,11 +1,12 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.io.IOUtils;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.ling.CoreAnnotations;
 
 import java.util.*;
 import java.io.*;
@@ -774,18 +775,4 @@ public class Trees {
     }
   }
 
-
-  /**
-   * Set the sentence index of all the leaves in the tree
-   * (only works on CoreLabel)
-   */
-  public static void setSentIndex(Tree tree, int sentIndex) {
-    List<Label> leaves = tree.yield();
-    for (Label leaf : leaves) {
-      if (!(leaf instanceof CoreLabel)) {
-        throw new IllegalArgumentException("Only works on CoreLabel");
-      }
-      ((CoreLabel) leaf).setSentIndex(sentIndex);
-    }
-  }
 }

@@ -51,7 +51,7 @@ public class TsurgeonTest extends TestCase {
     TregexMatcher matcher = tregex.matcher(tree);
     assertTrue(matcher.find());
     assertEquals("(B 1 2)", matcher.getNode("foo").toString());
-    Tree updated = tsurgeon.matcher().evaluate(tree, matcher);
+    Tree updated = tsurgeon.evaluate(tree, matcher);
     assertEquals("(A (FOO (BAR 1 2)))", updated.toString());
     // TODO: do we want the tsurgeon to implicitly update the matched node?
     // System.err.println(matcher.getNode("foo"));
@@ -69,7 +69,7 @@ public class TsurgeonTest extends TestCase {
     TregexMatcher matcher = tregex.matcher(tree);
     assertTrue(matcher.find());
     assertEquals("(B 1 2)", matcher.getNode("foo").toString());
-    Tree updated = tsurgeon.matcher().evaluate(tree, matcher);
+    Tree updated = tsurgeon.evaluate(tree, matcher);
     assertEquals("(A (B (BAR 1 2)))", updated.toString());
     assertEquals("(B (BAR 1 2))", matcher.getNode("foo").toString());
     assertFalse(matcher.find());
@@ -87,7 +87,7 @@ public class TsurgeonTest extends TestCase {
     TregexMatcher matcher = tregex.matcher(tree);
     assertTrue(matcher.find());
     assertEquals("(B 1 2)", matcher.getNode("foo").toString());
-    Tree updated = tsurgeon.matcher().evaluate(tree, matcher);
+    Tree updated = tsurgeon.evaluate(tree, matcher);
     assertEquals("(A (FOO (B 1 2)))", updated.toString());
     assertEquals("(B 1 2)", matcher.getNode("foo").toString());
     assertFalse(matcher.find());
@@ -552,20 +552,6 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, "(A (B foo))", "(A (BAR foo))");
     runTest(tregex, tsurgeon, "(A (C foo))", "(A (BAZ foo))");
     runTest(tregex, tsurgeon, "(A (B foo) (C foo))", "(A (BAR foo) (BAZ foo))");
-  }
-
-  public void testExcise() {
-    // TODO: needs more meat to this test
-    TregexPattern tregex = TregexPattern.compile("__=repeat <: (~repeat < __)");
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("excise repeat repeat");
-    runTest(tregex, tsurgeon, "(A (B (B foo)))", "(A (B foo))");
-    // Test that if a deleted root is excised down to a level that has
-    // just one child, that one child gets returned as the new tree
-    runTest(tregex, tsurgeon, "(B (B foo))", "(B foo)");
-
-    tregex = TregexPattern.compile("A=root");
-    tsurgeon = Tsurgeon.parseOperation("excise root root");
-    runTest(tregex, tsurgeon, "(A (B bar) (C foo))", null);
   }
 
   public static void runTest(TregexPattern tregex, TsurgeonPattern tsurgeon,

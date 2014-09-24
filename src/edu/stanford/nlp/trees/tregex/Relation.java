@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Trees;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IdentityHashSet;
 import edu.stanford.nlp.util.Interner;
@@ -107,21 +107,16 @@ abstract class Relation implements Serializable {
 
     // finally try relations with headFinders
     Relation r;
-    switch (s) {
-      case ">>#":
-        r = new Heads(headFinder);
-        break;
-      case "<<#":
-        r = new HeadedBy(headFinder);
-        break;
-      case ">#":
-        r = new ImmediatelyHeads(headFinder);
-        break;
-      case "<#":
-        r = new ImmediatelyHeadedBy(headFinder);
-        break;
-      default:
-        throw new ParseException("Unrecognized simple relation " + s);
+    if (s.equals(">>#")) {
+      r = new Heads(headFinder);
+    } else if (s.equals("<<#")) {
+      r = new HeadedBy(headFinder);
+    } else if (s.equals(">#")) {
+      r = new ImmediatelyHeads(headFinder);
+    } else if (s.equals("<#")) {
+      r = new ImmediatelyHeadedBy(headFinder);
+    } else {
+      throw new ParseException("Unrecognized simple relation " + s);
     }
 
     return Interner.globalIntern(r);
@@ -148,28 +143,21 @@ abstract class Relation implements Serializable {
       return getRelation(s, basicCatFunction, headFinder);
     }
     Relation r;
-    switch (s) {
-      case "<":
-        r = new HasIthChild(Integer.parseInt(arg));
-        break;
-      case ">":
-        r = new IthChildOf(Integer.parseInt(arg));
-        break;
-      case "<+":
-        r = new UnbrokenCategoryDominates(arg, basicCatFunction);
-        break;
-      case ">+":
-        r = new UnbrokenCategoryIsDominatedBy(arg, basicCatFunction);
-        break;
-      case ".+":
-        r = new UnbrokenCategoryPrecedes(arg, basicCatFunction);
-        break;
-      case ",+":
-        r = new UnbrokenCategoryFollows(arg, basicCatFunction);
-        break;
-      default:
-        throw new ParseException("Unrecognized compound relation " + s + ' '
-            + arg);
+    if (s.equals("<")) {
+      r = new HasIthChild(Integer.parseInt(arg));
+    } else if (s.equals(">")) {
+      r = new IthChildOf(Integer.parseInt(arg));
+    } else if (s.equals("<+")) {
+      r = new UnbrokenCategoryDominates(arg, basicCatFunction);
+    } else if (s.equals(">+")) {
+      r = new UnbrokenCategoryIsDominatedBy(arg, basicCatFunction);
+    } else if (s.equals(".+")) {
+      r = new UnbrokenCategoryPrecedes(arg, basicCatFunction);
+    } else if (s.equals(",+")) {
+      r = new UnbrokenCategoryFollows(arg, basicCatFunction);
+    } else {
+      throw new ParseException("Unrecognized compound relation " + s + ' '
+          + arg);
     }
     return Interner.globalIntern(r);
   }

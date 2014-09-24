@@ -148,24 +148,4 @@ public class StringUtilsTest extends TestCase {
     }
   }
 
-  public void testGetCharacterNgrams() {
-    testCharacterNgram("abc", 0, 0);
-    testCharacterNgram("abc", 1, 1, "a", "b", "c");
-    testCharacterNgram("abc", 2, 2, "ab", "bc");
-    testCharacterNgram("abc", 1, 2, "a", "b", "c", "ab", "bc");
-    testCharacterNgram("abc", 1, 3, "a", "b", "c", "ab", "bc", "abc");
-    testCharacterNgram("abc", 1, 4, "a", "b", "c", "ab", "bc", "abc");
-  }
-
-  private void testCharacterNgram(String string, int min, int max, String... expected) {
-    System.out.println(makeSet(expected));
-    System.out.println(StringUtils.getCharacterNgrams(string, min, max));
-    assertEquals(makeSet(expected),
-                 new HashSet<String>(StringUtils.getCharacterNgrams(string, min, max)));
-  }
-
-  private <T> Set<T> makeSet(T... elems) {
-    return new HashSet<T>(Arrays.asList(elems));
-  }
-
 }

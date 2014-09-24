@@ -14,7 +14,6 @@ import java.lang.reflect.Method;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -228,7 +227,11 @@ public class StringUtils {
   }
 
   public static String joinWords(List<? extends HasWord> l, String glue, int start, int end) {
-    return join(l, glue, in -> in.word(), start, end);
+    return join(l, glue, new Function<HasWord, String>() {
+      public String apply(HasWord in) {
+        return in.word();
+      }
+    }, start, end);
   }
 
   public static final Function<Object,String> DEFAULT_TOSTRING = new Function<Object, String>() {
@@ -2030,24 +2033,6 @@ public class StringUtils {
    */
   public static Collection<String> getNgramsString(String s, int minSize, int maxSize){
     return getNgrams(Arrays.asList(s.split("\\s+")), minSize, maxSize);
-  }
-
-  /**
-   * Build a list of character-based ngrams from the given string.
-   */
-  public static Collection<String> getCharacterNgrams(String s, int minSize, int maxSize) {
-    Collection<String> ngrams = new ArrayList<String>();
-    int len = s.length();
-
-    for (int i = 0; i < len; i++) {
-      for (int ngramSize = minSize;
-           ngramSize > 0 && ngramSize <= maxSize && i + ngramSize <= len;
-           ngramSize++) {
-        ngrams.add(s.substring(i, i + ngramSize));
-      }
-    }
-
-    return ngrams;
   }
 
   private static Pattern diacriticalMarksPattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}");

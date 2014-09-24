@@ -2,7 +2,7 @@ package edu.stanford.nlp.process;
 
 import java.io.Serializable;
 
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 public class AmericanizeFunction implements Function<String, String>, Serializable {
   public String apply(String input) {

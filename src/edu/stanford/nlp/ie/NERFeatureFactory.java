@@ -111,7 +111,7 @@ import edu.stanford.nlp.util.Timing;
  * If provided gazettes are loaded from these files.  Each line should be an entity class name, followed by whitespace followed by an entity (which might be a phrase of several tokens with a single space between words).
  * Giving this property turns on useGazettes, so you normally don't need to specify it (but can use it to turn off gazettes specified in a properties file).</td></tr>
  * <tr><td> sloppyGazette</td><td>boolean</td><td>false</td><td>If true, a gazette feature fires when any token of a gazette entry matches</td></tr>
- * <tr><td> cleanGazette</td><td>boolean</td><td>false</td><td>If true, a gazette feature fires when all tokens of a gazette entry match</td></tr>
+ * <tr><td> cleanGazette</td><td>boolean</td><td>false</td><td></td>If true, a gazette feature fires when all tokens of a gazette entry match</tr>
  * <p>
  * <tr><td> wordShape</td><td>String</td><td>none</td><td>Either "none" for no wordShape use, or the name of a word shape function recognized by {@link WordShapeClassifier#lookupShaper(String)}</td></tr>
  * <tr><td> useSequences</td><td>boolean</td><td>true</td><td>Does not use any class combination features if this is false</td></tr>
@@ -185,9 +185,6 @@ import edu.stanford.nlp.util.Timing;
  * <tr><td> useLastRealWord</td><td>boolean</td><td>false</td><td>Iff the prev word is of length 3 or less, add an extra feature that combines the word two back and the current word's shape. <i>Weird!</i></td></tr>
  * <tr><td> useNextRealWord</td><td>boolean</td><td>false</td><td>Iff the next word is of length 3 or less, add an extra feature that combines the word after next and the current word's shape. <i>Weird!</i></td></tr>
  * <tr><td> useTitle</td><td>boolean</td><td>false</td><td>Match a word against a list of name titles (Mr, Mrs, etc.)</td></tr>
- * <tr><td> useDistSim</td><td>boolean</td><td>false</td><td>Load a file of distributional similarity classes (specified by <code>distSimLexicon</code>) and use it for features</td></tr>
- * <tr><td> distSimLexicon</td><td>String</td><td></td><td>The file to be loaded for distsim classes.</td></tr>
- * <tr><td> distSimFileFormat</td><td>String</td><td>alexclark</td><td>Files should be formatted as tab separated rows where each row is a word/class pair.  alexclark=word first, terrykoo=class first</td></tr>
  * <tr><td> useOccurrencePatterns</td><td>boolean</td><td>false</td><td>This is a very engineered feature designed to capture multiple references to names.  If the current word isn't capitalized, followed by a non-capitalized word, and preceded by a word with alphabetic characters, it returns NO-OCCURRENCE-PATTERN.  Otherwise, if the previous word is a capitalized NNP, then if in the next 150 words you find this PW-W sequence, you get XY-NEXT-OCCURRENCE-XY, else if you find W you get XY-NEXT-OCCURRENCE-Y.  Similarly for backwards and XY-PREV-OCCURRENCE-XY and XY-PREV-OCCURRENCE-Y.  Else (if the previous word isn't a capitalized NNP), under analogous rules you get one or more of X-NEXT-OCCURRENCE-YX, X-NEXT-OCCURRENCE-XY, X-NEXT-OCCURRENCE-X, X-PREV-OCCURRENCE-YX, X-PREV-OCCURRENCE-XY, X-PREV-OCCURRENCE-X.</td></tr>
  * <tr><td> useTypeySequences</td><td>boolean</td><td>false</td><td>Some first order word shape patterns.</td></tr>
  * <tr><td> useGenericFeatures</td><td>boolean</td><td>false</td><td>If true, any features you include in the map will be incorporated into the model with values equal to those given in the file; values are treated as strings unless you use the "realValued" option (described below)</td></tr>
@@ -210,13 +207,13 @@ import edu.stanford.nlp.util.Timing;
  * <tr><td> splitDocuments</td><td>boolean</td><td>true</td><td>Whether or not to split the data into separate documents for training/testing</td></tr>
  * <tr><td> maxDocSize</td><td>int</td><td>10000</td><td>If this number is greater than 0, attempt to split documents bigger than this value into multiple documents at sentence boundaries during testing; otherwise do nothing.</td></tr>
  * </table>
- * <p>
+ * <p/>
  * Note: flags/properties overwrite left to right.  That is, the parameter
  * setting specified <i>last</i> is the one used.
- * </p><p>
+ * <p/>
  * <pre>
  * DOCUMENTATION ON FEATURE TEMPLATES
- * <br>
+ * <p/>
  * w = word
  * t = tag
  * p = position (word index in sentence)
@@ -231,22 +228,22 @@ import edu.stanford.nlp.util.Timing;
  * g(w) = gazette entries containing w
  * l(w) = length of w
  * o(...) = occurrence patterns of words
- * <br>
+ * <p/>
  * useReverse reverses meaning of prev, next everywhere below (on in macro)
- * <br>
+ * <p/>
  * "Prolog" booleans: , = AND and ; = OR
- * <br>
+ * <p/>
  * Mac: Y = turned on in -macro,
  *      + = additional positive things relative to -macro for CoNLL NERFeatureFactory
  *          (perhaps none...)
  *      - = Known negative for CoNLL NERFeatureFactory relative to -macro
- * <br>
+ * <p/>p
  * Bio: + = additional things that are positive for BioCreative
  *      - = things negative relative to -macro
- * <br>
+ * <p/>
  * HighMagnitude: There are no (0) to a few (+) to many (+++) high weight
  * features of this template. (? = not used in goodCoNLL, but usually = 0)
- * <br>
+ * <p/>
  * Feature              Mac Bio CRFFlags                   HighMagnitude
  * ---------------------------------------------------------------------
  * w,c                    Y     useWord                    0 (useWord is almost useless with unlimited ngram features, but helps a fraction in goodCoNLL, if only because of prior fiddling
@@ -264,14 +261,14 @@ import edu.stanford.nlp.util.Timing;
  * t,nt,c                       useSymTags                 ?
  * pt,t,c                       useSymTags                 ?
  * pw,nw,c                      useSymWordPairs            ?
- * <br>
+ * <p/>
  * pc,c                   Y     usePrev,useSequences,usePrevSequences   +++
  * pc,w,c                 Y     usePrev,useSequences,usePrevSequences   0
  * nc,c                         useNext,useSequences,useNextSequences   ?
  * w,nc,c                       useNext,useSequences,useNextSequences   ?
  * pc,nc,c                      useNext,usePrev,useSequences,usePrevSequences,useNextSequences  ?
  * w,pc,nc,c                    useNext,usePrev,useSequences,usePrevSequences,useNextSequences   ?
- * <br>
+ * <p/>
  * (pw;p2w;p3w;p4w),c        +  useDisjunctive  (out to disjunctionWidth now)   +++
  * (nw;n2w;n3w;n4w),c        +  useDisjunctive  (out to disjunctionWidth now)   ++++
  * (pw;p2w;p3w;p4w),s,c      +  useDisjunctiveShapeInteraction          ?
@@ -280,7 +277,7 @@ import edu.stanford.nlp.util.Timing;
  * (nw;n2w;n3w;n4w),c        +  useWideDisjunctive (to wideDisjunctionWidth)   ?
  * (ps;p2s;p3s;p4s),c           useDisjShape  (out to disjunctionWidth now)   ?
  * (ns;n2s;n3s;n4s),c           useDisjShape  (out to disjunctionWidth now)   ?
- * <br>
+ * <p/>
  * pt,pc,t,c              Y     useTaggySequences                        +
  * p2t,p2c,pt,pc,t,c      Y     useTaggySequences,maxLeft&gt;=2          +
  * p3t,p3c,p2t,p2c,pt,pc,t,c Y  useTaggySequences,maxLeft&gt;=3,!dontExtendTaggy   ?
@@ -288,21 +285,21 @@ import edu.stanford.nlp.util.Timing;
  * p3c,p2c,pc,c           Y     useLongSequences,maxLeft&gt;=3           ?
  * p4c,p3c,p2c,pc,c       Y     useLongSequences,maxLeft&gt;=4           ?
  * p2c,pc,c,pw=BOUNDARY         useBoundarySequences                     0 (OK, but!)
- * <br>
+ * <p/>
  * p2t,pt,t,c             -     useExtraTaggySequences                   ?
  * p3t,p2t,pt,t,c         -     useExtraTaggySequences                   ?
- * <br>
+ * <p/>
  * p2t,pt,t,s,p2c,pc,c    -     useTaggySequencesShapeInteraction        ?
  * p3t,p2t,pt,t,s,p3c,p2c,pc,c  useTaggySequencesShapeInteraction        ?
- * <br>
+ * <p/>
  * s,pc,c                 Y     useTypeySequences                        ++
  * ns,pc,c                Y     useTypeySequences  // error for ps? not? 0
  * ps,pc,s,c              Y     useTypeySequences                        0
  * // p2s,p2c,ps,pc,s,c      Y     useTypeySequences,maxLeft&gt;=2 // duplicated a useTypeSeqs2 feature
- * <br>
+ * <p/>
  * n(w),c                 Y     useNGrams (noMidNGrams, MaxNGramLeng, lowercaseNGrams, dehyphenateNGrams)   +++
  * n(w),s,c                     useNGrams,conjoinShapeNGrams             ?
- * <br>
+ * <p/>
  * g,c                        + useGazFeatures   // test refining this?   ?
  * pg,pc,c                    + useGazFeatures                           ?
  * ng,c                       + useGazFeatures                           ?
@@ -312,10 +309,10 @@ import edu.stanford.nlp.util.Timing;
  * g,w,c                        useMoreGazFeatures                       ?
  * pg,pc,g,c                    useMoreGazFeatures                       ?
  * g,ng,c                       useMoreGazFeatures                       ?
- * <br>
+ * <p/>
  * g(w),c                       useGazette,sloppyGazette (contains same word)   ?
  * g(w),[pw,nw,...],c           useGazette,cleanGazette (entire entry matches)   ?
- * <br>
+ * <p/>
  * s,c                    Y     wordShape &gt;= 0                       +++
  * ps,c                   Y     wordShape &gt;= 0,useTypeSeqs           +
  * ns,c                   Y     wordShape &gt;= 0,useTypeSeqs           +
@@ -327,11 +324,11 @@ import edu.stanford.nlp.util.Timing;
  * pc,ps,s,c              Y     wordShape &gt;= 0,useTypeSeqs,useTypeSeqs2   0
  * p2c,p2s,pc,ps,s,c      Y     wordShape &gt;= 0,useTypeSeqs,useTypeSeqs2,maxLeft&gt;=2   +++
  * pc,ps,s,ns,c                 wordShape &gt;= 0,useTypeSeqs,useTypeSeqs3   ?
- * <br>
+ * <p/>
  * p2w,s,c if l(pw) &lt;= 3 Y     useLastRealWord // weird features, but work   0
  * n2w,s,c if l(nw) &lt;= 3 Y     useNextRealWord                        ++
  * o(pw,w,nw),c           Y     useOccurrencePatterns // don't fully grok but has to do with capitalized name patterns   ++
- * <br>
+ * <p/>
  * a,c                          useAbbr;useMinimalAbbr
  * pa,a,c                       useAbbr
  * a,na,c                       useAbbr
@@ -340,23 +337,23 @@ import edu.stanford.nlp.util.Timing;
  * p2a,p2c,pa,pc,a              useAbbr
  * w,a,c                        useMinimalAbbr
  * p2a,p2c,a,c                  useMinimalAbbr
- * <br>
+ * <p/>
  * RESTR. w,(pw,pc;p2w,p2c;p3w,p3c;p4w,p4c)   + useParenMatching,maxLeft&gt;=n
- * <br>
+ * <p/>
  * c                          - useClassFeature
- * <br>
+ * <p/>
   * p,s,c                      - useShapeConjunctions
  * t,s,c                      - useShapeConjunctions
- * <br>
+ * <p/>
  * w,t,c                      + useWordTag                      ?
  * w,pt,c                     + useWordTag                      ?
  * w,nt,c                     + useWordTag                      ?
- * <br>
+ * <p/>
  * r,c                          useNPGovernor (only for baseNP words)
  * r,t,c                        useNPGovernor (only for baseNP words)
  * h,c                          useNPHead (only for baseNP words)
  * h,t,c                        useNPHead (only for baseNP words)
- * <br>
+ * <p/>
  * </pre>
  *
  * @author Dan Klein
@@ -1712,7 +1709,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
             featuresCpC.add(pWord + "-PSEQpW"); // added later after goodCoNLL
           }
 
-          if (flags.useDistSim) {
+          if (true) { // TODO [cdm Jul 2014]: should really be if (flags.useDistSim) but fixing current itest....
             featuresCpC.add(pDS + "-PSEQpDS");
             featuresCpC.add(cDS + "-PSEQcDS");
             featuresCpC.add(pDS+ '-' +cDS + "-PSEQpcDS");
@@ -1750,7 +1747,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       if (flags.useTypeySequences) {
         featuresCpC.add(cShape + "-TPS2");
         featuresCpC.add(n.get(CoreAnnotations.ShapeAnnotation.class) + "-TNS1");
-        // featuresCpC.add(pShape) + "-" + cShape) + "-TPS"); // duplicates -TYPES, so now omitted; you may need to slightly increase sigma to duplicate previous results, however.
+        // featuresCpC.add(pShape) + "-" + cShape) + "-TPS"); // duplicates -TYPES, so now omitted; you may need to slighly increase sigma to duplicate previous results, however.
       }
 
       if (flags.useTaggySequences) {

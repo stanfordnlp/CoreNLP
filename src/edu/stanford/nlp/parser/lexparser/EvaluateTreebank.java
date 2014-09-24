@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.stanford.nlp.io.NullOutputStream;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
@@ -40,7 +39,7 @@ import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeTransformer;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.ScoredObject;
@@ -585,15 +584,8 @@ public class EvaluateTreebank {
     TreePrint treePrint = op.testOptions.treePrint(op.tlpParams);
     TreebankLangParserParams tlpParams = op.tlpParams;
     TreebankLanguagePack tlp = op.langpack();
-    PrintWriter pwOut, pwErr;
-    if (op.testOptions.quietEvaluation) {
-      NullOutputStream quiet = new NullOutputStream();
-      pwOut = tlpParams.pw(quiet);
-      pwErr = tlpParams.pw(quiet);
-    } else {
-      pwOut = tlpParams.pw();
-      pwErr = tlpParams.pw(System.err);
-    }
+    PrintWriter pwOut = tlpParams.pw();
+    PrintWriter pwErr = tlpParams.pw(System.err);
     if (op.testOptions.verbose) {
       pwErr.print("Testing ");
       pwErr.println(testTreebank.textualSummary(tlp));
@@ -659,9 +651,6 @@ public class EvaluateTreebank {
 
     //Done parsing...print the results of the evaluations
     treebankTotalTimer.done("Testing on treebank");
-    if (op.testOptions.quietEvaluation) {
-      pwErr = tlpParams.pw(System.err);
-    }
     if (saidMemMessage) {
       ParserUtils.printOutOfMemory(pwErr);
     }
@@ -669,7 +658,7 @@ public class EvaluateTreebank {
       EvalbFormatWriter.closeEVALBfiles();
     }
     if(numSkippedEvals != 0) {
-      pwErr.printf("Unable to evaluate %d parser hypotheses due to yield mismatch\n",numSkippedEvals);
+      pwOut.printf("Unable to evaluate %d parser hypotheses due to yield mismatch\n",numSkippedEvals);
     }
     // only created here so we know what parser types are supported...
     ParserQuery pq = pqFactory.parserQuery();

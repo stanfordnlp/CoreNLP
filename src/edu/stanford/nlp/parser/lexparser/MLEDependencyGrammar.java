@@ -417,7 +417,7 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
     } else {
       String tagStr = smoothTPIndex.get(tag);
       String binStr = TP_PREFIX + smoothTP.project(tagStr);
-      return (short) smoothTPIndex.addToIndex(binStr);
+      return (short) smoothTPIndex.indexOf(binStr, true);
     }
   }
 
@@ -587,7 +587,7 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
     if (useSmoothTagProjection) {
       aPT = tagProject(dependency.arg.tag);
       short hPT = tagProject(dependency.head.tag);
-
+      
       IntTaggedWord projectedArg = new IntTaggedWord(dependency.arg.word, aPT);
       IntTaggedWord projectedAnyHead = new IntTaggedWord(ANY_WORD_INT, hPT);
       IntTaggedWord projectedAnyArg = new IntTaggedWord(ANY_WORD_INT, aPT);
@@ -817,7 +817,7 @@ public class MLEDependencyGrammar extends AbstractDependencyGrammar {
         String[] fields = StringUtils.splitOnCharWithQuoting(line, ' ', '\"', '\\'); // split on spaces, quote with doublequote, and escape with backslash
         //        System.out.println("fields:\n" + fields[0] + "\n" + fields[1] + "\n" + fields[2] + "\n" + fields[3] + "\n" + fields[4] + "\n" + fields[5]);
 
-
+        
         short distance = (short)Integer.parseInt(fields[4]);
         IntTaggedWord tempHead = new IntTaggedWord(fields[0], '/', wordIndex, tagIndex);
         IntTaggedWord tempArg = new IntTaggedWord(fields[2], '/', wordIndex, tagIndex);

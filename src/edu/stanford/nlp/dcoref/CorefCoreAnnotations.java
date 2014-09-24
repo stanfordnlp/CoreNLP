@@ -11,7 +11,7 @@ import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
 
 /**
- * Similar to {@link edu.stanford.nlp.ling.CoreAnnotations},
+ * Similar to {@link edu.stanford.nlp.ling.CoreAnnotations}, 
  * but this class contains
  * annotations made specifically for storing Coref data.  This is kept
  * separate from CoreAnnotations so that systems which only need
@@ -20,8 +20,8 @@ import edu.stanford.nlp.util.Pair;
 public class CorefCoreAnnotations {
 
   /**
-   * The standard key for the coref label.
-   * Not used by the new dcoref system.
+   * the standard key for the coref label.
+   * not used by the new dcoref system.
    */
   public static class CorefAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
@@ -30,11 +30,11 @@ public class CorefCoreAnnotations {
   }
 
   /**
-   * Destination of the coreference link for this word (if any).
-   * It contains the index of the sentence and the index of the word that
-   * are the end of this coref link. Both indices start at 1. The
+   * Destination of the coreference link for this word (if any): it
+   * contains the index of the sentence and the index of the word that
+   * are the end of this coref link Both indices start at 1 The
    * sentence index is IntTuple.get(0); the token index in the
-   * sentence is IntTuple.get(1).
+   * sentence is IntTuple.get(1)
    */
   public static class CorefDestAnnotation implements CoreAnnotation<IntTuple> {
     public Class<IntTuple> getType() {
@@ -77,9 +77,9 @@ public class CorefCoreAnnotations {
       return ErasureUtils.uncheckedCast(Set.class);
     }
   }
-
+  
   /**
-   * CorefChainID - CorefChain map.
+   * CorefChainID - CorefChain map
    */
   public static class CorefChainAnnotation implements CoreAnnotation<Map<Integer, CorefChain>> {
     public Class<Map<Integer, CorefChain>> getType() {

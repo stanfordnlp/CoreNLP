@@ -21,7 +21,7 @@ import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
@@ -235,7 +235,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     Tree tree = ParserUtils.xTree(words);
     for (CoreLabel word : words) {
       if (word.tag() == null) {
-        word.setTag("XX");
+        word.setTag("X");
       }
     }
     finishSentence(sentence, tree);
@@ -265,14 +265,8 @@ public class ParserAnnotator extends SentenceAnnotator {
     Tree tree = null;
     try {
       tree = pq.getBestParse();
-      if (tree == null) {
-        System.err.println("WARNING: Parsing of sentence failed.  " +
-                         "Will ignore and continue: " +
-                         Sentence.listToString(words));
-      } else {
-        // -10000 denotes unknown words
-        tree.setScore(pq.getPCFGScore() % -10000.0);
-      }
+      // -10000 denotes unknown words
+      tree.setScore(pq.getPCFGScore() % -10000.0);
     } catch (OutOfMemoryError e) {
       System.err.println("WARNING: Parsing of sentence ran out of memory.  " +
                          "Will ignore and continue: " +

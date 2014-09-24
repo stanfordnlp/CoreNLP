@@ -4,7 +4,7 @@ import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 import java.util.List;
 import java.util.Map;

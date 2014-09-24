@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreLabel.GenericAnnotation;
-import edu.stanford.nlp.util.ErasureUtils;
 
 public class PatternsAnnotations implements Serializable {
   private static final long serialVersionUID = 1L;
@@ -14,14 +13,6 @@ public class PatternsAnnotations implements Serializable {
       return Boolean.class;
     }
   }
-
-  public static class MatchedPatterns implements GenericAnnotation<Set<SurfacePattern>> {
-    public Class<Set<SurfacePattern>> getType(){
-      return ErasureUtils.<Class<Set<SurfacePattern>>> uncheckedCast(Set.class);
-    }
-
-  }
-
 
   public static class MatchedPhrases implements GenericAnnotation<Set<String>> {
     public Class<Set<String>> getType() {
@@ -83,24 +74,16 @@ public class PatternsAnnotations implements Serializable {
       return String.class;
     }
   }
-
+  
   public static class PatternLabel10 implements GenericAnnotation<String>{
     public Class<String> getType(){
       return String.class;
     }
   }
-
+  
   public static class OtherSemanticLabel implements GenericAnnotation<String>{
     public Class<String> getType(){
       return String.class;
     }
   }
-
-  public static class Features implements GenericAnnotation<Set<String>>{
-    public Class<Set<String>> getType(){
-      return ErasureUtils.<Class<Set<String>>> uncheckedCast(Set.class);
-    }
-  }
-
-
 }

@@ -77,7 +77,7 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
   /**
    * The underlying Collection of input sources.  Currently supported
    * input sources are: Files, Strings, URLs and Readers.   The
-   * implementation automatically determines the type of input and
+   * implementation automatically  determines the type of input and
    * produces a java.util.Reader accordingly.
    */
   protected Collection<Object> c;
@@ -93,7 +93,6 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
    *
    * @return an Iterator over the input sources in the underlying Collection.
    */
-  @Override
   public Iterator<Reader> iterator() {
     return new ReaderIterator();
   }

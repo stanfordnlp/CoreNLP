@@ -11,16 +11,15 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 
 /**
- * Test some of the static methods in AbstractSequenceClassifier.
+ * Test some of the static methods in AbstractSequenceClassifier.  
  * In particular, this tests the IOB encoding results counting.
  *
  * @author John Bauer
  */
 public class AbstractSequenceClassifierTest extends TestCase {
+  final static String BG = "O";
 
-  static final String BG = "O";
-
-  static final String[][] labelsIOB2 = {
+  final static String[][] labelsIOB2 = {
     {    BG,    BG,    BG,    BG,    BG,    BG,    BG,    BG,    BG,    BG },  //0
     {    BG,    BG,    BG,    BG, "I-A",    BG,    BG,    BG,    BG,    BG },
     {    BG,    BG,    BG,    BG, "I-A", "I-A",    BG,    BG,    BG,    BG },
@@ -30,7 +29,7 @@ public class AbstractSequenceClassifierTest extends TestCase {
     {    BG,    BG,    BG,    BG,    BG,    BG,    BG,    BG,    BG, "I-A" }   //6
   };
 
-  private static void runIOB2ResultsTest(String[] gold, String[] guess, double tp, double fp, double fn) {
+  public void runIOB2ResultsTest(String[] gold, String[] guess, double tp, double fp, double fn) {
     List<CoreLabel> sentence = new ArrayList<CoreLabel>();
     assertEquals("Cannot run test on lists of different length", gold.length, guess.length);
     for (int i = 0; i < gold.length; ++i) {
@@ -107,14 +106,14 @@ public class AbstractSequenceClassifierTest extends TestCase {
   }
 
   // TODO: add more IOB tests
-  static final String[][] labelsIOB = {
+  final static String[][] labelsIOB = {
     {    BG,    BG,    BG,    BG,    BG,    BG,    BG,    BG,    BG,    BG },  //0
     {    BG,    BG,    BG,    BG, "B-A",    BG,    BG,    BG,    BG,    BG },
     {    BG,    BG,    BG,    BG, "B-A", "I-A",    BG,    BG,    BG,    BG },
     {    BG,    BG,    BG, "B-A", "I-A",    BG,    BG,    BG,    BG,    BG }
   };
 
-  public static void runIOBResultsTest(String[] gold, String[] guess, double tp, double fp, double fn) {
+  public void runIOBResultsTest(String[] gold, String[] guess, double tp, double fp, double fn) {
     List<CoreLabel> sentence = new ArrayList<CoreLabel>();
     assertEquals("Cannot run test on lists of different length", gold.length, guess.length);
     for (int i = 0; i < gold.length; ++i) {

@@ -190,7 +190,6 @@ public class State implements Scored {
         value = value.replace(equivalentSeparators[i][0], equivalentSeparators[i][1]);
       }
       if (separatorRegex.matcher(value).matches()) {
-        // TODO: put "value" instead?  Perhaps do this next time we rebuild all models
         separators.put(index, leaf.value());
       }
     }

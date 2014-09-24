@@ -14,7 +14,7 @@ public class RNNOptions implements Serializable {
   /**
    * The random seed the random number generator is initialized with.
    */
-  public int randomSeed = new Random().nextInt();
+  public int randomSeed = (new Random()).nextInt();
 
   /**
    * Filename for the word vectors
@@ -135,7 +135,7 @@ public class RNNOptions implements Serializable {
 
   public int setOption(String[] args, int argIndex) {
     if (args[argIndex].equalsIgnoreCase("-randomSeed")) {
-      randomSeed = Integer.parseInt(args[argIndex + 1]);
+      randomSeed = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-wordVectors")) {
       wordVectors = args[argIndex + 1];
@@ -144,10 +144,10 @@ public class RNNOptions implements Serializable {
       unkWord = args[argIndex] + 1;
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-numHid")) {
-      numHid = Integer.parseInt(args[argIndex + 1]);
+      numHid = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-numClasses")) {
-      numClasses = Integer.parseInt(args[argIndex + 1]);
+      numClasses = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-lowercaseWordVectors")) {
       lowercaseWordVectors = true;

@@ -37,7 +37,6 @@ public class PTBTokenizerTest extends TestCase {
     "You can get a B.S. or a B. A. or a Ph.D (sometimes a Ph. D) from Stanford.",
     "@Harry_Styles didn`t like Mu`ammar al-Qaddafi",
     "Kenneth liked Windows 3.1, Windows 3.x, and Mesa A.B as I remember things.",
-    "I like programming in F# more than C#."
   };
 
   private final String[][] ptbGold = {
@@ -67,8 +66,8 @@ public class PTBTokenizerTest extends TestCase {
     { "No", ".", "I", "like", "No.", "24", "and", "no.", "47", "." },
     { "You", "can", "get", "a", "B.S.", "or", "a", "B.", "A.", "or", "a", "Ph.D", "-LRB-", "sometimes", "a", "Ph.", "D", "-RRB-", "from", "Stanford", "." },
     { "@Harry_Styles", "did", "n`t", "like", "Mu`ammar", "al-Qaddafi" },
-    { "Kenneth", "liked", "Windows", "3.1", ",", "Windows", "3.x", ",", "and", "Mesa", "A.B", "as", "I", "remember", "things", ".", },
-    { "I", "like", "programming", "in", "F#", "more", "than", "C#", "." },
+    { "Kenneth", "liked", "Windows", "3.1", ",", "Windows", "3.x", ",", "and", "Mesa", "A.B", "as", "I", "remember", "things", ".",
+    }
   };
 
   public void testPTBTokenizerWord() {

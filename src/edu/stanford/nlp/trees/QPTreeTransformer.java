@@ -2,11 +2,14 @@ package edu.stanford.nlp.trees;
 
 
 
+import edu.stanford.nlp.ling.LabelFactory;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -58,7 +61,7 @@ public class QPTreeTransformer implements TreeTransformer {
   private static TregexPattern multiwordXSTregex =
     // TODO: should add NN and $ to the numeric expressions captured
     //   NN is for words such as "half" which are probably misparsed
-    // TODO: <3 (IN < as|than) is to avoid one weird case in PTB,
+    // TODO: <3 (IN < as|than) is to avoid one weird case in PTB, 
     // "more than about".  Perhaps there is some way to generalize this
     // TODO: "all but X"
     // TODO: "all but about X"

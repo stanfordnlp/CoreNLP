@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.function.Function;
 
 /**
  * Utilities for Maps, including inverting, composing, and support for list/set values.
@@ -99,7 +98,11 @@ public class Maps {
    */
   public static <K extends Comparable<? super K>, V> List<Map.Entry<K, V>> sortedEntries(Collection<Map.Entry<K, V>> entries) {
     List<Entry<K,V>> entriesList = new ArrayList<Map.Entry<K, V>>(entries);
-    Collections.sort(entriesList, (e1, e2) -> e1.getKey().compareTo(e2.getKey()));
+    Collections.sort(entriesList, new Comparator<Map.Entry<K, V>>() {
+      public int compare(Map.Entry<K, V> e1, Map.Entry<K, V> e2) {
+        return e1.getKey().compareTo(e2.getKey());
+      }
+    });
     return entriesList;
   }
 

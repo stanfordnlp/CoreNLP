@@ -32,7 +32,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.trees.CollinsHeadFinder;
 import edu.stanford.nlp.trees.HeadFinder;

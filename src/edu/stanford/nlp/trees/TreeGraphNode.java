@@ -1,28 +1,42 @@
 package edu.stanford.nlp.trees;
 
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.LabelFactory;
+import edu.stanford.nlp.trees.GrammaticalRelation.GrammaticalRelationAnnotation;
+import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Filter;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
+import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
+import static edu.stanford.nlp.trees.GrammaticalRelation.GOVERNOR;
+
 /**
- * <p>
- * A <code>TreeGraphNode</code> is simply a
- * {@link Tree <code>Tree</code>}
- * with some additional functionality.  For example, the
- * <code>parent()</code> method works without searching from the root.
- * Labels are always assumed to be
- * {@link CoreLabel <code>CoreLabel</code>}
+ * A "TreeGraph" is a tree with additional directed, labeled arcs
+ * between arbitrary pairs of nodes.  (So, it's a graph with a tree
+ * skeleton.)  A <code>TreeGraphNode</code> represents any node in a
+ * TreeGraph.  The additional labeled arcs are represented by using
+ * {@link CoreLabel <code>CoreLabel</code>} labels at each node, which
+ * contain <code>Map</code>s from arc label strings to
+ * <code>Set</code>s of <code>TreeGraphNode</code>s.  Each
+ * <code>TreeGraphNode</code> should contain a reference to a {@link
+ * TreeGraph <code>TreeGraph</code>} object, which is a container for
+ * the complete TreeGraph structure.<p>
  *
  * <p>This class makes the horrible mistake of changing the semantics of
  * equals and hashCode to go back to "==" and System.identityHashCode,
  * despite the semantics of the superclass's equality.</p>
  *
  * @author Bill MacCartney
+ * @see TreeGraph
  */
 public class TreeGraphNode extends Tree implements HasParent {
 
@@ -43,10 +57,10 @@ public class TreeGraphNode extends Tree implements HasParent {
   protected TreeGraphNode[] children = ZERO_TGN_CHILDREN;
 
   /**
-   * The {@link GrammaticalStructure <code>GrammaticalStructure</code>} of which this
+   * The {@link TreeGraph <code>TreeGraph</code>} of which this
    * node is part.
    */
-  protected GrammaticalStructure tg;
+  protected TreeGraph tg;
 
   /**
    * A leaf node should have a zero-length array for its
@@ -94,7 +108,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    * @param t     the tree to copy
    * @param graph the graph of which this node is a part
    */
-  public TreeGraphNode(Tree t, GrammaticalStructure graph) {
+  public TreeGraphNode(Tree t, TreeGraph graph) {
     this(t, (TreeGraphNode) null);
     this.setTreeGraph(graph);
   }
@@ -182,6 +196,72 @@ public class TreeGraphNode extends Tree implements HasParent {
   }
 
   /**
+   * Assign sequential integer indices to the leaves of the subtree
+   * rooted at this <code>TreeGraphNode</code>, beginning with
+   * <code>startIndex</code>, and traversing the leaves from left
+   * to right. If node is already indexed, then it uses the existing index.
+   *
+   * @param startIndex index for this node
+   * @return the next index still unassigned
+   */
+  private int indexLeaves(int startIndex) {
+    if (isLeaf()) {
+      int oldIndex = index();
+      if (oldIndex>=0) {
+        startIndex = oldIndex;
+      } else {
+        setIndex(startIndex);
+      }
+      if (tg != null) {
+        tg.addNodeToIndexMap(startIndex, this);
+      }
+      startIndex++;
+    } else {
+      for (TreeGraphNode child : children) {
+        startIndex = child.indexLeaves(startIndex);
+      }
+    }
+    return startIndex;
+  }
+
+  /**
+   * Assign sequential integer indices to all nodes of the subtree
+   * rooted at this <code>TreeGraphNode</code>, beginning with
+   * <code>startIndex</code>, and doing a pre-order tree traversal.
+   * Any node which already has an index will not be re-indexed
+   * &mdash; this is so that we can index the leaves first, and
+   * then index the rest.
+   *
+   * @param startIndex index for this node
+   * @return the next index still unassigned
+   */
+  private int indexNodes(int startIndex) {
+    if (index() < 0) {		// if this node has no index
+      if (tg != null) {
+        tg.addNodeToIndexMap(startIndex, this);
+      }
+      setIndex(startIndex++);
+    }
+    if (!isLeaf()) {
+      for (TreeGraphNode child : children) {
+        startIndex = child.indexNodes(startIndex);
+      }
+    }
+    return startIndex;
+  }
+
+  /**
+   * Assign sequential integer indices (starting with 0) to all
+   * nodes of the subtree rooted at this
+   * <code>TreeGraphNode</code>.  The leaves are indexed first,
+   * from left to right.  Then the internal nodes are indexed,
+   * using a pre-order tree traversal.
+   */
+  protected void indexNodes() {
+    indexNodes(indexLeaves(1));
+  }
+
+  /**
    * Get the parent for the current node.
    */
   @Override
@@ -241,23 +321,173 @@ public class TreeGraphNode extends Tree implements HasParent {
   }
 
   /**
-   * Get the <code>GrammaticalStructure</code> of which this node is a
+   * Get the <code>TreeGraph</code> of which this node is a
    * part.
    */
-  protected GrammaticalStructure treeGraph() {
+  protected TreeGraph treeGraph() {
     return tg;
   }
 
   /**
-   * Set pointer to the <code>GrammaticalStructure</code> of which this node
+   * Set pointer to the <code>TreeGraph</code> of which this node
    * is a part.  Operates recursively to set pointer for all
    * descendants too.
    */
-  protected void setTreeGraph(GrammaticalStructure tg) {
+  protected void setTreeGraph(TreeGraph tg) {
     this.tg = tg;
     for (TreeGraphNode child : children) {
       child.setTreeGraph(tg);
     }
+  }
+
+  /**
+   * Add a labeled arc from this node to the argument node.
+   *
+   * @param arcLabel the <code>Class&lt;? extends GrammaticalRelationAnnotation&gt;</code> with which the new arc
+   *                 is to be labeled.
+   * @param node     the <code>TreeGraphNode</code> to which the new
+   *                 arc should point.
+   * @return <code>true</code> iff the arc did not already exist.
+   */
+  @SuppressWarnings("unchecked")
+  public <GR extends GrammaticalRelationAnnotation> boolean addArc(Class<GR> arcLabel, TreeGraphNode node) {
+    if (node == null) {
+      return false;
+    }
+    if (!treeGraph().equals(node.treeGraph())) {
+      System.err.println("Warning: you are trying to add an arc from node " + this + " to node " + node + ", but they do not belong to the same TreeGraph!");
+    }
+    Set<TreeGraphNode> collection = label.get(arcLabel);
+    if (collection == null) {
+      collection = Generics.<TreeGraphNode>newHashSet();
+      label.set(arcLabel, collection);
+    }
+    return collection.add(node);
+  }
+
+  /**
+   * Returns the <code>Set</code> of <code>TreeGraphNode</code>s to
+   * which there exist arcs bearing the specified label from this
+   * node, or <code>null</code> if no such nodes exist.
+   *
+   * @param arcLabel the <code>Object</code> which labels the
+   *                 arc(s) to be followed.
+   * @return a <code>Set</code> containing only and all the
+   *         <code>TreeGraphNode</code>s to which there exist arcs bearing
+   *         the specified label from this node.
+   */
+  public Set<TreeGraphNode> followArcToSet(Class<? extends GrammaticalRelationAnnotation> arcLabel) {
+    return label().get(arcLabel);
+  }
+
+  /**
+   * Returns a single <code>TreeGraphNode</code> to which there
+   * exists an arc bearing the specified label from this node, or
+   * <code>null</code> if no such node exists.  If more than one
+   * such node exists, this method will return an arbitrary node
+   * from among them; if this is a possibility, you might want to
+   * use {@link TreeGraphNode#followArcToSet
+   * <code>followArcToSet</code>} instead.
+   *
+   * @param arcLabel a <code>Object</code> containing the label of
+   *                 the arc(s) to be followed
+   * @return a <code>TreeGraphNode</code> to which there exists an
+   *         arc bearing the specified label from this node
+   */
+  public TreeGraphNode followArcToNode(Class<? extends GrammaticalRelationAnnotation> arcLabel) {
+    Set<TreeGraphNode> valueSet = followArcToSet(arcLabel);
+    if (valueSet == null) {
+      return null;
+    }
+    return valueSet.iterator().next();
+  }
+
+  /**
+   * Finds all arcs between this node and <code>destNode</code>,
+   * and returns the <code>Set</code> of <code>Object</code>s which
+   * label those arcs.  If no such arcs exist, returns an empty
+   * <code>Set</code>.
+   *
+   * @param destNode the destination node
+   * @return the <code>Set</code> of <code>Object</code>s which
+   *         label arcs between this node and <code>destNode</code>
+   */
+  public Set<Class<? extends GrammaticalRelationAnnotation>> arcLabelsToNode(TreeGraphNode destNode) {
+    Set<Class<? extends GrammaticalRelationAnnotation>> arcLabels = Generics.newHashSet();
+    CoreLabel cl = label();
+    for (Class key : cl.keySet()) {
+      if (key == null || !GrammaticalRelationAnnotation.class.isAssignableFrom(key)) {
+        continue;
+      }
+      Class<? extends GrammaticalRelationAnnotation> typedKey = ErasureUtils.uncheckedCast(key);
+      Set<TreeGraphNode> val = cl.get(typedKey);
+      if (val != null && val.contains(destNode)) {
+        arcLabels.add(typedKey);
+      }
+    }
+    return arcLabels;
+  }
+
+  /**
+   * Returns the label of a single arc between this node and <code>destNode</code>,
+   * or <code>null</code> if no such arc exists.  If more than one
+   * such arc exists, this method will return an arbitrary arc label
+   * from among them; if this is a possibility, you might want to
+   * use {@link TreeGraphNode#arcLabelsToNode
+   * <code>arcLabelsToNode</code>} instead.
+   *
+   * @param destNode the destination node
+   * @return the <code>Object</code> which
+   *         labels one arc between this node and <code>destNode</code>
+   */
+  public Class<? extends GrammaticalRelationAnnotation> arcLabelToNode(TreeGraphNode destNode) {
+    Set<Class<? extends GrammaticalRelationAnnotation>> arcLabels = arcLabelsToNode(destNode);
+    if (arcLabels == null) {
+      return null;
+    }
+    if (arcLabels.size() == 0) {
+      return null;
+    }
+    return arcLabels.iterator().next();
+  }
+
+  /**
+   * Tries to return a leaf (terminal) node which is the {@link
+   * GrammaticalRelation#GOVERNOR
+   * <code>GOVERNOR</code>} of the given node <code>t</code>.
+   * Probably, <code>t</code> should be a leaf node as well.
+   *
+   * @param t a leaf node in this <code>GrammaticalStructure</code>
+   * @return a node which is the governor for node
+   *         <code>t</code>, or else <code>null</code>
+   */
+  public TreeGraphNode getGovernor() {
+    return getNodeInRelation(GOVERNOR);
+  }
+
+  public TreeGraphNode getNodeInRelation(GrammaticalRelation r) {
+    return followArcToNode(GrammaticalRelation.getAnnotationClass(r));
+  }
+
+  /**
+   * Tries to return a <code>Set</code> of leaf (terminal) nodes
+   * which are the {@link GrammaticalRelation#DEPENDENT
+   * <code>DEPENDENT</code>}s of the given node <code>t</code>.
+   * Probably, <code>this</code> should be a leaf node as well.
+   *
+   * @return a <code>Set</code> of nodes which are dependents of
+   *         node <code>this</code>, possibly an empty set
+   */
+  public Set<TreeGraphNode> getDependents() {
+    Set<TreeGraphNode> deps = Generics.newHashSet();
+    for (Tree subtree : treeGraph().root()) {
+      TreeGraphNode node = (TreeGraphNode) subtree;
+      TreeGraphNode gov = node.getGovernor();
+      if (gov != null && gov == this) {
+        deps.add(node);
+      }
+    }
+    return deps;
   }
 
   /**
@@ -484,9 +714,9 @@ public class TreeGraphNode extends Tree implements HasParent {
       buf.append("  ");
     }
     if (children == null || children.length == 0) {
-      buf.append(label.toString(CoreLabel.OutputFormat.VALUE_INDEX_MAP));
+      buf.append(label.toString("value-index{map}"));
     } else {
-      buf.append('(').append(label.toString(CoreLabel.OutputFormat.VALUE_INDEX_MAP));
+      buf.append('(').append(label.toString("value-index{map}"));
       for (TreeGraphNode child : children) {
         buf.append(' ').append(child.toPrettyString(indentLevel + 1));
       }
@@ -516,7 +746,11 @@ public class TreeGraphNode extends Tree implements HasParent {
   }
 
   public String toPrimes() {
-    int copy = label().copyCount();
+    Integer integer = label().get(CoreAnnotations.CopyAnnotation.class);
+    int copy = 0;
+    if (integer != null) {
+      copy = integer;
+    }
     return StringUtils.repeat('\'', copy);
   }
 
@@ -525,7 +759,7 @@ public class TreeGraphNode extends Tree implements HasParent {
     return label.toString();
   }
 
-  public String toString(CoreLabel.OutputFormat format) {
+  public String toString(String format) {
     return label.toString(format);
   }
 
@@ -539,7 +773,7 @@ public class TreeGraphNode extends Tree implements HasParent {
       System.out.println(t);
       TreeGraphNode tgn = new TreeGraphNode(t, (TreeGraphNode) null);
       System.out.println(tgn.toPrettyString(0));
-      EnglishGrammaticalStructure gs = new EnglishGrammaticalStructure(tgn);
+      tgn.indexNodes();
       System.out.println(tgn.toPrettyString(0));
       tgn.percolateHeads(new SemanticHeadFinder());
       System.out.println(tgn.toPrettyString(0));

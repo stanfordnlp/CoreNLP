@@ -35,6 +35,7 @@ import edu.stanford.nlp.util.Index;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.Serializable;
 import java.util.*;
 
@@ -198,7 +199,12 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
    */
   @Override
   public TreeReaderFactory treeReaderFactory() {
-    return in -> new PennTreeReader(in, new LabeledScoredTreeFactory(), new NPTmpRetainingTreeNormalizer(englishTrain.splitTMP, englishTrain.splitSGapped == 5, englishTrain.leaveItAll, englishTrain.splitNPADV >= 1, headFinder()));
+    return new TreeReaderFactory() {
+      @Override
+      public TreeReader newTreeReader(Reader in) {
+        return new PennTreeReader(in, new LabeledScoredTreeFactory(), new NPTmpRetainingTreeNormalizer(englishTrain.splitTMP, englishTrain.splitSGapped == 5, englishTrain.leaveItAll, englishTrain.splitNPADV >= 1, headFinder()));
+      }
+    };
   }
 
 
@@ -207,7 +213,12 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
    */
   @Override
   public MemoryTreebank testMemoryTreebank() {
-    return new MemoryTreebank(in -> new PennTreeReader(in, new LabeledScoredTreeFactory(), new BobChrisTreeNormalizer(tlp)));
+    return new MemoryTreebank(new TreeReaderFactory() {
+      @Override
+      public TreeReader newTreeReader(Reader in) {
+        return new PennTreeReader(in, new LabeledScoredTreeFactory(), new BobChrisTreeNormalizer(tlp));
+      }
+    });
   }
 
   /**
@@ -703,113 +714,100 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     if (t.isPreTerminal()) {
       if (englishTrain.correctTags) {
         if (baseParentStr.equals("NP")) {
-          switch (baseCat) {
-            case "IN":
-              if (word.equalsIgnoreCase("a") || word.equalsIgnoreCase("that")) {
-                cat = changeBaseCat(cat, "DT");
-              } else if (word.equalsIgnoreCase("so") ||
-                  word.equalsIgnoreCase("about")) {
-                cat = changeBaseCat(cat, "RB");
-              } else if (word.equals("fiscal") || word.equalsIgnoreCase("next")) {
-                cat = changeBaseCat(cat, "JJ");
-              }
-              break;
-            case "RB":
-              if (word.equals("McNally")) {
-                cat = changeBaseCat(cat, "NNP");
-              } else if (word.equals("multifamily")) {
-                cat = changeBaseCat(cat, "NN");
-              } else if (word.equals("MORE")) {
-                cat = changeBaseCat(cat, "JJR");
-              } else if (word.equals("hand")) {
-                cat = changeBaseCat(cat, "NN");
-              } else if (word.equals("fist")) {
-                cat = changeBaseCat(cat, "NN");
-              }
-              break;
-            case "RP":
-              if (word.equals("Howard")) {
-                cat = changeBaseCat(cat, "NNP");
-              } else if (word.equals("whole")) {
-                cat = changeBaseCat(cat, "JJ");
-              }
-              break;
-            case "JJ":
-              if (word.equals("U.S.")) {
-                cat = changeBaseCat(cat, "NNP");
-              } else if (word.equals("ours")) {
-                cat = changeBaseCat(cat, "PRP");
-              } else if (word.equals("mine")) {
-                cat = changeBaseCat(cat, "NN");
-              } else if (word.equals("Sept.")) {
-                cat = changeBaseCat(cat, "NNP");
-              }
-              break;
-            case "NN":
-              if (word.equals("Chapman") || word.equals("Jan.") || word.equals("Sept.") || word.equals("Oct.") || word.equals("Nov.") || word.equals("Dec.")) {
-                cat = changeBaseCat(cat, "NNP");
-              } else if (word.equals("members") || word.equals("bureaus") || word.equals("days") || word.equals("outfits") || word.equals("institutes") || word.equals("innings") || word.equals("write-offs") || word.equals("wines") || word.equals("trade-offs") || word.equals("tie-ins") || word.equals("thrips") || word.equals("1980s") || word.equals("1920s")) {
-                cat = changeBaseCat(cat, "NNS");
-              } else if (word.equals("this")) {
-                cat = changeBaseCat(cat, "DT");
-              }
-              break;
-            case ":":
-              if (word.equals("'")) {
-                cat = changeBaseCat(cat, "''");
-              }
-              break;
-            case "NNS":
-              if (word.equals("start-up") || word.equals("ground-handling") ||
-                  word.equals("word-processing") || word.equals("T-shirt") ||
-                  word.equals("co-pilot")) {
-                cat = changeBaseCat(cat, "NN");
-              } else if (word.equals("Sens.") || word.equals("Aichi")) {
-                cat = changeBaseCat(cat, "NNP");  //not clear why Sens not NNPS
-              }
-              break;
-            case "VBZ":
-              if (word.equals("'s")) {
-                cat = changeBaseCat(cat, "POS");
-              } else if (!word.equals("kills")) { // a worse PTB error
-                cat = changeBaseCat(cat, "NNS");
-              }
-              break;
-            case "VBG":
-              if (word.equals("preferred")) {
-                cat = changeBaseCat(cat, "VBN");
-              }
-              break;
-            case "VB":
-              if (word.equals("The")) {
-                cat = changeBaseCat(cat, "DT");
-              } else if (word.equals("allowed")) {
-                cat = changeBaseCat(cat, "VBD");
-              } else if (word.equals("short") || word.equals("key") || word.equals("many") || word.equals("last") || word.equals("further")) {
-                cat = changeBaseCat(cat, "JJ");
-              } else if (word.equals("lower")) {
-                cat = changeBaseCat(cat, "JJR");
-              } else if (word.equals("Nov.") || word.equals("Jan.") || word.equals("Dec.") || word.equals("Tandy") || word.equals("Release") || word.equals("Orkem")) {
-                cat = changeBaseCat(cat, "NNP");
-              } else if (word.equals("watch") || word.equals("review") || word.equals("risk") || word.equals("realestate") || word.equals("love") || word.equals("experience") || word.equals("control") || word.equals("Transport") || word.equals("mind") || word.equals("term") || word.equals("program") || word.equals("gender") || word.equals("audit") || word.equals("blame") || word.equals("stock") || word.equals("run") || word.equals("group") || word.equals("affect") || word.equals("rent") || word.equals("show") || word.equals("accord") || word.equals("change") || word.equals("finish") || word.equals("work") || word.equals("schedule") || word.equals("influence") || word.equals("school") || word.equals("freight") || word.equals("growth") || word.equals("travel") || word.equals("call") || word.equals("autograph") || word.equals("demand") || word.equals("abuse") || word.equals("return") || word.equals("defeat") || word.equals("pressure") || word.equals("bank") || word.equals("notice") || word.equals("tax") || word.equals("ooze") || word.equals("network") || word.equals("concern") || word.equals("pit") || word.equals("contract") || word.equals("cash")) {
-                cat = changeBaseCat(cat, "NN");
-              }
-              break;
-            case "NNP":
-              if (word.equals("Officials")) {
-                cat = changeBaseCat(cat, "NNS");
-              } else if (word.equals("Currently")) {
-                cat = changeBaseCat(cat, "RB");
-                // should change NP-TMP to ADVP-TMP here too!
-              }
-              break;
-            case "PRP":
-              if (word.equals("her") && parent.numChildren() > 1) {
-                cat = changeBaseCat(cat, "PRP$");
-              } else if (word.equals("US")) {
-                cat = changeBaseCat(cat, "NNP");
-              }
-              break;
+          if (baseCat.equals("IN")) {
+            if (word.equalsIgnoreCase("a") || word.equalsIgnoreCase("that")) {
+              cat = changeBaseCat(cat, "DT");
+            } else if (word.equalsIgnoreCase("so") ||
+                       word.equalsIgnoreCase("about")) {
+              cat = changeBaseCat(cat, "RB");
+            } else if (word.equals("fiscal") || word.equalsIgnoreCase("next")) {
+              cat = changeBaseCat(cat, "JJ");
+            }
+          } else if (baseCat.equals("RB")) {
+            if (word.equals("McNally")) {
+              cat = changeBaseCat(cat, "NNP");
+            } else if (word.equals("multifamily")) {
+              cat = changeBaseCat(cat, "NN");
+            } else if (word.equals("MORE")) {
+              cat = changeBaseCat(cat, "JJR");
+            } else if (word.equals("hand")) {
+              cat = changeBaseCat(cat, "NN");
+            } else if (word.equals("fist")) {
+              cat = changeBaseCat(cat, "NN");
+            }
+          } else if (baseCat.equals("RP")) {
+            if (word.equals("Howard")) {
+              cat = changeBaseCat(cat, "NNP");
+            } else if (word.equals("whole")) {
+              cat = changeBaseCat(cat, "JJ");
+            }
+          } else if (baseCat.equals("JJ")) {
+            if (word.equals("U.S.")) {
+              cat = changeBaseCat(cat, "NNP");
+            } else if (word.equals("ours")) {
+              cat = changeBaseCat(cat, "PRP");
+            } else if (word.equals("mine")) {
+              cat = changeBaseCat(cat, "NN");
+            } else if (word.equals("Sept.")) {
+              cat = changeBaseCat(cat, "NNP");
+            }
+          } else if (baseCat.equals("NN")) {
+            if (word.equals("Chapman") || word.equals("Jan.") || word.equals("Sept.") || word.equals("Oct.") || word.equals("Nov.") || word.equals("Dec.")) {
+              cat = changeBaseCat(cat, "NNP");
+            } else if (word.equals("members") || word.equals("bureaus") || word.equals("days") || word.equals("outfits") || word.equals("institutes") || word.equals("innings") || word.equals("write-offs") || word.equals("wines") || word.equals("trade-offs") || word.equals("tie-ins") || word.equals("thrips") || word.equals("1980s") || word.equals("1920s")) {
+              cat = changeBaseCat(cat, "NNS");
+            } else if (word.equals("this")) {
+              cat = changeBaseCat(cat, "DT");
+            }
+          } else if (baseCat.equals(":")) {
+            if (word.equals("'")) {
+              cat = changeBaseCat(cat, "''");
+            }
+          } else if (baseCat.equals("NNS")) {
+            if (word.equals("start-up") || word.equals("ground-handling") ||
+                word.equals("word-processing") || word.equals("T-shirt") ||
+                word.equals("co-pilot")) {
+              cat = changeBaseCat(cat, "NN");
+            } else if (word.equals("Sens.") || word.equals("Aichi")) {
+              cat = changeBaseCat(cat, "NNP");  //not clear why Sens not NNPS
+            }
+          } else if (baseCat.equals("VBZ")) {
+            if (word.equals("'s")) {
+              cat = changeBaseCat(cat, "POS");
+            } else if (!word.equals("kills")) { // a worse PTB error
+              cat = changeBaseCat(cat, "NNS");
+            }
+          } else if (baseCat.equals("VBG")) {
+            if (word.equals("preferred")) {
+              cat = changeBaseCat(cat, "VBN");
+            }
+          } else if (baseCat.equals("VB")) {
+            if (word.equals("The")) {
+              cat = changeBaseCat(cat, "DT");
+            } else if (word.equals("allowed")) {
+              cat = changeBaseCat(cat, "VBD");
+            } else if (word.equals("short") || word.equals("key") || word.equals("many") || word.equals("last") || word.equals("further")) {
+              cat = changeBaseCat(cat, "JJ");
+            } else if (word.equals("lower")) {
+              cat = changeBaseCat(cat, "JJR");
+            } else if (word.equals("Nov.") || word.equals("Jan.") || word.equals("Dec.") || word.equals("Tandy") || word.equals("Release") || word.equals("Orkem")) {
+              cat = changeBaseCat(cat, "NNP");
+            } else if (word.equals("watch") || word.equals("review") || word.equals("risk") || word.equals("realestate") || word.equals("love") || word.equals("experience") || word.equals("control") || word.equals("Transport") || word.equals("mind") || word.equals("term") || word.equals("program") || word.equals("gender") || word.equals("audit") || word.equals("blame") || word.equals("stock") || word.equals("run") || word.equals("group") || word.equals("affect") || word.equals("rent") || word.equals("show") || word.equals("accord") || word.equals("change") || word.equals("finish") || word.equals("work") || word.equals("schedule") || word.equals("influence") || word.equals("school") || word.equals("freight") || word.equals("growth") || word.equals("travel") || word.equals("call") || word.equals("autograph") || word.equals("demand") || word.equals("abuse") || word.equals("return") || word.equals("defeat") || word.equals("pressure") || word.equals("bank") || word.equals("notice") || word.equals("tax") || word.equals("ooze") || word.equals("network") || word.equals("concern") || word.equals("pit") || word.equals("contract") || word.equals("cash")) {
+              cat = changeBaseCat(cat, "NN");
+            }
+          } else if (baseCat.equals("NNP")) {
+            if (word.equals("Officials")) {
+              cat = changeBaseCat(cat, "NNS");
+            } else if (word.equals("Currently")) {
+              cat = changeBaseCat(cat, "RB");
+              // should change NP-TMP to ADVP-TMP here too!
+            }
+          } else if (baseCat.equals("PRP")) {
+            if (word.equals("her") && parent.numChildren() > 1) {
+              cat = changeBaseCat(cat, "PRP$");
+            } else if (word.equals("US")) {
+              cat = changeBaseCat(cat, "NNP");
+            }
           }
         } else if (baseParentStr.equals("WHNP")) {
           if (baseCat.equals("VBP") && (word.equalsIgnoreCase("that"))) {
@@ -844,20 +842,14 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
           if (baseCat.equals("NNS")) {
             cat = changeBaseCat(cat, "VBZ");
           } else if (baseCat.equals("IN")) {
-            switch (word) {
-              case "complicated":
-                cat = changeBaseCat(cat, "VBD");
-                break;
-              case "post":
-                cat = changeBaseCat(cat, "VB");
-                break;
-              case "like":
-                cat = changeBaseCat(cat, "VB");  // most are VB; odd VBP
-
-                break;
-              case "off":
-                cat = changeBaseCat(cat, "RP");
-                break;
+            if (word.equals("complicated")) {
+              cat = changeBaseCat(cat, "VBD");
+            } else if (word.equals("post")) {
+              cat = changeBaseCat(cat, "VB");
+            } else if (word.equals("like")) {
+              cat = changeBaseCat(cat, "VB");  // most are VB; odd VBP
+            } else if (word.equals("off")) {
+              cat = changeBaseCat(cat, "RP");
             }
           } else if (baseCat.equals("NN")) {
             if (word.endsWith("ing")) {
@@ -963,73 +955,52 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
               cat = changeBaseCat(cat, "VB");
             }
           } else if (baseCat.equals("NNP")) {
-            switch (word) {
-              case "GRAB":
-                cat = changeBaseCat(cat, "VBP");
-                break;
-              case "mature":
-                cat = changeBaseCat(cat, "VB");
-                break;
-              case "Face":
-                cat = changeBaseCat(cat, "VBP");
-                break;
-              case "are":
-                cat = changeBaseCat(cat, "VBP");
-                break;
-              case "Urging":
-                cat = changeBaseCat(cat, "VBG");
-                break;
-              case "Finding":
-                cat = changeBaseCat(cat, "VBG");
-                break;
-              case "say":
-                cat = changeBaseCat(cat, "VBP");
-                break;
-              case "Added":
-                cat = changeBaseCat(cat, "VBD");
-                break;
-              case "Adds":
-                cat = changeBaseCat(cat, "VBZ");
-                break;
-              case "BRACED":
-                cat = changeBaseCat(cat, "VBD");
-                break;
-              case "REQUIRED":
-                cat = changeBaseCat(cat, "VBN");
-                break;
-              case "SIZING":
-                cat = changeBaseCat(cat, "VBG");
-                break;
-              case "REVIEW":
-                cat = changeBaseCat(cat, "VB");
-                break;
-              case "code-named":
-                cat = changeBaseCat(cat, "VBN");
-                break;
-              case "Printed":
-                cat = changeBaseCat(cat, "VBN");
-                break;
-              case "Rated":
-                cat = changeBaseCat(cat, "VBN");
-                break;
-              case "FALTERS":
-                cat = changeBaseCat(cat, "VBZ");
-                break;
-              case "Got":
-                cat = changeBaseCat(cat, "VBN");
-                break;
-              case "JUMPING":
-                cat = changeBaseCat(cat, "VBG");
-                break;
-              case "Branching":
-                cat = changeBaseCat(cat, "VBG");
-                break;
-              case "Excluding":
-                cat = changeBaseCat(cat, "VBG");
-                break;
-              case "OKing":
-                cat = changeBaseCat(cat, "VBG");
-                break;
+            if (word.equals("GRAB")) {
+              cat = changeBaseCat(cat, "VBP");
+            } else if (word.equals("mature")) {
+              cat = changeBaseCat(cat, "VB");
+            } else if (word.equals("Face")) {
+              cat = changeBaseCat(cat, "VBP");
+            } else if (word.equals("are")) {
+              cat = changeBaseCat(cat, "VBP");
+            } else if (word.equals("Urging")) {
+              cat = changeBaseCat(cat, "VBG");
+            } else if (word.equals("Finding")) {
+              cat = changeBaseCat(cat, "VBG");
+            } else if (word.equals("say")) {
+              cat = changeBaseCat(cat, "VBP");
+            } else if (word.equals("Added")) {
+              cat = changeBaseCat(cat, "VBD");
+            } else if (word.equals("Adds")) {
+              cat = changeBaseCat(cat, "VBZ");
+            } else if (word.equals("BRACED")) {
+              cat = changeBaseCat(cat, "VBD");
+            } else if (word.equals("REQUIRED")) {
+              cat = changeBaseCat(cat, "VBN");
+            } else if (word.equals("SIZING")) {
+              cat = changeBaseCat(cat, "VBG");
+            } else if (word.equals("REVIEW")) {
+              cat = changeBaseCat(cat, "VB");
+            } else if (word.equals("code-named")) {
+              cat = changeBaseCat(cat, "VBN");
+            } else if (word.equals("Printed")) {
+              cat = changeBaseCat(cat, "VBN");
+            } else if (word.equals("Rated")) {
+              cat = changeBaseCat(cat, "VBN");
+            } else if (word.equals("FALTERS")) {
+              cat = changeBaseCat(cat, "VBZ");
+            } else if (word.equals("Got")) {
+              cat = changeBaseCat(cat, "VBN");
+            } else if (word.equals("JUMPING")) {
+              cat = changeBaseCat(cat, "VBG");
+            } else if (word.equals("Branching")) {
+              cat = changeBaseCat(cat, "VBG");
+            } else if (word.equals("Excluding")) {
+              cat = changeBaseCat(cat, "VBG");
+            } else if (word.equals("Adds")) {
+              cat = changeBaseCat(cat, "VBZ");
+            } else if (word.equals("OKing")) {
+              cat = changeBaseCat(cat, "VBG");
             }
           } else if (baseCat.equals("POS")) {
             cat = changeBaseCat(cat, "VBZ");
@@ -1068,36 +1039,31 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
             cat = changeBaseCat(cat, "RB");
           }
         } else if (baseParentStr.equals("ADJP")) {
-          switch (baseCat) {
-            case "UH":
+          if (baseCat.equals("UH")) {
+            cat = changeBaseCat(cat, "JJ");
+          } else if (baseCat.equals("JJ")) {
+            if (word.equalsIgnoreCase("more")) {
+              cat = changeBaseCat(cat, "JJR");
+            }
+          } else if (baseCat.equals("RB")) {
+            if (word.equalsIgnoreCase("free")) {
               cat = changeBaseCat(cat, "JJ");
-              break;
-            case "JJ":
-              if (word.equalsIgnoreCase("more")) {
-                cat = changeBaseCat(cat, "JJR");
-              }
-              break;
-            case "RB":
-              if (word.equalsIgnoreCase("free")) {
-                cat = changeBaseCat(cat, "JJ");
-              } else if (word.equalsIgnoreCase("clear")) {
-                cat = changeBaseCat(cat, "JJ");
-              } else if (word.equalsIgnoreCase("tight")) {
-                cat = changeBaseCat(cat, "JJ");
-              } else if (word.equalsIgnoreCase("sure")) {
-                cat = changeBaseCat(cat, "JJ");
-              } else if (word.equalsIgnoreCase("particular")) {
-                cat = changeBaseCat(cat, "JJ");
-              }
-              // most uses of hard/RB should be JJ but not hard put/pressed exx.
-              break;
-            case "VB":
-              if (word.equalsIgnoreCase("stock")) {
-                cat = changeBaseCat(cat, "NN");
-              } else if (word.equalsIgnoreCase("secure")) {
-                cat = changeBaseCat(cat, "JJ");
-              }
-              break;
+            } else if (word.equalsIgnoreCase("clear")) {
+              cat = changeBaseCat(cat, "JJ");
+            } else if (word.equalsIgnoreCase("tight")) {
+              cat = changeBaseCat(cat, "JJ");
+            } else if (word.equalsIgnoreCase("sure")) {
+              cat = changeBaseCat(cat, "JJ");
+            } else if (word.equalsIgnoreCase("particular")) {
+              cat = changeBaseCat(cat, "JJ");
+            }
+            // most uses of hard/RB should be JJ but not hard put/pressed exx.
+          } else if (baseCat.equals("VB")) {
+            if (word.equalsIgnoreCase("stock")) {
+              cat = changeBaseCat(cat, "NN");
+            } else if (word.equalsIgnoreCase("secure")) {
+              cat = changeBaseCat(cat, "JJ");
+            }
           }
         } else if (baseParentStr.equals("QP")) {
           if (word.equalsIgnoreCase("about")) {
@@ -1151,22 +1117,16 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
             cat = changeBaseCat(cat, "RB");
           }
         } else if (baseCat.equals(",")) {
-          switch (word) {
-            case "2":
-              cat = changeBaseCat(cat, "CD");
-              break;
-            case "an":
-              cat = changeBaseCat(cat, "DT");
-              break;
-            case "Wa":
-              cat = changeBaseCat(cat, "NNP");
-              break;
-            case "section":
-              cat = changeBaseCat(cat, "NN");
-              break;
-            case "underwriters":
-              cat = changeBaseCat(cat, "NNS");
-              break;
+          if (word.equals("2")) {
+            cat = changeBaseCat(cat, "CD");
+          } else if (word.equals("an")) {
+            cat = changeBaseCat(cat, "DT");
+          } else if (word.equals("Wa")) {
+            cat = changeBaseCat(cat, "NNP");
+          } else if (word.equals("section")) {
+            cat = changeBaseCat(cat, "NN");
+          } else if (word.equals("underwriters")) {
+            cat = changeBaseCat(cat, "NNS");
           }
         } else if (baseCat.equals("CD")) {
           if (word.equals("high-risk")) {
@@ -1548,22 +1508,12 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
           // don't split on weirdo categories!
           // but do preserve agreement distinctions
           // note MD is like VBD -- any subject person/number okay
-          switch (baseTag) {
-            case "VBD":
-            case "MD":
-              cat = cat + "-VBF";
-              break;
-            case "VBZ":
-            case "TO":
-            case "VBG":
-            case "VBP":
-            case "VBN":
-            case "VB":
-              cat = cat + "-" + baseTag;
-              break;
-            default:
-              System.err.println("XXXX Head of " + t + " is " + word + "/" + baseTag);
-              break;
+          if (baseTag.equals("VBD") || baseTag.equals("MD")) {
+            cat = cat + "-VBF";
+          } else if (baseTag.equals("VBZ") || baseTag.equals("TO") || baseTag.equals("VBG") || baseTag.equals("VBP") || baseTag.equals("VBN") || baseTag.equals("VB")) {
+            cat = cat + "-" + baseTag;
+          } else {
+            System.err.println("XXXX Head of " + t + " is " + word + "/" + baseTag);
           }
         } else if (englishTrain.splitVP == 3 || englishTrain.splitVP == 4) {
           // don't split on weirdo categories but deduce

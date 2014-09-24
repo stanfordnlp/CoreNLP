@@ -2,8 +2,6 @@ package edu.stanford.nlp.trees;
 
 import java.io.Serializable;
 
-import edu.stanford.nlp.ling.CoreLabel;
-
 /**
  * A <code>TypedDependency</code> is a relation between two words in a
  * <code>GrammaticalStructure</code>.  Each <code>TypedDependency</code>
@@ -17,12 +15,6 @@ public class TypedDependency implements Comparable<TypedDependency>, Serializabl
 
   private static final long serialVersionUID = -7690294213151279779L;
 
-  // TODO FIXME: these should all be final.  That they are mutable is
-  // awful design.  Awful.  It means that underlying data structures
-  // can be mutated in ways you don't intend.  For example, there was
-  // a time when you could call typedDependenciesCollapsed() and it
-  // would change the GrammaticalStructure because of the way that
-  // object mutated its TypedDependency objects.
   private GrammaticalRelation reln;
   private TreeGraphNode gov;
   private TreeGraphNode dep;
@@ -33,13 +25,6 @@ public class TypedDependency implements Comparable<TypedDependency>, Serializabl
     this.reln = reln;
     this.gov = gov;
     this.dep = dep;
-  }
-
-  public TypedDependency(TypedDependency other) {
-    this.reln = other.reln;
-    this.gov = other.gov;
-    this.dep = other.dep;
-    this.extra = other.extra;
   }
 
   public GrammaticalRelation reln() {
@@ -111,7 +96,7 @@ public class TypedDependency implements Comparable<TypedDependency>, Serializabl
     return reln + "(" + gov + ", " + dep + ")";
   }
 
-  public String toString(CoreLabel.OutputFormat format) {
+  public String toString(String format) {
     return reln + "(" + gov.toString(format) + ", " + dep.toString(format) + ")";
   }
 

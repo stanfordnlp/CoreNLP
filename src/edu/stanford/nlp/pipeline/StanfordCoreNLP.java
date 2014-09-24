@@ -26,21 +26,24 @@
 
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.ie.NERClassifierCombiner;
+import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.io.FileSequentialCollection;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.objectbank.ObjectBank;
+import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 import edu.stanford.nlp.util.logging.StanfordRedwoodConfiguration;
 
 import java.io.*;
+import java.util.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
 import java.util.regex.Pattern;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
@@ -48,7 +51,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 /**
  * This is a pipeline that takes in a string and returns various analyzed
  * linguistic forms.
- * The String is tokenized via a tokenizer (using a TokenizerAnnotator), and
+ * The String is tokenized via a tokenizer (such as PTBTokenizerAnnotator), and
  * then other sequence model style annotation can be used to add things like
  * lemmas, POS tags, and named entities.  These are returned as a list of CoreLabels.
  * Other analysis components build and store parse trees, dependency graphs, etc.
@@ -80,7 +83,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 public class StanfordCoreNLP extends AnnotationPipeline {
 
-  enum OutputFormat { TEXT, XML, JSON, CONLL, SERIALIZED }
+  enum OutputFormat { TEXT, XML, SERIALIZED }
 
   // other constants
   public static final String CUSTOM_ANNOTATOR_PREFIX = "customAnnotatorClass.";
@@ -160,7 +163,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
    * </p>
    *
    * @return A class which specifies the actual implementation of each of the annotators called
-   *         when creating the annotator pool. The canonical annotators are defaulted to in
+   *         when creating the annotator pool. The cannonical annotators are defaulted to in
    *         {@link edu.stanford.nlp.pipeline.AnnotatorImplementations}.
    */
   protected AnnotatorImplementations getAnnotatorImplementations() {
@@ -240,9 +243,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   }
 
   public boolean getPrintSingletons() {
-    return PropertiesUtils.getBool(properties, "output.printSingletonEntities", false);
+    return PropertiesUtils.getBool(properties, "output.printSingletonEntities", false); 
   }
-
+   
 
   public static boolean isXMLOutputPresent() {
     try {
@@ -332,21 +335,427 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       pool = new AnnotatorPool();
     }
 
-    pool.register(STANFORD_TOKENIZE, AnnotatorFactories.tokenize(properties, annotatorImplementation));
-    pool.register(STANFORD_CLEAN_XML, AnnotatorFactories.cleanXML(properties, annotatorImplementation));
-    pool.register(STANFORD_SSPLIT, AnnotatorFactories.sentenceSplit(properties, annotatorImplementation));
-    pool.register(STANFORD_POS, AnnotatorFactories.posTag(properties, annotatorImplementation));
-    pool.register(STANFORD_LEMMA, AnnotatorFactories.lemma(properties, annotatorImplementation));
-    pool.register(STANFORD_NER, AnnotatorFactories.nerTag(properties, annotatorImplementation));
-    pool.register(STANFORD_REGEXNER, AnnotatorFactories.regexNER(properties, annotatorImplementation));
-    pool.register(STANFORD_GENDER, AnnotatorFactories.gender(properties, annotatorImplementation));
-    pool.register(STANFORD_TRUECASE, AnnotatorFactories.truecase(properties, annotatorImplementation));
-    pool.register(STANFORD_PARSE, AnnotatorFactories.parse(properties, annotatorImplementation));
-    pool.register(STANFORD_DETERMINISTIC_COREF, AnnotatorFactories.coref(properties, annotatorImplementation));
-    pool.register(STANFORD_RELATION, AnnotatorFactories.relation(properties, annotatorImplementation));
-    pool.register(STANFORD_SENTIMENT, AnnotatorFactories.sentiment(properties, annotatorImplementation));
-    pool.register(STANFORD_COLUMN_DATA_CLASSIFIER,AnnotatorFactories.columnDataClassifier(properties,annotatorImplementation));
-    // Add more annotators here
+    //
+    // tokenizer: breaks text into a sequence of tokens
+    // this is required for all following annotators!
+    //
+    pool.register(STANFORD_TOKENIZE, new AnnotatorFactory(inputProps, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
+                          "false"))) {
+          return annotatorImplementation.whitespaceTokenizer(properties);
+        } else {
+          String options = properties.getProperty("tokenize.options", PTBTokenizerAnnotator.DEFAULT_OPTIONS);
+          boolean keepNewline = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
+          // If they
+          if (properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
+            keepNewline = true;
+          }
+          // If the user specifies "tokenizeNLs=false" in tokenize.options, then this default will
+          // be overridden.
+          if (keepNewline) {
+            options = "tokenizeNLs," + options;
+          }
+          return annotatorImplementation.ptbTokenizer(properties, false, options);
+        }
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        StringBuilder os = new StringBuilder();
+        os.append("tokenize.whitespace:" +
+                properties.getProperty("tokenize.whitespace", "false"));
+        if (properties.getProperty("tokenize.options") != null) {
+          os.append(":tokenize.options:" + properties.getProperty("tokenize.options"));
+        }
+        if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
+                "false"))) {
+          os.append(WhitespaceTokenizerAnnotator.EOL_PROPERTY + ":" +
+                  properties.getProperty(WhitespaceTokenizerAnnotator.EOL_PROPERTY,
+                          "false"));
+          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ":" +
+                  properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
+                          "false"));
+          return os.toString();
+        } else {
+          os.append(NEWLINE_SPLITTER_PROPERTY + ":" +
+                  Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY,
+                          "false")));
+          os.append(NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ":" +
+                    properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY, DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
+        }
+        return os.toString();
+      }
+    });
+
+    pool.register(STANFORD_CLEAN_XML, new AnnotatorFactory(inputProps, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        String xmlTags =
+          properties.getProperty("clean.xmltags",
+                            CleanXmlAnnotator.DEFAULT_XML_TAGS);
+        String sentenceEndingTags =
+          properties.getProperty("clean.sentenceendingtags",
+                            CleanXmlAnnotator.DEFAULT_SENTENCE_ENDERS);
+        String singleSentenceTags =
+                properties.getProperty("clean.singlesentencetags",
+                        CleanXmlAnnotator.DEFAULT_SINGLE_SENTENCE_TAGS);
+        String allowFlawedString = properties.getProperty("clean.allowflawedxml");
+        boolean allowFlawed = CleanXmlAnnotator.DEFAULT_ALLOW_FLAWS;
+        if (allowFlawedString != null)
+          allowFlawed = Boolean.valueOf(allowFlawedString);
+        String dateTags =
+          properties.getProperty("clean.datetags",
+                            CleanXmlAnnotator.DEFAULT_DATE_TAGS);
+        String docIdTags =
+                properties.getProperty("clean.docIdtags",
+                        CleanXmlAnnotator.DEFAULT_DOCID_TAGS);
+        String docTypeTags =
+                properties.getProperty("clean.docTypetags",
+                        CleanXmlAnnotator.DEFAULT_DOCTYPE_TAGS);
+        String utteranceTurnTags =
+                properties.getProperty("clean.turntags",
+                        CleanXmlAnnotator.DEFAULT_UTTERANCE_TURN_TAGS);
+        String speakerTags =
+                properties.getProperty("clean.speakertags",
+                        CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS);
+        String docAnnotations =
+                properties.getProperty("clean.docAnnotations",
+                        CleanXmlAnnotator.DEFAULT_DOC_ANNOTATIONS_PATTERNS);
+        String tokenAnnotations =
+                properties.getProperty("clean.tokenAnnotations",
+                        CleanXmlAnnotator.DEFAULT_TOKEN_ANNOTATIONS_PATTERNS);
+        String sectionTags =
+                properties.getProperty("clean.sectiontags",
+                        CleanXmlAnnotator.DEFAULT_SECTION_TAGS);
+        String sectionAnnotations =
+                properties.getProperty("clean.sectionAnnotations",
+                        CleanXmlAnnotator.DEFAULT_SECTION_ANNOTATIONS_PATTERNS);
+        String ssplitDiscardTokens =
+                properties.getProperty("clean.ssplitDiscardTokens");
+        CleanXmlAnnotator annotator = annotatorImplementation.cleanXML(properties, xmlTags,
+            sentenceEndingTags,
+            dateTags,
+            allowFlawed);
+        annotator.setSingleSentenceTagMatcher(singleSentenceTags);
+        annotator.setDocIdTagMatcher(docIdTags);
+        annotator.setDocTypeTagMatcher(docTypeTags);
+        annotator.setDiscourseTags(utteranceTurnTags, speakerTags);
+        annotator.setDocAnnotationPatterns(docAnnotations);
+        annotator.setTokenAnnotationPatterns(tokenAnnotations);
+        annotator.setSectionTagMatcher(sectionTags);
+        annotator.setSectionAnnotationPatterns(sectionAnnotations);
+        annotator.setSsplitDiscardTokensMatcher(ssplitDiscardTokens);
+        return annotator;
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        return "clean.xmltags:" +
+                properties.getProperty("clean.xmltags",
+                  CleanXmlAnnotator.DEFAULT_XML_TAGS) +
+                "clean.sentenceendingtags:" +
+                properties.getProperty("clean.sentenceendingtags",
+                  CleanXmlAnnotator.DEFAULT_SENTENCE_ENDERS) +
+                "clean.sentenceendingtags:" +
+                properties.getProperty("clean.singlesentencetags",
+                        CleanXmlAnnotator.DEFAULT_SINGLE_SENTENCE_TAGS) +
+                "clean.allowflawedxml:" +
+                properties.getProperty("clean.allowflawedxml", "") +
+                "clean.datetags:" +
+                properties.getProperty("clean.datetags",
+                  CleanXmlAnnotator.DEFAULT_DATE_TAGS) +
+                "clean.docidtags:" +
+                properties.getProperty("clean.docid",
+                        CleanXmlAnnotator.DEFAULT_DOCID_TAGS) +
+                "clean.doctypetags:" +
+                properties.getProperty("clean.doctype",
+                        CleanXmlAnnotator.DEFAULT_DOCTYPE_TAGS) +
+                "clean.turntags:" +
+                properties.getProperty("clean.turntags",
+                  CleanXmlAnnotator.DEFAULT_UTTERANCE_TURN_TAGS) +
+                "clean.speakertags:" +
+                properties.getProperty("clean.speakertags",
+                  CleanXmlAnnotator.DEFAULT_SPEAKER_TAGS) +
+                "clean.docAnnotations:" +
+                properties.getProperty("clean.docAnnotations",
+                  CleanXmlAnnotator.DEFAULT_DOC_ANNOTATIONS_PATTERNS) +
+                "clean.tokenAnnotations:" +
+                properties.getProperty("clean.tokenAnnotations",
+                        CleanXmlAnnotator.DEFAULT_TOKEN_ANNOTATIONS_PATTERNS) +
+                "clean.sectiontags:" +
+                properties.getProperty("clean.sectiontags",
+                  CleanXmlAnnotator.DEFAULT_SECTION_TAGS) +
+                "clean.sectionAnnotations:" +
+                properties.getProperty("clean.sectionAnnotations",
+                        CleanXmlAnnotator.DEFAULT_SECTION_ANNOTATIONS_PATTERNS);
+      }
+    });
+
+    //
+    // Sentence splitter: splits the above sequence of tokens into
+    // sentences.  This is required when processing entire documents or
+    // text consisting of multiple sentences.
+    //
+    pool.register(STANFORD_SSPLIT, new AnnotatorFactory(inputProps, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        System.err.println(signature());
+        boolean nlSplitting = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
+        if (nlSplitting) {
+          boolean whitespaceTokenization = Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"));
+          if (whitespaceTokenization) {
+            if (System.getProperty("line.separator").equals("\n")) {
+              return WordsToSentencesAnnotator.newlineSplitter(false, "\n");
+            } else {
+              // throw "\n" in just in case files use that instead of
+              // the system separator
+              return WordsToSentencesAnnotator.newlineSplitter(false, System.getProperty("line.separator"), "\n");
+            }
+          } else {
+            return WordsToSentencesAnnotator.newlineSplitter(false, PTBTokenizer.getNewlineToken());
+          }
+
+        } else {
+          // Treat as one sentence: You get a no-op sentence splitter that always returns all tokens as one sentence.
+          String isOneSentence = properties.getProperty("ssplit.isOneSentence");
+          if (Boolean.parseBoolean(isOneSentence)) { // this method treats null as false
+            return WordsToSentencesAnnotator.nonSplitter(false);
+          }
+
+          // multi token sentence boundaries
+          String boundaryMultiTokenRegex = properties.getProperty("ssplit.boundaryMultiTokenRegex");
+
+          // Discard these tokens without marking them as sentence boundaries
+          String tokenPatternsToDiscardProp = properties.getProperty("ssplit.tokenPatternsToDiscard");
+          Set<String> tokenRegexesToDiscard = null;
+          if (tokenPatternsToDiscardProp != null){
+            String [] toks = tokenPatternsToDiscardProp.split(",");
+            tokenRegexesToDiscard = Generics.newHashSet(Arrays.asList(toks));
+          }
+          // regular boundaries
+          String boundaryTokenRegex = properties.getProperty("ssplit.boundaryTokenRegex");
+          Set<String> boundariesToDiscard = null;
+
+          // newline boundaries which are discarded.
+          String bounds = properties.getProperty("ssplit.boundariesToDiscard");
+          if (bounds != null) {
+            String [] toks = bounds.split(",");
+            boundariesToDiscard = Generics.newHashSet(Arrays.asList(toks));
+          }
+          Set<String> htmlElementsToDiscard = null;
+          // HTML boundaries which are discarded
+          bounds = properties.getProperty("ssplit.htmlBoundariesToDiscard");
+          if (bounds != null) {
+            String [] elements = bounds.split(",");
+            htmlElementsToDiscard = Generics.newHashSet(Arrays.asList(elements));
+          }
+          String nlsb = properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY, DEFAULT_NEWLINE_IS_SENTENCE_BREAK);
+
+          return annotatorImplementation.wordToSentences(properties,
+              false, boundaryTokenRegex, boundariesToDiscard, htmlElementsToDiscard,
+              nlsb, boundaryMultiTokenRegex, tokenRegexesToDiscard);
+        }
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        StringBuilder os = new StringBuilder();
+        if (Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"))) {
+          os.append(NEWLINE_SPLITTER_PROPERTY + "=").append(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false")).append("\n");
+          os.append("tokenize.whitespace=").append(properties.getProperty("tokenize.whitespace", "false")).append("\n");
+        } else {
+          os.append(baseSignature(properties, STANFORD_SSPLIT));
+        }
+        return os.toString();
+      }
+    });
+
+    //
+    // POS tagger
+    //
+    pool.register(STANFORD_POS, new AnnotatorFactory(inputProps, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        try {
+          return annotatorImplementation.posTagger(properties);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        return POSTaggerAnnotator.signature(properties);
+      }
+    });
+
+    //
+    // Lemmatizer
+    //
+    pool.register(STANFORD_LEMMA, new AnnotatorFactory(inputProps, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        return annotatorImplementation.morpha(properties, false);
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        // nothing for this one
+        return "";
+      }
+    });
+
+    //
+    // NER
+    //
+    pool.register(STANFORD_NER, new AnnotatorFactory(inputProps, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        try {
+          return annotatorImplementation.ner(properties);
+        } catch (FileNotFoundException e) {
+          throw new RuntimeIOException(e);
+        }
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        return "ner.model:" +
+                properties.getProperty("ner.model", "") +
+                NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY + ":" +
+                properties.getProperty(NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
+                        Boolean.toString(NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT)) +
+                NumberSequenceClassifier.USE_SUTIME_PROPERTY + ":" +
+                properties.getProperty(NumberSequenceClassifier.USE_SUTIME_PROPERTY,
+                        Boolean.toString(NumberSequenceClassifier.USE_SUTIME_DEFAULT));
+      }
+    });
+
+    //
+    // Regex NER
+    //
+    pool.register(STANFORD_REGEXNER, new AnnotatorFactory(inputProps, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        return annotatorImplementation.tokensRegexNER(properties, "regexner");
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        return PropertiesUtils.getSignature("regexner", properties, TokensRegexNERAnnotator.SUPPORTED_PROPERTIES);
+      }
+    });
+
+    //
+    // Gender Annotator
+    //
+    pool.register(STANFORD_GENDER, new AnnotatorFactory(inputProps, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        return annotatorImplementation.gender(properties, false);
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        return "gender.firstnames:" +
+                properties.getProperty("gender.firstnames",
+                        DefaultPaths.DEFAULT_GENDER_FIRST_NAMES);
+      }
+    });
+
+
+    //
+    // True caser
+    //
+    pool.register(STANFORD_TRUECASE, new AnnotatorFactory(inputProps, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        String model = properties.getProperty("truecase.model", DefaultPaths.DEFAULT_TRUECASE_MODEL);
+        String bias = properties.getProperty("truecase.bias", TrueCaseAnnotator.DEFAULT_MODEL_BIAS);
+        String mixed = properties.getProperty("truecase.mixedcasefile", DefaultPaths.DEFAULT_TRUECASE_DISAMBIGUATION_LIST);
+        return annotatorImplementation.trueCase(properties, model, bias, mixed, false);
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        return "truecase.model:" +
+                properties.getProperty("truecase.model",
+                        DefaultPaths.DEFAULT_TRUECASE_MODEL) +
+                "truecase.bias:" +
+                properties.getProperty("truecase.bias",
+                        TrueCaseAnnotator.DEFAULT_MODEL_BIAS) +
+                "truecase.mixedcasefile:" +
+                properties.getProperty("truecase.mixedcasefile",
+                        DefaultPaths.DEFAULT_TRUECASE_DISAMBIGUATION_LIST);
+      }
+    });
+
+    //
+    // Parser
+    //
+    pool.register(STANFORD_PARSE, new AnnotatorFactory(inputProps, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        return annotatorImplementation.parse(properties);
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        String type = properties.getProperty("parse.type", "stanford");
+        if(type.equalsIgnoreCase("stanford")){
+          return ParserAnnotator.signature("parse", properties);
+        } else if(type.equalsIgnoreCase("charniak")) {
+          return "parse.model:" +
+                  properties.getProperty("parse.model", "") +
+                  "parse.executable:" +
+                  properties.getProperty("parse.executable", "") +
+                  "parse.maxlen:" +
+                  properties.getProperty("parse.maxlen", "");
+        } else {
+          throw new RuntimeException("Unknown parser type: " + type +
+                  " (currently supported: stanford and charniak)");
+        }
+      }
+    });
+
+    //
+    // Coreference resolution
+    //
+    pool.register(STANFORD_DETERMINISTIC_COREF, new AnnotatorFactory(inputProps, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        return annotatorImplementation.coref(properties);
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        return DeterministicCorefAnnotator.signature(properties);
+      }
+    });
 
     // add annotators loaded via reflection from classnames specified
     // in the properties
@@ -356,7 +765,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       final String property = (String) propertyKey;
       if (property.startsWith(CUSTOM_ANNOTATOR_PREFIX)) {
         final String customName =
-            property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
+          property.substring(CUSTOM_ANNOTATOR_PREFIX.length());
         final String customClassName = inputProps.getProperty(property);
         System.err.println("Registering annotator " + customName +
             " with class " + customClassName);
@@ -381,6 +790,38 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         });
       }
     }
+
+
+    pool.register(STANFORD_RELATION, new AnnotatorFactory(inputProps, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        return annotatorImplementation.relations(properties);
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        return "sup.relation.verbose:" +
+        properties.getProperty("sup.relation.verbose",
+                "false") +
+        properties.getProperty("sup.relation.model",
+                DefaultPaths.DEFAULT_SUP_RELATION_EX_RELATION_MODEL);
+      }
+    });
+
+    pool.register(STANFORD_SENTIMENT, new AnnotatorFactory(inputProps, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        return annotatorImplementation.sentiment(properties, STANFORD_SENTIMENT);
+      }
+
+      @Override
+      public String additionalSignature() {
+        return "sentiment.model=" + inputProps.get("sentiment.model");
+      }
+    });
 
     //
     // add more annotators here!
@@ -474,32 +915,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   }
 
   /**
-   * Displays the output of all annotators in JSON format.
-   * @param annotation Contains the output of all annotators
-   * @param w The Writer to send the output to
-   * @throws IOException
-   */
-  public void jsonPrint(Annotation annotation, Writer w) throws IOException {
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    JSONOutputter.jsonPrint(annotation, os, this);
-    w.write(new String(os.toByteArray(), getEncoding()));
-    w.flush();
-  }
-
-  /**
-   * Displays the output of many annotators in CoNLL format.
-   * @param annotation Contains the output of all annotators
-   * @param w The Writer to send the output to
-   * @throws IOException
-   */
-  public void conllPrint(Annotation annotation, Writer w) throws IOException {
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    CoNLLOutputter.conllPrint(annotation, os, this);
-    w.write(new String(os.toByteArray(), getEncoding()));
-    w.flush();
-  }
-
-  /**
    * Displays the output of all annotators in XML format.
    * @param annotation Contains the output of all annotators
    * @param os The output stream
@@ -510,7 +925,13 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       Class clazz = Class.forName("edu.stanford.nlp.pipeline.XMLOutputter");
       Method method = clazz.getMethod("xmlPrint", Annotation.class, OutputStream.class, StanfordCoreNLP.class);
       method.invoke(null, annotation, os, this);
-    } catch (NoSuchMethodException | IllegalAccessException | ClassNotFoundException | InvocationTargetException e) {
+    } catch (NoSuchMethodException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (InvocationTargetException e) {
       throw new RuntimeException(e);
     }
   }
@@ -675,14 +1096,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         case XML:
           pipeline.xmlPrint(anno, System.out);
           break;
-        case JSON:
-          new JSONOutputter().print(anno, System.out, pipeline);
-          System.out.println();
-          break;
-        case CONLL:
-          new CoNLLOutputter().print(anno, System.out, pipeline);
-          System.out.println();
-          break;
         case TEXT:
           pipeline.prettyPrint(anno, System.out);
           break;
@@ -697,7 +1110,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     return ObjectBank.getLineIterator(fileName, new ObjectBank.PathToFileFunction());
   }
 
-  private static AnnotationSerializer loadSerializer(String serializerClass, String name, Properties properties) {
+  private AnnotationSerializer loadSerializer(String serializerClass, String name, Properties properties) {
     AnnotationSerializer serializer = null;
     try {
       // Try loading with properties
@@ -806,129 +1219,121 @@ public class StanfordCoreNLP extends AnnotationPipeline {
 
       final String finalOutputFilename = outputFilename;
       //register a task...
-      toRun.add(() -> {
-        //catching exceptions...
-        try {
-          // Check whether this file should be skipped again
-          if (noClobber && new File(finalOutputFilename).exists()) {
-            err("Skipping " + file.getName() + ": output file " + finalOutputFilename + " as it already exists.  Don't use the noClobber option to override this.");
-            synchronized (totalSkipped) {
-              totalSkipped.incValue(1);
-            }
-            return;
-          }
-
-          forceTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + finalOutputFilename);
-
-          //--Process File
-          Annotation annotation = null;
-          if (file.getAbsolutePath().endsWith(".ser.gz")) {
-            // maybe they want to continue processing a partially processed annotation
-            try {
-              // Create serializers
-              if (inputSerializerClass != null) {
-                AnnotationSerializer inputSerializer = loadSerializer(inputSerializerClass, inputSerializerName, properties);
-                InputStream is = new BufferedInputStream(new FileInputStream(file));
-                Pair<Annotation, InputStream> pair = inputSerializer.read(is);
-                pair.second.close();
-                annotation = pair.first;
-                IOUtils.closeIgnoringExceptions(is);
-              } else {
-                annotation = IOUtils.readObjectFromFile(file);
-              }
-            } catch (IOException e) {
-              // guess that's not what they wanted
-              // We hide IOExceptions because ones such as file not
-              // found will be thrown again in a moment.  Note that
-              // we are intentionally letting class cast exceptions
-              // and class not found exceptions go through.
-            } catch (ClassNotFoundException e) {
-              throw new RuntimeException(e);
-            }
-          }
-
-          //(read file)
-          if (annotation == null) {
-            String encoding = getEncoding();
-            String text = IOUtils.slurpFile(file, encoding);
-            annotation = new Annotation(text);
-          }
-
-          boolean annotationOkay = false;
-          forceTrack("Annotating file " + file.getAbsoluteFile());
+      toRun.add(new Runnable(){
+        //who's run() method is...
+        @Override
+        public void run(){
+          //catching exceptions...
           try {
-            annotate(annotation);
-            annotationOkay = true;
-          } catch (Exception ex) {
-            if (continueOnAnnotateError) {
-              // Error annotating but still wanna continue
-              // (maybe in the middle of long job and maybe next one will be okay)
-              err("Error annotating " + file.getAbsoluteFile(), ex);
-              annotationOkay = false;
-              synchronized (totalErrorAnnotating) {
-                totalErrorAnnotating.incValue(1);
+            // Check whether this file should be skipped again
+            if (noClobber && new File(finalOutputFilename).exists()) {
+              err("Skipping " + file.getName() + ": output file " + finalOutputFilename + " as it already exists.  Don't use the noClobber option to override this.");
+              synchronized (totalSkipped) {
+                totalSkipped.incValue(1);
+              }
+              return;
+            }
+
+            forceTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + finalOutputFilename);
+
+            //--Process File
+            Annotation annotation = null;
+            if (file.getAbsolutePath().endsWith(".ser.gz")) {
+              // maybe they want to continue processing a partially processed annotation
+              try {
+                // Create serializers
+                if (inputSerializerClass != null) {
+                  AnnotationSerializer inputSerializer = loadSerializer(inputSerializerClass, inputSerializerName, properties);
+                  InputStream is = new BufferedInputStream(new FileInputStream(file));
+                  Pair<Annotation, InputStream> pair = inputSerializer.read(is);
+                  pair.second.close();
+                  annotation = pair.first;
+                  IOUtils.closeIgnoringExceptions(is);
+                } else {
+                  annotation = IOUtils.readObjectFromFile(file);
+                }
+              } catch (IOException e) {
+                // guess that's not what they wanted
+                // We hide IOExceptions because ones such as file not
+                // found will be thrown again in a moment.  Note that
+                // we are intentionally letting class cast exceptions
+                // and class not found exceptions go through.
+              } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+              }
+            }
+
+            //(read file)
+            if (annotation == null) {
+              String encoding = getEncoding();
+              String text = IOUtils.slurpFile(file, encoding);
+              annotation = new Annotation(text);
+            }
+
+            boolean annotationOkay = false;
+            forceTrack("Annotating file " + file.getAbsoluteFile());
+            try {
+              annotate(annotation);
+              annotationOkay = true;
+            } catch (Exception ex) {
+              if (continueOnAnnotateError) {
+                // Error annotating but still wanna continue
+                // (maybe in the middle of long job and maybe next one will be okay)
+                err("Error annotating " + file.getAbsoluteFile(), ex);
+                annotationOkay = false;
+                synchronized (totalErrorAnnotating) {
+                  totalErrorAnnotating.incValue(1);
+                }
+              } else {
+                throw new RuntimeException("Error annotating " + file.getAbsoluteFile(), ex);
+              }
+            } finally {
+              endTrack("Annotating file " + file.getAbsoluteFile());
+            }
+
+            if (annotationOkay) {
+              //--Output File
+              switch (outputFormat) {
+              case XML: {
+                OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+                xmlPrint(annotation, fos);
+                fos.close();
+                break;
+              }
+              case TEXT: {
+                OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+                prettyPrint(annotation, fos);
+                fos.close();
+                break;
+              }
+              case SERIALIZED: {
+                if (outputSerializerClass != null) {
+                  AnnotationSerializer outputSerializer = loadSerializer(outputSerializerClass, outputSerializerName, properties);
+                  OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
+                  outputSerializer.write(annotation, fos).close();
+                } else {
+                  IOUtils.writeObjectToFile(annotation, finalOutputFilename);
+                }
+                break;
+              }
+              default:
+                throw new IllegalArgumentException("Unknown output format " + outputFormat);
+              }
+              synchronized (totalProcessed) {
+                totalProcessed.incValue(1);
+                if (totalProcessed.intValue() % 1000 == 0) {
+                  log("Processed " + totalProcessed + " documents");
+                }
               }
             } else {
-              throw new RuntimeException("Error annotating " + file.getAbsoluteFile(), ex);
+              warn("Error annotating " + file.getAbsoluteFile() + " not saved to " + finalOutputFilename);
             }
-          } finally {
-            endTrack("Annotating file " + file.getAbsoluteFile());
+
+            endTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + finalOutputFilename);
+
+          } catch (IOException e) {
+            throw new RuntimeIOException(e);
           }
-
-          if (annotationOkay) {
-            //--Output File
-            switch (outputFormat) {
-            case XML: {
-              OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
-              xmlPrint(annotation, fos);
-              fos.close();
-              break;
-            }
-            case JSON: {
-              OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
-              new JSONOutputter().print(annotation, fos);
-              fos.close();
-              break;
-            }
-            case CONLL: {
-              OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
-              new CoNLLOutputter().print(annotation, fos);
-              fos.close();
-              break;
-            }
-            case TEXT: {
-              OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
-              prettyPrint(annotation, fos);
-              fos.close();
-              break;
-            }
-            case SERIALIZED: {
-              if (outputSerializerClass != null) {
-                AnnotationSerializer outputSerializer = loadSerializer(outputSerializerClass, outputSerializerName, properties);
-                OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
-                outputSerializer.write(annotation, fos).close();
-              } else {
-                IOUtils.writeObjectToFile(annotation, finalOutputFilename);
-              }
-              break;
-            }
-            default:
-              throw new IllegalArgumentException("Unknown output format " + outputFormat);
-            }
-            synchronized (totalProcessed) {
-              totalProcessed.incValue(1);
-              if (totalProcessed.intValue() % 1000 == 0) {
-                log("Processed " + totalProcessed + " documents");
-              }
-            }
-          } else {
-            warn("Error annotating " + file.getAbsoluteFile() + " not saved to " + finalOutputFilename);
-          }
-
-          endTrack("Processing file " + file.getAbsolutePath() + " ... writing to " + finalOutputFilename);
-
-        } catch (IOException e) {
-          throw new RuntimeIOException(e);
         }
       });
     }
