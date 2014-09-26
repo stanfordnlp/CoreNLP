@@ -1952,8 +1952,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       String gold = line.get(GoldAnswerAnnotation.class);
       String guess = line.get(whichClassToCompare);
 
-      if (gold == null || guess == null)
-        throw new RuntimeException("why is gold or guess null?");
+      assert (gold != null) : "gold is null";
+      assert(guess != null) : "guess is null";
+
 
       if (gold.equals(guess) && !gold.equalsIgnoreCase(background)) {
         entityTP.incrementCount(gold);
@@ -2299,6 +2300,16 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   public double FScore(double precision, double recall, double beta) {
     double betasq = beta * beta;
     return (1 + betasq) * precision * recall / (betasq * precision + recall);
+  }
+
+  public Set<String> getNonBackgroundLabels(CoreLabel l){
+    Set<String> labels = new HashSet<String>();
+    for(Map.Entry<String, Class<? extends Key<String>>> en: constVars.getAnswerClass().entrySet()){
+      if(!l.get(en.getValue()).equals(constVars.backgroundSymbol)){
+        labels.add(en.getKey());
+      }
+    }
+    return labels;
   }
 
   public static Map<String, Set<String>> readSeedWords(Properties props) {

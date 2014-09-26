@@ -143,9 +143,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
   @Override
   protected void postProcessDependencies(List<TypedDependency> list) {
-    if (DEBUG) {
-      printListSorted("At postProcessDependencies:", list);
-    }
     convertRel(list);
     if (DEBUG) {
       printListSorted("After converting rel:", list);

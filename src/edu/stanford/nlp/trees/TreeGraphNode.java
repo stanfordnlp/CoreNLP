@@ -516,7 +516,11 @@ public class TreeGraphNode extends Tree implements HasParent {
   }
 
   public String toPrimes() {
-    int copy = label().copyCount();
+    Integer integer = label().get(CoreAnnotations.CopyAnnotation.class);
+    int copy = 0;
+    if (integer != null) {
+      copy = integer;
+    }
     return StringUtils.repeat('\'', copy);
   }
 
