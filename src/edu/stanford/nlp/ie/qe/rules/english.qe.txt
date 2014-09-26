@@ -1,0 +1,40 @@
+ENV.defaults["stage.limitIters"] = 50
+
+ENV.defaults["stage"] = 1
+
+$Unit = ( [ {{ tags["Unit"] }} ] ); 
+
+{ pattern: ( ($NUM) ($Unit) ), 
+  result: QuantifiableEntity($1[0].numcompvalue, GetTag($2[0],"Unit") ) }
+  
+{ pattern: ( ($NUM) (/($SiPrefixes)-?($SiUnits)s?/) ),
+  matchWithResults: TRUE,
+  result: QuantifiableEntity(
+    Multiply($1[0].numcompvalue, 
+    SI_PREFIX_MAP[Lowercase($$2.matchResults[0].word.group(1))].scale), 
+    SI_UNIT_MAP[Lowercase($$2.matchResults[0].word.group(2))]) 
+}
+  
+{ pattern: ( ($NUM) (/($SiSymPrefixes)($SiSymUnits)s?/) ),
+  matchWithResults: TRUE,
+  result: QuantifiableEntity(
+    Multiply($1[0].numcompvalue, 
+    SI_SYM_PREFIX_MAP[Lowercase($$2.matchResults[0].word.group(1))].scale), 
+    SI_SYM_UNIT_MAP[Lowercase($$2.matchResults[0].word.group(2))]) 
+}
+  
+{ pattern: ( (/(\d+|\d*.\d+)-?($SiSymPrefixes)($SiSymUnits)s?/) ),
+  matchWithResults: TRUE,
+  result: QuantifiableEntity(
+    Multiply( { type: "NUMBER", value: $$1.matchResults[0].word.group(1) }, 
+    SI_SYM_PREFIX_MAP[Lowercase($$1.matchResults[0].word.group(2))].scale), 
+    SI_SYM_UNIT_MAP[Lowercase($$1.matchResults[0].word.group(3))]) 
+}
+  
+{ pattern: ( (/(\d+|\d*.\d+)($SymUnits)s?/) ),
+  matchWithResults: TRUE,
+  result: QuantifiableEntity(
+    { type: "NUMBER", value: $$1.matchResults[0].word.group(1) }, 
+    SYM_UNIT_MAP[Lowercase($$1.matchResults[0].word.group(2))]) 
+}
+  
