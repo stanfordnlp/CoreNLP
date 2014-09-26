@@ -458,7 +458,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   public CoreNLPProtos.DependencyGraph toProto(SemanticGraph graph) {
     CoreNLPProtos.DependencyGraph.Builder builder = CoreNLPProtos.DependencyGraph.newBuilder();
     // Roots
-    Set<IndexedWord> rootSet = new IdentityHashSet<IndexedWord>(graph.getRoots());
+    Set<Integer> rootSet = new IdentityHashSet<>();
+    for (IndexedWord root : graph.getRoots()) {
+      rootSet.add(root.index());
+    }
     // Nodes
     for (IndexedWord node : graph.vertexSet()) {
       // Register node
@@ -470,7 +473,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       builder.addNode(nodeBuilder.build());
       // Register root
-      if (rootSet.contains(node)) {
+      if (rootSet.contains(node.index())) {
         builder.addRoot(node.index());
       }
     }
