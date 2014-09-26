@@ -1,11 +1,9 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreLabel.GenericAnnotation;
-import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.ErasureUtils;
 
 public class PatternsAnnotations implements Serializable {
@@ -25,21 +23,10 @@ public class PatternsAnnotations implements Serializable {
   }
 
 
-  /** All matched phrases - can be from multiple labels*/
-  public static class MatchedPhrases implements GenericAnnotation<CollectionValuedMap<String, String>> {
-    public Class<CollectionValuedMap<String, String>> getType() {
-      Class<CollectionValuedMap<String, String>> claz = (Class) Map.class;
+  public static class MatchedPhrases implements GenericAnnotation<Set<String>> {
+    public Class<Set<String>> getType() {
+      Class<Set<String>> claz = (Class) Set.class;
       return claz;
-    }
-  }
-
-  /**
-   * For each label, what was the longest phrase that matched. If none, then the map doesn't have the label key
-   */
-  public static class LongestMatchedPhraseForEachLabel implements  GenericAnnotation<Map<String, String>>{
-    @Override
-    public Class<Map<String, String>> getType() {
-      return ErasureUtils.<Class<Map<String, String>>> uncheckedCast(Map.class);
     }
   }
 
@@ -103,10 +90,6 @@ public class PatternsAnnotations implements Serializable {
     }
   }
 
-  public static class SeedLabeledOrNot implements GenericAnnotation<Map<Class, Boolean>>{
-    public Class<Map<Class, Boolean>> getType() {
-      return ErasureUtils.<Class<Map<Class, Boolean>>> uncheckedCast(Map.class);}
-  }
   public static class OtherSemanticLabel implements GenericAnnotation<String>{
     public Class<String> getType(){
       return String.class;

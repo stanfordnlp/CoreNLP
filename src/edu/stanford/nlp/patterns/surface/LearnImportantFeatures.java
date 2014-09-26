@@ -187,20 +187,15 @@ public class LearnImportantFeatures {
     Counter<String> feat = new ClassicCounter<String>();
     CoreLabel l = sent[i];
 
-    String label;
-    if (l.get(answerClass).toString().equals(answerLabel))
-      label = answerLabel;
-    else
-      label = "O";
     
-      CollectionValuedMap<String, String> matchedPhrases = l
+      Set<String> matchedPhrases = l
           .get(PatternsAnnotations.MatchedPhrases.class);
       if (matchedPhrases == null) {
-        matchedPhrases = new CollectionValuedMap<String, String>();
-        matchedPhrases.add(label, l.word());
+        matchedPhrases = new HashSet<String>();
+        matchedPhrases.add(l.word());
       }
 
-      for (String w : matchedPhrases.allValues()) {
+      for (String w : matchedPhrases) {
         Integer num = this.clusterIds.get(w);
         if (num == null)
           num = -1;
@@ -227,7 +222,11 @@ public class LearnImportantFeatures {
       feat.incrementCount("NEXT-" + "TAG-" + lj.tag());
     }
 
-
+    String label;
+    if (l.get(answerClass).toString().equals(answerLabel))
+      label = answerLabel;
+    else
+      label = "O";
     // System.out.println("adding " + l.word() + " as " + label);
     return new RVFDatum<String, String>(feat, label);
   }
