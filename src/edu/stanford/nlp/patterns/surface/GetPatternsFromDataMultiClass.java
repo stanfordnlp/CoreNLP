@@ -403,9 +403,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
             runLabelSeedWords(sentsf, constVars.getAnswerClass().get(l), l, seed, constVars);
 
-            Set<String> otherseed = constVars.getOtherSemanticClasses() == null || !labelUsingSeedSets ? new HashSet<String>() : constVars
-                .getOtherSemanticClasses();
+
             if (constVars.addIndvWordsFromPhrasesExceptLastAsNeg) {
+              Set<String> otherseed = new HashSet<String>();
               for (String s : seed) {
                 String[] t = s.split("\\s+");
                 for (int i = 0; i < t.length - 1; i++) {
@@ -414,16 +414,25 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                   }
                 }
               }
-            }
-            if (constVars.getOtherSemanticClasses() != null)
               runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed, constVars);
+            }
 
           }
+
+          if (constVars.getOtherSemanticClassesWords() != null)
+            runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", constVars.getOtherSemanticClassesWords(), constVars);
+
+          if(constVars.removeOverLappingLabelsFromSeed){
+            removeOverLappingLabels(sentsf);
+          }
+
           Redwood.log(Redwood.DBG, "Saving the labeled seed sents (if given the option) to the same file " + f);
           IOUtils.writeObjectToFile(sentsf, f);
         }
       }
     } else {
+
+      //not batch processing sentences
 
       totalNumSents = Data.sents.size();
 
@@ -439,12 +448,27 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
         runLabelSeedWords(Data.sents, constVars.getAnswerClass().get(l), l, seed, constVars);
 
-        Set<String> otherseed = constVars.getOtherSemanticClasses() == null || !labelUsingSeedSets ? new HashSet<String>() : constVars
-            .getOtherSemanticClasses();
-        if (constVars.getOtherSemanticClasses() != null)
+        if (constVars.addIndvWordsFromPhrasesExceptLastAsNeg) {
+          Set<String> otherseed = new HashSet<String>();
+          for (String s : seed) {
+            String[] t = s.split("\\s+");
+            for (int i = 0; i < t.length - 1; i++) {
+              if (!seed.contains(t[i])) {
+                otherseed.add(t[i]);
+              }
+            }
+          }
           runLabelSeedWords(Data.sents, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed, constVars);
+        }
       }
 
+
+      if (constVars.getOtherSemanticClassesWords() != null)
+        runLabelSeedWords(Data.sents, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", constVars.getOtherSemanticClassesWords() , constVars);
+
+      if(constVars.removeOverLappingLabelsFromSeed){
+        removeOverLappingLabels(Data.sents);
+      }
     }
 
     if (constVars.saveInvertedIndexDir != null) {
@@ -497,7 +521,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     if (constVars.usePatternEvalSemanticOdds || constVars.usePhraseEvalSemanticOdds) {
       Counter<String> dictOddsWeightsLabel = new ClassicCounter<String>();
       Counter<String> otherSemanticClassFreq = new ClassicCounter<String>();
-      for (String s : constVars.getOtherSemanticClasses()) {
+      for (String s : constVars.getOtherSemanticClassesWords()) {
         for (String s1 : StringUtils.getNgrams(Arrays.asList(s.split("\\s+")), 1, constVars.numWordsCompound))
           otherSemanticClassFreq.incrementCount(s1);
       }
@@ -526,6 +550,41 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         otherLabelFreq.addAll(otherSemanticClassFreq);
         dictOddsWeightsLabel = Counters.divisionNonNaN(labelDictNgram.get(label), otherLabelFreq);
         constVars.dictOddsWeights.put(label, dictOddsWeightsLabel);
+      }
+    }
+  }
+
+  /**
+   * If a token is labeled for two or more labels, then keep the one that has the longest matching phrase. For example, "lung" as BODYPART label and "lung cancer" as DISEASE label,
+   * keep only the DISEASE label for "lung". For this to work, you need to have <code>PatternsAnnotations.Ln</code> set, which is already done in runLabelSeedWords function.
+   */
+  public void removeOverLappingLabels(Map<String, List<CoreLabel>> sents){
+    for(Map.Entry<String, List<CoreLabel>> sentEn: sents.entrySet()){
+
+      for(CoreLabel l : sentEn.getValue()){
+        Map<String, String> longestMatchingMap = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
+        String longestMatchingString = "";
+        String longestMatchingLabel = null;
+        for(Map.Entry<String, String> en: longestMatchingMap.entrySet()){
+          if(en.getValue().length() > longestMatchingString.length()){
+              longestMatchingLabel = en.getKey();
+              longestMatchingString = en.getValue();
+          }
+        }
+
+        if(longestMatchingLabel  != null){
+
+          if(!"OTHERSEM".equals(longestMatchingLabel))
+             l.set(PatternsAnnotations.OtherSemanticLabel.class, constVars.backgroundSymbol);
+
+          for(Entry<String, Class<? extends Key<String>>> en: constVars.getAnswerClass().entrySet()) {
+            if (!en.getKey().equals(longestMatchingLabel)){
+              l.set(en.getValue(), constVars.backgroundSymbol);
+            }
+            else
+              l.set(en.getValue(), en.getKey());
+          }
+        }
       }
     }
   }
@@ -823,29 +882,54 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           num++;
         }
         boolean[] labels = new boolean[tokens.length];
+
         CollectionValuedMap<Integer, String> matchedPhrases = new CollectionValuedMap<Integer, String>();
+        Map<Integer, String> longestMatchedPhrases = new HashMap<Integer, String>();
+
         for (String[] s : seedwordsTokens) {
           List<Integer> indices = getSubListIndex(s, tokens, tokenslemma, dictWords, seenFuzzyMatches,
               minLen4FuzzyForPattern);
           if (indices != null && !indices.isEmpty())
             for (int index : indices)
               for (int i = 0; i < s.length; i++) {
-                matchedPhrases.add(index + i, StringUtils.join(s, " "));
+                String ph = StringUtils.join(s, " ");
+                matchedPhrases.add(index + i, ph);
+
+                String longPh = longestMatchedPhrases.get(index+i);
+                longPh = longPh != null && longPh.length() > ph.length() ? longPh: ph;
+                longestMatchedPhrases.put(index+i, longPh);
+
                 labels[index + i] = true;
               }
         }
         int i = -1;
         for (CoreLabel l : sent) {
           i++;
+
+          if (!l.containsKey(PatternsAnnotations.MatchedPhrases.class))
+            l.set(PatternsAnnotations.MatchedPhrases.class, new CollectionValuedMap<String, String>());
+          if(!l.containsKey(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class))
+            l.set(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class, new HashMap<String, String>());
+
           if (labels[i]) {
             l.set(labelClass, label);
+
+            //set whether labeled by the seeds or not
+            if(!l.containsKey(PatternsAnnotations.SeedLabeledOrNot.class))
+              l.set(PatternsAnnotations.SeedLabeledOrNot.class, new HashMap<Class, Boolean>());
+            l.get(PatternsAnnotations.SeedLabeledOrNot.class).put(labelClass, true);
+
+            String longestMatching = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(label);
+            longestMatching = (longestMatching != null && (longestMatching.length() > longestMatchedPhrases.get(i).length())) ? longestMatching : longestMatchedPhrases.get(i);
+            l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).put(label, longestMatching);
+            l.get(PatternsAnnotations.MatchedPhrases.class).addAll(label, matchedPhrases.get(i));
+
             Redwood.log(ConstantsAndVariables.extremedebug, "labeling " + l.word() + " or its lemma " + l.lemma() + " as " + label
-                + " because of the dict phrases " + (Set<String>) matchedPhrases.get(i));
+              + " because of the dict phrases " + (Set<String>) matchedPhrases.get(i));
+
           } else
             l.set(labelClass, backgroundSymbol);
-          if (!l.containsKey(PatternsAnnotations.MatchedPhrases.class))
-            l.set(PatternsAnnotations.MatchedPhrases.class, new HashSet<String>());
-          l.get(PatternsAnnotations.MatchedPhrases.class).addAll(matchedPhrases.get(i));
+
 
         }
         newsent.put(k, sent);
@@ -1268,13 +1352,16 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       List<CoreLabel> sent = sentEn.getValue();
       for (int i = 0; i < sent.size(); i++) {
         CoreLabel token = sent.get(i);
-        Set<String> matchedPhrases = token.get(PatternsAnnotations.MatchedPhrases.class);
+        //Map<String, Set<String>> matchedPhrases = token.get(PatternsAnnotations.MatchedPhrases.class);
 
         String tokenWordOrLemma = token.word();
         String longestMatchingPhrase = null;
 
         if (constVars.useMatchingPhrase) {
-          if (matchedPhrases != null && !matchedPhrases.isEmpty()) {
+          Map<String, String> longestMatchingPhrases = token.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
+          longestMatchingPhrase = longestMatchingPhrases.get(label);
+          longestMatchingPhrase = (longestMatchingPhrase !=null && (longestMatchingPhrase.length() > tokenWordOrLemma.length()))? longestMatchingPhrase : tokenWordOrLemma;
+          /*if (matchedPhrases != null && !matchedPhrases.isEmpty()) {
             for (String s : matchedPhrases) {
               if (s.equals(tokenWordOrLemma)) {
                 longestMatchingPhrase = tokenWordOrLemma;
@@ -1286,7 +1373,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             }
           } else {
             longestMatchingPhrase = tokenWordOrLemma;
-          }
+          }*/
+
         } else
           longestMatchingPhrase = tokenWordOrLemma;
 
@@ -1356,7 +1444,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               break;
             }
           if (!negToken)
-            if (constVars.getOtherSemanticClasses().contains(token.word()) || constVars.getOtherSemanticClasses().contains(token.lemma()))
+            if (constVars.getOtherSemanticClassesWords().contains(token.word()) || constVars.getOtherSemanticClassesWords().contains(token.lemma()))
               negToken = true;
 
           for (SurfacePattern s : CollectionUtils.union(CollectionUtils.union(prevPat, nextPat), prevnextPat)) {
@@ -1507,10 +1595,16 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               int index = idx + j;
               CoreLabel l = sentEn.getValue().get(index);
               if (constVars.usePatternResultAsLabel) {
+
                 l.set(constVars.getAnswerClass().get(label), label);
-                Set<String> matched = new HashSet<String>();
-                matched.add(StringUtils.join(ph, " "));
-                l.set(PatternsAnnotations.MatchedPhrases.class, matched);
+
+                CollectionValuedMap<String, String> matched = new CollectionValuedMap<String, String>();
+                matched.add(label, StringUtils.join(ph, " "));
+                if(!l.containsKey(PatternsAnnotations.MatchedPhrases.class))
+                  l.set(PatternsAnnotations.MatchedPhrases.class, matched);
+                else
+                  l.get(PatternsAnnotations.MatchedPhrases.class).addAll(matched);
+
                 for (int k = Math.max(0, index - constVars.numWordsCompound); k < sentEn.getValue().size()
                     && k <= index + constVars.numWordsCompound + 1; k++) {
                   contextWordsRecalculatePats.add(k);
