@@ -1689,6 +1689,8 @@ public class ColumnDataClassifier {
       } else if (key.equals("splitWordsWithPTBTokenizer")) {
         System.out.println("splitting with ptb tokenizer");
         myFlags[col].splitWordsWithPTBTokenizer=Boolean.parseBoolean(val);
+      } else if(key.equals("showTokenization")){
+        myFlags[col].showTokenization = Boolean.parseBoolean(val);
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
       }
