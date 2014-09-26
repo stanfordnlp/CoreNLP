@@ -3,7 +3,6 @@ package edu.stanford.nlp.patterns.surface;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +18,6 @@ import java.util.concurrent.Future;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
 import edu.stanford.nlp.patterns.surface.SurfacePattern.Genre;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.Execution;
@@ -198,7 +196,7 @@ public class CreatePatterns {
       int numNonStopWordsNext = 0, numNonStopWordsPrev = 0;
       boolean useprev = false, usenext = false;
 
-     
+
       PatternToken twithoutPOS = null;
       if (addPatWithoutPOS) {
         twithoutPOS = new PatternToken(tag, false,
@@ -212,7 +210,7 @@ public class CreatePatterns {
             constVars.numWordsCompound > 1, constVars.numWordsCompound,
             nerTag, constVars.useTargetNERRestriction, constVars.useTargetParserParentRestriction, token.get(CoreAnnotations.GrandparentAnnotation.class));
       }
-      
+
       if (usePreviousContext) {
         // int j = Math.max(0, i - 1);
         int j = i - 1;
@@ -386,7 +384,7 @@ public class CreatePatterns {
 
         if (isASCII(StringUtils.join(prevOriginal))) {
           prevContext = prevContextList.toArray(new String[0]);
-          prevOriginalArr = prevOriginal.toArray(new String[0]); 
+          prevOriginalArr = prevOriginal.toArray(new String[0]);
           if (previousTokens.size() >= minWindow4Pattern) {
             if (twithoutPOS != null) {
               SurfacePattern pat = new SurfacePattern(prevContext, twithoutPOS,
@@ -511,18 +509,18 @@ public class CreatePatterns {
       num = keyset.size() / (constVars.numThreads);
     ExecutorService executor = Executors
         .newFixedThreadPool(constVars.numThreads);
-    
+
     Redwood.log(ConstantsAndVariables.extremedebug, "Computing all patterns. keyset size is " + keyset.size() + ". Assigning " + num + " values to each thread");
     List<Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>>> list = new ArrayList<Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>>>();
     for (int i = 0; i < constVars.numThreads; i++) {
-      
+
       int from = i * num;
       int to = -1;
       if(i == constVars.numThreads -1)
         to = keyset.size();
       else
        to =Math.min(keyset.size(), (i + 1) * num);
-//      
+//
 //      Redwood.log(ConstantsAndVariables.extremedebug, "assigning from " + i * num
 //          + " till " + Math.min(keyset.size(), (i + 1) * num));
 
@@ -547,7 +545,7 @@ public class CreatePatterns {
     }
     executor.shutdown();
     Redwood.log(ConstantsAndVariables.extremedebug, "Done computing all patterns");
-    
+
     return patternsForEachToken;
   }
 
@@ -589,7 +587,7 @@ public class CreatePatterns {
           }
           Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>> pat = getContext(sent, i);
           p.put(i, pat);
-          
+
         }
         patternsForTokens.put(id, p);
       }
