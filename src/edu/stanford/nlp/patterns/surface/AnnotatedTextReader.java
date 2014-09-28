@@ -76,10 +76,8 @@ public class AnnotatedTextReader {
           Matcher startingMatcher = startingLabelToken.matcher(tok);
           Matcher endMatcher = endLabelToken.matcher(tok);
           if (startingMatcher.matches()) {
-            //System.out.println("matched starting");
             label = startingMatcher.group(1);
           } else if (endMatcher.matches()) {
-            //System.out.println("matched end");
             label = backgroundSymbol;
           } else {
 

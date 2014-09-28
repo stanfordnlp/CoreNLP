@@ -1539,6 +1539,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
 
+    if (mwp0 == null) {
+      return;
+    }
+
     // now search for prep|advmod|dep|amod(gov, mwp0)
     TreeGraphNode governor = null;
     TypedDependency prep = null;
@@ -1548,6 +1552,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         prep = td1;
         governor = prep.gov();
       }
+    }
+
+    if (prep == null) {
+      return;
     }
 
     // search for the complement: pobj|pcomp(mwp1,X)
@@ -1652,6 +1660,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       // the two words in the mwp should be next to another in the sentence
       // (difference of indexes = 1)
 
+      if (mwp0 == null) {
+        continue;
+      }
+
       for (TypedDependency td1 : list) {
         if (mwp0 != null && td1.dep().value().equalsIgnoreCase(mwp[1]) && td1.gov() == governor && td1.reln() == PREPOSITIONAL_MODIFIER && Math.abs(td1.dep().index() - mwp0.index()) == 1) {// we
           // found
@@ -1660,6 +1672,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
           mwp1 = td1.dep();
           prep = td1;
         }
+      }
+
+      if (mwp1 == null) {
+        continue;
       }
 
       // search for the complement: pobj|pcomp(mwp1,X)
@@ -1987,10 +2003,14 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
       // first find the multi_preposition: dep(mpw[1], mwp[0])
       for (TypedDependency td : list) {
-        if (td.gov().value().equalsIgnoreCase(mwp[1]) && td.dep().value().equalsIgnoreCase(mwp[0]) && Math.abs(td.gov().index() - td.dep().index()) == 1) {
+        if (Math.abs(td.gov().index() - td.dep().index()) == 1 && td.gov().value().equalsIgnoreCase(mwp[1]) && td.dep().value().equalsIgnoreCase(mwp[0])) {
           mwp1 = td.gov();
           dep = td;
         }
+      }
+
+      if (mwp1 == null) {
+        continue;
       }
 
       // now search for prep(gov, mwp1)
@@ -2000,6 +2020,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
           prep = td1;
           governor = prep.gov();
         }
+      }
+
+      if (prep == null) {
+        continue;
       }
 
       // search for the complement: pobj|pcomp(mwp1,X)

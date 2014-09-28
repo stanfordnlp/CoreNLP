@@ -1047,7 +1047,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     classifyAndWriteAnswers(documents, readerWriter, outputScores);
   }
 
-  public void classifyAndWriteAnswers(Collection<List<IN>> documents,
+  private void classifyAndWriteAnswers(Collection<List<IN>> documents,
                                        DocumentReaderAndWriter<IN> readerWriter,
                                        boolean outputScores)
     throws IOException
