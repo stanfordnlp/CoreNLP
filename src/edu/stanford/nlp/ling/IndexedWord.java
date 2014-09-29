@@ -96,7 +96,6 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
 
   /**
    * TODO: would be nice to get rid of this.  Only used in two places in RTE.  
-   * Also used to copy CoreLabels in EnglishGrammaticalStructure for the copy nodes
    */
   public CoreLabel backingLabel() { return label; }
 
