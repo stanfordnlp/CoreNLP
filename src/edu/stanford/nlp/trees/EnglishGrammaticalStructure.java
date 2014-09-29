@@ -1232,9 +1232,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         // we add a "copy" entry in the CoreLabel
         // existence of copy key is checked at printing (toString method of
         // TypedDependency)
-        CoreLabel copy = new CoreLabel(td1.gov().backingLabel());
-        IndexedWord label = new IndexedWord(copy);
-        label.set(CoreAnnotations.CopyAnnotation.class, copyNumber);
+        IndexedWord label = td1.gov().makeCopy(copyNumber);
         copyNumber++;
 
         // now we add the conjunction relation between td1.gov and the copy

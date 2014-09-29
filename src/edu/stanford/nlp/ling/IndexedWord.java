@@ -87,6 +87,13 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
     label.set(CoreAnnotations.IndexAnnotation.class, index);
   }
 
+  public IndexedWord makeCopy(int count) {
+    CoreLabel labelCopy = new CoreLabel(label);
+    IndexedWord copy = new IndexedWord(labelCopy);
+    copy.setCopyCount(count);
+    return copy;
+  }
+
   /**
    * TODO: would be nice to get rid of this.  Only used in two places in RTE.  
    * Also used to copy CoreLabels in EnglishGrammaticalStructure for the copy nodes
