@@ -7,6 +7,7 @@ import edu.stanford.nlp.optimization.LineSearcher;
 import edu.stanford.nlp.sequences.Clique;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.FeatureFactory;
+import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.CoreMap;
 import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
@@ -48,6 +49,8 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
   public CRFBiasedClassifier(Properties props) {
     super(props);
   }
+
+  public CRFBiasedClassifier(SeqClassifierFlags flags) {super(flags); }
 
   @Override
   public CRFDatum<List<String>, CRFLabel> makeDatum(List<IN> info, int loc, List<FeatureFactory<IN>> featureFactories) {
