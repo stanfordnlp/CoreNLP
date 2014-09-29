@@ -557,11 +557,14 @@ public class TreePrint {
           if (!dependencyFilter.accept(d)) {
             continue;
           }
-          CoreMap dep = (CoreMap) d.dependent();
-          CoreMap gov = (CoreMap) d.governor();
+          if (!(d.dependent() instanceof HasIndex) || !(d.governor() instanceof HasIndex)) {
+            throw new IllegalArgumentException("Expected labels to have indices");
+          }
+          HasIndex dep = (HasIndex) d.dependent();
+          HasIndex gov = (HasIndex) d.governor();
 
-          Integer depi = dep.get(CoreAnnotations.IndexAnnotation.class);
-          Integer govi = gov.get(CoreAnnotations.IndexAnnotation.class);
+          int depi = dep.index();
+          int govi = gov.index();
 
           CoreLabel w = tagged.get(depi-1);
 

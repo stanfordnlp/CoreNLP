@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.stanford.nlp.ling.HasIndex;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -14,7 +15,6 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Generics;
 
@@ -105,10 +105,10 @@ public class Dependencies {
 
       @Override
       public int compare(Dependency dep1, Dependency dep2) {
-        CoreMap dep1lab = (CoreMap) dep1.dependent();
-        CoreMap dep2lab = (CoreMap) dep2.dependent();
-        Integer dep1idx = dep1lab.get(CoreAnnotations.IndexAnnotation.class);
-        Integer dep2idx = dep2lab.get(CoreAnnotations.IndexAnnotation.class);
+        HasIndex dep1lab = (HasIndex) dep1.dependent();
+        HasIndex dep2lab = (HasIndex) dep2.dependent();
+        int dep1idx = dep1lab.index();
+        int dep2idx = dep2lab.index();
         return dep1idx - dep2idx;
       }
 
