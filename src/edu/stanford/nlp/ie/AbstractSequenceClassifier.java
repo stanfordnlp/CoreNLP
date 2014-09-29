@@ -990,7 +990,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     classifyAndWriteAnswers(testFile, plainTextReaderAndWriter, false);
   }
 
-  // todo [cdm 2014]: Change these methods to return some statistics of P/R/F1/Acc so you can use them in cross-validation loop
   /**
    * Load a test file, run the classifier on it, and then print the answers to
    * stdout (with timing to stderr). This uses the value of flags.documentReader
@@ -1048,7 +1047,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     classifyAndWriteAnswers(documents, readerWriter, outputScores);
   }
 
-  public void classifyAndWriteAnswers(Collection<List<IN>> documents,
+  private void classifyAndWriteAnswers(Collection<List<IN>> documents,
                                        DocumentReaderAndWriter<IN> readerWriter,
                                        boolean outputScores)
     throws IOException

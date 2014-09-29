@@ -9,6 +9,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -117,10 +118,10 @@ public class Dependencies {
 
   }
 
-  public static Map<TreeGraphNode,List<TypedDependency>> govToDepMap(List<TypedDependency> deps) {
-    Map<TreeGraphNode,List<TypedDependency>> govToDepMap = Generics.newHashMap();
+  public static Map<IndexedWord,List<TypedDependency>> govToDepMap(List<TypedDependency> deps) {
+    Map<IndexedWord,List<TypedDependency>> govToDepMap = Generics.newHashMap();
     for (TypedDependency dep : deps) {
-      TreeGraphNode gov = dep.gov();
+      IndexedWord gov = dep.gov();
 
       List<TypedDependency> depList = govToDepMap.get(gov);
       if (depList == null) {
@@ -132,13 +133,13 @@ public class Dependencies {
     return govToDepMap;
   }
 
-  private static Set<List<TypedDependency>> getGovMaxChains(Map<TreeGraphNode,List<TypedDependency>> govToDepMap, TreeGraphNode gov, int depth) {
+  private static Set<List<TypedDependency>> getGovMaxChains(Map<IndexedWord,List<TypedDependency>> govToDepMap, IndexedWord gov, int depth) {
     Set<List<TypedDependency>> depLists = Generics.newHashSet();
     List<TypedDependency> children = govToDepMap.get(gov);
 
     if (depth > 0 && children != null) {
       for (TypedDependency child : children) {
-        TreeGraphNode childNode = child.dep();
+        IndexedWord childNode = child.dep();
         if (childNode == null) continue;
         Set<List<TypedDependency>> childDepLists = getGovMaxChains(govToDepMap, childNode, depth-1);
         if (childDepLists.size() != 0) {
@@ -157,9 +158,9 @@ public class Dependencies {
   }
 
   public static Counter<List<TypedDependency>> getTypedDependencyChains(List<TypedDependency> deps, int maxLength) {
-    Map<TreeGraphNode,List<TypedDependency>> govToDepMap = govToDepMap(deps);
+    Map<IndexedWord,List<TypedDependency>> govToDepMap = govToDepMap(deps);
     Counter<List<TypedDependency>> tdc = new ClassicCounter<List<TypedDependency>>();
-    for (TreeGraphNode gov : govToDepMap.keySet()) {
+    for (IndexedWord gov : govToDepMap.keySet()) {
       Set<List<TypedDependency>> maxChains = getGovMaxChains(govToDepMap, gov, maxLength);
       for (List<TypedDependency> maxChain : maxChains) {
          for (int i = 1; i <= maxChain.size(); i++) {

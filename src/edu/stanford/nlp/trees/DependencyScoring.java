@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.trees.GrammaticalRelation.Language;
 import edu.stanford.nlp.util.Generics;
@@ -66,7 +67,7 @@ public class DependencyScoring {
   private static void removeHeadsAssignedToPunc(Set<TypedDependency> depSet) {
     List<TypedDependency> deps = new ArrayList<TypedDependency>(depSet);
     for (TypedDependency dep : deps) {
-      if (langIndependentPuncCheck(dep.dep().label().word())) {
+      if (langIndependentPuncCheck(dep.dep().word())) {
         if (VERBOSE) {
            System.err.printf("Dropping Punctuation Dependency: %s\n", dep);
         }
@@ -120,7 +121,7 @@ public class DependencyScoring {
   static private class TypedDependencyStringEquality extends TypedDependency {
     private static final long serialVersionUID = 1L;
 
-    public TypedDependencyStringEquality(GrammaticalRelation reln, TreeGraphNode gov, TreeGraphNode dep)  {
+    public TypedDependencyStringEquality(GrammaticalRelation reln, IndexedWord gov, IndexedWord dep)  {
        super(reln, gov, dep);
     }
 
@@ -214,10 +215,14 @@ public class DependencyScoring {
       }
 
       //Word govWord = new Word(govName.substring(0, govDash));
-      Word govWord = new Word(normalizeNumbers(govName));
+      IndexedWord govWord = new IndexedWord();
+      govWord.setValue(normalizeNumbers(govName));
+      govWord.setWord(govWord.value());
       //Word childWord = new Word(childName.substring(0, childDash));
-      Word childWord = new Word(normalizeNumbers(childName));
-      TypedDependency dep = new TypedDependencyStringEquality(grel, new TreeGraphNode(govWord), new TreeGraphNode(childWord));
+      IndexedWord childWord = new IndexedWord();
+      childWord.setValue(normalizeNumbers(childName));
+      childWord.setWord(childWord.value());
+      TypedDependency dep = new TypedDependencyStringEquality(grel, govWord, childWord);
       deps.add(dep);
       } catch (Exception e) {
         breader.close();
@@ -284,25 +289,25 @@ public class DependencyScoring {
 
       for (TypedDependency goldDep: goldDeps.get(i)) {
           //System.out.print(goldDep);
-          String sChild = goldDep.dep().label().toString().replaceFirst("-[^-]*$", "");
+          String sChild = goldDep.dep().toString().replaceFirst("-[^-]*$", "");
           String prefixLabeled = "";
           String prefixUnlabeled = "";
           if (childCorrectWithLabel.containsKey(sChild)) {
             prefixLabeled = childCorrectWithLabel.get(sChild)+", ";
             prefixUnlabeled = childCorrectWithOutLabel.get(sChild)+", ";
           }
-          childCorrectWithLabel.put(sChild, prefixLabeled + goldDep.reln()+"("+goldDep.gov().label().toString().replaceFirst("-[^-]*$", "")+", "+sChild+")");
-          childCorrectWithOutLabel.put(sChild, prefixUnlabeled + "dep("+goldDep.gov().label().toString().replaceFirst("-[^-]*$", "")+", "+sChild+")");
+          childCorrectWithLabel.put(sChild, prefixLabeled + goldDep.reln()+"("+goldDep.gov().toString().replaceFirst("-[^-]*$", "")+", "+sChild+")");
+          childCorrectWithOutLabel.put(sChild, prefixUnlabeled + "dep("+goldDep.gov().toString().replaceFirst("-[^-]*$", "")+", "+sChild+")");
       }
 
       for (TypedDependency labeledError: errl.get(0)) {
-          String sChild = labeledError.dep().label().toString().replaceFirst("-[^-]*$", "");
-          String sGov   = labeledError.gov().label().toString().replaceFirst("-[^-]*$", "");
+          String sChild = labeledError.dep().toString().replaceFirst("-[^-]*$", "");
+          String sGov   = labeledError.gov().toString().replaceFirst("-[^-]*$", "");
           labeledErrorCounts.incrementCount(labeledError.reln().toString()+"("+sGov+", "+sChild+") <= "+childCorrectWithLabel.get(sChild));
       }
       for (TypedDependency unlabeledError: errl.get(1)) {
-          String sChild = unlabeledError.dep().label().toString().replaceFirst("-[^-]*$", "");
-          String sGov   = unlabeledError.gov().label().toString().replaceFirst("-[^-]*$", "");
+          String sChild = unlabeledError.dep().toString().replaceFirst("-[^-]*$", "");
+          String sGov   = unlabeledError.gov().toString().replaceFirst("-[^-]*$", "");
           unlabeledErrorCounts.incrementCount("dep("+sGov+", "+sChild+") <= "+childCorrectWithOutLabel.get(sChild));
       }
     }

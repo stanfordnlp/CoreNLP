@@ -226,7 +226,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
           if (cachedScoresForThisIter.containsKey(word)) {
             score = cachedScoresForThisIter.getCount(word);
           } else {
-            if (constVars.getOtherSemanticClassesWords().contains(word)
+            if (constVars.getOtherSemanticClasses().contains(word)
                 || constVars.getCommonEngWords().contains(word))
               score = 1;
             else {

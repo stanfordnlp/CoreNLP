@@ -31,6 +31,8 @@ import javax.json.JsonValue;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
+import edu.stanford.nlp.patterns.surface.Data;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScoring;
 import edu.stanford.nlp.patterns.surface.PhraseScorer.Normalization;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -416,8 +418,8 @@ public class ScorePhrases {
     if (constVars.wordScoring.equals(WordScoring.WEIGHTEDNORM)) {
 
       for (Pair<String, String> en : wordsandLemmaPatExtracted.firstKeySet()) {
-        if (!constVars.getOtherSemanticClassesWords().contains(en.first())
-            && !constVars.getOtherSemanticClassesWords().contains(en.second())) {
+        if (!constVars.getOtherSemanticClasses().contains(en.first())
+            && !constVars.getOtherSemanticClasses().contains(en.second())) {
           terms.addAll(en.first(), wordsandLemmaPatExtracted.getCounter(en));
         }
         wordsPatExtracted.addAll(en.first(),
@@ -457,10 +459,10 @@ public class ScorePhrases {
 
       Set<String> ignoreWordsAll ;
       if(ignoreWords !=null && !ignoreWords.isEmpty()){
-        ignoreWordsAll = CollectionUtils.unionAsSet(ignoreWords, constVars.getOtherSemanticClassesWords());
+        ignoreWordsAll = CollectionUtils.unionAsSet(ignoreWords, constVars.getOtherSemanticClasses());
       }
       else
-        ignoreWordsAll = constVars.getOtherSemanticClassesWords();
+        ignoreWordsAll = constVars.getOtherSemanticClasses();
       Counter<String> finalwords = chooseTopWords(phraseScores, terms,
           phraseScores, ignoreWordsAll, constVars.thresholdWordExtract);
       // for (String w : finalwords.keySet()) {

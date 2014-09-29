@@ -265,7 +265,7 @@ public class ConstantsAndVariables implements Serializable{
   public String otherSemanticClassesFiles = null;
 
   // set of words that are considered negative for all classes
-  private Set<String> otherSemanticClassesWords = null;
+  private Set<String> otherSemanticClasses = null;
 
   /**
    * Seed dictionary, set in the class that uses this class
@@ -438,17 +438,10 @@ public class ConstantsAndVariables implements Serializable{
   public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
 
 
-
   public enum ScorePhraseMeasures {
     DISTSIM, GOOGLENGRAM, PATWTBYFREQ, EDITDISTSAME, EDITDISTOTHER, DOMAINNGRAM, SEMANTICODDS, WORDSHAPE
   }
 
-
-  /**
-   * Keeps only one label for each token, whichever has the longest
-   */
-  @Option(name="removeOverLappingLabelsFromSeed")
-  public boolean removeOverLappingLabelsFromSeed = false;
 
   /**
    * Only works if you have single label. And the word classes are given.
@@ -678,23 +671,23 @@ public class ConstantsAndVariables implements Serializable{
     }
 
     if (otherSemanticClassesFiles != null) {
-      if (otherSemanticClassesWords == null)
-        otherSemanticClassesWords = Collections
+      if (otherSemanticClasses == null)
+        otherSemanticClasses = Collections
             .synchronizedSet(new HashSet<String>());
       for (String file : otherSemanticClassesFiles.split("[;,]")) {
         for (String w : IOUtils.linesFromFile(file)) {
 
           String[] t = w.split("\\s+");
           if (t.length <= this.numWordsCompound)
-            otherSemanticClassesWords.add(w);
+            otherSemanticClasses.add(w);
 
         }
       }
 
       System.out.println("Size of othersemantic class variables is "
-        + otherSemanticClassesWords.size());
+          + otherSemanticClasses.size());
     } else {
-      otherSemanticClassesWords = Collections.synchronizedSet(new HashSet<String>());
+      otherSemanticClasses = Collections.synchronizedSet(new HashSet<String>());
       System.out.println("Size of othersemantic class variables is " + 0);
     }
 
@@ -826,12 +819,12 @@ public class ConstantsAndVariables implements Serializable{
     return this.commonEngWords;
   }
 
-  public Set<String> getOtherSemanticClassesWords() {
-    return this.otherSemanticClassesWords;
+  public Set<String> getOtherSemanticClasses() {
+    return this.otherSemanticClasses;
   }
 
-  public void setOtherSemanticClassesWords(Set<String> other) {
-    this.otherSemanticClassesWords = other;
+  public void setOtherSemanticClasses(Set<String> other) {
+    this.otherSemanticClasses = other;
   }
 
   public Map<String, Integer> getWordClassClusters() {
@@ -912,13 +905,13 @@ public class ConstantsAndVariables implements Serializable{
           editDistanceFromOtherSemanticClassesMatches.get(ph),
           editDistanceFromOtherSemanticClasses.get(ph));
 
-    Pair<String, Double> minD = getEditDist(otherSemanticClassesWords, ph);
+    Pair<String, Double> minD = getEditDist(otherSemanticClasses, ph);
 
     // double minDtotal = editDistMax;
     // String minPh = "";
     // if (minD.second() == editDistMax && ph.contains(" ")) {
     // for (String s : ph.split("\\s+")) {
-    // Pair<String, Double> minDSingle = getEditDist(otherSemanticClassesWords, s);
+    // Pair<String, Double> minDSingle = getEditDist(otherSemanticClasses, s);
     // if (minDSingle.second() < minDtotal) {
     // minDtotal = minDSingle.second;
     // }
@@ -944,7 +937,7 @@ public class ConstantsAndVariables implements Serializable{
     double minD = d.second();
     String minPh = d.first();
     if (d.second() > 2) {
-      Pair<String, Double> minD2 = getEditDist(otherSemanticClassesWords, ph);
+      Pair<String, Double> minD2 = getEditDist(otherSemanticClasses, ph);
       if (minD2.second < minD) {
         minD = minD2.second();
         minPh = minD2.first();
