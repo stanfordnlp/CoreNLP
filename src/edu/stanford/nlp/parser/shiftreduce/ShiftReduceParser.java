@@ -489,7 +489,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         wordLabel = (CoreLabel) hw;
         tag = wordLabel.tag();
         CoreLabel cl = (CoreLabel) hw;
-        System.err.println("Reuse! " + cl.word() + " " + cl.value() + " " + cl.tag());
       } else {
         wordLabel = new CoreLabel();
         wordLabel.setValue(hw.word());
