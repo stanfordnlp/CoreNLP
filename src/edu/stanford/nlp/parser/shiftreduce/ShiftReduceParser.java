@@ -286,6 +286,14 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   }
 
   @Override
+  public Tree parse(String sentence) {
+    if (!getOp().testOptions.preTag) {
+      throw new UnsupportedOperationException("Can only parse raw text if a tagger is specified, as the ShiftReduceParser cannot produce its own tags");
+    }
+    return super.parse(sentence);    
+  }
+
+  @Override
   public Tree parse(List<? extends HasWord> sentence) {
     ShiftReduceParserQuery pq = new ShiftReduceParserQuery(this);
     if (pq.parse(sentence)) {

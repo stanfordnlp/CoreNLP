@@ -7,6 +7,7 @@ import java.util.List;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.process.Tokenizer;
@@ -14,6 +15,7 @@ import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import java.util.function.Function;
+import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.Timing;
 // TODO: it would be nice to move these to common, but that would
 // wreck all existing models
@@ -57,7 +59,30 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
   public Tree parse(String sentence) {
     TokenizerFactory<? extends HasWord> tf = getOp().tlpParams.treebankLanguagePack().getTokenizerFactory();
     Tokenizer<? extends HasWord> tokenizer = tf.getTokenizer(new StringReader(sentence));
-    return parse(tokenizer.tokenize());
+    List<? extends HasWord> tokens = tokenizer.tokenize();
+    if (getOp().testOptions.preTag) {
+      Function<List<? extends HasWord>, List<TaggedWord>> tagger = loadTagger();
+      tokens = tagger.apply(tokens);
+    }
+    return parse(tokens);
+  }
+
+  private transient Function<List<? extends HasWord>, List<TaggedWord>> tagger;
+  private transient String taggerPath;
+
+  public Function<List<? extends HasWord>, List<TaggedWord>> loadTagger() {
+    Options op = getOp();
+    if (op.testOptions.preTag) {
+      synchronized(this) { // TODO: rather coarse synchronization
+        if (!op.testOptions.taggerSerializedFile.equals(taggerPath)) {
+          taggerPath = op.testOptions.taggerSerializedFile;
+          tagger = ReflectionLoading.loadByReflection("edu.stanford.nlp.tagger.maxent.MaxentTagger", taggerPath);
+        }
+        return tagger;
+      }
+    } else {
+      return null;
+    }
   }
 
   /**
