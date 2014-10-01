@@ -32,10 +32,16 @@ public class LexicalizedParserServer {
 
   boolean stillRunning = true;
 
-  public LexicalizedParserServer(int port, String model) 
+  public LexicalizedParserServer(int port, String parserModel) 
     throws IOException
   {
-    this(port, ParserGrammar.loadModel(model));
+    this(port, loadModel(parserModel, null));
+  }
+
+  public LexicalizedParserServer(int port, String parserModel, String taggerModel) 
+    throws IOException
+  {
+    this(port, loadModel(parserModel, taggerModel));
   }
 
   public LexicalizedParserServer(int port, ParserGrammar parser)
@@ -47,6 +53,14 @@ public class LexicalizedParserServer {
     this.binarizer = TreeBinarizer.simpleTreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack());
   }
 
+
+  private static ParserGrammar loadModel(String parserModel, String taggerModel) {
+    if (taggerModel == null) {
+      return ParserGrammar.loadModel(parserModel);
+    } else {
+      return ParserGrammar.loadModel(parserModel, "-preTag", "-taggerSerializedFile", taggerModel);
+    }
+  }
 
   /**
    * Runs in a loop, getting requests from new clients until a client
@@ -189,6 +203,7 @@ public class LexicalizedParserServer {
 
     int port = DEFAULT_PORT;
     String model = LexicalizedParser.DEFAULT_PARSER_LOC;
+    String tagger = null;
 
     for (int i = 0; i < args.length; i += 2) {
       if (i + 1 >= args.length) {
@@ -205,10 +220,12 @@ public class LexicalizedParserServer {
         model = args[i + 1];
       } else if (arg.equalsIgnoreCase("port")) {
         port = Integer.valueOf(args[i + 1]);
+      } else if (arg.equalsIgnoreCase("tagger")) {
+        tagger = args[i + 1];
       }
     }
     
-    LexicalizedParserServer server = new LexicalizedParserServer(port, model);
+    LexicalizedParserServer server = new LexicalizedParserServer(port, model, tagger);
     System.err.println("Server ready!");
     server.listen();
   }
