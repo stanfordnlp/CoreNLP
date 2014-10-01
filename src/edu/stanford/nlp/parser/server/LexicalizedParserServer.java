@@ -22,7 +22,6 @@ import edu.stanford.nlp.trees.Tree;
  */
 public class LexicalizedParserServer {
   final int port;
-  final String model;
 
   final ServerSocket serverSocket;
 
@@ -36,15 +35,14 @@ public class LexicalizedParserServer {
   public LexicalizedParserServer(int port, String model) 
     throws IOException
   {
-    this(port, model, ParserGrammar.loadModel(model));
+    this(port, ParserGrammar.loadModel(model));
   }
 
-  public LexicalizedParserServer(int port, String model, ParserGrammar parser)
+  public LexicalizedParserServer(int port, ParserGrammar parser)
     throws IOException
   {
     this.port = port;
     this.serverSocket = new ServerSocket(port);
-    this.model = model;
     this.parser = parser;
     this.binarizer = TreeBinarizer.simpleTreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack());
   }

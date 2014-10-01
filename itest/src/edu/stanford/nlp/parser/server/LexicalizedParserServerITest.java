@@ -5,15 +5,21 @@ import java.io.IOException;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.net.Ports;
+import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser;
 import edu.stanford.nlp.trees.Tree;
 
 
 
 public class LexicalizedParserServerITest extends TestCase {
-  private static volatile LexicalizedParser parser = null;
+  private static LexicalizedParser lexparser = null;
+  private static ShiftReduceParser srparser = null;
 
-  static final String model = LexicalizedParser.DEFAULT_PARSER_LOC;
+  static final String lexmodel = LexicalizedParser.DEFAULT_PARSER_LOC;
+
+  static final String srmodel = "/u/nlp/data/srparser/englishSR.ser.gz";
+  static final String tagger = "/u/nlp/data/pos-tagger/distrib/wsj-0-18-left3words-distsim.tagger";
 
   static final String testString = "John Bauer works at Stanford.";
   static final String resultString = "(ROOT (S (NP (NNP John) (NNP Bauer)) (VP (VBZ works) (PP (IN at) (NP (NNP Stanford)))) (. .)))";
@@ -22,10 +28,13 @@ public class LexicalizedParserServerITest extends TestCase {
   public void setUp() 
     throws IOException
   {
-    if (parser == null) {
+    if (lexparser == null) {
       synchronized(LexicalizedParserServerITest.class) {
-        if (parser == null) {
-          parser = LexicalizedParser.loadModel(model);
+        if (lexparser == null) {
+          lexparser = LexicalizedParser.loadModel(lexmodel);
+        }
+        if (srparser == null) {
+          srparser = ShiftReduceParser.loadModel(srmodel, "-preTag", "-taggerSerializedFile", tagger);
         }
       }
     }
@@ -34,8 +43,14 @@ public class LexicalizedParserServerITest extends TestCase {
   public Thread startLPServer(int port, boolean daemon) 
     throws IOException
   {
+    return startLPServer(port, daemon, lexparser);
+  }
+
+  public Thread startLPServer(int port, boolean daemon, ParserGrammar parser) 
+    throws IOException
+  {
     final LexicalizedParserServer server = 
-      new LexicalizedParserServer(port, model, parser);
+      new LexicalizedParserServer(port, parser);
     Thread thread = new Thread() {
         public void run() {
           try {
@@ -92,7 +107,7 @@ public class LexicalizedParserServerITest extends TestCase {
     throws IOException
   {
     int port = Ports.findAvailable(2000, 10000);
-    System.err.println("testGetText: starting on port " + port);
+    System.err.println("testGetBinarizedText: starting on port " + port);
     startLPServer(port, true);
 
     LexicalizedParserClient client = 
@@ -118,4 +133,19 @@ public class LexicalizedParserServerITest extends TestCase {
     }
     assertEquals(Thread.State.TERMINATED, serverThread.getState());
   }
+
+  public void testGetShiftReduceText()
+    throws IOException
+  {
+    int port = Ports.findAvailable(2000, 10000);
+    System.err.println("testGetShiftReduceText: starting on port " + port);
+    startLPServer(port, true, srparser);
+
+    LexicalizedParserClient client = 
+      new LexicalizedParserClient("localhost", port);
+    String tree = client.getParse(testString, false);
+    assertEquals(resultString, tree.trim());
+  }
+
+  
 }
