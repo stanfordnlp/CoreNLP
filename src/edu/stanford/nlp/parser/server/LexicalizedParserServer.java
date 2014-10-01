@@ -111,7 +111,9 @@ public class LexicalizedParserServer {
     case "parse":
       handleParse(arg, clientSocket.getOutputStream(), false);
       break;
-    case "binarized":
+    case "parse:binarized": 
+      // TODO: if commands get more complex, can do more intelligent
+      // parsing of commands
       handleParse(arg, clientSocket.getOutputStream(), true);
       break;
     case "tree":

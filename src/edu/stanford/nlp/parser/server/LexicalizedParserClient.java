@@ -42,7 +42,7 @@ public class LexicalizedParserClient {
     Socket socket = new Socket(host, port);
 
     Writer out = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
-    out.write((binarized ? "binarized " : "parse ") + query + "\n");
+    out.write("parse" + (binarized ? ":binarized " : " ") + query + "\n");
     out.flush();
 
     BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "utf-8"));

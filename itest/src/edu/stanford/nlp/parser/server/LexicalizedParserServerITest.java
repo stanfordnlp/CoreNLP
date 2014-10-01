@@ -17,6 +17,7 @@ public class LexicalizedParserServerITest extends TestCase {
 
   static final String testString = "John Bauer works at Stanford.";
   static final String resultString = "(ROOT (S (NP (NNP John) (NNP Bauer)) (VP (VBZ works) (PP (IN at) (NP (NNP Stanford)))) (. .)))";
+  static final String binarizedResultString = "(ROOT (S (NP (NNP John) (NNP Bauer)) (@S (VP (VBZ works) (PP (IN at) (NP (NNP Stanford)))) (. .))))";
 
   public void setUp() 
     throws IOException
@@ -85,6 +86,19 @@ public class LexicalizedParserServerITest extends TestCase {
       new LexicalizedParserClient("localhost", port);
     String tree = client.getParse(testString, false);
     assertEquals(resultString, tree.trim());
+  }
+
+  public void testGetBinarizedText()
+    throws IOException
+  {
+    int port = Ports.findAvailable(2000, 10000);
+    System.err.println("testGetText: starting on port " + port);
+    startLPServer(port, true);
+
+    LexicalizedParserClient client = 
+      new LexicalizedParserClient("localhost", port);
+    String tree = client.getParse(testString, true);
+    assertEquals(binarizedResultString, tree.trim());
   }
 
   public void testQuit()
