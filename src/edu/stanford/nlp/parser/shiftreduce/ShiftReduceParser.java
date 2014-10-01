@@ -286,7 +286,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   }
 
   @Override
-  public Tree apply(List<? extends HasWord> sentence) {
+  public Tree parse(List<? extends HasWord> sentence) {
     ShiftReduceParserQuery pq = new ShiftReduceParserQuery(this);
     if (pq.parse(sentence)) {
       return pq.getBestParse();

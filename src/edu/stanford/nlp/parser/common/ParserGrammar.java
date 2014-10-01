@@ -1,6 +1,8 @@
 package edu.stanford.nlp.parser.common;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.List;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -8,6 +10,8 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
+import edu.stanford.nlp.process.Tokenizer;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import java.util.function.Function;
@@ -34,9 +38,39 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
   public abstract ParserQuery parserQuery();
 
   /**
-   * A convenience method which wraps the ParserQuery and returns a Tree
+   * Parses the list of HasWord.  If the parse fails for some reason,
+   * an X tree is returned instead of barfing.
+   *
+   * @param words The input sentence (a List of words)
+   * @return A Tree that is the parse tree for the sentence.  If the parser
+   *         fails, a new Tree is synthesized which attaches all words to the
+   *         root.
    */
-  public abstract Tree apply(List<? extends HasWord> words);
+  @Override
+  public Tree apply(List<? extends HasWord> words) {
+    return parse(words);
+  }
+
+  /**
+   * Will parse the text in <code>sentence</code> as if it represented
+   * a single sentence by first processing it with a tokenizer.
+   */
+  public Tree parse(String sentence) {
+    TokenizerFactory<? extends HasWord> tf = getOp().tlpParams.treebankLanguagePack().getTokenizerFactory();
+    Tokenizer<? extends HasWord> tokenizer = tf.getTokenizer(new BufferedReader(new StringReader(sentence)));
+    return parse(tokenizer.tokenize());
+  }
+
+  /**
+   * Parses the list of HasWord.  If the parse fails for some reason,
+   * an X tree is returned instead of barfing.
+   *
+   * @param words The input sentence (a List of words)
+   * @return A Tree that is the parse tree for the sentence.  If the parser
+   *         fails, a new Tree is synthesized which attaches all words to the
+   *         root.
+   */
+  public abstract Tree parse(List<? extends HasWord> words);
 
   /**
    * Returns a list of extra Eval objects to use when scoring the parser.
