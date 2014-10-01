@@ -590,7 +590,8 @@ public class TreeBinarizer implements TreeTransformer {
   }
 
 
-  /** Let's you test out the TreeBinarizer on the command line.
+  /** 
+   *  Lets you test out the TreeBinarizer on the command line.
    *  This main method doesn't yet handle as many flags as one would like.
    *  But it does have:
    *  <ul>
