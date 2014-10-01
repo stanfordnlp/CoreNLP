@@ -16,14 +16,16 @@ import edu.stanford.nlp.util.TwoDimensionalMap;
 
 // TODO: get rid of the word Sentiment everywhere
 public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
-  SentimentModel model;
-  List<Tree> trainingBatch;
+
+  private final SentimentModel model;
+  private final List<Tree> trainingBatch;
 
   public SentimentCostAndGradient(SentimentModel model, List<Tree> trainingBatch) {
     this.model = model;
     this.trainingBatch = trainingBatch;
   }
 
+  @Override
   public int domainDimension() {
     // TODO: cache this for speed?
     return model.totalParamSize();
@@ -47,7 +49,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
    * Returns the index with the highest value in the <code>predictions</code> matrix.
    * Indexed from 0.
    */
-  public int getPredictedClass(SimpleMatrix predictions) {
+  private static int getPredictedClass(SimpleMatrix predictions) {
     int argmax = 0;
     for (int i = 1; i < predictions.getNumElements(); ++i) {
       if (predictions.get(i) > predictions.get(argmax)) {
@@ -57,11 +59,12 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return argmax;
   }
 
+  @Override
   public void calculate(double[] theta) {
     model.vectorToParams(theta);
 
-    double localValue = 0.0;
-    double[] localDerivative = new double[theta.length];
+    // double localValue = 0.0;
+    // double[] localDerivative = new double[theta.length];
 
     // We use TreeMap for each of these so that they stay in a
     // canonical sorted order
@@ -147,7 +150,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     derivative = NeuralUtils.paramsToVector(theta.length, binaryTD.valueIterator(), binaryCD.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensorTD.valueIterator()), unaryCD.values().iterator(), wordVectorD.values().iterator());
   }
 
-  double scaleAndRegularize(TwoDimensionalMap<String, String, SimpleMatrix> derivatives,
+  static double scaleAndRegularize(TwoDimensionalMap<String, String, SimpleMatrix> derivatives,
                             TwoDimensionalMap<String, String, SimpleMatrix> currentMatrices,
                             double scale,
                             double regCost) {
@@ -161,7 +164,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return cost;
   }
 
-  double scaleAndRegularize(Map<String, SimpleMatrix> derivatives,
+  static double scaleAndRegularize(Map<String, SimpleMatrix> derivatives,
                             Map<String, SimpleMatrix> currentMatrices,
                             double scale,
                             double regCost) {
@@ -175,7 +178,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return cost;
   }
 
-  double scaleAndRegularizeTensor(TwoDimensionalMap<String, String, SimpleTensor> derivatives,
+  static double scaleAndRegularizeTensor(TwoDimensionalMap<String, String, SimpleTensor> derivatives,
                                   TwoDimensionalMap<String, String, SimpleTensor> currentMatrices,
                                   double scale,
                                   double regCost) {
@@ -291,7 +294,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     }
   }
 
-  private SimpleMatrix computeTensorDeltaDown(SimpleMatrix deltaFull, SimpleMatrix leftVector, SimpleMatrix rightVector,
+  private static SimpleMatrix computeTensorDeltaDown(SimpleMatrix deltaFull, SimpleMatrix leftVector, SimpleMatrix rightVector,
                                               SimpleMatrix W, SimpleTensor Wt) {
     SimpleMatrix WTDelta = W.transpose().mult(deltaFull);
     SimpleMatrix WTDeltaNoBias = WTDelta.extractMatrix(0, deltaFull.numRows() * 2, 0, 1);
@@ -305,7 +308,7 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     return deltaTensor.plus(WTDeltaNoBias);
   }
 
-  private SimpleTensor getTensorGradient(SimpleMatrix deltaFull, SimpleMatrix leftVector, SimpleMatrix rightVector) {
+  private static SimpleTensor getTensorGradient(SimpleMatrix deltaFull, SimpleMatrix leftVector, SimpleMatrix rightVector) {
     int size = deltaFull.getNumElements();
     SimpleTensor Wt_df = new SimpleTensor(size*2, size*2, size);
     // TODO: combine this concatenation with computeTensorDeltaDown?
@@ -376,5 +379,6 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     label.set(RNNCoreAnnotations.Predictions.class, predictions);
     label.set(RNNCoreAnnotations.PredictedClass.class, index);
     label.set(RNNCoreAnnotations.NodeVector.class, nodeVector);
-  }
+  } // end forwardPropagateTree
+
 }

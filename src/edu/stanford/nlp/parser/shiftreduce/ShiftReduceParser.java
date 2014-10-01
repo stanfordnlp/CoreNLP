@@ -96,13 +96,14 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  * @author John Bauer
  */
 public class ShiftReduceParser extends ParserGrammar implements Serializable {
-  Index<Transition> transitionIndex;
-  Map<String, Weight> featureWeights;
+
+  final Index<Transition> transitionIndex;
+  final Map<String, Weight> featureWeights;
   //final Map<String, List<ScoredObject<Integer>>> featureWeights;
 
-  ShiftReduceOptions op;
+  final ShiftReduceOptions op;
 
-  FeatureFactory featureFactory;
+  final FeatureFactory featureFactory;
 
   Set<String> knownStates;
   Set<String> rootStates;
