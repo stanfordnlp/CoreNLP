@@ -1,6 +1,5 @@
 package edu.stanford.nlp.parser.common;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
@@ -57,7 +56,7 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
    */
   public Tree parse(String sentence) {
     TokenizerFactory<? extends HasWord> tf = getOp().tlpParams.treebankLanguagePack().getTokenizerFactory();
-    Tokenizer<? extends HasWord> tokenizer = tf.getTokenizer(new BufferedReader(new StringReader(sentence)));
+    Tokenizer<? extends HasWord> tokenizer = tf.getTokenizer(new StringReader(sentence));
     return parse(tokenizer.tokenize());
   }
 
