@@ -548,7 +548,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   }
 
   public static List<Tree> binarizeTreebank(Treebank treebank, Options op) {
-    TreeBinarizer binarizer = new TreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack(), false, false, 0, false, false, 0.0, false, true, true);
+    TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack());
     BasicCategoryTreeTransformer basicTransformer = new BasicCategoryTreeTransformer(op.langpack());
     CompositeTreeTransformer transformer = new CompositeTreeTransformer();
     transformer.addTransformer(binarizer);
