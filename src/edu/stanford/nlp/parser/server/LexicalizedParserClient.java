@@ -36,13 +36,13 @@ public class LexicalizedParserClient {
    * Tree in any way.  However, it is useful to provide getParse to
    * test that functionality in the server.
    */
-  public String getParse(String query)
+  public String getParse(String query, boolean binarized)
     throws IOException
   {
     Socket socket = new Socket(host, port);
 
     Writer out = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
-    out.write("parse " + query + "\n");
+    out.write((binarized ? "binarized " : "parse ") + query + "\n");
     out.flush();
 
     BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "utf-8"));
@@ -112,7 +112,7 @@ public class LexicalizedParserClient {
     System.out.println(query);
     Tree tree = client.getTree(query);
     System.out.println(tree);
-    String results = client.getParse(query);
+    String results = client.getParse(query, false);
     System.out.println(results);
   }
 }

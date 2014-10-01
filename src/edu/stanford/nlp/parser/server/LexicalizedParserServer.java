@@ -11,6 +11,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.trees.Tree;
 
 /**
@@ -25,6 +26,7 @@ public class LexicalizedParserServer {
   final ServerSocket serverSocket;
 
   final LexicalizedParser parser;
+  final TreeBinarizer binarizer;
 
   //static final Charset utf8Charset = Charset.forName("utf-8");
 
@@ -44,6 +46,7 @@ public class LexicalizedParserServer {
     this.serverSocket = new ServerSocket(port);
     this.model = model;
     this.parser = parser;
+    this.binarizer = TreeBinarizer.simpleTreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack());
   }
 
 
@@ -102,15 +105,18 @@ public class LexicalizedParserServer {
       System.err.println(" ... with argument " + arg);
     }
     switch (command) {
-      case "quit":
-        handleQuit();
-        break;
-      case "parse":
-        handleParse(arg, clientSocket.getOutputStream());
-        break;
-      case "tree":
-        handleTree(arg, clientSocket.getOutputStream());
-        break;
+    case "quit":
+      handleQuit();
+      break;
+    case "parse":
+      handleParse(arg, clientSocket.getOutputStream(), false);
+      break;
+    case "binarized":
+      handleParse(arg, clientSocket.getOutputStream(), true);
+      break;
+    case "tree":
+      handleTree(arg, clientSocket.getOutputStream());
+      break;
     }
 
     System.err.println("Handled request");
@@ -131,10 +137,10 @@ public class LexicalizedParserServer {
   public void handleTree(String arg, OutputStream outStream) 
     throws IOException
   {
-    if (arg == null) {
+    Tree tree = parse(arg, false);
+    if (tree == null) {
       return;
     }
-    Tree tree = parser.parse(arg);
     System.err.println(tree);
     if (tree != null) {
       ObjectOutputStream oos = new ObjectOutputStream(outStream);
@@ -146,13 +152,13 @@ public class LexicalizedParserServer {
   /**
    * Returns the result of applying the parser to arg as a string.
    */
-  public void handleParse(String arg, OutputStream outStream) 
+  public void handleParse(String arg, OutputStream outStream, boolean binarized) 
     throws IOException
   {
-    if (arg == null) {
+    Tree tree = parse(arg, binarized);
+    if (tree == null) {
       return;
     }
-    Tree tree = parser.parse(arg);
     System.err.println(tree);
     if (tree != null) {
       OutputStreamWriter osw = new OutputStreamWriter(outStream, "utf-8");
@@ -162,6 +168,16 @@ public class LexicalizedParserServer {
     }
   }
 
+  private Tree parse(String arg, boolean binarized) {
+    if (arg == null) {
+      return null;
+    }
+    Tree tree = parser.parse(arg);
+    if (binarized) {
+      tree = binarizer.transformTree(tree);
+    }
+    return tree;
+  }
 
   static final int DEFAULT_PORT = 4466;
 

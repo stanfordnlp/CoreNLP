@@ -83,7 +83,7 @@ public class LexicalizedParserServerITest extends TestCase {
 
     LexicalizedParserClient client = 
       new LexicalizedParserClient("localhost", port);
-    String tree = client.getParse(testString);
+    String tree = client.getParse(testString, false);
     assertEquals(resultString, tree.trim());
   }
 
