@@ -10,6 +10,7 @@ import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.trees.Tree;
@@ -25,7 +26,7 @@ public class LexicalizedParserServer {
 
   final ServerSocket serverSocket;
 
-  final LexicalizedParser parser;
+  final ParserGrammar parser;
   final TreeBinarizer binarizer;
 
   //static final Charset utf8Charset = Charset.forName("utf-8");
@@ -35,11 +36,10 @@ public class LexicalizedParserServer {
   public LexicalizedParserServer(int port, String model) 
     throws IOException
   {
-    this(port, model, LexicalizedParser.loadModel(model));
+    this(port, model, ParserGrammar.loadModel(model));
   }
 
-  public LexicalizedParserServer(int port, String model, 
-                                 LexicalizedParser parser)
+  public LexicalizedParserServer(int port, String model, ParserGrammar parser)
     throws IOException
   {
     this.port = port;
