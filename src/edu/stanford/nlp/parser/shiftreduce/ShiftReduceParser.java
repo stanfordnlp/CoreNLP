@@ -480,6 +480,8 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       if (hw instanceof CoreLabel) {
         wordLabel = (CoreLabel) hw;
         tag = wordLabel.tag();
+        CoreLabel cl = (CoreLabel) hw;
+        System.err.println("Reuse! " + cl.word() + " " + cl.value() + " " + cl.tag());
       } else {
         wordLabel = new CoreLabel();
         wordLabel.setValue(hw.word());
@@ -547,7 +549,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   }
 
   public static List<Tree> binarizeTreebank(Treebank treebank, Options op) {
-    TreeBinarizer binarizer = new TreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack(), false, false, 0, false, false, 0.0, false, true, true);
+    TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack());
     BasicCategoryTreeTransformer basicTransformer = new BasicCategoryTreeTransformer(op.langpack());
     CompositeTreeTransformer transformer = new CompositeTreeTransformer();
     transformer.addTransformer(binarizer);
