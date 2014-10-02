@@ -11,7 +11,8 @@ import edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser;
 import edu.stanford.nlp.trees.Tree;
 
 
-
+// TODO: tests should fail if a query causes the server to crash.  Right now it just hangs.
+// Alternatively, the server should catch exceptions and do something productive with them
 public class LexicalizedParserServerITest extends TestCase {
   private static LexicalizedParser lexparser = null;
   private static ShiftReduceParser srparser = null;
@@ -24,6 +25,11 @@ public class LexicalizedParserServerITest extends TestCase {
   static final String testString = "John Bauer works at Stanford.";
   static final String resultString = "(ROOT (S (NP (NNP John) (NNP Bauer)) (VP (VBZ works) (PP (IN at) (NP (NNP Stanford)))) (. .)))";
   static final String binarizedResultString = "(ROOT (S (NP (NNP John) (NNP Bauer)) (@S (VP (VBZ works) (PP (IN at) (NP (NNP Stanford)))) (. .))))";
+  static final String collapsedTreeString = ("nn(Bauer-2, John-1)\n" + 
+                                             "nsubj(works-3, Bauer-2)\n" + 
+                                             "root(ROOT-0, works-3)\n" +
+                                             "prep_at(works-3, Stanford-5)\n" +
+                                             "punct(works-3, .-6)");
 
   public void setUp() 
     throws IOException
@@ -114,6 +120,19 @@ public class LexicalizedParserServerITest extends TestCase {
       new LexicalizedParserClient("localhost", port);
     String tree = client.getParse(testString, true);
     assertEquals(binarizedResultString, tree.trim());
+  }
+
+  public void testGetCollapsedTreeDependencies()
+    throws IOException
+  {
+    int port = Ports.findAvailable(2000, 10000);
+    System.err.println("testGetCollapsedTreeDependencies: starting on port " + port);
+    startLPServer(port, true);
+
+    LexicalizedParserClient client = 
+      new LexicalizedParserClient("localhost", port);
+    String result = client.getDependencies(testString, "collapsed_tree");
+    assertEquals(collapsedTreeString, result.trim());
   }
 
   public void testQuit()

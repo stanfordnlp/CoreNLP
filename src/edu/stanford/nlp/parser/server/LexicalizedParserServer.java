@@ -9,11 +9,15 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collection;
 
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
+import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TypedDependency;
+import edu.stanford.nlp.util.Filters;
 
 /**
  * Serves requests to the given parser model on the given port.
@@ -128,6 +132,9 @@ public class LexicalizedParserServer {
     case "parse":
       handleParse(arg, clientSocket.getOutputStream(), commandArgs.equals("binarized"));
       break;
+    case "dependencies":
+      handleDependencies(arg, clientSocket.getOutputStream(), commandArgs);
+      break;
     case "tree":
       handleTree(arg, clientSocket.getOutputStream());
       break;
@@ -143,6 +150,34 @@ public class LexicalizedParserServer {
    */
   public void handleQuit() {
     stillRunning = false;
+  }
+
+  // TODO: when this method throws an exception (for whatever reason)
+  // a waiting client might hang.  There should be some graceful
+  // handling of that.
+  public void handleDependencies(String arg, OutputStream outStream, String commandArgs) 
+    throws IOException
+  {
+    Tree tree = parse(arg, false);
+    if (tree == null) {
+      return;
+    }
+    // TODO: this might throw an exception if the parser doesn't support dependencies.  Handle that cleaner?
+    GrammaticalStructure gs = parser.getTLPParams().getGrammaticalStructure(tree, Filters.acceptFilter(), parser.getTLPParams().typedDependencyHeadFinder());
+    Collection<TypedDependency> deps = null;
+    switch (commandArgs.toUpperCase()) {
+    case "COLLAPSED_TREE":
+      deps = gs.typedDependenciesCollapsedTree();
+      break;
+    default:
+      throw new UnsupportedOperationException("Dependencies type not implemented: " + commandArgs);
+    }
+    OutputStreamWriter osw = new OutputStreamWriter(outStream, "utf-8");
+    for (TypedDependency dep : deps) {
+      osw.write(dep.toString());
+      osw.write("\n");
+    }
+    osw.flush();
   }
 
   /**
