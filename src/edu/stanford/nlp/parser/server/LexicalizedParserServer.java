@@ -107,7 +107,12 @@ public class LexicalizedParserServer {
       return;
     line = line.trim();
     String[] pieces = line.split(" ", 2);
-    String command = pieces[0];
+    String[] commandPieces = pieces[0].split(":", 2);
+    String command = commandPieces[0];
+    String commandArgs = "";
+    if (commandPieces.length > 1) {
+      commandArgs = commandPieces[1];
+    }
     String arg = null;
     if (pieces.length > 1) {
       arg = pieces[1];
@@ -121,12 +126,7 @@ public class LexicalizedParserServer {
       handleQuit();
       break;
     case "parse":
-      handleParse(arg, clientSocket.getOutputStream(), false);
-      break;
-    case "parse:binarized": 
-      // TODO: if commands get more complex, can do more intelligent
-      // parsing of commands
-      handleParse(arg, clientSocket.getOutputStream(), true);
+      handleParse(arg, clientSocket.getOutputStream(), commandArgs.equals("binarized"));
       break;
     case "tree":
       handleTree(arg, clientSocket.getOutputStream());
