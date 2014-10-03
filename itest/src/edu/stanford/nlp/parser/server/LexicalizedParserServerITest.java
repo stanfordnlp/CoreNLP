@@ -82,11 +82,11 @@ public class LexicalizedParserServerITest extends TestCase {
   }
 
 
-  public void testGetATree()
+  public void testGetTree()
     throws IOException
   {
     int port = Ports.findAvailable(2000, 10000);
-    System.err.println("testGetATree: starting on port " + port);
+    System.err.println("testGetTree: starting on port " + port);
     startLPServer(port, true);
 
     LexicalizedParserClient client = 
@@ -96,11 +96,11 @@ public class LexicalizedParserServerITest extends TestCase {
   }
 
 
-  public void testGetText()
+  public void testGetTextTree()
     throws IOException
   {
     int port = Ports.findAvailable(2000, 10000);
-    System.err.println("testGetText: starting on port " + port);
+    System.err.println("testGetTextTree: starting on port " + port);
     startLPServer(port, true);
 
     LexicalizedParserClient client = 
@@ -109,11 +109,11 @@ public class LexicalizedParserServerITest extends TestCase {
     assertEquals(resultString, tree.trim());
   }
 
-  public void testGetBinarizedText()
+  public void testGetBinarizedTextTree()
     throws IOException
   {
     int port = Ports.findAvailable(2000, 10000);
-    System.err.println("testGetBinarizedText: starting on port " + port);
+    System.err.println("testGetBinarizedTextTree: starting on port " + port);
     startLPServer(port, true);
 
     LexicalizedParserClient client = 
