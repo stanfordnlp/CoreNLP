@@ -53,13 +53,21 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
   }
 
   /**
+   * Tokenize the text using the parser's tokenizer
+   */
+  public List<? extends HasWord> tokenize(String sentence) {
+    TokenizerFactory<? extends HasWord> tf = treebankLanguagePack().getTokenizerFactory();
+    Tokenizer<? extends HasWord> tokenizer = tf.getTokenizer(new StringReader(sentence));
+    List<? extends HasWord> tokens = tokenizer.tokenize();
+    return tokens;
+  }
+
+  /**
    * Will parse the text in <code>sentence</code> as if it represented
    * a single sentence by first processing it with a tokenizer.
    */
   public Tree parse(String sentence) {
-    TokenizerFactory<? extends HasWord> tf = getOp().tlpParams.treebankLanguagePack().getTokenizerFactory();
-    Tokenizer<? extends HasWord> tokenizer = tf.getTokenizer(new StringReader(sentence));
-    List<? extends HasWord> tokens = tokenizer.tokenize();
+    List<? extends HasWord> tokens = tokenize(sentence);
     if (getOp().testOptions.preTag) {
       Function<List<? extends HasWord>, List<TaggedWord>> tagger = loadTagger();
       tokens = tagger.apply(tokens);

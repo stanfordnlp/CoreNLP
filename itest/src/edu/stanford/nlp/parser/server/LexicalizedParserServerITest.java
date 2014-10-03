@@ -30,6 +30,7 @@ public class LexicalizedParserServerITest extends TestCase {
                                              "root(ROOT-0, works-3)\n" +
                                              "prep_at(works-3, Stanford-5)\n" +
                                              "punct(works-3, .-6)");
+  static final String tokenizedString = "John Bauer works at Stanford .";
 
   public void setUp() 
     throws IOException
@@ -95,6 +96,18 @@ public class LexicalizedParserServerITest extends TestCase {
     assertEquals(resultString, tree.toString().trim());
   }
 
+  public void testGetTokenizedTest()
+    throws IOException
+  {
+    int port = Ports.findAvailable(2000, 10000);
+    System.err.println("testGetTree: starting on port " + port);
+    startLPServer(port, true);
+
+    LexicalizedParserClient client = 
+      new LexicalizedParserClient("localhost", port);
+    String tokenized = client.getTokenizedText(testString);
+    assertEquals(tokenizedString, tokenized);
+  }
 
   public void testGetTextTree()
     throws IOException

@@ -47,6 +47,24 @@ public class LexicalizedParserClient {
   }
 
   /**
+   * Tokenize the text according to the parser's tokenizer, 
+   * return it as whitespace tokenized text.
+   */
+  public String getTokenizedText(String query) 
+    throws IOException
+  {
+    Socket socket = new Socket(host, port);
+
+    Writer out = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
+    out.write("tokenize " + query + "\n");
+    out.flush();
+
+    String result = readResult(socket);
+    socket.close();
+    return result;
+  }
+
+  /**
    * Returns the String output of the dependencies.
    * <br>
    * TODO: use some form of Mode enum (such as the one in SemanticGraphFactory) 

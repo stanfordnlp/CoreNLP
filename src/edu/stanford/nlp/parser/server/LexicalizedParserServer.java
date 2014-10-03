@@ -10,7 +10,9 @@ import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collection;
+import java.util.List;
 
+import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
@@ -138,6 +140,9 @@ public class LexicalizedParserServer {
     case "tree":
       handleTree(arg, clientSocket.getOutputStream());
       break;
+    case "tokenize":
+      handleTokenize(arg, clientSocket.getOutputStream());
+      break;
     }
 
     System.err.println("Handled request");
@@ -150,6 +155,25 @@ public class LexicalizedParserServer {
    */
   public void handleQuit() {
     stillRunning = false;
+  }
+
+  public void handleTokenize(String arg, OutputStream outStream) 
+    throws IOException
+  {
+    if (arg == null) {
+      return;
+    }
+    List<? extends HasWord> tokens = parser.tokenize(arg);
+    OutputStreamWriter osw = new OutputStreamWriter(outStream, "utf-8");
+    for (int i = 0; i < tokens.size(); ++i) {
+      HasWord word = tokens.get(i);
+      if (i > 0) {
+        osw.write(" ");
+      }
+      osw.write(word.toString());
+    }
+    osw.write("\n");
+    osw.flush();
   }
 
   // TODO: when this method throws an exception (for whatever reason)
