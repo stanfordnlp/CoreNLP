@@ -2,10 +2,7 @@ package edu.stanford.nlp.trees;
 
 import java.io.*;
 import java.util.*;
-import java.util.regex.Pattern;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.util.*;
 
@@ -185,7 +182,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   //   while (matcher.find()) {
   //     IndexedWord gov = matcher.getNode("prepdep");
   //     IndexedWord dep = matcher.getNode("head");
-  
+
   //     TypedDependency newDep = new TypedDependency(PREPOSITIONAL_OBJECT, gov, dep);
   //     newDep.setExtra();
   //     list.add(newDep);
@@ -263,7 +260,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       boolean foundPrep = false;
       for (TypedDependency prep : list) {
 
-        // todo: It would also be good to add a rule here to prefer ccomp nsbubj over dobj if there is a ccomp with no subj
+        // todo: It would also be good to add a rule here to prefer ccomp nsubj over dobj if there is a ccomp with no subj
         // then we could get right: Which eco-friendly options do you think there will be on the new Lexus?
 
         if (prep.reln() != PREPOSITIONAL_MODIFIER) {
@@ -738,11 +735,6 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     }
   }
 
-  // TODO: is there some better pattern to look for?
-  // We do not have tag information at this point
-  private static final String RELATIVIZING_WORD_REGEX = "(?i:that|what|which|who|whom|whose)";
-  private static final Pattern RELATIVIZING_WORD_PATTERN = Pattern.compile(RELATIVIZING_WORD_REGEX);
-
   /**
    * Look for ref rules for a given word.  We look through the
    * children and grandchildren of the rcmod dependency, and if any
@@ -765,7 +757,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       TypedDependency leftChild = null;
       for (TypedDependency child : list) {
         if (child.gov().equals(modifier) &&
-            RELATIVIZING_WORD_PATTERN.matcher(child.dep().value()).matches() &&
+            EnglishPatterns.RELATIVIZING_WORD_PATTERN.matcher(child.dep().value()).matches() &&
             (leftChild == null || child.dep().index() < leftChild.dep().index())) {
           leftChild = child;
         }
@@ -779,7 +771,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         }
         for (TypedDependency grandchild : list) {
           if (grandchild.gov().equals(child.dep()) &&
-              RELATIVIZING_WORD_PATTERN.matcher(grandchild.dep().value()).matches() &&
+              EnglishPatterns.RELATIVIZING_WORD_PATTERN.matcher(grandchild.dep().value()).matches() &&
               (leftGrandchild == null || grandchild.dep().index() < leftGrandchild.dep().index())) {
             leftGrandchild = grandchild;
           }
@@ -1563,43 +1555,47 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
 
+    if (pobj == null || newtd == null) {
+      return;
+    }
+
     // only if we found the three parts, set to KILL and remove
     // and add the new one
-    if (prep != null && dep != null && pobj != null && newtd != null) {
-      if (DEBUG) {
-        System.err.println("Removing " + prep + ", " + dep + ", and " + pobj);
-        System.err.println("  and adding " + newtd);
-      }
-      prep.setReln(KILL);
-      dep.setReln(KILL);
-      pobj.setReln(KILL);
-      newTypedDeps.add(newtd);
+    // Necessarily from the above: prep != null, dep != null, pobj != null, newtd != null
 
-      // now remove typed dependencies with reln "kill"
-      // and promote possible orphans
-      for (TypedDependency td1 : list) {
-        if (td1.reln() != KILL) {
-          if (td1.gov().equals(mwp0) || td1.gov().equals(mwp1)) {
-            // CDM: Thought of adding this in Jan 2010, but it causes
-            // conflicting relations tmod vs. pobj. Needs more thought
-            // maybe restrict pobj to first NP in PP, and allow tmod for a later
-            // one?
-            if (td1.reln() == TEMPORAL_MODIFIER) {
-              // special case when an extra NP-TMP is buried in a PP for
-              // "during the same period last year"
-              td1.setGov(pobj.dep());
-            } else {
-              td1.setGov(governor);
-            }
-          }
-          if (!newTypedDeps.contains(td1)) {
-            newTypedDeps.add(td1);
+    if (DEBUG) {
+      System.err.println("Removing " + prep + ", " + dep + ", and " + pobj);
+      System.err.println("  and adding " + newtd);
+    }
+    prep.setReln(KILL);
+    dep.setReln(KILL);
+    pobj.setReln(KILL);
+    newTypedDeps.add(newtd);
+
+    // now remove typed dependencies with reln "kill"
+    // and promote possible orphans
+    for (TypedDependency td1 : list) {
+      if (td1.reln() != KILL) {
+        if (td1.gov().equals(mwp0) || td1.gov().equals(mwp1)) {
+          // CDM: Thought of adding this in Jan 2010, but it causes
+          // conflicting relations tmod vs. pobj. Needs more thought
+          // maybe restrict pobj to first NP in PP, and allow tmod for a later
+          // one?
+          if (td1.reln() == TEMPORAL_MODIFIER) {
+            // special case when an extra NP-TMP is buried in a PP for
+            // "during the same period last year"
+            td1.setGov(pobj.dep());
+          } else {
+            td1.setGov(governor);
           }
         }
+        if (!newTypedDeps.contains(td1)) {
+          newTypedDeps.add(td1);
+        }
       }
-      list.clear();
-      list.addAll(newTypedDeps);
     }
+    list.clear();
+    list.addAll(newTypedDeps);
   }
 
   /**
@@ -1641,7 +1637,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       // the two words in the mwp should be next to another in the sentence
       // (difference of indexes = 1)
 
-      if (mwp0 == null) {
+      if (mwp0 == null || governor == null) {
         continue;
       }
 
@@ -1665,43 +1661,43 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
           pobj = td2;
           // create the new gr relation
           GrammaticalRelation gr = EnglishGrammaticalRelations.getPrep(mwp[0] + '_' + mwp[1]);
-          if (governor != null) {
-            newtd = new TypedDependency(gr, governor, pobj.dep());
-          }
+          newtd = new TypedDependency(gr, governor, pobj.dep());
         }
         if (td2.reln() == PREPOSITIONAL_COMPLEMENT && td2.gov().equals(mwp1)) {
           pobj = td2;
           // create the new gr relation
           GrammaticalRelation gr = EnglishGrammaticalRelations.getPrepC(mwp[0] + '_' + mwp[1]);
-          if (governor != null) {
-            newtd = new TypedDependency(gr, governor, pobj.dep());
-          }
+          newtd = new TypedDependency(gr, governor, pobj.dep());
         }
+      }
+
+      if (pobj == null) {
+        return;
       }
 
       // only if we found the three parts, set to KILL and remove
       // and add the new one
-      if (prep != null && pobj != null && newtd != null) {
-        prep.setReln(KILL);
-        dep.setReln(KILL);
-        pobj.setReln(KILL);
-        newTypedDeps.add(newtd);
+      // now prep != null, pobj != null and newtd != null
 
-        // now remove typed dependencies with reln "kill"
-        // and promote possible orphans
-        for (TypedDependency td1 : list) {
-          if (td1.reln() != KILL) {
-            if (td1.gov().equals(mwp0) || td1.gov().equals(mwp1)) {
-              td1.setGov(governor);
-            }
-            if (!newTypedDeps.contains(td1)) {
-              newTypedDeps.add(td1);
-            }
+      prep.setReln(KILL);
+      dep.setReln(KILL);
+      pobj.setReln(KILL);
+      newTypedDeps.add(newtd);
+
+      // now remove typed dependencies with reln "kill"
+      // and promote possible orphans
+      for (TypedDependency td1 : list) {
+        if (td1.reln() != KILL) {
+          if (td1.gov().equals(mwp0) || td1.gov().equals(mwp1)) {
+            td1.setGov(governor);
+          }
+          if (!newTypedDeps.contains(td1)) {
+            newTypedDeps.add(td1);
           }
         }
-        list.clear();
-        list.addAll(newTypedDeps);
       }
+      list.clear();
+      list.addAll(newTypedDeps);
     }
   }
 
@@ -2023,27 +2019,29 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         }
       }
 
+      if (pobj == null) {
+        return;
+      }
       // only if we found the three parts, set to KILL and remove
-      if (prep != null && dep != null && pobj != null) {
-        prep.setReln(KILL);
-        dep.setReln(KILL);
-        pobj.setReln(KILL);
+      // we know prep != null && dep != null && dep != null
+      prep.setReln(KILL);
+      dep.setReln(KILL);
+      pobj.setReln(KILL);
 
-        // now remove typed dependencies with reln "kill"
-        // and promote possible orphans
-        for (TypedDependency td1 : list) {
-          if (td1.reln() != KILL) {
-            if (td1.gov().equals(mwp1)) {
-              td1.setGov(governor);
-            }
-            if (!newTypedDeps.contains(td1)) {
-              newTypedDeps.add(td1);
-            }
+      // now remove typed dependencies with reln "kill"
+      // and promote possible orphans
+      for (TypedDependency td1 : list) {
+        if (td1.reln() != KILL) {
+          if (td1.gov().equals(mwp1)) {
+            td1.setGov(governor);
+          }
+          if (!newTypedDeps.contains(td1)) {
+            newTypedDeps.add(td1);
           }
         }
-        list.clear();
-        list.addAll(newTypedDeps);
       }
+      list.clear();
+      list.addAll(newTypedDeps);
     }
   }
 
