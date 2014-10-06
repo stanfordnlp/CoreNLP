@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
 
 
 /**
- * {@code GrammaticalRelation} is used to define a
+ * <code>GrammaticalRelation</code> is used to define a
  * standardized, hierarchical set of grammatical relations,
  * together with patterns for identifying them in
  * parse trees.<p>
@@ -50,17 +50,17 @@ import java.util.regex.Pattern;
  * Each <code>GrammaticalRelation</code> has:
  * <ul>
  *   <li>A <code>String</code> short name, which should be a lowercase
- *       abbreviation of some kind (in the fure mainly Universal Dependency names).</li>
+ *       abbreviation of some kind.</li>
  *   <li>A <code>String</code> long name, which should be descriptive.</li>
  *   <li>A parent in the <code>GrammaticalRelation</code> hierarchy.</li>
  *   <li>A {@link Pattern <code>Pattern</code>} called
  *   <code>sourcePattern</code> which matches (parent) nodes from which
  *   this <code>GrammaticalRelation</code> could hold.  (Note: this is done
- *   with the Java regex Pattern <code>matches()</code> predicate. The pattern
+ *   with the Java regex Pattern <code>matches()</code> predicate: the pattern
  *   must match the
  *   whole node name, and <code>^</code> or <code>$</code> aren't needed.
  *   Tregex constructions like __ do not work. Use ".*" to be applicable
- *   at all nodes. This prefiltering is used for efficiency.)</li>
+ *   at all nodes.)</li>
  *   <li>A list of zero or more {@link TregexPattern
  *   <code>TregexPattern</code>s} called <code>targetPatterns</code>,
  *   which describe the local tree structure which must hold between
@@ -310,7 +310,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     }
   }
 
-  // This is the main constructor used
   public GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
@@ -321,7 +320,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     this(language, shortName, longName, parent, sourcePattern, tregexCompiler, targetPatterns, null);
   }
 
-  // Used for non-leaf relations with no patterns
   public GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
@@ -329,7 +327,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     this(language, shortName, longName, parent, null, null, StringUtils.EMPTY_STRING_ARRAY, null);
   }
 
-  // used to create collapsed relations with specificString
   public GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
