@@ -252,6 +252,13 @@ public class LexicalizedParserServer {
     return tree;
   }
 
+  private static void help() {
+    System.err.println("-help:   display this message");
+    System.err.println("-model:  load this parser (default englishPCFG.ser.gz)");
+    System.err.println("-tagger: pretag with this tagger model");
+    System.err.println("-port:   run on this port (default 4466)");
+  }
+
   static final int DEFAULT_PORT = 4466;
 
   public static void main(String[] args) 
@@ -281,6 +288,9 @@ public class LexicalizedParserServer {
         port = Integer.valueOf(args[i + 1]);
       } else if (arg.equalsIgnoreCase("tagger")) {
         tagger = args[i + 1];
+      } else if (arg.equalsIgnoreCase("help")) {
+        help();
+        System.exit(0);
       }
     }
     
