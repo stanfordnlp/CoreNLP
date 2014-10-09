@@ -61,11 +61,14 @@ public class LexicalizedParserServer {
 
 
   private static ParserGrammar loadModel(String parserModel, String taggerModel) {
+    ParserGrammar model;
     if (taggerModel == null) {
-      return ParserGrammar.loadModel(parserModel);
+      model = ParserGrammar.loadModel(parserModel);
     } else {
-      return ParserGrammar.loadModel(parserModel, "-preTag", "-taggerSerializedFile", taggerModel);
+      model = ParserGrammar.loadModel(parserModel, "-preTag", "-taggerSerializedFile", taggerModel);
     }
+    model.setOptionFlags(model.defaultCoreNLPFlags());
+    return model;
   }
 
   /**
@@ -271,6 +274,7 @@ public class LexicalizedParserServer {
     String model = LexicalizedParser.DEFAULT_PARSER_LOC;
     String tagger = null;
 
+    // TODO: rewrite this a bit to allow for passing flags to the parser
     for (int i = 0; i < args.length; i += 2) {
       if (i + 1 >= args.length) {
         System.err.println("Unspecified argument " + args[i]);
