@@ -9,7 +9,10 @@ import java.util.concurrent.locks.Lock;
 import edu.stanford.nlp.graph.DirectedMultiGraph;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.AbstractCoreLabel;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.StringLabel;
 import edu.stanford.nlp.ling.Word;
@@ -258,22 +261,35 @@ public abstract class GrammaticalStructure implements Serializable {
     List<TreeGraphNode> tgWordNodes = new ArrayList<TreeGraphNode>(tokens.size());
     List<TreeGraphNode> tgPOSNodes = new ArrayList<TreeGraphNode>(tokens.size());
 
+    CoreLabel rootLabel = new CoreLabel();
+    rootLabel.setValue("ROOT");
+    List<IndexedWord> nodeWords = new ArrayList<IndexedWord>(tgPOSNodes.size() + 1);
+    nodeWords.add(new IndexedWord(rootLabel));
+
     SemanticHeadFinder headFinder = new SemanticHeadFinder();
 
     Iterator<String> posIter = posTags.iterator();
     for (String wordString : tokens) {
       String posString = posIter.next();
-      TreeGraphNode word = new TreeGraphNode(new Word(wordString));
-      TreeGraphNode pos = new TreeGraphNode(new Word(posString));
+      CoreLabel wordLabel = new CoreLabel();
+      wordLabel.setWord(wordString);
+      wordLabel.setValue(wordString);
+      wordLabel.setTag(posString);
+      TreeGraphNode word = new TreeGraphNode(wordLabel);
+      CoreLabel tagLabel = new CoreLabel();
+      tagLabel.setValue(posString);
+      tagLabel.setWord(posString);
+      TreeGraphNode pos = new TreeGraphNode(tagLabel);
       tgWordNodes.add(word);
       tgPOSNodes.add(pos);
       TreeGraphNode[] childArr = {word};
       pos.setChildren(childArr);
       word.setParent(pos);
       pos.percolateHeads(headFinder);
+      nodeWords.add(new IndexedWord(wordLabel));
     }
 
-    TreeGraphNode root = new TreeGraphNode(new StringLabel("ROOT"));
+    TreeGraphNode root = new TreeGraphNode(rootLabel);
 
     root.setChildren(tgPOSNodes.toArray(new TreeGraphNode[tgPOSNodes.size()]));
 
@@ -309,7 +325,7 @@ public abstract class GrammaticalStructure implements Serializable {
 
       GrammaticalRelation grel = new GrammaticalRelation(GrammaticalRelation.Language.Any, type, null, DEPENDENT);
 
-      TypedDependency tdep = new TypedDependency(grel, (parentIdx == 0 ? root: tgWordNodes.get(parentIdx-1)), tgWordNodes.get(childIdx-1));
+      TypedDependency tdep = new TypedDependency(grel, nodeWords.get(parentIdx), nodeWords.get(childIdx));
       tdeps.add(tdep);
     }
 
@@ -409,9 +425,9 @@ public abstract class GrammaticalStructure implements Serializable {
 
     for (TreeGraphNode gov : basicGraph.getAllVertices()) {
       for (TreeGraphNode dep : basicGraph.getChildren(gov)) {
-        GrammaticalRelation reln = getGrammaticalRelationCommonAncestor(gov, dep, basicGraph.getEdges(gov, dep));
+        GrammaticalRelation reln = getGrammaticalRelationCommonAncestor(gov.label(), dep.label(), basicGraph.getEdges(gov, dep));
         // System.err.println("  Gov: " + gov + " Dep: " + dep + " Reln: " + reln);
-        basicDep.add(new TypedDependency(reln, gov.headWordNode(), dep.headWordNode()));
+        basicDep.add(new TypedDependency(reln, new IndexedWord(gov.headWordNode().label()), new IndexedWord(dep.headWordNode().label())));
       }
     }
 
@@ -433,7 +449,7 @@ public abstract class GrammaticalStructure implements Serializable {
       }
     }
     if (rootDep != null) {
-      TypedDependency rootTypedDep = new TypedDependency(ROOT, dependencyRoot, rootDep);
+      TypedDependency rootTypedDep = new TypedDependency(ROOT, new IndexedWord(dependencyRoot.label()), new IndexedWord(rootDep.label()));
       if (puncTypedDepFilter.accept(rootTypedDep)) {
         basicDep.add(rootTypedDep);
       }
@@ -494,7 +510,7 @@ public abstract class GrammaticalStructure implements Serializable {
     for (TreeGraphNode gov : completeGraph.getAllVertices()) {
       for (TreeGraphNode dep : completeGraph.getChildren(gov)) {
         for (GrammaticalRelation rel : removeGrammaticalRelationAncestors(completeGraph.getEdges(gov, dep))) {
-          TypedDependency newDep = new TypedDependency(rel, gov.headWordNode(), dep.headWordNode());
+          TypedDependency newDep = new TypedDependency(rel, new IndexedWord(gov.headWordNode().label()), new IndexedWord(dep.headWordNode().label()));
           if (!deps.contains(newDep) && puncTypedDepFilter.accept(newDep) && extraTreeDepFilter.accept(newDep)) {
             newDep.setExtra();
             deps.add(newDep);
@@ -539,10 +555,7 @@ public abstract class GrammaticalStructure implements Serializable {
     public boolean accept(TypedDependency d) {
       if (d == null) return false;
 
-      TreeGraphNode s = d.dep();
-      if (s == null) return false;
-
-      Label l = s.label();
+      IndexedWord l = d.dep();
       if (l == null) return false;
 
       return npf.accept(l.value());
@@ -560,17 +573,18 @@ public abstract class GrammaticalStructure implements Serializable {
   public GrammaticalRelation getGrammaticalRelation(int govIndex, int depIndex) {
     TreeGraphNode gov = getNodeByIndex(govIndex);
     TreeGraphNode dep = getNodeByIndex(depIndex);
-    return getGrammaticalRelation(gov, dep);
+    // TODO: this is pretty ugly
+    return getGrammaticalRelation(new IndexedWord(gov.label()), new IndexedWord(dep.label()));
   }
 
   /**
    * Get GrammaticalRelation between gov and dep, and null if gov is not the
    * governor of dep
    */
-  public GrammaticalRelation getGrammaticalRelation(TreeGraphNode gov, TreeGraphNode dep) {
+  public GrammaticalRelation getGrammaticalRelation(IndexedWord gov, IndexedWord dep) {
     List<GrammaticalRelation> labels = Generics.newArrayList();
     for (TypedDependency dependency : typedDependencies(true)) {
-      if (dependency.gov() == gov && dependency.dep() == dep) {
+      if (dependency.gov().equals(gov) && dependency.dep().equals(dep)) {
         labels.add(dependency.reln());
       }
     }
@@ -580,10 +594,10 @@ public abstract class GrammaticalStructure implements Serializable {
 
   /**
    * Returns the GrammaticalRelation which is the highest common
-   * ancestor of the list of relations passed in.  The TreeGraphNodes
+   * ancestor of the list of relations passed in.  The IndexedWords
    * are passed in only for debugging reasons.
    */
-  private static GrammaticalRelation getGrammaticalRelationCommonAncestor(TreeGraphNode govH, TreeGraphNode depH, List<GrammaticalRelation> labels) {
+  private static GrammaticalRelation getGrammaticalRelationCommonAncestor(AbstractCoreLabel govH, AbstractCoreLabel depH, List<GrammaticalRelation> labels) {
     GrammaticalRelation reln = GrammaticalRelation.DEPENDENT;
 
     List<GrammaticalRelation> sortedLabels;
@@ -600,16 +614,16 @@ public abstract class GrammaticalStructure implements Serializable {
         reln = reln2;
       } else if (PRINT_DEBUGGING && ! reln2.isAncestor(reln)) {
         System.err.println("@@@\t" + reln + "\t" + reln2 + "\t" +
-                           govH.label().get(CoreAnnotations.ValueAnnotation.class) + "\t" + depH.label().get(CoreAnnotations.ValueAnnotation.class));
+                           govH.get(CoreAnnotations.ValueAnnotation.class) + "\t" + depH.get(CoreAnnotations.ValueAnnotation.class));
       }
     }
     if (PRINT_DEBUGGING && reln.equals(GrammaticalRelation.DEPENDENT)) {
-      String topCat = govH.label().get(CoreAnnotations.ValueAnnotation.class);
-      String topTag = govH.label().get(TreeCoreAnnotations.HeadTagAnnotation.class).value();
-      String topWord = govH.label().get(TreeCoreAnnotations.HeadWordAnnotation.class).value();
-      String botCat = depH.label().get(CoreAnnotations.ValueAnnotation.class);
-      String botTag = depH.label().get(TreeCoreAnnotations.HeadTagAnnotation.class).value();
-      String botWord = depH.label().get(TreeCoreAnnotations.HeadWordAnnotation.class).value();
+      String topCat = govH.get(CoreAnnotations.ValueAnnotation.class);
+      String topTag = govH.get(TreeCoreAnnotations.HeadTagAnnotation.class).value();
+      String topWord = govH.get(TreeCoreAnnotations.HeadWordAnnotation.class).value();
+      String botCat = depH.get(CoreAnnotations.ValueAnnotation.class);
+      String botTag = depH.get(TreeCoreAnnotations.HeadTagAnnotation.class).value();
+      String botWord = depH.get(TreeCoreAnnotations.HeadWordAnnotation.class).value();
       System.err.println("### dep\t" + topCat + "\t" + topTag + "\t" + topWord +
                          "\t" + botCat + "\t" + botTag + "\t" + botWord + "\t");
     }
@@ -849,15 +863,15 @@ public abstract class GrammaticalStructure implements Serializable {
 
     // need to see if more than one governor is not listed somewhere as a dependent
     // first take all the deps
-    Collection<TreeGraphNode> deps = Generics.newHashSet();
+    Collection<IndexedWord> deps = Generics.newHashSet();
     for (TypedDependency typedDep : list) {
       deps.add(typedDep.dep());
     }
 
     // go through the list and add typedDependency for which the gov is not a dep
-    Collection<TreeGraphNode> govs = Generics.newHashSet();
+    Collection<IndexedWord> govs = Generics.newHashSet();
     for (TypedDependency typedDep : list) {
-      TreeGraphNode gov = typedDep.gov();
+      IndexedWord gov = typedDep.gov();
       if (!deps.contains(gov) && !govs.contains(gov)) {
         roots.add(typedDep);
       }
@@ -975,8 +989,8 @@ public abstract class GrammaticalStructure implements Serializable {
   }
 
   private static String toStringIndex(TypedDependency td, Map<Integer, Integer> indexToPos) {
-    TreeGraphNode gov = td.gov();
-    TreeGraphNode dep = td.dep();
+    IndexedWord gov = td.gov();
+    IndexedWord dep = td.dep();
     return td.reln() + "(" + gov.value() + "-" + indexToPos.get(gov.index()) + gov.toPrimes() + ", " + dep.value() + "-" + indexToPos.get(dep.index()) + dep.toPrimes() + ")";
   }
 
@@ -1027,25 +1041,29 @@ public abstract class GrammaticalStructure implements Serializable {
   buildCoNLLXGrammaticalStructure(List<List<String>> tokenFields,
                                 Map<String, GrammaticalRelation> shortNameToGRel,
                                 GrammaticalStructureFromDependenciesFactory factory) {
-    List<TreeGraphNode> tgWordNodes =
-      new ArrayList<TreeGraphNode>(tokenFields.size());
-    List<TreeGraphNode> tgPOSNodes =
-      new ArrayList<TreeGraphNode>(tokenFields.size());
+    List<IndexedWord> tgWords = new ArrayList<IndexedWord>(tokenFields.size());
+    List<TreeGraphNode> tgPOSNodes = new ArrayList<TreeGraphNode>(tokenFields.size());
 
     SemanticHeadFinder headFinder = new SemanticHeadFinder();
 
     // Construct TreeGraphNodes for words and POS tags
     for (List<String> fields : tokenFields) {
-      TreeGraphNode word =
-        new TreeGraphNode(new Word(fields.get(CoNLLX_WordField)));
-      TreeGraphNode pos =
-        new TreeGraphNode(new Word(fields.get(CoNLLX_POSField)));
-      tgWordNodes.add(word);
-      tgPOSNodes.add(pos);
-      TreeGraphNode[] childArr = { word };
-      pos.setChildren(childArr);
-      word.setParent(pos);
-      pos.percolateHeads(headFinder);
+      CoreLabel word = new CoreLabel();
+      word.setValue(fields.get(CoNLLX_WordField));
+      word.setWord(fields.get(CoNLLX_WordField));
+      word.setTag(fields.get(CoNLLX_POSField));
+      word.setIndex(tgWords.size() + 1);
+      CoreLabel pos = new CoreLabel();
+      pos.setTag(fields.get(CoNLLX_POSField));
+      pos.setValue(fields.get(CoNLLX_POSField));
+      TreeGraphNode wordNode = new TreeGraphNode(word);
+      TreeGraphNode posNode =new TreeGraphNode(pos);
+      tgWords.add(new IndexedWord(word));
+      tgPOSNodes.add(posNode);
+      TreeGraphNode[] childArr = { wordNode };
+      posNode.setChildren(childArr);
+      wordNode.setParent(posNode);
+      posNode.percolateHeads(headFinder);
     }
 
     // We fake up the parts of the tree structure that are not
@@ -1057,26 +1075,23 @@ public abstract class GrammaticalStructure implements Serializable {
     // parent child relationship between words and their POS tags.
     //
     // e.g. (ROOT (PRP I) (VBD hit) (DT the) (NN ball) (. .))
-    // cdm Nov 2009: This next bit wasn't used so I commented it out
-    // List<List<Integer>> children = new
-    // ArrayList<List<Integer>>(tokenFields.size());
-    // for (int i = 0; i < tgWordNodes.size(); i++) {
-    //   children.add(new ArrayList<Integer>());
-    // }
 
     TreeGraphNode root =
-      new TreeGraphNode(new Word("ROOT-" + (tgWordNodes.size() + 1)));
+      new TreeGraphNode(new Word("ROOT-" + (tgPOSNodes.size() + 1)));
     root.setChildren(tgPOSNodes.toArray(new TreeGraphNode[tgPOSNodes.size()]));
 
     // Build list of TypedDependencies
-    List<TypedDependency> tdeps =
-      new ArrayList<TypedDependency>(tgWordNodes.size());
+    List<TypedDependency> tdeps = new ArrayList<TypedDependency>(tgWords.size());
 
     // Create a node outside the tree useful for root dependencies;
     // we want to keep those if they were stored in the conll file
-    TreeGraphNode dependencyRoot = new TreeGraphNode(new Word("ROOT"));
-    dependencyRoot.setIndex(0);
-    for (int i = 0; i < tgWordNodes.size(); i++) {
+    
+    CoreLabel rootLabel = new CoreLabel();
+    rootLabel.setValue("ROOT");
+    rootLabel.setWord("ROOT");
+    rootLabel.setIndex(0);
+    IndexedWord dependencyRoot = new IndexedWord(rootLabel);
+    for (int i = 0; i < tgWords.size(); i++) {
       String parentIdStr = tokenFields.get(i).get(CoNLLX_GovField);
       if (parentIdStr == null || parentIdStr.equals(""))
         continue;
@@ -1088,22 +1103,22 @@ public abstract class GrammaticalStructure implements Serializable {
       TypedDependency tdep;
       if (grel == null) {
         if (grelString.toLowerCase().equals("root")) {
-          tdep = new TypedDependency(ROOT, dependencyRoot, tgWordNodes.get(i));
+          tdep = new TypedDependency(ROOT, dependencyRoot, tgWords.get(i));
         } else {
           throw new RuntimeException("Unknown grammatical relation '" +
                                      grelString + "' fields: " +
                                      tokenFields.get(i) + "\nNode: " +
-                                     tgWordNodes.get(i) + "\n" +
+                                     tgWords.get(i) + "\n" +
                                      "Known Grammatical relations: ["+shortNameToGRel.keySet()+"]" );
         }
       } else {
-        if (parentId >= tgWordNodes.size()) {
-          System.err.printf("Warning: Invalid Parent Id %d Sentence Length: %d%n", parentId+1, tgWordNodes.size());
+        if (parentId >= tgWords.size()) {
+          System.err.printf("Warning: Invalid Parent Id %d Sentence Length: %d%n", parentId+1, tgWords.size());
           System.err.printf("         Assigning to root (0)%n");
           parentId = -1;
         }
-        tdep = new TypedDependency(grel, (parentId == -1 ? root : tgWordNodes.get(parentId)),
-                                   tgWordNodes.get(i));
+        tdep = new TypedDependency(grel, (parentId == -1 ? dependencyRoot : tgWords.get(parentId)),
+                                   tgWords.get(i));
       }
       tdeps.add(tdep);
     }

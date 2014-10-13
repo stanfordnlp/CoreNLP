@@ -29,6 +29,62 @@ public class LexicalizedParserClient {
   }
 
   /**
+   * Reads a text result from the given socket
+   */
+  private static String readResult(Socket socket) 
+    throws IOException
+  {
+    BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "utf-8"));
+    StringBuilder result = new StringBuilder();
+    String line;
+    while ((line = reader.readLine()) != null) {
+      if (result.length() > 0) {
+        result.append("\n");
+      }
+      result.append(line);
+    }
+    return result.toString();
+  }
+
+  /**
+   * Tokenize the text according to the parser's tokenizer, 
+   * return it as whitespace tokenized text.
+   */
+  public String getTokenizedText(String query) 
+    throws IOException
+  {
+    Socket socket = new Socket(host, port);
+
+    Writer out = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
+    out.write("tokenize " + query + "\n");
+    out.flush();
+
+    String result = readResult(socket);
+    socket.close();
+    return result;
+  }
+
+  /**
+   * Returns the String output of the dependencies.
+   * <br>
+   * TODO: use some form of Mode enum (such as the one in SemanticGraphFactory) 
+   * instead of a String
+   */
+  public String getDependencies(String query, String mode) 
+    throws IOException
+  {
+    Socket socket = new Socket(host, port);
+
+    Writer out = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
+    out.write("dependencies:" + mode + " " + query + "\n");
+    out.flush();
+
+    String result = readResult(socket);
+    socket.close();
+    return result;
+  }
+
+  /**
    * Returns the String output of the parse of the given query.
    * <br>
    * The "parse" method in the server is mostly useful for clients
@@ -36,24 +92,18 @@ public class LexicalizedParserClient {
    * Tree in any way.  However, it is useful to provide getParse to
    * test that functionality in the server.
    */
-  public String getParse(String query)
+  public String getParse(String query, boolean binarized)
     throws IOException
   {
     Socket socket = new Socket(host, port);
 
     Writer out = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
-    out.write("parse " + query + "\n");
+    out.write("parse" + (binarized ? ":binarized " : " ") + query + "\n");
     out.flush();
 
-    BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "utf-8"));
-    StringBuilder result = new StringBuilder();
-    String line;
-    while ((line = reader.readLine()) != null) {
-      result.append(line);
-    }
-
+    String result = readResult(socket);
     socket.close();
-    return result.toString();
+    return result;
   }
 
   /**
@@ -112,7 +162,7 @@ public class LexicalizedParserClient {
     System.out.println(query);
     Tree tree = client.getTree(query);
     System.out.println(tree);
-    String results = client.getParse(query);
+    String results = client.getParse(query, false);
     System.out.println(results);
   }
 }
