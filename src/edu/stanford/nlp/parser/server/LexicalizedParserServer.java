@@ -66,6 +66,8 @@ public class LexicalizedParserServer {
       model = ParserGrammar.loadModel(parserModel);
     } else {
       model = ParserGrammar.loadModel(parserModel, "-preTag", "-taggerSerializedFile", taggerModel);
+      // preload tagger so the first query doesn't take forever
+      model.loadTagger();
     }
     model.setOptionFlags(model.defaultCoreNLPFlags());
     return model;
