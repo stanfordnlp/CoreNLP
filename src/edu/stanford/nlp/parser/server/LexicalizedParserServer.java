@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.util.Collection;
 import java.util.List;
 
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
@@ -148,6 +149,9 @@ public class LexicalizedParserServer {
     case "tokenize":
       handleTokenize(arg, clientSocket.getOutputStream());
       break;
+    case "lemma":
+      handleLemma(arg, clientSocket.getOutputStream());
+      break;
     }
 
     System.err.println("Handled request");
@@ -176,6 +180,25 @@ public class LexicalizedParserServer {
         osw.write(" ");
       }
       osw.write(word.toString());
+    }
+    osw.write("\n");
+    osw.flush();
+  }
+
+  public void handleLemma(String arg, OutputStream outStream) 
+    throws IOException
+  {
+    if (arg == null) {
+      return;
+    }
+    List<CoreLabel> tokens = parser.lemmatize(arg);
+    OutputStreamWriter osw = new OutputStreamWriter(outStream, "utf-8");
+    for (int i = 0; i < tokens.size(); ++i) {
+      CoreLabel word = tokens.get(i);
+      if (i > 0) {
+        osw.write(" ");
+      }
+      osw.write(word.lemma());
     }
     osw.write("\n");
     osw.flush();
