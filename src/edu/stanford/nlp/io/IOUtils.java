@@ -455,7 +455,7 @@ public class IOUtils {
     if (textFileOrUrl.endsWith(".gz")) {
       // gunzip it if necessary
       in = new GZIPInputStream(in, GZIP_FILE_BUFFER_SIZE);
-    }
+    } 
 
     // buffer this stream.  even gzip streams benefit from buffering,
     // such as for the shift reduce parser
@@ -504,7 +504,6 @@ public class IOUtils {
   }
 
 
-  // todo [cdm 2014]: get rid of this method, using other methods. This will change the semantics to null meaning UTF-8, but that seems better in 2015.
   /**
    * Open a BufferedReader to a File. If the file's getName() ends in .gz,
    * it is interpreted as a gzipped file (and uncompressed). The file is then

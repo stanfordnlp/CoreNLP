@@ -8,7 +8,6 @@ import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.StringLabelFactory;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.trees.GrammaticalStructure;
@@ -19,7 +18,7 @@ import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TypedDependency;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.IdentityHashSet;
 import junit.framework.TestCase;
 
 /**
@@ -89,14 +88,14 @@ public class DependencyIndexITest extends TestCase {
     // System.out.println(deps);
 
     // collect all nodes in deps
-    Set<IndexedWord> nodes = Generics.newHashSet();
+    Set<CoreLabel> nodes = new IdentityHashSet<CoreLabel>();
     for (TypedDependency dep: deps) {
-      nodes.add(dep.gov());
-      nodes.add(dep.dep());
+      nodes.add(dep.gov().label());
+      nodes.add(dep.dep().label());
     }
 
     // check the indices for all nodes
-    for (IndexedWord n: nodes) {
+    for (CoreLabel n: nodes) {
       String text = n.value();
       int index = n.get(CoreAnnotations.IndexAnnotation.class);
       if (text.equals("Mary")) assertEquals(1, index);

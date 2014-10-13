@@ -3,7 +3,6 @@ package edu.stanford.nlp.ling;
 import java.util.Set;
 
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.TypesafeMap;
 
 /**
@@ -13,12 +12,6 @@ import edu.stanford.nlp.util.TypesafeMap;
  * Comparable/compareTo, hashCode, and equals.  This means no other annotations,
  * including the identity of the word, are taken into account when using these
  * methods.
- * <br>
- * The actual implementation is to wrap a <code>CoreLabel<code/>.
- * This avoids breaking the <code>equals()</code> and
- * <code>hashCode()</code> contract and also avoids expensive copying
- * when used to represent the same data as the original
- * <code>CoreLabel</code>.
  *
  * @author rafferty
  *
@@ -87,15 +80,8 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
     label.set(CoreAnnotations.IndexAnnotation.class, index);
   }
 
-  public IndexedWord makeCopy(int count) {
-    CoreLabel labelCopy = new CoreLabel(label);
-    IndexedWord copy = new IndexedWord(labelCopy);
-    copy.setCopyCount(count);
-    return copy;
-  }
-
   /**
-   * TODO: would be nice to get rid of this.  Only used in two places in RTE.  
+   * TODO: would be nice to get rid of this.  Only used in two places in RTE.
    */
   public CoreLabel backingLabel() { return label; }
 
@@ -249,11 +235,6 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
     label.setCopyCount(count);
   }
 
-  public String toPrimes() {
-    int copy = label.copyCount();
-    return StringUtils.repeat('\'', copy);    
-  }
-
   /**
    * This .equals is dependent only on docID, sentenceIndex, and index.
    * It doesn't consider the actual word value, but assumes that it is
@@ -267,12 +248,12 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
 
     //now compare on appropriate keys
     final IndexedWord otherWord = (IndexedWord) o;
-    Integer myInd = get(CoreAnnotations.IndexAnnotation.class);
-    Integer otherInd = otherWord.get(CoreAnnotations.IndexAnnotation.class);
-    if (myInd == null) {
-      if (otherInd != null)
+    String myDocID = getString(CoreAnnotations.DocIDAnnotation.class);
+    String otherDocID = otherWord.getString(CoreAnnotations.DocIDAnnotation.class);
+    if (myDocID == null) {
+      if (otherDocID != null)
       return false;
-    } else if ( ! myInd.equals(otherInd)) {
+    } else if ( ! myDocID.equals(otherDocID)) {
       return false;
     }
     Integer mySentInd = get(CoreAnnotations.SentenceIndexAnnotation.class);
@@ -283,12 +264,12 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
     } else if ( ! mySentInd.equals(otherSentInd)) {
       return false;
     }
-    String myDocID = getString(CoreAnnotations.DocIDAnnotation.class);
-    String otherDocID = otherWord.getString(CoreAnnotations.DocIDAnnotation.class);
-    if (myDocID == null) {
-      if (otherDocID != null)
+    Integer myInd = get(CoreAnnotations.IndexAnnotation.class);
+    Integer otherInd = otherWord.get(CoreAnnotations.IndexAnnotation.class);
+    if (myInd == null) {
+      if (otherInd != null)
       return false;
-    } else if ( ! myDocID.equals(otherDocID)) {
+    } else if ( ! myInd.equals(otherInd)) {
       return false;
     }
     if (copyCount() != otherWord.copyCount()) {

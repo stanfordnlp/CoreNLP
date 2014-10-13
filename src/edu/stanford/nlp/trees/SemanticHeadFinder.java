@@ -91,7 +91,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
    *
    * @param tlp The TreebankLanguagePack, used by the superclass to get basic
    *     category of constituents.
-   * @param noCopulaHead If true, a copular verb
+   * @param noCopulaHead If true, a copular verb 
    *     (be, seem, appear, stay, remain, resemble, become)
    *     is not treated as head when it has an AdjP or NP complement.  If false,
    *     a copula verb is still always treated as a head.  But it will still
@@ -239,16 +239,16 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   // structure has already been removed in CoordinationTransformer.
   static final TregexPattern[] headOfCopulaTregex = {
     // Matches phrases such as "what is wrong"
-    TregexPattern.compile("SBARQ < (WHNP $++ (/^VB/ < " + EnglishPatterns.copularWordRegex + " $++ ADJP=head))"),
+    TregexPattern.compile("SBARQ < (WHNP $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $++ ADJP=head))"),
 
     // matches WHNP $+ VB<copula $+ NP
     // for example, "Who am I to judge?"
     // !$++ ADJP matches against "Why is the dog pink?"
-    TregexPattern.compile("SBARQ < (WHNP=head $++ (/^VB/ < " + EnglishPatterns.copularWordRegex + " $+ NP !$++ ADJP))"),
+    TregexPattern.compile("SBARQ < (WHNP=head $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $+ NP !$++ ADJP))"),
 
-    // Actually somewhat limited in scope, this detects "Tuesday it is",
+    // Actually somewhat limited in scope, this detects "Tuesday it is", 
     // "Such a great idea this was", etc
-    TregexPattern.compile("SINV < (NP=head $++ (NP $++ (VP < (/^(?:VB|AUX)/ < " + EnglishPatterns.copularWordRegex + "))))"),
+    TregexPattern.compile("SINV < (NP=head $++ (NP $++ (VP < (/^(?:VB|AUX)/ < " + EnglishGrammaticalRelations.copularWordRegex + "))))"),
   };
 
   static final TregexPattern[] headOfConjpTregex = {
@@ -259,9 +259,9 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
   static final TregexPattern noVerbOverTempTregex = TregexPattern.compile("/^VP/ < NP-TMP !< /^V/ !< NNP|NN|NNPS|NNS|NP|JJ|ADJP|S");
 
-  /**
+  /** 
    * We use this to avoid making a -TMP or -ADV the head of a copular phrase.
-   * For example, in the sentence "It is hands down the best dessert ...",
+   * For example, in the sentence "It is hands down the best dessert ...", 
    * we want to avoid using "hands down" as the head.
    */
   static final Filter<Tree> REMOVE_TMP_AND_ADV = tree -> {
@@ -277,7 +277,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     }
     return true;
   };
-
+    
   /**
    * Determine which daughter of the current parse tree is the
    * head.  It assumes that the daughters already have had their
@@ -309,7 +309,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       // if none of the above patterns match, use the standard method
     }
 
-    if (motherCat.equals("SBARQ") || motherCat.equals("SINV")) {
+    if (motherCat.equals("SBARQ") || motherCat.equals("SINV")) { 
       if (!makeCopulaHead) {
         for (TregexPattern pattern : headOfCopulaTregex) {
           TregexMatcher matcher = pattern.matcher(t);

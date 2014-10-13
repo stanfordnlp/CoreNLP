@@ -3,7 +3,6 @@ package edu.stanford.nlp.trees;
 import java.io.Serializable;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.IndexedWord;
 
 /**
  * A <code>TypedDependency</code> is a relation between two words in a
@@ -25,12 +24,12 @@ public class TypedDependency implements Comparable<TypedDependency>, Serializabl
   // would change the GrammaticalStructure because of the way that
   // object mutated its TypedDependency objects.
   private GrammaticalRelation reln;
-  private IndexedWord gov;
-  private IndexedWord dep;
+  private TreeGraphNode gov;
+  private TreeGraphNode dep;
   private boolean extra; // = false; // to code whether the dependency preserves the tree structure or not
   // cdm: todo: remove this field and use typing on reln?  Expand implementation of SEMANTIC_DEPENDENT
 
-  public TypedDependency(GrammaticalRelation reln, IndexedWord gov, IndexedWord dep) {
+  public TypedDependency(GrammaticalRelation reln, TreeGraphNode gov, TreeGraphNode dep) {
     this.reln = reln;
     this.gov = gov;
     this.dep = dep;
@@ -47,20 +46,11 @@ public class TypedDependency implements Comparable<TypedDependency>, Serializabl
     return reln;
   }
 
-  public void setGov(IndexedWord gov) {
-    this.gov = gov;
-  }
-
-  public void setDep(IndexedWord dep) {
-    this.dep = dep;
-  }
-
-
-  public IndexedWord gov() {
+  public TreeGraphNode gov() {
     return gov;
   }
 
-  public IndexedWord dep() {
+  public TreeGraphNode dep() {
     return dep;
   }
 
@@ -70,6 +60,14 @@ public class TypedDependency implements Comparable<TypedDependency>, Serializabl
 
   public void setReln(GrammaticalRelation reln) {
     this.reln = reln;
+  }
+
+  public void setGov(TreeGraphNode gov) {
+    this.gov = gov;
+  }
+
+  public void setDep(TreeGraphNode dep) {
+    this.dep = dep;
   }
 
   public void setExtra() {
@@ -110,16 +108,26 @@ public class TypedDependency implements Comparable<TypedDependency>, Serializabl
 
   @Override
   public String toString() {
-    return toString(CoreLabel.OutputFormat.VALUE_INDEX);
+    return reln + "(" + gov + ", " + dep + ")";
   }
 
   public String toString(CoreLabel.OutputFormat format) {
     return reln + "(" + gov.toString(format) + ", " + dep.toString(format) + ")";
   }
 
+  public String toString(boolean noIndex) {
+    if (!noIndex) return toString();
+    String govWord = gov.toString();
+    String depWord = dep.toString();
+    govWord = govWord.substring(0,govWord.lastIndexOf("-"));
+    depWord = depWord.substring(0,depWord.lastIndexOf("-"));
+    return reln + "(" + govWord + ", " + depWord + ")";
+  }
+
+
   public int compareTo(TypedDependency tdArg) {
-    IndexedWord depArg = tdArg.dep();
-    IndexedWord depThis = this.dep();
+    TreeGraphNode depArg = tdArg.dep();
+    TreeGraphNode depThis = this.dep();
     int indexArg = depArg.index();
     int indexThis = depThis.index();
 

@@ -1,6 +1,5 @@
 package edu.stanford.nlp.trees.international.pennchinese;
 
-import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams;
 import edu.stanford.nlp.parser.ViterbiParserWithOptions;
 import edu.stanford.nlp.trees.*;
@@ -78,9 +77,9 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
   private static void collapsePrepAndPoss(Collection<TypedDependency> list) {
     Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
 
-    // Construct a map from words to the set of typed
-    // dependencies in which the word appears as governor.
-    Map<IndexedWord, Set<TypedDependency>> map = Generics.newHashMap();
+    // Construct a map from tree nodes to the set of typed
+    // dependencies in which the node appears as governor.
+    Map<TreeGraphNode, Set<TypedDependency>> map = Generics.newHashMap();
     for (TypedDependency typedDep : list) {
       if (!map.containsKey(typedDep.gov())) {
         map.put(typedDep.gov(), Generics.<TypedDependency>newHashSet());
@@ -91,8 +90,8 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
     for (TypedDependency td1 : list) {
       if (td1.reln() != GrammaticalRelation.KILL) {
-        IndexedWord td1Dep = td1.dep();
-        String td1DepPOS = td1Dep.tag();
+        TreeGraphNode td1Dep = td1.dep();
+        String td1DepPOS = td1Dep.parent().value();
         // find all other typedDeps having our dep as gov
         Set<TypedDependency> possibles = map.get(td1Dep);
         if (possibles != null) {

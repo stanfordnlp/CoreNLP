@@ -1,21 +1,16 @@
 package edu.stanford.nlp.parser.common;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.List;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
-import edu.stanford.nlp.process.Tokenizer;
-import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import java.util.function.Function;
-import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.Timing;
 // TODO: it would be nice to move these to common, but that would
 // wreck all existing models
@@ -39,70 +34,9 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
   public abstract ParserQuery parserQuery();
 
   /**
-   * Parses the list of HasWord.  If the parse fails for some reason,
-   * an X tree is returned instead of barfing.
-   *
-   * @param words The input sentence (a List of words)
-   * @return A Tree that is the parse tree for the sentence.  If the parser
-   *         fails, a new Tree is synthesized which attaches all words to the
-   *         root.
+   * A convenience method which wraps the ParserQuery and returns a Tree
    */
-  @Override
-  public Tree apply(List<? extends HasWord> words) {
-    return parse(words);
-  }
-
-  /**
-   * Tokenize the text using the parser's tokenizer
-   */
-  public List<? extends HasWord> tokenize(String sentence) {
-    TokenizerFactory<? extends HasWord> tf = treebankLanguagePack().getTokenizerFactory();
-    Tokenizer<? extends HasWord> tokenizer = tf.getTokenizer(new StringReader(sentence));
-    List<? extends HasWord> tokens = tokenizer.tokenize();
-    return tokens;
-  }
-
-  /**
-   * Will parse the text in <code>sentence</code> as if it represented
-   * a single sentence by first processing it with a tokenizer.
-   */
-  public Tree parse(String sentence) {
-    List<? extends HasWord> tokens = tokenize(sentence);
-    if (getOp().testOptions.preTag) {
-      Function<List<? extends HasWord>, List<TaggedWord>> tagger = loadTagger();
-      tokens = tagger.apply(tokens);
-    }
-    return parse(tokens);
-  }
-
-  private transient Function<List<? extends HasWord>, List<TaggedWord>> tagger;
-  private transient String taggerPath;
-
-  public Function<List<? extends HasWord>, List<TaggedWord>> loadTagger() {
-    Options op = getOp();
-    if (op.testOptions.preTag) {
-      synchronized(this) { // TODO: rather coarse synchronization
-        if (!op.testOptions.taggerSerializedFile.equals(taggerPath)) {
-          taggerPath = op.testOptions.taggerSerializedFile;
-          tagger = ReflectionLoading.loadByReflection("edu.stanford.nlp.tagger.maxent.MaxentTagger", taggerPath);
-        }
-        return tagger;
-      }
-    } else {
-      return null;
-    }
-  }
-
-  /**
-   * Parses the list of HasWord.  If the parse fails for some reason,
-   * an X tree is returned instead of barfing.
-   *
-   * @param words The input sentence (a List of words)
-   * @return A Tree that is the parse tree for the sentence.  If the parser
-   *         fails, a new Tree is synthesized which attaches all words to the
-   *         root.
-   */
-  public abstract Tree parse(List<? extends HasWord> words);
+  public abstract Tree apply(List<? extends HasWord> words);
 
   /**
    * Returns a list of extra Eval objects to use when scoring the parser.

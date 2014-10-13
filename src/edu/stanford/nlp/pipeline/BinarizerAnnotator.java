@@ -34,7 +34,8 @@ public class BinarizerAnnotator implements Annotator {
   public BinarizerAnnotator(String annotatorName, Properties props) {
     this.tlppClass = props.getProperty(annotatorName + ".tlppClass", DEFAULT_TLPP_CLASS);
     TreebankLangParserParams tlpp = ReflectionLoading.loadByReflection(tlppClass);
-    this.binarizer = TreeBinarizer.simpleTreeBinarizer(tlpp.headFinder(), tlpp.treebankLanguagePack());
+    this.binarizer = new TreeBinarizer(tlpp.headFinder(), tlpp.treebankLanguagePack(),
+                                       false, false, 0, false, false, 0.0, false, true, true);
   }
 
   public static String signature(String annotatorName, Properties props) {
