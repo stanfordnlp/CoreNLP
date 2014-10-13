@@ -215,7 +215,7 @@ public class LexicalizedParserServer {
       return;
     }
     // TODO: this might throw an exception if the parser doesn't support dependencies.  Handle that cleaner?
-    GrammaticalStructure gs = parser.getTLPParams().getGrammaticalStructure(tree, Filters.acceptFilter(), parser.getTLPParams().typedDependencyHeadFinder());
+    GrammaticalStructure gs = parser.getTLPParams().getGrammaticalStructure(tree, parser.treebankLanguagePack().punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
     Collection<TypedDependency> deps = null;
     switch (commandArgs.toUpperCase()) {
     case "COLLAPSED_TREE":
