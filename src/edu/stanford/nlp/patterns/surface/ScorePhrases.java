@@ -44,7 +44,6 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.logging.Redwood;
-import sun.java2d.Surface;
 
 public class ScorePhrases {
 

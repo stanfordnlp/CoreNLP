@@ -60,12 +60,12 @@ public abstract class PhraseScorer {
   }
 
   double getPatTFIDFScore(String word,
-      Counter<SurfacePattern> patsThatExtractedThis,
-      Counter<SurfacePattern> allSelectedPatterns) {
+      Counter<Integer> patsThatExtractedThis,
+      Counter<Integer> allSelectedPatterns) {
     double total = 0;
 
-    Set<SurfacePattern> rem = new HashSet<SurfacePattern>();
-    for (Entry<SurfacePattern, Double> en2 : patsThatExtractedThis.entrySet()) {
+    Set<Integer> rem = new HashSet<Integer>();
+    for (Entry<Integer, Double> en2 : patsThatExtractedThis.entrySet()) {
       double weight = 1.0;
       if (usePatternWeights) {
         weight = allSelectedPatterns.getCount(en2.getKey());

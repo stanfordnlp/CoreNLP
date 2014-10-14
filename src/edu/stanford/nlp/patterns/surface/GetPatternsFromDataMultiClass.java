@@ -1925,6 +1925,33 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     return this.learnedPatterns.get(label);
   }
 
+  public Counter<SurfacePattern> getLearnedPatternsSurfaceForm(String label) {
+    return transformPatternsToSurface(this.learnedPatterns.get(label));
+  }
+
+  public Counter<SurfacePattern> transformPatternsToSurface(Counter<Integer> pats) {
+    return Counters.transform(pats, new Function<Integer, SurfacePattern>() {
+      @Override
+      public SurfacePattern apply(Integer integer) {
+        return constVars.getPatternIndex().get(integer);
+      }
+    });
+  }
+
+  public Counter<Integer> transformPatternsToIndex(Counter<SurfacePattern> pats) {
+    return Counters.transform(pats, new Function<SurfacePattern, Integer>() {
+      @Override
+      public Integer apply(SurfacePattern pat) {
+        return constVars.getPatternIndex().indexOf(pat);
+      }
+    });
+  }
+
+  public Integer transformPatternToIndex(SurfacePattern pat) {
+    return constVars.getPatternIndex().indexOf(pat);
+  }
+
+
   public Map<String, Counter<Integer>> getLearnedPatterns() {
     return this.learnedPatterns;
   }
@@ -2715,12 +2742,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       for (String label : model.constVars.getLabelDictionary().keySet()) {
         IOUtils.ensureDir(new File(patternsWordsDir + "/" + label));
         Counter<Integer> pats = model.getLearnedPatterns(label);
-        Counter<SurfacePattern> patsSur = Counters.transform(pats, new Function<Integer, SurfacePattern>(){
-          @Override
-          public SurfacePattern apply(Integer integer) {
-            return model.constVars.getPatternIndex().get(integer);
-          }
-        });
+        Counter<SurfacePattern> patsSur = model.transformPatternsToSurface(pats);
         IOUtils.writeObjectToFile(patsSur, patternsWordsDir + "/" + label + "/patterns.ser");
         BufferedWriter w = new BufferedWriter(new FileWriter(patternsWordsDir + "/" + label + "/phrases.txt"));
         model.writeWordsToFile(model.getLearnedWords(label), w);
