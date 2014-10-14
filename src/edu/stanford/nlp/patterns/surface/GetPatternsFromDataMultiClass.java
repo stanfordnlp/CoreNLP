@@ -2498,7 +2498,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
         //TODO: this seems unnecessary; delete the following line
         IOUtils.writeObjectToFile(sents, saveSentencesSerDir + "/sents_all.ser");
-        
+
       } else {
         String systemdir = System.getProperty("java.io.tmpdir");
         saveSentencesSerDirFile = File.createTempFile("sents", ".tmp", new File(systemdir));
