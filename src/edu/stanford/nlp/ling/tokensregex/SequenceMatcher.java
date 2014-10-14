@@ -107,6 +107,11 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     matchedGroups = new MatchedGroup[pattern.totalGroups];
   }
 
+  public void setBranchLimit(int blimit){
+    this.branchLimit = blimit;
+  }
+
+
   /**
    * Interface that specifies what to replace a matched pattern with
    * @param <T>
