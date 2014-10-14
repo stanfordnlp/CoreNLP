@@ -170,7 +170,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
 
   @Override
   public Object matchWithResult(CoreMap token) {
-    Map<Class,Object> matchResults = Generics.newHashMap();
+    Map<Class,Object> matchResults = new HashMap<Class, Object>();//Generics.newHashMap();
     if (match(token, matchResults)) {
       return matchResults;
     } else {

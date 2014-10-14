@@ -1152,7 +1152,7 @@ public class Expressions {
   */
   public static class CompositeValue extends SimpleCachedExpression<Map<String,Expression>> implements Value<Map<String,Expression>>{
     public CompositeValue(String... tags) {
-      super(TYPE_COMPOSITE, Generics.<String,Expression>newHashMap(), tags);
+      super(TYPE_COMPOSITE, new HashMap<String, Expression>(), tags);//Generics.<String,Expression>newHashMap()
     }
 
     public CompositeValue(Map<String, Expression> m, boolean isEvaluated, String... tags) {
@@ -1338,7 +1338,7 @@ public class Expressions {
 
     public CompositeValue simplifyNoTypeConversion(Env env, Object... args) {
       Map<String, Expression> m = value;
-      Map<String, Expression> res = Generics.newHashMap (m.size());
+      Map<String, Expression> res = new HashMap<String, Expression>(m.size());//Generics.newHashMap (m.size());
       for (Map.Entry<String, Expression> stringExpressionEntry : m.entrySet()) {
         res.put(stringExpressionEntry.getKey(), stringExpressionEntry.getValue().simplify(env));
       }
@@ -1347,7 +1347,7 @@ public class Expressions {
 
     private CompositeValue evaluateNoTypeConversion(Env env, Object... args) {
       Map<String, Expression> m = value;
-      Map<String, Expression> res = Generics.newHashMap (m.size());
+      Map<String, Expression> res = new HashMap<String, Expression>(m.size());//Generics.newHashMap (m.size());
       for (Map.Entry<String, Expression> stringExpressionEntry : m.entrySet()) {
         res.put(stringExpressionEntry.getKey(), stringExpressionEntry.getValue().evaluate(env, args));
       }
@@ -1358,7 +1358,7 @@ public class Expressions {
       Value v = attemptTypeConversion(this, env, args);
       if (v != null) return v;
       Map<String, Expression> m = value;
-      Map<String, Expression> res = Generics.newHashMap (m.size());
+      Map<String, Expression> res = new HashMap<String, Expression>(m.size());//Generics.newHashMap (m.size());
       for (Map.Entry<String, Expression> stringExpressionEntry : m.entrySet()) {
         res.put(stringExpressionEntry.getKey(), stringExpressionEntry.getValue().evaluate(env, args));
       }

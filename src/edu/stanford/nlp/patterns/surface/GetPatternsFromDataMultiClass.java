@@ -2066,7 +2066,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       } else if (gold.equals(guess) && !gold.equalsIgnoreCase(background)) {
         wordTN.incrementCount(line.word());
       } else if (!(gold.equalsIgnoreCase(background) && guess.equalsIgnoreCase(background)))
-        throw new RuntimeException("don't know reached here. not meant for more than one entity label");
+        throw new RuntimeException("don't know reached here. not meant for more than one entity label: " + gold + " and " + guess);
 
     }
 
