@@ -152,7 +152,7 @@ public class ScorePhrases {
 
   public Counter<String> learnNewPhrases(
       String label,
-      Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>> patternsForEachToken,
+      Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken,
       Counter<SurfacePattern> patternsLearnedThisIter,
       Counter<SurfacePattern> allSelectedPatterns,
       CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> tokensMatchedPatterns,
@@ -334,10 +334,10 @@ public class ScorePhrases {
   }
   
   
-  private void statsWithoutApplyingPatterns(Map<String, List<CoreLabel>> sents, Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>> patternsForEachToken,
+  private void statsWithoutApplyingPatterns(Map<String, List<CoreLabel>> sents, Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken,
       Counter<SurfacePattern> patternsLearnedThisIter, TwoDimensionalCounter<Pair<String, String>, SurfacePattern> wordsandLemmaPatExtracted){
     for (Entry<String, List<CoreLabel>> sentEn : sents.entrySet()) {
-      Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>> pat4Sent = patternsForEachToken
+      Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>> pat4Sent = patternsForEachToken
           .get(sentEn.getKey());
       if (pat4Sent == null) {
         throw new RuntimeException("How come there are no patterns for "
@@ -345,12 +345,12 @@ public class ScorePhrases {
             + patternsForEachToken.size() + " and keys "
             + patternsForEachToken.keySet());
       }
-      for (Entry<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>> en : pat4Sent
+      for (Entry<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>> en : pat4Sent
           .entrySet()) {
         CoreLabel token = null;
-        Set<Integer> p1 = en.getValue().first();
-        Set<Integer> p2 = en.getValue().second();
-        Set<Integer> p3 = en.getValue().third();
+        Set<SurfacePattern> p1 = en.getValue().first();
+        Set<SurfacePattern> p2 = en.getValue().second();
+        Set<SurfacePattern> p3 = en.getValue().third();
         for (SurfacePattern p : patternsLearnedThisIter.keySet()) {
           if (p1.contains(p) || p2.contains(p) || p3.contains(p)) {
             if (token == null)
@@ -364,7 +364,7 @@ public class ScorePhrases {
   }
   private Counter<String> learnNewPhrasesPrivate(
       String label,
-      Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>> patternsForEachToken,
+      Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken,
       Counter<SurfacePattern> patternsLearnedThisIter,
       Counter<SurfacePattern> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat,

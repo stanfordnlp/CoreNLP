@@ -26,7 +26,6 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.TypesafeMap.Key;
-import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 import edu.stanford.nlp.util.logging.Redwood;
 
 public class ConstantsAndVariables implements Serializable{
@@ -438,9 +437,6 @@ public class ConstantsAndVariables implements Serializable{
   public Map<String, Counter<Integer>> distSimWeights = new HashMap<String, Counter<Integer>>();
   public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
 
-  public ConcurrentHashIndex<SurfacePattern> getPatternIndex() {
-    return patternIndex;
-  }
 
 
   public enum ScorePhraseMeasures {
@@ -609,8 +605,6 @@ public class ConstantsAndVariables implements Serializable{
 
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";
-
-  public ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
 
   Properties props;
 

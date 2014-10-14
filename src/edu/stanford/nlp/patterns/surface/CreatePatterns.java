@@ -97,7 +97,7 @@ public class CreatePatterns {
 
   ConstantsAndVariables constVars;
 
-  Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>> patternsForEachToken ;
+  Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken ;
 
   public CreatePatterns(Properties props, ConstantsAndVariables constVars)
       throws IOException {
@@ -175,12 +175,12 @@ public class CreatePatterns {
         strOriginal);
   }
 
-  public Triple<Set<Integer>, Set<Integer>, Set<Integer>> getContext(
+  public Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>> getContext(
      List<CoreLabel> sent, int i) {
 
-    Set<Integer> prevpatterns = new HashSet<Integer>();
-    Set<Integer> nextpatterns = new HashSet<Integer>();
-    Set<Integer> prevnextpatterns = new HashSet<Integer>();
+    Set<SurfacePattern> prevpatterns = new HashSet<SurfacePattern>();
+    Set<SurfacePattern> nextpatterns = new HashSet<SurfacePattern>();
+    Set<SurfacePattern> prevnextpatterns = new HashSet<SurfacePattern>();
     CoreLabel token = sent.get(i);
     String tag = null;
     if (usePOS4Pattern) {
@@ -198,7 +198,7 @@ public class CreatePatterns {
       int numNonStopWordsNext = 0, numNonStopWordsPrev = 0;
       boolean useprev = false, usenext = false;
 
-
+     
       PatternToken twithoutPOS = null;
       if (addPatWithoutPOS) {
         twithoutPOS = new PatternToken(tag, false,
@@ -212,7 +212,7 @@ public class CreatePatterns {
             constVars.numWordsCompound > 1, constVars.numWordsCompound,
             nerTag, constVars.useTargetNERRestriction, constVars.useTargetParserParentRestriction, token.get(CoreAnnotations.GrandparentAnnotation.class));
       }
-
+      
       if (usePreviousContext) {
         // int j = Math.max(0, i - 1);
         int j = i - 1;
@@ -386,17 +386,17 @@ public class CreatePatterns {
 
         if (isASCII(StringUtils.join(prevOriginal))) {
           prevContext = prevContextList.toArray(new String[0]);
-          prevOriginalArr = prevOriginal.toArray(new String[0]);
+          prevOriginalArr = prevOriginal.toArray(new String[0]); 
           if (previousTokens.size() >= minWindow4Pattern) {
             if (twithoutPOS != null) {
               SurfacePattern pat = new SurfacePattern(prevContext, twithoutPOS,
                   null, Genre.PREV);
-              prevpatterns.add(constVars.patternIndex.addToIndex(pat));
+              prevpatterns.add(pat);
             }
             if (twithPOS != null) {
               SurfacePattern patPOS = new SurfacePattern(prevContext, twithPOS,
                   null, Genre.PREV);
-              prevpatterns.add(constVars.patternIndex.addToIndex(patPOS));
+              prevpatterns.add(patPOS);
             }
           }
           useprev = true;
@@ -438,12 +438,12 @@ public class CreatePatterns {
           if (twithoutPOS != null) {
             SurfacePattern pat = new SurfacePattern(null, twithoutPOS,
                 nextContext, Genre.NEXT);
-            nextpatterns.add(constVars.patternIndex.addToIndex(pat));
+            nextpatterns.add(pat);
           }
           if (twithPOS != null) {
             SurfacePattern patPOS = new SurfacePattern(null, twithPOS,
                 nextContext, Genre.NEXT);
-            nextpatterns.add(constVars.patternIndex.addToIndex(patPOS));
+            nextpatterns.add(patPOS);
           }
 
         }
@@ -460,20 +460,20 @@ public class CreatePatterns {
           if (twithoutPOS != null) {
             SurfacePattern pat = new SurfacePattern(prevContext, twithoutPOS,
                 nextContext, Genre.PREVNEXT);
-            prevnextpatterns.add(constVars.patternIndex.addToIndex(pat));
+            prevnextpatterns.add(pat);
           }
 
           if (twithPOS != null) {
             SurfacePattern patPOS = new SurfacePattern(prevContext, twithPOS,
                 nextContext, Genre.PREVNEXT);
-            prevnextpatterns.add(constVars.patternIndex.addToIndex(patPOS));
+            prevnextpatterns.add(patPOS);
           }
         }
 
       }
     }
 
-    Triple<Set<Integer>, Set<Integer>, Set<Integer>> patterns = new Triple<Set<Integer>, Set<Integer>, Set<Integer>>(
+    Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>> patterns = new Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>(
         prevpatterns, nextpatterns, prevnextpatterns);
     // System.out.println("For word " + sent.get(i) + " in sentence " + sent +
     // " prev patterns are " + prevpatterns);
@@ -494,14 +494,14 @@ public class CreatePatterns {
 
   }
 
-  public Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>> getPatternsForEachToken(){
+  public Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> getPatternsForEachToken(){
     return patternsForEachToken;
   }
 
-  public Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>> getAllPatterns(Map<String, List<CoreLabel>> sents)
+  public Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> getAllPatterns(Map<String, List<CoreLabel>> sents)
       throws InterruptedException, ExecutionException {
 
-    patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>();
+    patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>();
     List<String> keyset = new ArrayList<String>(sents.keySet());
 
     int num = 0;
@@ -511,33 +511,33 @@ public class CreatePatterns {
       num = keyset.size() / (constVars.numThreads);
     ExecutorService executor = Executors
         .newFixedThreadPool(constVars.numThreads);
-
+    
     Redwood.log(ConstantsAndVariables.extremedebug, "Computing all patterns. keyset size is " + keyset.size() + ". Assigning " + num + " values to each thread");
-    List<Future<Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>>> list = new ArrayList<Future<Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>>>();
+    List<Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>>> list = new ArrayList<Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>>>();
     for (int i = 0; i < constVars.numThreads; i++) {
-
+      
       int from = i * num;
       int to = -1;
       if(i == constVars.numThreads -1)
         to = keyset.size();
       else
        to =Math.min(keyset.size(), (i + 1) * num);
-//
+//      
 //      Redwood.log(ConstantsAndVariables.extremedebug, "assigning from " + i * num
 //          + " till " + Math.min(keyset.size(), (i + 1) * num));
 
-      Callable<Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>> task = null;
+      Callable<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> task = null;
       List<String> ids = keyset.subList(from ,to);
       task = new CreatePatternsThread(sents, ids);
 
-      Future<Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>> submit = executor
+      Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> submit = executor
           .submit(task);
       list.add(submit);
     }
 
     // Now retrieve the result
 
-    for (Future<Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>> future : list) {
+    for (Future<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> future : list) {
       try{
         patternsForEachToken.putAll(future.get());
       } catch(Exception e){
@@ -547,13 +547,13 @@ public class CreatePatterns {
     }
     executor.shutdown();
     Redwood.log(ConstantsAndVariables.extremedebug, "Done computing all patterns");
-
+    
     return patternsForEachToken;
   }
 
   public class CreatePatternsThread
       implements
-      Callable<Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>> {
+      Callable<Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>> {
 
     //String label;
     // Class otherClass;
@@ -569,27 +569,27 @@ public class CreatePatterns {
     }
 
     @Override
-    public Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>> call() throws Exception {
-      Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>> patternsForTokens = new HashMap<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>();
+    public Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> call() throws Exception {
+      Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForTokens = new HashMap<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>();
 
       for (String id : sentIds) {
         List<CoreLabel> sent = sents.get(id);
 
-        Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>> p = new HashMap<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>();
+        Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>> p = new HashMap<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>();
         for (int i = 0; i < sent.size(); i++) {
           p.put(
               i,
-              new Triple<Set<Integer>, Set<Integer>, Set<Integer>>(
-                  new HashSet<Integer>(), new HashSet<Integer>(),
-                  new HashSet<Integer>()));
+              new Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>(
+                  new HashSet<SurfacePattern>(), new HashSet<SurfacePattern>(),
+                  new HashSet<SurfacePattern>()));
           CoreLabel token = sent.get(i);
           // do not create patterns around stop words!
           if (doNotUse(token.word(), constVars.getStopWords())) {
             continue;
           }
-          Triple<Set<Integer>, Set<Integer>, Set<Integer>> pat = getContext(sent, i);
+          Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>> pat = getContext(sent, i);
           p.put(i, pat);
-
+          
         }
         patternsForTokens.put(id, p);
       }
