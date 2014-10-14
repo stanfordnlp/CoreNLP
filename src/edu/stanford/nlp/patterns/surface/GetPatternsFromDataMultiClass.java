@@ -2537,9 +2537,21 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           if (!batchProcessSents)
             sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
           else{
-            File newf = new File(saveSentencesSerDir + "/" + f.getAbsolutePath().replaceAll(Pattern.quote("/"), "_"));
-            IOUtils.cp(f, newf);
-            Data.sentsFiles.add(newf);
+            Map<String, List<CoreLabel>> sentsFromFile = IOUtils.readObjectFromFile(f);
+            Map<String, List<CoreLabel>> splitSents = new HashMap<String, List<CoreLabel>>();
+            int num =0 ;
+            int numFile = -1;
+            for(Entry<String, List<CoreLabel>> en: sentsFromFile.entrySet()){
+              num++;
+              splitSents.put(en.getKey(), en.getValue());
+              if(num >= numMaxSentencesPerBatchFile){
+                numFile++;
+                File newf = new File(saveSentencesSerDir + "/" + f.getAbsolutePath().replaceAll(Pattern.quote("/"), "_") +"_"+numFile);
+                IOUtils.writeObjectToFile(splitSents, newf);
+                Data.sentsFiles.add(newf);
+                splitSents.clear();
+              }
+            }
           }
         }
       } else {
