@@ -1852,8 +1852,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Counter<String> scoreForAllWordsThisIteration = new ClassicCounter<String>();
 
       identifiedWords.addAll(scorePhrases.learnNewPhrases(label, this.patternsForEachToken, patterns, learnedPatterns.get(label), matchedTokensByPat,
-          scoreForAllWordsThisIteration, terms, wordsPatExtracted.get(label), currentPatternWeights.get(label), this.patternsandWords.get(label),
-          this.allPatternsandWords.get(label), constVars.identifier, ignoreWords));
+          scoreForAllWordsThisIteration, terms, wordsPatExtracted.get(label), this.patternsandWords.get(label), constVars.identifier, ignoreWords));
 
       if (identifiedWords.size() > 0) {
         if (constVars.usePatternResultAsLabel) {

@@ -159,9 +159,7 @@ public class ScorePhrases {
       Counter<String> scoreForAllWordsThisIteration,
       TwoDimensionalCounter<String, Integer> terms,
       TwoDimensionalCounter<String, Integer> wordsPatExtracted,
-      Counter<Integer> currentAllPatternWeights,
       TwoDimensionalCounter<Integer, String> patternsAndWords4Label,
-      TwoDimensionalCounter<Integer, String> allPatternsAndWords4Label,
       String identifier, Set<String> ignoreWords) throws InterruptedException, ExecutionException,
       IOException, ClassNotFoundException {
 
@@ -176,8 +174,8 @@ public class ScorePhrases {
         patternsForEachToken, patternsLearnedThisIter, allSelectedPatterns,
         constVars.getLabelDictionary().get(label),
         tokensMatchedPatterns, scoreForAllWordsThisIteration, terms,
-        wordsPatExtracted, currentAllPatternWeights, patternsAndWords4Label,
-        allPatternsAndWords4Label, identifier, ignoreWords, computeDataFreq);
+        wordsPatExtracted,  patternsAndWords4Label,
+        identifier, ignoreWords, computeDataFreq);
     constVars.addLabelDictionary(label, words.keySet());
     
 
@@ -369,6 +367,7 @@ public class ScorePhrases {
       }
     }
   }
+
   private Counter<String> learnNewPhrasesPrivate(
       String label,
       Map<String, Map<Integer, Set<Integer>>> patternsForEachToken,
@@ -378,9 +377,7 @@ public class ScorePhrases {
       Counter<String> scoreForAllWordsThisIteration,
       TwoDimensionalCounter<String, Integer> terms,
       TwoDimensionalCounter<String, Integer> wordsPatExtracted,
-      Counter<Integer> currentAllPatternWeights,
       TwoDimensionalCounter<Integer, String> patternsAndWords4Label,
-      TwoDimensionalCounter<Integer, String> allPatternsAndWords4Label,
       String identifier, Set<String> ignoreWords, boolean computeDataFreq) throws InterruptedException, ExecutionException,
       IOException, ClassNotFoundException {
 
