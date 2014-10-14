@@ -49,9 +49,9 @@ public abstract class PhraseScorer {
 
   Counter<String> learnedScores = new ClassicCounter<String>();
 
-  abstract Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, SurfacePattern> terms,
-      TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted,
-      Counter<SurfacePattern> allSelectedPatterns,
+  abstract Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, Integer> terms,
+      TwoDimensionalCounter<String, Integer> wordsPatExtracted,
+      Counter<Integer> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, boolean forLearningPatterns)
       throws IOException, ClassNotFoundException;
 

@@ -22,10 +22,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
 import edu.stanford.nlp.patterns.surface.SurfacePattern.Genre;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
-import edu.stanford.nlp.util.Execution;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.Triple;
-import edu.stanford.nlp.util.TypesafeMap;
+import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -97,7 +94,7 @@ public class CreatePatterns {
 
   ConstantsAndVariables constVars;
 
-  Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>> patternsForEachToken ;
+  Map<String, Map<Integer, Set<Integer>>> patternsForEachToken ;
 
   public CreatePatterns(Properties props, ConstantsAndVariables constVars)
       throws IOException {
@@ -175,7 +172,7 @@ public class CreatePatterns {
         strOriginal);
   }
 
-  public Triple<Set<Integer>, Set<Integer>, Set<Integer>> getContext(
+  public Set<Integer> getContext(
      List<CoreLabel> sent, int i) {
 
     Set<Integer> prevpatterns = new HashSet<Integer>();
@@ -473,15 +470,15 @@ public class CreatePatterns {
       }
     }
 
-    Triple<Set<Integer>, Set<Integer>, Set<Integer>> patterns = new Triple<Set<Integer>, Set<Integer>, Set<Integer>>(
-        prevpatterns, nextpatterns, prevnextpatterns);
+//    Triple<Set<Integer>, Set<Integer>, Set<Integer>> patterns = new Triple<Set<Integer>, Set<Integer>, Set<Integer>>(
+//        prevpatterns, nextpatterns, prevnextpatterns);
     // System.out.println("For word " + sent.get(i) + " in sentence " + sent +
     // " prev patterns are " + prevpatterns);
     // System.out.println("For word " + sent.get(i) + " in sentence " + sent +
     // " next patterns are " + nextpatterns);
     // System.out.println("For word " + sent.get(i) + " in sentence " + sent +
     // " prevnext patterns are " + prevnextpatterns);
-    return patterns;
+    return CollectionUtils.unionAsSet(prevpatterns, nextpatterns, prevnextpatterns);
   }
 
   public static boolean isASCII(String text) {
@@ -494,14 +491,15 @@ public class CreatePatterns {
 
   }
 
-  public Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>> getPatternsForEachToken(){
+  public Map<String, Map<Integer, Set<Integer>>> getPatternsForEachToken(){
     return patternsForEachToken;
   }
 
-  public Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>> getAllPatterns(Map<String, List<CoreLabel>> sents)
+  public Map<String, Map<Integer, Set<Integer>>> getAllPatterns(Map<String, List<CoreLabel>> sents)
       throws InterruptedException, ExecutionException {
 
-    patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>();
+//    this.patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>();
+    this.patternsForEachToken = new HashMap<String, Map<Integer, Set<Integer>>>();
     List<String> keyset = new ArrayList<String>(sents.keySet());
 
     int num = 0;
@@ -513,7 +511,7 @@ public class CreatePatterns {
         .newFixedThreadPool(constVars.numThreads);
 
     Redwood.log(ConstantsAndVariables.extremedebug, "Computing all patterns. keyset size is " + keyset.size() + ". Assigning " + num + " values to each thread");
-    List<Future<Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>>> list = new ArrayList<Future<Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>>>();
+    List<Future<Map<String, Map<Integer, Set<Integer>>>>> list = new ArrayList<Future<Map<String, Map<Integer, Set<Integer>>>>>();
     for (int i = 0; i < constVars.numThreads; i++) {
 
       int from = i * num;
@@ -526,18 +524,18 @@ public class CreatePatterns {
 //      Redwood.log(ConstantsAndVariables.extremedebug, "assigning from " + i * num
 //          + " till " + Math.min(keyset.size(), (i + 1) * num));
 
-      Callable<Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>> task = null;
+      Callable<Map<String, Map<Integer, Set<Integer>>>> task = null;
       List<String> ids = keyset.subList(from ,to);
       task = new CreatePatternsThread(sents, ids);
 
-      Future<Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>> submit = executor
+      Future<Map<String, Map<Integer, Set<Integer>>>> submit = executor
           .submit(task);
       list.add(submit);
     }
 
     // Now retrieve the result
 
-    for (Future<Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>> future : list) {
+    for (Future<Map<String, Map<Integer, Set<Integer>>>> future : list) {
       try{
         patternsForEachToken.putAll(future.get());
       } catch(Exception e){
@@ -553,7 +551,7 @@ public class CreatePatterns {
 
   public class CreatePatternsThread
       implements
-      Callable<Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>> {
+      Callable<Map<String, Map<Integer, Set<Integer>>>> {
 
     //String label;
     // Class otherClass;
@@ -569,25 +567,26 @@ public class CreatePatterns {
     }
 
     @Override
-    public Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>> call() throws Exception {
-      Map<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>> patternsForTokens = new HashMap<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>();
+    public Map<String, Map<Integer, Set<Integer>>> call() throws Exception {
+      Map<String, Map<Integer, Set<Integer>>> patternsForTokens = new HashMap<String, Map<Integer, Set<Integer>>>();
 
       for (String id : sentIds) {
         List<CoreLabel> sent = sents.get(id);
 
-        Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>> p = new HashMap<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>();
+        Map<Integer, Set<Integer>> p = new HashMap<Integer, Set<Integer>>();
         for (int i = 0; i < sent.size(); i++) {
-          p.put(
-              i,
-              new Triple<Set<Integer>, Set<Integer>, Set<Integer>>(
-                  new HashSet<Integer>(), new HashSet<Integer>(),
-                  new HashSet<Integer>()));
+//          p.put(
+//              i,
+//              new Triple<Set<Integer>, Set<Integer>, Set<Integer>>(
+//                  new HashSet<Integer>(), new HashSet<Integer>(),
+//                  new HashSet<Integer>()));
+          p.put(i, new HashSet<Integer>());
           CoreLabel token = sent.get(i);
           // do not create patterns around stop words!
           if (doNotUse(token.word(), constVars.getStopWords())) {
             continue;
           }
-          Triple<Set<Integer>, Set<Integer>, Set<Integer>> pat = getContext(sent, i);
+          Set<Integer> pat = getContext(sent, i);
           p.put(i, pat);
 
         }

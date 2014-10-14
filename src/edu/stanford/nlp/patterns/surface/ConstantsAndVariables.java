@@ -110,9 +110,10 @@ public class ConstantsAndVariables implements Serializable{
 
   /**
    * Do not learn patterns in which the neighboring words have the same label.
+   * Deprecated!
    */
-  @Option(name = "ignorePatWithLabeledNeigh")
-  public boolean ignorePatWithLabeledNeigh = false;
+  //@Option(name = "ignorePatWithLabeledNeigh")
+  //public boolean ignorePatWithLabeledNeigh = false;
 
   /**
    * Save this run as ...

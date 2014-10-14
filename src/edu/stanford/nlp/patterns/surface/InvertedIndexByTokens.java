@@ -14,6 +14,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.Index;
 
 /**
  * Creates an inverted index of (word or lemma) => {file1 => {sentid1,
@@ -123,9 +124,10 @@ public class InvertedIndexByTokens implements Serializable{
     return sentids;
   }
 
-  public Map<String, Set<String>> getFileSentIdsFromPats(Set<SurfacePattern> pats) {
+  public Map<String, Set<String>> getFileSentIdsFromPats(Set<Integer> pats, Index<SurfacePattern> index) {
     Set<String> relevantWords = new HashSet<String>();
-    for (SurfacePattern p : pats) {
+    for (Integer pindex : pats) {
+      SurfacePattern p = index.get(pindex);
       Set<String> relwordsThisPat = new HashSet<String>();
       String[] next = p.getSimplerTokensNext();
       if (next != null)
