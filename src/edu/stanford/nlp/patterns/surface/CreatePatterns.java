@@ -93,8 +93,9 @@ public class CreatePatterns {
   //String channelNameLogger = "createpatterns";
 
   ConstantsAndVariables constVars;
+  private Map<String, Map<Integer, Set<Integer>>> patternsForEachToken;
 
-  Map<String, Map<Integer, Set<Integer>>> patternsForEachToken ;
+  //Map<String, Map<Integer, Set<Integer>>> patternsForEachToken ;
 
   public CreatePatterns(Properties props, ConstantsAndVariables constVars)
       throws IOException {
@@ -491,15 +492,15 @@ public class CreatePatterns {
 
   }
 
-  public Map<String, Map<Integer, Set<Integer>>> getPatternsForEachToken(){
-    return patternsForEachToken;
-  }
+//  public Map<String, Map<Integer, Set<Integer>>> getPatternsForEachToken(){
+//    return patternsForEachToken;
+//  }
 
-  public Map<String, Map<Integer, Set<Integer>>> getAllPatterns(Map<String, List<CoreLabel>> sents)
+  public void getAllPatterns(Map<String, List<CoreLabel>> sents, PatternsForEachToken patsForEach)
       throws InterruptedException, ExecutionException {
 
 //    this.patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>();
-    this.patternsForEachToken = new HashMap<String, Map<Integer, Set<Integer>>>();
+   // this.patternsForEachToken = new HashMap<String, Map<Integer, Set<Integer>>>();
     List<String> keyset = new ArrayList<String>(sents.keySet());
 
     int num = 0;
@@ -526,7 +527,7 @@ public class CreatePatterns {
 
       Callable<Map<String, Map<Integer, Set<Integer>>>> task = null;
       List<String> ids = keyset.subList(from ,to);
-      task = new CreatePatternsThread(sents, ids);
+      task = new CreatePatternsThread(sents, ids, patsForEach);
 
       Future<Map<String, Map<Integer, Set<Integer>>>> submit = executor
           .submit(task);
@@ -537,7 +538,8 @@ public class CreatePatterns {
 
     for (Future<Map<String, Map<Integer, Set<Integer>>>> future : list) {
       try{
-        patternsForEachToken.putAll(future.get());
+        future.get();
+        //patternsForEachToken.putAll(future.get());
       } catch(Exception e){
         executor.shutdownNow();
         throw new RuntimeException(e);
@@ -546,6 +548,14 @@ public class CreatePatterns {
     executor.shutdown();
     Redwood.log(ConstantsAndVariables.extremedebug, "Done computing all patterns");
 
+    //return patternsForEachToken;
+  }
+
+  /**
+   * Returns null if using DB backed!!
+   * @return
+   */
+  public Map<String, Map<Integer, Set<Integer>>> getPatternsForEachToken() {
     return patternsForEachToken;
   }
 
@@ -557,18 +567,20 @@ public class CreatePatterns {
     // Class otherClass;
     Map<String, List<CoreLabel>> sents;
     List<String> sentIds;
+    PatternsForEachToken patsForEach;
 
-    public CreatePatternsThread(Map<String, List<CoreLabel>> sents, List<String> sentIds) {
+    public CreatePatternsThread(Map<String, List<CoreLabel>> sents, List<String> sentIds, PatternsForEachToken patsForEach) {
 
       //this.label = label;
       // this.otherClass = otherClass;
       this.sents = sents;
       this.sentIds = sentIds;
+      this.patsForEach = patsForEach;
     }
 
     @Override
     public Map<String, Map<Integer, Set<Integer>>> call() throws Exception {
-      Map<String, Map<Integer, Set<Integer>>> patternsForTokens = new HashMap<String, Map<Integer, Set<Integer>>>();
+      //Map<String, Map<Integer, Set<Integer>>> patternsForTokens = new HashMap<String, Map<Integer, Set<Integer>>>();
 
       for (String id : sentIds) {
         List<CoreLabel> sent = sents.get(id);
@@ -590,9 +602,11 @@ public class CreatePatterns {
           p.put(i, pat);
 
         }
-        patternsForTokens.put(id, p);
+        patsForEach.addPatterns(id, p);
+        //patternsForTokens.put(id, p);
       }
-      return patternsForTokens;
+      //return patternsForTokens;
+      return null;
     }
 
   }

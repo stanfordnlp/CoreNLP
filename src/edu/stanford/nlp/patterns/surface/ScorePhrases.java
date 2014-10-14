@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -152,7 +153,7 @@ public class ScorePhrases {
 
   public Counter<String> learnNewPhrases(
       String label,
-      Map<String, Map<Integer, Set<Integer>>> patternsForEachToken,
+      PatternsForEachToken patternsForEachToken,
       Counter<Integer> patternsLearnedThisIter,
       Counter<Integer> allSelectedPatterns,
       CollectionValuedMap<Integer, Triple<String, Integer, Integer>> tokensMatchedPatterns,
@@ -161,7 +162,7 @@ public class ScorePhrases {
       TwoDimensionalCounter<String, Integer> wordsPatExtracted,
       TwoDimensionalCounter<Integer, String> patternsAndWords4Label,
       String identifier, Set<String> ignoreWords) throws InterruptedException, ExecutionException,
-      IOException, ClassNotFoundException {
+    IOException, ClassNotFoundException, SQLException {
 
     boolean computeDataFreq = false;
     if (Data.processedDataFreq == null || Data.rawFreq == null) {
@@ -283,10 +284,10 @@ public class ScorePhrases {
       else{
         filesToLoad = new ArrayList<File>();
         for (String fname : sentidswithfilerest.keySet()) {
-          String filename = "";
-          if(constVars.usingDirForSentsInIndex)
-            filename = constVars.saveSentencesSerDir+"/"+fname;
-          else
+          String filename;
+//          if(!constVars.usingDirForSentsInIndex)
+//            filename = constVars.saveSentencesSerDir+"/"+fname;
+//          else
             filename = fname;
           filesToLoad.add(new File(filename));
         }  
@@ -298,25 +299,39 @@ public class ScorePhrases {
 
         if(sentidswithfilerest != null && !sentidswithfilerest.isEmpty()){
           
-          String filename = "";
-          if(constVars.usingDirForSentsInIndex)
-            filename = constVars.saveSentencesSerDir+"/"+fname.getName();
-          else
+          String filename;
+//          if(constVars.usingDirForSentsInIndex)
+//            filename = constVars.saveSentencesSerDir+"/"+fname.getName();
+//          else
             filename = fname.getAbsolutePath();
           
           Set<String> sentIDs = sentidswithfilerest.get(filename);
           if (sentIDs != null){
             this.runParallelApplyPats(sents, sentIDs, label, patternsLearnedThisIterRest, wordsandLemmaPatExtracted, matchedTokensByPat);
           } else
-            throw new RuntimeException("How come no sentIds for " + filename  + ". Index keyset is " + constVars.invertedIndex.getKeySet());
+            Redwood.log(Redwood.DBG, "No sentIds for " + filename  + " in the index for the keywords from the patterns! The index came up with these files: " + sentidswithfilerest.keySet());
         }
         if(patternsLearnedThisIterConsistsOnlyGeneralized.size() > 0){
           this.runParallelApplyPats(sents, sents.keySet(), label, patternsLearnedThisIterConsistsOnlyGeneralized, wordsandLemmaPatExtracted, matchedTokensByPat);
         }
-        
-        if (computeDataFreq)
+
+        if (computeDataFreq){
           Data.computeRawFreqIfNull(sents, constVars.numWordsCompound);
+          Data.fileNamesUsedToComputeRawFreq.add(fname.getName());
+        }
       }
+
+      //Compute Frequency from the files not loaded using the invertedindex query. otherwise, later on there is an error.
+      if(computeDataFreq){
+        for(File f: Data.sentsFiles){
+          if(!Data.fileNamesUsedToComputeRawFreq.contains(f.getName())){
+            Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
+            Data.computeRawFreqIfNull(sents, constVars.numWordsCompound);
+            Data.fileNamesUsedToComputeRawFreq.add(f.getName());
+          }
+        }
+      }
+
     } else {
       
       if (sentidswithfilerest != null && !sentidswithfilerest.isEmpty()) {
@@ -336,16 +351,14 @@ public class ScorePhrases {
   }
   
   
-  private void statsWithoutApplyingPatterns(Map<String, List<CoreLabel>> sents, Map<String, Map<Integer, Set<Integer>>> patternsForEachToken,
-      Counter<Integer> patternsLearnedThisIter, TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted){
+  private void statsWithoutApplyingPatterns(Map<String, List<CoreLabel>> sents, PatternsForEachToken patternsForEachToken,
+      Counter<Integer> patternsLearnedThisIter, TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted) throws SQLException, IOException, ClassNotFoundException {
     for (Entry<String, List<CoreLabel>> sentEn : sents.entrySet()) {
-      Map<Integer, Set<Integer>> pat4Sent = patternsForEachToken
-          .get(sentEn.getKey());
+      Map<Integer, Set<Integer>> pat4Sent = patternsForEachToken.getPatternsForAllTokens(sentEn.getKey());
+
       if (pat4Sent == null) {
         throw new RuntimeException("How come there are no patterns for "
-            + sentEn.getKey() + ". The total patternsForEachToken size is "
-            + patternsForEachToken.size() + " and keys "
-            + patternsForEachToken.keySet());
+            + sentEn.getKey());
       }
       for (Entry<Integer, Set<Integer>> en : pat4Sent
           .entrySet()) {
@@ -370,7 +383,7 @@ public class ScorePhrases {
 
   private Counter<String> learnNewPhrasesPrivate(
       String label,
-      Map<String, Map<Integer, Set<Integer>>> patternsForEachToken,
+      PatternsForEachToken patternsForEachToken,
       Counter<Integer> patternsLearnedThisIter,
       Counter<Integer> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat,
@@ -379,7 +392,7 @@ public class ScorePhrases {
       TwoDimensionalCounter<String, Integer> wordsPatExtracted,
       TwoDimensionalCounter<Integer, String> patternsAndWords4Label,
       String identifier, Set<String> ignoreWords, boolean computeDataFreq) throws InterruptedException, ExecutionException,
-      IOException, ClassNotFoundException {
+    IOException, ClassNotFoundException, SQLException {
 
     TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, Integer>();
     if (constVars.doNotApplyPatterns) {
@@ -542,7 +555,7 @@ public class ScorePhrases {
               Redwood.DBG, "Phrase " + 
               word
                   + " extracted because of patterns: \t"
-                  + Counters.toSortedString(wordsPatExtracted.getCounter(word),
+                  + Counters.toSortedString(constVars.transformPatternsToSurface(wordsPatExtracted.getCounter(word)),
                       wordsPatExtracted.getCounter(word).size(), "%1$s:%2$f",
                       "\n"));
         }
