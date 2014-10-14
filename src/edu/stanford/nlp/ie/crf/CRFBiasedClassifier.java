@@ -66,7 +66,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
       windowCliques.removeAll(done);
       done.addAll(windowCliques);
       for (Clique c : windowCliques) {
-        for (FeatureFactory<IN> featureFactory : featureFactories) {
+        for (FeatureFactory featureFactory : featureFactories) {
           featuresC.addAll(featureFactory.getCliqueFeatures(pInfo, loc, c));
         }
         if(testTime && i==0)
@@ -124,7 +124,6 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
       evalFunction = e;
     }
 
-    @Override
     public Double apply(Double w) {
       crf.setBiasWeight(0,w);
       return evalFunction.apply(w);

@@ -889,14 +889,37 @@ public class SemanticGraphUtils {
 
 
   /**
-   * Given a <code>SemanticGraph</code>, sets the lemmas on its label
-   * objects based on their word and tag.
+   * Given a <code>SemanticGraph</code>, returns a new graph (with new node), with
+   * the lemma fields in place.
+   *
+   * NOTE: unfortunately, cannot lemmatize in place, due to brittleness with modifying
+   * existing nodes in JGraph.  TODO: is that still true?
    */
-  public static void lemmatize(SemanticGraph sg) {
-    for (IndexedWord node : sg.vertexSet()) {
+  public static SemanticGraph lemmatize(SemanticGraph sg) {
+    // Need to call replacenode on each, otherwise the graph will fall
+    // apart.  Eat one time cost to allow lemmas to be retained.
+    // Also, maintain a list of the current to new root mappings, and reset
+    SemanticGraph newGraph = new SemanticGraph(sg);
+    List<IndexedWord> prevRoots =
+      new ArrayList<IndexedWord>(newGraph.getRoots());
+    List<IndexedWord> newRoots = new ArrayList<IndexedWord>();
+    Map<IndexedWord, IndexedWord> wordsToReplacements =
+      new IdentityHashMap<IndexedWord, IndexedWord>();
+    for (IndexedWord node : newGraph.vertexSet()) {
+      IndexedWord newWord = new IndexedWord(node);
       String lemma = Morphology.stemStatic(node.word(), node.tag()).word();
-      node.setLemma(lemma);
+      newWord.setLemma(lemma);
+      wordsToReplacements.put(node, newWord);
     }
+
+    for (Map.Entry<IndexedWord, IndexedWord> replace :
+           wordsToReplacements.entrySet()) {
+      replaceNode(replace.getValue(), replace.getKey(), newGraph);
+      if (prevRoots.contains(replace.getKey()))
+        newRoots.add(replace.getValue());
+    }
+    newGraph.setRoots(newRoots);
+    return newGraph;
   }
 
   /**

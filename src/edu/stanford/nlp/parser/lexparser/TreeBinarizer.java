@@ -554,12 +554,6 @@ public class TreeBinarizer implements TreeTransformer {
     return result;
   }
 
-  /**
-   * Builds a TreeBinarizer with all of the options set to simple values
-   */
-  public static TreeBinarizer simpleTreeBinarizer(HeadFinder hf, TreebankLanguagePack tlp) {
-    return new TreeBinarizer(hf, tlp, false, false, 0, false, false, 0.0, false, true, true);
-  }
 
   /** Build a custom binarizer for Trees.
    *
@@ -574,7 +568,6 @@ public class TreeBinarizer implements TreeTransformer {
    *        tree.  This is used only when compaction is happening
    * @param selectiveSplitThreshold if selective split is used, this will be the threshold used to decide which state splits to keep
    * @param markFinalStates whether or not to make the state names (labels) of the final active states distinctive
-   * @param noRebinarization if true, a node which already has exactly two children is not altered
    */
   public TreeBinarizer(HeadFinder hf, TreebankLanguagePack tlp,
                        boolean insideFactor,
@@ -597,8 +590,7 @@ public class TreeBinarizer implements TreeTransformer {
   }
 
 
-  /** 
-   *  Lets you test out the TreeBinarizer on the command line.
+  /** Let's you test out the TreeBinarizer on the command line.
    *  This main method doesn't yet handle as many flags as one would like.
    *  But it does have:
    *  <ul>
