@@ -2550,6 +2550,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                 IOUtils.writeObjectToFile(splitSents, newf);
                 Data.sentsFiles.add(newf);
                 splitSents.clear();
+                num = 0;
               }
             }
           }
