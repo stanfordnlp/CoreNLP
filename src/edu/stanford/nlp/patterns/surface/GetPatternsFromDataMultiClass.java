@@ -2505,11 +2505,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         saveSentencesSerDirFile.mkdir();
       }
 
-      List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(file);
       int numFilesTillNow = 0;
       if (fileFormat == null || fileFormat.equalsIgnoreCase("text") || fileFormat.equalsIgnoreCase("txt")) {
         Map<String, List<CoreLabel>> sentsthis = new HashMap<String, List<CoreLabel>>();
-        for (File f : allFiles) {
+        for (File f : GetPatternsFromDataMultiClass.getAllFiles(file)) {
           Redwood.log(Redwood.DBG, "Annotating text in " + f);
 
           String text = IOUtils.stringFromFile(f.getAbsolutePath());
@@ -2528,7 +2527,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       } else if (fileFormat.equalsIgnoreCase("ser")) {
         usingDirForSentsInIndex = false;
-        for (File f : allFiles) {
+        for (File f : GetPatternsFromDataMultiClass.getAllFiles(file)) {
           if (!batchProcessSents)
             sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
           else{
