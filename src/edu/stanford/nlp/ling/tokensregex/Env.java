@@ -361,7 +361,7 @@ public class Env {
   public void push(String name, Object value) {
     Map<String,Object> vars = threadLocalVariables.get();
     if (vars == null) {
-      threadLocalVariables.set(vars = Generics.newHashMap());
+      threadLocalVariables.set(vars = new HashMap<String, Object>());//Generics.newHashMap());
     }
     Stack<Object> stack = (Stack<Object>) vars.get(name);
     if (stack == null) {
