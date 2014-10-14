@@ -463,4 +463,23 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
   public static final AttributesEqualMatchChecker TEXT_ATTR_EQUAL_CHECKER =
           new AttributesEqualMatchChecker(CoreAnnotations.TextAnnotation.class);
 
+  //For exact matching integers. Presumably faster than NumericAnnotationPattern
+  //TODO : add this in the valueOf function of CoreMapNodePattern
+  public static class IntegerAnnotationPattern extends NodePattern<Integer>{
+
+    int value;
+    public IntegerAnnotationPattern(int v){
+      this.value = v;
+    }
+
+    @Override
+    public boolean match(Integer node) {
+      return value == node;
+    }
+
+    public int getValue() {
+      return value;
+    }
+  }
+
 }
