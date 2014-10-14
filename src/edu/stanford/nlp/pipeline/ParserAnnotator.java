@@ -249,8 +249,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree);
 
     if (saveBinaryTrees) {
-      TreeBinarizer binarizer = new TreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack(),
-                                                  false, false, 0, false, false, 0.0, false, true, true);
+      TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack());
       Tree binarized = binarizer.transformTree(tree);
       Trees.convertToCoreLabels(binarized);
       sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, binarized);

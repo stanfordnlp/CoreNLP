@@ -96,13 +96,14 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  * @author John Bauer
  */
 public class ShiftReduceParser extends ParserGrammar implements Serializable {
-  Index<Transition> transitionIndex;
-  Map<String, Weight> featureWeights;
+
+  final Index<Transition> transitionIndex;
+  final Map<String, Weight> featureWeights;
   //final Map<String, List<ScoredObject<Integer>>> featureWeights;
 
-  ShiftReduceOptions op;
+  final ShiftReduceOptions op;
 
-  FeatureFactory featureFactory;
+  final FeatureFactory featureFactory;
 
   Set<String> knownStates;
   Set<String> rootStates;
@@ -285,7 +286,15 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   }
 
   @Override
-  public Tree apply(List<? extends HasWord> sentence) {
+  public Tree parse(String sentence) {
+    if (!getOp().testOptions.preTag) {
+      throw new UnsupportedOperationException("Can only parse raw text if a tagger is specified, as the ShiftReduceParser cannot produce its own tags");
+    }
+    return super.parse(sentence);    
+  }
+
+  @Override
+  public Tree parse(List<? extends HasWord> sentence) {
     ShiftReduceParserQuery pq = new ShiftReduceParserQuery(this);
     if (pq.parse(sentence)) {
       return pq.getBestParse();
@@ -479,6 +488,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       if (hw instanceof CoreLabel) {
         wordLabel = (CoreLabel) hw;
         tag = wordLabel.tag();
+        CoreLabel cl = (CoreLabel) hw;
       } else {
         wordLabel = new CoreLabel();
         wordLabel.setValue(hw.word());
@@ -546,7 +556,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   }
 
   public static List<Tree> binarizeTreebank(Treebank treebank, Options op) {
-    TreeBinarizer binarizer = new TreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack(), false, false, 0, false, false, 0.0, false, true, true);
+    TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(op.tlpParams.headFinder(), op.tlpParams.treebankLanguagePack());
     BasicCategoryTreeTransformer basicTransformer = new BasicCategoryTreeTransformer(op.langpack());
     CompositeTreeTransformer transformer = new CompositeTreeTransformer();
     transformer.addTransformer(binarizer);

@@ -26,9 +26,9 @@
 
 package edu.stanford.nlp.trees;
 
+import static edu.stanford.nlp.trees.EnglishPatterns.*;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -106,40 +106,6 @@ public class EnglishGrammaticalRelations {
    *  that act a bit like an enum.
    */
   private EnglishGrammaticalRelations() {}
-
-  private static final String timeWordRegex =
-    "/^(?i:Mondays?|Tuesdays?|Wednesdays?|Thursdays?|Fridays?|Saturdays?|Sundays?|years?|months?|weeks?|days?|mornings?|evenings?|nights?|January|Jan\\.|February|Feb\\.|March|Mar\\.|April|Apr\\.|May|June|July|August|Aug\\.|September|Sept\\.|October|Oct\\.|November|Nov\\.|December|Dec\\.|today|yesterday|tomorrow|spring|summer|fall|autumn|winter)$/";
-  private static final String timeWordLotRegex =
-    "/^(?i:Mondays?|Tuesdays?|Wednesdays?|Thursdays?|Fridays?|Saturdays?|Sundays?|years?|months?|weeks?|days?|mornings?|evenings?|nights?|January|Jan\\.|February|Feb\\.|March|Mar\\.|April|Apr\\.|May|June|July|August|Aug\\.|September|Sept\\.|October|Oct\\.|November|Nov\\.|December|Dec\\.|today|yesterday|tomorrow|spring|summer|fall|autumn|winter|lot)$/";
-  // r is for texting r = are
-  // TODO: remove everything but "to be".  Must do this carefully to
-  // make sure we like all the dependency changes that happen
-  static final String copularWordRegex =
-    "/^(?i:" + StringUtils.join(SemanticHeadFinder.copulaVerbs, "|") + ")$/";
-  static final String clausalComplementRegex =
-    "/^(?i:seem|seems|seemed|seeming|resemble|resembles|resembled|resembling|become|becomes|became|becoming|remain|remains|remained|remaining)$/";
-  private static final String passiveAuxWordRegex =
-    "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|seem|seems|seemed|seeming|appear|appears|appeared|become|becomes|became|becoming|get|got|getting|gets|gotten|remains|remained|remain)$/";
-  private static final String beAuxiliaryRegex =
-    "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/";
-  private static final String haveRegex =
-    "/^(?i:have|had|has|having|'ve|ve|v|'d|d|hvae|hav|as)$/";
-  // private static final String stopKeepRegex = "/^(?i:stop|stops|stopped|stopping|keep|keeps|kept|keeping)$/";
-  private static final String selfRegex =
-    "/^(?i:myself|yourself|himself|herself|itself|ourselves|yourselves|themselves)$/";
-  private static final String xcompVerbRegex =
-    "/^(?i:advise|advises|advised|advising|allow|allows|allowed|allowing|ask|asks|asked|asking|beg|begs|begged|begging|demand|demands|demanded|demanding|desire|desires|desired|desiring|expect|expects|expected|expecting|encourage|encourages|encouraged|encouraging|force|forces|forced|forcing|implore|implores|implored|imploring|lobby|lobbies|lobbied|lobbying|order|orders|ordered|ordering|persuade|persuades|persuaded|persuading|pressure|pressures|pressured|pressuring|prompt|prompts|prompted|prompting|require|requires|required|requiring|tell|tells|told|telling|urge|urges|urged|urging)$/";
-  // A list of verbs where the answer to a question involving that
-  // verb would be a ccomp.  For example, "I know when the train is
-  // arriving."  What does the person know?
-  private static final String ccompVerbRegex =
-    "/^(?i:ask|asks|asked|asking|know|knows|knew|knowing|specify|specifies|specified|specifying|tell|tells|told|telling|understand|understands|understood|understanding|wonder|wonders|wondered|wondering)$/";
-  // A subset of ccompVerbRegex where you could expect an object and
-  // still have a ccomp.  For example, "They told me when ..." can
-  // still have a ccomp.  "They know my order when ..." would not
-  // expect a ccomp between "know" and the head of "when ..."
-  private static final String ccompObjVerbRegex =
-    "/^(?i:tell|tells|told|telling)$/";
 
   // By setting the HeadFinder to null, we find out right away at
   // runtime if we have incorrectly set the HeadFinder for the

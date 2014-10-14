@@ -557,11 +557,14 @@ public class TreePrint {
           if (!dependencyFilter.accept(d)) {
             continue;
           }
-          CoreMap dep = (CoreMap) d.dependent();
-          CoreMap gov = (CoreMap) d.governor();
+          if (!(d.dependent() instanceof HasIndex) || !(d.governor() instanceof HasIndex)) {
+            throw new IllegalArgumentException("Expected labels to have indices");
+          }
+          HasIndex dep = (HasIndex) d.dependent();
+          HasIndex gov = (HasIndex) d.governor();
 
-          Integer depi = dep.get(CoreAnnotations.IndexAnnotation.class);
-          Integer govi = gov.get(CoreAnnotations.IndexAnnotation.class);
+          int depi = dep.index();
+          int govi = gov.index();
 
           CoreLabel w = tagged.get(depi-1);
 
@@ -682,7 +685,7 @@ public class TreePrint {
       Collection<TypedDependency> deps = gs.typedDependencies(false);
       List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<Dependency<Label, Label, Object>>();
       for (TypedDependency dep : deps) {
-        sortedDeps.add(new NamedDependency(dep.gov().label(), dep.dep().label(), dep.reln().toString()));
+        sortedDeps.add(new NamedDependency(dep.gov(), dep.dep(), dep.reln().toString()));
       }
       Collections.sort(sortedDeps, Dependencies.dependencyIndexComparator());
       return sortedDeps;
@@ -970,22 +973,22 @@ public class TreePrint {
     for (TypedDependency td : dependencies) {
       String reln = td.reln().toString();
       String gov = td.gov().value();
-      String govTag = td.gov().label().tag();
+      String govTag = td.gov().tag();
       int govIdx = td.gov().index();
       String dep = td.dep().value();
-      String depTag = td.dep().label().tag();
+      String depTag = td.dep().tag();
       int depIdx = td.dep().index();
       boolean extra = td.extra();
       // add an attribute if the node is a copy
       // (this happens in collapsing when different prepositions are conjuncts)
       String govCopy = "";
-      Integer copyGov = td.gov().label.get(CoreAnnotations.CopyAnnotation.class);
-      if (copyGov != null) {
+      int copyGov = td.gov().copyCount();
+      if (copyGov > 0) {
         govCopy = " copy=\"" + copyGov + '\"';
       }
       String depCopy = "";
-      Integer copyDep = td.dep().label.get(CoreAnnotations.CopyAnnotation.class);
-      if (copyDep != null) {
+      int copyDep = td.dep().copyCount();
+      if (copyDep > 0) {
         depCopy = " copy=\"" + copyDep + '\"';
       }
       String govTagAttribute = (includeTags && govTag != null) ? " tag=\"" + govTag + "\"" : "";
