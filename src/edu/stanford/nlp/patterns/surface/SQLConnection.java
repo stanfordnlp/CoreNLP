@@ -26,7 +26,7 @@ public class SQLConnection {
 
   public static Connection getConnection() throws SQLException, ClassNotFoundException {
     //System.out.println("username is " + dbusername + " and location is " + dbLocation);
-    return DriverManager.getConnection(dbLocation + "?user="
+    return DriverManager.getConnection(dbLocation + "?host="+host+ "user="
       + dbusername + "&password=" + dbpassword + "&characterEncoding=utf-8&"
       + "useUnicode=true");
   }

@@ -29,15 +29,18 @@ public class PatternsForEachToken {
   String tableName = null;
 
   private Map<String, Map<Integer, Set<Integer>>> patternsForEachToken = null;
+
   Connection conn;
 
   public PatternsForEachToken(Properties props, Map<String, Map<Integer, Set<Integer>>> pats) throws SQLException, ClassNotFoundException, IOException {
     Execution.fillOptions(this, props);
+
     if (useDB) {
       Execution.fillOptions(SQLConnection.class, props);
       conn = SQLConnection.getConnection();
       Execution.fillOptions(SQLConnection.class, props);
       assert tableName != null;
+      tableName = tableName.toLowerCase();
       if (createTable && !deleteExisting)
         throw new RuntimeException("Cannot have createTable as true and deleteExisting as false!");
       if (createTable)
@@ -54,16 +57,17 @@ public class PatternsForEachToken {
 
   void createTable() throws SQLException, ClassNotFoundException {
     DatabaseMetaData dbm = conn.getMetaData();
-    // check if "employee" table is there
     ResultSet tables = dbm.getTables(null, null, tableName, null);
     if (tables.next()) {
+      System.out.println("Found table " + tableName);
       if (deleteExisting) {
+        System.out.println("deleting table " + tableName);
         Statement stmt = conn.createStatement();
-        stmt.executeQuery("DELETE FROM " + tableName);
+        stmt.executeUpdate("DELETE FROM " + tableName);
       }
     } else {
       Statement stmt = conn.createStatement();
-      String query = "create table " + tableName + " (\"sentid\" text, \"tokenid\" int, \"patterns\" bytea); ";
+      String query = "create table  IF NOT EXISTS " + tableName + " (\"sentid\" text, \"tokenid\" int, \"patterns\" bytea); ";
       stmt.execute(query);
     }
   }
@@ -92,8 +96,8 @@ public class PatternsForEachToken {
   }
 
   PreparedStatement getPreparedStmt() throws SQLException {
-  return conn.prepareStatement("UPDATE table SET patterns=? WHERE sentid=? and tokenid=?; " +
-    "INSERT INTO " + tableName + "(sentid, tokenid, patterns) + VALUES (?,?,?) WHERE NOT EXISTS (SELECT 1 FROM table WHERE sentid=? and tokenid=?;");
+  return conn.prepareStatement("UPDATE " + tableName + " SET patterns = ? WHERE sentid = ? and tokenid = ?; " +
+    "INSERT INTO " + tableName + " (sentid, tokenid, patterns) (SELECT ?,?,? WHERE NOT EXISTS (SELECT sentid FROM " + tableName + " WHERE sentid  =? and tokenid=?));");
   }
 
   public void addPattern(String sentId, int tokenId, Set<Integer> patterns) throws SQLException, IOException {
@@ -118,13 +122,19 @@ public class PatternsForEachToken {
         oos.writeObject(patterns);
         byte[] patsAsBytes = baos.toByteArray();
         ByteArrayInputStream bais = new ByteArrayInputStream(patsAsBytes);
-        pstmt.setString(1,sentId);
-        pstmt.setInt(2, tokenId);
-        pstmt.setString(3,sentId);
-        pstmt.setInt(4, tokenId);
-        pstmt.setBinaryStream(5, bais, patsAsBytes.length);
-        pstmt.setString(6,sentId);
-        pstmt.setInt(7, tokenId);
+        pstmt.setBinaryStream(1, bais, patsAsBytes.length);
+        pstmt.setObject(2,sentId);
+        pstmt.setInt(3, tokenId);
+        pstmt.setString(4,sentId);
+        pstmt.setInt(5, tokenId);
+        ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+        ObjectOutputStream oos2 = new ObjectOutputStream(baos2);
+        oos2.writeObject(patterns);
+        byte[] patsAsBytes2 = baos2.toByteArray();
+        ByteArrayInputStream bais2 = new ByteArrayInputStream(patsAsBytes2);
+        pstmt.setBinaryStream(6, bais2, patsAsBytes2.length);
+        pstmt.setString(7,sentId);
+        pstmt.setInt(8, tokenId);
       } else{
         if(!patternsForEachToken.containsKey(sentId))
           patternsForEachToken.put(sentId, new ConcurrentHashMap<Integer, Set<Integer>>());
@@ -136,7 +146,7 @@ public class PatternsForEachToken {
 
   Set<Integer> getPatterns(String sentId, Integer tokenId) throws SQLException, IOException, ClassNotFoundException {
     if(useDB){
-      String query = "Select patterns from " + tableName + " where sentid=\"" + sentId + "\" and tokenid = " + tokenId;
+      String query = "Select patterns from " + tableName + " where sentid=\'" + sentId + "\' and tokenid = " + tokenId;
       Statement stmt = conn.createStatement();
       ResultSet rs = stmt.executeQuery(query);
       if(rs.next()){
@@ -156,7 +166,7 @@ public class PatternsForEachToken {
 
   Map<Integer, Set<Integer>> getPatternsForAllTokens(String sentId) throws SQLException, IOException, ClassNotFoundException {
     if(useDB){
-      Map<Integer, Set<Integer>> pats = new ConcurrentHashMap<>();
+      Map<Integer, Set<Integer>> pats = new ConcurrentHashMap<Integer, Set<Integer>>();
       String query = "Select tokenid, patterns from " + tableName + " where sentid=\"" + sentId + "\"";
       Statement stmt = conn.createStatement();
       ResultSet rs = stmt.executeQuery(query);
