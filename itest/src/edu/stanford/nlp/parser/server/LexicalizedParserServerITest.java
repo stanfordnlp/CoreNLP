@@ -28,9 +28,11 @@ public class LexicalizedParserServerITest extends TestCase {
   static final String collapsedTreeString = ("nn(Bauer-2, John-1)\n" + 
                                              "nsubj(works-3, Bauer-2)\n" + 
                                              "root(ROOT-0, works-3)\n" +
-                                             "prep_at(works-3, Stanford-5)\n" +
-                                             "punct(works-3, .-6)");
+                                             "prep_at(works-3, Stanford-5)");
   static final String tokenizedString = "John Bauer works at Stanford .";
+
+  static final String lemmaTestString = "A man was walking in the rain.";
+  static final String lemmaExpectedString = "a man be walk in the rain .";
 
   public void setUp() 
     throws IOException
@@ -100,7 +102,7 @@ public class LexicalizedParserServerITest extends TestCase {
     throws IOException
   {
     int port = Ports.findAvailable(2000, 10000);
-    System.err.println("testGetTree: starting on port " + port);
+    System.err.println("testGetTokenizedText: starting on port " + port);
     startLPServer(port, true);
 
     LexicalizedParserClient client = 
@@ -108,6 +110,19 @@ public class LexicalizedParserServerITest extends TestCase {
     String tokenized = client.getTokenizedText(testString);
     assertEquals(tokenizedString, tokenized);
   }
+
+  public void testGetLemmas()
+    throws IOException
+  {
+    int port = Ports.findAvailable(2000, 10000);
+    System.err.println("testGetLemmas: starting on port " + port);
+    startLPServer(port, true);
+
+    LexicalizedParserClient client = 
+      new LexicalizedParserClient("localhost", port);
+    String tokenized = client.getLemmas(lemmaTestString);
+    assertEquals(lemmaExpectedString, tokenized);
+  }    
 
   public void testGetTextTree()
     throws IOException

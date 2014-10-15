@@ -122,6 +122,16 @@ public class CollectionUtils {
     return union;
   }
 
+  public static <T> Set<T> unionAsSet(Collection<T>... sets) {
+    Set<T> union = Generics.newHashSet();
+    for(Collection<T> set: sets){
+      for (T t : set) {
+        union.add(t);
+      }
+    }
+    return union;
+  }
+
   /**
    * Returns all objects in list1 that are not in list2
    *
