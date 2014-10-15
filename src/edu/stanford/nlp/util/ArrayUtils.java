@@ -882,20 +882,6 @@ public class ArrayUtils {
     return CollectionUtils.compareLists(firstAsList, secondAsList);
   }
 
-  /* -- This is an older more direct implementation of the above, but not necessary unless for performance
-   public static <C extends Comparable<C>> int compareArrays(C[] a1, C[] a2) {
-    int len = Math.min(a1.length, a2.length);
-    for (int i = 0; i < len; i++) {
-      int comparison = a1[i].compareTo(a2[i]);
-      if (comparison != 0) return comparison;
-    }
-    // one is a prefix of the other, or they're identical
-    if (a1.length < a2.length) return -1;
-    if (a1.length > a2.length) return 1;
-    return 0;
-  }
-   */
-
   /**
    * If tofind is a part of tokens, it finds the ****starting index***** of tofind in tokens
    * If tofind is not a sub-array of tokens, then it returns null
@@ -983,15 +969,4 @@ public class ArrayUtils {
     return b;
   }
 
-  public static int compareBooleanArrays(boolean[] a1, boolean[] a2) {
-    int len = Math.min(a1.length, a2.length);
-    for (int i = 0; i < len; i++) {
-      if (!a1[i] && a2[i]) return -1;
-      if (a1[i] && !a2[i]) return 1;
-    }
-    // one is a prefix of the other, or they're identical
-    if (a1.length < a2.length) return -1;
-    if (a1.length > a2.length) return 1;
-    return 0;
-  }
 }

@@ -1,6 +1,5 @@
 package edu.stanford.nlp.patterns.surface;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -13,7 +12,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -25,11 +23,9 @@ import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScori
 import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.TypesafeMap.Key;
-import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 import edu.stanford.nlp.util.logging.Redwood;
 
 public class ConstantsAndVariables implements Serializable{
@@ -113,10 +109,9 @@ public class ConstantsAndVariables implements Serializable{
 
   /**
    * Do not learn patterns in which the neighboring words have the same label.
-   * Deprecated!
    */
-  //@Option(name = "ignorePatWithLabeledNeigh")
-  //public boolean ignorePatWithLabeledNeigh = false;
+  @Option(name = "ignorePatWithLabeledNeigh")
+  public boolean ignorePatWithLabeledNeigh = false;
 
   /**
    * Save this run as ...
@@ -442,9 +437,6 @@ public class ConstantsAndVariables implements Serializable{
   public Map<String, Counter<Integer>> distSimWeights = new HashMap<String, Counter<Integer>>();
   public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
 
-  public ConcurrentHashIndex<SurfacePattern> getPatternIndex() {
-    return patternIndex;
-  }
 
 
   public enum ScorePhraseMeasures {
@@ -581,25 +573,25 @@ public class ConstantsAndVariables implements Serializable{
   // @Option(name="diskBackedInvertedIndex")
   // public boolean diskBackedInvertedIndex = false;
 
-//  /**
-//   * You can save the inverted index to this file
-//   */
-//  @Option(name="saveInvertedIndexDir")
-//  public String saveInvertedIndexDir  = null;
-//
-//  /**
-//   * You can load the inv index using this file
-//   */
-//  @Option(name="loadInvertedIndexDir")
-//  public String loadInvertedIndexDir  = null;
-//
-//  /**
-//   * Directory where to save the sentences ser files.
-//   */
-//  @Option(name="saveSentencesSerDir")
-//  public File saveSentencesSerDir = null;
-//
-//  public boolean usingDirForSentsInIndex = false;
+  /**
+   * You can save the inverted index to this file
+   */
+  @Option(name="saveInvertedIndexDir")
+  public String saveInvertedIndexDir  = null;
+
+  /**
+   * You can load the inv index using this file
+   */
+  @Option(name="loadInvertedIndexDir")
+  public String loadInvertedIndexDir  = null;
+
+  /**
+   * Directory where to save the sentences ser files.
+   */
+  @Option(name="saveSentencesSerDir")
+  public String saveSentencesSerDir = null;
+
+  public boolean usingDirForSentsInIndex = false;
 
   // @Option(name = "wekaOptions")
   // public String wekaOptions = "";
@@ -613,8 +605,6 @@ public class ConstantsAndVariables implements Serializable{
 
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";
-
-  public ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
 
   Properties props;
 
@@ -1071,28 +1061,5 @@ public class ConstantsAndVariables implements Serializable{
 
   public Map<String, Map<Class, Object>> getIgnoreWordswithClassesDuringSelection() {
     return ignoreWordswithClassesDuringSelection;
-  }
-
-
-  public Counter<SurfacePattern> transformPatternsToSurface(Counter<Integer> pats) {
-    return Counters.transform(pats, new Function<Integer, SurfacePattern>() {
-      @Override
-      public SurfacePattern apply(Integer integer) {
-        return patternIndex.get(integer);
-      }
-    });
-  }
-
-  public Counter<Integer> transformPatternsToIndex(Counter<SurfacePattern> pats) {
-    return Counters.transform(pats, new Function<SurfacePattern, Integer>() {
-      @Override
-      public Integer apply(SurfacePattern pat) {
-        return patternIndex.indexOf(pat);
-      }
-    });
-  }
-
-  public Integer transformPatternToIndex(SurfacePattern pat) {
-    return patternIndex.indexOf(pat);
   }
 }

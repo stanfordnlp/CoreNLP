@@ -1,7 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +16,6 @@ public class Data {
   public static double ratioDomainNgramFreqWithDataFreq = 1;
   static public Counter<String> rawFreq = null;
   public static List<File> sentsFiles = null;
-  public static List<String> fileNamesUsedToComputeRawFreq = new ArrayList<String>();
   public static Map<String, List<CoreLabel>> sents = null;
   public static Counter<String> processedDataFreq = null;
   public static Counter<String> domainNGramRawFreq = new ClassicCounter<String>();;

@@ -14,7 +14,6 @@ import java.util.Set;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.Index;
 
 /**
  * Creates an inverted index of (word or lemma) => {file1 => {sentid1,
@@ -37,9 +36,9 @@ public class InvertedIndexByTokens implements Serializable{
   // static int numfilesindiskbacked = 10000;
   int numAllEntries = 0;
   boolean batchProcessSents = false;
-  //String filenamePrefix = null;
+  String filenamePrefix = null;
   
-  public InvertedIndexByTokens(boolean lc, Set<String> stopWords, Set<String> specialWords, boolean batchProcessSents, String dirName) {
+  public InvertedIndexByTokens(File invertedIndexDir, boolean lc, Set<String> stopWords, Set<String> specialWords, boolean batchProcessSents, String dirName) {
     // if (filebacked)
     // index = new FileBackedCache<StringwithConsistentHashCode,
     // Hashtable<String, Set<String>>>(invertedIndexDir, numfilesindiskbacked);
@@ -53,7 +52,7 @@ public class InvertedIndexByTokens implements Serializable{
     if (this.stopWords == null)
       this.stopWords = new HashSet<String>();
     this.specialWords = specialWords;
-    //this.filenamePrefix = dirName;
+    this.filenamePrefix = dirName;
   }
 
   public InvertedIndexByTokens(Map<String, Hashtable<String, Set<String>>> index, boolean lc, Set<String> stopWords,
@@ -65,14 +64,14 @@ public class InvertedIndexByTokens implements Serializable{
     if (this.stopWords == null)
       this.stopWords = new HashSet<String>();
     this.specialWords = specialWords;
-   // this.filenamePrefix = dirName;
+    this.filenamePrefix = dirName;
   }
 
   void add(Map<String, List<CoreLabel>> sents, String filename, boolean indexLemma) {
     
-//    if(filenamePrefix != null)
-//      filename = filenamePrefix+ (filenamePrefix.endsWith("/")?"":"/")+filename;
-//
+    if(filenamePrefix != null)
+      filename = filenamePrefix+ (filenamePrefix.endsWith("/")?"":"/")+filename;
+    
     for (Map.Entry<String, List<CoreLabel>> sEn : sents.entrySet()) {
       for (CoreLabel l : sEn.getValue()) {
         String w = l.word();
@@ -124,10 +123,9 @@ public class InvertedIndexByTokens implements Serializable{
     return sentids;
   }
 
-  public Map<String, Set<String>> getFileSentIdsFromPats(Set<Integer> pats, Index<SurfacePattern> index) {
+  public Map<String, Set<String>> getFileSentIdsFromPats(Set<SurfacePattern> pats) {
     Set<String> relevantWords = new HashSet<String>();
-    for (Integer pindex : pats) {
-      SurfacePattern p = index.get(pindex);
+    for (SurfacePattern p : pats) {
       Set<String> relwordsThisPat = new HashSet<String>();
       String[] next = p.getSimplerTokensNext();
       if (next != null)
@@ -167,42 +165,42 @@ public class InvertedIndexByTokens implements Serializable{
     return this.specialWords;
   }
 
-//  public void saveIndex(String dir) throws IOException {
-//    BufferedWriter w = new BufferedWriter(new FileWriter(dir + "/param.txt"));
-//    w.write(String.valueOf(convertToLowercase) + "\n");
-//    w.write(String.valueOf(this.batchProcessSents) + "\n");
-//    w.write(this.filenamePrefix+"\n");
-//    w.close();
-//    IOUtils.writeObjectToFile(this.stopWords, dir + "/stopwords.ser");
-//    IOUtils.writeObjectToFile(this.specialWords, dir + "/specialwords.ser");
-//    // if (!filebacked)
-//    IOUtils.writeObjectToFile(index, dir + "/map.ser");
-//
-//  }
-//
-//  public static InvertedIndexByTokens loadIndex(String dir) {
-//    try {
-//      List<String> lines = IOUtils.linesFromFile(dir + "/param.txt");
-//      boolean lc = Boolean.parseBoolean(lines.get(0));
-//      boolean batchProcessSents = Boolean.parseBoolean(lines.get(1));
-//      String filenameprefix = lines.get(2);
-//
-//      if(filenameprefix.equals("null"))
-//        filenameprefix = null;
-//
-//      Set<String> stopwords = IOUtils.readObjectFromFile(dir + "/stopwords.ser");
-//      Set<String> specialwords = IOUtils.readObjectFromFile(dir + "/specialwords.ser");
-//      Map<String, Hashtable<String, Set<String>>> index = null;
-//      // if (!filebacked)
-//      index = IOUtils.readObjectFromFile(dir + "/map.ser");
-//      // else
-//      // index = new FileBackedCache<StringwithConsistentHashCode,
-//      // Hashtable<String, Set<String>>>(dir + "/cache", numfilesindiskbacked);
-//      return new InvertedIndexByTokens(index, lc, stopwords, specialwords, batchProcessSents, filenameprefix);
-//    } catch (Exception e) {
-//      throw new RuntimeException("Cannot load the inverted index. " + e);
-//    }
-//  }
+  public void saveIndex(String dir) throws IOException {
+    BufferedWriter w = new BufferedWriter(new FileWriter(dir + "/param.txt"));
+    w.write(String.valueOf(convertToLowercase) + "\n");
+    w.write(String.valueOf(this.batchProcessSents) + "\n");
+    w.write(this.filenamePrefix+"\n");
+    w.close();
+    IOUtils.writeObjectToFile(this.stopWords, dir + "/stopwords.ser");
+    IOUtils.writeObjectToFile(this.specialWords, dir + "/specialwords.ser");
+    // if (!filebacked)
+    IOUtils.writeObjectToFile(index, dir + "/map.ser");
+
+  }
+
+  public static InvertedIndexByTokens loadIndex(String dir) {
+    try {
+      List<String> lines = IOUtils.linesFromFile(dir + "/param.txt");
+      boolean lc = Boolean.parseBoolean(lines.get(0));
+      boolean batchProcessSents = Boolean.parseBoolean(lines.get(1));
+      String filenameprefix = lines.get(2);
+      
+      if(filenameprefix.equals("null"))
+        filenameprefix = null;
+      
+      Set<String> stopwords = IOUtils.readObjectFromFile(dir + "/stopwords.ser");
+      Set<String> specialwords = IOUtils.readObjectFromFile(dir + "/specialwords.ser");
+      Map<String, Hashtable<String, Set<String>>> index = null;
+      // if (!filebacked)
+      index = IOUtils.readObjectFromFile(dir + "/map.ser");
+      // else
+      // index = new FileBackedCache<StringwithConsistentHashCode,
+      // Hashtable<String, Set<String>>>(dir + "/cache", numfilesindiskbacked);
+      return new InvertedIndexByTokens(index, lc, stopwords, specialwords, batchProcessSents, filenameprefix);
+    } catch (Exception e) {
+      throw new RuntimeException("Cannot load the inverted index. " + e);
+    }
+  }
 
   public int size() {
     return index.size();

@@ -65,24 +65,6 @@ public class LexicalizedParserClient {
   }
 
   /**
-   * Get the lemmas for the text according to the parser's lemmatizer
-   * (only applies to English), return it as whitespace tokenized text.
-   */
-  public String getLemmas(String query) 
-    throws IOException
-  {
-    Socket socket = new Socket(host, port);
-
-    Writer out = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
-    out.write("lemma " + query + "\n");
-    out.flush();
-
-    String result = readResult(socket);
-    socket.close();
-    return result;
-  }
-
-  /**
    * Returns the String output of the dependencies.
    * <br>
    * TODO: use some form of Mode enum (such as the one in SemanticGraphFactory) 

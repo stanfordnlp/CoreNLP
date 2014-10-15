@@ -1320,7 +1320,7 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer {
     "relabel badder PP-TMP\n" +
             '\n') +
 
-    // TODO: this suggests a postposing in the above sentence! Do as movement?
+    // TODO: this suggests a posposing in the above sentence! Do as movement?
     //    (ADVP-TMP
     //     (ADVP (RB as) (JJ long) (RB ago))
     //     (PP (IN as)

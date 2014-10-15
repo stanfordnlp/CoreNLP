@@ -279,7 +279,7 @@ public class SequenceMatchRules {
   public static Rule createRule(Env env, Expressions.CompositeValue cv) {
     Map<String, Object> attributes;
     cv = cv.simplifyNoTypeConversion(env);
-    attributes = new HashMap<String, Object>();//Generics.newHashMap();
+    attributes = Generics.newHashMap();
     for (String s:cv.getAttributes()) {
       attributes.put(s, cv.getExpression(s));
     }
@@ -307,7 +307,7 @@ public class SequenceMatchRules {
     }
     AnnotationExtractRuleCreator ruleCreator = lookupExtractRuleCreator(env, ruleType);
     if (ruleCreator != null) {
-      Map<String,Object> attributes = new HashMap<String, Object>();//Generics.newHashMap();
+      Map<String,Object> attributes = Generics.newHashMap();
       attributes.put("ruleType", ruleType);
       attributes.put("pattern", pattern);
       attributes.put("result", result);
@@ -325,7 +325,7 @@ public class SequenceMatchRules {
   public final static CompositeExtractRuleCreator COMPOSITE_EXTRACT_RULE_CREATOR = new CompositeExtractRuleCreator();
   public final static TextPatternExtractRuleCreator TEXT_PATTERN_EXTRACT_RULE_CREATOR = new TextPatternExtractRuleCreator();
   public final static AnnotationExtractRuleCreator DEFAULT_EXTRACT_RULE_CREATOR = TOKEN_PATTERN_EXTRACT_RULE_CREATOR;
-  final static Map<String, AnnotationExtractRuleCreator> registeredRuleTypes = new HashMap<String, AnnotationExtractRuleCreator>();//Generics.newHashMap();
+  final static Map<String, AnnotationExtractRuleCreator> registeredRuleTypes = Generics.newHashMap();
   static {
     registeredRuleTypes.put(TOKEN_PATTERN_RULE_TYPE, TOKEN_PATTERN_EXTRACT_RULE_CREATOR);
     registeredRuleTypes.put(COMPOSITE_RULE_TYPE, COMPOSITE_EXTRACT_RULE_CREATOR);
