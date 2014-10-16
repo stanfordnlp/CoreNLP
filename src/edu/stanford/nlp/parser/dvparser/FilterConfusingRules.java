@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.dvparser;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,7 +28,7 @@ import edu.stanford.nlp.util.TwoDimensionalSet;
  * most of this kind of tree is to make sure the parser is trained
  * with <code>-compactGrammar 0</code>.
  */
-public class FilterConfusingRules implements Predicate<Tree> {
+public class FilterConfusingRules implements Predicate<Tree>, Serializable {
   final Set<String> unaryRules = new HashSet<String>();
   final TwoDimensionalSet<String, String> binaryRules = new TwoDimensionalSet<String, String>();
   

@@ -1,6 +1,8 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.Label;
+
+import java.io.Serializable;
 import java.util.function.Predicate;
 
 
@@ -116,7 +118,7 @@ public class BobChrisTreeNormalizer extends TreeNormalizer implements TreeTransf
   private static final long serialVersionUID = -1005188028979810143L;
 
 
-  public static class EmptyFilter implements Predicate<Tree> {
+  public static class EmptyFilter implements Predicate<Tree>, Serializable {
 
     private static final long serialVersionUID = 8914098359495987617L;
 
@@ -133,7 +135,7 @@ public class BobChrisTreeNormalizer extends TreeNormalizer implements TreeTransf
   } // end class EmptyFilter
 
 
-  public static class AOverAFilter implements Predicate<Tree> {
+  public static class AOverAFilter implements Predicate<Tree>, Serializable {
 
     /** Doesn't accept nodes that are A over A nodes (perhaps due to
      *  empty removal or are EDITED nodes).

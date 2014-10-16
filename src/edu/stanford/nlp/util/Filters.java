@@ -33,7 +33,7 @@ public class Filters {
     return new CategoricalFilter<T>(false);
   }
 
-  private static final class CategoricalFilter<T> implements Predicate<T> {
+  private static final class CategoricalFilter<T> implements Predicate<T>, Serializable {
 
     private final boolean judgment;
 
@@ -151,7 +151,7 @@ public class Filters {
   /**
    * Conjunction or disjunction of two filters.
    */
-  private static class CombinedFilter<E> implements Predicate<E> {
+  private static class CombinedFilter<E> implements Predicate<E>, Serializable {
     private Predicate<E> f1, f2;
     private boolean conjunction; // and vs. or
 
@@ -175,7 +175,7 @@ public class Filters {
   /**
    * Disjunction of a list of filters.
    */
-  public static class DisjFilter<T> implements Predicate<T> {
+  public static class DisjFilter<T> implements Predicate<T>, Serializable {
     List<Predicate<T>> filters;
 
     public DisjFilter(List<Predicate<T>> filters) {
@@ -204,7 +204,7 @@ public class Filters {
   /**
    * Conjunction of a list of filters.
    */
-  public static class ConjFilter<T> implements Predicate<T> {
+  public static class ConjFilter<T> implements Predicate<T>, Serializable {
     List<Predicate<T>> filters;
 
     public ConjFilter(List<Predicate<T>> filters) {
@@ -247,7 +247,7 @@ public class Filters {
   /**
    * Negation of a filter.
    */
-  private static class NegatedFilter<E> implements Predicate<E> {
+  private static class NegatedFilter<E> implements Predicate<E>, Serializable {
     private Predicate<E> filter;
     private boolean negated;
 
@@ -275,7 +275,7 @@ public class Filters {
   /**
    * A filter that accepts a random fraction of the input it sees.
    */
-  public static class RandomFilter<E> implements Predicate<E> {
+  public static class RandomFilter<E> implements Predicate<E>, Serializable {
     final Random random;
     final double fraction;
 

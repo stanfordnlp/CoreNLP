@@ -1,5 +1,6 @@
 package edu.stanford.nlp.util;
 
+import java.io.Serializable;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -8,7 +9,7 @@ import java.util.regex.Pattern;
  *
  * @author John Bauer
  */
-public class RegexStringFilter implements Predicate<String> {
+public class RegexStringFilter implements Predicate<String>, Serializable {
   final Pattern pattern;
 
   public RegexStringFilter(String pattern) {

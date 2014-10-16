@@ -200,7 +200,7 @@ public class AnCoraProcessor {
    * Accepts any tree node to the left of the provided node (or the
    * provided node itself).
    */
-  private static class LeftOfFilter implements Predicate<Tree> {
+  private static class LeftOfFilter implements Predicate<Tree>, Serializable {
 
     private static final long serialVersionUID = -5146948439247427344L;
 
@@ -236,7 +236,7 @@ public class AnCoraProcessor {
   /**
    * Accepts any tree node to the right of the provided node.
    */
-  private static class RightOfExclusiveFilter implements Predicate<Tree> {
+  private static class RightOfExclusiveFilter implements Predicate<Tree>, Serializable {
 
     private static final long serialVersionUID = 8283161954004080591L;
 

@@ -104,7 +104,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     return extraTreeDepFilter;
   }
 
-  private static class ExtraTreeDepFilter implements Predicate<TypedDependency> {
+  private static class ExtraTreeDepFilter implements Predicate<TypedDependency>, Serializable {
     @Override
     public boolean test(TypedDependency d) {
       return d != null && d.reln() != RELATIVE;

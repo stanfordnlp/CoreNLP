@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.util.*;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -183,7 +184,7 @@ public class SequenceMatchRules {
    * Rule that specifies how to extract sequence of MatchedExpression from an annotation (CoreMap).
    * @param <T> Output type (MatchedExpression)
    */
-  public static class AnnotationExtractRule<S, T extends MatchedExpression> implements Rule, ExtractRule<S,T>, Predicate<T> {
+  public static class AnnotationExtractRule<S, T extends MatchedExpression> implements Rule, ExtractRule<S,T>, Predicate<T>, Serializable {
     /** Name of the rule */
     public String name;
     /** Stage in which this rule should be applied with respect to others */
@@ -561,7 +562,7 @@ public class SequenceMatchRules {
     }
   }
 
-  public static class AnnotationMatchedFilter implements Predicate<MatchedExpression> {
+  public static class AnnotationMatchedFilter implements Predicate<MatchedExpression>, Serializable {
 
     MatchedExpression.SingleAnnotationExtractor extractor;
 

@@ -1,5 +1,6 @@
 package edu.stanford.nlp.util;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,7 +16,7 @@ import java.util.function.Predicate;
  *
  * @author John Bauer
  */
-public class ArrayStringFilter implements Predicate<String> {
+public class ArrayStringFilter implements Predicate<String>, Serializable {
   private final String[] words;
   private final int length;
   private final Mode mode;

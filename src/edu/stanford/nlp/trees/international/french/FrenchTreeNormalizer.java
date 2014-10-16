@@ -1,5 +1,6 @@
 package edu.stanford.nlp.trees.international.french;
 
+import java.io.Serializable;
 import java.util.Collections;
 
 import edu.stanford.nlp.international.french.FrenchMorphoFeatureSpecification;
@@ -161,7 +162,7 @@ public class FrenchTreeNormalizer extends BobChrisTreeNormalizer {
     return tree;
   }
 
-  public static class FrenchAOverAFilter implements Predicate<Tree> {
+  public static class FrenchAOverAFilter implements Predicate<Tree>, Serializable {
 
     private static final long serialVersionUID = 793800623099852951L;
 

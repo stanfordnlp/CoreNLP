@@ -1,5 +1,6 @@
 package edu.stanford.nlp.trees.international.hebrew;
 
+import java.io.Serializable;
 import java.util.Collections;
 
 import edu.stanford.nlp.trees.BobChrisTreeNormalizer;
@@ -26,7 +27,7 @@ public class HebrewTreeNormalizer extends BobChrisTreeNormalizer {
   /**
    * Remove traces and pronoun deletion markers.
    */
-  public static class HebrewEmptyFilter implements Predicate<Tree> {
+  public static class HebrewEmptyFilter implements Predicate<Tree>, Serializable {
 
     private static final long serialVersionUID = -7256461296718287280L;
 

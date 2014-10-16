@@ -517,7 +517,7 @@ public abstract class GrammaticalStructure implements Serializable {
     }
   }
 
-  private static class NoPunctFilter implements Predicate<Dependency<Label, Label, Object>> {
+  private static class NoPunctFilter implements Predicate<Dependency<Label, Label, Object>>, Serializable {
     private Predicate<String> npf;
 
     NoPunctFilter(Predicate<String> f) {
@@ -541,7 +541,7 @@ public abstract class GrammaticalStructure implements Serializable {
   } // end static class NoPunctFilter
 
 
-  private static class NoPunctTypedDependencyFilter implements Predicate<TypedDependency> {
+  private static class NoPunctTypedDependencyFilter implements Predicate<TypedDependency>, Serializable {
     private Predicate<String> npf;
 
     NoPunctTypedDependencyFilter(Predicate<String> f) {

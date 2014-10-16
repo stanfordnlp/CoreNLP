@@ -1,5 +1,6 @@
 package edu.stanford.nlp.trees;
 
+import java.io.Serializable;
 import java.util.function.Predicate;
 
 /** 
@@ -8,7 +9,7 @@ import java.util.function.Predicate;
  *
  *  @author John Bauer
  */
-public class LengthTreeFilter implements Predicate<Tree> {
+public class LengthTreeFilter implements Predicate<Tree>, Serializable {
   private int length;
 
   public LengthTreeFilter(int length) {

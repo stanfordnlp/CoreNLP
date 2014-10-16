@@ -1,5 +1,6 @@
 package edu.stanford.nlp.trees;
 
+import java.io.Serializable;
 import java.util.regex.Pattern;
 import edu.stanford.nlp.ling.Label;
 import java.util.function.Predicate;
@@ -13,7 +14,7 @@ import java.util.function.Predicate;
  * @author John Bauer
  */
 public class TreeFilters {
-  public static class HasMatchingChild implements Predicate<Tree> {
+  public static class HasMatchingChild implements Predicate<Tree>, Serializable {
     TreebankLanguagePack tlp;
 
     Pattern pattern;

@@ -1,5 +1,6 @@
 package edu.stanford.nlp.trees;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -26,7 +27,7 @@ public class Dependencies {
   private Dependencies() {} // only static methods
 
 
-  public static class DependentPuncTagRejectFilter<G extends Label,D extends Label,N> implements Predicate<Dependency<G, D, N>> {
+  public static class DependentPuncTagRejectFilter<G extends Label,D extends Label,N> implements Predicate<Dependency<G, D, N>>, Serializable {
 
     private Predicate<String> tagRejectFilter;
 
@@ -56,7 +57,7 @@ public class Dependencies {
   } // end class DependentPuncTagRejectFilter
 
 
-  public static class DependentPuncWordRejectFilter<G extends Label,D extends Label,N> implements Predicate<Dependency<G, D, N>> {
+  public static class DependentPuncWordRejectFilter<G extends Label,D extends Label,N> implements Predicate<Dependency<G, D, N>>, Serializable {
 
     /**
      *

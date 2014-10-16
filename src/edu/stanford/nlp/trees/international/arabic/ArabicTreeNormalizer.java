@@ -1,5 +1,6 @@
 package edu.stanford.nlp.trees.international.arabic;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -231,7 +232,7 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer {
   /**
    * Remove traces and pronoun deletion markers.
    */
-  public static class ArabicEmptyFilter implements Predicate<Tree> {
+  public static class ArabicEmptyFilter implements Predicate<Tree>, Serializable {
 
     private static final long serialVersionUID = 7417844982953945964L;
 

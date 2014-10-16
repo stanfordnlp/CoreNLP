@@ -1,5 +1,6 @@
 package edu.stanford.nlp.trees.international.pennchinese;
 
+import java.io.Serializable;
 import java.util.regex.Pattern;
 import java.util.*;
 
@@ -104,7 +105,7 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
   }
 
 
-  private static class ChineseEmptyFilter implements Predicate<Tree> {
+  private static class ChineseEmptyFilter implements Predicate<Tree>, Serializable {
 
     private static final long serialVersionUID = 8914098359495987617L;
 

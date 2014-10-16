@@ -64,7 +64,7 @@ public class ArabicTreeReaderFactory implements TreeReaderFactory, Serializable 
   }
 
 
-  static class XFilter implements Predicate<Tree> {
+  static class XFilter implements Predicate<Tree>, Serializable {
 
     private static final long serialVersionUID = -4522060160716318895L;
 
