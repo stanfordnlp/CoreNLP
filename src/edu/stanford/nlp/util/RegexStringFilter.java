@@ -1,5 +1,6 @@
 package edu.stanford.nlp.util;
 
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
@@ -7,14 +8,14 @@ import java.util.regex.Pattern;
  *
  * @author John Bauer
  */
-public class RegexStringFilter implements Filter<String> {
+public class RegexStringFilter implements Predicate<String> {
   final Pattern pattern;
 
   public RegexStringFilter(String pattern) {
     this.pattern = Pattern.compile(pattern);
   }
 
-  public boolean accept(String text) {
+  public boolean test(String text) {
     return pattern.matcher(text).matches();
   }
 

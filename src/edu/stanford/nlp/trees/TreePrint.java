@@ -9,6 +9,7 @@ import edu.stanford.nlp.util.XMLUtils;
 import java.io.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 
 /**
@@ -66,8 +67,8 @@ public class TreePrint {
   private final HeadFinder hf;
   private final TreebankLanguagePack tlp;
   private final WordStemmer stemmer;
-  private final Filter<Dependency<Label, Label, Object>> dependencyFilter;
-  private final Filter<Dependency<Label, Label, Object>> dependencyWordFilter;
+  private final Predicate<Dependency<Label, Label, Object>> dependencyFilter;
+  private final Predicate<Dependency<Label, Label, Object>> dependencyWordFilter;
   private final GrammaticalStructureFactory gsf;
 
   /** Pool use of one WordNetConnection.  I don't really know if
@@ -154,7 +155,7 @@ public class TreePrint {
     boolean includePunctuationDependencies;
     includePunctuationDependencies = propertyToBoolean(this.options,
                                                        "includePunctuationDependencies");
-    Filter<String> puncWordFilter;
+    Predicate<String> puncWordFilter;
     if (includePunctuationDependencies) {
       dependencyFilter = Filters.acceptFilter();
       dependencyWordFilter = Filters.acceptFilter();
@@ -554,7 +555,7 @@ public class TreePrint {
 
         for (int i = 0; i < sortedDeps.size(); i++) {
           Dependency<Label, Label, Object> d = sortedDeps.get(i);
-          if (!dependencyFilter.accept(d)) {
+          if (!dependencyFilter.test(d)) {
             continue;
           }
           if (!(d.dependent() instanceof HasIndex) || !(d.governor() instanceof HasIndex)) {
@@ -679,7 +680,7 @@ public class TreePrint {
     pw.flush();
   }
 
-  private List<Dependency<Label, Label, Object>> getSortedDeps(Tree tree, Filter<Dependency<Label, Label, Object>> filter) {
+  private List<Dependency<Label, Label, Object>> getSortedDeps(Tree tree, Predicate<Dependency<Label, Label, Object>> filter) {
     if (gsf != null) {
       GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
       Collection<TypedDependency> deps = gs.typedDependencies(false);

@@ -3,6 +3,7 @@ package edu.stanford.nlp.util;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Filters Strings based on whether they exactly match any string in
@@ -14,7 +15,7 @@ import java.util.Set;
  *
  * @author John Bauer
  */
-public class ArrayStringFilter implements Filter<String> {
+public class ArrayStringFilter implements Predicate<String> {
   private final String[] words;
   private final int length;
   private final Mode mode;
@@ -34,7 +35,7 @@ public class ArrayStringFilter implements Filter<String> {
   }
 
   @Override
-  public boolean accept(String input) {
+  public boolean test(String input) {
     switch (mode) {
     case EXACT:
       for (int i = 0; i < length; ++i) {
