@@ -10,7 +10,7 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.trees.BobChrisTreeNormalizer;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 
 /**
  * Prepares French Treebank trees for parsing.
@@ -37,9 +37,9 @@ public class FrenchTreeNormalizer extends BobChrisTreeNormalizer {
 
     aOverAFilter = new FrenchAOverAFilter();
 
-    emptyFilter = new Filter<Tree>() {
+    emptyFilter = new Predicate<Tree>() {
       private static final long serialVersionUID = -22673346831392110L;
-      public boolean accept(Tree tree) {
+      public boolean test(Tree tree) {
         if(tree.isPreTerminal() && (tree.firstChild().value().equals("") || tree.firstChild().value().equals("-NONE-"))) {
           return false;
         }
@@ -161,7 +161,7 @@ public class FrenchTreeNormalizer extends BobChrisTreeNormalizer {
     return tree;
   }
 
-  public static class FrenchAOverAFilter implements Filter<Tree> {
+  public static class FrenchAOverAFilter implements Predicate<Tree> {
 
     private static final long serialVersionUID = 793800623099852951L;
 
@@ -170,7 +170,7 @@ public class FrenchTreeNormalizer extends BobChrisTreeNormalizer {
      *
      *  Also removes all w nodes.
      */
-    public boolean accept(Tree t) {
+    public boolean test(Tree t) {
       if(t.value() != null && t.value().equals("w"))
         return false;
 

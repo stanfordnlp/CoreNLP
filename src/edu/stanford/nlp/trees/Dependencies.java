@@ -12,10 +12,9 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.Generics;
 
 /** Utilities for Dependency objects.
@@ -27,16 +26,16 @@ public class Dependencies {
   private Dependencies() {} // only static methods
 
 
-  public static class DependentPuncTagRejectFilter<G extends Label,D extends Label,N> implements Filter<Dependency<G, D, N>> {
+  public static class DependentPuncTagRejectFilter<G extends Label,D extends Label,N> implements Predicate<Dependency<G, D, N>> {
 
-    private Filter<String> tagRejectFilter;
+    private Predicate<String> tagRejectFilter;
 
-    public DependentPuncTagRejectFilter(Filter<String> trf) {
+    public DependentPuncTagRejectFilter(Predicate<String> trf) {
       tagRejectFilter = trf;
     }
 
     @Override
-    public boolean accept(Dependency<G, D, N> d) {
+    public boolean test(Dependency<G, D, N> d) {
       /*
       System.err.println("DRF: Checking " + d + ": hasTag?: " +
                          (d.dependent() instanceof HasTag) + "; value: " +
@@ -49,7 +48,7 @@ public class Dependencies {
         return false;
       }
       String tag = ((HasTag) d.dependent()).tag();
-      return tagRejectFilter.accept(tag);
+      return tagRejectFilter.test(tag);
     }
 
     private static final long serialVersionUID = -7732189363171164852L;
@@ -57,23 +56,23 @@ public class Dependencies {
   } // end class DependentPuncTagRejectFilter
 
 
-  public static class DependentPuncWordRejectFilter<G extends Label,D extends Label,N> implements Filter<Dependency<G, D, N>> {
+  public static class DependentPuncWordRejectFilter<G extends Label,D extends Label,N> implements Predicate<Dependency<G, D, N>> {
 
     /**
      *
      */
     private static final long serialVersionUID = 1166489968248785287L;
-    private final Filter<String> wordRejectFilter;
+    private final Predicate<String> wordRejectFilter;
 
     /** @param wrf A filter that rejects punctuation words.
      */
-    public DependentPuncWordRejectFilter(Filter<String> wrf) {
+    public DependentPuncWordRejectFilter(Predicate<String> wrf) {
       // System.err.println("wrf is " + wrf);
       wordRejectFilter = wrf;
     }
 
     @Override
-    public boolean accept(Dependency<G, D, N> d) {
+    public boolean test(Dependency<G, D, N> d) {
       /*
       System.err.println("DRF: Checking " + d + ": hasWord?: " +
                          (d.dependent() instanceof HasWord) + "; value: " +
@@ -90,7 +89,7 @@ public class Dependencies {
         word = d.dependent().value();
       }
       // System.err.println("Dep: kid is " + ((MapLabel) d.dependent()).toString("value{map}"));
-      return wordRejectFilter.accept(word);
+      return wordRejectFilter.test(word);
     }
 
   } // end class DependentPuncWordRejectFilter

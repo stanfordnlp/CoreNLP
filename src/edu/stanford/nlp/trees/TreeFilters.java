@@ -2,7 +2,7 @@ package edu.stanford.nlp.trees;
 
 import java.util.regex.Pattern;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 
 /**
  * A location for general implementations of Filter&lt;Tree&gt;.  For
@@ -13,7 +13,7 @@ import edu.stanford.nlp.util.Filter;
  * @author John Bauer
  */
 public class TreeFilters {
-  public static class HasMatchingChild implements Filter<Tree> {
+  public static class HasMatchingChild implements Predicate<Tree> {
     TreebankLanguagePack tlp;
 
     Pattern pattern;
@@ -23,7 +23,7 @@ public class TreeFilters {
       this.tlp = tlp;
     }
 
-    public boolean accept(Tree tree) {
+    public boolean test(Tree tree) {
       if (tree == null) {
         return false;
       }

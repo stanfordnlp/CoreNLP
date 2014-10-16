@@ -10,7 +10,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 
 
 /** Reads ArabicTreebank trees.  See {@link ArabicTreeNormalizer} for the
@@ -64,13 +64,13 @@ public class ArabicTreeReaderFactory implements TreeReaderFactory, Serializable 
   }
 
 
-  static class XFilter implements Filter<Tree> {
+  static class XFilter implements Predicate<Tree> {
 
     private static final long serialVersionUID = -4522060160716318895L;
 
     public XFilter() {}
 
-    public boolean accept(Tree t) {
+    public boolean test(Tree t) {
       return ! (t.numChildren() == 1 && "X".equals(t.firstChild().value()));
     }
 

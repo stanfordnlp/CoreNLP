@@ -10,7 +10,7 @@ import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.lexparser.UnaryGrammar;
 import edu.stanford.nlp.parser.lexparser.UnaryRule;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.TwoDimensionalSet;
@@ -27,7 +27,7 @@ import edu.stanford.nlp.util.TwoDimensionalSet;
  * most of this kind of tree is to make sure the parser is trained
  * with <code>-compactGrammar 0</code>.
  */
-public class FilterConfusingRules implements Filter<Tree> {
+public class FilterConfusingRules implements Predicate<Tree> {
   final Set<String> unaryRules = new HashSet<String>();
   final TwoDimensionalSet<String, String> binaryRules = new TwoDimensionalSet<String, String>();
   
@@ -74,7 +74,7 @@ public class FilterConfusingRules implements Filter<Tree> {
     }
   }
 
-  public boolean accept(Tree tree) {
+  public boolean test(Tree tree) {
     if (tree.isLeaf() || tree.isPreTerminal()) {
       return true;
     }
@@ -97,7 +97,7 @@ public class FilterConfusingRules implements Filter<Tree> {
       }
     }
     for (Tree child : tree.children()) {
-      if (!accept(child)) {
+      if (!test(child)) {
         return false;
       }
     }
