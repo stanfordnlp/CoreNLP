@@ -83,8 +83,19 @@ public class KBestSequenceFinderTest extends TestCase {
         System.err.println((i+1) + " best sequence: " + strSequence + "; score: " + score);
         System.err.println("    vs. correct: " + test2nrAnswers[i]);
       }
-      assertEquals("Best sequence is wrong. Correct: " + Arrays.toString(tsm.correctAnswers()) +
-                    ", found: " + test2nrAnswers[i], test2nrAnswers[i], strSequence);
+      // Deal with ties in the scoring ... only tied pairs handled.
+      boolean found = false;
+      if (strSequence.equals(test2nrAnswers[i])) {
+        found = true;
+      } else if (i > 0 && Math.abs(score - test2nrScores[i-1]) < 1e-8 &&
+              strSequence.equals(test2nrAnswers[i-1])) {
+        found = true;
+      } else if (i+1 < test2nrScores.length && Math.abs(score - test2nrScores[i+1]) < 1e-8 &&
+              strSequence.equals(test2nrAnswers[i+1])) {
+        found = true;
+      }
+      assertTrue("Best sequence is wrong. Correct: " + test2nrAnswers[i] +
+                    ", found: " + strSequence, found);
       assertEquals("Best sequence score is wrong.", test2nrScores[i], score, 1e-8);
     }
   }
