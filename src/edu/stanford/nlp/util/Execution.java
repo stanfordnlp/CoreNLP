@@ -342,6 +342,13 @@ public class Execution {
       for (int i = 0; i < classes.length; ++i) {
         assert instances[i].getClass() == classes[i];
         class2object.put(classes[i], instances[i]);
+        Class<?> mySuper = instances[i].getClass().getSuperclass();
+        while (mySuper != null && !mySuper.equals(Object.class)) {
+          if (!class2object.containsKey(mySuper)) {
+            class2object.put(mySuper, instances[i]);
+          }
+          mySuper = mySuper.getSuperclass();
+        }
       }
     }
 
