@@ -359,7 +359,7 @@ public class Execution {
     for (Class c : classes) {
       Field[] fields;
       try {
-        fields = c.getDeclaredFields();
+        fields = c.getFields();
       } catch (Throwable e) {
         debug("Could not check fields for class: " + c.getName() + "  (caused by " + e.getClass() + ": " + e.getMessage() + ")");
         continue;
