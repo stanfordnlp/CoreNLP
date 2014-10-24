@@ -75,9 +75,11 @@ public class ApplyPatterns    implements  Callable<Pair<TwoDimensionalCounter<Pa
             CoreLabel l = sent.get(i);
             l.set(PatternsAnnotations.MatchedPattern.class, true);
 
-            if(!l.containsKey(PatternsAnnotations.MatchedPatterns.class))
+            if(!l.containsKey(PatternsAnnotations.MatchedPatterns.class) || l.get(PatternsAnnotations.MatchedPatterns.class) == null)
               l.set(PatternsAnnotations.MatchedPatterns.class, new HashSet<SurfacePattern>());
-            l.get(PatternsAnnotations.MatchedPatterns.class).add(constVars.getPatternIndex().get(pEn.getValue()));
+            SurfacePattern pSur = constVars.getPatternIndex().get(pEn.getValue());
+            assert pSur != null : "Why is " + pEn.getValue() + " not present in the index?!";
+            l.get(PatternsAnnotations.MatchedPatterns.class).add(pSur);
 
             for (Entry<Class, Object> ig : constVars.getIgnoreWordswithClassesDuringSelection()
                 .get(label).entrySet()) {
