@@ -107,7 +107,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   public ShiftReduceParser(ShiftReduceOptions op) {
     this.transitionIndex = new HashIndex<Transition>();
     this.op = op;
-    this.model = new PerceptronModel(this.op, this.transitionIndex);
+    this.model = new PerceptronModel(this.op, this.transitionIndex, this.knownStates, this.rootStates, this.rootOnlyStates);
   }
 
   public ShiftReduceParser(ShiftReduceParser other, PerceptronModel model) {
@@ -218,75 +218,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       evals.add(new TreeRecorder(TreeRecorder.Mode.DEBINARIZED, op.testOptions().recordDebinarized));
     }
     return evals;
-  }
-
-  /**
-   * Returns a transition which might not even be part of the model,
-   * but will hopefully allow progress in an otherwise stuck parse
-   *
-   * TODO: perhaps we want to create an EmergencyTransition class
-   * which indicates that something has gone wrong
-   */
-  public Transition findEmergencyTransition(State state, List<ParserConstraint> constraints) {
-    if (state.stack.size() == 0) {
-      return null;
-    }
-
-    // See if there is a constraint whose boundaries match the end
-    // points of the top node on the stack.  If so, we can apply a
-    // UnaryTransition / CompoundUnaryTransition if that would solve
-    // the constraint
-    if (constraints != null) {
-      final Tree top = state.stack.peek();
-      for (ParserConstraint constraint : constraints) {
-        if (ShiftReduceUtils.leftIndex(top) != constraint.start || ShiftReduceUtils.rightIndex(top) != constraint.end - 1) {
-          continue;
-        }
-        if (ShiftReduceUtils.constraintMatchesTreeTop(top, constraint)) {
-          continue;
-        }
-        // found an unmatched constraint that can be fixed with a unary transition
-        // now we need to find a matching state for the transition
-        for (String label : knownStates) {
-          if (constraint.state.matcher(label).matches()) {
-            return ((op.compoundUnaries) ?
-                    new CompoundUnaryTransition(Collections.singletonList(label), false) :
-                    new UnaryTransition(label, false));
-          }
-        }
-      }
-    }
-
-    if (ShiftReduceUtils.isTemporary(state.stack.peek()) &&
-        (state.stack.size() == 1 || ShiftReduceUtils.isTemporary(state.stack.pop().peek()))) {
-      return ((op.compoundUnaries) ?
-              new CompoundUnaryTransition(Collections.singletonList(state.stack.peek().value().substring(1)), false) :
-              new UnaryTransition(state.stack.peek().value().substring(1), false));
-    }
-
-    if (state.stack.size() == 1 && state.tokenPosition >= state.sentence.size()) {
-      // either need to finalize or transition to a root state
-      if (!rootStates.contains(state.stack.peek().value())) {
-        String root = rootStates.iterator().next();
-        return ((op.compoundUnaries) ?
-                new CompoundUnaryTransition(Collections.singletonList(root), false) :
-                new UnaryTransition(root, false));
-      }
-    }
-
-    if (state.stack.size() == 1) {
-      return null;
-    }
-
-    if (ShiftReduceUtils.isTemporary(state.stack.peek())) {
-      return new BinaryTransition(state.stack.peek().value().substring(1), BinaryTransition.Side.RIGHT);
-    }
-
-    if (ShiftReduceUtils.isTemporary(state.stack.pop().peek())) {
-      return new BinaryTransition(state.stack.pop().peek().value().substring(1), BinaryTransition.Side.LEFT);
-    }
-
-    return null;
   }
 
   public static State initialStateFromGoldTagTree(Tree tree) {
@@ -950,7 +881,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       trainModel(tempName, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, null);
       saveModel(tempName);
       Set<String> features = model.featureWeights.keySet();
-      this.model = new PerceptronModel(this.op, this.transitionIndex);
+      this.model = new PerceptronModel(this.op, this.transitionIndex, this.knownStates, this.rootStates, this.rootOnlyStates);
       trainModel(serializedPath, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, features);
     } else {
       trainModel(serializedPath, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, null);
