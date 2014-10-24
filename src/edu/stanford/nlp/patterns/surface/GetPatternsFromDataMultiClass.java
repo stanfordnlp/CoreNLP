@@ -1252,7 +1252,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     }
 
     if (alreadyIdentifiedPatterns != null && !alreadyIdentifiedPatterns.isEmpty()) {
-      Counters.removeKeys(currentPatternWeights4Label, alreadyIdentifiedPatterns);
+      Redwood.log(ConstantsAndVariables.extremedebug, "Patterns size is " + currentPatternWeights4Label.size());
+        Counters.removeKeys(currentPatternWeights4Label, alreadyIdentifiedPatterns);
       Redwood.log(ConstantsAndVariables.extremedebug, "Removing already identified patterns of size  " + alreadyIdentifiedPatterns.size()
           + ". New patterns size " + currentPatternWeights4Label.size());
     }
@@ -2022,9 +2023,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     Counter<String> identifiedWords = new ClassicCounter<String>();
     Counter<Integer> patterns = new ClassicCounter<Integer>();
     for (int i = 0; i < numIter; i++) {
-
-      patterns.addAll(getPatterns(label, learnedPatterns.get(label).keySet(), p0, p0Set, ignorePatterns));
-      learnedPatterns.get(label).addAll(patterns);
+      Counter<Integer> patternThisIter = getPatterns(label, learnedPatterns.get(label).keySet(), p0, p0Set, ignorePatterns);
+      patterns.addAll(patternThisIter);
+      learnedPatterns.get(label).addAll(patternThisIter);
 
       if (sentsOutFile != null)
         sentsOutFile = sentsOutFile + "_" + i + "iter.ser";
@@ -2072,7 +2073,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
     }
     if (patternsOut != null)
-      this.writePatternsToFile(learnedPatterns.get(label), patternsOut);
+      this.writePatternsToFile(patterns, patternsOut);
 
     return new Pair<Counter<Integer>, Counter<String>>(patterns, identifiedWords);
   }

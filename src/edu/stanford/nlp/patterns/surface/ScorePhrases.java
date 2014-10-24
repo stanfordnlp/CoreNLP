@@ -66,6 +66,7 @@ public class ScorePhrases {
       TwoDimensionalCounter<String, Integer> terms,
       Counter<String> useThresholdNumPatternsForTheseWords,
       Set<String> ignoreWords, double thresholdWordExtract) {
+
     Iterator<String> termIter = Counters.toPriorityQueue(newdt).iterator();
     Counter<String> finalwords = new ClassicCounter<String>();
 
@@ -614,6 +615,7 @@ public class ScorePhrases {
       }
       else
         ignoreWordsAll = constVars.getOtherSemanticClassesWords();
+      ignoreWordsAll.addAll(constVars.getLabelDictionary().get(label));
       Counter<String> finalwords = chooseTopWords(phraseScores, terms,
           phraseScores, ignoreWordsAll, constVars.thresholdWordExtract);
       // for (String w : finalwords.keySet()) {
