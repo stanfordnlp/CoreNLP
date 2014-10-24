@@ -202,7 +202,7 @@ public class ScorePhrases {
 
 
     //Apply the patterns and extract candidate phrases
-    int num = 0;
+    int num;
     int numThreads = constVars.numThreads;
 
     //If number of sentences is less, do not create so many threads

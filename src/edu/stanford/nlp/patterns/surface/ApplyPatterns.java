@@ -79,6 +79,7 @@ public class ApplyPatterns    implements  Callable<Pair<TwoDimensionalCounter<Pa
               l.set(PatternsAnnotations.MatchedPatterns.class, new HashSet<SurfacePattern>());
             SurfacePattern pSur = constVars.getPatternIndex().get(pEn.getValue());
             assert pSur != null : "Why is " + pEn.getValue() + " not present in the index?!";
+            assert l.get(PatternsAnnotations.MatchedPatterns.class) != null : "How come MatchedPatterns class is null for the token. The classes in the key set are " + l.keySet();
             l.get(PatternsAnnotations.MatchedPatterns.class).add(pSur);
 
             for (Entry<Class, Object> ig : constVars.getIgnoreWordswithClassesDuringSelection()
