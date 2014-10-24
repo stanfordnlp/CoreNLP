@@ -1053,8 +1053,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         for (CoreLabel l : sent) {
           i++;
 
-          if (!l.containsKey(PatternsAnnotations.MatchedPhrases.class))
+          //The second clause is for old sents ser files compatibility reason
+          if (!l.containsKey(PatternsAnnotations.MatchedPhrases.class) || !(l.get(PatternsAnnotations.MatchedPhrases.class).getClass().isAssignableFrom(PatternsAnnotations.MatchedPhrases.class)))
             l.set(PatternsAnnotations.MatchedPhrases.class, new CollectionValuedMap<String, String>());
+
           if(!l.containsKey(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class))
             l.set(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class, new HashMap<String, String>());
 
