@@ -627,7 +627,7 @@ public class ScorePhrases {
 
       Redwood.log(
           ConstantsAndVariables.minimaldebug,
-          "## Selected Words: "
+          "\n\n## Selected Words fpr " + label + " : "
               + Counters.toSortedString(finalwords, finalwords.size(),
                   "%1$s:%2$.2f", "\t"));
 

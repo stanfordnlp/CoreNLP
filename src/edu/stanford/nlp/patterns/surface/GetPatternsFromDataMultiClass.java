@@ -1391,7 +1391,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     this.removeLearnedPatterns(label, removePatterns);
 
     Redwood.log(Redwood.DBG, "final size of the patterns is " + chosenPat.size());
-    Redwood.log(ConstantsAndVariables.minimaldebug, "## Selected Patterns ## \n");
+    Redwood.log(ConstantsAndVariables.minimaldebug, "\n\n## Selected Patterns for " + label + "##\n");
     List<Pair<Integer, Double>> chosenPatSorted = Counters.toSortedListWithCounts(chosenPat);
     for (Pair<Integer, Double> en : chosenPatSorted)
       Redwood.log(ConstantsAndVariables.minimaldebug, constVars.getPatternIndex().get(en.first()).toString() + ":" + df.format(en.second) + "\n");
