@@ -1,9 +1,13 @@
 package edu.stanford.nlp.patterns.surface;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CollectionValuedMap;
@@ -26,10 +30,18 @@ public class InvertedIndexByTokens extends SentenceIndex implements Serializable
   Map<String, Set<String>> index;
 
   public InvertedIndexByTokens(Properties props, Set<String> stopWords, Function<CoreLabel, Map<String, String>> transformSentenceToString) {
-    super(props, stopWords, transformSentenceToString);
+    super(stopWords, transformSentenceToString);
     Execution.fillOptions(this, props);
     index = new HashMap<String, Set<String>>();
   }
+
+  public InvertedIndexByTokens(Properties props, Set<String> stopWords, Function<CoreLabel, Map<String, String>> transformSentenceToString, Map<String, Set<String>> index) {
+    super(stopWords, transformSentenceToString);
+    Execution.fillOptions(this, props);
+    this.index = index;
+  }
+
+
 
 
   @Override
@@ -128,50 +140,28 @@ public class InvertedIndexByTokens extends SentenceIndex implements Serializable
   @Override
   public Map<Integer, Set<String>> queryIndex(Collection<Integer> patterns, ConcurrentHashIndex<SurfacePattern> patternIndex) {
     Map<Integer, Set<String>> sentSentids = getFileSentIdsFromPats(patterns, patternIndex);
-//    Map<Integer, Map<String, List<CoreLabel>>> sents = new HashMap<Integer, Map<String, List<CoreLabel>>>();
-//    for(Map.Entry<Integer, Set<String>> en: sentSentids.entrySet()){
-//      sents.put(en.getKey(), getSentences(en.getValue()));
-//    }
     return sentSentids;
   }
 
+  @Override
+  public void saveIndex(String dir){
+    try {
+      IOUtils.writeObjectToFile(index, dir + "/map.ser");
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-//  public void saveIndex(String dir) throws IOException {
-//    BufferedWriter w = new BufferedWriter(new FileWriter(dir + "/param.txt"));
-//    w.write(String.valueOf(convertToLowercase) + "\n");
-//    w.write(String.valueOf(this.batchProcessSents) + "\n");
-//    w.write(this.filenamePrefix+"\n");
-//    w.close();
-//    IOUtils.writeObjectToFile(this.stopWords, dir + "/stopwords.ser");
-//    IOUtils.writeObjectToFile(this.specialWords, dir + "/specialwords.ser");
-//    // if (!filebacked)
-//    IOUtils.writeObjectToFile(index, dir + "/map.ser");
-//
-//  }
-//
-//  public static InvertedIndexByTokens loadIndex(String dir) {
-//    try {
-//      List<String> lines = IOUtils.linesFromFile(dir + "/param.txt");
-//      boolean lc = Boolean.parseBoolean(lines.get(0));
-//      boolean batchProcessSents = Boolean.parseBoolean(lines.get(1));
-//      String filenameprefix = lines.get(2);
-//
-//      if(filenameprefix.equals("null"))
-//        filenameprefix = null;
-//
-//      Set<String> stopwords = IOUtils.readObjectFromFile(dir + "/stopwords.ser");
-//      Set<String> specialwords = IOUtils.readObjectFromFile(dir + "/specialwords.ser");
-//      Map<String, Hashtable<String, Set<String>>> index = null;
-//      // if (!filebacked)
-//      index = IOUtils.readObjectFromFile(dir + "/map.ser");
-//      // else
-//      // index = new FileBackedCache<StringwithConsistentHashCode,
-//      // Hashtable<String, Set<String>>>(dir + "/cache", numfilesindiskbacked);
-//      return new InvertedIndexByTokens(index, lc, stopwords, specialwords, batchProcessSents, filenameprefix);
-//    } catch (Exception e) {
-//      throw new RuntimeException("Cannot load the inverted index. " + e);
-//    }
-//  }
+  //called by SentenceIndex.loadIndex
+  public static InvertedIndexByTokens loadIndex(Properties props, Set<String> stopwords, String dir,  Function<CoreLabel, Map<String, String>> transformSentenceToString) {
+    try {
+      Map<String, Set<String>>  index = IOUtils.readObjectFromFile(dir + "/map.ser");
+      System.out.println("Loading inverted index from " + dir);
+      return new InvertedIndexByTokens(props, stopwords, transformSentenceToString, index);
+    } catch (Exception e) {
+      throw new RuntimeException("Cannot load the inverted index. " + e);
+    }
+  }
 
 
 }

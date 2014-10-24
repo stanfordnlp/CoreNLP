@@ -21,27 +21,12 @@ public abstract class SentenceIndex {
   //TODO: implement this
   int numAllSentences = 0;
 
-  @Option(name="batchProcessSents")
-  //Only for in memory non-lucene index
-  boolean batchProcessSents = false;
-
-//  @Option(name="matchLowerCaseContext")
-//  boolean matchLowerCaseContext = false;
-//
-//  //TODO: implement this
-//  @Option(name="useLemmaContextTokens")
-//  boolean useLemmaContextTokens = false;
-Function<CoreLabel, Map<String, String>>  transformCoreLabeltoString;
+  Function<CoreLabel, Map<String, String>>  transformCoreLabeltoString;
 
 
-  public SentenceIndex(Properties props, Set<String> stopWords, Function<CoreLabel, Map<String, String>>  transformCoreLabeltoString) {
+  public SentenceIndex(Set<String> stopWords, Function<CoreLabel, Map<String, String>>  transformCoreLabeltoString) {
     this.stopWords = stopWords;
     this.transformCoreLabeltoString = transformCoreLabeltoString;
-  }
-
-
-  public boolean isBatchProcessed(){
-    return this.batchProcessSents;
   }
 
   public int size() {
@@ -139,4 +124,21 @@ Function<CoreLabel, Map<String, String>>  transformCoreLabeltoString;
   public abstract void finishUpdating();
 
   public abstract void update(List<CoreLabel> value, String key);
+
+  public abstract void saveIndex(String dir);
+
+  public static SentenceIndex loadIndex(Class<? extends SentenceIndex> indexClass, Properties props, Set<String> stopWords, String indexDirectory, Function<CoreLabel, Map<String, String>> transformCoreLabeltoString){
+    try{
+      Execution.fillOptions(SentenceIndex.class, props);
+      Method m = indexClass.getMethod("loadIndex", Properties.class, Set.class, String.class, Function.class);
+      SentenceIndex index = (SentenceIndex) m.invoke(null, new Object[]{props, stopWords, indexDirectory, transformCoreLabeltoString});
+      return index;
+    }catch(NoSuchMethodException e){
+      throw new RuntimeException(e);
+    } catch (InvocationTargetException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

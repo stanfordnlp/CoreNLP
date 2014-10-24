@@ -446,6 +446,9 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name="invertedIndexClass", gloss="another option is Lucene backed, which is not included in the CoreNLP release. Contact us to get a copy (distributed under Apache License).")
   public Class<? extends SentenceIndex> invertedIndexClass = edu.stanford.nlp.patterns.surface.InvertedIndexByTokens.class;
 
+  /**
+   * Where the inverted index (either in memory or lucene) is stored
+   */
   @Option(name="invertedIndexDirectory")
   public String invertedIndexDirectory;
 
@@ -582,27 +585,19 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name = "doNotExtractPhraseAnyWordLabeledOtherClass")
   public boolean doNotExtractPhraseAnyWordLabeledOtherClass = true;
 
-  @Option(name="useLuceneIndexing")
-  public boolean useLuceneIndexing = false;
+  /**
+   * You can save the inverted index. Lucene index is saved by default to <code>invertedIndexDirectory</code> if given.
+   */
+  @Option(name="saveInvertedIndex")
+  public boolean saveInvertedIndex  = false;
 
-  // /**
-  // * Use FileBackedCache for the inverted index -- use if memory is limited
-  // */
-  // @Option(name="diskBackedInvertedIndex")
-  // public boolean diskBackedInvertedIndex = false;
+  /**
+   * You can load the inverted index using this file.
+   * If false and using lucene index, the existing directory is deleted and new index is made.
+   */
+  @Option(name="loadInvertedIndex")
+  public boolean loadInvertedIndex  = false;
 
-//  /**
-//   * You can save the inverted index to this file
-//   */
-//  @Option(name="saveInvertedIndexDir")
-//  public String saveInvertedIndexDir  = null;
-//
-//  /**
-//   * You can load the inv index using this file
-//   */
-//  @Option(name="loadInvertedIndexDir")
-//  public String loadInvertedIndexDir  = null;
-//
 //  /**
 //   * Directory where to save the sentences ser files.
 //   */

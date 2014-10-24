@@ -295,15 +295,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           "writeMatchedTokensFiles and batchProcessSents cannot be true at the same time (not implemented; also doesn't make sense to save a large sentences json file)");
     }
 
-    if(constVars.batchProcessSents && constVars.useLuceneIndexing){
-      throw new RuntimeException(
-        "useLuceneIndexing and batchProcessSents cannot be true at the same time (not implemented; also doesn't make sense.)");
-    }
-
     //constVars.setUp(props);
     if (constVars.debug < 1) {
       Redwood.hideChannelsEverywhere(ConstantsAndVariables.minimaldebug);
     }
+
     if (constVars.debug < 2) {
       Redwood.hideChannelsEverywhere(Redwood.DBG);
     }
@@ -396,7 +392,13 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
     };
 
-    constVars.invertedIndex = SentenceIndex.createIndex(constVars.invertedIndexClass, null, props, extremelySmallStopWordsList, constVars.invertedIndexDirectory, transformCoreLabelToString);
+    boolean createIndex = false;
+    if(constVars.loadInvertedIndex)
+      constVars.invertedIndex = SentenceIndex.loadIndex(constVars.invertedIndexClass, props, extremelySmallStopWordsList, constVars.invertedIndexDirectory, transformCoreLabelToString);
+    else {
+      constVars.invertedIndex = SentenceIndex.createIndex(constVars.invertedIndexClass, null, props, extremelySmallStopWordsList, constVars.invertedIndexDirectory, transformCoreLabelToString);
+      createIndex = true;
+    }
 
     int totalNumSents = 0;
 
@@ -407,7 +409,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     }
 
     if (constVars.batchProcessSents) {
-      if (labelUsingSeedSets || computeDataFreq) {
+      if (labelUsingSeedSets || computeDataFreq || createIndex) {
 
         for (File f : Data.sentsFiles) {
 
@@ -506,7 +508,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         removeOverLappingLabels(Data.sents);
       }
 
-      constVars.invertedIndex.add(Data.sents, true);
+      if(createIndex)
+        constVars.invertedIndex.add(Data.sents, true);
 
     }
 
@@ -752,9 +755,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       IOUtils.writeObjectToFile(sents, file);
       Data.sentsFiles.add(file);
 
-      for(String sentid: sents.keySet())
-         Data.sentId2File.put(sentid, file);
-
+      for(String sentid: sents.keySet()) {
+        assert !Data.sentId2File.containsKey(sentid) : "Data.sentId2File already contains " + sentid + ". Make sure sentIds are unique!";
+        Data.sentId2File.put(sentid, file);
+      }
       sents.clear();
     }
     // not lugging around sents if batch processing
@@ -2709,7 +2713,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
           Iterator<String> reader = IOUtils.readLines(f).iterator();
           while(reader.hasNext()){
-            numFilesTillNow = tokenize(reader, posModelPath, lowercase, useTargetNERRestriction || useContextNERRestriction, f.getName() + "-",
+            numFilesTillNow = tokenize(reader, posModelPath, lowercase, useTargetNERRestriction || useContextNERRestriction, f.getName() + "-" + numFilesTillNow+"-",
               useTargetParserParentRestriction, props.getProperty("numThreads"), batchProcessSents, numMaxSentencesPerBatchFile,
               saveSentencesSerDir == null? tempSaveSentencesDir : saveSentencesSerDir, sentsthis, numFilesTillNow);
           }
@@ -2938,6 +2942,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         System.err.println("No eval sentences or list of gold entities provided to evaluate! Make sure evalFileWithGoldLabels or goldEntitiesEvalFiles is set, or turn off the evaluate flag");
 
     }
+
+    if(model.constVars.saveInvertedIndex){
+      model.constVars.invertedIndex.saveIndex(model.constVars.invertedIndexDirectory);
+    }
+
     return model;
   }
 

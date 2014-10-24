@@ -51,7 +51,7 @@ public class PatternsForEachToken {
     if (useDBForTokenPatterns) {
       Execution.fillOptions(SQLConnection.class, props);
 
-      assert tableName != null;
+      assert tableName != null : "tableName property is null!";
       tableName = tableName.toLowerCase();
       if (createTable && !deleteExisting)
         throw new RuntimeException("Cannot have createTable as true and deleteExisting as false!");
