@@ -442,6 +442,12 @@ public class ConstantsAndVariables implements Serializable{
   public Map<String, Counter<Integer>> distSimWeights = new HashMap<String, Counter<Integer>>();
   public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
 
+  @Option(name="invertedIndexClass", gloss="another option is Lucene backed, which is not included in the CoreNLP release. Contact us to get a copy (distributed under Apache License).")
+  public Class<? extends SentenceIndex> invertedIndexClass = edu.stanford.nlp.patterns.surface.InvertedIndexByTokens.class;
+
+  @Option(name="invertedIndexDirectory")
+  public String invertedIndexDirectory;
+
   public ConcurrentHashIndex<SurfacePattern> getPatternIndex() {
     return patternIndex;
   }
@@ -575,6 +581,9 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name = "doNotExtractPhraseAnyWordLabeledOtherClass")
   public boolean doNotExtractPhraseAnyWordLabeledOtherClass = true;
 
+  @Option(name="useLuceneIndexing")
+  public boolean useLuceneIndexing = false;
+
   // /**
   // * Use FileBackedCache for the inverted index -- use if memory is limited
   // */
@@ -609,7 +618,7 @@ public class ConstantsAndVariables implements Serializable{
   int wordShaper = WordShapeClassifier.WORDSHAPECHRIS2;
   private Map<String, String> wordShapeCache = new HashMap<String, String>();
 
-  public InvertedIndexByTokens invertedIndex;
+  public SentenceIndex invertedIndex;
 
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";

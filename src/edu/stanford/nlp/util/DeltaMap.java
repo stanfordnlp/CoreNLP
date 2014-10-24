@@ -1,7 +1,6 @@
 package edu.stanford.nlp.util;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 /**
  * A Map which wraps an original Map, and only stores the changes (deltas) from
@@ -198,11 +197,11 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
     return new AbstractSet<Map.Entry<K,V>>() {
       @Override
       public Iterator<Map.Entry<K,V>> iterator() {
-        Predicate<Entry<K,V>> filter1 = new Predicate<Entry<K,V>>() {
+        Filter<Map.Entry<K,V>> filter1 = new Filter<Map.Entry<K,V>>() {
           private static final long serialVersionUID = 1L;
 
           // only accepts stuff not overwritten by deltaMap
-          public boolean test(Map.Entry<K, V> e) {
+          public boolean accept(Map.Entry<K,V> e) {
             K key = e.getKey();
             return ! deltaMap.containsKey(key);
           }
@@ -210,10 +209,10 @@ public class DeltaMap<K,V> extends AbstractMap<K,V> {
 
         Iterator<Map.Entry<K, V>> iter1 = new FilteredIterator<Map.Entry<K, V>>(originalMap.entrySet().iterator(), filter1);
 
-        Predicate<Entry<K,V>> filter2 = new Predicate<Entry<K,V>>() {
+        Filter<Map.Entry<K,V>> filter2 = new Filter<Map.Entry<K,V>>() {
           private static final long serialVersionUID = 1L;
           // only accepts stuff not overwritten by deltaMap
-          public boolean test(Map.Entry<K, V> e) {
+          public boolean accept(Map.Entry<K,V> e) {
             Object value = e.getValue();
             if (value == removedValue) {
               return false;
