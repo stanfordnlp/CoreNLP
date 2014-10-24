@@ -403,8 +403,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     }
 
     if (constVars.batchProcessSents) {
-      if (labelUsingSeedSets || computeDataFreq || createIndex) {
-
         for (File f : Data.sentsFiles) {
 
           if(!f.exists())
@@ -413,6 +411,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           Redwood.log(Redwood.DBG, "Reading file from " + f.getAbsolutePath());
 
           Map<String, List<CoreLabel>> sentsf = IOUtils.readObjectFromFile(f);
+
+          for(Entry<String, List<CoreLabel>> en: sentsf.entrySet()){
+            Data.sentId2File.put(en.getKey(), f);
+          }
 
           totalNumSents += sentsf.size();
 
@@ -459,7 +461,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           Redwood.log(Redwood.DBG, "Saving the labeled seed sents (if given the option) to the same file " + f);
           IOUtils.writeObjectToFile(sentsf, f);
         }
-      }
+
     } else {
 
       //not batch processing sentences
@@ -2554,7 +2556,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         String path = ".*";
         File dir = filef;
         for (File f : IOUtils.iterFilesRecursive(dir, Pattern.compile(path))) {
-          Redwood.log(ConstantsAndVariables.extremedebug, "Will reading from file " + f);
+          Redwood.log(ConstantsAndVariables.extremedebug, "Will read from file " + f);
           allFiles.add(f);
         }
       } else {
@@ -2754,22 +2756,26 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           if (!batchProcessSents)
             sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
           else{
-            Map<String, List<CoreLabel>> sentsFromFile = IOUtils.readObjectFromFile(f);
-            Map<String, List<CoreLabel>> splitSents = new HashMap<String, List<CoreLabel>>();
-            int num =0 ;
-            int numFile = -1;
-            for(Entry<String, List<CoreLabel>> en: sentsFromFile.entrySet()){
-              num++;
-              splitSents.put(en.getKey(), en.getValue());
-              if(num >= numMaxSentencesPerBatchFile){
-                numFile++;
-                File newf = new File(tempSaveSentencesDir.getAbsolutePath() + "/" + f.getAbsolutePath().replaceAll(Pattern.quote("/"), "_") +"_"+numFile);
-                IOUtils.writeObjectToFile(splitSents, newf);
-                Data.sentsFiles.add(newf);
-                splitSents.clear();
-                num = 0;
-              }
-            }
+            File newf = new File(tempSaveSentencesDir.getAbsolutePath() + "/" + f.getAbsolutePath().replaceAll(Pattern.quote("/"), "_"));
+            IOUtils.cp(f, newf);
+            Data.sentsFiles.add(newf);
+
+//            Map<String, List<CoreLabel>> sentsFromFile = IOUtils.readObjectFromFile(f);
+//            Map<String, List<CoreLabel>> splitSents = new HashMap<String, List<CoreLabel>>();
+//            int num =0 ;
+//            int numFile = -1;
+//            for(Entry<String, List<CoreLabel>> en: sentsFromFile.entrySet()){
+//              num++;
+//              splitSents.put(en.getKey(), en.getValue());
+//              if(num >= numMaxSentencesPerBatchFile){
+//                numFile++;
+//                File newf = new File(tempSaveSentencesDir.getAbsolutePath() + "/" + f.getAbsolutePath().replaceAll(Pattern.quote("/"), "_") +"_"+numFile);
+//                IOUtils.writeObjectToFile(splitSents, newf);
+//                Data.sentsFiles.add(newf);
+//                splitSents.clear();
+//                num = 0;
+//              }
+//            }
           }
         }
       } else {

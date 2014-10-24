@@ -394,7 +394,7 @@ public class PatternsForEachToken {
         }
 
         if(doesnotexist){
-        String indexquery ="create index " + tableName +"_index on " + tableName+ " using hash(\"sentid\") ";
+        String indexquery ="create index CONCURRENTLY " + tableName +"_index on " + tableName+ " using hash(\"sentid\") ";
         stmt.execute(indexquery);
         Redwood.log(Redwood.DBG, "Done creating index for " + tableName);
         }

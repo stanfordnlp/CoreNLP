@@ -319,8 +319,11 @@ public class ScorePhrases {
           sentsAll.put(setEn.getKey(), new HashMap<String, List<CoreLabel>>());
         for(String s: setEn.getValue()){
           sentIds2Pats.add(s, setEn.getKey());
-          if(constVars.batchProcessSents)
-            files.add(Data.sentId2File.get(s));
+          if(constVars.batchProcessSents){
+            File f = Data.sentId2File.get(s);
+            assert f!= null : "How come no file for sentence " + s;
+            files.add(f);
+          }
         }
       }
 
