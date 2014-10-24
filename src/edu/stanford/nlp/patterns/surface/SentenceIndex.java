@@ -34,13 +34,12 @@ public abstract class SentenceIndex {
   @Option(name="useLemmaContextTokens")
   boolean useLemmaContextTokens = false;
 
+  ConstantsAndVariables constVars;
 
-  public SentenceIndex(Properties props, Set<String> stopWords, Set<String> specialWords) {
-    System.out.println("lower case is " + matchLowerCaseContext);
-    System.out.println("properties " + props);
+  public SentenceIndex(Properties props, Set<String> stopWords, Set<String> specialWords, ConstantsAndVariables constVars) {
     this.stopWords = stopWords;
     this.specialWords = specialWords;
-    setUp(props);
+    this.constVars = constVars;
   }
 
   public boolean isBatchProcessed(){
@@ -124,11 +123,12 @@ public abstract class SentenceIndex {
   }
 
   //TODO: what if someone calls with SentenceIndex.class?
-  public static SentenceIndex createIndex(Class<? extends SentenceIndex> indexClass, Map<String, List<CoreLabel>> sents, Properties props, Set<String> stopWords, Set<String> specialWords, String indexDirectory)  {
+  public static SentenceIndex createIndex(Class<? extends SentenceIndex> indexClass, Map<String, List<CoreLabel>> sents, Properties props, Set<String> stopWords,
+                                          Set<String> specialWords, String indexDirectory,ConstantsAndVariables constVars)  {
     try{
       Execution.fillOptions(SentenceIndex.class, props);
-      Method m = indexClass.getMethod("createIndex", Map.class, Properties.class, Set.class, Set.class, String.class);
-      SentenceIndex index = (SentenceIndex) m.invoke(null, new Object[]{sents, props, stopWords, specialWords, indexDirectory});
+      Method m = indexClass.getMethod("createIndex", Map.class, Properties.class, Set.class, Set.class, String.class, ConstantsAndVariables.class);
+      SentenceIndex index = (SentenceIndex) m.invoke(null, new Object[]{sents, props, stopWords, specialWords, indexDirectory, constVars});
       return index;
     }catch(NoSuchMethodException e){
       throw new RuntimeException(e);

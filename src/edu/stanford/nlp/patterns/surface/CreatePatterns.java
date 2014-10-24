@@ -120,58 +120,109 @@ public class CreatePatterns {
     else
       return false;
 
-  }
 
-  Triple<Boolean, String, String> getContextTokenStr(CoreLabel tokenj) {
-    String strgeneric = "";
+  }
+  Triple<Boolean, Token, String> getContextTokenStr(CoreLabel tokenj) {
+    Token strgeneric = new Token();
     String strOriginal = "";
     boolean isLabeledO = true;
-    for (Entry<String, Class<? extends TypesafeMap.Key<String>>> e : constVars.getAnswerClass().entrySet()) {
-      if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
-        isLabeledO = false;
-        if (strgeneric.isEmpty()) {
-          strgeneric = "{" + e.getKey() + ":" + e.getKey() + "}";
-          strOriginal = e.getKey();
-        } else {
-          strgeneric += " | " + "{" + e.getKey() + ":" + e.getKey() + "}";
-          strOriginal += "|" + e.getKey();
-        }
-      }
-    }
+//    for (Entry<String, Class<? extends TypesafeMap.Key<String>>> e : constVars.getAnswerClass().entrySet()) {
+//      if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
+//        isLabeledO = false;
+//        if (strOriginal.isEmpty()) {
+//          strOriginal = e.getKey();
+//        } else {
+//          strOriginal += "|" + e.getKey();
+//        }
+//        strgeneric.addRestriction(e.getKey(), e.getKey());
+//      }
+//    }
 
     for (Entry<String, Class> e : constVars.getGeneralizeClasses().entrySet()) {
       if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
         isLabeledO = false;
-        if (strgeneric.isEmpty()) {
-          strgeneric = "{" + e.getKey() + ":" + tokenj.get(e.getValue()) + "}";
+        if (strOriginal.isEmpty()) {
+
           strOriginal = e.getKey();
         } else {
-          strgeneric += " | " + "{" + e.getKey() + ":"
-              + tokenj.get(e.getValue()) + "}";
+
           strOriginal += "|" + e.getKey();
         }
+        strgeneric.addORRestriction(e.getValue(), e.getKey());
       }
     }
 
     if (constVars.useContextNERRestriction) {
       String nerTag = tokenj
-          .get(CoreAnnotations.NamedEntityTagAnnotation.class);
+        .get(CoreAnnotations.NamedEntityTagAnnotation.class);
       if (nerTag != null
-          && !nerTag.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL)) {
+        && !nerTag.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL)) {
         isLabeledO = false;
-        if (strgeneric.isEmpty()) {
-          strgeneric = "{ner:" + nerTag + "}";
+        if (strOriginal.isEmpty()) {
+
           strOriginal = nerTag;
         } else {
-          strgeneric += " | " + "{ner:" + nerTag + "}";
+
           strOriginal += "|" + nerTag;
         }
+        strgeneric.addORRestriction(CoreAnnotations.NamedEntityTagAnnotation.class, nerTag);
       }
     }
 
-    return new Triple<Boolean, String, String>(isLabeledO, strgeneric,
-        strOriginal);
+    return new Triple<Boolean, Token, String>(isLabeledO, strgeneric,
+      strOriginal);
   }
+
+//  Triple<Boolean, String, String> getContextTokenStr(CoreLabel tokenj) {
+//    String strgeneric = "";
+//    String strOriginal = "";
+//    boolean isLabeledO = true;
+//    for (Entry<String, Class<? extends TypesafeMap.Key<String>>> e : constVars.getAnswerClass().entrySet()) {
+//      if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
+//        isLabeledO = false;
+//        if (strgeneric.isEmpty()) {
+//          strgeneric = "{" + e.getKey() + ":" + e.getKey() + "}";
+//          strOriginal = e.getKey();
+//        } else {
+//          strgeneric += " | " + "{" + e.getKey() + ":" + e.getKey() + "}";
+//          strOriginal += "|" + e.getKey();
+//        }
+//      }
+//    }
+//
+//    for (Entry<String, Class> e : constVars.getGeneralizeClasses().entrySet()) {
+//      if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
+//        isLabeledO = false;
+//        if (strgeneric.isEmpty()) {
+//          strgeneric = "{" + e.getKey() + ":" + tokenj.get(e.getValue()) + "}";
+//          strOriginal = e.getKey();
+//        } else {
+//          strgeneric += " | " + "{" + e.getKey() + ":"
+//              + tokenj.get(e.getValue()) + "}";
+//          strOriginal += "|" + e.getKey();
+//        }
+//      }
+//    }
+//
+//    if (constVars.useContextNERRestriction) {
+//      String nerTag = tokenj
+//          .get(CoreAnnotations.NamedEntityTagAnnotation.class);
+//      if (nerTag != null
+//          && !nerTag.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL)) {
+//        isLabeledO = false;
+//        if (strgeneric.isEmpty()) {
+//          strgeneric = "{ner:" + nerTag + "}";
+//          strOriginal = nerTag;
+//        } else {
+//          strgeneric += " | " + "{ner:" + nerTag + "}";
+//          strOriginal += "|" + nerTag;
+//        }
+//      }
+//    }
+//
+//    return new Triple<Boolean, String, String>(isLabeledO, strgeneric,
+//        strOriginal);
+//  }
 
   public Set<Integer> getContext(
      List<CoreLabel> sent, int i) {
@@ -187,9 +238,9 @@ public class CreatePatterns {
     }
     String nerTag = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
     for (int maxWin = 1; maxWin <= maxWindow4Pattern; maxWin++) {
-      List<String> previousTokens = new ArrayList<String>();
+      List<Token> previousTokens = new ArrayList<Token>();
       List<String> originalPrev = new ArrayList<String>(), originalNext = new ArrayList<String>();
-      List<String> nextTokens = new ArrayList<String>();
+      List<Token> nextTokens = new ArrayList<Token>();
 
       int numStopWordsprev = 0, numStopWordsnext = 0;
       // int numPrevTokensSpecial = 0, numNextTokensSpecial = 0;
@@ -237,14 +288,14 @@ public class CreatePatterns {
 //                + tokenj.word() + " in " + sent + " is not set");
 //          }
 
-          Triple<Boolean, String, String> tr = this.getContextTokenStr(tokenj);
+          Triple<Boolean, Token, String> tr = this.getContextTokenStr(tokenj);
           boolean isLabeledO = tr.first;
-          String strgeneric = tr.second;
+          Token strgeneric = tr.second;
           String strOriginal = tr.third;
 
           if (!isLabeledO) {
             // numPrevTokensSpecial++;
-            previousTokens.add(0, "[" + strgeneric + "]");
+            previousTokens.add(0, strgeneric);
             // previousTokens.add(0,
             // "[{answer:"
             // + tokenj.get(constVars.answerClass.get(label)).toString()
@@ -257,7 +308,7 @@ public class CreatePatterns {
             originalPrev.clear();
             break;
           } else {
-            String str = SurfacePattern.getContextStr(tokenj,
+            Token str = SurfacePattern.getContextToken(tokenj,
                 constVars.useLemmaContextTokens,
                 constVars.matchLowerCaseContext);
             previousTokens.add(0, str);
@@ -297,9 +348,9 @@ public class CreatePatterns {
 //                    + " in " + sent + " is not set");
 //          }
 
-          Triple<Boolean, String, String> tr = this.getContextTokenStr(tokenj);
+          Triple<Boolean, Token, String> tr = this.getContextTokenStr(tokenj);
           boolean isLabeledO = tr.first;
-          String strgeneric = tr.second;
+          Token strgeneric = tr.second;
           String strOriginal = tr.third;
 
           // boolean isLabeledO = tokenj.get(constVars.answerClass.get(label))
@@ -307,7 +358,7 @@ public class CreatePatterns {
           if (!isLabeledO) {
             // numNextTokensSpecial++;
             numNonStopWordsNext++;
-            nextTokens.add("[" + strgeneric + "]");
+            nextTokens.add(strgeneric);
             // nextTokens.add("[{" + label + ":"
             // + tokenj.get(constVars.answerClass.get(label)).toString()
             // + "}]");
@@ -320,7 +371,7 @@ public class CreatePatterns {
             originalNext.clear();
             break;
           } else {// if (!tokenj.word().matches("[.,?()]")) {
-            String str = SurfacePattern.getContextStr(tokenj,
+            Token str = SurfacePattern.getContextToken(tokenj,
                 constVars.useLemmaContextTokens,
                 constVars.matchLowerCaseContext);
             nextTokens.add(str);
@@ -340,17 +391,21 @@ public class CreatePatterns {
       // - numPrevTokensSpecial;
       // int numNonSpecialNextTokens = nextTokens.size() - numNextTokensSpecial;
 
-      String fw = "";
-      if (useFillerWordsInPat)
-        fw = " $FILLER{0,2} ";
-
-      String sw = "";
+      //TODO: move to global
+      Token fw = new Token();
+      if (useFillerWordsInPat) {
+        fw.setEnvBindRestriction("$FILLER");
+        fw.setNumOcc(0,2);
+      }
+      Token sw = new Token();
       if (useStopWordsBeforeTerm) {
-        sw = " $STOPWORD{0,2} ";
+        sw.setEnvBindRestriction("$STOPWORD");
+        sw.setNumOcc(0, 2);
       }
 
-      String[] prevContext = null;
-      String[] prevOriginalArr = null;
+      Token[] prevContext = null;
+      //String[] prevContext = null;
+      //String[] prevOriginalArr = null;
       // if (previousTokens.size() >= minWindow4Pattern
       // && (numStopWordsprev < numNonSpecialPrevTokens ||
       // numNonSpecialPrevTokens > numMinStopWordsToAdd)) {
@@ -359,12 +414,12 @@ public class CreatePatterns {
 
         // prevContext = StringUtils.join(previousTokens, fw);
 
-        List<String> prevContextList = new ArrayList<String>();
+        List<Token> prevContextList = new ArrayList<Token>();
         List<String> prevOriginal = new ArrayList<String>();
-        for (String p : previousTokens) {
+        for (Token p : previousTokens) {
           prevContextList.add(p);
           if (!fw.isEmpty())
-            prevContextList.add(fw.trim());
+            prevContextList.add(fw);
         }
 
         // add fw and sw to the the originalprev
@@ -375,7 +430,7 @@ public class CreatePatterns {
         }
 
         if (!sw.isEmpty()) {
-          prevContextList.add(sw.trim());
+          prevContextList.add(sw);
           prevOriginal.add(" SW ");
         }
 
@@ -383,8 +438,8 @@ public class CreatePatterns {
 
 
         if (isASCII(StringUtils.join(prevOriginal))) {
-          prevContext = prevContextList.toArray(new String[0]);
-          prevOriginalArr = prevOriginal.toArray(new String[0]);
+          prevContext = prevContextList.toArray(new Token[0]);
+          //prevOriginalArr = prevOriginal.toArray(new String[0]);
           if (previousTokens.size() >= minWindow4Pattern) {
             if (twithoutPOS != null) {
               SurfacePattern pat = new SurfacePattern(prevContext, twithoutPOS,
@@ -401,24 +456,24 @@ public class CreatePatterns {
         }
       }
 
-      String[] nextContext = null;
-      String [] nextOriginalArr = null;
+      Token[] nextContext = null;
+      //String [] nextOriginalArr = null;
       // if (nextTokens.size() > 0
       // && (numStopWordsnext < numNonSpecialNextTokens ||
       // numNonSpecialNextTokens > numMinStopWordsToAdd)) {
       if (nextTokens.size() > 0
           && (numNonStopWordsNext > 0 || numStopWordsnext > numMinStopWordsToAdd)) {
         // nextContext = StringUtils.join(nextTokens, fw);
-        List<String> nextContextList = new ArrayList<String>();
+        List<Token> nextContextList = new ArrayList<Token>();
 
         List<String> nextOriginal = new ArrayList<String>();
 
         if (!sw.isEmpty()) {
-          nextContextList.add(sw.trim());
+          nextContextList.add(sw);
           nextOriginal.add(" SW ");
         }
 
-        for (String n : nextTokens) {
+        for (Token n : nextTokens) {
           if (!fw.isEmpty())
             nextContextList.add(fw);
           nextContextList.add(n);
@@ -431,8 +486,8 @@ public class CreatePatterns {
         }
 
         if (nextTokens.size() >= minWindow4Pattern) {
-          nextContext = nextContextList.toArray(new String[0]);
-          nextOriginalArr =  nextOriginal.toArray(new String[0]);
+          nextContext = nextContextList.toArray(new Token[0]);
+          //nextOriginalArr =  nextOriginal.toArray(new String[0]);
           if (twithoutPOS != null) {
             SurfacePattern pat = new SurfacePattern(null, twithoutPOS,
                 nextContext, Genre.NEXT);

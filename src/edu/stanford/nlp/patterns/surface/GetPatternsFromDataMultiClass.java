@@ -380,7 +380,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       constVars.invertedIndexDirectory = f.getAbsolutePath();
     }
 
-    constVars.invertedIndex = SentenceIndex.createIndex(constVars.invertedIndexClass, null, props, constVars.getStopWords(), specialwords4Index, constVars.invertedIndexDirectory);
+    Set<String> extremelySmallStopWordsList = CollectionUtils.asSet(new String[]{".",",","in","on","of","a","the","an"});
+    constVars.invertedIndex = SentenceIndex.createIndex(constVars.invertedIndexClass, null, props, extremelySmallStopWordsList, specialwords4Index, constVars.invertedIndexDirectory, constVars);
 
     int totalNumSents = 0;
 
@@ -391,7 +392,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     }
 
     if (constVars.batchProcessSents) {
-      //TODO : remove createInvIndex
       if (labelUsingSeedSets || computeDataFreq) {
 
         for (File f : Data.sentsFiles) {
@@ -1683,7 +1683,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   public void labelWords(String label, Map<String, List<CoreLabel>> sents, Set<String> identifiedWords, String outFile,
       CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) throws IOException, SQLException {
-
+  //TODO: update the index
     CollectionValuedMap<String, Integer> tokensMatchedPatterns = null;
     if (constVars.restrictToMatched) {
       tokensMatchedPatterns = new CollectionValuedMap<String, Integer>();

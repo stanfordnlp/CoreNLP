@@ -30,8 +30,9 @@ public class InvertedIndexByTokens extends SentenceIndex implements Serializable
 
   Map<String, Set<String>> index;
 
-  public InvertedIndexByTokens(Properties props, Set<String> stopWords, Set<String> specialWords) {
-    super(props, stopWords, specialWords);
+  public InvertedIndexByTokens(Properties props, Set<String> stopWords, Set<String> specialWords, ConstantsAndVariables constVars) {
+
+    super(props, stopWords, specialWords, constVars);
     Execution.fillOptions(this, props);
     index = new HashMap<String, Set<String>>();
   }
@@ -39,6 +40,7 @@ public class InvertedIndexByTokens extends SentenceIndex implements Serializable
 
   @Override
   public void add(Map<String, List<CoreLabel>> sents) {
+    //TODO: take care of special words and generalizations
 
 //    if(filenamePrefix != null)
 //      filename = filenamePrefix+ (filenamePrefix.endsWith("/")?"":"/")+filename;
@@ -46,32 +48,43 @@ public class InvertedIndexByTokens extends SentenceIndex implements Serializable
     for (Map.Entry<String, List<CoreLabel>> sEn : sents.entrySet()) {
       numAllSentences ++;
       for (CoreLabel l : sEn.getValue()) {
+
+        //TODO: finish this
+        Map<String, Class> m = constVars.getGeneralizeClasses();
+
         String w = l.word();
-//        if (useLemmaContextTokens)
-//          w = l.lemma();
+        if (useLemmaContextTokens)
+          w = l.lemma();
 
         if (matchLowerCaseContext)
           w = w.toLowerCase();
 
         w = w.replaceAll("/", "\\\\/");
-
-        Set<String> sentids = index.get(w);
-
-        if (sentids == null) {
-          sentids = new HashSet<String>();
+        add(w, sEn.getKey());
+        for(Map.Entry<String, Class> gn: m.entrySet()){
+          Object b  = l.get(gn.getValue());
+          if(b != null && !b.toString().equals(constVars.backgroundSymbol)){
+            String key = gn.getValue().toString()+":"+b.toString();
+            add(key, sEn.getKey());
+          }
         }
 
-        sentids.add(sEn.getKey());
-
-        index.put(w, sentids);
       }
     }
-    System.out.println("words are " + index.keySet());
-    System.out.println("done adding. Size is " + size() + "  and number of words in inv index is " + index.size() + " and sentence ids are " + index.get("massachusetts"));
-
-
+    System.out.println("done adding. Size is " + size() + "  and number of words in inv index is " + index.size());
   }
 
+  void add(String w, String sentid){
+    Set<String> sentids = index.get(w);
+
+    if (sentids == null) {
+      sentids = new HashSet<String>();
+    }
+
+    sentids.add(sentid);
+
+    index.put(w, sentids);
+  }
 //  public Set<String> getFileSentIds(String word) {
 //    return index.get(word);
 //  }
@@ -100,8 +113,8 @@ public class InvertedIndexByTokens extends SentenceIndex implements Serializable
   }
 
   //The last variable is not really used!
-  public static InvertedIndexByTokens createIndex(Map<String, List<CoreLabel>> sentences, Properties props, Set<String> stopWords, Set<String> specialWords, String dir) {
-    InvertedIndexByTokens inv = new InvertedIndexByTokens(props, stopWords, specialWords);
+  public static InvertedIndexByTokens createIndex(Map<String, List<CoreLabel>> sentences, Properties props, Set<String> stopWords, Set<String> specialWords, String dir, ConstantsAndVariables constVars) {
+    InvertedIndexByTokens inv = new InvertedIndexByTokens(props, stopWords, specialWords, constVars);
 
     if(sentences != null && sentences.size() > 0)
       inv.add(sentences);

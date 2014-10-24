@@ -183,8 +183,6 @@ public class ScorePhrases {
     return words;
   }
 
-
-
   void runParallelApplyPats(Map<String, List<CoreLabel>> sents, String label, Integer pattern,  TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted,
                             CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) throws InterruptedException, ExecutionException{
 
@@ -313,8 +311,6 @@ public class ScorePhrases {
  //   Counter<Integer> patternsLearnedThisIterConsistsOnlyGeneralized = new ClassicCounter<Integer>();
  //   Counter<Integer> patternsLearnedThisIterRest = new ClassicCounter<Integer>();
 //    Set<String> specialWords = constVars.invertedIndex.getSpecialWordsList();
-    //TODO: use this list for creating index
-    List<String> extremelySmallStopWordsList = Arrays.asList(".",",","in","on","of","a","the","an");
 
    //TODO: check computeRawFreq
 

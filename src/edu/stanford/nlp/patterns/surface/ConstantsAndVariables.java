@@ -632,6 +632,9 @@ public class ConstantsAndVariables implements Serializable{
     this.labels = labels;
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
+    if(this.generalizeClasses == null)
+      this.generalizeClasses = new HashMap<String, Class>();
+    this.generalizeClasses.putAll(answerClass);
     this.ignoreWordswithClassesDuringSelection = ignoreClasses;
     setUp(props);
   }
@@ -642,6 +645,9 @@ public class ConstantsAndVariables implements Serializable{
     this.labels = labelDictionary.keySet();
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
+    if(this.generalizeClasses == null)
+      this.generalizeClasses = new HashMap<String, Class>();
+    this.generalizeClasses.putAll(answerClass);
     this.ignoreWordswithClassesDuringSelection = ignoreClasses;
     setUp(props);
   }
@@ -656,6 +662,9 @@ public class ConstantsAndVariables implements Serializable{
     this.labels = labels;
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
+    if(this.generalizeClasses == null)
+      this.generalizeClasses = new HashMap<String, Class>();
+    this.generalizeClasses.putAll(answerClass);
     setUp(props);
   }
 
