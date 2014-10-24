@@ -549,8 +549,7 @@ public class CreatePatterns {
 //    return patternsForEachToken;
 //  }
 
-  public void getAllPatterns(Map<String, List<CoreLabel>> sents, PatternsForEachToken patsForEach)
-      throws InterruptedException, ExecutionException {
+  public void getAllPatterns(Map<String, List<CoreLabel>> sents, PatternsForEachToken patsForEach) {
 
 //    this.patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>();
    // this.patternsForEachToken = new HashMap<String, Map<Integer, Set<Integer>>>();
@@ -639,7 +638,7 @@ public class CreatePatterns {
       for (String id : sentIds) {
         List<CoreLabel> sent = sents.get(id);
 
-        if(constVars.useDBForTokenPatterns)
+        if(!constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY))
           tempPatternsForTokens.put(id, new HashMap<Integer, Set<Integer>>());
 
         Map<Integer, Set<Integer>> p = new HashMap<Integer, Set<Integer>>();
@@ -661,7 +660,7 @@ public class CreatePatterns {
         }
 
         //to save number of commits to the database
-        if(constVars.useDBForTokenPatterns){
+        if(!constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY)){
           tempPatternsForTokens.put(id, p);
           numSentencesInOneCommit++;
           if(numSentencesInOneCommit % 1000 == 0){
@@ -678,7 +677,7 @@ public class CreatePatterns {
       }
 
       //For the remaining sentences
-      if(constVars.useDBForTokenPatterns)
+      if(!constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY))
         patsForEach.addPatterns(tempPatternsForTokens);
 
       return null;

@@ -45,7 +45,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
   }
 
   @Override
-  Counter<Integer> score() throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+  Counter<Integer> score() throws IOException, ClassNotFoundException {
 
     Counter<String> externalWordWeightsNormalized = null;
     if (constVars.dictOddsWeights.containsKey(label))
@@ -115,8 +115,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
   Counter<Integer> convert2OneDim(String label,
       TwoDimensionalCounter<Integer, String> patternsandWords,
       boolean sqrtPatScore, boolean scorePhrasesInPatSelection,
-      Counter<String> dictOddsWordWeights, boolean useFreqPhraseExtractedByPat)
-      throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+      Counter<String> dictOddsWordWeights, boolean useFreqPhraseExtractedByPat) throws IOException, ClassNotFoundException {
 
     if (Data.googleNGram.size() == 0 && Data.googleNGramsFile != null) {
       Data.loadGoogleNGrams();

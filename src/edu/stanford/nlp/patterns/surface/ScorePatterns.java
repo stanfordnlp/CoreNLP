@@ -15,7 +15,7 @@ public abstract class ScorePatterns {
   protected PatternScoring patternScoring;
   protected Properties props;
   
-  abstract Counter<Integer> score() throws IOException, InterruptedException, ExecutionException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException;
+  abstract Counter<Integer> score() throws IOException, ClassNotFoundException;
   protected TwoDimensionalCounter<Integer, String> patternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
   protected TwoDimensionalCounter<Integer, String> negPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
   // protected TwoDimensionalCounter<SurfacePattern, String>

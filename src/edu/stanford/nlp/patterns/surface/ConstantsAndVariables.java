@@ -607,8 +607,9 @@ public class ConstantsAndVariables implements Serializable{
   public boolean loadInvertedIndex  = false;
 
 
-  @Option(name = "useDBForTokenPatterns", gloss="used for storing patterns")
-  boolean useDBForTokenPatterns = false;
+  @Option(name = "storePatsForEachToken", gloss="used for storing patterns in PSQL")
+  public PatternForEachTokenWay storePatsForEachToken = PatternForEachTokenWay.MEMORY;
+
 
 //  /**
 //   * Directory where to save the sentences ser files.
@@ -634,6 +635,8 @@ public class ConstantsAndVariables implements Serializable{
   public ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
 
   Properties props;
+
+  public enum PatternForEachTokenWay {MEMORY, LUCENE, DB};
 
   public ConstantsAndVariables(Properties props, Set<String> labels, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
                                Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
@@ -681,6 +684,7 @@ public class ConstantsAndVariables implements Serializable{
     if (alreadySetUp) {
       return;
     }
+
     Execution.fillOptions(this, props);
     if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty())
       ignoreWordRegex = Pattern.compile(wordIgnoreRegex);

@@ -5,16 +5,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -51,14 +47,21 @@ public class ScorePhrases {
   Class<? extends PhraseScorer> phraseScorerClass = edu.stanford.nlp.patterns.surface.ScorePhrasesAverageFeatures.class;
   PhraseScorer phraseScorer = null;
 
-  public ScorePhrases(Properties props, ConstantsAndVariables cv)
-      throws InstantiationException, IllegalAccessException,
-      IllegalArgumentException, InvocationTargetException,
-      NoSuchMethodException, SecurityException {
+  public ScorePhrases(Properties props, ConstantsAndVariables cv){
     Execution.fillOptions(this, props);
     this.constVars = cv;
-    phraseScorer = phraseScorerClass
-        .getConstructor(ConstantsAndVariables.class).newInstance(constVars);
+    try {
+      phraseScorer = phraseScorerClass
+          .getConstructor(ConstantsAndVariables.class).newInstance(constVars);
+    } catch (InstantiationException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InvocationTargetException e) {
+      throw new RuntimeException(e);
+    } catch (NoSuchMethodException e) {
+      throw new RuntimeException(e);
+    }
     Execution.fillOptions(phraseScorer, props);
   }
 
@@ -157,8 +160,7 @@ public class ScorePhrases {
       TwoDimensionalCounter<String, Integer> terms,
       TwoDimensionalCounter<String, Integer> wordsPatExtracted,
       TwoDimensionalCounter<Integer, String> patternsAndWords4Label,
-      String identifier, Set<String> ignoreWords) throws InterruptedException, ExecutionException,
-    IOException, ClassNotFoundException, SQLException {
+      String identifier, Set<String> ignoreWords) throws IOException, ClassNotFoundException {
 
     boolean computeProcDataFreq = false;
     if (Data.processedDataFreq == null) {
@@ -180,7 +182,7 @@ public class ScorePhrases {
   }
 
   void runParallelApplyPats(Map<String, List<CoreLabel>> sents, String label, Integer pattern,  TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted,
-                            CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) throws InterruptedException, ExecutionException{
+                            CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) {
 
     Redwood.log(Redwood.DBG, "Applying pattern " + pattern + " to a total of " + sents.size() + " sentences ");
     List<String> notAllowedClasses = new ArrayList<String>();
@@ -354,7 +356,7 @@ public class ScorePhrases {
   }
 
   public void applyPats(Counter<Integer> patterns, String label, TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted,
-                        CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) throws ClassNotFoundException, IOException, InterruptedException, ExecutionException{
+                        CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat){
  //   Counter<Integer> patternsLearnedThisIterConsistsOnlyGeneralized = new ClassicCounter<Integer>();
  //   Counter<Integer> patternsLearnedThisIterRest = new ClassicCounter<Integer>();
 //    Set<String> specialWords = constVars.invertedIndex.getSpecialWordsList();
@@ -486,7 +488,7 @@ public class ScorePhrases {
   */
   
   private void statsWithoutApplyingPatterns(Map<String, List<CoreLabel>> sents, PatternsForEachToken patternsForEachToken,
-      Counter<Integer> patternsLearnedThisIter, TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted) throws SQLException, IOException, ClassNotFoundException {
+      Counter<Integer> patternsLearnedThisIter, TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted){
     for (Entry<String, List<CoreLabel>> sentEn : sents.entrySet()) {
       Map<Integer, Set<Integer>> pat4Sent = patternsForEachToken.getPatternsForAllTokens(sentEn.getKey());
 
@@ -525,8 +527,7 @@ public class ScorePhrases {
       TwoDimensionalCounter<String, Integer> terms,
       TwoDimensionalCounter<String, Integer> wordsPatExtracted,
       TwoDimensionalCounter<Integer, String> patternsAndWords4Label,
-      String identifier, Set<String> ignoreWords, boolean computeProcDataFreq) throws InterruptedException, ExecutionException,
-    IOException, ClassNotFoundException, SQLException {
+      String identifier, Set<String> ignoreWords, boolean computeProcDataFreq) throws IOException, ClassNotFoundException {
 
     TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, Integer>();
     if (constVars.doNotApplyPatterns) {
