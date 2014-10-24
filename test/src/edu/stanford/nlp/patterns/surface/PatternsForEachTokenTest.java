@@ -17,7 +17,7 @@ public class PatternsForEachTokenTest extends TestCase {
 
   @Test
   public void testCreatingAndInserting() throws SQLException, IOException, ClassNotFoundException {
-
+/*
   //Uncomment for testing
 
     Properties props = new Properties();
@@ -73,6 +73,6 @@ public class PatternsForEachTokenTest extends TestCase {
 
     ConcurrentHashIndex<SurfacePattern> index = new ConcurrentHashIndex<SurfacePattern>();
     p.savePatternIndexInDB(index);
-
+*/
   }
 }
