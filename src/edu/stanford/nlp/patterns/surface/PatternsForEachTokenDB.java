@@ -525,11 +525,6 @@ public class PatternsForEachTokenDB extends PatternsForEachToken{
   }
 
   @Override
-  public void close() {
-    //nothing to do
-  }
-
-  @Override
   public int size(){
     //TODO: NOT IMPLEMENTED
     return Integer.MAX_VALUE;

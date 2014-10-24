@@ -33,7 +33,7 @@ public abstract class PatternsForEachToken {
   abstract public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String dir) throws IOException;
 
 
-  public void updatePatterns(Map<String, Map<Integer, Set<Integer>>> tempPatsForSents) {
+    public void updatePatterns(Map<String, Map<Integer, Set<Integer>>> tempPatsForSents) {
     for(Map.Entry<String, Map<Integer, Set<Integer>>> en :tempPatsForSents.entrySet()){
       Map<Integer, Set<Integer>> m = getPatternsForAllTokens(en.getKey());
       if(m == null)
@@ -86,8 +86,6 @@ public abstract class PatternsForEachToken {
   }
 
   public abstract Map<String,Map<Integer,Set<Integer>>> getPatternsForAllTokens(Collection<String> sampledSentIds);
-
-  public abstract void close();
 
 
 //  @Option(name="allPatternsFile")

@@ -12,13 +12,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by sonalg on 10/22/14.
  */
 public class PatternsForEachTokenInMemory extends PatternsForEachToken {
-  public static ConcurrentHashMap<String, Map<Integer, Set<Integer>>> patternsForEachToken = null;
+  private Map<String, Map<Integer, Set<Integer>>> patternsForEachToken = null;
 
   public PatternsForEachTokenInMemory(Properties props, Map<String, Map<Integer, Set<Integer>>> pats) {
     Execution.fillOptions(this, props);
-
-    if(patternsForEachToken == null)
-      patternsForEachToken = new ConcurrentHashMap<String, Map<Integer, Set<Integer>>>();
+    patternsForEachToken = new ConcurrentHashMap<String, Map<Integer, Set<Integer>>>();
 
     if (pats != null)
       addPatterns(pats);
@@ -68,11 +66,6 @@ public class PatternsForEachTokenInMemory extends PatternsForEachToken {
       pats.put(s, getPatternsForAllTokens(s));
     }
     return pats;
-  }
-
-  @Override
-  public void close() {
-    //nothing to do
   }
 
 

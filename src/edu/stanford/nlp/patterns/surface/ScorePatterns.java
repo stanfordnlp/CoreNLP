@@ -3,7 +3,6 @@ package edu.stanford.nlp.patterns.surface;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
@@ -23,28 +22,27 @@ public abstract class ScorePatterns {
   // posnegPatternsandWords4Label = new TwoDimensionalCounter<SurfacePattern,
   // String>();
   protected TwoDimensionalCounter<Integer, String> unLabeledPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
-  //protected TwoDimensionalCounter<Integer, String> negandUnLabeledPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
-  //protected TwoDimensionalCounter<Integer, String> allPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
+  protected TwoDimensionalCounter<Integer, String> negandUnLabeledPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
+  protected TwoDimensionalCounter<Integer, String> allPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
   protected String label;
-  protected Set<String> allCandidatePhrases;
 
   public ScorePatterns(
       ConstantsAndVariables constVars,
       PatternScoring patternScoring,
       String label,
-      Set<String> allCandidatePhrases,
       TwoDimensionalCounter<Integer, String> patternsandWords4Label,
       TwoDimensionalCounter<Integer, String> negPatternsandWords4Label,
       TwoDimensionalCounter<Integer, String> unLabeledPatternsandWords4Label,
-      Properties props) {
+      TwoDimensionalCounter<Integer, String> negandUnLabeledPatternsandWords4Label,
+      TwoDimensionalCounter<Integer, String> allPatternsandWords4Label, Properties props) {
     this.constVars = constVars;
     this.patternScoring = patternScoring;
     this.label = label;
-    this.allCandidatePhrases = allCandidatePhrases;
     this.patternsandWords4Label = patternsandWords4Label;
     this.negPatternsandWords4Label = negPatternsandWords4Label;
     this.unLabeledPatternsandWords4Label = unLabeledPatternsandWords4Label;
-
+    this.negandUnLabeledPatternsandWords4Label = negandUnLabeledPatternsandWords4Label;
+    this.allPatternsandWords4Label = allPatternsandWords4Label;
     this.props = props;
   }
   
