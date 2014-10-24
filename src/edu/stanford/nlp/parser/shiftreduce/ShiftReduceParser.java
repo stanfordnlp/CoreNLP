@@ -950,50 +950,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
   }
 
-  private void train(List<Pair<String, FileFilter>> trainTreebankPath,
-                     Pair<String, FileFilter> devTreebankPath,
-                     String serializedPath, Set<String> allowedFeatures) {
-    System.err.println("Training method: " + op.trainOptions().trainingMethod);
-
-    List<Tree> binarizedTrees = Generics.newArrayList();
-    for (Pair<String, FileFilter> treebank : trainTreebankPath) {
-      binarizedTrees.addAll(readBinarizedTreebank(treebank.first(), treebank.second()));
-    }
-
-    int nThreads = op.trainOptions.trainingThreads;
-    nThreads = nThreads <= 0 ? Runtime.getRuntime().availableProcessors() : nThreads;
-
-    Tagger tagger = null;
-    if (op.testOptions.preTag) {
-      Timing retagTimer = new Timing();
-      tagger = Tagger.loadModel(op.testOptions.taggerSerializedFile);
-      redoTags(binarizedTrees, tagger, nThreads);
-      retagTimer.done("Retagging");
-    }
-
-    knownStates = findKnownStates(binarizedTrees);
-    rootStates = findRootStates(binarizedTrees);
-    rootOnlyStates = findRootOnlyStates(binarizedTrees, rootStates);
-
-    System.err.println("Known states: " + knownStates);
-    System.err.println("States which occur at the root: " + rootStates);
-    System.err.println("States which only occur at the root: " + rootStates);
-
-    Timing transitionTimer = new Timing();
-    List<List<Transition>> transitionLists = CreateTransitionSequence.createTransitionSequences(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates);
-    for (List<Transition> transitions : transitionLists) {
-      transitionIndex.addAll(transitions);
-    }
-    transitionTimer.done("Converting trees into transition lists");
-    System.err.println("Number of transitions: " + transitionIndex.size());
-
-    Random random = new Random(op.trainOptions.randomSeed);
-
-    Treebank devTreebank = null;
-    if (devTreebankPath != null) {
-      devTreebank = readTreebank(devTreebankPath.first(), devTreebankPath.second());
-    }
-
+  private void trainModel(String serializedPath, Tagger tagger, Random random, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, Treebank devTreebank, int nThreads, Set<String> allowedFeatures) {
     double bestScore = 0.0;
     int bestIteration = 0;
     PriorityQueue<ScoredObject<ShiftReduceParser>> bestModels = null;
@@ -1135,6 +1092,53 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
 
     condenseFeatures();
+  }
+
+  private void train(List<Pair<String, FileFilter>> trainTreebankPath,
+                     Pair<String, FileFilter> devTreebankPath,
+                     String serializedPath, Set<String> allowedFeatures) {
+    System.err.println("Training method: " + op.trainOptions().trainingMethod);
+
+    List<Tree> binarizedTrees = Generics.newArrayList();
+    for (Pair<String, FileFilter> treebank : trainTreebankPath) {
+      binarizedTrees.addAll(readBinarizedTreebank(treebank.first(), treebank.second()));
+    }
+
+    int nThreads = op.trainOptions.trainingThreads;
+    nThreads = nThreads <= 0 ? Runtime.getRuntime().availableProcessors() : nThreads;
+
+    Tagger tagger = null;
+    if (op.testOptions.preTag) {
+      Timing retagTimer = new Timing();
+      tagger = Tagger.loadModel(op.testOptions.taggerSerializedFile);
+      redoTags(binarizedTrees, tagger, nThreads);
+      retagTimer.done("Retagging");
+    }
+
+    knownStates = findKnownStates(binarizedTrees);
+    rootStates = findRootStates(binarizedTrees);
+    rootOnlyStates = findRootOnlyStates(binarizedTrees, rootStates);
+
+    System.err.println("Known states: " + knownStates);
+    System.err.println("States which occur at the root: " + rootStates);
+    System.err.println("States which only occur at the root: " + rootStates);
+
+    Timing transitionTimer = new Timing();
+    List<List<Transition>> transitionLists = CreateTransitionSequence.createTransitionSequences(binarizedTrees, op.compoundUnaries, rootStates, rootOnlyStates);
+    for (List<Transition> transitions : transitionLists) {
+      transitionIndex.addAll(transitions);
+    }
+    transitionTimer.done("Converting trees into transition lists");
+    System.err.println("Number of transitions: " + transitionIndex.size());
+
+    Random random = new Random(op.trainOptions.randomSeed);
+
+    Treebank devTreebank = null;
+    if (devTreebankPath != null) {
+      devTreebank = readTreebank(devTreebankPath.first(), devTreebankPath.second());
+    }
+
+    trainModel(serializedPath, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, allowedFeatures);
   }
 
   public void setOptionFlags(String ... flags) {

@@ -34,6 +34,5 @@ elif [ $lang == "Chinese" ]; then
 elif [ $lang == "French" ]; then
   tlp="$tlp".FrenchTreebankParserParams
   lang_opts="-frenchFactored -encoding UTF-8"
-  
-  parse_opts="-tokenized"
+  parse_opts=""
 fi

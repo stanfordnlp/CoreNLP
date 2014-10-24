@@ -2,12 +2,14 @@ package edu.stanford.nlp.trees.international.pennchinese;
 
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
-import edu.stanford.nlp.util.Filter;
+
+import java.io.Serializable;
+import java.util.function.Predicate;
 
 /**
  * Filters the fragments which end documents in Chinese Treebank
  */
-public class FragmentTreeFilter implements Filter<Tree> {
+public class FragmentTreeFilter implements Predicate<Tree>, Serializable {
   static final TregexPattern threeNodePattern = 
     TregexPattern.compile("FRAG=root <, (PU <: /（/) <2 (VV <: /完/) <- (PU=a <: /）/) <3 =a : =root !> (__ > __)");
 
@@ -40,7 +42,7 @@ public class FragmentTreeFilter implements Filter<Tree> {
 
   static final TregexPattern[] patterns = { threeNodePattern, oneNodePattern, automaticInitialPattern, manuallySegmentedPattern, onthewayPattern, singlePuncFragPattern, singlePuncPattern, metaPattern, bracketPattern };
 
-  public boolean accept(Tree tree) {
+  public boolean test(Tree tree) {
     for (TregexPattern pattern : patterns) {
       if (pattern.matcher(tree).find()) {
         return false;

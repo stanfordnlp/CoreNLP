@@ -7,7 +7,7 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.ArrayUtils;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.Generics;
 
 import java.util.Arrays;
@@ -128,7 +128,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   //makes modifications of Collins' rules to better fit with semantic notions of heads
   private void ruleChanges() {
     //  NP: don't want a POS to be the head
-    nonTerminalInfo.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP" }, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "QP", "DT", "WDT", "NML", "PRN", "RB", "RBR", "ADVP"}, {"left", "POS"}});
+    // verbs are here so that POS isn't favored in the case of bad parses
+    nonTerminalInfo.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP" }, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "QP", "DT", "WDT", "NML", "PRN", "RB", "RBR", "ADVP"}, {"rightdis", "VP", "VB", "VBZ", "VBD", "VBP"}, {"left", "POS"}});
     nonTerminalInfo.put("NX", nonTerminalInfo.get("NP"));
     nonTerminalInfo.put("NML", nonTerminalInfo.get("NP"));
     // WHNP clauses should have the same sort of head as an NP
@@ -264,7 +265,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
    * For example, in the sentence "It is hands down the best dessert ...",
    * we want to avoid using "hands down" as the head.
    */
-  static final Filter<Tree> REMOVE_TMP_AND_ADV = tree -> {
+  static final Predicate<Tree> REMOVE_TMP_AND_ADV = tree -> {
     if (tree == null)
       return false;
     Label label = tree.label();

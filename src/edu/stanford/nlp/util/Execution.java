@@ -342,6 +342,13 @@ public class Execution {
       for (int i = 0; i < classes.length; ++i) {
         assert instances[i].getClass() == classes[i];
         class2object.put(classes[i], instances[i]);
+        Class<?> mySuper = instances[i].getClass().getSuperclass();
+        while (mySuper != null && !mySuper.equals(Object.class)) {
+          if (!class2object.containsKey(mySuper)) {
+            class2object.put(mySuper, instances[i]);
+          }
+          mySuper = mySuper.getSuperclass();
+        }
       }
     }
 
@@ -352,7 +359,7 @@ public class Execution {
     for (Class c : classes) {
       Field[] fields;
       try {
-        fields = c.getDeclaredFields();
+        fields = c.getFields();
       } catch (Throwable e) {
         debug("Could not check fields for class: " + c.getName() + "  (caused by " + e.getClass() + ": " + e.getMessage() + ")");
         continue;

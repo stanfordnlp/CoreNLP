@@ -10,7 +10,7 @@ import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.international.arabic.ArabicTreeNormalizer.ArabicEmptyFilter;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -21,7 +21,7 @@ import edu.stanford.nlp.util.Generics;
  */
 public class ATBTreeUtils {
 
-  private static final Filter<Tree> emptyFilter = new ArabicEmptyFilter();
+  private static final Predicate<Tree> emptyFilter = new ArabicEmptyFilter();
   private static final TreeFactory tf = new LabeledScoredTreeFactory();
 
   //The default segmentation marker. Can be changed for processing e.g. IBM Arabic.
