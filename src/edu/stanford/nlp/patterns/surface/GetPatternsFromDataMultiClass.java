@@ -1116,10 +1116,18 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           patsForEachToken = new PatternsForEachToken(props);
           Redwood.log(Redwood.DBG, "Computing all patterns");
           createPats.getAllPatterns(Data.sents, patsForEachToken);
-        } else if( constVars.allPatternsDir!=null ){
-          patsForEachToken = new PatternsForEachToken(props, IOUtils.readObjectFromFile(constVars.allPatternsDir+"/allpatterns.ser"));
-          Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsDir+"/allpatterns.ser");
-          constVars.setPatternIndex(IOUtils.readObjectFromFile(constVars.allPatternsDir+"/patternshashindex.ser"));
+        } else{
+          if(!constVars.useDBForTokenPatterns) {
+            assert constVars.allPatternsDir != null;
+            patsForEachToken = new PatternsForEachToken(props, IOUtils.readObjectFromFile(constVars.allPatternsDir + "/allpatterns.ser"));
+            Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsDir + "/allpatterns.ser");
+            constVars.setPatternIndex(IOUtils.readObjectFromFile(constVars.allPatternsDir + "/patternshashindex.ser"));
+          }else{
+            props.setProperty("createTable","false");
+            props.setProperty("deleteExisting","false");
+            patsForEachToken = new PatternsForEachToken(props);
+            constVars.setPatternIndex(patsForEachToken.readPatternIndexFromDB());
+          }
         }
       }
 
@@ -1140,8 +1148,18 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               patsForEachToken = new PatternsForEachToken(props);
             }
             else{
-              patsForEachToken = new PatternsForEachToken(props, IOUtils.readObjectFromFile(constVars.allPatternsDir+"/allpatterns.ser"));
-              constVars.setPatternIndex(IOUtils.readObjectFromFile(constVars.allPatternsDir+"/patternshashindex.ser"));
+
+              if(!constVars.useDBForTokenPatterns) {
+                assert constVars.allPatternsDir != null;
+                patsForEachToken = new PatternsForEachToken(props, IOUtils.readObjectFromFile(constVars.allPatternsDir + "/allpatterns.ser"));
+                Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsDir + "/allpatterns.ser");
+                constVars.setPatternIndex(IOUtils.readObjectFromFile(constVars.allPatternsDir + "/patternshashindex.ser"));
+              }else{
+                props.setProperty("createTable","false");
+                props.setProperty("deleteExisting","false");
+                patsForEachToken = new PatternsForEachToken(props);
+                constVars.setPatternIndex(patsForEachToken.readPatternIndexFromDB());
+              }
             }
           }
         }
@@ -1152,9 +1170,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
         if (constVars.computeAllPatterns) {
           createPats.getAllPatterns(sents, patsForEachToken);
+          Redwood.log(Redwood.DBG, "Done creating patterns for " + f);
         }
-
-        Redwood.log(Redwood.DBG, "Done creating patterns for " + f);
 
         this.calculateSufficientStats(sents, patsForEachToken, label, patternsandWords4Label, posnegPatternsandWords4Label, allPatternsandWords4Label,
           negPatternsandWords4Label, unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label);
