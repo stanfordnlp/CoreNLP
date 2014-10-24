@@ -2,6 +2,7 @@ package edu.stanford.nlp.patterns.surface;
 
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -23,16 +24,15 @@ public class ScorePatternsF1 extends ScorePatterns {
   Integer p0;
   public ScorePatternsF1(ConstantsAndVariables constVars,
       PatternScoring patternScoring,
-      String label,
+      String label, Set<String> allCandidatePhrases,
       TwoDimensionalCounter<Integer, String> patternsandWords4Label,
       TwoDimensionalCounter<Integer, String> negPatternsandWords4Label,
       TwoDimensionalCounter<Integer, String> unLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<Integer, String> negandUnLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<Integer, String> allPatternsandWords4Label, Properties props, Counter<String> p0Set, Integer p0){
+      Properties props, Counter<String> p0Set, Integer p0){
     super(constVars,
-        patternScoring, label, patternsandWords4Label,
+        patternScoring, label, allCandidatePhrases, patternsandWords4Label,
         negPatternsandWords4Label, unLabeledPatternsandWords4Label,
-        negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props);
+        props);
     this.p0 = p0;
     this.p0Set =p0Set; 
   }
