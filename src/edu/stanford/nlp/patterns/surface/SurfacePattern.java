@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -27,8 +26,8 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
   private static final long serialVersionUID = 1L;
 
-  protected Token[] prevContext;
-  protected Token[] nextContext;
+  protected String[] prevContext;
+  protected String[] nextContext;
   // String prevContextStr = "", nextContextStr = "";
   protected PatternToken token;
   // protected String[] originalPrev;
@@ -49,11 +48,10 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
   public static boolean insertModifierWildcard = false;
 
-  public SurfacePattern(Token[] prevContext, PatternToken token, Token[] nextContext, Genre genre) {
+  public SurfacePattern(String[] prevContext, PatternToken token, String[] nextContext, Genre genre) {
     // String[] originalPrev, String[] originalNext, Genre genre) {
-    //TODO: make sure trim is happening
-//    prevContext = trim(prevContext);
-//    nextContext = trim(nextContext);
+    prevContext = trim(prevContext);
+    nextContext = trim(nextContext);
     this.setPrevContext(prevContext);
     this.setNextContext(nextContext);
     //
@@ -72,47 +70,36 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
 
   }
 
-  public static Token getContextToken(CoreLabel tokenj, boolean useLemmaContextTokens, boolean lowerCaseContext) {
-    Token token = new Token();
+  String[] trim(String[] p) {
+
+    if (p == null)
+      return null;
+
+    for (int i = 0; i < p.length; i++) {
+      p[i] = p[i].trim();
+    }
+    return p;
+  }
+
+  public static String getContextStr(CoreLabel tokenj, boolean useLemmaContextTokens, boolean lowerCaseContext) {
+    String str = "";
 
     if (useLemmaContextTokens) {
       String tok = tokenj.lemma();
       if (lowerCaseContext)
         tok = tok.toLowerCase();
-      token.addORRestriction(CoreAnnotations.LemmaAnnotation.class, tok);
-      //str = "[{lemma:/" + Pattern.quote(tok.replaceAll("/", "\\\\/"))+ "/}] ";
-
+      str = "[{lemma:/" + Pattern.quote(tok.replaceAll("/", "\\\\/"))+ "/}] ";
+      //str = "[{lemma:/\\Q" + tok.replaceAll("/", "\\\\/") + "\\E/}] ";
     } else {
       String tok = tokenj.word();
       if (lowerCaseContext)
         tok = tok.toLowerCase();
-      token.addORRestriction(CoreAnnotations.TextAnnotation.class, tok);
-      //str = "[{word:/" + Pattern.quote(tok.replaceAll("/", "\\\\/")) + "/}] ";
-
+      str = "[{word:/" + Pattern.quote(tok.replaceAll("/", "\\\\/")) + "/}] ";
+      //str = "[{word:/\\Q" + tok.replaceAll("/", "\\\\/") + "\\E/}] ";
 
     }
-    return token;
+    return str;
   }
-
-//  public static String getContextStr(CoreLabel tokenj, boolean useLemmaContextTokens, boolean lowerCaseContext) {
-//    String str = "";
-//
-//    if (useLemmaContextTokens) {
-//      String tok = tokenj.lemma();
-//      if (lowerCaseContext)
-//        tok = tok.toLowerCase();
-//      str = "[{lemma:/" + Pattern.quote(tok.replaceAll("/", "\\\\/"))+ "/}] ";
-//      //str = "[{lemma:/\\Q" + tok.replaceAll("/", "\\\\/") + "\\E/}] ";
-//    } else {
-//      String tok = tokenj.word();
-//      if (lowerCaseContext)
-//        tok = tok.toLowerCase();
-//      str = "[{word:/" + Pattern.quote(tok.replaceAll("/", "\\\\/")) + "/}] ";
-//      //str = "[{word:/\\Q" + tok.replaceAll("/", "\\\\/") + "\\E/}] ";
-//
-//    }
-//    return str;
-//  }
 
   public static String getContextStr(String w) {
     String str = "[/" + Pattern.quote(w.replaceAll("/", "\\\\/")) + "/] ";
@@ -239,30 +226,11 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     return getSimplerTokens(nextContext);
   }
 
-  //TODO: update these to not use "/" and "/"
   static Pattern p1 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(lemma|word)\\s*:\\s*/" + Pattern.quote("\\Q") + "(.*)"
       + Pattern.quote("\\E") + "/\\s*" + Pattern.quote("}") + "\\s*" + Pattern.quote("]"));
-
   static Pattern p2 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(.*)\\s*:\\s*(.*)\\s*" + Pattern.quote("}") + "\\s*"
       + Pattern.quote("]"));
 
-  public String[] getSimplerTokens(Token[] p){
-    if (p == null)
-      return null;
-
-    String[] sim = new String[p.length];
-    for (int i = 0; i < p.length; i++) {
-
-      assert p[i] != null : "How is the any one " + Arrays.toString(p) + " null!";
-
-      if (p1 == null)
-        throw new RuntimeException("how is p1 null");
-        sim[i] = p[i].getSimple();
-
-    }
-    return sim;
-  }
-/*
   public String[] getSimplerTokens(String[] p) {
     if (p == null)
       return null;
@@ -294,7 +262,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     return sim;
 
   }
-*/
+
   public String toStringSimple() {
 
     String[] simprev = getSimplerTokensPrev();
@@ -306,19 +274,19 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     return sim;
   }
 
-  public Token[] getPrevContext() {
+  public String[] getPrevContext() {
     return prevContext;
   }
 
-  public void setPrevContext(Token[] prevContext) {
+  public void setPrevContext(String[] prevContext) {
     this.prevContext = prevContext;
   }
 
-  public Token[] getNextContext() {
+  public String[] getNextContext() {
     return nextContext;
   }
 
-  public void setNextContext(Token[] nextContext) {
+  public void setNextContext(String[] nextContext) {
     this.nextContext = nextContext;
   }
 
@@ -381,7 +349,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
    * @param array2
    * @return
    */
-  static public boolean subsumesArray(Object[] array1, Object[] array2) {
+  static public boolean subsumesArray(String[] array1, String[] array2) {
 
     if ((array1 == null && array2 == null)) {
       return true;

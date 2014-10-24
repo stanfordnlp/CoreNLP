@@ -168,7 +168,7 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
     return new Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>(allFreq, matchedTokensByPat);
   }
 
-  boolean  containsStopWord(CoreLabel l, Set<String> commonEngWords, Pattern ignoreWordRegex) {
+  boolean containsStopWord(CoreLabel l, Set<String> commonEngWords, Pattern ignoreWordRegex) {
     // if(useWordResultCache.containsKey(l.word()))
     // return useWordResultCache.get(l.word());
 

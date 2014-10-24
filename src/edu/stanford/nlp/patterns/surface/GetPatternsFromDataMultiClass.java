@@ -15,7 +15,11 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -295,11 +299,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           "writeMatchedTokensFiles and batchProcessSents cannot be true at the same time (not implemented; also doesn't make sense to save a large sentences json file)");
     }
 
-    if(constVars.batchProcessSents && constVars.useLuceneIndexing){
-      throw new RuntimeException(
-        "useLuceneIndexing and batchProcessSents cannot be true at the same time (not implemented; also doesn't make sense.)");
-    }
-
     //constVars.setUp(props);
     if (constVars.debug < 1) {
       Redwood.hideChannelsEverywhere(ConstantsAndVariables.minimaldebug);
@@ -321,7 +320,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     wordsPatExtracted = new HashMap<String, TwoDimensionalCounter<String, Integer>>();
 
     //File invIndexDir = null;
-    //boolean createInvIndex = true;
+    boolean createInvIndex = true;
 //    if (constVars.loadInvertedIndexDir != null) {
 //      createInvIndex = false;
 //
@@ -362,37 +361,19 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     createPats = new CreatePatterns(props, constVars);
     assert !(constVars.doNotApplyPatterns && (createPats.useStopWordsBeforeTerm || constVars.numWordsCompound > 1)) : " Cannot have both doNotApplyPatterns and (useStopWordsBeforeTerm true or numWordsCompound > 1)!";
 
-//    String prefixFileForIndex = null;
+    String prefixFileForIndex = null;
 //    if (constVars.usingDirForSentsInIndex) {
 //      prefixFileForIndex = constVars.saveSentencesSerDir;
 //    }
 
-
-    //  constVars.invertedIndex = new SentenceIndex(constVars.matchLowerCaseContext, constVars.getStopWords(), specialwords4Index,
-     //   constVars.batchProcessSents);
-      // new InvertedIndexByTokens(constVars.matchLowerCaseContext, constVars.getStopWords(), specialwords4Index,
-      //    constVars.batchProcessSents, prefixFileForIndex);
-
-    if(constVars.invertedIndexDirectory == null){
-      File f  = File.createTempFile("inv","index");
-      f.deleteOnExit();
-      f.mkdir();
-      constVars.invertedIndexDirectory = f.getAbsolutePath();
-    }
-
-    Set<String> extremelySmallStopWordsList = CollectionUtils.asSet(new String[]{".",",","in","on","of","a","the","an"});
-    constVars.invertedIndex = SentenceIndex.createIndex(constVars.invertedIndexClass, null, props, extremelySmallStopWordsList, specialwords4Index, constVars.invertedIndexDirectory, constVars);
+    if (createInvIndex)
+      constVars.invertedIndex = new InvertedIndexByTokens(constVars.matchLowerCaseContext, constVars.getStopWords(), specialwords4Index,
+          constVars.batchProcessSents, prefixFileForIndex);
 
     int totalNumSents = 0;
 
-    boolean computeDataFreq = false;
-    if (Data.rawFreq == null) {
-      Data.rawFreq = new ClassicCounter<String>();
-      computeDataFreq = true;
-    }
-
     if (constVars.batchProcessSents) {
-      if (labelUsingSeedSets || computeDataFreq) {
+      if (createInvIndex || labelUsingSeedSets) {
 
         for (File f : Data.sentsFiles) {
 
@@ -405,12 +386,15 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
           totalNumSents += sentsf.size();
 
-          if(computeDataFreq){
-            Data.computeRawFreqIfNull(sentsf, constVars.numWordsCompound);
+          if (createInvIndex) {
+            String filename = "";
+//            if (constVars.usingDirForSentsInIndex) {
+//              filename = f.getName();
+//            } else
+              filename = f.getAbsolutePath();
+
+            constVars.invertedIndex.add(sentsf, filename, constVars.useLemmaContextTokens);
           }
-
-          constVars.invertedIndex.add(sentsf);
-
           Redwood.log(Redwood.DBG, "Initializing sents from " + f + " with " + sentsf.size()
               + " sentences, either by labeling with the seed set or just setting the right classes");
           for (String l : constVars.getAnswerClass().keySet()) {
@@ -453,11 +437,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
       totalNumSents = Data.sents.size();
 
-      if(computeDataFreq){
-        Data.computeRawFreqIfNull(Data.sents, constVars.numWordsCompound);
-      }
-
-     constVars.invertedIndex.add(Data.sents);
+      if (createInvIndex)
+        constVars.invertedIndex.add(Data.sents, "1", constVars.useLemmaContextTokens);
 
       Redwood.log(Redwood.DBG, "Initializing sents " + Data.sents.size()
           + " sentences, either by labeling with the seed set or just setting the right classes");
@@ -491,15 +472,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
     }
 
-
-
-
 //    if (constVars.saveInvertedIndexDir != null) {
 //      IOUtils.ensureDir(new File(constVars.saveInvertedIndexDir));
 //      constVars.invertedIndex.saveIndex(constVars.saveInvertedIndexDir);
 //    }
 
-    Redwood.log(Redwood.DBG, "Done creating inverted index of tokens and labeling data with total of "
+    Redwood.log(Redwood.DBG, "Done creating inverted index of " + constVars.invertedIndex.size() + " tokens and labeling data with total of "
         + totalNumSents + " sentences");
 
     if (constVars.usePatternEvalWordClass || constVars.usePhraseEvalWordClass) {
@@ -717,7 +695,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if (useTargetParserParentRestriction)
         inferParentParseTag(s.get(TreeAnnotation.class));
       sents.put(sentIDPrefix + i, s.get(CoreAnnotations.TokensAnnotation.class));
-
 //      if (batchProcessSents && sents.size() >= numMaxSentencesPerBatchFile) {
 //        numFilesTillNow++;
 //        File file = new File(saveSentencesSerDirFile + "/sents_" + numFilesTillNow);
@@ -732,10 +709,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       File file = new File(saveSentencesSerDirFile + "/sents_" + numFilesTillNow);
       IOUtils.writeObjectToFile(sents, file);
       Data.sentsFiles.add(file);
-
-      for(String sentid: sents.keySet())
-         Data.sentId2File.put(sentid, file);
-
       sents.clear();
     }
     // not lugging around sents if batch processing
@@ -744,7 +717,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     return numFilesTillNow;
   }
 
-  /*
   public static int tokenize(String text, String posModelPath, boolean lowercase, boolean useTargetNERRestriction, String sentIDPrefix,
       boolean useTargetParserParentRestriction, String numThreads, boolean batchProcessSents, int numMaxSentencesPerBatchFile,
       File saveSentencesSerDirFile, Map<String, List<CoreLabel>> sents, int numFilesTillNow) throws InterruptedException, ExecutionException,
@@ -809,7 +781,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       sents = null;
     return numFilesTillNow;
   }
-*/
+
   static void inferParentParseTag(Tree tree) {
 
     String grandstr = tree.value();
@@ -1683,7 +1655,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   public void labelWords(String label, Map<String, List<CoreLabel>> sents, Set<String> identifiedWords, String outFile,
       CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) throws IOException, SQLException {
-  //TODO: update the index
+
     CollectionValuedMap<String, Integer> tokensMatchedPatterns = null;
     if (constVars.restrictToMatched) {
       tokensMatchedPatterns = new CollectionValuedMap<String, Integer>();
@@ -2613,10 +2585,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     if (!batchProcessSents)
       sents = new HashMap<String, List<CoreLabel>>();
-    else {
+    else
       Data.sentsFiles = new ArrayList<File>();
-      Data.sentId2File = new ConcurrentHashMap<String, File>();
-    }
 
     String file = props.getProperty("file");
 
@@ -2751,11 +2721,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         IOUtils.writeObjectToFile(evalsents, saveEvalSentencesSerFileFile);
 
         if (batchProcessSents) {
-
+          if (Data.sentsFiles == null)
+            Data.sentsFiles = new ArrayList<File>();
           Data.sentsFiles.add(saveEvalSentencesSerFileFile);
-
-          for(String k: evalsents.keySet())
-            Data.sentId2File.put(k, saveEvalSentencesSerFileFile);
         } else
           sents.putAll(evalsents);
       }
@@ -2811,7 +2779,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
         if (model.constVars.restrictToMatched) {
           TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, Integer>();
-          model.scorePhrases.applyPats(model.getLearnedPatterns(label), label, wordsandLemmaPatExtracted, matchedTokensByPat);
+          model.scorePhrases.applyPats(model.getLearnedPatterns(label), label, false, wordsandLemmaPatExtracted, matchedTokensByPat);
         }
 
         if (model.constVars.batchProcessSents) {
