@@ -2,20 +2,14 @@ package edu.stanford.nlp.patterns.surface;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -549,13 +543,21 @@ public class CreatePatterns {
 //    return patternsForEachToken;
 //  }
 
-  public void getAllPatterns(Map<String, List<CoreLabel>> sents, PatternsForEachToken patsForEach) {
+  /**
+   * creates all patterns and saves them in the correct PatternsForEachToken* class appropriately
+   * @param sents
+   * @param props
+   * @param storePatsForEachTokenWay
+   */
+  public void getAllPatterns(Map<String, List<CoreLabel>> sents, Properties props, ConstantsAndVariables.PatternForEachTokenWay storePatsForEachTokenWay) {
 
 //    this.patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>();
    // this.patternsForEachToken = new HashMap<String, Map<Integer, Set<Integer>>>();
+
+    Date startDate = new Date();
     List<String> keyset = new ArrayList<String>(sents.keySet());
 
-    int num = 0;
+    int num;
     if (constVars.numThreads == 1)
       num = keyset.size();
     else
@@ -579,7 +581,7 @@ public class CreatePatterns {
 
       Callable<Map<String, Map<Integer, Set<Integer>>>> task = null;
       List<String> ids = keyset.subList(from ,to);
-      task = new CreatePatternsThread(sents, ids, patsForEach);
+      task = new CreatePatternsThread(sents, ids, props, storePatsForEachTokenWay);
 
       Future<Map<String, Map<Integer, Set<Integer>>>> submit = executor
           .submit(task);
@@ -598,8 +600,11 @@ public class CreatePatterns {
       }
     }
     executor.shutdown();
-    Redwood.log(ConstantsAndVariables.extremedebug, "Done computing all patterns");
 
+    Date endDate = new Date();
+
+    String timeTaken = GetPatternsFromDataMultiClass.elapsedTime(startDate, endDate);
+    Redwood.log(Redwood.DBG, "Done computing all patterns ["+timeTaken+"]");
     //return patternsForEachToken;
   }
 
@@ -621,13 +626,13 @@ public class CreatePatterns {
     List<String> sentIds;
     PatternsForEachToken patsForEach;
 
-    public CreatePatternsThread(Map<String, List<CoreLabel>> sents, List<String> sentIds, PatternsForEachToken patsForEach) {
+    public CreatePatternsThread(Map<String, List<CoreLabel>> sents, List<String> sentIds, Properties props, ConstantsAndVariables.PatternForEachTokenWay storePatsForEachToken) {
 
       //this.label = label;
       // this.otherClass = otherClass;
       this.sents = sents;
       this.sentIds = sentIds;
-      this.patsForEach = patsForEach;
+      this.patsForEach = PatternsForEachToken.getPatternsInstance(props, storePatsForEachToken);
     }
 
     @Override

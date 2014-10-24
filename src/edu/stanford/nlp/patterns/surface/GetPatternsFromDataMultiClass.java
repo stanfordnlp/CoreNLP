@@ -48,6 +48,8 @@ import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.TypesafeMap;
 import edu.stanford.nlp.util.TypesafeMap.Key;
 import edu.stanford.nlp.util.logging.Redwood;
+import org.joda.time.Interval;
+import org.joda.time.Period;
 
 /**
  * Given text and a seed list, this class gives more words like the seed words
@@ -162,6 +164,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   DecimalFormat df = new DecimalFormat("#.##");
 
+  private boolean notComputedAllPatternsYet = true;
   /*
    * when there is only one label
    */
@@ -954,7 +957,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     List<String> keyset = new ArrayList<String>(sents.keySet());
 
-    int num = 0;
+    Redwood.log(Redwood.DBG, "Labeling " + keyset.size() + " sentences with " + seedWords.size() + " seeds for the label " + label);
+
+    int num;
     if (constVars.numThreads == 1)
       num = keyset.size();
     else
@@ -1090,8 +1095,37 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   }
 
   public Map<String, TwoDimensionalCounter<Integer, String>> patternsandWords = null;
-  public Map<String, TwoDimensionalCounter<Integer, String>> allPatternsandWords = null;
+  //public Map<String, TwoDimensionalCounter<Integer, String>> allPatternsandWords = null;
   public Map<String, Counter<Integer>> currentPatternWeights = null;
+
+  public void processSents(Map<String, List<CoreLabel>> sents) throws IOException, ClassNotFoundException {
+
+    if (constVars.computeAllPatterns) {
+        props.setProperty("createTable", "true");
+        props.setProperty("deleteExisting", "true");
+        props.setProperty("createPatLuceneIndex", "true");
+        Redwood.log(Redwood.DBG, "Computing all patterns");
+        createPats.getAllPatterns(sents, props, constVars.storePatsForEachToken);
+      }
+
+
+    props.setProperty("createTable","false");
+    props.setProperty("deleteExisting","false");
+    props.setProperty("createPatLuceneIndex","false");
+
+  }
+
+  void readSavedPatternsAndIndex() throws IOException, ClassNotFoundException {
+    if(!constVars.computeAllPatterns) {
+      assert constVars.allPatternsDir != null : "allPatternsDir flag cannot be emoty if computeAllPatterns is false!";
+      if (constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY)) {
+        patsForEachToken.addPatterns(IOUtils.readObjectFromFile(constVars.allPatternsDir + "/allpatterns.ser"));
+        Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsDir + "/allpatterns.ser");
+      }
+      constVars.setPatternIndex(patsForEachToken.readPatternIndex(constVars.allPatternsDir));
+
+    }
+  }
 
   @SuppressWarnings({ "unchecked" })
   public Counter<Integer> getPatterns(String label, Set<Integer> alreadyIdentifiedPatterns, Integer p0, Counter<String> p0Set,
@@ -1099,131 +1133,49 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     TwoDimensionalCounter<Integer, String> patternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
     TwoDimensionalCounter<Integer, String> negPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
-    TwoDimensionalCounter<Integer, String> posnegPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
+    //TwoDimensionalCounter<Integer, String> posnegPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
     TwoDimensionalCounter<Integer, String> unLabeledPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
-    TwoDimensionalCounter<Integer, String> negandUnLabeledPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
-    TwoDimensionalCounter<Integer, String> allPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
+    //TwoDimensionalCounter<Integer, String> negandUnLabeledPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
+    //TwoDimensionalCounter<Integer, String> allPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
+    Set<String> allCandidatePhrases = new HashSet<String>();
 
+      if (!constVars.batchProcessSents) {
 
-    if (!constVars.batchProcessSents) {
-      // if not batch processing
-      if (this.patsForEachToken == null) {
-
-        if (constVars.computeAllPatterns) {
-          props.setProperty("createTable","true");
-          props.setProperty("deleteExisting","true");
-          props.setProperty("createPatLuceneIndex","true");
-        }
-        else{
-          props.setProperty("createTable","false");
-          props.setProperty("deleteExisting","false");
-          props.setProperty("createPatLuceneIndex","false");
+        if(notComputedAllPatternsYet){
+          // if not batch processing
+          processSents(Data.sents);
+          patsForEachToken = PatternsForEachToken.getPatternsInstance(props, constVars.storePatsForEachToken);
+          readSavedPatternsAndIndex();
+          System.out.println("size of pats for each token is " + patsForEachToken.size());
         }
 
+       this.calculateSufficientStats(Data.sents, patsForEachToken, label, patternsandWords4Label, negPatternsandWords4Label, unLabeledPatternsandWords4Label, allCandidatePhrases);
 
-        patsForEachToken = PatternsForEachToken.getPatternsInstance(props, constVars.storePatsForEachToken);
 
-        // if patterns for each token null
-        if (constVars.computeAllPatterns) {
-          Redwood.log(Redwood.DBG, "Computing all patterns");
-          createPats.getAllPatterns(Data.sents, patsForEachToken);
-        } else{
-          assert constVars.allPatternsDir != null : "allPatternsDir flag cannot be emoty if computeAllPatterns is false!";
-          if(constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY)) {
-            patsForEachToken.addPatterns(IOUtils.readObjectFromFile(constVars.allPatternsDir + "/allpatterns.ser"));
-            Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsDir + "/allpatterns.ser");
+      }// batch processing sentences
+      else {
+        for (File f : Data.sentsFiles) {
+          Redwood.log(Redwood.DBG, (constVars.computeAllPatterns ? "Creating patterns and " : "") + "calculating sufficient statistics from " + f);
+          Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
+
+          if(notComputedAllPatternsYet){
+            //in the first iteration
+            processSents(sents);
+            if(patsForEachToken == null){
+              //in the first iteration, for the first file
+              patsForEachToken = PatternsForEachToken.getPatternsInstance(props, constVars.storePatsForEachToken);
+              readSavedPatternsAndIndex();
+            }
           }
-          constVars.setPatternIndex(patsForEachToken.readPatternIndex(constVars.allPatternsDir));
+          this.calculateSufficientStats(sents, patsForEachToken, label, patternsandWords4Label, negPatternsandWords4Label, unLabeledPatternsandWords4Label, allCandidatePhrases);
         }
       }
 
-      this.calculateSufficientStats(Data.sents, patsForEachToken, label, patternsandWords4Label, posnegPatternsandWords4Label,
-        allPatternsandWords4Label, negPatternsandWords4Label, unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label);
-
-    }// batch processing sentences
-    else {
-
-      int i = -1;
-      for (File f : Data.sentsFiles) {
-        i++;
-        Redwood.log(Redwood.DBG, (constVars.computeAllPatterns ? "Creating patterns and " : "") + "calculating sufficient statistics from " + f);
-
-        Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
-
-        if(i == 0){
-
-          if (patsForEachToken == null) {
-
-
-            if (constVars.computeAllPatterns) {
-              props.setProperty("createTable","true");
-              props.setProperty("deleteExisting","true");
-              props.setProperty("createPatLuceneIndex","true");
-            }
-            else{
-              props.setProperty("createTable","false");
-              props.setProperty("deleteExisting","false");
-              props.setProperty("createPatLuceneIndex","false");
-            }
-
-
-
-            patsForEachToken = PatternsForEachToken.getPatternsInstance(props, constVars.storePatsForEachToken);
-
-            // if patterns for each token null
-            if (constVars.computeAllPatterns) {
-              Redwood.log(Redwood.DBG, "Computing all patterns");
-              createPats.getAllPatterns(sents, patsForEachToken);
-            } else{
-              assert constVars.allPatternsDir != null : "allPatternsDir flag cannot be emoty if computeAllPatterns is false!";
-              if(constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY)) {
-                patsForEachToken.addPatterns(IOUtils.readObjectFromFile(constVars.allPatternsDir + "/allpatterns.ser"));
-                Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsDir + "/allpatterns.ser");
-              }
-              constVars.setPatternIndex(patsForEachToken.readPatternIndex(constVars.allPatternsDir));
-            }
-
-//            patsForEachToken = PatternsForEachToken.getPatternsInstance(props, constVars.storePatsForEachToken);
-//
-//            if(constVars.computeAllPatterns){
-//              props.setProperty("createTable","true");
-//              props.setProperty("deleteExisting","true");
-//              props.setProperty("createPatLuceneIndex","true");
-//
-//            }
-//            else{
-//              props.setProperty("createTable","false");
-//              props.setProperty("deleteExisting","false");
-//              props.setProperty("createPatLuceneIndex","false");
-//              assert constVars.allPatternsDir != null: "allPatternsDir flag cannot be emoty if computeAllPatterns is false!";;
-//              if(constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY)) {
-//                patsForEachToken.addPatterns(IOUtils.readObjectFromFile(constVars.allPatternsDir + "/allpatterns.ser"));
-//                Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsDir + "/allpatterns.ser");
-//              }
-//
-//              constVars.setPatternIndex(patsForEachToken.readPatternIndex(constVars.allPatternsDir));
-//            }
-          }
-        }
-
-
-
-        if (constVars.computeAllPatterns) {
-          createPats.getAllPatterns(sents, patsForEachToken);
-          Redwood.log(Redwood.DBG, "Done creating patterns for " + f);
-        }
-
-        this.calculateSufficientStats(sents, patsForEachToken, label, patternsandWords4Label, posnegPatternsandWords4Label, allPatternsandWords4Label,
-          negPatternsandWords4Label, unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label);
-
-      }
-
-    }
-
-    if(constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.DB))
-      patsForEachToken.createIndexIfUsingDBAndNotExists();
+    notComputedAllPatternsYet = false;
 
     if (constVars.computeAllPatterns){
+      if(constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.DB))
+        patsForEachToken.createIndexIfUsingDBAndNotExists();
       savePatternIndex(constVars.allPatternsDir);
     }
 
@@ -1234,8 +1186,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
     if (patternsandWords == null)
       patternsandWords = new HashMap<String, TwoDimensionalCounter<Integer, String>>();
-    if (allPatternsandWords == null)
-      allPatternsandWords = new HashMap<String, TwoDimensionalCounter<Integer, String>>();
+//    if (allPatternsandWords == null)
+//      allPatternsandWords = new HashMap<String, TwoDimensionalCounter<Integer, String>>();
     if (currentPatternWeights == null)
       currentPatternWeights = new HashMap<String, Counter<Integer>>();
 
@@ -1244,9 +1196,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     Set<Integer> removePats = enforceMinSupportRequirements(patternsandWords4Label, unLabeledPatternsandWords4Label);
     Counters.removeKeys(patternsandWords4Label, removePats);
     Counters.removeKeys(unLabeledPatternsandWords4Label, removePats);
-    Counters.removeKeys(negandUnLabeledPatternsandWords4Label, removePats);
-    Counters.removeKeys(allPatternsandWords4Label, removePats);
-    Counters.removeKeys(posnegPatternsandWords4Label, removePats);
+//    Counters.removeKeys(negandUnLabeledPatternsandWords4Label, removePats);
+//    Counters.removeKeys(allPatternsandWords4Label, removePats);
+//    Counters.removeKeys(posnegPatternsandWords4Label, removePats);
     Counters.removeKeys(negPatternsandWords4Label, removePats);
 
     // Redwood.log(ConstantsAndVariables.extremedebug,
@@ -1257,8 +1209,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     Class<?> patternscoringclass = getPatternScoringClass(constVars.patternScoring);
 
     if (patternscoringclass != null && patternscoringclass.equals(ScorePatternsF1.class)) {
-      scorePatterns = new ScorePatternsF1(constVars, constVars.patternScoring, label, patternsandWords4Label, negPatternsandWords4Label,
-          unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props, p0Set, p0);
+      scorePatterns = new ScorePatternsF1(constVars, constVars.patternScoring, label, allCandidatePhrases, patternsandWords4Label, negPatternsandWords4Label,
+          unLabeledPatternsandWords4Label, props, p0Set, p0);
       Counter<Integer> finalPat = scorePatterns.score();
       Counters.removeKeys(finalPat, alreadyIdentifiedPatterns);
       Counters.retainNonZeros(finalPat);
@@ -1269,22 +1221,20 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       return finalPat;
 
     } else if (patternscoringclass != null && patternscoringclass.equals(ScorePatternsRatioModifiedFreq.class)) {
-      scorePatterns = new ScorePatternsRatioModifiedFreq(constVars, constVars.patternScoring, label, patternsandWords4Label,
-          negPatternsandWords4Label, unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label,
-          phInPatScoresCache, scorePhrases, props);
+      scorePatterns = new ScorePatternsRatioModifiedFreq(constVars, constVars.patternScoring, label, allCandidatePhrases, patternsandWords4Label,
+          negPatternsandWords4Label, unLabeledPatternsandWords4Label, phInPatScoresCache, scorePhrases, props);
 
     } else if (patternscoringclass != null && patternscoringclass.equals(ScorePatternsFreqBased.class)) {
-      scorePatterns = new ScorePatternsFreqBased(constVars, constVars.patternScoring, label, patternsandWords4Label, negPatternsandWords4Label,
-          unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props);
+      scorePatterns = new ScorePatternsFreqBased(constVars, constVars.patternScoring, label, allCandidatePhrases, patternsandWords4Label, negPatternsandWords4Label,
+          unLabeledPatternsandWords4Label, props);
 
     } else if (constVars.patternScoring.equals(PatternScoring.kNN)) {
       try {
         Class<? extends ScorePatterns> clazz = (Class<? extends ScorePatterns>) Class.forName("edu.stanford.nlp.patterns.surface.ScorePatternsKNN");
-        Constructor<? extends ScorePatterns> ctor = clazz.getConstructor(ConstantsAndVariables.class, PatternScoring.class, String.class,
-            TwoDimensionalCounter.class, TwoDimensionalCounter.class, TwoDimensionalCounter.class, TwoDimensionalCounter.class,
-            TwoDimensionalCounter.class, ScorePhrases.class, Properties.class);
-        scorePatterns = ctor.newInstance(constVars, constVars.patternScoring, label, patternsandWords4Label, negPatternsandWords4Label,
-            unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, scorePhrases, props);
+        Constructor<? extends ScorePatterns> ctor = clazz.getConstructor(ConstantsAndVariables.class, PatternScoring.class, String.class, Set.class,
+            TwoDimensionalCounter.class, TwoDimensionalCounter.class, TwoDimensionalCounter.class, ScorePhrases.class, Properties.class);
+        scorePatterns = ctor.newInstance(constVars, constVars.patternScoring, label, allCandidatePhrases, patternsandWords4Label, negPatternsandWords4Label,
+            unLabeledPatternsandWords4Label, scorePhrases, props);
 
       } catch (ClassNotFoundException e) {
         throw new RuntimeException("kNN pattern scoring is not released yet. Stay tuned.");
@@ -1340,7 +1290,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       boolean notchoose = false;
       if (!unLabeledPatternsandWords4Label.containsFirstKey(patindex) || unLabeledPatternsandWords4Label.getCounter(patindex).isEmpty()) {
         Redwood.log(ConstantsAndVariables.extremedebug, "Removing pattern " + pat + " because it has no unlab support; pos words: "
-            + patternsandWords4Label.getCounter(patindex) + " and all words " + allPatternsandWords4Label.getCounter(patindex));
+            + patternsandWords4Label.getCounter(patindex));
         notchoose = true;
         continue;
       }
@@ -1538,7 +1488,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                     "%1$s:%2$f", ";"));
       }
     }
-    allPatternsandWords.put(label, allPatternsandWords4Label);
+    //allPatternsandWords.put(label, allPatternsandWords4Label);
     patternsandWords.put(label, patternsandWords4Label);
     currentPatternWeights.put(label, currentPatternWeights4Label);
 
@@ -1577,35 +1527,140 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   static AtomicInteger numCallsToCalStats = new AtomicInteger();
 
 
+  public static <E> List<List<E>> splitIntoNumThreads(List<E> c, int n, int numThreads) {
+    if (n < 0)
+      throw new IllegalArgumentException("n < 0: " + n);
+    if (n > c.size())
+      throw new IllegalArgumentException("n > size of collection: " + n + ", " + c.size());
+    List<List<E>> resultAll = new ArrayList<List<E>>(numThreads);
+    int num;
+
+    if (numThreads == 1)
+      num = n;
+    else
+      num = n / (numThreads - 1);
+
+    //Collections.shuffle(c, new Random(numCallsToCalStats.getAndIncrement()));
+    System.out.println("shuffled " + c.size() + " sentences and selecting " + num  + " sentences per thread");
+    List<E> result = new ArrayList<E>(num);
+    int totalitems = 0;
+    int nitem = 0;
+    Random r = new Random(numCallsToCalStats.incrementAndGet());
+    boolean[] added = new boolean[c.size()];
+    Arrays.fill(added, false);
+    while(totalitems < n){
+
+      //find the new sample index
+      int index;
+
+      do{
+        index =  r.nextInt(c.size());
+      }while(added[index]);
+      added[index] = true;
+
+      E c1 = c.get(index);
+
+      if(nitem == num){
+        resultAll.add(result);
+        result = new ArrayList<E>(num);
+        nitem= 0;
+      }
+      result.add(c1);
+      totalitems++;
+      nitem ++;
+    }
+
+    if(!result.isEmpty())
+      resultAll.add(result);
+    return resultAll;
+  }
+
   private void calculateSufficientStats(Map<String, List<CoreLabel>> sents,
-      PatternsForEachToken patternsForEachToken, String label,
-      TwoDimensionalCounter<Integer, String> patternsandWords4Label,
-      TwoDimensionalCounter<Integer, String> posnegPatternsandWords4Label,
-      TwoDimensionalCounter<Integer, String> allPatternsandWords4Label,
-      TwoDimensionalCounter<Integer, String> negPatternsandWords4Label,
-      TwoDimensionalCounter<Integer, String> unLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<Integer, String> negandUnLabeledPatternsandWords4Label) {
+                                        PatternsForEachToken patternsForEachToken, String label,
+                                        TwoDimensionalCounter<Integer, String> patternsandWords4Label,
+                                        TwoDimensionalCounter<Integer, String> negPatternsandWords4Label,
+                                        TwoDimensionalCounter<Integer, String> unLabeledPatternsandWords4Label, Set<String> allCandidatePhrases) {
+
+    Redwood.log(Redwood.DBG,"calculating sufficient stats");
+
     // calculating the sufficient statistics
     Class answerClass4Label = constVars.getAnswerClass().get(label);
-    Collection<String> sampledSentIds = CollectionUtils.sampleWithoutReplacement(sents.keySet(), (int) Math.round(constVars.sampleSentencesForSufficientStats*sents.size()), new Random(numCallsToCalStats.incrementAndGet()));
+    int sampleSize = constVars.sampleSentencesForSufficientStats == 1.0?sents.size():(int) Math.round(constVars.sampleSentencesForSufficientStats*sents.size());
+    List<List<String>> sampledSentIds = splitIntoNumThreads(CollectionUtils.toList(sents.keySet()),sampleSize, constVars.numThreads);
+    Redwood.log(Redwood.DBG,"sampled " + sampleSize + " sentences (" + constVars.sampleSentencesForSufficientStats*100 + "%)");
 
-    for (String sentId : sampledSentIds) {
-      Map<Integer, Set<Integer>> pat4Sent = patternsForEachToken.getPatternsForAllTokens(sentId);
-      if (pat4Sent == null) {
-        throw new RuntimeException("How come there are no patterns for " + sentId);
+    ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
+
+    List<Future<Triple<List<Pair<Integer, String>>, List<Pair<Integer, String>>, List<Pair<Integer, String>>>>> list = new ArrayList<Future<Triple<List<Pair<Integer, String>>, List<Pair<Integer, String>>, List<Pair<Integer, String>>>>>();
+    for (List<String> sampledSents : sampledSentIds) {
+
+      Callable<Triple<List<Pair<Integer, String>>, List<Pair<Integer, String>>, List<Pair<Integer, String>>>> task = new CalculateSufficientStatsThreads(patternsForEachToken, sampledSents, sents, label, answerClass4Label);
+      Future<Triple<List<Pair<Integer, String>>, List<Pair<Integer, String>>, List<Pair<Integer, String>>>> submit = executor.submit(task);
+      list.add(submit);
+    }
+
+    // Now retrieve the result
+    for (Future<Triple<List<Pair<Integer, String>>, List<Pair<Integer, String>>, List<Pair<Integer, String>>>> future : list) {
+      try {
+        Triple<List<Pair<Integer, String>>, List<Pair<Integer, String>>, List<Pair<Integer, String>>> stats = future.get();
+        addStats(patternsandWords4Label, stats.first());
+        addStats(negPatternsandWords4Label, stats.second());
+        addStats(unLabeledPatternsandWords4Label, stats.third());
+      } catch (Exception e) {
+        executor.shutdownNow();
+        throw new RuntimeException(e);
       }
-      List<CoreLabel> sent = sents.get(sentId);
-      for (int i = 0; i < sent.size(); i++) {
-        CoreLabel token = sent.get(i);
-        //Map<String, Set<String>> matchedPhrases = token.get(PatternsAnnotations.MatchedPhrases.class);
+    }
+    executor.shutdown();
 
-        String tokenWordOrLemma = token.word();
-        String longestMatchingPhrase = null;
 
-        if (constVars.useMatchingPhrase) {
-          Map<String, String> longestMatchingPhrases = token.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
-          longestMatchingPhrase = longestMatchingPhrases.get(label);
-          longestMatchingPhrase = (longestMatchingPhrase !=null && (longestMatchingPhrase.length() > tokenWordOrLemma.length()))? longestMatchingPhrase : tokenWordOrLemma;
+  }
+
+  private void addStats(TwoDimensionalCounter<Integer, String> pw, List<Pair<Integer, String>> v) {
+    for(Pair<Integer, String> w: v){
+      pw.incrementCount(w.first(), w.second());
+    }
+  }
+
+  private class CalculateSufficientStatsThreads implements Callable{
+
+    private final Map<String, List<CoreLabel>> sents;
+    private final PatternsForEachToken patternsForEachToken;
+    private final Collection<String> sentIds;
+    private final String label;
+    private final Class answerClass4Label;
+
+    public CalculateSufficientStatsThreads(PatternsForEachToken patternsForEachToken, Collection<String> sentIds, Map<String, List<CoreLabel>> sents,String label, Class answerClass4Label){
+      this.patternsForEachToken = patternsForEachToken;
+      this.sentIds = sentIds;
+      this.sents = sents;
+      this.label = label;
+      this.answerClass4Label = answerClass4Label;
+    }
+
+    @Override
+    public Triple<List<Pair<Integer, String>>, List<Pair<Integer, String>>, List<Pair<Integer, String>>> call() throws Exception {
+
+      List<Pair<Integer, String>> posWords = new ArrayList<Pair<Integer, String>>();
+      List<Pair<Integer, String>> negWords = new ArrayList<Pair<Integer, String>>();
+      List<Pair<Integer, String>> unlabWords = new ArrayList<Pair<Integer, String>>();
+      for(String sentId: sentIds){
+        Map<Integer, Set<Integer>> pat4Sent = patternsForEachToken.getPatternsForAllTokens(sentId);
+        if (pat4Sent == null) {
+          throw new RuntimeException("How come there are no patterns for " + sentId);
+        }
+        List<CoreLabel> sent = sents.get(sentId);
+        for (int i = 0; i < sent.size(); i++) {
+          CoreLabel token = sent.get(i);
+          //Map<String, Set<String>> matchedPhrases = token.get(PatternsAnnotations.MatchedPhrases.class);
+
+          String tokenWordOrLemma = token.word();
+          String longestMatchingPhrase = null;
+
+          if (constVars.useMatchingPhrase) {
+            Map<String, String> longestMatchingPhrases = token.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
+            longestMatchingPhrase = longestMatchingPhrases.get(label);
+            longestMatchingPhrase = (longestMatchingPhrase !=null && (longestMatchingPhrase.length() > tokenWordOrLemma.length()))? longestMatchingPhrase : tokenWordOrLemma;
           /*if (matchedPhrases != null && !matchedPhrases.isEmpty()) {
             for (String s : matchedPhrases) {
               if (s.equals(tokenWordOrLemma)) {
@@ -1620,103 +1675,82 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             longestMatchingPhrase = tokenWordOrLemma;
           }*/
 
-        } else
-          longestMatchingPhrase = tokenWordOrLemma;
+          } else
+            longestMatchingPhrase = tokenWordOrLemma;
 
-        Set<Integer> pats = pat4Sent.get(i);
-        if (pats == null)
-          throw new RuntimeException("Why are patterns null for sentence " + sentId + " and token " + i +". pat4Sent has token ids " + pat4Sent.keySet() + (constVars.batchProcessSents ? "" : ". The sentence is " + Data.sents.get(sentId))+". If you have switched batchProcessSents, recompute the patterns.");
+          Set<Integer> pats = pat4Sent.get(i);
+          if (pats == null)
+            throw new RuntimeException("Why are patterns null for sentence " + sentId + " and token " + i +". pat4Sent has token ids " + pat4Sent.keySet() + (constVars.batchProcessSents ? "" : ". The sentence is " + Data.sents.get(sentId))+". If you have switched batchProcessSents, recompute the patterns.");
 
 
 //        Set<Integer> prevPat = pat.first();
 //        Set<Integer> nextPat = pat.second();
 //        Set<Integer> prevnextPat = pat.third();
-        if (constVars.ignoreWordRegex.matcher(token.word()).matches())
-          continue;
-
-        // if the target word/phrase does not satisfy the POS requirement
-        String tag = token.tag();
-        if (constVars.allowedTagsInitials != null && constVars.allowedTagsInitials.containsKey(label)) {
-          boolean use = false;
-          for (String allowed : constVars.allowedTagsInitials.get(label)) {
-            if (tag.startsWith(allowed)) {
-              use = true;
-              break;
-            }
-          }
-          if (!use)
+          if (constVars.ignoreWordRegex.matcher(token.word()).matches())
             continue;
-        }
 
-        // if the target word/phrase does not satisfy the NER requirements
-        String nertag = token.ner();
-        if (constVars.allowedNERsforLabels != null && constVars.allowedNERsforLabels.containsKey(label)) {
-          if (!constVars.allowedNERsforLabels.get(label).contains(nertag)) {
-            continue;
-          }
-        }
-        if (token.get(answerClass4Label).equals(label)) {
-          // Positive
-          for (Integer sindex : pats) {
-            //SurfacePattern s = constVars.patternIndex.get(sindex);
-            patternsandWords4Label.getCounter(sindex).incrementCount(longestMatchingPhrase);
-            posnegPatternsandWords4Label.getCounter(sindex).incrementCount(longestMatchingPhrase);
-            allPatternsandWords4Label.getCounter(sindex).incrementCount(longestMatchingPhrase);
+          // if the target word/phrase does not satisfy the POS requirement
+          String tag = token.tag();
+          if (constVars.allowedTagsInitials != null && constVars.allowedTagsInitials.containsKey(label)) {
+            boolean use = false;
+            for (String allowed : constVars.allowedTagsInitials.get(label)) {
+              if (tag.startsWith(allowed)) {
+                use = true;
+                break;
+              }
+            }
+            if (!use)
+              continue;
           }
 
-          //boolean prevTokenLabel = i == 0 ? false : sent.get(i - 1).get(answerClass4Label).equals(label);
-          //boolean nextTokenLabel = i == sent.size() - 1 ? false : sent.get(i + 1).get(answerClass4Label).equals(label);
-
-//          if (!constVars.ignorePatWithLabeledNeigh || !prevTokenLabel) {
-//            for (Integer sindex : prevPat) {
-//              SurfacePattern s = constVars.patternIndex.get(sindex);
-//              patternsandWords4Label.getCounter(s).incrementCount(longestMatchingPhrase);
-//              posnegPatternsandWords4Label.getCounter(s).incrementCount(longestMatchingPhrase);
-//              allPatternsandWords4Label.getCounter(s).incrementCount(longestMatchingPhrase);
-//            }
-//          }
-//          if (!constVars.ignorePatWithLabeledNeigh || !nextTokenLabel) {
-//            for (Integer sindex : nextPat) {
-//              SurfacePattern s = constVars.patternIndex.get(sindex);
-//              patternsandWords4Label.getCounter(s).incrementCount(longestMatchingPhrase);
-//              posnegPatternsandWords4Label.getCounter(s).incrementCount(longestMatchingPhrase);
-//              allPatternsandWords4Label.getCounter(s).incrementCount(longestMatchingPhrase);
-//            }
-//          }
-//          if (!constVars.ignorePatWithLabeledNeigh || (!prevTokenLabel && !nextTokenLabel)) {
-//            for (Integer sindex : prevnextPat) {
-//              SurfacePattern s = constVars.patternIndex.get(sindex);
-//              patternsandWords4Label.getCounter(s).incrementCount(longestMatchingPhrase);
-//              posnegPatternsandWords4Label.getCounter(s).incrementCount(longestMatchingPhrase);
-//              allPatternsandWords4Label.getCounter(s).incrementCount(longestMatchingPhrase);
-//            }
-//          }
-        } else {
-          // Negative or unlabeled
-          boolean negToken = false;
-          Map<Class, Object> ignore = constVars.getIgnoreWordswithClassesDuringSelection().get(label);
-          for (Class igCl : ignore.keySet())
-            if ((Boolean) token.get(igCl)) {
-              negToken = true;
-              break;
+          // if the target word/phrase does not satisfy the NER requirements
+          String nertag = token.ner();
+          if (constVars.allowedNERsforLabels != null && constVars.allowedNERsforLabels.containsKey(label)) {
+            if (!constVars.allowedNERsforLabels.get(label).contains(nertag)) {
+              continue;
             }
-          if (!negToken)
-            if (constVars.getOtherSemanticClassesWords().contains(token.word()) || constVars.getOtherSemanticClassesWords().contains(token.lemma()))
-              negToken = true;
+          }
+          if (token.get(answerClass4Label).equals(label)) {
+            // Positive
+            for (Integer sindex : pats) {
+              //SurfacePattern s = constVars.patternIndex.get(sindex);
 
-          for (Integer sindex : pats) {
-            //SurfacePattern s = constVars.patternIndex.get(sindex);
-            if (negToken) {
-              negPatternsandWords4Label.getCounter(sindex).incrementCount(tokenWordOrLemma);
-              posnegPatternsandWords4Label.getCounter(sindex).incrementCount(tokenWordOrLemma);
-            } else {
-              unLabeledPatternsandWords4Label.getCounter(sindex).incrementCount(tokenWordOrLemma);
+              //patternsandWords4Label.getCounter(sindex).incrementCount(longestMatchingPhrase);
+              posWords.add(new Pair<Integer, String>(sindex, longestMatchingPhrase));
+              //posnegPatternsandWords4Label.getCounter(sindex).incrementCount(longestMatchingPhrase);
+              //allPatternsandWords4Label.getCounter(sindex).incrementCount(longestMatchingPhrase);
             }
-            negandUnLabeledPatternsandWords4Label.getCounter(sindex).incrementCount(tokenWordOrLemma);
-            allPatternsandWords4Label.incrementCount(sindex, tokenWordOrLemma);
+
+          } else {
+            // Negative or unlabeled
+            boolean negToken = false;
+            Map<Class, Object> ignore = constVars.getIgnoreWordswithClassesDuringSelection().get(label);
+            for (Class igCl : ignore.keySet())
+              if ((Boolean) token.get(igCl)) {
+                negToken = true;
+                break;
+              }
+            if (!negToken)
+              if (constVars.getOtherSemanticClassesWords().contains(token.word()) || constVars.getOtherSemanticClassesWords().contains(token.lemma()))
+                negToken = true;
+
+            for (Integer sindex : pats) {
+              //SurfacePattern s = constVars.patternIndex.get(sindex);
+              if (negToken) {
+                negWords.add(new Pair<Integer, String>(sindex, tokenWordOrLemma));
+                //negPatternsandWords4Label.getCounter(sindex).incrementCount(tokenWordOrLemma);
+                //posnegPatternsandWords4Label.getCounter(sindex).incrementCount(tokenWordOrLemma);
+              } else {
+                unlabWords.add(new Pair<Integer, String>(sindex, tokenWordOrLemma));
+                //unLabeledPatternsandWords4Label.getCounter(sindex).incrementCount(tokenWordOrLemma);
+              }
+              //negandUnLabeledPatternsandWords4Label.getCounter(sindex).incrementCount(tokenWordOrLemma);
+              //allPatternsandWords4Label.incrementCount(sindex, tokenWordOrLemma);
+            }
           }
         }
       }
+      return new Triple(posWords, negWords, unlabWords);
     }
   }
 
@@ -1803,6 +1837,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   public void labelWords(String label, Map<String, List<CoreLabel>> sents, Set<String> identifiedWords, String outFile,
       CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) throws IOException {
 
+    Redwood.log(Redwood.DBG, "Labeling " + sents.size() + " sentences with " + identifiedWords.size() + " phrases for label " + label);
+
     CollectionValuedMap<String, Integer> tokensMatchedPatterns = null;
     if (constVars.restrictToMatched) {
       tokensMatchedPatterns = new CollectionValuedMap<String, Integer>();
@@ -1850,6 +1886,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
             }
           }
           if (donotuse == false) {
+            String phStr = StringUtils.join(ph, " ");
+            Redwood.log(ConstantsAndVariables.extremedebug,"Labeling because of phrase " + phStr);
             for (int j = 0; j < ph.length; j++) {
               int index = idx + j;
               CoreLabel l = sentEn.getValue().get(index);
@@ -1859,7 +1897,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
 
                 CollectionValuedMap<String, String> matched = new CollectionValuedMap<String, String>();
-                matched.add(label, StringUtils.join(ph, " "));
+                matched.add(label, phStr);
                 if(!l.containsKey(PatternsAnnotations.MatchedPhrases.class))
                   l.set(PatternsAnnotations.MatchedPhrases.class, matched);
                 else
@@ -2930,10 +2968,11 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     // If you want to reuse patterns and words learned previously (may be on
     // another dataset etc)
     boolean loadSavedPatternsWordsDir = Boolean.parseBoolean(props.getProperty("loadSavedPatternsWordsDir"));
-
+    boolean labelSentsUsingModel = Boolean.parseBoolean(props.getProperty("labelSentsUsingModel","true"));
+    boolean applyPatsUsingModel = Boolean.parseBoolean(props.getProperty("applyPatsUsingModel","true"));
     //Load already save pattersn and phrases
     if (loadSavedPatternsWordsDir) {
-      loadFromSavedPatternsWordsDir(model , props);
+      loadFromSavedPatternsWordsDir(model , props, labelSentsUsingModel, applyPatsUsingModel);
     }
 
     if (learn)
@@ -3018,10 +3057,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       model.constVars.invertedIndex.saveIndex(model.constVars.invertedIndexDirectory);
     }
 
+    if(model.constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.LUCENE)){
+      model.patsForEachToken.close();
+    }
     return model;
   }
 
-  private static void loadFromSavedPatternsWordsDir(GetPatternsFromDataMultiClass model, Properties props) throws IOException, ClassNotFoundException {
+
+  private static void loadFromSavedPatternsWordsDir(GetPatternsFromDataMultiClass model, Properties props, boolean labelSentsUsingModel, boolean applyPatsUsingModel) throws IOException, ClassNotFoundException {
     String patternsWordsDir = props.getProperty("patternsWordsDir");
     String sentsOutFile = props.getProperty("sentsOutFile");
 
@@ -3061,24 +3104,47 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         model.setLearnedWords(words, label);
         Redwood.log(Redwood.DBG, "Loaded " + words.size() + " phrases from " + wordf);
       }
-      CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat = null;
+      CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<>();
 
-      if (model.constVars.restrictToMatched) {
-        TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, Integer>();
-        model.scorePhrases.applyPats(model.getLearnedPatterns(label), label, wordsandLemmaPatExtracted, matchedTokensByPat);
+      Iterator<Pair<Map<String, List<CoreLabel>>, File>> sentsIter = new ConstantsAndVariables.DataSentsIterator(model.constVars.batchProcessSents);
+      TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, Integer>();
+
+      while(sentsIter.hasNext()){
+        Pair<Map<String, List<CoreLabel>>, File> sents = sentsIter.next();
+        if (model.constVars.restrictToMatched || applyPatsUsingModel) {
+          model.constVars.invertedIndex.add(sents.first(), true);
+          model.constVars.invertedIndex.add(sents.first(), true);
+          model.scorePhrases.applyPats(model.getLearnedPatterns(label), label, wordsandLemmaPatExtracted, matchedTokensByPat);
+        }
+        if(labelSentsUsingModel){
+            Redwood.log(Redwood.DBG, "labeling sentences from " + sents.second() + " with the already learned words");
+            assert sents.first() != null : "Why are sents null";
+            model.labelWords(label, sents.first(), model.getLearnedWords(label).keySet(), sentsOutFile, matchedTokensByPat);
+          if(sents.second().exists())
+            IOUtils.writeObjectToFile(sents, sents.second());
+      }
       }
 
-      if (model.constVars.batchProcessSents) {
-        for (File f : Data.sentsFiles) {
-          Redwood.log(Redwood.DBG, "labeling sentences from " + f + " with the already learned words");
-          Map<String, List<CoreLabel>> sentsf = IOUtils.readObjectFromFile(f);
-          assert sentsf != null : "Why are sents null";
-          model.labelWords(label, sentsf, model.getLearnedWords(label).keySet(), sentsOutFile, matchedTokensByPat);
-          IOUtils.writeObjectToFile(sentsf, f);
-        }
-      } else
-        model.labelWords(label, Data.sents, model.getLearnedWords(label).keySet(), sentsOutFile, matchedTokensByPat);
+
+//      if(labelSentsUsingModel){
+//        if (model.constVars.batchProcessSents) {
+//          for (File f : Data.sentsFiles) {
+//            Redwood.log(Redwood.DBG, "labeling sentences from " + f + " with the already learned words");
+//            Map<String, List<CoreLabel>> sentsf = IOUtils.readObjectFromFile(f);
+//            assert sentsf != null : "Why are sents null";
+//            model.labelWords(label, sentsf, model.getLearnedWords(label).keySet(), sentsOutFile, matchedTokensByPat);
+//            IOUtils.writeObjectToFile(sentsf, f);
+//          }
+//        } else
+//          model.labelWords(label, Data.sents, model.getLearnedWords(label).keySet(), sentsOutFile, matchedTokensByPat);
+//      }
     }
+  }
+
+  public static String elapsedTime(Date d1, Date d2){
+    Interval interval = new Interval(d1.getTime(), d2.getTime());
+    Period period = interval.toPeriod();
+    return period.getDays() + " days, " + period.getHours()+" hours, " + period.getMinutes()  +" minutes, " +period.getSeconds()+" seconds";
   }
 
 
