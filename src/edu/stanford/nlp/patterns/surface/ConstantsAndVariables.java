@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.Env;
+import edu.stanford.nlp.ling.tokensregex.NodePattern;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScoring;
@@ -58,8 +59,8 @@ public class ConstantsAndVariables implements Serializable{
   /**
    * Cached file of all patterns for all tokens
    */
-  @Option(name = "allPatternsFile")
-  public String allPatternsFile = null;
+  @Option(name = "allPatternsDir")
+  public String allPatternsDir = null;
 
   /**
    * If all patterns should be computed. Otherwise patterns are read from
@@ -93,7 +94,7 @@ public class ConstantsAndVariables implements Serializable{
   /**
    * Currently, does not work correctly. TODO: make this work. Ideally this
    * would label words only when they occur in the context of any learned
-   * pattern
+   * pattern. This comment seems old. Test it!
    */
   @Option(name = "restrictToMatched")
   public boolean restrictToMatched = false;
@@ -442,8 +443,25 @@ public class ConstantsAndVariables implements Serializable{
   public Map<String, Counter<Integer>> distSimWeights = new HashMap<String, Counter<Integer>>();
   public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
 
+  @Option(name="invertedIndexClass", gloss="another option is Lucene backed, which is not included in the CoreNLP release. Contact us to get a copy (distributed under Apache License).")
+  public Class<? extends SentenceIndex> invertedIndexClass = edu.stanford.nlp.patterns.surface.InvertedIndexByTokens.class;
+
+  /**
+   * Where the inverted index (either in memory or lucene) is stored
+   */
+  @Option(name="invertedIndexDirectory")
+  public String invertedIndexDirectory;
+
+  //TODO: add to the examples properties file
+  @Option(name="clubNeighboringLabeledWords")
+  public boolean clubNeighboringLabeledWords = false;
+
   public ConcurrentHashIndex<SurfacePattern> getPatternIndex() {
     return patternIndex;
+  }
+
+  public void setPatternIndex(ConcurrentHashIndex<SurfacePattern> patternIndex) {
+    this.patternIndex = patternIndex;
   }
 
 
@@ -575,24 +593,23 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name = "doNotExtractPhraseAnyWordLabeledOtherClass")
   public boolean doNotExtractPhraseAnyWordLabeledOtherClass = true;
 
-  // /**
-  // * Use FileBackedCache for the inverted index -- use if memory is limited
-  // */
-  // @Option(name="diskBackedInvertedIndex")
-  // public boolean diskBackedInvertedIndex = false;
+  /**
+   * You can save the inverted index. Lucene index is saved by default to <code>invertedIndexDirectory</code> if given.
+   */
+  @Option(name="saveInvertedIndex")
+  public boolean saveInvertedIndex  = false;
 
-//  /**
-//   * You can save the inverted index to this file
-//   */
-//  @Option(name="saveInvertedIndexDir")
-//  public String saveInvertedIndexDir  = null;
-//
-//  /**
-//   * You can load the inv index using this file
-//   */
-//  @Option(name="loadInvertedIndexDir")
-//  public String loadInvertedIndexDir  = null;
-//
+  /**
+   * You can load the inverted index using this file.
+   * If false and using lucene index, the existing directory is deleted and new index is made.
+   */
+  @Option(name="loadInvertedIndex")
+  public boolean loadInvertedIndex  = false;
+
+
+  @Option(name = "useDBForTokenPatterns", gloss="used for storing patterns")
+  boolean useDBForTokenPatterns = false;
+
 //  /**
 //   * Directory where to save the sentences ser files.
 //   */
@@ -609,7 +626,7 @@ public class ConstantsAndVariables implements Serializable{
   int wordShaper = WordShapeClassifier.WORDSHAPECHRIS2;
   private Map<String, String> wordShapeCache = new HashMap<String, String>();
 
-  public InvertedIndexByTokens invertedIndex;
+  public SentenceIndex invertedIndex;
 
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";
@@ -623,6 +640,9 @@ public class ConstantsAndVariables implements Serializable{
     this.labels = labels;
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
+    if(this.generalizeClasses == null)
+      this.generalizeClasses = new HashMap<String, Class>();
+    this.generalizeClasses.putAll(answerClass);
     this.ignoreWordswithClassesDuringSelection = ignoreClasses;
     setUp(props);
   }
@@ -633,6 +653,9 @@ public class ConstantsAndVariables implements Serializable{
     this.labels = labelDictionary.keySet();
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
+    if(this.generalizeClasses == null)
+      this.generalizeClasses = new HashMap<String, Class>();
+    this.generalizeClasses.putAll(answerClass);
     this.ignoreWordswithClassesDuringSelection = ignoreClasses;
     setUp(props);
   }
@@ -647,6 +670,9 @@ public class ConstantsAndVariables implements Serializable{
     this.labels = labels;
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
+    if(this.generalizeClasses == null)
+      this.generalizeClasses = new HashMap<String, Class>();
+    this.generalizeClasses.putAll(answerClass);
     setUp(props);
   }
 
@@ -722,8 +748,10 @@ public class ConstantsAndVariables implements Serializable{
           "/" + StringUtils.join(fillerWords, "|") + "/");
       env.get(label).bind("$STOPWORD", stopStr);
       env.get(label).bind("$MOD", "[{tag:/JJ.*/}]");
-      if (matchLowerCaseContext)
+      if (matchLowerCaseContext){
+        env.get(label).setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
         env.get(label).setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
+      }
       env.get(label).bind("OTHERSEM",
           PatternsAnnotations.OtherSemanticLabel.class);
       env.get(label).bind("grandparentparsetag", CoreAnnotations.GrandparentAnnotation.class);

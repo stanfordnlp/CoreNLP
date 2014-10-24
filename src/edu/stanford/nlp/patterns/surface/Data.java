@@ -17,6 +17,10 @@ public class Data {
   public static double ratioDomainNgramFreqWithDataFreq = 1;
   static public Counter<String> rawFreq = null;
   public static List<File> sentsFiles = null;
+
+  //when using batch processing, map from sentid to the file that has that sentence
+  public static Map<String, File> sentId2File = null;
+
   public static List<String> fileNamesUsedToComputeRawFreq = new ArrayList<String>();
   public static Map<String, List<CoreLabel>> sents = null;
   public static Counter<String> processedDataFreq = null;
