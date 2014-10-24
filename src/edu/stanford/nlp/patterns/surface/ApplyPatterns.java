@@ -55,7 +55,7 @@ public class ApplyPatterns    implements  Callable<Pair<TwoDimensionalCounter<Pa
 //        m.setFindType(SequenceMatcher.FindType.FIND_ALL);
 
         //Higher branch values makes the faster but uses more memory
-        //m.setBranchLimit(5);
+        m.setBranchLimit(5);
 
         while (m.find()) {
 
