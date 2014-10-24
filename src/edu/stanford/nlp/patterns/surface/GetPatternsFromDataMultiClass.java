@@ -162,6 +162,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   DecimalFormat df = new DecimalFormat("#.##");
 
+  private boolean notComputedAllPatternsYet = true;
   /*
    * when there is only one label
    */
@@ -1093,6 +1094,35 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   public Map<String, TwoDimensionalCounter<Integer, String>> allPatternsandWords = null;
   public Map<String, Counter<Integer>> currentPatternWeights = null;
 
+  public void processSents(Map<String, List<CoreLabel>> sents) throws IOException, ClassNotFoundException {
+
+    if (constVars.computeAllPatterns) {
+        props.setProperty("createTable", "true");
+        props.setProperty("deleteExisting", "true");
+        props.setProperty("createPatLuceneIndex", "true");
+        Redwood.log(Redwood.DBG, "Computing all patterns");
+        createPats.getAllPatterns(sents, props, constVars.storePatsForEachToken);
+      }
+
+
+    props.setProperty("createTable","false");
+    props.setProperty("deleteExisting","false");
+    props.setProperty("createPatLuceneIndex","false");
+
+  }
+
+  void readSavedPatternsAndIndex() throws IOException, ClassNotFoundException {
+    if(!constVars.computeAllPatterns) {
+      assert constVars.allPatternsDir != null : "allPatternsDir flag cannot be emoty if computeAllPatterns is false!";
+      if (constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY)) {
+        patsForEachToken.addPatterns(IOUtils.readObjectFromFile(constVars.allPatternsDir + "/allpatterns.ser"));
+        Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsDir + "/allpatterns.ser");
+      }
+      constVars.setPatternIndex(patsForEachToken.readPatternIndex(constVars.allPatternsDir));
+
+    }
+  }
+
   @SuppressWarnings({ "unchecked" })
   public Counter<Integer> getPatterns(String label, Set<Integer> alreadyIdentifiedPatterns, Integer p0, Counter<String> p0Set,
       Set<Integer> ignorePatterns) throws IOException, ClassNotFoundException {
@@ -1104,126 +1134,45 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     TwoDimensionalCounter<Integer, String> negandUnLabeledPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
     TwoDimensionalCounter<Integer, String> allPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
 
+      if (!constVars.batchProcessSents) {
 
-    if (!constVars.batchProcessSents) {
-      // if not batch processing
-      if (this.patsForEachToken == null) {
-
-        if (constVars.computeAllPatterns) {
-          props.setProperty("createTable","true");
-          props.setProperty("deleteExisting","true");
-          props.setProperty("createPatLuceneIndex","true");
-        }
-        else{
-          props.setProperty("createTable","false");
-          props.setProperty("deleteExisting","false");
-          props.setProperty("createPatLuceneIndex","false");
+        if(notComputedAllPatternsYet){
+          // if not batch processing
+          processSents(Data.sents);
+          patsForEachToken = PatternsForEachToken.getPatternsInstance(props, constVars.storePatsForEachToken);
+          readSavedPatternsAndIndex();
+          System.out.println("size of pats for each token is " + patsForEachToken.size());
         }
 
+        this.calculateSufficientStats(Data.sents, patsForEachToken, label, patternsandWords4Label, posnegPatternsandWords4Label,
+          allPatternsandWords4Label, negPatternsandWords4Label, unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label);
 
-        patsForEachToken = PatternsForEachToken.getPatternsInstance(props, constVars.storePatsForEachToken);
 
-        // if patterns for each token null
-        if (constVars.computeAllPatterns) {
-          Redwood.log(Redwood.DBG, "Computing all patterns");
-          createPats.getAllPatterns(Data.sents, patsForEachToken);
-        } else{
-          assert constVars.allPatternsDir != null : "allPatternsDir flag cannot be emoty if computeAllPatterns is false!";
-          if(constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY)) {
-            patsForEachToken.addPatterns(IOUtils.readObjectFromFile(constVars.allPatternsDir + "/allpatterns.ser"));
-            Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsDir + "/allpatterns.ser");
+      }// batch processing sentences
+      else {
+        for (File f : Data.sentsFiles) {
+          Redwood.log(Redwood.DBG, (constVars.computeAllPatterns ? "Creating patterns and " : "") + "calculating sufficient statistics from " + f);
+          Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
+
+          if(notComputedAllPatternsYet){
+            //in the first iteration
+            processSents(sents);
+            if(patsForEachToken == null){
+              //in the first iteration, for the first file
+              patsForEachToken = PatternsForEachToken.getPatternsInstance(props, constVars.storePatsForEachToken);
+              readSavedPatternsAndIndex();
+            }
           }
-          constVars.setPatternIndex(patsForEachToken.readPatternIndex(constVars.allPatternsDir));
+          this.calculateSufficientStats(sents, patsForEachToken, label, patternsandWords4Label, posnegPatternsandWords4Label, allPatternsandWords4Label,
+            negPatternsandWords4Label, unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label);
         }
       }
 
-      this.calculateSufficientStats(Data.sents, patsForEachToken, label, patternsandWords4Label, posnegPatternsandWords4Label,
-        allPatternsandWords4Label, negPatternsandWords4Label, unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label);
-
-    }// batch processing sentences
-    else {
-
-      int i = -1;
-      for (File f : Data.sentsFiles) {
-        i++;
-        Redwood.log(Redwood.DBG, (constVars.computeAllPatterns ? "Creating patterns and " : "") + "calculating sufficient statistics from " + f);
-
-        Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
-
-        if(i == 0){
-
-          if (patsForEachToken == null) {
-
-
-            if (constVars.computeAllPatterns) {
-              props.setProperty("createTable","true");
-              props.setProperty("deleteExisting","true");
-              props.setProperty("createPatLuceneIndex","true");
-            }
-            else{
-              props.setProperty("createTable","false");
-              props.setProperty("deleteExisting","false");
-              props.setProperty("createPatLuceneIndex","false");
-            }
-
-
-
-            patsForEachToken = PatternsForEachToken.getPatternsInstance(props, constVars.storePatsForEachToken);
-
-            // if patterns for each token null
-            if (constVars.computeAllPatterns) {
-              Redwood.log(Redwood.DBG, "Computing all patterns");
-              createPats.getAllPatterns(sents, patsForEachToken);
-            } else{
-              assert constVars.allPatternsDir != null : "allPatternsDir flag cannot be emoty if computeAllPatterns is false!";
-              if(constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY)) {
-                patsForEachToken.addPatterns(IOUtils.readObjectFromFile(constVars.allPatternsDir + "/allpatterns.ser"));
-                Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsDir + "/allpatterns.ser");
-              }
-              constVars.setPatternIndex(patsForEachToken.readPatternIndex(constVars.allPatternsDir));
-            }
-
-//            patsForEachToken = PatternsForEachToken.getPatternsInstance(props, constVars.storePatsForEachToken);
-//
-//            if(constVars.computeAllPatterns){
-//              props.setProperty("createTable","true");
-//              props.setProperty("deleteExisting","true");
-//              props.setProperty("createPatLuceneIndex","true");
-//
-//            }
-//            else{
-//              props.setProperty("createTable","false");
-//              props.setProperty("deleteExisting","false");
-//              props.setProperty("createPatLuceneIndex","false");
-//              assert constVars.allPatternsDir != null: "allPatternsDir flag cannot be emoty if computeAllPatterns is false!";;
-//              if(constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY)) {
-//                patsForEachToken.addPatterns(IOUtils.readObjectFromFile(constVars.allPatternsDir + "/allpatterns.ser"));
-//                Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsDir + "/allpatterns.ser");
-//              }
-//
-//              constVars.setPatternIndex(patsForEachToken.readPatternIndex(constVars.allPatternsDir));
-//            }
-          }
-        }
-
-
-
-        if (constVars.computeAllPatterns) {
-          createPats.getAllPatterns(sents, patsForEachToken);
-          Redwood.log(Redwood.DBG, "Done creating patterns for " + f);
-        }
-
-        this.calculateSufficientStats(sents, patsForEachToken, label, patternsandWords4Label, posnegPatternsandWords4Label, allPatternsandWords4Label,
-          negPatternsandWords4Label, unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label);
-
-      }
-
-    }
-
-    if(constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.DB))
-      patsForEachToken.createIndexIfUsingDBAndNotExists();
+    notComputedAllPatternsYet = false;
 
     if (constVars.computeAllPatterns){
+      if(constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.DB))
+        patsForEachToken.createIndexIfUsingDBAndNotExists();
       savePatternIndex(constVars.allPatternsDir);
     }
 
@@ -3018,6 +2967,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       model.constVars.invertedIndex.saveIndex(model.constVars.invertedIndexDirectory);
     }
 
+    if(model.constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.LUCENE)){
+      model.patsForEachToken.close();
+    }
     return model;
   }
 

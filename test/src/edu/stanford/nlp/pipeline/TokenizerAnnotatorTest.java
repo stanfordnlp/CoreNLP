@@ -62,29 +62,4 @@ public class TokenizerAnnotatorTest extends TestCase {
       // yay, passed
     }
   }
-
-  private static final String spanishText = "Me voy a Madrid (ES).\n\"Me gusta\", lo dice.";
-  private static List<String> spanishTokens = Arrays.asList(new String[] { "Me", "voy", "a", "Madrid", "=LRB=", "ES", "=RRB=", ".", "\"", "Me", "gusta", "\"", ",", "lo", "dice", "." });
-  private static final String spanishText2 = "Me voy a Madrid (ES).\n(Me gusta), lo dice.";
-  private static List<String> spanishTokens2 = Arrays.asList(new String[] { "Me", "voy", "a", "Madrid", "=LRB=", "ES", "=RRB=", ".", "*NL*", "\"", "Me", "gusta", "\"", ",", "lo", "dice", "." });
-
-  public void testSpanishTokenizer() {
-    TokenizerAnnotator annotator = new TokenizerAnnotator(false, "es", null);
-    Annotation annotation = new Annotation(spanishText);
-    annotator.annotate(annotation);
-    List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
-    assertEquals(spanishTokens.size(), tokens.size());
-    for (int i = 0; i < tokens.size(); ++i) {
-      assertEquals(spanishTokens.get(i), tokens.get(i).value());
-    }
-
-    annotator = new TokenizerAnnotator(false, "es", "tokenizeNLs,");
-    annotation = new Annotation(spanishText);
-    annotator.annotate(annotation);
-    tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
-    assertEquals(spanishTokens2.size(), tokens.size());
-    for (int i = 0; i < tokens.size(); ++i) {
-      assertEquals(spanishTokens2.get(i), tokens.get(i).value());
-    }
-  }
 }

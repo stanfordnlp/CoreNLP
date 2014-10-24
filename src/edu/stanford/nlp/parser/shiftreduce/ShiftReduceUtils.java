@@ -1,7 +1,5 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
-import java.util.Collection;
-
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.trees.Tree;
@@ -72,17 +70,4 @@ class ShiftReduceUtils {
       } 
     }
   }
-
-  /**
-   * Returns true iff the given <code>state</code> is present on the <code>agenda</code>
-   */
-  static boolean findStateOnAgenda(Collection<State> agenda, State state) {
-    for (State other : agenda) {
-      if (other.areTransitionsEqual(state)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
 }
