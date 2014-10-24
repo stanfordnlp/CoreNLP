@@ -516,8 +516,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 //      constVars.invertedIndex.saveIndex(constVars.saveInvertedIndexDir);
 //    }
 
-    Redwood.log(Redwood.DBG, "Done creating inverted index of tokens and labeling data with total of "
-        + totalNumSents + " sentences");
+    Redwood.log(Redwood.DBG, "Done loading/creating inverted index of tokens and labeling data with total of "
+        + constVars.invertedIndex.size() + " sentences");
 
     if (constVars.usePatternEvalWordClass || constVars.usePhraseEvalWordClass) {
 
@@ -3020,7 +3020,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if (wordf.exists()) {
         Counter<String> words = model.readLearnedWordsFromFile(wordf);
         model.setLearnedWords(words, label);
-        Redwood.log(Redwood.DBG, "Loaded " + words.size() + " from " + patf);
+        Redwood.log(Redwood.DBG, "Loaded " + words.size() + " phrases from " + wordf);
       }
       CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat = null;
 

@@ -182,7 +182,7 @@ public class ScorePhrases {
   void runParallelApplyPats(Map<String, List<CoreLabel>> sents, String label, Integer pattern,  TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted,
                             CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) throws InterruptedException, ExecutionException{
 
-
+    Redwood.log(Redwood.DBG, "Applying pattern " + pattern + " to a total of " + sents.size() + " sentences ");
     List<String> notAllowedClasses = new ArrayList<String>();
     List<String> sentids = CollectionUtils.toList(sents.keySet());
     if(constVars.doNotExtractPhraseAnyWordLabeledOtherClass){
@@ -219,11 +219,11 @@ public class ScorePhrases {
     List<Future<Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>>> list = new ArrayList<Future<Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>>>();
 
 
-    for (int i = 0; i < constVars.numThreads; i++) {
+    for (int i = 0; i < numThreads; i++) {
     
       Callable<Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>> task = null;
 
-
+      //Redwood.log(Redwood.DBG, "Applying pats: assigning sentences " + i*num + " to " +Math.min(sentids.size(), (i + 1) * num) + " to thread " + (i+1));
       task = new ApplyPatterns(sents, num == sents.size() ? sentids : sentids.subList(i * num,
           Math.min(sentids.size(), (i + 1) * num)), patternsLearnedThisIterConverted, label,
           constVars.removeStopWordsFromSelectedPhrases,
