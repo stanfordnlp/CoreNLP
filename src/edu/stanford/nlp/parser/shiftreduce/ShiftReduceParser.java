@@ -477,15 +477,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
   }
 
-  private static boolean findStateOnAgenda(Collection<State> agenda, State state) {
-    for (State other : agenda) {
-      if (other.areTransitionsEqual(state)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   private Pair<Integer, Integer> trainTree(int index, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, List<Update> updates, Oracle oracle) {
     int numCorrect = 0;
     int numWrong = 0;
@@ -603,18 +594,18 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
           if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM) {
             // If the correct state has fallen off the agenda, break
-            if (!findStateOnAgenda(newAgenda, newGoldState)) {
+            if (!ShiftReduceUtils.findStateOnAgenda(newAgenda, newGoldState)) {
               break;
             } else {
               transitions.remove(0);
             }
           } else if (op.trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.REORDER_BEAM) {
-            if (!findStateOnAgenda(newAgenda, newGoldState)) {
+            if (!ShiftReduceUtils.findStateOnAgenda(newAgenda, newGoldState)) {
               if (!reorderer.reorder(goldState, highestScoringTransitionFromGoldState, transitions)) {
                 break;
               }
               newGoldState = highestScoringTransitionFromGoldState.apply(goldState);
-              if (!findStateOnAgenda(newAgenda, newGoldState)) {
+              if (!ShiftReduceUtils.findStateOnAgenda(newAgenda, newGoldState)) {
                 break;
               }
             } else {
