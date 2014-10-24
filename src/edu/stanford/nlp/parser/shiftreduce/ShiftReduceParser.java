@@ -946,7 +946,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
 
     if (op.trainOptions().retrainAfterCutoff && op.trainOptions().featureFrequencyCutoff > 0) {
-      // TODO: factor out some of the treebank loading
       String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + "temp.ser.gz";
       trainModel(tempName, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, null);
       saveModel(tempName);
