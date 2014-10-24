@@ -87,8 +87,6 @@ public abstract class PatternsForEachToken {
 
   public abstract Map<String,Map<Integer,Set<Integer>>> getPatternsForAllTokens(Collection<String> sampledSentIds);
 
-  public abstract void close();
-
 
 //  @Option(name="allPatternsFile")
 //  String allPatternsFile = null;
