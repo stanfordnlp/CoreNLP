@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -550,13 +549,7 @@ public class CreatePatterns {
 //    return patternsForEachToken;
 //  }
 
-  /**
-   * creates all patterns and saves them in the correct PatternsForEachToken* class appropriately
-   * @param sents
-   * @param props
-   * @param storePatsForEachTokenWay
-   */
-  public void getAllPatterns(Map<String, List<CoreLabel>> sents, Properties props, ConstantsAndVariables.PatternForEachTokenWay storePatsForEachTokenWay) {
+  public void getAllPatterns(Map<String, List<CoreLabel>> sents, PatternsForEachToken patsForEach) {
 
 //    this.patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>();
    // this.patternsForEachToken = new HashMap<String, Map<Integer, Set<Integer>>>();
@@ -586,7 +579,7 @@ public class CreatePatterns {
 
       Callable<Map<String, Map<Integer, Set<Integer>>>> task = null;
       List<String> ids = keyset.subList(from ,to);
-      task = new CreatePatternsThread(sents, ids, props, storePatsForEachTokenWay);
+      task = new CreatePatternsThread(sents, ids, patsForEach);
 
       Future<Map<String, Map<Integer, Set<Integer>>>> submit = executor
           .submit(task);
@@ -628,13 +621,13 @@ public class CreatePatterns {
     List<String> sentIds;
     PatternsForEachToken patsForEach;
 
-    public CreatePatternsThread(Map<String, List<CoreLabel>> sents, List<String> sentIds, Properties props, ConstantsAndVariables.PatternForEachTokenWay storePatsForEachToken) {
+    public CreatePatternsThread(Map<String, List<CoreLabel>> sents, List<String> sentIds, PatternsForEachToken patsForEach) {
 
       //this.label = label;
       // this.otherClass = otherClass;
       this.sents = sents;
       this.sentIds = sentIds;
-      this.patsForEach = PatternsForEachToken.getPatternsInstance(props, storePatsForEachToken);
+      this.patsForEach = patsForEach;
     }
 
     @Override

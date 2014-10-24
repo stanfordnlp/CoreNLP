@@ -57,6 +57,12 @@ public class ShiftReduceOptions extends Options {
     } else if (args[i].equalsIgnoreCase("-noCVAveragedModels")) {
       trainOptions().cvAveragedModels = false;
       i++;
+    } else if (args[i].equalsIgnoreCase("-retrainAfterCutoff")) {
+      trainOptions().retrainAfterCutoff = true;
+      i++;
+    } else if (args[i].equalsIgnoreCase("-noRetrainAfterCutoff")) {
+      trainOptions().retrainAfterCutoff = false;
+      i++;
     } else if (args[i].equalsIgnoreCase("-trainingMethod")) {
       trainOptions().trainingMethod = ShiftReduceTrainOptions.TrainingMethod.valueOf(args[i + 1].toUpperCase());
       if (trainOptions().trainingMethod == ShiftReduceTrainOptions.TrainingMethod.BEAM ||
