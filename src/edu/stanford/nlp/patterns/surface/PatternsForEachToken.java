@@ -69,23 +69,32 @@ public class PatternsForEachToken {
     this(props, null);
   }
 
-  void createTable() throws SQLException, ClassNotFoundException {
-    Connection conn = SQLConnection.getConnection();
-    DatabaseMetaData dbm = conn.getMetaData();
-    ResultSet tables = dbm.getTables(null, null, tableName, null);
-    if (tables.next()) {
-      System.out.println("Found table " + tableName);
-      if (deleteExisting) {
-        System.out.println("deleting table " + tableName);
+  void createTable() {
+    String query ="";
+    try {
+      Connection conn = null;
+
+      conn = SQLConnection.getConnection();
+
+      DatabaseMetaData dbm = conn.getMetaData();
+      ResultSet tables = dbm.getTables(null, null, tableName, null);
+      if (tables.next()) {
+        System.out.println("Found table " + tableName);
+        if (deleteExisting) {
+          System.out.println("deleting table " + tableName);
+          Statement stmt = conn.createStatement();
+          query = "DELETE FROM " + tableName;
+          stmt.executeUpdate(query);
+        }
+      } else {
         Statement stmt = conn.createStatement();
-        stmt.executeUpdate("DELETE FROM " + tableName);
+        //query = "create table  IF NOT EXISTS " + tableName + " (\"sentid\" text, \"tokenid\" int, \"patterns\" bytea); ";
+        query = "create table  IF NOT EXISTS " + tableName + " (\"sentid\" text, \"patterns\" bytea); ";
+        stmt.execute(query);
       }
-    } else {
-      Statement stmt = conn.createStatement();
-      String query = "create table  IF NOT EXISTS " + tableName + " (\"sentid\" text, \"tokenid\" int, \"patterns\" bytea); ";
-      stmt.execute(query);
+      conn.close();} catch (SQLException e) {
+      throw new RuntimeException("Error executing query " + query + "\n" + e);
     }
-    conn.close();
   }
 
 
@@ -95,11 +104,13 @@ public class PatternsForEachToken {
 
     if(useDBForTokenPatterns) {
       conn = SQLConnection.getConnection();
-       pstmt =getPreparedStmt(conn);
+      pstmt =getPreparedStmt(conn);
     }
 
     for (Map.Entry<String, Map<Integer, Set<Integer>>> en : pats.entrySet()) {
-      addPatterns(en.getKey(), en.getValue(), pstmt);
+      addPattern(en.getKey(), en.getValue(), pstmt);
+      if(useDBForTokenPatterns)
+        pstmt.addBatch();
     }
 
     if(useDBForTokenPatterns){
@@ -109,6 +120,7 @@ public class PatternsForEachToken {
       conn.close();
     }
   }
+
 
   public void addPatterns(String id, Map<Integer, Set<Integer>> p) throws IOException, SQLException {
     PreparedStatement pstmt = null;
@@ -118,16 +130,18 @@ public class PatternsForEachToken {
       conn = SQLConnection.getConnection();
       pstmt = getPreparedStmt(conn);
     }
-    addPatterns(id, p, pstmt);
+
+    addPattern(id, p, pstmt);
 
     if(useDBForTokenPatterns){
-      pstmt.executeBatch();
+      pstmt.execute();
       conn.commit();
       pstmt.close();
       conn.close();
     }
   }
 
+  /*
   public void addPatterns(String id, Map<Integer, Set<Integer>> p, PreparedStatement pstmt) throws IOException, SQLException {
     for (Map.Entry<Integer, Set<Integer>> en2 : p.entrySet()) {
       addPattern(id, en2.getKey(), en2.getValue(), pstmt);
@@ -135,7 +149,9 @@ public class PatternsForEachToken {
         pstmt.addBatch();
     }
   }
+*/
 
+/*
   public void addPatterns(String sentId, int tokenId, Set<Integer> patterns) throws SQLException, IOException{
     PreparedStatement pstmt = null;
     Connection conn= null;
@@ -153,9 +169,10 @@ public class PatternsForEachToken {
       conn.close();
     }
   }
+  */
 
-
-  public void addPattern(String sentId, int tokenId, Set<Integer> patterns, PreparedStatement pstmt) throws SQLException, IOException {
+  /*
+  private void addPattern(String sentId, int tokenId, Set<Integer> patterns, PreparedStatement pstmt) throws SQLException, IOException {
 
     if(pstmt != null){
 //      ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -192,16 +209,57 @@ public class PatternsForEachToken {
         patternsForEachToken.put(sentId, new ConcurrentHashMap<Integer, Set<Integer>>());
       patternsForEachToken.get(sentId).put(tokenId, patterns);
     }
+  }*/
+
+
+  private void addPattern(String sentId, Map<Integer, Set<Integer>> patterns, PreparedStatement pstmt) throws SQLException, IOException {
+
+    if(pstmt != null){
+//      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//      ObjectOutputStream oos = new ObjectOutputStream(baos);
+//      oos.writeObject(patterns);
+//      byte[] patsAsBytes = baos.toByteArray();
+//      ByteArrayInputStream bais = new ByteArrayInputStream(patsAsBytes);
+//      pstmt.setBinaryStream(1, bais, patsAsBytes.length);
+//      pstmt.setObject(2, sentId);
+//      pstmt.setInt(3, tokenId);
+//      pstmt.setString(4,sentId);
+//      pstmt.setInt(5, tokenId);
+//      ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+//      ObjectOutputStream oos2 = new ObjectOutputStream(baos2);
+//      oos2.writeObject(patterns);
+//      byte[] patsAsBytes2 = baos2.toByteArray();
+//      ByteArrayInputStream bais2 = new ByteArrayInputStream(patsAsBytes2);
+//      pstmt.setBinaryStream(6, bais2, patsAsBytes2.length);
+//      pstmt.setString(7,sentId);
+//      pstmt.setInt(8, tokenId);
+
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ObjectOutputStream oos = new ObjectOutputStream(baos);
+      oos.writeObject(patterns);
+      byte[] patsAsBytes = baos.toByteArray();
+      ByteArrayInputStream bais = new ByteArrayInputStream(patsAsBytes);
+      pstmt.setBinaryStream(2, bais, patsAsBytes.length);
+      pstmt.setObject(1, sentId);
+      //pstmt.setInt(2, tokenId);
+
+
+    } else{
+      if(!patternsForEachToken.containsKey(sentId))
+        patternsForEachToken.put(sentId, new ConcurrentHashMap<Integer, Set<Integer>>());
+      patternsForEachToken.get(sentId).putAll(patterns);
+    }
   }
+
 
   public void createUpsertFunction() throws SQLException {
     Connection conn = SQLConnection.getConnection();
-    String s = "CREATE OR REPLACE FUNCTION upsert_patterns(sentid1 text, tokenid1 int, pats1 bytea) RETURNS VOID AS $$\n" +
+    String s = "CREATE OR REPLACE FUNCTION upsert_patterns(sentid1 text, pats1 bytea) RETURNS VOID AS $$\n" +
       "DECLARE\n" +
       "BEGIN\n" +
-      "    UPDATE " + tableName+ " SET patterns = pats1 WHERE sentid = sentid1 and tokenid = tokenid1;\n" +
+      "    UPDATE " + tableName+ " SET patterns = pats1 WHERE sentid = sentid1;\n" +
       "    IF NOT FOUND THEN\n" +
-      "    INSERT INTO " + tableName + "  values (sentid1, tokenid1, pats1);\n" +
+      "    INSERT INTO " + tableName + "  values (sentid1, pats1);\n" +
       "    END IF;\n" +
       "END;\n" +
       "$$ LANGUAGE 'plpgsql';\n";
@@ -218,16 +276,16 @@ public class PatternsForEachToken {
 
   private PreparedStatement getPreparedStmt(Connection conn) throws SQLException {
     conn.setAutoCommit(false);
-  //return conn.prepareStatement("UPDATE " + tableName + " SET patterns = ? WHERE sentid = ? and tokenid = ?; " +
-  //  "INSERT INTO " + tableName + " (sentid, tokenid, patterns) (SELECT ?,?,? WHERE NOT EXISTS (SELECT sentid FROM " + tableName + " WHERE sentid  =? and tokenid=?));");
-  //  return conn.prepareStatement("INSERT INTO " + tableName + " (sentid, tokenid, patterns) (SELECT ?,?,? WHERE NOT EXISTS (SELECT sentid FROM " + tableName + " WHERE sentid  =? and tokenid=?))");
-    return conn.prepareStatement("select upsert_patterns(?,?,?)");
+    //return conn.prepareStatement("UPDATE " + tableName + " SET patterns = ? WHERE sentid = ? and tokenid = ?; " +
+    //  "INSERT INTO " + tableName + " (sentid, tokenid, patterns) (SELECT ?,?,? WHERE NOT EXISTS (SELECT sentid FROM " + tableName + " WHERE sentid  =? and tokenid=?));");
+    //  return conn.prepareStatement("INSERT INTO " + tableName + " (sentid, tokenid, patterns) (SELECT ?,?,? WHERE NOT EXISTS (SELECT sentid FROM " + tableName + " WHERE sentid  =? and tokenid=?))");
+    return conn.prepareStatement("select upsert_patterns(?,?)");
   }
 
 
 
 
-
+/*
   public Set<Integer> getPatterns(String sentId, Integer tokenId) throws SQLException, IOException, ClassNotFoundException {
     if(useDBForTokenPatterns){
       Connection conn = SQLConnection.getConnection();
@@ -248,25 +306,26 @@ public class PatternsForEachToken {
     }
     else
       return patternsForEachToken.get(sentId).get(tokenId);
-  }
+  }*/
 
 
   public Map<Integer, Set<Integer>> getPatternsForAllTokens(String sentId) throws SQLException, IOException, ClassNotFoundException {
     if(useDBForTokenPatterns){
       Connection conn = SQLConnection.getConnection();
-      Map<Integer, Set<Integer>> pats = new ConcurrentHashMap<Integer, Set<Integer>>();
-      String query = "Select tokenid, patterns from " + tableName + " where sentid=\'" + sentId + "\'";
+      //Map<Integer, Set<Integer>> pats = new ConcurrentHashMap<Integer, Set<Integer>>();
+      String query = "Select patterns from " + tableName + " where sentid=\'" + sentId + "\'";
       Statement stmt = conn.createStatement();
       ResultSet rs = stmt.executeQuery(query);
-      while(rs.next()){
-        byte[] st = (byte[]) rs.getObject(2);
+      Map<Integer, Set<Integer>> patsToken = new HashMap<Integer, Set<Integer>>();
+      if(rs.next()){
+        byte[] st = (byte[]) rs.getObject(1);
         ByteArrayInputStream baip = new ByteArrayInputStream(st);
         ObjectInputStream ois = new ObjectInputStream(baip);
-        Set<Integer> patsToken = (Set<Integer>) ois.readObject();
-        pats.put(rs.getInt("tokenid"), patsToken);
+        patsToken = (Map<Integer, Set<Integer>>) ois.readObject();
+        //pats.put(rs.getInt("tokenid"), patsToken);
       }
       conn.close();
-      return pats;
+      return patsToken;
     }
     else
       return patternsForEachToken.containsKey(sentId) ? patternsForEachToken.get(sentId): Collections.emptyMap();
@@ -317,7 +376,26 @@ public class PatternsForEachToken {
     if(!useDBForTokenPatterns)
       return patternsForEachToken.entrySet();
     else
-    //not yet supported if backed by DB
+      //not yet supported if backed by DB
       throw new UnsupportedOperationException();
+  }
+
+  public void updatePatterns(Map<String, Map<Integer, Set<Integer>>> tempPatsForSents) {
+    try {
+    for(Map.Entry<String, Map<Integer, Set<Integer>>> en :tempPatsForSents.entrySet()){
+      Map<Integer, Set<Integer>> m = getPatternsForAllTokens(en.getKey());
+      if(m == null)
+        m = new HashMap<Integer, Set<Integer>>();
+      //m.putAll(en.getValue());
+      tempPatsForSents.get(en.getKey()).putAll(m);
+    }
+      this.addPatterns(tempPatsForSents);
+    } catch (IOException e) {
+      e.printStackTrace();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
+    }
   }
 }

@@ -1546,7 +1546,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
         Set<Integer> pat = pat4Sent.get(i);
         if (pat == null)
-          throw new RuntimeException("Why are patterns null for sentence " + sentEn.getKey() + " and token " + i);
+          throw new RuntimeException("Why are patterns null for sentence " + sentEn.getKey() + " and token " + i +". pat4Sent has token ids " + pat4Sent.keySet() + (constVars.batchProcessSents ? "" : ". The sentence is " + Data.sents.get(sentEn.getKey())));
         Set<Integer> pats = pat;
 
 //        Set<Integer> prevPat = pat.first();
@@ -1736,6 +1736,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
     }
 
+    Map<String, Map<Integer, Set<Integer>>> tempPatsForSents = new HashMap<String, Map<Integer, Set<Integer>>>();
+
     for (Entry<String, List<CoreLabel>> sentEn : sents.entrySet()) {
       boolean sentenceChanged = false;
       Set<String[]> identifiedWordsTokens = new HashSet<String[]>();
@@ -1795,13 +1797,24 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         }
       }
 
-      if (patsForEachToken != null && patsForEachToken.containsSentId(sentEn.getKey())) {
-        for (int index : contextWordsRecalculatePats)
-          patsForEachToken.addPatterns(sentEn.getKey(), index, createPats.getContext(sentEn.getValue(), index));
+      if (patsForEachToken != null )//&& patsForEachToken.containsSentId(sentEn.getKey()))
+      {
+        for (int index : contextWordsRecalculatePats){
+
+          if(!tempPatsForSents.containsKey(sentEn.getKey()))
+            tempPatsForSents.put(sentEn.getKey(), new HashMap<Integer, Set<Integer>>());
+
+          tempPatsForSents.get(sentEn.getKey()).put(index, createPats.getContext(sentEn.getValue(), index));
+          //patsForEachToken.addPatterns(sentEn.getKey(), index, createPats.getContext(sentEn.getValue(), index));
+        }
       }
       if(sentenceChanged)
         constVars.invertedIndex.update(sentEn.getValue(), sentEn.getKey());
     }
+
+    patsForEachToken.updatePatterns(tempPatsForSents);//sentEn.getKey(), index, createPats.getContext(sentEn.getValue(), index));
+
+
     constVars.invertedIndex.finishUpdating();
 
     if (outFile != null) {

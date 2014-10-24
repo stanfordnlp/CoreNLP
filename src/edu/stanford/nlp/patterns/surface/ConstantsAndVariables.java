@@ -598,6 +598,10 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name="loadInvertedIndex")
   public boolean loadInvertedIndex  = false;
 
+
+  @Option(name = "useDBForTokenPatterns", gloss="used for storing patterns")
+  boolean useDBForTokenPatterns = false;
+
 //  /**
 //   * Directory where to save the sentences ser files.
 //   */

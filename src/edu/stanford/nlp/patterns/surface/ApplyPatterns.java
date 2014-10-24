@@ -6,6 +6,7 @@ import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.tokensregex.SequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
@@ -49,6 +50,13 @@ public class ApplyPatterns    implements  Callable<Pair<TwoDimensionalCounter<Pa
           throw new RuntimeException("why is the pattern " + pEn + " null?");
 
         TokenSequenceMatcher m = pEn.getKey().getMatcher(sent);
+
+//        //Setting this find type can save time in searching - greedy and reluctant quantifiers are not enforced
+//        m.setFindType(SequenceMatcher.FindType.FIND_ALL);
+
+        //Higher branch values makes the faster but uses more memory
+        //m.setBranchLimit(5);
+
         while (m.find()) {
 
           int s = m.start("$term");

@@ -631,10 +631,14 @@ public class CreatePatterns {
 
     @Override
     public Map<String, Map<Integer, Set<Integer>>> call() throws Exception {
-      //Map<String, Map<Integer, Set<Integer>>> patternsForTokens = new HashMap<String, Map<Integer, Set<Integer>>>();
+      Map<String, Map<Integer, Set<Integer>>> tempPatternsForTokens = new HashMap<String, Map<Integer, Set<Integer>>>();
+      int numSentencesInOneCommit = 0;
 
       for (String id : sentIds) {
         List<CoreLabel> sent = sents.get(id);
+
+        if(constVars.useDBForTokenPatterns)
+          tempPatternsForTokens.put(id, new HashMap<Integer, Set<Integer>>());
 
         Map<Integer, Set<Integer>> p = new HashMap<Integer, Set<Integer>>();
         for (int i = 0; i < sent.size(); i++) {
@@ -653,10 +657,28 @@ public class CreatePatterns {
           p.put(i, pat);
 
         }
-        patsForEach.addPatterns(id, p);
-        //patternsForTokens.put(id, p);
+
+        //to save number of commits to the database
+        if(constVars.useDBForTokenPatterns){
+          tempPatternsForTokens.put(id, p);
+          numSentencesInOneCommit++;
+          if(numSentencesInOneCommit % 1000 == 0){
+            patsForEach.addPatterns(tempPatternsForTokens);
+            tempPatternsForTokens.clear();
+            numSentencesInOneCommit = 0;
+          }
+//          patsForEach.addPatterns(id, p);
+
+        }
+        else
+          patsForEach.addPatterns(id, p);
+
       }
-      //return patternsForTokens;
+
+      //For the remaining sentences
+      if(constVars.useDBForTokenPatterns)
+        patsForEach.addPatterns(tempPatternsForTokens);
+
       return null;
     }
 

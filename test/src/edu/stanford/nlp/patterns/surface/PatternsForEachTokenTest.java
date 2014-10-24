@@ -3,6 +3,7 @@ package edu.stanford.nlp.patterns.surface;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.StringUtils;
 import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -13,10 +14,11 @@ import java.util.*;
  */
 public class PatternsForEachTokenTest extends TestCase {
 
+  @Test
   public void testCreatingAndInserting() throws SQLException, IOException, ClassNotFoundException {
 
   //Uncomment for testing
-/*
+
     Properties props = new Properties();
 
     props.setProperty("tableName","tempPatsTable");
@@ -32,19 +34,19 @@ public class PatternsForEachTokenTest extends TestCase {
     Set<Integer> pats = new HashSet<Integer>();
     pats.add(345);
 
-    p.addPatterns("sent1", 1, pats);
+//    p.addPatterns("sent1", 1, pats);
+//
+//    pats.add(466);
+//    p.addPatterns("sent1", 2, pats);
+//
+//    pats.add(455);
+//    p.addPatterns("sent1", 1, pats);
+//
+//    assertTrue(p.containsSentId("sent1"));
 
-    pats.add(466);
-    p.addPatterns("sent1", 2, pats);
-
-    pats.add(455);
-    p.addPatterns("sent1", 1, pats);
-
-    assertTrue(p.containsSentId("sent1"));
-
-    Map<Integer, Set<Integer>> pt = p.getPatternsForAllTokens("sent1");
-    assert pt.size() == 2;
-    assert pt.get(1).size() == 3;
+//    Map<Integer, Set<Integer>> pt = p.getPatternsForAllTokens("sent1");
+//    assert pt.size() == 2;
+//    assert pt.get(1).size() == 3;
 
     Map<String, Map<Integer, Set<Integer>>> sentpats = new HashMap<String, Map<Integer, Set<Integer>>>();
     Map<Integer, Set<Integer>> pats2 = new HashMap<Integer, Set<Integer>>();
@@ -68,6 +70,6 @@ public class PatternsForEachTokenTest extends TestCase {
     Map<Integer, Set<Integer>> ptsup = p.getPatternsForAllTokens("sent2");
     assert ptsup.get(1).size() == 3;
 
-*/
+
   }
 }
