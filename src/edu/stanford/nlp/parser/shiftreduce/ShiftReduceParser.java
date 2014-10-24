@@ -199,27 +199,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
   }
 
 
-  /**
-   * Output some random facts about the parser
-   */
-  public void outputStats() {
-    System.err.println("Number of known features: " + model.featureWeights.size());
-
-    int numWeights = 0;
-    for (String feature : model.featureWeights.keySet()) {
-      numWeights += model.featureWeights.get(feature).size();
-    }
-    System.err.println("Number of non-zero weights: " + numWeights);
-
-    int wordLength = 0;
-    for (String feature : model.featureWeights.keySet()) {
-      wordLength += feature.length();
-    }
-    System.err.println("Total word length: " + wordLength);
-
-    System.err.println("Number of transitions: " + transitionIndex.size());
-  }
-
   /** TODO: add an eval which measures transition accuracy? */
   @Override
   public List<Eval> getExtraEvals() {
@@ -850,7 +829,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       }
       trainingTimer.done("Iteration " + iteration);
       System.err.println("While training, got " + numCorrect + " transitions correct and " + numWrong + " transitions wrong");
-      outputStats();
+      model.outputStats();
 
 
       double labelF1 = 0.0;
