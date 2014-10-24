@@ -59,8 +59,8 @@ public class ConstantsAndVariables implements Serializable{
   /**
    * Cached file of all patterns for all tokens
    */
-  @Option(name = "allPatternsFile")
-  public String allPatternsFile = null;
+  @Option(name = "allPatternsDir")
+  public String allPatternsDir = null;
 
   /**
    * If all patterns should be computed. Otherwise patterns are read from
@@ -94,7 +94,7 @@ public class ConstantsAndVariables implements Serializable{
   /**
    * Currently, does not work correctly. TODO: make this work. Ideally this
    * would label words only when they occur in the context of any learned
-   * pattern
+   * pattern. This comment seems old. Test it!
    */
   @Option(name = "restrictToMatched")
   public boolean restrictToMatched = false;
@@ -452,8 +452,16 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name="invertedIndexDirectory")
   public String invertedIndexDirectory;
 
+  //TODO: add to the examples properties file
+  @Option(name="clubNeighboringLabeledWords")
+  public boolean clubNeighboringLabeledWords = false;
+
   public ConcurrentHashIndex<SurfacePattern> getPatternIndex() {
     return patternIndex;
+  }
+
+  public void setPatternIndex(ConcurrentHashIndex<SurfacePattern> patternIndex) {
+    this.patternIndex = patternIndex;
   }
 
 

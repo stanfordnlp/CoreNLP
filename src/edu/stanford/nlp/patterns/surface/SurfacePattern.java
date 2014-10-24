@@ -50,10 +50,7 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
   public static boolean insertModifierWildcard = false;
 
   public SurfacePattern(Token[] prevContext, PatternToken token, Token[] nextContext, Genre genre) {
-    // String[] originalPrev, String[] originalNext, Genre genre) {
-    //TODO: make sure trim is happening
-//    prevContext = trim(prevContext);
-//    nextContext = trim(nextContext);
+
     this.setPrevContext(prevContext);
     this.setNextContext(nextContext);
     //
@@ -240,7 +237,6 @@ public class SurfacePattern implements Serializable, Comparable<SurfacePattern> 
     return getSimplerTokens(nextContext);
   }
 
-//  //TODO: update these to not use "/" and "/"
 //  static Pattern p1 = Pattern.compile(Pattern.quote("[") + "\\s*" + Pattern.quote("{") + "\\s*(lemma|word)\\s*:\\s*/" + Pattern.quote("\\Q") + "(.*)"
 //      + Pattern.quote("\\E") + "/\\s*" + Pattern.quote("}") + "\\s*" + Pattern.quote("]"));
 //

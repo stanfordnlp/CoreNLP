@@ -29,6 +29,9 @@ public class PatternsForEachToken {
   @Option(name = "tableName")
   String tableName = null;
 
+  @Option(name = "patternindicesTable")
+  String patternindicesTable = "patternindices";
+
   @Option(name="deleteDBResourcesOnExit")
   boolean deleteDBResourcesOnExit = true;
 
@@ -56,9 +59,12 @@ public class PatternsForEachToken {
       tableName = tableName.toLowerCase();
       if (createTable && !deleteExisting)
         throw new RuntimeException("Cannot have createTable as true and deleteExisting as false!");
-      if (createTable)
+      if (createTable){
         createTable();
-      createUpsertFunction();
+        createUpsertFunction();
+      }else{
+        assert DBTableExists() : "Table " + tableName + " does not exists. Pass createTable=true to create a new table";
+      }
     }else
       patternsForEachToken = new ConcurrentHashMap<String, Map<Integer, Set<Integer>>>();
 
@@ -73,14 +79,8 @@ public class PatternsForEachToken {
   void createTable() {
     String query ="";
     try {
-      Connection conn = null;
-
-      conn = SQLConnection.getConnection();
-
-      DatabaseMetaData dbm = conn.getMetaData();
-      ResultSet tables = dbm.getTables(null, null, tableName, null);
-      if (tables.next()) {
-        System.out.println("Found table " + tableName);
+      Connection conn = SQLConnection.getConnection();
+      if(DBTableExists()){
         if (deleteExisting) {
           System.out.println("deleting table " + tableName);
           Statement stmt = conn.createStatement();
@@ -275,9 +275,24 @@ public class PatternsForEachToken {
     conn.close();
   }
 
-  public void writeIndex(ConcurrentHashIndex<SurfacePattern> index){
-
+  public void createUpsertFunctionPatternIndex() throws SQLException {
+    Connection conn = SQLConnection.getConnection();
+    String s = "CREATE OR REPLACE FUNCTION upsert_patternindex(tablename1 text, index1 bytea) RETURNS VOID AS $$\n" +
+      "DECLARE\n" +
+      "BEGIN\n" +
+      "    UPDATE " + patternindicesTable + " SET index = index1 WHERE  tablename = tablename;\n" +
+      "    IF NOT FOUND THEN\n" +
+      "    INSERT INTO " + patternindicesTable + "  values (tablename1, index1);\n" +
+      "    END IF;\n" +
+      "END;\n" +
+      "$$ LANGUAGE 'plpgsql';\n";
+    Statement st = conn.createStatement();
+    st.execute(s);
+    conn.close();
   }
+
+
+
 
 
 
@@ -394,9 +409,9 @@ public class PatternsForEachToken {
         }
 
         if(doesnotexist){
-        String indexquery ="create index CONCURRENTLY " + tableName +"_index on " + tableName+ " using hash(\"sentid\") ";
-        stmt.execute(indexquery);
-        Redwood.log(Redwood.DBG, "Done creating index for " + tableName);
+          String indexquery ="create index CONCURRENTLY " + tableName +"_index on " + tableName+ " using hash(\"sentid\") ";
+          stmt.execute(indexquery);
+          Redwood.log(Redwood.DBG, "Done creating index for " + tableName);
         }
       } catch (SQLException e) {
         throw new RuntimeException(e);
@@ -432,6 +447,75 @@ public class PatternsForEachToken {
       e.printStackTrace();
     } catch (ClassNotFoundException e) {
       e.printStackTrace();
+    }
+  }
+
+  public boolean DBTableExists() {
+    try {
+      Connection conn = null;
+
+      conn = SQLConnection.getConnection();
+
+      DatabaseMetaData dbm = conn.getMetaData();
+      ResultSet tables = dbm.getTables(null, null, tableName, null);
+      if (tables.next()) {
+        System.out.println("Found table " + tableName);
+        conn.close();
+        return true;
+      }
+      conn.close();
+      return false;
+    }catch(SQLException e){
+      throw new RuntimeException(e);
+
+    }
+  }
+
+  public ConcurrentHashIndex<SurfacePattern> readPatternIndexFromDB(){
+    try{
+      Connection conn = SQLConnection.getConnection();
+      //Map<Integer, Set<Integer>> pats = new ConcurrentHashMap<Integer, Set<Integer>>();
+      String query = "Select * from " + patternindicesTable + " where tablename=\'" + tableName + "\'";
+      Statement stmt = conn.createStatement();
+      ResultSet rs = stmt.executeQuery(query);
+      ConcurrentHashIndex<SurfacePattern> index = null;
+      if(rs.next()){
+        byte[] st = (byte[]) rs.getObject(1);
+        ByteArrayInputStream baip = new ByteArrayInputStream(st);
+        ObjectInputStream ois = new ObjectInputStream(baip);
+        index  = (ConcurrentHashIndex<SurfacePattern>) ois.readObject();
+      }
+      assert index != null;
+      return index;
+    }catch(SQLException e){
+      throw new RuntimeException(e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void savePatternIndexInDB(ConcurrentHashIndex<SurfacePattern> index) {
+    try {
+      createUpsertFunctionPatternIndex();
+      Connection conn = SQLConnection.getConnection();
+      PreparedStatement  st = conn.prepareStatement("select upsert_patternindex(?,?)");
+      st.setString(1,tableName);
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ObjectOutputStream oos = new ObjectOutputStream(baos);
+      oos.writeObject(index);
+      byte[] patsAsBytes = baos.toByteArray();
+      ByteArrayInputStream bais = new ByteArrayInputStream(patsAsBytes);
+      st.setBinaryStream(2, bais, patsAsBytes.length);
+
+      st.execute();
+      st.close();
+      conn.close();
+    }catch (SQLException e){
+      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 }

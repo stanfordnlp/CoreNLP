@@ -359,8 +359,6 @@ public class ScorePhrases {
  //   Counter<Integer> patternsLearnedThisIterRest = new ClassicCounter<Integer>();
 //    Set<String> specialWords = constVars.invertedIndex.getSpecialWordsList();
 
-   //TODO: check computeRawFreq
-
     for(Map.Entry<String, Env> en: constVars.env.entrySet()){
       en.getValue().getVariables().putAll(Token.env.getVariables());
     }
@@ -602,7 +600,7 @@ public class ScorePhrases {
       // + this.phraseScoresRaw.getCounter(w));
       // }
       // } else if(useMultiplyFeatForScoring) {
-      // //TODO
+      //
       // }
 
       Counter<String> phraseScores = phraseScorer.scorePhrases(label,
@@ -627,7 +625,7 @@ public class ScorePhrases {
 
       Redwood.log(
           ConstantsAndVariables.minimaldebug,
-          "\n\n## Selected Words fpr " + label + " : "
+          "\n\n## Selected Words for " + label + " : "
               + Counters.toSortedString(finalwords, finalwords.size(),
                   "%1$s:%2$.2f", "\t"));
 

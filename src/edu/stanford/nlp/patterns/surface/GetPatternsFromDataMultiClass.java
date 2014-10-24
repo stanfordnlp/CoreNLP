@@ -1116,9 +1116,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           patsForEachToken = new PatternsForEachToken(props);
           Redwood.log(Redwood.DBG, "Computing all patterns");
           createPats.getAllPatterns(Data.sents, patsForEachToken);
-        } else if( constVars.allPatternsFile!=null ){
-          patsForEachToken = new PatternsForEachToken(props, IOUtils.readObjectFromFile(constVars.allPatternsFile));
-          Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsFile);
+        } else if( constVars.allPatternsDir!=null ){
+          patsForEachToken = new PatternsForEachToken(props, IOUtils.readObjectFromFile(constVars.allPatternsDir+"/allpatterns.ser"));
+          Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsDir+"/allpatterns.ser");
+          constVars.setPatternIndex(IOUtils.readObjectFromFile(constVars.allPatternsDir+"/patternshashindex.ser"));
         }
       }
 
@@ -1138,8 +1139,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
               props.setProperty("deleteExisting","true");
               patsForEachToken = new PatternsForEachToken(props);
             }
-            else
-              patsForEachToken = new PatternsForEachToken(props, IOUtils.readObjectFromFile(constVars.allPatternsFile));
+            else{
+              patsForEachToken = new PatternsForEachToken(props, IOUtils.readObjectFromFile(constVars.allPatternsDir+"/allpatterns.ser"));
+              constVars.setPatternIndex(IOUtils.readObjectFromFile(constVars.allPatternsDir+"/patternshashindex.ser"));
+            }
           }
         }
 
@@ -1163,9 +1166,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     if(constVars.useDBForTokenPatterns)
       patsForEachToken.createIndexIfUsingDBAndNotExists();
 
-    if (constVars.computeAllPatterns && constVars.allPatternsFile != null && !patsForEachToken.getUseDBForTokenPatterns()) {
-      patsForEachToken.writePatternsIfInMemory(constVars.allPatternsFile);
+    if (constVars.computeAllPatterns){
+      savePatternIndex(constVars.allPatternsDir);
     }
+
 
     //This is important. It makes sure that we don't recompute patterns in every iteration!
     constVars.computeAllPatterns = false;
@@ -1485,6 +1489,16 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   }
 
+  private void savePatternIndex(String dir ) throws IOException {
+    if(constVars.allPatternsDir != null && !patsForEachToken.getUseDBForTokenPatterns()) {
+      IOUtils.ensureDir(new File(dir));
+      patsForEachToken.writePatternsIfInMemory(dir+"/allpatterns.ser");
+      IOUtils.writeObjectToFile(constVars.getPatternIndex(),  dir +"/patternshashindex.ser");
+    } else if(patsForEachToken.getUseDBForTokenPatterns()){
+      patsForEachToken.savePatternIndexInDB(constVars.getPatternIndex());
+    }
+  }
+
   public static Class getPatternScoringClass(PatternScoring patternScoring) {
     if (patternScoring.equals(PatternScoring.F1SeedPattern)) {
       return ScorePatternsF1.class;
@@ -1729,7 +1743,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   public void labelWords(String label, Map<String, List<CoreLabel>> sents, Set<String> identifiedWords, String outFile,
       CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) throws IOException, SQLException {
-  //TODO: update the index
+
     CollectionValuedMap<String, Integer> tokensMatchedPatterns = null;
     if (constVars.restrictToMatched) {
       tokensMatchedPatterns = new CollectionValuedMap<String, Integer>();
@@ -1806,7 +1820,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if (patsForEachToken != null )//&& patsForEachToken.containsSentId(sentEn.getKey()))
       {
         for (int index : contextWordsRecalculatePats){
-
           if(!tempPatsForSents.containsKey(sentEn.getKey()))
             tempPatsForSents.put(sentEn.getKey(), new HashMap<Integer, Set<Integer>>());
 
@@ -1818,7 +1831,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         constVars.invertedIndex.update(sentEn.getValue(), sentEn.getKey());
     }
 
-    patsForEachToken.updatePatterns(tempPatsForSents);//sentEn.getKey(), index, createPats.getContext(sentEn.getValue(), index));
+    if(patsForEachToken != null)
+      patsForEachToken.updatePatterns(tempPatsForSents);//sentEn.getKey(), index, createPats.getContext(sentEn.getValue(), index));
 
 
     constVars.invertedIndex.finishUpdating();
@@ -2860,47 +2874,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     // If you want to reuse patterns and words learned previously (may be on
     // another dataset etc)
     boolean loadSavedPatternsWordsDir = Boolean.parseBoolean(props.getProperty("loadSavedPatternsWordsDir"));
-    String patternsWordsDir = props.getProperty("patternsWordsDir");
 
+    //Load already save pattersn and phrases
     if (loadSavedPatternsWordsDir) {
-      for (String label : model.constVars.getLabelDictionary().keySet()) {
-        assert (new File(patternsWordsDir + "/" + label).exists());
-        File patf = new File(patternsWordsDir + "/" + label + "/patterns.ser");
-        if (patf.exists()) {
-          Counter<SurfacePattern> patterns = IOUtils.readObjectFromFile(patf);
-          Counter<Integer> patternsIndexed = new ClassicCounter<Integer>();
-          for(Entry<SurfacePattern, Double> en: patterns.entrySet())
-          {
-            patternsIndexed.setCount(model.constVars.getPatternIndex().addToIndex(en.getKey()), en.getValue());
-          }
-
-          model.setLearnedPatterns(patternsIndexed, label);
-          Redwood.log(Redwood.DBG, "Loaded " + patterns.size() + " patterns from " + patf);
-        }
-        File wordf = new File(patternsWordsDir + "/" + label + "/phrases.txt");
-        if (wordf.exists()) {
-          Counter<String> words = model.readLearnedWordsFromFile(wordf);
-          model.setLearnedWords(words, label);
-          Redwood.log(Redwood.DBG, "Loaded " + words.size() + " from " + patf);
-        }
-        CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat = null;
-
-        if (model.constVars.restrictToMatched) {
-          TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, Integer>();
-          model.scorePhrases.applyPats(model.getLearnedPatterns(label), label, wordsandLemmaPatExtracted, matchedTokensByPat);
-        }
-
-        if (model.constVars.batchProcessSents) {
-          for (File f : Data.sentsFiles) {
-            Redwood.log(Redwood.DBG, "labeling sentences from " + f + " with the already learned words");
-            Map<String, List<CoreLabel>> sentsf = IOUtils.readObjectFromFile(f);
-            assert sentsf != null : "Why are sents null";
-            model.labelWords(label, sentsf, model.getLearnedWords(label).keySet(), sentsOutFile, matchedTokensByPat);
-            IOUtils.writeObjectToFile(sentsf, f);
-          }
-        } else
-          model.labelWords(label, Data.sents, model.getLearnedWords(label).keySet(), sentsOutFile, matchedTokensByPat);
-      }
+      loadFromSavedPatternsWordsDir(model , props);
     }
 
     if (learn)
@@ -2916,6 +2893,15 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     boolean savePatternsWordsDir = Boolean.parseBoolean(props.getProperty("savePatternsWordsDir"));
 
     if (savePatternsWordsDir) {
+      String patternsWordsDir = props.getProperty("patternsWordsDir");
+      //save pattern index!
+      if(!model.patsForEachToken.getUseDBForTokenPatterns() && model.constVars.allPatternsDir == null){
+        String allPatsDir = patternsWordsDir+"/allpatterns/";
+        IOUtils.ensureDir(new File(allPatsDir));
+        model.savePatternIndex(allPatsDir);
+        Redwood.log(Redwood.FORCE, "WARNING: SAVING OF THE MODEL IS SET BUT allPatternsDir IS NOT SET. SAVING ALL PATTERNS DIR TO " + allPatsDir+ ". USE THIS AS allPatternsDir WHEN LOADING THE MODEL!");
+      } //else if using DB, already saved when creating patterns;
+
       for (String label : model.constVars.getLabelDictionary().keySet()) {
         IOUtils.ensureDir(new File(patternsWordsDir + "/" + label));
         Counter<Integer> pats = model.getLearnedPatterns(label);
@@ -2923,6 +2909,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         IOUtils.writeObjectToFile(patsSur, patternsWordsDir + "/" + label + "/patterns.ser");
         BufferedWriter w = new BufferedWriter(new FileWriter(patternsWordsDir + "/" + label + "/phrases.txt"));
         model.writeWordsToFile(model.getLearnedWords(label), w);
+
         w.close();
       }
     }
@@ -2976,6 +2963,66 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     }
 
     return model;
+  }
+
+  private static void loadFromSavedPatternsWordsDir(GetPatternsFromDataMultiClass model, Properties props) throws IOException, ClassNotFoundException, SQLException, ExecutionException, InterruptedException {
+    String patternsWordsDir = props.getProperty("patternsWordsDir");
+    String sentsOutFile = props.getProperty("sentsOutFile");
+
+    for (String label : model.constVars.getLabelDictionary().keySet()) {
+      assert (new File(patternsWordsDir + "/" + label).exists());
+
+
+     /* if(!model.constVars.useDBForTokenPatterns){
+        assert model.constVars.allPatternsDir != null && new File(model.constVars.allPatternsDir).exists() : "Should save allPatternsFile when saving the model and use that";
+        model.patsForEachToken = new PatternsForEachToken(props, IOUtils.readObjectFromFile(model.constVars.allPatternsDir+"/allpatterns.ser"));
+        model.constVars.setPatternIndex( IOUtils.readObjectFromFile(model.constVars.allPatternsDir+"/patternshashindex.ser"));
+      }else {
+        props.setProperty("createTable", "false");
+        props.setProperty("deleteExisting", "false");
+        model.patsForEachToken = new PatternsForEachToken(props);
+        model.constVars.setPatternIndex(model.patsForEachToken.readPatternIndexFromDB());
+      }
+*/
+
+      File patf = new File(patternsWordsDir + "/" + label + "/patterns.ser");
+      if (patf.exists()) {
+        Counter<SurfacePattern> patterns = IOUtils.readObjectFromFile(patf);
+        Counter<Integer> patternsIndexed = new ClassicCounter<Integer>();
+        for(Entry<SurfacePattern, Double> en: patterns.entrySet())
+        {
+          patternsIndexed.setCount(model.constVars.getPatternIndex().addToIndex(en.getKey()), en.getValue());
+        }
+
+        model.setLearnedPatterns(patternsIndexed, label);
+        Redwood.log(Redwood.DBG, "Loaded " + patterns.size() + " patterns from " + patf);
+      }
+
+
+      File wordf = new File(patternsWordsDir + "/" + label + "/phrases.txt");
+      if (wordf.exists()) {
+        Counter<String> words = model.readLearnedWordsFromFile(wordf);
+        model.setLearnedWords(words, label);
+        Redwood.log(Redwood.DBG, "Loaded " + words.size() + " from " + patf);
+      }
+      CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat = null;
+
+      if (model.constVars.restrictToMatched) {
+        TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, Integer>();
+        model.scorePhrases.applyPats(model.getLearnedPatterns(label), label, wordsandLemmaPatExtracted, matchedTokensByPat);
+      }
+
+      if (model.constVars.batchProcessSents) {
+        for (File f : Data.sentsFiles) {
+          Redwood.log(Redwood.DBG, "labeling sentences from " + f + " with the already learned words");
+          Map<String, List<CoreLabel>> sentsf = IOUtils.readObjectFromFile(f);
+          assert sentsf != null : "Why are sents null";
+          model.labelWords(label, sentsf, model.getLearnedWords(label).keySet(), sentsOutFile, matchedTokensByPat);
+          IOUtils.writeObjectToFile(sentsf, f);
+        }
+      } else
+        model.labelWords(label, Data.sents, model.getLearnedWords(label).keySet(), sentsOutFile, matchedTokensByPat);
+    }
   }
 
 

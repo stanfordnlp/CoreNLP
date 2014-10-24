@@ -2,6 +2,7 @@ package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 import junit.framework.TestCase;
 import org.junit.Test;
 
@@ -70,6 +71,8 @@ public class PatternsForEachTokenTest extends TestCase {
     Map<Integer, Set<Integer>> ptsup = p.getPatternsForAllTokens("sent2");
     assert ptsup.get(1).size() == 3;
 
+    ConcurrentHashIndex<SurfacePattern> index = new ConcurrentHashIndex<SurfacePattern>();
+    p.savePatternIndexInDB(index);
 
   }
 }

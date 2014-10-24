@@ -67,9 +67,26 @@ public class ApplyPatterns    implements  Callable<Pair<TwoDimensionalCounter<Pa
           boolean useWordNotLabeled = false;
           boolean doNotUse = false;
 
+         //find if the neighboring words are labeled - if so - club them together
+          if(constVars.clubNeighboringLabeledWords) {
+            for (int i = s - 1; i >= 0; i--) {
+              if (!sent.get(i).get(constVars.getAnswerClass().get(label)).equals(label)) {
+                s = i + 1;
+                break;
+              }
+            }
+            for (int i = e; i < sent.size(); i++) {
+              if (!sent.get(i).get(constVars.getAnswerClass().get(label)).equals(label)) {
+                e = i;
+                break;
+              }
+            }
+          }
+
           //to make sure we discard phrases with stopwords in between, but include the ones in which stop words were removed at the ends if removeStopWordsFromSelectedPhrases is true
           boolean[] addedindices = new boolean[e-s];
           Arrays.fill(addedindices, false);
+
 
           for (int i = s; i < e; i++) {
             CoreLabel l = sent.get(i);
@@ -77,6 +94,7 @@ public class ApplyPatterns    implements  Callable<Pair<TwoDimensionalCounter<Pa
 
             if(!l.containsKey(PatternsAnnotations.MatchedPatterns.class) || l.get(PatternsAnnotations.MatchedPatterns.class) == null)
               l.set(PatternsAnnotations.MatchedPatterns.class, new HashSet<SurfacePattern>());
+
             SurfacePattern pSur = constVars.getPatternIndex().get(pEn.getValue());
             assert pSur != null : "Why is " + pEn.getValue() + " not present in the index?!";
             assert l.get(PatternsAnnotations.MatchedPatterns.class) != null : "How come MatchedPatterns class is null for the token. The classes in the key set are " + l.keySet();

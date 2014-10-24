@@ -18,7 +18,6 @@ public abstract class SentenceIndex {
 
   Set<String> stopWords;
 
-  //TODO: implement this
   int numAllSentences = 0;
 
   Function<CoreLabel, Map<String, String>>  transformCoreLabeltoString;

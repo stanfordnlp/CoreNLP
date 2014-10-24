@@ -89,7 +89,7 @@ public class CreatePatterns {
   @Option(name = "useStopWordsBeforeTerm")
   public boolean useStopWordsBeforeTerm = false;
 
-
+  Token fw, sw;
   //String channelNameLogger = "createpatterns";
 
   ConstantsAndVariables constVars;
@@ -110,6 +110,17 @@ public class CreatePatterns {
     if (!addPatWithoutPOS && !this.usePOS4Pattern) {
       throw new RuntimeException(
           "addPatWithoutPOS and usePOS4Pattern both cannot be false ");
+    }
+
+    fw = new Token();
+    if (useFillerWordsInPat) {
+      fw.setEnvBindRestriction("$FILLER");
+      fw.setNumOcc(0,2);
+    }
+    sw = new Token();
+    if (useStopWordsBeforeTerm) {
+      sw.setEnvBindRestriction("$STOPWORD");
+      sw.setNumOcc(0, 2);
     }
   }
 
@@ -226,6 +237,7 @@ public class CreatePatterns {
 
   public Set<Integer> getContext(
      List<CoreLabel> sent, int i) {
+
 
     Set<Integer> prevpatterns = new HashSet<Integer>();
     Set<Integer> nextpatterns = new HashSet<Integer>();
@@ -387,17 +399,7 @@ public class CreatePatterns {
       // - numPrevTokensSpecial;
       // int numNonSpecialNextTokens = nextTokens.size() - numNextTokensSpecial;
 
-      //TODO: move to global
-      Token fw = new Token();
-      if (useFillerWordsInPat) {
-        fw.setEnvBindRestriction("$FILLER");
-        fw.setNumOcc(0,2);
-      }
-      Token sw = new Token();
-      if (useStopWordsBeforeTerm) {
-        sw.setEnvBindRestriction("$STOPWORD");
-        sw.setNumOcc(0, 2);
-      }
+
 
       Token[] prevContext = null;
       //String[] prevContext = null;
