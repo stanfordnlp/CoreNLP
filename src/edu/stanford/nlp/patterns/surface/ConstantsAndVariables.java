@@ -609,7 +609,7 @@ public class ConstantsAndVariables implements Serializable{
   int wordShaper = WordShapeClassifier.WORDSHAPECHRIS2;
   private Map<String, String> wordShapeCache = new HashMap<String, String>();
 
-  public InvertedIndexByTokens invertedIndex;
+  public SentenceIndex invertedIndex;
 
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";
