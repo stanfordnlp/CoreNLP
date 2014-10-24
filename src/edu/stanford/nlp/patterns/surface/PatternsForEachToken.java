@@ -4,6 +4,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
+import edu.stanford.nlp.util.logging.Redwood;
 
 
 import java.io.*;
@@ -83,15 +84,21 @@ public class PatternsForEachToken {
         if (deleteExisting) {
           System.out.println("deleting table " + tableName);
           Statement stmt = conn.createStatement();
-          query = "DELETE FROM " + tableName;
-          stmt.executeUpdate(query);
+          query = "drop table " + tableName;
+          stmt.execute(query);
+          stmt.close();
+          Statement stmtindex = conn.createStatement();
+          query = "DROP INDEX IF EXISTS " + tableName+"_index";
+          stmtindex.execute(query);
+          stmtindex.close();
         }
-      } else {
-        Statement stmt = conn.createStatement();
-        //query = "create table  IF NOT EXISTS " + tableName + " (\"sentid\" text, \"tokenid\" int, \"patterns\" bytea); ";
-        query = "create table  IF NOT EXISTS " + tableName + " (\"sentid\" text, \"patterns\" bytea); ";
-        stmt.execute(query);
       }
+      System.out.println("creating table " + tableName);
+      Statement stmt = conn.createStatement();
+      //query = "create table  IF NOT EXISTS " + tableName + " (\"sentid\" text, \"tokenid\" int, \"patterns\" bytea); ";
+      query = "create table IF NOT EXISTS " + tableName + " (sentid text, patterns bytea); ";
+      stmt.execute(query);
+      stmt.close();
       conn.close();} catch (SQLException e) {
       throw new RuntimeException("Error executing query " + query + "\n" + e);
     }
@@ -309,6 +316,7 @@ public class PatternsForEachToken {
   }*/
 
 
+
   public Map<Integer, Set<Integer>> getPatternsForAllTokens(String sentId) throws SQLException, IOException, ClassNotFoundException {
     if(useDBForTokenPatterns){
       Connection conn = SQLConnection.getConnection();
@@ -368,6 +376,34 @@ public class PatternsForEachToken {
     }
   }
 
+  public void createIndexIfUsingDBAndNotExists(){
+    if(useDBForTokenPatterns){
+      try {
+        Redwood.log(Redwood.DBG, "Creating index for " + tableName);
+        Connection conn = SQLConnection.getConnection();
+        Statement stmt = conn.createStatement();
+        boolean doesnotexist = false;
+
+        //check if the index already exists
+        try{
+          Statement stmt2 = conn.createStatement();
+          String query = "SELECT '"+tableName+"_index'::regclass";
+          stmt2.execute(query);
+        }catch (SQLException e){
+          doesnotexist = true;
+        }
+
+        if(doesnotexist){
+        String indexquery ="create index " + tableName +"_index on " + tableName+ " using hash(\"sentid\") ";
+        stmt.execute(indexquery);
+        Redwood.log(Redwood.DBG, "Done creating index for " + tableName);
+        }
+      } catch (SQLException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
   /**
    * not yet supported if backed by DB
    * @return
@@ -382,13 +418,13 @@ public class PatternsForEachToken {
 
   public void updatePatterns(Map<String, Map<Integer, Set<Integer>>> tempPatsForSents) {
     try {
-    for(Map.Entry<String, Map<Integer, Set<Integer>>> en :tempPatsForSents.entrySet()){
-      Map<Integer, Set<Integer>> m = getPatternsForAllTokens(en.getKey());
-      if(m == null)
-        m = new HashMap<Integer, Set<Integer>>();
-      //m.putAll(en.getValue());
-      tempPatsForSents.get(en.getKey()).putAll(m);
-    }
+      for(Map.Entry<String, Map<Integer, Set<Integer>>> en :tempPatsForSents.entrySet()){
+        Map<Integer, Set<Integer>> m = getPatternsForAllTokens(en.getKey());
+        if(m == null)
+          m = new HashMap<Integer, Set<Integer>>();
+        //m.putAll(en.getValue());
+        tempPatsForSents.get(en.getKey()).putAll(m);
+      }
       this.addPatterns(tempPatsForSents);
     } catch (IOException e) {
       e.printStackTrace();

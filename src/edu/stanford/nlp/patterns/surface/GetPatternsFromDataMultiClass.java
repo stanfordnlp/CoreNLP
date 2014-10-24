@@ -509,7 +509,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
 
 
-
 //    if (constVars.saveInvertedIndexDir != null) {
 //      IOUtils.ensureDir(new File(constVars.saveInvertedIndexDir));
 //      constVars.invertedIndex.saveIndex(constVars.saveInvertedIndexDir);
@@ -1150,6 +1149,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           createPats.getAllPatterns(sents, patsForEachToken);
         }
 
+        Redwood.log(Redwood.DBG, "Done creating patterns for " + f);
 
         this.calculateSufficientStats(sents, patsForEachToken, label, patternsandWords4Label, posnegPatternsandWords4Label, allPatternsandWords4Label,
           negPatternsandWords4Label, unLabeledPatternsandWords4Label, negandUnLabeledPatternsandWords4Label);
@@ -1157,6 +1157,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       }
 
     }
+
+    if(constVars.useDBForTokenPatterns)
+      patsForEachToken.createIndexIfUsingDBAndNotExists();
 
     if (constVars.computeAllPatterns && constVars.allPatternsFile != null && !patsForEachToken.getUseDBForTokenPatterns()) {
       patsForEachToken.writePatternsIfInMemory(constVars.allPatternsFile);
