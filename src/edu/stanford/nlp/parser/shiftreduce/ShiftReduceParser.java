@@ -903,7 +903,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
   private void train(List<Pair<String, FileFilter>> trainTreebankPath,
                      Pair<String, FileFilter> devTreebankPath,
-                     String serializedPath, Set<String> allowedFeatures) {
+                     String serializedPath) {
     System.err.println("Training method: " + op.trainOptions().trainingMethod);
 
     List<Tree> binarizedTrees = Generics.newArrayList();
@@ -945,7 +945,17 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       devTreebank = readTreebank(devTreebankPath.first(), devTreebankPath.second());
     }
 
-    trainModel(serializedPath, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, allowedFeatures);
+    if (op.trainOptions().retrainAfterCutoff && op.trainOptions().featureFrequencyCutoff > 0) {
+      // TODO: factor out some of the treebank loading
+      String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + "temp.ser.gz";
+      trainModel(tempName, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, null);
+      saveModel(tempName);
+      Set<String> features = model.featureWeights.keySet();
+      this.model = new PerceptronModel(this.op, this.transitionIndex);
+      trainModel(serializedPath, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, features);
+    } else {
+      trainModel(serializedPath, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, null);
+    }
   }
 
   public void setOptionFlags(String ... flags) {
@@ -1041,17 +1051,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         parser = new ShiftReduceParser(op);
       }
       ShiftReduceOptions op = parser.op;
-      if (op.trainOptions().retrainAfterCutoff && op.trainOptions().featureFrequencyCutoff > 0) {
-        // TODO: factor out some of the treebank loading
-        String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + "temp.ser.gz";
-        parser.train(trainTreebankPath, devTreebankPath, tempName, null);
-        parser.saveModel(tempName);
-        Set<String> features = parser.model.featureWeights.keySet();
-        parser = new ShiftReduceParser(op);
-        parser.train(trainTreebankPath, devTreebankPath, serializedPath, features);
-      } else {
-        parser.train(trainTreebankPath, devTreebankPath, serializedPath, null);
-      }
+      parser.train(trainTreebankPath, devTreebankPath, serializedPath);
       parser.saveModel(serializedPath);
     }
 
