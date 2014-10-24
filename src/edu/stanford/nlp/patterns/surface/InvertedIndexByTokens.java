@@ -1,9 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 import java.util.function.Function;
 
@@ -146,6 +143,7 @@ public class InvertedIndexByTokens extends SentenceIndex implements Serializable
   @Override
   public void saveIndex(String dir){
     try {
+      IOUtils.ensureDir(new File(dir));
       IOUtils.writeObjectToFile(index, dir + "/map.ser");
     } catch (IOException e) {
       throw new RuntimeException(e);

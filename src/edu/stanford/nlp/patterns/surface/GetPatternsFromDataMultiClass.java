@@ -1,14 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
@@ -17,6 +9,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.json.Json;
@@ -28,6 +21,7 @@ import javax.json.JsonValue;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RegExFileFilter;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
@@ -2538,19 +2532,28 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     for (String tokfile : file.split("[,;]")) {
       File filef = new File(tokfile);
       if (filef.isDirectory()) {
+        Redwood.log(Redwood.DBG, "Will read from directory " + filef);
         String path = ".*";
         File dir = filef;
         for (File f : IOUtils.iterFilesRecursive(dir, Pattern.compile(path))) {
-          Redwood.log(Redwood.DBG, "Reading file " + f);
+          Redwood.log(ConstantsAndVariables.extremedebug, "Will reading from file " + f);
           allFiles.add(f);
         }
       } else {
-        Redwood.log(Redwood.DBG, "Reading file " + filef);
-        allFiles.add(filef);
+        if (filef.exists()) {
+          Redwood.log(Redwood.DBG, "Will read from file " + filef);
+          allFiles.add(filef);
+        } else {
+          Redwood.log(Redwood.DBG, "trying to read from file " + filef);
+          //Is this a pattern?
+          RegExFileFilter fileFilter = new RegExFileFilter(Pattern.compile(filef.getName()));
+          File dir = new File(tokfile.substring(0, tokfile.lastIndexOf("/")));
+          File[] files = dir.listFiles(fileFilter);
+          allFiles.addAll(Arrays.asList(files));
+        }
       }
 
-      // RegExFileFilter fileFilter = new RegExFileFilter(Pattern.compile(ext));
-      // File[] files = dir.listFiles(fileFilter);
+
     }
 
     return allFiles;
