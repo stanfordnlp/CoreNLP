@@ -12,12 +12,8 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
-import edu.stanford.nlp.util.ArrayStringFilter;
-import edu.stanford.nlp.util.Filter;
-import edu.stanford.nlp.util.Filters;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.RegexStringFilter;
+import edu.stanford.nlp.util.*;
+import java.util.function.Predicate;
 
 /**
  * An abstract base class for relations between graph nodes in semgrex. There
@@ -36,7 +32,7 @@ import edu.stanford.nlp.util.RegexStringFilter;
  */
 abstract class GraphRelation implements Serializable {
   final String symbol;
-  final Filter<String> type;
+  final Predicate<String> type;
   final String rawType;
 	
   final String name;
@@ -76,7 +72,7 @@ abstract class GraphRelation implements Serializable {
     return symbol + ((rawType != null) ? rawType : "") + ((name != null) ? "=" + name : "");
   }
 	
-  public Filter<String> getPattern(String relnType)
+  public Predicate<String> getPattern(String relnType)
   {
     if ((relnType == null) || (relnType.equals(""))) {
       return Filters.acceptFilter();
@@ -248,7 +244,7 @@ abstract class GraphRelation implements Serializable {
     boolean satisfies(IndexedWord l1, IndexedWord l2, SemanticGraph sg) {
       List<Pair<GrammaticalRelation, IndexedWord>> deps = sg.childPairs(l1);
       for (Pair<GrammaticalRelation, IndexedWord> dep : deps) {
-        if (this.type.accept(dep.first().toString()) &&
+        if (this.type.test(dep.first().toString()) &&
             dep.second().equals(l2)) {
           return true;  
         }
@@ -273,7 +269,7 @@ abstract class GraphRelation implements Serializable {
             while (iterator.hasNext()) {
               SemanticGraphEdge edge = iterator.next();
               relation = edge.getRelation().toString();
-              if (!type.accept(relation)) {
+              if (!type.test(relation)) {
                 continue;
               }
               this.next = edge.getTarget();
@@ -302,7 +298,7 @@ abstract class GraphRelation implements Serializable {
         return false;
       List<Pair<GrammaticalRelation, IndexedWord>> govs = sg.parentPairs(l1);
       for (Pair<GrammaticalRelation, IndexedWord> gov : govs) {
-        if (this.type.accept(gov.first().toString()) &&
+        if (this.type.test(gov.first().toString()) &&
             gov.second().equals(l2)) return true;  
       }
       return false;
@@ -326,7 +322,7 @@ abstract class GraphRelation implements Serializable {
               return;
             }
             List<Pair<GrammaticalRelation, IndexedWord>> govs = sg.parentPairs(node);
-            while (nextNum < govs.size() && !type.accept(govs.get(nextNum).first().toString())) {  
+            while (nextNum < govs.size() && !type.test(govs.get(nextNum).first().toString())) {
               nextNum++;
             }
             if (nextNum < govs.size()) {
@@ -377,7 +373,7 @@ abstract class GraphRelation implements Serializable {
       }
       if (depth + 1 >= startDepth) {
         for (Pair<GrammaticalRelation, IndexedWord> dep : deps) {
-          if (this.type.accept(dep.first().toString()) &&
+          if (this.type.test(dep.first().toString()) &&
               dep.second().equals(l2)) return true;  
         }
       }
@@ -461,7 +457,7 @@ abstract class GraphRelation implements Serializable {
                     nextStack.push(children.get(i));
                 }
                 if (currentDepth >= startDepth &&
-                    type.accept(nextPair.first().toString()) &&
+                    type.test(nextPair.first().toString()) &&
                     !returnedNodes.contains(nextPair.second())) {
                   next = nextPair.second();
                   relation = nextPair.first().toString();
@@ -509,7 +505,7 @@ abstract class GraphRelation implements Serializable {
                                   Set<IndexedWord> usedNodes) {
       List<Pair<GrammaticalRelation, IndexedWord>> govs = getNeighborPairs(sg, node);
       for (Pair<GrammaticalRelation, IndexedWord> gov : govs) {
-        if (this.type.accept(gov.first().toString()) &&
+        if (this.type.test(gov.first().toString()) &&
             gov.second().equals(l2)) return true;  
       }
 			      
@@ -565,7 +561,7 @@ abstract class GraphRelation implements Serializable {
                   searchStack.push(otherEnd);
                   searchedNodes.add(otherEnd);
                 }
-                if (type.accept(edge.getRelation().toString()) && !matchedNodes.contains(otherEnd)) {
+                if (type.test(edge.getRelation().toString()) && !matchedNodes.contains(otherEnd)) {
                   matchedNodes.add(otherEnd);
                   next = otherEnd;
                   relation = edge.getRelation().toString();
@@ -668,7 +664,7 @@ abstract class GraphRelation implements Serializable {
       }
       if (depth + 1 >= startDepth) {
         for (Pair<GrammaticalRelation, IndexedWord> dep : deps) {
-          if (this.type.accept(dep.first().toString()) &&
+          if (this.type.test(dep.first().toString()) &&
               dep.second().equals(l2)) return true;  
         }
       }
@@ -752,7 +748,7 @@ abstract class GraphRelation implements Serializable {
                     nextStack.push(parents.get(i));
                 }
                 if (currentDepth >= startDepth &&
-                    type.accept(nextPair.first().toString()) &&
+                    type.test(nextPair.first().toString()) &&
                     !returnedNodes.contains(nextPair.second())) {
                   returnedNodes.add(nextPair.second());
                   next = nextPair.second();

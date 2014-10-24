@@ -274,8 +274,6 @@ public class ScorePhrases {
       else
         patternsLearnedThisIterConsistsOnlyGeneralized.setCount(en.getKey(), en.getValue());
     }
-
-
     
     Map<String, Set<String>> sentidswithfilerest = constVars.invertedIndex.getFileSentIdsFromPats(patternsLearnedThisIterRest.keySet(), constVars.getPatternIndex());
     

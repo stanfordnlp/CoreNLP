@@ -367,10 +367,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 //    }
 
     if (createInvIndex)
-      constVars.invertedIndex = new SentenceIndex(constVars.matchLowerCaseContext, constVars.getStopWords(), specialwords4Index,
-        constVars.batchProcessSents, prefixFileForIndex);
-      // new InvertedIndexByTokens(constVars.matchLowerCaseContext, constVars.getStopWords(), specialwords4Index,
-      //    constVars.batchProcessSents, prefixFileForIndex);
+      constVars.invertedIndex = new InvertedIndexByTokens(constVars.matchLowerCaseContext, constVars.getStopWords(), specialwords4Index,
+          constVars.batchProcessSents, prefixFileForIndex);
 
     int totalNumSents = 0;
 
@@ -479,7 +477,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 //      constVars.invertedIndex.saveIndex(constVars.saveInvertedIndexDir);
 //    }
 
-    Redwood.log(Redwood.DBG, "Done creating inverted index of tokens and labeling data with total of "
+    Redwood.log(Redwood.DBG, "Done creating inverted index of " + constVars.invertedIndex.size() + " tokens and labeling data with total of "
         + totalNumSents + " sentences");
 
     if (constVars.usePatternEvalWordClass || constVars.usePhraseEvalWordClass) {

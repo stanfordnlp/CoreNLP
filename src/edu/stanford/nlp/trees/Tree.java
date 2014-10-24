@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.*;
+import java.util.function.Predicate;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasIndex;
@@ -486,7 +487,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     return constituentsSet;
   }
 
-  public Set<Constituent> constituents(ConstituentFactory cf, boolean charLevel, Filter<Tree> filter) {
+  public Set<Constituent> constituents(ConstituentFactory cf, boolean charLevel, Predicate<Tree> filter) {
     Set<Constituent> constituentsSet = Generics.newHashSet();
     constituents(constituentsSet, 0, cf, charLevel, filter, -1, 0);
     return constituentsSet;
@@ -543,7 +544,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @param depth           The current depth
    * @return Index of right frontier of Constituent
    */
-  private int constituents(Set<Constituent> constituentsSet, int left, ConstituentFactory cf, boolean charLevel, Filter<Tree> filter, int maxDepth, int depth) {
+  private int constituents(Set<Constituent> constituentsSet, int left, ConstituentFactory cf, boolean charLevel, Predicate<Tree> filter, int maxDepth, int depth) {
 
     if(isPreTerminal())
       return left + ((charLevel) ? firstChild().value().length() : 1);
@@ -559,7 +560,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       // System.err.println("  position went to " + position);
     }
 
-    if ((filter == null || filter.accept(this)) &&
+    if ((filter == null || filter.test(this)) &&
         (maxDepth < 0 || depth <= maxDepth)) {
       //Compute span of entire tree at the end of recursion
       constituentsSet.add(cf.newConstituent(left, position - 1, label(), score()));
@@ -1204,7 +1205,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     return dependencies(Filters.<Dependency<Label, Label, Object>>acceptFilter());
   }
 
-  public Set<Dependency<Label, Label, Object>> dependencies(Filter<Dependency<Label, Label, Object>> f) {
+  public Set<Dependency<Label, Label, Object>> dependencies(Predicate<Dependency<Label, Label, Object>> f) {
     return dependencies(f, true, true, false);
   }
 
@@ -1246,7 +1247,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *          accepted by the Filter
    * @return Set of dependencies (each a Dependency)
    */
-  public Set<Dependency<Label, Label, Object>> dependencies(Filter<Dependency<Label, Label, Object>> f, boolean isConcrete, boolean copyLabel, boolean copyPosTag) {
+  public Set<Dependency<Label, Label, Object>> dependencies(Predicate<Dependency<Label, Label, Object>> f, boolean isConcrete, boolean copyLabel, boolean copyPosTag) {
     Set<Dependency<Label, Label, Object>> deps = Generics.newHashSet();
     for (Tree node : this) {
       // Skip leaves and unary re-writes
@@ -1278,7 +1279,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
               new UnnamedConcreteDependency(headLabel, depLabel) :
               new UnnamedDependency(headLabel, depLabel);
 
-          if (f.accept(dependency)) {
+          if (f.test(dependency)) {
             deps.add(dependency);
           }
         }
@@ -1302,7 +1303,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *           <code>CoreLabel</code>s, which each contain a tag(), word(),
    *           and value(), the last two of which are identical).
    */
-  public Set<Dependency<Label, Label, Object>> mapDependencies(Filter<Dependency<Label, Label, Object>> f, HeadFinder hf) {
+  public Set<Dependency<Label, Label, Object>> mapDependencies(Predicate<Dependency<Label, Label, Object>> f, HeadFinder hf) {
     if (hf == null) {
       throw new IllegalArgumentException("mapDependencies: need HeadFinder");
     }
@@ -1331,7 +1332,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
          //System.err.println("transformed to " + dml.toString("value{map}"));
         if (dwt != hwt) {
           Dependency<Label, Label, Object> p = new UnnamedDependency(hwt.label(), dwt.label());
-          if (f.accept(p)) {
+          if (f.test(p)) {
             deps.add(p);
           }
         }
@@ -1357,7 +1358,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *           <code>CoreLabel</code>s, which each contain a tag(), word(),
    *           and value(), the last two of which are identical).
    */
-  public Set<Dependency<Label, Label, Object>> mapDependencies(Filter<Dependency<Label, Label, Object>> f, HeadFinder hf, String rootName) {
+  public Set<Dependency<Label, Label, Object>> mapDependencies(Predicate<Dependency<Label, Label, Object>> f, HeadFinder hf, String rootName) {
     Set<Dependency<Label, Label, Object>> deps = mapDependencies(f, hf);
     if(rootName != null) {
       Label hl = headTerminal(hf).label();
@@ -1936,7 +1937,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *                   keep this node, false to mean delete it
    * @return a filtered copy of the tree
    */
-  public Tree spliceOut(final Filter<Tree> nodeFilter) {
+  public Tree spliceOut(final Predicate<Tree> nodeFilter) {
     return spliceOut(nodeFilter, treeFactory());
   }
 
@@ -1958,7 +1959,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *                   the root node is deleted.
    * @return a filtered copy of the tree.
    */
-  public Tree spliceOut(final Filter<Tree> nodeFilter, final TreeFactory tf) {
+  public Tree spliceOut(final Predicate<Tree> nodeFilter, final TreeFactory tf) {
     List<Tree> l = spliceOutHelper(nodeFilter, tf);
     if (l.isEmpty()) {
       return null;
@@ -1970,7 +1971,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
 
-  private List<Tree> spliceOutHelper(Filter<Tree> nodeFilter, TreeFactory tf) {
+  private List<Tree> spliceOutHelper(Predicate<Tree> nodeFilter, TreeFactory tf) {
     // recurse over all children first
     Tree[] kids = children();
     List<Tree> l = new ArrayList<Tree>();
@@ -1978,7 +1979,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       l.addAll(kid.spliceOutHelper(nodeFilter, tf));
     }
     // check if this node is being spliced out
-    if (nodeFilter.accept(this)) {
+    if (nodeFilter.test(this)) {
       // no, so add our children and return
       Tree t;
       if ( ! l.isEmpty()) {
@@ -2018,7 +2019,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return a filtered copy of the tree, including the possibility of
    *         <code>null</code> if the root node of the tree is filtered
    */
-  public Tree prune(final Filter<Tree> filter) {
+  public Tree prune(final Predicate<Tree> filter) {
     return prune(filter, treeFactory());
   }
 
@@ -2035,9 +2036,9 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return a filtered copy of the tree, including the possibility of
    *         <code>null</code> if the root node of the tree is filtered
    */
-  public Tree prune(Filter<Tree> filter, TreeFactory tf) {
+  public Tree prune(Predicate<Tree> filter, TreeFactory tf) {
     // is the current node to be pruned?
-    if ( ! filter.accept(this)) {
+    if ( ! filter.test(this)) {
       return null;
     }
     // if not, recurse over all children

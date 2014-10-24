@@ -2,6 +2,7 @@ package edu.stanford.nlp.util;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Predicate;
 
 
 /**
@@ -563,11 +564,11 @@ public class ArrayUtils {
    * Implementation notes: creates two arrays, calls <code>filter</code>
    * once for each element, does not alter <code>original</code>
    */
-  public static <T> T[] filter(T[] original, Filter<? super T> filter) {
+  public static <T> T[] filter(T[] original, Predicate<? super T> filter) {
     T[] result = Arrays.copyOf(original, original.length); // avoids generic array creation compile error
     int size = 0;
     for (T value : original) {
-      if (filter.accept(value)) {
+      if (filter.test(value)) {
         result[size] = value;
         size++;
       }

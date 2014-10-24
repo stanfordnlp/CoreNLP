@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -895,10 +896,10 @@ public class CollectionUtils {
    * Filters the objects in the collection according to the given Filter and returns a list
    *
    */
-  public static<T> List<T> filterAsList(Collection<? extends T> original, Filter<? super T> f){
+  public static<T> List<T> filterAsList(Collection<? extends T> original, Predicate<? super T> f){
     List<T> transformed = new ArrayList<T>();
     for (T t: original) {
-      if (f.accept(t)) {
+      if (f.test(t)) {
         transformed.add(t);
       }
     }
