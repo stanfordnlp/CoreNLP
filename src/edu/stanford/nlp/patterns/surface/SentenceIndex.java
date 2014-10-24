@@ -1,16 +1,11 @@
 package edu.stanford.nlp.patterns.surface;
 
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Execution.Option;
-import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -21,7 +16,7 @@ import java.util.function.Function;
  */
 public abstract class SentenceIndex {
 
-  Set<String> stopWords, specialWords;
+  Set<String> stopWords;
 
   //TODO: implement this
   int numAllSentences = 0;
@@ -39,9 +34,8 @@ public abstract class SentenceIndex {
 Function<CoreLabel, Map<String, String>>  transformCoreLabeltoString;
 
 
-  public SentenceIndex(Properties props, Set<String> stopWords, Set<String> specialWords, Function<CoreLabel, Map<String, String>>  transformCoreLabeltoString) {
+  public SentenceIndex(Properties props, Set<String> stopWords, Function<CoreLabel, Map<String, String>>  transformCoreLabeltoString) {
     this.stopWords = stopWords;
-    this.specialWords = specialWords;
     this.transformCoreLabeltoString = transformCoreLabeltoString;
   }
 
@@ -62,17 +56,12 @@ Function<CoreLabel, Map<String, String>>  transformCoreLabeltoString;
    */
   public abstract void add(Map<String, List<CoreLabel>> sents, boolean addProcessedText);
 
-
-  public Set<String> getSpecialWordsList() {
-    return specialWords;
-  }
-
-  protected CollectionValuedMap<String, String> getRelevantWords(Set<Integer> pats, Index<SurfacePattern> patternIndex){
-    CollectionValuedMap<String, String> relwords = new CollectionValuedMap<String, String>();
-    for(Integer p : pats)
-    relwords.addAll(getRelevantWords(patternIndex.get(p)));
-    return relwords;
-  }
+//  protected CollectionValuedMap<String, String> getRelevantWords(Set<Integer> pats, Index<SurfacePattern> patternIndex){
+//    CollectionValuedMap<String, String> relwords = new CollectionValuedMap<String, String>();
+//    for(Integer p : pats)
+//    relwords.addAll(getRelevantWords(patternIndex.get(p)));
+//    return relwords;
+//  }
 
   protected CollectionValuedMap<String, String> getRelevantWords(SurfacePattern pat){
     CollectionValuedMap<String, String> relwordsThisPat = new CollectionValuedMap<String, String>();
@@ -123,11 +112,11 @@ Function<CoreLabel, Map<String, String>>  transformCoreLabeltoString;
 
   //TODO: what if someone calls with SentenceIndex.class?
   public static SentenceIndex createIndex(Class<? extends SentenceIndex> indexClass, Map<String, List<CoreLabel>> sents, Properties props, Set<String> stopWords,
-                                          Set<String> specialWords, String indexDirectory, Function<CoreLabel, Map<String, String>> transformCoreLabeltoString)  {
+                                          String indexDirectory, Function<CoreLabel, Map<String, String>> transformCoreLabeltoString)  {
     try{
       Execution.fillOptions(SentenceIndex.class, props);
-      Method m = indexClass.getMethod("createIndex", Map.class, Properties.class, Set.class, Set.class, String.class, Function.class);
-      SentenceIndex index = (SentenceIndex) m.invoke(null, new Object[]{sents, props, stopWords, specialWords, indexDirectory, transformCoreLabeltoString});
+      Method m = indexClass.getMethod("createIndex", Map.class, Properties.class, Set.class, String.class, Function.class);
+      SentenceIndex index = (SentenceIndex) m.invoke(null, new Object[]{sents, props, stopWords, indexDirectory, transformCoreLabeltoString});
       return index;
     }catch(NoSuchMethodException e){
       throw new RuntimeException(e);
@@ -145,5 +134,9 @@ Function<CoreLabel, Map<String, String>>  transformCoreLabeltoString;
     Execution.fillOptions(this, props);
   }
 
-  public abstract void add(List<CoreLabel> value, String sentId, boolean addProcessedText);
+  protected abstract void add(List<CoreLabel> value, String sentId, boolean addProcessedText);
+
+  public abstract void finishUpdating();
+
+  public abstract void update(List<CoreLabel> value, String key);
 }

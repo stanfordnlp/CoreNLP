@@ -43,8 +43,6 @@ public class ApplyPatterns    implements  Callable<Pair<TwoDimensionalCounter<Pa
     CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<Integer, Triple<String, Integer, Integer>>();
     for (String sentid : sentids) {
       List<CoreLabel> sent = sents.get(sentid);
-      if(sentid.equals("presidents.txt-240"))
-        System.out.println("matching presidents.txt");
       for (Entry<TokenSequencePattern, Integer> pEn : patterns.entrySet()) {
 
         if (pEn.getKey() == null)

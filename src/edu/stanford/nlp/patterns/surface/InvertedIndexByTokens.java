@@ -1,17 +1,11 @@
 package edu.stanford.nlp.patterns.surface;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Index;
@@ -19,11 +13,8 @@ import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
- * Creates an inverted index of (word or lemma) => {file1 => {sentid1,
- * sentid2,.. }, file2 => {sentid1, sentid2, ...}}.
+ * Creates an inverted index of (classkey:value) => {sentid1,sentid2,.. }.
  *
- * (Commented out FileBackedCache because it currrently doesnt support changing
- * the values)
  *
  * @author Sonal Gupta (sonalg@stanford.edu)
  *
@@ -34,32 +25,22 @@ public class InvertedIndexByTokens extends SentenceIndex implements Serializable
 
   Map<String, Set<String>> index;
 
-  public InvertedIndexByTokens(Properties props, Set<String> stopWords, Set<String> specialWords, Function<CoreLabel, Map<String, String>> transformSentenceToString) {
-    super(props, stopWords, specialWords, transformSentenceToString);
+  public InvertedIndexByTokens(Properties props, Set<String> stopWords, Function<CoreLabel, Map<String, String>> transformSentenceToString) {
+    super(props, stopWords, transformSentenceToString);
     Execution.fillOptions(this, props);
     index = new HashMap<String, Set<String>>();
-
   }
 
 
   @Override
   public void add(Map<String, List<CoreLabel>> sents, boolean addProcessedText) {
-//    if(filenamePrefix != null)
-//      filename = filenamePrefix+ (filenamePrefix.endsWith("/")?"":"/")+filename;
-//
-    //TODO: finish this
-
-    //HashSet<Class> classesToIndex =new HashSet<Class>(constVars.getGeneralizeClasses().values());
-    //classesToIndex.add(PatternsAnnotations.ProcessedTextAnnotation.class);
-
     for (Map.Entry<String, List<CoreLabel>> sEn : sents.entrySet()) {
-       add(sEn.getValue(), sEn.getKey(), addProcessedText);
+      add(sEn.getValue(), sEn.getKey(), addProcessedText);
     }
-    System.out.println("done adding. Size is " + size() + "  and number of words in inv index is " + index.size());
   }
 
   @Override
-  public void add(List<CoreLabel> sent, String sentId, boolean addProcessedText){
+  protected void add(List<CoreLabel> sent, String sentId, boolean addProcessedText){
     numAllSentences ++;
     for (CoreLabel l : sent) {
 
@@ -73,18 +54,20 @@ public class InvertedIndexByTokens extends SentenceIndex implements Serializable
       }
       if(addProcessedText){
         String val  =Token.getKeyForClass(PatternsAnnotations.ProcessedTextAnnotation.class) +":"+ l.get(PatternsAnnotations.ProcessedTextAnnotation.class);
-        add(val, sentId);
+        if(!stopWords.contains(val.toLowerCase()))
+          add(val, sentId);
       }
-
-//      for(Class gn: classesToIndex){
-//        Object b  = l.get(gn);
-//        if(b != null && !b.toString().equals(constVars.backgroundSymbol)){
-//          String key = Token.getKeyForClass(gn)+":"+b.toString();
-//          add(key, sentId);
-//        }
-//      }
-
     }
+  }
+
+  @Override
+  public void finishUpdating() {
+    //nothing to do right now!
+  }
+
+  @Override
+  public void update(List<CoreLabel> tokens, String sentid) {
+    add(tokens, sentid, false);
   }
 
   void add(String w, String sentid){
@@ -98,24 +81,26 @@ public class InvertedIndexByTokens extends SentenceIndex implements Serializable
 
     index.put(w, sentids);
   }
-//  public Set<String> getFileSentIds(String word) {
-//    return index.get(word);
-//  }
 
   String combineKeyValue(String key, String value){
     return key+":"+value;
   }
 
   public Set<String> getFileSentIds(CollectionValuedMap<String, String> relevantWords) {
-    Set<String> sentids = new HashSet<String>();
+    Set<String> sentids = null;
     for (Map.Entry<String, Collection<String>> en : relevantWords.entrySet()) {
       for(String en2: en.getValue()){
-      String w = combineKeyValue(en.getKey(), en2);
-      Set<String> st = index.get(w);
-      if (st == null)
-        throw new RuntimeException("How come the index does not have sentences for " + w);
-      sentids.addAll(st);
-    }}
+        if(!stopWords.contains(en2.toLowerCase())){
+          String w = combineKeyValue(en.getKey(), en2);
+          Set<String> st = index.get(w);
+          if (st == null)
+            throw new RuntimeException("How come the index does not have sentences for " + w);
+          if(sentids == null)
+            sentids= st;
+          else
+            sentids = CollectionUtils.intersection(sentids, st);
+        }
+      }}
     return sentids;
   }
 
@@ -131,8 +116,8 @@ public class InvertedIndexByTokens extends SentenceIndex implements Serializable
   }
 
   //The last variable is not really used!
-  public static InvertedIndexByTokens createIndex(Map<String, List<CoreLabel>> sentences, Properties props, Set<String> stopWords, Set<String> specialWords, String dir, Function<CoreLabel, Map<String, String>> transformCoreLabeltoString) {
-    InvertedIndexByTokens inv = new InvertedIndexByTokens(props, stopWords, specialWords, transformCoreLabeltoString);
+  public static InvertedIndexByTokens createIndex(Map<String, List<CoreLabel>> sentences, Properties props, Set<String> stopWords, String dir, Function<CoreLabel, Map<String, String>> transformCoreLabeltoString) {
+    InvertedIndexByTokens inv = new InvertedIndexByTokens(props, stopWords, transformCoreLabeltoString);
 
     if(sentences != null && sentences.size() > 0)
       inv.add(sentences, true);
