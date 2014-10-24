@@ -36,10 +36,6 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
     Map<String, Counter<ScorePhraseMeasures>> scores = new HashMap<String, Counter<ScorePhraseMeasures>>();
     if (Data.domainNGramsFile != null)
       Data.loadDomainNGrams();
-
-
-    Redwood.log(ConstantsAndVariables.extremedebug, "Considering terms: " + terms.firstKeySet());
-
     // calculate TF-IDF like scores
     Counter<String> tfidfScores = new ClassicCounter<String>();
     if (constVars.usePhraseEvalPatWtByFreq) {
@@ -47,7 +43,7 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
         double score = getPatTFIDFScore(en.getKey(), en.getValue(), allSelectedPatterns);
         tfidfScores.setCount(en.getKey(), score);
       }
-      Redwood.log(ConstantsAndVariables.extremedebug, "BEFORE IDF " + Counters.toSortedString(tfidfScores, 100, "%1$s:%2$f", "\t"));
+      Redwood.log("extremePatDebug", "BEFORE IDF " + Counters.toSortedString(tfidfScores, 100, "%1$s:%2$f", "\t"));
       Counters.divideInPlace(tfidfScores, Data.processedDataFreq);
     }
 

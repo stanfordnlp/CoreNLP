@@ -88,7 +88,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   Iterator<Integer> curMatchIter = null;
   MatchedStates<T> curMatchStates = null;
 
-  // Branching limit for searching with back tracking. Higher value makes the search faster but uses more memory.
+  // Branching limit for searching with back tracking
   int branchLimit = 2;
 
   protected SequenceMatcher(SequencePattern<T> pattern, List<? extends T> elements)

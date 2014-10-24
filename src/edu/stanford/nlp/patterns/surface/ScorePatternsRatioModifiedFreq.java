@@ -46,7 +46,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
 
   @Override
   Counter<Integer> score() throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
-
+    // TODO: changed
     Counter<String> externalWordWeightsNormalized = null;
     if (constVars.dictOddsWeights.containsKey(label))
       externalWordWeightsNormalized = GetPatternsFromDataMultiClass
@@ -181,6 +181,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
             externalFeatWtsNormalized.setCount(g, externalWtsDefault);
         }
       }
+      // TODO : changed
       if (constVars.usePatternEvalGoogleNgram)
         googleNgramNormScores = GetPatternsFromDataMultiClass
             .normalizeSoftMaxMinMaxScores(googleNgramNormScores, true, true,

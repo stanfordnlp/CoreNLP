@@ -61,23 +61,7 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
         String phraseLemma = "";
         boolean useWordNotLabeled = false;
         boolean doNotUse = false;
-
-        //find if the neighboring words are labeled - if so - club them together
-        if(constVars.clubNeighboringLabeledWords) {
-          for (int i = s - 1; i >= 0; i--) {
-            if (!sent.get(i).get(constVars.getAnswerClass().get(label)).equals(label)) {
-              s = i + 1;
-              break;
-            }
-          }
-          for (int i = e; i < sent.size(); i++) {
-            if (!sent.get(i).get(constVars.getAnswerClass().get(label)).equals(label)) {
-              e = i;
-              break;
-            }
-          }
-        }
-
+        
         //to make sure we discard phrases with stopwords in between, but include the ones in which stop words were removed at the ends if removeStopWordsFromSelectedPhrases is true
         boolean[] addedindices = new boolean[e-s];
         Arrays.fill(addedindices, false);
@@ -184,7 +168,7 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
     return new Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>(allFreq, matchedTokensByPat);
   }
 
-  boolean  containsStopWord(CoreLabel l, Set<String> commonEngWords, Pattern ignoreWordRegex) {
+  boolean containsStopWord(CoreLabel l, Set<String> commonEngWords, Pattern ignoreWordRegex) {
     // if(useWordResultCache.containsKey(l.word()))
     // return useWordResultCache.get(l.word());
 
