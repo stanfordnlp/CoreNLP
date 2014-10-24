@@ -27,8 +27,8 @@ public class SurfacePatternTest {
     String[] prevContext = {"[{lemma:/\\Q,\\E/}]", "[{word  :/\\Qhappy\\E/}]", "[{DT:DT}]"};
     String[] nextContext = null;
     PatternToken token = new PatternToken("V", false, true, 2, null, false, false, null);
-    SurfacePattern p = new SurfacePattern(prevContext, token, nextContext, Genre.PREV);
-    String[] sim = p.getSimplerTokensPrev();
-    System.out.println(Arrays.toString(sim));
+    //SurfacePattern p = new SurfacePattern(prevContext, token, nextContext, Genre.PREV);
+    //String[] sim = p.getSimplerTokensPrev();
+    //System.out.println(Arrays.toString(sim));
   }
 }

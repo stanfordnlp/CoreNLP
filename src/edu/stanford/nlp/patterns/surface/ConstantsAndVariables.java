@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.Env;
+import edu.stanford.nlp.ling.tokensregex.NodePattern;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScoring;
@@ -442,6 +443,12 @@ public class ConstantsAndVariables implements Serializable{
   public Map<String, Counter<Integer>> distSimWeights = new HashMap<String, Counter<Integer>>();
   public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
 
+  @Option(name="invertedIndexClass", gloss="another option is Lucene backed, which is not included in the CoreNLP release. Contact us to get a copy (distributed under Apache License).")
+  public Class<? extends SentenceIndex> invertedIndexClass = edu.stanford.nlp.patterns.surface.InvertedIndexByTokens.class;
+
+  @Option(name="invertedIndexDirectory")
+  public String invertedIndexDirectory;
+
   public ConcurrentHashIndex<SurfacePattern> getPatternIndex() {
     return patternIndex;
   }
@@ -575,6 +582,9 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name = "doNotExtractPhraseAnyWordLabeledOtherClass")
   public boolean doNotExtractPhraseAnyWordLabeledOtherClass = true;
 
+  @Option(name="useLuceneIndexing")
+  public boolean useLuceneIndexing = false;
+
   // /**
   // * Use FileBackedCache for the inverted index -- use if memory is limited
   // */
@@ -609,7 +619,7 @@ public class ConstantsAndVariables implements Serializable{
   int wordShaper = WordShapeClassifier.WORDSHAPECHRIS2;
   private Map<String, String> wordShapeCache = new HashMap<String, String>();
 
-  public InvertedIndexByTokens invertedIndex;
+  public SentenceIndex invertedIndex;
 
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";
@@ -623,6 +633,9 @@ public class ConstantsAndVariables implements Serializable{
     this.labels = labels;
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
+    if(this.generalizeClasses == null)
+      this.generalizeClasses = new HashMap<String, Class>();
+    this.generalizeClasses.putAll(answerClass);
     this.ignoreWordswithClassesDuringSelection = ignoreClasses;
     setUp(props);
   }
@@ -633,6 +646,9 @@ public class ConstantsAndVariables implements Serializable{
     this.labels = labelDictionary.keySet();
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
+    if(this.generalizeClasses == null)
+      this.generalizeClasses = new HashMap<String, Class>();
+    this.generalizeClasses.putAll(answerClass);
     this.ignoreWordswithClassesDuringSelection = ignoreClasses;
     setUp(props);
   }
@@ -647,6 +663,9 @@ public class ConstantsAndVariables implements Serializable{
     this.labels = labels;
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
+    if(this.generalizeClasses == null)
+      this.generalizeClasses = new HashMap<String, Class>();
+    this.generalizeClasses.putAll(answerClass);
     setUp(props);
   }
 
@@ -722,8 +741,10 @@ public class ConstantsAndVariables implements Serializable{
           "/" + StringUtils.join(fillerWords, "|") + "/");
       env.get(label).bind("$STOPWORD", stopStr);
       env.get(label).bind("$MOD", "[{tag:/JJ.*/}]");
-      if (matchLowerCaseContext)
+      if (matchLowerCaseContext){
+        env.get(label).setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
         env.get(label).setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
+      }
       env.get(label).bind("OTHERSEM",
           PatternsAnnotations.OtherSemanticLabel.class);
       env.get(label).bind("grandparentparsetag", CoreAnnotations.GrandparentAnnotation.class);
