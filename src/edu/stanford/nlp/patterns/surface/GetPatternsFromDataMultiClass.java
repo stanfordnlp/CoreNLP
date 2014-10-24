@@ -2912,12 +2912,12 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     if (savePatternsWordsDir) {
       String patternsWordsDir = props.getProperty("patternsWordsDir");
       //save pattern index!
-      if(!model.patsForEachToken.getUseDBForTokenPatterns() && model.constVars.allPatternsDir == null){
-        String allPatsDir = patternsWordsDir+"/allpatterns/";
-        IOUtils.ensureDir(new File(allPatsDir));
-        model.savePatternIndex(allPatsDir);
-        Redwood.log(Redwood.FORCE, "WARNING: SAVING OF THE MODEL IS SET BUT allPatternsDir IS NOT SET. SAVING ALL PATTERNS DIR TO " + allPatsDir+ ". USE THIS AS allPatternsDir WHEN LOADING THE MODEL!");
-      } //else if using DB, already saved when creating patterns;
+//      if(!model.patsForEachToken.getUseDBForTokenPatterns() && model.constVars.allPatternsDir == null){
+//        String allPatsDir = patternsWordsDir+"/allpatterns/";
+//        IOUtils.ensureDir(new File(allPatsDir));
+//        model.savePatternIndex(allPatsDir);
+//        Redwood.log(Redwood.FORCE, "WARNING: SAVING OF THE MODEL IS SET BUT allPatternsDir IS NOT SET. SAVING ALL PATTERNS DIR TO " + allPatsDir+ ". USE THIS AS allPatternsDir WHEN LOADING THE MODEL!");
+//      } //else if using DB, already saved when creating patterns;
 
       for (String label : model.constVars.getLabelDictionary().keySet()) {
         IOUtils.ensureDir(new File(patternsWordsDir + "/" + label));
