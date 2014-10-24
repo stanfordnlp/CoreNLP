@@ -8,6 +8,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1573,6 +1574,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     }
   }
 
+  static AtomicInteger numCallsToCalStats = new AtomicInteger();
+
+
   private void calculateSufficientStats(Map<String, List<CoreLabel>> sents,
       PatternsForEachToken patternsForEachToken, String label,
       TwoDimensionalCounter<Integer, String> patternsandWords4Label,
@@ -1583,13 +1587,14 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       TwoDimensionalCounter<Integer, String> negandUnLabeledPatternsandWords4Label) {
     // calculating the sufficient statistics
     Class answerClass4Label = constVars.getAnswerClass().get(label);
+    Collection<String> sampledSentIds = CollectionUtils.sampleWithoutReplacement(sents.keySet(), (int) Math.round(constVars.sampleSentencesForSufficientStats*sents.size()), new Random(numCallsToCalStats.incrementAndGet()));
 
-    for (Entry<String, List<CoreLabel>> sentEn : sents.entrySet()) {
-      Map<Integer, Set<Integer>> pat4Sent = patternsForEachToken.getPatternsForAllTokens(sentEn.getKey());
+    for (String sentId : sampledSentIds) {
+      Map<Integer, Set<Integer>> pat4Sent = patternsForEachToken.getPatternsForAllTokens(sentId);
       if (pat4Sent == null) {
-        throw new RuntimeException("How come there are no patterns for " + sentEn.getKey());
+        throw new RuntimeException("How come there are no patterns for " + sentId);
       }
-      List<CoreLabel> sent = sentEn.getValue();
+      List<CoreLabel> sent = sents.get(sentId);
       for (int i = 0; i < sent.size(); i++) {
         CoreLabel token = sent.get(i);
         //Map<String, Set<String>> matchedPhrases = token.get(PatternsAnnotations.MatchedPhrases.class);
@@ -1620,7 +1625,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
         Set<Integer> pats = pat4Sent.get(i);
         if (pats == null)
-          throw new RuntimeException("Why are patterns null for sentence " + sentEn.getKey() + " and token " + i +". pat4Sent has token ids " + pat4Sent.keySet() + (constVars.batchProcessSents ? "" : ". The sentence is " + Data.sents.get(sentEn.getKey()))+". If you have switched batchProcessSents, recompute the patterns.");
+          throw new RuntimeException("Why are patterns null for sentence " + sentId + " and token " + i +". pat4Sent has token ids " + pat4Sent.keySet() + (constVars.batchProcessSents ? "" : ". The sentence is " + Data.sents.get(sentId))+". If you have switched batchProcessSents, recompute the patterns.");
 
 
 //        Set<Integer> prevPat = pat.first();

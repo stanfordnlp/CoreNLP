@@ -610,6 +610,8 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name = "storePatsForEachToken", gloss="used for storing patterns in PSQL")
   public PatternForEachTokenWay storePatsForEachToken = PatternForEachTokenWay.MEMORY;
 
+  @Option(name="sampleSentencesForSufficientStats",gloss="% sentences to use for learning pattterns" )
+  double sampleSentencesForSufficientStats = 1.0;
 
 //  /**
 //   * Directory where to save the sentences ser files.

@@ -85,6 +85,8 @@ public abstract class PatternsForEachToken {
     //if(storePatsForEachToken.equals(DB)){}
   }
 
+  public abstract Map<String,Map<Integer,Set<Integer>>> getPatternsForAllTokens(Collection<String> sampledSentIds);
+
 
 //  @Option(name="allPatternsFile")
 //  String allPatternsFile = null;
