@@ -6,10 +6,8 @@ import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.util.*;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -184,7 +182,7 @@ public class SequenceMatchRules {
    * Rule that specifies how to extract sequence of MatchedExpression from an annotation (CoreMap).
    * @param <T> Output type (MatchedExpression)
    */
-  public static class AnnotationExtractRule<S, T extends MatchedExpression> implements Rule, ExtractRule<S,T>, Predicate<T>, Serializable {
+  public static class AnnotationExtractRule<S, T extends MatchedExpression> implements Rule, ExtractRule<S,T>, Filter<T> {
     /** Name of the rule */
     public String name;
     /** Stage in which this rule should be applied with respect to others */
@@ -213,7 +211,7 @@ public class SequenceMatchRules {
     public boolean active = true;
     /** Actual rule performing the extraction (converting annotation to MatchedExpression) */
     public ExtractRule<S, T> extractRule;
-    public Predicate<T> filterRule;
+    public Filter<T> filterRule;
 
     public void update(Env env, Map<String, Object> attributes) {
       for (String key:attributes.keySet()) {
@@ -266,8 +264,8 @@ public class SequenceMatchRules {
       return extractRule.extract(in, out);
     }
 
-    public boolean test(T obj) {
-      return filterRule.test(obj);
+    public boolean accept(T obj) {
+      return filterRule.accept(obj);
     }
   }
 
@@ -562,7 +560,7 @@ public class SequenceMatchRules {
     }
   }
 
-  public static class AnnotationMatchedFilter implements Predicate<MatchedExpression>, Serializable {
+  public static class AnnotationMatchedFilter implements Filter<MatchedExpression> {
 
     MatchedExpression.SingleAnnotationExtractor extractor;
 
@@ -570,7 +568,7 @@ public class SequenceMatchRules {
       this.extractor = extractor;
     }
 
-    public boolean test(MatchedExpression me) {
+    public boolean accept(MatchedExpression me) {
       CoreMap cm = me.getAnnotation();
       Value v = extractor.apply(cm);
       if (v != null) {
@@ -659,21 +657,21 @@ public class SequenceMatchRules {
    */
   public static class FilterExtractRule<I,O> implements ExtractRule<I,O>
   {
-    Predicate<I> filter;
+    Filter<I> filter;
     ExtractRule<I,O> rule;
 
-    public FilterExtractRule(Predicate<I> filter, ExtractRule<I,O> rule) {
+    public FilterExtractRule(Filter<I> filter, ExtractRule<I,O> rule) {
       this.filter = filter;
       this.rule = rule;
     }
 
-    public FilterExtractRule(Predicate<I> filter, ExtractRule<I,O>... rules) {
+    public FilterExtractRule(Filter<I> filter, ExtractRule<I,O>... rules) {
       this.filter = filter;
       this.rule = new ListExtractRule<I,O>(rules);
     }
 
     public boolean extract(I in, List<O> out) {
-      if (filter.test(in)) {
+      if (filter.accept(in)) {
         return rule.extract(in,out);
       } else {
         return false;

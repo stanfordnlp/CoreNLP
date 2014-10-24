@@ -1,10 +1,8 @@
 package edu.stanford.nlp.util;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * Filters Strings based on whether they exactly match any string in
@@ -16,7 +14,7 @@ import java.util.function.Predicate;
  *
  * @author John Bauer
  */
-public class ArrayStringFilter implements Predicate<String>, Serializable {
+public class ArrayStringFilter implements Filter<String> {
   private final String[] words;
   private final int length;
   private final Mode mode;
@@ -36,7 +34,7 @@ public class ArrayStringFilter implements Predicate<String>, Serializable {
   }
 
   @Override
-  public boolean test(String input) {
+  public boolean accept(String input) {
     switch (mode) {
     case EXACT:
       for (int i = 0; i < length; ++i) {
