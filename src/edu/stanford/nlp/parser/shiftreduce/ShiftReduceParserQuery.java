@@ -69,10 +69,11 @@ public class ShiftReduceParserQuery implements ParserQuery {
       beam = new PriorityQueue<State>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State bestState = null;
       for (State state : oldBeam) {
-        Collection<ScoredObject<Integer>> predictedTransitions = parser.model.findHighestScoringTransitions(state, true, maxBeamSize, constraints);
+        List<String> features = parser.featureFactory.featurize(state);
+        Collection<ScoredObject<Integer>> predictedTransitions = parser.findHighestScoringTransitions(state, features, true, maxBeamSize, constraints);
         // System.err.println("Examining state: " + state);
         for (ScoredObject<Integer> predictedTransition : predictedTransitions) {
-          Transition transition = parser.model.transitionIndex.get(predictedTransition.object());
+          Transition transition = parser.transitionIndex.get(predictedTransition.object());
           State newState = transition.apply(state, predictedTransition.score());
           // System.err.println("  Transition: " + transition + " (" + predictedTransition.score() + ")");
           if (bestState == null || bestState.score() < newState.score()) {
@@ -93,7 +94,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
         // This will probably result in a bad parse, but at least it
         // will result in some sort of parse.
         for (State state : oldBeam) {
-          Transition transition = parser.model.findEmergencyTransition(state, constraints);
+          Transition transition = parser.findEmergencyTransition(state, constraints);
           if (transition != null) {
             State newState = transition.apply(state);
             if (bestState == null || bestState.score() < newState.score()) {

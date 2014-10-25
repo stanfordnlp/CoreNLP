@@ -3,7 +3,14 @@ package edu.stanford.nlp.patterns.surface;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -11,7 +18,6 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.NodePattern;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
@@ -601,11 +607,8 @@ public class ConstantsAndVariables implements Serializable{
   public boolean loadInvertedIndex  = false;
 
 
-  @Option(name = "storePatsForEachToken", gloss="used for storing patterns in PSQL")
-  public PatternForEachTokenWay storePatsForEachToken = PatternForEachTokenWay.MEMORY;
-
-  @Option(name="sampleSentencesForSufficientStats",gloss="% sentences to use for learning pattterns" )
-  double sampleSentencesForSufficientStats = 1.0;
+  @Option(name = "useDBForTokenPatterns", gloss="used for storing patterns")
+  boolean useDBForTokenPatterns = false;
 
 //  /**
 //   * Directory where to save the sentences ser files.
@@ -631,8 +634,6 @@ public class ConstantsAndVariables implements Serializable{
   public ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
 
   Properties props;
-
-  public enum PatternForEachTokenWay {MEMORY, LUCENE, DB};
 
   public ConstantsAndVariables(Properties props, Set<String> labels, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
                                Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
@@ -680,7 +681,6 @@ public class ConstantsAndVariables implements Serializable{
     if (alreadySetUp) {
       return;
     }
-
     Execution.fillOptions(this, props);
     if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty())
       ignoreWordRegex = Pattern.compile(wordIgnoreRegex);
@@ -796,48 +796,6 @@ public class ConstantsAndVariables implements Serializable{
       }
     }
     alreadySetUp = true;
-  }
-
-
-
-  //streams sents, files-from-which-sents-were read
-  static public class DataSentsIterator implements Iterator<Pair<Map<String, List<CoreLabel>>, File>> {
-
-    boolean readInMemory = false;
-    Iterator<File> sentfilesIter = null;
-    boolean batchProcessSents;
-    public DataSentsIterator(boolean batchProcessSents){
-      this.batchProcessSents = batchProcessSents;
-      if(batchProcessSents){
-        sentfilesIter = Data.sentsFiles.iterator();
-        }
-
-    }
-    @Override
-    public boolean hasNext() {
-      if(batchProcessSents){
-       return sentfilesIter.hasNext();
-      }else{
-        return !readInMemory;
-      }
-    }
-
-    @Override
-    public Pair<Map<String, List<CoreLabel>>, File> next() {
-      if(batchProcessSents){
-        try {
-          File f= sentfilesIter.next();
-          return new Pair<Map<String, List<CoreLabel>>, File>(IOUtils.readObjectFromFile(f), f);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-          throw new RuntimeException(e);
-        }
-      }else{
-        readInMemory= true;
-        return new Pair(Data.sents, new File(""));
-      }
-    }
   }
 
   public Map<String, Counter<String>> getWordShapesForLabels() {

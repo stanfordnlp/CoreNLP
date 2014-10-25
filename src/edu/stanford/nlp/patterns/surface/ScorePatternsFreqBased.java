@@ -2,7 +2,6 @@ package edu.stanford.nlp.patterns.surface;
 
 import java.util.Properties;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -16,13 +15,15 @@ public class ScorePatternsFreqBased extends ScorePatterns {
   public ScorePatternsFreqBased(
       ConstantsAndVariables constVars,
       PatternScoring patternScoring,
-      String label, Set<String> allCandidatePhrases,
+      String label,
       TwoDimensionalCounter<Integer, String> patternsandWords4Label,
       TwoDimensionalCounter<Integer, String> negPatternsandWords4Label,
       TwoDimensionalCounter<Integer, String> unLabeledPatternsandWords4Label,
-      Properties props) {
-    super(constVars, patternScoring, label, allCandidatePhrases, patternsandWords4Label,
-        negPatternsandWords4Label, unLabeledPatternsandWords4Label,  props);
+      TwoDimensionalCounter<Integer, String> negandUnLabeledPatternsandWords4Label,
+      TwoDimensionalCounter<Integer, String> allPatternsandWords4Label, Properties props) {
+    super(constVars, patternScoring, label, patternsandWords4Label,
+        negPatternsandWords4Label, unLabeledPatternsandWords4Label,
+        negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props);
   }
 
   @Override
@@ -34,6 +35,7 @@ public class ScorePatternsFreqBased extends ScorePatterns {
     Counter<Integer> currentPatternWeights4Label = new ClassicCounter<Integer>();
 
     Counter<Integer> pos_i = new ClassicCounter<Integer>();
+    Counter<Integer> all_i = new ClassicCounter<Integer>();
     Counter<Integer> neg_i = new ClassicCounter<Integer>();
     Counter<Integer> unlab_i = new ClassicCounter<Integer>();
 
@@ -52,12 +54,10 @@ public class ScorePatternsFreqBased extends ScorePatterns {
       pos_i.setCount(en.getKey(), en.getValue().size());
     }
 
-    Counter<Integer> all_i = Counters.add(pos_i, neg_i);
-    all_i.addAll(unlab_i);
-//    for (Entry<Integer, ClassicCounter<String>> en : allPatternsandWords4Label
-//        .entrySet()) {
-//      all_i.setCount(en.getKey(), en.getValue().size());
-//    }
+    for (Entry<Integer, ClassicCounter<String>> en : allPatternsandWords4Label
+        .entrySet()) {
+      all_i.setCount(en.getKey(), en.getValue().size());
+    }
 
     Counter<Integer> posneg_i = Counters.add(pos_i, neg_i);
     Counter<Integer> logFi = new ClassicCounter<Integer>(pos_i);
