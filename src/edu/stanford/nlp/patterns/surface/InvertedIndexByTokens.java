@@ -102,8 +102,11 @@ public class InvertedIndexByTokens extends SentenceIndex implements Serializable
         if(!stopWords.contains(en2.toLowerCase())){
           String w = combineKeyValue(en.getKey(), en2);
           Set<String> st = index.get(w);
-          if (st == null)
-            throw new RuntimeException("How come the index does not have sentences for " + w);
+          if (st == null){
+            System.err.println("\n\nWARNING: INDEX HAS NO SENTENCES FOR " + w);
+            return Collections.emptySet();
+            //throw new RuntimeException("How come the index does not have sentences for " + w);
+          }
           if(sentids == null)
             sentids= st;
           else
