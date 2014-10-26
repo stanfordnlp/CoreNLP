@@ -77,27 +77,17 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
     List<TypedDependency> dependencies = new ArrayList<>();
     DependencyTree result = results.get(0);
 
-    // Word which has ROOT as its head
-    IndexedWord rootDep = null;
+    IndexedWord root = new IndexedWord(new Word("ROOT"));
     for (int i = 1; i < result.n; i++) {
       int head = result.getHead(i);
       String label = result.getLabel(i);
 
       IndexedWord thisWord = new IndexedWord(tokens.get(i - 1)),
-          headWord = new IndexedWord(tokens.get(head - 1));
+          headWord = head == 0 ? root : new IndexedWord(tokens.get(head - 1));
 
-      GrammaticalRelation relation = EnglishGrammaticalRelations.shortNameToGRel.get(label);
+      GrammaticalRelation relation = head == 0
+          ? GrammaticalRelation.ROOT : EnglishGrammaticalRelations.shortNameToGRel.get(label);
       dependencies.add(new TypedDependency(relation, headWord, thisWord));
-
-      if (head == 0)
-        rootDep = thisWord;
-    }
-
-    // Add root
-    if (rootDep != null) {
-      IndexedWord root = new IndexedWord(new Word("ROOT"));
-      TypedDependency rootTypedDep = new TypedDependency(GrammaticalRelation.ROOT, root, rootDep);
-      dependencies.add(rootTypedDep);
     }
 
     SemanticGraph deps = new SemanticGraph(dependencies);
