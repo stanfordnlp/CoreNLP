@@ -132,6 +132,12 @@ public class Classifier
 
       double cost = 0.0;
       double correct = 0.0;
+
+      // Track keys of preMap entries which were observed in this
+      // sample; these are the indices for which we need to perform
+      // backprop later
+      Set<Integer> preMapIndicesSeen = new HashSet<>();
+
       for (Example ex : examples) {
         List<Integer> feature = ex.getFeature();
         List<Integer> label = ex.getLabel();
@@ -155,6 +161,7 @@ public class Classifier
             // Unit activations for this input feature value have been
             // precomputed
             int id = preMap.get(index);
+            preMapIndicesSeen.add(index);
 
             // Only extract activations for those nodes which are still
             // activated (`ls`)
@@ -238,7 +245,7 @@ public class Classifier
         }
       }
 
-      for (int x : preMap.keySet()) {
+      for (int x : preMapIndicesSeen) {
         int mapX = preMap.get(x);
         int tok = x / numTokens;
         int offset = (x % numTokens) * embeddingSize;
