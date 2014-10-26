@@ -517,7 +517,7 @@ public class NNParser
     //NOTE: remove -NULL-, and the pass it to ParsingSystem
     List<String> lDict = new ArrayList<String>(labelDict);
     lDict.remove(0);
-    system = new ArcStandard(lDict);
+    system = new ArcStandard(config.tlp, lDict);
 
     double[][] E = new double[wordDict.size() + posDict.size() + labelDict.size()][config.embeddingSize];
     double[][] W1 = new double[config.hiddenSize][config.embeddingSize * config.numTokens];
@@ -745,7 +745,7 @@ public class NNParser
     //NOTE: remove -NULL-, and the pass it to ParsingSystem
     List<String> lDict = new ArrayList<>(labelDict);
     lDict.remove(0);
-    system = new ArcStandard(lDict);
+    system = new ArcStandard(config.tlp, lDict);
 
     // Pre-compute matrix multiplications
     if (config.numPreComputed > 0)
