@@ -260,14 +260,14 @@ public class Classifier {
           }
         }
 
-        cost += (Math.log(sum2) - Math.log(sum1)) / examples.size();
+        cost += (Math.log(sum2) - Math.log(sum1)) / params.getBatchSize();
         if (label.get(optLabel) == 1)
-          correct += +1.0 / examples.size();
+          correct += +1.0 / params.getBatchSize();
 
         double[] gradHidden3 = new double[config.hiddenSize];
         for (int i = 0; i < numLabels; ++i)
           if (label.get(i) >= 0) {
-            double delta = -(label.get(i) - scores[i] / sum2) / examples.size();
+            double delta = -(label.get(i) - scores[i] / sum2) / params.getBatchSize();
             for (int nodeIndex : ls) {
               gradW2[i][nodeIndex] += delta * hidden3[nodeIndex];
               gradHidden3[nodeIndex] += delta * W2[i][nodeIndex];
@@ -318,10 +318,21 @@ public class Classifier {
    */
   private static class FeedforwardParams {
 
+    /**
+     * Size of the entire mini-batch (not just the chunk that might be
+     * fed-forward at this moment).
+     */
+    private final int batchSize;
+
     private final double dropOutProb;
 
-    private FeedforwardParams(double dropOutProb) {
+    private FeedforwardParams(int batchSize, double dropOutProb) {
+      this.batchSize = batchSize;
       this.dropOutProb = dropOutProb;
+    }
+
+    public int getBatchSize() {
+      return batchSize;
     }
 
     public double getDropOutProb() {
@@ -532,7 +543,7 @@ public class Classifier {
     preCompute(smallMap);
 
     // Set up parameters for feedforward
-    FeedforwardParams params = new FeedforwardParams(dropOutProb);
+    FeedforwardParams params = new FeedforwardParams(batchSize, dropOutProb);
 
     int numChunks = config.trainingThreads;
     List<Collection<Example>> chunks = CollectionUtils.partitionIntoFolds(examples, numChunks);
