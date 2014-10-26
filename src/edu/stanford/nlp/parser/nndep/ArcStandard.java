@@ -16,8 +16,8 @@ import java.util.List;
 public class ArcStandard extends ParsingSystem {
   private boolean singleRoot = true;
 
-  public ArcStandard(TreebankLanguagePack tlp, List<String> labels) {
-    super(tlp, labels);
+  public ArcStandard(TreebankLanguagePack tlp, List<String> labels, boolean verbose) {
+    super(tlp, labels, verbose);
   }
 
   @Override

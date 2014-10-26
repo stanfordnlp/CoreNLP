@@ -457,30 +457,27 @@ public class DependencyParser {
    * @param modelFile       Path to serialized model (may be GZipped)
    * @param extraProperties Extra test-time properties not already associated with model (may be null)
    *
-   * @return Loaded and initialized (see {@link #initialize()} model
+   * @return Loaded and initialized (see {@link #initialize(boolean)} model
    */
   public static DependencyParser loadFromModelFile(String modelFile, Properties extraProperties) {
     DependencyParser parser = extraProperties == null ? new DependencyParser() : new DependencyParser(extraProperties);
-    parser.loadModelFile(modelFile);
+    parser.loadModelFile(modelFile, false);
     return parser;
   }
 
-  /** Loads a parser
+  /** Load a parser model file, printing out some messages about the grammar in the file.
    *
    *  @param modelFile The file (classpath resource, etc.) to load the model from.
    */
-  public void load(String modelFile) {
-    Timing t = new Timing();
-    // System.err.println("Model File: " + modelFile);
-
-    loadModelFile(modelFile);
-    t.done("Initializing dependency parser");
+  public void loadModelFile(String modelFile) {
+    loadModelFile(modelFile, true);
   }
 
-  private void loadModelFile(String modelFile) {
+  private void loadModelFile(String modelFile, boolean verbose) {
+    Timing t = new Timing();
     try {
       // System.err.println(Config.SEPARATOR);
-      System.err.println("Loading model file: " + modelFile + " ... ");
+      System.err.println("Loading depparse model file: " + modelFile + " ... ");
       String s;
       BufferedReader input = IOUtils.readerFromString(modelFile);
 
@@ -490,7 +487,9 @@ public class DependencyParser {
 
       for (int k = 0; k < 7; ++k) {
         s = input.readLine();
-        System.err.println(s);
+        if (verbose) {
+          System.err.println(s);
+        }
         int number = Integer.parseInt(s.substring(s.indexOf('=') + 1));
         switch (k) {
           case 0:
@@ -589,7 +588,8 @@ public class DependencyParser {
     }
 
     // initialize the loaded parser
-    initialize();
+    initialize(verbose);
+    t.done("Initializing dependency parser");
   }
 
   private void readEmbedFile(String embedFile) {
@@ -660,7 +660,7 @@ public class DependencyParser {
     //NOTE: remove -NULL-, and the pass it to ParsingSystem
     List<String> lDict = new ArrayList<String>(knownLabels);
     lDict.remove(0);
-    system = new ArcStandard(config.tlp, lDict);
+    system = new ArcStandard(config.tlp, lDict, true);
 
     double[][] E = new double[knownWords.size() + knownPos.size() + knownLabels.size()][config.embeddingSize];
     double[][] W1 = new double[config.hiddenSize][config.embeddingSize * config.numTokens];
@@ -807,7 +807,8 @@ public class DependencyParser {
    * Determine the dependency parse of the given sentence using the loaded model.
    * You must first load a parser before calling this method.
    *
-   * @throws java.lang.IllegalStateException If parser has not yet been loaded and initialized (see {@link #initialize()}
+   * @throws java.lang.IllegalStateException If parser has not yet been loaded and initialized
+   *         (see {@link #initialize(boolean)}
    */
   public GrammaticalStructure predict(CoreMap sentence) {
     if (system == null)
@@ -965,7 +966,7 @@ public class DependencyParser {
   /**
    * Prepare for parsing after a model has been loaded.
    */
-  private void initialize() {
+  private void initialize(boolean verbose) {
     if (knownLabels == null)
       throw new IllegalStateException("Model has not been loaded or trained");
 
@@ -973,7 +974,7 @@ public class DependencyParser {
     List<String> lDict = new ArrayList<>(knownLabels);
     lDict.remove(0);
 
-    system = new ArcStandard(config.tlp, lDict);
+    system = new ArcStandard(config.tlp, lDict, verbose);
 
     // Pre-compute matrix multiplications
     if (config.numPreComputed > 0) {
@@ -1069,7 +1070,7 @@ public class DependencyParser {
     boolean loaded = false;
     // Test with CoNLL-X data
     if (props.containsKey("testFile")) {
-      parser.load(props.getProperty("model"));
+      parser.loadModelFile(props.getProperty("model"));
       loaded = true;
 
       parser.testCoNLL(props.getProperty("testFile"), props.getProperty("outFile"));
@@ -1078,7 +1079,7 @@ public class DependencyParser {
     // Parse raw text data
     if (props.containsKey("parseFile")) {
       if (!loaded) {
-        parser.load(props.getProperty("model"));
+        parser.loadModelFile(props.getProperty("model"));
         loaded = true;
       }
 

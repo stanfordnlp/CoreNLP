@@ -94,7 +94,7 @@ public abstract class ParsingSystem {
    * @param labels A list of possible dependency relation labels, with
    *               the ROOT relation label as the first element
    */
-  public ParsingSystem(TreebankLanguagePack tlp, List<String> labels) {
+  public ParsingSystem(TreebankLanguagePack tlp, List<String> labels, boolean verbose) {
     this.tlp = tlp;
     this.labels = new ArrayList<>(labels);
 
@@ -102,10 +102,12 @@ public abstract class ParsingSystem {
     rootLabel = labels.get(0);
     makeTransitions();
 
-    System.err.println(Config.SEPARATOR);
-    System.err.println("#Transitions: " + transitions.size());
-    System.err.println("#Labels: " + labels.size());
-    System.err.println("ROOTLABEL: " + rootLabel);
+    if (verbose) {
+      System.err.println(Config.SEPARATOR);
+      System.err.println("#Transitions: " + transitions.size());
+      System.err.println("#Labels: " + labels.size());
+      System.err.println("ROOTLABEL: " + rootLabel);
+    }
   }
 
   public int getTransitionID(String s) {
