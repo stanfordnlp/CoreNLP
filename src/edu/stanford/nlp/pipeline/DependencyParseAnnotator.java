@@ -6,6 +6,7 @@ import edu.stanford.nlp.depparser.util.Sentence;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
@@ -74,14 +75,28 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
     List<TypedDependency> dependencies = new ArrayList<>();
     DependencyTree result = results.get(0);
 
-    for (int i = 0; i < result.n; i++) {
+    // Word which has ROOT as its head
+    IndexedWord rootDep = null;
+    for (int i = 1; i < result.n; i++) {
       int head = result.getHead(i);
       String label = result.getLabel(i);
 
+      IndexedWord thisWord = new IndexedWord(tokens.get(i - 1)),
+          headWord = new IndexedWord(tokens.get(head - 1));
+
       GrammaticalRelation relation = new GrammaticalRelation(GrammaticalRelation.Language.English,
           label, label, null);
-      dependencies.add(new TypedDependency(relation,
-          new IndexedWord(tokens.get(i)), new IndexedWord(tokens.get(head))));
+      dependencies.add(new TypedDependency(relation, headWord, thisWord));
+
+      if (head == 0)
+        rootDep = thisWord;
+    }
+
+    // Add root
+    if (rootDep != null) {
+      IndexedWord root = new IndexedWord(new Word("ROOT"));
+      TypedDependency rootTypedDep = new TypedDependency(GrammaticalRelation.ROOT, root, rootDep);
+      dependencies.add(rootTypedDep);
     }
 
     SemanticGraph deps = new SemanticGraph(dependencies);
