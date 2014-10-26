@@ -845,8 +845,8 @@ public class DependencyParser {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     List<TypedDependency> dependencies = new ArrayList<>();
 
-    IndexedWord root = new IndexedWord(new Word("ROOT-" + (tokens.size() + 1)));
-    root.set(CoreAnnotations.IndexAnnotation.class, -1);
+    IndexedWord root = new IndexedWord(new Word("ROOT"));
+    root.set(CoreAnnotations.IndexAnnotation.class, 0);
 
     for (int i = 1; i <= result.n; i++) {
       int head = result.getHead(i);
@@ -880,7 +880,7 @@ public class DependencyParser {
     CoreLabel sentenceLabel = new CoreLabel();
     List<CoreLabel> tokens = new ArrayList<>();
 
-    int i = 0;
+    int i = 1;
     for (HasWord wd : sentence) {
       CoreLabel label;
       if (wd instanceof CoreLabel) {
