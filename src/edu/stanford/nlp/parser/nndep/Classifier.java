@@ -53,6 +53,8 @@ public class Classifier
    */
   private Map<Integer, Integer> smallMap;
 
+  private final boolean isTraining;
+
   /**
    * All training examples.
    */
@@ -104,7 +106,11 @@ public class Classifier
     for (int i = 0; i < preComputed.size(); ++i)
       preMap.put(preComputed.get(i), i);
 
-    jobHandler = new MulticoreWrapper<>(config.trainingThreads, new CostFunction(), false);
+    isTraining = dataset != null;
+    if (isTraining)
+      jobHandler = new MulticoreWrapper<>(config.trainingThreads, new CostFunction(), false);
+    else
+      jobHandler = null;
   }
 
   private class CostFunction implements ThreadsafeProcessor<Pair<Collection<Example>, FeedforwardParams>, Cost> {
