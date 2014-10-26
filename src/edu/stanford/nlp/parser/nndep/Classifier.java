@@ -43,6 +43,9 @@ public class Classifier {
   private final double[][] W1, W2, E;
   private final double[] b1;
 
+  // Global gradSaved
+  private double[][] gradSaved;
+
   // Gradient histories
   private final double[][] eg2W1, eg2W2, eg2E;
   double[] eg2b1;
@@ -168,7 +171,6 @@ public class Classifier {
     private double[] gradb1;
     private double[][] gradW2;
     private double[][] gradE;
-    private double[][] gradSaved;
 
     private final ThreadLocalRandom random = ThreadLocalRandom.current();
 
@@ -181,7 +183,6 @@ public class Classifier {
       gradb1 = new double[b1.length];
       gradW2 = new double[W2.length][W2[0].length];
       gradE = new double[E.length][E[0].length];
-      gradSaved = new double[preMap.size()][config.hiddenSize];
 
       double cost = 0.0;
       double correct = 0.0;
@@ -292,7 +293,7 @@ public class Classifier {
         }
       }
 
-      return new Cost(cost, correct, gradW1, gradb1, gradW2, gradE, gradSaved);
+      return new Cost(cost, correct, gradW1, gradb1, gradW2, gradE);
     }
 
     /**
@@ -354,10 +355,9 @@ public class Classifier {
     private final double[] gradb1;
     private final double[][] gradW2;
     private final double[][] gradE;
-    private final double[][] gradSaved;
 
     private Cost(double cost, double percentCorrect, double[][] gradW1, double[] gradb1, double[][] gradW2,
-                 double[][] gradE, double[][] gradSaved) {
+                 double[][] gradE) {
       this.cost = cost;
       this.percentCorrect = percentCorrect;
 
@@ -365,7 +365,6 @@ public class Classifier {
       this.gradb1 = gradb1;
       this.gradW2 = gradW2;
       this.gradE = gradE;
-      this.gradSaved = gradSaved;
     }
 
     /**
@@ -382,7 +381,6 @@ public class Classifier {
       addInPlace(gradb1, otherCost.getGradb1());
       addInPlace(gradW2, otherCost.getGradW2());
       addInPlace(gradE, otherCost.getGradE());
-      addInPlace(gradSaved, otherCost.getGradSaved());
     }
 
     /**
@@ -464,10 +462,6 @@ public class Classifier {
       return gradE;
     }
 
-    public double[][] getGradSaved() {
-      return gradSaved;
-    }
-
   }
 
   /**
@@ -525,6 +519,9 @@ public class Classifier {
     // Set up parameters for feedforward
     FeedforwardParams params = new FeedforwardParams(batchSize, dropOutProb);
 
+    // Zero out saved-embedding gradients
+    gradSaved = new double[preMap.size()][config.hiddenSize];
+
     int numChunks = config.trainingThreads;
     List<Collection<Example>> chunks = CollectionUtils.partitionIntoFolds(examples, numChunks);
 
@@ -570,7 +567,7 @@ public class Classifier {
     validateTraining();
 
     double[][] gradW1 = cost.getGradW1(), gradW2 = cost.getGradW2(),
-        gradE = cost.getGradE(), gradSaved = cost.getGradSaved();
+        gradE = cost.getGradE();
     double[] gradb1 = cost.getGradb1();
 
     for (int i = 0; i < W1.length; ++i) {
