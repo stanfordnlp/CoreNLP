@@ -3,27 +3,20 @@
 * 	@Author:  Danqi Chen
 * 	@Email:  danqi@cs.stanford.edu
 *	@Created:  2014-08-25
-* 	@Last Modified:  2014-09-01
+* 	@Last Modified:  2014-10-05
 */
-
-package edu.stanford.nlp.depparser.util;
-
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.process.CoreLabelTokenFactory;
-import edu.stanford.nlp.util.CoreMap;
 
 import java.util.*;
 import java.io.*;
 
 public class Util 
 {
-	
+	public static Random random = new Random();
+
 	// return strings sorted by frequency, and filter out those with freq. less than cutOff.
 	public static List<String> generateDict(List<String> str, int cutOff)
 	{
-		StrCounter freq = new StrCounter();
+		Counter<String> freq = new Counter<String>();
 		for (int i = 0; i < str.size(); ++ i) 
 			freq.add(str.get(i));
 		
@@ -44,88 +37,68 @@ public class Util
 
 	public static <T> List<T> getRandomSubList(List<T> input, int subsetSize)
 	{
-	    Random r = new Random();
 	    int inputSize = input.size();
 	    if (subsetSize > inputSize)
 	    	subsetSize = inputSize;
 
 	    for (int i = 0; i < subsetSize; i++)
 	    {
-	        int indexToSwap = i + r.nextInt(inputSize - i);
+	        int indexToSwap = i + random.nextInt(inputSize - i);
 	        T temp = input.get(i);
 	        input.set(i, input.get(indexToSwap));
 	        input.set(indexToSwap, temp);
 	    }
 	    return input.subList(0, subsetSize);
 	}
-
-  // TODO replace with GrammaticalStructure#readCoNLLGrammaticalStructureCollection
-	public static void loadConllFile(String inFile, List<CoreMap> sents, List<DependencyTree> trees, boolean labeled)
+	
+	public static void loadConllFile(String inFile, List<Sentence> sents, List<DependencyTree> trees, boolean labeled)
 	{
-    CoreLabelTokenFactory tf = new CoreLabelTokenFactory(false);
-
 		try
 		{
-      BufferedReader reader = IOUtils.getBufferedReaderFromClasspathOrFileSystem(inFile);
-
-      CoreMap sentence = new CoreLabel();
-      List<CoreLabel> sentenceTokens = new ArrayList<>();
-      sentence.set(CoreAnnotations.TokensAnnotation.class, sentenceTokens);
-
+			BufferedReader input = new BufferedReader(new FileReader(inFile));
+			String s;
+			Sentence sent = new Sentence();
 			DependencyTree tree = new DependencyTree();
 
-			for (String line : IOUtils.getLineIterable(reader, false))
+			while ((s = input.readLine()) != null)
 			{
-				String[] splits = line.split("\t");
+				String[] splits = s.split("\t");
 				if (splits.length < 10)
 				{
-					trees.add(tree);
-					sents.add(sentence);
-					tree = new DependencyTree();
-
-					sentence = new CoreLabel();
-				} else {
-          String word = splits[1],
-              pos = splits[4],
-              depType = splits[7];
-          int head = Integer.parseInt(splits[6]);
-
-          CoreLabel token = tf.makeToken(word, 0, 0);
-          token.setTag(pos);
-          token.set(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, head);
-          token.set(CoreAnnotations.CoNLLDepTypeAnnotation.class, depType);
-
+					trees.add(tree); 
+					sents.add(sent);
+					tree = new DependencyTree();	
+					sent = new Sentence();
+				} else
+				{
+					sent.add(splits[1], splits[4]);
 					if (labeled)
-						tree.add(head, depType);
+						tree.add(Integer.parseInt(splits[6]), splits[7]);
 					else
-						tree.add(head, CONST.UNKNOWN);
+						tree.add(Integer.parseInt(splits[6]), CONST.UNKNOWN);
 				}
 			}
 		}
 		catch (Exception e) { System.out.println(e); };
 	}
 
-	public static void loadConllFile(String inFile, List<CoreMap> sents, List<DependencyTree> trees)
+	public static void loadConllFile(String inFile, List<Sentence> sents, List<DependencyTree> trees)
 	{
 		loadConllFile(inFile, sents, trees, true);
 	}
 
-    public static void writeConllFile(String outFile, List<CoreMap> sentences, List<DependencyTree> trees)
+    public static void writeConllFile(String outFile, List<Sentence> sentences, List<DependencyTree> trees)
     {
         try
         {
-          PrintWriter output = IOUtils.getPrintWriter(outFile);
-            for (CoreMap sentence : sentences)
+            BufferedWriter output = new BufferedWriter(new FileWriter(outFile));
+            for (int i = 0; i < sentences.size(); ++ i)
             {
-              List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-
-                for (int j = 1; j <= tokens.size(); ++ j)
+                for (int j = 1; j <= sentences.get(i).n; ++ j)
                 {
-                  CoreLabel token = tokens.get(j - 1);
-                  output.printf("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_%n",
-                      j, token.word(), token.tag(), token.tag(),
-                      token.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class),
-                      token.get(CoreAnnotations.CoNLLDepTypeAnnotation.class));
+                    String w = sentences.get(i).getWord(j);
+                    output.write(j + "\t" + w + "\t_\t" + sentences.get(i).getPOS(j) + "\t" + sentences.get(i).getPOS(j)
+                            + "\t_\t" + trees.get(i).getHead(j) + "\t" + trees.get(i).getLabel(j) + "\t_\t_\n");
                 }
                 output.write("\n");
             }
