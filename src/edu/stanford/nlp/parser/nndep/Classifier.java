@@ -300,30 +300,6 @@ public class Classifier {
         }
       }
 
-      double reg = params.getRegParameter();
-      for (int i = 0; i < W1.length; ++i)
-        for (int j = 0; j < W1[i].length; ++j) {
-          cost += reg * W1[i][j] * W1[i][j] / 2.0;
-          gradW1[i][j] += reg * W1[i][j];
-        }
-
-      for (int i = 0; i < b1.length; ++i) {
-        cost += reg * b1[i] * b1[i] / 2.0;
-        gradb1[i] += reg * b1[i];
-      }
-
-      for (int i = 0; i < W2.length; ++i)
-        for (int j = 0; j < W2[i].length; ++j) {
-          cost += reg * W2[i][j] * W2[i][j] / 2.0;
-          gradW2[i][j] += reg * W2[i][j];
-        }
-
-      for (int i = 0; i < E.length; ++i)
-        for (int j = 0; j < E[i].length; ++j) {
-          cost += reg * E[i][j] * E[i][j] / 2.0;
-          gradE[i][j] += reg * E[i][j];
-        }
-
       return new Cost(cost, correct, gradW1, gradb1, gradW2, gradE, gradSaved);
     }
 
@@ -342,16 +318,10 @@ public class Classifier {
    */
   private static class FeedforwardParams {
 
-    private final double regParameter;
     private final double dropOutProb;
 
-    private FeedforwardParams(double regParameter, double dropOutProb) {
+    private FeedforwardParams(double dropOutProb) {
       this.dropOutProb = dropOutProb;
-      this.regParameter = regParameter;
-    }
-
-    public double getRegParameter() {
-      return regParameter;
     }
 
     public double getDropOutProb() {
@@ -420,7 +390,7 @@ public class Classifier {
      *               which features were pre-computed (=> which
      *               features need to have their gradients backprop'd)
      */
-    public void backpropSaved(Map<Integer, Integer> preMap) {
+    private void backpropSaved(Map<Integer, Integer> preMap) {
       for (int x : preMap.keySet()) {
         int mapX = preMap.get(x);
         int tok = x / config.numTokens;
@@ -431,6 +401,38 @@ public class Classifier {
             gradW1[j][offset + k] += delta * E[tok][k];
             gradE[tok][k] += delta * W1[j][offset + k];
           }
+        }
+      }
+    }
+
+    /**
+     * Add L2 regularization cost to the gradients associated with this
+     * instance.
+     */
+    private void addL2Regularization(double regularizationWeight) {
+      for (int i = 0; i < W1.length; ++i) {
+        for (int j = 0; j < W1[i].length; ++j) {
+          cost += regularizationWeight * W1[i][j] * W1[i][j] / 2.0;
+          gradW1[i][j] += regularizationWeight * W1[i][j];
+        }
+      }
+
+      for (int i = 0; i < b1.length; ++i) {
+        cost += regularizationWeight * b1[i] * b1[i] / 2.0;
+        gradb1[i] += regularizationWeight * b1[i];
+      }
+
+      for (int i = 0; i < W2.length; ++i) {
+        for (int j = 0; j < W2[i].length; ++j) {
+          cost += regularizationWeight * W2[i][j] * W2[i][j] / 2.0;
+          gradW2[i][j] += regularizationWeight * W2[i][j];
+        }
+      }
+
+      for (int i = 0; i < E.length; ++i) {
+        for (int j = 0; j < E[i].length; ++j) {
+          cost += regularizationWeight * E[i][j] * E[i][j] / 2.0;
+          gradE[i][j] += regularizationWeight * E[i][j];
         }
       }
     }
@@ -530,7 +532,7 @@ public class Classifier {
     preCompute(smallMap);
 
     // Set up parameters for feedforward
-    FeedforwardParams params = new FeedforwardParams(regParameter, dropOutProb);
+    FeedforwardParams params = new FeedforwardParams(dropOutProb);
 
     int numChunks = config.trainingThreads;
     List<Collection<Example>> chunks = CollectionUtils.partitionIntoFolds(examples, numChunks);
@@ -557,6 +559,8 @@ public class Classifier {
     // Backpropagate gradients on saved pre-computed values to actual
     // embeddings
     cost.backpropSaved(smallMap);
+
+    cost.addL2Regularization(regParameter);
 
     return cost;
   }
