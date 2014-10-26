@@ -1,10 +1,13 @@
 package edu.stanford.nlp.parser.nndep;
 
+import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.ReflectionLoading;
 
+import java.util.List;
 import java.util.Properties;
+import java.util.function.Function;
 
 /**
  * Defines configuration settings for training and testing the
@@ -157,6 +160,25 @@ public class Config
    */
   public TreebankLanguagePack tlp;
 
+  // --- Runtime parsing options
+
+  /**
+   * If non-null, when parsing raw text assume sentences have already
+   * been split and are separated by the given delimiter.
+   *
+   * If null, the parser splits sentences automatically.
+   */
+  public String sentenceDelimiter = null;
+
+  /**
+   * Defines a word-escaper to use when parsing raw sentences.
+   *
+   * As a command-line option, you should provide the fully qualified
+   * class name of a valid escaper (that is, a class which implements
+   * {@code Function<List<HasWord>, List<HasWord>>}).
+   */
+  public Function<List<HasWord>, List<HasWord>> escaper = null;
+
   public Config(Properties properties) {
     setProperties(properties);
   }
@@ -178,6 +200,13 @@ public class Config
     clearGradientsPerIter = PropertiesUtils.getInt(props, "clearGradientsPerIter", clearGradientsPerIter);
     saveIntermediate = PropertiesUtils.getBool(props, "saveIntermediate", saveIntermediate);
 
+    // Runtime parsing options
+    sentenceDelimiter = PropertiesUtils.getString(props, "sentenceDelimiter", sentenceDelimiter);
+
+    String escaperClass = props.getProperty("escaper");
+    escaper = escaperClass != null ? ReflectionLoading.loadByReflection(escaperClass) : null;
+
+    // Language options
     language = PropertiesUtils.getString(props, "language", language);
     String tlpClass = language.equals("Chinese") ? "edu.stanford.nlp.trees.international.pennchinese.ChineseTreebankLanguagePack" : "edu.stanford.nlp.trees.PennTreebankLanguagePack";
     tlp = ReflectionLoading.loadByReflection(tlpClass);

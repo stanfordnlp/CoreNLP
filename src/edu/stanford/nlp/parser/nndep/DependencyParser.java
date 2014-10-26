@@ -8,6 +8,8 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.process.DocumentPreprocessor;
+import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.IntCounter;
@@ -22,6 +24,9 @@ import edu.stanford.nlp.util.Timing;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -882,7 +887,7 @@ public class DependencyParser {
    *  @param outFile File to write results to in CoNLL-X format.  If null, no output is written
    *  @return The LAS score on the dataset
    */
-  public double test(String testFile, String outFile) {
+  public double testCoNLL(String testFile, String outFile) {
     System.err.println("Test File: " + testFile);
     Timing timer = new Timing();
     List<CoreMap> testSents = new ArrayList<>();
@@ -913,6 +918,29 @@ public class DependencyParser {
     return lasNoPunc;
   }
 
+  private void parseTextFile(BufferedReader input, PrintWriter output) {
+    DocumentPreprocessor preprocessor = new DocumentPreprocessor(input);
+    preprocessor.setSentenceFinalPuncWords(config.tlp.sentenceFinalPunctuationWords());
+    preprocessor.setEscaper(config.escaper);
+    preprocessor.setSentenceDelimiter(config.sentenceDelimiter);
+    preprocessor.setTokenizerFactory(config.tlp.getTokenizerFactory());
+
+    Timing timer = new Timing();
+    timer.start();
+
+    int numSentences = 0;
+    for (List<HasWord> sentence : preprocessor) {
+      GrammaticalStructure parse = predict(sentence);
+      output.println(parse);
+      numSentences++;
+    }
+
+    long millis = timer.stop();
+    double seconds = millis / 1000.0;
+    System.err.printf("Parsed %d sentences in %.2f seconds (%.2f sents/sec).",
+        numSentences, seconds, numSentences / seconds);
+  }
+
   /**
    * Prepare for parsing after a model has been loaded.
    */
@@ -938,13 +966,49 @@ public class DependencyParser {
     Properties props = StringUtils.argsToProperties(args);
     DependencyParser parser = new DependencyParser(props);
 
+    // Train with CoNLL-X data
     if (props.containsKey("trainFile"))
       parser.train(props.getProperty("trainFile"), props.getProperty("devFile"), props.getProperty("model"),
           props.getProperty("embedFile"));
 
+    boolean loaded = false;
+    // Test with CoNLL-X data
     if (props.containsKey("testFile")) {
       parser.load(props.getProperty("model"));
-      parser.test(props.getProperty("testFile"), props.getProperty("outFile"));
+      loaded = true;
+
+      parser.testCoNLL(props.getProperty("testFile"), props.getProperty("outFile"));
+    }
+
+    // Parse raw text data
+    if (props.containsKey("parseFile")) {
+      if (!loaded) {
+        parser.load(props.getProperty("model"));
+        loaded = true;
+      }
+
+      String encoding = parser.config.tlp.getEncoding();
+      String inputFilename = props.getProperty("parseFile");
+      BufferedReader input;
+      try {
+        input = inputFilename.equals("-")
+                ? new BufferedReader(new InputStreamReader(System.in, encoding))
+                : IOUtils.readerFromString(inputFilename, encoding);
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+
+      String outputFilename = props.getProperty("outFile");
+      PrintWriter output;
+      try {
+        output = outputFilename.equals("-")
+            ? IOUtils.encodedOutputStreamPrintWriter(System.out, encoding, true)
+            : IOUtils.getPrintWriter(outputFilename, encoding);
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+
+      parser.parseTextFile(input, output);
     }
   }
 }
