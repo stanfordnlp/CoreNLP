@@ -8,7 +8,7 @@ import java.util.*;
  *
  * @author Danqi Chen
  */
-public class DependencyTree {
+class DependencyTree {
   public int n;
   List<Integer> head;
   List<String> label;

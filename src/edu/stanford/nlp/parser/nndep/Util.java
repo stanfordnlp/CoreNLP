@@ -20,8 +20,7 @@ import edu.stanford.nlp.util.CoreMap;
 import java.util.*;
 import java.io.*;
 
-public class Util
-{
+class Util {
 
   private Util() {} // static methods
 
