@@ -20,10 +20,12 @@ public class ArcStandard extends ParsingSystem {
     super(tlp, labels);
   }
 
+  @Override
   public boolean isTerminal(Configuration c) {
     return (c.getStackSize() == 1 && c.getBufferSize() == 0);
   }
 
+  @Override
   public void makeTransitions() {
     transitions = new ArrayList<>();
 
@@ -36,6 +38,7 @@ public class ArcStandard extends ParsingSystem {
     transitions.add("S");
   }
 
+  @Override
   public Configuration initialConfiguration(CoreMap s) {
     Configuration c = new Configuration(s);
     int length = s.get(CoreAnnotations.TokensAnnotation.class).size();
@@ -53,6 +56,7 @@ public class ArcStandard extends ParsingSystem {
     return c;
   }
 
+  @Override
   public boolean canApply(Configuration c, String t) {
     if (t.startsWith("L") || t.startsWith("R")) {
       String label = t.substring(2, t.length() - 1);
@@ -76,6 +80,7 @@ public class ArcStandard extends ParsingSystem {
       return nBuffer > 0;
   }
 
+  @Override
   public void apply(Configuration c, String t) {
     int w1 = c.getStack(1);
     int w2 = c.getStack(0);
@@ -89,6 +94,7 @@ public class ArcStandard extends ParsingSystem {
   }
 
   // O(n) implementation
+  @Override
   public String getOracle(Configuration c, DependencyTree dTree) {
     int w1 = c.getStack(1);
     int w2 = c.getStack(0);
@@ -152,6 +158,7 @@ public class ArcStandard extends ParsingSystem {
     return g[nLeft][nRight] != -1;
   }
 
+  @Override
   public boolean isOracle(Configuration c, String t, DependencyTree dTree) {
     if (!canApply(c, t))
       return false;

@@ -32,7 +32,7 @@ public abstract class ParsingSystem {
    */
   protected final String rootLabel;
 
-  public List<String> labels, transitions;
+  protected List<String> labels, transitions;
 
   /**
    * Generate all possible transitions which this parsing system can
@@ -219,4 +219,5 @@ public abstract class ParsingSystem {
     Map<String, Double> result = evaluate(sentences, trees, goldTrees);
     return result == null || !result.containsKey("UASwoPunc") ? -1.0 : result.get("UASwoPunc");
   }
+
 }

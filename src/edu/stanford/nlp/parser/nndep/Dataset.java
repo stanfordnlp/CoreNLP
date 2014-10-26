@@ -1,5 +1,5 @@
 
-/* 
+/*
 * 	@Author:  Danqi Chen
 * 	@Email:  danqi@cs.stanford.edu
 *	@Created:  2014-09-01
@@ -8,30 +8,14 @@
 
 package edu.stanford.nlp.parser.nndep;
 
-import java.util.*;
-
-class Example {
-  List<Integer> feature;
-  List<Integer> label;
-
-  public Example(List<Integer> feature, List<Integer> label) {
-    this.feature = feature;
-    this.label = label;
-  }
-
-  public List<Integer> getFeature() {
-    return feature;
-  }
-
-  public List<Integer> getLabel() {
-    return label;
-  }
-}
+import java.util.ArrayList;
+import java.util.List;
 
 public class Dataset {
+
   int n;
-  int numFeatures, numLabels;
-  List<Example> examples;
+  final int numFeatures, numLabels;
+  final List<Example> examples;
 
   Dataset(int numFeatures, int numLabels) {
     n = 0;
@@ -45,4 +29,5 @@ public class Dataset {
     n += 1;
     examples.add(data);
   }
+
 }

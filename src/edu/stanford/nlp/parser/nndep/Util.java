@@ -25,7 +25,7 @@ class Util {
 
   private Util() {} // static methods
 
-  public static Random random = new Random();
+  private static final Random random = new Random();
 
   // return strings sorted by frequency, and filter out those with freq. less than cutOff.
 

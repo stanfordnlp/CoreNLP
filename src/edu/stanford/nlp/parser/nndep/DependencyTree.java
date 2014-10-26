@@ -9,7 +9,8 @@ import java.util.*;
  * @author Danqi Chen
  */
 class DependencyTree {
-  public int n;
+
+  int n;
   List<Integer> head;
   List<String> label;
   private int counter;
@@ -151,4 +152,5 @@ class DependencyTree {
       System.out.println(i + " " + getHead(i) + " " + getLabel(i));
     System.out.println();
   }
+
 }

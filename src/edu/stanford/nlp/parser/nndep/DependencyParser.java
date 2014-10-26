@@ -1,11 +1,3 @@
-
-/*
-* 	@Author:  Danqi Chen
-* 	@Email:  danqi@cs.stanford.edu
-*	@Created:  2014-08-25
-* 	@Last Modified:  2014-10-05
-*/
-
 package edu.stanford.nlp.parser.nndep;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -28,7 +20,6 @@ import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -62,7 +53,7 @@ import java.util.stream.Collectors;
  * {@link #predict(edu.stanford.nlp.util.CoreMap)} on the returned
  * parser instance in order to get new parses.
  *
- * @author Danqi Chen
+ * @author Danqi Chen (danqi@cs.stanford.edu)
  * @author Jon Gauthier
  */
 public class DependencyParser {

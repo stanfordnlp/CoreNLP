@@ -20,11 +20,11 @@ import java.util.List;
  */
 public class Configuration {
 
-  public List<Integer> stack;
-  public List<Integer> buffer;
+  final List<Integer> stack;
+  final List<Integer> buffer;
 
-  public DependencyTree tree;
-  public final CoreMap sentence;
+  final DependencyTree tree;
+  final CoreMap sentence;
 
   public Configuration(Configuration config) {
     stack = new ArrayList<Integer>(config.stack);
