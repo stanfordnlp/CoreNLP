@@ -533,7 +533,7 @@ public class NNParser
 	{
         if (!silent)
             System.out.println("Prediction..");
-		classifier.preCompute();
+
         int numTrans = system.transitions.size();
 
         long startTime = System.currentTimeMillis();
@@ -576,7 +576,7 @@ public class NNParser
 		System.out.println("Model File: " + modelFile);
 
         loadModelFile(modelFile);
-        initialize();
+        initialize(true);
 
 		List<Sentence> testSents = new ArrayList<Sentence>();       
         List<DependencyTree> testTrees = new ArrayList<DependencyTree>();
@@ -599,7 +599,7 @@ public class NNParser
   /**
    * Prepare for parsing after a model has been loaded.
    */
-  public void initialize() {
+  public void initialize(boolean preCompute) {
     if (labelDict == null)
       throw new IllegalStateException("Model has not been loaded or trained");
 
@@ -607,5 +607,12 @@ public class NNParser
     List<String> lDict = new ArrayList<>(labelDict);
     lDict.remove(0);
     system = new ArcStandard(lDict);
+
+    // Pre-compute matrix multiplications
+    classifier.preCompute();
+  }
+
+  public void initialize() {
+    initialize(false);
   }
 }
