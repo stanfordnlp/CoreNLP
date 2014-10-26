@@ -660,7 +660,7 @@ public class Classifier {
         .currentTimeMillis() - startTime) / 1000.0 + " (s)");
   }
 
-  public double[] computeScores(List<Integer> feature) {
+  double[] computeScores(int[] feature) {
     return computeScores(feature, preMap);
   }
 
@@ -668,13 +668,13 @@ public class Classifier {
    * Feed a feature vector forward through the network. Returns the
    * values of the output layer.
    */
-  private double[] computeScores(List<Integer> feature, Map<Integer, Integer> preMap) {
-    double[] scores = new double[numLabels];
+  private double[] computeScores(int[] feature, Map<Integer, Integer> preMap) {
     double[] hidden = new double[config.hiddenSize];
     int offset = 0;
-    for (int j = 0; j < config.numTokens; ++j) {
-      int tok = feature.get(j);
+    for (int j = 0; j < feature.length; ++j) {
+      int tok = feature[j];
       int index = tok * config.numTokens + j;
+
       if (preMap.containsKey(index)) {
         int id = preMap.get(index);
         for (int i = 0; i < config.hiddenSize; ++i)
@@ -692,6 +692,7 @@ public class Classifier {
       hidden[i] = hidden[i] * hidden[i] * hidden[i];  // cube nonlinearity
     }
 
+    double[] scores = new double[numLabels];
     for (int i = 0; i < numLabels; ++i)
       for (int j = 0; j < config.hiddenSize; ++j)
         scores[i] += W2[i][j] * hidden[j];

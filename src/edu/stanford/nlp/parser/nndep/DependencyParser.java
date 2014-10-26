@@ -173,6 +173,63 @@ public class DependencyParser {
     return feature;
   }
 
+  private static final int POS_OFFSET = 18;
+  private static final int DEP_OFFSET = 36;
+  private static final int STACK_OFFSET = 6;
+  private static final int STACK_NUMBER = 6;
+
+  private int[] getFeatureArray(Configuration c) {
+    int[] feature = new int[config.numTokens];  // positions 0-17 hold fWord, 18-35 hold fPos, 36-47 hold fLabel
+
+    for (int j = 2; j >= 0; --j) {
+      int index = c.getStack(j);
+      feature[2-j] = getWordID(c.getWord(index));
+      feature[POS_OFFSET + (2-j)] = getPosID(c.getPOS(index));
+    }
+
+    for (int j = 0; j <= 2; ++j) {
+      int index = c.getBuffer(j);
+      feature[3 + j] = getWordID(c.getWord(index));
+      feature[POS_OFFSET + 3 + j] = getPosID(c.getPOS(index));
+    }
+
+    for (int j = 0; j <= 1; ++j) {
+      int k = c.getStack(j);
+
+      int index = c.getLeftChild(k);
+      feature[STACK_OFFSET + j * STACK_NUMBER] = getWordID(c.getWord(index));
+      feature[POS_OFFSET + STACK_OFFSET + j * STACK_NUMBER] = getPosID(c.getPOS(index));
+      feature[DEP_OFFSET + j * STACK_NUMBER] = getLabelID(c.getLabel(index));
+
+      index = c.getRightChild(k);
+      feature[STACK_OFFSET + j * STACK_NUMBER + 1] = getWordID(c.getWord(index));
+      feature[POS_OFFSET + STACK_OFFSET + j * STACK_NUMBER + 1] = getPosID(c.getPOS(index));
+      feature[DEP_OFFSET + j * STACK_NUMBER + 1] = getLabelID(c.getLabel(index));
+
+      index = c.getLeftChild(k, 2);
+      feature[STACK_OFFSET + j * STACK_NUMBER + 2] = getWordID(c.getWord(index));
+      feature[POS_OFFSET + STACK_OFFSET + j * STACK_NUMBER + 2] = getPosID(c.getPOS(index));
+      feature[DEP_OFFSET + j * STACK_NUMBER + 2] = getLabelID(c.getLabel(index));
+
+      index = c.getRightChild(k, 2);
+      feature[STACK_OFFSET + j * STACK_NUMBER + 3] = getWordID(c.getWord(index));
+      feature[POS_OFFSET + STACK_OFFSET + j * STACK_NUMBER + 3] = getPosID(c.getPOS(index));
+      feature[DEP_OFFSET + j * STACK_NUMBER + 3] = getLabelID(c.getLabel(index));
+
+      index = c.getLeftChild(c.getLeftChild(k));
+      feature[STACK_OFFSET + j * STACK_NUMBER + 4] = getWordID(c.getWord(index));
+      feature[POS_OFFSET + STACK_OFFSET + j * STACK_NUMBER + 4] = getPosID(c.getPOS(index));
+      feature[DEP_OFFSET + j * STACK_NUMBER + 4] = getLabelID(c.getLabel(index));
+
+      index = c.getRightChild(c.getRightChild(k));
+      feature[STACK_OFFSET + j * STACK_NUMBER + 5] = getWordID(c.getWord(index));
+      feature[POS_OFFSET + STACK_OFFSET + j * STACK_NUMBER + 5] = getPosID(c.getPOS(index));
+      feature[DEP_OFFSET + j * STACK_NUMBER + 5] = getLabelID(c.getLabel(index));
+    }
+
+    return feature;
+  }
+
   public Dataset genTrainExamples(List<CoreMap> sents, List<DependencyTree> trees) {
     Dataset ret = new Dataset(config.numTokens, system.transitions.size());
 
@@ -704,7 +761,7 @@ public class DependencyParser {
 
     Configuration c = system.initialConfiguration(sentence);
     while (!system.isTerminal(c)) {
-      double[] scores = classifier.computeScores(getFeatures(c));
+      double[] scores = classifier.computeScores(getFeatureArray(c));
 
       double optScore = Double.NEGATIVE_INFINITY;
       String optTrans = null;
