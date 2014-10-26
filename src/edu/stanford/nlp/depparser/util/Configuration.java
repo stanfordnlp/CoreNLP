@@ -104,12 +104,12 @@ public class Configuration
 
 	public String getWord(int k)
 	{
-		return getCoreLabel(k).word();
+		return k < 0 ? CONST.NULL : getCoreLabel(k).word();
 	}
 
 	public String getPOS(int k)
 	{
-		return getCoreLabel(k).tag();
+		return k < 0 ? CONST.NULL : getCoreLabel(k).tag();
 	}
 
 	public void addArc(int h, int t, String l)
