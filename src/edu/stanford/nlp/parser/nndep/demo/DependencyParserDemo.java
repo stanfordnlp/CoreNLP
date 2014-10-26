@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author Jon Gauthier
  */
-public class NNParserDemo {
+public class DependencyParserDemo {
   public static void main(String[] args) {
     String modelPath = DependencyParser.DEFAULT_MODEL;
     String taggerPath = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger";
