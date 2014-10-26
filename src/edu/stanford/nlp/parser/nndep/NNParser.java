@@ -8,6 +8,9 @@
 
 package edu.stanford.nlp.parser.nndep;
 
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -18,22 +21,24 @@ import edu.stanford.nlp.parser.nndep.util.Configuration;
 import edu.stanford.nlp.parser.nndep.util.Counter;
 import edu.stanford.nlp.parser.nndep.util.DependencyTree;
 import edu.stanford.nlp.parser.nndep.util.ParsingSystem;
-
 import edu.stanford.nlp.parser.nndep.util.Util;
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.EnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.TreeGraphNode;
 import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.PropertiesUtils;
 
-import java.util.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class NNParser 
@@ -541,7 +546,7 @@ public class NNParser
         if (embedID.containsKey(str)) index = embedID.get(str);
         else if (embedID.containsKey(str.toLowerCase())) index = embedID.get(str.toLowerCase());
       }
-      
+
       if (index >= 0) {
         ++foundEmbed;
         for (int j = 0; j < E[i].length; ++j)
@@ -652,10 +657,10 @@ public class NNParser
       IndexedWord headWord = head == 0 ? root
                                        : new IndexedWord(tokens.get(head - 1));
 
-      // TODO English-specific
       GrammaticalRelation relation = head == 0
                                      ? GrammaticalRelation.ROOT
-                                     : EnglishGrammaticalRelations.shortNameToGRel.get(label);
+                                     : new GrammaticalRelation(GrammaticalRelation.Language.Any, label, null,
+                                         GrammaticalRelation.DEPENDENT);
 
       dependencies.add(new TypedDependency(relation, headWord, thisWord));
     }
