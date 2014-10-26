@@ -2,12 +2,15 @@ package edu.stanford.nlp.parser.nndep.util;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.trees.PennTreebankLanguagePack;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CoreMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -114,6 +117,15 @@ public abstract class ParsingSystem {
     return -1;
   }
 
+  private Set<String> getPunctuationTags() {
+    if (tlp instanceof PennTreebankLanguagePack) {
+      // Hack for English: match punctuation tags used in Danqi's paper
+      return new HashSet<>(Arrays.asList("``", "''", ".", ",", ":"));
+    } else {
+      return CollectionUtils.asSet(tlp.punctuationTags());
+    }
+  }
+
   /**
    * Evaluate performance on a list of sentences, predicted parses,
    * and gold parses.
@@ -126,7 +138,7 @@ public abstract class ParsingSystem {
 
     // We'll skip words which are punctuation. Retrieve tags indicating
     // punctuation in this treebank.
-    Set<String> punctuationTags = CollectionUtils.asSet(tlp.punctuationTags());
+    Set<String> punctuationTags = getPunctuationTags();
 
     if (trees.size() != goldTrees.size()) {
       System.out.println("[Error] Incorrect number of trees.");

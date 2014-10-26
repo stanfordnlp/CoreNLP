@@ -636,6 +636,7 @@ public class NNParser {
       classifier.takeAdaGradientStep(cost, config.adaAlpha, config.adaEps);
 
       System.out.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
+
       if (devFile != null && iter % config.evalPerIter == 0) {
         // Redo precomputation with updated weights. This is only
         // necessary because we're updating weights -- for normal
