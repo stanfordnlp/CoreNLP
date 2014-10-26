@@ -122,13 +122,11 @@ public class NNParser {
    */
   public int getWordID(String s) {
     //NOTE: to use the previous trained parameters, we need to add one line
-    if (s == CONST.ROOT) s = CONST.NULL;
     return wordIDs.containsKey(s) ? wordIDs.get(s) : wordIDs.get(CONST.UNKNOWN);
   }
 
   public int getPosID(String s) {
     //NOTE: to use the previous trained parameters, we need to add one line
-    if (s == CONST.ROOT) s = CONST.NULL;
     return posIDs.containsKey(s) ? posIDs.get(s) : posIDs.get(CONST.UNKNOWN);
   }
 
