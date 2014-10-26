@@ -531,9 +531,13 @@ public class NNParser
         for (int iter = 0; iter < Config.maxIter; ++ iter)
         {
         	System.out.println("##### Iteration " + iter);
-        	classifier.computeCostFunction(Config.batchSize, Config.regParameter, Config.dropProb);
-        	classifier.takeAdaGradientStep(Config.adaAlpha, Config.adaEps);
-     		System.out.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
+
+          // TODO track correct %
+        	Classifier.Cost cost = classifier.computeCostFunction(Config.batchSize, Config.regParameter, Config.dropProb);
+          System.out.println("Cost = " + cost.getCost() + ", Correct(%) = " + 0);
+          classifier.takeAdaGradientStep(cost, Config.adaAlpha, Config.adaEps);
+
+          System.out.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
         	if (devFile != null && iter % Config.evalPerIter == 0)
 	        	System.out.println("UAS: "  + system.getUASScore(devSents, predict(devSents), devTrees));
         }
