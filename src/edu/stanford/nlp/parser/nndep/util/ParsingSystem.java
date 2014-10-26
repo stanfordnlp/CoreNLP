@@ -1,11 +1,3 @@
-
-/* 
-* 	@Author:  Danqi Chen
-* 	@Email:  danqi@cs.stanford.edu
-*	@Created:  2014-08-31
-* 	@Last Modified:  2014-09-01
-*/
-
 package edu.stanford.nlp.parser.nndep.util;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -20,30 +12,87 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Defines a transition-based parsing framework for dependency parsing.
+ *
+ * @author Danqi Chen
+ */
 public abstract class ParsingSystem {
 
+  /**
+   * Defines language-specific settings for this parsing instance.
+   */
   private final TreebankLanguagePack tlp;
 
+  /**
+   * Dependency label used between root of sentence and ROOT node
+   */
   protected final String rootLabel;
+
   public List<String> labels, transitions;
 
-  abstract void makeTransitions();
+  /**
+   * Generate all possible transitions which this parsing system can
+   * take for any given configuration.
+   */
+  protected abstract void makeTransitions();
 
+  /**
+   * Determine whether the given transition is legal for this
+   * configuration.
+   *
+   * @param c Parsing configuration
+   * @param t Transition string
+   * @return Whether the given transition is legal in this
+   *         configuration
+   */
   public abstract boolean canApply(Configuration c, String t);
 
   //abstract boolean canApplyWithDictionary(Configuration c, String t);
+
+  /**
+   * Apply the given transition to the given configuration, modifying
+   * the configuration's state in place.
+   */
   public abstract void apply(Configuration c, String t);
 
+  /**
+   * Provide a static-oracle recommendation for the next parsing step
+   * to take.
+   *
+   * @param c Current parser configuration
+   * @param dTree Gold tree which parser needs to reach
+   * @return Transition string
+   */
   public abstract String getOracle(Configuration c, DependencyTree dTree);
 
+  /**
+   * Determine whether applying the given transition in the given
+   * configuration tree will leave in us a state in which we can reach
+   * the gold tree. (Useful for building a dynamic oracle.)
+   */
   abstract boolean isOracle(Configuration c, String t, DependencyTree dTree);
 
+  /**
+   * Build an initial parser configuration from the given sentence.
+   */
   public abstract Configuration initialConfiguration(CoreMap sentence);
 
+  /**
+   * Determine if the given configuration corresponds to a parser which
+   * has completed its parse.
+   */
   abstract boolean isTerminal(Configuration c);
 
   // TODO pass labels as Map<String, GrammaticalRelation>; use
   // GrammaticalRelation throughout
+
+  /**
+   * @param tlp TreebankLanguagePack describing the language being
+   *            parsed
+   * @param labels A list of possible dependency relation labels, with
+   *               the ROOT relation label as the first element
+   */
   public ParsingSystem(TreebankLanguagePack tlp, List<String> labels) {
     this.tlp = tlp;
     this.labels = new ArrayList<>(labels);
@@ -65,6 +114,12 @@ public abstract class ParsingSystem {
     return -1;
   }
 
+  /**
+   * Evaluate performance on a list of sentences, predicted parses,
+   * and gold parses.
+   *
+   * @return A map from metric name to metric value
+   */
   public Map<String, Double> evaluate(List<CoreMap> sentences, List<DependencyTree> trees,
                                       List<DependencyTree> goldTrees) {
     Map<String, Double> result = new HashMap<String, Double>();

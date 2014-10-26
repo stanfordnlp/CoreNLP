@@ -1,15 +1,13 @@
-
-/* 
-* 	@Author:  Danqi Chen
-* 	@Email:  danqi@cs.stanford.edu
-*	@Created:  2014-08-31
-* 	@Last Modified:  2014-09-01
-*/
-
 package edu.stanford.nlp.parser.nndep.util;
 
 import java.util.*;
 
+/**
+ * Represents a partial or complete dependency parse of a sentence, and
+ * provides convenience methods for analyzing the parse.
+ *
+ * @author Danqi Chen
+ */
 public class DependencyTree {
   public int n;
   List<Integer> head;
@@ -30,12 +28,26 @@ public class DependencyTree {
     label = new ArrayList<String>(tree.label);
   }
 
+  /**
+   * Add the next token to the parse.
+   *
+   * @param h Head of the next token
+   * @param l Dependency relation label between this node and its head
+   */
   public void add(int h, String l) {
     ++n;
     head.add(h);
     label.add(l);
   }
 
+  /**
+   * Establish a labeled dependency relation between the two given
+   * nodes.
+   *
+   * @param k Index of the dependent node
+   * @param h Index of the head node
+   * @param l Label of the dependency relation
+   */
   public void set(int k, int h, String l) {
     head.set(k, h);
     label.set(k, l);
@@ -55,6 +67,10 @@ public class DependencyTree {
       return label.get(k);
   }
 
+  /**
+   * Get the index of the node which is the root of the parse (i.e.,
+   * that node which has the ROOT node as its head).
+   */
   public int getRoot() {
     for (int k = 1; k <= n; ++k)
       if (getHead(k) == 0)
@@ -62,7 +78,9 @@ public class DependencyTree {
     return 0;
   }
 
-  // check if there is only one root
+  /**
+   * Check if this parse has only one root.
+   */
   public boolean isSingleRoot() {
     int roots = 0;
     for (int k = 1; k <= n; ++k)
@@ -93,6 +111,15 @@ public class DependencyTree {
     return true;
   }
 
+  // check if the tree is projective, O(n^2)
+  public boolean isProjective() {
+    if (!isTree())
+      return false;
+    counter = -1;
+    return visitTree(0);
+  }
+
+  // Inner recursive function for checking projectivity of tree
   private boolean visitTree(int w) {
     for (int i = 1; i < w; ++i)
       if (getHead(i) == w && visitTree(i) == false)
@@ -106,14 +133,7 @@ public class DependencyTree {
     return true;
   }
 
-  // check if the tree is projective, O(n^2)
-  public boolean isProjective() {
-    if (!isTree())
-      return false;
-    counter = -1;
-    return visitTree(0);
-  }
-
+  // TODO properly override equals, hashCode?
   public boolean equal(DependencyTree t) {
     if (t.n != n)
       return false;

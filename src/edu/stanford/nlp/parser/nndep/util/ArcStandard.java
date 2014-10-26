@@ -1,11 +1,3 @@
-
-/* 
-* 	@Author:  Danqi Chen
-* 	@Email:  danqi@cs.stanford.edu
-*	@Created:  2014-08-31
-* 	@Last Modified:  2014-09-01
-*/
-
 package edu.stanford.nlp.parser.nndep.util;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -15,6 +7,12 @@ import edu.stanford.nlp.util.CoreMap;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Defines an arc-standard transition-based dependency parsing system
+ * (Nivre, 2004).
+ *
+ * @author Danqi Chen
+ */
 public class ArcStandard extends ParsingSystem {
   private boolean singleRoot = true;
 
@@ -27,22 +25,31 @@ public class ArcStandard extends ParsingSystem {
   }
 
   public void makeTransitions() {
-    transitions = new ArrayList<String>();
-    for (int i = 0; i < labels.size(); ++i)
-      transitions.add("L(" + labels.get(i) + ")");
-    for (int i = 0; i < labels.size(); ++i)
-      transitions.add("R(" + labels.get(i) + ")");
+    transitions = new ArrayList<>();
+
+    // TODO store these as objects!
+    for (String label : labels)
+      transitions.add("L(" + label + ")");
+    for (String label : labels)
+      transitions.add("R(" + label + ")");
+
     transitions.add("S");
   }
 
   public Configuration initialConfiguration(CoreMap s) {
     Configuration c = new Configuration(s);
     int length = s.get(CoreAnnotations.TokensAnnotation.class).size();
+
+    // For each token, add dummy elements to the configuration's tree
+    // and add the words onto the buffer
     for (int i = 1; i <= length; ++i) {
       c.tree.add(CONST.NONEXIST, CONST.UNKNOWN);
       c.buffer.add(i);
     }
+
+    // Put the ROOT node on the stack
     c.stack.add(0);
+
     return c;
   }
 
