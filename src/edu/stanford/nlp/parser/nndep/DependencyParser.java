@@ -976,10 +976,20 @@ public class DependencyParser {
   }
 
   /**
+   * Explicitly specifies the number of arguments expected with
+   * particular command line options.
+   */
+  private static final Map<String, Integer> numArgs = new HashMap<>();
+  static {
+    numArgs.put("parseFile", 1);
+    numArgs.put("outFile", 1);
+  }
+
+  /**
    * TODO document
    */
   public static void main(String[] args) {
-    Properties props = StringUtils.argsToProperties(args);
+    Properties props = StringUtils.argsToProperties(args, numArgs);
     DependencyParser parser = new DependencyParser(props);
 
     // Train with CoNLL-X data
