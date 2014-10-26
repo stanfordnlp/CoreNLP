@@ -322,7 +322,8 @@ public class NNParser
             System.out.println(CONST.SEPARATOR);
 			System.out.println("Loading Model File: " + modelFile);
 			String s;
-			BufferedReader input = IOUtils.getBufferedReaderFromClasspathOrFileSystem(modelFile);
+			BufferedReader input = new BufferedReader(new InputStreamReader(
+          IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(modelFile)));
 			
 			int nDict, nPOS, nLabel;
 			int eSize, hSize, nTokens, nPreComputed;
