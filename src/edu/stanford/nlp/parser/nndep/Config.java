@@ -86,6 +86,8 @@ public class Config
    * Total number of tokens provided as input to the classifier. (Each
    * token is provided in word embedding form.)
    */
+  // TODO we can figure this out automatically based on features used.
+  // Should remove this option once we make feature templates / dynamic features
   public int numTokens = 48;
 
   /**
