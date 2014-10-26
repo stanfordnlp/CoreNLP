@@ -31,7 +31,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
    * Maximum parse time (in milliseconds) for a sentence
    */
   private final long maxTime;
-  private static final long DEFAULT_MAXTIME = 0;
+  private static final long DEFAULT_MAXTIME = Long.MAX_VALUE;
 
   public DependencyParseAnnotator() {
     this(new Properties());
