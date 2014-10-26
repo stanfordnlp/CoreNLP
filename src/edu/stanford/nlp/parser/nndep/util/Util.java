@@ -1,5 +1,5 @@
 
-/* 
+/*
 * 	@Author:  Danqi Chen
 * 	@Email:  danqi@cs.stanford.edu
 *	@Created:  2014-08-25
@@ -20,11 +20,14 @@ import edu.stanford.nlp.util.CoreMap;
 import java.util.*;
 import java.io.*;
 
-public class Util 
+public class Util
 {
-	public static Random random = new Random();
 
-	// return strings sorted by frequency, and filter out those with freq. less than cutOff.
+  private Util() {} // static methods
+
+  public static Random random = new Random();
+
+  // return strings sorted by frequency, and filter out those with freq. less than cutOff.
 
   /**
    * Build a dictionary of words collected from a corpus.
@@ -35,40 +38,40 @@ public class Util
    *         any words with a frequency below {@code cutOff}
    */
   public static List<String> generateDict(List<String> str, int cutOff)
-	{
-		Counter<String> freq = new IntCounter<>();
+  {
+    Counter<String> freq = new IntCounter<>();
     for (String aStr : str)
       freq.incrementCount(aStr);
 
-		List<String> keys = Counters.toSortedList(freq, false);
-		List<String> dict = new ArrayList<>();
+    List<String> keys = Counters.toSortedList(freq, false);
+    List<String> dict = new ArrayList<>();
     for (String word : keys) {
       if (freq.getCount(word) >= cutOff)
         dict.add(word);
     }
-		return dict;
-	}
+    return dict;
+  }
 
-	public static List<String> generateDict(List<String> str)
-	{
-		return generateDict(str, 1);
-	}
+  public static List<String> generateDict(List<String> str)
+  {
+    return generateDict(str, 1);
+  }
 
-	public static <T> List<T> getRandomSubList(List<T> input, int subsetSize)
-	{
-	    int inputSize = input.size();
-	    if (subsetSize > inputSize)
-	    	subsetSize = inputSize;
+  public static <T> List<T> getRandomSubList(List<T> input, int subsetSize)
+  {
+    int inputSize = input.size();
+    if (subsetSize > inputSize)
+      subsetSize = inputSize;
 
-	    for (int i = 0; i < subsetSize; i++)
-	    {
-	        int indexToSwap = i + random.nextInt(inputSize - i);
-	        T temp = input.get(i);
-	        input.set(i, input.get(indexToSwap));
-	        input.set(indexToSwap, temp);
-	    }
-	    return input.subList(0, subsetSize);
-	}
+    for (int i = 0; i < subsetSize; i++)
+    {
+      int indexToSwap = i + random.nextInt(inputSize - i);
+      T temp = input.get(i);
+      input.set(i, input.get(indexToSwap));
+      input.set(indexToSwap, temp);
+    }
+    return input.subList(0, subsetSize);
+  }
 
   // TODO replace with GrammaticalStructure#readCoNLLGrammaticalStructureCollection
   public static void loadConllFile(String inFile, List<CoreMap> sents, List<DependencyTree> trees, boolean labeled)
@@ -99,8 +102,8 @@ public class Util
         sentenceTokens = new ArrayList<>();
       } else {
         String word = splits[1],
-            pos = splits[4],
-            depType = splits[7];
+                pos = splits[4],
+                depType = splits[7];
         int head = Integer.parseInt(splits[6]);
 
         CoreLabel token = tf.makeToken(word, 0, 0);
@@ -135,9 +138,9 @@ public class Util
         {
           CoreLabel token = tokens.get(j - 1);
           output.printf("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_%n",
-              j, token.word(), token.tag(), token.tag(),
-              token.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class),
-              token.get(CoreAnnotations.CoNLLDepTypeAnnotation.class));
+                  j, token.word(), token.tag(), token.tag(),
+                  token.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class),
+                  token.get(CoreAnnotations.CoNLLDepTypeAnnotation.class));
         }
         output.write("\n");
       }
@@ -146,25 +149,26 @@ public class Util
     catch (Exception e) { System.out.println(e); }
   }
 
-	public static void printTreeStats(String str, List<DependencyTree> trees)
-	{
-		System.out.println(CONST.SEPARATOR + " " + str);
-		System.out.println("#Trees: " + trees.size());
-		int nonTrees = 0;
-		int nonProjective = 0;
-		for (int k = 0; k < trees.size(); ++ k)
-		{
-			if (!trees.get(k).isTree())
-				++ nonTrees;
-			else if (!trees.get(k).isProjective())
-				++ nonProjective;
-		}
-		System.out.println(nonTrees + " tree(s) are illegal.");
-		System.out.println(nonProjective + " tree(s) are legal but not projective.");
-	}
+  public static void printTreeStats(String str, List<DependencyTree> trees)
+  {
+    System.out.println(CONST.SEPARATOR + " " + str);
+    System.out.println("#Trees: " + trees.size());
+    int nonTrees = 0;
+    int nonProjective = 0;
+    for (int k = 0; k < trees.size(); ++ k)
+    {
+      if (!trees.get(k).isTree())
+        ++ nonTrees;
+      else if (!trees.get(k).isProjective())
+        ++ nonProjective;
+    }
+    System.out.println(nonTrees + " tree(s) are illegal.");
+    System.out.println(nonProjective + " tree(s) are legal but not projective.");
+  }
 
-	public static void printTreeStats(List<DependencyTree> trees)
-	{
-		printTreeStats("", trees);
-	}
+  public static void printTreeStats(List<DependencyTree> trees)
+  {
+    printTreeStats("", trees);
+  }
+
 }
