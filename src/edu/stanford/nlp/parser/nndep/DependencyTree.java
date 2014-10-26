@@ -18,9 +18,9 @@ class DependencyTree {
   public DependencyTree() {
     n = 0;
     head = new ArrayList<Integer>();
-    head.add(CONST.NONEXIST);
+    head.add(Config.NONEXIST);
     label = new ArrayList<String>();
-    label.add(CONST.UNKNOWN);
+    label.add(Config.UNKNOWN);
   }
 
   public DependencyTree(DependencyTree tree) {
@@ -56,14 +56,14 @@ class DependencyTree {
 
   public int getHead(int k) {
     if (k <= 0 || k > n)
-      return CONST.NONEXIST;
+      return Config.NONEXIST;
     else
       return head.get(k);
   }
 
   public String getLabel(int k) {
     if (k <= 0 || k > n)
-      return CONST.NULL;
+      return Config.NULL;
     else
       return label.get(k);
   }

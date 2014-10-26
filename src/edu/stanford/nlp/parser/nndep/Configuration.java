@@ -42,7 +42,7 @@ public class Configuration {
 
   public boolean shift() {
     int k = getBuffer(0);
-    if (k == CONST.NONEXIST)
+    if (k == Config.NONEXIST)
       return false;
     buffer.remove(0);
     stack.add(k);
@@ -92,22 +92,22 @@ public class Configuration {
   /**
    * Get the sentence index of the kth word on the stack.
    *
-   * @return Sentence index or {@link CONST#NONEXIST} if stack doesn't
+   * @return Sentence index or {@link Config#NONEXIST} if stack doesn't
    *         have an element at this index
    */
   public int getStack(int k) {
     int nStack = getStackSize();
-    return (k >= 0 && k < nStack) ? stack.get(nStack - 1 - k) : CONST.NONEXIST;
+    return (k >= 0 && k < nStack) ? stack.get(nStack - 1 - k) : Config.NONEXIST;
   }
 
   /**
    * Get the sentence index of the kth word on the buffer.
    *
-   * @return Sentence index or {@link CONST#NONEXIST} if stack doesn't
+   * @return Sentence index or {@link Config#NONEXIST} if stack doesn't
    *         have an element at this index
    */
   public int getBuffer(int k) {
-    return (k >= 0 && k < getBufferSize()) ? buffer.get(k) : CONST.NONEXIST;
+    return (k >= 0 && k < getBufferSize()) ? buffer.get(k) : Config.NONEXIST;
   }
 
   public List<CoreLabel> getCoreLabels() {
@@ -119,11 +119,11 @@ public class Configuration {
    *          begins at 1)
    */
   public String getWord(int k) {
-    if (k == 0) return CONST.ROOT;
+    if (k == 0) return Config.ROOT;
     else k--;
 
     List<CoreLabel> lbls = getCoreLabels();
-    return k < 0 || k >= lbls.size() ? CONST.NULL : lbls.get(k).word();
+    return k < 0 || k >= lbls.size() ? Config.NULL : lbls.get(k).word();
   }
 
   /**
@@ -131,11 +131,11 @@ public class Configuration {
    *          begins at 1)
    */
   public String getPOS(int k) {
-    if (k == 0) return CONST.ROOT;
+    if (k == 0) return Config.ROOT;
     else k--;
 
     List<CoreLabel> lbls = getCoreLabels();
-    return k < 0 || k >= lbls.size() ? CONST.NULL : lbls.get(k).tag();
+    return k < 0 || k >= lbls.size() ? Config.NULL : lbls.get(k).tag();
   }
 
   /**
@@ -151,14 +151,14 @@ public class Configuration {
 
   public int getLeftChild(int k, int cnt) {
     if (k < 0 || k > tree.n)
-      return CONST.NONEXIST;
+      return Config.NONEXIST;
 
     int c = 0;
     for (int i = 1; i < k; ++i)
       if (tree.getHead(i) == k)
         if ((++c) == cnt)
           return i;
-    return CONST.NONEXIST;
+    return Config.NONEXIST;
   }
 
   public int getLeftChild(int k) {
@@ -167,14 +167,14 @@ public class Configuration {
 
   public int getRightChild(int k, int cnt) {
     if (k < 0 || k > tree.n)
-      return CONST.NONEXIST;
+      return Config.NONEXIST;
 
     int c = 0;
     for (int i = tree.n; i > k; --i)
       if (tree.getHead(i) == k)
         if ((++c) == cnt)
           return i;
-    return CONST.NONEXIST;
+    return Config.NONEXIST;
   }
 
   public int getRightChild(int k) {
@@ -190,7 +190,7 @@ public class Configuration {
 
   public int getLeftValency(int k) {
     if (k < 0 || k > tree.n)
-      return CONST.NONEXIST;
+      return Config.NONEXIST;
     int cnt = 0;
     for (int i = 1; i < k; ++i)
       if (tree.getHead(i) == k)
@@ -200,7 +200,7 @@ public class Configuration {
 
   public int getRightValency(int k) {
     if (k < 0 || k > tree.n)
-      return CONST.NONEXIST;
+      return Config.NONEXIST;
     int cnt = 0;
     for (int i = k + 1; i <= tree.n; ++i)
       if (tree.getHead(i) == k)
@@ -210,7 +210,7 @@ public class Configuration {
 
   public String getLeftLabelSet(int k) {
     if (k < 0 || k > tree.n)
-      return CONST.NULL;
+      return Config.NULL;
 
     HashSet<String> labelSet = new HashSet<String>();
     for (int i = 1; i < k; ++i)
@@ -227,7 +227,7 @@ public class Configuration {
 
   public String getRightLabelSet(int k) {
     if (k < 0 || k > tree.n)
-      return CONST.NULL;
+      return Config.NULL;
 
     HashSet<String> labelSet = new HashSet<String>();
     for (int i = k + 1; i <= tree.n; ++i)

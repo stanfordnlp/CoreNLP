@@ -104,7 +104,7 @@ public abstract class ParsingSystem {
     rootLabel = labels.get(0);
     makeTransitions();
 
-    System.err.println(CONST.SEPARATOR);
+    System.err.println(Config.SEPARATOR);
     System.err.println("#Transitions: " + transitions.size());
     System.err.println("#Labels: " + labels.size());
     System.err.println("ROOTLABEL: " + rootLabel);

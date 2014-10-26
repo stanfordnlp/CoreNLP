@@ -138,7 +138,7 @@ class Util {
         if (labeled)
           tree.add(head, depType);
         else
-          tree.add(head, CONST.UNKNOWN);
+          tree.add(head, Config.UNKNOWN);
       }
     }
   }
@@ -176,7 +176,7 @@ class Util {
 
   public static void printTreeStats(String str, List<DependencyTree> trees)
   {
-    System.err.println(CONST.SEPARATOR + " " + str);
+    System.err.println(Config.SEPARATOR + " " + str);
     System.err.println("#Trees: " + trees.size());
     int nonTrees = 0;
     int nonProjective = 0;

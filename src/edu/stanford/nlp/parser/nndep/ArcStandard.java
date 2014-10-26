@@ -46,7 +46,7 @@ public class ArcStandard extends ParsingSystem {
     // For each token, add dummy elements to the configuration's tree
     // and add the words onto the buffer
     for (int i = 1; i <= length; ++i) {
-      c.tree.add(CONST.NONEXIST, CONST.UNKNOWN);
+      c.tree.add(Config.NONEXIST, Config.UNKNOWN);
       c.buffer.add(i);
     }
 
@@ -110,7 +110,7 @@ public class ArcStandard extends ParsingSystem {
   public boolean canReach(Configuration c, DependencyTree dTree) {
     int n = c.sentence.get(CoreAnnotations.TokensAnnotation.class).size();
     for (int i = 1; i <= n; ++i)
-      if (c.getHead(i) != CONST.NONEXIST && c.getHead(i) != dTree.getHead(i))
+      if (c.getHead(i) != Config.NONEXIST && c.getHead(i) != dTree.getHead(i))
         return false;
 
     boolean[] inBuffer = new boolean[n + 1];

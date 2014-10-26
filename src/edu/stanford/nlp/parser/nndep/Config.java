@@ -18,6 +18,31 @@ import java.util.Properties;
 public class Config
 {
   /**
+  *   Out-of-vocabulary toke string.
+  */
+  public static final String UNKNOWN = "-UNKNOWN-";
+
+   /**
+   *   Root token string.
+   */
+  public static final String ROOT = "-ROOT-";
+
+   /**
+   *   Non-existent token string.
+   */
+  public static final String NULL = "-NULL-";
+
+   /**
+   *   Represent a non-existent token.
+   */
+  public static final int NONEXIST = -1;
+
+   /**
+   *   For printing messages.
+   */
+  public static final String SEPARATOR = "###################";
+
+  /**
    * Number of threads to use during training. Also indirectly controls
    * how mini-batches are partitioned (more threads => more partitions
    * => smaller partitions).

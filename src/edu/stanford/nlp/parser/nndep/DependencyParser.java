@@ -108,13 +108,11 @@ public class DependencyParser {
    *         "unknown" word if the word is unknown
    */
   public int getWordID(String s) {
-    //NOTE: to use the previous trained parameters, we need to add one line
-    return wordIDs.containsKey(s) ? wordIDs.get(s) : wordIDs.get(CONST.UNKNOWN);
+    return wordIDs.containsKey(s) ? wordIDs.get(s) : wordIDs.get(Config.UNKNOWN);
   }
 
   public int getPosID(String s) {
-    //NOTE: to use the previous trained parameters, we need to add one line
-    return posIDs.containsKey(s) ? posIDs.get(s) : posIDs.get(CONST.UNKNOWN);
+    return posIDs.containsKey(s) ? posIDs.get(s) : posIDs.get(Config.UNKNOWN);
   }
 
   public int getLabelID(String s) {
@@ -180,7 +178,7 @@ public class DependencyParser {
     Dataset ret = new Dataset(config.numTokens, system.transitions.size());
 
     Counter<Integer> tokPosCount = new IntCounter<>();
-    System.err.println(CONST.SEPARATOR);
+    System.err.println(Config.SEPARATOR);
     System.err.println("Generate training examples...");
 
     for (int i = 0; i < sents.size(); ++i) {
@@ -277,18 +275,18 @@ public class DependencyParser {
     knownLabels = Util.generateDict(label);
     knownLabels.add(0, rootLabel);
 
-    knownWords.add(0, CONST.UNKNOWN);
-    knownWords.add(1, CONST.NULL);
-    knownWords.add(2, CONST.ROOT);
+    knownWords.add(0, Config.UNKNOWN);
+    knownWords.add(1, Config.NULL);
+    knownWords.add(2, Config.ROOT);
 
-    knownPos.add(0, CONST.UNKNOWN);
-    knownPos.add(1, CONST.NULL);
-    knownPos.add(2, CONST.ROOT);
+    knownPos.add(0, Config.UNKNOWN);
+    knownPos.add(1, Config.NULL);
+    knownPos.add(2, Config.ROOT);
 
-    knownLabels.add(0, CONST.NULL);
+    knownLabels.add(0, Config.NULL);
     generateIDs();
 
-    System.out.println(CONST.SEPARATOR);
+    System.out.println(Config.SEPARATOR);
     System.out.println("#Word: " + knownWords.size());
     System.out.println("#POS:" + knownPos.size());
     System.out.println("#Label: " + knownLabels.size());
@@ -402,7 +400,7 @@ public class DependencyParser {
 
   private void loadModelFile(String modelFile) {
     try {
-      System.err.println(CONST.SEPARATOR);
+      System.err.println(Config.SEPARATOR);
       System.err.println("Loading Model File: " + modelFile);
       String s;
       BufferedReader input = IOUtils.readerFromString(modelFile);
