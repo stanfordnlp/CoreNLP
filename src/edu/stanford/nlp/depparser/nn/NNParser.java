@@ -16,6 +16,7 @@ import edu.stanford.nlp.depparser.util.DependencyTree;
 import edu.stanford.nlp.depparser.util.ParsingSystem;
 
 import edu.stanford.nlp.depparser.util.Util;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
@@ -313,6 +314,7 @@ public class NNParser
 		catch (Exception e) { System.out.println(e); }
 	}
 
+  // TODO replace with GrammaticalStructure's CoNLL loader
 	public void loadModelFile(String modelFile)
 	{
 		try
@@ -320,7 +322,7 @@ public class NNParser
             System.out.println(CONST.SEPARATOR);
 			System.out.println("Loading Model File: " + modelFile);
 			String s;
-			BufferedReader input = new BufferedReader(new FileReader(modelFile));
+			BufferedReader input = IOUtils.getBufferedReaderFromClasspathOrFileSystem(modelFile);
 			
 			int nDict, nPOS, nLabel;
 			int eSize, hSize, nTokens, nPreComputed;
