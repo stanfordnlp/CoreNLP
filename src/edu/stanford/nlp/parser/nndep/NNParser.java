@@ -1,5 +1,5 @@
 
-/* 
+/*
 * 	@Author:  Danqi Chen
 * 	@Email:  danqi@cs.stanford.edu
 *	@Created:  2014-08-25
@@ -771,7 +771,15 @@ public class NNParser {
   }
 
   //TODO: support sentence-only files as input
-  public void test(String testFile, String modelFile, String outFile) {
+
+  /** Run the parser in the modelFile on a testFile and perhaps save output
+   *
+   *  @param testFile
+   *  @param modelFile
+   *  @param outFile
+   *  @return The LAS score on the dataset
+   */
+  public double test(String testFile, String modelFile, String outFile) {
     System.out.println("Test File: " + testFile);
     System.out.println("Model File: " + modelFile);
 
@@ -784,11 +792,14 @@ public class NNParser {
 
     List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(Collectors.toList());
     Map<String, Double> result = system.evaluate(testSents, predicted, testTrees);
+    double lasNoPunc = result.get("LASwoPunc");
     System.out.println("UAS = " + result.get("UASwoPunc"));
-    System.out.println("LAS = " + result.get("LASwoPunc"));
+    System.out.println("LAS = " + lasNoPunc);
 
-    if (outFile != null)
+    if (outFile != null) {
       Util.writeConllFile(outFile, testSents, predicted);
+    }
+    return lasNoPunc;
   }
 
   public void test(String testFile, String modelFile) {
