@@ -73,6 +73,9 @@ public class Configuration {
     return buffer.size();
   }
 
+  public int getSentenceSize() {
+    return getCoreLabels().size();
+  }
   /**
    * @param k Word index (zero = root node; actual word indexing
    *          begins at 1)

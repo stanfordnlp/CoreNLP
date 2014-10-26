@@ -108,7 +108,7 @@ public class ArcStandard extends ParsingSystem {
 
   // NOTE: unused. need to check the correctness again.
   public boolean canReach(Configuration c, DependencyTree dTree) {
-    int n = c.sentence.get(CoreAnnotations.TokensAnnotation.class).size();
+    int n = c.getSentenceSize();
     for (int i = 1; i <= n; ++i)
       if (c.getHead(i) != Config.NONEXIST && c.getHead(i) != dTree.getHead(i))
         return false;
