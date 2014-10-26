@@ -6,8 +6,6 @@
 * 	@Last Modified:  2014-09-30
 */
 
-package edu.stanford.nlp.depparser.nn;
-
 import java.util.*;
 
 class Example

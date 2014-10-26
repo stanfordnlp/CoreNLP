@@ -3,31 +3,14 @@
 * 	@Author:  Danqi Chen
 * 	@Email:  danqi@cs.stanford.edu
 *	@Created:  2014-08-25
-* 	@Last Modified:  2014-09-30
+* 	@Last Modified:  2014-10-05
 */
-
-package edu.stanford.nlp.depparser.nn;
-
-import edu.stanford.nlp.depparser.util.ArcStandard;
-import edu.stanford.nlp.depparser.util.CONST;
-import edu.stanford.nlp.depparser.util.Configuration;
-import edu.stanford.nlp.depparser.util.DependencyTree;
-import edu.stanford.nlp.depparser.util.IntCounter;
-import edu.stanford.nlp.depparser.util.ParsingSystem;
-import edu.stanford.nlp.depparser.util.Util;
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.CoreMap;
 
 import java.util.*;
 import java.io.*;
 
 public class NNParser 
 {
-
-  public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/depparser/nn/PTB_Stanford_params.txt.gz";
-
 	List<String> wordDict, posDict, labelDict;
 	Map<String, Integer> wordMap, posMap, labelMap;
 	Dataset trainSet;
@@ -116,11 +99,11 @@ public class NNParser
 		return feature;
 	}
 
-	public void genTrainExamples(List<CoreMap> sents, List<DependencyTree> trees)
+	public void genTrainExamples(List<Sentence> sents, List<DependencyTree> trees)
 	{
-		trainSet = new Dataset(CONST.numTokens, system.transitions.size());
+		trainSet = new Dataset(Config.numTokens, system.transitions.size());
 
-        IntCounter tokPosCount = new IntCounter();
+        Counter<Integer> tokPosCount = new Counter<Integer>();
 		System.out.println(CONST.SEPARATOR);
 		System.out.println("Generate training examples...");
 
@@ -159,7 +142,7 @@ public class NNParser
 		}
 		System.out.println("#Train Examples: " + trainSet.n);
 
-        preComputed = tokPosCount.getSortedKeys(CONST.numPreComputed);
+        preComputed = tokPosCount.getSortedKeys(Config.numPreComputed);
 	}
 
     public void genMapping()
@@ -177,20 +160,17 @@ public class NNParser
             labelMap.put(labelDict.get(i), (index++));
     }
 
-	public void genDictionaries(List<CoreMap> sents, List<DependencyTree> trees)
+	public void genDictionaries(List<Sentence> sents, List<DependencyTree> trees)
 	{
 		List<String> word = new ArrayList<String>();
 		List<String> pos = new ArrayList<String>();
-		List<String> label = new ArrayList<String>();
-
-    for (CoreMap sentence : sents) {
-      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-
-      for (CoreLabel token : tokens) {
-        word.add(token.word());
-        pos.add(token.tag());
-      }
-    }
+		List<String> label = new ArrayList<String>(); 
+		for (int i = 0; i < sents.size(); ++ i)
+			for (int k = 1; k <= sents.get(i).n; ++ k)
+			{
+				word.add(sents.get(i).getWord(k));
+				pos.add(sents.get(i).getPOS(k));
+			}
 
 		String rootLabel = null;
 		for (int i = 0; i < trees.size(); ++ i)
@@ -200,7 +180,7 @@ public class NNParser
 				else
 					label.add(trees.get(i).getLabel(k));
 
-		wordDict = Util.generateDict(word, CONST.wordCutOff);
+		wordDict = Util.generateDict(word, Config.wordCutOff);
 		posDict = Util.generateDict(pos);
 		labelDict = Util.generateDict(label);
 		labelDict.add(0, rootLabel);
@@ -311,8 +291,8 @@ public class NNParser
             System.out.println(CONST.SEPARATOR);
 			System.out.println("Loading Model File: " + modelFile);
 			String s;
-      BufferedReader input = IOUtils.getBufferedReaderFromClasspathOrFileSystem(modelFile);
-
+			BufferedReader input = new BufferedReader(new FileReader(modelFile));
+			
 			int nDict, nPOS, nLabel;
 			int eSize, hSize, nTokens, nPreComputed;
             nDict = nPOS = nLabel = eSize = hSize = nTokens = nPreComputed = 0;
@@ -429,7 +409,7 @@ public class NNParser
             int dim = splits.length - 1;
             embeddings = new double[nWords][dim];
             System.out.println("Embedding File " + embedFile + ": #Words = "  + nWords + ", dim = " + dim);
-            if (dim != CONST.embeddingSize)
+            if (dim != Config.embeddingSize)
                 System.out.println("ERROR: embedding dimension mismatch");
 
             for (int i = 0; i < lines.size(); ++ i)
@@ -443,176 +423,167 @@ public class NNParser
         catch (Exception e) { System.out.println(e); }
     }
 
-  public void train(String trainFile, String devFile, String modelFile, String embedFile) {
-    System.out.println("Train File: " + trainFile);
-    System.out.println("Dev File: " + devFile);
-    System.out.println("Model File: " + modelFile);
-    System.out.println("Embedding File: " + embedFile);
+	public void train(String trainFile, String devFile, String modelFile, String embedFile) 
+    {
+        System.out.println("Train File: " + trainFile);
+        System.out.println("Dev File: " + devFile);
+        System.out.println("Model File: " + modelFile);
+        System.out.println("Embedding File: " + embedFile);
 
-    List<CoreMap> trainSents = new ArrayList<>();
-    List<DependencyTree> trainTrees = new ArrayList<>();
-    Util.loadConllFile(trainFile, trainSents, trainTrees);
-    Util.printTreeStats("Train", trainTrees);
+        List<Sentence> trainSents = new ArrayList<Sentence>();
+        List<DependencyTree> trainTrees = new ArrayList<DependencyTree>();
+        Util.loadConllFile(trainFile, trainSents, trainTrees);
+        Util.printTreeStats("Train", trainTrees);
 
-    List<CoreMap> devSents = new ArrayList<>();
-    List<DependencyTree> devTrees = new ArrayList<>();
-    if (devFile != null) {
-      Util.loadConllFile(devFile, devSents, devTrees);
-      Util.printTreeStats("Dev", devTrees);
-    }
-    genDictionaries(trainSents, trainTrees);
+        List<Sentence> devSents = new ArrayList<Sentence>();
+        List<DependencyTree> devTrees = new ArrayList<DependencyTree>();
+        if (devFile != null) {
+            Util.loadConllFile(devFile, devSents, devTrees);
+            Util.printTreeStats("Dev", devTrees);
+        }
+        genDictionaries(trainSents, trainTrees);
 
-    initialize();
+        //NOTE: remove -NULL-, and the pass it to ParsingSystem
+        List<String> lDict = new ArrayList<String>(labelDict);
+        lDict.remove(0);
+        system = new ArcStandard(lDict);
 
-    double[][] E = new double[wordDict.size() + posDict.size() + labelDict.size()][CONST.embeddingSize];
-    double[][] W1 = new double[CONST.hiddenSize][CONST.embeddingSize * CONST.numTokens];
-    double[] b1 = new double[CONST.hiddenSize];
-    double[][] W2 = new double[labelDict.size() * 2 - 1][CONST.hiddenSize];
+        double[][] E = new double[wordDict.size() + posDict.size() + labelDict.size()][Config.embeddingSize];
+        double[][] W1 = new double[Config.hiddenSize][Config.embeddingSize * Config.numTokens];
+        double[] b1 = new double[Config.hiddenSize];
+        double[][] W2 = new double[labelDict.size() * 2 - 1][Config.hiddenSize];
 
-    Random random = new Random();
-    for (int i = 0; i < W1.length; ++i)
-      for (int j = 0; j < W1[i].length; ++j)
-        W1[i][j] = random.nextDouble() * 2 * CONST.initRange - CONST.initRange;
+        Random random = new Random();
+        for (int i = 0; i < W1.length; ++i)
+            for (int j = 0; j < W1[i].length; ++j)
+                W1[i][j] = random.nextDouble() * 2 * Config.initRange - Config.initRange;
 
-    for (int i = 0; i < b1.length; ++i)
-      b1[i] = random.nextDouble() * 2 * CONST.initRange - CONST.initRange;
+        for (int i = 0; i < b1.length; ++i)
+            b1[i] = random.nextDouble() * 2 * Config.initRange - Config.initRange;
 
-    for (int i = 0; i < W2.length; ++i)
-      for (int j = 0; j < W2[i].length; ++j)
-        W2[i][j] = random.nextDouble() * 2 * CONST.initRange - CONST.initRange;
+        for (int i = 0; i < W2.length; ++i)
+            for (int j = 0; j < W2[i].length; ++j)
+                W2[i][j] = random.nextDouble() * 2 * Config.initRange - Config.initRange;
 
-    readEmbedFile(embedFile);
-    int foundEmbed = 0;
-    for (int i = 0; i < E.length; ++i) {
-      int index = -1;
-      if (i < wordDict.size()) {
-        String str = wordDict.get(i);
-        //NOTE: exact match first, and then try lower case..
-        if (embedID.containsKey(str)) index = embedID.get(str);
-        else if (embedID.containsKey(str.toLowerCase())) index = embedID.get(str.toLowerCase());
-      }
-      if (index >= 0) {
-        ++foundEmbed;
-        for (int j = 0; j < E[i].length; ++j)
-          E[i][j] = embeddings[index][j];
-
-      } else {
-        for (int j = 0; j < E[i].length; ++j)
-          E[i][j] = random.nextDouble() * CONST.initRange * 2 - CONST.initRange;
-      }
-    }
-    System.out.println("Found embeddings: " + foundEmbed + " / " + wordDict.size());
-
-    genTrainExamples(trainSents, trainTrees);
-    classifier = new Classifier(trainSet, E, W1, b1, W2, preComputed);
-
-    //TODO: save the best intermediate parameters
-    long startTime = System.currentTimeMillis();
-    for (int iter = 0; iter < CONST.maxIter; ++iter) {
-      System.out.println("##### Iteration " + iter);
-      classifier.computeCostFunction(CONST.batchSize, CONST.regParameter, CONST.dropProb);
-      classifier.takeAdaGradientStep(CONST.adaAlpha, CONST.adaEps);
-      System.out.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
-      if (devFile != null && iter % CONST.evalPerIter == 0)
-        System.out.println("UAS: " + system.getUASScore(devSents, predict(devSents), devTrees));
-    }
-    writeModelFile(modelFile);
-  }
-
-  public void train(String trainFile, String devFile, String modelFile) {
-    train(trainFile, devFile, modelFile, null);
-  }
-
-  public void train(String trainFile, String modelFile) {
-    train(trainFile, null, modelFile);
-  }
-
-  public List<DependencyTree> predict(List<CoreMap> sents, boolean silent) {
-    if (!silent)
-      System.out.println("Prediction..");
-
-    int numTrans = system.transitions.size();
-
-    long startTime = System.currentTimeMillis();
-    List<DependencyTree> trees = new ArrayList<DependencyTree>();
-    for (int i = 0; i < sents.size(); ++i) {
-      if (!silent && i % 100 == 0)
-        System.out.println("DATA " + i);
-
-      Configuration c = system.initialConfiguration(sents.get(i));
-      for (int k = 0; k < numTransitions(sents.get(i)); ++k) {
-        double[] scores = classifier.computeScores(getFeatures(c));
-        double optScore = Double.NEGATIVE_INFINITY;
-        String optTrans = null;
-        for (int j = 0; j < numTrans; ++j)
-          if (scores[j] > optScore)
-            if (system.canApply(c, system.transitions.get(j))) {
-              optScore = scores[j];
-              optTrans = system.transitions.get(j);
+        readEmbedFile(embedFile);
+        int foundEmbed = 0;
+        for (int i = 0; i < E.length; ++i)
+        {
+            int index = -1;
+            if (i < wordDict.size())
+            {
+                String str = wordDict.get(i);
+                //NOTE: exact match first, and then try lower case..
+                if (embedID.containsKey(str)) index = embedID.get(str);
+                    else if (embedID.containsKey(str.toLowerCase())) index = embedID.get(str.toLowerCase());
             }
-        system.apply(c, optTrans);
-      }
-      trees.add(c.tree);
+            if (index >= 0)
+            {
+                ++ foundEmbed;
+                for (int j = 0; j < E[i].length; ++ j)
+                    E[i][j] = embeddings[index][j];
+
+            } else
+            {
+                for (int j = 0; j < E[i].length; ++j)
+                    E[i][j] = random.nextDouble() * Config.initRange * 2 - Config.initRange;
+            }
+        }
+        System.out.println("Found embeddings: " + foundEmbed + " / " + wordDict.size());
+
+        genTrainExamples(trainSents, trainTrees);
+        classifier = new Classifier(trainSet, E, W1, b1, W2, preComputed);
+
+        //TODO: save the best intermediate parameters
+        long startTime = System.currentTimeMillis();
+        for (int iter = 0; iter < Config.maxIter; ++ iter)
+        {
+        	System.out.println("##### Iteration " + iter);
+        	classifier.computeCostFunction(Config.batchSize, Config.regParameter, Config.dropProb);
+        	classifier.takeAdaGradientStep(Config.adaAlpha, Config.adaEps);
+     		System.out.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
+        	if (devFile != null && iter % Config.evalPerIter == 0)
+	        	System.out.println("UAS: "  + system.getUASScore(devSents, predict(devSents), devTrees));
+        }
+        writeModelFile(modelFile);
+	}
+
+    public void train(String trainFile, String devFile, String modelFile)
+    {
+        train(trainFile, devFile, modelFile, null);
     }
-    if (!silent)
-      System.out.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
-    return trees;
-  }
 
-  public List<DependencyTree> predict(List<CoreMap> sents) {
-    return predict(sents, true);
-  }
+	public void train(String trainFile, String modelFile)
+	{
+		train(trainFile, null, modelFile);
+	}
 
-  //TODO: support sentence-only files as input
-  public void test(String testFile, String modelFile, String outFile) {
-    System.out.println("Test File: " + testFile);
-    System.out.println("Model File: " + modelFile);
+	public List<DependencyTree> predict(List<Sentence> sents, boolean silent)
+	{
+        if (!silent)
+            System.out.println("Prediction..");
+		classifier.preCompute();
+        int numTrans = system.transitions.size();
 
-    loadModelFile(modelFile);
-    initialize(true);
+        long startTime = System.currentTimeMillis();
+		List<DependencyTree> trees = new ArrayList<DependencyTree>();
+		for (int i = 0; i < sents.size(); ++ i)
+		{
+            if (!silent && i % 100 == 0)
+                System.out.println("DATA " + i);
+			Configuration c = system.initialConfiguration(sents.get(i));
+			for (int k = 0; k < sents.get(i).n * 2; ++ k)
+			{
+				double[] scores = classifier.computeScores(getFeatures(c));
+                double optScore = Double.NEGATIVE_INFINITY;
+				String optTrans = null;
+				for (int j = 0; j < numTrans; ++ j)
+					if (scores[j] > optScore)
+						if (system.canApply(c, system.transitions.get(j)))
+							{
+								optScore = scores[j];
+								optTrans = system.transitions.get(j);
+							}
+				system.apply(c, optTrans);
+			}
+			trees.add(c.tree);
+		}
+        if (!silent)
+        System.out.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
+		return trees;
+	}
 
-    List<CoreMap> testSents = new ArrayList<>();
-    List<DependencyTree> testTrees = new ArrayList<DependencyTree>();
-    Util.loadConllFile(testFile, testSents, testTrees);
+    public List<DependencyTree> predict(List<Sentence> sents)
+    {
+        return predict(sents, true);
+    }
 
-    List<DependencyTree> trees = predict(testSents, false);
-    Map<String, Double> result = system.evaluate(testSents, trees, testTrees);
-    System.out.println("UAS = " + result.get("UASwoPunc"));
-    System.out.println("LAS = " + result.get("LASwoPunc"));
+    //TODO: support sentence-only files as input
+	public void test(String testFile, String modelFile, String outFile)
+    {
+		System.out.println("Test File: " + testFile);
+		System.out.println("Model File: " + modelFile);
 
-    if (outFile != null)
-      Util.writeConllFile(outFile, testSents, trees);
-  }
+        loadModelFile(modelFile);
+        List<String> lDict = new ArrayList<String>(labelDict);
+        lDict.remove(0);
+		system = new ArcStandard(lDict);
 
-  public void test(String testFile, String modelFile) {
-    test(testFile, modelFile, null);
-  }
+		List<Sentence> testSents = new ArrayList<Sentence>();       
+        List<DependencyTree> testTrees = new ArrayList<DependencyTree>();
+        Util.loadConllFile(testFile, testSents, testTrees);
 
-  /**
-   * Prepare for parsing after a model has been loaded.
-   */
-  public void initialize(boolean preCompute) {
-    if (labelDict == null)
-      throw new IllegalStateException("Model has not been loaded or trained");
+        List<DependencyTree> trees = predict(testSents, false);
+        Map<String, Double> result = system.evaluate(testSents, trees, testTrees);
+        System.out.println("UAS = " + result.get("UASwoPunc"));
+        System.out.println("LAS = " + result.get("LASwoPunc"));
 
-    //NOTE: remove -NULL-, and the pass it to ParsingSystem
-    List<String> lDict = new ArrayList<>(labelDict);
-    lDict.remove(0);
-    system = new ArcStandard(lDict);
+        if (outFile != null)
+            Util.writeConllFile(outFile, testSents, trees);
+	}
 
-    // Pre-compute matrix multiplications
-    classifier.preCompute();
-  }
-
-  public void initialize() {
-    initialize(false);
-  }
-
-  /**
-   * Determine the number of shift-reduce transitions necessary to
-   * build a dependency parse of the given sentence.
-   */
-  private static int numTransitions(CoreMap sentence) {
-    return 2 * sentence.get(CoreAnnotations.TokensAnnotation.class).size();
-  }
+    public void test(String testFile, String modelFile)
+    {
+        test(testFile, modelFile, null);
+    }
 }
