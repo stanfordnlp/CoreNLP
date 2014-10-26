@@ -381,8 +381,8 @@ public class Classifier
      * Backpropagate gradient values from gradSaved into the gradients
      * for the E vectors that generated them.
      */
-    public void backpropSaved() {
-      for (int x : preMap.keySet()) {
+    public void backpropSaved(Set<Integer> indexesSeen) {
+      for (int x : indexesSeen) {
         int mapX = preMap.get(x);
         int tok = x / config.numTokens;
         int offset = (x % config.numTokens) * config.embeddingSize;
@@ -453,7 +453,7 @@ public class Classifier
     double percentagePreComputed = toPreCompute.size() / (float) config.numPreComputed;
     System.err.printf("Percent actually necessary to pre-compute: %f%%%n", percentagePreComputed * 100);
 
-    preCompute();
+    preCompute(toPreCompute);
 
     // Set up parameters for feedforward
     FeedforwardParams params = new FeedforwardParams(regParameter, dropOutProb, W1, b1, W2, E, saved);
@@ -482,7 +482,7 @@ public class Classifier
 
     // Backpropagate gradients on saved pre-computed values to actual
     // embeddings
-    cost.backpropSaved();
+    cost.backpropSaved(toPreCompute);
 
     return cost;
   }
@@ -520,10 +520,10 @@ public class Classifier
     }
   }
 
-  public void preCompute() {
+  public void preCompute(Set<Integer> toPreCompute) {
     long startTime = System.currentTimeMillis();
     saved = new double[config.numPreComputed][config.hiddenSize];
-    for (int x : preMap.keySet()) {
+    for (int x : toPreCompute) {
       int mapX = preMap.get(x);
       int tok = x / config.numTokens;
       int pos = x % config.numTokens;
