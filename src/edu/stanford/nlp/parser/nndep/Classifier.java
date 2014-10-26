@@ -23,6 +23,15 @@ import java.util.stream.IntStream;
  * This classifier is built to accept distributed-representation
  * inputs, and feeds back errors to these input layers as it learns.
  *
+ * In order to train a classifier, instantiate this class using the
+ * {@link #Classifier(Config, Dataset, double[][], double[][], double[], double[][], java.util.List)}
+ * constructor. (The presence of a non-null dataset signals that we
+ * wish to train.) After training by alternating calls to
+ * {@link #computeCostFunction(int, double, double)} and,
+ * {@link #takeAdaGradientStep(edu.stanford.nlp.parser.nndep.Classifier.Cost, double, double)},
+ * be sure to call {@link #finalizeTraining()} in order to allow the
+ * classifier to clean up resources used during training.
+ *
  * @author Danqi Chen
  * @author Jon Gauthier
  */
@@ -54,7 +63,12 @@ public class Classifier {
    */
   private Map<Integer, Integer> smallMap;
 
-  private final boolean isTraining;
+  /**
+   * Initial training state is dependent on how the classifier is
+   * initialized. We use this flag to determine whether calls to
+   * {@link #computeCostFunction(int, double, double)}, etc. are valid.
+   */
+  private boolean isTraining;
 
   /**
    * All training examples.
@@ -518,6 +532,8 @@ public class Classifier {
    *         training
    */
   public Cost computeCostFunction(int batchSize, double regParameter, double dropOutProb) {
+    validateTraining();
+
     List<Example> examples = Util.getRandomSubList(dataset.examples, batchSize);
 
     Set<Integer> toPreCompute = getPreComputeTokens(examples);
@@ -565,7 +581,19 @@ public class Classifier {
     return cost;
   }
 
+  /**
+   * Update classifier weights using the given training cost
+   * information.
+   *
+   * @param cost Cost information as returned by
+   *             {@link #computeCostFunction(int, double, double)}.
+   * @param adaAlpha Global AdaGrad learning rate
+   * @param adaEps Epsilon value for numerical stability in AdaGrad's
+   *               division
+   */
   public void takeAdaGradientStep(Cost cost, double adaAlpha, double adaEps) {
+    validateTraining();
+
     double[][] gradW1 = cost.getGradW1(), gradW2 = cost.getGradW2(),
         gradE = cost.getGradE(), gradSaved = cost.getGradSaved();
     double[] gradb1 = cost.getGradb1();
@@ -597,6 +625,26 @@ public class Classifier {
     }
   }
 
+  private void validateTraining() {
+    if (!isTraining)
+      throw new IllegalStateException("Not training, or training was already finalized");
+  }
+
+  /**
+   * Finish training this classifier; prepare for a shutdown.
+   */
+  public void finalizeTraining() {
+    validateTraining();
+
+    // Destroy threadpool
+    jobHandler.join(true);
+
+    isTraining = false;
+  }
+
+  /**
+   * @see #preCompute(java.util.Map)
+   */
   public void preCompute() {
     preCompute(preMap);
   }

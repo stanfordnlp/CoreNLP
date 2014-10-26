@@ -631,7 +631,6 @@ public class NNParser {
     for (int iter = 0; iter < config.maxIter; ++iter) {
       System.out.println("##### Iteration " + iter);
 
-      // TODO track correct %
       Classifier.Cost cost = classifier.computeCostFunction(config.batchSize, config.regParameter, config.dropProb);
       System.out.println("Cost = " + cost.getCost() + ", Correct(%) = " + cost.getPercentCorrect());
       classifier.takeAdaGradientStep(cost, config.adaAlpha, config.adaEps);
@@ -647,6 +646,9 @@ public class NNParser {
         System.out.println("UAS: " + system.getUASScore(devSents, predicted, devTrees));
       }
     }
+
+    classifier.finalizeTraining();
+
     writeModelFile(modelFile);
   }
 
