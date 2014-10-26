@@ -8,6 +8,15 @@
 
 package edu.stanford.nlp.depparser.nn;
 
+import edu.stanford.nlp.depparser.util.ArcStandard;
+import edu.stanford.nlp.depparser.util.CONST;
+import edu.stanford.nlp.depparser.util.Configuration;
+import edu.stanford.nlp.depparser.util.DependencyTree;
+import edu.stanford.nlp.depparser.util.IntCounter;
+import edu.stanford.nlp.depparser.util.ParsingSystem;
+import edu.stanford.nlp.depparser.util.Sentence;
+import edu.stanford.nlp.depparser.util.Util;
+
 import java.util.*;
 import java.io.*;
 

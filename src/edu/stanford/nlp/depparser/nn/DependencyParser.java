@@ -8,6 +8,8 @@
 
 package edu.stanford.nlp.depparser.nn;
 
+import edu.stanford.nlp.depparser.util.CommandLineUtils;
+
 import java.util.*;
 import java.io.*;
 

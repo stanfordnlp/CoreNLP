@@ -109,7 +109,7 @@ public class Configuration
 		tree.set(t, h, l);
 	}
 
-	int getLeftChild(int k, int cnt)
+	public int getLeftChild(int k, int cnt)
 	{
 		if (k < 0 || k > tree.n) 
 			return CONST.NONEXIST;

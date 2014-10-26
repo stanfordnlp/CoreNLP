@@ -18,12 +18,12 @@ public abstract class ParsingSystem
 	public List<String> labels, transitions;
 
 	abstract void makeTransitions();
-	abstract boolean canApply(Configuration c, String t);
+	public abstract boolean canApply(Configuration c, String t);
 	//abstract boolean canApplyWithDictionary(Configuration c, String t);
-	abstract void apply(Configuration c, String t);
-	abstract String getOracle(Configuration c, DependencyTree dTree);
+	public abstract void apply(Configuration c, String t);
+	public abstract String getOracle(Configuration c, DependencyTree dTree);
 	abstract boolean isOracle(Configuration c, String t, DependencyTree dTree);
-	abstract Configuration initialConfiguration(Sentence sent);
+	public abstract Configuration initialConfiguration(Sentence sent);
 	abstract boolean isTerminal(Configuration c);
 
 

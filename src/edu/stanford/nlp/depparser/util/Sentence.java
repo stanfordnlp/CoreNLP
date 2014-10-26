@@ -11,10 +11,10 @@ package edu.stanford.nlp.depparser.util;
 import java.io.*;
 import java.util.*;
 
-class Sentence
+public class Sentence
 {
 	
-	int n;
+	public int n;
 	List<String> word, pos;
 
 	Sentence()
@@ -39,7 +39,7 @@ class Sentence
 		pos.add(t);
 	}
 
-	String getWord(int k)
+	public String getWord(int k)
 	{
 		if (k >= 0 && k <= n)
 			return word.get(k);
@@ -47,7 +47,7 @@ class Sentence
 			return CONST.NULL;
 	}
 
-	String getPOS(int k)
+	public String getPOS(int k)
 	{
 		if (k >= 0 && k <= n)
 			return pos.get(k);
