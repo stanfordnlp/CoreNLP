@@ -1,6 +1,7 @@
 package edu.stanford.nlp.parser.nndep;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
@@ -469,7 +470,7 @@ public class DependencyParser {
       for (int k = 0; k < 7; ++k) {
         s = input.readLine();
         System.err.println(s);
-        int number = Integer.parseInt(s.substring(s.indexOf("=") + 1, s.length()));
+        int number = Integer.parseInt(s.substring(s.indexOf('=') + 1));
         switch (k) {
           case 0:
             nDict = number;
@@ -556,13 +557,14 @@ public class DependencyParser {
       while (preComputed.size() < nPreComputed) {
         s = input.readLine();
         splits = s.split(" ");
-        for (int i = 0; i < splits.length; ++i)
-          preComputed.add(Integer.parseInt(splits[i]));
+        for (String split : splits) {
+          preComputed.add(Integer.parseInt(split));
+        }
       }
       input.close();
       classifier = new Classifier(config, E, W1, b1, W2, preComputed);
-    } catch (Exception e) {
-      e.printStackTrace();
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     }
   }
 
@@ -595,8 +597,8 @@ public class DependencyParser {
         for (int j = 0; j < dim; ++j)
           embeddings[i][j] = Double.parseDouble(splits[j + 1]);
       }
-    } catch (Exception e) {
-      e.printStackTrace();
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     } finally {
       IOUtils.closeIgnoringExceptions(input);
     }
