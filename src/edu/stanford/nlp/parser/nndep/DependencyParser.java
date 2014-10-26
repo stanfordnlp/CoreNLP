@@ -880,6 +880,7 @@ public class DependencyParser {
     CoreLabel sentenceLabel = new CoreLabel();
     List<CoreLabel> tokens = new ArrayList<>();
 
+    int i = 0;
     for (HasWord wd : sentence) {
       CoreLabel label;
       if (wd instanceof CoreLabel) {
@@ -898,6 +899,9 @@ public class DependencyParser {
 
         label.setTag(((HasTag) wd).tag());
       }
+
+      label.setIndex(i);
+      i++;
 
       tokens.add(label);
     }
