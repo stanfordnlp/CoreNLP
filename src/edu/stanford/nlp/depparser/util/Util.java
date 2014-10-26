@@ -64,45 +64,44 @@ public class Util
   {
     CoreLabelTokenFactory tf = new CoreLabelTokenFactory(false);
 
-    try
-    {
-      BufferedReader reader = IOUtils.getBufferedReaderFromClasspathOrFileSystem(inFile);
+    BufferedReader reader = null;
+    try {
+      reader = IOUtils.getBufferedReaderFromClasspathOrFileSystem(inFile);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
-      CoreMap sentence = new CoreLabel();
-      List<CoreLabel> sentenceTokens = new ArrayList<>();
-      sentence.set(CoreAnnotations.TokensAnnotation.class, sentenceTokens);
+    CoreMap sentence = new CoreLabel();
+    List<CoreLabel> sentenceTokens = new ArrayList<>();
+    sentence.set(CoreAnnotations.TokensAnnotation.class, sentenceTokens);
 
-      DependencyTree tree = new DependencyTree();
+    DependencyTree tree = new DependencyTree();
 
-      for (String line : IOUtils.getLineIterable(reader, false))
-      {
-        String[] splits = line.split("\t");
-        if (splits.length < 10)
-        {
-          trees.add(tree);
-          sents.add(sentence);
-          tree = new DependencyTree();
+    for (String line : IOUtils.getLineIterable(reader, false)) {
+      String[] splits = line.split("\t");
+      if (splits.length < 10) {
+        trees.add(tree);
+        sents.add(sentence);
+        tree = new DependencyTree();
 
-          sentence = new CoreLabel();
-        } else {
-          String word = splits[1],
-              pos = splits[4],
-              depType = splits[7];
-          int head = Integer.parseInt(splits[6]);
+        sentence = new CoreLabel();
+      } else {
+        String word = splits[1],
+            pos = splits[4],
+            depType = splits[7];
+        int head = Integer.parseInt(splits[6]);
 
-          CoreLabel token = tf.makeToken(word, 0, 0);
-          token.setTag(pos);
-          token.set(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, head);
-          token.set(CoreAnnotations.CoNLLDepTypeAnnotation.class, depType);
+        CoreLabel token = tf.makeToken(word, 0, 0);
+        token.setTag(pos);
+        token.set(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, head);
+        token.set(CoreAnnotations.CoNLLDepTypeAnnotation.class, depType);
 
-          if (labeled)
-            tree.add(head, depType);
-          else
-            tree.add(head, CONST.UNKNOWN);
-        }
+        if (labeled)
+          tree.add(head, depType);
+        else
+          tree.add(head, CONST.UNKNOWN);
       }
     }
-    catch (Exception e) { System.out.println(e); };
   }
 
   public static void loadConllFile(String inFile, List<CoreMap> sents, List<DependencyTree> trees)
