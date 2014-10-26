@@ -275,7 +275,7 @@ public class Classifier
           gradE[i][j] += reg * E[i][j];
         }
 
-      return new Cost(cost, gradW1, gradb1, gradW2, gradE, gradSaved);
+      return new Cost(cost, correct, gradW1, gradb1, gradW2, gradE, gradSaved);
     }
 
     /**
@@ -359,6 +359,9 @@ public class Classifier
 
     private double cost;
 
+    // Percent of training examples predicted correctly
+    private double percentCorrect;
+
     // Weight deltas
     private final double[][] gradW1;
     private final double[] gradb1;
@@ -366,9 +369,11 @@ public class Classifier
     private final double[][] gradE;
     private final double[][] gradSaved;
 
-    private Cost(double cost, double[][] gradW1, double[] gradb1, double[][] gradW2, double[][] gradE,
-                 double[][] gradSaved) {
+    private Cost(double cost, double percentCorrect, double[][] gradW1, double[] gradb1, double[][] gradW2,
+                 double[][] gradE, double[][] gradSaved) {
       this.cost = cost;
+      this.percentCorrect = percentCorrect;
+
       this.gradW1 = gradW1;
       this.gradb1 = gradb1;
       this.gradW2 = gradW2;
@@ -394,6 +399,10 @@ public class Classifier
 
     public double getCost() {
       return cost;
+    }
+
+    public double getPercentCorrect() {
+      return percentCorrect;
     }
 
     public double[][] getGradW1() {

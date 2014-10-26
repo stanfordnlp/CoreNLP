@@ -534,7 +534,7 @@ public class NNParser
 
           // TODO track correct %
         	Classifier.Cost cost = classifier.computeCostFunction(Config.batchSize, Config.regParameter, Config.dropProb);
-          System.out.println("Cost = " + cost.getCost() + ", Correct(%) = " + 0);
+          System.out.println("Cost = " + cost.getCost() + ", Correct(%) = " + cost.getPercentCorrect());
           classifier.takeAdaGradientStep(cost, Config.adaAlpha, Config.adaEps);
 
           System.out.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
