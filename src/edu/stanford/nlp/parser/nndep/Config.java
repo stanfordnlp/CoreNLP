@@ -10,7 +10,7 @@ import java.util.Properties;
  * Defines configuration settings for training and testing the
  * neural-network dependency parser.
  *
- * @see edu.stanford.nlp.parser.nndep.NNParser
+ * @see DependencyParser
  *
  * @author Danqi Chen
  * @author Jon Gauthier

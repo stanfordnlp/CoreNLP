@@ -1,6 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.parser.nndep.NNParser;
+import edu.stanford.nlp.parser.nndep.DependencyParser;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
@@ -22,7 +22,7 @@ import java.util.Set;
  */
 public class DependencyParseAnnotator extends SentenceAnnotator {
 
-  private final NNParser parser;
+  private final DependencyParser parser;
 
   private final int nThreads;
   private static final int DEFAULT_NTHREADS = 1;
@@ -38,8 +38,8 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
   }
 
   public DependencyParseAnnotator(Properties properties) {
-    String modelPath = PropertiesUtils.getString(properties, "modelFile", NNParser.DEFAULT_MODEL);
-    parser = NNParser.loadFromModelFile(modelPath, properties);
+    String modelPath = PropertiesUtils.getString(properties, "modelFile", DependencyParser.DEFAULT_MODEL);
+    parser = DependencyParser.loadFromModelFile(modelPath, properties);
     parser.initialize();
 
     nThreads = PropertiesUtils.getInt(properties, "testThreads", DEFAULT_NTHREADS);

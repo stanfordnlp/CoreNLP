@@ -64,7 +64,7 @@ import java.util.stream.Collectors;
  * @author Danqi Chen
  * @author Jon Gauthier
  */
-public class NNParser {
+public class DependencyParser {
   public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/PTB_Stanford_params.txt.gz";
 
   /**
@@ -98,11 +98,11 @@ public class NNParser {
 
   private final Config config;
 
-  NNParser() {
+  DependencyParser() {
     this(new Properties());
   }
 
-  public NNParser(Properties properties) {
+  public DependencyParser(Properties properties) {
     config = new Config(properties);
   }
 
@@ -385,7 +385,7 @@ public class NNParser {
    *
    * @see #loadFromModelFile(String, java.util.Properties)
    */
-  public static NNParser loadFromModelFile(String modelFile) {
+  public static DependencyParser loadFromModelFile(String modelFile) {
     return loadFromModelFile(modelFile, null);
   }
 
@@ -397,8 +397,8 @@ public class NNParser {
    *
    * @return Loaded and initialized (see {@link #initialize()} model
    */
-  public static NNParser loadFromModelFile(String modelFile, Properties extraProperties) {
-    NNParser parser = extraProperties == null ? new NNParser() : new NNParser(extraProperties);
+  public static DependencyParser loadFromModelFile(String modelFile, Properties extraProperties) {
+    DependencyParser parser = extraProperties == null ? new DependencyParser() : new DependencyParser(extraProperties);
     parser.loadModelFile(modelFile);
     parser.initialize();
     return parser;
@@ -830,7 +830,7 @@ public class NNParser {
   public static void main(String[] args) {
     Properties props = StringUtils.argsToProperties(args);
 
-    NNParser parser = new NNParser(props);
+    DependencyParser parser = new DependencyParser(props);
 
     if (props.containsKey("trainFile"))
       parser.train(props.getProperty("trainFile"), props.getProperty("devFile"), props.getProperty("model"),
