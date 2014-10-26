@@ -439,7 +439,7 @@ public class Classifier
     // Submit chunks for processing on separate threads
     for (Collection<Example> chunk : chunks)
       jobHandler.put(new Pair<>(chunk, params));
-    jobHandler.join();
+    jobHandler.join(false);
 
     // Join costs from each chunk
     Cost cost = null;
