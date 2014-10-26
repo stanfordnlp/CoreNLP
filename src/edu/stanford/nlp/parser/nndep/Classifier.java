@@ -552,11 +552,15 @@ public class Classifier
         .currentTimeMillis() - startTime) / 1000.0 + " (s)");
   }
 
+  public double[] computeScores(List<Integer> feature) {
+    return computeScores(feature, preMap);
+  }
+
   /**
    * Feed a feature vector forward through the network. Returns the
    * values of the output layer.
    */
-  public double[] computeScores(List<Integer> feature) {
+  public double[] computeScores(List<Integer> feature, Map<Integer, Integer> preMap) {
     double[] scores = new double[numLabels];
     double[] hidden = new double[config.hiddenSize];
     int offset = 0;
