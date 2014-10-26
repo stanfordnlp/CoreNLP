@@ -8,8 +8,13 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
+import edu.stanford.nlp.trees.EnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.GrammaticalRelation;
+import edu.stanford.nlp.trees.GrammaticalStructure;
+import edu.stanford.nlp.trees.GrammaticalStructureFromDependenciesFactory;
+import edu.stanford.nlp.trees.TreeGraphNode;
 import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.util.CoreMap;
 
@@ -89,8 +94,19 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
       dependencies.add(new TypedDependency(relation, headWord, thisWord));
     }
 
-    SemanticGraph deps = new SemanticGraph(dependencies);
-    sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, deps);
+    // Build GrammaticalStructure
+    // TODO ideally submodule should just return GrammaticalStructure
+    GrammaticalStructureFromDependenciesFactory gsf = new EnglishGrammaticalStructure.FromDependenciesFactory();
+    TreeGraphNode rootNode = new TreeGraphNode(new Word("ROOT-" + (tokens.size() + 1)));
+    GrammaticalStructure gs = gsf.build(dependencies, rootNode);
+
+    SemanticGraph deps = SemanticGraphFactory.generateCollapsedDependencies(gs),
+        uncollapsedDeps = SemanticGraphFactory.generateUncollapsedDependencies(gs),
+        ccDeps = SemanticGraphFactory.generateCCProcessedDependencies(gs);
+
+    sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
+    sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
+    sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
   }
 
   @Override
