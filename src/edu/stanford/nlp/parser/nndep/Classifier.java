@@ -384,6 +384,7 @@ public class Classifier {
      */
     public void merge(Cost otherCost) {
       this.cost += otherCost.getCost();
+      this.percentCorrect += otherCost.getPercentCorrect();
 
       addInPlace(gradW1, otherCost.getGradW1());
       addInPlace(gradb1, otherCost.getGradb1());
