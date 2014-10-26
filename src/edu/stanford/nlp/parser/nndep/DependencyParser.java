@@ -546,16 +546,6 @@ public class DependencyParser {
   }
 
   /**
-   * Determine the number of shift-reduce transitions necessary to
-   * build a dependency parse of the given sentence.
-   */
-
-  // TODO: this should depend on the parsing system
-  private static int numTransitions(CoreMap sentence) {
-    return 2 * sentence.get(CoreAnnotations.TokensAnnotation.class).size();
-  }
-
-  /**
    * Train a new dependency parser model.
    *
    * @param trainFile Training data
@@ -706,7 +696,7 @@ public class DependencyParser {
     int numTrans = system.transitions.size();
 
     Configuration c = system.initialConfiguration(sentence);
-    for (int k = 0; k < numTransitions(sentence); ++k) {
+    while (!system.isTerminal(c)) {
       double[] scores = classifier.computeScores(getFeatures(c));
 
       double optScore = Double.NEGATIVE_INFINITY;
@@ -718,10 +708,8 @@ public class DependencyParser {
           optTrans = system.transitions.get(j);
         }
       }
-
       system.apply(c, optTrans);
     }
-
     return c.tree;
   }
 
