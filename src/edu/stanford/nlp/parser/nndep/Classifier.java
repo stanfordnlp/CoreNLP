@@ -48,7 +48,7 @@ public class Classifier {
 
   // Gradient histories
   private final double[][] eg2W1, eg2W2, eg2E;
-  double[] eg2b1;
+  private final double[] eg2b1;
 
   /**
    * Pre-computed hidden layer unit activations. Each double array
@@ -654,7 +654,7 @@ public class Classifier {
    * Feed a feature vector forward through the network. Returns the
    * values of the output layer.
    */
-  public double[] computeScores(List<Integer> feature, Map<Integer, Integer> preMap) {
+  private double[] computeScores(List<Integer> feature, Map<Integer, Integer> preMap) {
     double[] scores = new double[numLabels];
     double[] hidden = new double[config.hiddenSize];
     int offset = 0;
@@ -675,7 +675,7 @@ public class Classifier {
 
     for (int i = 0; i < config.hiddenSize; ++i) {
       hidden[i] += b1[i];
-      hidden[i] = hidden[i] * hidden[i] * hidden[i];
+      hidden[i] = hidden[i] * hidden[i] * hidden[i];  // cube nonlinearity
     }
 
     for (int i = 0; i < numLabels; ++i)
