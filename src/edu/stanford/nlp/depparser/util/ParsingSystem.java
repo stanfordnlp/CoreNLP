@@ -108,7 +108,7 @@ public abstract class ParsingSystem
 						++ correctArcs;
 				}
 				++ sumArcs;
-				if (!pPunct.matcher(tokens.get(j).tag()).matches())
+				if (!pPunct.matcher(tokens.get(j - 1).tag()).matches())
 				{
 					++ sumArcsWoPunc;
 					++ nonPunc;
