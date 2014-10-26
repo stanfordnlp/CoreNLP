@@ -398,7 +398,6 @@ public class DependencyParser {
     return parser;
   }
 
-  // TODO replace with GrammaticalStructure's CoNLL loader
   private void loadModelFile(String modelFile) {
     try {
       System.err.println(CONST.SEPARATOR);
