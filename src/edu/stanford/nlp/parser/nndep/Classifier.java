@@ -14,6 +14,7 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,8 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
-public class Classifier 
-{
+public class Classifier implements Serializable {
   // E: numFeatures x embeddingSize
   // W1: hiddenSize x (embeddingSize x numFeatures)
   // b1: hiddenSize
@@ -40,7 +40,7 @@ public class Classifier
   double[] eg2b1;
 
   // Pre-computed hidden unit activations
-  private double[][] saved;
+  private transient double[][] saved;
 
   /**
    * TODO document
@@ -58,7 +58,7 @@ public class Classifier
   /**
    * All training examples.
    */
-  private final Dataset dataset;
+  private transient final Dataset dataset;
 
   /**
    * We use MulticoreWrapper to parallelize mini-batch training.
@@ -68,7 +68,7 @@ public class Classifier
    * Threaded job output: cost value, weight gradients for partition of
    *   minibatch
    */
-  private final MulticoreWrapper<Pair<Collection<Example>, FeedforwardParams>, Cost> jobHandler;
+  private transient final MulticoreWrapper<Pair<Collection<Example>, FeedforwardParams>, Cost> jobHandler;
 
   private final Config config;
 
