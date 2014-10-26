@@ -11,6 +11,12 @@ package edu.stanford.nlp.parser.nndep;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Defines a list of training / testing examples in multi-class classification setting.
+ *
+ * @author Danqi Chen
+ */
+
 public class Dataset {
 
   int n;

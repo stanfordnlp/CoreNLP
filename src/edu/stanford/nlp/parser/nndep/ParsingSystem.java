@@ -51,8 +51,6 @@ public abstract class ParsingSystem {
    */
   public abstract boolean canApply(Configuration c, String t);
 
-  //abstract boolean canApplyWithDictionary(Configuration c, String t);
-
   /**
    * Apply the given transition to the given configuration, modifying
    * the configuration's state in place.

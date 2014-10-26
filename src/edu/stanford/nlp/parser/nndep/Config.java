@@ -18,7 +18,7 @@ import java.util.Properties;
 public class Config
 {
   /**
-  *   Out-of-vocabulary toke string.
+  *   Out-of-vocabulary token string.
   */
   public static final String UNKNOWN = "-UNKNOWN-";
 
@@ -111,7 +111,7 @@ public class Config
    * Total number of tokens provided as input to the classifier. (Each
    * token is provided in word embedding form.)
    */
-  // TODO we can figure this out automatically based on features used.
+  // TODO: we can figure this out automatically based on features used.
   // Should remove this option once we make feature templates / dynamic features
   public final int numTokens = 48;
 

@@ -17,9 +17,17 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.util.CoreMap;
-
 import java.util.*;
 import java.io.*;
+
+
+/**
+ *
+ *  Some utility functions
+ *
+ *  @author Danqi Chen
+ *  @author Jon Gauthier
+ */
 
 class Util {
 
