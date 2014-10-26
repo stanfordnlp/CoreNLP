@@ -8,7 +8,6 @@
 
 package edu.stanford.nlp.parser.nndep;
 
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -31,27 +30,19 @@ import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.TreeGraphNode;
 import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.PropertiesUtils;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
+import java.io.*;
 import java.util.stream.Collectors;
 
-public class NNParser implements Serializable {
+public class NNParser 
+{
   public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/PTB_Stanford_params.txt.gz";
 
 	List<String> wordDict, posDict, labelDict;
 	Map<String, Integer> wordMap, posMap, labelMap;
-	transient Dataset trainSet;
+	Dataset trainSet;
 
     List<Integer> preComputed;
 
@@ -252,14 +243,6 @@ public class NNParser implements Serializable {
 		System.out.println("#POS:" + posDict.size());
 		System.out.println("#Label: " + labelDict.size());
 	}
-
-  public void saveModel(String path) {
-    try {
-      IOUtils.writeObjectToFile(this, path);
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    }
-  }
 
 	public void writeModelFile(String modelFile)
 	{
