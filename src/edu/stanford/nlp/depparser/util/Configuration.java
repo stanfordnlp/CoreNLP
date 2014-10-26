@@ -98,18 +98,22 @@ public class Configuration
 		return (k >= 0 && k < getBufferSize()) ? buffer.get(k) : CONST.NONEXIST; 
 	}
 
+  public List<CoreLabel> getCoreLabels() {
+    return sentence.get(CoreAnnotations.TokensAnnotation.class);
+  }
+
   public CoreLabel getCoreLabel(int k) {
-    return sentence.get(CoreAnnotations.TokensAnnotation.class).get(k);
+    return getCoreLabels().get(k);
   }
 
 	public String getWord(int k)
 	{
-		return k < 0 ? CONST.NULL : getCoreLabel(k).word();
+		return k < 0 || k >= getCoreLabels().size() ? CONST.NULL : getCoreLabel(k).word();
 	}
 
 	public String getPOS(int k)
 	{
-		return k < 0 ? CONST.NULL : getCoreLabel(k).tag();
+		return k < 0 || k >= getCoreLabels().size() ? CONST.NULL : getCoreLabel(k).tag();
 	}
 
 	public void addArc(int h, int t, String l)
