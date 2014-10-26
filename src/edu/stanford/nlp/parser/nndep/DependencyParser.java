@@ -10,7 +10,6 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.DocumentPreprocessor;
-import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.IntCounter;
@@ -27,10 +26,10 @@ import edu.stanford.nlp.util.Timing;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -943,7 +942,12 @@ public class DependencyParser {
     int numSentences = 0;
     for (List<TaggedWord> taggedSentence : tagged) {
       GrammaticalStructure parse = predict(taggedSentence);
-      output.println(parse);
+
+      Collection<TypedDependency> deps = parse.typedDependencies();
+      for (TypedDependency dep : deps)
+        output.println(dep);
+      output.println();
+
       numSentences++;
     }
 
