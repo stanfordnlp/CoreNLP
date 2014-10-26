@@ -88,7 +88,7 @@ public class Config
    */
   // TODO we can figure this out automatically based on features used.
   // Should remove this option once we make feature templates / dynamic features
-  public int numTokens = 48;
+  public final int numTokens = 48;
 
   /**
    * Number of input tokens for which we should compute hidden-layer
