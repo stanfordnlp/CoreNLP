@@ -45,16 +45,21 @@ import static java.util.stream.Collectors.toList;
  * representations of words, their part of speech tags, and the labels
  * which connect words in a partial dependency parse.
  *
+ * <p>
  * This is an implementation of the method described in
  *
+ * <blockquote>
  *   Danqi Chen and Christopher Manning. A Fast and Accurate Dependency
  *   Parser Using Neural Networks. In EMNLP 2014.
+ * </blockquote>
  *
+ * <p>
  * New models can be trained from the command line; see {@link #main}
  * for details on training options. This parser will also output
  * CoNLL-X format predictions; again see {@link #main} for available
  * options.
  *
+ * <p>
  * This parser can also be used programmatically. The easiest way to
  * prepare the parser with a pre-trained model is to call
  * {@link #loadFromModelFile(String)}. Then call
@@ -988,9 +993,11 @@ public class DependencyParser {
   /**
    * A main program for training, testing and using the parser.
    *
+   * <p>
    * You can use this program to train new parsers from treebank data,
    * evaluate on test treebank data, or parse raw text input.
    *
+   * <p>
    * Sample usages:
    * <ul>
    *   <li>
@@ -1007,6 +1014,7 @@ public class DependencyParser {
    *   </li>
    * </ul>
    *
+   * <p>
    * See below for more information on all of these training / test options and more.
    *
    * Input / output options:
@@ -1018,7 +1026,6 @@ public class DependencyParser {
    *   <tr><td><tt>&#8209;parseFile</tt></td><td>No</td><td>Yes (or <tt>testFile</tt>)</td><td>Path to a plaintext file containing sentences to be parsed.</td></tr>
    *   <tr><td><tt>&#8209;testFile</tt></td><td>No</td><td>Yes (or <tt>parseFile</tt>)</td><td>Path to a test-set treebank in <a href="http://ilk.uvt.nl/conll/#dataformat">CoNLL-X format</a> for final evaluation of the parser.</td></tr>
    *   <tr><td><tt>&#8209;trainFile</tt></td><td>Yes</td><td>No</td><td>Path to a training treebank in <a href="http://ilk.uvt.nl/conll/#dataformat">CoNLL-X format</a></td></tr>
-   *   <tr><td><tt>&#8209;</tt></td><td></td><td></td><td></td></tr>
    * </table>
    *
    * Training options:
