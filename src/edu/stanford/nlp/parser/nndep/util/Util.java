@@ -12,6 +12,9 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.util.CoreMap;
 
 import java.util.*;
@@ -22,19 +25,27 @@ public class Util
 	public static Random random = new Random();
 
 	// return strings sorted by frequency, and filter out those with freq. less than cutOff.
-	public static List<String> generateDict(List<String> str, int cutOff)
+
+  /**
+   * Build a dictionary of words collected from a corpus.
+   * <p>
+   * Filters out words with a frequency below the given {@code cutOff}.
+   *
+   * @return Words sorted by decreasing frequency, filtered to remove
+   *         any words with a frequency below {@code cutOff}
+   */
+  public static List<String> generateDict(List<String> str, int cutOff)
 	{
-		Counter<String> freq = new Counter<String>();
-		for (int i = 0; i < str.size(); ++ i) 
-			freq.add(str.get(i));
-		
-		List<String> keys = freq.getSortedKeys();
-		List<String> dict = new ArrayList<String>();
-		for (int i = 0; i < keys.size(); ++ i)
-		{
-			String s = keys.get(i);
-			if (freq.getCount(s) >= cutOff) dict.add(s);
-		}
+		Counter<String> freq = new IntCounter<>();
+    for (String aStr : str)
+      freq.incrementCount(aStr);
+
+		List<String> keys = Counters.toSortedList(freq, false);
+		List<String> dict = new ArrayList<>();
+    for (String word : keys) {
+      if (freq.getCount(word) >= cutOff)
+        dict.add(word);
+    }
 		return dict;
 	}
 

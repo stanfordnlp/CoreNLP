@@ -18,10 +18,12 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.nndep.util.ArcStandard;
 import edu.stanford.nlp.parser.nndep.util.CONST;
 import edu.stanford.nlp.parser.nndep.util.Configuration;
-import edu.stanford.nlp.parser.nndep.util.Counter;
 import edu.stanford.nlp.parser.nndep.util.DependencyTree;
 import edu.stanford.nlp.parser.nndep.util.ParsingSystem;
 import edu.stanford.nlp.parser.nndep.util.Util;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.trees.EnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.GrammaticalStructure;
@@ -147,7 +149,7 @@ public class NNParser
 	{
 		trainSet = new Dataset(config.numTokens, system.transitions.size());
 
-        Counter<Integer> tokPosCount = new Counter<Integer>();
+    Counter<Integer> tokPosCount = new IntCounter<>();
 		System.out.println(CONST.SEPARATOR);
 		System.out.println("Generate training examples...");
 
@@ -179,14 +181,15 @@ public class NNParser
 					}
 					trainSet.addExample(feature, label);
                     for (int j = 0; j < feature.size(); ++ j)
-                        tokPosCount.add(feature.get(j) * feature.size() + j);
+                      tokPosCount.incrementCount(feature.get(j) * feature.size() + j);
 					system.apply(c, oracle);
 				}
 			}
 		}
 		System.out.println("#Train Examples: " + trainSet.n);
 
-        preComputed = tokPosCount.getSortedKeys(config.numPreComputed);
+    Counters.retainTop(tokPosCount, config.numPreComputed);
+    preComputed = new ArrayList<>(tokPosCount.keySet());
 	}
 
     public void genMapping()
