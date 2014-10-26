@@ -847,15 +847,15 @@ public class DependencyParser {
     double lasNoPunc = result.get("LASwoPunc");
     System.err.printf("UAS = %.4f%n", result.get("UASwoPunc"));
     System.err.printf("LAS = %.4f%n", lasNoPunc);
-
-    if (outFile != null) {
-      Util.writeConllFile(outFile, testSents, predicted);
-    }
     long millis = timer.stop();
     double wordspersec = numWords / (((double) millis) / 1000);
     double sentspersec = numSentences / (((double) millis) / 1000);
     System.err.printf("%s tagged %d words in %d sentences in %.1fs at %.1f w/s, %.1f sent/s.%n",
             StringUtils.getShortClassName(this), numWords, numSentences, millis / 1000.0, wordspersec, sentspersec);
+
+    if (outFile != null) {
+        Util.writeConllFile(outFile, testSents, predicted);
+    }
     return lasNoPunc;
   }
 
