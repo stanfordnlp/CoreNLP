@@ -35,6 +35,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -182,7 +183,7 @@ public class NNParser {
       fLabel.add(getLabelID(c.getLabel(index)));
     }
 
-    List<Integer> feature = new ArrayList<Integer>(fWord);
+    List<Integer> feature = new ArrayList<>(fWord);
     feature.addAll(fPos);
     feature.addAll(fLabel);
     return feature;
@@ -209,7 +210,7 @@ public class NNParser {
         for (int k = 0; k < trees.get(i).n * 2; ++k) {
           String oracle = system.getOracle(c, trees.get(i));
           List<Integer> feature = getFeatures(c);
-          List<Integer> label = new ArrayList<Integer>();
+          List<Integer> label = new ArrayList<>();
           for (int j = 0; j < system.transitions.size(); ++j) {
             String str = system.transitions.get(j);
             if (str.equals(oracle)) label.add(1);
@@ -259,7 +260,7 @@ public class NNParser {
    * dependency relation labels observed. Prepare other structures
    * which support word / POS / label lookup at train- / run-time.
    */
-  public void genDictionaries(List<CoreMap> sents, List<DependencyTree> trees) {
+  private void genDictionaries(List<CoreMap> sents, List<DependencyTree> trees) {
     // Collect all words (!), etc. in lists, tacking on one sentence
     // after the other
     List<String> word = new ArrayList<>();
@@ -324,27 +325,31 @@ public class NNParser {
       output.write("preComputed=" + preComputed.size() + "\n");
 
       int index = 0;
-      for (int i = 0; i < knownWords.size(); ++i) {
-        output.write(knownWords.get(i));
+
+      // First write word / POS / label embeddings
+      for (String word : knownWords) {
+        output.write(word);
         for (int k = 0; k < E[index].length; ++k)
           output.write(" " + E[index][k]);
         output.write("\n");
         index = index + 1;
       }
-      for (int i = 0; i < knownPos.size(); ++i) {
-        output.write(knownPos.get(i));
+      for (String pos : knownPos) {
+        output.write(pos);
         for (int k = 0; k < E[index].length; ++k)
           output.write(" " + E[index][k]);
         output.write("\n");
         index = index + 1;
       }
-      for (int i = 0; i < knownLabels.size(); ++i) {
-        output.write(knownLabels.get(i));
+      for (String label : knownLabels) {
+        output.write(label);
         for (int k = 0; k < E[index].length; ++k)
           output.write(" " + E[index][k]);
         output.write("\n");
         index = index + 1;
       }
+
+      // Now write classifier weights
       for (int j = 0; j < W1[0].length; ++j)
         for (int i = 0; i < W1.length; ++i) {
           output.write("" + W1[i][j]);
@@ -368,6 +373,8 @@ public class NNParser {
           else
             output.write(" ");
         }
+
+      // Finish with pre-computation info
       for (int i = 0; i < preComputed.size(); ++i) {
         output.write("" + preComputed.get(i));
         if ((i + 1) % 100 == 0 || i == preComputed.size() - 1)
@@ -375,8 +382,9 @@ public class NNParser {
         else
           output.write(" ");
       }
+
       output.close();
-    } catch (Exception e) {
+    } catch (IOException e) {
       System.out.println(e);
     }
   }
@@ -510,7 +518,7 @@ public class NNParser {
     }
   }
 
-  public void readEmbedFile(String embedFile) {
+  private void readEmbedFile(String embedFile) {
     embedID = new HashMap<String, Integer>();
     if (embedFile == null)
       return;
@@ -542,6 +550,16 @@ public class NNParser {
     }
   }
 
+  /**
+   * Train a new dependency parser model.
+   *
+   * @param trainFile Training data
+   * @param devFile Development data (used for regular UAS evaluation
+   *                of model)
+   * @param modelFile String to which model should be saved
+   * @param embedFile File containing word embeddings for words used in
+   *                  training corpus
+   */
   public void train(String trainFile, String devFile, String modelFile, String embedFile) {
     System.out.println("Train File: " + trainFile);
     System.out.println("Dev File: " + devFile);
@@ -794,7 +812,8 @@ public class NNParser {
   }
 
   /**
-   * Determine the number of shift-reduce transitions necessary to build a dependency parse of the given sentence.
+   * Determine the number of shift-reduce transitions necessary to
+   * build a dependency parse of the given sentence.
    */
   private static int numTransitions(CoreMap sentence) {
     return 2 * sentence.get(CoreAnnotations.TokensAnnotation.class).size();
