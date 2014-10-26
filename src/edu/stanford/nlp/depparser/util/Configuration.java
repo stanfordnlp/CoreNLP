@@ -102,18 +102,22 @@ public class Configuration
     return sentence.get(CoreAnnotations.TokensAnnotation.class);
   }
 
-  public CoreLabel getCoreLabel(int k) {
-    return getCoreLabels().get(k);
-  }
-
 	public String getWord(int k)
 	{
-		return k < 0 || k >= getCoreLabels().size() ? CONST.NULL : getCoreLabel(k).word();
+    if (k == 0) return CONST.ROOT;
+    else k--;
+
+    List<CoreLabel> lbls = getCoreLabels();
+		return k < 0 || k >= lbls.size() ? CONST.NULL : lbls.get(k).word();
 	}
 
 	public String getPOS(int k)
 	{
-		return k < 0 || k >= getCoreLabels().size() ? CONST.NULL : getCoreLabel(k).tag();
+    if (k == 0) return CONST.ROOT;
+    else k--;
+
+    List<CoreLabel> lbls = getCoreLabels();
+		return k < 0 || k >= lbls.size() ? CONST.NULL : lbls.get(k).tag();
 	}
 
 	public void addArc(int h, int t, String l)
