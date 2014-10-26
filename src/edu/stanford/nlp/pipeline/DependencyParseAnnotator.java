@@ -81,7 +81,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
     List<TypedDependency> dependencies = new ArrayList<>();
     DependencyTree result = results.get(0);
 
-    IndexedWord root = new IndexedWord(new Word("ROOT"));
+    IndexedWord root = new IndexedWord(new Word("ROOT-" + (tokens.size() + 1)));
     for (int i = 1; i < result.n; i++) {
       int head = result.getHead(i);
       String label = result.getLabel(i);
@@ -97,7 +97,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
     // Build GrammaticalStructure
     // TODO ideally submodule should just return GrammaticalStructure
     GrammaticalStructureFromDependenciesFactory gsf = new EnglishGrammaticalStructure.FromDependenciesFactory();
-    TreeGraphNode rootNode = new TreeGraphNode(new Word("ROOT-" + (tokens.size() + 1)));
+    TreeGraphNode rootNode = new TreeGraphNode(root);
     GrammaticalStructure gs = gsf.build(dependencies, rootNode);
 
     SemanticGraph deps = SemanticGraphFactory.generateCollapsedDependencies(gs),
