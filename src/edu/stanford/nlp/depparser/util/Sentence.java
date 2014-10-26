@@ -17,7 +17,7 @@ public class Sentence
 	public int n;
 	List<String> word, pos;
 
-	Sentence()
+	public Sentence()
 	{
 		n = 0;
 		word = new ArrayList<String>();
@@ -32,7 +32,7 @@ public class Sentence
 		pos = new ArrayList<String>(sentence.pos);
 	}
 
-	void add(String w, String t)
+	public void add(String w, String t)
 	{
 		++ n; 
 		word.add(w); 

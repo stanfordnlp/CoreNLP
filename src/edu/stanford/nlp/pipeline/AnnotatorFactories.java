@@ -515,4 +515,21 @@ public class AnnotatorFactories {
     };
   }
 
+  //
+  // Dependency parsing
+  //
+  public static AnnotatorFactory dependencies(Properties properties, final AnnotatorImplementations annotatorImpl) {
+    return new AnnotatorFactory(properties, annotatorImpl) {
+      @Override
+      public Annotator create() {
+        return annotatorImpl.dependencies(properties);
+      }
+
+      @Override
+      protected String additionalSignature() {
+        return "";
+      }
+    };
+  }
+
 }

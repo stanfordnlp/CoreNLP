@@ -22,6 +22,9 @@ import java.io.*;
 
 public class NNParser 
 {
+
+  public static final String DEFAULT_MODEL = "edu/stanford/nlp/depparser/nn/english.txt";
+
 	List<String> wordDict, posDict, labelDict;
 	Map<String, Integer> wordMap, posMap, labelMap;
 	Dataset trainSet;
