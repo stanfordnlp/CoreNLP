@@ -48,6 +48,12 @@ public class Classifier
   private final Map<Integer, Integer> preMap;
 
   /**
+   * A subset of {@code preMap} containing only features necessary for
+   * the given mini-batch.
+   */
+  private Map<Integer, Integer> smallMap;
+
+  /**
    * All training examples.
    */
   private final Dataset dataset;
@@ -120,7 +126,7 @@ public class Classifier
       gradb1 = new double[params.getB1().length];
       gradW2 = new double[params.getW2().length][params.getW2()[0].length];
       gradE = new double[params.getE().length][params.getE()[0].length];
-      gradSaved = new double[config.numPreComputed][config.hiddenSize];
+      gradSaved = new double[smallMap.size()][config.hiddenSize];
 
       double cost = 0.0;
       double correct = 0.0;
@@ -144,10 +150,10 @@ public class Classifier
           int tok = feature.get(j);
           int index = tok * config.numTokens + j;
 
-          if (preMap.containsKey(index)) {
+          if (smallMap.containsKey(index)) {
             // Unit activations for this input feature value have been
             // precomputed
-            int id = preMap.get(index);
+            int id = smallMap.get(index);
 
             // Only extract activations for those nodes which are still
             // activated (`ls`)
@@ -215,8 +221,8 @@ public class Classifier
         for (int j = 0; j < config.numTokens; ++j) {
           int tok = feature.get(j);
           int index = tok * config.numTokens + j;
-          if (preMap.containsKey(index)) {
-            int id = preMap.get(index);
+          if (smallMap.containsKey(index)) {
+            int id = smallMap.get(index);
             for (int nodeIndex : ls)
               gradSaved[id][nodeIndex] += gradHidden[nodeIndex];
           } else {
@@ -383,7 +389,7 @@ public class Classifier
      */
     public void backpropSaved(Set<Integer> indexesSeen) {
       for (int x : indexesSeen) {
-        int mapX = preMap.get(x);
+        int mapX = smallMap.get(x);
         int tok = x / config.numTokens;
         int offset = (x % config.numTokens) * config.embeddingSize;
         for (int j = 0; j < config.hiddenSize; ++j) {
@@ -453,7 +459,14 @@ public class Classifier
     double percentagePreComputed = toPreCompute.size() / (float) config.numPreComputed;
     System.err.printf("Percent actually necessary to pre-compute: %f%%%n", percentagePreComputed * 100);
 
-    preCompute(toPreCompute);
+    smallMap = new HashMap<>(toPreCompute.size());
+    int newId = 0;
+    for (int id : toPreCompute) {
+      smallMap.put(preMap.get(id), newId);
+      newId++;
+    }
+
+    preCompute(smallMap);
 
     // Set up parameters for feedforward
     FeedforwardParams params = new FeedforwardParams(regParameter, dropOutProb, W1, b1, W2, E, saved);
@@ -520,10 +533,14 @@ public class Classifier
     }
   }
 
-  public void preCompute(Set<Integer> toPreCompute) {
+  public void preCompute() {
+    preCompute(preMap);
+  }
+
+  public void preCompute(Map<Integer, Integer> preMap) {
     long startTime = System.currentTimeMillis();
-    saved = new double[config.numPreComputed][config.hiddenSize];
-    for (int x : toPreCompute) {
+    saved = new double[preMap.size()][config.hiddenSize];
+    for (int x : preMap.keySet()) {
       int mapX = preMap.get(x);
       int tok = x / config.numTokens;
       int pos = x % config.numTokens;
@@ -531,7 +548,7 @@ public class Classifier
         for (int k = 0; k < config.embeddingSize; ++k)
           saved[mapX][j] += W1[j][pos * config.embeddingSize + k] * E[tok][k];
     }
-    System.out.println("PreComputed " + toPreCompute.size() + ", Elapsed Time: " + (System
+    System.out.println("PreComputed " + preMap.size() + ", Elapsed Time: " + (System
         .currentTimeMillis() - startTime) / 1000.0 + " (s)");
   }
 
