@@ -387,9 +387,9 @@ public class Classifier
      * Backpropagate gradient values from gradSaved into the gradients
      * for the E vectors that generated them.
      */
-    public void backpropSaved(Set<Integer> indexesSeen) {
-      for (int x : indexesSeen) {
-        int mapX = smallMap.get(x);
+    public void backpropSaved(Map<Integer, Integer> preMap) {
+      for (int x : preMap.keySet()) {
+        int mapX = preMap.get(x);
         int tok = x / config.numTokens;
         int offset = (x % config.numTokens) * config.embeddingSize;
         for (int j = 0; j < config.hiddenSize; ++j) {
@@ -495,7 +495,7 @@ public class Classifier
 
     // Backpropagate gradients on saved pre-computed values to actual
     // embeddings
-    cost.backpropSaved(toPreCompute);
+    cost.backpropSaved(smallMap);
 
     return cost;
   }
