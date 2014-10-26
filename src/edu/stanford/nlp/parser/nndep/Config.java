@@ -1,11 +1,3 @@
-
-/*
-* 	@Author:  Danqi Chen
-* 	@Email:  danqi@cs.stanford.edu
-*	@Created:  2014-10-03
-* 	@Last Modified:  2014-10-05
-*/
-
 package edu.stanford.nlp.parser.nndep;
 
 import edu.stanford.nlp.trees.TreebankLanguagePack;
@@ -14,6 +6,15 @@ import edu.stanford.nlp.util.ReflectionLoading;
 
 import java.util.Properties;
 
+/**
+ * Defines configuration settings for training and testing the
+ * neural-network dependency parser.
+ *
+ * @see edu.stanford.nlp.parser.nndep.NNParser
+ *
+ * @author Danqi Chen
+ * @author Jon Gauthier
+ */
 public class Config
 {
   /**

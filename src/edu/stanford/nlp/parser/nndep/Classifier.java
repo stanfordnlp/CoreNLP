@@ -1,11 +1,3 @@
-
-/* 
-* 	@Author:  Danqi Chen
-* 	@Email:  danqi@cs.stanford.edu
-*	@Created:  2014-08-25
-* 	@Last Modified:  2014-10-05
-*/
-
 package edu.stanford.nlp.parser.nndep;
 
 import edu.stanford.nlp.parser.nndep.util.Util;
@@ -24,6 +16,16 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
+/**
+ * Neural network classifier which powers a transition-based dependency
+ * parser.
+ *
+ * This classifier is built to accept distributed-representation
+ * inputs, and feeds back errors to these input layers as it learns.
+ *
+ * @author Danqi Chen
+ * @author Jon Gauthier
+ */
 public class Classifier {
   // E: numFeatures x embeddingSize
   // W1: hiddenSize x (embeddingSize x numFeatures)
@@ -72,18 +74,38 @@ public class Classifier {
   private final Config config;
 
   /**
-   * TODO document
+   * Number of possible dependency relation labels among which this
+   * classifier will choose.
    */
   private final int numLabels;
 
-  public Classifier(Config config, Dataset dataset, double[][] E, double[][] W1, double[] b1, double[][] W2) {
-    this(config, dataset, E, W1, b1, W2, new ArrayList<>());
-  }
-
+  /**
+   * Instantiate a classifier with previously learned parameters in
+   * order to perform new inference.
+   *
+   * @param config
+   * @param E
+   * @param W1
+   * @param b1
+   * @param W2
+   * @param preComputed
+   */
   public Classifier(Config config, double[][] E, double[][] W1, double[] b1, double[][] W2, List<Integer> preComputed) {
     this(config, null, E, W1, b1, W2, preComputed);
   }
 
+  /**
+   * Instantiate a classifier with training data and randomly
+   * initialized parameter matrices in order to begin training.
+   *
+   * @param config
+   * @param dataset
+   * @param E
+   * @param W1
+   * @param b1
+   * @param W2
+   * @param preComputed
+   */
   public Classifier(Config config, Dataset dataset, double[][] E, double[][] W1, double[] b1, double[][] W2,
                     List<Integer> preComputed) {
     this.config = config;
@@ -112,6 +134,20 @@ public class Classifier {
       jobHandler = null;
   }
 
+  /**
+   * Evaluates the training cost of a particular subset of training
+   * examples given the current learned weights.
+   *
+   * This function will be evaluated in parallel on different data in
+   * separate threads, and accesses the classifier's weights stored in
+   * the outer class instance.
+   *
+   * Each nested class instance accumulates its own weight gradients;
+   * these gradients will be merged on a main thread after all cost
+   * function runs complete.
+   *
+   * @see #computeCostFunction(int, double, double)
+   */
   private class CostFunction implements ThreadsafeProcessor<Pair<Collection<Example>, FeedforwardParams>, Cost> {
 
     private double[][] gradW1;
@@ -391,6 +427,11 @@ public class Classifier {
     /**
      * Backpropagate gradient values from gradSaved into the gradients
      * for the E vectors that generated them.
+     *
+     * @param preMap A map from feature ID to indices within
+     *               {@link #saved}, {@link #gradSaved} which describes
+     *               which features were pre-computed (=> which
+     *               features need to have their gradients backprop'd)
      */
     public void backpropSaved(Map<Integer, Integer> preMap) {
       for (int x : preMap.keySet()) {
@@ -457,6 +498,25 @@ public class Classifier {
     return ret;
   }
 
+  /**
+   * Determine the total cost on the dataset associated with this
+   * classifier using the current learned parameters. This cost is
+   * evaluated using mini-batch adaptive gradient descent.
+   *
+   * This method launches multiple threads, each of which evaluates
+   * training cost on a partition of the mini-batch.
+   *
+   * @param batchSize
+   * @param regParameter Regularization parameter (lambda)
+   * @param dropOutProb Drop-out probability. Hidden-layer units in the
+   *                    neural network will be randomly turned off
+   *                    while training a particular example with this
+   *                    probability.
+   * @return A {@link edu.stanford.nlp.parser.nndep.Classifier.Cost}
+   *         object which describes the total cost of the given
+   *         weights, and includes gradients to be used for further
+   *         training
+   */
   public Cost computeCostFunction(int batchSize, double regParameter, double dropOutProb) {
     List<Example> examples = Util.getRandomSubList(dataset.examples, batchSize);
 
@@ -541,9 +601,22 @@ public class Classifier {
     preCompute(preMap);
   }
 
+  /**
+   * Pre-compute hidden layer activations for some set of possible
+   * feature inputs.
+   *
+   * @param preMap A map from feature ID to destined indices within
+   *               {@link #saved}, which describes which features
+   *               should be pre-computed and where those results
+   *               should be placed
+   */
   public void preCompute(Map<Integer, Integer> preMap) {
     long startTime = System.currentTimeMillis();
+
+    // For each feature input, we need to calculate an entire hidden
+    // layer activation
     saved = new double[preMap.size()][config.hiddenSize];
+
     for (int x : preMap.keySet()) {
       int mapX = preMap.get(x);
       int tok = x / config.numTokens;
