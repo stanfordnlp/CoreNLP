@@ -9,14 +9,12 @@
 package edu.stanford.nlp.depparser.nn;
 
 import edu.stanford.nlp.depparser.util.Util;
-import edu.stanford.nlp.ling.tokensregex.MultiCoreMapNodePattern;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 import java.util.*;
-import java.util.concurrent.Callable;
 
 public class Classifier 
 {

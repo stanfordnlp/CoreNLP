@@ -11,7 +11,8 @@ package edu.stanford.nlp.depparser.util;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ArcStandard extends ParsingSystem
 {

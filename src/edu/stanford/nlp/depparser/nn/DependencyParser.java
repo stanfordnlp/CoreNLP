@@ -8,31 +8,23 @@
 
 package edu.stanford.nlp.depparser.nn;
 
-import edu.stanford.nlp.depparser.util.CommandLineUtils;
+import edu.stanford.nlp.util.StringUtils;
 
-import java.util.*;
-import java.io.*;
+import java.util.Properties;
 
-public class DependencyParser 
-{
-    public static void main(String[] args) 
-    {
-        Map<String, String> params = CommandLineUtils.simpleCommandLineParser(args);
+public class DependencyParser {
 
-    	String trainFile = params.get("trainFile");
-    	String devFile = params.get("devFile");
-        String testFile = params.get("testFile");
-        String outFile = params.get("outFile");
-    	String modelFile = params.get("model");
-        String embedFile = params.get("embeddingFile");
-        String propFile = params.get("prop");
+  public static void main(String[] args) {
+    Properties props = StringUtils.argsToProperties(args);
 
-        NNParser parser = new NNParser();
+    NNParser parser = new NNParser(props);
 
-    	if (trainFile != null)
-    		parser.train(trainFile, devFile, modelFile, embedFile);
+    if (props.containsKey("trainFile"))
+      parser.train(props.getProperty("trainFile"), props.getProperty("devFile"), props.getProperty("model"),
+          props.getProperty("embedFile"));
 
-    	if (testFile != null)
-    		parser.test(testFile, modelFile, outFile);
-    }
+    if (props.containsKey("testFile"))
+      parser.test(props.getProperty("testFile"), props.getProperty("model"), props.getProperty("outFile"));
+  }
+
 }
