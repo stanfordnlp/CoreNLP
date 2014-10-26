@@ -326,13 +326,28 @@ public class NNParser
 		catch (Exception e) { System.out.println(e); }
 	}
 
+  /**
+   * Convenience method; see
+   * {@link #loadFromModelFile(String, java.util.Properties)}.
+   *
+   * @see #loadFromModelFile(String, java.util.Properties)
+   */
   public static NNParser loadFromModelFile(String modelFile) {
     return loadFromModelFile(modelFile, null);
   }
 
+  /**
+   * Load a saved parser model.
+   *
+   * @param modelFile Path to serialized model (may be GZipped)
+   * @param extraProperties Extra test-time properties not already
+   *                        associated with model (may be null)
+   * @return Loaded and initialized (see {@link #initialize()} model
+   */
   public static NNParser loadFromModelFile(String modelFile, Properties extraProperties) {
     NNParser parser = extraProperties == null ? new NNParser() : new NNParser(extraProperties);
     parser.loadModelFile(modelFile);
+    parser.initialize();
     return parser;
   }
 
