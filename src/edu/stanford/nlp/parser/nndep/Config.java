@@ -1,6 +1,7 @@
 package edu.stanford.nlp.parser.nndep;
 
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.ReflectionLoading;
@@ -179,6 +180,12 @@ public class Config
    */
   public Function<List<HasWord>, List<HasWord>> escaper = null;
 
+  /**
+   * Path to a tagger file compatible with
+   * {@link edu.stanford.nlp.tagger.maxent.MaxentTagger}.
+   */
+  public String tagger = MaxentTagger.DEFAULT_JAR_PATH;
+
   public Config(Properties properties) {
     setProperties(properties);
   }
@@ -202,6 +209,7 @@ public class Config
 
     // Runtime parsing options
     sentenceDelimiter = PropertiesUtils.getString(props, "sentenceDelimiter", sentenceDelimiter);
+    tagger = PropertiesUtils.getString(props, "tagger", tagger);
 
     String escaperClass = props.getProperty("escaper");
     escaper = escaperClass != null ? ReflectionLoading.loadByReflection(escaperClass) : null;

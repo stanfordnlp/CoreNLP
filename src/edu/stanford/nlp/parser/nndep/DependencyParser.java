@@ -7,12 +7,14 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.IntCounter;
+import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.EnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.GrammaticalStructure;
@@ -926,18 +928,28 @@ public class DependencyParser {
     preprocessor.setTokenizerFactory(config.tlp.getTokenizerFactory());
 
     Timing timer = new Timing();
+
+    MaxentTagger tagger = new MaxentTagger(config.tagger);
+    List<List<TaggedWord>> tagged = new ArrayList<>();
+    for (List<HasWord> sentence : preprocessor) {
+      tagged.add(tagger.tagSentence(sentence));
+    }
+
+    System.err.printf("Tagging completed in %.2f sec.%n",
+        timer.stop() / 1000.0);
+
     timer.start();
 
     int numSentences = 0;
-    for (List<HasWord> sentence : preprocessor) {
-      GrammaticalStructure parse = predict(sentence);
+    for (List<TaggedWord> taggedSentence : tagged) {
+      GrammaticalStructure parse = predict(taggedSentence);
       output.println(parse);
       numSentences++;
     }
 
     long millis = timer.stop();
     double seconds = millis / 1000.0;
-    System.err.printf("Parsed %d sentences in %.2f seconds (%.2f sents/sec).",
+    System.err.printf("Parsed %d sentences in %.2f seconds (%.2f sents/sec).%n",
         numSentences, seconds, numSentences / seconds);
   }
 
