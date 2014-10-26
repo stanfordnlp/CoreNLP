@@ -111,43 +111,44 @@ class Util {
 
     BufferedReader reader = null;
     try {
-      reader = IOUtils.getBufferedReaderFromClasspathOrFileSystem(inFile);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+      reader = IOUtils.readerFromString(inFile);
 
-    CoreMap sentence = new CoreLabel();
-    List<CoreLabel> sentenceTokens = new ArrayList<>();
+      CoreMap sentence = new CoreLabel();
+      List<CoreLabel> sentenceTokens = new ArrayList<>();
 
-    DependencyTree tree = new DependencyTree();
+      DependencyTree tree = new DependencyTree();
 
-    for (String line : IOUtils.getLineIterable(reader, false)) {
-      String[] splits = line.split("\t");
-      if (splits.length < 10) {
-        trees.add(tree);
-        sentence.set(CoreAnnotations.TokensAnnotation.class, sentenceTokens);
-        sents.add(sentence);
+      for (String line : IOUtils.getLineIterable(reader, false)) {
+        String[] splits = line.split("\t");
+        if (splits.length < 10) {
+          trees.add(tree);
+          sentence.set(CoreAnnotations.TokensAnnotation.class, sentenceTokens);
+          sents.add(sentence);
 
-        tree = new DependencyTree();
-        sentence = new CoreLabel();
-        sentenceTokens = new ArrayList<>();
-      } else {
-        String word = splits[1],
-                pos = splits[4],
-                depType = splits[7];
-        int head = Integer.parseInt(splits[6]);
+          tree = new DependencyTree();
+          sentence = new CoreLabel();
+          sentenceTokens = new ArrayList<>();
+        } else {
+          String word = splits[1],
+                  pos = splits[4],
+                  depType = splits[7];
+          int head = Integer.parseInt(splits[6]);
 
-        CoreLabel token = tf.makeToken(word, 0, 0);
-        token.setTag(pos);
-        token.set(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, head);
-        token.set(CoreAnnotations.CoNLLDepTypeAnnotation.class, depType);
-        sentenceTokens.add(token);
+          CoreLabel token = tf.makeToken(word, 0, 0);
+          token.setTag(pos);
+          token.set(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, head);
+          token.set(CoreAnnotations.CoNLLDepTypeAnnotation.class, depType);
+          sentenceTokens.add(token);
 
-        if (labeled)
-          tree.add(head, depType);
-        else
-          tree.add(head, Config.UNKNOWN);
-      }
+          if (labeled)
+            tree.add(head, depType);
+          else
+            tree.add(head, Config.UNKNOWN);
+        }
+      }    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    } finally {
+      IOUtils.closeIgnoringExceptions(reader);
     }
   }
 
