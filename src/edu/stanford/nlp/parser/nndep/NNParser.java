@@ -40,14 +40,14 @@ public class NNParser
     Map<String, Integer> embedID;
     double[][] embeddings;
 
-  private final Properties properties;
+  private final Config config;
 
   public NNParser() {
     this(null);
   }
 
   public NNParser(Properties properties) {
-    this.properties = properties;
+    config = new Config(properties);
   }
 
 	public int getWordID(String s)
@@ -128,7 +128,7 @@ public class NNParser
 
 	public void genTrainExamples(List<CoreMap> sents, List<DependencyTree> trees)
 	{
-		trainSet = new Dataset(Config.numTokens, system.transitions.size());
+		trainSet = new Dataset(config.numTokens, system.transitions.size());
 
         Counter<Integer> tokPosCount = new Counter<Integer>();
 		System.out.println(CONST.SEPARATOR);
@@ -169,7 +169,7 @@ public class NNParser
 		}
 		System.out.println("#Train Examples: " + trainSet.n);
 
-        preComputed = tokPosCount.getSortedKeys(Config.numPreComputed);
+        preComputed = tokPosCount.getSortedKeys(config.numPreComputed);
 	}
 
     public void genMapping()
@@ -210,7 +210,7 @@ public class NNParser
         else
           label.add(trees.get(i).getLabel(k));
 
-		wordDict = Util.generateDict(word, Config.wordCutOff);
+		wordDict = Util.generateDict(word, config.wordCutOff);
 		posDict = Util.generateDict(pos);
 		labelDict = Util.generateDict(label);
 		labelDict.add(0, rootLabel);
@@ -413,7 +413,7 @@ public class NNParser
           preComputed.add(Integer.parseInt(splits[i]));
       }
       input.close();
-      classifier = new Classifier(E, W1, b1, W2, preComputed);
+      classifier = new Classifier(config, E, W1, b1, W2, preComputed);
     } catch (Exception e) {
       System.out.println(e);
     }
@@ -439,7 +439,7 @@ public class NNParser
             int dim = splits.length - 1;
             embeddings = new double[nWords][dim];
             System.out.println("Embedding File " + embedFile + ": #Words = "  + nWords + ", dim = " + dim);
-            if (dim != Config.embeddingSize)
+            if (dim != config.embeddingSize)
                 System.out.println("ERROR: embedding dimension mismatch");
 
             for (int i = 0; i < lines.size(); ++ i)
@@ -478,22 +478,22 @@ public class NNParser
         lDict.remove(0);
         system = new ArcStandard(lDict);
 
-        double[][] E = new double[wordDict.size() + posDict.size() + labelDict.size()][Config.embeddingSize];
-        double[][] W1 = new double[Config.hiddenSize][Config.embeddingSize * Config.numTokens];
-        double[] b1 = new double[Config.hiddenSize];
-        double[][] W2 = new double[labelDict.size() * 2 - 1][Config.hiddenSize];
+        double[][] E = new double[wordDict.size() + posDict.size() + labelDict.size()][config.embeddingSize];
+        double[][] W1 = new double[config.hiddenSize][config.embeddingSize * config.numTokens];
+        double[] b1 = new double[config.hiddenSize];
+        double[][] W2 = new double[labelDict.size() * 2 - 1][config.hiddenSize];
 
         Random random = new Random();
         for (int i = 0; i < W1.length; ++i)
             for (int j = 0; j < W1[i].length; ++j)
-                W1[i][j] = random.nextDouble() * 2 * Config.initRange - Config.initRange;
+                W1[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
 
         for (int i = 0; i < b1.length; ++i)
-            b1[i] = random.nextDouble() * 2 * Config.initRange - Config.initRange;
+            b1[i] = random.nextDouble() * 2 * config.initRange - config.initRange;
 
         for (int i = 0; i < W2.length; ++i)
             for (int j = 0; j < W2[i].length; ++j)
-                W2[i][j] = random.nextDouble() * 2 * Config.initRange - Config.initRange;
+                W2[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
 
         readEmbedFile(embedFile);
         int foundEmbed = 0;
@@ -516,27 +516,27 @@ public class NNParser
             } else
             {
                 for (int j = 0; j < E[i].length; ++j)
-                    E[i][j] = random.nextDouble() * Config.initRange * 2 - Config.initRange;
+                    E[i][j] = random.nextDouble() * config.initRange * 2 - config.initRange;
             }
         }
         System.out.println("Found embeddings: " + foundEmbed + " / " + wordDict.size());
 
         genTrainExamples(trainSents, trainTrees);
-        classifier = new Classifier(trainSet, E, W1, b1, W2, preComputed);
+        classifier = new Classifier(config, trainSet, E, W1, b1, W2, preComputed);
 
         //TODO: save the best intermediate parameters
         long startTime = System.currentTimeMillis();
-        for (int iter = 0; iter < Config.maxIter; ++ iter)
+        for (int iter = 0; iter < config.maxIter; ++ iter)
         {
         	System.out.println("##### Iteration " + iter);
 
           // TODO track correct %
-        	Classifier.Cost cost = classifier.computeCostFunction(Config.batchSize, Config.regParameter, Config.dropProb);
+        	Classifier.Cost cost = classifier.computeCostFunction(config.batchSize, config.regParameter, config.dropProb);
           System.out.println("Cost = " + cost.getCost() + ", Correct(%) = " + cost.getPercentCorrect());
-          classifier.takeAdaGradientStep(cost, Config.adaAlpha, Config.adaEps);
+          classifier.takeAdaGradientStep(cost, config.adaAlpha, config.adaEps);
 
           System.out.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
-        	if (devFile != null && iter % Config.evalPerIter == 0)
+        	if (devFile != null && iter % config.evalPerIter == 0)
 	        	System.out.println("UAS: "  + system.getUASScore(devSents, predict(devSents), devTrees));
         }
         writeModelFile(modelFile);
@@ -595,7 +595,7 @@ public class NNParser
     System.out.println("Model File: " + modelFile);
 
     loadModelFile(modelFile);
-    initialize(true);
+    initialize();
 
     List<CoreMap> testSents = new ArrayList<>();
     List<DependencyTree> testTrees = new ArrayList<DependencyTree>();
@@ -617,7 +617,7 @@ public class NNParser
   /**
    * Prepare for parsing after a model has been loaded.
    */
-  public void initialize(boolean preCompute) {
+  public void initialize() {
     if (labelDict == null)
       throw new IllegalStateException("Model has not been loaded or trained");
 
@@ -627,11 +627,8 @@ public class NNParser
     system = new ArcStandard(lDict);
 
     // Pre-compute matrix multiplications
-    classifier.preCompute();
-  }
-
-  public void initialize() {
-    initialize(false);
+    if (config.numPreComputed > 0)
+      classifier.preCompute();
   }
 
   /**

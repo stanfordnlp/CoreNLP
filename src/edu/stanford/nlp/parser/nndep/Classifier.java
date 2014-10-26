@@ -62,31 +62,24 @@ public class Classifier
    */
   private final MulticoreWrapper<Pair<Collection<Example>, FeedforwardParams>, Cost> jobHandler;
 
-  private int numThreads;
-
-  private final int embeddingSize, hiddenSize;
+  private final Config config;
 
   /**
    * TODO document
    */
-  private final int numTokens, numLabels;
+  private final int numLabels;
 
-  /**
-   * Number of words for which we have precomputed the hidden-layer
-   * unit activation values
-   */
-  private final int numPreComputed;
-
-  public Classifier(Dataset dataset, double[][] E, double[][] W1, double[] b1, double[][] W2) {
-    this(dataset, E, W1, b1, W2, new ArrayList<>());
+  public Classifier(Config config, Dataset dataset, double[][] E, double[][] W1, double[] b1, double[][] W2) {
+    this(config, dataset, E, W1, b1, W2, new ArrayList<>());
   }
 
-  public Classifier(double[][] E, double[][] W1, double[] b1, double[][] W2, List<Integer> preComputed) {
-    this(null, E, W1, b1, W2, preComputed);
+  public Classifier(Config config, double[][] E, double[][] W1, double[] b1, double[][] W2, List<Integer> preComputed) {
+    this(config, null, E, W1, b1, W2, preComputed);
   }
 
-  public Classifier(Dataset dataset, double[][] E, double[][] W1, double[] b1, double[][] W2,
+  public Classifier(Config config, Dataset dataset, double[][] E, double[][] W1, double[] b1, double[][] W2,
                     List<Integer> preComputed) {
+    this.config = config;
     this.dataset = dataset;
 
     this.E = E;
@@ -94,9 +87,6 @@ public class Classifier
     this.b1 = b1;
     this.W2 = W2;
 
-    embeddingSize = E[0].length;
-    hiddenSize = W1.length;
-    numTokens = W1[0].length / embeddingSize;
     numLabels = W2.length;
 
     eg2E = new double[E.length][E[0].length];
@@ -105,13 +95,10 @@ public class Classifier
     eg2W2 = new double[W2.length][W2[0].length];
 
     preMap = new HashMap<>();
-    numPreComputed = preComputed.size();
     for (int i = 0; i < preComputed.size(); ++i)
       preMap.put(preComputed.get(i), i);
 
-    // TODO make configurable
-    numThreads = Runtime.getRuntime().availableProcessors() - 1;
-    jobHandler = new MulticoreWrapper<>(numThreads, new CostFunction(), false);
+    jobHandler = new MulticoreWrapper<>(config.trainingThreads, new CostFunction(), false);
   }
 
   private class CostFunction implements ThreadsafeProcessor<Pair<Collection<Example>, FeedforwardParams>, Cost> {
@@ -133,7 +120,7 @@ public class Classifier
       gradb1 = new double[params.getB1().length];
       gradW2 = new double[params.getW2().length][params.getW2()[0].length];
       gradE = new double[params.getE().length][params.getE()[0].length];
-      gradSaved = new double[numPreComputed][hiddenSize];
+      gradSaved = new double[config.numPreComputed][config.hiddenSize];
 
       double cost = 0.0;
       double correct = 0.0;
@@ -148,19 +135,19 @@ public class Classifier
         List<Integer> label = ex.getLabel();
 
         double[] scores = new double[numLabels];
-        double[] hidden = new double[hiddenSize];
-        double[] hidden3 = new double[hiddenSize];
+        double[] hidden = new double[config.hiddenSize];
+        double[] hidden3 = new double[config.hiddenSize];
 
         // Run dropout: randomly drop some hidden-layer units. `ls`
         // contains the indices of those units which are still active
-        int[] ls = IntStream.range(0, hiddenSize)
+        int[] ls = IntStream.range(0, config.hiddenSize)
                             .filter(n -> random.nextDouble() > params.getDropOutProb())
                             .toArray();
 
         int offset = 0;
-        for (int j = 0; j < numTokens; ++j) {
+        for (int j = 0; j < config.numTokens; ++j) {
           int tok = feature.get(j);
-          int index = tok * numTokens + j;
+          int index = tok * config.numTokens + j;
 
           if (preMap.containsKey(index)) {
             // Unit activations for this input feature value have been
@@ -174,11 +161,11 @@ public class Classifier
               hidden[nodeIndex] += saved[id][nodeIndex];
           } else {
             for (int nodeIndex : ls) {
-              for (int k = 0; k < embeddingSize; ++k)
+              for (int k = 0; k < config.embeddingSize; ++k)
                 hidden[nodeIndex] += W1[nodeIndex][offset + k] * E[tok][k];
             }
           }
-          offset += embeddingSize;
+          offset += config.embeddingSize;
         }
 
         // Add bias term and apply activation function
@@ -214,7 +201,7 @@ public class Classifier
         if (label.get(optLabel) == 1)
           correct += +1.0 / examples.size();
 
-        double[] gradHidden3 = new double[hiddenSize];
+        double[] gradHidden3 = new double[config.hiddenSize];
         for (int i = 0; i < numLabels; ++i)
           if (label.get(i) >= 0) {
             double delta = -(label.get(i) - scores[i] / sum2) / examples.size();
@@ -224,39 +211,39 @@ public class Classifier
             }
           }
 
-        double[] gradHidden = new double[hiddenSize];
+        double[] gradHidden = new double[config.hiddenSize];
         for (int nodeIndex : ls) {
           gradHidden[nodeIndex] = gradHidden3[nodeIndex] * 3 * hidden[nodeIndex] * hidden[nodeIndex];
           gradb1[nodeIndex] += gradHidden3[nodeIndex];
         }
 
         offset = 0;
-        for (int j = 0; j < numTokens; ++j) {
+        for (int j = 0; j < config.numTokens; ++j) {
           int tok = feature.get(j);
-          int index = tok * numTokens + j;
+          int index = tok * config.numTokens + j;
           if (preMap.containsKey(index)) {
             int id = preMap.get(index);
             for (int nodeIndex : ls)
               gradSaved[id][nodeIndex] += gradHidden[nodeIndex];
           } else {
             for (int nodeIndex : ls) {
-              for (int k = 0; k < embeddingSize; ++k) {
+              for (int k = 0; k < config.embeddingSize; ++k) {
                 gradW1[nodeIndex][offset + k] += gradHidden[nodeIndex] * E[tok][k];
                 gradE[tok][k] += gradHidden[nodeIndex] * W1[nodeIndex][offset + k];
               }
             }
           }
-          offset += embeddingSize;
+          offset += config.embeddingSize;
         }
       }
 
       for (int x : preMapIndicesSeen) {
         int mapX = preMap.get(x);
-        int tok = x / numTokens;
-        int offset = (x % numTokens) * embeddingSize;
-        for (int j = 0; j < hiddenSize; ++j) {
+        int tok = x / config.numTokens;
+        int offset = (x % config.numTokens) * config.embeddingSize;
+        for (int j = 0; j < config.hiddenSize; ++j) {
           double delta = gradSaved[mapX][j];
-          for (int k = 0; k < embeddingSize; ++k) {
+          for (int k = 0; k < config.embeddingSize; ++k) {
             gradW1[j][offset + k] += delta * E[tok][k];
             gradE[tok][k] += delta * W1[j][offset + k];
           }
@@ -446,8 +433,7 @@ public class Classifier
     // Set up parameters for feedforward
     FeedforwardParams params = new FeedforwardParams(regParameter, dropOutProb, W1, b1, W2, E, saved);
 
-    // TODO make configurable
-    int numChunks = numThreads;
+    int numChunks = config.trainingThreads;
     List<Collection<Example>> chunks = CollectionUtils.partitionIntoFolds(examples, numChunks);
 
     // Submit chunks for processing on separate threads
@@ -504,16 +490,16 @@ public class Classifier
 
   public void preCompute() {
     long startTime = System.currentTimeMillis();
-    saved = new double[numPreComputed][hiddenSize];
+    saved = new double[config.numPreComputed][config.hiddenSize];
     for (int x : preMap.keySet()) {
       int mapX = preMap.get(x);
-      int tok = x / numTokens;
-      int pos = x % numTokens;
-      for (int j = 0; j < hiddenSize; ++j)
-        for (int k = 0; k < embeddingSize; ++k)
-          saved[mapX][j] += W1[j][pos * embeddingSize + k] * E[tok][k];
+      int tok = x / config.numTokens;
+      int pos = x % config.numTokens;
+      for (int j = 0; j < config.hiddenSize; ++j)
+        for (int k = 0; k < config.embeddingSize; ++k)
+          saved[mapX][j] += W1[j][pos * config.embeddingSize + k] * E[tok][k];
     }
-    System.out.println("PreComputed " + numPreComputed + ", Elapsed Time: " + (System
+    System.out.println("PreComputed " + config.numPreComputed + ", Elapsed Time: " + (System
         .currentTimeMillis() - startTime) / 1000.0 + " (s)");
   }
 
@@ -523,30 +509,30 @@ public class Classifier
    */
   public double[] computeScores(List<Integer> feature) {
     double[] scores = new double[numLabels];
-    double[] hidden = new double[hiddenSize];
+    double[] hidden = new double[config.hiddenSize];
     int offset = 0;
-    for (int j = 0; j < numTokens; ++j) {
+    for (int j = 0; j < config.numTokens; ++j) {
       int tok = feature.get(j);
-      int index = tok * numTokens + j;
+      int index = tok * config.numTokens + j;
       if (preMap.containsKey(index)) {
         int id = preMap.get(index);
-        for (int i = 0; i < hiddenSize; ++i)
+        for (int i = 0; i < config.hiddenSize; ++i)
           hidden[i] += saved[id][i];
       } else {
-        for (int i = 0; i < hiddenSize; ++i)
-          for (int k = 0; k < embeddingSize; ++k)
+        for (int i = 0; i < config.hiddenSize; ++i)
+          for (int k = 0; k < config.embeddingSize; ++k)
             hidden[i] += W1[i][offset + k] * E[tok][k];
       }
-      offset += embeddingSize;
+      offset += config.embeddingSize;
     }
 
-    for (int i = 0; i < hiddenSize; ++i) {
+    for (int i = 0; i < config.hiddenSize; ++i) {
       hidden[i] += b1[i];
       hidden[i] = hidden[i] * hidden[i] * hidden[i];
     }
 
     for (int i = 0; i < numLabels; ++i)
-      for (int j = 0; j < hiddenSize; ++j)
+      for (int j = 0; j < config.hiddenSize; ++j)
         scores[i] += W2[i][j] * hidden[j];
     return scores;
   }
