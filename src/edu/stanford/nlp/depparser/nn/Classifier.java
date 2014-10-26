@@ -54,6 +54,8 @@ public class Classifier
    */
   private final MulticoreWrapper<Pair<Collection<Example>, FeedforwardParams>, Cost> jobHandler;
 
+  private int numThreads;
+
   private final Random random;
 
   private final int embeddingSize, hiddenSize;
@@ -102,8 +104,8 @@ public class Classifier
       preMap.put(preComputed.get(i), i);
 
     // TODO make configurable
-    int nThreads = Runtime.getRuntime().availableProcessors() - 1;
-    jobHandler = new MulticoreWrapper<>(nThreads, new CostFunction(), false);
+    numThreads = Runtime.getRuntime().availableProcessors() - 1;
+    jobHandler = new MulticoreWrapper<>(numThreads, new CostFunction(), false);
 
     random = new Random();
   }
@@ -433,7 +435,7 @@ public class Classifier
     FeedforwardParams params = new FeedforwardParams(regParameter, dropOutProb, W1, b1, W2, E, saved);
 
     // TODO make configurable
-    int numChunks = Runtime.getRuntime().availableProcessors() - 1;
+    int numChunks = numThreads;
     List<Collection<Example>> chunks = CollectionUtils.partitionIntoFolds(examples, numChunks);
 
     // Submit chunks for processing on separate threads
