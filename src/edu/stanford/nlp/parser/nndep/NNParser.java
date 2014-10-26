@@ -75,6 +75,8 @@ public class NNParser {
   /**
    * Words, parts of speech, and dependency relation labels which were
    * observed in our corpus / stored in the model
+   *
+   * @see #genDictionaries(java.util.List, java.util.List)
    */
   private List<String> knownWords, knownPos, knownLabels;
 
@@ -229,24 +231,39 @@ public class NNParser {
     return ret;
   }
 
-  public void genMapping() {
-    wordIDs = new HashMap<String, Integer>();
-    posIDs = new HashMap<String, Integer>();
-    labelIDs = new HashMap<String, Integer>();
+  /**
+   * Generate unique integer IDs for all known words / part-of-speech
+   * tags / dependency relation labels.
+   *
+   * All three of the aforementioned types are assigned IDs from a
+   * continuous range of integers; all IDs 0 <= ID < n_w are word IDs,
+   * all IDs n_w <= ID < n_w + n_pos are POS tag IDs, and so on.
+   */
+  private void generateIDs() {
+    wordIDs = new HashMap<>();
+    posIDs = new HashMap<>();
+    labelIDs = new HashMap<>();
 
     int index = 0;
-    for (int i = 0; i < knownWords.size(); ++i)
-      wordIDs.put(knownWords.get(i), (index++));
-    for (int i = 0; i < knownPos.size(); ++i)
-      posIDs.put(knownPos.get(i), (index++));
-    for (int i = 0; i < knownLabels.size(); ++i)
-      labelIDs.put(knownLabels.get(i), (index++));
+    for (String word : knownWords)
+      wordIDs.put(word, (index++));
+    for (String pos : knownPos)
+      posIDs.put(pos, (index++));
+    for (String label : knownLabels)
+      labelIDs.put(label, (index++));
   }
 
+  /**
+   * Scan a corpus and store all words, part-of-speech tags, and
+   * dependency relation labels observed. Prepare other structures
+   * which support word / POS / label lookup at train- / run-time.
+   */
   public void genDictionaries(List<CoreMap> sents, List<DependencyTree> trees) {
-    List<String> word = new ArrayList<String>();
-    List<String> pos = new ArrayList<String>();
-    List<String> label = new ArrayList<String>();
+    // Collect all words (!), etc. in lists, tacking on one sentence
+    // after the other
+    List<String> word = new ArrayList<>();
+    List<String> pos = new ArrayList<>();
+    List<String> label = new ArrayList<>();
 
     for (CoreMap sentence : sents) {
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
@@ -258,13 +275,14 @@ public class NNParser {
     }
 
     String rootLabel = null;
-    for (int i = 0; i < trees.size(); ++i)
-      for (int k = 1; k <= trees.get(i).n; ++k)
-        if (trees.get(i).getHead(k) == 0)
-          rootLabel = trees.get(i).getLabel(k);
+    for (DependencyTree tree : trees)
+      for (int k = 1; k <= tree.n; ++k)
+        if (tree.getHead(k) == 0)
+          rootLabel = tree.getLabel(k);
         else
-          label.add(trees.get(i).getLabel(k));
+          label.add(tree.getLabel(k));
 
+    // Generate "dictionaries," possibly with frequency cutoff
     knownWords = Util.generateDict(word, config.wordCutOff);
     knownPos = Util.generateDict(pos);
     knownLabels = Util.generateDict(label);
@@ -279,7 +297,7 @@ public class NNParser {
     knownPos.add(2, CONST.ROOT);
 
     knownLabels.add(0, CONST.NULL);
-    genMapping();
+    generateIDs();
 
     System.out.println(CONST.SEPARATOR);
     System.out.println("#Word: " + knownWords.size());
@@ -452,7 +470,7 @@ public class NNParser {
           E[index][i] = Double.parseDouble(splits[i + 1]);
         index = index + 1;
       }
-      genMapping();
+      generateIDs();
 
       double[][] W1 = new double[hSize][eSize * nTokens];
       for (int j = 0; j < W1[0].length; ++j) {
