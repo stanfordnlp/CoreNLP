@@ -25,6 +25,7 @@ import edu.stanford.nlp.trees.TreeGraphNode;
 import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.Timing;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -128,9 +129,10 @@ public class DependencyParser {
   }
 
   public List<Integer> getFeatures(Configuration c) {
-    List<Integer> fWord = new ArrayList<Integer>();
-    List<Integer> fPos = new ArrayList<Integer>();
-    List<Integer> fLabel = new ArrayList<Integer>();
+    // Presize the arrays for very slight speed gain. Hardcoded, but so is the current feature list.
+    List<Integer> fWord = new ArrayList<Integer>(18);
+    List<Integer> fPos = new ArrayList<Integer>(18);
+    List<Integer> fLabel = new ArrayList<Integer>(12);
     for (int j = 2; j >= 0; --j) {
       int index = c.getStack(j);
       fWord.add(getWordID(c.getWord(index)));
@@ -174,7 +176,8 @@ public class DependencyParser {
       fLabel.add(getLabelID(c.getLabel(index)));
     }
 
-    List<Integer> feature = new ArrayList<>(fWord);
+    List<Integer> feature = new ArrayList<>(48);
+    feature.addAll(fWord);
     feature.addAll(fPos);
     feature.addAll(fLabel);
     return feature;
@@ -513,13 +516,13 @@ public class DependencyParser {
     embedID = new HashMap<String, Integer>();
     if (embedFile == null)
       return;
+    BufferedReader input = null;
     try {
-      BufferedReader input = new BufferedReader(new FileReader(embedFile));
-      String s;
+      input = IOUtils.readerFromString(embedFile);
       List<String> lines = new ArrayList<String>();
-      while ((s = input.readLine()) != null)
+      for (String s; (s = input.readLine()) != null; ) {
         lines.add(s);
-      input.close();
+      }
 
       int nWords = lines.size();
       String[] splits = lines.get(0).split("\\s+");
@@ -538,6 +541,8 @@ public class DependencyParser {
       }
     } catch (Exception e) {
       e.printStackTrace();
+    } finally {
+      IOUtils.closeIgnoringExceptions(input);
     }
   }
 
@@ -781,25 +786,40 @@ public class DependencyParser {
    *  @return The LAS score on the dataset
    */
   public double test(String testFile, String modelFile, String outFile) {
+    Timing t = new Timing();
     System.err.println("Test File: " + testFile);
     System.err.println("Model File: " + modelFile);
 
     loadModelFile(modelFile);
     initialize();
+    t.done("Initializing dependency parser");
 
+    Timing timer = new Timing();
     List<CoreMap> testSents = new ArrayList<>();
     List<DependencyTree> testTrees = new ArrayList<DependencyTree>();
     Util.loadConllFile(testFile, testSents, testTrees);
+    // count how much to parse
+    int numWords = 0;
+    int numSentences = 0;
+    for (CoreMap testSent : testSents) {
+      numSentences += 1;
+      numWords += testSent.get(CoreAnnotations.TokensAnnotation.class).size();
+    }
 
     List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(Collectors.toList());
     Map<String, Double> result = system.evaluate(testSents, predicted, testTrees);
     double lasNoPunc = result.get("LASwoPunc");
-    System.err.println("UAS = " + result.get("UASwoPunc"));
-    System.err.println("LAS = " + lasNoPunc);
+    System.err.printf("UAS = %.4f%n", result.get("UASwoPunc"));
+    System.err.printf("LAS = %.4f%n", lasNoPunc);
 
     if (outFile != null) {
       Util.writeConllFile(outFile, testSents, predicted);
     }
+    long millis = timer.stop();
+    double wordspersec = numWords / (((double) millis) / 1000);
+    double sentspersec = numSentences / (((double) millis) / 1000);
+    System.err.printf("%s tagged %d words in %d sentences in %.1fs at %.1f w/s, %.1f sent/s.%n",
+            StringUtils.getShortClassName(this), numWords, numSentences, millis / 1000.0, wordspersec, sentspersec);
     return lasNoPunc;
   }
 
