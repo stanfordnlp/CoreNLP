@@ -237,19 +237,6 @@ public class Classifier
         }
       }
 
-      for (int x : preMapIndicesSeen) {
-        int mapX = preMap.get(x);
-        int tok = x / config.numTokens;
-        int offset = (x % config.numTokens) * config.embeddingSize;
-        for (int j = 0; j < config.hiddenSize; ++j) {
-          double delta = gradSaved[mapX][j];
-          for (int k = 0; k < config.embeddingSize; ++k) {
-            gradW1[j][offset + k] += delta * E[tok][k];
-            gradE[tok][k] += delta * W1[j][offset + k];
-          }
-        }
-      }
-
       double reg = params.getRegParameter();
       for (int i = 0; i < W1.length; ++i)
         for (int j = 0; j < W1[i].length; ++j) {
@@ -354,7 +341,7 @@ public class Classifier
    *
    * @see Classifier.CostFunction
    */
-  public static class Cost {
+  public class Cost {
 
     private double cost;
 
@@ -394,6 +381,25 @@ public class Classifier
       addInPlace(gradW2, otherCost.getGradW2());
       addInPlace(gradE, otherCost.getGradE());
       addInPlace(gradSaved, otherCost.getGradSaved());
+    }
+
+    /**
+     * Backpropagate gradient values from gradSaved into the gradients
+     * for the E vectors that generated them.
+     */
+    public void backpropSaved() {
+      for (int x : preMap.keySet()) {
+        int mapX = preMap.get(x);
+        int tok = x / config.numTokens;
+        int offset = (x % config.numTokens) * config.embeddingSize;
+        for (int j = 0; j < config.hiddenSize; ++j) {
+          double delta = gradSaved[mapX][j];
+          for (int k = 0; k < config.embeddingSize; ++k) {
+            gradW1[j][offset + k] += delta * E[tok][k];
+            gradE[tok][k] += delta * W1[j][offset + k];
+          }
+        }
+      }
     }
 
     public double getCost() {
@@ -451,6 +457,13 @@ public class Classifier
       else
         cost.merge(otherCost);
     }
+
+    if (cost == null)
+      return null;
+
+    // Backpropagate gradients on saved pre-computed values to actual
+    // embeddings
+    cost.backpropSaved();
 
     return cost;
   }
