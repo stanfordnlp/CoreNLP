@@ -137,7 +137,8 @@ public class Config
 
   /**
    * During training, clear AdaGrad gradient histories after every
-   * {@code clearGradientsPerIter} iterations.
+   * {@code clearGradientsPerIter} iterations. (If zero, never clear
+   * gradients.)
    */
   public int clearGradientsPerIter = 0;
 

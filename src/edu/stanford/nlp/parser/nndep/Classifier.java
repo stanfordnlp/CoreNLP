@@ -47,8 +47,8 @@ public class Classifier {
   private double[][] gradSaved;
 
   // Gradient histories
-  private final double[][] eg2W1, eg2W2, eg2E;
-  private final double[] eg2b1;
+  private double[][] eg2W1, eg2W2, eg2E;
+  private double[] eg2b1;
 
   /**
    * Pre-computed hidden layer unit activations. Each double array
@@ -133,12 +133,9 @@ public class Classifier {
     this.b1 = b1;
     this.W2 = W2;
 
-    numLabels = W2.length;
+    initGradientHistories();
 
-    eg2E = new double[E.length][E[0].length];
-    eg2W1 = new double[W1.length][W1[0].length];
-    eg2b1 = new double[b1.length];
-    eg2W2 = new double[W2.length][W2[0].length];
+    numLabels = W2.length;
 
     preMap = new HashMap<>();
     for (int i = 0; i < preComputed.size(); ++i)
@@ -597,6 +594,23 @@ public class Classifier {
         E[i][j] -= adaAlpha * gradE[i][j] / Math.sqrt(eg2E[i][j] + adaEps);
       }
     }
+  }
+
+  private void initGradientHistories() {
+    eg2E = new double[E.length][E[0].length];
+    eg2W1 = new double[W1.length][W1[0].length];
+    eg2b1 = new double[b1.length];
+    eg2W2 = new double[W2.length][W2[0].length];
+  }
+
+  /**
+   * Clear all gradient histories used for AdaGrad training.
+   *
+   * @throws java.lang.IllegalStateException If not training
+   */
+  public void clearGradientHistories() {
+    validateTraining();
+    initGradientHistories();
   }
 
   private void validateTraining() {

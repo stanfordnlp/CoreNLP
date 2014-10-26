@@ -639,6 +639,7 @@ public class DependencyParser {
 
       System.err.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
 
+      // UAS evaluation
       if (devFile != null && iter % config.evalPerIter == 0) {
         // Redo precomputation with updated weights. This is only
         // necessary because we're updating weights -- for normal
@@ -656,6 +657,12 @@ public class DependencyParser {
           bestUAS = uas;
           writeModelFile(modelFile);
         }
+      }
+
+      // Clear gradients
+      if (config.clearGradientsPerIter > 0 && iter % config.clearGradientsPerIter == 0) {
+        System.err.println("Clearing gradient histories..");
+        classifier.clearGradientHistories();
       }
     }
 
