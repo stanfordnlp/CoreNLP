@@ -24,6 +24,7 @@ import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.TreeGraphNode;
 import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -541,6 +542,14 @@ public class NNParser {
   }
 
   /**
+   * Determine the number of shift-reduce transitions necessary to
+   * build a dependency parse of the given sentence.
+   */
+  private static int numTransitions(CoreMap sentence) {
+    return 2 * sentence.get(CoreAnnotations.TokensAnnotation.class).size();
+  }
+
+  /**
    * Train a new dependency parser model.
    *
    * @param trainFile Training data
@@ -816,10 +825,19 @@ public class NNParser {
   }
 
   /**
-   * Determine the number of shift-reduce transitions necessary to
-   * build a dependency parse of the given sentence.
+   * TODO document
    */
-  private static int numTransitions(CoreMap sentence) {
-    return 2 * sentence.get(CoreAnnotations.TokensAnnotation.class).size();
+  public static void main(String[] args) {
+    Properties props = StringUtils.argsToProperties(args);
+
+    NNParser parser = new NNParser(props);
+
+    if (props.containsKey("trainFile"))
+      parser.train(props.getProperty("trainFile"), props.getProperty("devFile"), props.getProperty("model"),
+          props.getProperty("embedFile"));
+
+    if (props.containsKey("testFile"))
+      parser.test(props.getProperty("testFile"), props.getProperty("model"), props.getProperty("outFile"));
   }
+
 }
