@@ -471,7 +471,7 @@ public class DependencyParser {
    */
   public void load(String modelFile) {
     Timing t = new Timing();
-    System.err.println("Model File: " + modelFile);
+    // System.err.println("Model File: " + modelFile);
 
     loadModelFile(modelFile);
     t.done("Initializing dependency parser");
@@ -479,8 +479,8 @@ public class DependencyParser {
 
   private void loadModelFile(String modelFile) {
     try {
-      System.err.println(Config.SEPARATOR);
-      System.err.println("Loading Model File: " + modelFile);
+      // System.err.println(Config.SEPARATOR);
+      System.err.println("Loading model file: " + modelFile + " ... ");
       String s;
       BufferedReader input = IOUtils.readerFromString(modelFile);
 
