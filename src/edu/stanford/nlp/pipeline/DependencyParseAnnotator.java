@@ -49,6 +49,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
   public DependencyParseAnnotator(String modelPath, int nThreads, long maxTime) {
     parser = new NNParser();
     parser.loadModelFile(modelPath);
+    parser.initialize();
 
     this.nThreads = nThreads;
     this.maxTime = maxTime;

@@ -457,10 +457,7 @@ public class NNParser
         }
         genDictionaries(trainSents, trainTrees);
 
-        //NOTE: remove -NULL-, and the pass it to ParsingSystem
-        List<String> lDict = new ArrayList<String>(labelDict);
-        lDict.remove(0);
-        system = new ArcStandard(lDict);
+        initialize();
 
         double[][] E = new double[wordDict.size() + posDict.size() + labelDict.size()][CONST.embeddingSize];
         double[][] W1 = new double[CONST.hiddenSize][CONST.embeddingSize * CONST.numTokens];
@@ -579,9 +576,7 @@ public class NNParser
 		System.out.println("Model File: " + modelFile);
 
         loadModelFile(modelFile);
-        List<String> lDict = new ArrayList<String>(labelDict);
-        lDict.remove(0);
-		system = new ArcStandard(lDict);
+        initialize();
 
 		List<Sentence> testSents = new ArrayList<Sentence>();       
         List<DependencyTree> testTrees = new ArrayList<DependencyTree>();
@@ -600,4 +595,17 @@ public class NNParser
     {
         test(testFile, modelFile, null);
     }
+
+  /**
+   * Prepare for parsing after a model has been loaded.
+   */
+  public void initialize() {
+    if (labelDict == null)
+      throw new IllegalStateException("Model has not been loaded or trained");
+
+    //NOTE: remove -NULL-, and the pass it to ParsingSystem
+    List<String> lDict = new ArrayList<>(labelDict);
+    lDict.remove(0);
+    system = new ArcStandard(lDict);
+  }
 }
