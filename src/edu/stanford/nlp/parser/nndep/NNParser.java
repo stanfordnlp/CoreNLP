@@ -658,6 +658,45 @@ public class NNParser
     return new EnglishGrammaticalStructure(dependencies, rootNode);
   }
 
+  /**
+   * Convenience method for
+   * {@link #predict(edu.stanford.nlp.util.CoreMap)}. The tokens of the
+   * provided sentence must also have tag annotations (the parser
+   * requires part-of-speech tags).
+   *
+   * @see #predict(edu.stanford.nlp.util.CoreMap)
+   */
+  public GrammaticalStructure predict(List<? extends HasWord> sentence) {
+    CoreLabel sentenceLabel = new CoreLabel();
+    List<CoreLabel> tokens = new ArrayList<>();
+
+    for (HasWord wd : sentence) {
+      CoreLabel label;
+      if (wd instanceof CoreLabel) {
+        label = (CoreLabel) wd;
+        if (label.tag() == null)
+          throw new IllegalArgumentException("Parser requires words " +
+              "with part-of-speech tag annotations");
+      } else {
+        label = new CoreLabel();
+        label.setValue(wd.word());
+        label.setWord(wd.word());
+
+        if (!(wd instanceof HasTag))
+          throw new IllegalArgumentException("Parser requires words " +
+              "with part-of-speech tag annotations");
+
+        label.setTag(((HasTag) wd).tag());
+      }
+
+      tokens.add(label);
+    }
+
+    sentenceLabel.set(CoreAnnotations.TokensAnnotation.class, tokens);
+
+    return predict(sentenceLabel);
+  }
+
   //TODO: support sentence-only files as input
   public void test(String testFile, String modelFile, String outFile) {
     System.out.println("Test File: " + testFile);
