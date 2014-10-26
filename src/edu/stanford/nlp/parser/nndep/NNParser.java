@@ -8,6 +8,9 @@
 
 package edu.stanford.nlp.parser.nndep;
 
+import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.nndep.util.ArcStandard;
 import edu.stanford.nlp.parser.nndep.util.CONST;
 import edu.stanford.nlp.parser.nndep.util.Configuration;
@@ -19,10 +22,17 @@ import edu.stanford.nlp.parser.nndep.util.Util;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
+import edu.stanford.nlp.trees.EnglishGrammaticalStructure;
+import edu.stanford.nlp.trees.GrammaticalRelation;
+import edu.stanford.nlp.trees.GrammaticalStructure;
+import edu.stanford.nlp.trees.TreeGraphNode;
+import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.util.CoreMap;
 
 import java.util.*;
 import java.io.*;
+import java.util.stream.Collectors;
 
 public class NNParser 
 {
@@ -542,7 +552,8 @@ public class NNParser
             // prediction, we just do this once in #initialize
             classifier.preCompute();
 
-            System.out.println("UAS: " + system.getUASScore(devSents, predict(devSents), devTrees));
+            List<DependencyTree> predicted = devSents.stream().map(this::predictInner).collect(Collectors.toList());
+            System.out.println("UAS: " + system.getUASScore(devSents, predicted, devTrees));
           }
         }
         writeModelFile(modelFile);
@@ -558,42 +569,82 @@ public class NNParser
 		train(trainFile, null, modelFile);
 	}
 
-  public List<DependencyTree> predict(List<CoreMap> sents, boolean silent) {
-    if (!silent)
-      System.out.println("Prediction..");
-
+  /**
+   * Determine the dependency parse of the given sentence.
+   *
+   * This "inner" method returns a structure unique to this package;
+   * use {@link #predict(edu.stanford.nlp.util.CoreMap)} for general
+   * parsing purposes.
+   */
+  private DependencyTree predictInner(CoreMap sentence) {
     int numTrans = system.transitions.size();
 
-    long startTime = System.currentTimeMillis();
-    List<DependencyTree> trees = new ArrayList<DependencyTree>();
-    for (int i = 0; i < sents.size(); ++i) {
-      if (!silent && i % 100 == 0)
-        System.out.println("DATA " + i);
+    Configuration c = system.initialConfiguration(sentence);
+    for (int k = 0; k < numTransitions(sentence); ++k) {
+      double[] scores = classifier.computeScores(getFeatures(c));
 
-      Configuration c = system.initialConfiguration(sents.get(i));
-      for (int k = 0; k < numTransitions(sents.get(i)); ++k) {
-        double[] scores = classifier.computeScores(getFeatures(c));
-        double optScore = Double.NEGATIVE_INFINITY;
-        String optTrans = null;
-        for (int j = 0; j < numTrans; ++j)
-          if (scores[j] > optScore)
-            if (system.canApply(c, system.transitions.get(j))) {
-              optScore = scores[j];
-              optTrans = system.transitions.get(j);
-            }
-        system.apply(c, optTrans);
+      double optScore = Double.NEGATIVE_INFINITY;
+      String optTrans = null;
+
+      for (int j = 0; j < numTrans; ++j) {
+        if (scores[j] > optScore && system.canApply(c, system.transitions.get(j))) {
+          optScore = scores[j];
+          optTrans = system.transitions.get(j);
+        }
       }
-      trees.add(c.tree);
+
+      system.apply(c, optTrans);
     }
-    if (!silent)
-      System.out.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
-    return trees;
+
+    return c.tree;
   }
 
-    public List<DependencyTree> predict(List<CoreMap> sents)
-    {
-        return predict(sents, true);
+  /**
+   * Determine the dependency parse of the given sentence using the
+   * loaded model. You must first initialize the parser after loading
+   * or training a model using {@link #initialize()}.
+   *
+   * @throws java.lang.IllegalStateException If parser has not yet been
+   *         properly initialized (see {@link #initialize()}
+   */
+  public GrammaticalStructure predict(CoreMap sentence) {
+    if (system == null)
+      throw new IllegalStateException("Parser has not been properly " +
+          "initialized; first load a model and call .initialize()");
+
+    DependencyTree result = predictInner(sentence);
+
+    // The rest of this method is just busy-work to convert the
+    // package-local representation into a CoreNLP-standard
+    // GrammaticalStructure.
+
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    List<TypedDependency> dependencies = new ArrayList<>();
+
+    IndexedWord root = new IndexedWord(new Word("ROOT-" + (tokens.size() + 1)));
+    root.set(CoreAnnotations.IndexAnnotation.class, -1);
+
+    for (int i = 1; i < result.n; i++) {
+      int head = result.getHead(i);
+      String label = result.getLabel(i);
+
+      IndexedWord thisWord = new IndexedWord(tokens.get(i - 1));
+      IndexedWord headWord = head == 0 ? root
+                                       : new IndexedWord(tokens.get(head - 1));
+
+      // TODO English-specific
+      GrammaticalRelation relation = head == 0
+                                     ? GrammaticalRelation.ROOT
+                                     : EnglishGrammaticalRelations.shortNameToGRel.get(label);
+
+      dependencies.add(new TypedDependency(relation, headWord, thisWord));
     }
+
+    // Build GrammaticalStructure
+    // TODO ideally submodule should just return GrammaticalStructure
+    TreeGraphNode rootNode = new TreeGraphNode(root);
+    return new EnglishGrammaticalStructure(dependencies, rootNode);
+  }
 
   //TODO: support sentence-only files as input
   public void test(String testFile, String modelFile, String outFile) {
@@ -607,13 +658,13 @@ public class NNParser
     List<DependencyTree> testTrees = new ArrayList<DependencyTree>();
     Util.loadConllFile(testFile, testSents, testTrees);
 
-    List<DependencyTree> trees = predict(testSents, false);
-    Map<String, Double> result = system.evaluate(testSents, trees, testTrees);
+    List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(Collectors.toList());
+    Map<String, Double> result = system.evaluate(testSents, predicted, testTrees);
     System.out.println("UAS = " + result.get("UASwoPunc"));
     System.out.println("LAS = " + result.get("LASwoPunc"));
 
     if (outFile != null)
-      Util.writeConllFile(outFile, testSents, trees);
+      Util.writeConllFile(outFile, testSents, predicted);
   }
 
   public void test(String testFile, String modelFile) {

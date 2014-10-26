@@ -72,35 +72,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
 
   @Override
   protected void doOneSentence(Annotation annotation, CoreMap sentence) {
-    // TODO some asymmetry -- wrapped class expects a sentence
-    // collection. It'd be nice to pass one-by-one and let the
-    // SentenceAnnotator superclass handle multicore processing
-    List<DependencyTree> results = parser.predict(Arrays.asList(sentence));
-
-    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    List<TypedDependency> dependencies = new ArrayList<>();
-    DependencyTree result = results.get(0);
-
-    IndexedWord root = new IndexedWord(new Word("ROOT-" + (tokens.size() + 1)));
-    root.set(CoreAnnotations.IndexAnnotation.class, -1);
-
-    for (int i = 1; i < result.n; i++) {
-      int head = result.getHead(i);
-      String label = result.getLabel(i);
-
-      IndexedWord thisWord = new IndexedWord(tokens.get(i - 1)),
-          headWord = head == 0 ? root : new IndexedWord(tokens.get(head - 1));
-
-      GrammaticalRelation relation = head == 0
-          ? GrammaticalRelation.ROOT : EnglishGrammaticalRelations.shortNameToGRel.get(label);
-      dependencies.add(new TypedDependency(relation, headWord, thisWord));
-    }
-
-    // Build GrammaticalStructure
-    // TODO ideally submodule should just return GrammaticalStructure
-    GrammaticalStructureFromDependenciesFactory gsf = new EnglishGrammaticalStructure.FromDependenciesFactory();
-    TreeGraphNode rootNode = new TreeGraphNode(root);
-    GrammaticalStructure gs = gsf.build(dependencies, rootNode);
+    GrammaticalStructure gs = parser.predict(sentence);
 
     SemanticGraph deps = SemanticGraphFactory.generateCollapsedDependencies(gs),
         uncollapsedDeps = SemanticGraphFactory.generateUncollapsedDependencies(gs),
