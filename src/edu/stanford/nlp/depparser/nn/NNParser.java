@@ -16,6 +16,7 @@ import edu.stanford.nlp.depparser.util.IntCounter;
 import edu.stanford.nlp.depparser.util.ParsingSystem;
 import edu.stanford.nlp.depparser.util.Sentence;
 import edu.stanford.nlp.depparser.util.Util;
+import edu.stanford.nlp.io.IOUtils;
 
 import java.util.*;
 import java.io.*;
@@ -305,8 +306,8 @@ public class NNParser
             System.out.println(CONST.SEPARATOR);
 			System.out.println("Loading Model File: " + modelFile);
 			String s;
-			BufferedReader input = new BufferedReader(new FileReader(modelFile));
-			
+      BufferedReader input = IOUtils.getBufferedReaderFromClasspathOrFileSystem(modelFile);
+
 			int nDict, nPOS, nLabel;
 			int eSize, hSize, nTokens, nPreComputed;
             nDict = nPOS = nLabel = eSize = hSize = nTokens = nPreComputed = 0;
