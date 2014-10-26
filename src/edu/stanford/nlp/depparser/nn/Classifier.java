@@ -15,6 +15,7 @@ import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class Classifier 
 {
@@ -139,18 +140,11 @@ public class Classifier
         double[] hidden = new double[hiddenSize];
         double[] hidden3 = new double[hiddenSize];
 
-        // Run dropout: randomly drop some hidden-layer units
-        List<Integer> unDropped = new ArrayList<Integer>();
-        int numH = 0;
-        for (int i = 0; i < hiddenSize; ++i) {
-          if (random.nextDouble() > params.getDropOutProb()) {
-            numH += 1;
-            unDropped.add(i);
-          }
-        }
-
-        // Unit IDs which are still active
-        int[] ls = CollectionUtils.asIntArray(unDropped);
+        // Run dropout: randomly drop some hidden-layer units. `ls`
+        // contains the indices of those units which are still active
+        int[] ls = IntStream.range(0, hiddenSize)
+                            .filter(n -> random.nextDouble() > params.getDropOutProb())
+                            .toArray();
 
         int offset = 0;
         for (int j = 0; j < numTokens; ++j) {
