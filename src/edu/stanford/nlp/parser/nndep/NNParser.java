@@ -8,6 +8,7 @@
 
 package edu.stanford.nlp.parser.nndep;
 
+import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.Word;
@@ -29,6 +30,7 @@ import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.TreeGraphNode;
 import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 import java.util.*;
 import java.io.*;
@@ -51,6 +53,10 @@ public class NNParser
     double[][] embeddings;
 
   private final Config config;
+
+  NNParser() {
+    this(new Properties());
+  }
 
   public NNParser(Properties properties) {
     config = new Config(properties);
@@ -320,8 +326,18 @@ public class NNParser
 		catch (Exception e) { System.out.println(e); }
 	}
 
+  public static NNParser loadFromModelFile(String modelFile) {
+    return loadFromModelFile(modelFile, null);
+  }
+
+  public static NNParser loadFromModelFile(String modelFile, Properties extraProperties) {
+    NNParser parser = extraProperties == null ? new NNParser() : new NNParser(extraProperties);
+    parser.loadModelFile(modelFile);
+    return parser;
+  }
+
   // TODO replace with GrammaticalStructure's CoNLL loader
-  public void loadModelFile(String modelFile) {
+  private void loadModelFile(String modelFile) {
     try {
       System.out.println(CONST.SEPARATOR);
       System.out.println("Loading Model File: " + modelFile);
