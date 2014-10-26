@@ -35,6 +35,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -312,7 +313,8 @@ public class NNParser {
       double[][] W2 = classifier.getW2();
       double[][] E = classifier.getE();
 
-      BufferedWriter output = new BufferedWriter(new FileWriter(modelFile));
+      Writer output = IOUtils.getPrintWriter(modelFile);
+
       output.write("dict=" + knownWords.size() + "\n");
       output.write("pos=" + knownPos.size() + "\n");
       output.write("label=" + knownLabels.size() + "\n");
