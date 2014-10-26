@@ -592,7 +592,7 @@ public class DependencyParser {
     double[] b1 = new double[config.hiddenSize];
     double[][] W2 = new double[knownLabels.size() * 2 - 1][config.hiddenSize];
 
-    Random random = new Random();
+    Random random = Util.getRandom();
     for (int i = 0; i < W1.length; ++i)
       for (int j = 0; j < W1[i].length; ++j)
         W1[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;

@@ -25,7 +25,7 @@ class Util {
 
   private Util() {} // static methods
 
-  private static final Random random = new Random();
+  private static Random random;
 
   // return strings sorted by frequency, and filter out those with freq. less than cutOff.
 
@@ -57,12 +57,35 @@ class Util {
     return generateDict(str, 1);
   }
 
+  /**
+   * @return Shared random generator used in this package
+   */
+  static Random getRandom() {
+    if (random != null)
+      return random;
+    else
+      return getRandom(System.currentTimeMillis());
+  }
+
+  /**
+   * Set up shared random generator to use the given seed.
+   *
+   * @return Shared random generator object
+   */
+  static Random getRandom(long seed) {
+    random = new Random(seed);
+    System.err.printf("Random generator initialized with seed %d%n", seed);
+
+    return random;
+  }
+
   public static <T> List<T> getRandomSubList(List<T> input, int subsetSize)
   {
     int inputSize = input.size();
     if (subsetSize > inputSize)
       subsetSize = inputSize;
 
+    Random random = getRandom();
     for (int i = 0; i < subsetSize; i++)
     {
       int indexToSwap = i + random.nextInt(inputSize - i);

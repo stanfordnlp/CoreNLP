@@ -172,12 +172,14 @@ public class Classifier {
     private double[][] gradW2;
     private double[][] gradE;
 
-    private final ThreadLocalRandom random = ThreadLocalRandom.current();
-
     @Override
     public Cost process(Pair<Collection<Example>, FeedforwardParams> input) {
       Collection<Example> examples = input.first();
       FeedforwardParams params = input.second();
+
+      // We can't fix the seed used with ThreadLocalRandom
+      // TODO: Is this a serious problem?
+      ThreadLocalRandom random = ThreadLocalRandom.current();
 
       gradW1 = new double[W1.length][W1[0].length];
       gradb1 = new double[b1.length];
