@@ -73,7 +73,6 @@ public class Util
 
     CoreMap sentence = new CoreLabel();
     List<CoreLabel> sentenceTokens = new ArrayList<>();
-    sentence.set(CoreAnnotations.TokensAnnotation.class, sentenceTokens);
 
     DependencyTree tree = new DependencyTree();
 
@@ -81,10 +80,12 @@ public class Util
       String[] splits = line.split("\t");
       if (splits.length < 10) {
         trees.add(tree);
+        sentence.set(CoreAnnotations.TokensAnnotation.class, sentenceTokens);
         sents.add(sentence);
-        tree = new DependencyTree();
 
+        tree = new DependencyTree();
         sentence = new CoreLabel();
+        sentenceTokens = new ArrayList<>();
       } else {
         String word = splits[1],
             pos = splits[4],
@@ -95,6 +96,7 @@ public class Util
         token.setTag(pos);
         token.set(CoreAnnotations.CoNLLDepParentIndexAnnotation.class, head);
         token.set(CoreAnnotations.CoNLLDepTypeAnnotation.class, depType);
+        sentenceTokens.add(token);
 
         if (labeled)
           tree.add(head, depType);
