@@ -25,7 +25,6 @@ import edu.stanford.nlp.util.Timing;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -85,7 +84,7 @@ public class DependencyParser {
    */
   private Map<String, Integer> wordIDs, posIDs, labelIDs;
 
-  List<Integer> preComputed;
+  private List<Integer> preComputed;
 
   /**
    * Given a particular parser configuration, this classifier will
@@ -463,8 +462,19 @@ public class DependencyParser {
   public static DependencyParser loadFromModelFile(String modelFile, Properties extraProperties) {
     DependencyParser parser = extraProperties == null ? new DependencyParser() : new DependencyParser(extraProperties);
     parser.loadModelFile(modelFile);
-    parser.initialize();
     return parser;
+  }
+
+  /** Loads a parser
+   *
+   *  @param modelFile The file (classpath resource, etc.) to load the model from.
+   */
+  public void load(String modelFile) {
+    Timing t = new Timing();
+    System.err.println("Model File: " + modelFile);
+
+    loadModelFile(modelFile);
+    t.done("Initializing dependency parser");
   }
 
   private void loadModelFile(String modelFile) {
@@ -577,6 +587,9 @@ public class DependencyParser {
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
+
+    // initialize the loaded parser
+    initialize();
   }
 
   private void readEmbedFile(String embedFile) {
@@ -791,15 +804,15 @@ public class DependencyParser {
   }
 
   /**
-   * Determine the dependency parse of the given sentence using the loaded model. You must first initialize the parser
-   * after loading or training a model using {@link #initialize()}.
+   * Determine the dependency parse of the given sentence using the loaded model.
+   * You must first load a parser before calling this method.
    *
-   * @throws java.lang.IllegalStateException If parser has not yet been properly initialized (see {@link #initialize()}
+   * @throws java.lang.IllegalStateException If parser has not yet been loaded and initialized (see {@link #initialize()}
    */
   public GrammaticalStructure predict(CoreMap sentence) {
     if (system == null)
-      throw new IllegalStateException("Parser has not been properly " +
-          "initialized; first load a model and call .initialize()");
+      throw new IllegalStateException("Parser has not been  " +
+          "loaded and initialized; first load a model.");
 
     DependencyTree result = predictInner(sentence);
 
@@ -873,19 +886,6 @@ public class DependencyParser {
   }
 
   //TODO: support sentence-only files as input
-
-  /** Loads a parser
-   *
-   *  @param modelFile The file (classpath resource, etc.) to load the model from.
-   */
-  public void load(String modelFile) {
-    Timing t = new Timing();
-    System.err.println("Model File: " + modelFile);
-
-    loadModelFile(modelFile);
-    initialize();
-    t.done("Initializing dependency parser");
-  }
 
   /** Run the parser in the modelFile on a testFile and perhaps save output.
    *
@@ -965,19 +965,20 @@ public class DependencyParser {
   /**
    * Prepare for parsing after a model has been loaded.
    */
-  public void initialize() {
+  private void initialize() {
     if (knownLabels == null)
       throw new IllegalStateException("Model has not been loaded or trained");
 
-    //NOTE: remove -NULL-, and the pass it to ParsingSystem
+    // NOTE: remove -NULL-, and then pass the label set to the ParsingSystem
     List<String> lDict = new ArrayList<>(knownLabels);
     lDict.remove(0);
 
     system = new ArcStandard(config.tlp, lDict);
 
     // Pre-compute matrix multiplications
-    if (config.numPreComputed > 0)
+    if (config.numPreComputed > 0) {
       classifier.preCompute();
+    }
   }
 
   /**
@@ -1086,7 +1087,7 @@ public class DependencyParser {
       BufferedReader input;
       try {
         input = inputFilename.equals("-")
-                ? new BufferedReader(new InputStreamReader(System.in, encoding))
+                ? IOUtils.readerFromStdin(encoding)
                 : IOUtils.readerFromString(inputFilename, encoding);
       } catch (IOException e) {
         throw new RuntimeIOException("No input file provided (use -parseFile)", e);
@@ -1105,4 +1106,5 @@ public class DependencyParser {
       parser.parseTextFile(input, output);
     }
   }
+
 }
