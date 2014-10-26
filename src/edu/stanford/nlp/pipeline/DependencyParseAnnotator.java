@@ -9,6 +9,7 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.util.CoreMap;
@@ -85,8 +86,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
       IndexedWord thisWord = new IndexedWord(tokens.get(i - 1)),
           headWord = new IndexedWord(tokens.get(head - 1));
 
-      GrammaticalRelation relation = new GrammaticalRelation(GrammaticalRelation.Language.English,
-          label, label, null);
+      GrammaticalRelation relation = EnglishGrammaticalRelations.shortNameToGRel.get(label);
       dependencies.add(new TypedDependency(relation, headWord, thisWord));
 
       if (head == 0)
