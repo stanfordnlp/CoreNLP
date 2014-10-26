@@ -145,13 +145,13 @@ class Util {
       }
       output.close();
     }
-    catch (Exception e) { System.out.println(e); }
+    catch (Exception e) { System.err.println(e); }
   }
 
   public static void printTreeStats(String str, List<DependencyTree> trees)
   {
-    System.out.println(CONST.SEPARATOR + " " + str);
-    System.out.println("#Trees: " + trees.size());
+    System.err.println(CONST.SEPARATOR + " " + str);
+    System.err.println("#Trees: " + trees.size());
     int nonTrees = 0;
     int nonProjective = 0;
     for (int k = 0; k < trees.size(); ++ k)
@@ -161,8 +161,8 @@ class Util {
       else if (!trees.get(k).isProjective())
         ++ nonProjective;
     }
-    System.out.println(nonTrees + " tree(s) are illegal.");
-    System.out.println(nonProjective + " tree(s) are legal but not projective.");
+    System.err.println(nonTrees + " tree(s) are illegal.");
+    System.err.println(nonProjective + " tree(s) are legal but not projective.");
   }
 
   public static void printTreeStats(List<DependencyTree> trees)

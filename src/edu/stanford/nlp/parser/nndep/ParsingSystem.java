@@ -104,10 +104,10 @@ public abstract class ParsingSystem {
     rootLabel = labels.get(0);
     makeTransitions();
 
-    System.out.println(CONST.SEPARATOR);
-    System.out.println("#Transitions: " + transitions.size());
-    System.out.println("#Labels: " + labels.size());
-    System.out.println("ROOTLABEL: " + rootLabel);
+    System.err.println(CONST.SEPARATOR);
+    System.err.println("#Transitions: " + transitions.size());
+    System.err.println("#Labels: " + labels.size());
+    System.err.println("ROOTLABEL: " + rootLabel);
   }
 
   public int getTransitionID(String s) {
@@ -141,7 +141,7 @@ public abstract class ParsingSystem {
     Set<String> punctuationTags = getPunctuationTags();
 
     if (trees.size() != goldTrees.size()) {
-      System.out.println("[Error] Incorrect number of trees.");
+      System.err.println("[Error] Incorrect number of trees.");
       return null;
     }
 
@@ -161,11 +161,11 @@ public abstract class ParsingSystem {
       List<CoreLabel> tokens = sentences.get(i).get(CoreAnnotations.TokensAnnotation.class);
 
       if (trees.get(i).n != goldTrees.get(i).n) {
-        System.out.println("[Error] Tree " + (i + 1) + ": incorrect number of nodes.");
+        System.err.println("[Error] Tree " + (i + 1) + ": incorrect number of nodes.");
         return null;
       }
       if (!trees.get(i).isTree()) {
-        System.out.println("[Error] Tree " + (i + 1) + ": illegal.");
+        System.err.println("[Error] Tree " + (i + 1) + ": illegal.");
         return null;
       }
 

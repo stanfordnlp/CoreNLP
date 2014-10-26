@@ -183,15 +183,15 @@ public class NNParser {
     Dataset ret = new Dataset(config.numTokens, system.transitions.size());
 
     Counter<Integer> tokPosCount = new IntCounter<>();
-    System.out.println(CONST.SEPARATOR);
-    System.out.println("Generate training examples...");
+    System.err.println(CONST.SEPARATOR);
+    System.err.println("Generate training examples...");
 
     for (int i = 0; i < sents.size(); ++i) {
       if (i > 0) {
         if (i % 1000 == 0)
-          System.out.print(i + " ");
+          System.err.print(i + " ");
         if (i % 10000 == 0 || i == sents.size() - 1)
-          System.out.println();
+          System.err.println();
       }
 
       if (trees.get(i).isProjective()) {
@@ -215,7 +215,7 @@ public class NNParser {
         }
       }
     }
-    System.out.println("#Train Examples: " + ret.n);
+    System.err.println("#Train Examples: " + ret.n);
 
     Counters.retainTop(tokPosCount, config.numPreComputed);
     preComputed = new ArrayList<>(tokPosCount.keySet());
@@ -406,8 +406,8 @@ public class NNParser {
   // TODO replace with GrammaticalStructure's CoNLL loader
   private void loadModelFile(String modelFile) {
     try {
-      System.out.println(CONST.SEPARATOR);
-      System.out.println("Loading Model File: " + modelFile);
+      System.err.println(CONST.SEPARATOR);
+      System.err.println("Loading Model File: " + modelFile);
       String s;
       BufferedReader input = IOUtils.readerFromString(modelFile);
 
@@ -417,7 +417,7 @@ public class NNParser {
 
       for (int k = 0; k < 7; ++k) {
         s = input.readLine();
-        System.out.println(s);
+        System.err.println(s);
         int number = Integer.parseInt(s.substring(s.indexOf("=") + 1, s.length()));
         switch (k) {
           case 0:
@@ -504,7 +504,7 @@ public class NNParser {
       input.close();
       classifier = new Classifier(config, E, W1, b1, W2, preComputed);
     } catch (Exception e) {
-      System.out.println(e);
+      e.printStackTrace();
     }
   }
 
@@ -525,9 +525,9 @@ public class NNParser {
 
       int dim = splits.length - 1;
       embeddings = new double[nWords][dim];
-      System.out.println("Embedding File " + embedFile + ": #Words = " + nWords + ", dim = " + dim);
+      System.err.println("Embedding File " + embedFile + ": #Words = " + nWords + ", dim = " + dim);
       if (dim != config.embeddingSize)
-        System.out.println("ERROR: embedding dimension mismatch");
+        System.err.println("ERROR: embedding dimension mismatch");
 
       for (int i = 0; i < lines.size(); ++i) {
         splits = lines.get(i).split("\\s+");
@@ -536,7 +536,7 @@ public class NNParser {
           embeddings[i][j] = Double.parseDouble(splits[j + 1]);
       }
     } catch (Exception e) {
-      System.out.println(e);
+      e.printStackTrace();
     }
   }
 
@@ -551,10 +551,10 @@ public class NNParser {
    *                  training corpus
    */
   public void train(String trainFile, String devFile, String modelFile, String embedFile) {
-    System.out.println("Train File: " + trainFile);
-    System.out.println("Dev File: " + devFile);
-    System.out.println("Model File: " + modelFile);
-    System.out.println("Embedding File: " + embedFile);
+    System.err.println("Train File: " + trainFile);
+    System.err.println("Dev File: " + devFile);
+    System.err.println("Model File: " + modelFile);
+    System.err.println("Embedding File: " + embedFile);
 
     List<CoreMap> trainSents = new ArrayList<>();
     List<DependencyTree> trainTrees = new ArrayList<DependencyTree>();
@@ -611,7 +611,7 @@ public class NNParser {
           E[i][j] = random.nextDouble() * config.initRange * 2 - config.initRange;
       }
     }
-    System.out.println("Found embeddings: " + foundEmbed + " / " + knownWords.size());
+    System.err.println("Found embeddings: " + foundEmbed + " / " + knownWords.size());
 
     Dataset trainSet = genTrainExamples(trainSents, trainTrees);
     classifier = new Classifier(config, trainSet, E, W1, b1, W2, preComputed);
@@ -619,13 +619,13 @@ public class NNParser {
     //TODO: save the best intermediate parameters
     long startTime = System.currentTimeMillis();
     for (int iter = 0; iter < config.maxIter; ++iter) {
-      System.out.println("##### Iteration " + iter);
+      System.err.println("##### Iteration " + iter);
 
       Classifier.Cost cost = classifier.computeCostFunction(config.batchSize, config.regParameter, config.dropProb);
-      System.out.println("Cost = " + cost.getCost() + ", Correct(%) = " + cost.getPercentCorrect());
+      System.err.println("Cost = " + cost.getCost() + ", Correct(%) = " + cost.getPercentCorrect());
       classifier.takeAdaGradientStep(cost, config.adaAlpha, config.adaEps);
 
-      System.out.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
+      System.err.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
 
       if (devFile != null && iter % config.evalPerIter == 0) {
         // Redo precomputation with updated weights. This is only
@@ -634,7 +634,7 @@ public class NNParser {
         classifier.preCompute();
 
         List<DependencyTree> predicted = devSents.stream().map(this::predictInner).collect(Collectors.toList());
-        System.out.println("UAS: " + system.getUASScore(devSents, predicted, devTrees));
+        System.err.println("UAS: " + system.getUASScore(devSents, predicted, devTrees));
       }
     }
 
@@ -772,8 +772,8 @@ public class NNParser {
    *  @return The LAS score on the dataset
    */
   public double test(String testFile, String modelFile, String outFile) {
-    System.out.println("Test File: " + testFile);
-    System.out.println("Model File: " + modelFile);
+    System.err.println("Test File: " + testFile);
+    System.err.println("Model File: " + modelFile);
 
     loadModelFile(modelFile);
     initialize();
@@ -785,8 +785,8 @@ public class NNParser {
     List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(Collectors.toList());
     Map<String, Double> result = system.evaluate(testSents, predicted, testTrees);
     double lasNoPunc = result.get("LASwoPunc");
-    System.out.println("UAS = " + result.get("UASwoPunc"));
-    System.out.println("LAS = " + lasNoPunc);
+    System.err.println("UAS = " + result.get("UASwoPunc"));
+    System.err.println("LAS = " + lasNoPunc);
 
     if (outFile != null) {
       Util.writeConllFile(outFile, testSents, predicted);
