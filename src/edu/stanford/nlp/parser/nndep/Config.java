@@ -105,6 +105,13 @@ public class Config
   public int evalPerIter = 100;
 
   /**
+   * Save an intermediate model file whenever we see an improved UAS
+   * evaluation. (The frequency of these evaluations is configurable as
+   * well; see {@link #evalPerIter}.)
+   */
+  public boolean saveIntermediate = true;
+
+  /**
    * Describes language-specific properties necessary for training and
    * testing. By default,
    * {@link edu.stanford.nlp.trees.PennTreebankLanguagePack} will be
@@ -128,9 +135,9 @@ public class Config
     dropProb = PropertiesUtils.getDouble(props, "dropProb", dropProb);
     hiddenSize = PropertiesUtils.getInt(props, "hiddenSize", hiddenSize);
     embeddingSize = PropertiesUtils.getInt(props, "embeddingSize", embeddingSize);
-    numTokens = PropertiesUtils.getInt(props, "numTokens", numTokens);
     numPreComputed = PropertiesUtils.getInt(props, "numPreComputed", numPreComputed);
     evalPerIter = PropertiesUtils.getInt(props, "evalPerIter", evalPerIter);
+    saveIntermediate = PropertiesUtils.getBool(props, "saveIntermediate", saveIntermediate);
 
     String tlpClass = PropertiesUtils.getString(props, "tlp",
         "edu.stanford.nlp.trees.PennTreebankLanguagePack");

@@ -627,8 +627,13 @@ public class DependencyParser {
     Dataset trainSet = genTrainExamples(trainSents, trainTrees);
     classifier = new Classifier(config, trainSet, E, W1, b1, W2, preComputed);
 
-    //TODO: save the best intermediate parameters
     long startTime = System.currentTimeMillis();
+
+    /**
+     * Track the best UAS performance we've seen.
+     */
+    double bestUAS = 0;
+
     for (int iter = 0; iter < config.maxIter; ++iter) {
       System.err.println("##### Iteration " + iter);
 
@@ -645,7 +650,16 @@ public class DependencyParser {
         classifier.preCompute();
 
         List<DependencyTree> predicted = devSents.stream().map(this::predictInner).collect(Collectors.toList());
-        System.err.println("UAS: " + system.getUASScore(devSents, predicted, devTrees));
+
+        double uas = system.getUASScore(devSents, predicted, devTrees);
+        System.err.println("UAS: " + uas);
+
+        if (config.saveIntermediate && uas > bestUAS) {
+          System.err.printf("Exceeds best previous UAS of %f. Saving model file..%n", bestUAS);
+
+          bestUAS = uas;
+          writeModelFile(modelFile);
+        }
       }
     }
 
