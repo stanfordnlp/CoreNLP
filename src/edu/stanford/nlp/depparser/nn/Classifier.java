@@ -212,18 +212,16 @@ public class Classifier
         for (int i = 0; i < numLabels; ++i)
           if (label.get(i) >= 0) {
             double delta = -(label.get(i) - scores[i] / sum2) / examples.size();
-            for (int lj = 0; lj < numH; ++lj) {
-              int j = ls[lj];
-              gradW2[i][j] += delta * hidden3[j];
-              gradHidden3[j] += delta * W2[i][j];
+            for (int nodeIndex : ls) {
+              gradW2[i][nodeIndex] += delta * hidden3[nodeIndex];
+              gradHidden3[nodeIndex] += delta * W2[i][nodeIndex];
             }
           }
 
         double[] gradHidden = new double[hiddenSize];
-        for (int li = 0; li < numH; ++li) {
-          int i = ls[li];
-          gradHidden[i] = gradHidden3[i] * 3 * hidden[i] * hidden[i];
-          gradb1[i] += gradHidden3[i];
+        for (int nodeIndex : ls) {
+          gradHidden[nodeIndex] = gradHidden3[nodeIndex] * 3 * hidden[nodeIndex] * hidden[nodeIndex];
+          gradb1[nodeIndex] += gradHidden3[nodeIndex];
         }
 
         offset = 0;
@@ -232,14 +230,13 @@ public class Classifier
           int index = tok * numTokens + j;
           if (preMap.containsKey(index)) {
             int id = preMap.get(index);
-            for (int li = 0; li < numH; ++li)
-              gradSaved[id][ls[li]] += gradHidden[ls[li]];
+            for (int nodeIndex : ls)
+              gradSaved[id][nodeIndex] += gradHidden[nodeIndex];
           } else {
-            for (int li = 0; li < numH; ++li) {
-              int i = ls[li];
+            for (int nodeIndex : ls) {
               for (int k = 0; k < embeddingSize; ++k) {
-                gradW1[i][offset + k] += gradHidden[i] * E[tok][k];
-                gradE[tok][k] += gradHidden[i] * W1[i][offset + k];
+                gradW1[nodeIndex][offset + k] += gradHidden[nodeIndex] * E[tok][k];
+                gradE[tok][k] += gradHidden[nodeIndex] * W1[nodeIndex][offset + k];
               }
             }
           }
