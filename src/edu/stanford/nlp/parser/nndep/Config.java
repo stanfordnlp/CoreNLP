@@ -136,6 +136,12 @@ public class Config
   public int evalPerIter = 100;
 
   /**
+   * During training, clear AdaGrad gradient histories after every
+   * {@code clearGradientsPerIter} iterations.
+   */
+  public int clearGradientsPerIter = 0;
+
+  /**
    * Save an intermediate model file whenever we see an improved UAS
    * evaluation. (The frequency of these evaluations is configurable as
    * well; see {@link #evalPerIter}.)
@@ -168,27 +174,30 @@ public class Config
     embeddingSize = PropertiesUtils.getInt(props, "embeddingSize", embeddingSize);
     numPreComputed = PropertiesUtils.getInt(props, "numPreComputed", numPreComputed);
     evalPerIter = PropertiesUtils.getInt(props, "evalPerIter", evalPerIter);
+    clearGradientsPerIter = PropertiesUtils.getInt(props, "clearGradientsPerIter", clearGradientsPerIter);
     saveIntermediate = PropertiesUtils.getBool(props, "saveIntermediate", saveIntermediate);
+
     language = PropertiesUtils.getString(props, "language", language);
     String tlpClass = language.equals("Chinese") ? "edu.stanford.nlp.trees.international.pennchinese.ChineseTreebankLanguagePack" : "edu.stanford.nlp.trees.PennTreebankLanguagePack";
     tlp = ReflectionLoading.loadByReflection(tlpClass);
   }
 
   public void printParameters() {
-      System.err.printf("language = %s%n", language);
-      System.err.printf("trainingThreads = %d%n", trainingThreads);
-      System.err.printf("wordCutOff = %d%n", wordCutOff);
-      System.err.printf("initRange = %.2g%n", initRange);
-      System.err.printf("maxIter = %d%n", maxIter);
-      System.err.printf("batchSize = %d%n", batchSize);
-      System.err.printf("adaEps = %.2g%n", adaEps);
-      System.err.printf("adaAlpha = %.2g%n", adaAlpha);
-      System.err.printf("regParameter = %.2g%n", regParameter);
-      System.err.printf("dropProb = %.2g%n", dropProb);
-      System.err.printf("hiddenSize = %d%n", hiddenSize);
-      System.err.printf("embeddingSize = %d%n", embeddingSize);
-      System.err.printf("numPreComputed = %d%n", numPreComputed);
-      System.err.printf("evalPerIter = %d%n", evalPerIter);
-      System.err.printf("saveItermediate = %b%n", saveIntermediate);
+    System.err.printf("language = %s%n", language);
+    System.err.printf("trainingThreads = %d%n", trainingThreads);
+    System.err.printf("wordCutOff = %d%n", wordCutOff);
+    System.err.printf("initRange = %.2g%n", initRange);
+    System.err.printf("maxIter = %d%n", maxIter);
+    System.err.printf("batchSize = %d%n", batchSize);
+    System.err.printf("adaEps = %.2g%n", adaEps);
+    System.err.printf("adaAlpha = %.2g%n", adaAlpha);
+    System.err.printf("regParameter = %.2g%n", regParameter);
+    System.err.printf("dropProb = %.2g%n", dropProb);
+    System.err.printf("hiddenSize = %d%n", hiddenSize);
+    System.err.printf("embeddingSize = %d%n", embeddingSize);
+    System.err.printf("numPreComputed = %d%n", numPreComputed);
+    System.err.printf("evalPerIter = %d%n", evalPerIter);
+    System.err.printf("clearGradientsPerIter = %d%n", clearGradientsPerIter);
+    System.err.printf("saveItermediate = %b%n", saveIntermediate);
   }
 }
