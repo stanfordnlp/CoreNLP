@@ -30,6 +30,8 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * This class defines a transition-based dependency parser which makes
  * use of a classifier powered by a neural network. The neural network
@@ -649,7 +651,7 @@ public class DependencyParser {
         // prediction, we just do this once in #initialize
         classifier.preCompute();
 
-        List<DependencyTree> predicted = devSents.stream().map(this::predictInner).collect(Collectors.toList());
+        List<DependencyTree> predicted = devSents.stream().map(this::predictInner).collect(toList());
 
         double uas = system.getUASScore(devSents, predicted, devTrees);
         System.err.println("UAS: " + uas);
@@ -665,7 +667,21 @@ public class DependencyParser {
 
     classifier.finalizeTraining();
 
-    writeModelFile(modelFile);
+    if (devFile != null) {
+      // Do final UAS evaluation and save if final model beats the
+      // best intermediate one
+      List<DependencyTree> predicted = devSents.stream().map(this::predictInner).collect(toList());
+      double uas = system.getUASScore(devSents, predicted, devTrees);
+
+      if (uas > bestUAS) {
+        System.err.printf("Final model UAS: %f%n", uas);
+        System.err.printf("Exceeds best previous UAS of %f. Saving model file..%n", bestUAS);
+
+        writeModelFile(modelFile);
+      }
+    } else {
+      writeModelFile(modelFile);
+    }
   }
 
   public void train(String trainFile, String devFile, String modelFile) {
@@ -822,7 +838,7 @@ public class DependencyParser {
       numWords += testSent.get(CoreAnnotations.TokensAnnotation.class).size();
     }
 
-    List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(Collectors.toList());
+    List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(toList());
     Map<String, Double> result = system.evaluate(testSents, predicted, testTrees);
     double lasNoPunc = result.get("LASwoPunc");
     System.err.printf("UAS = %.4f%n", result.get("UASwoPunc"));
