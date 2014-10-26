@@ -26,7 +26,7 @@ import java.io.*;
 public class NNParser 
 {
 
-  public static final String DEFAULT_MODEL = "edu/stanford/nlp/depparser/nn/english.txt";
+  public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/depparser/nn/PTB_Stanford_params.txt.gz";
 
 	List<String> wordDict, posDict, labelDict;
 	Map<String, Integer> wordMap, posMap, labelMap;
