@@ -426,8 +426,32 @@ public class Classifier
 
   }
 
+  /**
+   * Determine the tokens which need to be pre-computed in order to
+   * train this mini-batch of examples.
+   */
+  private Set<Integer> getPreComputeTokens(List<Example> examples) {
+    Set<Integer> ret = new HashSet<>();
+    for (Example ex : examples) {
+      List<Integer> feature = ex.getFeature();
+
+      for (int j = 0; j < config.numTokens; j++) {
+        int tok = feature.get(j);
+        int index = tok * config.numTokens + j;
+        ret.add(index);
+      }
+    }
+
+    return ret;
+  }
+
   public Cost computeCostFunction(int batchSize, double regParameter, double dropOutProb) {
     List<Example> examples = Util.getRandomSubList(dataset.examples, batchSize);
+
+    Set<Integer> toPreCompute = getPreComputeTokens(examples);
+    double percentagePreComputed = toPreCompute.size() / (float) config.numPreComputed;
+    System.err.printf("Percent necessary to pre-compute: %f%%%n", percentagePreComputed);
+
     preCompute();
 
     // Set up parameters for feedforward
