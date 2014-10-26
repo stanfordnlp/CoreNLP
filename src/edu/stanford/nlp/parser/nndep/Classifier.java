@@ -49,11 +49,19 @@ public class Classifier {
   private final double[][] eg2W1, eg2W2, eg2E;
   double[] eg2b1;
 
-  // Pre-computed hidden unit activations
+  /**
+   * Pre-computed hidden layer unit activations. Each double array
+   * within this data is an entire hidden layer. The sub-arrays are
+   * indexed somewhat arbitrarily; in order to find hidden-layer unit
+   * activations for a given feature ID, use {@link #preMap} to find
+   * the proper index into this data.
+   */
   private double[][] saved;
 
   /**
-   * TODO document
+   * Describes features which should be precomputed. Each entry maps a
+   * feature ID to its destined index in the saved hidden unit
+   * activation data (see {@link #saved}).
    */
   private final Map<Integer, Integer> preMap;
 
@@ -337,8 +345,7 @@ public class Classifier {
     private final double regParameter;
     private final double dropOutProb;
 
-    private FeedforwardParams(double regParameter, double dropOutProb, double[][] W1, double[] b1, double[][] W2,
-                              double[][] E, double[][] saved) {
+    private FeedforwardParams(double regParameter, double dropOutProb) {
       this.dropOutProb = dropOutProb;
       this.regParameter = regParameter;
     }
@@ -459,11 +466,11 @@ public class Classifier {
   }
 
   /**
-   * Determine the tokens which need to be pre-computed in order to
-   * train this mini-batch of examples.
+   * Build a preMap for only those features which need to be
+   * pre-computed for the examples in a given mini-batch.
    */
-  private Set<Integer> getPreComputeTokens(List<Example> examples) {
-    Set<Integer> ret = new HashSet<>();
+  private Map<Integer, Integer> makeSmallMap(List<Example> examples) {
+    Set<Integer> featureIDs = new HashSet<>();
     for (Example ex : examples) {
       List<Integer> feature = ex.getFeature();
 
@@ -471,11 +478,21 @@ public class Classifier {
         int tok = feature.get(j);
         int index = tok * config.numTokens + j;
         if (preMap.containsKey(index))
-          ret.add(index);
+          featureIDs.add(index);
       }
     }
 
-    return ret;
+    double percentagePreComputed = featureIDs.size() / (float) config.numPreComputed;
+    System.err.printf("Percent actually necessary to pre-compute: %f%%%n", percentagePreComputed * 100);
+
+    Map<Integer, Integer> savedFeatureMap = new HashMap<>(featureIDs.size());
+    int newId = 0;
+    for (int id : featureIDs) {
+      savedFeatureMap.put(preMap.get(id), newId);
+      newId++;
+    }
+
+    return savedFeatureMap;
   }
 
   /**
@@ -502,21 +519,18 @@ public class Classifier {
 
     List<Example> examples = Util.getRandomSubList(dataset.examples, batchSize);
 
-    Set<Integer> toPreCompute = getPreComputeTokens(examples);
-    double percentagePreComputed = toPreCompute.size() / (float) config.numPreComputed;
-    System.err.printf("Percent actually necessary to pre-compute: %f%%%n", percentagePreComputed * 100);
-
-    smallMap = new HashMap<>(toPreCompute.size());
-    int newId = 0;
-    for (int id : toPreCompute) {
-      smallMap.put(preMap.get(id), newId);
-      newId++;
-    }
-
+    // Redo precomputations for only those features which are triggered
+    // by examples in this mini-batch.
+    //
+    // This helps speed up training by ensuring that our `saved` data
+    // is a dense array (for small batch sizes it'd likely be extremely
+    // sparse if we generated `saved` from the entire possible set of
+    // features listed in `preMap`).
+    smallMap = makeSmallMap(examples);
     preCompute(smallMap);
 
     // Set up parameters for feedforward
-    FeedforwardParams params = new FeedforwardParams(regParameter, dropOutProb, W1, b1, W2, E, saved);
+    FeedforwardParams params = new FeedforwardParams(regParameter, dropOutProb);
 
     int numChunks = config.trainingThreads;
     List<Collection<Example>> chunks = CollectionUtils.partitionIntoFolds(examples, numChunks);
