@@ -438,7 +438,8 @@ public class Classifier
       for (int j = 0; j < config.numTokens; j++) {
         int tok = feature.get(j);
         int index = tok * config.numTokens + j;
-        ret.add(index);
+        if (preMap.containsKey(index))
+          ret.add(index);
       }
     }
 
@@ -450,7 +451,7 @@ public class Classifier
 
     Set<Integer> toPreCompute = getPreComputeTokens(examples);
     double percentagePreComputed = toPreCompute.size() / (float) config.numPreComputed;
-    System.err.printf("Percent necessary to pre-compute: %f%%%n", percentagePreComputed);
+    System.err.printf("Percent actually necessary to pre-compute: %f%%%n", percentagePreComputed * 100);
 
     preCompute();
 
