@@ -391,13 +391,12 @@ public class Classifier {
      * Backpropagate gradient values from gradSaved into the gradients
      * for the E vectors that generated them.
      *
-     * @param preMap A map from feature ID to indices within
-     *               {@link #saved}, {@link #gradSaved} which describes
-     *               which features were pre-computed (=> which
-     *               features need to have their gradients backprop'd)
+     * @param featuresSeen Feature IDs observed during training for
+     *                     which gradSaved values need to be backprop'd
+     *                     into gradE
      */
-    private void backpropSaved(Map<Integer, Integer> preMap) {
-      for (int x : preMap.keySet()) {
+    private void backpropSaved(Set<Integer> featuresSeen) {
+      for (int x : featuresSeen) {
         int mapX = preMap.get(x);
         int tok = x / config.numTokens;
         int offset = (x % config.numTokens) * config.embeddingSize;
@@ -552,7 +551,7 @@ public class Classifier {
 
     // Backpropagate gradients on saved pre-computed values to actual
     // embeddings
-    cost.backpropSaved(preMap);
+    cost.backpropSaved(toPreCompute);
 
     cost.addL2Regularization(regParameter);
 
