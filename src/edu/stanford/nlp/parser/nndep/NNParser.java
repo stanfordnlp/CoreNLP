@@ -6,16 +6,16 @@
 * 	@Last Modified:  2014-10-05
 */
 
-package edu.stanford.nlp.depparser.nn;
+package edu.stanford.nlp.parser.nndep;
 
-import edu.stanford.nlp.depparser.util.ArcStandard;
-import edu.stanford.nlp.depparser.util.CONST;
-import edu.stanford.nlp.depparser.util.Configuration;
-import edu.stanford.nlp.depparser.util.Counter;
-import edu.stanford.nlp.depparser.util.DependencyTree;
-import edu.stanford.nlp.depparser.util.ParsingSystem;
+import edu.stanford.nlp.parser.nndep.util.ArcStandard;
+import edu.stanford.nlp.parser.nndep.util.CONST;
+import edu.stanford.nlp.parser.nndep.util.Configuration;
+import edu.stanford.nlp.parser.nndep.util.Counter;
+import edu.stanford.nlp.parser.nndep.util.DependencyTree;
+import edu.stanford.nlp.parser.nndep.util.ParsingSystem;
 
-import edu.stanford.nlp.depparser.util.Util;
+import edu.stanford.nlp.parser.nndep.util.Util;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -26,7 +26,7 @@ import java.io.*;
 
 public class NNParser 
 {
-  public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/depparser/nn/PTB_Stanford_params.txt.gz";
+  public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/PTB_Stanford_params.txt.gz";
 
 	List<String> wordDict, posDict, labelDict;
 	Map<String, Integer> wordMap, posMap, labelMap;

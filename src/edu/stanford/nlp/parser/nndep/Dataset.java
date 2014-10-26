@@ -6,7 +6,7 @@
 * 	@Last Modified:  2014-09-30
 */
 
-package edu.stanford.nlp.depparser.nn;
+package edu.stanford.nlp.parser.nndep;
 
 import java.util.*;
 

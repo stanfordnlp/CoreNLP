@@ -6,7 +6,7 @@
 * 	@Last Modified:  2014-10-05
 */
 
-package edu.stanford.nlp.depparser.nn;
+package edu.stanford.nlp.parser.nndep;
 
 public class Config
 {

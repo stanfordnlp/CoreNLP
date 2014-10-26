@@ -1,7 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.depparser.nn.NNParser;
-import edu.stanford.nlp.depparser.util.DependencyTree;
+import edu.stanford.nlp.parser.nndep.NNParser;
+import edu.stanford.nlp.parser.nndep.util.DependencyTree;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;

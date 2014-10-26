@@ -1,5 +1,5 @@
 
-package edu.stanford.nlp.depparser.util;
+package edu.stanford.nlp.parser.nndep.util;
 
 import java.util.*;
 

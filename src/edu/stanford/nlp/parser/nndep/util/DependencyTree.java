@@ -6,9 +6,8 @@
 * 	@Last Modified:  2014-09-01
 */
 
-package edu.stanford.nlp.depparser.util;
+package edu.stanford.nlp.parser.nndep.util;
 
-import java.io.*;
 import java.util.*;
 
 public class DependencyTree

@@ -6,9 +6,9 @@
 * 	@Last Modified:  2014-10-05
 */
 
-package edu.stanford.nlp.depparser.nn;
+package edu.stanford.nlp.parser.nndep;
 
-import edu.stanford.nlp.depparser.util.Util;
+import edu.stanford.nlp.parser.nndep.util.Util;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
@@ -353,7 +353,7 @@ public class Classifier
    * The members of this class represent weight deltas computed by
    * backpropagation.
    *
-   * @see edu.stanford.nlp.depparser.nn.Classifier.CostFunction
+   * @see Classifier.CostFunction
    */
   public static class Cost {
 
