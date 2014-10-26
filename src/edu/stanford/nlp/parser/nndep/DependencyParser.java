@@ -848,7 +848,7 @@ public class DependencyParser {
     IndexedWord root = new IndexedWord(new Word("ROOT-" + (tokens.size() + 1)));
     root.set(CoreAnnotations.IndexAnnotation.class, -1);
 
-    for (int i = 1; i < result.n; i++) {
+    for (int i = 1; i <= result.n; i++) {
       int head = result.getHead(i);
       String label = result.getLabel(i);
 
