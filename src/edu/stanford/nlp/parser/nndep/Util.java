@@ -6,7 +6,7 @@
 * 	@Last Modified:  2014-10-05
 */
 
-package edu.stanford.nlp.parser.nndep.util;
+package edu.stanford.nlp.parser.nndep;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;

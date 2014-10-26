@@ -1,5 +1,5 @@
 
-package edu.stanford.nlp.parser.nndep.util;
+package edu.stanford.nlp.parser.nndep;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;

@@ -6,7 +6,7 @@
 * 	@Last Modified:  2014-09-30
 */
 
-package edu.stanford.nlp.parser.nndep.util;
+package edu.stanford.nlp.parser.nndep;
 
 public class CONST {
   public static final String UNKNOWN = "-UNKNOWN-";
