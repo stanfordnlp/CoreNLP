@@ -592,6 +592,9 @@ public class DependencyParser {
     t.done("Initializing dependency parser");
   }
 
+  // TODO this should be a function which returns the embeddings array + embedID
+  // otherwise the class needlessly carries around the extra baggage of `embeddings`
+  // (never again used) for the entire training process
   private void readEmbedFile(String embedFile) {
     embedID = new HashMap<String, Integer>();
     if (embedFile == null)
@@ -662,47 +665,8 @@ public class DependencyParser {
     lDict.remove(0);
     system = new ArcStandard(config.tlp, lDict, true);
 
-    double[][] E = new double[knownWords.size() + knownPos.size() + knownLabels.size()][config.embeddingSize];
-    double[][] W1 = new double[config.hiddenSize][config.embeddingSize * config.numTokens];
-    double[] b1 = new double[config.hiddenSize];
-    double[][] W2 = new double[knownLabels.size() * 2 - 1][config.hiddenSize];
-
-    Random random = Util.getRandom();
-    for (int i = 0; i < W1.length; ++i)
-      for (int j = 0; j < W1[i].length; ++j)
-        W1[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
-
-    for (int i = 0; i < b1.length; ++i)
-      b1[i] = random.nextDouble() * 2 * config.initRange - config.initRange;
-
-    for (int i = 0; i < W2.length; ++i)
-      for (int j = 0; j < W2[i].length; ++j)
-        W2[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
-
-    readEmbedFile(embedFile);
-    int foundEmbed = 0;
-    for (int i = 0; i < E.length; ++i) {
-      int index = -1;
-      if (i < knownWords.size()) {
-        String str = knownWords.get(i);
-        //NOTE: exact match first, and then try lower case..
-        if (embedID.containsKey(str)) index = embedID.get(str);
-        else if (embedID.containsKey(str.toLowerCase())) index = embedID.get(str.toLowerCase());
-      }
-
-      if (index >= 0) {
-        ++foundEmbed;
-        for (int j = 0; j < E[i].length; ++j)
-          E[i][j] = embeddings[index][j];
-      } else {
-        for (int j = 0; j < E[i].length; ++j)
-          E[i][j] = random.nextDouble() * config.initRange * 2 - config.initRange;
-      }
-    }
-    System.err.println("Found embeddings: " + foundEmbed + " / " + knownWords.size());
-
-    Dataset trainSet = genTrainExamples(trainSents, trainTrees);
-    classifier = new Classifier(config, trainSet, E, W1, b1, W2, preComputed);
+    // Initialize a classifier; prepare for training
+    setupClassifierForTraining(trainSents, trainTrees, embedFile);
 
     System.err.println(Config.SEPARATOR);
     config.printParameters();
@@ -768,12 +732,69 @@ public class DependencyParser {
     }
   }
 
+  /**
+   * @see #train(String, String, String, String)
+   */
   public void train(String trainFile, String devFile, String modelFile) {
     train(trainFile, devFile, modelFile, null);
   }
 
+  /**
+   * @see #train(String, String, String, String)
+   */
   public void train(String trainFile, String modelFile) {
     train(trainFile, null, modelFile);
+  }
+
+  /**
+   * Prepare a classifier for training with the given dataset.
+   */
+  private void setupClassifierForTraining(List<CoreMap> trainSents, List<DependencyTree> trainTrees, String embedFile) {
+    double[][] E = new double[knownWords.size() + knownPos.size() + knownLabels.size()][config.embeddingSize];
+    double[][] W1 = new double[config.hiddenSize][config.embeddingSize * config.numTokens];
+    double[] b1 = new double[config.hiddenSize];
+    double[][] W2 = new double[knownLabels.size() * 2 - 1][config.hiddenSize];
+
+    // Randomly initialize weight matrices / vectors
+    Random random = Util.getRandom();
+    for (int i = 0; i < W1.length; ++i)
+      for (int j = 0; j < W1[i].length; ++j)
+        W1[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
+
+    for (int i = 0; i < b1.length; ++i)
+      b1[i] = random.nextDouble() * 2 * config.initRange - config.initRange;
+
+    for (int i = 0; i < W2.length; ++i)
+      for (int j = 0; j < W2[i].length; ++j)
+        W2[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
+
+    // Read embeddings into `embedID`, `embeddings`
+    readEmbedFile(embedFile);
+
+    // Try to match loaded embeddings with words in dictionary
+    int foundEmbed = 0;
+    for (int i = 0; i < E.length; ++i) {
+      int index = -1;
+      if (i < knownWords.size()) {
+        String str = knownWords.get(i);
+        //NOTE: exact match first, and then try lower case..
+        if (embedID.containsKey(str)) index = embedID.get(str);
+        else if (embedID.containsKey(str.toLowerCase())) index = embedID.get(str.toLowerCase());
+      }
+
+      if (index >= 0) {
+        ++foundEmbed;
+        for (int j = 0; j < E[i].length; ++j)
+          E[i][j] = embeddings[index][j];
+      } else {
+        for (int j = 0; j < E[i].length; ++j)
+          E[i][j] = random.nextDouble() * config.initRange * 2 - config.initRange;
+      }
+    }
+    System.err.println("Found embeddings: " + foundEmbed + " / " + knownWords.size());
+
+    Dataset trainSet = genTrainExamples(trainSents, trainTrees);
+    classifier = new Classifier(config, trainSet, E, W1, b1, W2, preComputed);
   }
 
   /**
