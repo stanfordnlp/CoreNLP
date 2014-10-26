@@ -66,12 +66,6 @@ public class Classifier {
   private final Map<Integer, Integer> preMap;
 
   /**
-   * A subset of {@code preMap} containing only features necessary for
-   * the given mini-batch.
-   */
-  private Map<Integer, Integer> smallMap;
-
-  /**
    * Initial training state is dependent on how the classifier is
    * initialized. We use this flag to determine whether calls to
    * {@link #computeCostFunction(int, double, double)}, etc. are valid.
@@ -189,7 +183,7 @@ public class Classifier {
       gradb1 = new double[b1.length];
       gradW2 = new double[W2.length][W2[0].length];
       gradE = new double[E.length][E[0].length];
-      gradSaved = new double[smallMap.size()][config.hiddenSize];
+      gradSaved = new double[preMap.size()][config.hiddenSize];
 
       double cost = 0.0;
       double correct = 0.0;
@@ -213,10 +207,10 @@ public class Classifier {
           int tok = feature.get(j);
           int index = tok * config.numTokens + j;
 
-          if (smallMap.containsKey(index)) {
+          if (preMap.containsKey(index)) {
             // Unit activations for this input feature value have been
             // precomputed
-            int id = smallMap.get(index);
+            int id = preMap.get(index);
 
             // Only extract activations for those nodes which are still
             // activated (`ls`)
@@ -284,8 +278,8 @@ public class Classifier {
         for (int j = 0; j < config.numTokens; ++j) {
           int tok = feature.get(j);
           int index = tok * config.numTokens + j;
-          if (smallMap.containsKey(index)) {
-            int id = smallMap.get(index);
+          if (preMap.containsKey(index)) {
+            int id = preMap.get(index);
             for (int nodeIndex : ls)
               gradSaved[id][nodeIndex] += gradHidden[nodeIndex];
           } else {
@@ -540,8 +534,7 @@ public class Classifier {
     // is a dense array (for small batch sizes it'd likely be extremely
     // sparse if we generated `saved` from the entire possible set of
     // features listed in `preMap`).
-    smallMap = makeSmallMap(examples);
-    preCompute(smallMap);
+    preCompute(preMap);
 
     // Set up parameters for feedforward
     FeedforwardParams params = new FeedforwardParams(batchSize, dropOutProb);
@@ -570,7 +563,7 @@ public class Classifier {
 
     // Backpropagate gradients on saved pre-computed values to actual
     // embeddings
-    cost.backpropSaved(smallMap);
+    cost.backpropSaved(preMap);
 
     cost.addL2Regularization(regParameter);
 
