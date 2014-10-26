@@ -490,106 +490,99 @@ public class NNParser
         catch (Exception e) { System.out.println(e); }
     }
 
-	public void train(String trainFile, String devFile, String modelFile, String embedFile) 
-    {
-        System.out.println("Train File: " + trainFile);
-        System.out.println("Dev File: " + devFile);
-        System.out.println("Model File: " + modelFile);
-        System.out.println("Embedding File: " + embedFile);
+  public void train(String trainFile, String devFile, String modelFile, String embedFile) {
+    System.out.println("Train File: " + trainFile);
+    System.out.println("Dev File: " + devFile);
+    System.out.println("Model File: " + modelFile);
+    System.out.println("Embedding File: " + embedFile);
 
-        List<CoreMap> trainSents = new ArrayList<>();
-        List<DependencyTree> trainTrees = new ArrayList<DependencyTree>();
-        Util.loadConllFile(trainFile, trainSents, trainTrees);
-        Util.printTreeStats("Train", trainTrees);
+    List<CoreMap> trainSents = new ArrayList<>();
+    List<DependencyTree> trainTrees = new ArrayList<DependencyTree>();
+    Util.loadConllFile(trainFile, trainSents, trainTrees);
+    Util.printTreeStats("Train", trainTrees);
 
-        List<CoreMap> devSents = new ArrayList<CoreMap>();
-        List<DependencyTree> devTrees = new ArrayList<DependencyTree>();
-        if (devFile != null) {
-            Util.loadConllFile(devFile, devSents, devTrees);
-            Util.printTreeStats("Dev", devTrees);
-        }
-        genDictionaries(trainSents, trainTrees);
-
-        //NOTE: remove -NULL-, and the pass it to ParsingSystem
-        List<String> lDict = new ArrayList<String>(labelDict);
-        lDict.remove(0);
-        system = new ArcStandard(lDict);
-
-        double[][] E = new double[wordDict.size() + posDict.size() + labelDict.size()][config.embeddingSize];
-        double[][] W1 = new double[config.hiddenSize][config.embeddingSize * config.numTokens];
-        double[] b1 = new double[config.hiddenSize];
-        double[][] W2 = new double[labelDict.size() * 2 - 1][config.hiddenSize];
-
-        Random random = new Random();
-        for (int i = 0; i < W1.length; ++i)
-            for (int j = 0; j < W1[i].length; ++j)
-                W1[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
-
-        for (int i = 0; i < b1.length; ++i)
-            b1[i] = random.nextDouble() * 2 * config.initRange - config.initRange;
-
-        for (int i = 0; i < W2.length; ++i)
-            for (int j = 0; j < W2[i].length; ++j)
-                W2[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
-
-        readEmbedFile(embedFile);
-        int foundEmbed = 0;
-        for (int i = 0; i < E.length; ++i)
-        {
-            int index = -1;
-            if (i < wordDict.size())
-            {
-                String str = wordDict.get(i);
-                //NOTE: exact match first, and then try lower case..
-                if (embedID.containsKey(str)) index = embedID.get(str);
-                    else if (embedID.containsKey(str.toLowerCase())) index = embedID.get(str.toLowerCase());
-            }
-            if (index >= 0)
-            {
-                ++ foundEmbed;
-                for (int j = 0; j < E[i].length; ++ j)
-                    E[i][j] = embeddings[index][j];
-
-            } else
-            {
-                for (int j = 0; j < E[i].length; ++j)
-                    E[i][j] = random.nextDouble() * config.initRange * 2 - config.initRange;
-            }
-        }
-        System.out.println("Found embeddings: " + foundEmbed + " / " + wordDict.size());
-
-        genTrainExamples(trainSents, trainTrees);
-        classifier = new Classifier(config, trainSet, E, W1, b1, W2, preComputed);
-
-        //TODO: save the best intermediate parameters
-        long startTime = System.currentTimeMillis();
-        for (int iter = 0; iter < config.maxIter; ++ iter)
-        {
-        	System.out.println("##### Iteration " + iter);
-
-          // TODO track correct %
-        	Classifier.Cost cost = classifier.computeCostFunction(config.batchSize, config.regParameter, config.dropProb);
-          System.out.println("Cost = " + cost.getCost() + ", Correct(%) = " + cost.getPercentCorrect());
-          classifier.takeAdaGradientStep(cost, config.adaAlpha, config.adaEps);
-
-          System.out.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
-          if (devFile != null && iter % config.evalPerIter == 0) {
-            // Redo precomputation with updated weights. This is only
-            // necessary because we're updating weights -- for normal
-            // prediction, we just do this once in #initialize
-            classifier.preCompute();
-
-            List<DependencyTree> predicted = devSents.stream().map(this::predictInner).collect(Collectors.toList());
-            System.out.println("UAS: " + system.getUASScore(devSents, predicted, devTrees));
-          }
-        }
-        writeModelFile(modelFile);
-	}
-
-    public void train(String trainFile, String devFile, String modelFile)
-    {
-        train(trainFile, devFile, modelFile, null);
+    List<CoreMap> devSents = new ArrayList<CoreMap>();
+    List<DependencyTree> devTrees = new ArrayList<DependencyTree>();
+    if (devFile != null) {
+      Util.loadConllFile(devFile, devSents, devTrees);
+      Util.printTreeStats("Dev", devTrees);
     }
+    genDictionaries(trainSents, trainTrees);
+
+    //NOTE: remove -NULL-, and the pass it to ParsingSystem
+    List<String> lDict = new ArrayList<String>(labelDict);
+    lDict.remove(0);
+    system = new ArcStandard(lDict);
+
+    double[][] E = new double[wordDict.size() + posDict.size() + labelDict.size()][config.embeddingSize];
+    double[][] W1 = new double[config.hiddenSize][config.embeddingSize * config.numTokens];
+    double[] b1 = new double[config.hiddenSize];
+    double[][] W2 = new double[labelDict.size() * 2 - 1][config.hiddenSize];
+
+    Random random = new Random();
+    for (int i = 0; i < W1.length; ++i)
+      for (int j = 0; j < W1[i].length; ++j)
+        W1[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
+
+    for (int i = 0; i < b1.length; ++i)
+      b1[i] = random.nextDouble() * 2 * config.initRange - config.initRange;
+
+    for (int i = 0; i < W2.length; ++i)
+      for (int j = 0; j < W2[i].length; ++j)
+        W2[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
+
+    readEmbedFile(embedFile);
+    int foundEmbed = 0;
+    for (int i = 0; i < E.length; ++i) {
+      int index = -1;
+      if (i < wordDict.size()) {
+        String str = wordDict.get(i);
+        //NOTE: exact match first, and then try lower case..
+        if (embedID.containsKey(str)) index = embedID.get(str);
+        else if (embedID.containsKey(str.toLowerCase())) index = embedID.get(str.toLowerCase());
+      }
+      
+      if (index >= 0) {
+        ++foundEmbed;
+        for (int j = 0; j < E[i].length; ++j)
+          E[i][j] = embeddings[index][j];
+      } else {
+        for (int j = 0; j < E[i].length; ++j)
+          E[i][j] = random.nextDouble() * config.initRange * 2 - config.initRange;
+      }
+    }
+    System.out.println("Found embeddings: " + foundEmbed + " / " + wordDict.size());
+
+    genTrainExamples(trainSents, trainTrees);
+    classifier = new Classifier(config, trainSet, E, W1, b1, W2, preComputed);
+
+    //TODO: save the best intermediate parameters
+    long startTime = System.currentTimeMillis();
+    for (int iter = 0; iter < config.maxIter; ++iter) {
+      System.out.println("##### Iteration " + iter);
+
+      // TODO track correct %
+      Classifier.Cost cost = classifier.computeCostFunction(config.batchSize, config.regParameter, config.dropProb);
+      System.out.println("Cost = " + cost.getCost() + ", Correct(%) = " + cost.getPercentCorrect());
+      classifier.takeAdaGradientStep(cost, config.adaAlpha, config.adaEps);
+
+      System.out.println("Elapsed Time: " + (System.currentTimeMillis() - startTime) / 1000.0 + " (s)");
+      if (devFile != null && iter % config.evalPerIter == 0) {
+        // Redo precomputation with updated weights. This is only
+        // necessary because we're updating weights -- for normal
+        // prediction, we just do this once in #initialize
+        classifier.preCompute();
+
+        List<DependencyTree> predicted = devSents.stream().map(this::predictInner).collect(Collectors.toList());
+        System.out.println("UAS: " + system.getUASScore(devSents, predicted, devTrees));
+      }
+    }
+    writeModelFile(modelFile);
+  }
+
+  public void train(String trainFile, String devFile, String modelFile) {
+    train(trainFile, devFile, modelFile, null);
+  }
 
 	public void train(String trainFile, String modelFile)
 	{
