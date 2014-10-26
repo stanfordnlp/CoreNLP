@@ -315,111 +315,109 @@ public class NNParser
 	}
 
   // TODO replace with GrammaticalStructure's CoNLL loader
-	public void loadModelFile(String modelFile)
-	{
-		try
-		{
-            System.out.println(CONST.SEPARATOR);
-			System.out.println("Loading Model File: " + modelFile);
-			String s;
-			BufferedReader input = new BufferedReader(new InputStreamReader(
-          IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(modelFile)));
-			
-			int nDict, nPOS, nLabel;
-			int eSize, hSize, nTokens, nPreComputed;
-            nDict = nPOS = nLabel = eSize = hSize = nTokens = nPreComputed = 0;
+  public void loadModelFile(String modelFile) {
+    try {
+      System.out.println(CONST.SEPARATOR);
+      System.out.println("Loading Model File: " + modelFile);
+      String s;
+      BufferedReader input = IOUtils.readerFromString(modelFile);
 
-			for (int k = 0; k < 7; ++ k)
-			{
-				s = input.readLine();
-				System.out.println(s);
-				int number = Integer.parseInt(s.substring(s.indexOf("=") + 1, s.length()));
-				switch (k)
-				{
-					case 0: nDict = number;
-					case 1: nPOS = number;
-					case 2: nLabel = number;
-					case 3: eSize = number;
-					case 4: hSize = number;
-					case 5: nTokens = number;
-                    case 6: nPreComputed = number;
-					default: break;
-				}
-			}
+      int nDict, nPOS, nLabel;
+      int eSize, hSize, nTokens, nPreComputed;
+      nDict = nPOS = nLabel = eSize = hSize = nTokens = nPreComputed = 0;
 
-			wordDict = new ArrayList<String>();
-			posDict = new ArrayList<String>();
-			labelDict = new ArrayList<String>();
-            double[][] E = new double[nDict + nPOS + nLabel][eSize];
-            String[] splits;
-            int index = 0;
+      for (int k = 0; k < 7; ++k) {
+        s = input.readLine();
+        System.out.println(s);
+        int number = Integer.parseInt(s.substring(s.indexOf("=") + 1, s.length()));
+        switch (k) {
+          case 0:
+            nDict = number;
+          case 1:
+            nPOS = number;
+          case 2:
+            nLabel = number;
+          case 3:
+            eSize = number;
+          case 4:
+            hSize = number;
+          case 5:
+            nTokens = number;
+          case 6:
+            nPreComputed = number;
+          default:
+            break;
+        }
+      }
 
-			for (int k = 0; k < nDict; ++ k)
-			{
-				s = input.readLine();
-                splits = s.split(" ");
-				wordDict.add(splits[0]);
-                for (int i = 0; i < eSize; ++ i)
-                    E[index][i] = Double.parseDouble(splits[i + 1]);
-                index = index + 1;
-			}
-			for (int k = 0; k < nPOS; ++ k)
-			{
-                s = input.readLine();
-                splits = s.split(" ");
-                posDict.add(splits[0]);
-                for (int i = 0; i < eSize; ++ i)
-                    E[index][i] = Double.parseDouble(splits[i + 1]);
-                index = index + 1;
-			}
-			for (int k = 0; k < nLabel; ++ k)
-			{
-                s = input.readLine();
-                splits = s.split(" ");
-                labelDict.add(splits[0]);
-                for (int i = 0; i < eSize; ++ i)
-                    E[index][i] = Double.parseDouble(splits[i + 1]);
-                index = index + 1;
-			}
-            genMapping();
+      wordDict = new ArrayList<String>();
+      posDict = new ArrayList<String>();
+      labelDict = new ArrayList<String>();
+      double[][] E = new double[nDict + nPOS + nLabel][eSize];
+      String[] splits;
+      int index = 0;
 
-			double[][] W1 = new double[hSize][eSize * nTokens];
-			for (int j = 0; j < W1[0].length; ++ j)
-			{
-				s = input.readLine();
-				splits = s.split(" ");
-				for (int i = 0; i < W1.length; ++ i)
-					W1[i][j] = Double.parseDouble(splits[i]);
-			}
+      for (int k = 0; k < nDict; ++k) {
+        s = input.readLine();
+        splits = s.split(" ");
+        wordDict.add(splits[0]);
+        for (int i = 0; i < eSize; ++i)
+          E[index][i] = Double.parseDouble(splits[i + 1]);
+        index = index + 1;
+      }
+      for (int k = 0; k < nPOS; ++k) {
+        s = input.readLine();
+        splits = s.split(" ");
+        posDict.add(splits[0]);
+        for (int i = 0; i < eSize; ++i)
+          E[index][i] = Double.parseDouble(splits[i + 1]);
+        index = index + 1;
+      }
+      for (int k = 0; k < nLabel; ++k) {
+        s = input.readLine();
+        splits = s.split(" ");
+        labelDict.add(splits[0]);
+        for (int i = 0; i < eSize; ++i)
+          E[index][i] = Double.parseDouble(splits[i + 1]);
+        index = index + 1;
+      }
+      genMapping();
 
-			double[] b1 = new double[hSize];
-			s = input.readLine();
-			splits = s.split(" ");
-			for (int i = 0; i < b1.length; ++ i)
-				b1[i] = Double.parseDouble(splits[i]);
+      double[][] W1 = new double[hSize][eSize * nTokens];
+      for (int j = 0; j < W1[0].length; ++j) {
+        s = input.readLine();
+        splits = s.split(" ");
+        for (int i = 0; i < W1.length; ++i)
+          W1[i][j] = Double.parseDouble(splits[i]);
+      }
 
-			double[][] W2 = new double[nLabel * 2 - 1][hSize];
-			for (int j = 0; j < W2[0].length; ++ j)
-			{
-				s = input.readLine();
-				splits = s.split(" ");
-				for (int i = 0; i < W2.length; ++ i)
-					W2[i][j] = Double.parseDouble(splits[i]);
-			}
+      double[] b1 = new double[hSize];
+      s = input.readLine();
+      splits = s.split(" ");
+      for (int i = 0; i < b1.length; ++i)
+        b1[i] = Double.parseDouble(splits[i]);
 
-            preComputed = new ArrayList<Integer>();
-            while (preComputed.size() < nPreComputed)
-            {
-                s = input.readLine();
-                splits = s.split(" ");
-                for (int i = 0; i < splits.length; ++ i)
-                    preComputed.add(Integer.parseInt(splits[i]));
-            }
-			input.close();
-            classifier = new Classifier(E, W1, b1, W2, preComputed);
-		}
-		catch (Exception e) { System.out.println(e); }
-	}
+      double[][] W2 = new double[nLabel * 2 - 1][hSize];
+      for (int j = 0; j < W2[0].length; ++j) {
+        s = input.readLine();
+        splits = s.split(" ");
+        for (int i = 0; i < W2.length; ++i)
+          W2[i][j] = Double.parseDouble(splits[i]);
+      }
+
+      preComputed = new ArrayList<Integer>();
+      while (preComputed.size() < nPreComputed) {
+        s = input.readLine();
+        splits = s.split(" ");
+        for (int i = 0; i < splits.length; ++i)
+          preComputed.add(Integer.parseInt(splits[i]));
+      }
+      input.close();
+      classifier = new Classifier(E, W1, b1, W2, preComputed);
+    } catch (Exception e) {
+      System.out.println(e);
+    }
+  }
 
     public void readEmbedFile(String embedFile)
     {
