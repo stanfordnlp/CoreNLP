@@ -416,18 +416,25 @@ public class DependencyParser {
         switch (k) {
           case 0:
             nDict = number;
+            break;
           case 1:
             nPOS = number;
+            break;
           case 2:
             nLabel = number;
+            break;
           case 3:
             eSize = number;
+            break;
           case 4:
             hSize = number;
+            break;
           case 5:
             nTokens = number;
+            break;
           case 6:
             nPreComputed = number;
+            break;
           default:
             break;
         }
