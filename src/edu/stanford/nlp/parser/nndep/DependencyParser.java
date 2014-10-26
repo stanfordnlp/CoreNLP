@@ -769,22 +769,27 @@ public class DependencyParser {
 
   //TODO: support sentence-only files as input
 
-  /** Run the parser in the modelFile on a testFile and perhaps save output
+  /** Loads a parser
    *
-   *  @param testFile
-   *  @param modelFile
-   *  @param outFile
-   *  @return The LAS score on the dataset
+   *  @param modelFile The file (classpath resource, etc.) to load the model from.
    */
-  public double test(String testFile, String modelFile, String outFile) {
+  public void load(String modelFile) {
     Timing t = new Timing();
-    System.err.println("Test File: " + testFile);
     System.err.println("Model File: " + modelFile);
 
     loadModelFile(modelFile);
     initialize();
     t.done("Initializing dependency parser");
+  }
 
+  /** Run the parser in the modelFile on a testFile and perhaps save output.
+   *
+   *  @param testFile File to parse. In CoNLL-X format. Assumed to have gold answers included.
+   *  @param outFile File to write results to in CoNLL-X format.  If null, no output is written
+   *  @return The LAS score on the dataset
+   */
+  public double test(String testFile, String outFile) {
+    System.err.println("Test File: " + testFile);
     Timing timer = new Timing();
     List<CoreMap> testSents = new ArrayList<>();
     List<DependencyTree> testTrees = new ArrayList<DependencyTree>();
@@ -812,10 +817,6 @@ public class DependencyParser {
     System.err.printf("%s tagged %d words in %d sentences in %.1fs at %.1f w/s, %.1f sent/s.%n",
             StringUtils.getShortClassName(this), numWords, numSentences, millis / 1000.0, wordspersec, sentspersec);
     return lasNoPunc;
-  }
-
-  public void test(String testFile, String modelFile) {
-    test(testFile, modelFile, null);
   }
 
   /**
@@ -847,8 +848,10 @@ public class DependencyParser {
       parser.train(props.getProperty("trainFile"), props.getProperty("devFile"), props.getProperty("model"),
           props.getProperty("embedFile"));
 
-    if (props.containsKey("testFile"))
-      parser.test(props.getProperty("testFile"), props.getProperty("model"), props.getProperty("outFile"));
+    if (props.containsKey("testFile")) {
+      parser.load(props.getProperty("model"));
+      parser.test(props.getProperty("testFile"), props.getProperty("outFile"));
+    }
   }
 
 }

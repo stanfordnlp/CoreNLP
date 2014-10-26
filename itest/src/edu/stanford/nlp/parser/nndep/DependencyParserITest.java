@@ -13,8 +13,8 @@ public class DependencyParserITest extends TestCase {
 
   public void testDependencyParserEnglishSD() {
     DependencyParser parser = new DependencyParser();
-    double las = parser.test("/u/nlp/data/depparser/nn/data/dependency_treebanks/PTB_Stanford/dev.conll",
-            "/u/nlp/data/depparser/nn/PTB_Stanford_params.txt", null);
+    parser.load("/u/nlp/data/depparser/nn/PTB_Stanford_params.txt");
+    double las = parser.test("/u/nlp/data/depparser/nn/data/dependency_treebanks/PTB_Stanford/dev.conll", null);
     assertEquals(String.format("English SD LAS should be %.2f but was %.2f",
             EnglishSdLas, las), EnglishSdLas, las, 1e-4);
   }
