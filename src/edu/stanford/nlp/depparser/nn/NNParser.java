@@ -39,6 +39,16 @@ public class NNParser
     Map<String, Integer> embedID;
     double[][] embeddings;
 
+  private final Properties properties;
+
+  public NNParser() {
+    this(null);
+  }
+
+  public NNParser(Properties properties) {
+    this.properties = properties;
+  }
+
 	public int getWordID(String s)
 	{
         //NOTE: to use the previous trained parameters, we need to add one line
