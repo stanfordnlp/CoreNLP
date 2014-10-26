@@ -1013,7 +1013,7 @@ public class DependencyParser {
    */
   private static final Map<String, Integer> numArgs = new HashMap<>();
   static {
-    numArgs.put("parseFile", 1);
+    numArgs.put("textFile", 1);
     numArgs.put("outFile", 1);
   }
 
@@ -1033,11 +1033,11 @@ public class DependencyParser {
    *   </li>
    *   <li>
    *     <strong>Parse raw text from a file:</strong>
-   *     <code>java edu.stanford.nlp.parser.nndep.DependencyParser -model modelOutputFile.txt.gz -parseFile rawTextToParse -outFile dependenciesOutputFile.txt</code>
+   *     <code>java edu.stanford.nlp.parser.nndep.DependencyParser -model modelOutputFile.txt.gz -textFile rawTextToParse -outFile dependenciesOutputFile.txt</code>
    *   </li>
    *   <li>
    *     <strong>Parse raw text from standard input, writing to standard output:</strong>
-   *     <code>java edu.stanford.nlp.parser.nndep.DependencyParser -model modelOutputFile.txt.gz -parseFile - -outFile -</code>
+   *     <code>java edu.stanford.nlp.parser.nndep.DependencyParser -model modelOutputFile.txt.gz -textFile - -outFile -</code>
    *   </li>
    * </ul>
    *
@@ -1050,8 +1050,8 @@ public class DependencyParser {
    *   <tr><td><tt>&#8209;devFile</tt></td><td>Optional</td><td>No</td><td>Path to a development-set treebank in <a href="http://ilk.uvt.nl/conll/#dataformat">CoNLL-X format</a>. If provided, the </td></tr>
    *   <tr><td><tt>&#8209;embedFile</tt></td>Optional (highly recommended!)<td></td><td>No</td><td>A word embedding file, containing distributed representations of English words. Each line of the provided file should contain a single word followed by the elements of the corresponding word embedding (space-delimited). It is not absolutely necessary that all words in the treebank be covered by this embedding file, though the parser's performance will generally improve if you are able to provide better embeddings for more words.</td></tr>
    *   <tr><td><tt>&#8209;model</tt></td><td>Yes</td><td>Yes</td><td>Path to a model file. If the path ends in <tt>.gz</tt>, the model will be read as a Gzipped model file. During training, we write to this path; at test time we read a pre-trained model from this path.</td></tr>
-   *   <tr><td><tt>&#8209;parseFile</tt></td><td>No</td><td>Yes (or <tt>testFile</tt>)</td><td>Path to a plaintext file containing sentences to be parsed.</td></tr>
-   *   <tr><td><tt>&#8209;testFile</tt></td><td>No</td><td>Yes (or <tt>parseFile</tt>)</td><td>Path to a test-set treebank in <a href="http://ilk.uvt.nl/conll/#dataformat">CoNLL-X format</a> for final evaluation of the parser.</td></tr>
+   *   <tr><td><tt>&#8209;textFile</tt></td><td>No</td><td>Yes (or <tt>testFile</tt>)</td><td>Path to a plaintext file containing sentences to be parsed.</td></tr>
+   *   <tr><td><tt>&#8209;testFile</tt></td><td>No</td><td>Yes (or <tt>textFile</tt>)</td><td>Path to a test-set treebank in <a href="http://ilk.uvt.nl/conll/#dataformat">CoNLL-X format</a> for final evaluation of the parser.</td></tr>
    *   <tr><td><tt>&#8209;trainFile</tt></td><td>Yes</td><td>No</td><td>Path to a training treebank in <a href="http://ilk.uvt.nl/conll/#dataformat">CoNLL-X format</a></td></tr>
    * </table>
    *
@@ -1075,11 +1075,11 @@ public class DependencyParser {
    *   <tr><td><tt>&#8209;wordCutOff</tt></td><td>1</td><td>The parser can optionally ignore rare words by simply choosing an arbitrary "unknown" feature representation for words that appear with frequency less than <em>n</em> in the corpus. This <em>n</em> is controlled by the <tt>wordCutOff</tt> parameter.</td></tr>
    * </table>
    *
-   * Runtime parsing options (for parsing raw text with <tt>-parseFile</tt>):
+   * Runtime parsing options (for parsing raw text with <tt>-textFile</tt>):
    * <table>
    *   <tr><th>Option</th><th>Default</th><th>Description</th></tr>
    *   <tr><td><tt>&#8209;escaper</tt></td><td>N/A</td><td>If provided, use this word-escaper when parsing raw sentences. (Should be a fully-qualified class name like <tt>edu.stanford.nlp.trees.international.arabic.ATBEscaper</tt>.)</td></tr>
-   *   <tr><td><tt>&#8209;sentenceDelimiter</tt></td><td>N/A</td><td>If provided, assume that the given <tt>parseFile</tt> has already been sentence-split, and that sentences are separated by this delimiter.</td></tr>
+   *   <tr><td><tt>&#8209;sentenceDelimiter</tt></td><td>N/A</td><td>If provided, assume that the given <tt>textFile</tt> has already been sentence-split, and that sentences are separated by this delimiter.</td></tr>
    *   <tr><td><tt>&#8209;tagger.model</tt></td><td>edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger</td><td>Path to a part-of-speech tagger to use to pre-tag the raw sentences before parsing.</td></tr>
    * </table>
    */
@@ -1102,21 +1102,21 @@ public class DependencyParser {
     }
 
     // Parse raw text data
-    if (props.containsKey("parseFile")) {
+    if (props.containsKey("textFile")) {
       if (!loaded) {
         parser.loadModelFile(props.getProperty("model"));
         loaded = true;
       }
 
       String encoding = parser.config.tlp.getEncoding();
-      String inputFilename = props.getProperty("parseFile");
+      String inputFilename = props.getProperty("textFile");
       BufferedReader input;
       try {
         input = inputFilename.equals("-")
                 ? IOUtils.readerFromStdin(encoding)
                 : IOUtils.readerFromString(inputFilename, encoding);
       } catch (IOException e) {
-        throw new RuntimeIOException("No input file provided (use -parseFile)", e);
+        throw new RuntimeIOException("No input file provided (use -textFile)", e);
       }
 
       String outputFilename = props.getProperty("outFile");
