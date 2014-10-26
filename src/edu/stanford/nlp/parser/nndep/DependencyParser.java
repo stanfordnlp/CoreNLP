@@ -627,6 +627,9 @@ public class DependencyParser {
     Dataset trainSet = genTrainExamples(trainSents, trainTrees);
     classifier = new Classifier(config, trainSet, E, W1, b1, W2, preComputed);
 
+    System.err.println(Config.SEPARATOR);
+    config.printParameters();
+
     long startTime = System.currentTimeMillis();
 
     /**
