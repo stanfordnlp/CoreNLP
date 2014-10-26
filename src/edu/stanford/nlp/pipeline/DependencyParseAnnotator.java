@@ -2,7 +2,6 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.depparser.nn.NNParser;
 import edu.stanford.nlp.depparser.util.DependencyTree;
-import edu.stanford.nlp.depparser.util.Sentence;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -71,7 +70,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
     // TODO some asymmetry -- wrapped class expects a sentence
     // collection. It'd be nice to pass one-by-one and let the
     // SentenceAnnotator superclass handle multicore processing
-    List<DependencyTree> results = parser.predict(Arrays.asList(makeSentence(sentence)));
+    List<DependencyTree> results = parser.predict(Arrays.asList(sentence));
 
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     List<TypedDependency> dependencies = new ArrayList<>();
@@ -92,26 +91,6 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
 
     SemanticGraph deps = new SemanticGraph(dependencies);
     sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, deps);
-  }
-
-  /**
-   * Convert CoreMap sentence into depparser-style Sentence.
-   *
-   * TODO trash this!
-   *
-   * @param sentence
-   * @return depparser-style sentence
-   */
-  private Sentence makeSentence(CoreMap sentence) {
-    Sentence ret = new Sentence();
-    for (CoreLabel l : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
-      String word = l.word(),
-          pos = l.tag();
-
-      ret.add(word, pos);
-    }
-
-    return ret;
   }
 
   @Override

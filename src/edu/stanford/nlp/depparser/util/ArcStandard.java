@@ -8,6 +8,9 @@
 
 package edu.stanford.nlp.depparser.util;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.util.CoreMap;
+
 import java.util.*;
 
 public class ArcStandard extends ParsingSystem
@@ -34,12 +37,12 @@ public class ArcStandard extends ParsingSystem
 		transitions.add("S");	
 	}
 
-	public Configuration initialConfiguration(Sentence s)
+	public Configuration initialConfiguration(CoreMap s)
 	{
-		Configuration c = new Configuration();
-		for (int i = 1; i <= s.n; ++ i)
+		Configuration c = new Configuration(s);
+    int length = s.get(CoreAnnotations.TokensAnnotation.class).size();
+		for (int i = 1; i <= length; ++ i)
 		{
-			c.sentence.add(s.getWord(i), s.getPOS(i));
 			c.tree.add(CONST.NONEXIST, CONST.UNKNOWN);
 			c.buffer.add(i);
 		}
@@ -107,7 +110,7 @@ public class ArcStandard extends ParsingSystem
 	// NOTE: unused. need to check the correctness again.
 	public boolean canReach(Configuration c, DependencyTree dTree)
 	{
-		int n = c.sentence.n;
+		int n = c.sentence.get(CoreAnnotations.TokensAnnotation.class).size();
 		for (int i = 1; i <= n; ++ i)
 			if (c.getHead(i) != CONST.NONEXIST && c.getHead(i) != dTree.getHead(i))
 				return false;

@@ -8,6 +8,10 @@
 
 package edu.stanford.nlp.depparser.util;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.CoreMap;
+
 import java.util.*;
 
 public class Configuration
@@ -17,22 +21,22 @@ public class Configuration
 	public List<Integer> buffer;
 	
 	public DependencyTree tree;
-	public Sentence sentence;
+	public final CoreMap sentence;
 
 	public Configuration(Configuration config)
 	{
 		stack = new ArrayList<Integer>(config.stack);
 		buffer = new ArrayList<Integer>(config.buffer);
 		tree = new DependencyTree(config.tree);
-		sentence = new Sentence(config.sentence);
+		sentence = new CoreLabel(config.sentence);
 	}
 
-	public Configuration()
+	public Configuration(CoreMap sentence)
 	{
-		stack = new ArrayList<Integer>();
-		buffer = new ArrayList<Integer>();
-		tree = new DependencyTree();
-		sentence = new Sentence();
+		this.stack = new ArrayList<Integer>();
+    this.buffer = new ArrayList<Integer>();
+		this.tree = new DependencyTree();
+    this.sentence = sentence;
 	}
 
 	public boolean shift()
@@ -94,14 +98,18 @@ public class Configuration
 		return (k >= 0 && k < getBufferSize()) ? buffer.get(k) : CONST.NONEXIST; 
 	}
 
+  public CoreLabel getCoreLabel(int k) {
+    return sentence.get(CoreAnnotations.TokensAnnotation.class).get(k);
+  }
+
 	public String getWord(int k)
 	{
-		return sentence.getWord(k);
+		return getCoreLabel(k).word();
 	}
 
 	public String getPOS(int k)
 	{
-		return sentence.getPOS(k);
+		return getCoreLabel(k).tag();
 	}
 
 	public void addArc(int h, int t, String l)

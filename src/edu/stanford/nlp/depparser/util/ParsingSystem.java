@@ -8,8 +8,13 @@
 
 package edu.stanford.nlp.depparser.util;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.util.CoreMap;
+
 import java.util.*;
 import java.io.*;
+import java.util.regex.Pattern;
 
 public abstract class ParsingSystem
 {
@@ -23,9 +28,10 @@ public abstract class ParsingSystem
 	public abstract void apply(Configuration c, String t);
 	public abstract String getOracle(Configuration c, DependencyTree dTree);
 	abstract boolean isOracle(Configuration c, String t, DependencyTree dTree);
-	public abstract Configuration initialConfiguration(Sentence sent);
+	public abstract Configuration initialConfiguration(CoreMap sentence);
 	abstract boolean isTerminal(Configuration c);
 
+  private static final Pattern pPunct = Pattern.compile("``|''|[,.:]");
 
 	public ParsingSystem(List<String> labels)
 	{
@@ -49,7 +55,7 @@ public abstract class ParsingSystem
 		return -1;
 	}
 
-	public Map<String, Double> evaluate(List<Sentence> sent, List<DependencyTree> trees, List<DependencyTree> goldTrees)
+	public Map<String, Double> evaluate(List<CoreMap> sentences, List<DependencyTree> trees, List<DependencyTree> goldTrees)
 	{
 		Map<String, Double> result = new HashMap<String, Double>();
 
@@ -73,6 +79,8 @@ public abstract class ParsingSystem
 
 		for (int i = 0; i < trees.size(); ++ i)
 		{
+      List<CoreLabel> tokens = sentences.get(i).get(CoreAnnotations.TokensAnnotation.class);
+
 			if (trees.get(i).n != goldTrees.get(i).n)
 			{
 				System.out.println("[Error] Tree " + (i + 1) + ": incorrect number of nodes.");
@@ -98,7 +106,7 @@ public abstract class ParsingSystem
 						++ correctArcs;
 				}
 				++ sumArcs;
-				if (!sent.get(i).isPunc(j))
+				if (!pPunct.matcher(tokens.get(j).tag()).matches())
 				{
 					++ sumArcsWoPunc;
 					++ nonPunc;
@@ -130,9 +138,9 @@ public abstract class ParsingSystem
 		return result;
 	}
 
-	public double getUASScore(List<Sentence> sent, List<DependencyTree> trees, List<DependencyTree> goldTrees)
+	public double getUASScore(List<CoreMap> sentences, List<DependencyTree> trees, List<DependencyTree> goldTrees)
 	{
-		Map<String, Double> result = evaluate(sent, trees, goldTrees);
+		Map<String, Double> result = evaluate(sentences, trees, goldTrees);
 		return result == null || !result.containsKey("UASwoPunc") ? -1.0 : result.get("UASwoPunc");
 	}
 }
