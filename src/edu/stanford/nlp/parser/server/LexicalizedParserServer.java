@@ -10,7 +10,10 @@ import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collection;
+import java.util.List;
 
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
@@ -59,11 +62,16 @@ public class LexicalizedParserServer {
 
 
   private static ParserGrammar loadModel(String parserModel, String taggerModel) {
+    ParserGrammar model;
     if (taggerModel == null) {
-      return ParserGrammar.loadModel(parserModel);
+      model = ParserGrammar.loadModel(parserModel);
     } else {
-      return ParserGrammar.loadModel(parserModel, "-preTag", "-taggerSerializedFile", taggerModel);
+      model = ParserGrammar.loadModel(parserModel, "-preTag", "-taggerSerializedFile", taggerModel);
+      // preload tagger so the first query doesn't take forever
+      model.loadTagger();
     }
+    model.setOptionFlags(model.defaultCoreNLPFlags());
+    return model;
   }
 
   /**
@@ -138,6 +146,12 @@ public class LexicalizedParserServer {
     case "tree":
       handleTree(arg, clientSocket.getOutputStream());
       break;
+    case "tokenize":
+      handleTokenize(arg, clientSocket.getOutputStream());
+      break;
+    case "lemma":
+      handleLemma(arg, clientSocket.getOutputStream());
+      break;
     }
 
     System.err.println("Handled request");
@@ -152,6 +166,44 @@ public class LexicalizedParserServer {
     stillRunning = false;
   }
 
+  public void handleTokenize(String arg, OutputStream outStream) 
+    throws IOException
+  {
+    if (arg == null) {
+      return;
+    }
+    List<? extends HasWord> tokens = parser.tokenize(arg);
+    OutputStreamWriter osw = new OutputStreamWriter(outStream, "utf-8");
+    for (int i = 0; i < tokens.size(); ++i) {
+      HasWord word = tokens.get(i);
+      if (i > 0) {
+        osw.write(" ");
+      }
+      osw.write(word.toString());
+    }
+    osw.write("\n");
+    osw.flush();
+  }
+
+  public void handleLemma(String arg, OutputStream outStream) 
+    throws IOException
+  {
+    if (arg == null) {
+      return;
+    }
+    List<CoreLabel> tokens = parser.lemmatize(arg);
+    OutputStreamWriter osw = new OutputStreamWriter(outStream, "utf-8");
+    for (int i = 0; i < tokens.size(); ++i) {
+      CoreLabel word = tokens.get(i);
+      if (i > 0) {
+        osw.write(" ");
+      }
+      osw.write(word.lemma());
+    }
+    osw.write("\n");
+    osw.flush();
+  }
+
   // TODO: when this method throws an exception (for whatever reason)
   // a waiting client might hang.  There should be some graceful
   // handling of that.
@@ -163,7 +215,7 @@ public class LexicalizedParserServer {
       return;
     }
     // TODO: this might throw an exception if the parser doesn't support dependencies.  Handle that cleaner?
-    GrammaticalStructure gs = parser.getTLPParams().getGrammaticalStructure(tree, Filters.acceptFilter(), parser.getTLPParams().typedDependencyHeadFinder());
+    GrammaticalStructure gs = parser.getTLPParams().getGrammaticalStructure(tree, parser.treebankLanguagePack().punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
     Collection<TypedDependency> deps = null;
     switch (commandArgs.toUpperCase()) {
     case "COLLAPSED_TREE":
@@ -228,6 +280,13 @@ public class LexicalizedParserServer {
     return tree;
   }
 
+  private static void help() {
+    System.err.println("-help:   display this message");
+    System.err.println("-model:  load this parser (default englishPCFG.ser.gz)");
+    System.err.println("-tagger: pretag with this tagger model");
+    System.err.println("-port:   run on this port (default 4466)");
+  }
+
   static final int DEFAULT_PORT = 4466;
 
   public static void main(String[] args) 
@@ -240,6 +299,7 @@ public class LexicalizedParserServer {
     String model = LexicalizedParser.DEFAULT_PARSER_LOC;
     String tagger = null;
 
+    // TODO: rewrite this a bit to allow for passing flags to the parser
     for (int i = 0; i < args.length; i += 2) {
       if (i + 1 >= args.length) {
         System.err.println("Unspecified argument " + args[i]);
@@ -257,6 +317,9 @@ public class LexicalizedParserServer {
         port = Integer.valueOf(args[i + 1]);
       } else if (arg.equalsIgnoreCase("tagger")) {
         tagger = args[i + 1];
+      } else if (arg.equalsIgnoreCase("help")) {
+        help();
+        System.exit(0);
       }
     }
     

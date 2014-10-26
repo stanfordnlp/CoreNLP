@@ -589,7 +589,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The serialized protobuf to read the CoreLabel from.
    * @return A CoreLabel, missing the fields that are not stored in the CoreLabel protobuf.
    */
-  protected CoreLabel fromProto(CoreNLPProtos.Token proto) {
+  public CoreLabel fromProto(CoreNLPProtos.Token proto) {
     CoreLabel word = new CoreLabel();
     // Required fields
     word.setWord(proto.getWord());

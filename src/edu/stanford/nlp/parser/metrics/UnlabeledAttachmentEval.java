@@ -17,7 +17,7 @@ import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
@@ -36,8 +36,8 @@ public class UnlabeledAttachmentEval extends AbstractEval {
 
   private final HeadFinder headFinder;
 
-  private final Filter<String> punctRejectWordFilter;
-  private final Filter<Dependency<Label, Label, Object>> punctRejectFilter;
+  private final Predicate<String> punctRejectWordFilter;
+  private final Predicate<Dependency<Label, Label, Object>> punctRejectFilter;
 
   /**
    * @param headFinder If a headFinder is provided, then head percolation will be done
@@ -47,19 +47,19 @@ public class UnlabeledAttachmentEval extends AbstractEval {
     this(str, runningAverages, headFinder, Filters.<String>acceptFilter());
   }
 
-  public UnlabeledAttachmentEval(String str, boolean runningAverages, HeadFinder headFinder, Filter<String> punctRejectFilter) {
+  public UnlabeledAttachmentEval(String str, boolean runningAverages, HeadFinder headFinder, Predicate<String> punctRejectFilter) {
     super(str, runningAverages);
     this.headFinder = headFinder;
     this.punctRejectWordFilter = punctRejectFilter;
 
-    this.punctRejectFilter = new Filter<Dependency<Label,Label,Object>>() {
+    this.punctRejectFilter = new Predicate<Dependency<Label,Label,Object>>() {
       private static final long serialVersionUID = 649358302237611081L;
       // Semantics of this method are weird. If accept() returns true, then the dependent is
       // *not* a punctuation item. This filter thus accepts everything except punctuation
       // dependencies.
-      public boolean accept(Dependency<Label, Label, Object> dep) {
+      public boolean test(Dependency<Label, Label, Object> dep) {
         String depString = dep.dependent().value();
-        return punctRejectWordFilter.accept(depString);
+        return punctRejectWordFilter.test(depString);
       }
     };
   }

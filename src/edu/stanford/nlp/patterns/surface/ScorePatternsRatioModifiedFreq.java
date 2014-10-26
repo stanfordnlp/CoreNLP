@@ -2,10 +2,9 @@ package edu.stanford.nlp.patterns.surface;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Function;
 
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
@@ -14,23 +13,22 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.Execution;
+import edu.stanford.nlp.util.Pair;
 
 public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
 
   public ScorePatternsRatioModifiedFreq(
       ConstantsAndVariables constVars,
       PatternScoring patternScoring,
-      String label,
-      TwoDimensionalCounter<SurfacePattern, String> patternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> negPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> unLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> negandUnLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> allPatternsandWords4Label,
+      String label, Set<String> allCandidatePhrases,
+      TwoDimensionalCounter<Integer, String> patternsandWords4Label,
+      TwoDimensionalCounter<Integer, String> negPatternsandWords4Label,
+      TwoDimensionalCounter<Integer, String> unLabeledPatternsandWords4Label,
       TwoDimensionalCounter<String, ScorePhraseMeasures> phInPatScores,
       ScorePhrases scorePhrases, Properties props) {
-    super(constVars, patternScoring, label, patternsandWords4Label,
+    super(constVars, patternScoring, label, allCandidatePhrases,  patternsandWords4Label,
         negPatternsandWords4Label, unLabeledPatternsandWords4Label,
-        negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props);
+        props);
     this.phInPatScores = phInPatScores;
     this.scorePhrases = scorePhrases;
   }
@@ -45,53 +43,58 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
   }
 
   @Override
-  Counter<SurfacePattern> score() throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
-    // TODO: changed
+  Counter<Integer> score() throws IOException, ClassNotFoundException {
+
     Counter<String> externalWordWeightsNormalized = null;
     if (constVars.dictOddsWeights.containsKey(label))
       externalWordWeightsNormalized = GetPatternsFromDataMultiClass
           .normalizeSoftMaxMinMaxScores(constVars.dictOddsWeights.get(label),
               true, true, false);
 
-    Counter<SurfacePattern> currentPatternWeights4Label = new ClassicCounter<SurfacePattern>();
+    Counter<Integer> currentPatternWeights4Label = new ClassicCounter<Integer>();
 
     boolean useFreqPhraseExtractedByPat = false;
     if (patternScoring.equals(PatternScoring.SqrtAllRatio))
       useFreqPhraseExtractedByPat = true;
+    Function<Pair<Integer, String>, Double> numeratorScore = x -> patternsandWords4Label.getCount(x.first(), x.second());
 
-    Counter<SurfacePattern> numeratorPatWt = this.convert2OneDim(label,
-        patternsandWords4Label, constVars.sqrtPatScore, false, null,
+    Counter<Integer> numeratorPatWt = this.convert2OneDim(label,
+        numeratorScore, allCandidatePhrases, patternsandWords4Label, constVars.sqrtPatScore, false, null,
         useFreqPhraseExtractedByPat);
-    Counter<SurfacePattern> denominatorPatWt = null;
 
+    Counter<Integer> denominatorPatWt = null;
+
+    Function<Pair<Integer, String>, Double> denoScore;
     if (patternScoring.equals(PatternScoring.PosNegUnlabOdds)) {
-      // deno = negandUnLabeledPatternsandWords4Label;
+      denoScore = x -> negPatternsandWords4Label.getCount(x.first(), x.second()) + unLabeledPatternsandWords4Label.getCount(x.first(), x.second());
+
       denominatorPatWt = this.convert2OneDim(label,
-          negandUnLabeledPatternsandWords4Label, constVars.sqrtPatScore, false,
+          denoScore, allCandidatePhrases, patternsandWords4Label, constVars.sqrtPatScore, false,
           externalWordWeightsNormalized, useFreqPhraseExtractedByPat);
     } else if (patternScoring.equals(PatternScoring.RatioAll)) {
-      // deno = allPatternsandWords4Label;
-      denominatorPatWt = this.convert2OneDim(label, allPatternsandWords4Label,
+      denoScore = x -> negPatternsandWords4Label.getCount(x.first(), x.second()) + unLabeledPatternsandWords4Label.getCount(x.first(), x.second()) +
+        patternsandWords4Label.getCount(x.first(), x.second());
+      denominatorPatWt = this.convert2OneDim(label, denoScore,allCandidatePhrases, patternsandWords4Label,
           constVars.sqrtPatScore, false, externalWordWeightsNormalized,
           useFreqPhraseExtractedByPat);
     } else if (patternScoring.equals(PatternScoring.PosNegOdds)) {
-      // deno = negPatternsandWords4Label;
-      denominatorPatWt = this.convert2OneDim(label, negPatternsandWords4Label,
+      denoScore = x -> negPatternsandWords4Label.getCount(x.first(), x.second());
+      denominatorPatWt = this.convert2OneDim(label, denoScore, allCandidatePhrases, patternsandWords4Label,
           constVars.sqrtPatScore, false, externalWordWeightsNormalized,
-
           useFreqPhraseExtractedByPat);
     } else if (patternScoring.equals(PatternScoring.PhEvalInPat)
         || patternScoring.equals(PatternScoring.PhEvalInPatLogP)
         || patternScoring.equals(PatternScoring.LOGREG)
         || patternScoring.equals(PatternScoring.LOGREGlogP)) {
-      // deno = negandUnLabeledPatternsandWords4Label;
+      denoScore = x -> negPatternsandWords4Label.getCount(x.first(), x.second()) + unLabeledPatternsandWords4Label.getCount(x.first(), x.second());
       denominatorPatWt = this.convert2OneDim(label,
-          negandUnLabeledPatternsandWords4Label, constVars.sqrtPatScore, true,
+        denoScore, allCandidatePhrases, patternsandWords4Label, constVars.sqrtPatScore, true,
           externalWordWeightsNormalized, useFreqPhraseExtractedByPat);
     } else if (patternScoring.equals(PatternScoring.SqrtAllRatio)) {
-      // deno = negandUnLabeledPatternsandWords4Label;
+      denoScore = x -> negPatternsandWords4Label.getCount(x.first(), x.second()) + unLabeledPatternsandWords4Label.getCount(x.first(), x.second());
+
       denominatorPatWt = this.convert2OneDim(label,
-          negandUnLabeledPatternsandWords4Label, true, false,
+        denoScore, allCandidatePhrases, patternsandWords4Label, true, false,
           externalWordWeightsNormalized, useFreqPhraseExtractedByPat);
     } else
       throw new RuntimeException("Cannot understand patterns scoring");
@@ -101,8 +104,8 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
 
     //Multiplying by logP
     if (patternScoring.equals(PatternScoring.PhEvalInPatLogP) || patternScoring.equals(PatternScoring.LOGREGlogP)) {
-      Counter<SurfacePattern> logpos_i = new ClassicCounter<SurfacePattern>();
-      for (Entry<SurfacePattern, ClassicCounter<String>> en : patternsandWords4Label
+      Counter<Integer> logpos_i = new ClassicCounter<Integer>();
+      for (Entry<Integer, ClassicCounter<String>> en : patternsandWords4Label
           .entrySet()) {
         logpos_i.setCount(en.getKey(), Math.log(en.getValue().size()));
       }
@@ -112,17 +115,16 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
     return currentPatternWeights4Label;
   }
 
-  Counter<SurfacePattern> convert2OneDim(String label,
-      TwoDimensionalCounter<SurfacePattern, String> patternsandWords,
+  Counter<Integer> convert2OneDim(String label,
+      Function<Pair<Integer, String>, Double> scoringFunction, Set<String> allCandidatePhrases, TwoDimensionalCounter<Integer, String> positivePatternsAndWords,
       boolean sqrtPatScore, boolean scorePhrasesInPatSelection,
-      Counter<String> dictOddsWordWeights, boolean useFreqPhraseExtractedByPat)
-      throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+      Counter<String> dictOddsWordWeights, boolean useFreqPhraseExtractedByPat) throws IOException, ClassNotFoundException {
 
     if (Data.googleNGram.size() == 0 && Data.googleNGramsFile != null) {
       Data.loadGoogleNGrams();
     }
 
-    Counter<SurfacePattern> patterns = new ClassicCounter<SurfacePattern>();
+    Counter<Integer> patterns = new ClassicCounter<Integer>();
 
     Counter<String> googleNgramNormScores = new ClassicCounter<String>();
     Counter<String> domainNgramNormScores = new ClassicCounter<String>();
@@ -135,12 +137,8 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
 
     if ((patternScoring.equals(PatternScoring.PhEvalInPat) || patternScoring
         .equals(PatternScoring.PhEvalInPatLogP)) && scorePhrasesInPatSelection) {
-      Set<String> allPhrasesInQuestion = new HashSet<String>();
-      for (Entry<SurfacePattern, ClassicCounter<String>> d : patternsandWords
-          .entrySet()) {
-        allPhrasesInQuestion.addAll(d.getValue().keySet());
-      }
-      for (String g : allPhrasesInQuestion) {
+
+      for (String g : allCandidatePhrases) {
         if (constVars.usePatternEvalEditDistOther) {
 
           editDistanceFromOtherSemanticBinaryScores.setCount(g,
@@ -181,7 +179,6 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
             externalFeatWtsNormalized.setCount(g, externalWtsDefault);
         }
       }
-      // TODO : changed
       if (constVars.usePatternEvalGoogleNgram)
         googleNgramNormScores = GetPatternsFromDataMultiClass
             .normalizeSoftMaxMinMaxScores(googleNgramNormScores, true, true,
@@ -204,7 +201,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
       ScorePhrases scoreclassifier = new ScorePhrases(props2, constVars);
       System.out.println("file is " + props.getProperty("domainNGramsFile"));
       Execution.fillOptions(Data.class, props2);
-      classifierScores = scoreclassifier.phraseScorer.scorePhrases(label, patternsandWords.secondKeySet(),  true);
+      classifierScores = scoreclassifier.phraseScorer.scorePhrases(label, allCandidatePhrases,  true);
       // scorePhrases(Data.sents, label, true,
       // constVars.perSelectRand, constVars.perSelectNeg, null, null,
       // dictOddsWordWeights);
@@ -213,97 +210,94 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
 
     Counter<String> cachedScoresForThisIter = new ClassicCounter<String>();
 
-    for (Entry<SurfacePattern, ClassicCounter<String>> d : patternsandWords
-        .entrySet()) {
+    for (Map.Entry<Integer, ClassicCounter<String>> en: positivePatternsAndWords.entrySet()) {
 
-      for (Entry<String, Double> e : d.getValue().entrySet()) {
-        String word = e.getKey();
-        Counter<ScorePhraseMeasures> scoreslist = new ClassicCounter<ScorePhraseMeasures>();
-        double score = 1;
-        if ((patternScoring.equals(PatternScoring.PhEvalInPat) || patternScoring
+        for(Entry<String, Double> en2: en.getValue().entrySet()) {
+          String word = en2.getKey();
+          Counter<ScorePhraseMeasures> scoreslist = new ClassicCounter<ScorePhraseMeasures>();
+          double score = 1;
+          if ((patternScoring.equals(PatternScoring.PhEvalInPat) || patternScoring
             .equals(PatternScoring.PhEvalInPatLogP))
             && scorePhrasesInPatSelection) {
-          if (cachedScoresForThisIter.containsKey(word)) {
-            score = cachedScoresForThisIter.getCount(word);
-          } else {
-            if (constVars.getOtherSemanticClassesWords().contains(word)
+            if (cachedScoresForThisIter.containsKey(word)) {
+              score = cachedScoresForThisIter.getCount(word);
+            } else {
+              if (constVars.getOtherSemanticClassesWords().contains(word)
                 || constVars.getCommonEngWords().contains(word))
-              score = 1;
-            else {
+                score = 1;
+              else {
 
-              if (constVars.usePatternEvalSemanticOdds) {
-                double semanticClassOdds = 1;
-                if (dictOddsWordWeights.containsKey(word))
-                  semanticClassOdds = 1 - dictOddsWordWeights.getCount(word);
-                scoreslist.setCount(ScorePhraseMeasures.SEMANTICODDS,
+                if (constVars.usePatternEvalSemanticOdds) {
+                  double semanticClassOdds = 1;
+                  if (dictOddsWordWeights.containsKey(word))
+                    semanticClassOdds = 1 - dictOddsWordWeights.getCount(word);
+                  scoreslist.setCount(ScorePhraseMeasures.SEMANTICODDS,
                     semanticClassOdds);
-              }
-
-              if (constVars.usePatternEvalGoogleNgram) {
-                double gscore = 0;
-                if (googleNgramNormScores.containsKey(word)) {
-                  gscore = 1 - googleNgramNormScores.getCount(word);
                 }
-                scoreslist.setCount(ScorePhraseMeasures.GOOGLENGRAM, gscore);
-              }
 
-              if (constVars.usePatternEvalDomainNgram) {
-                double domainscore;
-                if (domainNgramNormScores.containsKey(word)) {
-                  domainscore = 1 - domainNgramNormScores.getCount(word);
-                } else
-                  domainscore = 1 - scorePhrases.phraseScorer
+                if (constVars.usePatternEvalGoogleNgram) {
+                  double gscore = 0;
+                  if (googleNgramNormScores.containsKey(word)) {
+                    gscore = 1 - googleNgramNormScores.getCount(word);
+                  }
+                  scoreslist.setCount(ScorePhraseMeasures.GOOGLENGRAM, gscore);
+                }
+
+                if (constVars.usePatternEvalDomainNgram) {
+                  double domainscore;
+                  if (domainNgramNormScores.containsKey(word)) {
+                    domainscore = 1 - domainNgramNormScores.getCount(word);
+                  } else
+                    domainscore = 1 - scorePhrases.phraseScorer
                       .getPhraseWeightFromWords(domainNgramNormScores, word,
-                          scorePhrases.phraseScorer.OOVDomainNgramScore);
-                scoreslist.setCount(ScorePhraseMeasures.DOMAINNGRAM,
+                        scorePhrases.phraseScorer.OOVDomainNgramScore);
+                  scoreslist.setCount(ScorePhraseMeasures.DOMAINNGRAM,
                     domainscore);
-              }
-              if (constVars.usePatternEvalWordClass) {
-                double externalFeatureWt = externalWtsDefault;
-                if (externalFeatWtsNormalized.containsKey(e.getKey()))
-                  externalFeatureWt = 1 - externalFeatWtsNormalized.getCount(e
-                      .getKey());
-                scoreslist.setCount(ScorePhraseMeasures.DISTSIM,
+                }
+                if (constVars.usePatternEvalWordClass) {
+                  double externalFeatureWt = externalWtsDefault;
+                  if (externalFeatWtsNormalized.containsKey(word))
+                    externalFeatureWt = 1 - externalFeatWtsNormalized.getCount(word);
+                  scoreslist.setCount(ScorePhraseMeasures.DISTSIM,
                     externalFeatureWt);
+                }
+
+                if (constVars.usePatternEvalEditDistOther) {
+                  assert editDistanceFromOtherSemanticBinaryScores.containsKey(word) : "How come no edit distance info?";
+                  scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER,
+                    editDistanceFromOtherSemanticBinaryScores.getCount(word));
+                }
+                if (constVars.usePatternEvalEditDistSame) {
+                  scoreslist.setCount(ScorePhraseMeasures.EDITDISTSAME,
+                    editDistanceFromAlreadyExtractedBinaryScores.getCount(word));
+                }
+
+                // taking average
+                score = Counters.mean(scoreslist);
+
+                phInPatScores.setCounter(word, scoreslist);
               }
 
-              if (constVars.usePatternEvalEditDistOther) {
-                assert editDistanceFromOtherSemanticBinaryScores.containsKey(e
-                    .getKey()) : "How come no edit distance info?";
-                scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER,
-                    editDistanceFromOtherSemanticBinaryScores.getCount(e
-                        .getKey()));
-              }
-              if (constVars.usePatternEvalEditDistSame) {
-                scoreslist.setCount(ScorePhraseMeasures.EDITDISTSAME,
-                    editDistanceFromAlreadyExtractedBinaryScores.getCount(e
-                        .getKey()));
-              }
-
-              // taking average
-              score = Counters.mean(scoreslist);
-
-              phInPatScores.setCounter(e.getKey(), scoreslist);
+              cachedScoresForThisIter.setCount(word, score);
             }
-
-            cachedScoresForThisIter.setCount(e.getKey(), score);
-          }
-        } else if ((patternScoring.equals(PatternScoring.LOGREG) || patternScoring.equals(PatternScoring.LOGREGlogP))
+          } else if ((patternScoring.equals(PatternScoring.LOGREG) || patternScoring.equals(PatternScoring.LOGREGlogP))
             && scorePhrasesInPatSelection) {
-          score = 1 - classifierScores.getCount(e.getKey());
-          // score = 1 - scorePhrases.scoreUsingClassifer(classifier,
-          // e.getKey(), label, true, null, null, dictOddsWordWeights);
-          // throw new RuntimeException("not implemented yet");
-        }
-        if (useFreqPhraseExtractedByPat)
-          score = score * e.getValue();
-        if (constVars.sqrtPatScore)
-          patterns.incrementCount(d.getKey(), Math.sqrt(score));
-        else
-          patterns.incrementCount(d.getKey(), score);
+            score = 1 - classifierScores.getCount(word);
+            // score = 1 - scorePhrases.scoreUsingClassifer(classifier,
+            // e.getKey(), label, true, null, null, dictOddsWordWeights);
+            // throw new RuntimeException("not implemented yet");
+          }
 
-      }
+          if (useFreqPhraseExtractedByPat)
+            score = score * scoringFunction.apply(new Pair(en.getKey(), word));
+          if (constVars.sqrtPatScore)
+            patterns.incrementCount(en.getKey(), Math.sqrt(score));
+          else
+            patterns.incrementCount(en.getKey(), score);
+        }
     }
+
+
 
     return patterns;
   }

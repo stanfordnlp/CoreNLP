@@ -10,7 +10,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.ReflectionLoading;
 
 /** Parses and specifies all the details for how to read some POS tagging data.
@@ -33,7 +33,7 @@ public class TaggedFileRecord {
   final TreeTransformer treeTransformer;
   final TreeNormalizer treeNormalizer;
   final NumberRangesFileFilter treeRange;
-  final Filter<Tree> treeFilter;
+  final Predicate<Tree> treeFilter;
   final Integer wordColumn;
   final Integer tagColumn;
   final TreeReaderFactory trf;
@@ -44,7 +44,7 @@ public class TaggedFileRecord {
                            TreeNormalizer treeNormalizer,
                            TreeReaderFactory trf,
                            NumberRangesFileFilter treeRange,
-                           Filter<Tree> treeFilter,
+                           Predicate<Tree> treeFilter,
                            Integer wordColumn, Integer tagColumn) {
     this.file = file;
     this.format = format;
@@ -148,7 +148,7 @@ public class TaggedFileRecord {
     TreeNormalizer treeNormalizer = null;
     TreeReaderFactory trf = null;
     NumberRangesFileFilter treeRange = null;
-    Filter<Tree> treeFilter = null;
+    Predicate<Tree> treeFilter = null;
     Integer wordColumn = null, tagColumn = null;
 
     for (String arg : args) {

@@ -184,17 +184,22 @@ public class TokenizerAnnotator implements Annotator {
     TokenizerFactory<CoreLabel> factory;
     String options = props.getProperty("tokenize.options", null);
     
-    // set it to the equivalent of both extraOptions and options, unless both are nulls
-    if (options == null) {
-      options = extraOptions;
-    } else if (extraOptions != null) {
-      options = extraOptions + options;
-    }
-    
-    // if options is STILL null set it to default options
+    // set it to the equivalent of both extraOptions and options
+    // TODO: maybe we should always have getDefaultOptions() and 
+    // expect the user to turn off default options.  That would 
+    // require all options to have negated options, but
+    // currently there are some which don't have that
     if (options == null) {
       options = type.getDefaultOptions();
+    } 
+    if (extraOptions != null) {
+      if (extraOptions.endsWith(",")) {
+        options = extraOptions + options;
+      } else {
+        options = extraOptions + "," + options;
+      }
     }
+    
     switch(type) {
     case Spanish:
       factory = SpanishTokenizer.factory(new CoreLabelTokenFactory(), options);

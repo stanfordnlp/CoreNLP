@@ -30,20 +30,24 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
 
   
   @Override
-  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, SurfacePattern> terms,
-      TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted, Counter<SurfacePattern> allSelectedPatterns,
+  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, Integer> terms,
+      TwoDimensionalCounter<String, Integer> wordsPatExtracted, Counter<Integer> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, boolean forLearningPatterns) {
     Map<String, Counter<ScorePhraseMeasures>> scores = new HashMap<String, Counter<ScorePhraseMeasures>>();
     if (Data.domainNGramsFile != null)
       Data.loadDomainNGrams();
+
+
+    Redwood.log(ConstantsAndVariables.extremedebug, "Considering terms: " + terms.firstKeySet());
+
     // calculate TF-IDF like scores
     Counter<String> tfidfScores = new ClassicCounter<String>();
     if (constVars.usePhraseEvalPatWtByFreq) {
-      for (Entry<String, ClassicCounter<SurfacePattern>> en : terms.entrySet()) {
+      for (Entry<String, ClassicCounter<Integer>> en : terms.entrySet()) {
         double score = getPatTFIDFScore(en.getKey(), en.getValue(), allSelectedPatterns);
         tfidfScores.setCount(en.getKey(), score);
       }
-      Redwood.log("extremePatDebug", "BEFORE IDF " + Counters.toSortedString(tfidfScores, 100, "%1$s:%2$f", "\t"));
+      Redwood.log(ConstantsAndVariables.extremedebug, "BEFORE IDF " + Counters.toSortedString(tfidfScores, 100, "%1$s:%2$f", "\t"));
       Counters.divideInPlace(tfidfScores, Data.processedDataFreq);
     }
 
