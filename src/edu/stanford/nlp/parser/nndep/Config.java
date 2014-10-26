@@ -43,6 +43,12 @@ public class Config
   public static final String SEPARATOR = "###################";
 
   /**
+  *   The language of the parser used on.
+  *   Currently, it supports Chinese and English, and it is only used to exclude punctuations in evaluation.
+  */
+  public String language = "English";
+
+  /**
    * Number of threads to use during training. Also indirectly controls
    * how mini-batches are partitioned (more threads => more partitions
    * => smaller partitions).
@@ -163,13 +169,13 @@ public class Config
     numPreComputed = PropertiesUtils.getInt(props, "numPreComputed", numPreComputed);
     evalPerIter = PropertiesUtils.getInt(props, "evalPerIter", evalPerIter);
     saveIntermediate = PropertiesUtils.getBool(props, "saveIntermediate", saveIntermediate);
-
-    String tlpClass = PropertiesUtils.getString(props, "tlp",
-        "edu.stanford.nlp.trees.PennTreebankLanguagePack");
+    language = PropertiesUtils.getString(props, "language", language);
+    String tlpClass = language.equals("Chinese") ? "edu.stanford.nlp.trees.international.pennchinese.ChineseTreebankLanguagePack" : "edu.stanford.nlp.trees.PennTreebankLanguagePack";
     tlp = ReflectionLoading.loadByReflection(tlpClass);
   }
 
   public void printParameters() {
+      System.err.printf("language = %s%n", language);
       System.err.printf("trainingThreads = %d%n", trainingThreads);
       System.err.printf("wordCutOff = %d%n", wordCutOff);
       System.err.printf("initRange = %.2g%n", initRange);

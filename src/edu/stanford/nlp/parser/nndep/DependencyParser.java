@@ -107,11 +107,11 @@ public class DependencyParser {
    *         "unknown" word if the word is unknown
    */
   public int getWordID(String s) {
-    return wordIDs.containsKey(s) ? wordIDs.get(s) : wordIDs.get(Config.UNKNOWN);
+      return wordIDs.containsKey(s) ? wordIDs.get(s) : wordIDs.get(Config.UNKNOWN);
   }
 
   public int getPosID(String s) {
-    return posIDs.containsKey(s) ? posIDs.get(s) : posIDs.get(Config.UNKNOWN);
+      return posIDs.containsKey(s) ? posIDs.get(s) : posIDs.get(Config.UNKNOWN);
   }
 
   public int getLabelID(String s) {
@@ -527,6 +527,8 @@ public class DependencyParser {
       int dim = splits.length - 1;
       embeddings = new double[nWords][dim];
       System.err.println("Embedding File " + embedFile + ": #Words = " + nWords + ", dim = " + dim);
+
+      //TODO: how if the embedding dim. does not match..?
       if (dim != config.embeddingSize)
         System.err.println("ERROR: embedding dimension mismatch");
 
@@ -547,6 +549,8 @@ public class DependencyParser {
    * Determine the number of shift-reduce transitions necessary to
    * build a dependency parse of the given sentence.
    */
+
+  // TODO: this should depend on the parsing system
   private static int numTransitions(CoreMap sentence) {
     return 2 * sentence.get(CoreAnnotations.TokensAnnotation.class).size();
   }
@@ -631,7 +635,6 @@ public class DependencyParser {
     config.printParameters();
 
     long startTime = System.currentTimeMillis();
-
     /**
      * Track the best UAS performance we've seen.
      */
@@ -866,6 +869,7 @@ public class DependencyParser {
     //NOTE: remove -NULL-, and the pass it to ParsingSystem
     List<String> lDict = new ArrayList<>(knownLabels);
     lDict.remove(0);
+
     system = new ArcStandard(config.tlp, lDict);
 
     // Pre-compute matrix multiplications
@@ -878,7 +882,6 @@ public class DependencyParser {
    */
   public static void main(String[] args) {
     Properties props = StringUtils.argsToProperties(args);
-
     DependencyParser parser = new DependencyParser(props);
 
     if (props.containsKey("trainFile"))
@@ -890,5 +893,4 @@ public class DependencyParser {
       parser.test(props.getProperty("testFile"), props.getProperty("outFile"));
     }
   }
-
 }
