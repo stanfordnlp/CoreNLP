@@ -9,6 +9,7 @@
 package edu.stanford.nlp.parser.nndep;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
@@ -133,7 +134,7 @@ class Util {
       {
         List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
 
-        for (int j = 1; j <= tokens.size(); ++ j)
+        for (int j = 1, size = tokens.size(); j <= size; ++j)
         {
           CoreLabel token = tokens.get(j - 1);
           output.printf("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_%n",
@@ -141,11 +142,13 @@ class Util {
                   token.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class),
                   token.get(CoreAnnotations.CoNLLDepTypeAnnotation.class));
         }
-        output.write("\n");
+        output.println();
       }
       output.close();
     }
-    catch (Exception e) { System.err.println(e); }
+    catch (Exception e) {
+      throw new RuntimeIOException(e);
+    }
   }
 
   public static void printTreeStats(String str, List<DependencyTree> trees)
@@ -154,12 +157,11 @@ class Util {
     System.err.println("#Trees: " + trees.size());
     int nonTrees = 0;
     int nonProjective = 0;
-    for (int k = 0; k < trees.size(); ++ k)
-    {
-      if (!trees.get(k).isTree())
-        ++ nonTrees;
-      else if (!trees.get(k).isProjective())
-        ++ nonProjective;
+    for (DependencyTree tree : trees) {
+      if (!tree.isTree())
+        ++nonTrees;
+      else if (!tree.isProjective())
+        ++nonProjective;
     }
     System.err.println(nonTrees + " tree(s) are illegal.");
     System.err.println(nonProjective + " tree(s) are legal but not projective.");
