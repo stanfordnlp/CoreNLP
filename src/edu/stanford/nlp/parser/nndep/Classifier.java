@@ -177,10 +177,10 @@ public class Classifier {
       Collection<Example> examples = input.first();
       FeedforwardParams params = input.second();
 
-      gradW1 = new double[params.getW1().length][params.getW1()[0].length];
-      gradb1 = new double[params.getB1().length];
-      gradW2 = new double[params.getW2().length][params.getW2()[0].length];
-      gradE = new double[params.getE().length][params.getE()[0].length];
+      gradW1 = new double[W1.length][W1[0].length];
+      gradb1 = new double[b1.length];
+      gradW2 = new double[W2.length][W2[0].length];
+      gradE = new double[E.length][E[0].length];
       gradSaved = new double[smallMap.size()][config.hiddenSize];
 
       double cost = 0.0;
@@ -334,16 +334,6 @@ public class Classifier {
    */
   private static class FeedforwardParams {
 
-    /**
-     * Weight matrices corresponding to those in the outer classifier
-     * instance
-     */
-    private final double[][] W1;
-    private final double[] b1;
-    private final double[][] W2;
-    private final double[][] E;
-    private final double[][] saved;
-
     private final double regParameter;
     private final double dropOutProb;
 
@@ -351,31 +341,6 @@ public class Classifier {
                               double[][] E, double[][] saved) {
       this.dropOutProb = dropOutProb;
       this.regParameter = regParameter;
-      this.saved = saved;
-      this.E = E;
-      this.W2 = W2;
-      this.b1 = b1;
-      this.W1 = W1;
-    }
-
-    public double[][] getW1() {
-      return W1;
-    }
-
-    public double[] getB1() {
-      return b1;
-    }
-
-    public double[][] getW2() {
-      return W2;
-    }
-
-    public double[][] getE() {
-      return E;
-    }
-
-    public double[][] getSaved() {
-      return saved;
     }
 
     public double getRegParameter() {
@@ -385,6 +350,7 @@ public class Classifier {
     public double getDropOutProb() {
       return dropOutProb;
     }
+
   }
 
   /**
