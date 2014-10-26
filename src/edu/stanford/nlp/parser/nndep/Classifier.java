@@ -14,7 +14,14 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 public class Classifier 
@@ -56,8 +63,6 @@ public class Classifier
   private final MulticoreWrapper<Pair<Collection<Example>, FeedforwardParams>, Cost> jobHandler;
 
   private int numThreads;
-
-  private final Random random;
 
   private final int embeddingSize, hiddenSize;
 
@@ -107,8 +112,6 @@ public class Classifier
     // TODO make configurable
     numThreads = Runtime.getRuntime().availableProcessors() - 1;
     jobHandler = new MulticoreWrapper<>(numThreads, new CostFunction(), false);
-
-    random = new Random();
   }
 
   private class CostFunction implements ThreadsafeProcessor<Pair<Collection<Example>, FeedforwardParams>, Cost> {
@@ -118,6 +121,8 @@ public class Classifier
     private double[][] gradW2;
     private double[][] gradE;
     private double[][] gradSaved;
+
+    private final ThreadLocalRandom random = ThreadLocalRandom.current();
 
     @Override
     public Cost process(Pair<Collection<Example>, FeedforwardParams> input) {
