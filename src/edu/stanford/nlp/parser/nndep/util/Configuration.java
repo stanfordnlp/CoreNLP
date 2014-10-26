@@ -1,19 +1,23 @@
 
-/* 
-* 	@Author:  Danqi Chen
-* 	@Email:  danqi@cs.stanford.edu
-*	@Created:  2014-08-31
-* 	@Last Modified:  2014-09-01
-*/
-
 package edu.stanford.nlp.parser.nndep.util;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 
+/**
+ * Describe the current configuration of a parser (i.e., parser state).
+ *
+ * This class uses an indexing scheme where an index of zero refers to
+ * the ROOT node and actual word indices begin at one.
+ *
+ * @author Danqi Chen
+ */
 public class Configuration {
 
   public List<Integer> stack;
@@ -69,19 +73,39 @@ public class Configuration {
     return buffer.size();
   }
 
+  /**
+   * @param k Word index (zero = root node; actual word indexing
+   *          begins at 1)
+   */
   public int getHead(int k) {
     return tree.getHead(k);
   }
 
+  /**
+   * @param k Word index (zero = root node; actual word indexing
+   *          begins at 1)
+   */
   public String getLabel(int k) {
     return tree.getLabel(k);
   }
 
+  /**
+   * Get the sentence index of the kth word on the stack.
+   *
+   * @return Sentence index or {@link CONST#NONEXIST} if stack doesn't
+   *         have an element at this index
+   */
   public int getStack(int k) {
     int nStack = getStackSize();
     return (k >= 0 && k < nStack) ? stack.get(nStack - 1 - k) : CONST.NONEXIST;
   }
 
+  /**
+   * Get the sentence index of the kth word on the buffer.
+   *
+   * @return Sentence index or {@link CONST#NONEXIST} if stack doesn't
+   *         have an element at this index
+   */
   public int getBuffer(int k) {
     return (k >= 0 && k < getBufferSize()) ? buffer.get(k) : CONST.NONEXIST;
   }
@@ -90,6 +114,10 @@ public class Configuration {
     return sentence.get(CoreAnnotations.TokensAnnotation.class);
   }
 
+  /**
+   * @param k Word index (zero = root node; actual word indexing
+   *          begins at 1)
+   */
   public String getWord(int k) {
     if (k == 0) return CONST.ROOT;
     else k--;
@@ -98,6 +126,10 @@ public class Configuration {
     return k < 0 || k >= lbls.size() ? CONST.NULL : lbls.get(k).word();
   }
 
+  /**
+   * @param k Word index (zero = root node; actual word indexing
+   *          begins at 1)
+   */
   public String getPOS(int k) {
     if (k == 0) return CONST.ROOT;
     else k--;
@@ -106,6 +138,13 @@ public class Configuration {
     return k < 0 || k >= lbls.size() ? CONST.NULL : lbls.get(k).tag();
   }
 
+  /**
+   * @param h Word index of governor (zero = root node; actual word
+   *          indexing begins at 1)
+   * @param t Word index of dependent (zero = root node; actual word
+   *          indexing begins at 1)
+   * @param l Arc label
+   */
   public void addArc(int h, int t, String l) {
     tree.set(t, h, l);
   }
