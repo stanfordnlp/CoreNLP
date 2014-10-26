@@ -474,10 +474,10 @@ public class Classifier {
   }
 
   /**
-   * Build a preMap for only those features which need to be
-   * pre-computed for the examples in a given mini-batch.
+   * Determine the feature IDs which need to be pre-computed for
+   * training with these examples.
    */
-  private Map<Integer, Integer> makeSmallMap(List<Example> examples) {
+  private Set<Integer> getToPreCompute(List<Example> examples) {
     Set<Integer> featureIDs = new HashSet<>();
     for (Example ex : examples) {
       List<Integer> feature = ex.getFeature();
@@ -493,14 +493,7 @@ public class Classifier {
     double percentagePreComputed = featureIDs.size() / (float) config.numPreComputed;
     System.err.printf("Percent actually necessary to pre-compute: %f%%%n", percentagePreComputed * 100);
 
-    Map<Integer, Integer> savedFeatureMap = new HashMap<>(featureIDs.size());
-    int newId = 0;
-    for (int id : featureIDs) {
-      savedFeatureMap.put(preMap.get(id), newId);
-      newId++;
-    }
-
-    return savedFeatureMap;
+    return featureIDs;
   }
 
   /**
@@ -529,12 +522,8 @@ public class Classifier {
 
     // Redo precomputations for only those features which are triggered
     // by examples in this mini-batch.
-    //
-    // This helps speed up training by ensuring that our `saved` data
-    // is a dense array (for small batch sizes it'd likely be extremely
-    // sparse if we generated `saved` from the entire possible set of
-    // features listed in `preMap`).
-    preCompute(preMap);
+    Set<Integer> toPreCompute = getToPreCompute(examples);
+    preCompute(toPreCompute);
 
     // Set up parameters for feedforward
     FeedforwardParams params = new FeedforwardParams(batchSize, dropOutProb);
@@ -632,29 +621,24 @@ public class Classifier {
   }
 
   /**
-   * @see #preCompute(java.util.Map)
+   * @see #preCompute(java.util.Set)
    */
   public void preCompute() {
-    preCompute(preMap);
+    // If no features are specified, pre-compute all of them!
+    preCompute(preMap.keySet());
   }
 
   /**
    * Pre-compute hidden layer activations for some set of possible
    * feature inputs.
    *
-   * @param preMap A map from feature ID to destined indices within
-   *               {@link #saved}, which describes which features
-   *               should be pre-computed and where those results
-   *               should be placed
+   * @param toPreCompute Set of feature IDs for which hidden layer
+   *                     activations should be precomputed
    */
-  public void preCompute(Map<Integer, Integer> preMap) {
+  public void preCompute(Set<Integer> toPreCompute) {
     long startTime = System.currentTimeMillis();
-
-    // For each feature input, we need to calculate an entire hidden
-    // layer activation
-    saved = new double[preMap.size()][config.hiddenSize];
-
-    for (int x : preMap.keySet()) {
+    saved = new double[config.numPreComputed][config.hiddenSize];
+    for (int x : toPreCompute) {
       int mapX = preMap.get(x);
       int tok = x / config.numTokens;
       int pos = x % config.numTokens;
@@ -662,7 +646,7 @@ public class Classifier {
         for (int k = 0; k < config.embeddingSize; ++k)
           saved[mapX][j] += W1[j][pos * config.embeddingSize + k] * E[tok][k];
     }
-    System.out.println("PreComputed " + preMap.size() + ", Elapsed Time: " + (System
+    System.out.println("PreComputed " + toPreCompute.size() + ", Elapsed Time: " + (System
         .currentTimeMillis() - startTime) / 1000.0 + " (s)");
   }
 
