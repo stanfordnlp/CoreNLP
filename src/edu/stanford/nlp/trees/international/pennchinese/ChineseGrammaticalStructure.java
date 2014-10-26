@@ -4,7 +4,7 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams;
 import edu.stanford.nlp.parser.ViterbiParserWithOptions;
 import edu.stanford.nlp.trees.*;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
@@ -49,7 +49,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
     this(t, new ChineseTreebankLanguagePack().punctuationWordRejectFilter());
   }
 
-  public ChineseGrammaticalStructure(Tree t, Predicate<String> puncFilter) {
+  public ChineseGrammaticalStructure(Tree t, Filter<String> puncFilter) {
     this (t, puncFilter, shf);
   }
 
@@ -57,7 +57,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
     this (t, null, hf);
   }
 
-  public ChineseGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf) {
+  public ChineseGrammaticalStructure(Tree t, Filter<String> puncFilter, HeadFinder hf) {
     super(t, ChineseGrammaticalRelations.values(), hf, puncFilter);
   }
 
@@ -285,7 +285,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
 
     for (Tree t : tb) {
-      Predicate<String> puncFilter;
+      Filter<String> puncFilter;
 
       if (keepPunct) {
         puncFilter = Filters.acceptFilter();

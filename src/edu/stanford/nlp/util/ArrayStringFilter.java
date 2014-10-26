@@ -1,14 +1,11 @@
 package edu.stanford.nlp.util;
 
-import java.io.Serializable;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * Filters Strings based on whether they exactly match any string in
- * the array it is initially constructed with.  Saves some time over
+ * the array it is initially onstructed with.  Saves some time over
  * using regexes if the array of strings is small enough.  No specific
  * experiments exist for how long the array can be before performance
  * is worse than a regex, but the English dependencies code was helped
@@ -16,7 +13,7 @@ import java.util.function.Predicate;
  *
  * @author John Bauer
  */
-public class ArrayStringFilter implements Predicate<String>, Serializable {
+public class ArrayStringFilter implements Filter<String> {
   private final String[] words;
   private final int length;
   private final Mode mode;
@@ -31,12 +28,13 @@ public class ArrayStringFilter implements Predicate<String>, Serializable {
     }
     this.mode = mode;
     this.words = new String[words.length];
-    System.arraycopy(words, 0, this.words, 0, words.length);
+    for (int i = 0; i < words.length; ++i) {
+      this.words[i] = words[i];
+    }
     this.length = words.length;
   }
 
-  @Override
-  public boolean test(String input) {
+  public boolean accept(String input) {
     switch (mode) {
     case EXACT:
       for (int i = 0; i < length; ++i) {
@@ -61,7 +59,7 @@ public class ArrayStringFilter implements Predicate<String>, Serializable {
           return true;
         }
       }
-      return false;
+      return false;      
     default:
       throw new IllegalArgumentException("Unknown mode " + mode);
     }
@@ -69,7 +67,7 @@ public class ArrayStringFilter implements Predicate<String>, Serializable {
 
   @Override
   public String toString() {
-    return mode.toString() + ':' + StringUtils.join(words, ",");
+    return mode.toString() + ":" + StringUtils.join(words, ",");
   }
 
   @Override
@@ -90,14 +88,19 @@ public class ArrayStringFilter implements Predicate<String>, Serializable {
       return false;
     }
     ArrayStringFilter filter = (ArrayStringFilter) other;
-    if (filter.mode != this.mode || filter.length != this.length) {
+    if (filter.mode != this.mode || filter.length != filter.length) {
       return false;
     }
-    Set<String> myWords = new HashSet<>(Arrays.asList(this.words));
-    Set<String> otherWords = new HashSet<>(Arrays.asList(filter.words));
+    Set<String> myWords = new HashSet<String>();
+    for (String word : this.words) {
+      myWords.add(word);
+    }
+    Set<String> otherWords = new HashSet<String>();
+    for (String word : filter.words) {
+      otherWords.add(word);
+    }
     return myWords.equals(otherWords);
   }
 
   private static final long serialVersionUID = 1;
-
 }

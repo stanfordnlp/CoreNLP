@@ -1,6 +1,5 @@
 package edu.stanford.nlp.parser.dvparser;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,7 +10,7 @@ import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.lexparser.UnaryGrammar;
 import edu.stanford.nlp.parser.lexparser.UnaryRule;
 import edu.stanford.nlp.trees.Tree;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.TwoDimensionalSet;
@@ -28,7 +27,7 @@ import edu.stanford.nlp.util.TwoDimensionalSet;
  * most of this kind of tree is to make sure the parser is trained
  * with <code>-compactGrammar 0</code>.
  */
-public class FilterConfusingRules implements Predicate<Tree>, Serializable {
+public class FilterConfusingRules implements Filter<Tree> {
   final Set<String> unaryRules = new HashSet<String>();
   final TwoDimensionalSet<String, String> binaryRules = new TwoDimensionalSet<String, String>();
   
@@ -75,7 +74,7 @@ public class FilterConfusingRules implements Predicate<Tree>, Serializable {
     }
   }
 
-  public boolean test(Tree tree) {
+  public boolean accept(Tree tree) {
     if (tree.isLeaf() || tree.isPreTerminal()) {
       return true;
     }
@@ -98,7 +97,7 @@ public class FilterConfusingRules implements Predicate<Tree>, Serializable {
       }
     }
     for (Tree child : tree.children()) {
-      if (!test(child)) {
+      if (!accept(child)) {
         return false;
       }
     }
