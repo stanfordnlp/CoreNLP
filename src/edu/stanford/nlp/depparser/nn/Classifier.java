@@ -6,6 +6,10 @@
 * 	@Last Modified:  2014-10-05
 */
 
+package edu.stanford.nlp.depparser.nn;
+
+import edu.stanford.nlp.depparser.util.Util;
+
 import java.util.*;
 
 public class Classifier 

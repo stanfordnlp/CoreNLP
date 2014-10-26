@@ -1,4 +1,6 @@
 
+package edu.stanford.nlp.depparser.util;
+
 import java.util.*;
 
 public class Counter<T> extends HashMap<T, Integer>

@@ -6,6 +6,7 @@
 * 	@Last Modified:  2014-09-30
 */
 
+package edu.stanford.nlp.depparser.util;
 
 public class CONST
 {

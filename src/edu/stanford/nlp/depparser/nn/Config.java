@@ -6,6 +6,8 @@
 * 	@Last Modified:  2014-10-05
 */
 
+package edu.stanford.nlp.depparser.nn;
+
 public class Config
 {
     public static int wordCutOff = 1;
