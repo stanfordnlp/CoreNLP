@@ -9,6 +9,7 @@
 package edu.stanford.nlp.parser.nndep.util;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.CoreMap;
 
 import java.util.ArrayList;
@@ -18,9 +19,9 @@ public class ArcStandard extends ParsingSystem
 {
 	private boolean singleRoot = true;
 
-	public ArcStandard(List<String> labels)
+	public ArcStandard(TreebankLanguagePack tlp, List<String> labels)
 	{
-		super(labels);
+		super(tlp, labels);
 	}
 
 	public boolean isTerminal(Configuration c)

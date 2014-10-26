@@ -8,7 +8,10 @@
 
 package edu.stanford.nlp.parser.nndep;
 
+import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
+import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.ReflectionLoading;
 
 import java.util.Properties;
 
@@ -99,6 +102,14 @@ public class Config
    */
   public int evalPerIter = 100;
 
+  /**
+   * Describes language-specific properties necessary for training and
+   * testing. By default,
+   * {@link edu.stanford.nlp.trees.PennTreebankLanguagePack} will be
+   * used.
+   */
+  public TreebankLanguagePack tlp;
+
   public Config(Properties properties) {
     setProperties(properties);
   }
@@ -118,6 +129,10 @@ public class Config
     numTokens = PropertiesUtils.getInt(props, "numTokens", numTokens);
     numPreComputed = PropertiesUtils.getInt(props, "numPreComputed", numPreComputed);
     evalPerIter = PropertiesUtils.getInt(props, "evalPerIter", evalPerIter);
+
+    String tlpClass = PropertiesUtils.getString(props, "tlp",
+        "edu.stanford.nlp.trees.PennTreebankLanguagePack");
+    tlp = ReflectionLoading.loadByReflection(tlpClass);
   }
 
 }

@@ -10,19 +10,25 @@ package edu.stanford.nlp.parser.nndep.util;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CoreMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public abstract class ParsingSystem
 {
 
-	public String rootLabel;
-	public List<String> labels, transitions;
+  private final TreebankLanguagePack tlp;
+
+	protected final String rootLabel;
+	protected List<String> labels, transitions;
 
 	abstract void makeTransitions();
 	public abstract boolean canApply(Configuration c, String t);
@@ -33,11 +39,11 @@ public abstract class ParsingSystem
 	public abstract Configuration initialConfiguration(CoreMap sentence);
 	abstract boolean isTerminal(Configuration c);
 
-  private static final Pattern pPunct = Pattern.compile("``|''|[,.:]");
-
-	public ParsingSystem(List<String> labels)
-	{
-		this.labels = new ArrayList<String>(labels);
+  // TODO pass labels as Map<String, GrammaticalRelation>; use
+  // GrammaticalRelation throughout
+	public ParsingSystem(TreebankLanguagePack tlp, List<String> labels) {
+    this.tlp = tlp;
+		this.labels = new ArrayList<>(labels);
 
 		//NOTE: assume that the first element of labels is rootLabel
 		rootLabel = labels.get(0);
@@ -60,6 +66,10 @@ public abstract class ParsingSystem
 	public Map<String, Double> evaluate(List<CoreMap> sentences, List<DependencyTree> trees, List<DependencyTree> goldTrees)
 	{
 		Map<String, Double> result = new HashMap<String, Double>();
+
+    // We'll skip words which are punctuation. Retrieve tags indicating
+    // punctuation in this treebank.
+    Set<String> punctuationTags = CollectionUtils.asSet(tlp.punctuationTags());
 
 		if (trees.size() != goldTrees.size())
 		{
@@ -108,8 +118,9 @@ public abstract class ParsingSystem
 						++ correctArcs;
 				}
 				++ sumArcs;
-				if (!pPunct.matcher(tokens.get(j - 1).tag()).matches())
-				{
+
+        String tag = tokens.get(j - 1).tag();
+				if (!punctuationTags.contains(tag)) {
 					++ sumArcsWoPunc;
 					++ nonPunc;
 					if (trees.get(i).getHead(j) == goldTrees.get(i).getHead(j))
