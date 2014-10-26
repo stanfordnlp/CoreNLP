@@ -531,7 +531,7 @@ public class Classifier
         for (int k = 0; k < config.embeddingSize; ++k)
           saved[mapX][j] += W1[j][pos * config.embeddingSize + k] * E[tok][k];
     }
-    System.out.println("PreComputed " + config.numPreComputed + ", Elapsed Time: " + (System
+    System.out.println("PreComputed " + toPreCompute.size() + ", Elapsed Time: " + (System
         .currentTimeMillis() - startTime) / 1000.0 + " (s)");
   }
 
