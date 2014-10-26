@@ -181,6 +181,7 @@ public class DependencyParser {
     System.err.println("Generate training examples...");
 
     for (int i = 0; i < sents.size(); ++i) {
+
       if (i > 0) {
         if (i % 1000 == 0)
           System.err.print(i + " ");
@@ -190,8 +191,8 @@ public class DependencyParser {
 
       if (trees.get(i).isProjective()) {
         Configuration c = system.initialConfiguration(sents.get(i));
-        //NOTE: here I use 2n transitions instead of 2n-1 transitions.
-        for (int k = 0; k < trees.get(i).n * 2; ++k) {
+
+        while (!system.isTerminal(c)) {
           String oracle = system.getOracle(c, trees.get(i));
           List<Integer> feature = getFeatures(c);
           List<Integer> label = new ArrayList<>();
