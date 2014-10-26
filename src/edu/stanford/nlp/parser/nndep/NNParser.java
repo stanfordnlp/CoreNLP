@@ -43,20 +43,61 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+/**
+ * This class defines a transition-based dependency parser which makes
+ * use of a classifier powered by a neural network. The neural network
+ * accepts distributed representation inputs: dense, continuous
+ * representations of words, their part of speech tags, and the labels
+ * which connect words in a partial dependency parse.
+ *
+ * This is an implementation of the method described in
+ *
+ *   Danqi Chen and Christopher Manning. A Fast and Accurate Dependency
+ *   Parser Using Neural Networks. In EMNLP 2014.
+ *
+ * New models can be trained from the command line; see {@link #main}
+ * for details on training options. This parser will also output
+ * CoNLL-X format predictions; again see {@link #main} for available
+ * options.
+ *
+ * This parser can also be used programmatically. The easiest way to
+ * prepare the parser with a pre-trained model is to call
+ * {@link #loadFromModelFile(String)}. Then call
+ * {@link #predict(edu.stanford.nlp.util.CoreMap)} on the returned
+ * parser instance in order to get new parses.
+ *
+ * @author Danqi Chen
+ * @author Jon Gauthier
+ */
 public class NNParser {
   public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/PTB_Stanford_params.txt.gz";
 
-  List<String> wordDict, posDict, labelDict;
-  Map<String, Integer> wordMap, posMap, labelMap;
-  Dataset trainSet;
+  /**
+   * Words, parts of speech, and dependency relation labels which were
+   * observed in our corpus / stored in the model
+   */
+  private List<String> knownWords, knownPos, knownLabels;
+
+  /**
+   * Mapping from word / POS / dependency relation label to integer ID
+   */
+  private Map<String, Integer> wordIDs, posIDs, labelIDs;
 
   List<Integer> preComputed;
 
-  Classifier classifier;
-  ParsingSystem system;
+  /**
+   * Given a particular parser configuration, this classifier will
+   * predict the best transition to make next.
+   *
+   * The {@link edu.stanford.nlp.parser.nndep.Classifier} class
+   * handles both training and inference.
+   */
+  private Classifier classifier;
 
-  Map<String, Integer> embedID;
-  double[][] embeddings;
+  private ParsingSystem system;
+
+  private Map<String, Integer> embedID;
+  private double[][] embeddings;
 
   private final Config config;
 
@@ -68,20 +109,27 @@ public class NNParser {
     config = new Config(properties);
   }
 
+  /**
+   * Get an integer ID for the given word. This ID can be used to index
+   * into the embeddings {@link #embeddings}.
+   *
+   * @return An ID for the given word, or an ID referring to a generic
+   *         "unknown" word if the word is unknown
+   */
   public int getWordID(String s) {
     //NOTE: to use the previous trained parameters, we need to add one line
     if (s == CONST.ROOT) s = CONST.NULL;
-    return wordMap.containsKey(s) ? wordMap.get(s) : wordMap.get(CONST.UNKNOWN);
+    return wordIDs.containsKey(s) ? wordIDs.get(s) : wordIDs.get(CONST.UNKNOWN);
   }
 
   public int getPosID(String s) {
     //NOTE: to use the previous trained parameters, we need to add one line
     if (s == CONST.ROOT) s = CONST.NULL;
-    return posMap.containsKey(s) ? posMap.get(s) : posMap.get(CONST.UNKNOWN);
+    return posIDs.containsKey(s) ? posIDs.get(s) : posIDs.get(CONST.UNKNOWN);
   }
 
   public int getLabelID(String s) {
-    return labelMap.get(s);
+    return labelIDs.get(s);
   }
 
   public List<Integer> getFeatures(Configuration c) {
@@ -137,8 +185,8 @@ public class NNParser {
     return feature;
   }
 
-  public void genTrainExamples(List<CoreMap> sents, List<DependencyTree> trees) {
-    trainSet = new Dataset(config.numTokens, system.transitions.size());
+  public Dataset genTrainExamples(List<CoreMap> sents, List<DependencyTree> trees) {
+    Dataset ret = new Dataset(config.numTokens, system.transitions.size());
 
     Counter<Integer> tokPosCount = new IntCounter<>();
     System.out.println(CONST.SEPARATOR);
@@ -165,31 +213,34 @@ public class NNParser {
             else if (system.canApply(c, str)) label.add(0);
             else label.add(-1);
           }
-          trainSet.addExample(feature, label);
+
+          ret.addExample(feature, label);
           for (int j = 0; j < feature.size(); ++j)
             tokPosCount.incrementCount(feature.get(j) * feature.size() + j);
           system.apply(c, oracle);
         }
       }
     }
-    System.out.println("#Train Examples: " + trainSet.n);
+    System.out.println("#Train Examples: " + ret.n);
 
     Counters.retainTop(tokPosCount, config.numPreComputed);
     preComputed = new ArrayList<>(tokPosCount.keySet());
+
+    return ret;
   }
 
   public void genMapping() {
-    wordMap = new HashMap<String, Integer>();
-    posMap = new HashMap<String, Integer>();
-    labelMap = new HashMap<String, Integer>();
+    wordIDs = new HashMap<String, Integer>();
+    posIDs = new HashMap<String, Integer>();
+    labelIDs = new HashMap<String, Integer>();
 
     int index = 0;
-    for (int i = 0; i < wordDict.size(); ++i)
-      wordMap.put(wordDict.get(i), (index++));
-    for (int i = 0; i < posDict.size(); ++i)
-      posMap.put(posDict.get(i), (index++));
-    for (int i = 0; i < labelDict.size(); ++i)
-      labelMap.put(labelDict.get(i), (index++));
+    for (int i = 0; i < knownWords.size(); ++i)
+      wordIDs.put(knownWords.get(i), (index++));
+    for (int i = 0; i < knownPos.size(); ++i)
+      posIDs.put(knownPos.get(i), (index++));
+    for (int i = 0; i < knownLabels.size(); ++i)
+      labelIDs.put(knownLabels.get(i), (index++));
   }
 
   public void genDictionaries(List<CoreMap> sents, List<DependencyTree> trees) {
@@ -214,26 +265,26 @@ public class NNParser {
         else
           label.add(trees.get(i).getLabel(k));
 
-    wordDict = Util.generateDict(word, config.wordCutOff);
-    posDict = Util.generateDict(pos);
-    labelDict = Util.generateDict(label);
-    labelDict.add(0, rootLabel);
+    knownWords = Util.generateDict(word, config.wordCutOff);
+    knownPos = Util.generateDict(pos);
+    knownLabels = Util.generateDict(label);
+    knownLabels.add(0, rootLabel);
 
-    wordDict.add(0, CONST.UNKNOWN);
-    wordDict.add(1, CONST.NULL);
-    wordDict.add(2, CONST.ROOT);
+    knownWords.add(0, CONST.UNKNOWN);
+    knownWords.add(1, CONST.NULL);
+    knownWords.add(2, CONST.ROOT);
 
-    posDict.add(0, CONST.UNKNOWN);
-    posDict.add(1, CONST.NULL);
-    posDict.add(2, CONST.ROOT);
+    knownPos.add(0, CONST.UNKNOWN);
+    knownPos.add(1, CONST.NULL);
+    knownPos.add(2, CONST.ROOT);
 
-    labelDict.add(0, CONST.NULL);
+    knownLabels.add(0, CONST.NULL);
     genMapping();
 
     System.out.println(CONST.SEPARATOR);
-    System.out.println("#Word: " + wordDict.size());
-    System.out.println("#POS:" + posDict.size());
-    System.out.println("#Label: " + labelDict.size());
+    System.out.println("#Word: " + knownWords.size());
+    System.out.println("#POS:" + knownPos.size());
+    System.out.println("#Label: " + knownLabels.size());
   }
 
   public void writeModelFile(String modelFile) {
@@ -244,31 +295,31 @@ public class NNParser {
       double[][] E = classifier.getE();
 
       BufferedWriter output = new BufferedWriter(new FileWriter(modelFile));
-      output.write("dict=" + wordDict.size() + "\n");
-      output.write("pos=" + posDict.size() + "\n");
-      output.write("label=" + labelDict.size() + "\n");
+      output.write("dict=" + knownWords.size() + "\n");
+      output.write("pos=" + knownPos.size() + "\n");
+      output.write("label=" + knownLabels.size() + "\n");
       output.write("embeddingSize=" + E[0].length + "\n");
       output.write("hiddenSize=" + b1.length + "\n");
       output.write("numTokens=" + (W1[0].length / E[0].length) + "\n");
       output.write("preComputed=" + preComputed.size() + "\n");
 
       int index = 0;
-      for (int i = 0; i < wordDict.size(); ++i) {
-        output.write(wordDict.get(i));
+      for (int i = 0; i < knownWords.size(); ++i) {
+        output.write(knownWords.get(i));
         for (int k = 0; k < E[index].length; ++k)
           output.write(" " + E[index][k]);
         output.write("\n");
         index = index + 1;
       }
-      for (int i = 0; i < posDict.size(); ++i) {
-        output.write(posDict.get(i));
+      for (int i = 0; i < knownPos.size(); ++i) {
+        output.write(knownPos.get(i));
         for (int k = 0; k < E[index].length; ++k)
           output.write(" " + E[index][k]);
         output.write("\n");
         index = index + 1;
       }
-      for (int i = 0; i < labelDict.size(); ++i) {
-        output.write(labelDict.get(i));
+      for (int i = 0; i < knownLabels.size(); ++i) {
+        output.write(knownLabels.get(i));
         for (int k = 0; k < E[index].length; ++k)
           output.write(" " + E[index][k]);
         output.write("\n");
@@ -370,9 +421,9 @@ public class NNParser {
         }
       }
 
-      wordDict = new ArrayList<String>();
-      posDict = new ArrayList<String>();
-      labelDict = new ArrayList<String>();
+      knownWords = new ArrayList<String>();
+      knownPos = new ArrayList<String>();
+      knownLabels = new ArrayList<String>();
       double[][] E = new double[nDict + nPOS + nLabel][eSize];
       String[] splits;
       int index = 0;
@@ -380,7 +431,7 @@ public class NNParser {
       for (int k = 0; k < nDict; ++k) {
         s = input.readLine();
         splits = s.split(" ");
-        wordDict.add(splits[0]);
+        knownWords.add(splits[0]);
         for (int i = 0; i < eSize; ++i)
           E[index][i] = Double.parseDouble(splits[i + 1]);
         index = index + 1;
@@ -388,7 +439,7 @@ public class NNParser {
       for (int k = 0; k < nPOS; ++k) {
         s = input.readLine();
         splits = s.split(" ");
-        posDict.add(splits[0]);
+        knownPos.add(splits[0]);
         for (int i = 0; i < eSize; ++i)
           E[index][i] = Double.parseDouble(splits[i + 1]);
         index = index + 1;
@@ -396,7 +447,7 @@ public class NNParser {
       for (int k = 0; k < nLabel; ++k) {
         s = input.readLine();
         splits = s.split(" ");
-        labelDict.add(splits[0]);
+        knownLabels.add(splits[0]);
         for (int i = 0; i < eSize; ++i)
           E[index][i] = Double.parseDouble(splits[i + 1]);
         index = index + 1;
@@ -491,14 +542,14 @@ public class NNParser {
     genDictionaries(trainSents, trainTrees);
 
     //NOTE: remove -NULL-, and the pass it to ParsingSystem
-    List<String> lDict = new ArrayList<String>(labelDict);
+    List<String> lDict = new ArrayList<String>(knownLabels);
     lDict.remove(0);
     system = new ArcStandard(config.tlp, lDict);
 
-    double[][] E = new double[wordDict.size() + posDict.size() + labelDict.size()][config.embeddingSize];
+    double[][] E = new double[knownWords.size() + knownPos.size() + knownLabels.size()][config.embeddingSize];
     double[][] W1 = new double[config.hiddenSize][config.embeddingSize * config.numTokens];
     double[] b1 = new double[config.hiddenSize];
-    double[][] W2 = new double[labelDict.size() * 2 - 1][config.hiddenSize];
+    double[][] W2 = new double[knownLabels.size() * 2 - 1][config.hiddenSize];
 
     Random random = new Random();
     for (int i = 0; i < W1.length; ++i)
@@ -516,8 +567,8 @@ public class NNParser {
     int foundEmbed = 0;
     for (int i = 0; i < E.length; ++i) {
       int index = -1;
-      if (i < wordDict.size()) {
-        String str = wordDict.get(i);
+      if (i < knownWords.size()) {
+        String str = knownWords.get(i);
         //NOTE: exact match first, and then try lower case..
         if (embedID.containsKey(str)) index = embedID.get(str);
         else if (embedID.containsKey(str.toLowerCase())) index = embedID.get(str.toLowerCase());
@@ -532,9 +583,9 @@ public class NNParser {
           E[i][j] = random.nextDouble() * config.initRange * 2 - config.initRange;
       }
     }
-    System.out.println("Found embeddings: " + foundEmbed + " / " + wordDict.size());
+    System.out.println("Found embeddings: " + foundEmbed + " / " + knownWords.size());
 
-    genTrainExamples(trainSents, trainTrees);
+    Dataset trainSet = genTrainExamples(trainSents, trainTrees);
     classifier = new Classifier(config, trainSet, E, W1, b1, W2, preComputed);
 
     //TODO: save the best intermediate parameters
@@ -709,11 +760,11 @@ public class NNParser {
    * Prepare for parsing after a model has been loaded.
    */
   public void initialize() {
-    if (labelDict == null)
+    if (knownLabels == null)
       throw new IllegalStateException("Model has not been loaded or trained");
 
     //NOTE: remove -NULL-, and the pass it to ParsingSystem
-    List<String> lDict = new ArrayList<>(labelDict);
+    List<String> lDict = new ArrayList<>(knownLabels);
     lDict.remove(0);
     system = new ArcStandard(config.tlp, lDict);
 
