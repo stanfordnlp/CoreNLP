@@ -6,6 +6,10 @@
 *   @Last Modified:  2014-08-25
 */
 
+package edu.stanford.nlp.depparser.nn;
+
+import edu.stanford.nlp.depparser.util.CommandLineUtils;
+
 import java.util.*;
 import java.io.*;
 
