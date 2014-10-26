@@ -209,7 +209,7 @@ public class Config
 
     // Runtime parsing options
     sentenceDelimiter = PropertiesUtils.getString(props, "sentenceDelimiter", sentenceDelimiter);
-    tagger = PropertiesUtils.getString(props, "tagger", tagger);
+    tagger = PropertiesUtils.getString(props, "tagger.model", tagger);
 
     String escaperClass = props.getProperty("escaper");
     escaper = escaperClass != null ? ReflectionLoading.loadByReflection(escaperClass) : null;

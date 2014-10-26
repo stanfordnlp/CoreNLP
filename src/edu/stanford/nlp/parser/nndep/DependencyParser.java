@@ -1055,7 +1055,7 @@ public class DependencyParser {
    *   <tr><th>Option</th><th>Default</th><th>Description</th></tr>
    *   <tr><td><tt>&#8209;escaper</tt></td><td>N/A</td><td>If provided, use this word-escaper when parsing raw sentences. (Should be a fully-qualified class name like <tt>edu.stanford.nlp.trees.international.arabic.ATBEscaper</tt>.)</td></tr>
    *   <tr><td><tt>&#8209;sentenceDelimiter</tt></td><td>N/A</td><td>If provided, assume that the given <tt>parseFile</tt> has already been sentence-split, and that sentences are separated by this delimiter.</td></tr>
-   *   <tr><td><tt>&#8209;tagger</tt></td><td>edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger</td><td>Path to a part-of-speech tagger to use to pre-tag the raw sentences before parsing.</td></tr>
+   *   <tr><td><tt>&#8209;tagger.model</tt></td><td>edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger</td><td>Path to a part-of-speech tagger to use to pre-tag the raw sentences before parsing.</td></tr>
    * </table>
    */
   public static void main(String[] args) {
