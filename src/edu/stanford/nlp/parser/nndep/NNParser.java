@@ -52,10 +52,6 @@ public class NNParser
 
   private final Config config;
 
-  public NNParser() {
-    this(null);
-  }
-
   public NNParser(Properties properties) {
     config = new Config(properties);
   }

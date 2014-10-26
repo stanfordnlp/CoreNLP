@@ -192,7 +192,7 @@ public class AnnotatorImplementations {
    */
   public Annotator dependencies(Properties properties) {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
-        Annotator.STANFORD_DEPENDENCIES);
+        Annotator.STANFORD_DEPENDENCIES + '.');
     return new DependencyParseAnnotator(relevantProperties);
   }
 
