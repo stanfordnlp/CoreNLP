@@ -24,8 +24,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
-public class Classifier 
-{
+public class Classifier {
   // E: numFeatures x embeddingSize
   // W1: hiddenSize x (embeddingSize x numFeatures)
   // b1: hiddenSize
@@ -62,11 +61,11 @@ public class Classifier
 
   /**
    * We use MulticoreWrapper to parallelize mini-batch training.
-   *
+   * <p>
    * Threaded job input: partition of minibatch;
-   *   current weights + params
+   * current weights + params
    * Threaded job output: cost value, weight gradients for partition of
-   *   minibatch
+   * minibatch
    */
   private final MulticoreWrapper<Pair<Collection<Example>, FeedforwardParams>, Cost> jobHandler;
 
@@ -341,7 +340,7 @@ public class Classifier
   /**
    * Describes the result of feedforward + backpropagation through
    * the neural network for the batch provided to a `CostFunction.`
-   *
+   * <p>
    * The members of this class represent weight deltas computed by
    * backpropagation.
    *
@@ -506,8 +505,7 @@ public class Classifier
     return cost;
   }
 
-	public void takeAdaGradientStep(Cost cost, double adaAlpha, double adaEps)
-	{
+  public void takeAdaGradientStep(Cost cost, double adaAlpha, double adaEps) {
     double[][] gradW1 = cost.getGradW1(), gradW2 = cost.getGradW2(),
         gradE = cost.getGradE(), gradSaved = cost.getGradSaved();
     double[] gradb1 = cost.getGradb1();
@@ -616,7 +614,7 @@ public class Classifier
    * Add the two 2d arrays in place of {@code m1}.
    *
    * @throws java.lang.IndexOutOfBoundsException (possibly) If
-   *         {@code m1} and {@code m2} are not of the same dimensions
+   *                                             {@code m1} and {@code m2} are not of the same dimensions
    */
   private static void addInPlace(double[][] m1, double[][] m2) {
     for (int i = 0; i < m1.length; i++)
@@ -628,7 +626,7 @@ public class Classifier
    * Add the two 1d arrays in place of {@code a1}.
    *
    * @throws java.lang.IndexOutOfBoundsException (Possibly) if
-   *         {@code a1} and {@code a2} are not of the same dimensions
+   *                                             {@code a1} and {@code a2} are not of the same dimensions
    */
   private static void addInPlace(double[] a1, double[] a2) {
     for (int i = 0; i < a1.length; i++)

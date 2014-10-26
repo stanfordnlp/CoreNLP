@@ -8,11 +8,10 @@
 
 package edu.stanford.nlp.parser.nndep.util;
 
-public class CONST
-{
-    public static final String UNKNOWN = "-UNKNOWN-";
-    public static final String ROOT = "-ROOT-";
-    public static final String NULL = "-NULL-";
-    public static final int NONEXIST = -1;
-    public static final String SEPARATOR = "###################";
+public class CONST {
+  public static final String UNKNOWN = "-UNKNOWN-";
+  public static final String ROOT = "-ROOT-";
+  public static final String NULL = "-NULL-";
+  public static final int NONEXIST = -1;
+  public static final String SEPARATOR = "###################";
 }
