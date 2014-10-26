@@ -17,11 +17,13 @@ import edu.stanford.nlp.trees.GrammaticalStructureFromDependenciesFactory;
 import edu.stanford.nlp.trees.TreeGraphNode;
 import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -37,27 +39,27 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
   private final NNParser parser;
 
   private final int nThreads;
+  private static final int DEFAULT_NTHREADS = 1;
 
   /**
    * Maximum parse time (in milliseconds) for a sentence
    */
   private final long maxTime;
+  private static final long DEFAULT_MAXTIME = 0;
 
   public DependencyParseAnnotator() {
-    this(NNParser.DEFAULT_MODEL);
+    this(new Properties());
   }
 
-  public DependencyParseAnnotator(String modelPath) {
-    this(modelPath, 1, 0);
-  }
+  public DependencyParseAnnotator(Properties properties) {
+    parser = new NNParser(properties);
 
-  public DependencyParseAnnotator(String modelPath, int nThreads, long maxTime) {
-    parser = new NNParser();
+    String modelPath = PropertiesUtils.getString(properties, "modelFile", NNParser.DEFAULT_MODEL);
     parser.loadModelFile(modelPath);
     parser.initialize();
 
-    this.nThreads = nThreads;
-    this.maxTime = maxTime;
+    nThreads = PropertiesUtils.getInt(properties, "testThreads", DEFAULT_NTHREADS);
+    maxTime = PropertiesUtils.getLong(properties, "sentenceTimeout", DEFAULT_MAXTIME);
   }
 
   @Override

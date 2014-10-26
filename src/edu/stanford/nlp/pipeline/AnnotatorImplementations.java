@@ -191,7 +191,9 @@ public class AnnotatorImplementations {
    * Annotate dependency relations in sentences
    */
   public Annotator dependencies(Properties properties) {
-    return new DependencyParseAnnotator();
+    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
+        Annotator.STANFORD_DEPENDENCIES);
+    return new DependencyParseAnnotator(relevantProperties);
   }
 
 }
