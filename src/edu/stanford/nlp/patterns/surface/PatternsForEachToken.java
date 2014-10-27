@@ -22,16 +22,15 @@ public abstract class PatternsForEachToken {
 
   abstract public Map<Integer, Set<Integer>> getPatternsForAllTokens(String sentId);
 
-  abstract public void setupSearch();
-    /**
-     * Only for Lucene and DB
-     * @return
-     */
-  abstract public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir) throws IOException, ClassNotFoundException;
+  /**
+   * Only for Lucene and DB
+   * @return
+   */
+  abstract public PatternIndex readPatternIndex(String dir) throws IOException, ClassNotFoundException;
 
   abstract int size();
 
-  abstract public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String dir) throws IOException;
+  //abstract public void savePatternIndex(PatternIndex index, String dir) throws IOException;
 
 
   public void updatePatterns(Map<String, Map<Integer, Set<Integer>>> tempPatsForSents) {

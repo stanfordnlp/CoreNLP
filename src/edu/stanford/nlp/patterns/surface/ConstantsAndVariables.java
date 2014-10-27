@@ -450,11 +450,11 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name="clubNeighboringLabeledWords")
   public boolean clubNeighboringLabeledWords = false;
 
-  public ConcurrentHashIndex<SurfacePattern> getPatternIndex() {
+  public PatternIndex getPatternIndex() {
     return patternIndex;
   }
 
-  public void setPatternIndex(ConcurrentHashIndex<SurfacePattern> patternIndex) {
+  public void setPatternIndex(PatternIndex patternIndex) {
     this.patternIndex = patternIndex;
   }
 
@@ -628,8 +628,9 @@ public class ConstantsAndVariables implements Serializable{
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";
 
-  public ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
-
+  //public ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
+  //TODO: initialize this
+  public PatternIndex patternIndex;
   Properties props;
 
   public enum PatternForEachTokenWay {MEMORY, LUCENE, DB};

@@ -1517,7 +1517,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     if(dir != null) {
       IOUtils.ensureDir(new File(dir));
     }
-    patsForEachToken.savePatternIndex(constVars.getPatternIndex(), dir);
+    constVars.getPatternIndex().save(dir);
+    //patsForEachToken.savePatternIndex(constVars.getPatternIndex(), dir);
 
   }
 
@@ -1599,7 +1600,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                                         TwoDimensionalCounter<Integer, String> unLabeledPatternsandWords4Label, Set<String> allCandidatePhrases) {
 
     Redwood.log(Redwood.DBG,"calculating sufficient stats");
-    patternsForEachToken.setupSearch();
+
     // calculating the sufficient statistics
     Class answerClass4Label = constVars.getAnswerClass().get(label);
     int sampleSize = constVars.sampleSentencesForSufficientStats == 1.0?sents.size():(int) Math.round(constVars.sampleSentencesForSufficientStats*sents.size());
@@ -1854,6 +1855,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   public void labelWords(String label, Map<String, List<CoreLabel>> sents, Set<String> identifiedWords, String outFile,
       CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) throws IOException {
 
+    Date startTime = new Date();
     Redwood.log(Redwood.DBG, "Labeling " + sents.size() + " sentences with " + identifiedWords.size() + " phrases for label " + label);
 
     CollectionValuedMap<String, Integer> tokensMatchedPatterns = null;
@@ -1955,6 +1957,9 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       Redwood.log(ConstantsAndVariables.minimaldebug, "Writing results to " + outFile);
       IOUtils.writeObjectToFile(sents, outFile);
     }
+
+    Date endTime = new Date();
+    Redwood.log(Redwood.DBG, "Done labeling provided sents in " + elapsedTime(startTime, endTime));
   }
 
 
@@ -2886,7 +2891,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       } else if (fileFormat.equalsIgnoreCase("ser")) {
         //usingDirForSentsInIndex = false;
         for (File f : GetPatternsFromDataMultiClass.getAllFiles(file)) {
-          Redwood.log(Redwood.DBG, "reading from ser file " + f);
           if (!batchProcessSents)
             sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
           else{

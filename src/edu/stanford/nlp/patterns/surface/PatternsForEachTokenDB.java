@@ -329,11 +329,6 @@ public class PatternsForEachTokenDB extends PatternsForEachToken{
   }
   }
 
-  @Override
-  public void setupSearch() {
-    //nothing to do
-  }
-
   public boolean containsSentId(String sentId){
       try {
         Connection conn = SQLConnection.getConnection();

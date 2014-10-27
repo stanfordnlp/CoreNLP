@@ -49,11 +49,6 @@ public class PatternsForEachTokenInMemory extends PatternsForEachToken {
   }
 
   @Override
-  public void setupSearch() {
-    //nothing to do
-  }
-
-  @Override
   public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir) throws IOException, ClassNotFoundException {
     return IOUtils.readObjectFromFile(dir+"/patternshashindex.ser");
   }
