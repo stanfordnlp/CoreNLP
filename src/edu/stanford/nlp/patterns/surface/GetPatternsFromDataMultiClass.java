@@ -2702,6 +2702,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           RegExFileFilter fileFilter = new RegExFileFilter(Pattern.compile(filef.getName()));
           File dir = new File(tokfile.substring(0, tokfile.lastIndexOf("/")));
           File[] files = dir.listFiles(fileFilter);
+          Redwood.log(Redwood.DBG, "reading from files " + files);
           allFiles.addAll(Arrays.asList(files));
         }
       }
