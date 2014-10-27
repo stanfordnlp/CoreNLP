@@ -22,6 +22,7 @@ public abstract class PatternsForEachToken {
 
   abstract public Map<Integer, Set<Integer>> getPatternsForAllTokens(String sentId);
 
+  abstract public boolean save(String dir);
 //  /**
 //   * Only for Lucene and DB
 //   * @return
@@ -90,6 +91,8 @@ public abstract class PatternsForEachToken {
   public abstract Map<String,Map<Integer,Set<Integer>>> getPatternsForAllTokens(Collection<String> sampledSentIds);
 
   public abstract void close();
+
+  public abstract void load(String allPatternsDir);
 
 
 //  @Option(name="allPatternsFile")

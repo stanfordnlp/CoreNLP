@@ -1120,7 +1120,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     if(!constVars.computeAllPatterns) {
       assert constVars.allPatternsDir != null : "allPatternsDir flag cannot be emoty if computeAllPatterns is false!";
       constVars.setPatternIndex(PatternIndex.load(constVars.allPatternsDir, constVars.storePatsIndex));
-
+      if(constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY))
+        patsForEachToken.load(constVars.allPatternsDir);
     }
   }
 
@@ -1188,6 +1189,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     if (constVars.computeAllPatterns){
       if(constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.DB))
         patsForEachToken.createIndexIfUsingDBAndNotExists();
+
+      patsForEachToken.save(constVars.allPatternsDir);
       savePatternIndex(constVars.allPatternsDir);
     }
 

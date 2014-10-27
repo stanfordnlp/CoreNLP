@@ -80,10 +80,21 @@ public class PatternsForEachTokenInMemory extends PatternsForEachToken {
     //nothing to do
   }
 
-
-  public boolean writePatternsIfInMemory(String allPatternsFile) {
+  @Override
+  public void load(String allPatternsDir) {
     try {
-      IOUtils.writeObjectToFile(this.patternsForEachToken, allPatternsFile);
+      addPatterns(IOUtils.readObjectFromFile(allPatternsDir+"/allpatterns.ser"));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public boolean save(String dir) {
+    try {
+      IOUtils.writeObjectToFile(this.patternsForEachToken, dir+"/allpatterns.ser");
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

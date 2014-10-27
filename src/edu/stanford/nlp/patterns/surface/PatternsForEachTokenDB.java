@@ -330,6 +330,12 @@ public class PatternsForEachTokenDB extends PatternsForEachToken{
   }
 
   @Override
+  public boolean save(String dir) {
+    //nothing to do
+    return false;
+  }
+
+  @Override
   public void setupSearch() {
     //nothing to do
   }
@@ -531,6 +537,11 @@ public class PatternsForEachTokenDB extends PatternsForEachToken{
 
   @Override
   public void close() {
+    //nothing to do
+  }
+
+  @Override
+  public void load(String allPatternsDir) {
     //nothing to do
   }
 

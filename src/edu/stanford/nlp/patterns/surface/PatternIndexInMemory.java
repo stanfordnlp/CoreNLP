@@ -18,6 +18,7 @@ public class PatternIndexInMemory extends PatternIndex{
 
   public PatternIndexInMemory(ConcurrentHashIndex<SurfacePattern> patternIndex ){
      this.patternIndex = patternIndex;
+    System.out.println("read " + patternIndex.size()  + " patterns ");
 
   }
 
@@ -28,7 +29,9 @@ public class PatternIndexInMemory extends PatternIndex{
 
   @Override
   public SurfacePattern get(int i) {
-    return patternIndex.get(i);
+    SurfacePattern p = patternIndex.get(i);
+    assert p!=null;
+    return p;
   }
 
   @Override
