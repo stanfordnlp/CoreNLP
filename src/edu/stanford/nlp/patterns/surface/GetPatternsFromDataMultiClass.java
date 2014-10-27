@@ -1195,6 +1195,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       savePatternIndex(constVars.allPatternsDir);
     }
 
+    patsForEachToken.close();
 
     //This is important. It makes sure that we don't recompute patterns in every iteration!
     constVars.computeAllPatterns = false;

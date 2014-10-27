@@ -41,6 +41,7 @@ public abstract class PatternsForEachToken {
       tempPatsForSents.get(en.getKey()).putAll(m);
     }
     this.addPatterns(tempPatsForSents);
+    close();
   }
 
   public ConstantsAndVariables.PatternForEachTokenWay getStoreWay() {
