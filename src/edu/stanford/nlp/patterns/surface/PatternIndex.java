@@ -1,5 +1,7 @@
 package edu.stanford.nlp.patterns.surface;
 
+import edu.stanford.nlp.util.logging.Redwood;
+
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -47,6 +49,8 @@ public abstract class PatternIndex {
   }
 
   public static PatternIndex load(String dir, ConstantsAndVariables.PatternIndexWay way){
+    Redwood.log(ConstantsAndVariables.minimaldebug, "Reading all patterns from " + dir);
+
     if(way.equals(ConstantsAndVariables.PatternIndexWay.MEMORY))
     return PatternIndexInMemory.load(dir);
     else if(way.equals(ConstantsAndVariables.PatternIndexWay.LUCENE)){

@@ -16,8 +16,9 @@ public class PatternIndexInMemory extends PatternIndex{
     patternIndex = new ConcurrentHashIndex<SurfacePattern>();
   }
 
-  public PatternIndexInMemory(  ConcurrentHashIndex<SurfacePattern> patternIndex ){
+  public PatternIndexInMemory(ConcurrentHashIndex<SurfacePattern> patternIndex ){
      this.patternIndex = patternIndex;
+
   }
 
   @Override
@@ -43,6 +44,11 @@ public class PatternIndexInMemory extends PatternIndex{
   @Override
   public void save(String dir) throws IOException {
     IOUtils.writeObjectToFile(patternIndex, dir +"/patternsindex.ser");
+  }
+
+  @Override
+  public void finishCommit() {
+    //nothing to do
   }
 
   public static PatternIndexInMemory load(String dir){

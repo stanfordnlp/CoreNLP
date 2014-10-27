@@ -1119,10 +1119,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   void readSavedPatternsAndIndex() throws IOException, ClassNotFoundException {
     if(!constVars.computeAllPatterns) {
       assert constVars.allPatternsDir != null : "allPatternsDir flag cannot be emoty if computeAllPatterns is false!";
-      if (constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY)) {
-        patsForEachToken.addPatterns(IOUtils.readObjectFromFile(constVars.allPatternsDir + "/allpatterns.ser"));
-        Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsDir + "/allpatterns.ser");
-      }
       constVars.setPatternIndex(PatternIndex.load(constVars.allPatternsDir, constVars.storePatsIndex));
 
     }
@@ -1516,8 +1512,8 @@ public class GetPatternsFromDataMultiClass implements Serializable {
   private void savePatternIndex(String dir ) throws IOException {
     if(dir != null) {
       IOUtils.ensureDir(new File(dir));
+      constVars.getPatternIndex().save(dir);
     }
-    constVars.getPatternIndex().save(dir);
     //patsForEachToken.savePatternIndex(constVars.getPatternIndex(), dir);
 
   }
