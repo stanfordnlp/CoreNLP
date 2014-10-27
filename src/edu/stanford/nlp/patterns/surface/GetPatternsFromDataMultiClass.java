@@ -3122,7 +3122,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         {
           patternsIndexed.setCount(model.constVars.getPatternIndex().addToIndex(en.getKey()), en.getValue());
         }
-
+        model.constVars.getPatternIndex().finishCommit();
         model.setLearnedPatterns(patternsIndexed, label);
         Redwood.log(Redwood.DBG, "Loaded " + patterns.size() + " patterns from " + patf);
       }

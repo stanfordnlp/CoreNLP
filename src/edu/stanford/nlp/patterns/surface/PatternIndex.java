@@ -68,4 +68,6 @@ public abstract class PatternIndex {
     } else
       throw new UnsupportedOperationException();
   }
+
+  public abstract void finishCommit();
 }

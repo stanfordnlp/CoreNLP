@@ -526,6 +526,7 @@ public class CreatePatterns {
     // " next patterns are " + nextpatterns);
     // System.out.println("For word " + sent.get(i) + " in sentence " + sent +
     // " prevnext patterns are " + prevnextpatterns);
+    constVars.getPatternIndex().finishCommit();
     return CollectionUtils.unionAsSet(prevpatterns, nextpatterns, prevnextpatterns);
   }
 
