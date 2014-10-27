@@ -193,11 +193,7 @@ public class TokenizerAnnotator implements Annotator {
       options = type.getDefaultOptions();
     } 
     if (extraOptions != null) {
-      if (extraOptions.endsWith(",")) {
-        options = extraOptions + options;
-      } else {
-        options = extraOptions + "," + options;
-      }
+      options = extraOptions + options;
     }
     
     switch(type) {

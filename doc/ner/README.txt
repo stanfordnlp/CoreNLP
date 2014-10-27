@@ -1,4 +1,4 @@
-Stanford NER - v3.5.0 - 2014-10-26
+Stanford NER - v3.4.1 - 2014-08-27
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named
@@ -164,8 +164,6 @@ PERSON	ORGANIZATION	LOCATION
 --------------------
 CHANGES
 --------------------
-
-2014-10-26    3.5.0     Upgrade to Java 1.8 
 
 2014-08-27    3.4.1     Add Spanish models 
 

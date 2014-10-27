@@ -123,36 +123,6 @@ public class PropertiesUtils {
     }
   }
 
-  /**
-   * Build a {@code Properties} object containing key-value pairs from
-   * the given data where the keys are prefixed with the given
-   * {@code prefix}. The keys in the returned object will be stripped
-   * of their common prefix.
-   *
-   * @param properties Key-value data from which to extract pairs
-   * @param prefix Key-value pairs where the key has this prefix will
-   *               be retained in the returned {@code Properties} object
-   * @return A Properties object containing those key-value pairs from
-   *         {@code properties} where the key was prefixed by
-   *         {@code prefix}. This prefix is removed from all keys in
-   *         the returned structure.
-   */
-  public static Properties extractPrefixedProperties(Properties properties, String prefix) {
-    Properties ret = new Properties();
-    Set<Object> sourceKeys = properties.keySet();
-
-    for (Object key : sourceKeys) {
-      String keyStr = (String) key;
-
-      if (keyStr.startsWith(prefix)) {
-        String newStr = keyStr.substring(prefix.length());
-        ret.setProperty(newStr, properties.getProperty(keyStr));
-      }
-    }
-
-    return ret;
-  }
-
 
   /**
    * Get the value of a property and automatically cast it to a specific type.

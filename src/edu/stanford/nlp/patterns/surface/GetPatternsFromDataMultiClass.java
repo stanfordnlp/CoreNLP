@@ -544,7 +544,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           lmf.answerClass = answerClass.get(label);
           lmf.answerLabel = label;
           lmf.setUp();
-          lmf.getTopFeatures(constVars.batchProcessSents, Data.sentsFiles, Data.sents, constVars.perSelectRand, constVars.perSelectNeg,
+          lmf.getTopFeatures(new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents), constVars.perSelectRand, constVars.perSelectNeg,
               externalFeatureWeightsFileLabel);
 
         }
@@ -1107,9 +1107,10 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         Redwood.log(Redwood.DBG, "Computing all patterns");
         createPats.getAllPatterns(sents, props, constVars.storePatsForEachToken);
       }
+    else
+      Redwood.log(Redwood.DBG, "Reading patterns from existing dir");
 
-
-    props.setProperty("createTable","false");
+    props.setProperty("createTable", "false");
     props.setProperty("deleteExisting","false");
     props.setProperty("createPatLuceneIndex","false");
 
@@ -1139,6 +1140,21 @@ public class GetPatternsFromDataMultiClass implements Serializable {
     //TwoDimensionalCounter<Integer, String> allPatternsandWords4Label = new TwoDimensionalCounter<Integer, String>();
     Set<String> allCandidatePhrases = new HashSet<String>();
 
+    ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
+    while(sentsIter.hasNext()){
+      Pair<Map<String, List<CoreLabel>>, File> sentsPair = sentsIter.next();
+      if(notComputedAllPatternsYet){
+        //in the first iteration
+        processSents(sentsPair.first());
+        if(patsForEachToken == null){
+          //in the first iteration, for the first file
+          patsForEachToken = PatternsForEachToken.getPatternsInstance(props, constVars.storePatsForEachToken);
+          readSavedPatternsAndIndex();
+        }
+      }
+      this.calculateSufficientStats(sentsPair.first(), patsForEachToken, label, patternsandWords4Label, negPatternsandWords4Label, unLabeledPatternsandWords4Label, allCandidatePhrases);
+    }
+    /*
       if (!constVars.batchProcessSents) {
 
         if(notComputedAllPatternsYet){
@@ -1170,7 +1186,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           this.calculateSufficientStats(sents, patsForEachToken, label, patternsandWords4Label, negPatternsandWords4Label, unLabeledPatternsandWords4Label, allCandidatePhrases);
         }
       }
-
+*/
     notComputedAllPatternsYet = false;
 
     if (constVars.computeAllPatterns){
@@ -2146,6 +2162,17 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       if (identifiedWords.size() > 0) {
         if (constVars.usePatternResultAsLabel) {
           if (constVars.getLabelDictionary().containsKey(label)) {
+
+            ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
+            while(sentsIter.hasNext()){
+              Pair<Map<String, List<CoreLabel>>, File> sentsf = sentsIter.next();
+              Redwood.log(Redwood.DBG, "labeling sentences from " + sentsf.second());
+              labelWords(label, sentsf.first(), identifiedWords.keySet(), sentsOutFile, matchedTokensByPat);
+              if(sentsf.second().exists())
+              IOUtils.writeObjectToFile(sentsf.first(), sentsf.second());
+            }
+
+            /*
             if (constVars.batchProcessSents) {
               for (File f : Data.sentsFiles) {
                 Redwood.log(Redwood.DBG, "labeling sentences from " + f);
@@ -2154,7 +2181,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                 IOUtils.writeObjectToFile(sents, f);
               }
             } else
-              labelWords(label, Data.sents, identifiedWords.keySet(), sentsOutFile, matchedTokensByPat);
+              labelWords(label, Data.sents, identifiedWords.keySet(), sentsOutFile, matchedTokensByPat);*/
           } else
             throw new RuntimeException("why is the answer label null?");
           learnedWords.get(label).addAll(identifiedWords);
@@ -2443,26 +2470,22 @@ public class GetPatternsFromDataMultiClass implements Serializable {
 
   public void writeLabeledData(String outFile) throws IOException, ClassNotFoundException {
     BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
-    if (!constVars.batchProcessSents) {
-      this.writeLabelDataSents(Data.sents, writer);
-    } else {
-      for (File f : Data.sentsFiles) {
-        Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
-        this.writeLabelDataSents(sents, writer);
-      }
+
+    ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
+    while(sentsIter.hasNext()){
+      Pair<Map<String, List<CoreLabel>>, File> sentsf = sentsIter.next();
+      this.writeLabelDataSents(sentsf.first(), writer);
     }
     writer.close();
   }
 
   public void writeColumnOutput(String outFile) throws IOException, ClassNotFoundException {
     BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
-    if (!constVars.batchProcessSents) {
-      this.writeColumnOutputSents(Data.sents, writer);
-    } else {
-      for (File f : Data.sentsFiles) {
-        Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
-        this.writeColumnOutputSents(sents, writer);
-      }
+
+    ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
+    while(sentsIter.hasNext()){
+      Pair<Map<String, List<CoreLabel>>, File> sentsf = sentsIter.next();
+      this.writeColumnOutputSents(sentsf.first(), writer);
     }
     writer.close();
   }

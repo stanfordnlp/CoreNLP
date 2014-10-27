@@ -64,8 +64,20 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
       Data.rawFreq = new ClassicCounter<String>();
       computeRawFreq = true;
     }
-    
-    if(constVars.batchProcessSents){
+
+    ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
+    while(sentsIter.hasNext()) {
+      Pair<Map<String, List<CoreLabel>>, File> sentsf = sentsIter.next();
+      Redwood.log(Redwood.DBG,"Sampling sentences from " + sentsf.second());
+      if(computeRawFreq)
+        Data.computeRawFreqIfNull(sentsf.first(), constVars.numWordsCompound);
+      dataset.addAll(choosedatums(label, forLearningPatterns, sentsf.first(), constVars.getAnswerClass().get(label), label,
+        constVars.getOtherSemanticClassesWords(), constVars.getIgnoreWordswithClassesDuringSelection().get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
+        allSelectedPatterns));
+    }
+
+    /*
+      if(constVars.batchProcessSents){
       
       for(File f: Data.sentsFiles){
         Redwood.log(Redwood.DBG,"Sampling sentences from " + f);
@@ -82,7 +94,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
       dataset.addAll(choosedatums(label, forLearningPatterns, Data.sents, constVars.getAnswerClass().get(label), label,
         constVars.getOtherSemanticClassesWords(), constVars.getIgnoreWordswithClassesDuringSelection().get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
         allSelectedPatterns));
-    }
+    }*/
     edu.stanford.nlp.classify.Classifier classifier;
 //    if (scoreClassifierType.equals(ClassifierType.DT)) {
 //      ClassifierFactory wekaFactory = new WekaDatumClassifierFactory<String, ScorePhraseMeasures>("weka.classifiers.trees.J48", constVars.wekaOptions);
