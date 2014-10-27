@@ -134,12 +134,16 @@ public class XMLOutputter extends AnnotationOutputter {
         // add tree info
         Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
 
-        if(tree != null){
+        if(tree != null) {
           // add the constituent tree for this sentence
           Element parseInfo = new Element("parse", NAMESPACE_URI);
           addConstituentTreeInfo(parseInfo, tree, options.constituentTreePrinter);
           sentElem.appendChild(parseInfo);
+        }
 
+        SemanticGraph basicDependencies = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+
+        if (basicDependencies != null) {
           // add the dependencies for this sentence
           Element depInfo = buildDependencyTreeInfo("basic-dependencies", sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class), tokens, NAMESPACE_URI);
           if (depInfo != null) {
