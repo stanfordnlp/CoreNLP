@@ -27,6 +27,7 @@ public abstract class PatternsForEachToken {
    * @return
    */
   abstract public PatternIndex readPatternIndex(String dir) throws IOException, ClassNotFoundException;
+  abstract public void setupSearch();
 
   abstract int size();
 

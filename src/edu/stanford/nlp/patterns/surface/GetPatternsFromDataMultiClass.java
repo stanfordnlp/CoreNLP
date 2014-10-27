@@ -1600,7 +1600,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
                                         TwoDimensionalCounter<Integer, String> unLabeledPatternsandWords4Label, Set<String> allCandidatePhrases) {
 
     Redwood.log(Redwood.DBG,"calculating sufficient stats");
-
+    patternsForEachToken.setupSearch();
     // calculating the sufficient statistics
     Class answerClass4Label = constVars.getAnswerClass().get(label);
     int sampleSize = constVars.sampleSentencesForSufficientStats == 1.0?sents.size():(int) Math.round(constVars.sampleSentencesForSufficientStats*sents.size());
@@ -2891,6 +2891,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       } else if (fileFormat.equalsIgnoreCase("ser")) {
         //usingDirForSentsInIndex = false;
         for (File f : GetPatternsFromDataMultiClass.getAllFiles(file)) {
+          Redwood.log(Redwood.DBG, "reading from ser file " + f);
           if (!batchProcessSents)
             sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
           else{
