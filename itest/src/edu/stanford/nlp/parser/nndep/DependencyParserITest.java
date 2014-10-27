@@ -1,6 +1,10 @@
 package edu.stanford.nlp.parser.nndep;
 
+import java.util.Properties;
+
 import junit.framework.TestCase;
+
+import edu.stanford.nlp.util.StringUtils;
 
 
 /** Test that the NN dependency parser performance doesn't change.
@@ -29,18 +33,15 @@ public class DependencyParserITest extends TestCase {
             EnglishConll2008Las, las), EnglishConll2008Las, las, 1e-4);
   }
 
-  /* -- Chinese model needs work, it appears
-
-  private static final double ChineseConllxGoldTagsLas = 82.4;
+  private static final double ChineseConllxGoldTagsLas = 82.42855503270974;
 
   public void testDependencyParserChineseCoNLLX() {
-    DependencyParser parser = new DependencyParser();
+    Properties props = StringUtils.stringToProperties("language=Chinese");
+    DependencyParser parser = new DependencyParser(props);
     parser.loadModelFile("/u/nlp/data/depparser/nn/distrib-2014-10-26/CTB_CoNLL_params.txt.gz");
     double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/CTB/dev.gold.conll", null);
     assertEquals(String.format("Chinese CoNLLX gold tags LAS should be %.2f but was %.2f",
             ChineseConllxGoldTagsLas, las), ChineseConllxGoldTagsLas, las, 1e-4);
   }
-
-  -- */
 
 }
