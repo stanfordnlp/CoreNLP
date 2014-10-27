@@ -6,18 +6,15 @@ import java.util.List;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
-import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import java.util.function.Function;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.Timing;
 // TODO: it would be nice to move these to common, but that would
@@ -94,36 +91,6 @@ public abstract class ParserGrammar implements Function<List<? extends HasWord>,
     } else {
       return null;
     }
-  }
-
-  public List<CoreLabel> lemmatize(String sentence) {
-    List<? extends HasWord> tokens = tokenize(sentence);
-    return lemmatize(tokens);
-  }
-
-  /**
-   * Only works on English, as it is hard coded for using the
-   * Morphology class, which is English-only
-   */
-  public List<CoreLabel> lemmatize(List<? extends HasWord> tokens) {
-    List<TaggedWord> tagged;
-    if (getOp().testOptions.preTag) {
-      Function<List<? extends HasWord>, List<TaggedWord>> tagger = loadTagger();
-      tagged = tagger.apply(tokens);
-    } else {
-      Tree tree = parse(tokens);
-      tagged = tree.taggedYield();
-    }
-    Morphology morpha = new Morphology();
-    List<CoreLabel> lemmas = Generics.newArrayList();
-    for (TaggedWord token : tagged) {
-      CoreLabel label = new CoreLabel();
-      label.setWord(token.word());
-      label.setTag(token.tag());
-      morpha.stem(label);
-      lemmas.add(label);
-    }
-    return lemmas;
   }
 
   /**

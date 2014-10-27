@@ -147,7 +147,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
 
   /**
-   * Dummy relation, used while collapsing relations, e.g., in English &amp; Chinese GrammaticalStructure
+   * Dummy relation, used while collapsing relations, in English &amp; Chinese GrammaticalStructure
    */
   public static final GrammaticalRelation KILL =
     new GrammaticalRelation(Language.Any, "KILL", "dummy relation kill", null);

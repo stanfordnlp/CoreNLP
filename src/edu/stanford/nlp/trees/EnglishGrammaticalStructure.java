@@ -2,7 +2,6 @@ package edu.stanford.nlp.trees;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.Predicate;
 
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.util.*;
@@ -50,7 +49,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * @param t Parse tree to make grammatical structure from
    * @param puncFilter Filter to remove punctuation dependencies
    */
-  public EnglishGrammaticalStructure(Tree t, Predicate<String> puncFilter) {
+  public EnglishGrammaticalStructure(Tree t, Filter<String> puncFilter) {
     this(t, puncFilter, new SemanticHeadFinder(true), true);
   }
 
@@ -61,7 +60,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * @param puncFilter Filter to remove punctuation dependencies
    * @param hf HeadFinder to use when building it
    */
-  public EnglishGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf) {
+  public EnglishGrammaticalStructure(Tree t, Filter<String> puncFilter, HeadFinder hf) {
     this(t, puncFilter, hf, true);
   }
 
@@ -80,7 +79,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * @param threadSafe Whether or not to support simultaneous instances among multiple
    *          threads
    */
-  public EnglishGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf, boolean threadSafe) {
+  public EnglishGrammaticalStructure(Tree t, Filter<String> puncFilter, HeadFinder hf, boolean threadSafe) {
     // the tree is normalized (for index and functional tag stripping) inside CoordinationTransformer
     super((new CoordinationTransformer(hf)).transformTree(t.deepCopy()), EnglishGrammaticalRelations.values(threadSafe), threadSafe ? EnglishGrammaticalRelations.valuesLock() : null, hf, puncFilter);
   }
@@ -100,20 +99,20 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * second pass over the trees for missing dependencies.
    */
   @Override
-  protected Predicate<TypedDependency> extraTreeDepFilter() {
+  protected Filter<TypedDependency> extraTreeDepFilter() {
     return extraTreeDepFilter;
   }
 
-  private static class ExtraTreeDepFilter implements Predicate<TypedDependency>, Serializable {
+  private static class ExtraTreeDepFilter implements Filter<TypedDependency> {
     @Override
-    public boolean test(TypedDependency d) {
+    public boolean accept(TypedDependency d) {
       return d != null && d.reln() != RELATIVE;
     }
 
     private static final long serialVersionUID = 1L;
   }
 
-  private static final Predicate<TypedDependency> extraTreeDepFilter = new ExtraTreeDepFilter();
+  private static final Filter<TypedDependency> extraTreeDepFilter = new ExtraTreeDepFilter();
 
 
   @Override

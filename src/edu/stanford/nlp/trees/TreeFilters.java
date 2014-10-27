@@ -1,9 +1,8 @@
 package edu.stanford.nlp.trees;
 
-import java.io.Serializable;
 import java.util.regex.Pattern;
 import edu.stanford.nlp.ling.Label;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 /**
  * A location for general implementations of Filter&lt;Tree&gt;.  For
@@ -14,7 +13,7 @@ import java.util.function.Predicate;
  * @author John Bauer
  */
 public class TreeFilters {
-  public static class HasMatchingChild implements Predicate<Tree>, Serializable {
+  public static class HasMatchingChild implements Filter<Tree> {
     TreebankLanguagePack tlp;
 
     Pattern pattern;
@@ -24,7 +23,7 @@ public class TreeFilters {
       this.tlp = tlp;
     }
 
-    public boolean test(Tree tree) {
+    public boolean accept(Tree tree) {
       if (tree == null) {
         return false;
       }

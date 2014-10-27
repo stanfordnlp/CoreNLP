@@ -4,7 +4,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.trees.*;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.util.Generics;
 
@@ -105,8 +105,8 @@ public class SemanticGraphFactory {
                                            Mode mode,
                                            boolean includeExtras,
                                            boolean threadSafe,
-                                           Predicate<TypedDependency> filter) {
-    Predicate<String> wordFilt;
+                                           Filter<TypedDependency> filter) {
+    Filter<String> wordFilt;
     if (INCLUDE_PUNCTUATION_DEPENDENCIES) {
       wordFilt = Filters.acceptFilter();
     } else {
@@ -127,7 +127,7 @@ public class SemanticGraphFactory {
                                            Mode mode,
                                            boolean includeExtras,
                                            boolean threadSafe,
-                                           Predicate<TypedDependency> filter) {
+                                           Filter<TypedDependency> filter) {
     addProjectedCategoriesToGrammaticalStructure(gs);
     Collection<TypedDependency> deps;
     switch(mode) {
@@ -150,7 +150,7 @@ public class SemanticGraphFactory {
     if (filter != null) {
       List<TypedDependency> depsFiltered = Generics.newArrayList();
       for (TypedDependency td : deps) {
-        if (filter.test(td)) {
+        if (filter.accept(td)) {
           depsFiltered.add(td);
         }
       }
@@ -176,7 +176,7 @@ public class SemanticGraphFactory {
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,
                                            boolean includeExtras,
-                                           Predicate<TypedDependency> filter) {
+                                           Filter<TypedDependency> filter) {
     return makeFromTree(tree, mode, includeExtras, false, filter);
   }
 

@@ -11,12 +11,6 @@ import edu.stanford.nlp.util.ErasureUtils;
 public class PatternsAnnotations implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  public static class ProcessedTextAnnotation implements GenericAnnotation<String>{
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
   public static class MatchedPattern implements GenericAnnotation<Boolean> {
     public Class<Boolean> getType() {
       return Boolean.class;

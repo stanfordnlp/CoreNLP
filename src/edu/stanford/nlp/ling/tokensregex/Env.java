@@ -34,7 +34,7 @@ public class Env {
   /**
    * Mapping of variable names to their values
    */
-  Map<String, Object> variables = new HashMap<String, Object>();//Generics.newHashMap();
+  Map<String, Object> variables = Generics.newHashMap();
 
   /**
    * Mapping of per thread temporary variables to their values
@@ -49,12 +49,12 @@ public class Env {
    *   the name of the variable to be replaced, and a <code>String</code> representing the
    *   regular expression (escaped) that is used to replace the name of the variable.
    */
-  Map<String, Pair<Pattern,String>> stringRegexVariables = new HashMap<String, Pair<Pattern, String>>();//Generics.newHashMap();
+  Map<String, Pair<Pattern,String>> stringRegexVariables = Generics.newHashMap();
 
   /**
    * Default parameters (used when reading in rules for {@link SequenceMatchRules}.
    */
-  public Map<String, Object> defaults = new HashMap<String, Object>();//Generics.newHashMap();
+  public Map<String, Object> defaults = Generics.newHashMap();
 
   /**
    * Default flags to use for string regular expressions match
@@ -361,7 +361,7 @@ public class Env {
   public void push(String name, Object value) {
     Map<String,Object> vars = threadLocalVariables.get();
     if (vars == null) {
-      threadLocalVariables.set(vars = new HashMap<String, Object>());//Generics.newHashMap());
+      threadLocalVariables.set(vars = Generics.newHashMap());
     }
     Stack<Object> stack = (Stack<Object>) vars.get(name);
     if (stack == null) {

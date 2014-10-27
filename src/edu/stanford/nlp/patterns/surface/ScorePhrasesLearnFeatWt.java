@@ -50,7 +50,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
 
 
   public edu.stanford.nlp.classify.Classifier learnClassifier(String label, boolean forLearningPatterns,
-      TwoDimensionalCounter<String, Integer> wordsPatExtracted, Counter<Integer> allSelectedPatterns) throws IOException, ClassNotFoundException {
+      TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted, Counter<SurfacePattern> allSelectedPatterns) throws IOException, ClassNotFoundException {
     phraseScoresRaw.clear();
     learnedScores.clear();
     
@@ -128,13 +128,13 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
   }
 
   @Override
-  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, Integer> terms,
-      TwoDimensionalCounter<String, Integer> wordsPatExtracted, Counter<Integer> allSelectedPatterns,
+  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, SurfacePattern> terms,
+      TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted, Counter<SurfacePattern> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, boolean forLearningPatterns) throws IOException, ClassNotFoundException {
 
     Counter<String> scores = new ClassicCounter<String>();
     edu.stanford.nlp.classify.Classifier classifier = learnClassifier(label, forLearningPatterns, wordsPatExtracted, allSelectedPatterns);
-    for (Entry<String, ClassicCounter<Integer>> en : terms.entrySet()) {
+    for (Entry<String, ClassicCounter<SurfacePattern>> en : terms.entrySet()) {
       double score = this.scoreUsingClassifer(classifier, en.getKey(), label, forLearningPatterns, en.getValue(), allSelectedPatterns);
       scores.setCount(en.getKey(), score);
     }
@@ -161,8 +161,8 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
   }
 
   public RVFDataset<String, ScorePhraseMeasures> choosedatums(String label, boolean forLearningPattern, Map<String, List<CoreLabel>> sents, Class answerClass, String answerLabel,
-      Set<String> negativeWords, Map<Class, Object> otherIgnoreClasses, double perSelectRand, double perSelectNeg, TwoDimensionalCounter<String, Integer> wordsPatExtracted,
-      Counter<Integer> allSelectedPatterns) {
+      Set<String> negativeWords, Map<Class, Object> otherIgnoreClasses, double perSelectRand, double perSelectNeg, TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted,
+      Counter<SurfacePattern> allSelectedPatterns) {
     // TODO: check whats happening with candidate terms for this iteration. do
     // not count them as negative!!! -- I think this comment is not valid anymore.
     Random r = new Random(10);
@@ -297,7 +297,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
   }
 
   public double scoreUsingClassifer(edu.stanford.nlp.classify.Classifier classifier, String word, String label, boolean forLearningPatterns,
-      Counter<Integer> patternsThatExtractedPat, Counter<Integer> allSelectedPatterns) {
+      Counter<SurfacePattern> patternsThatExtractedPat, Counter<SurfacePattern> allSelectedPatterns) {
 
     if (learnedScores.containsKey(word))
       return learnedScores.getCount(word);
@@ -352,7 +352,7 @@ public class ScorePhrasesLearnFeatWt extends PhraseScorer {
     return score;
   }
 
-  Counter<ScorePhraseMeasures> getFeatures(String label, String word, Counter<Integer> patThatExtractedWord, Counter<Integer> allSelectedPatterns) {
+  Counter<ScorePhraseMeasures> getFeatures(String label, String word, Counter<SurfacePattern> patThatExtractedWord, Counter<SurfacePattern> allSelectedPatterns) {
 
     if (phraseScoresRaw.containsFirstKey(word))
       return phraseScoresRaw.getCounter(word);

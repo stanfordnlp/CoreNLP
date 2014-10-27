@@ -2,7 +2,6 @@ package edu.stanford.nlp.util;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Predicate;
 
 
 /**
@@ -564,11 +563,11 @@ public class ArrayUtils {
    * Implementation notes: creates two arrays, calls <code>filter</code>
    * once for each element, does not alter <code>original</code>
    */
-  public static <T> T[] filter(T[] original, Predicate<? super T> filter) {
+  public static <T> T[] filter(T[] original, Filter<? super T> filter) {
     T[] result = Arrays.copyOf(original, original.length); // avoids generic array creation compile error
     int size = 0;
     for (T value : original) {
-      if (filter.test(value)) {
+      if (filter.accept(value)) {
         result[size] = value;
         size++;
       }
@@ -883,20 +882,6 @@ public class ArrayUtils {
     return CollectionUtils.compareLists(firstAsList, secondAsList);
   }
 
-  /* -- This is an older more direct implementation of the above, but not necessary unless for performance
-   public static <C extends Comparable<C>> int compareArrays(C[] a1, C[] a2) {
-    int len = Math.min(a1.length, a2.length);
-    for (int i = 0; i < len; i++) {
-      int comparison = a1[i].compareTo(a2[i]);
-      if (comparison != 0) return comparison;
-    }
-    // one is a prefix of the other, or they're identical
-    if (a1.length < a2.length) return -1;
-    if (a1.length > a2.length) return 1;
-    return 0;
-  }
-   */
-
   /**
    * If tofind is a part of tokens, it finds the ****starting index***** of tofind in tokens
    * If tofind is not a sub-array of tokens, then it returns null
@@ -984,15 +969,4 @@ public class ArrayUtils {
     return b;
   }
 
-  public static int compareBooleanArrays(boolean[] a1, boolean[] a2) {
-    int len = Math.min(a1.length, a2.length);
-    for (int i = 0; i < len; i++) {
-      if (!a1[i] && a2[i]) return -1;
-      if (a1[i] && !a2[i]) return 1;
-    }
-    // one is a prefix of the other, or they're identical
-    if (a1.length < a2.length) return -1;
-    if (a1.length > a2.length) return 1;
-    return 0;
-  }
 }
