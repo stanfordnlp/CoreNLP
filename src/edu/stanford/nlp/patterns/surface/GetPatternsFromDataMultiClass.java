@@ -2702,7 +2702,6 @@ public class GetPatternsFromDataMultiClass implements Serializable {
           RegExFileFilter fileFilter = new RegExFileFilter(Pattern.compile(filef.getName()));
           File dir = new File(tokfile.substring(0, tokfile.lastIndexOf("/")));
           File[] files = dir.listFiles(fileFilter);
-          Redwood.log(Redwood.DBG, "reading from files " + files);
           allFiles.addAll(Arrays.asList(files));
         }
       }
@@ -2887,6 +2886,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
       } else if (fileFormat.equalsIgnoreCase("ser")) {
         //usingDirForSentsInIndex = false;
         for (File f : GetPatternsFromDataMultiClass.getAllFiles(file)) {
+          Redwood.log(Redwood.DBG, "reading from ser file " + f);
           if (!batchProcessSents)
             sents.putAll((Map<String, List<CoreLabel>>) IOUtils.readObjectFromFile(f));
           else{
