@@ -8,32 +8,32 @@ import edu.stanford.nlp.util.CoreMap;
 
 /**
  * For sequence model inference at test-time.
- * 
+ *
  * @author Spence Green
  *
  */
 public class TestSequenceModel implements SequenceModel {
 
   private final int window;
-  private final int numClasses;
-  private final CRFCliqueTree cliqueTree;
+  // private final int numClasses;
+  private final CRFCliqueTree<? extends CharSequence> cliqueTree;  // todo [cdm 2014]: Just make String?
   private final int[] backgroundTag;
 
   private final int[] allTags;
   private int[][] allowedTagsAtPosition;
-  
-  public TestSequenceModel(CRFCliqueTree cliqueTree) {
+
+  public TestSequenceModel(CRFCliqueTree<? extends CharSequence> cliqueTree) {
     this(cliqueTree, null, null);
   }
 
-  public TestSequenceModel(CRFCliqueTree<String> cliqueTree,
+  public TestSequenceModel(CRFCliqueTree<? extends CharSequence> cliqueTree,
       LabelDictionary labelDictionary, List<? extends CoreMap> document) {
     // this.factorTables = factorTables;
     this.cliqueTree = cliqueTree;
     // this.window = factorTables[0].windowSize();
     this.window = cliqueTree.window();
     // this.numClasses = factorTables[0].numClasses();
-    this.numClasses = cliqueTree.getNumClasses();
+    int numClasses = cliqueTree.getNumClasses();
 
     this.backgroundTag = new int[] { cliqueTree.backgroundIndex() };
     allTags = new int[numClasses];

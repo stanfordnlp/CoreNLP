@@ -4,6 +4,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Map that takes a iterable as key, and maps it to an value.
@@ -64,7 +65,7 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
       K element = keyIter.next();
       boolean isLast = !keyIter.hasNext();
       if (curTrie.children == null) {
-        curTrie.children = Generics.newConcurrentHashMap();
+        curTrie.children = new ConcurrentHashMap<K, TrieMap<K, V>>();//Generics.newConcurrentHashMap();
       }
       parentTrie = curTrie;
       curTrie = curTrie.children.get(element);
@@ -165,7 +166,7 @@ public class TrieMap<K, V> extends AbstractMap<Iterable<K>, V> {
     // go through each element
     for(K element:key){
       if (curTrie.children == null) {
-        curTrie.children = Generics.newConcurrentHashMap();
+        curTrie.children = new ConcurrentHashMap<K, TrieMap<K, V>>();//Generics.newConcurrentHashMap();
       }
       TrieMap<K, V> parent = curTrie;
       curTrie = curTrie.children.get(element);

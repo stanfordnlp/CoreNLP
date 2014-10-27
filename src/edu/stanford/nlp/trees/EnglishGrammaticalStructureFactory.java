@@ -1,21 +1,21 @@
 package edu.stanford.nlp.trees;
 
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 
 public class EnglishGrammaticalStructureFactory implements GrammaticalStructureFactory {
 
-  private final Filter<String> puncFilter;
+  private final Predicate<String> puncFilter;
   private final HeadFinder hf;
 
   public EnglishGrammaticalStructureFactory() {
     this(null, null);
   }
 
-  public EnglishGrammaticalStructureFactory(Filter<String> puncFilter) {
+  public EnglishGrammaticalStructureFactory(Predicate<String> puncFilter) {
     this(puncFilter, null);
   }
 
-  public EnglishGrammaticalStructureFactory(Filter<String> puncFilter, HeadFinder hf) {
+  public EnglishGrammaticalStructureFactory(Predicate<String> puncFilter, HeadFinder hf) {
     this.puncFilter = puncFilter;
     this.hf = hf;
   }

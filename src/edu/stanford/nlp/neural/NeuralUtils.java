@@ -6,11 +6,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import java.util.function.Predicate;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.Filter;
 
 /**
  * Includes a bunch of utility methods usable by projects which use
@@ -48,8 +48,8 @@ public class NeuralUtils {
   }
 
   public static SimpleMatrix convertTextMatrix(String text) {
-    List<String> lines = CollectionUtils.filterAsList(Arrays.asList(text.split("\n")), new Filter<String>() {
-        public boolean accept(String s) {
+    List<String> lines = CollectionUtils.filterAsList(Arrays.asList(text.split("\n")), new Predicate<String>() {
+        public boolean test(String s) {
           return s.trim().length() > 0;
         }
         private static final long serialVersionUID = 1;

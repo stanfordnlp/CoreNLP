@@ -1,31 +1,30 @@
 package edu.stanford.nlp.patterns.surface;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.Env;
+import edu.stanford.nlp.ling.tokensregex.NodePattern;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScoring;
 import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.TypesafeMap.Key;
+import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 import edu.stanford.nlp.util.logging.Redwood;
 
 public class ConstantsAndVariables implements Serializable{
@@ -54,8 +53,8 @@ public class ConstantsAndVariables implements Serializable{
   /**
    * Cached file of all patterns for all tokens
    */
-  @Option(name = "allPatternsFile")
-  public String allPatternsFile = null;
+  @Option(name = "allPatternsDir")
+  public String allPatternsDir = null;
 
   /**
    * If all patterns should be computed. Otherwise patterns are read from
@@ -89,7 +88,7 @@ public class ConstantsAndVariables implements Serializable{
   /**
    * Currently, does not work correctly. TODO: make this work. Ideally this
    * would label words only when they occur in the context of any learned
-   * pattern
+   * pattern. This comment seems old. Test it!
    */
   @Option(name = "restrictToMatched")
   public boolean restrictToMatched = false;
@@ -109,9 +108,10 @@ public class ConstantsAndVariables implements Serializable{
 
   /**
    * Do not learn patterns in which the neighboring words have the same label.
+   * Deprecated!
    */
-  @Option(name = "ignorePatWithLabeledNeigh")
-  public boolean ignorePatWithLabeledNeigh = false;
+  //@Option(name = "ignorePatWithLabeledNeigh")
+  //public boolean ignorePatWithLabeledNeigh = false;
 
   /**
    * Save this run as ...
@@ -437,6 +437,26 @@ public class ConstantsAndVariables implements Serializable{
   public Map<String, Counter<Integer>> distSimWeights = new HashMap<String, Counter<Integer>>();
   public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
 
+  @Option(name="invertedIndexClass", gloss="another option is Lucene backed, which is not included in the CoreNLP release. Contact us to get a copy (distributed under Apache License).")
+  public Class<? extends SentenceIndex> invertedIndexClass = edu.stanford.nlp.patterns.surface.InvertedIndexByTokens.class;
+
+  /**
+   * Where the inverted index (either in memory or lucene) is stored
+   */
+  @Option(name="invertedIndexDirectory")
+  public String invertedIndexDirectory;
+
+  //TODO: add to the examples properties file
+  @Option(name="clubNeighboringLabeledWords")
+  public boolean clubNeighboringLabeledWords = false;
+
+  public ConcurrentHashIndex<SurfacePattern> getPatternIndex() {
+    return patternIndex;
+  }
+
+  public void setPatternIndex(ConcurrentHashIndex<SurfacePattern> patternIndex) {
+    this.patternIndex = patternIndex;
+  }
 
 
   public enum ScorePhraseMeasures {
@@ -567,31 +587,33 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name = "doNotExtractPhraseAnyWordLabeledOtherClass")
   public boolean doNotExtractPhraseAnyWordLabeledOtherClass = true;
 
-  // /**
-  // * Use FileBackedCache for the inverted index -- use if memory is limited
-  // */
-  // @Option(name="diskBackedInvertedIndex")
-  // public boolean diskBackedInvertedIndex = false;
+  /**
+   * You can save the inverted index. Lucene index is saved by default to <code>invertedIndexDirectory</code> if given.
+   */
+  @Option(name="saveInvertedIndex")
+  public boolean saveInvertedIndex  = false;
 
   /**
-   * You can save the inverted index to this file
+   * You can load the inverted index using this file.
+   * If false and using lucene index, the existing directory is deleted and new index is made.
    */
-  @Option(name="saveInvertedIndexDir")
-  public String saveInvertedIndexDir  = null;
+  @Option(name="loadInvertedIndex")
+  public boolean loadInvertedIndex  = false;
 
-  /**
-   * You can load the inv index using this file
-   */
-  @Option(name="loadInvertedIndexDir")
-  public String loadInvertedIndexDir  = null;
 
-  /**
-   * Directory where to save the sentences ser files.
-   */
-  @Option(name="saveSentencesSerDir")
-  public String saveSentencesSerDir = null;
+  @Option(name = "storePatsForEachToken", gloss="used for storing patterns in PSQL")
+  public PatternForEachTokenWay storePatsForEachToken = PatternForEachTokenWay.MEMORY;
 
-  public boolean usingDirForSentsInIndex = false;
+  @Option(name="sampleSentencesForSufficientStats",gloss="% sentences to use for learning pattterns" )
+  double sampleSentencesForSufficientStats = 1.0;
+
+//  /**
+//   * Directory where to save the sentences ser files.
+//   */
+//  @Option(name="saveSentencesSerDir")
+//  public File saveSentencesSerDir = null;
+//
+//  public boolean usingDirForSentsInIndex = false;
 
   // @Option(name = "wekaOptions")
   // public String wekaOptions = "";
@@ -601,18 +623,25 @@ public class ConstantsAndVariables implements Serializable{
   int wordShaper = WordShapeClassifier.WORDSHAPECHRIS2;
   private Map<String, String> wordShapeCache = new HashMap<String, String>();
 
-  public InvertedIndexByTokens invertedIndex;
+  public SentenceIndex invertedIndex;
 
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";
 
+  public ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
+
   Properties props;
+
+  public enum PatternForEachTokenWay {MEMORY, LUCENE, DB};
 
   public ConstantsAndVariables(Properties props, Set<String> labels, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
                                Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
     this.labels = labels;
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
+    if(this.generalizeClasses == null)
+      this.generalizeClasses = new HashMap<String, Class>();
+    this.generalizeClasses.putAll(answerClass);
     this.ignoreWordswithClassesDuringSelection = ignoreClasses;
     setUp(props);
   }
@@ -623,6 +652,9 @@ public class ConstantsAndVariables implements Serializable{
     this.labels = labelDictionary.keySet();
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
+    if(this.generalizeClasses == null)
+      this.generalizeClasses = new HashMap<String, Class>();
+    this.generalizeClasses.putAll(answerClass);
     this.ignoreWordswithClassesDuringSelection = ignoreClasses;
     setUp(props);
   }
@@ -637,6 +669,9 @@ public class ConstantsAndVariables implements Serializable{
     this.labels = labels;
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
+    if(this.generalizeClasses == null)
+      this.generalizeClasses = new HashMap<String, Class>();
+    this.generalizeClasses.putAll(answerClass);
     setUp(props);
   }
 
@@ -645,6 +680,7 @@ public class ConstantsAndVariables implements Serializable{
     if (alreadySetUp) {
       return;
     }
+
     Execution.fillOptions(this, props);
     if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty())
       ignoreWordRegex = Pattern.compile(wordIgnoreRegex);
@@ -712,8 +748,10 @@ public class ConstantsAndVariables implements Serializable{
           "/" + StringUtils.join(fillerWords, "|") + "/");
       env.get(label).bind("$STOPWORD", stopStr);
       env.get(label).bind("$MOD", "[{tag:/JJ.*/}]");
-      if (matchLowerCaseContext)
+      if (matchLowerCaseContext){
+        env.get(label).setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
         env.get(label).setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
+      }
       env.get(label).bind("OTHERSEM",
           PatternsAnnotations.OtherSemanticLabel.class);
       env.get(label).bind("grandparentparsetag", CoreAnnotations.GrandparentAnnotation.class);
@@ -758,6 +796,48 @@ public class ConstantsAndVariables implements Serializable{
       }
     }
     alreadySetUp = true;
+  }
+
+
+
+  //streams sents, files-from-which-sents-were read
+  static public class DataSentsIterator implements Iterator<Pair<Map<String, List<CoreLabel>>, File>> {
+
+    boolean readInMemory = false;
+    Iterator<File> sentfilesIter = null;
+    boolean batchProcessSents;
+    public DataSentsIterator(boolean batchProcessSents){
+      this.batchProcessSents = batchProcessSents;
+      if(batchProcessSents){
+        sentfilesIter = Data.sentsFiles.iterator();
+        }
+
+    }
+    @Override
+    public boolean hasNext() {
+      if(batchProcessSents){
+       return sentfilesIter.hasNext();
+      }else{
+        return !readInMemory;
+      }
+    }
+
+    @Override
+    public Pair<Map<String, List<CoreLabel>>, File> next() {
+      if(batchProcessSents){
+        try {
+          File f= sentfilesIter.next();
+          return new Pair<Map<String, List<CoreLabel>>, File>(IOUtils.readObjectFromFile(f), f);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+          throw new RuntimeException(e);
+        }
+      }else{
+        readInMemory= true;
+        return new Pair(Data.sents, new File(""));
+      }
+    }
   }
 
   public Map<String, Counter<String>> getWordShapesForLabels() {
@@ -1061,5 +1141,28 @@ public class ConstantsAndVariables implements Serializable{
 
   public Map<String, Map<Class, Object>> getIgnoreWordswithClassesDuringSelection() {
     return ignoreWordswithClassesDuringSelection;
+  }
+
+
+  public Counter<SurfacePattern> transformPatternsToSurface(Counter<Integer> pats) {
+    return Counters.transform(pats, new Function<Integer, SurfacePattern>() {
+      @Override
+      public SurfacePattern apply(Integer integer) {
+        return patternIndex.get(integer);
+      }
+    });
+  }
+
+  public Counter<Integer> transformPatternsToIndex(Counter<SurfacePattern> pats) {
+    return Counters.transform(pats, new Function<SurfacePattern, Integer>() {
+      @Override
+      public Integer apply(SurfacePattern pat) {
+        return patternIndex.indexOf(pat);
+      }
+    });
+  }
+
+  public Integer transformPatternToIndex(SurfacePattern pat) {
+    return patternIndex.indexOf(pat);
   }
 }

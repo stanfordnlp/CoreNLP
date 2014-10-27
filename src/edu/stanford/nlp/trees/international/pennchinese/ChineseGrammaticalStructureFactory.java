@@ -3,22 +3,22 @@ package edu.stanford.nlp.trees.international.pennchinese;
 import edu.stanford.nlp.trees.GrammaticalStructureFactory;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 
 public class ChineseGrammaticalStructureFactory implements GrammaticalStructureFactory {
 
-  private final Filter<String> puncFilter;
+  private final Predicate<String> puncFilter;
   private final HeadFinder hf;
 
   public ChineseGrammaticalStructureFactory() {
     this(null, null);
   }
 
-  public ChineseGrammaticalStructureFactory(Filter<String> puncFilter) {
+  public ChineseGrammaticalStructureFactory(Predicate<String> puncFilter) {
     this(puncFilter, null);
   }
 
-  public ChineseGrammaticalStructureFactory(Filter<String> puncFilter, HeadFinder hf) {
+  public ChineseGrammaticalStructureFactory(Predicate<String> puncFilter, HeadFinder hf) {
     this.puncFilter = puncFilter;
     this.hf = hf;
   }
