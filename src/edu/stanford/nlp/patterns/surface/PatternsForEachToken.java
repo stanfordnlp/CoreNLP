@@ -22,11 +22,11 @@ public abstract class PatternsForEachToken {
 
   abstract public Map<Integer, Set<Integer>> getPatternsForAllTokens(String sentId);
 
-  /**
-   * Only for Lucene and DB
-   * @return
-   */
-  abstract public PatternIndex readPatternIndex(String dir) throws IOException, ClassNotFoundException;
+//  /**
+//   * Only for Lucene and DB
+//   * @return
+//   */
+//  abstract public PatternIndex readPatternIndex(String dir) throws IOException, ClassNotFoundException;
   abstract public void setupSearch();
 
   abstract int size();

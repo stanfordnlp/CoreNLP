@@ -1123,7 +1123,7 @@ public class GetPatternsFromDataMultiClass implements Serializable {
         patsForEachToken.addPatterns(IOUtils.readObjectFromFile(constVars.allPatternsDir + "/allpatterns.ser"));
         Redwood.log(ConstantsAndVariables.minimaldebug, "Read all patterns from " + constVars.allPatternsDir + "/allpatterns.ser");
       }
-      constVars.setPatternIndex(patsForEachToken.readPatternIndex(constVars.allPatternsDir));
+      constVars.setPatternIndex(PatternIndex.load(constVars.allPatternsDir, constVars.storePatsIndex));
 
     }
   }

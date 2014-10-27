@@ -10,7 +10,15 @@ import java.io.IOException;
  */
 public class PatternIndexInMemory extends PatternIndex{
 
-  ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
+  ConcurrentHashIndex<SurfacePattern> patternIndex;
+
+  public PatternIndexInMemory(){
+    patternIndex = new ConcurrentHashIndex<SurfacePattern>();
+  }
+
+  public PatternIndexInMemory(  ConcurrentHashIndex<SurfacePattern> patternIndex ){
+     this.patternIndex = patternIndex;
+  }
 
   @Override
   public int addToIndex(SurfacePattern p) {
@@ -36,4 +44,16 @@ public class PatternIndexInMemory extends PatternIndex{
   public void save(String dir) throws IOException {
     IOUtils.writeObjectToFile(patternIndex, dir +"/patternsindex.ser");
   }
+
+  public static PatternIndexInMemory load(String dir){
+    try {
+      return new PatternIndexInMemory(IOUtils.readObjectFromFile(dir + "/patternsindex.ser"));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+
+  }
+
 }

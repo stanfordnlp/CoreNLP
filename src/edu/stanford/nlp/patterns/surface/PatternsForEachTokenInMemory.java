@@ -53,18 +53,18 @@ public class PatternsForEachTokenInMemory extends PatternsForEachToken {
     //nothing to do
   }
 
-  @Override
-  public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir) throws IOException, ClassNotFoundException {
-    return IOUtils.readObjectFromFile(dir+"/patternshashindex.ser");
-  }
-
-  @Override
-  public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String dir) throws IOException {
-    if(dir != null){
-    writePatternsIfInMemory(dir+"/allpatterns.ser");
-    IOUtils.writeObjectToFile(index, dir+"/patternshashindex.ser");
-    }
-  }
+//  @Override
+//  public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir) throws IOException, ClassNotFoundException {
+//    return IOUtils.readObjectFromFile(dir+"/patternshashindex.ser");
+//  }
+//
+//  @Override
+//  public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String dir) throws IOException {
+//    if(dir != null){
+//    writePatternsIfInMemory(dir+"/allpatterns.ser");
+//    IOUtils.writeObjectToFile(index, dir+"/patternshashindex.ser");
+//    }
+//  }
 
   @Override
   public Map<String, Map<Integer, Set<Integer>>> getPatternsForAllTokens(Collection<String> sampledSentIds) {
