@@ -9,8 +9,6 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Execution;
-import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
