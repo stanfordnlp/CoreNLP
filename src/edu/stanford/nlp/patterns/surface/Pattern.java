@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created by sonalg on 10/27/14.
+ * Created by Sonal Gupta on 10/27/14.
  */
 public abstract class Pattern {
 
@@ -17,16 +17,20 @@ public abstract class Pattern {
   }
 
 
-  public static boolean sameGenre(Pattern p1, Pattern p2){
-    //TODO: finish this
-    return false;
+  public static boolean sameGenre(PatternFactory.PatternType patternClass, Pattern p1, Pattern p2){
+    if(patternClass.equals(PatternFactory.PatternType.SURFACE))
+      return SurfacePattern.sameGenre((SurfacePattern)p1, (SurfacePattern)p2);
+    else
+      throw new UnsupportedOperationException();
   }
 
   public abstract edu.stanford.nlp.util.CollectionValuedMap<String, String> getRelevantWords();
 
-  public static boolean subsumes(Pattern pat, Pattern p) {
-    //TODO
-    return false;
+  public static boolean subsumes(PatternFactory.PatternType patternClass, Pattern pat, Pattern p) {
+    if(patternClass.equals(PatternFactory.PatternType.SURFACE))
+      return SurfacePattern.subsumes((SurfacePattern)pat, (SurfacePattern)p);
+    else
+      throw new UnsupportedOperationException();
   }
 
   public abstract int equalContext(Pattern p);

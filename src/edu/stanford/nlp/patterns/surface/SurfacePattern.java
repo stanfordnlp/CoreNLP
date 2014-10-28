@@ -19,12 +19,6 @@ import edu.stanford.nlp.util.*;
 
 public class SurfacePattern extends Pattern implements Serializable, Comparable<SurfacePattern>{
 
-//  @Override
-//  public boolean sameGenre(Pattern p1, Pattern p2) {
-//    //TODO: finish this
-//    return false;
-//  }
-
   @Override
   public CollectionValuedMap<String, String> getRelevantWords() {
     CollectionValuedMap<String, String> relwordsThisPat = new CollectionValuedMap<>();
@@ -37,8 +31,7 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
 
   @Override
   public int equalContext(Pattern p) {
-    //TODO: finsih this
-    return 0;
+    return equalContext((SurfacePattern)p);
   }
 
   private void getRelevantWords(Token[] t, CollectionValuedMap<String, String> relWords){

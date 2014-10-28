@@ -1319,7 +1319,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       if (!notchoose) {
         if (alreadyIdentifiedPatterns != null) {
           for (E p : alreadyIdentifiedPatterns) {
-            if (Pattern.subsumes(pat, p)) {
+            if (Pattern.subsumes(constVars.patternType, pat, p)) {
               // if (pat.getNextContextStr().contains(p.getNextContextStr()) &&
               // pat.getPrevContextStr().contains(p.getPrevContextStr())) {
               Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing pattern " + pat
@@ -1352,15 +1352,15 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
           //E p = constVars.getPatternIndex().get(pindex);
 
           boolean removeChosenPatFlag = false;
-          if (Pattern.sameGenre(pat, p)) {
+          if (Pattern.sameGenre(constVars.patternType, pat, p)) {
             
-            if(Pattern.subsumes(pat, p)){
+            if(Pattern.subsumes(constVars.patternType, pat, p)){
               Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing pattern " + pat
                   + " because it is contained in or contains the already chosen pattern " + p);
               notchoose = true;
               break;
             } 
-            else if (E.subsumes(p, pat)) {
+            else if (E.subsumes(constVars.patternType, p, pat)) {
               //subsume is true even if equal context
               
               //check if equal context
@@ -1944,13 +1944,14 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
           //patsForEachToken.addPatterns(sentEn.getKey(), index, createPats.getContext(sentEn.getValue(), index));
         }
       }
-      if(sentenceChanged)
+      if(sentenceChanged){
         constVars.invertedIndex.update(sentEn.getValue(), sentEn.getKey());
+      }
     }
 
-    if(patsForEachToken != null)
+    if(patsForEachToken != null) {
       patsForEachToken.updatePatterns(tempPatsForSents);//sentEn.getKey(), index, createPats.getContext(sentEn.getValue(), index));
-
+    }
 
     constVars.invertedIndex.finishUpdating();
 
