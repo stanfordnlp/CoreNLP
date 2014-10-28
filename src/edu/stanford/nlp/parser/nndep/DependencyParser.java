@@ -518,6 +518,7 @@ public class DependencyParser {
         }
       }
 
+
       knownWords = new ArrayList<String>();
       knownPos = new ArrayList<String>();
       knownLabels = new ArrayList<String>();

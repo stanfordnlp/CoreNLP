@@ -117,7 +117,7 @@ public class InvertedIndexByTokens extends SentenceIndex implements Serializable
   }
 
   //returns for each pattern, list of sentence ids
-  public Map<Integer, Set<String>> getFileSentIdsFromPats(Collection<Integer> pats, PatternIndex index) {
+  public Map<Integer, Set<String>> getFileSentIdsFromPats(Collection<Integer> pats, Index<SurfacePattern> index) {
     Map<Integer, Set<String>> sents = new HashMap<Integer, Set<String>>();
     for(Integer pat: pats){
       Set<String> ids = getFileSentIds(getRelevantWords(index.get(pat)));
@@ -138,7 +138,7 @@ public class InvertedIndexByTokens extends SentenceIndex implements Serializable
   }
 
   @Override
-  public Map<Integer, Set<String>> queryIndex(Collection<Integer> patterns, PatternIndex patternIndex) {
+  public Map<Integer, Set<String>> queryIndex(Collection<Integer> patterns, ConcurrentHashIndex<SurfacePattern> patternIndex) {
     Map<Integer, Set<String>> sentSentids = getFileSentIdsFromPats(patterns, patternIndex);
     return sentSentids;
   }

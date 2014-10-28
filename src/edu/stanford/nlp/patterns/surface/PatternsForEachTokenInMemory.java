@@ -49,22 +49,17 @@ public class PatternsForEachTokenInMemory extends PatternsForEachToken {
   }
 
   @Override
-  public void setupSearch() {
-    //nothing to do
+  public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir) throws IOException, ClassNotFoundException {
+    return IOUtils.readObjectFromFile(dir+"/patternshashindex.ser");
   }
 
-//  @Override
-//  public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir) throws IOException, ClassNotFoundException {
-//    return IOUtils.readObjectFromFile(dir+"/patternshashindex.ser");
-//  }
-//
-//  @Override
-//  public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String dir) throws IOException {
-//    if(dir != null){
-//    writePatternsIfInMemory(dir+"/allpatterns.ser");
-//    IOUtils.writeObjectToFile(index, dir+"/patternshashindex.ser");
-//    }
-//  }
+  @Override
+  public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String dir) throws IOException {
+    if(dir != null){
+    writePatternsIfInMemory(dir+"/allpatterns.ser");
+    IOUtils.writeObjectToFile(index, dir+"/patternshashindex.ser");
+    }
+  }
 
   @Override
   public Map<String, Map<Integer, Set<Integer>>> getPatternsForAllTokens(Collection<String> sampledSentIds) {
@@ -80,21 +75,10 @@ public class PatternsForEachTokenInMemory extends PatternsForEachToken {
     //nothing to do
   }
 
-  @Override
-  public void load(String allPatternsDir) {
-    try {
-      addPatterns(IOUtils.readObjectFromFile(allPatternsDir+"/allpatterns.ser"));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
-    }
-  }
 
-  @Override
-  public boolean save(String dir) {
+  public boolean writePatternsIfInMemory(String allPatternsFile) {
     try {
-      IOUtils.writeObjectToFile(this.patternsForEachToken, dir+"/allpatterns.ser");
+      IOUtils.writeObjectToFile(this.patternsForEachToken, allPatternsFile);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

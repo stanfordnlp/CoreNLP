@@ -533,14 +533,7 @@ public class ScorePhrases {
     if (constVars.doNotApplyPatterns) {
       // if want to get the stats by the lossy way of just counting without
       // applying the patterns
-      ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
-      while(sentsIter.hasNext()) {
-        Pair<Map<String, List<CoreLabel>>, File> sentsf = sentsIter.next();
-        this.statsWithoutApplyingPatterns(sentsf.first(), patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
-      }
-
-      /*
-        if (constVars.batchProcessSents) {
+      if (constVars.batchProcessSents) {
         for (File f : Data.sentsFiles) {
           Redwood.log(Redwood.DBG, "Calculating stats from sents file " + f);
           Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
@@ -548,7 +541,7 @@ public class ScorePhrases {
         }
       } else
         this.statsWithoutApplyingPatterns(Data.sents, patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
-      */
+
     } else {
       if (patternsLearnedThisIter.size() > 0) {
         this.applyPats(patternsLearnedThisIter, label, wordsandLemmaPatExtracted, matchedTokensByPat);

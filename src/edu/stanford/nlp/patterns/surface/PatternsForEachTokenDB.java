@@ -329,17 +329,6 @@ public class PatternsForEachTokenDB extends PatternsForEachToken{
   }
   }
 
-  @Override
-  public boolean save(String dir) {
-    //nothing to do
-    return false;
-  }
-
-  @Override
-  public void setupSearch() {
-    //nothing to do
-  }
-
   public boolean containsSentId(String sentId){
       try {
         Connection conn = SQLConnection.getConnection();
@@ -421,57 +410,57 @@ public class PatternsForEachTokenDB extends PatternsForEachToken{
 
     }
   }
-//
-//  @Override
-//  public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir){
-//    //dir parameter is not used!
-//    try{
-//      Connection conn = SQLConnection.getConnection();
-//      //Map<Integer, Set<Integer>> pats = new ConcurrentHashMap<Integer, Set<Integer>>();
-//      String query = "Select index from " + patternindicesTable + " where tablename=\'" + tableName + "\'";
-//      Statement stmt = conn.createStatement();
-//      ResultSet rs = stmt.executeQuery(query);
-//      ConcurrentHashIndex<SurfacePattern> index = null;
-//      if(rs.next()){
-//        byte[] st = (byte[]) rs.getObject(1);
-//        ByteArrayInputStream baip = new ByteArrayInputStream(st);
-//        ObjectInputStream ois = new ObjectInputStream(baip);
-//        index  = (ConcurrentHashIndex<SurfacePattern>) ois.readObject();
-//      }
-//      assert index != null;
-//      return index;
-//    }catch(SQLException e){
-//      throw new RuntimeException(e);
-//    } catch (ClassNotFoundException e) {
-//      throw new RuntimeException(e);
-//    } catch (IOException e) {
-//      throw new RuntimeException(e);
-//    }
-//  }
-//
-//  @Override
-//  public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String file) {
-//    try {
-//      createUpsertFunctionPatternIndex();
-//      Connection conn = SQLConnection.getConnection();
-//      PreparedStatement  st = conn.prepareStatement("select upsert_patternindex(?,?)");
-//      st.setString(1,tableName);
-//      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//      ObjectOutputStream oos = new ObjectOutputStream(baos);
-//      oos.writeObject(index);
-//      byte[] patsAsBytes = baos.toByteArray();
-//      ByteArrayInputStream bais = new ByteArrayInputStream(patsAsBytes);
-//      st.setBinaryStream(2, bais, patsAsBytes.length);
-//      st.execute();
-//      st.close();
-//      conn.close();
-//      System.out.println("Saved the pattern hash index for " + tableName + " in DB table " + patternindicesTable);
-//    }catch (SQLException e){
-//      throw new RuntimeException(e);
-//    } catch (IOException e) {
-//      throw new RuntimeException(e);
-//    }
-//  }
+
+  @Override
+  public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir){
+    //dir parameter is not used!
+    try{
+      Connection conn = SQLConnection.getConnection();
+      //Map<Integer, Set<Integer>> pats = new ConcurrentHashMap<Integer, Set<Integer>>();
+      String query = "Select index from " + patternindicesTable + " where tablename=\'" + tableName + "\'";
+      Statement stmt = conn.createStatement();
+      ResultSet rs = stmt.executeQuery(query);
+      ConcurrentHashIndex<SurfacePattern> index = null;
+      if(rs.next()){
+        byte[] st = (byte[]) rs.getObject(1);
+        ByteArrayInputStream baip = new ByteArrayInputStream(st);
+        ObjectInputStream ois = new ObjectInputStream(baip);
+        index  = (ConcurrentHashIndex<SurfacePattern>) ois.readObject();
+      }
+      assert index != null;
+      return index;
+    }catch(SQLException e){
+      throw new RuntimeException(e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String file) {
+    try {
+      createUpsertFunctionPatternIndex();
+      Connection conn = SQLConnection.getConnection();
+      PreparedStatement  st = conn.prepareStatement("select upsert_patternindex(?,?)");
+      st.setString(1,tableName);
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ObjectOutputStream oos = new ObjectOutputStream(baos);
+      oos.writeObject(index);
+      byte[] patsAsBytes = baos.toByteArray();
+      ByteArrayInputStream bais = new ByteArrayInputStream(patsAsBytes);
+      st.setBinaryStream(2, bais, patsAsBytes.length);
+      st.execute();
+      st.close();
+      conn.close();
+      System.out.println("Saved the pattern hash index for " + tableName + " in DB table " + patternindicesTable);
+    }catch (SQLException e){
+      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   //batch processing below is copied from Java Ranch
   public static final int SINGLE_BATCH = 1;
@@ -537,11 +526,6 @@ public class PatternsForEachTokenDB extends PatternsForEachToken{
 
   @Override
   public void close() {
-    //nothing to do
-  }
-
-  @Override
-  public void load(String allPatternsDir) {
     //nothing to do
   }
 

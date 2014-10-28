@@ -450,11 +450,11 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name="clubNeighboringLabeledWords")
   public boolean clubNeighboringLabeledWords = false;
 
-  public PatternIndex getPatternIndex() {
+  public ConcurrentHashIndex<SurfacePattern> getPatternIndex() {
     return patternIndex;
   }
 
-  public void setPatternIndex(PatternIndex patternIndex) {
+  public void setPatternIndex(ConcurrentHashIndex<SurfacePattern> patternIndex) {
     this.patternIndex = patternIndex;
   }
 
@@ -601,11 +601,8 @@ public class ConstantsAndVariables implements Serializable{
   public boolean loadInvertedIndex  = false;
 
 
-  @Option(name = "storePatsForEachToken", gloss="used for storing patterns in PSQL/MEMORY/LUCENE")
+  @Option(name = "storePatsForEachToken", gloss="used for storing patterns in PSQL")
   public PatternForEachTokenWay storePatsForEachToken = PatternForEachTokenWay.MEMORY;
-
-  @Option(name = "storePatsIndex", gloss="used for storing patterns index")
-  public PatternIndexWay storePatsIndex = PatternIndexWay.MEMORY;
 
   @Option(name="sampleSentencesForSufficientStats",gloss="% sentences to use for learning pattterns" )
   double sampleSentencesForSufficientStats = 1.0;
@@ -631,14 +628,11 @@ public class ConstantsAndVariables implements Serializable{
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";
 
-  //public ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
-  //TODO: initialize this
-  public PatternIndex patternIndex;
+  public ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
 
   Properties props;
 
   public enum PatternForEachTokenWay {MEMORY, LUCENE, DB};
-  public enum PatternIndexWay {MEMORY, LUCENE};
 
   public ConstantsAndVariables(Properties props, Set<String> labels, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
                                Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
@@ -801,8 +795,6 @@ public class ConstantsAndVariables implements Serializable{
 
       }
     }
-
-    patternIndex = PatternIndex.newInstance(storePatsIndex, allPatternsDir);
     alreadySetUp = true;
   }
 
