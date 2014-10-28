@@ -171,7 +171,7 @@ public class ThreadedParserSlowITest extends TestCase {
     }
   }
 
-  public void runFourTests(String pcfg, String factored)
+  public static void runFourTests(String pcfg, String factored)
     throws Exception
   {
     List<Tree> pcfgInput = inputTrees.get(pcfg);
@@ -199,7 +199,7 @@ public class ThreadedParserSlowITest extends TestCase {
             new ParserThread(factored, factoredInput, factoredResults));
   }
 
-  public void runTwoTests(String parserPath)
+  public static void runTwoTests(String parserPath)
     throws Exception
   {
     List<Tree> input = inputTrees.get(parserPath);
