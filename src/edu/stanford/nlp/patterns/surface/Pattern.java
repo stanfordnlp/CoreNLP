@@ -10,11 +10,11 @@ import java.util.Set;
  */
 public abstract class Pattern {
 
-  private Class type;
-
-  public Pattern(Class type){
-    this.type = type;
-  }
+//  private Class type;
+//
+//  public Pattern(Class type){
+//    this.type = type;
+//  }
 
 
   public static boolean sameGenre(PatternFactory.PatternType patternClass, Pattern p1, Pattern p2){

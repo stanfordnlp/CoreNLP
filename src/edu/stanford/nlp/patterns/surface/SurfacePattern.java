@@ -71,7 +71,7 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
 
 
   public SurfacePattern(Token[] prevContext, PatternToken token, Token[] nextContext, SurfacePatternFactory.Genre genre) {
-    super(SurfacePattern.class);
+   // super(SurfacePattern.class);
     this.setPrevContext(prevContext);
     this.setNextContext(nextContext);
     //
