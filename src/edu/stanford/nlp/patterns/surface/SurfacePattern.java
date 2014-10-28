@@ -1,7 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.Serializable;
-import java.nio.charset.Charset;
 import java.util.*;
 
 

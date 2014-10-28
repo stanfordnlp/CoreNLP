@@ -6,16 +6,12 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Created by Sonal Gupta on 10/27/14.
+ * An abstract class to represent a Pattern. Currently only surface patterns are implemented.
+ * In future, dependency patterns shd be implemented too.
+ *
+ * @Author Sonal Gupta @sonalg.
  */
 public abstract class Pattern {
-
-//  private Class type;
-//
-//  public Pattern(Class type){
-//    this.type = type;
-//  }
-
 
   public static boolean sameGenre(PatternFactory.PatternType patternClass, Pattern p1, Pattern p2){
     if(patternClass.equals(PatternFactory.PatternType.SURFACE))
@@ -43,4 +39,5 @@ public abstract class Pattern {
     else
       throw new UnsupportedOperationException();
   }
+
 }
