@@ -35,7 +35,7 @@ public abstract class PatternIndex {
         PatternIndex index = ctor.newInstance(dir);
         return index;
 
-    } else if(way.equals(ConstantsAndVariables.PatternIndexWay.OpenHFT)){
+    } else if(way.equals(ConstantsAndVariables.PatternIndexWay.OPENHFT)){
       Class<? extends PatternIndex> c = (Class<? extends PatternIndex>) Class.forName("edu.stanford.nlp.patterns.surface.PatternIndexOpenHFT");
       Constructor<? extends PatternIndex> ctor = c.getConstructor();
       PatternIndex index = ctor.newInstance();
