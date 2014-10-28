@@ -19,6 +19,7 @@ public class PatternsForEachTokenInMemory<E extends Pattern> extends PatternsFor
     Execution.fillOptions(this, props);
 
 
+    //TODO: make this atomic
     if(patternsForEachToken == null)
       patternsForEachToken = new ConcurrentHashMap<String, Map<Integer, Set<? extends Pattern>>>();
 
