@@ -25,27 +25,36 @@ public abstract class PatternIndex {
   public abstract void save(String dir) throws IOException;
 
   public static PatternIndex newInstance(ConstantsAndVariables.PatternIndexWay way, String dir) {
+    try {
     if (way.equals(ConstantsAndVariables.PatternIndexWay.MEMORY))
       return new PatternIndexInMemory();
     else if (way.equals(ConstantsAndVariables.PatternIndexWay.LUCENE)) {
-      try {
+
         Class<? extends PatternIndex> c = (Class<? extends PatternIndex>) Class.forName("edu.stanford.nlp.patterns.surface.PatternIndexLucene");
         Constructor<? extends PatternIndex> ctor = c.getConstructor(String.class);
         PatternIndex index = ctor.newInstance(dir);
         return index;
-      }catch (ClassNotFoundException e) {
-        throw new RuntimeException("Lucene option is not distributed (license clash). Email us if you really want it.");
-      } catch (InvocationTargetException e) {
-        throw new RuntimeException(e);
-      } catch (NoSuchMethodException e) {
-        throw new RuntimeException(e);
-      } catch (IllegalAccessException e) {
-        throw new RuntimeException(e);
-      } catch (InstantiationException e) {
-        throw new RuntimeException(e);
-      }
-    } else
+
+    } else if(way.equals(ConstantsAndVariables.PatternIndexWay.OpenHFT)){
+      Class<? extends PatternIndex> c = (Class<? extends PatternIndex>) Class.forName("edu.stanford.nlp.patterns.surface.PatternIndexOpenHFT");
+      Constructor<? extends PatternIndex> ctor = c.getConstructor();
+      PatternIndex index = ctor.newInstance();
+      return index;
+
+    }else
       throw new UnsupportedOperationException();
+
+    }catch (ClassNotFoundException e) {
+      throw new RuntimeException("Lucene option is not distributed (license clash). Email us if you really want it.");
+    } catch (InvocationTargetException e) {
+      throw new RuntimeException(e);
+    } catch (NoSuchMethodException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (InstantiationException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static PatternIndex load(String dir, ConstantsAndVariables.PatternIndexWay way){

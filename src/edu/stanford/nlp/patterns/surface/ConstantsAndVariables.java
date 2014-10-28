@@ -446,7 +446,6 @@ public class ConstantsAndVariables implements Serializable{
   @Option(name="invertedIndexDirectory")
   public String invertedIndexDirectory;
 
-  //TODO: add to the examples properties file
   @Option(name="clubNeighboringLabeledWords")
   public boolean clubNeighboringLabeledWords = false;
 
@@ -638,7 +637,7 @@ public class ConstantsAndVariables implements Serializable{
   Properties props;
 
   public enum PatternForEachTokenWay {MEMORY, LUCENE, DB};
-  public enum PatternIndexWay {MEMORY, LUCENE};
+  public enum PatternIndexWay {MEMORY, OpenHFT, LUCENE};
 
   public ConstantsAndVariables(Properties props, Set<String> labels, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
                                Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
