@@ -603,7 +603,6 @@ public class ConstantsAndVariables<E> implements Serializable{
   public static String minimaldebug = "minimaldebug";
 
   //public ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
-  //TODO: initialize this
   //public PatternIndex<E, E> patternIndex;
 
   Properties props;

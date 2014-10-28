@@ -1101,12 +1101,13 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
   //public Map<String, TwoDimensionalCounter<E, String>> allPatternsandWords = null;
   public Map<String, Counter<E>> currentPatternWeights = null;
 
-  public void processSents(Map<String, List<CoreLabel>> sents) throws IOException, ClassNotFoundException {
+  //deleteExistingIndex is def false for the second call to this function
+  public void processSents(Map<String, List<CoreLabel>> sents, Boolean deleteExistingIndex) throws IOException, ClassNotFoundException {
 
     if (constVars.computeAllPatterns) {
-        props.setProperty("createTable", "true");
-        props.setProperty("deleteExisting", "true");
-        props.setProperty("createPatLuceneIndex", "true");
+        props.setProperty("createTable", deleteExistingIndex.toString());
+        props.setProperty("deleteExisting", deleteExistingIndex.toString());
+        props.setProperty("createPatLuceneIndex", deleteExistingIndex.toString());
         Redwood.log(Redwood.DBG, "Computing all patterns");
         createPats.getAllPatterns(sents, props, constVars.storePatsForEachToken);
       }
@@ -1141,11 +1142,14 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     Set<String> allCandidatePhrases = new HashSet<String>();
 
     ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
+
+    boolean firstCallToProcessSents = true;
     while(sentsIter.hasNext()){
       Pair<Map<String, List<CoreLabel>>, File> sentsPair = sentsIter.next();
       if(notComputedAllPatternsYet){
         //in the first iteration
-        processSents(sentsPair.first());
+        processSents(sentsPair.first(), firstCallToProcessSents);
+        firstCallToProcessSents = false;
         if(patsForEachToken == null){
           //in the first iteration, for the first file
           patsForEachToken = PatternsForEachToken.getPatternsInstance(props, constVars.storePatsForEachToken);
