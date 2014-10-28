@@ -22,15 +22,17 @@ public abstract class PatternsForEachToken {
 
   abstract public Map<Integer, Set<Integer>> getPatternsForAllTokens(String sentId);
 
-  /**
-   * Only for Lucene and DB
-   * @return
-   */
-  abstract public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir) throws IOException, ClassNotFoundException;
+  abstract public boolean save(String dir);
+//  /**
+//   * Only for Lucene and DB
+//   * @return
+//   */
+//  abstract public PatternIndex readPatternIndex(String dir) throws IOException, ClassNotFoundException;
+  abstract public void setupSearch();
 
   abstract int size();
 
-  abstract public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String dir) throws IOException;
+  //abstract public void savePatternIndex(PatternIndex index, String dir) throws IOException;
 
 
   public void updatePatterns(Map<String, Map<Integer, Set<Integer>>> tempPatsForSents) {
@@ -41,6 +43,7 @@ public abstract class PatternsForEachToken {
       tempPatsForSents.get(en.getKey()).putAll(m);
     }
     this.addPatterns(tempPatsForSents);
+    close();
   }
 
   public ConstantsAndVariables.PatternForEachTokenWay getStoreWay() {
@@ -88,6 +91,8 @@ public abstract class PatternsForEachToken {
   public abstract Map<String,Map<Integer,Set<Integer>>> getPatternsForAllTokens(Collection<String> sampledSentIds);
 
   public abstract void close();
+
+  public abstract void load(String allPatternsDir);
 
 
 //  @Option(name="allPatternsFile")

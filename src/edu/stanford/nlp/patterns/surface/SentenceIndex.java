@@ -112,7 +112,7 @@ public abstract class SentenceIndex {
   }
 
 
-  public abstract Map<Integer, Set<String>> queryIndex(Collection<Integer> patterns, ConcurrentHashIndex<SurfacePattern> patternIndex);
+  public abstract Map<Integer, Set<String>> queryIndex(Collection<Integer> patterns,  PatternIndex patternIndex);
 
   public void setUp(Properties props) {
     Execution.fillOptions(this, props);
