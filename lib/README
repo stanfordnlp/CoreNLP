@@ -308,6 +308,27 @@ URL:https://jsonp.java.net/ It has two jars, API and RI. This is the RI one.
 USED BY:patterns.surface
 LAST UPDATE:2014-04-07
 LAST UPDATE BY:Sonal Gupta
+-----------------------------------------------------------------------
+lucene-analyzers-common-4.2.1.jar
+lucene-core-4.2.1.jar
+lucene-demo-4.2.1.jar
+lucene-queries-4.2.1.jar
+lucene-queryparser-4.2.1.jar
+ORIGINAL JAR NAME: lucene-core-3.0.3.jar
+                   lucene-demos-3.0.3.jar
+VERSION: 4.2.1
+RELEASE DATE: 02 Apr 2013
+SOURCE AVAILABLE: yes
+DESCRIPTION: "Apache Lucene is a high-performance, full-featured text
+search engine library written entirely in Java. It is a technology
+suitable for nearly any application that requires full-text search,
+especially cross-platform. Doesn't conform to naming convention as
+in has version number, as before. Broken into several Jars in this version."
+URL: http://lucene.apache.org/
+USED BY: patterns.surface
+
+LAST UPDATE: 2013-04-05
+LAST UPDATE BY: Keith Siilats
 -----------------------------------------------------------------
 foo.jar
 

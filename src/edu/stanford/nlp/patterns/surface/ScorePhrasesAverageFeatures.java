@@ -19,7 +19,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Sonal Gupta (sonalg@stanford.edu)
  *
  */
-public class ScorePhrasesAverageFeatures extends PhraseScorer{
+public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer<E>{
   
   public ScorePhrasesAverageFeatures(ConstantsAndVariables constvar) {
     super(constvar);
@@ -30,8 +30,8 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
 
   
   @Override
-  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, Integer> terms,
-      TwoDimensionalCounter<String, Integer> wordsPatExtracted, Counter<Integer> allSelectedPatterns,
+  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, E> terms,
+      TwoDimensionalCounter<String, E> wordsPatExtracted, Counter<E> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, boolean forLearningPatterns) {
     Map<String, Counter<ScorePhraseMeasures>> scores = new HashMap<String, Counter<ScorePhraseMeasures>>();
     if (Data.domainNGramsFile != null)
@@ -43,7 +43,7 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
     // calculate TF-IDF like scores
     Counter<String> tfidfScores = new ClassicCounter<String>();
     if (constVars.usePhraseEvalPatWtByFreq) {
-      for (Entry<String, ClassicCounter<Integer>> en : terms.entrySet()) {
+      for (Entry<String, ClassicCounter<E>> en : terms.entrySet()) {
         double score = getPatTFIDFScore(en.getKey(), en.getValue(), allSelectedPatterns);
         tfidfScores.setCount(en.getKey(), score);
       }
