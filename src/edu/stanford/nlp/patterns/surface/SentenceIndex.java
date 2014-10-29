@@ -1,6 +1,7 @@
 package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.patterns.surface.Pattern;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Execution.Option;
@@ -14,7 +15,7 @@ import java.util.function.Function;
 /**
  * Created by sonalg on 10/15/14.
  */
-public abstract class SentenceIndex {
+public abstract class SentenceIndex<E extends Pattern> {
 
   Set<String> stopWords;
 
@@ -40,36 +41,23 @@ public abstract class SentenceIndex {
    */
   public abstract void add(Map<String, List<CoreLabel>> sents, boolean addProcessedText);
 
-//  protected CollectionValuedMap<String, String> getRelevantWords(Set<Integer> pats, Index<SurfacePattern> patternIndex){
+//  protected CollectionValuedMap<String, String> getRelevantWords(Set<Integer> pats, Index<E> EIndex){
 //    CollectionValuedMap<String, String> relwords = new CollectionValuedMap<String, String>();
 //    for(Integer p : pats)
-//    relwords.addAll(getRelevantWords(patternIndex.get(p)));
+//    relwords.addAll(getRelevantWords(EIndex.get(p)));
 //    return relwords;
 //  }
 
-  protected CollectionValuedMap<String, String> getRelevantWords(SurfacePattern pat){
-    CollectionValuedMap<String, String> relwordsThisPat = new CollectionValuedMap<String, String>();
-    Token[] next = pat.getNextContext();
-    getRelevantWords(next, relwordsThisPat);
-    Token[] prev = pat.getPrevContext();
-    getRelevantWords(prev, relwordsThisPat);
-    return relwordsThisPat;
-  }
+//  protected CollectionValuedMap<String, String> getRelevantWords(E pat){
+//    return pat.getRelevantWords();
+//  }
 
   /*
   returns className->list_of_relevant_words in relWords
    */
-  private void getRelevantWords(Token[] t, CollectionValuedMap<String, String> relWords){
-    if (t != null)
-      for (Token s : t) {
-        Map<String, String> str = s.classORRestrictionsAsString();
-        if (str != null){
-          relWords.addAll(str);
-          }
-      }
-  }
 
-//  protected Set<String> getRelevantWords(SurfacePattern pat){
+
+//  protected Set<String> getRelevantWords(E pat){
 //
 //      Set<String> relwordsThisPat = new HashSet<String>();
 //      String[] next = pat.getSimplerTokensNext();
@@ -112,7 +100,7 @@ public abstract class SentenceIndex {
   }
 
 
-  public abstract Map<Integer, Set<String>> queryIndex(Collection<Integer> patterns, ConcurrentHashIndex<SurfacePattern> patternIndex);
+  public abstract Map<E, Set<String>> queryIndex(Collection<E> Es);//,  EIndex EIndex);
 
   public void setUp(Properties props) {
     Execution.fillOptions(this, props);

@@ -1,6 +1,5 @@
 package edu.stanford.nlp.patterns.surface;
 
-import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Execution.Option;
 
 import java.sql.Connection;

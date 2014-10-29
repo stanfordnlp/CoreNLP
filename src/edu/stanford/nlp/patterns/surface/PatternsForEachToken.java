@@ -10,37 +10,40 @@ import java.util.*;
 /**
  * Created by Sonal Gupta on 10/8/14.
  */
-public abstract class PatternsForEachToken {
+public abstract class PatternsForEachToken<E> {
 
   private static ConstantsAndVariables.PatternForEachTokenWay storeWay;
 
-  abstract public void addPatterns(Map<String, Map<Integer, Set<Integer>>> pats);
+  abstract public void addPatterns(Map<String, Map<Integer, Set<E>>> pats);
 
-  abstract public void addPatterns(String id, Map<Integer, Set<Integer>> p);
+  abstract public void addPatterns(String id, Map<Integer, Set<E>> p);
 
   abstract public void createIndexIfUsingDBAndNotExists();
 
-  abstract public Map<Integer, Set<Integer>> getPatternsForAllTokens(String sentId);
+  abstract public Map<Integer, Set<E>> getPatternsForAllTokens(String sentId);
 
-  /**
-   * Only for Lucene and DB
-   * @return
-   */
-  abstract public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir) throws IOException, ClassNotFoundException;
+  abstract public boolean save(String dir);
+//  /**
+//   * Only for Lucene and DB
+//   * @return
+//   */
+//  abstract public PatternIndex readPatternIndex(String dir) throws IOException, ClassNotFoundException;
+  abstract public void setupSearch();
 
   abstract int size();
 
-  abstract public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String dir) throws IOException;
+  //abstract public void savePatternIndex(PatternIndex index, String dir) throws IOException;
 
 
-  public void updatePatterns(Map<String, Map<Integer, Set<Integer>>> tempPatsForSents) {
-    for(Map.Entry<String, Map<Integer, Set<Integer>>> en :tempPatsForSents.entrySet()){
-      Map<Integer, Set<Integer>> m = getPatternsForAllTokens(en.getKey());
+  public void updatePatterns(Map<String, Map<Integer, Set<E>>> tempPatsForSents) {
+    for(Map.Entry<String, Map<Integer, Set<E>>> en :tempPatsForSents.entrySet()){
+      Map<Integer, Set<E>> m = getPatternsForAllTokens(en.getKey());
       if(m == null)
-        m = new HashMap<Integer, Set<Integer>>();
+        m = new HashMap<Integer, Set<E>>();
       tempPatsForSents.get(en.getKey()).putAll(m);
     }
     this.addPatterns(tempPatsForSents);
+    close();
   }
 
   public ConstantsAndVariables.PatternForEachTokenWay getStoreWay() {
@@ -85,9 +88,11 @@ public abstract class PatternsForEachToken {
     //if(storePatsForEachToken.equals(DB)){}
   }
 
-  public abstract Map<String,Map<Integer,Set<Integer>>> getPatternsForAllTokens(Collection<String> sampledSentIds);
+  public abstract Map<String,Map<Integer,Set<E>>> getPatternsForAllTokens(Collection<String> sampledSentIds);
 
   public abstract void close();
+
+  public abstract void load(String allPatternsDir);
 
 
 //  @Option(name="allPatternsFile")
