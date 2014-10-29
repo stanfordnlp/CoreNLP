@@ -280,8 +280,8 @@ public class DependencyParser {
     }
     System.err.println("#Train Examples: " + ret.n);
 
-    Counters.retainTop(tokPosCount, config.numPreComputed);
-    preComputed = new ArrayList<>(tokPosCount.keySet());
+    preComputed = new ArrayList<>(config.numPreComputed);
+    preComputed.addAll(Counters.toSortedList(tokPosCount, false));
 
     return ret;
   }
