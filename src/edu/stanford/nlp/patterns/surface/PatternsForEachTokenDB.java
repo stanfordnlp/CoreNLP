@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * Created by sonalg on 10/22/14.
  */
-public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachToken<E>{
+public class PatternsForEachTokenDB extends PatternsForEachToken{
 
 
   @Execution.Option(name = "createTable")
@@ -29,7 +29,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
   @Execution.Option(name="deleteDBResourcesOnExit")
   boolean deleteDBResourcesOnExit = true;
 
-  public PatternsForEachTokenDB(Properties props, Map<String, Map<Integer, Set<E>>> pats){
+  public PatternsForEachTokenDB(Properties props, Map<String, Map<Integer, Set<Integer>>> pats){
 
     Execution.fillOptions(this, props);
 
@@ -85,7 +85,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
   }
 
   @Override
-  public void addPatterns(Map<String, Map<Integer, Set<E>>> pats){
+  public void addPatterns(Map<String, Map<Integer, Set<Integer>>> pats){
     try {
       Connection conn = null;
       PreparedStatement pstmt = null;
@@ -95,7 +95,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
       pstmt = getPreparedStmt(conn);
 
 
-      for (Map.Entry<String, Map<Integer, Set<E>>> en : pats.entrySet()) {
+      for (Map.Entry<String, Map<Integer, Set<Integer>>> en : pats.entrySet()) {
         addPattern(en.getKey(), en.getValue(), pstmt);
 
         pstmt.addBatch();
@@ -114,7 +114,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
   }
 
 
-  public void addPatterns(String id, Map<Integer, Set<E>> p){
+  public void addPatterns(String id, Map<Integer, Set<Integer>> p){
     try {
     PreparedStatement pstmt = null;
     Connection conn= null;
@@ -209,7 +209,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
   }*/
 
 
-  private void addPattern(String sentId, Map<Integer, Set<E>> patterns, PreparedStatement pstmt) throws SQLException, IOException {
+  private void addPattern(String sentId, Map<Integer, Set<Integer>> patterns, PreparedStatement pstmt) throws SQLException, IOException {
 
     if(pstmt != null){
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -303,19 +303,19 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
 
 
   @Override
-  public Map<Integer, Set<E>> getPatternsForAllTokens(String sentId){
+  public Map<Integer, Set<Integer>> getPatternsForAllTokens(String sentId){
   try{
       Connection conn = SQLConnection.getConnection();
       //Map<Integer, Set<Integer>> pats = new ConcurrentHashMap<Integer, Set<Integer>>();
       String query = "Select patterns from " + tableName + " where sentid=\'" + sentId + "\'";
       Statement stmt = conn.createStatement();
       ResultSet rs = stmt.executeQuery(query);
-      Map<Integer, Set<E>> patsToken = new HashMap<Integer, Set<E>>();
+      Map<Integer, Set<Integer>> patsToken = new HashMap<Integer, Set<Integer>>();
       if(rs.next()){
         byte[] st = (byte[]) rs.getObject(1);
         ByteArrayInputStream baip = new ByteArrayInputStream(st);
         ObjectInputStream ois = new ObjectInputStream(baip);
-        patsToken = (Map<Integer, Set<E>>) ois.readObject();
+        patsToken = (Map<Integer, Set<Integer>>) ois.readObject();
         //pats.put(rs.getInt("tokenid"), patsToken);
       }
       conn.close();
@@ -327,17 +327,6 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
   } catch (IOException e) {
     throw new RuntimeException(e);
   }
-  }
-
-  @Override
-  public boolean save(String dir) {
-    //nothing to do
-    return false;
-  }
-
-  @Override
-  public void setupSearch() {
-    //nothing to do
   }
 
   public boolean containsSentId(String sentId){
@@ -421,57 +410,57 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
 
     }
   }
-//
-//  @Override
-//  public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir){
-//    //dir parameter is not used!
-//    try{
-//      Connection conn = SQLConnection.getConnection();
-//      //Map<Integer, Set<Integer>> pats = new ConcurrentHashMap<Integer, Set<Integer>>();
-//      String query = "Select index from " + patternindicesTable + " where tablename=\'" + tableName + "\'";
-//      Statement stmt = conn.createStatement();
-//      ResultSet rs = stmt.executeQuery(query);
-//      ConcurrentHashIndex<SurfacePattern> index = null;
-//      if(rs.next()){
-//        byte[] st = (byte[]) rs.getObject(1);
-//        ByteArrayInputStream baip = new ByteArrayInputStream(st);
-//        ObjectInputStream ois = new ObjectInputStream(baip);
-//        index  = (ConcurrentHashIndex<SurfacePattern>) ois.readObject();
-//      }
-//      assert index != null;
-//      return index;
-//    }catch(SQLException e){
-//      throw new RuntimeException(e);
-//    } catch (ClassNotFoundException e) {
-//      throw new RuntimeException(e);
-//    } catch (IOException e) {
-//      throw new RuntimeException(e);
-//    }
-//  }
-//
-//  @Override
-//  public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String file) {
-//    try {
-//      createUpsertFunctionPatternIndex();
-//      Connection conn = SQLConnection.getConnection();
-//      PreparedStatement  st = conn.prepareStatement("select upsert_patternindex(?,?)");
-//      st.setString(1,tableName);
-//      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//      ObjectOutputStream oos = new ObjectOutputStream(baos);
-//      oos.writeObject(index);
-//      byte[] patsAsBytes = baos.toByteArray();
-//      ByteArrayInputStream bais = new ByteArrayInputStream(patsAsBytes);
-//      st.setBinaryStream(2, bais, patsAsBytes.length);
-//      st.execute();
-//      st.close();
-//      conn.close();
-//      System.out.println("Saved the pattern hash index for " + tableName + " in DB table " + patternindicesTable);
-//    }catch (SQLException e){
-//      throw new RuntimeException(e);
-//    } catch (IOException e) {
-//      throw new RuntimeException(e);
-//    }
-//  }
+
+  @Override
+  public ConcurrentHashIndex<SurfacePattern> readPatternIndex(String dir){
+    //dir parameter is not used!
+    try{
+      Connection conn = SQLConnection.getConnection();
+      //Map<Integer, Set<Integer>> pats = new ConcurrentHashMap<Integer, Set<Integer>>();
+      String query = "Select index from " + patternindicesTable + " where tablename=\'" + tableName + "\'";
+      Statement stmt = conn.createStatement();
+      ResultSet rs = stmt.executeQuery(query);
+      ConcurrentHashIndex<SurfacePattern> index = null;
+      if(rs.next()){
+        byte[] st = (byte[]) rs.getObject(1);
+        ByteArrayInputStream baip = new ByteArrayInputStream(st);
+        ObjectInputStream ois = new ObjectInputStream(baip);
+        index  = (ConcurrentHashIndex<SurfacePattern>) ois.readObject();
+      }
+      assert index != null;
+      return index;
+    }catch(SQLException e){
+      throw new RuntimeException(e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public void savePatternIndex(ConcurrentHashIndex<SurfacePattern> index, String file) {
+    try {
+      createUpsertFunctionPatternIndex();
+      Connection conn = SQLConnection.getConnection();
+      PreparedStatement  st = conn.prepareStatement("select upsert_patternindex(?,?)");
+      st.setString(1,tableName);
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ObjectOutputStream oos = new ObjectOutputStream(baos);
+      oos.writeObject(index);
+      byte[] patsAsBytes = baos.toByteArray();
+      ByteArrayInputStream bais = new ByteArrayInputStream(patsAsBytes);
+      st.setBinaryStream(2, bais, patsAsBytes.length);
+      st.execute();
+      st.close();
+      conn.close();
+      System.out.println("Saved the pattern hash index for " + tableName + " in DB table " + patternindicesTable);
+    }catch (SQLException e){
+      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   //batch processing below is copied from Java Ranch
   public static final int SINGLE_BATCH = 1;
@@ -481,9 +470,9 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
 
   //TODO: make this into an iterator!!
   @Override
-  public Map<String, Map<Integer, Set<E>>> getPatternsForAllTokens(Collection<String> sampledSentIds) {
+  public Map<String, Map<Integer, Set<Integer>>> getPatternsForAllTokens(Collection<String> sampledSentIds) {
     try{
-      Map<String, Map<Integer, Set<E>>> pats = new HashMap<String, Map<Integer, Set<E>>>();
+      Map<String, Map<Integer, Set<Integer>>> pats = new HashMap<String, Map<Integer, Set<Integer>>>();
       Connection conn = SQLConnection.getConnection();
       Iterator<String> iter = sampledSentIds.iterator();
       int totalNumberOfValuesLeftToBatch = sampledSentIds.size();
@@ -520,7 +509,7 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
           byte[] st = (byte[]) rs.getObject(2);
           ByteArrayInputStream baip = new ByteArrayInputStream(st);
           ObjectInputStream ois = new ObjectInputStream(baip);
-          pats.put(sentid, (Map<Integer, Set<E>>) ois.readObject());
+          pats.put(sentid, (Map<Integer, Set<Integer>>) ois.readObject());
         }
 
       }
@@ -537,11 +526,6 @@ public class PatternsForEachTokenDB<E extends Pattern> extends PatternsForEachTo
 
   @Override
   public void close() {
-    //nothing to do
-  }
-
-  @Override
-  public void load(String allPatternsDir) {
     //nothing to do
   }
 

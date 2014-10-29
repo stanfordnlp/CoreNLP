@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.toSet;
+
 /**
  * Neural network classifier which powers a transition-based dependency
  * parser.
@@ -635,7 +637,10 @@ public class Classifier {
    */
   public void preCompute() {
     // If no features are specified, pre-compute all of them!
-    preCompute(preMap.keySet());
+    Set<Integer> keys = preMap.keySet().stream()
+                              .limit(config.numPreComputed)
+                              .collect(toSet());
+    preCompute(keys);
   }
 
   /**
