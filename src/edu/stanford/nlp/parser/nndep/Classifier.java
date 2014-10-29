@@ -636,9 +636,11 @@ public class Classifier {
    * @see #preCompute(java.util.Set)
    */
   public void preCompute() {
-    // If no features are specified, pre-compute all of them!
-    Set<Integer> keys = preMap.keySet().stream()
-                              .limit(config.numPreComputed)
+    // If no features are specified, pre-compute all of them (which fit
+    // into a `saved` array of size `config.numPreComputed`)
+    Set<Integer> keys = preMap.entrySet().stream()
+                              .filter(e -> e.getValue() < config.numPreComputed)
+                              .map(Map.Entry::getKey)
                               .collect(toSet());
     preCompute(keys);
   }
