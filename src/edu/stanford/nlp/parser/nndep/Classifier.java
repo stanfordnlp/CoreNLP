@@ -654,7 +654,14 @@ public class Classifier {
    */
   public void preCompute(Set<Integer> toPreCompute) {
     long startTime = System.currentTimeMillis();
+
+    // NB: It'd make sense to just make the first dimension of this
+    // array the same size as `toPreCompute`, then recalculate all
+    // `preMap` indices to map into this denser array. But this
+    // actually hurt training performance! (See experiments with
+    // "smallMap.")
     saved = new double[preMap.size()][config.hiddenSize];
+
     for (int x : toPreCompute) {
       int mapX = preMap.get(x);
       int tok = x / config.numTokens;
