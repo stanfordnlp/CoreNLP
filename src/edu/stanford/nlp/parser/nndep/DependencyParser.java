@@ -281,7 +281,8 @@ public class DependencyParser {
     System.err.println("#Train Examples: " + ret.n);
 
     preComputed = new ArrayList<>(config.numPreComputed);
-    preComputed.addAll(Counters.toSortedList(tokPosCount, false));
+    preComputed.addAll(Counters.toSortedList(tokPosCount, false)
+                               .subList(0, config.numPreComputed));
 
     return ret;
   }

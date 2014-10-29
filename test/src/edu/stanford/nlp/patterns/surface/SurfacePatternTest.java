@@ -12,6 +12,8 @@ import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.stanford.nlp.patterns.surface.SurfacePattern.Genre;
+
 public class SurfacePatternTest {
 
   @Before
@@ -52,7 +54,7 @@ public class SurfacePatternTest {
 
     PatternToken token = new PatternToken("V", false, true, 2, null, false, false, null);
 
-    SurfacePattern p = new SurfacePattern(createContext(prev), token, createContext(next), SurfacePatternFactory.Genre.PREVNEXT);
+    SurfacePattern p = new SurfacePattern(createContext(prev), token, createContext(next), Genre.PREVNEXT);
 
     Map<Class, String> prev2 = new HashMap<Class, String>(){{
       put(CoreAnnotations.LemmaAnnotation.class, "name");
@@ -65,7 +67,7 @@ public class SurfacePatternTest {
 
     PatternToken token2 = new PatternToken("V", false, true, 2, null, false, false, null);
 
-    SurfacePattern p2 = new SurfacePattern(createContext(prev2), token2, createContext(next2), SurfacePatternFactory.Genre.PREVNEXT);
+    SurfacePattern p2 = new SurfacePattern(createContext(prev2), token2, createContext(next2), Genre.PREVNEXT);
 
     assert p.compareTo(p2) == 0;
 

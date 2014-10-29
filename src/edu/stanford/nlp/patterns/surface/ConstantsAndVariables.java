@@ -27,7 +27,7 @@ import edu.stanford.nlp.util.TypesafeMap.Key;
 import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 import edu.stanford.nlp.util.logging.Redwood;
 
-public class ConstantsAndVariables<E> implements Serializable{
+public class ConstantsAndVariables implements Serializable{
 
   private static final long serialVersionUID = 1L;
 
@@ -160,6 +160,11 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="columnOutputFile")
   String columnOutputFile = null;
 
+  /**
+   * Use lemma instead of words for the context tokens
+   */
+  @Option(name = "useLemmaContextTokens")
+  public boolean useLemmaContextTokens = true;
 
   /**
    * Lowercase the context words/lemmas
@@ -167,6 +172,11 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name = "matchLowerCaseContext")
   public boolean matchLowerCaseContext = true;
 
+  /**
+   * Add NER restriction to the target phrase in the patterns
+   */
+  @Option(name = "useTargetNERRestriction")
+  public boolean useTargetNERRestriction = false;
 
   /**
    * Initials of all POS tags to use if
@@ -186,6 +196,19 @@ public class ConstantsAndVariables<E> implements Serializable{
 
 
   public Map<String, Set<String>> allowedNERsforLabels = null;
+
+  /**
+   * Adds the parent's tag from the parse tree to the target phrase in the patterns
+   */
+  @Option(name = "useTargetParserParentRestriction")
+  public boolean useTargetParserParentRestriction = false;
+
+  /**
+   * If the NER tag of the context tokens is not the background symbol,
+   * generalize the token with the NER tag
+   */
+  @Option(name = "useContextNERRestriction")
+  public boolean useContextNERRestriction = false;
 
   /**
    * Number of words to learn in each iteration
@@ -271,7 +294,7 @@ public class ConstantsAndVariables<E> implements Serializable{
    * the appropriate constructor. All label classes are by default generalized.
    */
   @SuppressWarnings("rawtypes")
-  private static Map<String, Class> generalizeClasses = new HashMap<String, Class>();
+  private Map<String, Class> generalizeClasses = new HashMap<String, Class>();
 
   /**
    * Minimum length of words that can be matched fuzzily
@@ -298,16 +321,20 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name = "stopWordsPatternFiles", gloss = "stop words")
   public String stopWordsPatternFiles = null;
 
-  private static Set<String> stopWords = null;
+  private Set<String> stopWords = null;
 
-
+  public List<String> fillerWords = Arrays.asList("a", "an", "the", "`", "``",
+      "'", "''");
 
   /**
    * Environment for {@link TokenSequencePattern}
    */
   public Map<String, Env> env = new HashMap<String, Env>();
 
-
+  /**
+   * by default doesn't ignore anything. What phrases to ignore.
+   */
+  public Pattern ignoreWordRegex = Pattern.compile("a^");
 
   /**
    *
@@ -349,6 +376,8 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name = "doNotApplyPatterns")
   public boolean doNotApplyPatterns = false;
 
+  @Option(name = "numWordsCompound")
+  public int numWordsCompound = 2;
 
   /**
    * If score for a pattern is square rooted
@@ -417,17 +446,17 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="invertedIndexDirectory")
   public String invertedIndexDirectory;
 
+  //TODO: add to the examples properties file
   @Option(name="clubNeighboringLabeledWords")
   public boolean clubNeighboringLabeledWords = false;
-  public PatternFactory.PatternType patternType = PatternFactory.PatternType.SURFACE;
 
-//  public PatternIndex getPatternIndex() {
-//    return patternIndex;
-//  }
-//
-//  public void setPatternIndex(PatternIndex patternIndex) {
-//    this.patternIndex = patternIndex;
-//  }
+  public ConcurrentHashIndex<SurfacePattern> getPatternIndex() {
+    return patternIndex;
+  }
+
+  public void setPatternIndex(ConcurrentHashIndex<SurfacePattern> patternIndex) {
+    this.patternIndex = patternIndex;
+  }
 
 
   public enum ScorePhraseMeasures {
@@ -572,11 +601,8 @@ public class ConstantsAndVariables<E> implements Serializable{
   public boolean loadInvertedIndex  = false;
 
 
-  @Option(name = "storePatsForEachToken", gloss="used for storing patterns in PSQL/MEMORY/LUCENE")
+  @Option(name = "storePatsForEachToken", gloss="used for storing patterns in PSQL")
   public PatternForEachTokenWay storePatsForEachToken = PatternForEachTokenWay.MEMORY;
-
-  @Option(name = "storePatsIndex", gloss="used for storing patterns index")
-  public PatternIndexWay storePatsIndex = PatternIndexWay.MEMORY;
 
   @Option(name="sampleSentencesForSufficientStats",gloss="% sentences to use for learning pattterns" )
   double sampleSentencesForSufficientStats = 1.0;
@@ -592,7 +618,7 @@ public class ConstantsAndVariables<E> implements Serializable{
   // @Option(name = "wekaOptions")
   // public String wekaOptions = "";
 
-  public static String backgroundSymbol = "O";
+  public String backgroundSymbol = "O";
 
   int wordShaper = WordShapeClassifier.WORDSHAPECHRIS2;
   private Map<String, String> wordShapeCache = new HashMap<String, String>();
@@ -602,13 +628,11 @@ public class ConstantsAndVariables<E> implements Serializable{
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";
 
-  //public ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
-  //public PatternIndex<E, E> patternIndex;
+  public ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
 
   Properties props;
 
   public enum PatternForEachTokenWay {MEMORY, LUCENE, DB};
-  public enum PatternIndexWay {MEMORY, OPENHFT, LUCENE};
 
   public ConstantsAndVariables(Properties props, Set<String> labels, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
                                Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
@@ -659,7 +683,7 @@ public class ConstantsAndVariables<E> implements Serializable{
 
     Execution.fillOptions(this, props);
     if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty())
-      PatternFactory.ignoreWordRegex = Pattern.compile(wordIgnoreRegex);
+      ignoreWordRegex = Pattern.compile(wordIgnoreRegex);
 
     for (String label : labels) {
       env.put(label, TokenSequencePattern.getNewEnv());
@@ -697,7 +721,7 @@ public class ConstantsAndVariables<E> implements Serializable{
         for (String w : IOUtils.linesFromFile(file)) {
 
           String[] t = w.split("\\s+");
-          if (t.length <= PatternFactory.numWordsCompound)
+          if (t.length <= this.numWordsCompound)
             otherSemanticClassesWords.add(w);
 
         }
@@ -721,7 +745,7 @@ public class ConstantsAndVariables<E> implements Serializable{
     stopStr += "/";
     for (String label : labels) {
       env.get(label).bind("$FILLER",
-          "/" + StringUtils.join(PatternFactory.fillerWords, "|") + "/");
+          "/" + StringUtils.join(fillerWords, "|") + "/");
       env.get(label).bind("$STOPWORD", stopStr);
       env.get(label).bind("$MOD", "[{tag:/JJ.*/}]");
       if (matchLowerCaseContext){
@@ -760,7 +784,7 @@ public class ConstantsAndVariables<E> implements Serializable{
       }
     }
 
-    if(PatternFactory.useTargetNERRestriction && targetAllowedNERs !=null){
+    if(useTargetNERRestriction && targetAllowedNERs !=null){
       allowedNERsforLabels = new HashMap<String, Set<String>>();
       for(String labelstr : targetAllowedNERs.split(";")){
         String[] t = labelstr.split(",");
@@ -771,8 +795,6 @@ public class ConstantsAndVariables<E> implements Serializable{
 
       }
     }
-
-    //patternIndex = PatternIndex.newInstance(storePatsIndex, allPatternsDir);
     alreadySetUp = true;
   }
 
@@ -829,11 +851,11 @@ public class ConstantsAndVariables<E> implements Serializable{
     this.generalizeClasses.putAll(gen);
   }
 
-  public static Map<String, Class> getGeneralizeClasses() {
-    return generalizeClasses;
+  public Map<String, Class> getGeneralizeClasses() {
+    return this.generalizeClasses;
   }
 
-  public static Set<String> getStopWords() {
+  public Set<String> getStopWords() {
     return stopWords;
   }
 
@@ -1122,25 +1144,25 @@ public class ConstantsAndVariables<E> implements Serializable{
   }
 
 
-//  public Counter<SurfacePattern> transformPatternsToSurface(Counter<E> pats) {
-//    return Counters.transform(pats, new Function<Integer, SurfacePattern>() {
-//      @Override
-//      public SurfacePattern apply(Integer integer) {
-//        return patternIndex.get(integer);
-//      }
-//    });
-//  }
+  public Counter<SurfacePattern> transformPatternsToSurface(Counter<Integer> pats) {
+    return Counters.transform(pats, new Function<Integer, SurfacePattern>() {
+      @Override
+      public SurfacePattern apply(Integer integer) {
+        return patternIndex.get(integer);
+      }
+    });
+  }
 
-//  public Counter<Integer> transformPatternsToIndex(Counter<SurfacePattern> pats) {
-//    return Counters.transform(pats, new Function<SurfacePattern, Integer>() {
-//      @Override
-//      public Integer apply(SurfacePattern pat) {
-//        return patternIndex.indexOf(pat);
-//      }
-//    });
-//  }
-//
-//  public Integer transformPatternToIndex(SurfacePattern pat) {
-//    return patternIndex.indexOf(pat);
-//  }
+  public Counter<Integer> transformPatternsToIndex(Counter<SurfacePattern> pats) {
+    return Counters.transform(pats, new Function<SurfacePattern, Integer>() {
+      @Override
+      public Integer apply(SurfacePattern pat) {
+        return patternIndex.indexOf(pat);
+      }
+    });
+  }
+
+  public Integer transformPatternToIndex(SurfacePattern pat) {
+    return patternIndex.indexOf(pat);
+  }
 }

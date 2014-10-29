@@ -3,8 +3,10 @@ package edu.stanford.nlp.patterns.surface;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.tokensregex.SequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
@@ -12,17 +14,17 @@ import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
 
-public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>> {
+public class ApplyPatterns    implements  Callable<Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>> {
   String label;
-  Map<TokenSequencePattern, E> patterns;
+  Map<TokenSequencePattern, Integer> patterns;
   List<String> sentids;
   boolean removeStopWordsFromSelectedPhrases;
   boolean removePhrasesWithStopWords;
-  ConstantsAndVariables<E> constVars;
+  ConstantsAndVariables constVars;
   Map<String, List<CoreLabel>> sents = null;
 
 
-  public ApplyPatterns(Map<String, List<CoreLabel>> sents, List<String> sentids, Map<TokenSequencePattern, E> patterns, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
+  public ApplyPatterns(Map<String, List<CoreLabel>> sents, List<String> sentids, Map<TokenSequencePattern, Integer> patterns, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
     this.sents = sents;
     this.patterns = patterns;
     this.sentids = sentids;
@@ -33,16 +35,16 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimen
 }
 
   @Override
-  public Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>> call()
+  public Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>> call()
       throws Exception {
     // CollectionValuedMap<String, Integer> tokensMatchedPattern = new
     // CollectionValuedMap<String, Integer>();
 
-    TwoDimensionalCounter<Pair<String, String>, E> allFreq = new TwoDimensionalCounter<Pair<String, String>, E>();
-    CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<E, Triple<String, Integer, Integer>>();
+    TwoDimensionalCounter<Pair<String, String>, Integer> allFreq = new TwoDimensionalCounter<Pair<String, String>, Integer>();
+    CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<Integer, Triple<String, Integer, Integer>>();
     for (String sentid : sentids) {
       List<CoreLabel> sent = sents.get(sentid);
-      for (Entry<TokenSequencePattern, E> pEn : patterns.entrySet()) {
+      for (Entry<TokenSequencePattern, Integer> pEn : patterns.entrySet()) {
 
         if (pEn.getKey() == null)
           throw new RuntimeException("why is the pattern " + pEn + " null?");
@@ -91,9 +93,9 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimen
             l.set(PatternsAnnotations.MatchedPattern.class, true);
 
             if(!l.containsKey(PatternsAnnotations.MatchedPatterns.class) || l.get(PatternsAnnotations.MatchedPatterns.class) == null)
-              l.set(PatternsAnnotations.MatchedPatterns.class, new HashSet<Pattern>());
+              l.set(PatternsAnnotations.MatchedPatterns.class, new HashSet<SurfacePattern>());
 
-            SurfacePattern pSur = (SurfacePattern) pEn.getValue();
+            SurfacePattern pSur = constVars.getPatternIndex().get(pEn.getValue());
             assert pSur != null : "Why is " + pEn.getValue() + " not present in the index?!";
             assert l.get(PatternsAnnotations.MatchedPatterns.class) != null : "How come MatchedPatterns class is null for the token. The classes in the key set are " + l.keySet();
             l.get(PatternsAnnotations.MatchedPatterns.class).add(pSur);
@@ -106,7 +108,7 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimen
               }
             }
             boolean containsStop = containsStopWord(l,
-                constVars.getCommonEngWords(), PatternFactory.ignoreWordRegex);
+                constVars.getCommonEngWords(), constVars.ignoreWordRegex);
             if (removePhrasesWithStopWords && containsStop) {
               doNotUse = true;
             } else {
@@ -144,12 +146,12 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimen
         }
       }
     }
-    return new Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>(allFreq, matchedTokensByPat);
+    return new Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>(allFreq, matchedTokensByPat);
 
 
   }
 
-  boolean  containsStopWord(CoreLabel l, Set<String> commonEngWords, java.util.regex.Pattern ignoreWordRegex) {
+  boolean  containsStopWord(CoreLabel l, Set<String> commonEngWords, Pattern ignoreWordRegex) {
     // if(useWordResultCache.containsKey(l.word()))
     // return useWordResultCache.get(l.word());
 

@@ -1,11 +1,14 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.StringUtils;
 
 /**
  * To represent a surface pattern in more detail than TokenSequencePattern (this
@@ -16,33 +19,11 @@ import edu.stanford.nlp.util.*;
  * Author: Sonal Gupta (sonalg@stanford.edu)
  */
 
-public class SurfacePattern extends Pattern implements Serializable, Comparable<SurfacePattern>{
+public class SurfacePattern implements Serializable, Comparable<SurfacePattern> {
 
-  @Override
-  public CollectionValuedMap<String, String> getRelevantWords() {
-    CollectionValuedMap<String, String> relwordsThisPat = new CollectionValuedMap<>();
-    Token[] next = getNextContext();
-    getRelevantWords(next, relwordsThisPat);
-    Token[] prev = getPrevContext();
-    getRelevantWords(prev, relwordsThisPat);
-    return relwordsThisPat;
-  }
-
-  @Override
-  public int equalContext(Pattern p) {
-    return equalContext((SurfacePattern)p);
-  }
-
-  private void getRelevantWords(Token[] t, CollectionValuedMap<String, String> relWords){
-    if (t != null)
-      for (Token s : t) {
-        Map<String, String> str = s.classORRestrictionsAsString();
-        if (str != null){
-          relWords.addAll(str);
-        }
-      }
-  }
-
+  public static enum Genre {
+    PREV, NEXT, PREVNEXT
+  };
 
   private static final long serialVersionUID = 1L;
 
@@ -56,21 +37,20 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
   // protected String originalNextStr = "";
   // protected String toString;
   protected int hashcode;
-  protected SurfacePatternFactory.Genre genre;
+  protected Genre genre;
 
-  public SurfacePatternFactory.Genre getGenre() {
+  public Genre getGenre() {
     return genre;
   }
 
-  public void setGenre(SurfacePatternFactory.Genre genre) {
+  public void setGenre(Genre genre) {
     this.genre = genre;
   }
 
   public static boolean insertModifierWildcard = false;
 
+  public SurfacePattern(Token[] prevContext, PatternToken token, Token[] nextContext, Genre genre) {
 
-  public SurfacePattern(Token[] prevContext, PatternToken token, Token[] nextContext, SurfacePatternFactory.Genre genre) {
-   // super(SurfacePattern.class);
     this.setPrevContext(prevContext);
     this.setNextContext(nextContext);
     //
@@ -133,7 +113,7 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
 //  }
 
   public static String getContextStr(String w) {
-    String str = "[/" + java.util.regex.Pattern.quote(w.replaceAll("/", "\\\\/")) + "/] ";
+    String str = "[/" + Pattern.quote(w.replaceAll("/", "\\\\/")) + "/] ";
     //String str = "[/\\Q" + w.replaceAll("/", "\\\\/") + "\\E/] ";
     return str;
   }
@@ -501,7 +481,5 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
   // String next = t[2];
   // return new SurfacePattern(prev, tok, next);
   // }
-
-
 
 }

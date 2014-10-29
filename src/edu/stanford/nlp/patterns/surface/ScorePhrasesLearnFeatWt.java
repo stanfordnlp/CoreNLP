@@ -34,7 +34,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Sonal Gupta (sonalg@stanford.edu)
  *
  */
-public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> {
+public class ScorePhrasesLearnFeatWt extends PhraseScorer {
   public ScorePhrasesLearnFeatWt(ConstantsAndVariables constvar) {
     super(constvar);
   }
@@ -50,7 +50,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
 
   public edu.stanford.nlp.classify.Classifier learnClassifier(String label, boolean forLearningPatterns,
-      TwoDimensionalCounter<String, E> wordsPatExtracted, Counter<E> allSelectedPatterns) throws IOException, ClassNotFoundException {
+      TwoDimensionalCounter<String, Integer> wordsPatExtracted, Counter<Integer> allSelectedPatterns) throws IOException, ClassNotFoundException {
     phraseScoresRaw.clear();
     learnedScores.clear();
     
@@ -64,20 +64,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       Data.rawFreq = new ClassicCounter<String>();
       computeRawFreq = true;
     }
-
-    ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
-    while(sentsIter.hasNext()) {
-      Pair<Map<String, List<CoreLabel>>, File> sentsf = sentsIter.next();
-      Redwood.log(Redwood.DBG,"Sampling sentences from " + sentsf.second());
-      if(computeRawFreq)
-        Data.computeRawFreqIfNull(sentsf.first(), PatternFactory.numWordsCompound);
-      dataset.addAll(choosedatums(label, forLearningPatterns, sentsf.first(), constVars.getAnswerClass().get(label), label,
-        constVars.getOtherSemanticClassesWords(), constVars.getIgnoreWordswithClassesDuringSelection().get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
-        allSelectedPatterns));
-    }
-
-    /*
-      if(constVars.batchProcessSents){
+    
+    if(constVars.batchProcessSents){
       
       for(File f: Data.sentsFiles){
         Redwood.log(Redwood.DBG,"Sampling sentences from " + f);
@@ -94,7 +82,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       dataset.addAll(choosedatums(label, forLearningPatterns, Data.sents, constVars.getAnswerClass().get(label), label,
         constVars.getOtherSemanticClassesWords(), constVars.getIgnoreWordswithClassesDuringSelection().get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
         allSelectedPatterns));
-    }*/
+    }
     edu.stanford.nlp.classify.Classifier classifier;
 //    if (scoreClassifierType.equals(ClassifierType.DT)) {
 //      ClassifierFactory wekaFactory = new WekaDatumClassifierFactory<String, ScorePhraseMeasures>("weka.classifiers.trees.J48", constVars.wekaOptions);
@@ -140,13 +128,13 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   }
 
   @Override
-  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, E> terms,
-      TwoDimensionalCounter<String, E> wordsPatExtracted, Counter<E> allSelectedPatterns,
+  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, Integer> terms,
+      TwoDimensionalCounter<String, Integer> wordsPatExtracted, Counter<Integer> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, boolean forLearningPatterns) throws IOException, ClassNotFoundException {
 
     Counter<String> scores = new ClassicCounter<String>();
     edu.stanford.nlp.classify.Classifier classifier = learnClassifier(label, forLearningPatterns, wordsPatExtracted, allSelectedPatterns);
-    for (Entry<String, ClassicCounter<E>> en : terms.entrySet()) {
+    for (Entry<String, ClassicCounter<Integer>> en : terms.entrySet()) {
       double score = this.scoreUsingClassifer(classifier, en.getKey(), label, forLearningPatterns, en.getValue(), allSelectedPatterns);
       scores.setCount(en.getKey(), score);
     }
@@ -173,8 +161,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   }
 
   public RVFDataset<String, ScorePhraseMeasures> choosedatums(String label, boolean forLearningPattern, Map<String, List<CoreLabel>> sents, Class answerClass, String answerLabel,
-      Set<String> negativeWords, Map<Class, Object> otherIgnoreClasses, double perSelectRand, double perSelectNeg, TwoDimensionalCounter<String, E> wordsPatExtracted,
-      Counter<E> allSelectedPatterns) {
+      Set<String> negativeWords, Map<Class, Object> otherIgnoreClasses, double perSelectRand, double perSelectNeg, TwoDimensionalCounter<String, Integer> wordsPatExtracted,
+      Counter<Integer> allSelectedPatterns) {
     // TODO: check whats happening with candidate terms for this iteration. do
     // not count them as negative!!! -- I think this comment is not valid anymore.
     Random r = new Random(10);
@@ -309,7 +297,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   }
 
   public double scoreUsingClassifer(edu.stanford.nlp.classify.Classifier classifier, String word, String label, boolean forLearningPatterns,
-      Counter<E> patternsThatExtractedPat, Counter<E> allSelectedPatterns) {
+      Counter<Integer> patternsThatExtractedPat, Counter<Integer> allSelectedPatterns) {
 
     if (learnedScores.containsKey(word))
       return learnedScores.getCount(word);
@@ -364,7 +352,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return score;
   }
 
-  Counter<ScorePhraseMeasures> getFeatures(String label, String word, Counter<E> patThatExtractedWord, Counter<E> allSelectedPatterns) {
+  Counter<ScorePhraseMeasures> getFeatures(String label, String word, Counter<Integer> patThatExtractedWord, Counter<Integer> allSelectedPatterns) {
 
     if (phraseScoresRaw.containsFirstKey(word))
       return phraseScoresRaw.getCounter(word);
