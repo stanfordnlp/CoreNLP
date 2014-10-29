@@ -654,7 +654,7 @@ public class Classifier {
    */
   public void preCompute(Set<Integer> toPreCompute) {
     long startTime = System.currentTimeMillis();
-    saved = new double[toPreCompute.size()][config.hiddenSize];
+    saved = new double[preMap.size()][config.hiddenSize];
     for (int x : toPreCompute) {
       int mapX = preMap.get(x);
       int tok = x / config.numTokens;
