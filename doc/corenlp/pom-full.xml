@@ -9,8 +9,8 @@
   <url>http://nlp.stanford.edu/software/corenlp.shtml</url>
   <licenses>
     <license>
-      <name>GNU General Public License Version 2</name>
-      <url>http://www.gnu.org/licenses/gpl-2.0.txt</url>
+      <name>GNU General Public License Version 3</name>
+      <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
     </license>
   </licenses>
   <scm>
