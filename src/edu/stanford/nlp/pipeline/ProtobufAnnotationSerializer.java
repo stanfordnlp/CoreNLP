@@ -904,7 +904,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       synchronized (globalLock) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
         assert ie.hasDep();
-        GrammaticalRelation rel = GrammaticalRelation.valueOf(GrammaticalRelation.Language.Any, ie.getDep());
+        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep());
         graph.addEdge(source, target, rel, 1.0, ie.hasIsExtra() && ie.getIsExtra());
       }
     }
