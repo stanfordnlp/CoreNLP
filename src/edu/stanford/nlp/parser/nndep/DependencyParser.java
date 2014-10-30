@@ -102,12 +102,32 @@ public class DependencyParser {
 
   private final Config config;
 
+  /**
+   * Language used to generate
+   * {@link edu.stanford.nlp.trees.GrammaticalRelation} instances.
+   */
+  private final GrammaticalRelation.Language language;
+
   DependencyParser() {
     this(new Properties());
   }
 
   public DependencyParser(Properties properties) {
     config = new Config(properties);
+
+    // Convert Languages.Language instance to
+    // GrammaticalLanguage.Language
+    switch (config.language) {
+      case English:
+        language = GrammaticalRelation.Language.English;
+        break;
+      case Chinese:
+        language = GrammaticalRelation.Language.Chinese;
+        break;
+      default:
+        language = GrammaticalRelation.Language.Any;
+        break;
+    }
   }
 
   /**
@@ -861,7 +881,7 @@ public class DependencyParser {
 
       GrammaticalRelation relation = head == 0
                                      ? GrammaticalRelation.ROOT
-                                     : new GrammaticalRelation(GrammaticalRelation.Language.Any, label, null,
+                                     : new GrammaticalRelation(language, label, null,
                                          GrammaticalRelation.DEPENDENT);
 
       dependencies.add(new TypedDependency(relation, headWord, thisWord));
