@@ -239,6 +239,9 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
           break;
         case Spanish:
           break;
+        case Unknown:
+          depLanguage = Language.Any;
+          break;
       }
       value = valueOf(depLanguage, s);
       valueOfCache.put(s, new SoftReference<>(value));
@@ -528,11 +531,11 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   /**
    * Get the language of the grammatical relation.
    */
-  public Optional<Languages.Language> getLanguage() {
+  public Languages.Language getLanguage() {
     switch (this.language) {
-      case Any: return Optional.empty();
-      case English: return Optional.of(Languages.Language.English);
-      case Chinese: return Optional.of(Languages.Language.Chinese);
+      case Any: return Languages.Language.Unknown;
+      case English: return Languages.Language.English;
+      case Chinese: return Languages.Language.Chinese;
       default:
         throw new IllegalStateException("Unknown language: " + this.language);
     }

@@ -19,7 +19,7 @@ public class Languages {
 
   private Languages() {}
 
-  public static enum Language {Arabic,Chinese,English,German,French,Hebrew,Spanish}
+  public static enum Language {Arabic,Chinese,English,German,French,Hebrew,Spanish,Unknown}
   
   private static String langList;
   static {

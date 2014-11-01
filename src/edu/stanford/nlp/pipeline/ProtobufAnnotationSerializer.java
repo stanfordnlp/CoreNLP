@@ -479,21 +479,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
     }
     // Edges
-    int numEdges = 0;
-    int numEdgesWithLanguage = 0;
-    Languages.Language language = Languages.Language.English;
     for (SemanticGraphEdge edge : graph.edgeIterable()) {
-      // Gather language info
-      Optional<Languages.Language> edgeLanguage = edge.getRelation().getLanguage();
-      if (edgeLanguage.isPresent()) {
-        if (edgeLanguage.get().equals(language)) {
-          numEdgesWithLanguage += 1;
-        } else {
-          language = edgeLanguage.get();
-          numEdgesWithLanguage += 1;
-        }
-      }
-      numEdges += 1;
       // Set edge
       builder.addEdge(CoreNLPProtos.DependencyGraph.Edge.newBuilder()
           .setSource(edge.getSource().index())
@@ -501,13 +487,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           .setDep(edge.getRelation().toString())
           .setIsExtra(edge.isExtra())
           .setSourceCopy(edge.getSource().copyCount())
-          .setTargetCopy(edge.getTarget().copyCount()));
+          .setTargetCopy(edge.getTarget().copyCount())
+          .setLanguage(toProto(edge.getRelation().getLanguage())));
     }
-    // Set language
-    if (numEdgesWithLanguage < numEdges / 2) {
-      System.err.println("WARNING: language is ambiguous for semantic graph");
-    }
-    builder.setLanguage(toProto(language));
     // Return
     return builder.build();
   }
@@ -624,6 +606,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return CoreNLPProtos.Language.Hebrew;
       case Spanish:
         return CoreNLPProtos.Language.Spanish;
+      case Unknown:
+        return CoreNLPProtos.Language.Unknown;
       default:
         throw new IllegalStateException("Unknown language: " + lang);
     }
@@ -905,6 +889,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return Languages.Language.Hebrew;
       case Spanish:
         return Languages.Language.Spanish;
+      case Unknown:
+        return Languages.Language.Unknown;
       default:
         throw new IllegalStateException("Unknown language: " + lang);
     }
@@ -923,7 +909,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   private SemanticGraph fromProto(CoreNLPProtos.DependencyGraph proto, List<CoreLabel> sentence, String docid) {
     SemanticGraph graph = new SemanticGraph();
-    Languages.Language language = fromProto(proto.getLanguage());
 
     // first construct the actual nodes; keep them indexed by their index
     // This block is optimized as one of the places which take noticeable time
@@ -972,7 +957,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       synchronized (globalLock) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
         assert ie.hasDep();
-        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep(), language);
+        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep(), fromProto(ie.getLanguage()));
         graph.addEdge(source, target, rel, 1.0, ie.hasIsExtra() && ie.getIsExtra());
       }
     }
