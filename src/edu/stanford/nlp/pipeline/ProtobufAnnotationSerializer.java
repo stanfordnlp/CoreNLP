@@ -8,6 +8,7 @@ import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations.*;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
+import edu.stanford.nlp.international.Languages;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -478,7 +479,22 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
     }
     // Edges
+    int numEdges = 0;
+    int numEdgesWithLanguage = 0;
+    Languages.Language language = Languages.Language.English;
     for (SemanticGraphEdge edge : graph.edgeIterable()) {
+      // Gather language info
+      Optional<Languages.Language> edgeLanguage = edge.getRelation().getLanguage();
+      if (edgeLanguage.isPresent()) {
+        if (edgeLanguage.get().equals(language)) {
+          numEdgesWithLanguage += 1;
+        } else {
+          language = edgeLanguage.get();
+          numEdgesWithLanguage += 1;
+        }
+      }
+      numEdges += 1;
+      // Set edge
       builder.addEdge(CoreNLPProtos.DependencyGraph.Edge.newBuilder()
           .setSource(edge.getSource().index())
           .setTarget(edge.getTarget().index())
@@ -487,6 +503,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           .setSourceCopy(edge.getSource().copyCount())
           .setTargetCopy(edge.getTarget().copyCount()));
     }
+    // Set language
+    if (numEdgesWithLanguage < numEdges / 2) {
+      System.err.println("WARNING: language is ambiguous for semantic graph");
+    }
+    builder.setLanguage(toProto(language));
     // Return
     return builder.build();
   }
@@ -580,6 +601,32 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (rel.getArgs() != null) { for (ExtractionObject arg : rel.getArgs()) { builder.addArg(toProto((EntityMention) arg)); } }
     // Return
     return builder.build();
+  }
+
+  /**
+   * Serialize a CoreNLP Language to a Protobuf Language.
+   * @param lang The language to serialize.
+   * @return The language in a Protobuf enum.
+   */
+  public static CoreNLPProtos.Language toProto(Languages.Language lang) {
+    switch (lang) {
+      case Arabic:
+        return CoreNLPProtos.Language.Arabic;
+      case Chinese:
+        return CoreNLPProtos.Language.Chinese;
+      case English:
+        return CoreNLPProtos.Language.English;
+      case German:
+        return CoreNLPProtos.Language.German;
+      case French:
+        return CoreNLPProtos.Language.French;
+      case Hebrew:
+        return CoreNLPProtos.Language.Hebrew;
+      case Spanish:
+        return CoreNLPProtos.Language.Spanish;
+      default:
+        throw new IllegalStateException("Unknown language: " + lang);
+    }
   }
 
   /**
@@ -842,9 +889,29 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     return node;
   }
 
+  public static Languages.Language fromProto(CoreNLPProtos.Language lang) {
+    switch (lang) {
+      case Arabic:
+        return Languages.Language.Arabic;
+      case Chinese:
+        return Languages.Language.Chinese;
+      case English:
+        return Languages.Language.English;
+      case German:
+        return Languages.Language.German;
+      case French:
+        return Languages.Language.French;
+      case Hebrew:
+        return Languages.Language.Hebrew;
+      case Spanish:
+        return Languages.Language.Spanish;
+      default:
+        throw new IllegalStateException("Unknown language: " + lang);
+    }
+  }
+
   /**
    * Voodoo magic to convert a serialized dependency graph into a {@link SemanticGraph}.
-   * Taken originally from {@link CustomAnnotationSerializer#convertIntermediateGraph(CustomAnnotationSerializer.IntermediateSemanticGraph, java.util.List)}.
    * This method is intended to be called only from the {@link ProtobufAnnotationSerializer#fromProto(CoreNLPProtos.Document)}
    * method.
    *
@@ -856,6 +923,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   private SemanticGraph fromProto(CoreNLPProtos.DependencyGraph proto, List<CoreLabel> sentence, String docid) {
     SemanticGraph graph = new SemanticGraph();
+    Languages.Language language = fromProto(proto.getLanguage());
 
     // first construct the actual nodes; keep them indexed by their index
     // This block is optimized as one of the places which take noticeable time
@@ -904,7 +972,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       synchronized (globalLock) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
         assert ie.hasDep();
-        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep());
+        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep(), language);
         graph.addEdge(source, target, rel, 1.0, ie.hasIsExtra() && ie.getIsExtra());
       }
     }

@@ -4,30 +4,28 @@ Written by Bill MacCartney <wcmac@cs.stanford.edu> 23 January 2006
 Updated by Daniel Ramage 16 October 2006
 
 This directory is intended to contain only *current and necessary*
-.jar files used with JavaNLP-core.  Each jar file in lib should be without
+.jar files used with JavaNLP.  Each jar file in lib should be without
 its version number but include a corresponding source .zip/.jar file
 with a full version number in the libsrc folder.  For example, if
 there is a file  lib/ra.jar there should be a corresponding and
 up-to-date libsrc/ra-0.1.8-src.zip.
 
 Outdated or redundant .jar files should NOT be kept here, but can
-be stored instead in /u/nlp/java/liball.  Files in that directory
+be stored instead in /u/nlp/java/liball.  Files in that directory 
 can have version numbers in the name.  Example: colt1.0.3.jar.
 
 If you're adding a new .jar to the repository, please:
  - add the jar itself (without version number)
  - add its source zip (with version number)
- - check to make sure that the jar file doesn't have other libraries
-   embedded within it (use jar -tf). if the .jar file has other libraries
-   embedded which overlap with other javanlp libraries, please remove that
+ - if the .jar file has other libraries embedded which overlap with
+   other javanlp libraries, please remove that
  - update the Eclipse .classpath file to include the jar and a path
-   to its source,
- - also update this file with information about the jar
- - If it will be needed by releases of CoreNLP, also add it to the *2* pom files.
- - If it will be needed by releases of CoreNLP, also document the licensing in LIBRARY-LICENSES.
+   to its source, AND
+ - also update this file with information about the jar.
+
 
 Any .jar files which appear in this directory should be listed in
-this file, with the following information:
+this file, with the following information: 
 
 ORIGINAL JAR NAME: original name of the .jar file when downloaded
 
@@ -44,7 +42,6 @@ URL: where to check for library information, documentation, and updates.
 
 USED BY: what JavaNLP packages use this library. (This need not be exhaustive,
 but should list a couple of key packages that use/need this library.)
-This should make clear whether it is neede by CoreNLP distributions.
 
 LAST UPDATE: when we last updated our copy from the source.
 
@@ -72,7 +69,6 @@ URL: http://ant-contrib.sourceforge.net/
 
 USED BY:
 the build.xml task that builds .jsps
-Not needed by CoreNLP distributions.
 
 LAST UPDATE: 2010/06/28
 
@@ -96,7 +92,6 @@ URL: http://tomcat.apache.org/download-70.cgi
 
 USED BY:
 used to build .jsps
-Not needed by CoreNLP distributions.
 
 LAST UPDATE: 2011-11-21
 
@@ -105,15 +100,12 @@ LAST UPDATE BY: John Bauer
 -----------------------------------------------------------------------
 commons-lang3-3.1.jar
 ORIGINAL JAR NAME: commons-lang3-3.1.jar
-VERSION:
+VERSION: 
 RELEASE DATE: 11-14-2011
 SOURCE AVAILABLE: yes
 DESCRIPTION: has XML escaping & unescaping methods, amongst other stuff; changes from 2.5 - no escapeHtml function.
 URL: http://commons.apache.org/lang/
-
-USED BY: edu.stanford.nlp.kbp and web servlets.
-Not needed by CoreNLP distributions.  In core, used only by web apps (jsp pages and NERServlet).
-
+USED BY: edu.stanford.nlp.kbp and web servlets
 LAST UPDATE: 2013-06-05
 LAST UPDATE BY: Sonal Gupta
 
@@ -128,10 +120,7 @@ DESCRIPTION: "The Logging package is an ultri-thin bridge between different
 logging implementations.  A library that uses the commons-logging API can be
 used with any logging implementation at runtime.
 URL: http://jakarta.apache.org/commons/logging
-
 USED BY: el-api.jar, jwnl, hadoop, etc. (Only by various external libraries.)
-Not needed by CoreNLP distributions.
-
 LAST UPDATE: 2006/02/06
 LAST UPDATE BY: Jeff Michels
 
@@ -151,8 +140,7 @@ DESCRIPTION: JUnit is a simple framework to write repeatable unit tests.
 
 URL: http://www.junit.org/
 
-USED BY: Our junit tests.
-Not needed by CoreNLP distributions.
+USED BY:
 
 LAST UPDATE: 2008/08/24
 
@@ -177,8 +165,6 @@ by reflection; see TregexGUI for an example).
 URL: http://developer.apple.com/samplecode/AppleJavaExtensions/index.html
 
 USED BY: TregexGUI.java
-Not needed by CoreNLP distributions
-(Only used for fake compilation -- at runtime, either Mac supplies this or it doesn't.)
 
 LAST UPDATE: 9/18/2007
 
@@ -199,8 +185,7 @@ DESCRIPTION: xml parsing
 
 URL: http://www.xom.nu/
 
-USED BY: StanfordCoreNLP.java
-Needed by CoreNLP distributions
+USED BY:
 
 LAST UPDATE: 2013-11-12
 
@@ -221,8 +206,7 @@ DESCRIPTION: compiles .flex files into .java
 
 URL: http://jflex.de/
 
-USED BY: Compiling PTBTokenizer, etc.
-Not needed by CoreNLP distributions
+USED BY: jflex the tokenizer
 
 LAST UPDATE: 2014-03-24
 
@@ -230,17 +214,14 @@ LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
 log4j-1.2.16.jar
-ORIGINAL JAR NAME: log4j-1.2.16.jar
+ORIGINAL JAR NAME: log4j-1.2.16.jar 
 VERSION: 1.2.16
 RELEASE DATE: 2010-04-06
 SOURCE AVAILABLE: yes
 DESCRIPTION: Java logging
 URL: http://logging.apache.org/log4j/1.2/index.html
-
 USED BY: edu.stanford.nlp.parser.ensemble (library required by the Malt module)
   Also used by RTE and the Parser webapp.
-Not needed by CoreNLP distributions
-
 LAST UPDATE: 2011/11/20
 LAST UPDATE BY: John Bauer
 
@@ -252,13 +233,9 @@ RELEASE DATE: 2012-02-22
 SOURCE AVAILABLE: yes
 DESCRIPTION: Extended date/time API that handles partial dates/times
 URL: http://joda-time.sourceforge.net/index.html
-
 USED BY: edu.stanford.nlp.time
-Needed by CoreNLP distributions.
-
 LAST UPDATE: 2012-11-08
 LAST UPDATE BY: John Bauer
-
 -----------------------------------------------------------------------
 jollyday-0.4.7.jar
 ORIGINAL JAR NAME: jollyday-0.4.7.jar
@@ -267,10 +244,7 @@ RELEASE DATE: 2012-11-05
 SOURCE AVAILABLE: yes
 DESCRIPTION: API for holidays (using jodatime)
 URL: http://jollyday.sourceforge.net
-
 USED BY: edu.stanford.nlp.time
-Needed by CoreNLP distributions.
-
 LAST UPDATE: 2012-11-05
 LAST UPDATE BY: John Bauer
 
@@ -283,10 +257,7 @@ SOURCE AVAILABLE: yes
 DESCRIPTION: Another matrix library for Java, perhaps fastest for medium
     size vectors and matrices in 2012.  Otherwise, it's ojAlgo.
 URL: http://code.google.com/p/efficient-java-matrix-library/
-
 USED BY: Used in deep learning, especially RNN parser and sentiment
-Needed by CoreNLP distributions.
-
 LAST UPDATE: 2013-10-14
 LAST UPDATE BY: Christopher Manning
 
@@ -299,9 +270,7 @@ SOURCE AVAILABLE: no
 DESCRIPTION: JavaCC is a parser/scanner generator for java
              compiles .jj and .jjt files to .java
 URL: https://java.net/projects/javacc
-USED BY: Needed for compiling tregex, tsurgeon, semgrex
-Not needed by CoreNLP distributions
-
+USED BY: tregex, tsurgeon, semgrex
 LAST UPDATE: 2014-07-08
 LAST UPDATE BY: John Bauer
 
@@ -313,10 +282,7 @@ RELEASE DATE: ?
 SOURCE AVAILABLE: Yes. In: libsrc/tomcat/apache-tomcat-7.0.12-src.zip
 DESCRIPTION: Used by Tomcat and servlets.  Originally part of Java EE 6.
 URL: ?
-
 USED BY: Our servlets
-Not needed by CoreNLP distributions
-
 LAST UPDATE: 2013
 LAST UPDATE BY: Spence Green
 
@@ -331,19 +297,17 @@ URL: https://code.google.com/p/protobuf/
 USED BY: CoreMapProtos (and associated serializers)
 LAST UPDATE: 2013-09-24
 LAST UPDATE BY: Gabor Angeli
-
 ----------------------------------------------------------------
 javax.json.jar
 ORIGINAL JAR NAME:javax.json-1.0.4.jar
 VERSION:1.0.4
 RELEASE DATE:? (sometime in 2013, most probably March)
-SOURCE AVAILABLE:Yes
-DESCRIPTION:Json processing tool (RI, which has the API also) available with Java EE 7.
+SOURCE AVAILABLE:Yes 
+DESCRIPTION:Json processing tool (RI, which has the API also) available with Java EE 7. 
 URL:https://jsonp.java.net/ It has two jars, API and RI. This is the RI one.
 USED BY:patterns.surface
 LAST UPDATE:2014-04-07
 LAST UPDATE BY:Sonal Gupta
-
 -----------------------------------------------------------------------
 lucene-analyzers-common-4.2.1.jar
 lucene-core-4.2.1.jar
@@ -365,7 +329,6 @@ USED BY: patterns.surface
 
 LAST UPDATE: 2013-04-05
 LAST UPDATE BY: Keith Siilats
-
 -----------------------------------------------------------------
 foo.jar
 

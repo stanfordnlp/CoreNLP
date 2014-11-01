@@ -3,6 +3,22 @@ package edu.stanford.nlp.pipeline;
 option java_package = "edu.stanford.nlp.pipeline";
 option java_outer_classname = "CoreNLPProtos";
 
+//
+// An enumeration for the valid languages allowed in CoreNLP
+//
+enum Language {
+  Arabic   = 0;
+  Chinese  = 1;
+  English  = 2;
+  German   = 3;
+  French   = 4;
+  Hebrew   = 5;
+  Spanish  = 6;
+}
+
+//
+// A document; that is, the equivalent of an Annotation.
+//
 message Document {
   required string     text        = 1;
   repeated Sentence   sentence    = 2;
@@ -119,9 +135,10 @@ message DependencyGraph {
     optional uint32 targetCopy = 6;
   }
   
-  repeated Node   node = 1;
-  repeated Edge   edge = 2;
-  repeated uint32 root = 3 [packed=true];
+  repeated Node     node     = 1;
+  repeated Edge     edge     = 2;
+  repeated uint32   root     = 3 [packed=true];
+  optional Language language = 4;
 }
 
 //
