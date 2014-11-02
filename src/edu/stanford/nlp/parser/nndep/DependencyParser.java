@@ -124,6 +124,9 @@ public class DependencyParser {
       case Chinese:
         language = GrammaticalRelation.Language.Chinese;
         break;
+      case Unknown:
+        language = GrammaticalRelation.Language.Any;
+        break;
       default:
         language = GrammaticalRelation.Language.English;  // note[gabor]: This is to conform to the default in the Parser annotator
         break;

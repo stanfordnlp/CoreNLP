@@ -497,7 +497,8 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
     final GrammaticalRelation gr = (GrammaticalRelation) o;
     // == okay for language as enum!
-    return this.language == gr.language &&
+    // TODO(gabor) perhaps Language.Any shouldn't be equal to any language? This is a bit of a hack around some dependencies caring about language and others not.
+    return (this.language == Language.Any || gr.language == Language.Any || this.language == gr.language) &&
              this.shortName.equals(gr.shortName) &&
              (this.specific == gr.specific ||
               (this.specific != null && this.specific.equals(gr.specific)));

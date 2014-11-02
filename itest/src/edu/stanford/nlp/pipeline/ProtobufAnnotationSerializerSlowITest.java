@@ -202,130 +202,130 @@ public class ProtobufAnnotationSerializerSlowITest {
     return annotators.toArray(new String[annotators.size()]);
   }
 
-//  @Test
-//  public void testGetPossibleAnnotators() {
-//    assertNotNull(possibleAnnotators());
-//    assertFalse(possibleAnnotators().length == 0);
-//  }
-//
-//  @Test
-//  public void testSave() throws IOException {
-//    ByteArrayOutputStream os = new ByteArrayOutputStream();
-//    new ProtobufAnnotationSerializer().write(mkAnnotation(), os).close();
-//    String json = new String(os.toByteArray(), "UTF-8").trim();
-//    assertNotNull(json);
-//  }
-//
-//  @Test
-//  public void testSaveLarge() throws IOException {
-//    ByteArrayOutputStream os = new ByteArrayOutputStream();
-//    new ProtobufAnnotationSerializer().write(mkLargeAnnotation(), os).close();
-//    String json = new String(os.toByteArray(), "UTF-8");
-//    assertNotNull(json);
-//  }
-//
-//  @Test
-//  public void testSaveSize() throws IOException {
-//    // Annotate
-//    ByteArrayOutputStream os = new ByteArrayOutputStream();
-//    ByteArrayOutputStream compressedImpl = new ByteArrayOutputStream();
-//    GZIPOutputStream compressed = new GZIPOutputStream(compressedImpl);
-//    new ProtobufAnnotationSerializer().write(mkLargeAnnotation(), os).close();
-//    new ProtobufAnnotationSerializer().write(mkLargeAnnotation(), compressed).close();
-//    byte[] uncompressedProto = os.toByteArray();
-//    byte[] compressedProto = compressedImpl.toByteArray();
-//    assertNotNull(uncompressedProto);
-//    assertNotNull(compressedProto);
-//
-//    // Check size
-//    assertTrue("" + compressedProto.length, compressedProto.length < 290000);
-//    assertTrue("" + uncompressedProto.length, uncompressedProto.length < 1000000);
-//  }
-//
-//  @Test
-//  public void testCanWriteRead() {
-//    try {
-//      AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
-//      // Write
-//      StanfordCoreNLP pipe = new StanfordCoreNLP(new Properties());
-//      Annotation doc = pipe.process(prideAndPrejudiceFirstBit);
-//      ByteArrayOutputStream ks = new ByteArrayOutputStream();
-//      serializer.write(doc, ks).close();
-//
-//      // Read
-//      InputStream kis = new ByteArrayInputStream(ks.toByteArray());
-//      Pair<Annotation, InputStream> pair = serializer.read(kis);
-//      pair.second.close();
-//      Annotation readDoc = pair.first;
-//      kis.close();
-//
-//      sameAsRead(doc, readDoc);
-//    } catch (Exception e) { throw new RuntimeException(e); }
-//  }
-//
-//  @Test
-//  public void testCanWriteReadCleanXML() {
-//    try {
-//      AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
-//      // Write
-//      Properties props = new Properties();
-//      props.setProperty("annotators", "tokenize,cleanxml");
-//      StanfordCoreNLP pipe = new StanfordCoreNLP(props);
-//      Annotation doc = pipe.process(prideAndPrejudiceFirstBit);
-//      ByteArrayOutputStream ks = new ByteArrayOutputStream();
-//      serializer.write(doc, ks).close();
-//
-//      // Read
-//      InputStream kis = new ByteArrayInputStream(ks.toByteArray());
-//      Pair<Annotation, InputStream> pair = serializer.read(kis);
-//      pair.second.close();
-//      Annotation readDoc = pair.first;
-//      kis.close();
-//
-//      sameAsRead(doc, readDoc);
-//    } catch (Exception e) {
-//      throw new RuntimeException(e);
-//    }
-//  }
-//
-//  @Test
-//  public void testCanWriteReadWriteReadLargeFile() {
-//    try {
-//      AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
-//      // Write
-//      StanfordCoreNLP pipe = new StanfordCoreNLP(new Properties());
-//      Annotation doc = pipe.process(prideAndPrejudiceChapters1to5);
-//
-//      ByteArrayOutputStream ks = new ByteArrayOutputStream();
-//      serializer.write(doc, ks).close();
-//
-//      // Read
-//      InputStream kis = new ByteArrayInputStream(ks.toByteArray());
-//      Pair<Annotation, InputStream> pair1 = serializer.read(kis);
-//      pair1.second.close();
-//      Annotation readDoc = pair1.first;
-//      kis.close();
-//
-//      sameAsRead(doc, readDoc);
-//
-//      // Write 2
-//      ByteArrayOutputStream ks2 = new ByteArrayOutputStream();
-//      serializer.write(readDoc, ks2).close();
-//
-//      // Read 2
-//      InputStream kis2 = new ByteArrayInputStream(ks2.toByteArray());
-//      Pair<Annotation, InputStream> pair = serializer.read(kis2);
-//      pair.second.close();
-//      Annotation readDoc2 = pair.first;
-//      kis2.close();
-//
-//      sameAsRead(readDoc, readDoc2);
-//      sameAsRead(doc, readDoc2);
-//    } catch (Exception e) {
-//      throw new RuntimeException(e);
-//    }
-//  }
-//
+  @Test
+  public void testGetPossibleAnnotators() {
+    assertNotNull(possibleAnnotators());
+    assertFalse(possibleAnnotators().length == 0);
+  }
+
+  @Test
+  public void testSave() throws IOException {
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    new ProtobufAnnotationSerializer().write(mkAnnotation(), os).close();
+    String json = new String(os.toByteArray(), "UTF-8").trim();
+    assertNotNull(json);
+  }
+
+  @Test
+  public void testSaveLarge() throws IOException {
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    new ProtobufAnnotationSerializer().write(mkLargeAnnotation(), os).close();
+    String json = new String(os.toByteArray(), "UTF-8");
+    assertNotNull(json);
+  }
+
+  @Test
+  public void testSaveSize() throws IOException {
+    // Annotate
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    ByteArrayOutputStream compressedImpl = new ByteArrayOutputStream();
+    GZIPOutputStream compressed = new GZIPOutputStream(compressedImpl);
+    new ProtobufAnnotationSerializer().write(mkLargeAnnotation(), os).close();
+    new ProtobufAnnotationSerializer().write(mkLargeAnnotation(), compressed).close();
+    byte[] uncompressedProto = os.toByteArray();
+    byte[] compressedProto = compressedImpl.toByteArray();
+    assertNotNull(uncompressedProto);
+    assertNotNull(compressedProto);
+
+    // Check size
+    assertTrue("" + compressedProto.length, compressedProto.length < 290000);
+    assertTrue("" + uncompressedProto.length, uncompressedProto.length < 1000000);
+  }
+
+  @Test
+  public void testCanWriteRead() {
+    try {
+      AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+      // Write
+      StanfordCoreNLP pipe = new StanfordCoreNLP(new Properties());
+      Annotation doc = pipe.process(prideAndPrejudiceFirstBit);
+      ByteArrayOutputStream ks = new ByteArrayOutputStream();
+      serializer.write(doc, ks).close();
+
+      // Read
+      InputStream kis = new ByteArrayInputStream(ks.toByteArray());
+      Pair<Annotation, InputStream> pair = serializer.read(kis);
+      pair.second.close();
+      Annotation readDoc = pair.first;
+      kis.close();
+
+      sameAsRead(doc, readDoc);
+    } catch (Exception e) { throw new RuntimeException(e); }
+  }
+
+  @Test
+  public void testCanWriteReadCleanXML() {
+    try {
+      AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+      // Write
+      Properties props = new Properties();
+      props.setProperty("annotators", "tokenize,cleanxml");
+      StanfordCoreNLP pipe = new StanfordCoreNLP(props);
+      Annotation doc = pipe.process(prideAndPrejudiceFirstBit);
+      ByteArrayOutputStream ks = new ByteArrayOutputStream();
+      serializer.write(doc, ks).close();
+
+      // Read
+      InputStream kis = new ByteArrayInputStream(ks.toByteArray());
+      Pair<Annotation, InputStream> pair = serializer.read(kis);
+      pair.second.close();
+      Annotation readDoc = pair.first;
+      kis.close();
+
+      sameAsRead(doc, readDoc);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Test
+  public void testCanWriteReadWriteReadLargeFile() {
+    try {
+      AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+      // Write
+      StanfordCoreNLP pipe = new StanfordCoreNLP(new Properties());
+      Annotation doc = pipe.process(prideAndPrejudiceChapters1to5);
+
+      ByteArrayOutputStream ks = new ByteArrayOutputStream();
+      serializer.write(doc, ks).close();
+
+      // Read
+      InputStream kis = new ByteArrayInputStream(ks.toByteArray());
+      Pair<Annotation, InputStream> pair1 = serializer.read(kis);
+      pair1.second.close();
+      Annotation readDoc = pair1.first;
+      kis.close();
+
+      sameAsRead(doc, readDoc);
+
+      // Write 2
+      ByteArrayOutputStream ks2 = new ByteArrayOutputStream();
+      serializer.write(readDoc, ks2).close();
+
+      // Read 2
+      InputStream kis2 = new ByteArrayInputStream(ks2.toByteArray());
+      Pair<Annotation, InputStream> pair = serializer.read(kis2);
+      pair.second.close();
+      Annotation readDoc2 = pair.first;
+      kis2.close();
+
+      sameAsRead(readDoc, readDoc2);
+      sameAsRead(doc, readDoc2);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
 
   private void testAnnotators(String annotators) {
     try {
@@ -353,62 +353,62 @@ public class ProtobufAnnotationSerializerSlowITest {
     testAnnotators("tokenize,ssplit,parse");
     testAnnotators("tokenize,ssplit,pos,depparse");
   }
-//
-//  @Test
-//  public void testRelation() {
-//    testAnnotators("tokenize,ssplit,pos,lemma,ner,parse,relation");
-//  }
-//
-//  @Test
-//  public void testSerializeSSplitTokensRegression() {
-//    testAnnotators("tokenize,ssplit");
-//  }
-//
-//  /**
-//   * Is the protobuf annotator "CoreNLP complete?"
-//   * That is, does it effectively save every combination of annotators possible?
-//   */
-//  @Test
-//  public void testAllAnnotatorCombinations() {
-//    String[] possibleAnnotators = possibleAnnotators();
-//    Properties props = new Properties();
-//    for (int i = 1; i < (0x1 << (possibleAnnotators.length)); ++i) {
-//      // Get annotators
-//      Set<String> annotatorsToConsider = new LinkedHashSet<>();
-//      for (int k = 0; k < possibleAnnotators.length; ++k) {
-//        int mask = (0x1 << k);
-//        if ((i & mask) != 0) { annotatorsToConsider.add(possibleAnnotators[k]); }
-//      }
-//
-//      // Sort annotators
-//      new StanfordCoreNLP();  // construct annotator pool
-//      List<String> annotators = new ArrayList<>();
-//      Set<String> annotatorsAdded = new LinkedHashSet<>();
-//      boolean wasChanged = true;
-//      while (wasChanged) {
-//        wasChanged = false;
-//        Iterator<String> iter = annotatorsToConsider.iterator();
-//        while(iter.hasNext()) {
-//          String annotator = iter.next();
-//          boolean valid = true;
-//          try {
-//            for (Annotator.Requirement requirement : StanfordCoreNLP.getExistingAnnotator(annotator).requires()) {
-//              if (!annotatorsAdded.contains(requirement.name)) { valid = false; }
-//            }
-//          } catch (NullPointerException e) { }
-//          if (valid) {
-//            annotators.add(annotator);
-//            annotatorsAdded.add(annotator);
-//            iter.remove();
-//            wasChanged = true;
-//          }
-//        }
-//      }
-//      if (!annotatorsToConsider.isEmpty()) { continue; }  // continue if we couldn't add all the annotators
-//
-//      // Create pipeline
-//      testAnnotators(StringUtils.join(annotators, ","));
-//    }
-//  }
+
+  @Test
+  public void testRelation() {
+    testAnnotators("tokenize,ssplit,pos,lemma,ner,parse,relation");
+  }
+
+  @Test
+  public void testSerializeSSplitTokensRegression() {
+    testAnnotators("tokenize,ssplit");
+  }
+
+  /**
+   * Is the protobuf annotator "CoreNLP complete?"
+   * That is, does it effectively save every combination of annotators possible?
+   */
+  @Test
+  public void testAllAnnotatorCombinations() {
+    String[] possibleAnnotators = possibleAnnotators();
+    Properties props = new Properties();
+    for (int i = 1; i < (0x1 << (possibleAnnotators.length)); ++i) {
+      // Get annotators
+      Set<String> annotatorsToConsider = new LinkedHashSet<>();
+      for (int k = 0; k < possibleAnnotators.length; ++k) {
+        int mask = (0x1 << k);
+        if ((i & mask) != 0) { annotatorsToConsider.add(possibleAnnotators[k]); }
+      }
+
+      // Sort annotators
+      new StanfordCoreNLP();  // construct annotator pool
+      List<String> annotators = new ArrayList<>();
+      Set<String> annotatorsAdded = new LinkedHashSet<>();
+      boolean wasChanged = true;
+      while (wasChanged) {
+        wasChanged = false;
+        Iterator<String> iter = annotatorsToConsider.iterator();
+        while(iter.hasNext()) {
+          String annotator = iter.next();
+          boolean valid = true;
+          try {
+            for (Annotator.Requirement requirement : StanfordCoreNLP.getExistingAnnotator(annotator).requires()) {
+              if (!annotatorsAdded.contains(requirement.name)) { valid = false; }
+            }
+          } catch (NullPointerException e) { }
+          if (valid) {
+            annotators.add(annotator);
+            annotatorsAdded.add(annotator);
+            iter.remove();
+            wasChanged = true;
+          }
+        }
+      }
+      if (!annotatorsToConsider.isEmpty()) { continue; }  // continue if we couldn't add all the annotators
+
+      // Create pipeline
+      testAnnotators(StringUtils.join(annotators, ","));
+    }
+  }
 
 }
