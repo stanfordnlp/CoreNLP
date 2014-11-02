@@ -16,6 +16,7 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.zip.GZIPOutputStream;
 
 import static junit.framework.Assert.*;
 
