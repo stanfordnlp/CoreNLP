@@ -132,4 +132,6 @@ public abstract class BaseModel implements Serializable {
    * @param nThreads how many threads the model can use for training
    */
   public abstract void trainModel(String serializedPath, Tagger tagger, Random random, List<Tree> binarizedTrainTrees, List<List<Transition>> transitionLists, Treebank devTreebank, int nThreads);
+
+  private static final long serialVersionUID = -175375535849840611L;
 }
