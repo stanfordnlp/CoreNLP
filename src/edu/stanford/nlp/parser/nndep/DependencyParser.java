@@ -19,6 +19,7 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.TreeGraphNode;
 import edu.stanford.nlp.trees.TypedDependency;
+import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
@@ -893,7 +894,17 @@ public class DependencyParser {
     // Build GrammaticalStructure
     // TODO ideally submodule should just return GrammaticalStructure
     TreeGraphNode rootNode = new TreeGraphNode(root);
-    return new EnglishGrammaticalStructure(dependencies, rootNode);
+    return makeGrammaticalStructure(dependencies, rootNode);
+  }
+
+  private GrammaticalStructure makeGrammaticalStructure(List<TypedDependency> dependencies, TreeGraphNode rootNode) {
+    switch (language) {
+      case English: return new EnglishGrammaticalStructure(dependencies, rootNode);
+      case Chinese: return new ChineseGrammaticalStructure(dependencies, rootNode);
+
+      // TODO suboptimal: default to EnglishGrammaticalStructure return
+      default: return new EnglishGrammaticalStructure(dependencies, rootNode);
+    }
   }
 
   /**
