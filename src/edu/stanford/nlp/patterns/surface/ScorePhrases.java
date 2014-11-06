@@ -37,11 +37,11 @@ import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.logging.Redwood;
 
-public class ScorePhrases {
+public class ScorePhrases<E extends  Pattern> {
 
   Map<String, Boolean> writtenInJustification = new HashMap<String, Boolean>();
 
-  ConstantsAndVariables constVars = null;
+  ConstantsAndVariables<E> constVars = null;
 
   @Option(name = "phraseScorerClass")
   Class<? extends PhraseScorer> phraseScorerClass = edu.stanford.nlp.patterns.surface.ScorePhrasesAverageFeatures.class;
@@ -66,7 +66,7 @@ public class ScorePhrases {
   }
 
   public Counter<String> chooseTopWords(Counter<String> newdt,
-      TwoDimensionalCounter<String, Integer> terms,
+      TwoDimensionalCounter<String, E> terms,
       Counter<String> useThresholdNumPatternsForTheseWords,
       Set<String> ignoreWords, double thresholdWordExtract) {
 
@@ -130,15 +130,17 @@ public class ScorePhrases {
   }
 
   private double numNonRedundantPatterns(
-      TwoDimensionalCounter<String, Integer> terms, String w) {
-    Integer[] pats = terms.getCounter(w).keySet()
-        .toArray(new Integer[0]);
+      TwoDimensionalCounter<String, E> terms, String w) {
+    Object[] pats = terms.getCounter(w).keySet()
+        .toArray();
     int numPat = 0;
     for (int i = 0; i < pats.length; i++) {
-      String pati = constVars.getPatternIndex().get(pats[i]).toString();
+      //String pati = constVars.getPatternIndex().get(pats[i]).toString();
+      String pati = pats[i].toString();
       boolean contains = false;
       for (int j = i + 1; j < pats.length; j++) {
-        String patj = constVars.getPatternIndex().get(pats[j]).toString();
+        //String patj = constVars.getPatternIndex().get(pats[j]).toString();
+        String patj = pats[j].toString();
         if (patj.contains(pati) || pati.contains(patj)) {
           contains = true;
           break;
@@ -153,13 +155,13 @@ public class ScorePhrases {
   public Counter<String> learnNewPhrases(
       String label,
       PatternsForEachToken patternsForEachToken,
-      Counter<Integer> patternsLearnedThisIter,
-      Counter<Integer> allSelectedPatterns,
-      CollectionValuedMap<Integer, Triple<String, Integer, Integer>> tokensMatchedPatterns,
+      Counter<E> patternsLearnedThisIter,
+      Counter<E> allSelectedPatterns,
+      CollectionValuedMap<E, Triple<String, Integer, Integer>> tokensMatchedPatterns,
       Counter<String> scoreForAllWordsThisIteration,
-      TwoDimensionalCounter<String, Integer> terms,
-      TwoDimensionalCounter<String, Integer> wordsPatExtracted,
-      TwoDimensionalCounter<Integer, String> patternsAndWords4Label,
+      TwoDimensionalCounter<String, E> terms,
+      TwoDimensionalCounter<String, E> wordsPatExtracted,
+      TwoDimensionalCounter<E, String> patternsAndWords4Label,
       String identifier, Set<String> ignoreWords) throws IOException, ClassNotFoundException {
 
     boolean computeProcDataFreq = false;
@@ -181,8 +183,8 @@ public class ScorePhrases {
     return words;
   }
 
-  void runParallelApplyPats(Map<String, List<CoreLabel>> sents, String label, Integer pattern,  TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted,
-                            CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) {
+  void runParallelApplyPats(Map<String, List<CoreLabel>> sents, String label, E pattern,  TwoDimensionalCounter<Pair<String, String>, E> wordsandLemmaPatExtracted,
+                            CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat) {
 
     Redwood.log(Redwood.DBG, "Applying pattern " + pattern + " to a total of " + sents.size() + " sentences ");
     List<String> notAllowedClasses = new ArrayList<String>();
@@ -196,10 +198,10 @@ public class ScorePhrases {
       notAllowedClasses.add("OTHERSEM:OTHERSEM");
     }
 
-    SurfacePattern p = constVars.getPatternIndex().get(pattern);
-    Map<TokenSequencePattern, Integer> patternsLearnedThisIterConverted = new HashMap<TokenSequencePattern , Integer>();
+
+    Map<TokenSequencePattern, E> patternsLearnedThisIterConverted = new HashMap<TokenSequencePattern , E>();
     //for(Integer pindex : patternsLearnedThisIter.keySet()){
-    TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), p.toString(notAllowedClasses));
+    TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), ((SurfacePattern)pattern).toString(notAllowedClasses));
     patternsLearnedThisIterConverted.put(pat, pattern);
     //}
 
@@ -218,12 +220,12 @@ public class ScorePhrases {
       num = sents.size() / (numThreads - 1);
 
     ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
-    List<Future<Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>>> list = new ArrayList<Future<Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>>>();
+    List<Future<Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>>> list = new ArrayList<>();
 
 
     for (int i = 0; i < numThreads; i++) {
     
-      Callable<Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>> task = null;
+      Callable<Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>> task = null;
 
       //Redwood.log(Redwood.DBG, "Applying pats: assigning sentences " + i*num + " to " +Math.min(sentids.size(), (i + 1) * num) + " to thread " + (i+1));
       task = new ApplyPatterns(sents, num == sents.size() ? sentids : sentids.subList(i * num,
@@ -231,17 +233,17 @@ public class ScorePhrases {
           constVars.removeStopWordsFromSelectedPhrases,
           constVars.removePhrasesWithStopWords, constVars);
 
-      Future<Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>> submit = executor
+      Future<Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>> submit = executor
           .submit(task);
       list.add(submit);
     }
 
     // Now retrieve the result
-    for (Future<Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>> future : list) {
+    for (Future<Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>> future : list) {
       try{
-        Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>> result = future
+        Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>> result = future
             .get();
-        Redwood.log(ConstantsAndVariables.extremedebug, "Pattern " + p + " extracted phrases " + result.first());
+        Redwood.log(ConstantsAndVariables.extremedebug, "Pattern " + pat + " extracted phrases " + result.first());
         wordsandLemmaPatExtracted.addAll(result.first());
         matchedTokensByPat.addAll(result.second());
       }catch(Exception e){
@@ -252,7 +254,7 @@ public class ScorePhrases {
     executor.shutdown();
   }
 /*
-  void runParallelApplyPats(Map<String, List<CoreLabel>> sents, Set<String> sentIds, String label, Counter<Integer> patternsLearnedThisIter,  TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted,
+  void runParallelApplyPats(Map<String, List<CoreLabel>> sents, Set<String> sentIds, String label, Counter<E> patternsLearnedThisIter,  TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted,
                             CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) throws InterruptedException, ExecutionException{
     List<String> keyset = new ArrayList<String>(sentIds);
     List<String> notAllowedClasses = new ArrayList<String>();
@@ -310,14 +312,14 @@ public class ScorePhrases {
   }
 */
 
-  protected Map<Integer, Map<String, List<CoreLabel>>> getSentences(Map<Integer, Set<String>> sentids) {
+  protected Map<E, Map<String, List<CoreLabel>>> getSentences(Map<E, Set<String>> sentids) {
     try{
 
       Set<File> files = new HashSet<File>();
 
-      Map<Integer, Map<String, List<CoreLabel>>> sentsAll  = new HashMap<Integer, Map<String, List<CoreLabel>>>();
-      CollectionValuedMap<String, Integer> sentIds2Pats = new CollectionValuedMap<String, Integer>();
-      for(Map.Entry<Integer, Set<String>> setEn: sentids.entrySet()){
+      Map<E, Map<String, List<CoreLabel>>> sentsAll  = new HashMap<E, Map<String, List<CoreLabel>>>();
+      CollectionValuedMap<String, E> sentIds2Pats = new CollectionValuedMap<String, E>();
+      for(Map.Entry<E, Set<String>> setEn: sentids.entrySet()){
         if(!sentsAll.containsKey(setEn.getKey()))
           sentsAll.put(setEn.getKey(), new HashMap<String, List<CoreLabel>>());
         for(String s: setEn.getValue()){
@@ -334,13 +336,13 @@ public class ScorePhrases {
         for(File f: files){
           Map<String, List<CoreLabel>> sentsf = IOUtils.readObjectFromFile(f);
           for(Map.Entry<String, List<CoreLabel>> s: sentsf.entrySet()){
-            for(Integer pat: sentIds2Pats.get(s.getKey()))
+            for(E pat: sentIds2Pats.get(s.getKey()))
               sentsAll.get(pat).put(s.getKey(), s.getValue());
           }
         }
       }else{
         for(Map.Entry<String, List<CoreLabel>> s: Data.sents.entrySet()){
-          for(Integer pat: sentIds2Pats.get(s.getKey()))
+          for(E pat: sentIds2Pats.get(s.getKey()))
             sentsAll.get(pat).put(s.getKey(), s.getValue());
         }
       }
@@ -355,29 +357,29 @@ public class ScorePhrases {
     }
   }
 
-  public void applyPats(Counter<Integer> patterns, String label, TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted,
-                        CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat){
- //   Counter<Integer> patternsLearnedThisIterConsistsOnlyGeneralized = new ClassicCounter<Integer>();
- //   Counter<Integer> patternsLearnedThisIterRest = new ClassicCounter<Integer>();
+  public void applyPats(Counter<E> patterns, String label, TwoDimensionalCounter<Pair<String, String>, E> wordsandLemmaPatExtracted,
+                        CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat){
+ //   Counter<E> patternsLearnedThisIterConsistsOnlyGeneralized = new ClassicCounter<E>();
+ //   Counter<E> patternsLearnedThisIterRest = new ClassicCounter<E>();
 //    Set<String> specialWords = constVars.invertedIndex.getSpecialWordsList();
 
     for(Map.Entry<String, Env> en: constVars.env.entrySet()){
       en.getValue().getVariables().putAll(Token.env.getVariables());
     }
 
-    Map<Integer, Map<String, List<CoreLabel>>> sentencesForPatterns = getSentences(constVars.invertedIndex.queryIndex(patterns.keySet(), constVars.patternIndex));
+    Map<E, Map<String, List<CoreLabel>>> sentencesForPatterns = getSentences(constVars.invertedIndex.queryIndex(patterns.keySet()));
 
-    for(Map.Entry<Integer, Map<String, List<CoreLabel>>> en: sentencesForPatterns.entrySet()){
+    for(Map.Entry<E, Map<String, List<CoreLabel>>> en: sentencesForPatterns.entrySet()){
       runParallelApplyPats(en.getValue(), label, en.getKey(), wordsandLemmaPatExtracted, matchedTokensByPat);
     }
 
     Redwood.log(Redwood.DBG, "# words/lemma and pattern pairs are " + wordsandLemmaPatExtracted.size());
   }
   /*
-  public void applyPats(Counter<Integer> patterns, String label, boolean computeDataFreq,  TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted,
+  public void applyPats(Counter<E> patterns, String label, boolean computeDataFreq,  TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted,
                         CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat) throws ClassNotFoundException, IOException, InterruptedException, ExecutionException{
-    Counter<Integer> patternsLearnedThisIterConsistsOnlyGeneralized = new ClassicCounter<Integer>();
-    Counter<Integer> patternsLearnedThisIterRest = new ClassicCounter<Integer>();
+    Counter<E> patternsLearnedThisIterConsistsOnlyGeneralized = new ClassicCounter<E>();
+    Counter<E> patternsLearnedThisIterRest = new ClassicCounter<E>();
     Set<String> specialWords = constVars.invertedIndex.getSpecialWordsList();
     List<String> extremelySmallStopWordsList = Arrays.asList(".",",","in","on","of","a","the","an");
 
@@ -488,29 +490,28 @@ public class ScorePhrases {
   */
   
   private void statsWithoutApplyingPatterns(Map<String, List<CoreLabel>> sents, PatternsForEachToken patternsForEachToken,
-      Counter<Integer> patternsLearnedThisIter, TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted){
+      Counter<E> patternsLearnedThisIter, TwoDimensionalCounter<Pair<String, String>, E> wordsandLemmaPatExtracted){
     for (Entry<String, List<CoreLabel>> sentEn : sents.entrySet()) {
-      Map<Integer, Set<Integer>> pat4Sent = patternsForEachToken.getPatternsForAllTokens(sentEn.getKey());
+      Map<Integer, Set<E>> pat4Sent = patternsForEachToken.getPatternsForAllTokens(sentEn.getKey());
 
       if (pat4Sent == null) {
         throw new RuntimeException("How come there are no patterns for "
             + sentEn.getKey());
       }
-      for (Entry<Integer, Set<Integer>> en : pat4Sent
+      for (Entry<Integer, Set<E>> en : pat4Sent
           .entrySet()) {
         CoreLabel token = null;
-        Set<Integer> p1 = en.getValue();
+        Set<E> p1 = en.getValue();
 
 //        Set<Integer> p1 = en.getValue().first();
 //        Set<Integer> p2 = en.getValue().second();
 //        Set<Integer> p3 = en.getValue().third();
-        for (Integer index : patternsLearnedThisIter.keySet()) {
+        for (E index : patternsLearnedThisIter.keySet()) {
 
           if (p1.contains(index)) {
             if (token == null)
               token = sentEn.getValue().get(en.getKey());
-            wordsandLemmaPatExtracted.incrementCount(
-                new Pair<String, String>(token.word(), token.lemma()), index);
+            wordsandLemmaPatExtracted.incrementCount(new Pair<String, String>(token.word(), token.lemma()), index);
           }
         }
       }
@@ -520,20 +521,27 @@ public class ScorePhrases {
   private Counter<String> learnNewPhrasesPrivate(
       String label,
       PatternsForEachToken patternsForEachToken,
-      Counter<Integer> patternsLearnedThisIter,
-      Counter<Integer> allSelectedPatterns,
-      Set<String> alreadyIdentifiedWords, CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat,
+      Counter<E> patternsLearnedThisIter,
+      Counter<E> allSelectedPatterns,
+      Set<String> alreadyIdentifiedWords, CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat,
       Counter<String> scoreForAllWordsThisIteration,
-      TwoDimensionalCounter<String, Integer> terms,
-      TwoDimensionalCounter<String, Integer> wordsPatExtracted,
-      TwoDimensionalCounter<Integer, String> patternsAndWords4Label,
+      TwoDimensionalCounter<String, E> terms,
+      TwoDimensionalCounter<String, E> wordsPatExtracted,
+      TwoDimensionalCounter<E, String> patternsAndWords4Label,
       String identifier, Set<String> ignoreWords, boolean computeProcDataFreq) throws IOException, ClassNotFoundException {
 
-    TwoDimensionalCounter<Pair<String, String>, Integer> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, Integer>();
+    TwoDimensionalCounter<Pair<String, String>, E> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, E>();
     if (constVars.doNotApplyPatterns) {
       // if want to get the stats by the lossy way of just counting without
       // applying the patterns
-      if (constVars.batchProcessSents) {
+      ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
+      while(sentsIter.hasNext()) {
+        Pair<Map<String, List<CoreLabel>>, File> sentsf = sentsIter.next();
+        this.statsWithoutApplyingPatterns(sentsf.first(), patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
+      }
+
+      /*
+        if (constVars.batchProcessSents) {
         for (File f : Data.sentsFiles) {
           Redwood.log(Redwood.DBG, "Calculating stats from sents file " + f);
           Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
@@ -541,7 +549,7 @@ public class ScorePhrases {
         }
       } else
         this.statsWithoutApplyingPatterns(Data.sents, patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
-
+      */
     } else {
       if (patternsLearnedThisIter.size() > 0) {
         this.applyPats(patternsLearnedThisIter, label, wordsandLemmaPatExtracted, matchedTokensByPat);
@@ -635,7 +643,7 @@ public class ScorePhrases {
         IOUtils.ensureDir(new File(outputdir));
         TwoDimensionalCounter<String, String> reasonForWords = new TwoDimensionalCounter<String, String>();
         for (String word : finalwords.keySet()) {
-          for (Integer l : wordsPatExtracted.getCounter(word).keySet()) {
+          for (E l : wordsPatExtracted.getCounter(word).keySet()) {
             for (String w2 : patternsAndWords4Label.getCounter(l)) {
               reasonForWords.incrementCount(word, w2);
             }
@@ -669,8 +677,8 @@ public class ScorePhrases {
             l.add(w2);
           }
           JsonArrayBuilder pats = Json.createArrayBuilder();
-          for (Integer p : wordsPatExtracted.getCounter(w)) {
-            pats.add(constVars.getPatternIndex().get(p).toStringSimple());
+          for (E p : wordsPatExtracted.getCounter(w)) {
+            pats.add(p.toStringSimple());
           }
           objinner.add("reasonwords", l);
           objinner.add("patterns", pats);
@@ -692,7 +700,7 @@ public class ScorePhrases {
               Redwood.DBG, "Phrase " + 
               word
                   + " extracted because of patterns: \t"
-                  + Counters.toSortedString(constVars.transformPatternsToSurface(wordsPatExtracted.getCounter(word)),
+                  + Counters.toSortedString(wordsPatExtracted.getCounter(word),
                       wordsPatExtracted.getCounter(word).size(), "%1$s:%2$f",
                       "\n"));
         }
@@ -708,10 +716,10 @@ public class ScorePhrases {
     } else if (constVars.wordScoring.equals(WordScoring.BPB)) {
       Counters.addInPlace(terms, wordsPatExtracted);
       Counter<String> maxPatWeightTerms = new ClassicCounter<String>();
-      Map<String, Integer> wordMaxPat = new HashMap<String, Integer>();
-      for (Entry<String, ClassicCounter<Integer>> en : terms.entrySet()) {
-        Counter<Integer> weights = new ClassicCounter<Integer>();
-        for (Integer k : en.getValue().keySet())
+      Map<String, E> wordMaxPat = new HashMap<String, E>();
+      for (Entry<String, ClassicCounter<E>> en : terms.entrySet()) {
+        Counter<E> weights = new ClassicCounter<E>();
+        for (E k : en.getValue().keySet())
           weights.setCount(k, patternsLearnedThisIter.getCount(k));
         maxPatWeightTerms.setCount(en.getKey(), Counters.max(weights));
         wordMaxPat.put(en.getKey(), Counters.argmax(weights));

@@ -280,8 +280,10 @@ public class DependencyParser {
     }
     System.err.println("#Train Examples: " + ret.n);
 
-    Counters.retainTop(tokPosCount, config.numPreComputed);
-    preComputed = new ArrayList<>(tokPosCount.keySet());
+    preComputed = new ArrayList<>(config.numPreComputed);
+    List<Integer> sortedTokens = Counters.toSortedList(tokPosCount, false);
+
+    preComputed = new ArrayList<>(sortedTokens.subList(0, Math.min(config.numPreComputed, sortedTokens.size())));
 
     return ret;
   }
@@ -517,6 +519,7 @@ public class DependencyParser {
             break;
         }
       }
+
 
       knownWords = new ArrayList<String>();
       knownPos = new ArrayList<String>();

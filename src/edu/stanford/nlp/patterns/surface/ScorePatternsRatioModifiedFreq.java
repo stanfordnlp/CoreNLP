@@ -15,15 +15,15 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Pair;
 
-public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
+public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
 
   public ScorePatternsRatioModifiedFreq(
       ConstantsAndVariables constVars,
       PatternScoring patternScoring,
       String label, Set<String> allCandidatePhrases,
-      TwoDimensionalCounter<Integer, String> patternsandWords4Label,
-      TwoDimensionalCounter<Integer, String> negPatternsandWords4Label,
-      TwoDimensionalCounter<Integer, String> unLabeledPatternsandWords4Label,
+      TwoDimensionalCounter<E, String> patternsandWords4Label,
+      TwoDimensionalCounter<E, String> negPatternsandWords4Label,
+      TwoDimensionalCounter<E, String> unLabeledPatternsandWords4Label,
       TwoDimensionalCounter<String, ScorePhraseMeasures> phInPatScores,
       ScorePhrases scorePhrases, Properties props) {
     super(constVars, patternScoring, label, allCandidatePhrases,  patternsandWords4Label,
@@ -43,7 +43,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
   }
 
   @Override
-  Counter<Integer> score() throws IOException, ClassNotFoundException {
+  Counter<E> score() throws IOException, ClassNotFoundException {
 
     Counter<String> externalWordWeightsNormalized = null;
     if (constVars.dictOddsWeights.containsKey(label))
@@ -51,20 +51,20 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
           .normalizeSoftMaxMinMaxScores(constVars.dictOddsWeights.get(label),
               true, true, false);
 
-    Counter<Integer> currentPatternWeights4Label = new ClassicCounter<Integer>();
+    Counter<E> currentPatternWeights4Label = new ClassicCounter<E>();
 
     boolean useFreqPhraseExtractedByPat = false;
     if (patternScoring.equals(PatternScoring.SqrtAllRatio))
       useFreqPhraseExtractedByPat = true;
-    Function<Pair<Integer, String>, Double> numeratorScore = x -> patternsandWords4Label.getCount(x.first(), x.second());
+    Function<Pair<E, String>, Double> numeratorScore = x -> patternsandWords4Label.getCount(x.first(), x.second());
 
-    Counter<Integer> numeratorPatWt = this.convert2OneDim(label,
+    Counter<E> numeratorPatWt = this.convert2OneDim(label,
         numeratorScore, allCandidatePhrases, patternsandWords4Label, constVars.sqrtPatScore, false, null,
         useFreqPhraseExtractedByPat);
 
-    Counter<Integer> denominatorPatWt = null;
+    Counter<E> denominatorPatWt = null;
 
-    Function<Pair<Integer, String>, Double> denoScore;
+    Function<Pair<E, String>, Double> denoScore;
     if (patternScoring.equals(PatternScoring.PosNegUnlabOdds)) {
       denoScore = x -> negPatternsandWords4Label.getCount(x.first(), x.second()) + unLabeledPatternsandWords4Label.getCount(x.first(), x.second());
 
@@ -104,8 +104,8 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
 
     //Multiplying by logP
     if (patternScoring.equals(PatternScoring.PhEvalInPatLogP) || patternScoring.equals(PatternScoring.LOGREGlogP)) {
-      Counter<Integer> logpos_i = new ClassicCounter<Integer>();
-      for (Entry<Integer, ClassicCounter<String>> en : patternsandWords4Label
+      Counter<E> logpos_i = new ClassicCounter<E>();
+      for (Entry<E, ClassicCounter<String>> en : patternsandWords4Label
           .entrySet()) {
         logpos_i.setCount(en.getKey(), Math.log(en.getValue().size()));
       }
@@ -115,8 +115,8 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
     return currentPatternWeights4Label;
   }
 
-  Counter<Integer> convert2OneDim(String label,
-      Function<Pair<Integer, String>, Double> scoringFunction, Set<String> allCandidatePhrases, TwoDimensionalCounter<Integer, String> positivePatternsAndWords,
+  Counter<E> convert2OneDim(String label,
+      Function<Pair<E, String>, Double> scoringFunction, Set<String> allCandidatePhrases, TwoDimensionalCounter<E, String> positivePatternsAndWords,
       boolean sqrtPatScore, boolean scorePhrasesInPatSelection,
       Counter<String> dictOddsWordWeights, boolean useFreqPhraseExtractedByPat) throws IOException, ClassNotFoundException {
 
@@ -124,7 +124,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
       Data.loadGoogleNGrams();
     }
 
-    Counter<Integer> patterns = new ClassicCounter<Integer>();
+    Counter<E> patterns = new ClassicCounter<E>();
 
     Counter<String> googleNgramNormScores = new ClassicCounter<String>();
     Counter<String> domainNgramNormScores = new ClassicCounter<String>();
@@ -210,7 +210,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
 
     Counter<String> cachedScoresForThisIter = new ClassicCounter<String>();
 
-    for (Map.Entry<Integer, ClassicCounter<String>> en: positivePatternsAndWords.entrySet()) {
+    for (Map.Entry<E, ClassicCounter<String>> en: positivePatternsAndWords.entrySet()) {
 
         for(Entry<String, Double> en2: en.getValue().entrySet()) {
           String word = en2.getKey();
