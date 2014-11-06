@@ -2,7 +2,7 @@ package edu.stanford.nlp.trees;
 
 import java.io.IOException;
 
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 /**
  * A <code>FilteringTreeReader</code> filters the output of another TreeReader.
@@ -16,9 +16,9 @@ import java.util.function.Predicate;
 public class FilteringTreeReader implements TreeReader {
 
   private TreeReader tr;
-  private Predicate<Tree> f;
+  private Filter<Tree> f;
 
-  public FilteringTreeReader(TreeReader tr, Predicate<Tree> f) {
+  public FilteringTreeReader(TreeReader tr, Filter<Tree> f) {
     this.tr = tr;
     this.f = f;
   }
@@ -32,7 +32,7 @@ public class FilteringTreeReader implements TreeReader {
     Tree t;
     do {
       t = tr.readTree();
-    } while (t != null && ! f.test(t));
+    } while (t != null && ! f.accept(t));
     return t;
   }
 

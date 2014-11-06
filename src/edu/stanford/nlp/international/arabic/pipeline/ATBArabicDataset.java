@@ -21,7 +21,7 @@ import edu.stanford.nlp.trees.TreeVisitor;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.BobChrisTreeNormalizer.AOverAFilter;
 import edu.stanford.nlp.trees.international.arabic.*;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 /**
  * Converts raw ATB trees into a format appropriate for treebank parsing.
@@ -108,8 +108,8 @@ public class ATBArabicDataset extends AbstractDataset {
     protected final Buckwalter encodingMap;
     protected final PrintWriter outfile;
     protected final PrintWriter flatFile;
-    protected final Predicate<Tree> nullFilter;
-    protected final Predicate<Tree> aOverAFilter;
+    protected final Filter<Tree> nullFilter;
+    protected final Filter<Tree> aOverAFilter;
     protected final TreeFactory tf;
     protected final TreebankLanguagePack tlp;
 

@@ -1,7 +1,5 @@
 package edu.stanford.nlp.trees;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Map;
 
 /**
@@ -232,14 +230,7 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
         }
         return traverseLocate(kids, defaultRule, true);
       } else {
-        // TreePrint because TreeGraphNode only prints the node number,
-        // doesn't print the tree structure
-        TreePrint printer = new TreePrint("penn");
-        StringWriter buffer = new StringWriter();
-        printer.printTree(t, new PrintWriter(buffer));
-        // TODO: we could get really fancy and define our own
-        // exception class to represent this
-        throw new IllegalArgumentException("No head rule defined for " + motherCat + " using " + this.getClass() + " in " + buffer.toString());
+        throw new IllegalArgumentException("No head rule defined for " + motherCat + " using " + this.getClass() + " in " + t);
       }
     }
     for (int i = 0; i < how.length; i++) {

@@ -6,7 +6,7 @@ import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CollectionUtils;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -48,7 +48,7 @@ public class SentimentUtils {
     return trees;
   }
 
-  static final Predicate<Tree> UNKNOWN_ROOT_FILTER = tree -> {
+  static final Filter<Tree> UNKNOWN_ROOT_FILTER = tree -> {
     int gold = RNNCoreAnnotations.getGoldClass(tree);
     return gold != -1;
   };

@@ -15,8 +15,8 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.logging.Redwood;
 
-public abstract class PhraseScorer<E extends Pattern> {
-  ConstantsAndVariables<E> constVars;
+public abstract class PhraseScorer {
+  ConstantsAndVariables constVars;
 
   double OOVExternalFeatWt = 0.5;
   double OOVdictOdds = 1e-10;
@@ -49,9 +49,9 @@ public abstract class PhraseScorer<E extends Pattern> {
 
   Counter<String> learnedScores = new ClassicCounter<String>();
 
-  abstract Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, E> terms,
-      TwoDimensionalCounter<String, E> wordsPatExtracted,
-      Counter<E> allSelectedPatterns,
+  abstract Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, SurfacePattern> terms,
+      TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted,
+      Counter<SurfacePattern> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, boolean forLearningPatterns)
       throws IOException, ClassNotFoundException;
 
@@ -60,12 +60,12 @@ public abstract class PhraseScorer<E extends Pattern> {
   }
 
   double getPatTFIDFScore(String word,
-      Counter<E> patsThatExtractedThis,
-      Counter<E> allSelectedPatterns) {
+      Counter<SurfacePattern> patsThatExtractedThis,
+      Counter<SurfacePattern> allSelectedPatterns) {
     double total = 0;
 
-    Set<E> rem = new HashSet<E>();
-    for (Entry<E, Double> en2 : patsThatExtractedThis.entrySet()) {
+    Set<SurfacePattern> rem = new HashSet<SurfacePattern>();
+    for (Entry<SurfacePattern, Double> en2 : patsThatExtractedThis.entrySet()) {
       double weight = 1.0;
       if (usePatternWeights) {
         weight = allSelectedPatterns.getCount(en2.getKey());
