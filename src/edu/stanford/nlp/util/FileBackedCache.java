@@ -1030,7 +1030,7 @@ public class FileBackedCache<KEY extends Serializable, T> implements Map<KEY, T>
   @SuppressWarnings("unchecked")
   public static <KEY extends Serializable, T extends Serializable> void merge(
       FileBackedCache<KEY, T> destination, Collection<FileBackedCache<KEY, T>> constituents) {
-    merge(destination, constituents.toArray(new FileBackedCache[constituents.size()]));
+    merge(destination, constituents.toArray((FileBackedCache<KEY,T>[])new FileBackedCache[constituents.size()]));
   }
 
 }

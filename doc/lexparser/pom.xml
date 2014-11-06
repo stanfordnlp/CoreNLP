@@ -14,8 +14,8 @@
     </license>
   </licenses>
   <scm>
-    <url>http://nlp.stanford.edu/software/stanford-parser-2014-10-26.zip</url>
-    <connection>http://nlp.stanford.edu/software/stanford-parser-2014-10-26.zip</connection>
+    <url>http://nlp.stanford.edu/software/stanford-parser-2014-10-31.zip</url>
+    <connection>http://nlp.stanford.edu/software/stanford-parser-2014-10-31.zip</connection>
   </scm>
   <developers>
     <developer>
@@ -35,8 +35,8 @@
     </developer>
   </developers>
   <properties>
-    <maven.compiler.source>1.6</maven.compiler.source>
-    <maven.compiler.target>1.6</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
     <encoding>UTF-8</encoding>
   </properties>
   <dependencies>
@@ -63,7 +63,7 @@
             <configuration>
               <artifacts>
                 <artifact>
-                  <file>${project.basedir}/stanford-parser-3.4-models.jar</file>
+                  <file>${project.basedir}/stanford-parser-3.5.0-models.jar</file>
                   <type>jar</type>
                   <classifier>models</classifier>
                 </artifact>
