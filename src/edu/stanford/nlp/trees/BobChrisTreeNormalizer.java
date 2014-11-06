@@ -1,7 +1,9 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.util.Filter;
+
+import java.io.Serializable;
+import java.util.function.Predicate;
 
 
 /**
@@ -109,19 +111,19 @@ public class BobChrisTreeNormalizer extends TreeNormalizer implements TreeTransf
   }
 
 
-  protected Filter<Tree> emptyFilter = new EmptyFilter();
+  protected Predicate<Tree> emptyFilter = new EmptyFilter();
 
-  protected Filter<Tree> aOverAFilter = new AOverAFilter();
+  protected Predicate<Tree> aOverAFilter = new AOverAFilter();
 
   private static final long serialVersionUID = -1005188028979810143L;
 
 
-  public static class EmptyFilter implements Filter<Tree> {
+  public static class EmptyFilter implements Predicate<Tree>, Serializable {
 
     private static final long serialVersionUID = 8914098359495987617L;
 
     /** Doesn't accept nodes that only cover an empty. */
-    public boolean accept(Tree t) {
+    public boolean test(Tree t) {
       Tree[] kids = t.children();
       Label l = t.label();
       // Delete (return false for) empty/trace nodes (ones marked '-NONE-')
@@ -133,12 +135,12 @@ public class BobChrisTreeNormalizer extends TreeNormalizer implements TreeTransf
   } // end class EmptyFilter
 
 
-  public static class AOverAFilter implements Filter<Tree> {
+  public static class AOverAFilter implements Predicate<Tree>, Serializable {
 
     /** Doesn't accept nodes that are A over A nodes (perhaps due to
      *  empty removal or are EDITED nodes).
      */
-    public boolean accept(Tree t) {
+    public boolean test(Tree t) {
       if (t.isLeaf() || t.isPreTerminal()) {
         return true;
       }

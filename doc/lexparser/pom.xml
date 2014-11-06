@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.stanford.nlp</groupId>
   <artifactId>stanford-parser</artifactId>
-  <version>3.4.1</version>
+  <version>3.5.0</version>
   <packaging>jar</packaging>
   <name>Stanford Parser</name>
   <description>Stanford Parser processes raw text in English, Chinese, German, Arabic, and French, and extracts constituency parse trees.</description>
@@ -14,8 +14,8 @@
     </license>
   </licenses>
   <scm>
-    <url>http://nlp.stanford.edu/software/stanford-parser-2014-08-27.zip</url>
-    <connection>http://nlp.stanford.edu/software/stanford-parser-2014-08-27.zip</connection>
+    <url>http://nlp.stanford.edu/software/stanford-parser-2014-10-26.zip</url>
+    <connection>http://nlp.stanford.edu/software/stanford-parser-2014-10-26.zip</connection>
   </scm>
   <developers>
     <developer>

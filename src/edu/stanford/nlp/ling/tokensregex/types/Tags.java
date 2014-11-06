@@ -5,10 +5,7 @@ import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Generics;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Tags that can be added to values or annotations
@@ -25,7 +22,7 @@ public class Tags implements Serializable {
 
   public Tags(String... tags) {
     if (tags != null) {
-      this.tags = Generics.newHashMap();
+      this.tags = new HashMap<String, Value>();// Generics.newHashMap();
       for (String tag:tags) {
         this.tags.put(tag, null);
       }
@@ -41,12 +38,14 @@ public class Tags implements Serializable {
   }
 
   public void setTag(String tag, Value v) {
-    if (tags == null) { tags = Generics.newHashMap(1); }
+    if (tags == null) { tags = new HashMap<String, Value>(1);//Generics.newHashMap(1);
+    }
     tags.put(tag, v);
   }
 
   public void addTag(String tag, Value v) {
-    if (tags == null) { tags = Generics.newHashMap(1); }
+    if (tags == null) { tags = new HashMap<String, Value>(1);//Generics.newHashMap(1);
+    }
     // Adds v as a tag into a list of tags...
     List<Value> tagList = null;
     if (tags.containsKey(tag)) {
