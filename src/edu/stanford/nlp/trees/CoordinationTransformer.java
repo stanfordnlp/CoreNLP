@@ -155,7 +155,7 @@ public class CoordinationTransformer implements TreeTransformer {
     // generally add the "not" to the following tree with moveRB, or
     // should we make "and not" a CONJP?
     // also, perhaps look at ADVP
-    TregexPattern.compile("/^(S|PP|VP)/ < (/^(S|PP|VP)/ $++ (CC=start $+ (RB|ADVP $+ /^(S|PP|VP)/) " +
+    TregexPattern.compile("/^(S|PP|VP)/ < (/^(S(?!YM)|PP|VP)/ $++ (CC=start $+ (RB|ADVP $+ /^(S(?!YM)|PP|VP)/) " +
                           "[ (< and $+ (RB=end < yet)) | " +  // TODO: what should be the head of "and yet"?
                           "  (< and $+ (RB=end < so)) | " +
                           "  (< and $+ (ADVP=end < (RB|IN < so))) ] ))"); // TODO: this structure needs a dependency
@@ -171,7 +171,7 @@ public class CoordinationTransformer implements TreeTransformer {
   }
 
   private static TregexPattern[] moveRBTregex = {
-    TregexPattern.compile("/^S|PP|VP|NP/ < (/^(S|PP|VP|NP)/ $++ (/^(,|CC|CONJP)$/ [ $+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB) ])) : (=adv $+ /^(S|PP|VP|NP)/=dest) "),
+    TregexPattern.compile("/^S|PP|VP|NP/ < (/^(S|PP|VP|NP)/ $++ (/^(,|CC|CONJP)$/ [ $+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB) ])) : (=adv $+ /^(S(?!YM)|PP|VP|NP)/=dest) "),
     TregexPattern.compile("/^ADVP/ < (/^ADVP/ $++ (/^(,|CC|CONJP)$/ [$+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB)])) : (=adv $+ /^NP-ADV|ADVP|PP/=dest)"),
     TregexPattern.compile("/^FRAG/ < (ADVP|RB=adv $+ VP=dest)"),
   };
@@ -179,7 +179,7 @@ public class CoordinationTransformer implements TreeTransformer {
   private static TsurgeonPattern moveRBTsurgeon =
     Tsurgeon.parseOperation("move adv >0 dest");
 
-  private static Tree moveRB(Tree t) {
+  static Tree moveRB(Tree t) {
     if (t == null) {
       return null;
     }
