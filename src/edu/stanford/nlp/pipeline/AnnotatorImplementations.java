@@ -187,4 +187,13 @@ public class AnnotatorImplementations {
     return new SentimentAnnotator(name, properties);
   }
 
+  /**
+   * Annotate dependency relations in sentences
+   */
+  public Annotator dependencies(Properties properties) {
+    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
+        Annotator.STANFORD_DEPENDENCIES + '.');
+    return new DependencyParseAnnotator(relevantProperties);
+  }
+
 }

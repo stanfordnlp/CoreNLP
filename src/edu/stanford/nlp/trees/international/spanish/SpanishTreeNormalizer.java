@@ -15,7 +15,7 @@ import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -61,8 +61,8 @@ public class SpanishTreeNormalizer extends BobChrisTreeNormalizer {
    * A filter which rejects preterminal nodes that contain "empty" leaf
    * nodes.
    */
-  private static final Filter<Tree> emptyFilter = new Filter<Tree>() {
-    public boolean accept(Tree tree) {
+  private static final Predicate<Tree> emptyFilter = new Predicate<Tree>() {
+    public boolean test(Tree tree) {
       if (tree.isPreTerminal()
           && tree.firstChild().value().equals(EMPTY_LEAF_VALUE))
         return false;

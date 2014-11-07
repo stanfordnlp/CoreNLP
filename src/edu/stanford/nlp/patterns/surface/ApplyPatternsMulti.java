@@ -3,7 +3,6 @@ package edu.stanford.nlp.patterns.surface;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.MultiPatternMatcher;
@@ -17,18 +16,18 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
 
 
-public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>> {
+public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>> {
   String label;
-  Map<TokenSequencePattern, Integer> patterns;
+  Map<TokenSequencePattern, E> patterns;
   List<String> sentids;
   boolean removeStopWordsFromSelectedPhrases;
   boolean removePhrasesWithStopWords;
-  ConstantsAndVariables constVars;
+  ConstantsAndVariables<E> constVars;
   //Set<String> ignoreWords;
   MultiPatternMatcher<CoreMap> multiPatternMatcher;
   Map<String, List<CoreLabel>> sents = null;
 
-  public ApplyPatternsMulti(Map<String, List<CoreLabel>> sents, List<String> sentids, Map<TokenSequencePattern, Integer> patterns, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
+  public ApplyPatternsMulti(Map<String, List<CoreLabel>> sents, List<String> sentids, Map<TokenSequencePattern, E> patterns, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
     this.sents = sents;
     this.patterns = patterns;
     multiPatternMatcher = TokenSequencePattern.getMultiPatternMatcher(patterns.keySet());
@@ -40,12 +39,12 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
   }
 
   @Override
-  public Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>> call() throws Exception {
+  public Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>> call() throws Exception {
     
     //CollectionValuedMap<String, Integer> tokensMatchedPattern = new CollectionValuedMap<String, Integer>();
-    CollectionValuedMap<Integer, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<Integer, Triple<String, Integer, Integer>>();
+    CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<E, Triple<String, Integer, Integer>>();
 
-    TwoDimensionalCounter<Pair<String, String>, Integer> allFreq = new TwoDimensionalCounter<Pair<String, String>, Integer>();
+    TwoDimensionalCounter<Pair<String, String>, E> allFreq = new TwoDimensionalCounter<Pair<String, String>, E>();
     for (String sentid : sentids) {
       List<CoreLabel> sent = sents.get(sentid);
 
@@ -55,13 +54,29 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
       for (SequenceMatchResult<CoreMap> m: matched) {
         int s = m.start("$term");
         int e = m.end("$term");
-        Integer matchedPat = patterns.get(m.pattern());
+        E matchedPat = patterns.get(m.pattern());
         matchedTokensByPat.add(matchedPat, new Triple<String, Integer, Integer>(sentid, s, e));
         String phrase = "";
         String phraseLemma = "";
         boolean useWordNotLabeled = false;
         boolean doNotUse = false;
-        
+
+        //find if the neighboring words are labeled - if so - club them together
+        if(constVars.clubNeighboringLabeledWords) {
+          for (int i = s - 1; i >= 0; i--) {
+            if (!sent.get(i).get(constVars.getAnswerClass().get(label)).equals(label)) {
+              s = i + 1;
+              break;
+            }
+          }
+          for (int i = e; i < sent.size(); i++) {
+            if (!sent.get(i).get(constVars.getAnswerClass().get(label)).equals(label)) {
+              e = i;
+              break;
+            }
+          }
+        }
+
         //to make sure we discard phrases with stopwords in between, but include the ones in which stop words were removed at the ends if removeStopWordsFromSelectedPhrases is true
         boolean[] addedindices = new boolean[e-s];
         Arrays.fill(addedindices, false);
@@ -71,8 +86,8 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
           l.set(PatternsAnnotations.MatchedPattern.class, true);
 
           if(!l.containsKey(PatternsAnnotations.MatchedPatterns.class))
-            l.set(PatternsAnnotations.MatchedPatterns.class, new HashSet<SurfacePattern>());
-          l.get(PatternsAnnotations.MatchedPatterns.class).add(constVars.getPatternIndex().get(matchedPat));
+            l.set(PatternsAnnotations.MatchedPatterns.class, new HashSet<Pattern>());
+          l.get(PatternsAnnotations.MatchedPatterns.class).add(matchedPat);
 
           // if (restrictToMatched) {
           // tokensMatchedPattern.add(sentid, i);
@@ -82,7 +97,7 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
               doNotUse = true;
             }
           }
-          boolean containsStop = containsStopWord(l, constVars.getCommonEngWords(), constVars.ignoreWordRegex);
+          boolean containsStop = containsStopWord(l, constVars.getCommonEngWords(), PatternFactory.ignoreWordRegex);
           if (removePhrasesWithStopWords && containsStop) {
             doNotUse = true;
           } else {
@@ -165,10 +180,10 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
 //      }
     }
 
-    return new Pair<TwoDimensionalCounter<Pair<String, String>, Integer>, CollectionValuedMap<Integer, Triple<String, Integer, Integer>>>(allFreq, matchedTokensByPat);
+    return new Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>(allFreq, matchedTokensByPat);
   }
 
-  boolean containsStopWord(CoreLabel l, Set<String> commonEngWords, Pattern ignoreWordRegex) {
+  boolean  containsStopWord(CoreLabel l, Set<String> commonEngWords, java.util.regex.Pattern ignoreWordRegex) {
     // if(useWordResultCache.containsKey(l.word()))
     // return useWordResultCache.get(l.word());
 

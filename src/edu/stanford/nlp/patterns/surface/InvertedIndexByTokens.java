@@ -1,222 +1,166 @@
 package edu.stanford.nlp.patterns.surface;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
+import java.util.function.Function;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.CollectionValuedMap;
+import edu.stanford.nlp.util.Execution;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
- * Creates an inverted index of (word or lemma) => {file1 => {sentid1,
- * sentid2,.. }, file2 => {sentid1, sentid2, ...}}.
- * 
- * (Commented out FileBackedCache because it currrently doesnt support changing
- * the values)
- * 
+ * Creates an inverted index of (classkey:value) => {sentid1,sentid2,.. }.
+ *
+ *
  * @author Sonal Gupta (sonalg@stanford.edu)
- * 
+ *
  */
-public class InvertedIndexByTokens implements Serializable{
+public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> implements Serializable{
 
   private static final long serialVersionUID = 1L;
 
-  Map<String, Hashtable<String, Set<String>>> index;
-  boolean convertToLowercase;
-  // boolean filebacked;
-  Set<String> stopWords, specialWords;
-  // static int numfilesindiskbacked = 10000;
-  int numAllEntries = 0;
-  boolean batchProcessSents = false;
-  //String filenamePrefix = null;
-  
-  public InvertedIndexByTokens(boolean lc, Set<String> stopWords, Set<String> specialWords, boolean batchProcessSents, String dirName) {
-    // if (filebacked)
-    // index = new FileBackedCache<StringwithConsistentHashCode,
-    // Hashtable<String, Set<String>>>(invertedIndexDir, numfilesindiskbacked);
-    // else
-    // memory mapped
-    index = new HashMap<String, Hashtable<String, Set<String>>>();
-    this.convertToLowercase = lc;
-    this.batchProcessSents = batchProcessSents;
-    // this.filebacked = filebacked;
-    this.stopWords = stopWords;
-    if (this.stopWords == null)
-      this.stopWords = new HashSet<String>();
-    this.specialWords = specialWords;
-    //this.filenamePrefix = dirName;
+  Map<String, Set<String>> index;
+
+  public InvertedIndexByTokens(Properties props, Set<String> stopWords, Function<CoreLabel, Map<String, String>> transformSentenceToString) {
+    super(stopWords, transformSentenceToString);
+    Execution.fillOptions(this, props);
+    index = new HashMap<String, Set<String>>();
   }
 
-  public InvertedIndexByTokens(Map<String, Hashtable<String, Set<String>>> index, boolean lc, Set<String> stopWords,
-      Set<String> specialWords, boolean batchProcessSents, String dirName) {
+  public InvertedIndexByTokens(Properties props, Set<String> stopWords, Function<CoreLabel, Map<String, String>> transformSentenceToString, Map<String, Set<String>> index) {
+    super(stopWords, transformSentenceToString);
+    Execution.fillOptions(this, props);
     this.index = index;
-    this.convertToLowercase = lc;
-    this.batchProcessSents = batchProcessSents;
-    this.stopWords = stopWords;
-    if (this.stopWords == null)
-      this.stopWords = new HashSet<String>();
-    this.specialWords = specialWords;
-   // this.filenamePrefix = dirName;
   }
 
-  void add(Map<String, List<CoreLabel>> sents, String filename, boolean indexLemma) {
-    
-//    if(filenamePrefix != null)
-//      filename = filenamePrefix+ (filenamePrefix.endsWith("/")?"":"/")+filename;
-//
+
+
+
+  @Override
+  public void add(Map<String, List<CoreLabel>> sents, boolean addProcessedText) {
     for (Map.Entry<String, List<CoreLabel>> sEn : sents.entrySet()) {
-      for (CoreLabel l : sEn.getValue()) {
-        String w = l.word();
-        if (indexLemma)
-          w = l.lemma();
-
-        if (convertToLowercase)
-          w = w.toLowerCase();
-
-        w = w.replaceAll("/", "\\\\/");
-
-        Hashtable<String, Set<String>> t = index.get(w);
-        if (t == null)
-          t = new Hashtable<String, Set<String>>();
-
-        Set<String> sentids = t.get(filename);
-        if (sentids == null) {
-          sentids = new HashSet<String>();
-        }
-        numAllEntries = numAllEntries - sentids.size();
-        sentids.add(sEn.getKey());
-        t.put(filename, sentids);
-        numAllEntries = numAllEntries + sentids.size();
-        index.put(w, t);
-      }
+      add(sEn.getValue(), sEn.getKey(), addProcessedText);
     }
-
   }
 
-  public Map<String, Set<String>> getFileSentIds(String word) {
-    return index.get(word);
-  }
+  @Override
+  protected void add(List<CoreLabel> sent, String sentId, boolean addProcessedText){
+    numAllSentences ++;
+    for (CoreLabel l : sent) {
 
-  public Map<String, Set<String>> getFileSentIds(Set<String> words) {
-    Hashtable<String, Set<String>> sentids = new Hashtable<String, Set<String>>();
-    for (String w : words) {
-      Hashtable<String, Set<String>> st = index.get(w);
-      if (st == null)
-        throw new RuntimeException("How come the index does not have sentences for " + w);
-      for (Map.Entry<String, Set<String>> en : st.entrySet()) {
-        if (!sentids.containsKey(en.getKey())) {
-          sentids.put(en.getKey(), new HashSet<String>());
-        }
-
-        sentids.get(en.getKey()).addAll(en.getValue());
+      //String w = l.word();
+//        w = w.replaceAll("/", "\\\\/");
+//        add(w, sEn.getKey());
+      Map<String, String> addThis = this.transformCoreLabeltoString.apply(l);
+      for(Map.Entry<String, String> en: addThis.entrySet()){
+        String val = combineKeyValue(en.getKey(),en.getValue());
+        add(val, sentId);
+      }
+      if(addProcessedText){
+        String val  =Token.getKeyForClass(PatternsAnnotations.ProcessedTextAnnotation.class) +":"+ l.get(PatternsAnnotations.ProcessedTextAnnotation.class);
+        if(!stopWords.contains(val.toLowerCase()))
+          add(val, sentId);
       }
     }
+  }
 
+  @Override
+  public void finishUpdating() {
+    //nothing to do right now!
+  }
+
+  @Override
+  public void update(List<CoreLabel> tokens, String sentid) {
+    add(tokens, sentid, false);
+  }
+
+  void add(String w, String sentid){
+    Set<String> sentids = index.get(w);
+
+    if (sentids == null) {
+      sentids = new HashSet<String>();
+    }
+
+    sentids.add(sentid);
+
+    index.put(w, sentids);
+  }
+
+  String combineKeyValue(String key, String value){
+    return key+":"+value;
+  }
+
+  public Set<String> getFileSentIds(CollectionValuedMap<String, String> relevantWords) {
+    Set<String> sentids = null;
+    for (Map.Entry<String, Collection<String>> en : relevantWords.entrySet()) {
+      for(String en2: en.getValue()){
+        if(!stopWords.contains(en2.toLowerCase())){
+          String w = combineKeyValue(en.getKey(), en2);
+          Set<String> st = index.get(w);
+          if (st == null){
+            System.err.println("\n\nWARNING: INDEX HAS NO SENTENCES FOR " + w);
+            return Collections.emptySet();
+            //throw new RuntimeException("How come the index does not have sentences for " + w);
+          }
+          if(sentids == null)
+            sentids= st;
+          else
+            sentids = CollectionUtils.intersection(sentids, st);
+        }
+      }}
     return sentids;
   }
 
-  public Map<String, Set<String>> getFileSentIdsFromPats(Set<Integer> pats, Index<SurfacePattern> index) {
-    Set<String> relevantWords = new HashSet<String>();
-    for (Integer pindex : pats) {
-      SurfacePattern p = index.get(pindex);
-      Set<String> relwordsThisPat = new HashSet<String>();
-      String[] next = p.getSimplerTokensNext();
-      if (next != null)
-        for (String s : next) {
-          s = s.trim();
-          if (convertToLowercase)
-            s = s.toLowerCase();
-          if (!s.isEmpty())
-            relwordsThisPat.add(s);
-        }
-      String[] prev = p.getSimplerTokensPrev();
-      if (prev != null)
-        for (String s : prev) {
-          s = s.trim();
-          if (convertToLowercase)
-            s = s.toLowerCase();
-          if (!s.isEmpty())
-            relwordsThisPat.add(s);
-        }
-      boolean nonStopW = false;
-      for (String w : relwordsThisPat) {
-        if (!stopWords.contains(w) && !specialWords.contains(w)) {
-          relevantWords.add(w);
-          nonStopW = true;
-        }
-      }
-      // If the pat contains just the stop words, add all the stop words!
-      if (!nonStopW)
-        relevantWords.addAll(relwordsThisPat);
-
+  //returns for each pattern, list of sentence ids
+  public Map<E, Set<String>> getFileSentIdsFromPats(Collection<E> pats) {
+    Map<E, Set<String>> sents = new HashMap<E, Set<String>>();
+    for(E pat: pats){
+      Set<String> ids = getFileSentIds(pat.getRelevantWords());
+      Redwood.log(ConstantsAndVariables.extremedebug, "For pattern with index " + pat + " extracted the following sentences from the index " + ids);
+      sents.put(pat, ids);
     }
-    relevantWords.removeAll(specialWords);
-    return getFileSentIds(relevantWords);
+    return sents;
   }
 
-  public Set<String> getSpecialWordsList() {
-    return this.specialWords;
+  //The last variable is not really used!
+  public static InvertedIndexByTokens createIndex(Map<String, List<CoreLabel>> sentences, Properties props, Set<String> stopWords, String dir, Function<CoreLabel, Map<String, String>> transformCoreLabeltoString) {
+    InvertedIndexByTokens inv = new InvertedIndexByTokens(props, stopWords, transformCoreLabeltoString);
+
+    if(sentences != null && sentences.size() > 0)
+      inv.add(sentences, true);
+    System.out.println("Created index with size " + inv.size());
+    return inv;
   }
 
-//  public void saveIndex(String dir) throws IOException {
-//    BufferedWriter w = new BufferedWriter(new FileWriter(dir + "/param.txt"));
-//    w.write(String.valueOf(convertToLowercase) + "\n");
-//    w.write(String.valueOf(this.batchProcessSents) + "\n");
-//    w.write(this.filenamePrefix+"\n");
-//    w.close();
-//    IOUtils.writeObjectToFile(this.stopWords, dir + "/stopwords.ser");
-//    IOUtils.writeObjectToFile(this.specialWords, dir + "/specialwords.ser");
-//    // if (!filebacked)
-//    IOUtils.writeObjectToFile(index, dir + "/map.ser");
-//
-//  }
-//
-//  public static InvertedIndexByTokens loadIndex(String dir) {
-//    try {
-//      List<String> lines = IOUtils.linesFromFile(dir + "/param.txt");
-//      boolean lc = Boolean.parseBoolean(lines.get(0));
-//      boolean batchProcessSents = Boolean.parseBoolean(lines.get(1));
-//      String filenameprefix = lines.get(2);
-//
-//      if(filenameprefix.equals("null"))
-//        filenameprefix = null;
-//
-//      Set<String> stopwords = IOUtils.readObjectFromFile(dir + "/stopwords.ser");
-//      Set<String> specialwords = IOUtils.readObjectFromFile(dir + "/specialwords.ser");
-//      Map<String, Hashtable<String, Set<String>>> index = null;
-//      // if (!filebacked)
-//      index = IOUtils.readObjectFromFile(dir + "/map.ser");
-//      // else
-//      // index = new FileBackedCache<StringwithConsistentHashCode,
-//      // Hashtable<String, Set<String>>>(dir + "/cache", numfilesindiskbacked);
-//      return new InvertedIndexByTokens(index, lc, stopwords, specialwords, batchProcessSents, filenameprefix);
-//    } catch (Exception e) {
-//      throw new RuntimeException("Cannot load the inverted index. " + e);
-//    }
-//  }
-
-  public int size() {
-    return index.size();
-  }
-  
-  public boolean isBatchProcessed(){
-    return this.batchProcessSents;
+  @Override
+  public Map<E, Set<String>> queryIndex(Collection<E> patterns) {
+    Map<E, Set<String>> sentSentids = getFileSentIdsFromPats(patterns);
+    return sentSentids;
   }
 
-  public int numAllEntries() {
-    return this.numAllEntries;
+  @Override
+  public void saveIndex(String dir){
+    try {
+      IOUtils.ensureDir(new File(dir));
+      IOUtils.writeObjectToFile(index, dir + "/map.ser");
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
-  public Set<String> getKeySet() {
-    return index.keySet();
+  //called by SentenceIndex.loadIndex
+  public static InvertedIndexByTokens loadIndex(Properties props, Set<String> stopwords, String dir,  Function<CoreLabel, Map<String, String>> transformSentenceToString) {
+    try {
+      Map<String, Set<String>>  index = IOUtils.readObjectFromFile(dir + "/map.ser");
+      System.out.println("Loading inverted index from " + dir);
+      return new InvertedIndexByTokens(props, stopwords, transformSentenceToString, index);
+    } catch (Exception e) {
+      throw new RuntimeException("Cannot load the inverted index. " + e);
+    }
   }
+
+
 }
