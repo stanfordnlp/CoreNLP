@@ -37,9 +37,10 @@ import edu.stanford.nlp.util.logging.PrettyLoggable;
  * An Object to double map used for keeping weights or counts for objects.
  * Utility functions are contained in
  * {@link Counters}.  The class previously known as Counter has been
- * renamed to {@link ClassicCounter}.  An alternative Counter
- * implementation, which is more memory efficient but not necessarily faster,
- * is {@link OpenAddressCounter}.
+ * renamed to {@link ClassicCounter}.
+ *
+ *
+ *
  * <p>
  * <i>Implementation note:</i> You shouldn't casually add further methods to
  * this interface. Rather, they should be added to the {@link Counters} class.
