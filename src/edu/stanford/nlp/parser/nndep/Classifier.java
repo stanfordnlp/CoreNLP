@@ -271,7 +271,7 @@ public class Classifier {
         double[] gradHidden = new double[config.hiddenSize];
         for (int nodeIndex : ls) {
           gradHidden[nodeIndex] = gradHidden3[nodeIndex] * 3 * hidden[nodeIndex] * hidden[nodeIndex];
-          gradb1[nodeIndex] += gradHidden[nodeIndex];
+          gradb1[nodeIndex] += gradHidden3[nodeIndex];
         }
 
         offset = 0;

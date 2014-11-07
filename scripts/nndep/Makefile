@@ -1,9 +1,9 @@
 ENGLISH_EMBEDDINGS=/u/nlp/data/depparser/nn/data/embeddings/en-cw.txt
 CHINESE_EMBEDDINGS=/u/nlp/data/depparser/nn/data/embeddings/zh-word2vec.txt
 
-PTB_STANFORD_TRAIN=/u/nlp/data/dependency_treebanks/PTB_Stanford/3.3.0/train.conll
-PTB_STANFORD_DEV=/u/nlp/data/dependency_treebanks/PTB_Stanford/3.3.0/dev.conll
-PTB_STANFORD_TEST=/u/nlp/data/dependency_treebanks/PTB_Stanford/3.3.0/test.conll
+PTB_STANFORD_TRAIN=/u/nlp/data/dependency_treebanks/PTB_Stanford/train.conll
+PTB_STANFORD_DEV=/u/nlp/data/dependency_treebanks/PTB_Stanford/dev.conll
+PTB_STANFORD_TEST=/u/nlp/data/dependency_treebanks/PTB_Stanford/test.conll
 
 PTB_CONLL_TRAIN=/u/nlp/data/dependency_treebanks/CTB_CoNLL/train.conll
 PTB_CONLL_DEV=/u/nlp/data/dependency_treebanks/PTB_CoNLL/dev.conll
