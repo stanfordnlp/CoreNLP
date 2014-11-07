@@ -2,7 +2,6 @@ package edu.stanford.nlp.parser.nndep;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
@@ -10,22 +9,10 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
-import edu.stanford.nlp.trees.GrammaticalRelation;
-import edu.stanford.nlp.trees.TypedDependency;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.PropertiesUtils;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.util.StringUtils;
-import org.hamcrest.CoreMatchers;
-import org.junit.matchers.JUnitMatchers;
-
-import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.hasItem;
 
 
 /**
@@ -72,28 +59,6 @@ public class DependencyParserITest extends TestCase {
     double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/CTB/dev.gold.conll", null);
     assertEquals(String.format("Chinese CoNLLX gold tags LAS should be %.2f but was %.2f",
             ChineseConllxGoldTagsLas, las), ChineseConllxGoldTagsLas, las, 1e-4);
-  }
-
-  /**
-   * Test that postprocessing like CC-processing can handle the parser
-   * output properly
-   */
-  public void testCCProcess() {
-    Properties props = PropertiesUtils.fromString("annotators=tokenize,ssplit,pos,depparse");
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-
-    String text = "Chris and John went to the store.";
-    Annotation document = new Annotation(text);
-    pipeline.annotate(document);
-
-    SemanticGraph ccProcessed = document.get(CoreAnnotations.SentencesAnnotation.class).get(0)
-                                        .get(
-                                            SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
-    Collection<TypedDependency> dependencies = ccProcessed.typedDependencies();
-
-    GrammaticalRelation expected = EnglishGrammaticalRelations.getConj("and");
-    assertThat(dependencies.stream().map(d -> d.reln()).collect(toList()),
-        hasItem(expected));
   }
 
   /**
