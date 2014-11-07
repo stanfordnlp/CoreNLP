@@ -11,21 +11,15 @@ import edu.stanford.nlp.util.ErasureUtils;
 public class PatternsAnnotations implements Serializable {
   private static final long serialVersionUID = 1L;
 
-  public static class ProcessedTextAnnotation implements GenericAnnotation<String>{
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
   public static class MatchedPattern implements GenericAnnotation<Boolean> {
     public Class<Boolean> getType() {
       return Boolean.class;
     }
   }
 
-  public static class MatchedPatterns implements GenericAnnotation<Set<Pattern>> {
-    public Class<Set<Pattern>> getType(){
-      return ErasureUtils.<Class<Set<Pattern>>> uncheckedCast(Set.class);
+  public static class MatchedPatterns implements GenericAnnotation<Set<SurfacePattern>> {
+    public Class<Set<SurfacePattern>> getType(){
+      return ErasureUtils.<Class<Set<SurfacePattern>>> uncheckedCast(Set.class);
     }
 
   }

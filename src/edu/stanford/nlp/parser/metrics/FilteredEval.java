@@ -8,7 +8,7 @@ import edu.stanford.nlp.trees.LabeledScoredConstituentFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreeFilters;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -21,11 +21,11 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 public class FilteredEval extends AbstractEval {
-  Predicate<Tree> subtreeFilter;
+  Filter<Tree> subtreeFilter;
 
   private final ConstituentFactory cf = new LabeledScoredConstituentFactory();
 
-  public FilteredEval(String str, boolean runningAverages, Predicate<Tree> subtreeFilter) {
+  public FilteredEval(String str, boolean runningAverages, Filter<Tree> subtreeFilter) {
     super(str, runningAverages);
     this.subtreeFilter = subtreeFilter;
   }

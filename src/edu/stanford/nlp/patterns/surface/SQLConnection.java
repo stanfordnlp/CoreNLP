@@ -1,5 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
+import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Execution.Option;
 
 import java.sql.Connection;
@@ -26,7 +27,7 @@ public class SQLConnection {
   public static Connection getConnection() throws SQLException {
 
     //System.out.println("username is " + dbusername + " and location is " + dbLocation);
-    return DriverManager.getConnection(dbLocation + "?host="+host+ "&user="
+    return DriverManager.getConnection(dbLocation + "?host="+host+ "user="
       + dbusername + "&password=" + dbpassword + "&characterEncoding=utf-8&"
       + "useUnicode=true");
   }

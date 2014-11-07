@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 
 
 /**
@@ -215,11 +214,11 @@ public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
     return new AbstractSet<Entry<K, Collection<V>>>() {
       @Override
       public Iterator<Map.Entry<K, Collection<V>>> iterator() {
-        Predicate<Entry<K, Collection<V>>> filter1 = new Predicate<Entry<K, Collection<V>>>() {
+        Filter<Map.Entry<K, Collection<V>>> filter1 = new Filter<Map.Entry<K, Collection<V>>>() {
           private static final long serialVersionUID = -3257173354412718639L;
 
           // only accepts stuff not overwritten by deltaMap
-          public boolean test(Map.Entry<K, Collection<V>> e) {
+          public boolean accept(Map.Entry<K, Collection<V>> e) {
             K key = e.getKey();
             if (deltaMap.containsKey(key)) {
               return false;
@@ -230,11 +229,11 @@ public class DeltaCollectionValuedMap<K, V> extends CollectionValuedMap<K, V> {
 
         Iterator<Map.Entry<K, Collection<V>>> iter1 = new FilteredIterator<Map.Entry<K, Collection<V>>>(originalMap.entrySet().iterator(), filter1);
 
-        Predicate<Entry<K, Collection<V>>> filter2 = new Predicate<Entry<K, Collection<V>>>() {
+        Filter<Map.Entry<K, Collection<V>>> filter2 = new Filter<Map.Entry<K, Collection<V>>>() {
           private static final long serialVersionUID = 1L;
 
           // only accepts stuff not overwritten by deltaMap
-          public boolean test(Map.Entry<K, Collection<V>> e) {
+          public boolean accept(Map.Entry<K, Collection<V>> e) {
             if (e.getValue() == removedValue) {
               return false;
             }

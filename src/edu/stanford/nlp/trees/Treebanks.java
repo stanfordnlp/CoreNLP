@@ -7,7 +7,7 @@ import java.text.DecimalFormat;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.NumberRangesFileFilter;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
@@ -82,7 +82,7 @@ public class Treebanks {
     String suffix = Treebank.DEFAULT_TREE_FILE_SUFFIX;
     TreeReaderFactory trf = null;
     TreebankLanguagePack tlp = null;
-    List<Predicate<Tree>> filters = new ArrayList<Predicate<Tree>>();
+    List<Filter<Tree>> filters = new ArrayList<Filter<Tree>>();
 
     while (i < args.length && args[i].startsWith("-")) {
       if (args[i].equals("-maxLength") && i + 1 < args.length) {
@@ -166,7 +166,7 @@ public class Treebanks {
         removeCodeTrees = true;
         i++;
       } else if (args[i].equals("-filter")) {
-        Predicate<Tree> filter = ReflectionLoading.loadByReflection(args[i+1]);
+        Filter<Tree> filter = ReflectionLoading.loadByReflection(args[i+1]);
         filters.add(filter);
         i += 2;
       } else {
@@ -187,7 +187,7 @@ public class Treebanks {
       treebank = new DiskTreebank(trf, encoding);
     }
 
-    for (Predicate<Tree> filter : filters) {
+    for (Filter<Tree> filter : filters) {
       treebank = new FilteringTreebank(treebank, filter);
     }
 
@@ -303,11 +303,11 @@ public class Treebanks {
     if (tlp == null) {
       System.err.println("The -punct option requires you to specify -tlp");
     } else {
-      Predicate<String> punctTagFilter = tlp.punctuationTagAcceptFilter();
+      Filter<String> punctTagFilter = tlp.punctuationTagAcceptFilter();
       for (Tree t : treebank) {
         List<TaggedWord> tws = t.taggedYield();
         for (TaggedWord tw : tws) {
-          if (punctTagFilter.test(tw.tag())) {
+          if (punctTagFilter.accept(tw.tag())) {
             pw.println(tw);
           }
         }

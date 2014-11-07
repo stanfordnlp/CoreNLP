@@ -12,7 +12,7 @@ import edu.stanford.nlp.process.WordSegmenter;
 import edu.stanford.nlp.process.WordSegmentingTokenizer;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.pennchinese.*;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
@@ -283,18 +283,18 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
 
       // Chinese-specific punctuation splits
       if (chineseSplitPunct && baseTag.equals("PU")) {
-        if (ChineseTreebankLanguagePack.chineseDouHaoAcceptFilter().test(word)) {
+        if (ChineseTreebankLanguagePack.chineseDouHaoAcceptFilter().accept(word)) {
           tag = tag + "-DOU";
           // System.out.println("Punct: Split dou hao"); // debugging
-        } else if (ChineseTreebankLanguagePack.chineseCommaAcceptFilter().test(word)) {
+        } else if (ChineseTreebankLanguagePack.chineseCommaAcceptFilter().accept(word)) {
           tag = tag + "-COMMA";
           // System.out.println("Punct: Split comma"); // debugging
-        } else if (ChineseTreebankLanguagePack.chineseColonAcceptFilter().test(word)) {
+        } else if (ChineseTreebankLanguagePack.chineseColonAcceptFilter().accept(word)) {
           tag = tag + "-COLON";
           // System.out.println("Punct: Split colon"); // debugging
-        } else if (ChineseTreebankLanguagePack.chineseQuoteMarkAcceptFilter().test(word)) {
+        } else if (ChineseTreebankLanguagePack.chineseQuoteMarkAcceptFilter().accept(word)) {
           if (chineseSplitPunctLR) {
-            if (ChineseTreebankLanguagePack.chineseLeftQuoteMarkAcceptFilter().test(word)) {
+            if (ChineseTreebankLanguagePack.chineseLeftQuoteMarkAcceptFilter().accept(word)) {
               tag += "-LQUOTE";
             } else {
               tag += "-RQUOTE";
@@ -303,12 +303,12 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
             tag = tag + "-QUOTE";
           }
           // System.out.println("Punct: Split quote"); // debugging
-        } else if (ChineseTreebankLanguagePack.chineseEndSentenceAcceptFilter().test(word)) {
+        } else if (ChineseTreebankLanguagePack.chineseEndSentenceAcceptFilter().accept(word)) {
           tag = tag + "-ENDSENT";
           // System.out.println("Punct: Split end sent"); // debugging
-        } else if (ChineseTreebankLanguagePack.chineseParenthesisAcceptFilter().test(word)) {
+        } else if (ChineseTreebankLanguagePack.chineseParenthesisAcceptFilter().accept(word)) {
           if (chineseSplitPunctLR) {
-            if (ChineseTreebankLanguagePack.chineseLeftParenthesisAcceptFilter().test(word)) {
+            if (ChineseTreebankLanguagePack.chineseLeftParenthesisAcceptFilter().accept(word)) {
               tag += "-LPAREN";
             } else {
               tag += "-RPAREN";
@@ -320,16 +320,16 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
             //throw new RuntimeException();
           }
           // System.out.println("Punct: Split paren"); // debugging
-        } else if (ChineseTreebankLanguagePack.chineseDashAcceptFilter().test(word)) {
+        } else if (ChineseTreebankLanguagePack.chineseDashAcceptFilter().accept(word)) {
           tag = tag + "-DASH";
           // System.out.println("Punct: Split dash"); // debugging
-        } else if (ChineseTreebankLanguagePack.chineseOtherAcceptFilter().test(word)) {
+        } else if (ChineseTreebankLanguagePack.chineseOtherAcceptFilter().accept(word)) {
           tag = tag + "-OTHER";
         } else {
           printlnErr("Unknown punct (you should add it to CTLP): " + tag + " |" + word + "|");
         }
       } else if (chineseSplitDouHao) {   // only split DouHao
-        if (ChineseTreebankLanguagePack.chineseDouHaoAcceptFilter().test(word) && baseTag.equals("PU")) {
+        if (ChineseTreebankLanguagePack.chineseDouHaoAcceptFilter().accept(word) && baseTag.equals("PU")) {
           tag = tag + "-DOU";
         }
       }
@@ -541,7 +541,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
         boolean hasCommaSis = false;
         boolean hasIPSis = false;
         for (Tree sister : sisters) {
-          if (ctlp.basicCategory(sister.label().value()).equals("PU") && ChineseTreebankLanguagePack.chineseCommaAcceptFilter().test(sister.children()[0].label().toString())) {
+          if (ctlp.basicCategory(sister.label().value()).equals("PU") && ChineseTreebankLanguagePack.chineseCommaAcceptFilter().accept(sister.children()[0].label().toString())) {
             hasCommaSis = true;
             //System.out.println("Found CommaSis"); // testing
           }
@@ -1228,7 +1228,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
 
   @Override
   public GrammaticalStructure getGrammaticalStructure(Tree t,
-                                                      Predicate<String> filter,
+                                                      Filter<String> filter,
                                                       HeadFinder hf) {
     return new ChineseGrammaticalStructure(t, filter, hf);
   }

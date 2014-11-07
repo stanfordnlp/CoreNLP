@@ -14,7 +14,6 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.function.Predicate;
 
 /**
  * A tool which accepts raw AnCora-3.0 Spanish XML files and produces
@@ -200,7 +199,7 @@ public class AnCoraProcessor {
    * Accepts any tree node to the left of the provided node (or the
    * provided node itself).
    */
-  private static class LeftOfFilter implements Predicate<Tree>, Serializable {
+  private static class LeftOfFilter implements Filter<Tree> {
 
     private static final long serialVersionUID = -5146948439247427344L;
 
@@ -219,7 +218,7 @@ public class AnCoraProcessor {
     }
 
     @Override
-    public boolean test(Tree obj) {
+    public boolean accept(Tree obj) {
       if (obj == reference || obj.dominates(reference) || reference.dominates(obj))
         return true;
 
@@ -236,7 +235,7 @@ public class AnCoraProcessor {
   /**
    * Accepts any tree node to the right of the provided node.
    */
-  private static class RightOfExclusiveFilter implements Predicate<Tree>, Serializable {
+  private static class RightOfExclusiveFilter implements Filter<Tree> {
 
     private static final long serialVersionUID = 8283161954004080591L;
 
@@ -258,7 +257,7 @@ public class AnCoraProcessor {
     }
 
     @Override
-    public boolean test(Tree obj) {
+    public boolean accept(Tree obj) {
       if (obj.dominates(firstToKeep))
         return true;
 

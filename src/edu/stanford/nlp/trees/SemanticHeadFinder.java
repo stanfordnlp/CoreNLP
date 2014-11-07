@@ -7,7 +7,7 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.ArrayUtils;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Generics;
 
 import java.util.Arrays;
@@ -265,7 +265,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
    * For example, in the sentence "It is hands down the best dessert ...",
    * we want to avoid using "hands down" as the head.
    */
-  static final Predicate<Tree> REMOVE_TMP_AND_ADV = tree -> {
+  static final Filter<Tree> REMOVE_TMP_AND_ADV = tree -> {
     if (tree == null)
       return false;
     Label label = tree.label();

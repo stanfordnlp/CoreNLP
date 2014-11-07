@@ -3,7 +3,7 @@ package edu.stanford.nlp.trees;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Iterator;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 /** 
  * This class wraps another Treebank, and will vend trees that passed
@@ -12,12 +12,12 @@ import java.util.function.Predicate;
  *  @author John Bauer
  */
 public class FilteringTreebank extends Treebank {
-  private Predicate<Tree> filter;
+  private Filter<Tree> filter;
   private Treebank treebank;
 
   private static final boolean VERBOSE = false;
 
-  public FilteringTreebank(Treebank treebank, Predicate<Tree> filter) {
+  public FilteringTreebank(Treebank treebank, Filter<Tree> filter) {
     this.filter = filter;
     this.treebank = treebank;
   }
@@ -55,7 +55,7 @@ public class FilteringTreebank extends Treebank {
       System.out.println("Applying " + tv + " to treebank");
     }
     for (Tree t : treebank) {
-      if (!filter.test(t)) {
+      if (!filter.accept(t)) {
         if (VERBOSE) System.out.println("  Skipping " + t);
         continue;
       }
@@ -75,11 +75,11 @@ public class FilteringTreebank extends Treebank {
 
   private static class FilteringTreebankIterator implements Iterator<Tree> {
     private Iterator<Tree> iter;
-    private Predicate<Tree> filter;
+    private Filter<Tree> filter;
 
     Tree next;
 
-    FilteringTreebankIterator (Iterator<Tree> iter, Predicate<Tree> filter) {
+    FilteringTreebankIterator (Iterator<Tree> iter, Filter<Tree> filter) {
       this.iter = iter;
       this.filter = filter;
       primeNext();
@@ -98,7 +98,7 @@ public class FilteringTreebank extends Treebank {
     public void primeNext() {
       while (iter.hasNext()) {
         next = iter.next();
-        if (filter.test(next)) {
+        if (filter.accept(next)) {
           return;
         }
       }

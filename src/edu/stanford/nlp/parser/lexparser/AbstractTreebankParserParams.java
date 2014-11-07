@@ -10,7 +10,7 @@ import edu.stanford.nlp.process.SerializableFunction;
 import edu.stanford.nlp.stats.EquivalenceClasser;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Index;
 
 import java.io.OutputStream;
@@ -667,7 +667,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
 
   @Override
   public GrammaticalStructure getGrammaticalStructure(Tree t,
-                                                      Predicate<String> filter,
+                                                      Filter<String> filter,
                                                       HeadFinder hf) {
     throw new UnsupportedOperationException("This language does not support GrammaticalStructures or dependencies");
   }

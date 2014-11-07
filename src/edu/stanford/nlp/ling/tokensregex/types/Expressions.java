@@ -457,15 +457,13 @@ public class Expressions {
     }
   }
 
-
   /**
    * A variable assignment with the name of the variable, and the expression to assign to that variable
    */
   public static class VarAssignmentExpression extends Expressions.TypedExpression {
-
-    final String varName;
-    final Expression valueExpr;
-    final boolean bindAsValue;
+    String varName;
+    Expression valueExpr;
+    boolean bindAsValue = false;
 
     public VarAssignmentExpression(String varName, Expression valueExpr, boolean bindAsValue) {
       super("VAR_ASSIGNMENT");
@@ -526,8 +524,7 @@ public class Expressions {
       result = 31 * result + (bindAsValue ? 1 : 0);
       return result;
     }
-  } // end class VarAssignmentExpression
-
+  }
 
   /**
    * A variable, which can be assigned any expression.
@@ -535,12 +532,9 @@ public class Expressions {
    *   environment, evaluated, and returned.
    */
   public static class VarExpression extends SimpleExpression<String> implements AssignableExpression  {
-
     public VarExpression(String varname, String... tags) {
       super(TYPE_VAR, varname, tags);
     }
-
-    @Override
     public Value evaluate(Env env, Object... args) {
       Expression exp = null;
       String varName = value;
@@ -749,9 +743,7 @@ public class Expressions {
     }
   }
 
-
   public static class ConditionalExpression extends Expressions.WrappedExpression {
-
     public ConditionalExpression(Expression expr) {
       this.expr = expr;
     }
@@ -785,17 +777,14 @@ public class Expressions {
       }
     }
 
-    @Override
     public String getType() {
       return Expressions.TYPE_BOOLEAN;
     }
 
-    @Override
     public Expression simplify(Env env) {
       return this;
     }
 
-    @Override
     public Value evaluate(Env env, Object... args) {
       Value v = expr.evaluate(env, args);
       return convertValueToBooleanValue(v, false);
@@ -865,13 +854,10 @@ public class Expressions {
     return compatible;
   }
 
-
   protected static final String NEWLINE = System.getProperty("line.separator");
-
   public static class FunctionCallExpression extends Expressions.TypedExpression {
-
-    final String function;
-    final List<? extends Expression> params;
+    String function;
+    List<? extends Expression> params;
 
     public FunctionCallExpression(String function, List<? extends Expression> params, String... tags) {
       super(TYPE_FUNCTION, tags);
@@ -880,7 +866,12 @@ public class Expressions {
     }
 
     public String toString() {
-      return function + '(' + StringUtils.join(params, ", ") + ')';
+      StringBuilder sb = new StringBuilder("");
+      sb.append(function);
+      sb.append("(");
+      sb.append(StringUtils.join(params, ", "));
+      sb.append(")");
+      return sb.toString();
     }
 
     public Expression simplify(Env env)
