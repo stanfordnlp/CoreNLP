@@ -182,11 +182,16 @@ public class LambdaSolve {
       }
     }
 
+    if (VERBOSE) {
+      System.err.println(" pcond initialized ");
+    }
     // init zlambda
     for (int x = 0; x < p.data.xSize; x++) {
       zlambda[x] = probConds[x].length;
     }
-
+    if (VERBOSE) {
+      System.err.println(" zlambda initialized ");
+    }
     // init ftildeArr
     for (int i = 0; i < p.fSize; i++) {
       ftildeArr[i] = p.functions.get(i).ftilde();
@@ -226,7 +231,7 @@ public class LambdaSolve {
       }
     }//x
     if (VERBOSE) {
-      System.err.println(" pcond, zlamda, ftildeArr " + (fixedFnumXY ? "(fixed sum) " : "") + "initialized ");
+      System.err.println(" ftildeArr initialized " + (fixedFnumXY ? "fixed sum " : ""));
     }
   }
 
