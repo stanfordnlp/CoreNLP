@@ -1,5 +1,4 @@
 /**
- * <body>
  * A package for doing Chinese word segmentation.
  * <p>
  * This package makes use of the CRFClassifier class (a conditional random
@@ -15,9 +14,9 @@
  * <blockquote><code>
  * java -mx200m edu.stanford.nlp.ie.crf.CRFClassifier -sighanCorporaDict $CH_SEG/data -NormalizationTable $CH_SEG/data/norm.simp.utf8 -normTableEncoding UTF-8 -loadClassifier $CH_SEG/data/ctb.gz -testFile $file -inputEncoding $enc
  * </code></blockquote>
+ *
  * @author Pi-Chuan Chang
  * @author Huihsin Tseng
  * @author Galen Andrew
- * </body>
  */
 package edu.stanford.nlp.wordseg;
