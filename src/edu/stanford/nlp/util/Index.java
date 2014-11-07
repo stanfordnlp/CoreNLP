@@ -10,6 +10,14 @@ import java.util.List;
  * A collection that maps between a vocabulary of type E and a
  * continuous non-negative integer index series beginning (inclusively) at 0.
  *
+ * <p>Often one uses a List to associate a unique index with each Object
+ * (e.g. controlled vocabulary, feature map, etc.). Index offers constant-time
+ * performance for both <code>index -&gt; Object</code> ({@link #get(int)}) and <code>
+ * Object -&gt; index</code> ({@link #indexOf(Object)}) as well as for {@link #contains(Object)}.
+ * Otherwise it behaves like a normal list. Index also
+ * supports {@link #lock()} and {@link #unlock()} to ensure that it's
+ * only modified when desired.</p>
+ *
  * @author Daniel Cer
  *
  * @param <E> The type of objects in the Index
