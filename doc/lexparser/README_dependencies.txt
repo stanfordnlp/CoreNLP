@@ -58,6 +58,17 @@ these two relations can be recovered from the POS tag of the dependent.
 
 
 --------------------------------------
+CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.4
+
+One major change was made to the dependency taxonomy:
+
+ - We decided to collapse together the two dependencies partmod and infmod,
+ since they have similar function and mainly differ in the form of the verbal
+ head, which is anyways recorded in the POS tag. Those two relations are
+ removed from the taxonomy, and a new relation vmod covering the union of both
+ was added.
+
+--------------------------------------
 CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.3
 
 Some fixes/improvements were made in the dependency conversion, and one
