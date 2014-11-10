@@ -1348,17 +1348,6 @@ public class CoreAnnotations {
     }
   }
 
-//  /**
-//   * Used in nlp.trees. When nodes are duplicated in Stanford Dependencies
-//   * conversion (to represent conjunction of PPs with preposition collapsing,
-//   * this gets set to a positive number on duplicated nodes.
-//   */
-//  public static class CopyAnnotation implements CoreAnnotation<Integer> {
-//    public Class<Integer> getType() {
-//      return Integer.class;
-//    }
-//  }
-
   /**
    * Used in SimpleXMLAnnotator. The value is an XML element name String for the
    * innermost element in which this token was contained.
@@ -1626,5 +1615,9 @@ public class CoreAnnotations {
 
   public static class ColumnDataClassifierAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() { return String.class; }
+  }
+
+  public static class LabelIDAnnotation implements CoreAnnotation<Integer>{
+    public Class<Integer> getType() { return Integer.class; }
   }
 }

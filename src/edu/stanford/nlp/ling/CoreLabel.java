@@ -542,17 +542,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
     set(CoreAnnotations.CharacterOffsetEndAnnotation.class, endPos);
   }
 
-//  public int copyCount() {
-//    Integer copy = get(CoreAnnotations.CopyAnnotation.class);
-//    if (copy == null)
-//      return 0;
-//    return copy;
-//  }
-//
-//  public void setCopyCount(int count) {
-//    set(CoreAnnotations.CopyAnnotation.class, count);
-//  }
-
   /**
    * Tag separator to use by default
    */
@@ -621,12 +610,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
       if (index != null) {
         buf.append('-').append((index).intValue());
       }
-      //buf.append(toPrimes());
       break;
     }
     case VALUE_TAG: {
       buf.append(value());
-      //buf.append(toPrimes());
       String tag = tag();
       if (tag != null) {
         buf.append(TAG_SEPARATOR).append(tag);
@@ -643,7 +630,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
       if (index != null) {
         buf.append('-').append((index).intValue());
       }
-      //buf.append(toPrimes());
       break;
     }
     case VALUE_INDEX_MAP: {
@@ -679,7 +665,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
       if (index != null) {
         buf.append('-').append((index).intValue());
       }
-      //buf.append(toPrimes());
       break;
     }
     default:
@@ -687,10 +672,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
     }
     return buf.toString();
   }
-
-//  public String toPrimes() {
-//    return StringUtils.repeat('\'', copyCount());
-//  }
 
   private static final Comparator<Class<?>> asClassComparator = new Comparator<Class<?>>() {
     @Override
