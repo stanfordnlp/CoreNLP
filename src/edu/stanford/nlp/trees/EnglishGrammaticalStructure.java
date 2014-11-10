@@ -1207,10 +1207,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         // OK, we have a conjunction over different PPs
         // we create a new node;
         // in order to make a distinction between the original node and its copy
-        // we add a "copy" entry in the CoreLabel
-        // existence of copy key is checked at printing (toString method of
+        // we set the "copyCount" variable in the IndexedWord
+        // existence of copyCount > 0 is checked at printing (toString method of
         // TypedDependency)
-        IndexedWord label = td1.gov().makeCopy(copyNumber);
+        IndexedWord label = td1.gov().makeSoftCopy(copyNumber);
         copyNumber++;
 
         // now we add the conjunction relation between td1.gov and the copy
