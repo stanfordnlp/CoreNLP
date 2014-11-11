@@ -189,10 +189,7 @@ public class Trees {
     while (leafIterator.hasNext() && labelIterator.hasNext()) {
       Tree leaf = leafIterator.next();
       Label label = labelIterator.next();
-      System.err.println(leaf + " " + System.identityHashCode(leaf.label()) + " " + label + " " + System.identityHashCode(label));
-      System.err.println("  " + leaf.getClass());
       leaf.setLabel(label);
-      System.err.println("  " + leaf.label() + " " + System.identityHashCode(leaf.label()));
       //leafIterator.next().setLabel(labelIterator.next());
     }
     if (leafIterator.hasNext()) {
