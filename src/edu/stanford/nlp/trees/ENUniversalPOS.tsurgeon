@@ -23,8 +23,10 @@ TO=target <... {/.*/}
 
 relabel target ADP
 
+% delete the next two rules, third one should also cover them
+
 % VB -> AUX (passive, case 1)
-VP < (/^VB/=target < /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|seem|seems|seemed|seeming|appear|appears|appeared|become|becomes|became|becoming|get|got|getting|gets|gotten|remains|remained|remain)$/ ) < (VP|ADJP [ < VBN|VBD | < (VP|ADJP < VBN|VBD) < CC ] )
+VP < (/^VB/=target < /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|get|got|getting|gets|gotten)$/ ) < (VP|ADJP [ < VBN|VBD | < (VP|ADJP < VBN|VBD) < CC ] )
 
 relabel target AUX
 
@@ -276,6 +278,10 @@ relabel target X
 HYPH=target <... {/.*/}
 
 relabel target PUNCT
+
+% make hyphens, asterisk, tilde always a punctuation mark
+
+% run on PTB
 
 % NFP -> SYM
 NFP=target <... {/.*/}
