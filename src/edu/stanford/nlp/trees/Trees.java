@@ -180,6 +180,47 @@ public class Trees {
     }
   }
 
+  /**
+   * Given a tree, set the tags on the leaf nodes if they are not
+   * already set.  Do this by using the preterminal's value as a tag.
+   */
+  public static void setLeafTagsIfUnset(Tree tree) {
+    if (tree.isPreTerminal()) {
+      Tree leaf = tree.children()[0];
+      if (!(leaf.label() instanceof HasTag)) {
+        return;
+      }
+      HasTag label = (HasTag) leaf.label();
+      if (label.tag() == null) {
+        label.setTag(tree.value());
+      }
+    } else {
+      for (Tree child : tree.children()) {
+        setLeafTagsIfUnset(child);
+      }
+    }
+  }
+
+  /**
+   * Replace the labels of the leaves with the given leaves.
+   */
+  public static void setLeafLabels(Tree tree, List<Label> labels) {
+    Iterator<Tree> leafIterator = tree.getLeaves().iterator();
+    Iterator<Label> labelIterator = labels.iterator();
+    while (leafIterator.hasNext() && labelIterator.hasNext()) {
+      Tree leaf = leafIterator.next();
+      Label label = labelIterator.next();
+      leaf.setLabel(label);
+      //leafIterator.next().setLabel(labelIterator.next());
+    }
+    if (leafIterator.hasNext()) {
+      throw new IllegalArgumentException("Tree had more leaves than the labels provided");
+    }
+    if (labelIterator.hasNext()) {
+      throw new IllegalArgumentException("More labels provided than tree had leaves");
+    }
+  }
+
 
   /**
    * returns the maximal projection of <code>head</code> in
