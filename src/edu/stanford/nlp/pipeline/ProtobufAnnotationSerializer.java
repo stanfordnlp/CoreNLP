@@ -8,11 +8,13 @@ import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations.*;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
+import edu.stanford.nlp.international.Languages;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.LabeledScoredTreeNode;
@@ -342,6 +344,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (sentence.containsKey(CharacterOffsetBeginAnnotation.class)) { builder.setCharacterOffsetBegin(getAndRegister(sentence, keysToSerialize, CharacterOffsetBeginAnnotation.class)); }
     if (sentence.containsKey(CharacterOffsetEndAnnotation.class)) { builder.setCharacterOffsetEnd(getAndRegister(sentence, keysToSerialize, CharacterOffsetEndAnnotation.class)); }
     if (sentence.containsKey(TreeAnnotation.class)) { builder.setParseTree(toProto(getAndRegister(sentence, keysToSerialize, TreeAnnotation.class))); }
+    if (sentence.containsKey(BinarizedTreeAnnotation.class)) { builder.setBinarizedParseTree(toProto(getAndRegister(sentence, keysToSerialize, BinarizedTreeAnnotation.class))); }
+    if (sentence.containsKey(SentimentCoreAnnotations.AnnotatedTree.class)) { builder.setAnnotatedParseTree(toProto(getAndRegister(sentence, keysToSerialize, SentimentCoreAnnotations.AnnotatedTree.class))); }
+    if (sentence.containsKey(SentimentCoreAnnotations.ClassName.class)) { builder.setSentiment(getAndRegister(sentence, keysToSerialize, SentimentCoreAnnotations.ClassName.class)); }
     if (sentence.containsKey(BasicDependenciesAnnotation.class)) { builder.setBasicDependencies(toProto(getAndRegister(sentence, keysToSerialize, BasicDependenciesAnnotation.class))); }
     if (sentence.containsKey(CollapsedDependenciesAnnotation.class)) { builder.setCollapsedDependencies(toProto(getAndRegister(sentence, keysToSerialize, CollapsedDependenciesAnnotation.class))); }
     if (sentence.containsKey(CollapsedCCProcessedDependenciesAnnotation.class)) { builder.setCollapsedCCProcessedDependencies(toProto(getAndRegister(sentence, keysToSerialize, CollapsedCCProcessedDependenciesAnnotation.class))); }
@@ -468,8 +473,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       CoreNLPProtos.DependencyGraph.Node.Builder nodeBuilder = CoreNLPProtos.DependencyGraph.Node.newBuilder()
           .setSentenceIndex(node.get(SentenceIndexAnnotation.class))
           .setIndex(node.index());
-      if (node.containsKey(CopyAnnotation.class)) {
-        nodeBuilder.setCopyAnnotation(node.get(CopyAnnotation.class));
+      if (node.copyCount() > 0) {
+        nodeBuilder.setCopyAnnotation(node.copyCount());
       }
       builder.addNode(nodeBuilder.build());
       // Register root
@@ -479,13 +484,15 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     // Edges
     for (SemanticGraphEdge edge : graph.edgeIterable()) {
+      // Set edge
       builder.addEdge(CoreNLPProtos.DependencyGraph.Edge.newBuilder()
           .setSource(edge.getSource().index())
           .setTarget(edge.getTarget().index())
           .setDep(edge.getRelation().toString())
           .setIsExtra(edge.isExtra())
           .setSourceCopy(edge.getSource().copyCount())
-          .setTargetCopy(edge.getTarget().copyCount()));
+          .setTargetCopy(edge.getTarget().copyCount())
+          .setLanguage(toProto(edge.getRelation().getLanguage())));
     }
     // Return
     return builder.build();
@@ -583,13 +590,41 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   }
 
   /**
+   * Serialize a CoreNLP Language to a Protobuf Language.
+   * @param lang The language to serialize.
+   * @return The language in a Protobuf enum.
+   */
+  public static CoreNLPProtos.Language toProto(Languages.Language lang) {
+    switch (lang) {
+      case Arabic:
+        return CoreNLPProtos.Language.Arabic;
+      case Chinese:
+        return CoreNLPProtos.Language.Chinese;
+      case English:
+        return CoreNLPProtos.Language.English;
+      case German:
+        return CoreNLPProtos.Language.German;
+      case French:
+        return CoreNLPProtos.Language.French;
+      case Hebrew:
+        return CoreNLPProtos.Language.Hebrew;
+      case Spanish:
+        return CoreNLPProtos.Language.Spanish;
+      case Unknown:
+        return CoreNLPProtos.Language.Unknown;
+      default:
+        throw new IllegalStateException("Unknown language: " + lang);
+    }
+  }
+
+  /**
    * Create a CoreLabel from its serialized counterpart.
    * Note that this is, by itself, a lossy operation. Fields like the docid (sentence index, etc.) are only known
    * from the enclosing document, and are not tracked in the protobuf.
    * @param proto The serialized protobuf to read the CoreLabel from.
    * @return A CoreLabel, missing the fields that are not stored in the CoreLabel protobuf.
    */
-  protected CoreLabel fromProto(CoreNLPProtos.Token proto) {
+  public CoreLabel fromProto(CoreNLPProtos.Token proto) {
     CoreLabel word = new CoreLabel();
     // Required fields
     word.setWord(proto.getWord());
@@ -663,6 +698,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasCharacterOffsetBegin()) { sentence.set(CharacterOffsetBeginAnnotation.class, proto.getCharacterOffsetBegin()); }
     if (proto.hasCharacterOffsetEnd()) { sentence.set(CharacterOffsetEndAnnotation.class, proto.getCharacterOffsetEnd()); }
     if (proto.hasParseTree()) { sentence.set(TreeAnnotation.class, fromProto(proto.getParseTree())); }
+    if (proto.hasBinarizedParseTree()) { sentence.set(BinarizedTreeAnnotation.class, fromProto(proto.getBinarizedParseTree())); }
+    if (proto.hasAnnotatedParseTree()) { sentence.set(SentimentCoreAnnotations.AnnotatedTree.class, fromProto(proto.getAnnotatedParseTree())); }
+    if (proto.hasSentiment()) { sentence.set(SentimentCoreAnnotations.ClassName.class, proto.getSentiment()); }
     // Non-default fields
     if (proto.hasHasRelationAnnotations() && proto.getHasRelationAnnotations()) {
       // set entities
@@ -842,9 +880,31 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     return node;
   }
 
+  public static Languages.Language fromProto(CoreNLPProtos.Language lang) {
+    switch (lang) {
+      case Arabic:
+        return Languages.Language.Arabic;
+      case Chinese:
+        return Languages.Language.Chinese;
+      case English:
+        return Languages.Language.English;
+      case German:
+        return Languages.Language.German;
+      case French:
+        return Languages.Language.French;
+      case Hebrew:
+        return Languages.Language.Hebrew;
+      case Spanish:
+        return Languages.Language.Spanish;
+      case Unknown:
+        return Languages.Language.Unknown;
+      default:
+        throw new IllegalStateException("Unknown language: " + lang);
+    }
+  }
+
   /**
    * Voodoo magic to convert a serialized dependency graph into a {@link SemanticGraph}.
-   * Taken originally from {@link CustomAnnotationSerializer#convertIntermediateGraph(CustomAnnotationSerializer.IntermediateSemanticGraph, java.util.List)}.
    * This method is intended to be called only from the {@link ProtobufAnnotationSerializer#fromProto(CoreNLPProtos.Document)}
    * method.
    *
@@ -873,7 +933,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       if (in.hasCopyAnnotation() && in.getCopyAnnotation() > 0) {
         // TODO: if we make a copy wrapper CoreLabel, use it here instead
         word = new IndexedWord(new CoreLabel(token));
-        word.set(CopyAnnotation.class, in.getCopyAnnotation());
+        word.setCopyCount(in.getCopyAnnotation());
       } else {
         word = new IndexedWord(token);
       }
@@ -904,7 +964,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       synchronized (globalLock) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
         assert ie.hasDep();
-        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep());
+        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep(), fromProto(ie.getLanguage()));
         graph.addEdge(source, target, rel, 1.0, ie.hasIsExtra() && ie.getIsExtra());
       }
     }

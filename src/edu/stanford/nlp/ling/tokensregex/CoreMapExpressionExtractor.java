@@ -13,7 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -67,7 +67,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
     /** Rules to extract composite expressions (grouped in stages) */
     SequenceMatchRules.ExtractRule<List<? extends CoreMap>, T> compositeExtractRule;
     /** Filtering rule */
-    Filter<T> filterRule;
+    Predicate<T> filterRule;
 
     private static <I,O> SequenceMatchRules.ExtractRule<I,O> addRule(SequenceMatchRules.ExtractRule<I, O> origRule,
                                                                      SequenceMatchRules.ExtractRule<I, O> rule)
@@ -94,7 +94,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
       basicExtractRule = addRule(basicExtractRule, rule);
     }
 
-    private void addFilterRule(Filter<T> rule)
+    private void addFilterRule(Predicate<T> rule)
     {
       Filters.DisjFilter<T> r;
       if (filterRule instanceof Filters.DisjFilter) {
@@ -124,7 +124,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
    * @param env Environment to use for binding variables and applying rules
    */
   public CoreMapExpressionExtractor(Env env) {
-    this.stages = Generics.newHashMap();
+    this.stages = new HashMap<Integer, Stage<T>>();//Generics.newHashMap();
     this.env = env;
     this.tokensAnnotationKey = EnvLookup.getDefaultTokensAnnotationKey(env);
   }
@@ -194,7 +194,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
 
   public void setExtractRules(SequenceMatchRules.ExtractRule<CoreMap, T> basicExtractRule,
                               SequenceMatchRules.ExtractRule<List<? extends CoreMap>, T> compositeExtractRule,
-                              Filter<T> filterRule)
+                              Predicate<T> filterRule)
   {
     Stage<T> stage = new Stage<T>();
     stage.basicExtractRule = basicExtractRule;
@@ -494,14 +494,14 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
     expressions.removeAll(toDiscard);
   }
 
-  private List<T> filterInvalidExpressions(Filter<T> filterRule, List<T> expressions)
+  private List<T> filterInvalidExpressions(Predicate<T> filterRule, List<T> expressions)
   {
     if (filterRule == null) return expressions;
     if (expressions.size() == 0) return expressions;
     int nfiltered = 0;
     List<T> kept = new ArrayList<T>(expressions.size());   // Approximate size
     for (T expr:expressions) {
-      if (!filterRule.accept(expr)) {
+      if (!filterRule.test(expr)) {
         kept.add(expr);
       } else {
         nfiltered++;

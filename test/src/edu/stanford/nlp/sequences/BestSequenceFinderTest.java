@@ -9,6 +9,8 @@ import junit.framework.TestCase;
  */
 public class BestSequenceFinderTest extends TestCase {
 
+  private static final boolean DEBUG = false;
+
   public interface TestSequenceModel extends SequenceModel {
 
     /** Returns the best label sequence. */
@@ -24,6 +26,8 @@ public class BestSequenceFinderTest extends TestCase {
    * This one isn't very tricky. It scores the correct answer with a label
    * and all other answers as 0.  So you're pretty broken if you can't
    * follow it.
+   *
+   * In the padding area you can only have tag 0. Otherwise, it likes the tag to match correctTags
    */
   public static class TestSequenceModel1 implements TestSequenceModel {
 
@@ -117,6 +121,7 @@ public class BestSequenceFinderTest extends TestCase {
 
   /**
    * A second class for testing best sequence finding on a SequenceModel.
+   * This wants 0 in padding and a maximal ascending sequence inside, so gets 7, 8, 9
    */
   public static class TestSequenceModel2 implements TestSequenceModel {
 
@@ -206,6 +211,100 @@ public class BestSequenceFinderTest extends TestCase {
     }
 
   } // end class TestSequenceModel2
+
+
+  /**
+   * A variant of second class for testing best sequence finding on a SequenceModel.
+   * This version has rightWindow == 0, which is sometimes needed.
+   * This wants 0 in padding and a maximal ascending sequence inside, so gets 7, 8, 9
+   */
+  public static class TestSequenceModel2nr implements TestSequenceModel {
+
+    private final int[] correctTags = {0, 0, 7, 8, 9 };
+    private final int[] allTags = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    private final int[] midTags = {0, 1, 2, 3, 4, 5};
+    private final int[] nullTags = {0};
+
+    /** {@inheritDoc} */
+    @Override
+    public int length() {
+      return correctTags.length - leftWindow() - rightWindow();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int leftWindow() {
+      return 2;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int rightWindow() {
+      return 0;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int[] getPossibleValues(int pos) {
+      if (pos < leftWindow() || pos >= leftWindow() + length()) {
+        return nullTags;
+      }
+      if (pos < 5) {
+        return allTags;
+      }
+      return midTags;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double scoreOf(int[] tags, int pos) {
+      double score;
+      if (tags[pos] > tags[pos-1] && tags[pos] <= tags[pos-1] + 1) {
+//       if (tags[pos] <= tags[pos-1] + 1 && tags[pos] <= tags[pos-2] + 1) {
+        score = tags[pos];
+      } else {
+        score = tags[pos] == 0 ? 0.0: 1.0 / tags[pos];
+      }
+      // System.out.printf("Score of label %d for position %d in %s is %.2f%n",
+      //     tags[pos], pos, Arrays.toString(tags), score);
+      return score;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double scoreOf(int[] sequence) {
+      double score = 0.0;
+      for (int i = leftWindow(); i < leftWindow() + length(); i++) {
+        score += scoreOf(sequence, i);
+      }
+      return score;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double[] scoresOf(int[] tags, int pos) {
+      int[] tagsAtPos = getPossibleValues(pos);
+      double[] scores = new double[tagsAtPos.length];
+      for (int t = 0; t < tagsAtPos.length; t++) {
+        tags[pos] = tagsAtPos[t];
+        scores[t] = scoreOf(tags, pos);
+      }
+      return scores;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int[] correctAnswers() {
+      return correctTags;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public double bestSequenceScore() {
+      return scoreOf(correctTags);
+    }
+
+  } // end class TestSequenceModel2nr
 
 
   /**
@@ -305,7 +404,10 @@ public class BestSequenceFinderTest extends TestCase {
   public static void runSequenceFinder(TestSequenceModel tsm,
                                        BestSequenceFinder sf) {
     int[] bestLabels = sf.bestSequence(tsm);
-    // System.out.println("The best sequence is ... " + Arrays.toString(bestLabels));
+    if (DEBUG) {
+      System.err.println("Best sequence: " + Arrays.toString(bestLabels));
+      System.err.println("  vs. correct: " + Arrays.toString(tsm.correctAnswers()));
+    }
     assertTrue("Best sequence is wrong. Correct: " + Arrays.toString(tsm.correctAnswers()) +
             ", found: " + Arrays.toString(bestLabels),
             Arrays.equals(tsm.correctAnswers(), bestLabels));
@@ -338,6 +440,9 @@ public class BestSequenceFinderTest extends TestCase {
     TestSequenceModel tsm2 = new TestSequenceModel2();
     runSequenceFinder(tsm2, bsf);
     runPossibleValuesChecker(tsm2, bsf);
+    TestSequenceModel tsm2nr = new TestSequenceModel2nr();
+    runSequenceFinder(tsm2nr, bsf);
+    runPossibleValuesChecker(tsm2nr, bsf);
     TestSequenceModel tsm3 = new TestSequenceModel3();
     runSequenceFinder(tsm3, bsf);
     runPossibleValuesChecker(tsm3, bsf);

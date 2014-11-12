@@ -19,8 +19,25 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * StringUtils is a class for random String things, including output
- * formatting and command line argument parsing.
+ * StringUtils is a class for random String things, including output formatting and command line argument parsing.
+ * <p>
+ * Many of these methods will be familiar to perl users: {@link #join(Iterable)}, {@link #split(String, String)}, {@link
+ * #trim(String, int)}, {@link #find(String, String)}, {@link #lookingAt(String, String)}, and {@link #matches(String,
+ * String)}.
+ * <p>
+ * There are also useful methods for padding Strings/Objects with spaces on the right or left for printing even-width
+ * table columns: {@link #padLeft(int, int)}, {@link #pad(String, int)}.
+ *
+ * <p>Example: print a comma-separated list of numbers:</p>
+ * <p><code>System.out.println(StringUtils.pad(nums, &quot;, &quot;));</code></p>
+ * <p>Example: print a 2D array of numbers with 8-char cells:</p>
+ * <p><code>for(int i = 0; i &lt; nums.length; i++) {<br>
+ * &nbsp;&nbsp;&nbsp; for(int j = 0; j &lt; nums[i].length; j++) {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ * System.out.print(StringUtils.leftPad(nums[i][j], 8));<br>
+ * &nbsp;&nbsp;&nbsp; <br>
+ * &nbsp;&nbsp;&nbsp; System.out.println();<br>
+ * </code></p>
  *
  * @author Dan Klein
  * @author Christopher Manning

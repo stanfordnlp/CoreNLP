@@ -457,13 +457,15 @@ public class Expressions {
     }
   }
 
+
   /**
    * A variable assignment with the name of the variable, and the expression to assign to that variable
    */
   public static class VarAssignmentExpression extends Expressions.TypedExpression {
-    String varName;
-    Expression valueExpr;
-    boolean bindAsValue = false;
+
+    final String varName;
+    final Expression valueExpr;
+    final boolean bindAsValue;
 
     public VarAssignmentExpression(String varName, Expression valueExpr, boolean bindAsValue) {
       super("VAR_ASSIGNMENT");
@@ -524,7 +526,8 @@ public class Expressions {
       result = 31 * result + (bindAsValue ? 1 : 0);
       return result;
     }
-  }
+  } // end class VarAssignmentExpression
+
 
   /**
    * A variable, which can be assigned any expression.
@@ -532,9 +535,12 @@ public class Expressions {
    *   environment, evaluated, and returned.
    */
   public static class VarExpression extends SimpleExpression<String> implements AssignableExpression  {
+
     public VarExpression(String varname, String... tags) {
       super(TYPE_VAR, varname, tags);
     }
+
+    @Override
     public Value evaluate(Env env, Object... args) {
       Expression exp = null;
       String varName = value;
@@ -743,7 +749,9 @@ public class Expressions {
     }
   }
 
+
   public static class ConditionalExpression extends Expressions.WrappedExpression {
+
     public ConditionalExpression(Expression expr) {
       this.expr = expr;
     }
@@ -777,14 +785,17 @@ public class Expressions {
       }
     }
 
+    @Override
     public String getType() {
       return Expressions.TYPE_BOOLEAN;
     }
 
+    @Override
     public Expression simplify(Env env) {
       return this;
     }
 
+    @Override
     public Value evaluate(Env env, Object... args) {
       Value v = expr.evaluate(env, args);
       return convertValueToBooleanValue(v, false);
@@ -854,10 +865,13 @@ public class Expressions {
     return compatible;
   }
 
+
   protected static final String NEWLINE = System.getProperty("line.separator");
+
   public static class FunctionCallExpression extends Expressions.TypedExpression {
-    String function;
-    List<? extends Expression> params;
+
+    final String function;
+    final List<? extends Expression> params;
 
     public FunctionCallExpression(String function, List<? extends Expression> params, String... tags) {
       super(TYPE_FUNCTION, tags);
@@ -866,12 +880,7 @@ public class Expressions {
     }
 
     public String toString() {
-      StringBuilder sb = new StringBuilder("");
-      sb.append(function);
-      sb.append("(");
-      sb.append(StringUtils.join(params, ", "));
-      sb.append(")");
-      return sb.toString();
+      return function + '(' + StringUtils.join(params, ", ") + ')';
     }
 
     public Expression simplify(Env env)
@@ -1152,7 +1161,7 @@ public class Expressions {
   */
   public static class CompositeValue extends SimpleCachedExpression<Map<String,Expression>> implements Value<Map<String,Expression>>{
     public CompositeValue(String... tags) {
-      super(TYPE_COMPOSITE, Generics.<String,Expression>newHashMap(), tags);
+      super(TYPE_COMPOSITE, new HashMap<String, Expression>(), tags);//Generics.<String,Expression>newHashMap()
     }
 
     public CompositeValue(Map<String, Expression> m, boolean isEvaluated, String... tags) {
@@ -1338,7 +1347,7 @@ public class Expressions {
 
     public CompositeValue simplifyNoTypeConversion(Env env, Object... args) {
       Map<String, Expression> m = value;
-      Map<String, Expression> res = Generics.newHashMap (m.size());
+      Map<String, Expression> res = new HashMap<String, Expression>(m.size());//Generics.newHashMap (m.size());
       for (Map.Entry<String, Expression> stringExpressionEntry : m.entrySet()) {
         res.put(stringExpressionEntry.getKey(), stringExpressionEntry.getValue().simplify(env));
       }
@@ -1347,7 +1356,7 @@ public class Expressions {
 
     private CompositeValue evaluateNoTypeConversion(Env env, Object... args) {
       Map<String, Expression> m = value;
-      Map<String, Expression> res = Generics.newHashMap (m.size());
+      Map<String, Expression> res = new HashMap<String, Expression>(m.size());//Generics.newHashMap (m.size());
       for (Map.Entry<String, Expression> stringExpressionEntry : m.entrySet()) {
         res.put(stringExpressionEntry.getKey(), stringExpressionEntry.getValue().evaluate(env, args));
       }
@@ -1358,7 +1367,7 @@ public class Expressions {
       Value v = attemptTypeConversion(this, env, args);
       if (v != null) return v;
       Map<String, Expression> m = value;
-      Map<String, Expression> res = Generics.newHashMap (m.size());
+      Map<String, Expression> res = new HashMap<String, Expression>(m.size());//Generics.newHashMap (m.size());
       for (Map.Entry<String, Expression> stringExpressionEntry : m.entrySet()) {
         res.put(stringExpressionEntry.getKey(), stringExpressionEntry.getValue().evaluate(env, args));
       }

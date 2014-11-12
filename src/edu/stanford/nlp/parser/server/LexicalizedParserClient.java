@@ -29,6 +29,80 @@ public class LexicalizedParserClient {
   }
 
   /**
+   * Reads a text result from the given socket
+   */
+  private static String readResult(Socket socket) 
+    throws IOException
+  {
+    BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "utf-8"));
+    StringBuilder result = new StringBuilder();
+    String line;
+    while ((line = reader.readLine()) != null) {
+      if (result.length() > 0) {
+        result.append("\n");
+      }
+      result.append(line);
+    }
+    return result.toString();
+  }
+
+  /**
+   * Tokenize the text according to the parser's tokenizer, 
+   * return it as whitespace tokenized text.
+   */
+  public String getTokenizedText(String query) 
+    throws IOException
+  {
+    Socket socket = new Socket(host, port);
+
+    Writer out = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
+    out.write("tokenize " + query + "\n");
+    out.flush();
+
+    String result = readResult(socket);
+    socket.close();
+    return result;
+  }
+
+  /**
+   * Get the lemmas for the text according to the parser's lemmatizer
+   * (only applies to English), return it as whitespace tokenized text.
+   */
+  public String getLemmas(String query) 
+    throws IOException
+  {
+    Socket socket = new Socket(host, port);
+
+    Writer out = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
+    out.write("lemma " + query + "\n");
+    out.flush();
+
+    String result = readResult(socket);
+    socket.close();
+    return result;
+  }
+
+  /**
+   * Returns the String output of the dependencies.
+   * <br>
+   * TODO: use some form of Mode enum (such as the one in SemanticGraphFactory) 
+   * instead of a String
+   */
+  public String getDependencies(String query, String mode) 
+    throws IOException
+  {
+    Socket socket = new Socket(host, port);
+
+    Writer out = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
+    out.write("dependencies:" + mode + " " + query + "\n");
+    out.flush();
+
+    String result = readResult(socket);
+    socket.close();
+    return result;
+  }
+
+  /**
    * Returns the String output of the parse of the given query.
    * <br>
    * The "parse" method in the server is mostly useful for clients
@@ -45,15 +119,9 @@ public class LexicalizedParserClient {
     out.write("parse" + (binarized ? ":binarized " : " ") + query + "\n");
     out.flush();
 
-    BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), "utf-8"));
-    StringBuilder result = new StringBuilder();
-    String line;
-    while ((line = reader.readLine()) != null) {
-      result.append(line);
-    }
-
+    String result = readResult(socket);
     socket.close();
-    return result.toString();
+    return result;
   }
 
   /**
