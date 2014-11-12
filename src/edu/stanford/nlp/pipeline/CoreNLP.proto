@@ -70,29 +70,31 @@ message Sentence {
 //
 message Token {
   // Fields set by the default annotators [new CoreNLP(new Properties())]
-  required string word            = 1;    // the word's gloss (post-tokenization)
-  optional string pos             = 2;    // The word's part of speech tag
-  optional string value           = 3;    // The word's 'value', (e.g., parse tree node)
-  optional string category        = 4;    // The word's 'category' (e.g., parse tree node)
-  optional string before          = 5;    // The whitespace/xml before the token
-  optional string after           = 6;    // The whitespace/xml after the token
-  optional string originalText    = 7;    // The original text for this token
-  optional string ner             = 8;    // The word's NER tag
-  optional string normalizedNER   = 9;    // The word's normalized NER tag
-  optional string lemma           = 10;   // The word's lemma
-  optional uint32 beginChar       = 11;   // The character offset begin
-  optional uint32 endChar         = 12;   // The character offset end
-  optional uint32 utterance       = 13;   // The utterance tag used in dcoref
-  optional string speaker         = 14;   // The speaker speaking this word
-  optional uint32 beginIndex      = 15;   // The begin index of, e.g., a span
-  optional uint32 endIndex        = 16;   // The begin index of, e.g., a span
-  optional uint32 tokenBeginIndex = 17;   // The begin index of the token
-  optional uint32 tokenEndIndex   = 18;   // The end index of the token
-  optional Timex  timexValue      = 19;   // The time this word refers to
-  optional bool   hasXmlContext   = 21;   // Used by clean xml annotator
-  repeated string xmlContext      = 22;   // Used by clean xml annotator
-  optional uint32 corefClusterID  = 23;   // The [primary] cluster id for this token
-  optional string answer          = 24;   // A temporary annotation which is occasionally left in
+  required string word              = 1;    // the word's gloss (post-tokenization)
+  optional string pos               = 2;    // The word's part of speech tag
+  optional string value             = 3;    // The word's 'value', (e.g., parse tree node)
+  optional string category          = 4;    // The word's 'category' (e.g., parse tree node)
+  optional string before            = 5;    // The whitespace/xml before the token
+  optional string after             = 6;    // The whitespace/xml after the token
+  optional string originalText      = 7;    // The original text for this token
+  optional string ner               = 8;    // The word's NER tag
+  optional string normalizedNER     = 9;    // The word's normalized NER tag
+  optional string lemma             = 10;   // The word's lemma
+  optional uint32 beginChar         = 11;   // The character offset begin
+  optional uint32 endChar           = 12;   // The character offset end
+  optional uint32 utterance         = 13;   // The utterance tag used in dcoref
+  optional string speaker           = 14;   // The speaker speaking this word
+  optional uint32 beginIndex        = 15;   // The begin index of, e.g., a span
+  optional uint32 endIndex          = 16;   // The begin index of, e.g., a span
+  optional uint32 tokenBeginIndex   = 17;   // The begin index of the token
+  optional uint32 tokenEndIndex     = 18;   // The end index of the token
+  optional Timex  timexValue        = 19;   // The time this word refers to
+  optional bool   hasXmlContext     = 21;   // Used by clean xml annotator
+  repeated string xmlContext        = 22;   // Used by clean xml annotator
+  optional uint32 corefClusterID    = 23;   // The [primary] cluster id for this token
+  optional string answer            = 24;   // A temporary annotation which is occasionally left in
+  optional string projectedCategory = 25;   // The syntactic category of the maximal constituent headed by the word. Used in SemanticGraph.
+  optional uint32 headWordIndex     = 26;   // The index of the head word of this word.
 
   // Fields set by other annotators in CoreNLP
   optional string gender          = 51;  // gender annotation (machine reading)

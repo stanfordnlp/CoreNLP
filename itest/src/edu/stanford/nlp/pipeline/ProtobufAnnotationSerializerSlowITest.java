@@ -88,6 +88,8 @@ public class ProtobufAnnotationSerializerSlowITest {
           if (!token.containsKey(CoreAnnotations.IndexAnnotation.class)) {
             token.set(CoreAnnotations.IndexAnnotation.class, k + 1);
           }
+          // TODO(gabor) this bit shouldn't be here!
+          token.remove(TreeCoreAnnotations.HeadWordAnnotation.class);
         }
         // Set normalized named entity for chunked tokens
         if (sentence.containsKey(CoreAnnotations.NumerizedTokensAnnotation.class)) {
