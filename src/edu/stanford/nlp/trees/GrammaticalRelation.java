@@ -26,7 +26,6 @@
 
 package edu.stanford.nlp.trees;
 
-import edu.stanford.nlp.international.Languages;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
@@ -43,7 +42,7 @@ import java.util.regex.Pattern;
 
 
 /**
- * {@code GrammaticalRelation} is used to define a
+ * <code>GrammaticalRelation</code> is used to define a
  * standardized, hierarchical set of grammatical relations,
  * together with patterns for identifying them in
  * parse trees.<p>
@@ -51,17 +50,17 @@ import java.util.regex.Pattern;
  * Each <code>GrammaticalRelation</code> has:
  * <ul>
  *   <li>A <code>String</code> short name, which should be a lowercase
- *       abbreviation of some kind (in the fure mainly Universal Dependency names).</li>
+ *       abbreviation of some kind.</li>
  *   <li>A <code>String</code> long name, which should be descriptive.</li>
  *   <li>A parent in the <code>GrammaticalRelation</code> hierarchy.</li>
  *   <li>A {@link Pattern <code>Pattern</code>} called
  *   <code>sourcePattern</code> which matches (parent) nodes from which
  *   this <code>GrammaticalRelation</code> could hold.  (Note: this is done
- *   with the Java regex Pattern <code>matches()</code> predicate. The pattern
+ *   with the Java regex Pattern <code>matches()</code> predicate: the pattern
  *   must match the
  *   whole node name, and <code>^</code> or <code>$</code> aren't needed.
  *   Tregex constructions like __ do not work. Use ".*" to be applicable
- *   at all nodes. This prefiltering is used for efficiency.)</li>
+ *   at all nodes.)</li>
  *   <li>A list of zero or more {@link TregexPattern
  *   <code>TregexPattern</code>s} called <code>targetPatterns</code>,
  *   which describe the local tree structure which must hold between
@@ -148,7 +147,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
 
   /**
-   * Dummy relation, used while collapsing relations, e.g., in English &amp; Chinese GrammaticalStructure
+   * Dummy relation, used while collapsing relations, in English &amp; Chinese GrammaticalStructure
    */
   public static final GrammaticalRelation KILL =
     new GrammaticalRelation(Language.Any, "KILL", "dummy relation kill", null);
@@ -215,42 +214,15 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   }
 
   private static Map<String, SoftReference<GrammaticalRelation>> valueOfCache = new HashMap<String, SoftReference<GrammaticalRelation>>();
-
-  public static GrammaticalRelation valueOf(String s, Languages.Language language) {
+  public static GrammaticalRelation valueOf(String s) {
     GrammaticalRelation value = null;
     SoftReference<GrammaticalRelation> possiblyCachedValue = valueOfCache.get(s);
     if (possiblyCachedValue != null) { value = possiblyCachedValue.get(); }
-    if (value == null) {  // TODO(gabor) we have the language conversion going on again...
-      Language depLanguage = Language.Any;
-      switch (language) {
-        case Arabic:
-          break;
-        case Chinese:
-          depLanguage = Language.Chinese;
-          break;
-        case English:
-          depLanguage = Language.English;
-          break;
-        case German:
-          break;
-        case French:
-          break;
-        case Hebrew:
-          break;
-        case Spanish:
-          break;
-        case Unknown:
-          depLanguage = Language.Any;
-          break;
-      }
-      value = valueOf(depLanguage, s);
-      valueOfCache.put(s, new SoftReference<>(value));
+    if (value == null) {
+      value = valueOf(Language.English, s);
+      valueOfCache.put(s, new SoftReference<GrammaticalRelation>(value));
     }
     return value;
-  }
-
-  public static GrammaticalRelation valueOf(String s) {
-    return valueOf(s, Languages.Language.English);
   }
 
   /**
@@ -266,7 +238,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   }
 
 
-  public static enum Language { Any, English, Chinese }
+  public enum Language { Any, English, Chinese }
 
 
   /* Non-static stuff */
@@ -338,7 +310,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     }
   }
 
-  // This is the main constructor used
   public GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
@@ -349,7 +320,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     this(language, shortName, longName, parent, sourcePattern, tregexCompiler, targetPatterns, null);
   }
 
-  // Used for non-leaf relations with no patterns
   public GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
@@ -357,7 +327,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     this(language, shortName, longName, parent, null, null, StringUtils.EMPTY_STRING_ARRAY, null);
   }
 
-  // used to create collapsed relations with specificString
   public GrammaticalRelation(Language language,
                              String shortName,
                              String longName,
@@ -497,8 +466,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
     final GrammaticalRelation gr = (GrammaticalRelation) o;
     // == okay for language as enum!
-    // TODO(gabor) perhaps Language.Any shouldn't be equal to any language? This is a bit of a hack around some dependencies caring about language and others not.
-    return (this.language == Language.Any || gr.language == Language.Any || this.language == gr.language) &&
+    return this.language == gr.language &&
              this.shortName.equals(gr.shortName) &&
              (this.specific == gr.specific ||
               (this.specific != null && this.specific.equals(gr.specific)));
@@ -526,20 +494,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
   public String getShortName() {
     return shortName;
-  }
-
-  // TODO(gabor) this is nontrivially brittle. I guess in the long term we should only have one "Language" enum?
-  /**
-   * Get the language of the grammatical relation.
-   */
-  public Languages.Language getLanguage() {
-    switch (this.language) {
-      case Any: return Languages.Language.Unknown;
-      case English: return Languages.Language.English;
-      case Chinese: return Languages.Language.Chinese;
-      default:
-        throw new IllegalStateException("Unknown language: " + this.language);
-    }
   }
 
   public String getSpecific() {

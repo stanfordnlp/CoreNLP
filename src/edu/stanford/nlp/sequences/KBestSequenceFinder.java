@@ -1,7 +1,6 @@
 package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 
 import java.util.Arrays;
@@ -14,7 +13,6 @@ public class KBestSequenceFinder implements BestSequenceFinder {
   /**
    * Runs the Viterbi algorithm on the sequence model
    * in order to find the best sequence.
-   * This sequence finder only works on SequenceModel's with rightWindow == 0.
    *
    * @return An array containing the int tags of the best sequence
    */
@@ -23,26 +21,14 @@ public class KBestSequenceFinder implements BestSequenceFinder {
     return Counters.argmax(kBestSequences(ts, 1));
   }
 
-  /**
-   * Runs the Viterbi algorithm on the sequence model, and then proceeds to efficiently
-   * backwards decode the best k label sequence assignments.
-   * This sequence finder only works on SequenceModel's with rightWindow == 0.
-   *
-   * @param ts The SequenceModel to find the best k label sequence assignments of
-   * @param k The number of top-scoring assignments to find.
-   * @return A Counter with k entries that map from a sequence assignment (int array) to a double score
-   */
-  @SuppressWarnings("MethodMayBeStatic")
-  public Counter<int[]> kBestSequences(SequenceModel ts, int k) {
+  public ClassicCounter<int[]> kBestSequences(SequenceModel ts, int k) {
 
     // Set up tag options
     int length = ts.length();
     int leftWindow = ts.leftWindow();
     int rightWindow = ts.rightWindow();
 
-    if (rightWindow != 0) {
-      throw new IllegalArgumentException("KBestSequenceFinder only works with rightWindow == 0 not " + rightWindow);
-    }
+    assert (rightWindow == 0);
 
     int padLength = length + leftWindow + rightWindow;
 
@@ -188,10 +174,9 @@ public class KBestSequenceFinder implements BestSequenceFinder {
         for (int k2 = 0; k2 < bestFinalScores.length; k2++) {
           if (score[padLength - 1][product][k1] > bestFinalScores[k2]) {
 
-            // open up a space in the arrays at position k2
-            System.arraycopy(bestFinalScores, k2, bestFinalScores, k2+1, bestFinalScores.length-(k2+1));
-            System.arraycopy(whichDerivation, k2, whichDerivation, k2+1, whichDerivation.length-(k2+1));
-            System.arraycopy(bestCurrentProducts, k2, bestCurrentProducts, k2+1, bestCurrentProducts.length-(k2+1));
+            System.arraycopy(bestFinalScores, k1, bestFinalScores, k1+1, bestFinalScores.length-(k1+1));
+            System.arraycopy(whichDerivation, k1, whichDerivation, k1+1, whichDerivation.length-(k1+1));
+            System.arraycopy(bestCurrentProducts, k1, bestCurrentProducts, k1+1, bestCurrentProducts.length-(k1+1));
 
             bestCurrentProducts[k2] = product;
             whichDerivation[k2] = k1;

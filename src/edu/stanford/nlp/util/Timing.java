@@ -11,19 +11,6 @@ import java.text.DecimalFormat;
  * preferred usage is to instantiate a Timing object and use instance
  * methods.
  *
- * <p>To use, call {@link #startTime()} before running the code in
- * question. Call {@link #tick()} to print an intermediate update, and {@link #endTime()} to
- * finish the timing and print the result. You can optionally pass a descriptive
- * string and <code>PrintStream</code> to <code>tick</code> and <code>endTime</code>
- * for more control over what gets printed where.</p>
- *
- * <p>Example: time reading in a big file and transforming it:</p>
- * <p><code>Timing.startTime();<br>
- * String bigFileContents = IOUtils.slurpFile(bigFile);<br>
- * Timing.tick(&quot;read in big file&quot;, System.err);<br>
- * String output = costlyTransform(bigFileContents);<br>
- * Timing.endTime(&quot;transformed big file&quot;, System.err);</code></p>
- *
  * @author Bill MacCartney
  */
 public class Timing {

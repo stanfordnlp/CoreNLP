@@ -158,15 +158,6 @@ public class TreeGraphNode extends Tree implements HasParent {
     return label;
   }
 
-  @Override
-  public void setLabel(Label label) {
-    if (label instanceof CoreLabel) {
-      this.setLabel((CoreLabel) label);
-    } else {
-      this.setLabel((CoreLabel) mlf.newLabel(label));
-    }
-  }
-
   /**
    * Sets the label associated with the current node.
    *
@@ -524,17 +515,16 @@ public class TreeGraphNode extends Tree implements HasParent {
     return buf.toString();
   }
 
-//  public String toPrimes() {
-//    int copy = label().copyCount();
-//    return StringUtils.repeat('\'', copy);
-//  }
+  public String toPrimes() {
+    int copy = label().copyCount();
+    return StringUtils.repeat('\'', copy);
+  }
 
   @Override
   public String toString() {
-    return toString(CoreLabel.DEFAULT_FORMAT);
+    return label.toString();
   }
 
-  //TODO: is it important to have the toPrimes() string attached to this? (SG) Currently it is not.
   public String toString(CoreLabel.OutputFormat format) {
     return label.toString(format);
   }

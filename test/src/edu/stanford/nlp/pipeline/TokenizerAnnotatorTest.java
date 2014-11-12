@@ -7,11 +7,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import junit.framework.TestCase;
 
 
-/** 
- * See TokenizerAnnotatorITest for some tests that require model files
- *
- * @author Christopher Manning 
- */
+/** @author Christopher Manning */
 public class TokenizerAnnotatorTest extends TestCase {
 
   private static final String text = "She'll prove it ain't so.";
@@ -41,6 +37,18 @@ public class TokenizerAnnotatorTest extends TestCase {
       assertEquals("Bung token in new CoreLabel usage", it2.next(), word.get(CoreAnnotations.TextAnnotation.class));
     }
     assertFalse("Too few tokens in new CoreLabel usage", it2.hasNext());
+  }
+
+  public void testNotSpanish() {
+    Annotation ann = new Annotation("Damelo");
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize");
+    props.setProperty("tokenize.language", "english");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(ann);
+
+    assertEquals(1, ann.get(CoreAnnotations.TokensAnnotation.class).size());
+    assertEquals("Damelo", ann.get(CoreAnnotations.TokensAnnotation.class).get(0).word());
   }
 
   public void testBadLanguage() {

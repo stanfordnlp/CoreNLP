@@ -14,8 +14,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import edu.stanford.nlp.util.*;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Factory;
+import edu.stanford.nlp.util.Filter;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.MapFactory;
+import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
@@ -114,21 +118,21 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * given Filter. Passing in a filter that always returns true is equivalent
    * to calling {@link #totalCount()}.
    */
-  public int totalIntCount(Predicate<E> filter) {
+  public int totalIntCount(Filter<E> filter) {
     int total = 0;
     for (E key : map.keySet()) {
-      if (filter.test(key)) {
+      if (filter.accept(key)) {
         total += getIntCount(key);
       }
     }
     return (total);
   }
 
-  public double totalDoubleCount(Predicate<E> filter) {
+  public double totalDoubleCount(Filter<E> filter) {
     return totalIntCount(filter);
   }
 
-  public double totalCount(Predicate<E> filter) {
+  public double totalCount(Filter<E> filter) {
     return totalDoubleCount(filter);
   }
 

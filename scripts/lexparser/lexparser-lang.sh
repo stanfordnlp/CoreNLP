@@ -45,7 +45,7 @@ source $scriptdir/lexparser_lang.def
 CLASSPATH="$CLASSPATH":"$scriptdir/*"
 
 # Run the Stanford parser
-java -Xmx"$mem" -cp "$CLASSPATH" edu.stanford.nlp.parser.lexparser.LexicalizedParser -maxLength "$len" \
+java -Xmx"$mem" -cp "$scriptdir/*:" edu.stanford.nlp.parser.lexparser.LexicalizedParser -maxLength "$len" \
 -tLPP "$tlp" $lang_opts $parse_opts -writeOutputFiles \
 -outputFilesExtension "$out_file"."$len".stp -outputFormat "penn" \
 -outputFormatOptions "removeTopBracket,includePunctuationDependencies" -loadFromSerializedFile $grammar $*

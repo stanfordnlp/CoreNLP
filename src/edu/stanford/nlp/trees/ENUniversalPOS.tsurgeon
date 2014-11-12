@@ -1,0 +1,278 @@
+%VB.* -> AUX (Case 1)
+VP < VP < (/^VB.*$/=target <... {/.*/})
+
+relabel target AUX
+
+%VB.* -> AUX (Case 2)
+SQ|SINV < (/^VB/=target $++ /^(?:VP|ADJP)/ <... {/.*/})
+
+relabel target AUX
+
+%VB -> VERB
+/^VB.*/=target <... {/.*/}
+
+relabel target VERB
+
+%IN -> SCONJ (only in case of subordinating conjunctions)
+SBAR|SBAR-TMP < (IN=target $++ S|FRAG <... {/.*/})
+
+relabel target SCONJ
+
+%IN -> PREP (otherwise)
+IN=target <... {/.*/}
+
+relabel target PREP
+
+% FIXME
+%NN -> SYM (in case of the percent sign)
+%NN=target <... {/\\%/}
+%
+%relabel target SYM
+
+
+%NN -> NOUN (otherwise)
+NN=target <... {/.*/}
+
+relabel target NOUN
+
+%CC -> CONJ
+CC=target <... {/.*/}
+
+relabel target CONJ
+
+%CD -> NUM
+CD=target <... {/.*/}
+
+relabel target NUM
+
+%DT -> DET
+DT=target <... {/.*/}
+
+relabel target DET
+
+%EX -> DET
+EX=target <... {/.*/}
+
+relabel target DET
+
+%FW -> X
+FW=target <... {/.*/}
+
+relabel target X
+
+%JJ -> ADJ
+JJ=target <... {/.*/}
+
+relabel target ADJ
+
+%JJR -> ADJ
+JJR=target <... {/.*/}
+
+relabel target ADJ
+
+%JJS -> ADJ
+JJR=target <... {/.*/}
+
+relabel target ADJ
+
+%LS -> X
+LS=target <... {/.*/}
+
+relabel target X
+
+%MD -> AUX
+MD=target <... {/.*/}
+
+relabel target AUX
+
+%NNS -> NOUN
+NNS=target <... {/.*/}
+
+relabel target NOUN
+
+%NNP -> PROPN
+NNP=target <... {/.*/}
+
+relabel target PROPN
+
+%NNPS -> PROPN
+NNPS=target <... {/.*/}
+
+relabel target PROPN
+
+%PDT -> DET
+PDT=target <... {/.*/}
+
+relabel target DET
+
+%POS -> PART
+POS=target <... {/.*/}
+
+relabel target PART
+
+%PRP -> PRON
+PRP=target <... {/.*/}
+
+relabel target PRON
+
+%PRP$ -> PRON
+/^PRP\$$/=target <... {/.*/}
+
+relabel target PRON
+
+%RB -> ADV
+RB=target <... {/.*/}
+
+relabel target ADV
+
+%RBR -> ADV
+RBR=target <... {/.*/}
+
+relabel target ADV
+
+%RBS -> ADV
+RBS=target <... {/.*/}
+
+relabel target ADV
+
+%RP -> ADP
+RP=target <... {/.*/}
+
+relabel target ADP
+
+%SYM -> SYM
+SYM=target <... {/.*/}
+
+relabel target SYM
+
+%TO -> PART
+TO=target <... {/.*/}
+
+relabel target PART
+
+%UH -> INTJ
+UH=target <... {/.*/}
+
+relabel target INTJ
+
+%WDT -> DET
+WDT=target <... {/.*/}
+
+relabel target DET
+
+%WP -> PRON
+WP=target <... {/.*/}
+
+relabel target PRON
+
+%WP$ -> PRON
+/^WP\$$/=target <... {/.*/}
+
+relabel target PRON
+
+%WRB -> ADV
+WRB=target <... {/.*/}
+
+relabel target ADV
+
+%`` -> PUNCT
+/^``$/=target <... {/.*/}
+
+relabel target PUNCT
+
+%! -> PUNCT
+/^!$/=target <... {/.*/}
+
+relabel target PUNCT
+
+%# -> SYM
+/^#$/=target <... {/.*/}
+
+relabel target SYM
+
+%$ -> SYM
+/^\$$/=target <... {/.*/}
+
+relabel target SYM
+
+%' -> PUNCT
+/^'$/=target <... {/.*/}
+
+relabel target PUNCT
+
+%( -> PUNCT
+/^\($/=target <... {/.*/}
+
+relabel target PUNCT
+
+%) -> PUNCT
+/^\)$/=target <... {/.*/}
+
+relabel target PUNCT
+
+%, -> PUNCT
+/^,$/=target <... {/.*/}
+
+relabel target PUNCT
+
+%-LRB- -> PUNCT
+/^-LRB-$/=target <... {/.*/}
+
+relabel target PUNCT
+
+%-RRB- -> PUNCT
+/^-RRB-$/=target <... {/.*/}
+
+relabel target PUNCT
+
+%. -> PUNCT
+/^\.$/=target <... {/.*/}
+
+relabel target PUNCT
+
+%: -> PUNCT
+/^:$/=target <... {/.*/}
+
+relabel target PUNCT
+
+%? -> PUNCT
+/^\?$/=target <... {/.*/}
+
+relabel target PUNCT
+
+%ADD -> X
+ADD=target <... {/.*/}
+
+relabel target X
+
+%AFX -> X
+AFX=target <... {/.*/}
+
+relabel target X
+
+%GW -> X
+GW=target <... {/.*/}
+
+relabel target X
+
+%HYPH -> PUNCT
+HYPH=target <... {/.*/}
+
+relabel target PUNCT
+
+%NFP -> SYM
+NFP=target <... {/.*/}
+
+relabel target SYM
+
+%XX -> X
+XX=target <... {/.*/}
+
+relabel target X
+
+
+
+
+
+
+

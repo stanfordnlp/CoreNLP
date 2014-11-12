@@ -15,9 +15,6 @@ import java.util.Map;
  * @author Angel Chang
  */
 public class EnvLookup {
-
-  private EnvLookup() {} // static methods
-
   // TODO: For additional keys, read map of name to Class from file???
   public static Class lookupAnnotationKey(Env env, String name)
   {
@@ -88,7 +85,7 @@ public class EnvLookup {
       }
     }
     return null;
-  }
+  }  
 
   public static Class getDefaultNestedResultsAnnotationKey(Env env)
   {
@@ -122,5 +119,4 @@ public class EnvLookup {
     }
     return CoreAnnotations.TokensAnnotation.class;
   }
-
 }
