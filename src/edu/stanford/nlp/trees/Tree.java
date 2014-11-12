@@ -1884,36 +1884,6 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     return t;
   }
 
-  /**
-   * Returns a deep copy of everything but the leaf labels.  The leaf
-   * labels are reused from the original tree.  This is useful for
-   * cases such as the dependency converter, which wants to finish
-   * with the same labels in the dependencies as the parse tree.
-   */
-  public Tree treeSkeletonConstituentCopy() {
-    return treeSkeletonConstituentCopy(treeFactory(), label().labelFactory());
-  }
-
-  public Tree treeSkeletonConstituentCopy(TreeFactory tf, LabelFactory lf) {
-    if (isLeaf()) {
-      // Reuse the current label for a leaf.  This way, trees which
-      // are based on tokens in a sentence can have the same tokens
-      // even after a "deep copy".
-      // TODO: the LabeledScoredTreeFactory copies the label for a new
-      // leaf.  Perhaps we could add a newLeafNoCopy or something like
-      // that for efficiency.
-      Tree newLeaf = tf.newLeaf(label());
-      newLeaf.setLabel(label());
-      return newLeaf;
-    }    
-    Label label = lf.newLabel(label());
-    Tree[] kids = children();
-    List<Tree> newKids = new ArrayList<Tree>(kids.length);
-    for (Tree kid : kids) {
-      newKids.add(kid.treeSkeletonConstituentCopy(tf, lf));
-    }
-    return tf.newTreeNode(label, newKids);
-  }
 
   /**
    * Create a transformed Tree.  The tree is traversed in a depth-first,

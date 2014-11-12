@@ -158,15 +158,6 @@ public class TreeGraphNode extends Tree implements HasParent {
     return label;
   }
 
-  @Override
-  public void setLabel(Label label) {
-    if (label instanceof CoreLabel) {
-      this.setLabel((CoreLabel) label);
-    } else {
-      this.setLabel((CoreLabel) mlf.newLabel(label));
-    }
-  }
-
   /**
    * Sets the label associated with the current node.
    *

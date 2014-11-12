@@ -36,7 +36,6 @@ public class TimeFormatter {
       this.format = new SimpleDateFormat(pattern);
     }
 
-    @Override
     public Value apply(CoreMap m) {
       try {
         // TODO: Allow specification of locale, pivot year (set2DigitYearStart) for interpreting 2 digit years
@@ -87,7 +86,6 @@ public class TimeFormatter {
       this.action = action;
     }
 
-    @Override
     public O apply(I in) {
       O v = base.apply(in);
       if (action != null) {
