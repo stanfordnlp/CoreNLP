@@ -96,6 +96,7 @@ public abstract class GrammaticalStructure implements Serializable {
                               Lock relationsLock, HeadFinder hf, Predicate<String> puncFilter) {
     this.root = new TreeGraphNode(t, this);
     Trees.setLeafLabels(this.root, t.yield());
+    Trees.setLeafTagsIfUnset(this.root);
     indexNodes(this.root);
     // add head word and tag to phrase nodes
     if (hf == null) {

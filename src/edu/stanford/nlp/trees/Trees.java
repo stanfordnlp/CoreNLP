@@ -181,6 +181,27 @@ public class Trees {
   }
 
   /**
+   * Given a tree, set the tags on the leaf nodes if they are not
+   * already set.  Do this by using the preterminal's value as a tag.
+   */
+  public static void setLeafTagsIfUnset(Tree tree) {
+    if (tree.isPreTerminal()) {
+      Tree leaf = tree.children()[0];
+      if (!(leaf.label() instanceof HasTag)) {
+        return;
+      }
+      HasTag label = (HasTag) leaf.label();
+      if (label.tag() == null) {
+        label.setTag(tree.value());
+      }
+    } else {
+      for (Tree child : tree.children()) {
+        setLeafTagsIfUnset(child);
+      }
+    }
+  }
+
+  /**
    * Replace the labels of the leaves with the given leaves.
    */
   public static void setLeafLabels(Tree tree, List<Label> labels) {
