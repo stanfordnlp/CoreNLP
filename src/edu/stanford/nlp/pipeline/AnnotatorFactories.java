@@ -532,4 +532,21 @@ public class AnnotatorFactories {
     };
   }
 
+  //
+  // Monotonicity and Polarity
+  //
+  public static AnnotatorFactory natlog(Properties properties, final AnnotatorImplementations annotatorImpl) {
+    return new AnnotatorFactory(properties, annotatorImpl) {
+      @Override
+      public Annotator create() {
+        return annotatorImpl.natlog(properties);
+      }
+
+      @Override
+      protected String additionalSignature() {
+        return "";
+      }
+    };
+  }
+
 }

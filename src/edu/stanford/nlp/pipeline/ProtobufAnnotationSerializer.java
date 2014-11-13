@@ -12,6 +12,7 @@ import edu.stanford.nlp.international.Languages;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.naturalli.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
@@ -295,6 +296,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       builder.setHasXmlContext(false);
     }
     if (coreLabel.containsKey(CorefClusterIdAnnotation.class)) { builder.setCorefClusterID(getAndRegister(coreLabel, keysToSerialize, CorefClusterIdAnnotation.class)); }
+    if (coreLabel.containsKey(NaturalLogicAnnotations.OperatorAnnotation.class)) { builder.setOperator(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.OperatorAnnotation.class))); }
+    if (coreLabel.containsKey(NaturalLogicAnnotations.PolarityAnnotation.class)) { builder.setPolarity(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.PolarityAnnotation.class))); }
     // Non-default annotators
     if (getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class) != null) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }
     if (coreLabel.containsKey(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
@@ -627,6 +630,31 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   }
 
   /**
+   * Return a Protobuf operator from an OperatorSpec (Natural Logic).
+   */
+  public static CoreNLPProtos.Operator toProto(OperatorSpec op) {
+    return CoreNLPProtos.Operator.newBuilder()
+        .setName(op.instance.name()).setQuantifierSpanBegin(op.quantifierBegin).setQuantifierSpanEnd(op.quantifierEnd)
+        .setSubjectSpanBegin(op.subjectBegin).setSubjectSpanEnd(op.subjectEnd)
+        .setObjectSpanBegin(op.objectBegin).setObjectSpanEnd(op.objectEnd).build();
+  }
+
+  /**
+   * Return a Protobuf polarity from a CoreNLP Polarity (Natural Logic).
+   */
+  public static CoreNLPProtos.Polarity toProto(Polarity pol) {
+    return CoreNLPProtos.Polarity.newBuilder()
+        .setProjectEquivalence(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.EQUIVALENCE).fixedIndex))
+        .setProjectForwardEntailment(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.FORWARD_ENTAILMENT).fixedIndex))
+        .setProjectReverseEntailment(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.REVERSE_ENTAILMENT).fixedIndex))
+        .setProjectNegation(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.NEGATION).fixedIndex))
+        .setProjectAlternation(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.ALTERNATION).fixedIndex))
+        .setProjectCover(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.COVER).fixedIndex))
+        .setProjectIndependence(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.INDEPENDENCE).fixedIndex))
+        .build();
+  }
+
+  /**
    * Create a CoreLabel from its serialized counterpart.
    * Note that this is, by itself, a lossy operation. Fields like the docid (sentence index, etc.) are only known
    * from the enclosing document, and are not tracked in the protobuf.
@@ -660,6 +688,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasCorefClusterID()) { word.set(CorefClusterIdAnnotation.class, proto.getCorefClusterID()); }
     if (proto.hasAnswer()) { word.set(AnswerAnnotation.class, proto.getAnswer()); }
     if (proto.hasProjectedCategory()) { word.set(ProjectedCategoryAnnotation.class, proto.getProjectedCategory()); }
+    if (proto.hasOperator()) { word.set(NaturalLogicAnnotations.OperatorAnnotation.class, fromProto(proto.getOperator())); }
+    if (proto.hasPolarity()) { word.set(NaturalLogicAnnotations.PolarityAnnotation.class, fromProto(proto.getPolarity())); }
     // Non-default annotators
     if (proto.hasGender()) { word.set(GenderAnnotation.class, proto.getGender()); }
     if (proto.hasTrueCase()) { word.set(TrueCaseAnnotation.class, proto.getTrueCase()); }
@@ -890,6 +920,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     return node;
   }
 
+  /**
+   * Return a CoreNLP language from a Protobuf language
+   */
   public static Languages.Language fromProto(CoreNLPProtos.Language lang) {
     switch (lang) {
       case Arabic:
@@ -911,6 +944,38 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       default:
         throw new IllegalStateException("Unknown language: " + lang);
     }
+  }
+
+  /**
+   * Return a CoreNLP Operator (Natural Logic operator) from a Protobuf operator
+   */
+  public static OperatorSpec fromProto(CoreNLPProtos.Operator operator) {
+    String opName = operator.getName().toLowerCase();
+    Operator op = null;
+    for (Operator candidate : Operator.values()) {
+      if (candidate.name().toLowerCase().equals(opName)) {
+        op = candidate;
+        break;
+      }
+    }
+    return new OperatorSpec(op, operator.getQuantifierSpanBegin(), operator.getQuantifierSpanEnd(),
+        operator.getSubjectSpanBegin(), operator.getSubjectSpanEnd(),
+        operator.getObjectSpanBegin(), operator.getObjectSpanEnd());
+  }
+
+  /**
+   * Return a CoreNLP Polarity (Natural Logic polarity) from a Protobuf operator
+   */
+  public static Polarity fromProto(CoreNLPProtos.Polarity polarity) {
+    byte[] projectionFn = new byte[7];
+    projectionFn[0] = (byte) polarity.getProjectEquivalence().getNumber();
+    projectionFn[1] = (byte) polarity.getProjectForwardEntailment().getNumber();
+    projectionFn[2] = (byte) polarity.getProjectReverseEntailment().getNumber();
+    projectionFn[3] = (byte) polarity.getProjectNegation().getNumber();
+    projectionFn[4] = (byte) polarity.getProjectAlternation().getNumber();
+    projectionFn[5] = (byte) polarity.getProjectCover().getNumber();
+    projectionFn[6] = (byte) polarity.getProjectIndependence().getNumber();
+    return new Polarity(projectionFn);
   }
 
   /**
