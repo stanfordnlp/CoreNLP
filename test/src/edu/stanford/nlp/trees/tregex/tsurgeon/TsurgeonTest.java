@@ -40,6 +40,12 @@ public class TsurgeonTest extends TestCase {
             "(A (X w) (B w))");
   }
 
+  public void testForeign() {
+    TregexPattern tregex = TregexPattern.compile("atentát=test");
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("relabel test perform_atentát");
+    runTest(tregex, tsurgeon, "(foo atentát)", "(foo perform_atentát)");
+  }
+
   public void testAdjoin() {
     TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("adjoin (FOO (BAR@)) foo");
     TregexPattern tregex = TregexPattern.compile("B=foo");
