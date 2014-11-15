@@ -151,9 +151,8 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
   }
 
   static double scaleAndRegularize(TwoDimensionalMap<String, String, SimpleMatrix> derivatives,
-                            TwoDimensionalMap<String, String, SimpleMatrix> currentMatrices,
-                            double scale,
-                            double regCost) {
+                                   TwoDimensionalMap<String, String, SimpleMatrix> currentMatrices,
+                                   double scale, double regCost) {
     double cost = 0.0; // the regularization cost
     for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : currentMatrices) {
       SimpleMatrix D = derivatives.get(entry.getFirstKey(), entry.getSecondKey());

@@ -22,19 +22,12 @@ public enum Operator {
   FOR_ALL("for all", "anti-additive", "multiplicative"),
   FOR_EVERY("for every", "anti-additive", "multiplicative"),
   FOR_EACH("for each", "anti-additive", "multiplicative"),
-  EVERYONE("everyone", "anti-additive", "multiplicative"),
   NUM("__num__", "anti-additive", "multiplicative"),  // TODO check me
-  NUM_NUM("__num__ __num__", "anti-additive", "multiplicative"),  // TODO check me
-  NUM_NUM_NUM("__num__ __num__ __num__", "anti-additive", "multiplicative"),  // TODO check me
-  NUM_NUM_NUM_NUM("__num__ __num__ __num__ __num__", "anti-additive", "multiplicative"),  // TODO check me
   FEW("few", "anti-additive", "multiplicative"),        // TODO check me
   IMPLICIT_NAMED_ENTITY("__implicit_named_entity__", "anti-additive", "multiplicative"),
 
   // "No" quantifiers
   NO("no", "anti-additive", "anti-additive"),
-  NEITHER("neither", "anti-additive", "anti-additive"),
-  NO_ONE("no one", "anti-additive", "anti-additive"),
-  NOBODY("nobody", "anti-additive", "anti-additive"),
   UNARY_NO("no", "anti-additive"),
   UNARY_NOT("not", "anti-additive"),
   UNARY_NO_ONE("no one", "anti-additive"),
