@@ -19,5 +19,18 @@ public class SentimentTrainingITest extends TestCase {
     assertTrue("Gradient check failed with random seed of " + op.randomSeed, 
                SentimentTraining.runGradientCheck(model, trainingTrees));
   }
+
+  public void testRegularizationGradientCheck() {
+    List<Tree> trainingTrees = SentimentUtils.readTreesWithGoldLabels(TRAIN_PATH);
+    RNNOptions op = new RNNOptions();
+    op.numHid = 5;
+    op.trainOptions.regTransformMatrix = 10.0;
+    op.trainOptions.regTransformTensor = 10.0;
+    op.trainOptions.regClassification = 10.0;
+    op.trainOptions.regWordVector = 10.0;
+    SentimentModel model = new SentimentModel(op, trainingTrees);
+    assertTrue("Gradient check failed with random seed of " + op.randomSeed, 
+               SentimentTraining.runGradientCheck(model, trainingTrees));
+  }
 }
 
