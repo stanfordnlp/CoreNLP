@@ -335,6 +335,10 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   public static TokenizerFactory<CoreLabel> coreLabelFactory() {
     return SpanishTokenizerFactory.newCoreLabelTokenizerFactory();
   }
+  
+  public static TokenizerFactory<CoreLabel> factory() {
+    return coreLabelFactory();
+  }
 
   private static String usage() {
     StringBuilder sb = new StringBuilder();
