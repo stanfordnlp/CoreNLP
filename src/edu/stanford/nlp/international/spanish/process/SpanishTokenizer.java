@@ -350,6 +350,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     Map<String,Integer> argOptionDefs = Generics.newHashMap();
     argOptionDefs.put("help", 0);
     argOptionDefs.put("ftb", 0);
+    argOptionDefs.put("ancora", 0);
     argOptionDefs.put("lowerCase", 0);
     argOptionDefs.put("encoding", 1);
     argOptionDefs.put("orthoOpts", 1);
