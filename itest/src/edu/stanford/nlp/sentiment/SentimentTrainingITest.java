@@ -20,6 +20,11 @@ public class SentimentTrainingITest extends TestCase {
                SentimentTraining.runGradientCheck(model, trainingTrees));
   }
 
+  /**
+   * Because the regularizations are typically set to be 0.001 of the
+   * total cost, it is important to test those gradients with the reg
+   * values turned up a lot.
+   */
   public void testRegularizationGradientCheck() {
     List<Tree> trainingTrees = SentimentUtils.readTreesWithGoldLabels(TRAIN_PATH);
     RNNOptions op = new RNNOptions();
