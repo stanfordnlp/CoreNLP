@@ -73,9 +73,9 @@ public class CreateTransitionSequence {
       CoreLabel label = (CoreLabel) tree.label();
       CoreLabel leftLabel = (CoreLabel) tree.children()[0].label();
       CoreLabel rightLabel = (CoreLabel) tree.children()[1].label();
-      CoreLabel head = label.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class);
-      CoreLabel leftHead = leftLabel.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class);
-      CoreLabel rightHead = rightLabel.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class);
+      Tree head = label.get(TreeCoreAnnotations.HeadWordAnnotation.class);
+      Tree leftHead = leftLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class);
+      Tree rightHead = rightLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class);
       if (head == null || leftHead == null || rightHead == null) {
         throw new IllegalArgumentException("Expected tree labels to have their heads assigned");
       }

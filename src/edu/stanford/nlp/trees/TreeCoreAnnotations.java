@@ -1,7 +1,7 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.ling.CoreLabel;
+
 
 /**
  * Set of common annotations for {@link edu.stanford.nlp.util.CoreMap}s 
@@ -52,17 +52,10 @@ public class TreeCoreAnnotations {
     public Class<Tree> getType() {  return Tree.class; } }
 
   /**
-   * The standard key for storing a head word in the map as a pointer to
-   * the head label.
-   */
-  public static class HeadWordLabelAnnotation implements CoreAnnotation<CoreLabel> {
-    public Class<CoreLabel> getType() {  return CoreLabel.class; } }
-
-  /**
    * The standard key for storing a head tag in the map as a pointer to
-   * the head label.
+   * another node.
    */
-  public static class HeadTagLabelAnnotation implements CoreAnnotation<CoreLabel> {
-    public Class<CoreLabel> getType() {  return CoreLabel.class; } }
+  public static class HeadTagAnnotation implements CoreAnnotation<Tree> {
+    public Class<Tree> getType() {  return Tree.class; } }
 
 }

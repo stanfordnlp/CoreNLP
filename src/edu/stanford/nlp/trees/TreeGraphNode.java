@@ -3,9 +3,11 @@ package edu.stanford.nlp.trees;
 import java.io.StringReader;
 import java.util.List;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.LabelFactory;
+import edu.stanford.nlp.util.StringUtils;
 
 /**
  * <p>
@@ -54,8 +56,13 @@ public class TreeGraphNode extends Tree implements HasParent {
    */
   protected static final TreeGraphNode[] ZERO_TGN_CHILDREN = new TreeGraphNode[0];
 
-  private static final LabelFactory mlf = CoreLabel.factory();
+  private static LabelFactory mlf = CoreLabel.factory();
 
+  /**
+   * Create a new empty <code>TreeGraphNode</code>.
+   */
+  public TreeGraphNode() {
+  }
 
   /**
    * Create a new <code>TreeGraphNode</code> with the supplied
@@ -300,6 +307,14 @@ public class TreeGraphNode extends Tree implements HasParent {
         } else {
           setHeadWordNode(hwn);
         }
+
+        TreeGraphNode htn = head.headTagNode();
+        if (htn == null && head.isLeaf()) { // below us is a leaf
+          setHeadTagNode(this);
+        } else {
+          setHeadTagNode(htn);
+        }
+
       } else {
         System.err.println("Head is null: " + this);
       }
@@ -338,6 +353,40 @@ public class TreeGraphNode extends Tree implements HasParent {
    */
   private void setHeadWordNode(final TreeGraphNode hwn) {
     label.set(TreeCoreAnnotations.HeadWordAnnotation.class, hwn);
+  }
+
+  /**
+   * Return the node containing the head tag for this node (or
+   * <code>null</code> if none), as recorded in this node's {@link
+   * CoreLabel <code>CoreLabel</code>}.  (In contrast to {@link
+   * edu.stanford.nlp.ling.CategoryWordTag
+   * <code>CategoryWordTag</code>}, we store head words and head
+   * tags as references to nodes, not merely as
+   * <code>String</code>s.)
+   *
+   * @return the node containing the head tag for this node
+   */
+  public TreeGraphNode headTagNode() {
+    TreeGraphNode htn = safeCast(label.get(TreeCoreAnnotations.HeadTagAnnotation.class));
+    if (htn == null || (htn.treeGraph() != null && !(htn.treeGraph().equals(this.treeGraph())))) {
+      return null;
+    }
+    return htn;
+  }
+
+  /**
+   * Store the node containing the head tag for this node by
+   * storing it in this node's {@link CoreLabel
+   * <code>CoreLabel</code>}.  (In contrast to {@link
+   * edu.stanford.nlp.ling.CategoryWordTag
+   * <code>CategoryWordTag</code>}, we store head words and head
+   * tags as references to nodes, not merely as
+   * <code>String</code>s.)
+   *
+   * @param htn the node containing the head tag for this node
+   */
+  private void setHeadTagNode(final TreeGraphNode htn) {
+    label.set(TreeCoreAnnotations.HeadTagAnnotation.class, htn);
   }
 
   /**
@@ -475,12 +524,17 @@ public class TreeGraphNode extends Tree implements HasParent {
     return buf.toString();
   }
 
+//  public String toPrimes() {
+//    int copy = label().copyCount();
+//    return StringUtils.repeat('\'', copy);
+//  }
 
   @Override
   public String toString() {
     return toString(CoreLabel.DEFAULT_FORMAT);
   }
 
+  //TODO: is it important to have the toPrimes() string attached to this? (SG) Currently it is not.
   public String toString(CoreLabel.OutputFormat format) {
     return label.toString(format);
   }
