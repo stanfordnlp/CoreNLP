@@ -41,6 +41,11 @@ public class TreeGraphNode extends Tree implements HasParent {
   protected TreeGraphNode[] children = ZERO_TGN_CHILDREN;
 
   /**
+   * For internal nodes, the head word of this subtree.
+   */
+  private TreeGraphNode headWordNode;
+
+  /**
    * A leaf node should have a zero-length array for its
    * children. For efficiency, subclasses can use this array as a
    * return value for children() for leaf nodes if desired. Should
@@ -274,8 +279,8 @@ public class TreeGraphNode extends Tree implements HasParent {
    * @return the node containing the head word for this node
    */
   public TreeGraphNode headWordNode() {
-    return safeCast(label.get(TreeCoreAnnotations.HeadWordAnnotation.class));
-  }
+    return headWordNode;
+   }
 
   /**
    * Store the node containing the head word for this node by
@@ -289,7 +294,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    * @param hwn the node containing the head word for this node
    */
   private void setHeadWordNode(final TreeGraphNode hwn) {
-    label.set(TreeCoreAnnotations.HeadWordAnnotation.class, hwn);
+    this.headWordNode = hwn;
   }
 
   /**

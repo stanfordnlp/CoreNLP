@@ -120,7 +120,6 @@ import java.util.*;
  *
  * @author Gabor Angeli
  */
-// TODO(gabor) figure out how to de-serialize HeadWordAnnotation.class
 public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
   /** A global lock; necessary since dependency tree creation is not threadsafe */
@@ -282,12 +281,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (getAndRegister(coreLabel, keysToSerialize, NormalizedNamedEntityTagAnnotation.class) != null) { builder.setNormalizedNER(getAndRegister(coreLabel, keysToSerialize, NormalizedNamedEntityTagAnnotation.class)); }
     if (coreLabel.containsKey(TimexAnnotation.class)) { builder.setTimexValue(toProto(getAndRegister(coreLabel, keysToSerialize, TimexAnnotation.class))); }
     if (coreLabel.containsKey(AnswerAnnotation.class)) { builder.setAnswer(getAndRegister(coreLabel, keysToSerialize, AnswerAnnotation.class)); }
-    if (coreLabel.containsKey(HeadWordAnnotation.class)) {
-      Tree tree = coreLabel.get(HeadWordAnnotation.class);
-      if (tree.isLeaf() && tree.label() instanceof CoreLabel) {
-        builder.setHeadWordIndex(((CoreLabel) tree.label()).index() - 1);
-      }
-    }
     if (coreLabel.containsKey(XmlContextAnnotation.class)) {
       builder.setHasXmlContext(true);
       builder.addAllXmlContext(getAndRegister(coreLabel, keysToSerialize, XmlContextAnnotation.class));

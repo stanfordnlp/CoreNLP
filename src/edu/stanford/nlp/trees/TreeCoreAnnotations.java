@@ -46,13 +46,6 @@ public class TreeCoreAnnotations {
 
   /**
    * The standard key for storing a head word in the map as a pointer to
-   * another node.
-   */
-  public static class HeadWordAnnotation implements CoreAnnotation<Tree> {
-    public Class<Tree> getType() {  return Tree.class; } }
-
-  /**
-   * The standard key for storing a head word in the map as a pointer to
    * the head label.
    */
   public static class HeadWordLabelAnnotation implements CoreAnnotation<CoreLabel> {
