@@ -307,14 +307,6 @@ public class TreeGraphNode extends Tree implements HasParent {
         } else {
           setHeadWordNode(hwn);
         }
-
-        TreeGraphNode htn = head.headTagNode();
-        if (htn == null && head.isLeaf()) { // below us is a leaf
-          setHeadTagNode(this);
-        } else {
-          setHeadTagNode(htn);
-        }
-
       } else {
         System.err.println("Head is null: " + this);
       }
@@ -353,40 +345,6 @@ public class TreeGraphNode extends Tree implements HasParent {
    */
   private void setHeadWordNode(final TreeGraphNode hwn) {
     label.set(TreeCoreAnnotations.HeadWordAnnotation.class, hwn);
-  }
-
-  /**
-   * Return the node containing the head tag for this node (or
-   * <code>null</code> if none), as recorded in this node's {@link
-   * CoreLabel <code>CoreLabel</code>}.  (In contrast to {@link
-   * edu.stanford.nlp.ling.CategoryWordTag
-   * <code>CategoryWordTag</code>}, we store head words and head
-   * tags as references to nodes, not merely as
-   * <code>String</code>s.)
-   *
-   * @return the node containing the head tag for this node
-   */
-  public TreeGraphNode headTagNode() {
-    TreeGraphNode htn = safeCast(label.get(TreeCoreAnnotations.HeadTagAnnotation.class));
-    if (htn == null || (htn.treeGraph() != null && !(htn.treeGraph().equals(this.treeGraph())))) {
-      return null;
-    }
-    return htn;
-  }
-
-  /**
-   * Store the node containing the head tag for this node by
-   * storing it in this node's {@link CoreLabel
-   * <code>CoreLabel</code>}.  (In contrast to {@link
-   * edu.stanford.nlp.ling.CategoryWordTag
-   * <code>CategoryWordTag</code>}, we store head words and head
-   * tags as references to nodes, not merely as
-   * <code>String</code>s.)
-   *
-   * @param htn the node containing the head tag for this node
-   */
-  private void setHeadTagNode(final TreeGraphNode htn) {
-    label.set(TreeCoreAnnotations.HeadTagAnnotation.class, htn);
   }
 
   /**
