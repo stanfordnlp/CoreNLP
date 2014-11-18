@@ -92,12 +92,6 @@ public class TreeGraphNode extends Tree implements HasParent {
     this.setTreeGraph(graph);
   }
 
-  // XXX TODO it's not really clear what graph the copy should be a part of
-  public TreeGraphNode(TreeGraphNode t) {
-    this(t, t.parent);
-    this.setTreeGraph(t.treeGraph());
-  }
-
   /**
    * Create a new <code>TreeGraphNode</code> having the same tree
    * structure and label values as an existing tree (but no shared
