@@ -786,7 +786,7 @@ public class ArrayMath {
   }
 
   /**
-   * @return the index of the max value; if max is a tie, returns the first one.
+   * @return the index of the min value; if min is a tie, returns the first one.
    */
   public static int argmin(double[] a) {
     double min = Double.POSITIVE_INFINITY;
@@ -800,12 +800,15 @@ public class ArrayMath {
     return argmin;
   }
 
+  /**
+   * @return The minimum value in an array.
+   */
   public static double min(double[] a) {
     return a[argmin(a)];
   }
 
   /**
-   * Returns the largest value in a vector of doubles.  Any values which
+   * Returns the smallest value in a vector of doubles.  Any values which
    * are NaN or infinite are ignored.  If the vector is empty, 0.0 is
    * returned.
    */
@@ -816,7 +819,7 @@ public class ArrayMath {
   }
 
   /**
-   * @return the index of the max value; if max is a tie, returns the first one.
+   * @return the index of the min value; if min is a tie, returns the first one.
    */
   public static int argmin(float[] a) {
     float min = Float.POSITIVE_INFINITY;
@@ -835,7 +838,7 @@ public class ArrayMath {
   }
 
   /**
-   * @return the index of the max value; if max is a tie, returns the first one.
+   * @return the index of the min value; if min is a tie, returns the first one.
    */
   public static int argmin(int[] a) {
     int min = Integer.MAX_VALUE;
@@ -1111,12 +1114,6 @@ public class ArrayMath {
   }
 
   // UTILITIES
-
-  public static int[] subArray(int[] a, int from, int to) {
-    int[] result = new int[to-from];
-    System.arraycopy(a, from, result, 0, to-from);
-    return result;
-  }
 
   public static double[][] load2DMatrixFromFile(String filename) throws IOException {
     String s = IOUtils.slurpFile(filename);
@@ -1395,7 +1392,7 @@ public class ArrayMath {
   public static int mean(int[] a) {
     return sum(a) / a.length;
   }
-  
+
   public static double median(double[] a) {
     double[] b = new double[a.length];
     System.arraycopy(a, 0, b, 0, b.length);
@@ -1528,29 +1525,29 @@ public class ArrayMath {
    * x and y, then compute innerProduct(x,y)/(x.length-1).
    */
   public static double pearsonCorrelation(double[] x, double[] y) {
-		double result;
-		double sum_sq_x = 0, sum_sq_y = 0;
+    double result;
+    double sum_sq_x = 0, sum_sq_y = 0;
     double mean_x = x[0], mean_y = y[0];
-		double sum_coproduct = 0;
-		for(int i=2; i<x.length+1;++i) {
-			double w = (i - 1)*1.0/i;
-			double delta_x = x[i-1] - mean_x;
-			double delta_y = y[i-1] - mean_y;
-			sum_sq_x += delta_x * delta_x*w;
-			sum_sq_y += delta_y * delta_y*w;
-			sum_coproduct += delta_x * delta_y*w;
-			mean_x += delta_x / i;
-			mean_y += delta_y / i;
-		}
-		double pop_sd_x = Math.sqrt(sum_sq_x/x.length);
-		double pop_sd_y = Math.sqrt(sum_sq_y/y.length);
-		double cov_x_y = sum_coproduct / x.length;
+    double sum_coproduct = 0;
+    for(int i=2; i<x.length+1;++i) {
+      double w = (i - 1)*1.0/i;
+      double delta_x = x[i-1] - mean_x;
+      double delta_y = y[i-1] - mean_y;
+      sum_sq_x += delta_x * delta_x*w;
+      sum_sq_y += delta_y * delta_y*w;
+      sum_coproduct += delta_x * delta_y*w;
+      mean_x += delta_x / i;
+      mean_y += delta_y / i;
+    }
+    double pop_sd_x = Math.sqrt(sum_sq_x/x.length);
+    double pop_sd_y = Math.sqrt(sum_sq_y/y.length);
+    double cov_x_y = sum_coproduct / x.length;
     double denom = pop_sd_x*pop_sd_y;
     if(denom == 0.0)
       return 0.0;
     result = cov_x_y/denom;
-		return result;
-	}
+    return result;
+  }
 
   /**
    * Computes the significance level by approximate randomization, using a
@@ -2045,24 +2042,9 @@ public class ArrayMath {
     }
   }
 
-  /**
-   * Simulate Arrays.copyOf method provided by Java 6
-   * When/if the JavaNLP-core code base moves past Java 5, this method can be removed
-   *
-   * @param original
-   * @param newSize
-   */
-  public static double[] copyOf(double[] original, int newSize) {
-    double[] a = new double[newSize];
-    System.arraycopy(original, 0, a, 0, original.length);
-    return a;
-  }
-
   public static double entropy(double[] probs) {
-    double e = 0;
-    double p = 0;
-    for (int i = 0; i < probs.length; i++) {
-      p = probs[i];
+    double e = 0.0;
+    for (double p : probs) {
       if (p != 0.0)
         e -= p * Math.log(p);
     }
