@@ -3,11 +3,9 @@ package edu.stanford.nlp.trees;
 import java.io.StringReader;
 import java.util.List;
 
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.LabelFactory;
-import edu.stanford.nlp.util.StringUtils;
 
 /**
  * <p>
@@ -56,13 +54,8 @@ public class TreeGraphNode extends Tree implements HasParent {
    */
   protected static final TreeGraphNode[] ZERO_TGN_CHILDREN = new TreeGraphNode[0];
 
-  private static LabelFactory mlf = CoreLabel.factory();
+  private static final LabelFactory mlf = CoreLabel.factory();
 
-  /**
-   * Create a new empty <code>TreeGraphNode</code>.
-   */
-  public TreeGraphNode() {
-  }
 
   /**
    * Create a new <code>TreeGraphNode</code> with the supplied
@@ -482,17 +475,12 @@ public class TreeGraphNode extends Tree implements HasParent {
     return buf.toString();
   }
 
-//  public String toPrimes() {
-//    int copy = label().copyCount();
-//    return StringUtils.repeat('\'', copy);
-//  }
 
   @Override
   public String toString() {
     return toString(CoreLabel.DEFAULT_FORMAT);
   }
 
-  //TODO: is it important to have the toPrimes() string attached to this? (SG) Currently it is not.
   public String toString(CoreLabel.OutputFormat format) {
     return label.toString(format);
   }
