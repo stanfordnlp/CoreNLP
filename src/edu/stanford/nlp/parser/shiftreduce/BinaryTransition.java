@@ -177,8 +177,8 @@ public class BinaryTransition implements Transition {
 
     CoreLabel production = new CoreLabel();
     production.setValue(label);
-    production.set(TreeCoreAnnotations.HeadWordAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class));
-    production.set(TreeCoreAnnotations.HeadTagAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagAnnotation.class));
+    production.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class));
+    production.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagLabelAnnotation.class));
     Tree newTop = new LabeledScoredTreeNode(production);
     newTop.addChild(left);
     newTop.addChild(right);
