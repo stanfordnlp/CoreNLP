@@ -93,7 +93,7 @@ message Token {
   repeated string xmlContext        = 22;   // Used by clean xml annotator
   optional uint32 corefClusterID    = 23;   // The [primary] cluster id for this token
   optional string answer            = 24;   // A temporary annotation which is occasionally left in
-  optional string projectedCategory = 25;   // The syntactic category of the maximal constituent headed by the word. Used in SemanticGraph.
+  //  optional string projectedCategory = 25;   // The syntactic category of the maximal constituent headed by the word. Not used anywhere, so deleted.
   optional uint32 headWordIndex     = 26;   // The index of the head word of this word.
   optional Operator operator        = 27;   // If this is an operator, which one is it and what is its scope (as per Natural Logic)?
   optional Polarity polarity        = 28;   // The polarity of this word, according to Natural Logic

@@ -282,7 +282,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (getAndRegister(coreLabel, keysToSerialize, NormalizedNamedEntityTagAnnotation.class) != null) { builder.setNormalizedNER(getAndRegister(coreLabel, keysToSerialize, NormalizedNamedEntityTagAnnotation.class)); }
     if (coreLabel.containsKey(TimexAnnotation.class)) { builder.setTimexValue(toProto(getAndRegister(coreLabel, keysToSerialize, TimexAnnotation.class))); }
     if (coreLabel.containsKey(AnswerAnnotation.class)) { builder.setAnswer(getAndRegister(coreLabel, keysToSerialize, AnswerAnnotation.class)); }
-    if (coreLabel.containsKey(ProjectedCategoryAnnotation.class)) { builder.setProjectedCategory(getAndRegister(coreLabel, keysToSerialize, ProjectedCategoryAnnotation.class)); }
     if (coreLabel.containsKey(HeadWordAnnotation.class)) {
       Tree tree = coreLabel.get(HeadWordAnnotation.class);
       if (tree.isLeaf() && tree.label() instanceof CoreLabel) {
@@ -687,7 +686,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasHasXmlContext() && proto.getHasXmlContext()) { word.set(XmlContextAnnotation.class, proto.getXmlContextList()); }
     if (proto.hasCorefClusterID()) { word.set(CorefClusterIdAnnotation.class, proto.getCorefClusterID()); }
     if (proto.hasAnswer()) { word.set(AnswerAnnotation.class, proto.getAnswer()); }
-    if (proto.hasProjectedCategory()) { word.set(ProjectedCategoryAnnotation.class, proto.getProjectedCategory()); }
     if (proto.hasOperator()) { word.set(NaturalLogicAnnotations.OperatorAnnotation.class, fromProto(proto.getOperator())); }
     if (proto.hasPolarity()) { word.set(NaturalLogicAnnotations.PolarityAnnotation.class, fromProto(proto.getPolarity())); }
     // Non-default annotators
