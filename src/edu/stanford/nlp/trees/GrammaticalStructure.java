@@ -99,7 +99,7 @@ public abstract class GrammaticalStructure implements Serializable {
    */
   public GrammaticalStructure(Tree t, Collection<GrammaticalRelation> relations,
                               Lock relationsLock, HeadFinder hf, Predicate<String> puncFilter) {
-    this.root = new TreeGraphNode(t, this);
+    this.root = new TreeGraphNode(t, (TreeGraphNode) null);
     // TODO FIXME: Ideally the tree would reuse the original
     // CoreLabels, but unfortunately this module then sets the head
     // word annotations, changing the labels.  This is made worse

@@ -41,12 +41,6 @@ public class TreeGraphNode extends Tree implements HasParent {
   protected TreeGraphNode[] children = ZERO_TGN_CHILDREN;
 
   /**
-   * The {@link GrammaticalStructure <code>GrammaticalStructure</code>} of which this
-   * node is part.
-   */
-  protected GrammaticalStructure tg;
-
-  /**
    * A leaf node should have a zero-length array for its
    * children. For efficiency, subclasses can use this array as a
    * return value for children() for leaf nodes if desired. Should
@@ -78,18 +72,6 @@ public class TreeGraphNode extends Tree implements HasParent {
   public TreeGraphNode(Label label, List<Tree> children) {
     this(label);
     setChildren(children);
-  }
-
-  /**
-   * Create a new <code>TreeGraphNode</code> having the same tree
-   * structure and label values as an existing tree (but no shared
-   * storage).
-   * @param t     the tree to copy
-   * @param graph the graph of which this node is a part
-   */
-  public TreeGraphNode(Tree t, GrammaticalStructure graph) {
-    this(t, (TreeGraphNode) null);
-    this.setTreeGraph(graph);
   }
 
   /**
@@ -237,26 +219,6 @@ public class TreeGraphNode extends Tree implements HasParent {
   }
 
   /**
-   * Get the <code>GrammaticalStructure</code> of which this node is a
-   * part.
-   */
-  protected GrammaticalStructure treeGraph() {
-    return tg;
-  }
-
-  /**
-   * Set pointer to the <code>GrammaticalStructure</code> of which this node
-   * is a part.  Operates recursively to set pointer for all
-   * descendants too.
-   */
-  protected void setTreeGraph(GrammaticalStructure tg) {
-    this.tg = tg;
-    for (TreeGraphNode child : children) {
-      child.setTreeGraph(tg);
-    }
-  }
-
-  /**
    * Uses the specified {@link HeadFinder <code>HeadFinder</code>}
    * to determine the heads for this node and all its descendants,
    * and to store references to the head word node and head tag node
@@ -312,11 +274,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    * @return the node containing the head word for this node
    */
   public TreeGraphNode headWordNode() {
-    TreeGraphNode hwn = safeCast(label.get(TreeCoreAnnotations.HeadWordAnnotation.class));
-    if (hwn == null || (hwn.treeGraph() != null && !(hwn.treeGraph().equals(this.treeGraph())))) {
-      return null;
-    }
-    return hwn;
+    return safeCast(label.get(TreeCoreAnnotations.HeadWordAnnotation.class));
   }
 
   /**
