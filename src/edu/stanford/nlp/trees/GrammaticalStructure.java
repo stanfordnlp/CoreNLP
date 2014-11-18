@@ -434,7 +434,7 @@ public abstract class GrammaticalStructure implements Serializable {
 
     for (TreeGraphNode gov : basicGraph.getAllVertices()) {
       for (TreeGraphNode dep : basicGraph.getChildren(gov)) {
-        GrammaticalRelation reln = getGrammaticalRelationCommonAncestor(gov.label(), dep.label(), basicGraph.getEdges(gov, dep));
+        GrammaticalRelation reln = getGrammaticalRelationCommonAncestor(gov.headWordNode().label(), gov.label(), dep.headWordNode().label(), dep.label(), basicGraph.getEdges(gov, dep));
         // System.err.println("  Gov: " + gov + " Dep: " + dep + " Reln: " + reln);
         basicDep.add(new TypedDependency(reln, new IndexedWord(gov.headWordNode().label()), new IndexedWord(dep.headWordNode().label())));
       }
@@ -598,22 +598,24 @@ public abstract class GrammaticalStructure implements Serializable {
       }
     }
 
-    return getGrammaticalRelationCommonAncestor(gov, dep, labels);
+    return getGrammaticalRelationCommonAncestor(gov, gov, dep, dep, labels);
   }
 
   /**
    * Returns the GrammaticalRelation which is the highest common
-   * ancestor of the list of relations passed in.  The IndexedWords
-   * are passed in only for debugging reasons.
+   * ancestor of the list of relations passed in.  The Labels are
+   * passed in only for debugging reasons.  gov &amp; dep are the
+   * labels with the text, govH and depH can be higher labels in the
+   * tree which represent the category
    */
-  private static GrammaticalRelation getGrammaticalRelationCommonAncestor(AbstractCoreLabel govH, AbstractCoreLabel depH, List<GrammaticalRelation> labels) {
+  private static GrammaticalRelation getGrammaticalRelationCommonAncestor(AbstractCoreLabel gov, AbstractCoreLabel govH, AbstractCoreLabel dep, AbstractCoreLabel depH, List<GrammaticalRelation> labels) {
     GrammaticalRelation reln = GrammaticalRelation.DEPENDENT;
 
     List<GrammaticalRelation> sortedLabels;
     if (labels.size() <= 1) {
       sortedLabels = labels;
     } else {
-      sortedLabels = new ArrayList(labels);
+      sortedLabels = new ArrayList<GrammaticalRelation>(labels);
       Collections.sort(sortedLabels, new NameComparator<GrammaticalRelation>());
     }
     // System.err.println(" gov " + govH + " dep " + depH + " arc labels: " + sortedLabels);
@@ -628,11 +630,11 @@ public abstract class GrammaticalStructure implements Serializable {
     }
     if (PRINT_DEBUGGING && reln.equals(GrammaticalRelation.DEPENDENT)) {
       String topCat = govH.get(CoreAnnotations.ValueAnnotation.class);
-      String topTag = govH.get(TreeCoreAnnotations.HeadTagAnnotation.class).value();
-      String topWord = govH.get(TreeCoreAnnotations.HeadWordAnnotation.class).value();
+      String topTag = gov.tag();
+      String topWord = gov.value();
       String botCat = depH.get(CoreAnnotations.ValueAnnotation.class);
-      String botTag = depH.get(TreeCoreAnnotations.HeadTagAnnotation.class).value();
-      String botWord = depH.get(TreeCoreAnnotations.HeadWordAnnotation.class).value();
+      String botTag = dep.tag();
+      String botWord = dep.value();
       System.err.println("### dep\t" + topCat + "\t" + topTag + "\t" + topWord +
                          "\t" + botCat + "\t" + botTag + "\t" + botWord + "\t");
     }

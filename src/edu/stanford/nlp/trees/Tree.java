@@ -1082,10 +1082,10 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
   /**
-   * Finds the head words of each tree and assigns HeadWordAnnotation
-   * to each node pointing to the correct node.  This relies on the
-   * nodes being CoreLabels, so it throws an IllegalArgumentException
-   * if this is ever not true.
+   * Finds the head words of each tree and assigns
+   * HeadWordLabelAnnotation on each node pointing to the correct
+   * CoreLabel.  This relies on the nodes being CoreLabels, so it
+   * throws an IllegalArgumentException if this is ever not true.
    */
   public void percolateHeadAnnotations(HeadFinder hf) {
     if (!(label() instanceof CoreLabel)) {
@@ -1098,8 +1098,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     }
 
     if (isPreTerminal()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, children()[0]);
-      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, this);
+      nodeLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, (CoreLabel) children()[0].label());
+      nodeLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, nodeLabel);
       return;
     }
 
@@ -1111,18 +1111,18 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     if (head == null) {
       throw new NullPointerException("HeadFinder " + hf + " returned null for " + this);
     } else if (head.isLeaf()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, head);
-      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, head.parent(this));
+      nodeLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, (CoreLabel) head.label());
+      nodeLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, (CoreLabel) head.parent(this).label());
     } else if (head.isPreTerminal()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, head.children()[0]);
-      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, head);
+      nodeLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, (CoreLabel) head.children()[0].label());
+      nodeLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, (CoreLabel) head.label());
     } else {
       if (!(head.label() instanceof CoreLabel)) {
         throw new AssertionError("Horrible bug");
       }
       CoreLabel headLabel = (CoreLabel) head.label();
-      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class));
-      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagAnnotation.class));
+      nodeLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class));
+      nodeLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagLabelAnnotation.class));
     }
   }
 
