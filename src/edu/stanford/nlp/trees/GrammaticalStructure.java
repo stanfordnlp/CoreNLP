@@ -90,6 +90,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * @param t             A Tree to analyze
    * @param relations     A set of GrammaticalRelations to consider
    * @param relationsLock Something needed to make this thread-safe
+   * @param transformer   A transformer to apply to the tree before converting
    * @param hf            A HeadFinder for analysis
    * @param puncFilter    A Filter to reject punctuation. To delete punctuation
    *                      dependencies, this filter should return false on
@@ -98,14 +99,22 @@ public abstract class GrammaticalStructure implements Serializable {
    *                      should pass in a Filters.&lt;String&gt;acceptFilter().
    */
   public GrammaticalStructure(Tree t, Collection<GrammaticalRelation> relations,
-                              Lock relationsLock, HeadFinder hf, Predicate<String> puncFilter) {
-    this.root = new TreeGraphNode(t, (TreeGraphNode) null);
+                              Lock relationsLock, TreeTransformer transformer,
+                              HeadFinder hf, Predicate<String> puncFilter) {
+    TreeGraphNode treegraph = new TreeGraphNode(t, (TreeGraphNode) null);
     // TODO: create the tree and reuse the leaf labels in one pass,
-    // avoiding a wasteful copy of the labels.  Even better would be
-    // to pass in the CoordinationTransformer used by
-    // EnglishGrammaticalStructure
-    Trees.setLeafLabels(this.root, t.yield());
-    Trees.setLeafTagsIfUnset(this.root);
+    // avoiding a wasteful copy of the labels.
+    Trees.setLeafLabels(treegraph, t.yield());
+    Trees.setLeafTagsIfUnset(treegraph);
+    if (transformer != null) {
+      Tree transformed = transformer.transformTree(treegraph);
+      if (!(transformed instanceof TreeGraphNode)) {
+        throw new RuntimeException("Transformer did not change TreeGraphNode into another TreeGraphNode: " + transformer);
+      }
+      this.root = (TreeGraphNode) transformed;
+    } else {
+      this.root = treegraph;
+    }
     indexNodes(this.root);
     // add head word and tag to phrase nodes
     if (hf == null) {
@@ -353,7 +362,7 @@ public abstract class GrammaticalStructure implements Serializable {
 
   public GrammaticalStructure(Tree t, Collection<GrammaticalRelation> relations,
                               HeadFinder hf, Predicate<String> puncFilter) {
-    this(t, relations, null, hf, puncFilter);
+    this(t, relations, null, null, hf, puncFilter);
   }
 
   @Override
