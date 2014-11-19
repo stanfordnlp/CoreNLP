@@ -201,10 +201,14 @@ public class TreeGraphNode extends Tree implements HasParent {
     } else {
       if (children instanceof TreeGraphNode[]) {
         this.children = (TreeGraphNode[]) children;
+        for (TreeGraphNode child : this.children) {
+          child.setParent(this);
+        }
       } else {
         this.children = new TreeGraphNode[children.length];
         for (int i = 0; i < children.length; i++) {
           this.children[i] = (TreeGraphNode)children[i];
+          this.children[i].setParent(this);
         }
       }
     }
@@ -221,6 +225,62 @@ public class TreeGraphNode extends Tree implements HasParent {
       childTreesList.toArray(childTrees);
       setChildren(childTrees);
     }
+  }
+
+  @Override
+  public Tree setChild(int i, Tree t) {
+    if (!(t instanceof TreeGraphNode)) {
+      throw new IllegalArgumentException("Horrible error");
+    }
+    ((TreeGraphNode) t).setParent(this);
+    return super.setChild(i, t);
+  }
+
+  /**
+   * Adds a child in the ith location.  Does so without overwriting
+   * the parent pointers of the rest of the children, which might be
+   * relevant in case there are add and remove operations mixed
+   * together.
+   */
+  @Override
+  public void addChild(int i, Tree t) {
+    if (!(t instanceof TreeGraphNode)) {
+      throw new IllegalArgumentException("Horrible error");
+    }
+    ((TreeGraphNode) t).setParent(this);
+    TreeGraphNode[] kids = this.children;
+    TreeGraphNode[] newKids = new TreeGraphNode[kids.length + 1];
+    if (i != 0) {
+      System.arraycopy(kids, 0, newKids, 0, i);
+    }
+    newKids[i] = (TreeGraphNode) t;
+    if (i != kids.length) {
+      System.arraycopy(kids, i, newKids, i + 1, kids.length - i);
+    }
+    this.children = newKids;
+  }
+
+  /**
+   * Removes the ith child from the TreeGraphNode.  Needs to override
+   * the parent removeChild so it can avoid setting the parent
+   * pointers on the remaining children.  This is useful if you want
+   * to add and remove children from one node to another node; this way,
+   * it won't matter what order you do the add and remove operations.
+   */
+  @Override
+  public Tree removeChild(int i) {
+    TreeGraphNode[] kids = children();
+    TreeGraphNode kid = kids[i];
+    TreeGraphNode[] newKids = new TreeGraphNode[kids.length - 1];
+    for (int j = 0; j < newKids.length; j++) {
+      if (j < i) {
+        newKids[j] = kids[j];
+      } else {
+        newKids[j] = kids[j + 1];
+      }
+    }
+    this.children = newKids;
+    return kid;
   }
 
   /**
