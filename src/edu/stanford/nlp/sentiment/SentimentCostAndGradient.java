@@ -139,22 +139,26 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
     double scale = (1.0 / trainingBatch.size());
     value = error * scale;
 
-    value += scaleAndRegularize(binaryTD, model.binaryTransform, scale, model.op.trainOptions.regTransformMatrix);
-    value += scaleAndRegularize(binaryCD, model.binaryClassification, scale, model.op.trainOptions.regClassification);
+    value += scaleAndRegularize(binaryTD, model.binaryTransform, scale, model.op.trainOptions.regTransformMatrix, false);
+    value += scaleAndRegularize(binaryCD, model.binaryClassification, scale, model.op.trainOptions.regClassification, true);
     value += scaleAndRegularizeTensor(binaryTensorTD, model.binaryTensors, scale, model.op.trainOptions.regTransformTensor);
-    value += scaleAndRegularize(unaryCD, model.unaryClassification, scale, model.op.trainOptions.regClassification, false);
-    value += scaleAndRegularize(wordVectorD, model.wordVectors, scale, model.op.trainOptions.regWordVector, true);
+    value += scaleAndRegularize(unaryCD, model.unaryClassification, scale, model.op.trainOptions.regClassification, false, true);
+    value += scaleAndRegularize(wordVectorD, model.wordVectors, scale, model.op.trainOptions.regWordVector, true, false);
 
     derivative = NeuralUtils.paramsToVector(theta.length, binaryTD.valueIterator(), binaryCD.valueIterator(), SimpleTensor.iteratorSimpleMatrix(binaryTensorTD.valueIterator()), unaryCD.values().iterator(), wordVectorD.values().iterator());
   }
 
   static double scaleAndRegularize(TwoDimensionalMap<String, String, SimpleMatrix> derivatives,
                                    TwoDimensionalMap<String, String, SimpleMatrix> currentMatrices,
-                                   double scale, double regCost) {
+                                   double scale, double regCost, boolean dropBiasColumn) {
     double cost = 0.0; // the regularization cost
     for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> entry : currentMatrices) {
       SimpleMatrix D = derivatives.get(entry.getFirstKey(), entry.getSecondKey());
       SimpleMatrix regMatrix = entry.getValue();
+      if (dropBiasColumn) {
+        regMatrix = new SimpleMatrix(regMatrix);
+        regMatrix.insertIntoThis(0, regMatrix.numCols() - 1, new SimpleMatrix(regMatrix.numRows(), 1));
+      }
       D = D.scale(scale).plus(regMatrix.scale(regCost));
       derivatives.put(entry.getFirstKey(), entry.getSecondKey(), D);
       cost += regMatrix.elementMult(regMatrix).elementSum() * regCost / 2.0;
@@ -164,7 +168,8 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
 
   static double scaleAndRegularize(Map<String, SimpleMatrix> derivatives,
                                    Map<String, SimpleMatrix> currentMatrices,
-                                   double scale, double regCost, boolean activeMatricesOnly) {
+                                   double scale, double regCost, 
+                                   boolean activeMatricesOnly, boolean dropBiasColumn) {
     double cost = 0.0; // the regularization cost
     for (Map.Entry<String, SimpleMatrix> entry : currentMatrices.entrySet()) {
       SimpleMatrix D = derivatives.get(entry.getKey());
@@ -174,9 +179,14 @@ public class SentimentCostAndGradient extends AbstractCachingDiffFunction {
         derivatives.put(entry.getKey(), new SimpleMatrix(entry.getValue().numRows(), entry.getValue().numCols()));
         continue;
       }
-      D = D.scale(scale).plus(entry.getValue().scale(regCost));
+      SimpleMatrix regMatrix = entry.getValue();
+      if (dropBiasColumn) {
+        regMatrix = new SimpleMatrix(regMatrix);
+        regMatrix.insertIntoThis(0, regMatrix.numCols() - 1, new SimpleMatrix(regMatrix.numRows(), 1));
+      }
+      D = D.scale(scale).plus(regMatrix.scale(regCost));
       derivatives.put(entry.getKey(), D);
-      cost += entry.getValue().elementMult(entry.getValue()).elementSum() * regCost / 2.0;
+      cost += regMatrix.elementMult(regMatrix).elementSum() * regCost / 2.0;
     }
     return cost;
   }
