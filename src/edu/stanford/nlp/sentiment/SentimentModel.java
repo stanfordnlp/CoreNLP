@@ -318,12 +318,81 @@ public class SentimentModel implements Serializable {
     numUnaryMatrices = unaryClassification.size();
     unaryClassificationSize = numClasses * (numHid + 1);
 
-    // System.err.println("Binary transform matrices:");
-    // System.err.println(binaryTransform);
-    // System.err.println("Binary classification matrices:");
-    // System.err.println(binaryClassification);
-    // System.err.println("Unary classification matrices:");
-    // System.err.println(unaryClassification);
+    //System.err.println(this);
+  }
+
+  /**
+   * Dumps *all* the matrices in a mostly readable format.
+   */
+  @Override
+  public String toString() {
+    StringBuilder output = new StringBuilder();
+
+    if (binaryTransform.size() > 0) {
+      if (binaryTransform.size() == 1) {
+        output.append("Binary transform matrix\n");
+      } else {
+        output.append("Binary transform matrices\n");
+      }
+      for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> matrix : binaryTransform) {
+        if (!matrix.getFirstKey().equals("") || !matrix.getSecondKey().equals("")) {
+          output.append(matrix.getFirstKey() + " " + matrix.getSecondKey() + ":\n");
+        }
+        output.append(NeuralUtils.toString(matrix.getValue(), "%f"));
+      }
+    }
+
+    if (binaryTensors.size() > 0) {
+      if (binaryTensors.size() == 1) {
+        output.append("Binary transform tensor\n");
+      } else {
+        output.append("Binary transform tensors\n");
+      }
+      for (TwoDimensionalMap.Entry<String, String, SimpleTensor> matrix : binaryTensors) {
+        if (!matrix.getFirstKey().equals("") || !matrix.getSecondKey().equals("")) {
+          output.append(matrix.getFirstKey() + " " + matrix.getSecondKey() + ":\n");
+        }
+        output.append(matrix.getValue().toString("%f"));
+      }
+    }
+
+    if (binaryClassification.size() > 0) {
+      if (binaryClassification.size() == 1) {
+        output.append("Binary classification matrix\n");
+      } else {
+        output.append("Binary classification matrices\n");
+      }
+      for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> matrix : binaryClassification) {
+        if (!matrix.getFirstKey().equals("") || !matrix.getSecondKey().equals("")) {
+          output.append(matrix.getFirstKey() + " " + matrix.getSecondKey() + ":\n");
+        }
+        output.append(NeuralUtils.toString(matrix.getValue(), "%f"));
+      }
+    }
+
+    if (unaryClassification.size() > 0) {
+      if (unaryClassification.size() == 1) {
+        output.append("Unary classification matrix\n");
+      } else {
+        output.append("Unary classification matrices\n");
+      }
+      for (Map.Entry<String, SimpleMatrix> matrix : unaryClassification.entrySet()) {
+        if (!matrix.getKey().equals("")) {
+          output.append(matrix.getKey() + ":\n");
+        }
+        output.append(NeuralUtils.toString(matrix.getValue(), "%f"));
+      }
+    }
+
+    output.append("Word vectors\n");
+    for (Map.Entry<String, SimpleMatrix> matrix : wordVectors.entrySet()) {
+      output.append("'" + matrix.getKey() + "'");
+      output.append("\n");
+      output.append(NeuralUtils.toString(matrix.getValue(), "%f"));
+      output.append("\n");
+    }
+
+    return output.toString();
   }
 
   SimpleTensor randomBinaryTensor() {
