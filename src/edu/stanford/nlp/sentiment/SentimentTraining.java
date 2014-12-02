@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sentiment;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
@@ -8,6 +9,7 @@ import java.util.List;
 
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 
 public class SentimentTraining {
@@ -192,6 +194,10 @@ public class SentimentTraining {
     // build an unitialized SentimentModel from the binary productions
     System.err.println("Sentiment model options:\n" + op);
     SentimentModel model = new SentimentModel(op, trainingTrees);
+
+    if (op.trainOptions.initialMatrixLogPath != null) {
+      StringUtils.printToFile(new File(op.trainOptions.initialMatrixLogPath), model.toString(), false, false, "utf-8");
+    }
 
     // TODO: need to handle unk rules somehow... at test time the tree
     // structures might have something that we never saw at training
