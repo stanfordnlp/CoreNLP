@@ -86,7 +86,7 @@ public class SentimentTraining {
           break;
         }
 
-        if (batch == 0 && epoch > 0 && epoch % model.op.trainOptions.debugOutputEpochs == 0) {
+        if (batch == (numBatches - 1) && model.op.trainOptions.debugOutputEpochs > 0 && (epoch + 1) % model.op.trainOptions.debugOutputEpochs == 0) {
           double score = 0.0;
           if (devTrees != null) {
             Evaluate eval = new Evaluate(model);
