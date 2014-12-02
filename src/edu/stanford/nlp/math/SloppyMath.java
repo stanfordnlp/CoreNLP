@@ -347,22 +347,28 @@ public final class SloppyMath {
    * @return b^e
    */
   public static int intPow(int b, int e) {
-    // common case
-    if (e == 2) {
-      return b * b;
-    }
-    int result = 1;
-    int currPow = b;
-    while (e > 0) {
-      if ((e & 1) != 0) {
-        result *= currPow;
+    if (e <= 1) {
+      if (e == 1) {
+        return b;
+      } else {
+        return 0; // this is also what you get for e < 0 !
       }
-      currPow *= currPow;
-      e >>= 1;
+    } else {
+      if (e == 2) {
+        return b * b;
+      } else {
+        int result = 1;
+        while (e > 0) {
+          if ((e & 1) != 0) {
+            result *= b;
+          }
+          b *= b;
+          e >>= 1;
+        }
+        return result;
+      }
     }
-    return result;
   }
-
 
   /**
      * Exponentiation like we learned in grade school:
