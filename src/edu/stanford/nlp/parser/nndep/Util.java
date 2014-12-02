@@ -162,17 +162,20 @@ class Util {
     try
     {
       PrintWriter output = IOUtils.getPrintWriter(outFile);
-      for (CoreMap sentence : sentences)
+
+      for (int i = 0; i < sentences.size(); i++)
       {
+        CoreMap sentence = sentences.get(i);
+        DependencyTree tree = trees.get(i);
+
         List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
 
         for (int j = 1, size = tokens.size(); j <= size; ++j)
         {
           CoreLabel token = tokens.get(j - 1);
           output.printf("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_%n",
-                  j, token.word(), token.tag(), token.tag(),
-                  token.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class),
-                  token.get(CoreAnnotations.CoNLLDepTypeAnnotation.class));
+              j, token.word(), token.tag(), token.tag(),
+              tree.getHead(j), tree.getLabel(j));
         }
         output.println();
       }
