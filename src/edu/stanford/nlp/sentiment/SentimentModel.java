@@ -41,6 +41,11 @@ public class SentimentModel implements Serializable {
    */
   public final Map<String, SimpleMatrix> unaryClassification;
 
+  /**
+   * Map from vocabulary words to word vectors.
+   *
+   * @see #getWordVector(String) 
+   */
   public Map<String, SimpleMatrix> wordVectors;
 
   /**
@@ -544,10 +549,22 @@ public class SentimentModel implements Serializable {
     }
   }
 
+  /**
+   * Retrieve a learned word vector for the given word.
+   *
+   * If the word is OOV, returns a vector associated with an
+   * {@code <unk>} term.
+   */
   public SimpleMatrix getWordVector(String word) {
     return wordVectors.get(getVocabWord(word));
   }
 
+  /**
+   * Get the known vocabulary word associated with the given word.
+   *
+   * @return The form of the given word known by the model, or
+   *         {@link #UNKNOWN_WORD} if this word has not been observed
+   */
   public String getVocabWord(String word) {
     if (op.lowercaseWordVectors) {
       word = word.toLowerCase();
