@@ -140,7 +140,7 @@ public class Classifier {
     numLabels = W2.length;
 
     preMap = new HashMap<>();
-    for (int i = 0; i < preComputed.size(); ++i)
+    for (int i = 0; i < preComputed.size() && i < config.numPreComputed; ++i)
       preMap.put(preComputed.get(i), i);
 
     isTraining = dataset != null;
@@ -636,13 +636,7 @@ public class Classifier {
    * @see #preCompute(java.util.Set)
    */
   public void preCompute() {
-    // If no features are specified, pre-compute all of them (which fit
-    // into a `saved` array of size `config.numPreComputed`)
-    Set<Integer> keys = preMap.entrySet().stream()
-                              .filter(e -> e.getValue() < config.numPreComputed)
-                              .map(Map.Entry::getKey)
-                              .collect(toSet());
-    preCompute(keys);
+    preCompute(preMap.keySet());
   }
 
   /**
