@@ -351,7 +351,7 @@ public final class SloppyMath {
       if (e == 1) {
         return b;
       } else {
-        return 0; // this is also what you get for e < 0 !
+        return 1; // this is also what you get for e < 0 !
       }
     } else {
       if (e == 2) {
