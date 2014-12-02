@@ -88,6 +88,7 @@ public class Annotation extends ArrayCoreMap {
     return this.get(CoreAnnotations.TextAnnotation.class);
   }
 
+  /** Make a new Annotation from a List of tokenized sentences. */
   public Annotation(List<CoreMap> sentences) {
     super();
     this.set(CoreAnnotations.SentencesAnnotation.class, sentences);
