@@ -58,7 +58,9 @@ public class SentimentTraining {
       }
 
       List<Tree> shuffledSentences = Generics.newArrayList(trainingTrees);
-      Collections.shuffle(shuffledSentences, model.rand);
+      if (model.op.trainOptions.shuffleMatrices) {
+        Collections.shuffle(shuffledSentences, model.rand);
+      }
       for (int batch = 0; batch < numBatches; ++batch) {
         System.err.println("======================================");
         System.err.println("Epoch " + epoch + " batch " + batch);
