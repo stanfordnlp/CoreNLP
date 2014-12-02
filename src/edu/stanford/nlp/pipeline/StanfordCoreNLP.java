@@ -735,6 +735,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     String defaultExtension;
     switch (outputFormat) {
       case XML: defaultExtension = ".xml"; break;
+      case JSON: defaultExtension = ".json"; break;
       case TEXT: defaultExtension = ".out"; break;
       case SERIALIZED: defaultExtension = ".ser.gz"; break;
       default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
