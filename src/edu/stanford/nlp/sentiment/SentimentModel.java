@@ -343,7 +343,7 @@ public class SentimentModel implements Serializable {
         if (!matrix.getFirstKey().equals("") || !matrix.getSecondKey().equals("")) {
           output.append(matrix.getFirstKey() + " " + matrix.getSecondKey() + ":\n");
         }
-        output.append(NeuralUtils.toString(matrix.getValue(), "%f"));
+        output.append(NeuralUtils.toString(matrix.getValue(), "%.8f"));
       }
     }
 
@@ -357,7 +357,7 @@ public class SentimentModel implements Serializable {
         if (!matrix.getFirstKey().equals("") || !matrix.getSecondKey().equals("")) {
           output.append(matrix.getFirstKey() + " " + matrix.getSecondKey() + ":\n");
         }
-        output.append(matrix.getValue().toString("%f"));
+        output.append(matrix.getValue().toString("%.8f"));
       }
     }
 
@@ -371,7 +371,7 @@ public class SentimentModel implements Serializable {
         if (!matrix.getFirstKey().equals("") || !matrix.getSecondKey().equals("")) {
           output.append(matrix.getFirstKey() + " " + matrix.getSecondKey() + ":\n");
         }
-        output.append(NeuralUtils.toString(matrix.getValue(), "%f"));
+        output.append(NeuralUtils.toString(matrix.getValue(), "%.8f"));
       }
     }
 
@@ -385,7 +385,7 @@ public class SentimentModel implements Serializable {
         if (!matrix.getKey().equals("")) {
           output.append(matrix.getKey() + ":\n");
         }
-        output.append(NeuralUtils.toString(matrix.getValue(), "%f"));
+        output.append(NeuralUtils.toString(matrix.getValue(), "%.8f"));
       }
     }
 
@@ -393,7 +393,7 @@ public class SentimentModel implements Serializable {
     for (Map.Entry<String, SimpleMatrix> matrix : wordVectors.entrySet()) {
       output.append("'" + matrix.getKey() + "'");
       output.append("\n");
-      output.append(NeuralUtils.toString(matrix.getValue(), "%f"));
+      output.append(NeuralUtils.toString(matrix.getValue(), "%.8f"));
       output.append("\n");
     }
 
