@@ -189,17 +189,25 @@ class Util {
   public static void printTreeStats(String str, List<DependencyTree> trees)
   {
     System.err.println(Config.SEPARATOR + " " + str);
-    System.err.println("#Trees: " + trees.size());
-    int nonTrees = 0;
+    int nTrees = trees.size();
+    int nonTree = 0;
+    int multiRoot = 0;
     int nonProjective = 0;
     for (DependencyTree tree : trees) {
       if (!tree.isTree())
-        ++nonTrees;
-      else if (!tree.isProjective())
-        ++nonProjective;
+        ++nonTree;
+      else
+      {
+        if (!tree.isProjective())
+          ++nonProjective;
+        if (!tree.isSingleRoot())
+          ++multiRoot;
+      }
     }
-    System.err.println(nonTrees + " tree(s) are illegal.");
-    System.err.println(nonProjective + " tree(s) are legal but not projective.");
+    System.err.printf("#Trees: %d%n", nTrees);
+    System.err.printf("%d tree(s) are illegal (%.2f%%).%n", nonTree, nonTree * 100.0 / nTrees);
+    System.err.printf("%d tree(s) are legal but have multiple roots (%.2f%%).%n", multiRoot, multiRoot * 100.0 / nTrees);
+    System.err.printf("%d tree(s) are legal but not projective (%.2f%%).%n", nonProjective, nonProjective * 100.0 / nTrees);
   }
 
   public static void printTreeStats(List<DependencyTree> trees)
