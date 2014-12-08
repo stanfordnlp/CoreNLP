@@ -23,9 +23,9 @@ public class PatternsAnnotations implements Serializable {
     }
   }
 
-  public static class MatchedPatterns implements GenericAnnotation<Set<SurfacePattern>> {
-    public Class<Set<SurfacePattern>> getType(){
-      return ErasureUtils.<Class<Set<SurfacePattern>>> uncheckedCast(Set.class);
+  public static class MatchedPatterns implements GenericAnnotation<Set<Pattern>> {
+    public Class<Set<Pattern>> getType(){
+      return ErasureUtils.<Class<Set<Pattern>>> uncheckedCast(Set.class);
     }
 
   }

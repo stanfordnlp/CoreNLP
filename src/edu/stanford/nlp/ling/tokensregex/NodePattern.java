@@ -5,12 +5,13 @@ import edu.stanford.nlp.util.StringUtils;
 import java.util.List;
 
 /**
- * Matches a Node (i.e a Token)
+ * Matches a Node (i.e a Token).
  *
  * @author Angel Chang
  */
 public abstract class NodePattern<T> {
-  public final static NodePattern ANY_NODE = new AnyNodePattern();
+
+  public static final NodePattern ANY_NODE = new AnyNodePattern();
 
   // Flags for string annotations
   public static final int CASE_INSENSITIVE = 0x02;
@@ -42,10 +43,11 @@ public abstract class NodePattern<T> {
     protected AnyNodePattern() {
     }
 
+    @Override
     public boolean match(T node) {
       return true;
     }
-    
+
     public String toString() {
       return "*";
     }
@@ -83,6 +85,7 @@ public abstract class NodePattern<T> {
       this.p = p;
     }
 
+    @Override
     public boolean match(T node)
     {
       return !p.match(node);
@@ -104,6 +107,7 @@ public abstract class NodePattern<T> {
       this.nodePatterns = nodePatterns;
     }
 
+    @Override
     public boolean match(T node)
     {
       boolean matched = true;
@@ -132,6 +136,7 @@ public abstract class NodePattern<T> {
       this.nodePatterns = nodePatterns;
     }
 
+    @Override
     public boolean match(T node)
     {
       boolean matched = false;
@@ -148,4 +153,5 @@ public abstract class NodePattern<T> {
       return StringUtils.join(nodePatterns, " | ");
     }
   }
+
 }
