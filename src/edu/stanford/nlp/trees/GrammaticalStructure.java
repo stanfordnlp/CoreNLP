@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.AbstractCoreLabel;
@@ -18,9 +19,13 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
+import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
+import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.*;
-import java.util.function.Predicate;
 
+import java.util.function.Predicate;
 import java.util.function.Function;
 
 import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
@@ -95,6 +100,13 @@ public abstract class GrammaticalStructure implements Serializable {
   public GrammaticalStructure(Tree t, Collection<GrammaticalRelation> relations,
                               Lock relationsLock, HeadFinder hf, Predicate<String> puncFilter) {
     this.root = new TreeGraphNode(t, this);
+    // TODO FIXME: Ideally the tree would reuse the original
+    // CoreLabels, but unfortunately this module then sets the head
+    // word annotations, changing the labels.  This is made worse
+    // because the annotations are TreeGraphNode, which use identity
+    // equality instead of object equality.
+    // Trees.setLeafLabels(this.root, t.yield());
+    // Trees.setLeafTagsIfUnset(this.root);
     indexNodes(this.root);
     // add head word and tag to phrase nodes
     if (hf == null) {
@@ -923,9 +935,14 @@ public abstract class GrammaticalStructure implements Serializable {
     }
 
     if (conllx) {
+      
       List<Tree> leaves = tree.getLeaves();
+      Tree uposTree = UniversalPOSMapper.mapTree(tree);
+      List<Label> uposLabels = uposTree.preTerminalYield();
       String[] words = new String[leaves.size()];
       String[] pos = new String[leaves.size()];
+      String[] upos = new String[leaves.size()];
+      
       String[] relns = new String[leaves.size()];
       int[] govs = new int[leaves.size()];
 
@@ -938,6 +955,7 @@ public abstract class GrammaticalStructure implements Serializable {
         int depPos = indexToPos.get(index) - 1;
         words[depPos] = leaf.value();
         pos[depPos] = leaf.parent(tree).value(); // use slow, but safe, parent look up
+        upos[depPos] = uposLabels.get(index - 1).value();
       }
 
       for (TypedDependency dep : deps) {
@@ -950,7 +968,7 @@ public abstract class GrammaticalStructure implements Serializable {
         if (words[i] == null) {
           continue;
         }
-        String out = String.format("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_\n", i + 1, words[i], pos[i], pos[i], govs[i], (relns[i] != null ? relns[i] : "erased"));
+        String out = String.format("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_\n", i + 1, words[i], upos[i], pos[i], govs[i], (relns[i] != null ? relns[i] : "erased"));
         bf.append(out);
       }
 

@@ -107,6 +107,8 @@
         <compilerarg value="-Xmaxwarns"/>
         <compilerarg value="10000"/> -->
     </javac>
+    <copy file="${source.path}/edu/stanford/nlp/trees/ENUniversalPOS.tsurgeon"
+         todir="${build.path}/edu/stanford/nlp/trees/" />
   </target>
 
   <target name="test" depends="classpath,compile"
