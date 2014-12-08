@@ -608,7 +608,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * marker, and that abbreviation is part of a named entity, the reported
    * entity string excludes the period.
    *
-   * @param sentences The string to be classified
+   * @param sentences
+   *          The string to be classified
    * @return A {@link List} of {@link Triple}s, each of which gives an entity
    *         type and the beginning and ending character offsets.
    */
@@ -616,7 +617,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     ObjectBank<List<IN>> documents =
       makeObjectBankFromString(sentences, plainTextReaderAndWriter);
 
-    List<Triple<String, Integer, Integer>> entities = new ArrayList<>();
+    List<Triple<String, Integer, Integer>> entities =
+      new ArrayList<Triple<String, Integer, Integer>>();
     for (List<IN> doc : documents) {
       String prevEntityType = flags.backgroundSymbol;
       Triple<String, Integer, Integer> prevEntity = null;
@@ -635,9 +637,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
             if (prevEntity != null) {
               entities.add(prevEntity);
             }
-            prevEntity = new Triple<>(guessedAnswer,
-                    fl.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
-                    fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+            prevEntity = new Triple<String, Integer, Integer>(guessedAnswer, fl
+                .get(CoreAnnotations.CharacterOffsetBeginAnnotation.class), fl.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
           } else {
             assert prevEntity != null; // if you read the code carefully, this
                                        // should always be true!
@@ -1009,13 +1010,15 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   /** If the flag
-   *  {@code outputEncoding} is defined, the output is written in that
-   *  character encoding, otherwise in the system default character encoding.
+   * <code>outputEncoding</code> is defined, the output is written in that
+   * character encoding, otherwise in the system default character encoding.
    */
   public void classifyAndWriteAnswers(String testFile, OutputStream outStream,
                                       DocumentReaderAndWriter<IN> readerWriter, boolean outputScores)
-          throws IOException {
-    ObjectBank<List<IN>> documents = makeObjectBankFromFile(testFile, readerWriter);
+    throws IOException
+  {
+    ObjectBank<List<IN>> documents =
+      makeObjectBankFromFile(testFile, readerWriter);
     PrintWriter pw = IOUtils.encodedOutputStreamPrintWriter(outStream, flags.outputEncoding, true);
     classifyAndWriteAnswers(documents, pw, readerWriter, outputScores);
   }
@@ -1023,19 +1026,23 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void classifyAndWriteAnswers(String baseDir, String filePattern,
                                       DocumentReaderAndWriter<IN> readerWriter,
                                       boolean outputScores)
-          throws IOException {
-    ObjectBank<List<IN>> documents = makeObjectBankFromFiles(baseDir, filePattern, readerWriter);
+    throws IOException
+  {
+    ObjectBank<List<IN>> documents =
+      makeObjectBankFromFiles(baseDir, filePattern, readerWriter);
     classifyAndWriteAnswers(documents, readerWriter, outputScores);
   }
 
   public void classifyFilesAndWriteAnswers(Collection<File> testFiles)
-          throws IOException {
+    throws IOException
+  {
     classifyFilesAndWriteAnswers(testFiles, plainTextReaderAndWriter, false);
   }
 
   public void classifyFilesAndWriteAnswers(Collection<File> testFiles,
                                            DocumentReaderAndWriter<IN> readerWriter, boolean outputScores)
-          throws IOException {
+    throws IOException
+  {
     ObjectBank<List<IN>> documents =
       makeObjectBankFromFiles(testFiles, readerWriter);
     classifyAndWriteAnswers(documents, readerWriter, outputScores);
@@ -1044,7 +1051,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   public void classifyAndWriteAnswers(Collection<List<IN>> documents,
                                        DocumentReaderAndWriter<IN> readerWriter,
                                        boolean outputScores)
-          throws IOException {
+    throws IOException
+  {
     classifyAndWriteAnswers(documents,
                             IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true),
                             readerWriter, outputScores);
@@ -1057,7 +1065,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
                                       PrintWriter printWriter,
                                       DocumentReaderAndWriter<IN> readerWriter,
                                       boolean outputScores)
-          throws IOException {
+    throws IOException
+  {
     if (flags.exportFeatures != null) {
       dumpFeatures(documents);
     }
@@ -1136,17 +1145,16 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * stdout (with timing to stderr). This uses the value of flags.documentReader
    * to determine testFile format.
    *
-   * @param testFile The name of the file to test on.
-   * @param k How many best to print
-   * @param readerAndWriter
+   * @param testFile The filename to test on.
    */
   public void classifyAndWriteAnswersKBest(String testFile, int k,
                                        DocumentReaderAndWriter<IN> readerAndWriter)
-    throws IOException {
-    ObjectBank<List<IN>> documents = makeObjectBankFromFile(testFile, readerAndWriter);
+    throws IOException
+  {
+    ObjectBank<List<IN>> documents =
+      makeObjectBankFromFile(testFile, readerAndWriter);
     PrintWriter pw = IOUtils.encodedOutputStreamPrintWriter(System.out, flags.outputEncoding, true);
     classifyAndWriteAnswersKBest(documents, k, pw, readerAndWriter);
-    pw.flush();
   }
 
   /**
@@ -1168,10 +1176,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       List<List<IN>> sorted = Counters.toSortedList(kBest);
       int n = 1;
       for (List<IN> l : sorted) {
-        printWriter.println("<sentence id=" + numSentences + " k=" + n + " logProb=" + kBest.getCount(l) + " prob="
+        System.out.println("<sentence id=" + numSentences + " k=" + n + " logProb=" + kBest.getCount(l) + " prob="
             + Math.exp(kBest.getCount(l)) + '>');
         writeAnswers(l, printWriter, readerAndWriter);
-        printWriter.println("</sentence>");
+        System.out.println("</sentence>");
         n++;
       }
       numSentences++;
@@ -1219,7 +1227,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   /**
-   * Write the classifications of the Sequence classifier to a writer in a
+   * Write the classifications of the Sequence classifier out to a writer in a
    * format determined by the DocumentReaderAndWriter used.
    *
    * @param doc Documents to write out
@@ -1228,7 +1236,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    */
   public void writeAnswers(List<IN> doc, PrintWriter printWriter,
                            DocumentReaderAndWriter<IN> readerAndWriter)
-          throws IOException {
+    throws IOException {
     if (flags.lowerNewgeneThreshold) {
       return;
     }

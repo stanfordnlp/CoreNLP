@@ -9,6 +9,8 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Execution;
+import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -18,7 +20,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  * @author Sonal Gupta (sonalg@stanford.edu)
  *
  */
-public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> implements Serializable{
+public class InvertedIndexByTokens extends SentenceIndex implements Serializable{
 
   private static final long serialVersionUID = 1L;
 
@@ -115,10 +117,10 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
   }
 
   //returns for each pattern, list of sentence ids
-  public Map<E, Set<String>> getFileSentIdsFromPats(Collection<E> pats) {
-    Map<E, Set<String>> sents = new HashMap<E, Set<String>>();
-    for(E pat: pats){
-      Set<String> ids = getFileSentIds(pat.getRelevantWords());
+  public Map<Integer, Set<String>> getFileSentIdsFromPats(Collection<Integer> pats, Index<SurfacePattern> index) {
+    Map<Integer, Set<String>> sents = new HashMap<Integer, Set<String>>();
+    for(Integer pat: pats){
+      Set<String> ids = getFileSentIds(getRelevantWords(index.get(pat)));
       Redwood.log(ConstantsAndVariables.extremedebug, "For pattern with index " + pat + " extracted the following sentences from the index " + ids);
       sents.put(pat, ids);
     }
@@ -136,8 +138,8 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
   }
 
   @Override
-  public Map<E, Set<String>> queryIndex(Collection<E> patterns) {
-    Map<E, Set<String>> sentSentids = getFileSentIdsFromPats(patterns);
+  public Map<Integer, Set<String>> queryIndex(Collection<Integer> patterns, ConcurrentHashIndex<SurfacePattern> patternIndex) {
+    Map<Integer, Set<String>> sentSentids = getFileSentIdsFromPats(patterns, patternIndex);
     return sentSentids;
   }
 

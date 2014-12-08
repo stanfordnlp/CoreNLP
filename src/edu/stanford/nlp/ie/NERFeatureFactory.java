@@ -51,6 +51,7 @@ import edu.stanford.nlp.sequences.Clique;
 import edu.stanford.nlp.sequences.CoNLLDocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
+import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
@@ -1167,15 +1168,12 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       }
 
       if (flags.useNPHead) {
-        // TODO: neat idea, but this would need to be set somewhere.
-        // Probably should have its own annotation as this one would
-        // be more narrow and would clobber other potential uses
-        featuresC.add(c.get(CoreAnnotations.HeadWordStringAnnotation.class) + "-HW");
+        featuresC.add(c.get(TreeCoreAnnotations.HeadWordAnnotation.class) + "-HW");
         if (flags.useTags) {
-          featuresC.add(c.get(CoreAnnotations.HeadWordStringAnnotation.class) + "-" + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-HW-T");
+          featuresC.add(c.get(TreeCoreAnnotations.HeadWordAnnotation.class) + "-" + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-HW-T");
         }
         if (flags.useDistSim) {
-          featuresC.add(c.get(CoreAnnotations.HeadWordStringAnnotation.class) + "-" + c.get(CoreAnnotations.DistSimAnnotation.class) + "-HW-DISTSIM");
+          featuresC.add(c.get(TreeCoreAnnotations.HeadWordAnnotation.class) + "-" + c.get(CoreAnnotations.DistSimAnnotation.class) + "-HW-DISTSIM");
         }
       }
 
@@ -1190,10 +1188,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       }
 
       if (flags.useHeadGov) {
-        // TODO: neat idea, but this would need to be set somewhere.
-        // Probably should have its own annotation as this one would
-        // be more narrow and would clobber other potential uses
-        featuresC.add(c.get(CoreAnnotations.HeadWordStringAnnotation.class) + "-" + c.get(CoreAnnotations.GovernorAnnotation.class) + "-HW_GW");
+        featuresC.add(c.get(TreeCoreAnnotations.HeadWordAnnotation.class) + "-" + c.get(CoreAnnotations.GovernorAnnotation.class) + "-HW_GW");
       }
 
       if (flags.useClassFeature) {

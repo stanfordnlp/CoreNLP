@@ -251,8 +251,8 @@ public class XMLOutputter extends AnnotationOutputter {
         int target = edge.getTarget().index();
         String sourceWord = tokens.get(source - 1).word();
         String targetWord = tokens.get(target - 1).word();
-        Integer sourceCopy = edge.getSource().copyCount();
-        Integer targetCopy = edge.getTarget().copyCount();
+        Integer sourceCopy = edge.getSource().get(CoreAnnotations.CopyAnnotation.class);
+        Integer targetCopy = edge.getTarget().get(CoreAnnotations.CopyAnnotation.class);
         boolean isExtra = edge.isExtra();
 
         addDependencyInfo(depInfo, rel, isExtra, source, sourceWord, sourceCopy, target, targetWord, targetCopy, curNS);
@@ -272,7 +272,7 @@ public class XMLOutputter extends AnnotationOutputter {
     Element govElem = new Element("governor", curNS);
     govElem.addAttribute(new Attribute("idx", Integer.toString(source)));
     govElem.appendChild(sourceWord);
-    if (sourceCopy != null && sourceCopy > 0) {
+    if (sourceCopy != null) {
       govElem.addAttribute(new Attribute("copy", Integer.toString(sourceCopy)));
     }
     depElem.appendChild(govElem);
@@ -280,7 +280,7 @@ public class XMLOutputter extends AnnotationOutputter {
     Element dependElem = new Element("dependent", curNS);
     dependElem.addAttribute(new Attribute("idx", Integer.toString(target)));
     dependElem.appendChild(targetWord);
-    if (targetCopy != null && targetCopy > 0) {
+    if (targetCopy != null) {
       dependElem.addAttribute(new Attribute("copy", Integer.toString(targetCopy)));
     }
     depElem.appendChild(dependElem);

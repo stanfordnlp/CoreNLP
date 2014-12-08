@@ -428,6 +428,20 @@ public class CoreAnnotations {
   }
 
   /**
+   * Keys from AbstractMapLabel (descriptions taken from that class)
+   */
+  /**
+   * The standard key for storing a projected category in the map, as a String.
+   * For any word (leaf node), the projected category is the syntactic category
+   * of the maximal constituent headed by the word. Used in SemanticGraph.
+   */
+  public static class ProjectedCategoryAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
    * The standard key for a propbank label which is of type Argument
    */
   public static class ArgumentAnnotation implements CoreAnnotation<String> {
@@ -1335,6 +1349,17 @@ public class CoreAnnotations {
   }
 
   /**
+   * Used in nlp.trees. When nodes are duplicated in Stanford Dependencies
+   * conversion (to represent conjunction of PPs with preposition collapsing,
+   * this gets set to a positive number on duplicated nodes.
+   */
+  public static class CopyAnnotation implements CoreAnnotation<Integer> {
+    public Class<Integer> getType() {
+      return Integer.class;
+    }
+  }
+
+  /**
    * Used in SimpleXMLAnnotator. The value is an XML element name String for the
    * innermost element in which this token was contained.
    */
@@ -1601,9 +1626,5 @@ public class CoreAnnotations {
 
   public static class ColumnDataClassifierAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() { return String.class; }
-  }
-
-  public static class LabelIDAnnotation implements CoreAnnotation<Integer>{
-    public Class<Integer> getType() { return Integer.class; }
   }
 }

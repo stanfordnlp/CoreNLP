@@ -296,18 +296,5 @@ public class SimpleTensor implements Serializable {
     return result.toString();
   }
 
-  /**
-   * Output the tensor one slice at a time.  Each number is output
-   * with the format given, so for example "%f"
-   */
-  public String toString(String format) {
-    StringBuilder result = new StringBuilder();
-    for (int slice = 0; slice < numSlices; ++slice) {
-      result.append("Slice " + slice + "\n");
-      result.append(NeuralUtils.toString(slices[slice], format));
-    }
-    return result.toString();
-  }
-
   private static final long serialVersionUID = 1;
 }

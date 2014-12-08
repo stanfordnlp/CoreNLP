@@ -614,7 +614,7 @@ public class PerceptronModel extends BaseModel implements Serializable {
    * a dev set.  If op.retrainAfterCutoff is set, will rerun training
    * after the first time through on a limited set of features.
    */
-  public void trainModel(String serializedPath, Tagger tagger, Random random, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, Treebank devTreebank, int nThreads) {
+  void trainModel(String serializedPath, Tagger tagger, Random random, List<Tree> binarizedTrees, List<List<Transition>> transitionLists, Treebank devTreebank, int nThreads) {
     if (op.trainOptions().retrainAfterCutoff && op.trainOptions().featureFrequencyCutoff > 0) {
       String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + "temp.ser.gz";
       trainModel(tempName, tagger, random, binarizedTrees, transitionLists, devTreebank, nThreads, null);

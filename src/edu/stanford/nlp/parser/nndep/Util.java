@@ -162,20 +162,17 @@ class Util {
     try
     {
       PrintWriter output = IOUtils.getPrintWriter(outFile);
-
-      for (int i = 0; i < sentences.size(); i++)
+      for (CoreMap sentence : sentences)
       {
-        CoreMap sentence = sentences.get(i);
-        DependencyTree tree = trees.get(i);
-
         List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
 
         for (int j = 1, size = tokens.size(); j <= size; ++j)
         {
           CoreLabel token = tokens.get(j - 1);
           output.printf("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_%n",
-              j, token.word(), token.tag(), token.tag(),
-              tree.getHead(j), tree.getLabel(j));
+                  j, token.word(), token.tag(), token.tag(),
+                  token.get(CoreAnnotations.CoNLLDepParentIndexAnnotation.class),
+                  token.get(CoreAnnotations.CoNLLDepTypeAnnotation.class));
         }
         output.println();
       }
@@ -189,25 +186,17 @@ class Util {
   public static void printTreeStats(String str, List<DependencyTree> trees)
   {
     System.err.println(Config.SEPARATOR + " " + str);
-    int nTrees = trees.size();
-    int nonTree = 0;
-    int multiRoot = 0;
+    System.err.println("#Trees: " + trees.size());
+    int nonTrees = 0;
     int nonProjective = 0;
     for (DependencyTree tree : trees) {
       if (!tree.isTree())
-        ++nonTree;
-      else
-      {
-        if (!tree.isProjective())
-          ++nonProjective;
-        if (!tree.isSingleRoot())
-          ++multiRoot;
-      }
+        ++nonTrees;
+      else if (!tree.isProjective())
+        ++nonProjective;
     }
-    System.err.printf("#Trees: %d%n", nTrees);
-    System.err.printf("%d tree(s) are illegal (%.2f%%).%n", nonTree, nonTree * 100.0 / nTrees);
-    System.err.printf("%d tree(s) are legal but have multiple roots (%.2f%%).%n", multiRoot, multiRoot * 100.0 / nTrees);
-    System.err.printf("%d tree(s) are legal but not projective (%.2f%%).%n", nonProjective, nonProjective * 100.0 / nTrees);
+    System.err.println(nonTrees + " tree(s) are illegal.");
+    System.err.println(nonProjective + " tree(s) are legal but not projective.");
   }
 
   public static void printTreeStats(List<DependencyTree> trees)

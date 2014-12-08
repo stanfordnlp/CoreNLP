@@ -16,11 +16,13 @@ import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.CoreAnnotations.ParentAnnotation;
+import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.AbstractTokenizer;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.LexedTokenFactory;
 import edu.stanford.nlp.process.Tokenizer;
+import edu.stanford.nlp.process.WordTokenFactory;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
@@ -59,7 +61,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 	private SpanishVerbStripper verbStripper;
 
   // Produces the tokenization for parsing used by AnCora (fixed) */
-  public static final String ANCORA_OPTIONS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitAll=true";
+  public static final String ANCORA_OPTS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitAll=true";
 
   /**
    * Constructor.
@@ -77,7 +79,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     this.splitAny = (splitCompounds || splitVerbs || splitContractions);
 
     if (splitAny) compoundBuffer = Generics.newLinkedList();
-		if (splitVerbs) verbStripper = SpanishVerbStripper.getInstance();
+		verbStripper = SpanishVerbStripper.getInstance();
   }
 
   @Override
@@ -89,22 +91,22 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       // some tokens can be obliterated. In this case, keep iterating
       // until we see a non-zero length token.
       do {
-        nextToken = (splitAny && compoundBuffer.size() > 0) ?
-            (T) compoundBuffer.remove(0) :
+	  nextToken = (splitAny && compoundBuffer.size() > 0) ?
+	      (T) compoundBuffer.remove(0) :
               (T) lexer.next();
       } while (nextToken != null && nextToken.word().length() == 0);
 
       // Check for compounds to split
       if (splitAny && nextToken instanceof CoreLabel) {
         CoreLabel cl = (CoreLabel) nextToken;
-        if (cl.containsKey(ParentAnnotation.class)) {
-          if(splitCompounds && cl.get(ParentAnnotation.class).equals(SpanishLexer.COMPOUND_ANNOTATION))
-            nextToken = (T) processCompound(cl);
-          else if (splitVerbs && cl.get(ParentAnnotation.class).equals(SpanishLexer.VB_PRON_ANNOTATION))
-            nextToken = (T) processVerb(cl);
-          else if (splitContractions && cl.get(ParentAnnotation.class).equals(SpanishLexer.CONTR_ANNOTATION))
-            nextToken = (T) processContraction(cl);
-        }
+	if (cl.containsKey(ParentAnnotation.class)) {
+	    if(splitCompounds && cl.get(ParentAnnotation.class).equals(SpanishLexer.COMPOUND_ANNOTATION))
+		nextToken = (T) processCompound(cl);
+	    else if (splitVerbs && cl.get(ParentAnnotation.class).equals(SpanishLexer.VB_PRON_ANNOTATION))
+		nextToken = (T) processVerb(cl);
+	    else if (splitContractions && cl.get(ParentAnnotation.class).equals(SpanishLexer.CONTR_ANNOTATION))
+		nextToken = (T) processContraction(cl);
+	}
       }
 
       return nextToken;
@@ -117,11 +119,11 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   /* Copies the CoreLabel cl with the new word part */
   private CoreLabel copyCoreLabel(CoreLabel cl, String part) {
-    CoreLabel newLabel = new CoreLabel(cl);
-    newLabel.setWord(part);
-    newLabel.setValue(part);
-    newLabel.set(OriginalTextAnnotation.class, part);
-    return newLabel;
+      CoreLabel newLabel = new CoreLabel(cl);
+      newLabel.setWord(part);
+      newLabel.setValue(part);
+      newLabel.set(OriginalTextAnnotation.class, part);
+      return newLabel;
   }
 
   /**
@@ -194,6 +196,13 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   }
 
   /**
+   * a factory that vends CoreLabel tokens with default tokenization.
+   */
+  public static TokenizerFactory<CoreLabel> coreLabelFactory() {
+    return SpanishTokenizerFactory.newCoreLabelTokenizerFactory();
+  }
+
+  /**
    * recommended factory method
    */
   public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory, String options) {
@@ -201,7 +210,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   }
 
   public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory) {
-    return new SpanishTokenizerFactory<T>(factory, ANCORA_OPTIONS);
+    return new SpanishTokenizerFactory<T>(factory, ANCORA_OPTS);
   }
 
   /**
@@ -223,7 +232,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     protected boolean splitContractionOption = false;
 
     public static TokenizerFactory<CoreLabel> newCoreLabelTokenizerFactory() {
-      return new SpanishTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory());
+      return new SpanishTokenizerFactory<CoreLabel>(new CoreLabelTokenFactory(), ANCORA_OPTS);
     }
 
 
@@ -245,6 +254,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     /** Make a factory for SpanishTokenizers, default options */
     private SpanishTokenizerFactory(LexedTokenFactory<T> factory) {
       this.factory = factory;
+      setOptions(ANCORA_OPTS);
     }
 
     /** Make a factory for SpanishTokenizers, options passed in */
@@ -261,7 +271,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
     @Override
     public Tokenizer<T> getTokenizer(Reader r) {
-      return new SpanishTokenizer<T>(r, factory, lexerProperties, splitCompoundOption, splitVerbOption, splitContractionOption);
+	return new SpanishTokenizer<T>(r, factory, lexerProperties, splitCompoundOption, splitVerbOption, splitContractionOption);
     }
 
     /**
@@ -320,25 +330,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   } // end static class SpanishTokenizerFactory
 
-  /**
-   * Returns a tokenizer with Ancora tokenization.
-   */
-  public static TokenizerFactory<CoreLabel> ancoraFactory() {
-    TokenizerFactory<CoreLabel> tf = SpanishTokenizerFactory.newCoreLabelTokenizerFactory();
-    tf.setOptions(ANCORA_OPTIONS);
-    return tf;
-  }
-  
-  /**
-   * a factory that vends CoreLabel tokens with default tokenization.
-   */
-  public static TokenizerFactory<CoreLabel> coreLabelFactory() {
-    return SpanishTokenizerFactory.newCoreLabelTokenizerFactory();
-  }
-  
-  public static TokenizerFactory<CoreLabel> factory() {
-    return coreLabelFactory();
-  }
+
 
   private static String usage() {
     StringBuilder sb = new StringBuilder();
@@ -349,8 +341,8 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     sb.append("   -ancora        : Tokenization style of AnCora (fixed).").append(nl);
     sb.append("   -lowerCase     : Apply lowercasing.").append(nl);
     sb.append("   -encoding type : Encoding format.").append(nl);
-    sb.append("   -options str   : Orthographic options (see SpanishLexer.java)").append(nl);
-		sb.append("   -tokens        : Output tokens as line-separated instead of space-separted.").append(nl);
+    sb.append("   -orthoOpts str : Orthographic options (see SpanishLexer.java)").append(nl);
+		sb.append("   -lines         : Keep tokens as space-separated, not line separated.").append(nl);
     return sb.toString();
   }
 
@@ -358,11 +350,10 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     Map<String,Integer> argOptionDefs = Generics.newHashMap();
     argOptionDefs.put("help", 0);
     argOptionDefs.put("ftb", 0);
-    argOptionDefs.put("ancora", 0);
     argOptionDefs.put("lowerCase", 0);
     argOptionDefs.put("encoding", 1);
-    argOptionDefs.put("options", 1);
-    argOptionDefs.put("tokens", 0);
+    argOptionDefs.put("orthoOpts", 1);
+    argOptionDefs.put("lines", 0);
     return argOptionDefs;
   }
 
@@ -386,17 +377,17 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
     // Lexer options
     final TokenizerFactory<CoreLabel> tf = SpanishTokenizer.coreLabelFactory();
-    String orthoOptions = options.containsKey("ancora") ? ANCORA_OPTIONS : "";
-    if (options.containsKey("options")) {
-      orthoOptions = orthoOptions.length() == 0 ? options.getProperty("options") : orthoOptions + "," + options;
-    }
-    final boolean tokens = PropertiesUtils.getBool(options, "tokens", false);
-    if ( ! tokens) {
-      orthoOptions = orthoOptions.length() == 0 ? "tokenizeNLs" : orthoOptions + ",tokenizeNLs";
-    }
+    if (options.containsKey("ancora"))
+      tf.setOptions(ANCORA_OPTS);
+    String orthoOptions = options.getProperty("orthoOpts", "");
     tf.setOptions(orthoOptions);
 
+    // When called from this main method, split on newline. No options for
+    // more granular sentence splitting.
+    tf.setOptions("tokenizeNLs");
+
     // Other options
+		final boolean lines = options.containsKey("lines");
     final String encoding = options.getProperty("encoding", "UTF-8");
     final boolean toLower = PropertiesUtils.getBool(options, "lowerCase", false);
 		final Locale es = new Locale("es");
@@ -416,7 +407,10 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
           printSpace = false;
           System.out.println();
         } else {
-          if (printSpace) System.out.print(" ");
+          if (printSpace) {
+            if (lines) System.out.print(" ");
+            else System.out.println();
+          }
           String outputToken = toLower ? word.toLowerCase(es) : word;
           System.out.print(outputToken);
           printSpace = true;

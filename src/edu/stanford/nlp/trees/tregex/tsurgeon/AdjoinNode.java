@@ -45,7 +45,7 @@ class AdjoinNode extends TsurgeonPattern {
       Tree targetNode = childMatcher[0].evaluate(tree, tregex);
       Tree parent = targetNode.parent(tree);
       // put children underneath target in foot of auxilary tree
-      AuxiliaryTree ft = adjunctionTree.copy(this, tree.treeFactory(), tree.label().labelFactory());
+      AuxiliaryTree ft = adjunctionTree.copy(this);
       ft.foot.setChildren(targetNode.getChildrenAsList());
       // replace match with root of auxiliary tree
       if (parent==null) {

@@ -128,6 +128,7 @@ public class SemanticGraphFactory {
                                            boolean includeExtras,
                                            boolean threadSafe,
                                            Predicate<TypedDependency> filter) {
+    addProjectedCategoriesToGrammaticalStructure(gs);
     Collection<TypedDependency> deps;
     switch(mode) {
     case COLLAPSED_TREE:
@@ -222,6 +223,36 @@ public class SemanticGraphFactory {
   // todo: Should we now update this to do CC process by default?
   public static SemanticGraph allTypedDependencies(Tree tree, boolean collapse) {
     return makeFromTree(tree, (collapse) ? Mode.COLLAPSED : Mode.BASIC, true, null);
+  }
+
+  /**
+   * Modifies the given GrammaticalStructure by adding some annotations to the
+   * MapLabels of certain nodes. <p/>
+   *
+   * For each word (leaf node), we add an annotation which indicates the
+   * syntactic category of the maximal constituent headed by the word.
+   */
+  static void addProjectedCategoriesToGrammaticalStructure(GrammaticalStructure gs) {
+    // Our strategy: (1) assume every node in GrammaticalStructure is already
+    // annotated with head word, (2) traverse nodes of GrammaticalStructure in
+    // reverse of pre-order (bottom up), and (3) at each, get head word and
+    // annotate it with category of this node.
+    List<TreeGraphNode> nodes = new ArrayList<TreeGraphNode>();
+    for (Tree node : gs.root()) {       // pre-order traversal
+      nodes.add((TreeGraphNode) node);
+    }
+    Collections.reverse(nodes);         // reverse
+    for (TreeGraphNode node : nodes) {
+      if (!"ROOT".equals(node.value())) { // main verb should get PROJ_CAT "S", not "ROOT"
+        CoreLabel label = node.label();
+        Tree hw = label.get(TreeCoreAnnotations.HeadWordAnnotation.class);
+        if (hw != null) {
+          TreeGraphNode hwn = (TreeGraphNode) hw;
+          CoreLabel hwLabel = hwn.label();
+          hwLabel.set(CoreAnnotations.ProjectedCategoryAnnotation.class, node.value());
+        }
+      }
+    }
   }
 
   /**

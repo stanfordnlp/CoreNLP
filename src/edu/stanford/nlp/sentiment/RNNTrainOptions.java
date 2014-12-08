@@ -56,19 +56,6 @@ public class RNNTrainOptions implements Serializable {
   /** Regularization cost for the transform tensor  */
   public double regTransformTensor = 0.001;
 
-  /** 
-   * Shuffle matrices when training.  Usually should be true.  Set to
-   * false to compare training across different implementations, such
-   * as with the original Matlab version 
-   */
-  public boolean shuffleMatrices = true;
-
-  /**
-   * If set, the initial matrices are logged to this location as a single file
-   * using SentimentModel.toString()
-   */
-  public String initialMatrixLogPath = null;
-
   @Override
   public String toString() {
     StringBuilder result = new StringBuilder();
@@ -95,8 +82,6 @@ public class RNNTrainOptions implements Serializable {
     result.append("regWordVector=" + regWordVector + "\n");
     result.append("initialAdagradWeight=" + initialAdagradWeight + "\n");
     result.append("adagradResetFrequency=" + adagradResetFrequency + "\n");
-    result.append("shuffleMatrices=" + shuffleMatrices + "\n");
-    result.append("initialMatrixLogPath=" + initialMatrixLogPath + "\n");
     return result.toString();
   }
 
@@ -144,15 +129,6 @@ public class RNNTrainOptions implements Serializable {
       for (int i = 0; i < pieces.length; ++i) {
         classWeights[i] = Double.parseDouble(pieces[i]);
       }
-      return argIndex + 2;
-    } else if (args[argIndex].equalsIgnoreCase("-shuffleMatrices")) {
-      shuffleMatrices = true;
-      return argIndex + 1;
-    } else if (args[argIndex].equalsIgnoreCase("-noShuffleMatrices")) {
-      shuffleMatrices = false;
-      return argIndex + 1;
-    } else if (args[argIndex].equalsIgnoreCase("-initialMatrixLogPath")) {
-      initialMatrixLogPath = args[argIndex + 1];
       return argIndex + 2;
     } else {
       return argIndex;

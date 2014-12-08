@@ -132,13 +132,13 @@ public class CustomAnnotationSerializer extends AnnotationSerializer {
       pw.print(node.index());
       // CopyAnnotations indicate copied (or virtual nodes) generated due to CCs (see EnglishGrammaticalStructure)
       // These annotations are usually not set, so print them only if necessary
-      if(node.copyCount() > 0){
+      if(node.containsKey(CoreAnnotations.CopyAnnotation.class)){
         pw.print("-");
-        pw.print(node.copyCount());
+        pw.print(node.get(CoreAnnotations.CopyAnnotation.class));
         // System.out.println("FOUND COPY ANNOTATION: " + node.get(CoreAnnotations.CopyAnnotation.class));
       }
       if (graph.getRoots().contains(node)) {
-        if (node.copyCount() > 0) {
+        if (node.containsKey(CoreAnnotations.CopyAnnotation.class)) {
           pw.print("-R");
         } else {
           pw.print("-0-R");

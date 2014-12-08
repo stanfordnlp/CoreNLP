@@ -2,8 +2,15 @@ package edu.stanford.nlp.patterns.surface;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Set;
 
 import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.classify.LogisticClassifierFactory;
@@ -133,7 +140,7 @@ public class LearnImportantFeatures {
     return numrand;
   }
 
-  public Counter<String> getTopFeatures(Iterator<Pair<Map<String, List<CoreLabel>>, File>> sentsf,
+  public Counter<String> getTopFeatures(boolean batchProcessSents, List<File> sentFiles, Map<String, List<CoreLabel>> sents,
       double perSelectRand, double perSelectNeg, String externalFeatureWeightsFileLabel) throws IOException, ClassNotFoundException {
     Counter<String> features = new ClassicCounter<String>();
     RVFDataset<String, String> dataset = new RVFDataset<String, String>();
@@ -141,18 +148,15 @@ public class LearnImportantFeatures {
     Random rneg = new Random(10);
     int numrand = 0;
     List<Pair<String, Integer>> chosen = new ArrayList<Pair<String, Integer>>();
-    while(sentsf.hasNext()){
-      Pair<Map<String, List<CoreLabel>>, File> sents = sentsf.next();
-      numrand = this.sample(sents.first(), r, rneg, perSelectNeg, perSelectRand, numrand, chosen, dataset);
-    }
-    /*if(batchProcessSents){
+    
+    if(batchProcessSents){
       for(File f: sentFiles){
         Map<String, List<CoreLabel>> sentsf = IOUtils.readObjectFromFile(f);
         numrand = this.sample(sentsf, r, rneg, perSelectNeg, perSelectRand, numrand, chosen, dataset);
       }
     }else
       numrand = this.sample(sents, r, rneg, perSelectNeg, perSelectRand, numrand, chosen, dataset);
-  */
+
     System.out.println("num random chosen: " + numrand);
     System.out.println("Number of datums per label: "
         + dataset.numDatumsPerLabel());
@@ -244,7 +248,7 @@ public class LearnImportantFeatures {
       double perSelectNeg = Double.parseDouble(props
           .getProperty("perSelectNeg"));
       // String wekaOptions = props.getProperty("wekaOptions");
-      //lmf.getTopFeatures(false, , perSelectRand, perSelectNeg, props.getProperty("externalFeatureWeightsFile"));
+      lmf.getTopFeatures(false, null, sents, perSelectRand, perSelectNeg, props.getProperty("externalFeatureWeightsFile"));
     } catch (Exception e) {
       e.printStackTrace();
     }
