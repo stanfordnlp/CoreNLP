@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sentiment;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
@@ -8,6 +9,7 @@ import java.util.List;
 
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 
 public class SentimentTraining {
@@ -58,7 +60,9 @@ public class SentimentTraining {
       }
 
       List<Tree> shuffledSentences = Generics.newArrayList(trainingTrees);
-      Collections.shuffle(shuffledSentences, model.rand);
+      if (model.op.trainOptions.shuffleMatrices) {
+        Collections.shuffle(shuffledSentences, model.rand);
+      }
       for (int batch = 0; batch < numBatches; ++batch) {
         System.err.println("======================================");
         System.err.println("Epoch " + epoch + " batch " + batch);
@@ -82,7 +86,7 @@ public class SentimentTraining {
           break;
         }
 
-        if (batch == 0 && epoch > 0 && epoch % model.op.trainOptions.debugOutputEpochs == 0) {
+        if (batch == (numBatches - 1) && model.op.trainOptions.debugOutputEpochs > 0 && (epoch + 1) % model.op.trainOptions.debugOutputEpochs == 0) {
           double score = 0.0;
           if (devTrees != null) {
             Evaluate eval = new Evaluate(model);
@@ -190,6 +194,10 @@ public class SentimentTraining {
     // build an unitialized SentimentModel from the binary productions
     System.err.println("Sentiment model options:\n" + op);
     SentimentModel model = new SentimentModel(op, trainingTrees);
+
+    if (op.trainOptions.initialMatrixLogPath != null) {
+      StringUtils.printToFile(new File(op.trainOptions.initialMatrixLogPath), model.toString(), false, false, "utf-8");
+    }
 
     // TODO: need to handle unk rules somehow... at test time the tree
     // structures might have something that we never saw at training

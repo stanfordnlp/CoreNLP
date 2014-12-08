@@ -66,7 +66,7 @@ public class AnnotatorImplementations {
   }
 
   /**
-   * Annotate for named entities -- note that this combines multiple NER tag sets, and some auxilliary things (like temporal tagging)
+   * Annotate for named entities -- note that this combines multiple NER tag sets, and some auxiliary things (like temporal tagging)
    */
   public Annotator ner(Properties properties) throws FileNotFoundException {
 

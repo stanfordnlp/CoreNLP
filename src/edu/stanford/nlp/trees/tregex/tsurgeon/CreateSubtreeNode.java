@@ -72,7 +72,7 @@ public class CreateSubtreeNode extends TsurgeonPattern {
         throw new TsurgeonRuntimeException("Parents did not match for trees when applied to " + this);
       }
       
-      AuxiliaryTree treeCopy = auxTree.copy(this);
+      AuxiliaryTree treeCopy = auxTree.copy(this, tree.treeFactory(), tree.label().labelFactory());
 
       // Collect all the children of the parent of the node we care
       // about.  If the child is one of the nodes we care about, or

@@ -31,7 +31,7 @@ public class OperatorSpec {
   }
 
   /**
-   * If true, this is an explcit quantifier, such as "all" or "some."
+   * If true, this is an explicit quantifier, such as "all" or "some."
    * The other option is for this to be an implicit quantification, for instance with proper names:
    *
    * <code>
