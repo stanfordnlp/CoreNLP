@@ -1,5 +1,6 @@
 package edu.stanford.nlp.ling;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -12,9 +13,9 @@ import edu.stanford.nlp.util.Generics;
 
 /**
  * A CoreLabel represents a single word with ancillary information
- * attached using CoreAnnotations.  If the proper annotations are set,
- * the CoreLabel also provides convenient methods to access tags,
- * lemmas, etc.
+ * attached using CoreAnnotations.
+ * A CoreLabel also provides convenient methods to access tags,
+ * lemmas, etc. (if the proper annotations are set).
  * <p>
  * A CoreLabel is a Map from keys (which are Class objects) to values,
  * whose type is determined by the key.  That is, it is a heterogeneous
@@ -28,7 +29,7 @@ import edu.stanford.nlp.util.Generics;
  * @author dramage
  * @author rafferty
  */
-public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWord, HasTag, HasCategory, HasLemma, HasContext, HasIndex, HasOffset {
+public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCategory, HasContext {
 
   private static final long serialVersionUID = 2L;
 
@@ -138,7 +139,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
    * This allows you to read in arbitrary values from a file as features, for example.
    */
   public static interface GenericAnnotation<T> extends CoreAnnotation<T> {  }
-  //Unchecked is below because eclipse can't handle the level of type inference if we correctly parameterize GenericAnnotation with String
+  //Unchecked is below because eclipse can't handle the level of type inference if we correctly parametrize GenericAnnotation with String
   @SuppressWarnings("unchecked")
   public static final Map<String, Class<? extends GenericAnnotation>> genericKeys = Generics.newHashMap();
   @SuppressWarnings("unchecked")
@@ -147,7 +148,11 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
 
   @SuppressWarnings("unchecked")
   private void initFromStrings(String[] keys, String[] values) {
-    for (int i = 0; i < Math.min(keys.length, values.length); i++) {
+    if (keys.length != values.length) {
+      throw new UnsupportedOperationException("Argument array lengths differ: " +
+              Arrays.toString(keys) + " vs. " + Arrays.toString(values));
+    }
+    for (int i = 0; i < keys.length; i++) {
       String key = keys[i];
       String value = values[i];
       KeyLookup lookup = AnnotationLookup.getCoreKey(key);
@@ -191,14 +196,15 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
             this.set(lookup.coreKey, Double.parseDouble(values[i]));
           } else if(valueClass == Long.class) {
             this.set(lookup.coreKey, Long.parseLong(values[i]));
+          } else {
+            throw new RuntimeException("Can't handle " + valueClass);
           }
         } catch (Exception e) {
-          e.printStackTrace();
           // unexpected value type
-          System.err.println("CORE: CoreLabel.initFromStrings: "
+          throw new UnsupportedOperationException("CORE: CoreLabel.initFromStrings: "
               + "Bad type for " + key
               + ". Value was: " + value
-              + "; expected "+AnnotationLookup.getValueType(lookup.coreKey));
+              + "; expected "+AnnotationLookup.getValueType(lookup.coreKey), e);
         }
       }
     }
@@ -274,16 +280,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
   }
 
   /**
-   * Return a non-null String value for a key.
-   * This method is included for backwards compatibility with AbstractMapLabel.
-   * It is guaranteed to not return null; if the key is not present or
-   * has a null value, it returns the empty string ("").  It is only valid to
-   * call this method when key is paired with a value of type String.
-   *
-   * @param <KEY> A key type with a String value
-   * @param key The key to return the value of.
-   * @return "" if the key is not in the map or has the value <code>null</code>
-   *     and the String value of the key otherwise
+   * {@inheritDoc}
    */
   @Override
   public <KEY extends Key<String>> String getString(Class<KEY> key) {
@@ -294,13 +291,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
     return value;
   }
 
-
-  /**
-   * {@inheritDoc}
-   */
-//  public int size() {
-//    return map.size();
-//  }
 
   /**
    * {@inheritDoc}
@@ -334,8 +324,8 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
   public void setWord(String word) {
     String originalWord = get(CoreAnnotations.TextAnnotation.class);
     set(CoreAnnotations.TextAnnotation.class, word);
-    // pado feb 09: if you change the word, delete the lemma.
-    // gabor dec 2012: check if there was a real change -- this remove is actually rather expensive if it gets called a lot
+    // Pado feb 09: if you change the word, delete the lemma.
+    // Gabor dec 2012: check if there was a real change -- this remove is actually rather expensive if it gets called a lot
     if (word != null && !word.equals(originalWord) && containsKey(CoreAnnotations.LemmaAnnotation.class)) {
       remove(CoreAnnotations.LemmaAnnotation.class);
     }
@@ -447,14 +437,17 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
   }
 
   /**
-   * Return the named entity class of the label (or null if none).
-   *
-   * @return String the word value for the label
+   * {@inheritDoc}
    */
+  @Override
   public String ner() {
     return get(CoreAnnotations.NamedEntityTagAnnotation.class);
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public void setNER(String ner) {
     set(CoreAnnotations.NamedEntityTagAnnotation.class, ner);
   }
@@ -557,7 +550,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
 
   public enum OutputFormat {
     VALUE_INDEX, VALUE, VALUE_TAG, VALUE_TAG_INDEX, MAP, VALUE_MAP, VALUE_INDEX_MAP, WORD, WORD_INDEX
-  };
+  }
 
   public static final OutputFormat DEFAULT_FORMAT = OutputFormat.VALUE_INDEX;
 
@@ -646,7 +639,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
       if (index != null) {
         buf.append('-').append((index).intValue());
       }
-      Map<String,Object> map2 = new TreeMap<String,Object>();
+      Map<String,Object> map2 = new TreeMap<>();
       for(Class key : this.keySet()) {
         String cls = key.getName();
         // special shortening of all the Annotation classes
@@ -681,11 +674,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
     return buf.toString();
   }
 
-  private static final Comparator<Class<?>> asClassComparator = new Comparator<Class<?>>() {
-    @Override
-    public int compare(Class<?> o1, Class<?> o2) {
-      return o1.getName().compareTo(o2.getName());
-    }
-  };
+  private static final Comparator<Class<?>> asClassComparator =
+          (o1, o2) -> o1.getName().compareTo(o2.getName());
 
 }
