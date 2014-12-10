@@ -170,7 +170,7 @@ public class Polarity {
 
   /**
    * Project the given natural logic lexical relation on this word. So, for example, if we want to go up the
-   * Hypernymy hierarchy ({@link edu.stanford.nlp.naturalli.NaturalLogicRelation#FORWARD_ENTAILMENT}) on this word,
+   * Hypernymy hierarhy ({@link edu.stanford.nlp.naturalli.NaturalLogicRelation#FORWARD_ENTAILMENT}) on this word,
    * then this function will tell you what relation holds between the new mutated fact and this fact.
    *
    * @param lexicalRelation The lexical relation we are applying to this word.
