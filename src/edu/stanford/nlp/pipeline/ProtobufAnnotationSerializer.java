@@ -13,6 +13,7 @@ import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.naturalli.*;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
@@ -454,6 +455,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (!Double.isNaN(parseTree.score())) {
       builder.setScore(parseTree.score());
+    }
+    Integer sentiment;
+    if (parseTree.label() instanceof CoreMap && (sentiment = ((CoreMap) parseTree.label()).get(RNNCoreAnnotations.PredictedClass.class)) != null) {
+      builder.setSentiment(CoreNLPProtos.Sentiment.valueOf(sentiment));
     }
     // Return
     return builder.build();
@@ -897,6 +902,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       if (proto.hasYieldBeginIndex() && proto.hasYieldEndIndex()) {
         IntPair span = new IntPair(proto.getYieldBeginIndex(), proto.getYieldEndIndex());
         value.set(SpanAnnotation.class, span);
+      }
+      // Set sentiment
+      if (proto.hasSentiment()) {
+        value.set(RNNCoreAnnotations.PredictedClass.class, proto.getSentiment().getNumber());
       }
     }
     // Set score
