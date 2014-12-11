@@ -3,6 +3,7 @@ package edu.stanford.nlp.process;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
@@ -276,7 +277,19 @@ import edu.stanford.nlp.util.Generics;
     "zag", "zap", "zig", "zig-zag", "zigzag", 
     "zip", "ztrip" };
 
- private final Set<String> verbStemSet;
+ private static final Set<String> verbStemSet = loadVerbStemSet(verbStems);
+
+ /**
+  * Loads a list of words from the array and stores them in a HashSet.
+  */
+ private static Set<String> loadVerbStemSet(String[] verbStems) {
+   Set<String> set = Generics.newHashSet(verbStems.length);
+   for (String stem : verbStems) {
+     set.add(stem);
+   }
+   return Collections.unmodifiableSet(set);
+ }
+
 
 %}
 
@@ -287,7 +300,6 @@ import edu.stanford.nlp.util.Generics;
     options[j] = true;
   }
   options[0]=false;
-  verbStemSet = loadVerbStemSet(verbStems);
   if (noTags) { 
     yybegin(any);
   } else {
@@ -333,17 +345,6 @@ import edu.stanford.nlp.util.Generics;
   return s1.toString();
   }
 
-
-/**
- * Loads a list of words from the array and stores them in a HashSet.
- */
-private Set<String> loadVerbStemSet(String[] verbStems) {
-  Set<String> set = Generics.newHashSet(verbStems.length);
-  for (String stem : verbStems) {
-    set.add(stem);
-  }
-  return set;
-}    
 
 
 String condub_stem(int del, String add, String affix) {
