@@ -522,8 +522,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *          divided into documents according to (heuristically
    *          determined) sentence boundaries.
    * @param outputFormat
-   *          The format to put the output in: one of "slashTags", "xml",
-   *          "inlineXML", "tsv", or "tabbedEntities"
+   *          The format to put the output in: one of "slashTags", "xml", or
+   *          "inlineXML"
    * @param preserveSpacing
    *          Whether to preserve the input spacing between tokens, which may
    *          sometimes be none (true) or whether to tokenize the text and print

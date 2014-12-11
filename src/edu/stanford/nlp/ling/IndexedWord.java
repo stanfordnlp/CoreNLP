@@ -15,7 +15,7 @@ import edu.stanford.nlp.util.TypesafeMap;
  * to that use case. A second use case is now the Stanford Dependencies code,
  * where this class directly implements the "copy nodes" of section 4.6 of the
  * Stanford Dependencies Manual, rather than these being placed directly in the
- * backing CoreLabel. This was so there can stay one CoreLabel per token, despite
+ * backing CoreLabel. This was there can stay one CoreLabel per token, despite
  * there being multiple IndexedWord nodes, additional ones representing copy
  * nodes.
  * <p>

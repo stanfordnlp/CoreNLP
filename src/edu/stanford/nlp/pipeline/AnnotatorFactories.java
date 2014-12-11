@@ -4,6 +4,7 @@ import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.WordToSentenceProcessor;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 
@@ -30,7 +31,10 @@ public class AnnotatorFactories {
         String extraOptions = null;
         boolean keepNewline = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
             "false"));
-        if (properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
+
+        WordToSentenceProcessor.NewlineIsSentenceBreak nlsb = WordToSentenceProcessor.stringToNewlineIsSentenceBreak(properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY,
+            StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
+        if (nlsb != WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER) {
           keepNewline = true;
         }
         if (keepNewline) {
