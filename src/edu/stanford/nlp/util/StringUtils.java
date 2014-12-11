@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * StringUtils is a class for random String things, including output formatting and command line argument parsing.
@@ -338,9 +339,11 @@ public class StringUtils {
   }
 
   /**
-   * Joins each elem in the {@code Collection} with the given glue.
+   * Joins each elem in the {@link Iterable} with the given glue.
    * For example, given a list of {@code Integers}, you can create
    * a comma-separated list by calling {@code join(numbers, ", ")}.
+   *
+   * @see StringUtils#join(Stream, String)
    */
   public static <X> String join(Iterable<X> l, String glue) {
     StringBuilder sb = new StringBuilder();
@@ -352,6 +355,28 @@ public class StringUtils {
         first = false;
       }
       sb.append(o);
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Joins each elem in the {@link Stream} with the given glue.
+   * For example, given a list of {@code Integers}, you can create
+   * a comma-separated list by calling {@code join(numbers, ", ")}.
+   *
+   * @see StringUtils#join(Iterable, String)
+   */
+  public static <X> String join(Stream<X> l, String glue) {
+    StringBuilder sb = new StringBuilder();
+    boolean first = true;
+    Iterator<X> iter = l.iterator();
+    while (iter.hasNext()) {
+      if ( ! first) {
+        sb.append(glue);
+      } else {
+        first = false;
+      }
+      sb.append(iter.next());
     }
     return sb.toString();
   }
