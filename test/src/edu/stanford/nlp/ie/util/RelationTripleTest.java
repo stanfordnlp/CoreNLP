@@ -59,7 +59,7 @@ public class RelationTripleTest extends TestCase {
         tree.addEdge(
             new IndexedWord(sentence.get(parent - 1)),
             new IndexedWord(sentence.get(i)),
-            GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, reln),
+            new GrammaticalRelation(GrammaticalRelation.Language.English, reln, null, null),
             1.0, false
         );
       }
