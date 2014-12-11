@@ -148,11 +148,10 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
 
   @SuppressWarnings("unchecked")
   private void initFromStrings(String[] keys, String[] values) {
-    if (keys.length != values.length) {
-      throw new UnsupportedOperationException("Argument array lengths differ: " +
-              Arrays.toString(keys) + " vs. " + Arrays.toString(values));
-    }
-    for (int i = 0; i < keys.length; i++) {
+    // values too long is okay in the case of reading NER data where
+    // we don't care about some fields, for example.  keys too long
+    // means some keys will be null.
+    for (int i = 0; i < Math.min(keys.length, values.length); i++) {
       String key = keys[i];
       String value = values[i];
       KeyLookup lookup = AnnotationLookup.getCoreKey(key);
