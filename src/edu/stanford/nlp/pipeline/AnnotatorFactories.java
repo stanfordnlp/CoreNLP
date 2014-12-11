@@ -32,10 +32,13 @@ public class AnnotatorFactories {
         boolean keepNewline = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
             "false"));
 
-        WordToSentenceProcessor.NewlineIsSentenceBreak nlsb = WordToSentenceProcessor.stringToNewlineIsSentenceBreak(properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY,
-            StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
-        if (nlsb != WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER) {
-          keepNewline = true;
+        String hasSsplit = properties.getProperty("annotators");
+        if (hasSsplit != null && hasSsplit.contains(StanfordCoreNLP.STANFORD_SSPLIT)) {
+          WordToSentenceProcessor.NewlineIsSentenceBreak nlsb = WordToSentenceProcessor.stringToNewlineIsSentenceBreak(properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY,
+              StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
+          if (nlsb != WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER) {
+            keepNewline = true;
+          }
         }
         if (keepNewline) {
           extraOptions = "tokenizeNLs,";
