@@ -9,6 +9,7 @@ import edu.stanford.nlp.ling.AnnotationLookup.KeyLookup;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringUtils;
 
 
 /**
@@ -86,11 +87,8 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
    * Returns a new CoreLabel instance based on the contents of the given
    * label.   Warning: The behavior of this method is a bit disjunctive!
    * If label is a CoreMap (including CoreLabel), then its entire
-   * contents is copied into this label.
-   * If label is an IndexedWord, then the backing label is copied over
-   * entirely.
-   * But, otherwise, just the
-   * value() and word iff it implements {@link HasWord} is copied.
+   * contents is copied into this label.  But, otherwise, just the
+   * value() and word iff it implements HasWord is copied.
    *
    * @param label Basis for this label
    */
@@ -99,12 +97,6 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
     super(0);
     if (label instanceof CoreMap) {
       CoreMap cl = (CoreMap) label;
-      setCapacity(cl.size());
-      for (Class key : cl.keySet()) {
-        set(key, cl.get(key));
-      }
-    } else if (label instanceof IndexedWord) {
-      CoreMap cl = ((IndexedWord) label).backingLabel();
       setCapacity(cl.size());
       for (Class key : cl.keySet()) {
         set(key, cl.get(key));
