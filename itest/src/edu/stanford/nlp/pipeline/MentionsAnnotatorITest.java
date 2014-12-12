@@ -24,7 +24,6 @@ public class MentionsAnnotatorITest extends TestCase {
         Properties props = new Properties();
         // TODO: remove need for ner and just have the mentions annotator
         props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner");
-	props.setProperty("ssplit.newlineIsSentenceBreak", "never");
         pipeline = new StanfordCoreNLP(props);
       }
     }
