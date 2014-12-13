@@ -895,30 +895,28 @@ public class StringUtils {
         int min = maxFlagArgs == null ? 0 : maxFlagArgs;
         List<String> flagArgs = new ArrayList<String>();
         // cdm oct 2007: add length check to allow for empty string argument!
-        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
+        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].isEmpty() || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
         if (flagArgs.isEmpty()) {
           result.setProperty(key, "true");
         } else {
           result.setProperty(key, join(flagArgs, " "));
-          if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS))
-          {
+          if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
             try {
-              InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(result.getProperty(key));
-              InputStreamReader reader = new InputStreamReader(is, "utf-8");
+              BufferedReader reader = IOUtils.readerFromString(result.getProperty(key));
               result.remove(key); // location of this line is critical
               result.load(reader);
               // trim all values
-              for(Object propKey : result.keySet()){
-                String newVal = result.getProperty((String)propKey);
-                result.setProperty((String)propKey,newVal.trim());
+              for (String propKey : result.stringPropertyNames()){
+                String newVal = result.getProperty(propKey);
+                result.setProperty(propKey, newVal.trim());
               }
-              is.close();
+              reader.close();
             } catch (IOException e) {
+              String msg = "argsToProperties could not read properties file: " + result.getProperty(key);
               result.remove(key);
-              System.err.println("argsToProperties could not read properties file: " + result.getProperty(key));
-              throw new RuntimeIOException(e);
+              throw new RuntimeIOException(msg, e);
             }
           }
         }
