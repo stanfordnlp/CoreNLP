@@ -741,7 +741,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       case SERIALIZED: defaultExtension = ".ser.gz"; break;
       default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
     }
-    final String serializerClass = properties.getProperty("serializer");
+    final String serializerClass = properties.getProperty("serializer", GenericAnnotationSerializer.class.getName());
     final String inputSerializerClass = properties.getProperty("inputSerializer", serializerClass);
     final String inputSerializerName = (serializerClass.equals(inputSerializerClass))? "serializer":"inputSerializer";
     final String outputSerializerClass = properties.getProperty("outputSerializer", serializerClass);
