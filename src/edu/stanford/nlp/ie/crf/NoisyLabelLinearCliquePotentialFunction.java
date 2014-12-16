@@ -3,12 +3,11 @@ package edu.stanford.nlp.ie.crf;
 /**
  * @author Mengqiu Wang
  */
-
 public class NoisyLabelLinearCliquePotentialFunction implements CliquePotentialFunction {
 
-  double[][] weights;
-  int[] docLabels;
-  double[][] errorMatrix;
+  private final double[][] weights;
+  private final int[] docLabels;
+  private final double[][] errorMatrix;
 
   public NoisyLabelLinearCliquePotentialFunction(double[][] weights, int[] docLabels, double[][] errorMatrix) {
     this.weights = weights;
@@ -20,8 +19,7 @@ public class NoisyLabelLinearCliquePotentialFunction implements CliquePotentialF
     if (errorMatrix == null)
       return 0;
     int observed = docLabels[posInSent];
-    int truth = labelIndex;
-    return errorMatrix[truth][observed];
+    return errorMatrix[labelIndex][observed];
   }
 
   @Override
@@ -29,8 +27,8 @@ public class NoisyLabelLinearCliquePotentialFunction implements CliquePotentialF
       double[] featureVal, int posInSent) {
     double output = 0.0;
     double dotProd = 0;
-    for (int m = 0; m < cliqueFeatures.length; m++) {
-      dotProd = weights[cliqueFeatures[m]][labelIndex];
+    for (int cliqueFeature : cliqueFeatures) {
+      dotProd = weights[cliqueFeature][labelIndex];
       output += dotProd;
     }
     if (cliqueSize == 1) { // add the noisy label part
@@ -38,4 +36,5 @@ public class NoisyLabelLinearCliquePotentialFunction implements CliquePotentialF
     }
     return output;
   }
+
 }
