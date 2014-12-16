@@ -77,7 +77,8 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
   } // end enum Output style
 
   private static final Pattern sgml = Pattern.compile("<[^>]*>");
-  private final WordToSentenceProcessor<IN> wts = new WordToSentenceProcessor<IN>(WordToSentenceProcessor.NewlineIsSentenceBreak.ALWAYS);
+  private final WordToSentenceProcessor<IN> wts =
+          new WordToSentenceProcessor<IN>(WordToSentenceProcessor.NewlineIsSentenceBreak.ALWAYS);
 
   private SeqClassifierFlags flags; // = null;
   private TokenizerFactory<IN> tokenizerFactory;
@@ -328,7 +329,13 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
         lastEntityType = entityType;
       }
     }
-    out.println(); // finish line then add blank line
+    // if we're in the middle of printing an entity, then we should print its type
+    if (lastEntityType != null && ! background.equals(lastEntityType)) {
+      out.print('\t');
+      out.print(lastEntityType);
+    }
+    // finish line then add blank line
+    out.println();
     out.println();
   }
 
@@ -362,7 +369,13 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
         lastEntityType = entityType;
       }
     }
-    out.println(); // finish line then add blank line
+    // if we're in the middle of printing an entity, then we should print its type
+    if (lastEntityType != null && ! background.equals(lastEntityType)) {
+      out.print('\t');
+      out.print(lastEntityType);
+    }
+    // finish line then add blank line
+    out.println();
     out.println();
   }
 
