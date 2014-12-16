@@ -38,11 +38,21 @@ public class EnvLookup {
     if (lookup != null) {
       return lookup.coreKey;
     } else {
+      return null;
+    }
+  }
+
+  public static Class lookupAnnotationKeyWithClassname(Env env, String name) {
+    Class annotationKey = lookupAnnotationKey(env, name);
+    if (annotationKey == null) {
       try {
         Class clazz = Class.forName(name);
         return clazz;
-      } catch (ClassNotFoundException ex) {}
+      } catch (ClassNotFoundException ex) {
+      }
       return null;
+    } else {
+      return annotationKey;
     }
   }
 
