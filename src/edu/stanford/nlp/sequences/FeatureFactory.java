@@ -91,7 +91,7 @@ public abstract class FeatureFactory<IN> implements Serializable {
    */
   @SuppressWarnings({"MethodMayBeStatic"})
   protected void addAllInterningAndSuffixing(Collection<String> accumulator, Collection<String> addend, String suffix) {
-    boolean nonNullSuffix = suffix != null && ! "".equals(suffix);
+    boolean nonNullSuffix = suffix != null && ! suffix.isEmpty();
     if (nonNullSuffix) {
       suffix = '|' + suffix;
     }
@@ -123,4 +123,5 @@ public abstract class FeatureFactory<IN> implements Serializable {
     }
     return word;
   }
+
 }
