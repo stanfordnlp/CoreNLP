@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Neural network classifier which powers a transition-based dependency

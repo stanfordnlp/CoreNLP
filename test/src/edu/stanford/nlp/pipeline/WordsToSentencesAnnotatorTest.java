@@ -64,16 +64,4 @@ public class WordsToSentencesAnnotatorTest extends TestCase {
     assertEquals(4, sentences.size());
   }
 
-  public void testDefaultNewlineIsSentenceBreakSettings() {
-    String text = "This is one sentence\n\nThis is another.";
-    Properties props = new Properties();
-    props.setProperty("annotators", "tokenize, ssplit");
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-
-    Annotation document1 = new Annotation(text);
-    pipeline.annotate(document1);
-    List<CoreMap> sentences = document1.get(CoreAnnotations.SentencesAnnotation.class);
-    assertEquals(2, sentences.size());
-  }
-
 }

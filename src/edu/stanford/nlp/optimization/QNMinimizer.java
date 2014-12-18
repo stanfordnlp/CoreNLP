@@ -143,9 +143,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     DIAGONAL, SCALAR
   }
 
-  private eLineSearch lsOpt = eLineSearch.MINPACK;
-  private eScaling scaleOpt = eScaling.DIAGONAL;
-  private eState state = eState.CONTINUE;
+  eLineSearch lsOpt = eLineSearch.MINPACK;// eLineSearch.MINPACK;
+  eScaling scaleOpt = eScaling.DIAGONAL;// eScaling.DIAGONAL;
+  eState state = eState.CONTINUE;
 
 
   public QNMinimizer() {
@@ -286,6 +286,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   }
 
   /**
+   *
    * The Record class is used to collect information about the function value
    * over a series of iterations. This information is used to determine
    * convergence, and to (attempt to) ensure numerical errors are not an issue.
@@ -1186,12 +1187,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     return dfunc.valueAt(x);
   }
 
-  /** To set QNMinimizer to use L1 regularization, call this method before use,
-   *  with the boolean set true, and the appropriate lambda parameter.
-   *
-   *  @param use Whether to use Orthant-wise optimization
-   * @param lambda The L1 regularization parameter.
-   */
   public void useOWLQN(boolean use, double lambda) {
     this.useOWLQN = use;
     this.lambdaOWL = lambda;

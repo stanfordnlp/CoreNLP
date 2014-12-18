@@ -87,16 +87,16 @@ echo "Classpath is $CLASSPATH" >> serializedParsers.log
 
 
 
-( echo "Running englishFactored (from treebank) on $host server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.AmericanizeFunction -evals "factDA,tsv" -ijcai03 -saveToSerializedFile englishFactored.ser.gz -maxLength 40 -train /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 100-2199 -train2 /u/nlp/data/lexparser/extraTrain 1-4000,9000-9099 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running englishFactored (from treebank) on $host server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.AmericanizeFunction -evals "factDA,tsv" -ijcai03 -saveToSerializedFile englishFactored.ser.gz -maxLength 40 -train /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 100-2199,9000-9099 -train2 /u/nlp/data/lexparser/extraTrain 1-4000 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 ) >>& ./serializedParsers.log
 
 # "General English" PCFG binary 
 
-( echo "Running englishPCFG (from treebank) on $host server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.AmericanizeFunction -evals "factDA,tsv" -goodPCFG -saveToSerializedFile englishPCFG.ser.gz -maxLength 40 -train /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 100-2199  -train2 /u/nlp/data/lexparser/extraTrain 1-4000,9000-9099 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english  -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running englishPCFG (from treebank) on $host server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.AmericanizeFunction -evals "factDA,tsv" -goodPCFG -saveToSerializedFile englishPCFG.ser.gz -maxLength 40 -train /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 100-2199,9000-9099  -train2 /u/nlp/data/lexparser/extraTrain 1-4000 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english  -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 ) >>& ./serializedParsers.log
 
 
 # "General English" PCFG, case insensitive, binary
 
-( echo "Running caseless englishPCFG (from treebank) on $host server" ; time java -mx4g edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.LowercaseAndAmericanizeFunction -evals factDA,tsv -goodPCFG -saveToSerializedFile englishPCFG.caseless.ser.gz -maxLength 40 -train /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 100-2199 -train2 /u/nlp/data/lexparser/extraTrain 1-4000,9000-9099 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english  -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running caseless englishPCFG (from treebank) on $host server" ; time java -mx4g edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.LowercaseAndAmericanizeFunction -evals factDA,tsv -goodPCFG -saveToSerializedFile englishPCFG.caseless.ser.gz -maxLength 40 -train /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 100-2199,9000-9099 -train2 /u/nlp/data/lexparser/extraTrain 1-4000 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english  -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 ) >>& ./serializedParsers.log
 
 
 # English WSJ 2-21 PCFG simplified grammar
@@ -107,7 +107,7 @@ echo "Classpath is $CLASSPATH" >> serializedParsers.log
 # English with extras PCFG simplified grammar
 # This dumbed down parser is used by the RNN parser.  
 # See /scr/nlp/data/dvparser for more details.
-( echo "Running english pcfg (simplified for use in the RNN parser) on $host -server" ; time java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.AmericanizeFunction -evals "factDA,tsv" -goodPCFG -noRightRec -dominatesV 0 -baseNP 0 -saveToSerializedFile englishPCFG.nocompact.simple.ser.gz -maxLength 40  -compactGrammar 0 -train /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 100-2199  -train2 /u/nlp/data/lexparser/extraTrain 1-4000,9000-9099 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running english pcfg (simplified for use in the RNN parser) on $host -server" ; time java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.AmericanizeFunction -evals "factDA,tsv" -goodPCFG -noRightRec -dominatesV 0 -baseNP 0 -saveToSerializedFile englishPCFG.nocompact.simple.ser.gz -maxLength 40  -compactGrammar 0 -train /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 100-2199,9000-9099  -train2 /u/nlp/data/lexparser/extraTrain 1-4000 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 2200-2219 ) >>& ./serializedParsers.log
 
 
 # Xinhua Mainland Chinese PCFG binary

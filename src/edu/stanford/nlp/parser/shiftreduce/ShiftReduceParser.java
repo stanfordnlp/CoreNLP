@@ -151,13 +151,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
   }
 
-  /**
-   * Return an unmodifiableSet containing the known states (including binarization)
-   */
-  public Set<String> knownStates() {
-    return Collections.unmodifiableSet(model.knownStates);
-  }
-
   @Override
   public boolean requiresTags() {
     return true;
