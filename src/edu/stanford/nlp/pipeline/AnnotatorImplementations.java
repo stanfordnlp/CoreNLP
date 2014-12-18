@@ -109,7 +109,14 @@ public class AnnotatorImplementations {
    * Run RegexNER -- rule-based NER based on a deterministic mapping file
    */
   public Annotator tokensRegexNER(Properties properties, String name) {
-    return new TokensRegexNERAnnotator("regexner", properties);
+    return new TokensRegexNERAnnotator(name, properties);
+  }
+
+  /**
+   * Annotate mentions
+   */
+  public Annotator mentions(Properties properties, String name) {
+    return new MentionsAnnotator(name, properties);
   }
 
   /**

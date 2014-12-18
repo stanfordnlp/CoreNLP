@@ -114,6 +114,17 @@ message Token {
 }
 
 //
+// An enumeration of valid sentiment values for the sentiment classifier.
+//
+enum Sentiment {
+  STRONG_NEGATIVE   = 0;
+  WEAK_NEGATIVE     = 1;
+  NEUTRAL           = 2;
+  WEAK_POSITIVE     = 3;
+  STRONG_POSITIVE   = 4;
+}
+
+//
 // A syntactic parse tree, with scores.
 //
 message ParseTree {
@@ -122,6 +133,7 @@ message ParseTree {
   optional uint32    yieldBeginIndex = 3;
   optional uint32    yieldEndIndex   = 4;
   optional double    score           = 5;
+  optional Sentiment sentiment       = 6;
 }
 
 //

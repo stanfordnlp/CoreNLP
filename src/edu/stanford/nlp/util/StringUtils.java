@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * StringUtils is a class for random String things, including output formatting and command line argument parsing.
@@ -338,9 +339,11 @@ public class StringUtils {
   }
 
   /**
-   * Joins each elem in the {@code Collection} with the given glue.
+   * Joins each elem in the {@link Iterable} with the given glue.
    * For example, given a list of {@code Integers}, you can create
    * a comma-separated list by calling {@code join(numbers, ", ")}.
+   *
+   * @see StringUtils#join(Stream, String)
    */
   public static <X> String join(Iterable<X> l, String glue) {
     StringBuilder sb = new StringBuilder();
@@ -352,6 +355,28 @@ public class StringUtils {
         first = false;
       }
       sb.append(o);
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Joins each elem in the {@link Stream} with the given glue.
+   * For example, given a list of {@code Integers}, you can create
+   * a comma-separated list by calling {@code join(numbers, ", ")}.
+   *
+   * @see StringUtils#join(Iterable, String)
+   */
+  public static <X> String join(Stream<X> l, String glue) {
+    StringBuilder sb = new StringBuilder();
+    boolean first = true;
+    Iterator<X> iter = l.iterator();
+    while (iter.hasNext()) {
+      if ( ! first) {
+        sb.append(glue);
+      } else {
+        first = false;
+      }
+      sb.append(iter.next());
     }
     return sb.toString();
   }
@@ -870,30 +895,28 @@ public class StringUtils {
         int min = maxFlagArgs == null ? 0 : maxFlagArgs;
         List<String> flagArgs = new ArrayList<String>();
         // cdm oct 2007: add length check to allow for empty string argument!
-        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
+        for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].isEmpty() || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
         if (flagArgs.isEmpty()) {
           result.setProperty(key, "true");
         } else {
           result.setProperty(key, join(flagArgs, " "));
-          if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS))
-          {
+          if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
             try {
-              InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(result.getProperty(key));
-              InputStreamReader reader = new InputStreamReader(is, "utf-8");
+              BufferedReader reader = IOUtils.readerFromString(result.getProperty(key));
               result.remove(key); // location of this line is critical
               result.load(reader);
               // trim all values
-              for(Object propKey : result.keySet()){
-                String newVal = result.getProperty((String)propKey);
-                result.setProperty((String)propKey,newVal.trim());
+              for (String propKey : result.stringPropertyNames()){
+                String newVal = result.getProperty(propKey);
+                result.setProperty(propKey, newVal.trim());
               }
-              is.close();
+              reader.close();
             } catch (IOException e) {
+              String msg = "argsToProperties could not read properties file: " + result.getProperty(key);
               result.remove(key);
-              System.err.println("argsToProperties could not read properties file: " + result.getProperty(key));
-              throw new RuntimeIOException(e);
+              throw new RuntimeIOException(msg, e);
             }
           }
         }

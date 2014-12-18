@@ -173,13 +173,13 @@ public class TokenizerAnnotator implements Annotator {
    * initFactory returns the right type of TokenizerFactory based on the options in the properties file
    * and the type. When adding a new Tokenizer, modify TokenizerType.getTokenizerType() to retrieve
    * your tokenizer from the properties file, and then add a class is the switch structure here to
-   * instanstiate the new Tokenizer type.
+   * instantiate the new Tokenizer type.
    *
    * @param type the TokenizerType
-   * @param type the properties file
+   * @param props the properties file
    * @param extraOptions extra things that should be passed into the tokenizer constructor
    */
-  private TokenizerFactory<CoreLabel> initFactory(TokenizerType type, Properties props, String extraOptions) throws IllegalArgumentException{
+  private static TokenizerFactory<CoreLabel> initFactory(TokenizerType type, Properties props, String extraOptions) throws IllegalArgumentException{
     TokenizerFactory<CoreLabel> factory;
     String options = props.getProperty("tokenize.options", null);
 
@@ -195,7 +195,7 @@ public class TokenizerAnnotator implements Annotator {
       if (extraOptions.endsWith(",")) {
         options = extraOptions + options;
       } else {
-        options = extraOptions + "," + options;
+        options = extraOptions + ',' + options;
       }
     }
 
@@ -211,7 +211,7 @@ public class TokenizerAnnotator implements Annotator {
     case Whitespace:
       boolean eolIsSignificant = Boolean.valueOf(props.getProperty(EOL_PROPERTY, "false"));
       eolIsSignificant = eolIsSignificant || Boolean.valueOf(props.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
-      factory = new WhitespaceTokenizer.WhitespaceTokenizerFactory<CoreLabel> (new CoreLabelTokenFactory(), eolIsSignificant);
+      factory = new WhitespaceTokenizer.WhitespaceTokenizerFactory<>(new CoreLabelTokenFactory(), eolIsSignificant);
       break;
 
     case English:

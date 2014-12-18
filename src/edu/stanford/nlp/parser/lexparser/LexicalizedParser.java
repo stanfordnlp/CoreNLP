@@ -1148,7 +1148,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    * <LI><code>-outputFormatOptions</code> Provide options that control the
    * behavior of various <code>-outputFormat</code> choices, such as
    * <code>lexicalize</code>, <code>stem</code>, <code>markHeadNodes</code>,
-   * or <code>xml</code>.
+   * or <code>xml</code>.  {@link edu.stanford.nlp.trees.TreePrint}
    * Options are specified as a comma-separated list.</LI>
    * <LI><code>-writeOutputFiles</code> Write output files corresponding
    * to the input files, with the same name but a <code>".stp"</code>

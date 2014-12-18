@@ -45,6 +45,7 @@ public class DcorefExactOutputITest extends TestCase {
       if (pipeline == null) {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, cleanxml, ssplit, pos, lemma, ner, parse, dcoref");
+	props.setProperty("ssplit.newlineIsSentenceBreak", "never");
         pipeline = new StanfordCoreNLP(props);
       }
     }

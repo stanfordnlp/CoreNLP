@@ -24,13 +24,13 @@ public class ShiftReduceParserQuery implements ParserQuery {
   Debinarizer debinarizer = new Debinarizer(false);
 
   List<? extends HasWord> originalSentence;
-  State initialState, finalState;
+  private State initialState, finalState;
   Tree debinarized;
 
   boolean success;
   boolean unparsable;
 
-  List<State> bestParses;
+  private List<State> bestParses;
 
   final ShiftReduceParser parser;
 

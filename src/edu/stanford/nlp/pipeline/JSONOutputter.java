@@ -3,11 +3,14 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
+import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 
 import java.io.*;
@@ -66,6 +69,14 @@ public class JSONOutputter extends AnnotationOutputter {
           l2.set("basic-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)));
           l2.set("collapsed-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)));
           l2.set("collapsed-ccprocessed-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)));
+          // (sentiment)
+          Tree sentimentTree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
+          if (sentimentTree != null) {
+            int sentiment = RNNCoreAnnotations.getPredictedClass(sentimentTree);
+            String sentimentClass = sentence.get(SentimentCoreAnnotations.ClassName.class);
+            l2.set("sentimentValue", Integer.toString(sentiment));
+            l2.set("sentiment", sentimentClass.replaceAll(" ", ""));
+          }
 
           // (add tokens)
           if (sentence.get(CoreAnnotations.TokensAnnotation.class) != null) {
