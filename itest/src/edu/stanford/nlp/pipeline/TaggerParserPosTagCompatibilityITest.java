@@ -10,7 +10,7 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 /**
  * @author Christopher Manning
  */
-public class PosParserTagCompatibilityITest extends TestCase {
+public class TaggerParserPosTagCompatibilityITest extends TestCase {
 
   // todo: rename to TaggerParserPosCompatibility.  Add other models.
 
