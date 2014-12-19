@@ -9,6 +9,9 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ErasureUtils;
 
 class ShiftReduceUtils {
+
+  private ShiftReduceUtils() {} // static utility methods
+
   static BinaryTransition.Side getBinarySide(Tree tree) {
     if (tree.children().length != 2) {
       throw new AssertionError();
@@ -20,7 +23,7 @@ class ShiftReduceUtils {
     } else {
       return BinaryTransition.Side.RIGHT;
     }
-  }  
+  }
 
   static boolean isTemporary(Tree tree) {
     String label = tree.value();
@@ -49,7 +52,7 @@ class ShiftReduceUtils {
 
     return leftIndex(tree.children()[0]);
   }
-    
+
   /** Returns a 0-based index of the right leaf of the tree.  Assumes the leaves had been indexed from 1 */
   static int rightIndex(Tree tree) {
     if (tree.isLeaf()) {
@@ -68,12 +71,12 @@ class ShiftReduceUtils {
         top = top.children()[0];
       } else {
         return false;
-      } 
+      }
     }
   }
 
   /**
-   * Returns true iff the given <code>state</code> is present on the <code>agenda</code>
+   * Returns true iff the given {@code state} is present on the {@code agenda}
    */
   static boolean findStateOnAgenda(Collection<State> agenda, State state) {
     for (State other : agenda) {
