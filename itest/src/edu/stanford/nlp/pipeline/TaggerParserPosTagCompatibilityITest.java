@@ -2,6 +2,7 @@ package edu.stanford.nlp.pipeline;
 
 import java.util.Set;
 
+import edu.stanford.nlp.parser.shiftreduce.ShiftReduceParser;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
@@ -12,7 +13,27 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
  */
 public class TaggerParserPosTagCompatibilityITest extends TestCase {
 
-  // todo: rename to TaggerParserPosCompatibility.  Add other models.
+  private static void testTagSet3(String[] lexParsers, String[] maxentTaggers, String[] srParsers) {
+    LexicalizedParser lp = LexicalizedParser.loadModel(lexParsers[0]);
+    Set<String> tagSet = lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction());
+    for (String name : maxentTaggers) {
+      MaxentTagger tagger = new MaxentTagger(name);
+      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch", tagSet, tagger.tagSet());
+    }
+    for (String name : lexParsers) {
+      LexicalizedParser lp2 = LexicalizedParser.loadModel(name);
+      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch",
+                   tagSet, lp2.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()));
+    }
+
+    for (String name : srParsers) {
+      ShiftReduceParser srp = ShiftReduceParser.loadModel(name);
+
+      assertEquals(lexParsers[0] + " vs. " + name + " tag set mismatch",
+                   tagSet, srp.tagSet());
+    }
+  }
+
 
   private static final String[] englishTaggers = {
     "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger",
@@ -27,57 +48,77 @@ public class TaggerParserPosTagCompatibilityITest extends TestCase {
     "edu/stanford/nlp/models/lexparser/englishFactored.ser.gz",
   };
 
+  private static final String[] englishSrParsers = {
+    "edu/stanford/nlp/models/srparser/englishSR.beam.ser.gz",
+    "edu/stanford/nlp/models/srparser/englishSR.ser.gz",
+  };
 
   public void testEnglishTagSet() {
-    LexicalizedParser lp = LexicalizedParser.loadModel(englishParsers[0]);
-    Set<String> tagSet = lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction());
-    for (String name : englishTaggers) {
-      MaxentTagger tagger = new MaxentTagger(name);
-      assertEquals("English PCFG parser/" + name + " tag set mismatch", tagSet, tagger.tagSet());
-    }
-    for (String name : englishParsers) {
-      LexicalizedParser lp2 = LexicalizedParser.loadModel(name);
-      assertEquals("English PCFG parser/" + name + " tag set mismatch",
-                   tagSet, lp2.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()));
-    }
+    testTagSet3(englishParsers, englishTaggers, englishSrParsers);
   }
 
+
   private static final String[] germanTaggers = {
-    "/u/nlp/data/pos-tagger/distrib-2014-07-03/german-fast.tagger",
-    "/u/nlp/data/pos-tagger/distrib-2014-07-03/german-fast-caseless.tagger",
-    "/u/nlp/data/pos-tagger/distrib-2014-07-03/german-fast.tagger",
-    "/u/nlp/data/pos-tagger/distrib-2014-07-03/german-hgc.tagger"
+    "edu/stanford/nlp/models/pos-tagger/german/german-fast.tagger",
+    "edu/stanford/nlp/models/pos-tagger/german/german-fast-caseless.tagger",
+    "edu/stanford/nlp/models/pos-tagger/german/german-fast.tagger",
+    "edu/stanford/nlp/models/pos-tagger/german/german-hgc.tagger"
   };
 
   private static final String[] germanParsers = {
     "edu/stanford/nlp/models/lexparser/germanPCFG.ser.gz",
     "edu/stanford/nlp/models/lexparser/germanFactored.ser.gz",
   };
+  private static final String[] germanSrParsers = {
+    "edu/stanford/nlp/models/srparser/germanSR.ser.gz",
+  };
 
-
-  /*
-  // todo: fix German so the tests pass
-  // todo: Change to use classpath models once new taggers are in classpath models
   public void testGermanTagSet() {
-    LexicalizedParser lp = LexicalizedParser.loadModel(germanParsers[0]);
-    Set<String> tagSet = lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction());
-    for (String name : germanTaggers) {
-      MaxentTagger tagger = new MaxentTagger(name);
-      assertEquals("German PCFG parser/tagger tag set mismatch", tagSet, tagger.tagSet());
-    }
-    LexicalizedParser lp2 = LexicalizedParser.loadModel(germanParsers[1]);
-    assertEquals("German (PCFG/factored) parsers tag set mismatch",
-                 lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()),
-                 lp2.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()));
+    testTagSet3(germanParsers, germanTaggers, germanSrParsers);
   }
-  */
 
-  // todo: rewrite to test all Chinese models, as for English
+
+  private static final String[] chineseTaggers = {
+    "edu/stanford/nlp/models/pos-tagger/chinese-distsim/chinese-distsim.tagger",
+  };
+
+  private static final String[] chineseParsers = {
+    // Can't compare Xinhua ones because they have a smaller tag set than the full CTB v6+
+//    "edu/stanford/nlp/models/lexparser/xinhuaPCFG.ser.gz",
+    "edu/stanford/nlp/models/lexparser/chineseFactored.ser.gz",
+    "edu/stanford/nlp/models/lexparser/chinesePCFG.ser.gz",
+//    "edu/stanford/nlp/models/lexparser/xinhuaFactoredSegmenting.ser.gz",
+//    "edu/stanford/nlp/models/lexparser/xinhuaFactored.ser.gz",
+
+  };
+  private static final String[] chineseSrParsers = {
+    "edu/stanford/nlp/models/srparser/chineseSR.ser.gz",
+  };
+
   public void testChineseTagSet() {
-    LexicalizedParser lp = LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/chineseFactored.ser.gz");
-    MaxentTagger tagger = new MaxentTagger("edu/stanford/nlp/models/pos-tagger/chinese-distsim/chinese-distsim.tagger");
-    assertEquals("Chinese (Fact/distsim) parser/tagger tag set mismatch",
-            lp.getLexicon().tagSet(lp.treebankLanguagePack().getBasicCategoryFunction()), tagger.tagSet());
+    testTagSet3(chineseParsers, chineseTaggers, chineseSrParsers);
   }
+
+
+  private static final String[] spanishTaggers = {
+    "edu/stanford/nlp/models/pos-tagger/spanish/spanish.tagger",
+    "edu/stanford/nlp/models/pos-tagger/spanish/spanish-distsim.tagger",
+  };
+
+  private static final String[] spanishParsers = {
+    "edu/stanford/nlp/models/lexparser/spanishPCFG.ser.gz",
+  };
+
+  private static final String[] spanishSrParsers = {
+          // todo [cdm 2014]: For some reason the SR parsers don't have the same tag set, missing 6 tags....
+//    "edu/stanford/nlp/models/srparser/spanishSR.ser.gz",
+//          "edu/stanford/nlp/models/srparser/spanishSR.beam.ser.gz",
+  };
+
+  public void testSpanishTagSet() {
+    testTagSet3(spanishParsers, spanishTaggers, spanishSrParsers);
+  }
+
+  // todo: Add French and Arabic sometime
 
 }
