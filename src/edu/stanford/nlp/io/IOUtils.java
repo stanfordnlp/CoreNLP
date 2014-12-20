@@ -313,19 +313,6 @@ public class IOUtils {
     return ErasureUtils.uncheckedCast(o);
   }
 
-  public static <T> T readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(String msg, String path) {
-    T obj;
-    try {
-      Timing timing = new Timing();
-      System.err.print(msg + ' ' + path + " ... ");
-      obj = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
-      timing.done();
-    } catch (IOException | ClassNotFoundException e) {
-      throw new RuntimeIOException(e);
-    }
-    return obj;
-  }
-
   public static <T> T readObjectFromObjectStream(ObjectInputStream ois) throws IOException,
           ClassNotFoundException {
     Object o = ois.readObject();

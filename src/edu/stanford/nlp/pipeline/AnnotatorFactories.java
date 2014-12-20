@@ -558,7 +558,7 @@ public class AnnotatorFactories {
 
       @Override
       protected String additionalSignature() {
-        return "";
+        return DependencyParseAnnotator.signature(StanfordCoreNLP.STANFORD_DEPENDENCIES, properties);
       }
     };
   }

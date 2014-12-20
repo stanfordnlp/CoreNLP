@@ -17,11 +17,9 @@ import edu.stanford.nlp.util.ReflectionLoading;
  * @author John Bauer
  */
 public abstract class Tagger implements Function<List<? extends HasWord>,List<TaggedWord>> {
-
   public static final String EOS_TAG = ".$$.";
   public static final String EOS_WORD = ".$.";
-
-  @Override
+  
   public abstract List<TaggedWord> apply(List<? extends HasWord> in);
 
   public static Tagger loadModel(String path) {
@@ -29,5 +27,4 @@ public abstract class Tagger implements Function<List<? extends HasWord>,List<Ta
     // serialization mechanism in MaxentTagger.  Similar to ParserGrammar
     return ReflectionLoading.loadByReflection("edu.stanford.nlp.tagger.maxent.MaxentTagger", path);
   }
-
 }

@@ -38,6 +38,7 @@ import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.util.ErasureUtils;
 import java.util.function.Function;
 import edu.stanford.nlp.util.HashIndex;
@@ -100,7 +101,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   @Override
   public Options getOp() { return op; }
 
-  public Reranker reranker; // = null;
+  public Reranker reranker = null;
 
   @Override
   public TreebankLangParserParams getTLPParams() { return op.tlpParams; }
@@ -1419,7 +1420,16 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
           tokenizerFactory = lp.op.langpack().getTokenizerFactory();
           tokenizerFactory.setOptions(tokenizerOptions);
         }
-      } catch (IllegalAccessException | InvocationTargetException | ClassNotFoundException | NoSuchMethodException e) {
+      } catch (IllegalAccessException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (NoSuchMethodException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (ClassNotFoundException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
         System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
         throw new RuntimeException(e);
       }

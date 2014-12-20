@@ -37,6 +37,7 @@ import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.TreeLemmatizer;
@@ -118,9 +119,9 @@ public class CoNLLMentionExtractor extends MentionExtractor {
         // generate the dependency graph
         try {
           SemanticGraph deps = SemanticGraphFactory.makeFromTree(tree,
-              SemanticGraphFactory.Mode.COLLAPSED, includeExtras, threadSafe);
+              SemanticGraphFactory.Mode.COLLAPSED, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe);
           SemanticGraph basicDeps = SemanticGraphFactory.makeFromTree(tree,
-              SemanticGraphFactory.Mode.BASIC, includeExtras, threadSafe);
+              SemanticGraphFactory.Mode.BASIC, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe);
           sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, basicDeps);
           sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
         } catch(Exception e) {

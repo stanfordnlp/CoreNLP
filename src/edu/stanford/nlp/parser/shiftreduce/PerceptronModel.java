@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
@@ -10,8 +11,6 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.parser.lexparser.EvaluateTreebank;
@@ -31,7 +30,7 @@ import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
-public class PerceptronModel extends BaseModel { // Serializable
+public class PerceptronModel extends BaseModel implements Serializable {
   Map<String, Weight> featureWeights;
   final FeatureFactory featureFactory;
 
@@ -46,7 +45,7 @@ public class PerceptronModel extends BaseModel { // Serializable
     } else {
       FeatureFactory[] factories = new FeatureFactory[classes.length];
       for (int i = 0; i < classes.length; ++i) {
-        int paren = classes[i].indexOf('(');
+        int paren = classes[i].indexOf("(");
         if (paren >= 0) {
           String arg = classes[i].substring(paren + 1, classes[i].length() - 1);
           factories[i] = ReflectionLoading.loadByReflection(classes[i].substring(0, paren), arg);
@@ -72,7 +71,7 @@ public class PerceptronModel extends BaseModel { // Serializable
   private static final NumberFormat FILENAME = new DecimalFormat("0000");
 
   public void averageScoredModels(Collection<ScoredObject<PerceptronModel>> scoredModels) {
-    if (scoredModels.isEmpty()) {
+    if (scoredModels.size() == 0) {
       throw new IllegalArgumentException("Cannot average empty models");
     }
 
@@ -82,12 +81,12 @@ public class PerceptronModel extends BaseModel { // Serializable
     }
     System.err.println();
 
-    List<PerceptronModel> models = CollectionUtils.transformAsList(scoredModels, ScoredObject::object);
+    List<PerceptronModel> models = CollectionUtils.transformAsList(scoredModels, object -> object.object());
     averageModels(models);
   }
 
   public void  averageModels(Collection<PerceptronModel> models) {
-    if (models.isEmpty()) {
+    if (models.size() == 0) {
       throw new IllegalArgumentException("Cannot average empty models");
     }
 
@@ -146,9 +145,10 @@ public class PerceptronModel extends BaseModel { // Serializable
    */
   public void outputStats() {
     System.err.println("Number of known features: " + featureWeights.size());
+
     int numWeights = 0;
-    for (Map.Entry<String, Weight> stringWeightEntry : featureWeights.entrySet()) {
-      numWeights += stringWeightEntry.getValue().size();
+    for (String feature : featureWeights.keySet()) {
+      numWeights += featureWeights.get(feature).size();
     }
     System.err.println("Number of non-zero weights: " + numWeights);
 
@@ -161,41 +161,17 @@ public class PerceptronModel extends BaseModel { // Serializable
     System.err.println("Number of transitions: " + transitionIndex.size());
   }
 
-  /** Reconstruct that tag set that was used to train the model by decoding some of the features.
-   *  This is slow and brittle but should work!  Only if "-" is not in the tag set....
-   */
-  @Override
-  Set<String> tagSet() {
-    Set<String> tags = Generics.newHashSet();
-    Pattern p1 = Pattern.compile("Q0TQ1T-([^-]+)-.*");
-    Pattern p2 = Pattern.compile("S0T-(.*)");
-    for (String feat : featureWeights.keySet()) {
-      Matcher m1 = p1.matcher(feat);
-      if (m1.matches()) {
-        tags.add(m1.group(1));
-      }
-      Matcher m2 = p2.matcher(feat);
-      if (m2.matches()) {
-        tags.add(m2.group(1));
-      }
-    }
-    // Add the end of sentence tag!
-    // The SR model doesn't use it, but other models do and report it.
-    // todo [cdm 2014]: Maybe we should reverse the convention here?!?
-    tags.add(Tagger.EOS_TAG);
-    return tags;
-  }
+
 
   /** Convenience method: returns one highest scoring transition, without any ParserConstraints */
   private ScoredObject<Integer> findHighestScoringTransition(State state, List<String> features, boolean requireLegal) {
     Collection<ScoredObject<Integer>> transitions = findHighestScoringTransitions(state, features, requireLegal, 1, null);
-    if (transitions.isEmpty()) {
+    if (transitions.size() == 0) {
       return null;
     }
     return transitions.iterator().next();
   }
 
-  @Override
   public Collection<ScoredObject<Integer>> findHighestScoringTransitions(State state, boolean requireLegal, int numTransitions, List<ParserConstraint> constraints) {
     List<String> features = featureFactory.featurize(state);
     return findHighestScoringTransitions(state, features, requireLegal, numTransitions, constraints);

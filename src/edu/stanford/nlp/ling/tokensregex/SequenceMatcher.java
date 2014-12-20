@@ -3,7 +3,6 @@ package edu.stanford.nlp.ling.tokensregex;
 import edu.stanford.nlp.util.*;
 
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static edu.stanford.nlp.ling.tokensregex.SequenceMatcher.FindType.FIND_NONOVERLAPPING;
@@ -867,10 +866,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     Index<Pair<Integer,Integer>> bidIndex = new HashIndex<Pair<Integer,Integer>>();
     // Map of branch id to branch state
     Map<Integer,BranchState> branchStates = new HashMap<Integer, BranchState>();//Generics.newHashMap();
-    // The activeMatchedStates is only kept to determine what branch states are still needed
-    // It's okay if it overly conservative and has more states than needed,
-    // And while ideally a set, it's okay to have duplicates (esp if it is a bit faster for normal cases).
-    Collection<MatchedStates> activeMatchedStates = new ArrayList<MatchedStates>();//= Generics.newHashSet();
+    Set<MatchedStates> activeMatchedStates = new HashSet<MatchedStates>();//= Generics.newHashSet();
 
     /**
      * Links specified MatchedStates to us (list of MatchedStates
@@ -888,8 +884,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
      * @param s
      */
     private void unlink(MatchedStates s) {
-      // Make sure all instances of s are removed
-      while (activeMatchedStates.remove(s)) {}
+      activeMatchedStates.remove(s);
     }
 
     protected int getBid(int parent, int child)
@@ -917,11 +912,9 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       for (MatchedStates ms:activeMatchedStates) {
         // Trim out unneeded states info
         List<State> states = ms.states;
-        if (logger.isLoggable(Level.FINEST)) {
-          logger.finest("Condense matched state: curPosition=" + ms.curPosition
-              + ", totalTokens=" + ms.matcher.elements.size()
-              + ", nStates=" + states.size());
-        }
+        logger.finest("Condense matched state: curPosition=" + ms.curPosition
+                + ", totalTokens=" + ms.matcher.elements.size()
+               + ", nStates=" + states.size());
         for (State state: states) {
           curBidSet.add(state.bid);
           keepBidStates.add(state.bid);
@@ -940,17 +933,13 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       Collection<Integer> curBidStates = new ArrayList<Integer>(branchStates.keySet());
       for (int bid:curBidStates) {
         if (!keepBidStates.contains(bid)) {
-          if (logger.isLoggable(Level.FINEST)) {
-            logger.finest("Remove state for bid=" + bid);
-          }
+          logger.finest("Remove state for bid=" + bid);
           branchStates.remove(bid);
         }
       }
-      if (logger.isLoggable(Level.FINEST)) {
-        logger.finest("Condense matched state: oldBidStates=" + curBidStates.size()
-            + ", newBidStates=" + branchStates.size()
-            + ", curBidSet=" + curBidSet.size());
-      }
+      logger.finest("Condense matched state: oldBidStates=" + curBidStates.size()
+              + ", newBidStates=" + branchStates.size()
+              + ", curBidSet=" + curBidSet.size());
 
       // TODO: We should be able to trim some bids from our bidIndex as well....
       /*
@@ -1053,7 +1042,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
         MatchedGroup mg = matchedGroups.get(captureGroupId);
         if (mg != null) {
           // This is possible if we have patterns like "( ... )+" in which case multiple nodes can match as the subgroup
-          // We will match the first occurrence and use that as the subgroup  (Java uses the last match as the subgroup)
+          // We will match the first occurence and use that as the subgroup  (Java uses the last match as the subgroup)
           logger.fine("Setting matchBegin=" + curPosition + ": Capture group " + captureGroupId + " already exists: " + mg);
         }
         matchedGroups.put(captureGroupId, new MatchedGroup(curPosition, -1, null));
@@ -1261,17 +1250,15 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   /**
    * Utility class that helps us perform pattern matching against a sequence
    * Keeps information about:
-   * <ul>
-   * <li>the states we need to visit</li>
-   * <li>the current position in the sequence we are at</li>
-   * <li>state for each branch we took</li>
-   * </ul>
+   * - the states we need to visit
+   * - the current position in the sequence we are at
+   * - state for each branch we took
    * @param <T>  Type of node that the matcher is operating on
    */
   static class MatchedStates<T>
   {
     // Sequence matcher with pattern that we are matching against and sequence
-    final SequenceMatcher<T> matcher;
+    SequenceMatcher<T> matcher;
     // Branch states
     BranchStates branchStates;
     // set of old states along with their branch ids (used to avoid reallocating mem)
@@ -1280,7 +1267,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     List<State> states;
     // Current position to match
     int curPosition = -1;
-    final int hashCode;
 
     protected MatchedStates(SequenceMatcher<T> matcher, SequencePattern.State state)
     {
@@ -1295,7 +1281,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       oldStates = new ArrayList<State>();
       this.branchStates = branchStates;
       branchStates.link(this);
-      hashCode = Objects.hashCode(this);
     }
 
     protected BranchStates getBranchStates()
