@@ -61,6 +61,7 @@ message Sentence {
   repeated Entity          entity                              = 52;
   repeated Relation        relation                            = 53;
   optional bool            hasNumerizedTokensAnnotation        = 54;
+  repeated NERMention      mentions                            = 55;
 
   extensions 100 to 255;
 }
@@ -80,8 +81,8 @@ message Token {
   optional string ner               = 8;    // The word's NER tag
   optional string normalizedNER     = 9;    // The word's normalized NER tag
   optional string lemma             = 10;   // The word's lemma
-  optional uint32 beginChar         = 11;   // The character offset begin
-  optional uint32 endChar           = 12;   // The character offset end
+  optional uint32 beginChar         = 11;   // The character offset begin, in the document
+  optional uint32 endChar           = 12;   // The character offset end, in the document
   optional uint32 utterance         = 13;   // The utterance tag used in dcoref
   optional string speaker           = 14;   // The speaker speaking this word
   optional uint32 beginIndex        = 15;   // The begin index of, e.g., a span
@@ -274,4 +275,17 @@ message Polarity {
   required NaturalLogicRelation projectAlternation       = 5;
   required NaturalLogicRelation projectCover             = 6;
   required NaturalLogicRelation projectIndependence      = 7;
+}
+
+//
+// An NER mention in the text
+//
+message NERMention {
+  optional uint32 sentenceIndex                 = 1;
+  required uint32 tokenStartInSentenceInclusive = 2;
+  required uint32 tokenEndInSentenceExclusive   = 3;
+  required string ner                           = 4;
+  optional string normalizedNER                 = 5;
+  optional string entityType                    = 6;
+  optional Timex  timex                         = 7;
 }
