@@ -284,14 +284,15 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
     }
 
     private void primeNext() {
-      nextSent = Generics.newArrayList(nextSentCarryover);
-      nextSentCarryover.clear();
-      boolean seenBoundary = false;
-
       if (inputReader == null) {
         // we've already been out of stuff and have closed the input reader; so just return
         return;
       }
+
+      nextSent = Generics.newArrayList(nextSentCarryover);
+      nextSentCarryover.clear();
+      boolean seenBoundary = false;
+
       if (!tokenizer.hasNext()) {
         IOUtils.closeIgnoringExceptions(inputReader);
         inputReader = null;
