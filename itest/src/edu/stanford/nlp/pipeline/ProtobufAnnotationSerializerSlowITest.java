@@ -229,6 +229,7 @@ public class ProtobufAnnotationSerializerSlowITest {
   public void testMentions() {
     testAnnotators("tokenize,ssplit,pos,lemma,ner,mentions");
   }
+  */
 
 
   @Test
@@ -236,6 +237,7 @@ public class ProtobufAnnotationSerializerSlowITest {
     testAnnotators("tokenize,ssplit,pos,parse,sentiment");
   }
 
+  /*
   @Test
   public void testGetPossibleAnnotators() {
     assertNotNull(possibleAnnotators());
