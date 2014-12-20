@@ -84,14 +84,14 @@ public class SemanticGraphFactory {
   }
 
   /**
-   * Produces a Collapsed SemanticGraph with no extras.
+   * Produces a Collapsed SemanticGraph with optional extras.
    */
   public static SemanticGraph generateCollapsedDependencies(GrammaticalStructure gs, GrammaticalStructure.Extras extras) {
     return makeFromTree(gs, Mode.COLLAPSED, extras, true, null);
   }
 
   /**
-   * Produces a CCProcessed SemanticGraph with no extras.
+   * Produces a CCProcessed SemanticGraph with optional extras.
    */
   public static SemanticGraph generateCCProcessedDependencies(GrammaticalStructure gs, GrammaticalStructure.Extras extras) {
     return makeFromTree(gs, Mode.CCPROCESSED, extras, true, null);
