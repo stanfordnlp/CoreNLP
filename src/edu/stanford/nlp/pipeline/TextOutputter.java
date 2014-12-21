@@ -37,7 +37,7 @@ public class TextOutputter extends AnnotationOutputter {
   /**
    * The meat of the outputter
    */
-  private void print(Annotation annotation, PrintWriter os, Options options) throws IOException {
+  private static void print(Annotation annotation, PrintWriter os, Options options) throws IOException {
     double beam = options.beamPrintingOption;
 
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
