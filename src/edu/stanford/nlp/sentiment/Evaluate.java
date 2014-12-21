@@ -5,6 +5,7 @@ import java.util.List;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 
+/** @author John Bauer */
 public class Evaluate extends AbstractEvaluate {
 
     final SentimentCostAndGradient cag;
@@ -34,12 +35,12 @@ public class Evaluate extends AbstractEvaluate {
      *   edu/stanford/nlp/models/sentiment/sentiment.ser.gz
      *   /u/nlp/data/sentiment/trees/dev.txt
      * </code>
-     * 
+     *
      * Other arguments are available, for example <code> -numClasses</code>.
-     * 
+     *
      * See RNNOptions.java, RNNTestOptions.java and RNNTrainOptions.java for
      * more arguments.
-     * 
+     *
      * The configuration is usually derived from the RNN model file, which is
      * not available here as the predictions are external. It is the caller's
      * responsibility to provide a configuration matching the settings of

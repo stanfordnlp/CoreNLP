@@ -16,7 +16,8 @@ import java.util.Set;
 
 /**
  *
- *
+ * @author John Bauer
+ * @author Michael Haas <haas@cl.uni-heidelberg.de> (extracted this abstract class from Evaluate)
  */
 public abstract class AbstractEvaluate {
 
@@ -249,11 +250,10 @@ public abstract class AbstractEvaluate {
 
     /**
      * Sets the predicted sentiment label for all trees given.
-     * 
+     *
      * This method sets the {@link RNNCoreAnnotations.PredictedClass} annotation
      * for all nodes in all trees.
-     * 
-     * 
+     *
      * @param trees List of Trees to be annotated
      */
     public abstract void populatePredictedLabels(List<Tree> trees);

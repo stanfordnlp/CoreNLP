@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * Evaluate predictions made outside of the RNTN.
- * 
+ *
  * @author Michael Haas <haas@cl.uni-heidelberg.de>
  */
 public class ExternalEvaluate extends AbstractEvaluate {
