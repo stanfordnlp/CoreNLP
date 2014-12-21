@@ -16,8 +16,7 @@
 #
 # usage:
 # cd /u/nlp/data/lexparser   # to have files output in "usual" location
-# kinit xxx@stanford.edu ; aklog -c ir.stanford.edu
-# $JAVANLP_HOME/projects/core/scripts/lexparser/makeSerialized.csh
+# ./makeSerialized.csh
 #
 ## Uncomment this bit to run it with older parser version
 # setenv CLASSPATH /u/nlp/distrib/lexparser-2004-03-24/javanlp.jar:
@@ -58,17 +57,17 @@ echo "Classpath is $CLASSPATH" >> serializedParsers.log
 
 # English WSJ 2-21 PCFG binary and text grammars
 
-( echo "Running wsjPCFG (goodPCFG) on $host" ; time java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -goodPCFG -saveToSerializedFile wsjPCFG.ser.gz -saveToTextFile wsjPCFG.txt -maxLength 40 -train $wsjptb 200-2199 -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running wsjPCFG (goodPCFG) on $host -server" ; time java -server -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -goodPCFG -saveToSerializedFile wsjPCFG.ser.gz -saveToTextFile wsjPCFG.txt -maxLength 40 -train $wsjptb 200-2199 -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
 
 # English noTagSplit no rule compaction PCFG text grammar
-( echo "Running wsjPCFG-noTagSplit-noCompact on $host" ; time java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -goodPCFG -noTagSplit -saveToTextFile wsjPCFG-noTagSplit.txt -compactGrammar 0 -maxLength 40 -train $wsjptb 200-2199 -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running wsjPCFG-noTagSplit-noCompact on $host -server" ; time java -server -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -goodPCFG -noTagSplit -saveToTextFile wsjPCFG-noTagSplit.txt -compactGrammar 0 -maxLength 40 -train $wsjptb 200-2199 -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
 
 # English WSJ 2-21 Factored binary
 
 ## Not yet clear that goodFactored is better than -ijcai03 -- not on dev set
-# ( echo "Running wsjFactored (goodFactored) on $host" ; time java -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDAtsv" -goodFactored -saveToSerializedFile wsjFactored.ser.gz -saveToTextFile wsjFactored.txt -maxLength 40 -train $wsjptb 200-2199 -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
-( echo "Running wsjFactored (ijcai03 correctTags) on $host" ; time java -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -ijcai03 -v -printStates -compactGrammar 0 -correctTags -saveToSerializedFile wsjFactored.ser.gz -saveToTextFile wsjFactored.txt -maxLength 40 -train $wsjptb 200-2199 -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
-( echo "Running wsjFactored (ijcai03 replication) on $host" ; time java -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -ijcai03 -v -printStates -compactGrammar 0 -maxLength 40 -train $wsjptb 200-2199 -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
+# ( echo "Running wsjFactored (goodFactored) on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDAtsv" -goodFactored -saveToSerializedFile wsjFactored.ser.gz -saveToTextFile wsjFactored.txt -maxLength 40 -train $wsjptb 200-2199 -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running wsjFactored (ijcai03 correctTags) on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -ijcai03 -v -printStates -compactGrammar 0 -correctTags -saveToSerializedFile wsjFactored.ser.gz -saveToTextFile wsjFactored.txt -maxLength 40 -train $wsjptb 200-2199 -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running wsjFactored (ijcai03 replication) on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -ijcai03 -v -printStates -compactGrammar 0 -maxLength 40 -train $wsjptb 200-2199 -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
 
 
 ## "General English" models 
@@ -81,51 +80,50 @@ echo "Classpath is $CLASSPATH" >> serializedParsers.log
 #   (by us) 
 # - 95 sentences parsed by us (mainly questions and imperatives; a few from 
 #   recent newswire).
+
 # /u/nlp/data/genia/sentences_cleaned.tree
-
-
-
-# was using: /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj
 
 # "General English" Factored binary
 
-( echo "Running englishFactored (from treebank) on $host" ; time java -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.AmericanizeFunction -evals "factDA,tsv" -ijcai03 -saveToSerializedFile englishFactored.ser.gz -maxLength 40 -train $wsjptb 100-2199 -train2 /u/nlp/data/lexparser/extraTrain 1-4000,9000-9099 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english -testTreebank ${wsjptb}/22 2200-2219 ) >>& ./serializedParsers.log
+
+
+( echo "Running englishFactored (from treebank) on $host server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.AmericanizeFunction -evals "factDA,tsv" -ijcai03 -saveToSerializedFile englishFactored.ser.gz -maxLength 40 -train /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 100-2199 -train2 /u/nlp/data/lexparser/extraTrain 1-4000,9000-9099 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 ) >>& ./serializedParsers.log
 
 # "General English" PCFG binary 
 
-( echo "Running englishPCFG (from treebank) on $host" ; time java -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.AmericanizeFunction -evals "factDA,tsv" -goodPCFG -saveToSerializedFile englishPCFG.ser.gz -maxLength 40 -train ${wsjptb} 100-2199  -train2 /u/nlp/data/lexparser/extraTrain 1-4000,9000-9099 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english  -testTreebank ${wsjptb}/22 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running englishPCFG (from treebank) on $host server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.AmericanizeFunction -evals "factDA,tsv" -goodPCFG -saveToSerializedFile englishPCFG.ser.gz -maxLength 40 -train /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 100-2199  -train2 /u/nlp/data/lexparser/extraTrain 1-4000,9000-9099 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english  -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 ) >>& ./serializedParsers.log
 
 
 # "General English" PCFG, case insensitive, binary
 
-( echo "Running caseless englishPCFG (from treebank) on $host" ; time java -mx4g edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.LowercaseAndAmericanizeFunction -evals factDA,tsv -goodPCFG -saveToSerializedFile englishPCFG.caseless.ser.gz -maxLength 40 -train ${wsjptb} 100-2199 -train2 /u/nlp/data/lexparser/extraTrain 1-4000,9000-9099 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english  -testTreebank ${wsjptb}/22 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running caseless englishPCFG (from treebank) on $host server" ; time java -mx4g edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.LowercaseAndAmericanizeFunction -evals factDA,tsv -goodPCFG -saveToSerializedFile englishPCFG.caseless.ser.gz -maxLength 40 -train /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 100-2199 -train2 /u/nlp/data/lexparser/extraTrain 1-4000,9000-9099 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english  -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 ) >>& ./serializedParsers.log
 
 
 # English WSJ 2-21 PCFG simplified grammar
 # This dumbed down parser is used by the RNN parser.  
 # See /scr/nlp/data/dvparser for more details.
-( echo "Running wsj pcfg (simplified for use in the RNN parser) on $host" ; time java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -goodPCFG -noRightRec -dominatesV 0 -baseNP 0 -saveToSerializedFile wsjPCFG.nocompact.simple.ser.gz -maxLength 40  -compactGrammar 0 -train /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 200-2199 -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running wsj pcfg (simplified for use in the RNN parser) on $host -server" ; time java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -goodPCFG -noRightRec -dominatesV 0 -baseNP 0 -saveToSerializedFile wsjPCFG.nocompact.simple.ser.gz -maxLength 40  -compactGrammar 0 -train /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 200-2199 -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 2200-2219 ) >>& ./serializedParsers.log
 
 # English with extras PCFG simplified grammar
 # This dumbed down parser is used by the RNN parser.  
 # See /scr/nlp/data/dvparser for more details.
-( echo "Running english pcfg (simplified for use in the RNN parser) on $host" ; time java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.AmericanizeFunction -evals "factDA,tsv" -goodPCFG -noRightRec -dominatesV 0 -baseNP 0 -saveToSerializedFile englishPCFG.nocompact.simple.ser.gz -maxLength 40  -compactGrammar 0 -train ${wsjptb} 100-2199  -train2 /u/nlp/data/lexparser/extraTrain 1-4000,9000-9099 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english -testTreebank ${wsjptb}/22 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running english pcfg (simplified for use in the RNN parser) on $host -server" ; time java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.AmericanizeFunction -evals "factDA,tsv" -goodPCFG -noRightRec -dominatesV 0 -baseNP 0 -saveToSerializedFile englishPCFG.nocompact.simple.ser.gz -maxLength 40  -compactGrammar 0 -train /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 100-2199  -train2 /u/nlp/data/lexparser/extraTrain 1-4000,9000-9099 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 2200-2219 ) >>& ./serializedParsers.log
 
 
 # Xinhua Mainland Chinese PCFG binary
 
-( echo "Running xinhuaPCFG on $host" ; time java -mx800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chinesePCFG -saveToSerializedFile xinhuaPCFG.ser.gz -maxLength 40 -train $ctb 026-270,301-499,600-999 -test $ctb 001-025 ) >>& ./serializedParsers.log
+( echo "Running xinhuaPCFG on $host -server" ; time java -server -mx800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chinesePCFG -saveToSerializedFile xinhuaPCFG.ser.gz -maxLength 40 -train $ctb 026-270,301-499,600-999 -test $ctb 001-025 ) >>& ./serializedParsers.log
 # new train list (Galen and Huihsin): 026-270,301-499,555-589,597-1041
 # newer train list (Galen and Huihsin): 026-270,301-499,600-999
 # this is all Xinhua minus Stanford devel and Bikel test
 
 # Xinhua Mainland Chinese Factored binary
 
-( echo "Running xinhuaFactored on $host" ; time java -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -acl03chinese -scTags -saveToSerializedFile xinhuaFactored.ser.gz -maxLength 40 -train $ctb 026-270,301-499,600-999 -test $ctb 001-025 ) >>& ./serializedParsers.log
+( echo "Running xinhuaFactored on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -acl03chinese -scTags -saveToSerializedFile xinhuaFactored.ser.gz -maxLength 40 -train $ctb 026-270,301-499,600-999 -test $ctb 001-025 ) >>& ./serializedParsers.log
 
 # Mixed dialect Chinese on lots of data (with chineseFactored)
 
-( echo "Running chineseFactored on $host" ; time java -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chineseFactored -saveToSerializedFile chineseFactored.ser.gz -maxLength 40 -train $ctb7train -test $ctb7test ) >>& ./serializedParsers.log
+( echo "Running chineseFactored on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chineseFactored -saveToSerializedFile chineseFactored.ser.gz -maxLength 40 -train $ctb7train -test $ctb7test ) >>& ./serializedParsers.log
 # new train list (Galen and Huihsin): 026-270,301-499,555-589,597-1041
 # newer train list (Galen and Huihsin): 026-270,301-499,600-999
 # this is all Xinhua minus Stanford devel and Bikel test
@@ -138,7 +136,7 @@ echo "Classpath is $CLASSPATH" >> serializedParsers.log
 
 # Mixed dialect Chinese PCFG on lots of data
 
-( echo "Running chinesePCFG on $host" ; time java -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chinesePCFG -useUnicodeType -saveToSerializedFile chinesePCFG.ser.gz -maxLength 40 -train $ctb7train -test $ctb7test ) >>& ./serializedParsers.log
+( echo "Running chinesePCFG on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chinesePCFG -useUnicodeType -saveToSerializedFile chinesePCFG.ser.gz -maxLength 40 -train $ctb7train -test $ctb7test ) >>& ./serializedParsers.log
 # new train list (Galen and Huihsin): 026-270,301-499,555-589,597-1041
 # newer train list (Galen and Huihsin): 026-270,301-499,600-999
 # this is all Xinhua minus Stanford devel and Bikel test
@@ -146,37 +144,33 @@ echo "Classpath is $CLASSPATH" >> serializedParsers.log
 
 # Chinese parser for unsegmented Chinese
 
-( echo "Running xinhuaFactoredSegmenting on $host" ; time java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -segmentMarkov -train $ctb 26-270,301-499,600-999 -sctags -acl03chinese -saveToSerializedFile xinhuaFactoredSegmenting.ser.gz ) >>& ./serializedParsers.log
+( echo "Running xinhuaFactoredSegmenting on $host -server" ; time java -server -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -segmentMarkov -train $ctb 26-270,301-499,600-999 -sctags -acl03chinese -saveToSerializedFile xinhuaFactoredSegmenting.ser.gz ) >>& ./serializedParsers.log
 java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -encoding utf-8 xinhuaFactoredSegmenting.ser.gz /u/nlp/data/lexparser/chinese-onesent-unseg-utf8.txt >>& ./serializedParsers.log
 
 
 # It used to be the case that explicitly saying tLPP on command line was 
 # needed for file encoding.  But it has been fixed.
-# ( echo "Running xinhuaFactored from serialized check on $host" ; time java -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -maxLength 40 -loadFromSerializedFile xinhuaFactored.ser.gz -test $ctb 001-025 ) >>& ./serializedParsers.log
+# ( echo "Running xinhuaFactored from serialized check on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -maxLength 40 -loadFromSerializedFile xinhuaFactored.ser.gz -test $ctb 001-025 ) >>& ./serializedParsers.log
 # This now works
-( echo "Running xinhuaFactored from serialized (check without specifying -tLPP) on $host" ; time java -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -maxLength 40 -loadFromSerializedFile xinhuaFactored.ser.gz -test $ctb 001-025 ) >>& ./serializedParsers.log
+( echo "Running xinhuaFactored from serialized (check without specifying -tLPP) on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -maxLength 40 -loadFromSerializedFile xinhuaFactored.ser.gz -test $ctb 001-025 ) >>& ./serializedParsers.log
 
-( echo "Running chinesePCFG (simplified for use in the RNN parser) on $host" ; time java -mx4g edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chineseFactored -PCFG -hMarkov 1 -nomarkNPconj -compactGrammar 0 -saveToSerializedFile chinesePCFG.simple.ser.gz -maxLength 40 -train $ctb7train -test $ctb7test ) >>& ./serializedParsers.log
+( echo "Running chinesePCFG (simplified for use in the RNN parser) on $host -server" ; time java -server -mx4g edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chineseFactored -PCFG -hMarkov 1 -nomarkNPconj -compactGrammar 0 -saveToSerializedFile chinesePCFG.simple.ser.gz -maxLength 40 -train $ctb7train -test $ctb7test ) >>& ./serializedParsers.log
 
 # German Factored binary from Negra (version 2)
 # $negra 3 is the dev set 
 
-( echo "Running germanFactored on $host" ; time java -mx5g edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.NegraPennTreebankParserParams -hMarkov 1 -vMarkov 2 -vSelSplitCutOff 300 -uwm 1 -unknownSuffixSize 2 -maxLength 40 -nodeCleanup 2 -saveToSerializedFile germanFactored.ser.gz -train $negra 1 -test $negra 3 ) >>& ./serializedParsers.log
+( echo "Running germanFactored on $host -server" ; time java -server -mx5g edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.NegraPennTreebankParserParams -hMarkov 1 -vMarkov 2 -vSelSplitCutOff 300 -uwm 1 -unknownSuffixSize 2 -maxLength 40 -nodeCleanup 2 -saveToSerializedFile germanFactored.ser.gz -train $negra 1 -test $negra 3 ) >>& ./serializedParsers.log
 
 # German PCFG from Negra (version 2)
 
-( echo "Running germanPCFG on $host" ; time java -mx2g edu.stanford.nlp.parser.lexparser.LexicalizedParser -v -evals tsv -tLPP edu.stanford.nlp.parser.lexparser.NegraPennTreebankParserParams -PCFG -hMarkov 1 -vMarkov 2 -vSelSplitCutOff 300 -uwm 1 -unknownSuffixSize 1 -maxLength 40 -nodeCleanup 2 -saveToSerializedFile germanPCFG.ser.gz -train $negra 1 -test $negra 3 ) >>& ./serializedParsers.log
+( echo "Running germanPCFG on $host -server" ; time java -server -mx2g edu.stanford.nlp.parser.lexparser.LexicalizedParser -v -evals tsv -tLPP edu.stanford.nlp.parser.lexparser.NegraPennTreebankParserParams -PCFG -hMarkov 1 -vMarkov 2 -vSelSplitCutOff 300 -uwm 1 -unknownSuffixSize 1 -maxLength 40 -nodeCleanup 2 -saveToSerializedFile germanPCFG.ser.gz -train $negra 1 -test $negra 3 ) >>& ./serializedParsers.log
 
 # German Dependency parser
 # This requires normalizing the dependency output to strip boundary symbol.
-# ( echo "Running germanDep on $host" ; time java -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.NegraPennTreebankParserParams -dep -hMarkov 1 -maxLength 40 -saveToSerializedFile germanDep.ser.gz -train $negra 1 -test $negra 3 ) >>& ./serializedParsers.log
-
-#########
-# SPANISH
- #########
+# ( echo "Running germanDep on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.NegraPennTreebankParserParams -dep -hMarkov 1 -maxLength 40 -saveToSerializedFile germanDep.ser.gz -train $negra 1 -test $negra 3 ) >>& ./serializedParsers.log
 
 # Spanish PCFG
-( echo "Running spanishPCFG on $host" ; time java -mx6g edu.stanford.nlp.parser.lexparser.LexicalizedParser -v -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.SpanishTreebankParserParams -PCFG -vMarkov 3 -uwm 1 -vSelSplitCutoff 100 -rightRec -train $ancoraTrain -test $ancoraTest -saveToSerializedFile spanishPCFG.ser.gz ) >>& ./serializedParsers.log
+( echo "Running spanishPCFG on $host -server" ; time java -server -mx6g edu.stanford.nlp.parser.lexparser.LexicalizedParser -v -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.SpanishTreebankParserParams -PCFG -vMarkov 3 -uwm 1 -vSelSplitCutoff 100 -rightRec -train $ancoraTrain -test $ancoraTest -saveToSerializedFile spanishPCFG.ser.gz ) >>& ./serializedParsers.log
 
 
 ########
@@ -233,14 +227,14 @@ echo time $train_sh $fr_train_args >>& ./serializedParsers.log
 ## English just to check parser code regression (not saved)
 
 ## Just for reference
-( echo "Running wsjPCFG (acl03pcfg replication) on $host" ; time java -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -acl03pcfg -maxLength 40 -train $wsjptb 200-2199 -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running wsjPCFG (acl03pcfg replication) on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -acl03pcfg -maxLength 40 -train $wsjptb 200-2199 -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
 
 ## See if same results from serialized parser
-( echo "Running wsjFactored (ijcai03 from serialized) on $host" ; time java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -v -maxLength 40 -loadFromSerializedFile wsjFactored.ser.gz -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
-# ( echo "Running wsjFactored (ijcai03 with nodeprune) on $host" ; time java -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -ijcai03 -v -compactGrammar 0 -nodePrune true -maxLength 40 -train $wsjptb 200-2199 -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running wsjFactored (ijcai03 from serialized) on $host -server" ; time java -server -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -v -maxLength 40 -loadFromSerializedFile wsjFactored.ser.gz -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
+# ( echo "Running wsjFactored (ijcai03 with nodeprune) on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -ijcai03 -v -compactGrammar 0 -nodePrune true -maxLength 40 -train $wsjptb 200-2199 -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
 
 ## See if same results from text grammar parser
-( echo "Running wsjFactored (ijcai03 from textGrammar) on $host" ; time java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -v -maxLength 40 -loadFromTextFile wsjFactored.txt -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running wsjFactored (ijcai03 from textGrammar) on $host -server" ; time java -server -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -v -maxLength 40 -loadFromTextFile wsjFactored.txt -testTreebank $wsjptb 2200-2219 ) >>& ./serializedParsers.log
 
 uptime >> serializedParsers.log
 
