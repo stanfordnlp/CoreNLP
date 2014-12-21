@@ -7,10 +7,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.trees.GrammaticalStructureFactory;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.trees.Trees;
+import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
@@ -27,7 +24,9 @@ public class ParserAnnotatorUtils {
    * EnglishGrammaticalStructureFactory and the
    * ChineseGrammaticalStructureFactory are thread safe.
    */
-  public static void fillInParseAnnotations(boolean verbose, boolean buildGraphs, GrammaticalStructureFactory gsf, CoreMap sentence, Tree tree) {
+  public static void fillInParseAnnotations(boolean verbose, boolean buildGraphs,
+                                            GrammaticalStructureFactory gsf, CoreMap sentence, Tree tree,
+                                            GrammaticalStructure.Extras extras) {
     // make sure all tree nodes are CoreLabels
     // TODO: why isn't this always true? something fishy is going on
     Trees.convertToCoreLabels(tree);
@@ -47,9 +46,9 @@ public class ParserAnnotatorUtils {
       // unfortunately, it is necessary to make the
       // GrammaticalStructure three times, as the dependency
       // conversion changes the given data structure
-      SemanticGraph deps = SemanticGraphFactory.generateCollapsedDependencies(gsf.newGrammaticalStructure(tree));
-      SemanticGraph uncollapsedDeps = SemanticGraphFactory.generateUncollapsedDependencies(gsf.newGrammaticalStructure(tree));
-      SemanticGraph ccDeps = SemanticGraphFactory.generateCCProcessedDependencies(gsf.newGrammaticalStructure(tree));
+      SemanticGraph deps = SemanticGraphFactory.generateCollapsedDependencies(gsf.newGrammaticalStructure(tree), extras);
+      SemanticGraph uncollapsedDeps = SemanticGraphFactory.generateUncollapsedDependencies(gsf.newGrammaticalStructure(tree), extras);
+      SemanticGraph ccDeps = SemanticGraphFactory.generateCCProcessedDependencies(gsf.newGrammaticalStructure(tree), extras);
       if (verbose) {
         System.err.println("SDs:");
         System.err.println(deps.toString(SemanticGraph.OutputFormat.LIST));
