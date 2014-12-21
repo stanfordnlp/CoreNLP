@@ -1551,7 +1551,6 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       //asdasd
     }
 
-    // todo [cdm 2014]: Have this guarded by a flag and things would be a little faster. Set flag in current uses of this annotation.
     // NER tag annotations from a previous NER system
     if (c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class) != null) {
       featuresC.add(c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)+ "-CStackedNERTag");

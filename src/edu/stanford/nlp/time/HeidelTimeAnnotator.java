@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
+import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.DataFilePaths;
@@ -25,18 +26,16 @@ import java.util.regex.Pattern;
 
 
 /**
- * Annotates text using HeidelTime.
+ * Annotates text using HeidelTime
  *
  * GUTIME/TimeML specifications can be found at:
  * <a href="http://www.timeml.org/site/tarsqi/modules/gutime/index.html">
  * http://www.timeml.org/site/tarsqi/modules/gutime/index.html</a>.
  *
+ * TODO heideltime doesn't actually run on the NLP machines :( (TreeTagger doesn't run)
  * @author Gabor Angeli
  */
 public class HeidelTimeAnnotator implements Annotator {
-
-  // TODO HeidelTime doesn't actually run on the NLP machines :( (TreeTagger doesn't run.)
-  // This could probably be fixed in newer HeidelTime versions, which even support using our tagger.
 
   private static final String BASE_PATH = "$NLP_DATA_HOME/packages/heideltime/";
   private static final String DEFAULT_PATH = DataFilePaths.convert(BASE_PATH);
@@ -63,11 +62,10 @@ public class HeidelTimeAnnotator implements Annotator {
                                                        DEFAULT_PATH));
     this.heideltimePath = new File(path);
 
-    this.outputResults =
+    this.outputResults = 
       Boolean.valueOf(props.getProperty(HEIDELTIME_OUTPUT_RESULTS, "false"));
   }
 
-  @Override
   public void annotate(Annotation annotation) {
     try {
       this.annotate((CoreMap)annotation);
@@ -136,25 +134,25 @@ public class HeidelTimeAnnotator implements Annotator {
       		ex, IOUtils.slurpFile(inputFile), output), ex);
     }
     inputFile.delete();
-
+    
     // get Timex annotations
     List<CoreMap> timexAnns = toTimexCoreMaps(outputXML, document);
     document.set(TimeAnnotations.TimexAnnotations.class, timexAnns);
     if (outputResults) {
       System.out.println(timexAnns);
     }
-
+    
     // align Timex annotations to sentences
     int timexIndex = 0;
     for (CoreMap sentence: document.get(CoreAnnotations.SentencesAnnotation.class)) {
     	int sentBegin = beginOffset(sentence);
     	int sentEnd = endOffset(sentence);
-
+    	
     	// skip times before the sentence
     	while (timexIndex < timexAnns.size() && beginOffset(timexAnns.get(timexIndex)) < sentBegin) {
     		++timexIndex;
     	}
-
+    	
     	// determine times within the sentence
     	int sublistBegin = timexIndex;
     	int sublistEnd = timexIndex;
@@ -164,20 +162,20 @@ public class HeidelTimeAnnotator implements Annotator {
     		++sublistEnd;
     		++timexIndex;
     	}
-
+    	
     	// set the sentence timexes
     	sentence.set(TimeAnnotations.TimexAnnotations.class, timexAnns.subList(sublistBegin, sublistEnd));
     }
   }
-
+  
   private static int beginOffset(CoreMap ann) {
   	return ann.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
   }
-
+  
   private static int endOffset(CoreMap ann) {
   	return ann.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
   }
-
+  
   private static List<CoreMap> toTimexCoreMaps(Element docElem, CoreMap originalDocument) {
     //--Collect Token Offsets
     Map<Integer,Integer> beginMap = Generics.newHashMap();

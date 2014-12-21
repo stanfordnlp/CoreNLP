@@ -151,7 +151,7 @@ public class ChineseGrammaticalStructureTest extends TestCase {
 
       assertEquals("Unexpected CC processed dependencies for tree "+testTree,
           testAnswer,
-          ChineseGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false));
+          ChineseGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(true), tree, false, false));
     }
   }
 

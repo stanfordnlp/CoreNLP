@@ -7,9 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.stanford.nlp.trees.*;
 import junit.framework.TestCase;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
+import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
+import edu.stanford.nlp.trees.PennTreeReader;
+import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -40,7 +43,7 @@ public class SemanticGraphTest extends TestCase {
       throw new RuntimeException(e);
     }
 
-    return SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC, GrammaticalStructure.Extras.MAXIMAL, true);
+    return SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC, true, true);
   }
 
   public void testShortestPath() {

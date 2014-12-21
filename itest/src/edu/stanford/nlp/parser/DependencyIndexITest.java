@@ -85,7 +85,7 @@ public class DependencyIndexITest extends TestCase {
     GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();
 
     GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
-    Collection<TypedDependency> deps = gs.typedDependenciesCCprocessed(GrammaticalStructure.Extras.MAXIMAL);
+    Collection<TypedDependency> deps = gs.typedDependenciesCCprocessed(true);
     // System.out.println(deps);
 
     // collect all nodes in deps
