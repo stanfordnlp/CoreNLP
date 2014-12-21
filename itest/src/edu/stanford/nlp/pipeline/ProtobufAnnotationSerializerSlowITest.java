@@ -224,20 +224,11 @@ public class ProtobufAnnotationSerializerSlowITest {
     } catch (Exception e) { throw new RuntimeException(e); }
   }
 
-  /*
-  @Test
-  public void testMentions() {
-    testAnnotators("tokenize,ssplit,pos,lemma,ner,mentions");
-  }
-  */
-
-
   @Test
   public void testSentiment() {
     testAnnotators("tokenize,ssplit,pos,parse,sentiment");
   }
 
-  /*
   @Test
   public void testGetPossibleAnnotators() {
     assertNotNull(possibleAnnotators());
@@ -382,13 +373,11 @@ public class ProtobufAnnotationSerializerSlowITest {
   public void testSerializeNatLog() {
     testAnnotators("tokenize,ssplit,pos,lemma,parse,natlog");
   }
-  */
 
   /**
    * Is the protobuf annotator "CoreNLP complete?"
    * That is, does it effectively save every combination of annotators possible?
    */
-  /*
   @Test
   public void testAllAnnotatorCombinations() {
     String[] possibleAnnotators = possibleAnnotators();
@@ -431,6 +420,5 @@ public class ProtobufAnnotationSerializerSlowITest {
       testAnnotators(StringUtils.join(annotators, ","));
     }
   }
-  */
 
 }

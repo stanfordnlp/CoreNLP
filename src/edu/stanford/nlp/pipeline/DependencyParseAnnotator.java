@@ -6,7 +6,6 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.PropertiesUtils;
 
 import java.util.HashSet;
@@ -33,7 +32,6 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
    */
   private final long maxTime;
   private static final long DEFAULT_MAXTIME = Long.MAX_VALUE;
-  private final GrammaticalStructure.Extras extraDependencies;
 
   public DependencyParseAnnotator() {
     this(new Properties());
@@ -45,7 +43,6 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
 
     nThreads = PropertiesUtils.getInt(properties, "testThreads", DEFAULT_NTHREADS);
     maxTime = PropertiesUtils.getLong(properties, "sentenceTimeout", DEFAULT_MAXTIME);
-    extraDependencies = MetaClass.cast(properties.getProperty(StanfordCoreNLP.STANFORD_DEPENDENCIES + ".extradependencies", "NONE"), GrammaticalStructure.Extras.class);
   }
 
   @Override
@@ -62,9 +59,9 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
   protected void doOneSentence(Annotation annotation, CoreMap sentence) {
     GrammaticalStructure gs = parser.predict(sentence);
 
-    SemanticGraph deps = SemanticGraphFactory.makeFromTree(gs, SemanticGraphFactory.Mode.COLLAPSED, extraDependencies, true, null),
-                  uncollapsedDeps = SemanticGraphFactory.makeFromTree(gs, SemanticGraphFactory.Mode.BASIC, extraDependencies, true, null),
-                  ccDeps = SemanticGraphFactory.makeFromTree(gs, SemanticGraphFactory.Mode.CCPROCESSED, extraDependencies, true, null);
+    SemanticGraph deps = SemanticGraphFactory.generateCollapsedDependencies(gs),
+        uncollapsedDeps = SemanticGraphFactory.generateUncollapsedDependencies(gs),
+        ccDeps = SemanticGraphFactory.generateCCProcessedDependencies(gs);
 
     sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
     sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
@@ -85,13 +82,6 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
   @Override
   public Set<Requirement> requirementsSatisfied() {
     return new HashSet<>();
-  }
-
-  public static String signature(String annotatorName, Properties props) {
-    StringBuilder os = new StringBuilder();
-    os.append(annotatorName).append(".extradependencies:");
-    os.append(props.getProperty(annotatorName + ".extradependencies", "NONE").toLowerCase());
-    return os.toString();
   }
 
 }
