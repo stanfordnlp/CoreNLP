@@ -884,10 +884,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       // todo [cdm 2014]: Talk to Mengqiu about this; it seems like it only supports first order CRF
       if (i == 0) {
         nodeFeatureIndicesMap = featureIndexMap;
-        System.err.println("setting nodeFeatureIndicesMap, size="+nodeFeatureIndicesMap.size());
+        // System.err.println("setting nodeFeatureIndicesMap, size="+nodeFeatureIndicesMap.size());
       } else {
         edgeFeatureIndicesMap = featureIndexMap;
-        System.err.println("setting edgeFeatureIndicesMap, size="+edgeFeatureIndicesMap.size());
+        // System.err.println("setting edgeFeatureIndicesMap, size="+edgeFeatureIndicesMap.size());
       }
     }
 
