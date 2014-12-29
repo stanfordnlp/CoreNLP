@@ -166,7 +166,10 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
     default:
       throw new RuntimeIOException("Unexpected input (many fields): " + line);
     }
-    wi.set(CoreAnnotations.OriginalAnswerAnnotation.class, wi.get(CoreAnnotations.AnswerAnnotation.class));
+    // The copy to GoldAnswerAnnotation is done before the recoding is done, and so it preserves the original coding.
+    // This is important if the original coding is true, but the recoding is defective (like IOB2 to IO), since
+    // it will allow correct evaluation later.
+    wi.set(CoreAnnotations.GoldAnswerAnnotation.class, wi.get(CoreAnnotations.AnswerAnnotation.class));
     return wi;
   }
 
@@ -205,7 +208,7 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
       if (word == BOUNDARY) { // Using == is okay, because it is set to constant
         out.println();
       } else {
-        String gold = fl.getString(CoreAnnotations.OriginalAnswerAnnotation.class);
+        String gold = fl.getString(CoreAnnotations.GoldAnswerAnnotation.class);
         String guess = fl.get(CoreAnnotations.AnswerAnnotation.class);
         // System.err.println(word + "\t" + gold + "\t" + guess));
         String pos = fl.getString(CoreAnnotations.PartOfSpeechAnnotation.class);
