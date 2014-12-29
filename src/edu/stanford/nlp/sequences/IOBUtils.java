@@ -37,6 +37,8 @@ public class IOBUtils {
    * This code is very specific to the particular CoNLL way of labeling
    * classes for IOB-style encoding, but this notation is quite widespread.
    * It will work on any of these styles of input.
+   * This will also recognize BILOU format (B=B, I=I, L=E, O=O, U=S).
+   * It also works with lowercased names like i-org.
    * If the labels are not of the form "C-Y+", where C is a single character,
    * then they will be regarded as NOPREFIX labels.
    * This method updates the List tokens in place.
@@ -79,6 +81,9 @@ public class IOBUtils {
       case "noprefix":
         how = 6;
         break;
+      case "bilou":
+        how = 7;
+        break;
       default:
         throw new IllegalArgumentException("entitySubclassify: unknown style: " + style);
     }
@@ -102,7 +107,7 @@ public class IOBUtils {
       char prefix;
       if (cAns.length() > 2 && cAns.charAt(1) == '-') {
         base = cAns.substring(2, cAns.length());
-        prefix = cAns.charAt(0);
+        prefix = Character.toUpperCase(cAns.charAt(0));
       } else {
         base = cAns;
         prefix = ' ';
@@ -111,7 +116,7 @@ public class IOBUtils {
       char pPrefix;
       if (pAns.length() > 2 && pAns.charAt(1) == '-') {
         pBase = pAns.substring(2, pAns.length());
-        pPrefix = pAns.charAt(0);
+        pPrefix = Character.toUpperCase(pAns.charAt(0));
       } else {
         pBase = pAns;
         pPrefix = ' ';
@@ -120,16 +125,16 @@ public class IOBUtils {
       char nPrefix;
       if (nAns.length() > 2 && nAns.charAt(1) == '-') {
         nBase = nAns.substring(2, nAns.length());
-        nPrefix = nAns.charAt(0);
+        nPrefix = Character.toUpperCase(nAns.charAt(0));
       } else {
         nBase = nAns;
         nPrefix = ' ';
       }
 
       boolean isStartAdjacentSame = base.equals(pBase) &&
-              (prefix == 'B' || prefix == 'S' || pPrefix == 'E' || pPrefix == 'S');
+              (prefix == 'B' || prefix == 'S' || prefix == 'U' || pPrefix == 'E' || pPrefix == 'S' || pPrefix == 'U');
       boolean isEndAdjacentSame = base.equals(nBase) &&
-              (prefix == 'E' || prefix == 'S' || nPrefix == 'B' || pPrefix == 'S');
+              (prefix == 'E' || prefix == 'L' || prefix == 'S' || prefix == 'U' || nPrefix == 'B' || nPrefix == 'S' || nPrefix == 'U');
       boolean isFirst = !base.equals(pBase) || isStartAdjacentSame;
       boolean isLast = !base.equals(nBase) || isEndAdjacentSame;
       String newAnswer = base;
@@ -176,7 +181,18 @@ public class IOBUtils {
             } else {
               newAnswer = "I-" + base;
             }
+            break;
           // nothing to do on case 6 as it's just base
+          case 7:
+            if (isFirst && isLast) {
+              newAnswer = "U-" + base;
+            } else if ( ( ! isFirst) && isLast) {
+              newAnswer = "L-" + base;
+            } else if (isFirst && ( ! isLast)) {
+              newAnswer = "B-" + base;
+            } else {
+              newAnswer = "I-" + base;
+            }
         }
       }
       if (intern) {
@@ -231,7 +247,7 @@ public class IOBUtils {
         return false;
       } else if (gold.length() > 2 && gold.charAt(1) == '-') {
         goldEntity = gold.substring(2, gold.length());
-        goldPrefix = gold.charAt(0);
+        goldPrefix = Character.toUpperCase(gold.charAt(0));
       } else {
         goldEntity = gold;
         goldPrefix = ' ';
@@ -241,7 +257,7 @@ public class IOBUtils {
         return false;
       } else if (guess.length() > 2 && guess.charAt(1) == '-') {
         guessEntity = guess.substring(2, guess.length());
-        guessPrefix = guess.charAt(0);
+        guessPrefix = Character.toUpperCase(guess.charAt(0));
       } else {
         guessEntity = guess;
         guessPrefix = ' ';
@@ -251,13 +267,13 @@ public class IOBUtils {
       //        "Guess: " + guess + " (" + guessPrefix + ' ' + guessEntity + ')');
 
       boolean goldIsStartAdjacentSame = goldEntity.equals(previousGoldEntity) &&
-              (goldPrefix == 'B' || goldPrefix == 'S' || previousGoldPrefix == 'E' || previousGoldPrefix == 'S');
+              (goldPrefix == 'B' || goldPrefix == 'S' || goldPrefix == 'U' || previousGoldPrefix == 'E' || previousGoldPrefix == 'S' || previousGoldPrefix == 'S');
       boolean newGold = ! gold.equals(background) &&
               ( ! goldEntity.equals(previousGoldEntity) || goldIsStartAdjacentSame);
       boolean guessIsStartAdjacentSame = guessEntity.equals(previousGuessEntity) &&
-              (guessPrefix == 'B' || guessPrefix == 'S' || previousGuessPrefix == 'E' || previousGuessPrefix == 'S');
+              (guessPrefix == 'B' || guessPrefix == 'S' || guessPrefix == 'U' || previousGuessPrefix == 'E' || previousGuessPrefix == 'L' || previousGuessPrefix == 'S' || previousGuessPrefix == 'U');
       boolean newGuess = ! guess.equals(background) &&
-              ( ! guessEntity.equals(previousGuessEntity) || guessIsStartAdjacentSame);;
+              ( ! guessEntity.equals(previousGuessEntity) || guessIsStartAdjacentSame);
 
       boolean goldEnded = ! previousGold.equals(background) &&
               ( ! goldEntity.equals(previousGoldEntity) || goldIsStartAdjacentSame);
@@ -333,6 +349,5 @@ public class IOBUtils {
       }
     }
   }
-
 
 }
