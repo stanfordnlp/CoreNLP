@@ -54,15 +54,15 @@ import org.joda.time.Period;
  * Given text and a seed list, this class gives more words like the seed words
  * by learning surface word patterns.
  * <p>
- * 
+ *
  * The multi-threaded class (<code>nthread</code> parameter for number of
  * threads) takes as input.
- * 
+ *
  * To use the default options, run
  * <p>
  * <code>java -mx1000m edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -file text_file -seedWordsFiles label1,seedwordlist1;label2,seedwordlist2;... -outDir output_directory (optional)</code>
  * <p>
- * 
+ *
  * <code>fileFormat</code>: (Optional) Default is text. Valid values are text
  * (or txt) and ser, where the serialized file is of the type <code>Map&lt;String,
  * List&lt;CoreLabel&gt;&gt;</code>.
@@ -79,20 +79,20 @@ import org.joda.time.Period;
  * files are stored
  * <p>
  * For other flags, see individual comments for each flag.
- * 
+ *
  * <p>
  * To use a properties file, see
  * projects/core/data/edu/stanford/nlp/patterns/surface/example.properties or patterns/example.properties (depends on which codebase you are using)
  * as an example for the flags and their brief descriptions. Run the code as:
  * <code>java -mx1000m -cp classpath edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -props dir-as-above/example.properties</code>
- * 
+ *
  * <p>
  * IMPORTANT: Many flags are described in the classes
  * {@link ConstantsAndVariables}, {@link CreatePatterns}, and
  * {@link PhraseScorer}.
- * 
- * 
- * 
+ *
+ *
+ *
  * @author Sonal Gupta (sonal@cs.stanford.edu)
  */
 
@@ -108,7 +108,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
 
   // String channelNameLogger = "patterns";
   /**
-   * 
+   *
    * RlogF is from Riloff 1996, when R's denominator is (pos+neg+unlabeled)
    * <p>
    * RlogFPosNeg is when the R's denominator is just (pos+negative) examples
@@ -137,11 +137,11 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
    * Below F1SeedPattern and BPB based on paper
    * "Unsupervised Method for Automatics Construction of a disease dictionary..."
    * <p>
-   * Precision, Recall, and FMeasure (controlled by fbeta flag) is ranking the patterns using 
-   * their precision, recall and F_beta measure 
+   * Precision, Recall, and FMeasure (controlled by fbeta flag) is ranking the patterns using
+   * their precision, recall and F_beta measure
    */
   public enum PatternScoring {
-    F1SeedPattern, RlogF, RlogFPosNeg, RlogFUnlabNeg, RlogFNeg, PhEvalInPat, PhEvalInPatLogP, PosNegOdds, 
+    F1SeedPattern, RlogF, RlogFPosNeg, RlogFUnlabNeg, RlogFNeg, PhEvalInPat, PhEvalInPatLogP, PosNegOdds,
     YanGarber02, PosNegUnlabOdds, RatioAll, LOGREG, LOGREGlogP, SqrtAllRatio, LinICML03, kNN, Precision, Recall, FMeasure
   }
 
@@ -247,7 +247,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
   /**
    * generalize classes basically maps label strings to a map of generalized
    * strings and the corresponding class ignoreClasses have to be boolean
-   * 
+   *
    * @throws IOException
    * @throws SecurityException
    * @throws NoSuchMethodException
@@ -853,7 +853,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
    * If l1 is a part of l2, it finds the starting index of l1 in l2 If l1 is not
    * a sub-array of l2, then it returns -1 note that l2 should have the exact
    * elements and order as in l1
-   * 
+   *
    * @param l1
    *          array you want to find in l2
    * @param l2
@@ -1298,9 +1298,9 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     Counter<E> chosenPat = new ClassicCounter<E>();
 
     Set<E> removePatterns = new HashSet<E>();
-    
+
     Set<E> removeIdentifiedPatterns = null;
-    
+
     while (num < constVars.numPatterns && !q.isEmpty()) {
       E pat = q.removeFirst();
       //E pat = constVars.getPatternIndex().get(patindex);
@@ -1340,7 +1340,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
             if (rest < 0) {
               if(removeIdentifiedPatterns == null)
                 removeIdentifiedPatterns = new HashSet<E>();
-              
+
               removeIdentifiedPatterns.add(p);
             } else {
               notchoose = true;
@@ -1357,16 +1357,16 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
 
           boolean removeChosenPatFlag = false;
           if (Pattern.sameGenre(constVars.patternType, pat, p)) {
-            
+
             if(Pattern.subsumes(constVars.patternType, pat, p)){
               Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing pattern " + pat
                   + " because it is contained in or contains the already chosen pattern " + p);
               notchoose = true;
               break;
-            } 
+            }
             else if (E.subsumes(constVars.patternType, p, pat)) {
               //subsume is true even if equal context
-              
+
               //check if equal context
               int rest = pat.equalContext(p);
 
@@ -1374,7 +1374,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
               if (rest == Integer.MAX_VALUE)
               {
                 Redwood.log(ConstantsAndVariables.extremedebug, "Not choosing pattern " + p
-                    + " because it is contained in or contains another chosen pattern in this iteration " + pat);  
+                    + " because it is contained in or contains another chosen pattern in this iteration " + pat);
                 removeChosenPatFlag = true;
               }
               // if pat is less restrictive, remove p from chosen patterns and
@@ -1385,9 +1385,9 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
                 notchoose = true;
                 break;
               }
-            } 
+            }
 
-            
+
             if (removeChosenPatFlag) {
               if(removeChosenPats == null)
                 removeChosenPats = new HashSet<E>();
@@ -1398,7 +1398,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
           }
         }
       }
-      
+
       if (notchoose) {
         Redwood.log(Redwood.DBG, "Not choosing " + pat + " for whatever reason!");
         continue;
@@ -1409,16 +1409,16 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
             + pat);
         Counters.removeKeys(chosenPat, removeChosenPats);
       }
-      
+
       if (removeIdentifiedPatterns != null) {
         Redwood.log(ConstantsAndVariables.extremedebug, "Removing already identified patterns " + removeIdentifiedPatterns + " in favor of " + pat);
         removePatterns.addAll(removeIdentifiedPatterns);
 
       }
-      
+
       chosenPat.setCount(pat, currentPatternWeights4Label.getCount(pat));
       num++;
-      
+
     }
 
     this.removeLearnedPatterns(label, removePatterns);
@@ -2370,19 +2370,91 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     return true;
   }
 
+  public static boolean countResults(List<? extends CoreMap> doc,
+                                     Counter<String> entityTP,
+                                     Counter<String> entityFP,
+                                     Counter<String> entityFN,
+                                     String background) {
+    int index = 0;
+    int goldIndex = 0, guessIndex = 0;
+    String lastGold = background, lastGuess = background;
+
+    // As we go through the document, there are two events we might be
+    // interested in.  One is when a gold entity ends, and the other
+    // is when a guessed entity ends.  If the gold and guessed
+    // entities end at the same time, started at the same time, and
+    // match entity type, we have a true positive.  Otherwise we
+      // either have a false positive or a false negative.
+    for (CoreMap line : doc) {
+      String gold = line.get(CoreAnnotations.GoldAnswerAnnotation.class);
+      String guess = line.get(CoreAnnotations.AnswerAnnotation.class);
+
+      if (gold == null || guess == null)
+        return false;
+
+      if (lastGold != null && !lastGold.equals(gold) && !lastGold.equals(background)) {
+        if (lastGuess.equals(lastGold) && !lastGuess.equals(guess) && goldIndex == guessIndex) {
+          entityTP.incrementCount(lastGold, 1.0);
+        } else {
+          entityFN.incrementCount(lastGold, 1.0);
+        }
+      }
+
+      if (lastGuess != null && !lastGuess.equals(guess) && !lastGuess.equals(background)) {
+        if (lastGuess.equals(lastGold) && !lastGuess.equals(guess) && goldIndex == guessIndex && !lastGold.equals(gold)) {
+          // correct guesses already tallied
+          // only need to tally false positives
+        } else {
+          entityFP.incrementCount(lastGuess, 1.0);
+        }
+      }
+
+      if (lastGold == null || !lastGold.equals(gold)) {
+        lastGold = gold;
+        goldIndex = index;
+      }
+
+      if (lastGuess == null || !lastGuess.equals(guess)) {
+        lastGuess = guess;
+        guessIndex = index;
+      }
+      ++index;
+    }
+
+    // We also have to account for entities at the very end of the
+    // document, since the above logic only occurs when we see
+    // something that tells us an entity has ended
+    if (lastGold != null && !lastGold.equals(background)) {
+      if (lastGold.equals(lastGuess) && goldIndex == guessIndex) {
+        entityTP.incrementCount(lastGold, 1.0);
+      } else {
+        entityFN.incrementCount(lastGold, 1.0);
+      }
+    }
+    if (lastGuess != null && !lastGuess.equals(background)) {
+      if (lastGold.equals(lastGuess) && goldIndex == guessIndex) {
+        // correct guesses already tallied
+      } else {
+        entityFP.incrementCount(lastGuess, 1.0);
+      }
+    }
+    return true;
+  }
+
+
   /**
    * Count the successes and failures of the model on the given document
    * ***token-based***. Fills numbers in to counters for true positives, false
    * positives, and false negatives, and also keeps track of the entities seen. <br>
    * Returns false if we ever encounter null for gold or guess.
-   * 
+   *
    * this currently is only for testing one label at a time
    */
   public static void countResultsPerToken(List<CoreLabel> doc, Counter<String> entityTP, Counter<String> entityFP, Counter<String> entityFN,
       String background, Counter<String> wordTP, Counter<String> wordTN, Counter<String> wordFP, Counter<String> wordFN,
       Class<? extends TypesafeMap.Key<String>> whichClassToCompare) {
 
-    CRFClassifier.countResults(doc, entityTP, entityFP, entityFN, background);
+    countResults(doc, entityTP, entityFP, entityFN, background);
 
     // int index = 0;
     // int goldIndex = 0, guessIndex = 0;
@@ -2446,7 +2518,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
         List<String> listEndedLabels = new ArrayList<String>();
         //to first finish labels before starting
         List<String> startingLabels = new ArrayList<String>();
-        
+
         for (Entry<String, Class<? extends TypesafeMap.Key<String>>> as : constVars.getAnswerClass().entrySet()) {
           String label = as.getKey();
           boolean lastwordlabeled = lastWordLabeled.get(label);
@@ -2686,7 +2758,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
   }
 
   public static List<File> getAllFiles(String file) {
-    
+
     List<File> allFiles = new ArrayList<File>();
     for (String tokfile : file.split("[,;]")) {
       File filef = new File(tokfile);

@@ -51,8 +51,7 @@ public class StringUtils {
   /**
    * Don't let anyone instantiate this class.
    */
-  private StringUtils() {
-  }
+  private StringUtils() {}
 
   public static final String[] EMPTY_STRING_ARRAY = new String[0];
   private static final String PROP = "prop";
@@ -107,7 +106,8 @@ public class StringUtils {
   /**
    * Takes a string of the form "x1=y1,x2=y2,..." such
    * that each y is an integer and each x is a key.  A
-   * String[] s is returned such that s[yn]=xn
+   * String[] s is returned such that s[yn]=xn.
+   *
    * @param map A string of the form "x1=y1,x2=y2,..." such
    *     that each y is an integer and each x is a key.
    * @return  A String[] s is returned such that s[yn]=xn
@@ -135,7 +135,8 @@ public class StringUtils {
 
 
   /**
-   * Takes a string of the form "x1=y1,x2=y2,..." and returns Map
+   * Takes a string of the form "x1=y1,x2=y2,..." and returns Map.
+   *
    * @param map A string of the form "x1=y1,x2=y2,..."
    * @return  A Map m is returned such that m.get(xn) = yn
    */

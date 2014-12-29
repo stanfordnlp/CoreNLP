@@ -5,6 +5,8 @@ import java.util.Locale;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PaddedList;
 import edu.stanford.nlp.util.TypesafeMap;
 
@@ -46,7 +48,7 @@ public class IOBUtils {
    * @param intern Whether to String-intern the new labels (may as well, small number!)
    */
   @SuppressWarnings("StringContatenationInLoop")
-  public static void entitySubclassify(List<CoreLabel> tokens,
+  public static <TOK extends CoreMap> void entitySubclassify(List<TOK> tokens,
                                  Class<? extends TypesafeMap.Key<String>> key,
                                  String backgroundLabel,
                                  String style,
@@ -80,13 +82,13 @@ public class IOBUtils {
       default:
         throw new IllegalArgumentException("entitySubclassify: unknown style: " + style);
     }
-    List<CoreLabel> paddedTokens = new PaddedList<>(tokens, new CoreLabel());
+    List<TOK> paddedTokens = new PaddedList<>(tokens, (TOK) new CoreLabel());
     int size = paddedTokens.size();
     String[] newAnswers = new String[size];
     for (int i = 0; i < size; i++) {
-      CoreLabel c = paddedTokens.get(i);
-      CoreLabel p = paddedTokens.get(i - 1);
-      CoreLabel n = paddedTokens.get(i + 1);
+      TOK c = paddedTokens.get(i);
+      TOK p = paddedTokens.get(i - 1);
+      TOK n = paddedTokens.get(i + 1);
       String cAns = c.get(key);
       String pAns = p.get(key);
       if (pAns == null) {
@@ -183,13 +185,146 @@ public class IOBUtils {
       newAnswers[i] = newAnswer;
     }
     for (int i = 0; i < size; i++) {
-      CoreLabel c = tokens.get(i);
+      TOK c = tokens.get(i);
       c.set(CoreAnnotations.AnswerAnnotation.class, newAnswers[i]);
     }
   }
 
+  /** For a sequence labeling task with multi-token entities, like NER,
+   *  this works out TP, FN, FP counts that can be used for entity-level
+   *  F1 results. This works with any kind of prefixed IOB labeling, or
+   *  just with simply entity names (also treated as IO labeling).
+   *
+   * @param doc The document (with Answer and GoldAnswer annotations) to score
+   * @param entityTP Counter from entity type to count of true positives
+   * @param entityFP Counter from entity type to count of false positives
+   * @param entityFN Counter from entity type to count of false negatives
+   * @param background The background symbol. Normally it isn't counted in entity-level
+   *                   F1 scores. If you want it counted, pass in null for this.
+   * @return Whether scoring was successful (it'll only be unsuccessful if information
+   *         is missing or ill-formed in the doc).
+   */
+  public static boolean countEntityResults(List<? extends CoreMap> doc,
+                                         Counter<String> entityTP,
+                                         Counter<String> entityFP,
+                                         Counter<String> entityFN,
+                                         String background) {
+    boolean entityCorrect = true;
+    // the annotations
+    String previousGold = background;
+    String previousGuess = background;
+    // the part after the I- or B- in the annotation
+    String previousGoldEntity = "";
+    String previousGuessEntity = "";
+    char previousGoldPrefix = ' ';
+    char previousGuessPrefix = ' ';
+
+    for (CoreMap word : doc) {
+      String gold = word.get(CoreAnnotations.GoldAnswerAnnotation.class);
+      String guess = word.get(CoreAnnotations.AnswerAnnotation.class);
+      String goldEntity;
+      String guessEntity;
+      char goldPrefix;
+      char guessPrefix;
+      if (gold == null || gold.isEmpty()) {
+        System.err.println("Missing gold entity");
+        return false;
+      } else if (gold.length() > 2 && gold.charAt(1) == '-') {
+        goldEntity = gold.substring(2, gold.length());
+        goldPrefix = gold.charAt(0);
+      } else {
+        goldEntity = gold;
+        goldPrefix = ' ';
+      }
+      if (guess == null || guess.isEmpty()) {
+        System.err.println("Missing guess entity");
+        return false;
+      } else if (guess.length() > 2 && guess.charAt(1) == '-') {
+        guessEntity = guess.substring(2, guess.length());
+        guessPrefix = guess.charAt(0);
+      } else {
+        guessEntity = guess;
+        guessPrefix = ' ';
+      }
+
+      //System.out.println("Gold: " + gold + " (" + goldPrefix + ' ' + goldEntity + "); " +
+      //        "Guess: " + guess + " (" + guessPrefix + ' ' + guessEntity + ')');
+
+      boolean goldIsStartAdjacentSame = goldEntity.equals(previousGoldEntity) &&
+              (goldPrefix == 'B' || goldPrefix == 'S' || previousGoldPrefix == 'E' || previousGoldPrefix == 'S');
+      boolean newGold = ! gold.equals(background) &&
+              ( ! goldEntity.equals(previousGoldEntity) || goldIsStartAdjacentSame);
+      boolean guessIsStartAdjacentSame = guessEntity.equals(previousGuessEntity) &&
+              (guessPrefix == 'B' || guessPrefix == 'S' || previousGuessPrefix == 'E' || previousGuessPrefix == 'S');
+      boolean newGuess = ! guess.equals(background) &&
+              ( ! guessEntity.equals(previousGuessEntity) || guessIsStartAdjacentSame);;
+
+      boolean goldEnded = ! previousGold.equals(background) &&
+              ( ! goldEntity.equals(previousGoldEntity) || goldIsStartAdjacentSame);
+      boolean guessEnded = ! previousGuess.equals(background) &&
+              ( ! guessEntity.equals(previousGuessEntity) || guessIsStartAdjacentSame);
+
+      // System.out.println("  newGold " + newGold + "; newGuess " + newGuess +
+      //        "; goldEnded:" + goldEnded + "; guessEnded: " + guessEnded);
+
+      if (goldEnded && ! guessEnded) {
+        entityFN.incrementCount(previousGoldEntity);
+        entityCorrect = gold.equals(background) && guess.equals(background);
+      }
+      if (goldEnded && guessEnded) {
+        if (entityCorrect) {
+          entityTP.incrementCount(previousGoldEntity);
+        } else {
+          // same span but wrong label
+          entityFN.incrementCount(previousGoldEntity);
+          entityFP.incrementCount(previousGuessEntity);
+        }
+        entityCorrect = goldEntity.equals(guessEntity);
+      }
+      if (! goldEnded && guessEnded) {
+        entityCorrect = false;
+        entityFP.incrementCount(previousGuessEntity);
+      }
+      // nothing to do if neither gold nor guess have ended
+
+      if (newGold && ! newGuess) {
+        entityCorrect = false;
+      }
+      if (newGold && newGuess) {
+        entityCorrect = guessEntity.equals(goldEntity);
+      }
+      if ( ! newGold && newGuess) {
+        entityCorrect = false;
+      }
+
+      previousGold = gold;
+      previousGuess = guess;
+      previousGoldEntity = goldEntity;
+      previousGuessEntity = guessEntity;
+    }
+
+    // At the end, we need to check the last entity
+    if ( ! previousGold.equals(background)) {
+      if (entityCorrect) {
+        entityTP.incrementCount(previousGoldEntity);
+      } else {
+        entityFN.incrementCount(previousGoldEntity);
+      }
+    }
+    if ( ! previousGuess.equals(background)) {
+      if ( ! entityCorrect) {
+        entityFP.incrementCount(previousGuessEntity);
+      }
+    }
+
+    return true;
+  }
+
+
+
   /** Converts entity representation of a file. */
   public static void main(String[] args) {
+    // todo!
     if (args.length == 0) {
 
     } else {
