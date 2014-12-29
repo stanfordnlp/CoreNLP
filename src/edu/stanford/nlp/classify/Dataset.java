@@ -400,7 +400,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
   public String toSummaryStatistics() {
     StringBuilder sb = new StringBuilder();
     sb.append("numDatums: ").append(size).append('\n');
-    sb.append("numDatumsPerLabel: ").append(this.numDatumsPerLabel()+"\n");
+    sb.append("numDatumsPerLabel: ").append(this.numDatumsPerLabel()).append('\n');
     sb.append("numLabels: ").append(labelIndex.size()).append(" [");
     Iterator<L> iter = labelIndex.iterator();
     while (iter.hasNext()) {
