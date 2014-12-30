@@ -139,21 +139,26 @@ public class IOBUtilsTest extends TestCase {
   };
 
   private static void runIOBResultsTest(String[] gold, String[] guess, double tp, double fp, double fn) {
-    List<CoreLabel> sentence = new ArrayList<CoreLabel>();
+    List<CoreLabel> sentence = makeListCoreLabel(gold, guess);
+    Counter<String> entityTP = new ClassicCounter<>();
+    Counter<String> entityFP = new ClassicCounter<>();
+    Counter<String> entityFN = new ClassicCounter<>();
+    IOBUtils.countEntityResults(sentence, entityTP, entityFP, entityFN, BG);
+    assertEquals("For true positives", tp, entityTP.totalCount(), 0.0001);
+    assertEquals("For false positives", fp, entityFP.totalCount(), 0.0001);
+    assertEquals("For false negatives", fn, entityFN.totalCount(), 0.0001);
+  }
+
+  private static List<CoreLabel> makeListCoreLabel(String[] gold, String[] guess) {
     assertEquals("Cannot run test on lists of different length", gold.length, guess.length);
+    List<CoreLabel> sentence = new ArrayList<>();
     for (int i = 0; i < gold.length; ++i) {
       CoreLabel word = new CoreLabel();
       word.set(CoreAnnotations.GoldAnswerAnnotation.class, gold[i]);
       word.set(CoreAnnotations.AnswerAnnotation.class, guess[i]);
       sentence.add(word);
     }
-    Counter<String> entityTP = new ClassicCounter<String>();
-    Counter<String> entityFP = new ClassicCounter<String>();
-    Counter<String> entityFN = new ClassicCounter<String>();
-    IOBUtils.countEntityResults(sentence, entityTP, entityFP, entityFN, BG);
-    assertEquals(tp, entityTP.totalCount(), 0.0001);
-    assertEquals(fp, entityFP.totalCount(), 0.0001);
-    assertEquals(fn, entityFN.totalCount(), 0.0001);
+    return sentence;
   }
 
   public void testIOB2Results() {
@@ -246,11 +251,29 @@ public class IOBUtilsTest extends TestCase {
     runIOBResultsTest(labelsIOB[4], labelsIOB[2], 0, 1, 2);
   }
 
+  private static final String[][] labelsIOE = {
+   {    BG,    BG,    BG,    BG, "I-A", "E-A", "I-A",    BG,    BG,    BG },  // 0
+   {    BG,    BG,    BG,    BG, "I-A", "L-A", "I-A",    BG,    BG,    BG },  // 1
+   {    BG,    BG,    BG,    BG, "I-A", "I-A", "I-A",    BG,    BG,    BG },  // 2
+  };
+
+  public void testIOEResults() {
+    // gold, guess, tp, fp, fn
+
+    runIOBResultsTest(labelsIOE[0], labelsIOE[1], 2, 0, 0);
+    runIOBResultsTest(labelsIOE[0], labelsIOE[2], 0, 1, 2);
+    runIOBResultsTest(labelsIOE[2], labelsIOE[0], 0, 2, 1);
+    runIOBResultsTest(labelsIOE[0], labelsIOB[2], 1, 0, 1);
+  }
+
   private static final String[][] labelsIO = {
     {    BG,    BG,    BG,    BG,    BG,    BG,    BG,    BG,    BG,    BG },  // 0
     {    BG,    BG,    BG,    BG, "I-A",    BG,    BG,    BG,    BG,    BG },  // 1
     {    BG,    BG,    BG,    BG, "I-A", "I-A",    BG,    BG,    BG,    BG },  // 2
     {    BG,    BG,    BG, "I-A", "I-A",    BG,    BG,    BG,    BG,    BG },  // 3
+    {    BG,    BG,    BG, "I-A", "I-A", "I-A", "I-A",    BG,    BG,    BG },  // 4
+    {    BG,    BG,    BG, "I-A", "I-B", "I-B", "I-A",    BG,    BG,    BG },  // 5
+    {    BG,    BG,    BG, "I-A", "I-A", "I-B", "I-A",    BG,    BG,    BG },  // 6
   };
 
   public void testIOResults() {
@@ -261,6 +284,28 @@ public class IOBUtilsTest extends TestCase {
 
     runIOBResultsTest(labelsIO[2], labelsIOB[2], 1, 0, 0);
     runIOBResultsTest(labelsIO[2], labelsIOB[4], 0, 2, 1);
+
+    runIOBResultsTest(labelsIO[4], labelsIO[5], 0, 3, 1);
+    runIOBResultsTest(labelsIO[4], labelsIO[6], 0, 3, 1);
+    runIOBResultsTest(labelsIO[5], labelsIO[6], 1, 2, 2);
+  }
+
+  private static final String[][] labelsIOBES = {
+    {    BG,    BG,    BG, "B-A", "E-A",    BG,    BG,    BG,    BG,    BG },  // 0
+    {    BG,    BG,    BG, "B-A", "L-A",    BG,    BG,    BG,    BG,    BG },  // 1
+    {    BG,    BG,    BG, "B-A", "I-A", "I-A", "E-A",    BG,    BG,    BG },  // 2
+    {    BG,    BG,    BG, "B-A", "I-A", "I-A", "L-A",    BG,    BG,    BG },  // 3
+    {    BG,    BG,    BG, "B-A", "L-A", "U-A", "U-A",    BG,    BG,    BG },  // 4
+  };
+
+  public void testIOBESResults() {
+    // gold, guess, tp, fp, fn
+
+    runIOBResultsTest(labelsIOBES[0], labelsIOBES[1], 1, 0, 0);
+    runIOBResultsTest(labelsIOBES[4], labelsIOBES[0], 1, 0, 2);
+
+    runIOBResultsTest(labelsIOBES[2], labelsIOBES[3], 1, 0, 0);
+    runIOBResultsTest(labelsIOBES[2], labelsIOBES[4], 0, 3, 1);
   }
 
 }

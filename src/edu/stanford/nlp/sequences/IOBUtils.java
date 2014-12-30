@@ -131,12 +131,10 @@ public class IOBUtils {
         nPrefix = ' ';
       }
 
-      boolean isStartAdjacentSame = base.equals(pBase) &&
-              (prefix == 'B' || prefix == 'S' || prefix == 'U' || pPrefix == 'E' || pPrefix == 'S' || pPrefix == 'U');
-      boolean isEndAdjacentSame = base.equals(nBase) &&
-              (prefix == 'E' || prefix == 'L' || prefix == 'S' || prefix == 'U' || nPrefix == 'B' || nPrefix == 'S' || nPrefix == 'U');
-      boolean isFirst = !base.equals(pBase) || isStartAdjacentSame;
-      boolean isLast = !base.equals(nBase) || isEndAdjacentSame;
+      boolean isStartAdjacentSame = isSameEntityBoundary(pBase, pPrefix, base, prefix);
+      boolean isEndAdjacentSame = isSameEntityBoundary(base, prefix, nBase, nPrefix);
+      boolean isFirst = isDifferentEntityBoundary(pBase, base) || isStartAdjacentSame;
+      boolean isLast = isDifferentEntityBoundary(base, nBase) || isEndAdjacentSame;
       String newAnswer = base;
       if ( ! base.equals(backgroundLabel)) {
         switch (how) {
@@ -206,6 +204,25 @@ public class IOBUtils {
     }
   }
 
+  public static boolean isEntityBoundary(String beforeEntity, char beforePrefix, String afterEntity, char afterPrefix) {
+    return ! beforeEntity.equals(afterEntity) ||
+            afterPrefix == 'B' || afterPrefix == 'S' || afterPrefix == 'U' ||
+            beforePrefix == 'E' || beforePrefix == 'L' || beforePrefix == 'S' || beforePrefix == 'U';
+
+  }
+
+  public static boolean isSameEntityBoundary(String beforeEntity, char beforePrefix, String afterEntity, char afterPrefix) {
+    return beforeEntity.equals(afterEntity) &&
+            (afterPrefix == 'B' || afterPrefix == 'S' || afterPrefix == 'U' ||
+            beforePrefix == 'E' || beforePrefix == 'L' || beforePrefix == 'S' || beforePrefix == 'U');
+
+  }
+
+  public static boolean isDifferentEntityBoundary(String beforeEntity, String afterEntity) {
+    return  ! beforeEntity.equals(afterEntity);
+  }
+
+
   /** For a sequence labeling task with multi-token entities, like NER,
    *  this works out TP, FN, FP counts that can be used for entity-level
    *  F1 results. This works with any kind of prefixed IOB labeling, or
@@ -266,50 +283,42 @@ public class IOBUtils {
       //System.out.println("Gold: " + gold + " (" + goldPrefix + ' ' + goldEntity + "); " +
       //        "Guess: " + guess + " (" + guessPrefix + ' ' + guessEntity + ')');
 
-      boolean goldIsStartAdjacentSame = goldEntity.equals(previousGoldEntity) &&
-              (goldPrefix == 'B' || goldPrefix == 'S' || goldPrefix == 'U' || previousGoldPrefix == 'E' || previousGoldPrefix == 'S' || previousGoldPrefix == 'S');
-      boolean newGold = ! gold.equals(background) &&
-              ( ! goldEntity.equals(previousGoldEntity) || goldIsStartAdjacentSame);
-      boolean guessIsStartAdjacentSame = guessEntity.equals(previousGuessEntity) &&
-              (guessPrefix == 'B' || guessPrefix == 'S' || guessPrefix == 'U' || previousGuessPrefix == 'E' || previousGuessPrefix == 'L' || previousGuessPrefix == 'S' || previousGuessPrefix == 'U');
-      boolean newGuess = ! guess.equals(background) &&
-              ( ! guessEntity.equals(previousGuessEntity) || guessIsStartAdjacentSame);
+      boolean newGold = ! gold.equals(background) && isEntityBoundary(previousGoldEntity, previousGoldPrefix, goldEntity, goldPrefix);
+      boolean newGuess = ! guess.equals(background) && isEntityBoundary(previousGuessEntity, previousGuessPrefix, guessEntity, guessPrefix);
 
-      boolean goldEnded = ! previousGold.equals(background) &&
-              ( ! goldEntity.equals(previousGoldEntity) || goldIsStartAdjacentSame);
-      boolean guessEnded = ! previousGuess.equals(background) &&
-              ( ! guessEntity.equals(previousGuessEntity) || guessIsStartAdjacentSame);
+      boolean goldEnded = ! previousGold.equals(background) && isEntityBoundary(previousGoldEntity, previousGoldPrefix, goldEntity, goldPrefix);
+      boolean guessEnded = ! previousGuess.equals(background) && isEntityBoundary(previousGuessEntity, previousGuessPrefix, guessEntity, guessPrefix);
 
       // System.out.println("  newGold " + newGold + "; newGuess " + newGuess +
       //        "; goldEnded:" + goldEnded + "; guessEnded: " + guessEnded);
 
-      if (goldEnded && ! guessEnded) {
-        entityFN.incrementCount(previousGoldEntity);
-        entityCorrect = gold.equals(background) && guess.equals(background);
-      }
-      if (goldEnded && guessEnded) {
-        if (entityCorrect) {
-          entityTP.incrementCount(previousGoldEntity);
+      if (goldEnded) {
+        if (guessEnded) {
+          if (entityCorrect) {
+            entityTP.incrementCount(previousGoldEntity);
+          } else {
+            // same span but wrong label
+            entityFN.incrementCount(previousGoldEntity);
+            entityFP.incrementCount(previousGuessEntity);
+          }
+          entityCorrect = goldEntity.equals(guessEntity);
         } else {
-          // same span but wrong label
           entityFN.incrementCount(previousGoldEntity);
-          entityFP.incrementCount(previousGuessEntity);
+          entityCorrect = gold.equals(background) && guess.equals(background);
         }
-        entityCorrect = goldEntity.equals(guessEntity);
-      }
-      if (! goldEnded && guessEnded) {
+      } else if (guessEnded) {
         entityCorrect = false;
         entityFP.incrementCount(previousGuessEntity);
       }
-      // nothing to do if neither gold nor guess have ended
+      // nothing to do if neither gold nor guess have ended (a category change signals an end)
 
-      if (newGold && ! newGuess) {
-        entityCorrect = false;
-      }
-      if (newGold && newGuess) {
-        entityCorrect = guessEntity.equals(goldEntity);
-      }
-      if ( ! newGold && newGuess) {
+      if (newGold) {
+        if (newGuess) {
+          entityCorrect = guessEntity.equals(goldEntity);
+        } else {
+          entityCorrect = false;
+        }
+      } else if (newGuess) {
         entityCorrect = false;
       }
 
@@ -317,6 +326,8 @@ public class IOBUtils {
       previousGuess = guess;
       previousGoldEntity = goldEntity;
       previousGuessEntity = guessEntity;
+      previousGoldPrefix = goldPrefix;
+      previousGuessPrefix = guessPrefix;
     }
 
     // At the end, we need to check the last entity
