@@ -25,13 +25,10 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
   public static final String THREE_CLASSES_PROPERTY = "3class";
   public static final boolean THREE_CLASSES = Boolean.parseBoolean(System.getProperty(THREE_CLASSES_PROPERTY, "false"));
 
-  /**
-   * 
-   */
   private static final long serialVersionUID = -3000389291781534479L;
   private IteratorFromReaderFactory<List<CoreLabel>> factory;
   private Boolean verboseForTrueCasing = false;
-  private static Pattern alphabet = Pattern.compile("[A-Za-z]+");
+  private static final Pattern alphabet = Pattern.compile("[A-Za-z]+");
 
   /**
    * for test only
@@ -68,7 +65,7 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
   public void printAnswers(List<CoreLabel> doc, PrintWriter out) {
     List<String> sentence = new ArrayList<String>();
     int wrong = 0;
-    
+
     for (CoreLabel wi : doc) {
       StringBuilder sb = new StringBuilder();
       if (! wi.get(CoreAnnotations.AnswerAnnotation.class).equals(wi.get(CoreAnnotations.GoldAnswerAnnotation.class))) {
@@ -82,7 +79,7 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
         sb.append(wi.word().substring(0,1).toUpperCase())
           .append(wi.word().substring(1));
       } else if (wi.get(CoreAnnotations.AnswerAnnotation.class).equals("O")) {
-        // in this case, if it cotains a-z at all, then append "MIX" at the end
+        // in this case, if it contains a-z at all, then append "MIX" at the end
         sb.append(wi.word());
         Matcher alphaMatcher = alphabet.matcher(wi.word());
         if (alphaMatcher.matches()) {
@@ -107,19 +104,19 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
     private static Pattern allLower = Pattern.compile("[^A-Z]*?[a-z]+[^A-Z]*?");
     private static Pattern allUpper = Pattern.compile("[^a-z]*?[A-Z]+[^a-z]*?");
     private static Pattern startUpper = Pattern.compile("[A-Z].*");
-    
+
     public List<CoreLabel> apply(String line) {
       List<CoreLabel> doc = new ArrayList<CoreLabel>();
       int pos = 0;
-      
+
       //line = line.replaceAll(" +"," ");
       //System.err.println("pichuan: processing line = "+line);
-      
+
       String[] toks = line.split(" ");
       for (String word : toks) {
         CoreLabel wi = new CoreLabel();
         Matcher lowerMatcher = allLower.matcher(word);
-        
+
         if (lowerMatcher.matches()) {
           wi.set(CoreAnnotations.AnswerAnnotation.class, "LOWER");
           wi.set(CoreAnnotations.GoldAnswerAnnotation.class, "LOWER");
@@ -149,7 +146,7 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
             }
           }
         }
-        
+
         wi.setWord(word.toLowerCase());
         wi.set(CoreAnnotations.PositionAnnotation.class, pos + "");
         doc.add(wi);
@@ -158,4 +155,5 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
       return doc;
     }
   }
+
 }
