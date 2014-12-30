@@ -28,6 +28,7 @@ import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.sequences.IOBUtils;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
@@ -2370,77 +2371,6 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     return true;
   }
 
-  public static boolean countResults(List<? extends CoreMap> doc,
-                                     Counter<String> entityTP,
-                                     Counter<String> entityFP,
-                                     Counter<String> entityFN,
-                                     String background) {
-    int index = 0;
-    int goldIndex = 0, guessIndex = 0;
-    String lastGold = background, lastGuess = background;
-
-    // As we go through the document, there are two events we might be
-    // interested in.  One is when a gold entity ends, and the other
-    // is when a guessed entity ends.  If the gold and guessed
-    // entities end at the same time, started at the same time, and
-    // match entity type, we have a true positive.  Otherwise we
-      // either have a false positive or a false negative.
-    for (CoreMap line : doc) {
-      String gold = line.get(CoreAnnotations.GoldAnswerAnnotation.class);
-      String guess = line.get(CoreAnnotations.AnswerAnnotation.class);
-
-      if (gold == null || guess == null)
-        return false;
-
-      if (lastGold != null && !lastGold.equals(gold) && !lastGold.equals(background)) {
-        if (lastGuess.equals(lastGold) && !lastGuess.equals(guess) && goldIndex == guessIndex) {
-          entityTP.incrementCount(lastGold, 1.0);
-        } else {
-          entityFN.incrementCount(lastGold, 1.0);
-        }
-      }
-
-      if (lastGuess != null && !lastGuess.equals(guess) && !lastGuess.equals(background)) {
-        if (lastGuess.equals(lastGold) && !lastGuess.equals(guess) && goldIndex == guessIndex && !lastGold.equals(gold)) {
-          // correct guesses already tallied
-          // only need to tally false positives
-        } else {
-          entityFP.incrementCount(lastGuess, 1.0);
-        }
-      }
-
-      if (lastGold == null || !lastGold.equals(gold)) {
-        lastGold = gold;
-        goldIndex = index;
-      }
-
-      if (lastGuess == null || !lastGuess.equals(guess)) {
-        lastGuess = guess;
-        guessIndex = index;
-      }
-      ++index;
-    }
-
-    // We also have to account for entities at the very end of the
-    // document, since the above logic only occurs when we see
-    // something that tells us an entity has ended
-    if (lastGold != null && !lastGold.equals(background)) {
-      if (lastGold.equals(lastGuess) && goldIndex == guessIndex) {
-        entityTP.incrementCount(lastGold, 1.0);
-      } else {
-        entityFN.incrementCount(lastGold, 1.0);
-      }
-    }
-    if (lastGuess != null && !lastGuess.equals(background)) {
-      if (lastGold.equals(lastGuess) && goldIndex == guessIndex) {
-        // correct guesses already tallied
-      } else {
-        entityFP.incrementCount(lastGuess, 1.0);
-      }
-    }
-    return true;
-  }
-
 
   /**
    * Count the successes and failures of the model on the given document
@@ -2454,7 +2384,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       String background, Counter<String> wordTP, Counter<String> wordTN, Counter<String> wordFP, Counter<String> wordFN,
       Class<? extends TypesafeMap.Key<String>> whichClassToCompare) {
 
-    countResults(doc, entityTP, entityFP, entityFN, background);
+    IOBUtils.countEntityResults(doc, entityTP, entityFP, entityFN, background);
 
     // int index = 0;
     // int goldIndex = 0, guessIndex = 0;
