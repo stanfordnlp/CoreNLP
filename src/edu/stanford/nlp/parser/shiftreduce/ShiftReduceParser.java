@@ -354,6 +354,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       return tree;
     }
 
+    @Override
     public RetagProcessor newInstance() {
       // already threadsafe
       return this;

@@ -194,7 +194,7 @@ int Index() : {
   Token t;
 } {
   ( "[" t = IntegerToken() "]" )
-  { return Integer.valueOf(t.image); }
+  { return Integer.parseInt(t.image); }
 }
 
 Expression FunctionCallExpression(Env env) : {
