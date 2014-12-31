@@ -5,6 +5,9 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.objectbank.ObjectBank;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.AbstractIterator;
 
 import java.util.*;
@@ -219,21 +222,32 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
     }
   }
 
+  private static StringBuilder maybeIncrementCounter(StringBuilder inProgressMisc, Counter<String> miscCounter) {
+    if (inProgressMisc.length() > 0) {
+      miscCounter.incrementCount(inProgressMisc.toString());
+      inProgressMisc = new StringBuilder();
+    }
+    return inProgressMisc;
+  }
+
   /** Count some stats on what occurs in a file.
    */
   public static void main(String[] args) throws IOException, ClassNotFoundException {
-    CoNLLDocumentReaderAndWriter f = new CoNLLDocumentReaderAndWriter();
-    f.init(new SeqClassifierFlags());
+    CoNLLDocumentReaderAndWriter rw = new CoNLLDocumentReaderAndWriter();
+    rw.init(new SeqClassifierFlags());
     int numDocs = 0;
     int numTokens = 0;
     int numEntities = 0;
     String lastAnsBase = "";
-    for (Iterator<List<CoreLabel>> it = f.getIterator(new FileReader(args[0])); it.hasNext(); ) {
+    Counter<String> miscCounter = new ClassicCounter<>();
+    StringBuilder inProgressMisc = new StringBuilder();
+    for (Iterator<List<CoreLabel>> it = rw.getIterator(new FileReader(args[0])); it.hasNext(); ) {
       List<CoreLabel> doc = it.next();
       numDocs++;
       for (CoreLabel fl : doc) {
+        String word = fl.word();
         // System.out.println("FL " + (++i) + " was " + fl);
-        if (fl.word().equals(BOUNDARY)) {
+        if (word.equals(BOUNDARY)) {
           continue;
         }
         String ans = fl.get(CoreAnnotations.AnswerAnnotation.class);
@@ -252,16 +266,30 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
           if (ansBase.equals(lastAnsBase)) {
             if (ansPrefix.equals("B")) {
               numEntities++;
+              inProgressMisc = maybeIncrementCounter(inProgressMisc, miscCounter);
             }
           } else {
             numEntities++;
+            inProgressMisc = maybeIncrementCounter(inProgressMisc, miscCounter);
           }
+          if (ansBase.equals("MISC")) {
+            if (inProgressMisc.length() > 0) {
+              // already something there
+              inProgressMisc.append(' ');
+            }
+            inProgressMisc.append(word);
+          }
+        } else {
+          inProgressMisc = maybeIncrementCounter(inProgressMisc, miscCounter);
         }
-      }
-    }
+        lastAnsBase = ansBase;
+      } // for tokenis
+    } // for documents
     System.out.println("File " + args[0] + " has " + numDocs + " documents, " +
             numTokens + " (non-blank line) tokens and " +
             numEntities + " entities.");
+    System.out.printf("Here are the %.0f MISC items with counts:%n", miscCounter.totalCount());
+    System.out.println(Counters.toVerticalString(miscCounter, "%.0f\t%s"));
   } // end main
 
 } // end class CoNLLDocumentReaderAndWriter
