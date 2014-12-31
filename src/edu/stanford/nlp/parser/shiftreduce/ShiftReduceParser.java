@@ -76,6 +76,7 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 
 /**
+ * A shift-reduce constituency parser.
  * Overview and description available at
  * http://nlp.stanford.edu/software/srparser.shtml
  *
@@ -263,7 +264,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     op.setOptions(args);
 
     if (op.trainOptions.randomSeed == 0) {
-      op.trainOptions.randomSeed = (new Random()).nextLong();
+      op.trainOptions.randomSeed = System.nanoTime();
       System.err.println("Random seed not set by options, using " + op.trainOptions.randomSeed);
     }
     return op;
