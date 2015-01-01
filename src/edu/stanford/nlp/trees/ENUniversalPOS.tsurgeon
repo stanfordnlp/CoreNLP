@@ -1,6 +1,6 @@
 %
 % Context-sensitive mapping of PTB POS tags to
-% Universal POS tags. 
+% Universal POS tags.
 %
 % Author: Sebastian Schuster
 %
@@ -14,7 +14,7 @@ CONJP < TO=target < VB
 relabel target PART
 
 % TO -> PART
-VP < VP < (/^TO$/=target <... {/.*/}) 
+VP < VP < (/^TO$/=target <... {/.*/})
 
 relabel target PART
 
@@ -51,14 +51,14 @@ relabel target AUX
 relabel target VERB
 
 % IN -> SCONJ (only in case of subordinating conjunctions)
-SBAR|SBAR-TMP < (IN=target $++ S|FRAG <... {/.*/})
+/^SBAR(-[^ ]+)?$/ < (IN=target $++ S|FRAG <... {/.*/})
 
 relabel target SCONJ
 
-% IN -> PREP (otherwise)
-IN=target <... {/.*/}
+% IN -> ADP (otherwise)
+IN=target < __
 
-relabel target PREP
+relabel target ADP
 
 % NN -> SYM (in case of the percent sign)
 NN=target <... {/\\%/}
