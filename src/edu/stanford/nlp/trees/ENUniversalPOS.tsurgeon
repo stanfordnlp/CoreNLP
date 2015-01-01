@@ -3,6 +3,7 @@
 % Universal POS tags.
 %
 % Author: Sebastian Schuster
+% Author: Christopher Manning
 %
 %
 % Context-sensitive mappings
@@ -70,7 +71,6 @@ NN=target <... {/.*/}
 
 relabel target NOUN
 
-
 % NFP -> PUNCT (in case of possibly repeated hyphens, asterisks or tildes)
 NFP=target <... {/^(~+|\*+|\-+)$/}
 
@@ -80,6 +80,16 @@ relabel target PUNCT
 NFP=target <... {/.*/}
 
 relabel target SYM
+
+% RB -> PART when it is verbal negation (not or its reductions)
+@VP|SINV|SQ|FRAG < (RB=target < /^(?i:not|n't|nt|t|n)$/)
+
+relabel target PART
+
+% Otherwise RB -> ADV
+RB=target <... {/.*/}
+
+relabel target ADV
 
 %
 % 1 to 1 mappings
@@ -160,11 +170,6 @@ relabel target PRON
 
 relabel target PRON
 
-% RB -> ADV
-RB=target <... {/.*/}
-
-relabel target ADV
-
 % RBR -> ADV
 RBR=target <... {/.*/}
 
@@ -210,23 +215,8 @@ relabel target ADV
 
 relabel target PUNCT
 
-% ! -> PUNCT
-/^!$/=target <... {/.*/}
-
-relabel target PUNCT
-
-% # -> SYM
-/^#$/=target <... {/.*/}
-
-relabel target SYM
-
-% $ -> SYM
-/^\$$/=target <... {/.*/}
-
-relabel target SYM
-
-% ' -> PUNCT
-/^'$/=target <... {/.*/}
+% '' -> PUNCT
+/^''$/=target < __
 
 relabel target PUNCT
 
@@ -240,11 +230,6 @@ relabel target PUNCT
 
 relabel target PUNCT
 
-% , -> PUNCT
-/^,$/=target <... {/.*/}
-
-relabel target PUNCT
-
 % -LRB- -> PUNCT
 /^-LRB-$/=target <... {/.*/}
 
@@ -252,6 +237,11 @@ relabel target PUNCT
 
 % -RRB- -> PUNCT
 /^-RRB-$/=target <... {/.*/}
+
+relabel target PUNCT
+
+% , -> PUNCT
+/^,$/=target <... {/.*/}
 
 relabel target PUNCT
 
@@ -265,10 +255,20 @@ relabel target PUNCT
 
 relabel target PUNCT
 
-% ? -> PUNCT
-/^\?$/=target <... {/.*/}
+% HYPH -> PUNCT
+HYPH=target <... {/.*/}
 
 relabel target PUNCT
+
+% # -> SYM
+/^#$/=target <... {/.*/}
+
+relabel target SYM
+
+% $ -> SYM.  Also note that there is a no-op rule of SYM -> SYM!
+/^\$$/=target <... {/.*/}
+
+relabel target SYM
 
 % ADD -> X
 ADD=target <... {/.*/}
@@ -284,11 +284,6 @@ relabel target X
 GW=target <... {/.*/}
 
 relabel target X
-
-% HYPH -> PUNCT
-HYPH=target <... {/.*/}
-
-relabel target PUNCT
 
 % XX -> X
 XX=target <... {/.*/}
