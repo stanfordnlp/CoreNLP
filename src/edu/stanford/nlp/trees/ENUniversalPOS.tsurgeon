@@ -121,7 +121,7 @@ FW=target <... {/.*/}
 relabel target X
 
 % JJ.* -> ADJ
-JJ.*=target <... {/.*/}
+/^JJ.*$/=target < __
 
 relabel target ADJ
 
