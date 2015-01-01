@@ -757,8 +757,7 @@ public class Counters {
    * Returns the set of keys whose counts are at or above the given threshold.
    * This set may have 0 elements but will not be null.
    *
-   * @param c
-   *          The Counter to examine
+   * @param c The Counter to examine
    * @param countThreshold
    *          Items equal to or above this number are kept
    * @return A (non-null) Set of keys whose counts are at or above the given
@@ -1429,8 +1428,7 @@ public class Counters {
    * <i>Implementation note:</i> The method name favors legibility of the L over
    * the convention of using lowercase names for methods.
    *
-   * @param c
-   *          The Counter
+   * @param c The Counter
    * @return Its length
    */
   public static <E, C extends Counter<E>> double L2Norm(C c) {
@@ -1440,7 +1438,7 @@ public class Counters {
   /**
    * Return the sum of squares (squared L2 norm).
    *
-   * @param c
+   * @param c The Counter
    * @return the L2 norm of the values in c
    */
   public static <E, C extends Counter<E>> double sumSquares(C c) {
@@ -1457,8 +1455,7 @@ public class Counters {
    * name favors legibility of the L over the convention of using lowercase
    * names for methods.
    *
-   * @param c
-   *          The Counter
+   * @param c The Counter
    * @return Its length
    */
   public static <E, C extends Counter<E>> double L1Norm(C c) {
@@ -1475,8 +1472,7 @@ public class Counters {
   /**
    * L2 normalize a counter.
    *
-   * @param c
-   *          The {@link Counter} to be L2 normalized. This counter is not
+   * @param c The {@link Counter} to be L2 normalized. This counter is not
    *          modified.
    * @return A new l2-normalized Counter based on c.
    */
@@ -1719,10 +1715,8 @@ public class Counters {
   /**
    * Returns a new Counter which is the input counter with log tf scaling
    *
-   * @param c
-   *          The counter to scale. It is not changed
-   * @param base
-   *          The base of the logarithm used for tf scaling by 1 + log tf
+   * @param c The counter to scale. It is not changed
+   * @param base The base of the logarithm used for tf scaling by 1 + log tf
    * @return A new Counter which is the argument scaled by the given scale
    *         factor.
    */
@@ -1752,10 +1746,8 @@ public class Counters {
    * Loads a Counter from a text file. File must have the format of one
    * key/count pair per line, separated by whitespace.
    *
-   * @param filename
-   *          the path to the file to load the Counter from
-   * @param c
-   *          the Class to instantiate each member of the set. Must have a
+   * @param filename The path to the file to load the Counter from
+   * @param c The Class to instantiate each member of the set. Must have a
    *          String constructor.
    * @return The counter loaded from the file.
    */
@@ -1769,10 +1761,8 @@ public class Counters {
    * Loads a Counter from a text file. File must have the format of one
    * key/count pair per line, separated by whitespace.
    *
-   * @param filename
-   *          the path to the file to load the Counter from
-   * @param c
-   *          the Class to instantiate each member of the set. Must have a
+   * @param filename The path to the file to load the Counter from
+   * @param c The Class to instantiate each member of the set. Must have a
    *          String constructor.
    * @return The counter loaded from the file.
    */
@@ -1921,17 +1911,14 @@ public class Counters {
    *
    * toVerticalString(c, k) => toSortedString(c, k, "%2$g\t%1$s", "\n", "%s\n")
    *
-   * @param counter
-   *          A Counter.
-   * @param k
-   *          The number of keys to include. Use Integer.MAX_VALUE to include
+   * @param counter A Counter.
+   * @param k The number of keys to include. Use Integer.MAX_VALUE to include
    *          all keys.
    * @param itemFormat
    *          The format string for key/count pairs, where the key is first and
    *          the value is second. To display the value first, use argument
    *          indices, e.g. "%2$f %1$s".
-   * @param joiner
-   *          The string used between pairs of key/value strings.
+   * @param joiner The string used between pairs of key/value strings.
    * @param wrapperFormat
    *          The format string for wrapping text around the joined items, where
    *          the joined item string value is "%s".
@@ -1952,8 +1939,7 @@ public class Counters {
    * Returns a string representation of a Counter, displaying the keys and their
    * counts in decreasing order of count. At most k keys are displayed.
    *
-   * @param counter
-   *          A Counter.
+   * @param counter A Counter.
    * @param k
    *          The number of keys to include. Use Integer.MAX_VALUE to include
    *          all keys.
@@ -1973,8 +1959,7 @@ public class Counters {
    * Returns a string representation of a Counter, where (key, value) pairs are
    * sorted by key, and formatted as specified.
    *
-   * @param counter
-   *          The Counter.
+   * @param counter The Counter.
    * @param itemFormat
    *          The format string for key/count pairs, where the key is first and
    *          the value is second. To display the value first, use argument
@@ -1999,10 +1984,8 @@ public class Counters {
    * maxKeysToPrint elements with largest counts. If maxKeysToPrint is
    * non-positive, all elements are printed.
    *
-   * @param counter
-   *          The Counter
-   * @param maxKeysToPrint
-   *          Max keys to print
+   * @param counter The Counter
+   * @param maxKeysToPrint Max keys to print
    * @return A partial string representation
    */
   public static <E> String toString(Counter<E> counter, int maxKeysToPrint) {
@@ -2057,8 +2040,7 @@ public class Counters {
     return toPriorityQueue(c).toString();
   }
 
-  // TODO this method seems badly written. It should exploit topK printing of
-  // PriorityQueue
+  // TODO this method seems badly written. It should exploit topK printing of PriorityQueue
   public static <E> String toBiggestValuesFirstString(Counter<E> c, int k) {
     PriorityQueue<E> pq = toPriorityQueue(c);
     PriorityQueue<E> largestK = new BinaryHeapPriorityQueue<E>();
@@ -2102,18 +2084,15 @@ public class Counters {
   }
 
   /**
-   * Returns a <code>String</code> representation of the <code>k</code> keys
+   * Returns a {@code String} representation of the {@code k} keys
    * with the largest counts in the given {@link Counter}, using the given
    * format string.
    *
-   * @param c
-   *          a Counter
-   * @param k
-   *          how many keys to print
-   * @param fmt
-   *          a format string, such as "%.0f\t%s" (do not include final "%n")
-   * @param swap
-   *          whether the count should appear after the key
+   * @param c A Counter
+   * @param k How many keys to print
+   * @param fmt A format string, such as "%.0f\t%s" (do not include final "%n").
+   *            If swap is false, you will get val, key as arguments, if true, key, val.
+   * @param swap Whether the count should appear after the key
    */
   public static <E> String toVerticalString(Counter<E> c, int k, String fmt, boolean swap) {
     PriorityQueue<E> q = Counters.toPriorityQueue(c);
@@ -3011,4 +2990,5 @@ public class Counters {
       counter.setCount(key, func.apply(counter.getCount(key)));
     }
   }
+
 }
