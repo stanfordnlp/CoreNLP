@@ -514,8 +514,23 @@ public class Tsurgeon {
    * @throws IOException If there is any I/O problem
    */
   public static List<Pair<TregexPattern, TsurgeonPattern>> getOperationsFromFile(String filename, String encoding, TregexPatternCompiler compiler) throws IOException {
-    List<Pair<TregexPattern,TsurgeonPattern>> operations = new ArrayList<Pair<TregexPattern, TsurgeonPattern>>();
     BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), encoding));
+    List<Pair<TregexPattern,TsurgeonPattern>> operations = getOperationsFromReader(reader, compiler);
+    reader.close();
+    return operations;
+  }
+  
+  
+  /**
+   * Parses and compiles all operations from a BufferedReader into a list
+   * of pairs of tregex and tsurgeon patterns.
+   *
+   * @param reader A BufferedReader to read the operations
+   * @return A pair of a tregex and tsurgeon pattern read from reader
+   * @throws IOException If there is any I/O problem
+   */
+  public static List<Pair<TregexPattern, TsurgeonPattern>> getOperationsFromReader(BufferedReader reader, TregexPatternCompiler compiler) throws IOException {
+    List<Pair<TregexPattern,TsurgeonPattern>> operations = new ArrayList<Pair<TregexPattern, TsurgeonPattern>>();
     for ( ; ; ) {
       Pair<TregexPattern, TsurgeonPattern> operation = getOperationFromReader(reader, compiler);
       if (operation == null) {
@@ -523,9 +538,10 @@ public class Tsurgeon {
       }
       operations.add(operation);
     }
-    reader.close();
     return operations;
   }
+
+  
 
   /**
    * Applies {#processPattern} to a collection of trees.

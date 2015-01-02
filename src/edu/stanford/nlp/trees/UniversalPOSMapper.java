@@ -1,5 +1,6 @@
 package edu.stanford.nlp.trees;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -20,7 +21,7 @@ import edu.stanford.nlp.util.Pair;
 
 public class UniversalPOSMapper {
 
-  public static final String DEFAULT_TSURGEON_FILE = "edu/stanford/nlp/trees/ENUniversalPOS.tsurgeon";
+  public static final String DEFAULT_TSURGEON_FILE = "edu/stanford/nlp/models/upos/ENUniversalPOS.tsurgeon";
 
   private static boolean loaded = false;
 
@@ -34,16 +35,9 @@ public class UniversalPOSMapper {
     loaded = true;
 
     try {
-      URL url = IOUtils.class.getClassLoader().getResource(filename);
-      if (url == null) {
-        System.err.printf(
-            "%s: Warning - could not load Tsurgeon file from %s.%n",
-            UniversalPOSMapper.class.getSimpleName(), filename);
-        return;
-      }
-      String path = url.getPath();
-      operations = Tsurgeon.getOperationsFromFile(path, "UTF-8",
-          new TregexPatternCompiler());
+      BufferedReader reader = IOUtils.getBufferedReaderFromClasspathOrFileSystem(filename);
+      operations = Tsurgeon.getOperationsFromReader(reader, new TregexPatternCompiler());
+      reader.close();
     } catch (IOException e) {
       System.err.printf("%s: Warning - could not load Tsurgeon file from %s.%n",
           UniversalPOSMapper.class.getSimpleName(), filename);
