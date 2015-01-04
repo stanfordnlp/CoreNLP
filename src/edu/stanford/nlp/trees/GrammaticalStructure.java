@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import java.util.function.Function;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.AbstractCoreLabel;
@@ -328,7 +329,7 @@ public abstract class GrammaticalStructure implements Serializable {
   public static GrammaticalStructure fromStringReps(List<String> tokens, List<String> posTags, List<String> deps) {
     if (tokens.size() != posTags.size()) {
       throw new RuntimeException(String.format(
-              "tokens.size(): %d != pos.size(): %d\n", tokens.size(), posTags
+              "tokens.size(): %d != pos.size(): %d%n", tokens.size(), posTags
                       .size()));
     }
 
@@ -392,7 +393,7 @@ public abstract class GrammaticalStructure implements Serializable {
       if (parentDash == -1) throwDepFormatException(depString);
       int childDash = childArg.lastIndexOf('-');
       if (childDash == -1) throwDepFormatException(depString);
-      //System.err.printf("parentArg: %s\n", parentArg);
+      //System.err.printf("parentArg: %s%n", parentArg);
       int parentIdx = Integer.parseInt(parentArg.substring(parentDash+1).replace("'", ""));
 
       int childIdx = Integer.parseInt(childArg.substring(childDash+1).replace("'", ""));
@@ -1117,14 +1118,14 @@ public abstract class GrammaticalStructure implements Serializable {
    * @throws IOException
    */
   public static List<GrammaticalStructure> readCoNLLXGrammaticalStructureCollection(String fileName, Map<String, GrammaticalRelation> shortNameToGRel, GrammaticalStructureFromDependenciesFactory factory) throws IOException {
-    LineNumberReader reader = new LineNumberReader(new FileReader(fileName));
+    LineNumberReader reader = new LineNumberReader(IOUtils.readerFromString(fileName));
     List<GrammaticalStructure> gsList = new LinkedList<GrammaticalStructure>();
 
     List<List<String>> tokenFields = new ArrayList<List<String>>();
 
     for (String inline = reader.readLine(); inline != null;
          inline = reader.readLine()) {
-      if (!"".equals(inline)) {
+      if ( ! inline.isEmpty()) {
         // read in a single sentence token by token
         List<String> fields = Arrays.asList(inline.split("\t"));
         if (fields.size() != CoNLLX_FieldCount) {
@@ -1352,10 +1353,10 @@ public abstract class GrammaticalStructure implements Serializable {
       e.printStackTrace();
       return null;
     } catch (NoSuchMethodException e) {
-      if (depPrintArgs == null) {
-        System.err.printf("Can't find no-argument constructor %s().\n", altDepPrinterName);
+      if (depPrintArgs.length == 0) {
+        System.err.printf("Can't find no-argument constructor %s().%n", altDepPrinterName);
       } else {
-        System.err.printf("Can't find constructor %s(%s).\n", altDepPrinterName, Arrays.toString(depPrintArgs));
+        System.err.printf("Can't find constructor %s(%s).%n", altDepPrinterName, Arrays.toString(depPrintArgs));
       }
       return null;
     }
@@ -1629,7 +1630,7 @@ public abstract class GrammaticalStructure implements Serializable {
     } else if (treeFileName != null) {
       tb.loadPath(treeFileName);
     } else if (filter != null) {
-      tb.load(new BufferedReader(new InputStreamReader(System.in)));
+      tb.load(IOUtils.readerFromStdin());
     } else if (conllXFileName != null) {
       try {
         gsBank = params.readGrammaticalStructureFromFile(conllXFileName);

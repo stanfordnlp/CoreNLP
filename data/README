@@ -1,8 +1,13 @@
 README for data
 ---------------
+
 Small data files (test files, properties files, etc) can go here.
 
-Don't put large models here.  That would cause svn to bloat too much.
+Don't put large models here.  That would cause git to bloat too much.
+
+Open source: Don't put here any file that is copyright or that we
+don't have the rights to rights to redistribute. The contents of this
+directory appear in our public github repository.
 
 Contact: John Bauer (horatio@gmail.com)
 Last Modified: 2010-10-27
