@@ -6,10 +6,8 @@ import edu.stanford.nlp.stats.Counters;
 
 import java.util.Arrays;
 
-/** A SequenceFinder which can efficiently return a k-best list of sequence labellings.
- *
- *  @author Jenny Finkel
- *  @author Sven Zethelius
+/**
+ * @author Jenny Finkel
  */
 public class KBestSequenceFinder implements BestSequenceFinder {
 
@@ -112,58 +110,64 @@ public class KBestSequenceFinder implements BestSequenceFinder {
       numWaysToMake[pos] = new int[productSizes[pos]];
       Arrays.fill(numWaysToMake[pos], 1);
       for (int product = 0; product < productSizes[pos]; product++) {
-        if (pos > leftWindow) {
+        if (pos == leftWindow) {
+          numWaysToMake[pos][product] = 1;
+        } else if (pos > leftWindow) {
           // loop over possible predecessor types
           int sharedProduct = product / tagNum[pos];
           int factor = productSizes[pos] / tagNum[pos];
 
           numWaysToMake[pos][product] = 0;
-          for (int newTagNum = 0; newTagNum < tagNum[pos - leftWindow - 1] && numWaysToMake[pos][product] < k; newTagNum++) {
+          for (int newTagNum = 0; newTagNum < tagNum[pos - leftWindow - 1]; newTagNum++) {
             int predProduct = newTagNum * factor + sharedProduct;
             numWaysToMake[pos][product] += numWaysToMake[pos-1][predProduct];
           }
           if (numWaysToMake[pos][product] > k) { numWaysToMake[pos][product] = k; }
+        } else {
+          numWaysToMake[pos][product] = 1;
         }
 
         score[pos][product] = new double[numWaysToMake[pos][product]];
-        Arrays.fill(score[pos][product], Double.NEGATIVE_INFINITY);
-        trace[pos][product] = new int[numWaysToMake[pos][product]][];
-        Arrays.fill(trace[pos][product], new int[]{-1,-1});
+        trace[pos][product] = new int[numWaysToMake[pos][product]][2];
       }
     }
 
     // Do forward Viterbi algorithm
-    // this is the hottest loop, so cache loop control variables hoping for a little speed....
 
     // loop over the classification spot
-    for (int pos = leftWindow, posMax = length + leftWindow; pos < posMax; pos++) {
+    for (int pos = leftWindow; pos < length + leftWindow; pos++) {
       // loop over window product types
-      for (int product = 0, productMax = productSizes[pos]; product < productMax; product++) {
+      for (int product = 0; product < productSizes[pos]; product++) {
         // check for initial spot
-        double[] scorePos = score[pos][product];
-        int[][] tracePos = trace[pos][product];
         if (pos == leftWindow) {
           // no predecessor type
-          scorePos[0] = windowScore[pos][product];
+          score[pos][product][0] = windowScore[pos][product];
+          trace[pos][product][0][0] = -1;
+          trace[pos][product][0][1] = -1;
         } else {
           // loop over possible predecessor types/k-best
 
+          for (int k1 = 0; k1 < score[pos][product].length; k1++) {
+            score[pos][product][k1] = Double.NEGATIVE_INFINITY;
+            trace[pos][product][k1][0] = -1;
+            trace[pos][product][k1][1] = -1;
+          }
           int sharedProduct = product / tagNum[pos + rightWindow];
           int factor = productSizes[pos] / tagNum[pos + rightWindow];
-          for (int newTagNum = 0, maxTagNum = tagNum[pos - leftWindow - 1]; newTagNum < maxTagNum; newTagNum++) {
+          for (int newTagNum = 0; newTagNum < tagNum[pos - leftWindow - 1]; newTagNum++) {
             int predProduct = newTagNum * factor + sharedProduct;
-            double[] scorePosPrev = score[pos-1][predProduct];
-            for (int k1 = 0; k1 < scorePosPrev.length; k1++) {
-              double predScore = scorePosPrev[k1] + windowScore[pos][product];
-              if (predScore > scorePos[0]) { // new value higher then lowest value we should keep
-                int k2 = Arrays.binarySearch(scorePos, predScore);
-                k2 = k2 < 0 ? -k2 - 2 : k2 - 1;
-                // open a spot at k2 by shifting off the lowest value
-                System.arraycopy(scorePos, 1, scorePos, 0, k2);
-                System.arraycopy(tracePos, 1, tracePos, 0, k2);
-
-                scorePos[k2] = predScore;
-                tracePos[k2]= new int[] {predProduct, k1};
+            for (int k1 = 0; k1 < score[pos-1][predProduct].length; k1++) {
+              double predScore = score[pos - 1][predProduct][k1] + windowScore[pos][product];
+              for (int k2 = 0; k2 < score[pos][product].length; k2++) {
+                if (predScore > score[pos][product][k2]) {
+                  System.arraycopy(score[pos][product], k2, score[pos][product], k2+1, score[pos][product].length-(k2+1));
+                  System.arraycopy(trace[pos][product], k2, trace[pos][product], k2+1, trace[pos][product].length-(k2+1));
+                  score[pos][product][k2] = predScore;
+                  trace[pos][product][k2]= new int[2];
+                  trace[pos][product][k2][0] = predProduct;
+                  trace[pos][product][k2][1] = k1;
+                  break;
+                }
               }
             }
           }
@@ -172,6 +176,7 @@ public class KBestSequenceFinder implements BestSequenceFinder {
     }
 
     // Project the actual tag sequence
+    int[][] kBest = new int[k][padLength];
     int[] whichDerivation = new int[k];
     int[] bestCurrentProducts = new int[k];
     double[] bestFinalScores = new double[k];
@@ -179,39 +184,48 @@ public class KBestSequenceFinder implements BestSequenceFinder {
 
     // just the last guy
     for (int product = 0; product < productSizes[padLength - 1]; product++) {
-      double[] scorePos = score[padLength - 1][product];
-      for (int k1 = scorePos.length - 1;
-            k1 >= 0 && scorePos[k1] > bestFinalScores[0];
-            k1--) {
-        int k2 = Arrays.binarySearch(bestFinalScores, scorePos[k1]);
-        k2 = k2 < 0 ? -k2 - 2 : k2 - 1;
-        // open a spot at k2 by shifting off the lowest value
-        System.arraycopy(bestFinalScores, 1, bestFinalScores, 0, k2);
-        System.arraycopy(whichDerivation, 1, whichDerivation, 0, k2);
-        System.arraycopy(bestCurrentProducts, 1, bestCurrentProducts, 0, k2);
+      for (int k1 = 0; k1 < score[padLength - 1][product].length; k1++) {
+        for (int k2 = 0; k2 < bestFinalScores.length; k2++) {
+          if (score[padLength - 1][product][k1] > bestFinalScores[k2]) {
 
-        bestCurrentProducts[k2] = product;
-        whichDerivation[k2] = k1;
-        bestFinalScores[k2] = scorePos[k1];
+            // open up a space in the arrays at position k2
+            System.arraycopy(bestFinalScores, k2, bestFinalScores, k2+1, bestFinalScores.length-(k2+1));
+            System.arraycopy(whichDerivation, k2, whichDerivation, k2+1, whichDerivation.length-(k2+1));
+            System.arraycopy(bestCurrentProducts, k2, bestCurrentProducts, k2+1, bestCurrentProducts.length-(k2+1));
+
+            bestCurrentProducts[k2] = product;
+            whichDerivation[k2] = k1;
+            bestFinalScores[k2] = score[padLength - 1][product][k1];
+            break;
+          }
+        }
       }
     }
-    ClassicCounter<int[]> kBestWithScores = new ClassicCounter<int[]>();
-    for (int k1 = k - 1; k1 >= 0 && bestFinalScores[k1] > Double.NEGATIVE_INFINITY; k1--) {
-      int lastProduct = bestCurrentProducts[k1];
-      for (int last = padLength - 1; last >= length - 1 && last >= 0; last--) {
-        tempTags[last] = tags[last][lastProduct % tagNum[last]];
-        lastProduct /= tagNum[last];
-      }
+    int[] lastProducts = new int[k];
+    System.arraycopy(bestCurrentProducts, 0, lastProducts, 0, lastProducts.length);
 
-      for (int pos = leftWindow + length - 2; pos >= leftWindow; pos--) {
-        int bestNextProduct = bestCurrentProducts[k1];
-        bestCurrentProducts[k1] = trace[pos + 1][bestNextProduct][whichDerivation[k1]][0];
-        whichDerivation[k1] = trace[pos + 1][bestNextProduct][whichDerivation[k1]][1];
-        tempTags[pos - leftWindow] =
-                 tags[pos - leftWindow][bestCurrentProducts[k1]
-                       / (productSizes[pos] / tagNum[pos - leftWindow])];
+    for (int last = padLength - 1; last >= length - 1 && last >= 0; last--) {
+      for (int k1 = 0; k1 < lastProducts.length; k1++) {
+        kBest[k1][last] = tags[last][lastProducts[k1] % tagNum[last]];
+        lastProducts[k1] /= tagNum[last];
       }
-      kBestWithScores.setCount(Arrays.copyOf(tempTags, tempTags.length), bestFinalScores[k1]);
+    }
+    for (int pos = padLength - 2; pos >= leftWindow; pos--) {
+      System.arraycopy(bestCurrentProducts, 0, lastProducts, 0, lastProducts.length);
+      Arrays.fill(bestCurrentProducts, -1);
+      for (int k1 = 0; k1 < lastProducts.length; k1++) {
+        bestCurrentProducts[k1] = trace[pos + 1][lastProducts[k1]][whichDerivation[k1]][0];
+        whichDerivation[k1] = trace[pos + 1][lastProducts[k1]][whichDerivation[k1]][1];
+        kBest[k1][pos - leftWindow] = tags[pos - leftWindow][bestCurrentProducts[k1] / (productSizes[pos] / tagNum[pos - leftWindow])];
+      }
+    }
+
+    ClassicCounter<int[]> kBestWithScores = new ClassicCounter<int[]>();
+    for (int i = 0; i < kBest.length; i++) {
+      if(bestFinalScores[i] > Double.NEGATIVE_INFINITY) {
+        kBestWithScores.setCount(kBest[i], bestFinalScores[i]);
+        //System.err.println(bestFinalScores[i]+"\t"+Arrays.toString(kBest[i]));
+      }
     }
 
     return kBestWithScores;

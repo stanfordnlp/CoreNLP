@@ -551,8 +551,9 @@ public class IOUtils {
    * Open a BufferedReader on stdin. Use the user's default encoding.
    *
    * @return The BufferedReader
+   * @throws IOException If there is an I/O problem
    */
-  public static BufferedReader readerFromStdin() {
+  public static BufferedReader readerFromStdin() throws IOException {
     return new BufferedReader(new InputStreamReader(System.in));
   }
 
