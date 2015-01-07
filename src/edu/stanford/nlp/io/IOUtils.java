@@ -999,8 +999,7 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir
-   *          The root directory.
+   * @param dir The root directory.
    * @return All files within the directory.
    */
   public static Iterable<File> iterFilesRecursive(final File dir) {
@@ -1010,10 +1009,8 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir
-   *          The root directory.
-   * @param ext
-   *          A string that must be at the end of all files (e.g. ".txt")
+   * @param dir The root directory.
+   * @param ext A string that must be at the end of all files (e.g. ".txt")
    * @return All files within the directory ending in the given extension.
    */
   public static Iterable<File> iterFilesRecursive(final File dir,
@@ -1024,10 +1021,8 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir
-   *          The root directory.
-   * @param pattern
-   *          A regular expression that the file path must match. This uses
+   * @param dir The root directory.
+   * @param pattern A regular expression that the file path must match. This uses
    *          Matcher.find(), so use ^ and $ to specify endpoints.
    * @return All files within the directory.
    */
@@ -1117,7 +1112,7 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = new InputStreamReader(getInputStreamFromURLOrClasspathOrFileSystem(filename), encoding);
+    Reader r = readerFromString(filename, encoding);
     return IOUtils.slurpReader(r);
   }
 
@@ -1148,13 +1143,6 @@ public class IOUtils {
   /**
    * Returns all the text at the given URL.
    */
-  public static String slurpGBURL(URL u) throws IOException {
-    return IOUtils.slurpURL(u, "GB18030");
-  }
-
-  /**
-   * Returns all the text at the given URL.
-   */
   public static String slurpURLNoExceptions(URL u, String encoding) {
     try {
       return IOUtils.slurpURL(u, encoding);
@@ -1180,9 +1168,12 @@ public class IOUtils {
       return "";
     }
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
-    String temp;
     StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
-    while ((temp = br.readLine()) != null) {
+    for (String temp; (temp = br.readLine()) != null;
+
+
+
+            ) {
       buff.append(temp);
       buff.append(lineSeparator);
     }
