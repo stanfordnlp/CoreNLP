@@ -651,7 +651,7 @@ ABCOMP2 = Invt|Elec|Natl|M[ft]g|Dept
 /* ABRREV2 abbreviations are normally followed by an upper case word.
  *  We assume they aren't used sentence finally. Ph is in there for Ph. D
  */
-ABBREV4 = {ABTITLE}|vs|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|{ACRO}|{ABCOMP2}
+ABBREV4 = {ABTITLE}|vs|[v]|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|{ACRO}|{ABCOMP2}
 ABBREV2 = {ABBREV4}\.
 ACRONYM = ({ACRO})\.
 /* Cie. is used by French companies sometimes before and sometimes at end as in English Co.  But we treat as allowed to have Capital following without being sentence end.  Cia. is used in Spanish/South American company abbreviations, which come before the company name, but we exclude that and lose, because in a caseless segmenter, it's too confusable with CIA. */
@@ -688,7 +688,7 @@ INSENTP = [,;:\u3001]
 QUOTES = {APOS}|''|[`\u2018\u2019\u201A\u201B\u201C\u201D\u0091\u0092\u0093\u0094\u201E\u201F\u2039\u203A\u00AB\u00BB]{1,2}
 DBLQUOT = \"|&quot;
 /* Cap'n for captain, c'est for french */
-TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est
+TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est|Yahoo\!
 TBSPEC2 = {APOS}[0-9][0-9]
 
 /* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
