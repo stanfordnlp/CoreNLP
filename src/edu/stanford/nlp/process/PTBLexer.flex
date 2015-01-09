@@ -66,10 +66,10 @@ import edu.stanford.nlp.util.StringUtils;
  *  character sequence and the non-token whitespace around it in a CoreLabel.
  *  And you can ask for newlines to be tokenized.
  *  <p>
- *  <i>Character entities:</i> For legacy reasons, this file will parse and
- *  interpret some simply SGML/XML/HTML character entities.  For modern formats
+ *  <i>Character entities:</i> For legacy reasons, this file will parse and interpret
+ *  some simple SGML/XML/HTML tags and character entities.  For modern formats
  *  like XML, you are better off doing XML parsing, and then running the
- *  tokenizer on CDATA elements.  But we and others frequently work with simple
+ *  tokenizer on CDATA elements.  But, we and others frequently work with simple
  *  SGML text corpora that are not XML (like LDC text collections).  In practice,
  *  they only include very simple markup and a few simple entities, and the
  *  combination of the -parseInside option and the minimal character entity
@@ -540,7 +540,8 @@ SGML = <([!?][A-Za-z-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:.-]* *)>
  */
 /* SGML = \<([!\?][A-Za-z\-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*['\"][^\r\n'\"]*['\"]|['\"][^\r\n'\"]*['\"]|[ ]*\/))*[ ]*)\>
 */
-SGML = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^']*'|\"[^\"]*\")))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
+// <STORYID cat=w pri=u>
+SGML = \<([!\?][A-Za-z\-][^>\r\n]*|[A-Za-z][A-Za-z0-9_:\.\-]*([ ]+([A-Za-z][A-Za-z0-9_:\.\-]*|[A-Za-z][A-Za-z0-9_:\.\-]*[ ]*=[ ]*('[^']*'|\"[^\"]*\"|[A-Za-z][A-Za-z0-9_:\.\-]*)))*[ ]*\/?|\/[A-Za-z][A-Za-z0-9_:\.\-]*)[ ]*\>
 SPMDASH = &(MD|mdash|ndash);|[\u0096\u0097\u2013\u2014\u2015]
 SPAMP = &amp;
 SPPUNC = &(HT|TL|UR|LR|QC|QL|QR|odq|cdq|#[0-9]+);

@@ -223,6 +223,7 @@ public class PTBTokenizerTest extends TestCase {
             "&gt; No one said you did, runny.  What's got you so scared, anyway?-\n" +
             "\">",
     "&lt;b...@canada.com&gt; funky@thedismalscience.net <myemail@where.com>",
+    "<DOC> <DOCID> nyt960102.0516 </DOCID><STORYID cat=w pri=u> A0264 </STORYID> <SLUG fv=ttj-z> ", // this is a MUC7 document
   };
 
   private final String[][] sgmlGold = {
@@ -247,6 +248,7 @@ public class PTBTokenizerTest extends TestCase {
             "&gt; No one said you did, runny.  What's got you so scared, anyway?-\n" +
             "\">" },
     { "&lt;b...@canada.com&gt;", "funky@thedismalscience.net", "<myemail@where.com>" },
+    { "<DOC>", "<DOCID>", "nyt960102", ".0516", "</DOCID>", "<STORYID\u00A0cat=w\u00A0pri=u>", "A0264", "</STORYID>", "<SLUG\u00A0fv=ttj-z>" },
   };
 
   public void testPTBTokenizerSGML() {
