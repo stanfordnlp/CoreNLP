@@ -45,7 +45,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
 
     nThreads = PropertiesUtils.getInt(properties, "testThreads", DEFAULT_NTHREADS);
     maxTime = PropertiesUtils.getLong(properties, "sentenceTimeout", DEFAULT_MAXTIME);
-    extraDependencies = MetaClass.cast(properties.getProperty(StanfordCoreNLP.STANFORD_DEPENDENCIES + ".extradependencies", "NONE"), GrammaticalStructure.Extras.class);
+    extraDependencies = MetaClass.cast(properties.getProperty("extradependencies", "NONE"), GrammaticalStructure.Extras.class);
   }
 
   @Override

@@ -846,7 +846,7 @@ public class SUTime {
       }
     };
 
-    final TimexType timexType;
+    TimexType timexType;
     TimeUnit unit = TimeUnit.UNKNOWN;
     Duration period = SUTime.DURATION_NONE;
 
@@ -4088,10 +4088,10 @@ public class SUTime {
   }
 
   /**
-   * Duration specified in terms of milliseconds.
+   * Duration specified in terms of milliseconds
    */
   public static class DurationWithMillis extends Duration {
-    private final ReadableDuration base;
+    ReadableDuration base;
 
     public DurationWithMillis(long ms) {
       this.base = new org.joda.time.Duration(ms);
@@ -4154,8 +4154,8 @@ public class SUTime {
    * A range of durations.  For instance, 2 to 3 days.
    */
   public static class DurationRange extends Duration {
-    private final Duration minDuration;
-    private final Duration maxDuration;
+    Duration minDuration;
+    Duration maxDuration;
 
     public DurationRange(DurationRange d, Duration min, Duration max) {
       super(d);

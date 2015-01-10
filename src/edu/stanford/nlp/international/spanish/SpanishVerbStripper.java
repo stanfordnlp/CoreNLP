@@ -6,6 +6,7 @@ import edu.stanford.nlp.util.Pair;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public final class SpanishVerbStripper implements Serializable {
   //   - Gerunds
   //   - Affirmative imperatives
 
-  /* HashMap of singleton instances */
+  /* Hashmap of singleton instances */
   private static final Map<String, SpanishVerbStripper> instances = new HashMap<String, SpanishVerbStripper>();
 
   private HashMap<String, String> dict;
@@ -69,23 +70,24 @@ public final class SpanishVerbStripper implements Serializable {
 
   /**
    * Sets up dictionary of valid verbs and their POS info from an input file.
-   * The input file must be a list of tab-separated verb-POS pairs, one verb
+   * The input file must be a list of tab-seperated verb-POS pairs, one verb
    * per line.
    *
    * @param dictPath the path to the dictionary file
-   */
+   */  
   private void setupDictionary(String dictPath) {
     try {
       dict = new HashMap<String, String>();
-      BufferedReader br = IOUtils.readerFromString(dictPath);
-      for(String line; (line = br.readLine()) != null; ) {
+      BufferedReader br = new BufferedReader(new InputStreamReader(
+        IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(dictPath), "UTF-8"));
+      String line = br.readLine();
+      for(; line != null; line = br.readLine()) {
         String[] words = line.trim().split("\\s");
         if(words.length < 3) {
-          System.err.printf("SpanishVerbStripper: addings words to dict, missing word, ignoring line%n");
+          System.err.printf("SpanishVerbStripper: addings words to dict, missing word, ignoring line\n");
         }
         dict.put(words[0], words[2]);
       }
-      IOUtils.closeIgnoringExceptions(br);
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
     } catch (FileNotFoundException e) {
@@ -122,7 +124,7 @@ public final class SpanishVerbStripper implements Serializable {
   }
 
   /**
-   * Singleton pattern function for getting a verb stripper based on
+   * Singleton pattern function for getting a verb stripper based on 
    * the dictionary at dictPath.
    *
    * @param dictPath the path to the dictionary for this verb stripper.
@@ -160,7 +162,7 @@ public final class SpanishVerbStripper implements Serializable {
    * Determine if the given word is a verb which needs to be stripped.
    */
   public static boolean isStrippable(String word) {
-    return pStrippable.matcher(word).find() || pIrregulars.matcher(word).find();
+    return (pStrippable.matcher(word).find() || pIrregulars.matcher(word).find());
   }
 
   private static String removeAccents(String word) {
@@ -173,11 +175,11 @@ public final class SpanishVerbStripper implements Serializable {
         .replaceAll(accentFix.second());
     return stripped;
   }
-
+  
   /**
    * Determines the case of the letter as if it had been part of the
    * original string
-   *
+   * 
    * @param letter The character whose case must be determined
    * @param original The string we are modelling the case on
    */
@@ -203,7 +205,7 @@ public final class SpanishVerbStripper implements Serializable {
     String firstPron = pair.second().get(0).toLowerCase();
 
     String pos = dict.get(stripped);
-
+    
     if (pos != null) {
       if (pos.equals("VMM02P0") && firstPron.equalsIgnoreCase("os")) {
         // Invalid combination of verb root and pronoun.
@@ -216,7 +218,7 @@ public final class SpanishVerbStripper implements Serializable {
 
       return true;
     }
-
+    
     // Special case: de-elide elided verb root in the case of a second
     // person plural imperative + second person object pronoun
     //
@@ -237,7 +239,7 @@ public final class SpanishVerbStripper implements Serializable {
 
     return false;
   }
-
+	
   /**
    * Separate attached pronouns from the given verb.
    *
@@ -250,7 +252,7 @@ public final class SpanishVerbStripper implements Serializable {
   private static Pair<String, List<String>> stripSuffix(String word,
                                                         Pattern pSuffix) {
     Matcher m = pSuffix.matcher(word);
-    if (m.find()) {
+    if(m.find()) {
       String stripped = word.substring(0, m.start());
       stripped = removeAccents(stripped);
 
@@ -306,12 +308,11 @@ public final class SpanishVerbStripper implements Serializable {
    */
   public String stripVerb(String verb) {
     Pair<String, List<String>> separated = separatePronouns(verb);
-    if (separated != null) {
+    if (separated != null)
       return separated.first();
-    }
+
     return null;
   }
 
   private static final long serialVersionUID = -4780144226395772354L;
-
 }
