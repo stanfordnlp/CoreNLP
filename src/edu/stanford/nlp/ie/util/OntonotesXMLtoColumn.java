@@ -8,6 +8,8 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -15,12 +17,12 @@ import org.xml.sax.helpers.DefaultHandler;
 
 
 /**
- * A rather specialized xml processor that turns files in Ontonotes
+ * A rather specialized xml processor that turns files in OntoNotes
  * xml format into a column data structure with word in the first
  * column and tag in the second column.  It parses lines one line at a
  * time and treats each line as a separate document.
  * <br>
- * It is specialized for Ontonotes in that it parses only lines that
+ * It is specialized for OntoNotes in that it parses only lines that
  * occur between &lt;DOC&gt; and &lt;/DOC&gt; tags.  It also looks for
  * a very specific TYPE tag to denote the ner type.  It could
  * theoretically be adapted or generalized for other projects if
@@ -33,12 +35,10 @@ public class OntonotesXMLtoColumn {
 
   int filesProcessed = 0;
 
-  public OntonotesXMLtoColumn() { 
+  public OntonotesXMLtoColumn() {
     try {
       parser = SAXParserFactory.newInstance().newSAXParser();
-    } catch (ParserConfigurationException e) {
-      throw new RuntimeException(e);
-    } catch (SAXException e) {
+    } catch (ParserConfigurationException | SAXException e) {
       throw new RuntimeException(e);
     }
   }
@@ -46,21 +46,16 @@ public class OntonotesXMLtoColumn {
 
   /**
    * Reads the given filename (assumed to be a file at this point)
-   * by creating a reader and then processing that reader with 
+   * by creating a reader and then processing that reader with
    * processXML(Reader)
    */
   public void processXML(String filename) {
     try {
-      File file = new File(filename);
-      FileInputStream fis = new FileInputStream(file);
-      InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
-      processXML(new BufferedReader(isr), filename);
-    } catch (FileNotFoundException e) {
-      throw new RuntimeException(e);
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
+      processXML(IOUtils.readerFromString(filename, "UTF-8"), filename);
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     } catch (SAXException e) {
-      throw new RuntimeException("Error while parsing " + filename + 
+      throw new RuntimeException("Error while parsing " + filename +
                                  ":\n" + e.toString(), e);
     }
   }
@@ -72,7 +67,7 @@ public class OntonotesXMLtoColumn {
    * <br>
    * TODO: throw a different kind of exception?
    */
-  public void processXML(BufferedReader input, String filename) 
+  public void processXML(BufferedReader input, String filename)
     throws SAXException
   {
     try {
@@ -90,10 +85,10 @@ public class OntonotesXMLtoColumn {
         }
 
         line = line.trim();
-        if (line.equals("（ 完 ）") || line.equals("完")) {
+        if (line.equals("（ 完 ）") || line.equals("完") || line.equals("<TURN>")) {
           // continue;
         }
-        
+
         InputSource source = new InputSource(new StringReader("<xml>" + line + "</xml>"));
         source.setEncoding("UTF-8");
 
@@ -106,7 +101,7 @@ public class OntonotesXMLtoColumn {
     }
   }
 
-  void finishXML(ColumnHandler handler, String filename) {
+  private static void finishXML(ColumnHandler handler, String filename) {
     for (int i = 0; i < handler.words.size(); ++i) {
       System.out.println(handler.words.get(i) + "\t" + handler.tags.get(i));
     }
@@ -114,12 +109,12 @@ public class OntonotesXMLtoColumn {
   }
 
 
-  ColumnHandler getHandler() {
+  private static ColumnHandler getHandler() {
     return new ColumnHandler();
   }
 
 
-  static public class ColumnHandler extends DefaultHandler {
+  public static class ColumnHandler extends DefaultHandler {
     StringBuilder currentText = new StringBuilder();
     String inside = null;
 
@@ -141,29 +136,26 @@ public class OntonotesXMLtoColumn {
       }
       currentText = new StringBuilder();
     }
-    
+
     @Override
-    public void startElement(String uri, String localName, 
+    public void startElement(String uri, String localName,
                              String qName, Attributes attributes)
-      throws SAXException
-    {
+      throws SAXException {
       saveWords();
       //String name = ((!localName.equals("")) ? localName : qName);
-      String name = attributes.getValue("TYPE");
-      inside = name;
+      inside = attributes.getValue("TYPE");
     }
 
     @Override
-    public void endElement(String uri, String localName, 
-                           String qName) 
-      throws SAXException
-    {
+    public void endElement(String uri, String localName,
+                           String qName)
+      throws SAXException {
       saveWords();
       inside = null;
     }
 
     @Override
-    public void characters(char buf[], int offset, int len) {
+    public void characters(char[] buf, int offset, int len) {
       String newText = new String(buf, offset, len);
       currentText.append(newText);
     }
