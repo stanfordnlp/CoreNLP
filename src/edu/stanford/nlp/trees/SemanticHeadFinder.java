@@ -65,11 +65,6 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
           "has", "have", "had", "having", "'ve", "ve", "v", "of", "hav", "hvae", "as",
           "get", "gets", "getting", "got", "gotten", "do", "does", "did", "'d", "d", "du",
           "to", "2", "na", "a", "ot", "ta", "the", "too" };
-  private static final String[] beGetVerbs = {
-          "be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "`s", "art", "ar", "wase",
-          "get", "getting", "gets", "got", "gotten" };
-  static final String[] copulaVerbs = {
-          "be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "`s", "art", "ar", "wase"};
 
   // include Charniak tags (AUX, AUXG) so can do BLLIP right
   private static final String[] verbTags = {"TO", "MD", "VB", "VBD", "VBP", "VBZ", "VBG", "VBN", "AUX", "AUXG"};
@@ -112,12 +107,12 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     // get the NP has semantic head in sentences like "Bill is an honest man".  (Added "sha" for "shan't" May 2009
     verbalAuxiliaries = Generics.newHashSet(Arrays.asList(auxiliaries));
 
-    passiveAuxiliaries = Generics.newHashSet(Arrays.asList(beGetVerbs));
+    passiveAuxiliaries = Generics.newHashSet(Arrays.asList(EnglishPatterns.beGetVerbs));
 
     //copula verbs having an NP complement
     copulars = Generics.newHashSet();
     if (noCopulaHead) {
-      copulars.addAll(Arrays.asList(copulaVerbs));
+      copulars.addAll(Arrays.asList(EnglishPatterns.copularVerbs));
     }
 
     // TODO: reverse the polarity of noCopulaHead
