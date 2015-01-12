@@ -58,12 +58,20 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   private static final boolean DEBUG = System.getProperty("SemanticHeadFinder", null) != null;
 
   /* A few times the apostrophe is missing on "'s", so we have "s" */
-  /* Tricky auxiliaries: "na" is from "gonna", "ve" from "Weve", etc.  "of" as non-standard for "have" */
-  private static final String[] auxiliaries = {"will", "wo", "shall", "sha", "may", "might", "should", "would", "can", "could", "ca", "must", "has", "have", "had", "having", "get", "gets", "getting", "got", "gotten", "do", "does", "did", "to", "'ve", "ve", "v", "'d", "d", "'ll", "ll", "na", "of", "hav", "hvae", "as" };
-  private static final String[] beGetVerbs = {"be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "art", "ar", "get", "getting", "gets", "got"};
-  static final String[] copulaVerbs = {"be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "ar", "art", "'re", "'s", "s", "wase"};
+  /* Tricky auxiliaries: "a", "na" is from "(gon|wan)na", "ve" from "Weve", etc.  "of" as non-standard for "have" */
+  /* "as" is "has" with missing first letter. "to" is rendered "the" once in EWT. */
+  private static final String[] auxiliaries = {
+          "will", "wo", "shall", "sha", "may", "might", "should", "would", "can", "could", "ca", "must", "'ll", "ll", "-ll", "cold",
+          "has", "have", "had", "having", "'ve", "ve", "v", "of", "hav", "hvae", "as",
+          "get", "gets", "getting", "got", "gotten", "do", "does", "did", "'d", "d", "du",
+          "to", "2", "na", "a", "ot", "ta", "the", "too" };
+  private static final String[] beGetVerbs = {
+          "be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "`s", "art", "ar", "wase",
+          "get", "getting", "gets", "got", "gotten" };
+  static final String[] copulaVerbs = {
+          "be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "`s", "art", "ar", "wase"};
 
-  // include Charniak tags so can do BLLIP right
+  // include Charniak tags (AUX, AUXG) so can do BLLIP right
   private static final String[] verbTags = {"TO", "MD", "VB", "VBD", "VBP", "VBZ", "VBG", "VBN", "AUX", "AUXG"};
   // These ones are always auxiliaries, even if the word is "too", "my", or whatever else appears in web text.
   private static final String[] unambiguousAuxTags = {"TO", "MD", "AUX", "AUXG"};
@@ -91,8 +99,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
    *
    * @param tlp The TreebankLanguagePack, used by the superclass to get basic
    *     category of constituents.
-   * @param noCopulaHead If true, a copular verb
-   *     (be, seem, appear, stay, remain, resemble, become)
+   * @param noCopulaHead If true, a copular verb (a form of be)
    *     is not treated as head when it has an AdjP or NP complement.  If false,
    *     a copula verb is still always treated as a head.  But it will still
    *     be treated as an auxiliary in periphrastic tenses with a VP complement.
@@ -322,8 +329,6 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       // if none of the above patterns match, use the standard method
     }
 
-    Tree[] tmpFilteredChildren = null;
-
     // do VPs with auxiliary as special case
     if ((motherCat.equals("VP") || motherCat.equals("SQ") || motherCat.equals("SINV"))) {
       Tree[] kids = t.children();
@@ -337,6 +342,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
       }
 
       // looks for auxiliaries
+      Tree[] tmpFilteredChildren = null;
       if (hasVerbalAuxiliary(kids, verbalAuxiliaries, true) || hasPassiveProgressiveAuxiliary(kids)) {
         // String[] how = new String[] {"left", "VP", "ADJP", "NP"};
         // Including NP etc seems okay for copular sentences but is
