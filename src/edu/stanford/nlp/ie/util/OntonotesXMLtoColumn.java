@@ -75,7 +75,7 @@ public class OntonotesXMLtoColumn {
       String line;
       boolean active = false;
       while ((line = input.readLine()) != null) {
-        if (!active) {
+        if ( ! active) {
           if (line.startsWith("<DOC")) {
             active = true;
           }
@@ -85,21 +85,23 @@ public class OntonotesXMLtoColumn {
         }
 
         line = line.trim();
-        if (line.equals("（ 完 ）") || line.equals("完") || line.equals("<TURN>")) {
-          // continue;
-        }
+        // System.err.println("Line is |" + line + "|");
 
+        if ( ! (line.equals("（ 完 ）") || line.equals("完") || line.equals("<TURN>"))) {
         InputSource source = new InputSource(new StringReader("<xml>" + line + "</xml>"));
+        // System.err.println("Parsing |" + "<xml>" + line + "</xml>" + "|");
         source.setEncoding("UTF-8");
 
         ColumnHandler handler = getHandler();
         parser.parse(source, handler);
         finishXML(handler, filename);
+        }
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
+
 
   private static void finishXML(ColumnHandler handler, String filename) {
     for (int i = 0; i < handler.words.size(); ++i) {
