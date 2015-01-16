@@ -32,13 +32,10 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
 
   protected char[] substChars = SUBST_CHARS;
   protected String[] replaceSubsts = REPLACE_SUBSTS;
-
-  // starting about 2013, we no longer escape  * and /. We de-escape them when reading Treebank3
-  protected char[] escapeChars = {}; //  {'/', '*'};
-  protected String[] replaceEscapes = {}; //  = {"\\/", "\\*"};
+  protected char[] escapeChars = {'/', '*'};
+  protected String[] replaceEscapes = {"\\/", "\\*"};
 
   protected boolean fixQuotes = true;
-
 
   public PTBEscapingProcessor() {
   }
@@ -64,7 +61,6 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
   /** Escape a List of HasWords.  Implements the
    *  Function&lt;List&lt;HasWord&gt;, List&lt;HasWord&gt;&gt; interface.
    */
-  @Override
   public List<HasWord> apply(List<IN> hasWordsList) {
     return process(hasWordsList);
   }
@@ -80,7 +76,6 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
   /**
    * @param input must be a List of objects of type HasWord
    */
-  @Override
   public List<HasWord> process(List<? extends IN> input) {
     List<HasWord> output = new ArrayList<HasWord>();
     for (IN h : input) {
@@ -123,7 +118,8 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
     } else {
       // alternate from the beginning
       begin = true;
-      for (HasWord hw : input) {
+      for (int i = 0; i < inputSize; i++) {
+        HasWord hw = input.get(i);
         String tok = hw.word();
         if (tok.equals("\"")) {
           if (begin) {
@@ -236,6 +232,7 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
     } catch (Exception e) {
       e.printStackTrace();
     }
+
   }
 
 }

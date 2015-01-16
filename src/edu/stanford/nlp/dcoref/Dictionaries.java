@@ -20,14 +20,6 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 
-/** Provides accessors for various grammatical, semantic, and world knowledge
- *  lexicons and word lists primarily used by the Sieve coreference system,
- *  but sometimes also drawn on from other code.
- *
- *  The source of the dictionaries on Stanford NLP machines is
- *  /u/nlp/data/coref/gazetteers/dcoref/ . In models jars, they live in
- *  edu/stanford/nlp/models/dcoref .
- */
 public class Dictionaries {
 
   public enum MentionType {
@@ -388,7 +380,9 @@ public class Dictionaries {
       getWordsFromFile(neutralWordsFile, neutralWords, false);
       Map<List<String>, Gender> temp = IOUtils.readObjectFromURLOrClasspathOrFileSystem(file);
       genderNumber.putAll(temp);
-    } catch (IOException | ClassNotFoundException e) {
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    } catch (ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
   }
