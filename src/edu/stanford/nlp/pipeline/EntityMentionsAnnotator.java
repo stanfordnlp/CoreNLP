@@ -28,7 +28,7 @@ import java.util.Set;
  *
  * @author Angel Chang
  */
-public class MentionsAnnotator implements Annotator {
+public class EntityMentionsAnnotator implements Annotator {
   // Currently relies on NER annotations being okay
   // - Replace with calling NER classifiers and timeAnnotator directly
   LabeledChunkIdentifier chunkIdentifier;
@@ -36,13 +36,13 @@ public class MentionsAnnotator implements Annotator {
   // TODO: Provide properties
   public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{};
 
-  public MentionsAnnotator() {
+  public EntityMentionsAnnotator() {
     chunkIdentifier = new LabeledChunkIdentifier();
   }
 
   // note: used in annotate.properties
   @SuppressWarnings("UnusedDeclaration")
-  public MentionsAnnotator(String name, Properties props) {
+  public EntityMentionsAnnotator(String name, Properties props) {
     this();
   }
 
