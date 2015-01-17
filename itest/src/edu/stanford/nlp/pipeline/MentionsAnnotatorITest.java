@@ -13,13 +13,13 @@ import java.util.Properties;
  *
  * @author Angel Chang
  */
-public class EntityMentionsAnnotatorITest extends TestCase {
+public class MentionsAnnotatorITest extends TestCase {
   static AnnotationPipeline pipeline = null;
-  protected static final String ENTITY_MENTIONS_ANNOTATOR_NAME = "entitymentions";
+  protected static final String MENTIONS_ANNOTATOR_NAME = "mentions";
 
   @Override
   public void setUp() throws Exception {
-    synchronized(EntityMentionsAnnotatorITest.class) {
+    synchronized(MentionsAnnotatorITest.class) {
       if (pipeline == null) {
         Properties props = new Properties();
         // TODO: remove need for ner and just have the mentions annotator
@@ -36,14 +36,14 @@ public class EntityMentionsAnnotatorITest extends TestCase {
     return props;
   }
 
-  protected EntityMentionsAnnotator getMentionsAnnotator()
+  protected MentionsAnnotator getMentionsAnnotator()
   {
-    return new EntityMentionsAnnotator(ENTITY_MENTIONS_ANNOTATOR_NAME, getDefaultProperties());
+    return new MentionsAnnotator(MENTIONS_ANNOTATOR_NAME, getDefaultProperties());
   }
 
-  protected static EntityMentionsAnnotator getMentionsAnnotator(Properties props)
+  protected static MentionsAnnotator getMentionsAnnotator(Properties props)
   {
-    return new EntityMentionsAnnotator(ENTITY_MENTIONS_ANNOTATOR_NAME, props);
+    return new MentionsAnnotator(MENTIONS_ANNOTATOR_NAME, props);
   }
 
   protected static Annotation createDocument(String text) {
@@ -75,7 +75,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
     List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
     tokens.get(3).setNER("ORGANIZATION");
     tokens.get(4).setNER("ORGANIZATION");
-    EntityMentionsAnnotator annotator = getMentionsAnnotator();
+    MentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
@@ -88,7 +88,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
 
   public void testDates() {
     Annotation doc = createDocument("July 3rd July 4th are two different dates");
-    EntityMentionsAnnotator annotator = getMentionsAnnotator();
+    MentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
@@ -102,7 +102,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
 
   public void testDates2() {
     Annotation doc = createDocument("July 3rd July 3rd are two mentions of the same date");
-    EntityMentionsAnnotator annotator = getMentionsAnnotator();
+    MentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
@@ -116,7 +116,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
 
   public void testNumbers() {
     Annotation doc = createDocument("one two three four five");
-    EntityMentionsAnnotator annotator = getMentionsAnnotator();
+    MentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
@@ -135,7 +135,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
         "Covering an area nearly 5,500 square meters, the new Dickson Poon University of Oxford China Center in St Hugh's College cost about 21 million pounds.\n" +
         "Dickson Poon, a philanthropist from Hong Kong, China, is the one of the major donors of the center, who contributed 10 million British pounds (16.14 million U.S. dollars).");
 
-    EntityMentionsAnnotator annotator = getMentionsAnnotator();
+    MentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
