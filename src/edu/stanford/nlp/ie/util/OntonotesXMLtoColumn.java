@@ -21,7 +21,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * xml format into a column data structure with word in the first
  * column and tag in the second column.  It parses lines one line at a
  * time and treats each line as a separate document.
- * <br>
+ *
  * It is specialized for OntoNotes in that it parses only lines that
  * occur between &lt;DOC&gt; and &lt;/DOC&gt; tags.  It also looks for
  * a very specific TYPE tag to denote the ner type.  It could
@@ -33,7 +33,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public class OntonotesXMLtoColumn {
   final SAXParser parser;
 
-  int filesProcessed = 0;
+  int filesProcessed; // = 0;
 
   public OntonotesXMLtoColumn() {
     try {
@@ -167,9 +167,8 @@ public class OntonotesXMLtoColumn {
     OntonotesXMLtoColumn processor = new OntonotesXMLtoColumn();
     if (args.length == 0) {
       try {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String line = null;
-        while ( (line = br.readLine()) != null) {
+        BufferedReader br = IOUtils.readerFromStdin();
+        for (String line = null; (line = br.readLine()) != null; ) {
           processor.processXML(line);
         }
       } catch (Exception ex) {
