@@ -94,7 +94,7 @@ public class OntonotesXMLtoColumn {
 
         ColumnHandler handler = getHandler();
         parser.parse(source, handler);
-        finishXML(handler, filename);
+        finishXML(handler);
         }
       }
     } catch (IOException e) {
@@ -103,9 +103,9 @@ public class OntonotesXMLtoColumn {
   }
 
 
-  private static void finishXML(ColumnHandler handler, String filename) {
+  private static void finishXML(ColumnHandler handler) {
     for (int i = 0; i < handler.words.size(); ++i) {
-      System.out.println(handler.words.get(i) + "\t" + handler.tags.get(i));
+      System.out.printf("%s\t%s%n", handler.words.get(i), handler.tags.get(i));
     }
     System.out.println();
   }
@@ -168,7 +168,7 @@ public class OntonotesXMLtoColumn {
     if (args.length == 0) {
       try {
         BufferedReader br = IOUtils.readerFromStdin();
-        for (String line = null; (line = br.readLine()) != null; ) {
+        for (String line; (line = br.readLine()) != null; ) {
           processor.processXML(line);
         }
       } catch (Exception ex) {
