@@ -31,9 +31,12 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author John Bauer
  */
 public class OntonotesXMLtoColumn {
+
+  private static final boolean VERBOSE = true;
+
   final SAXParser parser;
 
-  int filesProcessed; // = 0;
+  private int filesProcessed; // = 0;
 
   public OntonotesXMLtoColumn() {
     try {
@@ -125,6 +128,12 @@ public class OntonotesXMLtoColumn {
 
     public void saveWords() {
       String text = currentText.toString().trim();
+      if (VERBOSE) {
+        // write entities for analysis
+        if (inside != null && ! inside.equals("O")) {
+          System.err.printf("%s\t%s%n", inside, text);
+        }
+      }
       if (text.length() >= 0) {
         String[] pieces = text.split(" +");
         for (String word : pieces) {
