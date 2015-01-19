@@ -108,6 +108,7 @@ public class HeidelTimeAnnotator implements Annotator {
     ArrayList<String> args = new ArrayList<String>();
     args.add("java");
     args.add("-jar"); args.add(this.heideltimePath.getPath() + "/heideltime.jar");
+    args.add("-c"); args.add(this.heideltimePath.getPath()+"/config.props");
     args.add("-t"); args.add("NEWS");
     if(pubDate != null){
       args.add("-dct"); args.add(pubDate);
