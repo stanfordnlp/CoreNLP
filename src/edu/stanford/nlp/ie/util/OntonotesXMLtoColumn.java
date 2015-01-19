@@ -32,7 +32,7 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class OntonotesXMLtoColumn {
 
-  private static final boolean VERBOSE = true;
+  private static final boolean VERBOSE = false;
 
   final SAXParser parser;
 
