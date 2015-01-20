@@ -115,7 +115,19 @@ public class GUTimeAnnotator implements Annotator {
       		e, IOUtils.slurpFile(inputFile), output));
     } */
     inputFile.delete();
+
     
+   //The TimeTag.pl result file contains next tags which must be removed
+    output = output.replaceAll("<lex.*?>", "");
+    output = output.replace("</lex>", "");
+    output = output.replace("<NG>", "");
+    output = output.replace("</NG>", "");
+    output = output.replace("<VG>", "");
+    output = output.replace("</VG>", "");
+    output = output.replace("<s>", "");
+    output = output.replace("</s>", "");
+
+
     // get Timex annotations
     List<CoreMap> timexAnns = toTimexCoreMaps(outputXML, document);
     document.set(TimeAnnotations.TimexAnnotations.class, timexAnns);
