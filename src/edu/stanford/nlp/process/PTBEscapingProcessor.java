@@ -8,6 +8,7 @@ import edu.stanford.nlp.ling.BasicDocument;
 import edu.stanford.nlp.ling.Document;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.io.File;
 import java.net.URL;
@@ -27,20 +28,27 @@ import java.util.*;
 public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractListProcessor<IN, HasWord, L, F>
   implements Function<List<IN>, List<HasWord>> {
 
+  private static final char[] EMPTY_CHAR_ARRAY = new char[0];
+
   private static final char[] SUBST_CHARS = {'(', ')', '[', ']', '{', '}'};
   private static final String[] REPLACE_SUBSTS = {"-LRB-", "-RRB-", "-LSB-", "-RSB-", "-LCB-", "-RCB-"};
 
-  protected char[] substChars = SUBST_CHARS;
-  protected String[] replaceSubsts = REPLACE_SUBSTS;
+  private final char[] substChars;
+  private final String[] replaceSubsts;
 
   // starting about 2013, we no longer escape  * and /. We de-escape them when reading Treebank3
-  protected char[] escapeChars = {}; //  {'/', '*'};
-  protected String[] replaceEscapes = {}; //  = {"\\/", "\\*"};
+  private final char[] escapeChars; // was  {'/', '*'};
+  private final String[] replaceEscapes; // was = {"\\/", "\\*"};
 
-  protected boolean fixQuotes = true;
+  private final boolean fixQuotes;
 
 
   public PTBEscapingProcessor() {
+    this(true);
+  }
+
+  public PTBEscapingProcessor(boolean fixQuotes) {
+    this(EMPTY_CHAR_ARRAY, StringUtils.EMPTY_STRING_ARRAY, SUBST_CHARS, REPLACE_SUBSTS, fixQuotes);
   }
 
   public PTBEscapingProcessor(char[] escapeChars, String[] replaceEscapes, char[] substChars, String[] replaceSubsts, boolean fixQuotes) {
