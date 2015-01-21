@@ -99,6 +99,17 @@ public class GUTimeAnnotator implements Annotator {
     Pattern docClose = Pattern.compile("</DOC>.*", Pattern.DOTALL);
     output = docClose.matcher(output).replaceAll("</DOC>");
 
+
+   //The TimeTag.pl result file contains next tags which must be removed
+    output = output.replaceAll("<lex.*?>", "");
+    output = output.replace("</lex>", "");
+    output = output.replace("<NG>", "");
+    output = output.replace("</NG>", "");
+    output = output.replace("<VG>", "");
+    output = output.replace("</VG>", "");
+    output = output.replace("<s>", "");
+    output = output.replace("</s>", "");
+
     // parse the GUTime output
     Element outputXML;
     try {
@@ -117,15 +128,6 @@ public class GUTimeAnnotator implements Annotator {
     inputFile.delete();
 
     
-   //The TimeTag.pl result file contains next tags which must be removed
-    output = output.replaceAll("<lex.*?>", "");
-    output = output.replace("</lex>", "");
-    output = output.replace("<NG>", "");
-    output = output.replace("</NG>", "");
-    output = output.replace("<VG>", "");
-    output = output.replace("</VG>", "");
-    output = output.replace("<s>", "");
-    output = output.replace("</s>", "");
 
 
     // get Timex annotations

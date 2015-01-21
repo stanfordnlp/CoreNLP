@@ -8,7 +8,7 @@ echo "Need three parameter"
 version=3.5.0
 
 if [ $# -eq 3 ]; then
-    java -Dpos.model=edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger -cp stanford-corenlp-$version.jar:stanford-corenlp-$version-models.jar:lib/xom.jar:lib/joda-time.jar:lib/jollyday.jar -Xmx3g edu.stanford.nlp.time.SUTimeMain -in.type TEMPEVAL3  -i $1 -o $2 -timeAnnotator $3 -heideltime.path ~/git/CoreNLP/packages/heideltime -gutime.path ~/git/CoreNLP/packages/gutime
+    java -Dpos.model=edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger -cp stanford-corenlp-$version.jar:stanford-corenlp-$version-models.jar:lib/xom.jar:lib/joda-time.jar:lib/jollyday-0.4.7.jar -Xmx3g edu.stanford.nlp.time.SUTimeMain -in.type TEMPEVAL3  -i $1 -o $2 -timeAnnotator $3 -heideltime.path ~/git/CoreNLP/packages/heideltime -gutime.path ~/git/CoreNLP/packages/gutime
 fi
 
 

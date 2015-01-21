@@ -169,7 +169,9 @@ public class HeidelTimeAnnotator implements Annotator {
     	// set the sentence timexes
     	sentence.set(TimeAnnotations.TimexAnnotations.class, timexAnns.subList(sublistBegin, sublistEnd));
     }
+
   }
+
 
   private static int beginOffset(CoreMap ann) {
   	return ann.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
