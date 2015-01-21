@@ -41,7 +41,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   private static final boolean DEBUG = false;
   private List<AbstractSequenceClassifier<IN>> baseClassifiers;
 
-  private static final String DEFAULT_AUX_CLASSIFIER_PATH="/u/nlp/data/ner/goodClassifiers/english.muc.7class.distsim.crf.ser.gz";
+  private static final String DEFAULT_AUX_CLASSIFIER_PATH="/u/nlp/data/ner/goodClassifiers/english.all.7class.distsim.crf.ser.gz";
   private static final String DEFAULT_CLASSIFIER_PATH="/u/nlp/data/ner/goodClassifiers/english.all.3class.distsim.crf.ser.gz";
 
   /**
