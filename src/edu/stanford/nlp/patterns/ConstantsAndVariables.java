@@ -539,14 +539,19 @@ public class ConstantsAndVariables<E> implements Serializable{
       return ((ScorePhraseMeasures)o).numObj == (this.numObj);
     }
 
-    static ScorePhraseMeasures DISTSIM = new ScorePhraseMeasures("DistSim");
-    static ScorePhraseMeasures GOOGLENGRAM = new ScorePhraseMeasures("GoogleNGram");
-    static ScorePhraseMeasures PATWTBYFREQ=new ScorePhraseMeasures("PatWtByFreq");
-    static ScorePhraseMeasures  EDITDISTSAME=new ScorePhraseMeasures("EditDistSame");
-    static ScorePhraseMeasures  EDITDISTOTHER =new ScorePhraseMeasures("EditDistOther");
-    static ScorePhraseMeasures  DOMAINNGRAM =new ScorePhraseMeasures("DomainNgram");
-    static ScorePhraseMeasures  SEMANTICODDS =new ScorePhraseMeasures("SemanticOdds");
-    static ScorePhraseMeasures  WORDSHAPE = new ScorePhraseMeasures("WordShape");
+    static final ScorePhraseMeasures DISTSIM = new ScorePhraseMeasures("DistSim");
+    static final ScorePhraseMeasures GOOGLENGRAM = new ScorePhraseMeasures("GoogleNGram");
+    static final ScorePhraseMeasures PATWTBYFREQ=new ScorePhraseMeasures("PatWtByFreq");
+    static final ScorePhraseMeasures  EDITDISTSAME=new ScorePhraseMeasures("EditDistSame");
+    static final ScorePhraseMeasures  EDITDISTOTHER =new ScorePhraseMeasures("EditDistOther");
+    static final ScorePhraseMeasures  DOMAINNGRAM =new ScorePhraseMeasures("DomainNgram");
+    static final ScorePhraseMeasures  SEMANTICODDS =new ScorePhraseMeasures("SemanticOdds");
+    static final ScorePhraseMeasures  WORDSHAPE = new ScorePhraseMeasures("WordShape");
+    static final ScorePhraseMeasures WORDVECPOSSIMAVG = new ScorePhraseMeasures("WordVecPosSimAvg");
+    static final ScorePhraseMeasures WORDVECPOSSIMMAX = new ScorePhraseMeasures("WordVecPosSimMax");
+    static final ScorePhraseMeasures WORDVECNEGSIMAVG = new ScorePhraseMeasures("WordVecNegSimAvg");
+    static final ScorePhraseMeasures WORDVECNEGSIMMAX = new ScorePhraseMeasures("WordVecNegSimMax");
+
 
     @Override
     public int compareTo(Object o) {
@@ -568,6 +573,12 @@ public class ConstantsAndVariables<E> implements Serializable{
    */
   @Option(name = "usePhraseEvalWordClass")
   public boolean usePhraseEvalWordClass = false;
+
+  /**
+   * Only works if you have single label. And the word vectors are given.
+   */
+  @Option(name = "usePhraseEvalWordVector")
+  public boolean usePhraseEvalWordVector = false;
 
   /**
    * use google tf-idf for learning phrases. Need to also provide googleNgram_dbname,

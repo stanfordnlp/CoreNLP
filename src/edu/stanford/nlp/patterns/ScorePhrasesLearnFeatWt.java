@@ -143,7 +143,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       classifier = svmcf.trainClassifier(dataset);
     } else
       throw new RuntimeException("cannot identify classifier " + scoreClassifierType);
-    
+
 //    else if (scoreClassifierType.equals(ClassifierType.RF)) {
 //      ClassifierFactory wekaFactory = new WekaDatumClassifierFactory<String, ScorePhraseMeasures>("weka.classifiers.trees.RandomForest", constVars.wekaOptions);
 //      classifier = wekaFactory.trainClassifier(dataset);
@@ -236,13 +236,27 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
   }
 
-  private Counter<CandidatePhrase> computeSimWithWordVectors(Collection<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> otherPhrases, boolean ignoreWordRegex){
+  private Counter<CandidatePhrase> computeSimWithWordVectors(Collection<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> otherPhrases, boolean ignoreWordRegex, String label){
     Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>(candidatePhrases.size());
     for(CandidatePhrase p : candidatePhrases) {
+
+      Map<String, double[]> simsAvgMaxAllLabels = similaritiesWithLabeledPhrases.get(p.getPhrase());
+      if(simsAvgMaxAllLabels == null)
+        simsAvgMaxAllLabels = new HashMap<String, double[]>();
+      double[] simsAvgMax = simsAvgMaxAllLabels.get(label);
+      if(simsAvgMax == null) {
+        simsAvgMax = new double[Similarities.values().length];
+        Arrays.fill(simsAvgMax, 0);
+      }
+
       if(wordVectors.containsKey(p.getPhrase()) && (! ignoreWordRegex || !PatternFactory.ignoreWordRegex.matcher(p.getPhrase()).matches())){
+
         double[] d1 = wordVectors.get(p.getPhrase());
 
         double finalSimScore = 0;// Double.MIN_VALUE;
+        double allsum = 0;
+        double max = Double.MIN_VALUE;
+
         boolean donotuse = false;
         for (CandidatePhrase pos : otherPhrases) {
 
@@ -277,22 +291,44 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             finalSimScore =  sim;
 
           //avgSim /= otherPhrases.size();
+          allsum += sim;
+          if(sim > max)
+            max = sim;
         }
+
+        double prevNumItems = simsAvgMax[Similarities.NUMITEMS.ordinal()];
+        double prevAvg = simsAvgMax[Similarities.AVGSIM.ordinal()];
+        double prevMax = simsAvgMax[Similarities.MAXSIM.ordinal()];
+        double newNumItems = prevNumItems + otherPhrases.size();
+        double newAvg = (prevAvg*prevNumItems + allsum) /(newNumItems);
+        double newMax = prevMax > max ? prevMax: max;
+        simsAvgMax[Similarities.NUMITEMS.ordinal()] = newNumItems;
+        simsAvgMax[Similarities.AVGSIM.ordinal()] = newAvg;
+        simsAvgMax[Similarities.MAXSIM.ordinal()] = newMax;
+
         if(!donotuse){
           sims.setCount(p, finalSimScore);
         }
       }else{
         sims.setCount(p, Double.MIN_VALUE);
       }
+
+
+
+
     }
     return sims;
   }
 
-  private Counter<CandidatePhrase> computeSimWithWordVectors(List<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> positivePhrases, Collection<CandidatePhrase> allPossibleNegativePhrases) {
+  private Counter<CandidatePhrase> computeSimWithWordVectors(List<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> positivePhrases, Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases, String label) {
     //TODO: check this
     assert wordVectors != null : "Why are word vectors null?";
-    Counter<CandidatePhrase> posSims = computeSimWithWordVectors(candidatePhrases, positivePhrases, true);
-    Counter<CandidatePhrase> negSims = computeSimWithWordVectors(posSims.keySet(), allPossibleNegativePhrases, false);
+    Counter<CandidatePhrase> posSims = computeSimWithWordVectors(candidatePhrases, positivePhrases, true, label);
+    Counter<CandidatePhrase> negSims = new ClassicCounter<CandidatePhrase>();
+
+    for(Map.Entry<String, Collection<CandidatePhrase>> en: allPossibleNegativePhrases.entrySet())
+      negSims.addAll(computeSimWithWordVectors(posSims.keySet(), en.getValue(), false, en.getKey()));
+
     Function<CandidatePhrase, Boolean> retainPhrasesNotCloseToNegative = candidatePhrase -> {
       if(negSims.getCount(candidatePhrase) > posSims.getCount(candidatePhrase))
         return false;
@@ -354,9 +390,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     String label;
     AtomicDouble allMaxSim;
     Collection<CandidatePhrase> positivePhrases;
-    Collection<CandidatePhrase> knownNegativePhrases;
+    Map<String, Collection<CandidatePhrase>> knownNegativePhrases;
 
-    public ComputeSim(String label, List<CandidatePhrase> candidatePhrases, AtomicDouble allMaxSim, Collection<CandidatePhrase> positivePhrases, Collection<CandidatePhrase> knownNegativePhrases){
+    public ComputeSim(String label, List<CandidatePhrase> candidatePhrases, AtomicDouble allMaxSim, Collection<CandidatePhrase> positivePhrases, Map<String, Collection<CandidatePhrase>> knownNegativePhrases){
       this.label = label;
       this.candidatePhrases = candidatePhrases;
       this.allMaxSim = allMaxSim;
@@ -368,7 +404,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     public Counter<CandidatePhrase> call() throws Exception {
 
       if(constVars.useWordVectorsToComputeSim){
-        Counter<CandidatePhrase> phs = computeSimWithWordVectors(candidatePhrases, positivePhrases, knownNegativePhrases);
+        Counter<CandidatePhrase> phs = computeSimWithWordVectors(candidatePhrases, positivePhrases, knownNegativePhrases, label);
         Redwood.log(Redwood.DBG, "Computed similarities with positive and negative phrases");
         return phs;
       }
@@ -381,7 +417,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
 
   //this chooses the ones that are not close to the positive phrases!
-  Set<CandidatePhrase> chooseUnknownAsNegatives(Set<CandidatePhrase> candidatePhrases, String label, double percentage, Collection<CandidatePhrase> positivePhrases, Collection<CandidatePhrase> knownNegativePhrases, BufferedWriter logFile) throws IOException {
+  Set<CandidatePhrase> chooseUnknownAsNegatives(Set<CandidatePhrase> candidatePhrases, String label, double percentage, Collection<CandidatePhrase> positivePhrases, Map<String, Collection<CandidatePhrase>> knownNegativePhrases, BufferedWriter logFile) throws IOException {
 
     List<List<CandidatePhrase>> threadedCandidates = GetPatternsFromDataMultiClass.getThreadBatches(CollectionUtils.toList(candidatePhrases), constVars.numThreads);
 
@@ -508,6 +544,14 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
   }
 
+  static<E,F> boolean hasElement(Map<E, Collection<F>> values, F value){
+      for(Map.Entry<E, Collection<F>> en: values.entrySet()){
+        if(en.getValue().contains(value))
+          return true;
+      }
+    return false;
+  }
+
   public class ChooseDatumsThread implements Callable {
 
     Collection<String> keys;
@@ -518,9 +562,10 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted;
     Counter<E> allSelectedPatterns;
     Counter<Integer> wordClassClustersOfPositive;
-    Collection<CandidatePhrase> allPossibleNegativePhrases;
+    Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases;
 
-    public ChooseDatumsThread(String label, Map<String, DataInstance> sents, Collection<String> keys, boolean forLearningPattern, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted, Counter<E> allSelectedPatterns, Counter<Integer> wordClassClustersOfPositive, Collection<CandidatePhrase> allPossibleNegativePhrases){
+    public ChooseDatumsThread(String label, Map<String, DataInstance> sents, Collection<String> keys, boolean forLearningPattern, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted, Counter<E> allSelectedPatterns,
+                              Counter<Integer> wordClassClustersOfPositive, Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases){
       this.answerLabel = label;
       this.sents = sents;
       this.keys = keys;
@@ -569,7 +614,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             }
 
             //Do not add to positive if the word is a "negative" (stop word, english word, ...)
-            if(allPossibleNegativePhrases.contains(candidate) || PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches())
+            if(hasElement(allPossibleNegativePhrases, candidate) || PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches())
               continue;
 
             allPositivePhrases.add(candidate);
@@ -618,12 +663,12 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
               allNegativePhrases.add(candidate);
             }
 
-            if(!negative && !ignoreclass && constVars.expandPositivesWhenSampling && !allPossibleNegativePhrases.contains(candidate) && !PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches()) {
+            if(!negative && !ignoreclass && constVars.expandPositivesWhenSampling && !hasElement(allPossibleNegativePhrases, candidate) && !PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches()) {
               if (!allConsideredPhrases.contains(candidate)) {
                 Counter<CandidatePhrase> sims;
                 assert candidate != null;
                 if(constVars.useWordVectorsToComputeSim)
-                  sims =computeSimWithWordVectors(Arrays.asList(candidate), knownPositivePhrases, allPossibleNegativePhrases);
+                  sims =computeSimWithWordVectors(Arrays.asList(candidate), knownPositivePhrases, allPossibleNegativePhrases, answerLabel);
                 else
                   sims = computeSimWithWordCluster(Arrays.asList(candidate), knownPositivePhrases, new AtomicDouble());
 
@@ -701,6 +746,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
   static Counter<PhrasePair> cacheSimilarities = new ConcurrentHashCounter<PhrasePair>();
 
+  //First map is phrase, second map is label to similarity stats
+  static Map<String, Map<String, double[]>> similaritiesWithLabeledPhrases = new ConcurrentHashMap<String, Map<String, double[]>>();
+
   public RVFDataset<String, ScorePhraseMeasures> choosedatums(boolean forLearningPattern, String answerLabel,
       TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
       Counter<E> allSelectedPatterns, boolean computeRawFreq) throws IOException {
@@ -720,20 +768,22 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       }
     }
 
-    Collection<CandidatePhrase> allPossibleNegativePhrases = null;
+    Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases = null;
 
     if(constVars.expandPositivesWhenSampling || constVars.subsampleUnkAsNegUsingSim){
-      allPossibleNegativePhrases = new HashSet<CandidatePhrase>();
-      allPossibleNegativePhrases.addAll(constVars.getOtherSemanticClassesWords());
-      allPossibleNegativePhrases.addAll(constVars.getStopWords());
-      allPossibleNegativePhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.functionWords));
-      allPossibleNegativePhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.getEnglishWords()));
+      allPossibleNegativePhrases = new HashMap<String, Collection<CandidatePhrase>>();
+      Collection<CandidatePhrase> negPhrases = new HashSet<CandidatePhrase>();
+      negPhrases.addAll(constVars.getOtherSemanticClassesWords());
+      negPhrases.addAll(constVars.getStopWords());
+      negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.functionWords));
+      negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.getEnglishWords()));
       for(Entry<String, Counter<CandidatePhrase>> en: constVars.getLearnedWords().entrySet()) {
         if (!en.getKey().equals(answerLabel)){
-          allPossibleNegativePhrases.addAll(en.getValue().keySet());
-          allPossibleNegativePhrases.addAll(constVars.getSeedLabelDictionary().get(en.getKey()));
+          negPhrases.addAll(en.getValue().keySet());
+          negPhrases.addAll(constVars.getSeedLabelDictionary().get(en.getKey()));
         }
       }
+      allPossibleNegativePhrases.put("NEGATIVE", negPhrases);
     }
 
     RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
@@ -894,6 +944,12 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return dataset;
   }
 
+
+  //Map of label to an array of values -- num_items, avg similarity, max similarity
+  public Map<String, double[]> getSimilarities(String phrase){
+    return similaritiesWithLabeledPhrases.get(phrase);
+  }
+
   Counter<ScorePhraseMeasures> getPhraseFeaturesForPattern(String label, CandidatePhrase word) {
 
     if (phraseScoresRaw.containsFirstKey(word))
@@ -985,7 +1041,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       if (flipsign)
         score = 1 - score;
 
-    } else if (scoreClassifierType.equals(ClassifierType.RF)) {
+    } else if (scoreClassifierType.equals(ClassifierType.SVM) || scoreClassifierType.equals(ClassifierType.RF)) {
 
       Counter<ScorePhraseMeasures> feat = null;
       if (forLearningPatterns)
@@ -1052,6 +1108,29 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 //      scoreslist.setCount(ScorePhraseMeasures.DISTSIM, distSimWt);
       Integer wordclass = constVars.getWordClassClusters().get(word.getPhrase());
       scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.DISTSIM.toString()+"-"+wordclass), 1.0);
+    }
+
+    if(constVars.usePhraseEvalWordVector){
+      Map<String, double[]> sims = getSimilarities(word.getPhrase());
+      double avgPosSim = sims.get(label)[Similarities.AVGSIM.ordinal()];
+      double maxPosSim = sims.get(label)[Similarities.MAXSIM.ordinal()];
+      double sumNeg = 0, maxNeg = Double.MIN_VALUE;
+      double allNumItems =0;
+      for(Entry<String, double[]> simEn: sims.entrySet()){
+        if(simEn.getKey().equals(label))
+          continue;
+        double numItems = simEn.getValue()[Similarities.NUMITEMS.ordinal()];
+        sumNeg += simEn.getValue()[Similarities.AVGSIM.ordinal()]*numItems;
+        allNumItems += numItems;
+        double maxNegLabel =simEn.getValue()[Similarities.MAXSIM.ordinal()];
+        if(maxNeg < maxNegLabel)
+          maxNeg = maxNegLabel;
+      }
+      double avgNegSim = sumNeg / allNumItems;
+      scoreslist.setCount(ScorePhraseMeasures.WORDVECPOSSIMAVG, avgPosSim);
+      scoreslist.setCount(ScorePhraseMeasures.WORDVECPOSSIMMAX, maxPosSim);
+      scoreslist.setCount(ScorePhraseMeasures.WORDVECNEGSIMAVG, avgNegSim);
+      scoreslist.setCount(ScorePhraseMeasures.WORDVECNEGSIMAVG, maxNeg);
     }
 
     if (constVars.usePhraseEvalEditDistOther) {

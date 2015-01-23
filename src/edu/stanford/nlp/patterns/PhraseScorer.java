@@ -3,6 +3,7 @@ package edu.stanford.nlp.patterns;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -40,6 +41,8 @@ public abstract class PhraseScorer<E extends Pattern> {
   public enum Normalization {
     NONE, SQRT, LOG
   };
+
+  static public enum Similarities{NUMITEMS, AVGSIM, MAXSIM};
 
   public PhraseScorer(ConstantsAndVariables constvar) {
     this.constVars = constvar;
@@ -203,5 +206,6 @@ public abstract class PhraseScorer<E extends Pattern> {
   abstract public Counter<CandidatePhrase> scorePhrases(String label, Set<CandidatePhrase> terms, boolean forLearningPatterns) throws IOException, ClassNotFoundException;
 
   public abstract void printReasonForChoosing(Counter<CandidatePhrase> phrases);
+
 
   }
