@@ -27,8 +27,9 @@ import java.util.function.Function;
 
 
 
-/** Currently written to only support word based patterns - that is no lemmas.
- * Created by sonalg on 10/14/14.
+/**
+ * To create a lucene inverted index for tokens -> sentence ids (right now not storing all core tokens although some functions might suggest that)
+ * Created by Sonal Gupta on 10/14/14.
  */
 public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 

@@ -225,6 +225,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       sims.setCount(p, maxSim);
     }
     Counters.retainBottom(sims, Math.min((int) (sims.size() * 0.8), maxNum));
+    System.out.println("choosing " + sims + " as the negative phrases");
     return sims.keySet();
   }
 
@@ -256,7 +257,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     SemanticGraph g = ((DataInstanceDep) sent).getGraph();
     Collection<CoreLabel> sampledHeads = CollectionUtils.sampleWithoutReplacement(sent.getTokens(), Math.min(maxNum, (int) (perSelect * sent.getTokens().size())), random);
 
-    //TODO: change this for more efficient
+    //TODO: change this for more efficient implementation
     List<String> textTokens = sent.getTokens().stream().map(x -> x.word()).collect(Collectors.toList());
 
     for(CoreLabel l: sampledHeads) {
@@ -277,7 +278,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }else if(constVars.patternType.equals(PatternFactory.PatternType.SURFACE)){
       CoreLabel[] tokens = sent.getTokens().toArray(new CoreLabel[0]);
       for(int i =0; i < tokens.length; i++){
-        if(random.nextDouble() < perSelect){
+        if(random.nextDouble() < 0.5){
           int left = (int)((length -1) /2.0);
           int right = length -1 -left;
           String ph = "";
@@ -322,11 +323,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
         CoreLabel l = sent[i];
 
 
-         if (l.get(answerClass).equals(answerLabel)) {
+        if (l.get(answerClass).equals(answerLabel)) {
           CandidatePhrase candidate = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(label);
 
-          if(candidate == null) {
-            System.out.println("candidate null for " + l.word() +  " and longest matching" + l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class)  + " and hash amp is " + CandidatePhrase.candidatePhraseMap);
+          if (candidate == null) {
+            System.out.println("candidate null for " + l.word() + " and longest matching" + l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class) + " and hash amp is " + CandidatePhrase.candidatePhraseMap);
             throw new RuntimeException("");
             //candidate = CandidatePhrase.createOrGet(l.word());
           }
@@ -343,47 +344,35 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           }
           RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, "true");
           dataset.add(datum);
-        }
-      }
-
-
-      for (int i = 0; i < sent.length; i++) {
-        CoreLabel l = sent[i];
-        if (allNegativePhrases.size() >= numpos)
-          break;
-        //boolean ignoreclass = false;
-
-        if (l.get(answerClass).equals(answerLabel)) {
-          //positive
-          continue;
-        }
-
-        boolean ignoreclass = false;
-        for (Class cl : otherIgnoreClasses.keySet()) {
-          if ((Boolean) l.get(cl)) {
-            ignoreclass = true;
+        } else {
+          boolean ignoreclass = false;
+          for (Class cl : otherIgnoreClasses.keySet()) {
+            if ((Boolean) l.get(cl)) {
+              ignoreclass = true;
+            }
           }
-        }
+          CandidatePhrase candidate = null;
 
-
-        CandidatePhrase candidate = null;
-
-        boolean negative = false;
-        Map<String, CandidatePhrase> longestMatching = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
-        for (Map.Entry<String, CandidatePhrase> lo : longestMatching.entrySet()) {
-          if (!lo.getKey().equals(label) && lo.getValue() != null) {
-            negative = true;
-            candidate = lo.getValue();
+          boolean negative = false;
+          boolean add= false;
+          Map<String, CandidatePhrase> longestMatching = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
+          for (Map.Entry<String, CandidatePhrase> lo : longestMatching.entrySet()) {
+            if (!lo.getKey().equals(label) && lo.getValue() != null) {
+              negative = true;
+              add = true;
+              candidate = lo.getValue();
+            }
+          }
+          if (!negative && ignoreclass) {
+            candidate = longestMatching.get("OTHERSEM");
+            add = true;
+          }
+          if(add && rneg.nextDouble() < perSelectNeg){
             allNegativePhrases.add(candidate);
           }
         }
-        if (!negative && ignoreclass) {
-          candidate = longestMatching.get("OTHERSEM");
-          allNegativePhrases.add(candidate);
-        }
       }
-
-      allNegativePhrases.addAll(this.chooseNegativePhrases(en.getValue(), r, perSelectRand, constVars.getAnswerClass().get(label), label,Math.max(0, (numpos - allNegativePhrases.size()))));
+      allNegativePhrases.addAll(this.chooseNegativePhrases(en.getValue(), r, perSelectRand, constVars.getAnswerClass().get(label), label,Math.max(0, Integer.MAX_VALUE)));
 //
 //        if (negative && getRandomBoolean(rneg, perSelectNeg)) {
 //          numneg++;

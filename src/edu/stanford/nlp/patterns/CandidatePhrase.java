@@ -4,6 +4,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by sonalg on 11/7/14.
  */
-public class CandidatePhrase {
+public class CandidatePhrase implements Serializable {
   //TODO: would computing hash code and storing it make this faster to access?
   final String phrase;
   final String phraseLemma;
