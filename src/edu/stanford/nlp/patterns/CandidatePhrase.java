@@ -22,6 +22,7 @@ public class CandidatePhrase implements Serializable, Comparable  {
   static ConcurrentHashMap<String, CandidatePhrase> candidatePhraseMap = new ConcurrentHashMap<String, CandidatePhrase>();
 
   static public CandidatePhrase createOrGet(String phrase){
+    phrase = phrase.trim();
      if(candidatePhraseMap.containsKey(phrase)){
        return candidatePhraseMap.get(phrase);
      }
@@ -33,6 +34,7 @@ public class CandidatePhrase implements Serializable, Comparable  {
   }
 
   static public CandidatePhrase createOrGet(String phrase, String phraseLemma){
+    phrase = phrase.trim();
     if(candidatePhraseMap.containsKey(phrase)){
       CandidatePhrase p = candidatePhraseMap.get(phrase);
       p.phraseLemma = phraseLemma;
@@ -46,6 +48,7 @@ public class CandidatePhrase implements Serializable, Comparable  {
   }
 
   static public CandidatePhrase createOrGet(String phrase, String phraseLemma, Counter<String> features){
+    phrase = phrase.trim();
     if(candidatePhraseMap.containsKey(phrase)){
       CandidatePhrase p = candidatePhraseMap.get(phrase);
       p.phraseLemma = phraseLemma;
@@ -66,7 +69,6 @@ public class CandidatePhrase implements Serializable, Comparable  {
   }
 
   private CandidatePhrase(String phrase, String lemma, Counter<String> features){
-    phrase = phrase.trim();
     this.phrase = phrase;
     this.phraseLemma = lemma;
     this.features = features;
