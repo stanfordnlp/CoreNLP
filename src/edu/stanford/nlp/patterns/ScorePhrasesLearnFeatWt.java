@@ -538,7 +538,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             for (Class cl : otherIgnoreClasses.keySet()) {
               if ((Boolean) l.get(cl)) {
                 ignoreclass = true;
-                candidate = longestMatching.get("OTHERSEM");
+                candidate = longestMatching.containsKey("OTHERSEM")? longestMatching.get("OTHERSEM") : candidate;
                 break;
               }
             }
