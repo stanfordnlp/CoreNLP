@@ -2,10 +2,11 @@ package edu.stanford.nlp.patterns;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.dep.DepPattern;
-import edu.stanford.nlp.patterns.surface.PatternFactory;
+import edu.stanford.nlp.patterns.dep.DepPatternFactory;
 import edu.stanford.nlp.patterns.surface.SurfacePattern;
 import edu.stanford.nlp.patterns.surface.SurfacePatternFactory;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
@@ -15,7 +16,14 @@ import java.util.Set;
  *
  * @Author Sonal Gupta @sonalg.
  */
-public abstract class Pattern {
+public abstract class Pattern implements Serializable{
+
+  public PatternFactory.PatternType type;
+
+  public Pattern(PatternFactory.PatternType type){
+    this.type = type;
+  }
+
 
   public static boolean sameGenre(PatternFactory.PatternType patternClass, Pattern p1, Pattern p2){
     if(patternClass.equals(PatternFactory.PatternType.SURFACE))
@@ -41,11 +49,13 @@ public abstract class Pattern {
 
   public abstract String toStringSimple();
 
-  public static Set getContext(PatternFactory.PatternType patternClass, List<CoreLabel> sent, int i) {
+  /** Get set of patterns around this token.*/
+  public static Set getContext(PatternFactory.PatternType patternClass, DataInstance sent, int i) {
     if(patternClass.equals(PatternFactory.PatternType.SURFACE))
-      return SurfacePatternFactory.getContext(sent, i);
+      return SurfacePatternFactory.getContext(sent.getTokens(), i);
     else
-      throw new UnsupportedOperationException();
+      return DepPatternFactory.getContext(sent, i);
   }
 
+  public abstract String toString(List<String> notAllowedClasses);
 }

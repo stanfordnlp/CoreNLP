@@ -6,6 +6,7 @@ import java.util.*;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.Pattern;
+import edu.stanford.nlp.patterns.PatternFactory;
 import edu.stanford.nlp.patterns.PatternsAnnotations;
 import edu.stanford.nlp.util.*;
 
@@ -48,10 +49,10 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
 
   private static final long serialVersionUID = 1L;
 
-  protected Token[] prevContext;
-  protected Token[] nextContext;
+  public Token[] prevContext;
+  public Token[] nextContext;
   // String prevContextStr = "", nextContextStr = "";
-  protected PatternToken token;
+  public PatternToken token;
   // protected String[] originalPrev;
   // protected String[] originalNext;
   // protected String originalPrevStr = "";
@@ -72,7 +73,7 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
 
 
   public SurfacePattern(Token[] prevContext, PatternToken token, Token[] nextContext, SurfacePatternFactory.Genre genre) {
-   // super(SurfacePattern.class);
+    super(PatternFactory.PatternType.SURFACE);
     this.setPrevContext(prevContext);
     this.setNextContext(nextContext);
     //

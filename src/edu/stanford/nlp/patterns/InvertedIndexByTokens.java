@@ -6,7 +6,6 @@ import java.util.function.Function;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
 import edu.stanford.nlp.patterns.surface.Token;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CollectionValuedMap;
@@ -42,9 +41,9 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
 
 
   @Override
-  public void add(Map<String, List<CoreLabel>> sents, boolean addProcessedText) {
-    for (Map.Entry<String, List<CoreLabel>> sEn : sents.entrySet()) {
-      add(sEn.getValue(), sEn.getKey(), addProcessedText);
+  public void add(Map<String,DataInstance> sents, boolean addProcessedText) {
+    for (Map.Entry<String, DataInstance> sEn : sents.entrySet()) {
+      add(sEn.getValue().getTokens(), sEn.getKey(), addProcessedText);
     }
   }
 

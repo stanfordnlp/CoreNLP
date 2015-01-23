@@ -1,12 +1,11 @@
-package edu.stanford.nlp.patterns.surface;
+package edu.stanford.nlp.patterns;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
-import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
+import edu.stanford.nlp.patterns.ConstantsAndVariables;
+import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 
@@ -16,7 +15,7 @@ public abstract class ScorePatterns<E> {
   protected PatternScoring patternScoring;
   protected Properties props;
   
-  abstract Counter<E> score() throws IOException, ClassNotFoundException;
+  public abstract Counter<E> score() throws IOException, ClassNotFoundException;
   protected TwoDimensionalCounter<E, String> patternsandWords4Label = new TwoDimensionalCounter<E, String>();
   protected TwoDimensionalCounter<E, String> negPatternsandWords4Label = new TwoDimensionalCounter<E, String>();
   // protected TwoDimensionalCounter<SurfacePattern, String>

@@ -1,13 +1,12 @@
-package edu.stanford.nlp.patterns.surface;
+package edu.stanford.nlp.patterns;
 
+import edu.stanford.nlp.patterns.surface.SurfacePatternFactory;
 import edu.stanford.nlp.util.Execution;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.*;
 
 /**
  * Created by sonalg on 10/27/14.

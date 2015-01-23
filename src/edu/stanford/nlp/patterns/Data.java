@@ -7,7 +7,6 @@ import java.util.Map;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.*;
@@ -23,7 +22,7 @@ public class Data {
   public static Map<String, File> sentId2File = null;
 
   public static List<String> fileNamesUsedToComputeRawFreq = new ArrayList<String>();
-  public static Map<String, List<CoreLabel>> sents = null;
+  public static Map<String, DataInstance> sents = null;
   public static Counter<String> processedDataFreq = null;
   public static Counter<String> domainNGramRawFreq = new ClassicCounter<String>();;
 
@@ -39,9 +38,9 @@ public class Data {
 
   public static CollectionValuedMap<String, Triple<String, Integer, Integer>> matchedTokensForEachPhrase = new CollectionValuedMap<String, Triple<String, Integer, Integer>>(MapFactory.CONCURRENT_MAP_FACTORY, CollectionFactory.ARRAY_LIST_FACTORY, false);
 
-  public static void computeRawFreqIfNull(Map<String, List<CoreLabel>> sents, int numWordsCompound) {
-      for (List<CoreLabel> l : sents.values()) {
-        List<List<CoreLabel>> ngrams = CollectionUtils.getNGrams(l, 1, numWordsCompound);
+  public static void computeRawFreqIfNull(Map<String, DataInstance> sents, int numWordsCompound) {
+      for (DataInstance l : sents.values()) {
+        List<List<CoreLabel>> ngrams = CollectionUtils.getNGrams(l.getTokens(), 1, numWordsCompound);
         for (List<CoreLabel> n : ngrams) {
           String s = "";
           for (CoreLabel c : n) {

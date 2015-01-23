@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.patterns.Pattern;
+import edu.stanford.nlp.patterns.*;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -102,7 +102,7 @@ public class CreatePatterns<E> {
    * @param props
    * @param storePatsForEachTokenWay
    */
-  public void getAllPatterns(Map<String, List<CoreLabel>> sents, Properties props, ConstantsAndVariables.PatternForEachTokenWay storePatsForEachTokenWay) {
+  public void getAllPatterns(Map<String, DataInstance> sents, Properties props, ConstantsAndVariables.PatternForEachTokenWay storePatsForEachTokenWay) {
 
 //    this.patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<Integer>, Set<Integer>, Set<Integer>>>>();
    // this.patternsForEachToken = new HashMap<String, Map<Integer, Set<Integer>>>();
@@ -175,11 +175,11 @@ public class CreatePatterns<E> {
 
     //String label;
     // Class otherClass;
-    Map<String, List<CoreLabel>> sents;
+    Map<String, DataInstance> sents;
     List<String> sentIds;
     PatternsForEachToken patsForEach;
 
-    public CreatePatternsThread(Map<String, List<CoreLabel>> sents, List<String> sentIds, Properties props, ConstantsAndVariables.PatternForEachTokenWay storePatsForEachToken) {
+    public CreatePatternsThread(Map<String, DataInstance> sents, List<String> sentIds, Properties props, ConstantsAndVariables.PatternForEachTokenWay storePatsForEachToken) {
 
       //this.label = label;
       // this.otherClass = otherClass;
@@ -194,20 +194,20 @@ public class CreatePatterns<E> {
       int numSentencesInOneCommit = 0;
 
       for (String id : sentIds) {
-        List<CoreLabel> sent = sents.get(id);
-
+        DataInstance sent = sents.get(id);
+        List<CoreLabel> tokens = sent.getTokens();
         if(!constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY))
           tempPatternsForTokens.put(id, new HashMap<Integer, Set<E>>());
 
         Map<Integer, Set<E>> p = new HashMap<Integer, Set<E>>();
-        for (int i = 0; i < sent.size(); i++) {
+        for (int i = 0; i < tokens.size(); i++) {
 //          p.put(
 //              i,
 //              new Triple<Set<Integer>, Set<Integer>, Set<Integer>>(
 //                  new HashSet<Integer>(), new HashSet<Integer>(),
 //                  new HashSet<Integer>()));
           p.put(i, new HashSet<E>());
-          CoreLabel token = sent.get(i);
+          CoreLabel token = tokens.get(i);
           // do not create patterns around stop words!
           if (PatternFactory.doNotUse(token.word(), constVars.getStopWords())) {
             continue;

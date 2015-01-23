@@ -1,4 +1,4 @@
-package edu.stanford.nlp.patterns.surface;
+package edu.stanford.nlp.patterns;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,9 +17,7 @@ import edu.stanford.nlp.classify.LogisticClassifierFactory;
 import edu.stanford.nlp.classify.RVFDataset;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.RVFDatum;
-import edu.stanford.nlp.patterns.Data;
-import edu.stanford.nlp.patterns.Pattern;
-import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
+import edu.stanford.nlp.patterns.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
@@ -68,7 +66,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
     while(sentsIter.hasNext()) {
-      Pair<Map<String, List<CoreLabel>>, File> sentsf = sentsIter.next();
+      Pair<Map<String, DataInstance>, File> sentsf = sentsIter.next();
       Redwood.log(Redwood.DBG,"Sampling sentences from " + sentsf.second());
       if(computeRawFreq)
         Data.computeRawFreqIfNull(sentsf.first(), PatternFactory.numWordsCompound);
@@ -173,7 +171,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return 1 / (1 + Math.exp(-1 * d));
   }
 
-  public RVFDataset<String, ScorePhraseMeasures> choosedatums(String label, boolean forLearningPattern, Map<String, List<CoreLabel>> sents, Class answerClass, String answerLabel,
+  public RVFDataset<String, ScorePhraseMeasures> choosedatums(String label, boolean forLearningPattern, Map<String, DataInstance> sents, Class answerClass, String answerLabel,
       Set<String> negativeWords, Map<Class, Object> otherIgnoreClasses, double perSelectRand, double perSelectNeg, TwoDimensionalCounter<String, E> wordsPatExtracted,
       Counter<E> allSelectedPatterns) {
     // TODO: check whats happening with candidate terms for this iteration. do
@@ -183,8 +181,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
     int numpos = 0, numneg = 0;
     List<Pair<String, Integer>> chosen = new ArrayList<Pair<String, Integer>>();
-    for (Entry<String, List<CoreLabel>> en : sents.entrySet()) {
-      List<CoreLabel> value = en.getValue();
+    for (Entry<String, DataInstance> en : sents.entrySet()) {
+      List<CoreLabel> value = en.getValue().getTokens();
       CoreLabel[] sent = value.toArray(new CoreLabel[value.size()]);
 
       for (int i = 0; i < sent.length; i++) {

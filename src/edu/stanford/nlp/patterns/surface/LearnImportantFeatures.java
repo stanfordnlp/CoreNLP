@@ -12,6 +12,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.RVFDatum;
+import edu.stanford.nlp.patterns.DataInstance;
 import edu.stanford.nlp.patterns.PatternsAnnotations;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -104,9 +105,9 @@ public class LearnImportantFeatures {
   //
   // }
   
-  private int sample(Map<String, List<CoreLabel>> sents, Random r, Random rneg, double perSelectNeg, double perSelectRand, int numrand, List<Pair<String, Integer>> chosen, RVFDataset<String, String> dataset){
-    for (Entry<String, List<CoreLabel>> en : sents.entrySet()) {
-      CoreLabel[] sent = en.getValue().toArray(new CoreLabel[0]);
+  private int sample(Map<String, DataInstance> sents, Random r, Random rneg, double perSelectNeg, double perSelectRand, int numrand, List<Pair<String, Integer>> chosen, RVFDataset<String, String> dataset){
+    for (Entry<String, DataInstance> en : sents.entrySet()) {
+      CoreLabel[] sent = en.getValue().getTokens().toArray(new CoreLabel[0]);
 
       for (int i = 0; i < sent.length; i++) {
         CoreLabel l = sent[i];
@@ -134,7 +135,7 @@ public class LearnImportantFeatures {
     return numrand;
   }
 
-  public Counter<String> getTopFeatures(Iterator<Pair<Map<String, List<CoreLabel>>, File>> sentsf,
+  public Counter<String> getTopFeatures(Iterator<Pair<Map<String, DataInstance>, File>> sentsf,
       double perSelectRand, double perSelectNeg, String externalFeatureWeightsFileLabel) throws IOException, ClassNotFoundException {
     Counter<String> features = new ClassicCounter<String>();
     RVFDataset<String, String> dataset = new RVFDataset<String, String>();
@@ -143,7 +144,7 @@ public class LearnImportantFeatures {
     int numrand = 0;
     List<Pair<String, Integer>> chosen = new ArrayList<Pair<String, Integer>>();
     while(sentsf.hasNext()){
-      Pair<Map<String, List<CoreLabel>>, File> sents = sentsf.next();
+      Pair<Map<String, DataInstance>, File> sents = sentsf.next();
       numrand = this.sample(sents.first(), r, rneg, perSelectNeg, perSelectRand, numrand, chosen, dataset);
     }
     /*if(batchProcessSents){
@@ -237,7 +238,7 @@ public class LearnImportantFeatures {
       Execution.fillOptions(lmf, props);
       lmf.setUp();
       String sentsFile = props.getProperty("sentsFile");
-      Map<String, List<CoreLabel>> sents = IOUtils
+      Map<String, DataInstance> sents = IOUtils
           .readObjectFromFile(sentsFile);
       System.out.println("Read the sents file: " + sentsFile);
       double perSelectRand = Double.parseDouble(props

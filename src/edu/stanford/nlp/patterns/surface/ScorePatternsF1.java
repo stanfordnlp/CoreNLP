@@ -4,7 +4,9 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
+import edu.stanford.nlp.patterns.ConstantsAndVariables;
+import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.PatternScoring;
+import edu.stanford.nlp.patterns.ScorePatterns;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
@@ -41,7 +43,7 @@ public class ScorePatternsF1<E> extends ScorePatterns<E> {
   public void setUp(Properties props){}
   
   @Override
-  Counter<E> score() {
+  public Counter<E> score() {
     Counter<E> specificity = new ClassicCounter<E>();
     Counter<E> sensitivity = new ClassicCounter<E>();
 

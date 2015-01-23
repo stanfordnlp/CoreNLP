@@ -2,6 +2,8 @@ package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.patterns.ConstantsAndVariables;
+import edu.stanford.nlp.patterns.PatternFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Execution;
@@ -14,7 +16,7 @@ import java.util.*;
 /**
  * Created by sonalg on 10/27/14.
  */
-public class SurfacePatternFactory extends PatternFactory{
+public class SurfacePatternFactory extends PatternFactory {
 
   /**
    * Use POS tag restriction in the target term: One of this and

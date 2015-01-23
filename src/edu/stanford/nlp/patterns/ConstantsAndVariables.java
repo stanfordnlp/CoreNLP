@@ -1,4 +1,4 @@
-package edu.stanford.nlp.patterns.surface;
+package edu.stanford.nlp.patterns;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,12 +14,8 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.NodePattern;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
-import edu.stanford.nlp.patterns.Data;
-import edu.stanford.nlp.patterns.InvertedIndexByTokens;
-import edu.stanford.nlp.patterns.PatternsAnnotations;
-import edu.stanford.nlp.patterns.SentenceIndex;
-import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
-import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScoring;
+import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.PatternScoring;
+import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.WordScoring;
 import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -294,7 +290,7 @@ public class ConstantsAndVariables<E> implements Serializable{
 
   /**
    * Words that are not learned. Patterns are not created around these words.
-   * And, if useStopWordsBeforeTerm in {@link CreatePatterns} is true.
+   * And, if useStopWordsBeforeTerm in {@link edu.stanford.nlp.patterns.surface.CreatePatterns} is true.
    */
   @Option(name = "stopWordsPatternFiles", gloss = "stop words")
   public String stopWordsPatternFiles = null;
@@ -420,7 +416,10 @@ public class ConstantsAndVariables<E> implements Serializable{
 
   @Option(name="clubNeighboringLabeledWords")
   public boolean clubNeighboringLabeledWords = false;
-  public PatternFactory.PatternType patternType = PatternFactory.PatternType.SURFACE;
+
+  @Option(name="patternType", required=true)
+  public PatternFactory.PatternType patternType = null;
+  //PatternFactory.PatternType.SURFACE;
 
 
 //  public PatternIndex getPatternIndex() {
@@ -783,7 +782,7 @@ public class ConstantsAndVariables<E> implements Serializable{
 
 
   //streams sents, files-from-which-sents-were read
-  static public class DataSentsIterator implements Iterator<Pair<Map<String, List<CoreLabel>>, File>> {
+  static public class DataSentsIterator implements Iterator<Pair<Map<String, DataInstance>, File>> {
 
     boolean readInMemory = false;
     Iterator<File> sentfilesIter = null;
@@ -805,11 +804,11 @@ public class ConstantsAndVariables<E> implements Serializable{
     }
 
     @Override
-    public Pair<Map<String, List<CoreLabel>>, File> next() {
+    public Pair<Map<String, DataInstance>, File> next() {
       if(batchProcessSents){
         try {
           File f= sentfilesIter.next();
-          return new Pair<Map<String, List<CoreLabel>>, File>(IOUtils.readObjectFromFile(f), f);
+          return new Pair<Map<String, DataInstance>, File>(IOUtils.readObjectFromFile(f), f);
         } catch (IOException e) {
           throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {

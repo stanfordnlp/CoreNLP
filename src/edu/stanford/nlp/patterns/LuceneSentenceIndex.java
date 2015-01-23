@@ -174,13 +174,13 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 
 
   @Override
-  public void add(Map<String, List<CoreLabel>> sentences, boolean addProcessedText) {
+  public void add(Map<String, DataInstance> sentences, boolean addProcessedText) {
     try {
       this.setIndexWriter();
 
-      for(Map.Entry<String, List<CoreLabel>> en: sentences.entrySet()){
+      for(Map.Entry<String, DataInstance> en: sentences.entrySet()){
         //String sentence = StringUtils.joinWords(en.getValue(), " ");
-        add(en.getValue(), en.getKey(), addProcessedText);
+        add(en.getValue().getTokens(), en.getKey(), addProcessedText);
       }
 
       indexWriter.commit();

@@ -1,4 +1,4 @@
-package edu.stanford.nlp.patterns.surface;
+package edu.stanford.nlp.patterns;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -23,10 +23,12 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
-import edu.stanford.nlp.patterns.Data;
-import edu.stanford.nlp.patterns.Pattern;
-import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScoring;
-import edu.stanford.nlp.patterns.surface.PhraseScorer.Normalization;
+import edu.stanford.nlp.patterns.dep.ApplyDepPatterns;
+import edu.stanford.nlp.patterns.dep.DepPattern;
+import edu.stanford.nlp.patterns.surface.*;
+import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.WordScoring;
+import edu.stanford.nlp.patterns.PhraseScorer.Normalization;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
@@ -46,7 +48,7 @@ public class ScorePhrases<E extends Pattern> {
   ConstantsAndVariables<E> constVars = null;
 
   @Option(name = "phraseScorerClass")
-  Class<? extends PhraseScorer> phraseScorerClass = edu.stanford.nlp.patterns.surface.ScorePhrasesAverageFeatures.class;
+  Class<? extends PhraseScorer> phraseScorerClass = ScorePhrasesAverageFeatures.class;
   PhraseScorer phraseScorer = null;
 
   public ScorePhrases(Properties props, ConstantsAndVariables cv){
@@ -185,7 +187,7 @@ public class ScorePhrases<E extends Pattern> {
     return words;
   }
 
-  void runParallelApplyPats(Map<String, List<CoreLabel>> sents, String label, E pattern,  TwoDimensionalCounter<Pair<String, String>, E> wordsandLemmaPatExtracted,
+  void runParallelApplyPats(Map<String, DataInstance> sents, String label, E pattern,  TwoDimensionalCounter<Pair<String, String>, E> wordsandLemmaPatExtracted,
                             CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat) {
 
     Redwood.log(Redwood.DBG, "Applying pattern " + pattern + " to a total of " + sents.size() + " sentences ");
@@ -201,12 +203,20 @@ public class ScorePhrases<E extends Pattern> {
     }
 
 
-    Map<TokenSequencePattern, E> patternsLearnedThisIterConverted = new HashMap<TokenSequencePattern , E>();
-    //for(Integer pindex : patternsLearnedThisIter.keySet()){
-    TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), ((SurfacePattern)pattern).toString(notAllowedClasses));
-    patternsLearnedThisIterConverted.put(pat, pattern);
-    //}
+    //TODO: apply patterns according to type
+    Map<TokenSequencePattern, E> surfacePatternsLearnedThisIterConverted = null;
+    Map<SemgrexPattern, E> depPatternsLearnedThisIterConverted = null;
 
+    if(constVars.patternType.equals(PatternFactory.PatternType.SURFACE)) {
+      surfacePatternsLearnedThisIterConverted = new HashMap<TokenSequencePattern, E>();
+      TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), pattern.toString(notAllowedClasses));
+      surfacePatternsLearnedThisIterConverted.put(pat, pattern);
+    }else if(constVars.patternType.equals(PatternFactory.PatternType.DEP)){
+      depPatternsLearnedThisIterConverted = new HashMap<SemgrexPattern, E>();
+      SemgrexPattern pat = SemgrexPattern.compile(pattern.toString(notAllowedClasses));
+      depPatternsLearnedThisIterConverted.put(pat, pattern);
+    } else
+    throw new UnsupportedOperationException();
 
     //Apply the patterns and extract candidate phrases
     int num;
@@ -229,11 +239,18 @@ public class ScorePhrases<E extends Pattern> {
     
       Callable<Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>> task = null;
 
-      //Redwood.log(Redwood.DBG, "Applying pats: assigning sentences " + i*num + " to " +Math.min(sentids.size(), (i + 1) * num) + " to thread " + (i+1));
-      task = new ApplyPatterns(sents, num == sents.size() ? sentids : sentids.subList(i * num,
-          Math.min(sentids.size(), (i + 1) * num)), patternsLearnedThisIterConverted, label,
+      if(pattern.type.equals(PatternFactory.PatternType.SURFACE))
+        //Redwood.log(Redwood.DBG, "Applying pats: assigning sentences " + i*num + " to " +Math.min(sentids.size(), (i + 1) * num) + " to thread " + (i+1));
+        task = new ApplyPatterns(sents, num == sents.size() ? sentids : sentids.subList(i * num,
+          Math.min(sentids.size(), (i + 1) * num)), surfacePatternsLearnedThisIterConverted, label,
           constVars.removeStopWordsFromSelectedPhrases,
           constVars.removePhrasesWithStopWords, constVars);
+      else
+        task = new ApplyDepPatterns(sents, num == sents.size() ? sentids : sentids.subList(i * num,
+          Math.min(sentids.size(), (i + 1) * num)), depPatternsLearnedThisIterConverted, label,
+          constVars.removeStopWordsFromSelectedPhrases,
+          constVars.removePhrasesWithStopWords, constVars);
+
 
       Future<Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>> submit = executor
           .submit(task);
@@ -245,7 +262,7 @@ public class ScorePhrases<E extends Pattern> {
       try{
         Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>> result = future
             .get();
-        Redwood.log(ConstantsAndVariables.extremedebug, "Pattern " + pat + " extracted phrases " + result.first());
+        Redwood.log(ConstantsAndVariables.extremedebug, "Pattern " + pattern + " extracted phrases " + result.first());
         wordsandLemmaPatExtracted.addAll(result.first());
         matchedTokensByPat.addAll(result.second());
       }catch(Exception e){
@@ -314,16 +331,16 @@ public class ScorePhrases<E extends Pattern> {
   }
 */
 
-  protected Map<E, Map<String, List<CoreLabel>>> getSentences(Map<E, Set<String>> sentids) {
+  protected Map<E, Map<String, DataInstance>> getSentences(Map<E, Set<String>> sentids) {
     try{
 
       Set<File> files = new HashSet<File>();
 
-      Map<E, Map<String, List<CoreLabel>>> sentsAll  = new HashMap<E, Map<String, List<CoreLabel>>>();
+      Map<E, Map<String, DataInstance>> sentsAll  = new HashMap<E, Map<String, DataInstance>>();
       CollectionValuedMap<String, E> sentIds2Pats = new CollectionValuedMap<String, E>();
       for(Map.Entry<E, Set<String>> setEn: sentids.entrySet()){
         if(!sentsAll.containsKey(setEn.getKey()))
-          sentsAll.put(setEn.getKey(), new HashMap<String, List<CoreLabel>>());
+          sentsAll.put(setEn.getKey(), new HashMap<String, DataInstance>());
         for(String s: setEn.getValue()){
           sentIds2Pats.add(s, setEn.getKey());
           if(constVars.batchProcessSents){
@@ -336,14 +353,14 @@ public class ScorePhrases<E extends Pattern> {
 
       if(constVars.batchProcessSents){
         for(File f: files){
-          Map<String, List<CoreLabel>> sentsf = IOUtils.readObjectFromFile(f);
-          for(Map.Entry<String, List<CoreLabel>> s: sentsf.entrySet()){
+          Map<String, DataInstance> sentsf = IOUtils.readObjectFromFile(f);
+          for(Map.Entry<String, DataInstance> s: sentsf.entrySet()){
             for(E pat: sentIds2Pats.get(s.getKey()))
               sentsAll.get(pat).put(s.getKey(), s.getValue());
           }
         }
       }else{
-        for(Map.Entry<String, List<CoreLabel>> s: Data.sents.entrySet()){
+        for(Map.Entry<String, DataInstance> s: Data.sents.entrySet()){
           for(E pat: sentIds2Pats.get(s.getKey()))
             sentsAll.get(pat).put(s.getKey(), s.getValue());
         }
@@ -369,9 +386,9 @@ public class ScorePhrases<E extends Pattern> {
       en.getValue().getVariables().putAll(Token.env.getVariables());
     }
 
-    Map<E, Map<String, List<CoreLabel>>> sentencesForPatterns = getSentences(constVars.invertedIndex.queryIndex(patterns.keySet()));
+    Map<E, Map<String, DataInstance>> sentencesForPatterns = getSentences(constVars.invertedIndex.queryIndex(patterns.keySet()));
 
-    for(Map.Entry<E, Map<String, List<CoreLabel>>> en: sentencesForPatterns.entrySet()){
+    for(Map.Entry<E, Map<String, DataInstance>> en: sentencesForPatterns.entrySet()){
       runParallelApplyPats(en.getValue(), label, en.getKey(), wordsandLemmaPatExtracted, matchedTokensByPat);
     }
 
@@ -491,9 +508,9 @@ public class ScorePhrases<E extends Pattern> {
   }
   */
   
-  private void statsWithoutApplyingPatterns(Map<String, List<CoreLabel>> sents, PatternsForEachToken patternsForEachToken,
+  private void statsWithoutApplyingPatterns(Map<String, DataInstance> sents, PatternsForEachToken patternsForEachToken,
       Counter<E> patternsLearnedThisIter, TwoDimensionalCounter<Pair<String, String>, E> wordsandLemmaPatExtracted){
-    for (Entry<String, List<CoreLabel>> sentEn : sents.entrySet()) {
+    for (Entry<String, DataInstance> sentEn : sents.entrySet()) {
       Map<Integer, Set<E>> pat4Sent = patternsForEachToken.getPatternsForAllTokens(sentEn.getKey());
 
       if (pat4Sent == null) {
@@ -512,7 +529,7 @@ public class ScorePhrases<E extends Pattern> {
 
           if (p1.contains(index)) {
             if (token == null)
-              token = sentEn.getValue().get(en.getKey());
+              token = sentEn.getValue().getTokens().get(en.getKey());
             wordsandLemmaPatExtracted.incrementCount(new Pair<String, String>(token.word(), token.lemma()), index);
           }
         }
@@ -538,7 +555,7 @@ public class ScorePhrases<E extends Pattern> {
       // applying the patterns
       ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
       while(sentsIter.hasNext()) {
-        Pair<Map<String, List<CoreLabel>>, File> sentsf = sentsIter.next();
+        Pair<Map<String, DataInstance>, File> sentsf = sentsIter.next();
         this.statsWithoutApplyingPatterns(sentsf.first(), patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
       }
 

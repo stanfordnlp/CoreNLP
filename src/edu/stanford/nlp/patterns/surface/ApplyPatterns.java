@@ -7,13 +7,16 @@ import java.util.concurrent.Callable;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
-import edu.stanford.nlp.patterns.Pattern;
-import edu.stanford.nlp.patterns.PatternsAnnotations;
+import edu.stanford.nlp.patterns.*;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
 
+/**
+ * Applying SurfacePattern to sentences.
+ * @param <E>
+ */
 public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>> {
   String label;
   Map<TokenSequencePattern, E> patterns;
@@ -21,10 +24,10 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimen
   boolean removeStopWordsFromSelectedPhrases;
   boolean removePhrasesWithStopWords;
   ConstantsAndVariables<E> constVars;
-  Map<String, List<CoreLabel>> sents = null;
+  Map<String, DataInstance> sents = null;
 
 
-  public ApplyPatterns(Map<String, List<CoreLabel>> sents, List<String> sentids, Map<TokenSequencePattern, E> patterns, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
+  public ApplyPatterns(Map<String, DataInstance> sents, List<String> sentids, Map<TokenSequencePattern, E> patterns, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
     this.sents = sents;
     this.patterns = patterns;
     this.sentids = sentids;
@@ -43,7 +46,7 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimen
     TwoDimensionalCounter<Pair<String, String>, E> allFreq = new TwoDimensionalCounter<Pair<String, String>, E>();
     CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<E, Triple<String, Integer, Integer>>();
     for (String sentid : sentids) {
-      List<CoreLabel> sent = sents.get(sentid);
+      List<CoreLabel> sent = sents.get(sentid).getTokens();
       for (Entry<TokenSequencePattern, E> pEn : patterns.entrySet()) {
 
         if (pEn.getKey() == null)

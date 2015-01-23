@@ -1,12 +1,22 @@
 package edu.stanford.nlp.patterns.dep;
 
 import edu.stanford.nlp.patterns.Pattern;
+import edu.stanford.nlp.patterns.PatternFactory;
 import edu.stanford.nlp.util.CollectionValuedMap;
+
+import java.util.List;
 
 /**
  * Created by sonalg on 10/31/14.
  */
 public class DepPattern extends Pattern {
+
+  public DepPattern() {
+    super(PatternFactory.PatternType.DEP);
+  }
+
+  //TODO: implement this class
+
   @Override
   public CollectionValuedMap<String, String> getRelevantWords() {
     return null;
@@ -19,6 +29,12 @@ public class DepPattern extends Pattern {
 
   @Override
   public String toStringSimple() {
+    return null;
+  }
+
+  @Override
+  public String toString(List<String> notAllowedClasses) {
+    //TODO: implement this
     return null;
   }
 

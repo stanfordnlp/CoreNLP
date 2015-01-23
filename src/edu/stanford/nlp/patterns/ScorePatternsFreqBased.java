@@ -1,10 +1,10 @@
-package edu.stanford.nlp.patterns.surface;
+package edu.stanford.nlp.patterns;
 
 import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
+import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
@@ -29,7 +29,7 @@ public class ScorePatternsFreqBased<E> extends ScorePatterns<E> {
   public void setUp(Properties props){}
   
   @Override
-  Counter<E> score() {
+  public Counter<E> score() {
 
     Counter<E> currentPatternWeights4Label = new ClassicCounter<E>();
 

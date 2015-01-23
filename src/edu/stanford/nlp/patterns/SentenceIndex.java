@@ -35,7 +35,7 @@ public abstract class SentenceIndex<E extends Pattern> {
    * @param sents
    * @param addProcessedText
    */
-  public abstract void add(Map<String, List<CoreLabel>> sents, boolean addProcessedText);
+  public abstract void add(Map<String, DataInstance> sents, boolean addProcessedText);
 
 //  protected CollectionValuedMap<String, String> getRelevantWords(Set<Integer> pats, Index<E> EIndex){
 //    CollectionValuedMap<String, String> relwords = new CollectionValuedMap<String, String>();

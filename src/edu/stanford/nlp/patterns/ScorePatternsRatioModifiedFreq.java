@@ -1,13 +1,12 @@
-package edu.stanford.nlp.patterns.surface;
+package edu.stanford.nlp.patterns;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import edu.stanford.nlp.patterns.Data;
-import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
-import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
+import edu.stanford.nlp.patterns.ConstantsAndVariables.ScorePhraseMeasures;
+import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
@@ -43,13 +42,13 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
   }
 
   @Override
-  Counter<E> score() throws IOException, ClassNotFoundException {
+  public Counter<E> score() throws IOException, ClassNotFoundException {
 
     Counter<String> externalWordWeightsNormalized = null;
     if (constVars.dictOddsWeights.containsKey(label))
       externalWordWeightsNormalized = GetPatternsFromDataMultiClass
           .normalizeSoftMaxMinMaxScores(constVars.dictOddsWeights.get(label),
-              true, true, false);
+            true, true, false);
 
     Counter<E> currentPatternWeights4Label = new ClassicCounter<E>();
 

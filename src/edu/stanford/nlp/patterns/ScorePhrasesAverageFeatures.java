@@ -1,4 +1,4 @@
-package edu.stanford.nlp.patterns.surface;
+package edu.stanford.nlp.patterns;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -6,9 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import edu.stanford.nlp.patterns.Data;
-import edu.stanford.nlp.patterns.Pattern;
-import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
+import edu.stanford.nlp.patterns.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
@@ -21,7 +19,7 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  */
 public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer<E>{
-  
+
   public ScorePhrasesAverageFeatures(ConstantsAndVariables constvar) {
     super(constvar);
   }
