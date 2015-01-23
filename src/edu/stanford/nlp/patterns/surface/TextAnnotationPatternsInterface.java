@@ -163,7 +163,7 @@ public class TextAnnotationPatternsInterface {
 
 
     static private void doRemovePhrases(String line) {
-      model.labelWords();
+      //model.labelWords();
       System.out.println("removing phrases");
     }
 
