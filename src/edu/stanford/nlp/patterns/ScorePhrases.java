@@ -674,7 +674,8 @@ public class ScorePhrases<E extends Pattern> {
 
           Redwood.log(ConstantsAndVariables.minimaldebug,
             "\n\n## Gold labels for selected words for label " + label + " : " + s.toString());
-        }
+        } else
+          Redwood.log(Redwood.DBG, "No gold entities provided for label " + label);
       }
 
       if (constVars.outDir != null && !constVars.outDir.isEmpty()) {

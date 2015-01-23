@@ -954,34 +954,8 @@ public class ConstantsAndVariables<E> implements Serializable{
      Data.usingGoogleNgram = true;
      Execution.fillOptions(GoogleNGramsSQLBacked.class, props);
    }
-
-    if(goldEntitiesEvalFiles != null){
-      Redwood.log(ConstantsAndVariables.minimaldebug, "Reading gold entities from " + goldEntitiesEvalFiles);
-      String[] t = goldEntitiesEvalFiles.split(";");
-      for(String label: labels)
-        goldEntities.put(label, new HashMap<String, Boolean>());
-      for(String tok: t){
-        String[] tok1 = tok.split(",");
-        String label = tok1[0];
-        for(String line: IOUtils.readLines(tok1[1])){
-          String entity;
-          boolean goldlabel;
-          if(line.endsWith("#")){
-            goldlabel = false;
-            entity = line.substring(0, line.length() -1).trim();
-          }else{
-            goldlabel = true;
-            entity = line.trim();
-          }
-          goldEntities.get(label).put(entity, goldlabel);
-        }
-        Redwood.log(ConstantsAndVariables.minimaldebug, "Read " + goldEntities.get(label).size() + " entities for label " + label+". All set of labels are " + labels);
-      }
-    }
-    if(goldEntitiesEvalFiles !=null)
-      goldEntities = readGoldEntities(goldEntitiesEvalFiles);
-
-
+  if(goldEntitiesEvalFiles !=null)
+    goldEntities = readGoldEntities(goldEntitiesEvalFiles);
     alreadySetUp = true;
   }
 
@@ -1009,7 +983,7 @@ public class ConstantsAndVariables<E> implements Serializable{
           else
             goldWords4Label.put(line, true);
         }
-
+        goldWords.put(label, goldWords4Label);
       }
     }
     return goldWords;
