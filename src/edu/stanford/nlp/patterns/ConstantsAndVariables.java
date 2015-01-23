@@ -1166,7 +1166,7 @@ public class ConstantsAndVariables<E> implements Serializable{
 
   }
 
-  double editDistMax = 100;
+  final double editDistMax = 1000;
 
   /**
    * Use this option if you are limited by memory ; ignored if fileFormat is ser.
@@ -1184,9 +1184,9 @@ public class ConstantsAndVariables<E> implements Serializable{
       String ph, int minLen) {
     if (ph.length() < minLen)
       return new Pair<String, Double>(ph, editDistMax);
-    if (editDistanceFromThisClass.containsKey(ph))
-      return new Pair<String, Double>(editDistanceFromThisClassMatches.get(ph),
-          editDistanceFromThisClass.get(ph));
+//    if (editDistanceFromThisClass.containsKey(ph))
+//      return new Pair<String, Double>(editDistanceFromThisClassMatches.get(ph),
+//          editDistanceFromThisClass.get(ph));
 
     Set<CandidatePhrase> words = seedLabelDictionary.get(label);
     words.addAll(learnedWords.get(label).keySet());
@@ -1195,8 +1195,8 @@ public class ConstantsAndVariables<E> implements Serializable{
     double minDtotal = minD.second();
     String minPh = minD.first();
     assert (!minPh.isEmpty());
-    editDistanceFromThisClass.putIfAbsent(ph, minDtotal);
-    editDistanceFromThisClassMatches.putIfAbsent(ph, minPh);
+//    editDistanceFromThisClass.putIfAbsent(ph, minDtotal);
+//    editDistanceFromThisClassMatches.putIfAbsent(ph, minPh);
     return new Pair<String, Double>(minPh, minDtotal);
   }
 
@@ -1204,10 +1204,10 @@ public class ConstantsAndVariables<E> implements Serializable{
       String ph, int minLen) {
     if (ph.length() < minLen)
       return new Pair<String, Double>(ph, editDistMax);
-    if (editDistanceFromOtherSemanticClasses.containsKey(ph))
-      return new Pair<String, Double>(
-          editDistanceFromOtherSemanticClassesMatches.get(ph),
-          editDistanceFromOtherSemanticClasses.get(ph));
+//    if (editDistanceFromOtherSemanticClasses.containsKey(ph))
+//      return new Pair<String, Double>(
+//          editDistanceFromOtherSemanticClassesMatches.get(ph),
+//          editDistanceFromOtherSemanticClasses.get(ph));
 
     Pair<String, Double> minD = getEditDist(CandidatePhrase.convertToString(otherSemanticClassesWords), ph);
 
@@ -1227,8 +1227,8 @@ public class ConstantsAndVariables<E> implements Serializable{
     String minPh = minD.first();
     // }
     assert (!minPh.isEmpty());
-    editDistanceFromOtherSemanticClasses.putIfAbsent(ph, minDtotal);
-    editDistanceFromOtherSemanticClassesMatches.putIfAbsent(ph, minPh);
+//    editDistanceFromOtherSemanticClasses.putIfAbsent(ph, minDtotal);
+//    editDistanceFromOtherSemanticClassesMatches.putIfAbsent(ph, minPh);
     return new Pair<String, Double>(minPh, minDtotal);
   }
 
@@ -1264,17 +1264,17 @@ public class ConstantsAndVariables<E> implements Serializable{
   public double getEditDistanceScoresOtherClass(String g) {
     double editDist;
     String editDistPh;
-    if (editDistanceFromOtherSemanticClasses.containsKey(g)) {
-      editDist = editDistanceFromOtherSemanticClasses.get(g);
-      editDistPh = editDistanceFromOtherSemanticClassesMatches.get(g);
-    } else {
+//    if (editDistanceFromOtherSemanticClasses.containsKey(g)) {
+//      editDist = editDistanceFromOtherSemanticClasses.get(g);
+//      editDistPh = editDistanceFromOtherSemanticClassesMatches.get(g);
+//    } else {
       Pair<String, Double> editMatch = getEditDistanceFromOtherSemanticClasses(
           g, 4);
       editDist = editMatch.second();
       editDistPh = editMatch.first();
-    }
+//    }
     assert (!editDistPh.isEmpty());
-    return editDist / (double) editDistPh.length();
+    return (editDist == editDistMax ? 1.0 : (editDist / (double) editDistPh.length()));
   }
 
   /**
@@ -1303,18 +1303,19 @@ public class ConstantsAndVariables<E> implements Serializable{
   public double getEditDistanceScoresThisClass(String label, String g) {
     double editDist;
     String editDistPh;
-    if (editDistanceFromThisClass.containsKey(g)) {
-      editDist = editDistanceFromThisClass.get(g);
-      editDistPh = editDistanceFromThisClassMatches.get(g);
-      assert (!editDistPh.isEmpty());
-    } else {
+//    if (editDistanceFromThisClass.containsKey(g)) {
+//      editDist = editDistanceFromThisClass.get(g);
+//      editDistPh = editDistanceFromThisClassMatches.get(g);
+//      assert (!editDistPh.isEmpty());
+//    } else {
+//
       Pair<String, Double> editMatch = getEditDistanceFromThisClass(label, g, 4);
       editDist = editMatch.second();
       editDistPh = editMatch.first();
       assert (!editDistPh.isEmpty());
-    }
+    //}
 
-    return editDist / (double) editDistPh.length();
+    return ((editDist == editDistMax) ? 1.0 : (editDist / (double) editDistPh.length()));
   }
 
   public static boolean isFuzzyMatch(String w1, String w2, int minLen4Fuzzy) {
