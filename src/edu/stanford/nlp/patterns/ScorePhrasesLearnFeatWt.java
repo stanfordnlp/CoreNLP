@@ -230,6 +230,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
   private Counter<CandidatePhrase> computeSimWithWordVectors(List<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> positivePhrases, AtomicDouble allMaxSim) {
     //TODO: check this
+    assert wordVectors != null : "Why are word vectors null?";
     Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>(candidatePhrases.size());
 
     for(CandidatePhrase p : candidatePhrases) {
@@ -243,7 +244,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           donotuse = true;
           break;
         }
-        double[] d2 = wordVectors.get(p.getPhrase());
+        double[] d2 = wordVectors.get(pos.getPhrase());
 
         double sum = 0;
         double d1sq = 0;
