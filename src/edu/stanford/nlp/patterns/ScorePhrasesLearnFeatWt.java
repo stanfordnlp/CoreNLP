@@ -235,7 +235,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       if(wordVectors.containsKey(p.getPhrase())){
         double[] d1 = wordVectors.get(p.getPhrase());
 
-        double avgSim = 0;// Double.MIN_VALUE;
+        double finalSimScore = 0;// Double.MIN_VALUE;
         boolean donotuse = false;
         for (CandidatePhrase pos : otherPhrases) {
 
@@ -246,9 +246,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           if (!wordVectors.containsKey(pos.getPhrase()))
             continue;
 
+          double sim;
+
           PhrasePair pair = new PhrasePair(p.getPhrase(), pos.getPhrase());
           if (cacheSimilarities.containsKey(pair))
-            avgSim = cacheSimilarities.getCount(pair);
+            sim = cacheSimilarities.getCount(pair);
           else {
             double[] d2 = wordVectors.get(pos.getPhrase());
 
@@ -260,15 +262,17 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
               d1sq += d1[i] * d1[i];
               d2sq += d2[i] * d2[i];
             }
-            double sim = sum / (Math.sqrt(d1sq) * Math.sqrt(d2sq));
-            avgSim += sim;
+            sim = sum / (Math.sqrt(d1sq) * Math.sqrt(d2sq));
+            cacheSimilarities.setCount(pair, sim);
           }
 
-          avgSim /= otherPhrases.size();
-          cacheSimilarities.setCount(pair, avgSim);
+          if(sim > finalSimScore)
+            finalSimScore =  sim;
+
+          //avgSim /= otherPhrases.size();
         }
         if(!donotuse){
-          sims.setCount(p, avgSim);
+          sims.setCount(p, finalSimScore);
         }
       }else{
         sims.setCount(p, Double.MIN_VALUE);
@@ -277,7 +281,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return sims;
   }
 
-  private Counter<CandidatePhrase> computeSimWithWordVectors(List<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> positivePhrases, Collection<CandidatePhrase> allPossibleNegativePhrases, AtomicDouble allMaxSim) {
+  private Counter<CandidatePhrase> computeSimWithWordVectors(List<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> positivePhrases, Collection<CandidatePhrase> allPossibleNegativePhrases) {
     //TODO: check this
     assert wordVectors != null : "Why are word vectors null?";
     Counter<CandidatePhrase> posSims = computeSimWithWordVectors(candidatePhrases, positivePhrases);
@@ -357,7 +361,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     public Counter<CandidatePhrase> call() throws Exception {
 
       if(constVars.useWordVectorsToComputeSim){
-        Counter<CandidatePhrase> phs = computeSimWithWordVectors(candidatePhrases, positivePhrases, knownNegativePhrases, allMaxSim);
+        Counter<CandidatePhrase> phs = computeSimWithWordVectors(candidatePhrases, positivePhrases, knownNegativePhrases);
         Redwood.log(Redwood.DBG, "Computed similarities with positive and negative phrases");
         return phs;
       }
@@ -606,7 +610,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
                 Counter<CandidatePhrase> sims;
                 assert candidate != null;
                 if(constVars.useWordVectorsToComputeSim)
-                  sims =computeSimWithWordVectors(Arrays.asList(candidate), knownPositivePhrases, allPossibleNegativePhrases, new AtomicDouble());
+                  sims =computeSimWithWordVectors(Arrays.asList(candidate), knownPositivePhrases, allPossibleNegativePhrases);
                 else
                   sims = computeSimWithWordCluster(Arrays.asList(candidate), knownPositivePhrases, new AtomicDouble());
 

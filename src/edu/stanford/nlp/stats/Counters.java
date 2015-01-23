@@ -3057,10 +3057,12 @@ public class Counters {
 
 
   public static<E> void retainKeys(Counter<E> counter, Function<E, Boolean> retainFunction) {
+    Set<E> remove = new HashSet<E>();
     for(Entry<E, Double> en: counter.entrySet()){
       if(!retainFunction.apply(en.getKey())){
-        counter.remove(en.getKey());
+        remove.add(en.getKey());
       }
     }
+    Counters.removeKeys(counter, remove);
   }
 }
