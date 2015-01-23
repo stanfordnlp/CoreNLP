@@ -222,7 +222,7 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name = "englishWordsFiles")
   public String englishWordsFiles = null;
 
-  private Set<String> englishWords = null;
+  private Set<String> englishWords = new HashSet<String>();
 
   /**
    * Words to be ignored when learning phrases if
@@ -482,6 +482,15 @@ public class ConstantsAndVariables<E> implements Serializable{
     return values;
   }
 
+  public boolean hasSeedWordOrOtherSem(CandidatePhrase p) {
+    for(Map.Entry<String, Set<CandidatePhrase>> seeds: this.seedLabelDictionary.entrySet()){
+      if(seeds.getValue().contains(p))
+        return true;
+    }
+    if(otherSemanticClassesWords.contains(p))
+      return true;
+    return false;
+  }
 
 
   //PatternFactory.PatternType.SURFACE;

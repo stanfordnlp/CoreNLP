@@ -923,7 +923,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
    * @param l2
    * @return starting index of the sublist
    */
-  public static List<Integer> getSubListIndex(String[] l1, String[] l2, String[] subl2, Set<String> englishWords, HashSet<String> seenFuzzyMatches,
+  public static List<Integer> getSubListIndex(String[] l1, String[] l2, String[] subl2, Set<String> doNotLabelTheseWords, HashSet<String> seenFuzzyMatches,
       int minLen4Fuzzy) {
     if (l1.length > l2.length)
       return null;
@@ -937,7 +937,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       for (int j = 0; j < l1.length;) {
         boolean d1 = false, d2 = false;
         boolean compareFuzzy = true;
-        if (englishWords.contains(l2[i]) || englishWords.contains(subl2[i]) || l2[i].length() <= minLen4Fuzzy || subl2[i].length() <= minLen4Fuzzy)
+        if (doNotLabelTheseWords.contains(l2[i]) || doNotLabelTheseWords.contains(subl2[i]) || l2[i].length() <= minLen4Fuzzy || subl2[i].length() <= minLen4Fuzzy)
           compareFuzzy = false;
         if (compareFuzzy == false || l1[j].length() <= minLen4Fuzzy) {
           d1 = l1[j].equals(l2[i]) ? true : false;
@@ -1100,13 +1100,13 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     String label;
     int minLen4FuzzyForPattern;
     String backgroundSymbol = "O";
-    Set<String> dictWords = null;
+    Set<String> doNotLabelDictWords = null;
     Function<CoreLabel, String> stringTransformation;
     boolean writeMatchedTokensIdsForEachPhrase = false;
     boolean overwriteExistingLabels;
     PatternFactory.PatternType patternType;
 
-    public LabelWithSeedWords(Collection<CandidatePhrase> seedwords, Map<String, DataInstance> sents, List<String> keyset, Class labelclass, String label, int minLen4FuzzyForPattern, String backgroundSymbol, Set<String> dictWords, Function<CoreLabel, String> stringTransformation, boolean writeMatchedTokensIdsForEachPhrase, boolean overwriteExistingLabels, PatternFactory.PatternType type) {
+    public LabelWithSeedWords(Collection<CandidatePhrase> seedwords, Map<String, DataInstance> sents, List<String> keyset, Class labelclass, String label, int minLen4FuzzyForPattern, String backgroundSymbol, Set<String> doNotLabelDictWords, Function<CoreLabel, String> stringTransformation, boolean writeMatchedTokensIdsForEachPhrase, boolean overwriteExistingLabels, PatternFactory.PatternType type) {
       for (CandidatePhrase s : seedwords)
         this.seedwordsTokens.put(s, s.getPhrase().split("\\s+"));
       this.sents = sents;
@@ -1115,7 +1115,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       this.label = label;
       this.minLen4FuzzyForPattern= minLen4FuzzyForPattern;
       this.backgroundSymbol = backgroundSymbol;
-      this.dictWords = dictWords;
+      this.doNotLabelDictWords = doNotLabelDictWords;
       this.stringTransformation = stringTransformation;
       this.writeMatchedTokensIdsForEachPhrase = writeMatchedTokensIdsForEachPhrase;
       this.overwriteExistingLabels = overwriteExistingLabels;
@@ -1157,7 +1157,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
         for (Entry<CandidatePhrase, String[]> sEn : seedwordsTokens.entrySet()) {
           String[] s = sEn.getValue();
           CandidatePhrase sc = sEn.getKey();
-          List<Integer> indices = getSubListIndex(s, tokens, tokenslemma, dictWords, seenFuzzyMatches,
+          List<Integer> indices = getSubListIndex(s, tokens, tokenslemma, doNotLabelDictWords, seenFuzzyMatches,
               minLen4FuzzyForPattern);
 
           if (indices != null && !indices.isEmpty()){

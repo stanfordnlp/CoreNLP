@@ -48,10 +48,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     if(constvar.useWordVectorsToComputeSim) {
       wordVectors = new HashMap<String, double[]>();
       for (String line : IOUtils.readLines(constVars.wordVectorFile)) {
-        String[] tok = line.split("\t");
+        String[] tok = line.split("\\s+");
         String word = tok[0];
         CandidatePhrase p = CandidatePhrase.createOrGet(word);
-        if (Data.rawFreq.containsKey(p)) {
+        //save the vector if it occurs in the rawFreq, seed set, stop words, english words
+        if (Data.rawFreq.containsKey(p) || constvar.getStopWords().contains(p) || constvar.getEnglishWords().contains(word) || constvar.hasSeedWordOrOtherSem(p)) {
           double[] d = new double[tok.length - 1];
           for (int i = 1; i < tok.length; i++) {
             d[i - 1] = Double.valueOf(tok[i]);
@@ -653,9 +654,10 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       executor.shutdown();
     }
 
-    Set<CandidatePhrase> knownPositivePhrases = CollectionUtils.unionAsSet(constVars.getLearnedWords().get(answerLabel).keySet(), constVars.getSeedLabelDictionary().get(answerLabel));
+    //Set<CandidatePhrase> knownPositivePhrases = CollectionUtils.unionAsSet(constVars.getLearnedWords().get(answerLabel).keySet(), constVars.getSeedLabelDictionary().get(answerLabel));
     //TODO: this is kinda not nice; how is allpositivephrases different from positivephrases again?
-    allPositivePhrases.addAll(knownPositivePhrases);
+    allPositivePhrases.addAll(constVars.getLearnedWords().get(answerLabel).keySet());
+    //allPositivePhrases.addAll(knownPositivePhrases);
 
     if(constVars.expandPositivesWhenSampling){
       Counters.retainTop(allCloseToPositivePhrases, (int) (allCloseToPositivePhrases.size()*constVars.subSampleUnkAsPosUsingSimPercentage));
