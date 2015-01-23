@@ -3,6 +3,7 @@ package edu.stanford.nlp.patterns;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -435,6 +436,28 @@ public class ConstantsAndVariables<E> implements Serializable{
     this.learnedWords.get(trainLabel).addAll(identifiedWords);
   }
 
+  public Map<String, String> getAllOptions() {
+    Map<String, String> values = new HashMap<String, String>();
+    if(props != null)
+      props.forEach( (x,y) -> values.put(x.toString(),y == null?"null":y.toString()));
+
+    Class<?> thisClass;
+    try {
+      thisClass = Class.forName(this.getClass().getName());
+
+      Field[] aClassFields = thisClass.getDeclaredFields();
+      for(Field f : aClassFields){
+        String fName = f.getName();
+        Object fvalue = f.get(this);
+        values.put(fName, fvalue == null ? "null" : fvalue.toString());
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return values;
+  }
+
   //PatternFactory.PatternType.SURFACE;
 
 
@@ -856,7 +879,11 @@ public class ConstantsAndVariables<E> implements Serializable{
       learnedWords.put(label, new ClassicCounter<CandidatePhrase>());
     }
     
-    //patternIndex = PatternIndex.newInstance(storePatsIndex, allPatternsDir);
+   if(usePhraseEvalGoogleNgram || usePatternEvalDomainNgram) {
+     Data.usingGoogleNgram = true;
+     Execution.fillOptions(GoogleNGramsSQLBacked.class, props);
+   }
+
     alreadySetUp = true;
   }
 

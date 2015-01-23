@@ -208,23 +208,38 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
   }
 
-  Set<CandidatePhrase> chooseNegatives(Set<CandidatePhrase> candidatePhrases, String label, int maxNum){
+  Set<CandidatePhrase> chooseUnknownAsNegatives(Set<CandidatePhrase> candidatePhrases, String label, int maxNum){
     Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>();
+    double allMaxSim = Double.MIN_VALUE;
     for(CandidatePhrase p : candidatePhrases) {
-    Counter<Integer> feat = wordClassClustersForPhrase.get(p);
-    if(feat == null){
-      feat = wordClass(p.getPhrase(), p.getPhraseLemma());
-      wordClassClustersForPhrase.put(p, feat);
-    }
-    double maxSim = Double.MIN_VALUE;
-    for(CandidatePhrase pos: CollectionUtils.union(constVars.getLearnedWords(label).keySet(), constVars.getSeedLabelDictionary().get(label))){
+      Counter<Integer> feat = wordClassClustersForPhrase.get(p);
+      if(feat == null){
+        feat = wordClass(p.getPhrase(), p.getPhraseLemma());
+        wordClassClustersForPhrase.put(p, feat);
+      }
+      double maxSim = Double.MIN_VALUE;
+      for(CandidatePhrase pos: CollectionUtils.union(constVars.getLearnedWords(label).keySet(), constVars.getSeedLabelDictionary().get(label))){
         double j = Counters.jaccardCoefficient(wordClassClustersForPhrase.get(pos), feat);
-      if(j  >maxSim)
-        maxSim = j;
-    }
+        System.out.println("clusters for positive phrase " + pos + " is " +wordClassClustersForPhrase.get(pos) + " and the features for unknown are "  + feat + " for phrase " + p);
+
+
+        if(j  > maxSim)
+          maxSim = j;
+      }
       sims.setCount(p, maxSim);
+      if(allMaxSim < maxSim)
+        allMaxSim = maxSim;
     }
-    Counters.retainBottom(sims, Math.min((int) (sims.size() * 0.8), maxNum));
+
+    double percentage;
+    if(allMaxSim == Double.MIN_VALUE){
+      Redwood.log(Redwood.DBG, "No similarity recorded between the positives and the unknown!");
+      percentage = 1.0;
+    }
+    else
+      percentage = 0.8;
+
+    Counters.retainBottom(sims, Math.min((int) (sims.size() * percentage), maxNum));
     System.out.println("choosing " + sims + " as the negative phrases");
     return sims.keySet();
   }
@@ -298,7 +313,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     } else
     throw new RuntimeException("not yet implemented");
-    return chooseNegatives(negativeSamples, label, maxNum);
+    return chooseUnknownAsNegatives(negativeSamples, label, maxNum);
   }
 
 
@@ -371,7 +386,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           }
         }
       }
-      allNegativePhrases.addAll(this.chooseNegativePhrases(en.getValue(), r, perSelectRand, constVars.getAnswerClass().get(label), label,Math.max(0, Integer.MAX_VALUE)));
+      //allNegativePhrases.addAll(this.chooseNegativePhrases(en.getValue(), r, perSelectRand, constVars.getAnswerClass().get(label), label,Math.max(0, Integer.MAX_VALUE)));
 //
 //        if (negative && getRandomBoolean(rneg, perSelectNeg)) {
 //          numneg++;
@@ -525,7 +540,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     if(word.getFeatures()!= null){
       scoreslist.addAll(Counters.transform(word.getFeatures(), x -> ScorePhraseMeasures.create(x)));
     } else{
-      System.out.println("features are null for " + word);
+      Redwood.log(ConstantsAndVariables.extremedebug, "features are null for " + word);
     }
 
 

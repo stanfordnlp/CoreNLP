@@ -11,6 +11,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
+import edu.stanford.nlp.util.GoogleNGramsSQLBacked;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -74,12 +75,8 @@ public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer
           System.err.println("why is " + g + " not present in domainNgram");
       }
 
-      if (constVars.usePhraseEvalGoogleNgram) {
-        if (Data.googleNGram.containsKey(g)) {
-          assert (Data.rawFreq.containsKey(gc));
-          googleNgramNormScores.setCount(gc, ((1 + Data.rawFreq.getCount(g) * Math.sqrt(Data.ratioGoogleNgramFreqWithDataFreq)) / Data.googleNGram.getCount(g)));
-        }
-      }
+      if (constVars.usePhraseEvalGoogleNgram)
+        googleNgramNormScores.setCount(gc, getGoogleNgramScore(gc));
 
       if (constVars.usePhraseEvalWordClass) {
         // calculate dist sim weights

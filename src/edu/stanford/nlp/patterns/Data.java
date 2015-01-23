@@ -22,22 +22,23 @@ public class Data {
   //when using batch processing, map from sentid to the file that has that sentence
   public static Map<String, File> sentId2File = null;
 
-  public static List<String> fileNamesUsedToComputeRawFreq = new ArrayList<String>();
   public static Map<String, DataInstance> sents = null;
   public static Counter<CandidatePhrase> processedDataFreq = null;
   public static Counter<String> domainNGramRawFreq = new ClassicCounter<String>();;
 
   public static double ratioGoogleNgramFreqWithDataFreq = 1;
 
-  @Option(name = "googleNGramsFile")
-  public static String googleNGramsFile = null;
+//  @Option(name = "googleNGramsFile")
+//  public static String googleNGramsFile = null;
 
   @Option(name = "domainNGramsFile")
   public static String domainNGramsFile = null;
 
-  public static Counter<String> googleNGram = new ClassicCounter<String>();
+  static boolean usingGoogleNgram = false;
 
-  public static Map<String, Map<String, List<Integer>>> matchedTokensForEachPhrase = new ConcurrentHashMap<>();
+  //public static Counter<String> googleNGram = new ClassicCounter<String>();
+
+  public static Map<String, Map<String, List<Integer>>> matchedTokensForEachPhrase = new ConcurrentHashMap<String, Map<String, List<Integer>>>();
 
   public static void computeRawFreqIfNull(Map<String, DataInstance> sents, int numWordsCompound) {
       for (DataInstance l : sents.values()) {
@@ -53,29 +54,31 @@ public class Data {
             Data.rawFreq.incrementCount(new CandidatePhrase(s.trim()));
         }
       }
-      if (googleNGram != null && googleNGram.size() > 0)
-        setRatioGoogleNgramFreqWithDataFreq();
-      if (domainNGramRawFreq != null && domainNGramRawFreq.size() > 0)
+      //if (googleNGram != null && googleNGram.size() > 0)
+    if(usingGoogleNgram)
+      setRatioGoogleNgramFreqWithDataFreq();
+
+    if (domainNGramRawFreq != null && domainNGramRawFreq.size() > 0)
         ratioDomainNgramFreqWithDataFreq = domainNGramRawFreq.totalCount() / Data.rawFreq.totalCount();
     
   }
 
   public static void setRatioGoogleNgramFreqWithDataFreq() {
-    ratioGoogleNgramFreqWithDataFreq = googleNGram.totalCount() / Data.rawFreq.totalCount();
+    ratioGoogleNgramFreqWithDataFreq = GoogleNGramsSQLBacked.getTotalCount(1)/ Data.rawFreq.totalCount();
     Redwood.log(ConstantsAndVariables.minimaldebug, "Data", "ratioGoogleNgramFreqWithDataFreq is " + ratioGoogleNgramFreqWithDataFreq);
     //return ratioGoogleNgramFreqWithDataFreq;
 
   }
 
-  public static void loadGoogleNGrams() {
-    if (googleNGram == null || googleNGram.size() == 0) {
-      for (String line : IOUtils.readLines(googleNGramsFile)) {
-        String[] t = line.split("\t");
-        googleNGram.setCount(t[0], Double.valueOf(t[1]));
-      }
-      Redwood.log(ConstantsAndVariables.minimaldebug, "Data", "loading freq from google ngram file " + googleNGramsFile);
-    }
-  }
+//  public static void loadGoogleNGrams() {
+//    if (googleNGram == null || googleNGram.size() == 0) {
+//      for (String line : IOUtils.readLines(googleNGramsFile)) {
+//        String[] t = line.split("\t");
+//        googleNGram.setCount(t[0], Double.valueOf(t[1]));
+//      }
+//      Redwood.log(ConstantsAndVariables.minimaldebug, "Data", "loading freq from google ngram file " + googleNGramsFile);
+//    }
+//  }
 
   public static void loadDomainNGrams() {
     assert(domainNGramsFile != null);

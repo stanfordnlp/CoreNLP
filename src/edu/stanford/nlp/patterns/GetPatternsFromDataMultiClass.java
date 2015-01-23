@@ -2,6 +2,7 @@ package edu.stanford.nlp.patterns;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -40,17 +41,8 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
-import edu.stanford.nlp.util.ArrayUtils;
-import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.CollectionValuedMap;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.EditDistance;
-import edu.stanford.nlp.util.Execution;
-import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.PriorityQueue;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.Triple;
-import edu.stanford.nlp.util.TypesafeMap;
 import edu.stanford.nlp.util.TypesafeMap.Key;
 import edu.stanford.nlp.util.logging.Redwood;
 import org.joda.time.Interval;
@@ -665,6 +657,8 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
         constVars.dictOddsWeights.put(label, dictOddsWeightsLabel);
       }
     }
+
+    Redwood.log(Redwood.DBG, "All options are:" + "\n" + Maps.toString(getAllOptions(), "","","\t","\n"));
   }
 
   public PatternsForEachToken getPatsForEachToken() {
@@ -3019,6 +3013,32 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
 
   void removeLabelings(String label, Collection<String> removeLabeledPhrases){
     //TODO: write this up when appropriate
+  }
+
+  public Map<String, String> getAllOptions(){
+    Map<String, String> values = new HashMap<String, String>();
+    props.forEach((x, y) -> values.put(x.toString(), y.toString()));
+    values.putAll(constVars.getAllOptions());
+    //StringBuilder sb = new StringBuilder();
+
+    Class<?> thisClass;
+    try {
+      thisClass = Class.forName(this.getClass().getName());
+
+      Field[] aClassFields = thisClass.getDeclaredFields();
+      //sb.append(this.getClass().getSimpleName() + " [ ");
+      for(Field f : aClassFields){
+        String fName = f.getName();
+        Object fvalue = f.get(this);
+        values.put(fName, fvalue == null?"null":fvalue.toString());
+        //sb.append("(" + f.getType() + ") " + fName + " = " + f.get(this) + ", ");
+      }
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    return values;
   }
 
   public static Pair processSents(Properties props, Set<String> labels) throws IOException, ExecutionException, InterruptedException, ClassNotFoundException {

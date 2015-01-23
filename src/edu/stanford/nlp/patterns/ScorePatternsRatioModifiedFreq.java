@@ -119,9 +119,9 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
       boolean sqrtPatScore, boolean scorePhrasesInPatSelection,
       Counter<CandidatePhrase> dictOddsWordWeights, boolean useFreqPhraseExtractedByPat) throws IOException, ClassNotFoundException {
 
-    if (Data.googleNGram.size() == 0 && Data.googleNGramsFile != null) {
-      Data.loadGoogleNGrams();
-    }
+//    if (Data.googleNGram.size() == 0 && Data.googleNGramsFile != null) {
+//      Data.loadGoogleNGrams();
+//    }
 
     Counter<E> patterns = new ClassicCounter<E>();
 
@@ -149,17 +149,10 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
               1 - constVars.getEditDistanceScoresThisClassThreshold(label, g));
         }
 
-        if (constVars.usePatternEvalGoogleNgram) {
-          if (Data.googleNGram.containsKey(g)) {
-            assert (Data.rawFreq.containsKey(gc));
+        if (constVars.usePatternEvalGoogleNgram)
             googleNgramNormScores
-                .setCount(
-                    gc,
-                    ((1 + Data.rawFreq.getCount(gc)
-                        * Math.sqrt(Data.ratioGoogleNgramFreqWithDataFreq)) / Data.googleNGram
-                        .getCount(g)));
-          }
-        }
+                .setCount(gc, PhraseScorer.getGoogleNgramScore(gc));
+
         if (constVars.usePatternEvalDomainNgram) {
           // calculate domain-ngram wts
           if (Data.domainNGramRawFreq.containsKey(g)) {

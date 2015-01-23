@@ -11,6 +11,7 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.Execution.Option;
+import edu.stanford.nlp.util.GoogleNGramsSQLBacked;
 import edu.stanford.nlp.util.logging.Redwood;
 
 public abstract class PhraseScorer<E extends Pattern> {
@@ -79,18 +80,22 @@ public abstract class PhraseScorer<E extends Pattern> {
     
     assert Data.processedDataFreq.containsKey(word) : "How come the processed corpus freq doesnt have "
         + word + " .Size of processedDataFreq is " + Data.processedDataFreq.size()  + " and size of raw freq is " + Data.rawFreq.size();
-    return total / Data.processedDataFreq.getCount(word);
+    double score = total / Data.processedDataFreq.getCount(word);
+    assert score != Double.NaN : " How come PatTFIDFScore is NaN; numerator is " + total + " and processsed freq is " + Data.processedDataFreq.getCount(word) + " for word " + word;
+    return score;
   }
 
-  public double getGoogleNgramScore(CandidatePhrase g) {
-    if (Data.googleNGram.containsKey(g.getPhrase())) {
+  public static double getGoogleNgramScore(CandidatePhrase g) {
+    double count = GoogleNGramsSQLBacked.getCount(g.getPhrase());
+    if (count != -1) {
       assert (Data.rawFreq.containsKey(g));
       return (1 + Data.rawFreq.getCount(g)
           * Math.sqrt(Data.ratioGoogleNgramFreqWithDataFreq))
-          / Data.googleNGram.getCount(g);
+          / count;
     }
     return 0;
   }
+
 
   public double getDomainNgramScore(String g) {
     assert Data.domainNGramRawFreq.containsKey(g) : " How come dowmin ngram raw freq does not contain "
