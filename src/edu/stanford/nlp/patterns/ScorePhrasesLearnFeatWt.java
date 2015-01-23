@@ -281,9 +281,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     //TODO: check this
     assert wordVectors != null : "Why are word vectors null?";
     Counter<CandidatePhrase> posSims = computeSimWithWordVectors(candidatePhrases, positivePhrases);
-    Redwood.log(Redwood.DBG, "Computed similarities with positive phrases");
     Counter<CandidatePhrase> negSims = computeSimWithWordVectors(posSims.keySet(), allPossibleNegativePhrases);
-    Redwood.log(Redwood.DBG, "Computed similarties with negative phrases");
     Function<CandidatePhrase, Boolean> retainPhrasesNotCloseToNegative = candidatePhrase -> {
       if(negSims.getCount(candidatePhrase) > posSims.getCount(candidatePhrase))
         return false;
@@ -358,8 +356,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     @Override
     public Counter<CandidatePhrase> call() throws Exception {
 
-      if(constVars.useWordVectorsToComputeSim)
-        return computeSimWithWordVectors(candidatePhrases, positivePhrases, knownNegativePhrases, allMaxSim);
+      if(constVars.useWordVectorsToComputeSim){
+        Counter<CandidatePhrase> phs = computeSimWithWordVectors(candidatePhrases, positivePhrases, knownNegativePhrases, allMaxSim);
+        Redwood.log(Redwood.DBG, "Computed similarities with positive and negative phrases");
+        return phs;
+      }
       else
       //TODO: knownnegaitvephrases
         return computeSimWithWordCluster(candidatePhrases, positivePhrases, allMaxSim);
