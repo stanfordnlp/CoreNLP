@@ -22,7 +22,6 @@ import edu.stanford.nlp.patterns.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.patterns.dep.DataInstanceDep;
 import edu.stanford.nlp.patterns.dep.ExtractPhraseFromPattern;
 import edu.stanford.nlp.patterns.dep.ExtractedPhrase;
-import edu.stanford.nlp.semgraph.ISemanticGraphEdgeEql;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -160,6 +159,13 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     return classifier;
 
+  }
+
+  @Override
+  public void printReasonForChoosing(Counter<CandidatePhrase> phrases){
+    Redwood.log(Redwood.DBG, "Features of selected phrases");
+    for(Entry<CandidatePhrase, Double> pEn: phrases.entrySet())
+      Redwood.log(Redwood.DBG, pEn.getKey().getPhrase() + "\t" + pEn.getValue() + "\t" +  phraseScoresRaw.getCounter(pEn.getKey()));
   }
 
   @Override

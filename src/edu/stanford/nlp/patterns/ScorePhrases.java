@@ -654,6 +654,8 @@ public class ScorePhrases<E extends Pattern> {
       // System.out.println("Features for " + w + ": "
       // + this.phraseScoresRaw.getCounter(w));
       // }
+      phraseScorer.printReasonForChoosing(finalwords);
+
       scoreForAllWordsThisIteration.clear();
       Counters.addInPlace(scoreForAllWordsThisIteration, phraseScores);
 

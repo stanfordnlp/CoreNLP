@@ -1,6 +1,7 @@
 package edu.stanford.nlp.patterns;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -178,5 +179,8 @@ public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer
     throw new RuntimeException("not implemented");
   }
 
-
+  @Override
+  public void printReasonForChoosing(Counter<CandidatePhrase> phrases) {
+    //TODO
+  }
 }
