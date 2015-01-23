@@ -1,8 +1,6 @@
 package edu.stanford.nlp.neural;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -10,7 +8,6 @@ import java.util.Random;
 
 import java.util.function.Predicate;
 import org.ejml.simple.SimpleMatrix;
-import org.ejml.ops.MatrixIO;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.CollectionUtils;
@@ -73,15 +70,6 @@ public class NeuralUtils {
     return new SimpleMatrix(data);
   }
 
-  /**
-   * @param matrix The matrix to return as a String
-   * @param format The format to use for each value in the matrix, eg "%f"
-   */
-  public static String toString(SimpleMatrix matrix, String format) {
-    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    MatrixIO.print(new PrintStream(stream), matrix.getMatrix(), format);
-    return stream.toString();
-  }
 
   /**
    * Compute cosine distance between two column vectors.

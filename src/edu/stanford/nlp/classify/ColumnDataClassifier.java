@@ -102,7 +102,7 @@ import java.util.regex.PatternSyntaxException;
  * Manning and Klein maxent classifier tutorial, slides 46-49, available at
  * http://nlp.stanford.edu/downloads/classifier.shtml are included in the
  * classify package source directory (files starting with "easy").  Other
- * examples appear in the {@code examples} directory of the distributed
+ * examples appear in the <code>examples</code> directory of the distributed
  * classifier.
  * <p/>
  * In many instances, parameters can either be given on the command line
@@ -115,10 +115,10 @@ import java.util.regex.PatternSyntaxException;
  * describing the datum.  If you have multidimensional data, you need to use
  * a properties file.  Property names, as below, are either global (things
  * like the testFile name) or are seen as properties that define features
- * for the first data column (NOTE: we count columns from 0 - unlike the Unix cut
+ * for the first data column (we count columns from 0 - unlike the Unix cut
  * command!).  To specify features for a particular data column, precede a
  * feature by a column number and then a period (for example,
- * {@code 3.wordShape=chris4}).  If no number is specified, then the
+ * <code>3.wordShape=chris4</code>).  If no number is specified, then the
  * default interpretation is column 0. Note that in properties files you must
  * give a value to boolean properties (e.g., <code>2.useString=true</code>);
  * just giving the property name (as <code>2.useString</code>) isn't
@@ -155,26 +155,17 @@ import java.util.regex.PatternSyntaxException;
  * <tr><td> splitWordsIgnoreRegexp</td><td>String</td><td>\\s+</td><td>If non-empty, this regexp is used to determine character sequences which should not be returned as tokens when using <code>splitWordsTokenizerRegexp</code> or <code>splitWordsRegexp</code>. With the former, first the program attempts to match this regular expression at the start of the string (with <code>lookingAt()</code>) and if it matches, those characters are discarded, but if it doesn't match then <code>splitWordsTokenizerRegexp</code> is tried. With <code>splitWordsRegexp</code>, this is used to filter tokens (with <code>matches()</code> resulting from the splitting.  By default this regular expression is set to be all whitespace tokens (i.e., \\s+). Set it to an empty string to get all tokens returned.</td></tr>
  * <tr><td> splitWordsWithPTBTokenizer</td><td>boolean</td><td>false</td><td>If true, and <code>splitWordsRegexp</code> and <code>splitWordsTokenizerRegexp</code> are false, then will tokenize using the <code>PTBTokenizer</code></td></tr>
  * <tr><td> useSplitWords</td><td>boolean</td><td>false</td><td>Make features from the "words" that are returned by dividing the string on splitWordsRegexp or splitWordsTokenizerRegexp.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SW-<i>str</i></td></tr>
- * <tr><td> useLowercaseSplitWords</td><td>boolean</td><td>false</td><td>Make features from the "words" that are returned by dividing the string on splitWordsRegexp or splitWordsTokenizerRegexp and then lowercasing the result.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.  Note that this can be specified independently of useSplitWords. You can put either or both original cased and lowercased words in as features.</td><td>LSW-<i>str</i></td></tr>
- * <tr><td> useSplitWordPairs</td><td>boolean</td><td>false</td><td>Make features from the pairs of adjacent "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp. This doesn't add features for the first and last words being next to a boundary; if you want those, also set useSplitFirstLastWords.</td><td>SWP-<i>str1</i>-<i>str2</i></td></tr>
- * <tr><td> useLowercaseSplitWordPairs</td><td>boolean</td><td>false</td><td>Make features from the lowercased form of the pairs of adjacent "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp. This doesn't add features for the first and last words being next to a boundary; if you want those, also set useLowercaseSplitFirstLastWords.</td><td>LSWP-<i>str1</i>-<i>str2</i></td></tr>
+ * <tr><td> useLowercaseSplitWords</td><td>boolean</td><td>false</td><td>Make features from the "words" that are returned by dividing the string on splitWordsRegexp or splitWordsTokenizerRegexp and then lowercasing the result.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.  Note that this can be specified independently of useSplitWords. You can put either or both original cased and lowercased words in as features.</td><td>SW-<i>str</i></td></tr>
+ * <tr><td> useSplitWordPairs</td><td>boolean</td><td>false</td><td>Make features from the pairs of adjacent "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SWP-<i>str1</i>-<i>str2</i></td></tr>
  * <tr><td> useAllSplitWordPairs</td><td>boolean</td><td>false</td><td>Make features from all pairs of "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>ASWP-<i>str1</i>-<i>str2</i></td></tr>
  * <tr><td> useAllSplitWordTriples</td><td>boolean</td><td>false</td><td>Make features from all triples of "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>ASWT-<i>str1</i>-<i>str2</i>-<i>str3</i></td></tr>
  * <tr><td> useSplitWordNGrams</td><td>boolean</td><td>false</td><td>Make features of adjacent word n-grams of lengths between minWordNGramLeng and maxWordNGramLeng inclusive. Note that these are word sequences, not character n-grams.</td><td>SW#-<i>str1-str2-strN</i></td></tr>
- *
- * <tr><td> splitWordCount</td><td>boolean</td><td>false</td><td>If true, the value of this real-valued feature is the number of split word tokens in the column.</td><td>SWNUM</td></tr>
- * <tr><td> logSplitWordCount</td><td>boolean</td><td>false</td><td>If true, the value of this real-valued feature is the log of the number of split word tokens in the column.</td><td>LSWNUM</td></tr>
- * <tr><td> binnedSplitWordCounts</td><td>String</td><td>null</td><td>If non-null, treat as a sequence of comma-separated integer bounds, where items above the previous bound (if any) up to the next bound (inclusive) are binned (e.g., "1,5,15,30,60"). The feature represents the number of split words in this column.</td><td>SWNUMBIN-<i>range</i></td></tr>
-
  * <tr><td> maxWordNGramLeng</td><td>int</td><td>-1</td><td>If this number is positive, word n-grams above this size will not be used in the model</td></tr>
  * <tr><td> minWordNGramLeng</td><td>int</td><td>1</td><td>Must be positive. word n-grams below this size will not be used in the model</td></tr>
  * <tr><td> wordNGramBoundaryRegexp</td><td>String</td><td>null</td><td>If this is defined and the regexp matches, then the ngram stops</td></tr>
  * <tr><td> useSplitFirstLastWords</td><td>boolean</td><td>false</td><td>Make a feature from each of the first and last "words" that are returned as splitWords.  This is equivalent to having word bigrams with boundary tokens at each end of the sequence (they get a special feature).  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SFW-<i>str</i>, SLW-<i>str</i></td></tr>
- * <tr><td> useLowercaseSplitFirstLastWords</td><td>boolean</td><td>false</td><td>Make a feature from each of the first and last "words" that are returned as splitWords.  This is equivalent to having word bigrams with boundary tokens at each end of the sequence (they get a special feature).  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>LSFW-<i>str</i>, LSLW-<i>str</i></td></tr>
  * <tr><td> useSplitNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams - internal as well as edge all treated the same - after the data string has been split into tokens.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#-<i>str</i></td></tr>
  * <tr><td> useSplitPrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefixes and suffixes of each token, after splitting string with splitWordsRegexp.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#B-<i>str</i>, S#E-<i>str</i></td></tr>
- * <tr><td> useSplitWordVectors</td><td>String</td><td>null</td><td>(If non-null) load word vectors from this file and add their average over all split words as real-valued features.  Requires splitWordsRegexp or splitWordsTokenizerRegexp. Note that for best results you need a close match between your tokenization and that used by the word vectors.</td><td>SWV-<i>num</i></td></tr>
-
  * <tr><td> useNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams - internal as well as edge all treated the same.</td><td>#-<i>str</i></td></tr>
  * <tr><td> usePrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefix and suffix substrings of the string.</td><td>#B-<i>str</i>, #E-<i>str</i></td></tr>
  * <tr><td> lowercase</td><td>boolean</td><td>false</td><td>Make the input string lowercase so all features work uncased</td></tr>
@@ -222,12 +213,9 @@ import java.util.regex.PatternSyntaxException;
  * <tr><td>testFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the testFile is in SVMLight format</td></tr>
  * <tr><td>printSVMLightFormatTo</td><td>String</td><td>null</td><td>If non-null, print the featurized training data to an SVMLight format file (usually used with exitAfterTrainingFeaturization). This is just an option to write out data in a particular format. After that, you're on your own using some other piece of software that reads SVMlight format files.</td></tr>
  * <tr><td>crossValidationFolds</td><td>int</td><td>-1</td><td>If positive, the training data is divided in to this many folds and cross-validation is done on the training data (prior to testing on test data, if it is also specified)</td></tr>
- * <tr><td>printCrossValidationDecisions</td><td>boolean</td><td>false</td><td>Whether to print the individual classification decisions in cross-validation training, if crossValidationFolds is positive.</td></tr>
  * <tr><td>shuffleTrainingData</td><td>boolean</td><td>false</td><td>If true, the training data is shuffled prior to training and cross-validation. This is vital in cross-validation if the training data is otherwise sorted by class.</td></tr>
  * <tr><td>shuffleSeed</td><td>long</td><td>0</td><td>If non-zero, and the training data is being shuffled, this is used as the seed for the Random. Otherwise, System.nanoTime() is used.</td></tr>
- * <tr><td>csvInput</td><td>boolean</td><td>false</td><td>If true, reads train and test file in csv format, with support for quoted fields.</td></tr>
- * <tr><td>inputFormat</td><td>String</td><td>null</td><td>If "header" then reads file with first line treated as header; if "comments" treats lines starting with # as comments; else treated as "plain" tsv/csv file</td></tr>
- *  <tr><td>csvOutput</td><td>String</td><td>null</td><td>If non-null, used to format the output of the classifier. This is a printf-style format specification where %0 through %9 can print columns of the input, %c prints the assigned class and %n a newline character. This option can produce Kaggle-format output files!</td></tr>
+ * <tr><td>csvFormat</td><td>boolean</td><td>false</td><td>If true, reads train and test file in csv format, with support for quoted fields.</td></tr>
  * </table>
  *
  * @author Christopher Manning
@@ -244,7 +232,6 @@ public class ColumnDataClassifier {
   private Classifier<String,String> classifier; // really only assigned once too (either in train or load in setProperties)
   private TokenizerFactory<Word> ptbFactory;
 
-  enum InputFormat { PLAIN, COMMENTS, HEADER }
 
   /**
    * Entry point for taking a String (formatted as a line of a TSV file) and
@@ -386,7 +373,6 @@ public class ColumnDataClassifier {
    *  @param inTestPhase Whether to return the read String[] for each data item
    *  @return A Pair of a GeneralDataSet of Datums and a List of datums in String form.
    */
-  @SuppressWarnings("NonThreadSafeLazyInitialization")
   private Pair<GeneralDataset<String,String>, List<String[]>> readDataset(String filename, boolean inTestPhase) {
     Timing tim = new Timing();
     System.err.print("Reading dataset from " + filename + " ... ");
@@ -420,18 +406,6 @@ public class ColumnDataClassifier {
         int maxColumns = 0;
         for (String line : ObjectBank.getLineIterator(new File(filename), Flags.encoding)) {
           lineNo++;
-          if (Flags.inputFormat == InputFormat.HEADER) {
-            if (lineNo == 1) {
-              if (storedHeader == null) {
-                storedHeader = line; // store it because need elements of it to print header in output
-              }
-              continue;
-            }
-          } else if (Flags.inputFormat == InputFormat.COMMENTS) {
-            if (line.matches("\\s#.*")) {
-              continue;
-            }
-          }
           String[] strings = splitLineToFields(line);
           if (strings.length < 2) {
             throw new RuntimeException("Line format error at line " + lineNo + ": " + line);
@@ -445,10 +419,6 @@ public class ColumnDataClassifier {
           if (inTestPhase) {
             lineInfos.add(strings);
           }
-          if (strings.length < flags.length) {
-            throw new RuntimeException("Error: Line has too few tab-separated columns (" + maxColumns +
-                    ") for " + flags.length + " columns required by specified properties: " + line);
-          }
           dataset.add(makeDatumFromStrings(strings));
         }
         if (lineNo > 0 && minColumns != maxColumns) {
@@ -457,7 +427,7 @@ public class ColumnDataClassifier {
                   filename + " varies between " + minColumns + " and " + maxColumns);
         }
       } catch (Exception e) {
-        throw new RuntimeException("Dataset could not be loaded", e);
+        throw new RuntimeException("Dataset could not be processed", e);
       }
     }
 
@@ -467,7 +437,7 @@ public class ColumnDataClassifier {
 
   //Split according to whether we are using tsv file (default) or csv files
   private String[] splitLineToFields(String line) {
-    if(globalFlags.csvInput) {
+    if(globalFlags.csvFormat) {
       String[] strings = StringUtils.splitOnCharWithQuoting(line, ',', '"', '"');
       for (int i = 0; i < strings.length; ++i) {
         if (strings[i].startsWith("\"") && strings[i].endsWith("\""))
@@ -548,15 +518,13 @@ public class ColumnDataClassifier {
   private static boolean currentHighestProbCorrect = false;
   private static boolean foundAnswerInGroup = false;
 
-  private static String storedHeader;
-
   private static final NumberFormat nf = new DecimalFormat("0.000");
 
   /**
    * Write out an answer, and update statistics.
    */
   private void writeAnswer(String[] strs, String clAnswer, Distribution<String> cntr, Counter<String> contingency, Classifier<String,String> c, double sim) {
-    String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
+    String goldAnswer = strs[globalFlags.goldAnswerColumn];
     String printedText = "";
     if (globalFlags.displayedColumn >= 0) {
       printedText = strs[globalFlags.displayedColumn];
@@ -564,14 +532,14 @@ public class ColumnDataClassifier {
     String results;
     if (globalFlags.displayAllAnswers) {
       // sort the labels by probability
-      TreeSet<Pair<Double,String>> sortedLabels = new TreeSet<>();
+      TreeSet<Pair<Double,String>> sortedLabels = new TreeSet<Pair<Double,String>>();
       for (String key : cntr.keySet()) {
-        sortedLabels.add(new Pair<>(cntr.probabilityOf(key), key));
+        sortedLabels.add(new Pair<Double,String>(cntr.probabilityOf(key), key));
       }
       StringBuilder builder = new StringBuilder();
       for (Pair<Double,String> pair : sortedLabels.descendingSet()) {
         if (builder.length() > 0) {
-          builder.append('\t');
+          builder.append("\t");
         }
         builder.append(pair.first().toString()).append('\t').append(pair.second());
       }
@@ -587,10 +555,6 @@ public class ColumnDataClassifier {
       line = printedText + '\t' + goldAnswer + '\t' + results;
     }
     System.out.println(line);
-  }
-
-  private void updatePerformanceStatistics(String[] strs, String clAnswer, Distribution<String> cntr, Counter<String> contingency, Classifier<String, String> c, double sim) {
-    String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
     // NB: This next bit judges correctness by surface String equality, not our internal indices, so strs has to be right even for svmlightFormat
     for (String next : c.labels()) {
       if (next.equals(goldAnswer)) {
@@ -671,140 +635,87 @@ public class ColumnDataClassifier {
    * @return A Pair consisting of the accuracy (micro-averaged F1) and macro-averaged F1 for the dataset
    */
   private Pair<Double, Double> testExamples(Classifier<String, String> cl, GeneralDataset<String, String> test, List<String[]> lineInfos) {
-    // usually suppress item level printing in crossvalidation
-    if ( ! (globalFlags.crossValidationFolds > 0 && ! globalFlags.printCrossValidationDecisions)) {
-      if (globalFlags.csvOutput != null) {
-        System.out.print(formatCsv(globalFlags.csvOutput, storedHeader.split("\t"), null));
-      } else {
-        System.err.print("Output format: ");
-        if (globalFlags.displayedColumn >= 0) {
-          System.err.printf("dataColumn%d\t", globalFlags.displayedColumn);
-        }
-        System.err.print("goldAnswer\t");
-        if (globalFlags.displayAllAnswers) {
-          System.err.println("[P(class) class]+ {sorted by probability}");
-        } else {
-          System.err.println("classifierAnswer\tP(clAnswer)\tP(goldAnswer)");
-        }
-      }
+    System.err.print("Output format: ");
+    if (globalFlags.displayedColumn >= 0) {
+      System.err.printf("dataColumn%d\t", globalFlags.displayedColumn);
+    }
+    System.err.print("goldAnswer\t");
+    if (globalFlags.displayAllAnswers) {
+      System.err.println("[P(class) class]+ {sorted by probability}");
+    } else {
+      System.err.println("classifierAnswer\tP(clAnswer)\tP(goldAnswer)");
     }
 
     Counter<String> contingency = new ClassicCounter<String>();  // store tp,fp,fn,tn
     for (int i = 0, sz = test.size(); i < sz; i++) {
-      testExample(cl, test, lineInfos, contingency, i);
-    }
+      String[] simpleLineInfo = lineInfos.get(i);
+      Datum<String,String> d;
+      if (globalFlags.usesRealValues) {
+        d = test.getRVFDatum(i);
+      } else {
+        d = test.getDatum(i);
+      }
+      if (globalFlags.justify) {
+        System.err.println("### Test item " + i);
+        for (String field : simpleLineInfo) {
+          System.err.print(field);
+          System.err.print('\t');
+        }
+        System.err.println();
+        if (cl instanceof LinearClassifier) {
+          ((LinearClassifier<String,String>)cl).justificationOf(d);
+        }
+        System.err.println();
+      }
+      Counter<String> logScores;
+      if (globalFlags.usesRealValues) {
+        logScores = ErasureUtils.<RVFClassifier<String,String>>uncheckedCast(cl).scoresOf((RVFDatum<String,String>)d);
+      } else {
+        logScores = cl.scoresOf(d);
+      }
+      Distribution<String> dist = Distribution.distributionFromLogisticCounter(logScores);
+      String answer = null;
+      if (globalFlags.biasedHyperplane != null) {
+        // System.err.println("Biased using counter: " +
+        //         globalFlags.biasedHyperplane);
+        List<String> biggestKeys = new ArrayList<String>(logScores.keySet());
+        Collections.sort(biggestKeys, Counters.toComparatorDescending(logScores));
+        for (String key : biggestKeys) {
+          double prob = dist.probabilityOf(key);
+          double threshold = globalFlags.biasedHyperplane.getCount(key);
+          // System.err.println("  Trying " + key + " prob is " + prob +
+          //           " threshold is " + threshold);
+          if (prob > threshold) {
+            answer = key;
+            break;
+          }
+        }
+      }
+      if (answer == null) {
+        if (globalFlags.usesRealValues) {
+          answer = ErasureUtils.<RVFClassifier<String,String>>uncheckedCast(cl).classOf((RVFDatum<String,String>) d);
+        } else {
+          answer = cl.classOf(d);
+        }
+      }
+      double sim = 0.0;
+      if (globalFlags.rankingScoreColumn >= 0) {
+        try {
+          sim = Double.parseDouble(simpleLineInfo[globalFlags.rankingScoreColumn]);
+        } catch (NumberFormatException nfe) {
+          // just don't print it
+        }
+      }
+      writeAnswer(simpleLineInfo, answer, dist, contingency, cl, sim);
+    } // end for test example
 
     if (globalFlags.groupingColumn >= 0 && globalFlags.rankingAccuracyClass != null)
       finishRanking(contingency, bestSim);
 
+    if (globalFlags.printFeatures != null) {
+      closeFeaturePrinter();
+    }
     return writeResultsSummary(test.size(), contingency, cl.labels());
-  }
-
-  private void testExample(Classifier<String, String> cl,
-                           GeneralDataset<String, String> test,
-                           List<String[]> lineInfos,
-                           Counter<String> contingency,
-                           int i) {
-    String[] example = lineInfos.get(i);
-    Datum<String,String> d;
-    if (globalFlags.usesRealValues) {
-      d = test.getRVFDatum(i);
-    } else {
-      d = test.getDatum(i);
-    }
-    if (globalFlags.justify) {
-      System.err.println("### Test item " + i);
-      for (String field : example) {
-        System.err.print(field);
-        System.err.print('\t');
-      }
-      System.err.println();
-      if (cl instanceof LinearClassifier) {
-        ((LinearClassifier<String,String>)cl).justificationOf(d);
-      }
-      System.err.println();
-    }
-    Counter<String> logScores;
-    if (globalFlags.usesRealValues) {
-      logScores = ErasureUtils.<RVFClassifier<String,String>>uncheckedCast(cl).scoresOf((RVFDatum<String,String>)d);
-    } else {
-      logScores = cl.scoresOf(d);
-    }
-    Distribution<String> dist = Distribution.distributionFromLogisticCounter(logScores);
-    String answer = null;
-    if (globalFlags.biasedHyperplane != null) {
-      // System.err.println("Biased using counter: " +
-      //         globalFlags.biasedHyperplane);
-      List<String> biggestKeys = new ArrayList<String>(logScores.keySet());
-      Collections.sort(biggestKeys, Counters.toComparatorDescending(logScores));
-      for (String key : biggestKeys) {
-        double prob = dist.probabilityOf(key);
-        double threshold = globalFlags.biasedHyperplane.getCount(key);
-        // System.err.println("  Trying " + key + " prob is " + prob +
-        //           " threshold is " + threshold);
-        if (prob > threshold) {
-          answer = key;
-          break;
-        }
-      }
-    }
-    if (answer == null) {
-      if (globalFlags.usesRealValues) {
-        answer = ErasureUtils.<RVFClassifier<String,String>>uncheckedCast(cl).classOf((RVFDatum<String,String>) d);
-      } else {
-        answer = cl.classOf(d);
-      }
-    }
-    double sim = 0.0;
-    if (globalFlags.rankingScoreColumn >= 0) {
-      try {
-        sim = Double.parseDouble(example[globalFlags.rankingScoreColumn]);
-      } catch (NumberFormatException nfe) {
-        // just don't print it
-      }
-    }
-    if ( ! (globalFlags.crossValidationFolds > 0 && ! globalFlags.printCrossValidationDecisions)) {
-      if (globalFlags.csvOutput != null) {
-        System.out.print(formatCsv(globalFlags.csvOutput, example, answer));
-      } else {
-        writeAnswer(example, answer, dist, contingency, cl, sim);
-      }
-    }
-    updatePerformanceStatistics(example, answer, dist, contingency, cl, sim);
-  }
-
-  private String formatCsv(String format, String[] fields, String answer) {
-    StringBuilder out = new StringBuilder();
-    for (int i = 0, len = format.length(); i < len; i++) {
-      char ch = format.charAt(i);
-      if (ch == '%' && i + 1 < len) {
-        char ch2 = format.charAt(i + 1);
-        if (ch2 >= '0' && ch2 <= '9') {
-          int field = ch2 - '0';
-          if (field < fields.length) {
-            out.append(fields[field]);
-          } else {
-            throw new IllegalArgumentException("Not enough columns for format " + format);
-          }
-        } else if (ch2 == 'c') {
-          if (answer != null) {
-            out.append(answer);
-          } else if (globalFlags.goldAnswerColumn < fields.length) {
-            out.append(fields[globalFlags.goldAnswerColumn]);
-          } else {
-            out.append("Class");
-          }
-        } else if (ch2 == 'n') {
-          out.append('\n');
-        } else {
-          throw new IllegalArgumentException("Unrecognized format specification in " + format);
-        }
-        i++; // have also dealt with next character giving format
-      } else {
-        out.append(ch);
-      }
-    }
-    return out.toString();
   }
 
 
@@ -815,7 +726,6 @@ public class ColumnDataClassifier {
    * @return The constructed Datum
    */
   private Datum<String,String> makeDatum(String[] strs) {
-    String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
     List<String> theFeatures = new ArrayList<String>();
     Collection<String> globalFeatures = Generics.newHashSet();
     if (globalFlags.useClassFeature) {
@@ -825,7 +735,7 @@ public class ColumnDataClassifier {
 
     for (int i = 0; i < flags.length; i++) {
       Collection<String> featuresC = Generics.newHashSet();//important that this is a hash set to prevent same feature from being added multiple times
-      makeDatum(strs[i], flags[i], featuresC, goldAnswer);
+      makeDatum(strs[i], flags[i], featuresC, strs[globalFlags.goldAnswerColumn]);
       addAllInterningAndPrefixing(theFeatures, featuresC, i + "-");
     }
 
@@ -833,7 +743,7 @@ public class ColumnDataClassifier {
       printFeatures(strs, theFeatures);
     }
     //System.out.println("Features are: " + theFeatures);
-    return new BasicDatum<String,String>(theFeatures, goldAnswer);
+    return new BasicDatum<String,String>(theFeatures, strs[globalFlags.goldAnswerColumn]);
   }
 
   /**
@@ -845,17 +755,16 @@ public class ColumnDataClassifier {
    * @return The constructed RVFDatum
    */
   private RVFDatum<String,String> makeRVFDatum(String[] strs) {
-    String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
     ClassicCounter<String> theFeatures = new ClassicCounter<String>();
     ClassicCounter<String> globalFeatures = new ClassicCounter<String>();
     if (globalFlags.useClassFeature) {
-      globalFeatures.setCount("CLASS", 1.0);
+      globalFeatures.setCount("CLASS",1.0);
     }
     addAllInterningAndPrefixingRVF(theFeatures, globalFeatures, "");
 
     for (int i = 0; i < flags.length; i++) {
       ClassicCounter<String> featuresC = new ClassicCounter<String>();
-      makeDatum(strs[i], flags[i], featuresC, goldAnswer);
+      makeDatum(strs[i], flags[i], featuresC, strs[globalFlags.goldAnswerColumn]);
       addAllInterningAndPrefixingRVF(theFeatures, featuresC, i + "-");
     }
 
@@ -863,7 +772,7 @@ public class ColumnDataClassifier {
       printFeatures(strs, theFeatures);
     }
     //System.out.println("Features are: " + theFeatures);
-    return new RVFDatum<String,String>(theFeatures, goldAnswer);
+    return new RVFDatum<String,String>(theFeatures, strs[globalFlags.goldAnswerColumn]);
   }
 
   private void addAllInterningAndPrefixingRVF(ClassicCounter<String> accumulator, ClassicCounter<String> addend, String prefix) {
@@ -876,7 +785,7 @@ public class ColumnDataClassifier {
       if (globalFlags.intern) {
         protoFeat = protoFeat.intern();
       }
-      accumulator.incrementCount(protoFeat, count);
+      accumulator.incrementCount(protoFeat,count);
     }
   }
 
@@ -940,8 +849,6 @@ public class ColumnDataClassifier {
      * Extracts all the features from a certain input column.
      *
      * @param cWord The String to extract data from
-     * @param goldAns The goldAnswer for this whole datum or emptyString if none.
-     *                    This is used only for filling in the binned lengths histogram counters
      */
     private void makeDatum(String cWord, Flags flags, Object featuresC, String goldAns) {
 
@@ -1032,22 +939,6 @@ public class ColumnDataClassifier {
           System.err.println(Arrays.toString(bits));
         }
 
-        if (flags.splitWordCount) {
-          addFeature(featuresC, "SWNUM", bits.length);
-        }
-        if (flags.logSplitWordCount) {
-          addFeature(featuresC, "LSWNUM", Math.log(bits.length));
-        }
-        if (flags.binnedSplitWordCounts != null) {
-          String featureName = null;
-          for (int i = 0; i <= flags.binnedSplitWordCounts.length; i++) {
-            if (i == flags.binnedSplitWordCounts.length || bits.length <= flags.binnedSplitWordCounts[i]) {
-              featureName = "SWNUMBIN-" + ((i == 0) ? 0 : (flags.binnedSplitWordCounts[i - 1] + 1)) + '-' + ((i == flags.binnedSplitWordCounts.length) ? "Inf" : Integer.toString(flags.binnedSplitWordCounts[i]));
-              break;
-            }
-          }
-          addFeature(featuresC, featureName, DEFAULT_VALUE);
-        }
         // add features over splitWords
         for (int i = 0; i < bits.length; i++) {
           if (flags.useSplitWords) {
@@ -1059,11 +950,6 @@ public class ColumnDataClassifier {
           if (flags.useSplitWordPairs) {
             if (i + 1 < bits.length) {
               addFeature(featuresC, "SWP-" + bits[i] + '-' + bits[i + 1], DEFAULT_VALUE);
-            }
-          }
-          if (flags.useLowercaseSplitWordPairs) {
-            if (i + 1 < bits.length) {
-              addFeature(featuresC, "LSWP-" + bits[i].toLowerCase() + '-' + bits[i + 1].toLowerCase(), DEFAULT_VALUE);
             }
           }
           if (flags.useAllSplitWordPairs) {
@@ -1115,13 +1001,6 @@ public class ColumnDataClassifier {
               addFeature(featuresC,"SLW-" + bits[i], DEFAULT_VALUE);
             }
           }
-          if (flags.useLowercaseSplitFirstLastWords) {
-            if (i == 0) {
-              addFeature(featuresC,"LSFW-" + bits[i].toLowerCase(), DEFAULT_VALUE);
-            } else if (i == bits.length - 1) {
-              addFeature(featuresC,"SLW-" + bits[i].toLowerCase(), DEFAULT_VALUE);
-            }
-          }
           if (flags.useSplitNGrams || flags.useSplitPrefixSuffixNGrams) {
             Collection<String> featureNames = makeNGramFeatures(bits[i], flags, true, "S#");
             for(String featureName : featureNames)
@@ -1132,34 +1011,12 @@ public class ColumnDataClassifier {
             // System.err.println("Shaper is " + flags.splitWordShape + " word len " + bits[i].length() + " shape is " + shape);
             addFeature(featuresC,"SSHAPE-" + shape,DEFAULT_VALUE);
           }
-        } // for bits
-        if (flags.wordVectors != null) {
-          double[] averages = null;
-          for (String bit : bits) {
-            float[] wv = flags.wordVectors.get(bit);
-            if (wv != null) {
-              if (averages == null) {
-                averages = new double[wv.length];
-                for (int j = 0; j < wv.length; j++) {
-                  averages[j] += wv[j];
-                }
-              }
-            }
-          }
-          if (averages != null) {
-            for (int j = 0; j < averages.length; j++) {
-              averages[j] /= bits.length;
-              addFeature(featuresC, "SWV-" + j, averages[j]);
-            }
-          // } else {
-          //   System.err.println("No word vectors found for words in |" + cWord + '|');
-          }
-        } // end if wordVectors
-      } // end if uses some split words features
+        }
+      }
 
       if (flags.wordShape > WordShapeClassifier.NOWORDSHAPE) {
         String shape = edu.stanford.nlp.process.WordShapeClassifier.wordShape(cWord, flags.wordShape);
-        addFeature(featuresC, "SHAPE-" + shape, DEFAULT_VALUE);
+        addFeature(featuresC,"SHAPE-" + shape,DEFAULT_VALUE);
       }
       if (flags.useNGrams || flags.usePrefixSuffixNGrams) {
         Collection<String> featureNames = makeNGramFeatures(cWord, flags, false, "#");
@@ -1462,7 +1319,7 @@ public class ColumnDataClassifier {
   private static String[] regexpTokenize(Pattern tokenizerRegexp, Pattern ignoreRegexp, String inWord) {
     List<String> al = new ArrayList<String>();
     String word = inWord;
-    while ( ! word.isEmpty()) {
+    while (word.length() > 0) {
       // System.err.println("String to match on is " + word);
       Matcher mig = null;
       if (ignoreRegexp != null) {
@@ -1508,40 +1365,6 @@ public class ColumnDataClassifier {
     return bits;
   }
 
-  static Map<String, float[]> loadWordVectors(String filename) {
-    Timing timing = new Timing();
-    System.err.print("Loading word vectors from " + filename + " ... ");
-    Map<String,float[]> map = new HashMap<>(10000); // presumably they'll load a fair-sized vocab!?
-    BufferedReader br = null;
-    try {
-      br = IOUtils.readerFromString(filename);
-      int numDimensions = -1;
-      boolean warned = false;
-      for (String line; (line = br.readLine()) != null; ) {
-        String[] fields = line.split("\\s+");
-        if (numDimensions < 0) {
-          numDimensions = fields.length - 1;
-        } else {
-          if (numDimensions != fields.length -1 && ! warned) {
-            System.err.println("loadWordVectors: Inconsistent vector size: " + numDimensions +
-                    " vs. " + (fields.length - 1));
-            warned = true;
-          }
-        }
-        float[] vector = new float[fields.length - 1];
-        for (int i = 1; i < fields.length; i++) {
-          vector[i-1] = Float.parseFloat(fields[i]);
-        }
-        map.put(fields[0], vector);
-      }
-    } catch (IOException ioe) {
-      throw new RuntimeIOException("Couldn't load word vectors", ioe);
-    } finally {
-      IOUtils.closeIgnoringExceptions(br);
-    }
-    timing.done();
-    return map;
-  }
 
 
   /**
@@ -1597,7 +1420,9 @@ public class ColumnDataClassifier {
         key = matcher.group(2);
       }
       if (col >= myFlags.length) {
-        myFlags = Arrays.copyOf(myFlags, col + 1);
+        Flags[] newFl = new Flags[col + 1];
+        System.arraycopy(myFlags, 0, newFl, 0, myFlags.length);
+        myFlags = newFl;
       }
       if (myFlags[col] == null) {
         myFlags[col] = new Flags();
@@ -1615,19 +1440,7 @@ public class ColumnDataClassifier {
         }
       } else if (key.equals("binnedLengthsStatistics")) {
         if (Boolean.parseBoolean(val)) {
-          myFlags[col].binnedLengthsCounter = new TwoDimensionalCounter<String, String>();
-        }
-      } else if (key.equals("splitWordCount")) {
-        myFlags[col].splitWordCount = Boolean.parseBoolean(val);
-      } else if (key.equals("logSplitWordCount")) {
-        myFlags[col].logSplitWordCount = Boolean.parseBoolean(val);
-      } else if (key.equals("binnedSplitWordCounts")) {
-        if (val != null) {
-          String[] binnedSplitWordCountStrs = val.split("[, ]+");
-          myFlags[col].binnedSplitWordCounts = new int[binnedSplitWordCountStrs.length];
-          for (int i = 0; i < myFlags[col].binnedSplitWordCounts.length; i++) {
-            myFlags[col].binnedSplitWordCounts[i] = Integer.parseInt(binnedSplitWordCountStrs[i]);
-          }
+          myFlags[col].binnedLengthsCounter = new TwoDimensionalCounter<String,String>();
         }
       } else if (key.equals("countChars")) {
         myFlags[col].countChars = val.toCharArray();
@@ -1772,8 +1585,6 @@ public class ColumnDataClassifier {
         myFlags[col].useSplitWords = Boolean.parseBoolean(val);
       } else if (key.equals("useSplitWordPairs")) {
         myFlags[col].useSplitWordPairs = Boolean.parseBoolean(val);
-      } else if (key.equals("useLowercaseSplitWordPairs")) {
-        myFlags[col].useLowercaseSplitWordPairs = Boolean.parseBoolean(val);
       } else if (key.equals("useAllSplitWordPairs")) {
         myFlags[col].useAllSplitWordPairs = Boolean.parseBoolean(val);
       } else if (key.equals("useAllSplitWordTriples")) {
@@ -1798,8 +1609,6 @@ public class ColumnDataClassifier {
         }
       } else if (key.equals("useSplitFirstLastWords")) {
         myFlags[col].useSplitFirstLastWords = Boolean.parseBoolean(val);
-      } else if (key.equals("useLowercaseSplitFirstLastWords")) {
-        myFlags[col].useLowercaseSplitFirstLastWords = Boolean.parseBoolean(val);
       } else if (key.equals("loadClassifier")) {
         myFlags[col].loadClassifier = val;
       } else if (key.equals("serializeTo")) {
@@ -1871,34 +1680,17 @@ public class ColumnDataClassifier {
         // System.err.println("Biased Hyperplane is " + biasedHyperplane);
       } else if (key.equals("crossValidationFolds")) {
         myFlags[col].crossValidationFolds = Integer.parseInt(val);
-      } else if (key.equals("printCrossValidationDecisions")) {
-        myFlags[col].printCrossValidationDecisions = Boolean.parseBoolean(val);
       } else if (key.equals("shuffleTrainingData")) {
         myFlags[col].shuffleTrainingData = Boolean.parseBoolean(val);
       } else if (key.equals("shuffleSeed")) {
         myFlags[col].shuffleSeed = Long.parseLong(val);
-      } else if (key.equals("csvInput")) {
-        myFlags[col].csvInput = Boolean.parseBoolean(val);
-      } else if (key.equals("inputFormat")) {
-        if (val.equalsIgnoreCase("header")) {
-          myFlags[col].inputFormat = InputFormat.HEADER;
-        } else if (val.equalsIgnoreCase("comments")) {
-          myFlags[col].inputFormat = InputFormat.COMMENTS;
-        } else if (val.equalsIgnoreCase("plain")) {
-          myFlags[col].inputFormat = InputFormat.PLAIN;
-        } else {
-          System.err.println("Unknown inputFormat: " + val);
-        }
+      } else if (key.equals("csvFormat")) {
+        myFlags[col].csvFormat= Boolean.parseBoolean(val);
       } else if (key.equals("splitWordsWithPTBTokenizer")) {
-        // System.out.println("splitting with ptb tokenizer");
-        myFlags[col].splitWordsWithPTBTokenizer = Boolean.parseBoolean(val);
-      } else if (key.equals("useSplitWordVectors")) {
-        myFlags[col].wordVectors = loadWordVectors(val);
-        myUsesRealValues = true;
-      } else if (key.equals("showTokenization")) {
+        System.out.println("splitting with ptb tokenizer");
+        myFlags[col].splitWordsWithPTBTokenizer=Boolean.parseBoolean(val);
+      } else if(key.equals("showTokenization")){
         myFlags[col].showTokenization = Boolean.parseBoolean(val);
-      } else if (key.equals("csvOutput")) {
-        myFlags[col].csvOutput = val;
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
       }
@@ -2072,9 +1864,6 @@ public class ColumnDataClassifier {
 
     testExamples(classifier, test, lineInfos);
     // ((LinearClassifier) classifier).dumpSorted();
-    if (globalFlags.printFeatures != null) {
-      closeFeaturePrinter();
-    }
   }
 
   /** Run cross-validation on a dataset, and return accuracy and macro-F1 scores.
@@ -2161,10 +1950,8 @@ public class ColumnDataClassifier {
     Pattern splitWordsIgnorePattern = Pattern.compile(DEFAULT_IGNORE_REGEXP);
     boolean useSplitWords = false;
     boolean useSplitWordPairs = false;
-    boolean useLowercaseSplitWordPairs = false;
     boolean useSplitFirstLastWords = false;
     boolean useLowercaseSplitWords = false;
-    boolean useLowercaseSplitFirstLastWords = false;
 
     int wordShape = edu.stanford.nlp.process.WordShapeClassifier.NOWORDSHAPE;
     int splitWordShape = WordShapeClassifier.NOWORDSHAPE;
@@ -2260,17 +2047,8 @@ public class ColumnDataClassifier {
     boolean shuffleTrainingData = false;
     long shuffleSeed = 0;
 
-    static boolean csvInput = false; //train and test files are in csv format
-    static InputFormat inputFormat = InputFormat.PLAIN;
+    static boolean csvFormat = false; //train and test files are in csv format
     boolean splitWordsWithPTBTokenizer = false;
-
-    boolean splitWordCount;
-    boolean logSplitWordCount;
-    int[] binnedSplitWordCounts;
-    Map<String, float[]> wordVectors;
-
-    static String csvOutput = null;
-    boolean printCrossValidationDecisions = false;
 
     @Override
     public String toString() {

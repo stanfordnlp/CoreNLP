@@ -1,15 +1,14 @@
 package edu.stanford.nlp.patterns.surface;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.patterns.Pattern;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
 

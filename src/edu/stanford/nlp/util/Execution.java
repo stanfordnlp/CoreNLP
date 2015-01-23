@@ -525,7 +525,7 @@ public class Execution {
     //(convert to map)
     Properties options = StringUtils.argsToProperties(args);
     for (String key : props.stringPropertyNames()) {
-      options.setProperty(key, props.getProperty(key));
+      options.put(key, props.getProperty(key));
     }
     //(bootstrap)
     Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap

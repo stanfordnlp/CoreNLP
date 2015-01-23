@@ -5,8 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
-import edu.stanford.nlp.patterns.surface.Data;
+import edu.stanford.nlp.patterns.Data;
+import edu.stanford.nlp.patterns.Pattern;
 import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;

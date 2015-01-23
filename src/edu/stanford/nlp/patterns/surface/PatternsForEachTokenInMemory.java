@@ -1,13 +1,12 @@
 package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.patterns.Pattern;
 import edu.stanford.nlp.util.Execution;
-import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Created by sonalg on 10/22/14.

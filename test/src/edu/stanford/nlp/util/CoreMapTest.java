@@ -130,7 +130,8 @@ public class CoreMapTest extends TestCase {
         CoreAnnotations.PartOfSpeechAnnotation.class, CoreAnnotations.ShapeAnnotation.class, CoreAnnotations.NamedEntityTagAnnotation.class,
         CoreAnnotations.DocIDAnnotation.class, CoreAnnotations.ValueAnnotation.class, CoreAnnotations.CategoryAnnotation.class,
         CoreAnnotations.BeforeAnnotation.class, CoreAnnotations.AfterAnnotation.class, CoreAnnotations.OriginalTextAnnotation.class,
-        CoreAnnotations.ArgumentAnnotation.class, CoreAnnotations.MarkingAnnotation.class
+        CoreAnnotations.ProjectedCategoryAnnotation.class, CoreAnnotations.ArgumentAnnotation.class,
+        CoreAnnotations.MarkingAnnotation.class
     };
 
     // how many iterations

@@ -17,9 +17,7 @@ import java.util.zip.GZIPOutputStream;
 /**
  * Helper Class for various I/O related things.
  *
- * @author Kayur Patel
- * @author Teg Grenager
- * @author Christopher Manning
+ * @author Kayur Patel, Teg Grenager
  */
 
 public class IOUtils {
@@ -315,19 +313,6 @@ public class IOUtils {
     return ErasureUtils.uncheckedCast(o);
   }
 
-  public static <T> T readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(String msg, String path) {
-    T obj;
-    try {
-      Timing timing = new Timing();
-      System.err.print(msg + ' ' + path + " ... ");
-      obj = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
-      timing.done();
-    } catch (IOException | ClassNotFoundException e) {
-      throw new RuntimeIOException(e);
-    }
-    return obj;
-  }
-
   public static <T> T readObjectFromObjectStream(ObjectInputStream ois) throws IOException,
           ClassNotFoundException {
     Object o = ois.readObject();
@@ -551,8 +536,9 @@ public class IOUtils {
    * Open a BufferedReader on stdin. Use the user's default encoding.
    *
    * @return The BufferedReader
+   * @throws IOException If there is an I/O problem
    */
-  public static BufferedReader readerFromStdin() {
+  public static BufferedReader readerFromStdin() throws IOException {
     return new BufferedReader(new InputStreamReader(System.in));
   }
 
@@ -999,7 +985,8 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir The root directory.
+   * @param dir
+   *          The root directory.
    * @return All files within the directory.
    */
   public static Iterable<File> iterFilesRecursive(final File dir) {
@@ -1009,8 +996,10 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir The root directory.
-   * @param ext A string that must be at the end of all files (e.g. ".txt")
+   * @param dir
+   *          The root directory.
+   * @param ext
+   *          A string that must be at the end of all files (e.g. ".txt")
    * @return All files within the directory ending in the given extension.
    */
   public static Iterable<File> iterFilesRecursive(final File dir,
@@ -1021,8 +1010,10 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir The root directory.
-   * @param pattern A regular expression that the file path must match. This uses
+   * @param dir
+   *          The root directory.
+   * @param pattern
+   *          A regular expression that the file path must match. This uses
    *          Matcher.find(), so use ^ and $ to specify endpoints.
    * @return All files within the directory.
    */
@@ -1112,7 +1103,7 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = readerFromString(filename, encoding);
+    Reader r = new InputStreamReader(getInputStreamFromURLOrClasspathOrFileSystem(filename), encoding);
     return IOUtils.slurpReader(r);
   }
 
@@ -1143,6 +1134,13 @@ public class IOUtils {
   /**
    * Returns all the text at the given URL.
    */
+  public static String slurpGBURL(URL u) throws IOException {
+    return IOUtils.slurpURL(u, "GB18030");
+  }
+
+  /**
+   * Returns all the text at the given URL.
+   */
   public static String slurpURLNoExceptions(URL u, String encoding) {
     try {
       return IOUtils.slurpURL(u, encoding);
@@ -1168,12 +1166,9 @@ public class IOUtils {
       return "";
     }
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
+    String temp;
     StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
-    for (String temp; (temp = br.readLine()) != null;
-
-
-
-            ) {
+    while ((temp = br.readLine()) != null) {
       buff.append(temp);
       buff.append(lineSeparator);
     }

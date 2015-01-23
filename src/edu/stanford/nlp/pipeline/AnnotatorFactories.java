@@ -4,7 +4,6 @@ import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.process.PTBTokenizer;
-import edu.stanford.nlp.process.WordToSentenceProcessor;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 
@@ -21,8 +20,6 @@ import java.util.Set;
  */
 public class AnnotatorFactories {
 
-  private AnnotatorFactories() {} // static factory class
-
   public static AnnotatorFactory tokenize(Properties properties, final AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
@@ -31,14 +28,8 @@ public class AnnotatorFactories {
         String extraOptions = null;
         boolean keepNewline = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
             "false"));
-
-        String hasSsplit = properties.getProperty("annotators");
-        if (hasSsplit != null && hasSsplit.contains(StanfordCoreNLP.STANFORD_SSPLIT)) {
-          WordToSentenceProcessor.NewlineIsSentenceBreak nlsb = WordToSentenceProcessor.stringToNewlineIsSentenceBreak(properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY,
-              StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
-          if (nlsb != WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER) {
-            keepNewline = true;
-          }
+        if (properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
+          keepNewline = true;
         }
         if (keepNewline) {
           extraOptions = "tokenizeNLs,";
@@ -62,15 +53,15 @@ public class AnnotatorFactories {
         }
         if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
             "false"))) {
-          os.append(TokenizerAnnotator.EOL_PROPERTY + ':').append(properties.getProperty(TokenizerAnnotator.EOL_PROPERTY,
+          os.append(TokenizerAnnotator.EOL_PROPERTY + ":").append(properties.getProperty(TokenizerAnnotator.EOL_PROPERTY,
               "false"));
-          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ':').append(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
+          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ":").append(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
               "false"));
           return os.toString();
         } else {
-          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ':').append(Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
+          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ":").append(Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
               "false")));
-          os.append(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ':').append(properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
+          os.append(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ":").append(properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
         }
         return os.toString();
       }
@@ -199,8 +190,7 @@ public class AnnotatorFactories {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        // System.err.println(signature());
-        // todo: The above shows that signature is edu.stanford.nlp.pipeline.AnnotatorImplementations: and doesn't reflect what annotator it is! Should fix.
+        System.err.println(signature());
         boolean nlSplitting = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
         if (nlSplitting) {
           boolean whitespaceTokenization = Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"));
@@ -264,8 +254,8 @@ public class AnnotatorFactories {
         // keep track of all relevant properties for this annotator here!
         StringBuilder os = new StringBuilder();
         if (Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"))) {
-          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + '=').append(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false")).append('\n');
-          os.append("tokenize.whitespace=").append(properties.getProperty("tokenize.whitespace", "false")).append('\n');
+          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + "=").append(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false")).append("\n");
+          os.append("tokenize.whitespace=").append(properties.getProperty("tokenize.whitespace", "false")).append("\n");
         } else {
           os.append(baseSignature(properties, StanfordCoreNLP.STANFORD_SSPLIT));
         }
@@ -337,10 +327,10 @@ public class AnnotatorFactories {
         // keep track of all relevant properties for this annotator here!
         return "ner.model:" +
             properties.getProperty("ner.model", "") +
-            NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY + ':' +
+            NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY + ":" +
             properties.getProperty(NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_PROPERTY,
                 Boolean.toString(NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT)) +
-            NumberSequenceClassifier.USE_SUTIME_PROPERTY + ':' +
+            NumberSequenceClassifier.USE_SUTIME_PROPERTY + ":" +
             properties.getProperty(NumberSequenceClassifier.USE_SUTIME_PROPERTY,
                 Boolean.toString(NumberSequenceClassifier.USE_SUTIME_DEFAULT));
       }
@@ -355,32 +345,13 @@ public class AnnotatorFactories {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        return annotatorImplementation.tokensRegexNER(properties, Annotator.STANFORD_REGEXNER);
+        return annotatorImplementation.tokensRegexNER(properties, "regexner");
       }
 
       @Override
       public String additionalSignature() {
         // keep track of all relevant properties for this annotator here!
-        return PropertiesUtils.getSignature(Annotator.STANFORD_REGEXNER, properties, TokensRegexNERAnnotator.SUPPORTED_PROPERTIES);
-      }
-    };
-  }
-
-  //
-  // Mentions annotator
-  //
-  public static AnnotatorFactory entityMentions(Properties properties, final AnnotatorImplementations annotatorImplementation) {
-    return new AnnotatorFactory(properties, annotatorImplementation) {
-      private static final long serialVersionUID = 1L;
-      @Override
-      public Annotator create() {
-        return annotatorImplementation.mentions(properties, Annotator.STANFORD_ENTITY_MENTIONS);
-      }
-
-      @Override
-      public String additionalSignature() {
-        // keep track of all relevant properties for this annotator here!
-        return PropertiesUtils.getSignature(Annotator.STANFORD_ENTITY_MENTIONS, properties, EntityMentionsAnnotator.SUPPORTED_PROPERTIES);
+        return PropertiesUtils.getSignature("regexner", properties, TokensRegexNERAnnotator.SUPPORTED_PROPERTIES);
       }
     };
   }
@@ -530,7 +501,6 @@ public class AnnotatorFactories {
 
   public static AnnotatorFactory columnDataClassifier(Properties properties, final AnnotatorImplementations annotatorImpls) {
     return new AnnotatorFactory(properties, annotatorImpls) {
-      private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
         if(!properties.containsKey("loadClassifier"))
@@ -550,27 +520,9 @@ public class AnnotatorFactories {
   //
   public static AnnotatorFactory dependencies(Properties properties, final AnnotatorImplementations annotatorImpl) {
     return new AnnotatorFactory(properties, annotatorImpl) {
-      private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
         return annotatorImpl.dependencies(properties);
-      }
-
-      @Override
-      protected String additionalSignature() {
-        return DependencyParseAnnotator.signature(StanfordCoreNLP.STANFORD_DEPENDENCIES, properties);
-      }
-    };
-  }
-
-  //
-  // Monotonicity and Polarity
-  //
-  public static AnnotatorFactory natlog(Properties properties, final AnnotatorImplementations annotatorImpl) {
-    return new AnnotatorFactory(properties, annotatorImpl) {
-      @Override
-      public Annotator create() {
-        return annotatorImpl.natlog(properties);
       }
 
       @Override

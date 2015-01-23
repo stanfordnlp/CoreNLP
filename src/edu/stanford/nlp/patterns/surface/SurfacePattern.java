@@ -5,6 +5,8 @@ import java.util.*;
 
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.patterns.Pattern;
+import edu.stanford.nlp.patterns.PatternsAnnotations;
 import edu.stanford.nlp.util.*;
 
 /**

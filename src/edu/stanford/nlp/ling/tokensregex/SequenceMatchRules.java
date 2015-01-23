@@ -645,8 +645,8 @@ public class SequenceMatchRules {
 
   /**
    * Interface for a rule that extracts a list of matched items from a input
-   * @param <I> input type
-   * @param <O> output type
+   * @param <I>
+   * @param <O>
    */
   public static interface ExtractRule<I,O> {
     public boolean extract(I in, List<O> out);
@@ -654,8 +654,8 @@ public class SequenceMatchRules {
 
   /**
    * Extraction rule that filters the input before passing it on to the next extractor
-   * @param <I> input type
-   * @param <O> output type
+   * @param <I>
+   * @param <O>
    */
   public static class FilterExtractRule<I,O> implements ExtractRule<I,O>
   {
@@ -684,8 +684,8 @@ public class SequenceMatchRules {
   /**
    * Extraction rule that applies a list of rules in sequence and aggregates
    *   all matches found
-   * @param <I> input type
-   * @param <O> output type
+   * @param <I>
+   * @param <O>
    */
   public static class ListExtractRule<I,O> implements ExtractRule<I,O>
   {
@@ -729,9 +729,8 @@ public class SequenceMatchRules {
 
   /**
    * Extraction rule to apply a extraction rule on a particular CoreMap field
-   * Input is of type CoreMap, output is templated type O.
-   * @param <T> type of the annotation field
-   * @param <O> output type
+   * @param <T>
+   * @param <O>
    */
   public static class CoreMapExtractRule<T,O> implements ExtractRule<CoreMap, O>
   {
@@ -755,12 +754,6 @@ public class SequenceMatchRules {
 
   }
 
-  /**
-   * Extraction rule that treats a single CoreMap as a list/sequence of CoreMaps
-   * (convenience class, for use with BasicSequenceExtractRule)
-   * Input is of type CoreMap, output is templated type O.
-   * @param <O> output type
-   */
   public static class CoreMapToListExtractRule<O> implements ExtractRule<CoreMap, O>
   {
     ExtractRule<List<? extends CoreMap>,O> extractRule;
@@ -774,10 +767,6 @@ public class SequenceMatchRules {
     }
   }
 
-  /**
-   * Extraction rule
-   * Input is of type CoreMap, output is MatchedExpression
-   */
   public static class BasicSequenceExtractRule implements ExtractRule< List<? extends CoreMap>, MatchedExpression>
   {
     MatchedExpression.SingleAnnotationExtractor extractor;

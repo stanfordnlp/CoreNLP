@@ -52,7 +52,7 @@ public class PatternFactory {
     SurfacePatternFactory.setUp(props);
   }
 
-  public enum PatternType{SURFACE};
+  public enum PatternType{SURFACE, DEP};
 
   public static boolean doNotUse(String word, Set<String> stopWords) {
     if (stopWords.contains(word.toLowerCase())

@@ -14,14 +14,11 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
-import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.EnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.TreeGraphNode;
 import edu.stanford.nlp.trees.TypedDependency;
-import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
-import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
@@ -105,35 +102,12 @@ public class DependencyParser {
 
   private final Config config;
 
-  /**
-   * Language used to generate
-   * {@link edu.stanford.nlp.trees.GrammaticalRelation} instances.
-   */
-  private final GrammaticalRelation.Language language;
-
   DependencyParser() {
     this(new Properties());
   }
 
   public DependencyParser(Properties properties) {
     config = new Config(properties);
-
-    // Convert Languages.Language instance to
-    // GrammaticalLanguage.Language
-    switch (config.language) {
-      case English:
-        language = GrammaticalRelation.Language.English;
-        break;
-      case Chinese:
-        language = GrammaticalRelation.Language.Chinese;
-        break;
-      case Unknown:
-        language = GrammaticalRelation.Language.Any;
-        break;
-      default:
-        language = GrammaticalRelation.Language.English;  // note[gabor]: This is to conform to the default in the Parser annotator
-        break;
-    }
   }
 
   /**
@@ -306,10 +280,8 @@ public class DependencyParser {
     }
     System.err.println("#Train Examples: " + ret.n);
 
-    preComputed = new ArrayList<>(config.numPreComputed);
-    List<Integer> sortedTokens = Counters.toSortedList(tokPosCount, false);
-
-    preComputed = new ArrayList<>(sortedTokens.subList(0, Math.min(config.numPreComputed, sortedTokens.size())));
+    Counters.retainTop(tokPosCount, config.numPreComputed);
+    preComputed = new ArrayList<>(tokPosCount.keySet());
 
     return ret;
   }
@@ -504,7 +476,7 @@ public class DependencyParser {
   private void loadModelFile(String modelFile, boolean verbose) {
     Timing t = new Timing();
     try {
-
+      // System.err.println(Config.SEPARATOR);
       System.err.println("Loading depparse model file: " + modelFile + " ... ");
       String s;
       BufferedReader input = IOUtils.readerFromString(modelFile);
@@ -643,8 +615,9 @@ public class DependencyParser {
       embeddings = new double[nWords][dim];
       System.err.println("Embedding File " + embedFile + ": #Words = " + nWords + ", dim = " + dim);
 
+      //TODO: how if the embedding dim. does not match..?
       if (dim != config.embeddingSize)
-          throw new IllegalArgumentException("The dimension of embedding file does not match config.embeddingSize");
+        System.err.println("ERROR: embedding dimension mismatch");
 
       for (int i = 0; i < lines.size(); ++i) {
         splits = lines.get(i).split("\\s+");
@@ -886,7 +859,8 @@ public class DependencyParser {
 
       GrammaticalRelation relation = head == 0
                                      ? GrammaticalRelation.ROOT
-                                     : makeGrammaticalRelation(label);
+                                     : new GrammaticalRelation(GrammaticalRelation.Language.Any, label, null,
+                                         GrammaticalRelation.DEPENDENT);
 
       dependencies.add(new TypedDependency(relation, headWord, thisWord));
     }
@@ -894,36 +868,7 @@ public class DependencyParser {
     // Build GrammaticalStructure
     // TODO ideally submodule should just return GrammaticalStructure
     TreeGraphNode rootNode = new TreeGraphNode(root);
-    return makeGrammaticalStructure(dependencies, rootNode);
-  }
-
-  private GrammaticalRelation makeGrammaticalRelation(String label) {
-    GrammaticalRelation stored;
-
-    switch (language) {
-      case English:
-        stored = EnglishGrammaticalRelations.shortNameToGRel.get(label);
-        if (stored != null)
-          return stored;
-        break;
-      case Chinese:
-        stored = ChineseGrammaticalRelations.shortNameToGRel.get(label);
-        if (stored != null)
-          return stored;
-        break;
-    }
-
-    return new GrammaticalRelation(language, label, null, GrammaticalRelation.DEPENDENT);
-  }
-
-  private GrammaticalStructure makeGrammaticalStructure(List<TypedDependency> dependencies, TreeGraphNode rootNode) {
-    switch (language) {
-      case English: return new EnglishGrammaticalStructure(dependencies, rootNode);
-      case Chinese: return new ChineseGrammaticalStructure(dependencies, rootNode);
-
-      // TODO suboptimal: default to EnglishGrammaticalStructure return
-      default: return new EnglishGrammaticalStructure(dependencies, rootNode);
-    }
+    return new EnglishGrammaticalStructure(dependencies, rootNode);
   }
 
   /**
@@ -991,16 +936,13 @@ public class DependencyParser {
 
     List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(toList());
     Map<String, Double> result = system.evaluate(testSents, predicted, testTrees);
-    
-    double uasNoPunc = result.get("UASwoPunc");
     double lasNoPunc = result.get("LASwoPunc");
-    System.err.printf("UAS = %.4f%n", uasNoPunc);
+    System.err.printf("UAS = %.4f%n", result.get("UASwoPunc"));
     System.err.printf("LAS = %.4f%n", lasNoPunc);
-
     long millis = timer.stop();
     double wordspersec = numWords / (((double) millis) / 1000);
     double sentspersec = numSentences / (((double) millis) / 1000);
-    System.err.printf("%s parsed %d words in %d sentences in %.1fs at %.1f w/s, %.1f sent/s.%n",
+    System.err.printf("%s tagged %d words in %d sentences in %.1fs at %.1f w/s, %.1f sent/s.%n",
             StringUtils.getShortClassName(this), numWords, numSentences, millis / 1000.0, wordspersec, sentspersec);
 
     if (outFile != null) {
@@ -1103,12 +1045,11 @@ public class DependencyParser {
    * <p>
    * See below for more information on all of these training / test options and more.
    *
-   * <p>
    * Input / output options:
    * <table>
    *   <tr><th>Option</th><th>Required for training</th><th>Required for testing / parsing</th><th>Description</th></tr>
    *   <tr><td><tt>&#8209;devFile</tt></td><td>Optional</td><td>No</td><td>Path to a development-set treebank in <a href="http://ilk.uvt.nl/conll/#dataformat">CoNLL-X format</a>. If provided, the </td></tr>
-   *   <tr><td><tt>&#8209;embedFile</tt></td><td>Optional (highly recommended!)</td><td>No</td><td>A word embedding file, containing distributed representations of English words. Each line of the provided file should contain a single word followed by the elements of the corresponding word embedding (space-delimited). It is not absolutely necessary that all words in the treebank be covered by this embedding file, though the parser's performance will generally improve if you are able to provide better embeddings for more words.</td></tr>
+   *   <tr><td><tt>&#8209;embedFile</tt></td>Optional (highly recommended!)<td></td><td>No</td><td>A word embedding file, containing distributed representations of English words. Each line of the provided file should contain a single word followed by the elements of the corresponding word embedding (space-delimited). It is not absolutely necessary that all words in the treebank be covered by this embedding file, though the parser's performance will generally improve if you are able to provide better embeddings for more words.</td></tr>
    *   <tr><td><tt>&#8209;model</tt></td><td>Yes</td><td>Yes</td><td>Path to a model file. If the path ends in <tt>.gz</tt>, the model will be read as a Gzipped model file. During training, we write to this path; at test time we read a pre-trained model from this path.</td></tr>
    *   <tr><td><tt>&#8209;textFile</tt></td><td>No</td><td>Yes (or <tt>testFile</tt>)</td><td>Path to a plaintext file containing sentences to be parsed.</td></tr>
    *   <tr><td><tt>&#8209;testFile</tt></td><td>No</td><td>Yes (or <tt>textFile</tt>)</td><td>Path to a test-set treebank in <a href="http://ilk.uvt.nl/conll/#dataformat">CoNLL-X format</a> for final evaluation of the parser.</td></tr>
@@ -1135,13 +1076,12 @@ public class DependencyParser {
    *   <tr><td><tt>&#8209;wordCutOff</tt></td><td>1</td><td>The parser can optionally ignore rare words by simply choosing an arbitrary "unknown" feature representation for words that appear with frequency less than <em>n</em> in the corpus. This <em>n</em> is controlled by the <tt>wordCutOff</tt> parameter.</td></tr>
    * </table>
    *
-   * Runtime parsing options:
+   * Runtime parsing options (for parsing raw text with <tt>-textFile</tt>):
    * <table>
    *   <tr><th>Option</th><th>Default</th><th>Description</th></tr>
-   *   <tr><td><tt>&#8209;escaper</tt></td><td>N/A</td><td>Only applicable for testing with <tt>-textFile</tt>. If provided, use this word-escaper when parsing raw sentences. (Should be a fully-qualified class name like <tt>edu.stanford.nlp.trees.international.arabic.ATBEscaper</tt>.)</td></tr>
-   *   <tr><td><tt>&#8209;numPreComputed</tt></td><td>100000</td><td>The parser pre-computes hidden-layer unit activations for particular inputs words at both training and testing time in order to speed up feedforward computation in the neural network. This parameter determines how many words for which we should compute hidden-layer activations.</td></tr>
-   *   <tr><td><tt>&#8209;sentenceDelimiter</tt></td><td>N/A</td><td>Only applicable for testing with <tt>-textFile</tt>.  If provided, assume that the given <tt>textFile</tt> has already been sentence-split, and that sentences are separated by this delimiter.</td></tr>
-   *   <tr><td><tt>&#8209;tagger.model</tt></td><td>edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger</td><td>Only applicable for testing with <tt>-textFile</tt>. Path to a part-of-speech tagger to use to pre-tag the raw sentences before parsing.</td></tr>
+   *   <tr><td><tt>&#8209;escaper</tt></td><td>N/A</td><td>If provided, use this word-escaper when parsing raw sentences. (Should be a fully-qualified class name like <tt>edu.stanford.nlp.trees.international.arabic.ATBEscaper</tt>.)</td></tr>
+   *   <tr><td><tt>&#8209;sentenceDelimiter</tt></td><td>N/A</td><td>If provided, assume that the given <tt>textFile</tt> has already been sentence-split, and that sentences are separated by this delimiter.</td></tr>
+   *   <tr><td><tt>&#8209;tagger.model</tt></td><td>edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger</td><td>Path to a part-of-speech tagger to use to pre-tag the raw sentences before parsing.</td></tr>
    * </table>
    */
   public static void main(String[] args) {
@@ -1158,6 +1098,7 @@ public class DependencyParser {
     if (props.containsKey("testFile")) {
       parser.loadModelFile(props.getProperty("model"));
       loaded = true;
+
       parser.testCoNLL(props.getProperty("testFile"), props.getProperty("outFile"));
     }
 
@@ -1192,4 +1133,5 @@ public class DependencyParser {
       parser.parseTextFile(input, output);
     }
   }
+
 }

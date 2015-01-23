@@ -80,8 +80,8 @@ public class UnaryTransition implements Transition {
     CoreLabel headLabel = (CoreLabel) top.label();
     CoreLabel production = new CoreLabel();
     production.setValue(label);
-    production.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class));
-    production.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagLabelAnnotation.class));
+    production.set(TreeCoreAnnotations.HeadWordAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class));
+    production.set(TreeCoreAnnotations.HeadTagAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagAnnotation.class));
     Tree newTop = new LabeledScoredTreeNode(production);
     for (Tree child : children) {
       newTop.addChild(child);

@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -15,16 +14,18 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.NodePattern;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.patterns.Data;
+import edu.stanford.nlp.patterns.InvertedIndexByTokens;
+import edu.stanford.nlp.patterns.PatternsAnnotations;
+import edu.stanford.nlp.patterns.SentenceIndex;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScoring;
 import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.TypesafeMap.Key;
-import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 import edu.stanford.nlp.util.logging.Redwood;
 
 public class ConstantsAndVariables<E> implements Serializable{
@@ -409,7 +410,7 @@ public class ConstantsAndVariables<E> implements Serializable{
   public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
 
   @Option(name="invertedIndexClass", gloss="another option is Lucene backed, which is not included in the CoreNLP release. Contact us to get a copy (distributed under Apache License).")
-  public Class<? extends SentenceIndex> invertedIndexClass = edu.stanford.nlp.patterns.surface.InvertedIndexByTokens.class;
+  public Class<? extends SentenceIndex> invertedIndexClass = InvertedIndexByTokens.class;
 
   /**
    * Where the inverted index (either in memory or lucene) is stored
@@ -420,6 +421,7 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="clubNeighboringLabeledWords")
   public boolean clubNeighboringLabeledWords = false;
   public PatternFactory.PatternType patternType = PatternFactory.PatternType.SURFACE;
+
 
 //  public PatternIndex getPatternIndex() {
 //    return patternIndex;
@@ -602,9 +604,6 @@ public class ConstantsAndVariables<E> implements Serializable{
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";
 
-  //public ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
-  //public PatternIndex<E, E> patternIndex;
-
   Properties props;
 
   public enum PatternForEachTokenWay {MEMORY, LUCENE, DB};
@@ -673,15 +672,20 @@ public class ConstantsAndVariables<E> implements Serializable{
     }
     Redwood.log(Redwood.DBG, channelNameLogger, "Running with debug output");
     stopWords = new HashSet<String>();
-    Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger, "Reading stop words from "
+
+    if(stopWordsPatternFiles != null) {
+      Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger, "Reading stop words from "
         + stopWordsPatternFiles);
-    for (String stopwfile : stopWordsPatternFiles.split("[;,]"))
-      stopWords.addAll(IOUtils.linesFromFile(stopwfile));
+      for (String stopwfile : stopWordsPatternFiles.split("[;,]"))
+        stopWords.addAll(IOUtils.linesFromFile(stopwfile));
+    }
 
     englishWords = new HashSet<String>();
-    System.out.println("Reading english words from " + englishWordsFiles);
-    for (String englishWordsFile : englishWordsFiles.split("[;,]"))
-      englishWords.addAll(IOUtils.linesFromFile(englishWordsFile));
+    if(englishWordsFiles != null) {
+      System.out.println("Reading english words from " + englishWordsFiles);
+      for (String englishWordsFile : englishWordsFiles.split("[;,]"))
+        englishWords.addAll(IOUtils.linesFromFile(englishWordsFile));
+    }
 
     if (commonWordsPatternFiles != null) {
       commonEngWords = Collections.synchronizedSet(new HashSet<String>());
@@ -929,6 +933,9 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="writeMatchedTokensFiles")
   public boolean writeMatchedTokensFiles = false;
 
+  @Option(name="writeMatchedTokensIdsForEachPhrase")
+  public boolean writeMatchedTokensIdsForEachPhrase = false;
+
   public Pair<String, Double> getEditDistanceFromThisClass(String label,
       String ph, int minLen) {
     if (ph.length() < minLen)
@@ -1121,26 +1128,4 @@ public class ConstantsAndVariables<E> implements Serializable{
     return ignoreWordswithClassesDuringSelection;
   }
 
-
-//  public Counter<SurfacePattern> transformPatternsToSurface(Counter<E> pats) {
-//    return Counters.transform(pats, new Function<Integer, SurfacePattern>() {
-//      @Override
-//      public SurfacePattern apply(Integer integer) {
-//        return patternIndex.get(integer);
-//      }
-//    });
-//  }
-
-//  public Counter<Integer> transformPatternsToIndex(Counter<SurfacePattern> pats) {
-//    return Counters.transform(pats, new Function<SurfacePattern, Integer>() {
-//      @Override
-//      public Integer apply(SurfacePattern pat) {
-//        return patternIndex.indexOf(pat);
-//      }
-//    });
-//  }
-//
-//  public Integer transformPatternToIndex(SurfacePattern pat) {
-//    return patternIndex.indexOf(pat);
-//  }
 }

@@ -23,6 +23,8 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.patterns.Data;
+import edu.stanford.nlp.patterns.Pattern;
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScoring;
 import edu.stanford.nlp.patterns.surface.PhraseScorer.Normalization;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -37,7 +39,7 @@ import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.logging.Redwood;
 
-public class ScorePhrases<E extends  Pattern> {
+public class ScorePhrases<E extends Pattern> {
 
   Map<String, Boolean> writtenInJustification = new HashMap<String, Boolean>();
 
@@ -74,7 +76,7 @@ public class ScorePhrases<E extends  Pattern> {
     Counter<String> finalwords = new ClassicCounter<String>();
 
     while (termIter.hasNext()) {
-
+      
       if (finalwords.size() >= constVars.numWordsToAdd){
         break;
       }
@@ -109,16 +111,16 @@ public class ScorePhrases<E extends  Pattern> {
         ignoreWords.add(w);
       }
     }
-    String nextFive = "";
-    int n = 0;
-    while (termIter.hasNext()) {
-      n++;
-      if (n > 5)
-        break;
-      String w = termIter.next();
-      nextFive += ";\t" + w + ":" + newdt.getCount(w);
-    }
-    Redwood.log(Redwood.DBG, "Next five phrases were " + nextFive);
+     String nextFive = "";
+     int n = 0;
+     while (termIter.hasNext()) {
+     n++;
+     if (n > 5)
+     break;
+     String w = termIter.next();
+     nextFive += ";\t" + w + ":" + newdt.getCount(w);
+     }
+     Redwood.log(Redwood.DBG, "Next five phrases were " + nextFive);
     return finalwords;
   }
 
@@ -170,7 +172,7 @@ public class ScorePhrases<E extends  Pattern> {
       Data.processedDataFreq = new ClassicCounter<String>();
       assert Data.rawFreq != null;
     }
-
+    
     Counter<String> words = learnNewPhrasesPrivate(label,
         patternsForEachToken, patternsLearnedThisIter, allSelectedPatterns,
         constVars.getLabelDictionary().get(label),
@@ -178,7 +180,7 @@ public class ScorePhrases<E extends  Pattern> {
         wordsPatExtracted,  patternsAndWords4Label,
         identifier, ignoreWords, computeProcDataFreq);
     constVars.addLabelDictionary(label, words.keySet());
-
+    
 
     return words;
   }
@@ -224,7 +226,7 @@ public class ScorePhrases<E extends  Pattern> {
 
 
     for (int i = 0; i < numThreads; i++) {
-
+    
       Callable<Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>> task = null;
 
       //Redwood.log(Redwood.DBG, "Applying pats: assigning sentences " + i*num + " to " +Math.min(sentids.size(), (i + 1) * num) + " to thread " + (i+1));
@@ -412,9 +414,9 @@ public class ScorePhrases<E extends  Pattern> {
     }
 
 
-
+    
     Map<String, Set<String>> sentidswithfilerest = constVars.invertedIndex.getFileSentIdsFromPats(patternsLearnedThisIterRest.keySet(), constVars.getPatternIndex());
-
+    
     if (constVars.batchProcessSents) {
       List<File> filesToLoad;
       if(patternsLearnedThisIterConsistsOnlyGeneralized.size() > 0)
@@ -428,7 +430,7 @@ public class ScorePhrases<E extends  Pattern> {
 //          else
             filename = fname;
           filesToLoad.add(new File(filename));
-        }
+        }  
       }
 
       for (File fname : filesToLoad) {
@@ -436,13 +438,13 @@ public class ScorePhrases<E extends  Pattern> {
         Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(fname);
 
         if(sentidswithfilerest != null && !sentidswithfilerest.isEmpty()){
-
+          
           String filename;
 //          if(constVars.usingDirForSentsInIndex)
 //            filename = constVars.saveSentencesSerDir+"/"+fname.getName();
 //          else
             filename = fname.getAbsolutePath();
-
+          
           Set<String> sentIDs = sentidswithfilerest.get(filename);
           if (sentIDs != null){
             this.runParallelApplyPats(sents, sentIDs, label, patternsLearnedThisIterRest, wordsandLemmaPatExtracted, matchedTokensByPat);
@@ -471,7 +473,7 @@ public class ScorePhrases<E extends  Pattern> {
       }
 
     } else {
-
+      
       if (sentidswithfilerest != null && !sentidswithfilerest.isEmpty()) {
         String filename = CollectionUtils.toList(sentidswithfilerest.keySet()).get(0);
         Set<String> sentids = sentidswithfilerest.get(filename);
@@ -488,7 +490,7 @@ public class ScorePhrases<E extends  Pattern> {
     Redwood.log(Redwood.DBG, "# words/lemma and pattern pairs are " + wordsandLemmaPatExtracted.size());
   }
   */
-
+  
   private void statsWithoutApplyingPatterns(Map<String, List<CoreLabel>> sents, PatternsForEachToken patternsForEachToken,
       Counter<E> patternsLearnedThisIter, TwoDimensionalCounter<Pair<String, String>, E> wordsandLemmaPatExtracted){
     for (Entry<String, List<CoreLabel>> sentEn : sents.entrySet()) {
@@ -573,7 +575,7 @@ public class ScorePhrases<E extends  Pattern> {
       } else
         Data.processedDataFreq = Data.rawFreq;
     }
-
+    
     if (constVars.wordScoring.equals(WordScoring.WEIGHTEDNORM)) {
 
       for (Pair<String, String> en : wordsandLemmaPatExtracted.firstKeySet()) {
@@ -697,7 +699,7 @@ public class ScorePhrases<E extends  Pattern> {
         Redwood.log(Redwood.DBG, "\nJustification for phrases:\n");
         for (String word : finalwords.keySet()) {
           Redwood.log(
-              Redwood.DBG, "Phrase " +
+              Redwood.DBG, "Phrase " + 
               word
                   + " extracted because of patterns: \t"
                   + Counters.toSortedString(wordsPatExtracted.getCounter(word),

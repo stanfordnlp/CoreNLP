@@ -6,8 +6,8 @@ WSJ_TAGGER = /u/nlp/data/pos-tagger/distrib/wsj-0-18-bidirectional-nodistsim.tag
 WSJ_TLPP   = edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams
 
 
-ENGLISH_TRAIN  = /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 200-2199
-ENGLISH_TRAIN2 = /u/nlp/data/lexparser/extraTrain 1-4000,9000-9999
+ENGLISH_TRAIN  = /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 200-2199,9000-9999
+ENGLISH_TRAIN2 = /u/nlp/data/lexparser/extraTrain 1-4000
 ENGLISH_DEV    = $(WSJ_DEV)
 ENGLISH_TEST   = $(WSJ_TEST)
 ENGLISH_TAGGER = /u/nlp/data/pos-tagger/distrib/english-left3words-distsim.tagger

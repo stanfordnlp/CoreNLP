@@ -1082,10 +1082,10 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
   /**
-   * Finds the head words of each tree and assigns
-   * HeadWordLabelAnnotation on each node pointing to the correct
-   * CoreLabel.  This relies on the nodes being CoreLabels, so it
-   * throws an IllegalArgumentException if this is ever not true.
+   * Finds the head words of each tree and assigns HeadWordAnnotation
+   * to each node pointing to the correct node.  This relies on the
+   * nodes being CoreLabels, so it throws an IllegalArgumentException
+   * if this is ever not true.
    */
   public void percolateHeadAnnotations(HeadFinder hf) {
     if (!(label() instanceof CoreLabel)) {
@@ -1098,8 +1098,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     }
 
     if (isPreTerminal()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, (CoreLabel) children()[0].label());
-      nodeLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, nodeLabel);
+      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, children()[0]);
+      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, this);
       return;
     }
 
@@ -1111,18 +1111,18 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     if (head == null) {
       throw new NullPointerException("HeadFinder " + hf + " returned null for " + this);
     } else if (head.isLeaf()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, (CoreLabel) head.label());
-      nodeLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, (CoreLabel) head.parent(this).label());
+      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, head);
+      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, head.parent(this));
     } else if (head.isPreTerminal()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, (CoreLabel) head.children()[0].label());
-      nodeLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, (CoreLabel) head.label());
+      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, head.children()[0]);
+      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, head);
     } else {
       if (!(head.label() instanceof CoreLabel)) {
         throw new AssertionError("Horrible bug");
       }
       CoreLabel headLabel = (CoreLabel) head.label();
-      nodeLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class));
-      nodeLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagLabelAnnotation.class));
+      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class));
+      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagAnnotation.class));
     }
   }
 
@@ -1884,36 +1884,6 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     return t;
   }
 
-  /**
-   * Returns a deep copy of everything but the leaf labels.  The leaf
-   * labels are reused from the original tree.  This is useful for
-   * cases such as the dependency converter, which wants to finish
-   * with the same labels in the dependencies as the parse tree.
-   */
-  public Tree treeSkeletonConstituentCopy() {
-    return treeSkeletonConstituentCopy(treeFactory(), label().labelFactory());
-  }
-
-  public Tree treeSkeletonConstituentCopy(TreeFactory tf, LabelFactory lf) {
-    if (isLeaf()) {
-      // Reuse the current label for a leaf.  This way, trees which
-      // are based on tokens in a sentence can have the same tokens
-      // even after a "deep copy".
-      // TODO: the LabeledScoredTreeFactory copies the label for a new
-      // leaf.  Perhaps we could add a newLeafNoCopy or something like
-      // that for efficiency.
-      Tree newLeaf = tf.newLeaf(label());
-      newLeaf.setLabel(label());
-      return newLeaf;
-    }    
-    Label label = lf.newLabel(label());
-    Tree[] kids = children();
-    List<Tree> newKids = new ArrayList<Tree>(kids.length);
-    for (Tree kid : kids) {
-      newKids.add(kid.treeSkeletonConstituentCopy(tf, lf));
-    }
-    return tf.newTreeNode(label, newKids);
-  }
 
   /**
    * Create a transformed Tree.  The tree is traversed in a depth-first,

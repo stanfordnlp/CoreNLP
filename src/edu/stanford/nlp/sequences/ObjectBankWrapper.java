@@ -155,10 +155,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
         fl.set(CoreAnnotations.CharAnnotation.class,intern(fix(fl.get(CoreAnnotations.CharAnnotation.class))));
       } else {
         fl.set(CoreAnnotations.TextAnnotation.class, intern(fix(fl.get(CoreAnnotations.TextAnnotation.class))));
-        // only override GoldAnswer if not set - so that a DocumentReaderAndWriter can set it right in the first place.
-        if (fl.get(CoreAnnotations.AnswerAnnotation.class) == null) {
-          fl.set(CoreAnnotations.GoldAnswerAnnotation.class, fl.get(CoreAnnotations.AnswerAnnotation.class));
-        }
+        fl.set(CoreAnnotations.GoldAnswerAnnotation.class, fl.get(CoreAnnotations.AnswerAnnotation.class));
       }
     }
   }

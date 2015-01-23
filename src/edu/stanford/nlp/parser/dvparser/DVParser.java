@@ -304,7 +304,7 @@ public class DVParser {
     this.op = parser.getOp();
 
     if (op.trainOptions.randomSeed == 0) {
-      op.trainOptions.randomSeed = System.nanoTime();
+      op.trainOptions.randomSeed = (new Random()).nextLong();
       System.err.println("Random seed not set, using randomly chosen seed of " + op.trainOptions.randomSeed);
     } else {
       System.err.println("Random seed set to " + op.trainOptions.randomSeed);

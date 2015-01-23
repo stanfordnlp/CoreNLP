@@ -22,15 +22,14 @@ import java.util.logging.Logger;
  *    See {@link SequenceMatchRules} for syntax of rules.
  * </p>
  *
- * <p>Assignment rules are used to assign a value to a variable for later use in
+ * <p>Assignment rules are used to assign value to variable for later use in
  * extraction rules or for expansions in patterns.</p>
  * <p>Extraction rules are used to extract text/tokens matching regular expressions.
- * Extraction rules are grouped into stages, with each stage consisting of the following:
+ * Extraction rules are grouped into stages, with each stage consisting of the following.
  * <ol>
- *   <li>Matching of rules over <b>text</b> and <b>tokens</b>.  These rules are applied directly on the <b>text</b> and <b>tokens</b> fields of the <code>CoreMap</code>.</li>
- *   <li>Matching of <b>composite</b> rules.  Matched expression are merged, and composite rules
- *       are applied recursively until no more changes to the matched expressions are detected.</li>
- *   <li><b>Filtering</b> of an invalid expression.  In the final phase, a final filtering stage filters out invalid expressions.</li>
+ *   <li>Matching of rules over <b>text</b> and <b>tokens</b>.  These rules are applied directly on the <b>text</b> and <b>tokens</b> fields of the <code>CoreMap</code></li>
+ *   <li>Matching of <b>composite</b> rules.  Matched expression are merged, and composite rules are applied recursively until no more changes to the matched expressions are detected.</li>
+ *   <li><b>Filtering</b> of invalid expression.  In the final phase, a final filtering stage filters out invalid expressions.</li>
  * </ol>
  * The different stages are numbered and are applied in numeric order.
  * </p>
@@ -39,18 +38,16 @@ import java.util.logging.Logger;
  * @see SequenceMatchRules
  */
 public class CoreMapExpressionExtractor<T extends MatchedExpression> {
-
   // TODO: Remove templating of MatchedExpressions<?>  (keep for now until TimeExpression rules can be decoupled)
-
   private Logger logger = Logger.getLogger(CoreMapExpressionExtractor.class.getName());
-  private final Env env;
+  Env env;
   /* Keeps temporary tags created by extractor */
-  private boolean keepTags = false;
-  private final Class tokensAnnotationKey;
-  private final Map<Integer, Stage<T>> stages;
+  boolean keepTags = false;
+  Class tokensAnnotationKey;
+  Map<Integer, Stage<T>> stages;
 
   /**
-   * Describes one stage of extraction.
+   * Describes one stage of extraction
    * @param <T>
    */
   public static class Stage<T> {
@@ -115,7 +112,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
   }
 
   /**
-   * Creates an empty instance with no rules.
+   * Creates an empty instance with no rules
    */
   public CoreMapExpressionExtractor() {
     this(null);

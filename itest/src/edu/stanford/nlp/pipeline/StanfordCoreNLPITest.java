@@ -38,7 +38,6 @@ public class StanfordCoreNLPITest extends TestCase {
     // create a properties that enables all the anotators
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
-    props.setProperty("ssplit.newlineIsSentenceBreak", "never");
 
     // run an annotation through the pipeline
     String text = "Dan Ramage is working for\nMicrosoft. He's in Seattle! \n";
@@ -246,19 +245,8 @@ public class StanfordCoreNLPITest extends TestCase {
     processSerialization(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class));
     processSerialization(sentence);
 
-    Object processed = processSerialization(document);
-    assertTrue(processed instanceof Annotation);
-    Annotation newDocument = (Annotation) processed;
-    assertEquals(document.get(CoreAnnotations.SentencesAnnotation.class).size(),
-                 newDocument.get(CoreAnnotations.SentencesAnnotation.class).size());
-    for (int i = 0; i < document.get(CoreAnnotations.SentencesAnnotation.class).size(); ++i) {
-      CoreMap oldSentence = document.get(CoreAnnotations.SentencesAnnotation.class).get(0);
-      CoreMap newSentence = newDocument.get(CoreAnnotations.SentencesAnnotation.class).get(0);
-      assertEquals(oldSentence.get(TreeCoreAnnotations.TreeAnnotation.class),
-                   newSentence.get(TreeCoreAnnotations.TreeAnnotation.class));
-      assertEquals(oldSentence.get(CoreAnnotations.TokensAnnotation.class),
-                   newSentence.get(CoreAnnotations.TokensAnnotation.class));
-    }
+    Object newDocument = processSerialization(document);
+    assertTrue(newDocument instanceof Annotation);
     assertTrue(document.equals(newDocument));
   }
 

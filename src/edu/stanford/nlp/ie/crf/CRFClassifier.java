@@ -50,7 +50,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Class for sequence classification using a Conditional Random Field model.
+ * Class for Sequence Classification using a Conditional Random Field model.
  * The code has functionality for different document formats, but when
  * using the standard {@link edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter} for training
  * or testing models, input files are expected to
@@ -71,35 +71,34 @@ import java.util.zip.GZIPOutputStream;
  * To read from stdin, use the flag -readStdin.  The same
  * reader/writer will be used as for -textFile.
  * </p>
- * <p><b>Typical command-line usage</b></p>
+ * <b>Typical command-line usage</b>
  * <p>For running a trained model with a provided serialized classifier on a
- * text file: </p>
- * <p><code>
+ * text file: <p>
+ * <code>
  * java -mx500m edu.stanford.nlp.ie.crf.CRFClassifier -loadClassifier
  * conll.ner.gz -textFile samplesentences.txt
- * </code></p>
+ * </code>
  * <p>
  * When specifying all parameters in a properties file (train, test, or
  * runtime):
- * </p>
- * <p><code>
- * java -mx1g edu.stanford.nlp.ie.crf.CRFClassifier -prop propFile
- * </code></p>
  * <p>
- * To train and test a simple NER model from the command line:</p>
- * <p><code>java -mx1000m edu.stanford.nlp.ie.crf.CRFClassifier
+ * <code>
+ * java -mx1g edu.stanford.nlp.ie.crf.CRFClassifier -prop propFile
+ * </code>
+ * <p>
+ * To train and test a simple NER model from the command line:<br>
+ * <code>java -mx1000m edu.stanford.nlp.ie.crf.CRFClassifier
  * -trainFile trainFile -testFile testFile -macro &gt; output </code>
  * </p>
  * <p>
- * To train with multiple files: </p>
- * <p><code>java -mx1000m edu.stanford.nlp.ie.crf.CRFClassifier
+ * To train with multiple files: <br>
+ * <code>java -mx1000m edu.stanford.nlp.ie.crf.CRFClassifier
  * -trainFileList file1,file2,... -testFile testFile -macro &gt; output</code>
  * </p>
  * <p>
  * To test on multiple files, use the -testFiles option and a comma
  * separated list.
  * </p>
- * <p>
  * Features are defined by a {@link edu.stanford.nlp.sequences.FeatureFactory}.
  * {@link NERFeatureFactory} is used by default, and you should look
  * there for feature templates and properties or flags that will cause
@@ -116,18 +115,17 @@ import java.util.zip.GZIPOutputStream;
  * to get a CRFClassifier is to deserialize one via the static
  * {@link CRFClassifier#getClassifier(String)} methods, which return a
  * deserialized classifier. You may then tag (classify the items of) documents
- * using either the assorted <code>classify()</code> methods here or the additional
- * ones in {@link AbstractSequenceClassifier}.
+ * using either the assorted <code>classify()</code> or the assorted
+ * <code>classify</code> methods in {@link AbstractSequenceClassifier}.
  * Probabilities assigned by the CRF can be interrogated using either the
  * <code>printProbsDocument()</code> or <code>getCliqueTrees()</code> methods.
  *
  * @author Jenny Finkel
  * @author Sonal Gupta (made the class generic)
  * @author Mengqiu Wang (LOP implementation and non-linear CRF implementation)
+ * TODO(mengqiu) need to move the embedding lookup and capitalization features into a FeatureFactory
  */
 public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifier<IN> {
-
-  // TODO(mengqiu) need to move the embedding lookup and capitalization features into a FeatureFactory
 
   List<Index<CRFLabel>> labelIndices;
   Index<String> tagIndex;
@@ -497,7 +495,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         int[] cliqueFeatures = docData[i][j];
         transData[i][j] = new int[cliqueFeatures.length];
         for (int n = 0; n < cliqueFeatures.length; n++) {
-          int transFeatureIndex; // initialized below;
+          int transFeatureIndex = -1;
           if (j == 0) {
             transFeatureIndex = nodeFeatureIndicesMap.indexOf(cliqueFeatures[n]);
             if (transFeatureIndex == -1)
@@ -884,10 +882,10 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       // todo [cdm 2014]: Talk to Mengqiu about this; it seems like it only supports first order CRF
       if (i == 0) {
         nodeFeatureIndicesMap = featureIndexMap;
-        // System.err.println("setting nodeFeatureIndicesMap, size="+nodeFeatureIndicesMap.size());
+        System.err.println("setting nodeFeatureIndicesMap, size="+nodeFeatureIndicesMap.size());
       } else {
         edgeFeatureIndicesMap = featureIndexMap;
-        // System.err.println("setting edgeFeatureIndicesMap, size="+edgeFeatureIndicesMap.size());
+        System.err.println("setting edgeFeatureIndicesMap, size="+edgeFeatureIndicesMap.size());
       }
     }
 
@@ -1371,7 +1369,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * label at each point. This gives a simple way to examine the probability
    * distributions of the CRF. See <code>getCliqueTrees()</code> for more.
    *
-   * @param filename The path to the specified file
+   * @param filename
+   *          The path to the specified file
    */
   public void printFirstOrderProbs(String filename, DocumentReaderAndWriter<IN> readerAndWriter) {
     // only for the OCR data does this matter
@@ -1646,7 +1645,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       File featIndexFile = null;
 
       // CRFLogConditionalObjectiveFunction.featureIndex = featureIndex;
-      // int numFeatures = featureIndex.size();
+      int numFeatures = featureIndex.size();
       if (flags.saveFeatureIndexToDisk) {
         try {
           System.err.println("Writing feature index to temporary file.");
@@ -1893,39 +1892,45 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
   public Minimizer<DiffFunction> getMinimizer(int featurePruneIteration, Evaluator[] evaluators) {
     Minimizer<DiffFunction> minimizer = null;
-    QNMinimizer qnMinimizer = null;
-
-    if (flags.useQN || flags.useSGDtoQN) {
-      // share code for creation of QNMinimizer
-      int qnMem;
+    if (flags.useQN) {
+      int QNmem;
       if (featurePruneIteration == 0) {
-        qnMem = flags.QNsize;
+        QNmem = flags.QNsize;
       } else {
-        qnMem = flags.QNsize2;
+        QNmem = flags.QNsize2;
       }
 
       if (flags.interimOutputFreq != 0) {
         Function monitor = new ResultStoringMonitor(flags.interimOutputFreq, flags.serializeTo);
-        qnMinimizer = new QNMinimizer(monitor, qnMem, flags.useRobustQN);
+        minimizer = new QNMinimizer(monitor, QNmem, flags.useRobustQN);
       } else {
-        qnMinimizer = new QNMinimizer(qnMem, flags.useRobustQN);
+        minimizer = new QNMinimizer(QNmem, flags.useRobustQN);
       }
 
-      qnMinimizer.terminateOnMaxItr(flags.maxQNItr);
-      qnMinimizer.terminateOnEvalImprovement(flags.terminateOnEvalImprovement);
-      qnMinimizer.setTerminateOnEvalImprovementNumOfEpoch(flags.terminateOnEvalImprovementNumOfEpoch);
-      qnMinimizer.suppressTestPrompt(flags.suppressTestDebug);
+      ((QNMinimizer) minimizer).terminateOnMaxItr(flags.maxQNItr);
+      ((QNMinimizer) minimizer).terminateOnEvalImprovement(flags.terminateOnEvalImprovement);
+      ((QNMinimizer) minimizer).setTerminateOnEvalImprovementNumOfEpoch(flags.terminateOnEvalImprovementNumOfEpoch);
+      ((QNMinimizer) minimizer).suppressTestPrompt(flags.suppressTestDebug);
       if (flags.useOWLQN) {
-        qnMinimizer.useOWLQN(flags.useOWLQN, flags.priorLambda);
+        ((QNMinimizer) minimizer).useOWLQN(flags.useOWLQN, flags.priorLambda);
       }
-    }
-
-    if (flags.useQN) {
-      minimizer = qnMinimizer;
     } else if (flags.useInPlaceSGD) {
       SGDMinimizer<DiffFunction> sgdMinimizer =
               new SGDMinimizer<DiffFunction>(flags.sigma, flags.SGDPasses, flags.tuneSampleSize, flags.stochasticBatchSize);
       if (flags.useSGDtoQN) {
+        QNMinimizer qnMinimizer;
+        int QNmem;
+        if (featurePruneIteration == 0) {
+          QNmem = flags.QNsize;
+        } else {
+          QNmem = flags.QNsize2;
+        }
+        if (flags.interimOutputFreq != 0) {
+          Function monitor = new ResultStoringMonitor(flags.interimOutputFreq, flags.serializeTo);
+          qnMinimizer = new QNMinimizer(monitor, QNmem, flags.useRobustQN);
+        } else {
+          qnMinimizer = new QNMinimizer(QNmem, flags.useRobustQN);
+        }
         minimizer = new HybridMinimizer(sgdMinimizer, qnMinimizer, flags.SGDPasses);
       } else {
         minimizer = sgdMinimizer;
@@ -1953,8 +1958,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           flags.scaledSGDMethod);
     } else if (flags.l1reg > 0.0) {
       minimizer = ReflectionLoading.loadByReflection("edu.stanford.nlp.optimization.OWLQNMinimizer", flags.l1reg);
-    } else {
-      throw new RuntimeException("No minimizer assigned!");
     }
 
     if (minimizer instanceof HasEvaluators) {
@@ -1962,6 +1965,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         ((QNMinimizer) minimizer).setEvaluators(flags.evaluateIters, flags.startEvaluateIters, evaluators);
       } else
         ((HasEvaluators) minimizer).setEvaluators(flags.evaluateIters, evaluators);
+    }
+    if (minimizer == null) {
+      throw new RuntimeException("No minimizer assigned!");
     }
 
     return minimizer;

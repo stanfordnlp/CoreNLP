@@ -4,9 +4,6 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
-
 /**
  * Implements an Index that supports constant-time lookup in
  * both directions (via {@code get(int)} and {@code indexOf(E)}.
@@ -317,9 +314,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
   }
 
   /**
-   * This assumes each line is of the form (number=value) and it adds each value in order of the lines in the file.
-   * Warning: This ignores the value of number, and just indexes each value it encounters in turn!
-   *
+   * This assumes each line is of the form (number=value) and it adds each value in order of the lines in the file
    * @param file Which file to load
    * @return An index built out of the lines in the file
    */
@@ -327,7 +322,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     Index<String> index = new HashIndex<String>();
     BufferedReader br = null;
     try {
-      br = IOUtils.readerFromString(file);
+      br = new BufferedReader(new FileReader(file));
       for (String line; (line = br.readLine()) != null; ) {
         int start = line.indexOf('=');
         if (start == -1 || start == line.length() - 1) {
@@ -336,10 +331,16 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
         index.add(line.substring(start + 1));
       }
       br.close();
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
+    } catch (Exception e) {
+      e.printStackTrace();
     } finally {
-      IOUtils.closeIgnoringExceptions(br);
+      if (br != null) {
+        try {
+          br.close();
+        } catch (IOException ioe) {
+          // forget it
+        }
+      }
     }
     return index;
   }

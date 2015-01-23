@@ -20,23 +20,23 @@ import java.util.List;
  */
 public class CRFCliqueTree<E> implements ListeningSequenceModel {
 
-  private final FactorTable[] factorTables;
-  private final double z; // norm constant
-  private final Index<E> classIndex;
+  protected final FactorTable[] factorTables;
+  protected final double z; // norm constant
+  protected final Index<E> classIndex;
   private final E backgroundSymbol;
   private final int backgroundIndex;
   // the window size, which is also the clique size
-  private final int windowSize;
+  protected final int windowSize;
   // the number of possible classes for each label
   private final int numClasses;
   private final int[] possibleValues;
 
-  /** Initialize a clique tree. */
+  /** Initialize a clique tree */
   public CRFCliqueTree(FactorTable[] factorTables, Index<E> classIndex, E backgroundSymbol) {
     this(factorTables, classIndex, backgroundSymbol, factorTables[0].totalMass());
   }
 
-  /** This extra constructor was added to support the CRFCliqueTreeForPartialLabels. */
+  /** This extra constructor was added to support the CRFCliqueTreeForPartialLabels */
   CRFCliqueTree(FactorTable[] factorTables, Index<E> classIndex, E backgroundSymbol, double z) {
     this.factorTables = factorTables;
     this.z = z;
@@ -610,22 +610,22 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel {
     return new CRFCliqueTree<E>(factorTables, classIndex, backgroundSymbol);
   }
 
-  private static FactorTable getFactorTable(double[] weights, double wScale, int[][] weightIndices, int[][] data,
+  private static FactorTable getFactorTable(double[] weights, double wscale, int[][] weightIndices, int[][] data,
       List<Index<CRFLabel>> labelIndices, int numClasses) {
 
     FactorTable factorTable = null;
 
     for (int j = 0, sz = labelIndices.size(); j < sz; j++) {
-      Index<CRFLabel> labelIndex = labelIndices.get(j);
+      Index labelIndex = labelIndices.get(j);
       FactorTable ft = new FactorTable(numClasses, j + 1);
 
       // ... and each possible labeling for that clique
       for (int k = 0, liSize = labelIndex.size(); k < liSize; k++) {
-        int[] label = labelIndex.get(k).getLabel();
+        int[] label = ((CRFLabel) labelIndex.get(k)).getLabel();
         double weight = 0.0;
         for (int m = 0; m < data[j].length; m++) {
           int wi = weightIndices[data[j][m]][k];
-          weight += wScale * weights[wi];
+          weight += wscale * weights[wi];
         }
         // try{
         ft.setValue(label, weight);
@@ -658,7 +658,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel {
     FactorTable factorTable = null;
 
     for (int j = 0, sz = labelIndices.size(); j < sz; j++) {
-      Index<CRFLabel> labelIndex = labelIndices.get(j);
+      Index labelIndex = labelIndices.get(j);
       FactorTable ft = new FactorTable(numClasses, j + 1);
       double[] featureVal = null;
       if (featureValByCliqueSize != null)
@@ -666,7 +666,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel {
 
       // ... and each possible labeling for that clique
       for (int k = 0, liSize = labelIndex.size(); k < liSize; k++) {
-        int[] label = labelIndex.get(k).getLabel();
+        int[] label = ((CRFLabel) labelIndex.get(k)).getLabel();
         double cliquePotential = cliquePotentialFunc.computeCliquePotential(j+1, k, data[j], featureVal, posInSent);
         // for (int m = 0; m < data[j].length; m++) {
         //   weight += weights[data[j][m]][k];

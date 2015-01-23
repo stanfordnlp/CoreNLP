@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import edu.stanford.nlp.patterns.surface.Data;
+import edu.stanford.nlp.patterns.Data;
+import edu.stanford.nlp.patterns.Pattern;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;

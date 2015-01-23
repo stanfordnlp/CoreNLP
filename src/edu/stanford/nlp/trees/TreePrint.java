@@ -488,7 +488,7 @@ public class TreePrint {
           print(gs.allTypedDependencies(), "xml", includeTags, pw);
         }
         if (collapsedDependencies) {
-          print(gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL), "xml", includeTags, pw);
+          print(gs.typedDependenciesCollapsed(true), "xml", includeTags, pw);
         }
         if (CCPropagatedDependencies) {
           print(gs.typedDependenciesCCprocessed(), "xml", includeTags, pw);
@@ -656,7 +656,7 @@ public class TreePrint {
           print(gs.allTypedDependencies(), "separator", includeTags, pw);
         }
         if (collapsedDependencies) {
-          print(gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL), includeTags, pw);
+          print(gs.typedDependenciesCollapsed(true), includeTags, pw);
         }
         if (CCPropagatedDependencies) {
           print(gs.typedDependenciesCCprocessed(), includeTags, pw);
@@ -683,7 +683,7 @@ public class TreePrint {
   private List<Dependency<Label, Label, Object>> getSortedDeps(Tree tree, Predicate<Dependency<Label, Label, Object>> filter) {
     if (gsf != null) {
       GrammaticalStructure gs = gsf.newGrammaticalStructure(tree);
-      Collection<TypedDependency> deps = gs.typedDependencies(GrammaticalStructure.Extras.NONE);
+      Collection<TypedDependency> deps = gs.typedDependencies(false);
       List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<Dependency<Label, Label, Object>>();
       for (TypedDependency dep : deps) {
         sortedDeps.add(new NamedDependency(dep.gov(), dep.dep(), dep.reln().toString()));

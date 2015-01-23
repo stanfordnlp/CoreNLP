@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.ling.HasIndex;
-import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 
 /**
@@ -237,10 +236,6 @@ public class PennTreeReader implements TreeReader {
           if (leaf.label() instanceof HasWord) {
             HasWord hw = (HasWord) leaf.label();
             hw.setWord(leaf.label().value());
-          }
-          if (leaf.label() instanceof HasTag) {
-            HasTag ht = (HasTag) leaf.label();
-            ht.setTag(currentTree.label().value());
           }
           wordIndex++;
 

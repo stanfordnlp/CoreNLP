@@ -2,12 +2,12 @@ package edu.stanford.nlp.classify;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.stanford.nlp.io.IOUtils;
 import junit.framework.TestCase;
 
 /**
@@ -16,7 +16,7 @@ import junit.framework.TestCase;
  * It works by calling the main method of ColumnDataClassifier
  * directly with various args, capturing the stdout, and comparing
  * it to the expected stdout for those commands.
- *
+ * 
  * This expects the output to be exactly the same, which means that if
  * numbers change (which can happen for various reasons) the test will
  * fail and no one will look at this comment to figure out why.
@@ -33,8 +33,8 @@ import junit.framework.TestCase;
  * @author John Bauer
  */
 public class ColumnDataClassifierITest extends TestCase {
-  public static void runAndTestCDC(String goldFileName,
-                                   String ... args)
+  static public void runAndTestCDC(String goldfile, 
+                                   String ... args) 
     throws IOException
   {
     PrintStream oldOut = System.out;
@@ -52,13 +52,14 @@ public class ColumnDataClassifierITest extends TestCase {
     System.setOut(oldOut);
     System.setErr(oldErr);
 
-    BufferedReader goldFile = IOUtils.readerFromString(goldFileName);
-    List<String> lines = new ArrayList<>();
-
-    for (String line; (line = goldFile.readLine()) != null; ) {
+    BufferedReader goldFile = 
+      new BufferedReader(new FileReader(goldfile));
+    List<String> lines = new ArrayList<String>();
+    String line;
+    while ((line = goldFile.readLine()) != null) {
       lines.add(line.trim().replaceAll("\\s+", " "));
     }
-
+                         
     String[] result = outStream.toString().trim().split("\n");
     assertEquals(lines.size(), result.length);
     for (int i = 0; i < result.length; ++i) {
@@ -68,11 +69,11 @@ public class ColumnDataClassifierITest extends TestCase {
     }
   }
 
-  public void testNoArgClassify()
-    throws IOException {
+  public void testNoArgClassify() 
+    throws IOException
+  {
     runAndTestCDC("projects/core/data/edu/stanford/nlp/classify/iris.gold",
                   "-prop",
                   "projects/core/data/edu/stanford/nlp/classify/iris.prop");
   }
-
 }

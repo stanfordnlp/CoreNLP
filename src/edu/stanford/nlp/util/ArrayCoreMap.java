@@ -3,7 +3,6 @@ package edu.stanford.nlp.util;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -288,7 +287,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
   private static final ThreadLocal<IdentityHashSet<CoreMap>> toStringCalled =
           new ThreadLocal<IdentityHashSet<CoreMap>>() {
             @Override protected IdentityHashSet<CoreMap> initialValue() {
-              return new IdentityHashSet<>();
+              return new IdentityHashSet<CoreMap>();
             }
           };
 
@@ -330,42 +329,20 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
     return s.toString();
   }
 
-  // support caching of String form of keys for speedier printing
-  private static final ConcurrentHashMap<Class, String> shortNames =
-          new ConcurrentHashMap<>(12, 0.75f, 1);
-
-  private static final int SHORTER_STRING_CHARSTRING_START_SIZE = 64;
-
   /**
    * {@inheritDoc}
    */
   @Override
   public String toShorterString(String... what) {
-    StringBuilder s = new StringBuilder(SHORTER_STRING_CHARSTRING_START_SIZE);
-    s.append('[');
-    Set<String> whatSet = null;
-    if (size > 5 && what.length > 5) {
-      // if there's a lot of stuff, hash.
-      whatSet = new HashSet<>(Arrays.asList(what));
-    }
+    StringBuilder s = new StringBuilder("[");
     for (int i = 0; i < size; i++) {
-      Class klass = keys[i];
-      String name = shortNames.get(klass);
-      if (name == null) {
-        name = klass.getSimpleName();
-        int annoIdx = name.lastIndexOf("Annotation");
-        if (annoIdx >= 0) {
-          name = name.substring(0, annoIdx);
-        }
-        shortNames.put(klass, name);
+      String name = keys[i].getSimpleName();
+      int annoIdx = name.lastIndexOf("Annotation");
+      if (annoIdx >= 0) {
+        name = name.substring(0, annoIdx);
       }
-
       boolean include;
-      if (what.length == 0) {
-        include = true;
-      } else if (whatSet != null) {
-        include = whatSet.contains(name);
-      } else {
+      if (what.length > 0) {
         include = false;
         for (String item : what) {
           if (item.equals(name)) {
@@ -373,6 +350,8 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
             break;
           }
         }
+      } else {
+        include = true;
       }
       if (include) {
         if (s.length() > 1) {

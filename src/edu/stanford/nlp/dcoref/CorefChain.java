@@ -98,7 +98,7 @@ public class CorefChain implements Serializable {
 
   /** get CorefMention by position */
   public Set<CorefMention> getMentionsWithSameHead(int sentenceNumber, int headIndex) {
-    return getMentionsWithSameHead(new IntPair(sentenceNumber, headIndex));
+    return mentionMap.get(new IntPair(sentenceNumber, headIndex));
   }
 
   public Map<IntPair, Set<CorefMention>> getMentionMap() { return mentionMap; }
@@ -144,7 +144,6 @@ public class CorefChain implements Serializable {
     public final IntTuple position;
     public final String mentionSpan;
 
-    /** This constructor is used to recreate a CorefMention following serialization. */
     public CorefMention(MentionType mentionType,
             Number number,
             Gender gender,
@@ -171,7 +170,6 @@ public class CorefChain implements Serializable {
       this.mentionSpan = mentionSpan;
     }
 
-    /** This constructor builds the external CorefMention class from the internal Mention. */
     public CorefMention(Mention m, IntTuple pos){
       mentionType = m.mentionType;
       number = m.number;
@@ -234,8 +232,10 @@ public class CorefChain implements Serializable {
     }
 
     @Override
-    public String toString() {
-      return '"' + mentionSpan + "\" in sentence " + sentNum;
+    public String toString(){
+      StringBuilder s = new StringBuilder();
+      s.append('"').append(mentionSpan).append('"').append(" in sentence ").append(sentNum);
+      return s.toString();
       //      return "(sentence:" + sentNum + ", startIndex:" + startIndex + "-endIndex:" + endIndex + ")";
     }
 
@@ -263,9 +263,7 @@ public class CorefChain implements Serializable {
     }
 
     private static final long serialVersionUID = 3657691243504173L;
-
-  } // end static class CorefMention
-
+  }
 
   protected static class CorefMentionComparator implements Comparator<CorefMention> {
     @Override

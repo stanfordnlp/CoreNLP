@@ -1,9 +1,9 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.trees.Tree;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -505,7 +505,7 @@ public class HTKLatticeReader {
     this.PRETTYPRINT = prettyPrint;
     this.mergeType = mergeType;
 
-    BufferedReader in = IOUtils.readerFromString(filename);
+    BufferedReader in = new BufferedReader(new FileReader(filename));
     //System.err.println(-1);
     readInput(in);
     //System.err.println(0);

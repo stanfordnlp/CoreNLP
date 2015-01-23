@@ -69,7 +69,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
 
   @Override
-  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, Extras includeExtras) {
+  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, boolean includeExtras) {
     //      collapseConj(list);
     collapsePrepAndPoss(list);
     //      collapseMultiwordPreps(list);
@@ -310,21 +310,21 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
         if (collapsed || nonCollapsed) {
           System.out.println("------------- basic dependencies ---------------");
         }
-        printDependencies(gs, gs.typedDependencies(Extras.NONE), t, conllx, false);
+        printDependencies(gs, gs.typedDependencies(false), t, conllx, false);
       }
 
       if (nonCollapsed) {
         if (basic || collapsed) {
           System.out.println("------------- noncollapsed dependencies ---------------");
         }
-        printDependencies(gs, gs.typedDependencies(Extras.MAXIMAL), t, conllx, false);
+        printDependencies(gs, gs.typedDependencies(true), t, conllx, false);
       }
 
       if (collapsed) {
         if (basic || nonCollapsed) {
           System.out.println("----------- collapsed dependencies -----------");
         }
-        printDependencies(gs, gs.typedDependenciesCollapsed(Extras.MAXIMAL), t, conllx, false);
+        printDependencies(gs, gs.typedDependenciesCollapsed(true), t, conllx, false);
       }
 
       //gs.printTypedDependencies("xml");

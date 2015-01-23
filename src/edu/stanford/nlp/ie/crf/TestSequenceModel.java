@@ -10,6 +10,7 @@ import edu.stanford.nlp.util.CoreMap;
  * For sequence model inference at test-time.
  *
  * @author Spence Green
+ *
  */
 public class TestSequenceModel implements SequenceModel {
 
@@ -19,7 +20,7 @@ public class TestSequenceModel implements SequenceModel {
   private final int[] backgroundTag;
 
   private final int[] allTags;
-  private final int[][] allowedTagsAtPosition;
+  private int[][] allowedTagsAtPosition;
 
   public TestSequenceModel(CRFCliqueTree<? extends CharSequence> cliqueTree) {
     this(cliqueTree, null, null);
@@ -48,8 +49,6 @@ public class TestSequenceModel implements SequenceModel {
         allowedTagsAtPosition[i] = labelDictionary.isConstrained(observation) ?
             labelDictionary.getConstrainedSet(observation) : allTags;
       }
-    } else {
-      allowedTagsAtPosition = null;
     }
   }
 

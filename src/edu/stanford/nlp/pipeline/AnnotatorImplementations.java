@@ -2,7 +2,6 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
-import edu.stanford.nlp.naturalli.NaturalLogicAnnotator;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.ReflectionLoading;
 
@@ -66,7 +65,7 @@ public class AnnotatorImplementations {
   }
 
   /**
-   * Annotate for named entities -- note that this combines multiple NER tag sets, and some auxiliary things (like temporal tagging)
+   * Annotate for named entities -- note that this combines multiple NER tag sets, and some auxilliary things (like temporal tagging)
    */
   public Annotator ner(Properties properties) throws FileNotFoundException {
 
@@ -109,14 +108,7 @@ public class AnnotatorImplementations {
    * Run RegexNER -- rule-based NER based on a deterministic mapping file
    */
   public Annotator tokensRegexNER(Properties properties, String name) {
-    return new TokensRegexNERAnnotator(name, properties);
-  }
-
-  /**
-   * Annotate mentions
-   */
-  public Annotator mentions(Properties properties, String name) {
-    return new EntityMentionsAnnotator(name, properties);
+    return new TokensRegexNERAnnotator("regexner", properties);
   }
 
   /**
@@ -202,15 +194,6 @@ public class AnnotatorImplementations {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
         Annotator.STANFORD_DEPENDENCIES + '.');
     return new DependencyParseAnnotator(relevantProperties);
-  }
-
-  /**
-   * Annotate operators (e.g., quantifiers) and polarity of tokens in a sentence
-   */
-  public Annotator natlog(Properties properties) {
-    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
-        Annotator.STANFORD_NATLOG + '.');
-    return new NaturalLogicAnnotator(relevantProperties);
   }
 
 }
