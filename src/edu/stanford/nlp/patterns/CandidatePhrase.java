@@ -19,7 +19,7 @@ public class CandidatePhrase implements Serializable, Comparable  {
   String phraseLemma;
   Counter<String> features;
   final int hashCode;
-  
+
   static final long serialVersionUID = 42L;
 
   static ConcurrentHashMap<String, CandidatePhrase> candidatePhraseMap = new ConcurrentHashMap<String, CandidatePhrase>();
