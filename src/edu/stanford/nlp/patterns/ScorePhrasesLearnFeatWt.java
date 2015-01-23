@@ -269,7 +269,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
         double[] d1 = wordVectors.get(p.getPhrase());
 
-        BinaryHeapPriorityQueue<CandidatePhrase> topSimPhs = new BinaryHeapPriorityQueue<CandidatePhrase>(numTopSimilar);
+        BinaryHeapPriorityQueue<CandidatePhrase> topSimPhs = new BinaryHeapPriorityQueue<CandidatePhrase>(constVars.expandPhrasesNumTopSimilar);
         double allsum = 0;
         double max = Double.MIN_VALUE;
 
