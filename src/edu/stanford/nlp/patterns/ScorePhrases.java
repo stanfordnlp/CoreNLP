@@ -600,8 +600,8 @@ public class ScorePhrases<E extends Pattern> {
     if (constVars.wordScoring.equals(WordScoring.WEIGHTEDNORM)) {
 
       for (CandidatePhrase en : wordsPatExtracted.firstKeySet()) {
-        
-        if (!constVars.getOtherSemanticClassesWords().contains(en) && !constVars.getOtherSemanticClassesWords().contains(CandidatePhrase.createOrGet(en.getPhraseLemma()))){
+
+        if (!constVars.getOtherSemanticClassesWords().contains(en) && (en.getPhraseLemma() ==null || !constVars.getOtherSemanticClassesWords().contains(CandidatePhrase.createOrGet(en.getPhraseLemma())))){
           terms.addAll(en, wordsPatExtracted.getCounter(en));
         }
 //        wordsPatExtracted.addAll(en,

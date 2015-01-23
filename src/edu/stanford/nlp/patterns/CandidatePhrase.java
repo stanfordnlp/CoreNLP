@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
- * Created by sonalg on 11/7/14.
+ * Created by Sonal Gupta on 11/7/14.
  */
 public class CandidatePhrase implements Serializable, Comparable  {
 
@@ -53,7 +53,14 @@ public class CandidatePhrase implements Serializable, Comparable  {
     if(candidatePhraseMap.containsKey(phrase)){
       CandidatePhrase p = candidatePhraseMap.get(phrase);
       p.phraseLemma = phraseLemma;
-      p.features = features;
+
+      //If features are non-empty, add to the current set
+      if(features != null && features.size() > 0){
+      if(p.features == null)
+        p.features = new ClassicCounter<String>();
+        p.features.addAll(features);
+      }
+
       return p;
     }
     else{
