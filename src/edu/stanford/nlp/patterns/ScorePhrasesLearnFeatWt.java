@@ -851,6 +851,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           allUnknownPhrases.addAll(result.third());
           for(Entry<CandidatePhrase, Double> en : result.fourth().entrySet())
             allCloseToPositivePhrases.setCount(en.getKey(), en.getValue());
+          for(Entry<CandidatePhrase, Double> en : result.fifth().entrySet())
+            allCloseToNegativePhrases.setCount(en.getKey(), en.getValue());
 
         } catch (Exception e) {
           executor.shutdownNow();
@@ -895,9 +897,24 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       }
     }
 
+    if(constVars.expandNegativesWhenSampling){
+      //TODO: patwtbyfrew
+      //Counters.retainTop(allCloseToPositivePhrases, (int) (allCloseToPositivePhrases.size()*constVars.subSampleUnkAsPosUsingSimPercentage));
+      Redwood.log("Expanding positives by adding " + allCloseToNegativePhrases + " phrases");
+      allNegativePhrases.addAll(allCloseToNegativePhrases.keySet());
+      if(logFile != null && wordVectors != null){
+        for(CandidatePhrase p : allCloseToNegativePhrases.keySet()){
+          if(wordVectors.containsKey(p.getPhrase())){
+            logFile.write(p.getPhrase()+"-NN " + ArrayUtils.toString(wordVectors.get(p.getPhrase()), " ")+"\n");
+          }
+        }
+      }
+    }
 
 
-    System.out.println("all positive phrases are  " + allPositivePhrases);
+
+
+    System.out.println("all positive phrases of size " + allPositivePhrases.size() + " are  " + allPositivePhrases);
     for(CandidatePhrase candidate: allPositivePhrases) {
       Counter<ScorePhraseMeasures> feat = null;
       //CandidatePhrase candidate = new CandidatePhrase(l.word());
