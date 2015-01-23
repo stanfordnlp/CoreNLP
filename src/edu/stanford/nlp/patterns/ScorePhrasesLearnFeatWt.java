@@ -532,7 +532,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             Map<String, CandidatePhrase> longestMatching = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
 
             boolean ignoreclass = false;
-            CandidatePhrase candidate = null;
+            CandidatePhrase candidate =  CandidatePhrase.createOrGet(l.word());;
 
             for (Class cl : otherIgnoreClasses.keySet()) {
               if ((Boolean) l.get(cl)) {
@@ -541,11 +541,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
               candidate = longestMatching.get("OTHERSEM");
             }
 
-            if(!ignoreclass){
-              CandidatePhrase ph = CandidatePhrase.createOrGet(l.word());
-              ignoreclass = constVars.functionWords.contains(l.word()) ;
-              if(ignoreclass)
-                candidate = CandidatePhrase.createOrGet(l.word());
+            if(!ignoreclass) {
+              ignoreclass = constVars.functionWords.contains(l.word());
             }
 
 
