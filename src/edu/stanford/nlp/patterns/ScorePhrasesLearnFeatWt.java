@@ -871,9 +871,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       }
     }
 
-    Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases = null;
-    if(expandPos || expandNeg)
-      allPossibleNegativePhrases = getAllPossibleNegativePhrases(answerLabel);
+    //computing this regardless of expandpos and expandneg because we reject all positive words that occur in negatives (can happen in multi word phrases etc)
+    Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases  = getAllPossibleNegativePhrases(answerLabel);
 
     RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
     int numpos = 0;
