@@ -533,13 +533,14 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             Map<String, CandidatePhrase> longestMatching = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
 
             boolean ignoreclass = false;
-            CandidatePhrase candidate =  CandidatePhrase.createOrGet(l.word());;
+            CandidatePhrase candidate =  CandidatePhrase.createOrGet(l.word());
 
             for (Class cl : otherIgnoreClasses.keySet()) {
               if ((Boolean) l.get(cl)) {
                 ignoreclass = true;
+                candidate = longestMatching.get("OTHERSEM");
+                break;
               }
-              candidate = longestMatching.get("OTHERSEM");
             }
 
             if(!ignoreclass) {
@@ -680,6 +681,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       allPositivePhrases.addAll(allCloseToPositivePhrases.keySet());
     }
 
+    System.out.println("all positive phrases are  " + allPositivePhrases);
     for(CandidatePhrase candidate: allPositivePhrases) {
       Counter<ScorePhraseMeasures> feat = null;
       //CandidatePhrase candidate = new CandidatePhrase(l.word());
@@ -720,6 +722,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       allNegativePhrases = selectedNegPhrases;
     }
 
+    System.out.println("all negative phrases are " + allNegativePhrases);
     for(CandidatePhrase negative: allNegativePhrases){
       Counter<ScorePhraseMeasures> feat;
       //CandidatePhrase candidate = new CandidatePhrase(l.word());
