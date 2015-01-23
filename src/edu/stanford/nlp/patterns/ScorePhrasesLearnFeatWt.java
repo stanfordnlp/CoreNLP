@@ -50,6 +50,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           Data.rawFreq = new ClassicCounter<CandidatePhrase>();
           Data.computeRawFreqIfNull(PatternFactory.numWordsCompound, constvar.batchProcessSents);
       }
+      Redwood.log(Redwood.DBG, "Reading word vectors");
       wordVectors = new HashMap<String, double[]>();
       for (String line : IOUtils.readLines(constVars.wordVectorFile)) {
         String[] tok = line.split("\\s+");
@@ -66,6 +67,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
         } else
           CandidatePhrase.deletePhrase(p);
       }
+      Redwood.log(Redwood.DBG, "Read " + wordVectors.size() + " word vectors");
     }
   }
 
