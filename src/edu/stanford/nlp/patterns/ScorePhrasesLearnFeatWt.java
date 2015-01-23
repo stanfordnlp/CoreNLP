@@ -1036,9 +1036,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     System.out.println("Before feature count threshold, dataset stats are ");
     dataset.summaryStatistics();
 
-    int threshold = 2;
-    dataset.applyFeatureCountThreshold(threshold);
-    System.out.println("AFTER feature count threshold of " + threshold + ", dataset stats are ");
+
+    dataset.applyFeatureCountThreshold(constVars.featureCountThreshold);
+    System.out.println("AFTER feature count threshold of " + constVars.featureCountThreshold + ", dataset stats are ");
     dataset.summaryStatistics();
 
     Redwood.log(Redwood.DBG, "Eventually, number of positive datums:  " + numpos + " and number of negative datums: " + allNegativePhrases.size());

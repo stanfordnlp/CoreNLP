@@ -462,6 +462,9 @@ public class ConstantsAndVariables<E> implements Serializable{
 
   Map<String, Map<String, Boolean>> goldEntities = new HashMap<String, Map<String, Boolean>>();
 
+  @Option(name="featureCountThreshold")
+  public int featureCountThreshold = 1;
+
   public Set<String> getLabels() {
     return labels;
   }
