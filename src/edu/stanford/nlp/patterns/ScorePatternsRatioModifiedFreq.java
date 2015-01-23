@@ -142,7 +142,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
 
         if (constVars.usePatternEvalEditDistOther) {
           editDistanceFromOtherSemanticBinaryScores.setCount(gc,
-              constVars.getEditDistanceScoresOtherClassThreshold(g));
+              constVars.getEditDistanceScoresOtherClassThreshold(label, g));
         }
 
         if (constVars.usePatternEvalEditDistSame) {

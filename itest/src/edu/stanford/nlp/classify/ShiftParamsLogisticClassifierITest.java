@@ -1,5 +1,7 @@
 package edu.stanford.nlp.classify;
 
+import edu.stanford.nlp.ling.BasicDatum;
+import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.stats.ClassicCounter;
 import junit.framework.Assert;
@@ -10,22 +12,22 @@ import org.junit.Test;
  */
 public class ShiftParamsLogisticClassifierITest {
 
-  private static <L, F> RVFDatum<L, F> newDatum(L label,
-                                                F[] features,
-                                                Double[] counts) {
+  private static <L, F> BasicDatum<L, F> newDatum(L label,
+                                                  F[] features,
+                                                  Double[] counts) {
     ClassicCounter<F> counter = new ClassicCounter<F>();
     for (int i = 0; i < features.length; i++) {
       counter.setCount(features[i], counts[i]);
     }
-    return new RVFDatum<L, F>(counter, label);
+    return new BasicDatum<L, F>(counter.keySet(), label);
   }
 
   private static void testStrBinaryDatums(double d1f1, double d1f2, double d2f1, double d2f2) throws Exception {
-    RVFDataset<String, String> trainData = new RVFDataset<String, String>();
-    RVFDatum<String, String> d1 = newDatum("alpha",
+    Dataset<String, String> trainData = new Dataset<String, String>();
+    Datum<String, String> d1 = newDatum("alpha",
       new String[]{"f1", "f2"},
       new Double[]{d1f1, d1f2});
-    RVFDatum<String, String> d2 = newDatum("beta",
+    Datum<String, String> d2 = newDatum("beta",
       new String[]{"f1", "f2"},
       new Double[]{d2f1, d2f2});
     trainData.add(d1);
