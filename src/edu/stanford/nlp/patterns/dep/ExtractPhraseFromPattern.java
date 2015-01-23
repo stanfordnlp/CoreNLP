@@ -23,8 +23,6 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
-import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.CollectionValuedMap;
@@ -102,7 +100,7 @@ public class ExtractPhraseFromPattern {
     for (SemgrexPattern pattern : typePatterns) {
       Collection<IndexedWord> triggerWords = getSemGrexPatternNodes(g,
           textTokens, typePhrases, typeIndices, pattern,
-          findSubTrees, extractedPhrases, lowercase, o -> true, o -> null);
+          findSubTrees, extractedPhrases, lowercase, o -> true);
       for (IndexedWord w : triggerWords) {
         if (!typeTriggerWords.contains(w))
           typeTriggerWords.add(w);
@@ -127,7 +125,7 @@ public class ExtractPhraseFromPattern {
   public Set<IndexedWord> getSemGrexPatternNodes(SemanticGraph g,
       List<String> tokens, Collection<String> outputNodes, Collection<IntPair> outputIndices,
       SemgrexPattern pattern, boolean findSubTrees,
-      Collection<ExtractedPhrase> extractedPhrases, boolean lowercase, Function<CoreLabel, Boolean> acceptWord, Function<Pair<IndexedWord, SemanticGraph>, Counter<String>> extractFeat) {
+      Collection<ExtractedPhrase> extractedPhrases, boolean lowercase, Function<CoreLabel, Boolean> acceptWord) {
 
     Set<IndexedWord> foundWordsParents = new HashSet<IndexedWord>();
     SemgrexMatcher m = pattern.matcher(g, lowercase);
@@ -169,19 +167,19 @@ public class ExtractPhraseFromPattern {
       System.out.println("g is ");
       g.prettyPrint();
       printSubGraph(g, w, cutoffrelations, tokens, outputNodes, outputIndices, seenNodes, new ArrayList<IndexedWord>(),
-          findSubTrees, extractedPhrases, pattern, acceptWord, extractFeat);
+          findSubTrees, extractedPhrases, pattern, acceptWord);
     }
     return foundWordsParents;
   }
 
   //Here, the index (startIndex, endIndex) seems to be inclusive of the endIndex
    public void printSubGraph(SemanticGraph g, IndexedWord w,
-      List<String> additionalCutOffRels,
-      List<String> textTokens,
-      Collection<String> listOfOutput, Collection<IntPair> listOfOutputIndices,
-      List<IndexedWord> seenNodes, List<IndexedWord> doNotAddThese,
-      boolean findSubTrees, Collection<ExtractedPhrase> extractedPhrases,
-      SemgrexPattern pattern, Function<CoreLabel, Boolean> acceptWord, Function<Pair<IndexedWord, SemanticGraph>, Counter<String>> extractFeat) {
+                             List<String> additionalCutOffRels,
+                             List<String> textTokens,
+                             Collection<String> listOfOutput, Collection<IntPair> listOfOutputIndices,
+                             List<IndexedWord> seenNodes, List<IndexedWord> doNotAddThese,
+                             boolean findSubTrees, Collection<ExtractedPhrase> extractedPhrases,
+                             SemgrexPattern pattern, Function<CoreLabel, Boolean> acceptWord) {
     try {
       if (seenNodes.contains(w))
         return;
@@ -200,7 +198,7 @@ public class ExtractPhraseFromPattern {
       for (IndexedWord w1 : andNodes) {
         printSubGraph(g, w1, additionalCutOffRels, textTokens,
             listOfOutput, listOfOutputIndices, seenNodes,
-            doNotAddThese, findSubTrees, extractedPhrases, pattern, acceptWord, extractFeat);
+            doNotAddThese, findSubTrees, extractedPhrases, pattern, acceptWord);
 
       }
       doNotAddThese.addAll(andNodes);
@@ -287,7 +285,7 @@ public class ExtractPhraseFromPattern {
                 printSubGraph(g, word, additionalCutOffRels,
                     textTokens, listOfOutput,
                     listOfOutputIndices, seenNodes, doNotAddThese,
-                    findSubTrees, extractedPhrases, pattern, acceptWord, extractFeat);
+                    findSubTrees, extractedPhrases, pattern, acceptWord);
           }
         }
       }

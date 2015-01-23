@@ -331,7 +331,7 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name = "wordClassClusterFile")
   String wordClassClusterFile = null;
 
-  private Map<String, Integer> wordClassClusters = null;
+  private Map<String, Integer> wordClassClusters = new HashMap<String, Integer>();
 
   /**
    * General cluster file, if you wanna use it somehow, in which each line is
@@ -953,7 +953,12 @@ public class ConstantsAndVariables<E> implements Serializable{
   Map<String, Counter<CandidatePhrase>> learnedWords = new HashMap<String, Counter<CandidatePhrase>>();
 
   public Counter<CandidatePhrase> getLearnedWords(String label) {
-    return this.learnedWords.get(label);
+    Counter<CandidatePhrase> learned = this.learnedWords.get(label);
+    if(learned == null){
+      learned = new ClassicCounter<CandidatePhrase>();
+      this.learnedWords.put(label, learned);
+    }
+    return learned;
   }
 
   public Map<String, Counter<CandidatePhrase>> getLearnedWords() {

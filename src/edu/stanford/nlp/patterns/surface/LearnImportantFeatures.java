@@ -12,6 +12,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.RVFDatum;
+import edu.stanford.nlp.patterns.CandidatePhrase;
 import edu.stanford.nlp.patterns.DataInstance;
 import edu.stanford.nlp.patterns.PatternsAnnotations;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -191,15 +192,15 @@ public class LearnImportantFeatures {
     else
       label = "O";
     
-      CollectionValuedMap<String, String> matchedPhrases = l
+      CollectionValuedMap<String, CandidatePhrase> matchedPhrases = l
           .get(PatternsAnnotations.MatchedPhrases.class);
       if (matchedPhrases == null) {
-        matchedPhrases = new CollectionValuedMap<String, String>();
-        matchedPhrases.add(label, l.word());
+        matchedPhrases = new CollectionValuedMap<String, CandidatePhrase>();
+        matchedPhrases.add(label, CandidatePhrase.createOrGet(l.word()));
       }
 
-      for (String w : matchedPhrases.allValues()) {
-        Integer num = this.clusterIds.get(w);
+      for (CandidatePhrase w : matchedPhrases.allValues()) {
+        Integer num = this.clusterIds.get(w.getPhrase());
         if (num == null)
           num = -1;
         feat.setCount("Cluster-" + num, 1.0);

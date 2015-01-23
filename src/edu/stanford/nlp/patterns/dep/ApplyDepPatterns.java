@@ -169,14 +169,15 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
 
     }
 
+  Function<CoreLabel, Boolean> matchingWordRestriction = new Function<CoreLabel, Boolean>(){
+    @Override
+    public Boolean apply(CoreLabel coreLabel) {
+      return matchedRestriction(coreLabel, label);
+    }
+  };
+
   private Collection<ExtractedPhrase> getMatchedTokensIndex(SemanticGraph graph, SemgrexPattern pattern, DataInstance sent) {
 
-    Function<CoreLabel, Boolean> matchingWordRestriction = new Function<CoreLabel, Boolean>(){
-      @Override
-      public Boolean apply(CoreLabel coreLabel) {
-        return matchedRestriction(coreLabel, label);
-      }
-    };
 
     //TODO: look at the ignoreCommonTags flag
     ExtractPhraseFromPattern extract = new ExtractPhraseFromPattern(false, PatternFactory.numWordsCompound);
@@ -207,7 +208,7 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
     };
 
     extract.getSemGrexPatternNodes(graph, tokens, outputPhrases, outputIndices,
-      pattern, findSubTrees, extractedPhrases, constVars.matchLowerCaseContext, matchingWordRestriction, extractFeatures);
+      pattern, findSubTrees, extractedPhrases, constVars.matchLowerCaseContext, matchingWordRestriction);
 
 
     /*
