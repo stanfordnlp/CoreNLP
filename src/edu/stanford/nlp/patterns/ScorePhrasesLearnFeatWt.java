@@ -560,7 +560,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             }
 
             //Do not add to positive if the word is a "negative" (stop word, english word, ...)
-            if(allPossibleNegativePhrases.contains(candidate))
+            if(allPossibleNegativePhrases.contains(candidate) || PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches())
               continue;
 
             allPositivePhrases.add(candidate);
@@ -609,7 +609,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
               allNegativePhrases.add(candidate);
             }
 
-            if(!negative && !ignoreclass && constVars.expandPositivesWhenSampling & !allPossibleNegativePhrases.contains(candidate)) {
+            if(!negative && !ignoreclass && constVars.expandPositivesWhenSampling & !allPossibleNegativePhrases.contains(candidate) && !PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches()) {
               if (!allCloseToPositivePhrases.containsKey(candidate)) {
                 Counter<CandidatePhrase> sims;
                 assert candidate != null;
@@ -774,7 +774,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     //allPositivePhrases.addAll(knownPositivePhrases);
 
     if(constVars.expandPositivesWhenSampling){
-      Counters.retainTop(allCloseToPositivePhrases, (int) (allCloseToPositivePhrases.size()*constVars.subSampleUnkAsPosUsingSimPercentage));
+      //Counters.retainTop(allCloseToPositivePhrases, (int) (allCloseToPositivePhrases.size()*constVars.subSampleUnkAsPosUsingSimPercentage));
       Redwood.log("Expanding positives by adding " + allCloseToPositivePhrases + " phrases");
       allPositivePhrases.addAll(allCloseToPositivePhrases.keySet());
     }
@@ -804,7 +804,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     Redwood.log(Redwood.DBG, "Number of unknown phrases is " + allUnknownPhrases.size());
 
     if(constVars.subsampleUnkAsNegUsingSim){
-      Set<CandidatePhrase> chosenUnknown = chooseUnknownAsNegatives(allUnknownPhrases, answerLabel, constVars.subSampleUnkAsNegUsingSimPercentage, allPositivePhrases, allPossibleNegativePhrases, logFile);
+      double subSampleUnkAsNegUsingSimPercentage = 1.0;
+      Set<CandidatePhrase> chosenUnknown = chooseUnknownAsNegatives(allUnknownPhrases, answerLabel, subSampleUnkAsNegUsingSimPercentage, allPositivePhrases, allPossibleNegativePhrases, logFile);
       Redwood.log(Redwood.DBG, "Choosing " + chosenUnknown.size() + " unknowns as negative based to their similarity to the positive phrases");
       allNegativePhrases.addAll(chosenUnknown);
     }

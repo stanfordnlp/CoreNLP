@@ -430,8 +430,8 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="subsampleUnkAsNegUsingSim", gloss="When learning a classifier, remove phrases from unknown phrases that are too close to the positive phrases")
   public boolean subsampleUnkAsNegUsingSim = false;
 
-  @Option(name="subSampleUnkAsNegUsingSimPercentage", gloss="When using subsampleUnkAsNegUsingSim, select bottom %")
-  public double subSampleUnkAsNegUsingSimPercentage = 0.95;
+//  @Option(name="subSampleUnkAsNegUsingSimPercentage", gloss="When using subsampleUnkAsNegUsingSim, select bottom %")
+//  public double subSampleUnkAsNegUsingSimPercentage = 0.95;
 
   @Option(name="expandPositivesWhenSampling", gloss="when sampling for learning feature wts for learning phrases, expand the positives")
   public boolean expandPositivesWhenSampling = false;
@@ -442,8 +442,8 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="positiveSimilarityThresholdLowPrecision", gloss="used for not choosing close unknowns as positives")
   public double positiveSimilarityThresholdLowPrecision  = 0.5;
 
-  @Option(name="subSampleUnkAsPosUsingSimPercentage", gloss="When using expandPositivesWhenSampling, select top % after applying the threshold")
-  public double subSampleUnkAsPosUsingSimPercentage = 0.05;
+//  @Option(name="subSampleUnkAsPosUsingSimPercentage", gloss="When using expandPositivesWhenSampling, select top % after applying the threshold")
+//  public double subSampleUnkAsPosUsingSimPercentage = 0.05;
 
   @Option(name="wordVectorFile", gloss = "if using word vectors for computing similarities")
   public String wordVectorFile = null;
