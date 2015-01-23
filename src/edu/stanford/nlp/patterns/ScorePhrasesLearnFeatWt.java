@@ -954,7 +954,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     if(constVars.expandPositivesWhenSampling){
       //TODO: patwtbyfrew
       //Counters.retainTop(allCloseToPositivePhrases, (int) (allCloseToPositivePhrases.size()*constVars.subSampleUnkAsPosUsingSimPercentage));
-      Redwood.log("Expanding positives by adding " + closeToPositivesFirstIter + " phrases");
+      Redwood.log("Expanding positives by adding " + Counters.toSortedString(closeToPositivesFirstIter, closeToPositivesFirstIter.size(),"%1$s:%2$f", "\t")+ " phrases");
+
       allPositivePhrases.addAll(closeToPositivesFirstIter.keySet());
 
       //write log
@@ -970,7 +971,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     if(constVars.expandNegativesWhenSampling){
       //TODO: patwtbyfrew
       //Counters.retainTop(allCloseToPositivePhrases, (int) (allCloseToPositivePhrases.size()*constVars.subSampleUnkAsPosUsingSimPercentage));
-      Redwood.log("Expanding negatives by adding " + closeToNegativesFirstIter + " phrases");
+      Redwood.log("Expanding negatives by adding " + Counters.toSortedString(closeToNegativesFirstIter , closeToNegativesFirstIter.size(), "%1$s:%2$f","\t")+ " phrases");
       allNegativePhrases.addAll(closeToNegativesFirstIter.keySet());
 
       //write log
