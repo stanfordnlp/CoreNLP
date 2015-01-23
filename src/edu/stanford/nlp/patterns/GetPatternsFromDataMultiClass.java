@@ -1068,10 +1068,11 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
           if (indices != null && !indices.isEmpty()){
             String ph = StringUtils.join(s, " ");
             for (int index : indices){
-              //TODO: add here
+              //TODO: add here (what? this comment doens't make any sense. I shd start adding sensible comments - unlike the current one I am typing.)
 
-              if(writeMatchedTokensIdsForEachPhrase)
-                Data.matchedTokensForEachPhrase.add(ph, new Triple(k, index, s.length));
+              if(writeMatchedTokensIdsForEachPhrase) {
+                addToMatchedTokensByPhrase(ph, k, index, s.length);
+              }
 
               for (int i = 0; i < s.length; i++) {
                 matchedPhrases.add(index + i, ph);
@@ -1120,6 +1121,16 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       }
       return newsent;
     }
+  }
+
+  static private void addToMatchedTokensByPhrase(String ph, String sentid, int index, int length){
+    if(!Data.matchedTokensForEachPhrase.containsKey(ph))
+      Data.matchedTokensForEachPhrase.put(ph, new HashMap<String, List<Integer>>());
+    Map<String, List<Integer>> matcheds = Data.matchedTokensForEachPhrase.get(ph);
+    if(!matcheds.containsKey(sentid))
+      matcheds.put(sentid, new ArrayList<Integer>());
+    for (int i = 0; i < length; i++)
+      matcheds.get(sentid).add(index + i);
   }
 
   public Map<String, TwoDimensionalCounter<E, String>> patternsandWords = null;
@@ -1946,7 +1957,8 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
             String phStr = StringUtils.join(ph, " ");
 
             if(constVars.writeMatchedTokensIdsForEachPhrase)
-              Data.matchedTokensForEachPhrase.add(phStr, new Triple(sentEn.getKey(), idx, ph.length));
+              addToMatchedTokensByPhrase(phStr, sentEn.getKey(), idx, ph.length);
+
 
             Redwood.log(ConstantsAndVariables.extremedebug,"Labeling because of phrase " + phStr);
             for (int j = 0; j < ph.length; j++) {
@@ -2161,21 +2173,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
 
       if(constVars.writeMatchedTokensIdsForEachPhrase){
         String matchedtokensfilename = constVars.outDir + "/" + constVars.identifier  + "/tokenids4matchedphrases" + ".json";
-        JsonObjectBuilder pats = Json.createObjectBuilder();
-
-        for (Entry<String, Collection<Triple<String, Integer, Integer>>> en : Data.matchedTokensForEachPhrase.entrySet()) {
-
-          JsonArrayBuilder arrobj =Json.createArrayBuilder();
-          for (Triple<String, Integer, Integer> sen : en.getValue()) {
-            JsonObjectBuilder obj = Json.createObjectBuilder();
-            obj.add("id",sen.first());
-            obj.add("start", sen.second());
-            obj.add("length", sen.third());
-            arrobj.add(obj);
-          }
-          pats.add(en.getKey(), arrobj);
-        }
-        IOUtils.writeStringToFile(pats.build().toString(), matchedtokensfilename, "utf8");
+        IOUtils.writeStringToFile(matchedTokensByPhraseJsonString(), matchedtokensfilename, "utf8");
 
       }
     }
@@ -2195,6 +2193,26 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       wordsOutput.get(label).close();
       patternsOutput.get(label).close();
     }
+  }
+
+  public String matchedTokensByPhraseJsonString(){
+    JsonObjectBuilder pats = Json.createObjectBuilder();
+
+    for (Entry<String, Map<String, List<Integer>>> en : Data.matchedTokensForEachPhrase.entrySet()) {
+
+      JsonArrayBuilder arrobj =Json.createArrayBuilder();
+      for (Entry<String, List<Integer>> sen : en.getValue().entrySet()) {
+        JsonObjectBuilder obj = Json.createObjectBuilder();
+        JsonArrayBuilder tokens = Json.createArrayBuilder();
+        for(Integer i : sen.getValue()){
+          tokens.add(i);
+        }
+        obj.add("id",tokens);
+        arrobj.add(obj);
+      }
+      pats.add(en.getKey(), arrobj);
+    }
+    return pats.build().toString();
   }
 
   public Pair<Counter<E>, Counter<String>> iterateExtractApply4Label(String label, E p0, Counter<String> p0Set,

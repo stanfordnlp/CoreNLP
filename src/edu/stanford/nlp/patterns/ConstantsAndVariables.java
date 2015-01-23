@@ -25,6 +25,10 @@ import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.TypesafeMap.Key;
 import edu.stanford.nlp.util.logging.Redwood;
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+
 public class ConstantsAndVariables<E> implements Serializable{
 
   private static final long serialVersionUID = 1L;
@@ -892,6 +896,17 @@ public class ConstantsAndVariables<E> implements Serializable{
 
   public Map<String, Counter<String>> getLearnedWords() {
     return learnedWords;
+  }
+
+  public String getLearnedWordsAsJson(){
+    JsonObjectBuilder obj = Json.createObjectBuilder();
+    for(Map.Entry<String, Counter<String>> en: learnedWords.entrySet()){
+      JsonArrayBuilder arr = Json.createArrayBuilder();
+      for(String k: en.getValue().keySet())
+        arr.add(k);
+      obj.add(en.getKey(), arr);
+    }
+    return obj.build().toString();
   }
 
   public void setLearnedWords(Counter<String> words, String label) {

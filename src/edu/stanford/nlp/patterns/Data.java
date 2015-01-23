@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -36,7 +37,7 @@ public class Data {
 
   public static Counter<String> googleNGram = new ClassicCounter<String>();
 
-  public static CollectionValuedMap<String, Triple<String, Integer, Integer>> matchedTokensForEachPhrase = new CollectionValuedMap<String, Triple<String, Integer, Integer>>(MapFactory.CONCURRENT_MAP_FACTORY, CollectionFactory.ARRAY_LIST_FACTORY, false);
+  public static Map<String, Map<String, List<Integer>>> matchedTokensForEachPhrase = new ConcurrentHashMap<>();
 
   public static void computeRawFreqIfNull(Map<String, DataInstance> sents, int numWordsCompound) {
       for (DataInstance l : sents.values()) {
