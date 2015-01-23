@@ -245,24 +245,30 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             donotuse = true;
             break;
           }
-          if(!wordVectors.containsKey(pos.getPhrase()))
+          if (!wordVectors.containsKey(pos.getPhrase()))
             continue;
-          double[] d2 = wordVectors.get(pos.getPhrase());
 
-          double sum = 0;
-          double d1sq = 0;
-          double d2sq = 0;
-          for (int i = 0; i < d1.length; i++) {
-            sum += d1[i] * d2[i];
-            d1sq += d1[i] * d1[i];
-            d2sq += d2[i] * d2[i];
+          PhrasePair pair = new PhrasePair(p.getPhrase(), pos.getPhrase());
+          if (cacheSimilarities.containsKey(pair))
+            avgSim = cacheSimilarities.getCount(pair);
+          else {
+            double[] d2 = wordVectors.get(pos.getPhrase());
+
+            double sum = 0;
+            double d1sq = 0;
+            double d2sq = 0;
+            for (int i = 0; i < d1.length; i++) {
+              sum += d1[i] * d2[i];
+              d1sq += d1[i] * d1[i];
+              d2sq += d2[i] * d2[i];
+            }
+            double sim = sum / (Math.sqrt(d1sq) * Math.sqrt(d2sq));
+            avgSim += sim;
           }
-          double sim = sum / (Math.sqrt(d1sq) * Math.sqrt(d2sq));
-          avgSim += sim;
+
+          avgSim /= positivePhrases.size();
+          cacheSimilarities.setCount(pair, avgSim);
         }
-
-        avgSim /= positivePhrases.size();
-
         if(!donotuse){
           sims.setCount(p, avgSim);
           if(allMaxSim.get() < avgSim)
@@ -384,8 +390,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     CandidatePhrase k = Counters.argmax(sims);
     System.out.println("Maximum similarity was " + sims.getCount(k) + " for word " + k);
 
-    Counter<CandidatePhrase> removed = Counters.retainBelow(sims, constVars.positiveSimilarityThreshold);
-    System.out.println("removing phrases as negative phrases that were higher that positive similarity threshold of " + constVars.positiveSimilarityThreshold + removed);
+    Counter<CandidatePhrase> removed = Counters.retainBelow(sims, constVars.positiveSimilarityThresholdLowPrecision);
+    System.out.println("removing phrases as negative phrases that were higher that positive similarity threshold of " + constVars.positiveSimilarityThresholdLowPrecision + removed);
     if(logFile != null){
       for(Entry<CandidatePhrase, Double> en: removed.entrySet())
         if(wordVectors.containsKey(en.getKey().getPhrase()))
@@ -586,7 +592,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
                   sims = computeSimWithWordCluster(Arrays.asList(candidate), knownPositivePhrases, new AtomicDouble());
 
                 double sim = sims.getCount(candidate);
-                if (sim > constVars.positiveSimilarityThreshold)
+                if (sim > constVars.positiveSimilarityThresholdHighPrecision)
                   allCloseToPositivePhrases.setCount(candidate, sim);
               }
             }
@@ -611,13 +617,38 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
   }
 
+  private class PhrasePair{
+    final String p1;
+    final String p2;
+    final int hashCode;
+    public PhrasePair(String p1, String p2) {
+      if(p1.compareTo(p2) <=0)
+      {
+        this.p1 = p1;
+        this.p2 = p2;
+      }else
+      {
+        this.p1 = p2;
+        this.p2 = p1;
+      }
+
+      this.hashCode = p1.hashCode() + p2.hashCode() + 331;
+    }
+
+    @Override
+    public int hashCode(){
+      return hashCode;
+    }
+  }
+
+  Counter<PhrasePair> cacheSimilarities = new ConcurrentHashCounter<PhrasePair>();
 
   public RVFDataset<String, ScorePhraseMeasures> choosedatums(boolean forLearningPattern, String answerLabel,
       TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
       Counter<E> allSelectedPatterns, boolean computeRawFreq) throws IOException {
 
     Counter<Integer> distSimClustersOfPositive = new ClassicCounter<Integer>();
-    if(constVars.expandPositivesWhenSampling){
+    if(constVars.expandPositivesWhenSampling && !constVars.useWordVectorsToComputeSim){
       for(CandidatePhrase s: CollectionUtils.union(constVars.getLearnedWords(answerLabel).keySet(), constVars.getSeedLabelDictionary().get(answerLabel))){
         String[] toks = s.getPhrase().split("\\s+");
         if(!constVars.getWordClassClusters().containsKey(s.getPhrase())){
