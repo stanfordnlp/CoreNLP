@@ -29,8 +29,8 @@ public class BasicFeatureFactory extends FeatureFactory {
       features.add(wtFeature + NULL);
       return;
     }
-    String tag = label.get(TreeCoreAnnotations.HeadTagAnnotation.class).label().value();
-    String word = label.get(TreeCoreAnnotations.HeadWordAnnotation.class).label().value();
+    String tag = label.get(TreeCoreAnnotations.HeadTagLabelAnnotation.class).value();
+    String word = label.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class).value();
 
     // TODO: check to see if this is slow because of the string concat
     features.add(wtFeature + tag + "-" + word);

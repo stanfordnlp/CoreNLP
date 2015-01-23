@@ -73,7 +73,7 @@ public class ScorePhrases<E extends Pattern> {
     Counter<CandidatePhrase> finalwords = new ClassicCounter<CandidatePhrase>();
 
     while (termIter.hasNext()) {
-      
+
       if (finalwords.size() >= constVars.numWordsToAdd){
         break;
       }
@@ -428,9 +428,9 @@ public class ScorePhrases<E extends Pattern> {
     }
 
 
-    
+
     Map<String, Set<String>> sentidswithfilerest = constVars.invertedIndex.getFileSentIdsFromPats(patternsLearnedThisIterRest.keySet(), constVars.getPatternIndex());
-    
+
     if (constVars.batchProcessSents) {
       List<File> filesToLoad;
       if(patternsLearnedThisIterConsistsOnlyGeneralized.size() > 0)
@@ -444,7 +444,7 @@ public class ScorePhrases<E extends Pattern> {
 //          else
             filename = fname;
           filesToLoad.add(new File(filename));
-        }  
+        }
       }
 
       for (File fname : filesToLoad) {
@@ -452,13 +452,13 @@ public class ScorePhrases<E extends Pattern> {
         Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(fname);
 
         if(sentidswithfilerest != null && !sentidswithfilerest.isEmpty()){
-          
+
           String filename;
 //          if(constVars.usingDirForSentsInIndex)
 //            filename = constVars.saveSentencesSerDir+"/"+fname.getName();
 //          else
             filename = fname.getAbsolutePath();
-          
+
           Set<String> sentIDs = sentidswithfilerest.get(filename);
           if (sentIDs != null){
             this.runParallelApplyPats(sents, sentIDs, label, patternsLearnedThisIterRest, wordsandLemmaPatExtracted, matchedTokensByPat);
@@ -487,7 +487,7 @@ public class ScorePhrases<E extends Pattern> {
       }
 
     } else {
-      
+
       if (sentidswithfilerest != null && !sentidswithfilerest.isEmpty()) {
         String filename = CollectionUtils.toList(sentidswithfilerest.keySet()).get(0);
         Set<String> sentids = sentidswithfilerest.get(filename);
@@ -592,7 +592,7 @@ public class ScorePhrases<E extends Pattern> {
       } else
         Data.processedDataFreq = Data.rawFreq;
     }
-    
+
     if (constVars.wordScoring.equals(WordScoring.WEIGHTEDNORM)) {
 
       for (CandidatePhrase en : wordsPatExtracted.firstKeySet()) {
@@ -734,7 +734,7 @@ public class ScorePhrases<E extends Pattern> {
         Redwood.log(Redwood.DBG, "\nJustification for phrases:\n");
         for (CandidatePhrase word : finalwords.keySet()) {
           Redwood.log(
-              Redwood.DBG, "Phrase " + 
+              Redwood.DBG, "Phrase " +
               word
                   + " extracted because of patterns: \t"
                   + Counters.toSortedString(wordsPatExtracted.getCounter(word),

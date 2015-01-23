@@ -54,4 +54,33 @@ public class TokenizerAnnotatorTest extends TestCase {
       // yay, passed
     }
   }
+
+  public void testDefaultNoNLsPipeline() {
+    String t = "Text with \n\n a new \nline.";
+    List<String> tWords = Arrays.asList(new String[] {
+        "Text",
+        "with",
+        "a",
+        "new",
+        "line",
+        "."
+    });
+
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize");
+    Annotation ann = new Annotation(t);
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(ann);
+    Iterator<String> it = tWords.iterator();
+    for (CoreLabel word : ann.get(CoreAnnotations.TokensAnnotation.class)) {
+      assertEquals("Bung token in new CoreLabel usage", it.next(), word.word());
+    }
+    assertFalse("Too few tokens in new CoreLabel usage", it.hasNext());
+
+    Iterator<String> it2 = tWords.iterator();
+    for (CoreLabel word : ann.get(CoreAnnotations.TokensAnnotation.class)) {
+      assertEquals("Bung token in new CoreLabel usage", it2.next(), word.get(CoreAnnotations.TextAnnotation.class));
+    }
+    assertFalse("Too few tokens in new CoreLabel usage", it2.hasNext());
+  }
 }

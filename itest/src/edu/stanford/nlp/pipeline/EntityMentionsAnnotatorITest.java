@@ -13,17 +13,18 @@ import java.util.Properties;
  *
  * @author Angel Chang
  */
-public class MentionsAnnotatorITest extends TestCase {
+public class EntityMentionsAnnotatorITest extends TestCase {
   static AnnotationPipeline pipeline = null;
-  protected static final String MENTIONS_ANNOTATOR_NAME = "mentions";
+  protected static final String ENTITY_MENTIONS_ANNOTATOR_NAME = "entitymentions";
 
   @Override
   public void setUp() throws Exception {
-    synchronized(MentionsAnnotatorITest.class) {
+    synchronized(EntityMentionsAnnotatorITest.class) {
       if (pipeline == null) {
         Properties props = new Properties();
         // TODO: remove need for ner and just have the mentions annotator
         props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner");
+	props.setProperty("ssplit.newlineIsSentenceBreak", "never");
         pipeline = new StanfordCoreNLP(props);
       }
     }
@@ -35,14 +36,14 @@ public class MentionsAnnotatorITest extends TestCase {
     return props;
   }
 
-  protected MentionsAnnotator getMentionsAnnotator()
+  protected EntityMentionsAnnotator getMentionsAnnotator()
   {
-    return new MentionsAnnotator(MENTIONS_ANNOTATOR_NAME, getDefaultProperties());
+    return new EntityMentionsAnnotator(ENTITY_MENTIONS_ANNOTATOR_NAME, getDefaultProperties());
   }
 
-  protected static MentionsAnnotator getMentionsAnnotator(Properties props)
+  protected static EntityMentionsAnnotator getMentionsAnnotator(Properties props)
   {
-    return new MentionsAnnotator(MENTIONS_ANNOTATOR_NAME, props);
+    return new EntityMentionsAnnotator(ENTITY_MENTIONS_ANNOTATOR_NAME, props);
   }
 
   protected static Annotation createDocument(String text) {
@@ -74,7 +75,7 @@ public class MentionsAnnotatorITest extends TestCase {
     List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
     tokens.get(3).setNER("ORGANIZATION");
     tokens.get(4).setNER("ORGANIZATION");
-    MentionsAnnotator annotator = getMentionsAnnotator();
+    EntityMentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
@@ -87,7 +88,7 @@ public class MentionsAnnotatorITest extends TestCase {
 
   public void testDates() {
     Annotation doc = createDocument("July 3rd July 4th are two different dates");
-    MentionsAnnotator annotator = getMentionsAnnotator();
+    EntityMentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
@@ -101,7 +102,7 @@ public class MentionsAnnotatorITest extends TestCase {
 
   public void testDates2() {
     Annotation doc = createDocument("July 3rd July 3rd are two mentions of the same date");
-    MentionsAnnotator annotator = getMentionsAnnotator();
+    EntityMentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
@@ -115,7 +116,7 @@ public class MentionsAnnotatorITest extends TestCase {
 
   public void testNumbers() {
     Annotation doc = createDocument("one two three four five");
-    MentionsAnnotator annotator = getMentionsAnnotator();
+    EntityMentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
@@ -134,7 +135,7 @@ public class MentionsAnnotatorITest extends TestCase {
         "Covering an area nearly 5,500 square meters, the new Dickson Poon University of Oxford China Center in St Hugh's College cost about 21 million pounds.\n" +
         "Dickson Poon, a philanthropist from Hong Kong, China, is the one of the major donors of the center, who contributed 10 million British pounds (16.14 million U.S. dollars).");
 
-    MentionsAnnotator annotator = getMentionsAnnotator();
+    EntityMentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);

@@ -634,10 +634,17 @@ public class EnglishGrammaticalRelations {
   public static final GrammaticalRelation CLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.English, "ccomp", "clausal complement",
         COMPLEMENT, "VP|SINV|S|ADJP|ADVP|NP(?:-.*)?", tregexCompiler,
+            // Weird case of verbs with direct S complement that is not an infinitive or participle
+            // ("I saw [him take the cake].", "making [him go crazy]")
             "VP < (S=target < (VP !<, TO|VBG|VBN) !$-- NP)",
+            // the canonical case of a SBAR[that] with an overt "that" or "whether"
             "VP < (SBAR=target < (S <+(S) VP) <, (IN|DT < /^(?i:that|whether)$/))",
+            // Conjoined SBAR otherwise in the canonical case
             "VP < (SBAR=target < (SBAR < (S <+(S) VP) <, (IN|DT < /^(?i:that|whether)$/)) < CC|CONJP)",
+            // This finds most ccomp SBAR[that] with omission of that, but only ones without dobj
             "VP < (SBAR=target < (S < VP) !$-- NP !<, (IN|WHADVP) !<2 (IN|WHADVP $- ADVP|RB))",
+            // Find ccomp SBAR[that] after dobj for clear marker verbs
+            "VP < (/^V/ < " + ccompObjVerbRegex + ") < (SBAR=target < (S < VP) $-- NP !<, (IN|WHADVP) !<2 (IN|WHADVP $- ADVP|RB))",
             "VP < (SBAR=target < (S < VP) !$-- NP <, (WHADVP < (WRB < /^(?i:how)$/)))",
             "VP < @SBARQ=target",  // Direct question: She asked "Who is in trouble"
             "VP < (/^VB/ < " + haveRegex + ") < (S=target < @NP < VP)",

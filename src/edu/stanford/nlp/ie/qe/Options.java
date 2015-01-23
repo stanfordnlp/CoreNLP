@@ -10,7 +10,7 @@ import java.util.Properties;
  * @author Angel Chang
  */
 public class Options {
-  static final String RULES_DIR = "C:\\code\\NLP\\javanlp\\projects\\core\\src\\edu\\stanford\\nlp\\ie\\qe\\rules";
+  static final String RULES_DIR = "edu/stanford/nlp/models/ie/qe/rules";
   static final String[] DEFAULT_GRAMMAR_FILES = {RULES_DIR + "/english.qe.txt"};
   static final String DEFAULT_PREFIX_FILE = RULES_DIR + "/prefixes.txt";
   static final String DEFAULT_UNITS_FILE = RULES_DIR + "/units.txt";

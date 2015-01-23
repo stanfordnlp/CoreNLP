@@ -16,6 +16,9 @@ import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.lexparser.Debinarizer;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
+import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
@@ -24,13 +27,13 @@ public class ShiftReduceParserQuery implements ParserQuery {
   Debinarizer debinarizer = new Debinarizer(false);
 
   List<? extends HasWord> originalSentence;
-  State initialState, finalState;
+  private State initialState, finalState;
   Tree debinarized;
 
   boolean success;
   boolean unparsable;
 
-  List<State> bestParses;
+  private List<State> bestParses;
 
   final ShiftReduceParser parser;
 
@@ -52,6 +55,14 @@ public class ShiftReduceParserQuery implements ParserQuery {
     initialState = ShiftReduceParser.initialStateFromGoldTagTree(tree);
     return parseInternal();
   }
+
+  // TODO: we are assuming that sentence final punctuation always has
+  // either . or PU as the tag.
+  private static TregexPattern rearrangeFinalPunctuationTregex =
+    TregexPattern.compile("__ !> __ <- (__=top <- (__ <<- (/[.]|PU/=punc < /[.!?。！？]/)))");
+
+  private static TsurgeonPattern rearrangeFinalPunctuationTsurgeon =
+    Tsurgeon.parseOperation("move punc >-1 top");
 
   private boolean parseInternal() {
     final int maxBeamSize = Math.max(parser.op.testOptions().beamSize, 1);
@@ -123,6 +134,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
       Collections.reverse(bestParses);
       finalState = bestParses.get(0);
       debinarized = debinarizer.transformTree(finalState.stack.peek());
+      debinarized = Tsurgeon.processPattern(rearrangeFinalPunctuationTregex, rearrangeFinalPunctuationTsurgeon, debinarized);
     }
     return success;
   }

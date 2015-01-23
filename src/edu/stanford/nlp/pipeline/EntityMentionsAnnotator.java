@@ -7,6 +7,7 @@ import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,18 +28,21 @@ import java.util.Set;
  *
  * @author Angel Chang
  */
-public class MentionsAnnotator implements Annotator {
+public class EntityMentionsAnnotator implements Annotator {
   // Currently relies on NER annotations being okay
   // - Replace with calling NER classifiers and timeAnnotator directly
   LabeledChunkIdentifier chunkIdentifier;
 
-  public MentionsAnnotator() {
+  // TODO: Provide properties
+  public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{};
+
+  public EntityMentionsAnnotator() {
     chunkIdentifier = new LabeledChunkIdentifier();
   }
 
   // note: used in annotate.properties
   @SuppressWarnings("UnusedDeclaration")
-  public MentionsAnnotator(String name, Properties props) {
+  public EntityMentionsAnnotator(String name, Properties props) {
     this();
   }
 

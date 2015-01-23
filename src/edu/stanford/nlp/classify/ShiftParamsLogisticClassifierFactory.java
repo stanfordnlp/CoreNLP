@@ -42,11 +42,13 @@ public class ShiftParamsLogisticClassifierFactory<L, F> implements ClassifierFac
     numFeatures = dataset.numFeatures();
     
     data = dataset.getDataArray();
-    data = augmentFeatureMatrix(data);
-    
-    dataValues = LogisticUtils.initializeDataValues(data);
-    if (dataset instanceof RVFDataset<?, ?>)
+    if (dataset instanceof RVFDataset<?, ?>) {
       dataValues = dataset.getValuesArray();
+    } else {
+      dataValues = LogisticUtils.initializeDataValues(data);
+    }
+    augmentFeatureMatrix(data, dataValues);
+
     labels = dataset.getLabelsArray();
 
     return new MultinomialLogisticClassifier<L, F>(trainWeights(), dataset.featureIndex, dataset.labelIndex);
@@ -76,15 +78,15 @@ public class ShiftParamsLogisticClassifierFactory<L, F> implements ClassifierFac
   }
   
   // augments the feature matrix to account for shift parameters, setting X := [X|I]
-  private int[][] augmentFeatureMatrix(int[][] features) {
-    int[][] result = new int[features.length][];
+  private void augmentFeatureMatrix(int[][] data, double[][] dataValues) {
     for (int i = 0; i < data.length; i++) {
-      int newLength = features[i].length + 1;
-      result[i] = Arrays.copyOf(features[i], newLength);
-      result[i][newLength - 1] = i + numFeatures;
+      int newLength = data[i].length + 1;
+      data[i] = Arrays.copyOf(data[i], newLength);
+      data[i][newLength - 1] = i + numFeatures;
+      
+      dataValues[i] = Arrays.copyOf(dataValues[i], newLength);
+      dataValues[i][newLength - 1] = 1;
     }
-    
-    return result;
   }
   
   // convert labels to form that the objective function expects

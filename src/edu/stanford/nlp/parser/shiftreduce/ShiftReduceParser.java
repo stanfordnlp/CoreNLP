@@ -29,13 +29,8 @@ package edu.stanford.nlp.parser.shiftreduce;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.Serializable;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
 
@@ -48,7 +43,6 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.common.ArgUtils;
-import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.common.ParserUtils;
@@ -70,14 +64,11 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.ArrayUtils;
-import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
-import edu.stanford.nlp.util.ScoredComparator;
-import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
@@ -85,6 +76,7 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
 
 /**
+ * A shift-reduce constituency parser.
  * Overview and description available at
  * http://nlp.stanford.edu/software/srparser.shtml
  *
@@ -138,7 +130,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     return getTLPParams().treebankLanguagePack();
   }
 
-  private final static String[] BEAM_FLAGS = { "-beamSize", "4" };
+  private static final String[] BEAM_FLAGS = { "-beamSize", "4" };
 
   @Override
   public String[] defaultCoreNLPFlags() {
@@ -149,6 +141,18 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       // this model, such as -retainTmpSubcategories
       return getTLPParams().defaultCoreNLPFlags();
     }
+  }
+
+  /**
+   * Return an unmodifiableSet containing the known states (including binarization)
+   */
+  public Set<String> knownStates() {
+    return Collections.unmodifiableSet(model.knownStates);
+  }
+
+  /** Return the Set of POS tags used in the model. */
+  public Set<String> tagSet() {
+    return model.tagSet();
   }
 
   @Override
@@ -166,7 +170,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     if (!getOp().testOptions.preTag) {
       throw new UnsupportedOperationException("Can only parse raw text if a tagger is specified, as the ShiftReduceParser cannot produce its own tags");
     }
-    return super.parse(sentence);    
+    return super.parse(sentence);
   }
 
   @Override
@@ -214,7 +218,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       if (hw instanceof CoreLabel) {
         wordLabel = (CoreLabel) hw;
         tag = wordLabel.tag();
-        CoreLabel cl = (CoreLabel) hw;
       } else {
         wordLabel = new CoreLabel();
         wordLabel.setValue(hw.word());
@@ -241,10 +244,11 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       LabeledScoredTreeNode tagNode = new LabeledScoredTreeNode(tagLabel);
       tagNode.addChild(wordNode);
 
-      wordLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, wordNode);
-      wordLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, tagNode);
-      tagLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, wordNode);
-      tagLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, tagNode);
+      // TODO: can we get away with not setting these on the wordLabel?
+      wordLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, wordLabel);
+      wordLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, tagLabel);
+      tagLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, wordLabel);
+      tagLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, tagLabel);
 
       preterminals.add(tagNode);
     }
@@ -260,7 +264,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     op.setOptions(args);
 
     if (op.trainOptions.randomSeed == 0) {
-      op.trainOptions.randomSeed = (new Random()).nextLong();
+      op.trainOptions.randomSeed = System.nanoTime();
       System.err.println("Random seed not set by options, using " + op.trainOptions.randomSeed);
     }
     return op;
@@ -345,11 +349,13 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       this.tagger = tagger;
     }
 
+    @Override
     public Tree process(Tree tree) {
       redoTags(tree, tagger);
       return tree;
     }
 
+    @Override
     public RetagProcessor newInstance() {
       // already threadsafe
       return this;
@@ -456,22 +462,14 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     this.model = newModel;
   }
 
+  @Override
   public void setOptionFlags(String ... flags) {
     op.setOptions(flags);
   }
 
   public static ShiftReduceParser loadModel(String path, String ... extraFlags) {
-    ShiftReduceParser parser = null;
-    try {
-      Timing timing = new Timing();
-      System.err.print("Loading parser from serialized file " + path + " ...");
-      parser = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
-      timing.done();
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeIOException(e);
-    }
+    ShiftReduceParser parser = IOUtils.readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(
+            "Loading parser from serialized file", path);
     if (extraFlags.length > 0) {
       parser.setOptionFlags(extraFlags);
     }
@@ -576,5 +574,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
 
   private static final long serialVersionUID = 1;
+
 }
 

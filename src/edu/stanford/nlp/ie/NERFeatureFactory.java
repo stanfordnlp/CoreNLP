@@ -51,7 +51,6 @@ import edu.stanford.nlp.sequences.Clique;
 import edu.stanford.nlp.sequences.CoNLLDocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
@@ -1168,12 +1167,15 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       }
 
       if (flags.useNPHead) {
-        featuresC.add(c.get(TreeCoreAnnotations.HeadWordAnnotation.class) + "-HW");
+        // TODO: neat idea, but this would need to be set somewhere.
+        // Probably should have its own annotation as this one would
+        // be more narrow and would clobber other potential uses
+        featuresC.add(c.get(CoreAnnotations.HeadWordStringAnnotation.class) + "-HW");
         if (flags.useTags) {
-          featuresC.add(c.get(TreeCoreAnnotations.HeadWordAnnotation.class) + "-" + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-HW-T");
+          featuresC.add(c.get(CoreAnnotations.HeadWordStringAnnotation.class) + "-" + c.getString(CoreAnnotations.PartOfSpeechAnnotation.class) + "-HW-T");
         }
         if (flags.useDistSim) {
-          featuresC.add(c.get(TreeCoreAnnotations.HeadWordAnnotation.class) + "-" + c.get(CoreAnnotations.DistSimAnnotation.class) + "-HW-DISTSIM");
+          featuresC.add(c.get(CoreAnnotations.HeadWordStringAnnotation.class) + "-" + c.get(CoreAnnotations.DistSimAnnotation.class) + "-HW-DISTSIM");
         }
       }
 
@@ -1188,7 +1190,10 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       }
 
       if (flags.useHeadGov) {
-        featuresC.add(c.get(TreeCoreAnnotations.HeadWordAnnotation.class) + "-" + c.get(CoreAnnotations.GovernorAnnotation.class) + "-HW_GW");
+        // TODO: neat idea, but this would need to be set somewhere.
+        // Probably should have its own annotation as this one would
+        // be more narrow and would clobber other potential uses
+        featuresC.add(c.get(CoreAnnotations.HeadWordStringAnnotation.class) + "-" + c.get(CoreAnnotations.GovernorAnnotation.class) + "-HW_GW");
       }
 
       if (flags.useClassFeature) {
@@ -1320,6 +1325,15 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
           if (flags.useDisjunctiveShapeInteraction) {
             featuresC.add(getWord(dp) + '-' + cShape + "-DISJP-CS");
           }
+        }
+      }
+
+      if (flags.useUndirectedDisjunctive) {
+        for (int i = 1; i <= flags.disjunctionWidth; i++) {
+          CoreLabel dn = cInfo.get(loc + i);
+          CoreLabel dp = cInfo.get(loc - i);
+          featuresC.add(getWord(dn) + "-DISJ");
+          featuresC.add(getWord(dp) + "-DISJ");
         }
       }
 
@@ -1546,6 +1560,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       //asdasd
     }
 
+    // todo [cdm 2014]: Have this guarded by a flag and things would be a little faster. Set flag in current uses of this annotation.
     // NER tag annotations from a previous NER system
     if (c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class) != null) {
       featuresC.add(c.get(CoreAnnotations.StackedNamedEntityTagAnnotation.class)+ "-CStackedNERTag");

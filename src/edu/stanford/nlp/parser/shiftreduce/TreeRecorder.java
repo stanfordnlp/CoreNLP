@@ -43,7 +43,7 @@ public class TreeRecorder implements ParserQueryEval {
     try {
       switch (mode) {
       case BINARIZED:
-        out.write(srquery.finalState.stack.peek().toString());
+        out.write(srquery.getBestBinarizedParse().toString());
         break;
       case DEBINARIZED:
         out.write(srquery.debinarized.toString());

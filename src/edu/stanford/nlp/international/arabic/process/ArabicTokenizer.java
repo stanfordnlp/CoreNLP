@@ -49,7 +49,7 @@ public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     String optionsStr = "normArDigits,normArPunc,normAlif,removeDiacritics,removeTatweel,removeQuranChars";
     String[] optionToks = optionsStr.split(",");
     for (String option : optionToks) {
-      atbOptions.put(option, "true");
+      atbOptions.setProperty(option, "true");
     }
   }
 

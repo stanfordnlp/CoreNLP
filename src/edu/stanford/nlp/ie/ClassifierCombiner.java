@@ -41,8 +41,8 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   private static final boolean DEBUG = false;
   private List<AbstractSequenceClassifier<IN>> baseClassifiers;
 
-  private static final String DEFAULT_AUX_CLASSIFIER_PATH="/u/nlp/data/ner/goodClassifiers/english.muc.7class.distsim.crf.ser.gz";
-  private static final String DEFAULT_CLASSIFIER_PATH="/u/nlp/data/ner/goodClassifiers/english.all.3class.distsim.crf.ser.gz";
+  private static final String DEFAULT_AUX_CLASSIFIER_PATH="edu/stanford/nlp/models/ner/english.all.7class.distsim.crf.ser.gz";
+  private static final String DEFAULT_CLASSIFIER_PATH="edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz";
 
   /**
    * NORMAL means that if one classifier uses PERSON, later classifiers can't also add PERSON, for example. <br>
@@ -126,14 +126,15 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   }
 
 
-  /** Combines a series of base classifiers
+  /** Combines a series of base classifiers.
    *
    * @param classifiers The base classifiers
    */
+  @SafeVarargs
   public ClassifierCombiner(AbstractSequenceClassifier<IN>... classifiers) {
     super(new Properties());
     this.combinationMode = DEFAULT_COMBINATION_MODE;
-    baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>(Arrays.asList(classifiers));
+    baseClassifiers = new ArrayList<>(Arrays.asList(classifiers));
     flags.backgroundSymbol = baseClassifiers.get(0).flags.backgroundSymbol;
   }
 
