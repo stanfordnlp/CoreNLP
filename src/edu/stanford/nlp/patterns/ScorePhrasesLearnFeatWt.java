@@ -347,6 +347,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             //candidate = CandidatePhrase.createOrGet(l.word());
           }
 
+          //If the phrase does not exist in its form in the datset (happens when fuzzy matching etc).
+          if(!Data.rawFreq.containsKey(candidate)){
+            candidate = CandidatePhrase.createOrGet(l.word());
+          }
+
           numpos++;
           chosen.add(new Pair<String, Integer>(en.getKey(), i));
 

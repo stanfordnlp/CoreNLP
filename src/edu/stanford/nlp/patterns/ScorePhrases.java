@@ -550,14 +550,14 @@ public class ScorePhrases<E extends Pattern> {
     TwoDimensionalCounter<E, CandidatePhrase> patternsAndWords4Label,
     String identifier, Set<CandidatePhrase> ignoreWords, boolean computeProcDataFreq) throws IOException, ClassNotFoundException {
 
-    TwoDimensionalCounter<CandidatePhrase, E> wordsandLemmaPatExtracted = new TwoDimensionalCounter<CandidatePhrase, E>();
+    //TwoDimensionalCounter<CandidatePhrase, E> wordsandLemmaPatExtracted = new TwoDimensionalCounter<CandidatePhrase, E>();
     if (constVars.doNotApplyPatterns) {
       // if want to get the stats by the lossy way of just counting without
       // applying the patterns
       ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
       while(sentsIter.hasNext()) {
         Pair<Map<String, DataInstance>, File> sentsf = sentsIter.next();
-        this.statsWithoutApplyingPatterns(sentsf.first(), patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
+        this.statsWithoutApplyingPatterns(sentsf.first(), patternsForEachToken, patternsLearnedThisIter, wordsPatExtracted);
       }
 
       /*
@@ -572,7 +572,7 @@ public class ScorePhrases<E extends Pattern> {
       */
     } else {
       if (patternsLearnedThisIter.size() > 0) {
-        this.applyPats(patternsLearnedThisIter, label, wordsandLemmaPatExtracted, matchedTokensByPat);
+        this.applyPats(patternsLearnedThisIter, label, wordsPatExtracted, matchedTokensByPat);
 
       }
     }
@@ -599,13 +599,13 @@ public class ScorePhrases<E extends Pattern> {
     
     if (constVars.wordScoring.equals(WordScoring.WEIGHTEDNORM)) {
 
-      for (CandidatePhrase en : wordsandLemmaPatExtracted.firstKeySet()) {
-        if (!constVars.getOtherSemanticClassesWords().contains(en.getPhrase())
-            && !constVars.getOtherSemanticClassesWords().contains(en.getPhraseLemma())) {
-          terms.addAll(en, wordsandLemmaPatExtracted.getCounter(en));
+      for (CandidatePhrase en : wordsPatExtracted.firstKeySet()) {
+        assert !en.getPhrase().trim().isEmpty();
+        if (!constVars.getOtherSemanticClassesWords().contains(en) && !constVars.getOtherSemanticClassesWords().contains(CandidatePhrase.createOrGet(en.getPhraseLemma()))){
+          terms.addAll(en, wordsPatExtracted.getCounter(en));
         }
-        wordsPatExtracted.addAll(en,
-            wordsandLemmaPatExtracted.getCounter(en));
+//        wordsPatExtracted.addAll(en,
+//            wordsandLemmaPatExtracted.getCounter(en));
       }
       removeKeys(terms, constVars.getStopWords());
 

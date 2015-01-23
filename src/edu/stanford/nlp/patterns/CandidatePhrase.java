@@ -3,6 +3,7 @@ package edu.stanford.nlp.patterns;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.Serializable;
 import java.util.*;
@@ -69,6 +70,9 @@ public class CandidatePhrase implements Serializable, Comparable  {
   }
 
   private CandidatePhrase(String phrase, String lemma, Counter<String> features){
+    if(phrase.isEmpty()){
+      Redwood.log(Redwood.WARN, "Creating empty candidatePhrase");
+    }
     this.phrase = phrase;
     this.phraseLemma = lemma;
     this.features = features;

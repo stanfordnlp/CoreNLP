@@ -144,7 +144,7 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimen
 
             if (useWordNotLabeled) {
               phrase = phrase.trim();
-              assert !phrase.isEmpty();
+              assert !phrase.isEmpty() : "How come the phrase is empty when applying the patterns";
               phraseLemma = phraseLemma.trim();
               allFreq.incrementCount(CandidatePhrase.createOrGet(phrase, phraseLemma), pEn.getValue(), 1.0);
             }
