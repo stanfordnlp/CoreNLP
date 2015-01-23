@@ -605,7 +605,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
               allNegativePhrases.add(candidate);
             }
 
-            if(!negative && !ignoreclass && constVars.expandPositivesWhenSampling) {
+            if(!negative && !ignoreclass && constVars.expandPositivesWhenSampling & !allPossibleNegativePhrases.contains(candidate)) {
               if (!allCloseToPositivePhrases.containsKey(candidate)) {
                 Counter<CandidatePhrase> sims;
                 assert candidate != null;
@@ -711,6 +711,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       allPossibleNegativePhrases = new HashSet<CandidatePhrase>();
       allPossibleNegativePhrases.addAll(constVars.getOtherSemanticClassesWords());
       allPossibleNegativePhrases.addAll(constVars.getStopWords());
+      allPossibleNegativePhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.functionWords));
       allPossibleNegativePhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.getEnglishWords()));
       for(Entry<String, Counter<CandidatePhrase>> en: constVars.getLearnedWords().entrySet()) {
         if (!en.getKey().equals(answerLabel)){
