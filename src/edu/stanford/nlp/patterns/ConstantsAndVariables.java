@@ -465,6 +465,9 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="featureCountThreshold")
   public int featureCountThreshold = 1;
 
+  @Option(name="expandPhrasesNumTopSimilar", gloss="k in kNN")
+  public int expandPhrasesNumTopSimilar = 1;
+
   public Set<String> getLabels() {
     return labels;
   }

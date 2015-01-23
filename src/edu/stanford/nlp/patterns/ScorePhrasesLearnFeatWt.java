@@ -253,8 +253,6 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   }
 
   private Counter<CandidatePhrase> computeSimWithWordVectors(Collection<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> otherPhrases, boolean ignoreWordRegex, String label){
-    final int numTopSimilar = 3;
-
     Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>(candidatePhrases.size());
     for(CandidatePhrase p : candidatePhrases) {
 
@@ -308,7 +306,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           }
 
           topSimPhs.add(other, sim);
-          if(topSimPhs.size() > numTopSimilar)
+          if(topSimPhs.size() > constVars.expandPhrasesNumTopSimilar)
             topSimPhs.removeLastEntry();
 
           //avgSim /= otherPhrases.size();
@@ -861,7 +859,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       if(constVars.expandPositivesWhenSampling)
         expandPos = true;
     }
-    
+
 
     Counter<Integer> distSimClustersOfPositive = new ClassicCounter<Integer>();
     if((expandPos || expandNeg) && !constVars.useWordVectorsToComputeSim){
