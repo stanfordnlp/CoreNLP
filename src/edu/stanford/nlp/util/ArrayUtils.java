@@ -995,4 +995,15 @@ public class ArrayUtils {
     if (a1.length > a2.length) return 1;
     return 0;
   }
+
+  public static String toString(double[] doubles, String glue) {
+    String s = "";
+    for(int i = 0; i < doubles.length; i++){
+      if(i==0)
+        s = String.valueOf(doubles[i]);
+      else
+        s+= glue + String.valueOf(doubles[i]);
+    }
+    return s;
+  }
 }

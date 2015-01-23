@@ -448,6 +448,8 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="useWordVectorsToComputeSim", gloss="use vectors directly instead of word classes for computing similarity")
   public boolean useWordVectorsToComputeSim;
 
+  @Option(name="logFileVectorSimilarity", gloss="To store vectors for selected/almost-selected positive and negative words")
+  String logFileVectorSimilarity = null;
 
   public Set<String> getLabels() {
     return labels;

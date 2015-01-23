@@ -234,7 +234,6 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>(candidatePhrases.size());
 
     for(CandidatePhrase p : candidatePhrases) {
-      System.out.println("candidate phrase is " + p);
       if(wordVectors.containsKey(p.getPhrase())){
         double[] d1 = wordVectors.get(p.getPhrase());
 
@@ -348,7 +347,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
 
   //this chooses the ones that are not close to the positive phrases!
-  Set<CandidatePhrase> chooseUnknownAsNegatives(Set<CandidatePhrase> candidatePhrases, String label, double percentage, Collection<CandidatePhrase> positivePhrases){
+  Set<CandidatePhrase> chooseUnknownAsNegatives(Set<CandidatePhrase> candidatePhrases, String label, double percentage, Collection<CandidatePhrase> positivePhrases, BufferedWriter logFile) throws IOException {
 
     List<List<CandidatePhrase>> threadedCandidates = GetPatternsFromDataMultiClass.getThreadBatches(CollectionUtils.toList(candidatePhrases), constVars.numThreads);
 
@@ -384,9 +383,14 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     CandidatePhrase k = Counters.argmax(sims);
     System.out.println("Maximum similarity was " + sims.getCount(k) + " for word " + k);
-    Collection<CandidatePhrase> removed = Counters.retainBelow(sims, constVars.positiveSimilarityThreshold);
-    System.out.println("removing phrases as negative phrases that were higher that positive similarity threshold of " + constVars.positiveSimilarityThreshold + Counters.getCounts(sims, removed));
 
+    Counter<CandidatePhrase> removed = Counters.retainBelow(sims, constVars.positiveSimilarityThreshold);
+    System.out.println("removing phrases as negative phrases that were higher that positive similarity threshold of " + constVars.positiveSimilarityThreshold + removed);
+    if(logFile != null){
+      for(Entry<CandidatePhrase, Double> en: removed.entrySet())
+        if(wordVectors.containsKey(en.getKey().getPhrase()))
+          logFile.write(en.getKey()+"-PN " + ArrayUtils.toString(wordVectors.get(en.getKey().getPhrase()), " ")+"\n");
+    }
     //Collection<CandidatePhrase> removed = Counters.retainBottom(sims, (int) (sims.size() * percentage));
     //System.out.println("not choosing " + removed + " as the negative phrases. percentage is " + percentage + " and allMaxsim was " + allMaxSim);
     return sims.keySet();
@@ -610,7 +614,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
   public RVFDataset<String, ScorePhraseMeasures> choosedatums(boolean forLearningPattern, String answerLabel,
       TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
-      Counter<E> allSelectedPatterns, boolean computeRawFreq) {
+      Counter<E> allSelectedPatterns, boolean computeRawFreq) throws IOException {
 
     Counter<Integer> distSimClustersOfPositive = new ClassicCounter<Integer>();
     if(constVars.expandPositivesWhenSampling){
@@ -681,6 +685,10 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       allPositivePhrases.addAll(allCloseToPositivePhrases.keySet());
     }
 
+    BufferedWriter logFile = null;
+    if(constVars.logFileVectorSimilarity != null)
+      logFile = new BufferedWriter(new FileWriter(constVars.logFileVectorSimilarity));
+
     System.out.println("all positive phrases are  " + allPositivePhrases);
     for(CandidatePhrase candidate: allPositivePhrases) {
       Counter<ScorePhraseMeasures> feat = null;
@@ -693,13 +701,16 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, "true");
       dataset.add(datum);
       numpos += 1;
+      if(logFile!=null && wordVectors.containsKey(candidate.getPhrase())){
+        logFile.write(candidate.getPhrase()+"-P"+" " + ArrayUtils.toString(wordVectors.get(candidate.getPhrase()), " ")+"\n");
+      }
     }
 
     Redwood.log(Redwood.DBG, "Number of pure negative phrases is " + allNegativePhrases.size());
     Redwood.log(Redwood.DBG, "Number of unknown phrases is " + allUnknownPhrases.size());
 
     if(constVars.subsampleUnkAsNegUsingSim){
-      Set<CandidatePhrase> chosenUnknown = chooseUnknownAsNegatives(allUnknownPhrases, answerLabel, constVars.subSampleUnkAsNegUsingSimPercentage, allPositivePhrases);
+      Set<CandidatePhrase> chosenUnknown = chooseUnknownAsNegatives(allUnknownPhrases, answerLabel, constVars.subSampleUnkAsNegUsingSimPercentage, allPositivePhrases,logFile);
       Redwood.log(Redwood.DBG, "Choosing " + chosenUnknown.size() + " unknowns as negative based to their similarity to the positive phrases");
       allNegativePhrases.addAll(chosenUnknown);
     }
@@ -733,6 +744,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       }
       RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, "false");
       dataset.add(datum);
+      if(logFile!=null && wordVectors.containsKey(negative.getPhrase())){
+        logFile.write(negative.getPhrase()+"-N"+" " + ArrayUtils.toString(wordVectors.get(negative.getPhrase()), " ")+"\n");
+      }
     }
 
     System.out.println("Before feature count threshold, dataset stats are ");

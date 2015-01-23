@@ -696,15 +696,16 @@ public class Counters {
    *          than this threshold are discarded.
    * @return The set of discarded entries.
    */
-  public static <E> Set<E> retainBelow(Counter<E> counter, double countMaxThreshold) {
-    Set<E> removed = Generics.newHashSet();
+  public static <E> Counter<E> retainBelow(Counter<E> counter, double countMaxThreshold) {
+    Counter<E> removed = new ClassicCounter<E>();
     for (E key : counter.keySet()) {
+      double count = counter.getCount(key);
       if (counter.getCount(key) > countMaxThreshold) {
-        removed.add(key);
+        removed.setCount(key, count);
       }
     }
-    for (E key : removed) {
-      counter.remove(key);
+    for (Entry<E, Double> key : removed.entrySet()) {
+      counter.remove(key.getKey());
     }
     return removed;
   }
