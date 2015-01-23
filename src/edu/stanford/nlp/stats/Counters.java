@@ -3046,4 +3046,11 @@ public class Counters {
       counter.setCount(key, func.apply(counter.getCount(key)));
     }
   }
+
+  public static<E> Counter<E> getCounts(Counter<E> c, Collection<E> keys){
+    Counter<E> newcounter = new ClassicCounter<E>();
+    for(E k : keys)
+      newcounter.setCount(k, c.getCount(k));
+    return newcounter;
+  }
 }

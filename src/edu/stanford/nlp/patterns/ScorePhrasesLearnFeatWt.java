@@ -381,8 +381,13 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       Redwood.log(Redwood.DBG, "No similarity recorded between the positives and the unknown!");
     }
 
-    Collection<CandidatePhrase> removed = Counters.retainBottom(sims, (int) (sims.size() * percentage));
-    System.out.println("not choosing " + removed + " as the negative phrases. percentage is " + percentage + " and allMaxsim was " + allMaxSim);
+    CandidatePhrase k = Counters.argmax(sims);
+    System.out.println("Maximum similarity was " + sims.getCount(k) + " for word " + k);
+    Collection<CandidatePhrase> removed = Counters.retainBelow(sims, constVars.positiveSimilarityThreshold);
+    System.out.println("removing phrases as negative phrases that were higher that positive similarity threshold of " + constVars.positiveSimilarityThreshold + Counters.getCounts(sims, removed));
+
+    //Collection<CandidatePhrase> removed = Counters.retainBottom(sims, (int) (sims.size() * percentage));
+    //System.out.println("not choosing " + removed + " as the negative phrases. percentage is " + percentage + " and allMaxsim was " + allMaxSim);
     return sims.keySet();
   }
 
@@ -396,7 +401,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       return unknownSamples;
 
     Function<CoreLabel, Boolean> acceptWord = coreLabel -> {
-      if(coreLabel.get(positiveClass).equals(label) || constVars.getStopWords().contains(CandidatePhrase.createOrGet(coreLabel.word())))
+      if(coreLabel.get(positiveClass).equals(label) || constVars.functionWords.contains(coreLabel.word()))
         return false;
       else
         return true;
@@ -449,9 +454,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             }
             ph += " " + tokens[j].word();
           }
-
-          if(!haspositive && !ph.trim().isEmpty() && !constVars.getStopWords().contains(CandidatePhrase.createOrGet(ph))){
-            unknownSamples.add(CandidatePhrase.createOrGet(ph.trim()));
+          ph = ph.trim();
+          if(!haspositive && !ph.trim().isEmpty() && !constVars.functionWords.contains(ph)){
+            unknownSamples.add(CandidatePhrase.createOrGet(ph));
           }
         }
       }
@@ -538,7 +543,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
             if(!ignoreclass){
               CandidatePhrase ph = CandidatePhrase.createOrGet(l.word());
-              ignoreclass = constVars.getStopWords().contains(ph) ;
+              ignoreclass = constVars.functionWords.contains(l.word()) ;
               if(ignoreclass)
                 candidate = CandidatePhrase.createOrGet(l.word());
             }
@@ -580,7 +585,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
                   sims = computeSimWithWordCluster(Arrays.asList(candidate), knownPositivePhrases, new AtomicDouble());
 
                 double sim = sims.getCount(candidate);
-                if (sim > constVars.expandPositivesWhenSamplingThreshold)
+                if (sim > constVars.positiveSimilarityThreshold)
                   allCloseToPositivePhrases.setCount(candidate, sim);
               }
             }
@@ -717,7 +722,6 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       }
       allNegativePhrases.clear();
       allNegativePhrases = selectedNegPhrases;
-
     }
 
     for(CandidatePhrase negative: allNegativePhrases){

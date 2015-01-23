@@ -436,7 +436,7 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="expandPositivesWhenSampling", gloss="when sampling for learning feature wts for learning phrases, expand the positives")
   public boolean expandPositivesWhenSampling = false;
 
-  public double expandPositivesWhenSamplingThreshold  = 0.5;
+  public double positiveSimilarityThreshold  = 0.7;
 
   @Option(name="subSampleUnkAsPosUsingSimPercentage", gloss="When using expandPositivesWhenSampling, select top % after applying the threshold")
   public double subSampleUnkAsPosUsingSimPercentage = 0.05;
@@ -717,6 +717,8 @@ public class ConstantsAndVariables<E> implements Serializable{
 
   public enum PatternForEachTokenWay {MEMORY, LUCENE, DB};
   public enum PatternIndexWay {MEMORY, OPENHFT, LUCENE};
+
+  public List<String> functionWords = Arrays.asList("a","an","the","of","at","on","in","he","she","him","her","they","them","and","no","not","nor","as","do");
 
   public ConstantsAndVariables(Properties props, Set<String> labels, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
                                Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
