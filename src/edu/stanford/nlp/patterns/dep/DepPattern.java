@@ -69,7 +69,7 @@ public class DepPattern extends Pattern {
 
     Pair<Token, GrammaticalRelation> rel = relations.get(0);
     //String pattern = "({" + wordType + ":/" + parent + "/}=parent >>" + rel + "=reln {}=node)";
-    String p = "(" + rel.first().toString() + "=parent >>"+rel.second().toString() + "=reln {}=node)";
+    String p = "(" + rel.first().toString() + "=parent >"+rel.second().toString() + "=reln {}=node)";
     return p;
   }
 

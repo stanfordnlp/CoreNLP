@@ -35,8 +35,7 @@ public class ExtractPhraseFromPattern {
   public static ArrayList<String> cutoffTags = new ArrayList<String>();
   public int maxPhraseLength = Integer.MAX_VALUE;
   //Namespace curNS;
-  public List<String> cutoffRelationsForTech = new ArrayList<String>();
-  public List<String> cuttoffRelationsForApp = new ArrayList<String>();
+
   Map<SemgrexPattern, List<Pair<String, SemanticGraph>>> matchedGraphsForPattern = new HashMap<SemgrexPattern, List<Pair<String, SemanticGraph>>>();
 
   // 0 means none, 1 means partial, 2 means it shows sentences and their
@@ -241,13 +240,13 @@ public class ExtractPhraseFromPattern {
         if ((max - min + 1) <= maxPhraseLength){
           indices = new IntPair(min - 1, max - 1);
           phrase = StringUtils.join(textTokens.subList(min - 1, max), " ");
-          extractedPh = new ExtractedPhrase(min - 1, max - 1, pattern,  phrase);
+          extractedPh = new ExtractedPhrase(min - 1, max -1, pattern,  phrase);
         }
         else {
-          int newmax =min + maxPhraseLength - 1;
+          int newmax = min + maxPhraseLength - 2;
           indices = new IntPair(min - 1, newmax);
           phrase = StringUtils.join(
-            textTokens.subList(min - 1, newmax), " ");
+            textTokens.subList(min - 1, newmax + 1), " ");
           extractedPh = new ExtractedPhrase(min - 1, newmax, pattern,
             phrase);
         }

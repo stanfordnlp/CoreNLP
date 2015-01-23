@@ -74,8 +74,7 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
 
 
             int s = match.startIndex;
-            //Because the matching class gives inclusive index
-            int e = match.endIndex + 1;
+            int e = match.endIndex  + 1;
 
             String phrase = "";
             String phraseLemma = "";
@@ -85,13 +84,13 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
             //find if the neighboring words are labeled - if so - club them together
             if(constVars.clubNeighboringLabeledWords) {
               for (int i = s - 1; i >= 0; i--) {
-                if (!tokens.get(i).get(constVars.getAnswerClass().get(label)).equals(label) || (e-i) > PatternFactory.numWordsCompound) {
+                if (!tokens.get(i).get(constVars.getAnswerClass().get(label)).equals(label) || (e-i) <= PatternFactory.numWordsCompound) {
                   s = i + 1;
                   break;
                 }
               }
               for (int i = e; i < tokens.size(); i++) {
-                if (!tokens.get(i).get(constVars.getAnswerClass().get(label)).equals(label) || (i-s + 1) > PatternFactory.numWordsCompound) {
+                if (!tokens.get(i).get(constVars.getAnswerClass().get(label)).equals(label) || (i-s + 1) <= PatternFactory.numWordsCompound) {
                   e = i;
                   break;
                 }
@@ -180,28 +179,38 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
 
     extract.getSemGrexPatternNodes(graph, tokens, outputPhrases, outputIndices,
       pattern, findSubTrees, extractedPhrases, constVars.matchLowerCaseContext);
-    Collection<IntPair> outputIndicesMaxPhraseLen = new ArrayList<IntPair>();
+    Collection<ExtractedPhrase> outputIndicesMaxPhraseLen = new ArrayList<ExtractedPhrase>();
 
     //TODO: probably a bad idea to add ALL ngrams
     for(IntPair o: outputIndices){
       int min = o.get(0);
       int max = o.get(1);
+
       for (int i = min; i <= max ; i++) {
+
         CoreLabel t = tokensC.get(i);
+        String phrase = t.word();
         if(!matchedRestriction(t, label))
           continue;
-        for (int ngramSize = 1; ngramSize <= PatternFactory.numWordsCompound; ++ngramSize) {
+        for (int ngramSize = 1; ngramSize < PatternFactory.numWordsCompound; ++ngramSize) {
           int j = i + ngramSize - 1;
           if(j > max)
             break;
-          if (matchedRestriction(tokensC.get(j), label)) {
-            outputIndicesMaxPhraseLen.add(new IntPair(i, j));
+
+          CoreLabel tokenj = tokensC.get(j);
+
+          if(ngramSize > 1)
+            phrase += " " + tokenj.word();
+
+          if (matchedRestriction(tokenj, label)) {
+            outputIndicesMaxPhraseLen.add(new ExtractedPhrase(i, j, phrase));
+            //outputIndicesMaxPhraseLen.add(new IntPair(i, j));
           }
         }
       }
     }
-    System.out.println("extracted phrases are " + extractedPhrases);
-    return extractedPhrases;
+    System.out.println("extracted phrases are " + extractedPhrases + " and ngramed restricted phrases are " + outputIndicesMaxPhraseLen + " and output indices are " + outputIndices);
+    return outputIndicesMaxPhraseLen;
   }
 
   private boolean matchedRestriction(CoreLabel coreLabel, String label) {
@@ -233,6 +242,8 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
     }
     if(use)
       System.out.println(coreLabel.word() + " matched restriction " + (PatternFactory.useTargetNERRestriction ? constVars.allowedNERsforLabels.get(label) : "") + "and" + PatternFactory.useTargetNERRestriction + " and " + (constVars.allowedTagsInitials != null ? constVars.allowedTagsInitials.get(label) :""));
+    else
+      System.out.println(coreLabel.word() + " did not matched restrict " + (PatternFactory.useTargetNERRestriction ? constVars.allowedNERsforLabels.get(label) : "") + "and" + PatternFactory.useTargetNERRestriction + " and " + (constVars.allowedTagsInitials != null ? constVars.allowedTagsInitials.get(label) :""));
     return use;
   }
 

@@ -966,7 +966,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
         if(constVars.matchLowerCaseContext)
           s = s.toLowerCase();
         assert s!= null;
-        System.out.println("applied transformation from " + l + " to " + s + ". l keyset is " + l.toString(CoreLabel.OutputFormat.ALL));
+        //System.out.println("applied transformation from " + l + " to " + s + ". l keyset is " + l.toString(CoreLabel.OutputFormat.ALL));
         return s;
       }
     };
@@ -1743,9 +1743,13 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
             longestMatchingPhrase = tokenWordOrLemma;
 
           Set<E> pats = pat4Sent.get(i);
-          if (pats == null)
-            throw new RuntimeException("Why are patterns null for sentence " + sentId + " and token " + i +". pat4Sent has token ids " + pat4Sent.keySet() + (constVars.batchProcessSents ? "" : ". The sentence is " + Data.sents.get(sentId))+". If you have switched batchProcessSents, recompute the patterns.");
 
+          //This happens when dealing with the collapseddependencies
+          if (pats == null) {
+            if(!constVars.patternType.equals(PatternFactory.PatternType.DEP))
+              throw new RuntimeException("Why are patterns null for sentence " + sentId + " and token " + i + "(" + tokens.get(i) + "). pat4Sent has token ids " + pat4Sent.keySet() + (constVars.batchProcessSents ? "" : ". The sentence is " + Data.sents.get(sentId)) + ". If you have switched batchProcessSents, recompute the patterns.");
+            continue;
+          }
 
 //        Set<E> prevPat = pat.first();
 //        Set<E> nextPat = pat.second();

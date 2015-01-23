@@ -55,82 +55,33 @@ public class DepPatternFactory extends PatternFactory{
 
   static Map<Integer, Set<DepPattern>> getPatternsForAllPhrases(DataInstance sent, Set<CandidatePhrase> commonWords)
   {
+    SemanticGraph graph = ((DataInstanceDep)sent).getGraph();
+    Map<Integer, Set<DepPattern>> pats4Sent = new HashMap<Integer, Set<DepPattern>>();
+    if (graph == null || graph.isEmpty()){
+      System.out.println("graph is empty or null!");
+      return null;
+    }
 
-   // Map<String, Map<Integer, Set>> allPossiblePatterns = new HashMap<String, Map<Integer, Set>>();
-    //Map<String, Map<Integer, Map<String, Counter<String>>>> phrasesForAllPossiblePatterns = new HashMap<String, Map<Integer, Map<String, Counter<String>>>>();
+    Set<IndexedWord> allNodes;
+    try {
+      allNodes = graph.getLeafVertices();
+    } catch (IllegalArgumentException i) {
+      return null;
+    }
 
-
-
-
-      //Map<Integer, Map<String, List<String>>> possiblePatternsForAbs = new TreeMap<Integer, Map<String, List<String>>>();
-      //Map<Integer, Map<String, Counter<String>>> phrasesForPossiblePatternsForAbs = new TreeMap<Integer, Map<String, Counter<String>>>();
-
-
-      SemanticGraph graph = ((DataInstanceDep)sent).getGraph();
-
-
-      Map<Integer, Set<DepPattern>> pats4Sent = new HashMap<Integer, Set<DepPattern>>();
-        Map<String, List<String>> mappingsForSent = new HashMap<String, List<String>>();
-        Map<String, Counter<String>> phrasesForPatternForSent = new HashMap<String, Counter<String>>();
-
-        //List<String> token = sentIdEn.getValue();
-        //SemanticGraph g = depsForAbs.get(sentId);
-        if (graph == null || graph.isEmpty()){
-            System.out.println("graph is empty or null!");
-            return null;
-        }
-        ArrayList<IndexedWord> seenNodes = new ArrayList<IndexedWord>();
-
-        Set<IndexedWord> allNodes = null;
-        try {
-          allNodes = graph.descendants(graph.getFirstRoot());
-        } catch (IllegalArgumentException i) {
-          return null;
-        }
-        for (IndexedWord w : allNodes) {
-          //List<IntPair> phraseIndices4ThisSent = new ArrayList<IntPair>();
-          //List<String> phrases4ThisSent = new ArrayList<String>();
-          //List<ExtractedPhrase> extractedPhrases4ThisSent = new ArrayList<ExtractedPhrase>();
-          //etm.printSubGraph(g, w, false, null, token, null, "", phrases4ThisSent, phraseIndices4ThisSent, seenNodes, new ArrayList<IndexedWord>(), findSubTrees, extractedPhrases4ThisSent, null);
-          // if (phrases4ThisSent.size() > 1){
-          // System.err.println("phrases are " +
-          // StringUtils.join(phrases4ThisSent, ";"));
-          // }
-//          if (phrases4ThisSent.size() == 0) {
-//            if (DEBUG >= 1)
-//              System.err.println("no phrase");
-//            continue;
-//          }
-
-          //for (String phrase : phrases4ThisSent) {
-
-          //  phrase = phrase.trim().toLowerCase();
-            //List<String> patterns = mappingsForSent.get(phrase);
-            //if (patterns == null)
-            //  patterns = new ArrayList<String>();
-
-
-          //because index starts at 1!!!!
-          pats4Sent.put(w.index() -1,  getContext(w, graph, commonWords));
-
-            //mappingsForSent.put(phrase, patterns);
-          }
-
-        //possiblePatternsForAbs.put(sentId, mappingsForSent);
-        //phrasesForPossiblePatternsForAbs.put(sentId, phrasesForPatternForSent);
-
-      //allPossiblePatterns.put(articleId, possiblePatternsForAbs);
-    //  phrasesForAllPossiblePatterns.put(articleId, phrasesForPossiblePatternsForAbs);
-
+    for (IndexedWord w : allNodes) {
+      //because index starts at 1!!!!
+      pats4Sent.put(w.index() -1,  getContext(w, graph, commonWords, sent));
+    }
     return pats4Sent;
   }
 
-  static public DepPattern patternToDepPattern(Pair<IndexedWord, GrammaticalRelation> p) {
+  static public DepPattern patternToDepPattern(Pair<IndexedWord, GrammaticalRelation> p, DataInstance sent) {
 
     Token token = new Token(PatternFactory.PatternType.DEP);
-    assert p.first().backingLabel().containsKey(PatternsAnnotations.ProcessedTextAnnotation.class) : "the keyset are " + p.first().backingLabel().toString(CoreLabel.OutputFormat.ALL) + " and the sentence is " + p.first().containsKey(PatternsAnnotations.ProcessedTextAnnotation.class);
-    token.addORRestriction(PatternsAnnotations.ProcessedTextAnnotation.class, p.first().backingLabel().get(PatternsAnnotations.ProcessedTextAnnotation.class));
-
+    CoreLabel backingLabel = sent.getTokens().get(p.first().index() -1);
+    assert backingLabel.containsKey(PatternsAnnotations.ProcessedTextAnnotation.class) : "the keyset are " + backingLabel.toString(CoreLabel.OutputFormat.ALL);
+    token.addORRestriction(PatternsAnnotations.ProcessedTextAnnotation.class, backingLabel.get(PatternsAnnotations.ProcessedTextAnnotation.class));
     return new DepPattern(token, p.second());
 
   }
@@ -142,7 +93,7 @@ public class DepPatternFactory extends PatternFactory{
       return false;
   }
 
-  static Set<DepPattern> getContext(IndexedWord w, SemanticGraph graph, Set<CandidatePhrase> stopWords){
+  static Set<DepPattern> getContext(IndexedWord w, SemanticGraph graph, Set<CandidatePhrase> stopWords, DataInstance sent){
     Set<DepPattern> patterns = new HashSet<DepPattern>();
     IndexedWord node = w;
     int depth = 1;
@@ -155,7 +106,7 @@ public class DepPatternFactory extends PatternFactory{
         if (tagPattern.matcher(parent.tag()).matches()) {
           if (!ifIgnoreRel(rel) && !stopWords.contains(new CandidatePhrase(parent.word())) && parent.word().length() > 1) {
             Pair<IndexedWord, GrammaticalRelation> pattern = new Pair<IndexedWord, GrammaticalRelation>(parent, rel);
-            DepPattern patterndep = patternToDepPattern(pattern);
+            DepPattern patterndep = patternToDepPattern(pattern, sent);
             if (depth <= upDepth){
               patterns.add(patterndep);
             }
@@ -181,7 +132,10 @@ public class DepPatternFactory extends PatternFactory{
   public static Set getContext(DataInstance sent, int i, Set<CandidatePhrase> stopWords) {
     SemanticGraph graph = ((DataInstanceDep)sent).getGraph();
     //nodes are indexed from 1 -- so wrong!!
-    IndexedWord w = graph.getNodeByIndex(i+1);
-    return getContext(w, graph, stopWords);
+    try{
+      IndexedWord w = graph.getNodeByIndex(i+1);
+      return getContext(w, graph, stopWords, sent);}catch(IllegalArgumentException e){
+      return Collections.emptySet();
+    }
   }
 }

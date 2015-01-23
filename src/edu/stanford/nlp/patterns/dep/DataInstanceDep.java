@@ -3,6 +3,7 @@ package edu.stanford.nlp.patterns.dep;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.DataInstance;
+import edu.stanford.nlp.patterns.PatternsAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
