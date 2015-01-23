@@ -473,8 +473,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       CoreNLPProtos.DependencyGraph.Node.Builder nodeBuilder = CoreNLPProtos.DependencyGraph.Node.newBuilder()
           .setSentenceIndex(node.get(SentenceIndexAnnotation.class))
           .setIndex(node.index());
-      if (node.containsKey(CopyAnnotation.class)) {
-        nodeBuilder.setCopyAnnotation(node.get(CopyAnnotation.class));
+      if (node.copyCount() > 0) {
+        nodeBuilder.setCopyAnnotation(node.copyCount());
       }
       builder.addNode(nodeBuilder.build());
       // Register root
@@ -933,7 +933,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       if (in.hasCopyAnnotation() && in.getCopyAnnotation() > 0) {
         // TODO: if we make a copy wrapper CoreLabel, use it here instead
         word = new IndexedWord(new CoreLabel(token));
-        word.set(CopyAnnotation.class, in.getCopyAnnotation());
+        word.setCopyCount(in.getCopyAnnotation());
       } else {
         word = new IndexedWord(token);
       }

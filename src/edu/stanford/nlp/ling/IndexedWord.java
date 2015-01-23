@@ -34,6 +34,7 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
 
   private final CoreLabel label;
 
+  private int copyCount = 0;
   /**
    * Default constructor; uses {@link CoreLabel} default constructor
    */
@@ -90,6 +91,12 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
   public IndexedWord makeCopy(int count) {
     CoreLabel labelCopy = new CoreLabel(label);
     IndexedWord copy = new IndexedWord(labelCopy);
+    copy.setCopyCount(count);
+    return copy;
+  }
+
+  public IndexedWord makeSoftCopy(int count) {
+    IndexedWord copy = new IndexedWord(label);
     copy.setCopyCount(count);
     return copy;
   }
@@ -242,16 +249,15 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
   }
 
   public int copyCount() {
-    return label.copyCount();
+    return copyCount;
   }
 
   public void setCopyCount(int count) {
-    label.setCopyCount(count);
+    this.copyCount = count;
   }
 
   public String toPrimes() {
-    int copy = label.copyCount();
-    return StringUtils.repeat('\'', copy);    
+    return StringUtils.repeat('\'', copyCount);
   }
 
   /**
@@ -370,11 +376,11 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
    */
   @Override
   public String toString() {
-    return label.toString(CoreLabel.OutputFormat.VALUE_TAG);
+    return toString(CoreLabel.OutputFormat.VALUE_TAG);
   }
 
   public String toString(CoreLabel.OutputFormat format) {
-    return label.toString(format);
+    return label.toString(format) + toPrimes();
   }
 
   /**
