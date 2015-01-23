@@ -22,6 +22,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.IntPair;
@@ -206,7 +207,16 @@ public class ExtractPhraseFromPattern {
         allCutOffRels.addAll(additionalCutOffRels);
       allCutOffRels.addAll(cutoffRelations);
 
-      Set<IndexedWord> words = descendants(g, w, allCutOffRels, doNotAddThese, ignoreCommonTags, acceptWord);
+      Counter<String> feat = new ClassicCounter<String>();
+      List<Pair<GrammaticalRelation, IndexedWord>> pt = g.parentPairs(w);
+      for(Pair<GrammaticalRelation, IndexedWord> en: pt) {
+        feat.incrementCount("PARENTREL-" + en.first());
+      }
+
+
+      Set<IndexedWord> words = descendants(g, w, allCutOffRels, doNotAddThese, ignoreCommonTags, acceptWord, feat);
+      feat.incrementCount("LENGTH-" + words.size());
+
       // words.addAll(andNodes);
 
       // if (includeSiblings == true) {
@@ -241,23 +251,16 @@ public class ExtractPhraseFromPattern {
         // ph.put(word.index(), word.value());
         // }
         // phrase = StringUtils.join(ph.values(), " ");
-        String phrase;
-        ExtractedPhrase extractedPh;
-        if ((max - min + 1) <= maxPhraseLength){
-          indices = new IntPair(min - 1, max - 1);
-          phrase = StringUtils.join(textTokens.subList(min - 1, max), " ");
-          extractedPh = new ExtractedPhrase(min - 1, max -1, pattern,  phrase, extractFeat.apply(new Pair(w, g)));
+        if ((max - min + 1) > maxPhraseLength){
+          max = min + maxPhraseLength - 1 ;
         }
-        else {
-          int newmax = min + maxPhraseLength - 2;
-          indices = new IntPair(min - 1, newmax);
-          phrase = StringUtils.join(
-            textTokens.subList(min - 1, newmax + 1), " ");
-          extractedPh = new ExtractedPhrase(min - 1, newmax, pattern,
-            phrase, extractFeat.apply(new Pair(w, g)));
-        }
+        indices = new IntPair(min - 1, max -1);
+        String phrase = StringUtils.join(
+          textTokens.subList(min - 1, max), " ");
         phrase = phrase.trim();
         System.out.println("phrase is " + phrase  + " index is " + indices + " and maxphraselength is " + maxPhraseLength + " and descendentset is " + words);
+        ExtractedPhrase  extractedPh = new ExtractedPhrase(min - 1, max -1, pattern,  phrase, feat);
+
 
         if (!listOfOutput.contains(phrase) && !doNotAddThese.contains(phrase)) {
 
@@ -291,7 +294,7 @@ public class ExtractPhraseFromPattern {
 
   public static Set<IndexedWord> descendants(SemanticGraph g,
       IndexedWord vertex, List<String> allCutOffRels,
-      List<IndexedWord> doNotAddThese, boolean ignoreCommonTags, Function<CoreLabel, Boolean> acceptWord) throws Exception {
+      List<IndexedWord> doNotAddThese, boolean ignoreCommonTags, Function<CoreLabel, Boolean> acceptWord, Counter<String> feat) throws Exception {
     // Do a depth first search
     Set<IndexedWord> descendantSet = new HashSet<IndexedWord>();
 
@@ -302,7 +305,7 @@ public class ExtractPhraseFromPattern {
       return descendantSet;
 
     descendantsHelper(g, vertex, descendantSet, allCutOffRels, doNotAddThese,
-        new ArrayList<IndexedWord>(), ignoreCommonTags, acceptWord);
+        new ArrayList<IndexedWord>(), ignoreCommonTags, acceptWord, feat);
 //    String descStr = "";
 //    for(IndexedWord descendant: descendantSet){
 //      descStr += descendant.word()+" ";
@@ -312,8 +315,7 @@ public class ExtractPhraseFromPattern {
   }
 
   static boolean checkIfSatisfiesRelConstrains(SemanticGraph g,
-      IndexedWord curr, IndexedWord child, List<String> allCutOffRels) {
-    GrammaticalRelation rel = g.reln(curr, child);
+      IndexedWord curr, IndexedWord child, List<String> allCutOffRels, GrammaticalRelation rel) {
     String relName = rel.getShortName();
     String relSpecificName = rel.toString();
     String relFullName = rel.getLongName();
@@ -330,7 +332,7 @@ public class ExtractPhraseFromPattern {
 
   private static void descendantsHelper(SemanticGraph g, IndexedWord curr,
       Set<IndexedWord> descendantSet, List<String> allCutOffRels,
-      List<IndexedWord> doNotAddThese, List<IndexedWord> seenNodes, boolean ignoreCommonTags, Function<CoreLabel, Boolean> acceptWord)
+      List<IndexedWord> doNotAddThese, List<IndexedWord> seenNodes, boolean ignoreCommonTags, Function<CoreLabel, Boolean> acceptWord, Counter<String> feat)
       throws Exception {
 
     if (seenNodes.contains(curr))
@@ -341,17 +343,19 @@ public class ExtractPhraseFromPattern {
       return;
     }
 
-    if (!ignoreCommonTags || !ignoreTags.contains(curr.tag().trim()))
+    if (!ignoreCommonTags || !ignoreTags.contains(curr.tag().trim())) {
       descendantSet.add(curr);
-
+    }
 
     for (IndexedWord child : g.getChildren(curr)) {
       boolean dontuse = false;
       if (doNotAddThese!=null &&doNotAddThese.contains(child))
         dontuse = true;
 
+      GrammaticalRelation rel = null;
       if (dontuse == false) {
-        dontuse = checkIfSatisfiesRelConstrains(g, curr, child, allCutOffRels);
+        rel = g.reln(curr, child);
+        dontuse = checkIfSatisfiesRelConstrains(g, curr, child, allCutOffRels, rel);
       }
       if (dontuse == false) {
         for (String cutOffTagRegex : cutoffTags) {
@@ -365,9 +369,11 @@ public class ExtractPhraseFromPattern {
         }
 
       }
-      if (dontuse == false)
+      if (dontuse == false){
+        feat.incrementCount("REL-"+ rel.getShortName());
         descendantsHelper(g, child, descendantSet, allCutOffRels,
-            doNotAddThese, seenNodes, ignoreCommonTags, acceptWord);
+            doNotAddThese, seenNodes, ignoreCommonTags, acceptWord, feat);
+      }
     }
   }
 

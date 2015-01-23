@@ -13,6 +13,7 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.*;
 
 import java.util.*;
@@ -88,16 +89,17 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
             //find if the neighboring words are labeled - if so - club them together
             if(constVars.clubNeighboringLabeledWords) {
               for (int i = s - 1; i >= 0; i--) {
-                if (!tokens.get(i).get(constVars.getAnswerClass().get(label)).equals(label) || (e-i) <= PatternFactory.numWordsCompound) {
-                  s = i + 1;
-                  break;
-                }
+                if (tokens.get(i).get(constVars.getAnswerClass().get(label)).equals(label) && (e - i + 1) <= PatternFactory.numWordsCompound) {
+                  s = i;
+                  System.out.println("for phrase " + match + " clubbing earlier word. new s is " + s);
+                } else break;
               }
+
               for (int i = e; i < tokens.size(); i++) {
-                if (!tokens.get(i).get(constVars.getAnswerClass().get(label)).equals(label) || (i-s + 1) <= PatternFactory.numWordsCompound) {
+                if (tokens.get(i).get(constVars.getAnswerClass().get(label)).equals(label) && (i-s + 1) <= PatternFactory.numWordsCompound) {
                   e = i;
-                  break;
-                }
+                  System.out.println("for phrase " + match + " clubbing next word. new e is " + e);
+                } else break;
               }
             }
 
@@ -194,16 +196,23 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
       public Counter<String> apply(Pair<IndexedWord, SemanticGraph> indexedWordSemanticGraphPair) {
         //TODO: make features;
         Counter<String> feat = new ClassicCounter<>();
-
+        IndexedWord vertex = indexedWordSemanticGraphPair.first();
+        SemanticGraph graph = indexedWordSemanticGraphPair.second();
+        List<Pair<GrammaticalRelation, IndexedWord>> pt = graph.parentPairs(vertex);
+        for(Pair<GrammaticalRelation, IndexedWord> en: pt) {
+          feat.incrementCount("PARENTREL-" + en.first());
+        }
         return feat;
       }
     };
 
     extract.getSemGrexPatternNodes(graph, tokens, outputPhrases, outputIndices,
       pattern, findSubTrees, extractedPhrases, constVars.matchLowerCaseContext, matchingWordRestriction, extractFeatures);
-    Collection<ExtractedPhrase> outputIndicesMaxPhraseLen = new ArrayList<ExtractedPhrase>();
 
+
+    /*
     //TODO: probably a bad idea to add ALL ngrams
+    Collection<ExtractedPhrase> outputIndicesMaxPhraseLen = new ArrayList<ExtractedPhrase>();
     for(IntPair o: outputIndices){
       int min = o.get(0);
       int max = o.get(1);
@@ -230,9 +239,9 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
           }
         }
       }
-    }
-    System.out.println("extracted phrases are " + extractedPhrases + " and ngramed restricted phrases are " + outputIndicesMaxPhraseLen + " and output indices are " + outputIndices);
-    return outputIndicesMaxPhraseLen;
+    }*/
+    System.out.println("extracted phrases are " + extractedPhrases + " and output indices are " + outputIndices);
+    return extractedPhrases;
   }
 
   private boolean matchedRestriction(CoreLabel coreLabel, String label) {
