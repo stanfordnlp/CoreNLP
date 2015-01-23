@@ -330,6 +330,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
         sims.setCount(p, Double.MIN_VALUE);
       }
       simsAvgMaxAllLabels.put(label, simsAvgMax);
+      similaritiesWithLabeledPhrases.put(p.getPhrase(), simsAvgMaxAllLabels);
     }
     return sims;
   }
