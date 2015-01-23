@@ -46,11 +46,15 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   public ScorePhrasesLearnFeatWt(ConstantsAndVariables constvar) {
     super(constvar);
     if(constvar.useWordVectorsToComputeSim && (constvar.subsampleUnkAsNegUsingSim|| constvar.expandPositivesWhenSampling)) {
+      if(Data.rawFreq == null){
+          Data.computeRawFreqIfNull(PatternFactory.numWordsCompound, constvar.batchProcessSents);
+      }
       wordVectors = new HashMap<String, double[]>();
       for (String line : IOUtils.readLines(constVars.wordVectorFile)) {
         String[] tok = line.split("\\s+");
         String word = tok[0];
         CandidatePhrase p = CandidatePhrase.createOrGet(word);
+
         //save the vector if it occurs in the rawFreq, seed set, stop words, english words
         if (Data.rawFreq.containsKey(p) || constvar.getStopWords().contains(p) || constvar.getEnglishWords().contains(word) || constvar.hasSeedWordOrOtherSem(p)) {
           double[] d = new double[tok.length - 1];
