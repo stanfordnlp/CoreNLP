@@ -630,6 +630,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       Set<CandidatePhrase> allConsideredPhrases = new HashSet<CandidatePhrase>();
 
       Map<Class, Object> otherIgnoreClasses = constVars.getIgnoreWordswithClassesDuringSelection().get(answerLabel);
+      int numlabeled = 0;
       for (String sentid : keys) {
         DataInstance sentInst = sents.get(sentid);
         List<CoreLabel> value = sentInst.getTokens();
@@ -639,6 +640,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           CoreLabel l = sent[i];
 
           if (l.get(answerClass).equals(answerLabel)) {
+            numlabeled++;
             CandidatePhrase candidate = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(answerLabel);
 
             if (candidate == null) {
@@ -652,8 +654,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             }
 
             //Do not add to positive if the word is a "negative" (stop word, english word, ...)
-            if(hasElement(allPossiblePhrases, candidate, answerLabel) || PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches())
-              continue;
+            //TODO: undo the commenting
+            //if(hasElement(allPossiblePhrases, candidate, answerLabel) || PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches())
+            //  continue;
 
             allPositivePhrases.add(candidate);
 
@@ -744,6 +747,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 //
 //          chosen.add(new Pair<String, Integer>(en.getKey(), i));
       }
+      Redwood.log(Redwood.DBG, "number of labeled tokens are " + numlabeled);
     return new Quintuple(allPositivePhrases, allNegativePhrases, allUnknownPhrases, allCloseToPositivePhrases, allCloseToNegativePhrases);
     }
   }
