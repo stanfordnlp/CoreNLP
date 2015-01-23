@@ -25,14 +25,19 @@ import edu.stanford.nlp.io.RegExFileFilter;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
+import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.patterns.dep.DataInstanceDep;
 import edu.stanford.nlp.patterns.surface.*;
 import edu.stanford.nlp.patterns.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.ArrayUtils;
@@ -613,13 +618,13 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     for(Map.Entry<String, DataInstance> sentEn: sents.entrySet()){
 
       for(CoreLabel l : sentEn.getValue().getTokens()){
-        Map<String, String> longestMatchingMap = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
+        Map<String, CandidatePhrase> longestMatchingMap = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
         String longestMatchingString = "";
         String longestMatchingLabel = null;
-        for(Map.Entry<String, String> en: longestMatchingMap.entrySet()){
-          if(en.getValue().length() > longestMatchingString.length()){
+        for(Map.Entry<String, CandidatePhrase> en: longestMatchingMap.entrySet()){
+          if(en.getValue().getPhrase().length() > longestMatchingString.length()){
               longestMatchingLabel = en.getKey();
-              longestMatchingString = en.getValue();
+              longestMatchingString = en.getValue().getPhrase();
           }
         }
 
@@ -987,7 +992,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       List<String> keys = keyset.subList(i * num, Math.min(keyset.size(), (i + 1) * num));
       Redwood.log(ConstantsAndVariables.extremedebug, "assigning from " + i * num + " till " + Math.min(keyset.size(), (i + 1) * num));
 
-      Callable<Map<String, DataInstance>> task = new LabelWithSeedWords(seedWords, sents, keys, answerclass, label, constVars.minLen4FuzzyForPattern, constVars.backgroundSymbol, constVars.getEnglishWords(), stringTransformationFunction, constVars.writeMatchedTokensIdsForEachPhrase, overwriteExistingLabels);
+      Callable<Map<String, DataInstance>> task = new LabelWithSeedWords(seedWords, sents, keys, answerclass, label, constVars.minLen4FuzzyForPattern, constVars.backgroundSymbol, constVars.getEnglishWords(), stringTransformationFunction, constVars.writeMatchedTokensIdsForEachPhrase, overwriteExistingLabels, constVars.patternType);
       Future<Map<String, DataInstance>> submit = executor.submit(task);
       list.add(submit);
     }
@@ -1005,12 +1010,33 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     executor.shutdown();
   }
 
+  public static void getFeatures(SemanticGraph graph, IndexedWord vertex, boolean isHead, Collection<String> features, GrammaticalRelation reln){
+    if(isHead){
+      List<Pair<GrammaticalRelation, IndexedWord>> pt = graph.parentPairs(vertex);
+      for(Pair<GrammaticalRelation, IndexedWord> en: pt) {
+        features.add("PARENTREL-" + en.first());
+      }
+    } else{
+      //find the relation to the parent
+      if(reln == null){
+        List<SemanticGraphEdge> parents = graph.getOutEdgesSorted(vertex);
+        if(parents.size() > 0)
+        reln = parents.get(0).getRelation();
+      }
+      if(reln != null)
+        features.add("REL-" + reln.getShortName());
+    }
+    System.out.println("For graph " + graph.toFormattedString() + " and vertex " + vertex + " the features are " + features);
+  }
+
+  static void addLengthFeature(){}
+
   /**
    * Warning: sets labels of words that are not in the given seed set as O!!!
    */
   @SuppressWarnings("rawtypes")
   public static class LabelWithSeedWords implements Callable<Map<String, DataInstance>> {
-    Set<String[]> seedwordsTokens = new HashSet<String[]>();
+    Map<CandidatePhrase, String[]> seedwordsTokens = new HashMap<CandidatePhrase, String[]>();
     Map<String, DataInstance> sents;
     List<String> keyset;
     Class labelClass;
@@ -1022,10 +1048,11 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     Function<CoreLabel, String> stringTransformation;
     boolean writeMatchedTokensIdsForEachPhrase = false;
     boolean overwriteExistingLabels;
+    PatternFactory.PatternType patternType;
 
-    public LabelWithSeedWords(Collection<CandidatePhrase> seedwords, Map<String, DataInstance> sents, List<String> keyset, Class labelclass, String label, int minLen4FuzzyForPattern, String backgroundSymbol, Set<String> dictWords, Function<CoreLabel, String> stringTransformation, boolean writeMatchedTokensIdsForEachPhrase, boolean overwriteExistingLabels) {
+    public LabelWithSeedWords(Collection<CandidatePhrase> seedwords, Map<String, DataInstance> sents, List<String> keyset, Class labelclass, String label, int minLen4FuzzyForPattern, String backgroundSymbol, Set<String> dictWords, Function<CoreLabel, String> stringTransformation, boolean writeMatchedTokensIdsForEachPhrase, boolean overwriteExistingLabels, PatternFactory.PatternType type) {
       for (CandidatePhrase s : seedwords)
-        this.seedwordsTokens.add(s.getPhrase().split("\\s+"));
+        this.seedwordsTokens.put(s, s.getPhrase().split("\\s+"));
       this.sents = sents;
       this.keyset = keyset;
       this.labelClass = labelclass;
@@ -1036,6 +1063,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       this.stringTransformation = stringTransformation;
       this.writeMatchedTokensIdsForEachPhrase = writeMatchedTokensIdsForEachPhrase;
       this.overwriteExistingLabels = overwriteExistingLabels;
+      this.patternType = type;
     }
 
     @SuppressWarnings("unchecked")
@@ -1045,6 +1073,12 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       for (String k : keyset) {
         DataInstance sent = sents.get(k);
         List<CoreLabel> tokensCore = sent.getTokens();
+
+        SemanticGraph graph = null;
+        if(patternType.equals(PatternFactory.PatternType.DEP)){
+          graph = ((DataInstanceDep)sent).getGraph();
+        }
+
         String[] tokens = new String[tokensCore.size()];
         String[] tokenslemma = new String[tokensCore.size()];
         int num = 0;
@@ -1061,32 +1095,49 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
         }
         boolean[] labels = new boolean[tokens.length];
 
-        CollectionValuedMap<Integer, String> matchedPhrases = new CollectionValuedMap<Integer, String>();
-        Map<Integer, String> longestMatchedPhrases = new HashMap<Integer, String>();
+        CollectionValuedMap<Integer, CandidatePhrase> matchedPhrases = new CollectionValuedMap<Integer, CandidatePhrase>();
+        Map<Integer, CandidatePhrase> longestMatchedPhrases = new HashMap<Integer, CandidatePhrase>();
 
-        for (String[] s : seedwordsTokens) {
+        for (Entry<CandidatePhrase, String[]> sEn : seedwordsTokens.entrySet()) {
+          String[] s = sEn.getValue();
+          CandidatePhrase sc = sEn.getKey();
           List<Integer> indices = getSubListIndex(s, tokens, tokenslemma, dictWords, seenFuzzyMatches,
               minLen4FuzzyForPattern);
 
           if (indices != null && !indices.isEmpty()){
             String ph = StringUtils.join(s, " ");
+            sc.addFeature("LENGTH-" + s.length, 1.0);
+
+            Collection<String> features = new ArrayList<String>();
+
             for (int index : indices){
               //TODO: add here (what? this comment doens't make any sense. I shd start adding sensible comments - unlike the current one I am typing.)
+
+              if(graph != null){
+                GetPatternsFromDataMultiClass.getFeatures(graph, graph.getNodeByIndex(index + 1), true, features, null);
+              }
 
               if(writeMatchedTokensIdsForEachPhrase) {
                 addToMatchedTokensByPhrase(ph, k, index, s.length);
               }
 
               for (int i = 0; i < s.length; i++) {
-                matchedPhrases.add(index + i, ph);
+                matchedPhrases.add(index + i, sc);
 
-                String longPh = longestMatchedPhrases.get(index+i);
-                longPh = longPh != null && longPh.length() > ph.length() ? longPh: ph;
+                if(graph != null){
+                  GetPatternsFromDataMultiClass.getFeatures(graph, graph.getNodeByIndex(index+ i + 1), false, features, null);
+
+                }
+
+                CandidatePhrase longPh = longestMatchedPhrases.get(index+i);
+                longPh = longPh != null && longPh.getPhrase().length() > sc.getPhrase().length() ? longPh: sc;
                 longestMatchedPhrases.put(index+i, longPh);
 
                 labels[index + i] = true;
               }
-            }}
+            }
+          sc.addFeatures(features);
+          }
         }
         int i = -1;
         for (CoreLabel l : sent.getTokens()) {
@@ -1094,10 +1145,10 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
 
           //The second clause is for old sents ser files compatibility reason
           if (!l.containsKey(PatternsAnnotations.MatchedPhrases.class) || !(PatternsAnnotations.MatchedPhrases.class.isInstance(l.get(PatternsAnnotations.MatchedPhrases.class))))
-            l.set(PatternsAnnotations.MatchedPhrases.class, new CollectionValuedMap<String, String>());
+            l.set(PatternsAnnotations.MatchedPhrases.class, new CollectionValuedMap<String, CandidatePhrase>());
 
           if(!l.containsKey(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class))
-            l.set(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class, new HashMap<String, String>());
+            l.set(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class, new HashMap<String, CandidatePhrase>());
 
           if (labels[i]) {
             l.set(labelClass, label);
@@ -1107,13 +1158,14 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
               l.set(PatternsAnnotations.SeedLabeledOrNot.class, new HashMap<Class, Boolean>());
             l.get(PatternsAnnotations.SeedLabeledOrNot.class).put(labelClass, true);
 
-            String longestMatching = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(label);
-            longestMatching = (longestMatching != null && (longestMatching.length() > longestMatchedPhrases.get(i).length())) ? longestMatching : longestMatchedPhrases.get(i);
-            l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).put(label, longestMatching);
+            CandidatePhrase longestMatchingPh = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(label);
+            assert longestMatchedPhrases.containsKey(i);
+            longestMatchingPh = (longestMatchingPh != null && (longestMatchingPh.getPhrase().length() > longestMatchedPhrases.get(i).getPhrase().length())) ? longestMatchingPh : longestMatchedPhrases.get(i);
+            l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).put(label, longestMatchingPh);
             l.get(PatternsAnnotations.MatchedPhrases.class).addAll(label, matchedPhrases.get(i));
 
             Redwood.log(ConstantsAndVariables.extremedebug, "labeling " + l.word() + " or its lemma " + l.lemma() + " as " + label
-              + " because of the dict phrases " + (Set<String>) matchedPhrases.get(i));
+              + " because of the dict phrases " + matchedPhrases.get(i));
 
           } else if(overwriteExistingLabels)
             l.set(labelClass, backgroundSymbol);
@@ -1718,13 +1770,13 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
           CoreLabel token = tokens.get(i);
           //Map<String, Set<String>> matchedPhrases = token.get(PatternsAnnotations.MatchedPhrases.class);
 
-          String tokenWordOrLemma = token.word();
-          String longestMatchingPhrase = null;
+          CandidatePhrase tokenWordOrLemma = CandidatePhrase.createOrGet(token.word());
+          CandidatePhrase longestMatchingPhrase;
 
           if (constVars.useMatchingPhrase) {
-            Map<String, String> longestMatchingPhrases = token.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
+            Map<String, CandidatePhrase> longestMatchingPhrases = token.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
             longestMatchingPhrase = longestMatchingPhrases.get(label);
-            longestMatchingPhrase = (longestMatchingPhrase !=null && (longestMatchingPhrase.length() > tokenWordOrLemma.length()))? longestMatchingPhrase : tokenWordOrLemma;
+            longestMatchingPhrase = (longestMatchingPhrase !=null && (longestMatchingPhrase.getPhrase().length() > tokenWordOrLemma.getPhrase().length()))? longestMatchingPhrase : tokenWordOrLemma;
           /*if (matchedPhrases != null && !matchedPhrases.isEmpty()) {
             for (String s : matchedPhrases) {
               if (s.equals(tokenWordOrLemma)) {
@@ -1784,7 +1836,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
               //E s = constVars.patternIndex.get(sindex);
 
               //patternsandWords4Label.getCounter(sindex).incrementCount(longestMatchingPhrase);
-              posWords.add(new Pair<E, CandidatePhrase>(s, new CandidatePhrase(longestMatchingPhrase)));
+              posWords.add(new Pair<E, CandidatePhrase>(s, longestMatchingPhrase));
               //posnegPatternsandWords4Label.getCounter(sindex).incrementCount(longestMatchingPhrase);
               //allPatternsandWords4Label.getCounter(sindex).incrementCount(longestMatchingPhrase);
             }
@@ -1803,17 +1855,12 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
                 negToken = true;
 
             for (E sindex : pats) {
-              //E s = constVars.patternIndex.get(sindex);
               if (negToken) {
-                negWords.add(new Pair<E, CandidatePhrase>(sindex, new CandidatePhrase(tokenWordOrLemma)));
-                //negPatternsandWords4Label.getCounter(sindex).incrementCount(tokenWordOrLemma);
-                //posnegPatternsandWords4Label.getCounter(sindex).incrementCount(tokenWordOrLemma);
+                negWords.add(new Pair<E, CandidatePhrase>(sindex, tokenWordOrLemma));
               } else {
-                unlabWords.add(new Pair<E, CandidatePhrase>(sindex, new CandidatePhrase(tokenWordOrLemma)));
-                //unLabeledPatternsandWords4Label.getCounter(sindex).incrementCount(tokenWordOrLemma);
+                unlabWords.add(new Pair<E, CandidatePhrase>(sindex, tokenWordOrLemma));
               }
-              //negandUnLabeledPatternsandWords4Label.getCounter(sindex).incrementCount(tokenWordOrLemma);
-              //allPatternsandWords4Label.incrementCount(sindex, tokenWordOrLemma);
+
             }
           }
         }
@@ -1929,10 +1976,10 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     for (Entry<String, DataInstance> sentEn : sents.entrySet()) {
       List<CoreLabel> tokens = sentEn.getValue().getTokens();
       boolean sentenceChanged = false;
-      Set<String[]> identifiedWordsTokens = new HashSet<String[]>();
+      Map<CandidatePhrase, String[]> identifiedWordsTokens = new HashMap<CandidatePhrase, String[]>();
       for (CandidatePhrase s : identifiedWords) {
         String[] toks = s.getPhrase().split("\\s+");
-        identifiedWordsTokens.add(toks);
+        identifiedWordsTokens.put(s, toks);
       }
       String[] sent = new String[tokens.size()];
       int i = 0;
@@ -1943,7 +1990,8 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
         sent[i] = l.word();
         i++;
       }
-      for (String[] ph : identifiedWordsTokens) {
+      for (Entry<CandidatePhrase, String[]> phEn : identifiedWordsTokens.entrySet()) {
+        String[] ph = phEn.getValue();
         //TODO: match lowercase text given option?!
         List<Integer> ints = ArrayUtils.getSubListIndex(ph, sent);
         if (ints == null)
@@ -1976,12 +2024,17 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
                 l.set(constVars.getAnswerClass().get(label), label);
                 numTokensLabeled ++;
 
-                CollectionValuedMap<String, String> matched = new CollectionValuedMap<String, String>();
-                matched.add(label, phStr);
+                //set the matched and the longest phrases
+                CollectionValuedMap<String, CandidatePhrase> matched = new CollectionValuedMap<String, CandidatePhrase>();
+                matched.add(label, phEn.getKey());
                 if(!l.containsKey(PatternsAnnotations.MatchedPhrases.class))
                   l.set(PatternsAnnotations.MatchedPhrases.class, matched);
                 else
                   l.get(PatternsAnnotations.MatchedPhrases.class).addAll(matched);
+
+                CandidatePhrase longest = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(label);
+                longest = longest != null && longest.getPhrase().length() > phEn.getKey().getPhrase().length() ? longest: phEn.getKey();
+                l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).put(label, longest);
 
                 for (int k = Math.max(0, index - PatternFactory.numWordsCompound); k < tokens.size()
                     && k <= index + PatternFactory.numWordsCompound + 1; k++) {
@@ -2588,18 +2641,18 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     writer.close();
   }
 
-  public void writeColumnOutput(String outFile) throws IOException, ClassNotFoundException {
+  static public void writeColumnOutput(String outFile, boolean batchProcessSents, Map<String, Class<? extends TypesafeMap.Key<String>>> answerclasses) throws IOException, ClassNotFoundException {
     BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
 
-    ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
+    ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(batchProcessSents);
     while(sentsIter.hasNext()){
       Pair<Map<String, DataInstance>, File> sentsf = sentsIter.next();
-      this.writeColumnOutputSents(sentsf.first(), writer);
+      writeColumnOutputSents(sentsf.first(), writer, answerclasses);
     }
     writer.close();
   }
 
-  private void writeColumnOutputSents(Map<String, DataInstance> sents, BufferedWriter writer) throws IOException {
+  private static void writeColumnOutputSents(Map<String, DataInstance> sents, BufferedWriter writer, Map<String, Class<? extends TypesafeMap.Key<String>>> answerclasses) throws IOException {
     for (Entry<String, DataInstance> sent : sents.entrySet()) {
 
       writer.write("\n\n" + sent.getKey() + "\n");
@@ -2607,7 +2660,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       for (CoreLabel s : sent.getValue().getTokens()) {
         writer.write(s.word()+"\t");
         Set<String> labels = new HashSet<String>();
-        for (Entry<String, Class<? extends TypesafeMap.Key<String>>> as : constVars.getAnswerClass().entrySet()) {
+        for (Entry<String, Class<? extends TypesafeMap.Key<String>>> as : answerclasses.entrySet()) {
           String label = as.getKey();
           if (s.get(as.getValue()).equals(label)) {
             labels.add(label);
@@ -3152,7 +3205,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     }
 
     if(model.constVars.columnOutputFile != null)
-      model.writeColumnOutput(model.constVars.columnOutputFile);
+      writeColumnOutput(model.constVars.columnOutputFile, model.constVars.batchProcessSents, model.constVars.getAnswerClass());
 
     boolean savePatternsWordsDir = Boolean.parseBoolean(props.getProperty("savePatternsWordsDir"));
 

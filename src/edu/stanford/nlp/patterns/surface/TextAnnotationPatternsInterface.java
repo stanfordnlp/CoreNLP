@@ -305,6 +305,8 @@ public class TextAnnotationPatternsInterface {
         GetPatternsFromDataMultiClass.runLabelSeedWords(Data.sents, humanLabelClasses.get(label), label, seedWords.get(label), constVars, true);
       }
 
+      GetPatternsFromDataMultiClass.writeColumnOutput(outputfile, false, humanLabelClasses);
+
       System.out.println("written the output to " + outputfile);
       return "SUCCESS";
     }
