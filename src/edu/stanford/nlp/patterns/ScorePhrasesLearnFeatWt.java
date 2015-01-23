@@ -240,6 +240,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   }
 
   private Counter<CandidatePhrase> computeSimWithWordVectors(Collection<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> otherPhrases, boolean ignoreWordRegex, String label){
+    final int numTopSimilar = 5;
+
     Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>(candidatePhrases.size());
     for(CandidatePhrase p : candidatePhrases) {
 
@@ -256,7 +258,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
         double[] d1 = wordVectors.get(p.getPhrase());
 
-        double finalSimScore = 0;// Double.MIN_VALUE;
+        BinaryHeapPriorityQueue<CandidatePhrase> topSimPhs = new BinaryHeapPriorityQueue<CandidatePhrase>(numTopSimilar);
         double allsum = 0;
         double max = Double.MIN_VALUE;
 
@@ -290,14 +292,22 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             cacheSimilarities.setCount(pair, sim);
           }
 
-          if(sim > finalSimScore)
-            finalSimScore =  sim;
+          topSimPhs.add(pos, sim);
+          if(topSimPhs.size() > numTopSimilar)
+            topSimPhs.removeLastEntry();
 
           //avgSim /= otherPhrases.size();
           allsum += sim;
           if(sim > max)
             max = sim;
         }
+
+        double finalSimScore = 0;
+        while(topSimPhs.hasNext()) {
+          finalSimScore += topSimPhs.getPriority();
+          topSimPhs.next();
+        }
+        finalSimScore /= numTopSimilar;
 
         double prevNumItems = simsAvgMax[Similarities.NUMITEMS.ordinal()];
         double prevAvg = simsAvgMax[Similarities.AVGSIM.ordinal()];
