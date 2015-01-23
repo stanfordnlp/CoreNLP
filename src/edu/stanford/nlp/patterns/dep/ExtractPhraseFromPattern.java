@@ -11,15 +11,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.function.Function;
 
 //import org.jdom.Element;
 //import org.jdom.Namespace;
 
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
@@ -95,7 +98,7 @@ public class ExtractPhraseFromPattern {
     for (SemgrexPattern pattern : typePatterns) {
       Collection<IndexedWord> triggerWords = getSemGrexPatternNodes(g,
           textTokens, typePhrases, typeIndices, pattern,
-          findSubTrees, extractedPhrases, lowercase);
+          findSubTrees, extractedPhrases, lowercase, o -> true, o -> null);
       for (IndexedWord w : triggerWords) {
         if (!typeTriggerWords.contains(w))
           typeTriggerWords.add(w);
@@ -120,7 +123,7 @@ public class ExtractPhraseFromPattern {
   public Set<IndexedWord> getSemGrexPatternNodes(SemanticGraph g,
       List<String> tokens, Collection<String> outputNodes, Collection<IntPair> outputIndices,
       SemgrexPattern pattern, boolean findSubTrees,
-      Collection<ExtractedPhrase> extractedPhrases, boolean lowercase) {
+      Collection<ExtractedPhrase> extractedPhrases, boolean lowercase, Function<CoreLabel, Boolean> acceptWord, Function<Pair<IndexedWord, SemanticGraph>, Counter<String>> extractFeat) {
 
     Set<IndexedWord> foundWordsParents = new HashSet<IndexedWord>();
     SemgrexMatcher m = pattern.matcher(g, lowercase);
@@ -136,15 +139,18 @@ public class ExtractPhraseFromPattern {
       if (ifSatisfiedMaxDepth == false)
         continue;
 
-      List<Pair<String, SemanticGraph>> matchedGraphs = matchedGraphsForPattern
+
+      if(DEBUG > 3) {
+        List<Pair<String, SemanticGraph>> matchedGraphs = matchedGraphsForPattern
           .get(pattern);
-      if (matchedGraphs == null)
-        matchedGraphs = new ArrayList<Pair<String, SemanticGraph>>();
-      matchedGraphs.add(new Pair<String, SemanticGraph>(StringUtils.join(
+        if (matchedGraphs == null)
+          matchedGraphs = new ArrayList<Pair<String, SemanticGraph>>();
+        matchedGraphs.add(new Pair<String, SemanticGraph>(StringUtils.join(
           tokens, " "), g));
-      if (DEBUG >= 3)
-        System.out.println("matched pattern is " + pattern);
-      matchedGraphsForPattern.put(pattern, matchedGraphs);
+        if (DEBUG >= 3)
+          System.out.println("matched pattern is " + pattern);
+        matchedGraphsForPattern.put(pattern, matchedGraphs);
+      }
 
       foundWordsParents.add(parent);
 
@@ -159,7 +165,7 @@ public class ExtractPhraseFromPattern {
       System.out.println("g is ");
       g.prettyPrint();
       printSubGraph(g, w, cutoffrelations, tokens, outputNodes, outputIndices, seenNodes, new ArrayList<IndexedWord>(),
-          findSubTrees, extractedPhrases, pattern);
+          findSubTrees, extractedPhrases, pattern, acceptWord, extractFeat);
     }
     return foundWordsParents;
   }
@@ -171,7 +177,7 @@ public class ExtractPhraseFromPattern {
       Collection<String> listOfOutput, Collection<IntPair> listOfOutputIndices,
       List<IndexedWord> seenNodes, List<IndexedWord> doNotAddThese,
       boolean findSubTrees, Collection<ExtractedPhrase> extractedPhrases,
-      SemgrexPattern pattern) {
+      SemgrexPattern pattern, Function<CoreLabel, Boolean> acceptWord, Function<Pair<IndexedWord, SemanticGraph>, Counter<String>> extractFeat) {
     try {
       if (seenNodes.contains(w))
         return;
@@ -190,7 +196,7 @@ public class ExtractPhraseFromPattern {
       for (IndexedWord w1 : andNodes) {
         printSubGraph(g, w1, additionalCutOffRels, textTokens,
             listOfOutput, listOfOutputIndices, seenNodes,
-            doNotAddThese, findSubTrees, extractedPhrases, pattern);
+            doNotAddThese, findSubTrees, extractedPhrases, pattern, acceptWord, extractFeat);
 
       }
       doNotAddThese.addAll(andNodes);
@@ -200,7 +206,7 @@ public class ExtractPhraseFromPattern {
         allCutOffRels.addAll(additionalCutOffRels);
       allCutOffRels.addAll(cutoffRelations);
 
-      Set<IndexedWord> words = descendants(g, w, allCutOffRels, doNotAddThese, ignoreCommonTags);
+      Set<IndexedWord> words = descendants(g, w, allCutOffRels, doNotAddThese, ignoreCommonTags, acceptWord);
       // words.addAll(andNodes);
 
       // if (includeSiblings == true) {
@@ -240,7 +246,7 @@ public class ExtractPhraseFromPattern {
         if ((max - min + 1) <= maxPhraseLength){
           indices = new IntPair(min - 1, max - 1);
           phrase = StringUtils.join(textTokens.subList(min - 1, max), " ");
-          extractedPh = new ExtractedPhrase(min - 1, max -1, pattern,  phrase);
+          extractedPh = new ExtractedPhrase(min - 1, max -1, pattern,  phrase, extractFeat.apply(new Pair(w, g)));
         }
         else {
           int newmax = min + maxPhraseLength - 2;
@@ -248,7 +254,7 @@ public class ExtractPhraseFromPattern {
           phrase = StringUtils.join(
             textTokens.subList(min - 1, newmax + 1), " ");
           extractedPh = new ExtractedPhrase(min - 1, newmax, pattern,
-            phrase);
+            phrase, extractFeat.apply(new Pair(w, g)));
         }
         phrase = phrase.trim();
         System.out.println("phrase is " + phrase  + " index is " + indices + " and maxphraselength is " + maxPhraseLength + " and descendentset is " + words);
@@ -273,7 +279,7 @@ public class ExtractPhraseFromPattern {
                 printSubGraph(g, word, additionalCutOffRels,
                     textTokens, listOfOutput,
                     listOfOutputIndices, seenNodes, doNotAddThese,
-                    findSubTrees, extractedPhrases, pattern);
+                    findSubTrees, extractedPhrases, pattern, acceptWord, extractFeat);
           }
         }
       }
@@ -285,15 +291,18 @@ public class ExtractPhraseFromPattern {
 
   public static Set<IndexedWord> descendants(SemanticGraph g,
       IndexedWord vertex, List<String> allCutOffRels,
-      List<IndexedWord> doNotAddThese, boolean ignoreCommonTags) throws Exception {
+      List<IndexedWord> doNotAddThese, boolean ignoreCommonTags, Function<CoreLabel, Boolean> acceptWord) throws Exception {
     // Do a depth first search
     Set<IndexedWord> descendantSet = new HashSet<IndexedWord>();
 
     if (doNotAddThese !=null && doNotAddThese.contains(vertex))
       return descendantSet;
 
+    if(!acceptWord.apply(vertex.backingLabel()))
+      return descendantSet;
+
     descendantsHelper(g, vertex, descendantSet, allCutOffRels, doNotAddThese,
-        new ArrayList<IndexedWord>(), ignoreCommonTags);
+        new ArrayList<IndexedWord>(), ignoreCommonTags, acceptWord);
 //    String descStr = "";
 //    for(IndexedWord descendant: descendantSet){
 //      descStr += descendant.word()+" ";
@@ -321,14 +330,14 @@ public class ExtractPhraseFromPattern {
 
   private static void descendantsHelper(SemanticGraph g, IndexedWord curr,
       Set<IndexedWord> descendantSet, List<String> allCutOffRels,
-      List<IndexedWord> doNotAddThese, List<IndexedWord> seenNodes, boolean ignoreCommonTags)
+      List<IndexedWord> doNotAddThese, List<IndexedWord> seenNodes, boolean ignoreCommonTags, Function<CoreLabel, Boolean> acceptWord)
       throws Exception {
 
     if (seenNodes.contains(curr))
       return;
 
     seenNodes.add(curr);
-    if (descendantSet.contains(curr) || (doNotAddThese!=null && doNotAddThese.contains(curr))) {
+    if (descendantSet.contains(curr) || (doNotAddThese!=null && doNotAddThese.contains(curr)) || !acceptWord.apply(curr.backingLabel())) {
       return;
     }
 
@@ -358,7 +367,7 @@ public class ExtractPhraseFromPattern {
       }
       if (dontuse == false)
         descendantsHelper(g, child, descendantSet, allCutOffRels,
-            doNotAddThese, seenNodes, ignoreCommonTags);
+            doNotAddThese, seenNodes, ignoreCommonTags, acceptWord);
     }
   }
 

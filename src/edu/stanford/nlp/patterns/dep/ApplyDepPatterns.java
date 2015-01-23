@@ -2,6 +2,7 @@ package edu.stanford.nlp.patterns.dep;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.*;
@@ -9,11 +10,14 @@ import edu.stanford.nlp.patterns.surface.SurfacePattern;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.*;
 
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -164,6 +168,14 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
     }
 
   private Collection<ExtractedPhrase> getMatchedTokensIndex(SemanticGraph graph, SemgrexPattern pattern, DataInstance sent) {
+
+    Function<CoreLabel, Boolean> matchingWordRestriction = new Function<CoreLabel, Boolean>(){
+      @Override
+      public Boolean apply(CoreLabel coreLabel) {
+        return matchedRestriction(coreLabel, label);
+      }
+    };
+
     //TODO: look at the ignoreCommonTags flag
     ExtractPhraseFromPattern extract = new ExtractPhraseFromPattern(false, PatternFactory.numWordsCompound);
     Collection<IntPair> outputIndices = new ArrayList<IntPair>();
@@ -177,8 +189,18 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
 
     List<ExtractedPhrase> extractedPhrases = new ArrayList<ExtractedPhrase>();
 
+    Function<Pair<IndexedWord, SemanticGraph>, Counter<String>> extractFeatures = new Function<Pair<IndexedWord, SemanticGraph>, Counter<String>>() {
+      @Override
+      public Counter<String> apply(Pair<IndexedWord, SemanticGraph> indexedWordSemanticGraphPair) {
+        //TODO: make features;
+        Counter<String> feat = new ClassicCounter<>();
+
+        return feat;
+      }
+    };
+
     extract.getSemGrexPatternNodes(graph, tokens, outputPhrases, outputIndices,
-      pattern, findSubTrees, extractedPhrases, constVars.matchLowerCaseContext);
+      pattern, findSubTrees, extractedPhrases, constVars.matchLowerCaseContext, matchingWordRestriction, extractFeatures);
     Collection<ExtractedPhrase> outputIndicesMaxPhraseLen = new ArrayList<ExtractedPhrase>();
 
     //TODO: probably a bad idea to add ALL ngrams

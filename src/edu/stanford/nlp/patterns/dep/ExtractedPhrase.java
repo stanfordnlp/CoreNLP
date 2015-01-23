@@ -22,7 +22,11 @@ public class ExtractedPhrase implements Serializable{
   Counter<String> features;
 
   public ExtractedPhrase(int startIndex, int endIndex, SemgrexPattern pattern, String value) {
-    this(startIndex, endIndex, pattern, value, 1.0, null, null);
+    this(startIndex, endIndex, pattern, value, 1.0, null, null, null);
+  }
+
+  public ExtractedPhrase(int startIndex, int endIndex, SemgrexPattern pattern, String value, Counter<String> features) {
+    this(startIndex, endIndex, pattern, value, 1.0, null, null, features);
   }
 
   public ExtractedPhrase(int startIndex, int endIndex, SemgrexPattern pattern, String value, double weight,
