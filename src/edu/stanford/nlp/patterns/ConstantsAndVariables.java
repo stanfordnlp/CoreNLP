@@ -342,11 +342,11 @@ public class ConstantsAndVariables<E> implements Serializable{
 
   private Map<String, Integer> generalWordClassClusters = null;
 
-  @Option(name = "includeExternalFeatures")
-  public boolean includeExternalFeatures = false;
+//  @Option(name = "includeExternalFeatures")
+//  public boolean includeExternalFeatures = false;
 
   @Option(name = "externalFeatureWeightsFile")
-  public String externalFeatureWeightsFile = null;
+  public String externalFeatureWeightsDir = null;
 
   @Option(name = "doNotApplyPatterns")
   public boolean doNotApplyPatterns = false;
@@ -845,6 +845,10 @@ public class ConstantsAndVariables<E> implements Serializable{
       }
     }
 
+    for(String label: labels){
+      learnedWords.put(label, new ClassicCounter<CandidatePhrase>());
+    }
+    
     //patternIndex = PatternIndex.newInstance(storePatsIndex, allPatternsDir);
     alreadySetUp = true;
   }

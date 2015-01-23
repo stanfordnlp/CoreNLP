@@ -132,7 +132,7 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
 
     if(sentences != null && sentences.size() > 0)
       inv.add(sentences, true);
-    System.out.println("Created index with size " + inv.size());
+    System.out.println("Created index with size " + inv.size() + ". Don't worry if it's zero and you are using batch process sents.");
     return inv;
   }
 

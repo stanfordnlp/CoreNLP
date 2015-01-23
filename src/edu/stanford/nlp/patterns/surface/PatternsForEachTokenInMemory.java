@@ -3,7 +3,9 @@ package edu.stanford.nlp.patterns.surface;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.patterns.Pattern;
 import edu.stanford.nlp.util.Execution;
+import edu.stanford.nlp.util.logging.Redwood;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -96,7 +98,10 @@ public class PatternsForEachTokenInMemory<E extends Pattern> extends PatternsFor
   @Override
   public boolean save(String dir) {
     try {
-      IOUtils.writeObjectToFile(this.patternsForEachToken, dir+"/allpatterns.ser");
+      IOUtils.ensureDir(new File(dir));
+      String f = dir+"/allpatterns.ser";
+      IOUtils.writeObjectToFile(this.patternsForEachToken, f);
+      Redwood.log(Redwood.DBG, "Saving the patterns to " + f);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

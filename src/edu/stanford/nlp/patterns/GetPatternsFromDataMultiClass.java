@@ -414,88 +414,38 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       computeDataFreq = true;
     }
 
-    if (constVars.batchProcessSents) {
-        for (File f : Data.sentsFiles) {
+    ConstantsAndVariables.DataSentsIterator iter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
+    while(iter.hasNext()){
+      Pair<Map<String, DataInstance>, File> sentsIter = iter.next();
+      Map<String, DataInstance> sentsf = sentsIter.first();
 
-          if(!f.exists())
-            throw new RuntimeException("File " + f + " does not exist. Something is wrong. Contact the author with full details.");
-
-          Redwood.log(Redwood.DBG, "Reading file from " + f.getAbsolutePath());
-
-          Map<String, DataInstance> sentsf = IOUtils.readObjectFromFile(f);
-
-          for(Entry<String, DataInstance> en: sentsf.entrySet()){
-            Data.sentId2File.put(en.getKey(), f);
-          }
-
-          totalNumSents += sentsf.size();
-
-          if(computeDataFreq){
-            Data.computeRawFreqIfNull(sentsf, PatternFactory.numWordsCompound);
-          }
-
-
-          Redwood.log(Redwood.DBG, "Initializing sents from " + f + " with " + sentsf.size()
-              + " sentences, either by labeling with the seed set or just setting the right classes");
-          for (String l : constVars.getAnswerClass().keySet()) {
-
-            Set<CandidatePhrase> seed = seedSets == null || !labelUsingSeedSets ? new HashSet<CandidatePhrase>() : (seedSets.containsKey(l) ? seedSets.get(l)
-                : new HashSet<CandidatePhrase>());
-
-            runLabelSeedWords(sentsf, constVars.getAnswerClass().get(l), l, seed, constVars, labelUsingSeedSets);
-
-
-            if (constVars.addIndvWordsFromPhrasesExceptLastAsNeg) {
-              Set<CandidatePhrase> otherseed = new HashSet<CandidatePhrase>();
-              for (CandidatePhrase s : seed) {
-                String[] t = s.getPhrase().split("\\s+");
-                for (int i = 0; i < t.length - 1; i++) {
-                  if (!seed.contains(t[i])) {
-                    otherseed.add(new CandidatePhrase(t[i]));
-                  }
-                }
-              }
-              runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed, constVars, labelUsingSeedSets);
-            }
-
-          }
-
-          if (constVars.getOtherSemanticClassesWords() != null)
-            runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", constVars.getOtherSemanticClassesWords(), constVars, labelUsingSeedSets);
-
-          if(constVars.removeOverLappingLabelsFromSeed){
-            removeOverLappingLabels(sentsf);
-          }
-
-          constVars.invertedIndex.add(sentsf, true);
-
-
-          Redwood.log(Redwood.DBG, "Saving the labeled seed sents (if given the option) to the same file " + f);
-          IOUtils.writeObjectToFile(sentsf, f);
+      if(constVars.batchProcessSents) {
+        for (Entry<String, DataInstance> en : sentsf.entrySet()) {
+          Data.sentId2File.put(en.getKey(), sentsIter.second());
         }
+      }
 
-    } else {
-
-      //not batch processing sentences
-
-      totalNumSents = Data.sents.size();
+      totalNumSents += sentsf.size();
 
       if(computeDataFreq){
-        Data.computeRawFreqIfNull(Data.sents, PatternFactory.numWordsCompound);
+        Data.computeRawFreqIfNull(sentsf, PatternFactory.numWordsCompound);
       }
 
 
-      Redwood.log(Redwood.DBG, "Initializing sents " + Data.sents.size()
-          + " sentences, either by labeling with the seed set or just setting the right classes");
+      Redwood.log(Redwood.DBG, "Initializing sents size " + sentsf.size()
+        + " sentences, either by labeling with the seed set or just setting the right classes");
       for (String l : constVars.getAnswerClass().keySet()) {
+        Redwood.log(Redwood.DBG, "labelUsingSeedSets is " + labelUsingSeedSets + " and seed set size for " + l + " is " + (seedSets == null?"null":seedSets.get(l).size()));
 
         Set<CandidatePhrase> seed = seedSets == null || !labelUsingSeedSets ? new HashSet<CandidatePhrase>() : (seedSets.containsKey(l) ? seedSets.get(l)
-            : new HashSet<CandidatePhrase>());
+          : new HashSet<CandidatePhrase>());
 
-        runLabelSeedWords(Data.sents, constVars.getAnswerClass().get(l), l, seed, constVars, labelUsingSeedSets);
+        runLabelSeedWords(sentsf, constVars.getAnswerClass().get(l), l, seed, constVars, labelUsingSeedSets);
+
 
         if (constVars.addIndvWordsFromPhrasesExceptLastAsNeg) {
           Set<CandidatePhrase> otherseed = new HashSet<CandidatePhrase>();
+          if(labelUsingSeedSets){
           for (CandidatePhrase s : seed) {
             String[] t = s.getPhrase().split("\\s+");
             for (int i = 0; i < t.length - 1; i++) {
@@ -504,44 +454,154 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
               }
             }
           }
-          runLabelSeedWords(Data.sents, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed, constVars, labelUsingSeedSets);
+          }
+          runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed, constVars, labelUsingSeedSets);
         }
+
       }
 
-
-      if (constVars.getOtherSemanticClassesWords() != null)
-        runLabelSeedWords(Data.sents, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", constVars.getOtherSemanticClassesWords() , constVars, labelUsingSeedSets);
+      if (labelUsingSeedSets && constVars.getOtherSemanticClassesWords() != null)
+        runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", constVars.getOtherSemanticClassesWords(), constVars, labelUsingSeedSets);
 
       if(constVars.removeOverLappingLabelsFromSeed){
-        removeOverLappingLabels(Data.sents);
+        removeOverLappingLabels(sentsf);
       }
 
       if(createIndex)
-        constVars.invertedIndex.add(Data.sents, true);
+        constVars.invertedIndex.add(sentsf, true);
 
+      if(constVars.batchProcessSents){
+        Redwood.log(Redwood.DBG, "Saving the labeled seed sents (if given the option) to the same file " + sentsIter.second());
+        IOUtils.writeObjectToFile(sentsf, sentsIter.second());
+      }
     }
 
 
-
-//    if (constVars.saveInvertedIndexDir != null) {
-//      IOUtils.ensureDir(new File(constVars.saveInvertedIndexDir));
-//      constVars.invertedIndex.saveIndex(constVars.saveInvertedIndexDir);
+//    if (constVars.batchProcessSents) {
+//        for (File f : Data.sentsFiles) {
+//
+//          if(!f.exists())
+//            throw new RuntimeException("File " + f + " does not exist. Something is wrong. Contact the author with full details.");
+//
+//          Redwood.log(Redwood.DBG, "Reading file from " + f.getAbsolutePath());
+//
+//          Map<String, DataInstance> sentsf = IOUtils.readObjectFromFile(f);
+//
+//          for(Entry<String, DataInstance> en: sentsf.entrySet()){
+//            Data.sentId2File.put(en.getKey(), f);
+//          }
+//
+//          totalNumSents += sentsf.size();
+//
+//          if(computeDataFreq){
+//            Data.computeRawFreqIfNull(sentsf, PatternFactory.numWordsCompound);
+//          }
+//
+//
+//          Redwood.log(Redwood.DBG, "Initializing sents from " + f + " with " + sentsf.size()
+//              + " sentences, either by labeling with the seed set or just setting the right classes");
+//          for (String l : constVars.getAnswerClass().keySet()) {
+//            Redwood.log(Redwood.DBG, "labelUsingSeedSets is " + labelUsingSeedSets + " and seed set size for " + l + " is " + (seedSets == null?"null":seedSets.size()));
+//
+//            Set<CandidatePhrase> seed = seedSets == null || !labelUsingSeedSets ? new HashSet<CandidatePhrase>() : (seedSets.containsKey(l) ? seedSets.get(l)
+//                : new HashSet<CandidatePhrase>());
+//
+//            runLabelSeedWords(sentsf, constVars.getAnswerClass().get(l), l, seed, constVars, labelUsingSeedSets);
+//
+//
+//            if (constVars.addIndvWordsFromPhrasesExceptLastAsNeg) {
+//              Set<CandidatePhrase> otherseed = new HashSet<CandidatePhrase>();
+//              for (CandidatePhrase s : seed) {
+//                String[] t = s.getPhrase().split("\\s+");
+//                for (int i = 0; i < t.length - 1; i++) {
+//                  if (!seed.contains(t[i])) {
+//                    otherseed.add(new CandidatePhrase(t[i]));
+//                  }
+//                }
+//              }
+//              runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed, constVars, labelUsingSeedSets);
+//            }
+//
+//          }
+//
+//          if (constVars.getOtherSemanticClassesWords() != null)
+//            runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", constVars.getOtherSemanticClassesWords(), constVars, labelUsingSeedSets);
+//
+//          if(constVars.removeOverLappingLabelsFromSeed){
+//            removeOverLappingLabels(sentsf);
+//          }
+//
+//          constVars.invertedIndex.add(sentsf, true);
+//
+//
+//          Redwood.log(Redwood.DBG, "Saving the labeled seed sents (if given the option) to the same file " + f);
+//          IOUtils.writeObjectToFile(sentsf, f);
+//        }
+//
+//    } else {
+//
+//      //not batch processing sentences
+//
+//      totalNumSents = Data.sents.size();
+//
+//      if(computeDataFreq){
+//        Data.computeRawFreqIfNull(Data.sents, PatternFactory.numWordsCompound);
+//      }
+//
+//
+//      Redwood.log(Redwood.DBG, "Initializing sents " + Data.sents.size()
+//          + " sentences, either by labeling with the seed set or just setting the right classes");
+//      for (String l : constVars.getAnswerClass().keySet()) {
+//
+//        Set<CandidatePhrase> seed = seedSets == null || !labelUsingSeedSets ? new HashSet<CandidatePhrase>() : (seedSets.containsKey(l) ? seedSets.get(l)
+//            : new HashSet<CandidatePhrase>());
+//
+//        runLabelSeedWords(Data.sents, constVars.getAnswerClass().get(l), l, seed, constVars, labelUsingSeedSets);
+//
+//        if (constVars.addIndvWordsFromPhrasesExceptLastAsNeg) {
+//          Set<CandidatePhrase> otherseed = new HashSet<CandidatePhrase>();
+//          for (CandidatePhrase s : seed) {
+//            String[] t = s.getPhrase().split("\\s+");
+//            for (int i = 0; i < t.length - 1; i++) {
+//              if (!seed.contains(t[i])) {
+//                otherseed.add(new CandidatePhrase(t[i]));
+//              }
+//            }
+//          }
+//          runLabelSeedWords(Data.sents, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed, constVars, labelUsingSeedSets);
+//        }
+//      }
+//
+//
+//      if (constVars.getOtherSemanticClassesWords() != null)
+//        runLabelSeedWords(Data.sents, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", constVars.getOtherSemanticClassesWords() , constVars, labelUsingSeedSets);
+//
+//      if(constVars.removeOverLappingLabelsFromSeed){
+//        removeOverLappingLabels(Data.sents);
+//      }
+//
+//      if(createIndex)
+//        constVars.invertedIndex.add(Data.sents, true);
+//
 //    }
+
 
     Redwood.log(Redwood.DBG, "Done loading/creating inverted index of tokens and labeling data with total of "
         + constVars.invertedIndex.size() + " sentences");
 
     if (constVars.usePatternEvalWordClass || constVars.usePhraseEvalWordClass) {
 
-      if (constVars.externalFeatureWeightsFile == null) {
+      if (constVars.externalFeatureWeightsDir == null) {
         File f = File.createTempFile("tempfeat", ".txt");
         f.delete();
         f.deleteOnExit();
-        constVars.externalFeatureWeightsFile = f.getAbsolutePath();
+        constVars.externalFeatureWeightsDir = f.getAbsolutePath();
       }
 
+      IOUtils.ensureDir(new File(constVars.externalFeatureWeightsDir));
+
       for (String label : seedSets.keySet()) {
-        String externalFeatureWeightsFileLabel = constVars.externalFeatureWeightsFile + "_" + label;
+        String externalFeatureWeightsFileLabel = constVars.externalFeatureWeightsDir + "/" + label;
         File f = new File(externalFeatureWeightsFileLabel);
         if (!f.exists()) {
           Redwood.log(Redwood.DBG, "externalweightsfile for the label " + label + " does not exist: learning weights!");
