@@ -2,6 +2,7 @@ package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.patterns.CandidatePhrase;
 import edu.stanford.nlp.patterns.ConstantsAndVariables;
 import edu.stanford.nlp.patterns.DataInstance;
 import edu.stanford.nlp.patterns.PatternFactory;
@@ -115,7 +116,7 @@ public class SurfacePatternFactory extends PatternFactory {
   }
 
 
-  public static Set<SurfacePattern> getContext(List<CoreLabel> sent, int i, Set<String> stopWords) {
+  public static Set<SurfacePattern> getContext(List<CoreLabel> sent, int i, Set<CandidatePhrase> stopWords) {
 
 
     Set<SurfacePattern> prevpatterns = new HashSet<SurfacePattern>();
@@ -481,7 +482,7 @@ public class SurfacePatternFactory extends PatternFactory {
 
   }
 
-  public static Map<Integer, Set> getPatternsAroundTokens(DataInstance sent, Set<String> stopWords) {
+  public static Map<Integer, Set> getPatternsAroundTokens(DataInstance sent, Set<CandidatePhrase> stopWords) {
     Map<Integer, Set> p = new HashMap<Integer, Set>();
     List<CoreLabel> tokens = sent.getTokens();
     for (int i = 0; i < tokens.size(); i++) {

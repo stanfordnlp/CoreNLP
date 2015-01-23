@@ -57,15 +57,15 @@ public class PatternFactory {
 
   public enum PatternType{SURFACE, DEP};
 
-  public static boolean doNotUse(String word, Set<String> stopWords) {
-    if (stopWords.contains(word.toLowerCase())
+  public static boolean doNotUse(String word, Set<CandidatePhrase> stopWords) {
+    if (stopWords.contains(new CandidatePhrase(word.toLowerCase()))
       || ignoreWordRegex.matcher(word).matches())
       return true;
     else
       return false;
   }
 
-  public static Map<Integer, Set> getPatternsAroundTokens(PatternType patternType, DataInstance sent, Set<String> stopWords) {
+  public static Map<Integer, Set> getPatternsAroundTokens(PatternType patternType, DataInstance sent, Set<CandidatePhrase> stopWords) {
       if(patternType.equals(PatternType.SURFACE)){
         return SurfacePatternFactory.getPatternsAroundTokens(sent, stopWords);
       } else if(patternType.equals(PatternType.DEP)){

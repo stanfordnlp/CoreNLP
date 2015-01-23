@@ -16,7 +16,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 public class Data {
   public static double ratioDomainNgramFreqWithDataFreq = 1;
-  static public Counter<String> rawFreq = null;
+  static public Counter<CandidatePhrase> rawFreq = null;
   public static List<File> sentsFiles = null;
 
   //when using batch processing, map from sentid to the file that has that sentence
@@ -24,7 +24,7 @@ public class Data {
 
   public static List<String> fileNamesUsedToComputeRawFreq = new ArrayList<String>();
   public static Map<String, DataInstance> sents = null;
-  public static Counter<String> processedDataFreq = null;
+  public static Counter<CandidatePhrase> processedDataFreq = null;
   public static Counter<String> domainNGramRawFreq = new ClassicCounter<String>();;
 
   public static double ratioGoogleNgramFreqWithDataFreq = 1;
@@ -50,7 +50,7 @@ public class Data {
             // }
           }
           if (!s.trim().isEmpty())
-            Data.rawFreq.incrementCount(s.trim());
+            Data.rawFreq.incrementCount(new CandidatePhrase(s.trim()));
         }
       }
       if (googleNGram != null && googleNGram.size() > 0)

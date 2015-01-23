@@ -19,11 +19,11 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
   public ScorePatternsRatioModifiedFreq(
       ConstantsAndVariables constVars,
       PatternScoring patternScoring,
-      String label, Set<String> allCandidatePhrases,
-      TwoDimensionalCounter<E, String> patternsandWords4Label,
-      TwoDimensionalCounter<E, String> negPatternsandWords4Label,
-      TwoDimensionalCounter<E, String> unLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<String, ScorePhraseMeasures> phInPatScores,
+      String label, Set<CandidatePhrase> allCandidatePhrases,
+      TwoDimensionalCounter<E, CandidatePhrase> patternsandWords4Label,
+      TwoDimensionalCounter<E, CandidatePhrase> negPatternsandWords4Label,
+      TwoDimensionalCounter<E, CandidatePhrase> unLabeledPatternsandWords4Label,
+      TwoDimensionalCounter<CandidatePhrase, ScorePhraseMeasures> phInPatScores,
       ScorePhrases scorePhrases, Properties props) {
     super(constVars, patternScoring, label, allCandidatePhrases,  patternsandWords4Label,
         negPatternsandWords4Label, unLabeledPatternsandWords4Label,
@@ -33,7 +33,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
   }
 
   // cached values
-  private TwoDimensionalCounter<String, ScorePhraseMeasures> phInPatScores;
+  private TwoDimensionalCounter<CandidatePhrase, ScorePhraseMeasures> phInPatScores;
 
   private ScorePhrases scorePhrases;
 
@@ -44,7 +44,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
   @Override
   public Counter<E> score() throws IOException, ClassNotFoundException {
 
-    Counter<String> externalWordWeightsNormalized = null;
+    Counter<CandidatePhrase> externalWordWeightsNormalized = null;
     if (constVars.dictOddsWeights.containsKey(label))
       externalWordWeightsNormalized = GetPatternsFromDataMultiClass
           .normalizeSoftMaxMinMaxScores(constVars.dictOddsWeights.get(label),
@@ -55,7 +55,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
     boolean useFreqPhraseExtractedByPat = false;
     if (patternScoring.equals(PatternScoring.SqrtAllRatio))
       useFreqPhraseExtractedByPat = true;
-    Function<Pair<E, String>, Double> numeratorScore = x -> patternsandWords4Label.getCount(x.first(), x.second());
+    Function<Pair<E, CandidatePhrase>, Double> numeratorScore = x -> patternsandWords4Label.getCount(x.first(), x.second());
 
     Counter<E> numeratorPatWt = this.convert2OneDim(label,
         numeratorScore, allCandidatePhrases, patternsandWords4Label, constVars.sqrtPatScore, false, null,
@@ -63,7 +63,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
 
     Counter<E> denominatorPatWt = null;
 
-    Function<Pair<E, String>, Double> denoScore;
+    Function<Pair<E, CandidatePhrase>, Double> denoScore;
     if (patternScoring.equals(PatternScoring.PosNegUnlabOdds)) {
       denoScore = x -> negPatternsandWords4Label.getCount(x.first(), x.second()) + unLabeledPatternsandWords4Label.getCount(x.first(), x.second());
 
@@ -104,7 +104,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
     //Multiplying by logP
     if (patternScoring.equals(PatternScoring.PhEvalInPatLogP) || patternScoring.equals(PatternScoring.LOGREGlogP)) {
       Counter<E> logpos_i = new ClassicCounter<E>();
-      for (Entry<E, ClassicCounter<String>> en : patternsandWords4Label
+      for (Entry<E, ClassicCounter<CandidatePhrase>> en : patternsandWords4Label
           .entrySet()) {
         logpos_i.setCount(en.getKey(), Math.log(en.getValue().size()));
       }
@@ -115,9 +115,9 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
   }
 
   Counter<E> convert2OneDim(String label,
-      Function<Pair<E, String>, Double> scoringFunction, Set<String> allCandidatePhrases, TwoDimensionalCounter<E, String> positivePatternsAndWords,
+      Function<Pair<E, CandidatePhrase>, Double> scoringFunction, Set<CandidatePhrase> allCandidatePhrases, TwoDimensionalCounter<E, CandidatePhrase> positivePatternsAndWords,
       boolean sqrtPatScore, boolean scorePhrasesInPatSelection,
-      Counter<String> dictOddsWordWeights, boolean useFreqPhraseExtractedByPat) throws IOException, ClassNotFoundException {
+      Counter<CandidatePhrase> dictOddsWordWeights, boolean useFreqPhraseExtractedByPat) throws IOException, ClassNotFoundException {
 
     if (Data.googleNGram.size() == 0 && Data.googleNGramsFile != null) {
       Data.loadGoogleNGrams();
@@ -125,36 +125,37 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
 
     Counter<E> patterns = new ClassicCounter<E>();
 
-    Counter<String> googleNgramNormScores = new ClassicCounter<String>();
-    Counter<String> domainNgramNormScores = new ClassicCounter<String>();
+    Counter<CandidatePhrase> googleNgramNormScores = new ClassicCounter<CandidatePhrase>();
+    Counter<CandidatePhrase> domainNgramNormScores = new ClassicCounter<CandidatePhrase>();
 
-    Counter<String> externalFeatWtsNormalized = new ClassicCounter<String>();
-    Counter<String> editDistanceFromOtherSemanticBinaryScores = new ClassicCounter<String>();
-    Counter<String> editDistanceFromAlreadyExtractedBinaryScores = new ClassicCounter<String>();
+    Counter<CandidatePhrase> externalFeatWtsNormalized = new ClassicCounter<CandidatePhrase>();
+    Counter<CandidatePhrase> editDistanceFromOtherSemanticBinaryScores = new ClassicCounter<CandidatePhrase>();
+    Counter<CandidatePhrase> editDistanceFromAlreadyExtractedBinaryScores = new ClassicCounter<CandidatePhrase>();
     double externalWtsDefault = 0.5;
     Counter<String> classifierScores = null;
 
     if ((patternScoring.equals(PatternScoring.PhEvalInPat) || patternScoring
         .equals(PatternScoring.PhEvalInPatLogP)) && scorePhrasesInPatSelection) {
 
-      for (String g : allCandidatePhrases) {
+      for (CandidatePhrase gc : allCandidatePhrases) {
+        String g = gc.getPhrase();
         if (constVars.usePatternEvalEditDistOther) {
 
-          editDistanceFromOtherSemanticBinaryScores.setCount(g,
+          editDistanceFromOtherSemanticBinaryScores.setCount(gc,
               constVars.getEditDistanceScoresOtherClassThreshold(g));
         }
         if (constVars.usePatternEvalEditDistSame) {
-          editDistanceFromAlreadyExtractedBinaryScores.setCount(g,
+          editDistanceFromAlreadyExtractedBinaryScores.setCount(gc,
               1 - constVars.getEditDistanceScoresThisClassThreshold(label, g));
         }
 
         if (constVars.usePatternEvalGoogleNgram) {
           if (Data.googleNGram.containsKey(g)) {
-            assert (Data.rawFreq.containsKey(g));
+            assert (Data.rawFreq.containsKey(gc));
             googleNgramNormScores
                 .setCount(
-                    g,
-                    ((1 + Data.rawFreq.getCount(g)
+                    gc,
+                    ((1 + Data.rawFreq.getCount(gc)
                         * Math.sqrt(Data.ratioGoogleNgramFreqWithDataFreq)) / Data.googleNGram
                         .getCount(g)));
           }
@@ -162,8 +163,8 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
         if (constVars.usePatternEvalDomainNgram) {
           // calculate domain-ngram wts
           if (Data.domainNGramRawFreq.containsKey(g)) {
-            assert (Data.rawFreq.containsKey(g));
-            domainNgramNormScores.setCount(g,
+            assert (Data.rawFreq.containsKey(gc));
+            domainNgramNormScores.setCount(gc,
                 scorePhrases.phraseScorer.getDomainNgramScore(g));
           }
         }
@@ -172,10 +173,10 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
           Integer num = constVars.getWordClassClusters().get(g);
           if (num != null
               && constVars.distSimWeights.get(label).containsKey(num)) {
-            externalFeatWtsNormalized.setCount(g,
+            externalFeatWtsNormalized.setCount(gc,
                 constVars.distSimWeights.get(label).getCount(num));
           } else
-            externalFeatWtsNormalized.setCount(g, externalWtsDefault);
+            externalFeatWtsNormalized.setCount(gc, externalWtsDefault);
         }
       }
       if (constVars.usePatternEvalGoogleNgram)
@@ -207,12 +208,12 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
       // throw new RuntimeException("Not implemented currently");
     }
 
-    Counter<String> cachedScoresForThisIter = new ClassicCounter<String>();
+    Counter<CandidatePhrase> cachedScoresForThisIter = new ClassicCounter<CandidatePhrase>();
 
-    for (Map.Entry<E, ClassicCounter<String>> en: positivePatternsAndWords.entrySet()) {
+    for (Map.Entry<E, ClassicCounter<CandidatePhrase>> en: positivePatternsAndWords.entrySet()) {
 
-        for(Entry<String, Double> en2: en.getValue().entrySet()) {
-          String word = en2.getKey();
+        for(Entry<CandidatePhrase, Double> en2: en.getValue().entrySet()) {
+          CandidatePhrase word = en2.getKey();
           Counter<ScorePhraseMeasures> scoreslist = new ClassicCounter<ScorePhraseMeasures>();
           double score = 1;
           if ((patternScoring.equals(PatternScoring.PhEvalInPat) || patternScoring

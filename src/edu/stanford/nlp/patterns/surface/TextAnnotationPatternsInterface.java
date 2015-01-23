@@ -1,10 +1,7 @@
 package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.patterns.ConstantsAndVariables;
-import edu.stanford.nlp.patterns.Data;
-import edu.stanford.nlp.patterns.DataInstance;
-import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
+import edu.stanford.nlp.patterns.*;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.TypesafeMap;
 
@@ -67,7 +64,7 @@ public class TextAnnotationPatternsInterface {
 
     Properties props;
 
-    Map<String, Set<String>> seedWords;
+    Map<String, Set<CandidatePhrase>> seedWords;
     private String backgroundSymbol ="O";
 
     public PerformActionUpdateModel(Socket socket, int clientNumber) {
@@ -357,12 +354,12 @@ public class TextAnnotationPatternsInterface {
       JsonObject objarr = jsonReader.readObject();
       for(Map.Entry<String, JsonValue> o: objarr.entrySet()){
         String label = o.getKey();
-        Set<String> seed = new HashSet<String>();
+        Set<CandidatePhrase> seed = new HashSet<CandidatePhrase>();
         JsonArray arr = objarr.getJsonArray(o.getKey());
         for(int i = 0; i < arr.size(); i++){
           String seedw = arr.getString(i);
           System.out.println("adding " + seedw + " to seed ");
-          seed.add(seedw);
+          seed.add(new CandidatePhrase(seedw));
         }
         seedWords.get(label).addAll(seed);
         constVars.addSeedWords(label, seed);

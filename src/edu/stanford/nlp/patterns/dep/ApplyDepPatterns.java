@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 /**
  * Created by sonalg on 11/1/14.
  */
-public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>> {
+public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoDimensionalCounter<CandidatePhrase, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>> {
     String label;
     Map<SemgrexPattern, E> patterns;
     List<String> sentids;
@@ -40,12 +40,12 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
     }
 
     @Override
-    public Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>> call()
+    public Pair<TwoDimensionalCounter<CandidatePhrase, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>> call()
       throws Exception {
       // CollectionValuedMap<String, Integer> tokensMatchedPattern = new
       // CollectionValuedMap<String, Integer>();
 
-      TwoDimensionalCounter<Pair<String, String>, E> allFreq = new TwoDimensionalCounter<Pair<String, String>, E>();
+      TwoDimensionalCounter<CandidatePhrase, E> allFreq = new TwoDimensionalCounter<CandidatePhrase, E>();
       CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<E, Triple<String, Integer, Integer>>();
 
       for (String sentid : sentids) {
@@ -151,14 +151,13 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
               if (useWordNotLabeled) {
                 phrase = phrase.trim();
                 phraseLemma = phraseLemma.trim();
-                allFreq.incrementCount(new Pair<String, String>(phrase,
-                  phraseLemma), pEn.getValue(), 1.0);
+                allFreq.incrementCount(new CandidatePhrase(phrase,phraseLemma), pEn.getValue(), 1.0);
               }
             }
           }
         }
       }
-      return new Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>(allFreq, matchedTokensByPat);
+      return new Pair<TwoDimensionalCounter<CandidatePhrase, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>(allFreq, matchedTokensByPat);
 
 
     }

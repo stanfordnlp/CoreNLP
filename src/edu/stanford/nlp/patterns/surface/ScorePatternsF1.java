@@ -4,6 +4,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
+import edu.stanford.nlp.patterns.CandidatePhrase;
 import edu.stanford.nlp.patterns.ConstantsAndVariables;
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.patterns.ScorePatterns;
@@ -22,15 +23,15 @@ import edu.stanford.nlp.util.CollectionUtils;
 
 public class ScorePatternsF1<E> extends ScorePatterns<E> {
 
-  Counter<String> p0Set = null;
+  Counter<CandidatePhrase> p0Set = null;
   E p0;
   public ScorePatternsF1(ConstantsAndVariables constVars,
       PatternScoring patternScoring,
-      String label, Set<String> allCandidatePhrases,
-      TwoDimensionalCounter<E, String> patternsandWords4Label,
-      TwoDimensionalCounter<E, String> negPatternsandWords4Label,
-      TwoDimensionalCounter<E, String> unLabeledPatternsandWords4Label,
-      Properties props, Counter<String> p0Set, E p0){
+      String label, Set<CandidatePhrase> allCandidatePhrases,
+      TwoDimensionalCounter<E, CandidatePhrase> patternsandWords4Label,
+      TwoDimensionalCounter<E, CandidatePhrase> negPatternsandWords4Label,
+      TwoDimensionalCounter<E, CandidatePhrase> unLabeledPatternsandWords4Label,
+      Properties props, Counter<CandidatePhrase> p0Set, E p0){
     super(constVars,
         patternScoring, label, allCandidatePhrases, patternsandWords4Label,
         negPatternsandWords4Label, unLabeledPatternsandWords4Label,
@@ -51,7 +52,7 @@ public class ScorePatternsF1<E> extends ScorePatterns<E> {
       throw new RuntimeException("how come p0set size is empty for " + p0
           + "?");
 
-    for (Entry<E, ClassicCounter<String>> en : patternsandWords4Label
+    for (Entry<E, ClassicCounter<CandidatePhrase>> en : patternsandWords4Label
         .entrySet()) {
 
       int common = CollectionUtils.intersection(en.getValue().keySet(),

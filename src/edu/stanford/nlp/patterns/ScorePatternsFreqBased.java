@@ -16,10 +16,10 @@ public class ScorePatternsFreqBased<E> extends ScorePatterns<E> {
   public ScorePatternsFreqBased(
       ConstantsAndVariables constVars,
       PatternScoring patternScoring,
-      String label, Set<String> allCandidatePhrases,
-      TwoDimensionalCounter<E, String> patternsandWords4Label,
-      TwoDimensionalCounter<E, String> negPatternsandWords4Label,
-      TwoDimensionalCounter<E, String> unLabeledPatternsandWords4Label,
+      String label, Set<CandidatePhrase> allCandidatePhrases,
+      TwoDimensionalCounter<E, CandidatePhrase> patternsandWords4Label,
+      TwoDimensionalCounter<E, CandidatePhrase> negPatternsandWords4Label,
+      TwoDimensionalCounter<E, CandidatePhrase> unLabeledPatternsandWords4Label,
       Properties props) {
     super(constVars, patternScoring, label, allCandidatePhrases, patternsandWords4Label,
         negPatternsandWords4Label, unLabeledPatternsandWords4Label,  props);
@@ -37,17 +37,17 @@ public class ScorePatternsFreqBased<E> extends ScorePatterns<E> {
     Counter<E> neg_i = new ClassicCounter<E>();
     Counter<E> unlab_i = new ClassicCounter<E>();
 
-    for (Entry<E, ClassicCounter<String>> en : negPatternsandWords4Label
+    for (Entry<E, ClassicCounter<CandidatePhrase>> en : negPatternsandWords4Label
         .entrySet()) {
       neg_i.setCount(en.getKey(), en.getValue().size());
     }
 
-    for (Entry<E, ClassicCounter<String>> en : unLabeledPatternsandWords4Label
+    for (Entry<E, ClassicCounter<CandidatePhrase>> en : unLabeledPatternsandWords4Label
         .entrySet()) {
       unlab_i.setCount(en.getKey(), en.getValue().size());
     }
 
-    for (Entry<E, ClassicCounter<String>> en : patternsandWords4Label
+    for (Entry<E, ClassicCounter<CandidatePhrase>> en : patternsandWords4Label
         .entrySet()) {
       pos_i.setCount(en.getKey(), en.getValue().size());
     }

@@ -2,6 +2,7 @@ package edu.stanford.nlp.patterns.dep;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.patterns.CandidatePhrase;
 import edu.stanford.nlp.patterns.DataInstance;
 import edu.stanford.nlp.patterns.PatternFactory;
 import edu.stanford.nlp.patterns.PatternsAnnotations;
@@ -46,12 +47,12 @@ public class DepPatternFactory extends PatternFactory{
 
   }
 
-  public static Map<Integer, Set<DepPattern>> getPatternsAroundTokens(DataInstance sent, Set<String> stopWords) {
+  public static Map<Integer, Set<DepPattern>> getPatternsAroundTokens(DataInstance sent, Set<CandidatePhrase> stopWords) {
 
     return getPatternsForAllPhrases(sent, stopWords);
   }
 
-  static Map<Integer, Set<DepPattern>> getPatternsForAllPhrases(DataInstance sent, Set<String> commonWords)
+  static Map<Integer, Set<DepPattern>> getPatternsForAllPhrases(DataInstance sent, Set<CandidatePhrase> commonWords)
   {
 
    // Map<String, Map<Integer, Set>> allPossiblePatterns = new HashMap<String, Map<Integer, Set>>();
@@ -139,7 +140,7 @@ public class DepPatternFactory extends PatternFactory{
       return false;
   }
 
-  static Set<DepPattern> getContext(IndexedWord w, SemanticGraph graph, Set<String> stopWords){
+  static Set<DepPattern> getContext(IndexedWord w, SemanticGraph graph, Set<CandidatePhrase> stopWords){
     Set<DepPattern> patterns = new HashSet<DepPattern>();
     IndexedWord node = w;
     int depth = 1;
@@ -150,7 +151,7 @@ public class DepPatternFactory extends PatternFactory{
       GrammaticalRelation rel = graph.reln(parent, node);
       for (Pattern tagPattern : allowedTagPatternForTrigger) {
         if (tagPattern.matcher(parent.tag()).matches()) {
-          if (!ifIgnoreRel(rel) && !stopWords.contains(parent.word()) && parent.word().length() > 1) {
+          if (!ifIgnoreRel(rel) && !stopWords.contains(new CandidatePhrase(parent.word())) && parent.word().length() > 1) {
             Pair<IndexedWord, GrammaticalRelation> pattern = new Pair<IndexedWord, GrammaticalRelation>(parent, rel);
             DepPattern patterndep = patternToDepPattern(pattern);
             if (depth <= upDepth){
@@ -175,7 +176,7 @@ public class DepPatternFactory extends PatternFactory{
     return patterns;
   }
 
-  public static Set getContext(DataInstance sent, int i, Set<String> stopWords) {
+  public static Set getContext(DataInstance sent, int i, Set<CandidatePhrase> stopWords) {
     SemanticGraph graph = ((DataInstanceDep)sent).getGraph();
     //nodes are indexed from 1 -- so wrong!!
     IndexedWord w = graph.getNodeByIndex(i+1);

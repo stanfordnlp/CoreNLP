@@ -53,7 +53,7 @@ public abstract class Pattern implements Serializable{
   public abstract String toStringSimple();
 
   /** Get set of patterns around this token.*/
-  public static Set getContext(PatternFactory.PatternType patternClass, DataInstance sent, int i, Set<String> stopWords) {
+  public static Set getContext(PatternFactory.PatternType patternClass, DataInstance sent, int i, Set<CandidatePhrase> stopWords) {
     if(patternClass.equals(PatternFactory.PatternType.SURFACE))
       return SurfacePatternFactory.getContext(sent.getTokens(), i, stopWords);
     else

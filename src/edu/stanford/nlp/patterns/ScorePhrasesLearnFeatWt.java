@@ -45,11 +45,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     DT, LR, RF
   }
 
-  public TwoDimensionalCounter<String, ScorePhraseMeasures> phraseScoresRaw = new TwoDimensionalCounter<String, ScorePhraseMeasures>();
+  public TwoDimensionalCounter<CandidatePhrase, ScorePhraseMeasures> phraseScoresRaw = new TwoDimensionalCounter<CandidatePhrase, ScorePhraseMeasures>();
 
 
   public edu.stanford.nlp.classify.Classifier learnClassifier(String label, boolean forLearningPatterns,
-      TwoDimensionalCounter<String, E> wordsPatExtracted, Counter<E> allSelectedPatterns) throws IOException, ClassNotFoundException {
+      TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted, Counter<E> allSelectedPatterns) throws IOException, ClassNotFoundException {
     phraseScoresRaw.clear();
     learnedScores.clear();
     
@@ -60,7 +60,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     
     boolean computeRawFreq = false;
     if (Data.rawFreq == null) {
-      Data.rawFreq = new ClassicCounter<String>();
+      Data.rawFreq = new ClassicCounter<CandidatePhrase>();
       computeRawFreq = true;
     }
 
@@ -129,7 +129,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       throw new RuntimeException("cannot identify classifier " + scoreClassifierType);
     BufferedWriter w = new BufferedWriter(new FileWriter("tempscorestrainer.txt"));
     System.out.println("size of learned scores is " + phraseScoresRaw.size());
-    for (String s : phraseScoresRaw.firstKeySet()) {
+    for (CandidatePhrase s : phraseScoresRaw.firstKeySet()) {
       w.write(s + "\t" + phraseScoresRaw.getCounter(s) + "\n");
     }
     w.close();
@@ -139,13 +139,13 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   }
 
   @Override
-  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, E> terms,
-      TwoDimensionalCounter<String, E> wordsPatExtracted, Counter<E> allSelectedPatterns,
-      Set<String> alreadyIdentifiedWords, boolean forLearningPatterns) throws IOException, ClassNotFoundException {
+  public Counter<CandidatePhrase> scorePhrases(String label, TwoDimensionalCounter<CandidatePhrase, E> terms,
+      TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted, Counter<E> allSelectedPatterns,
+      Set<CandidatePhrase> alreadyIdentifiedWords, boolean forLearningPatterns) throws IOException, ClassNotFoundException {
 
-    Counter<String> scores = new ClassicCounter<String>();
+    Counter<CandidatePhrase> scores = new ClassicCounter<CandidatePhrase>();
     edu.stanford.nlp.classify.Classifier classifier = learnClassifier(label, forLearningPatterns, wordsPatExtracted, allSelectedPatterns);
-    for (Entry<String, ClassicCounter<E>> en : terms.entrySet()) {
+    for (Entry<CandidatePhrase, ClassicCounter<E>> en : terms.entrySet()) {
       double score = this.scoreUsingClassifer(classifier, en.getKey(), label, forLearningPatterns, en.getValue(), allSelectedPatterns);
       scores.setCount(en.getKey(), score);
     }
@@ -153,10 +153,10 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   }
   
   @Override
-  public Counter<String> scorePhrases(String label, Set<String> terms, boolean forLearningPatterns) throws IOException, ClassNotFoundException {
-    Counter<String> scores = new ClassicCounter<String>();
+  public Counter<CandidatePhrase> scorePhrases(String label, Set<CandidatePhrase> terms, boolean forLearningPatterns) throws IOException, ClassNotFoundException {
+    Counter<CandidatePhrase> scores = new ClassicCounter<CandidatePhrase>();
     edu.stanford.nlp.classify.Classifier classifier = learnClassifier(label, forLearningPatterns, null, null);
-    for (String en : terms) {
+    for (CandidatePhrase en : terms) {
       double score = this.scoreUsingClassifer(classifier, en, label, forLearningPatterns,null, null);
       scores.setCount(en, score);
     }
@@ -172,7 +172,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   }
 
   public RVFDataset<String, ScorePhraseMeasures> choosedatums(String label, boolean forLearningPattern, Map<String, DataInstance> sents, Class answerClass, String answerLabel,
-      Set<String> negativeWords, Map<Class, Object> otherIgnoreClasses, double perSelectRand, double perSelectNeg, TwoDimensionalCounter<String, E> wordsPatExtracted,
+      Set<CandidatePhrase> negativeWords, Map<Class, Object> otherIgnoreClasses, double perSelectRand, double perSelectNeg, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
       Counter<E> allSelectedPatterns) {
     // TODO: check whats happening with candidate terms for this iteration. do
     // not count them as negative!!! -- I think this comment is not valid anymore.
@@ -205,10 +205,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           chosen.add(new Pair<String, Integer>(en.getKey(), i));
 
           Counter<ScorePhraseMeasures> feat = null;
+          CandidatePhrase candidate = new CandidatePhrase(l.word());
           if (forLearningPattern) {
-            feat = getPhraseFeaturesForPattern(label, l.word());
+            feat = getPhraseFeaturesForPattern(label, candidate);
           } else {
-            feat = getFeatures(label, l.word(), wordsPatExtracted.getCounter(l.word()), allSelectedPatterns);
+            feat = getFeatures(label, candidate, wordsPatExtracted.getCounter(candidate), allSelectedPatterns);
           }
           RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, datumlabel.toString());
           dataset.add(datum);
@@ -237,10 +238,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
         if (chooseThis) {
           chosen.add(new Pair<String, Integer>(en.getKey(), i));
           Counter<ScorePhraseMeasures> feat = null;
+          CandidatePhrase candidate = new CandidatePhrase(l.word());
           if (forLearningPattern) {
-            feat = getPhraseFeaturesForPattern(label, l.word());
+            feat = getPhraseFeaturesForPattern(label, candidate);
           } else {
-            feat = getFeatures(label, l.word(), wordsPatExtracted.getCounter(l.word()), allSelectedPatterns);
+            feat = getFeatures(label, candidate, wordsPatExtracted.getCounter(candidate), allSelectedPatterns);
           }
           RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, datumlabel.toString());
           dataset.add(datum);
@@ -253,7 +255,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return dataset;
   }
 
-  Counter<ScorePhraseMeasures> getPhraseFeaturesForPattern(String label, String word) {
+  Counter<ScorePhraseMeasures> getPhraseFeaturesForPattern(String label, CandidatePhrase word) {
 
     if (phraseScoresRaw.containsFirstKey(word))
       return phraseScoresRaw.getCounter(word);
@@ -277,7 +279,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     if (constVars.usePatternEvalDomainNgram) {
-      Double gscore = getDomainNgramScore(word);
+      Double gscore = getDomainNgramScore(word.getPhrase());
       if (gscore.isInfinite() || gscore.isNaN()) {
         throw new RuntimeException("how is the domain ngrams score " + gscore + " for " + word + " when domain raw freq is " + Data.domainNGramRawFreq.getCount(word)
             + " and raw freq is " + Data.rawFreq.getCount(word));
@@ -288,26 +290,26 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     if (constVars.usePatternEvalWordClass) {
-      double distSimWt = getDistSimWtScore(word, label);
+      double distSimWt = getDistSimWtScore(word.getPhrase(), label);
       distSimWt = logistic(distSimWt);
       scoreslist.setCount(ScorePhraseMeasures.DISTSIM, distSimWt);
     }
 
     if (constVars.usePatternEvalEditDistOther) {
-      scoreslist.setCount(ScorePhraseMeasures.EDITDISTSAME, constVars.getEditDistanceScoresThisClass(label, word));
+      scoreslist.setCount(ScorePhraseMeasures.EDITDISTSAME, constVars.getEditDistanceScoresThisClass(label, word.getPhrase()));
     }
     if (constVars.usePatternEvalEditDistSame)
-      scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, constVars.getEditDistanceScoresOtherClass(word));
+      scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, constVars.getEditDistanceScoresOtherClass(word.getPhrase()));
     
     if(constVars.usePatternEvalWordShape){
-      scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word, label));
+      scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word.getPhrase(), label));
     }
     
     phraseScoresRaw.setCounter(word, scoreslist);
     return scoreslist;
   }
 
-  public double scoreUsingClassifer(edu.stanford.nlp.classify.Classifier classifier, String word, String label, boolean forLearningPatterns,
+  public double scoreUsingClassifer(edu.stanford.nlp.classify.Classifier classifier, CandidatePhrase word, String label, boolean forLearningPatterns,
       Counter<E> patternsThatExtractedPat, Counter<E> allSelectedPatterns) {
 
     if (learnedScores.containsKey(word))
@@ -363,7 +365,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return score;
   }
 
-  Counter<ScorePhraseMeasures> getFeatures(String label, String word, Counter<E> patThatExtractedWord, Counter<E> allSelectedPatterns) {
+  Counter<ScorePhraseMeasures> getFeatures(String label, CandidatePhrase word, Counter<E> patThatExtractedWord, Counter<E> allSelectedPatterns) {
 
     if (phraseScoresRaw.containsFirstKey(word))
       return phraseScoresRaw.getCounter(word);
@@ -388,7 +390,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     if (constVars.usePhraseEvalDomainNgram) {
-      Double gscore = getDomainNgramScore(word);
+      Double gscore = getDomainNgramScore(word.getPhrase());
       if (gscore.isInfinite() || gscore.isNaN()) {
         throw new RuntimeException("how is the domain ngrams score " + gscore + " for " + word + " when domain raw freq is " + Data.domainNGramRawFreq.getCount(word)
             + " and raw freq is " + Data.rawFreq.getCount(word));
@@ -398,18 +400,18 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     if (constVars.usePhraseEvalWordClass) {
-      double distSimWt = getDistSimWtScore(word, label);
+      double distSimWt = getDistSimWtScore(word.getPhrase(), label);
       scoreslist.setCount(ScorePhraseMeasures.DISTSIM, distSimWt);
     }
 
     if (constVars.usePhraseEvalEditDistOther) {
-      scoreslist.setCount(ScorePhraseMeasures.EDITDISTSAME, constVars.getEditDistanceScoresThisClass(label, word));
+      scoreslist.setCount(ScorePhraseMeasures.EDITDISTSAME, constVars.getEditDistanceScoresThisClass(label, word.getPhrase()));
     }
     if (constVars.usePhraseEvalEditDistSame)
-      scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, constVars.getEditDistanceScoresOtherClass(word));
+      scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, constVars.getEditDistanceScoresOtherClass(word.getPhrase()));
     
     if(constVars.usePhraseEvalWordShape){
-      scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word, label));
+      scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word.getPhrase(), label));
     }
     
     phraseScoresRaw.setCounter(word, scoreslist);

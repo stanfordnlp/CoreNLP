@@ -45,19 +45,19 @@ public abstract class PhraseScorer<E extends Pattern> {
     this.constVars = constvar;
   }
 
-  Counter<String> learnedScores = new ClassicCounter<String>();
+  Counter<CandidatePhrase> learnedScores = new ClassicCounter<CandidatePhrase>();
 
-  abstract Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, E> terms,
-      TwoDimensionalCounter<String, E> wordsPatExtracted,
+  abstract Counter<CandidatePhrase> scorePhrases(String label, TwoDimensionalCounter<CandidatePhrase, E> terms,
+      TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
       Counter<E> allSelectedPatterns,
-      Set<String> alreadyIdentifiedWords, boolean forLearningPatterns)
+      Set<CandidatePhrase> alreadyIdentifiedWords, boolean forLearningPatterns)
       throws IOException, ClassNotFoundException;
 
-  Counter<String> getLearnedScores() {
+  Counter<CandidatePhrase> getLearnedScores() {
     return learnedScores;
   }
 
-  double getPatTFIDFScore(String word,
+  double getPatTFIDFScore(CandidatePhrase word,
       Counter<E> patsThatExtractedThis,
       Counter<E> allSelectedPatterns) {
     double total = 0;
@@ -82,8 +82,8 @@ public abstract class PhraseScorer<E extends Pattern> {
     return total / Data.processedDataFreq.getCount(word);
   }
 
-  public double getGoogleNgramScore(String g) {
-    if (Data.googleNGram.containsKey(g)) {
+  public double getGoogleNgramScore(CandidatePhrase g) {
+    if (Data.googleNGram.containsKey(g.getPhrase())) {
       assert (Data.rawFreq.containsKey(g));
       return (1 + Data.rawFreq.getCount(g)
           * Math.sqrt(Data.ratioGoogleNgramFreqWithDataFreq))
@@ -149,9 +149,9 @@ public abstract class PhraseScorer<E extends Pattern> {
     return score;
   }
   
-  public double getDictOddsScore(String word, String label) {
+  public double getDictOddsScore(CandidatePhrase word, String label) {
     double dscore;
-    Counter<String> dictOddsWordWeights = constVars.dictOddsWeights.get(label);
+    Counter<CandidatePhrase> dictOddsWordWeights = constVars.dictOddsWeights.get(label);
     assert dictOddsWordWeights != null : "dictOddsWordWeights is null for label " + label;
     if (dictOddsWordWeights.containsKey(word)) {
       dscore = dictOddsWordWeights.getCount(word);
@@ -160,9 +160,9 @@ public abstract class PhraseScorer<E extends Pattern> {
     return dscore;
   }
 
-  public double getPhraseWeightFromWords(Counter<String> weights, String ph,
+  public double getPhraseWeightFromWords(Counter<CandidatePhrase> weights, CandidatePhrase ph,
       double defaultWt) {
-    String[] t = ph.split("\\s+");
+    String[] t = ph.getPhrase().split("\\s+");
     if (t.length < 2) {
       if (weights.containsKey(ph))
         return weights.getCount(ph);
@@ -173,19 +173,19 @@ public abstract class PhraseScorer<E extends Pattern> {
     double minScore = Double.MAX_VALUE;
     for (String w : t) {
       double score = defaultWt;
-      if (weights.containsKey(w))
+      if (weights.containsKey(new CandidatePhrase(w)))
         score = weights.getCount(w);
       if (score < minScore)
         minScore = score;
       totalscore += score;
     }
     if (useAvgInsteadofMinPhraseScoring)
-      return totalscore / ph.length();
+      return totalscore / ph.getPhrase().length();
     else
       return minScore;
   }
 
-  abstract public Counter<String> scorePhrases(String label, Set<String> terms, boolean forLearningPatterns) throws IOException, ClassNotFoundException;
+  abstract public Counter<CandidatePhrase> scorePhrases(String label, Set<CandidatePhrase> terms, boolean forLearningPatterns) throws IOException, ClassNotFoundException;
   
 
 }
