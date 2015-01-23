@@ -240,7 +240,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   }
 
   private Counter<CandidatePhrase> computeSimWithWordVectors(Collection<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> otherPhrases, boolean ignoreWordRegex, String label){
-    final int numTopSimilar = 5;
+    final int numTopSimilar = 3;
 
     Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>(candidatePhrases.size());
     for(CandidatePhrase p : candidatePhrases) {
@@ -305,11 +305,13 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
         }
 
         double finalSimScore = 0;
+        int numEl = 0;
         while(topSimPhs.hasNext()) {
           finalSimScore += topSimPhs.getPriority();
           topSimPhs.next();
+          numEl++;
         }
-        finalSimScore /= numTopSimilar;
+        finalSimScore /= numEl;
 
         double prevNumItems = simsAvgMax[Similarities.NUMITEMS.ordinal()];
         double prevAvg = simsAvgMax[Similarities.AVGSIM.ordinal()];
@@ -841,7 +843,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           allPositivePhrases.addAll(result.first());
           allNegativePhrases.addAll(result.second());
           allUnknownPhrases.addAll(result.third());
-          allCloseToPositivePhrases.addAll(result.fourth());
+          for(Entry<CandidatePhrase, Double> en : result.fourth().entrySet())
+            allCloseToPositivePhrases.setCount(en.getKey(), en.getValue());
+
         } catch (Exception e) {
           executor.shutdownNow();
           throw new RuntimeException(e);
@@ -956,6 +960,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     if(logFile!=null){
       logFile.close();
+    }
+    if(logFileFeat != null){
       logFileFeat.close();
     }
 
