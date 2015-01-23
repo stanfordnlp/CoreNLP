@@ -21,10 +21,7 @@ import edu.stanford.nlp.patterns.dep.DataInstanceDep;
 import edu.stanford.nlp.patterns.dep.ExtractPhraseFromPattern;
 import edu.stanford.nlp.patterns.dep.ExtractedPhrase;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.stats.Counters;
-import edu.stanford.nlp.stats.TwoDimensionalCounter;
+import edu.stanford.nlp.stats.*;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.concurrent.AtomicDouble;
@@ -162,13 +159,10 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       classifier =  factory.trainClassifier(newdataset);
 
       //print weights
-      LogisticClassifier logcl = ((LogisticClassifier) classifier);
-      String l = (String) logcl.getLabelForInternalPositiveClass();
-      Counter<String> weights = logcl.weightsAsGenericCounter();
-      if (l.equals(Boolean.FALSE.toString())) {
-        Counters.multiplyInPlace(weights, -1);
-      }
-      List<Pair<String, Double>> wtd = Counters.toDescendingMagnitudeSortedListWithCounts(weights);
+      MultinomialLogisticClassifier<String, ScorePhraseMeasures> logcl = ((MultinomialLogisticClassifier) classifier);
+      Counter<ScorePhraseMeasures> weights = logcl.weightsAsGenericCounter().get("true");
+
+      List<Pair<ScorePhraseMeasures, Double>> wtd = Counters.toDescendingMagnitudeSortedListWithCounts(weights);
       Redwood.log(ConstantsAndVariables.minimaldebug, "The weights are " + StringUtils.join(wtd.subList(0, Math.min(wtd.size(), 600)), "\n"));
 
     } else if(scoreClassifierType.equals(ClassifierType.LINEAR)){

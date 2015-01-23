@@ -9,6 +9,8 @@ import java.io.ObjectOutputStream;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.ling.RVFDatum;
@@ -131,5 +133,23 @@ public class MultinomialLogisticClassifier<L, F> implements ProbabilisticClassif
     out.close();
     
     System.out.println("done.");
+  }
+
+  public Map<L, Counter<F>> weightsAsGenericCounter() {
+
+    Map<L, Counter<F>> allweights = new HashMap<L, Counter<F>>();
+    for(int i = 0; i < weights.length; i++){
+      Counter<F> c = new ClassicCounter<F>();
+      L label  = labelIndex.get(i);
+      double[] w =  weights[i];
+      for (F f : featureIndex) {
+        int indexf = featureIndex.indexOf(f);
+        if(w[indexf] != 0.0)
+          c.setCount(f, w[indexf]);
+
+      }
+      allweights.put(label, c);
+    }
+    return allweights;
   }
 }
