@@ -428,6 +428,13 @@ public class ConstantsAndVariables<E> implements Serializable{
   public Set<String> getLabels() {
     return labels;
   }
+
+  public void addLearnedWords(String trainLabel, Counter<CandidatePhrase> identifiedWords) {
+    if(!learnedWords.containsKey(trainLabel))
+      learnedWords.put(trainLabel, new ClassicCounter<CandidatePhrase>());
+    this.learnedWords.get(trainLabel).addAll(identifiedWords);
+  }
+
   //PatternFactory.PatternType.SURFACE;
 
 
@@ -947,7 +954,7 @@ public class ConstantsAndVariables<E> implements Serializable{
     return this.seedLabelDictionary;
   }
 
-  public void addLabelDictionary(String label, Set<CandidatePhrase> words) {
+  public void addSeedLabelDictionary(String label, Set<CandidatePhrase> words) {
     this.seedLabelDictionary.get(label).addAll(words);
 
     if(usePhraseEvalWordShape || usePatternEvalWordShape)
