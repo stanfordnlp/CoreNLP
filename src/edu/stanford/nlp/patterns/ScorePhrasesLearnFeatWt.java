@@ -559,6 +559,10 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
               candidate = CandidatePhrase.createOrGet(l.word());
             }
 
+            //Do not add to positive if the word is a "negative" (stop word, english word, ...)
+            if(allPossibleNegativePhrases.contains(candidate))
+              continue;
+
             allPositivePhrases.add(candidate);
 
           } else {
