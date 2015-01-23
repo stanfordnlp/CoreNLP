@@ -234,36 +234,42 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>(candidatePhrases.size());
 
     for(CandidatePhrase p : candidatePhrases) {
-      double[] d1 = wordVectors.get(p.getPhrase());
+      if(wordVectors.containsKey(p.getPhrase())){
+        double[] d1 = wordVectors.get(p.getPhrase());
 
-      double avgSim = 0;// Double.MIN_VALUE;
-      boolean donotuse = false;
-      for (CandidatePhrase pos : positivePhrases) {
+        double avgSim = 0;// Double.MIN_VALUE;
+        boolean donotuse = false;
+        for (CandidatePhrase pos : positivePhrases) {
 
-        if (p.equals(pos)) {
-          donotuse = true;
-          break;
+          if (p.equals(pos)) {
+            donotuse = true;
+            break;
+          }
+          if(!wordVectors.containsKey(pos.getPhrase()))
+            continue;
+          double[] d2 = wordVectors.get(pos.getPhrase());
+
+          double sum = 0;
+          double d1sq = 0;
+          double d2sq = 0;
+          for (int i = 0; i < d1.length; i++) {
+            sum += d1[i] * d2[i];
+            d1sq += d1[i] * d1[i];
+            d2sq += d2[i] * d2[i];
+          }
+          double sim = sum / (Math.sqrt(d1sq) * Math.sqrt(d2sq));
+          avgSim += sim;
         }
-        double[] d2 = wordVectors.get(pos.getPhrase());
 
-        double sum = 0;
-        double d1sq = 0;
-        double d2sq = 0;
-        for (int i = 0; i < d1.length; i++) {
-          sum += d1[i] * d2[i];
-          d1sq += d1[i] * d1[i];
-          d2sq += d2[i] * d2[i];
+        avgSim /= positivePhrases.size();
+
+        if(!donotuse){
+          sims.setCount(p, avgSim);
+          if(allMaxSim.get() < avgSim)
+            allMaxSim.set(avgSim);
         }
-        double sim = sum / (Math.sqrt(d1sq) * Math.sqrt(d2sq));
-        avgSim += sim;
-      }
-
-      avgSim /= positivePhrases.size();
-
-      if(!donotuse){
-        sims.setCount(p, avgSim);
-        if(allMaxSim.get() < avgSim)
-          allMaxSim.set(avgSim);
+      }else{
+        sims.setCount(p, Double.MIN_VALUE);
       }
     }
     return sims;
