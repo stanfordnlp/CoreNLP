@@ -682,7 +682,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
               allNegativePhrases.add(candidate);
             }
 
-            if(!negative && !ignoreclass && constVars.expandPositivesWhenSampling && !hasElement(allPossibleNegativePhrases, candidate) && !PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches()) {
+            if(!negative && !ignoreclass && (constVars.expandPositivesWhenSampling || constVars.expandNegativesWhenSampling) && !hasElement(allPossibleNegativePhrases, candidate) && !PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches()) {
               if (!allConsideredPhrases.contains(candidate)) {
                 Pair<Counter<CandidatePhrase>, Counter<CandidatePhrase>> sims;
                 assert candidate != null;
@@ -691,10 +691,16 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
                 else
                   sims = computeSimWithWordCluster(Arrays.asList(candidate), knownPositivePhrases, new AtomicDouble());
 
-                double sim = sims.first().getCount(candidate);
-                if (sim > constVars.similarityThresholdHighPrecision)
-                  allCloseToPositivePhrases.setCount(candidate, sim);
-                else {
+                boolean addedAsPos = false;
+                if(constVars.expandPositivesWhenSampling)
+                {
+                  double sim = sims.first().getCount(candidate);
+                  if (sim > constVars.similarityThresholdHighPrecision){
+                    allCloseToPositivePhrases.setCount(candidate, sim);
+                    addedAsPos = true;
+                  }
+                }
+                if(constVars.expandNegativesWhenSampling &&  !addedAsPos) {
                   double simneg = sims.second().getCount(candidate);
                   if (simneg > constVars.similarityThresholdHighPrecision)
                     allCloseToNegativePhrases.setCount(candidate, simneg);
