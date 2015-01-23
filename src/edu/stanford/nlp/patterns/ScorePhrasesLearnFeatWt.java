@@ -144,6 +144,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       Set<String> labels = Generics.newHashSet(Arrays.asList("true"));
       List<Triple<ScorePhraseMeasures, String, Double>> topfeatures = ((SVMLightClassifier<String, ScorePhraseMeasures>) classifier).getTopFeatures(labels, 0, true, -1, true);
       Redwood.log(ConstantsAndVariables.minimaldebug, "The weights are " + StringUtils.join(topfeatures, "\n"));
+    }else if(scoreClassifierType.equals(ClassifierType.SHIFTLR)){
+      ShiftParamsLogisticClassifierFactory<String, ScorePhraseMeasures> factory = new ShiftParamsLogisticClassifierFactory<String, ScorePhraseMeasures>();
+      classifier =  factory.trainClassifier(dataset);
     } else
       throw new RuntimeException("cannot identify classifier " + scoreClassifierType);
 
@@ -747,7 +750,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 //
 //          chosen.add(new Pair<String, Integer>(en.getKey(), i));
       }
-      Redwood.log(Redwood.DBG, "number of labeled tokens are " + numlabeled);
+
     return new Quintuple(allPositivePhrases, allNegativePhrases, allUnknownPhrases, allCloseToPositivePhrases, allCloseToNegativePhrases);
     }
   }
@@ -827,8 +830,6 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
       Counter<E> allSelectedPatterns, boolean computeRawFreq) throws IOException {
 
-    //TODO: remove this
-    Redwood.log(Redwood.DBG, "Number of labeled tokens are " + numLabeledTokens());
 
     Counter<Integer> distSimClustersOfPositive = new ClassicCounter<Integer>();
     if(constVars.expandPositivesWhenSampling && !constVars.useWordVectorsToComputeSim){
@@ -846,10 +847,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases = getAllPossibleNegativePhrases(answerLabel);
-    for(String l : allPossibleNegativePhrases.keySet()){
-      System.out.println("all possible negative phrases for label " + l + " are " + allPossibleNegativePhrases.get(l).size() +":\n"+allPossibleNegativePhrases.get(l));
-    }
-
+    
     RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
     int numpos = 0;
     Set<CandidatePhrase> allNegativePhrases = new HashSet<CandidatePhrase>();
@@ -1134,7 +1132,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       if (flipsign)
         score = 1 - score;
 
-    } else if (scoreClassifierType.equals(ClassifierType.SVM) || scoreClassifierType.equals(ClassifierType.RF)) {
+    } else if (scoreClassifierType.equals(ClassifierType.SVM) || scoreClassifierType.equals(ClassifierType.RF) || scoreClassifierType.equals(ClassifierType.SHIFTLR)) {
 
       Counter<ScorePhraseMeasures> feat = null;
       if (forLearningPatterns)
