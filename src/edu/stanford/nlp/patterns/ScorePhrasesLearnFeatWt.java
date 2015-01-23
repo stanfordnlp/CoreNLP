@@ -1186,7 +1186,18 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 //        score = 1 - score;
       score = logcl.scoresOf(d).getCount(Boolean.TRUE.toString());
 
-    } else if (scoreClassifierType.equals(ClassifierType.SVM) || scoreClassifierType.equals(ClassifierType.RF) || scoreClassifierType.equals(ClassifierType.SHIFTLR) || scoreClassifierType.equals(ClassifierType.LINEAR)) {
+    } else if( scoreClassifierType.equals(ClassifierType.SHIFTLR)){
+      //convert to basicdatum -- restriction of ShiftLR right now
+      Counter<ScorePhraseMeasures> feat;
+      if (forLearningPatterns)
+        feat = getPhraseFeaturesForPattern(label, word);
+      else
+        feat = this.getFeatures(label, word, patternsThatExtractedPat, allSelectedPatterns);
+      BasicDatum<String, ScorePhraseMeasures> d = new BasicDatum<String, ScorePhraseMeasures>(feat.keySet(), Boolean.FALSE.toString());
+      Counter<String> sc = classifier.scoresOf(d);
+      score = sc.getCount(Boolean.TRUE.toString());
+
+    }else if (scoreClassifierType.equals(ClassifierType.SVM) || scoreClassifierType.equals(ClassifierType.RF) ||scoreClassifierType.equals(ClassifierType.LINEAR)) {
 
       Counter<ScorePhraseMeasures> feat = null;
       if (forLearningPatterns)
