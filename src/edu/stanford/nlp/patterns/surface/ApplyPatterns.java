@@ -65,6 +65,8 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimen
           int s = m.start("$term");
           int e = m.end("$term");
 
+          assert e-s <= PatternFactory.numWordsCompound : "How come the pattern is extracting phrases longer than numWordsCompound";
+
           String phrase = "";
           String phraseLemma = "";
           boolean useWordNotLabeled = false;
