@@ -846,7 +846,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases = getAllPossibleNegativePhrases(answerLabel);
-
+    for(String l : allPossibleNegativePhrases.keySet()){
+      System.out.println("all possible negative phrases for label " + l + " are " + allPossibleNegativePhrases.get(l).size() +":\n"+allPossibleNegativePhrases.get(l));
+    }
 
     RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
     int numpos = 0;
