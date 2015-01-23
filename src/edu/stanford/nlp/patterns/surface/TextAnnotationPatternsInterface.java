@@ -1,18 +1,16 @@
 package edu.stanford.nlp.patterns.surface;
 
+import edu.stanford.nlp.patterns.Data;
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
 import edu.stanford.nlp.patterns.PatternFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import javax.json.*;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static edu.stanford.nlp.patterns.PatternFactory.PatternType;
@@ -28,7 +26,7 @@ public class TextAnnotationPatternsInterface {
     server = new ServerSocket(portnum);
   }
 
-  public enum Actions {NEWPHRASES, REMOVEPHRASES, NEWANNOTATIONS, NONE, CLOSE, PROCESSFILE};
+  public enum Actions {NEWPHRASES, REMOVEPHRASES, NEWANNOTATIONS, NONE, CLOSE, SUMMARY, PROCESSFILE, SUGGEST};
 
 
   /**
@@ -54,29 +52,38 @@ public class TextAnnotationPatternsInterface {
      * and sending back the capitalized version of the string.
      */
     public void run() {
-      try {
+      PrintWriter out = null;
+      String msg = "";
 
         // Decorate the streams so we can send characters
         // and not just bytes.  Ensure output is flushed
         // after every newline.
-        BufferedReader in = new BufferedReader(
-          new InputStreamReader(socket.getInputStream()));
-        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-
+      BufferedReader in = null;
+      try {
+        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        out = new PrintWriter(socket.getOutputStream(), true);
+      }catch (IOException e) {
+        try {
+          socket.close();
+        } catch (IOException e1) {
+          e1.printStackTrace();
+        }
+        e.printStackTrace();
+      }
         // Send a welcome message to the client.
-        out.println("Hello, you are client #" + clientNumber + ".");
-        out.println("Enter a line with only a period to quit\n");
+        out.println("The possible actions are " + Arrays.toString(Actions.values()) + ".Enter a line with only a period to quit");
 
         Actions nextlineAction = Actions.NONE;
         // Get messages from the client, line by line; return them
         // capitalized
         while (true) {
-          String input = in.readLine();
+          try {
+            String input = in.readLine();
           if (input == null || input.equals(".")) {
             break;
           }
 
-          String msg = "";
+          ;
 
           if(nextlineAction.equals(Actions.NEWPHRASES)){
             msg = "Added new phrases";
@@ -91,8 +98,7 @@ public class TextAnnotationPatternsInterface {
             doRemovePhrases(input);
             nextlineAction = Actions.NONE;
           } else if(nextlineAction.equals(Actions.PROCESSFILE)){
-            processFile(input);
-            msg = "DONEPROCESS";
+            msg = processFile(input);
             nextlineAction = Actions.NONE;
           }else{
             try{
@@ -111,68 +117,103 @@ public class TextAnnotationPatternsInterface {
               msg = "bye!";
             else if(nextlineAction.equals(Actions.PROCESSFILE)){
               msg = "please write the filename to process";
+            } else if (nextlineAction.equals(Actions.SUMMARY)){
+              msg = this.currentSummary();
+              nextlineAction = Actions.NONE;
+            } else if (nextlineAction.equals(Actions.SUGGEST)){
+              msg = this.suggestPhrases();
+              nextlineAction = Actions.NONE;
             }
           }
           System.out.println("sending msg " + msg);
-
-          out.println(msg);
-
-          //out.println(input.toUpperCase());
+          } catch (Exception e) {
+            msg = "ERROR " + e.toString().replaceAll("\n","\t") +". REDO.";
+            nextlineAction = Actions.NONE;
+            log("Error handling client# " + clientNumber);
+            e.printStackTrace();
+          } finally {
+            out.println(msg);
+          }
         }
-      } catch (IOException e) {
-        log("Error handling client# " + clientNumber + ": " + e);
-      } catch (IllegalAccessException e) {
-        log("Error handling client# " + clientNumber + ": " + e);
-      } catch (InterruptedException e) {
-        log("Error handling client# " + clientNumber + ": " + e);
-      } catch (ExecutionException e) {
-        log("Error handling client# " + clientNumber + ": " + e);
-      } catch (InstantiationException e) {
-        log("Error handling client# " + clientNumber + ": " + e);
-      } catch (SQLException e) {
-        log("Error handling client# " + clientNumber + ": " + e);
-      } catch (NoSuchMethodException e) {
-        log("Error handling client# " + clientNumber + ": " + e);
-      } catch (InvocationTargetException e) {
-        log("Error handling client# " + clientNumber + ": " + e);
-      } catch (ClassNotFoundException e) {
-        log("Error handling client# " + clientNumber + ": " + e);
-      } finally {
-        try {
-          socket.close();
-        } catch (IOException e) {
-          log("Couldn't close a socket, what's going on?");
-        }
-        log("Connection with client# " + clientNumber + " closed");
       }
+
+
+    private String suggestPhrases() throws IOException, ClassNotFoundException {
+      model.constVars.numIterationsForPatterns = 2;
+      model.iterateExtractApply();
+      return model.constVars.getLearnedWords().toString();
     }
 
-    private void processFile(String file) throws IOException, InstantiationException, InvocationTargetException, ExecutionException, SQLException, InterruptedException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException {
-      String outputfile =file+"_processed";
+    //the format of the line input is json string of maps. required keys are "file" and "seedWordsFiles". For example: {"file":"presidents.txt","seedWordsFiles":"name;place"}
+    private String processFile(String line) throws IOException, InstantiationException, InvocationTargetException, ExecutionException, SQLException, InterruptedException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException {
+      JsonReader jsonReader = Json.createReader(new StringReader(line));
+      JsonObject objarr = jsonReader.readObject();
+      jsonReader.close();
       Properties props = new Properties();
-      props.setProperty("file",file);
-      props.setProperty("fileFormat","txt");
-      props.setProperty("learn","false");
-      props.setProperty("labelUsingSeedSets","false");
-      props.setProperty("patternType","SURFACE");
-      props.setProperty("columnOutputFile",outputfile);
+
+      for (Map.Entry<String, JsonValue> o : objarr.entrySet()){
+        props.setProperty(o.getKey(), objarr.getString(o.getKey()));
+      }
+
+      System.out.println("file value is " + objarr.getString("file"));
+
+      String outputfile =props.getProperty("file")+"_processed";
+
+      if(!props.containsKey("fileFormat"))
+        props.setProperty("fileFormat","txt");
+
+      if(!props.containsKey("learn"))
+        props.setProperty("learn","false");
+      if(!props.containsKey("patternType"))
+        props.setProperty("patternType","SURFACE");
+      if(!props.containsKey("columnOutputFile"))
+        props.setProperty("columnOutputFile",outputfile);
+
       props.setProperty("preserveSentenceSequence", "true");
+      if(!props.containsKey("debug"))
+        props.setProperty("debug","4");
+      if(!props.containsKey("thresholdWordExtract"))
+        props.setProperty("thresholdWordExtract","0.00000000000000001");
+      if(!props.containsKey("thresholdNumPatternsApplied"))
+        props.setProperty("thresholdNumPatternsApplied", "1");
+
       model = GetPatternsFromDataMultiClass.<SurfacePattern>run(props);
       System.out.println("written the output to " + outputfile);
+      return "SUCCESS";
     }
 
 
-    static private void doRemovePhrases(String line) {
-      //model.labelWords();
+    private void doRemovePhrases(String line) {
+
       System.out.println("removing phrases");
     }
 
-    static private void doNewAnnotations(String line) {
+    private void doNewAnnotations(String line) {
       System.out.println("Adding new annotations");
     }
 
-    static private void doNewPhrases(String line) {
+    private String currentSummary(){
+      return "HAND:"+model.constVars.getSeedLabelDictionary().toString()+"\t\tLEARNED:"+model.constVars.getLearnedWords();
+    }
+
+    //line is a jsonstring of map of label to array of strings; ex: {"name":["Bush","Carter","Obama"]}
+    private void doNewPhrases(String line) throws Exception {
       System.out.println("adding new phrases");
+      JsonReader jsonReader = Json.createReader(new StringReader(line));
+      JsonObject objarr = jsonReader.readObject();
+      for(Map.Entry<String, JsonValue> o: objarr.entrySet()){
+        String label = o.getKey();
+        Set<String> seed = new HashSet<String>();
+        JsonArray arr = objarr.getJsonArray(o.getKey());
+        for(int i = 0; i < arr.size(); i++){
+          String seedw = arr.getString(i);
+          System.out.println("adding " + seedw + " to seed ");
+          seed.add(seedw);
+        }
+        model.constVars.addSeedWords(label, seed);
+        model.labelWords(label, Data.sents, seed);
+      }
+      System.out.println("added new phrases");
     }
 
     /**
@@ -257,8 +298,8 @@ public class TextAnnotationPatternsInterface {
    * client that connects just to show interesting logging
    * messages.  It is certainly not necessary to do this.
    */
-  public static void main(String[] args) throws Exception {
-    System.out.println("The capitalization server is running.");
+  public static void main(String[] args) throws IOException {
+    System.out.println("The modeling server is running.");
     int clientNumber = 0;
     ServerSocket listener = new ServerSocket(9898);
     try {

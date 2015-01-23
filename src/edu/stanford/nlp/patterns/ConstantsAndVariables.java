@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.NodePattern;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
@@ -246,7 +245,7 @@ public class ConstantsAndVariables<E> implements Serializable{
   /**
    * Seed dictionary, set in the class that uses this class
    */
-  private Map<String, Set<String>> labelDictionary = new HashMap<String, Set<String>>();
+  private Map<String, Set<String>> seedLabelDictionary = new HashMap<String, Set<String>>();
 
   /**
    * Just the set of labels
@@ -467,7 +466,7 @@ public class ConstantsAndVariables<E> implements Serializable{
    * phrases
    */
   @Option(name = "usePhraseEvalPatWtByFreq")
-  public boolean usePhraseEvalPatWtByFreq = false;
+  public boolean usePhraseEvalPatWtByFreq = true;
 
   /**
    * odds of the phrase freq in the label dictionary vs other dictionaries
@@ -624,7 +623,7 @@ public class ConstantsAndVariables<E> implements Serializable{
 
   public ConstantsAndVariables(Properties props, Map<String, Set<String>> labelDictionary, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
                                Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
-    this.labelDictionary= labelDictionary;
+    this.seedLabelDictionary = labelDictionary;
     this.labels = labelDictionary.keySet();
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
@@ -864,8 +863,8 @@ public class ConstantsAndVariables<E> implements Serializable{
     }
   }
 
-  public void setLabelDictionary(Map<String, Set<String>> seedSets) {
-    this.labelDictionary = seedSets;
+  public void setSeedLabelDictionary(Map<String, Set<String>> seedSets) {
+    this.seedLabelDictionary = seedSets;
 
     if(usePhraseEvalWordShape || usePatternEvalWordShape){
       this.wordShapesForLabels.clear();
@@ -874,16 +873,31 @@ public class ConstantsAndVariables<E> implements Serializable{
     }
   }
 
-  public Map<String, Set<String>> getLabelDictionary() {
-    return this.labelDictionary;
+  public Map<String, Set<String>> getSeedLabelDictionary() {
+    return this.seedLabelDictionary;
   }
 
   public void addLabelDictionary(String label, Set<String> words) {
-    this.labelDictionary.get(label).addAll(words);
+    this.seedLabelDictionary.get(label).addAll(words);
 
     if(usePhraseEvalWordShape || usePatternEvalWordShape)
       addWordShapes(label, words);
   }
+
+  Map<String, Counter<String>> learnedWords = new HashMap<String, Counter<String>>();
+
+  public Counter<String> getLearnedWords(String label) {
+    return this.learnedWords.get(label);
+  }
+
+  public Map<String, Counter<String>> getLearnedWords() {
+    return learnedWords;
+  }
+
+  public void setLearnedWords(Counter<String> words, String label) {
+    this.learnedWords.put(label, words);
+  }
+
 
   public Set<String> getEnglishWords() {
     return this.englishWords;
@@ -949,13 +963,15 @@ public class ConstantsAndVariables<E> implements Serializable{
       return new Pair<String, Double>(editDistanceFromThisClassMatches.get(ph),
           editDistanceFromThisClass.get(ph));
 
-    Pair<String, Double> minD = getEditDist(labelDictionary.get(label), ph);
+    Set<String> words = seedLabelDictionary.get(label);
+    words.addAll(learnedWords.get(label).keySet());
+    Pair<String, Double> minD = getEditDist(words, ph);
 
     // double minDtotal = editDistMax;
     // String minPh = "";
     // if (minD.second() == editDistMax && ph.contains(" ")) {
     // for (String s : ph.split("\\s+")) {
-    // Pair<String, Double> minDSingle = getEditDist(labelDictionary.get(label),
+    // Pair<String, Double> minDSingle = getEditDist(seedLabelDictionary.get(label),
     // s);
     // if (minDSingle.second() < minDtotal) {
     // minDtotal = minDSingle.second;
@@ -1131,6 +1147,13 @@ public class ConstantsAndVariables<E> implements Serializable{
 
   public Map<String, Map<Class, Object>> getIgnoreWordswithClassesDuringSelection() {
     return ignoreWordswithClassesDuringSelection;
+  }
+
+  public void addSeedWords(String label, Collection<String> seeds) throws Exception {
+    if(!seedLabelDictionary.containsKey(label)){
+      throw new Exception("label not present in the model");
+    }
+    this.seedLabelDictionary.get(label).addAll(seeds);
   }
 
 }

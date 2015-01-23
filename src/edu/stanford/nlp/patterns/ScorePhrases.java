@@ -24,7 +24,6 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.dep.ApplyDepPatterns;
-import edu.stanford.nlp.patterns.dep.DepPattern;
 import edu.stanford.nlp.patterns.surface.*;
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.WordScoring;
 import edu.stanford.nlp.patterns.PhraseScorer.Normalization;
@@ -84,6 +83,7 @@ public class ScorePhrases<E extends Pattern> {
       }
       String w = termIter.next();
       if (newdt.getCount(w) < thresholdWordExtract) {
+        Redwood.log(ConstantsAndVariables.extremedebug,"not adding word " + w + " and any later words because the score " + newdt.getCount(w) + " is less than the threshold of  " + thresholdWordExtract);
         break;
       }
       assert (newdt.getCount(w) != Double.POSITIVE_INFINITY);
@@ -94,7 +94,7 @@ public class ScorePhrases<E extends Pattern> {
                 "extremePatDebug",
                 "Not adding "
                     + w
-                    + " because the number of non redundant patterns are below threshold: "
+                    + " because the number of non redundant patterns are below threshold of " +  constVars.thresholdNumPatternsApplied + ":"
                     + terms.getCounter(w).keySet());
         continue;
       }
@@ -174,14 +174,16 @@ public class ScorePhrases<E extends Pattern> {
       Data.processedDataFreq = new ClassicCounter<String>();
       assert Data.rawFreq != null;
     }
-    
+
+    Set<String> alreadyIdentifiedWords = new HashSet<String>(constVars.getLearnedWords().get(label).keySet());
+    alreadyIdentifiedWords.addAll(constVars.getSeedLabelDictionary().get(label));
     Counter<String> words = learnNewPhrasesPrivate(label,
-        patternsForEachToken, patternsLearnedThisIter, allSelectedPatterns,
-        constVars.getLabelDictionary().get(label),
+        patternsForEachToken, patternsLearnedThisIter, allSelectedPatterns, alreadyIdentifiedWords,
         tokensMatchedPatterns, scoreForAllWordsThisIteration, terms,
         wordsPatExtracted,  patternsAndWords4Label,
         identifier, ignoreWords, computeProcDataFreq);
-    constVars.addLabelDictionary(label, words.keySet());
+
+    //constVars.addLabelDictionary(label, words.keySet());
     
 
     return words;
@@ -641,7 +643,7 @@ public class ScorePhrases<E extends Pattern> {
       }
       else
         ignoreWordsAll = constVars.getOtherSemanticClassesWords();
-      ignoreWordsAll.addAll(constVars.getLabelDictionary().get(label));
+      ignoreWordsAll.addAll(constVars.getSeedLabelDictionary().get(label));
       Counter<String> finalwords = chooseTopWords(phraseScores, terms,
           phraseScores, ignoreWordsAll, constVars.thresholdWordExtract);
       // for (String w : finalwords.keySet()) {

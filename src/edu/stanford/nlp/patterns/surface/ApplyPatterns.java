@@ -150,15 +150,13 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimen
       }
     }
     return new Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>(allFreq, matchedTokensByPat);
-
-
   }
 
   boolean  containsStopWord(CoreLabel l, Set<String> commonEngWords, java.util.regex.Pattern ignoreWordRegex) {
     // if(useWordResultCache.containsKey(l.word()))
     // return useWordResultCache.get(l.word());
 
-    if ((commonEngWords.contains(l.lemma()) || commonEngWords.contains(l.word())) || (ignoreWordRegex != null && ignoreWordRegex.matcher(l.lemma()).matches())){
+    if ((commonEngWords != null && (commonEngWords.contains(l.lemma()) || commonEngWords.contains(l.word()))) || (ignoreWordRegex != null && ignoreWordRegex.matcher(l.lemma()).matches())){
       //|| (ignoreWords !=null && (ignoreWords.contains(l.lemma()) || ignoreWords.contains(l.word())))) {
       // useWordResultCache.putIfAbsent(l.word(), false);
       return true;
