@@ -235,10 +235,10 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
   }
 
-  private Counter<CandidatePhrase> computeSimWithWordVectors(Collection<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> otherPhrases){
+  private Counter<CandidatePhrase> computeSimWithWordVectors(Collection<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> otherPhrases, boolean ignoreWordRegex){
     Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>(candidatePhrases.size());
     for(CandidatePhrase p : candidatePhrases) {
-      if(wordVectors.containsKey(p.getPhrase())){
+      if(wordVectors.containsKey(p.getPhrase()) && (! ignoreWordRegex || !PatternFactory.ignoreWordRegex.matcher(p.getPhrase()).matches())){
         double[] d1 = wordVectors.get(p.getPhrase());
 
         double finalSimScore = 0;// Double.MIN_VALUE;
@@ -290,8 +290,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   private Counter<CandidatePhrase> computeSimWithWordVectors(List<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> positivePhrases, Collection<CandidatePhrase> allPossibleNegativePhrases) {
     //TODO: check this
     assert wordVectors != null : "Why are word vectors null?";
-    Counter<CandidatePhrase> posSims = computeSimWithWordVectors(candidatePhrases, positivePhrases);
-    Counter<CandidatePhrase> negSims = computeSimWithWordVectors(posSims.keySet(), allPossibleNegativePhrases);
+    Counter<CandidatePhrase> posSims = computeSimWithWordVectors(candidatePhrases, positivePhrases, true);
+    Counter<CandidatePhrase> negSims = computeSimWithWordVectors(posSims.keySet(), allPossibleNegativePhrases, false);
     Function<CandidatePhrase, Boolean> retainPhrasesNotCloseToNegative = candidatePhrase -> {
       if(negSims.getCount(candidatePhrase) > posSims.getCount(candidatePhrase))
         return false;
@@ -846,6 +846,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
         if (i >= numpos)
           break;
         selectedNegPhrases.add(p);
+        i++;
       }
       allNegativePhrases.clear();
       allNegativePhrases = selectedNegPhrases;
