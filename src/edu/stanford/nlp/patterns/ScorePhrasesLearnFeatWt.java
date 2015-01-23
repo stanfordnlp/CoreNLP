@@ -10,10 +10,7 @@ import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import edu.stanford.nlp.classify.LogPrior;
-import edu.stanford.nlp.classify.LogisticClassifier;
-import edu.stanford.nlp.classify.LogisticClassifierFactory;
-import edu.stanford.nlp.classify.RVFDataset;
+import edu.stanford.nlp.classify.*;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -75,7 +72,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   ClassifierType scoreClassifierType = ClassifierType.LR;
 
   public enum ClassifierType {
-    DT, LR, RF
+    DT, LR, RF, SVM
   }
 
   public TwoDimensionalCounter<CandidatePhrase, ScorePhraseMeasures> phraseScoresRaw = new TwoDimensionalCounter<CandidatePhrase, ScorePhraseMeasures>();
@@ -85,7 +82,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted, Counter<E> allSelectedPatterns) throws IOException, ClassNotFoundException {
     phraseScoresRaw.clear();
     learnedScores.clear();
-    
+
     if(Data.domainNGramsFile != null)
       Data.loadDomainNGrams();
 
@@ -100,7 +97,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     /*
       if(constVars.batchProcessSents){
-      
+
       for(File f: Data.sentsFiles){
         Redwood.log(Redwood.DBG,"Sampling sentences from " + f);
         Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
@@ -141,15 +138,19 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       }
       List<Pair<String, Double>> wtd = Counters.toDescendingMagnitudeSortedListWithCounts(weights);
       Redwood.log(ConstantsAndVariables.minimaldebug, "The weights are " + StringUtils.join(wtd.subList(0, Math.min(wtd.size(), 600)), "\n"));
-    }
+    } else if(scoreClassifierType.equals(ClassifierType.SVM)){
+      SVMLightClassifierFactory<String, ScorePhraseMeasures> svmcf = new SVMLightClassifierFactory<String, ScorePhraseMeasures>();
+      classifier = svmcf.trainClassifier(dataset);
+    } else
+      throw new RuntimeException("cannot identify classifier " + scoreClassifierType);
+    
 //    else if (scoreClassifierType.equals(ClassifierType.RF)) {
 //      ClassifierFactory wekaFactory = new WekaDatumClassifierFactory<String, ScorePhraseMeasures>("weka.classifiers.trees.RandomForest", constVars.wekaOptions);
 //      classifier = wekaFactory.trainClassifier(dataset);
 //      Classifier cls = ((WekaDatumClassifier) classifier).getClassifier();
 //      RandomForest rf = (RandomForest) cls;
 //    }
-    else
-      throw new RuntimeException("cannot identify classifier " + scoreClassifierType);
+
     BufferedWriter w = new BufferedWriter(new FileWriter("tempscorestrainer.txt"));
     System.out.println("size of learned scores is " + phraseScoresRaw.size());
     for (CandidatePhrase s : phraseScoresRaw.firstKeySet()) {
@@ -181,7 +182,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
     return scores;
   }
-  
+
   @Override
   public Counter<CandidatePhrase> scorePhrases(String label, Set<CandidatePhrase> terms, boolean forLearningPatterns) throws IOException, ClassNotFoundException {
     getAllLabeledWordsCluster();
@@ -938,11 +939,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
     if (constVars.usePatternEvalEditDistSame)
       scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, constVars.getEditDistanceScoresOtherClass(word.getPhrase()));
-    
+
     if(constVars.usePatternEvalWordShape){
       scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word.getPhrase(), label));
     }
-    
+
     phraseScoresRaw.setCounter(word, scoreslist);
     return scoreslist;
   }
@@ -1058,11 +1059,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
     if (constVars.usePhraseEvalEditDistSame)
       scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, constVars.getEditDistanceScoresOtherClass(word.getPhrase()));
-    
+
     if(constVars.usePhraseEvalWordShape){
       scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word.getPhrase(), label));
     }
-    
+
     phraseScoresRaw.setCounter(word, scoreslist);
     //System.out.println("scores for " + word + " are " + scoreslist);
     return scoreslist;
