@@ -456,7 +456,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     Counter<CandidatePhrase> removed = Counters.retainBelow(sims, constVars.positiveSimilarityThresholdLowPrecision);
     System.out.println("removing phrases as negative phrases that were higher that positive similarity threshold of " + constVars.positiveSimilarityThresholdLowPrecision + removed);
-    if(logFile != null){
+    if(logFile != null && wordVectors != null){
       for(Entry<CandidatePhrase, Double> en: removed.entrySet())
         if(wordVectors.containsKey(en.getKey().getPhrase()))
           logFile.write(en.getKey()+"-PN " + ArrayUtils.toString(wordVectors.get(en.getKey().getPhrase()), " ")+"\n");
@@ -840,10 +840,12 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       logFile = new BufferedWriter(new FileWriter(constVars.logFileVectorSimilarity));
       logFileFeat = new BufferedWriter(new FileWriter(constVars.logFileVectorSimilarity+"_feat"));
 
+      if(wordVectors != null){
       for(CandidatePhrase p : allPositivePhrases){
         if(wordVectors.containsKey(p.getPhrase())){
           logFile.write(p.getPhrase()+"-P " + ArrayUtils.toString(wordVectors.get(p.getPhrase()), " ")+"\n");
         }
+      }
       }
     }
 
@@ -852,7 +854,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       //Counters.retainTop(allCloseToPositivePhrases, (int) (allCloseToPositivePhrases.size()*constVars.subSampleUnkAsPosUsingSimPercentage));
       Redwood.log("Expanding positives by adding " + allCloseToPositivePhrases + " phrases");
       allPositivePhrases.addAll(allCloseToPositivePhrases.keySet());
-      if(logFile != null){
+      if(logFile != null && wordVectors != null){
         for(CandidatePhrase p : allCloseToPositivePhrases.keySet()){
           if(wordVectors.containsKey(p.getPhrase())){
             logFile.write(p.getPhrase()+"-PP " + ArrayUtils.toString(wordVectors.get(p.getPhrase()), " ")+"\n");
@@ -920,10 +922,14 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       }
       RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, "false");
       dataset.add(datum);
-      if(logFile!=null && wordVectors.containsKey(negative.getPhrase())){
+
+      if(logFile!=null && wordVectors != null && wordVectors.containsKey(negative.getPhrase())){
         logFile.write(negative.getPhrase()+"-N"+" " + ArrayUtils.toString(wordVectors.get(negative.getPhrase()), " ")+"\n");
-        logFileFeat.write("NEGATIVE " + negative.getPhrase() +"\t" + Counters.toSortedByKeysString(feat,"%1$s:%2$.0f",";","%s")+"\n");
       }
+
+      if(logFileFeat !=null)
+        logFileFeat.write("NEGATIVE " + negative.getPhrase() +"\t" + Counters.toSortedByKeysString(feat,"%1$s:%2$.0f",";","%s")+"\n");
+
     }
 
     if(logFile!=null){
