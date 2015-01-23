@@ -263,22 +263,24 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
         double max = Double.MIN_VALUE;
 
         boolean donotuse = false;
-        for (CandidatePhrase pos : otherPhrases) {
 
-          if (p.equals(pos)) {
+        for (CandidatePhrase other : otherPhrases) {
+
+          if (p.equals(other)) {
             donotuse = true;
             break;
           }
-          if (!wordVectors.containsKey(pos.getPhrase()))
+
+          if (!wordVectors.containsKey(other.getPhrase()))
             continue;
 
           double sim;
 
-          PhrasePair pair = new PhrasePair(p.getPhrase(), pos.getPhrase());
+          PhrasePair pair = new PhrasePair(p.getPhrase(), other.getPhrase());
           if (cacheSimilarities.containsKey(pair))
             sim = cacheSimilarities.getCount(pair);
           else {
-            double[] d2 = wordVectors.get(pos.getPhrase());
+            double[] d2 = wordVectors.get(other.getPhrase());
 
             double sum = 0;
             double d1sq = 0;
@@ -292,7 +294,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             cacheSimilarities.setCount(pair, sim);
           }
 
-          topSimPhs.add(pos, sim);
+          topSimPhs.add(other, sim);
           if(topSimPhs.size() > numTopSimilar)
             topSimPhs.removeLastEntry();
 
