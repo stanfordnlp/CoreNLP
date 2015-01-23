@@ -234,6 +234,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>(candidatePhrases.size());
 
     for(CandidatePhrase p : candidatePhrases) {
+      System.out.println("candidate phrase is " + p);
       if(wordVectors.containsKey(p.getPhrase())){
         double[] d1 = wordVectors.get(p.getPhrase());
 
@@ -554,9 +555,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
                 negative = true;
                 add = true;
                 //If the phrase does not exist in its form in the datset (happens when fuzzy matching etc).
-                if(!Data.rawFreq.containsKey(lo.getValue())){
-                  candidate = CandidatePhrase.createOrGet(l.word());
-                } else{
+                if(Data.rawFreq.containsKey(lo.getValue())){
                   candidate = lo.getValue();
                 }
               }
@@ -575,7 +574,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             if(!negative && !ignoreclass && constVars.expandPositivesWhenSampling) {
               if (!allCloseToPositivePhrases.containsKey(candidate)) {
                 Counter<CandidatePhrase> sims;
-
+                assert candidate != null;
                 if(constVars.useWordVectorsToComputeSim)
                   sims =computeSimWithWordVectors(Arrays.asList(candidate), knownPositivePhrases, new AtomicDouble());
                 else
