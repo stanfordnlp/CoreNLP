@@ -436,6 +436,7 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="expandPositivesWhenSampling", gloss="when sampling for learning feature wts for learning phrases, expand the positives")
   public boolean expandPositivesWhenSampling = false;
 
+  @Option(name="positiveSimilarityThreshold")
   public double positiveSimilarityThreshold  = 0.7;
 
   @Option(name="subSampleUnkAsPosUsingSimPercentage", gloss="When using expandPositivesWhenSampling, select top % after applying the threshold")
@@ -685,9 +686,9 @@ public class ConstantsAndVariables<E> implements Serializable{
 
   @Option(name = "storePatsForEachToken", gloss="used for storing patterns in PSQL/MEMORY/LUCENE")
   public PatternForEachTokenWay storePatsForEachToken = PatternForEachTokenWay.MEMORY;
-
-  @Option(name = "storePatsIndex", gloss="used for storing patterns index")
-  public PatternIndexWay storePatsIndex = PatternIndexWay.MEMORY;
+//
+//  @Option(name = "storePatsIndex", gloss="used for storing patterns index")
+//  public PatternIndexWay storePatsIndex = PatternIndexWay.MEMORY;
 
   @Option(name="sampleSentencesForSufficientStats",gloss="% sentences to use for learning pattterns" )
   double sampleSentencesForSufficientStats = 1.0;
