@@ -493,7 +493,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     while(sentsIter.hasNext()) {
       Pair<Map<String, DataInstance>, File> sentsf = sentsIter.next();
       Map<String, DataInstance> sents = sentsf.first();
-      Redwood.log(Redwood.DBG, "Sampling sentences from " + sentsf.second());
+      Redwood.log(Redwood.DBG, "Sampling datums from " + sentsf.second());
       if (computeRawFreq)
         Data.computeRawFreqIfNull(sents, PatternFactory.numWordsCompound);
 
@@ -556,9 +556,15 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       dataset.add(datum);
     }
 
-    System.out.println("size of the dataset is ");
+    System.out.println("Before feature count threshold, dataset stats are ");
     dataset.summaryStatistics();
-    System.out.println("number of positive datums:  " + numpos + " and number of negative datums: " + allNegativePhrases.size());
+
+    int threshold = 2;
+    dataset.applyFeatureCountThreshold(threshold);
+    System.out.println("AFTER feature count threshold of " + threshold + ", dataset stats are ");
+    dataset.summaryStatistics();
+
+    Redwood.log(Redwood.DBG, "Eventually, number of positive datums:  " + numpos + " and number of negative datums: " + allNegativePhrases.size());
     return dataset;
   }
 

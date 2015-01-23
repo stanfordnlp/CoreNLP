@@ -13,12 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
-import javax.json.JsonValue;
+import javax.json.*;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.io.IOUtils;
@@ -1033,7 +1028,6 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       num = keyset.size() / (numThreads - 1);
     Redwood.log(ConstantsAndVariables.extremedebug, "keyset size is " + keyset.size());
     List<List<E>> threadedSentIds = new ArrayList<List<E>>();
-    List<Future<Map<String, DataInstance>>> list = new ArrayList<Future<Map<String, DataInstance>>>();
     for (int i = 0; i < numThreads; i++) {
       List<E> keys = keyset.subList(i * num, Math.min(keyset.size(), (i + 1) * num));
       threadedSentIds.add(keys);
@@ -2977,6 +2971,21 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       }
     }
     return labels;
+  }
+
+  public static Map<String, Set<CandidatePhrase>> readSeedWordsFromJSONString(String str){
+    Map<String, Set<CandidatePhrase>> seedWords  = new HashMap<String, Set<CandidatePhrase>>();
+    JsonReader jsonReader = Json.createReader(new StringReader(str));
+    JsonObject obj = jsonReader.readObject();
+
+    jsonReader.close();
+    for (String o : obj.keySet()){
+      seedWords.put(o, new HashSet<CandidatePhrase>());
+      JsonArray arr  = obj.getJsonArray(o);
+      for(JsonValue v: arr)
+        seedWords.get(o).add(CandidatePhrase.createOrGet(v.toString()));
+    }
+    return seedWords;
   }
 
   public static Map<String, Set<CandidatePhrase>> readSeedWords(Properties props) {

@@ -139,11 +139,12 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
 
       for (CandidatePhrase gc : allCandidatePhrases) {
         String g = gc.getPhrase();
-        if (constVars.usePatternEvalEditDistOther) {
 
+        if (constVars.usePatternEvalEditDistOther) {
           editDistanceFromOtherSemanticBinaryScores.setCount(gc,
               constVars.getEditDistanceScoresOtherClassThreshold(g));
         }
+
         if (constVars.usePatternEvalEditDistSame) {
           editDistanceFromAlreadyExtractedBinaryScores.setCount(gc,
               1 - constVars.getEditDistanceScoresThisClassThreshold(label, g));
@@ -256,7 +257,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
                 }
 
                 if (constVars.usePatternEvalEditDistOther) {
-                  assert editDistanceFromOtherSemanticBinaryScores.containsKey(word) : "How come no edit distance info?";
+                  assert editDistanceFromOtherSemanticBinaryScores.containsKey(word) : "How come no edit distance info for word " + word + "";
                   scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER,
                     editDistanceFromOtherSemanticBinaryScores.getCount(word));
                 }
