@@ -182,8 +182,12 @@ public class ExtractPhraseFromPattern {
         return;
 
       List<IndexedWord> andNodes = new ArrayList<IndexedWord>();
+
       descendantsWithReln(g, w, "conj_and", new ArrayList<IndexedWord>(),
           andNodes);
+
+      System.out.println("and nodes are " + andNodes);
+
       for (IndexedWord w1 : andNodes) {
         printSubGraph(g, w1, additionalCutOffRels, textTokens,
             listOfOutput, listOfOutputIndices, seenNodes,
@@ -191,10 +195,12 @@ public class ExtractPhraseFromPattern {
 
       }
       doNotAddThese.addAll(andNodes);
+
       List<String> allCutOffRels = new ArrayList<String>();
       if (additionalCutOffRels != null)
         allCutOffRels.addAll(additionalCutOffRels);
       allCutOffRels.addAll(cutoffRelations);
+
       Set<IndexedWord> words = descendants(g, w, allCutOffRels, doNotAddThese, ignoreCommonTags);
       // words.addAll(andNodes);
 
@@ -212,6 +218,7 @@ public class ExtractPhraseFromPattern {
       // words.removeAll(wordsAnd);
       // printSubGraph(g,afterand, includeSiblings, additionalCutOffNodes);
       // }
+      System.out.println("words are " + words);
       if (words.size() > 0) {
         int min = Integer.MAX_VALUE, max = -1;
         for (IndexedWord word : words) {
@@ -221,7 +228,7 @@ public class ExtractPhraseFromPattern {
             max = word.index();
         }
 
-        IntPair indices = new IntPair(min - 1, max - 1);
+        IntPair indices;
 
         // Map<Integer, String> ph = new TreeMap<Integer, String>();
         // String phrase = "";
@@ -230,12 +237,20 @@ public class ExtractPhraseFromPattern {
         // }
         // phrase = StringUtils.join(ph.values(), " ");
         String phrase;
-        if ((max - min + 1) <= maxPhraseLength)
+        ExtractedPhrase extractedPh;
+        if ((max - min + 1) <= maxPhraseLength){
+          indices = new IntPair(min - 1, max - 1);
           phrase = StringUtils.join(textTokens.subList(min - 1, max), " ");
-        else
+          extractedPh = new ExtractedPhrase(min - 1, max - 1, pattern,  phrase);
+        }
+        else {
+          int newmax =min + maxPhraseLength - 1;
+          indices = new IntPair(min - 1, newmax);
           phrase = StringUtils.join(
-              textTokens.subList(min - 1, min + maxPhraseLength - 1), " ");
-
+            textTokens.subList(min - 1, newmax), " ");
+          extractedPh = new ExtractedPhrase(min - 1, newmax, pattern,
+            phrase);
+        }
         phrase = phrase.trim();
         System.out.println("phrase is " + phrase  + " index is " + indices + " and maxphraselength is " + maxPhraseLength + " and descendentset is " + words);
 
@@ -250,8 +265,7 @@ public class ExtractPhraseFromPattern {
 
           if (!listOfOutputIndices.contains(indices)) {
             listOfOutputIndices.add(indices);
-            extractedPhrases.add(new ExtractedPhrase(min - 1, max - 1, pattern,
-                phrase));
+            extractedPhrases.add(extractedPh);
           }
 
           if (findSubTrees == true) {

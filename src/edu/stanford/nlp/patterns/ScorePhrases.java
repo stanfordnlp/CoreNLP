@@ -100,8 +100,7 @@ public class ScorePhrases<E extends Pattern> {
       }
       CandidatePhrase matchedFuzzy = null;
       if (constVars.minLen4FuzzyForPattern > 0 && ignoreWords != null)
-        matchedFuzzy = ConstantsAndVariables.containsFuzzy(ignoreWords, w,
-            constVars.minLen4FuzzyForPattern);
+        matchedFuzzy = ConstantsAndVariables.containsFuzzy(ignoreWords, w, constVars.minLen4FuzzyForPattern);
       if (matchedFuzzy == null) {
         Redwood.log("extremePatDebug", "adding word " + w);
         finalwords.setCount(w, newdt.getCount(w));

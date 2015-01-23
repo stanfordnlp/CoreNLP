@@ -3,6 +3,7 @@ package edu.stanford.nlp.patterns.dep;
 import java.io.Serializable;
 
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.IntPair;
 
 public class ExtractedPhrase implements Serializable{
@@ -18,13 +19,19 @@ public class ExtractedPhrase implements Serializable{
   double confidence = 1;
   String articleId = null;
   Integer sentId = null;
+  Counter<String> features;
 
   public ExtractedPhrase(int startIndex, int endIndex, SemgrexPattern pattern, String value) {
     this(startIndex, endIndex, pattern, value, 1.0, null, null);
   }
 
   public ExtractedPhrase(int startIndex, int endIndex, SemgrexPattern pattern, String value, double weight,
-      String articleId, Integer sentId) {
+                         String articleId, Integer sentId){
+    this(startIndex, endIndex, pattern, value, weight, articleId, sentId, null);
+  }
+
+  public ExtractedPhrase(int startIndex, int endIndex, SemgrexPattern pattern, String value, double weight,
+      String articleId, Integer sentId, Counter<String> features) {
     this.startIndex = startIndex;
     this.endIndex = endIndex;
     this.pattern = pattern;
@@ -32,6 +39,7 @@ public class ExtractedPhrase implements Serializable{
     this.confidence = weight;
     this.articleId = articleId;
     this.sentId = sentId;
+    this.features = features;
   }
 
   // public ExtractedPhrase(int startIndex, int endIndex) {
@@ -91,4 +99,12 @@ public class ExtractedPhrase implements Serializable{
     return this.startIndex * 31 + this.endIndex + this.value.hashCode();
   }
 
+  public Counter<String> getFeatures(){
+    return this.features;
+  }
+
+  @Override
+  public String toString(){
+    return this.value + "("+startIndex+","+endIndex+")";
+  }
 }

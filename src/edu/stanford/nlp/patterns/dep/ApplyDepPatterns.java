@@ -17,6 +17,8 @@ import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 /**
+ * Applying Dependency patterns to sentences.
+ *
  * Created by sonalg on 11/1/14.
  */
 public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoDimensionalCounter<CandidatePhrase, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>> {
@@ -66,14 +68,14 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
           //Higher branch values makes the faster but uses more memory
           //m.setBranchLimit(5);
 
-          Collection<IntPair> matched = getMatchedTokensIndex(graph, pEn.getKey(), sent);
+          Collection<ExtractedPhrase> matched = getMatchedTokensIndex(graph, pEn.getKey(), sent);
 
-          for (IntPair match : matched) {
+          for (ExtractedPhrase match : matched) {
 
 
-            int s = match.get(0);
+            int s = match.startIndex;
             //Because the matching class gives inclusive index
-            int e = match.get(1) + 1;
+            int e = match.endIndex + 1;
 
             String phrase = "";
             String phraseLemma = "";
@@ -151,7 +153,7 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
               if (useWordNotLabeled) {
                 phrase = phrase.trim();
                 phraseLemma = phraseLemma.trim();
-                allFreq.incrementCount(new CandidatePhrase(phrase,phraseLemma), pEn.getValue(), 1.0);
+                allFreq.incrementCount(new CandidatePhrase(phrase,phraseLemma, match.getFeatures()), pEn.getValue(), 1.0);
               }
             }
           }
@@ -162,19 +164,24 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
 
     }
 
-  private Collection<IntPair> getMatchedTokensIndex(SemanticGraph graph, SemgrexPattern pattern, DataInstance sent) {
+  private Collection<ExtractedPhrase> getMatchedTokensIndex(SemanticGraph graph, SemgrexPattern pattern, DataInstance sent) {
     //TODO: look at the ignoreCommonTags flag
     ExtractPhraseFromPattern extract = new ExtractPhraseFromPattern(false, PatternFactory.numWordsCompound);
     Collection<IntPair> outputIndices = new ArrayList<IntPair>();
     boolean findSubTrees = true;
     List<CoreLabel> tokensC = sent.getTokens();
     //TODO: see if you can get rid of this (only used for matchedGraphs)
+
     List<String> tokens = tokensC.stream().map(x -> x.word()).collect(Collectors.toList());
+
     List<String> outputPhrases =new ArrayList<String>();
+
     List<ExtractedPhrase> extractedPhrases = new ArrayList<ExtractedPhrase>();
+
     extract.getSemGrexPatternNodes(graph, tokens, outputPhrases, outputIndices,
       pattern, findSubTrees, extractedPhrases, constVars.matchLowerCaseContext);
     Collection<IntPair> outputIndicesMaxPhraseLen = new ArrayList<IntPair>();
+
     //TODO: probably a bad idea to add ALL ngrams
     for(IntPair o: outputIndices){
       int min = o.get(0);
@@ -193,8 +200,8 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
         }
       }
     }
-    System.out.println("outputIndicesMaxPhraseLen is " + outputIndicesMaxPhraseLen);
-    return outputIndicesMaxPhraseLen;
+    System.out.println("extracted phrases are " + extractedPhrases);
+    return extractedPhrases;
   }
 
   private boolean matchedRestriction(CoreLabel coreLabel, String label) {
