@@ -6,6 +6,7 @@ import edu.stanford.nlp.patterns.DataInstance;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.util.List;
 
@@ -30,5 +31,9 @@ public class DataInstanceDep extends DataInstance {
 
   public SemanticGraph getGraph() {
     return graph;
+  }
+
+  public String toString(){
+    return StringUtils.join(tokens, " ");
   }
 }

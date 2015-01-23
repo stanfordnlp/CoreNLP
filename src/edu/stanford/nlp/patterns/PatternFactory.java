@@ -1,12 +1,11 @@
 package edu.stanford.nlp.patterns;
 
+import edu.stanford.nlp.patterns.dep.DepPatternFactory;
+import edu.stanford.nlp.patterns.surface.SurfacePattern;
 import edu.stanford.nlp.patterns.surface.SurfacePatternFactory;
 import edu.stanford.nlp.util.Execution;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by sonalg on 10/27/14.
@@ -46,9 +45,14 @@ public class PatternFactory {
    */
   public static java.util.regex.Pattern ignoreWordRegex = java.util.regex.Pattern.compile("a^");
 
-  public static void setUp(Properties props) {
+  public static void setUp(Properties props, PatternType patternType) {
     Execution.fillOptions(PatternFactory.class, props);
-    SurfacePatternFactory.setUp(props);
+    if(patternType.equals(PatternType.SURFACE))
+      SurfacePatternFactory.setUp(props);
+    else if(patternType.equals(PatternType.DEP))
+      DepPatternFactory.setUp(props);
+    else
+      throw new UnsupportedOperationException();
   }
 
   public enum PatternType{SURFACE, DEP};
@@ -59,7 +63,15 @@ public class PatternFactory {
       return true;
     else
       return false;
-
-
   }
+
+  public static Map<Integer, Set> getPatternsAroundTokens(PatternType patternType, DataInstance sent, Set<String> stopWords) {
+      if(patternType.equals(PatternType.SURFACE)){
+        return SurfacePatternFactory.getPatternsAroundTokens(sent, stopWords);
+      } else if(patternType.equals(PatternType.DEP)){
+        return (Map) DepPatternFactory.getPatternsAroundTokens(sent, stopWords);
+      } else
+        throw new UnsupportedOperationException();
+  }
+
 }

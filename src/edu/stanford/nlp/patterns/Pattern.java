@@ -5,9 +5,12 @@ import edu.stanford.nlp.patterns.dep.DepPattern;
 import edu.stanford.nlp.patterns.dep.DepPatternFactory;
 import edu.stanford.nlp.patterns.surface.SurfacePattern;
 import edu.stanford.nlp.patterns.surface.SurfacePatternFactory;
+import edu.stanford.nlp.patterns.surface.Token;
+import edu.stanford.nlp.util.CollectionValuedMap;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -50,12 +53,31 @@ public abstract class Pattern implements Serializable{
   public abstract String toStringSimple();
 
   /** Get set of patterns around this token.*/
-  public static Set getContext(PatternFactory.PatternType patternClass, DataInstance sent, int i) {
+  public static Set getContext(PatternFactory.PatternType patternClass, DataInstance sent, int i, Set<String> stopWords) {
     if(patternClass.equals(PatternFactory.PatternType.SURFACE))
-      return SurfacePatternFactory.getContext(sent.getTokens(), i);
+      return SurfacePatternFactory.getContext(sent.getTokens(), i, stopWords);
     else
-      return DepPatternFactory.getContext(sent, i);
+      return DepPatternFactory.getContext(sent, i, stopWords);
   }
 
   public abstract String toString(List<String> notAllowedClasses);
+
+  static protected void getRelevantWords(Token[] t, CollectionValuedMap<String, String> relWords){
+    if (t != null)
+      for (Token s : t) {
+        Map<String, String> str = s.classORRestrictionsAsString();
+        if (str != null){
+          relWords.addAll(str);
+        }
+      }
+  }
+
+  static protected void getRelevantWords(Token t, CollectionValuedMap<String, String> relWords){
+    if (t != null) {
+      Map<String, String> str = t.classORRestrictionsAsString();
+      if (str != null) {
+        relWords.addAll(str);
+      }
+    }
+  }
 }

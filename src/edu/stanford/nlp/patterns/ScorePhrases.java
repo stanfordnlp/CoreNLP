@@ -213,7 +213,7 @@ public class ScorePhrases<E extends Pattern> {
       surfacePatternsLearnedThisIterConverted.put(pat, pattern);
     }else if(constVars.patternType.equals(PatternFactory.PatternType.DEP)){
       depPatternsLearnedThisIterConverted = new HashMap<SemgrexPattern, E>();
-      SemgrexPattern pat = SemgrexPattern.compile(pattern.toString(notAllowedClasses));
+      SemgrexPattern pat = SemgrexPattern.compile(pattern.toString(notAllowedClasses), new edu.stanford.nlp.semgraph.semgrex.Env(constVars.env.get(label).getVariables()));
       depPatternsLearnedThisIterConverted.put(pat, pattern);
     } else
     throw new UnsupportedOperationException();

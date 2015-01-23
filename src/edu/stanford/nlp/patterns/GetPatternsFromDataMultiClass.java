@@ -283,7 +283,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     Data.sents = sents;
     Execution.fillOptions(Data.class, props);
     Execution.fillOptions(ConstantsAndVariables.class, props);
-    PatternFactory.setUp(props);
+    PatternFactory.setUp(props, PatternFactory.PatternType.valueOf(props.getProperty("patternType")));
 
     constVars = new ConstantsAndVariables<E>(props, seedSets, answerClass, generalizeClasses, ignoreClasses);
 
@@ -650,10 +650,12 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     anns.add("pos");
     anns.add("lemma");
 
-    if (useTargetParserParentRestriction || type.equals(PatternFactory.PatternType.DEP)) {
+    if (useTargetParserParentRestriction){
       anns.add("parse");
-
     }
+    if(type.equals(PatternFactory.PatternType.DEP))
+      anns.add("depparse");
+
     if (useTargetNERRestriction) {
       anns.add("ner");
     }
@@ -701,9 +703,12 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       anns.add("pos");
       anns.add("lemma");
 
-      if (useTargetParserParentRestriction) {
+      if (useTargetParserParentRestriction){
         anns.add("parse");
       }
+      if(type.equals(PatternFactory.PatternType.DEP))
+        anns.add("depparse");
+
       if (useTargetNERRestriction) {
         anns.add("ner");
       }
@@ -1577,7 +1582,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     else
       num = n / (numThreads - 1);
 
-    //Collections.shuffle(c, new Random(numCallsToCalStats.getAndIncrement()));
+    //Collec tions.shuffle(c, new Random(numCallsToCalStats.getAndIncrement()));
     System.out.println("shuffled " + c.size() + " sentences and selecting " + num  + " sentences per thread");
     List<E> result = new ArrayList<E>(num);
     int totalitems = 0;
@@ -1966,7 +1971,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
           if(!tempPatsForSents.containsKey(sentEn.getKey()))
             tempPatsForSents.put(sentEn.getKey(), new HashMap<Integer, Set<E>>());
 
-          tempPatsForSents.get(sentEn.getKey()).put(index, Pattern.getContext(constVars.patternType, sentEn.getValue(), index));
+          tempPatsForSents.get(sentEn.getKey()).put(index, Pattern.getContext(constVars.patternType, sentEn.getValue(), index, ConstantsAndVariables.getStopWords()));
           //patsForEachToken.addPatterns(sentEn.getKey(), index, createPats.getContext(sentEn.getValue(), index));
         }
       }

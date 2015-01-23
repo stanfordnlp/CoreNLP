@@ -3,6 +3,7 @@ package edu.stanford.nlp.patterns.surface;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.ConstantsAndVariables;
+import edu.stanford.nlp.patterns.DataInstance;
 import edu.stanford.nlp.patterns.PatternFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.CollectionUtils;
@@ -101,12 +102,12 @@ public class SurfacePatternFactory extends PatternFactory {
         "addPatWithoutPOS and usePOS4Pattern both cannot be false ");
     }
 
-    fw = new Token();
+    fw = new Token(PatternType.SURFACE);
     if (useFillerWordsInPat) {
       fw.setEnvBindRestriction("$FILLER");
       fw.setNumOcc(0,2);
     }
-    sw = new Token();
+    sw = new Token(PatternType.SURFACE);
     if (useStopWordsBeforeTerm) {
       sw.setEnvBindRestriction("$STOPWORD");
       sw.setNumOcc(0, 2);
@@ -114,7 +115,7 @@ public class SurfacePatternFactory extends PatternFactory {
   }
 
 
-  public static Set<SurfacePattern> getContext(List<CoreLabel> sent, int i) {
+  public static Set<SurfacePattern> getContext(List<CoreLabel> sent, int i, Set<String> stopWords) {
 
 
     Set<SurfacePattern> prevpatterns = new HashSet<SurfacePattern>();
@@ -201,7 +202,7 @@ public class SurfacePatternFactory extends PatternFactory {
             Token str = SurfacePattern.getContextToken(tokenj);
             previousTokens.add(0, str);
             originalPrev.add(0, tokenjStr);
-            if (doNotUse(tokenjStr, ConstantsAndVariables.getStopWords())) {
+            if (doNotUse(tokenjStr, stopWords)) {
               numStopWordsprev++;
             } else
               numNonStopWordsPrev++;
@@ -262,7 +263,7 @@ public class SurfacePatternFactory extends PatternFactory {
             Token str = SurfacePattern.getContextToken(tokenj);
             nextTokens.add(str);
             originalNext.add(tokenjStr);
-            if (doNotUse(tokenjStr, ConstantsAndVariables.getStopWords())) {
+            if (doNotUse(tokenjStr, stopWords)) {
               numStopWordsnext++;
             } else
               numNonStopWordsNext++;
@@ -417,7 +418,7 @@ public class SurfacePatternFactory extends PatternFactory {
 
 
   static Triple<Boolean, Token, String> getContextTokenStr(CoreLabel tokenj) {
-    Token strgeneric = new Token();
+    Token strgeneric = new Token(PatternType.SURFACE);
     String strOriginal = "";
     boolean isLabeledO = true;
 //    for (Entry<String, Class<? extends TypesafeMap.Key<String>>> e : getAnswerClass().entrySet()) {
@@ -475,5 +476,28 @@ public class SurfacePatternFactory extends PatternFactory {
     // !text.contains("*");// && !
     // text.contains("$") && !text.contains("\"");
 
+  }
+
+  public static Map<Integer, Set> getPatternsAroundTokens(DataInstance sent, Set<String> stopWords) {
+    Map<Integer, Set> p = new HashMap<Integer, Set>();
+    List<CoreLabel> tokens = sent.getTokens();
+    for (int i = 0; i < tokens.size(); i++) {
+//          p.put(
+//              i,
+//              new Triple<Set<Integer>, Set<Integer>, Set<Integer>>(
+//                  new HashSet<Integer>(), new HashSet<Integer>(),
+//                  new HashSet<Integer>()));
+      p.put(i, new HashSet<SurfacePattern>());
+      CoreLabel token = tokens.get(i);
+      // do not create patterns around stop words!
+      if (PatternFactory.doNotUse(token.word(), stopWords)) {
+        continue;
+      }
+
+      Set<SurfacePattern> pat = getContext(sent.getTokens(), i, stopWords);
+      p.put(i, pat);
+
+    }
+    return p;
   }
 }

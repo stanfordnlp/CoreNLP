@@ -36,15 +36,7 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
     return equalContext((SurfacePattern)p);
   }
 
-  private void getRelevantWords(Token[] t, CollectionValuedMap<String, String> relWords){
-    if (t != null)
-      for (Token s : t) {
-        Map<String, String> str = s.classORRestrictionsAsString();
-        if (str != null){
-          relWords.addAll(str);
-        }
-      }
-  }
+
 
 
   private static final long serialVersionUID = 1L;
@@ -93,25 +85,8 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
   }
 
   public static Token getContextToken(CoreLabel tokenj) {
-    Token token = new Token();
+    Token token = new Token(PatternFactory.PatternType.SURFACE);
     token.addORRestriction(PatternsAnnotations.ProcessedTextAnnotation.class, tokenj.get(PatternsAnnotations.ProcessedTextAnnotation.class));
-
-//    if (useLemmaContextTokens) {
-//      String tok = tokenj.lemma();
-//      if (lowerCaseContext)
-//        tok = tok.toLowerCase();
-//      token.addORRestriction(CoreAnnotations.LemmaAnnotation.class, tok);
-//      //str = "[{lemma:/" + Pattern.quote(tok.replaceAll("/", "\\\\/"))+ "/}] ";
-//
-//    } else {
-//      String tok = tokenj.word();
-//      if (lowerCaseContext)
-//        tok = tok.toLowerCase();
-//      token.addORRestriction(CoreAnnotations.TextAnnotation.class, tok);
-//      //str = "[{word:/" + Pattern.quote(tok.replaceAll("/", "\\\\/")) + "/}] ";
-//
-//
-//    }
     return token;
   }
 

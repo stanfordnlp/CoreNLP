@@ -14,16 +14,9 @@ import edu.stanford.nlp.util.logging.Redwood;
 
 public class CreatePatterns<E> {
 
-
-
-
-
   //String channelNameLogger = "createpatterns";
 
   ConstantsAndVariables constVars;
-  private Map<String, Map<Integer, Set<Integer>>> patternsForEachToken;
-
-  //Map<String, Map<Integer, Set<Integer>>> patternsForEachToken ;
 
   public CreatePatterns(Properties props, ConstantsAndVariables constVars)
       throws IOException {
@@ -37,64 +30,6 @@ public class CreatePatterns<E> {
     Execution.fillOptions(this, props);
   }
 
-
-
-//  Triple<Boolean, String, String> getContextTokenStr(CoreLabel tokenj) {
-//    String strgeneric = "";
-//    String strOriginal = "";
-//    boolean isLabeledO = true;
-//    for (Entry<String, Class<? extends TypesafeMap.Key<String>>> e : constVars.getAnswerClass().entrySet()) {
-//      if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
-//        isLabeledO = false;
-//        if (strgeneric.isEmpty()) {
-//          strgeneric = "{" + e.getKey() + ":" + e.getKey() + "}";
-//          strOriginal = e.getKey();
-//        } else {
-//          strgeneric += " | " + "{" + e.getKey() + ":" + e.getKey() + "}";
-//          strOriginal += "|" + e.getKey();
-//        }
-//      }
-//    }
-//
-//    for (Entry<String, Class> e : constVars.getGeneralizeClasses().entrySet()) {
-//      if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
-//        isLabeledO = false;
-//        if (strgeneric.isEmpty()) {
-//          strgeneric = "{" + e.getKey() + ":" + tokenj.get(e.getValue()) + "}";
-//          strOriginal = e.getKey();
-//        } else {
-//          strgeneric += " | " + "{" + e.getKey() + ":"
-//              + tokenj.get(e.getValue()) + "}";
-//          strOriginal += "|" + e.getKey();
-//        }
-//      }
-//    }
-//
-//    if (constVars.useContextNERRestriction) {
-//      String nerTag = tokenj
-//          .get(CoreAnnotations.NamedEntityTagAnnotation.class);
-//      if (nerTag != null
-//          && !nerTag.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL)) {
-//        isLabeledO = false;
-//        if (strgeneric.isEmpty()) {
-//          strgeneric = "{ner:" + nerTag + "}";
-//          strOriginal = nerTag;
-//        } else {
-//          strgeneric += " | " + "{ner:" + nerTag + "}";
-//          strOriginal += "|" + nerTag;
-//        }
-//      }
-//    }
-//
-//    return new Triple<Boolean, String, String>(isLabeledO, strgeneric,
-//        strOriginal);
-//  }
-
-
-
-//  public Map<String, Map<Integer, Set<Integer>>> getPatternsForEachToken(){
-//    return patternsForEachToken;
-//  }
 
   /**
    * creates all patterns and saves them in the correct PatternsForEachToken* class appropriately
@@ -119,7 +54,7 @@ public class CreatePatterns<E> {
         .newFixedThreadPool(constVars.numThreads);
 
     Redwood.log(ConstantsAndVariables.extremedebug, "Computing all patterns. keyset size is " + keyset.size() + ". Assigning " + num + " values to each thread");
-    List<Future<Map<String, Map<Integer, Set<Integer>>>>> list = new ArrayList<Future<Map<String, Map<Integer, Set<Integer>>>>>();
+    List<Future<Boolean>> list = new ArrayList<Future<Boolean>>();
     for (int i = 0; i < constVars.numThreads; i++) {
 
       int from = i * num;
@@ -132,18 +67,17 @@ public class CreatePatterns<E> {
 //      Redwood.log(ConstantsAndVariables.extremedebug, "assigning from " + i * num
 //          + " till " + Math.min(keyset.size(), (i + 1) * num));
 
-      Callable<Map<String, Map<Integer, Set<Integer>>>> task = null;
       List<String> ids = keyset.subList(from ,to);
-      task = new CreatePatternsThread(sents, ids, props, storePatsForEachTokenWay);
+      Callable<Boolean> task = new CreatePatternsThread(sents, ids, props, storePatsForEachTokenWay);
 
-      Future<Map<String, Map<Integer, Set<Integer>>>> submit = executor
+      Future<Boolean> submit = executor
           .submit(task);
       list.add(submit);
     }
 
     // Now retrieve the result
 
-    for (Future<Map<String, Map<Integer, Set<Integer>>>> future : list) {
+    for (Future<Boolean> future : list) {
       try{
         future.get();
         //patternsForEachToken.putAll(future.get());
@@ -161,17 +95,17 @@ public class CreatePatterns<E> {
     //return patternsForEachToken;
   }
 
-  /**
-   * Returns null if using DB backed!!
-   * @return
-   */
-  public Map<String, Map<Integer, Set<Integer>>> getPatternsForEachToken() {
-    return patternsForEachToken;
-  }
+//  /**
+//   * Returns null if using DB backed!!
+//   * @return
+//   */
+//  public Map<String, Map<Integer, Set<Integer>>> getPatternsForEachToken() {
+//    return patternsForEachToken;
+//  }
 
   public class CreatePatternsThread
       implements
-      Callable<Map<String, Map<Integer, Set<Integer>>>> {
+      Callable<Boolean> {
 
     //String label;
     // Class otherClass;
@@ -189,35 +123,17 @@ public class CreatePatterns<E> {
     }
 
     @Override
-    public Map<String, Map<Integer, Set<Integer>>> call() throws Exception {
+    public Boolean call() throws Exception {
       Map<String, Map<Integer, Set<E>>> tempPatternsForTokens = new HashMap<String, Map<Integer, Set<E>>>();
       int numSentencesInOneCommit = 0;
 
       for (String id : sentIds) {
         DataInstance sent = sents.get(id);
-        List<CoreLabel> tokens = sent.getTokens();
+
         if(!constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY))
           tempPatternsForTokens.put(id, new HashMap<Integer, Set<E>>());
 
-        Map<Integer, Set<E>> p = new HashMap<Integer, Set<E>>();
-        for (int i = 0; i < tokens.size(); i++) {
-//          p.put(
-//              i,
-//              new Triple<Set<Integer>, Set<Integer>, Set<Integer>>(
-//                  new HashSet<Integer>(), new HashSet<Integer>(),
-//                  new HashSet<Integer>()));
-          p.put(i, new HashSet<E>());
-          CoreLabel token = tokens.get(i);
-          // do not create patterns around stop words!
-          if (PatternFactory.doNotUse(token.word(), constVars.getStopWords())) {
-            continue;
-          }
-
-          Set<E> pat = Pattern.getContext(constVars.patternType, sent, i);
-          p.put(i, pat);
-
-        }
-
+        Map<Integer, Set<E>> p  = (Map) PatternFactory.getPatternsAroundTokens(constVars.patternType, sent, constVars.getStopWords());
         //to save number of commits to the database
         if(!constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY)){
           tempPatternsForTokens.put(id, p);
@@ -239,7 +155,7 @@ public class CreatePatterns<E> {
       if(!constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.MEMORY))
         patsForEach.addPatterns(tempPatternsForTokens);
 
-      return null;
+      return true;
     }
 
   }

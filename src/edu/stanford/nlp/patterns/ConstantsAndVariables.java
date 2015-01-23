@@ -16,6 +16,8 @@ import edu.stanford.nlp.ling.tokensregex.NodePattern;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.WordScoring;
+import edu.stanford.nlp.patterns.dep.DepPatternFactory;
+import edu.stanford.nlp.patterns.surface.SurfacePatternFactory;
 import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -656,6 +658,10 @@ public class ConstantsAndVariables<E> implements Serializable{
     }
 
     Execution.fillOptions(this, props);
+    Execution.fillOptions(PatternFactory.class, props);
+    Execution.fillOptions(SurfacePatternFactory.class, props);
+    Execution.fillOptions(DepPatternFactory.class, props);
+
     if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty())
       PatternFactory.ignoreWordRegex = Pattern.compile(wordIgnoreRegex);
 
