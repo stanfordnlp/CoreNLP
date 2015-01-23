@@ -900,7 +900,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     if(constVars.expandNegativesWhenSampling){
       //TODO: patwtbyfrew
       //Counters.retainTop(allCloseToPositivePhrases, (int) (allCloseToPositivePhrases.size()*constVars.subSampleUnkAsPosUsingSimPercentage));
-      Redwood.log("Expanding positives by adding " + allCloseToNegativePhrases + " phrases");
+      Redwood.log("Expanding negatives by adding " + allCloseToNegativePhrases + " phrases");
       allNegativePhrases.addAll(allCloseToNegativePhrases.keySet());
       if(logFile != null && wordVectors != null){
         for(CandidatePhrase p : allCloseToNegativePhrases.keySet()){
