@@ -329,15 +329,13 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       }else{
         sims.setCount(p, Double.MIN_VALUE);
       }
-
-
-
-
+      simsAvgMaxAllLabels.put(label, simsAvgMax);
     }
     return sims;
   }
 
-  private Pair<Counter<CandidatePhrase>, Counter<CandidatePhrase>> computeSimWithWordVectors(List<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> positivePhrases, Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases, String label) {
+  private Pair<Counter<CandidatePhrase>, Counter<CandidatePhrase>> computeSimWithWordVectors(List<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> positivePhrases,
+                                                                                             Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases, String label) {
     assert wordVectors != null : "Why are word vectors null?";
     Counter<CandidatePhrase> posSims = computeSimWithWordVectors(candidatePhrases, positivePhrases, true, label);
     Counter<CandidatePhrase> negSims = new ClassicCounter<CandidatePhrase>();
@@ -687,7 +685,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
                 Pair<Counter<CandidatePhrase>, Counter<CandidatePhrase>> sims;
                 assert candidate != null;
                 if(constVars.useWordVectorsToComputeSim)
-                  sims =computeSimWithWordVectors(Arrays.asList(candidate), knownPositivePhrases, allPossibleNegativePhrases, answerLabel);
+                  sims = computeSimWithWordVectors(Arrays.asList(candidate), knownPositivePhrases, allPossibleNegativePhrases, answerLabel);
                 else
                   sims = computeSimWithWordCluster(Arrays.asList(candidate), knownPositivePhrases, new AtomicDouble());
 
@@ -1168,6 +1166,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     if(constVars.usePhraseEvalWordVector){
       Map<String, double[]> sims = getSimilarities(word.getPhrase());
+      assert sims != null : " Why are there no similarities for " + word;
       double avgPosSim = sims.get(label)[Similarities.AVGSIM.ordinal()];
       double maxPosSim = sims.get(label)[Similarities.MAXSIM.ordinal()];
       double sumNeg = 0, maxNeg = Double.MIN_VALUE;
