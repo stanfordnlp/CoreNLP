@@ -167,7 +167,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return 1 / (1 + Math.exp(-1 * d));
   }
 
-  Map<CandidatePhrase, Counter<Integer>> wordClassClustersForPhrase = new HashMap<CandidatePhrase, Counter<Integer>>();
+  ConcurrentHashMap<CandidatePhrase, Counter<Integer>> wordClassClustersForPhrase = new ConcurrentHashMap<CandidatePhrase, Counter<Integer>>();
 
   Counter<Integer> wordClass(String phrase, String phraseLemma){
     Counter<Integer> cl = new ClassicCounter<Integer>();
@@ -198,54 +198,74 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
   }
 
+  Counter<CandidatePhrase> computeSim(Collection<CandidatePhrase> candidatePhrases, Collection<CandidatePhrase> positivePhrases, AtomicDouble allMaxSim){
+    Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>(candidatePhrases.size());
+
+    for(CandidatePhrase p : candidatePhrases) {
+      Counter<Integer> feat = wordClassClustersForPhrase.get(p);
+      if(feat == null){
+        feat = wordClass(p.getPhrase(), p.getPhraseLemma());
+        wordClassClustersForPhrase.put(p, feat);
+      }
+
+      double avgSim = 0;// Double.MIN_VALUE;
+      if(feat.size() > 0) {
+        for (CandidatePhrase pos : positivePhrases) {
+
+          if(p.equals(pos))
+            continue;
+
+          Counter<Integer> posfeat = wordClassClustersForPhrase.get(pos);
+
+          if(posfeat == null){
+            posfeat = wordClass(pos.getPhrase(), pos.getPhraseLemma());
+            wordClassClustersForPhrase.put(pos, feat);
+          }
+
+          if(posfeat.size() > 0){
+            Double j = Counters.jaccardCoefficient(posfeat, feat);
+            //System.out.println("clusters for positive phrase " + pos + " is " +wordClassClustersForPhrase.get(pos) + " and the features for unknown are "  + feat + " for phrase " + p);
+            if(!j.isInfinite() && !j.isNaN()){
+              avgSim += j;
+            }
+            //if (j > maxSim)
+            //  maxSim = j;
+          }
+        }
+        avgSim /= positivePhrases.size();
+      }
+
+      sims.setCount(p, avgSim);
+      if(allMaxSim.get() < avgSim)
+        allMaxSim.set(avgSim);
+    }
+    return sims;
+  }
+
   class ComputeSim implements Callable<Counter<CandidatePhrase>>{
 
     List<CandidatePhrase> candidatePhrases;
     String label;
     AtomicDouble allMaxSim;
+    Collection<CandidatePhrase> positivePhrases;
 
-    public ComputeSim(String label, List<CandidatePhrase> candidatePhrases, AtomicDouble allMaxSim){
+    public ComputeSim(String label, List<CandidatePhrase> candidatePhrases, AtomicDouble allMaxSim, Collection<CandidatePhrase> positivePhrases){
       this.label = label;
       this.candidatePhrases = candidatePhrases;
       this.allMaxSim = allMaxSim;
+      this.positivePhrases = positivePhrases;
     }
 
     @Override
     public Counter<CandidatePhrase> call() throws Exception {
-      Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>(candidatePhrases.size());
-
-      for(CandidatePhrase p : candidatePhrases) {
-        Counter<Integer> feat = wordClassClustersForPhrase.get(p);
-        if(feat == null){
-          feat = wordClass(p.getPhrase(), p.getPhraseLemma());
-          wordClassClustersForPhrase.put(p, feat);
-        }
-
-        double maxSim = Double.MIN_VALUE;
-        if(feat.size() > 0) {
-          for (CandidatePhrase pos : CollectionUtils.union(constVars.getLearnedWords(label).keySet(), constVars.getSeedLabelDictionary().get(label))) {
-            Counter<Integer> posfeat = wordClassClustersForPhrase.get(pos);
-            if(posfeat.size() > 0){
-              double j = Counters.jaccardCoefficient(posfeat, feat);
-              //System.out.println("clusters for positive phrase " + pos + " is " +wordClassClustersForPhrase.get(pos) + " and the features for unknown are "  + feat + " for phrase " + p);
-              if (j > maxSim)
-                maxSim = j;
-            }
-          }
-        }
-
-        sims.setCount(p, maxSim);
-        if(allMaxSim.get() < maxSim)
-          allMaxSim.set(maxSim);
-      }
-      return sims;
+      return computeSim(candidatePhrases, positivePhrases, allMaxSim);
     }
   }
 
   //this chooses the ones that are not close to the positive phrases!
-  Set<CandidatePhrase> chooseUnknownAsNegatives(List<CandidatePhrase> candidatePhrases, String label, double percentage){
+  Set<CandidatePhrase> chooseUnknownAsNegatives(Set<CandidatePhrase> candidatePhrases, String label, double percentage, Collection<CandidatePhrase> positivePhrases){
 
-    List<List<CandidatePhrase>> threadedCandidates = GetPatternsFromDataMultiClass.getThreadBatches(candidatePhrases, constVars.numThreads);
+    List<List<CandidatePhrase>> threadedCandidates = GetPatternsFromDataMultiClass.getThreadBatches(CollectionUtils.toList(candidatePhrases), constVars.numThreads);
 
     Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>();
 
@@ -256,7 +276,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     //multi-threaded choose positive, negative and unknown
     for (List<CandidatePhrase> keys : threadedCandidates) {
-      Callable<Counter<CandidatePhrase>> task = new ComputeSim(label, keys, allMaxSim);
+      Callable<Counter<CandidatePhrase>> task = new ComputeSim(label, keys, allMaxSim, positivePhrases);
       Future<Counter<CandidatePhrase>> submit = executor.submit(task);
       list.add(submit);
     }
@@ -292,7 +312,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       return unknownSamples;
 
     Function<CoreLabel, Boolean> acceptWord = coreLabel -> {
-      if(coreLabel.get(positiveClass).equals(label))
+      if(coreLabel.get(positiveClass).equals(label) || constVars.getStopWords().contains(CandidatePhrase.createOrGet(coreLabel.word())))
         return false;
       else
         return true;
@@ -360,7 +380,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
   }
 
-  public class chooseDatumsThread implements Callable {
+  public class ChooseDatumsThread implements Callable {
 
     Collection<String> keys;
     Map<String, DataInstance> sents;
@@ -369,26 +389,30 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     boolean forLearningPattern;
     TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted;
     Counter<E> allSelectedPatterns;
+    Counter<Integer> wordClassClustersOfPositive;
 
-    public chooseDatumsThread(String label, Map<String, DataInstance> sents, Collection<String> keys, boolean forLearningPattern, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted, Counter<E> allSelectedPatterns){
+    public ChooseDatumsThread(String label, Map<String, DataInstance> sents, Collection<String> keys, boolean forLearningPattern, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted, Counter<E> allSelectedPatterns, Counter<Integer> wordClassClustersOfPositive){
       this.answerLabel = label;
       this.sents = sents;
       this.keys = keys;
       this.forLearningPattern = forLearningPattern;
       this.wordsPatExtracted = wordsPatExtracted;
       this.allSelectedPatterns = allSelectedPatterns;
-
+      this.wordClassClustersOfPositive = wordClassClustersOfPositive;
       answerClass = constVars.getAnswerClass().get(answerLabel);
     }
 
     @Override
-    public Triple<List<RVFDatum<String, ScorePhraseMeasures>>, List<CandidatePhrase>, List<CandidatePhrase>> call() throws Exception {
+    public Quadruple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>> call() throws Exception {
 
       Random r = new Random(10);
       Random rneg = new Random(10);
-      List<RVFDatum<String, ScorePhraseMeasures>> datums = new ArrayList<RVFDatum<String, ScorePhraseMeasures>>();
-      List<CandidatePhrase> allNegativePhrases = new ArrayList<CandidatePhrase>();
-      List<CandidatePhrase> allUnknownPhrases = new ArrayList<CandidatePhrase>();
+      Set<CandidatePhrase> allPositivePhrases = new HashSet<CandidatePhrase>();
+      Set<CandidatePhrase> allNegativePhrases = new HashSet<CandidatePhrase>();
+      Set<CandidatePhrase> allUnknownPhrases = new HashSet<CandidatePhrase>();
+      Counter<CandidatePhrase> allCloseToPositivePhrases = new ClassicCounter<CandidatePhrase>();
+
+      Set<CandidatePhrase> knownPositivePhrases = CollectionUtils.unionAsSet(constVars.getLearnedWords().get(answerLabel).keySet(), constVars.getSeedLabelDictionary().get(answerLabel));
 
       Map<Class, Object> otherIgnoreClasses = constVars.getIgnoreWordswithClassesDuringSelection().get(answerLabel);
       for (String sentid : keys) {
@@ -412,49 +436,58 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
               candidate = CandidatePhrase.createOrGet(l.word());
             }
 
-
-            Counter<ScorePhraseMeasures> feat = null;
-            //CandidatePhrase candidate = new CandidatePhrase(l.word());
-            if (forLearningPattern) {
-              feat = getPhraseFeaturesForPattern(answerLabel, candidate);
-            } else {
-              feat = getFeatures(answerLabel, candidate, wordsPatExtracted.getCounter(candidate), allSelectedPatterns);
-            }
-            RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, "true");
-            datums.add(datum);
+            allPositivePhrases.add(candidate);
 
           } else {
+
             boolean ignoreclass = false;
             for (Class cl : otherIgnoreClasses.keySet()) {
               if ((Boolean) l.get(cl)) {
                 ignoreclass = true;
               }
             }
+
+            if(!ignoreclass){
+              ignoreclass = constVars.getStopWords().contains(CandidatePhrase.createOrGet(l.word())) ;
+            }
+
             CandidatePhrase candidate = null;
 
             boolean negative = false;
             boolean add= false;
             Map<String, CandidatePhrase> longestMatching = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
-
-            for (Map.Entry<String, CandidatePhrase> lo : longestMatching.entrySet()) {
-              //assert !lo.getValue().getPhrase().isEmpty() : "How is the longestmatching phrase for " + l.word() + " empty ";
-              if (!lo.getKey().equals(answerLabel) && lo.getValue() != null) {
-                negative = true;
-                add = true;
-                //If the phrase does not exist in its form in the datset (happens when fuzzy matching etc).
-                if(!Data.rawFreq.containsKey(lo.getValue())){
-                  candidate = CandidatePhrase.createOrGet(l.word());
-                } else
-                  candidate = lo.getValue();
+            if(!ignoreclass){
+              for (Map.Entry<String, CandidatePhrase> lo : longestMatching.entrySet()) {
+                //assert !lo.getValue().getPhrase().isEmpty() : "How is the longestmatching phrase for " + l.word() + " empty ";
+                if (!lo.getKey().equals(answerLabel) && lo.getValue() != null) {
+                  negative = true;
+                  add = true;
+                  //If the phrase does not exist in its form in the datset (happens when fuzzy matching etc).
+                  if(!Data.rawFreq.containsKey(lo.getValue())){
+                    candidate = CandidatePhrase.createOrGet(l.word());
+                  } else
+                    candidate = lo.getValue();
+                }
               }
             }
+
             if (!negative && ignoreclass) {
               candidate = longestMatching.get("OTHERSEM");
               add = true;
             }
+
             if(add && rneg.nextDouble() < constVars.perSelectNeg){
               assert !candidate.getPhrase().isEmpty();
               allNegativePhrases.add(candidate);
+            }
+
+            if(!negative && !ignoreclass && constVars.expandPositivesWhenSampling) {
+              if (!allCloseToPositivePhrases.containsKey(candidate)) {
+                Counter<CandidatePhrase> sims = computeSim(Arrays.asList(candidate), knownPositivePhrases, new AtomicDouble());
+                double sim = sims.getCount(candidate);
+                if (sim > constVars.expandPositivesWhenSamplingThreshold)
+                  allCloseToPositivePhrases.setCount(candidate, sim);
+              }
             }
           }
         }
@@ -473,7 +506,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 //
 //          chosen.add(new Pair<String, Integer>(en.getKey(), i));
       }
-    return new Triple(datums, allNegativePhrases, allUnknownPhrases);
+    return new Quadruple(allPositivePhrases, allNegativePhrases, allUnknownPhrases, allCloseToPositivePhrases);
     }
   }
 
@@ -482,11 +515,27 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
       Counter<E> allSelectedPatterns, boolean computeRawFreq) {
 
+    Counter<Integer> distSimClustersOfPositive = new ClassicCounter<Integer>();
+    if(constVars.expandPositivesWhenSampling){
+      for(CandidatePhrase s: CollectionUtils.union(constVars.getLearnedWords(answerLabel).keySet(), constVars.getSeedLabelDictionary().get(answerLabel))){
+        String[] toks = s.getPhrase().split("\\s+");
+        if(!constVars.getWordClassClusters().containsKey(s.getPhrase())){
+          for(String tok: toks){
+            if(constVars.getWordClassClusters().containsKey(tok)){
+              distSimClustersOfPositive.incrementCount(constVars.getWordClassClusters().get(tok));
+            }
+          }
+        } else
+        distSimClustersOfPositive.incrementCount(constVars.getWordClassClusters().get(s.getPhrase()));
+      }
+    }
 
     RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
     int numpos = 0;
-    List<CandidatePhrase> allNegativePhrases = new ArrayList<CandidatePhrase>();
-    List<CandidatePhrase> allUnknownPhrases = new ArrayList<CandidatePhrase>();
+    Set<CandidatePhrase> allNegativePhrases = new HashSet<CandidatePhrase>();
+    Set<CandidatePhrase> allUnknownPhrases = new HashSet<CandidatePhrase>();
+    Set<CandidatePhrase> allPositivePhrases = new HashSet<CandidatePhrase>();
+    Counter<CandidatePhrase> allCloseToPositivePhrases = new ClassicCounter<CandidatePhrase>();
 
     //for all sentences brtch
     ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
@@ -499,24 +548,23 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
       List<List<String>> threadedSentIds = GetPatternsFromDataMultiClass.getThreadBatches(new ArrayList<String>(sents.keySet()), constVars.numThreads);
       ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
-      List<Future<Triple<List<RVFDatum<String, ScorePhraseMeasures>>, List<CandidatePhrase>, List<CandidatePhrase>>>> list = new ArrayList<Future<Triple<List<RVFDatum<String, ScorePhraseMeasures>>, List<CandidatePhrase>, List<CandidatePhrase>>>>();
+      List<Future<Quadruple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>>>> list = new ArrayList<Future<Quadruple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>>>>();
 
       //multi-threaded choose positive, negative and unknown
       for (List<String> keys : threadedSentIds) {
-        Callable<Triple<List<RVFDatum<String, ScorePhraseMeasures>>, List<CandidatePhrase>, List<CandidatePhrase>>> task = new chooseDatumsThread(answerLabel, sents, keys, forLearningPattern, wordsPatExtracted, allSelectedPatterns);
-        Future<Triple<List<RVFDatum<String, ScorePhraseMeasures>>, List<CandidatePhrase>, List<CandidatePhrase>>> submit = executor.submit(task);
+        Callable<Quadruple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>>> task = new ChooseDatumsThread(answerLabel, sents, keys, forLearningPattern, wordsPatExtracted, allSelectedPatterns, distSimClustersOfPositive);
+        Future<Quadruple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>>> submit = executor.submit(task);
         list.add(submit);
       }
 
       // Now retrieve the result
-      for (Future<Triple<List<RVFDatum<String, ScorePhraseMeasures>>, List<CandidatePhrase>, List<CandidatePhrase>>> future : list) {
+      for (Future<Quadruple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>>> future : list) {
         try {
-          Triple<List<RVFDatum<String, ScorePhraseMeasures>>, List<CandidatePhrase>, List<CandidatePhrase>> result = future.get();
-          List<RVFDatum<String, ScorePhraseMeasures>> posdatums = result.first();
-          dataset.addAll(posdatums);
-          numpos += posdatums.size();
+          Quadruple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>> result = future.get();
+          allPositivePhrases.addAll(result.first());
           allNegativePhrases.addAll(result.second());
           allUnknownPhrases.addAll(result.third());
+          allCloseToPositivePhrases.addAll(result.fourth());
         } catch (Exception e) {
           executor.shutdownNow();
           throw new RuntimeException(e);
@@ -525,11 +573,34 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       executor.shutdown();
     }
 
+    Set<CandidatePhrase> knownPositivePhrases = CollectionUtils.unionAsSet(constVars.getLearnedWords().get(answerLabel).keySet(), constVars.getSeedLabelDictionary().get(answerLabel));
+    //TODO: this is kinda not nice; how is allpositivephrases different from positivephrases again?
+    allPositivePhrases.addAll(knownPositivePhrases);
+
+    if(constVars.expandPositivesWhenSampling){
+      Counters.retainTop(allCloseToPositivePhrases, (int) (allCloseToPositivePhrases.size()*constVars.subSampleUnkAsPosUsingSimPercentage));
+      Redwood.log("Expanding positives by adding " + allCloseToPositivePhrases + " phrases");
+      allPositivePhrases.addAll(allCloseToPositivePhrases.keySet());
+    }
+
+    for(CandidatePhrase candidate: allPositivePhrases) {
+      Counter<ScorePhraseMeasures> feat = null;
+      //CandidatePhrase candidate = new CandidatePhrase(l.word());
+      if (forLearningPattern) {
+        feat = getPhraseFeaturesForPattern(answerLabel, candidate);
+      } else {
+        feat = getFeatures(answerLabel, candidate, wordsPatExtracted.getCounter(candidate), allSelectedPatterns);
+      }
+      RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, "true");
+      dataset.add(datum);
+      numpos += 1;
+    }
+
     Redwood.log(Redwood.DBG, "Number of pure negative phrases is " + allNegativePhrases.size());
     Redwood.log(Redwood.DBG, "Number of unknown phrases is " + allUnknownPhrases.size());
 
     if(constVars.subsampleUnkAsNegUsingSim){
-      Set<CandidatePhrase> chosenUnknown = chooseUnknownAsNegatives(allUnknownPhrases, answerLabel, constVars.subSampleUnkAsNegUsingSimPercentage);
+      Set<CandidatePhrase> chosenUnknown = chooseUnknownAsNegatives(allUnknownPhrases, answerLabel, constVars.subSampleUnkAsNegUsingSimPercentage, allPositivePhrases);
       Redwood.log(Redwood.DBG, "Choosing " + chosenUnknown.size() + " unknowns as negative based to their similarity to the positive phrases");
       allNegativePhrases.addAll(chosenUnknown);
     }
@@ -541,7 +612,16 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       Redwood.log(Redwood.WARN, "Num of negative (" + allNegativePhrases.size() + ") is higher than number of positive phrases (" + numpos + ") = " +
         (allNegativePhrases.size() / (double)numpos) + ". " +
         "Capping the number by taking the first numPositives as negative. Consider decreasing perSelectNeg and perSelectRand");
-      allNegativePhrases = allNegativePhrases.subList(0, numpos);
+      int i = 0;
+      Set<CandidatePhrase> selectedNegPhrases = new HashSet<CandidatePhrase>();
+      for(CandidatePhrase p : allNegativePhrases){
+        if (i >= numpos)
+          break;
+        selectedNegPhrases.add(p);
+      }
+      allNegativePhrases.clear();
+      allNegativePhrases = selectedNegPhrases;
+
     }
 
     for(CandidatePhrase negative: allNegativePhrases){

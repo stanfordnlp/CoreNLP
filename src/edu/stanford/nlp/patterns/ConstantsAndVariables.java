@@ -432,6 +432,14 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="subSampleUnkAsNegUsingSimPercentage", gloss="When using subsampleUnkAsNegUsingSim, select bottom %")
   public double subSampleUnkAsNegUsingSimPercentage = 0.95;
 
+  @Option(name="expandPositivesWhenSampling", gloss="when sampling for learning feature wts for learning phrases, expand the positives")
+  public boolean expandPositivesWhenSampling = false;
+
+  public double expandPositivesWhenSamplingThreshold  = 0.5;
+
+  @Option(name="subSampleUnkAsPosUsingSimPercentage", gloss="When using expandPositivesWhenSampling, select top % after applying the threshold")
+  public double subSampleUnkAsPosUsingSimPercentage = 0.05;
+
 
   public Set<String> getLabels() {
     return labels;
