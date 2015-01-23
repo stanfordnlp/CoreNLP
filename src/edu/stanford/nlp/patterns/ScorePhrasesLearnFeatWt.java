@@ -537,6 +537,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
       Set<CandidatePhrase> knownPositivePhrases = CollectionUtils.unionAsSet(constVars.getLearnedWords().get(answerLabel).keySet(), constVars.getSeedLabelDictionary().get(answerLabel));
 
+      Set<CandidatePhrase> allConsideredPhrases = new HashSet<CandidatePhrase>();
+
       Map<Class, Object> otherIgnoreClasses = constVars.getIgnoreWordswithClassesDuringSelection().get(answerLabel);
       for (String sentid : keys) {
         DataInstance sentInst = sents.get(sentid);
@@ -609,8 +611,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
               allNegativePhrases.add(candidate);
             }
 
-            if(!negative && !ignoreclass && constVars.expandPositivesWhenSampling & !allPossibleNegativePhrases.contains(candidate) && !PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches()) {
-              if (!allCloseToPositivePhrases.containsKey(candidate)) {
+            if(!negative && !ignoreclass && constVars.expandPositivesWhenSampling && !allPossibleNegativePhrases.contains(candidate) && !PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches()) {
+              if (!allConsideredPhrases.contains(candidate)) {
                 Counter<CandidatePhrase> sims;
                 assert candidate != null;
                 if(constVars.useWordVectorsToComputeSim)
@@ -621,6 +623,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
                 double sim = sims.getCount(candidate);
                 if (sim > constVars.positiveSimilarityThresholdHighPrecision)
                   allCloseToPositivePhrases.setCount(candidate, sim);
+
+                allConsideredPhrases.add(candidate);
               }
             }
           }
@@ -773,15 +777,31 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     allPositivePhrases.addAll(constVars.getLearnedWords().get(answerLabel).keySet());
     //allPositivePhrases.addAll(knownPositivePhrases);
 
+    BufferedWriter logFile = null;
+
+    if(constVars.logFileVectorSimilarity != null){
+      logFile = new BufferedWriter(new FileWriter(constVars.logFileVectorSimilarity));
+      for(CandidatePhrase p : allPositivePhrases){
+        if(wordVectors.containsKey(p.getPhrase())){
+          logFile.write(p.getPhrase()+"-P " + ArrayUtils.toString(wordVectors.get(p.getPhrase()), " ")+"\n");
+        }
+      }
+    }
+
     if(constVars.expandPositivesWhenSampling){
       //Counters.retainTop(allCloseToPositivePhrases, (int) (allCloseToPositivePhrases.size()*constVars.subSampleUnkAsPosUsingSimPercentage));
       Redwood.log("Expanding positives by adding " + allCloseToPositivePhrases + " phrases");
       allPositivePhrases.addAll(allCloseToPositivePhrases.keySet());
+      if(logFile != null){
+        for(CandidatePhrase p : allCloseToPositivePhrases.keySet()){
+          if(wordVectors.containsKey(p.getPhrase())){
+            logFile.write(p.getPhrase()+"-PP " + ArrayUtils.toString(wordVectors.get(p.getPhrase()), " ")+"\n");
+          }
+        }
+      }
     }
 
-    BufferedWriter logFile = null;
-    if(constVars.logFileVectorSimilarity != null)
-      logFile = new BufferedWriter(new FileWriter(constVars.logFileVectorSimilarity));
+
 
     System.out.println("all positive phrases are  " + allPositivePhrases);
     for(CandidatePhrase candidate: allPositivePhrases) {
@@ -795,9 +815,6 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, "true");
       dataset.add(datum);
       numpos += 1;
-      if(logFile!=null && wordVectors.containsKey(candidate.getPhrase())){
-        logFile.write(candidate.getPhrase()+"-P"+" " + ArrayUtils.toString(wordVectors.get(candidate.getPhrase()), " ")+"\n");
-      }
     }
 
     Redwood.log(Redwood.DBG, "Number of pure negative phrases is " + allNegativePhrases.size());
