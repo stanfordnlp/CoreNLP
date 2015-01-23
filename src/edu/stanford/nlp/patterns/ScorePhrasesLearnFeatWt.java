@@ -847,7 +847,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases = getAllPossibleNegativePhrases(answerLabel);
-    
+
     RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
     int numpos = 0;
     Set<CandidatePhrase> allNegativePhrases = new HashSet<CandidatePhrase>();
