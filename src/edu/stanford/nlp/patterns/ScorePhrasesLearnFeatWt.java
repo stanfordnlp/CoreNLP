@@ -559,8 +559,10 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
   }
 
-  static<E,F> boolean hasElement(Map<E, Collection<F>> values, F value){
+  static<E,F> boolean hasElement(Map<E, Collection<F>> values, F value, E ignoreLabel){
       for(Map.Entry<E, Collection<F>> en: values.entrySet()){
+        if(en.getKey().equals(ignoreLabel))
+          continue;
         if(en.getValue().contains(value))
           return true;
       }
@@ -577,10 +579,10 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted;
     Counter<E> allSelectedPatterns;
     Counter<Integer> wordClassClustersOfPositive;
-    Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases;
+    Map<String, Collection<CandidatePhrase>> allPossiblePhrases;
 
     public ChooseDatumsThread(String label, Map<String, DataInstance> sents, Collection<String> keys, boolean forLearningPattern, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted, Counter<E> allSelectedPatterns,
-                              Counter<Integer> wordClassClustersOfPositive, Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases){
+                              Counter<Integer> wordClassClustersOfPositive, Map<String, Collection<CandidatePhrase>> allPossiblePhrases){
       this.answerLabel = label;
       this.sents = sents;
       this.keys = keys;
@@ -588,7 +590,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       this.wordsPatExtracted = wordsPatExtracted;
       this.allSelectedPatterns = allSelectedPatterns;
       this.wordClassClustersOfPositive = wordClassClustersOfPositive;
-      this.allPossibleNegativePhrases = allPossibleNegativePhrases;
+      this.allPossiblePhrases = allPossiblePhrases;
       answerClass = constVars.getAnswerClass().get(answerLabel);
     }
 
@@ -631,7 +633,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             }
 
             //Do not add to positive if the word is a "negative" (stop word, english word, ...)
-            if(hasElement(allPossibleNegativePhrases, candidate) || PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches())
+            if(hasElement(allPossiblePhrases, candidate, answerLabel) || PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches())
               continue;
 
             allPositivePhrases.add(candidate);
@@ -680,12 +682,12 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
               allNegativePhrases.add(candidate);
             }
 
-            if(!negative && !ignoreclass && (constVars.expandPositivesWhenSampling || constVars.expandNegativesWhenSampling) && !hasElement(allPossibleNegativePhrases, candidate) && !PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches()) {
+            if(!negative && !ignoreclass && (constVars.expandPositivesWhenSampling || constVars.expandNegativesWhenSampling) && !hasElement(allPossiblePhrases, candidate, answerLabel) && !PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches()) {
               if (!allConsideredPhrases.contains(candidate)) {
                 Pair<Counter<CandidatePhrase>, Counter<CandidatePhrase>> sims;
                 assert candidate != null;
                 if(constVars.useWordVectorsToComputeSim)
-                  sims = computeSimWithWordVectors(Arrays.asList(candidate), knownPositivePhrases, allPossibleNegativePhrases, answerLabel);
+                  sims = computeSimWithWordVectors(Arrays.asList(candidate), knownPositivePhrases, allPossiblePhrases, answerLabel);
                 else
                   sims = computeSimWithWordCluster(Arrays.asList(candidate), knownPositivePhrases, new AtomicDouble());
 
@@ -776,6 +778,27 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   //First map is phrase, second map is label to similarity stats
   static Map<String, Map<String, double[]>> similaritiesWithLabeledPhrases = new ConcurrentHashMap<String, Map<String, double[]>>();
 
+  Map<String, Collection<CandidatePhrase>> getAllPossibleNegativePhrases(String answerLabel){
+
+    //make all possible negative phrases
+    Map<String, Collection<CandidatePhrase>> allPossiblePhrases = new HashMap<String, Collection<CandidatePhrase>>();
+    Collection<CandidatePhrase> negPhrases = new HashSet<CandidatePhrase>();
+    negPhrases.addAll(constVars.getOtherSemanticClassesWords());
+    negPhrases.addAll(constVars.getStopWords());
+    negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.functionWords));
+    negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.getEnglishWords()));
+    allPossiblePhrases.put("NEGATIVE", negPhrases);
+    for(Entry<String, Counter<CandidatePhrase>> en: constVars.getLearnedWords().entrySet()) {
+      if (!en.getKey().equals(answerLabel)){
+        allPossiblePhrases.put(en.getKey(), new HashSet<CandidatePhrase>());
+        //negPhrases.addAll(en.getValue().keySet());
+        allPossiblePhrases.get(en.getKey()).addAll(en.getValue().keySet());
+        allPossiblePhrases.get(en.getKey()).addAll(constVars.getSeedLabelDictionary().get(en.getKey()));
+      }
+    }
+    allPossiblePhrases.put("OTHERSEM", constVars.getOtherSemanticClassesWords());
+    return allPossiblePhrases;
+  }
   public RVFDataset<String, ScorePhraseMeasures> choosedatums(boolean forLearningPattern, String answerLabel,
       TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
       Counter<E> allSelectedPatterns, boolean computeRawFreq) throws IOException {
@@ -795,20 +818,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       }
     }
 
-    //make all possible negative phrases
-    Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases = new HashMap<String, Collection<CandidatePhrase>>();
-    Collection<CandidatePhrase> negPhrases = new HashSet<CandidatePhrase>();
-    negPhrases.addAll(constVars.getOtherSemanticClassesWords());
-    negPhrases.addAll(constVars.getStopWords());
-    negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.functionWords));
-    negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.getEnglishWords()));
-    for(Entry<String, Counter<CandidatePhrase>> en: constVars.getLearnedWords().entrySet()) {
-      if (!en.getKey().equals(answerLabel)){
-        negPhrases.addAll(en.getValue().keySet());
-        negPhrases.addAll(constVars.getSeedLabelDictionary().get(en.getKey()));
-      }
-    }
-    allPossibleNegativePhrases.put("NEGATIVE", negPhrases);
+    Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases = getAllPossibleNegativePhrases(answerLabel);
 
 
     RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
@@ -1166,7 +1176,15 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     if(constVars.usePhraseEvalWordVector){
       Map<String, double[]> sims = getSimilarities(word.getPhrase());
+      if(sims == null){
+        //TODO: make more efficient
+        Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases = getAllPossibleNegativePhrases(label);
+        Set<CandidatePhrase> knownPositivePhrases = CollectionUtils.unionAsSet(constVars.getLearnedWords().get(label).keySet(), constVars.getSeedLabelDictionary().get(label));
+        computeSimWithWordVectors(Arrays.asList(word), knownPositivePhrases, allPossibleNegativePhrases, label);
+        sims = getSimilarities(word.getPhrase());
+      }
       assert sims != null : " Why are there no similarities for " + word;
+
       double avgPosSim = sims.get(label)[Similarities.AVGSIM.ordinal()];
       double maxPosSim = sims.get(label)[Similarities.MAXSIM.ordinal()];
       double sumNeg = 0, maxNeg = Double.MIN_VALUE;
