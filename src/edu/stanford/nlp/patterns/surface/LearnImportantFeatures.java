@@ -34,7 +34,7 @@ import edu.stanford.nlp.util.StringUtils;
 public class LearnImportantFeatures {
 
   @Option(name = "answerClass")
-  public Class answerClass = CoreAnnotations.AnswerAnnotation.class;// edu.stanford.nlp.sentimentaspects.health.HealthAnnotations.DictAnnotationDTorSC.class;
+  public Class answerClass = CoreAnnotations.AnswerAnnotation.class;
 
   @Option(name = "answerLabel")
   public String answerLabel = "WORD";

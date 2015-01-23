@@ -559,8 +559,10 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     if (constVars.usePhraseEvalWordClass) {
-      double distSimWt = getDistSimWtScore(word.getPhrase(), label);
-      scoreslist.setCount(ScorePhraseMeasures.DISTSIM, distSimWt);
+//      double distSimWt = getDistSimWtScore(word.getPhrase(), label);
+//      scoreslist.setCount(ScorePhraseMeasures.DISTSIM, distSimWt);
+      Integer wordclass = constVars.getWordClassClusters().get(word.getPhrase());
+      scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.DISTSIM.toString()+"-"+wordclass), 1.0);
     }
 
     if (constVars.usePhraseEvalEditDistOther) {

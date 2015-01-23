@@ -589,7 +589,8 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     Redwood.log(Redwood.DBG, "Done loading/creating inverted index of tokens and labeling data with total of "
         + constVars.invertedIndex.size() + " sentences");
 
-    if (constVars.usePatternEvalWordClass || constVars.usePhraseEvalWordClass) {
+    //If the scorer class is LearnFeatWt then individual word class is added as a feature
+    if (scorePhrases.phraseScorerClass.equals(ScorePhrasesAverageFeatures.class) && (constVars.usePatternEvalWordClass || constVars.usePhraseEvalWordClass)) {
 
       if (constVars.externalFeatureWeightsDir == null) {
         File f = File.createTempFile("tempfeat", ".txt");
