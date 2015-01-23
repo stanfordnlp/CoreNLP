@@ -768,23 +768,21 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       }
     }
 
-    Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases = null;
-
-    if(constVars.expandPositivesWhenSampling || constVars.subsampleUnkAsNegUsingSim){
-      allPossibleNegativePhrases = new HashMap<String, Collection<CandidatePhrase>>();
-      Collection<CandidatePhrase> negPhrases = new HashSet<CandidatePhrase>();
-      negPhrases.addAll(constVars.getOtherSemanticClassesWords());
-      negPhrases.addAll(constVars.getStopWords());
-      negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.functionWords));
-      negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.getEnglishWords()));
-      for(Entry<String, Counter<CandidatePhrase>> en: constVars.getLearnedWords().entrySet()) {
-        if (!en.getKey().equals(answerLabel)){
-          negPhrases.addAll(en.getValue().keySet());
-          negPhrases.addAll(constVars.getSeedLabelDictionary().get(en.getKey()));
-        }
+    //make all possible negative phrases
+    Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases = new HashMap<String, Collection<CandidatePhrase>>();
+    Collection<CandidatePhrase> negPhrases = new HashSet<CandidatePhrase>();
+    negPhrases.addAll(constVars.getOtherSemanticClassesWords());
+    negPhrases.addAll(constVars.getStopWords());
+    negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.functionWords));
+    negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.getEnglishWords()));
+    for(Entry<String, Counter<CandidatePhrase>> en: constVars.getLearnedWords().entrySet()) {
+      if (!en.getKey().equals(answerLabel)){
+        negPhrases.addAll(en.getValue().keySet());
+        negPhrases.addAll(constVars.getSeedLabelDictionary().get(en.getKey()));
       }
-      allPossibleNegativePhrases.put("NEGATIVE", negPhrases);
     }
+    allPossibleNegativePhrases.put("NEGATIVE", negPhrases);
+
 
     RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
     int numpos = 0;
@@ -808,7 +806,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
       //multi-threaded choose positive, negative and unknown
       for (List<String> keys : threadedSentIds) {
-        Callable<Quadruple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>>> task = new ChooseDatumsThread(answerLabel, sents, keys, forLearningPattern, wordsPatExtracted, allSelectedPatterns, distSimClustersOfPositive, allPossibleNegativePhrases);
+        Callable<Quadruple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>>> task = new ChooseDatumsThread(answerLabel, sents, keys, forLearningPattern, wordsPatExtracted, allSelectedPatterns,
+          distSimClustersOfPositive, allPossibleNegativePhrases);
         Future<Quadruple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>>> submit = executor.submit(task);
         list.add(submit);
       }
