@@ -435,11 +435,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
         allNegativePhrases.addAll(allUnknownPhrases);
     }
 
-    if(allNegativePhrases.size() > 1.5* numpos) {
-      Redwood.log(Redwood.WARN, "Num of negative (" + allNegativePhrases.size() + ") is much higher than number of positive phrases (" + numpos + ") = " +
+    if(allNegativePhrases.size() > numpos) {
+      Redwood.log(Redwood.WARN, "Num of negative (" + allNegativePhrases.size() + ") is higher than number of positive phrases (" + numpos + ") = " +
         (allNegativePhrases.size() / (double)numpos) + ". " +
-        "Capping the number by taking the first 1.5*numPositives as negative. Consider decreasing perSelectNeg and perSelectRand");
-      allNegativePhrases = allNegativePhrases.subList(0,(int) 1.5*numpos);
+        "Capping the number by taking the first numPositives as negative. Consider decreasing perSelectNeg and perSelectRand");
+      allNegativePhrases = allNegativePhrases.subList(0, numpos);
     }
 
     for(CandidatePhrase negative: allNegativePhrases){
