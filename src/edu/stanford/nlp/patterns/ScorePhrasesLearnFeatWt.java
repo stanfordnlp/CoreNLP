@@ -300,9 +300,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           for(int j = Math.max(0, i - left); j < tokens.length && j <= i+right; j++){
             if(tokens[j].get(positiveClass).equals(label)){
               haspositive = true;
-              ph += " " + tokens[j].word();
               break;
             }
+            ph += " " + tokens[j].word();
           }
           if(!haspositive){
             unknownSamples.add(CandidatePhrase.createOrGet(ph.trim()));
@@ -394,6 +394,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             add = true;
           }
           if(add && rneg.nextDouble() < perSelectNeg){
+            assert !candidate.getPhrase().isEmpty();
             allNegativePhrases.add(candidate);
           }
         }
