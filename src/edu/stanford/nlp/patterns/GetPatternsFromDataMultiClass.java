@@ -1025,30 +1025,38 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     }
   };
 
+  public static<E> List<List<E>> getThreadBatches(List<E> keyset, int numThreads){
+    int num;
+    if (numThreads == 1)
+      num = keyset.size();
+    else
+      num = keyset.size() / (numThreads - 1);
+    Redwood.log(ConstantsAndVariables.extremedebug, "keyset size is " + keyset.size());
+    List<List<E>> threadedSentIds = new ArrayList<List<E>>();
+    List<Future<Map<String, DataInstance>>> list = new ArrayList<Future<Map<String, DataInstance>>>();
+    for (int i = 0; i < numThreads; i++) {
+      List<E> keys = keyset.subList(i * num, Math.min(keyset.size(), (i + 1) * num));
+      threadedSentIds.add(keys);
+      Redwood.log(ConstantsAndVariables.extremedebug, "assigning from " + i * num + " till " + Math.min(keyset.size(), (i + 1) * num));
+    }
+    return threadedSentIds;
+  }
+
   /** Warning: sets labels of words that are not in the given seed set as O!!!
    * */
   public static void runLabelSeedWords(Map<String, DataInstance> sents, Class answerclass, String label, Collection<CandidatePhrase> seedWords, ConstantsAndVariables constVars, boolean overwriteExistingLabels)
       throws InterruptedException, ExecutionException, IOException {
 
-    List<String> keyset = new ArrayList<String>(sents.keySet());
-
-    Redwood.log(Redwood.DBG, "Labeling " + keyset.size() + " sentences with " + seedWords.size() + " seeds for the label " + label);
-
-    int num;
-    if (constVars.numThreads == 1)
-      num = keyset.size();
-    else
-      num = keyset.size() / (constVars.numThreads - 1);
+    List<List<String>> threadedSentIds = getThreadBatches(new ArrayList<String>(sents.keySet()), constVars.numThreads);
     ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
-    Redwood.log(ConstantsAndVariables.extremedebug, "keyset size is " + keyset.size());
     List<Future<Map<String, DataInstance>>> list = new ArrayList<Future<Map<String, DataInstance>>>();
-    for (int i = 0; i < constVars.numThreads; i++) {
-      List<String> keys = keyset.subList(i * num, Math.min(keyset.size(), (i + 1) * num));
-      Redwood.log(ConstantsAndVariables.extremedebug, "assigning from " + i * num + " till " + Math.min(keyset.size(), (i + 1) * num));
 
+    int i =0;
+    for (List<String> keys: threadedSentIds) {
       Callable<Map<String, DataInstance>> task = new LabelWithSeedWords(seedWords, sents, keys, answerclass, label, constVars.minLen4FuzzyForPattern, constVars.backgroundSymbol, constVars.getEnglishWords(), stringTransformationFunction, constVars.writeMatchedTokensIdsForEachPhrase, overwriteExistingLabels, constVars.patternType);
       Future<Map<String, DataInstance>> submit = executor.submit(task);
       list.add(submit);
+      i++;
     }
 
     // Now retrieve the result
@@ -1695,7 +1703,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
   static AtomicInteger numCallsToCalStats = new AtomicInteger();
 
 
-  public static <E> List<List<E>> splitIntoNumThreads(List<E> c, int n, int numThreads) {
+  public static <E> List<List<E>> splitIntoNumThreadsWithSampling(List<E> c, int n, int numThreads) {
     if (n < 0)
       throw new IllegalArgumentException("n < 0: " + n);
     if (n > c.size())
@@ -1708,7 +1716,6 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     else
       num = n / (numThreads - 1);
 
-    //Collec tions.shuffle(c, new Random(numCallsToCalStats.getAndIncrement()));
     System.out.println("shuffled " + c.size() + " sentences and selecting " + num  + " sentences per thread");
     List<E> result = new ArrayList<E>(num);
     int totalitems = 0;
@@ -1754,8 +1761,8 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     patternsForEachToken.setupSearch();
     // calculating the sufficient statistics
     Class answerClass4Label = constVars.getAnswerClass().get(label);
-    int sampleSize = constVars.sampleSentencesForSufficientStats == 1.0?sents.size():(int) Math.round(constVars.sampleSentencesForSufficientStats*sents.size());
-    List<List<String>> sampledSentIds = splitIntoNumThreads(CollectionUtils.toList(sents.keySet()),sampleSize, constVars.numThreads);
+    int sampleSize = constVars.sampleSentencesForSufficientStats == 1.0 ? sents.size(): (int) Math.round(constVars.sampleSentencesForSufficientStats*sents.size());
+    List<List<String>> sampledSentIds = splitIntoNumThreadsWithSampling(CollectionUtils.toList(sents.keySet()), sampleSize, constVars.numThreads);
     Redwood.log(Redwood.DBG,"sampled " + sampleSize + " sentences (" + constVars.sampleSentencesForSufficientStats*100 + "%)");
 
     ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);

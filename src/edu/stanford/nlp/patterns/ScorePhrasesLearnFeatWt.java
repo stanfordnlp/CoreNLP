@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -25,11 +26,10 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
-import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.IntPair;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.Execution.Option;
+import edu.stanford.nlp.util.concurrent.AtomicDouble;
+import edu.stanford.nlp.util.concurrent.ConcurrentHashCounter;
 import edu.stanford.nlp.util.logging.Redwood;
 
 
@@ -60,25 +60,15 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     
     if(Data.domainNGramsFile != null)
       Data.loadDomainNGrams();
-    
-    RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
-    
+
     boolean computeRawFreq = false;
     if (Data.rawFreq == null) {
       Data.rawFreq = new ClassicCounter<CandidatePhrase>();
       computeRawFreq = true;
     }
 
-    ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
-    while(sentsIter.hasNext()) {
-      Pair<Map<String, DataInstance>, File> sentsf = sentsIter.next();
-      Redwood.log(Redwood.DBG,"Sampling sentences from " + sentsf.second());
-      if(computeRawFreq)
-        Data.computeRawFreqIfNull(sentsf.first(), PatternFactory.numWordsCompound);
-      dataset.addAll(choosedatums(label, forLearningPatterns, sentsf.first(), constVars.getAnswerClass().get(label), label,
-        constVars.getIgnoreWordswithClassesDuringSelection().get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
-        allSelectedPatterns));
-    }
+    RVFDataset<String, ScorePhraseMeasures> dataset = choosedatums(forLearningPatterns, label, wordsPatExtracted, allSelectedPatterns, computeRawFreq);
+
 
     /*
       if(constVars.batchProcessSents){
@@ -208,41 +198,84 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
   }
 
-  //this chooses the ones that are not close to the positive phrases!
-  Set<CandidatePhrase> chooseUnknownAsNegatives(Collection<CandidatePhrase> candidatePhrases, String label, double percentage){
+  class ComputeSim implements Callable<Counter<CandidatePhrase>>{
 
-    Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>();
-    double allMaxSim = Double.MIN_VALUE;
-    for(CandidatePhrase p : candidatePhrases) {
-      Counter<Integer> feat = wordClassClustersForPhrase.get(p);
-      if(feat == null){
-        feat = wordClass(p.getPhrase(), p.getPhraseLemma());
-        wordClassClustersForPhrase.put(p, feat);
-      }
+    List<CandidatePhrase> candidatePhrases;
+    String label;
+    AtomicDouble allMaxSim;
 
-      double maxSim = Double.MIN_VALUE;
-      if(feat.size() > 0) {
-        for (CandidatePhrase pos : CollectionUtils.union(constVars.getLearnedWords(label).keySet(), constVars.getSeedLabelDictionary().get(label))) {
-          Counter<Integer> posfeat = wordClassClustersForPhrase.get(pos);
-          if(posfeat.size() > 0){
-            double j = Counters.jaccardCoefficient(posfeat, feat);
-            //System.out.println("clusters for positive phrase " + pos + " is " +wordClassClustersForPhrase.get(pos) + " and the features for unknown are "  + feat + " for phrase " + p);
-            if (j > maxSim)
-              maxSim = j;
+    public ComputeSim(String label, List<CandidatePhrase> candidatePhrases, AtomicDouble allMaxSim){
+      this.label = label;
+      this.candidatePhrases = candidatePhrases;
+      this.allMaxSim = allMaxSim;
+    }
+
+    @Override
+    public Counter<CandidatePhrase> call() throws Exception {
+      Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>(candidatePhrases.size());
+
+      for(CandidatePhrase p : candidatePhrases) {
+        Counter<Integer> feat = wordClassClustersForPhrase.get(p);
+        if(feat == null){
+          feat = wordClass(p.getPhrase(), p.getPhraseLemma());
+          wordClassClustersForPhrase.put(p, feat);
+        }
+
+        double maxSim = Double.MIN_VALUE;
+        if(feat.size() > 0) {
+          for (CandidatePhrase pos : CollectionUtils.union(constVars.getLearnedWords(label).keySet(), constVars.getSeedLabelDictionary().get(label))) {
+            Counter<Integer> posfeat = wordClassClustersForPhrase.get(pos);
+            if(posfeat.size() > 0){
+              double j = Counters.jaccardCoefficient(posfeat, feat);
+              //System.out.println("clusters for positive phrase " + pos + " is " +wordClassClustersForPhrase.get(pos) + " and the features for unknown are "  + feat + " for phrase " + p);
+              if (j > maxSim)
+                maxSim = j;
+            }
           }
         }
+
+        sims.setCount(p, maxSim);
+        if(allMaxSim.get() < maxSim)
+          allMaxSim.set(maxSim);
       }
+      return sims;
+    }
+  }
 
-      sims.setCount(p, maxSim);
-      if(allMaxSim < maxSim)
-        allMaxSim = maxSim;
+  //this chooses the ones that are not close to the positive phrases!
+  Set<CandidatePhrase> chooseUnknownAsNegatives(List<CandidatePhrase> candidatePhrases, String label, double percentage){
+
+    List<List<CandidatePhrase>> threadedCandidates = GetPatternsFromDataMultiClass.getThreadBatches(candidatePhrases, constVars.numThreads);
+
+    Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>();
+
+    AtomicDouble allMaxSim = new AtomicDouble(Double.MIN_VALUE);
+
+    ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
+    List<Future<Counter<CandidatePhrase>>> list = new ArrayList<Future<Counter<CandidatePhrase>>>();
+
+    //multi-threaded choose positive, negative and unknown
+    for (List<CandidatePhrase> keys : threadedCandidates) {
+      Callable<Counter<CandidatePhrase>> task = new ComputeSim(label, keys, allMaxSim);
+      Future<Counter<CandidatePhrase>> submit = executor.submit(task);
+      list.add(submit);
     }
 
-    if(allMaxSim == Double.MIN_VALUE){
+    // Now retrieve the result
+    for (Future<Counter<CandidatePhrase>> future : list) {
+      try {
+        sims.addAll(future.get());
+      } catch (Exception e) {
+        executor.shutdownNow();
+        throw new RuntimeException(e);
+      }
+    }
+    executor.shutdown();
+
+
+    if(allMaxSim.get() == Double.MIN_VALUE){
       Redwood.log(Redwood.DBG, "No similarity recorded between the positives and the unknown!");
-      percentage = 1.0;
     }
-
 
     Collection<CandidatePhrase> removed = Counters.retainBottom(sims, (int) (sims.size() * percentage));
     System.out.println("not choosing " + removed + " as the negative phrases. percentage is " + percentage + " and allMaxsim was " + allMaxSim);
@@ -327,88 +360,106 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
   }
 
+  public class chooseDatumsThread implements Callable {
+
+    Collection<String> keys;
+    Map<String, DataInstance> sents;
+    Class answerClass;
+    String answerLabel;
+    boolean forLearningPattern;
+    TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted;
+    Counter<E> allSelectedPatterns;
+
+    public chooseDatumsThread(String label, Map<String, DataInstance> sents, Collection<String> keys, boolean forLearningPattern, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted, Counter<E> allSelectedPatterns){
+      this.answerLabel = label;
+      this.sents = sents;
+      this.keys = keys;
+      this.forLearningPattern = forLearningPattern;
+      this.wordsPatExtracted = wordsPatExtracted;
+      this.allSelectedPatterns = allSelectedPatterns;
+
+      answerClass = constVars.getAnswerClass().get(answerLabel);
+    }
+
+    @Override
+    public Triple<List<RVFDatum<String, ScorePhraseMeasures>>, List<CandidatePhrase>, List<CandidatePhrase>> call() throws Exception {
+
+      Random r = new Random(10);
+      Random rneg = new Random(10);
+      List<RVFDatum<String, ScorePhraseMeasures>> datums = new ArrayList<RVFDatum<String, ScorePhraseMeasures>>();
+      List<CandidatePhrase> allNegativePhrases = new ArrayList<CandidatePhrase>();
+      List<CandidatePhrase> allUnknownPhrases = new ArrayList<CandidatePhrase>();
+
+      Map<Class, Object> otherIgnoreClasses = constVars.getIgnoreWordswithClassesDuringSelection().get(answerLabel);
+      for (String sentid : keys) {
+        DataInstance sentInst = sents.get(sentid);
+        List<CoreLabel> value = sentInst.getTokens();
+        CoreLabel[] sent = value.toArray(new CoreLabel[value.size()]);
+
+        for (int i = 0; i < sent.length; i++) {
+          CoreLabel l = sent[i];
+
+          if (l.get(answerClass).equals(answerLabel)) {
+            CandidatePhrase candidate = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(answerLabel);
+
+            if (candidate == null) {
+              throw new RuntimeException("for sentence id " + sentid + " and token id " + i + " candidate is null for " + l.word() + " and longest matching" + l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class) + " and matched phrases are " + l.get(PatternsAnnotations.MatchedPhrases.class));
+              //candidate = CandidatePhrase.createOrGet(l.word());
+            }
+
+            //If the phrase does not exist in its form in the datset (happens when fuzzy matching etc).
+            if(!Data.rawFreq.containsKey(candidate)){
+              candidate = CandidatePhrase.createOrGet(l.word());
+            }
 
 
-  public RVFDataset<String, ScorePhraseMeasures> choosedatums(String label, boolean forLearningPattern, Map<String, DataInstance> sents, Class answerClass, String answerLabel,
-      Map<Class, Object> otherIgnoreClasses, double perSelectRand, double perSelectNeg, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
-      Counter<E> allSelectedPatterns) {
-    Random r = new Random(10);
-    Random rneg = new Random(10);
-    RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
-    int numpos = 0;//, numneg = 0;
-    List<Pair<String, Integer>> chosen = new ArrayList<Pair<String, Integer>>();
-    List<CandidatePhrase> allNegativePhrases = new ArrayList<CandidatePhrase>();
-    List<CandidatePhrase> allUnknownPhrases = new ArrayList<CandidatePhrase>();
+            Counter<ScorePhraseMeasures> feat = null;
+            //CandidatePhrase candidate = new CandidatePhrase(l.word());
+            if (forLearningPattern) {
+              feat = getPhraseFeaturesForPattern(answerLabel, candidate);
+            } else {
+              feat = getFeatures(answerLabel, candidate, wordsPatExtracted.getCounter(candidate), allSelectedPatterns);
+            }
+            RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, "true");
+            datums.add(datum);
 
-    for (Entry<String, DataInstance> en : sents.entrySet()) {
-      List<CoreLabel> value = en.getValue().getTokens();
-      CoreLabel[] sent = value.toArray(new CoreLabel[value.size()]);
-
-      for (int i = 0; i < sent.length; i++) {
-        CoreLabel l = sent[i];
-
-        if (l.get(answerClass).equals(answerLabel)) {
-          CandidatePhrase candidate = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(label);
-
-          if (candidate == null) {
-            throw new RuntimeException("for sentence id " + en.getKey() + " and token id " + i + " candidate is null for " + l.word() + " and longest matching" + l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class) + " and matched phrases are " + l.get(PatternsAnnotations.MatchedPhrases.class));
-            //candidate = CandidatePhrase.createOrGet(l.word());
-          }
-
-          //If the phrase does not exist in its form in the datset (happens when fuzzy matching etc).
-          if(!Data.rawFreq.containsKey(candidate)){
-            candidate = CandidatePhrase.createOrGet(l.word());
-          }
-
-          numpos++;
-          chosen.add(new Pair<String, Integer>(en.getKey(), i));
-
-          Counter<ScorePhraseMeasures> feat = null;
-          //CandidatePhrase candidate = new CandidatePhrase(l.word());
-          if (forLearningPattern) {
-            feat = getPhraseFeaturesForPattern(label, candidate);
           } else {
-            feat = getFeatures(label, candidate, wordsPatExtracted.getCounter(candidate), allSelectedPatterns);
-          }
-          RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, "true");
-          dataset.add(datum);
-        } else {
-          boolean ignoreclass = false;
-          for (Class cl : otherIgnoreClasses.keySet()) {
-            if ((Boolean) l.get(cl)) {
-              ignoreclass = true;
+            boolean ignoreclass = false;
+            for (Class cl : otherIgnoreClasses.keySet()) {
+              if ((Boolean) l.get(cl)) {
+                ignoreclass = true;
+              }
             }
-          }
-          CandidatePhrase candidate = null;
+            CandidatePhrase candidate = null;
 
-          boolean negative = false;
-          boolean add= false;
-          Map<String, CandidatePhrase> longestMatching = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
+            boolean negative = false;
+            boolean add= false;
+            Map<String, CandidatePhrase> longestMatching = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
 
-          for (Map.Entry<String, CandidatePhrase> lo : longestMatching.entrySet()) {
-            //assert !lo.getValue().getPhrase().isEmpty() : "How is the longestmatching phrase for " + l.word() + " empty ";
-            if (!lo.getKey().equals(label) && lo.getValue() != null) {
-              negative = true;
+            for (Map.Entry<String, CandidatePhrase> lo : longestMatching.entrySet()) {
+              //assert !lo.getValue().getPhrase().isEmpty() : "How is the longestmatching phrase for " + l.word() + " empty ";
+              if (!lo.getKey().equals(answerLabel) && lo.getValue() != null) {
+                negative = true;
+                add = true;
+                //If the phrase does not exist in its form in the datset (happens when fuzzy matching etc).
+                if(!Data.rawFreq.containsKey(lo.getValue())){
+                  candidate = CandidatePhrase.createOrGet(l.word());
+                } else
+                  candidate = lo.getValue();
+              }
+            }
+            if (!negative && ignoreclass) {
+              candidate = longestMatching.get("OTHERSEM");
               add = true;
-              //If the phrase does not exist in its form in the datset (happens when fuzzy matching etc).
-              if(!Data.rawFreq.containsKey(lo.getValue())){
-                candidate = CandidatePhrase.createOrGet(l.word());
-              } else
-              candidate = lo.getValue();
             }
-          }
-          if (!negative && ignoreclass) {
-            candidate = longestMatching.get("OTHERSEM");
-            add = true;
-          }
-          if(add && rneg.nextDouble() < perSelectNeg){
-            assert !candidate.getPhrase().isEmpty();
-            allNegativePhrases.add(candidate);
+            if(add && rneg.nextDouble() < constVars.perSelectNeg){
+              assert !candidate.getPhrase().isEmpty();
+              allNegativePhrases.add(candidate);
+            }
           }
         }
-      }
 
-      allUnknownPhrases.addAll(this.chooseUnknownPhrases(en.getValue(), r, perSelectRand, constVars.getAnswerClass().get(label), label,Math.max(0, Integer.MAX_VALUE)));
+        allUnknownPhrases.addAll(chooseUnknownPhrases(sentInst, r, constVars.perSelectRand, constVars.getAnswerClass().get(answerLabel), answerLabel, Math.max(0, Integer.MAX_VALUE)));
 //
 //        if (negative && getRandomBoolean(rneg, perSelectNeg)) {
 //          numneg++;
@@ -421,13 +472,64 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 //
 //
 //          chosen.add(new Pair<String, Integer>(en.getKey(), i));
+      }
+    return new Triple(datums, allNegativePhrases, allUnknownPhrases);
+    }
+  }
+
+
+  public RVFDataset<String, ScorePhraseMeasures> choosedatums(boolean forLearningPattern, String answerLabel,
+      TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
+      Counter<E> allSelectedPatterns, boolean computeRawFreq) {
+
+
+    RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
+    int numpos = 0;
+    List<CandidatePhrase> allNegativePhrases = new ArrayList<CandidatePhrase>();
+    List<CandidatePhrase> allUnknownPhrases = new ArrayList<CandidatePhrase>();
+
+    //for all sentences brtch
+    ConstantsAndVariables.DataSentsIterator sentsIter = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
+    while(sentsIter.hasNext()) {
+      Pair<Map<String, DataInstance>, File> sentsf = sentsIter.next();
+      Map<String, DataInstance> sents = sentsf.first();
+      Redwood.log(Redwood.DBG, "Sampling sentences from " + sentsf.second());
+      if (computeRawFreq)
+        Data.computeRawFreqIfNull(sents, PatternFactory.numWordsCompound);
+
+      List<List<String>> threadedSentIds = GetPatternsFromDataMultiClass.getThreadBatches(new ArrayList<String>(sents.keySet()), constVars.numThreads);
+      ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
+      List<Future<Triple<List<RVFDatum<String, ScorePhraseMeasures>>, List<CandidatePhrase>, List<CandidatePhrase>>>> list = new ArrayList<Future<Triple<List<RVFDatum<String, ScorePhraseMeasures>>, List<CandidatePhrase>, List<CandidatePhrase>>>>();
+
+      //multi-threaded choose positive, negative and unknown
+      for (List<String> keys : threadedSentIds) {
+        Callable<Triple<List<RVFDatum<String, ScorePhraseMeasures>>, List<CandidatePhrase>, List<CandidatePhrase>>> task = new chooseDatumsThread(answerLabel, sents, keys, forLearningPattern, wordsPatExtracted, allSelectedPatterns);
+        Future<Triple<List<RVFDatum<String, ScorePhraseMeasures>>, List<CandidatePhrase>, List<CandidatePhrase>>> submit = executor.submit(task);
+        list.add(submit);
+      }
+
+      // Now retrieve the result
+      for (Future<Triple<List<RVFDatum<String, ScorePhraseMeasures>>, List<CandidatePhrase>, List<CandidatePhrase>>> future : list) {
+        try {
+          Triple<List<RVFDatum<String, ScorePhraseMeasures>>, List<CandidatePhrase>, List<CandidatePhrase>> result = future.get();
+          List<RVFDatum<String, ScorePhraseMeasures>> posdatums = result.first();
+          dataset.addAll(posdatums);
+          numpos += posdatums.size();
+          allNegativePhrases.addAll(result.second());
+          allUnknownPhrases.addAll(result.third());
+        } catch (Exception e) {
+          executor.shutdownNow();
+          throw new RuntimeException(e);
+        }
+      }
+      executor.shutdown();
     }
 
     Redwood.log(Redwood.DBG, "Number of pure negative phrases is " + allNegativePhrases.size());
     Redwood.log(Redwood.DBG, "Number of unknown phrases is " + allUnknownPhrases.size());
 
     if(constVars.subsampleUnkAsNegUsingSim){
-      Set<CandidatePhrase> chosenUnknown = chooseUnknownAsNegatives(allUnknownPhrases, label, constVars.subSampleUnkAsNegUsingSimPercentage);
+      Set<CandidatePhrase> chosenUnknown = chooseUnknownAsNegatives(allUnknownPhrases, answerLabel, constVars.subSampleUnkAsNegUsingSimPercentage);
       Redwood.log(Redwood.DBG, "Choosing " + chosenUnknown.size() + " unknowns as negative based to their similarity to the positive phrases");
       allNegativePhrases.addAll(chosenUnknown);
     }
@@ -446,9 +548,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       Counter<ScorePhraseMeasures> feat;
       //CandidatePhrase candidate = new CandidatePhrase(l.word());
       if (forLearningPattern) {
-        feat = getPhraseFeaturesForPattern(label, negative);
+        feat = getPhraseFeaturesForPattern(answerLabel, negative);
       } else {
-        feat = getFeatures(label, negative, wordsPatExtracted.getCounter(negative), allSelectedPatterns);
+        feat = getFeatures(answerLabel, negative, wordsPatExtracted.getCounter(negative), allSelectedPatterns);
       }
       RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, "false");
       dataset.add(datum);

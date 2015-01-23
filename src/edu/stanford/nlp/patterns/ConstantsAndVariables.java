@@ -430,7 +430,7 @@ public class ConstantsAndVariables<E> implements Serializable{
   public boolean subsampleUnkAsNegUsingSim = false;
 
   @Option(name="subSampleUnkAsNegUsingSimPercentage", gloss="When using subsampleUnkAsNegUsingSim, select bottom %")
-  public double subSampleUnkAsNegUsingSimPercentage = 0.8;
+  public double subSampleUnkAsNegUsingSimPercentage = 0.95;
 
 
   public Set<String> getLabels() {
