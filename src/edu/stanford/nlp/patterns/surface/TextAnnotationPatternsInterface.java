@@ -29,17 +29,27 @@ public class TextAnnotationPatternsInterface {
   }
 
   public enum Actions {
-    NEWPHRASES,
-    REMOVEPHRASES,
-    NEWANNOTATIONS,
-    NONE,
-    CLOSE,
-    SUMMARY,
-    PROCESSFILE,
-    SUGGEST,
-    MATCHEDTOKENSBYALL,
-    REMOVEANNOTATIONS,
-    MATCHEDTOKENSBYPHRASE
+    //Commands that change the model
+    NEWPHRASES ("adds new phrases, that is, phrase X is of label l"),
+    REMOVEPHRASES ("removes phrases"),
+    NEWANNOTATIONS ("adds new annotations, that is, when is the feedback is token x, y, z of sentence w are label l"),
+    PROCESSFILE ("the first command to run to process the sentences and write back the tokenized/labeled file"),
+    REMOVEANNOTATIONS ("opposite of NEWANNOTATIONS"),
+    //Commands that ask for an answer
+    SUGGEST ("ask for suggestions. Runs GetPatternsFromDataMultiClass"),
+    MATCHEDTOKENSBYALL ("Sentence and token ids (starting at 0) matched by all the phrases"),
+    MATCHEDTOKENSBYPHRASE ("Sentence and token ids (starting at 0) matched by the given phrase"),
+    ALLANNOTATIONS ("If a token is labeled, it's label. returns for each sentence id, labeled_tokenid -> label. Only for tokens that are labeled."),
+    ANNOTATIONSBYSENT ("For the given sentence, the labeled token ids and their corresponding labels"),
+    SUMMARY ("Phrases that have been labeled by humans"),
+    //Miscellaneous
+    NONE ("Nothing happens"),
+    CLOSE ("Close the socket");
+
+    String whatitdoes;
+    Actions(String whatitdoes){
+      this.whatitdoes = whatitdoes;
+    }
   };
 
 
@@ -58,6 +68,7 @@ public class TextAnnotationPatternsInterface {
     Properties props;
 
     Map<String, Set<String>> seedWords;
+    private String backgroundSymbol ="O";
 
     public PerformActionUpdateModel(Socket socket, int clientNumber) {
       this.socket = socket;
@@ -81,7 +92,7 @@ public class TextAnnotationPatternsInterface {
       try {
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream(), true);
-      }catch (IOException e) {
+      } catch (IOException e) {
         try {
           socket.close();
         } catch (IOException e1) {
@@ -103,40 +114,57 @@ public class TextAnnotationPatternsInterface {
           }
 
           String[] toks = line.split("###");
-          try{
+          try {
             nextlineAction = Actions.valueOf(toks[0].trim());
-          }catch(IllegalArgumentException e){
+          } catch (IllegalArgumentException e) {
             System.out.println("read " + toks[0] + " and cannot understand");
             msg = "Did not understand " + toks[0] + ". POSSIBLE ACTIONS ARE: " + Arrays.toString(Actions.values());
           }
 
-          String input = toks.length == 2? toks[1] : null;
-
-          if(nextlineAction.equals(Actions.NEWPHRASES)){
-            msg = doNewPhrases(input);
-          } else if(nextlineAction.equals(Actions.NEWANNOTATIONS)){
-            msg = doNewAnnotations(input);
-          } else if(nextlineAction.equals(Actions.REMOVEANNOTATIONS)){
-            msg = doRemoveAnnotations(input);
-          } else if(nextlineAction.equals(Actions.REMOVEPHRASES)){
-            msg = doRemovePhrases(input);
-          } else if(nextlineAction.equals(Actions.PROCESSFILE)){
-            msg = processFile(input);
-          } else if (nextlineAction.equals(Actions.SUMMARY)){
-            msg = this.currentSummary();
-          } else if (nextlineAction.equals(Actions.SUGGEST)){
-            msg = this.suggestPhrases();
-          } else if(nextlineAction.equals(Actions.MATCHEDTOKENSBYALL)){
-            msg = this.getMatchedTokensByAllPhrases();
-          } else if (nextlineAction.equals(Actions.MATCHEDTOKENSBYPHRASE)){
-            msg = this.getMatchedTokensByPhrase(input);
-          } else if(nextlineAction.equals(Actions.CLOSE)){
-            msg = "bye!";
+          String input = toks.length == 2 ? toks[1] : null;
+          switch (nextlineAction) {
+            case NEWPHRASES:
+              msg = doNewPhrases(input);
+              break;
+            case REMOVEPHRASES:
+              msg = doRemovePhrases(input);
+              break;
+            case NEWANNOTATIONS:
+              msg = doNewAnnotations(input);
+              break;
+            case PROCESSFILE:
+              msg = processFile(input);
+              break;
+            case REMOVEANNOTATIONS:
+              msg = doRemoveAnnotations(input);
+              break;
+            case SUGGEST:
+              msg = this.suggestPhrases();
+              break;
+            case MATCHEDTOKENSBYALL:
+              msg = this.getMatchedTokensByAllPhrases();
+              break;
+            case MATCHEDTOKENSBYPHRASE:
+              msg = this.getMatchedTokensByPhrase(input);
+              break;
+            case ALLANNOTATIONS:
+              msg = this.getAllAnnotations();
+              break;
+            case ANNOTATIONSBYSENT:
+              msg = this.getAllAnnotations(input);
+              break;
+            case SUMMARY:
+              msg = this.currentSummary();
+              break;
+            case NONE:
+              break;
+            case CLOSE:
+              msg = "bye!";
+              break;
           }
-
           System.out.println("sending msg " + msg);
         } catch (Exception e) {
-          msg = "ERROR " + e.toString().replaceAll("\n","\t") +". REDO.";
+          msg = "ERROR " + e.toString().replaceAll("\n", "\t") + ". REDO.";
           nextlineAction = Actions.NONE;
           log("Error handling client# " + clientNumber);
           e.printStackTrace();
@@ -144,6 +172,52 @@ public class TextAnnotationPatternsInterface {
           out.println(msg);
         }
       }
+    }
+
+
+    public String getAllAnnotations() {
+      JsonObjectBuilder obj = Json.createObjectBuilder();
+      for(Map.Entry<String, DataInstance> sent: Data.sents.entrySet()){
+        boolean sentHasLabel = false;
+        JsonObjectBuilder objsent = Json.createObjectBuilder();
+        int tokenid = 0;
+        for(CoreLabel l : sent.getValue().getTokens()){
+          boolean haslabel = false;
+          JsonArrayBuilder labelArr = Json.createArrayBuilder();
+          for(Map.Entry<String, Class<? extends TypesafeMap.Key<String>>> en: this.humanLabelClasses.entrySet()){
+            if(!l.get(en.getValue()).equals(backgroundSymbol)){
+              haslabel = true;
+              sentHasLabel = true;
+              labelArr.add(en.getKey());
+            }
+          }
+          if(haslabel)
+            objsent.add(String.valueOf(tokenid), labelArr);
+          tokenid++;
+        }
+        if(sentHasLabel)
+          obj.add(sent.getKey(), objsent);
+      }
+      return obj.build().toString();
+    }
+
+    private String getAllAnnotations(String input) {
+      JsonObjectBuilder objsent = Json.createObjectBuilder();
+      int tokenid = 0;
+      for(CoreLabel l : Data.sents.get(input).getTokens()){
+        boolean haslabel = false;
+        JsonArrayBuilder labelArr = Json.createArrayBuilder();
+        for(Map.Entry<String, Class<? extends TypesafeMap.Key<String>>> en: this.humanLabelClasses.entrySet()){
+          if(!l.get(en.getValue()).equals(backgroundSymbol)){
+            haslabel = true;
+            labelArr.add(en.getKey());
+          }
+        }
+        if(haslabel)
+          objsent.add(String.valueOf(tokenid), labelArr);
+        tokenid++;
+      }
+      return objsent.build().toString();
     }
 
 
@@ -264,7 +338,7 @@ public class TextAnnotationPatternsInterface {
           JsonArray tokenArry = obj4label.getJsonArray(sentid);
           for(JsonValue tokenid: tokenArry){
             tokensNum ++;
-            Data.sents.get(sentid).getTokens().get(Integer.valueOf(tokenid.toString())).set(humanLabelClasses.get(label), remove ? "O": label);
+            Data.sents.get(sentid).getTokens().get(Integer.valueOf(tokenid.toString())).set(humanLabelClasses.get(label), remove ? backgroundSymbol: label);
           }
         }
       }
@@ -305,6 +379,8 @@ public class TextAnnotationPatternsInterface {
     private void log(String message) {
       System.out.println(message);
     }
+
+
   }
 
   /**
