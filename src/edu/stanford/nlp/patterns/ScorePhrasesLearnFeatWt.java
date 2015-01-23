@@ -160,6 +160,17 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       }
       ShiftParamsLogisticClassifierFactory<String, ScorePhraseMeasures> factory = new ShiftParamsLogisticClassifierFactory<String, ScorePhraseMeasures>();
       classifier =  factory.trainClassifier(newdataset);
+
+      //print weights
+      LogisticClassifier logcl = ((LogisticClassifier) classifier);
+      String l = (String) logcl.getLabelForInternalPositiveClass();
+      Counter<String> weights = logcl.weightsAsGenericCounter();
+      if (l.equals(Boolean.FALSE.toString())) {
+        Counters.multiplyInPlace(weights, -1);
+      }
+      List<Pair<String, Double>> wtd = Counters.toDescendingMagnitudeSortedListWithCounts(weights);
+      Redwood.log(ConstantsAndVariables.minimaldebug, "The weights are " + StringUtils.join(wtd.subList(0, Math.min(wtd.size(), 600)), "\n"));
+
     } else if(scoreClassifierType.equals(ClassifierType.LINEAR)){
       LinearClassifierFactory<String, ScorePhraseMeasures> lcf = new LinearClassifierFactory<String, ScorePhraseMeasures>();
       classifier = lcf.trainClassifier(dataset);
