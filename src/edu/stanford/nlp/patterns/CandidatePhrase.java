@@ -167,4 +167,8 @@ public class CandidatePhrase implements Serializable, Comparable  {
   public void setPhraseLemma(String phraseLemma) {
     this.phraseLemma = phraseLemma;
   }
+
+  public static void deletePhrase(CandidatePhrase p) {
+    candidatePhraseMap.remove(p);
+  }
 }

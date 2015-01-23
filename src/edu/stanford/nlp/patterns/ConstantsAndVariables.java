@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.Env;
@@ -440,6 +441,12 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="subSampleUnkAsPosUsingSimPercentage", gloss="When using expandPositivesWhenSampling, select top % after applying the threshold")
   public double subSampleUnkAsPosUsingSimPercentage = 0.05;
 
+  @Option(name="wordVectorFile", gloss = "if using word vectors for computing similarities")
+  public String wordVectorFile = null;
+
+  @Option(name="useWordVectorsToComputeSim", gloss="use vectors directly instead of word classes for computing similarity")
+  public boolean useWordVectorsToComputeSim;
+
 
   public Set<String> getLabels() {
     return labels;
@@ -474,6 +481,8 @@ public class ConstantsAndVariables<E> implements Serializable{
     }
     return values;
   }
+
+
 
   //PatternFactory.PatternType.SURFACE;
 
