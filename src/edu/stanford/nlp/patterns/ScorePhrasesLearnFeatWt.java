@@ -448,10 +448,14 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             }
 
             if(!ignoreclass){
-              ignoreclass = constVars.getStopWords().contains(CandidatePhrase.createOrGet(l.word())) ;
+              CandidatePhrase ph = CandidatePhrase.createOrGet(l.word());
+              ignoreclass = constVars.getStopWords().contains(ph) ;
             }
 
             CandidatePhrase candidate = null;
+            if(ignoreclass){
+              candidate = CandidatePhrase.createOrGet(l.word());
+            }
 
             boolean negative = false;
             boolean add= false;
