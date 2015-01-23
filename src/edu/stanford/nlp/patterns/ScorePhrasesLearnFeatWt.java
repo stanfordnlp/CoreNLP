@@ -1194,7 +1194,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       else
         feat = this.getFeatures(label, word, patternsThatExtractedPat, allSelectedPatterns);
       BasicDatum<String, ScorePhraseMeasures> d = new BasicDatum<String, ScorePhraseMeasures>(feat.keySet(), Boolean.FALSE.toString());
-      Counter<String> sc = classifier.scoresOf(d);
+      Counter<String> sc = ((MultinomialLogisticClassifier)classifier).probabilityOf(d);
       score = sc.getCount(Boolean.TRUE.toString());
 
     }else if (scoreClassifierType.equals(ClassifierType.SVM) || scoreClassifierType.equals(ClassifierType.RF) ||scoreClassifierType.equals(ClassifierType.LINEAR)) {
