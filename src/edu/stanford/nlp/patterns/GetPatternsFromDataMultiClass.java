@@ -3028,7 +3028,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       Field[] aClassFields = thisClass.getDeclaredFields();
       //sb.append(this.getClass().getSimpleName() + " [ ");
       for(Field f : aClassFields){
-        if(f.getType().getClass().isPrimitive() || Arrays.binarySearch(printOptionClass, f.getType().getClass()) >= 0){
+        if(f.getGenericType().getClass().isPrimitive() || Arrays.binarySearch(printOptionClass, f.getType().getClass()) >= 0){
           String fName = f.getName();
           Object fvalue = f.get(this);
           values.put(fName, fvalue == null?"null":fvalue.toString());

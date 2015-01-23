@@ -292,7 +292,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }else if(constVars.patternType.equals(PatternFactory.PatternType.SURFACE)){
       CoreLabel[] tokens = sent.getTokens().toArray(new CoreLabel[0]);
       for(int i =0; i < tokens.length; i++){
-        if(random.nextDouble() < 0.5){
+        if(random.nextDouble() < perSelect){
 
           int left = (int)((length -1) /2.0);
           int right = length -1 -left;
@@ -421,7 +421,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       allNegativePhrases.addAll(chooseUnknownAsNegatives(allUnknownPhrases, label, constVars.subSampleUnkAsNegUsingSimPercentage));
     else{
       if(allUnknownPhrases.size() + allNegativePhrases.size() > 1.5* numpos){
-        Redwood.log(Redwood.WARN, "Num of negative (" + allNegativePhrases.size() + ") plus num of unknown phrases (" + allUnknownPhrases.size() + ") is much higher than number of positive phrases (" + numpos + "). Consider decreasing perSelectNeg and perSelect");
+        Redwood.log(Redwood.WARN, "Num of negative (" + allNegativePhrases.size() + ") plus num of unknown phrases (" + allUnknownPhrases.size() + ") is much higher than number of positive phrases (" + numpos + "). Consider decreasing perSelectNeg and perSelectRand");
         allNegativePhrases.addAll(allUnknownPhrases);
       }
     }

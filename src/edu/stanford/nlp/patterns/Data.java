@@ -52,7 +52,6 @@ public class Data {
           }
           s = s.trim();
           if (!s.isEmpty()){
-            System.out.println("adding " + s + " to the rawfreq");
             Data.rawFreq.incrementCount(CandidatePhrase.createOrGet(s));
           }
         }
