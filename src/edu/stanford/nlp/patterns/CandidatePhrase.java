@@ -70,9 +70,10 @@ public class CandidatePhrase implements Serializable, Comparable  {
   }
 
   private CandidatePhrase(String phrase, String lemma, Counter<String> features){
-    if(phrase.isEmpty()){
-      Redwood.log(Redwood.FORCE, "Creating empty candidatePhrase");
-    }
+
+    if(phrase.isEmpty())
+      new Exception("Creating empty candidatePhrase").printStackTrace(System.out);
+
     this.phrase = phrase;
     this.phraseLemma = lemma;
     this.features = features;

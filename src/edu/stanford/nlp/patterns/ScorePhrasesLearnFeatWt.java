@@ -293,6 +293,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       CoreLabel[] tokens = sent.getTokens().toArray(new CoreLabel[0]);
       for(int i =0; i < tokens.length; i++){
         if(random.nextDouble() < 0.5){
+
           int left = (int)((length -1) /2.0);
           int right = length -1 -left;
           String ph = "";
@@ -304,7 +305,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             }
             ph += " " + tokens[j].word();
           }
-          if(!haspositive){
+
+          if(!haspositive && !ph.trim().isEmpty()){
             unknownSamples.add(CandidatePhrase.createOrGet(ph.trim()));
           }
         }
@@ -378,7 +380,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           Map<String, CandidatePhrase> longestMatching = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
 
           for (Map.Entry<String, CandidatePhrase> lo : longestMatching.entrySet()) {
-            assert !lo.getValue().getPhrase().isEmpty() : "How is the longestmatching phrase for " + l.word() + " empty ";
+            //assert !lo.getValue().getPhrase().isEmpty() : "How is the longestmatching phrase for " + l.word() + " empty ";
             if (!lo.getKey().equals(label) && lo.getValue() != null) {
               negative = true;
               add = true;
