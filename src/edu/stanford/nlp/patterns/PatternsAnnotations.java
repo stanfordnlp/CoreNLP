@@ -126,4 +126,65 @@ public class PatternsAnnotations implements Serializable {
   }
 
 
+  public static class PatternHumanLabel1 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel2 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel3 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel4 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel5 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel6 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel7 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel8 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel9 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel10 implements GenericAnnotation<String>{
+    public Class<String> getType(){
+      return String.class;
+    }
+  }
+
+
 }

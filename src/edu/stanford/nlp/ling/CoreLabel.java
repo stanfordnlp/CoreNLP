@@ -559,7 +559,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
   public static final String TAG_SEPARATOR = "/";
 
   public enum OutputFormat {
-    VALUE_INDEX, VALUE, VALUE_TAG, VALUE_TAG_INDEX, MAP, VALUE_MAP, VALUE_INDEX_MAP, WORD, WORD_INDEX
+    VALUE_INDEX, VALUE, VALUE_TAG, VALUE_TAG_INDEX, MAP, VALUE_MAP, VALUE_INDEX_MAP, WORD, WORD_INDEX, ALL
   };
 
   public static final OutputFormat DEFAULT_FORMAT = OutputFormat.VALUE_INDEX;
@@ -680,6 +680,12 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWor
         buf.append('-').append((index).intValue());
       }
       buf.append(toPrimes());
+      break;
+    }
+    case ALL:{
+      for(Class en: this.keySet()){
+        buf.append(";").append(en).append(":").append(this.get(en));
+      }
       break;
     }
     default:

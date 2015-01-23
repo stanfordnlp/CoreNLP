@@ -424,6 +424,10 @@ public class ConstantsAndVariables<E> implements Serializable{
 
   @Option(name="patternType", required=true)
   public PatternFactory.PatternType patternType = null;
+
+  public Set<String> getLabels() {
+    return labels;
+  }
   //PatternFactory.PatternType.SURFACE;
 
 
@@ -616,6 +620,9 @@ public class ConstantsAndVariables<E> implements Serializable{
   public ConstantsAndVariables(Properties props, Set<String> labels, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
                                Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
     this.labels = labels;
+    for(String label: labels){
+      this.seedLabelDictionary.put(label, new HashSet<String>());
+    }
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
     if(this.generalizeClasses == null)
@@ -640,12 +647,32 @@ public class ConstantsAndVariables<E> implements Serializable{
 
   public ConstantsAndVariables(Properties props, Set<String> labels,  Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass) throws IOException {
     this.labels = labels;
+    for(String label: labels){
+      this.seedLabelDictionary.put(label, new HashSet<String>());
+    }
     this.answerClass = answerClass;
+    this.generalizeClasses = new HashMap<String, Class>();
+    this.generalizeClasses.putAll(answerClass);
     setUp(props);
   }
 
+  public ConstantsAndVariables(Properties props, String label,  Class<? extends TypesafeMap.Key<String>> answerClass) throws IOException {
+    this.labels = new HashSet<String>();
+    this.labels.add(label);
+    this.seedLabelDictionary.put(label, new HashSet<String>());
+    this.answerClass = new HashMap<>();
+    this.answerClass.put(label, answerClass);
+    this.generalizeClasses = new HashMap<String, Class>();
+    this.generalizeClasses.putAll(this.answerClass);
+    setUp(props);
+  }
+
+
   public ConstantsAndVariables(Properties props, Set<String> labels,  Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass, Map<String, Class> generalizeClasses) throws IOException {
     this.labels = labels;
+    for(String label: labels){
+      this.seedLabelDictionary.put(label, new HashSet<String>());
+    }
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
     if(this.generalizeClasses == null)

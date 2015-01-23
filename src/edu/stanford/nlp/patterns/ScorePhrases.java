@@ -644,6 +644,8 @@ public class ScorePhrases<E extends Pattern> {
       else
         ignoreWordsAll = constVars.getOtherSemanticClassesWords();
       ignoreWordsAll.addAll(constVars.getSeedLabelDictionary().get(label));
+      ignoreWordsAll.addAll(constVars.getLearnedWords().get(label).keySet());
+
       Counter<String> finalwords = chooseTopWords(phraseScores, terms,
           phraseScores, ignoreWordsAll, constVars.thresholdWordExtract);
       // for (String w : finalwords.keySet()) {

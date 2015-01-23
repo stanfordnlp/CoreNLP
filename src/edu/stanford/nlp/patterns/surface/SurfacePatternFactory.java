@@ -434,6 +434,9 @@ public class SurfacePatternFactory extends PatternFactory {
 //    }
 
     for (Map.Entry<String, Class> e : ConstantsAndVariables.getGeneralizeClasses().entrySet()) {
+      assert tokenj.containsKey(e.getValue()) && tokenj.get(e.getValue()) != null: " Why does the token not have the class " + e.getValue() + " set? Existing classes " + tokenj.toString(CoreLabel.OutputFormat.ALL);
+
+
       if (!tokenj.get(e.getValue()).equals(ConstantsAndVariables.backgroundSymbol)) {
         isLabeledO = false;
         if (strOriginal.isEmpty()) {
