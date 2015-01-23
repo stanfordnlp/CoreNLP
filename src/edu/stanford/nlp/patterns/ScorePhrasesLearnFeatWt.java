@@ -72,7 +72,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   ClassifierType scoreClassifierType = ClassifierType.LR;
 
   public enum ClassifierType {
-    DT, LR, RF, SVM, SHIFTLR
+    DT, LR, RF, SVM, SHIFTLR, LINEAR
   }
 
   public TwoDimensionalCounter<CandidatePhrase, ScorePhraseMeasures> phraseScoresRaw = new TwoDimensionalCounter<CandidatePhrase, ScorePhraseMeasures>();
@@ -147,7 +147,10 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }else if(scoreClassifierType.equals(ClassifierType.SHIFTLR)){
       ShiftParamsLogisticClassifierFactory<String, ScorePhraseMeasures> factory = new ShiftParamsLogisticClassifierFactory<String, ScorePhraseMeasures>();
       classifier =  factory.trainClassifier(dataset);
-    } else
+    } else if(scoreClassifierType.equals(ClassifierType.LINEAR)){
+      LinearClassifierFactory<String, ScorePhraseMeasures> lcf = new LinearClassifierFactory<>();
+      classifier = lcf.trainClassifier(dataset);
+    }else
       throw new RuntimeException("cannot identify classifier " + scoreClassifierType);
 
 //    else if (scoreClassifierType.equals(ClassifierType.RF)) {
@@ -1128,11 +1131,13 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
         feat = this.getFeatures(label, word, patternsThatExtractedPat, allSelectedPatterns);
 
       RVFDatum<String, ScorePhraseMeasures> d = new RVFDatum<String, ScorePhraseMeasures>(feat, Boolean.FALSE.toString());
-      score = logcl.probabilityOf(d);
-      if (flipsign)
-        score = 1 - score;
+      //TODO: do we need probability?
+//      score = logcl.probabilityOf(d);
+//      if (flipsign)
+//        score = 1 - score;
+      score = logcl.scoresOf(d).getCount(Boolean.TRUE.toString());
 
-    } else if (scoreClassifierType.equals(ClassifierType.SVM) || scoreClassifierType.equals(ClassifierType.RF) || scoreClassifierType.equals(ClassifierType.SHIFTLR)) {
+    } else if (scoreClassifierType.equals(ClassifierType.SVM) || scoreClassifierType.equals(ClassifierType.RF) || scoreClassifierType.equals(ClassifierType.SHIFTLR) || scoreClassifierType.equals(ClassifierType.LINEAR)) {
 
       Counter<ScorePhraseMeasures> feat = null;
       if (forLearningPatterns)
