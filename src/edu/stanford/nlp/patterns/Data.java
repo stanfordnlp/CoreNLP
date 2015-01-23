@@ -41,6 +41,7 @@ public class Data {
   public static Map<String, Map<String, List<Integer>>> matchedTokensForEachPhrase = new ConcurrentHashMap<String, Map<String, List<Integer>>>();
 
   public static void computeRawFreqIfNull(int numWordsCompound, boolean batchProcess) {
+
     ConstantsAndVariables.DataSentsIterator iter = new ConstantsAndVariables.DataSentsIterator(batchProcess);
     while(iter.hasNext()){
       computeRawFreqIfNull(iter.next().first(), numWordsCompound);

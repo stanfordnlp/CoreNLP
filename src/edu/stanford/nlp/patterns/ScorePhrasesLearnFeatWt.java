@@ -47,6 +47,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     super(constvar);
     if(constvar.useWordVectorsToComputeSim && (constvar.subsampleUnkAsNegUsingSim|| constvar.expandPositivesWhenSampling)) {
       if(Data.rawFreq == null){
+          Data.rawFreq = new ClassicCounter<CandidatePhrase>();
           Data.computeRawFreqIfNull(PatternFactory.numWordsCompound, constvar.batchProcessSents);
       }
       wordVectors = new HashMap<String, double[]>();
