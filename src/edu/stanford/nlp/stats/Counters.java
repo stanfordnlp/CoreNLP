@@ -3054,4 +3054,13 @@ public class Counters {
       newcounter.setCount(k, c.getCount(k));
     return newcounter;
   }
+
+
+  public static<E> void retainKeys(Counter<E> counter, Function<E, Boolean> retainFunction) {
+    for(Entry<E, Double> en: counter.entrySet()){
+      if(!retainFunction.apply(en.getKey())){
+        counter.remove(en.getKey());
+      }
+    }
+  }
 }
