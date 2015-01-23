@@ -3453,9 +3453,14 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
   }
 
   public static String elapsedTime(Date d1, Date d2){
+    try{
     Interval interval = new Interval(d1.getTime(), d2.getTime());
     Period period = interval.toPeriod();
     return period.getDays() + " days, " + period.getHours()+" hours, " + period.getMinutes()  +" minutes, " +period.getSeconds()+" seconds";
+    }catch(java.lang.IllegalArgumentException e){
+      e.printStackTrace();
+    }
+    return "";
   }
 
 
