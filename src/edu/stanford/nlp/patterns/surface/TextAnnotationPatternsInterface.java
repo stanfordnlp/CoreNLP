@@ -361,7 +361,7 @@ public class TextAnnotationPatternsInterface {
         for(int i = 0; i < arr.size(); i++){
           String seedw = arr.getString(i);
           System.out.println("adding " + seedw + " to seed ");
-          seed.add(new CandidatePhrase(seedw));
+          seed.add(CandidatePhrase.createOrGet(seedw));
         }
         seedWords.get(label).addAll(seed);
         constVars.addSeedWords(label, seed);

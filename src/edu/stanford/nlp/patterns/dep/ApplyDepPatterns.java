@@ -158,7 +158,7 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
               if (useWordNotLabeled) {
                 phrase = phrase.trim();
                 phraseLemma = phraseLemma.trim();
-                allFreq.incrementCount(new CandidatePhrase(phrase,phraseLemma, match.getFeatures()), pEn.getValue(), 1.0);
+                allFreq.incrementCount(CandidatePhrase.createOrGet(phrase,phraseLemma, match.getFeatures()), pEn.getValue(), 1.0);
               }
             }
           }

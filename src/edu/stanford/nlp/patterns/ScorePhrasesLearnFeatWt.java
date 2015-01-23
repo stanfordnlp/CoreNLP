@@ -286,7 +286,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       extract.printSubGraph(g, w, new ArrayList<String>(), textTokens, outputPhrases, outputIndices, new ArrayList<IndexedWord>(), new ArrayList<IndexedWord>(),
         false, extractedPhrases, null, acceptWord);
       for(ExtractedPhrase p :extractedPhrases){
-        negativeSamples.add(new CandidatePhrase(p.getValue(), null, p.getFeatures()));
+        negativeSamples.add(CandidatePhrase.createOrGet(p.getValue(), null, p.getFeatures()));
       }
     }
 
@@ -321,8 +321,6 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   public RVFDataset<String, ScorePhraseMeasures> choosedatums(String label, boolean forLearningPattern, Map<String, DataInstance> sents, Class answerClass, String answerLabel,
       Map<Class, Object> otherIgnoreClasses, double perSelectRand, double perSelectNeg, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
       Counter<E> allSelectedPatterns) {
-    // TODO: check whats happening with candidate terms for this iteration. do
-    // not count them as negative!!! -- I think this comment is not valid anymore.
     Random r = new Random(10);
     Random rneg = new Random(10);
     RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
@@ -336,7 +334,6 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
       for (int i = 0; i < sent.length; i++) {
         CoreLabel l = sent[i];
-
 
         if (l.get(answerClass).equals(answerLabel)) {
           CandidatePhrase candidate = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(label);
@@ -590,6 +587,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
     
     phraseScoresRaw.setCounter(word, scoreslist);
+    System.out.println("scores for " + word + " are " + scoreslist);
     return scoreslist;
   }
 

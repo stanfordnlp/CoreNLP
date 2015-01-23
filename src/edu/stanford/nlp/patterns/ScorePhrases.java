@@ -531,7 +531,7 @@ public class ScorePhrases<E extends Pattern> {
           if (p1.contains(index)) {
             if (token == null)
               token = sentEn.getValue().getTokens().get(en.getKey());
-            wordsandLemmaPatExtracted.incrementCount(new CandidatePhrase(token.word(), token.lemma()), index);
+            wordsandLemmaPatExtracted.incrementCount(CandidatePhrase.createOrGet(token.word(), token.lemma()), index);
           }
         }
       }
@@ -580,7 +580,7 @@ public class ScorePhrases<E extends Pattern> {
       if (!phraseScorer.wordFreqNorm.equals(Normalization.NONE)) {
         Redwood.log(Redwood.DBG, "computing processed freq");
         for (Entry<CandidatePhrase, Double> fq : Data.rawFreq.entrySet()) {
-          double in = fq.getValue();
+          Double in = fq.getValue();
           if (phraseScorer.wordFreqNorm.equals(Normalization.SQRT))
             in = Math.sqrt(in);
 
@@ -588,6 +588,9 @@ public class ScorePhrases<E extends Pattern> {
             in = 1 + Math.log(in);
           else
             throw new RuntimeException("can't understand the normalization");
+
+          assert !in.isNaN(): "Why is processed freq nan when rawfreq is " + in;
+
           Data.processedDataFreq.setCount(fq.getKey(), in);
         }
       } else

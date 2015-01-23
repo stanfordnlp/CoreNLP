@@ -50,8 +50,9 @@ public class Data {
             s += " " + c.word();
             // }
           }
-          if (!s.trim().isEmpty())
-            Data.rawFreq.incrementCount(new CandidatePhrase(s.trim()));
+          s = s.trim();
+          if (!s.isEmpty())
+            Data.rawFreq.incrementCount(CandidatePhrase.createOrGet(s));
         }
       }
       //if (googleNGram != null && googleNGram.size() > 0)

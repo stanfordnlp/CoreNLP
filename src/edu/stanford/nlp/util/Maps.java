@@ -180,6 +180,7 @@ public class Maps {
       sb.append(en.getKey());
       sb.append(keyValSeparator);
       sb.append(en.getValue());
+      i++;
     }
     sb.append(postAppend);
     return sb.toString();

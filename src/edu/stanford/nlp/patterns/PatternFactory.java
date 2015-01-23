@@ -58,7 +58,7 @@ public class PatternFactory {
   public enum PatternType{SURFACE, DEP};
 
   public static boolean doNotUse(String word, Set<CandidatePhrase> stopWords) {
-    if (stopWords.contains(new CandidatePhrase(word.toLowerCase()))
+    if (stopWords.contains(CandidatePhrase.createOrGet(word.toLowerCase()))
       || ignoreWordRegex.matcher(word).matches())
       return true;
     else

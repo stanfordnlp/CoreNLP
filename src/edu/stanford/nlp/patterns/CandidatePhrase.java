@@ -12,11 +12,12 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by sonalg on 11/7/14.
  */
-public class CandidatePhrase implements Serializable {
-  //TODO: would computing hash code and storing it make this faster to access?
+public class CandidatePhrase implements Serializable, Comparable  {
+
   final String phrase;
-  final String phraseLemma;
+  String phraseLemma;
   Counter<String> features;
+  final int hashCode;
 
   static ConcurrentHashMap<String, CandidatePhrase> candidatePhraseMap = new ConcurrentHashMap<String, CandidatePhrase>();
 
@@ -24,23 +25,55 @@ public class CandidatePhrase implements Serializable {
      if(candidatePhraseMap.containsKey(phrase)){
        return candidatePhraseMap.get(phrase);
      }
-    else
-       return new CandidatePhrase(phrase);
+    else{
+       CandidatePhrase p=  new CandidatePhrase(phrase);
+       candidatePhraseMap.put(phrase, p);
+       return p;
+     }
   }
 
-  public CandidatePhrase(String phrase, String lemma){
+  static public CandidatePhrase createOrGet(String phrase, String phraseLemma){
+    if(candidatePhraseMap.containsKey(phrase)){
+      CandidatePhrase p = candidatePhraseMap.get(phrase);
+      p.phraseLemma = phraseLemma;
+      return p;
+    }
+    else{
+      CandidatePhrase p=  new CandidatePhrase(phrase, phraseLemma);
+      candidatePhraseMap.put(phrase, p);
+      return p;
+    }
+  }
+
+  static public CandidatePhrase createOrGet(String phrase, String phraseLemma, Counter<String> features){
+    if(candidatePhraseMap.containsKey(phrase)){
+      CandidatePhrase p = candidatePhraseMap.get(phrase);
+      p.phraseLemma = phraseLemma;
+      p.features = features;
+      return p;
+    }
+    else{
+      CandidatePhrase p=  new CandidatePhrase(phrase, phraseLemma, features);
+      candidatePhraseMap.put(phrase, p);
+      return p;
+    }
+  }
+
+
+
+  private CandidatePhrase(String phrase, String lemma) {
     this(phrase, lemma, null);
   }
 
-  public CandidatePhrase(String phrase, String lemma, Counter<String> features){
+  private CandidatePhrase(String phrase, String lemma, Counter<String> features){
     this.phrase = phrase;
     this.phraseLemma = lemma;
     this.features = features;
-    candidatePhraseMap.put(phrase, this);
+    this.hashCode = phrase.hashCode();
   }
 
-  public CandidatePhrase(String w) {
-    this(w, null);
+  private CandidatePhrase(String w) {
+    this(w, null, null);
   }
 
   public String getPhrase(){
@@ -68,8 +101,17 @@ public class CandidatePhrase implements Serializable {
   }
 
   @Override
+  public int compareTo(Object o){
+    if(! (o instanceof CandidatePhrase))
+      return -1;
+    else
+      return ((CandidatePhrase)o).getPhrase().compareTo(this.getPhrase());
+  }
+
+
+  @Override
   public int hashCode(){
-    return phrase.hashCode();
+    return hashCode;
   }
 
   public static List<CandidatePhrase> convertStringPhrases(Collection<String> str){
@@ -81,7 +123,7 @@ public class CandidatePhrase implements Serializable {
   }
 
   public static List<String> convertToString(Collection<CandidatePhrase> words) {
-    List<String> phs = new ArrayList<>();
+    List<String> phs = new ArrayList<String>();
     for(CandidatePhrase ph: words){
       phs.add(ph.getPhrase());
     }
@@ -104,5 +146,9 @@ public class CandidatePhrase implements Serializable {
       features = new ClassicCounter<String>();
     }
     Counters.addInPlace(features, feat);
+  }
+
+  public void setPhraseLemma(String phraseLemma) {
+    this.phraseLemma = phraseLemma;
   }
 }

@@ -168,7 +168,7 @@ public class ConstantsAndVariables<E> implements Serializable{
    * Lowercase the context words/lemmas
    */
   @Option(name = "matchLowerCaseContext")
-  public boolean matchLowerCaseContext = true;
+  public static boolean matchLowerCaseContext = true;
 
 
   /**
@@ -447,9 +447,11 @@ public class ConstantsAndVariables<E> implements Serializable{
 
       Field[] aClassFields = thisClass.getDeclaredFields();
       for(Field f : aClassFields){
-        String fName = f.getName();
-        Object fvalue = f.get(this);
-        values.put(fName, fvalue == null ? "null" : fvalue.toString());
+        if(f.getType().getClass().isPrimitive() || Arrays.binarySearch(GetPatternsFromDataMultiClass.printOptionClass, f.getType()) >= 0){
+          String fName = f.getName();
+          Object fvalue = f.get(this);
+          values.put(fName, fvalue == null ? "null" : fvalue.toString());
+        }
       }
 
     } catch (Exception e) {
@@ -522,7 +524,8 @@ public class ConstantsAndVariables<E> implements Serializable{
   public boolean usePhraseEvalWordClass = false;
 
   /**
-   * use google tf-idf for learning phrases
+   * use google tf-idf for learning phrases. Need to also provide googleNgram_dbname,
+   * googleNgram_username and googleNgram_host
    */
   @Option(name = "usePhraseEvalGoogleNgram")
   public boolean usePhraseEvalGoogleNgram = false;
@@ -585,7 +588,8 @@ public class ConstantsAndVariables<E> implements Serializable{
 
   /**
    * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
-   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
+   * <code>PhEvalInPat</code>. See usePhrase* for meanings. Need to also provide googleNgram_dbname,
+   * googleNgram_username and googleNgram_host
    */
   @Option(name = "usePatternEvalDomainNgram")
   public boolean usePatternEvalDomainNgram = false;

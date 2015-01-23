@@ -80,8 +80,14 @@ public abstract class PhraseScorer<E extends Pattern> {
     
     assert Data.processedDataFreq.containsKey(word) : "How come the processed corpus freq doesnt have "
         + word + " .Size of processedDataFreq is " + Data.processedDataFreq.size()  + " and size of raw freq is " + Data.rawFreq.size();
+
+    if(Data.processedDataFreq.getCount(word) == 0.0)
+      throw new RuntimeException("How come the processed corpus freq has count of " + word + " as 0. The count in raw freq is " + Data.rawFreq.getCount(word));
+
     double score = total / Data.processedDataFreq.getCount(word);
-    assert score != Double.NaN : " How come PatTFIDFScore is NaN; numerator is " + total + " and processsed freq is " + Data.processedDataFreq.getCount(word) + " for word " + word;
+
+    System.out.println("patwtbyfreq score for " + word + " is " + score + " when total is " + total + " and processeddatafreq is " + Data.processedDataFreq.getCount(word));
+
     return score;
   }
 
@@ -178,7 +184,7 @@ public abstract class PhraseScorer<E extends Pattern> {
     double minScore = Double.MAX_VALUE;
     for (String w : t) {
       double score = defaultWt;
-      if (weights.containsKey(new CandidatePhrase(w)))
+      if (weights.containsKey(CandidatePhrase.createOrGet(w)))
         score = weights.getCount(w);
       if (score < minScore)
         minScore = score;

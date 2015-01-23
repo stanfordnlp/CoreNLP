@@ -442,7 +442,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
             String[] t = s.getPhrase().split("\\s+");
             for (int i = 0; i < t.length - 1; i++) {
               if (!seed.contains(t[i])) {
-                otherseed.add(new CandidatePhrase(t[i]));
+                otherseed.add(CandidatePhrase.createOrGet(t[i]));
               }
             }
           }
@@ -628,7 +628,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       Counter<CandidatePhrase> otherSemanticClassFreq = new ClassicCounter<CandidatePhrase>();
       for (CandidatePhrase s : constVars.getOtherSemanticClassesWords()) {
         for (String s1 : StringUtils.getNgrams(Arrays.asList(s.getPhrase().split("\\s+")), 1, PatternFactory.numWordsCompound))
-          otherSemanticClassFreq.incrementCount(new CandidatePhrase(s1));
+          otherSemanticClassFreq.incrementCount(CandidatePhrase.createOrGet(s1));
       }
       otherSemanticClassFreq = Counters.add(otherSemanticClassFreq, 1.0);
       // otherSemanticClassFreq.setDefaultReturnValue(1.0);
@@ -638,7 +638,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
         Counter<CandidatePhrase> classFreq = new ClassicCounter<CandidatePhrase>();
         for (CandidatePhrase s : seedSets.get(label)) {
           for (String s1 : StringUtils.getNgrams(Arrays.asList(s.getPhrase().split("\\s+")), 1, PatternFactory.numWordsCompound))
-            classFreq.incrementCount(new CandidatePhrase(s1));
+            classFreq.incrementCount(CandidatePhrase.createOrGet(s1));
         }
         classFreq = Counters.add(classFreq, 1.0);
         labelDictNgram.put(label, classFreq);
@@ -1009,27 +1009,26 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     return allIndices;
   }
 
+  //if matchcontextlowercase is on, transform that. escape the word etc. Useful for pattern matching later on
+  static  Function<CoreLabel, String> stringTransformationFunction = new Function<CoreLabel, String>() {
+    @Override
+    public String apply(CoreLabel l) {
+      String s;
+      if(PatternFactory.useLemmaContextTokens)
+        s = l.lemma();
+      else
+        s= l.word();
+      if(ConstantsAndVariables.matchLowerCaseContext)
+        s = s.toLowerCase();
+      assert s!= null;
+      return s;
+    }
+  };
+
   /** Warning: sets labels of words that are not in the given seed set as O!!!
    * */
   public static void runLabelSeedWords(Map<String, DataInstance> sents, Class answerclass, String label, Collection<CandidatePhrase> seedWords, ConstantsAndVariables constVars, boolean overwriteExistingLabels)
       throws InterruptedException, ExecutionException, IOException {
-
-    //if matchcontextlowercase is on, transform that. escape the word etc. Useful for pattern matching later on
-    Function<CoreLabel, String> stringTransformationFunction = new Function<CoreLabel, String>() {
-      @Override
-      public String apply(CoreLabel l) {
-        String s;
-        if(PatternFactory.useLemmaContextTokens)
-          s = l.lemma();
-        else
-          s= l.word();
-        if(constVars.matchLowerCaseContext)
-          s = s.toLowerCase();
-        assert s!= null;
-        //System.out.println("applied transformation from " + l + " to " + s + ". l keyset is " + l.toString(CoreLabel.OutputFormat.ALL));
-        return s;
-      }
-    };
 
     List<String> keyset = new ArrayList<String>(sents.keySet());
 
@@ -2450,7 +2449,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     Counter<CandidatePhrase> words = new ClassicCounter<CandidatePhrase>();
     for (String line : IOUtils.readLines(file)) {
       String[] t = line.split("\t");
-      words.setCount(new CandidatePhrase(t[0]), Double.parseDouble(t[1]));
+      words.setCount(CandidatePhrase.createOrGet(t[0]), Double.parseDouble(t[1]));
     }
     return words;
   }
@@ -3002,7 +3001,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
           if (line.isEmpty() || line.startsWith("#")) {
             continue;
           }
-          seedWords4Label.add(new CandidatePhrase(line));
+          seedWords4Label.add(CandidatePhrase.createOrGet(line));
         }
       }
       seedWords.put(label, seedWords4Label);
@@ -3015,6 +3014,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     //TODO: write this up when appropriate
   }
 
+  static Class[] printOptionClass = {String.class, Boolean.class, Integer.class, Long.class, Double.class, Float.class};
   public Map<String, String> getAllOptions(){
     Map<String, String> values = new HashMap<String, String>();
     props.forEach((x, y) -> values.put(x.toString(), y.toString()));
@@ -3028,10 +3028,12 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       Field[] aClassFields = thisClass.getDeclaredFields();
       //sb.append(this.getClass().getSimpleName() + " [ ");
       for(Field f : aClassFields){
-        String fName = f.getName();
-        Object fvalue = f.get(this);
-        values.put(fName, fvalue == null?"null":fvalue.toString());
+        if(f.getType().getClass().isPrimitive() || Arrays.binarySearch(printOptionClass, f.getType().getClass()) >= 0){
+          String fName = f.getName();
+          Object fvalue = f.get(this);
+          values.put(fName, fvalue == null?"null":fvalue.toString());
         //sb.append("(" + f.getType() + ") " + fName + " = " + f.get(this) + ", ");
+        }
       }
 
     } catch (Exception e) {

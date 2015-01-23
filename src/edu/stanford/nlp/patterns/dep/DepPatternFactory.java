@@ -104,7 +104,7 @@ public class DepPatternFactory extends PatternFactory{
       GrammaticalRelation rel = graph.reln(parent, node);
       for (Pattern tagPattern : allowedTagPatternForTrigger) {
         if (tagPattern.matcher(parent.tag()).matches()) {
-          if (!ifIgnoreRel(rel) && !stopWords.contains(new CandidatePhrase(parent.word())) && parent.word().length() > 1) {
+          if (!ifIgnoreRel(rel) && !stopWords.contains(CandidatePhrase.createOrGet(parent.word())) && parent.word().length() > 1) {
             Pair<IndexedWord, GrammaticalRelation> pattern = new Pair<IndexedWord, GrammaticalRelation>(parent, rel);
             DepPattern patterndep = patternToDepPattern(pattern, sent);
             if (depth <= upDepth){
