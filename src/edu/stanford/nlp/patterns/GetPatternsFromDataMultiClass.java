@@ -15,7 +15,6 @@ import java.util.function.Function;
 
 import javax.json.*;
 
-import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RegExFileFilter;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -54,7 +53,7 @@ import org.joda.time.Period;
  *
  * To use the default options, run
  * <p>
- * <code>java -mx1000m edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -file text_file -seedWordsFiles label1,seedwordlist1;label2,seedwordlist2;... -outDir output_directory (optional)</code>
+ * <code>java -mx1000m edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass -file text_file -seedWordsFiles label1,seedwordlist1;label2,seedwordlist2;... -outDir output_directory (optional)</code>
  * <p>
  *
  * <code>fileFormat</code>: (Optional) Default is text. Valid values are text
@@ -78,11 +77,11 @@ import org.joda.time.Period;
  * To use a properties file, see
  * projects/core/data/edu/stanford/nlp/patterns/surface/example.properties or patterns/example.properties (depends on which codebase you are using)
  * as an example for the flags and their brief descriptions. Run the code as:
- * <code>java -mx1000m -cp classpath edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -props dir-as-above/example.properties</code>
+ * <code>java -mx1000m -cp classpath edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass -props dir-as-above/example.properties</code>
  *
  * <p>
  * IMPORTANT: Many flags are described in the classes
- * {@link ConstantsAndVariables}, {@link edu.stanford.nlp.patterns.surface.CreatePatterns}, and
+ * {@link ConstantsAndVariables}, {@link edu.stanford.nlp.patterns.CreatePatterns}, and
  * {@link PhraseScorer}.
  *
  *
@@ -1404,7 +1403,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     } else if (constVars.patternScoring.equals(PatternScoring.kNN)) {
       try {
-        Class<? extends ScorePatterns> clazz = (Class<? extends ScorePatterns>) Class.forName("edu.stanford.nlp.patterns.surface.ScorePatternsKNN");
+        Class<? extends ScorePatterns> clazz = (Class<? extends ScorePatterns>) Class.forName("edu.stanford.nlp.patterns.ScorePatternsKNN");
         Constructor<? extends ScorePatterns> ctor = clazz.getConstructor(ConstantsAndVariables.class, PatternScoring.class, String.class, Set.class,
             TwoDimensionalCounter.class, TwoDimensionalCounter.class, TwoDimensionalCounter.class, ScorePhrases.class, Properties.class);
         scorePatterns = ctor.newInstance(constVars, constVars.patternScoring, label, allCandidatePhrases, patternsandWords4Label, negPatternsandWords4Label,

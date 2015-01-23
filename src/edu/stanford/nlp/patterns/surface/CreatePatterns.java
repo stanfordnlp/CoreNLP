@@ -7,7 +7,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.*;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
