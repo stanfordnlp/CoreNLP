@@ -601,8 +601,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return counter;
   }
 
-  Counter<CandidatePhrase> closeToPositivesFirstIter = new ClassicCounter<CandidatePhrase>();
-  Counter<CandidatePhrase> closeToNegativesFirstIter = new ClassicCounter<CandidatePhrase>();
+  Counter<CandidatePhrase> closeToPositivesFirstIter = null;
+  Counter<CandidatePhrase> closeToNegativesFirstIter = null;
 
   public class ChooseDatumsThread implements Callable {
 
@@ -849,12 +849,19 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       Counter<E> allSelectedPatterns, boolean computeRawFreq) throws IOException {
 
     boolean expandNeg = false;
-    if(closeToNegativesFirstIter == null && constVars.expandNegativesWhenSampling)
-      expandNeg = true;
+    if(closeToNegativesFirstIter == null){
+      closeToNegativesFirstIter = new ClassicCounter<CandidatePhrase>();
+      if(constVars.expandNegativesWhenSampling)
+        expandNeg = true;
+    }
 
     boolean expandPos = false;
-    if(closeToPositivesFirstIter == null && constVars.expandPositivesWhenSampling)
-      expandPos = true;
+    if(closeToPositivesFirstIter == null) {
+      closeToPositivesFirstIter = new ClassicCounter<CandidatePhrase>();
+      if(constVars.expandPositivesWhenSampling)
+        expandPos = true;
+    }
+    
 
     Counter<Integer> distSimClustersOfPositive = new ClassicCounter<Integer>();
     if((expandPos || expandNeg) && !constVars.useWordVectorsToComputeSim){
