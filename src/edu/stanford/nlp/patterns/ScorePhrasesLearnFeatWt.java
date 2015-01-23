@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import edu.stanford.nlp.classify.*;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.RVFDatum;
@@ -96,7 +97,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       computeRawFreq = true;
     }
 
-    RVFDataset<String, ScorePhraseMeasures> dataset = choosedatums(forLearningPatterns, label, wordsPatExtracted, allSelectedPatterns, computeRawFreq);
+    GeneralDataset<String, ScorePhraseMeasures> dataset = choosedatums(forLearningPatterns, label, wordsPatExtracted, allSelectedPatterns, computeRawFreq);
 
 
     /*
@@ -149,8 +150,16 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       List<Triple<ScorePhraseMeasures, String, Double>> topfeatures = ((SVMLightClassifier<String, ScorePhraseMeasures>) classifier).getTopFeatures(labels, 0, true, -1, true);
       Redwood.log(ConstantsAndVariables.minimaldebug, "The weights are " + StringUtils.join(topfeatures, "\n"));
     }else if(scoreClassifierType.equals(ClassifierType.SHIFTLR)){
+
+      //change the dataset to basic dataset because currently ShiftParamsLR doesn't support RVFDatum
+      GeneralDataset<String, ScorePhraseMeasures> newdataset = new Dataset<String, ScorePhraseMeasures>();
+      Iterator<RVFDatum<String, ScorePhraseMeasures>> iter = dataset.iterator();
+      while(iter.hasNext()){
+        RVFDatum<String, ScorePhraseMeasures> inst = iter.next();
+        newdataset.add(new BasicDatum<String, ScorePhraseMeasures>(inst.asFeatures(), inst.label()));
+      }
       ShiftParamsLogisticClassifierFactory<String, ScorePhraseMeasures> factory = new ShiftParamsLogisticClassifierFactory<String, ScorePhraseMeasures>();
-      classifier =  factory.trainClassifier(dataset);
+      classifier =  factory.trainClassifier(newdataset);
     } else if(scoreClassifierType.equals(ClassifierType.LINEAR)){
       LinearClassifierFactory<String, ScorePhraseMeasures> lcf = new LinearClassifierFactory<String, ScorePhraseMeasures>();
       classifier = lcf.trainClassifier(dataset);
@@ -842,7 +851,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return allPossiblePhrases;
   }
 
-  public RVFDataset<String, ScorePhraseMeasures> choosedatums(boolean forLearningPattern, String answerLabel,
+  public GeneralDataset<String, ScorePhraseMeasures> choosedatums(boolean forLearningPattern, String answerLabel,
       TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
       Counter<E> allSelectedPatterns, boolean computeRawFreq) throws IOException {
 
@@ -879,7 +888,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     //computing this regardless of expandpos and expandneg because we reject all positive words that occur in negatives (can happen in multi word phrases etc)
     Map<String, Collection<CandidatePhrase>> allPossibleNegativePhrases  = getAllPossibleNegativePhrases(answerLabel);
 
-    RVFDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
+    GeneralDataset<String, ScorePhraseMeasures> dataset = new RVFDataset<String, ScorePhraseMeasures>();
     int numpos = 0;
     Set<CandidatePhrase> allNegativePhrases = new HashSet<CandidatePhrase>();
     Set<CandidatePhrase> allUnknownPhrases = new HashSet<CandidatePhrase>();
