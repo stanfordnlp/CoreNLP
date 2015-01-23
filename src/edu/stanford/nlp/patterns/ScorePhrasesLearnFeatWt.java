@@ -371,10 +371,16 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           boolean negative = false;
           boolean add= false;
           Map<String, CandidatePhrase> longestMatching = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
+
           for (Map.Entry<String, CandidatePhrase> lo : longestMatching.entrySet()) {
+            assert !lo.getValue().getPhrase().isEmpty() : "How is the longestmatching phrase for " + l.word() + " empty ";
             if (!lo.getKey().equals(label) && lo.getValue() != null) {
               negative = true;
               add = true;
+              //If the phrase does not exist in its form in the datset (happens when fuzzy matching etc).
+              if(!Data.rawFreq.containsKey(lo.getValue())){
+                candidate = CandidatePhrase.createOrGet(l.word());
+              } else
               candidate = lo.getValue();
             }
           }
