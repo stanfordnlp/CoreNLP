@@ -601,7 +601,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
     
     phraseScoresRaw.setCounter(word, scoreslist);
-    System.out.println("scores for " + word + " are " + scoreslist);
+    //System.out.println("scores for " + word + " are " + scoreslist);
     return scoreslist;
   }
 

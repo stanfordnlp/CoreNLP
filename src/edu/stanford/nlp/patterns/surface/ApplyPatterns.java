@@ -139,8 +139,10 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimen
 
             matchedTokensByPat.add(pEn.getValue(), new Triple<String, Integer, Integer>(
                 sentid, s, e -1 ));
+
             if (useWordNotLabeled) {
               phrase = phrase.trim();
+              assert !phrase.isEmpty();
               phraseLemma = phraseLemma.trim();
               allFreq.incrementCount(CandidatePhrase.createOrGet(phrase, phraseLemma), pEn.getValue(), 1.0);
             }
