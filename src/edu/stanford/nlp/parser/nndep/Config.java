@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.nndep;
 
+import edu.stanford.nlp.international.Languages;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
@@ -47,10 +48,9 @@ public class Config
   public static final String SEPARATOR = "###################";
 
   /**
-  *   The language of the parser used on.
-  *   Currently, it supports Chinese and English, and it is only used to exclude punctuations in evaluation.
-  */
-  public String language = "English";
+   * The language being parsed.
+   */
+  public Languages.Language language = Languages.Language.English;
 
   /**
    * Number of threads to use during training. Also indirectly controls
@@ -215,9 +215,26 @@ public class Config
     escaper = escaperClass != null ? ReflectionLoading.loadByReflection(escaperClass) : null;
 
     // Language options
-    language = PropertiesUtils.getString(props, "language", language);
-    String tlpClass = language.equals("Chinese") ? "edu.stanford.nlp.trees.international.pennchinese.ChineseTreebankLanguagePack" : "edu.stanford.nlp.trees.PennTreebankLanguagePack";
-    tlp = ReflectionLoading.loadByReflection(tlpClass);
+    language = props.containsKey("language")
+               ? getLanguage(props.getProperty("language"))
+               : language;
+    tlp = Languages.getLanguageParams(language).treebankLanguagePack();
+  }
+
+  /**
+   * Get the {@link edu.stanford.nlp.international.Languages.Language}
+   * object corresponding to the given language string.
+   *
+   * @return A {@link edu.stanford.nlp.international.Languages.Language}
+   *         or {@code null} if no instance matches the given string.
+   */
+  private Languages.Language getLanguage(String languageStr) {
+    for (Languages.Language l : Languages.Language.values()) {
+      if (l.name().equalsIgnoreCase(languageStr))
+        return l;
+    }
+
+    return null;
   }
 
   public void printParameters() {

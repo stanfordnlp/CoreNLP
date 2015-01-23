@@ -8,6 +8,93 @@ public final class CoreNLPProtos {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  public enum Language
+      implements com.google.protobuf.ProtocolMessageEnum {
+    Unknown(0, 0),
+    Arabic(1, 1),
+    Chinese(2, 2),
+    English(3, 3),
+    German(4, 4),
+    French(5, 5),
+    Hebrew(6, 6),
+    Spanish(7, 7),
+    ;
+    
+    public static final int Unknown_VALUE = 0;
+    public static final int Arabic_VALUE = 1;
+    public static final int Chinese_VALUE = 2;
+    public static final int English_VALUE = 3;
+    public static final int German_VALUE = 4;
+    public static final int French_VALUE = 5;
+    public static final int Hebrew_VALUE = 6;
+    public static final int Spanish_VALUE = 7;
+    
+    
+    public final int getNumber() { return value; }
+    
+    public static Language valueOf(int value) {
+      switch (value) {
+        case 0: return Unknown;
+        case 1: return Arabic;
+        case 2: return Chinese;
+        case 3: return English;
+        case 4: return German;
+        case 5: return French;
+        case 6: return Hebrew;
+        case 7: return Spanish;
+        default: return null;
+      }
+    }
+    
+    public static com.google.protobuf.Internal.EnumLiteMap<Language>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static com.google.protobuf.Internal.EnumLiteMap<Language>
+        internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<Language>() {
+            public Language findValueByNumber(int number) {
+              return Language.valueOf(number);
+            }
+          };
+    
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(index);
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return edu.stanford.nlp.pipeline.CoreNLPProtos.getDescriptor().getEnumTypes().get(0);
+    }
+    
+    private static final Language[] VALUES = {
+      Unknown, Arabic, Chinese, English, German, French, Hebrew, Spanish, 
+    };
+    
+    public static Language valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      return VALUES[desc.getIndex()];
+    }
+    
+    private final int index;
+    private final int value;
+    
+    private Language(int index, int value) {
+      this.index = index;
+      this.value = value;
+    }
+    
+    // @@protoc_insertion_point(enum_scope:edu.stanford.nlp.pipeline.Language)
+  }
+  
   public interface DocumentOrBuilder extends
       com.google.protobuf.GeneratedMessage.
           ExtendableMessageOrBuilder<Document> {
@@ -7506,6 +7593,10 @@ public final class CoreNLPProtos {
       // optional uint32 targetCopy = 6;
       boolean hasTargetCopy();
       int getTargetCopy();
+      
+      // optional .edu.stanford.nlp.pipeline.Language language = 7;
+      boolean hasLanguage();
+      edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage();
     }
     public static final class Edge extends
         com.google.protobuf.GeneratedMessage
@@ -7618,6 +7709,16 @@ public final class CoreNLPProtos {
         return targetCopy_;
       }
       
+      // optional .edu.stanford.nlp.pipeline.Language language = 7;
+      public static final int LANGUAGE_FIELD_NUMBER = 7;
+      private edu.stanford.nlp.pipeline.CoreNLPProtos.Language language_;
+      public boolean hasLanguage() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      public edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage() {
+        return language_;
+      }
+      
       private void initFields() {
         source_ = 0;
         target_ = 0;
@@ -7625,6 +7726,7 @@ public final class CoreNLPProtos {
         isExtra_ = false;
         sourceCopy_ = 0;
         targetCopy_ = 0;
+        language_ = edu.stanford.nlp.pipeline.CoreNLPProtos.Language.Unknown;
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
@@ -7664,6 +7766,9 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000020) == 0x00000020)) {
           output.writeUInt32(6, targetCopy_);
         }
+        if (((bitField0_ & 0x00000040) == 0x00000040)) {
+          output.writeEnum(7, language_.getNumber());
+        }
         getUnknownFields().writeTo(output);
       }
       
@@ -7696,6 +7801,10 @@ public final class CoreNLPProtos {
         if (((bitField0_ & 0x00000020) == 0x00000020)) {
           size += com.google.protobuf.CodedOutputStream
             .computeUInt32Size(6, targetCopy_);
+        }
+        if (((bitField0_ & 0x00000040) == 0x00000040)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeEnumSize(7, language_.getNumber());
         }
         size += getUnknownFields().getSerializedSize();
         memoizedSerializedSize = size;
@@ -7833,6 +7942,8 @@ public final class CoreNLPProtos {
           bitField0_ = (bitField0_ & ~0x00000010);
           targetCopy_ = 0;
           bitField0_ = (bitField0_ & ~0x00000020);
+          language_ = edu.stanford.nlp.pipeline.CoreNLPProtos.Language.Unknown;
+          bitField0_ = (bitField0_ & ~0x00000040);
           return this;
         }
         
@@ -7895,6 +8006,10 @@ public final class CoreNLPProtos {
             to_bitField0_ |= 0x00000020;
           }
           result.targetCopy_ = targetCopy_;
+          if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+            to_bitField0_ |= 0x00000040;
+          }
+          result.language_ = language_;
           result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
@@ -7928,6 +8043,9 @@ public final class CoreNLPProtos {
           }
           if (other.hasTargetCopy()) {
             setTargetCopy(other.getTargetCopy());
+          }
+          if (other.hasLanguage()) {
+            setLanguage(other.getLanguage());
           }
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
@@ -7996,6 +8114,17 @@ public final class CoreNLPProtos {
               case 48: {
                 bitField0_ |= 0x00000020;
                 targetCopy_ = input.readUInt32();
+                break;
+              }
+              case 56: {
+                int rawValue = input.readEnum();
+                edu.stanford.nlp.pipeline.CoreNLPProtos.Language value = edu.stanford.nlp.pipeline.CoreNLPProtos.Language.valueOf(rawValue);
+                if (value == null) {
+                  unknownFields.mergeVarintField(7, rawValue);
+                } else {
+                  bitField0_ |= 0x00000040;
+                  language_ = value;
+                }
                 break;
               }
             }
@@ -8141,6 +8270,30 @@ public final class CoreNLPProtos {
         public Builder clearTargetCopy() {
           bitField0_ = (bitField0_ & ~0x00000020);
           targetCopy_ = 0;
+          onChanged();
+          return this;
+        }
+        
+        // optional .edu.stanford.nlp.pipeline.Language language = 7;
+        private edu.stanford.nlp.pipeline.CoreNLPProtos.Language language_ = edu.stanford.nlp.pipeline.CoreNLPProtos.Language.Unknown;
+        public boolean hasLanguage() {
+          return ((bitField0_ & 0x00000040) == 0x00000040);
+        }
+        public edu.stanford.nlp.pipeline.CoreNLPProtos.Language getLanguage() {
+          return language_;
+        }
+        public Builder setLanguage(edu.stanford.nlp.pipeline.CoreNLPProtos.Language value) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          bitField0_ |= 0x00000040;
+          language_ = value;
+          onChanged();
+          return this;
+        }
+        public Builder clearLanguage() {
+          bitField0_ = (bitField0_ & ~0x00000040);
+          language_ = edu.stanford.nlp.pipeline.CoreNLPProtos.Language.Unknown;
           onChanged();
           return this;
         }
@@ -14009,37 +14162,42 @@ public final class CoreNLPProtos {
       "\001 \003(\0132$.edu.stanford.nlp.pipeline.ParseT" +
       "ree\022\r\n\005value\030\002 \001(\t\022\027\n\017yieldBeginIndex\030\003 ",
       "\001(\r\022\025\n\ryieldEndIndex\030\004 \001(\r\022\r\n\005score\030\005 \001(" +
-      "\001\"\255\002\n\017DependencyGraph\022=\n\004node\030\001 \003(\0132/.ed" +
+      "\001\"\215\003\n\017DependencyGraph\022=\n\004node\030\001 \003(\0132/.ed" +
       "u.stanford.nlp.pipeline.DependencyGraph." +
       "Node\022=\n\004edge\030\002 \003(\0132/.edu.stanford.nlp.pi" +
       "peline.DependencyGraph.Edge\022\020\n\004root\030\003 \003(" +
       "\rB\002\020\001\032D\n\004Node\022\025\n\rsentenceIndex\030\001 \002(\r\022\r\n\005" +
-      "index\030\002 \002(\r\022\026\n\016copyAnnotation\030\003 \001(\r\032D\n\004E" +
-      "dge\022\016\n\006source\030\001 \002(\r\022\016\n\006target\030\002 \002(\r\022\013\n\003d" +
-      "ep\030\003 \001(\t\022\017\n\007isExtra\030\004 \001(\010\"\306\002\n\nCorefChain" +
-      "\022\017\n\007chainID\030\001 \002(\005\022C\n\007mention\030\002 \003(\01322.edu",
-      ".stanford.nlp.pipeline.CorefChain.CorefM" +
-      "ention\022\026\n\016representative\030\003 \002(\r\032\311\001\n\014Coref" +
-      "Mention\022\021\n\tmentionID\030\001 \001(\005\022\023\n\013mentionTyp" +
-      "e\030\002 \001(\t\022\016\n\006number\030\003 \001(\t\022\016\n\006gender\030\004 \001(\t\022" +
-      "\017\n\007animacy\030\005 \001(\t\022\022\n\nstartIndex\030\006 \001(\r\022\020\n\010" +
-      "endIndex\030\007 \001(\r\022\021\n\theadIndex\030\t \001(\r\022\025\n\rsen" +
-      "tenceIndex\030\n \001(\r\022\020\n\010position\030\013 \001(\r\"w\n\005Ti" +
-      "mex\022\r\n\005value\030\001 \001(\t\022\020\n\010altValue\030\002 \001(\t\022\014\n\004" +
-      "text\030\003 \001(\t\022\014\n\004type\030\004 \001(\t\022\013\n\003tid\030\005 \001(\t\022\022\n" +
-      "\nbeginPoint\030\006 \001(\r\022\020\n\010endPoint\030\007 \001(\r\"\333\001\n\006",
-      "Entity\022\021\n\theadStart\030\006 \001(\r\022\017\n\007headEnd\030\007 \001" +
-      "(\r\022\023\n\013mentionType\030\010 \001(\t\022\026\n\016normalizedNam" +
-      "e\030\t \001(\t\022\026\n\016headTokenIndex\030\n \001(\r\022\017\n\007coref" +
-      "ID\030\013 \001(\t\022\020\n\010objectID\030\001 \001(\t\022\023\n\013extentStar" +
-      "t\030\002 \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014\n\004type\030\004 \001(\t" +
-      "\022\017\n\007subtype\030\005 \001(\t\"\267\001\n\010Relation\022\017\n\007argNam" +
-      "e\030\006 \003(\t\022.\n\003arg\030\007 \003(\0132!.edu.stanford.nlp." +
-      "pipeline.Entity\022\021\n\tsignature\030\010 \001(\t\022\020\n\010ob" +
-      "jectID\030\001 \001(\t\022\023\n\013extentStart\030\002 \001(\r\022\021\n\text" +
-      "entEnd\030\003 \001(\r\022\014\n\004type\030\004 \001(\t\022\017\n\007subtype\030\005 ",
-      "\001(\tB*\n\031edu.stanford.nlp.pipelineB\rCoreNL" +
-      "PProtos"
+      "index\030\002 \002(\r\022\026\n\016copyAnnotation\030\003 \001(\r\032\243\001\n\004" +
+      "Edge\022\016\n\006source\030\001 \002(\r\022\016\n\006target\030\002 \002(\r\022\013\n\003" +
+      "dep\030\003 \001(\t\022\017\n\007isExtra\030\004 \001(\010\022\022\n\nsourceCopy" +
+      "\030\005 \001(\r\022\022\n\ntargetCopy\030\006 \001(\r\0225\n\010language\030\007",
+      " \001(\0162#.edu.stanford.nlp.pipeline.Languag" +
+      "e\"\306\002\n\nCorefChain\022\017\n\007chainID\030\001 \002(\005\022C\n\007men" +
+      "tion\030\002 \003(\01322.edu.stanford.nlp.pipeline.C" +
+      "orefChain.CorefMention\022\026\n\016representative" +
+      "\030\003 \002(\r\032\311\001\n\014CorefMention\022\021\n\tmentionID\030\001 \001" +
+      "(\005\022\023\n\013mentionType\030\002 \001(\t\022\016\n\006number\030\003 \001(\t\022" +
+      "\016\n\006gender\030\004 \001(\t\022\017\n\007animacy\030\005 \001(\t\022\022\n\nstar" +
+      "tIndex\030\006 \001(\r\022\020\n\010endIndex\030\007 \001(\r\022\021\n\theadIn" +
+      "dex\030\t \001(\r\022\025\n\rsentenceIndex\030\n \001(\r\022\020\n\010posi" +
+      "tion\030\013 \001(\r\"w\n\005Timex\022\r\n\005value\030\001 \001(\t\022\020\n\010al",
+      "tValue\030\002 \001(\t\022\014\n\004text\030\003 \001(\t\022\014\n\004type\030\004 \001(\t" +
+      "\022\013\n\003tid\030\005 \001(\t\022\022\n\nbeginPoint\030\006 \001(\r\022\020\n\010end" +
+      "Point\030\007 \001(\r\"\333\001\n\006Entity\022\021\n\theadStart\030\006 \001(" +
+      "\r\022\017\n\007headEnd\030\007 \001(\r\022\023\n\013mentionType\030\010 \001(\t\022" +
+      "\026\n\016normalizedName\030\t \001(\t\022\026\n\016headTokenInde" +
+      "x\030\n \001(\r\022\017\n\007corefID\030\013 \001(\t\022\020\n\010objectID\030\001 \001" +
+      "(\t\022\023\n\013extentStart\030\002 \001(\r\022\021\n\textentEnd\030\003 \001" +
+      "(\r\022\014\n\004type\030\004 \001(\t\022\017\n\007subtype\030\005 \001(\t\"\267\001\n\010Re" +
+      "lation\022\017\n\007argName\030\006 \003(\t\022.\n\003arg\030\007 \003(\0132!.e" +
+      "du.stanford.nlp.pipeline.Entity\022\021\n\tsigna",
+      "ture\030\010 \001(\t\022\020\n\010objectID\030\001 \001(\t\022\023\n\013extentSt" +
+      "art\030\002 \001(\r\022\021\n\textentEnd\030\003 \001(\r\022\014\n\004type\030\004 \001" +
+      "(\t\022\017\n\007subtype\030\005 \001(\t*n\n\010Language\022\013\n\007Unkno" +
+      "wn\020\000\022\n\n\006Arabic\020\001\022\013\n\007Chinese\020\002\022\013\n\007English" +
+      "\020\003\022\n\n\006German\020\004\022\n\n\006French\020\005\022\n\n\006Hebrew\020\006\022\013" +
+      "\n\007Spanish\020\007B*\n\031edu.stanford.nlp.pipeline" +
+      "B\rCoreNLPProtos"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -14099,7 +14257,7 @@ public final class CoreNLPProtos {
           internal_static_edu_stanford_nlp_pipeline_DependencyGraph_Edge_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_edu_stanford_nlp_pipeline_DependencyGraph_Edge_descriptor,
-              new java.lang.String[] { "Source", "Target", "Dep", "IsExtra", "SourceCopy", "TargetCopy", },
+              new java.lang.String[] { "Source", "Target", "Dep", "IsExtra", "SourceCopy", "TargetCopy", "Language", },
               edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge.class,
               edu.stanford.nlp.pipeline.CoreNLPProtos.DependencyGraph.Edge.Builder.class);
           internal_static_edu_stanford_nlp_pipeline_CorefChain_descriptor =

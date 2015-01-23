@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.toSet;
+
 /**
  * Neural network classifier which powers a transition-based dependency
  * parser.
@@ -634,8 +636,13 @@ public class Classifier {
    * @see #preCompute(java.util.Set)
    */
   public void preCompute() {
-    // If no features are specified, pre-compute all of them!
-    preCompute(preMap.keySet());
+    // If no features are specified, pre-compute all of them (which fit
+    // into a `saved` array of size `config.numPreComputed`)
+    Set<Integer> keys = preMap.entrySet().stream()
+                              .filter(e -> e.getValue() < config.numPreComputed)
+                              .map(Map.Entry::getKey)
+                              .collect(toSet());
+    preCompute(keys);
   }
 
   /**
@@ -647,7 +654,14 @@ public class Classifier {
    */
   public void preCompute(Set<Integer> toPreCompute) {
     long startTime = System.currentTimeMillis();
-    saved = new double[toPreCompute.size()][config.hiddenSize];
+
+    // NB: It'd make sense to just make the first dimension of this
+    // array the same size as `toPreCompute`, then recalculate all
+    // `preMap` indices to map into this denser array. But this
+    // actually hurt training performance! (See experiments with
+    // "smallMap.")
+    saved = new double[preMap.size()][config.hiddenSize];
+
     for (int x : toPreCompute) {
       int mapX = preMap.get(x);
       int tok = x / config.numTokens;
