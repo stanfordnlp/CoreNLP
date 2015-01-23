@@ -644,7 +644,8 @@ public class ScorePhrases<E extends Pattern> {
         ignoreWordsAll = CollectionUtils.unionAsSet(ignoreWords, constVars.getOtherSemanticClassesWords());
       }
       else
-        ignoreWordsAll = constVars.getOtherSemanticClassesWords();
+        ignoreWordsAll = new HashSet<CandidatePhrase>(constVars.getOtherSemanticClassesWords());
+
       ignoreWordsAll.addAll(constVars.getSeedLabelDictionary().get(label));
       ignoreWordsAll.addAll(constVars.getLearnedWords().get(label).keySet());
 

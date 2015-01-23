@@ -72,7 +72,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   ClassifierType scoreClassifierType = ClassifierType.LR;
 
   public enum ClassifierType {
-    DT, LR, RF, SVM
+    DT, LR, RF, SVM, SHIFTLR
   }
 
   public TwoDimensionalCounter<CandidatePhrase, ScorePhraseMeasures> phraseScoresRaw = new TwoDimensionalCounter<CandidatePhrase, ScorePhraseMeasures>();
@@ -806,7 +806,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     //make all possible negative phrases
     Map<String, Collection<CandidatePhrase>> allPossiblePhrases = new HashMap<String, Collection<CandidatePhrase>>();
     Collection<CandidatePhrase> negPhrases = new HashSet<CandidatePhrase>();
-    negPhrases.addAll(constVars.getOtherSemanticClassesWords());
+    //negPhrases.addAll(constVars.getOtherSemanticClassesWords());
     negPhrases.addAll(constVars.getStopWords());
     negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.functionWords));
     negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.getEnglishWords()));

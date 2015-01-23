@@ -431,6 +431,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
 
 
         if (constVars.addIndvWordsFromPhrasesExceptLastAsNeg) {
+          Redwood.log(ConstantsAndVariables.minimaldebug, "adding indv words from phrases except last as neg");
           Set<CandidatePhrase> otherseed = new HashSet<CandidatePhrase>();
           if(labelUsingSeedSets){
           for (CandidatePhrase s : seed) {
