@@ -600,16 +600,20 @@ public class Counters {
   /**
    * Removes all entries from c except for the bottom <code>num</code>
    */
-  public static <E> void retainBottom(Counter<E> c, int num) {
+  public static <E> List<E> retainBottom(Counter<E> c, int num) {
     int numToPurge = c.size() - num;
     if (numToPurge <= 0) {
-      return;
+      return Generics.newArrayList();
     }
 
+    List<E> removed = new ArrayList<E>();
     List<E> l = Counters.toSortedList(c);
     for (int i = 0; i < numToPurge; i++) {
-      c.remove(l.get(i));
+      E rem = l.get(i);
+      removed.add(rem);
+      c.remove(rem);
     }
+    return removed;
   }
 
   /**
