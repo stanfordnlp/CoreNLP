@@ -58,37 +58,31 @@ public abstract class PhraseScorer<E extends Pattern> {
     return learnedScores;
   }
 
-  double getPatTFIDFScore(CandidatePhrase word,
-      Counter<E> patsThatExtractedThis,
-      Counter<E> allSelectedPatterns) {
-    double total = 0;
+  double getPatTFIDFScore(CandidatePhrase word,  Counter<E> patsThatExtractedThis,   Counter<E> allSelectedPatterns) {
+    if(Data.processedDataFreq.getCount(word) == 0.0) {
+      Redwood.log(Redwood.WARN, "How come the processed corpus freq has count of " + word + " as 0. The count in raw freq is " + Data.rawFreq.getCount(word) + " and the Data.rawFreq size is " + Data.rawFreq.size());
+      return 0;
+    } else {
+      double total = 0;
 
-    Set<E> rem = new HashSet<E>();
-    for (Entry<E, Double> en2 : patsThatExtractedThis.entrySet()) {
-      double weight = 1.0;
-      if (usePatternWeights) {
-        weight = allSelectedPatterns.getCount(en2.getKey());
-        if (weight == 0){
-          Redwood.log(Redwood.FORCE, "Warning: Weight zero for " + en2.getKey() + ". May be pattern was removed when choosing other patterns (if subsumed by another pattern).");
-          rem.add(en2.getKey());  
+      Set<E> rem = new HashSet<E>();
+      for (Entry<E, Double> en2 : patsThatExtractedThis.entrySet()) {
+        double weight = 1.0;
+        if (usePatternWeights) {
+          weight = allSelectedPatterns.getCount(en2.getKey());
+          if (weight == 0){
+            Redwood.log(Redwood.FORCE, "Warning: Weight zero for " + en2.getKey() + ". May be pattern was removed when choosing other patterns (if subsumed by another pattern).");
+            rem.add(en2.getKey());
+          }
         }
+        total += weight;
       }
-      total += weight;
+
+      Counters.removeKeys(patsThatExtractedThis, rem);
+      double score = total / Data.processedDataFreq.getCount(word);
+
+      return score;
     }
-    
-    Counters.removeKeys(patsThatExtractedThis, rem);
-    
-    assert Data.processedDataFreq.containsKey(word) : "How come the processed corpus freq doesnt have "
-        + word + " .Size of processedDataFreq is " + Data.processedDataFreq.size()  + " and size of raw freq is " + Data.rawFreq.size();
-
-    if(Data.processedDataFreq.getCount(word) == 0.0)
-      throw new RuntimeException("How come the processed corpus freq has count of " + word + " as 0. The count in raw freq is " + Data.rawFreq.getCount(word));
-
-    double score = total / Data.processedDataFreq.getCount(word);
-
-    System.out.println("patwtbyfreq score for " + word + " is " + score + " when total is " + total + " and processeddatafreq is " + Data.processedDataFreq.getCount(word));
-
-    return score;
   }
 
   public static double getGoogleNgramScore(CandidatePhrase g) {
@@ -104,12 +98,22 @@ public abstract class PhraseScorer<E extends Pattern> {
 
 
   public double getDomainNgramScore(String g) {
-    assert Data.domainNGramRawFreq.containsKey(g) : " How come dowmin ngram raw freq does not contain "
-        + g;
-    if (Data.domainNGramRawFreq.getCount(g) == 0) {
+
+    String gnew = g;
+    if(!Data.domainNGramRawFreq.containsKey(gnew)){
+      gnew = g.replaceAll(" ","");
+    }
+
+    if(!Data.domainNGramRawFreq.containsKey(gnew)){
+      gnew = g.replaceAll("-","");
+    }else
+    g = gnew;
+    if(!Data.domainNGramRawFreq.containsKey(gnew)){
       System.err.println("domain count 0 for " + g);
       return 0;
-    }
+    } else g = gnew;
+
+
     return ((1 + Data.rawFreq.getCount(g)
         * Math.sqrt(Data.ratioDomainNgramFreqWithDataFreq)) / Data.domainNGramRawFreq
           .getCount(g));

@@ -208,7 +208,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
   }
 
-  Set<CandidatePhrase> chooseUnknownAsNegatives(Set<CandidatePhrase> candidatePhrases, String label, int maxNum){
+  Set<CandidatePhrase> chooseUnknownAsNegatives(Collection<CandidatePhrase> candidatePhrases, String label, double percentage){
+
     Counter<CandidatePhrase> sims = new ClassicCounter<CandidatePhrase>();
     double allMaxSim = Double.MIN_VALUE;
     for(CandidatePhrase p : candidatePhrases) {
@@ -222,36 +223,34 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
         double j = Counters.jaccardCoefficient(wordClassClustersForPhrase.get(pos), feat);
         System.out.println("clusters for positive phrase " + pos + " is " +wordClassClustersForPhrase.get(pos) + " and the features for unknown are "  + feat + " for phrase " + p);
 
-
         if(j  > maxSim)
           maxSim = j;
       }
+
       sims.setCount(p, maxSim);
       if(allMaxSim < maxSim)
         allMaxSim = maxSim;
     }
 
-    double percentage;
     if(allMaxSim == Double.MIN_VALUE){
       Redwood.log(Redwood.DBG, "No similarity recorded between the positives and the unknown!");
       percentage = 1.0;
     }
-    else
-      percentage = 0.8;
 
-    Counters.retainBottom(sims, Math.min((int) (sims.size() * percentage), maxNum));
-    System.out.println("choosing " + sims + " as the negative phrases");
+
+    Counters.retainBottom(sims, (int) (sims.size() * percentage));
+    System.out.println("choosing " + sims + " as the negative phrases. percentage is " + percentage + " and allMaxsim was " + allMaxSim);
     return sims.keySet();
   }
 
 
 
-  Set<CandidatePhrase> chooseNegativePhrases(DataInstance sent, Random random, double perSelect, Class positiveClass, String label, int maxNum){
+  Set<CandidatePhrase> chooseUnknownPhrases(DataInstance sent, Random random, double perSelect, Class positiveClass, String label, int maxNum){
 
-    Set<CandidatePhrase> negativeSamples = new HashSet<CandidatePhrase>();
+    Set<CandidatePhrase> unknownSamples = new HashSet<CandidatePhrase>();
 
     if(maxNum == 0)
-      return negativeSamples;
+      return unknownSamples;
 
     Function<CoreLabel, Boolean> acceptWord = coreLabel -> {
       if(coreLabel.get(positiveClass).equals(label))
@@ -286,7 +285,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       extract.printSubGraph(g, w, new ArrayList<String>(), textTokens, outputPhrases, outputIndices, new ArrayList<IndexedWord>(), new ArrayList<IndexedWord>(),
         false, extractedPhrases, null, acceptWord);
       for(ExtractedPhrase p :extractedPhrases){
-        negativeSamples.add(CandidatePhrase.createOrGet(p.getValue(), null, p.getFeatures()));
+        unknownSamples.add(CandidatePhrase.createOrGet(p.getValue(), null, p.getFeatures()));
       }
     }
 
@@ -306,14 +305,18 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             }
           }
           if(!haspositive){
-            negativeSamples.add(CandidatePhrase.createOrGet(ph.trim()));
+            unknownSamples.add(CandidatePhrase.createOrGet(ph.trim()));
           }
         }
       }
 
     } else
     throw new RuntimeException("not yet implemented");
-    return chooseUnknownAsNegatives(negativeSamples, label, maxNum);
+
+
+    //this chooses the ones that are not close to the positive phrases!
+    return unknownSamples;
+
   }
 
 
@@ -327,6 +330,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     int numpos = 0;//, numneg = 0;
     List<Pair<String, Integer>> chosen = new ArrayList<Pair<String, Integer>>();
     List<CandidatePhrase> allNegativePhrases = new ArrayList<CandidatePhrase>();
+    List<CandidatePhrase> allUnknownPhrases = new ArrayList<CandidatePhrase>();
 
     for (Entry<String, DataInstance> en : sents.entrySet()) {
       List<CoreLabel> value = en.getValue().getTokens();
@@ -383,7 +387,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           }
         }
       }
-      //allNegativePhrases.addAll(this.chooseNegativePhrases(en.getValue(), r, perSelectRand, constVars.getAnswerClass().get(label), label,Math.max(0, Integer.MAX_VALUE)));
+
+      allUnknownPhrases.addAll(this.chooseUnknownPhrases(en.getValue(), r, perSelectRand, constVars.getAnswerClass().get(label), label,Math.max(0, Integer.MAX_VALUE)));
 //
 //        if (negative && getRandomBoolean(rneg, perSelectNeg)) {
 //          numneg++;
@@ -396,6 +401,15 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 //
 //
 //          chosen.add(new Pair<String, Integer>(en.getKey(), i));
+    }
+
+    if(constVars.subsampleUnkAsNegUsingSim)
+      allNegativePhrases.addAll(chooseUnknownAsNegatives(allUnknownPhrases, label, constVars.subSampleUnkAsNegUsingSimPercentage));
+    else{
+      if(allUnknownPhrases.size() + allNegativePhrases.size() > 1.5* numpos){
+        Redwood.log(Redwood.WARN, "Num of negative (" + allNegativePhrases.size() + ") plus num of unknown phrases (" + allUnknownPhrases.size() + ") is much higher than number of positive phrases (" + numpos + "). Consider decreasing perSelectNeg and perSelect");
+        allNegativePhrases.addAll(allUnknownPhrases);
+      }
     }
 
     for(CandidatePhrase negative: allNegativePhrases){

@@ -426,6 +426,13 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="patternType", required=true)
   public PatternFactory.PatternType patternType = null;
 
+  @Option(name="subsampleUnkAsNegUsingSim", gloss="When learning a classifier, remove phrases from unknown phrases that are too close to the positive phrases")
+  public boolean subsampleUnkAsNegUsingSim = false;
+
+  @Option(name="subSampleUnkAsNegUsingSimPercentage", gloss="When using subsampleUnkAsNegUsingSim, select bottom %")
+  public double subSampleUnkAsNegUsingSimPercentage = 0.8;
+
+
   public Set<String> getLabels() {
     return labels;
   }

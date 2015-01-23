@@ -66,6 +66,7 @@ public class CandidatePhrase implements Serializable, Comparable  {
   }
 
   private CandidatePhrase(String phrase, String lemma, Counter<String> features){
+    phrase = phrase.trim();
     this.phrase = phrase;
     this.phraseLemma = lemma;
     this.features = features;
@@ -97,7 +98,8 @@ public class CandidatePhrase implements Serializable, Comparable  {
   public boolean equals(Object o){
     if(! (o instanceof CandidatePhrase))
       return false;
-    return ((CandidatePhrase)o).getPhrase().equals(this.getPhrase());
+
+    return this.hashCode == o.hashCode();
   }
 
   @Override
