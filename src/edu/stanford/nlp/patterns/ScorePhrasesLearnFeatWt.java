@@ -141,6 +141,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     } else if(scoreClassifierType.equals(ClassifierType.SVM)){
       SVMLightClassifierFactory<String, ScorePhraseMeasures> svmcf = new SVMLightClassifierFactory<String, ScorePhraseMeasures>(true);
       classifier = svmcf.trainClassifier(dataset);
+      Set<String> labels = Generics.newHashSet(Arrays.asList("true"));
+      List<Triple<ScorePhraseMeasures, String, Double>> topfeatures = ((SVMLightClassifier<String, ScorePhraseMeasures>) classifier).getTopFeatures(labels, 0, true, -1, true);
+      Redwood.log(ConstantsAndVariables.minimaldebug, "The weights are " + StringUtils.join(topfeatures, "\n"));
     } else
       throw new RuntimeException("cannot identify classifier " + scoreClassifierType);
 
