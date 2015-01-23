@@ -61,7 +61,7 @@ public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer
     for (CandidatePhrase gc : terms.firstKeySet()) {
       String g = gc.getPhrase();
       if (constVars.usePhraseEvalEditDistOther) {
-        editDistanceOtherBinaryScores.setCount(gc, 1 - constVars.getEditDistanceScoresOtherClassThreshold(g));
+        editDistanceOtherBinaryScores.setCount(gc, 1 - constVars.getEditDistanceScoresOtherClassThreshold(label, g));
       }
 
       if (constVars.usePhraseEvalEditDistSame)

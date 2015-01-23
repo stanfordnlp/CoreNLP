@@ -152,7 +152,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       ShiftParamsLogisticClassifierFactory<String, ScorePhraseMeasures> factory = new ShiftParamsLogisticClassifierFactory<String, ScorePhraseMeasures>();
       classifier =  factory.trainClassifier(dataset);
     } else if(scoreClassifierType.equals(ClassifierType.LINEAR)){
-      LinearClassifierFactory<String, ScorePhraseMeasures> lcf = new LinearClassifierFactory<>();
+      LinearClassifierFactory<String, ScorePhraseMeasures> lcf = new LinearClassifierFactory<String, ScorePhraseMeasures>();
       classifier = lcf.trainClassifier(dataset);
       Set<String> labels = Generics.newHashSet(Arrays.asList("true"));
       List<Triple<ScorePhraseMeasures, String, Double>> topfeatures = ((LinearClassifier<String, ScorePhraseMeasures>) classifier).getTopFeatures(labels, 0, true, -1, true);
@@ -1091,11 +1091,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       scoreslist.setCount(ScorePhraseMeasures.DISTSIM, distSimWt);
     }
 
-    if (constVars.usePatternEvalEditDistOther) {
+    if (constVars.usePatternEvalEditDistSame) {
       scoreslist.setCount(ScorePhraseMeasures.EDITDISTSAME, constVars.getEditDistanceScoresThisClass(label, word.getPhrase()));
     }
-    if (constVars.usePatternEvalEditDistSame)
-      scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, constVars.getEditDistanceScoresOtherClass(word.getPhrase()));
+    if (constVars.usePatternEvalEditDistOther)
+      scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, constVars.getEditDistanceScoresOtherClass(label, word.getPhrase()));
 
     if(constVars.usePatternEvalWordShape){
       scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word.getPhrase(), label));
@@ -1245,17 +1245,17 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       scoreslist.setCount(ScorePhraseMeasures.WORDVECNEGSIMAVG, maxNeg);
     }
 
-    if (constVars.usePhraseEvalEditDistOther) {
+    if (constVars.usePhraseEvalEditDistSame) {
       double ed = constVars.getEditDistanceScoresThisClass(label, word.getPhrase());
       assert ed <= 1 : " how come edit distance from the true class is " + ed  + " for word " + word;
       scoreslist.setCount(ScorePhraseMeasures.EDITDISTSAME,  ed == 1 ? 1: ed);
     }
-    if (constVars.usePhraseEvalEditDistSame) {
-      double ed = constVars.getEditDistanceScoresOtherClass(word.getPhrase());
+    if (constVars.usePhraseEvalEditDistOther) {
+      double ed = constVars.getEditDistanceScoresOtherClass(label, word.getPhrase());
       assert ed <= 1 : " how come edit distance from the true class is " + ed  + " for word " + word;;
       scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, ed == 1 ? 1 : ed);
     }
-    
+
     if(constVars.usePhraseEvalWordShape){
       scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word.getPhrase(), label));
     }
