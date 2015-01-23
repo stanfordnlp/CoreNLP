@@ -66,6 +66,10 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       }
       Redwood.log(Redwood.DBG, "Read " + wordVectors.size() + " word vectors");
     }
+    OOVExternalFeatWt = 0;
+    OOVdictOdds = 0;
+    OOVDomainNgramScore = 0;
+    OOVGoogleNgramScore = 0;
   }
 
   @Option(name = "scoreClassifierType")
@@ -150,6 +154,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     } else if(scoreClassifierType.equals(ClassifierType.LINEAR)){
       LinearClassifierFactory<String, ScorePhraseMeasures> lcf = new LinearClassifierFactory<>();
       classifier = lcf.trainClassifier(dataset);
+      Set<String> labels = Generics.newHashSet(Arrays.asList("true"));
+      List<Triple<ScorePhraseMeasures, String, Double>> topfeatures = ((LinearClassifier<String, ScorePhraseMeasures>) classifier).getTopFeatures(labels, 0, true, -1, true);
+      Redwood.log(ConstantsAndVariables.minimaldebug, "The weights are " + StringUtils.join(topfeatures, "\n"));
     }else
       throw new RuntimeException("cannot identify classifier " + scoreClassifierType);
 
@@ -1053,7 +1060,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     if (constVars.usePatternEvalSemanticOdds) {
       assert constVars.dictOddsWeights != null : "usePatternEvalSemanticOdds is true but dictOddsWeights is null for the label " + label;
-      double dscore = this.getDictOddsScore(word, label);
+      double dscore = this.getDictOddsScore(word, label, 0);
       dscore = logistic(dscore);
       scoreslist.setCount(ScorePhraseMeasures.SEMANTICODDS, dscore);
     }
@@ -1177,7 +1184,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     if (constVars.usePhraseEvalSemanticOdds) {
-      double dscore = this.getDictOddsScore(word, label);
+      double dscore = this.getDictOddsScore(word, label, 0);
       scoreslist.setCount(ScorePhraseMeasures.SEMANTICODDS, dscore);
     }
 

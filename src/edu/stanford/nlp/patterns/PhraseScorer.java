@@ -19,6 +19,7 @@ import edu.stanford.nlp.util.logging.Redwood;
 public abstract class PhraseScorer<E extends Pattern> {
   ConstantsAndVariables<E> constVars;
 
+  //these get overwritten in ScorePhrasesLearnFeatWt class
   double OOVExternalFeatWt = 0.5;
   double OOVdictOdds = 1e-10;
   double OOVDomainNgramScore = 1e-10;
@@ -167,14 +168,14 @@ public abstract class PhraseScorer<E extends Pattern> {
     return score;
   }
   
-  public double getDictOddsScore(CandidatePhrase word, String label) {
+  public double getDictOddsScore(CandidatePhrase word, String label, double defaultWt) {
     double dscore;
     Counter<CandidatePhrase> dictOddsWordWeights = constVars.dictOddsWeights.get(label);
     assert dictOddsWordWeights != null : "dictOddsWordWeights is null for label " + label;
     if (dictOddsWordWeights.containsKey(word)) {
       dscore = dictOddsWordWeights.getCount(word);
     } else
-      dscore = getPhraseWeightFromWords(dictOddsWordWeights, word, OOVdictOdds);
+      dscore = getPhraseWeightFromWords(dictOddsWordWeights, word, defaultWt);
     return dscore;
   }
 
