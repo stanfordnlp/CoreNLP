@@ -402,7 +402,7 @@ public class ConstantsAndVariables<E> implements Serializable{
    */
   private ConcurrentHashMap<String, String> editDistanceFromThisClassMatches = new ConcurrentHashMap<String, String>();
 
-  private Map<String, Counter<String>> wordShapesForLabels = new HashMap<String, Counter<String>>();
+  private ConcurrentHashMap<String, Counter<String>> wordShapesForLabels = new ConcurrentHashMap<String, Counter<String>>();
 
 
 
@@ -680,7 +680,7 @@ public class ConstantsAndVariables<E> implements Serializable{
   public static String backgroundSymbol = "O";
 
   int wordShaper = WordShapeClassifier.WORDSHAPECHRIS2;
-  private Map<String, String> wordShapeCache = new HashMap<String, String>();
+  private ConcurrentHashMap<String, String> wordShapeCache = new ConcurrentHashMap<String, String>();
 
   public SentenceIndex invertedIndex;
 
@@ -944,7 +944,7 @@ public class ConstantsAndVariables<E> implements Serializable{
     return wordShapesForLabels;
   }
 
-  public void setWordShapesForLabels(Map<String, Counter<String>> wordShapesForLabels) {
+  public void setWordShapesForLabels(ConcurrentHashMap<String, Counter<String>> wordShapesForLabels) {
     this.wordShapesForLabels = wordShapesForLabels;
   }
   public void addGeneralizeClasses(Map<String, Class> gen) {
@@ -1099,22 +1099,8 @@ public class ConstantsAndVariables<E> implements Serializable{
     words.addAll(learnedWords.get(label).keySet());
     Pair<String, Double> minD = getEditDist(CandidatePhrase.convertToString(words), ph);
 
-    // double minDtotal = editDistMax;
-    // String minPh = "";
-    // if (minD.second() == editDistMax && ph.contains(" ")) {
-    // for (String s : ph.split("\\s+")) {
-    // Pair<String, Double> minDSingle = getEditDist(seedLabelDictionary.get(label),
-    // s);
-    // if (minDSingle.second() < minDtotal) {
-    // minDtotal = minDSingle.second;
-    // }
-    // minPh += " " + minDSingle.first();
-    // }
-    // minPh = minPh.trim();
-    // } else {
     double minDtotal = minD.second();
     String minPh = minD.first();
-    // }
     assert (!minPh.isEmpty());
     editDistanceFromThisClass.putIfAbsent(ph, minDtotal);
     editDistanceFromThisClassMatches.putIfAbsent(ph, minPh);
@@ -1227,12 +1213,14 @@ public class ConstantsAndVariables<E> implements Serializable{
     if (editDistanceFromThisClass.containsKey(g)) {
       editDist = editDistanceFromThisClass.get(g);
       editDistPh = editDistanceFromThisClassMatches.get(g);
+      assert (!editDistPh.isEmpty());
     } else {
       Pair<String, Double> editMatch = getEditDistanceFromThisClass(label, g, 4);
       editDist = editMatch.second();
       editDistPh = editMatch.first();
+      assert (!editDistPh.isEmpty());
     }
-    assert (!editDistPh.isEmpty());
+
     return editDist / (double) editDistPh.length();
   }
 
