@@ -3270,3 +3270,23 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
   } // end main()
 
 }
+//  public void testProtobufSerialization() throws Exception {
+//    // Check the regexner is integrated with the StanfordCoreNLP
+//    Properties props = new Properties();
+//    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,parse");
+//    String text = "Barack Obama, a Yale professor, is president.";
+//    Annotation document = new Annotation(text);
+//    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+//    pipeline.annotate(document);
+//    File tempfile = File.createTempFile("temp","gz");
+//    tempfile.deleteOnExit();
+//    ProtobufAnnotationSerializer serializer = new ProtobufAnnotationSerializer(true);
+//    GZIPOutputStream gz = new GZIPOutputStream(new FileOutputStream(tempfile));
+//    gz.write(serializer.toProto(document).toByteArray());
+//    gz.finish();
+//    gz.close();
+//
+//    //IOUtils.writeObjectToFile(document.get(CoreAnnotations.SentencesAnnotation.class), tempfile);
+//    Annotation doc2 = serializer.read(new BufferedInputStream(new GZIPInputStream(new FileInputStream((tempfile))))).first();
+//
+//  }
