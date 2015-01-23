@@ -90,7 +90,7 @@ import org.joda.time.Period;
  * @author Sonal Gupta (sonal@cs.stanford.edu)
  */
 
-public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serializable {
+public class GetPatternsFromDataMultiClass<E extends Pattern> implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -1346,8 +1346,6 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       if(constVars.storePatsForEachToken.equals(ConstantsAndVariables.PatternForEachTokenWay.DB))
         patsForEachToken.createIndexIfUsingDBAndNotExists();
 
-
-      IOUtils.ensureDir(new File(constVars.allPatternsDir));
       patsForEachToken.save(constVars.allPatternsDir);
       //savePatternIndex(constVars.allPatternsDir);
     }
