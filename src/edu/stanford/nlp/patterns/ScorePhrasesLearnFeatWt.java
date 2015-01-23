@@ -45,7 +45,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
   public ScorePhrasesLearnFeatWt(ConstantsAndVariables constvar) {
     super(constvar);
-    if(constvar.useWordVectorsToComputeSim) {
+    if(constvar.useWordVectorsToComputeSim && (constvar.subsampleUnkAsNegUsingSim|| constvar.expandPositivesWhenSampling)) {
       wordVectors = new HashMap<String, double[]>();
       for (String line : IOUtils.readLines(constVars.wordVectorFile)) {
         String[] tok = line.split("\\s+");
