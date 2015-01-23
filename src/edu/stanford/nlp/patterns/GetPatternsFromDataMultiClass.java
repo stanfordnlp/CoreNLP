@@ -651,8 +651,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
 
     if (useTargetParserParentRestriction){
       anns.add("parse");
-    }
-    if(type.equals(PatternFactory.PatternType.DEP))
+    } else if(type.equals(PatternFactory.PatternType.DEP))
       anns.add("depparse");
 
     if (useTargetNERRestriction) {
@@ -966,6 +965,8 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
           s= l.word();
         if(constVars.matchLowerCaseContext)
           s = s.toLowerCase();
+        assert s!= null;
+        System.out.println("applied transformation from " + l + " to " + s + ". l keyset is " + l.toString(CoreLabel.OutputFormat.ALL));
         return s;
       }
     };

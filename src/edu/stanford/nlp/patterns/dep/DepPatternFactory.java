@@ -1,6 +1,7 @@
 package edu.stanford.nlp.patterns.dep;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.patterns.CandidatePhrase;
 import edu.stanford.nlp.patterns.DataInstance;
@@ -127,6 +128,7 @@ public class DepPatternFactory extends PatternFactory{
   static public DepPattern patternToDepPattern(Pair<IndexedWord, GrammaticalRelation> p) {
 
     Token token = new Token(PatternFactory.PatternType.DEP);
+    assert p.first().backingLabel().containsKey(PatternsAnnotations.ProcessedTextAnnotation.class) : "the keyset are " + p.first().backingLabel().toString(CoreLabel.OutputFormat.ALL) + " and the sentence is " + p.first().containsKey(PatternsAnnotations.ProcessedTextAnnotation.class);
     token.addORRestriction(PatternsAnnotations.ProcessedTextAnnotation.class, p.first().backingLabel().get(PatternsAnnotations.ProcessedTextAnnotation.class));
 
     return new DepPattern(token, p.second());

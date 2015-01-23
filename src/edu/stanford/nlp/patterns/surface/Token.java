@@ -166,6 +166,7 @@ public class Token implements Serializable {
       throw new RuntimeException("cannot add restriction to something that is binding to an env variable");
     if(classORrestrictions == null)
       classORrestrictions = new TreeMap<Class, String>(new ClassComparator());
+    assert value!=null;
     classORrestrictions.put(classR, value);
   }
 
