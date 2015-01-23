@@ -22,6 +22,7 @@ import edu.stanford.nlp.patterns.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.patterns.dep.DataInstanceDep;
 import edu.stanford.nlp.patterns.dep.ExtractPhraseFromPattern;
 import edu.stanford.nlp.patterns.dep.ExtractedPhrase;
+import edu.stanford.nlp.semgraph.ISemanticGraphEdgeEql;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -280,7 +281,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     //TODO: check this
     assert wordVectors != null : "Why are word vectors null?";
     Counter<CandidatePhrase> posSims = computeSimWithWordVectors(candidatePhrases, positivePhrases);
+    Redwood.log(Redwood.DBG, "Computed similarities with positive phrases");
     Counter<CandidatePhrase> negSims = computeSimWithWordVectors(posSims.keySet(), allPossibleNegativePhrases);
+    Redwood.log(Redwood.DBG, "Computed similarties with negative phrases");
     Function<CandidatePhrase, Boolean> retainPhrasesNotCloseToNegative = candidatePhrase -> {
       if(negSims.getCount(candidatePhrase) > posSims.getCount(candidatePhrase))
         return false;
@@ -636,6 +639,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     final String p1;
     final String p2;
     final int hashCode;
+
     public PhrasePair(String p1, String p2) {
       if(p1.compareTo(p2) <=0)
       {
@@ -653,6 +657,25 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     @Override
     public int hashCode(){
       return hashCode;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (!(o instanceof PhrasePair))
+        return false;
+      PhrasePair p = (PhrasePair) o;
+      if (p.getPhrase1().equals(this.getPhrase1()) && p.getPhrase2().equals(this.getPhrase2()))
+        return true;
+      return false;
+    }
+
+    public String getPhrase1() {
+      return p1;
+    }
+
+
+    public String getPhrase2() {
+      return p2;
     }
   }
 
@@ -678,7 +701,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     Collection<CandidatePhrase> allPossibleNegativePhrases = null;
-    
+
     if(constVars.expandPositivesWhenSampling || constVars.subsampleUnkAsNegUsingSim){
       allPossibleNegativePhrases = new HashSet<CandidatePhrase>();
       allPossibleNegativePhrases.addAll(constVars.getOtherSemanticClassesWords());
