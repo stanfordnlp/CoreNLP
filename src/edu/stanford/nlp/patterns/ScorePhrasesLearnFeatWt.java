@@ -327,8 +327,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
           CandidatePhrase candidate = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(label);
 
           if (candidate == null) {
-            System.out.println("candidate null for " + l.word() + " and longest matching" + l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class) + " and hash amp is " + CandidatePhrase.candidatePhraseMap);
-            throw new RuntimeException("");
+            throw new RuntimeException("for sentence id " + en.getKey() + " and token id " + i + " candidate is null for " + l.word() + " and longest matching" + l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class) + " and matched phrases are " + l.get(PatternsAnnotations.MatchedPhrases.class));
             //candidate = CandidatePhrase.createOrGet(l.word());
           }
 
