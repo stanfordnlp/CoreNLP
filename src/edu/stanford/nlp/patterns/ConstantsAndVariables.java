@@ -956,6 +956,7 @@ public class ConstantsAndVariables<E> implements Serializable{
    }
 
     if(goldEntitiesEvalFiles != null){
+      Redwood.log(ConstantsAndVariables.minimaldebug, "Reading gold entities from " + goldEntitiesEvalFiles);
       String[] t = goldEntitiesEvalFiles.split(";");
       for(String label: labels)
         goldEntities.put(label, new HashMap<String, Boolean>());
@@ -974,6 +975,7 @@ public class ConstantsAndVariables<E> implements Serializable{
           }
           goldEntities.get(label).put(entity, goldlabel);
         }
+        Redwood.log(ConstantsAndVariables.minimaldebug, "Read " + goldEntities.get(label).size() + " entities for label " + label+". All set of labels are " + labels);
       }
     }
     if(goldEntitiesEvalFiles !=null)
