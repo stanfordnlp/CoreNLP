@@ -14,11 +14,14 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
+import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.EnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.TreeGraphNode;
 import edu.stanford.nlp.trees.TypedDependency;
+import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
+import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
@@ -884,8 +887,7 @@ public class DependencyParser {
 
       GrammaticalRelation relation = head == 0
                                      ? GrammaticalRelation.ROOT
-                                     : new GrammaticalRelation(language, label, null,
-                                         GrammaticalRelation.DEPENDENT);
+                                     : makeGrammaticalRelation(label);
 
       dependencies.add(new TypedDependency(relation, headWord, thisWord));
     }
@@ -893,7 +895,36 @@ public class DependencyParser {
     // Build GrammaticalStructure
     // TODO ideally submodule should just return GrammaticalStructure
     TreeGraphNode rootNode = new TreeGraphNode(root);
-    return new EnglishGrammaticalStructure(dependencies, rootNode);
+    return makeGrammaticalStructure(dependencies, rootNode);
+  }
+
+  private GrammaticalRelation makeGrammaticalRelation(String label) {
+    GrammaticalRelation stored;
+
+    switch (language) {
+      case English:
+        stored = EnglishGrammaticalRelations.shortNameToGRel.get(label);
+        if (stored != null)
+          return stored;
+        break;
+      case Chinese:
+        stored = ChineseGrammaticalRelations.shortNameToGRel.get(label);
+        if (stored != null)
+          return stored;
+        break;
+    }
+
+    return new GrammaticalRelation(language, label, null, GrammaticalRelation.DEPENDENT);
+  }
+
+  private GrammaticalStructure makeGrammaticalStructure(List<TypedDependency> dependencies, TreeGraphNode rootNode) {
+    switch (language) {
+      case English: return new EnglishGrammaticalStructure(dependencies, rootNode);
+      case Chinese: return new ChineseGrammaticalStructure(dependencies, rootNode);
+
+      // TODO suboptimal: default to EnglishGrammaticalStructure return
+      default: return new EnglishGrammaticalStructure(dependencies, rootNode);
+    }
   }
 
   /**

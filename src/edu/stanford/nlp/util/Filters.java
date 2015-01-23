@@ -6,7 +6,14 @@ import java.util.*;
 import java.util.function.Predicate;
 
 /**
- * Some simple implementations of the {@link java.util.function.Predicate} interface.
+ * <p>Static class with some useful {@link java.util.function.Predicate} implementations and utility methods for working
+ * with {@code Predicates}.</p>
+ * <p>
+ * <p></p>Contains filters that always accept or reject, filters that accept or reject an Object if it's in a given
+ * Collection, as well as several composite filters. Contains methods for creating a new Filter that is the AND/OR of
+ * two Filters, or the NOT of a Filter. Finally, you can filter an Object[] through a Filter to return a new
+ * <code>Object[]</code> with only the accepeted values, or {@link #retainAll(java.util.Collection,
+ * java.util.function.Predicate)} elements in a Collection that pass a filter.</p>
  *
  * @author Christopher Manning
  * @version 1.0

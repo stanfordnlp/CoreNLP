@@ -203,6 +203,32 @@ public class ProtobufAnnotationSerializerSlowITest {
     return annotators.toArray(new String[annotators.size()]);
   }
 
+  private void testAnnotators(String annotators) {
+    try {
+      AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+      // Write
+      Annotation doc = new StanfordCoreNLP(new Properties(){{
+        setProperty("annotators", annotators);
+      }}).process(THOROUGH_TEST ? prideAndPrejudiceChapters1to5 : prideAndPrejudiceFirstBit);
+      ByteArrayOutputStream ks = new ByteArrayOutputStream();
+      serializer.write(doc, ks).close();
+
+      // Read
+      InputStream kis = new ByteArrayInputStream(ks.toByteArray());
+      Pair<Annotation, InputStream> pair = serializer.read(kis);
+      pair.second.close();
+      Annotation readDoc = pair.first;
+      kis.close();
+
+      sameAsRead(doc, readDoc);
+    } catch (Exception e) { throw new RuntimeException(e); }
+  }
+
+  @Test
+  public void testSentiment() {
+    testAnnotators("tokenize,ssplit,pos,parse,sentiment");
+  }
+
   @Test
   public void testGetPossibleAnnotators() {
     assertNotNull(possibleAnnotators());
@@ -325,28 +351,6 @@ public class ProtobufAnnotationSerializerSlowITest {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-  }
-
-
-  private void testAnnotators(String annotators) {
-    try {
-      AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
-      // Write
-      Annotation doc = new StanfordCoreNLP(new Properties(){{
-        setProperty("annotators", annotators);
-      }}).process(THOROUGH_TEST ? prideAndPrejudiceChapters1to5 : prideAndPrejudiceFirstBit);
-      ByteArrayOutputStream ks = new ByteArrayOutputStream();
-      serializer.write(doc, ks).close();
-
-      // Read
-      InputStream kis = new ByteArrayInputStream(ks.toByteArray());
-      Pair<Annotation, InputStream> pair = serializer.read(kis);
-      pair.second.close();
-      Annotation readDoc = pair.first;
-      kis.close();
-
-      sameAsRead(doc, readDoc);
-    } catch (Exception e) { throw new RuntimeException(e); }
   }
 
   @Test
