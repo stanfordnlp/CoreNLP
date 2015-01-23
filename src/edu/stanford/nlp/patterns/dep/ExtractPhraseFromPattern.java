@@ -141,8 +141,8 @@ public class ExtractPhraseFromPattern {
 
 
       if(DEBUG > 3) {
-        List<Pair<String, SemanticGraph>> matchedGraphs = matchedGraphsForPattern
-          .get(pattern);
+        List<Pair<String, SemanticGraph>> matchedGraphs = matchedGraphsForPattern.get(pattern);
+
         if (matchedGraphs == null)
           matchedGraphs = new ArrayList<Pair<String, SemanticGraph>>();
         matchedGraphs.add(new Pair<String, SemanticGraph>(StringUtils.join(
