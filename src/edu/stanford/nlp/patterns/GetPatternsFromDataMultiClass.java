@@ -2195,6 +2195,22 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     }
   }
 
+  public String matchedTokensByPhraseJsonString(String phrase){
+    if(!Data.matchedTokensForEachPhrase.containsKey(phrase))
+      return "";
+    JsonArrayBuilder arrobj =Json.createArrayBuilder();
+    for (Entry<String, List<Integer>> sen : Data.matchedTokensForEachPhrase.get(phrase).entrySet()) {
+      JsonObjectBuilder obj = Json.createObjectBuilder();
+      JsonArrayBuilder tokens = Json.createArrayBuilder();
+      for(Integer i : sen.getValue()){
+        tokens.add(i);
+      }
+      obj.add(sen.getKey(),tokens);
+      arrobj.add(obj);
+    }
+    return arrobj.build().toString();
+  }
+
   public String matchedTokensByPhraseJsonString(){
     JsonObjectBuilder pats = Json.createObjectBuilder();
 
@@ -2207,7 +2223,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
         for(Integer i : sen.getValue()){
           tokens.add(i);
         }
-        obj.add("id",tokens);
+        obj.add(sen.getKey(),tokens);
         arrobj.add(obj);
       }
       pats.add(en.getKey(), arrobj);

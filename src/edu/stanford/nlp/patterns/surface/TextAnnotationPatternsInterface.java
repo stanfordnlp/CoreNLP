@@ -2,7 +2,7 @@ package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.patterns.Data;
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
-import edu.stanford.nlp.patterns.PatternFactory;
+
 
 import javax.json.*;
 import java.io.*;
@@ -12,9 +12,6 @@ import java.net.Socket;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-
-import static edu.stanford.nlp.patterns.PatternFactory.PatternType;
-import static edu.stanford.nlp.patterns.PatternFactory.PatternType.*;
 
 /**
  * Created by sonalg on 10/30/14.
@@ -116,6 +113,10 @@ public class TextAnnotationPatternsInterface {
             msg = this.currentSummary();
           } else if (nextlineAction.equals(Actions.SUGGEST)){
             msg = this.suggestPhrases();
+          } else if(nextlineAction.equals(Actions.MATCHEDTOKENSBYALL)){
+            msg = this.getMatchedTokensByAllPhrases();
+          } else if (nextlineAction.equals(Actions.MATCHEDTOKENSBYPHRASE)){
+            msg = this.getMatchedTokensByPhrase(input);
           } else if(nextlineAction.equals(Actions.CLOSE)){
             msg = "bye!";
           }
@@ -136,12 +137,15 @@ public class TextAnnotationPatternsInterface {
     private String suggestPhrases() throws IOException, ClassNotFoundException {
       model.constVars.numIterationsForPatterns = 2;
       model.iterateExtractApply();
-      JsonObjectBuilder objThisIter = Json.createObjectBuilder();
       return model.constVars.getLearnedWordsAsJson();
     }
 
-    private String getMatchedTokensByPhrase(){
+    private String getMatchedTokensByAllPhrases(){
       return model.matchedTokensByPhraseJsonString();
+    }
+
+    private String getMatchedTokensByPhrase(String input){
+      return model.matchedTokensByPhraseJsonString(input);
     }
 
     //the format of the line input is json string of maps. required keys are "file" and "seedWordsFiles". For example: {"file":"presidents.txt","seedWordsFiles":"name;place"}
@@ -176,6 +180,8 @@ public class TextAnnotationPatternsInterface {
         props.setProperty("thresholdWordExtract","0.00000000000000001");
       if(!props.containsKey("thresholdNumPatternsApplied"))
         props.setProperty("thresholdNumPatternsApplied", "1");
+      if(!props.containsKey("writeMatchedTokensIdsForEachPhrase"))
+        props.setProperty("writeMatchedTokensIdsForEachPhrase","true");
 
       model = GetPatternsFromDataMultiClass.<SurfacePattern>run(props);
       System.out.println("written the output to " + outputfile);
@@ -223,71 +229,6 @@ public class TextAnnotationPatternsInterface {
       System.out.println(message);
     }
   }
-
-  /*
-  public void serve()
-  {
-    try
-    {
-      while (true)
-      {
-        Socket client = server.accept();
-        client.setTcpNoDelay(true);
-        BufferedReader r = new BufferedReader(new InputStreamReader(client.getInputStream()));
-        PrintWriter w = new PrintWriter(client.getOutputStream(), true);
-        w.println("POSSIBLE ACTIONS ARE: " + Arrays.toString(Actions.values()));
-        w.flush();
-        String line;
-        Actions nextlineAction = Actions.NONE;
-        do
-        {
-          line = r.readLine();
-          System.out.println("read " + line);
-          String msg = "";
-          if ( line != null){
-            if(nextlineAction.equals(Actions.NEWPHRASES)){
-              msg = "Added new phrases";
-              doNewPhrases(line);
-              nextlineAction = Actions.NONE;
-            } else if(nextlineAction.equals(Actions.NEWANNOTATIONS)){
-              doNewAnnotations(line);
-              msg = "Added new annotations";
-              nextlineAction = Actions.NONE;
-            } else if(nextlineAction.equals(Actions.REMOVEPHRASES)){
-              msg = "Removed phrases";
-              doRemovePhrases(line);
-              nextlineAction = Actions.NONE;
-            } else{
-               try{
-                nextlineAction = Actions.valueOf(line.trim());
-               }catch(IllegalArgumentException e){
-                 System.out.println("read " + line + " and cannot understand");
-                msg = "Did not understand " + line + ". POSSIBLE ACTIONS ARE: " + Arrays.toString(Actions.values());
-               }
-              if(nextlineAction.equals(Actions.NEWPHRASES))
-                msg = "Please write the new phrases to add in the next line ";
-              else if(nextlineAction.equals(Actions.NEWANNOTATIONS))
-                msg = "Please write the new annotations to add in the next line ";
-              else if(nextlineAction.equals(Actions.REMOVEPHRASES))
-                msg = "Please write the  phrases to remove in the next line ";
-              else if(nextlineAction.equals(Actions.CLOSE))
-                msg = "bye!";
-            }
-            System.out.println("sending msg " + msg);
-
-            w.println(msg);
-            w.flush();
-          }
-        }
-        while (!nextlineAction.equals(Actions.CLOSE));
-        client.close();
-      }
-    }
-    catch (Exception err)
-    {
-    throw new RuntimeException(err);
-    }
-  }*/
 
   /**
    * Application method to run the server runs in an infinite loop
