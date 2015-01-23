@@ -436,8 +436,11 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="expandPositivesWhenSampling", gloss="when sampling for learning feature wts for learning phrases, expand the positives")
   public boolean expandPositivesWhenSampling = false;
 
-  @Option(name="positiveSimilarityThresholdHighPrecision", gloss="used for expanding positives")
-  public double positiveSimilarityThresholdHighPrecision  = 0.7;
+  @Option(name="expandNegativesWhenSampling", gloss="when sampling for learning feature wts for learning phrases, expand the negatives")
+  public boolean expandNegativesWhenSampling = false;
+
+  @Option(name="similarityThresholdHighPrecision", gloss="used for expanding positives")
+  public double similarityThresholdHighPrecision  = 0.7;
 
   @Option(name="positiveSimilarityThresholdLowPrecision", gloss="used for not choosing close unknowns as positives")
   public double positiveSimilarityThresholdLowPrecision  = 0.5;
