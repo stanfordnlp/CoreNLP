@@ -1246,11 +1246,16 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     if (constVars.usePhraseEvalEditDistOther) {
-      scoreslist.setCount(ScorePhraseMeasures.EDITDISTSAME, constVars.getEditDistanceScoresThisClass(label, word.getPhrase()) == 1 ? 0:1);
+      double ed = constVars.getEditDistanceScoresThisClass(label, word.getPhrase());
+      assert ed <= 1 : " how come edit distance from the true class is " + ed  + " for word " + word;
+      scoreslist.setCount(ScorePhraseMeasures.EDITDISTSAME,  ed == 1 ? 1: ed);
     }
-    if (constVars.usePhraseEvalEditDistSame)
-      scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, constVars.getEditDistanceScoresOtherClass(word.getPhrase()) == 1 ? 0: 1);
-
+    if (constVars.usePhraseEvalEditDistSame) {
+      double ed = constVars.getEditDistanceScoresOtherClass(word.getPhrase());
+      assert ed <= 1 : " how come edit distance from the true class is " + ed  + " for word " + word;;
+      scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, ed == 1 ? 1 : ed);
+    }
+    
     if(constVars.usePhraseEvalWordShape){
       scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word.getPhrase(), label));
     }
