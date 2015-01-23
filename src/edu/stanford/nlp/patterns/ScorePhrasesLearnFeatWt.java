@@ -784,9 +784,12 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     //allPositivePhrases.addAll(knownPositivePhrases);
 
     BufferedWriter logFile = null;
+    BufferedWriter logFileFeat = null;
 
     if(constVars.logFileVectorSimilarity != null){
       logFile = new BufferedWriter(new FileWriter(constVars.logFileVectorSimilarity));
+      logFileFeat = new BufferedWriter(new FileWriter(constVars.logFileVectorSimilarity+"_feat"));
+
       for(CandidatePhrase p : allPositivePhrases){
         if(wordVectors.containsKey(p.getPhrase())){
           logFile.write(p.getPhrase()+"-P " + ArrayUtils.toString(wordVectors.get(p.getPhrase()), " ")+"\n");
@@ -795,6 +798,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     if(constVars.expandPositivesWhenSampling){
+      //TODO: patwtbyfrew
       //Counters.retainTop(allCloseToPositivePhrases, (int) (allCloseToPositivePhrases.size()*constVars.subSampleUnkAsPosUsingSimPercentage));
       Redwood.log("Expanding positives by adding " + allCloseToPositivePhrases + " phrases");
       allPositivePhrases.addAll(allCloseToPositivePhrases.keySet());
@@ -821,6 +825,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, "true");
       dataset.add(datum);
       numpos += 1;
+      if(logFileFeat !=null){
+        logFileFeat.write("POSITIVE " + candidate.getPhrase() +"\t" + Counters.toSortedByKeysString(feat,"%1$s:%2$.0f",";","%s")+"\n");
+      }
     }
 
     Redwood.log(Redwood.DBG, "Number of pure negative phrases is " + allNegativePhrases.size());
@@ -865,7 +872,13 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       dataset.add(datum);
       if(logFile!=null && wordVectors.containsKey(negative.getPhrase())){
         logFile.write(negative.getPhrase()+"-N"+" " + ArrayUtils.toString(wordVectors.get(negative.getPhrase()), " ")+"\n");
+        logFileFeat.write("NEGATIVE " + negative.getPhrase() +"\t" + Counters.toSortedByKeysString(feat,"%1$s:%2$.0f",";","%s")+"\n");
       }
+    }
+
+    if(logFile!=null){
+      logFile.close();
+      logFileFeat.close();
     }
 
     System.out.println("Before feature count threshold, dataset stats are ");

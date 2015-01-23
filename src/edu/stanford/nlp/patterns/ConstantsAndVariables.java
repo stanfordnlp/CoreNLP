@@ -511,7 +511,7 @@ public class ConstantsAndVariables<E> implements Serializable{
 //  }
 
 
-  static public class ScorePhraseMeasures {
+  static public class ScorePhraseMeasures implements Comparable {
     String name;
     static int num = 0;
     int numObj;
@@ -547,6 +547,13 @@ public class ConstantsAndVariables<E> implements Serializable{
     static ScorePhraseMeasures  DOMAINNGRAM =new ScorePhraseMeasures("DomainNgram");
     static ScorePhraseMeasures  SEMANTICODDS =new ScorePhraseMeasures("SemanticOdds");
     static ScorePhraseMeasures  WORDSHAPE = new ScorePhraseMeasures("WordShape");
+
+    @Override
+    public int compareTo(Object o) {
+      if(!(o instanceof  ScorePhraseMeasures))
+        return -1;
+      else return ((ScorePhraseMeasures)o).toString().compareTo(this.toString());
+    }
   }
 
 
