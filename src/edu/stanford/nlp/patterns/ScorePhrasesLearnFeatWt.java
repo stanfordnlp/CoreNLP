@@ -654,9 +654,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             }
 
             //Do not add to positive if the word is a "negative" (stop word, english word, ...)
-            //TODO: undo the commenting
-            //if(hasElement(allPossiblePhrases, candidate, answerLabel) || PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches())
-            //  continue;
+
+            if(hasElement(allPossiblePhrases, candidate, answerLabel) || PatternFactory.ignoreWordRegex.matcher(candidate.getPhrase()).matches())
+              continue;
 
             allPositivePhrases.add(candidate);
 
@@ -811,12 +811,13 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.functionWords));
     negPhrases.addAll(CandidatePhrase.convertStringPhrases(constVars.getEnglishWords()));
     allPossiblePhrases.put("NEGATIVE", negPhrases);
-    for(Entry<String, Counter<CandidatePhrase>> en: constVars.getLearnedWords().entrySet()) {
-      if (!en.getKey().equals(answerLabel)){
-        allPossiblePhrases.put(en.getKey(), new HashSet<CandidatePhrase>());
+    for(String label: constVars.getLabels()) {
+      if (!label.equals(answerLabel)){
+        allPossiblePhrases.put(label, new HashSet<CandidatePhrase>());
         //negPhrases.addAll(en.getValue().keySet());
-        allPossiblePhrases.get(en.getKey()).addAll(en.getValue().keySet());
-        allPossiblePhrases.get(en.getKey()).addAll(constVars.getSeedLabelDictionary().get(en.getKey()));
+        if(constVars.getLearnedWords().containsKey(label))
+          allPossiblePhrases.get(label).addAll(constVars.getLearnedWords().get(label).keySet());
+        allPossiblePhrases.get(label).addAll(constVars.getSeedLabelDictionary().get(label));
       }
     }
     allPossiblePhrases.put("OTHERSEM", constVars.getOtherSemanticClassesWords());
