@@ -32,11 +32,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
-import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.CollectionValuedMap;
-import edu.stanford.nlp.util.Execution;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.Triple;
+import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -731,7 +727,7 @@ public class ScorePhrases<E extends Pattern> {
 
         // Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger,
         // "Writing justification at " + filename);
-        IOUtils.writeStringToFile(obj.build().toString(), filename, "utf8");
+        IOUtils.writeStringToFile(StringUtils.normalize(StringUtils.toAscii(obj.build().toString())), filename, "ASCII");
         writtenInJustification.put(label, true);
       }
       if (constVars.justify) {

@@ -1632,7 +1632,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       obj.add(objThisIter.build());
 
       IOUtils.ensureDir(new File(filename).getParentFile());
-      IOUtils.writeStringToFile(obj.build().toString(), filename, "utf8");
+      IOUtils.writeStringToFile(StringUtils.normalize(StringUtils.toAscii(obj.build().toString())), filename, "ASCII");
       writtenPatInJustification.put(label, true);
     }
 
