@@ -4,11 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.Map.Entry;
 
 import edu.stanford.nlp.classify.LogPrior;
@@ -71,7 +67,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       if(computeRawFreq)
         Data.computeRawFreqIfNull(sentsf.first(), PatternFactory.numWordsCompound);
       dataset.addAll(choosedatums(label, forLearningPatterns, sentsf.first(), constVars.getAnswerClass().get(label), label,
-        constVars.getOtherSemanticClassesWords(), constVars.getIgnoreWordswithClassesDuringSelection().get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
+        constVars.getIgnoreWordswithClassesDuringSelection().get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
         allSelectedPatterns));
     }
 
@@ -171,8 +167,45 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return 1 / (1 + Math.exp(-1 * d));
   }
 
+  Map<CandidatePhrase, Counter<Integer>> wordClassClustersForPhrase = new HashMap<CandidatePhrase, Counter<Integer>>();
+
+  Counter<Integer> wordClass(String phrase, String phraseLemma){
+    Counter<Integer> cl = new ClassicCounter<>();
+    String[] phl = null;
+    if(phraseLemma!=null)
+      phl = phraseLemma.split("\\s+");
+    int i =0;
+    for(String w: phrase.split("\\s+")) {
+      Integer cluster = constVars.getWordClassClusters().get(w);
+      if (cluster == null && phl!=null)
+          cluster = constVars.getWordClassClusters().get(phl[i]);
+      if(cluster != null)
+        cl.incrementCount(cluster);
+      i++;
+    }
+    return cl;
+  }
+
+  void getAllLabeledWordsCluster(){
+    for(String label: constVars.getLabels()){
+    for(Map.Entry<CandidatePhrase, Double> p : constVars.getLearnedWords(label).entrySet()){
+      wordClassClustersForPhrase.put(p.getKey(), wordClass(p.getKey().getPhrase(), p.getKey().getPhraseLemma()));
+    }
+
+    for(CandidatePhrase p : constVars.getSeedLabelDictionary().get(label)){
+      wordClassClustersForPhrase.put(p, wordClass(p.getPhrase(), p.getPhraseLemma()));
+    }
+    }
+  }
+
+  boolean chooseNegatives(Set<CandidatePhrase> candidatePhrases, String label){
+    return false;
+  }
+
+
+
   public RVFDataset<String, ScorePhraseMeasures> choosedatums(String label, boolean forLearningPattern, Map<String, DataInstance> sents, Class answerClass, String answerLabel,
-      Set<CandidatePhrase> negativeWords, Map<Class, Object> otherIgnoreClasses, double perSelectRand, double perSelectNeg, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
+      Map<Class, Object> otherIgnoreClasses, double perSelectRand, double perSelectNeg, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
       Counter<E> allSelectedPatterns) {
     // TODO: check whats happening with candidate terms for this iteration. do
     // not count them as negative!!! -- I think this comment is not valid anymore.
@@ -188,30 +221,27 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       for (int i = 0; i < sent.length; i++) {
         CoreLabel l = sent[i];
 
-        boolean chooseThis = false;
-        boolean ignoreclass = false;
-        Boolean datumlabel = false;
-        for (Class cl : otherIgnoreClasses.keySet()) {
-          if ((Boolean) l.get(cl)) {    // cast is needed for jdk 1.6
-            ignoreclass = true;
+
+         if (l.get(answerClass).equals(answerLabel)) {
+          CandidatePhrase candidate = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(label);
+
+          if(candidate == null) {
+            System.out.println("candidate null for " + l.word() +  " and longest matching" + l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class)  + " and hash amp is " + CandidatePhrase.candidatePhraseMap);
+            throw new RuntimeException("");
+            //candidate = CandidatePhrase.createOrGet(l.word());
           }
-        }
-        if (l.get(answerClass).equals(answerLabel)) {
-          datumlabel = true;
-          chooseThis = true;
+
           numpos++;
-        }
-        if (chooseThis) {
           chosen.add(new Pair<String, Integer>(en.getKey(), i));
 
           Counter<ScorePhraseMeasures> feat = null;
-          CandidatePhrase candidate = new CandidatePhrase(l.word());
+          //CandidatePhrase candidate = new CandidatePhrase(l.word());
           if (forLearningPattern) {
             feat = getPhraseFeaturesForPattern(label, candidate);
           } else {
             feat = getFeatures(label, candidate, wordsPatExtracted.getCounter(candidate), allSelectedPatterns);
           }
-          RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, datumlabel.toString());
+          RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, "true");
           dataset.add(datum);
         }
       }
@@ -220,33 +250,56 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
         CoreLabel l = sent[i];
         if (numneg >= numpos)
           break;
-        boolean chooseThis = false;
-        boolean ignoreclass = false;
-        Boolean datumlabel = false;
+        //boolean ignoreclass = false;
+
         if (l.get(answerClass).equals(answerLabel)) {
+          //positive
           continue;
-        } else if ((ignoreclass || negativeWords.contains(l.word().toLowerCase())) && getRandomBoolean(rneg, perSelectNeg)) {
-          chooseThis = true;
-          datumlabel = false;
+        }
+
+        boolean ignoreclass = false;
+        for (Class cl : otherIgnoreClasses.keySet()) {
+          if ((Boolean) l.get(cl)) {
+            ignoreclass = true;
+          }
+        }
+
+
+        CandidatePhrase candidate = null;
+
+        boolean negative = false;
+        Map<String, CandidatePhrase> longestMatching = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class);
+        for(Map.Entry<String, CandidatePhrase> lo: longestMatching.entrySet()){
+          if(!lo.getKey().equals(label) && lo.getValue() !=null){
+            negative = true;
+            candidate = lo.getValue();
+          }
+        }
+        if(!negative && ignoreclass){
+//TODO
+        }
+
+        if (negative && getRandomBoolean(rneg, perSelectNeg)) {
           numneg++;
         } else if (getRandomBoolean(r, perSelectRand)) {
-          chooseThis = true;
-          datumlabel = false;
+          candidate = CandidatePhrase.createOrGet(l.word());
           numneg++;
-        } else
-          chooseThis = false;
-        if (chooseThis) {
+        } else {
+          continue;
+        }
+
+
           chosen.add(new Pair<String, Integer>(en.getKey(), i));
           Counter<ScorePhraseMeasures> feat = null;
-          CandidatePhrase candidate = new CandidatePhrase(l.word());
+          //CandidatePhrase candidate = new CandidatePhrase(l.word());
           if (forLearningPattern) {
             feat = getPhraseFeaturesForPattern(label, candidate);
           } else {
             feat = getFeatures(label, candidate, wordsPatExtracted.getCounter(candidate), allSelectedPatterns);
           }
-          RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, datumlabel.toString());
+          RVFDatum<String, ScorePhraseMeasures> datum = new RVFDatum<String, ScorePhraseMeasures>(feat, "false");
           dataset.add(datum);
-        }
+
       }
     }
     System.out.println("size of the dataset is ");
@@ -371,6 +424,15 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       return phraseScoresRaw.getCounter(word);
 
     Counter<ScorePhraseMeasures> scoreslist = new ClassicCounter<ScorePhraseMeasures>();
+
+    //Add features on the word, if any!
+    if(word.getFeatures()!= null){
+      scoreslist.addAll(Counters.transform(word.getFeatures(), x -> ScorePhraseMeasures.create(x)));
+    } else{
+      System.out.println("features are null for " + word);
+    }
+
+
     if (constVars.usePhraseEvalPatWtByFreq) {
       double tfscore = getPatTFIDFScore(word, patThatExtractedWord, allSelectedPatterns);
       scoreslist.setCount(ScorePhraseMeasures.PATWTBYFREQ, tfscore);

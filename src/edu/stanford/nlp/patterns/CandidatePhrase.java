@@ -1,10 +1,11 @@
 package edu.stanford.nlp.patterns;
 
+import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -16,13 +17,25 @@ public class CandidatePhrase {
   final String phraseLemma;
   Counter<String> features;
 
+  static ConcurrentHashMap<String, CandidatePhrase> candidatePhraseMap = new ConcurrentHashMap<String, CandidatePhrase>();
+
+  static public CandidatePhrase createOrGet(String phrase){
+     if(candidatePhraseMap.containsKey(phrase)){
+       return candidatePhraseMap.get(phrase);
+     }
+    else
+       return new CandidatePhrase(phrase);
+  }
+
   public CandidatePhrase(String phrase, String lemma){
     this(phrase, lemma, null);
   }
+
   public CandidatePhrase(String phrase, String lemma, Counter<String> features){
     this.phrase = phrase;
     this.phraseLemma = lemma;
     this.features = features;
+    candidatePhraseMap.put(phrase, this);
   }
 
   public CandidatePhrase(String w) {
@@ -61,7 +74,7 @@ public class CandidatePhrase {
   public static List<CandidatePhrase> convertStringPhrases(Collection<String> str){
     List<CandidatePhrase> phs = new ArrayList<>();
     for(String s: str){
-      phs.add(new CandidatePhrase(s));
+      phs.add(CandidatePhrase.createOrGet(s));
     }
     return phs;
   }
@@ -72,5 +85,23 @@ public class CandidatePhrase {
       phs.add(ph.getPhrase());
     }
     return phs;
+  }
+
+  public Counter<String> getFeatures() {
+    return features;
+  }
+
+  public void addFeature(String s, double v) {
+    if(features == null){
+      features = new ClassicCounter<String>();
+    }
+    features.setCount(s, v);
+  }
+
+  public void addFeatures(Collection<String> feat) {
+    if(features == null){
+      features = new ClassicCounter<String>();
+    }
+    Counters.addInPlace(features, feat);
   }
 }

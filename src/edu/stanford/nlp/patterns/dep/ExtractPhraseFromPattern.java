@@ -18,13 +18,16 @@ import java.util.function.Function;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.GrammaticalRelation;
+import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
@@ -207,15 +210,13 @@ public class ExtractPhraseFromPattern {
         allCutOffRels.addAll(additionalCutOffRels);
       allCutOffRels.addAll(cutoffRelations);
 
-      Counter<String> feat = new ClassicCounter<String>();
-      List<Pair<GrammaticalRelation, IndexedWord>> pt = g.parentPairs(w);
-      for(Pair<GrammaticalRelation, IndexedWord> en: pt) {
-        feat.incrementCount("PARENTREL-" + en.first());
-      }
+      CollectionValuedMap<Integer, String> featPerToken = new CollectionValuedMap<>();
+      Collection<String> feat = new ArrayList<>();
+      GetPatternsFromDataMultiClass.getFeatures(g, w, true, feat, null);
 
 
-      Set<IndexedWord> words = descendants(g, w, allCutOffRels, doNotAddThese, ignoreCommonTags, acceptWord, feat);
-      feat.incrementCount("LENGTH-" + words.size());
+      Set<IndexedWord> words = descendants(g, w, allCutOffRels, doNotAddThese, ignoreCommonTags, acceptWord, featPerToken);
+
 
       // words.addAll(andNodes);
 
@@ -258,8 +259,12 @@ public class ExtractPhraseFromPattern {
         String phrase = StringUtils.join(
           textTokens.subList(min - 1, max), " ");
         phrase = phrase.trim();
+        feat.add("LENGTH-" + (max - min + 1));
+        for(int i = min; i <= max; i++)
+          feat.addAll(featPerToken.get(i));
+
         System.out.println("phrase is " + phrase  + " index is " + indices + " and maxphraselength is " + maxPhraseLength + " and descendentset is " + words);
-        ExtractedPhrase  extractedPh = new ExtractedPhrase(min - 1, max -1, pattern,  phrase, feat);
+        ExtractedPhrase  extractedPh = new ExtractedPhrase(min - 1, max -1, pattern,  phrase, Counters.asCounter(feat));
 
 
         if (!listOfOutput.contains(phrase) && !doNotAddThese.contains(phrase)) {
@@ -294,7 +299,7 @@ public class ExtractPhraseFromPattern {
 
   public static Set<IndexedWord> descendants(SemanticGraph g,
       IndexedWord vertex, List<String> allCutOffRels,
-      List<IndexedWord> doNotAddThese, boolean ignoreCommonTags, Function<CoreLabel, Boolean> acceptWord, Counter<String> feat) throws Exception {
+      List<IndexedWord> doNotAddThese, boolean ignoreCommonTags, Function<CoreLabel, Boolean> acceptWord, CollectionValuedMap<Integer, String> feat) throws Exception {
     // Do a depth first search
     Set<IndexedWord> descendantSet = new HashSet<IndexedWord>();
 
@@ -332,7 +337,7 @@ public class ExtractPhraseFromPattern {
 
   private static void descendantsHelper(SemanticGraph g, IndexedWord curr,
       Set<IndexedWord> descendantSet, List<String> allCutOffRels,
-      List<IndexedWord> doNotAddThese, List<IndexedWord> seenNodes, boolean ignoreCommonTags, Function<CoreLabel, Boolean> acceptWord, Counter<String> feat)
+      List<IndexedWord> doNotAddThese, List<IndexedWord> seenNodes, boolean ignoreCommonTags, Function<CoreLabel, Boolean> acceptWord, CollectionValuedMap<Integer, String> feat)
       throws Exception {
 
     if (seenNodes.contains(curr))
@@ -370,7 +375,11 @@ public class ExtractPhraseFromPattern {
 
       }
       if (dontuse == false){
-        feat.incrementCount("REL-"+ rel.getShortName());
+        if(!feat.containsKey(curr.index())){
+          feat.put(curr.index(), new ArrayList<String>());
+        }
+        GetPatternsFromDataMultiClass.getFeatures(g, curr, false, feat.get(curr.index()), rel);
+        //feat.add(curr.index(), "REL-" + rel.getShortName());
         descendantsHelper(g, child, descendantSet, allCutOffRels,
             doNotAddThese, seenNodes, ignoreCommonTags, acceptWord, feat);
       }

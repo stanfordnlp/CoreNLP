@@ -440,8 +440,42 @@ public class ConstantsAndVariables<E> implements Serializable{
 //  }
 
 
-  public enum ScorePhraseMeasures {
-    DISTSIM, GOOGLENGRAM, PATWTBYFREQ, EDITDISTSAME, EDITDISTOTHER, DOMAINNGRAM, SEMANTICODDS, WORDSHAPE
+  static public class ScorePhraseMeasures {
+    String name;
+    static int num = 0;
+    int numObj;
+    static Map<String, ScorePhraseMeasures> createdObjects = new ConcurrentHashMap<String, ScorePhraseMeasures>();
+
+    public static ScorePhraseMeasures create(String n){
+      if(createdObjects.containsKey(n))
+        return createdObjects.get(n);
+      else
+        return new ScorePhraseMeasures(n);
+    }
+
+    private ScorePhraseMeasures(String n){
+      this.name= n;
+      numObj = num++;
+      createdObjects.put(n, this);
+    }
+
+    @Override
+    public String toString(){return name;}
+
+    @Override
+    public boolean equals(Object o){
+      if(! (o instanceof ScorePhraseMeasures)) return false;
+      return ((ScorePhraseMeasures)o).numObj == (this.numObj);
+    }
+
+    static ScorePhraseMeasures DISTSIM = new ScorePhraseMeasures("DistSim");
+    static ScorePhraseMeasures GOOGLENGRAM = new ScorePhraseMeasures("GoogleNGram");
+    static ScorePhraseMeasures PATWTBYFREQ=new ScorePhraseMeasures("PatWtByFreq");
+    static ScorePhraseMeasures  EDITDISTSAME=new ScorePhraseMeasures("EditDistSame");
+    static ScorePhraseMeasures  EDITDISTOTHER =new ScorePhraseMeasures("EditDistOther");
+    static ScorePhraseMeasures  DOMAINNGRAM =new ScorePhraseMeasures("DomainNgram");
+    static ScorePhraseMeasures  SEMANTICODDS =new ScorePhraseMeasures("SemanticOdds");
+    static ScorePhraseMeasures  WORDSHAPE = new ScorePhraseMeasures("WordShape");
   }
 
 
@@ -737,7 +771,7 @@ public class ConstantsAndVariables<E> implements Serializable{
 
           String[] t = w.split("\\s+");
           if (t.length <= PatternFactory.numWordsCompound)
-            otherSemanticClassesWords.add(new CandidatePhrase(w));
+            otherSemanticClassesWords.add(CandidatePhrase.createOrGet(w));
 
         }
       }

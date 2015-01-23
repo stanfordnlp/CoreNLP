@@ -32,20 +32,21 @@ public class PatternsAnnotations implements Serializable {
 
 
   /** All matched phrases - can be from multiple labels*/
-  public static class MatchedPhrases implements GenericAnnotation<CollectionValuedMap<String, String>> {
-    public Class<CollectionValuedMap<String, String>> getType() {
-      Class<CollectionValuedMap<String, String>> claz = (Class) Map.class;
+  public static class MatchedPhrases implements GenericAnnotation<CollectionValuedMap<String, CandidatePhrase>> {
+    public Class<CollectionValuedMap<String, CandidatePhrase>> getType() {
+      Class<CollectionValuedMap<String, CandidatePhrase>> claz = (Class) Map.class;
       return claz;
     }
   }
 
+
   /**
    * For each label, what was the longest phrase that matched. If none, then the map doesn't have the label key
    */
-  public static class LongestMatchedPhraseForEachLabel implements  GenericAnnotation<Map<String, String>>{
+  public static class LongestMatchedPhraseForEachLabel implements  GenericAnnotation<Map<String, CandidatePhrase>>{
     @Override
-    public Class<Map<String, String>> getType() {
-      return ErasureUtils.<Class<Map<String, String>>> uncheckedCast(Map.class);
+    public Class<Map<String, CandidatePhrase>> getType() {
+      return ErasureUtils.<Class<Map<String, CandidatePhrase>>> uncheckedCast(Map.class);
     }
   }
 
