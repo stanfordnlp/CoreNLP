@@ -221,8 +221,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       double maxSim = Double.MIN_VALUE;
       for(CandidatePhrase pos: CollectionUtils.union(constVars.getLearnedWords(label).keySet(), constVars.getSeedLabelDictionary().get(label))){
         double j = Counters.jaccardCoefficient(wordClassClustersForPhrase.get(pos), feat);
-        System.out.println("clusters for positive phrase " + pos + " is " +wordClassClustersForPhrase.get(pos) + " and the features for unknown are "  + feat + " for phrase " + p);
-
+        //System.out.println("clusters for positive phrase " + pos + " is " +wordClassClustersForPhrase.get(pos) + " and the features for unknown are "  + feat + " for phrase " + p);
         if(j  > maxSim)
           maxSim = j;
       }
@@ -306,7 +305,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
             ph += " " + tokens[j].word();
           }
 
-          if(!haspositive && !ph.trim().isEmpty()){
+          if(!haspositive && !ph.trim().isEmpty() && !constVars.getStopWords().contains(CandidatePhrase.createOrGet(ph))){
             unknownSamples.add(CandidatePhrase.createOrGet(ph.trim()));
           }
         }
