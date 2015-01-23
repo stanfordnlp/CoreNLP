@@ -1,12 +1,22 @@
 package edu.stanford.nlp.patterns.surface;
 
+import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
+import edu.stanford.nlp.patterns.PatternFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+
+import static edu.stanford.nlp.patterns.PatternFactory.PatternType;
+import static edu.stanford.nlp.patterns.PatternFactory.PatternType.*;
 
 /**
  * Created by sonalg on 10/30/14.
@@ -18,42 +28,8 @@ public class TextAnnotationPatternsInterface {
     server = new ServerSocket(portnum);
   }
 
-  public enum Actions {NEWPHRASES, REMOVEPHRASES, NEWANNOTATIONS, NONE, CLOSE};
+  public enum Actions {NEWPHRASES, REMOVEPHRASES, NEWANNOTATIONS, NONE, CLOSE, PROCESSFILE};
 
-
-
-  static private void doRemovePhrases(String line) {
-    System.out.println("removing phrases");
-  }
-
-  static private void doNewAnnotations(String line) {
-    System.out.println("Adding new annotations");
-  }
-
-  static private void doNewPhrases(String line) {
-    System.out.println("adding new phrases");
-  }
-
-  /**
-   * Application method to run the server runs in an infinite loop
-   * listening on port 9898.  When a connection is requested, it
-   * spawns a new thread to do the servicing and immediately returns
-   * to listening.  The server keeps a unique client number for each
-   * client that connects just to show interesting logging
-   * messages.  It is certainly not necessary to do this.
-   */
-  public static void main(String[] args) throws Exception {
-    System.out.println("The capitalization server is running.");
-    int clientNumber = 0;
-    ServerSocket listener = new ServerSocket(9898);
-    try {
-      while (true) {
-        new PerformActionUpdateModel(listener.accept(), clientNumber++).start();
-      }
-    } finally {
-      listener.close();
-    }
-  }
 
   /**
    * A private thread to handle capitalization requests on a particular
@@ -63,6 +39,8 @@ public class TextAnnotationPatternsInterface {
   private static class PerformActionUpdateModel extends Thread {
     private Socket socket;
     private int clientNumber;
+    GetPatternsFromDataMultiClass<SurfacePattern> model;
+
 
     public PerformActionUpdateModel(Socket socket, int clientNumber) {
       this.socket = socket;
@@ -112,7 +90,11 @@ public class TextAnnotationPatternsInterface {
             msg = "Removed phrases";
             doRemovePhrases(input);
             nextlineAction = Actions.NONE;
-          } else{
+          } else if(nextlineAction.equals(Actions.PROCESSFILE)){
+            processFile(input);
+            msg = "DONEPROCESS";
+            nextlineAction = Actions.NONE;
+          }else{
             try{
               nextlineAction = Actions.valueOf(input.trim());
             }catch(IllegalArgumentException e){
@@ -127,6 +109,9 @@ public class TextAnnotationPatternsInterface {
               msg = "Please write the  phrases to remove in the next line ";
             else if(nextlineAction.equals(Actions.CLOSE))
               msg = "bye!";
+            else if(nextlineAction.equals(Actions.PROCESSFILE)){
+              msg = "please write the filename to process";
+            }
           }
           System.out.println("sending msg " + msg);
 
@@ -136,6 +121,22 @@ public class TextAnnotationPatternsInterface {
         }
       } catch (IOException e) {
         log("Error handling client# " + clientNumber + ": " + e);
+      } catch (IllegalAccessException e) {
+        log("Error handling client# " + clientNumber + ": " + e);
+      } catch (InterruptedException e) {
+        log("Error handling client# " + clientNumber + ": " + e);
+      } catch (ExecutionException e) {
+        log("Error handling client# " + clientNumber + ": " + e);
+      } catch (InstantiationException e) {
+        log("Error handling client# " + clientNumber + ": " + e);
+      } catch (SQLException e) {
+        log("Error handling client# " + clientNumber + ": " + e);
+      } catch (NoSuchMethodException e) {
+        log("Error handling client# " + clientNumber + ": " + e);
+      } catch (InvocationTargetException e) {
+        log("Error handling client# " + clientNumber + ": " + e);
+      } catch (ClassNotFoundException e) {
+        log("Error handling client# " + clientNumber + ": " + e);
       } finally {
         try {
           socket.close();
@@ -144,6 +145,34 @@ public class TextAnnotationPatternsInterface {
         }
         log("Connection with client# " + clientNumber + " closed");
       }
+    }
+
+    private void processFile(String file) throws IOException, InstantiationException, InvocationTargetException, ExecutionException, SQLException, InterruptedException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException {
+      String outputfile =file+"_processed";
+      Properties props = new Properties();
+      props.setProperty("file",file);
+      props.setProperty("fileFormat","txt");
+      props.setProperty("learn","false");
+      props.setProperty("labelUsingSeedSets","false");
+      props.setProperty("patternType","SURFACE");
+      props.setProperty("columnOutputFile",outputfile);
+      props.setProperty("preserveSentenceSequence", "true");
+      model = GetPatternsFromDataMultiClass.<SurfacePattern>run(props);
+      System.out.println("written the output to " + outputfile);
+    }
+
+
+    static private void doRemovePhrases(String line) {
+      model.labelWords();
+      System.out.println("removing phrases");
+    }
+
+    static private void doNewAnnotations(String line) {
+      System.out.println("Adding new annotations");
+    }
+
+    static private void doNewPhrases(String line) {
+      System.out.println("adding new phrases");
     }
 
     /**
@@ -218,32 +247,27 @@ public class TextAnnotationPatternsInterface {
     {
     throw new RuntimeException(err);
     }
+  }*/
+
+  /**
+   * Application method to run the server runs in an infinite loop
+   * listening on port 9898.  When a connection is requested, it
+   * spawns a new thread to do the servicing and immediately returns
+   * to listening.  The server keeps a unique client number for each
+   * client that connects just to show interesting logging
+   * messages.  It is certainly not necessary to do this.
+   */
+  public static void main(String[] args) throws Exception {
+    System.out.println("The capitalization server is running.");
+    int clientNumber = 0;
+    ServerSocket listener = new ServerSocket(9898);
+    try {
+      while (true) {
+        new PerformActionUpdateModel(listener.accept(), clientNumber++).start();
+      }
+    } finally {
+      listener.close();
+    }
   }
 
-  private void doRemovePhrases(String line) {
-    System.out.println("removing phrases");
-  }
-
-  private void doNewAnnotations(String line) {
-    System.out.println("Adding new annotations");
-  }
-
-  private void doNewPhrases(String line) {
-    System.out.println("adding new phrases");
-  }
-*/
-
-//  public static void main(String[] args) {
-//    try {
-//      Properties props = StringUtils.argsToPropertiesWithResolve(args);
-//      TextAnnotationPatternsInterface textanno = new TextAnnotationPatternsInterface(9999);
-//      textanno.serve();
-//      //GetPatternsFromDataMultiClass.<SurfacePattern>run(props);
-//    } catch (OutOfMemoryError e) {
-//      System.out.println("Out of memory! Either change the memory alloted by running as java -mx20g ... for example if you want to allot 20G. Or consider using batchProcessSents and numMaxSentencesPerBatchFile flags");
-//      e.printStackTrace();
-//    } catch (Exception e) {
-//      e.printStackTrace();
-//    }
-//  }
 }
