@@ -3333,37 +3333,17 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
     boolean evaluate = Boolean.parseBoolean(props.getProperty("evaluate"));
 
     if (evaluate) {
-      // The format of goldEntitiesEvalFiles is assumed same as
-      // seedwordsfiles: label,file;label2,file2;...
-      // Each file of gold entities consists of each entity in newline with
-      // incorrect entities marked with "#" at the end of the entity.
-      // Learned entities not present in the gold file are considered
-      // negative.
-      String goldEntitiesEvalFiles = props.getProperty("goldEntitiesEvalFiles");
-      if (goldEntitiesEvalFiles != null) {
-        for (String gfile : goldEntitiesEvalFiles.split(";")) {
-          String[] t = gfile.split(",");
-          String label = t[0];
-          String goldfile = t[1];
-          Map<String, Boolean> goldWords4Label = new HashMap<String, Boolean>();
-          for (String line : IOUtils.readLines(goldfile)) {
-            line = line.trim();
-            if (line.isEmpty())
-              continue;
+      if(model.constVars.goldEntitiesEvalFiles !=null) {
 
-            if (line.endsWith("#"))
-              goldWords4Label.put(line.substring(0, line.length() - 1), false);
-            else
-              goldWords4Label.put(line, true);
-          }
-          Pair<Double, Double> pr = model.getPrecisionRecall(label, goldWords4Label);
+        for (String label : model.constVars.getLabels()) {
+          Pair<Double, Double> pr = model.getPrecisionRecall(label, model.constVars.goldEntities.get(label));
           Redwood.log(ConstantsAndVariables.minimaldebug,
-            "\nFor label " + label + ": Number of gold entities is " + goldWords4Label.size() + ", Precision is " + model.df.format(pr.first() * 100)
+            "\nFor label " + label + ": Number of gold entities is " + model.constVars.goldEntities.get(label) + ", Precision is " + model.df.format(pr.first() * 100)
               + ", Recall is " + model.df.format(pr.second() * 100) + ", F1 is " + model.df.format(model.FScore(pr.first(), pr.second(), 1.0) * 100)
               + "\n\n");
         }
-
       }
+
       //File saveEvalSentencesSerFileFile = sentsPair.second();
       Map<String, DataInstance> evalsents = sentsPair.second();
       //if (saveEvalSentencesSerFileFile != null && saveEvalSentencesSerFileFile.exists()) {
@@ -3375,7 +3355,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
         }
      // }
 
-      if (evalsents.size() == 0 && goldEntitiesEvalFiles == null)
+      if (evalsents.size() == 0 && model.constVars.goldEntitiesEvalFiles == null)
         System.err.println("No eval sentences or list of gold entities provided to evaluate! Make sure evalFileWithGoldLabels or goldEntitiesEvalFiles is set, or turn off the evaluate flag");
 
     }

@@ -665,6 +665,18 @@ public class ScorePhrases<E extends Pattern> {
               + Counters.toSortedString(finalwords, finalwords.size(),
                   "%1$s:%2$.2f", "\t"));
 
+      if(constVars.goldEntities != null){
+        Map<String, Boolean> goldEntities4Label = constVars.goldEntities.get(label);
+        if(goldEntities4Label != null) {
+          StringBuffer s = new StringBuffer();
+          finalwords.keySet().stream().forEach(x ->
+            s.append(x.getPhrase() + (goldEntities4Label.containsKey(x.getPhrase()) ? ":"+goldEntities4Label.get(x.getPhrase()) : ":UKNOWN")+"\n"));
+
+          Redwood.log(ConstantsAndVariables.minimaldebug,
+            "\n\n## Gold labels for selected words for label " + label + " : " + s.toString());
+        }
+      }
+
       if (constVars.outDir != null && !constVars.outDir.isEmpty()) {
         String outputdir = constVars.outDir + "/" + identifier +"/"+ label;
         IOUtils.ensureDir(new File(outputdir));

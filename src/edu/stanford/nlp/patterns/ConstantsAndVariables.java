@@ -457,6 +457,11 @@ public class ConstantsAndVariables<E> implements Serializable{
   @Option(name="logFileVectorSimilarity", gloss="To store vectors for selected/almost-selected positive and negative words")
   String logFileVectorSimilarity = null;
 
+  @Option(name="goldEntitiesEvalFiles", gloss="label1,gold_list_of_entities_file;label2,...")
+  public String goldEntitiesEvalFiles = null;
+
+  Map<String, Map<String, Boolean>> goldEntities = new HashMap<String, Map<String, Boolean>>();
+
   public Set<String> getLabels() {
     return labels;
   }
@@ -950,9 +955,63 @@ public class ConstantsAndVariables<E> implements Serializable{
      Execution.fillOptions(GoogleNGramsSQLBacked.class, props);
    }
 
+    if(goldEntitiesEvalFiles != null){
+      String[] t = goldEntitiesEvalFiles.split(";");
+      for(String label: labels)
+        goldEntities.put(label, new HashMap<String, Boolean>());
+      for(String tok: t){
+        String[] tok1 = tok.split(",");
+        String label = tok1[0];
+        for(String line: IOUtils.readLines(tok1[1])){
+          String entity;
+          boolean goldlabel;
+          if(line.endsWith("#")){
+            goldlabel = false;
+            entity = line.substring(0, line.length() -1).trim();
+          }else{
+            goldlabel = true;
+            entity = line.trim();
+          }
+          goldEntities.get(label).put(entity, goldlabel);
+        }
+      }
+    }
+    if(goldEntitiesEvalFiles !=null)
+      goldEntities = readGoldEntities(goldEntitiesEvalFiles);
+
+
     alreadySetUp = true;
   }
 
+  // The format of goldEntitiesEvalFiles is assumed same as
+  // seedwordsfiles: label,file;label2,file2;...
+  // Each file of gold entities consists of each entity in newline with
+  // incorrect entities marked with "#" at the end of the entity.
+  // Learned entities not present in the gold file are considered
+  // negative.
+  static Map<String, Map<String, Boolean>> readGoldEntities(String goldEntitiesEvalFiles){
+    Map<String, Map<String, Boolean>> goldWords = new HashMap<String, Map<String, Boolean>>();
+    if (goldEntitiesEvalFiles != null) {
+      for (String gfile : goldEntitiesEvalFiles.split(";")) {
+        String[] t = gfile.split(",");
+        String label = t[0];
+        String goldfile = t[1];
+        Map<String, Boolean> goldWords4Label = new HashMap<String, Boolean>();
+        for (String line : IOUtils.readLines(goldfile)) {
+          line = line.trim();
+          if (line.isEmpty())
+            continue;
+
+          if (line.endsWith("#"))
+            goldWords4Label.put(line.substring(0, line.length() - 1), false);
+          else
+            goldWords4Label.put(line, true);
+        }
+
+      }
+    }
+    return goldWords;
+  }
 
 
   //streams sents, files-from-which-sents-were read
