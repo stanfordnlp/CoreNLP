@@ -570,6 +570,24 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return false;
   }
 
+  Counter<String> numLabeledTokens(){
+    Counter<String> counter = new ClassicCounter<String>();
+    ConstantsAndVariables.DataSentsIterator data = new ConstantsAndVariables.DataSentsIterator(constVars.batchProcessSents);
+    while(data.hasNext()){
+      Map<String, DataInstance> sentsf = data.next().first();
+      for(Entry<String, DataInstance> en: sentsf.entrySet()){
+        for(CoreLabel l : en.getValue().getTokens()){
+          for(Entry<String, Class<? extends TypesafeMap.Key<String>>> enc: constVars.getAnswerClass().entrySet()){
+            if(l.get(enc.getValue()).equals(enc.getKey())){
+              counter.incrementCount(enc.getKey());
+            }
+          }
+        }
+      }
+    }
+    return counter;
+  }
+
   public class ChooseDatumsThread implements Callable {
 
     Collection<String> keys;
@@ -803,6 +821,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
   public RVFDataset<String, ScorePhraseMeasures> choosedatums(boolean forLearningPattern, String answerLabel,
       TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted,
       Counter<E> allSelectedPatterns, boolean computeRawFreq) throws IOException {
+
+    //TODO: remove this
+    Redwood.log(Redwood.DBG, "Number of labeled tokens are " + numLabeledTokens());
 
     Counter<Integer> distSimClustersOfPositive = new ClassicCounter<Integer>();
     if(constVars.expandPositivesWhenSampling && !constVars.useWordVectorsToComputeSim){
