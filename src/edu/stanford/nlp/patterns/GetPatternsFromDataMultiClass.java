@@ -81,7 +81,7 @@ import org.joda.time.Period;
  *
  * <p>
  * IMPORTANT: Many flags are described in the classes
- * {@link ConstantsAndVariables}, {@link edu.stanford.nlp.patterns.CreatePatterns}, and
+ * {@link ConstantsAndVariables}, {@link edu.stanford.nlp.patterns.surface.CreatePatterns}, and
  * {@link PhraseScorer}.
  *
  *
@@ -150,7 +150,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
   Properties props;
   public ScorePhrases scorePhrases;
-  public ConstantsAndVariables<E> constVars;
+  public ConstantsAndVariables constVars;
   public CreatePatterns createPats;
 
   DecimalFormat df = new DecimalFormat("#.##");
@@ -276,7 +276,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     Execution.fillOptions(ConstantsAndVariables.class, props);
     PatternFactory.setUp(props, PatternFactory.PatternType.valueOf(props.getProperty("patternType")));
 
-    constVars = new ConstantsAndVariables<E>(props, seedSets, answerClass, generalizeClasses, ignoreClasses);
+    constVars = new ConstantsAndVariables(props, seedSets, answerClass, generalizeClasses, ignoreClasses);
 
     //Execution.fillOptions(constVars, props);
     //constVars.ignoreWordswithClassesDuringSelection = ignoreClasses;
@@ -386,7 +386,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     };
 
     boolean createIndex = false;
-    if(constVars.loadInvertedIndex)
+    if (constVars.loadInvertedIndex)
       constVars.invertedIndex = SentenceIndex.loadIndex(constVars.invertedIndexClass, props, extremelySmallStopWordsList, constVars.invertedIndexDirectory, transformCoreLabelToString);
     else {
       constVars.invertedIndex = SentenceIndex.createIndex(constVars.invertedIndexClass, null, props, extremelySmallStopWordsList, constVars.invertedIndexDirectory, transformCoreLabelToString);

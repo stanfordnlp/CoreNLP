@@ -30,7 +30,7 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 
-public class ConstantsAndVariables<E> implements Serializable{
+public class ConstantsAndVariables implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -570,7 +570,7 @@ public class ConstantsAndVariables<E> implements Serializable{
     public int compareTo(Object o) {
       if(!(o instanceof  ScorePhraseMeasures))
         return -1;
-      else return ((ScorePhraseMeasures)o).toString().compareTo(this.toString());
+      else return o.toString().compareTo(this.toString());
     }
   }
 
@@ -954,7 +954,7 @@ public class ConstantsAndVariables<E> implements Serializable{
     for(String label: labels){
       learnedWords.put(label, new ClassicCounter<CandidatePhrase>());
     }
-    
+
    if(usePhraseEvalGoogleNgram || usePatternEvalDomainNgram) {
      Data.usingGoogleNgram = true;
      Execution.fillOptions(GoogleNGramsSQLBacked.class, props);
@@ -1022,15 +1022,13 @@ public class ConstantsAndVariables<E> implements Serializable{
       if(batchProcessSents){
         try {
           File f= sentfilesIter.next();
-          return new Pair<Map<String, DataInstance>, File>(IOUtils.readObjectFromFile(f), f);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
+          return new Pair<>(IOUtils.readObjectFromFile(f), f);
+        } catch (IOException | ClassNotFoundException e) {
           throw new RuntimeException(e);
         }
       }else{
         readInMemory= true;
-        return new Pair(Data.sents, new File(""));
+        return new Pair<>(Data.sents, new File(""));
       }
     }
   }

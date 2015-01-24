@@ -32,7 +32,7 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
     List<String> sentids;
     boolean removeStopWordsFromSelectedPhrases;
     boolean removePhrasesWithStopWords;
-    ConstantsAndVariables<E> constVars;
+    ConstantsAndVariables constVars;
     Map<String, DataInstance> sents = null;
 
 
