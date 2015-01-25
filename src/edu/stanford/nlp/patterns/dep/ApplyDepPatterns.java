@@ -91,14 +91,14 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
               for (int i = s - 1; i >= 0; i--) {
                 if (tokens.get(i).get(constVars.getAnswerClass().get(label)).equals(label) && (e - i + 1) <= PatternFactory.numWordsCompound) {
                   s = i;
-                  System.out.println("for phrase " + match + " clubbing earlier word. new s is " + s);
+                  //System.out.println("for phrase " + match + " clubbing earlier word. new s is " + s);
                 } else break;
               }
 
               for (int i = e; i < tokens.size(); i++) {
                 if (tokens.get(i).get(constVars.getAnswerClass().get(label)).equals(label) && (i-s + 1) <= PatternFactory.numWordsCompound) {
                   e = i;
-                  System.out.println("for phrase " + match + " clubbing next word. new e is " + e);
+                  //System.out.println("for phrase " + match + " clubbing next word. new e is " + e);
                 } else break;
               }
             }
@@ -196,7 +196,7 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
       @Override
       public Counter<String> apply(Pair<IndexedWord, SemanticGraph> indexedWordSemanticGraphPair) {
         //TODO: make features;
-        Counter<String> feat = new ClassicCounter<>();
+        Counter<String> feat = new ClassicCounter<String>();
         IndexedWord vertex = indexedWordSemanticGraphPair.first();
         SemanticGraph graph = indexedWordSemanticGraphPair.second();
         List<Pair<GrammaticalRelation, IndexedWord>> pt = graph.parentPairs(vertex);
@@ -241,7 +241,7 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
         }
       }
     }*/
-    System.out.println("extracted phrases are " + extractedPhrases + " and output indices are " + outputIndices);
+    //System.out.println("extracted phrases are " + extractedPhrases + " and output indices are " + outputIndices);
     return extractedPhrases;
   }
 
@@ -256,7 +256,7 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
          }
       }
     } else {
-      System.out.println("not matching NER");
+      //System.out.println("not matching NER");
       use = true;
     }
 
@@ -272,10 +272,11 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
         }
       }
     }
-    if(use)
-      System.out.println(coreLabel.word() + " matched restriction " + (PatternFactory.useTargetNERRestriction ? constVars.allowedNERsforLabels.get(label) : "") + "and" + PatternFactory.useTargetNERRestriction + " and " + (constVars.allowedTagsInitials != null ? constVars.allowedTagsInitials.get(label) :""));
-    else
-      System.out.println(coreLabel.word() + " did not matched restrict " + (PatternFactory.useTargetNERRestriction ? constVars.allowedNERsforLabels.get(label) : "") + "and" + PatternFactory.useTargetNERRestriction + " and " + (constVars.allowedTagsInitials != null ? constVars.allowedTagsInitials.get(label) :""));
+    if(constVars.debug >= 4)
+      if(use)
+        System.out.println(coreLabel.word() + " matched restriction " + (PatternFactory.useTargetNERRestriction ? constVars.allowedNERsforLabels.get(label) : "") + "and" + PatternFactory.useTargetNERRestriction + " and " + (constVars.allowedTagsInitials != null ? constVars.allowedTagsInitials.get(label) :""));
+      else
+        System.out.println(coreLabel.word() + " did not matched restrict " + (PatternFactory.useTargetNERRestriction ? constVars.allowedNERsforLabels.get(label) : "") + "and" + PatternFactory.useTargetNERRestriction + " and " + (constVars.allowedTagsInitials != null ? constVars.allowedTagsInitials.get(label) :""));
     return use;
   }
 

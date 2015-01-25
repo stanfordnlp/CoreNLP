@@ -1083,7 +1083,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       if(reln != null)
         features.add("REL-" + reln.getShortName());
     }
-    System.out.println("For graph " + graph.toFormattedString() + " and vertex " + vertex + " the features are " + features);
+    //System.out.println("For graph " + graph.toFormattedString() + " and vertex " + vertex + " the features are " + features);
   }
 
   static void addLengthFeature(){}
@@ -3343,11 +3343,13 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       if(model.constVars.goldEntitiesEvalFiles !=null) {
 
         for (String label : model.constVars.getLabels()) {
-          Pair<Double, Double> pr = model.getPrecisionRecall(label, model.constVars.goldEntities.get(label));
-          Redwood.log(ConstantsAndVariables.minimaldebug,
-            "\nFor label " + label + ": Number of gold entities is " + model.constVars.goldEntities.get(label) + ", Precision is " + model.df.format(pr.first() * 100)
-              + ", Recall is " + model.df.format(pr.second() * 100) + ", F1 is " + model.df.format(model.FScore(pr.first(), pr.second(), 1.0) * 100)
-              + "\n\n");
+          if(model.constVars.goldEntities.containsKey(label)){
+            Pair<Double, Double> pr = model.getPrecisionRecall(label, model.constVars.goldEntities.get(label));
+            Redwood.log(ConstantsAndVariables.minimaldebug,
+              "\nFor label " + label + ": Number of gold entities is " + model.constVars.goldEntities.get(label).size() + ", Precision is " + model.df.format(pr.first() * 100)
+                + ", Recall is " + model.df.format(pr.second() * 100) + ", F1 is " + model.df.format(model.FScore(pr.first(), pr.second(), 1.0) * 100)
+                + "\n\n");
+          }
         }
       }
 
