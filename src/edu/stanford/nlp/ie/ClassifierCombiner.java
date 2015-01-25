@@ -4,7 +4,6 @@ import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.ner.CMMClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
@@ -42,7 +41,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   private static final boolean DEBUG = false;
   private List<AbstractSequenceClassifier<IN>> baseClassifiers;
 
-  private static final String DEFAULT_AUX_CLASSIFIER_PATH="edu/stanford/nlp/models/ner/english.muc.7class.distsim.crf.ser.gz";
+  private static final String DEFAULT_AUX_CLASSIFIER_PATH="edu/stanford/nlp/models/ner/english.all.7class.distsim.crf.ser.gz";
   private static final String DEFAULT_CLASSIFIER_PATH="edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz";
 
   /**
@@ -96,8 +95,8 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     // fall back strategy: use the two default paths on NLP machines
     //
     else {
-      paths.add(DefaultPaths.DEFAULT_NER_THREECLASS_MODEL);
-      paths.add(DefaultPaths.DEFAULT_NER_MUC_MODEL);
+      paths.add(DEFAULT_CLASSIFIER_PATH);
+      paths.add(DEFAULT_AUX_CLASSIFIER_PATH);
       loadClassifiers(paths);
     }
   }
