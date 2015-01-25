@@ -52,9 +52,9 @@ Shared Task training data that labels for PERSON, ORGANIZATION,
 LOCATION, and MISC.  It is named
 english.conll.4class.distsim.crf.ser.gz .
 
-A third model is trained only on data from MUC and OntoNotes and
+A third model is trained only on data from MUC and
 distinguishes between 7 different classes:
-english.all.7class.distsim.crf.ser.gz.
+english.muc.7class.distsim.crf.ser.gz.
 
 All of the serialized classifiers come in two versions, one trained to
 basically expected standard written English capitalization, and the other
