@@ -4,6 +4,7 @@ import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
@@ -35,7 +36,7 @@ public class StanfordCoreNLPITest extends TestCase {
   }
 
   public void test() throws Exception {
-    // create a properties that enables all the anotators
+    // create a properties that enables all the annotators
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
     props.setProperty("ssplit.newlineIsSentenceBreak", "never");
@@ -68,7 +69,15 @@ public class StanfordCoreNLPITest extends TestCase {
 
       // check for parse tree
       Assert.assertNotNull(sentence.get(TreeCoreAnnotations.TreeAnnotation.class));
+
+      // check that dependency graph Labels have word()
+      SemanticGraph deps = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+      for (IndexedWord vertex : deps.vertexSet()) {
+        Assert.assertNotNull(vertex.word());
+        Assert.assertEquals(vertex.word(), vertex.value());
+      }
     }
+
 
     // test pretty print
     StringWriter stringWriter = new StringWriter();
