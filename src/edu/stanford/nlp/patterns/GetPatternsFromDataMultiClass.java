@@ -2955,7 +2955,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     }
 
     if (!assumedNeg.isEmpty())
-      System.err.println("Gold entity list does not contain words " + assumedNeg + " for label " + label + ". Assuming them as negative.");
+      System.err.println("\nGold entity list does not contain words " + assumedNeg + " for label " + label + ". Assuming them as negative.");
 
     double precision = numcorrect / (double) (numcorrect + numincorrect);
     double recall = numcorrect / (double) (numgoldcorrect);
