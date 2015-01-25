@@ -3100,6 +3100,9 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         + " and addEvalSentsToTrain is " + addEvalSentsToTrain);
     }
 
+    if(props.getProperty("patternType") == null)
+      throw new RuntimeException("PattenrType not specified. Options are SURFACE and DEP");
+
     PatternFactory.PatternType patternType = PatternFactory.PatternType.valueOf(props.getProperty("patternType"));
     File saveSentencesSerDir = null;
     File tempSaveSentencesDir = null;
