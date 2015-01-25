@@ -852,7 +852,12 @@ public class ConstantsAndVariables implements Serializable {
       Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger, "Reading stop words from "
         + stopWordsPatternFiles);
       for (String stopwfile : stopWordsPatternFiles.split("[;,]"))
-        stopWords.addAll(CandidatePhrase.convertStringPhrases(IOUtils.linesFromFile(stopwfile)));
+      {
+        for(String word: IOUtils.readLines(stopwfile)){
+          if(!word.trim().isEmpty())
+            stopWords.add(CandidatePhrase.createOrGet(word.trim()));
+        }
+      }
     }
 
     englishWords = new HashSet<String>();
@@ -1022,7 +1027,7 @@ public class ConstantsAndVariables implements Serializable {
       if(batchProcessSents){
         try {
           File f= sentfilesIter.next();
-          return new Pair<>(IOUtils.readObjectFromFile(f), f);
+          return new Pair<Map<String, DataInstance>, File>(IOUtils.readObjectFromFile(f), f);
         } catch (IOException | ClassNotFoundException e) {
           throw new RuntimeException(e);
         }
