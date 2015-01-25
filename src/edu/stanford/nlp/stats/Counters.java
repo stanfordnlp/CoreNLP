@@ -492,7 +492,19 @@ public class Counters {
    * @param <E> Type of elements in Counter
    */
   public static <E> void normalize(Counter<E> target) {
-    multiplyInPlace(target, 1.0 / target.totalCount());
+    divideInPlace(target, target.totalCount());
+  }
+
+  /**
+   * L1 normalize a counter. Return a counter that is a probability distribution,
+   * so the sum of the resulting value equals 1.
+   *
+   * @param c The {@link Counter} to be L1 normalized. This counter is not
+   *          modified.
+   * @return A new L1-normalized Counter based on c.
+   */
+  public static <E, C extends Counter<E>> C asNormalizedCounter(C c) {
+    return scale(c, 1.0 / c.totalCount());
   }
 
   /**
@@ -1406,13 +1418,17 @@ public class Counters {
   /**
    * Calculates the Jensen-Shannon divergence between the two counters. That is,
    * it calculates 1/2 [KL(c1 || avg(c1,c2)) + KL(c2 || avg(c1,c2))] .
+   * This code assumes that the Counters have only non-negative values in them.
    *
    * @return The Jensen-Shannon divergence between the distributions
    */
   public static <E> double jensenShannonDivergence(Counter<E> c1, Counter<E> c2) {
-    Counter<E> average = average(c1, c2);
-    double kl1 = klDivergence(c1, average);
-    double kl2 = klDivergence(c2, average);
+    // need to normalize the counters first before averaging them! Else buggy if not a probability distribution
+    Counter<E> d1 = asNormalizedCounter(c1);
+    Counter<E> d2 = asNormalizedCounter(c2);
+    Counter<E> average = average(d1, d2);
+    double kl1 = klDivergence(d1, average);
+    double kl2 = klDivergence(d2, average);
     return (kl1 + kl2) / 2.0;
   }
 
@@ -1424,8 +1440,10 @@ public class Counters {
    * @return The skew divergence between the distributions
    */
   public static <E> double skewDivergence(Counter<E> c1, Counter<E> c2, double skew) {
-    Counter<E> average = linearCombination(c2, skew, c1, (1.0 - skew));
-    return klDivergence(c1, average);
+    Counter<E> d1 = asNormalizedCounter(c1);
+    Counter<E> d2 = asNormalizedCounter(c2);
+    Counter<E> average = linearCombination(d2, skew, d1, (1.0 - skew));
+    return klDivergence(d1, average);
   }
 
   /**
@@ -1701,10 +1719,8 @@ public class Counters {
   /**
    * Returns a new Counter which is scaled by the given scale factor.
    *
-   * @param c
-   *          The counter to scale. It is not changed
-   * @param s
-   *          The constant to scale the counter by
+   * @param c The counter to scale. It is not changed
+   * @param s The constant to scale the counter by
    * @return A new Counter which is the argument scaled by the given scale
    *         factor.
    */
