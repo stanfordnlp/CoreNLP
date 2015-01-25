@@ -52,7 +52,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
     return annotation;
   }
 
-  protected void compareMentions(String prefix, String[] expectedMentions, List<CoreMap> mentions) {
+  protected static void compareMentions(String prefix, String[] expectedMentions, List<CoreMap> mentions) {
     if (expectedMentions == null) {
       for (int i = 0; i < mentions.size(); i++) {
         String actual = mentions.get(i).toShorterString();
