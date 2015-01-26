@@ -1,6 +1,7 @@
 package edu.stanford.nlp.patterns;
 
 import edu.stanford.nlp.patterns.dep.DepPatternFactory;
+import edu.stanford.nlp.patterns.surface.SurfacePattern;
 import edu.stanford.nlp.patterns.surface.SurfacePatternFactory;
 import edu.stanford.nlp.util.Execution;
 

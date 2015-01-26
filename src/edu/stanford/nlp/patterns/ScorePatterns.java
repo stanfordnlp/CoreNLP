@@ -10,11 +10,11 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 
 public abstract class ScorePatterns<E> {
-
-  ConstantsAndVariables constVars;
+  
+  ConstantsAndVariables<E> constVars;
   protected PatternScoring patternScoring;
   protected Properties props;
-
+  
   public abstract Counter<E> score() throws IOException, ClassNotFoundException;
   protected TwoDimensionalCounter<E, CandidatePhrase> patternsandWords4Label = new TwoDimensionalCounter<E, CandidatePhrase>();
   protected TwoDimensionalCounter<E, CandidatePhrase> negPatternsandWords4Label = new TwoDimensionalCounter<E, CandidatePhrase>();
@@ -46,6 +46,6 @@ public abstract class ScorePatterns<E> {
 
     this.props = props;
   }
-
+  
   abstract public void setUp(Properties props);
 }

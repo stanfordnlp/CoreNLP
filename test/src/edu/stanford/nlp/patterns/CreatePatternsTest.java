@@ -28,7 +28,7 @@ public class CreatePatternsTest {
   public void test() throws IOException {
     Properties props = new Properties();
     props.setProperty("patternType","DEP");
-    ConstantsAndVariables constvars = new ConstantsAndVariables(props, new HashSet<String>(), new HashMap<String, Class<? extends TypesafeMap.Key<String>>>());
+    ConstantsAndVariables<DepPattern> constvars = new ConstantsAndVariables<DepPattern>(props, new HashSet<String>(), new HashMap<String, Class<? extends TypesafeMap.Key<String>>>());
     CreatePatterns<DepPattern> createPatterns = new CreatePatterns<>(props, constvars);
     Map<String, DataInstance> sents = new HashMap<String, DataInstance>();
     CoreMap m = new ArrayCoreMap();

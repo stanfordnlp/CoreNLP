@@ -5,12 +5,9 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * Implements the ACE {@literal <entity>} construct.
- *
- * @author David McClosky
+ * Implements the ACE <entity> construct
  */
 public class AceEntity extends AceElement {
-
   private String mType;
 
   private String mSubtype;
@@ -29,8 +26,8 @@ public class AceEntity extends AceElement {
     mClass = cls;
     mMentions = new ArrayList<AceEntityMention>();
   }
-
-  public void addMention(AceEntityMention m) {
+  
+  public void addMention(AceEntityMention m) { 
     mMentions.add(m);
     m.setParent(this);
   }
@@ -46,10 +43,10 @@ public class AceEntity extends AceElement {
   public String toXml(int offset) {
     StringBuffer buffer = new StringBuffer();
     appendOffset(buffer, offset);
-    buffer.append("<entity ID=\"" + getId() + "\" TYPE =\"" +
+    buffer.append("<entity ID=\"" + getId() + "\" TYPE =\"" + 
 		  AceToken.OTHERS.get(mType) +
-		  "\" SUBTYPE=\"" +
-		  AceToken.OTHERS.get(mSubtype) + "\" CLASS=\"" +
+		  "\" SUBTYPE=\"" + 
+		  AceToken.OTHERS.get(mSubtype) + "\" CLASS=\"" + 
 		  AceToken.OTHERS.get(mClass) + "\">\n");
 
     for(AceEntityMention m: mMentions){

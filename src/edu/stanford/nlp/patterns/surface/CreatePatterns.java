@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.patterns.*;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.logging.Redwood;
@@ -110,7 +111,7 @@ public class CreatePatterns<E> {
     // Class otherClass;
     Map<String, DataInstance> sents;
     List<String> sentIds;
-    PatternsForEachToken<E> patsForEach;
+    PatternsForEachToken patsForEach;
 
     public CreatePatternsThread(Map<String, DataInstance> sents, List<String> sentIds, Properties props, ConstantsAndVariables.PatternForEachTokenWay storePatsForEachToken) {
 

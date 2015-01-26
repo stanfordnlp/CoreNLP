@@ -62,7 +62,7 @@ public abstract class Pattern implements Serializable{
 
   public abstract String toString(List<String> notAllowedClasses);
 
-  static protected void getRelevantWordsBase(Token[] t, CollectionValuedMap<String, String> relWords){
+  static protected void getRelevantWords(Token[] t, CollectionValuedMap<String, String> relWords){
     if (t != null)
       for (Token s : t) {
         Map<String, String> str = s.classORRestrictionsAsString();
@@ -72,7 +72,7 @@ public abstract class Pattern implements Serializable{
       }
   }
 
-  static protected void getRelevantWordsBase(Token t, CollectionValuedMap<String, String> relWords){
+  static protected void getRelevantWords(Token t, CollectionValuedMap<String, String> relWords){
     if (t != null) {
       Map<String, String> str = t.classORRestrictionsAsString();
       if (str != null) {

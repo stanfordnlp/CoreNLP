@@ -1523,7 +1523,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * is used.
    * <p/>
    * <i>Implementation note:</i> when we summon up enough courage, this
-   * method will be changed to take and return a {@code List<W extends TaggedWord>}.
+   * method will be changed to take and return a List<W extends TaggedWord>.
    *
    * @param ty The list in which the tagged yield of the tree will be
    *           placed. Normally, this will be empty when the routine is called,
@@ -1544,10 +1544,12 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
   public List<LabeledWord> labeledYield(List<LabeledWord> ty) {
-    if (isPreTerminal()) {
-      ty.add(new LabeledWord(firstChild().label(), label()));
+    Tree[] kids = children();
+    // this inlines the content of isPreTerminal()
+    if (kids.length == 1 && kids[0].isLeaf()) {
+      ty.add(new LabeledWord(kids[0].label(), label()));
     } else {
-      for (Tree kid : children()) {
+      for (Tree kid : kids) {
         kid.labeledYield(ty);
       }
     }
@@ -1555,29 +1557,29 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
   public List<CoreLabel> taggedLabeledYield() {
-    List<CoreLabel> ty = new ArrayList<CoreLabel>();
-    taggedLabeledYield(ty, 0);
-    return ty;
+  	List<CoreLabel> ty = new ArrayList<CoreLabel>();
+  	taggedLabeledYield(ty,0);
+  	return ty;
   }
 
   private int taggedLabeledYield(List<CoreLabel> ty, int termIdx) {
-    if (isPreTerminal()) {
-      CoreLabel taggedWord = new CoreLabel();
-      final String tag = (value() == null) ? "" : value();
-      taggedWord.setValue(tag);
-      taggedWord.setTag(tag);
-      taggedWord.setIndex(termIdx);
-      taggedWord.setWord(firstChild().value());
-      ty.add(taggedWord);
+  	if(isPreTerminal()) {
+  		CoreLabel taggedWord = new CoreLabel();
+  		final String tag = (value() == null) ? "" : value();
+  		taggedWord.setValue(tag);
+  		taggedWord.setTag(tag);
+  		taggedWord.setIndex(termIdx);
+  		taggedWord.setWord(firstChild().value());
+  		ty.add(taggedWord);
 
-      return termIdx + 1;
+  		return termIdx + 1;
 
-    } else {
-      for (Tree kid : getChildrenAsList())
-        termIdx = kid.taggedLabeledYield(ty, termIdx);
-    }
+  	} else {
+  		for(Tree kid : getChildrenAsList())
+  			termIdx = kid.taggedLabeledYield(ty, termIdx);
+  	}
 
-    return termIdx;
+		return termIdx;
   }
 
   /**
@@ -1903,7 +1905,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       Tree newLeaf = tf.newLeaf(label());
       newLeaf.setLabel(label());
       return newLeaf;
-    }
+    }    
     Label label = lf.newLabel(label());
     Tree[] kids = children();
     List<Tree> newKids = new ArrayList<Tree>(kids.length);
@@ -2851,12 +2853,6 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     }
   }
 
-  /** Index all spans (constituents) in the tree.
-   *  For this, spans uses 0-based indexing and the span records the fencepost
-   *  to the left of the first word and after the last word of the span.
-   *  The spans are only recorded if the Tree has labels of a class which
-   *  extends CoreMap.
-   */
   public void indexSpans() {
     indexSpans(0);
   }
@@ -2869,7 +2865,6 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * Assigns span indices (BeginIndexAnnotation and EndIndexAnnotation) to all nodes in a tree.
    * The beginning index is equivalent to the IndexAnnotation of the first leaf in the constituent.
    * The end index is equivalent to the first integer after the IndexAnnotation of the last leaf in the constituent.
-   *
    * @param startIndex Begin indexing at this value
    */
   public Pair<Integer, Integer> indexSpans(MutableInteger startIndex) {
@@ -2894,7 +2889,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       afl.set(CoreAnnotations.BeginIndexAnnotation.class, start);
       afl.set(CoreAnnotations.EndIndexAnnotation.class, end);
     }
-    return new Pair<>(start, end);
+    return new Pair<Integer, Integer>(start, end);
   }
 
 }

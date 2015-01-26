@@ -26,7 +26,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
   List<String> sentids;
   boolean removeStopWordsFromSelectedPhrases;
   boolean removePhrasesWithStopWords;
-  ConstantsAndVariables constVars;
+  ConstantsAndVariables<E> constVars;
   //Set<String> ignoreWords;
   MultiPatternMatcher<CoreMap> multiPatternMatcher;
   Map<String, List<CoreLabel>> sents = null;
@@ -44,7 +44,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
 
   @Override
   public Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>> call() throws Exception {
-
+    
     //CollectionValuedMap<String, Integer> tokensMatchedPattern = new CollectionValuedMap<String, Integer>();
     CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<E, Triple<String, Integer, Integer>>();
 
@@ -84,7 +84,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
         //to make sure we discard phrases with stopwords in between, but include the ones in which stop words were removed at the ends if removeStopWordsFromSelectedPhrases is true
         boolean[] addedindices = new boolean[e-s];
         Arrays.fill(addedindices, false);
-
+        
         for (int i = s; i < e; i++) {
           CoreLabel l = sent.get(i);
           l.set(PatternsAnnotations.MatchedPattern.class, true);
@@ -106,7 +106,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
             doNotUse = true;
           } else {
             if (!containsStop || !removeStopWordsFromSelectedPhrases) {
-
+              
               if (label == null || l.get(constVars.getAnswerClass().get(label)) == null || !l.get(constVars.getAnswerClass().get(label)).equals(label.toString())) {
                 useWordNotLabeled = true;
               }
@@ -116,14 +116,14 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
             }
           }
         }
-
+        
         for(int i =0; i < addedindices.length; i++){
           if(i > 0 && i < addedindices.length -1 && addedindices[i-1] == true && addedindices[i] == false && addedindices[i+1] == true){
             doNotUse = true;
             break;
           }
         }
-
+        
         if (!doNotUse && useWordNotLabeled) {
           phrase = phrase.trim();
           phraseLemma = phraseLemma.trim();
@@ -131,7 +131,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
           allFreq.incrementCount(new Pair<String, String>(phrase, phraseLemma), matchedPat, 1.0);
         }
       }
-
+      
 //      for (SurfacePattern pat : patterns.keySet()) {
 //        String patternStr = pat.toString();
 //
@@ -165,7 +165,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
 //              doNotUse = true;
 //            } else {
 //              if (!containsStop || !removeStopWordsFromSelectedPhrases) {
-//
+//                
 //                if (label == null || l.get(constVars.answerClass.get(label)) == null || !l.get(constVars.answerClass.get(label)).equals(label.toString())) {
 //                  useWordNotLabeled = true;
 //                }

@@ -25,9 +25,9 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
   public CollectionValuedMap<String, String> getRelevantWords() {
     CollectionValuedMap<String, String> relwordsThisPat = new CollectionValuedMap<>();
     Token[] next = getNextContext();
-    getRelevantWordsBase(next, relwordsThisPat);
+    getRelevantWords(next, relwordsThisPat);
     Token[] prev = getPrevContext();
-    getRelevantWordsBase(prev, relwordsThisPat);
+    getRelevantWords(prev, relwordsThisPat);
     return relwordsThisPat;
   }
 

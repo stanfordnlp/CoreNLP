@@ -121,7 +121,7 @@ public class StringDictionary {
   }
 
   /**
-   * Saves all dictionary entries that appeared {@literal >} threshold times Note: feature
+   * Saves all dictionary entries that appeared > threshold times Note: feature
    * indices are changed to contiguous values starting at 0. This is needed in
    * order to minimize the memory allocated for the expanded feature vectors
    * (average perceptron).
@@ -131,11 +131,12 @@ public class StringDictionary {
     String fileName = path + java.io.File.separator + prefix + "." + mName;
     java.io.PrintStream os = new java.io.PrintStream(new java.io.FileOutputStream(fileName));
 
+    Set<String> keys = mDict.keySet();
     int index = 0;
-    for (Map.Entry<String, IndexAndCount> entry : mDict.entrySet()) {
-      IndexAndCount ic = entry.getValue();
+    for (String key : keys) {
+      IndexAndCount ic = mDict.get(key);
       if (ic.mCount > threshold) {
-        os.println(entry.getKey() + ' ' + index + ' ' + ic.mCount);
+        os.println(key + " " + index + " " + ic.mCount);
         index++;
       }
     }
@@ -182,5 +183,4 @@ public class StringDictionary {
   public java.util.Set<String> keys() {
     return mDict.keySet();
   }
-
 }

@@ -17,7 +17,7 @@ import edu.stanford.nlp.util.GoogleNGramsSQLBacked;
 import edu.stanford.nlp.util.logging.Redwood;
 
 public abstract class PhraseScorer<E extends Pattern> {
-  ConstantsAndVariables constVars;
+  ConstantsAndVariables<E> constVars;
 
   //these get overwritten in ScorePhrasesLearnFeatWt class
   double OOVExternalFeatWt = 0.5;
@@ -30,7 +30,7 @@ public abstract class PhraseScorer<E extends Pattern> {
 
   @Option(name = "wordFreqNorm")
   Normalization wordFreqNorm = Normalization.valueOf("LOG");
-
+  
   /**
    * For phrases, some phrases are evaluated as a combination of their
    * individual words. Default is taking minimum of all the words. This flag
@@ -167,7 +167,7 @@ public abstract class PhraseScorer<E extends Pattern> {
     double score = thislabel/ (alllabels + 1);
     return score;
   }
-
+  
   public double getDictOddsScore(CandidatePhrase word, String label, double defaultWt) {
     double dscore;
     Counter<CandidatePhrase> dictOddsWordWeights = constVars.dictOddsWeights.get(label);

@@ -42,7 +42,7 @@ public class DepPattern extends Pattern {
   public CollectionValuedMap<String, String> getRelevantWords() {
     CollectionValuedMap<String, String> relwordsThisPat = new CollectionValuedMap<String, String>();
     for(Pair<Token, GrammaticalRelation> r: relations)
-      getRelevantWordsBase(r.first(), relwordsThisPat);
+      getRelevantWords(r.first(), relwordsThisPat);
     return relwordsThisPat;
   }
 

@@ -63,7 +63,7 @@ public class ArcStandard extends ParsingSystem {
       int h = t.startsWith("L") ? c.getStack(0) : c.getStack(1);
       if (h < 0) return false;
       if (h == 0 && !label.equals(rootLabel)) return false;
-      //if (h > 0 && label.equals(rootLabel)) return false;
+      if (h > 0 && label.equals(rootLabel)) return false;
     }
 
     int nStack = c.getStackSize();

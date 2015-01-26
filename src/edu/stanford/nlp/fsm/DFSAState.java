@@ -6,7 +6,9 @@ import edu.stanford.nlp.util.Scored;
 import java.util.*;
 
 /**
- * DFSAState represents the state of a deterministic finite state
+ * DFSAState
+ * <p/>
+ * Class for representing the state of a deterministic finite state
  * automaton without epsilon transitions.
  *
  * @author Dan Klein

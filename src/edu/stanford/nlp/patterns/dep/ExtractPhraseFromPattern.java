@@ -132,7 +132,7 @@ public class ExtractPhraseFromPattern {
     while (m.find()) {
 
       IndexedWord w = m.getNode("node");
-      //System.out.println("found a match for " + pattern.pattern());
+      System.out.println("found a match for " + pattern.pattern());
 
       IndexedWord parent = m.getNode("parent");
 
@@ -149,8 +149,8 @@ public class ExtractPhraseFromPattern {
           matchedGraphs = new ArrayList<Pair<String, SemanticGraph>>();
         matchedGraphs.add(new Pair<String, SemanticGraph>(StringUtils.join(
           tokens, " "), g));
-        //if (DEBUG >= 3)
-        //  System.out.println("matched pattern is " + pattern);
+        if (DEBUG >= 3)
+          System.out.println("matched pattern is " + pattern);
         matchedGraphsForPattern.put(pattern, matchedGraphs);
       }
 
@@ -164,8 +164,8 @@ public class ExtractPhraseFromPattern {
 //        cutoffrelations = cutoffRelationsForTech;
 //      if (elementStr.equalsIgnoreCase("app"))
 //        cutoffrelations = this.cuttoffRelationsForApp;
-      //System.out.println("g is ");
-      //g.prettyPrint();
+      System.out.println("g is ");
+      g.prettyPrint();
       printSubGraph(g, w, cutoffrelations, tokens, outputNodes, outputIndices, seenNodes, new ArrayList<IndexedWord>(),
           findSubTrees, extractedPhrases, pattern, acceptWord);
     }
@@ -193,7 +193,7 @@ public class ExtractPhraseFromPattern {
       descendantsWithReln(g, w, "conj_and", new ArrayList<IndexedWord>(),
           andNodes);
 
-      //System.out.println("and nodes are " + andNodes);
+      System.out.println("and nodes are " + andNodes);
 
       for (IndexedWord w1 : andNodes) {
         printSubGraph(g, w1, additionalCutOffRels, textTokens,
@@ -232,7 +232,7 @@ public class ExtractPhraseFromPattern {
       // words.removeAll(wordsAnd);
       // printSubGraph(g,afterand, includeSiblings, additionalCutOffNodes);
       // }
-      //System.out.println("words are " + words);
+      System.out.println("words are " + words);
       if (words.size() > 0) {
         int min = Integer.MAX_VALUE, max = -1;
         for (IndexedWord word : words) {
@@ -261,7 +261,7 @@ public class ExtractPhraseFromPattern {
         for(int i = min; i <= max; i++)
           feat.addAll(featPerToken.get(i));
 
-        //System.out.println("phrase is " + phrase  + " index is " + indices + " and maxphraselength is " + maxPhraseLength + " and descendentset is " + words);
+        System.out.println("phrase is " + phrase  + " index is " + indices + " and maxphraselength is " + maxPhraseLength + " and descendentset is " + words);
         ExtractedPhrase  extractedPh = new ExtractedPhrase(min - 1, max -1, pattern,  phrase, Counters.asCounter(feat));
 
 

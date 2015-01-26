@@ -23,7 +23,7 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimen
   List<String> sentids;
   boolean removeStopWordsFromSelectedPhrases;
   boolean removePhrasesWithStopWords;
-  ConstantsAndVariables constVars;
+  ConstantsAndVariables<E> constVars;
   Map<String, DataInstance> sents = null;
 
 
