@@ -295,33 +295,33 @@ public class CRFClassifierITest extends TestCase {
     for (int i = 0; i < testTexts.length; i++) {
       String[] testText = testTexts[i];
 
-      assertEquals("Wrong array size in test", 7, testText.length);
+      assertEquals(i + ": Wrong array size in test", 7, testText.length);
       // System.err.println("length of string is " + testText[0].length());
       String out;
 
       out = crf.classifyToString(testText[0]);
-      assertEquals("CRF buggy on classifyToString", testText[1], out);
+      assertEquals(i + ": CRF buggy on classifyToString", testText[1], out);
 
       out = crf.classifyWithInlineXML(testText[0]);
-      assertEquals("CRF buggy on classifyWithInlineXML", testText[2], out);
+      assertEquals(i + ": CRF buggy on classifyWithInlineXML", testText[2], out);
 
       out = crf.classifyToString(testText[0], "xml", false).replaceAll("\r", "");
-      assertEquals("CRF buggy on classifyToString(xml, false)", testText[3], out);
+      assertEquals(i + ": CRF buggy on classifyToString(xml, false)", testText[3], out);
 
       out = crf.classifyToString(testText[0], "xml", true);
-      assertEquals("CRF buggy on classifyToString(xml, true)", testText[4], out);
+      assertEquals(i + ": CRF buggy on classifyToString(xml, true)", testText[4], out);
 
       out = crf.classifyToString(testText[0], "slashTags", false).replaceAll("\r", "");
       // System.out.println("Gold:  |" + testText[5] + "|");
       // System.out.println("Guess: |" + out + "|");
-      assertEquals("CRF buggy on classifyToString(slashTags, false)", testText[5], out);
+      assertEquals(i + ": CRF buggy on classifyToString(slashTags, false)", testText[5], out);
 
       out = crf.classifyToString(testText[0], "inlineXML", false).replaceAll("\r", "");
-      assertEquals("CRF buggy on classifyToString(inlineXML, false)", testText[6], out);
+      assertEquals(i + ": CRF buggy on classifyToString(inlineXML, false)", testText[6], out);
 
       List<Triple<String,Integer,Integer>> trip = crf.classifyToCharacterOffsets(testText[0]);
       // I couldn't work out how to avoid a type warning in the next line, sigh [cdm 2009]
-      assertEquals("CRF buggy on classifyToCharacterOffsets", Arrays.asList(testTrip[i]), trip);
+      assertEquals(i + ": CRF buggy on classifyToCharacterOffsets", Arrays.asList(testTrip[i]), trip);
 
       if (i == 0) {
         // cdm 2013: I forget exactly what this was but something about the reduplicated period at the end of Jr.?
