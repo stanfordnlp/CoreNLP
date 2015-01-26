@@ -131,8 +131,8 @@ public class StanfordCoreNLPITest extends TestCase {
         assertEquals(message + ": ner mismatch for " + debug + "(" + tokens.get(j).word() + ")\n" + coremapOutput, ner, tokens.get(j).ner());
       }
     }
-
   }
+
   public void testRegexNer() throws Exception {
     // Check the regexner is integrated with the StanfordCoreNLP
     Properties props = new Properties();
@@ -197,7 +197,6 @@ public class StanfordCoreNLPITest extends TestCase {
   }
 
 
-
   /* This test no longer supported. Do not mess with AnnotatorPool outside of StanfordCoreNLP */
   /*
   public void testAnnotatorPool() throws Exception {
@@ -237,6 +236,7 @@ public class StanfordCoreNLPITest extends TestCase {
   }
   */
 
+
   public void testSerialization()
     throws Exception
   {
@@ -271,7 +271,7 @@ public class StanfordCoreNLPITest extends TestCase {
     assertTrue(document.equals(newDocument));
   }
 
-  public static Object processSerialization(Object input)
+  private static Object processSerialization(Object input)
     throws Exception
   {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -290,7 +290,6 @@ public class StanfordCoreNLPITest extends TestCase {
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos");
     props.setProperty("ssplit.isOneSentence", "true");
-    // props.setProperty("ssplit.newlineIsSentenceBreak", "never");
 
     // run an annotation through the pipeline
     String text = "At least a few female committee members are from Scandinavia. \n";
@@ -301,12 +300,55 @@ public class StanfordCoreNLPITest extends TestCase {
     // check that tokens are present
     List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
     Assert.assertNotNull(tokens);
-    Assert.assertEquals("Wrong number of tokens", 11, tokens.size());
+    Assert.assertEquals("Wrong number of tokens: " + tokens, 11, tokens.size());
 
     // check that sentences are present
     List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
     Assert.assertNotNull(sentences);
     Assert.assertEquals("Wrong number of sentences", 1, sentences.size());
+  }
+
+  public void testSentenceNewlinesTwo() {
+    // create a properties that enables all the annotators
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize");
+
+    // run an annotation through the pipeline
+    String text = "At least a few female committee members\nare from Scandinavia.\n";
+    Annotation document = new Annotation(text);
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(document);
+
+    // check that tokens are present
+    List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
+    Assert.assertNotNull(tokens);
+    Assert.assertEquals("Wrong number of tokens: " + tokens, 11, tokens.size());
+  }
+
+  public void testSentenceNewlinesThree() {
+    // create a properties that enables all the annotators
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos");
+
+    // run an annotation through the pipeline
+    String text = "At least a few female committee members\nare from Scandinavia.\n";
+    Annotation document = new Annotation(text);
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(document);
+
+    // check that tokens are present
+    List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
+    Assert.assertNotNull(tokens);
+    Assert.assertEquals("Wrong number of tokens: " + tokens, 11, tokens.size());
+
+    // check that sentences are present
+    List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
+    Assert.assertNotNull(sentences);
+    Assert.assertEquals("Wrong number of sentences", 1, sentences.size());
+    CoreMap firstSentence = sentences.get(0);
+    List<CoreLabel> sentTokens = firstSentence.get(CoreAnnotations.TokensAnnotation.class);
+    Assert.assertNotNull(sentTokens);
+    Assert.assertEquals("Wrong number of sentTokens: " + sentTokens, 11, sentTokens.size());
   }
 
 }
