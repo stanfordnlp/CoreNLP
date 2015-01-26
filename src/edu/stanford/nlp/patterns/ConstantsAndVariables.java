@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.Env;
@@ -31,7 +30,7 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 
-public class ConstantsAndVariables<E> implements Serializable{
+public class ConstantsAndVariables implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -571,7 +570,7 @@ public class ConstantsAndVariables<E> implements Serializable{
     public int compareTo(Object o) {
       if(!(o instanceof  ScorePhraseMeasures))
         return -1;
-      else return ((ScorePhraseMeasures)o).toString().compareTo(this.toString());
+      else return o.toString().compareTo(this.toString());
     }
   }
 
@@ -853,7 +852,12 @@ public class ConstantsAndVariables<E> implements Serializable{
       Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger, "Reading stop words from "
         + stopWordsPatternFiles);
       for (String stopwfile : stopWordsPatternFiles.split("[;,]"))
-        stopWords.addAll(CandidatePhrase.convertStringPhrases(IOUtils.linesFromFile(stopwfile)));
+      {
+        for(String word: IOUtils.readLines(stopwfile)){
+          if(!word.trim().isEmpty())
+            stopWords.add(CandidatePhrase.createOrGet(word.trim()));
+        }
+      }
     }
 
     englishWords = new HashSet<String>();
@@ -955,7 +959,7 @@ public class ConstantsAndVariables<E> implements Serializable{
     for(String label: labels){
       learnedWords.put(label, new ClassicCounter<CandidatePhrase>());
     }
-    
+
    if(usePhraseEvalGoogleNgram || usePatternEvalDomainNgram) {
      Data.usingGoogleNgram = true;
      Execution.fillOptions(GoogleNGramsSQLBacked.class, props);
@@ -1024,14 +1028,12 @@ public class ConstantsAndVariables<E> implements Serializable{
         try {
           File f= sentfilesIter.next();
           return new Pair<Map<String, DataInstance>, File>(IOUtils.readObjectFromFile(f), f);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
           throw new RuntimeException(e);
         }
       }else{
         readInMemory= true;
-        return new Pair(Data.sents, new File(""));
+        return new Pair<>(Data.sents, new File(""));
       }
     }
   }

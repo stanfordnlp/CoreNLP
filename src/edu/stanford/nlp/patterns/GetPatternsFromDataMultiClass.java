@@ -15,7 +15,6 @@ import java.util.function.Function;
 
 import javax.json.*;
 
-import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RegExFileFilter;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -54,7 +53,7 @@ import org.joda.time.Period;
  *
  * To use the default options, run
  * <p>
- * <code>java -mx1000m edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -file text_file -seedWordsFiles label1,seedwordlist1;label2,seedwordlist2;... -outDir output_directory (optional)</code>
+ * <code>java -mx1000m edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass -file text_file -seedWordsFiles label1,seedwordlist1;label2,seedwordlist2;... -outDir output_directory (optional)</code>
  * <p>
  *
  * <code>fileFormat</code>: (Optional) Default is text. Valid values are text
@@ -78,7 +77,7 @@ import org.joda.time.Period;
  * To use a properties file, see
  * projects/core/data/edu/stanford/nlp/patterns/surface/example.properties or patterns/example.properties (depends on which codebase you are using)
  * as an example for the flags and their brief descriptions. Run the code as:
- * <code>java -mx1000m -cp classpath edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass -props dir-as-above/example.properties</code>
+ * <code>java -mx1000m -cp classpath edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass -props dir-as-above/example.properties</code>
  *
  * <p>
  * IMPORTANT: Many flags are described in the classes
@@ -151,7 +150,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
   Properties props;
   public ScorePhrases scorePhrases;
-  public ConstantsAndVariables<E> constVars;
+  public ConstantsAndVariables constVars;
   public CreatePatterns createPats;
 
   DecimalFormat df = new DecimalFormat("#.##");
@@ -277,7 +276,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     Execution.fillOptions(ConstantsAndVariables.class, props);
     PatternFactory.setUp(props, PatternFactory.PatternType.valueOf(props.getProperty("patternType")));
 
-    constVars = new ConstantsAndVariables<E>(props, seedSets, answerClass, generalizeClasses, ignoreClasses);
+    constVars = new ConstantsAndVariables(props, seedSets, answerClass, generalizeClasses, ignoreClasses);
 
     //Execution.fillOptions(constVars, props);
     //constVars.ignoreWordswithClassesDuringSelection = ignoreClasses;
@@ -387,7 +386,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     };
 
     boolean createIndex = false;
-    if(constVars.loadInvertedIndex)
+    if (constVars.loadInvertedIndex)
       constVars.invertedIndex = SentenceIndex.loadIndex(constVars.invertedIndexClass, props, extremelySmallStopWordsList, constVars.invertedIndexDirectory, transformCoreLabelToString);
     else {
       constVars.invertedIndex = SentenceIndex.createIndex(constVars.invertedIndexClass, null, props, extremelySmallStopWordsList, constVars.invertedIndexDirectory, transformCoreLabelToString);
@@ -1084,7 +1083,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       if(reln != null)
         features.add("REL-" + reln.getShortName());
     }
-    System.out.println("For graph " + graph.toFormattedString() + " and vertex " + vertex + " the features are " + features);
+    //System.out.println("For graph " + graph.toFormattedString() + " and vertex " + vertex + " the features are " + features);
   }
 
   static void addLengthFeature(){}
@@ -1404,7 +1403,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     } else if (constVars.patternScoring.equals(PatternScoring.kNN)) {
       try {
-        Class<? extends ScorePatterns> clazz = (Class<? extends ScorePatterns>) Class.forName("edu.stanford.nlp.patterns.surface.ScorePatternsKNN");
+        Class<? extends ScorePatterns> clazz = (Class<? extends ScorePatterns>) Class.forName("edu.stanford.nlp.patterns.ScorePatternsKNN");
         Constructor<? extends ScorePatterns> ctor = clazz.getConstructor(ConstantsAndVariables.class, PatternScoring.class, String.class, Set.class,
             TwoDimensionalCounter.class, TwoDimensionalCounter.class, TwoDimensionalCounter.class, ScorePhrases.class, Properties.class);
         scorePatterns = ctor.newInstance(constVars, constVars.patternScoring, label, allCandidatePhrases, patternsandWords4Label, negPatternsandWords4Label,
@@ -2956,7 +2955,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     }
 
     if (!assumedNeg.isEmpty())
-      System.err.println("Gold entity list does not contain words " + assumedNeg + " for label " + label + ". Assuming them as negative.");
+      System.err.println("\nGold entity list does not contain words " + assumedNeg + " for label " + label + ". Assuming them as negative.");
 
     double precision = numcorrect / (double) (numcorrect + numincorrect);
     double recall = numcorrect / (double) (numgoldcorrect);
@@ -3100,6 +3099,9 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       throw new RuntimeException("No training data! file is " + file + " and evalFileWithGoldLabels is " + evalFileWithGoldLabels
         + " and addEvalSentsToTrain is " + addEvalSentsToTrain);
     }
+
+    if(props.getProperty("patternType") == null)
+      throw new RuntimeException("PattenrType not specified. Options are SURFACE and DEP");
 
     PatternFactory.PatternType patternType = PatternFactory.PatternType.valueOf(props.getProperty("patternType"));
     File saveSentencesSerDir = null;
@@ -3341,11 +3343,13 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       if(model.constVars.goldEntitiesEvalFiles !=null) {
 
         for (String label : model.constVars.getLabels()) {
-          Pair<Double, Double> pr = model.getPrecisionRecall(label, model.constVars.goldEntities.get(label));
-          Redwood.log(ConstantsAndVariables.minimaldebug,
-            "\nFor label " + label + ": Number of gold entities is " + model.constVars.goldEntities.get(label) + ", Precision is " + model.df.format(pr.first() * 100)
-              + ", Recall is " + model.df.format(pr.second() * 100) + ", F1 is " + model.df.format(model.FScore(pr.first(), pr.second(), 1.0) * 100)
-              + "\n\n");
+          if(model.constVars.goldEntities.containsKey(label)){
+            Pair<Double, Double> pr = model.getPrecisionRecall(label, model.constVars.goldEntities.get(label));
+            Redwood.log(ConstantsAndVariables.minimaldebug,
+              "\nFor label " + label + ": Number of gold entities is " + model.constVars.goldEntities.get(label).size() + ", Precision is " + model.df.format(pr.first() * 100)
+                + ", Recall is " + model.df.format(pr.second() * 100) + ", F1 is " + model.df.format(model.FScore(pr.first(), pr.second(), 1.0) * 100)
+                + "\n\n");
+          }
         }
       }
 
