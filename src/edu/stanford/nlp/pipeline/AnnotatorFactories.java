@@ -71,6 +71,7 @@ public class AnnotatorFactories {
         } else {
           os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ':');
           os.append(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
+          os.append("ssplit.isOneSentence" + ':' + properties.getProperty("ssplit.isOneSentence", "false"));
           os.append(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ':');
           os.append(properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
         }
