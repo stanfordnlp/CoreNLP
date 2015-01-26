@@ -285,5 +285,28 @@ public class StanfordCoreNLPITest extends TestCase {
     return oin.readObject();
   }
 
+  public void testSentenceNewlines() {
+    // create a properties that enables all the annotators
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize,ssplit,pos");
+    props.setProperty("ssplit.isOneSentence", "true");
+    // props.setProperty("ssplit.newlineIsSentenceBreak", "never");
+
+    // run an annotation through the pipeline
+    String text = "At least a few female committee members are from Scandinavia. \n";
+    Annotation document = new Annotation(text);
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+    pipeline.annotate(document);
+
+    // check that tokens are present
+    List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
+    Assert.assertNotNull(tokens);
+    Assert.assertEquals("Wrong number of tokens", 11, tokens.size());
+
+    // check that sentences are present
+    List<CoreMap> sentences = document.get(CoreAnnotations.SentencesAnnotation.class);
+    Assert.assertNotNull(sentences);
+    Assert.assertEquals("Wrong number of sentences", 1, sentences.size());
+  }
 
 }
