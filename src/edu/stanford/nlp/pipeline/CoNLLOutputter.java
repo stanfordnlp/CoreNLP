@@ -74,7 +74,7 @@ public class CoNLLOutputter extends AnnotationOutputter {
 
   public CoNLLOutputter() { }
 
-  private String orNull(String in) {
+  private static String orNull(String in) {
     if (in == null) {
       return NULL_PLACEHOLDER;
     } else {
@@ -83,9 +83,9 @@ public class CoNLLOutputter extends AnnotationOutputter {
   }
 
   /**
-   * Write a line of the CoNLL output.
+   * Produce a line of the CoNLL output.
    */
-  private String line(int index,
+  private static String line(int index,
                       CoreLabel token,
                       int head, String deprel) {
     ArrayList<String> fields = new ArrayList<>(16);
@@ -111,14 +111,8 @@ public class CoNLLOutputter extends AnnotationOutputter {
     PrintWriter writer = new PrintWriter(target);
 
     // vv A bunch of nonsense to get tokens vv
-    boolean firstSentence = true;
     if (doc.get(CoreAnnotations.SentencesAnnotation.class) != null) {
       for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
-        if (!firstSentence) {
-          writer.println();
-          writer.println();
-        }
-        firstSentence = false;
         if (sentence.get(CoreAnnotations.TokensAnnotation.class) != null) {
           List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
           SemanticGraph depTree = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
@@ -153,6 +147,8 @@ public class CoNLLOutputter extends AnnotationOutputter {
             writer.print(line(i + 1, tokens.get(i), head, deprel));
           }
         }
+        writer.println();
+        writer.println();
       }
     }
     writer.flush();
