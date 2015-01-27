@@ -219,7 +219,7 @@ public class AnnotatorImplementations {
   public Annotator quote(Properties properties) {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
         Annotator.STANFORD_QUOTE + '.');
-    return new QuoteAnnotator();
+    return new QuoteAnnotator(relevantProperties);
   }
 
 }

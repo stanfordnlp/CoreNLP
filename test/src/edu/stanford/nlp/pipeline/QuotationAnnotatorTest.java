@@ -24,7 +24,7 @@ public class QuotationAnnotatorTest extends TestCase {
     synchronized(QuotationAnnotatorTest.class) {
       if (pipeline == null) {
         Properties props = new Properties();
-        props.setProperty("annotators", "tokenize,quote");
+        props.setProperty("annotators", "quote");
         pipeline = new StanfordCoreNLP(props);
       }
     }
@@ -39,7 +39,7 @@ public class QuotationAnnotatorTest extends TestCase {
 
   public void testUnclosedLastDoubleQuotes() {
     String text = "\"Hello,\" he said, \"how are you doing?";
-    List<CoreMap> quotes = runQuotes(text, 2);
+    List<CoreMap> quotes = runQuotes(text, 1);
     assertEquals("\"Hello,\"", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
   }
 
@@ -98,7 +98,7 @@ public class QuotationAnnotatorTest extends TestCase {
 
   public void testUnclosedLastSingleQuotes() {
     String text = "'Hello,' he said, 'how are you doing?";
-    List<CoreMap> quotes = runQuotes(text, 2);
+    List<CoreMap> quotes = runQuotes(text, 1);
     assertEquals("'Hello,'", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
   }
 
