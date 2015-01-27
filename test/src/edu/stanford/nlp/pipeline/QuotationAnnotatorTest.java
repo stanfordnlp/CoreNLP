@@ -43,6 +43,26 @@ public class QuotationAnnotatorTest extends TestCase {
     assertEquals("\"Hello,\"", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
   }
 
+  public void testDoubleEnclosedInSingle() {
+    String text = "'\"Hello,\" he said, \"how are you doing?\"'";
+    List<CoreMap> quotes = runQuotes(text, 3);
+    assertEquals("'\"Hello,\" he said, \"how are you doing?\"'", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("\"Hello,\"", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("\"how are you doing?\"", quotes.get(2).get(CoreAnnotations.TextAnnotation.class));
+    assertEmbedded("\"Hello,\"", text, quotes);
+    assertEmbedded("\"how are you doing?\"", text, quotes);
+  }
+
+  public void testSingleEnclosedInDouble() {
+    String text = "\"'Hello,' he said, 'how are you doing?'\"";
+    List<CoreMap> quotes = runQuotes(text, 3);
+    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("'Hello,'", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("'how are you doing?'", quotes.get(2).get(CoreAnnotations.TextAnnotation.class));
+    assertEmbedded("'Hello,'", text, quotes);
+    assertEmbedded("'how are you doing?'", text, quotes);
+  }
+
   public void testEmbeddedQuotes() {
     String text = "\"'Enter,' said De Lacy; 'and I will\n" +
         "\n" +

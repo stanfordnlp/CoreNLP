@@ -279,8 +279,12 @@ public class QuoteAnnotator implements Annotator {
   private static boolean isDoubleQuoteEnd(String text, int i) {
     if (i == text.length() - 1) return true;
     String next = text.substring(i + 1, i + 2);
-    return (isWhitespaceOrPunct(next) &&
-            !isSingleQuote(next));
+    if (i == text.length() - 2 && isWhitespaceOrPunct(next)) {
+      return true;
+    }
+    String nextNext = text.substring(i + 2, i + 3);
+    return ((isWhitespaceOrPunct(next) &&
+           !isSingleQuote(next)) || (isSingleQuote(next) && isWhitespaceOrPunct(nextNext)));
   }
 
   public static boolean isWhitespaceOrPunct(String c) {
