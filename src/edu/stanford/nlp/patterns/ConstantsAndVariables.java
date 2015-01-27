@@ -459,6 +459,9 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name="goldEntitiesEvalFiles", gloss="label1,gold_list_of_entities_file;label2,...")
   public String goldEntitiesEvalFiles = null;
 
+  @Option(name="evaluate")
+  public boolean evaluate = false;
+
   Map<String, Map<String, Boolean>> goldEntities = new HashMap<String, Map<String, Boolean>>();
 
   @Option(name="featureCountThreshold")
@@ -964,7 +967,7 @@ public class ConstantsAndVariables implements Serializable {
      Data.usingGoogleNgram = true;
      Execution.fillOptions(GoogleNGramsSQLBacked.class, props);
    }
-  if(goldEntitiesEvalFiles !=null)
+  if(goldEntitiesEvalFiles !=null && evaluate)
     goldEntities = readGoldEntities(goldEntitiesEvalFiles);
     alreadySetUp = true;
   }
