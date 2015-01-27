@@ -213,13 +213,4 @@ public class AnnotatorImplementations {
     return new NaturalLogicAnnotator(relevantProperties);
   }
 
-  /**
-   * Annotate quotes and extract them like sentences
-   */
-  public Annotator quote(Properties properties) {
-    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
-        Annotator.STANFORD_QUOTE + '.');
-    return new QuoteAnnotator(relevantProperties);
-  }
-
 }

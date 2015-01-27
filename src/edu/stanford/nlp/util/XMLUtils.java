@@ -1,7 +1,14 @@
 package edu.stanford.nlp.util;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,10 +19,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -28,56 +32,10 @@ import edu.stanford.nlp.io.IOUtils;
  * parsing them and by using the methods of a desperate Perl hacker.
  *
  * @author Teg Grenager
- * @author Grace Muzny
  */
 public class XMLUtils {
 
   private XMLUtils() {} // only static methods
-
-  /**
-   * Returns the text content of all nodes in the given file with the given tag.
-   *
-   * @return List of String text contents of tags.
-   */
-  public static List<String> getTextContentFromTagsFromFile(File f, String tag) {
-    List<String> sents = new ArrayList<>();
-    try {
-      sents = getTextContentFromTagsFromFileSAXException(f, tag);
-    } catch (SAXException e) {
-      System.err.println(e);
-    }
-    return sents;
-  }
-
-  /**
-   * Returns the text content of all nodes in the given file with the given tag.
-   *
-   * @throws SAXException if tag doesn't exist in the file.
-   * @return List of String text contents of tags.
-   */
-  public static List<String> getTextContentFromTagsFromFileSAXException(
-      File f, String tag) throws SAXException {
-    List<String> sents = new ArrayList<>();
-    try {
-      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-      DocumentBuilder db = dbf.newDocumentBuilder();
-      Document doc = db.parse(f);
-      doc.getDocumentElement().normalize();
-
-      NodeList nodeList=doc.getElementsByTagName(tag);
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        // Get element
-        Element element = (Element)nodeList.item(i);
-        sents.add(StringEscapeUtils.unescapeXml(element.getTextContent()));
-      }
-    } catch (IOException e) {
-      System.err.println(e);
-    } catch (ParserConfigurationException e) {
-      System.err.println(e);
-    }
-    return sents;
-  }
-
 
   /**
    * Returns a non-validating XML parser. The parser ignores both DTDs and XSDs.
