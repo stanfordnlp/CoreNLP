@@ -106,7 +106,6 @@ public interface Annotator {
   public static final String STANFORD_COLUMN_DATA_CLASSIFIER = "cdc";
   public static final String STANFORD_DEPENDENCIES = "depparse";
   public static final String STANFORD_NATLOG = "natlog";
-  public static final String STANFORD_QUOTE = "quote";
 
 
   public static final Requirement TOKENIZE_REQUIREMENT = new Requirement(STANFORD_TOKENIZE);
@@ -121,7 +120,6 @@ public interface Annotator {
   public static final Requirement DETERMINISTIC_COREF_REQUIREMENT = new Requirement(STANFORD_DETERMINISTIC_COREF);
   public static final Requirement RELATION_EXTRACTOR_REQUIREMENT = new Requirement(STANFORD_RELATION);
   public static final Requirement NATLOG_REQUIREMENT = new Requirement(STANFORD_NATLOG);
-  public static final Requirement QUOTE_REQUIREMENT = new Requirement(STANFORD_QUOTE);
 
   /**
    * These are annotators which StanfordCoreNLP does not know how to
