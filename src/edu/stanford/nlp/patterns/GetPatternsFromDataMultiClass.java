@@ -654,7 +654,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       }
     }
 
-    Redwood.log(Redwood.DBG, "All options are:" + "\n" + Maps.toString(getAllOptions(), "","","\t","\n"));
+    //Redwood.log(Redwood.DBG, "All options are:" + "\n" + Maps.toString(getAllOptions(), "","","\t","\n"));
   }
 
   public PatternsForEachToken getPatsForEachToken() {
@@ -925,7 +925,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
    * @return starting index of the sublist
    */
   public static List<Integer> getSubListIndex(String[] l1, String[] l2, String[] subl2, Set<String> doNotLabelTheseWords, HashSet<String> seenFuzzyMatches,
-      int minLen4Fuzzy) {
+      int minLen4Fuzzy, boolean fuzzyMatch) {
     if (l1.length > l2.length)
       return null;
     EditDistance editDistance = new EditDistance(true);
@@ -938,11 +938,11 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       for (int j = 0; j < l1.length;) {
         boolean d1 = false, d2 = false;
         boolean compareFuzzy = true;
-        if (doNotLabelTheseWords.contains(l2[i]) || doNotLabelTheseWords.contains(subl2[i]) || l2[i].length() <= minLen4Fuzzy || subl2[i].length() <= minLen4Fuzzy)
+        if (!fuzzyMatch || doNotLabelTheseWords.contains(l2[i]) || doNotLabelTheseWords.contains(subl2[i]) || l2[i].length() <= minLen4Fuzzy || subl2[i].length() <= minLen4Fuzzy)
           compareFuzzy = false;
         if (compareFuzzy == false || l1[j].length() <= minLen4Fuzzy) {
           d1 = l1[j].equals(l2[i]) ? true : false;
-          if (!d1)
+          if (!d1 && fuzzyMatch)
             d2 = subl2[i].equals(l1[j]) ? true : false;
         } else {
           String combo = l1[j] + "#" + l2[i];
@@ -1048,7 +1048,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     int i =0;
     for (List<String> keys: threadedSentIds) {
-      Callable<Map<String, DataInstance>> task = new LabelWithSeedWords(seedWords, sents, keys, answerclass, label, constVars.minLen4FuzzyForPattern, constVars.backgroundSymbol, constVars.getEnglishWords(), stringTransformationFunction, constVars.writeMatchedTokensIdsForEachPhrase, overwriteExistingLabels, constVars.patternType);
+      Callable<Map<String, DataInstance>> task = new LabelWithSeedWords(seedWords, sents, keys, answerclass, label, constVars.fuzzyMatch, constVars.minLen4FuzzyForPattern, constVars.backgroundSymbol, constVars.getEnglishWords(), stringTransformationFunction, constVars.writeMatchedTokensIdsForEachPhrase, overwriteExistingLabels, constVars.patternType);
       Future<Map<String, DataInstance>> submit = executor.submit(task);
       list.add(submit);
       i++;
@@ -1106,8 +1106,9 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     boolean writeMatchedTokensIdsForEachPhrase = false;
     boolean overwriteExistingLabels;
     PatternFactory.PatternType patternType;
+    boolean fuzzyMatch = false;
 
-    public LabelWithSeedWords(Collection<CandidatePhrase> seedwords, Map<String, DataInstance> sents, List<String> keyset, Class labelclass, String label, int minLen4FuzzyForPattern, String backgroundSymbol, Set<String> doNotLabelDictWords, Function<CoreLabel, String> stringTransformation, boolean writeMatchedTokensIdsForEachPhrase, boolean overwriteExistingLabels, PatternFactory.PatternType type) {
+    public LabelWithSeedWords(Collection<CandidatePhrase> seedwords, Map<String, DataInstance> sents, List<String> keyset, Class labelclass, String label, boolean fuzzyMatch, int minLen4FuzzyForPattern, String backgroundSymbol, Set<String> doNotLabelDictWords, Function<CoreLabel, String> stringTransformation, boolean writeMatchedTokensIdsForEachPhrase, boolean overwriteExistingLabels, PatternFactory.PatternType type) {
       for (CandidatePhrase s : seedwords)
         this.seedwordsTokens.put(s, s.getPhrase().split("\\s+"));
       this.sents = sents;
@@ -1121,6 +1122,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       this.writeMatchedTokensIdsForEachPhrase = writeMatchedTokensIdsForEachPhrase;
       this.overwriteExistingLabels = overwriteExistingLabels;
       this.patternType = type;
+      this.fuzzyMatch = fuzzyMatch;
     }
 
     @SuppressWarnings("unchecked")
@@ -1145,9 +1147,10 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
           l.set(PatternsAnnotations.ProcessedTextAnnotation.class, stringTransformation.apply(l));
 
           tokens[num] = l.word();
-          if (l.lemma() == null)
+          if(l.lemma() == null)
             throw new RuntimeException("how come lemma is null");
           tokenslemma[num] = l.lemma();
+
           num++;
         }
         boolean[] labels = new boolean[tokens.length];
@@ -1159,7 +1162,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
           String[] s = sEn.getValue();
           CandidatePhrase sc = sEn.getKey();
           List<Integer> indices = getSubListIndex(s, tokens, tokenslemma, doNotLabelDictWords, seenFuzzyMatches,
-              minLen4FuzzyForPattern);
+              minLen4FuzzyForPattern, fuzzyMatch);
 
           if (indices != null && !indices.isEmpty()){
             String ph = StringUtils.join(s, " ");
@@ -1168,8 +1171,6 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
             Collection<String> features = new ArrayList<String>();
 
             for (int index : indices){
-              //TODO: add here (what? this comment doens't make any sense. I shd start adding sensible comments - unlike the current one I am typing.)
-
               if(graph != null){
                 GetPatternsFromDataMultiClass.getFeatures(graph, graph.getNodeByIndex(index + 1), true, features, null);
               }
@@ -1214,6 +1215,9 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
             if(!l.containsKey(PatternsAnnotations.SeedLabeledOrNot.class))
               l.set(PatternsAnnotations.SeedLabeledOrNot.class, new HashMap<Class, Boolean>());
             l.get(PatternsAnnotations.SeedLabeledOrNot.class).put(labelClass, true);
+
+            if(l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).containsKey(label))
+              System.out.println("\n"+l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(label) + " for label " + label+"\n\n");
 
             CandidatePhrase longestMatchingPh = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(label);
             assert longestMatchedPhrases.containsKey(i);
@@ -2268,7 +2272,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     System.out.println("\n\nAll patterns learned:");
     for (Entry<String, Counter<E>> en : this.learnedPatterns.entrySet()) {
-      System.out.println(en.getKey() + ":\t\t" + StringUtils.join(en.getValue().keySet()));
+      System.out.println(en.getKey() + ":\t\t" + StringUtils.join(en.getValue().keySet(),"\n"));
     }
 
     System.out.println("\n\nAll words learned:");
@@ -2955,7 +2959,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     }
 
     if (!assumedNeg.isEmpty())
-      System.err.println("\nGold entity list does not contain words " + assumedNeg + " for label " + label + ". Assuming them as negative.");
+      System.err.println("\nGold entity list does not contain words " + assumedNeg + " for label " + label + ". *****Assuming them as negative.******");
 
     double precision = numcorrect / (double) (numcorrect + numincorrect);
     double recall = numcorrect / (double) (numgoldcorrect);
@@ -3112,9 +3116,13 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       String saveSentencesSerDirstr = props.getProperty("saveSentencesSerDir");
       if (saveSentencesSerDirstr != null) {
         saveSentencesSerDir = new File(saveSentencesSerDirstr);
+
+        if(saveSentencesSerDir.exists() && !fileFormat.equalsIgnoreCase("ser"))
+          IOUtils.deleteDirRecursively(saveSentencesSerDir);
+
         IOUtils.ensureDir(saveSentencesSerDir);
-        if(!batchProcessSents)
-          IOUtils.writeObjectToFile(sents, saveSentencesSerDirstr + "/sents_all.ser");
+//        if(!batchProcessSents)
+//          IOUtils.writeObjectToFile(sents, saveSentencesSerDirstr + "/sents_all.ser");
       }
 
       String systemdir = System.getProperty("java.io.tmpdir");
@@ -3151,12 +3159,29 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         }
 
         if (!batchProcessSents) {
-          IOUtils.writeObjectToFile(sents, (saveSentencesSerDir == null? tempSaveSentencesDir: saveSentencesSerDir) + "/sents_" + numFilesTillNow);
+          for(Map.Entry<String, DataInstance> d: sents.entrySet()){
+            for(CoreLabel l : d.getValue().getTokens()){
+              for(String label: labels) {
+                if(l.containsKey(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class)){
+                  CandidatePhrase p = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(label);
+              }}
+            }
+          }
+          String outfilename= (saveSentencesSerDir == null ? tempSaveSentencesDir : saveSentencesSerDir) + "/sents_" + numFilesTillNow;
+          Redwood.log("Saving sentences in " + outfilename);
+          IOUtils.writeObjectToFile(sents, outfilename);
         }
+
+        //IOUtils.writeObjectToFile(CandidatePhrase.candidatePhraseMap, (saveSentencesSerDir == null? tempSaveSentencesDir: saveSentencesSerDir) + "/candidatePhraseMap.ser");
 
       } else if (fileFormat.equalsIgnoreCase("ser")) {
         //usingDirForSentsInIndex = false;
         for (File f : GetPatternsFromDataMultiClass.getAllFiles(file)) {
+//          if(f.getName().equalsIgnoreCase("candidatePhraseMap.ser")){
+//            ConcurrentHashMap<String, CandidatePhrase> candidatPhraseMap = IOUtils.readObjectFromFile(f);
+//            CandidatePhrase.setCandidatePhraseMap(candidatPhraseMap);
+//
+//          }else{
           Redwood.log(Redwood.DBG, "reading from ser file " + f);
           if (!batchProcessSents)
             sents.putAll((Map<String, DataInstance>) IOUtils.readObjectFromFile(f));
@@ -3164,24 +3189,8 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
             File newf = new File(tempSaveSentencesDir.getAbsolutePath() + "/" + f.getAbsolutePath().replaceAll(java.util.regex.Pattern.quote("/"), "_"));
             IOUtils.cp(f, newf);
             Data.sentsFiles.add(newf);
-
-//            Map<String, DataInstance> sentsFromFile = IOUtils.readObjectFromFile(f);
-//            Map<String, DataInstance> splitSents = new HashMap<String, DataInstance>();
-//            int num =0 ;
-//            int numFile = -1;
-//            for(Entry<String, DataInstance> en: sentsFromFile.entrySet()){
-//              num++;
-//              splitSents.put(en.getKey(), en.getValue());
-//              if(num >= numMaxSentencesPerBatchFile){
-//                numFile++;
-//                File newf = new File(tempSaveSentencesDir.getAbsolutePath() + "/" + f.getAbsolutePath().replaceAll(Pattern.quote("/"), "_") +"_"+numFile);
-//                IOUtils.writeObjectToFile(splitSents, newf);
-//                Data.sentsFiles.add(newf);
-//                splitSents.clear();
-//                num = 0;
-//              }
-//            }
           }
+         // }
         }
       } else {
         throw new RuntimeException(
@@ -3317,6 +3326,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     if (savePatternsWordsDir) {
       String patternsWordsDir = props.getProperty("patternsWordsDir");
+      Redwood.log(Redwood.FORCE,"Saving output in " + patternsWordsDir);
       //save pattern index!
 //      if(!model.patsForEachToken.getUseDBForTokenPatterns() && model.constVars.allPatternsDir == null){
 //        String allPatsDir = patternsWordsDir+"/allpatterns/";

@@ -470,6 +470,12 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name="expandPhrasesNumTopSimilar", gloss="k in kNN")
   public int expandPhrasesNumTopSimilar = 1;
 
+  /**
+   * Whether to do a fuzzy matching when matching seeds to text. You can tune minLen4FuzzyForPattern parameter.
+   */
+  @Option(name="fuzzyMatch")
+  public boolean fuzzyMatch = false;
+
   public Set<String> getLabels() {
     return labels;
   }
