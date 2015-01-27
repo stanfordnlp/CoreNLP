@@ -207,8 +207,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     Counter<CandidatePhrase> scores = new ClassicCounter<CandidatePhrase>();
     edu.stanford.nlp.classify.Classifier classifier = learnClassifier(label, forLearningPatterns, wordsPatExtracted, allSelectedPatterns);
     for (Entry<CandidatePhrase, ClassicCounter<E>> en : terms.entrySet()) {
-      double score = this.scoreUsingClassifer(classifier, en.getKey(), label, forLearningPatterns, en.getValue(), allSelectedPatterns);
-      scores.setCount(en.getKey(), score);
+      Double score = this.scoreUsingClassifer(classifier, en.getKey(), label, forLearningPatterns, en.getValue(), allSelectedPatterns);
+      if(!score.isNaN() && !score.isInfinite()){
+        scores.setCount(en.getKey(), score);
+      }else
+       Redwood.log(Redwood.DBG, "Ignoring " + en.getKey() + " because score is " + score);
     }
     return scores;
   }
