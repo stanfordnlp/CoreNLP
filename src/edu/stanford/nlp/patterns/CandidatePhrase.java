@@ -24,6 +24,9 @@ public class CandidatePhrase implements Serializable, Comparable  {
 
   static ConcurrentHashMap<String, CandidatePhrase> candidatePhraseMap = new ConcurrentHashMap<String, CandidatePhrase>();
 
+  static void setCandidatePhraseMap(ConcurrentHashMap<String, CandidatePhrase> candmap){
+    candidatePhraseMap = candmap;
+  }
   static public CandidatePhrase createOrGet(String phrase){
     phrase = phrase.trim();
      if(candidatePhraseMap.containsKey(phrase)){
@@ -133,7 +136,7 @@ public class CandidatePhrase implements Serializable, Comparable  {
   }
 
   public static List<CandidatePhrase> convertStringPhrases(Collection<String> str){
-    List<CandidatePhrase> phs = new ArrayList<>();
+    List<CandidatePhrase> phs = new ArrayList<CandidatePhrase>();
     for(String s: str){
       phs.add(CandidatePhrase.createOrGet(s));
     }

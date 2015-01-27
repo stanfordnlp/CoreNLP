@@ -459,6 +459,9 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name="goldEntitiesEvalFiles", gloss="label1,gold_list_of_entities_file;label2,...")
   public String goldEntitiesEvalFiles = null;
 
+  @Option(name="evaluate")
+  public boolean evaluate = false;
+
   Map<String, Map<String, Boolean>> goldEntities = new HashMap<String, Map<String, Boolean>>();
 
   @Option(name="featureCountThreshold")
@@ -466,6 +469,12 @@ public class ConstantsAndVariables implements Serializable {
 
   @Option(name="expandPhrasesNumTopSimilar", gloss="k in kNN")
   public int expandPhrasesNumTopSimilar = 1;
+
+  /**
+   * Whether to do a fuzzy matching when matching seeds to text. You can tune minLen4FuzzyForPattern parameter.
+   */
+  @Option(name="fuzzyMatch")
+  public boolean fuzzyMatch = false;
 
   public Set<String> getLabels() {
     return labels;
@@ -964,7 +973,7 @@ public class ConstantsAndVariables implements Serializable {
      Data.usingGoogleNgram = true;
      Execution.fillOptions(GoogleNGramsSQLBacked.class, props);
    }
-  if(goldEntitiesEvalFiles !=null)
+  if(goldEntitiesEvalFiles !=null && evaluate)
     goldEntities = readGoldEntities(goldEntitiesEvalFiles);
     alreadySetUp = true;
   }
