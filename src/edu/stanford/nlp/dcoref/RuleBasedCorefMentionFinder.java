@@ -318,7 +318,9 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
         // Add everything except separated dashes! The separated dashes mess with the parser too badly.
         CoreLabel label = tokens.get(i);
         if ( ! "-".equals(label.word())) {
-          extentTokens.add(tokens.get(i));
+          // necessary to copy tokens in case the parser does things like
+          // put new indices on the tokens
+          extentTokens.add((CoreLabel) label.labelFactory().newLabel(label));
         } else {
           approximateness++;
         }
@@ -412,7 +414,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
                        "token = |" + token + "|" + index + "|, approx=" + approximateness);
     for (Tree leaf : leaves) {
       if (token.equals(leaf.value())) {
-        // System.err.println("Found it at position " + ind + "; returning " + leaf);
+        //System.err.println("Found something: returning " + leaf);
         return leaf;
       }
     }
