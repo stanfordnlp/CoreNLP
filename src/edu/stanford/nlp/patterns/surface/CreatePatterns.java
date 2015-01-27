@@ -110,7 +110,7 @@ public class CreatePatterns<E> {
     // Class otherClass;
     Map<String, DataInstance> sents;
     List<String> sentIds;
-    PatternsForEachToken patsForEach;
+    PatternsForEachToken<E> patsForEach;
 
     public CreatePatternsThread(Map<String, DataInstance> sents, List<String> sentIds, Properties props, ConstantsAndVariables.PatternForEachTokenWay storePatsForEachToken) {
 

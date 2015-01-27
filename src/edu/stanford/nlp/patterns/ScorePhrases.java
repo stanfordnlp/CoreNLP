@@ -40,7 +40,7 @@ public class ScorePhrases<E extends Pattern> {
 
   Map<String, Boolean> writtenInJustification = new HashMap<String, Boolean>();
 
-  ConstantsAndVariables<E> constVars = null;
+  ConstantsAndVariables constVars = null;
 
   @Option(name = "phraseScorerClass")
   Class<? extends PhraseScorer> phraseScorerClass = ScorePhrasesAverageFeatures.class;
@@ -52,13 +52,7 @@ public class ScorePhrases<E extends Pattern> {
     try {
       phraseScorer = phraseScorerClass
           .getConstructor(ConstantsAndVariables.class).newInstance(constVars);
-    } catch (InstantiationException e) {
-      throw new RuntimeException(e);
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
-    } catch (InvocationTargetException e) {
-      throw new RuntimeException(e);
-    } catch (NoSuchMethodException e) {
+    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
       throw new RuntimeException(e);
     }
     Execution.fillOptions(phraseScorer, props);
@@ -179,7 +173,7 @@ public class ScorePhrases<E extends Pattern> {
         identifier, ignoreWords, computeProcDataFreq);
 
     //constVars.addLabelDictionary(label, words.keySet());
-    
+
 
     return words;
   }
@@ -233,7 +227,7 @@ public class ScorePhrases<E extends Pattern> {
 
 
     for (int i = 0; i < numThreads; i++) {
-    
+
       Callable<Pair<TwoDimensionalCounter<CandidatePhrase, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>> task = null;
 
       if(pattern.type.equals(PatternFactory.PatternType.SURFACE))
@@ -504,7 +498,7 @@ public class ScorePhrases<E extends Pattern> {
     Redwood.log(Redwood.DBG, "# words/lemma and pattern pairs are " + wordsandLemmaPatExtracted.size());
   }
   */
-  
+
   private void statsWithoutApplyingPatterns(Map<String, DataInstance> sents, PatternsForEachToken patternsForEachToken,
       Counter<E> patternsLearnedThisIter, TwoDimensionalCounter<CandidatePhrase, E> wordsandLemmaPatExtracted){
     for (Entry<String, DataInstance> sentEn : sents.entrySet()) {
