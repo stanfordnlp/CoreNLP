@@ -96,7 +96,7 @@ public interface Annotator {
   public static final String STANFORD_LEMMA = "lemma";
   public static final String STANFORD_NER = "ner";
   public static final String STANFORD_REGEXNER = "regexner";
-  public static final String STANFORD_MENTIONS = "mentions";
+  public static final String STANFORD_ENTITY_MENTIONS = "entitymentions";
   public static final String STANFORD_GENDER = "gender";
   public static final String STANFORD_TRUECASE = "truecase";
   public static final String STANFORD_PARSE = "parse";

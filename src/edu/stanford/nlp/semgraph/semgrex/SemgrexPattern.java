@@ -164,6 +164,8 @@ public abstract class SemgrexPattern implements Serializable {
   private boolean opt = false;
   private String patternString; // conceptually final, but can't do because of parsing
 
+  Env env;
+
   // package private constructor
   SemgrexPattern() {
   }
@@ -264,10 +266,11 @@ public abstract class SemgrexPattern implements Serializable {
    *          the pattern string
    * @return a SemgrexPattern for the string.
    */
-  public static SemgrexPattern compile(String semgrex) {
+  public static SemgrexPattern compile(String semgrex, Env env) {
     try {
       SemgrexParser parser = new SemgrexParser(new StringReader(semgrex + "\n"));
       SemgrexPattern newPattern = parser.Root();
+      newPattern.env = env;
       newPattern.patternString = semgrex;
       return newPattern;
     } catch (ParseException ex) {
@@ -275,6 +278,10 @@ public abstract class SemgrexPattern implements Serializable {
     } catch (TokenMgrError er) {
       throw new SemgrexParseException("Error parsing semgrex pattern " + semgrex, er);
     }
+  }
+
+  public static SemgrexPattern compile(String semgrex) {
+    return compile(semgrex, new Env());
   }
 
   public String pattern() {

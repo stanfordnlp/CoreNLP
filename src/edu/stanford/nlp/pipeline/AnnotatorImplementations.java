@@ -116,7 +116,7 @@ public class AnnotatorImplementations {
    * Annotate mentions
    */
   public Annotator mentions(Properties properties, String name) {
-    return new MentionsAnnotator(name, properties);
+    return new EntityMentionsAnnotator(name, properties);
   }
 
   /**

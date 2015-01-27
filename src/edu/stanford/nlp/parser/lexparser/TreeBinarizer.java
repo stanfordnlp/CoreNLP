@@ -13,6 +13,7 @@ import java.io.Reader;
  * Produces LSTrees with CWT labels.  The input trees have to have CWT labels!
  * Although the binarizer always respects heads, you can get left or right
  * binarization by defining an appropriate HeadFinder.
+ * TODO: why not use CoreLabel if the input Tree used CoreLabel?
  *
  * @author Dan Klein
  * @author Teg Grenager

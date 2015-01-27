@@ -1,6 +1,7 @@
 package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.patterns.Pattern;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.LuceneFieldType;
@@ -19,8 +20,6 @@ import org.apache.lucene.util.Version;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**

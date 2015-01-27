@@ -1,12 +1,11 @@
-package edu.stanford.nlp.patterns.surface;
+package edu.stanford.nlp.patterns;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
-import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
+import edu.stanford.nlp.patterns.ConstantsAndVariables;
+import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 
@@ -16,26 +15,26 @@ public abstract class ScorePatterns<E> {
   protected PatternScoring patternScoring;
   protected Properties props;
   
-  abstract Counter<E> score() throws IOException, ClassNotFoundException;
-  protected TwoDimensionalCounter<E, String> patternsandWords4Label = new TwoDimensionalCounter<E, String>();
-  protected TwoDimensionalCounter<E, String> negPatternsandWords4Label = new TwoDimensionalCounter<E, String>();
+  public abstract Counter<E> score() throws IOException, ClassNotFoundException;
+  protected TwoDimensionalCounter<E, CandidatePhrase> patternsandWords4Label = new TwoDimensionalCounter<E, CandidatePhrase>();
+  protected TwoDimensionalCounter<E, CandidatePhrase> negPatternsandWords4Label = new TwoDimensionalCounter<E, CandidatePhrase>();
   // protected TwoDimensionalCounter<SurfacePattern, String>
   // posnegPatternsandWords4Label = new TwoDimensionalCounter<SurfacePattern,
   // String>();
-  protected TwoDimensionalCounter<E, String> unLabeledPatternsandWords4Label = new TwoDimensionalCounter<E, String>();
+  protected TwoDimensionalCounter<E, CandidatePhrase> unLabeledPatternsandWords4Label = new TwoDimensionalCounter<E, CandidatePhrase>();
   //protected TwoDimensionalCounter<E, String> negandUnLabeledPatternsandWords4Label = new TwoDimensionalCounter<E, String>();
   //protected TwoDimensionalCounter<E, String> allPatternsandWords4Label = new TwoDimensionalCounter<E, String>();
   protected String label;
-  protected Set<String> allCandidatePhrases;
+  protected Set<CandidatePhrase> allCandidatePhrases;
 
   public ScorePatterns(
       ConstantsAndVariables constVars,
       PatternScoring patternScoring,
       String label,
-      Set<String> allCandidatePhrases,
-      TwoDimensionalCounter<E, String> patternsandWords4Label,
-      TwoDimensionalCounter<E, String> negPatternsandWords4Label,
-      TwoDimensionalCounter<E, String> unLabeledPatternsandWords4Label,
+      Set<CandidatePhrase> allCandidatePhrases,
+      TwoDimensionalCounter<E, CandidatePhrase> patternsandWords4Label,
+      TwoDimensionalCounter<E, CandidatePhrase> negPatternsandWords4Label,
+      TwoDimensionalCounter<E, CandidatePhrase> unLabeledPatternsandWords4Label,
       Properties props) {
     this.constVars = constVars;
     this.patternScoring = patternScoring;

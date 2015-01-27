@@ -1,7 +1,8 @@
 package edu.stanford.nlp.patterns.surface;
 
+import edu.stanford.nlp.patterns.Pattern;
+import edu.stanford.nlp.patterns.SQLConnection;
 import edu.stanford.nlp.util.Execution;
-import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 import edu.stanford.nlp.util.logging.Redwood;
 
 import java.io.*;

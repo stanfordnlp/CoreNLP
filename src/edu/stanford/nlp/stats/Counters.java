@@ -577,16 +577,20 @@ public class Counters {
   /**
    * Removes all entries from c except for the bottom {@code num}.
    */
-  public static <E> void retainBottom(Counter<E> c, int num) {
+  public static <E> List<E> retainBottom(Counter<E> c, int num) {
     int numToPurge = c.size() - num;
     if (numToPurge <= 0) {
-      return;
+      return Generics.newArrayList();
     }
 
+    List<E> removed = new ArrayList<E>();
     List<E> l = Counters.toSortedList(c);
     for (int i = 0; i < numToPurge; i++) {
-      c.remove(l.get(i));
+      E rem = l.get(i);
+      removed.add(rem);
+      c.remove(rem);
     }
+    return removed;
   }
 
   /**
@@ -666,15 +670,16 @@ public class Counters {
    *          than this threshold are discarded.
    * @return The set of discarded entries.
    */
-  public static <E> Set<E> retainBelow(Counter<E> counter, double countMaxThreshold) {
-    Set<E> removed = Generics.newHashSet();
+  public static <E> Counter<E> retainBelow(Counter<E> counter, double countMaxThreshold) {
+    Counter<E> removed = new ClassicCounter<E>();
     for (E key : counter.keySet()) {
+      double count = counter.getCount(key);
       if (counter.getCount(key) > countMaxThreshold) {
-        removed.add(key);
+        removed.setCount(key, count);
       }
     }
-    for (E key : removed) {
-      counter.remove(key);
+    for (Entry<E, Double> key : removed.entrySet()) {
+      counter.remove(key.getKey());
     }
     return removed;
   }
@@ -2991,4 +2996,21 @@ public class Counters {
     }
   }
 
+  public static<E> Counter<E> getCounts(Counter<E> c, Collection<E> keys){
+    Counter<E> newcounter = new ClassicCounter<E>();
+    for(E k : keys)
+      newcounter.setCount(k, c.getCount(k));
+    return newcounter;
+  }
+
+
+  public static<E> void retainKeys(Counter<E> counter, Function<E, Boolean> retainFunction) {
+    Set<E> remove = new HashSet<E>();
+    for(Entry<E, Double> en: counter.entrySet()){
+      if(!retainFunction.apply(en.getKey())){
+        remove.add(en.getKey());
+      }
+    }
+    Counters.removeKeys(counter, remove);
+  }
 }
