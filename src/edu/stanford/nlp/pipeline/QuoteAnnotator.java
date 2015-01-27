@@ -1,15 +1,8 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.MultiTokenTag;
-import edu.stanford.nlp.ling.tokensregex.SequenceMatcher;
-import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
-import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
-import edu.stanford.nlp.process.ListProcessor;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Timing;
 
@@ -24,11 +17,6 @@ public class QuoteAnnotator implements Annotator {
 
   private final boolean VERBOSE;
   private final boolean DEBUG = false;
-
-  public static final String PATTERN_SINGLE = "(^|\\s)(('(?:(?!'\\s).|\\n)+)(?='([\\s\\p{Punct}]|$))')";
-  public static final String PATTERN_DOUBLE = "(?:(^|\\s))((\"(?:(?!\"\\s).|\\n)+)(?=\"([\\s\\p{Punct}]|$))\")";
-  public static final int GROUP_NUM = 2;
-
 
   public QuoteAnnotator() {
     this(true);
@@ -52,45 +40,19 @@ public class QuoteAnnotator implements Annotator {
 //      System.err.print("Adding Quote annotation...");
 //    }
     String text = annotation.get(CoreAnnotations.TextAnnotation.class);
-    List<CoreMap> quotes = new ArrayList<CoreMap>();
 
     // TODO: the following
     // Pre-process to make word terminal apostrophes specially encoded (Jones' dog)
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
 
-    List<Pair<Integer, Integer>> singleQuotesQuotes = extractDirectSingleQuotes(text);
-    List<Pair<Integer, Integer>> doubleQuotesQuotes = extractDirectDoubleQuotes(text);
-
-    System.out.println(singleQuotesQuotes);
-    System.out.println(doubleQuotesQuotes);
-
-    // embed the quotations correctly
-    for (Pair<Integer, Integer> sq : singleQuotesQuotes) {
-      // see if there are any overlapping double quotes
-      for (Pair<Integer, Integer> dq : doubleQuotesQuotes) {
-        if (sq.first() <= dq.first() && sq.second() >= dq.second()) {
-          // the single quote contains the double quote
-
-        } else if (sq.first() >= dq.first() && sq.second() <= dq.second()) {
-          // the double quote contains the single quote
-
-        } else if (sq.first() <= dq.first() && sq.second() <= dq.second()) {
-          // weird case that probably shouldn't be happening
-          // the single quote overlaps the double quote to the left
-        } else if (sq.first() >= dq.first() && sq.second() >= dq.second()) {
-          // weird case that probably shouldn't be happening
-          // the single quote overlaps the double quote to the right
-        }
-      }
-    }
+    List<Pair<Integer, Integer>> overall = getQuotes(text);
 
     String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
 
-    addCoreMapQuotes(singleQuotesQuotes, quotes, text, docID);
-    addCoreMapQuotes(doubleQuotesQuotes, quotes, text, docID);
+    List<CoreMap> cmQuotes = getCoreMapQuotes(overall, tokens, text, docID);
 
     // add quotes to document
-    annotation.set(CoreAnnotations.QuotationsAnnotation.class, quotes);
+    annotation.set(CoreAnnotations.QuotationsAnnotation.class, cmQuotes);
 
 
 //    if (annotation.containsKey(CoreAnnotations.TokensAnnotation.class)) {
@@ -189,137 +151,182 @@ public class QuoteAnnotator implements Annotator {
 //    }
   }
 
-
-  public static void addCoreMapQuotes(List<Pair<Integer, Integer>> addThese,
-                                      List<CoreMap> toThese,
-                                      String text, String docID) {
-    for (Pair<Integer, Integer> p : addThese) {
-      // get the quote text from the first and last character offsets
+  public static List<CoreMap> getCoreMapQuotes(List<Pair<Integer, Integer>> quotes,
+                                               List<CoreLabel> tokens,
+                                              String text, String docID) {
+    List<CoreMap> cmQuotes = new ArrayList<>();
+    int tokenOffset = 0;
+    int currTok = 0;
+    for (Pair<Integer, Integer> p : quotes) {
       int begin = p.first();
       int end = p.second();
-      String quoteText = text.substring(begin, end);
+
+      // find the tokens for this quote
+      List<CoreLabel> quoteTokens = new ArrayList<>();
+      while(currTok < tokens.size() && tokens.get(currTok).beginPosition() < begin) {
+        currTok++;
+      }
+      int i = currTok;
+      while(i < tokens.size() && tokens.get(i).endPosition() <= end) {
+        quoteTokens.add(tokens.get(i));
+        i++;
+      }
 
       // create a quote annotation with text and token offsets
-      Annotation quote = new Annotation(quoteText);
-      quote.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, begin);
-      quote.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, end);
-      if (docID != null) {
-        quote.set(CoreAnnotations.DocIDAnnotation.class, docID);
-      }
+      int currQuoteSize = cmQuotes.size();
+      Annotation quote = makeQuote(text, begin, end, quoteTokens,
+          currQuoteSize, tokenOffset, docID);
+      tokenOffset += quoteTokens.size();
+
       // add quote in
-      toThese.add(quote);
+      cmQuotes.add(quote);
     }
-  }
 
-
-  public static List<Pair<Integer, Integer>> extractDirectQuotes(String text, String pattern, int groupNum) {
-    Pattern p = Pattern.compile(pattern);
-    List<Pair<Integer, Integer>> quotes = new ArrayList<>();
-
-    Matcher m = p.matcher(text);
-
-    while(m.find()) {
-      int start = m.start();
-      int end = m.end();
-      if (groupNum >= 0) {
-        String q = m.group(groupNum);
-        String whole = m.group();
-        start = whole.indexOf(q) + m.start();
-        end = start + q.length();
-      }
-      if (start != end) {
-        quotes.add(new Pair(start, end));
-      }
-    }
-    return quotes;
-  }
-
-  public static List<Pair<Integer, Integer>> extractDirectSingleQuotes(String text) {
-//    return extractDirectQuotes(text, PATTERN_SINGLE, GROUP_NUM);
-    return singleQuotes(text);
-  }
-
-  public static List<Pair<Integer, Integer>> extractDirectDoubleQuotes(String text) {
-//    return extractDirectQuotes(text, PATTERN_DOUBLE, GROUP_NUM);
-    return doubleQuotes(text);
-  }
-
-  public static List<Pair<Integer, Integer>> singleQuotes(String text) {
-    List<Pair<Integer, Integer>> quotes = new ArrayList<>();
-
-    int start = -1;
-    int end = -1;
-    for (int i = 0 ; i < text.length(); i++) {
-      if (text.charAt(i) == '\'') {
-        // opening
-        if (start < 0 && (i == 0 || isWhitespaceOrPunct(text.charAt(i - 1)))) {
-          start = i;
-          // closing
-        } else if (start > 0 && end < 0 &&
-            (i == text.length() - 1 ||
-                isWhitespaceOrPunct(text.charAt(i + 1)))) {
-          end = i + 1;
+    // embed quotes
+    for (CoreMap cmQuote : cmQuotes) {
+      int start = cmQuote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+      int end = cmQuote.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+      // See if we need to embed a quote
+      List<CoreMap> embeddedQuotes = new ArrayList<>();
+      for (CoreMap cmQuoteComp : cmQuotes) {
+        int startComp = cmQuoteComp.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+        int endComp = cmQuoteComp.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+        if (start < startComp && end >= endComp) {
+          // p contains comp
+          embeddedQuotes.add(cmQuoteComp);
         }
       }
-      if (start >= 0 && end > 0) {
-        quotes.add(new Pair(start, end));
-        start = -1;
-        end = -1;
-      }
+      cmQuote.set(CoreAnnotations.QuotationsAnnotation.class, embeddedQuotes);
     }
-    // if we reached then end and we have an open quote, close it
-    if (start >= 0) {
-      quotes.add(new Pair(start, text.length()));
-    }
-    return quotes;
+    return cmQuotes;
   }
 
-  public static List<Pair<Integer, Integer>> doubleQuotes(String text) {
-    List<Pair<Integer, Integer>> quotes = new ArrayList<>();
+  public static Annotation makeQuote(String text, int begin, int end,
+                                     List<CoreLabel> quoteTokens,
+                                     int currQuoteSize, int tokenOffset,
+                                     String docID) {
+    // create a quote annotation with text and token offsets
+    Annotation quote = new Annotation(text.substring(begin, end));
+    quote.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, begin);
+    quote.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, end);
+    if (docID != null) {
+      quote.set(CoreAnnotations.DocIDAnnotation.class, docID);
+    }
 
+    quote.set(CoreAnnotations.TokensAnnotation.class, quoteTokens);
+    quote.set(CoreAnnotations.TokenBeginAnnotation.class, tokenOffset);
+    quote.set(CoreAnnotations.TokenEndAnnotation.class, tokenOffset + quoteTokens.size());
+    quote.set(CoreAnnotations.SentenceIndexAnnotation.class, currQuoteSize);
+
+    int index = 1;
+    for (CoreLabel token : quoteTokens) {
+      token.setIndex(index++);
+      token.setSentIndex(currQuoteSize);
+      if (docID != null) {
+        token.setDocID(docID);
+      }
+    }
+    return quote;
+  }
+
+  // I'd like to try out a recursive method to see if that works!
+  public static List<Pair<Integer, Integer>> getQuotes(String text) {
+    return recursiveQuotes(text, 0, null);
+  }
+
+  // I'd like to try out a recursive method to see if that works!
+  public static List<Pair<Integer, Integer>> recursiveQuotes(String text, int offset, String prevQuote) {
+//    System.out.println("recurse: " + text);
+    Map<String, List<Pair<Integer, Integer>>> quotesMap = new HashMap<>();
     int start = -1;
     int end = -1;
+    String quote = null;
     for (int i = 0 ; i < text.length(); i++) {
-      if (text.charAt(i) == '"') {
-        // opening
-        if (start < 0) {
-          start = i;
+      // Either I'm not in any quote or this one matches
+      // the kind that I am.
+      String c = text.substring(i, i + 1);
+      // opening
+      if ((start < 0) && !matchesPrevQuote(c, prevQuote) &&
+          ((c.equals("'") && isSingleQuoteStart(text, i)) ||
+            (c.equals("\"")))) {
+        start = i;
+        quote = text.substring(start, start + 1);
         // closing
-        } else if (end < 0 &&
-            (i == text.length() - 1 ||
-            isWhitespaceOrPunct(text.charAt(i + 1)))) {
-          end = i + 1;
-        }
+      } else if (start >= 0 && end < 0 && c.equals(quote) &&
+          ((c.equals("'") && isSingleQuoteEnd(text, i)) ||
+           (c.equals("\"") && isDoubleQuoteEnd(text, i)))) {
+        end = i + 1;
       }
+
       if (start >= 0 && end > 0) {
-        quotes.add(new Pair(start, end));
+        if (!quotesMap.containsKey(quote)) {
+          quotesMap.put(quote, new ArrayList<>());
+        }
+        quotesMap.get(quote).add(new Pair(start, end));
         start = -1;
         end = -1;
+        quote = null;
       }
     }
-    // if we reached then end and we have an open quote, close it
-    if (start >= 0) {
-      quotes.add(new Pair(start, text.length()));
+
+    // TODO: determine if we want to be more strict w/ single quotes than double
+    // if we reached then end and we have an open quote, and it isn't single
+    // close it
+    if (start >= 0 && start < text.length() - 2) {
+      if (!quotesMap.containsKey(quote)) {
+        quotesMap.put(quote, new ArrayList<>());
+      }
+      quotesMap.get(quote).add(new Pair(start, text.length()));
+    } else if (start >= 0) {
+      System.err.println("WARNING: unmatched single quote at end of file!");
+    }
+
+    // recursively look for embedded quotes in these ones
+    List<Pair<Integer, Integer>> embedded = new ArrayList<>();
+    List<Pair<Integer, Integer>> quotes = new ArrayList<>();
+    for (String qKind : quotesMap.keySet()) {
+      for (Pair<Integer, Integer> q : quotesMap.get(qKind)) {
+        if (q.first() < q.second() - 2) {
+          embedded = recursiveQuotes(text.substring(q.first() + 1, q.second() - 1), q.first() + 1 + offset, qKind);
+        }
+        quotes.add(new Pair(q.first() + offset, q.second() + offset));
+      }
+    }
+    for (Pair<Integer, Integer> e : embedded) {
+      quotes.add(new Pair(e.first() + offset, e.second() + offset));
     }
     return quotes;
   }
 
-  public static boolean isWhitespaceOrPunct(char c) {
-    String s = "" + c;
-    return s.matches("[\\s\\p{Punct}]");
+  private static boolean matchesPrevQuote(String c, String prev) {
+    return prev != null && prev.equals(c);
   }
 
-  private static boolean isQuoteBeginner(CoreLabel token) {
-    return token.word().equals("``") || token.word().equals("`");
+  private static boolean isSingleQuoteStart(String text, int i) {
+    if (i == 0) return true;
+    String prev = text.substring(i - 1, i);
+    return isWhitespaceOrPunct(prev);
   }
 
-  private static boolean isAnyQuote(CoreLabel token) {
-    return token.word().equals("``") || token.word().equals("''") || token.word().equals("'") || token.word().equals("`");
+  private static boolean isSingleQuoteEnd(String text, int i) {
+    if (i == text.length() - 1) return true;
+    String next = text.substring(i + 1, i + 2);
+    return isWhitespaceOrPunct(next);
   }
 
-  private static boolean isNewline(CoreLabel token) {
-    //TODO replace with appropriate constant
-    return token.word().equals("*NL*");
+  private static boolean isDoubleQuoteEnd(String text, int i) {
+    if (i == text.length() - 1) return true;
+    String next = text.substring(i + 1, i + 2);
+    return (isWhitespaceOrPunct(next) &&
+            !isSingleQuote(next));
+  }
+
+  public static boolean isWhitespaceOrPunct(String c) {
+    return c.matches("[\\s\\p{Punct}]");
+  }
+
+  public static boolean isSingleQuote(String c) {
+    return c.matches("[']");
   }
 
   @Override
