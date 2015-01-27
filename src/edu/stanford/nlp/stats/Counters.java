@@ -492,7 +492,19 @@ public class Counters {
    * @param <E> Type of elements in Counter
    */
   public static <E> void normalize(Counter<E> target) {
-    multiplyInPlace(target, 1.0 / target.totalCount());
+    divideInPlace(target, target.totalCount());
+  }
+
+  /**
+   * L1 normalize a counter. Return a counter that is a probability distribution,
+   * so the sum of the resulting value equals 1.
+   *
+   * @param c The {@link Counter} to be L1 normalized. This counter is not
+   *          modified.
+   * @return A new L1-normalized Counter based on c.
+   */
+  public static <E, C extends Counter<E>> C asNormalizedCounter(C c) {
+    return scale(c, 1.0 / c.totalCount());
   }
 
   /**
@@ -577,16 +589,20 @@ public class Counters {
   /**
    * Removes all entries from c except for the bottom {@code num}.
    */
-  public static <E> void retainBottom(Counter<E> c, int num) {
+  public static <E> List<E> retainBottom(Counter<E> c, int num) {
     int numToPurge = c.size() - num;
     if (numToPurge <= 0) {
-      return;
+      return Generics.newArrayList();
     }
 
+    List<E> removed = new ArrayList<E>();
     List<E> l = Counters.toSortedList(c);
     for (int i = 0; i < numToPurge; i++) {
-      c.remove(l.get(i));
+      E rem = l.get(i);
+      removed.add(rem);
+      c.remove(rem);
     }
+    return removed;
   }
 
   /**
@@ -666,15 +682,16 @@ public class Counters {
    *          than this threshold are discarded.
    * @return The set of discarded entries.
    */
-  public static <E> Set<E> retainBelow(Counter<E> counter, double countMaxThreshold) {
-    Set<E> removed = Generics.newHashSet();
+  public static <E> Counter<E> retainBelow(Counter<E> counter, double countMaxThreshold) {
+    Counter<E> removed = new ClassicCounter<E>();
     for (E key : counter.keySet()) {
+      double count = counter.getCount(key);
       if (counter.getCount(key) > countMaxThreshold) {
-        removed.add(key);
+        removed.setCount(key, count);
       }
     }
-    for (E key : removed) {
-      counter.remove(key);
+    for (Entry<E, Double> key : removed.entrySet()) {
+      counter.remove(key.getKey());
     }
     return removed;
   }
@@ -1401,13 +1418,17 @@ public class Counters {
   /**
    * Calculates the Jensen-Shannon divergence between the two counters. That is,
    * it calculates 1/2 [KL(c1 || avg(c1,c2)) + KL(c2 || avg(c1,c2))] .
+   * This code assumes that the Counters have only non-negative values in them.
    *
    * @return The Jensen-Shannon divergence between the distributions
    */
   public static <E> double jensenShannonDivergence(Counter<E> c1, Counter<E> c2) {
-    Counter<E> average = average(c1, c2);
-    double kl1 = klDivergence(c1, average);
-    double kl2 = klDivergence(c2, average);
+    // need to normalize the counters first before averaging them! Else buggy if not a probability distribution
+    Counter<E> d1 = asNormalizedCounter(c1);
+    Counter<E> d2 = asNormalizedCounter(c2);
+    Counter<E> average = average(d1, d2);
+    double kl1 = klDivergence(d1, average);
+    double kl2 = klDivergence(d2, average);
     return (kl1 + kl2) / 2.0;
   }
 
@@ -1419,8 +1440,10 @@ public class Counters {
    * @return The skew divergence between the distributions
    */
   public static <E> double skewDivergence(Counter<E> c1, Counter<E> c2, double skew) {
-    Counter<E> average = linearCombination(c2, skew, c1, (1.0 - skew));
-    return klDivergence(c1, average);
+    Counter<E> d1 = asNormalizedCounter(c1);
+    Counter<E> d2 = asNormalizedCounter(c2);
+    Counter<E> average = linearCombination(d2, skew, d1, (1.0 - skew));
+    return klDivergence(d1, average);
   }
 
   /**
@@ -1696,10 +1719,8 @@ public class Counters {
   /**
    * Returns a new Counter which is scaled by the given scale factor.
    *
-   * @param c
-   *          The counter to scale. It is not changed
-   * @param s
-   *          The constant to scale the counter by
+   * @param c The counter to scale. It is not changed
+   * @param s The constant to scale the counter by
    * @return A new Counter which is the argument scaled by the given scale
    *         factor.
    */
@@ -2991,4 +3012,21 @@ public class Counters {
     }
   }
 
+  public static<E> Counter<E> getCounts(Counter<E> c, Collection<E> keys){
+    Counter<E> newcounter = new ClassicCounter<E>();
+    for(E k : keys)
+      newcounter.setCount(k, c.getCount(k));
+    return newcounter;
+  }
+
+
+  public static<E> void retainKeys(Counter<E> counter, Function<E, Boolean> retainFunction) {
+    Set<E> remove = new HashSet<E>();
+    for(Entry<E, Double> en: counter.entrySet()){
+      if(!retainFunction.apply(en.getKey())){
+        remove.add(en.getKey());
+      }
+    }
+    Counters.removeKeys(counter, remove);
+  }
 }

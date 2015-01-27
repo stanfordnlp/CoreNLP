@@ -85,6 +85,12 @@ public abstract class ParsingSystem {
    */
   abstract boolean isTerminal(Configuration c);
 
+  /**
+   * Return the number of transitions.
+   */
+  public int numTransitions() {
+    return transitions.size();
+  }
   // TODO pass labels as Map<String, GrammaticalRelation>; use
   // GrammaticalRelation throughout
 
@@ -104,14 +110,15 @@ public abstract class ParsingSystem {
 
     if (verbose) {
       System.err.println(Config.SEPARATOR);
-      System.err.println("#Transitions: " + transitions.size());
+      System.err.println("#Transitions: " + numTransitions());
       System.err.println("#Labels: " + labels.size());
       System.err.println("ROOTLABEL: " + rootLabel);
     }
   }
 
   public int getTransitionID(String s) {
-    for (int k = 0; k < transitions.size(); ++k)
+    int numTrans = numTransitions();
+    for (int k = 0; k < numTrans; ++k)
       if (transitions.get(k).equals(s))
         return k;
     return -1;
@@ -141,37 +148,37 @@ public abstract class ParsingSystem {
     Set<String> punctuationTags = getPunctuationTags();
 
     if (trees.size() != goldTrees.size()) {
-      System.err.println("[Error] Incorrect number of trees.");
+      System.err.println("ERROR: Incorrect number of trees.");
       return null;
     }
 
     int correctArcs = 0;
-    int correctArcsWoPunc = 0;
+    int correctArcsNoPunc = 0;
     int correctHeads = 0;
-    int correctHeadsWoPunc = 0;
+    int correctHeadsNoPunc = 0;
 
     int correctTrees = 0;
-    int correctTreesWoPunc = 0;
+    int correctTreesNoPunc = 0;
     int correctRoot = 0;
 
     int sumArcs = 0;
-    int sumArcsWoPunc = 0;
+    int sumArcsNoPunc = 0;
 
     for (int i = 0; i < trees.size(); ++i) {
       List<CoreLabel> tokens = sentences.get(i).get(CoreAnnotations.TokensAnnotation.class);
 
       if (trees.get(i).n != goldTrees.get(i).n) {
-        System.err.println("[Error] Tree " + (i + 1) + ": incorrect number of nodes.");
+        System.err.println("ERROR: Tree " + (i + 1) + ": incorrect number of nodes.");
         return null;
       }
       if (!trees.get(i).isTree()) {
-        System.err.println("[Error] Tree " + (i + 1) + ": illegal.");
+        System.err.println("ERROR: Tree " + (i + 1) + ": illegal.");
         return null;
       }
 
       int nCorrectHead = 0;
-      int nCorrectHeadwoPunc = 0;
-      int nonPunc = 0;
+      int nCorrectHeadNoPunc = 0;
+      int nNoPunc = 0;
 
       for (int j = 1; j <= trees.get(i).n; ++j) {
         if (trees.get(i).getHead(j) == goldTrees.get(i).getHead(j)) {
@@ -184,40 +191,44 @@ public abstract class ParsingSystem {
 
         String tag = tokens.get(j - 1).tag();
         if (!punctuationTags.contains(tag)) {
-          ++sumArcsWoPunc;
-          ++nonPunc;
+          ++sumArcsNoPunc;
+          ++nNoPunc;
           if (trees.get(i).getHead(j) == goldTrees.get(i).getHead(j)) {
-            ++correctHeadsWoPunc;
-            ++nCorrectHeadwoPunc;
+            ++correctHeadsNoPunc;
+            ++nCorrectHeadNoPunc;
             if (trees.get(i).getLabel(j).equals(goldTrees.get(i).getLabel(j)))
-              ++correctArcsWoPunc;
+              ++correctArcsNoPunc;
           }
         }
       }
       if (nCorrectHead == trees.get(i).n)
         ++correctTrees;
-      if (nCorrectHeadwoPunc == nonPunc)
-        ++correctTreesWoPunc;
+      if (nCorrectHeadNoPunc == nNoPunc)
+        ++correctTreesNoPunc;
       if (trees.get(i).getRoot() == goldTrees.get(i).getRoot())
         ++correctRoot;
     }
 
     result.put("UAS", correctHeads * 100.0 / sumArcs);
-    result.put("UASwoPunc", correctHeadsWoPunc * 100.0 / sumArcsWoPunc);
+    result.put("UASnoPunc", correctHeadsNoPunc * 100.0 / sumArcsNoPunc);
     result.put("LAS", correctArcs * 100.0 / sumArcs);
-    result.put("LASwoPunc", correctArcsWoPunc * 100.0 / sumArcsWoPunc);
+    result.put("LASnoPunc", correctArcsNoPunc * 100.0 / sumArcsNoPunc);
 
     result.put("UEM", correctTrees * 100.0 / trees.size());
-    result.put("UEMwoPunc", correctTreesWoPunc * 100.0 / trees.size());
+    result.put("UEMnoPunc", correctTreesNoPunc * 100.0 / trees.size());
     result.put("ROOT", correctRoot * 100.0 / trees.size());
 
 
     return result;
   }
 
-  public double getUASScore(List<CoreMap> sentences, List<DependencyTree> trees, List<DependencyTree> goldTrees) {
+  public double getUAS(List<CoreMap> sentences, List<DependencyTree> trees, List<DependencyTree> goldTrees) {
     Map<String, Double> result = evaluate(sentences, trees, goldTrees);
-    return result == null || !result.containsKey("UASwoPunc") ? -1.0 : result.get("UASwoPunc");
+    return result == null || !result.containsKey("UAS") ? -1.0 : result.get("UAS");
   }
 
+  public double getUASnoPunc(List<CoreMap> sentences, List<DependencyTree> trees, List<DependencyTree> goldTrees) {
+    Map<String, Double> result = evaluate(sentences, trees, goldTrees);
+    return result == null || !result.containsKey("UASnoPunc") ? -1.0 : result.get("UASnoPunc");
+  }
 }

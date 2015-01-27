@@ -167,6 +167,17 @@ public class CoreAnnotations {
   }
 
   /**
+   * The CoreMap key for getting the quotations contained by an annotation.
+   *
+   * This key is typically set only on document annotations.
+   */
+  public static class QuotationsAnnotation implements CoreAnnotation<List<CoreMap>> {
+    public Class<List<CoreMap>> getType() {
+      return ErasureUtils.uncheckedCast(List.class);
+    }
+  }
+
+  /**
    * The CoreMap key for getting the paragraphs contained by an annotation.
    *
    * This key is typically set only on document annotations.

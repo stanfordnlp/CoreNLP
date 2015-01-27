@@ -114,7 +114,7 @@ public class BinaryHeapPriorityQueue<E> extends AbstractSet<E> implements Priori
   /**
    * Remove the last element of the heap (last in the index array).
    */
-  private void removeLastEntry() {
+  public void removeLastEntry() {
     Entry<E> entry = indexToEntry.remove(size() - 1);
     keyToEntry.remove(entry.key);
   }

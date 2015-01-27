@@ -1,5 +1,6 @@
 package edu.stanford.nlp.util;
 
+import java.io.Serializable;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -8,7 +9,7 @@ import java.util.Iterator;
  * An array-backed set.
  * @author Roger Levy (rog@stanford.edu)
  */
-public class ArraySet<E> extends AbstractSet<E> {
+public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 
   private ArrayList<E> backer;
 
@@ -67,4 +68,6 @@ public class ArraySet<E> extends AbstractSet<E> {
   public int size() {
     return backer.size();
   }
+
+  private static final long serialVersionUID = 1L;
 }

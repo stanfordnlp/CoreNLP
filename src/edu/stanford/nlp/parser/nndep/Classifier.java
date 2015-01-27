@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
-
 /**
  * Neural network classifier which powers a transition-based dependency
  * parser.
@@ -744,5 +743,4 @@ public class Classifier {
     for (int i = 0; i < a1.length; i++)
       a1[i] += a2[i];
   }
-
 }

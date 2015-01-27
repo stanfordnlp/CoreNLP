@@ -1,4 +1,4 @@
-package edu.stanford.nlp.patterns.surface;
+package edu.stanford.nlp.patterns;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -32,20 +32,21 @@ public class PatternsAnnotations implements Serializable {
 
 
   /** All matched phrases - can be from multiple labels*/
-  public static class MatchedPhrases implements GenericAnnotation<CollectionValuedMap<String, String>> {
-    public Class<CollectionValuedMap<String, String>> getType() {
-      Class<CollectionValuedMap<String, String>> claz = (Class) Map.class;
+  public static class MatchedPhrases implements GenericAnnotation<CollectionValuedMap<String, CandidatePhrase>> {
+    public Class<CollectionValuedMap<String, CandidatePhrase>> getType() {
+      Class<CollectionValuedMap<String, CandidatePhrase>> claz = (Class) Map.class;
       return claz;
     }
   }
 
+
   /**
    * For each label, what was the longest phrase that matched. If none, then the map doesn't have the label key
    */
-  public static class LongestMatchedPhraseForEachLabel implements  GenericAnnotation<Map<String, String>>{
+  public static class LongestMatchedPhraseForEachLabel implements  GenericAnnotation<Map<String, CandidatePhrase>>{
     @Override
-    public Class<Map<String, String>> getType() {
-      return ErasureUtils.<Class<Map<String, String>>> uncheckedCast(Map.class);
+    public Class<Map<String, CandidatePhrase>> getType() {
+      return ErasureUtils.<Class<Map<String, CandidatePhrase>>> uncheckedCast(Map.class);
     }
   }
 
@@ -122,6 +123,67 @@ public class PatternsAnnotations implements Serializable {
   public static class Features implements GenericAnnotation<Set<String>>{
     public Class<Set<String>> getType(){
       return ErasureUtils.<Class<Set<String>>> uncheckedCast(Set.class);
+    }
+  }
+
+
+  public static class PatternHumanLabel1 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel2 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel3 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel4 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel5 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel6 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel7 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel8 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel9 implements GenericAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  public static class PatternHumanLabel10 implements GenericAnnotation<String>{
+    public Class<String> getType(){
+      return String.class;
     }
   }
 
