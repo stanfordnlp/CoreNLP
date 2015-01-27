@@ -4,7 +4,6 @@ import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.ner.CMMClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
@@ -42,8 +41,8 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   private static final boolean DEBUG = false;
   private List<AbstractSequenceClassifier<IN>> baseClassifiers;
 
-  private static final String DEFAULT_AUX_CLASSIFIER_PATH="edu/stanford/nlp/models/ner/english.muc.7class.distsim.crf.ser.gz";
-  private static final String DEFAULT_CLASSIFIER_PATH="edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz";
+  private static final String DEFAULT_AUX_CLASSIFIER_PATH="/u/nlp/data/ner/goodClassifiers/english.muc.7class.distsim.crf.ser.gz";
+  private static final String DEFAULT_CLASSIFIER_PATH="/u/nlp/data/ner/goodClassifiers/english.all.3class.distsim.crf.ser.gz";
 
   /**
    * NORMAL means that if one classifier uses PERSON, later classifiers can't also add PERSON, for example. <br>
@@ -96,8 +95,8 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     // fall back strategy: use the two default paths on NLP machines
     //
     else {
-      paths.add(DefaultPaths.DEFAULT_NER_THREECLASS_MODEL);
-      paths.add(DefaultPaths.DEFAULT_NER_MUC_MODEL);
+      paths.add(DEFAULT_CLASSIFIER_PATH);
+      paths.add(DEFAULT_AUX_CLASSIFIER_PATH);
       loadClassifiers(paths);
     }
   }
@@ -127,15 +126,14 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   }
 
 
-  /** Combines a series of base classifiers.
+  /** Combines a series of base classifiers
    *
    * @param classifiers The base classifiers
    */
-  @SafeVarargs
   public ClassifierCombiner(AbstractSequenceClassifier<IN>... classifiers) {
     super(new Properties());
     this.combinationMode = DEFAULT_COMBINATION_MODE;
-    baseClassifiers = new ArrayList<>(Arrays.asList(classifiers));
+    baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>(Arrays.asList(classifiers));
     flags.backgroundSymbol = baseClassifiers.get(0).flags.backgroundSymbol;
   }
 

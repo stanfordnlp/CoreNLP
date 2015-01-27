@@ -1,36 +1,33 @@
-package edu.stanford.nlp.patterns;
+package edu.stanford.nlp.patterns.surface;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.NodePattern;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
-import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.PatternScoring;
-import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass.WordScoring;
-import edu.stanford.nlp.patterns.dep.DepPatternFactory;
-import edu.stanford.nlp.patterns.surface.SurfacePatternFactory;
+import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
+import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.WordScoring;
 import edu.stanford.nlp.process.WordShapeClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.Execution.Option;
 import edu.stanford.nlp.util.TypesafeMap.Key;
+import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 import edu.stanford.nlp.util.logging.Redwood;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
-
-public class ConstantsAndVariables implements Serializable {
+public class ConstantsAndVariables<E> implements Serializable{
 
   private static final long serialVersionUID = 1L;
 
@@ -168,7 +165,7 @@ public class ConstantsAndVariables implements Serializable {
    * Lowercase the context words/lemmas
    */
   @Option(name = "matchLowerCaseContext")
-  public static boolean matchLowerCaseContext = true;
+  public boolean matchLowerCaseContext = true;
 
 
   /**
@@ -221,7 +218,7 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name = "englishWordsFiles")
   public String englishWordsFiles = null;
 
-  private Set<String> englishWords = new HashSet<String>();
+  private Set<String> englishWords = null;
 
   /**
    * Words to be ignored when learning phrases if
@@ -245,12 +242,12 @@ public class ConstantsAndVariables implements Serializable {
   public String otherSemanticClassesFiles = null;
 
   // set of words that are considered negative for all classes
-  private Set<CandidatePhrase> otherSemanticClassesWords = null;
+  private Set<String> otherSemanticClassesWords = null;
 
   /**
    * Seed dictionary, set in the class that uses this class
    */
-  private Map<String, Set<CandidatePhrase>> seedLabelDictionary = new HashMap<String, Set<CandidatePhrase>>();
+  private Map<String, Set<String>> labelDictionary = new HashMap<String, Set<String>>();
 
   /**
    * Just the set of labels
@@ -296,12 +293,12 @@ public class ConstantsAndVariables implements Serializable {
 
   /**
    * Words that are not learned. Patterns are not created around these words.
-   * And, if useStopWordsBeforeTerm in {@link edu.stanford.nlp.patterns.surface.CreatePatterns} is true.
+   * And, if useStopWordsBeforeTerm in {@link CreatePatterns} is true.
    */
   @Option(name = "stopWordsPatternFiles", gloss = "stop words")
   public String stopWordsPatternFiles = null;
 
-  private static Set<CandidatePhrase> stopWords = null;
+  private static Set<String> stopWords = null;
 
 
 
@@ -332,7 +329,7 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name = "wordClassClusterFile")
   String wordClassClusterFile = null;
 
-  private Map<String, Integer> wordClassClusters = new HashMap<String, Integer>();
+  private Map<String, Integer> wordClassClusters = null;
 
   /**
    * General cluster file, if you wanna use it somehow, in which each line is
@@ -343,11 +340,11 @@ public class ConstantsAndVariables implements Serializable {
 
   private Map<String, Integer> generalWordClassClusters = null;
 
-//  @Option(name = "includeExternalFeatures")
-//  public boolean includeExternalFeatures = false;
+  @Option(name = "includeExternalFeatures")
+  public boolean includeExternalFeatures = false;
 
   @Option(name = "externalFeatureWeightsFile")
-  public String externalFeatureWeightsDir = null;
+  public String externalFeatureWeightsFile = null;
 
   @Option(name = "doNotApplyPatterns")
   public boolean doNotApplyPatterns = false;
@@ -402,17 +399,17 @@ public class ConstantsAndVariables implements Serializable {
    */
   private ConcurrentHashMap<String, String> editDistanceFromThisClassMatches = new ConcurrentHashMap<String, String>();
 
-  private ConcurrentHashMap<String, Counter<String>> wordShapesForLabels = new ConcurrentHashMap<String, Counter<String>>();
+  private Map<String, Counter<String>> wordShapesForLabels = new HashMap<String, Counter<String>>();
 
 
 
   String channelNameLogger = "settingUp";
 
   public Map<String, Counter<Integer>> distSimWeights = new HashMap<String, Counter<Integer>>();
-  public Map<String, Counter<CandidatePhrase>> dictOddsWeights = new HashMap<String, Counter<CandidatePhrase>>();
+  public Map<String, Counter<String>> dictOddsWeights = new HashMap<String, Counter<String>>();
 
   @Option(name="invertedIndexClass", gloss="another option is Lucene backed, which is not included in the CoreNLP release. Contact us to get a copy (distributed under Apache License).")
-  public Class<? extends SentenceIndex> invertedIndexClass = InvertedIndexByTokens.class;
+  public Class<? extends SentenceIndex> invertedIndexClass = edu.stanford.nlp.patterns.surface.InvertedIndexByTokens.class;
 
   /**
    * Where the inverted index (either in memory or lucene) is stored
@@ -422,98 +419,7 @@ public class ConstantsAndVariables implements Serializable {
 
   @Option(name="clubNeighboringLabeledWords")
   public boolean clubNeighboringLabeledWords = false;
-
-  @Option(name="patternType", required=true)
-  public PatternFactory.PatternType patternType = null;
-
-  @Option(name="subsampleUnkAsNegUsingSim", gloss="When learning a classifier, remove phrases from unknown phrases that are too close to the positive phrases")
-  public boolean subsampleUnkAsNegUsingSim = false;
-
-//  @Option(name="subSampleUnkAsNegUsingSimPercentage", gloss="When using subsampleUnkAsNegUsingSim, select bottom %")
-//  public double subSampleUnkAsNegUsingSimPercentage = 0.95;
-
-  @Option(name="expandPositivesWhenSampling", gloss="when sampling for learning feature wts for learning phrases, expand the positives")
-  public boolean expandPositivesWhenSampling = false;
-
-  @Option(name="expandNegativesWhenSampling", gloss="when sampling for learning feature wts for learning phrases, expand the negatives")
-  public boolean expandNegativesWhenSampling = false;
-
-  @Option(name="similarityThresholdHighPrecision", gloss="used for expanding positives")
-  public double similarityThresholdHighPrecision  = 0.7;
-
-  @Option(name="positiveSimilarityThresholdLowPrecision", gloss="used for not choosing close unknowns as positives")
-  public double positiveSimilarityThresholdLowPrecision  = 0.5;
-
-//  @Option(name="subSampleUnkAsPosUsingSimPercentage", gloss="When using expandPositivesWhenSampling, select top % after applying the threshold")
-//  public double subSampleUnkAsPosUsingSimPercentage = 0.05;
-
-  @Option(name="wordVectorFile", gloss = "if using word vectors for computing similarities")
-  public String wordVectorFile = null;
-
-  @Option(name="useWordVectorsToComputeSim", gloss="use vectors directly instead of word classes for computing similarity")
-  public boolean useWordVectorsToComputeSim;
-
-  @Option(name="logFileVectorSimilarity", gloss="To store vectors for selected/almost-selected positive and negative words")
-  String logFileVectorSimilarity = null;
-
-  @Option(name="goldEntitiesEvalFiles", gloss="label1,gold_list_of_entities_file;label2,...")
-  public String goldEntitiesEvalFiles = null;
-
-  Map<String, Map<String, Boolean>> goldEntities = new HashMap<String, Map<String, Boolean>>();
-
-  @Option(name="featureCountThreshold")
-  public int featureCountThreshold = 1;
-
-  @Option(name="expandPhrasesNumTopSimilar", gloss="k in kNN")
-  public int expandPhrasesNumTopSimilar = 1;
-
-  public Set<String> getLabels() {
-    return labels;
-  }
-
-  public void addLearnedWords(String trainLabel, Counter<CandidatePhrase> identifiedWords) {
-    if(!learnedWords.containsKey(trainLabel))
-      learnedWords.put(trainLabel, new ClassicCounter<CandidatePhrase>());
-    this.learnedWords.get(trainLabel).addAll(identifiedWords);
-  }
-
-  public Map<String, String> getAllOptions() {
-    Map<String, String> values = new HashMap<String, String>();
-    if(props != null)
-      props.forEach( (x,y) -> values.put(x.toString(),y == null?"null":y.toString()));
-
-    Class<?> thisClass;
-    try {
-      thisClass = Class.forName(this.getClass().getName());
-
-      Field[] aClassFields = thisClass.getDeclaredFields();
-      for(Field f : aClassFields){
-        if(f.getType().getClass().isPrimitive() || Arrays.binarySearch(GetPatternsFromDataMultiClass.printOptionClass, f.getType()) >= 0){
-          String fName = f.getName();
-          Object fvalue = f.get(this);
-          values.put(fName, fvalue == null ? "null" : fvalue.toString());
-        }
-      }
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return values;
-  }
-
-  public boolean hasSeedWordOrOtherSem(CandidatePhrase p) {
-    for(Map.Entry<String, Set<CandidatePhrase>> seeds: this.seedLabelDictionary.entrySet()){
-      if(seeds.getValue().contains(p))
-        return true;
-    }
-    if(otherSemanticClassesWords.contains(p))
-      return true;
-    return false;
-  }
-
-
-  //PatternFactory.PatternType.SURFACE;
-
+  public PatternFactory.PatternType patternType = PatternFactory.PatternType.SURFACE;
 
 //  public PatternIndex getPatternIndex() {
 //    return patternIndex;
@@ -524,54 +430,8 @@ public class ConstantsAndVariables implements Serializable {
 //  }
 
 
-  static public class ScorePhraseMeasures implements Comparable {
-    String name;
-    static int num = 0;
-    int numObj;
-    static Map<String, ScorePhraseMeasures> createdObjects = new ConcurrentHashMap<String, ScorePhraseMeasures>();
-
-    public static ScorePhraseMeasures create(String n){
-      if(createdObjects.containsKey(n))
-        return createdObjects.get(n);
-      else
-        return new ScorePhraseMeasures(n);
-    }
-
-    private ScorePhraseMeasures(String n){
-      this.name= n;
-      numObj = num++;
-      createdObjects.put(n, this);
-    }
-
-    @Override
-    public String toString(){return name;}
-
-    @Override
-    public boolean equals(Object o){
-      if(! (o instanceof ScorePhraseMeasures)) return false;
-      return ((ScorePhraseMeasures)o).numObj == (this.numObj);
-    }
-
-    static final ScorePhraseMeasures DISTSIM = new ScorePhraseMeasures("DistSim");
-    static final ScorePhraseMeasures GOOGLENGRAM = new ScorePhraseMeasures("GoogleNGram");
-    static final ScorePhraseMeasures PATWTBYFREQ=new ScorePhraseMeasures("PatWtByFreq");
-    static final ScorePhraseMeasures  EDITDISTSAME=new ScorePhraseMeasures("EditDistSame");
-    static final ScorePhraseMeasures  EDITDISTOTHER =new ScorePhraseMeasures("EditDistOther");
-    static final ScorePhraseMeasures  DOMAINNGRAM =new ScorePhraseMeasures("DomainNgram");
-    static final ScorePhraseMeasures  SEMANTICODDS =new ScorePhraseMeasures("SemanticOdds");
-    static final ScorePhraseMeasures  WORDSHAPE = new ScorePhraseMeasures("WordShape");
-    static final ScorePhraseMeasures WORDVECPOSSIMAVG = new ScorePhraseMeasures("WordVecPosSimAvg");
-    static final ScorePhraseMeasures WORDVECPOSSIMMAX = new ScorePhraseMeasures("WordVecPosSimMax");
-    static final ScorePhraseMeasures WORDVECNEGSIMAVG = new ScorePhraseMeasures("WordVecNegSimAvg");
-    static final ScorePhraseMeasures WORDVECNEGSIMMAX = new ScorePhraseMeasures("WordVecNegSimMax");
-
-
-    @Override
-    public int compareTo(Object o) {
-      if(!(o instanceof  ScorePhraseMeasures))
-        return -1;
-      else return o.toString().compareTo(this.toString());
-    }
+  public enum ScorePhraseMeasures {
+    DISTSIM, GOOGLENGRAM, PATWTBYFREQ, EDITDISTSAME, EDITDISTOTHER, DOMAINNGRAM, SEMANTICODDS, WORDSHAPE
   }
 
 
@@ -588,14 +448,7 @@ public class ConstantsAndVariables implements Serializable {
   public boolean usePhraseEvalWordClass = false;
 
   /**
-   * Only works if you have single label. And the word vectors are given.
-   */
-  @Option(name = "usePhraseEvalWordVector")
-  public boolean usePhraseEvalWordVector = false;
-
-  /**
-   * use google tf-idf for learning phrases. Need to also provide googleNgram_dbname,
-   * googleNgram_username and googleNgram_host
+   * use google tf-idf for learning phrases
    */
   @Option(name = "usePhraseEvalGoogleNgram")
   public boolean usePhraseEvalGoogleNgram = false;
@@ -611,7 +464,7 @@ public class ConstantsAndVariables implements Serializable {
    * phrases
    */
   @Option(name = "usePhraseEvalPatWtByFreq")
-  public boolean usePhraseEvalPatWtByFreq = true;
+  public boolean usePhraseEvalPatWtByFreq = false;
 
   /**
    * odds of the phrase freq in the label dictionary vs other dictionaries
@@ -658,8 +511,7 @@ public class ConstantsAndVariables implements Serializable {
 
   /**
    * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
-   * <code>PhEvalInPat</code>. See usePhrase* for meanings. Need to also provide googleNgram_dbname,
-   * googleNgram_username and googleNgram_host
+   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
    */
   @Option(name = "usePatternEvalDomainNgram")
   public boolean usePatternEvalDomainNgram = false;
@@ -722,9 +574,9 @@ public class ConstantsAndVariables implements Serializable {
 
   @Option(name = "storePatsForEachToken", gloss="used for storing patterns in PSQL/MEMORY/LUCENE")
   public PatternForEachTokenWay storePatsForEachToken = PatternForEachTokenWay.MEMORY;
-//
-//  @Option(name = "storePatsIndex", gloss="used for storing patterns index")
-//  public PatternIndexWay storePatsIndex = PatternIndexWay.MEMORY;
+
+  @Option(name = "storePatsIndex", gloss="used for storing patterns index")
+  public PatternIndexWay storePatsIndex = PatternIndexWay.MEMORY;
 
   @Option(name="sampleSentencesForSufficientStats",gloss="% sentences to use for learning pattterns" )
   double sampleSentencesForSufficientStats = 1.0;
@@ -743,26 +595,24 @@ public class ConstantsAndVariables implements Serializable {
   public static String backgroundSymbol = "O";
 
   int wordShaper = WordShapeClassifier.WORDSHAPECHRIS2;
-  private ConcurrentHashMap<String, String> wordShapeCache = new ConcurrentHashMap<String, String>();
+  private Map<String, String> wordShapeCache = new HashMap<String, String>();
 
   public SentenceIndex invertedIndex;
 
   public static String extremedebug = "extremePatDebug";
   public static String minimaldebug = "minimaldebug";
 
+  //public ConcurrentHashIndex<SurfacePattern> patternIndex = new ConcurrentHashIndex<SurfacePattern>();
+  //public PatternIndex<E, E> patternIndex;
+
   Properties props;
 
   public enum PatternForEachTokenWay {MEMORY, LUCENE, DB};
   public enum PatternIndexWay {MEMORY, OPENHFT, LUCENE};
 
-  public List<String> functionWords = Arrays.asList("a","an","the","of","at","on","in","he","she","him","her","they","them","and","no","not","nor","as","do");
-
   public ConstantsAndVariables(Properties props, Set<String> labels, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
                                Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
     this.labels = labels;
-    for(String label: labels){
-      this.seedLabelDictionary.put(label, new HashSet<CandidatePhrase>());
-    }
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
     if(this.generalizeClasses == null)
@@ -772,9 +622,9 @@ public class ConstantsAndVariables implements Serializable {
     setUp(props);
   }
 
-  public ConstantsAndVariables(Properties props, Map<String, Set<CandidatePhrase>> labelDictionary, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
+  public ConstantsAndVariables(Properties props, Map<String, Set<String>> labelDictionary, Map<String, Class<? extends Key<String>>> answerClass, Map<String, Class> generalizeClasses,
                                Map<String, Map<Class, Object>> ignoreClasses) throws IOException {
-    this.seedLabelDictionary = labelDictionary;
+    this.labelDictionary= labelDictionary;
     this.labels = labelDictionary.keySet();
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
@@ -787,32 +637,12 @@ public class ConstantsAndVariables implements Serializable {
 
   public ConstantsAndVariables(Properties props, Set<String> labels,  Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass) throws IOException {
     this.labels = labels;
-    for(String label: labels){
-      this.seedLabelDictionary.put(label, new HashSet<CandidatePhrase>());
-    }
     this.answerClass = answerClass;
-    this.generalizeClasses = new HashMap<String, Class>();
-    this.generalizeClasses.putAll(answerClass);
     setUp(props);
   }
-
-  public ConstantsAndVariables(Properties props, String label,  Class<? extends TypesafeMap.Key<String>> answerClass) throws IOException {
-    this.labels = new HashSet<String>();
-    this.labels.add(label);
-    this.seedLabelDictionary.put(label, new HashSet<CandidatePhrase>());
-    this.answerClass = new HashMap<>();
-    this.answerClass.put(label, answerClass);
-    this.generalizeClasses = new HashMap<String, Class>();
-    this.generalizeClasses.putAll(this.answerClass);
-    setUp(props);
-  }
-
 
   public ConstantsAndVariables(Properties props, Set<String> labels,  Map<String, Class<? extends TypesafeMap.Key<String>>> answerClass, Map<String, Class> generalizeClasses) throws IOException {
     this.labels = labels;
-    for(String label: labels){
-      this.seedLabelDictionary.put(label, new HashSet<CandidatePhrase>());
-    }
     this.answerClass = answerClass;
     this.generalizeClasses = generalizeClasses;
     if(this.generalizeClasses == null)
@@ -828,10 +658,6 @@ public class ConstantsAndVariables implements Serializable {
     }
 
     Execution.fillOptions(this, props);
-    Execution.fillOptions(PatternFactory.class, props);
-    Execution.fillOptions(SurfacePatternFactory.class, props);
-    Execution.fillOptions(DepPatternFactory.class, props);
-
     if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty())
       PatternFactory.ignoreWordRegex = Pattern.compile(wordIgnoreRegex);
 
@@ -846,26 +672,16 @@ public class ConstantsAndVariables implements Serializable {
         env.get(label).bind(en.getKey(), en.getValue());
     }
     Redwood.log(Redwood.DBG, channelNameLogger, "Running with debug output");
-    stopWords = new HashSet<CandidatePhrase>();
-
-    if(stopWordsPatternFiles != null) {
-      Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger, "Reading stop words from "
+    stopWords = new HashSet<String>();
+    Redwood.log(ConstantsAndVariables.minimaldebug, channelNameLogger, "Reading stop words from "
         + stopWordsPatternFiles);
-      for (String stopwfile : stopWordsPatternFiles.split("[;,]"))
-      {
-        for(String word: IOUtils.readLines(stopwfile)){
-          if(!word.trim().isEmpty())
-            stopWords.add(CandidatePhrase.createOrGet(word.trim()));
-        }
-      }
-    }
+    for (String stopwfile : stopWordsPatternFiles.split("[;,]"))
+      stopWords.addAll(IOUtils.linesFromFile(stopwfile));
 
     englishWords = new HashSet<String>();
-    if(englishWordsFiles != null) {
-      System.out.println("Reading english words from " + englishWordsFiles);
-      for (String englishWordsFile : englishWordsFiles.split("[;,]"))
-        englishWords.addAll(IOUtils.linesFromFile(englishWordsFile));
-    }
+    System.out.println("Reading english words from " + englishWordsFiles);
+    for (String englishWordsFile : englishWordsFiles.split("[;,]"))
+      englishWords.addAll(IOUtils.linesFromFile(englishWordsFile));
 
     if (commonWordsPatternFiles != null) {
       commonEngWords = Collections.synchronizedSet(new HashSet<String>());
@@ -876,13 +692,13 @@ public class ConstantsAndVariables implements Serializable {
     if (otherSemanticClassesFiles != null) {
       if (otherSemanticClassesWords == null)
         otherSemanticClassesWords = Collections
-            .synchronizedSet(new HashSet<CandidatePhrase>());
+            .synchronizedSet(new HashSet<String>());
       for (String file : otherSemanticClassesFiles.split("[;,]")) {
         for (String w : IOUtils.linesFromFile(file)) {
 
           String[] t = w.split("\\s+");
           if (t.length <= PatternFactory.numWordsCompound)
-            otherSemanticClassesWords.add(CandidatePhrase.createOrGet(w));
+            otherSemanticClassesWords.add(w);
 
         }
       }
@@ -890,16 +706,16 @@ public class ConstantsAndVariables implements Serializable {
       System.out.println("Size of othersemantic class variables is "
         + otherSemanticClassesWords.size());
     } else {
-      otherSemanticClassesWords = Collections.synchronizedSet(new HashSet<CandidatePhrase>());
+      otherSemanticClassesWords = Collections.synchronizedSet(new HashSet<String>());
       System.out.println("Size of othersemantic class variables is " + 0);
     }
 
     String stopStr = "/";
     int i = 0;
-    for (CandidatePhrase s : stopWords) {
+    for (String s : stopWords) {
       if (i > 0)
         stopStr += "|";
-      stopStr += Pattern.quote(s.getPhrase().replaceAll("\\\\", "\\\\\\\\"));
+      stopStr += Pattern.quote(s.replaceAll("\\\\", "\\\\\\\\"));
       i++;
     }
     stopStr += "/";
@@ -956,52 +772,14 @@ public class ConstantsAndVariables implements Serializable {
       }
     }
 
-    for(String label: labels){
-      learnedWords.put(label, new ClassicCounter<CandidatePhrase>());
-    }
-
-   if(usePhraseEvalGoogleNgram || usePatternEvalDomainNgram) {
-     Data.usingGoogleNgram = true;
-     Execution.fillOptions(GoogleNGramsSQLBacked.class, props);
-   }
-  if(goldEntitiesEvalFiles !=null)
-    goldEntities = readGoldEntities(goldEntitiesEvalFiles);
+    //patternIndex = PatternIndex.newInstance(storePatsIndex, allPatternsDir);
     alreadySetUp = true;
   }
 
-  // The format of goldEntitiesEvalFiles is assumed same as
-  // seedwordsfiles: label,file;label2,file2;...
-  // Each file of gold entities consists of each entity in newline with
-  // incorrect entities marked with "#" at the end of the entity.
-  // Learned entities not present in the gold file are considered
-  // negative.
-  static Map<String, Map<String, Boolean>> readGoldEntities(String goldEntitiesEvalFiles){
-    Map<String, Map<String, Boolean>> goldWords = new HashMap<String, Map<String, Boolean>>();
-    if (goldEntitiesEvalFiles != null) {
-      for (String gfile : goldEntitiesEvalFiles.split(";")) {
-        String[] t = gfile.split(",");
-        String label = t[0];
-        String goldfile = t[1];
-        Map<String, Boolean> goldWords4Label = new HashMap<String, Boolean>();
-        for (String line : IOUtils.readLines(goldfile)) {
-          line = line.trim();
-          if (line.isEmpty())
-            continue;
-
-          if (line.endsWith("#"))
-            goldWords4Label.put(line.substring(0, line.length() - 1), false);
-          else
-            goldWords4Label.put(line, true);
-        }
-        goldWords.put(label, goldWords4Label);
-      }
-    }
-    return goldWords;
-  }
 
 
   //streams sents, files-from-which-sents-were read
-  static public class DataSentsIterator implements Iterator<Pair<Map<String, DataInstance>, File>> {
+  static public class DataSentsIterator implements Iterator<Pair<Map<String, List<CoreLabel>>, File>> {
 
     boolean readInMemory = false;
     Iterator<File> sentfilesIter = null;
@@ -1023,17 +801,19 @@ public class ConstantsAndVariables implements Serializable {
     }
 
     @Override
-    public Pair<Map<String, DataInstance>, File> next() {
+    public Pair<Map<String, List<CoreLabel>>, File> next() {
       if(batchProcessSents){
         try {
           File f= sentfilesIter.next();
-          return new Pair<Map<String, DataInstance>, File>(IOUtils.readObjectFromFile(f), f);
-        } catch (IOException | ClassNotFoundException e) {
+          return new Pair<Map<String, List<CoreLabel>>, File>(IOUtils.readObjectFromFile(f), f);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
           throw new RuntimeException(e);
         }
       }else{
         readInMemory= true;
-        return new Pair<>(Data.sents, new File(""));
+        return new Pair(Data.sents, new File(""));
       }
     }
   }
@@ -1042,7 +822,7 @@ public class ConstantsAndVariables implements Serializable {
     return wordShapesForLabels;
   }
 
-  public void setWordShapesForLabels(ConcurrentHashMap<String, Counter<String>> wordShapesForLabels) {
+  public void setWordShapesForLabels(Map<String, Counter<String>> wordShapesForLabels) {
     this.wordShapesForLabels = wordShapesForLabels;
   }
   public void addGeneralizeClasses(Map<String, Class> gen) {
@@ -1053,16 +833,15 @@ public class ConstantsAndVariables implements Serializable {
     return generalizeClasses;
   }
 
-  public static Set<CandidatePhrase> getStopWords() {
+  public static Set<String> getStopWords() {
     return stopWords;
   }
 
-  public void addWordShapes(String label, Set<CandidatePhrase> words){
+  public void addWordShapes(String label, Set<String> words){
     if(!this.wordShapesForLabels.containsKey(label)){
       this.wordShapesForLabels.put(label, new ClassicCounter<String>());
     }
-    for(CandidatePhrase wc: words){
-      String w = wc.getPhrase();
+    for(String w: words){
       String ws = null;
       if(wordShapeCache.containsKey(w))
         ws = wordShapeCache.get(w);
@@ -1076,57 +855,26 @@ public class ConstantsAndVariables implements Serializable {
     }
   }
 
-  public void setSeedLabelDictionary(Map<String, Set<CandidatePhrase>> seedSets) {
-    this.seedLabelDictionary = seedSets;
+  public void setLabelDictionary(Map<String, Set<String>> seedSets) {
+    this.labelDictionary = seedSets;
 
     if(usePhraseEvalWordShape || usePatternEvalWordShape){
       this.wordShapesForLabels.clear();
-     for(Entry<String, Set<CandidatePhrase>> en: seedSets.entrySet())
+     for(Entry<String, Set<String>> en: seedSets.entrySet())
        addWordShapes(en.getKey(), en.getValue());
     }
   }
 
-  public Map<String, Set<CandidatePhrase>> getSeedLabelDictionary() {
-    return this.seedLabelDictionary;
+  public Map<String, Set<String>> getLabelDictionary() {
+    return this.labelDictionary;
   }
 
-  public void addSeedLabelDictionary(String label, Set<CandidatePhrase> words) {
-    this.seedLabelDictionary.get(label).addAll(words);
+  public void addLabelDictionary(String label, Set<String> words) {
+    this.labelDictionary.get(label).addAll(words);
 
     if(usePhraseEvalWordShape || usePatternEvalWordShape)
       addWordShapes(label, words);
   }
-
-  Map<String, Counter<CandidatePhrase>> learnedWords = new HashMap<String, Counter<CandidatePhrase>>();
-
-  public Counter<CandidatePhrase> getLearnedWords(String label) {
-    Counter<CandidatePhrase> learned = this.learnedWords.get(label);
-    if(learned == null){
-      learned = new ClassicCounter<CandidatePhrase>();
-      this.learnedWords.put(label, learned);
-    }
-    return learned;
-  }
-
-  public Map<String, Counter<CandidatePhrase>> getLearnedWords() {
-    return learnedWords;
-  }
-
-  public String getLearnedWordsAsJson(){
-    JsonObjectBuilder obj = Json.createObjectBuilder();
-    for(Map.Entry<String, Counter<CandidatePhrase>> en: learnedWords.entrySet()){
-      JsonArrayBuilder arr = Json.createArrayBuilder();
-      for(CandidatePhrase k: en.getValue().keySet())
-        arr.add(k.getPhrase());
-      obj.add(en.getKey(), arr);
-    }
-    return obj.build().toString();
-  }
-
-  public void setLearnedWords(Counter<CandidatePhrase> words, String label) {
-    this.learnedWords.put(label, words);
-  }
-
 
   public Set<String> getEnglishWords() {
     return this.englishWords;
@@ -1136,11 +884,11 @@ public class ConstantsAndVariables implements Serializable {
     return this.commonEngWords;
   }
 
-  public Set<CandidatePhrase> getOtherSemanticClassesWords() {
+  public Set<String> getOtherSemanticClassesWords() {
     return this.otherSemanticClassesWords;
   }
 
-  public void setOtherSemanticClassesWords(Set<CandidatePhrase> other) {
+  public void setOtherSemanticClassesWords(Set<String> other) {
     this.otherSemanticClassesWords = other;
   }
 
@@ -1148,11 +896,10 @@ public class ConstantsAndVariables implements Serializable {
     return this.wordClassClusters;
   }
 
-  private Pair<String, Double> getEditDist(Collection<CandidatePhrase> words, String ph) {
+  private Pair<String, Double> getEditDist(Set<String> words, String ph) {
     double minD = editDistMax;
     String minPh = ph;
-    for (CandidatePhrase ec : words) {
-      String e = ec.getPhrase();
+    for (String e : words) {
       if (e.equals(ph))
         return new Pair<String, Double>(ph, 0.0);
 
@@ -1171,7 +918,7 @@ public class ConstantsAndVariables implements Serializable {
 
   }
 
-  final double editDistMax = 1000;
+  double editDistMax = 100;
 
   /**
    * Use this option if you are limited by memory ; ignored if fileFormat is ser.
@@ -1182,49 +929,49 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name="writeMatchedTokensFiles")
   public boolean writeMatchedTokensFiles = false;
 
-  @Option(name="writeMatchedTokensIdsForEachPhrase")
-  public boolean writeMatchedTokensIdsForEachPhrase = false;
-
   public Pair<String, Double> getEditDistanceFromThisClass(String label,
       String ph, int minLen) {
     if (ph.length() < minLen)
       return new Pair<String, Double>(ph, editDistMax);
-//    if (editDistanceFromThisClass.containsKey(ph))
-//      return new Pair<String, Double>(editDistanceFromThisClassMatches.get(ph),
-//          editDistanceFromThisClass.get(ph));
+    if (editDistanceFromThisClass.containsKey(ph))
+      return new Pair<String, Double>(editDistanceFromThisClassMatches.get(ph),
+          editDistanceFromThisClass.get(ph));
 
-    Set<CandidatePhrase> words = seedLabelDictionary.get(label);
-    words.addAll(learnedWords.get(label).keySet());
-    Pair<String, Double> minD = getEditDist(words, ph);
+    Pair<String, Double> minD = getEditDist(labelDictionary.get(label), ph);
 
+    // double minDtotal = editDistMax;
+    // String minPh = "";
+    // if (minD.second() == editDistMax && ph.contains(" ")) {
+    // for (String s : ph.split("\\s+")) {
+    // Pair<String, Double> minDSingle = getEditDist(labelDictionary.get(label),
+    // s);
+    // if (minDSingle.second() < minDtotal) {
+    // minDtotal = minDSingle.second;
+    // }
+    // minPh += " " + minDSingle.first();
+    // }
+    // minPh = minPh.trim();
+    // } else {
     double minDtotal = minD.second();
     String minPh = minD.first();
+    // }
     assert (!minPh.isEmpty());
-//    editDistanceFromThisClass.putIfAbsent(ph, minDtotal);
-//    editDistanceFromThisClassMatches.putIfAbsent(ph, minPh);
+    editDistanceFromThisClass.putIfAbsent(ph, minDtotal);
+    editDistanceFromThisClassMatches.putIfAbsent(ph, minPh);
     return new Pair<String, Double>(minPh, minDtotal);
   }
 
-  public Pair<String, Double> getEditDistanceFromOtherClasses(String label, String ph, int minLen) {
+  public Pair<String, Double> getEditDistanceFromOtherSemanticClasses(
+      String ph, int minLen) {
     if (ph.length() < minLen)
       return new Pair<String, Double>(ph, editDistMax);
-//    if (editDistanceFromOtherSemanticClasses.containsKey(ph))
-//      return new Pair<String, Double>(
-//          editDistanceFromOtherSemanticClassesMatches.get(ph),
-//          editDistanceFromOtherSemanticClasses.get(ph));
+    if (editDistanceFromOtherSemanticClasses.containsKey(ph))
+      return new Pair<String, Double>(
+          editDistanceFromOtherSemanticClassesMatches.get(ph),
+          editDistanceFromOtherSemanticClasses.get(ph));
 
     Pair<String, Double> minD = getEditDist(otherSemanticClassesWords, ph);
-    String minPh = minD.first();
-    double minDfinal = minD.second();
-    for(String l: labels){
-      if(l.equals(label))
-        continue;
-      Pair<String, Double> editMatch = getEditDistanceFromThisClass(l, ph, minLen);
-      if(editMatch.second() < minDfinal){
-        minDfinal = editMatch.second();
-        minPh = editMatch.first();
-      }
-    }
+
     // double minDtotal = editDistMax;
     // String minPh = "";
     // if (minD.second() == editDistMax && ph.contains(" ")) {
@@ -1237,34 +984,35 @@ public class ConstantsAndVariables implements Serializable {
     // }
     // minPh = minPh.trim();
     // } else {
-
+    double minDtotal = minD.second();
+    String minPh = minD.first();
     // }
     assert (!minPh.isEmpty());
-//    editDistanceFromOtherSemanticClasses.putIfAbsent(ph, minDtotal);
-//    editDistanceFromOtherSemanticClassesMatches.putIfAbsent(ph, minPh);
-    return new Pair<String, Double>(minPh, minDfinal);
+    editDistanceFromOtherSemanticClasses.putIfAbsent(ph, minDtotal);
+    editDistanceFromOtherSemanticClassesMatches.putIfAbsent(ph, minPh);
+    return new Pair<String, Double>(minPh, minDtotal);
   }
 
-//  public double getEditDistanceFromEng(String ph, int minLen) {
-//    if (ph.length() < minLen)
-//      return editDistMax;
-//    if (editDistanceFromEnglishWords.containsKey(ph))
-//      return editDistanceFromEnglishWords.get(ph);
-//    Pair<String, Double> d = getEditDist(commonEngWords, ph);
-//    double minD = d.second();
-//    String minPh = d.first();
-//    if (d.second() > 2) {
-//      Pair<String, Double> minD2 = getEditDist(CandidatePhrase.convertToString(otherSemanticClassesWords), ph);
-//      if (minD2.second < minD) {
-//        minD = minD2.second();
-//        minPh = minD2.first();
-//      }
-//    }
-//
-//    editDistanceFromEnglishWords.putIfAbsent(ph, minD);
-//    editDistanceFromEnglishWordsMatches.putIfAbsent(ph, minPh);
-//    return minD;
-//  }
+  public double getEditDistanceFromEng(String ph, int minLen) {
+    if (ph.length() < minLen)
+      return editDistMax;
+    if (editDistanceFromEnglishWords.containsKey(ph))
+      return editDistanceFromEnglishWords.get(ph);
+    Pair<String, Double> d = getEditDist(commonEngWords, ph);
+    double minD = d.second();
+    String minPh = d.first();
+    if (d.second() > 2) {
+      Pair<String, Double> minD2 = getEditDist(otherSemanticClassesWords, ph);
+      if (minD2.second < minD) {
+        minD = minD2.second();
+        minPh = minD2.first();
+      }
+    }
+
+    editDistanceFromEnglishWords.putIfAbsent(ph, minD);
+    editDistanceFromEnglishWordsMatches.putIfAbsent(ph, minPh);
+    return minD;
+  }
 
   public ConcurrentHashMap<String, Double> getEditDistanceFromEnglishWords() {
     return this.editDistanceFromEnglishWords;
@@ -1274,19 +1022,20 @@ public class ConstantsAndVariables implements Serializable {
     return this.editDistanceFromEnglishWordsMatches;
   }
 
-  public double getEditDistanceScoresOtherClass(String label, String g) {
+  public double getEditDistanceScoresOtherClass(String g) {
     double editDist;
     String editDistPh;
-//    if (editDistanceFromOtherSemanticClasses.containsKey(g)) {
-//      editDist = editDistanceFromOtherSemanticClasses.get(g);
-//      editDistPh = editDistanceFromOtherSemanticClassesMatches.get(g);
-//    } else {
-      Pair<String, Double> editMatch = getEditDistanceFromOtherClasses(label, g, 4);
+    if (editDistanceFromOtherSemanticClasses.containsKey(g)) {
+      editDist = editDistanceFromOtherSemanticClasses.get(g);
+      editDistPh = editDistanceFromOtherSemanticClassesMatches.get(g);
+    } else {
+      Pair<String, Double> editMatch = getEditDistanceFromOtherSemanticClasses(
+          g, 4);
       editDist = editMatch.second();
       editDistPh = editMatch.first();
-//    }
+    }
     assert (!editDistPh.isEmpty());
-    return (editDist == editDistMax ? 1.0 : (editDist / (double) Math.max(g.length(), editDistPh.length())));
+    return editDist / (double) editDistPh.length();
   }
 
   /**
@@ -1295,8 +1044,8 @@ public class ConstantsAndVariables implements Serializable {
    * @param g
    * @return
    */
-  public double getEditDistanceScoresOtherClassThreshold(String label, String g) {
-    double editDistRatio = getEditDistanceScoresOtherClass(label, g);
+  public double getEditDistanceScoresOtherClassThreshold(String g) {
+    double editDistRatio = getEditDistanceScoresOtherClass(g);
 
     if (editDistRatio < 0.2)
       return 1;
@@ -1315,19 +1064,16 @@ public class ConstantsAndVariables implements Serializable {
   public double getEditDistanceScoresThisClass(String label, String g) {
     double editDist;
     String editDistPh;
-//    if (editDistanceFromThisClass.containsKey(g)) {
-//      editDist = editDistanceFromThisClass.get(g);
-//      editDistPh = editDistanceFromThisClassMatches.get(g);
-//      assert (!editDistPh.isEmpty());
-//    } else {
-//
+    if (editDistanceFromThisClass.containsKey(g)) {
+      editDist = editDistanceFromThisClass.get(g);
+      editDistPh = editDistanceFromThisClassMatches.get(g);
+    } else {
       Pair<String, Double> editMatch = getEditDistanceFromThisClass(label, g, 4);
       editDist = editMatch.second();
       editDistPh = editMatch.first();
-      assert (!editDistPh.isEmpty());
-    //}
-
-    return ((editDist == editDistMax) ? 1.0 : (editDist / (double) Math.max(g.length(), editDistPh.length())));
+    }
+    assert (!editDistPh.isEmpty());
+    return editDist / (double) editDistPh.length();
   }
 
   public static boolean isFuzzyMatch(String w1, String w2, int minLen4Fuzzy) {
@@ -1343,10 +1089,10 @@ public class ConstantsAndVariables implements Serializable {
     return false;
   }
 
-  public static CandidatePhrase containsFuzzy(Set<CandidatePhrase> words, CandidatePhrase w,
+  public static String containsFuzzy(Set<String> words, String w,
       int minLen4Fuzzy) {
-    for (CandidatePhrase w1 : words) {
-      if (isFuzzyMatch(w1.getPhrase(), w.getPhrase(), minLen4Fuzzy))
+    for (String w1 : words) {
+      if (isFuzzyMatch(w1, w, minLen4Fuzzy))
         return w1;
     }
     return null;
@@ -1375,11 +1121,26 @@ public class ConstantsAndVariables implements Serializable {
     return ignoreWordswithClassesDuringSelection;
   }
 
-  public void addSeedWords(String label, Collection<CandidatePhrase> seeds) throws Exception {
-    if(!seedLabelDictionary.containsKey(label)){
-      throw new Exception("label not present in the model");
-    }
-    this.seedLabelDictionary.get(label).addAll(seeds);
-  }
 
+//  public Counter<SurfacePattern> transformPatternsToSurface(Counter<E> pats) {
+//    return Counters.transform(pats, new Function<Integer, SurfacePattern>() {
+//      @Override
+//      public SurfacePattern apply(Integer integer) {
+//        return patternIndex.get(integer);
+//      }
+//    });
+//  }
+
+//  public Counter<Integer> transformPatternsToIndex(Counter<SurfacePattern> pats) {
+//    return Counters.transform(pats, new Function<SurfacePattern, Integer>() {
+//      @Override
+//      public Integer apply(SurfacePattern pat) {
+//        return patternIndex.indexOf(pat);
+//      }
+//    });
+//  }
+//
+//  public Integer transformPatternToIndex(SurfacePattern pat) {
+//    return patternIndex.indexOf(pat);
+//  }
 }

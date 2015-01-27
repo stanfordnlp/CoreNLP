@@ -12,7 +12,7 @@ import java.util.*;
  * without epsilon transitions.
  *
  * @author Dan Klein
- * @author Michel Galley (AT&amp;T FSM library format printing)
+ * @author Michel Galley (AT&T FSM library format printing)
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) - cleanup and filling in types
  */
 public final class DFSA<T,S> implements Scored {

@@ -2,7 +2,6 @@ package edu.stanford.nlp.util;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A factory class for vending different sorts of Maps.
@@ -36,7 +35,6 @@ public abstract class MapFactory<K,V> implements Serializable {
   @SuppressWarnings("unchecked")
   private static final MapFactory ARRAY_MAP_FACTORY = new ArrayMapFactory();
 
-  public static final MapFactory CONCURRENT_MAP_FACTORY = new ConcurrentMapFactory();
 
   /** Return a MapFactory that returns a HashMap.
    *  <i>Implementation note: This method uses the same trick as the methods
@@ -345,38 +343,6 @@ public abstract class MapFactory<K,V> implements Serializable {
 
   } // end class ArrayMapFactory
 
-
-  private static class ConcurrentMapFactory<K,V> extends MapFactory<K,V> {
-
-    private static final long serialVersionUID = -5855812734715185523L;
-
-    @Override
-    public Map<K,V> newMap() {
-      return new ConcurrentHashMap<K,V>();
-    }
-
-    @Override
-    public Map<K,V> newMap(int initCapacity) {
-      return new ConcurrentHashMap<K,V>(initCapacity);
-    }
-
-    @Override
-    public Set<K> newSet() {
-      return Collections.newSetFromMap(new ConcurrentHashMap<K, Boolean>());
-    }
-
-    @Override
-    public <K1, V1> Map<K1, V1> setMap(Map<K1, V1> map) {
-      return new ConcurrentHashMap<K1,V1>();
-    }
-
-    @Override
-    public <K1, V1> Map<K1, V1> setMap(Map<K1,V1> map, int initCapacity) {
-      map = new ConcurrentHashMap<K1,V1>(initCapacity);
-      return map;
-    }
-
-  } // end class ConcurrentMapFactory
 
   /**
    * Returns a new non-parameterized map of a particular sort.

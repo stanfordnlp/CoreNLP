@@ -2,7 +2,6 @@ package edu.stanford.nlp.util;
 
 import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 
@@ -898,25 +897,15 @@ public class ArrayUtils {
   }
    */
 
-  public static List<Integer> getSubListIndex(Object[] tofind, Object[] tokens){
-     return getSubListIndex(tofind, tokens, new Function<Pair, Boolean>(){
-       @Override
-       public Boolean apply(Pair objectObjectPair) {
-         return objectObjectPair.first().equals(objectObjectPair.second());
-       }
-     });
-  }
-
   /**
    * If tofind is a part of tokens, it finds the ****starting index***** of tofind in tokens
    * If tofind is not a sub-array of tokens, then it returns null
    * note that tokens sublist should have the exact elements and order as in tofind
    * @param tofind array you want to find in tokens
    * @param tokens
-   * @param matchingFunction function that takes (tofindtoken, token) pair and returns whether they match
    * @return starting index of the sublist
    */
-  public static List<Integer> getSubListIndex(Object[] tofind, Object[] tokens, Function<Pair, Boolean> matchingFunction){
+  public static List<Integer> getSubListIndex(Object[] tofind, Object[] tokens){
     if(tofind.length > tokens.length)
       return null;
     List<Integer> allIndices = new ArrayList<Integer>();
@@ -925,7 +914,7 @@ public class ArrayUtils {
     int lastUnmatchedIndex = 0;
     for(int i = 0 ; i < tokens.length;){
       for(int j = 0; j < tofind.length ;){
-        if(matchingFunction.apply(new Pair(tofind[j], tokens[i]))){
+        if(tofind[j].equals(tokens[i])){
           index = i;
           i++;
           j++;
@@ -1005,16 +994,5 @@ public class ArrayUtils {
     if (a1.length < a2.length) return -1;
     if (a1.length > a2.length) return 1;
     return 0;
-  }
-
-  public static String toString(double[] doubles, String glue) {
-    String s = "";
-    for(int i = 0; i < doubles.length; i++){
-      if(i==0)
-        s = String.valueOf(doubles[i]);
-      else
-        s+= glue + String.valueOf(doubles[i]);
-    }
-    return s;
   }
 }

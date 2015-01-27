@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.patterns.PatternFactory;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
@@ -30,7 +29,7 @@ public class SurfacePatternTest {
     Token[] toks = new Token[res.size()];
     int i =0;
     for(Map.Entry<Class, String> en: res.entrySet()){
-      Token t = new Token(PatternFactory.PatternType.SURFACE);
+      Token t = new Token();
 
       t.addORRestriction(en.getKey(), en.getValue());
       toks[i] = t;

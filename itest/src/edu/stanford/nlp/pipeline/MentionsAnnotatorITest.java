@@ -9,17 +9,17 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * Unit test for the mentions annotator.
+ * Unit test for the mentions annotator
  *
  * @author Angel Chang
  */
-public class EntityMentionsAnnotatorITest extends TestCase {
+public class MentionsAnnotatorITest extends TestCase {
   static AnnotationPipeline pipeline = null;
-  protected static final String ENTITY_MENTIONS_ANNOTATOR_NAME = "entitymentions";
+  protected static final String MENTIONS_ANNOTATOR_NAME = "mentions";
 
   @Override
   public void setUp() throws Exception {
-    synchronized(EntityMentionsAnnotatorITest.class) {
+    synchronized(MentionsAnnotatorITest.class) {
       if (pipeline == null) {
         Properties props = new Properties();
         // TODO: remove need for ner and just have the mentions annotator
@@ -36,14 +36,14 @@ public class EntityMentionsAnnotatorITest extends TestCase {
     return props;
   }
 
-  protected EntityMentionsAnnotator getMentionsAnnotator()
+  protected MentionsAnnotator getMentionsAnnotator()
   {
-    return new EntityMentionsAnnotator(ENTITY_MENTIONS_ANNOTATOR_NAME, getDefaultProperties());
+    return new MentionsAnnotator(MENTIONS_ANNOTATOR_NAME, getDefaultProperties());
   }
 
-  protected static EntityMentionsAnnotator getMentionsAnnotator(Properties props)
+  protected static MentionsAnnotator getMentionsAnnotator(Properties props)
   {
-    return new EntityMentionsAnnotator(ENTITY_MENTIONS_ANNOTATOR_NAME, props);
+    return new MentionsAnnotator(MENTIONS_ANNOTATOR_NAME, props);
   }
 
   protected static Annotation createDocument(String text) {
@@ -52,7 +52,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
     return annotation;
   }
 
-  protected static void compareMentions(String prefix, String[] expectedMentions, List<CoreMap> mentions) {
+  protected void compareMentions(String prefix, String[] expectedMentions, List<CoreMap> mentions) {
     if (expectedMentions == null) {
       for (int i = 0; i < mentions.size(); i++) {
         String actual = mentions.get(i).toShorterString();
@@ -75,7 +75,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
     List<CoreLabel> tokens = doc.get(CoreAnnotations.TokensAnnotation.class);
     tokens.get(3).setNER("ORGANIZATION");
     tokens.get(4).setNER("ORGANIZATION");
-    EntityMentionsAnnotator annotator = getMentionsAnnotator();
+    MentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
@@ -88,7 +88,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
 
   public void testDates() {
     Annotation doc = createDocument("July 3rd July 4th are two different dates");
-    EntityMentionsAnnotator annotator = getMentionsAnnotator();
+    MentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
@@ -102,7 +102,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
 
   public void testDates2() {
     Annotation doc = createDocument("July 3rd July 3rd are two mentions of the same date");
-    EntityMentionsAnnotator annotator = getMentionsAnnotator();
+    MentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
@@ -116,7 +116,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
 
   public void testNumbers() {
     Annotation doc = createDocument("one two three four five");
-    EntityMentionsAnnotator annotator = getMentionsAnnotator();
+    MentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
@@ -135,18 +135,17 @@ public class EntityMentionsAnnotatorITest extends TestCase {
         "Covering an area nearly 5,500 square meters, the new Dickson Poon University of Oxford China Center in St Hugh's College cost about 21 million pounds.\n" +
         "Dickson Poon, a philanthropist from Hong Kong, China, is the one of the major donors of the center, who contributed 10 million British pounds (16.14 million U.S. dollars).");
 
-    EntityMentionsAnnotator annotator = getMentionsAnnotator();
+    MentionsAnnotator annotator = getMentionsAnnotator();
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
-    // TODO: "Duke of Cambridge" should be one mention. Perhaps should get "Prince William" rather than just "William"
+    // TODO: "Duke of Cambridge" should be one mention, "Prince William" should be one mention
     //       "nearly 5,500 square meters"? "10 million British pounds", "16.14 million U.S. dollars"
-    // TODO: "China Center should be organization, but is currently coming out as location. :(
     String[] expectedMentions = {
         "[Text=Duke CharacterOffsetBegin=0 CharacterOffsetEnd=4 Tokens=[Duke-1] TokenBegin=0 TokenEnd=1 NamedEntityTag=PERSON EntityType=PERSON]",
         "[Text=Cambridge CharacterOffsetBegin=8 CharacterOffsetEnd=17 Tokens=[Cambridge-3] TokenBegin=2 TokenEnd=3 NamedEntityTag=LOCATION EntityType=LOCATION]",
         "[Text=William CharacterOffsetBegin=26 CharacterOffsetEnd=33 Tokens=[William-6] TokenBegin=5 TokenEnd=6 NamedEntityTag=PERSON EntityType=PERSON]",
-        "[Text=China Center CharacterOffsetBegin=50 CharacterOffsetEnd=62 Tokens=[China-11, Center-12] TokenBegin=10 TokenEnd=12 NamedEntityTag=LOCATION EntityType=LOCATION]",
+        "[Text=China Center CharacterOffsetBegin=50 CharacterOffsetEnd=62 Tokens=[China-11, Center-12] TokenBegin=10 TokenEnd=12 NamedEntityTag=ORGANIZATION EntityType=ORGANIZATION]",
         "[Text=University of Oxford CharacterOffsetBegin=70 CharacterOffsetEnd=90 Tokens=[University-15, of-16, Oxford-17] TokenBegin=14 TokenEnd=17 NamedEntityTag=ORGANIZATION EntityType=ORGANIZATION]",
         "[Text=Monday CharacterOffsetBegin=91 CharacterOffsetEnd=97 Tokens=[Monday-18] TokenBegin=17 TokenEnd=18 NamedEntityTag=DATE NormalizedNamedEntityTag=XXXX-WXX-1 EntityType=DATE Timex=<TIMEX3 tid=\"t1\" type=\"DATE\" value=\"XXXX-WXX-1\">Monday</TIMEX3>]",
         "[Text=5,500 CharacterOffsetBegin=123 CharacterOffsetEnd=128 Tokens=[5,500-5] TokenBegin=23 TokenEnd=24 NamedEntityTag=NUMBER NormalizedNamedEntityTag=~5500.0 EntityType=NUMBER]",

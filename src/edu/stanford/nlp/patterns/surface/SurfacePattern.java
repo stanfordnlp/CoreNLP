@@ -5,9 +5,6 @@ import java.util.*;
 
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.patterns.Pattern;
-import edu.stanford.nlp.patterns.PatternFactory;
-import edu.stanford.nlp.patterns.PatternsAnnotations;
 import edu.stanford.nlp.util.*;
 
 /**
@@ -25,9 +22,9 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
   public CollectionValuedMap<String, String> getRelevantWords() {
     CollectionValuedMap<String, String> relwordsThisPat = new CollectionValuedMap<>();
     Token[] next = getNextContext();
-    getRelevantWordsBase(next, relwordsThisPat);
+    getRelevantWords(next, relwordsThisPat);
     Token[] prev = getPrevContext();
-    getRelevantWordsBase(prev, relwordsThisPat);
+    getRelevantWords(prev, relwordsThisPat);
     return relwordsThisPat;
   }
 
@@ -36,15 +33,23 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
     return equalContext((SurfacePattern)p);
   }
 
-
+  private void getRelevantWords(Token[] t, CollectionValuedMap<String, String> relWords){
+    if (t != null)
+      for (Token s : t) {
+        Map<String, String> str = s.classORRestrictionsAsString();
+        if (str != null){
+          relWords.addAll(str);
+        }
+      }
+  }
 
 
   private static final long serialVersionUID = 1L;
 
-  public Token[] prevContext;
-  public Token[] nextContext;
+  protected Token[] prevContext;
+  protected Token[] nextContext;
   // String prevContextStr = "", nextContextStr = "";
-  public PatternToken token;
+  protected PatternToken token;
   // protected String[] originalPrev;
   // protected String[] originalNext;
   // protected String originalPrevStr = "";
@@ -65,7 +70,7 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
 
 
   public SurfacePattern(Token[] prevContext, PatternToken token, Token[] nextContext, SurfacePatternFactory.Genre genre) {
-    super(PatternFactory.PatternType.SURFACE);
+   // super(SurfacePattern.class);
     this.setPrevContext(prevContext);
     this.setNextContext(nextContext);
     //
@@ -85,8 +90,25 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
   }
 
   public static Token getContextToken(CoreLabel tokenj) {
-    Token token = new Token(PatternFactory.PatternType.SURFACE);
+    Token token = new Token();
     token.addORRestriction(PatternsAnnotations.ProcessedTextAnnotation.class, tokenj.get(PatternsAnnotations.ProcessedTextAnnotation.class));
+
+//    if (useLemmaContextTokens) {
+//      String tok = tokenj.lemma();
+//      if (lowerCaseContext)
+//        tok = tok.toLowerCase();
+//      token.addORRestriction(CoreAnnotations.LemmaAnnotation.class, tok);
+//      //str = "[{lemma:/" + Pattern.quote(tok.replaceAll("/", "\\\\/"))+ "/}] ";
+//
+//    } else {
+//      String tok = tokenj.word();
+//      if (lowerCaseContext)
+//        tok = tok.toLowerCase();
+//      token.addORRestriction(CoreAnnotations.TextAnnotation.class, tok);
+//      //str = "[{word:/" + Pattern.quote(tok.replaceAll("/", "\\\\/")) + "/}] ";
+//
+//
+//    }
     return token;
   }
 

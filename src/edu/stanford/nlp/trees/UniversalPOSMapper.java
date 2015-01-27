@@ -12,7 +12,7 @@ import edu.stanford.nlp.util.Pair;
 /**
  * Helper class to perform a context-sensitive mapping of POS
  * tags in a tree to universal POS tags.
- *
+ * 
  * @author Sebastian Schuster
  */
 
@@ -23,8 +23,6 @@ public class UniversalPOSMapper {
   private static boolean loaded = false;
 
   private static List<Pair<TregexPattern, TsurgeonPattern>> operations = null;
-
-  private UniversalPOSMapper() {} // static methods
 
   public static void load() {
     load(DEFAULT_TSURGEON_FILE);

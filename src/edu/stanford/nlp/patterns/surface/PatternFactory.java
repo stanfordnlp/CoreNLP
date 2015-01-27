@@ -1,10 +1,13 @@
-package edu.stanford.nlp.patterns;
+package edu.stanford.nlp.patterns.surface;
 
-import edu.stanford.nlp.patterns.dep.DepPatternFactory;
-import edu.stanford.nlp.patterns.surface.SurfacePatternFactory;
 import edu.stanford.nlp.util.Execution;
 
-import java.util.*;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.regex.*;
 
 /**
  * Created by sonalg on 10/27/14.
@@ -44,33 +47,20 @@ public class PatternFactory {
    */
   public static java.util.regex.Pattern ignoreWordRegex = java.util.regex.Pattern.compile("a^");
 
-  public static void setUp(Properties props, PatternType patternType) {
+  public static void setUp(Properties props) {
     Execution.fillOptions(PatternFactory.class, props);
-    if(patternType.equals(PatternType.SURFACE))
-      SurfacePatternFactory.setUp(props);
-    else if(patternType.equals(PatternType.DEP))
-      DepPatternFactory.setUp(props);
-    else
-      throw new UnsupportedOperationException();
+    SurfacePatternFactory.setUp(props);
   }
 
-  public enum PatternType{SURFACE, DEP};
+  public enum PatternType{SURFACE};
 
-  public static boolean doNotUse(String word, Set<CandidatePhrase> stopWords) {
-    if (stopWords.contains(CandidatePhrase.createOrGet(word.toLowerCase()))
+  public static boolean doNotUse(String word, Set<String> stopWords) {
+    if (stopWords.contains(word.toLowerCase())
       || ignoreWordRegex.matcher(word).matches())
       return true;
     else
       return false;
-  }
 
-  public static Map<Integer, Set> getPatternsAroundTokens(PatternType patternType, DataInstance sent, Set<CandidatePhrase> stopWords) {
-      if(patternType.equals(PatternType.SURFACE)){
-        return SurfacePatternFactory.getPatternsAroundTokens(sent, stopWords);
-      } else if(patternType.equals(PatternType.DEP)){
-        return (Map) DepPatternFactory.getPatternsAroundTokens(sent, stopWords);
-      } else
-        throw new UnsupportedOperationException();
-  }
 
+  }
 }

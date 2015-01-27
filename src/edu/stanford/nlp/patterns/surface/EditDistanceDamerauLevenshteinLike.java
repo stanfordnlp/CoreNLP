@@ -1,4 +1,4 @@
-package edu.stanford.nlp.patterns;
+package edu.stanford.nlp.patterns.surface;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.max;

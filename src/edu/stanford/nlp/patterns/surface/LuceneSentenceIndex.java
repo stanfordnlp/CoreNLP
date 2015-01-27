@@ -1,8 +1,7 @@
-package edu.stanford.nlp.patterns;
+package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.patterns.surface.Token;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.util.CollectionValuedMap;
@@ -27,9 +26,8 @@ import java.util.function.Function;
 
 
 
-/**
- * To create a lucene inverted index for tokens -> sentence ids (right now not storing all core tokens although some functions might suggest that)
- * Created by Sonal Gupta on 10/14/14.
+/** Currently written to only support word based patterns - that is no lemmas.
+ * Created by sonalg on 10/14/14.
  */
 public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 
@@ -175,13 +173,13 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 
 
   @Override
-  public void add(Map<String, DataInstance> sentences, boolean addProcessedText) {
+  public void add(Map<String, List<CoreLabel>> sentences, boolean addProcessedText) {
     try {
       this.setIndexWriter();
 
-      for(Map.Entry<String, DataInstance> en: sentences.entrySet()){
+      for(Map.Entry<String, List<CoreLabel>> en: sentences.entrySet()){
         //String sentence = StringUtils.joinWords(en.getValue(), " ");
-        add(en.getValue().getTokens(), en.getKey(), addProcessedText);
+        add(en.getValue(), en.getKey(), addProcessedText);
       }
 
       indexWriter.commit();

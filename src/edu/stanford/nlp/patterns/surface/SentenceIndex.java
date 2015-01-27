@@ -1,7 +1,11 @@
-package edu.stanford.nlp.patterns;
+package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.patterns.surface.Pattern;
+import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Execution;
+import edu.stanford.nlp.util.Execution.Option;
+import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -35,7 +39,7 @@ public abstract class SentenceIndex<E extends Pattern> {
    * @param sents
    * @param addProcessedText
    */
-  public abstract void add(Map<String, DataInstance> sents, boolean addProcessedText);
+  public abstract void add(Map<String, List<CoreLabel>> sents, boolean addProcessedText);
 
 //  protected CollectionValuedMap<String, String> getRelevantWords(Set<Integer> pats, Index<E> EIndex){
 //    CollectionValuedMap<String, String> relwords = new CollectionValuedMap<String, String>();
