@@ -48,19 +48,41 @@ public class QuoteAnnotator implements Annotator {
 
   @Override
   public void annotate(Annotation annotation) {
-    if (VERBOSE) {
-      System.err.print("Adding Quote annotation...");
-    }
+//    if (VERBOSE) {
+//      System.err.print("Adding Quote annotation...");
+//    }
     String text = annotation.get(CoreAnnotations.TextAnnotation.class);
     List<CoreMap> quotes = new ArrayList<CoreMap>();
 
     // TODO: the following
     // Pre-process to make word terminal apostrophes specially encoded (Jones' dog)
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
-//    System.out.println(tokens);
 
     List<Pair<Integer, Integer>> singleQuotesQuotes = extractDirectSingleQuotes(text);
     List<Pair<Integer, Integer>> doubleQuotesQuotes = extractDirectDoubleQuotes(text);
+
+    System.out.println(singleQuotesQuotes);
+    System.out.println(doubleQuotesQuotes);
+
+    // embed the quotations correctly
+    for (Pair<Integer, Integer> sq : singleQuotesQuotes) {
+      // see if there are any overlapping double quotes
+      for (Pair<Integer, Integer> dq : doubleQuotesQuotes) {
+        if (sq.first() <= dq.first() && sq.second() >= dq.second()) {
+          // the single quote contains the double quote
+
+        } else if (sq.first() >= dq.first() && sq.second() <= dq.second()) {
+          // the double quote contains the single quote
+
+        } else if (sq.first() <= dq.first() && sq.second() <= dq.second()) {
+          // weird case that probably shouldn't be happening
+          // the single quote overlaps the double quote to the left
+        } else if (sq.first() >= dq.first() && sq.second() >= dq.second()) {
+          // weird case that probably shouldn't be happening
+          // the single quote overlaps the double quote to the right
+        }
+      }
+    }
 
     String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
 
@@ -199,11 +221,6 @@ public class QuoteAnnotator implements Annotator {
     while(m.find()) {
       int start = m.start();
       int end = m.end();
-//      System.out.println(m.groupCount());
-//      System.out.println("1:" + m.group(1));
-//      System.out.println("2:" + m.group(2));
-//      System.out.println("3:" + m.group(3));
-//      System.out.println(m.group());
       if (groupNum >= 0) {
         String q = m.group(groupNum);
         String whole = m.group();
@@ -218,12 +235,43 @@ public class QuoteAnnotator implements Annotator {
   }
 
   public static List<Pair<Integer, Integer>> extractDirectSingleQuotes(String text) {
-    return extractDirectQuotes(text, PATTERN_SINGLE, GROUP_NUM);
+//    return extractDirectQuotes(text, PATTERN_SINGLE, GROUP_NUM);
+    return singleQuotes(text);
   }
 
   public static List<Pair<Integer, Integer>> extractDirectDoubleQuotes(String text) {
 //    return extractDirectQuotes(text, PATTERN_DOUBLE, GROUP_NUM);
     return doubleQuotes(text);
+  }
+
+  public static List<Pair<Integer, Integer>> singleQuotes(String text) {
+    List<Pair<Integer, Integer>> quotes = new ArrayList<>();
+
+    int start = -1;
+    int end = -1;
+    for (int i = 0 ; i < text.length(); i++) {
+      if (text.charAt(i) == '\'') {
+        // opening
+        if (start < 0 && (i == 0 || isWhitespaceOrPunct(text.charAt(i - 1)))) {
+          start = i;
+          // closing
+        } else if (start > 0 && end < 0 &&
+            (i == text.length() - 1 ||
+                isWhitespaceOrPunct(text.charAt(i + 1)))) {
+          end = i + 1;
+        }
+      }
+      if (start >= 0 && end > 0) {
+        quotes.add(new Pair(start, end));
+        start = -1;
+        end = -1;
+      }
+    }
+    // if we reached then end and we have an open quote, close it
+    if (start >= 0) {
+      quotes.add(new Pair(start, text.length()));
+    }
+    return quotes;
   }
 
   public static List<Pair<Integer, Integer>> doubleQuotes(String text) {
@@ -241,7 +289,6 @@ public class QuoteAnnotator implements Annotator {
             (i == text.length() - 1 ||
             isWhitespaceOrPunct(text.charAt(i + 1)))) {
           end = i + 1;
-          System.out.println("Set: " + text.substring(start, end));
         }
       }
       if (start >= 0 && end > 0) {
@@ -249,6 +296,10 @@ public class QuoteAnnotator implements Annotator {
         start = -1;
         end = -1;
       }
+    }
+    // if we reached then end and we have an open quote, close it
+    if (start >= 0) {
+      quotes.add(new Pair(start, text.length()));
     }
     return quotes;
   }

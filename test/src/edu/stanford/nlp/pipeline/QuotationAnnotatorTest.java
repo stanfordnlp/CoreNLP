@@ -25,7 +25,6 @@ public class QuotationAnnotatorTest extends TestCase {
       if (pipeline == null) {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize,quote");
-//        props.setProperty("tokenize.options", "unicodeQuotes");
         pipeline = new StanfordCoreNLP(props);
       }
     }
