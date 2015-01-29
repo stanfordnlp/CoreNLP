@@ -3342,7 +3342,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         IOUtils.writeObjectToFile(pats, patternsWordsDir + "/" + label + "/patterns.ser");
         BufferedWriter w = new BufferedWriter(new FileWriter(patternsWordsDir + "/" + label + "/phrases.txt"));
         model.writeWordsToFile(model.constVars.getLearnedWords(label), w);
-
+        IOUtils.writeObjectToFile(model.constVars.env, patternsWordsDir + "/env.ser");
         w.close();
       }
     }
@@ -3409,6 +3409,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         model.constVars.setPatternIndex(model.patsForEachToken.readPatternIndexFromDB());
       }
 */
+      model.constVars.env = IOUtils.readObjectFromFile(patternsWordsDir + "/env.ser");
 
       File patf = new File(patternsWordsDir + "/" + label + "/patterns.ser");
       if (patf.exists()) {
