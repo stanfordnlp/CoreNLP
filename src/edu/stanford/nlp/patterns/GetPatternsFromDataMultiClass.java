@@ -3344,7 +3344,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         IOUtils.writeObjectToFile(pats, patternsWordsDir + "/" + label + "/patterns.ser");
         BufferedWriter w = new BufferedWriter(new FileWriter(patternsWordsDir + "/" + label + "/phrases.txt"));
         model.writeWordsToFile(model.constVars.getLearnedWords(label), w);
-        writeEnv(model.constVars.env, ConstantsAndVariables.globalEnv, patternsWordsDir + "/env.txt");
+        writeClassesInEnv(model.constVars.env, ConstantsAndVariables.globalEnv, patternsWordsDir + "/env.txt");
         w.close();
       }
     }
@@ -3411,7 +3411,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         model.constVars.setPatternIndex(model.patsForEachToken.readPatternIndexFromDB());
       }
 */
-      readEnv(patternsWordsDir + "/env.txt", model.constVars.env, ConstantsAndVariables.globalEnv);
+      readClassesInEnv(patternsWordsDir + "/env.txt", model.constVars.env, ConstantsAndVariables.globalEnv);
 
       File patf = new File(patternsWordsDir + "/" + label + "/patterns.ser");
       if (patf.exists()) {
@@ -3473,7 +3473,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     }
   }
 
-  private static void readEnv(String s, Map<String, Env> env, Env globalEnv) throws ClassNotFoundException {
+  private static void readClassesInEnv(String s, Map<String, Env> env, Env globalEnv) throws ClassNotFoundException {
 
     for(String line: IOUtils.readLines(s)){
       String[] toks = line.split("###");
@@ -3484,7 +3484,8 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         if(!env.containsKey(label))
           env.put(label, TokenSequencePattern.getNewEnv());
         env.get(label).bind(name, c);
-      }else if(toks.length ==2){
+      }else
+      if(toks.length ==2){
         String name = toks[0];
         Class c = Class.forName(toks[1]);
         globalEnv.bind(name, c);
@@ -3493,15 +3494,17 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     }
   }
 
-  private static void writeEnv(Map<String, Env> env, Env globalEnv, String file) throws IOException {
+  private static void writeClassesInEnv(Map<String, Env> env, Env globalEnv, String file) throws IOException {
     BufferedWriter w = new BufferedWriter(new FileWriter(file));
     for(Entry<String, Env> en: env.entrySet()){
       for(Entry<String, Object> en2: en.getValue().getVariables().entrySet()){
-        w.write(en.getKey()+"###"+en2.getKey()+"###"+en2.getValue()+"\n");
+        if(en2.getValue() instanceof Class)
+          w.write(en.getKey()+"###"+en2.getKey()+"###"+((Class)en2.getValue()).getName()+"\n");
       }
     }
     for(Entry<String, Object> en2: globalEnv.getVariables().entrySet()){
-      w.write(en2.getKey()+"###"+en2.getValue()+"\n");
+      if(en2.getValue() instanceof Class)
+        w.write(en2.getKey()+"###"+ ((Class)en2.getValue()).getName()+"\n");
     }
     w.close();
   }
