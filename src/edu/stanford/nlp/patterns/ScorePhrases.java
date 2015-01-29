@@ -194,7 +194,6 @@ public class ScorePhrases<E extends Pattern> {
     }
 
 
-    //TODO: apply patterns according to type
     Map<TokenSequencePattern, E> surfacePatternsLearnedThisIterConverted = null;
     Map<SemgrexPattern, E> depPatternsLearnedThisIterConverted = null;
 
