@@ -1,13 +1,13 @@
 ENGLISH_EMBEDDINGS=/u/nlp/data/depparser/nn/data/embeddings/en-cw.txt
 CHINESE_EMBEDDINGS=/u/nlp/data/depparser/nn/data/embeddings/zh-word2vec.txt
 
-PTB_STANFORD_TRAIN=/u/nlp/data/dependency_treebanks/PTB_Stanford/3.3.0/train.conll
-PTB_STANFORD_DEV=/u/nlp/data/dependency_treebanks/PTB_Stanford/3.3.0/dev.conll
-PTB_STANFORD_TEST=/u/nlp/data/dependency_treebanks/PTB_Stanford/3.3.0/test.conll
+PTB_STANFORD_TRAIN=/u/nlp/data/dependency_treebanks/PTB/Stanford_3_3_0/train.conll
+PTB_STANFORD_DEV=/u/nlp/data/dependency_treebanks/PTB/Stanford_3_3_0/dev.conll
+PTB_STANFORD_TEST=/u/nlp/data/dependency_treebanks/PTB/Stanford_3_3_0/test.conll
 
-PTB_CONLL_TRAIN=/u/nlp/data/dependency_treebanks/CTB_CoNLL/train.conll
-PTB_CONLL_DEV=/u/nlp/data/dependency_treebanks/PTB_CoNLL/dev.conll
-PTB_CONLL_TEST=/u/nlp/data/dependency_treebanks/PTB_CoNLL/test.conll
+PTB_CONLL_TRAIN=/u/nlp/data/dependency_treebanks/PTB/CoNLL/train.conll
+PTB_CONLL_DEV=/u/nlp/data/dependency_treebanks/PTB/CoNLL/dev.conll
+PTB_CONLL_TEST=/u/nlp/data/dependency_treebanks/PTB/CoNLL/test.conll
 
 CTB_CONLL_TRAIN=/u/nlp/data/dependency_treebanks/CTB/train.gold.conll
 CTB_CONLL_DEV=/u/nlp/data/dependency_treebanks/CTB/dev.gold.conll
