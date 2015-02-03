@@ -102,17 +102,6 @@ public class QuoteAnnotator implements Annotator {
 
   }
 
-  public static Comparator<CoreMap> getQuoteComparator() {
-   return new Comparator<CoreMap>() {
-     @Override
-     public int compare(CoreMap o1, CoreMap o2) {
-       int s1 = o1.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-       int s2 = o2.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
-       return s1 - s2;
-     }
-   };
-  }
-
   public static List<CoreMap> getCoreMapQuotes(List<Pair<Integer, Integer>> quotes,
                                                List<CoreLabel> tokens,
                                               String text, String docID) {
@@ -146,12 +135,7 @@ public class QuoteAnnotator implements Annotator {
       cmQuotes.add(quote);
     }
 
-    // sort quotes by beginning index
-    Comparator<CoreMap> quoteComparator = getQuoteComparator();
-    Collections.sort(cmQuotes, quoteComparator);
-
     // embed quotes
-    List<CoreMap> toRemove = new ArrayList<>();
     for (CoreMap cmQuote : cmQuotes) {
       int start = cmQuote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
       int end = cmQuote.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
@@ -163,17 +147,9 @@ public class QuoteAnnotator implements Annotator {
         if (start < startComp && end >= endComp) {
           // p contains comp
           embeddedQuotes.add(cmQuoteComp);
-          // now we want to remove it from the top-level quote list
-          toRemove.add(cmQuoteComp);
         }
       }
       cmQuote.set(CoreAnnotations.QuotationsAnnotation.class, embeddedQuotes);
-    }
-
-    // Remove all the quotes that we want to.
-    for (CoreMap r : toRemove) {
-      // remove that quote from the overall list
-      cmQuotes.remove(r);
     }
     return cmQuotes;
   }
@@ -259,12 +235,7 @@ public class QuoteAnnotator implements Annotator {
 //      quotesMap.get(quote).add(new Pair(start, text.length()));
 //    } else
     if (start >= 0) {
-      String warning = text;
-      if (text.length() > 150) {
-        warning = text.substring(0, 150) + "...";
-      }
-      System.err.println("WARNING: unmatched quote of type " +
-          quote + " at end of text segment: " + warning);
+      System.err.println("WARNING: unmatched quote of type " + quote + " at end of file!");
     }
 
     // recursively look for embedded quotes in these ones
@@ -274,23 +245,18 @@ public class QuoteAnnotator implements Annotator {
     // but without the part of the text before the single quote
     if (quotesMap.size() < 1 && start >= 0) {
       embedded = recursiveQuotes(text.substring(start, text.length()), start + offset, quote);
-      for (Pair<Integer, Integer> e : embedded) {
-        quotes.add(new Pair(e.first() + offset, e.second() + offset));
-      }
-    } else {
-      for (String qKind : quotesMap.keySet()) {
-        for (Pair<Integer, Integer> q : quotesMap.get(qKind)) {
-          if (q.first() < q.second() - 2) {
-            embedded = recursiveQuotes(text.substring(q.first() + 1, q.second() - 1), q.first() + 1 + offset, qKind);
-          }
-          quotes.add(new Pair(q.first() + offset, q.second() + offset));
-          for (Pair<Integer, Integer> e : embedded) {
-            quotes.add(new Pair(e.first() + offset, e.second() + offset));
-          }
+    }
+    for (String qKind : quotesMap.keySet()) {
+      for (Pair<Integer, Integer> q : quotesMap.get(qKind)) {
+        if (q.first() < q.second() - 2) {
+          embedded = recursiveQuotes(text.substring(q.first() + 1, q.second() - 1), q.first() + 1 + offset, qKind);
         }
+        quotes.add(new Pair(q.first() + offset, q.second() + offset));
       }
     }
-
+    for (Pair<Integer, Integer> e : embedded) {
+      quotes.add(new Pair(e.first() + offset, e.second() + offset));
+    }
     return quotes;
   }
 
