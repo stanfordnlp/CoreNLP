@@ -24,10 +24,31 @@ public class QuotationAnnotatorTest extends TestCase {
     synchronized(QuotationAnnotatorTest.class) {
       if (pipeline == null) {
         Properties props = new Properties();
-        props.setProperty("annotators", "quote");
+        props.setProperty("annotators", "tokenize, quote");
         pipeline = new StanfordCoreNLP(props);
       }
     }
+  }
+
+  public void testBasicUnicodeQuotes() {
+    String text = "“Hello,” he said, “how are you doing?”";
+    List<CoreMap> quotes = runQuotes(text, 2);
+    assertEquals("“Hello,”", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("“how are you doing?”", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
+  }
+
+  public void testUnicodeQuotesWithBadUnicodeQuotes() {
+    String text = "“Hello,” he said, “how‚ are‘ you doing?”";
+    List<CoreMap> quotes = runQuotes(text, 2);
+    assertEquals("“Hello,”", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("“how‚ are‘ you doing?”", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
+  }
+
+  public void testUnicodeQuotesWithApostrophes() {
+    String text = "“Hello,” he said, “where is the dog‘s ball today?”";
+    List<CoreMap> quotes = runQuotes(text, 2);
+    assertEquals("“Hello,”", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("“where is the dog‘s ball today?”", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
   }
 
   public void testBasicDoubleQuotes() {

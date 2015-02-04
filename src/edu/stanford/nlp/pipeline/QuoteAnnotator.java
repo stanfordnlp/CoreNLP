@@ -42,7 +42,8 @@ public class QuoteAnnotator implements Annotator {
     tmp.put("『", "』");  // cjk brackets
     tmp.put("„","”");  // directed double down/up
     tmp.put("‚","’");  // directed single down/up
-    tmp.put("``","''");  // directed latex style
+//    tmp.put("``","''");  // directed double latex style
+//    tmp.put("`","'");  // directed single latex style
     DIRECTED_QUOTES = Collections.unmodifiableMap(tmp);
   }
   public static final String[] QUOTES = {"\"", "'", "’"};
@@ -93,6 +94,7 @@ public class QuoteAnnotator implements Annotator {
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
 
     List<Pair<Integer, Integer>> overall = getQuotes(text);
+//    overall.addAll(getDirectedQuotes(text));
 
     String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
 
@@ -211,22 +213,25 @@ public class QuoteAnnotator implements Annotator {
     return quote;
   }
 
+  public static List<Pair<Integer, Integer>> getDirectedQuotes(List<CoreLabel> tokens) {
+    List<Pair<Integer, Integer>> quotes = new ArrayList<>();
 
-  public static void getDirectedQuotes(String text) {
-    // Make a stack
-    Stack<String> stackosaur = new Stack<>();
+    for (int i = 0; i < tokens.size(); i++) {
+      String current = tokens.get(i).word();
 
-    for (int i = 0; i < text.length() - 1; i++) {
-      // Get the 1 char substring
-      String one = text.substring(i, i + 1);
-      if (DIRECTED_QUOTES.containsKey(one)) {
-        stackosaur.push(one);
-      }
-      if (DIRECTED_QUOTES.values().contains(one)) {
-        // pop until we get a match?
+      // If I found an opening quote, go hunting for the closing one
+      if (DIRECTED_QUOTES.containsKey(current)) {
+        for (int j = i + 1; j < tokens.size(); j++) {
+          String trial = tokens.get(j).word();
+          // found it!
+          if (DIRECTED_QUOTES.get(current).equals(trial)) {
+            quotes.add(new Pair(tokens.get(i).beginPosition(), tokens.get(j).endPosition()));
+            break;
+          }
+        }
       }
     }
-
+    return quotes;
   }
 
   public static List<Pair<Integer, Integer>> getQuotes(String text) {
@@ -245,13 +250,16 @@ public class QuoteAnnotator implements Annotator {
       // opening
       if ((start < 0) && !matchesPrevQuote(c, prevQuote) &&
           ((c.equals("'") && isSingleQuoteStart(text, i)) ||
-            (c.equals("\"")))) {
+            (c.equals("\"") || DIRECTED_QUOTES.containsKey(c)))) {
         start = i;
         quote = text.substring(start, start + 1);
         // closing
-      } else if (start >= 0 && end < 0 && c.equals(quote) &&
+      } else if ((start >= 0 && end < 0) &&
+          ((c.equals(quote) &&
           ((c.equals("'") && isSingleQuoteEnd(text, i)) ||
-           (c.equals("\"") && isDoubleQuoteEnd(text, i)))) {
+           (c.equals("\"") && isDoubleQuoteEnd(text, i))))
+              ||
+              (DIRECTED_QUOTES.containsKey(quote) && DIRECTED_QUOTES.get(quote).equals(c)))) {
         end = i + 1;
       }
 
