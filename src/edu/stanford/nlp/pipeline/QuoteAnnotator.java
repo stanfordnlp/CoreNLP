@@ -42,8 +42,8 @@ public class QuoteAnnotator implements Annotator {
     tmp.put("『", "』");  // cjk brackets
     tmp.put("„","”");  // directed double down/up
     tmp.put("‚","’");  // directed single down/up
-//    tmp.put("``","''");  // directed double latex style
-//    tmp.put("`","'");  // directed single latex style
+    tmp.put("``","''");  // directed double latex style
+    tmp.put("`","'");  // directed single latex style
     DIRECTED_QUOTES = Collections.unmodifiableMap(tmp);
   }
   public static final String[] QUOTES = {"\"", "'", "’"};
@@ -94,7 +94,6 @@ public class QuoteAnnotator implements Annotator {
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
 
     List<Pair<Integer, Integer>> overall = getQuotes(text);
-//    overall.addAll(getDirectedQuotes(text));
 
     String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
 
@@ -213,27 +212,6 @@ public class QuoteAnnotator implements Annotator {
     return quote;
   }
 
-  public static List<Pair<Integer, Integer>> getDirectedQuotes(List<CoreLabel> tokens) {
-    List<Pair<Integer, Integer>> quotes = new ArrayList<>();
-
-    for (int i = 0; i < tokens.size(); i++) {
-      String current = tokens.get(i).word();
-
-      // If I found an opening quote, go hunting for the closing one
-      if (DIRECTED_QUOTES.containsKey(current)) {
-        for (int j = i + 1; j < tokens.size(); j++) {
-          String trial = tokens.get(j).word();
-          // found it!
-          if (DIRECTED_QUOTES.get(current).equals(trial)) {
-            quotes.add(new Pair(tokens.get(i).beginPosition(), tokens.get(j).endPosition()));
-            break;
-          }
-        }
-      }
-    }
-    return quotes;
-  }
-
   public static List<Pair<Integer, Integer>> getQuotes(String text) {
     return recursiveQuotes(text, 0, null);
   }
@@ -247,20 +225,29 @@ public class QuoteAnnotator implements Annotator {
       // Either I'm not in any quote or this one matches
       // the kind that I am.
       String c = text.substring(i, i + 1);
+
+      if (c.equals("`") && i < text.length() - 1 &&
+          text.charAt(i + 1) == '`') {
+        c += text.charAt(i + 1);
+      } else if (c.equals("'") && (quote != null && quote.equals("``")) &&
+          i < text.length() - 1 &&
+          text.charAt(i + 1) == '\'') {
+        c += text.charAt(i + 1);
+      }
+
       // opening
       if ((start < 0) && !matchesPrevQuote(c, prevQuote) &&
           ((c.equals("'") && isSingleQuoteStart(text, i)) ||
             (c.equals("\"") || DIRECTED_QUOTES.containsKey(c)))) {
         start = i;
-        quote = text.substring(start, start + 1);
+        quote = c;
         // closing
       } else if ((start >= 0 && end < 0) &&
           ((c.equals(quote) &&
           ((c.equals("'") && isSingleQuoteEnd(text, i)) ||
-           (c.equals("\"") && isDoubleQuoteEnd(text, i))))
-              ||
-              (DIRECTED_QUOTES.containsKey(quote) && DIRECTED_QUOTES.get(quote).equals(c)))) {
-        end = i + 1;
+           (c.equals("\"") && isDoubleQuoteEnd(text, i)))) ||
+           (DIRECTED_QUOTES.containsKey(quote) && DIRECTED_QUOTES.get(quote).equals(c)))) {
+        end = i + c.length();
       }
 
       if (start >= 0 && end > 0) {
@@ -271,6 +258,10 @@ public class QuoteAnnotator implements Annotator {
         start = -1;
         end = -1;
         quote = null;
+      }
+
+      if (c.length() > 1) {
+        i += c.length() - 1;
       }
     }
 
@@ -289,7 +280,7 @@ public class QuoteAnnotator implements Annotator {
         warning = text.substring(0, 150) + "...";
       }
       System.err.println("WARNING: unmatched quote of type " +
-          quote + " at end of text segment: " + warning);
+          quote + " found at index " + start + " in text segment: " + warning);
     }
 
     // recursively look for embedded quotes in these ones

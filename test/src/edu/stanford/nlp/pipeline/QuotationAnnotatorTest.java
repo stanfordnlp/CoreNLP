@@ -30,6 +30,13 @@ public class QuotationAnnotatorTest extends TestCase {
     }
   }
 
+  public void testBasicLatexQuotes() {
+    String text = "`Hello,' he said, ``how are you doing?''";
+    List<CoreMap> quotes = runQuotes(text, 2);
+    assertEquals("`Hello,'", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("``how are you doing?''", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
+  }
+
   public void testBasicUnicodeQuotes() {
     String text = "“Hello,” he said, “how are you doing?”";
     List<CoreMap> quotes = runQuotes(text, 2);
