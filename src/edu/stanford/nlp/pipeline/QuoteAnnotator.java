@@ -34,14 +34,14 @@ public class QuoteAnnotator implements Annotator {
   public static final Map<String, String> DIRECTED_QUOTES;
   static {
     Map<String, String> tmp = new HashMap<>();
-    tmp.put("“", "”");  // directed double
-    tmp.put("‘", "’");  // directed single
+    tmp.put("“", "”");  // directed double inward
+    tmp.put("‘", "’");  // directed single inward
     tmp.put("«", "»");  // guillemets
     tmp.put("‹","›");  // single guillemets
     tmp.put("「", "」");  // cjk brackets
     tmp.put("『", "』");  // cjk brackets
-    tmp.put("„","”");  // directed double down/up
-    tmp.put("‚","’");  // directed single down/up
+    tmp.put("„","”");  // directed double down/up left pointing
+    tmp.put("‚","’");  // directed single down/up left pointing
     tmp.put("``","''");  // directed double latex style
     tmp.put("`","'");  // directed single latex style
     DIRECTED_QUOTES = Collections.unmodifiableMap(tmp);
@@ -284,25 +284,27 @@ public class QuoteAnnotator implements Annotator {
     }
 
     // recursively look for embedded quotes in these ones
-    List<Pair<Integer, Integer>> embedded = new ArrayList<>();
     List<Pair<Integer, Integer>> quotes = new ArrayList<>();
     // If I didn't find any quotes, but did find a quote-beginning, try again,
     // but without the part of the text before the single quote
-    if (quotesMap.size() < 1 && start >= 0) {
-      embedded = recursiveQuotes(text.substring(start, text.length()), start + offset, quote);
+    if (quotesMap.isEmpty() && start >= 0) {
+      String toPass = text.substring(start + quote.length(), text.length() - (quote.length() - 1));
+      List<Pair<Integer, Integer>> embedded = recursiveQuotes(toPass, offset, null);
       for (Pair<Integer, Integer> e : embedded) {
-        quotes.add(new Pair(e.first() + offset, e.second() + offset));
+        quotes.add(new Pair(e.first() + offset + start + quote.length(), e.second() + offset + start + 1));
       }
     } else {
       for (String qKind : quotesMap.keySet()) {
         for (Pair<Integer, Integer> q : quotesMap.get(qKind)) {
-          if (q.first() < q.second() - 2) {
-            embedded = recursiveQuotes(text.substring(q.first() + 1, q.second() - 1), q.first() + 1 + offset, qKind);
+          if (q.first() < q.second() - qKind.length() * 2) {
+            String toPass = text.substring(q.first() + qKind.length(), q.second() - qKind.length());
+            List<Pair<Integer, Integer>> embedded = recursiveQuotes(toPass,
+                q.first() + qKind.length() + offset, qKind);
+            for (Pair<Integer, Integer> e : embedded) {
+              quotes.add(new Pair(e.first() + offset, e.second() + offset));
+            }
           }
           quotes.add(new Pair(q.first() + offset, q.second() + offset));
-          for (Pair<Integer, Integer> e : embedded) {
-            quotes.add(new Pair(e.first() + offset, e.second() + offset));
-          }
         }
       }
     }
