@@ -42,6 +42,7 @@ public class QuoteAnnotator implements Annotator {
     tmp.put("『", "』");  // cjk brackets
     tmp.put("„","”");  // directed double down/up
     tmp.put("‚","’");  // directed single down/up
+    tmp.put("``","''");  // directed latex style
     DIRECTED_QUOTES = Collections.unmodifiableMap(tmp);
   }
   public static final String[] QUOTES = {"\"", "'", "’"};
@@ -210,12 +211,28 @@ public class QuoteAnnotator implements Annotator {
     return quote;
   }
 
-  // I'd like to try out a recursive method to see if that works!
+
+  public static void getDirectedQuotes(String text) {
+    // Make a stack
+    Stack<String> stackosaur = new Stack<>();
+
+    for (int i = 0; i < text.length() - 1; i++) {
+      // Get the 1 char substring
+      String one = text.substring(i, i + 1);
+      if (DIRECTED_QUOTES.containsKey(one)) {
+        stackosaur.push(one);
+      }
+      if (DIRECTED_QUOTES.values().contains(one)) {
+        // pop until we get a match?
+      }
+    }
+
+  }
+
   public static List<Pair<Integer, Integer>> getQuotes(String text) {
     return recursiveQuotes(text, 0, null);
   }
 
-  // I'd like to try out a recursive method to see if that works!
   public static List<Pair<Integer, Integer>> recursiveQuotes(String text, int offset, String prevQuote) {
     Map<String, List<Pair<Integer, Integer>>> quotesMap = new HashMap<>();
     int start = -1;

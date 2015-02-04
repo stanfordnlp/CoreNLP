@@ -42,7 +42,7 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimen
       throws Exception {
     // CollectionValuedMap<String, Integer> tokensMatchedPattern = new
     // CollectionValuedMap<String, Integer>();
-    try{
+
     TwoDimensionalCounter<CandidatePhrase, E> allFreq = new TwoDimensionalCounter<CandidatePhrase, E>();
     CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<E, Triple<String, Integer, Integer>>();
     for (String sentid : sentids) {
@@ -153,24 +153,13 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Pair<TwoDimen
       }
     }
     return new Pair<TwoDimensionalCounter<CandidatePhrase, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>>(allFreq, matchedTokensByPat);
-    }catch(Exception e){
-      e.printStackTrace();
-      throw e;
-    }
   }
 
-  static boolean lemmaExists(CoreLabel l ){
-    if(l.lemma() != null && l.lemma().length() > 0)
-      return true;
-    else
-      return false;
-
-  }
   boolean  containsStopWord(CoreLabel l, Set<String> commonEngWords, java.util.regex.Pattern ignoreWordRegex) {
     // if(useWordResultCache.containsKey(l.word()))
     // return useWordResultCache.get(l.word());
 
-    if ((commonEngWords != null && ((lemmaExists(l) && commonEngWords.contains(l.lemma())) || commonEngWords.contains(l.word()))) || (ignoreWordRegex != null && ((lemmaExists(l) && ignoreWordRegex.matcher(l.lemma()).matches()) || ignoreWordRegex.matcher(l.word()).matches()))){
+    if ((commonEngWords != null && (commonEngWords.contains(l.lemma()) || commonEngWords.contains(l.word()))) || (ignoreWordRegex != null && ignoreWordRegex.matcher(l.lemma()).matches())){
       //|| (ignoreWords !=null && (ignoreWords.contains(l.lemma()) || ignoreWords.contains(l.word())))) {
       // useWordResultCache.putIfAbsent(l.word(), false);
       return true;

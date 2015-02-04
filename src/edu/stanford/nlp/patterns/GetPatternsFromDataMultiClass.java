@@ -1012,10 +1012,8 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     @Override
     public String apply(CoreLabel l) {
       String s;
-      if(PatternFactory.useLemmaContextTokens){
+      if(PatternFactory.useLemmaContextTokens)
         s = l.lemma();
-        assert s!=null : "Lemma is null and useLemmaContextTokens is true";
-      }
       else
         s= l.word();
       if(ConstantsAndVariables.matchLowerCaseContext)
@@ -1050,16 +1048,24 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
     List<Future<Map<String, DataInstance>>> list = new ArrayList<Future<Map<String, DataInstance>>>();
 
+    int i =0;
     for (List<String> keys: threadedSentIds) {
-      Callable<Map<String, DataInstance>> task = new LabelWithSeedWords(seedWords, sents, keys, answerclass, label, constVars.fuzzyMatch, constVars.minLen4FuzzyForPattern, constVars.backgroundSymbol, constVars.getEnglishWords(),
-        stringTransformationFunction, constVars.writeMatchedTokensIdsForEachPhrase, overwriteExistingLabels, constVars.patternType);
-      Map<String, DataInstance> sentsi  = executor.submit(task).get();
-      sents.putAll(sentsi);
+      Callable<Map<String, DataInstance>> task = new LabelWithSeedWords(seedWords, sents, keys, answerclass, label, constVars.fuzzyMatch, constVars.minLen4FuzzyForPattern, constVars.backgroundSymbol, constVars.getEnglishWords(), stringTransformationFunction, constVars.writeMatchedTokensIdsForEachPhrase, overwriteExistingLabels, constVars.patternType);
+      Future<Map<String, DataInstance>> submit = executor.submit(task);
+      list.add(submit);
+      i++;
     }
 
     // Now retrieve the result
 
-
+    for (Future<Map<String, DataInstance>> future : list) {
+      try {
+        sents.putAll(future.get());
+      } catch (Exception e) {
+        executor.shutdownNow();
+        throw new RuntimeException(e);
+      }
+    }
     executor.shutdown();
   }
 
@@ -1104,9 +1110,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     PatternFactory.PatternType patternType;
     boolean fuzzyMatch = false;
 
-    public LabelWithSeedWords(Collection<CandidatePhrase> seedwords, Map<String, DataInstance> sents, List<String> keyset, Class labelclass, String label, boolean fuzzyMatch,
-                              int minLen4FuzzyForPattern, String backgroundSymbol, Set<String> doNotLabelDictWords,
-                              Function<CoreLabel, String> stringTransformation, boolean writeMatchedTokensIdsForEachPhrase, boolean overwriteExistingLabels, PatternFactory.PatternType type) {
+    public LabelWithSeedWords(Collection<CandidatePhrase> seedwords, Map<String, DataInstance> sents, List<String> keyset, Class labelclass, String label, boolean fuzzyMatch, int minLen4FuzzyForPattern, String backgroundSymbol, Set<String> doNotLabelDictWords, Function<CoreLabel, String> stringTransformation, boolean writeMatchedTokensIdsForEachPhrase, boolean overwriteExistingLabels, PatternFactory.PatternType type) {
       for (CandidatePhrase s : seedwords)
         this.seedwordsTokens.put(s, s.getPhrase().split("\\s+"));
       this.sents = sents;
@@ -1125,7 +1129,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     @SuppressWarnings("unchecked")
     @Override
-    public Map<String, DataInstance> call()  {
+    public Map<String, DataInstance> call() throws Exception {
       Map<String, DataInstance> newsent = new HashMap<String, DataInstance>();
       for (String k : keyset) {
         DataInstance sent = sents.get(k);
@@ -1145,7 +1149,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
           l.set(PatternsAnnotations.ProcessedTextAnnotation.class, stringTransformation.apply(l));
 
           tokens[num] = l.word();
-          if(fuzzyMatch && l.lemma() == null)
+          if(l.lemma() == null)
             throw new RuntimeException("how come lemma is null");
           tokenslemma[num] = l.lemma();
 
@@ -3388,7 +3392,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
   }
 
 
-  public static<E extends Pattern> void loadFromSavedPatternsWordsDir(GetPatternsFromDataMultiClass<E> model, Properties props, boolean labelSentsUsingModel, boolean applyPatsUsingModel) throws IOException, ClassNotFoundException {
+  private static<E extends Pattern> void loadFromSavedPatternsWordsDir(GetPatternsFromDataMultiClass<E> model, Properties props, boolean labelSentsUsingModel, boolean applyPatsUsingModel) throws IOException, ClassNotFoundException {
     String patternsWordsDir = props.getProperty("patternsWordsDir");
     String sentsOutFile = props.getProperty("sentsOutFile");
 
