@@ -1472,11 +1472,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     if ((is = loadStreamFromClasspath(loadPath)) != null) {
       Timing.startDoing("Loading classifier from " + loadPath);
       loadClassifierNoExceptions(is, props);
-      try {
-        is.close();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+      IOUtils.closeIgnoringExceptions(is);
       Timing.endDoing();
     } else {
       loadClassifierNoExceptions(new File(loadPath), props);
