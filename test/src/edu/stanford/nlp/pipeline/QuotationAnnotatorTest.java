@@ -30,6 +30,13 @@ public class QuotationAnnotatorTest extends TestCase {
     }
   }
 
+  public void testBasicInternalPunc() {
+    String text = "\"Impossible, Mr. Bennet, impossible, when I am not acquainted with him\n" +
+        " myself; how can you be so teasing?\"";
+    List<CoreMap> quotes = runQuotes(text, 1);
+    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+  }
+
   public void testBasicLatexQuotes() {
     String text = "`Hello,' he said, ``how are you doing?''";
     List<CoreMap> quotes = runQuotes(text, 2);
