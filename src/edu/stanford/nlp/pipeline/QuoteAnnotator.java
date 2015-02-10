@@ -42,8 +42,7 @@ public class QuoteAnnotator implements Annotator {
     tmp.put("『", "』");  // cjk brackets
     tmp.put("„","”");  // directed double down/up left pointing
     tmp.put("‚","’");  // directed single down/up left pointing
-    tmp.put("``","''");  // directed double latex style
-    tmp.put("`","'");  // directed single latex style
+    tmp.put("``","''");  // double latex -- single latex quotes don't belong here!
     DIRECTED_QUOTES = Collections.unmodifiableMap(tmp);
   }
   public static final String[] QUOTES = {"\"", "'", "’"};
@@ -230,42 +229,51 @@ public class QuoteAnnotator implements Annotator {
       if (c.equals("`") && i < text.length() - 1 &&
           text.charAt(i + 1) == '`') {
         c += text.charAt(i + 1);
-      } else if (c.equals("'") && (quote != null && quote.equals("``")) &&
-          i < text.length() - 1 &&
-          text.charAt(i + 1) == '\'') {
-        c += text.charAt(i + 1);
+      } else if (c.equals("'") && (quote != null && (quote.equals("``") || quote.equals("`")))) {
+        // we want to ignore it if unless is is the beginning of the
+        // last set of ' of the proper length
+        int curr = i;
+        while (curr < text.length() && text.charAt(curr) == '\'') {
+          curr++;
+        }
+        if (i == curr - quote.length() ||
+            (directed > 0 && i == curr - (directed * quote.length()))) {
+          for (int a = i + 1; a < i + quote.length(); a++) {
+            c += text.charAt(a);
+          }
+        } else {
+          continue;
+        }
       }
 
-      if (DIRECTED_QUOTES.containsKey(quote)) {
-        if (DIRECTED_QUOTES.get(quote).equals(c)) {
+      if (DIRECTED_QUOTES.containsKey(quote) &&
+          DIRECTED_QUOTES.get(quote).equals(c)) {
           // closing
           directed--;
-        }
       }
 
       // opening
       if ((start < 0) && !matchesPrevQuote(c, prevQuote) &&
-          ((c.equals("'") && isSingleQuoteStart(text, i)) ||
+          (((c.equals("'") || c.equals("`")) && isSingleQuoteStart(text, i)) ||
             (c.equals("\"") || DIRECTED_QUOTES.containsKey(c)))) {
         start = i;
         quote = c;
-        // closing
+      // closing
       } else if ((start >= 0 && end < 0) &&
           ((c.equals(quote) &&
-          ((c.equals("'") && isSingleQuoteEnd(text, i)) ||
-           (c.equals("\"") && isDoubleQuoteEnd(text, i)))) ||
+           (((c.equals("'") || c.equals("`")) && isSingleQuoteEnd(text, i)) ||
+            (c.equals("\"") && isDoubleQuoteEnd(text, i)))) ||
+           (c.equals("'") && quote.equals("`") && isSingleQuoteEnd(text, i)) ||  // latex quotes are kind of problematic
            (DIRECTED_QUOTES.containsKey(quote) &&
                DIRECTED_QUOTES.get(quote).equals(c) &&
            directed == 0))) {
         end = i + c.length();
       }
 
-      if (DIRECTED_QUOTES.containsKey(quote)) {
-        if (DIRECTED_QUOTES.containsKey(c) &&
-            c.equals(quote)) {
-          // opening of this kind of directed quote
-          directed++;
-        }
+      if (DIRECTED_QUOTES.containsKey(c) &&
+          c.equals(quote)) {
+        // opening of this kind of directed quote
+        directed++;
       }
 
       if (start >= 0 && end > 0) {
@@ -318,7 +326,7 @@ public class QuoteAnnotator implements Annotator {
           if (q.first() < q.second() - qKind.length() * 2) {
             String toPass = text.substring(q.first() + qKind.length(),
                 q.second() - qKind.length());
-            String qKindToPass = DIRECTED_QUOTES.containsKey(qKind) ? null : qKind;
+            String qKindToPass = DIRECTED_QUOTES.containsKey(qKind) || qKind.equals("`") ? null : qKind;
             List<Pair<Integer, Integer>> embedded = recursiveQuotes(toPass,
                 q.first() + qKind.length() + offset, qKindToPass);
             for (Pair<Integer, Integer> e : embedded) {
