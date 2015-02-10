@@ -761,7 +761,6 @@ public class Trees {
     return commonAncestor;
   }
 
-  // todo [cdm 2015]: These next two methods duplicate the Tree.valueOf methods!
   /**
    * Simple tree reading utility method.  Given a tree formatted as a PTB string, returns a Tree made by a specific TreeFactory.
    */
