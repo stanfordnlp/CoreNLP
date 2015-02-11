@@ -979,7 +979,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     BufferedReader is = IOUtils.readerFromStdin(flags.inputEncoding);
     for (String line; (line = is.readLine()) != null; ) {
       Collection<List<IN>> documents = makeObjectBankFromString(line, readerWriter);
-      if (flags.keepEmptySentences && documents.size() == 0) {
+      if (flags.keepEmptySentences && documents.isEmpty()) {
         documents = Collections.<List<IN>>singletonList(Collections.<IN>emptyList());
       }
       classifyAndWriteAnswers(documents, readerWriter, false);

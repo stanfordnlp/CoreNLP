@@ -8,9 +8,8 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
-import edu.stanford.nlp.util.Timing;
+import edu.stanford.nlp.util.StringUtils;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -32,26 +31,13 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
 
   private final NERClassifierCombiner ner;
 
-  private final Timing timer = new Timing();
-  private boolean VERBOSE = true;
+  private final boolean VERBOSE;
 
   private final long maxTime;
   private final int nThreads;
 
   public NERCombinerAnnotator() throws IOException, ClassNotFoundException {
     this(true);
-  }
-
-  private void timerStart(String msg) {
-    if(VERBOSE){
-      timer.start();
-      System.err.println(msg);
-    }
-  }
-  private void timerStop() {
-    if(VERBOSE){
-      timer.stop("done.");
-    }
   }
 
   public NERCombinerAnnotator(boolean verbose)
@@ -83,20 +69,21 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
          PropertiesUtils.getLong(properties, name + ".maxtime", -1));
   }
 
-  final static NERClassifierCombiner createNERClassifierCombiner(String name, Properties properties) {
+  static NERClassifierCombiner createNERClassifierCombiner(String name, Properties properties) {
     // TODO: Move function into NERClassifierCombiner?
-    List<String> models = new ArrayList<String>();
-    String prefix = (name != null)? name + ".": "ner.";
+    String prefix = (name != null)? name + '.' : "ner.";
     String modelNames = properties.getProperty(prefix + "model");
     if (modelNames == null) {
-      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + "," + DefaultPaths.DEFAULT_NER_MUC_MODEL + "," + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
+      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + ',' + DefaultPaths.DEFAULT_NER_MUC_MODEL + ',' + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
     }
-    if (modelNames.length() > 0) {
-      models.addAll(Arrays.asList(modelNames.split(",")));
-    }
-    if (models.isEmpty()) {
+    // but modelNames can still be empty string is set explicitly to be empty!
+    String[] models;
+    if ( ! modelNames.isEmpty()) {
+      models  = modelNames.split(",");
+    } else {
       // Allow for no real NER model - can just use numeric classifiers or SUTime
       System.err.println("WARNING: no NER models specified");
+      models = StringUtils.EMPTY_STRING_ARRAY;
     }
     NERClassifierCombiner nerCombiner;
     try {
@@ -109,11 +96,10 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
               PropertiesUtils.getBool(properties,
                       prefix + "useSUTime",
                       NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-      // TODO: properties are passed in as it for number sequence classifiers (don't care about the prefix)
+      // TODO: properties are passed in as is for number sequence classifiers (don't care about the prefix)
       nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
-              useSUTime, properties,
-              models.toArray(new String[models.size()]));
-    } catch (FileNotFoundException e) {
+              useSUTime, properties, models);
+    } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
 
@@ -128,22 +114,26 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
   @Override
   protected long maxTime() {
     return maxTime;
-  };
+  }
 
   @Override
   public void annotate(Annotation annotation) {
-    timerStart("Adding NER Combiner annotation...");
+    if (VERBOSE) {
+      System.err.print("Adding NER Combiner annotation ... ");
+    }
 
     super.annotate(annotation);
-
     this.ner.finalizeAnnotation(annotation);
-    timerStop();
+
+    if (VERBOSE) {
+      System.err.println("done.");
+    }
   }
 
   @Override
   public void doOneSentence(Annotation annotation, CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    List<CoreLabel> output = null;
+    List<CoreLabel> output; // only used if try assignment works.
     try {
       output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
     } catch (RuntimeInterruptedException e) {
@@ -185,9 +175,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
   @Override
   public void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    for (int i = 0; i < tokens.size(); ++i) {
-      if (tokens.get(i).ner() == null) {
-        tokens.get(i).setNER(this.ner.backgroundSymbol());
+    for (CoreLabel token : tokens) {
+      if (token.ner() == null) {
+        token.setNER(this.ner.backgroundSymbol());
       }
     }
   }
