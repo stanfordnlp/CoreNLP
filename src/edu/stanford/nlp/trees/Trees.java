@@ -440,7 +440,7 @@ public class Trees {
 
 
   /** Turns a sentence into a flat phrasal tree.
-   *  The structure is S -> tag*.  And then each tag goes to a word.
+   *  The structure is S -&gt; tag*.  And then each tag goes to a word.
    *  The tag is either found from the label or made "WD".
    *  The tag and phrasal node have a StringLabel.
    *
@@ -452,7 +452,7 @@ public class Trees {
   }
 
   /** Turns a sentence into a flat phrasal tree.
-   *  The structure is S -> tag*.  And then each tag goes to a word.
+   *  The structure is S -&gt; tag*.  And then each tag goes to a word.
    *  The tag is either found from the label or made "WD".
    *  The tag and phrasal node have a StringLabel.
    *
