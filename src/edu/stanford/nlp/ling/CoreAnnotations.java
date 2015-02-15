@@ -187,7 +187,7 @@ public class CoreAnnotations {
   }
 
   /**
-   * The index of the sentence that this anotation begins in.
+   * The index of the sentence that this annotation begins in.
    */
   public static class SentenceBeginAnnotation implements CoreAnnotation<Integer> {
     public Class<Integer> getType() {
@@ -196,7 +196,7 @@ public class CoreAnnotations {
   }
 
   /**
-   * The index of the sentence that this anotation begins in.
+   * The index of the sentence that this annotation begins in.
    */
   public static class SentenceEndAnnotation implements CoreAnnotation<Integer> {
     public Class<Integer> getType() {
