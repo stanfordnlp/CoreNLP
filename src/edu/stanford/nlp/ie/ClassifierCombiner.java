@@ -101,16 +101,30 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     }
   }
 
-  /** Loads a series of base classifiers from the paths specified.
+  /** Loads a series of base classifiers from the paths specified using the
+   *  Properties specified.
    *
-   * @param loadPaths Paths to the base classifiers
-   * @throws FileNotFoundException If classifier files not found
+   *  @param props Properties for the classifier to use (encodings, output format, etc.)
+   *  @param combinationMode How to handle multiple classifiers specifying the same entity type
+   *  @param loadPaths Paths to the base classifiers
+   *  @throws IOException If IO errors in loading classifier files
    */
-  public ClassifierCombiner(CombinationMode combinationMode, String... loadPaths) throws IOException {
-    super(new Properties());
+  public ClassifierCombiner(Properties props, CombinationMode combinationMode, String... loadPaths) throws IOException {
+    super(props);
     this.combinationMode = combinationMode;
     List<String> paths = new ArrayList<>(Arrays.asList(loadPaths));
     loadClassifiers(paths);
+  }
+
+  /** Loads a series of base classifiers from the paths specified using the
+   *  Properties specified.
+   *
+   *  @param combinationMode How to handle multiple classifiers specifying the same entity type
+   *  @param loadPaths Paths to the base classifiers
+   *  @throws IOException If IO errors in loading classifier files
+   */
+  public ClassifierCombiner(CombinationMode combinationMode, String... loadPaths) throws IOException {
+    this(new Properties(), combinationMode, loadPaths);
   }
 
   /** Loads a series of base classifiers from the paths specified.
@@ -119,10 +133,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
    * @throws FileNotFoundException If classifier files not found
    */
   public ClassifierCombiner(String... loadPaths) throws IOException {
-    super(new Properties());
-    this.combinationMode = DEFAULT_COMBINATION_MODE;
-    List<String> paths = new ArrayList<>(Arrays.asList(loadPaths));
-    loadClassifiers(paths);
+    this(DEFAULT_COMBINATION_MODE, loadPaths);
   }
 
 
