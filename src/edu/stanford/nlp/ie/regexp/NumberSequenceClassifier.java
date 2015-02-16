@@ -200,9 +200,10 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     }
     // everything tagged as CD is also a number
     // NumberNormalizer probably catches these but let's be safe
-    for(CoreLabel token: tokenSequence) {
-      if(token.tag().equals("CD") &&
-         token.get(CoreAnnotations.AnswerAnnotation.class).equals(flags.backgroundSymbol)){
+    // use inverted "CD".equals() because tag could be null (if no POS info available)
+    for (CoreLabel token: tokenSequence) {
+      if ("CD".equals(token.tag()) &&
+         token.get(CoreAnnotations.AnswerAnnotation.class).equals(flags.backgroundSymbol)) {
         token.set(CoreAnnotations.AnswerAnnotation.class, "NUMBER");
       }
     }
@@ -343,9 +344,11 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   }
 
   /**
-   * Recognizes money and percents
-   * This accepts currency symbols (e.g., $) both before and after numbers; but it accepts units (e.g., "dollar") only after
-   * @param tokenSequence
+   * Recognizes money and percents.
+   * This accepts currency symbols (e.g., $) both before and after numbers; but it accepts units
+   * (e.g., "dollar") only after numbers.
+   *
+   * @param tokenSequence The list of tokens to find money and percents in
    */
   private void moneyAndPercentRecognizer(List<CoreLabel> tokenSequence) {
     for(int i = 0; i < tokenSequence.size(); i ++){
@@ -354,8 +357,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
       CoreLabel prev = (i > 0 ? tokenSequence.get(i - 1) : null);
 
       // $5
-      if(CURRENCY_SYMBOL_PATTERN.matcher(crt.word()).matches() && next != null &&
-         (next.get(CoreAnnotations.AnswerAnnotation.class).equals("NUMBER") || next.tag().equals("CD"))){
+      if (CURRENCY_SYMBOL_PATTERN.matcher(crt.word()).matches() && next != null &&
+         (next.get(CoreAnnotations.AnswerAnnotation.class).equals("NUMBER") || "CD".equals(next.tag()))) {
         crt.set(CoreAnnotations.AnswerAnnotation.class, "MONEY");
         i = changeLeftToRight(tokenSequence, i + 1,
             next.get(CoreAnnotations.AnswerAnnotation.class),
@@ -367,8 +370,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
                CURRENCY_SYMBOL_PATTERN.matcher(crt.word()).matches()) &&
                prev != null &&
                (prev.get(CoreAnnotations.AnswerAnnotation.class).equals("NUMBER") ||
-                prev.tag().equals("CD")) &&
-               ! leftScanFindsWeightWord(tokenSequence, i)){
+                "CD".equals(prev.tag())) &&
+               ! leftScanFindsWeightWord(tokenSequence, i)) {
         crt.set(CoreAnnotations.AnswerAnnotation.class, "MONEY");
         changeRightToLeft(tokenSequence, i - 1,
             prev.get(CoreAnnotations.AnswerAnnotation.class),
@@ -376,11 +379,11 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
       }
 
       // 5%, 5 percent
-      else if((PERCENT_WORD_PATTERN.matcher(crt.word()).matches() ||
+      else if ((PERCENT_WORD_PATTERN.matcher(crt.word()).matches() ||
                PERCENT_SYMBOL_PATTERN.matcher(crt.word()).matches()) &&
                prev != null &&
                (prev.get(CoreAnnotations.AnswerAnnotation.class).equals("NUMBER") ||
-                prev.tag().equals("CD"))){
+                "CD".equals(prev.tag()))) {
         crt.set(CoreAnnotations.AnswerAnnotation.class, "PERCENT");
         changeRightToLeft(tokenSequence, i - 1,
             prev.get(CoreAnnotations.AnswerAnnotation.class),
@@ -581,7 +584,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   private static final Pattern AM_PM = Pattern.compile("(a\\.?m\\.?)|(p\\.?m\\.?)", Pattern.CASE_INSENSITIVE);
 
   public static final Pattern CURRENCY_WORD_PATTERN = Pattern.compile("(?:dollar|cent|euro|pound)s?|penny|pence|yen|yuan|won", Pattern.CASE_INSENSITIVE);
-  public static final Pattern CURRENCY_SYMBOL_PATTERN = Pattern.compile("\\$|&#163|\u00A3|\u00A5|#|\u20AC|US\\$|HK\\$|A\\$", Pattern.CASE_INSENSITIVE);
+  public static final Pattern CURRENCY_SYMBOL_PATTERN = Pattern.compile("\\$|&#163;|\u00A3|\u00A5|\u20AC|US\\$|HK\\$|A\\$", Pattern.CASE_INSENSITIVE);  // No longer include archaic # for pound as messes up anytime someone says #1
 
   public static final Pattern ORDINAL_PATTERN = Pattern.compile("(?i)[2-9]?1st|[2-9]?2nd|[2-9]?3rd|1[0-9]th|[2-9]?[04-9]th|100+th|zeroth|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|eighteenth|nineteenth|twentieth|twenty-first|twenty-second|twenty-third|twenty-fourth|twenty-fifth|twenty-sixth|twenty-seventh|twenty-eighth|twenty-ninth|thirtieth|thirty-first|fortieth|fiftieth|sixtieth|seventieth|eightieth|ninetieth|hundredth|thousandth|millionth");
 
