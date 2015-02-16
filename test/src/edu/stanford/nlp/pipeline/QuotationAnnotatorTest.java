@@ -118,6 +118,7 @@ public class QuotationAnnotatorTest extends TestCase {
     String text = "\"Hello,\" he said, \"how are you doing?\"";
     List<CoreMap> quotes = runQuotes(text, 2);
     assertEquals("\"Hello,\"", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals(quotes.get(0).get(CoreAnnotations.TokensAnnotation.class).size(), 4);
     assertEquals("\"how are you doing?\"", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
   }
 
