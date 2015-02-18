@@ -561,6 +561,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
         return this;
         //throw new RuntimeException("Unknown Chinese relation " + this);
       }
+      return rel;
     }
     default: {
       throw new RuntimeException("Unknown language " + language);

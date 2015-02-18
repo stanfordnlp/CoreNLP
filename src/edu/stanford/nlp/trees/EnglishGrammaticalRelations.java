@@ -202,6 +202,13 @@ public class EnglishGrammaticalRelations {
   private static final String FW_ETC_PAT = "(ADVP|NP <1 (FW < /^(?i:etc)$/))";
   private static final String FW_ETC_PAT_target = "(ADVP|NP=target <1 (FW < /^(?i:etc)$/))";
 
+  // match "not", "n't", "nt" (for informal writing), or "never" as _complete_ string
+  private static final String NOT_PAT = "/^(?i:n[o']?t|never)$/";
+
+  private static final String WESTERN_SMILEY = "/^(?:[<>]?[:;=8][\\-o\\*']?(?:-RRB-|-LRB-|[DPdpO\\/\\\\\\:}{@\\|\\[\\]])|(?:-RRB-|-LRB-|[DPdpO\\/\\\\\\:}{@\\|\\[\\]])[\\-o\\*']?[:;=8][<>]?)$/";
+
+  private static final String ASIAN_SMILEY = "/(?!^--$)^(?:-LRB-)?[\\-\\^x=~<>'][_.]?[\\-\\^x=~<>'](?:-RRB-)?$/";
+
   /**
    * The "conjunct" grammatical relation.  A conjunct is the relation between
    * two elements connected by a conjunction word.  We treat conjunctions
@@ -273,10 +280,6 @@ public class EnglishGrammaticalRelations {
         });
   public static class CoordinationGRAnnotation extends GrammaticalRelationAnnotation { }
 
-
-  private static final String WESTERN_SMILEY = "/^(?:[<>]?[:;=8][\\-o\\*']?(?:-RRB-|-LRB-|[DPdpO\\/\\\\\\:}{@\\|\\[\\]])|(?:-RRB-|-LRB-|[DPdpO\\/\\\\\\:}{@\\|\\[\\]])[\\-o\\*']?[:;=8][<>]?)$/";
-
-  private static final String ASIAN_SMILEY = "/(?!^--$)^(?:-LRB-)?[\\-\\^x=~<>'][_.]?[\\-\\^x=~<>'](?:-RRB-)?$/";
 
   /**
    * The "punctuation" grammatical relation.  This is used for any piece of
@@ -1221,9 +1224,6 @@ public class EnglishGrammaticalRelations {
   public static class VerbalModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
 
-  // match "not", "n't", "nt" (for informal writing), or "never" as _complete_ string
-  private static final String NOT_PAT = "/^(?i:n[o']?t|never)$/";
-
   /**
    * The "adverbial modifier" grammatical relation.  An adverbial
    * modifier of a word is a (non-clausal) RB or ADVP that serves to modify
@@ -1242,7 +1242,8 @@ public class EnglishGrammaticalRelations {
         new String[] {
           "/^(?:VP|ADJP|JJP|WHADJP|SQ?|SBARQ?|SINV|XS|RRC|(?:WH)?NP(?:-TMP|-ADV)?)$/ < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + ")",
           // avoids adverb conjunctions matching as advmod; added JJ to catch How long
-          "ADVP|WHADVP < (RB|RBR|RBS|WRB|ADVP|WHADVP|JJ=target !< " + NOT_PAT + " !< " + ETC_PAT + ") !< CC !< CONJP",
+          // "!< no" so we can get neg instead for "no foo" when no is tagged as RB
+          "ADVP|WHADVP < (RB|RBR|RBS|WRB|ADVP|WHADVP|JJ=target !< " + NOT_PAT + " !< /^(?i:no)$/ !< " + ETC_PAT + ") !< CC|CONJP",
           //this one gets "at least" advmod(at, least) or "fewer than" advmod(than, fewer)
           "SBAR < (WHNP=target < WRB)", "SBARQ <, WHADVP=target", "XS < JJ=target",
           // for PP, only ones before head, or after NP, since others afterwards are pcomp
@@ -1266,7 +1267,7 @@ public class EnglishGrammaticalRelations {
   public static final GrammaticalRelation NEGATION_MODIFIER =
     new GrammaticalRelation(Language.English, "neg", "negation modifier",
         NegationModifierGRAnnotation.class, ADVERBIAL_MODIFIER,
-        "VP|ADJP|S|SBAR|SINV|SQ|NP(?:-TMP|-ADV)?|FRAG|CONJP|PP|NAC|NML|NX", tregexCompiler,
+        "VP|ADJP|S|SBAR|SINV|SQ|NP(?:-TMP|-ADV)?|FRAG|CONJP|PP|NAC|NML|NX|ADVP|WHADVP", tregexCompiler,
         new String[] {
           "/^(?:VP|NP(?:-TMP|-ADV)?|ADJP|SQ|S|FRAG|CONJP|PP)$/< (RB=target < " + NOT_PAT + ")",
           "VP|ADJP|S|SBAR|SINV|FRAG < (ADVP=target <# (RB < " + NOT_PAT + "))",
@@ -1274,6 +1275,9 @@ public class EnglishGrammaticalRelations {
           // the commented out parts were relevant for the "det", 
           // but don't seem to matter for the "neg" relation
           "/^(?:NP(?:-TMP|-ADV)?|NAC|NML|NX)$/ < (DT=target < /^(?i:no)$/ " + /* !$++ CC */ " $++ /^(?:N[MNXP]|CD|JJ|FW|ADJP|QP|RB|PRP(?![$])|PRN)/ " + /* =det !$++ (/^PRP[$]|POS/ $++ =det !$++ (/''/ $++ =det)) */ ")",
+          // catches "no more", possibly others as well
+          // !< CC|CONJP catches phrases such as "no more or less", which maybe should be preconj
+          "ADVP|WHADVP < (RB|RBR|RBS|WRB|ADVP|WHADVP|JJ=target < /^(?i:no)$/) !< CC|CONJP",
         });
   public static class NegationModifierGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -1424,7 +1428,7 @@ public class EnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation DETERMINER =
     new GrammaticalRelation(Language.English, "det", "determiner",
-        DeterminerGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NAC|NML|NX|X|ADVP", tregexCompiler,
+        DeterminerGRAnnotation.class, MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NAC|NML|NX|X|ADVP|ADJP", tregexCompiler,
         new String[] {
           // For this relation, we do not want to trigger if there are
           // possessive nodes of some kind between the target DT and
@@ -1439,7 +1443,9 @@ public class EnglishGrammaticalRelations {
           // "NP|NP-TMP|NP-ADV < (RB=target $++ (/^PDT$/ $+ /^NN/))", // todo: This matches nothing. Was it meant to be a PDT rule for (NP almost/RB no/DT chairs/NNS)?
           "NP|NP-TMP|NP-ADV <<, PRP <- (NP|DT|RB=target <<- all|both|each)", // we all, them all; various structures
           "WHNP < (NP $-- (WHNP=target < WDT))",
-          "@WHNP|ADVP < (/^(?:NP|NN|CD|RBS)/ $-- DT|WDT|WP=target)",
+          // testing against CC|CONJP avoids conflicts with preconj in
+          // phrases such as "both foo and bar"
+          "@WHNP|ADVP|ADJP < (/^(?:NP|NN|CD|RBS|JJ)/ $-- (DT|WDT|WP=target !$++ CC|CONJP))",
           "@NP < (/^(?:NP|NN|CD|RBS)/ $-- WDT|WP=target)"
         });
   public static class DeterminerGRAnnotation extends GrammaticalRelationAnnotation { }
