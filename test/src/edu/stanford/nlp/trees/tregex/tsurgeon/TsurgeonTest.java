@@ -15,20 +15,29 @@ import edu.stanford.nlp.util.Pair;
  * TODO: needs more coverage.
  *
  * @author John Bauer
+ * @author Christopher Manning
  */
 public class TsurgeonTest extends TestCase {
 
-  // We don't use valueOf because we sometimes use trees such as 
-  // (bar (foo (foo 1))), and the default valueOf uses a 
+  // We don't use valueOf because we sometimes use trees such as
+  // (bar (foo (foo 1))), and the default valueOf uses a
   // TreeNormalizer that removes nodes from such a tree
   public static Tree treeFromString(String s) {
     try {
-      TreeReader tr = new PennTreeReader(new StringReader(s), 
+      TreeReader tr = new PennTreeReader(new StringReader(s),
                                          new LabeledScoredTreeFactory());
       return tr.readTree();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /** This was buggy in 2009 since the label started pointing to the node with ~n on it. */
+  public void testBackReference() {
+    TregexPattern tregex = TregexPattern.compile("__ <1 B=n <2 ~n");
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("relabel n X");
+    runTest(tregex, tsurgeon, "(A (B w) (B w))",
+            "(A (X w) (B w))");
   }
 
   public void testAdjoin() {
@@ -44,7 +53,7 @@ public class TsurgeonTest extends TestCase {
     assertEquals("(B 1 2)", matcher.getNode("foo").toString());
     Tree updated = tsurgeon.evaluate(tree, matcher);
     assertEquals("(A (FOO (BAR 1 2)))", updated.toString());
-    // TODO: do we want the tsurgeon to implicitely update the matched node?
+    // TODO: do we want the tsurgeon to implicitly update the matched node?
     // System.err.println(matcher.getNode("foo"));
     assertFalse(matcher.find());
   }
@@ -169,7 +178,7 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, "(A (B (C 1)))", "A");
     runTest(tregex, tsurgeon, "(A (foo 1) (B (C 1)))", "(A (foo 1))");
     runTest(tregex, tsurgeon, "(A (B 1) (B (C 1)))", "A");
-    runTest(tregex, tsurgeon, "(A (foo 1) (bar (C 1)))", 
+    runTest(tregex, tsurgeon, "(A (foo 1) (bar (C 1)))",
             "(A (foo 1) (bar (C 1)))");
 
     tregex = TregexPattern.compile("C=bob");
@@ -186,7 +195,7 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, "(A (B (C 1)))", null);
     runTest(tregex, tsurgeon, "(A (foo 1) (B (C 1)))", "(A (foo 1))");
     runTest(tregex, tsurgeon, "(A (B 1) (B (C 1)))", null);
-    runTest(tregex, tsurgeon, "(A (foo 1) (bar (C 1)))", 
+    runTest(tregex, tsurgeon, "(A (foo 1) (bar (C 1)))",
             "(A (foo 1) (bar (C 1)))");
 
     tregex = TregexPattern.compile("C=bob");
@@ -197,7 +206,7 @@ public class TsurgeonTest extends TestCase {
   }
 
   public void testInsert() {
-    TsurgeonPattern tsurgeon = 
+    TsurgeonPattern tsurgeon =
       Tsurgeon.parseOperation("insert (D (E 6)) $+ bar");
     TregexPattern tregex = TregexPattern.compile("B=bar !$ D");
     runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A (D (E 6)) (B 0) (C 1))");
@@ -250,7 +259,7 @@ public class TsurgeonTest extends TestCase {
     tsurgeon = Tsurgeon.parseOperation("relabel foo /.*(voc.*)/$1/");
     tregex = TregexPattern.compile("/^a.*t/=foo");
     runTest(tregex, tsurgeon, "(A (avocet 0) (C 1))", "(A (vocet 0) (C 1))");
-    runTest(tregex, tsurgeon, "(A (avocet 0) (advocate 1))", 
+    runTest(tregex, tsurgeon, "(A (avocet 0) (advocate 1))",
             "(A (vocet 0) (vocate 1))");
 
     tregex = TregexPattern.compile("curlew=baz < /^a(.*)t/#1%bar=foo");
@@ -264,7 +273,7 @@ public class TsurgeonTest extends TestCase {
     tsurgeon = Tsurgeon.parseOperation("relabel baz /cu(rle)w/$1={foo}/");
     runTest(tregex, tsurgeon, "(curlew (avocet 0))", "(rleavocet (avocet 0))");
     tsurgeon = Tsurgeon.parseOperation("relabel baz /cu(rle)w/%{bar}$1={foo}/");
-    runTest(tregex, tsurgeon, 
+    runTest(tregex, tsurgeon,
             "(curlew (avocet 0))", "(vocerleavocet (avocet 0))");
 
     tregex = TregexPattern.compile("A=baz < /curlew.*/=foo < /avocet.*/=bar");
@@ -308,7 +317,7 @@ public class TsurgeonTest extends TestCase {
     // caused tregex to fail to find the second replacement
     tsurgeon = Tsurgeon.parseOperation("replace dest src");
     tregex = TregexPattern.compile("(/-([0-9]+)$/#1%i=src > /^FILLER$/) : (/^-NONE-/=dest <: /-([0-9]+)$/#1%i)");
-    runTest(tregex, tsurgeon, 
+    runTest(tregex, tsurgeon,
             "( (S (FILLER (NP-SBJ-1 (NNP Koito))) (VP (VBZ has) (VP (VBN refused) (S (NP-SBJ (-NONE- *-1)) (VP (TO to) (VP (VB grant) (NP (NNP Mr.) (NNP Pickens)) (NP (NP (NNS seats)) (PP-LOC (IN on) (NP (PRP$ its) (NN board))))))) (, ,) (S-ADV (NP-SBJ (-NONE- *-1)) (VP (VBG asserting) (SBAR (-NONE- 0) (S (NP-SBJ (PRP he)) (VP (VBZ is) (NP-PRD (NP (DT a) (NN greenmailer)) (VP (VBG trying) (S (NP-SBJ (-NONE- *)) (VP (TO to) (VP (VB pressure) (NP (NP (NNP Koito) (POS 's)) (JJ other) (NNS shareholders)) (PP-CLR (IN into) (S-NOM (NP-SBJ (-NONE- *)) (VP (VBG buying) (NP (PRP him)) (PRT (RP out)) (PP-MNR (IN at) (NP (DT a) (NN profit)))))))))))))))))) (. .)))",
             "( (S (FILLER (NP-SBJ-1 (NNP Koito))) (VP (VBZ has) (VP (VBN refused) (S (NP-SBJ (NP-SBJ-1 (NNP Koito))) (VP (TO to) (VP (VB grant) (NP (NNP Mr.) (NNP Pickens)) (NP (NP (NNS seats)) (PP-LOC (IN on) (NP (PRP$ its) (NN board))))))) (, ,) (S-ADV (NP-SBJ (NP-SBJ-1 (NNP Koito))) (VP (VBG asserting) (SBAR (-NONE- 0) (S (NP-SBJ (PRP he)) (VP (VBZ is) (NP-PRD (NP (DT a) (NN greenmailer)) (VP (VBG trying) (S (NP-SBJ (-NONE- *)) (VP (TO to) (VP (VB pressure) (NP (NP (NNP Koito) (POS 's)) (JJ other) (NNS shareholders)) (PP-CLR (IN into) (S-NOM (NP-SBJ (-NONE- *)) (VP (VBG buying) (NP (PRP him)) (PRT (RP out)) (PP-MNR (IN at) (NP (DT a) (NN profit)))))))))))))))))) (. .)))");
   }
@@ -366,7 +375,7 @@ public class TsurgeonTest extends TestCase {
     tsurgeon = Tsurgeon.parseOperation("delete dest");
     surgery.add(new Pair<TregexPattern, TsurgeonPattern>(tregex, tsurgeon));
 
-    runTest(surgery, 
+    runTest(surgery,
             "( (S (FILLER (NP-SBJ-1 (NNP Koito))) (VP (VBZ has) (VP (VBN refused) (S (NP-SBJ (-NONE- *-1)) (VP (TO to) (VP (VB grant) (NP (NNP Mr.) (NNP Pickens)) (NP (NP (NNS seats)) (PP-LOC (IN on) (NP (PRP$ its) (NN board))))))) (, ,) (S-ADV (NP-SBJ (-NONE- *-1)) (VP (VBG asserting) (SBAR (-NONE- 0) (S (NP-SBJ (PRP he)) (VP (VBZ is) (NP-PRD (NP (DT a) (NN greenmailer)) (VP (VBG trying) (S (NP-SBJ (-NONE- *)) (VP (TO to) (VP (VB pressure) (NP (NP (NNP Koito) (POS 's)) (JJ other) (NNS shareholders)) (PP-CLR (IN into) (S-NOM (NP-SBJ (-NONE- *)) (VP (VBG buying) (NP (PRP him)) (PRT (RP out)) (PP-MNR (IN at) (NP (DT a) (NN profit)))))))))))))))))) (. .)))",
             "( (S (FILLER (NP-SBJ-1 (NNP Koito))) (VP (VBZ has) (VP (VBN refused) (S (NP-SBJ (NP-SBJ-1 (NNP Koito))) (VP (TO to) (VP (VB grant) (NP (NNP Mr.) (NNP Pickens)) (NP (NP (NNS seats)) (PP-LOC (IN on) (NP (PRP$ its) (NN board))))))) (, ,) (S-ADV (NP-SBJ (NP-SBJ-1 (NNP Koito))) (VP (VBG asserting) (SBAR (-NONE- 0) (S (NP-SBJ (PRP he)) (VP (VBZ is) (NP-PRD (NP (DT a) (NN greenmailer)) (VP (VBG trying) (S (NP-SBJ (-NONE- *)) (VP (TO to) (VP (VB pressure) (NP (NP (NNP Koito) (POS 's)) (JJ other) (NNS shareholders)) (PP-CLR (IN into) (S-NOM (NP-SBJ (-NONE- *)) (VP (VBG buying) (NP (PRP him)) (PRT (RP out)) (PP-MNR (IN at) (NP (DT a) (NN profit)))))))))))))))))) (. .)))");
   }
@@ -413,7 +422,7 @@ public class TsurgeonTest extends TestCase {
   }
 
   /**
-   * You can compile multiple patterns into one node with the syntax 
+   * You can compile multiple patterns into one node with the syntax
    * [pattern1] [pattern2]
    * Test that it does what it is supposed to do
    */
@@ -443,9 +452,9 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, "(A (B foo) (C foo))", "(A (BAR foo) (BAZ foo))");
   }
 
-  public void runTest(TregexPattern tregex, TsurgeonPattern tsurgeon,
+  public static void runTest(TregexPattern tregex, TsurgeonPattern tsurgeon,
                       String input, String expected) {
-    Tree result = Tsurgeon.processPattern(tregex, tsurgeon, 
+    Tree result = Tsurgeon.processPattern(tregex, tsurgeon,
                                           treeFromString(input));
     if (expected == null) {
       assertEquals(null, result);
@@ -455,12 +464,12 @@ public class TsurgeonTest extends TestCase {
 
     // run the test on both a list and as a single pattern just to
     // make sure the underlying code works for both
-    Pair<TregexPattern, TsurgeonPattern> surgery = 
+    Pair<TregexPattern, TsurgeonPattern> surgery =
       new Pair<TregexPattern, TsurgeonPattern>(tregex, tsurgeon);
     runTest(Collections.singletonList(surgery), input, expected);
   }
 
-  public void runTest(List<Pair<TregexPattern, TsurgeonPattern>> surgery,
+  public static void runTest(List<Pair<TregexPattern, TsurgeonPattern>> surgery,
                       String input, String expected) {
     Tree result = Tsurgeon.processPatternsOnTree(surgery, treeFromString(input));
     if (expected == null) {
@@ -470,12 +479,12 @@ public class TsurgeonTest extends TestCase {
     }
   }
 
-  public void outputResults(TregexPattern tregex, TsurgeonPattern tsurgeon,
+  public static void outputResults(TregexPattern tregex, TsurgeonPattern tsurgeon,
                             String input, String expected) {
     outputResults(tregex, tsurgeon, input);
   }
 
-  public void outputResults(TregexPattern tregex, TsurgeonPattern tsurgeon,
+  public static void outputResults(TregexPattern tregex, TsurgeonPattern tsurgeon,
                             String input) {
     System.out.println("Tsurgeon: " + tsurgeon);
     System.out.println("Tregex: " + tregex);

@@ -1,4 +1,4 @@
-package edu.stanford.nlp.parser.lexparser;
+package edu.stanford.nlp.parser.common;
 
 import java.util.NoSuchElementException;
 

@@ -1,6 +1,8 @@
 package edu.stanford.nlp.time;
 
+import java.util.Properties;
 import edu.stanford.nlp.util.Factory;
+import edu.stanford.nlp.util.ReflectionLoading;
 
 /**
  * Factory for creating TimeExpressionExtractor
@@ -24,8 +26,16 @@ public class TimeExpressionExtractorFactory implements Factory<TimeExpressionExt
     return create(timeExpressionExtractorClass);
   }
 
+  public TimeExpressionExtractor create(String name, Properties props) {
+    return create(timeExpressionExtractorClass, name, props);
+  }
+
   public static TimeExpressionExtractor createExtractor() {
     return create(DEFAULT_TIME_EXPRESSION_EXTRACTOR_CLASS);
+  }
+
+  public static TimeExpressionExtractor createExtractor(String name, Properties props) {
+    return create(DEFAULT_TIME_EXPRESSION_EXTRACTOR_CLASS, name, props);
   }
 
   public static boolean isDefaultExtractorPresent() {
@@ -40,17 +50,10 @@ public class TimeExpressionExtractorFactory implements Factory<TimeExpressionExt
   }
 
   public static TimeExpressionExtractor create(String className) {
-    try {
-      Class clazz = Class.forName(className);
-      TimeExpressionExtractor extractor = (TimeExpressionExtractor) clazz.newInstance();
-      return extractor;
-    } catch (ClassNotFoundException ex) {
-      throw new RuntimeException(ex);
-    } catch (InstantiationException ex) {
-      throw new RuntimeException(ex);
-    } catch (IllegalAccessException ex) {
-      throw new RuntimeException(ex);
-    }
+    return ReflectionLoading.loadByReflection(className);
   }
 
+  public static TimeExpressionExtractor create(String className, String name, Properties props) {
+    return ReflectionLoading.loadByReflection(className, name, props);
+  }
 }

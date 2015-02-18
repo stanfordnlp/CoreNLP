@@ -214,7 +214,7 @@ import java.text.DecimalFormat;
  * @author Christopher Manning
  * @author John Bauer
  */
-public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<TaggedWord>>, ListProcessor<List<? extends HasWord>,ArrayList<TaggedWord>>, Serializable {
+public class MaxentTagger implements Function<List<? extends HasWord>,List<TaggedWord>>, ListProcessor<List<? extends HasWord>,List<TaggedWord>>, Serializable {
 
   /**
    * The directory from which to get taggers when using
@@ -238,31 +238,35 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   public MaxentTagger() {
   }
 
+  public MaxentTagger(TaggerConfig config) {
+    // maybe this shouldn't do this but replace the zero arg constructor.
+    // i.e., call init() not readModelAndInit()
+    this(config.getModel(), config);
+  }
+
   /**
-   * Constructor for a tagger using a model stored in a particular file.
-   * The <code>modelFile</code> is a filename for the model data.
-   * The tagger data is loaded when the
-   * constructor is called (this can be slow).
-   * This constructor first constructs a TaggerConfig object, which loads
-   * the tagger options from the modelFile.
+   * Constructor for a tagger, loading a model stored in a particular file,
+   * classpath resource, or URL.
+   * The tagger data is loaded when the constructor is called (this can be
+   * slow). This constructor first constructs a TaggerConfig object, which
+   * loads the tagger options from the modelFile.
    *
-   * @param modelFile filename of the trained model
+   * @param modelFile Filename, classpath resource, or URL for the trained model
    * @throws RuntimeIOException if I/O errors or serialization errors
    */
   public MaxentTagger(String modelFile) {
-    this(modelFile, StringUtils.argsToProperties(new String[] {"-model", modelFile}), true);
+    this(modelFile, StringUtils.argsToProperties("-model", modelFile), true);
   }
 
   /**
    * Constructor for a tagger using a model stored in a particular file,
    * with options taken from the supplied TaggerConfig.
-   * The <code>modelFile</code> is a filename for the model data.
    * The tagger data is loaded when the
    * constructor is called (this can be slow).
    * This version assumes that the tagger options in the modelFile have
    * already been loaded into the TaggerConfig (if that is desired).
    *
-   * @param modelFile filename of the trained model
+   * @param modelFile Filename, classpath resource, or URL for the trained model
    * @param config The configuration for the tagger
    * @throws RuntimeIOException if I/O errors or serialization errors
    */
@@ -290,7 +294,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   }
 
 
-  Dictionary dict = new Dictionary();
+  final Dictionary dict = new Dictionary();
   TTags tags;
 
   /**
@@ -317,7 +321,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   private LambdaSolveTagger prob;
   // For each extractor index, we have a map from possible extracted
   // features to an array which maps from tag number to feature weight index in the lambdas array.
-  List<Map<String, int[]>> fAssociations = new ArrayList<Map<String, int[]>>();
+  List<Map<String, int[]>> fAssociations = Generics.newArrayList();
   //PairsHolder pairs = new PairsHolder();
   Extractors extractors;
   Extractors extractorsRare;
@@ -325,14 +329,14 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   final boolean alltags = false;
   final Map<String, Set<String>> tagTokens = Generics.newHashMap();
 
-  static final int RARE_WORD_THRESH = Integer.valueOf(TaggerConfig.RARE_WORD_THRESH);
-  static final int MIN_FEATURE_THRESH = Integer.valueOf(TaggerConfig.MIN_FEATURE_THRESH);
-  static final int CUR_WORD_MIN_FEATURE_THRESH = Integer.valueOf(TaggerConfig.CUR_WORD_MIN_FEATURE_THRESH);
-  static final int RARE_WORD_MIN_FEATURE_THRESH = Integer.valueOf(TaggerConfig.RARE_WORD_MIN_FEATURE_THRESH);
-  static final int VERY_COMMON_WORD_THRESH = Integer.valueOf(TaggerConfig.VERY_COMMON_WORD_THRESH);
+  static final int RARE_WORD_THRESH = Integer.parseInt(TaggerConfig.RARE_WORD_THRESH);
+  static final int MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.MIN_FEATURE_THRESH);
+  static final int CUR_WORD_MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.CUR_WORD_MIN_FEATURE_THRESH);
+  static final int RARE_WORD_MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.RARE_WORD_MIN_FEATURE_THRESH);
+  static final int VERY_COMMON_WORD_THRESH = Integer.parseInt(TaggerConfig.VERY_COMMON_WORD_THRESH);
 
-  static final boolean OCCURRING_TAGS_ONLY = Boolean.valueOf(TaggerConfig.OCCURRING_TAGS_ONLY);
-  static final boolean POSSIBLE_TAGS_ONLY = Boolean.valueOf(TaggerConfig.POSSIBLE_TAGS_ONLY);
+  static final boolean OCCURRING_TAGS_ONLY = Boolean.parseBoolean(TaggerConfig.OCCURRING_TAGS_ONLY);
+  static final boolean POSSIBLE_TAGS_ONLY = Boolean.parseBoolean(TaggerConfig.POSSIBLE_TAGS_ONLY);
 
   private double defaultScore;
   private double[] defaultScores = null;
@@ -612,7 +616,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    */
   private void removeDeadRules() {
     for (Map<String, int[]> fAssociation : fAssociations) {
-      List<String> deadRules = new ArrayList<String>();
+      List<String> deadRules = Generics.newArrayList();
       for (Map.Entry<String, int[]> entry : fAssociation.entrySet()) {
         String value = entry.getKey();
         int[] fAssociations = entry.getValue();
@@ -798,7 +802,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
 
       xSize = rf.readInt();
       ySize = rf.readInt();
-      dict = new Dictionary();
+      // dict = new Dictionary();  // this method is called in constructor, and it's initialized as empty already
       dict.read(rf);
 
       if (VERBOSE) {
@@ -810,7 +814,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
 
       int[] numFA = new int[extractors.size() + extractorsRare.size()];
       int sizeAssoc = rf.readInt();
-      fAssociations = new ArrayList<Map<String, int[]>>();
+      fAssociations = Generics.newArrayList();
       for (int i = 0; i < extractors.size() + extractorsRare.size(); ++i) {
         fAssociations.add(Generics.<String, int[]>newHashMap());
       }
@@ -866,7 +870,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     NumberFormat nf = new DecimalFormat(" 0.000000;-0.000000");
     for (int i = 0; i < fAssociations.size(); ++i) {
       Map<String, int[]> fValueAssociations = fAssociations.get(i);
-      List<String> features = new ArrayList<String>(fValueAssociations.keySet());
+      List<String> features = Generics.newArrayList();
       Collections.sort(features);
       for (String featureValue : features) {
         int[] fTagAssociations = fValueAssociations.get(featureValue);
@@ -905,7 +909,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    * @return The same string with tags inserted in the form word/tag
    */
   public String tagTokenizedString(String toTag) {
-    ArrayList<Word> sent = Sentence.toUntaggedList(Arrays.asList(toTag.split("\\s+")));
+    List<Word> sent = Sentence.toUntaggedList(Arrays.asList(toTag.split("\\s+")));
     TestSentence testSentence = new TestSentence(this);
     testSentence.tagSentence(sent, false);
     return testSentence.getTaggedNice();
@@ -933,7 +937,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    * @param in This needs to be a Sentence
    * @return A Sentence of TaggedWord
    */
-  public ArrayList<TaggedWord> apply(List<? extends HasWord> in) {
+  public List<TaggedWord> apply(List<? extends HasWord> in) {
     TestSentence testSentence = new TestSentence(this);
     return testSentence.tagSentence(in, false);
   }
@@ -951,8 +955,8 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    * @return A List of Sentence of TaggedWord
    */
   @Override
-  public List<ArrayList<TaggedWord>> process(List<? extends List<? extends HasWord>> sentences) {
-    List<ArrayList<TaggedWord>> taggedSentences = new ArrayList<ArrayList<TaggedWord>>();
+  public List<List<TaggedWord>> process(List<? extends List<? extends HasWord>> sentences) {
+    List<List<TaggedWord>> taggedSentences = Generics.newArrayList();
 
     TestSentence testSentence = new TestSentence(this);
     for (List<? extends HasWord> sentence : sentences) {
@@ -969,7 +973,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    * @param sentence sentence to tag
    * @return tagged sentence
    */
-  public ArrayList<TaggedWord> tagSentence(List<? extends HasWord> sentence) {
+  public List<TaggedWord> tagSentence(List<? extends HasWord> sentence) {
     TestSentence testSentence = new TestSentence(this);
     return testSentence.tagSentence(sentence, false);
   }
@@ -984,7 +988,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    * @param reuseTags whether or not to reuse the given tag
    * @return tagged sentence
    */
-  public ArrayList<TaggedWord> tagSentence(List<? extends HasWord> sentence,
+  public List<TaggedWord> tagSentence(List<? extends HasWord> sentence,
                                            boolean reuseTags) {
     TestSentence testSentence = new TestSentence(this);
     return testSentence.tagSentence(sentence, reuseTags);
@@ -1031,7 +1035,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
    * actually give it CoreLabels.
    */
   private static List<CoreLabel> castCoreLabels(List<? extends HasWord> sent) {
-    List<CoreLabel> coreLabels = new ArrayList<CoreLabel>();
+    List<CoreLabel> coreLabels = Generics.newArrayList();
     for (HasWord word : sent) {
       if (!(word instanceof CoreLabel)) {
         throw new ClassCastException("Expected CoreLabels");
@@ -1070,7 +1074,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     if (tokenizerFactory != null) {
       documentPreprocessor.setTokenizerFactory(tokenizerFactory);
     }
-    List<List<HasWord>> out = new ArrayList<List<HasWord>>();
+    List<List<HasWord>> out = Generics.newArrayList();
     for (List<HasWord> item : documentPreprocessor) {
       out.add(item);
     }
@@ -1257,7 +1261,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       if (tokenize) {
         sentences = tokenizeText(new StringReader(o), tokenizerFactory);
       } else {
-        sentences = new ArrayList<List<HasWord>>();
+        sentences = Generics.newArrayList();
         sentences.add(Sentence.toWordList(o.split("\\s+")));
       }
 
@@ -1625,9 +1629,9 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     ObjectBank<List<CoreLabel>> ob = new ObjectBank<List<CoreLabel>>(new ReaderIteratorFactory(reader), readerAndWriter);
     PrintWriter pw = new PrintWriter(writer);
     for (List<CoreLabel> sentence : ob) {
-      ArrayList<CoreLabel> s = new ArrayList<CoreLabel>(sentence);
+      List<CoreLabel> s = Generics.newArrayList();
       numWords += s.size();
-      ArrayList<TaggedWord> taggedSentence = tagSentence(s, false);
+      List<TaggedWord> taggedSentence = tagSentence(s, false);
       Iterator<CoreLabel> origIter = sentence.iterator();
       for (TaggedWord tw : taggedSentence) {
         CoreLabel cl = origIter.next();
@@ -1771,7 +1775,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       }
       return coreLabels;
     } else {
-      ArrayList<TaggedWord> taggedSentence = tagSentence(sentence, false);
+      List<TaggedWord> taggedSentence = tagSentence(sentence, false);
       return taggedSentence;
     }
   }

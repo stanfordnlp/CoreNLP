@@ -59,6 +59,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.Triple;
 
 
@@ -138,7 +139,7 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td> printTo</td><td>String</td><td>n/a</td><td>Path to print a text representation of the linear classifier to</td></tr>
  * <tr><td> trainFile</td><td>String</td><td>n/a</td><td>Path of file to use as training data</td></tr>
  * <tr><td> testFile</td><td>String</td><td>n/a</td><td>Path of file to use as test data</td></tr>
- * <tr><td> encoding</td><td>String</td><td><i>platform default</i></td><td>Character encoding of training and test file, e.g. utf-8 or iso-8859-1</td></tr>
+ * <tr><td> encoding</td><td>String</td><td><i>utf-8</i></td><td>Character encoding of training and test file, e.g., utf-8, GB18030, or iso-8859-1</td></tr>
  * <tr><td> displayedColumn</td><td>int</td><td>1</td><td>Column number that will be printed out to stdout in the output next to the gold class and the chosen class.  This is just an aide memoire.  If the value is negative, nothing is printed. </td></tr>
  * <tr><td> displayAllAnswers</td><td>boolean</td><td>false</td><td>If true, print all classes and their probability, sorted by probability, rather than just the highest scoring and correct classes. </td></tr>
  * <tr><td> goldAnswerColumn</td><td>int</td><td>0</td><td>Column number that contains the correct class for each data item (again, columns are numbered from 0 up).</td></tr>
@@ -169,11 +170,11 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td> wordNGramBoundaryRegexp</td><td>String</td><td>null</td><td>If this is defined and the regexp matches, then the ngram stops</td></tr>
  * <tr><td> useSplitFirstLastWords</td><td>boolean</td><td>false</td><td>Make a feature from each of the first and last "words" that are returned as splitWords.  This is equivalent to having word bigrams with boundary tokens at each end of the sequence (they get a special feature).  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SFW-<i>str</i>, SLW-<i>str</i></td></tr>
  * <tr><td> useSplitNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams - internal as well as edge all treated the same - after the data string has been split into tokens.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#-<i>str</i></td></tr>
- * <tr><td> useSplitPrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefixes and suffixes after splitting with splitWordsRegexp.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#B-<i>str</i>, S#E-<i>str</i></td></tr>
+ * <tr><td> useSplitPrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefixes and suffixes of each token, after splitting string with splitWordsRegexp.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#B-<i>str</i>, S#E-<i>str</i></td></tr>
  * <tr><td> useNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams - internal as well as edge all treated the same.</td><td>#-<i>str</i></td></tr>
- * <tr><td> usePrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefix and suffix strings.</td><td>#B-<i>str</i>, #E-<i>str</i></td></tr>
- * <tr><td> lowercase</td><td>boolean</td><td>false</td><td>Make the input string lowercase so all features work unicase</td></tr>
- * <tr><td> lowercaseNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams all lowercase (for both useNGrams and usePrefixSuffixNGrams)</td></tr>
+ * <tr><td> usePrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefix and suffix substrings of the string.</td><td>#B-<i>str</i>, #E-<i>str</i></td></tr>
+ * <tr><td> lowercase</td><td>boolean</td><td>false</td><td>Make the input string lowercase so all features work uncased</td></tr>
+ * <tr><td> lowercaseNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams all lowercase (for all of useNGrams, usePrefixSuffixNGrams, useSplitNGrams, and useSplitPrefixSuffixNGrams)</td></tr>
  * <tr><td> maxNGramLeng</td><td>int</td><td>-1</td><td>If this number is positive, n-grams above this size will not be used in the model</td></tr>
  * <tr><td> minNGramLeng</td><td>int</td><td>2</td><td>Must be positive. n-grams below this size will not be used in the model</td></tr>
  * <tr><td> partialNGramRegexp</td><td>String</td><td>null</td><td>If this is defined and the regexp matches, then n-grams are made only from the matching text (if no capturing groups are defined) or from the first capturing group of the regexp, if there is one.  This substring is used for both useNGrams and usePrefixSuffixNGrams.</td></tr>
@@ -242,7 +243,7 @@ public class ColumnDataClassifier {
    *
    * @param line Line of file
    * @param lineNo The line number. This is just used in error messages if there is an input format problem. You can make it 0.
-   * @return A Datum (may be an RVFDatum)
+   * @return A Datum (may be an RVFDatum; never null)
    */
   public Datum<String,String> makeDatumFromLine(String line, int lineNo) {
     if (globalFlags.usesRealValues) {
@@ -327,7 +328,7 @@ public class ColumnDataClassifier {
    */
   public Pair<GeneralDataset<String,String>, List<String[]>> readAndReturnTrainingExamples(String fileName) {
     if (globalFlags.printFeatures != null) {
-      newFeaturePrinter(globalFlags.printFeatures, "train");
+      newFeaturePrinter(globalFlags.printFeatures, "train", Flags.encoding);
     }
     Pair<GeneralDataset<String,String>, List<String[]>> dataInfo = readDataset(fileName, true);
     GeneralDataset<String,String> train = dataInfo.first();
@@ -374,6 +375,8 @@ public class ColumnDataClassifier {
    *  @return A Pair of a GeneralDataSet of Datums and a List of datums in String form.
    */
   private Pair<GeneralDataset<String,String>, List<String[]>> readDataset(String filename, boolean inTestPhase) {
+    Timing tim = new Timing();
+    System.err.print("Reading dataset from " + filename + " ... ");
     GeneralDataset<String,String> dataset;
     List<String[]> lineInfos = null;
     if ((inTestPhase && Flags.testFromSVMLight) || (!inTestPhase && Flags.trainFromSVMLight)) {
@@ -406,16 +409,14 @@ public class ColumnDataClassifier {
             String[] wi = makeSimpleLineInfo(line, lineNo);
             lineInfos.add(wi);
           }
-          Datum<String,String> d = makeDatumFromLine(line, lineNo);
-          if (d != null) {
-            dataset.add(d);
-          }
+          dataset.add(makeDatumFromLine(line, lineNo));
         }
       } catch (Exception e) {
         throw new RuntimeException("Dataset could not be processed", e);
       }
     }
 
+    System.err.println("done [" + tim.toSecondsString() + "s, " + dataset.size() + " items].");
     return new Pair<GeneralDataset<String,String>,List<String[]>>(dataset, lineInfos);
   }
 
@@ -618,7 +619,7 @@ public class ColumnDataClassifier {
     }
 
     Counter<String> contingency = new ClassicCounter<String>();  // store tp,fp,fn,tn
-    for (int i = 0; i < test.size; i++) {
+    for (int i = 0; i < test.size(); i++) {
       String[] simpleLineInfo = lineInfos.get(i);
       Datum<String,String> d;
       if (globalFlags.usesRealValues) {
@@ -686,7 +687,7 @@ public class ColumnDataClassifier {
     if (globalFlags.printFeatures != null) {
       closeFeaturePrinter();
     }
-    return writeResultsSummary(test.size, contingency, cl.labels());
+    return writeResultsSummary(test.size(), contingency, cl.labels());
   }
 
 
@@ -829,7 +830,7 @@ public class ColumnDataClassifier {
         cWord = IOUtils.slurpFileNoExceptions(cWord);
       }
       if (flags.lowercase) {
-        cWord = cWord.toLowerCase();
+        cWord = cWord.toLowerCase(Locale.ENGLISH);
       }
 
       if (flags.useString) {
@@ -1025,7 +1026,7 @@ public class ColumnDataClassifier {
       prefixSuffixNGrams = flags.usePrefixSuffixNGrams;
     }
     if (flags.lowercaseNGrams) {
-      toNGrams = toNGrams.toLowerCase();
+      toNGrams = toNGrams.toLowerCase(Locale.ENGLISH);
     }
     if (flags.partialNGramRegexp != null) {
       Matcher m = flags.partialNGramPattern.matcher(toNGrams);
@@ -1076,12 +1077,12 @@ public class ColumnDataClassifier {
 
   private static PrintWriter cliqueWriter;
 
-  private static void newFeaturePrinter(String prefix, String suffix) {
+  private static void newFeaturePrinter(String prefix, String suffix, String encoding) {
     if (cliqueWriter != null) {
       closeFeaturePrinter();
     }
     try {
-      cliqueWriter = new PrintWriter(new FileOutputStream(prefix + '.' + suffix), true);
+      cliqueWriter = IOUtils.getPrintWriter(prefix + '.' + suffix, encoding);
     } catch (IOException ioe) {
       cliqueWriter = null;
     }
@@ -1345,7 +1346,6 @@ public class ColumnDataClassifier {
       ObjectInputStream ois = null;
       try {
         // load the classifier
-        //ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(loadPath)));
         ois = IOUtils.readStreamFromString(loadPath);
         classifier = ErasureUtils.<LinearClassifier<String,String>>uncheckedCast(ois.readObject());
         myFlags = (Flags[]) ois.readObject();
@@ -1756,8 +1756,7 @@ public class ColumnDataClassifier {
     String serializeTo = Flags.serializeTo;
     if (serializeTo != null) {
       System.err.println("Serializing classifier to " + serializeTo + "...");
-      //ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(serializeTo)));
-      ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(IOUtils.getFileOutputStream(serializeTo)));
+      ObjectOutputStream oos = IOUtils.writeStreamFromString(serializeTo);
       oos.writeObject(classifier);
       // Fiddle: Don't write a testFile to the serialized classifier.  It makes no sense and confuses people
       String testFile = globalFlags.testFile;
@@ -1797,7 +1796,7 @@ public class ColumnDataClassifier {
 
   private void testClassifier(String testFile) {
     if (globalFlags.printFeatures != null) {
-      newFeaturePrinter(globalFlags.printFeatures, "test");
+      newFeaturePrinter(globalFlags.printFeatures, "test", Flags.encoding);
     }
 
     Pair<GeneralDataset<String,String>,List<String[]>> testInfo = readTestExamples(testFile);

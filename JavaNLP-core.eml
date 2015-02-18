@@ -57,10 +57,10 @@
 	<lib name="AppleJavaExtensions.jar" scope="COMPILE">
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/AppleJavaExtensions.jar!/"/>
 	</lib>
-	<lib name="JFlex.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/jflex-1.4.3-src.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/jflex-1.4.3-src.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/JFlex.jar!/"/>
+	<lib name="jflex-1.5.1.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/jflex-1.5.1-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/jflex-1.5.1-src.zip!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/jflex-1.5.1.jar!/"/>
 	</lib>
 	<lib name="xom-1.2.10.jar" scope="COMPILE">
 		<srcroot url="file://libsrc/xom-1.2.10-src.zip"/>
@@ -98,5 +98,10 @@
 	</lib>
 	<lib name="javacc.jar" scope="COMPILE">
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/javacc.jar!/"/>
+	</lib>
+	<lib name="javax.json.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/javax.json-api-1.0-sources.jar!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/javax.json-api-1.0-sources.jar!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/javax.json.jar!/"/>
 	</lib>
 </component>

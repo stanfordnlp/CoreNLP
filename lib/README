@@ -297,6 +297,17 @@ URL: https://code.google.com/p/protobuf/
 USED BY: CoreMapProtos (and associated serializers)
 LAST UPDATE: 2013-09-24
 LAST UPDATE BY: Gabor Angeli
+----------------------------------------------------------------
+javax.json.jar
+ORIGINAL JAR NAME:javax.json-1.0.4.jar
+VERSION:1.0.4
+RELEASE DATE:? (sometime in 2013, most probably March)
+SOURCE AVAILABLE:Yes 
+DESCRIPTION:Json processing tool (RI, which has the API also) available with Java EE 7. 
+URL:https://jsonp.java.net/ It has two jars, API and RI. This is the RI one.
+USED BY:patterns.surface
+LAST UPDATE:2014-04-07
+LAST UPDATE BY:Sonal Gupta
 -----------------------------------------------------------------
 foo.jar
 

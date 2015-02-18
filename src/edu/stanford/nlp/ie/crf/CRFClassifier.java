@@ -880,6 +880,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           featureIndexToTemplateIndex.put(index, groupIndex);
         }
       }
+      // todo [cdm 2014]: Talk to Mengqiu about this; it seems like it only supports first order CRF
       if (i == 0) {
         nodeFeatureIndicesMap = featureIndexMap;
         System.err.println("setting nodeFeatureIndicesMap, size="+nodeFeatureIndicesMap.size());
@@ -2914,7 +2915,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     } else if (crf.flags.loadJarClassifier != null) {
       crf.loadJarClassifier(crf.flags.loadJarClassifier, props);
     } else if (crf.flags.trainFile != null || crf.flags.trainFileList != null) {
+      Timing timing = new Timing();
       crf.train();
+      timing.done("CRFClassifier training");
     } else {
       crf.loadDefaultClassifier();
     }

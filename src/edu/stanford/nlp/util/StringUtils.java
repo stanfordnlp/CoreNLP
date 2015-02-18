@@ -817,7 +817,7 @@ public class StringUtils {
    * @param args Command line arguments
    * @return A Properties object representing the arguments.
    */
-  public static Properties argsToProperties(String[] args) {
+  public static Properties argsToProperties(String... args) {
     return argsToProperties(args, Collections.<String,Integer>emptyMap());
   }
 
@@ -1929,7 +1929,7 @@ public class StringUtils {
   public static Properties argsToPropertiesWithResolve(String[] args) {
     LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
     Map<String, String> existingArgs = new LinkedHashMap<String, String>();
-    
+
     for (int i = 0; i < args.length; i++) {
       String key = args[i];
       if (key.length() > 0 && key.charAt(0) == '-') { // found a flag
@@ -1945,7 +1945,7 @@ public class StringUtils {
         for (int j = 0; j < max && i + 1 < args.length && (j < min || args[i + 1].length() == 0 || args[i + 1].charAt(0) != '-'); i++, j++) {
           flagArgs.add(args[i + 1]);
         }
-        
+
         if (flagArgs.isEmpty()) {
           existingArgs.put(key, "true");
         } else {
@@ -1953,7 +1953,7 @@ public class StringUtils {
           if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS)) {
             for(String flagArg: flagArgs)
               result.putAll(propFileToLinkedHashMap(flagArg, existingArgs));
-            
+
             existingArgs.clear();
           } else
             existingArgs.put(key, join(flagArgs, " "));

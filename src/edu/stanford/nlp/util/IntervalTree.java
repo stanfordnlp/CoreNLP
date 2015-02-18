@@ -3,9 +3,8 @@ package edu.stanford.nlp.util;
 import java.util.*;
 
 /**
- * Interval tree
- * Maintain tree so all intervals to the left starts before current interval
- * and all intervals to the right starts after
+ * An interval tree maintains a tree so that all intervals to the left start
+ * before current interval and all intervals to the right start after.
  *
  * @author Angel Chang
  */
@@ -14,7 +13,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
   private static final double defaultAlpha = 0.65; // How balanced we want this tree (between 0.5 and 1.0)
   private static final boolean debug = false;
 
-  TreeNode<E,T> root = new TreeNode<E,T>();
+  private TreeNode<E,T> root = new TreeNode<E,T>();
 
   // Tree node
   public static class TreeNode<E extends Comparable<E>, T extends HasInterval<E>> {
@@ -795,6 +794,7 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
           List<? extends T> items, Comparator<? super T> compareFunc)
   {
     Function<T,Interval<E>> toIntervalFunc = new Function<T, Interval<E>>() {
+      @Override
       public Interval<E> apply(T in) {
         return in.getInterval();
       }
@@ -806,11 +806,96 @@ public class IntervalTree<E extends Comparable<E>, T extends HasInterval<E>> ext
           List<? extends T> items)
   {
     Function<T,Interval<E>> toIntervalFunc = new Function<T, Interval<E>>() {
+      @Override
       public Interval<E> apply(T in) {
         return in.getInterval();
       }
     };
     return getNonOverlapping(items, toIntervalFunc);
+  }
+
+  private static class PartialScoredList<T,E> {
+    T object;
+    E lastMatchKey;
+    int size;
+    double score;
+  }
+  public static <T, E extends Comparable<E>> List<T> getNonOverlappingMaxScore(
+      List<? extends T> items, Function<? super T,Interval<E>> toIntervalFunc, Function<? super T, Double> scoreFunc)
+  {
+    if (items.size() > 1) {
+      Map<E,PartialScoredList<T,E>> bestNonOverlapping = new TreeMap<E,PartialScoredList<T,E>>();
+      for (T item:items) {
+        Interval<E> itemInterval = toIntervalFunc.apply(item);
+        E mBegin = itemInterval.getBegin();
+        E mEnd = itemInterval.getEnd();
+        PartialScoredList<T,E> bestk = bestNonOverlapping.get(mEnd);
+        double itemScore = scoreFunc.apply(item);
+        if (bestk == null) {
+          bestk = new PartialScoredList<T,E>();
+          bestk.size = 1;
+          bestk.score = itemScore;
+          bestk.object = item;
+          bestNonOverlapping.put(mEnd, bestk);
+        }
+        // Assumes map is ordered
+        for (E j:bestNonOverlapping.keySet()) {
+          if (j.compareTo(mBegin) > 0) break;
+          // Consider adding this match into the bestNonOverlapping strand at j
+          PartialScoredList<T,E> bestj = bestNonOverlapping.get(j);
+          double withMatchScore = bestj.score + itemScore;
+          boolean better = false;
+          if (withMatchScore > bestk.score) {
+            better = true;
+          } else if (withMatchScore == bestk.score) {
+            if (bestj.size + 1 < bestk.size) {
+              better = true;
+            }
+          }
+          if (better) {
+            bestk.size = bestj.size + 1;
+            bestk.score = withMatchScore;
+            bestk.object = item;
+            bestk.lastMatchKey = j;
+          }
+        }
+      }
+
+      PartialScoredList<T,E> best = null;
+      for (PartialScoredList<T,E> v: bestNonOverlapping.values()) {
+        if (best == null || v.score > best.score) {
+          best = v;
+        }
+      }
+      List<T> nonOverlapping = new ArrayList<T>(best.size);
+      PartialScoredList<T,E> prev = best;
+      while (prev != null) {
+        if (prev.object != null) {
+          nonOverlapping.add(prev.object);
+        }
+        if (prev.lastMatchKey != null) {
+          prev = bestNonOverlapping.get(prev.lastMatchKey);
+        } else {
+          prev = null;
+        }
+      }
+      Collections.reverse(nonOverlapping);
+      return nonOverlapping;
+    } else {
+      List<T> nonOverlapping = new ArrayList<T>(items);
+      return nonOverlapping;
+    }
+  }
+  public static <T extends HasInterval<E>, E extends Comparable<E>> List<T> getNonOverlappingMaxScore(
+      List<? extends T> items, Function<? super T, Double> scoreFunc)
+  {
+    Function<T,Interval<E>> toIntervalFunc = new Function<T, Interval<E>>() {
+      @Override
+      public Interval<E> apply(T in) {
+        return in.getInterval();
+      }
+    };
+    return getNonOverlappingMaxScore(items, toIntervalFunc, scoreFunc);
   }
 
   public static <T, E extends Comparable<E>> List<T> getNonNested(

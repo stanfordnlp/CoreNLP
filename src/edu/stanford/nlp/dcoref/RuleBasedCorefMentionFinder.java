@@ -14,8 +14,8 @@ import edu.stanford.nlp.ling.MultiTokenTag;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.parser.lexparser.ParserConstraint;
-import edu.stanford.nlp.parser.lexparser.ParserAnnotations;
+import edu.stanford.nlp.parser.common.ParserAnnotations;
+import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -415,8 +415,9 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
         return leaf;
       }
     }
-    SieveCoreferenceSystem.logger.warning("RuleBasedCorefMentionFinder: Last resort: returning as head: " + leaves.get(leaves.size() - 2));
-    return leaves.get(leaves.size() - 2); // last except for the added period.
+    int fallback = Math.max(0, leaves.size() - 2);
+    SieveCoreferenceSystem.logger.warning("RuleBasedCorefMentionFinder: Last resort: returning as head: " + leaves.get(fallback));
+    return leaves.get(fallback); // last except for the added period.
   }
 
   private static CoreLabel initCoreLabel(String token) {

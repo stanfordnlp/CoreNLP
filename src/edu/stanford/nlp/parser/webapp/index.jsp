@@ -327,12 +327,12 @@ if (pp == null) {
         } catch (Exception e) { 
           parseSuccessful = false;
           %><!-- exception occured  --><%
-          System.err.printf("------------------\n");
-          System.err.printf("Parser Select: '%s'\n", parserSelect);
-          System.err.printf("Query: '%s'\n",query);
+          System.err.printf("------------------%n");
+          System.err.printf("Parser Select: '%s'%n", parserSelect);
+          System.err.printf("Query: '%s'%n",query);
           if (pp.segmenter != null) { 
-             System.err.printf("using segmenter....\n");
-             System.err.printf("toParse: '%s'\n",toParse);
+             System.err.printf("using segmenter....%n");
+             System.err.printf("toParse: '%s'%n",toParse);
           }
           e.printStackTrace();
           if (DEBUG) {
@@ -345,7 +345,7 @@ if (pp == null) {
         time += System.currentTimeMillis();
 
         if (parseSuccessful) { 
-          sentenceLog.printf("SUCCESS\n"); 
+          sentenceLog.printf("SUCCESS%n");
           if (words != null) { %>
             <h3>Segmentation</h3>
             <div class="parserOutputMonospace">
@@ -422,7 +422,7 @@ if (pp == null) {
           <br />Tokens: <%= tokens %> <br /> Time: <%= String.format("%.3f s", time/1000.0) %> <br />
 
         <% } else {
-          sentenceLog.printf("FAILURE\n"); %>
+          sentenceLog.printf("FAILURE%n"); %>
           <p>Sorry, failed to parse query. Is the correct language selected?</p>
         <% }
          } 

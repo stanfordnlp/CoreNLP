@@ -1,5 +1,7 @@
 package edu.stanford.nlp.international.arabic.process;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
@@ -8,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
@@ -38,7 +41,7 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   private final Character segMarker;
 
   // TODO(spenceg): Make this configurable.
-  private final String tagDelimiter = "|||";
+  private static final String tagDelimiter = "|||";
 
   private final boolean inputHasTags;
   private final boolean inputHasDomainLabels;
@@ -159,5 +162,57 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
                                 word.get(CoreAnnotations.GoldAnswerAnnotation.class),
                                 word.get(CoreAnnotations.CharAnnotation.class));
     }
+  }
+  
+  /**
+   * For debugging.
+   * 
+   * @param args
+   * @throws IOException 
+   */
+  public static void main(String[] args) throws IOException {
+    if (args.length != 1) {
+      System.err.printf("Usage: java %s file > output%n", ArabicDocumentReaderAndWriter.class.getName());
+      System.exit(-1);
+    }
+    String fileName = args[0];
+    TokenizerFactory<CoreLabel> tokFactory = ArabicTokenizer.atbFactory();
+    String atbVocOptions = "removeProMarker,removeMorphMarker";
+    tokFactory.setOptions(atbVocOptions);
+    DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(true,
+        true,
+        false,
+        tokFactory);
+    
+    BufferedReader reader = IOUtils.readerFromString(fileName);
+    for (String line; (line = reader.readLine()) != null; ) {
+      String[] toks = line.split("\\s+");
+      final String delim = Pattern.quote(tagDelimiter);
+      boolean isStart = true;
+      for (String wordTag : toks) {
+        String[] wordTagPair = wordTag.split(delim);
+        assert wordTagPair.length == 2;
+        String word = wordTagPair[0];
+        if (tokFactory != null) {
+          List<CoreLabel> lexList = tokFactory.getTokenizer(new StringReader(word)).tokenize();
+          if (lexList.size() == 0) {
+            continue;
+          } else if (lexList.size() > 1) {
+            System.err.printf("%s: Raw token generates multiple segments: %s%n", ArabicDocumentReaderAndWriter.class.getName(), word);
+          }
+          word = lexList.get(0).value();
+        }
+        if ( ! isStart ) System.out.print(" ");
+        System.out.print(word);
+        isStart = false;
+      }
+      System.out.println();
+    }
+   
+//    Iterator<List<CoreLabel>> itr = docReader.getIterator(new InputStreamReader(new FileInputStream(new File(fileName))));
+//    while(itr.hasNext()) {
+//      List<CoreLabel> line = itr.next();
+//      System.out.println(Sentence.listToString(line));
+//    }
   }
 }

@@ -69,7 +69,14 @@ public class ReadSentimentDataset {
     TregexPattern.compile("-LRB-=lrb . (__=n1 !< __ . (__=n2 !< __ . (__=n3 !< __ . -RRB-=rrb))) : (=n1 [ (== the . (=n2 == characters . (=n3 == /^\'$/))) | (== the . (=n2 == movie . (=n3 == /^\'s$/))) | (== of . (=n2 == middle-aged . (=n3 == romance))) | (== Jack . (=n2 == Nicholson . (=n3 == /^\'s$/))) | (== De . (=n2 == Palma . (=n3 == /^\'s$/))) | (== Clara . (=n2 == and . (=n3 == Paul))) | (== Sex . (=n2 == and . (=n3 == Lucía))) ])"),
     // only one of these, so can be very general
     TregexPattern.compile("/^401$/ > (__ > __=top)"),
+    TregexPattern.compile("by . (all > (__=all > __=allgp) . (means > (__=means > __=meansgp))) : (=allgp !== =meansgp)"),
+    // 20th century, 21st century
+    TregexPattern.compile("/^(?:20th|21st)$/ . Century=century"),
+
+    // Fix any stranded unitary nodes
     TregexPattern.compile("__ <: (__=unitary < __)"),
+    // relabel some nodes where punctuation changes the score for no apparent reason
+    // TregexPattern.compile("__=node <2 (__ < /^[!.?,;]$/) !<1 ~node <1 __=child > ~child"),
     // TODO: relabel words in some less expensive way?
     TregexPattern.compile("/^[1]$/=label <: /^(?i:protagonist)$/"),
   };
@@ -89,8 +96,11 @@ public class ReadSentimentDataset {
     Tsurgeon.parseOperation("[prune rrb] [prune lrb]"),
     Tsurgeon.parseOperation("[prune rrb] [prune lrb]"),
     Tsurgeon.parseOperation("replace top (2 (2 401k) (2 statement))"),
+    Tsurgeon.parseOperation("[move means $- all] [excise meansgp meansgp] [createSubtree 2 all means]"),
+    Tsurgeon.parseOperation("relabel century century"),
     // Fix any stranded unitary nodes
     Tsurgeon.parseOperation("[excise unitary unitary]"),
+    //Tsurgeon.parseOperation("relabel node /^.*$/={child}/"),
     Tsurgeon.parseOperation("relabel label /^.*$/2/"),
   };
 
@@ -225,6 +235,9 @@ public class ReadSentimentDataset {
    * <code>-train</code>, <code>-dev</code>, <code>-test</code>
    * Paths for saving the corresponding output files <br>
    * Each of these arguments is required.
+   * <br>
+   * Macro arguments exist in -inputDir and -outputDir, so you can for example run <br>
+   * <code>java edu.stanford.nlp.sentiment.ReadSentimentDataset -inputDir ../data/sentiment/stanfordSentimentTreebank  -outputDir .</code>
    */
   public static void main(String[] args) {
     String dictionaryFilename = null;

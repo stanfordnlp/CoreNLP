@@ -114,4 +114,16 @@ public class HashIndexTest extends TestCase  {
     }
   }
 
+
+  public void testCopyConstructor() {
+    Index<String> test = new HashIndex<String>();
+    test.add("Beauty");
+    test.add("And");
+    test.add("The");
+    test.add("Beast");
+
+
+    HashIndex<String> copy = new HashIndex<String>(test);
+    assertEquals(test, copy);
+  }
 }
