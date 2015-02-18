@@ -841,6 +841,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     return (value() == null) ? "" : value();
   }
 
+  public static boolean DISPLAY_SCORES = true;
+
   /**
    * Display a node, implementing Penn Treebank style layout
    */
@@ -866,13 +868,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       return;
     }
     pw.print("(");
-    String nodeString;
-    if (onlyLabelValue) {
-      String value = value();
-      nodeString = (value == null) ? "" : value;
-    } else {
-      nodeString = nodeString();
-    }
+    String nodeString = onlyLabelValue ? nodeString() : nodeString();
     pw.print(nodeString);
     // pw.flush();
     boolean parentIsNull = label() == null || label().value() == null;

@@ -180,11 +180,6 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
     return new EnglishGrammaticalStructureFactory(puncFilter, hf);
   }
 
-  @Override
-  public boolean supportsGrammaticalStructures() {
-    return true;
-  }
-
   /** {@inheritDoc} */
   @Override
   public HeadFinder headFinder() {
