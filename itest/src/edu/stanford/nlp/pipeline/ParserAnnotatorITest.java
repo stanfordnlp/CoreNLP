@@ -263,9 +263,9 @@ public class ParserAnnotatorITest extends TestCase {
   };
 
   static final String[] XPARSES = {
-    "(X (X I) (X saw) (X him) (X ordering) (X them) (X to) (X saw) (X .))",
-    "(X (X Jack) (X 's) (X father) (X has) (X n't) (X played) (X golf) (X since) (X 20) (X years) (X ago) (X .))",
-    "(X (X I) (X 'm) (X going) (X to) (X the) (X bookstore) (X to) (X return) (X a) (X book) (X Jack) (X and) (X his) (X friends) (X bought) (X me) (X .))"
+    "(X (XX I) (XX saw) (XX him) (XX ordering) (XX them) (XX to) (XX saw) (XX .))",
+    "(X (XX Jack) (XX 's) (XX father) (XX has) (XX n't) (XX played) (XX golf) (XX since) (XX 20) (XX years) (XX ago) (XX .))",
+    "(X (XX I) (XX 'm) (XX going) (XX to) (XX the) (XX bookstore) (XX to) (XX return) (XX a) (XX book) (XX Jack) (XX and) (XX his) (XX friends) (XX bought) (XX me) (XX .))"
   };
 }
 

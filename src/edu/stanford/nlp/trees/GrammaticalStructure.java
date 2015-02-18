@@ -59,7 +59,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
  * @see GrammaticalRelation
  * @see EnglishGrammaticalStructure
  */
-public abstract class GrammaticalStructure extends TreeGraph {
+public abstract class GrammaticalStructure implements Serializable {
 
   private static final boolean PRINT_DEBUGGING = System.getProperty("GrammaticalStructure", null) != null;
 
@@ -67,6 +67,16 @@ public abstract class GrammaticalStructure extends TreeGraph {
   protected final List<TypedDependency> allTypedDependencies;
 
   protected final Filter<String> puncFilter;
+
+  /**
+   * The root Tree node for this GrammaticalStructure.
+   */
+  protected final TreeGraphNode root;
+
+  /**
+   * A map from arbitrary integer indices to nodes.
+   */
+  private final Map<Integer, TreeGraphNode> indexMap = Generics.newHashMap();
 
   /**
    * Create a new GrammaticalStructure, analyzing the parse tree and
@@ -85,7 +95,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
    */
   public GrammaticalStructure(Tree t, Collection<GrammaticalRelation> relations,
                               Lock relationsLock, HeadFinder hf, Filter<String> puncFilter) {
-    super(t); // makes a Tree with TreeGraphNode nodes
+    this.root = new TreeGraphNode(t, this);
+    indexNodes(this.root);
     // add head word and tag to phrase nodes
     if (hf == null) {
       throw new AssertionError("Cannot use null HeadFinder");
@@ -123,6 +134,103 @@ public abstract class GrammaticalStructure extends TreeGraph {
     getExtraDeps(allTypedDependencies, puncTypedDepFilter, completeGraph);
   }
 
+
+  /**
+   * Assign sequential integer indices (starting with 1) to all
+   * nodes of the subtree rooted at this
+   * <code>Tree</code>.  The leaves are indexed first,
+   * from left to right.  Then the internal nodes are indexed,
+   * using a pre-order tree traversal.
+   */
+  private void indexNodes(TreeGraphNode tree) {
+    indexNodes(tree, indexLeaves(tree, 1));
+  }
+
+  /**
+   * Assign sequential integer indices to the leaves of the subtree
+   * rooted at this <code>TreeGraphNode</code>, beginning with
+   * <code>startIndex</code>, and traversing the leaves from left
+   * to right. If node is already indexed, then it uses the existing index.
+   *
+   * @param startIndex index for this node
+   * @return the next index still unassigned
+   */
+  private int indexLeaves(TreeGraphNode tree, int startIndex) {
+    if (tree.isLeaf()) {
+      int oldIndex = tree.index();
+      if (oldIndex >= 0) {
+        startIndex = oldIndex;
+      } else {
+        tree.setIndex(startIndex);
+      }
+      addNodeToIndexMap(startIndex, tree);
+      startIndex++;
+    } else {
+      for (TreeGraphNode child : tree.children) {
+        startIndex = indexLeaves(child, startIndex);
+      }
+    }
+    return startIndex;
+  }
+
+  /**
+   * Assign sequential integer indices to all nodes of the subtree
+   * rooted at this <code>TreeGraphNode</code>, beginning with
+   * <code>startIndex</code>, and doing a pre-order tree traversal.
+   * Any node which already has an index will not be re-indexed
+   * &mdash; this is so that we can index the leaves first, and
+   * then index the rest.
+   *
+   * @param startIndex index for this node
+   * @return the next index still unassigned
+   */
+  private int indexNodes(TreeGraphNode tree, int startIndex) {
+    if (tree.index() < 0) {		// if this node has no index
+      addNodeToIndexMap(startIndex, tree);
+      tree.setIndex(startIndex++);
+    }
+    if (!tree.isLeaf()) {
+      for (TreeGraphNode child : tree.children) {
+        startIndex = indexNodes(child, startIndex);
+      }
+    }
+    return startIndex;
+  }
+
+  /**
+   * Store a mapping from an arbitrary integer index to a node in
+   * this treegraph.  Normally a client shouldn't need to use this,
+   * as the nodes are automatically indexed by the
+   * <code>TreeGraph</code> constructor.
+   *
+   * @param index the arbitrary integer index
+   * @param node  the <code>TreeGraphNode</code> to be indexed
+   */
+  private void addNodeToIndexMap(int index, TreeGraphNode node) {
+    indexMap.put(Integer.valueOf(index), node);
+  }
+
+
+  /**
+   * Return the node in the this treegraph corresponding to the
+   * specified integer index.
+   *
+   * @param index the integer index of the node you want
+   * @return the <code>TreeGraphNode</code> having the specified
+   *         index (or <code>null</code> if such does not exist)
+   */
+  private TreeGraphNode getNodeByIndex(int index) {
+    return indexMap.get(Integer.valueOf(index));
+  }
+
+  /**
+   * Return the root Tree of this GrammaticalStructure.
+   *
+   * @return the root Tree of this GrammaticalStructure
+   */
+  public TreeGraphNode root() {
+    return root;
+  }
 
   private static void throwDepFormatException(String dep) {
      throw new RuntimeException(String.format("Dependencies should be for the format 'type(arg-idx, arg-idx)'. Could not parse '%s'", dep));
@@ -214,7 +322,8 @@ public abstract class GrammaticalStructure extends TreeGraph {
   }
 
   public GrammaticalStructure(List<TypedDependency> projectiveDependencies, TreeGraphNode root) {
-    super(root);
+    this.root = root;
+    indexNodes(this.root);
     this.puncFilter = Filters.acceptFilter();
     allTypedDependencies = typedDependencies = new ArrayList<TypedDependency>(projectiveDependencies);
   }
@@ -224,17 +333,14 @@ public abstract class GrammaticalStructure extends TreeGraph {
     this(t, relations, null, hf, puncFilter);
   }
 
-  // @Override
-  // public String toString() {
-    // StringBuilder sb = new StringBuilder(super.toString());
-    //    sb.append("Dependencies:");
-    //    sb.append("\n" + dependencies);
-    //    sb.append("Typed Dependencies:");
-    //    sb.append("\n" + typedDependencies);
-    //    sb.append("More Typed Dependencies:");
-    //    sb.append("\n" + moreTypedDependencies());
-    // return sb.toString();
-  // }
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append(root.toPrettyString(0).substring(1));
+    sb.append("Typed Dependencies:");
+    sb.append("\n" + typedDependencies);
+    return sb.toString();
+  }
 
   private static void attachStrandedNodes(TreeGraphNode t, TreeGraphNode root, boolean attach, Filter<String> puncFilter, DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph) {
     if (t.isLeaf()) {

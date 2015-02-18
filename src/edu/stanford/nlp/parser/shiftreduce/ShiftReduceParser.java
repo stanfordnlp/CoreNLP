@@ -139,6 +139,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     this.featureFactory = factory;
   }
 
+  /*
   private void readObject(ObjectInputStream in)
     throws IOException, ClassNotFoundException 
   {
@@ -159,6 +160,7 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       System.err.println("Adding rootOnlyStates: " + rootOnlyStates);
     }    
   }
+  */
 
   @Override
   public Options getOp() {
@@ -243,6 +245,11 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       copy.transitionIndex.add(transition);
     }
     
+    // TODO: would make more sense to put this in the constructor
+    copy.knownStates = Collections.unmodifiableSet(Generics.newHashSet(firstModel.knownStates));
+    copy.rootStates = Collections.unmodifiableSet(Generics.newHashSet(firstModel.rootStates));
+    copy.rootOnlyStates = Collections.unmodifiableSet(Generics.newHashSet(firstModel.rootOnlyStates));
+
     for (ShiftReduceParser model : models) {
       if (!model.transitionIndex.equals(copy.transitionIndex)) {
         throw new IllegalArgumentException("Can only average models with the same transition index");
@@ -863,9 +870,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
   }
 
-  private void trainAndSave(List<Pair<String, FileFilter>> trainTreebankPath, 
-                            Pair<String, FileFilter> devTreebankPath,
-                            String serializedPath) {
+  private void train(List<Pair<String, FileFilter>> trainTreebankPath, 
+                     Pair<String, FileFilter> devTreebankPath,
+                     String serializedPath, Set<String> allowedFeatures) {
     List<Tree> binarizedTrees = Generics.newArrayList();
     for (Pair<String, FileFilter> treebank : trainTreebankPath) {
       binarizedTrees.addAll(readBinarizedTreebank(treebank.first(), treebank.second()));
@@ -948,6 +955,9 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
 
         for (Update update : result.first) {
           for (String feature : update.features) {
+            if (allowedFeatures != null && !allowedFeatures.contains(feature)) {
+              continue;
+            }
             Weight weights = featureWeights.get(feature);
             if (weights == null) {
               weights = new Weight();
@@ -1042,14 +1052,6 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
     }
 
     condenseFeatures();
-
-    if (serializedPath != null) {
-      try {
-        IOUtils.writeObjectToFile(this, serializedPath);
-      } catch (IOException e) {
-        throw new RuntimeIOException(e);
-      }
-    }
   }
 
   public void setOptionFlags(String ... flags) {
@@ -1144,7 +1146,18 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
         ShiftReduceOptions op = buildTrainingOptions(tlppClass, newArgs);
         parser = new ShiftReduceParser(op);
       }
-      parser.trainAndSave(trainTreebankPath, devTreebankPath, serializedPath);
+      ShiftReduceOptions op = parser.op;
+      if (op.trainOptions().retrainAfterCutoff && op.trainOptions().featureFrequencyCutoff > 0) {
+        String tempName = serializedPath.substring(0, serializedPath.length() - 7) + "-" + "temp.ser.gz";
+        parser.train(trainTreebankPath, devTreebankPath, tempName, null);
+        parser.saveModel(tempName);
+        Set<String> features = parser.featureWeights.keySet();
+        parser = new ShiftReduceParser(op);
+        parser.train(trainTreebankPath, devTreebankPath, serializedPath, features);
+      } else {
+        parser.train(trainTreebankPath, devTreebankPath, serializedPath, null);
+      }
+      parser.saveModel(serializedPath);
     }
 
     if (serializedPath != null && parser == null) {

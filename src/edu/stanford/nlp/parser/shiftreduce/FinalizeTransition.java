@@ -5,27 +5,11 @@ import java.util.Set;
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.trees.Tree;
 
-// only needed for readObject
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.Collections;
-import edu.stanford.nlp.util.ErasureUtils;
-
 /**
  * Transition that finishes the processing of a state
  */
 public class FinalizeTransition implements Transition {
-  private Set<String> rootStates;
-
-  private void readObject(ObjectInputStream in)
-    throws IOException, ClassNotFoundException 
-  {
-    ObjectInputStream.GetField fields = in.readFields();
-    rootStates = ErasureUtils.uncheckedCast(fields.get("rootStates", null));
-    if (rootStates == null) {
-      rootStates = Collections.singleton("ROOT");
-    }
-  }
+  private final Set<String> rootStates;
 
   public FinalizeTransition(Set<String> rootStates) {
     this.rootStates = rootStates;

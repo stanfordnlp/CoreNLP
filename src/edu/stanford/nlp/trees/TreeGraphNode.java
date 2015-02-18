@@ -19,16 +19,13 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
 import static edu.stanford.nlp.trees.GrammaticalRelation.GOVERNOR;
 
 /**
- * A "TreeGraph" is a tree with additional directed, labeled arcs
- * between arbitrary pairs of nodes.  (So, it's a graph with a tree
- * skeleton.)  A <code>TreeGraphNode</code> represents any node in a
- * TreeGraph.  The additional labeled arcs are represented by using
- * {@link CoreLabel <code>CoreLabel</code>} labels at each node, which
- * contain <code>Map</code>s from arc label strings to
- * <code>Set</code>s of <code>TreeGraphNode</code>s.  Each
- * <code>TreeGraphNode</code> should contain a reference to a {@link
- * TreeGraph <code>TreeGraph</code>} object, which is a container for
- * the complete TreeGraph structure.<p>
+ * <p>
+ * A <code>TreeGraphNode</code> is simply a 
+ * {@link Tree <code>Tree</code>} 
+ * with some additional functionality.  For example, the
+ * <code>parent()</code> method works without searching from the root.
+ * Labels are always assumed to be 
+ * {@link CoreLabel <code>CoreLabel</code>}
  *
  * <p>This class makes the horrible mistake of changing the semantics of
  * equals and hashCode to go back to "==" and System.identityHashCode,
@@ -56,10 +53,10 @@ public class TreeGraphNode extends Tree implements HasParent {
   protected TreeGraphNode[] children = ZERO_TGN_CHILDREN;
 
   /**
-   * The {@link TreeGraph <code>TreeGraph</code>} of which this
+   * The {@link GrammaticalStructure <code>GrammaticalStructure</code>} of which this
    * node is part.
    */
-  protected TreeGraph tg;
+  protected GrammaticalStructure tg;
 
   /**
    * A leaf node should have a zero-length array for its
@@ -107,7 +104,7 @@ public class TreeGraphNode extends Tree implements HasParent {
    * @param t     the tree to copy
    * @param graph the graph of which this node is a part
    */
-  public TreeGraphNode(Tree t, TreeGraph graph) {
+  public TreeGraphNode(Tree t, GrammaticalStructure graph) {
     this(t, (TreeGraphNode) null);
     this.setTreeGraph(graph);
   }
@@ -195,72 +192,6 @@ public class TreeGraphNode extends Tree implements HasParent {
   }
 
   /**
-   * Assign sequential integer indices to the leaves of the subtree
-   * rooted at this <code>TreeGraphNode</code>, beginning with
-   * <code>startIndex</code>, and traversing the leaves from left
-   * to right. If node is already indexed, then it uses the existing index.
-   *
-   * @param startIndex index for this node
-   * @return the next index still unassigned
-   */
-  private int indexLeaves(int startIndex) {
-    if (isLeaf()) {
-      int oldIndex = index();
-      if (oldIndex>=0) {
-        startIndex = oldIndex;
-      } else {
-        setIndex(startIndex);
-      }
-      if (tg != null) {
-        tg.addNodeToIndexMap(startIndex, this);
-      }
-      startIndex++;
-    } else {
-      for (TreeGraphNode child : children) {
-        startIndex = child.indexLeaves(startIndex);
-      }
-    }
-    return startIndex;
-  }
-
-  /**
-   * Assign sequential integer indices to all nodes of the subtree
-   * rooted at this <code>TreeGraphNode</code>, beginning with
-   * <code>startIndex</code>, and doing a pre-order tree traversal.
-   * Any node which already has an index will not be re-indexed
-   * &mdash; this is so that we can index the leaves first, and
-   * then index the rest.
-   *
-   * @param startIndex index for this node
-   * @return the next index still unassigned
-   */
-  private int indexNodes(int startIndex) {
-    if (index() < 0) {		// if this node has no index
-      if (tg != null) {
-        tg.addNodeToIndexMap(startIndex, this);
-      }
-      setIndex(startIndex++);
-    }
-    if (!isLeaf()) {
-      for (TreeGraphNode child : children) {
-        startIndex = child.indexNodes(startIndex);
-      }
-    }
-    return startIndex;
-  }
-
-  /**
-   * Assign sequential integer indices (starting with 0) to all
-   * nodes of the subtree rooted at this
-   * <code>TreeGraphNode</code>.  The leaves are indexed first,
-   * from left to right.  Then the internal nodes are indexed,
-   * using a pre-order tree traversal.
-   */
-  protected void indexNodes() {
-    indexNodes(indexLeaves(1));
-  }
-
-  /**
    * Get the parent for the current node.
    */
   @Override
@@ -320,19 +251,19 @@ public class TreeGraphNode extends Tree implements HasParent {
   }
 
   /**
-   * Get the <code>TreeGraph</code> of which this node is a
+   * Get the <code>GrammaticalStructure</code> of which this node is a
    * part.
    */
-  protected TreeGraph treeGraph() {
+  protected GrammaticalStructure treeGraph() {
     return tg;
   }
 
   /**
-   * Set pointer to the <code>TreeGraph</code> of which this node
+   * Set pointer to the <code>GrammaticalStructure</code> of which this node
    * is a part.  Operates recursively to set pointer for all
    * descendants too.
    */
-  protected void setTreeGraph(TreeGraph tg) {
+  protected void setTreeGraph(GrammaticalStructure tg) {
     this.tg = tg;
     for (TreeGraphNode child : children) {
       child.setTreeGraph(tg);
@@ -622,7 +553,7 @@ public class TreeGraphNode extends Tree implements HasParent {
       System.out.println(t);
       TreeGraphNode tgn = new TreeGraphNode(t, (TreeGraphNode) null);
       System.out.println(tgn.toPrettyString(0));
-      tgn.indexNodes();
+      EnglishGrammaticalStructure gs = new EnglishGrammaticalStructure(tgn);
       System.out.println(tgn.toPrettyString(0));
       tgn.percolateHeads(new SemanticHeadFinder());
       System.out.println(tgn.toPrettyString(0));

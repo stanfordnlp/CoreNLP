@@ -58,7 +58,7 @@ echo ------------------------------- >&2
 set BASEDIR=%~dp0
 set DATADIR=%BASEDIR%data
 :: set LEXDIR=%DATADIR%lexicons
-set JAVACMD=java -mx1024m -cp "%BASEDIR%seg.jar" edu.stanford.nlp.ie.crf.CRFClassifier -sighanCorporaDict "%DATADIR%" -testFile "%file%" -inputEncoding %enc% -sighanPostProcessing true %ARGS%
+set JAVACMD=java -mx1024m -cp "%BASEDIR%seg.jar" edu.stanford.nlp.ie.crf.CRFClassifier -sighanCorporaDict "%DATADIR%" -textFile "%file%" -inputEncoding %enc% -sighanPostProcessing true %ARGS%
 set DICTS=%DATADIR%\dict-chris6.ser.gz
 set KBESTCMD=
 if not %kBest%==0 set kBestCmd=-kBest %kBest%

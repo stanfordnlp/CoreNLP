@@ -356,7 +356,10 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "nsubj", "nominal subject",
         SUBJECT, "S|SQ|SBARQ|SINV|SBAR|PRN", tregexCompiler,
         new String[] {
-          "S < ((NP|WHNP=target !< EX !<# (/^NN/ < (" + timeWordRegex + "))) $++ VP)",
+          // Testing against subj being over various verb patterns
+          // prevents us from matching nsubj in cases where we
+          // actually want to make it a dobj
+          "S=subj < ((NP|WHNP=target !< EX !<# (/^NN/ < (" + timeWordRegex + "))) $++ VP=verb) : (=subj !> VP | !<< (=verb < TO))",
           "S < ( NP=target <# (/^NN/ < " + timeWordRegex + ") !$++ NP $++VP)",
           "SQ|PRN < (NP=target !< EX $++ VP)",
           "SQ < (NP=target !< EX $- (/^(?:VB|AUX)/ < " + copularWordRegex + ") !$++ VP)",
@@ -503,6 +506,9 @@ public class EnglishGrammaticalRelations {
               // The next qualification eliminates parentheticals that
               // come after the actual dobj
               " <# (__ !$++ (NP $++ (/^[:]$/ $++ =target))) ",
+
+          // Examples such as "Rolls-Royce expects sales to remain steady"
+          "VP < (S < (NP|WHNP=target $++ (VP < TO)))",
 
           // This matches rare cases of misparses, such as "What
           // disease causes cancer?" where the "causes" does not get a
