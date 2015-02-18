@@ -411,7 +411,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     long numTokens = 0;
     int numFiles = inputFileList.size();
     if (numFiles == 0) {
-      Reader stdin = new BufferedReader(new InputStreamReader(System.in, charset));
+      Reader stdin = IOUtils.readerFromStdin(charset);
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out, charset));
       numTokens += tokReader(stdin, writer, parseInsidePattern, options, preserveLines, dump, lowerCase);
       IOUtils.closeIgnoringExceptions(writer);
@@ -737,8 +737,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     if (inputOutputFileList && parsedArgs != null) {
       outputFileList = new ArrayList<String>();
       for (String fileName : parsedArgs) {
-        BufferedReader r = new BufferedReader(
-          new InputStreamReader(new FileInputStream(fileName), charset));
+        BufferedReader r = IOUtils.readerFromString(fileName, charset);
         for (String inLine; (inLine = r.readLine()) != null; ) {
           String[] fields = inLine.split("\\s+");
           inputFileList.add(fields[0]);

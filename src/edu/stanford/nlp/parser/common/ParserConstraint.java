@@ -29,13 +29,13 @@ import java.util.regex.Pattern;
  * "SBAR|SBAR[^a-zA-Z].*" would match SBAR but not SBARQ constituents.
  */
 public class ParserConstraint implements Serializable {
-  public int start;
-  public int end;
-  public Pattern state;
+  public final int start;
+  public final int end;
+  public final Pattern state;
   
   private static final long serialVersionUID = 2;
 
-  public ParserConstraint() {}
+  //public ParserConstraint() {}
 
   public ParserConstraint(int start, int end, String pattern) {
     this(start, end, Pattern.compile(pattern));
@@ -45,5 +45,10 @@ public class ParserConstraint implements Serializable {
     this.start = start;
     this.end = end;
     this.state = state;
+  }
+
+  @Override
+  public String toString() {
+    return "ParserConstraint(" + start + "," + end + ":" + state + ")";
   }
 }

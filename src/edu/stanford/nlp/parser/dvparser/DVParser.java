@@ -132,9 +132,9 @@ public class DVParser {
     
     int numBatches = sentences.size() / op.trainOptions.batchSize + 1;
     System.err.println("Training on " + sentences.size() + " trees in " + numBatches + " batches");
-    System.err.println("Times through each training batch: " + op.trainOptions.dvIterations);
+    System.err.println("Times through each training batch: " + op.trainOptions.trainingIterations);
     System.err.println("QN iterations per batch: " + op.trainOptions.qnIterationsPerBatch);
-    for (int iter = 0; iter < op.trainOptions.dvIterations; ++iter) {
+    for (int iter = 0; iter < op.trainOptions.trainingIterations; ++iter) {
       List<Tree> shuffledSentences = new ArrayList<Tree>(sentences);
       Collections.shuffle(shuffledSentences, dvModel.rand);
       for (int batch = 0; batch < numBatches; ++batch) {
@@ -304,18 +304,18 @@ public class DVParser {
     this.parser = parser;
     this.op = parser.getOp();
 
-    if (op.trainOptions.dvSeed == 0) {
-      op.trainOptions.dvSeed = (new Random()).nextLong();
-      System.err.println("Random seed not set, using randomly chosen seed of " + op.trainOptions.dvSeed);
+    if (op.trainOptions.randomSeed == 0) {
+      op.trainOptions.randomSeed = (new Random()).nextLong();
+      System.err.println("Random seed not set, using randomly chosen seed of " + op.trainOptions.randomSeed);
     } else {
-      System.err.println("Random seed set to " + op.trainOptions.dvSeed);
+      System.err.println("Random seed set to " + op.trainOptions.randomSeed);
     }
 
     System.err.println("Word vector file: " + op.lexOptions.wordVectorFile);
     System.err.println("Size of word vectors: " + op.lexOptions.numHid);
     System.err.println("Number of hypothesis trees to train against: " + op.trainOptions.dvKBest);
     System.err.println("Number of trees in one batch: " + op.trainOptions.batchSize);
-    System.err.println("Number of iterations of trees: " + op.trainOptions.dvIterations);
+    System.err.println("Number of iterations of trees: " + op.trainOptions.trainingIterations);
     System.err.println("Number of qn iterations per batch: " + op.trainOptions.qnIterationsPerBatch);
     System.err.println("Learning rate: " + op.trainOptions.learningRate);
     System.err.println("Delta margin: " + op.trainOptions.deltaMargin);
@@ -407,7 +407,7 @@ public class DVParser {
     System.err.println("Options overlapping the parser:");
     System.err.println("  -trainingThreads <int>: How many threads to use when training.");
     System.err.println("  -dvKBest <int>: How many hypotheses to use from the underlying parser.");
-    System.err.println("  -dvIterations <int>: When training, how many times to go through the train set.");
+    System.err.println("  -trainingIterations <int>: When training, how many times to go through the train set.");
     System.err.println("  -regCost <double>: How large of a cost to put on regularization.");
     System.err.println("  -batchSize <int>: How many trees to use in each batch of the training.");
     System.err.println("  -qnIterationsPerBatch <int>: How many steps to take per batch.");
@@ -415,7 +415,7 @@ public class DVParser {
     System.err.println("  -qnTolerance <double>: Tolerance for early exit when optimizing a batch.");
     System.err.println("  -debugOutputFrequency <int>: How frequently to score a model when training and write out intermediate models.");
     System.err.println("  -maxTrainTimeSeconds <int>: How long to train before terminating.");
-    System.err.println("  -dvSeed <long>: A starting point for the random number generator.  Setting this should lead to repeatable results, even taking into account randomness.  Otherwise, a new random seed will be picked.");
+    System.err.println("  -randomSeed <long>: A starting point for the random number generator.  Setting this should lead to repeatable results, even taking into account randomness.  Otherwise, a new random seed will be picked.");
     System.err.println("  -wordVectorFile <name>: A filename to load word vectors from.");
     System.err.println("  -numHid: The size of the matrices.  In most circumstances, should be set to the size of the word vectors.");
     System.err.println("  -learningRate: The rate of optimization when training");
@@ -434,7 +434,7 @@ public class DVParser {
   /**
    * An example command line for training a new parser:
    * <br>
-   *  nohup java -mx6g edu.stanford.nlp.parser.dvparser.DVParser -cachedTrees /scr/nlp/data/dvparser/wsj/cached.wsj.train.simple.ser.gz -train -testTreebank  /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 -debugOutputFrequency 400 -nofilter -trainingThreads 5 -parser /u/nlp/data/lexparser/wsjPCFG.nocompact.simple.ser.gz -dvIterations 40 -batchSize 25 -model /scr/nlp/data/dvparser/wsj/wsj.combine.v2.ser.gz -unkWord "*UNK*" -dvCombineCategories &gt; /scr/nlp/data/dvparser/wsj/wsj.combine.v2.out 2&gt;&amp;1 &amp;
+   *  nohup java -mx6g edu.stanford.nlp.parser.dvparser.DVParser -cachedTrees /scr/nlp/data/dvparser/wsj/cached.wsj.train.simple.ser.gz -train -testTreebank  /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 -debugOutputFrequency 400 -nofilter -trainingThreads 5 -parser /u/nlp/data/lexparser/wsjPCFG.nocompact.simple.ser.gz -trainingIterations 40 -batchSize 25 -model /scr/nlp/data/dvparser/wsj/wsj.combine.v2.ser.gz -unkWord "*UNK*" -dvCombineCategories &gt; /scr/nlp/data/dvparser/wsj/wsj.combine.v2.out 2&gt;&amp;1 &amp;
    */
   public static void main(String[] args) 
     throws IOException, ClassNotFoundException
@@ -479,7 +479,7 @@ public class DVParser {
           "-wordVectorFile", Options.LexOptions.DEFAULT_WORD_VECTOR_FILE,
           "-dvKBest", Integer.toString(TrainOptions.DEFAULT_K_BEST),
           "-batchSize", Integer.toString(TrainOptions.DEFAULT_BATCH_SIZE),
-          "-dvIterations", Integer.toString(TrainOptions.DEFAULT_DV_ITERATIONS),
+          "-trainingIterations", Integer.toString(TrainOptions.DEFAULT_TRAINING_ITERATIONS),
           "-qnIterationsPerBatch", Integer.toString(TrainOptions.DEFAULT_QN_ITERATIONS_PER_BATCH),
           "-regCost", Double.toString(TrainOptions.DEFAULT_REGCOST),
           "-learningRate", Double.toString(TrainOptions.DEFAULT_LEARNING_RATE),
@@ -559,7 +559,7 @@ public class DVParser {
       lexparser = LexicalizedParser.loadModel(parserPath, newArgs);
       dvparser = new DVParser(lexparser);
     } else if (modelPath != null) {
-      lexparser = LexicalizedParser.loadModel(initialModelPath, newArgs);
+      lexparser = LexicalizedParser.loadModel(modelPath, newArgs);
       DVModel model = getModelFromLexicalizedParser(lexparser);
       dvparser = new DVParser(model, lexparser);
     }

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# Reformat as [-]token[-]|||POS_TAGS
+cat $1 | awk '
+BEGIN { FS = "·"; ORS = " "; }
+/^t/ { print ($3 == "t" ? "-" : "") $9 ($4 == "t" ? "-" : "") "|||" $2; }
+/^TREE/ { print "\n"; }
+' | sed 's/^\s*//' | sed 's/\s*$//'

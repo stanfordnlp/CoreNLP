@@ -202,7 +202,7 @@ echo "" >>& ./serializedParsers.log
 ########
 # FRENCH
 ########
-set fr_data_dir=$data_dir/French
+set fr_data_dir=$data_dir/FrenchCC
 set fr_conf_file=$JAVANLP_HOME/projects/core/src/edu/stanford/nlp/international/french/pipeline/configurations/ftb-latest.conf
 set fr_train_args="French 40 $fr_data_dir/FTB-All.utf8.txt $fr_data_dir/FTB-Dev.utf8.txt BASELINE_fr -saveToSerializedFile frenchFactored.ser.gz"
 

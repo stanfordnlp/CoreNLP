@@ -12,7 +12,6 @@ class CoordinationPattern extends TregexPattern {
 
   private final boolean isConj;
   private final List<TregexPattern> children;
-  private final boolean changesVariables;
 
   /* if isConj is true, then it is an "AND" ; if it is false, it is an "OR".*/
   public CoordinationPattern(List<TregexPattern> children, boolean isConj) {
@@ -21,13 +20,6 @@ class CoordinationPattern extends TregexPattern {
     }
     this.children = children;
     this.isConj = isConj;
-    boolean changesVars = false;
-    for (TregexPattern child : children) {
-      if (child.getChangesVariables()) {
-        changesVars = true;
-      }
-    }
-    this.changesVariables = changesVars;
     //    System.out.println("Made " + (isConj ? "and " : "or ") + "node with " + children.size() + " children.");
   }
 
@@ -69,11 +61,6 @@ class CoordinationPattern extends TregexPattern {
       sb.append(']');
     }
     return sb.toString();
-  }
-
-  @Override
-  boolean getChangesVariables() {
-    return changesVariables;
   }
 
   @Override
@@ -133,11 +120,6 @@ class CoordinationPattern extends TregexPattern {
       }
     }
 
-    @Override
-    boolean getChangesVariables() {
-      return myNode.getChangesVariables();
-    }
-
     // find the next local match
     @Override
     public boolean matches() {  // also known as "FUN WITH LOGIC"
@@ -178,11 +160,6 @@ class CoordinationPattern extends TregexPattern {
             children[currChild].resetChildIter();
             // go backwards to see if we can continue matching from an
             // earlier location.
-            // TODO: perhaps there should be a version where we only
-            // care about new assignments to the root, or new
-            // assigments to the root and variables, in which case we
-            // could make use of getChangesVariables() to optimize how
-            // many nodes we can skip past
             --currChild;
             if (currChild < 0) {
               return myNode.isOptional();

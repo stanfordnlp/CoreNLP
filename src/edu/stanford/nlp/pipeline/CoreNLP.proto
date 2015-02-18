@@ -5,31 +5,42 @@ option java_outer_classname = "CoreNLPProtos";
 
 message Document {
   required string     text        = 1;
-  repeated Token      token       = 2;
-  repeated Sentence   sentence    = 3;
-  repeated CorefChain corefChain  = 4;
-  optional string     docID       = 5;
+  repeated Sentence   sentence    = 2;
+  repeated CorefChain corefChain  = 3;
+  optional string     docID       = 4;
+
+  /**
+   * A peculiar field, for the corner case when a Document is
+   * serialized without any sentences. Otherwise
+   */
+  repeated Token      sentencelessToken = 5;
+
+  extensions 100 to 255;
 }
 
 //
 // The serialized version of a CoreMap representing a sentence.
 //
 message Sentence {
-  required uint32          tokenOffsetBegin                    = 1;
-  required uint32          tokenOffsetEnd                      = 2;
-  optional uint32          sentenceIndex                       = 3;
-  optional uint32          characterOffsetBegin                = 4;
-  optional uint32          characterOffsetEnd                  = 5;
-  optional ParseTree       parseTree                           = 6;
-  optional DependencyGraph basicDependencies                   = 7;
-  optional DependencyGraph collapsedDependencies               = 8;
-  optional DependencyGraph collapsedCCProcessedDependencies    = 9;
-  optional uint32          paragraph                           = 10;
-  
+  repeated Token           token                               = 1;
+  required uint32          tokenOffsetBegin                    = 2;
+  required uint32          tokenOffsetEnd                      = 3;
+  optional uint32          sentenceIndex                       = 4;
+  optional uint32          characterOffsetBegin                = 5;
+  optional uint32          characterOffsetEnd                  = 6;
+  optional ParseTree       parseTree                           = 7;
+  optional DependencyGraph basicDependencies                   = 8;
+  optional DependencyGraph collapsedDependencies               = 9;
+  optional DependencyGraph collapsedCCProcessedDependencies    = 10;
+  optional uint32          paragraph                           = 11;
+
   // Fields set by other annotators in CoreNLP
-  optional bool            hasRelationAnnotations              = 101;
-  repeated Entity          entity                              = 102;
-  repeated Relation        relation                            = 103;
+  optional bool            hasRelationAnnotations              = 51;
+  repeated Entity          entity                              = 52;
+  repeated Relation        relation                            = 53;
+  optional bool            hasNumerizedTokensAnnotation        = 54;
+
+  extensions 100 to 255;
 }
 
 //
@@ -62,9 +73,9 @@ message Token {
   optional string answer          = 24;   // A temporary annotation which is occasionally left in
 
   // Fields set by other annotators in CoreNLP
-  optional string gender          = 101;  // gender annotation (machine reading)
-  optional string trueCase        = 102;  // true case type of token
-  optional string trueCaseText    = 103;  // true case gloss of token
+  optional string gender          = 51;  // gender annotation (machine reading)
+  optional string trueCase        = 52;  // true case type of token
+  optional string trueCaseText    = 53;  // true case gloss of token
 
   // Fields in the CoreLabel java class that are moved elsewhere
   //       string text           @see Document#text + character offsets
@@ -72,6 +83,8 @@ message Token {
   //       string docID          @see Document#docID
   //       uint32 index          @see implicit in Sentence
   //       uint32 paragraph      @see Sentence#paragraph
+
+  extensions 100 to 255;
 }
 
 //
@@ -104,7 +117,7 @@ message DependencyGraph {
   
   repeated Node   node = 1;
   repeated Edge   edge = 2;
-  repeated uint32 root = 3;
+  repeated uint32 root = 3 [packed=true];
 }
 
 //

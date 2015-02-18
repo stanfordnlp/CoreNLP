@@ -28,12 +28,15 @@ import java.util.*;
  * @author Jenny Finkel
  * @author Mihai Surdeanu (modified it to work with the new NERClassifierCombiner)
  */
-public class NERCombinerAnnotator implements Annotator {
+public class NERCombinerAnnotator extends SentenceAnnotator {
 
   private final NERClassifierCombiner ner;
 
   private final Timing timer = new Timing();
   private boolean VERBOSE = true;
+
+  private final long maxTime;
+  private final int nThreads;
 
   public NERCombinerAnnotator() throws IOException, ClassNotFoundException {
     this(true);
@@ -51,28 +54,33 @@ public class NERCombinerAnnotator implements Annotator {
     }
   }
 
-  public NERCombinerAnnotator(boolean verbose) throws IOException, ClassNotFoundException {
-    VERBOSE = verbose;
-    timerStart("Loading NER combiner model...");
-    ner = new NERClassifierCombiner(new Properties());
-    timerStop();
+  public NERCombinerAnnotator(boolean verbose) 
+    throws IOException, ClassNotFoundException 
+  {
+    this(new NERClassifierCombiner(new Properties()), verbose);
   }
 
-  public NERCombinerAnnotator(boolean verbose, String... classifiers)
-  throws IOException, ClassNotFoundException {
-    VERBOSE = verbose;
-    timerStart("Loading NER combiner model...");
-    ner = new NERClassifierCombiner(classifiers);
-    timerStop();
+  public NERCombinerAnnotator(boolean verbose, String... classifiers) 
+    throws IOException, ClassNotFoundException 
+  {
+    this(new NERClassifierCombiner(classifiers), verbose);
   }
 
   public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose) {
+    this(ner, verbose, 1, 0);
+  }
+
+  public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime) {
     VERBOSE = verbose;
     this.ner = ner;
+    this.maxTime = maxTime;
+    this.nThreads = nThreads;
   }
 
   public NERCombinerAnnotator(String name, Properties properties) {
-    this(createNERClassifierCombiner(name, properties), false);
+    this(createNERClassifierCombiner(name, properties), false, 
+         PropertiesUtils.getInt(properties, name + ".nthreads", PropertiesUtils.getInt(properties, "nthreads", 1)),
+         PropertiesUtils.getLong(properties, name + ".maxtime", 0));
   }
 
   private final static NERClassifierCombiner createNERClassifierCombiner(String name, Properties properties) {
@@ -107,25 +115,33 @@ public class NERCombinerAnnotator implements Annotator {
               models.toArray(new String[models.size()]));
     } catch (FileNotFoundException e) {
       throw new RuntimeIOException(e);
-   }
-   return nerCombiner;
- }
-
-public void annotate(Annotation annotation) {
-    timerStart("Adding NER Combiner annotation...");
-    if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
-      // classify tokens for each sentence
-      for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-        doOneSentence(annotation, sentence);
-      }
-      this.ner.finalizeAnnotation(annotation);
-    } else {
-      throw new RuntimeException("unable to find sentences in: " + annotation);
     }
-    //timerStop("done.");
+
+    return nerCombiner;
+  }
+  
+  @Override
+  protected int nThreads() {
+    return nThreads;
   }
 
-  public CoreMap doOneSentence(Annotation annotation, CoreMap sentence) {
+  @Override
+  protected long maxTime() {
+    return maxTime;
+  };  
+
+  @Override
+  public void annotate(Annotation annotation) {
+    timerStart("Adding NER Combiner annotation...");
+
+    super.annotate(annotation);
+
+    this.ner.finalizeAnnotation(annotation);
+    timerStop();
+  }
+
+  @Override
+  public void doOneSentence(Annotation annotation, CoreMap sentence) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     List<CoreLabel> output = this.ner.classifySentenceWithGlobalInformation(tokens, annotation, sentence);
     if (VERBOSE) {
@@ -156,7 +172,6 @@ public void annotate(Annotation annotation) {
       }
       System.err.println(']');
     }
-    return sentence;
   }
 
   @Override

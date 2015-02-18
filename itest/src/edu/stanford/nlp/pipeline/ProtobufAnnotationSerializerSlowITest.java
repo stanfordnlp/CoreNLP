@@ -59,7 +59,7 @@ public class ProtobufAnnotationSerializerSlowITest {
   }
 
   @SuppressWarnings("unchecked")
-  private void sameAsRead(Annotation doc, Annotation readDoc) {
+  public static void sameAsRead(Annotation doc, Annotation readDoc) {
     // Run the original document through the number normalizer
     if (doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
@@ -158,11 +158,20 @@ public class ProtobufAnnotationSerializerSlowITest {
             } else if (sentA.containsKey(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) && !sentA.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).equals(sentB.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class))) {
               assertTrue("Collapsed graph for sentence " + i + " doesn't match", false);
             } else {
+              for (Class x : sentA.keySet()) {
+                if (!sentA.get(x).equals(sentB.get(x))) {
+                  assertTrue("" + x.getSimpleName() + " for sentence " + i + " does not match", false);
+                }
+              }
+              for (Class x : sentB.keySet()) {
+                if (!sentB.get(x).equals(sentA.get(x))) {
+                  assertTrue("" + x.getSimpleName() + " for sentence " + i + " does not match", false);
+                }
+              }
               assertTrue("Sentence " + i + " doesn't match (don't know why?)", false);
             }
           }
         }
-
       } else {
         assertTrue("Annotations don't match (don't know why?)", false);
       }
@@ -225,7 +234,7 @@ public class ProtobufAnnotationSerializerSlowITest {
     assertNotNull(compressedProto);
 
     // Check size
-    assertTrue("" + compressedProto.length, compressedProto.length < 275000);
+    assertTrue("" + compressedProto.length, compressedProto.length < 290000);
     assertTrue("" + uncompressedProto.length, uncompressedProto.length < 1000000);
   }
 
@@ -311,6 +320,29 @@ public class ProtobufAnnotationSerializerSlowITest {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Test
+  public void testSerializeRelation() {
+    try {
+      AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+      // Write
+      Annotation doc = new StanfordCoreNLP(new Properties(){{
+        setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,relation");
+      }}).process(prideAndPrejudiceChapters1to5);
+      ByteArrayOutputStream ks = new ByteArrayOutputStream();
+      serializer.write(doc, ks).close();
+
+      // Read
+      InputStream kis = new ByteArrayInputStream(ks.toByteArray());
+      Pair<Annotation, InputStream> pair = serializer.read(kis);
+      pair.second.close();
+      Annotation readDoc = pair.first;
+      kis.close();
+
+      sameAsRead(doc, readDoc);
+    } catch (Exception e) { throw new RuntimeException(e); }
+
   }
 
   /**

@@ -19,8 +19,9 @@ import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.sequences.BestSequenceFinder;
 import edu.stanford.nlp.sequences.ExactBestSequenceFinder;
 import edu.stanford.nlp.sequences.SequenceModel;
-import edu.stanford.nlp.tagger.common.TaggerConstants;
+import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.util.ArrayUtils;
+import edu.stanford.nlp.util.ConfusionMatrix;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
@@ -114,7 +115,7 @@ public class TestSentence implements SequenceModel {
         sent.add(s.get(j).word());
       }
     }
-    sent.add(TaggerConstants.EOS_WORD);
+    sent.add(Tagger.EOS_WORD);
     if (reuseTags) {
       this.originalTags = new ArrayList<String>(sz + 1);
       for (int j = 0; j < sz; ++j) {
@@ -124,7 +125,7 @@ public class TestSentence implements SequenceModel {
           originalTags.add(null);
         }
       }
-      originalTags.add(TaggerConstants.EOS_TAG);
+      originalTags.add(Tagger.EOS_TAG);
     }
     size = sz + 1;
     if (VERBOSE) {
@@ -287,6 +288,18 @@ public class TestSentence implements SequenceModel {
       }
       pw.println(sw);
     }
+  }
+
+  /**
+   * Update a confusion matrix with the errors from this sentence.
+   *
+   * @param finalTags Chosen tags for sentence
+   * @param confusionMatrix Confusion matrix to write to
+   */
+  protected void updateConfusionMatrix(String[] finalTags,
+                                       ConfusionMatrix<String> confusionMatrix) {
+    for (int i = 0; i < correctTags.length; i++)
+      confusionMatrix.add(finalTags[i], correctTags[i]);
   }
 
 
@@ -571,7 +584,8 @@ public class TestSentence implements SequenceModel {
     int numTags = maxentTagger.numTags();
     double[][][] probabilities = new double[size][kBestSize][numTags];
     calculateProbs(probabilities);
-    for (int current = 0; current < size; current++) {
+
+    for (int current = 0; current < correctTags.length; current++) {
       pfu.print(sent.get(current));
       double[] probs = new double[3];
       String[] tag3 = new String[3];

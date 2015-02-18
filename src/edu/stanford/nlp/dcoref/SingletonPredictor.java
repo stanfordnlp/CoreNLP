@@ -116,7 +116,7 @@ public class SingletonPredictor {
   
   /**
    * Train the singleton predictor using a logistic regression classifier.
-   * @param Dataset of features
+   * @param pDataset Dataset of features
    * @return Singleton predictor
    */
   public LogisticClassifier<String, String> train(GeneralDataset<String, String> pDataset){

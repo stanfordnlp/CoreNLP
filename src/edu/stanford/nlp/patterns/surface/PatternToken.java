@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.logging.Redwood;
 
 /**
  * Class to represent a target phrase. Note that you can give additional negative constraints 
@@ -19,7 +20,6 @@ public class PatternToken implements Serializable {
   String tag;
   boolean useTag;
   int numWordsCompound;
-  String prevContext = "", nextContext = "";
   boolean useNER = false;
   String nerTag = null;
   boolean useTargetParserParentRestriction = false;
@@ -28,6 +28,9 @@ public class PatternToken implements Serializable {
   public PatternToken(String tag, boolean useTag, boolean getCompoundPhrases,
       int numWordsCompound, String nerTag, boolean useNER,
       boolean useTargetParserParentRestriction, String grandparentParseTag) {
+    if(useNER && nerTag == null){
+      throw new RuntimeException("NER tag is null and using NER restriction is true. Check your data.");
+    }
     this.tag = tag;
     this.useTag = useTag;
     this.numWordsCompound = numWordsCompound;
@@ -36,7 +39,14 @@ public class PatternToken implements Serializable {
     this.nerTag = nerTag;
     this.useNER = useNER;
     this.useTargetParserParentRestriction = useTargetParserParentRestriction;
-    this.grandparentParseTag = grandparentParseTag;
+    if(useTargetParserParentRestriction){
+      if(grandparentParseTag == null){
+        Redwood.log(ConstantsAndVariables.extremedebug,"Grand parent parse tag null ");
+        this.grandparentParseTag = "null";
+      }
+      else
+        this.grandparentParseTag = grandparentParseTag;
+    }
   }
 
   // static public PatternToken parse(String str) {
@@ -73,10 +83,6 @@ public class PatternToken implements Serializable {
 
   String getTokenStr(List<String> notAllowedClasses) {
     String str = " (?$term ";
-    if (!prevContext.isEmpty()) {
-      str += prevContext + " ";
-    }
-
     List<String> restrictions = new ArrayList<String>();
     if (useTag) {
       restrictions.add("{tag:/" + tag + ".*/}");
@@ -97,32 +103,33 @@ public class PatternToken implements Serializable {
     str += "[" + StringUtils.join(restrictions, " & ") + "]{1,"
         + numWordsCompound + "}";
 
-    if (!nextContext.isEmpty())
-      str += " " + nextContext;
-
     str += ")";
 
     str = StringUtils.toAscii(str);
     return str;
   }
 
-  void setPreviousContext(String str) {
-    this.prevContext = str;
-  }
-
-  void setNextContext(String str) {
-    this.nextContext = str;
-  }
 
   @Override
   public boolean equals(Object b) {
     if (!(b instanceof PatternToken))
       return false;
     PatternToken t = (PatternToken) b;
+    if(this.useNER != t.useNER || this.useTag != t.useTag || this.useTargetParserParentRestriction != t.useTargetParserParentRestriction || this.numWordsCompound != t.numWordsCompound)
+      return false;
+      
+    if (useTag && ! this.tag.equals(t.tag)) {
+      return false;
+    }
 
-    if (t.getTokenStr(null).equals(this.getTokenStr(null)))
-      return true;
-    return false;
+    if (useNER && ! this.nerTag.equals(t.nerTag)){
+      return false;
+    }
+
+    if (useTargetParserParentRestriction && ! this.grandparentParseTag.equals(t.grandparentParseTag))
+      return false;
+    
+    return true;
   }
 
   @Override

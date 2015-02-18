@@ -245,26 +245,26 @@ public class CoordinationTransformer implements TreeTransformer {
     return Tsurgeon.processPattern(removeXOverXTregex, removeXOverXTsurgeon, t);    
   }
 
-  private static final TregexPattern[] matchPatterns = {
-    // UCP (JJ ...) -> ADJP
-    // UCP (DT JJ ...) -> ADJP
-    // UCP (... (ADJP (JJR older|younger))) -> ADJP
-    // UCP (N ...) -> NP
-    // UCP ADVP -> ADVP
-    // Might want to look for ways to include RB for flatter structures,
-    // but then we have to watch out for (RB not) for example
-    // Note that the order of OR expressions means the older|younger
-    // pattern takes precedence
+  // UCP (JJ ...) -> ADJP
+  // UCP (DT JJ ...) -> ADJP
+  // UCP (... (ADJP (JJR older|younger))) -> ADJP
+  // UCP (N ...) -> NP
+  // UCP ADVP -> ADVP
+  // Might want to look for ways to include RB for flatter structures,
+  // but then we have to watch out for (RB not) for example
+  // Note that the order of OR expressions means the older|younger
+  // pattern takes precedence
+  // By searching for everything at once, then using one tsurgeon
+  // which fixes everything at once, we can save quite a bit of time
+  private static final TregexPattern ucpRenameTregex = 
     TregexPattern.compile("/^UCP/=ucp [ <, /^JJ|ADJP/=adjp | ( <1 DT <2 /^JJ|ADJP/=adjp ) |" + 
                           " <- (ADJP=adjp < (JJR < /^(?i:younger|older)$/)) |" + 
                           " <, /^N/=np | ( <1 DT <2 /^N/=np ) | " +
-                          " <, /^ADVP/=advp ]"),
-  };
+                          " <, /^ADVP/=advp ]");
 
-  private static final TsurgeonPattern[] operations = {
-    // TODO: this turns UCP-TMP into ADVP instead of ADVP-TMP.  What do we actually want?
-    Tsurgeon.parseOperation("[if exists adjp relabel ucp /^UCP(.*)$/ADJP$1/] [if exists np relabel ucp /^UCP(.*)$/NP$1/] [if exists advp relabel ucp /^UCP(.*)$/ADVP/]"),
-  };
+  // TODO: this turns UCP-TMP into ADVP instead of ADVP-TMP.  What do we actually want?
+  private static final TsurgeonPattern ucpRenameTsurgeon =
+    Tsurgeon.parseOperation("[if exists adjp relabel ucp /^UCP(.*)$/ADJP$1/] [if exists np relabel ucp /^UCP(.*)$/NP$1/] [if exists advp relabel ucp /^UCP(.*)$/ADVP/]");
 
   /**
    * Transforms t if it contains an UCP, it will change the UCP tag
@@ -280,20 +280,7 @@ public class CoordinationTransformer implements TreeTransformer {
     if (t == null) {
       return null;
     }
-    Tree firstChild = t.firstChild();
-    if (firstChild != null) {
-      // TODO: precompile the patterns, check to see whether this or
-      // calling for each pattern is more efficient
-      List<Pair<TregexPattern,TsurgeonPattern>> ops = Generics.newArrayList();
-
-      for (int i = 0; i < operations.length; i++) {
-        ops.add(Generics.newPair(matchPatterns[i], operations[i]));
-      }
-
-      return Tsurgeon.processPatternsOnTree(ops, t);
-    } else {
-      return t;
-    }
+    return Tsurgeon.processPattern(ucpRenameTregex, ucpRenameTsurgeon, t);
   }
 
 

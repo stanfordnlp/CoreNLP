@@ -767,12 +767,19 @@ public class NERGUI {
     return colors;
   }
 
+  public static boolean isMacOSX() {
+    return System.getProperty("os.name").toLowerCase().startsWith("mac os x");
+  }
+
   /** Run the GUI.  This program accepts no command-line arguments.
    *  Everything is entered into the GUI.
    */
   public static void main(String[] args) {
     //Schedule a job for the event-dispatching thread:
     //creating and showing this application's GUI.
+    if (isMacOSX()) {
+      System.setProperty("apple.laf.useScreenMenuBar", "true");
+    }
     SwingUtilities.invokeLater(new Runnable() {
         @Override
         public void run() {
@@ -781,4 +788,5 @@ public class NERGUI {
         }
       });
   }
+
 }

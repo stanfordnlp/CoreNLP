@@ -25,14 +25,14 @@ public class CoreMapSequenceMatcher<T extends CoreMap> extends SequenceMatcher<T
             }
           };
 
- public CoreMapSequenceMatcher(SequencePattern pattern, List<? extends T> tokens) {
+ public CoreMapSequenceMatcher(SequencePattern<T> pattern, List<? extends T> tokens) {
     super(pattern, tokens);
 //    this.nodesToStringConverter = COREMAP_LIST_TO_STRING_CONVERTER;
   }
 
   public static class BasicCoreMapSequenceMatcher extends CoreMapSequenceMatcher<CoreMap> {
     CoreMap annotation;
-    public BasicCoreMapSequenceMatcher(SequencePattern pattern, CoreMap annotation) {
+    public BasicCoreMapSequenceMatcher(SequencePattern<CoreMap> pattern, CoreMap annotation) {
       super(pattern, annotation.get(CoreAnnotations.TokensAnnotation.class));
       this.annotation = annotation;
       this.nodesToStringConverter = COREMAP_LIST_TO_STRING_CONVERTER;

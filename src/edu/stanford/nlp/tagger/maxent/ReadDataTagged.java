@@ -13,7 +13,7 @@ import java.util.Map;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.WordTag;
 import edu.stanford.nlp.stats.IntCounter;
-import edu.stanford.nlp.tagger.common.TaggerConstants;
+import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.tagger.io.TaggedFileReader;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 import edu.stanford.nlp.util.Generics;
@@ -103,8 +103,8 @@ public class ReadDataTagged {
       }
       maxLen = (sentence.size() > maxLen ? sentence.size() : maxLen);
       minLen = (sentence.size() < minLen ? sentence.size() : minLen);
-      words.add(TaggerConstants.EOS_WORD);
-      tags.add(TaggerConstants.EOS_TAG);
+      words.add(Tagger.EOS_WORD);
+      tags.add(Tagger.EOS_TAG);
       numElements = numElements + sentence.size() + 1;
       // iterate over the words in the sentence
       for (int i = 0; i < sentence.size() + 1; i++) {

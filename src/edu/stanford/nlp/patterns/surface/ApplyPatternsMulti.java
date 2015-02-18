@@ -1,5 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,13 +11,9 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.tokensregex.MultiPatternMatcher;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatchResult;
-import edu.stanford.nlp.ling.tokensregex.SequencePattern;
-import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.surface.ConstantsAndVariables;
-import edu.stanford.nlp.patterns.surface.Data;
 import edu.stanford.nlp.patterns.surface.PatternsAnnotations;
-import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.CoreMap;
@@ -28,22 +25,17 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
   String label;
   Map<TokenSequencePattern, SurfacePattern> patterns;
   List<String> sentids;
-  Set<String> alreadyIdentifiedWords;
-  boolean restrictToMatched;
-  boolean useGoogleNgrams;
   boolean removeStopWordsFromSelectedPhrases;
   boolean removePhrasesWithStopWords;
   ConstantsAndVariables constVars;
-  Set<String> ignoreWords;
+  //Set<String> ignoreWords;
   MultiPatternMatcher<CoreMap> multiPatternMatcher;
+  Map<String, List<CoreLabel>> sents = null;
 
-  public ApplyPatternsMulti(List<String> sentids, Map<TokenSequencePattern, SurfacePattern> patterns, Set<String> commonEngWords, Set<String> alreadyIdentifiedWords,
-      boolean restrictToMatched, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
+  public ApplyPatternsMulti(Map<String, List<CoreLabel>> sents, List<String> sentids, Map<TokenSequencePattern, SurfacePattern> patterns, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
+    this.sents = sents;
     this.patterns = patterns;
-    
     multiPatternMatcher = TokenSequencePattern.getMultiPatternMatcher(patterns.keySet());
-    this.alreadyIdentifiedWords = alreadyIdentifiedWords;
-    this.restrictToMatched = restrictToMatched;
     this.sentids = sentids;
     this.label = label;
     this.removeStopWordsFromSelectedPhrases = removeStopWordsFromSelectedPhrases;
@@ -58,10 +50,9 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
     CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>();
 
     TwoDimensionalCounter<Pair<String, String>, SurfacePattern> allFreq = new TwoDimensionalCounter<Pair<String, String>, SurfacePattern>();
-
     for (String sentid : sentids) {
-      List<CoreLabel> sent = Data.sents.get(sentid);
-      
+      List<CoreLabel> sent = sents.get(sentid);
+
       Iterable<SequenceMatchResult<CoreMap>> matched = multiPatternMatcher.findAllNonOverlappingMatchesPerPattern(sent);
       for (SequenceMatchResult<CoreMap> m: matched) {
         int s = m.start("$term");
@@ -72,6 +63,11 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
         String phraseLemma = "";
         boolean useWordNotLabeled = false;
         boolean doNotUse = false;
+        
+        //to make sure we discard phrases with stopwords in between, but include the ones in which stop words were removed at the ends if removeStopWordsFromSelectedPhrases is true
+        boolean[] addedindices = new boolean[e-s];
+        Arrays.fill(addedindices, false);
+        
         for (int i = s; i < e; i++) {
           CoreLabel l = sent.get(i);
           l.set(PatternsAnnotations.MatchedPattern.class, true);
@@ -83,7 +79,7 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
               doNotUse = true;
             }
           }
-          boolean containsStop = containsStopWord(l, constVars.getCommonEngWords(), constVars.ignoreWordRegex, ignoreWords);
+          boolean containsStop = containsStopWord(l, constVars.getCommonEngWords(), constVars.ignoreWordRegex);
           if (removePhrasesWithStopWords && containsStop) {
             doNotUse = true;
           } else {
@@ -94,18 +90,22 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
               }
               phrase += " " + l.word();
               phraseLemma += " " + l.lemma();
-
+              addedindices[i-s] = true;
             }
           }
         }
+        
+        for(int i =0; i < addedindices.length; i++){
+          if(i > 0 && i < addedindices.length -1 && addedindices[i-1] == true && addedindices[i] == false && addedindices[i+1] == true){
+            doNotUse = true;
+            break;
+          }
+        }
+        
         if (!doNotUse && useWordNotLabeled) {
           phrase = phrase.trim();
           phraseLemma = phraseLemma.trim();
-          
-          //means words were removed from between instead from at the ends
-          if(!Data.rawFreq.containsKey(phrase))
-            continue;
-          
+
           allFreq.incrementCount(new Pair<String, String>(phrase, phraseLemma), matchedPat, 1.0);
         }
       }
@@ -165,12 +165,12 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
     return new Pair<TwoDimensionalCounter<Pair<String, String>, SurfacePattern>, CollectionValuedMap<SurfacePattern, Triple<String, Integer, Integer>>>(allFreq, matchedTokensByPat);
   }
 
-  boolean containsStopWord(CoreLabel l, Set<String> commonEngWords, Pattern ignoreWordRegex, Set<String> ignoreWords) {
+  boolean containsStopWord(CoreLabel l, Set<String> commonEngWords, Pattern ignoreWordRegex) {
     // if(useWordResultCache.containsKey(l.word()))
     // return useWordResultCache.get(l.word());
 
-    if ((commonEngWords.contains(l.lemma()) || commonEngWords.contains(l.word())) || (ignoreWordRegex != null && ignoreWordRegex.matcher(l.lemma()).matches())
-        || (ignoreWords !=null && (ignoreWords.contains(l.lemma()) || ignoreWords.contains(l.word())))) {
+    if ((commonEngWords.contains(l.lemma()) || commonEngWords.contains(l.word())) || (ignoreWordRegex != null && ignoreWordRegex.matcher(l.lemma()).matches())){
+        //|| (ignoreWords !=null && (ignoreWords.contains(l.lemma()) || ignoreWords.contains(l.word())))) {
       // useWordResultCache.putIfAbsent(l.word(), false);
       return true;
     }

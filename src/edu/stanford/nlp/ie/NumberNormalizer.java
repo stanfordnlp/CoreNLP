@@ -617,6 +617,7 @@ public class NumberNormalizer {
     }
     for (CoreMap n:numbers) {
       String exp = n.get(CoreAnnotations.TextAnnotation.class);
+      if (exp.trim().equals("")) { continue; }
       List<CoreLabel> ts = n.get(CoreAnnotations.TokensAnnotation.class);
       String label = ts.get(ts.size() - 1).get(CoreAnnotations.NumericTypeAnnotation.class);
       if ("UNIT".equals(label)) {

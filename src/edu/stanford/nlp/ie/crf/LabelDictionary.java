@@ -64,9 +64,6 @@ public class LabelDictionary implements Serializable {
 
   /**
    * True if this observation is constrained, and false otherwise.
-   * 
-   * @param observation
-   * @return
    */
   public boolean isConstrained(String observation) {
     return observationIndex.indexOf(observation) >= 0;

@@ -43,6 +43,7 @@ import edu.stanford.nlp.process.*;
 import edu.stanford.nlp.process.PTBTokenizer.PTBTokenizerFactory;
 import edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter.OutputStyle;
+import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 import edu.stanford.nlp.util.DataFilePaths;
 import edu.stanford.nlp.util.Function;
@@ -200,7 +201,7 @@ import java.text.DecimalFormat;
  * <tr><td>curWordMinFeatureThreshold</td><td>int</td><td>2</td><td>Train</td><td>Words that occur more than this number of times will generate features with all of the tags they've been seen with.</td></tr>
  * <tr><td>rareWordMinFeatureThresh</td><td>int</td><td>10</td><td>Train</td><td>Features of rare words whose histories occur fewer than this number of times are discarded.</td></tr>
  * <tr><td>veryCommonWordThresh</td><td>int</td><td>250</td><td>Train</td><td>Words that occur more than this number of times form an equivalence class by themselves.  Ignored unless you are using ambiguity classes.</td></tr>
- * <tr><td>debug</td><td>boolean</td><td>boolean</td><td>All</td><td>Whether to write debugging information (words, top words, unknown words).  Useful for error analysis.</td></tr>
+ * <tr><td>debug</td><td>boolean</td><td>boolean</td><td>All</td><td>Whether to write debugging information (words, top words, unknown words, confusion matrix).  Useful for error analysis.</td></tr>
  * <tr><td>debugPrefix</td><td>String</td><td>N/A</td><td>All</td><td>File (path) prefix for where to write out the debugging information (relevant only if debug=true).</td></tr>
  * <tr><td>nthreads</td><td>int</td><td>1</td><td>Test,Text</td><td>Number of threads to use when processing text.</td></tr>
  * </table>
@@ -214,7 +215,7 @@ import java.text.DecimalFormat;
  * @author Christopher Manning
  * @author John Bauer
  */
-public class MaxentTagger implements Function<List<? extends HasWord>,List<TaggedWord>>, ListProcessor<List<? extends HasWord>,List<TaggedWord>>, Serializable {
+public class MaxentTagger extends Tagger implements ListProcessor<List<? extends HasWord>,List<TaggedWord>>, Serializable {
 
   /**
    * The directory from which to get taggers when using
@@ -1571,6 +1572,11 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
       writer.write("<pos>\n");
     }
 
+    String sentenceDelimiter = config.getSentenceDelimiter();
+    if (sentenceDelimiter != null && sentenceDelimiter.equals("newline")) {
+      sentenceDelimiter = "\n";
+    }
+
     while (true) {
       //Now we do everything through the doc preprocessor
       final DocumentPreprocessor docProcessor;
@@ -1578,9 +1584,9 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
       // this happens when we reach end of file
       if (line == null)
         break;
-      docProcessor = new DocumentPreprocessor(new BufferedReader(new StringReader(line)));
-
+      docProcessor = new DocumentPreprocessor(new StringReader(line));
       docProcessor.setTokenizerFactory(tokenizerFactory);
+      docProcessor.setSentenceDelimiter(sentenceDelimiter);
       if (config.keepEmptySentences()) {
         docProcessor.setKeepEmptySentences(true);
       }
@@ -1590,7 +1596,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,List<Tagge
 
         Timing t = new Timing();
         tagAndOutputSentence(sentence, outputLemmas, morpha, outputStyle,
-                             outputVerbosity, numSentences, "\n", writer);
+                             outputVerbosity, numSentences, "", writer);
 
         totalMillis += t.stop();
         writer.newLine();

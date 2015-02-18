@@ -385,17 +385,21 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    *  @param root The root of the Tree
    *  @return A Collection of dependent nodes to which t bears this GR
    */
-  public Collection<Tree> getRelatedNodes(Tree t, Tree root, HeadFinder headFinder) {
-    Set<Tree> nodeList = new ArraySet<Tree>();
+  public Collection<TreeGraphNode> getRelatedNodes(TreeGraphNode t, TreeGraphNode root, HeadFinder headFinder) {
+    Set<TreeGraphNode> nodeList = new ArraySet<TreeGraphNode>();
     for (TregexPattern p : targetPatterns) {    // cdm: I deleted: && nodeList.isEmpty()
       // Initialize the TregexMatcher with the HeadFinder so that we
       // can use the same HeadFinder through the entire process of
       // building the dependencies
       TregexMatcher m = p.matcher(root, headFinder);
       while (m.findAt(t)) {
-        nodeList.add(m.getNode("target"));
+        TreeGraphNode target = (TreeGraphNode) m.getNode("target");
+        if (target == null) {
+          throw new AssertionError("Expression has no target: " + p);
+        }
+        nodeList.add(target);
         if (DEBUG) {
-          System.err.println("found " + this + "(" + t + ", " + m.getNode("target") + ") using pattern " + p);
+          System.err.println("found " + this + "(" + t + "-" + t.headWordNode() + ", " + m.getNode("target") + "-" + ((TreeGraphNode) m.getNode("target")).headWordNode() + ") using pattern " + p);
           for (String nodeName : m.getNodeNames()) {
             if (nodeName.equals("target"))
               continue;
@@ -433,7 +437,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    * Returns short name (abbreviation) for this
    * <code>GrammaticalRelation</code>.  toString() for collapsed
    * relations will include the word that was collapsed.
-   * <br>
+   * <br/>
    * <i>Implementation note:</i> Note that this method must be synced with
    * the equals() and valueOf(String) methods
    */

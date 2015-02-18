@@ -176,7 +176,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         "det(man-2, The-1)\n" + "nsubj(is-3, man-2)\n" + "root(ROOT-0, is-3)\n" + "advmod(is-3, here-4)\n",
         "prep(live-6, In-1)\n" + "det(city-3, which-2)\n" + "pobj(In-1, city-3)\n" + "aux(live-6, do-4)\n" + "nsubj(live-6, you-5)\n" + "root(ROOT-0, live-6)\n",
         "dobj(invent-5, What-1)\n" + "aux(invent-5, did-2)\n" + "nn(Babbage-4, Charles-3)\n" + "nsubj(invent-5, Babbage-4)\n" + "root(ROOT-0, invent-5)\n",
-        "dep(used-5, What-1)\n" + "auxpass(used-5, is-2)\n" + "det(esophagus-4, the-3)\n" + "nsubjpass(used-5, esophagus-4)\n" + "root(ROOT-0, used-5)\n" + "prep(used-5, for-6)\n",
+        "pobj(for-6, What-1)\n" + "auxpass(used-5, is-2)\n" + "det(esophagus-4, the-3)\n" + "nsubjpass(used-5, esophagus-4)\n" + "root(ROOT-0, used-5)\n" + "prep(used-5, for-6)\n",
         "predet(boys-3, All-1)\n" + "det(boys-3, the-2)\n" + "nsubj(are-4, boys-3)\n" + "root(ROOT-0, are-4)\n" + "advmod(are-4, here-5)\n",
         "preconj(boys-3, Both-1)\n" + "det(boys-3, the-2)\n" + "nsubj(are-7, boys-3)\n" + "cc(boys-3, and-4)\n" + "det(girls-6, the-5)\n" + "conj(boys-3, girls-6)\n" + "root(ROOT-0, are-7)\n" + "advmod(are-7, here-8)\n",
         "nsubj(shut-2, They-1)\n" + "root(ROOT-0, shut-2)\n" + "prt(shut-2, down-3)\n" + "det(station-5, the-4)\n" + "dobj(shut-2, station-5)\n",
@@ -605,13 +605,13 @@ public class EnglishGrammaticalStructureTest extends TestCase {
                 "nn(pilots-6, Eastern-4)\n" +
                 "nn(pilots-6, Airlines-5)\n" +
                 "iobj(awarded-3, pilots-6)\n" +
-                "amod($-8, between-7)\n" +
+                "quantmod($-8, between-7)\n" +
                 "dobj(awarded-3, $-8)\n" +
-                "num($-8, 60-9)\n" +
+                "number(million-10, 60-9)\n" +
                 "num($-8, million-10)\n" +
                 "cc($-8, and-11)\n" +
                 "conj($-8, $-12)\n" +
-                "num($-12, 100-13)\n" +
+                "number(million-14, 100-13)\n" +
                 "num($-12, million-14)\n" +
                 "prep($-8, in-15)\n" +
                 "amod(pay-17, back-16)\n" +
@@ -1316,7 +1316,7 @@ public class EnglishGrammaticalStructureTest extends TestCase {
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "ref(man-4, who-5)\n" + "dobj(love-7, who-5)\n" + "nsubj(love-7, you-6)\n" + "rcmod(man-4, love-7)\n",
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "ref(man-4, whose-5)\n" + "poss(wife-6, whose-5)\n" + "dobj(love-8, wife-6)\n" + "nsubj(love-8, you-7)\n" + "rcmod(man-4, love-8)\n",
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(book-4, the-3)\n" + "dobj(saw-2, book-4)\n" + "ref(book-4, which-5)\n" + "dobj(bought-7, which-5)\n" + "nsubj(bought-7, you-6)\n" + "rcmod(book-4, bought-7)\n",
-        "dep(used-5, What-1)\n" + "pobj(for-6, What-1)\n" + "auxpass(used-5, is-2)\n" + "det(esophagus-4, the-3)\n" + "nsubjpass(used-5, esophagus-4)\n" + "root(ROOT-0, used-5)\n" + "prep(used-5, for-6)\n",
+        "pobj(for-6, What-1)\n" + "auxpass(used-5, is-2)\n" + "det(esophagus-4, the-3)\n" + "nsubjpass(used-5, esophagus-4)\n" + "root(ROOT-0, used-5)\n" + "prep(used-5, for-6)\n",
         "nsubj(saw-2, I-1)\n" +
                     "root(ROOT-0, saw-2)\n" +
                     "det(woman-4, the-3)\n" +

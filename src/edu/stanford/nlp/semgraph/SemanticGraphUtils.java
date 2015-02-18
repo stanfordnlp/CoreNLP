@@ -7,12 +7,12 @@ import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MapList;
 
 import java.io.StringWriter;
 import java.util.*;
-import java.util.List;
 
 
 /**
@@ -746,7 +746,7 @@ public class SemanticGraphUtils {
     Set<SemanticGraphEdge> seenEdges = Generics.newHashSet();
 
     buf.append(semgrexFromGraphHelper(patternRoot, sg, tabu, seenEdges, true, true, wildcardNodes,
-        useTag, useWord, nodeNameMap));
+        useTag, useWord, nodeNameMap, false));
 
     String patternString = buf.toString();
     return patternString;
@@ -771,7 +771,7 @@ public class SemanticGraphUtils {
    */
   protected static String semgrexFromGraphHelper(IndexedWord vertice, SemanticGraph sg,
       Set<IndexedWord> tabu, Set<SemanticGraphEdge> seenEdges, boolean useWordAsLabel, boolean nameEdges, Collection<IndexedWord> wildcardNodes,
-      boolean useTag, boolean useWord, Map<IndexedWord, String> nodeNameMap) {
+      boolean useTag, boolean useWord, Map<IndexedWord, String> nodeNameMap, boolean orderedNodes) {
     StringWriter buf = new StringWriter();
 
     // If the node is a wildcarded one, treat it as a {}, meaning any match.  Currently these will not
@@ -802,11 +802,23 @@ public class SemanticGraphUtils {
 
     tabu.add(vertice);
 
+    Iterable<SemanticGraphEdge> edgeIter = null;
+    if(!orderedNodes){
+     edgeIter = sg.outgoingEdgeIterable(vertice); 
+    } else{
+      edgeIter = CollectionUtils.sorted(sg.outgoingEdgeList(vertice), new Comparator<SemanticGraphEdge>(){
+        @Override
+        public int compare(SemanticGraphEdge arg0, SemanticGraphEdge arg1) {
+          return (arg0.getRelation().toString().compareTo(arg1.getRelation().toString()));      
+        }});
+    }
+      
+    
     // For each edge, record the edge, but do not traverse to the vertice if it is already in the
     // tabu list.  If it already is, we emit the edge and the target vertice, as
     // we will not be continuing in that vertex, but we wish to record the relation.
     // If we will proceed down that node, add parens if it will continue recursing down.
-    for (SemanticGraphEdge edge : sg.outgoingEdgeIterable(vertice)) {
+    for (SemanticGraphEdge edge : edgeIter) {
       seenEdges.add(edge);
       IndexedWord tgtVert = edge.getDependent();
       boolean applyParens =
@@ -829,13 +841,29 @@ public class SemanticGraphUtils {
         }
       } else {
         buf.append(semgrexFromGraphHelper(tgtVert, sg, tabu, seenEdges, useWordAsLabel, nameEdges,
-            wildcardNodes, useTag, useWord, nodeNameMap));
+            wildcardNodes, useTag, useWord, nodeNameMap, orderedNodes));
         if (applyParens)
           buf.append(")");
       }
     }
     return buf.toString();
   }
+  
+  public static String semgrexFromGraphOrderedNodes(SemanticGraph sg, Collection<IndexedWord> wildcardNodes,
+      boolean useTag, boolean useWord, Map<IndexedWord, String> nodeNameMap) throws Exception {
+    IndexedWord patternRoot = sg.getFirstRoot();
+    StringWriter buf = new StringWriter();
+    Set<IndexedWord> tabu = Generics.newHashSet();
+    Set<SemanticGraphEdge> seenEdges = Generics.newHashSet();
+
+    buf.append(semgrexFromGraphHelper(patternRoot, sg, tabu, seenEdges, true, true, wildcardNodes,
+        useTag, useWord, nodeNameMap, true));
+
+    String patternString = buf.toString();
+    return patternString;
+  }
+
+  
 
   /**
    * Sanitizes the given string into a Semgrex friendly name

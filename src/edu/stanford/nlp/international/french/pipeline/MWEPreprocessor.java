@@ -11,8 +11,8 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeReader;
 import edu.stanford.nlp.trees.TreeReaderFactory;
-import edu.stanford.nlp.trees.international.french.FrenchTreeReader;
 import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
+import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReader;
 import edu.stanford.nlp.trees.tregex.ParseException;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
@@ -99,7 +99,7 @@ public final class MWEPreprocessor {
                                   Tree t) {
     List<CoreLabel> yield = t.taggedLabeledYield();
     for(CoreLabel cl : yield) {
-      if(RESOLVE_DUMMY_TAGS && cl.tag().equals(FrenchTreeReader.MISSING_POS)) 
+      if(RESOLVE_DUMMY_TAGS && cl.tag().equals(FrenchXMLTreeReader.MISSING_POS)) 
         continue;
       else
         tagger.incrementCount(cl.word(), cl.tag());
@@ -111,7 +111,7 @@ public final class MWEPreprocessor {
       TwoDimensionalCounter<String, String> pretermLabel,
       TwoDimensionalCounter<String, String> unigramTagger) {
     if(t.isPreTerminal()) {
-      if(t.value().equals(FrenchTreeReader.MISSING_POS)) {
+      if(t.value().equals(FrenchXMLTreeReader.MISSING_POS)) {
         nMissingPOS++;
         String word = t.firstChild().value();
         String tag = (unigramTagger.firstKeySet().contains(word)) ? 
@@ -126,7 +126,7 @@ public final class MWEPreprocessor {
       traverseAndFix(kid,pretermLabel,unigramTagger);
     
     //Post-order visit
-    if(t.value().equals(FrenchTreeReader.MISSING_PHRASAL)) {
+    if(t.value().equals(FrenchXMLTreeReader.MISSING_PHRASAL)) {
       nMissingPhrasal++;
       StringBuilder sb = new StringBuilder();
       for(Tree kid : t.children())
@@ -149,7 +149,7 @@ public final class MWEPreprocessor {
     
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));
-      TreeReaderFactory trf = new FrenchTreeReaderFactory(true);
+      TreeReaderFactory trf = new FrenchTreeReaderFactory();
       TreeReader tr = trf.newTreeReader(br);
       
       PrintWriter pw = new PrintWriter(new PrintStream(new FileOutputStream(new File(treeFile + ".fixed")),false,"UTF-8"));
@@ -189,7 +189,7 @@ public final class MWEPreprocessor {
     while (m.findNextMatchingNode()) {
       Tree match = m.getMatch();
       String label = match.value();
-      if(RESOLVE_DUMMY_TAGS && label.equals(FrenchTreeReader.MISSING_PHRASAL))
+      if(RESOLVE_DUMMY_TAGS && label.equals(FrenchXMLTreeReader.MISSING_PHRASAL))
         continue;
       
       String preterm = Sentence.listToString(match.preTerminalYield());
@@ -228,7 +228,7 @@ public final class MWEPreprocessor {
     
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8"));
-      TreeReaderFactory trf = new FrenchTreeReaderFactory(true);
+      TreeReaderFactory trf = new FrenchTreeReaderFactory();
       TreeReader tr = trf.newTreeReader(br);
       
       for(Tree t; (t = tr.readTree()) != null;) {

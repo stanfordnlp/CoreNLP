@@ -509,4 +509,10 @@ public class MatchedExpression {
           Comparators.chain(EXPR_LENGTH_COMPARATOR, EXPR_PRIORITY_COMPARATOR,
                   EXPR_ORDER_COMPARATOR, EXPR_TOKEN_OFFSET_COMPARATOR);
 
+  public final static Function<MatchedExpression, Double> EXPR_WEIGHT_SCORER = new Function<MatchedExpression, Double>() {
+    @Override
+    public Double apply(MatchedExpression in) {
+      return in.weight;
+    }
+  };
 }

@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -77,10 +78,22 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   // Use a custom feature factory
   private static final String optFeatureFactory = "featureFactory";
   private static final String defaultFeatureFactory =
+      "edu.stanford.nlp.international.arabic.process.StartAndEndArabicSegmenterFeatureFactory";
+  private static final String localOnlyFeatureFactory = 
       "edu.stanford.nlp.international.arabic.process.ArabicSegmenterFeatureFactory";
 
   // Training and evaluation files have domain labels
-  private static final String optDomains = "withDomains";
+  private static final String optWithDomains = "withDomains";
+  
+  // Training and evaluation text are all in the same domain (default:atb)
+  private static final String optDomain = "domain";
+  
+  // Ignore rewrites (training only, produces a model that then can be used to do
+  // no-rewrite segmentation)
+  private static final String optNoRewrites = "noRewrites";
+  
+  // Use the original feature set which doesn't contain start-and-end "wrapper" features
+  private static final String optLocalFeaturesOnly = "localFeaturesOnly";
 
   private transient CRFClassifier<CoreLabel> classifier;
   private final SeqClassifierFlags flags;
@@ -91,22 +104,37 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
   private final String tokenizerOptions;
   private final String tedEvalPrefix;
   private final boolean hasDomainLabels;
+  private final String domain;
+  private final boolean noRewrites;
 
-  /** Make an Arabic Segmenter.
+  /** 
+   * Make an Arabic Segmenter.
    *
-   *  @param props Options for how to tokenize. See the main method of
-   *               {@see ArabicTokenizer} for details.
+   *  @param props Options for how to tokenize. See the main method of {@see ArabicTokenizer} for details
    */
   public ArabicSegmenter(Properties props) {
     isTokenized = props.containsKey(optTokenized);
     tokenizerOptions = props.getProperty(optTokenizer, null);
     tedEvalPrefix = props.getProperty(optTedEval, null);
-    hasDomainLabels = props.containsKey(optDomains);
+    hasDomainLabels = props.containsKey(optWithDomains);
+    domain = props.getProperty(optDomain, "atb");
+    noRewrites = props.containsKey(optNoRewrites);
     tf = getTokenizerFactory();
 
     prefixMarker = props.getProperty(optPrefix, "");
     suffixMarker = props.getProperty(optSuffix, "");
 
+    if (props.containsKey(optLocalFeaturesOnly)) {
+      if (props.containsKey(optFeatureFactory))
+        throw new RuntimeException("Cannot use custom feature factory with localFeaturesOnly flag--" +
+            "have your custom feature factory extend ArabicSegmenterFeatureFactory instead of " +
+            "StartAndEndArabicSegmenterFeatureFactory and remove the localFeaturesOnly flag.");
+      
+      props.put(optFeatureFactory, localOnlyFeatureFactory);
+    }
+    if (!props.containsKey(optFeatureFactory))
+      props.put(optFeatureFactory, defaultFeatureFactory);
+    
     // Remove all command-line properties that are specific to ArabicSegmenter
     props.remove(optTokenizer);
     props.remove(optTokenized);
@@ -114,10 +142,10 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     props.remove(optSuffix);
     props.remove(optThreads);
     props.remove(optTedEval);
-    props.remove(optDomains);
-
-    if (!props.containsKey(optFeatureFactory))
-      props.put(optFeatureFactory, defaultFeatureFactory);
+    props.remove(optWithDomains);
+    props.remove(optDomain);
+    props.remove(optNoRewrites);
+    props.remove(optLocalFeaturesOnly);
 
     flags = new SeqClassifierFlags(props);
     classifier = new CRFClassifier<CoreLabel>(flags);
@@ -135,6 +163,8 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     suffixMarker = other.suffixMarker;
     tedEvalPrefix = other.tedEvalPrefix;
     hasDomainLabels = other.hasDomainLabels;
+    domain = other.domain;
+    noRewrites = other.noRewrites;
     flags = other.flags;
 
     // ArabicTokenizerFactory is *not* threadsafe. Make a new copy.
@@ -156,7 +186,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     if ( ! isTokenized) {
       if (tokenizerOptions == null) {
         tokFactory = ArabicTokenizer.atbFactory();
-        String atbVocOptions = "removeProMarker,removeMorphMarker";
+        String atbVocOptions = "removeProMarker,removeMorphMarker,removeLengthening";
         tokFactory.setOptions(atbVocOptions);
       } else {
         if (tokenizerOptions.contains("removeSegMarker")) {
@@ -220,6 +250,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
       List<CoreLabel> tokens = tf.getTokenizer(new StringReader(line)).tokenize();
       tokenList = IOBUtils.StringToIOB(tokens, null, false);
     }
+    IOBUtils.labelDomain(tokenList, domain);
     tokenList = classifier.classify(tokenList);
     String segmentedString = IOBUtils.IOBToString(tokenList, prefixMarker, suffixMarker);
     return segmentedString;
@@ -255,6 +286,8 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(hasSegmentationMarkers,
                                                                                      hasTags,
                                                                                      hasDomainLabels,
+                                                                                     domain,
+                                                                                     noRewrites,
                                                                                      tf);
     ObjectBank<List<CoreLabel>> lines =
       classifier.makeObjectBankFromFile(flags.trainFile, docReader);
@@ -277,6 +310,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     DocumentReaderAndWriter<CoreLabel> docReader = new ArabicDocumentReaderAndWriter(hasSegmentationMarkers,
                                                                                      hasTags,
                                                                                      hasDomainLabels,
+                                                                                     domain,
                                                                                      tf);
     ObjectBank<List<CoreLabel>> lines =
       classifier.makeObjectBankFromFile(flags.testFile, docReader);
@@ -318,10 +352,24 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
         }
       }
       if (tedEvalParseSeg != null) {
-        assert inputTokens.length == parseTokens.length && inputTokens.length == goldTokens.length;
         tedEvalGoldTree.printf("(root");
         tedEvalParseTree.printf("(root");
-        for (int i = 0; i < inputTokens.length; i++) {
+        int safeLength = inputTokens.length;
+        if (inputTokens.length != goldTokens.length) {
+          System.err.println("In generating TEDEval files: Input and gold do not have the same number of tokens");
+          System.err.println("    (ignoring any extras)");
+          System.err.println("  input: " + Arrays.toString(inputTokens));
+          System.err.println("  gold: " + Arrays.toString(goldTokens));
+          safeLength = Math.min(inputTokens.length, goldTokens.length);
+        }
+        if (inputTokens.length != parseTokens.length) {
+          System.err.println("In generating TEDEval files: Input and parse do not have the same number of tokens");
+          System.err.println("    (ignoring any extras)");
+          System.err.println("  input: " + Arrays.toString(inputTokens));
+          System.err.println("  parse: " + Arrays.toString(parseTokens));
+          safeLength = Math.min(inputTokens.length, parseTokens.length);
+        }
+        for (int i = 0; i < safeLength; i++) {
           for (String segment : goldTokens[i].split(":"))
             tedEvalGoldTree.printf(" (seg %s)", segment);
           tedEvalGoldSeg.printf("%s\t%s%n", inputTokens[i], goldTokens[i]);
@@ -420,6 +468,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     sb.append("  -featureFactory cls  : Name of feature factory class  (default: ").append(defaultFeatureFactory);
     sb.append(")").append(nl);
     sb.append("  -withDomains         : Train file (if given) and eval file have domain labels.").append(nl);
+    sb.append("  -domain dom          : Assume one domain for all data (default: 123)").append(nl);
     sb.append(nl).append(" Otherwise, all flags correspond to those present in SeqClassifierFlags.java.").append(nl);
     return sb.toString();
   }
@@ -439,6 +488,7 @@ public class ArabicSegmenter implements WordSegmenter, Serializable, ThreadsafeP
     optionArgDefs.put("tedEval", 1);
     optionArgDefs.put("featureFactory", 1);
     optionArgDefs.put("withDomains", 0);
+    optionArgDefs.put("domain", 1);
     return optionArgDefs;
   }
 

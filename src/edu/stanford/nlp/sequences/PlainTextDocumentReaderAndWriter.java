@@ -26,19 +26,14 @@ import java.util.regex.*;
  * itest/src/edu/stanford/nlp/ie/crf/CRFClassifierITest.java for examples and
  * test cases for the output options.
  *
- * It can be over anything that extends {@link CoreMap}, and the default is
- * {@link CoreLabel}
+ * This class works over a list of anything that extends {@link CoreMap}.
+ * The usual case is {@link CoreLabel}.
  *
  * @author Jenny Finkel
  * @author Christopher Manning (new output options organization)
  * @author Sonal Gupta (made the class generic)
  */
 public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements DocumentReaderAndWriter<IN> {
-
-  // todo: This is hardwired for PTBTokenizer, and hence languages roughly
-  // like English. There should be flags which would allow it to be used with
-  // other languages/tokenizers, perhaps instead involving changes in
-  // CRFClassifier, etc.
 
   private static final long serialVersionUID = -2420535144980273136L;
 
@@ -53,8 +48,8 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
       this.shortName = shortName;
     }
 
-    private static final Map<String, OutputStyle> shortNames =
-      Generics.newHashMap();
+    private static final Map<String, OutputStyle> shortNames = Generics.newHashMap();
+
     static {
       for (OutputStyle style : OutputStyle.values())
         shortNames.put(style.shortName, style);
@@ -87,10 +82,11 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
   public PlainTextDocumentReaderAndWriter() {
   }
 
+  @Override
   public void init(SeqClassifierFlags flags) {
     String options = "tokenizeNLs=false,invertible=true";
     if (flags.tokenizerOptions != null) {
-      options = options + "," + flags.tokenizerOptions;
+      options = options + ',' + flags.tokenizerOptions;
     }
     TokenizerFactory<IN> factory;
     if (flags.tokenizerFactory != null) {
@@ -114,6 +110,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
 
   // todo: give options for document splitting. A line or the whole file or
   // sentence splitting as now
+  @Override
   public Iterator<List<IN>> getIterator(Reader r) {
     Tokenizer<IN> tokenizer = tokenizerFactory.getTokenizer(r);
     // PTBTokenizer.newPTBTokenizer(r, false, true);
@@ -181,10 +178,8 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
    * tokenized (since preserveSpacing output is somewhat dysfunctional with the
    * slashTags format).
    *
-   * @param list
-   *          List of tokens with classifier answers
-   * @param out
-   *          Where to print the output to
+   * @param list List of tokens with classifier answers
+   * @param out Where to print the output to
    */
   @Override
   public void printAnswers(List<IN> list, PrintWriter out) {
@@ -192,7 +187,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
     if (flags != null) {
       style = flags.outputFormat;
     }
-    if (style == null || "".equals(style)) {
+    if (style == null || style.isEmpty()) {
       style = "slashTags";
     }
     OutputStyle outputStyle = OutputStyle.fromShortName(style);

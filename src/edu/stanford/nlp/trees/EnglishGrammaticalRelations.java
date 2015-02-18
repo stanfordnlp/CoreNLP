@@ -130,12 +130,12 @@ public class EnglishGrammaticalRelations {
   private static final String selfRegex =
     "/^(?i:myself|yourself|himself|herself|itself|ourselves|yourselves|themselves)$/";
   private static final String xcompVerbRegex =
-    "/^(?i:advise|advises|advised|advising|ask|asks|asked|asking|beg|begs|begged|begging|demand|demands|demanded|demanding|desire|desires|desired|desiring|force|forces|forced|forcing|implore|implores|implored|imploring|order|orders|ordered|ordering|persuade|persuades|persuaded|persuading|require|requires|required|requiring|tell|tells|told|telling|urge|urges|urged|urging)$/";
+    "/^(?i:advise|advises|advised|advising|allow|allows|allowed|allowing|ask|asks|asked|asking|beg|begs|begged|begging|demand|demands|demanded|demanding|desire|desires|desired|desiring|expect|expects|expected|expecting|encourage|encourages|encouraged|encouraging|force|forces|forced|forcing|implore|implores|implored|imploring|lobby|lobbies|lobbied|lobbying|order|orders|ordered|ordering|persuade|persuades|persuaded|persuading|pressure|pressures|pressured|pressuring|prompt|prompts|prompted|prompting|require|requires|required|requiring|tell|tells|told|telling|urge|urges|urged|urging)$/";
   // A list of verbs where the answer to a question involving that
   // verb would be a ccomp.  For example, "I know when the train is
   // arriving."  What does the person know?
   private static final String ccompVerbRegex =
-    "/^(?i:know|knows|knew|knowing|specify|specifies|specified|specifying|tell|tells|told|telling|understand|understands|understood|understanding|wonder|wonders|wondered|wondering)$/";
+    "/^(?i:ask|asks|asked|asking|know|knows|knew|knowing|specify|specifies|specified|specifying|tell|tells|told|telling|understand|understands|understood|understanding|wonder|wonders|wondered|wondering)$/";
   // A subset of ccompVerbRegex where you could expect an object and
   // still have a ccomp.  For example, "They told me when ..." can
   // still have a ccomp.  "They know my order when ..." would not
@@ -1086,7 +1086,6 @@ public class EnglishGrammaticalRelations {
           "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (CD|QP=target !$- CC)",
           // $ is so phrases such as "$ 100 million buyout" get amod(buyout, $)
           "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (ADJP=target <: (QP !< /^[$]$/))",
-          "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?|(?:WH)?ADJP$/ < (QP < QP=target < /^[$]$/)",
           // Phrases such as $ 100 million get converted from (QP ($ $) (CD 100) (CD million)) to
           // (QP ($ $) (QP (CD 100) (CD million))).  This next tregex covers those phrases.
           // Note that the earlier tregexes are usually enough to cover those phrases, such as when
@@ -1443,7 +1442,8 @@ public class EnglishGrammaticalRelations {
         new String[] {
           "PP|XS < (IN|TO < as|of|at|to|in) < (JJ|IN|JJR|JJS|NN=target < such|because|Because|least|instead|due|Due|addition|to)",
           "ADVP < (RB|IN < well) < (IN|RB|JJS=target < as)",
-          "ADVP < (DT < all) < (CC < but)",
+          // TODO: perhaps the phrase "all but" is more like "all" and should have that as the head
+          "ADVP < (DT=target < all) < (CC < but)",
           "CONJP < (RB < rather|well|instead) < (RB|IN=target < as|than|of)",
           "CONJP < (IN < in) < (NN|TO=target < addition|to)",
           // todo: note inconsistent head finding for "rather than"!

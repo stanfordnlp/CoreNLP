@@ -156,7 +156,7 @@ public class FTBCorrector implements TreeTransformer {
       TregexPattern pBadTree2 = TregexPattern.compile("@SENT <1 @PUNC <2 @PUNC !<3 __");
       
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
-      TreeReaderFactory trf = new FrenchTreeReaderFactory(true);
+      TreeReaderFactory trf = new FrenchTreeReaderFactory();
       TreeReader tr = trf.newTreeReader(br);
    
       int nTrees = 0;

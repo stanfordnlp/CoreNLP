@@ -187,7 +187,7 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
       return new TokenSequencePattern(string, p.first(), p.second());
 
     } catch (Exception ex) {
-      throw new RuntimeException(ex);
+      throw new RuntimeException("When parsing " + string + "\t\t" + ex);
     }
   }
 
