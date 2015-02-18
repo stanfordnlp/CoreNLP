@@ -22,7 +22,7 @@ import java.util.zip.GZIPOutputStream;
 
 public class IOUtils {
 
-  private static final int SLURPBUFFSIZE = 16000;
+  private static final int SLURP_BUFFER_SIZE = 16000;
   private static final int GZIP_FILE_BUFFER_SIZE = 65536;
 
   public static final String eolChar = System.getProperty("line.separator");
@@ -506,9 +506,11 @@ public class IOUtils {
   /**
    * Open a BufferedReader to a File. If the file's getName() ends in .gz,
    * it is interpreted as a gzipped file (and uncompressed). The file is then
-   * interpreted as a utf-8 text file.
+   * turned into a BufferedReader with the given encoding.
+   * If the encoding passed in is null, then the system default encoding is used.
    *
    * @param file What to read from
+   * @param encoding What charset to use. A null String is interpreted as platform default encoding
    * @return The BufferedReader
    * @throws RuntimeIOException If there is an I/O problem
    */
@@ -516,7 +518,11 @@ public class IOUtils {
     InputStream is = null;
     try {
       is = inputStreamFromFile(file);
-      return new BufferedReader(new InputStreamReader(is, encoding));
+      if (encoding == null) {
+        return new BufferedReader(new InputStreamReader(is));
+      } else {
+        return new BufferedReader(new InputStreamReader(is, encoding));
+      }
     } catch (IOException ioe) {
       IOUtils.closeIgnoringExceptions(is);
       throw new RuntimeIOException(ioe);
@@ -576,6 +582,7 @@ public class IOUtils {
    * as a local file or other network-available file . If the String ends in .gz, it
    * is interpreted as a gzipped file (and uncompressed), else it is interpreted as
    * a regular text file in the given encoding.
+   * If the encoding passed in is null, then the system default encoding is used.
    *
    * @param textFileOrUrl What to read from
    * @param encoding CharSet encoding. Maybe be null, in which case the
@@ -844,7 +851,7 @@ public class IOUtils {
     private final int bufferSize;
     private EolPreservingLineReaderIterable( Reader reader )
     {
-      this(reader, SLURPBUFFSIZE);
+      this(reader, SLURP_BUFFER_SIZE);
     }
     private EolPreservingLineReaderIterable( Reader reader, int bufferSize )
     {
@@ -917,11 +924,7 @@ public class IOUtils {
                 return true; // end of line reached
               }
             }
-            if (charBuffer[i] == '\r') {
-              lastWasLF = true;
-            } else {
-              lastWasLF = false;
-            }
+            lastWasLF = (charBuffer[i] == '\r');
           }
           sb.append(charBuffer, charBufferPos, charsInBuffer - charBufferPos);
           // reset character buffer pos
@@ -1162,7 +1165,7 @@ public class IOUtils {
     }
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
     String temp;
-    StringBuilder buff = new StringBuilder(16000); // make biggish
+    StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
     while ((temp = br.readLine()) != null) {
       buff.append(temp);
       buff.append(lineSeparator);
@@ -1195,9 +1198,8 @@ public class IOUtils {
     String encoding = getUrlEncoding(uc);
     InputStream is = uc.getInputStream();
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
-    String temp;
-    StringBuilder buff = new StringBuilder(16000); // make biggish
-    while ((temp = br.readLine()) != null) {
+    StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
+    for (String temp; (temp = br.readLine()) != null; ) {
       buff.append(temp);
       buff.append(lineSeparator);
     }
@@ -1278,9 +1280,9 @@ public class IOUtils {
     BufferedReader r = new BufferedReader(reader);
     StringBuilder buff = new StringBuilder();
     try {
-      char[] chars = new char[SLURPBUFFSIZE];
+      char[] chars = new char[SLURP_BUFFER_SIZE];
       while (true) {
-        int amountRead = r.read(chars, 0, SLURPBUFFSIZE);
+        int amountRead = r.read(chars, 0, SLURP_BUFFER_SIZE);
         if (amountRead < 0) {
           break;
         }
@@ -2022,6 +2024,5 @@ public class IOUtils {
     //noinspection ResultOfMethodCallIgnored
     file.delete();
   }
-
 
 }

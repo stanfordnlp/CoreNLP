@@ -65,6 +65,7 @@ public class BasicRelationExtractor implements Extractor {
     featureFactory = featureFac;
     this.createUnrelatedRelations = createUnrelatedRelations;
     this.relationMentionFactory = factory;
+
     logger.setLevel(Level.INFO);
   }
 
@@ -136,7 +137,7 @@ public class BasicRelationExtractor implements Extractor {
       StringBuilder bos = new StringBuilder();
       bos.append("WEIGHTS FOR LABEL ").append(label).append(':');
       for (Pair<String, Double> feat: sorted) {
-        bos.append(' ').append(feat.first()).append(':').append(feat.second());
+        bos.append(' ').append(feat.first()).append(':').append(feat.second()+"\n");
       }
       logger.fine(bos.toString());
     }

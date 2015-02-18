@@ -89,15 +89,8 @@ public class InterruptibleMulticoreWrapper<I,O> extends MulticoreWrapper<I,O> {
    * interrupted.  The job the thread is running needs to occasionally
    * check Thread.interrupted() and throw an exception or otherwise
    * clean up.
-   * <br>
-   * Note that because we only put jobs on a processor when one is
-   * available, there actually shouldn't be any jobs in the threadpool
-   * which had never started.  Therefore, even though shutdownNow
-   * theoretically returns a list of jobs which have never been
-   * started, that list should always be empty, so this method doesn't
-   * return anything.
    */
-  public List<I> shutdownNow() {
+  private List<I> shutdownNow() {
     List<I> orphans = new ArrayList<I>();
     List<Runnable> runnables = threadPool.shutdownNow();
     for (Runnable runnable : runnables) {

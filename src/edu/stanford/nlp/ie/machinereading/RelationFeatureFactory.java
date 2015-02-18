@@ -57,7 +57,7 @@ public class RelationFeatureFactory implements Serializable {
     BASIC, COLLAPSED, COLLAPSED_CCPROCESSED
   }
 
-  private static final List<String> dependencyFeatures = Collections.unmodifiableList(Arrays.asList(new String [] {
+  private static final List<String> dependencyFeatures = Collections.unmodifiableList(Arrays.asList(
           "dependency_path_lowlevel","dependency_path_length","dependency_path_length_binary",
           "verb_in_dependency_path","dependency_path","dependency_path_words","dependency_paths_to_verb",
           "dependency_path_stubs_to_verb",
@@ -69,8 +69,8 @@ public class RelationFeatureFactory implements Serializable {
           "dependency_path_node-edge-node-grams","dependency_path_node-edge-node-grams_lowlevel",
           "dependency_path_directed_bigrams",
           "dependency_path_edge_unigrams",
-          "dependency_path_trigger",
-  }));
+          "dependency_path_trigger"
+  ));
 
   protected List<String> featureList;
 
