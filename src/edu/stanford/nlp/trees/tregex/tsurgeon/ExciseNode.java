@@ -32,13 +32,8 @@ class ExciseNode extends TsurgeonPattern {
       t.pennPrint(System.err);
       System.err.println("top: " + topNode + "\nbottom:" + bottomNode);
     }
-    if (topNode == t) {
-      if (bottomNode.children().length == 1) {
-        return bottomNode.children()[0];
-      } else {
-        return null;
-      }
-    }
+    if(topNode==t)
+      return null;
     Tree parent = topNode.parent(t);
     if(Tsurgeon.verbose)
       System.err.println("Parent: " + parent);

@@ -232,7 +232,6 @@ public class ParserAnnotator extends SentenceAnnotator {
   @Override
   public void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
     final List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    // TODO: xTree should use existing tags if there are any (?)
     Tree tree = ParserUtils.xTree(words);
     for (CoreLabel word : words) {
       if (word.tag() == null) {
@@ -266,14 +265,8 @@ public class ParserAnnotator extends SentenceAnnotator {
     Tree tree = null;
     try {
       tree = pq.getBestParse();
-      if (tree == null) {
-        System.err.println("WARNING: Parsing of sentence failed.  " +
-                         "Will ignore and continue: " +
-                         Sentence.listToString(words));
-      } else {
-        // -10000 denotes unknown words
-        tree.setScore(pq.getPCFGScore() % -10000.0);
-      }
+      // -10000 denotes unknown words
+      tree.setScore(pq.getPCFGScore() % -10000.0);
     } catch (OutOfMemoryError e) {
       System.err.println("WARNING: Parsing of sentence ran out of memory.  " +
                          "Will ignore and continue: " +
