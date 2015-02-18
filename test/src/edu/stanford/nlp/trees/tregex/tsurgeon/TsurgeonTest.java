@@ -554,6 +554,20 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, "(A (B foo) (C foo))", "(A (BAR foo) (BAZ foo))");
   }
 
+  public void testExcise() {
+    // TODO: needs more meat to this test
+    TregexPattern tregex = TregexPattern.compile("__=repeat <: (~repeat < __)");
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("excise repeat repeat");
+    runTest(tregex, tsurgeon, "(A (B (B foo)))", "(A (B foo))");
+    // Test that if a deleted root is excised down to a level that has
+    // just one child, that one child gets returned as the new tree
+    runTest(tregex, tsurgeon, "(B (B foo))", "(B foo)");
+
+    tregex = TregexPattern.compile("A=root");
+    tsurgeon = Tsurgeon.parseOperation("excise root root");
+    runTest(tregex, tsurgeon, "(A (B bar) (C foo))", null);
+  }
+
   public static void runTest(TregexPattern tregex, TsurgeonPattern tsurgeon,
                       String input, String expected) {
     Tree result = Tsurgeon.processPattern(tregex, tsurgeon,
