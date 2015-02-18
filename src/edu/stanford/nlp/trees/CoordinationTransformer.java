@@ -248,20 +248,18 @@ public class CoordinationTransformer implements TreeTransformer {
   private static final TregexPattern[] matchPatterns = {
     // UCP (JJ ...) -> ADJP
     // UCP (DT JJ ...) -> ADJP
-    TregexPattern.compile("/^UCP/=ucp [ <, /^JJ|ADJP/ | ( <1 DT <2 /^JJ|ADJP/ ) ]"),
-    // UCP (N ...) -> NP
-    TregexPattern.compile("/^UCP/=ucp [ <, /^N/ | ( <1 DT <2 /^N/ ) ]"),
-    // UCP ADVP -> ADVP
-    // Might want to look for ways to include RB for flatter structures,
-    // but then we have to watch out for (RB not) for example
-    TregexPattern.compile("/^UCP/=ucp <, /^ADVP/")
+    TregexPattern.compile("/^UCP/=ucp [ <, /^JJ|ADJP/=adjp | ( <1 DT <2 /^JJ|ADJP/=adjp ) |" + 
+                          // UCP (N ...) -> NP
+                                      " <, /^N/=np | ( <1 DT <2 /^N/=np ) | " +
+                          // UCP ADVP -> ADVP
+                          // Might want to look for ways to include RB for flatter structures,
+                          // but then we have to watch out for (RB not) for example
+                          " <, /^ADVP/=advp ]"),
   };
 
   private static final TsurgeonPattern[] operations = {
-    Tsurgeon.parseOperation("relabel ucp /^UCP(.*)$/ADJP$1/"),
-    Tsurgeon.parseOperation("relabel ucp /^UCP(.*)$/NP$1/"),
     // TODO: this turns UCP-TMP into ADVP instead of ADVP-TMP.  What do we actually want?
-    Tsurgeon.parseOperation("relabel ucp /^UCP(.*)$/ADVP/"), 
+    Tsurgeon.parseOperation("[if exists adjp relabel ucp /^UCP(.*)$/ADJP$1/] [if exists np relabel ucp /^UCP(.*)$/NP$1/] [if exists advp relabel ucp /^UCP(.*)$/ADVP/]"),
   };
 
   /**

@@ -274,7 +274,15 @@ public class Tsurgeon {
    * </blockquote>
    *
    * </p>
+   * <p>
+
+   * Tsurgeon has (very) limited support for conditional statements.
+   * If a pattern is prefaced with 
+   * <code>if exists &lt;name&gt;</code>, 
+   * the rest of the pattern will only execute if
+   * the named node was found in the corresponding TregexMatcher.
    *
+   * </p>
    *
    * @param args a list of names of files each of which contains a single tregex matching pattern plus a list, one per line,
    *        of transformation operations to apply to the matched pattern.
@@ -578,7 +586,7 @@ public class Tsurgeon {
     try {
       TsurgeonParser parser =
         new TsurgeonParser(new StringReader(operationString + "\n"));
-      return new TsurgeonPatternRoot(parser.Root());
+      return parser.Root();
     } catch(ParseException e) {
       throw new TsurgeonParseException("Error parsing Tsurgeon expression: " +
                                        operationString, e);

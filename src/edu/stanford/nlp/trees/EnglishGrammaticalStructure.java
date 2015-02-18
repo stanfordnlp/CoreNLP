@@ -577,10 +577,15 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
           for (TypedDependency td1 : gov_relations) {
             // System.err.println("gov rel " + td1);
             TreeGraphNode newGov = td1.gov();
+            // in the case of errors in the basic dependencies, it
+            // is possible to have overlapping newGov & dep
+            if (newGov == dep) {
+              continue;
+            }
             GrammaticalRelation newRel = td1.reln();
             if (newRel != ROOT) {
               if (rcmodHeads.contains(gov) && rcmodHeads.contains(dep)) {
-              // to prevent wrong propagation in the case of long dependencies in relative clauses
+                // to prevent wrong propagation in the case of long dependencies in relative clauses
                 if (newRel != DIRECT_OBJECT && newRel != NOMINAL_SUBJECT) {
                   if (DEBUG) {
                     System.err.println("Adding new " + newRel + " dependency from " + newGov + " to " + dep + " (subj/obj case)");

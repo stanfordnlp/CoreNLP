@@ -70,6 +70,8 @@ public class ReadSentimentDataset {
     // only one of these, so can be very general
     TregexPattern.compile("/^401$/ > (__ > __=top)"),
     TregexPattern.compile("__ <: (__=unitary < __)"),
+    // TODO: relabel words in some less expensive way?
+    TregexPattern.compile("/^[1]$/=label <: /^(?i:protagonist)$/"),
   };
 
   static final TsurgeonPattern[] tsurgeonPatterns = {
@@ -89,6 +91,7 @@ public class ReadSentimentDataset {
     Tsurgeon.parseOperation("replace top (2 (2 401k) (2 statement))"),
     // Fix any stranded unitary nodes
     Tsurgeon.parseOperation("[excise unitary unitary]"),
+    Tsurgeon.parseOperation("relabel label /^.*$/2/"),
   };
 
   static {
