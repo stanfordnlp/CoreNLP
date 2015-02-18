@@ -29,7 +29,7 @@ import edu.stanford.nlp.util.StringUtils;
  * @author dramage
  * @author rafferty
  */
-public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, HasCategory, HasLemma, HasContext, HasIndex, HasOffset {
+public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasWord, HasTag, HasCategory, HasLemma, HasContext, HasIndex, HasOffset {
 
   private static final long serialVersionUID = 2L;
 
@@ -277,6 +277,7 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    * @return "" if the key is not in the map or has the value <code>null</code>
    *     and the String value of the key otherwise
    */
+  @Override
   public <KEY extends Key<String>> String getString(Class<KEY> key) {
     String value = get(key);
     if (value == null) {
@@ -541,6 +542,17 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
     set(CoreAnnotations.CharacterOffsetEndAnnotation.class, endPos);
   }
 
+  public int copyCount() {
+    Integer copy = get(CoreAnnotations.CopyAnnotation.class);
+    if (copy == null)
+      return 0;
+    return copy;
+  }
+
+  public void setCopyCount(int count) {
+    set(CoreAnnotations.CopyAnnotation.class, count);
+  }
+
   /**
    * Tag separator to use by default
    */
@@ -612,6 +624,7 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
       buf.append(toPrimes());
     } else if (format.equals(VALUE_TAG_FORMAT)) {
       buf.append(value());
+      buf.append(toPrimes());
       String tag = tag();
       if (tag != null) {
         buf.append(TAG_SEPARATOR).append(tag);
@@ -663,10 +676,7 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
   }
 
   public String toPrimes() {
-    Integer copy = get(CoreAnnotations.CopyAnnotation.class);
-    if (copy == null || copy == 0)
-      return "";
-    return StringUtils.repeat('\'', copy);
+    return StringUtils.repeat('\'', copyCount());
   }
 
   private static final Comparator<Class<?>> asClassComparator = new Comparator<Class<?>>() {

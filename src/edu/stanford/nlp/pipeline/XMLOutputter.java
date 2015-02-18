@@ -15,6 +15,7 @@ import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.stats.Counters;
@@ -242,7 +243,7 @@ public class XMLOutputter {
       depInfo.addAttribute(new Attribute("type", dependencyType));
       // The SemanticGraph doesn't explicitly encode the ROOT node,
       // so we print that out ourselves
-      for (CoreLabel root : graph.getRoots()) {
+      for (IndexedWord root : graph.getRoots()) {
         String rel = GrammaticalRelation.ROOT.getLongName();
         rel = rel.replaceAll("\\s+", ""); // future proofing
         int source = 0;

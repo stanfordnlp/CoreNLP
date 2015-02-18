@@ -1678,37 +1678,22 @@ public class SemanticGraph implements Serializable {
     graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>(outerMapFactory, innerMapFactory);
     roots = wordMapFactory.newSet();
     
-    Map<Integer, IndexedWord> vertices = Generics.newHashMap();
-
     for (TypedDependency d : dependencies) {
       TreeGraphNode gov = d.gov();
       TreeGraphNode dep = d.dep();
       GrammaticalRelation reln = d.reln();
 
       if (reln != ROOT) { // the root relation only points to the root: the governor is a fake node that we don't want to add in the graph
-        IndexedWord govVertex = vertices.get(gov.index());
-        if (govVertex == null) {
-          govVertex = new IndexedWord(gov.label());
-          vertices.put(gov.index(), govVertex);
-        }
-        IndexedWord depVertex = vertices.get(dep.index());
-        if (depVertex == null) {
-          depVertex = new IndexedWord(dep.label());
-          vertices.put(dep.index(), depVertex);
-        }
+        IndexedWord govVertex = new IndexedWord(gov.label());
+        IndexedWord depVertex = new IndexedWord(dep.label());
         // It is unnecessary to call addVertex, since addEdge will
         // implicitly add vertices if needed
         //addVertex(govVertex);
         //addVertex(depVertex);
         addEdge(govVertex, depVertex, reln, Double.NEGATIVE_INFINITY, d.extra());
       } else { //it's the root and we add it
-        IndexedWord depVertex = vertices.get(dep.index());
-        if (depVertex == null) {
-          depVertex = new IndexedWord(dep.label());
-          vertices.put(dep.index(), depVertex);
-          addVertex(depVertex);
-        }
-
+        IndexedWord depVertex = new IndexedWord(dep.label());
+        addVertex(depVertex);
         roots.add(depVertex);
       }
     }

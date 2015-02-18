@@ -806,13 +806,7 @@ public class JodaTimeUtils {
    * Return the TIMEX string for the time given
    */
   public static String timexTimeValue(ReadableDateTime time){
-    return new StringBuilder()
-        .append(time.getYear()).append("-")                    //year
-        .append(zeroPad(time.getMonthOfYear(),2)).append("-")  //month
-        .append(zeroPad(time.getDayOfMonth(),2)).append("T")   //day
-        .append(zeroPad(time.getHourOfDay(),2)).append(":")    //hour
-        .append(zeroPad(time.getMinuteOfHour(),2))             //minute
-        .toString();
+    return String.valueOf(time.getYear()) + '-' + zeroPad(time.getMonthOfYear(), 2) + '-' + zeroPad(time.getDayOfMonth(), 2) + 'T' + zeroPad(time.getHourOfDay(), 2) + ':' + zeroPad(time.getMinuteOfHour(), 2);
   }
 
   public static class ConversionOptions{

@@ -1,5 +1,7 @@
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
+import java.util.Map;
+
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 
@@ -21,12 +23,23 @@ class IfExistsNode extends TsurgeonPattern {
   }
 
   @Override
-  public Tree evaluate(Tree t, TregexMatcher m) {
-    if (invert ^ (m.getNode(name) != null)) {
-      for (TsurgeonPattern child : children) {
-        child.evaluate(t, m);
-      }
+  public TsurgeonMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
+    return new Matcher(newNodeNames, coindexer);
+  }
+
+  private class Matcher extends TsurgeonMatcher {
+    public Matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer) {
+      super(IfExistsNode.this, newNodeNames, coindexer);
     }
-    return t;
+
+    @Override
+    public Tree evaluate(Tree tree, TregexMatcher tregex) {
+      if (invert ^ (tregex.getNode(name) != null)) {
+        for (TsurgeonMatcher child : childMatcher) {
+          child.evaluate(tree, tregex);
+        }
+      }
+      return tree;
+    }
   }
 }

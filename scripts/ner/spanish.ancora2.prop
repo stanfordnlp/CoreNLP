@@ -1,0 +1,46 @@
+trainFile = /u/nlp/data/spanish/ner/ancora-train.tsv
+testFile = /u/nlp/data/spanish/ner/ancora-test.tsv
+serializeTo = spanish.ancora2.crf.ser.gz
+
+useDistSim = false
+
+map = word=0,answer=1
+
+saveFeatureIndexToDisk = true
+
+useTitle = true
+useSpanishTitle = true
+useClassFeature=true
+useWord=true
+useNGrams=true
+noMidNGrams=true
+usePrev=true
+useNext=true
+useLongSequences=true
+useSequences=true
+usePrevSequences=true
+maxLeft=3
+useTypeSeqs=true
+useTypeSeqs2=true
+useTypeySequences=true
+useOccurrencePatterns=true
+useLastRealWord=true
+useNextRealWord=true
+normalize=true
+wordShape=dan2uselC
+useDisjunctive=true
+disjunctionWidth=5
+#useDisjunctiveShapeInteraction=true
+
+type=crf
+
+readerAndWriter=edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter
+
+useObservedSequencesOnly=true
+
+sigma = 1
+useQN = true
+QNsize = 25
+
+# makes it go faster
+featureDiffThresh=0.05

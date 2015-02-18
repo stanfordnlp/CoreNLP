@@ -480,7 +480,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           .setSource(edge.getSource().index())
           .setTarget(edge.getTarget().index())
           .setDep(edge.getRelation().toString())
-          .setIsExtra(edge.isExtra()));
+          .setIsExtra(edge.isExtra())
+          .setSourceCopy(edge.getSource().copyCount())
+          .setTargetCopy(edge.getTarget().copyCount()));
     }
     // Return
     return builder.build();
@@ -861,37 +863,40 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       min = in.getIndex() < min ? in.getIndex() : min;
       max = in.getIndex() > max ? in.getIndex() : max;
     }
-    IndexedWord[] nodes = new IndexedWord[max - min >= 0 ? max - min + 1 : 0];
+    TwoDimensionalMap<Integer, Integer, IndexedWord> nodes = TwoDimensionalMap.hashMap();
     for(CoreNLPProtos.DependencyGraph.Node in: proto.getNodeList()){
       CoreLabel token = sentence.get(in.getIndex() - 1); // index starts at 1!
-      IndexedWord word = new IndexedWord(token);
+      IndexedWord word;
+      if (in.hasCopyAnnotation() && in.getCopyAnnotation() > 0) {
+        // TODO: if we make a copy wrapper CoreLabel, use it here instead
+        word = new IndexedWord(new CoreLabel(token));
+        word.set(CopyAnnotation.class, in.getCopyAnnotation());
+      } else {
+        word = new IndexedWord(token);
+      }
 
       // for backwards compatibility - new annotations should have
       // these fields set, but annotations older than August 2014 might not
-      if (word.docID() == null) {
+      if (word.docID() == null && docid != null) {
         word.setDocID(docid);
       }
-      if (word.sentIndex() < 0) {
+      if (word.sentIndex() < 0 && in.getSentenceIndex() >= 0) {
         word.setSentIndex(in.getSentenceIndex());
       }
-      if (word.index() < 0) {
+      if (word.index() < 0 && in.getIndex() >= 0) {
         word.setIndex(in.getIndex());
-      }
+      }      
 
-      word.set(ValueAnnotation.class, word.get(TextAnnotation.class));
-      if(in.hasCopyAnnotation()){ word.set(CopyAnnotation.class, in.getCopyAnnotation()); }
       assert in.getIndex() == word.index();
-      nodes[in.getIndex() - min] = word;
-    }
-    for (IndexedWord node : nodes) {
-      if (node != null) { graph.addVertex(node); }
+      nodes.put(in.getIndex(), in.getCopyAnnotation(), word);
+      graph.addVertex(word);
     }
 
     // add all edges to the actual graph
     for(CoreNLPProtos.DependencyGraph.Edge ie: proto.getEdgeList()){
-      IndexedWord source = nodes[ie.getSource() - min];
+      IndexedWord source = nodes.get(ie.getSource(), ie.getSourceCopy());
       assert(source != null);
-      IndexedWord target = nodes[ie.getTarget() - min];
+      IndexedWord target = nodes.get(ie.getTarget(), ie.getTargetCopy());
       assert(target != null);
       synchronized (globalLock) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
@@ -904,7 +909,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.getRootCount() > 0) {
       Collection<IndexedWord> roots = new ArrayList<IndexedWord>();
       for(int rootI : proto.getRootList()){
-        roots.add(nodes[rootI - min]);
+        roots.add(nodes.get(rootI, 0)); // copies should never be roots...
       }
       graph.setRoots(roots);
     } else {

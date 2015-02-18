@@ -1,0 +1,51 @@
+trainFileList = /u/nlp/data/chinese/ner/chinese.ner.misc.train,/u/nlp/data/chinese/ner/chinese.ner.misc.extra.train
+testFile = /u/nlp/data/chinese/ner/chinese.ner.misc.test
+serializeTo = chinese.misc.nodistsim.crf.ser.gz
+
+map = word=0,answer=1
+
+useKnownLCWords = false
+
+useDistSim = false
+#distSimLexicon = /u/nlp/data/german/ner/dewac_175m_600
+mergeTags = true
+useTitle = false
+useClassFeature=true
+useWord=true
+useNGrams=true
+useNeighborNGrams=true
+noMidNGrams=true
+conjoinShapeNGrams=true
+useBeginSent=true
+maxNGramLeng=4
+#maxNGramLeng=6
+usePrev=true
+useNext=true
+useLongSequences=true
+useSequences=true
+usePrevSequences=true
+useTypeSeqs=true
+useTypeSeqs2=true
+useTypeySequences=true
+useOccurrencePatterns=true
+useLastRealWord=true
+useNextRealWord=true
+normalize=true
+wordShape=chris4
+useDisjunctive=true
+disjunctionWidth=5
+useDisjShape=true
+useRadical = true
+
+type=crf
+useQN = true
+
+# For making faster
+
+QNsize = 10
+saveFeatureIndexToDisk = true
+maxLeft=1
+useObservedSequencesOnly=true
+featureDiffThresh=0.05
+
+readerAndWriter=edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter
