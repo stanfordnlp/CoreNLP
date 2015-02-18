@@ -134,12 +134,16 @@ public class XMLOutputter extends AnnotationOutputter {
         // add tree info
         Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
 
-        if(tree != null){
+        if(tree != null) {
           // add the constituent tree for this sentence
           Element parseInfo = new Element("parse", NAMESPACE_URI);
           addConstituentTreeInfo(parseInfo, tree, options.constituentTreePrinter);
           sentElem.appendChild(parseInfo);
+        }
 
+        SemanticGraph basicDependencies = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+
+        if (basicDependencies != null) {
           // add the dependencies for this sentence
           Element depInfo = buildDependencyTreeInfo("basic-dependencies", sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class), tokens, NAMESPACE_URI);
           if (depInfo != null) {
@@ -247,8 +251,8 @@ public class XMLOutputter extends AnnotationOutputter {
         int target = edge.getTarget().index();
         String sourceWord = tokens.get(source - 1).word();
         String targetWord = tokens.get(target - 1).word();
-        Integer sourceCopy = edge.getSource().get(CoreAnnotations.CopyAnnotation.class);
-        Integer targetCopy = edge.getTarget().get(CoreAnnotations.CopyAnnotation.class);
+        Integer sourceCopy = edge.getSource().copyCount();
+        Integer targetCopy = edge.getTarget().copyCount();
         boolean isExtra = edge.isExtra();
 
         addDependencyInfo(depInfo, rel, isExtra, source, sourceWord, sourceCopy, target, targetWord, targetCopy, curNS);
@@ -268,7 +272,7 @@ public class XMLOutputter extends AnnotationOutputter {
     Element govElem = new Element("governor", curNS);
     govElem.addAttribute(new Attribute("idx", Integer.toString(source)));
     govElem.appendChild(sourceWord);
-    if (sourceCopy != null) {
+    if (sourceCopy != null && sourceCopy > 0) {
       govElem.addAttribute(new Attribute("copy", Integer.toString(sourceCopy)));
     }
     depElem.appendChild(govElem);
@@ -276,7 +280,7 @@ public class XMLOutputter extends AnnotationOutputter {
     Element dependElem = new Element("dependent", curNS);
     dependElem.addAttribute(new Attribute("idx", Integer.toString(target)));
     dependElem.appendChild(targetWord);
-    if (targetCopy != null) {
+    if (targetCopy != null && targetCopy > 0) {
       dependElem.addAttribute(new Attribute("copy", Integer.toString(targetCopy)));
     }
     depElem.appendChild(dependElem);

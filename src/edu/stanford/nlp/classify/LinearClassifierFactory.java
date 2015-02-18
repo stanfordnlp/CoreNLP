@@ -266,7 +266,11 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = 9028306475652690036L;
       @Override
       public Minimizer<DiffFunction> create() {
-        return new QNMinimizer(LinearClassifierFactory.this.mem);
+          QNMinimizer qnMinimizer = new QNMinimizer(LinearClassifierFactory.this.mem);
+          if (!verbose) {
+              qnMinimizer.shutUp();
+          }
+          return qnMinimizer;
       }
     };
   }
@@ -276,7 +280,11 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = -9108222058357693242L;
       @Override
       public Minimizer<DiffFunction> create() {
-        return new QNMinimizer(LinearClassifierFactory.this.mem, useRobust);
+          QNMinimizer qnMinimizer = new QNMinimizer(LinearClassifierFactory.this.mem, useRobust);
+          if (!verbose) {
+              qnMinimizer.shutUp();
+          }
+          return qnMinimizer;
       }
     };
   }
@@ -286,7 +294,11 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = -7760753348350678588L;
       @Override
       public Minimizer<DiffFunction> create() {
-        return new SQNMinimizer<DiffFunction>(LinearClassifierFactory.this.mem, initialSMDGain, stochasticBatchSize, false);
+          SQNMinimizer<DiffFunction> sqnMinimizer = new SQNMinimizer<DiffFunction>(LinearClassifierFactory.this.mem, initialSMDGain, stochasticBatchSize, false);
+          if (!verbose) {
+              sqnMinimizer.shutUp();
+          }
+          return sqnMinimizer;
       }
     };
   }
@@ -301,7 +313,11 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = 6860437108371914482L;
       @Override
       public Minimizer<DiffFunction> create() {
-        return new SMDMinimizer<DiffFunction>(initialSMDGain,stochasticBatchSize,stochasticMethod,passes);
+          SMDMinimizer<DiffFunction> smdMinimizer = new SMDMinimizer<DiffFunction>(initialSMDGain, stochasticBatchSize, stochasticMethod, passes);
+          if (!verbose) {
+              smdMinimizer.shutUp();
+          }
+          return smdMinimizer;
       }
     };
   }
@@ -315,7 +331,11 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = 2564615420955196299L;
       @Override
       public Minimizer<DiffFunction> create() {
-        return new InefficientSGDMinimizer<DiffFunction>(gainSGD,stochasticBatchSize);
+          InefficientSGDMinimizer<DiffFunction> sgdMinimizer = new InefficientSGDMinimizer<DiffFunction>(gainSGD, stochasticBatchSize);
+          if (!verbose) {
+              sgdMinimizer.shutUp();
+          }
+          return sgdMinimizer;
       }
     };
   }
@@ -329,7 +349,11 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = -5319225231759162616L;
       @Override
       public Minimizer<DiffFunction> create() {
-        return new SGDMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
+          SGDMinimizer<DiffFunction> sgdMinimizer = new SGDMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
+          if (!verbose) {
+              sgdMinimizer.shutUp();
+          }
+          return sgdMinimizer;
       }
     };
   }
@@ -339,9 +363,13 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = -3042400543337763144L;
       @Override
       public Minimizer<DiffFunction> create() {
-        Minimizer<DiffFunction> firstMinimizer = new SGDMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
-        Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
-        return new HybridMinimizer(firstMinimizer, secondMinimizer, SGDPasses);
+          SGDMinimizer<DiffFunction> firstMinimizer = new SGDMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
+          QNMinimizer secondMinimizer = new QNMinimizer(mem);
+          if (!verbose) {
+              firstMinimizer.shutUp();
+              secondMinimizer.shutUp();
+          }
+          return new HybridMinimizer(firstMinimizer, secondMinimizer, SGDPasses);
       }
     };
   }
@@ -353,8 +381,12 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
       private static final long serialVersionUID = 5823852936137599566L;
       @Override
       public Minimizer<DiffFunction> create() {
-        return new SGDToQNMinimizer(SGDGain, batchSize, sgdPasses,
-                                    qnPasses, hessSamples, QNMem, outputToFile);
+          SGDToQNMinimizer sgdToQNMinimizer = new SGDToQNMinimizer(SGDGain, batchSize, sgdPasses,
+                  qnPasses, hessSamples, QNMem, outputToFile);
+          if (!verbose) {
+              sgdToQNMinimizer.shutUp();
+          }
+          return sgdToQNMinimizer;
       }
     };
   }
@@ -366,9 +398,13 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   public void useHybridMinimizer(final double initialSMDGain, final int stochasticBatchSize,
                                  final StochasticCalculateMethods stochasticMethod, final int cutoffIteration){
     this.minimizerCreator = () -> {
-      Minimizer<DiffFunction> firstMinimizer = new SMDMinimizer<DiffFunction>(initialSMDGain, stochasticBatchSize,stochasticMethod,cutoffIteration);
-      Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
-      return new HybridMinimizer(firstMinimizer,secondMinimizer,cutoffIteration);
+        SMDMinimizer<DiffFunction> firstMinimizer = new SMDMinimizer<DiffFunction>(initialSMDGain, stochasticBatchSize, stochasticMethod, cutoffIteration);
+        QNMinimizer secondMinimizer = new QNMinimizer(mem);
+        if (!verbose) {
+            firstMinimizer.shutUp();
+            secondMinimizer.shutUp();
+        }
+        return new HybridMinimizer(firstMinimizer, secondMinimizer, cutoffIteration);
     };
   }
 

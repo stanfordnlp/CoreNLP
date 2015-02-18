@@ -15,17 +15,10 @@ import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
-import edu.stanford.nlp.trees.GrammaticalStructureFactory;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.Trees;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.trees.TreebankLanguagePack;
-import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.*;
+
 import java.util.function.Function;
-import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.ReflectionLoading;
-import edu.stanford.nlp.util.RuntimeInterruptedException;
-import edu.stanford.nlp.util.StringUtils;
 
 /**
  * This class will add parse information to an Annotation.
@@ -63,6 +56,8 @@ public class ParserAnnotator extends SentenceAnnotator {
 
   private final boolean saveBinaryTrees;
 
+  private final GrammaticalStructure.Extras extraDependencies;
+
   public ParserAnnotator(boolean verbose, int maxSent) {
     this(System.getProperty("parse.model", LexicalizedParser.DEFAULT_PARSER_LOC), verbose, maxSent, StringUtils.EMPTY_STRING_ARRAY);
   }
@@ -93,6 +88,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     }
     this.nThreads = 1;
     this.saveBinaryTrees = false;
+    this.extraDependencies = GrammaticalStructure.Extras.NONE;
   }
 
 
@@ -137,6 +133,8 @@ public class ParserAnnotator extends SentenceAnnotator {
     this.nThreads = PropertiesUtils.getInt(props, annotatorName + ".nthreads", PropertiesUtils.getInt(props, "nthreads", 1));
     boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);
     this.saveBinaryTrees = PropertiesUtils.getBool(props, annotatorName + ".binaryTrees", usesBinary);
+
+    extraDependencies = MetaClass.cast(props.getProperty(annotatorName + ".extradependencies", "NONE"), GrammaticalStructure.Extras.class);
   }
 
   public static String signature(String annotatorName, Properties props) {
@@ -158,6 +156,8 @@ public class ParserAnnotator extends SentenceAnnotator {
             props.getProperty(annotatorName + ".buildgraphs", "true"));
     os.append(annotatorName + ".nthreads:" +
               props.getProperty(annotatorName + ".nthreads", props.getProperty("nthreads", "")));
+    os.append(annotatorName + ".extradependencies:" +
+        props.getProperty(annotatorName + ".extradependences", "NONE").toLowerCase());
     boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);
     boolean saveBinaryTrees = PropertiesUtils.getBool(props, annotatorName + ".binaryTrees", usesBinary);
     os.append(annotatorName + ".binaryTrees:" + saveBinaryTrees);
@@ -246,11 +246,10 @@ public class ParserAnnotator extends SentenceAnnotator {
       tree = treeMap.apply(tree);
     }
 
-    ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree);
+    ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree, extraDependencies);
 
     if (saveBinaryTrees) {
-      TreeBinarizer binarizer = new TreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack(),
-                                                  false, false, 0, false, false, 0.0, false, true, true);
+      TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack());
       Tree binarized = binarizer.transformTree(tree);
       Trees.convertToCoreLabels(binarized);
       sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, binarized);

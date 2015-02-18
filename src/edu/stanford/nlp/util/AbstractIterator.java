@@ -6,15 +6,21 @@ import java.util.Iterator;
  * Iterator with <code>remove()</code> defined to throw an
  * <code>UnsupportedOperationException</code>.
  */
-abstract public class AbstractIterator<E> implements Iterator<E> {
+public abstract class AbstractIterator<E> implements Iterator<E> {
 
-  abstract public boolean hasNext();
+  /** {@inheritDoc} */
+  @Override
+  public abstract boolean hasNext();
 
-  abstract public E next();
+  /** {@inheritDoc} */
+  @SuppressWarnings("IteratorNextCanNotThrowNoSuchElementException")
+  @Override
+  public abstract E next();
 
   /**
-   * Throws an <code>UnupportedOperationException</code>.
+   * Throws an <code>UnsupportedOperationException</code>.
    */
+  @Override
   public void remove() {
     throw new UnsupportedOperationException();
   }

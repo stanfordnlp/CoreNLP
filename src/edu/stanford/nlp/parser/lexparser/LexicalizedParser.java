@@ -38,7 +38,6 @@ import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.metrics.Eval;
 import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.process.TokenizerFactory;
-import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.util.ErasureUtils;
 import java.util.function.Function;
 import edu.stanford.nlp.util.HashIndex;
@@ -101,7 +100,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   @Override
   public Options getOp() { return op; }
 
-  public Reranker reranker = null;
+  public Reranker reranker; // = null;
 
   @Override
   public TreebankLangParserParams getTLPParams() { return op.tlpParams; }
@@ -274,34 +273,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     return trainFromTreebank(trainTreebank, null, op);
   }
 
-
-  /**
-   * Converts a Sentence/List/String into a Tree.  If it can't be parsed,
-   * it is made into a trivial tree in which each word is attached to a
-   * dummy tag ("X") and then to a start nonterminal (also "X").  In all
-   * circumstances, the input will be treated as a single sentence to be
-   * parsed.
-   *
-   * @param words The input sentence (a List of words)
-   * @return A Tree that is the parse tree for the sentence.  If the parser
-   *         fails, a new Tree is synthesized which attaches all words to the
-   *         root.
-   * @throws IllegalArgumentException If argument isn't a List or String
-   */
-  @Override
-  public Tree apply(List<? extends HasWord> words) {
-    return parse(words);
-  }
-
-  /**
-   * Will parse the text in <code>sentence</code> as if it represented
-   * a single sentence by first processing it with a tokenizer.
-   */
-  public Tree parse(String sentence) {
-    TokenizerFactory<? extends HasWord> tf = op.tlpParams.treebankLanguagePack().getTokenizerFactory();
-    Tokenizer<? extends HasWord> tokenizer = tf.getTokenizer(new BufferedReader(new StringReader(sentence)));
-    return parse(tokenizer.tokenize());
-  }
 
   /**
    * Will process a list of strings into a list of HasWord and return
@@ -1176,7 +1147,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    * <LI><code>-outputFormatOptions</code> Provide options that control the
    * behavior of various <code>-outputFormat</code> choices, such as
    * <code>lexicalize</code>, <code>stem</code>, <code>markHeadNodes</code>,
-   * or <code>xml</code>.
+   * or <code>xml</code>.  {@link edu.stanford.nlp.trees.TreePrint}
    * Options are specified as a comma-separated list.</LI>
    * <LI><code>-writeOutputFiles</code> Write output files corresponding
    * to the input files, with the same name but a <code>".stp"</code>
@@ -1448,16 +1419,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
           tokenizerFactory = lp.op.langpack().getTokenizerFactory();
           tokenizerFactory.setOptions(tokenizerOptions);
         }
-      } catch (IllegalAccessException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (NoSuchMethodException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (ClassNotFoundException e) {
-        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
-        throw new RuntimeException(e);
-      } catch (InvocationTargetException e) {
+      } catch (IllegalAccessException | InvocationTargetException | ClassNotFoundException | NoSuchMethodException e) {
         System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
         throw new RuntimeException(e);
       }

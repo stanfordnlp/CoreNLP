@@ -155,7 +155,7 @@ public class CoordinationTransformer implements TreeTransformer {
     // generally add the "not" to the following tree with moveRB, or
     // should we make "and not" a CONJP?
     // also, perhaps look at ADVP
-    TregexPattern.compile("/^(S|PP|VP)/ < (/^(S|PP|VP)/ $++ (CC=start $+ (RB|ADVP $+ /^(S|PP|VP)/) " +
+    TregexPattern.compile("/^(S|PP|VP)/ < (/^(S(?!YM)|PP|VP)/ $++ (CC=start $+ (RB|ADVP $+ /^(S(?!YM)|PP|VP)/) " +
                           "[ (< and $+ (RB=end < yet)) | " +  // TODO: what should be the head of "and yet"?
                           "  (< and $+ (RB=end < so)) | " +
                           "  (< and $+ (ADVP=end < (RB|IN < so))) ] ))"); // TODO: this structure needs a dependency
@@ -171,7 +171,7 @@ public class CoordinationTransformer implements TreeTransformer {
   }
 
   private static TregexPattern[] moveRBTregex = {
-    TregexPattern.compile("/^S|PP|VP|NP/ < (/^(S|PP|VP|NP)/ $++ (/^(,|CC|CONJP)$/ [ $+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB) ])) : (=adv $+ /^(S|PP|VP|NP)/=dest) "),
+    TregexPattern.compile("/^S|PP|VP|NP/ < (/^(S|PP|VP|NP)/ $++ (/^(,|CC|CONJP)$/ [ $+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB) ])) : (=adv $+ /^(S(?!YM)|PP|VP|NP)/=dest) "),
     TregexPattern.compile("/^ADVP/ < (/^ADVP/ $++ (/^(,|CC|CONJP)$/ [$+ (RB=adv [ < not | < then ]) | $+ (ADVP=adv <: RB)])) : (=adv $+ /^NP-ADV|ADVP|PP/=dest)"),
     TregexPattern.compile("/^FRAG/ < (ADVP|RB=adv $+ VP=dest)"),
   };
@@ -179,7 +179,7 @@ public class CoordinationTransformer implements TreeTransformer {
   private static TsurgeonPattern moveRBTsurgeon =
     Tsurgeon.parseOperation("move adv >0 dest");
 
-  private static Tree moveRB(Tree t) {
+  static Tree moveRB(Tree t) {
     if (t == null) {
       return null;
     }
@@ -195,15 +195,15 @@ public class CoordinationTransformer implements TreeTransformer {
   // TODO: maybe we want to catch more complicated tree structures
   // with something in between the WH and the actual question.
   private static TregexPattern flattenSQTregex =
-    TregexPattern.compile("SBARQ < ((WHNP=what < WP) $+ (SQ=sq < (/^VB/=verb < " + EnglishGrammaticalRelations.copularWordRegex + ") " +
+    TregexPattern.compile("SBARQ < ((WHNP=what < WP) $+ (SQ=sq < (/^VB/=verb < " + EnglishPatterns.copularWordRegex + ") " +
                           // match against "is running" if the verb is under just a VBG
-                          " !< (/^VB/ < !" + EnglishGrammaticalRelations.copularWordRegex + ") " +
+                          " !< (/^VB/ < !" + EnglishPatterns.copularWordRegex + ") " +
                           // match against "is running" if the verb is under a VP - VBG
-                          " !< (/^V/ < /^VB/ < !" + EnglishGrammaticalRelations.copularWordRegex + ") " +
+                          " !< (/^V/ < /^VB/ < !" + EnglishPatterns.copularWordRegex + ") " +
                           // match against "What is on the test?"
                           " !< (PP $- =verb) " +
                           // match against "is there"
-                          " !<, (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $+ (NP < (EX < there)))))");
+                          " !<, (/^VB/ < " + EnglishPatterns.copularWordRegex + " $+ (NP < (EX < there)))))");
 
   private static TsurgeonPattern flattenSQTsurgeon = Tsurgeon.parseOperation("excise sq sq");
 

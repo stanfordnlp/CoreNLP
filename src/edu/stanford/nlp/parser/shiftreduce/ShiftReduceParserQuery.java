@@ -16,6 +16,9 @@ import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.lexparser.Debinarizer;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
+import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
@@ -24,13 +27,13 @@ public class ShiftReduceParserQuery implements ParserQuery {
   Debinarizer debinarizer = new Debinarizer(false);
 
   List<? extends HasWord> originalSentence;
-  State initialState, finalState;
+  private State initialState, finalState;
   Tree debinarized;
 
   boolean success;
   boolean unparsable;
 
-  List<State> bestParses;
+  private List<State> bestParses;
 
   final ShiftReduceParser parser;
 
@@ -53,6 +56,14 @@ public class ShiftReduceParserQuery implements ParserQuery {
     return parseInternal();
   }
 
+  // TODO: we are assuming that sentence final punctuation always has
+  // either . or PU as the tag.
+  private static TregexPattern rearrangeFinalPunctuationTregex =
+    TregexPattern.compile("__ !> __ <- (__=top <- (__ <<- (/[.]|PU/=punc < /[.!?。！？]/)))");
+
+  private static TsurgeonPattern rearrangeFinalPunctuationTsurgeon =
+    Tsurgeon.parseOperation("move punc >-1 top");
+
   private boolean parseInternal() {
     final int maxBeamSize = Math.max(parser.op.testOptions().beamSize, 1);
 
@@ -69,11 +80,10 @@ public class ShiftReduceParserQuery implements ParserQuery {
       beam = new PriorityQueue<State>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State bestState = null;
       for (State state : oldBeam) {
-        List<String> features = parser.featureFactory.featurize(state);
-        Collection<ScoredObject<Integer>> predictedTransitions = parser.findHighestScoringTransitions(state, features, true, maxBeamSize, constraints);
+        Collection<ScoredObject<Integer>> predictedTransitions = parser.model.findHighestScoringTransitions(state, true, maxBeamSize, constraints);
         // System.err.println("Examining state: " + state);
         for (ScoredObject<Integer> predictedTransition : predictedTransitions) {
-          Transition transition = parser.transitionIndex.get(predictedTransition.object());
+          Transition transition = parser.model.transitionIndex.get(predictedTransition.object());
           State newState = transition.apply(state, predictedTransition.score());
           // System.err.println("  Transition: " + transition + " (" + predictedTransition.score() + ")");
           if (bestState == null || bestState.score() < newState.score()) {
@@ -94,7 +104,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
         // This will probably result in a bad parse, but at least it
         // will result in some sort of parse.
         for (State state : oldBeam) {
-          Transition transition = parser.findEmergencyTransition(state, constraints);
+          Transition transition = parser.model.findEmergencyTransition(state, constraints);
           if (transition != null) {
             State newState = transition.apply(state);
             if (bestState == null || bestState.score() < newState.score()) {
@@ -124,6 +134,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
       Collections.reverse(bestParses);
       finalState = bestParses.get(0);
       debinarized = debinarizer.transformTree(finalState.stack.peek());
+      debinarized = Tsurgeon.processPattern(rearrangeFinalPunctuationTregex, rearrangeFinalPunctuationTsurgeon, debinarized);
     }
     return success;
   }

@@ -6,8 +6,10 @@ import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.util.*;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -182,7 +184,7 @@ public class SequenceMatchRules {
    * Rule that specifies how to extract sequence of MatchedExpression from an annotation (CoreMap).
    * @param <T> Output type (MatchedExpression)
    */
-  public static class AnnotationExtractRule<S, T extends MatchedExpression> implements Rule, ExtractRule<S,T>, Filter<T> {
+  public static class AnnotationExtractRule<S, T extends MatchedExpression> implements Rule, ExtractRule<S,T>, Predicate<T>, Serializable {
     /** Name of the rule */
     public String name;
     /** Stage in which this rule should be applied with respect to others */
@@ -211,7 +213,7 @@ public class SequenceMatchRules {
     public boolean active = true;
     /** Actual rule performing the extraction (converting annotation to MatchedExpression) */
     public ExtractRule<S, T> extractRule;
-    public Filter<T> filterRule;
+    public Predicate<T> filterRule;
 
     public void update(Env env, Map<String, Object> attributes) {
       for (String key:attributes.keySet()) {
@@ -264,8 +266,8 @@ public class SequenceMatchRules {
       return extractRule.extract(in, out);
     }
 
-    public boolean accept(T obj) {
-      return filterRule.accept(obj);
+    public boolean test(T obj) {
+      return filterRule.test(obj);
     }
   }
 
@@ -279,7 +281,7 @@ public class SequenceMatchRules {
   public static Rule createRule(Env env, Expressions.CompositeValue cv) {
     Map<String, Object> attributes;
     cv = cv.simplifyNoTypeConversion(env);
-    attributes = Generics.newHashMap();
+    attributes = new HashMap<String, Object>();//Generics.newHashMap();
     for (String s:cv.getAttributes()) {
       attributes.put(s, cv.getExpression(s));
     }
@@ -307,7 +309,7 @@ public class SequenceMatchRules {
     }
     AnnotationExtractRuleCreator ruleCreator = lookupExtractRuleCreator(env, ruleType);
     if (ruleCreator != null) {
-      Map<String,Object> attributes = Generics.newHashMap();
+      Map<String,Object> attributes = new HashMap<String, Object>();//Generics.newHashMap();
       attributes.put("ruleType", ruleType);
       attributes.put("pattern", pattern);
       attributes.put("result", result);
@@ -325,7 +327,7 @@ public class SequenceMatchRules {
   public final static CompositeExtractRuleCreator COMPOSITE_EXTRACT_RULE_CREATOR = new CompositeExtractRuleCreator();
   public final static TextPatternExtractRuleCreator TEXT_PATTERN_EXTRACT_RULE_CREATOR = new TextPatternExtractRuleCreator();
   public final static AnnotationExtractRuleCreator DEFAULT_EXTRACT_RULE_CREATOR = TOKEN_PATTERN_EXTRACT_RULE_CREATOR;
-  final static Map<String, AnnotationExtractRuleCreator> registeredRuleTypes = Generics.newHashMap();
+  final static Map<String, AnnotationExtractRuleCreator> registeredRuleTypes = new HashMap<String, AnnotationExtractRuleCreator>();//Generics.newHashMap();
   static {
     registeredRuleTypes.put(TOKEN_PATTERN_RULE_TYPE, TOKEN_PATTERN_EXTRACT_RULE_CREATOR);
     registeredRuleTypes.put(COMPOSITE_RULE_TYPE, COMPOSITE_EXTRACT_RULE_CREATOR);
@@ -560,7 +562,7 @@ public class SequenceMatchRules {
     }
   }
 
-  public static class AnnotationMatchedFilter implements Filter<MatchedExpression> {
+  public static class AnnotationMatchedFilter implements Predicate<MatchedExpression>, Serializable {
 
     MatchedExpression.SingleAnnotationExtractor extractor;
 
@@ -568,7 +570,7 @@ public class SequenceMatchRules {
       this.extractor = extractor;
     }
 
-    public boolean accept(MatchedExpression me) {
+    public boolean test(MatchedExpression me) {
       CoreMap cm = me.getAnnotation();
       Value v = extractor.apply(cm);
       if (v != null) {
@@ -643,8 +645,8 @@ public class SequenceMatchRules {
 
   /**
    * Interface for a rule that extracts a list of matched items from a input
-   * @param <I>
-   * @param <O>
+   * @param <I> input type
+   * @param <O> output type
    */
   public static interface ExtractRule<I,O> {
     public boolean extract(I in, List<O> out);
@@ -652,26 +654,26 @@ public class SequenceMatchRules {
 
   /**
    * Extraction rule that filters the input before passing it on to the next extractor
-   * @param <I>
-   * @param <O>
+   * @param <I> input type
+   * @param <O> output type
    */
   public static class FilterExtractRule<I,O> implements ExtractRule<I,O>
   {
-    Filter<I> filter;
+    Predicate<I> filter;
     ExtractRule<I,O> rule;
 
-    public FilterExtractRule(Filter<I> filter, ExtractRule<I,O> rule) {
+    public FilterExtractRule(Predicate<I> filter, ExtractRule<I,O> rule) {
       this.filter = filter;
       this.rule = rule;
     }
 
-    public FilterExtractRule(Filter<I> filter, ExtractRule<I,O>... rules) {
+    public FilterExtractRule(Predicate<I> filter, ExtractRule<I,O>... rules) {
       this.filter = filter;
       this.rule = new ListExtractRule<I,O>(rules);
     }
 
     public boolean extract(I in, List<O> out) {
-      if (filter.accept(in)) {
+      if (filter.test(in)) {
         return rule.extract(in,out);
       } else {
         return false;
@@ -682,8 +684,8 @@ public class SequenceMatchRules {
   /**
    * Extraction rule that applies a list of rules in sequence and aggregates
    *   all matches found
-   * @param <I>
-   * @param <O>
+   * @param <I> input type
+   * @param <O> output type
    */
   public static class ListExtractRule<I,O> implements ExtractRule<I,O>
   {
@@ -727,8 +729,9 @@ public class SequenceMatchRules {
 
   /**
    * Extraction rule to apply a extraction rule on a particular CoreMap field
-   * @param <T>
-   * @param <O>
+   * Input is of type CoreMap, output is templated type O.
+   * @param <T> type of the annotation field
+   * @param <O> output type
    */
   public static class CoreMapExtractRule<T,O> implements ExtractRule<CoreMap, O>
   {
@@ -752,6 +755,12 @@ public class SequenceMatchRules {
 
   }
 
+  /**
+   * Extraction rule that treats a single CoreMap as a list/sequence of CoreMaps
+   * (convenience class, for use with BasicSequenceExtractRule)
+   * Input is of type CoreMap, output is templated type O.
+   * @param <O> output type
+   */
   public static class CoreMapToListExtractRule<O> implements ExtractRule<CoreMap, O>
   {
     ExtractRule<List<? extends CoreMap>,O> extractRule;
@@ -765,6 +774,10 @@ public class SequenceMatchRules {
     }
   }
 
+  /**
+   * Extraction rule
+   * Input is of type CoreMap, output is MatchedExpression
+   */
   public static class BasicSequenceExtractRule implements ExtractRule< List<? extends CoreMap>, MatchedExpression>
   {
     MatchedExpression.SingleAnnotationExtractor extractor;

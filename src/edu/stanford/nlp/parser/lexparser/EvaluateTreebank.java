@@ -42,7 +42,6 @@ import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeTransformer;
 import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
@@ -112,7 +111,7 @@ public class EvaluateTreebank {
   }
 
   public EvaluateTreebank(Options op, Lexicon lex, ParserGrammar pqFactory) {
-    this(op, lex, pqFactory, loadTagger(op));
+    this(op, lex, pqFactory, pqFactory.loadTagger());
   }
 
   public EvaluateTreebank(Options op, Lexicon lex, ParserGrammar pqFactory, Function<List<? extends HasWord>,List<TaggedWord>> tagger) {
@@ -223,14 +222,6 @@ public class EvaluateTreebank {
       kbestPCFG = Math.max(kbestPCFG, op.testOptions.printPCFGkBest);
     }
 
-  }
-
-  private static Function<List<? extends HasWord>,List<TaggedWord>> loadTagger(Options op) {
-    if (op.testOptions.preTag) {
-      return ReflectionLoading.loadByReflection("edu.stanford.nlp.tagger.maxent.MaxentTagger", op.testOptions.taggerSerializedFile);
-    } else {
-      return null;
-    }
   }
 
   public double getLBScore() {
