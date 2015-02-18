@@ -140,6 +140,10 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
   }
 
 
+  public CMMClassifier(SeqClassifierFlags flags) {
+    super(flags);
+  }
+
   /**
    * Returns the Set of entities recognized by this Classifier.
    *

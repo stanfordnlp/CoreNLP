@@ -340,6 +340,9 @@ public class Options implements Serializable {
       trainOptions.HSEL_CUT = Integer.parseInt(args[i + 1]);
       trainOptions.hSelSplit = trainOptions.HSEL_CUT > 0;
       i += 2;
+    } else if (args[i].equalsIgnoreCase("-nohSelSplit")) {
+      trainOptions.hSelSplit = false;
+      i += 1;
     } else if (args[i].equalsIgnoreCase("-tagPA")) {
       trainOptions.tagPA = true;
       i += 1;
@@ -774,8 +777,8 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-qnTolerance")) {
       trainOptions.qnTolerance = Double.parseDouble(args[i + 1]);
       i += 2;
-    } else if (args[i].equalsIgnoreCase("-debugOutputSeconds")) {
-      trainOptions.debugOutputSeconds = Integer.parseInt(args[i + 1]);
+    } else if (args[i].equalsIgnoreCase("-debugOutputFrequency")) {
+      trainOptions.debugOutputFrequency = Integer.parseInt(args[i + 1]);
       i += 2;
     } else if (args[i].equalsIgnoreCase("-maxTrainTimeSeconds")) {
       trainOptions.maxTrainTimeSeconds = Integer.parseInt(args[i + 1]);
@@ -861,11 +864,11 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-noUseContextWords")) {
       trainOptions.useContextWords = false;
       i += 1;
-    } else if (args[i].equalsIgnoreCase("-dvCombineCategories")) {
-      dvCombineCategories = true;
+    } else if (args[i].equalsIgnoreCase("-trainWordVectors")) {
+      trainOptions.trainWordVectors = true;
       i += 1;
-    } else if (args[i].equalsIgnoreCase("-nodvCombineCategories")) {
-      dvCombineCategories = false;
+    } else if (args[i].equalsIgnoreCase("-noTrainWordVectors")) {
+      trainOptions.trainWordVectors = false;
       i += 1;
     }
     return i;
@@ -1141,12 +1144,6 @@ public class Options implements Serializable {
    * parser as well.  This tells us how much weight to give that score.
    */
   public double baseParserWeight = 0.0;
-
-  /**
-   * The DVParser will combine categories such as NP and NNP if this
-   * is set to true
-   */
-  public boolean dvCombineCategories = false;
 
   /**
    * Making the TestOptions transient means it won't even be

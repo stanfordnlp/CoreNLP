@@ -15,15 +15,47 @@ import edu.stanford.nlp.util.Generics;
  */
 public class PrintTagList {
   public static void main(String[] args) {
-    LexicalizedParser parser = LexicalizedParser.loadModel(args[0]);
-    Set<String> tags = Generics.newHashSet();
-    for (String tag : parser.tagIndex) {
-      String[] pieces = tag.split("\\^");
-      pieces[0] = pieces[0].replaceAll("-[A-Z]+$", "");
-      tags.add(pieces[0]);
+    String parserFile = null;
+    for (int argIndex = 0; argIndex < args.length; ) {
+      if (args[argIndex].equalsIgnoreCase("-model")) {
+        parserFile = args[argIndex + 1];
+        argIndex += 2;
+      } else {
+        String error = "Unknown argument " + args[argIndex];
+        System.err.println(error);
+        throw new RuntimeException(error);
+      }
     }
-    List<String> sortedTags = Generics.newArrayList(tags);
-    Collections.sort(sortedTags);
-    System.err.println(sortedTags);
+    if (parserFile == null) {
+      System.err.println("Must specify a model file with -model");
+      System.exit(2);
+    }
+
+    LexicalizedParser parser = LexicalizedParser.loadModel(parserFile);
+
+    Set<String> tags = Generics.newTreeSet();
+    for (String tag : parser.tagIndex) {
+      tags.add(parser.treebankLanguagePack().basicCategory(tag));
+    }
+    System.out.println("Basic tags: " + tags.size());
+    for (String tag : tags) {
+      System.out.print("  " + tag);
+    }
+    System.out.println();
+    System.out.println("All tags size: " + parser.tagIndex.size());
+
+    Set<String> states = Generics.newTreeSet();
+    for (String state : parser.stateIndex) {
+      states.add(parser.treebankLanguagePack().basicCategory(state));
+    }
+    System.out.println("Basic states: " + states.size());
+    for (String tag : states) {
+      System.out.print("  " + tag);
+    }
+    System.out.println();
+    System.out.println("All states size: " + parser.stateIndex.size());
+
+    System.out.println("Unary grammar size: " + parser.ug.numRules());
+    System.out.println("Binary grammar size: " + parser.bg.numRules());
   }
 }

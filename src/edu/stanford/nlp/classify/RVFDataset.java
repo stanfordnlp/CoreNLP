@@ -967,4 +967,35 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     }
   }
 
+  /**
+   * Randomizes the data array in place. Needs to be redefined here because we
+   * need to randomize the values as well.
+   */
+  @Override
+  public <E> void shuffleWithSideInformation(long randomSeed, List<E> sideInformation) {
+    if (size != sideInformation.size()) {
+      throw new IllegalArgumentException("shuffleWithSideInformation: sideInformation not of same size as Dataset");
+    }
+    Random rand = new Random(randomSeed);
+    for (int j = size - 1; j > 0; j--) {
+      int randIndex = rand.nextInt(j);
+
+      int[] tmp = data[randIndex];
+      data[randIndex] = data[j];
+      data[j] = tmp;
+
+      int tmpl = labels[randIndex];
+      labels[randIndex] = labels[j];
+      labels[j] = tmpl;
+
+      double[] tmpv = values[randIndex];
+      values[randIndex] = values[j];
+      values[j] = tmpv;
+
+      E tmpE = sideInformation.get(randIndex);
+      sideInformation.set(randIndex, sideInformation.get(j));
+      sideInformation.set(j, tmpE);
+    }
+  }
+
 }

@@ -9,9 +9,10 @@ public interface TsurgeonParserTreeConstants
   public int JJTNODESELECTIONLIST = 3;
   public int JJTNODESELECTION = 4;
   public int JJTNODENAME = 5;
-  public int JJTTREEROOT = 6;
-  public int JJTTREENODE = 7;
-  public int JJTTREEDTRS = 8;
+  public int JJTTREELIST = 6;
+  public int JJTTREEROOT = 7;
+  public int JJTTREENODE = 8;
+  public int JJTTREEDTRS = 9;
 
 
   public String[] jjtNodeName = {
@@ -21,9 +22,10 @@ public interface TsurgeonParserTreeConstants
     "NodeSelectionList",
     "NodeSelection",
     "NodeName",
+    "TreeList",
     "TreeRoot",
     "TreeNode",
     "TreeDtrs",
   };
 }
-/* JavaCC - OriginalChecksum=6054762eec29cf66060f527f622747bf (do not edit this line) */
+/* JavaCC - OriginalChecksum=50a421c1379c99e1a75030566d041db5 (do not edit this line) */

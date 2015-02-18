@@ -319,7 +319,40 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     }
   }
 
-  public GeneralDataset<L,F> sampleDataset(int randomSeed, double sampleFrac, boolean sampleWithReplacement) {
+  /**
+   * Randomizes the data array in place.
+   * Note: this cannot change the values array or the datum weights,
+   * so redefine this for RVFDataset and WeightedDataset!
+   * This uses the Fisher-Yates (or Durstenfeld-Knuth) shuffle, which is unbiased.
+   * The same algorithm is used by shuffle() in j.u.Collections, and so you should get compatible
+   * results if using it on a Collection with the same seed (as of JDK1.7, at least).
+   *
+   * @param randomSeed A seed for the Random object (allows you to reproduce the same ordering)
+   */
+  public <E> void shuffleWithSideInformation(long randomSeed, List<E> sideInformation) {
+    if (size != sideInformation.size()) {
+      throw new IllegalArgumentException("shuffleWithSideInformation: sideInformation not of same size as Dataset");
+    }
+    Random rand = new Random(randomSeed);
+    for (int j = size - 1; j > 0; j--) {
+      // swap each item with some lower numbered item
+      int randIndex = rand.nextInt(j);
+
+      int[] tmp = data[randIndex];
+      data[randIndex] = data[j];
+      data[j] = tmp;
+
+      int tmpl = labels[randIndex];
+      labels[randIndex] = labels[j];
+      labels[j] = tmpl;
+
+      E tmpE = sideInformation.get(randIndex);
+      sideInformation.set(randIndex, sideInformation.get(j));
+      sideInformation.set(j, tmpE);
+    }
+  }
+
+  public GeneralDataset<L,F> sampleDataset(long randomSeed, double sampleFrac, boolean sampleWithReplacement) {
     int sampleSize = (int)(this.size()*sampleFrac);
     Random rand = new Random(randomSeed);
     GeneralDataset<L,F> subset;
