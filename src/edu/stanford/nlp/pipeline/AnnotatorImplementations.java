@@ -6,7 +6,7 @@ import edu.stanford.nlp.naturalli.NaturalLogicAnnotator;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.ReflectionLoading;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -68,7 +68,7 @@ public class AnnotatorImplementations {
   /**
    * Annotate for named entities -- note that this combines multiple NER tag sets, and some auxiliary things (like temporal tagging)
    */
-  public Annotator ner(Properties properties) throws FileNotFoundException {
+  public Annotator ner(Properties properties) throws IOException {
 
     List<String> models = new ArrayList<String>();
     String modelNames = properties.getProperty("ner.model");
@@ -116,7 +116,7 @@ public class AnnotatorImplementations {
    * Annotate mentions
    */
   public Annotator mentions(Properties properties, String name) {
-    return new MentionsAnnotator(name, properties);
+    return new EntityMentionsAnnotator(name, properties);
   }
 
   /**
@@ -211,6 +211,15 @@ public class AnnotatorImplementations {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
         Annotator.STANFORD_NATLOG + '.');
     return new NaturalLogicAnnotator(relevantProperties);
+  }
+
+  /**
+   * Annotate quotes and extract them like sentences
+   */
+  public Annotator quote(Properties properties) {
+    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
+        Annotator.STANFORD_QUOTE + '.');
+    return new QuoteAnnotator(relevantProperties);
   }
 
 }

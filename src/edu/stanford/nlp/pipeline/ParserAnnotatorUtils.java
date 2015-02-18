@@ -18,11 +18,13 @@ public class ParserAnnotatorUtils {
 
   private ParserAnnotatorUtils() {} // static methods
 
-  /**
-   * Thread safety note: nothing special is done to ensure the thread
-   * safety of the GrammaticalStructureFactory.  However, both the
-   * EnglishGrammaticalStructureFactory and the
-   * ChineseGrammaticalStructureFactory are thread safe.
+  /** Put the tree in the CoreMap for the sentence, also add any
+   *  dependency graphs to the sentence, and fill in missing tag annotations.
+   *
+   *  Thread safety note: nothing special is done to ensure the thread
+   *  safety of the GrammaticalStructureFactory.  However, both the
+   *  EnglishGrammaticalStructureFactory and the
+   *  ChineseGrammaticalStructureFactory are thread safe.
    */
   public static void fillInParseAnnotations(boolean verbose, boolean buildGraphs,
                                             GrammaticalStructureFactory gsf, CoreMap sentence, Tree tree,
@@ -63,13 +65,13 @@ public class ParserAnnotatorUtils {
 
   /**
    * Set the tags of the original tokens and the leaves if they
-   * aren't already set
+   * aren't already set.
    */
   public static void setMissingTags(CoreMap sentence, Tree tree) {
     List<TaggedWord> taggedWords = null;
     List<Label> leaves = null;
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    for (int i = 0; i < tokens.size(); ++i) {
+    for (int i = 0, size = tokens.size(); i < size; ++i) {
       CoreLabel token = tokens.get(i);
       if (token.tag() == null) {
         if (taggedWords == null) {
@@ -86,4 +88,5 @@ public class ParserAnnotatorUtils {
       }
     }
   }
+
 }

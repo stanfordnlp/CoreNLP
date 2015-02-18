@@ -4,6 +4,7 @@ import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.ner.CMMClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
@@ -31,7 +32,8 @@ import java.util.*;
  * properties. We also maintain the older usage when only two base classifiers were accepted,
  * specified using -loadClassifier and -loadAuxClassifier.
  * <p>
- * ms 2009: removed all NER functionality (see NERClassifierCombiner), changed code so it accepts an arbitrary number of base classifiers, removed dead code.
+ * ms 2009: removed all NER functionality (see NERClassifierCombiner), changed code so it
+ * accepts an arbitrary number of base classifiers, removed dead code.
  *
  * @author Chris Cox
  * @author Mihai Surdeanu
@@ -39,14 +41,12 @@ import java.util.*;
 public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSequenceClassifier<IN> {
 
   private static final boolean DEBUG = false;
-  private List<AbstractSequenceClassifier<IN>> baseClassifiers;
 
-  private static final String DEFAULT_AUX_CLASSIFIER_PATH="/u/nlp/data/ner/goodClassifiers/english.muc.7class.distsim.crf.ser.gz";
-  private static final String DEFAULT_CLASSIFIER_PATH="/u/nlp/data/ner/goodClassifiers/english.all.3class.distsim.crf.ser.gz";
+  private List<AbstractSequenceClassifier<IN>> baseClassifiers;
 
   /**
    * NORMAL means that if one classifier uses PERSON, later classifiers can't also add PERSON, for example. <br>
-   * HIGH_RECALL allows later models to set PERSON as long as it doesn't clobber existing annotations.
+   * HIGH_RECALL allows later models do set PERSON as long as it doesn't clobber existing annotations.
    */
   static enum CombinationMode {
     NORMAL, HIGH_RECALL
@@ -61,11 +61,11 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
    * and <code>loadAuxClassifier</code> properties or, alternatively, <code>loadClassifier[1-10]</code> properties.
    * @throws FileNotFoundException If classifier files not found
    */
-  public ClassifierCombiner(Properties p) throws FileNotFoundException {
+  public ClassifierCombiner(Properties p) throws IOException {
     super(p);
     this.combinationMode = extractCombinationModeSafe(p);
     String loadPath1, loadPath2;
-    List<String> paths = new ArrayList<String>();
+    List<String> paths = new ArrayList<>();
 
     //
     // preferred configuration: specify up to 10 base classifiers using loadClassifier1 to loadClassifier10 properties
@@ -95,22 +95,36 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     // fall back strategy: use the two default paths on NLP machines
     //
     else {
-      paths.add(DEFAULT_CLASSIFIER_PATH);
-      paths.add(DEFAULT_AUX_CLASSIFIER_PATH);
+      paths.add(DefaultPaths.DEFAULT_NER_THREECLASS_MODEL);
+      paths.add(DefaultPaths.DEFAULT_NER_MUC_MODEL);
       loadClassifiers(paths);
     }
   }
 
-  /** Loads a series of base classifiers from the paths specified.
+  /** Loads a series of base classifiers from the paths specified using the
+   *  Properties specified.
    *
-   * @param loadPaths Paths to the base classifiers
-   * @throws FileNotFoundException If classifier files not found
+   *  @param props Properties for the classifier to use (encodings, output format, etc.)
+   *  @param combinationMode How to handle multiple classifiers specifying the same entity type
+   *  @param loadPaths Paths to the base classifiers
+   *  @throws IOException If IO errors in loading classifier files
    */
-  public ClassifierCombiner(CombinationMode combinationMode, String... loadPaths) throws FileNotFoundException {
-    super(new Properties());
+  public ClassifierCombiner(Properties props, CombinationMode combinationMode, String... loadPaths) throws IOException {
+    super(props);
     this.combinationMode = combinationMode;
-    List<String> paths = new ArrayList<String>(Arrays.asList(loadPaths));
+    List<String> paths = new ArrayList<>(Arrays.asList(loadPaths));
     loadClassifiers(paths);
+  }
+
+  /** Loads a series of base classifiers from the paths specified using the
+   *  Properties specified.
+   *
+   *  @param combinationMode How to handle multiple classifiers specifying the same entity type
+   *  @param loadPaths Paths to the base classifiers
+   *  @throws IOException If IO errors in loading classifier files
+   */
+  public ClassifierCombiner(CombinationMode combinationMode, String... loadPaths) throws IOException {
+    this(new Properties(), combinationMode, loadPaths);
   }
 
   /** Loads a series of base classifiers from the paths specified.
@@ -118,22 +132,20 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
    * @param loadPaths Paths to the base classifiers
    * @throws FileNotFoundException If classifier files not found
    */
-  public ClassifierCombiner(String... loadPaths) throws FileNotFoundException {
-    super(new Properties());
-    this.combinationMode = DEFAULT_COMBINATION_MODE;
-    List<String> paths = new ArrayList<String>(Arrays.asList(loadPaths));
-    loadClassifiers(paths);
+  public ClassifierCombiner(String... loadPaths) throws IOException {
+    this(DEFAULT_COMBINATION_MODE, loadPaths);
   }
 
 
-  /** Combines a series of base classifiers
+  /** Combines a series of base classifiers.
    *
    * @param classifiers The base classifiers
    */
+  @SafeVarargs
   public ClassifierCombiner(AbstractSequenceClassifier<IN>... classifiers) {
     super(new Properties());
     this.combinationMode = DEFAULT_COMBINATION_MODE;
-    baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>(Arrays.asList(classifiers));
+    baseClassifiers = new ArrayList<>(Arrays.asList(classifiers));
     flags.backgroundSymbol = baseClassifiers.get(0).flags.backgroundSymbol;
   }
 
@@ -167,13 +179,13 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     }
   }
 
-  private void loadClassifiers(List<String> paths) throws FileNotFoundException {
+  private void loadClassifiers(List<String> paths) throws IOException {
     baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>();
     for(String path: paths){
       AbstractSequenceClassifier<IN> cls = loadClassifierFromPath(path);
       baseClassifiers.add(cls);
       if(DEBUG){
-        System.err.printf("Successfully loaded classifier #%d from %s.\n", baseClassifiers.size(), path);
+        System.err.printf("Successfully loaded classifier #%d from %s.%n", baseClassifiers.size(), path);
       }
     }
     if (baseClassifiers.size() > 0) {
@@ -183,7 +195,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
 
 
   public static <INN extends CoreMap & HasWord> AbstractSequenceClassifier<INN> loadClassifierFromPath(String path)
-      throws FileNotFoundException {
+      throws IOException {
     //try loading as a CRFClassifier
     try {
        return ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(path));
@@ -196,9 +208,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     } catch (Exception e) {
       //fail
       //System.err.println("Couldn't load classifier from path :"+path);
-      FileNotFoundException fnfe = new FileNotFoundException();
-      fnfe.initCause(e);
-      throw fnfe;
+      throw new IOException("Couldn't load classifier from " + path, e);
     }
   }
 
