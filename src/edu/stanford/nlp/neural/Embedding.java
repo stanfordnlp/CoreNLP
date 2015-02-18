@@ -93,7 +93,7 @@ public class Embedding {
       String word = lineSplit[0];
 
       // check for unknown token
-      if(word.equals("UNKNOWN") || word.equals("UUUNKKK") || word.equals("UNK") || word.equals("*UNKNOWN*")){
+      if(word.equals("UNKNOWN") || word.equals("UUUNKKK") || word.equals("UNK") || word.equals("*UNKNOWN*") || word.equals("<unk>")){
         word = UNKNOWN_WORD;
       }
       // check for start token
@@ -155,7 +155,7 @@ public class Embedding {
       String word = wordIterator.next();
       
       // check for unknown token
-      if(word.equals("UNKNOWN") || word.equals("UUUNKKK") || word.equals("UNK") || word.equals("*UNKNOWN*")){
+    if(word.equals("UNKNOWN") || word.equals("UUUNKKK") || word.equals("UNK") || word.equals("*UNKNOWN*") || word.equals("<unk>")){
         word = UNKNOWN_WORD;
       }
       // check for start token
@@ -256,6 +256,8 @@ public class Embedding {
       if (wordVectors.containsKey("UNK")) { unkStr = "UNK"; }
       if (wordVectors.containsKey("UUUNKKK")) { unkStr = "UUUNKKK"; }
       if (wordVectors.containsKey("UNKNOWN")) { unkStr = "UNKNOWN"; }
+      if (wordVectors.containsKey("*UNKNOWN*")) { unkStr = "*UNKNOWN*"; }
+      if (wordVectors.containsKey("<unk>")) { unkStr = "<unk>"; }
       
       // set UNKNOWN_WORD
       if (!unkStr.equals("")){

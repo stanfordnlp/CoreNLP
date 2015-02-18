@@ -2,12 +2,14 @@ package edu.stanford.nlp.util;
 
 import java.io.StringWriter;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,13 +40,22 @@ public class ConfusionMatrix<U> {
   // classification placeholder prefix when drawing in table
   private static final String CLASS_PREFIX = "C"; 
   
-  protected static DecimalFormat d = new DecimalFormat("#.#####");
+  private static final String FORMAT = "#.#####";
+  protected DecimalFormat format;
   private int leftPadSize = 16;
   private int delimPadSize = 8;
   private boolean useRealLabels = false;
 
+  public ConfusionMatrix() {
+    format = new DecimalFormat(FORMAT);
+  }
+
+  public ConfusionMatrix(Locale locale) {
+    format = new DecimalFormat(FORMAT, new DecimalFormatSymbols(locale));
+  }
+
   @Override
-    public String toString() {
+  public String toString() {
     return printTable();
   }
   
@@ -75,7 +86,7 @@ public class ConfusionMatrix<U> {
    * @author yeh1@cs.stanford.edu
    * 
    */
-  public static class Contingency {
+  public class Contingency {
     private double tp = 0;
     private double fp = 0;
     private double tn = 0;
@@ -99,10 +110,10 @@ public class ConfusionMatrix<U> {
     }
     
     public String toString() {
-      return StringUtils.join(Arrays.asList("prec=" + (((tp + fp) > 0) ? d.format(prec) : "n/a"),
-                                            "recall=" + (((tp + fn) > 0) ? d.format(recall) : "n/a"),
-                                            "spec=" + (((fp + tn) > 0) ? d.format(spec) : "n/a"), "f1="
-                                            + (((prec + recall) > 0) ? d.format(f1) : "n/a")),
+      return StringUtils.join(Arrays.asList("prec=" + (((tp + fp) > 0) ? format.format(prec) : "n/a"),
+                                            "recall=" + (((tp + fn) > 0) ? format.format(recall) : "n/a"),
+                                            "spec=" + (((fp + tn) > 0) ? format.format(spec) : "n/a"), "f1="
+                                            + (((prec + recall) > 0) ? format.format(f1) : "n/a")),
                               ", ");
     }
     

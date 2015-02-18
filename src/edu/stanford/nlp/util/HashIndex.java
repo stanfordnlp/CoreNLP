@@ -5,20 +5,17 @@ import java.util.*;
 import java.util.concurrent.Semaphore;
 
 /**
- * An Index is a collection that maps between an Object vocabulary and a
- * contiguous non-negative integer index series beginning (inclusively) at 0.
- * It supports constant-time lookup in
- * both directions (via <code>get(int)</code> and <code>indexOf(E)</code>.
- * The <code>indexOf(E)</code> method compares objects by
- * <code>equals</code>, as other Collections.
+ * Implements an Index that supports constant-time lookup in
+ * both directions (via {@code get(int)} and {@code indexOf(E)}.
+ * The {@code indexOf(E)} method compares objects by
+ * {@code equals()}, as other Collections.
  * <p/>
  * The typical usage would be:
- * <p><code>Index index = new Index(collection);</code>
+ * <p>{@code Index<String> index = new Index<String>(collection);}
  * <p> followed by
- * <p><code>int i = index.indexOf(object);</code>
+ * <p>{@code int i = index.indexOf(str);}
  * <p> or
- * <p><code>Object o = index.get(i);</code>
- * <p>The source contains a concrete example of use as the main method.
+ * <p>{@code String s = index.get(i);}
  * <p>An Index can be locked or unlocked: a locked index cannot have new
  * items added to it.
  *
@@ -31,9 +28,11 @@ import java.util.concurrent.Semaphore;
 public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, RandomAccess {
 
   // these variables are also used in IntArrayIndex
-  ArrayList<E> objects = new ArrayList<E>();
-  Map<E,Integer> indexes = Generics.newHashMap();
-  boolean locked; // = false;
+  private final ArrayList<E> objects;
+  private final Map<E,Integer> indexes;
+  private boolean locked; // = false; // Mutable
+
+  private static final long serialVersionUID = 5398562825928375260L;
 
   /**
    * Clears this Index.
@@ -46,13 +45,13 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
 
   /**
    * Returns the index of each elem in a List.
-   * @param elems The list of items
+   * @param elements The list of items
    * @return An array of indices
    */
-  public int[] indices(Collection<E> elems) {
-    int[] indices = new int[elems.size()];
+  public int[] indices(Collection<E> elements) {
+    int[] indices = new int[elements.size()];
     int i = 0;
-    for (E elem : elems) {
+    for (E elem : elements) {
       indices[i++] = indexOf(elem);
     }
     return indices;
@@ -65,6 +64,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * @param indices An array of indices
    * @return a {@link Collection} of the objects corresponding to the indices argument.
    */
+  @Override
   public Collection<E> objects(final int[] indices) {
     return new AbstractList<E>() {
       @Override
@@ -95,10 +95,11 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * @param i the integer index to be queried for the corresponding argument
    * @return the object whose index is the integer argument.
    */
+  @Override
   public E get(int i) {
     if (i < 0 || i >= objects.size())
-      throw new ArrayIndexOutOfBoundsException("Index " + i + 
-                                               " outside the bounds [0," + 
+      throw new ArrayIndexOutOfBoundsException("Index " + i +
+                                               " outside the bounds [0," +
                                                size() + ")");
     return objects.get(i);
   }
@@ -111,6 +112,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    *
    * @return a complete {@link List} of indexed objects
    */
+  @Override
   public List<E> objectsList() {
     return objects;
   }
@@ -119,18 +121,21 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * Queries the Index for whether it's locked or not.
    * @return whether or not the Index is locked
    */
+  @Override
   public boolean isLocked() {
     return locked;
   }
 
   /** Locks the Index.  A locked index cannot have new elements added to it (calls to {@link #add} will
-   * leave the Index unchanged and return <code>false</code>).*/
+   * leave the Index unchanged and return {@code false}).*/
+  @Override
   public void lock() {
     locked = true;
   }
 
   /** Unlocks the Index.  A locked index cannot have new elements added to it (calls to {@link #add} will
-   * leave the Index unchanged and return <code>false</code>).*/
+   * leave the Index unchanged and return {@code false}).*/
+  @Override
   public void unlock() {
     locked = false;
   }
@@ -140,6 +145,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * @param o the Object whose index is desired.
    * @return the index of the Object argument.  Returns -1 if the object is not in the index.
    */
+  @Override
   public int indexOf(E o) {
     return indexOf(o, false);
   }
@@ -158,6 +164,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * @param add Whether it is okay to add new items to the index
    * @return The index of the Object argument.  Returns -1 if the object is not in the index.
    */
+  @Override
   public int indexOf(E o, boolean add) {
     Integer index = indexes.get(o);
     if (index == null) {
@@ -183,7 +190,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
 
   private final Semaphore semaphore = new Semaphore(1);
 
-  // TODO: delete this because we can leach off of Abstract Collection
+  // TODO: delete this when breaking serialization because we can leach off of AbstractCollection
  /**
    * Adds every member of Collection to the Index. Does nothing for members already in the Index.
    *
@@ -236,6 +243,8 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    */
   public HashIndex() {
     super();
+    objects = new ArrayList<E>();
+    indexes = Generics.newHashMap();
   }
 
   /**
@@ -247,6 +256,14 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     objects = new ArrayList<E>(capacity);
     indexes = Generics.newHashMap(capacity);
   }
+
+  /** Private constructor for supporting the unmodifiable view. */
+  private HashIndex(ArrayList<E> objects, Map<E,Integer> indexes) {
+    super();
+    this.objects = objects;
+    this.indexes = indexes;
+  }
+
 
   /**
    * Creates a new Index and adds every member of c to it.
@@ -262,6 +279,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     addAll(index.objectsList());
   }
 
+  @Override
   public void saveToFilename(String file) {
     BufferedWriter bw = null;
     try {
@@ -320,10 +338,11 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * text-serialization.  This is not intended to act as a standalone routine,
    * instead being called from the text-serialization routine for a component
    * that makes use of an Index, so everything can be stored in one file.  This is
-   * similar to <code>saveToFileName</code>.
+   * similar to {@code saveToFileName}.
    * @param bw Writer to save to.
    * @throws IOException Exception thrown if cannot save.
    */
+  @Override
   public void saveToWriter(Writer bw) throws IOException {
     for (int i = 0, sz = size(); i < sz; i++) {
       bw.write(i + "=" + get(i) + '\n');
@@ -331,7 +350,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
   }
 
   /**
-   * This is the analogue of <code>loadFromFilename</code>, and is intended to be included in a routine
+   * This is the analogue of {@code loadFromFilename}, and is intended to be included in a routine
    * that unpacks a text-serialized form of an object that incorporates an Index.
    * NOTE: presumes that the next readLine() will read in the first line of the
    * portion of the text file representing the saved Index.  Currently reads until it
@@ -407,10 +426,6 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     if (i < sz) buff.append("...");
     return buff.toString();
   }
-
-
-  private static final long serialVersionUID = 5398562825928375260L;
-
   /**
    * Returns an iterator over the elements of the collection.
    * @return An iterator over the objects indexed
@@ -432,13 +447,11 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * @return An unmodifiable view of the Index
    */
   public HashIndex<E> unmodifiableView() {
-    HashIndex<E> newIndex = new HashIndex<E>() {
+    HashIndex<E> newIndex = new HashIndex<E>(objects, indexes) {
       @Override
       public void unlock() { throw new UnsupportedOperationException("This is an unmodifiable view!"); }
       private static final long serialVersionUID = 3415903369787491736L;
     };
-    newIndex.objects = objects;
-    newIndex.indexes = indexes;
     newIndex.lock();
     return newIndex;
   }
@@ -447,12 +460,12 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
   public boolean remove(Object o){
     throw new UnsupportedOperationException();
   }
-  
+
   @Override
   public boolean removeAll(Collection<?> e){
     throw new UnsupportedOperationException();
   }
-  
+
   /**
    * This assumes each line is one value and creates index by adding values in the order of the lines in the file
    * @param file Which file to load
@@ -496,4 +509,5 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     result = 31 * result + indexes.hashCode();
     return result;
   }
+
 }

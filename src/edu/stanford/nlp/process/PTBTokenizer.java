@@ -163,7 +163,7 @@ import edu.stanford.nlp.util.StringUtils;
 public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   // the underlying lexer
-  private PTBLexer lexer;
+  private final PTBLexer lexer;
 
 
   /**
@@ -183,7 +183,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * Constructs a new PTBTokenizer that makes CoreLabel tokens.
    * It optionally returns carriage returns
    * as their own token. CRs come back as Words whose text is
-   * the value of <code>PTBLexer.NEWLINE_TOKEN</code>.
+   * the value of {@code PTBLexer.NEWLINE_TOKEN}.
    *
    * @param r The Reader to read tokens from
    * @param tokenizeNLs Whether to return newlines as separate tokens
@@ -202,7 +202,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * Constructs a new PTBTokenizer that optionally returns carriage returns
    * as their own token, and has a custom LexedTokenFactory.
    * If asked for, CRs come back as Words whose text is
-   * the value of <code>PTBLexer.cr</code>.  This constructor translates
+   * the value of {@code PTBLexer.cr}.  This constructor translates
    * between the traditional boolean options of PTBTokenizer and the new
    * options String.
    *

@@ -78,8 +78,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
 import edu.stanford.nlp.io.NumberRangesFileFilter;
+import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.tregex.gui.MatchesPanel.MatchesPanelListener;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.ReflectionLoading;
 
 /**
  * Main class for creating a tregex gui.  Manages the components and holds the menu bar.
@@ -106,11 +109,13 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   private JFileChooser chooser; // = null;
   private static File chooserFile;
 
+  final TreeTransformer transformer;
 
   //preferences, about panel so that we don't have to remake each time
   private JDialog preferenceDialog; // = null;
   private JDialog aboutBox; // = null;
 
+  private static final String TRANSFORMER = "transformer";
 
   private JMenuBar getMenu() {
     JMenuBar mbar = new JMenuBar();
@@ -275,13 +280,19 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     return fullTopPanel;
   }
 
-  public TregexGUI(String ... initialFiles) {
+  private TregexGUI(Properties props, List<String> initialFiles) {
     super("Tregex");
     TregexGUI.instance = this;
     setDefaultLookAndFeelDecorated(true);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-
+    String transformerClass = props.getProperty(TRANSFORMER, null);
+    if (transformerClass == null) {
+      transformer = null;
+    } else {
+      transformer = ReflectionLoading.loadByReflection(transformerClass);
+    }
+    
     initAboutBox();
     Container content = getContentPane();
     content.setBackground(Color.lightGray);
@@ -316,10 +327,10 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     setBounds(begX, begY, screenSize.width, screenSize.height);
     pack();
 
-    if (initialFiles.length > 0) {
-      File[] files = new File[initialFiles.length];
-      for (int i = 0; i < initialFiles.length; ++i) {
-        files[i] = new File(initialFiles[i]);
+    if (initialFiles.size() > 0) {
+      File[] files = new File[initialFiles.size()];
+      for (int i = 0; i < initialFiles.size(); ++i) {
+        files[i] = new File(initialFiles.get(i));
       }
       startFileLoadingThread(new EnumMap<FilterType,String>(FilterType.class), files);
     }
@@ -772,13 +783,27 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
 
   /**
    * Main method for launching a new tregex gui object
-   * @param args There are no command-line arguments used
+   * <br>
+   * If the argument <code>-transformer class</code> is given, that
+   * class is used as a TreeTransformer when loading in trees.
+   * <br>
+   * All other arguments will be interpreted as filenames to preload.
    */
   public static void main(String[] args) {
     if (isMacOSX()) {
       setMacProperties();
     }
-    new TregexGUI(args);
+    Properties props = new Properties();
+    List<String> filenames = Generics.newArrayList();
+    for (int argIndex = 0; argIndex < args.length; ) {
+      if (args[argIndex].equalsIgnoreCase("-" + TRANSFORMER)) {
+        props.setProperty(TRANSFORMER, args[argIndex + 1]);
+        argIndex += 2;
+      } else {
+        filenames.add(args[argIndex++]);
+      }
+    }
+    new TregexGUI(props, filenames);
   }
 
 

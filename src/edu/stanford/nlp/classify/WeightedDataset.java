@@ -11,14 +11,13 @@ import java.util.Random;
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) (Templatization)
  */
 public class WeightedDataset<L, F> extends Dataset<L, F> {
-  /**
-   * 
-   */
+
   private static final long serialVersionUID = -5435125789127705430L;
+
   protected float[] weights;
 
   public WeightedDataset(Index<L> labelIndex, int[] labels, Index<F> featureIndex, int[][] data, int size, float[] weights) {
-    super(labelIndex, labels, featureIndex, data, data.length);
+    super(labelIndex, labels, featureIndex, data, size);
     this.weights = weights;
   }
 
@@ -83,28 +82,29 @@ public class WeightedDataset<L, F> extends Dataset<L, F> {
     addFeatures(features);
     weights[size++] = weight;
   }
-  
+
   /**
-   * Randomizes the data array in place
-   * Needs to be redefined here because we need to randomize the weights as well
+   * Randomizes (shuffles) the data array in place.
+   * Needs to be redefined here because we need to randomize the weights as well.
    */
   @Override
-  public void randomize(int randomSeed) {
+  public void randomize(long randomSeed) {
     Random rand = new Random(randomSeed);
     for(int j = size - 1; j > 0; j --){
       int randIndex = rand.nextInt(j);
-      
+
       int [] tmp = data[randIndex];
       data[randIndex] = data[j];
       data[j] = tmp;
-      
-      int tmpl = labels[randIndex];
+
+      int tmpL = labels[randIndex];
       labels[randIndex] = labels[j];
-      labels[j] = tmpl;
-      
-      float tmpw = weights[randIndex];
+      labels[j] = tmpL;
+
+      float tmpW = weights[randIndex];
       weights[randIndex] = weights[j];
-      weights[j] = tmpw;
+      weights[j] = tmpW;
     }
   }
+
 }
