@@ -1102,6 +1102,18 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   @Override
+  public void dumpFeatures(Collection<List<IN>> docs) {
+    if (flags.exportFeatures != null) {
+      Timing timer = new Timing();
+      timer.start();
+      CRFFeatureExporter<IN> featureExporter = new CRFFeatureExporter<IN>(this);
+      featureExporter.printFeatures(flags.exportFeatures, docs);
+      long elapsedMs = timer.stop();
+      System.err.println("Time to export features: " + Timing.toSecondsString(elapsedMs) + " seconds");
+    }
+  }
+
+  @Override
   public List<IN> classify(List<IN> document) {
     if (flags.doGibbs) {
       try {
@@ -1599,11 +1611,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
 
     if (flags.exportFeatures != null) {
-      timer.start();
-      CRFFeatureExporter<IN> featureExporter = new CRFFeatureExporter<IN>(this);
-      featureExporter.printFeatures(flags.exportFeatures, docs);
-      elapsedMs = timer.stop();
-      System.err.println("Time to export features: " + Timing.toSecondsString(elapsedMs) + " seconds");
+      dumpFeatures(docs);
     }
 
     for (int i = 0; i <= flags.numTimesPruneFeatures; i++) {
