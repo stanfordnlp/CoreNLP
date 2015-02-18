@@ -16,6 +16,8 @@ import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
+import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
+import static edu.stanford.nlp.trees.GrammaticalRelation.GOVERNOR;
 
 /**
  * A "TreeGraph" is a tree with additional directed, labeled arcs
@@ -444,6 +446,45 @@ public class TreeGraphNode extends Tree implements HasParent {
       return null;
     }
     return (new ArrayList<Class<? extends GrammaticalRelationAnnotation>>(arcLabels)).get(0);
+  }
+
+  /**
+   * Tries to return a leaf (terminal) node which is the {@link
+   * GrammaticalRelation#GOVERNOR
+   * <code>GOVERNOR</code>} of the given node <code>t</code>.
+   * Probably, <code>t</code> should be a leaf node as well.
+   *
+   * @param t a leaf node in this <code>GrammaticalStructure</code>
+   * @return a node which is the governor for node
+   *         <code>t</code>, or else <code>null</code>
+   */
+  public TreeGraphNode getGovernor() {
+    return getNodeInRelation(GOVERNOR);
+  }
+
+  public TreeGraphNode getNodeInRelation(GrammaticalRelation r) {
+    return followArcToNode(GrammaticalRelation.getAnnotationClass(r));
+  }
+
+  /**
+   * Tries to return a <code>Set</code> of leaf (terminal) nodes
+   * which are the {@link GrammaticalRelation#DEPENDENT
+   * <code>DEPENDENT</code>}s of the given node <code>t</code>.
+   * Probably, <code>this</code> should be a leaf node as well.
+   *
+   * @return a <code>Set</code> of nodes which are dependents of
+   *         node <code>this</code>, possibly an empty set
+   */
+  public Set<TreeGraphNode> getDependents() {
+    Set<TreeGraphNode> deps = Generics.newHashSet();
+    for (Tree subtree : treeGraph().root()) {
+      TreeGraphNode node = (TreeGraphNode) subtree;
+      TreeGraphNode gov = node.getGovernor();
+      if (gov != null && gov == this) {
+        deps.add(node);
+      }
+    }
+    return deps;
   }
 
   /**

@@ -1,6 +1,7 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
+import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
@@ -8,6 +9,7 @@ import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.ref.SoftReference;
 import java.util.*;
@@ -504,6 +506,66 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
   public String getSpecific() {
     return specific;
+  }
+
+  /**
+   * When deserializing a GrammaticalRelation, it needs to be matched
+   * up with the existing singleton relation of the same type.
+   *
+   * TODO: there are a bunch of things wrong with this.  For one
+   * thing, it's crazy slow, since it goes through all the existing
+   * relations in an array.  For another, it would be cleaner to have
+   * subclasses for the English and Chinese relations
+   */
+  private Object readResolve() throws ObjectStreamException {
+    switch (language) {
+    case Any: {
+      if (shortName.equals(GOVERNOR.shortName)) {
+        return GOVERNOR;
+      } else if (shortName.equals(DEPENDENT.shortName)) {
+        return DEPENDENT;
+      } else if (shortName.equals(ROOT.shortName)) {
+        return ROOT;
+      } else if (shortName.equals(KILL.shortName)) {
+        return KILL;
+      } else {
+        throw new RuntimeException("Unknown general relation " + shortName);
+      }
+    }
+    case English: {
+      GrammaticalRelation rel = EnglishGrammaticalRelations.valueOf(toString());
+      if (rel == null) {
+        if (shortName.equals("conj")) {
+          return EnglishGrammaticalRelations.getConj(specific);
+        } else if (shortName.equals("prep")) {
+          return EnglishGrammaticalRelations.getPrep(specific);
+        } else if (shortName.equals("prepc")) {
+          return EnglishGrammaticalRelations.getPrepC(specific);
+        } else {
+          // TODO: we need to figure out what to do with relations
+          // which were serialized and then deprecated.  Perhaps there
+          // is a good way to make them singletons
+          return this;
+          //throw new RuntimeException("Unknown English relation " + this);
+        }
+      } else {
+        return rel;
+      }
+    }
+    case Chinese: {
+      GrammaticalRelation rel = ChineseGrammaticalRelations.valueOf(toString());      
+      if (rel == null) {
+        // TODO: we need to figure out what to do with relations
+        // which were serialized and then deprecated.  Perhaps there
+        // is a good way to make them singletons
+        return this;
+        //throw new RuntimeException("Unknown Chinese relation " + this);
+      }
+    }
+    default: {
+      throw new RuntimeException("Unknown language " + language);
+    }
+    }
   }
 
   /**

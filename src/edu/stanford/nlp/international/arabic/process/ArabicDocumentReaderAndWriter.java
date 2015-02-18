@@ -26,7 +26,7 @@ import edu.stanford.nlp.sequences.SeqClassifierFlags;
  */
 public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
 
-  private static final long serialVersionUID = 6730676681967976015L;
+  private static final long serialVersionUID = 3667837672769424178L;
 
   private final IteratorFromReaderFactory<List<CoreLabel>> factory;
 
@@ -41,6 +41,7 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   private final String tagDelimiter = "|||";
 
   private final boolean inputHasTags;
+  private final boolean inputHasDomainLabels;
 
   /**
    *
@@ -68,13 +69,40 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   public ArabicDocumentReaderAndWriter(boolean hasSegMarkers,
                                        boolean hasTags,
                                        TokenizerFactory<CoreLabel> tokFactory) {
+    this(hasSegMarkers, hasTags, false, tokFactory);
+  }
+  
+  /**
+   *
+   * @param hasSegMarkers if true, input has segmentation markers
+   * @param hasTags if true, input has morphological analyses separated by tagDelimiter.
+   * @param hasDomainLabels if true, input has a whitespace-terminated domain at the beginning
+   *     of each line of text
+   * @param tokFactory a TokenizerFactory for the input
+   */
+  public ArabicDocumentReaderAndWriter(boolean hasSegMarkers,
+                                       boolean hasTags,
+                                       boolean hasDomainLabels,
+                                       TokenizerFactory<CoreLabel> tokFactory) {
     tf = tokFactory;
     inputHasTags = hasTags;
+    inputHasDomainLabels = hasDomainLabels;
     segMarker = hasSegMarkers ? DEFAULT_SEG_MARKER : null;
     factory = LineIterator.getFactory(new SerializableFunction<String, List<CoreLabel>>() {
       private static final long serialVersionUID = 5243251505653686497L;
       public List<CoreLabel> apply(String in) {
         if (inputHasTags) {
+          String domain = "";
+          if (inputHasDomainLabels) {
+            String[] domainAndData = in.split("\\s+", 2);
+            if (domainAndData.length < 2) {
+              System.err.println("Missing domain label or text: ");
+              System.err.println(in);
+            } else {
+              domain = domainAndData[0];
+              in = domainAndData[1];
+            }
+          }
           String[] toks = in.split("\\s+");
           List<CoreLabel> input = new ArrayList<CoreLabel>(toks.length);
           final String delim = Pattern.quote(tagDelimiter);
@@ -95,6 +123,8 @@ public class ArabicDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
             cl.setValue(word);
             cl.setWord(word);
             cl.setTag(wordTagPair[1]);
+            if (inputHasDomainLabels)
+              cl.set(CoreAnnotations.DomainAnnotation.class, domain);
             input.add(cl);
           }
           return IOBUtils.StringToIOB(input, segMarker, true);
