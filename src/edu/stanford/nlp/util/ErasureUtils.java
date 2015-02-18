@@ -58,8 +58,6 @@ public class ErasureUtils {
       Collections.sort((List)result);
     } catch (ClassCastException e) {
       // unable to sort, just return the copy
-    } catch (NullPointerException npe) {
-      // this happens if there are null elements in the collection; just return the copy
     }
     return result;
   }

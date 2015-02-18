@@ -20,14 +20,6 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 
-/** Provides accessors for various grammatical, semantic, and world knowledge
- *  lexicons and word lists primarily used by the Sieve coreference system,
- *  but sometimes also drawn on from other code.
- *
- *  The source of the dictionaries on Stanford NLP machines is
- *  /u/nlp/data/coref/gazetteers/dcoref/ . In models jars, they live in
- *  edu/stanford/nlp/models/dcoref .
- */
 public class Dictionaries {
 
   public enum MentionType {
@@ -210,7 +202,7 @@ public class Dictionaries {
   public final Set<String> inanimateWords = Generics.newHashSet();
   public final Set<String> animateWords = Generics.newHashSet();
 
-  public final Map<List<String>, Gender> genderNumber = Generics.newHashMap();
+  public final Map<List<String>, int[]> genderNumber = Generics.newHashMap();
 
   public final ArrayList<Counter<Pair<String, String>>> corefDict = new ArrayList<Counter<Pair<String, String>>>(4);
   public final Counter<Pair<String, String>> corefDictPMI = new ClassicCounter<Pair<String, String>>();
@@ -266,7 +258,7 @@ public class Dictionaries {
    *  Lines starting with # are ignored
    *  The file is cased but stored in in-memory data structures uncased.
    *  The results are:
-   *  demonyms is a hash from each country (etc.) to a set of demonymic Strings;
+   *  demonyms is a has from each country (etc.) to a set of demonymic Strings;
    *  adjectiveNation is a set of demonymic Strings;
    *  demonymSet has all country (etc.) names and all demonymic Strings.
    */
@@ -378,17 +370,27 @@ public class Dictionaries {
 
   /**
    * Load Bergsma and Lin (2006) gender and number list.
-   * <br>
-   * The list is converted from raw text and numbers to a serialized
-   * map, which saves quite a bit of time loading.
-   * See edu.stanford.nlp.dcoref.util.ConvertGenderFile
+   *
    */
+  // todo: This is a complete memory hog. It takes at least 600MB and probably does pretty little. Either store more efficiently or just eliminate?
   private void loadGenderNumber(String file, String neutralWordsFile) {
     try {
       getWordsFromFile(neutralWordsFile, neutralWords, false);
-      Map<List<String>, Gender> temp = IOUtils.readObjectFromURLOrClasspathOrFileSystem(file);
-      genderNumber.putAll(temp);
-    } catch (IOException | ClassNotFoundException e) {
+      BufferedReader reader = IOUtils.readerFromString(file);
+      for (String line; (line = reader.readLine()) != null; ) {
+        String[] split = line.split("\t");
+        List<String> tokens = new ArrayList<String>(Arrays.asList(split[0].split(" ")));
+        String[] countStr = split[1].split(" ");
+        int[] counts = new int[4];
+        counts[0] = Integer.parseInt(countStr[0]);
+        counts[1] = Integer.parseInt(countStr[1]);
+        counts[2] = Integer.parseInt(countStr[2]);
+        counts[3] = Integer.parseInt(countStr[3]);
+
+        genderNumber.put(tokens, counts);
+      }
+      reader.close();
+    } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
   }

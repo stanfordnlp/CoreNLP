@@ -1,19 +1,16 @@
 package edu.stanford.nlp.neural;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import java.util.function.Predicate;
 import org.ejml.simple.SimpleMatrix;
-import org.ejml.ops.MatrixIO;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.Filter;
 
 /**
  * Includes a bunch of utility methods usable by projects which use
@@ -51,8 +48,8 @@ public class NeuralUtils {
   }
 
   public static SimpleMatrix convertTextMatrix(String text) {
-    List<String> lines = CollectionUtils.filterAsList(Arrays.asList(text.split("\n")), new Predicate<String>() {
-        public boolean test(String s) {
+    List<String> lines = CollectionUtils.filterAsList(Arrays.asList(text.split("\n")), new Filter<String>() { 
+        public boolean accept(String s) {
           return s.trim().length() > 0;
         }
         private static final long serialVersionUID = 1;
@@ -73,15 +70,6 @@ public class NeuralUtils {
     return new SimpleMatrix(data);
   }
 
-  /**
-   * @param matrix The matrix to return as a String
-   * @param format The format to use for each value in the matrix, eg "%f"
-   */
-  public static String toString(SimpleMatrix matrix, String format) {
-    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    MatrixIO.print(new PrintStream(stream), matrix.getMatrix(), format);
-    return stream.toString();
-  }
 
   /**
    * Compute cosine distance between two column vectors.
@@ -89,26 +77,29 @@ public class NeuralUtils {
   public static double cosine(SimpleMatrix vector1, SimpleMatrix vector2){
     return dot(vector1, vector2)/(vector1.normF()*vector2.normF());
   }
-
+  
   /**
    * Compute dot product between two vectors.
    */
   public static double dot(SimpleMatrix vector1, SimpleMatrix vector2){
-    if(vector1.numRows()==1){ // vector1: row vector, assume that vector2 is a row vector too
-      return vector1.mult(vector2.transpose()).get(0);
+    double score = Double.NaN;
+    if(vector1.numRows()==1){ // vector1: row vector, assume that vector2 is a row vector too 
+      score = vector1.mult(vector2.transpose()).get(0); 
     } else if (vector1.numCols()==1){ // vector1: col vector, assume that vector2 is also a column vector.
-      return vector1.transpose().mult(vector2).get(0);
+      score = vector1.transpose().mult(vector2).get(0);
     } else {
-      throw new AssertionError("Error in neural.Utils.dot: vector1 is a matrix " + vector1.numRows() + " x " + vector1.numCols());
+      System.err.println("! Error in neural.Utils.dot: vector1 is a matrix " + vector1.numRows() + " x " + vector1.numCols());
+      System.exit(1);
     }
-  }
 
+    return score;
+  }
+  
   /**
    * Given a sequence of Iterators over SimpleMatrix, fill in all of
    * the matrices with the entries in the theta vector.  Errors are
    * thrown if the theta vector does not exactly fill the matrices.
    */
-  @SafeVarargs
   public static void vectorToParams(double[] theta, Iterator<SimpleMatrix> ... matrices) {
     int index = 0;
     for (Iterator<SimpleMatrix> matrixIterator : matrices) {
@@ -132,7 +123,6 @@ public class NeuralUtils {
    * total size as a time savings.  AssertionError thrown if the
    * vector sizes do not exactly match.
    */
-  @SafeVarargs
   public static double[] paramsToVector(int totalSize, Iterator<SimpleMatrix> ... matrices) {
     double[] theta = new double[totalSize];
     int index = 0;
@@ -160,7 +150,6 @@ public class NeuralUtils {
    * expected total size as a time savings.  AssertionError thrown if
    * the vector sizes do not exactly match.
    */
-  @SafeVarargs
   public static double[] paramsToVector(double scale, int totalSize, Iterator<SimpleMatrix> ... matrices) {
     double[] theta = new double[totalSize];
     int index = 0;
@@ -201,7 +190,7 @@ public class NeuralUtils {
     }
     double sum = output.elementSum();
     // will be safe, since exp should never return 0
-    return output.scale(1.0 / sum);
+    return output.scale(1.0 / sum); 
   }
 
   /**
@@ -291,19 +280,6 @@ public class NeuralUtils {
       }
     }
     return result;
-  }
-
-  /**
-   * Returns true iff every element of matrix is 0
-   */
-  public static boolean isZero(SimpleMatrix matrix) {
-    int size = matrix.getNumElements();
-    for (int i = 0; i < size; ++i) {
-      if (matrix.get(i) != 0.0) {
-        return false;
-      }
-    }
-    return true;
   }
 }
 

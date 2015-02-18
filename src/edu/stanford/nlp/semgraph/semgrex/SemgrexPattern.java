@@ -6,7 +6,6 @@ import java.util.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeNormalizer;
@@ -31,8 +30,7 @@ import edu.stanford.nlp.util.StringUtils;
  * matches "NN", "NNS", "NNP", etc. --wcmac) <p/>
  *
  * For example, <code>{lemma:slice;tag:/VB.* /}</code> represents any verb nodes
- * with "slice" as their lemma.  Attributes are extracted using 
- * <code>edu.stanford.nlp.ling.AnnotationLookup</code>. <p/>
+ * with "slice" as their lemma. <p/>
  *
  * The root of the graph can be marked by the $ sign, that is <code>{$}</code>
  * represents the root node. <p/>
@@ -142,19 +140,6 @@ import edu.stanford.nlp.util.StringUtils;
  * which goes through a <code>dobj</code> and one of which goes
  * through a <code>mod</code>. <p/>
  *
- * <p><h3>Naming relations</h3>
- *
- * It is also possible to name relations.  For example, you can write the pattern
- * <code>{idx:1} &gt;=reln {idx:2}</code>  The name of the relation will then 
- * be stored in the matcher and can be extracted with <code>getRelnName("reln")</code>  
- * At present, though, there is no backreferencing capability such as with the 
- * named nodes; this is only useful when using the API to extract the name of the 
- * relation used when making the match.
- * <p/>
- * In the case of ancestor and descendant relations, the <b>last</b>
- * relation in the sequence of relations is the name used.  
- * <p/>
- *
  * @author Chloe Kiddon
  */
 public abstract class SemgrexPattern implements Serializable {
@@ -163,8 +148,6 @@ public abstract class SemgrexPattern implements Serializable {
   private boolean neg = false;
   private boolean opt = false;
   private String patternString; // conceptually final, but can't do because of parsing
-
-  Env env;
 
   // package private constructor
   SemgrexPattern() {
@@ -266,11 +249,10 @@ public abstract class SemgrexPattern implements Serializable {
    *          the pattern string
    * @return a SemgrexPattern for the string.
    */
-  public static SemgrexPattern compile(String semgrex, Env env) {
+  public static SemgrexPattern compile(String semgrex) {
     try {
       SemgrexParser parser = new SemgrexParser(new StringReader(semgrex + "\n"));
       SemgrexPattern newPattern = parser.Root();
-      newPattern.env = env;
       newPattern.patternString = semgrex;
       return newPattern;
     } catch (ParseException ex) {
@@ -278,10 +260,6 @@ public abstract class SemgrexPattern implements Serializable {
     } catch (TokenMgrError er) {
       throw new SemgrexParseException("Error parsing semgrex pattern " + semgrex, er);
     }
-  }
-
-  public static SemgrexPattern compile(String semgrex) {
-    return compile(semgrex, new Env());
   }
 
   public String pattern() {
@@ -410,7 +388,7 @@ public abstract class SemgrexPattern implements Serializable {
         treebank.loadPath(treeFile);
         for (Tree tree : treebank) {
           // TODO: allow other languages... this defaults to English
-          SemanticGraph graph = SemanticGraphFactory.makeFromTree(tree, mode, useExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, true, null);
+          SemanticGraph graph = SemanticGraphFactory.makeFromTree(tree, mode, useExtras, false, true, null);
           graphs.add(graph);
         }
       }
@@ -422,7 +400,7 @@ public abstract class SemgrexPattern implements Serializable {
         continue;
       }
       System.err.println("Matched graph:");
-      System.err.println(graph.toString(SemanticGraph.OutputFormat.LIST));
+      System.err.println(graph.toString("plain"));
       boolean found = true;
       while (found) {
         System.err.println("Matches at: " + matcher.getMatch().value() + "-" + matcher.getMatch().index());

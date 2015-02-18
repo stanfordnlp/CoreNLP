@@ -69,9 +69,6 @@ import edu.stanford.nlp.util.StringUtils;
  *     token and the whitespace around it that a list of tokens can be
  *     faithfully converted back to the original String.  Valid only if the
  *     LexedTokenFactory is an instance of CoreLabelTokenFactory.  The
- *
- *
- *
  *     keys used in it are: TextAnnotation for the tokenized form,
  *     OriginalTextAnnotation for the original string, BeforeAnnotation and
  *     AfterAnnotation for the whitespace before and after a token, and
@@ -166,7 +163,7 @@ import edu.stanford.nlp.util.StringUtils;
 public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   // the underlying lexer
-  private final PTBLexer lexer;
+  private PTBLexer lexer;
 
 
   /**
@@ -186,7 +183,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * Constructs a new PTBTokenizer that makes CoreLabel tokens.
    * It optionally returns carriage returns
    * as their own token. CRs come back as Words whose text is
-   * the value of {@code PTBLexer.NEWLINE_TOKEN}.
+   * the value of <code>PTBLexer.NEWLINE_TOKEN</code>.
    *
    * @param r The Reader to read tokens from
    * @param tokenizeNLs Whether to return newlines as separate tokens
@@ -205,7 +202,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * Constructs a new PTBTokenizer that optionally returns carriage returns
    * as their own token, and has a custom LexedTokenFactory.
    * If asked for, CRs come back as Words whose text is
-   * the value of {@code PTBLexer.cr}.  This constructor translates
+   * the value of <code>PTBLexer.cr</code>.  This constructor translates
    * between the traditional boolean options of PTBTokenizer and the new
    * options String.
    *
@@ -414,7 +411,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     long numTokens = 0;
     int numFiles = inputFileList.size();
     if (numFiles == 0) {
-      Reader stdin = IOUtils.readerFromStdin(charset);
+      Reader stdin = new BufferedReader(new InputStreamReader(System.in, charset));
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out, charset));
       numTokens += tokReader(stdin, writer, parseInsidePattern, options, preserveLines, dump, lowerCase);
       IOUtils.closeIgnoringExceptions(writer);
@@ -560,9 +557,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
      * Constructs a new PTBTokenizer that returns CoreLabel objects and
      * uses the options passed in.
      *
-     * @param options A String of options. For the default, recommended
-     *                options for PTB-style tokenization compatibility, pass
-     *                in an empty String.
+     * @param options A String of options
      * @return A TokenizerFactory that returns CoreLabel objects o
      */
     public static PTBTokenizerFactory<CoreLabel> newCoreLabelTokenizerFactory(String options) {
@@ -742,7 +737,8 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     if (inputOutputFileList && parsedArgs != null) {
       outputFileList = new ArrayList<String>();
       for (String fileName : parsedArgs) {
-        BufferedReader r = IOUtils.readerFromString(fileName, charset);
+        BufferedReader r = new BufferedReader(
+          new InputStreamReader(new FileInputStream(fileName), charset));
         for (String inLine; (inLine = r.readLine()) != null; ) {
           String[] fields = inLine.split("\\s+");
           inputFileList.add(fields[0]);

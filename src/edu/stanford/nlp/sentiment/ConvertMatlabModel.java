@@ -25,9 +25,6 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 public class ConvertMatlabModel {
-
-  private ConvertMatlabModel() {} // static class
-
   /** Will not overwrite an existing word vector if it is already there */
   public static void copyWordVector(Map<String, SimpleMatrix> wordVectors, String source, String target) {
     if (wordVectors.containsKey(target) || !wordVectors.containsKey(source)) {
@@ -58,7 +55,7 @@ public class ConvertMatlabModel {
     if (matrixFile.exists()) {
       return NeuralUtils.loadTextMatrix(matrixFile);
     }
-
+    
     throw new RuntimeException("Could not find either " + binaryName + " or " + textName);
   }
 
@@ -70,7 +67,7 @@ public class ConvertMatlabModel {
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-slices")) {
-        numSlices = Integer.parseInt(args[argIndex + 1]);
+        numSlices = Integer.valueOf(args[argIndex + 1]);
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-path")) {
         basePath = args[argIndex + 1];
@@ -93,12 +90,11 @@ public class ConvertMatlabModel {
 
     SimpleMatrix W = loadMatrix(basePath + "bin/W.bin", basePath + "W.txt");
     System.err.println("W matrix size: " + W.numRows() + "x" + W.numCols());
-
+    
     SimpleMatrix Wcat = loadMatrix(basePath + "bin/Wcat.bin", basePath + "Wcat.txt");
     System.err.println("W cat size: " + Wcat.numRows() + "x" + Wcat.numCols());
 
     SimpleMatrix combinedWV = loadMatrix(basePath + "bin/Wv.bin", basePath + "Wv.txt");
-    System.err.println("Word matrix size: " + combinedWV.numRows() + "x" + combinedWV.numCols());
 
     File vocabFile = new File(basePath + "vocab_1.txt");
     if (!vocabFile.exists()) {
@@ -109,19 +105,14 @@ public class ConvertMatlabModel {
       lines.add(line.trim());
     }
 
-    System.err.println("Lines in vocab file: " + lines.size());
-
     Map<String, SimpleMatrix> wordVectors = Generics.newTreeMap();
 
-    for (int i = 0; i < lines.size() && i < combinedWV.numCols(); ++i) {
+    for (int i = 0; i < lines.size() - 1; ++i) { // leave out UNK
       String[] pieces = lines.get(i).split(" +");
-      if (pieces.length == 0 || pieces.length > 1) {
+      if (pieces.length > 1) {
         continue;
       }
       wordVectors.put(pieces[0], combinedWV.extractMatrix(0, numSlices, i, i+1));
-      if (pieces[0].equals("UNK")) {
-        wordVectors.put(SentimentModel.UNKNOWN_WORD, wordVectors.get("UNK"));
-      }
     }
 
     // If there is no ",", we first try to look for an HTML escaping,
@@ -149,9 +140,7 @@ public class ConvertMatlabModel {
       op.numClasses = 2;
     }
 
-    if (!wordVectors.containsKey(SentimentModel.UNKNOWN_WORD)) {
-      wordVectors.put(SentimentModel.UNKNOWN_WORD, SimpleMatrix.random(numSlices, 1, -0.00001, 0.00001, new Random()));
-    }
+    wordVectors.put(SentimentModel.UNKNOWN_WORD, SimpleMatrix.random(numSlices, 1, -0.00001, 0.00001, new Random()));
 
     SentimentModel model = SentimentModel.modelFromMatrices(W, Wcat, tensor, wordVectors, op);
     model.saveSerialized("matlab.ser.gz");

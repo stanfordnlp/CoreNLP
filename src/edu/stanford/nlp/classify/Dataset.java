@@ -392,15 +392,9 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     System.err.println(toSummaryStatistics());
   }
 
-  /** A String that is multiple lines of text giving summary statistics.
-   *  (It does not end with a newline, though.)
-   *
-   *  @return A textual summary of the Dataset
-   */
   public String toSummaryStatistics() {
     StringBuilder sb = new StringBuilder();
     sb.append("numDatums: ").append(size).append('\n');
-    sb.append("numDatumsPerLabel: ").append(this.numDatumsPerLabel()).append('\n');
     sb.append("numLabels: ").append(labelIndex.size()).append(" [");
     Iterator<L> iter = labelIndex.iterator();
     while (iter.hasNext()) {
@@ -410,18 +404,10 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
       }
     }
     sb.append("]\n");
-    sb.append("numFeatures (Phi(X) types): ").append(featureIndex.size()).append(" [");
-    int sz = Math.min(5, featureIndex.size());
-    for (int i = 0; i < sz; i++) {
-      if (i > 0) {
-        sb.append(", ");
-      }
-      sb.append(featureIndex.get(i));
-    }
-    if (sz < featureIndex.size()) {
-      sb.append(", ...");
-    }
-    sb.append(']');
+    sb.append("numFeatures (Phi(X) types): ").append(featureIndex.size()).append('\n');
+    // List l = new ArrayList(featureIndex);
+//     Collections.sort(l);
+//     sb.append(l);
     return sb.toString();
   }
 

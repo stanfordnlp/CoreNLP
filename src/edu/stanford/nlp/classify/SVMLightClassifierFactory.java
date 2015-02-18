@@ -10,12 +10,11 @@ import edu.stanford.nlp.optimization.LineSearcher;
 import java.io.*;
 import java.text.NumberFormat;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
- * This class is meant for training SVMs ({@link SVMLightClassifier}s).  It actually calls SVM Light, or
- * SVM Struct for multiclass SVMs, or SVM perf is the option is enabled, on the command line, reads in the produced
+ * This class is meant for training SVMs ({@link SVMLightClassifier}s).  It actually calls SVM Light. or
+ * SVM Struct for multiclass SVMs, on the command line, reads in the produced
  * model file and creates a Linear Classifier.  A Platt model is also trained
  * (unless otherwise specified) on top of the SVM so that probabilities can
  * be produced. For multiclass classifier, you have to set C using setC otherwise the code will not run (by sonalg).
@@ -41,35 +40,24 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
   protected boolean verbose = true;
   private String svmLightLearn = "/u/nlp/packages/svm_light/svm_learn";
   private String svmStructLearn = "/u/nlp/packages/svm_multiclass/svm_multiclass_learn";
-  private String svmPerfLearn = "/u/nlp/packages/svm_perf/svm_perf_learn";
   private String svmLightClassify = "/u/nlp/packages/svm_light/svm_classify";
   private String svmStructClassify = "/u/nlp/packages/svm_multiclass/svm_multiclass_classify";
-  private String svmPerfClassify = "/u/nlp/packages/svm_perf/svm_perf_classify";
-
   private boolean useAlphaFile = false;
   protected File alphaFile;
   private boolean deleteTempFilesOnExit = true;
   private int svmLightVerbosity = 0;  // not verbose
   private boolean doEval = false;
-  private boolean useSVMPerf = false;
 
   /** @param svmLightLearn is the fullPathname of the training program of svmLight with default value "/u/nlp/packages/svm_light/svm_learn"
    * @param svmStructLearn is the fullPathname of the training program of svmMultiClass with default value "/u/nlp/packages/svm_multiclass/svm_multiclass_learn"
-   * @param svmPerfLearn is the fullPathname of the training program of svmMultiClass with default value "/u/nlp/packages/svm_perf/svm_perf_learn"
    */
-  public SVMLightClassifierFactory(String svmLightLearn, String svmStructLearn, String svmPerfLearn){
+  public SVMLightClassifierFactory(String svmLightLearn, String svmStructLearn){
     this.svmLightLearn = svmLightLearn;
     this.svmStructLearn = svmStructLearn;
-    this.svmPerfLearn = svmPerfLearn;
   }
 
   public SVMLightClassifierFactory(){
   }
-
-  public SVMLightClassifierFactory(boolean useSVMPerf){
-    this.useSVMPerf = useSVMPerf;
-  }
-
   /**
    * Set the C parameter (for the slack variables) for training the SVM.
    */
@@ -261,7 +249,9 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
 
     final CrossValidator<L, F> crossValidator = new CrossValidator<L, F>(dataset,numFolds);
     final Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> score =
-        fold -> {
+      new Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState>,Double> ()
+      {
+        public Double apply (Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,CrossValidator.SavedState> fold) {
           GeneralDataset<L, F> trainSet = fold.first();
           GeneralDataset<L, F> devSet = fold.second();
           alphaFile = (File)fold.third().state;
@@ -269,16 +259,20 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
           SVMLightClassifier<L, F> classifier = trainClassifierBasic(trainSet);
           fold.third().state = alphaFile;
           return scorer.score(classifier,devSet);
-        };
+        }
+      };
 
     Function<Double,Double> negativeScorer =
-        cToTry -> {
+      new Function<Double,Double> ()
+      {
+        public Double apply(Double cToTry) {
           C = cToTry;
           if (verbose) { System.out.print("C = "+cToTry+" "); }
           Double averageScore = crossValidator.computeAverage(score);
           if (verbose) { System.out.println(" -> average Score: "+averageScore); }
           return -averageScore;
-        };
+        }
+      };
 
     C = minimizer.minimize(negativeScorer);
 
@@ -304,12 +298,15 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
     useSigmoid = false;
 
     Function<Double,Double> negativeScorer =
-        cToTry -> {
+      new Function<Double,Double> ()
+      {
+        public Double apply(Double cToTry) {
           C = cToTry;
           SVMLightClassifier<L, F> classifier = trainClassifierBasic(trainSet);
           double score = scorer.score(classifier,devSet);
           return -score;
-        };
+        }
+      };
 
     C = minimizer.minimize(negativeScorer);
 
@@ -423,11 +420,10 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
 
       // -v 0 makes it not verbose
       // -m 400 gives it a larger cache, for faster training
-      String cmd = (multiclass ? svmStructLearn : (useSVMPerf ? svmPerfLearn : svmLightLearn)) + " -v " + svmLightVerbosity + " -m 400 ";
+      String cmd = (multiclass ? svmStructLearn : svmLightLearn) + " -v " + svmLightVerbosity + " -m 400 ";
 
       // set the value of C if we have one specified
       if (C > 0.0) cmd = cmd + " -c " + C + " ";  // C value
-      else if(useSVMPerf) cmd = cmd + " -c " + 0.01 + " "; //It's required to specify this parameter for SVM perf
 
       // Alpha File
       if (useAlphaFile) {
@@ -461,7 +457,7 @@ public class SVMLightClassifierFactory<L, F> implements ClassifierFactory<L, F, 
         if (deleteTempFilesOnExit) {
           predictFile.deleteOnExit();
         }
-        String evalCmd = (multiclass ? svmStructClassify : (useSVMPerf ? svmPerfClassify : svmLightClassify)) + " "
+        String evalCmd = (multiclass ? svmStructClassify : svmLightClassify) + " "
                 + dataFile.getAbsolutePath() + " " + modelFile.getAbsolutePath() + " " + predictFile.getAbsolutePath();
         if (verbose) System.err.println("<< "+evalCmd+" >>");
         SystemUtils.run(new ProcessBuilder(whitespacePattern.split(evalCmd)),

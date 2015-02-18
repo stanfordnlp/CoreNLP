@@ -51,19 +51,16 @@ public class UNKPrinter {
 
     for(int i = 0; i < args.length; i++) {
       if(args[i].startsWith("-")) {
-        switch (args[i]) {
-          case "-l":
-            lang = Language.valueOf(args[++i].trim());
-            tlpp = Languages.getLanguageParams(lang);
+        if(args[i].equals("-l")) {
+          lang = Language.valueOf(args[++i].trim());
+          tlpp = Languages.getLanguageParams(lang);
 
-            break;
-          case "-e":
-            encoding = args[++i];
+        } else if(args[i].equals("-e")) {
+          encoding = args[++i];
 
-            break;
-          default:
-            System.out.println(usage.toString());
-            System.exit(-1);
+        } else {
+          System.out.println(usage.toString());
+          System.exit(-1);
         }
 
       } else {

@@ -103,25 +103,23 @@ public class SGDWithAdaGradAndFOBOS<T extends DiffFunction> implements Minimizer
   }
 
   private static Prior getPrior(String priorType) {
-    switch (priorType) {
-      case "none":
-        return Prior.NONE;
-      case "lasso":
-        return Prior.LASSO;
-      case "ridge":
-        return Prior.RIDGE;
-      case "gaussian":
-        return Prior.GAUSSIAN;
-      case "ae-lasso":
-        return Prior.aeLASSO;
-      case "g-lasso":
-        return Prior.gLASSO;
-      case "sg-lasso":
-        return Prior.sgLASSO;
-      default:
-        throw new IllegalArgumentException("prior type " + priorType + " not recognized; supported priors " +
-            "are: lasso, ridge, gaussian, ae-lasso, g-lasso, and sg-lasso");
-    }
+    if (priorType.equals("none"))
+      return Prior.NONE;
+    else if (priorType.equals("lasso"))
+      return Prior.LASSO;
+    else if (priorType.equals("ridge"))
+      return Prior.RIDGE;
+    else if (priorType.equals("gaussian"))
+      return Prior.GAUSSIAN;
+    else if (priorType.equals("ae-lasso"))
+      return Prior.aeLASSO;
+    else if (priorType.equals("g-lasso"))
+      return Prior.gLASSO;
+    else if (priorType.equals("sg-lasso"))
+      return Prior.sgLASSO;
+    else
+      throw new IllegalArgumentException("prior type " + priorType + " not recognized; supported priors "+
+       "are: lasso, ridge, gaussian, ae-lasso, g-lasso, and sg-lasso");
   }
 
   public SGDWithAdaGradAndFOBOS(double initRate, double lambda, int numPasses) {

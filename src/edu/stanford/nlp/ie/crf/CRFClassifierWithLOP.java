@@ -26,15 +26,29 @@
 
 package edu.stanford.nlp.ie.crf;
 
+import edu.stanford.nlp.ie.*;
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.math.ArrayMath;
+import edu.stanford.nlp.util.ConvertByteArray;
+import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.optimization.*;
+import edu.stanford.nlp.optimization.Function;
 import edu.stanford.nlp.sequences.*;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.*;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
+import java.util.regex.*;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Subclass of {@link edu.stanford.nlp.ie.crf.CRFClassifier} for learning Logarithmic Opinion Pools.
@@ -59,6 +73,8 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
   }
 
   private int[][][][] createPartialDataForLOP(int lopIter, int[][][][] data) {
+    int[] oldFeatures = null;
+    int oldFeatureIndex = -1;
     ArrayList<Integer> newFeatureList = new ArrayList<Integer>(1000);
     Set<Integer> featureIndicesSet = featureIndicesSetArray.get(lopIter);
 
@@ -68,9 +84,10 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
       for (int j = 0; j < data[i].length; j++) {
         newData[i][j] = new int[data[i][j].length][];
         for (int k = 0; k < data[i][j].length; k++) {
-          int[] oldFeatures = data[i][j][k];
+          oldFeatures = data[i][j][k];
           newFeatureList.clear();
-          for (int oldFeatureIndex : oldFeatures) {
+          for (int l = 0; l < oldFeatures.length; l++) {
+            oldFeatureIndex = oldFeatures[l];
             if (featureIndicesSet.contains(oldFeatureIndex)) {
               newFeatureList.add(oldFeatureIndex);
             }
@@ -191,7 +208,7 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
         flags.backpropLopTraining);
     cliquePotentialFunctionHelper = func;
 
-    Minimizer<DiffFunction> minimizer = getMinimizer(0, evaluators);
+    Minimizer minimizer = getMinimizer(0, evaluators);
 
     double[] initialScales;
     //TODO(mengqiu) clean this part up when backpropLogTraining == true
@@ -221,5 +238,4 @@ public class CRFClassifierWithLOP<IN extends CoreMap> extends CRFClassifier<IN> 
     }
     return CRFLogConditionalObjectiveFunctionForLOP.combineAndScaleLopWeights(numLopExpert, learnedLopExpertWeights, lopScales);
   }
-
-} // end class CRFClassifierWithLOP
+} // end class CRFClassifier

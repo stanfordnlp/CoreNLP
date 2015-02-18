@@ -9,7 +9,6 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
  *
  * @author Pi-Chuan Chang
  * @author Huihsin Tseng
- * @author Percy Liang
  */
 public class ChineseSemanticHeadFinder extends ChineseHeadFinder {
 
@@ -24,16 +23,20 @@ public class ChineseSemanticHeadFinder extends ChineseHeadFinder {
 
   //makes modifications of head finder rules to better fit with semantic notions of heads
   private void ruleChanges() {
-    // Note: removed VC and added NP; copula should not be the head.
-    nonTerminalInfo.put("VP", new String[][]{{"left", "VP", "VCD", "VPT", "VV", "VCP", "VA", "VE", "IP", "VSB", "VCP", "VRD", "VNV", "NP"}, leftExceptPunct});
+    nonTerminalInfo.remove("VP");
+    nonTerminalInfo.put("VP", new String[][]{{"left", "VP", "VCD", "VPT", "VV", "VCP", "VA", "VE", "VC","IP", "VSB", "VCP", "VRD", "VNV"}, leftExceptPunct});
 
+    nonTerminalInfo.remove("CP");
     nonTerminalInfo.put("CP", new String[][]{{"right", "CP", "IP", "VP"}, rightExceptPunct});
-    nonTerminalInfo.put("DVP", new String[][]{{"leftdis", "VP" ,"ADVP"}});
-    nonTerminalInfo.put("LST", new String[][]{{"right", "CD", "NP", "QP", "PU"}});
 
-    nonTerminalInfo.put("PP", new String[][]{{"leftexcept", "P"}});  // Preposition
-    nonTerminalInfo.put("LCP", new String[][]{{"leftexcept", "LC"}});  // Localizer
-    nonTerminalInfo.put("DNP", new String[][]{{"leftexcept", "DEG"}});  // Associative
+    nonTerminalInfo.remove("DNP");
+    nonTerminalInfo.put("DNP", new String[][]{{"leftdis", "NP" }});    
+
+    nonTerminalInfo.remove("DVP");
+    nonTerminalInfo.put("DVP", new String[][]{{"leftdis", "VP" ,"ADVP"}});
+
+    nonTerminalInfo.remove("LST");
+    nonTerminalInfo.put("LST", new String[][]{{"right", "CD", "NP", "QP", "PU"}});
   }
 
   private static final long serialVersionUID = 2L;

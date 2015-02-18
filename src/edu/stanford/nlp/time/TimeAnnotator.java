@@ -166,20 +166,13 @@ import java.util.Set;
 public class TimeAnnotator implements Annotator {
 
   private final TimeExpressionExtractorImpl timexExtractor;
-  private final boolean quiet;
 
   public TimeAnnotator() {
-    this(false);
-  }
-
-  public TimeAnnotator(boolean quiet) {
     timexExtractor = new TimeExpressionExtractorImpl();
-    this.quiet = quiet;
   }
 
   public TimeAnnotator(String name, Properties props) {
     timexExtractor = new TimeExpressionExtractorImpl(name, props);
-    this.quiet = false;
   }
 
   @Override
@@ -189,7 +182,7 @@ public class TimeAnnotator implements Annotator {
     if(docDate == null) {
       Calendar cal = annotation.get(CoreAnnotations.CalendarAnnotation.class);
       if(cal == null) {
-        if (!quiet) { Redwood.log(Redwood.WARN, "No document date specified"); }
+        Redwood.log(Redwood.WARN, "No document date specified");
       } else {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
         docDate = dateFormat.format(cal.getTime());

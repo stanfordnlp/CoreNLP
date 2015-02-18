@@ -7,10 +7,8 @@ import java.util.List;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.parser.KBestViterbiParser;
-import edu.stanford.nlp.parser.common.NoSuchParseException;
-import edu.stanford.nlp.parser.common.ParserConstraint;
-import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
@@ -27,7 +25,7 @@ public class RerankingParserQuery implements ParserQuery {
   private final ParserQuery parserQuery;
   private final Reranker reranker;
   private final int rerankerKBest;
-
+  
   private List<ScoredObject<Tree>> scoredTrees;
 
   /**
@@ -61,7 +59,7 @@ public class RerankingParserQuery implements ParserQuery {
     }
 
     List<ScoredObject<Tree>> bestKParses = parserQuery.getKBestPCFGParses(rerankerKBest);
-    if (bestKParses.isEmpty()) {
+    if (bestKParses.size() == 0) {
       return false;
     }
     scoredTrees = rerank(sentence, bestKParses);
@@ -76,7 +74,7 @@ public class RerankingParserQuery implements ParserQuery {
     }
 
     List<ScoredObject<Tree>> bestKParses = parserQuery.getKBestPCFGParses(rerankerKBest);
-    if (bestKParses.isEmpty()) {
+    if (bestKParses.size() == 0) {
       return false;
     }
     scoredTrees = rerank(sentence, bestKParses);
@@ -102,7 +100,7 @@ public class RerankingParserQuery implements ParserQuery {
 
   @Override
   public Tree getBestParse() {
-    if (scoredTrees == null || scoredTrees.isEmpty()) {
+    if (scoredTrees == null || scoredTrees.size() == 0) {
       return null;
     }
     return scoredTrees.get(0).object();
@@ -115,7 +113,7 @@ public class RerankingParserQuery implements ParserQuery {
 
   @Override
   public double getPCFGScore() {
-    if (scoredTrees == null || scoredTrees.isEmpty()) {
+    if (scoredTrees == null || scoredTrees.size() == 0) {
       throw new AssertionError();
     }
     return scoredTrees.get(0).score();
@@ -135,7 +133,7 @@ public class RerankingParserQuery implements ParserQuery {
 
   @Override
   public List<ScoredObject<Tree>> getBestPCFGParses() {
-    if (scoredTrees == null || scoredTrees.isEmpty()) {
+    if (scoredTrees == null || scoredTrees.size() == 0) {
       throw new AssertionError();
     }
     List<ScoredObject<Tree>> equalTrees = Generics.newArrayList();
@@ -229,7 +227,7 @@ public class RerankingParserQuery implements ParserQuery {
   }
 
   @Override
-  public List<? extends HasWord> originalSentence() {
+  public List<? extends HasWord> originalSentence() { 
     return parserQuery.originalSentence();
   }
 

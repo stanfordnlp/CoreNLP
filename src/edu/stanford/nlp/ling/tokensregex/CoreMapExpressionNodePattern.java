@@ -11,7 +11,6 @@ import edu.stanford.nlp.util.CoreMap;
  * @author Angel Chang
  */
 public class CoreMapExpressionNodePattern extends NodePattern<CoreMap> {
-
   Env env;
   Expression expression;
 
@@ -25,14 +24,14 @@ public class CoreMapExpressionNodePattern extends NodePattern<CoreMap> {
   public static CoreMapExpressionNodePattern valueOf(Expression expression) {
     return valueOf(null, expression);
   }
-
+  
   public static CoreMapExpressionNodePattern valueOf(Env env, Expression expression) {
     CoreMapExpressionNodePattern p = new CoreMapExpressionNodePattern(env, expression);
     return p;
   }
 
-  @Override
-  public boolean match(CoreMap token) {
+  public boolean match(CoreMap token)
+  {
     Value v = expression.evaluate(env, token);
     Boolean matched = Expressions.convertValueToBoolean(v, false);
     return (matched != null)? matched:false;

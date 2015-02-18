@@ -17,15 +17,12 @@ import java.util.zip.GZIPOutputStream;
 /**
  * Helper Class for various I/O related things.
  *
- * @author Kayur Patel
- * @author Teg Grenager
- * @author Christopher Manning
+ * @author Kayur Patel, Teg Grenager
  */
 
 public class IOUtils {
 
-  private static final int SLURP_BUFFER_SIZE = 16000;
-  private static final int GZIP_FILE_BUFFER_SIZE = 65536;
+  private static final int SLURPBUFFSIZE = 16000;
 
   public static final String eolChar = System.getProperty("line.separator");
   public static final String defaultEncoding = "utf-8";
@@ -34,7 +31,7 @@ public class IOUtils {
   private IOUtils() { }
 
   /**
-   * Write object to a file with the specified name.  The file is silently gzipped if the filename ends with .gz.
+   * Write object to a file with the specified name.
    *
    * @param o Object to be written to file
    * @param filename Name of the temp file
@@ -47,7 +44,7 @@ public class IOUtils {
   }
 
   /**
-   * Write an object to a specified File.  The file is silently gzipped if the filename ends with .gz.
+   * Write an object to a specified File.
    *
    * @param o Object to be written to file
    * @param file The temp File
@@ -59,7 +56,7 @@ public class IOUtils {
   }
 
   /**
-   * Write an object to a specified File. The file is silently gzipped if the filename ends with .gz.
+   * Write an object to a specified File. The file is silently gzipped regardless of name.
    *
    * @param o Object to be written to file
    * @param file The temp File
@@ -69,12 +66,8 @@ public class IOUtils {
    */
   public static File writeObjectToFile(Object o, File file, boolean append) throws IOException {
     // file.createNewFile(); // cdm may 2005: does nothing needed
-    OutputStream os = new FileOutputStream(file, append);
-    if (file.getName().endsWith(".gz")) {
-      os = new GZIPOutputStream(os);
-    }
-    os = new BufferedOutputStream(os);
-    ObjectOutputStream oos = new ObjectOutputStream(os);
+    ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(
+            new GZIPOutputStream(new FileOutputStream(file, append))));
     oos.writeObject(o);
     oos.close();
     return file;
@@ -275,20 +268,12 @@ public class IOUtils {
    * @return The object read from the file.
    */
   public static <T> T readObjectFromFile(File file) throws IOException,
-      ClassNotFoundException {
-    try {
-      ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
-          new GZIPInputStream(new FileInputStream(file))));
-      Object o = ois.readObject();
-      ois.close();
-      return ErasureUtils.uncheckedCast(o);
-    } catch (java.util.zip.ZipException e) {
-      ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
-          new FileInputStream(file)));
-      Object o = ois.readObject();
-      ois.close();
-      return ErasureUtils.uncheckedCast(o);
-    }
+          ClassNotFoundException {
+    ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
+            new GZIPInputStream(new FileInputStream(file))));
+    Object o = ois.readObject();
+    ois.close();
+    return ErasureUtils.uncheckedCast(o);
   }
 
   public static DataInputStream getDataInputStream(String filenameUrlOrClassPath) throws IOException {
@@ -313,19 +298,6 @@ public class IOUtils {
     Object o = ois.readObject();
     ois.close();
     return ErasureUtils.uncheckedCast(o);
-  }
-
-  public static <T> T readObjectAnnouncingTimingFromURLOrClasspathOrFileSystem(String msg, String path) {
-    T obj;
-    try {
-      Timing timing = new Timing();
-      System.err.print(msg + ' ' + path + " ... ");
-      obj = IOUtils.readObjectFromURLOrClasspathOrFileSystem(path);
-      timing.done();
-    } catch (IOException | ClassNotFoundException e) {
-      throw new RuntimeIOException(e);
-    }
-    return obj;
   }
 
   public static <T> T readObjectFromObjectStream(ObjectInputStream ois) throws IOException,
@@ -399,7 +371,6 @@ public class IOUtils {
 
   /**
    * Locates this file either in the CLASSPATH or in the file system. The CLASSPATH takes priority.
-   *
    * @param name The file or resource name
    * @throws FileNotFoundException If the file does not exist
    * @return The InputStream of name, or null if not found
@@ -467,18 +438,15 @@ public class IOUtils {
       }
     }
 
-    if (textFileOrUrl.endsWith(".gz")) {
-      // gunzip it if necessary
-      in = new GZIPInputStream(in, GZIP_FILE_BUFFER_SIZE);
-    }
-
-    // buffer this stream.  even gzip streams benefit from buffering,
-    // such as for the shift reduce parser
+    // buffer this stream
     in = new BufferedInputStream(in);
+
+    // gzip it if necessary
+    if (textFileOrUrl.endsWith(".gz"))
+      in = new GZIPInputStream(in);
 
     return in;
   }
-
 
   /**
    * Quietly opens a File. If the file ends with a ".gz" extension,
@@ -497,7 +465,6 @@ public class IOUtils {
     }
   }
 
-
   /**
    * Open a BufferedReader to a File. If the file's getName() ends in .gz,
    * it is interpreted as a gzipped file (and uncompressed). The file is then
@@ -513,71 +480,26 @@ public class IOUtils {
       is = inputStreamFromFile(file);
       return new BufferedReader(new InputStreamReader(is, "UTF-8"));
     } catch (IOException ioe) {
-      IOUtils.closeIgnoringExceptions(is);
       throw new RuntimeIOException(ioe);
+    } finally {
+      IOUtils.closeIgnoringExceptions(is);
     }
   }
 
-
-  // todo [cdm 2014]: get rid of this method, using other methods. This will change the semantics to null meaning UTF-8, but that seems better in 2015.
-  /**
-   * Open a BufferedReader to a File. If the file's getName() ends in .gz,
-   * it is interpreted as a gzipped file (and uncompressed). The file is then
-   * turned into a BufferedReader with the given encoding.
-   * If the encoding passed in is null, then the system default encoding is used.
-   *
-   * @param file What to read from
-   * @param encoding What charset to use. A null String is interpreted as platform default encoding
-   * @return The BufferedReader
-   * @throws RuntimeIOException If there is an I/O problem
-   */
-  public static BufferedReader readerFromFile(File file, String encoding) {
-    InputStream is = null;
-    try {
-      is = inputStreamFromFile(file);
-      if (encoding == null) {
-        return new BufferedReader(new InputStreamReader(is));
-      } else {
-        return new BufferedReader(new InputStreamReader(is, encoding));
-      }
-    } catch (IOException ioe) {
-      IOUtils.closeIgnoringExceptions(is);
-      throw new RuntimeIOException(ioe);
-    }
-  }
 
 
   /**
    * Open a BufferedReader on stdin. Use the user's default encoding.
-   *
-   * @return The BufferedReader
    */
-  public static BufferedReader readerFromStdin() {
+  public static BufferedReader readerFromStdin() throws IOException {
     return new BufferedReader(new InputStreamReader(System.in));
   }
 
   /**
-   * Open a BufferedReader on stdin. Use the specified character encoding.
-   *
-   * @param encoding CharSet encoding. Maybe be null, in which case the
-   *         platform default encoding is used
-   * @return The BufferedReader
-   * @throws IOException If there is an I/O problem
-   */
-  public static BufferedReader readerFromStdin(String encoding) throws IOException {
-    if (encoding == null) {
-      return new BufferedReader(new InputStreamReader(System.in));
-    }
-    return new BufferedReader(new InputStreamReader(System.in, encoding));
-  }
-
-
-  /**
-   * Open a BufferedReader to a file, class path entry or URL specified by a String name.
-   * If the String starts with https?://, then it is first tried as a URL. It
-   * is next tried as a resource on the CLASSPATH, and then it is tried
-   * as a local file. Finally, it is then tried again in case it is some network-available
-   * file accessible by URL. If the String ends in .gz, it
+   * Open a BufferedReader to a file or URL specified by a String name. If the
+   * String starts with https?://, then it is first tried as a URL, otherwise it
+   * is next tried as a resource on the CLASSPATH, and then finally it is tried
+   * as a local file or other network-available file. If the String ends in .gz, it
    * is interpreted as a gzipped file (and uncompressed). The file is then
    * interpreted as a utf-8 text file.
    *
@@ -598,7 +520,6 @@ public class IOUtils {
    * as a local file or other network-available file . If the String ends in .gz, it
    * is interpreted as a gzipped file (and uncompressed), else it is interpreted as
    * a regular text file in the given encoding.
-   * If the encoding passed in is null, then the system default encoding is used.
    *
    * @param textFileOrUrl What to read from
    * @param encoding CharSet encoding. Maybe be null, in which case the
@@ -867,7 +788,7 @@ public class IOUtils {
     private final int bufferSize;
     private EolPreservingLineReaderIterable( Reader reader )
     {
-      this(reader, SLURP_BUFFER_SIZE);
+      this(reader, SLURPBUFFSIZE);
     }
     private EolPreservingLineReaderIterable( Reader reader, int bufferSize )
     {
@@ -940,7 +861,11 @@ public class IOUtils {
                 return true; // end of line reached
               }
             }
-            lastWasLF = (charBuffer[i] == '\r');
+            if (charBuffer[i] == '\r') {
+              lastWasLF = true;
+            } else {
+              lastWasLF = false;
+            }
           }
           sb.append(charBuffer, charBufferPos, charsInBuffer - charBufferPos);
           // reset character buffer pos
@@ -999,7 +924,8 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir The root directory.
+   * @param dir
+   *          The root directory.
    * @return All files within the directory.
    */
   public static Iterable<File> iterFilesRecursive(final File dir) {
@@ -1009,8 +935,10 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir The root directory.
-   * @param ext A string that must be at the end of all files (e.g. ".txt")
+   * @param dir
+   *          The root directory.
+   * @param ext
+   *          A string that must be at the end of all files (e.g. ".txt")
    * @return All files within the directory ending in the given extension.
    */
   public static Iterable<File> iterFilesRecursive(final File dir,
@@ -1021,8 +949,10 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir The root directory.
-   * @param pattern A regular expression that the file path must match. This uses
+   * @param dir
+   *          The root directory.
+   * @param pattern
+   *          A regular expression that the file path must match. This uses
    *          Matcher.find(), so use ^ and $ to specify endpoints.
    * @return All files within the directory.
    */
@@ -1112,7 +1042,7 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = readerFromString(filename, encoding);
+    Reader r = new InputStreamReader(getInputStreamFromURLOrClasspathOrFileSystem(filename), encoding);
     return IOUtils.slurpReader(r);
   }
 
@@ -1143,6 +1073,13 @@ public class IOUtils {
   /**
    * Returns all the text at the given URL.
    */
+  public static String slurpGBURL(URL u) throws IOException {
+    return IOUtils.slurpURL(u, "GB18030");
+  }
+
+  /**
+   * Returns all the text at the given URL.
+   */
   public static String slurpURLNoExceptions(URL u, String encoding) {
     try {
       return IOUtils.slurpURL(u, encoding);
@@ -1168,12 +1105,9 @@ public class IOUtils {
       return "";
     }
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
-    StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
-    for (String temp; (temp = br.readLine()) != null;
-
-
-
-            ) {
+    String temp;
+    StringBuilder buff = new StringBuilder(16000); // make biggish
+    while ((temp = br.readLine()) != null) {
       buff.append(temp);
       buff.append(lineSeparator);
     }
@@ -1205,8 +1139,9 @@ public class IOUtils {
     String encoding = getUrlEncoding(uc);
     InputStream is = uc.getInputStream();
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
-    StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
-    for (String temp; (temp = br.readLine()) != null; ) {
+    String temp;
+    StringBuilder buff = new StringBuilder(16000); // make biggish
+    while ((temp = br.readLine()) != null) {
       buff.append(temp);
       buff.append(lineSeparator);
     }
@@ -1287,9 +1222,9 @@ public class IOUtils {
     BufferedReader r = new BufferedReader(reader);
     StringBuilder buff = new StringBuilder();
     try {
-      char[] chars = new char[SLURP_BUFFER_SIZE];
+      char[] chars = new char[SLURPBUFFSIZE];
       while (true) {
-        int amountRead = r.read(chars, 0, SLURP_BUFFER_SIZE);
+        int amountRead = r.read(chars, 0, SLURPBUFFSIZE);
         if (amountRead < 0) {
           break;
         }
@@ -1323,8 +1258,7 @@ public class IOUtils {
   }
 
   /**
-   * Read in a CSV formatted file with a header row.
-   *
+   * Read in a CSV formatted file with a header row
    * @param path - path to CSV file
    * @param quoteChar - character for enclosing strings, defaults to "
    * @param escapeChar - character for escaping quotes appearing in quoted strings; defaults to " (i.e. "" is used for " inside quotes, consistent with Excel)
@@ -1658,7 +1592,7 @@ public class IOUtils {
       List<String> lines = new ArrayList<String>();
       BufferedReader in = new BufferedReader(new EncodingFileReader(filename,encoding));
       String line;
-      int i = 0;
+      int i = 0; 
       while ((line = in.readLine()) != null) {
         i++;
         if(ignoreHeader && i == 1)
@@ -1673,7 +1607,7 @@ public class IOUtils {
       return null;
     }
   }
-
+  
   public static String backupName(String filename) {
     return backupFile(new File(filename)).toString();
   }
@@ -1731,21 +1665,6 @@ public class IOUtils {
     }
   }
 
-  /**
-   * Given a filepath, delete all files in the directory recursively
-   * @param dir
-   * @return {@code true} if the deletion is successful, {@code false} otherwise
-   */
-  public static boolean deleteDirRecursively(File dir) {
-    if (dir.isDirectory()) {
-      for (File f : dir.listFiles()) {
-        boolean success = deleteDirRecursively(f);
-        if (!success)
-          return false;
-      }
-    }
-    return dir.delete();
-  }
 
   public static String getExtension(String fileName) {
     if(!fileName.contains("."))
@@ -1813,7 +1732,6 @@ public class IOUtils {
     }
   }
 
-
   /**
    * A raw file copy function -- this is not public since no error checks are made as to the
    * consistency of the filed being copied. Use instead:
@@ -1825,20 +1743,10 @@ public class IOUtils {
   private static void copyFile(File source, File target) throws IOException {
     FileChannel sourceChannel = new FileInputStream( source ).getChannel();
     FileChannel targetChannel = new FileOutputStream( target ).getChannel();
-
-    // allow for the case that it doesn't all transfer in one go (though it probably does for a file cp)
-    long pos = 0;
-    long toCopy = sourceChannel.size();
-    while (toCopy > 0) {
-      long bytes = sourceChannel.transferTo(pos, toCopy, targetChannel);
-      pos += bytes;
-      toCopy -= bytes;
-    }
-
+    sourceChannel.transferTo(0, sourceChannel.size(), targetChannel);
     sourceChannel.close();
     targetChannel.close();
   }
-
 
   /**
    * <p>An implementation of cp, as close to the Unix command as possible.
@@ -1918,119 +1826,5 @@ public class IOUtils {
    */
   public static void cp(File source, File target) throws IOException { cp(source, target, false); }
 
-  /**
-   * A Java implementation of the Unix tail functionality.
-   * That is, read the last n lines of the input file f.
-   * @param f The file to read the last n lines from
-   * @param n The number of lines to read from the end of the file.
-   * @param encoding The encoding to read the file in.
-   * @return The read lines, one String per line.
-   * @throws IOException if the file could not be read.
-   */
-  public static String[] tail(File f, int n, String encoding) throws IOException {
-    if (n == 0) { return new String[0]; }
-    // Variables
-    RandomAccessFile raf = new RandomAccessFile(f, "r");
-    int linesRead = 0;
-    List<Byte> bytes = new ArrayList<Byte>();
-    List<String> linesReversed = new ArrayList<String>();
-    // Seek to end of file
-    long length = raf.length() - 1;
-    raf.seek(length);
-    // Read backwards
-    for(long seek = length; seek >= 0; --seek){
-      // Seek back
-      raf.seek(seek);
-      // Read the next character
-      byte c = raf.readByte();
-      if(c == '\n'){
-        // If it's a newline, handle adding the line
-        byte[] str = new byte[bytes.size()];
-        for (int i = 0; i < str.length; ++i) {
-          str[i] = bytes.get(str.length - i - 1);
-        }
-        linesReversed.add(new String(str, encoding));
-        bytes = new ArrayList<Byte>();
-        linesRead += 1;
-        if (linesRead == n){
-          break;
-        }
-      } else {
-        // Else, register the character for later
-        bytes.add(c);
-      }
-    }
-    // Add any remaining lines
-    if (linesRead < n && bytes.size() > 0) {
-      byte[] str = new byte[bytes.size()];
-      for (int i = 0; i < str.length; ++i) {
-        str[i] = bytes.get(str.length - i - 1);
-      }
-      linesReversed.add(new String(str, encoding));
-    }
-    // Create output
-    String[] rtn = new String[linesReversed.size()];
-    for (int i = 0; i < rtn.length; ++i) {
-      rtn[i] = linesReversed.get(rtn.length - i - 1);
-    }
-    raf.close();
-    return rtn;
-  }
-
-  /** @see edu.stanford.nlp.io.IOUtils#tail(java.io.File, int, String) */
-  public static String[] tail(File f, int n) throws IOException { return tail(f, n, "utf-8"); }
-
-  /** Bare minimum sanity checks */
-  private static Set<String> blacklistedPathsToRemove = new HashSet<String>(){{
-    add("/");
-    add("/u"); add("/u/");
-    add("/u/nlp"); add("/u/nlp/");
-    add("/u/nlp/data"); add("/u/nlp/data/");
-    add("/scr"); add("/scr/");
-    add("/scr/nlp/data"); add("/scr/nlp/data/");
-  }};
-
-  /**
-   * Delete this file; or, if it is a directory, delete this directory and all its contents.
-   * This is a somewhat dangerous function to call from code, and so a few safety features have been
-   * implemented (though you should not rely on these!):
-   *
-   * <ul>
-   *   <li>Certain directories are prohibited from being removed.</li>
-   *   <li>More than 100 files cannot be removed with this function.</li>
-   *   <li>More than 10GB cannot be removed with this function.</li>
-   * </ul>
-   *
-   * @param file The file or directory to delete.
-   */
-  public static void deleteRecursively(File file) {
-    // Sanity checks
-    if (blacklistedPathsToRemove.contains(file.getPath())) {
-      throw new IllegalArgumentException("You're trying to delete " + file + "! I _really_ don't think you want to do that...");
-    }
-    int count = 0;
-    long size = 0;
-    for (File f : iterFilesRecursive(file)) {
-      count += 1;
-      size += f.length();
-    }
-    if (count > 100) {
-      throw new IllegalArgumentException("Deleting more than 100 files; you should do this manually");
-    }
-    if (size > 10000000000L) {  // 10 GB
-      throw new IllegalArgumentException("Deleting more than 10GB; you should do this manually");
-    }
-    // Do delete
-    if (file.isDirectory()) {
-      File[] children = file.listFiles();
-      if (children != null) {
-        for (File child : children) {
-          deleteRecursively(child);
-        }
-      }
-    }
-    //noinspection ResultOfMethodCallIgnored
-    file.delete();
-  }
 
 }

@@ -74,9 +74,6 @@ public class Execution {
   @SuppressWarnings("FieldCanBeLocal")
   @Option(name = "strict", gloss = "If true, make sure that all options passed in are used somewhere")
   private static boolean strict = false;
-  @SuppressWarnings("FieldCanBeLocal")
-  @Option(name = "exec.verbose", gloss = "If true, print options as they are set.")
-  private static boolean verbose = false;
 
   static {
     try {
@@ -98,9 +95,12 @@ public class Execution {
     private int toReturn = -1;
 
     public LazyFileIterator(File path, final String filter) {
-      this(path, (file, name) -> {
-        String filePath = (file.getPath() + "/" + name);
-        return new File(filePath).isDirectory() || filePath.matches(filter);
+      this(path, new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String name) {
+          String path = (dir.getPath() + "/" + name);
+          return new File(path).isDirectory() || path.matches(filter);
+        }
       });
     }
 
@@ -169,17 +169,6 @@ public class Execution {
 	 */
 
   private static void fillField(Object instance, Field f, String value) {
-    //--Verbose
-    if (verbose) {
-      Option opt = f.getAnnotation(Option.class);
-      StringBuilder b = new StringBuilder("setting ").append(f.getDeclaringClass().getName()).append("#").append(f.getName()).append(" ");
-      if (opt != null) {
-        b.append("[").append(opt.name()).append("] ");
-      }
-      b.append("to: ").append(value);
-      log(b.toString());
-    }
-
     try {
       //--Permissions
       boolean accessState = true;
@@ -329,19 +318,6 @@ public class Execution {
     return classes.toArray(new Class<?>[classes.size()]);
   }
 
-  /**
-   * Get all the declared fields of this class and all super classes.
-   */
-  private static Field[] scrapeFields(Class<?> clazz) throws Exception {
-    List<Field> fields = new ArrayList<>();
-    while (clazz != null && !clazz.equals(Object.class)) {
-      fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
-      clazz = clazz.getSuperclass();
-    }
-    return fields.toArray(new Field[fields.size()]);
-  }
-
-
   @SuppressWarnings("rawtypes")
   protected static Map<String, Field> fillOptionsImpl(
       Object[] instances,
@@ -355,13 +331,6 @@ public class Execution {
       for (int i = 0; i < classes.length; ++i) {
         assert instances[i].getClass() == classes[i];
         class2object.put(classes[i], instances[i]);
-        Class<?> mySuper = instances[i].getClass().getSuperclass();
-        while (mySuper != null && !mySuper.equals(Object.class)) {
-          if (!class2object.containsKey(mySuper)) {
-            class2object.put(mySuper, instances[i]);
-          }
-          mySuper = mySuper.getSuperclass();
-        }
       }
     }
 
@@ -372,7 +341,7 @@ public class Execution {
     for (Class c : classes) {
       Field[] fields;
       try {
-        fields = scrapeFields(c);
+        fields = c.getDeclaredFields();
       } catch (Throwable e) {
         debug("Could not check fields for class: " + c.getName() + "  (caused by " + e.getClass() + ": " + e.getMessage() + ")");
         continue;
@@ -426,7 +395,7 @@ public class Execution {
       }
       //(check to ensure that something got filled, if any @Option annotation was found)
       if (someOptionFound && !someOptionFilled) {
-        warn("found @Option annotations in class " + c + ", but didn't set any of them (all options were instance variables and no instance given?)");
+        warn("found @Option annotations in class, but didn't set any of them (all options were instance variables and no instance given?)");
       }
     }
 
@@ -445,7 +414,7 @@ public class Execution {
       }
       // (fill the field)
       if (target != null) {
-        // (case: declared option)z
+        // (case: declared option)
         fillField(class2object.get(target.getDeclaringClass()), target, value);
       } else if (ensureAllOptions) {
         // (case: undeclared option)
@@ -462,7 +431,7 @@ public class Execution {
           try {
             clazz = ClassLoader.getSystemClassLoader().loadClass(className);
           } catch (Exception e) {
-            err("Could not set option: " + rawKey + "; either the option is mistyped, not defined, or the class " + className + " does not exist.");
+            err("Could not set option: " + rawKey + "; no such class: " + className);
           }
           // get the field
           if (clazz != null) {
@@ -471,12 +440,7 @@ public class Execution {
             } catch (Exception e) {
               err("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
             }
-            if (target != null) {
-              log("option overrides " + target + " to '" + value + "'");
-              fillField(class2object.get(target.getDeclaringClass()), target, value);
-            } else {
-              err("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
-            }
+            fillField(class2object.get(target.getDeclaringClass()), target, value);
           }
         }
       }
@@ -525,7 +489,7 @@ public class Execution {
     //(convert to map)
     Properties options = StringUtils.argsToProperties(args);
     for (String key : props.stringPropertyNames()) {
-      options.setProperty(key, props.getProperty(key));
+      options.put(key, props.getProperty(key));
     }
     //(bootstrap)
     Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap

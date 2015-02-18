@@ -14,10 +14,10 @@ import edu.stanford.nlp.util.CoreMap;
 
 
 /**
- * This class assumes that there is a {@code List<CoreLabel>}
+ * This class assumes that there is a {@code List<? extends CoreLabel>}
  * under the {@code TokensAnnotation} field, and runs it
  * through {@link edu.stanford.nlp.process.WordToSentenceProcessor}
- * and puts the new {@code List<Annotation>}
+ * and puts the new {@code List<List<? extends CoreLabel>>}
  * under the {@code SentencesAnnotation} field.
  *
  * @author Jenny Finkel
@@ -117,7 +117,6 @@ public class WordsToSentencesAnnotator implements Annotator {
     // get text and tokens from the document
     String text = annotation.get(CoreAnnotations.TextAnnotation.class);
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
-    String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
     // System.err.println("Tokens are: " + tokens);
 
     // assemble the sentence annotations
@@ -158,7 +157,7 @@ public class WordsToSentencesAnnotator implements Annotator {
         sentence.set(CoreAnnotations.LineNumberAnnotation.class, lineNumber);
       }
 
-      // Annotate sentence with section information.
+      // Annotation sentence with section information
       // Assume section start and end appear as first and last tokens of sentence
       CoreLabel sentenceStartToken = sentenceTokens.get(0);
       CoreLabel sentenceEndToken = sentenceTokens.get(sentenceTokens.size()-1);
@@ -175,19 +174,6 @@ public class WordsToSentencesAnnotator implements Annotator {
       String sectionEnd = sentenceEndToken.get(CoreAnnotations.SectionEndAnnotation.class);
       if (sectionEnd != null) {
         sectionAnnotations = null;
-      }
-
-      if (docID != null) {
-        sentence.set(CoreAnnotations.DocIDAnnotation.class, docID);
-      }
-
-      int index = 1;
-      for (CoreLabel token : sentenceTokens) {
-        token.setIndex(index++);
-        token.setSentIndex(sentences.size());
-        if (docID != null) {
-          token.setDocID(docID);
-        }
       }
 
       // add the sentence to the list

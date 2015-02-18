@@ -128,24 +128,6 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
               "SCHOOL", "SCHOOL", "SCHOOL", "O", "O", "O", "LOCATION", "O");
   }
 
-  // Tests for TokensRegex syntax with match group
-  public void testTokensRegexMatchGroup() throws Exception {
-    String[][] regexes =
-      new String[][]{
-        new String[]{"( /the/? /movie/ (/[A-Z].*/+) )", "MOVIE", "", "0", "1"}
-      };
-    Annotator annotatorCased = getTokensRegexNerAnnotator(regexes, false);
-
-    String str = "the movie Mud was very muddy";
-    Annotation document = createDocument(str);
-    annotatorCased.annotate(document);
-    List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);
-
-    checkTags(tokens,
-      "O", "O", "MOVIE", "O", "O", "O");
-
-  }
-
   // Basic tests from RegexNERAnnotatorITest
   public void testBasicMatching() throws Exception {
     String str = "President Barack Obama lives in Chicago , Illinois , " +
@@ -161,12 +143,12 @@ public class TokensRegexNERAnnotatorITest extends TestCase {
   }
 
   /**
-   * The LOCATION on Ontario Lake should not be overwritten since Ontario (STATE_OR_PROVINCE)
-   * does not span Ontario Lake.  Native American Church will overwrite ORGANIZATION with
+   * The LOCATION on Ontario Place should not be overwritten since Ontario (STATE_OR_PROVINCE)
+   * does not span Ontario Place.  Native American Church will overwrite ORGANIZATION with
    * RELIGION.
    */
   public void testOverwrite() throws Exception {
-    String str = "I like Ontario Lake , and I like the Native American Church , too .";
+    String str = "I like Ontario Place , and I like the Native American Church , too .";
     Annotation document = createDocument(str);
     annotator.annotate(document);
     List<CoreLabel> tokens = document.get(CoreAnnotations.TokensAnnotation.class);

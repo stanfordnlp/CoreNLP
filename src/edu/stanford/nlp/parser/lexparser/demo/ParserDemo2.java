@@ -7,7 +7,6 @@ import java.util.*;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.Tokenizer;
@@ -43,28 +42,16 @@ class ParserDemo2 {
       for (String word : sent) {
         sentence.add(new Word(word));
       }
-
       String sent2 = ("This is a slightly longer and more complex " +
                       "sentence requiring tokenization.");
       // Use the default tokenizer for this TreebankLanguagePack
       Tokenizer<? extends HasWord> toke =
         tlp.getTokenizerFactory().getTokenizer(new StringReader(sent2));
       List<? extends HasWord> sentence2 = toke.tokenize();
-
-      String[] sent3 = { "It", "can", "can", "it", "." };
-      String[] tag3 = { "PRP", "MD", "VB", "PRP", "." }; // Parser gets second "can" wrong without help
-      List<TaggedWord> sentence3 = new ArrayList<TaggedWord>();
-      for (int i = 0; i < sent3.length; i++) {
-        sentence3.add(new TaggedWord(sent3[i], tag3[i]));
-      }
-      Tree parse = lp.parse(sentence3);
-      parse.pennPrint();
-
       List<List<? extends HasWord>> tmp =
         new ArrayList<List<? extends HasWord>>();
       tmp.add(sentence);
       tmp.add(sentence2);
-      tmp.add(sentence3);
       sentences = tmp;
     }
 
@@ -80,7 +67,7 @@ class ParserDemo2 {
       System.out.println("The words of the sentence:");
       for (Label lab : parse.yield()) {
         if (lab instanceof CoreLabel) {
-          System.out.println(((CoreLabel) lab).toString(CoreLabel.OutputFormat.VALUE_MAP));
+          System.out.println(((CoreLabel) lab).toString("{map}"));
         } else {
           System.out.println(lab);
         }

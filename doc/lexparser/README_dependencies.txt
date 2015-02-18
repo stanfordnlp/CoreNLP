@@ -1,4 +1,4 @@
-STANFORD DEPENDENCIES.  Stanford Parser v3.5.1
+STANFORD DEPENDENCIES.  Stanford Parser v3.3.1
 -----------------------------------------------------------
 
 The manual for the English version of the Stanford Dependencies
@@ -17,22 +17,7 @@ presentation in this paper:
 Pi-Chuan Chang, Huihsin Tseng, Dan Jurafsky, and Christopher
 D. Manning. 2009.  Discriminative Reordering with Chinese Grammatical
 Relations Features.  Third Workshop on Syntax and Structure in Statistical
-Translation. http://nlp.stanford.edu/pubs/ssst09-chang.pdf
-
-
---------------------------------------
-UNIVERSAL DEPENDENCIES
-
-We are at present involved in a group developing a cross-linguistically
-valid Universal Dependencies representation and treebanks:
-
-      http://universaldependencies.github.io/docs/
-
-It is our intention to transition Stanford NLP tools to Universal
-Dependencies, but there is not yet any model support for Universal
-Dependencies in this release.  (However, there is no reason that you
-yourself cannot train a POS tagger and a neural-net dependency parser
-for Universal Dependencies.
+Translation.
 
 
 --------------------------------------
@@ -57,23 +42,6 @@ For more discussion of the design principles, please see:
 These papers can be cited as references for the English Stanford
 Dependencies.
 
-
---------------------------------------
-CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.5.1
-
-A couple of small fixes were made, leading to ccomp and advcl being
-recognized in a couple of new environments.
-
---------------------------------------
-CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.4
-
-One major change was made to the dependency taxonomy:
-
- - We decided to collapse together the two dependencies partmod and infmod,
- since they have similar function and mainly differ in the form of the verbal
- head, which is anyways recorded in the POS tag. Those two relations are
- removed from the taxonomy, and a new relation vmod covering the union of both
- was added.
 
 --------------------------------------
 CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.3.1
@@ -119,22 +87,13 @@ change was made to the taxonomy of relations.
 --------------------------------------
 CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.2, JUNE 2013
 
-An improved dependency conversion means that our dependency trees are
-not always projective, one deletion was made from the taxonomy of
-relations, and various small converter fixes were made:
+Various small fixes were made to the dependencies conversion,
+and one change to the taxonomy of relations:
  - rel was removed. rel was originally used as the relation for an
     overt relativizer in a relative clause. But it was never a real
     grammatical relation, and we gradually started labeling easy cases
     as nsubj or dobj. In this release, rel is removed, pobj cases are
     also labeled, and the remaining hard cases are labeled as dep.
- - As a result of correctly labeling a pobj in questions and relative
-   clauses, the converter now sometimes produces non-projective dependency
-   trees (ones with crossing dependencies, if the words are laid out in
-   their normal order in a line, and all dependency arcs are drawn above
-   them). This is not a bug, it's an improvement in the generated
-   dependencies, but you should be aware that Stanford Dependencies
-   trees are now occasionally non-projective. (Some simple dependency
-   parsing algorithms only produce projective dependency trees.)
 
 --------------------------------------
 CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v2.0.5, MARCH 2013

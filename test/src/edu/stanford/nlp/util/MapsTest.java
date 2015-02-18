@@ -3,7 +3,6 @@ package edu.stanford.nlp.util;
 import junit.framework.TestCase;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  * Test some (well, just one at the moment) of the utility methods in Maps

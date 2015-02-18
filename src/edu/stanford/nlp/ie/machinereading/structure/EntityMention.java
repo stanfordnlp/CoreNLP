@@ -124,11 +124,10 @@ public class EntityMention extends ExtractionObject {
 
   public boolean equals(EntityMention otherEnt, boolean useSubType) {
     //
-    // two mentions are equal if they are over the same sentence,
-    // have the same head span, the same type/subtype, and the same text.
-    // We need this for scoring NER, and in various places in KBP
+    // two mentions are equal if they have the same head span, the same type/subtype, and the same text
+    // we need this for scoring NER
     //
-    if(sentence.get(CoreAnnotations.TextAnnotation.class).equals(otherEnt.sentence.get(CoreAnnotations.TextAnnotation.class)) && textEquals(otherEnt) && labelEquals(otherEnt, useSubType)){
+    if(textEquals(otherEnt) && labelEquals(otherEnt, useSubType)){
       return true;
     }
     /*
@@ -181,10 +180,6 @@ public class EntityMention extends ExtractionObject {
 
     if(extentTokenSpan != null && otherEnt.extentTokenSpan != null){
       if(extentTokenSpan.equals(otherEnt.extentTokenSpan)) return true;
-      return false;
-    }
-
-    if (!this.getExtentString().equals(otherEnt.getExtentString())) {
       return false;
     }
 
@@ -248,7 +243,6 @@ public class EntityMention extends ExtractionObject {
     int result = mentionType != null ? mentionType.hashCode() : 0;
     result = 31 * result + (headTokenSpan != null ? headTokenSpan.hashCode() : 0);
     result = 31 * result + (normalizedName != null ? normalizedName.hashCode() : 0);
-    result = 31 * result + (extentTokenSpan != null ? extentTokenSpan.hashCode() : 0);
     return result;
   }
 

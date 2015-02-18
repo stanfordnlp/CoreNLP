@@ -3,7 +3,6 @@ package edu.stanford.nlp.pipeline;
 import java.util.*;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 
 import junit.framework.Assert;
@@ -26,8 +25,7 @@ public class WordsToSentencesAnnotatorTest extends TestCase {
     Annotation doc = new Annotation(text);
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit");
-    props.setProperty("tokenize.language", "en");
-    //Annotator annotator = new TokenizerAnnotator("en");
+    //Annotator annotator = new PTBTokenizerAnnotator();
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     pipeline.annotate(doc);
 
@@ -46,6 +44,8 @@ public class WordsToSentencesAnnotatorTest extends TestCase {
     return true;
   }
 
+
+
   public void testSentenceSplitting() {
     String text = "Date :\n01/02/2012\nContent :\nSome words are here .\n";
     // System.out.println(text);
@@ -62,75 +62,5 @@ public class WordsToSentencesAnnotatorTest extends TestCase {
     // System.out.println("Sentences is " + sentences);
     assertEquals(4, sentences.size());
   }
-
-  public void testTokenizeNLsDoesntChangeSsplitResults() {
-    String text = "This is one sentence\n\nThis is not another with default ssplit settings.";
-    Properties props = new Properties();
-    props.setProperty("annotators", "tokenize, ssplit");
-    props.setProperty("tokenize.options", "tokenizeNLs");
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-
-    Annotation document1 = new Annotation(text);
-    pipeline.annotate(document1);
-    List<CoreMap> sentences = document1.get(CoreAnnotations.SentencesAnnotation.class);
-    assertEquals(1, sentences.size());
-
-    // make sure that there are the correct # of tokens
-    // (does NOT contain NL tokens)
-    List<CoreLabel> tokens = document1.get(CoreAnnotations.TokensAnnotation.class);
-    assertEquals(15, tokens.size());
-  }
-
-  public void testDefaultNewlineIsSentenceBreakSettings() {
-    String text = "This is one sentence\n\nThis is not another with default ssplit settings.";
-    Properties props = new Properties();
-    props.setProperty("annotators", "tokenize, ssplit");
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-
-    Annotation document1 = new Annotation(text);
-    pipeline.annotate(document1);
-    List<CoreMap> sentences = document1.get(CoreAnnotations.SentencesAnnotation.class);
-    assertEquals(1, sentences.size());
-
-    // make sure that there are the correct # of tokens
-    // (does NOT contain NL tokens)
-    List<CoreLabel> tokens = document1.get(CoreAnnotations.TokensAnnotation.class);
-    assertEquals(13, tokens.size());
-  }
-
-  public void testTwoNewlineIsSentenceBreakSettings() {
-    String text = "This is \none sentence\n\nThis is not another.";
-    Properties props = new Properties();
-    props.setProperty("annotators", "tokenize, ssplit");
-    props.setProperty("ssplit.newlineIsSentenceBreak", "two");
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-
-    Annotation document1 = new Annotation(text);
-    pipeline.annotate(document1);
-    List<CoreMap> sentences = document1.get(CoreAnnotations.SentencesAnnotation.class);
-    assertEquals(2, sentences.size());
-
-    // make sure that there are the correct # of tokens (does contain NL tokens)
-    List<CoreLabel> tokens = document1.get(CoreAnnotations.TokensAnnotation.class);
-    assertEquals(12, tokens.size());
-  }
-
-  public void testAlwaysNewlineIsSentenceBreakSettings() {
-    String text = "This is \none sentence\n\nThis is not another.";
-    Properties props = new Properties();
-    props.setProperty("annotators", "tokenize, ssplit");
-    props.setProperty("ssplit.newlineIsSentenceBreak", "always");
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-
-    Annotation document1 = new Annotation(text);
-    pipeline.annotate(document1);
-    List<CoreMap> sentences = document1.get(CoreAnnotations.SentencesAnnotation.class);
-    assertEquals(3, sentences.size());
-
-    // make sure that there are the correct # of tokens (does contain NL tokens)
-    List<CoreLabel> tokens = document1.get(CoreAnnotations.TokensAnnotation.class);
-    assertEquals(12, tokens.size());
-  }
-
 
 }

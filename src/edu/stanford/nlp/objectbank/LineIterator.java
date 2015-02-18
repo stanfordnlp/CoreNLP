@@ -3,7 +3,7 @@ package edu.stanford.nlp.objectbank;
 import java.io.*;
 import java.util.*;
 
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.AbstractIterator;
 
 
@@ -16,8 +16,8 @@ import edu.stanford.nlp.util.AbstractIterator;
  */
 public class LineIterator<X> extends AbstractIterator<X> {
 
-  private final Function<String,X> op;
-  private final BufferedReader in;
+  private Function<String,X> op;
+  private BufferedReader in;
   private X nextToken; // = null;
 
   @SuppressWarnings({"unchecked"})
@@ -92,7 +92,7 @@ public class LineIterator<X> extends AbstractIterator<X> {
     private static final long serialVersionUID = 1L;
 
     @SuppressWarnings({"NonSerializableFieldInSerializableClass"})
-    private final Function<String,X> oper;
+    private Function<String,X> oper;
 
     @SuppressWarnings({"unchecked"})
     public LineIteratorFactory() {

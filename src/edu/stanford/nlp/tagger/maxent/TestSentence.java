@@ -19,9 +19,8 @@ import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.sequences.BestSequenceFinder;
 import edu.stanford.nlp.sequences.ExactBestSequenceFinder;
 import edu.stanford.nlp.sequences.SequenceModel;
-import edu.stanford.nlp.tagger.common.Tagger;
+import edu.stanford.nlp.tagger.common.TaggerConstants;
 import edu.stanford.nlp.util.ArrayUtils;
-import edu.stanford.nlp.util.ConfusionMatrix;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
@@ -115,7 +114,7 @@ public class TestSentence implements SequenceModel {
         sent.add(s.get(j).word());
       }
     }
-    sent.add(Tagger.EOS_WORD);
+    sent.add(TaggerConstants.EOS_WORD);
     if (reuseTags) {
       this.originalTags = new ArrayList<String>(sz + 1);
       for (int j = 0; j < sz; ++j) {
@@ -125,7 +124,7 @@ public class TestSentence implements SequenceModel {
           originalTags.add(null);
         }
       }
-      originalTags.add(Tagger.EOS_TAG);
+      originalTags.add(TaggerConstants.EOS_TAG);
     }
     size = sz + 1;
     if (VERBOSE) {
@@ -290,18 +289,6 @@ public class TestSentence implements SequenceModel {
     }
   }
 
-  /**
-   * Update a confusion matrix with the errors from this sentence.
-   *
-   * @param finalTags Chosen tags for sentence
-   * @param confusionMatrix Confusion matrix to write to
-   */
-  protected void updateConfusionMatrix(String[] finalTags,
-                                       ConfusionMatrix<String> confusionMatrix) {
-    for (int i = 0; i < correctTags.length; i++)
-      confusionMatrix.add(finalTags[i], correctTags[i]);
-  }
-
 
   /**
    * Test using (exact Viterbi) TagInference.
@@ -409,20 +396,9 @@ public class TestSentence implements SequenceModel {
     Extractors ex = maxentTagger.extractors, exR = maxentTagger.extractorsRare;
     String w = pairs.getWord(h.current);
     double[] lS, lcS;
-    lS = localScores.get(w);
-    if (lS == null) {
+    if((lS = localScores.get(w)) == null) {
       lS = getHistories(tags, h, ex.local, rare ? exR.local : null);
       localScores.put(w,lS);
-    } else if (lS.length != tags.length) {
-      // This case can occur when a word was given a specific forced
-      // tag, and then later it shows up without the forced tag.
-      // TODO: if a word is given a forced tag, we should always get
-      // its features rather than use the cache, just in case the tag
-      // given is not the same tag as before
-      lS = getHistories(tags, h, ex.local, rare ? exR.local : null);
-      if (tags.length > 1) {
-        localScores.put(w,lS);
-      }
     }
     if((lcS = localContextScores[h.current]) == null) {
       lcS = getHistories(tags, h, ex.localContext, rare ? exR.localContext : null);
@@ -584,8 +560,7 @@ public class TestSentence implements SequenceModel {
     int numTags = maxentTagger.numTags();
     double[][][] probabilities = new double[size][kBestSize][numTags];
     calculateProbs(probabilities);
-
-    for (int current = 0; current < correctTags.length; current++) {
+    for (int current = 0; current < size; current++) {
       pfu.print(sent.get(current));
       double[] probs = new double[3];
       String[] tag3 = new String[3];

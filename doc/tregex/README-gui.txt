@@ -1,4 +1,4 @@
-Tregex GUI v3.5.1 - 2015-01-29
+Tregex GUI v3.3.1 - 2014-01-04
 ----------------------------------------------
 
 Copyright (c) 2003-2012 The Board of Trustees of 
@@ -155,15 +155,6 @@ LICENSE
 ----------------------------
 CHANGES
 ----------------------------
-
-2015-01-29    3.5.1     General bugfixes 
-
-2014-10-26    3.5.0     Upgrade to Java 1.8 
-
-2014-08-27    3.4.1     Fix bug by adding matcher object for tsurgeon 
-
-2014-06-16      3.4     Improved efficiency for some operations, new 
-                        tregex and tsurgeon patterns added 
 
 2014-01-04    3.3.1     Bugfix release, new createSubtree tsurgeon 
                         operation 

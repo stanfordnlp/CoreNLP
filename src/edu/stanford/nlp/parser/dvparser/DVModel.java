@@ -1,11 +1,13 @@
 package edu.stanford.nlp.parser.dvparser;
 
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -15,6 +17,7 @@ import java.util.regex.Pattern;
 import org.ejml.simple.SimpleMatrix;
 import org.ejml.data.DenseMatrix64F;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.neural.Embedding;
 import edu.stanford.nlp.neural.NeuralUtils;
 import edu.stanford.nlp.parser.lexparser.BinaryGrammar;
@@ -23,9 +26,11 @@ import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.parser.lexparser.UnaryGrammar;
 import edu.stanford.nlp.parser.lexparser.UnaryRule;
 import edu.stanford.nlp.trees.Tree;
-import java.util.function.Function;
+import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.Maps;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.TwoDimensionalMap;
 import edu.stanford.nlp.util.TwoDimensionalSet;
@@ -71,9 +76,21 @@ public class DVModel implements Serializable {
   static final String START_WORD = "*START*";
   static final String END_WORD = "*END*";
 
-  private static final Function<SimpleMatrix, DenseMatrix64F> convertSimpleMatrix = matrix -> matrix.getMatrix();
+  static final boolean TRAIN_WORD_VECTORS = true;
 
-  private static final Function<DenseMatrix64F, SimpleMatrix> convertDenseMatrix = matrix -> SimpleMatrix.wrap(matrix);
+  private static final Function<SimpleMatrix, DenseMatrix64F> convertSimpleMatrix = new Function<SimpleMatrix, DenseMatrix64F>() {
+    @Override
+    public DenseMatrix64F apply(SimpleMatrix matrix) {
+      return matrix.getMatrix();
+    }
+  };
+
+  private static final Function<DenseMatrix64F, SimpleMatrix> convertDenseMatrix = new Function<DenseMatrix64F, SimpleMatrix>() {
+    @Override
+    public SimpleMatrix apply(DenseMatrix64F matrix) {
+      return SimpleMatrix.wrap(matrix);
+    }
+  };
 
   private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
     in.defaultReadObject();
@@ -88,7 +105,7 @@ public class DVModel implements Serializable {
   public DVModel(Options op, Index<String> stateIndex, UnaryGrammar unaryGrammar, BinaryGrammar binaryGrammar) {
     this.op = op;
 
-    rand = new Random(op.trainOptions.randomSeed);
+    rand = new Random(op.trainOptions.dvSeed);
 
     readWordVectors();
 
@@ -173,7 +190,7 @@ public class DVModel implements Serializable {
 
     this.identity = SimpleMatrix.identity(numRows);
 
-    this.rand = new Random(op.trainOptions.randomSeed);
+    this.rand = new Random(op.trainOptions.dvSeed);
   }
 
   /**
@@ -414,6 +431,9 @@ public class DVModel implements Serializable {
       if (basic.length() > 0 && basic.charAt(0) == '@') {
         basic = basic.substring(1);
       }
+      if (op.dvCombineCategories) {
+        basic = op.tlpParams.combineCategory(basic);
+      }
       return basic;
     }
   }
@@ -584,7 +604,7 @@ public class DVModel implements Serializable {
     int totalSize = 0;
     totalSize += numBinaryMatrices * (binaryTransformSize + binaryScoreSize);
     totalSize += numUnaryMatrices * (unaryTransformSize + unaryScoreSize);
-    if (op.trainOptions.trainWordVectors) {
+    if (TRAIN_WORD_VECTORS) {
       totalSize += wordVectors.size() * op.lexOptions.numHid;
     }
     return totalSize;
@@ -594,7 +614,7 @@ public class DVModel implements Serializable {
   @SuppressWarnings("unchecked")
   public double[] paramsToVector(double scale) {
     int totalSize = totalParamSize();
-    if (op.trainOptions.trainWordVectors) {
+    if (TRAIN_WORD_VECTORS) {
       return NeuralUtils.paramsToVector(scale, totalSize,
                                         binaryTransform.valueIterator(), unaryTransform.values().iterator(),
                                         binaryScore.valueIterator(), unaryScore.values().iterator(),
@@ -610,7 +630,7 @@ public class DVModel implements Serializable {
   @SuppressWarnings("unchecked")
   public double[] paramsToVector() {
     int totalSize = totalParamSize();
-    if (op.trainOptions.trainWordVectors) {
+    if (TRAIN_WORD_VECTORS) {
       return NeuralUtils.paramsToVector(totalSize,
                                         binaryTransform.valueIterator(), unaryTransform.values().iterator(),
                                         binaryScore.valueIterator(), unaryScore.values().iterator(),
@@ -624,7 +644,7 @@ public class DVModel implements Serializable {
 
   @SuppressWarnings("unchecked")
   public void vectorToParams(double[] theta) {
-    if (op.trainOptions.trainWordVectors) {
+    if (TRAIN_WORD_VECTORS) {
       NeuralUtils.vectorToParams(theta,
                                  binaryTransform.valueIterator(), unaryTransform.values().iterator(),
                                  binaryScore.valueIterator(), unaryScore.values().iterator(),

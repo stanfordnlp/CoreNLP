@@ -8,7 +8,6 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.process.DocumentPreprocessor;
@@ -17,14 +16,7 @@ import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
-/**
- * @author John Bauer
- * @author Richard Socher
- */
 public class BuildBinarizedDataset {
-
-  private BuildBinarizedDataset() {} // static methods only
-
   /**
    * Sets all of the labels on a tree to the given default value.
    */
@@ -38,20 +30,8 @@ public class BuildBinarizedDataset {
     }
 
     tree.label().setValue(defaultLabel.toString());
-  }
-
-  public static void setPredictedLabels(Tree tree) {
-    if (tree.isLeaf()) {
-      return;
-    }
-
-    for (Tree child : tree.children()) {
-      setPredictedLabels(child);
-    }
-
-    tree.label().setValue(Integer.toString(RNNCoreAnnotations.getPredictedClass(tree)));
-  }
-
+  }  
+  
   public static void extractLabels(Map<Pair<Integer, Integer>, String> spanToLabels, List<HasWord> tokens, String line) {
     String[] pieces = line.trim().split("\\s+");
     if (pieces.length == 0) {
@@ -59,10 +39,11 @@ public class BuildBinarizedDataset {
     }
     if (pieces.length == 1) {
       String error = "Found line with label " + line + " but no tokens to associate with that line";
+      System.err.println(error);
       throw new RuntimeException(error);
     }
 
-    //TODO: BUG: The pieces are tokenized differently than the splitting, e.g., on possessive markers as in "actors' expenses"
+    //TODO: BUG: The pieces are tokenized differently than the splitting, e.g. on possessive markers as in "actors' expenses" 
     for (int i = 0; i < tokens.size() - pieces.length + 2; ++i) {
       boolean found = true;
       for (int j = 1; j < pieces.length; ++j) {
@@ -82,8 +63,8 @@ public class BuildBinarizedDataset {
       throw new AssertionError("Expected CoreLabels");
     }
     CoreLabel label = (CoreLabel) tree.label();
-    if (label.get(CoreAnnotations.BeginIndexAnnotation.class).equals(span.first) &&
-        label.get(CoreAnnotations.EndIndexAnnotation.class).equals(span.second)) {
+    if (label.get(CoreAnnotations.BeginIndexAnnotation.class) == span.first &&
+        label.get(CoreAnnotations.EndIndexAnnotation.class) == span.second) {
       label.setValue(value);
       return true;
     }
@@ -104,9 +85,9 @@ public class BuildBinarizedDataset {
    * the treebank used in the Sentiment project.
    * <br>
    * The expected input file is one sentence per line, with sentences
-   * separated by blank lines. The first line has the main label of the sentence together with the full sentence.
+   * separated by blank lines. The first line has the main label of the sentence together with the full sentence. 
    * Lines after the first sentence line but before
-   * the blank line will be treated as labeled sub-phrases.  The
+   * the blank line will be treated as labeled subphrases.  The
    * labels should start with the label and then contain a list of
    * tokens the label applies to. All phrases that do not have their own label will take on the main sentence label!
    *  For example:
@@ -115,17 +96,13 @@ public class BuildBinarizedDataset {
    * 1 Today is not a good day.<br>
    * 3 good<br>
    * 3 good day <br>
-   * 3 a good day <br>
+   * 3 a good day. <br>
    * <br>
    * (next block starts here) <br>
    * </code>
    * By default the englishPCFG parser is used.  This can be changed
    * with the <code>-parserModel</code> flag.  Specify an input file
    * with <code>-input</code>.
-   * <br>
-   * If a sentiment model is provided with -sentimentModel, that model
-   * will be used to prelabel the sentences.  Any spans with given
-   * labels will then be used to adjust those labels.
    */
   public static void main(String[] args) {
     CollapseUnaryTransformer transformer = new CollapseUnaryTransformer();
@@ -134,18 +111,12 @@ public class BuildBinarizedDataset {
 
     String inputPath = null;
 
-    String sentimentModelPath = null;
-    SentimentModel sentimentModel = null;
-
-    for (int argIndex = 0; argIndex < args.length; ) {
+    for (int argIndex = 0; argIndex < args.length; ++argIndex) {
       if (args[argIndex].equalsIgnoreCase("-input")) {
         inputPath = args[argIndex + 1];
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-parserModel")) {
         parserModel = args[argIndex + 1];
-        argIndex += 2;
-      } else if (args[argIndex].equalsIgnoreCase("-sentimentModel")) {
-        sentimentModelPath = args[argIndex + 1];
         argIndex += 2;
       } else {
         System.err.println("Unknown argument " + args[argIndex]);
@@ -153,22 +124,15 @@ public class BuildBinarizedDataset {
       }
     }
 
-    if (inputPath == null) {
-      throw new IllegalArgumentException("Must specify input file with -input");
-    }
-
     LexicalizedParser parser = LexicalizedParser.loadModel(parserModel);
-    TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack());
-
-    if (sentimentModelPath != null) {
-      sentimentModel = SentimentModel.loadSerialized(sentimentModelPath);
-    }
+    TreeBinarizer binarizer = new TreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack(), 
+                                                false, false, 0, false, false, 0.0, false, true, true);
 
     String text = IOUtils.slurpFileNoExceptions(inputPath);
     String[] chunks = text.split("\\n\\s*\\n+"); // need blank line to make a new chunk
 
     for (String chunk : chunks) {
-      if (chunk.trim().isEmpty()) {
+      if (chunk.trim() == "") {
         continue;
       }
       // The expected format is that line 0 will be the text of the
@@ -196,29 +160,18 @@ public class BuildBinarizedDataset {
 
       Tree tree = parser.apply(tokens);
       Tree binarized = binarizer.transformTree(tree);
+      setUnknownLabels(binarized, mainLabel);
       Tree collapsedUnary = transformer.transformTree(binarized);
-
-      // if there is a sentiment model for use in prelabeling, we
-      // label here and then use the user given labels to adjust
-      if (sentimentModel != null) {
-        Trees.convertToCoreLabels(collapsedUnary);
-        SentimentCostAndGradient scorer = new SentimentCostAndGradient(sentimentModel, null);
-        scorer.forwardPropagateTree(collapsedUnary);
-        setPredictedLabels(collapsedUnary);
-      } else {
-        setUnknownLabels(collapsedUnary, mainLabel);
-      }
 
       Trees.convertToCoreLabels(collapsedUnary);
       collapsedUnary.indexSpans();
 
-      for (Map.Entry<Pair<Integer, Integer>, String> pairStringEntry : spanToLabels.entrySet()) {
-        setSpanLabel(collapsedUnary, pairStringEntry.getKey(), pairStringEntry.getValue());
+      for (Pair<Integer, Integer> span : spanToLabels.keySet()) {
+        setSpanLabel(collapsedUnary, span, spanToLabels.get(span));
       }
 
       System.out.println(collapsedUnary);
       //System.out.println();
     }
-  } // end main
-
+  }
 }

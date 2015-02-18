@@ -1,6 +1,7 @@
 package edu.stanford.nlp.util;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -89,7 +90,7 @@ public class Sets {
     // *ahem* It would seem that Java already had this method. Hopefully this
     // stub will help people find it better than I did.
     return !Collections.disjoint(s1, s2);
-  }
+  }  
 
   /**
    * Returns the powerset (the set of all subsets) of set s.

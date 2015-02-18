@@ -2,10 +2,9 @@ package edu.stanford.nlp.classify;
 
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 /**
  * This class is meant to simplify performing cross validation of
@@ -47,7 +46,8 @@ public class CrossValidator<L, F> {
    * The input triple contains, in order, the train set, the test set, and the saved state.
    * You don't have to use the saved state if you don't want to.
    */
-  public double computeAverage (Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,SavedState>,Double> function) {
+  public double computeAverage (Function<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,SavedState>,Double> function)
+  {
     double sum = 0;
     Iterator<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,SavedState>> foldIt = iterator();
     while (foldIt.hasNext()) {
@@ -56,22 +56,19 @@ public class CrossValidator<L, F> {
     return sum / kFold;
   }
 
-
-  class CrossValidationIterator implements Iterator<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,SavedState>> {
-
-    private int iter = 0;
-
-    @Override
+  class CrossValidationIterator implements Iterator<Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,SavedState>>
+  {
+    int iter = 0;
     public boolean hasNext() { return iter < kFold; }
 
-    @Override
-    public void remove() {
-      throw new UnsupportedOperationException("CrossValidationIterator doesn't support remove()");
+    public void remove()
+    {
+      throw new RuntimeException("CrossValidationIterator doesn't support remove()");
     }
 
-    @Override
-    public Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,SavedState> next() {
-      if (iter == kFold) throw new NoSuchElementException("CrossValidatorIterator exhausted.");
+    public Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,SavedState> next()
+    {
+      if (iter == kFold) return null;
       int start = originalTrainData.size() * iter / kFold;
       int end = originalTrainData.size() * (iter + 1) / kFold;
       //System.err.println("##train data size: " +  originalTrainData.size() + " start " + start + " end " + end);
@@ -79,9 +76,7 @@ public class CrossValidator<L, F> {
 
       return new Triple<GeneralDataset<L, F>,GeneralDataset<L, F>,SavedState>(split.first(),split.second(),savedStates[iter++]);
     }
-
-  } // end class CrossValidationIterator
-
+  }
 
   public static class SavedState {
     public Object state;
@@ -90,9 +85,10 @@ public class CrossValidator<L, F> {
   public static void main(String[] args) {
     Dataset<String, String> d = Dataset.readSVMLightFormat(args[0]);
     Iterator<Triple<GeneralDataset<String, String>,GeneralDataset<String, String>,SavedState>> it = (new CrossValidator<String, String>(d)).iterator();
-    while (it.hasNext()) {
+    while (it.hasNext())
+    {
       it.next();
+      break;
     }
   }
-
 }

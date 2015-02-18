@@ -3,7 +3,6 @@ package edu.stanford.nlp.util.concurrent;
 import junit.framework.TestCase;
 
 import java.util.Iterator;
-import java.util.List;
 
 import edu.stanford.nlp.util.Index;
 
@@ -69,16 +68,9 @@ public class ConcurrentHashIndexTest extends TestCase  {
 
   public void testToArray() {
     String[] strs = new String[2];
-    strs = index.objectsList().toArray(strs);
+    strs = index.toArray(strs);
+    assertEquals("The", strs[0]);
+    assertEquals("Beast", strs[1]);
     assertEquals(2, strs.length);
-    assertTrue(index.contains(strs[0]));
-    assertTrue(index.contains(strs[1]));
   }
-
-  public void testObjects() {
-    List<String> foo = (List<String>) index2.objects(new int[] {0, 3});
-    assertEquals("Beauty", foo.get(0));
-    assertEquals("Beast", foo.get(1));
-  }
-
 }

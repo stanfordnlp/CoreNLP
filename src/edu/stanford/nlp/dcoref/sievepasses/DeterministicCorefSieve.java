@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.logging.Level;
 
 import edu.stanford.nlp.dcoref.Constants;
 import edu.stanford.nlp.dcoref.CorefCluster;
@@ -143,7 +142,7 @@ public abstract class DeterministicCorefSieve  {
         return false;
       }
     }
-    if (flags.DO_PRONOUN && Math.abs(mention2.sentNum-ant.sentNum) > 3 &&
+    if (flags.DO_PRONOUN && Math.abs(mention2.sentNum-ant.sentNum) > 3 && 
         mention2.person!=Person.I && mention2.person!=Person.YOU) {
       return false;
     }
@@ -370,29 +369,29 @@ public abstract class DeterministicCorefSieve  {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-
+    
     if(flags.USE_DISTANCE && Rules.entityTokenDistance(mention2, ant)){
       return false;
     }
-
+    
     if(flags.USE_COREF_DICT){
 
       // Head match
       if(ant.headWord.lemma().equals(mention2.headWord.lemma())) return false;
-
+      
       // Constraint: ignore pairs commonNoun - properNoun
-      if(ant.mentionType != MentionType.PROPER &&
-         ( mention2.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("NNP")
-           || !mention2.headWord.word().substring(1).equals(mention2.headWord.word().substring(1).toLowerCase()) ) ) return false;
-
+      if(ant.mentionType != MentionType.PROPER && 
+         ( mention2.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("NNP") 
+           || !mention2.headWord.word().substring(1).equals(mention2.headWord.word().substring(1).toLowerCase()) ) ) return false;      
+      
       // Constraint: ignore plurals
       if(ant.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNS")
           && mention2.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNS")) return false;
-
+     
       // Constraint: ignore mentions with indefinite determiners
-      if(dict.indefinitePronouns.contains(ant.originalSpan.get(0).lemma())
-          || dict.indefinitePronouns.contains(mention2.originalSpan.get(0).lemma())) return false;
-
+      if(dict.indefinitePronouns.contains(ant.originalSpan.get(0).lemma()) 
+          || dict.indefinitePronouns.contains(mention2.originalSpan.get(0).lemma())) return false;  
+      
       // Constraint: ignore coordinated mentions
       if(ant.isCoordinated() || mention2.isCoordinated()) return false;
 
@@ -401,13 +400,13 @@ public abstract class DeterministicCorefSieve  {
 
       // Constraint: sentence context incompatibility when the mentions are common nouns
       if(Rules.sentenceContextIncompatible(mention2, ant, dict)) return false;
-
-      if(Rules.entityClusterAllCorefDictionary(mentionCluster, potentialAntecedent, dict, 1, 8)) return true;
-      if(Rules.entityCorefDictionary(mention, ant, dict, 2, 2)) return true;
-      if(Rules.entityCorefDictionary(mention, ant, dict, 3, 2)) return true;
-      if(Rules.entityCorefDictionary(mention, ant, dict, 4, 2)) return true;
+      
+      if(Rules.entityClusterAllCorefDictionary(mentionCluster, potentialAntecedent, dict, 1, 8)) return true;            
+      if(Rules.entityCorefDictionary(mention, ant, dict, 2, 2)) return true;     
+      if(Rules.entityCorefDictionary(mention, ant, dict, 3, 2)) return true; 
+      if(Rules.entityCorefDictionary(mention, ant, dict, 4, 2)) return true;           
     }
-
+    
     if(flags.DO_PRONOUN){
       Mention m;
       if (mention.predicateNominatives!=null && mention.predicateNominatives.contains(mention2)) {
@@ -471,40 +470,39 @@ public abstract class DeterministicCorefSieve  {
     return orderedAntecedents;
   }
 
-  /** Divides a sentence into clauses and sorts the antecedents for pronoun matching. */
+  /** Divides a sentence into clauses and sort the antecedents for pronoun matching  */
   private static List<Mention> sortMentionsForPronoun(List<Mention> l, Mention m1, boolean sameSentence) {
     List<Mention> sorted = new ArrayList<Mention>();
-    if (sameSentence) {
-      Tree tree = m1.contextParseTree;
-      Tree current = m1.mentionSubTree;
-      current = current.parent(tree);
-      while (current != null) {
-        if (current.label().value().startsWith("S")) {
-          for (Mention m : l) {
-            if (!sorted.contains(m) && current.dominates(m.mentionSubTree)) {
-              sorted.add(m);
-            }
+    Tree tree = m1.contextParseTree;
+    Tree current = m1.mentionSubTree;
+    if(sameSentence){
+      while(true){
+        current = current.ancestor(1, tree);
+        if(current.label().value().startsWith("S")){
+          for(Mention m : l){
+            if(!sorted.contains(m) && current.dominates(m.mentionSubTree)) sorted.add(m);
           }
         }
-        current = current.parent(tree);
+        if(current.label().value().equals("ROOT") || current.ancestor(1, tree)==null) break;
       }
-      if (SieveCoreferenceSystem.logger.isLoggable(Level.FINEST)) {
-        if (l.size()!=sorted.size()) {
-          SieveCoreferenceSystem.logger.finest("sorting failed!!! -> parser error?? \tmentionID: "+m1.mentionID+" " + m1.spanToString());
-          sorted = l;
-        } else if ( ! l.equals(sorted)) {
-          SieveCoreferenceSystem.logger.finest("sorting succeeded & changed !! \tmentionID: "+m1.mentionID+" " + m1.spanToString());
-          for (int i=0; i<l.size(); i++) {
-            Mention ml = l.get(i);
-            Mention msorted = sorted.get(i);
-            SieveCoreferenceSystem.logger.finest("\t["+ml.spanToString()+"]\t["+msorted.spanToString()+"]");
-          }
-        } else {
-          SieveCoreferenceSystem.logger.finest("no changed !! \tmentionID: "+m1.mentionID+" " + m1.spanToString());
+      if(l.size()!=sorted.size()) {
+        SieveCoreferenceSystem.logger.finest("sorting failed!!! -> parser error?? \tmentionID: "+m1.mentionID+" " + m1.spanToString());
+        sorted=l;
+      } else if(!l.equals(sorted)){
+        SieveCoreferenceSystem.logger.finest("sorting succeeded & changed !! \tmentionID: "+m1.mentionID+" " + m1.spanToString());
+        for(int i=0; i<l.size(); i++){
+          Mention ml = l.get(i);
+          Mention msorted = sorted.get(i);
+          SieveCoreferenceSystem.logger.finest("\t["+ml.spanToString()+"]\t["+msorted.spanToString()+"]");
         }
+      } else {
+        SieveCoreferenceSystem.logger.finest("no changed !! \tmentionID: "+m1.mentionID+" " + m1.spanToString());
       }
     }
     return sorted;
   }
 
 }
+
+
+

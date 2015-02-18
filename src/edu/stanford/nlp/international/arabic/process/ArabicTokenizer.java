@@ -11,11 +11,8 @@ import java.util.Properties;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.process.AbstractTokenizer;
-import edu.stanford.nlp.process.CoreLabelTokenFactory;
-import edu.stanford.nlp.process.LexedTokenFactory;
-import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.process.*;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
@@ -49,7 +46,7 @@ public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     String optionsStr = "normArDigits,normArPunc,normAlif,removeDiacritics,removeTatweel,removeQuranChars";
     String[] optionToks = optionsStr.split(",");
     for (String option : optionToks) {
-      atbOptions.setProperty(option, "true");
+      atbOptions.put(option, "true");
     }
   }
 
@@ -161,7 +158,6 @@ public class ArabicTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * <li><code>removeProMarker</code> : Remove the ATB null pronoun marker</li>
    * <li><code>removeSegMarker</code> : Remove the ATB clitic segmentation marker</li>
    * <li><code>removeMorphMarker</code> : Remove the ATB morpheme boundary markers</li>
-   * <li><code>removeLengthening</code> : Replace all sequences of three or more identical (non-period) characters with one copy</li>
    * <li><code>atbEscaping</code> : Replace left/right parentheses with ATB escape characters</li>
    * </ul>
    * </p>

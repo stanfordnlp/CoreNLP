@@ -10,7 +10,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,7 +40,6 @@ public class ValueFunctions {
       this.name = name;
     }
 
-    @Override
     public String getDescription() { return ""; }
 
     public String getParamDesc() { return "..."; }
@@ -62,13 +60,16 @@ public class ValueFunctions {
 
     public String toString() {
       if (signature == null) {
-        signature = name + '(' + getParamDesc() + ')';
+        StringBuilder sb = new StringBuilder();
+        sb.append(name);
+        sb.append("(");
+        sb.append(getParamDesc());
+        sb.append(")");
+        signature = sb.toString();
       }
       return signature;
     }
-
-  } // end static class NamedValueFunction
-
+  }
 
   public static class ParamInfo {
     public final String name;
@@ -1001,7 +1002,7 @@ public class ValueFunctions {
       if (tags == null) {
         cm.set(Tags.TagsAnnotation.class, tags = new Tags());
       }
-      tags.setTag(tag, tagValue);
+      tags.addTag(tag, tagValue);
     }
 
     @Override
@@ -1100,7 +1101,7 @@ public class ValueFunctions {
       String tag = (String) in.get(1).get();
       if (in.size() >= 3) {
         Value tagValue = in.get(2);
-        tags.setTag(tag, tagValue);
+        tags.addTag(tag, tagValue);
       }
       return tags.getTag(tag);
     }
@@ -1137,7 +1138,7 @@ public class ValueFunctions {
       }
       String tag = (String) in.get(1).get();
       Value tagValue = (in.size() >= 3)? in.get(2):null;
-      tags.setTag(tag, tagValue);
+      tags.addTag(tag, tagValue);
       return v;
     }
   };
@@ -1640,5 +1641,4 @@ public class ValueFunctions {
       }
     }
   }
-
 }

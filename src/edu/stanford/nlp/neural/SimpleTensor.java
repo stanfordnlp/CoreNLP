@@ -18,7 +18,7 @@ import org.ejml.simple.SimpleMatrix;
  * @author Richard Socher
  */
 public class SimpleTensor implements Serializable {
-  private final SimpleMatrix[] slices;
+  private SimpleMatrix[] slices;
 
   final int numRows;
   final int numCols;
@@ -209,18 +209,6 @@ public class SimpleTensor implements Serializable {
   }
 
   /**
-   * Returns true iff every element of the tensor is 0
-   */
-  public boolean isZero() {
-    for (int i = 0; i < numSlices; ++i) {
-      if (!NeuralUtils.isZero(slices[i])) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
    * Returns an iterator over the <code>SimpleMatrix</code> objects contained in the tensor.
    */
   public Iterator<SimpleMatrix> iteratorSimpleMatrix() {
@@ -284,29 +272,6 @@ public class SimpleTensor implements Serializable {
     public void remove() {
       throw new UnsupportedOperationException();
     }
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder result = new StringBuilder();
-    for (int slice = 0; slice < numSlices; ++slice) {
-      result.append("Slice " + slice + "\n");
-      result.append(slices[slice]);
-    }
-    return result.toString();
-  }
-
-  /**
-   * Output the tensor one slice at a time.  Each number is output
-   * with the format given, so for example "%f"
-   */
-  public String toString(String format) {
-    StringBuilder result = new StringBuilder();
-    for (int slice = 0; slice < numSlices; ++slice) {
-      result.append("Slice " + slice + "\n");
-      result.append(NeuralUtils.toString(slices[slice], format));
-    }
-    return result.toString();
   }
 
   private static final long serialVersionUID = 1;

@@ -36,7 +36,7 @@ public class TreeToMorfette {
 
     String treeFile = args[0];
     
-    TreeReaderFactory trf = new FrenchTreeReaderFactory();
+    TreeReaderFactory trf = new FrenchTreeReaderFactory(true);
     try {
       TreeReader tr = trf.newTreeReader(new BufferedReader(new InputStreamReader(new FileInputStream(treeFile), "UTF-8")));
   

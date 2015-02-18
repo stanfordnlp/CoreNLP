@@ -3,7 +3,6 @@ package edu.stanford.nlp.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.function.Predicate;
 
 /**
  * Iterator that suppresses items in another iterator based on a filter function.
@@ -12,7 +11,7 @@ import java.util.function.Predicate;
  */
 public class FilteredIterator<T> implements Iterator<T> {
   Iterator<T> iterator = null;
-  Predicate<T> filter = null;
+  Filter<T> filter = null;
   T current = null;
   boolean hasCurrent = false;
 
@@ -35,7 +34,7 @@ public class FilteredIterator<T> implements Iterator<T> {
   }
 
   boolean currentCandidateIsAcceptable() {
-    return filter.test(currentCandidate());
+    return filter.accept(currentCandidate());
   }
 
   void skipUnacceptableCandidates() {
@@ -59,7 +58,7 @@ public class FilteredIterator<T> implements Iterator<T> {
     throw new UnsupportedOperationException();
   }
 
-  public FilteredIterator(Iterator<T> iterator, Predicate<T> filter) {
+  public FilteredIterator(Iterator<T> iterator, Filter<T> filter) {
     this.iterator = iterator;
     this.filter = filter;
     advanceCandidate();
@@ -68,10 +67,10 @@ public class FilteredIterator<T> implements Iterator<T> {
 
   public static void main(String[] args) {
     Collection<String> c = Arrays.asList(new String[]{"a", "aa", "b", "bb", "cc"});
-    Iterator<String> i = new FilteredIterator<String>(c.iterator(), new Predicate<String>() {
+    Iterator<String> i = new FilteredIterator<String>(c.iterator(), new Filter<String>() {
       private static final long serialVersionUID = 1L;
 
-      public boolean test(String o) {
+      public boolean accept(String o) {
         return o.length() == 1;
       }
     });

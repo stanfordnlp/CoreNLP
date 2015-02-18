@@ -10,7 +10,7 @@ import edu.stanford.nlp.process.SerializableFunction;
 import edu.stanford.nlp.stats.EquivalenceClasser;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Index;
 
 import java.io.OutputStream;
@@ -513,10 +513,13 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
    *  @return An Equivalence class for typed dependencies
    */
   public static EquivalenceClasser<List<String>, String> typedDependencyClasser() {
-    return s -> {
-      if(s.get(5).equals(leftHeaded))
-        return s.get(2) + '(' + s.get(3) + "->" + s.get(4) + ')';
-      return s.get(2) + '(' + s.get(4) + "<-" + s.get(3) + ')';
+    return new EquivalenceClasser<List<String>, String>() {
+      @Override
+      public String equivalenceClass(List<String> s) {
+        if(s.get(5).equals(leftHeaded))
+          return s.get(2) + '(' + s.get(3) + "->" + s.get(4) + ')';
+        return s.get(2) + '(' + s.get(4) + "<-" + s.get(3) + ')';
+      }
     };
   }
 
@@ -667,7 +670,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
 
   @Override
   public GrammaticalStructure getGrammaticalStructure(Tree t,
-                                                      Predicate<String> filter,
+                                                      Filter<String> filter,
                                                       HeadFinder hf) {
     throw new UnsupportedOperationException("This language does not support GrammaticalStructures or dependencies");
   }
@@ -681,11 +684,13 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
     return false;
   }
 
-  private static final String[] EMPTY_ARGS = new String[0];
 
+  /**
+   * In general, we don't actually do any category combining for
+   * DVModels.  Only English for now
+   */
   @Override
-  public String[] defaultCoreNLPFlags() {
-    return EMPTY_ARGS;
+  public String combineCategory(String basic) {
+    return basic;
   }
-
 }

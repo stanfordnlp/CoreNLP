@@ -1,33 +1,21 @@
 package edu.stanford.nlp.ling.tokensregex.matcher;
 
 import edu.stanford.nlp.util.BinaryHeapPriorityQueue;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.PriorityQueue;
 
 import java.util.*;
 
 /**
  * Map that is sorted by cost - keep lowest scores
- *  When deciding what item to keep with the same cost, ties are arbitrarily broken
+ *
  * @author Angel Chang
  */
 public class BoundedCostOrderedMap<K,V> extends AbstractMap<K,V> {
-  /**
-   * Limit on the size of the map
-   */
   final int maxSize;
-  /**
-   * Limit on the maximum allowed cost
-   */
   final double maxCost;
-  /**
-   * Priority queue on the keys - note that the priority queue only orders on the cost,
-   * We can't control the ordering of keys with the same cost
-   */
   PriorityQueue<K> priorityQueue = new BinaryHeapPriorityQueue<K>();
-  /** Map of keys to their values */
   Map<K,V> valueMap = new HashMap<K,V>();
-  /** Cost function on the values */
   Function<V,Double> costFunction;
 
   public BoundedCostOrderedMap(Function<V,Double> costFunction, int maxSize, double maxCost) {

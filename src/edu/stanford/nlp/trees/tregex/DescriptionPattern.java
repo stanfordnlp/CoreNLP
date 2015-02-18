@@ -1,11 +1,11 @@
 package edu.stanford.nlp.trees.tregex;
 
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.ArrayStringFilter;
 import edu.stanford.nlp.util.Pair;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -23,7 +23,7 @@ class DescriptionPattern extends TregexPattern {
   private final DescriptionMode descriptionMode;
   private final String exactMatch;
   private final Pattern descPattern;
-  private final Predicate<String> stringFilter;
+  private final Filter<String> stringFilter;
 
   // what size string matchers to use before switching to regex for
   // disjunction matches
@@ -39,6 +39,11 @@ class DescriptionPattern extends TregexPattern {
   // to make it so.
   private TregexPattern child;
   // also conceptually final, but it depends on the child
+  /**
+   * whether or not this node can change variables.  helps determine
+   * which nodes to change when backtracking
+   */
+  private boolean changesVariables;
   private final List<Pair<Integer,String>> variableGroups; // specifies the groups in a regex that are captured as matcher-global string variables
 
   private final Function<String, String> basicCatFunction;
@@ -207,22 +212,6 @@ class DescriptionPattern extends TregexPattern {
     this.variableGroups = variableGroups;
   }
 
-  public DescriptionPattern(Relation newRelation, DescriptionPattern oldPattern) {
-    this.rel = newRelation;
-    this.negDesc = oldPattern.negDesc;
-    this.isLink = oldPattern.isLink;
-    this.linkedName = oldPattern.linkedName;
-    this.stringDesc = oldPattern.stringDesc;
-    this.descriptionMode = oldPattern.descriptionMode;
-    this.descPattern = oldPattern.descPattern;
-    this.exactMatch = oldPattern.exactMatch;
-    this.stringFilter = oldPattern.stringFilter;
-    this.name = oldPattern.name;
-    this.setChild(oldPattern.child);
-    this.basicCatFunction = oldPattern.basicCatFunction;
-    this.variableGroups = oldPattern.variableGroups;
-  }  
-
   @Override
   public String localString() {
     return rel.toString() + ' ' + (negDesc ? "!" : "") + (basicCatFunction != null ? "@" : "") + stringDesc + (name == null ? "" : '=' + name);
@@ -267,6 +256,9 @@ class DescriptionPattern extends TregexPattern {
 
   public void setChild(TregexPattern n) {
     child = n;
+    changesVariables = ((descriptionMode != null || isLink) && name != null);
+    changesVariables = (changesVariables ||
+                        (child != null && child.getChangesVariables()));
   }
 
   @Override
@@ -276,6 +268,11 @@ class DescriptionPattern extends TregexPattern {
     } else {
       return Collections.singletonList(child);
     }
+  }
+
+  @Override
+  boolean getChangesVariables() {
+    return changesVariables;
   }
 
   @Override
@@ -315,9 +312,7 @@ class DescriptionPattern extends TregexPattern {
                               HeadFinder headFinder) {
       super(root, tree, nodesToParents, namesToNodes, variableStrings, headFinder);
       myNode = n;
-      // no need to reset anything - everything starts out as null or false.  
-      // lazy initialization of children to save time.
-      // resetChildIter();
+      resetChildIter();
     }
 
     @Override
@@ -343,6 +338,11 @@ class DescriptionPattern extends TregexPattern {
       } else {
         childMatcher.resetChildIter(nextTreeNodeMatchCandidate);
       }
+    }
+
+    @Override
+    boolean getChangesVariables() {
+      return myNode.getChangesVariables();
     }
 
     /* goes to the next node in the tree that is a successful match to my description pattern.
@@ -400,7 +400,7 @@ class DescriptionPattern extends TregexPattern {
               found = true;
               break;
             case STRINGS:
-              found = myNode.stringFilter.test(value);
+              found = myNode.stringFilter.accept(value);
               break;
             default:
               throw new IllegalArgumentException("Unexpected match mode");
@@ -479,7 +479,7 @@ class DescriptionPattern extends TregexPattern {
     }
 
     private void removeNamedNodes() {
-      if ((myNode.descriptionMode != null || myNode.isLink) &&
+      if ((myNode.descPattern != null || myNode.isLink) &&
           myNode.name != null) {
         namesToNodes.remove(myNode.name);
       }

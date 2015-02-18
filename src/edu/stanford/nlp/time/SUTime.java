@@ -181,7 +181,7 @@ public class SUTime {
       Matcher m = ID_PATTERN.matcher(s);
       if (m.matches()) {
         String prefix = m.group(1);
-        int id = Integer.parseInt(m.group(2));
+        int id = Integer.valueOf(m.group(2));
         if ("t".equals(prefix) || prefix.isEmpty()) {
           return temporalExprIndex.get(id);
         }
@@ -193,7 +193,7 @@ public class SUTime {
       Matcher m = ID_PATTERN.matcher(s);
       if (m.matches()) {
         String prefix = m.group(1);
-        int id = Integer.parseInt(m.group(2));
+        int id = Integer.valueOf(m.group(2));
         if ("t".equals(prefix)) {
           TimeExpression te = temporalExprIndex.get(id);
           return (te != null)? te.getTemporal(): null;
@@ -232,16 +232,16 @@ public class SUTime {
       return temporalFuncIndex.add(t);
     }
 
-    public int addToIndexTemporalExpr(TimeExpression t) {
-      return temporalExprIndex.addToIndex(t);
+    public int indexOfTemporalExpr(TimeExpression t, boolean add) {
+      return temporalExprIndex.indexOf(t, add);
     }
 
-    public int addToIndexTemporal(Temporal t) {
-      return temporalIndex.addToIndex(t);
+    public int indexOfTemporal(Temporal t, boolean add) {
+      return temporalIndex.indexOf(t, add);
     }
 
-    public int addToIndexTemporalFunc(Temporal t) {
-      return temporalFuncIndex.addToIndex(t);
+    public int indexOfTemporalFunc(Temporal t, boolean add) {
+      return temporalFuncIndex.indexOf(t, add);
     }
   }
 
@@ -366,7 +366,7 @@ public class SUTime {
 
     // TIMEX related functions
     public int getTid(TimeIndex timeIndex) {
-      return timeIndex.addToIndexTemporal(this);
+      return timeIndex.indexOfTemporal(this, true);
     }
 
     public String getTidString(TimeIndex timeIndex) {
@@ -374,7 +374,7 @@ public class SUTime {
     }
 
     public int getTfid(TimeIndex timeIndex) {
-      return timeIndex.addToIndexTemporalFunc(this);
+      return timeIndex.indexOfTemporalFunc(this, true);
     }
 
     public String getTfidString(TimeIndex timeIndex) {
@@ -546,21 +546,18 @@ public class SUTime {
   // Basic time units (durations)
 
   public static final Duration YEAR = new DurationWithFields(Period.years(1)) {
-    @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.year(), DateTimeFieldType.yearOfCentury(), DateTimeFieldType.yearOfEra() };
     }
     private static final long serialVersionUID = 1;
   };
   public static final Duration DAY = new DurationWithFields(Period.days(1)) {
-    @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.dayOfMonth(), DateTimeFieldType.dayOfWeek(), DateTimeFieldType.dayOfYear() };
     }
     private static final long serialVersionUID = 1;
   };
   public static final Duration WEEK = new DurationWithFields(Period.weeks(1)) {
-    @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.weekOfWeekyear() };
     }
@@ -568,7 +565,6 @@ public class SUTime {
   };
   public static final Duration FORTNIGHT = new DurationWithFields(Period.weeks(2));
   public static final Duration MONTH = new DurationWithFields(Period.months(1)) {
-    @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.monthOfYear() };
     }
@@ -577,42 +573,36 @@ public class SUTime {
   // public static final Duration QUARTER = new DurationWithFields(new
   // Period(JodaTimeUtils.Quarters)) {
   public static final Duration QUARTER = new DurationWithFields(Period.months(3)) {
-    @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { JodaTimeUtils.QuarterOfYear };
     }
     private static final long serialVersionUID = 1;
   };
   public static final Duration HALFYEAR = new DurationWithFields(Period.months(6)) {
-    @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { JodaTimeUtils.HalfYearOfYear };
     }
     private static final long serialVersionUID = 1;
   };
   public static final Duration MILLIS = new DurationWithFields(Period.millis(1)) {
-    @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.millisOfSecond(), DateTimeFieldType.millisOfDay() };
     }
     private static final long serialVersionUID = 1;
   };
   public static final Duration SECOND = new DurationWithFields(Period.seconds(1)) {
-    @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.secondOfMinute(), DateTimeFieldType.secondOfDay() };
     }
     private static final long serialVersionUID = 1;
   };
   public static final Duration MINUTE = new DurationWithFields(Period.minutes(1)) {
-    @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.minuteOfHour(), DateTimeFieldType.minuteOfDay() };
     }
     private static final long serialVersionUID = 1;
   };
   public static final Duration HOUR = new DurationWithFields(Period.hours(1)) {
-    @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.hourOfDay(), DateTimeFieldType.hourOfHalfday() };
     }
@@ -621,14 +611,12 @@ public class SUTime {
   public static final Duration HALFHOUR = new DurationWithFields(Period.minutes(30));
   public static final Duration QUARTERHOUR = new DurationWithFields(Period.minutes(15));
   public static final Duration DECADE = new DurationWithFields(Period.years(10)) {
-    @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { JodaTimeUtils.DecadeOfCentury };
     }
     private static final long serialVersionUID = 1;
   };
   public static final Duration CENTURY = new DurationWithFields(Period.years(100)) {
-    @Override
     public DateTimeFieldType[] getDateTimeFields() {
       return new DateTimeFieldType[] { DateTimeFieldType.centuryOfEra() };
     }
@@ -670,7 +658,6 @@ public class SUTime {
 
   public static final Time WEEKDAY = createTemporal(StandardTemporalType.DAYS_OF_WEEK, "WD",
           new InexactTime(null, SUTime.DAY, new SUTime.Range(SUTime.MONDAY, SUTime.FRIDAY)) {
-            @Override
             public Duration getDuration() {
               return SUTime.DAY;
             }
@@ -721,8 +708,8 @@ public class SUTime {
   public static final Time AFTERNOON = createTemporal(StandardTemporalType.TIME_OF_DAY, "AF", new InexactTime(new Range(NOON, new InexactTime(new Partial(DateTimeFieldType.hourOfDay(), 18)))));
   public static final Time EVENING = createTemporal(StandardTemporalType.TIME_OF_DAY, "EV", new InexactTime(new Range(new InexactTime(new Partial(DateTimeFieldType.hourOfDay(), 18)), new InexactTime(new Partial(DateTimeFieldType
       .hourOfDay(), 20)))));
-  public static final Time NIGHT = createTemporal(StandardTemporalType.TIME_OF_DAY, "NI",
-          new InexactTime(MIDNIGHT, new Range(new InexactTime(new Partial(DateTimeFieldType.hourOfDay(), 14)), HOUR.multiplyBy(10))));
+  public static final Time NIGHT = createTemporal(StandardTemporalType.TIME_OF_DAY, "NI", new InexactTime(new Range(new InexactTime(new Partial(DateTimeFieldType.hourOfDay(), 19)), new InexactTime(new Partial(DateTimeFieldType
+      .hourOfDay(), 5)))));
   public static final Time SUNRISE = createTemporal(StandardTemporalType.TIME_OF_DAY, "MO", TimexMod.EARLY.name(), new PartialTime());
   public static final Time SUNSET = createTemporal(StandardTemporalType.TIME_OF_DAY, "EV", TimexMod.EARLY.name(), new PartialTime());
   public static final Time DAWN = createTemporal(StandardTemporalType.TIME_OF_DAY, "MO", TimexMod.EARLY.name(), new PartialTime());
@@ -788,44 +775,37 @@ public class SUTime {
     QUARTER(TimexType.TIME, TimeUnit.QUARTER),
     YEAR(TimexType.TIME, TimeUnit.YEAR),  */
     TIME_OF_DAY(TimexType.TIME, TimeUnit.HOUR, SUTime.DAY) {
-      @Override
       public Duration getDuration() {
         return SUTime.HOUR.makeInexact();
       }
     },
     DAY_OF_YEAR(TimexType.DATE, TimeUnit.DAY, SUTime.YEAR) {
-      @Override
       protected Time _createTemporal(int n) {
         return new PartialTime(new Partial(DateTimeFieldType.dayOfYear(), n));
       }
     },
     DAY_OF_WEEK(TimexType.DATE, TimeUnit.DAY, SUTime.WEEK) {
-      @Override
       protected Time _createTemporal(int n) {
         return new PartialTime(new Partial(DateTimeFieldType.dayOfWeek(), n));
       }
     },
     DAYS_OF_WEEK(TimexType.DATE, TimeUnit.DAY, SUTime.WEEK) {
-      @Override
       public Duration getDuration() {
         return SUTime.DAY.makeInexact();
       }
     },
     WEEK_OF_YEAR(TimexType.DATE, TimeUnit.WEEK, SUTime.YEAR) {
-      @Override
       protected Time _createTemporal(int n) {
         return new PartialTime(new Partial(DateTimeFieldType.weekOfWeekyear(), n));
       }
     },
     MONTH_OF_YEAR(TimexType.DATE, TimeUnit.MONTH, SUTime.YEAR) {
-      @Override
       protected Time _createTemporal(int n) {
         //return new PartialTime(new Partial(DateTimeFieldType.monthOfYear(), n));
         return new IsoDate(-1, n, -1);
       }
     },
     PART_OF_YEAR(TimexType.DATE, TimeUnit.DAY, SUTime.YEAR) {
-      @Override
       public Duration getDuration() {
         return SUTime.DAY.makeInexact();
       }
@@ -833,20 +813,18 @@ public class SUTime {
     SEASON_OF_YEAR(TimexType.DATE, TimeUnit.QUARTER, SUTime.YEAR),
 
     QUARTER_OF_YEAR(TimexType.DATE, TimeUnit.QUARTER, SUTime.YEAR) {
-      @Override
       protected Time _createTemporal(int n) {
         return new PartialTime(new Partial(JodaTimeUtils.QuarterOfYear, n));
       }
     },
 
     HALF_OF_YEAR(TimexType.DATE, TimeUnit.HALFYEAR, SUTime.YEAR) {
-      @Override
       protected Time _createTemporal(int n) {
         return new PartialTime(new Partial(JodaTimeUtils.HalfYearOfYear, n));
       }
     };
 
-    final TimexType timexType;
+    TimexType timexType;
     TimeUnit unit = TimeUnit.UNKNOWN;
     Duration period = SUTime.DURATION_NONE;
 
@@ -938,7 +916,6 @@ public class SUTime {
 
     // (successor) Next week/day/...
     NEXT {
-      @Override
       public Temporal apply(Temporal arg1, Temporal arg2, int flags) {
         if (arg2 == null) {
           return arg1;
@@ -958,7 +935,6 @@ public class SUTime {
     },
     // This coming week/friday
     NEXT_IMMEDIATE {
-      @Override
       public Temporal apply(Temporal arg1, Temporal arg2, int flags) {
         if (arg1 == null) {
           return new RelativeTime(NEXT_IMMEDIATE, arg2);
@@ -992,7 +968,6 @@ public class SUTime {
     // Use arg1 as reference to resolve arg2 (take more general fields from arg1
     // and apply to arg2)
     THIS {
-      @Override
       public Temporal apply(Temporal arg1, Temporal arg2, int flags) {
         if (arg1 == null) {
           return new RelativeTime(THIS, arg2, flags);
@@ -1011,7 +986,6 @@ public class SUTime {
     },
     // (predecessor) Previous week/day/...
     PREV {
-      @Override
       public Temporal apply(Temporal arg1, Temporal arg2, int flags) {
         if (arg2 == null) {
           return arg1;
@@ -1031,7 +1005,6 @@ public class SUTime {
     },
     // This past week/friday
     PREV_IMMEDIATE {
-      @Override
       public Temporal apply(Temporal arg1, Temporal arg2, int flags) {
         if (arg1 == null) {
           return new RelativeTime(PREV_IMMEDIATE, arg2);
@@ -1063,7 +1036,6 @@ public class SUTime {
       }
     },
     UNION {
-      @Override
       public Temporal apply(Temporal arg1, Temporal arg2, int flags) {
         if (arg1 == null) {
           return arg2;
@@ -1076,7 +1048,6 @@ public class SUTime {
       }
     },
     INTERSECT {
-      @Override
       public Temporal apply(Temporal arg1, Temporal arg2, int flags) {
         if (arg1 == null) {
           return arg2;
@@ -1096,7 +1067,6 @@ public class SUTime {
     },
     // arg2 is "in" arg1, composite datetime
     IN {
-      @Override
       public Temporal apply(Temporal arg1, Temporal arg2, int flags) {
         if (arg1 == null) {
           return arg2;
@@ -1111,7 +1081,6 @@ public class SUTime {
     },
     OFFSET {
       // There is inexact offset where we remove anything from the result that is more granular than the duration
-      @Override
       public Temporal apply(Temporal arg1, Temporal arg2, int flags) {
         if (arg1 == null) {
           return new RelativeTime(OFFSET, arg2);
@@ -1126,7 +1095,6 @@ public class SUTime {
       }
     },
     MINUS {
-      @Override
       public Temporal apply(Temporal arg1, Temporal arg2, int flags) {
         if (arg1 == null) {
           return arg2;
@@ -1146,7 +1114,6 @@ public class SUTime {
       }
     },
     PLUS {
-      @Override
       public Temporal apply(Temporal arg1, Temporal arg2, int flags) {
         if (arg1 == null) {
           return arg2;
@@ -1166,7 +1133,6 @@ public class SUTime {
       }
     },
     MIN {
-      @Override
       public Temporal apply(Temporal arg1, Temporal arg2, int flags) {
         if (arg1 == null) {
           return arg2;
@@ -1184,7 +1150,6 @@ public class SUTime {
       }
     },
     MAX {
-      @Override
       public Temporal apply(Temporal arg1, Temporal arg2, int flags) {
         if (arg1 == null) {
           return arg2;
@@ -1216,7 +1181,6 @@ public class SUTime {
         return d.multiplyDurationBy(scale);
       }
 
-      @Override
       public Temporal apply(Object... args) {
         if (args.length == 2) {
           if (args[0] instanceof Duration && (args[1] instanceof Integer || args[1] instanceof Long)) {
@@ -1243,7 +1207,6 @@ public class SUTime {
         return d.divideDurationBy(scale);
       }
 
-      @Override
       public Temporal apply(Object... args) {
         if (args.length == 2) {
           if (args[0] instanceof Duration && (args[1] instanceof Integer || args[1] instanceof Long)) {
@@ -1261,7 +1224,6 @@ public class SUTime {
         return tu.createTemporal(n);
       }
 
-      @Override
       public Temporal apply(Object... args) {
         if (args.length == 2) {
           if (args[0] instanceof TimeUnit && args[1] instanceof Number) {
@@ -1282,7 +1244,6 @@ public class SUTime {
         return t.addMod(modifier);
       }
 
-      @Override
       public Temporal apply(Object... args) {
         if (args.length == 2) {
           if (args[0] instanceof Temporal && args[1] instanceof String) {
@@ -1294,7 +1255,6 @@ public class SUTime {
     },
     OFFSET_EXACT {
       // There is exact offset (more granular parts than the duration are kept)
-      @Override
       public Temporal apply(Temporal arg1, Temporal arg2, int flags) {
         if (arg1 == null) {
           return new RelativeTime(OFFSET_EXACT, arg2);
@@ -1347,31 +1307,26 @@ public class SUTime {
 
     // Represents a point in time - there is typically some
     // uncertainty/imprecision in the exact time
-    @Override
     public boolean isGrounded() {
       return false;
     }
 
     // A time is defined by a begin and end point, and a duration
-    @Override
     public Time getTime() {
       return this;
     }
 
     // Default is a instant in time with same begin and end point
     // Every time should return a non-null range
-    @Override
     public Range getRange(int flags, Duration granularity) {
       return new Range(this, this);
     }
 
     // Default duration is zero
-    @Override
     public Duration getDuration() {
       return DURATION_NONE;
     }
 
-    @Override
     public Duration getGranularity() {
       StandardTemporalType tlt = getStandardTemporalType();
       if (tlt != null) {
@@ -1381,7 +1336,6 @@ public class SUTime {
       return Duration.getDuration(JodaTimeUtils.getJodaTimePeriod(p));
     }
 
-    @Override
     public Interval<Time> getInterval() {
       Range r = getRange();
       if (r != null) {
@@ -1390,14 +1344,12 @@ public class SUTime {
         return null;
     }
 
-    @Override
     public boolean isComparable(Time t) {
       Instant i = this.getJodaTimeInstant();
       Instant i2 = t.getJodaTimeInstant();
       return (i != null && i2 != null);
     }
 
-    @Override
     public int compareTo(Time t) {
       Instant i = this.getJodaTimeInstant();
       Instant i2 = t.getJodaTimeInstant();
@@ -1408,7 +1360,6 @@ public class SUTime {
       return false;
     }
 
-    @Override
     public TimexType getTimexType() {
       if (getStandardTemporalType() != null) {
         return getStandardTemporalType().getTimexType();
@@ -1516,12 +1467,10 @@ public class SUTime {
       return cp;
     }
 
-    @Override
     public Temporal resolve(Time t, int flags) {
       return this;
     }
 
-    @Override
     public Temporal intersect(Temporal t) {
       if (t == null)
         return this;
@@ -1599,12 +1548,10 @@ public class SUTime {
       this.label = label;
     }
 
-    @Override
     public boolean isRef() {
       return true;
     }
 
-    @Override
     public String toFormattedString(int flags) {
       if (getTimeLabel() != null) {
         return getTimeLabel();
@@ -1622,11 +1569,9 @@ public class SUTime {
 
     @Override
     public Time offset(Duration offset, int offsetFlags) {
-      if ((offsetFlags & RELATIVE_OFFSET_INEXACT) != 0) {
+      if ((offsetFlags | RELATIVE_OFFSET_INEXACT) != 0)
         return new RelativeTime(this, TemporalOp.OFFSET, offset);
-      } else {
-        return new RelativeTime(this, TemporalOp.OFFSET_EXACT, offset);
-      }
+      else return new RelativeTime(this, TemporalOp.OFFSET_EXACT, offset);
     }
 
     @Override
@@ -1653,7 +1598,6 @@ public class SUTime {
       this.label = label;
     }
 
-    @Override
     public String toFormattedString(int flags) {
       if (getTimeLabel() != null) {
         return getTimeLabel();
@@ -1664,13 +1608,12 @@ public class SUTime {
       return label;
     }
 
-    @Override
     public Time add(Duration offset) {
       Time t = new RelativeTime(this, TemporalOp.OFFSET_EXACT, offset);
       // t.approx = this.approx;
       // t.mod = this.mod;
       return t;
-    }
+    };
 
     private static final long serialVersionUID = 1;
   }
@@ -1696,7 +1639,6 @@ public class SUTime {
       this.base = p;
     }
 
-    @Override
     public Instant getJodaTimeInstant() {
       Partial p = base;
       if (tod != null) {
@@ -1720,7 +1662,6 @@ public class SUTime {
       return JodaTimeUtils.getInstant(p);
     }
 
-    @Override
     public Duration getDuration() {
 /*      TimeLabel tl = getTimeLabel();
       if (tl != null) {
@@ -1747,7 +1688,6 @@ public class SUTime {
       return bd;
     }
 
-    @Override
     public Duration getPeriod() {
   /*    TimeLabel tl = getTimeLabel();
       if (tl != null) {
@@ -1785,42 +1725,15 @@ public class SUTime {
       return bd;
     }
 
-    private Range getIntersectedRange(CompositePartialTime cpt, Range r, Duration d) {
-      Time beginTime = r.beginTime();
-      Time endTime = r.endTime();
-      if (beginTime != TIME_UNKNOWN && endTime != TIME_UNKNOWN) {
-        Time t1 = cpt.intersect(r.beginTime());
-        if (t1 instanceof PartialTime) {
-          ((PartialTime) t1).withStandardFields();
-        }
-        Time t2 = cpt.intersect(r.endTime());
-        if (t2 instanceof PartialTime) {
-          ((PartialTime) t2).withStandardFields();
-        }
-        return new Range(t1, t2, d);
-      } else if (beginTime != TIME_UNKNOWN && endTime == TIME_UNKNOWN) {
-        Time t1 = cpt.intersect(r.beginTime());
-        if (t1 instanceof PartialTime) {
-          ((PartialTime) t1).withStandardFields();
-        }
-        Time t2 = t1.add(d);
-        if (t2 instanceof PartialTime) {
-          ((PartialTime) t2).withStandardFields();
-        }
-        return new Range(t1, t2, d);
-      } else {
-        throw new RuntimeException("Unsupport range: " + r);
-      }
-    }
-
-    @Override
     public Range getRange(int flags, Duration granularity) {
       Duration d = getDuration();
       if (tod != null) {
         Range r = tod.getRange(flags, granularity);
         if (r != null) {
           CompositePartialTime cpt = new CompositePartialTime(this, poy, dow, null);
-          return getIntersectedRange(cpt, r, d);
+          Time t1 = cpt.intersect(r.beginTime());
+          Time t2 = cpt.intersect(r.endTime());
+          return new Range(t1, t2, d);
         } else {
           return super.getRange(flags, granularity);
         }
@@ -1829,7 +1742,15 @@ public class SUTime {
         Range r = dow.getRange(flags, granularity);
         if (r != null) {
           CompositePartialTime cpt = new CompositePartialTime(this, poy, dow, null);
-          return getIntersectedRange(cpt, r, d);
+          Time t1 = cpt.intersect(r.beginTime());
+          if (t1 instanceof PartialTime) {
+            ((PartialTime) t1).withStandardFields();
+          }
+          Time t2 = cpt.intersect(r.endTime());
+          if (t2 instanceof PartialTime) {
+            ((PartialTime) t2).withStandardFields();
+          }
+          return new Range(t1, t2, d);
         } else {
           return super.getRange(flags, granularity);
         }
@@ -1838,7 +1759,9 @@ public class SUTime {
         Range r = poy.getRange(flags, granularity);
         if (r != null) {
           CompositePartialTime cpt = new CompositePartialTime(this, poy, null, null);
-          return getIntersectedRange(cpt, r, d);
+          Time t1 = cpt.intersect(r.beginTime());
+          Time t2 = cpt.intersect(r.endTime());
+          return new Range(t1, t2, d);
         } else {
           return super.getRange(flags, granularity);
         }
@@ -1846,7 +1769,6 @@ public class SUTime {
       return super.getRange(flags, granularity);
     }
 
-    @Override
     public Time intersect(Time t) {
       if (t == null || t == TIME_UNKNOWN)
         return this;
@@ -1878,17 +1800,14 @@ public class SUTime {
       }
     }
 
-    @Override
     protected PartialTime addSupported(Period p, int scalar) {
       return new CompositePartialTime(this, base.withPeriodAdded(p, 1), poy, dow, tod);
     }
 
-    @Override
     protected PartialTime addUnsupported(Period p, int scalar) {
       return new CompositePartialTime(this, JodaTimeUtils.addForce(base, p, scalar), poy, dow, tod);
     }
 
-    @Override
     public PartialTime reduceGranularityTo(Duration granularity) {
       Partial p = JodaTimeUtils.discardMoreSpecificFields( base,
         JodaTimeUtils.getMostSpecific(granularity.getJodaTimePeriod()) );
@@ -1898,7 +1817,6 @@ public class SUTime {
         tod.reduceGranularityTo(granularity));
     }
 
-    @Override
     public Time resolve(Time ref, int flags) {
       if (ref == null || ref == TIME_UNKNOWN || ref == TIME_REF) {
         return this;
@@ -1933,7 +1851,6 @@ public class SUTime {
       }
     }
 
-    @Override
     public DateTimeFormatter getFormatter(int flags) {
       DateTimeFormatterBuilder builder = new DateTimeFormatterBuilder();
       boolean hasDate = appendDateFormats(builder, flags);
@@ -1970,7 +1887,6 @@ public class SUTime {
       return builder.toFormatter();
     }
 
-    @Override
     public TimexType getTimexType() {
       if (tod != null) return TimexType.TIME;
       return super.getTimexType();
@@ -1996,12 +1912,10 @@ public class SUTime {
       this.n = (int) n;
     }
 
-    @Override
     public Time add(Duration offset) {
       return new RelativeTime(this, TemporalOp.OFFSET_EXACT, offset);
     }
 
-    @Override
     public String toFormattedString(int flags) {
       if (getTimeLabel() != null) {
         return getTimeLabel();
@@ -2021,7 +1935,6 @@ public class SUTime {
       return null;
     }
 
-    @Override
     public Time intersect(Time t) {
       if (base instanceof PartialTime && t instanceof PartialTime) {
         return new OrdinalTime(base.intersect(t), n);
@@ -2029,7 +1942,6 @@ public class SUTime {
         return new RelativeTime(t, TemporalOp.INTERSECT, this);
       }
     }
-    @Override
     public Temporal resolve(Time t, int flags) {
       if (t == null) return this; // No resolving to be done?
       if (base instanceof PartialTime) {
@@ -2062,12 +1974,10 @@ public class SUTime {
       this.range = range;
     }
 
-    @Override
     public TimeWithRange setTimeZone(DateTimeZone tz) {
       return new TimeWithRange(this, (Range) Temporal.setTimeZone(range, tz));
     }
 
-    @Override
     public Duration getDuration() {
       if (range != null)
         return range.getDuration();
@@ -2075,7 +1985,6 @@ public class SUTime {
         return null;
     }
 
-    @Override
     public Range getRange(int flags, Duration granularity) {
       if (range != null) {
         return range.getRange(flags, granularity);
@@ -2084,7 +1993,6 @@ public class SUTime {
       }
     }
 
-    @Override
     public Time add(Duration offset) {
       // TODO: Check logic
 //      if (getTimeLabel() != null) {
@@ -2095,7 +2003,6 @@ public class SUTime {
         return new TimeWithRange(this, range.offset(offset,0));
     }
 
-    @Override
     public Time intersect(Time t) {
       if (t == null || t == TIME_UNKNOWN)
         return this;
@@ -2110,7 +2017,6 @@ public class SUTime {
       }
     }
 
-    @Override
     public Time resolve(Time refTime, int flags) {
       CompositePartialTime cpt = makeComposite(new PartialTime(new Partial()), this);
       if (cpt != null) {
@@ -2124,7 +2030,6 @@ public class SUTime {
       //return new TimeWithRange(this, groundedRange);
     }
 
-    @Override
     public String toFormattedString(int flags) {
       if (getTimeLabel() != null) {
         return getTimeLabel();
@@ -2139,7 +2044,7 @@ public class SUTime {
   }
 
   /**
-   * Inexact time, not sure when this is, but have some guesses
+   * Inexact time, not sure when this is, but have some quesses
    */
   public static class InexactTime extends Time {
     Time base; // best guess
@@ -2159,12 +2064,6 @@ public class SUTime {
       this.approx = true;
     }
 
-    public InexactTime(Time base, Range range) {
-      this.base = base;
-      this.range = range;
-      this.approx = true;
-    }
-
     public InexactTime(InexactTime t, Time base, Duration duration, Range range) {
       super(t);
       this.base = base;
@@ -2179,7 +2078,6 @@ public class SUTime {
       this.approx = true;
     }
 
-    @Override
     public int compareTo(Time t) {
       if (this.base != null) return (this.base.compareTo(t));
       if (this.range != null) {
@@ -2190,19 +2088,16 @@ public class SUTime {
       return 0;
     }
 
-    @Override
     public InexactTime setTimeZone(DateTimeZone tz) {
       return new InexactTime(this,
               (Time) Temporal.setTimeZone(base, tz), duration,
               (Range) Temporal.setTimeZone(range, tz));
     }
 
-    @Override
     public Time getTime() {
       return this;
     }
 
-    @Override
     public Duration getDuration() {
       if (duration != null)
         return duration;
@@ -2214,7 +2109,6 @@ public class SUTime {
         return null;
     }
 
-    @Override
     public Range getRange(int flags, Duration granularity) {
       if (range != null) {
         return range.getRange(flags, granularity);
@@ -2224,7 +2118,6 @@ public class SUTime {
         return null;
     }
 
-    @Override
     public Time add(Duration offset) {
       //if (getTimeLabel() != null) {
       if (getStandardTemporalType() != null) {
@@ -2237,7 +2130,6 @@ public class SUTime {
       }
     }
 
-    @Override
     public Time resolve(Time refTime, int flags) {
       CompositePartialTime cpt = makeComposite(new PartialTime(this, new Partial()), this);
       if (cpt != null) {
@@ -2260,7 +2152,6 @@ public class SUTime {
       //return new InexactTime(groundedBase, duration, groundedRange);
     }
 
-    @Override
     public Instant getJodaTimeInstant() {
       Instant p = null;
       if (base != null) {
@@ -2272,7 +2163,6 @@ public class SUTime {
       return p;
     }
 
-    @Override
     public Partial getJodaTimePartial() {
       Partial p = null;
       if (base != null) {
@@ -2284,7 +2174,6 @@ public class SUTime {
       return p;
     }
 
-    @Override
     public String toFormattedString(int flags) {
       if (getTimeLabel() != null) {
         return getTimeLabel();
@@ -2365,23 +2254,19 @@ public class SUTime {
     public RelativeTime() {
     }
 
-    @Override
     public boolean isGrounded() {
       return (base != null) && base.isGrounded();
     }
 
     // TODO: compute duration/range => uncertainty of this time
-    @Override
     public Duration getDuration() {
       return null;
     }
 
-    @Override
     public Range getRange(int flags, Duration granularity) {
       return new Range(this, this);
     }
 
-    @Override
     public Map<String, String> getTimexAttributes(TimeIndex timeIndex) {
       Map<String, String> map = super.getTimexAttributes(timeIndex);
       String tfid = getTfidString(timeIndex);
@@ -2394,7 +2279,6 @@ public class SUTime {
     }
 
     // / NOTE: This is not ISO or timex standard
-    @Override
     public String toFormattedString(int flags) {
       if (getTimeLabel() != null) {
         return getTimeLabel();
@@ -2421,7 +2305,6 @@ public class SUTime {
       return sb.toString();
     }
 
-    @Override
     public Temporal resolve(Time refTime, int flags) {
       Temporal groundedBase = null;
       if (base == TIME_REF) {
@@ -2492,7 +2375,6 @@ public class SUTime {
       return result;
     }
 
-    @Override
     public Time add(Duration offset) {
       Time t;
       Duration d = offset;
@@ -2511,12 +2393,10 @@ public class SUTime {
       return t;
     }
 
-    @Override
     public Temporal intersect(Temporal t) {
       return new RelativeTime(this, TemporalOp.INTERSECT, t);
     }
 
-    @Override
     public Time intersect(Time t) {
       if (base == TIME_REF || base == null) {
         if (t instanceof PartialTime && tempOp == TemporalOp.OFFSET) {
@@ -2577,24 +2457,20 @@ public class SUTime {
     public PartialTime() {
     }
 
-    @Override
     public PartialTime setTimeZone(DateTimeZone tz) {
       PartialTime tzPt = new PartialTime(this, base);
       tzPt.dateTimeZone = tz;
       return tzPt;
     }
 
-    @Override
     public Instant getJodaTimeInstant() {
       return JodaTimeUtils.getInstant(base);
     }
 
-    @Override
     public Partial getJodaTimePartial() {
       return base;
     }
 
-    @Override
     public boolean hasTime() {
       if (base == null)
         return false;
@@ -2606,7 +2482,6 @@ public class SUTime {
       }
     }
 
-    @Override
     public TimexType getTimexType() {
       if (base == null) return null;
       return super.getTimexType();
@@ -2767,13 +2642,11 @@ public class SUTime {
       return builder.toFormatter();
     }
 
-    @Override
     public boolean isGrounded() {
       return false;
     }
 
     // TODO: compute duration/range => uncertainty of this time
-    @Override
     public Duration getDuration() {
 /*      TimeLabel tl = getTimeLabel();
       if (tl != null) {
@@ -2786,7 +2659,6 @@ public class SUTime {
       return Duration.getDuration(JodaTimeUtils.getJodaTimePeriod(base));
     }
 
-    @Override
     public Range getRange(int flags, Duration inputGranularity) {
       Duration d = getDuration();
       if (d != null) {
@@ -2843,7 +2715,6 @@ public class SUTime {
       }
     }
 
-    @Override
     public PartialTime reduceGranularityTo(Duration granularity) {
       Partial pbase = base;
       if (JodaTimeUtils.hasField(granularity.getJodaTimePeriod(), DurationFieldType.weeks())) {
@@ -2867,7 +2738,6 @@ public class SUTime {
       return new PartialTime(this,p);
     }
 
-    @Override
     public String toFormattedString(int flags) {
       if (getTimeLabel() != null) {
         return getTimeLabel();
@@ -2889,7 +2759,6 @@ public class SUTime {
       return s;
     }
 
-    @Override
     public Time resolve(Time ref, int flags) {
       if (ref == null || ref == TIME_UNKNOWN || ref == TIME_REF) {
         return this;
@@ -2904,7 +2773,7 @@ public class SUTime {
       if (partialRef == null) {
         throw new UnsupportedOperationException("Cannot resolve if reftime is of class: " + ref.getClass());
       }
-
+      
       Partial p = (base != null) ? JodaTimeUtils.combineMoreGeneralFields(base, partialRef) : partialRef;
       p = JodaTimeUtils.resolveDowToDay(p, partialRef);
 
@@ -2992,7 +2861,6 @@ public class SUTime {
       return null;
     }
 
-    @Override
     public Duration getPeriod() {
   /*    TimeLabel tl = getTimeLabel();
       if (tl != null) {
@@ -3052,7 +2920,6 @@ public class SUTime {
       }
     }
 
-    @Override
     public Time intersect(Time t) {
       if (t == null || t == TIME_UNKNOWN)
         return this;
@@ -3122,7 +2989,6 @@ public class SUTime {
       return new PartialTime(this, JodaTimeUtils.addForce(base, p, scalar));
     }
 
-    @Override
     public Time add(Duration offset) {
       if (base == null) {
         return this;
@@ -3417,7 +3283,6 @@ public class SUTime {
       initBase();
     }
 
-    @Override
     public boolean hasTime() {
       return true;
     }
@@ -3443,10 +3308,9 @@ public class SUTime {
     private static final long serialVersionUID = 1;
   }
 
-
   protected static class IsoDateTime extends PartialTime {
-    private final IsoDate date;
-    private final IsoTime time;
+    IsoDate date;
+    IsoTime time;
 
     public IsoDateTime(IsoDate date, IsoTime time) {
       this.date = date;
@@ -3454,7 +3318,6 @@ public class SUTime {
       base = JodaTimeUtils.combine(date.base, time.base);
     }
 
-    @Override
     public boolean hasTime() {
       return (time != null);
     }
@@ -3605,44 +3468,36 @@ public class SUTime {
       this.base = base;
     }
 
-    @Override
     public GroundedTime setTimeZone(DateTimeZone tz) {
       MutableDateTime tzBase = base.toInstant().toMutableDateTime();
       tzBase.setZone(tz);           // TODO: setZoneRetainFields?
       return new GroundedTime(this, tzBase);
     }
 
-    @Override
     public boolean hasTime() {
       return true;
     }
 
-    @Override
     public boolean isGrounded() {
       return true;
     }
 
-    @Override
     public Duration getDuration() {
       return DURATION_NONE;
     }
 
-    @Override
     public Range getRange(int flags, Duration granularity) {
       return new Range(this, this);
     }
 
-    @Override
     public String toFormattedString(int flags) {
       return base.toString();
     }
 
-    @Override
     public Time resolve(Time refTime, int flags) {
       return this;
     }
 
-    @Override
     public Time add(Duration offset) {
       Period p = offset.getJodaTimePeriod();
       GroundedTime g = new GroundedTime(base.toInstant().withDurationAdded(p.toDurationFrom(base), 1));
@@ -3651,7 +3506,6 @@ public class SUTime {
       return g;
     }
 
-    @Override
     public Time intersect(Time t) {
       if (t.getRange().contains(this.getRange())) {
         return this;
@@ -3660,7 +3514,6 @@ public class SUTime {
       }
     }
 
-    @Override
     public Temporal intersect(Temporal other) {
       if (other == null)
         return this;
@@ -3673,12 +3526,10 @@ public class SUTime {
       }
     }
 
-    @Override
     public Instant getJodaTimeInstant() {
       return base.toInstant();
     }
 
-    @Override
     public Partial getJodaTimePartial() {
       return JodaTimeUtils.getPartial(base.toInstant(), JodaTimeUtils.EMPTY_ISO_PARTIAL);
     }
@@ -3736,12 +3587,10 @@ public class SUTime {
       return null;
     }
 
-    @Override
     public boolean isGrounded() {
       return false;
     }
 
-    @Override
     public Time getTime() {
       return null;
     } // There is no time associated with a duration?
@@ -3812,17 +3661,14 @@ public class SUTime {
       return new InexactTime(new TimeWithRange(likelyRange), this, r);
     }
 
-    @Override
     public Duration getDuration() {
       return this;
     }
 
-    @Override
     public Range getRange(int flags, Duration granularity) {
       return new Range(null, null, this);
     } // Unanchored range
 
-    @Override
     public TimexType getTimexType() {
       return TimexType.DURATION;
     }
@@ -3831,7 +3677,6 @@ public class SUTime {
 
     public abstract org.joda.time.Duration getJodaTimeDuration();
 
-    @Override
     public String toFormattedString(int flags) {
       if (getTimeLabel() != null) {
         return getTimeLabel();
@@ -3853,7 +3698,6 @@ public class SUTime {
       return s;
     }
 
-    @Override
     public Duration getPeriod() {
   /*    TimeLabel tl = getTimeLabel();
       if (tl != null) {
@@ -3867,7 +3711,6 @@ public class SUTime {
     }
 
     // Rough approximate ordering of durations
-    @Override
     public int compareTo(Duration d) {
       org.joda.time.Duration d1 = getJodaTimeDuration();
       org.joda.time.Duration d2 = d.getJodaTimeDuration();
@@ -3894,7 +3737,6 @@ public class SUTime {
       }
     }
 
-    @Override
     public boolean isComparable(Duration d) {
       // TODO: When is two durations comparable?
       return true;
@@ -3911,12 +3753,10 @@ public class SUTime {
       return add(d.multiplyBy(-1));
     }
 
-    @Override
     public Duration resolve(Time refTime, int flags) {
       return this;
     }
 
-    @Override
     public Temporal intersect(Temporal t) {
       if (t == null)
         return this;
@@ -3994,7 +3834,6 @@ public class SUTime {
       this.period = period;
     }
 
-    @Override
     public Duration multiplyBy(int m) {
       if (m == 1 || period == null) {
         return this;
@@ -4007,7 +3846,6 @@ public class SUTime {
       }
     }
 
-    @Override
     public Duration divideBy(int m) {
       if (m == 1 || period == null) {
         return this;
@@ -4066,17 +3904,14 @@ public class SUTime {
       }
     }
 
-    @Override
     public Period getJodaTimePeriod() {
       return (period != null) ? period.toPeriod() : null;
     }
 
-    @Override
     public org.joda.time.Duration getJodaTimeDuration() {
       return (period != null) ? period.toPeriod().toDurationFrom(JodaTimeUtils.INSTANT_ZERO) : null;
     }
 
-    @Override
     public Duration resolve(Time refTime, int flags) {
       Instant instant = (refTime != null) ? refTime.getJodaTimeInstant() : null;
       if (instant != null) {
@@ -4089,7 +3924,6 @@ public class SUTime {
       return this;
     }
 
-    @Override
     public Duration add(Duration d) {
       Period p = period.toPeriod().plus(d.getJodaTimePeriod());
       if (this instanceof InexactDuration || d instanceof InexactDuration) {
@@ -4099,7 +3933,6 @@ public class SUTime {
       }
     }
 
-    @Override
     public Duration getGranularity() {
       Period res = new Period();
       res = res.withField(JodaTimeUtils.getMostSpecific(getJodaTimePeriod()), 1);
@@ -4110,10 +3943,10 @@ public class SUTime {
   }
 
   /**
-   * Duration specified in terms of milliseconds.
+   * Duration specified in terms of milliseconds
    */
   public static class DurationWithMillis extends Duration {
-    private final ReadableDuration base;
+    ReadableDuration base;
 
     public DurationWithMillis(long ms) {
       this.base = new org.joda.time.Duration(ms);
@@ -4128,7 +3961,6 @@ public class SUTime {
       this.base = base;
     }
 
-    @Override
     public Duration multiplyBy(int m) {
       if (m == 1) {
         return this;
@@ -4138,7 +3970,6 @@ public class SUTime {
       }
     }
 
-    @Override
     public Duration divideBy(int m) {
       if (m == 1) {
         return this;
@@ -4148,17 +3979,14 @@ public class SUTime {
       }
     }
 
-    @Override
     public Period getJodaTimePeriod() {
       return base.toPeriod();
     }
 
-    @Override
     public org.joda.time.Duration getJodaTimeDuration() {
       return base.toDuration();
     }
 
-    @Override
     public Duration add(Duration d) {
       if (d instanceof DurationWithMillis) {
         return new DurationWithMillis(this, base.toDuration().plus(((DurationWithMillis) d).base));
@@ -4176,8 +4004,8 @@ public class SUTime {
    * A range of durations.  For instance, 2 to 3 days.
    */
   public static class DurationRange extends Duration {
-    private final Duration minDuration;
-    private final Duration maxDuration;
+    Duration minDuration;
+    Duration maxDuration;
 
     public DurationRange(DurationRange d, Duration min, Duration max) {
       super(d);
@@ -4190,12 +4018,10 @@ public class SUTime {
       this.maxDuration = max;
     }
 
-    @Override
     public boolean includeTimexAltValue() {
       return true;
     }
 
-    @Override
     public String toFormattedString(int flags) {
       if ((flags & (FORMAT_ISO | FORMAT_TIMEX3_VALUE)) != 0) {
         // return super.toFormattedString(flags);
@@ -4210,7 +4036,6 @@ public class SUTime {
       return sb.toString();
     }
 
-    @Override
     public Period getJodaTimePeriod() {
       if (minDuration == null)
         return maxDuration.getJodaTimePeriod();
@@ -4220,7 +4045,6 @@ public class SUTime {
       return mid.getJodaTimePeriod();
     }
 
-    @Override
     public org.joda.time.Duration getJodaTimeDuration() {
       if (minDuration == null)
         return maxDuration.getJodaTimeDuration();
@@ -4230,21 +4054,18 @@ public class SUTime {
       return mid.getJodaTimeDuration();
     }
 
-    @Override
     public Duration add(Duration d) {
       Duration min2 = (minDuration != null) ? minDuration.add(d) : null;
       Duration max2 = (maxDuration != null) ? maxDuration.add(d) : null;
       return new DurationRange(this, min2, max2);
     }
 
-    @Override
     public Duration multiplyBy(int m) {
       Duration min2 = (minDuration != null) ? minDuration.multiplyBy(m) : null;
       Duration max2 = (maxDuration != null) ? maxDuration.multiplyBy(m) : null;
       return new DurationRange(this, min2, max2);
     }
 
-    @Override
     public Duration divideBy(int m) {
       Duration min2 = (minDuration != null) ? minDuration.divideBy(m) : null;
       Duration max2 = (maxDuration != null) ? maxDuration.divideBy(m) : null;
@@ -4283,7 +4104,6 @@ public class SUTime {
       this.approx = true;
     }
 
-    @Override
     public String toFormattedString(int flags) {
       String s = super.toFormattedString(flags);
       return s.replaceAll("\\d+", PAD_FIELD_UNKNOWN);
@@ -4296,9 +4116,9 @@ public class SUTime {
    * A time interval
    */
   public static class Range extends Temporal implements HasInterval<Time> {
-    private final Time begin; // = TIME_UNKNOWN;
-    private final Time end; // = TIME_UNKNOWN;
-    private final Duration duration; // = DURATION_UNKNOWN;
+    Time begin = TIME_UNKNOWN;
+    Time end = TIME_UNKNOWN;
+    Duration duration = DURATION_UNKNOWN;
 
     public Range(Time begin, Time end) {
       this.begin = begin;
@@ -4312,12 +4132,6 @@ public class SUTime {
       this.duration = duration;
     }
 
-    public Range(Time begin, Duration duration) {
-      this.begin = begin;
-      this.end = TIME_UNKNOWN;
-      this.duration = duration;
-    }
-
     public Range(Range r, Time begin, Time end, Duration duration) {
       super(r);
       this.begin = begin;
@@ -4325,12 +4139,10 @@ public class SUTime {
       this.duration = duration;
     }
 
-    @Override
     public Range setTimeZone(DateTimeZone tz) {
       return new Range(this, (Time) Temporal.setTimeZone(begin, tz), (Time) Temporal.setTimeZone(end, tz), duration);
     }
 
-    @Override
     public Interval<Time> getInterval() {
       return FuzzyInterval.toInterval(begin, end);
     }
@@ -4339,32 +4151,26 @@ public class SUTime {
       return new org.joda.time.Interval(begin.getJodaTimeInstant(), end.getJodaTimeInstant());
     }
 
-    @Override
     public boolean isGrounded() {
       return begin.isGrounded() && end.isGrounded();
     }
 
-    @Override
     public Time getTime() {
       return begin;
     } // TODO: return something that makes sense for time...
 
-    @Override
     public Duration getDuration() {
       return duration;
     }
 
-    @Override
     public Range getRange(int flags, Duration granularity) {
       return this;
     }
 
-    @Override
     public TimexType getTimexType() {
       return TimexType.DURATION;
     }
 
-    @Override
     public Map<String, String> getTimexAttributes(TimeIndex timeIndex) {
       String beginTidStr = (begin != null) ? begin.getTidString(timeIndex) : null;
       String endTidStr = (end != null) ? end.getTidString(timeIndex) : null;
@@ -4379,7 +4185,6 @@ public class SUTime {
     }
 
     // public boolean includeTimexAltValue() { return true; }
-    @Override
     public String toFormattedString(int flags) {
       if ((flags & (FORMAT_ISO | FORMAT_TIMEX3_VALUE)) != 0) {
         if (getTimeLabel() != null) {
@@ -4414,7 +4219,6 @@ public class SUTime {
       }
     }
 
-    @Override
     public Range resolve(Time refTime, int flags) {
       if (refTime == null) {
         return this;
@@ -4526,7 +4330,6 @@ public class SUTime {
     }
 
     // TODO: correct implementation
-    @Override
     public Temporal intersect(Temporal t) {
       if (t instanceof Time) {
         return new RelativeTime((Time) t, TemporalOp.INTERSECT, this);
@@ -4549,7 +4352,6 @@ public class SUTime {
     private static final long serialVersionUID = 1;
   }
 
-
   /**
    * Exciting set of times
    */
@@ -4562,7 +4364,6 @@ public class SUTime {
     }
 
     // public boolean includeTimexAltValue() { return true; }
-    @Override
     public TimexType getTimexType() {
       return TimexType.SET;
     }
@@ -4574,7 +4375,7 @@ public class SUTime {
    * Explicit set of times: like tomorrow and next week, not really used
    */
   public static class ExplicitTemporalSet extends TemporalSet {
-    private final Set<Temporal> temporals;
+    Set<Temporal> temporals;
 
     public ExplicitTemporalSet(Temporal... temporals) {
       this.temporals = CollectionUtils.asSet(temporals);
@@ -4589,7 +4390,6 @@ public class SUTime {
       this.temporals = temporals;
     }
 
-    @Override
     public ExplicitTemporalSet setTimeZone(DateTimeZone tz) {
       Set<Temporal> tzTemporals = Generics.newHashSet(temporals.size());
       for (Temporal t:temporals) {
@@ -4598,29 +4398,24 @@ public class SUTime {
       return new ExplicitTemporalSet(this, tzTemporals);
     }
 
-    @Override
     public boolean isGrounded() {
       return false;
     }
 
-    @Override
     public Time getTime() {
       return null;
     }
 
-    @Override
     public Duration getDuration() {
       // TODO: Return difference between min/max of set
       return null;
     }
 
-    @Override
     public Range getRange(int flags, Duration granularity) {
       // TODO: Return min/max of set
       return null;
     }
 
-    @Override
     public Temporal resolve(Time refTime, int flags) {
       Temporal[] newTemporals = new Temporal[temporals.size()];
       int i = 0;
@@ -4631,7 +4426,6 @@ public class SUTime {
       return new ExplicitTemporalSet(newTemporals);
     }
 
-    @Override
     public String toFormattedString(int flags) {
       if (getTimeLabel() != null) {
         return getTimeLabel();
@@ -4647,7 +4441,6 @@ public class SUTime {
       return "{" + StringUtils.join(temporals, ", ") + "}";
     }
 
-    @Override
     public Temporal intersect(Temporal other) {
       if (other == null)
         return this;
@@ -4664,7 +4457,6 @@ public class SUTime {
 
     private static final long serialVersionUID = 1;
   }
-
 
   public static final PeriodicTemporalSet HOURLY = new PeriodicTemporalSet(null, HOUR, "EVERY", "P1X");
   public static final PeriodicTemporalSet NIGHTLY = new PeriodicTemporalSet(NIGHT, DAY, "EVERY", "P1X");
@@ -4715,7 +4507,6 @@ public class SUTime {
       this.freq = freq;
     }
 
-    @Override
     public PeriodicTemporalSet setTimeZone(DateTimeZone tz) {
       return new PeriodicTemporalSet(this, (Time) Temporal.setTimeZone(base, tz), periodicity,
               (Range) Temporal.setTimeZone(occursIn, tz), quant, freq);
@@ -4729,32 +4520,26 @@ public class SUTime {
       return new PeriodicTemporalSet(this, this.base, periodicity.divideBy(scale), this.occursIn, this.quant, this.freq);
     }
 
-    @Override
     public boolean isGrounded() {
       return (occursIn != null && occursIn.isGrounded());
     }
 
-    @Override
     public Duration getPeriod() {
       return periodicity;
     }
 
-    @Override
     public Time getTime() {
       return null;
     }
 
-    @Override
     public Duration getDuration() {
       return null;
     }
 
-    @Override
     public Range getRange(int flags, Duration granularity) {
       return occursIn;
     }
 
-    @Override
     public Map<String, String> getTimexAttributes(TimeIndex timeIndex) {
       Map<String, String> map = super.getTimexAttributes(timeIndex);
       if (quant != null) {
@@ -4769,14 +4554,12 @@ public class SUTime {
       return map;
     }
 
-    @Override
     public Temporal resolve(Time refTime, int flags) {
       Range resolvedOccursIn = (occursIn != null) ? occursIn.resolve(refTime, flags) : null;
       Temporal resolvedBase = (base != null) ? base.resolve(null, 0) : null;
       return new PeriodicTemporalSet(this, resolvedBase, this.periodicity, resolvedOccursIn, this.quant, this.freq);
     }
 
-    @Override
     public String toFormattedString(int flags) {
       if (getTimeLabel() != null) {
         return getTimeLabel();
@@ -4795,7 +4578,6 @@ public class SUTime {
       return null;
     }
 
-    @Override
     public Temporal intersect(Temporal t) {
       if (t instanceof Range) {
         if (occursIn == null) {

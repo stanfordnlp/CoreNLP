@@ -2,6 +2,7 @@ package edu.stanford.nlp.tagger.maxent.documentation;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.stanford.nlp.ling.Sentence;
@@ -21,7 +22,7 @@ class TaggerDemo {
     MaxentTagger tagger = new MaxentTagger(args[0]);
     List<List<HasWord>> sentences = MaxentTagger.tokenizeText(new BufferedReader(new FileReader(args[1])));
     for (List<HasWord> sentence : sentences) {
-      List<TaggedWord> tSentence = tagger.tagSentence(sentence);
+      ArrayList<TaggedWord> tSentence = tagger.tagSentence(sentence);
       System.out.println(Sentence.listToString(tSentence, false));
     }
   }

@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.CoreAnnotations.ParentAnnotation;
@@ -56,7 +55,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   private List<CoreLabel> compoundBuffer;
 
   // Produces the tokenization for parsing used by Green, de Marneffe, and Manning (2011)
-  public static final String FTB_OPTIONS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitCompounds=true";
+  private static final String FTB_OPTIONS = "ptb3Ellipsis=true,normalizeParentheses=true,ptb3Dashes=false,splitCompounds=true";
 
   /**
    * Constructor.
@@ -103,6 +102,9 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
   /**
    * Splits a compound marked by the lexer.
+   *
+   * @param cl
+   * @return
    */
   private CoreLabel processCompound(CoreLabel cl) {
     cl.remove(ParentAnnotation.class);
@@ -111,7 +113,6 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
       CoreLabel newLabel = new CoreLabel(cl);
       newLabel.setWord(part);
       newLabel.setValue(part);
-      newLabel.set(OriginalTextAnnotation.class, part);
       compoundBuffer.add(newLabel);
     }
     return compoundBuffer.remove(0);
@@ -137,6 +138,11 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     }
 
     /**
+     * Constructs a new PTBTokenizer that returns Word objects and
+     * uses the options passed in.
+     * THIS METHOD IS INVOKED BY REFLECTION BY SOME OF THE JAVANLP
+     * CODE TO LOAD A TOKENIZER FACTORY.  IT SHOULD BE PRESENT IN A
+     * TokenizerFactory.
      * todo [cdm 2013]: But we should change it to a method that can return any kind of Label and return CoreLabel here
      *
      * @param options A String of options
@@ -180,14 +186,14 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
           if (fields[0].equals("splitCompounds")) {
             splitCompoundOption = true;
           } else {
-            lexerProperties.setProperty(option, "true");
+            lexerProperties.put(option, "true");
           }
 
         } else if (fields.length == 2) {
           if (fields[0].equals("splitCompounds")) {
             splitCompoundOption = Boolean.valueOf(fields[1]);
           } else {
-            lexerProperties.setProperty(fields[0], fields[1]);
+            lexerProperties.put(fields[0], fields[1]);
           }
 
         } else {
@@ -206,20 +212,21 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
 
 
   /**
-   * Returns a factory for FrenchTokenizer. THIS IS NEEDED FOR CREATION BY REFLECTION.
+   * Returns a factory for FrenchTokenizer.
+   * THIS IS NEEDED FOR CREATION BY REFLECTION.
+   *
+   * @return
    */
   public static TokenizerFactory<CoreLabel> factory() {
     return FrenchTokenizerFactory.newTokenizerFactory();
   }
 
-  public static <T extends HasWord> TokenizerFactory<T> factory(LexedTokenFactory<T> factory,
-                                                                String options) {
-    return new FrenchTokenizerFactory<T>(factory, options);
-  }
 
   /**
    * Returns a factory for FrenchTokenizer that replicates the tokenization of
    * Green, de Marneffe, and Manning (2011).
+   *
+   * @return
    */
   public static TokenizerFactory<CoreLabel> ftbFactory() {
     TokenizerFactory<CoreLabel> tf = FrenchTokenizerFactory.newTokenizerFactory();
@@ -236,7 +243,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     sb.append("   -ftb           : Tokenization for experiments in Green et al. (2011).").append(nl);
     sb.append("   -lowerCase     : Apply lowercasing.").append(nl);
     sb.append("   -encoding type : Encoding format.").append(nl);
-    sb.append("   -options str   : Orthographic options (see FrenchLexer.java)").append(nl);
+    sb.append("   -orthoOpts str : Orthographic options (see FrenchLexer.java)").append(nl);
     return sb.toString();
   }
 
@@ -246,7 +253,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     argOptionDefs.put("ftb", 0);
     argOptionDefs.put("lowerCase", 0);
     argOptionDefs.put("encoding", 1);
-    argOptionDefs.put("options", 1);
+    argOptionDefs.put("orthoOpts", 1);
     return argOptionDefs;
   }
 
@@ -271,11 +278,12 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     // Lexer options
     final TokenizerFactory<CoreLabel> tf = options.containsKey("ftb") ?
         FrenchTokenizer.ftbFactory() : FrenchTokenizer.factory();
-    String orthoOptions = options.getProperty("options", "");
+    String orthoOptions = options.getProperty("orthoOpts", "");
+    tf.setOptions(orthoOptions);
+
     // When called from this main method, split on newline. No options for
     // more granular sentence splitting.
-    orthoOptions = orthoOptions.length() == 0 ? "tokenizeNLs" : orthoOptions + ",tokenizeNLs";
-    tf.setOptions(orthoOptions);
+    tf.setOptions("tokenizeNLs");
 
     // Other options
     final String encoding = options.getProperty("encoding", "UTF-8");

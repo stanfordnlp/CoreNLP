@@ -64,7 +64,6 @@ public class IntervalTreeTest extends TestCase {
     assertTrue(overlapping2.size() == 1);
     overlapping3 = tree.getOverlapping(after);
     assertTrue(overlapping3.isEmpty());
-    assertTrue(tree.height() < 20);
 
     // Try balancing the tree
 //    System.out.println("Height is " + tree.height());

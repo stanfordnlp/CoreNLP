@@ -1,6 +1,10 @@
 package edu.stanford.nlp.graph;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import edu.stanford.nlp.util.CollectionUtils;
 import junit.framework.TestCase;
@@ -989,73 +993,6 @@ public class DirectedMultiGraphTest extends TestCase {
     checkIterator(g.incomingEdgeIterable(3), "1-3", "1-3b");
     checkIterator(g.outgoingEdgeIterable(3));
     checkIterator(g.edgeIterable(), "1-1", "1-3", "1-3b");
-  }
-
-  /** Test the behavior of the copy constructor; namely, make sure it's doing a deep copy */
-  public void testCopyConstructor() {
-    DirectedMultiGraph<Integer, String> g =
-        new DirectedMultiGraph<Integer, String>();
-    g.addVertex(1);
-    g.addVertex(2);
-    g.addVertex(3);
-    g.add(1, 2, "1-2a");
-    g.add(1, 2, "1-2b");
-    g.add(1, 2, "1-2c");
-    g.add(1, 3, "1-3a");
-    g.add(1, 3, "1-3b");
-    g.add(2, 3, "2-3a");
-    g.add(2, 3, "2-3b");
-    g.add(3, 1, "3-1a");
-    g.add(3, 1, "3-1b");
-
-    DirectedMultiGraph<Integer, String> copy = new DirectedMultiGraph<Integer, String>(g);
-    assertEquals(g.getNumEdges(), copy.getNumEdges());
-    int originalSize = g.getNumEdges();
-    assertEquals(originalSize, g.getNumEdges());
-
-    copy.removeEdge(1, 2, "1-2b");
-    assertEquals(originalSize - 1, copy.getNumEdges());
-    assertEquals(originalSize, g.getNumEdges());
-    copy.removeVertex(3);
-    assertEquals(originalSize - 7, copy.getNumEdges());
-    assertEquals(originalSize, g.getNumEdges());
-  }
-
-  /** Check to make sure {@link edu.stanford.nlp.graph.DirectedMultiGraph#edgeIterator()}.remove() works as expected */
-  public void testIteratorRemove() {
-    DirectedMultiGraph<Integer, String> g =
-        new DirectedMultiGraph<Integer, String>();
-    g.addVertex(1);
-    g.addVertex(2);
-    g.addVertex(3);
-    g.add(1, 2, "1-2a");
-    g.add(1, 2, "1-2b");
-    g.add(1, 2, "1-2c");
-    g.add(1, 3, "1-3a");
-    g.add(1, 3, "1-3b");
-    g.add(2, 3, "2-3a");
-    g.add(2, 3, "2-3b");
-    g.add(3, 1, "3-1a");
-    g.add(3, 1, "3-1b");
-
-    for (String edge : g.getAllEdges()) {
-      // Create copy and remove edge from copy manually
-      int originalSize = g.getNumEdges();
-      DirectedMultiGraph<Integer, String> gold = new DirectedMultiGraph<Integer, String>(g);
-      DirectedMultiGraph<Integer, String> guess = new DirectedMultiGraph<Integer, String>(g);
-      gold.removeEdge(Integer.parseInt(edge.substring(0, 1)), Integer.parseInt(edge.substring(2, 3)), edge);
-      assertEquals(originalSize, g.getNumEdges());
-      assertEquals(originalSize - 1, gold.getAllEdges().size());
-      // Use iter.remove()
-      Iterator<String> iter = guess.edgeIterator();
-      while (iter.hasNext()) {
-        if (iter.next().equals(edge)) {
-          iter.remove();
-        }
-      }
-      // Assert that they're the same
-      assertEquals(gold, guess);
-    }
   }
 
   /**

@@ -3,7 +3,6 @@ package edu.stanford.nlp.sentiment;
 import java.io.Serializable;
 
 public class RNNTrainOptions implements Serializable {
-
   public int batchSize = 27;
 
   /** Number of times through all the trees */
@@ -35,7 +34,7 @@ public class RNNTrainOptions implements Serializable {
 
   /** Regularization cost for the transform matrix  */
   public double regTransformMatrix = 0.001;
-
+  
   /** Regularization cost for the classification matrices */
   public double regClassification = 0.0001;
 
@@ -47,7 +46,7 @@ public class RNNTrainOptions implements Serializable {
    */
   public double initialAdagradWeight = 0.0;
 
-  /**
+  /** 
    * How many epochs between resets of the adagrad learning rates.
    * Set to 0 to never reset.
    */
@@ -55,20 +54,7 @@ public class RNNTrainOptions implements Serializable {
 
   /** Regularization cost for the transform tensor  */
   public double regTransformTensor = 0.001;
-
-  /** 
-   * Shuffle matrices when training.  Usually should be true.  Set to
-   * false to compare training across different implementations, such
-   * as with the original Matlab version 
-   */
-  public boolean shuffleMatrices = true;
-
-  /**
-   * If set, the initial matrices are logged to this location as a single file
-   * using SentimentModel.toString()
-   */
-  public String initialMatrixLogPath = null;
-
+  
   @Override
   public String toString() {
     StringBuilder result = new StringBuilder();
@@ -95,64 +81,53 @@ public class RNNTrainOptions implements Serializable {
     result.append("regWordVector=" + regWordVector + "\n");
     result.append("initialAdagradWeight=" + initialAdagradWeight + "\n");
     result.append("adagradResetFrequency=" + adagradResetFrequency + "\n");
-    result.append("shuffleMatrices=" + shuffleMatrices + "\n");
-    result.append("initialMatrixLogPath=" + initialMatrixLogPath + "\n");
     return result.toString();
   }
 
   public int setOption(String[] args, int argIndex) {
     if (args[argIndex].equalsIgnoreCase("-batchSize")) {
-      batchSize = Integer.parseInt(args[argIndex + 1]);
+      batchSize = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-epochs")) {
-      epochs = Integer.parseInt(args[argIndex + 1]);
+      epochs = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-debugOutputEpochs")) {
-      debugOutputEpochs = Integer.parseInt(args[argIndex + 1]);
+      debugOutputEpochs = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-maxTrainTimeSeconds")) {
-      maxTrainTimeSeconds = Integer.parseInt(args[argIndex + 1]);
+      maxTrainTimeSeconds = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-learningRate")) {
-      learningRate = Double.parseDouble(args[argIndex + 1]);
+      learningRate = Double.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-scalingForInit")) {
-      scalingForInit = Double.parseDouble(args[argIndex + 1]);
+      scalingForInit = Double.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-regTransformMatrix")) {
-      regTransformMatrix = Double.parseDouble(args[argIndex + 1]);
+      regTransformMatrix = Double.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-regTransformTensor")) {
-      regTransformTensor = Double.parseDouble(args[argIndex + 1]);
+      regTransformTensor = Double.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-regClassification")) {
-      regClassification = Double.parseDouble(args[argIndex + 1]);
+      regClassification = Double.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-regWordVector")) {
-      regWordVector = Double.parseDouble(args[argIndex + 1]);
+      regWordVector = Double.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-initialAdagradWeight")) {
-      initialAdagradWeight = Double.parseDouble(args[argIndex + 1]);
+      initialAdagradWeight = Double.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-adagradResetFrequency")) {
-      adagradResetFrequency = Integer.parseInt(args[argIndex + 1]);
+      adagradResetFrequency = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-classWeights")) {
       String classWeightString = args[argIndex + 1];
       String[] pieces = classWeightString.split(",");
       classWeights = new double[pieces.length];
       for (int i = 0; i < pieces.length; ++i) {
-        classWeights[i] = Double.parseDouble(pieces[i]);
+        classWeights[i] = Double.valueOf(pieces[i]);
       }
-      return argIndex + 2;
-    } else if (args[argIndex].equalsIgnoreCase("-shuffleMatrices")) {
-      shuffleMatrices = true;
-      return argIndex + 1;
-    } else if (args[argIndex].equalsIgnoreCase("-noShuffleMatrices")) {
-      shuffleMatrices = false;
-      return argIndex + 1;
-    } else if (args[argIndex].equalsIgnoreCase("-initialMatrixLogPath")) {
-      initialMatrixLogPath = args[argIndex + 1];
       return argIndex + 2;
     } else {
       return argIndex;

@@ -13,7 +13,7 @@ public class AnnotatorPoolTest extends TestCase {
   static class SampleAnnotatorFactory extends AnnotatorFactory {
     private static final long serialVersionUID = 1L;
     public SampleAnnotatorFactory(Properties props) {
-      super(props, new AnnotatorImplementations());
+      super(props);
     }
     @Override
     public Annotator create() {
@@ -43,16 +43,11 @@ public class AnnotatorPoolTest extends TestCase {
       os.append("sample.prop = " + properties.getProperty("sample.prop", ""));
       return os.toString();
     }
-
-    @Override
-    protected String additionalSignature() {
-      return "";
-    }
   }
 
   public void testSignature() throws Exception {
     Properties props = new Properties();
-    props.setProperty("sample.prop", "v1");
+    props.put("sample.prop", "v1");
     AnnotatorPool pool = new AnnotatorPool();
     pool.register("sample", new SampleAnnotatorFactory(props));
     Annotator a1 = pool.get("sample");
@@ -62,7 +57,7 @@ public class AnnotatorPoolTest extends TestCase {
     System.out.println("Second annotator: " + a2);
     Assert.assertTrue(a1 == a2);
 
-    props.setProperty("sample.prop", "v2");
+    props.put("sample.prop", "v2");
     pool.register("sample", new SampleAnnotatorFactory(props));
     Annotator a3 = pool.get("sample");
     System.out.println("Third annotator: " + a3);

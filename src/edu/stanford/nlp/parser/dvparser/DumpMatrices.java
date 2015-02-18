@@ -1,6 +1,7 @@
 package edu.stanford.nlp.parser.dvparser;
 
 import edu.stanford.nlp.io.FileSystem;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.util.TwoDimensionalMap;
 
@@ -49,7 +50,7 @@ public class DumpMatrices {
   public static void main(String[] args) throws IOException {
     String modelPath = null;
     String outputDir = null;
-
+    
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-model")) {
         modelPath = args[argIndex + 1];
@@ -102,19 +103,5 @@ public class DumpMatrices {
       String filename = unaryScoreDir + File.separator + entry.getKey() + ".txt";
       dumpMatrix(filename, entry.getValue());
     }
-
-    String embeddingFile = outputDir + File.separator + "embeddings.txt";
-    FileWriter fout = new FileWriter(embeddingFile);
-    BufferedWriter bout = new BufferedWriter(fout);
-    for (Map.Entry<String, SimpleMatrix> entry : model.wordVectors.entrySet()) {
-      bout.write(entry.getKey());
-      SimpleMatrix vector = entry.getValue();
-      for (int i = 0; i < vector.numRows(); ++i) {
-        bout.write("  " + vector.get(i, 0));
-      }
-      bout.write("\n");
-    }
-    bout.close();
-    fout.close();
   }
 }

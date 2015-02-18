@@ -61,7 +61,6 @@ public class StanfordCoreNLPSlowITest extends TestCase {
     props.setProperty("outputDirectory", dir.getPath());
     props.setProperty("annotators",
         "tokenize, cleanxml, ssplit, pos, lemma, ner, parse, dcoref");
-    props.setProperty("serializer", "AnnotationSerializer");
 
     return new StanfordCoreNLP(props);
   }

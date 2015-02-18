@@ -57,7 +57,6 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
-import edu.stanford.nlp.dcoref.Dictionaries.MentionType;
 import edu.stanford.nlp.dcoref.ScorerBCubed.BCubedType;
 import edu.stanford.nlp.dcoref.sievepasses.DeterministicCorefSieve;
 import edu.stanford.nlp.dcoref.sievepasses.ExactStringMatch;
@@ -917,7 +916,7 @@ public class SieveCoreferenceSystem {
               // Skip singletons according to the singleton predictor
               // (only for non-NE mentions)
               // Recasens, de Marneffe, and Potts (NAACL 2013)
-              if (m1.isSingleton && m1.mentionType != MentionType.PROPER && m2.isSingleton && m2.mentionType != MentionType.PROPER) continue;
+              if (m1.isSingleton && m2.isSingleton) continue;
               if (m1.corefClusterID == m2.corefClusterID) continue;
               CorefCluster c1 = corefClusters.get(m1.corefClusterID);
               CorefCluster c2 = corefClusters.get(m2.corefClusterID);
@@ -1068,7 +1067,7 @@ public class SieveCoreferenceSystem {
     if ( ! errStr.isEmpty()) {
       summary += "\nERROR: " + errStr;
     }
-    Pattern pattern = Pattern.compile("\\d+\\.\\d\\d\\d+");
+    Pattern pattern = Pattern.compile("\\d+.\\d\\d\\d+");
     DecimalFormat df = new DecimalFormat("#.##");
     Matcher matcher = pattern.matcher(summary);
     while(matcher.find()) {
@@ -1511,24 +1510,18 @@ public class SieveCoreferenceSystem {
     int passIndex = sieveClassNames.length - 1;
     String scoreDesc = metricType;
     double finalScore;
-    switch (metricType) {
-      case "combined":
-        finalScore = (scoreMUC.get(passIndex).getScore(subScoreType)
+    if ("combined".equals(metricType)) {
+      finalScore = (scoreMUC.get(passIndex).getScore(subScoreType)
             + scoreBcubed.get(passIndex).getScore(subScoreType)
-            + scorePairwise.get(passIndex).getScore(subScoreType)) / 3;
-        scoreDesc = "(muc + bcub + pairwise)/3";
-        break;
-      case "muc":
-        finalScore = scoreMUC.get(passIndex).getScore(subScoreType);
-        break;
-      case "bcub":
-      case "bcubed":
-        finalScore = scoreBcubed.get(passIndex).getScore(subScoreType);
-        break;
-      case "pairwise":
-        finalScore = scorePairwise.get(passIndex).getScore(subScoreType);
-        break;
-      default:
+            + scorePairwise.get(passIndex).getScore(subScoreType))/3;
+      scoreDesc = "(muc + bcub + pairwise)/3";
+    } else if ("muc".equals(metricType)) {
+      finalScore = scoreMUC.get(passIndex).getScore(subScoreType);
+    } else if ("bcub".equals(metricType) || "bcubed".equals(metricType)) {
+      finalScore = scoreBcubed.get(passIndex).getScore(subScoreType);
+    } else if ("pairwise".equals(metricType)) {
+      finalScore = scorePairwise.get(passIndex).getScore(subScoreType);
+    } else {
         throw new IllegalArgumentException("Invalid sub score type:" + subScoreType);
     }
     logger.info("Final score (" + scoreDesc + ") " + subScoreType + " = " + (new DecimalFormat("#.##")).format(finalScore));

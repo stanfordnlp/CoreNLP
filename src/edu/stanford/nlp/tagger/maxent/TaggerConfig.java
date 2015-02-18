@@ -285,10 +285,6 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     return getOutputOptionsContains("lemmatize");
   }
 
-  public boolean keepEmptySentences() {
-    return getOutputOptionsContains("keepEmptySentences");    
-  }
-
   public boolean getOutputOptionsContains(String sought) {
     String[] options = getOutputOptions();
     for (String option : options) {
@@ -548,8 +544,8 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     out.println("# outputFormat = " + OUTPUT_FORMAT);
     out.println();
 
-    out.println("# Output format options. Comma separated list.");
-    out.println("# currently \"lemmatize\" and \"keepEmptySentences\" are supported.");
+    out.println("# Output format options. Comma separated list, but");
+    out.println("# currently \"lemmatize\" is the only supported option.");
     out.println("# outputFormatOptions = " + OUTPUT_FORMAT_OPTIONS);
     out.println();
 
@@ -622,7 +618,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     out.println("# 'wordFunction'.  A function applied to the text before training or tagging.");
     out.println("# For example, edu.stanford.nlp.util.LowercaseFunction");
     out.println("# This function turns all the words into lowercase");
-    out.println("# The function must implement java.util.function.Function<String, String>");
+    out.println("# The function must implement edu.stanford.nlp.util.Function<String, String>");
     out.println("# Blank means no preprocessing function");
     out.println("# wordFunction = ");
     out.println();

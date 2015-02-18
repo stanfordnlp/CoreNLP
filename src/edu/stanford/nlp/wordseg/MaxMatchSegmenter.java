@@ -6,6 +6,7 @@ import edu.stanford.nlp.fsm.DFSATransition;
 import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
+import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
@@ -198,7 +199,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
       throw new UnsupportedOperationException("segmentWords must be run first");
     List<Word> segmentedWords = new ArrayList<Word>();
     // Init dynamic programming:
-    double[] costs = new double[len+1];
+    double costs[] = new double[len+1];
     List<DFSATransition<Word, Integer>> bptrs = new ArrayList<DFSATransition<Word, Integer>>();
     for (int i = 0; i < len + 1; ++i) {
       bptrs.add(null);
@@ -304,9 +305,10 @@ public class MaxMatchSegmenter implements WordSegmenter {
     sighanRW.init(flags);
 
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    StringReader strR = null;
     PrintWriter stdoutW = new PrintWriter(System.out);
     int lineNb = 0;
-    for ( ; ; ) {
+    for(;;) {
       ++lineNb;
       System.err.println("line: "+lineNb);
       try {
@@ -324,7 +326,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
           seg.buildSegmentationLattice(line);
           outputLine = Sentence.listToString(seg.maxMatchSegmentation());
         }
-        StringReader strR = new StringReader(outputLine);
+        strR = new StringReader(outputLine);
         Iterator<List<CoreLabel>> itr = sighanRW.getIterator(strR);
         while(itr.hasNext()) {
           sighanRW.printAnswers(itr.next(), stdoutW);

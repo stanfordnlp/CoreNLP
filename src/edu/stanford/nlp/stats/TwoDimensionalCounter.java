@@ -107,13 +107,6 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
     ClassicCounter<K2> c = map.get(o1);
     return c.containsKey(o2);
   }
-  
-  public boolean containsFirstKey(K1 o1) {
-    if (!map.containsKey(o1))
-      return false;
-    else
-      return true;
-  }
 
   /**
    */
@@ -387,16 +380,6 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
     map.remove(key);
   }
 
-  /**
-   * clears the map, total and default value
-   */       
-  public void clear(){
-    map.clear();
-    total = 0;
-    defaultValue = 0;
-  }
-
-
   public void clean() {
     for (K1 key1 : Generics.newHashSet(map.keySet())) {
       ClassicCounter<K2> c = map.get(key1);
@@ -429,10 +412,6 @@ public class TwoDimensionalCounter<K1, K2> implements TwoDimensionalCounterInter
     outerMF = outerFactory;
     map = outerFactory.newMap();
     total = 0.0;
-  }
-
-  public static <K1, K2> TwoDimensionalCounter<K1, K2> identityHashMapCounter() {
-    return new TwoDimensionalCounter<K1, K2>(MapFactory.<K1, ClassicCounter<K2>>identityHashMapFactory(), MapFactory.<K2, MutableDouble>identityHashMapFactory());
   }
 
   public void recomputeTotal(){

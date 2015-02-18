@@ -6,6 +6,7 @@ import de.jollyday.config.Holidays;
 // import de.jollyday.configuration.ConfigurationProvider;
 import de.jollyday.impl.XMLManager;
 import edu.stanford.nlp.ling.tokensregex.Env;
+import edu.stanford.nlp.net.ClasspathURLStreamHandler;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Generics;
 import org.joda.time.DateTimeFieldType;
@@ -34,14 +35,13 @@ public class JollyDayHolidays implements Env.Binder {
     String xmlPath = props.getProperty(prefix + "xml", "edu/stanford/nlp/models/sutime/jollyday/Holidays_sutime.xml");
     String xmlPathType = props.getProperty(prefix + "pathtype", "classpath");
     varPrefix = props.getProperty(prefix + "prefix", varPrefix);
-    System.err.println(prefix);
     System.err.println("Initializing JollyDayHoliday for sutime with " + xmlPathType + ":" + xmlPath);
     Properties managerProps = new Properties();
     managerProps.setProperty("manager.impl", "edu.stanford.nlp.time.JollyDayHolidays$MyXMLManager");
     try {
       URL holidayXmlUrl;
       if (xmlPathType.equalsIgnoreCase("classpath")) {
-        holidayXmlUrl = getClass().getClassLoader().getResource(xmlPath);
+        holidayXmlUrl = new URL("classpath", null, 0, xmlPath, new ClasspathURLStreamHandler());
       } else if (xmlPathType.equalsIgnoreCase("file")) {
         holidayXmlUrl = new URL("file:///" + xmlPath);
       } else if (xmlPathType.equalsIgnoreCase("url")) {

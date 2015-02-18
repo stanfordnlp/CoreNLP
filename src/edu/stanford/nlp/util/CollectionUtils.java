@@ -11,14 +11,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -32,7 +31,6 @@ import edu.stanford.nlp.stats.Counters;
  * @author Joseph Smarr (jsmarr@stanford.edu)
  */
 public class CollectionUtils {
-
   /**
    * Private constructor to prevent direct instantiation.
    */
@@ -43,16 +41,16 @@ public class CollectionUtils {
 
   public static List<Integer> asList(int[] a) {
     List<Integer> result = new ArrayList<Integer>(a.length);
-    for (int j : a) {
-      result.add(Integer.valueOf(j));
+    for (int i = 0; i < a.length; i++) {
+      result.add(Integer.valueOf(a[i]));
     }
     return result;
   }
 
   public static List<Double> asList(double[] a) {
     List<Double> result = new ArrayList<Double>(a.length);
-    for (double v : a) {
-      result.add(new Double(v));
+    for (int i = 0; i < a.length; i++) {
+      result.add(new Double(a[i]));
     }
     return result;
   }
@@ -123,16 +121,6 @@ public class CollectionUtils {
     return union;
   }
 
-  public static <T> Set<T> unionAsSet(Collection<T>... sets) {
-    Set<T> union = Generics.newHashSet();
-    for(Collection<T> set: sets){
-      for (T t : set) {
-        union.add(t);
-      }
-    }
-    return union;
-  }
-
   /**
    * Returns all objects in list1 that are not in list2
    *
@@ -150,7 +138,7 @@ public class CollectionUtils {
     }
     return diff;
   }
-
+  
   /**
    * Returns all objects in list1 that are not in list2
    *
@@ -506,14 +494,20 @@ public class CollectionUtils {
   }
 
   public static <C extends Comparable<C>> Comparator<List<C>> getListComparator() {
-    return (list1, list2) -> compareLists(list1, list2);
+    return new Comparator<List<C>>() {
+      public int compare(List<C> list1, List<C> list2) {
+        return compareLists(list1, list2);
+      }
+    };
   }
 
   /**
    * Return the items of an Iterable as a sorted list.
    *
-   * @param <T> The type of items in the Iterable.
-   * @param items The collection to be sorted.
+   * @param <T>
+   *          The type of items in the Iterable.
+   * @param items
+   *          The collection to be sorted.
    * @return A list containing the same items as the Iterable, but sorted.
    */
   public static <T extends Comparable<T>> List<T> sorted(Iterable<T> items) {
@@ -525,8 +519,10 @@ public class CollectionUtils {
   /**
    * Return the items of an Iterable as a sorted list.
    *
-   * @param <T> The type of items in the Iterable.
-   * @param items The collection to be sorted.
+   * @param <T>
+   *          The type of items in the Iterable.
+   * @param items
+   *          The collection to be sorted.
    * @return A list containing the same items as the Iterable, but sorted.
    */
   public static <T> List<T> sorted(Iterable<T> items, Comparator<T> comparator) {
@@ -538,8 +534,10 @@ public class CollectionUtils {
   /**
    * Create a list out of the items in the Iterable.
    *
-   * @param <T> The type of items in the Iterable.
-   * @param items The items to be made into a list.
+   * @param <T>
+   *          The type of items in the Iterable.
+   * @param items
+   *          The items to be made into a list.
    * @return A list consisting of the items of the Iterable, in the same order.
    */
   public static <T> List<T> toList(Iterable<T> items) {
@@ -551,8 +549,10 @@ public class CollectionUtils {
   /**
    * Create a set out of the items in the Iterable.
    *
-   * @param <T> The type of items in the Iterable.
-   * @param items The items to be made into a set.
+   * @param <T>
+   *          The type of items in the Iterable.
+   * @param items
+   *          The items to be made into a set.
    * @return A set consisting of the items from the Iterable.
    */
   public static <T> Set<T> toSet(Iterable<T> items) {
@@ -896,24 +896,23 @@ public class CollectionUtils {
    * Filters the objects in the collection according to the given Filter and returns a list
    *
    */
-  public static<T> List<T> filterAsList(Collection<? extends T> original, Predicate<? super T> f){
+  public static<T> List<T> filterAsList(Collection<? extends T> original, Filter<? super T> f){
     List<T> transformed = new ArrayList<T>();
     for (T t: original) {
-      if (f.test(t)) {
+      if (f.accept(t)) {
         transformed.add(t);
       }
     }
     return transformed;
   }
-
+  
   /**
-   * Get all values corresponding to the indices (if they exist in the map).
-   *
-   * @param map Any map from T to V
-   * @param indices A collection of indices of type T
-   * @return The corresponding list of values of type V
+   * get all values corresponding to the indices (if they exist in the map)
+   * @param map
+   * @param indices
+   * @return
    */
-  public static<T,V> List<V> getAll(Map<T, V> map, Collection<T> indices) {
+  public static<T,V> List<V> getAll(Map<T, V> map, Collection<T> indices){
     List<V> result = new ArrayList<V>();
     for(T i: indices)
       if(map.containsKey(i)){
@@ -921,9 +920,9 @@ public class CollectionUtils {
       }
     return result;
   }
-
+  
   public static<T extends Comparable<? super T>> int maxIndex(List<T> list){
-   T max = null;
+   T max = null;;
    int i = 0;
    int maxindex = -1;
    for(T t: list)
@@ -937,5 +936,4 @@ public class CollectionUtils {
    }
    return maxindex;
   }
-
 }

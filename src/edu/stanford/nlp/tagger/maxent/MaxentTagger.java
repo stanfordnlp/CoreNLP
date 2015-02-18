@@ -37,19 +37,15 @@ import edu.stanford.nlp.maxent.Problem;
 import edu.stanford.nlp.maxent.iis.LambdaSolve;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.objectbank.ReaderIteratorFactory;
-import edu.stanford.nlp.process.DocumentPreprocessor;
-import edu.stanford.nlp.process.ListProcessor;
-import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.process.TokenizerFactory;
-import edu.stanford.nlp.process.PTBTokenizer.PTBTokenizerFactory;
 import edu.stanford.nlp.process.TransformXML;
-import edu.stanford.nlp.process.WhitespaceTokenizer;
+import edu.stanford.nlp.process.*;
+import edu.stanford.nlp.process.PTBTokenizer.PTBTokenizerFactory;
 import edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter.OutputStyle;
-import edu.stanford.nlp.tagger.common.Tagger;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
 import edu.stanford.nlp.util.DataFilePaths;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.Timing;
@@ -161,11 +157,11 @@ import java.text.DecimalFormat;
  * <tr><td>trainFile</td><td>String</td><td>N/A</td><td>Train</td>
      <td>
        Path to the file holding the training data; specifying this option puts the tagger in training mode.  Only one of 'trainFile','testFile','textFile', and 'dump' may be specified.<br>
-       There are three formats possible.  The first is a text file of tagged data. Each line is considered a separate sentence.  In each sentence, words are separated by whitespace.  Each word must have a tag, which is separated from the token using the specified {@code tagSeparator}.  This format, called TEXT, is the default format.<br />
+       There are three formats possible.  The first is a text file of tagged data, Each line is considered a separate sentence.  In each sentence, words are separated by whitespace.  Each word must have a tag, which is separated using the specified tagSeparator.  This format, called TEXT, is the default format.<br />
        The second format is a file of Penn Treebank formatted tree files.  Trees are loaded one at a time and the tagged words in a tree are used as a training sentence.  To specify this format, preface the filename with "{@code format=TREES,}".  <br />
-       The final possible format is TSV files (tab-separated columns).  To specify a TSV file, set {@code trainFile} to "{@code format=TSV,wordColumn=x,tagColumn=y,filename}".  Column numbers are indexed from 0, and sentences are separated with blank lines. The default wordColumn is 0 and default tagColumn is 1.
+       The final possible format is TSV files (tab-separated columns).  To specify a TSV file, set trainFile to "{@code format=TSV,wordColumn=x,tagColumn=y,filename}".  Column numbers are indexed from 0, and sentences are separated with blank lines. The default wordColumn is 0 and default tagColumn is 1.
        <br>
-       A file can be in a different character set encoding than the tagger's default encoding by prefacing the filename with {@code "encoding=ENC"}.
+       A file can be in a different encoding than the tagger's default encoding by prefacing the filename with "encoding=ENC".
        You can specify the tagSeparator character in a TEXT file by prefacing the filename with "tagSeparator=c". <br/>
        Tree files can be fed through TreeTransformers and TreeNormalizers.  To specify a transformer, preface the filename with "treeTransformer=CLASSNAME".  To specify a normalizer, preface the filename with "treeNormalizer=CLASSNAME".
        You can also filter trees using a Filter&lt;Tree&gt;, which can be specified with "treeFilter=CLASSNAME".  A specific range of trees to be used can be specified with treeRange=X-Y.  Multiple parts of the range can be separated by : as opposed to the normal separator of ,.
@@ -185,7 +181,7 @@ import java.text.DecimalFormat;
  * <tr><td>tokenizerOptions</td><td>String</td><td></td><td>Tag,Test</td><td>Known options for the particular tokenizer used. A comma-separated list. For PTBTokenizer, options of interest include <code>americanize=false</code> and <code>asciiQuotes</code> (for German). Note that any choice of tokenizer options that conflicts with the tokenization used in the tagger training data will likely degrade tagger performance.</td></tr>
  * <tr><td>arch</td><td>String</td><td>generic</td><td>Train</td><td>Architecture of the model, as a comma-separated list of options, some with a parenthesized integer argument written k here: this determines what features are used to build your model.  See {@link ExtractorFrames} and {@link ExtractorFramesRare} for more information.</td></tr>
  * <tr><td>wordFunction</td><td>String</td><td>(none)</td><td>Train</td><td>A function to apply to the text before training or testing.  Must inherit from edu.stanford.nlp.util.Function&lt;String, String&gt;.  Can be blank.</td></tr>
- * <tr><td>lang</td><td>String</td><td>english</td><td>Train</td><td>Language from which the part of speech tags are drawn. This option determines which tags are considered closed-class (only fixed set of words can be tagged with a closed-class tag, such as prepositions). Defined languages are 'english' (Penn tagset), 'polish' (very rudimentary), 'french', 'chinese', 'arabic', 'german', and 'medline'.  </td></tr>
+ * <tr><td>lang</td><td>String</td><td>english</td><td>Train</td><td>Language from which the part of speech tags are drawn. This option determines which tags are considered closed-class (only fixed set of words can be tagged with a closed-class tag, such as prepositions). Defined languages are 'english' (Penn tagset), 'polish' (very rudimentary), 'chinese', 'arabic', 'german', and 'medline'.  </td></tr>
  * <tr><td>openClassTags</td><td>String</td><td>N/A</td><td>Train</td><td>Space separated list of tags that should be considered open-class.  All tags encountered that are not in this list are considered closed-class.  E.g. format: "NN VB"</td></tr>
  * <tr><td>closedClassTags</td><td>String</td><td>N/A</td><td>Train</td><td>Space separated list of tags that should be considered closed-class.  All tags encountered that are not in this list are considered open-class.</td></tr>
  * <tr><td>learnClosedClassTags</td><td>boolean</td><td>false</td><td>Train</td><td>If true, induce which tags are closed-class by counting as closed-class tags all those tags which have fewer unique word tokens than closedClassTagThreshold. </td></tr>
@@ -204,7 +200,7 @@ import java.text.DecimalFormat;
  * <tr><td>curWordMinFeatureThreshold</td><td>int</td><td>2</td><td>Train</td><td>Words that occur more than this number of times will generate features with all of the tags they've been seen with.</td></tr>
  * <tr><td>rareWordMinFeatureThresh</td><td>int</td><td>10</td><td>Train</td><td>Features of rare words whose histories occur fewer than this number of times are discarded.</td></tr>
  * <tr><td>veryCommonWordThresh</td><td>int</td><td>250</td><td>Train</td><td>Words that occur more than this number of times form an equivalence class by themselves.  Ignored unless you are using ambiguity classes.</td></tr>
- * <tr><td>debug</td><td>boolean</td><td>boolean</td><td>All</td><td>Whether to write debugging information (words, top words, unknown words, confusion matrix).  Useful for error analysis.</td></tr>
+ * <tr><td>debug</td><td>boolean</td><td>boolean</td><td>All</td><td>Whether to write debugging information (words, top words, unknown words).  Useful for error analysis.</td></tr>
  * <tr><td>debugPrefix</td><td>String</td><td>N/A</td><td>All</td><td>File (path) prefix for where to write out the debugging information (relevant only if debug=true).</td></tr>
  * <tr><td>nthreads</td><td>int</td><td>1</td><td>Test,Text</td><td>Number of threads to use when processing text.</td></tr>
  * </table>
@@ -218,7 +214,7 @@ import java.text.DecimalFormat;
  * @author Christopher Manning
  * @author John Bauer
  */
-public class MaxentTagger extends Tagger implements ListProcessor<List<? extends HasWord>,List<TaggedWord>>, Serializable {
+public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<TaggedWord>>, ListProcessor<List<? extends HasWord>,ArrayList<TaggedWord>>, Serializable {
 
   /**
    * The directory from which to get taggers when using
@@ -242,35 +238,31 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   public MaxentTagger() {
   }
 
-  public MaxentTagger(TaggerConfig config) {
-    // todo: maybe this shouldn't do this but replace the zero arg constructor.
-    // i.e., call init() not readModelAndInit(). This method is currently UNUSUED. Make non-public.
-    this(config.getModel(), config);
-  }
-
   /**
-   * Constructor for a tagger, loading a model stored in a particular file,
-   * classpath resource, or URL.
-   * The tagger data is loaded when the constructor is called (this can be
-   * slow). This constructor first constructs a TaggerConfig object, which
-   * loads the tagger options from the modelFile.
+   * Constructor for a tagger using a model stored in a particular file.
+   * The <code>modelFile</code> is a filename for the model data.
+   * The tagger data is loaded when the
+   * constructor is called (this can be slow).
+   * This constructor first constructs a TaggerConfig object, which loads
+   * the tagger options from the modelFile.
    *
-   * @param modelFile Filename, classpath resource, or URL for the trained model
+   * @param modelFile filename of the trained model
    * @throws RuntimeIOException if I/O errors or serialization errors
    */
   public MaxentTagger(String modelFile) {
-    this(modelFile, StringUtils.argsToProperties("-model", modelFile), true);
+    this(modelFile, StringUtils.argsToProperties(new String[] {"-model", modelFile}), true);
   }
 
   /**
    * Constructor for a tagger using a model stored in a particular file,
    * with options taken from the supplied TaggerConfig.
+   * The <code>modelFile</code> is a filename for the model data.
    * The tagger data is loaded when the
    * constructor is called (this can be slow).
    * This version assumes that the tagger options in the modelFile have
    * already been loaded into the TaggerConfig (if that is desired).
    *
-   * @param modelFile Filename, classpath resource, or URL for the trained model
+   * @param modelFile filename of the trained model
    * @param config The configuration for the tagger
    * @throws RuntimeIOException if I/O errors or serialization errors
    */
@@ -298,7 +290,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
 
-  final Dictionary dict = new Dictionary();
+  Dictionary dict = new Dictionary();
   TTags tags;
 
   /**
@@ -322,14 +314,10 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     return tags.getTag(index);
   }
 
-  public Set<String> tagSet() {
-    return tags.tagSet();
-  }
-
   private LambdaSolveTagger prob;
   // For each extractor index, we have a map from possible extracted
   // features to an array which maps from tag number to feature weight index in the lambdas array.
-  List<Map<String, int[]>> fAssociations = Generics.newArrayList();
+  List<Map<String, int[]>> fAssociations = new ArrayList<Map<String, int[]>>();
   //PairsHolder pairs = new PairsHolder();
   Extractors extractors;
   Extractors extractorsRare;
@@ -337,14 +325,14 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   final boolean alltags = false;
   final Map<String, Set<String>> tagTokens = Generics.newHashMap();
 
-  static final int RARE_WORD_THRESH = Integer.parseInt(TaggerConfig.RARE_WORD_THRESH);
-  static final int MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.MIN_FEATURE_THRESH);
-  static final int CUR_WORD_MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.CUR_WORD_MIN_FEATURE_THRESH);
-  static final int RARE_WORD_MIN_FEATURE_THRESH = Integer.parseInt(TaggerConfig.RARE_WORD_MIN_FEATURE_THRESH);
-  static final int VERY_COMMON_WORD_THRESH = Integer.parseInt(TaggerConfig.VERY_COMMON_WORD_THRESH);
+  static final int RARE_WORD_THRESH = Integer.valueOf(TaggerConfig.RARE_WORD_THRESH);
+  static final int MIN_FEATURE_THRESH = Integer.valueOf(TaggerConfig.MIN_FEATURE_THRESH);
+  static final int CUR_WORD_MIN_FEATURE_THRESH = Integer.valueOf(TaggerConfig.CUR_WORD_MIN_FEATURE_THRESH);
+  static final int RARE_WORD_MIN_FEATURE_THRESH = Integer.valueOf(TaggerConfig.RARE_WORD_MIN_FEATURE_THRESH);
+  static final int VERY_COMMON_WORD_THRESH = Integer.valueOf(TaggerConfig.VERY_COMMON_WORD_THRESH);
 
-  static final boolean OCCURRING_TAGS_ONLY = Boolean.parseBoolean(TaggerConfig.OCCURRING_TAGS_ONLY);
-  static final boolean POSSIBLE_TAGS_ONLY = Boolean.parseBoolean(TaggerConfig.POSSIBLE_TAGS_ONLY);
+  static final boolean OCCURRING_TAGS_ONLY = Boolean.valueOf(TaggerConfig.OCCURRING_TAGS_ONLY);
+  static final boolean POSSIBLE_TAGS_ONLY = Boolean.valueOf(TaggerConfig.POSSIBLE_TAGS_ONLY);
 
   private double defaultScore;
   private double[] defaultScores = null;
@@ -624,7 +612,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    */
   private void removeDeadRules() {
     for (Map<String, int[]> fAssociation : fAssociations) {
-      List<String> deadRules = Generics.newArrayList();
+      List<String> deadRules = new ArrayList<String>();
       for (Map.Entry<String, int[]> entry : fAssociation.entrySet()) {
         String value = entry.getKey();
         int[] fAssociations = entry.getValue();
@@ -744,7 +732,8 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
   /** This reads the complete tagger from a single model stored in a file, at a URL,
-   *  or as a resource in a jar file, and inits the tagger using a
+   *  or as a resource
+   *  in a jar file, and inits the tagger using a
    *  combination of the properties passed in and parameters from the file.
    *  <p>
    *  <i>Note for the future:</i> This assumes that the TaggerConfig in the file
@@ -809,7 +798,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
 
       xSize = rf.readInt();
       ySize = rf.readInt();
-      // dict = new Dictionary();  // this method is called in constructor, and it's initialized as empty already
+      dict = new Dictionary();
       dict.read(rf);
 
       if (VERBOSE) {
@@ -821,7 +810,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
 
       int[] numFA = new int[extractors.size() + extractorsRare.size()];
       int sizeAssoc = rf.readInt();
-      fAssociations = Generics.newArrayList();
+      fAssociations = new ArrayList<Map<String, int[]>>();
       for (int i = 0; i < extractors.size() + extractorsRare.size(); ++i) {
         fAssociations.add(Generics.<String, int[]>newHashMap());
       }
@@ -877,7 +866,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     NumberFormat nf = new DecimalFormat(" 0.000000;-0.000000");
     for (int i = 0; i < fAssociations.size(); ++i) {
       Map<String, int[]> fValueAssociations = fAssociations.get(i);
-      List<String> features = Generics.newArrayList();
+      List<String> features = new ArrayList<String>(fValueAssociations.keySet());
       Collections.sort(features);
       for (String featureValue : features) {
         int[] fTagAssociations = fValueAssociations.get(featureValue);
@@ -899,6 +888,11 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     return dict.sum(word) < rareWordThresh;
   }
 
+  // todo: clean this up. It seems like we'd be better off without this method. Used once in (MT's) PrefixTagger
+  public TTags getTags() {
+    return tags;
+  }
+
   /**
    * Tags the tokenized input string and returns the tagged version.
    * This method requires the input to already be tokenized.
@@ -911,7 +905,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * @return The same string with tags inserted in the form word/tag
    */
   public String tagTokenizedString(String toTag) {
-    List<Word> sent = Sentence.toUntaggedList(Arrays.asList(toTag.split("\\s+")));
+    ArrayList<Word> sent = Sentence.toUntaggedList(Arrays.asList(toTag.split("\\s+")));
     TestSentence testSentence = new TestSentence(this);
     testSentence.tagSentence(sent, false);
     return testSentence.getTaggedNice();
@@ -933,13 +927,13 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
   /**
-   * Expects a sentence and returns a tagged sentence.
+   * Expects a sentence and returns a tagged sentence.  The input Sentence items
    *
-   * @param in This needs to be a sentence (List of words)
-   * @return A sentence of TaggedWord
+   *
+   * @param in This needs to be a Sentence
+   * @return A Sentence of TaggedWord
    */
-  @Override
-  public List<TaggedWord> apply(List<? extends HasWord> in) {
+  public ArrayList<TaggedWord> apply(List<? extends HasWord> in) {
     TestSentence testSentence = new TestSentence(this);
     return testSentence.tagSentence(in, false);
   }
@@ -957,8 +951,8 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * @return A List of Sentence of TaggedWord
    */
   @Override
-  public List<List<TaggedWord>> process(List<? extends List<? extends HasWord>> sentences) {
-    List<List<TaggedWord>> taggedSentences = Generics.newArrayList();
+  public List<ArrayList<TaggedWord>> process(List<? extends List<? extends HasWord>> sentences) {
+    List<ArrayList<TaggedWord>> taggedSentences = new ArrayList<ArrayList<TaggedWord>>();
 
     TestSentence testSentence = new TestSentence(this);
     for (List<? extends HasWord> sentence : sentences) {
@@ -975,7 +969,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * @param sentence sentence to tag
    * @return tagged sentence
    */
-  public List<TaggedWord> tagSentence(List<? extends HasWord> sentence) {
+  public ArrayList<TaggedWord> tagSentence(List<? extends HasWord> sentence) {
     TestSentence testSentence = new TestSentence(this);
     return testSentence.tagSentence(sentence, false);
   }
@@ -986,12 +980,11 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * want to tag a single List instead of a List of Lists.  If you
    * supply tagSentence with a List of HasTag, and set reuseTags to
    * true, the tagger will reuse the supplied tags.
-   *
    * @param sentence sentence to tag
    * @param reuseTags whether or not to reuse the given tag
    * @return tagged sentence
    */
-  public List<TaggedWord> tagSentence(List<? extends HasWord> sentence,
+  public ArrayList<TaggedWord> tagSentence(List<? extends HasWord> sentence,
                                            boolean reuseTags) {
     TestSentence testSentence = new TestSentence(this);
     return testSentence.tagSentence(sentence, reuseTags);
@@ -1038,7 +1031,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * actually give it CoreLabels.
    */
   private static List<CoreLabel> castCoreLabels(List<? extends HasWord> sent) {
-    List<CoreLabel> coreLabels = Generics.newArrayList();
+    List<CoreLabel> coreLabels = new ArrayList<CoreLabel>();
     for (HasWord word : sent) {
       if (!(word instanceof CoreLabel)) {
         throw new ClassCastException("Expected CoreLabels");
@@ -1077,7 +1070,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     if (tokenizerFactory != null) {
       documentPreprocessor.setTokenizerFactory(tokenizerFactory);
     }
-    List<List<HasWord>> out = Generics.newArrayList();
+    List<List<HasWord>> out = new ArrayList<List<HasWord>>();
     for (List<HasWord> item : documentPreprocessor) {
       out.add(item);
     }
@@ -1142,7 +1135,6 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     byte[][] fnumArr = samples.getFnumArr();
     System.err.println("Samples from " + config.getFile());
     System.err.println("Number of features: " + feats.size());
-    System.err.println("Tag set: " + maxentTagger.tags.tagSet());
     Problem p = new Problem(samples, feats);
     LambdaSolveTagger prob = new LambdaSolveTagger(p, 0.0001, fnumArr);
     maxentTagger.prob = prob;
@@ -1265,7 +1257,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       if (tokenize) {
         sentences = tokenizeText(new StringReader(o), tokenizerFactory);
       } else {
-        sentences = Generics.newArrayList();
+        sentences = new ArrayList<List<HasWord>>();
         sentences.add(Sentence.toWordList(o.split("\\s+")));
       }
 
@@ -1575,11 +1567,6 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       writer.write("<pos>\n");
     }
 
-    String sentenceDelimiter = config.getSentenceDelimiter();
-    if (sentenceDelimiter != null && sentenceDelimiter.equals("newline")) {
-      sentenceDelimiter = "\n";
-    }
-
     while (true) {
       //Now we do everything through the doc preprocessor
       final DocumentPreprocessor docProcessor;
@@ -1587,19 +1574,16 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       // this happens when we reach end of file
       if (line == null)
         break;
-      docProcessor = new DocumentPreprocessor(new StringReader(line));
+      docProcessor = new DocumentPreprocessor(new BufferedReader(new StringReader(line)));
+
       docProcessor.setTokenizerFactory(tokenizerFactory);
-      docProcessor.setSentenceDelimiter(sentenceDelimiter);
-      if (config.keepEmptySentences()) {
-        docProcessor.setKeepEmptySentences(true);
-      }
 
       for (List<HasWord> sentence : docProcessor) {
         numWords += sentence.size();
 
         Timing t = new Timing();
         tagAndOutputSentence(sentence, outputLemmas, morpha, outputStyle,
-                             outputVerbosity, numSentences, "", writer);
+                             outputVerbosity, numSentences, "\n", writer);
 
         totalMillis += t.stop();
         writer.newLine();
@@ -1638,9 +1622,9 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     ObjectBank<List<CoreLabel>> ob = new ObjectBank<List<CoreLabel>>(new ReaderIteratorFactory(reader), readerAndWriter);
     PrintWriter pw = new PrintWriter(writer);
     for (List<CoreLabel> sentence : ob) {
-      List<CoreLabel> s = Generics.newArrayList();
+      ArrayList<CoreLabel> s = new ArrayList<CoreLabel>(sentence);
       numWords += s.size();
-      List<TaggedWord> taggedSentence = tagSentence(s, false);
+      ArrayList<TaggedWord> taggedSentence = tagSentence(s, false);
       Iterator<CoreLabel> origIter = sentence.iterator();
       for (TaggedWord tw : taggedSentence) {
         CoreLabel cl = origIter.next();
@@ -1660,7 +1644,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     printErrWordsPerSec(millis, numWords);
   }
 
-  public  <X extends HasWord> void runTagger(Iterable<List<X>> document,
+  public <X extends HasWord> void runTagger(Iterable<List<X>> document,
                                             BufferedWriter writer,
                                             OutputStyle outputStyle)
     throws IOException
@@ -1754,15 +1738,9 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     if (tagInside.length() > 0) {
       docProcessor = new DocumentPreprocessor(reader, DocumentPreprocessor.DocType.XML);
       docProcessor.setElementDelimiter(tagInside);
-      if (config.keepEmptySentences()) {
-        docProcessor.setKeepEmptySentences(true);
-      }
     } else {
       docProcessor = new DocumentPreprocessor(reader);
       docProcessor.setSentenceDelimiter(sentenceDelimiter);
-      if (config.keepEmptySentences()) {
-        docProcessor.setKeepEmptySentences(true);
-      }
     }
     docProcessor.setTokenizerFactory(tokenizerFactory);
 
@@ -1784,7 +1762,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
       }
       return coreLabels;
     } else {
-      List<TaggedWord> taggedSentence = tagSentence(sentence, false);
+      ArrayList<TaggedWord> taggedSentence = tagSentence(sentence, false);
       return taggedSentence;
     }
   }

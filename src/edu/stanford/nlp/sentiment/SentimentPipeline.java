@@ -7,13 +7,14 @@ import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
@@ -21,9 +22,9 @@ import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 
@@ -35,16 +36,12 @@ import edu.stanford.nlp.util.Generics;
  * <code>-parserModel</code> Which parser model to use, defaults to englishPCFG.ser.gz <br>
  * <code>-sentimentModel</code> Which sentiment model to use, defaults to sentiment.ser.gz <br>
  * <code>-file</code> Which file to process. <br>
- * <code>-fileList</code> A comma separated list of files to process. <br>
  * <code>-stdin</code> Read one line at a time from stdin. <br>
- * <code>-output</code> pennTrees: Output trees with scores at each binarized node.  vectors: Number tree nodes and print out the vectors.  probabilities: Output the scores for different labels for each node. Defaults to printing just the root. <br>
- * <code>-filterUnknown</code> remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels <br>
- * <code>-help</code> Print out help <br>
+ * <code>-output</code> pennTrees: Output trees with scores at each binarized node.  vectors: Number tree nodes and print out the vectors.  Defaults to printing just the root. <br>
  *
  * @author John Bauer
  */
 public class SentimentPipeline {
-
   private static final NumberFormat NF = new DecimalFormat("0.0000");
 
   static enum Output {
@@ -54,8 +51,6 @@ public class SentimentPipeline {
   static enum Input {
     TEXT, TREES
   }
-
-  private SentimentPipeline() {} // static methods
 
   /**
    * Sets the labels on the tree (except the leaves) to be the integer
@@ -177,8 +172,6 @@ public class SentimentPipeline {
     }
   }
 
-  static final String DEFAULT_TLPP_CLASS = "edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams";
-
   public static void help() {
     System.err.println("Known command line arguments:");
     System.err.println("  -sentimentModel <model>: Which model to use");
@@ -186,53 +179,36 @@ public class SentimentPipeline {
     System.err.println("  -file <filename>: Which file to process");
     System.err.println("  -fileList <file>,<file>,...: Comma separated list of files to process.  Output goes to file.out");
     System.err.println("  -stdin: Process stdin instead of a file");
-    System.err.println("  -input <format>: Which format to input, TEXT or TREES.  Will not process stdin as trees.  If trees are not already binarized, they will be binarized with -tlppClass's headfinder, which means they must have labels in that treebank's tagset.");
-    System.err.println("  -output <format>: Which format to output, PENNTREES, VECTORS, PROBABILITIES, or ROOT.  Multiple formats can be specified as a comma separated list.");
-    System.err.println("  -filterUnknown: remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels");
-    System.err.println("  -tlppClass: a class to use for building the binarizer if using non-binarized TREES as input.  Defaults to " + DEFAULT_TLPP_CLASS);
+    System.err.println("  -input <format>: Which format to input, TEXT or TREES.  Will not process stdin as trees.  Trees need to be binarized");
+    System.err.println("  -output <format>: Which format to output, PENNTREES, VECTOR, PROBABILITIES, or ROOT.  Multiple formats can be specified as a comma separated list.");
+    System.err.println("  -filterUnknown: remove neutral and unknown trees from the input.  Only applies to TREES input");
   }
 
   /**
    * Reads an annotation from the given filename using the requested input.
    */
-  public static List<Annotation> getAnnotations(StanfordCoreNLP tokenizer, Input inputFormat, String filename, boolean filterUnknown) {
+  public static Annotation getAnnotation(Input inputFormat, String filename, boolean filterUnknown) {
     switch (inputFormat) {
     case TEXT: {
       String text = IOUtils.slurpFileNoExceptions(filename);
       Annotation annotation = new Annotation(text);
-      tokenizer.annotate(annotation);
-      List<Annotation> annotations = Generics.newArrayList();
-      for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-        Annotation nextAnnotation = new Annotation(sentence.get(CoreAnnotations.TextAnnotation.class));
-        nextAnnotation.set(CoreAnnotations.SentencesAnnotation.class, Collections.singletonList(sentence));
-        annotations.add(nextAnnotation);
-      }
-      return annotations;
+      return annotation;
     }
     case TREES: {
-      List<Tree> trees;
+      List<Tree> trees = SentimentUtils.readTreesWithGoldLabels(filename);
       if (filterUnknown) {
-        trees = SentimentUtils.readTreesWithGoldLabels(filename);
         trees = SentimentUtils.filterUnknownRoots(trees);
-      } else {
-        trees = Generics.newArrayList();
-        MemoryTreebank treebank = new MemoryTreebank("utf-8");
-        treebank.loadPath(filename, null);
-        for (Tree tree : treebank) {
-          trees.add(tree);
-        }
       }
-
-      List<Annotation> annotations = Generics.newArrayList();
+      List<CoreMap> sentences = Generics.newArrayList();
+      
       for (Tree tree : trees) {
         CoreMap sentence = new Annotation(Sentence.listToString(tree.yield()));
-        sentence.set(TreeCoreAnnotations.TreeAnnotation.class, tree);
-        List<CoreMap> sentences = Collections.singletonList(sentence);
-        Annotation annotation = new Annotation("");
-        annotation.set(CoreAnnotations.SentencesAnnotation.class, sentences);
-        annotations.add(annotation);
+        sentence.set(TreeCoreAnnotations.BinarizedTreeAnnotation.class, tree);
+        sentences.add(sentence);
       }
-      return annotations;
+      Annotation annotation = new Annotation("");
+      annotation.set(CoreAnnotations.SentencesAnnotation.class, sentences);
+      return annotation;
     }
     default:
       throw new IllegalArgumentException("Unknown format " + inputFormat);
@@ -249,10 +225,8 @@ public class SentimentPipeline {
 
     boolean filterUnknown = false;
 
-    List<Output> outputFormats = Collections.singletonList(Output.ROOT);
+    List<Output> outputFormats = Arrays.asList(new Output[] { Output.ROOT });
     Input inputFormat = Input.TEXT;
-
-    String tlppClass = DEFAULT_TLPP_CLASS;
 
     for (int argIndex = 0; argIndex < args.length; ) {
       if (args[argIndex].equalsIgnoreCase("-sentimentModel")) {
@@ -283,43 +257,30 @@ public class SentimentPipeline {
       } else if (args[argIndex].equalsIgnoreCase("-filterUnknown")) {
         filterUnknown = true;
         argIndex++;
-      } else if (args[argIndex].equalsIgnoreCase("-tlppClass")) {
-        tlppClass = args[argIndex + 1];
-        argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-help")) {
         help();
         System.exit(0);
       } else {
         System.err.println("Unknown argument " + args[argIndex + 1]);
-        help();
         throw new IllegalArgumentException("Unknown argument " + args[argIndex + 1]);
       }
     }
 
-    // We construct two pipelines.  One handles tokenization, if
-    // necessary.  The other takes tokenized sentences and converts
-    // them to sentiment trees.
-    Properties pipelineProps = new Properties();
-    Properties tokenizerProps = null;
+    Properties props = new Properties();
     if (sentimentModel != null) {
-      pipelineProps.setProperty("sentiment.model", sentimentModel);
+      props.setProperty("sentiment.model", sentimentModel);
     }
     if (parserModel != null) {
-      pipelineProps.setProperty("parse.model", parserModel);
+      props.setProperty("parse.model", parserModel);
     }
     if (stdin) {
-      pipelineProps.setProperty("ssplit.eolonly", "true");
+      props.setProperty("ssplit.eolonly", "true");
     }
     if (inputFormat == Input.TREES) {
-      pipelineProps.setProperty("annotators", "binarizer, sentiment");
-      pipelineProps.setProperty("customAnnotatorClass.binarizer", "edu.stanford.nlp.pipeline.BinarizerAnnotator");
-      pipelineProps.setProperty("binarizer.tlppClass", tlppClass);
-      pipelineProps.setProperty("enforceRequirements", "false");
+      props.setProperty("annotators", "sentiment");
+      props.setProperty("enforceRequirements", "false");
     } else {
-      pipelineProps.setProperty("annotators", "parse, sentiment");
-      pipelineProps.setProperty("enforceRequirements", "false");
-      tokenizerProps = new Properties();
-      tokenizerProps.setProperty("annotators", "tokenize, ssplit");
+      props.setProperty("annotators", "tokenize, ssplit, parse, sentiment");
     }
 
     int count = 0;
@@ -333,21 +294,18 @@ public class SentimentPipeline {
       throw new IllegalArgumentException("Please specify either -file, -fileList or -stdin");
     }
 
-    StanfordCoreNLP tokenizer = (tokenizerProps == null) ? null : new StanfordCoreNLP(tokenizerProps);
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(pipelineProps);
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
     if (filename != null) {
       // Process a file.  The pipeline will do tokenization, which
       // means it will split it into sentences as best as possible
       // with the tokenizer.
-      List<Annotation> annotations = getAnnotations(tokenizer, inputFormat, filename, filterUnknown);
-      for (Annotation annotation : annotations) {
-        pipeline.annotate(annotation);
+      Annotation annotation = getAnnotation(inputFormat, filename, filterUnknown);
+      pipeline.annotate(annotation);
 
-        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-          System.out.println(sentence);
-          outputTree(System.out, sentence, outputFormats);
-        }
+      for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+        System.out.println(sentence);
+        outputTree(System.out, sentence, outputFormats);
       }
     } else if (fileList != null) {
       // Process multiple files.  The pipeline will do tokenization,
@@ -355,16 +313,14 @@ public class SentimentPipeline {
       // possible with the tokenizer.  Output will go to filename.out
       // for each file.
       for (String file : fileList.split(",")) {
-        List<Annotation> annotations = getAnnotations(tokenizer, inputFormat, file, filterUnknown);
+        Annotation annotation = getAnnotation(inputFormat, file, filterUnknown);
+        pipeline.annotate(annotation);
+
         FileOutputStream fout = new FileOutputStream(file + ".out");
         PrintStream pout = new PrintStream(fout);
-        for (Annotation annotation : annotations) {
-          pipeline.annotate(annotation);
-
-          for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
-            pout.println(sentence);
-            outputTree(pout, sentence, outputFormats);
-          }
+        for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
+          pout.println(sentence);
+          outputTree(pout, sentence, outputFormats);
         }
         pout.flush();
         fout.close();
@@ -374,13 +330,15 @@ public class SentimentPipeline {
       System.err.println("Reading in text from stdin.");
       System.err.println("Please enter one sentence per line.");
       System.err.println("Processing will end when EOF is reached.");
-      BufferedReader reader = IOUtils.readerFromStdin("utf-8");
-
-      for (String line; (line = reader.readLine()) != null; ) {
+      BufferedReader reader = new BufferedReader(IOUtils.encodedInputStreamReader(System.in, "utf-8"));
+      while (true) {
+        String line = reader.readLine();
+        if (line == null) {
+          break;
+        }
         line = line.trim();
         if (line.length() > 0) {
-          Annotation annotation = tokenizer.process(line);
-          pipeline.annotate(annotation);
+          Annotation annotation = pipeline.process(line);
           for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
             outputTree(System.out, sentence, outputFormats);
           }
@@ -390,8 +348,7 @@ public class SentimentPipeline {
           System.out.println("");
         }
       }
-
+      
     }
   }
-
 }

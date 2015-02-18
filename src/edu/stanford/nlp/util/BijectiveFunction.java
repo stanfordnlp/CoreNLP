@@ -1,9 +1,7 @@
 package edu.stanford.nlp.util;
 
-import java.util.function.Function;
-
 /**
- * A {@link java.util.function.Function} that is invertible, and so has the unapply method.
+ * A {@link Function} that is invertible, and so has the unapply method.
  * 
  *
  * @author David Hall

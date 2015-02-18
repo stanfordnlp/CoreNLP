@@ -4,7 +4,7 @@ import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.ling.*;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Index;
 
 import java.io.OutputStream;
@@ -234,11 +234,16 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
    * UnsupportedOperationException if the language doesn't support
    * dependencies or GrammaticalStructures.
    */
-  GrammaticalStructure getGrammaticalStructure(Tree t, Predicate<String> filter,
+  GrammaticalStructure getGrammaticalStructure(Tree t, Filter<String> filter,
                                                HeadFinder hf);
 
   boolean supportsBasicDependencies();
 
-  /** When run inside StanfordCoreNLP, which flags should be used by default */
-  String[] defaultCoreNLPFlags();
+  /**
+   * For the DVParser in particular, we want to combine some
+   * categories to simplify the number of matrices and therefore the
+   * number of parameters.  For example, we will treat NN, NNP, etc
+   * the same for English.
+   */
+  String combineCategory(String basic);
 }

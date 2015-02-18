@@ -11,6 +11,8 @@ import edu.stanford.nlp.util.Triple;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,8 +20,7 @@ import java.util.Set;
 
 /**
  * Implementation of Generalized Expectation Objective function for
- * an I.I.D. log-linear model. See Mann and McCallum, ACL 2008 for GE in CRFs.
- * This code, however, is just for log-linear model
+ * an I.I.D. log-linear model. See Mann and McCallum, ACL 2008.
  * IMPORTANT: the current implementation is only correct as long as
  * the labeled features passed to GE are binary.
  * However, other features are allowed to be real valued.

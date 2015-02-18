@@ -22,7 +22,7 @@ public class SUTimeITest extends TestCase {
     synchronized(SUTimeITest.class) {
       if (pipeline == null) {
         pipeline = new AnnotationPipeline();
-        pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+        pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
         pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
         pipeline.addAnnotator(new POSTaggerAnnotator(DefaultPaths.DEFAULT_POS_MODEL, false));
         //pipeline.addAnnotator(new NumberAnnotator(false));
@@ -158,8 +158,7 @@ public class SUTimeITest extends TestCase {
             "It was six and three months.\n" +
             "Several days has already passed.\n" +
             "For five hours on Friday, the shop was closed.\n" +
-            "For more than five hours on Friday, the shop was closed.\n";
-           // "Last two days was hot.";  // TODO: Add this test case
+            "For more than five hours on Friday, the shop was closed.";
 
     Iterator<Timex> expectedTimexes =
       Arrays.asList(Timex.fromXml("<TIMEX3 tid=\"t1\" alt_value=\"1997 INTERSECT P9M\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf0\" anchorTimeID=\"t2\">the first 9 months of 1997</TIMEX3>"),
@@ -175,7 +174,6 @@ public class SUTimeITest extends TestCase {
                     Timex.fromXml("<TIMEX3 tid=\"t12\" value=\"PXD\" type=\"DURATION\">Several days</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t13\" alt_value=\"XXXX-WXX-5 INTERSECT PT5H\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf1\" anchorTimeID=\"t14\">five hours on Friday</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t15\" alt_value=\"XXXX-WXX-5 INTERSECT &gt;PT5H\" type=\"DATE\" mod=\"MORE_THAN\" temporalFunction=\"true\" valueFromFunction=\"tf2\" anchorTimeID=\"t14\">more than five hours on Friday</TIMEX3>")
-                    //Timex.fromXml("<TIMEX3 alt_value=\"THIS P2D OFFSET P-2D\" anchorTimeID=\"t17\" temporalFunction=\"true\" tid=\"t16\" type=\"DATE\" valueFromFunction=\"tf3\">Last two days</TIMEX3>")
       ).iterator();
 
     Iterator<Timex> expectedTimexesResolved =
@@ -193,7 +191,6 @@ public class SUTimeITest extends TestCase {
                     // Friday past tense
                     Timex.fromXml("<TIMEX3 tid=\"t13\" alt_value=\"2010-02-19-WXX-5 INTERSECT PT5H\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf1\" anchorTimeID=\"t14\">five hours on Friday</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t15\" alt_value=\"2010-02-19-WXX-5 INTERSECT &gt;PT5H\" type=\"DATE\" mod=\"MORE_THAN\" temporalFunction=\"true\" valueFromFunction=\"tf2\" anchorTimeID=\"t16\">more than five hours on Friday</TIMEX3>")
-                    //Timex.fromXml("<TIMEX3 alt_value=\"THIS P2D OFFSET P-2D\" anchorTimeID=\"t17\" temporalFunction=\"true\" tid=\"t16\" type=\"DATE\" valueFromFunction=\"tf3\">Last two days</TIMEX3>")
       ).iterator();
 
     Annotation document = createDocument(testText);
@@ -349,12 +346,6 @@ public class SUTimeITest extends TestCase {
         "It is 6:53:32 PDT on 7-16-2010.\n" +
         "ISO partial datetime 2008-05-16T09 Beijing Time.\n" +
         "It is 2:14:12 MSK\n";
-//        "ISO datetime is 11 Feb 2005 17:13:41-0800 (PST).\n" +
-//        "ISO datetime is Fri, 11 Feb 2005 17:13:41 -0800 (PST).\n" +
-//        "ISO datetime is 2004-03-04T18:32:56-0800 (PST).\n" +
-//        "ISO datetime is 2004-03-05T18:32:56 (PST).\n" +
-//        "ISO datetime is 2004-03-06T18:32:56+0800.\n" +
-//        "ISO datetime is 2004-03-06T18:32:56-0800.\n";
 //        "The time is 1400D\n";
 
     // set up expected results
@@ -369,12 +360,6 @@ public class SUTimeITest extends TestCase {
         Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"2010-07-16T06:53:32-0800\" type=\"TIME\">6:53:32 PDT on 7-16-2010</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t8\" value=\"2008-05-16T09\" type=\"TIME\">2008-05-16T09</TIMEX3>"),  // TODO: Beijing Time
         Timex.fromXml("<TIMEX3 tid=\"t9\" value=\"T02:14:12+0300\" type=\"TIME\">2:14:12 MSK</TIMEX3>")
-//        Timex.fromXml("<TIMEX3 tid=\"t10\" value=\"2005-02-11T17:13:41-0800\" type=\"TIME\">11 Feb 2005 17:13:41-0800 (PST)</TIMEX3>"),
-//        Timex.fromXml("<TIMEX3 tid=\"t11\" value=\"2005-02-11T17:13:41-0800\" type=\"TIME\">Fri, 11 Feb 2005 17:13:41-0800 (PST)</TIMEX3>"),
-//        Timex.fromXml("<TIMEX3 tid=\"t11\" value=\"2004-03-04T18:32:56-0800\" type=\"TIME\">2004-03-04T18:32:56-0800 (PST)</TIMEX3>"),
-//        Timex.fromXml("<TIMEX3 tid=\"t12\" value=\"2004-03-05T18:32:56-0800\" type=\"TIME\">2004-03-05T18:32:56 (PST)</TIMEX3>"),
-//        Timex.fromXml("<TIMEX3 tid=\"t13\" value=\"2004-03-06T18:32:56+0800\" type=\"TIME\">2004-03-06T18:32:56+0800</TIMEX3>"),
-//        Timex.fromXml("<TIMEX3 tid=\"t14\" value=\"2004-03-06T18:32:56-0800\" type=\"TIME\">2004-03-06T18:32:56-0800</TIMEX3>")
 //        Timex.fromXml("<TIMEX3 tid=\"t10\" value=\"T14:00+0400\" type=\"TIME\">1400D</TIMEX3>")
       ).iterator();
 
@@ -389,12 +374,6 @@ public class SUTimeITest extends TestCase {
         Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"2010-07-16T06:53:32-0800\" type=\"TIME\">6:53:32 PDT on 7-16-2010</TIMEX3>"),
         Timex.fromXml("<TIMEX3 tid=\"t8\" value=\"2008-05-16T09\" type=\"TIME\">2008-05-16T09</TIMEX3>"),  // TODO: Beijing Time
         Timex.fromXml("<TIMEX3 tid=\"t9\" value=\"2010-02-17T02:14:12+0300\" type=\"TIME\">2:14:12 MSK</TIMEX3>")
-//        Timex.fromXml("<TIMEX3 tid=\"t10\" value=\"2005-02-11T17:13:41-0800\" type=\"TIME\">11 Feb 2005 17:13:41-0800 (PST)</TIMEX3>"),
-//        Timex.fromXml("<TIMEX3 tid=\"t11\" value=\"2005-02-11T17:13:41-0800\" type=\"TIME\">Fri, 11 Feb 2005 17:13:41-0800 (PST)</TIMEX3>"),
-//        Timex.fromXml("<TIMEX3 tid=\"t11\" value=\"2004-03-04T18:32:56-0800\" type=\"TIME\">2004-03-04T18:32:56-0800 (PST)</TIMEX3>"),
-//        Timex.fromXml("<TIMEX3 tid=\"t12\" value=\"2004-03-05T18:32:56-0800\" type=\"TIME\">2004-03-05T18:32:56 (PST)</TIMEX3>"),
-//        Timex.fromXml("<TIMEX3 tid=\"t13\" value=\"2004-03-06T18:32:56+0800\" type=\"TIME\">2004-03-06T18:32:56+0800</TIMEX3>"),
-//        Timex.fromXml("<TIMEX3 tid=\"t14\" value=\"2004-03-06T18:32:56-0800\" type=\"TIME\">2004-03-06T18:32:56-0800</TIMEX3>")
 //        Timex.fromXml("<TIMEX3 tid=\"t10\" value=\"2010-02-17T14:00+0400\" type=\"TIME\">1400D</TIMEX3>")
       ).iterator();
 
@@ -827,8 +806,7 @@ public class SUTimeITest extends TestCase {
             "Meeting in madrid this week.\n" +
             "They watched a movie over the weekend.\n" +
             // TODO: semi-annual
-            "But publicity-shy Gabriel Garcia Marquez , who turned 80 this month, did finally appear Monday at the semi-annual meeting of the Inter American Press Association as it ended with a luncheon\n" +
-            "The event happens tomorrow night, not Wednesday afternoon.";
+            "But publicity-shy Gabriel Garcia Marquez , who turned 80 this month, did finally appear Monday at the semi-annual meeting of the Inter American Press Association as it ended with a luncheon";
 
 
     Iterator<Timex> expectedTimexes =
@@ -841,10 +819,7 @@ public class SUTimeITest extends TestCase {
                     Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"XXXX-WE\" type=\"DATE\" range=\"(XXXX-WXX-6,XXXX-WXX-7,P2D)\">the weekend</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t8\" alt_value=\"THIS P1M\" type=\"DATE\" temporalFunction=\"true\" valueFromFunction=\"tf2\" anchorTimeID=\"t0\" range=\"(THIS P1M,THIS P1M,)\">this month</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t9\" value=\"XXXX-WXX-1\" type=\"DATE\" range=\"(XXXX-WXX-1,XXXX-WXX-1,P1D)\">Monday</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 tid=\"t10\" value=\"P6M\" type=\"SET\" quant=\"EVERY\" freq=\"P1X\" periodicity=\"P6M\">semi-annual</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 alt_value=\"OFFSET P1D INTERSECT NI\" anchorTimeID=\"t12\" range=\"(OFFSET P1D INTERSECT NI,OFFSET P1D INTERSECT NI,)\" temporalFunction=\"true\" tid=\"t11\" type=\"DATE\" valueFromFunction=\"tf3\">tomorrow night</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 range=\"(XXXX-WXX-3T12:00:00.000,XXXX-WXX-3T18,PT6H)\" tid=\"t13\" type=\"TIME\" value=\"XXXX-WXX-3TAF\">Wednesday afternoon</TIMEX3>")
-      ).iterator();
+                    Timex.fromXml("<TIMEX3 tid=\"t10\" value=\"P6M\" type=\"SET\" quant=\"EVERY\" freq=\"P1X\" periodicity=\"P6M\">semi-annual</TIMEX3>")).iterator();
     Iterator<Timex> expectedTimexesResolved =
       Arrays.asList(Timex.fromXml("<TIMEX3 tid=\"t1\" value=\"2003-01-31TMO\" type=\"TIME\" range=\"(2003-01-31T06:00:00.000,2003-01-31T12:00,PT6H)\">The morning of January 31</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t2\" value=\"2002-12\" type=\"DATE\" range=\"(2002-12-01,2002-12-31,P1M)\">December of 2002</TIMEX3>"),
@@ -855,10 +830,7 @@ public class SUTimeITest extends TestCase {
                     Timex.fromXml("<TIMEX3 tid=\"t7\" value=\"2003-W16-WE\" type=\"DATE\" range=\"(2003-04-19,2003-04-20,P2D)\">the weekend</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t8\" value=\"2003-04\" type=\"DATE\" range=\"(2003-04-01,2003-04-30,P1M)\">this month</TIMEX3>"),
                     Timex.fromXml("<TIMEX3 tid=\"t9\" value=\"2003-04-14\" type=\"DATE\" range=\"(2003-04-14-WXX-1,2003-04-14-WXX-1,P1D)\">Monday</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 tid=\"t10\" value=\"P6M\" type=\"SET\" quant=\"EVERY\" freq=\"P1X\" periodicity=\"P6M\">semi-annual</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 range=\"(2003-04-15T19:00:00.000,2003-04-16T05:00:00.000,PT10H)\" tid=\"t11\" type=\"TIME\" value=\"2003-04-15TNI\">tomorrow night</TIMEX3>"),
-                    Timex.fromXml("<TIMEX3 range=\"(2003-04-16-WXX-3T12:00:00.000,2003-04-16-WXX-3T18,PT6H)\" tid=\"t12\" type=\"TIME\" value=\"2003-04-16TAF\">Wednesday afternoon</TIMEX3>")
-      ).iterator();
+                    Timex.fromXml("<TIMEX3 tid=\"t10\" value=\"P6M\" type=\"SET\" quant=\"EVERY\" freq=\"P1X\" periodicity=\"P6M\">semi-annual</TIMEX3>")).iterator();
 
     // create document
     Annotation document = createDocument(testText);

@@ -3,23 +3,11 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.util.Pair;
 
 import java.io.*;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * Serializes Annotation objects using the default Java serializer
  */
 public class GenericAnnotationSerializer extends AnnotationSerializer {
-
-  boolean compress = false;
-
-  public GenericAnnotationSerializer(boolean compress) {
-    this.compress = compress;
-  }
-
-  public GenericAnnotationSerializer() {
-    this(false);
-  }
 
   /** Turns out, an ObjectOutputStream cannot append to a file. This is dumb. */
   public class AppendingObjectOutputStream extends ObjectOutputStream {
@@ -39,11 +27,11 @@ public class GenericAnnotationSerializer extends AnnotationSerializer {
       ((AppendingObjectOutputStream) os).writeObject(corpus);
       return os;
     } else if (os instanceof ObjectOutputStream) {
-      ObjectOutputStream objectOutput = new AppendingObjectOutputStream(compress ? new GZIPOutputStream(os) : os);
+      ObjectOutputStream objectOutput = new AppendingObjectOutputStream(os);
       objectOutput.writeObject(corpus);
       return objectOutput;
     } else {
-      ObjectOutputStream objectOutput = new ObjectOutputStream(compress ? new GZIPOutputStream(os) : os);
+      ObjectOutputStream objectOutput = new ObjectOutputStream(os);
       objectOutput.writeObject(corpus);
       return objectOutput;
     }
@@ -55,7 +43,7 @@ public class GenericAnnotationSerializer extends AnnotationSerializer {
     if (is instanceof ObjectInputStream) {
       objectInput = (ObjectInputStream) is;
     } else {
-      objectInput = new ObjectInputStream(compress ? new GZIPInputStream(is) : is);
+      objectInput = new ObjectInputStream(is);
     }
     Object annotation = objectInput.readObject();
     if(annotation == null) return null;

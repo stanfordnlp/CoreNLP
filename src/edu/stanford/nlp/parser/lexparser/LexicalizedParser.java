@@ -1,5 +1,5 @@
 // Stanford Parser -- a probabilistic lexicalized NL CFG parser
-// Copyright (c) 2002 - 2014 The Board of Trustees of
+// Copyright (c) 2002 - 2011 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -13,8 +13,8 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation,
-// Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
@@ -27,19 +27,17 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.parser.common.ArgUtils;
-import edu.stanford.nlp.parser.common.ParserGrammar;
-import edu.stanford.nlp.parser.common.ParserQuery;
-import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.metrics.Eval;
-import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.util.ErasureUtils;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
@@ -87,7 +85,7 @@ import java.lang.reflect.Method;
  * @author Galen Andrew (considerable refactoring)
  * @author John Bauer (made threadsafe)
  */
-public class LexicalizedParser extends ParserGrammar implements Serializable {
+public class LexicalizedParser implements Function<List<? extends HasWord>, Tree>, Serializable {
 
   public Lexicon lex;
   public BinaryGrammar bg;
@@ -96,27 +94,13 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   public Index<String> stateIndex, wordIndex, tagIndex;
 
   private Options op;
-
-  @Override
   public Options getOp() { return op; }
 
-  public Reranker reranker; // = null;
+  public Reranker reranker = null;
 
-  @Override
   public TreebankLangParserParams getTLPParams() { return op.tlpParams; }
 
-  @Override
   public TreebankLanguagePack treebankLanguagePack() { return getTLPParams().treebankLanguagePack(); }
-
-  @Override
-  public String[] defaultCoreNLPFlags() {
-    return getTLPParams().defaultCoreNLPFlags();
-  }
-
-  @Override
-  public boolean requiresTags() {
-    return false;
-  }
 
   private static final String SERIALIZED_PARSER_PROPERTY = "edu.stanford.nlp.SerializedLexicalizedParser";
   public static final String DEFAULT_PARSER_LOC = ((System.getenv("NLP_PARSER") != null) ?
@@ -275,6 +259,34 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
 
 
   /**
+   * Converts a Sentence/List/String into a Tree.  If it can't be parsed,
+   * it is made into a trivial tree in which each word is attached to a
+   * dummy tag ("X") and then to a start nonterminal (also "X").  In all
+   * circumstances, the input will be treated as a single sentence to be
+   * parsed.
+   *
+   * @param words The input sentence (a List of words)
+   * @return A Tree that is the parse tree for the sentence.  If the parser
+   *         fails, a new Tree is synthesized which attaches all words to the
+   *         root.
+   * @throws IllegalArgumentException If argument isn't a List or String
+   */
+  @Override
+  public Tree apply(List<? extends HasWord> words) {
+    return parse(words);
+  }
+
+  /**
+   * Will parse the text in <code>sentence</code> as if it represented
+   * a single sentence by first processing it with a tokenizer.
+   */
+  public Tree parse(String sentence) {
+    TokenizerFactory<? extends HasWord> tf = op.tlpParams.treebankLanguagePack().getTokenizerFactory();
+    Tokenizer<? extends HasWord> tokenizer = tf.getTokenizer(new BufferedReader(new StringReader(sentence)));
+    return parse(tokenizer.tokenize());
+  }
+
+  /**
    * Will process a list of strings into a list of HasWord and return
    * the parse tree associated with that list.
    */
@@ -305,7 +317,16 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       System.err.println("Recovering using fall through strategy: will construct an (X ...) tree.");
     }
     // if can't parse or exception, fall through
-    return ParserUtils.xTree(lst);
+    // TODO: merge with ParserAnnotatorUtils
+    TreeFactory lstf = new LabeledScoredTreeFactory();
+    List<Tree> lst2 = new ArrayList<Tree>();
+    for (HasWord obj : lst) {
+      String s = obj.word();
+      Tree t = lstf.newLeaf(s);
+      Tree t2 = lstf.newTreeNode("X", Collections.singletonList(t));
+      lst2.add(t2);
+    }
+    return lstf.newTreeNode("X", lst2);
   }
 
   public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences) {
@@ -371,13 +392,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     }
   }
 
-
-  public List<ParserQueryEval> getParserQueryEvals() {
-    return Collections.emptyList();
-  }
-
-
-  @Override
   public ParserQuery parserQuery() {
     if (reranker == null) {
       return new LexicalizedParserQuery(this);
@@ -670,9 +684,8 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     return trainTransformer;
   }
 
-  /** @return A triple of binaryTrainTreebank, binarySecondaryTrainTreebank, binaryTuneTreebank.
+  /** @return a pair of binaryTrainTreebank,binaryTuneTreebank.
    */
-  @SuppressWarnings("UnusedDeclaration")
   public static Triple<Treebank, Treebank, Treebank> getAnnotatedBinaryTreebankFromTreebank(Treebank trainTreebank,
       Treebank secondaryTreebank,
       Treebank tuneTreebank,
@@ -754,7 +767,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       binarizer.dumpStats();
     }
 
-    return new Triple<>(trainTreebank, secondaryTreebank, tuneTreebank);
+    return new Triple<Treebank, Treebank, Treebank>(trainTreebank, secondaryTreebank, tuneTreebank);
   }
 
   private static void removeDeleteSplittersFromSplitters(TreebankLanguagePack tlp, Options op) {
@@ -1015,7 +1028,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    *   </li>
    *
    *   <li> <b>Parse one or more files, given a serialized grammar and a list of files</b>
-   *    <code>java -mx512m edu.stanford.nlp.parser.lexparser.LexicalizedParser [-v] serializedGrammarPath filename [filename]*</code>
+   *    <code>java -mx512m edu.stanford.nlp.parser.lexparser.LexicalizedParser [-v] serializedGrammarPath filename [filename] ...</code>
    *   </li>
    *
    *   <li> <b>Test and report scores for a serialized grammar on trees in an output directory</b>
@@ -1033,26 +1046,22 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    * most current treebanks).  It can be specified like a range of pages to be
    * printed, for instance as <code>200-2199</code> or
    * <code>1-300,500-725,9000</code> or just as <code>1</code> (if all your
-   * trees are in a single file, either omit this parameter or just give a dummy
-   * argument such as {@code 0}).
-   * If the filename to parse is "-" then the parser parses from stdin.
-   * If no files are supplied to parse, then a hardwired sentence
-   * is parsed.
-   *
-   * <p>
+   * trees are in a single file, just give a dummy argument such as
+   * <code>0</code> or <code>1</code>).
    * The parser can write a grammar as either a serialized Java object file
    * or in a text format (or as both), specified with the following options:
-   * <blockquote><code>
-   * java edu.stanford.nlp.parser.lexparser.LexicalizedParser
-   * [-v] -train
-   * trainFilesPath [fileRange] [-saveToSerializedFile grammarPath]
-   * [-saveToTextFile grammarPath]
-   * </code></blockquote>
    *
    * <p>
-   * In the same position as the verbose flag ({@code -v}), many other
+   * <code>java edu.stanford.nlp.parser.lexparser.LexicalizedParser
+   * [-v] -train
+   * trainFilesPath [fileRange] [-saveToSerializedFile grammarPath]
+   * [-saveToTextFile grammarPath]</code><p>
+   * If no files are supplied to parse, then a hardwired sentence
+   * is parsed. <p>
+   *
+   * In the same position as the verbose flag (<code>-v</code>), many other
    * options can be specified.  The most useful to an end user are:
-   * <ul>
+   * <UL>
    * <LI><code>-tLPP class</code> Specify a different
    * TreebankLangParserParams, for when using a different language or
    * treebank (the default is English Penn Treebank). <i>This option MUST occur
@@ -1152,7 +1161,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    * <LI><code>-outputFormatOptions</code> Provide options that control the
    * behavior of various <code>-outputFormat</code> choices, such as
    * <code>lexicalize</code>, <code>stem</code>, <code>markHeadNodes</code>,
-   * or <code>xml</code>.  {@link edu.stanford.nlp.trees.TreePrint}
+   * or <code>xml</code>.
    * Options are specified as a comma-separated list.</LI>
    * <LI><code>-writeOutputFiles</code> Write output files corresponding
    * to the input files, with the same name but a <code>".stp"</code>
@@ -1171,7 +1180,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    * can use multiple threads.  This option tells the parser how many
    * threads to use.  A negative number indicates to use as many
    * threads as the machine has cores.
-   * </ul>
+   * </UL>
    * See also the package documentation for more details and examples of use.
    *
    * @param args Command line arguments, as above
@@ -1220,17 +1229,23 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       if (args[argIndex].equalsIgnoreCase("-train") ||
           args[argIndex].equalsIgnoreCase("-trainTreebank")) {
         train = true;
-        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-train");
+        Pair<String, FileFilter> treebankDescription = ArgUtils.getTreebankDescription(args, argIndex, "-test");
         argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
         treebankPath = treebankDescription.first();
         trainFilter = treebankDescription.second();
       } else if (args[argIndex].equalsIgnoreCase("-train2")) {
+        // TODO: we could use the fully expressive -train options if
+        // we add some mechanism for returning leftover options from
+        // ArgUtils.getTreebankDescription
         // train = true;     // cdm july 2005: should require -train for this
-        Triple<String, FileFilter, Double> treebankDescription = ArgUtils.getWeightedTreebankDescription(args, argIndex, "-train2");
-        argIndex = argIndex + ArgUtils.numSubArgs(args, argIndex) + 1;
-        secondaryTreebankPath = treebankDescription.first();
-        secondaryTrainFilter = treebankDescription.second();
-        secondaryTreebankWeight = treebankDescription.third();
+        int numSubArgs = ArgUtils.numSubArgs(args, argIndex);
+        argIndex++;
+        if (numSubArgs < 2) {
+          throw new RuntimeException("Error: -train2 <treebankPath> [<ranges>] <weight>.");
+        }
+        secondaryTreebankPath = args[argIndex++];
+        secondaryTrainFilter = (numSubArgs == 3) ? new NumberRangesFileFilter(args[argIndex++], true) : null;
+        secondaryTreebankWeight = Double.parseDouble(args[argIndex++]);
       } else if (args[argIndex].equalsIgnoreCase("-tLPP") && (argIndex + 1 < args.length)) {
         try {
           op.tlpParams = (TreebankLangParserParams) Class.forName(args[argIndex + 1]).newInstance();
@@ -1326,7 +1341,9 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       } else {
         int oldIndex = argIndex;
         argIndex = op.setOptionOrWarn(args, argIndex);
-        optionArgs.addAll(Arrays.asList(args).subList(oldIndex, argIndex));
+        for (int i = oldIndex; i < argIndex; i++) {
+          optionArgs.add(args[i]);
+        }
       }
     } // end while loop through arguments
 
@@ -1422,7 +1439,16 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
           tokenizerFactory = lp.op.langpack().getTokenizerFactory();
           tokenizerFactory.setOptions(tokenizerOptions);
         }
-      } catch (IllegalAccessException | InvocationTargetException | ClassNotFoundException | NoSuchMethodException e) {
+      } catch (IllegalAccessException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (NoSuchMethodException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (ClassNotFoundException e) {
+        System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
         System.err.println("Couldn't instantiate TokenizerFactory " + tokenizerFactoryClass + " with options " + tokenizerOptions);
         throw new RuntimeException(e);
       }

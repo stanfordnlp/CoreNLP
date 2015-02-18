@@ -1,6 +1,5 @@
 package edu.stanford.nlp.parser.dvparser;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -9,7 +8,7 @@ import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.util.CollectionUtils;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.TwoDimensionalMap;
@@ -46,7 +45,7 @@ public class AverageDVModels {
   }
 
   public static TwoDimensionalMap<String, String, SimpleMatrix> averageBinaryMatrices(List<TwoDimensionalMap<String, String, SimpleMatrix>> maps) {
-    TwoDimensionalMap<String, String, SimpleMatrix> averages = TwoDimensionalMap.treeMap();
+    TwoDimensionalMap<String, String, SimpleMatrix> averages = new TwoDimensionalMap<String, String, SimpleMatrix>();
     for (Pair<String, String> binary : getBinaryMatrixNames(maps)) {
       int count = 0;
       SimpleMatrix matrix = null;
@@ -69,7 +68,7 @@ public class AverageDVModels {
   }
 
   public static Map<String, SimpleMatrix> averageUnaryMatrices(List<Map<String, SimpleMatrix>> maps) {
-    Map<String, SimpleMatrix> averages = Generics.newTreeMap();
+    Map<String, SimpleMatrix> averages = Generics.newHashMap();
     for (String name : getUnaryMatrixNames(maps)) {
       int count = 0;
       SimpleMatrix matrix = null;
@@ -107,25 +106,15 @@ public class AverageDVModels {
         argIndex += 2;
       } else if (args[argIndex].equalsIgnoreCase("-input")) {
         for (++argIndex; argIndex < args.length && !args[argIndex].startsWith("-"); ++argIndex) {
-          inputModelFilenames.addAll(Arrays.asList(args[argIndex].split(",")));
+          inputModelFilenames.add(args[argIndex]);
         }
       } else {
         throw new RuntimeException("Unknown argument " + args[argIndex]);
       }
     }
 
-    if (outputModelFilename == null) {
-      System.err.println("Need to specify output model name with -output");
-      System.exit(2);
-    }
-
-    if (inputModelFilenames.size() == 0) {
-      System.err.println("Need to specify input model names with -input");
-      System.exit(2);
-    }
-
-    System.err.println("Averaging " + inputModelFilenames);
-    System.err.println("Outputting result to " + outputModelFilename);
+    System.err.println(outputModelFilename);
+    System.err.println(inputModelFilenames);
 
     LexicalizedParser lexparser = null;
     List<DVModel> models = Generics.newArrayList();
@@ -138,19 +127,39 @@ public class AverageDVModels {
     }
 
     List<TwoDimensionalMap<String, String, SimpleMatrix>> binaryTransformMaps =
-      CollectionUtils.transformAsList(models, model -> model.binaryTransform);
+      CollectionUtils.transformAsList(models, new Function<DVModel, TwoDimensionalMap<String, String, SimpleMatrix>>() {
+          public TwoDimensionalMap<String, String, SimpleMatrix> apply(DVModel model) {
+            return model.binaryTransform;
+          }
+        });
 
     List<TwoDimensionalMap<String, String, SimpleMatrix>> binaryScoreMaps =
-      CollectionUtils.transformAsList(models, model -> model.binaryScore);
+      CollectionUtils.transformAsList(models, new Function<DVModel, TwoDimensionalMap<String, String, SimpleMatrix>>() {
+          public TwoDimensionalMap<String, String, SimpleMatrix> apply(DVModel model) {
+            return model.binaryScore;
+          }
+        });
 
     List<Map<String, SimpleMatrix>> unaryTransformMaps =
-      CollectionUtils.transformAsList(models, model -> model.unaryTransform);
+      CollectionUtils.transformAsList(models, new Function<DVModel, Map<String, SimpleMatrix>>() {
+          public Map<String, SimpleMatrix> apply(DVModel model) {
+            return model.unaryTransform;
+          }
+        });
 
     List<Map<String, SimpleMatrix>> unaryScoreMaps =
-      CollectionUtils.transformAsList(models, model -> model.unaryScore);
+      CollectionUtils.transformAsList(models, new Function<DVModel, Map<String, SimpleMatrix>>() {
+          public Map<String, SimpleMatrix> apply(DVModel model) {
+            return model.unaryScore;
+          }
+        });
 
     List<Map<String, SimpleMatrix>> wordMaps =
-      CollectionUtils.transformAsList(models, model -> model.wordVectors);
+      CollectionUtils.transformAsList(models, new Function<DVModel, Map<String, SimpleMatrix>>() {
+          public Map<String, SimpleMatrix> apply(DVModel model) {
+            return model.wordVectors;
+          }
+        });
 
     TwoDimensionalMap<String, String, SimpleMatrix> binaryTransformAverages = averageBinaryMatrices(binaryTransformMaps);
     TwoDimensionalMap<String, String, SimpleMatrix> binaryScoreAverages = averageBinaryMatrices(binaryScoreMaps);

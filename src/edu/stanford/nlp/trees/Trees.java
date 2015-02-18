@@ -1,11 +1,12 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.io.IOUtils;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.ling.CoreAnnotations;
 
 import java.util.*;
 import java.io.*;
@@ -177,47 +178,6 @@ public class Trees {
       for (Tree kid : t.children()) {
         taggedLeafLabels(kid, l);
       }
-    }
-  }
-
-  /**
-   * Given a tree, set the tags on the leaf nodes if they are not
-   * already set.  Do this by using the preterminal's value as a tag.
-   */
-  public static void setLeafTagsIfUnset(Tree tree) {
-    if (tree.isPreTerminal()) {
-      Tree leaf = tree.children()[0];
-      if (!(leaf.label() instanceof HasTag)) {
-        return;
-      }
-      HasTag label = (HasTag) leaf.label();
-      if (label.tag() == null) {
-        label.setTag(tree.value());
-      }
-    } else {
-      for (Tree child : tree.children()) {
-        setLeafTagsIfUnset(child);
-      }
-    }
-  }
-
-  /**
-   * Replace the labels of the leaves with the given leaves.
-   */
-  public static void setLeafLabels(Tree tree, List<Label> labels) {
-    Iterator<Tree> leafIterator = tree.getLeaves().iterator();
-    Iterator<Label> labelIterator = labels.iterator();
-    while (leafIterator.hasNext() && labelIterator.hasNext()) {
-      Tree leaf = leafIterator.next();
-      Label label = labelIterator.next();
-      leaf.setLabel(label);
-      //leafIterator.next().setLabel(labelIterator.next());
-    }
-    if (leafIterator.hasNext()) {
-      throw new IllegalArgumentException("Tree had more leaves than the labels provided");
-    }
-    if (labelIterator.hasNext()) {
-      throw new IllegalArgumentException("More labels provided than tree had leaves");
     }
   }
 
@@ -440,7 +400,7 @@ public class Trees {
 
 
   /** Turns a sentence into a flat phrasal tree.
-   *  The structure is S -&gt; tag*.  And then each tag goes to a word.
+   *  The structure is S -> tag*.  And then each tag goes to a word.
    *  The tag is either found from the label or made "WD".
    *  The tag and phrasal node have a StringLabel.
    *
@@ -452,7 +412,7 @@ public class Trees {
   }
 
   /** Turns a sentence into a flat phrasal tree.
-   *  The structure is S -&gt; tag*.  And then each tag goes to a word.
+   *  The structure is S -> tag*.  And then each tag goes to a word.
    *  The tag is either found from the label or made "WD".
    *  The tag and phrasal node have a StringLabel.
    *
@@ -761,7 +721,6 @@ public class Trees {
     return commonAncestor;
   }
 
-  // todo [cdm 2015]: These next two methods duplicate the Tree.valueOf methods!
   /**
    * Simple tree reading utility method.  Given a tree formatted as a PTB string, returns a Tree made by a specific TreeFactory.
    */
@@ -816,18 +775,4 @@ public class Trees {
     }
   }
 
-
-  /**
-   * Set the sentence index of all the leaves in the tree
-   * (only works on CoreLabel)
-   */
-  public static void setSentIndex(Tree tree, int sentIndex) {
-    List<Label> leaves = tree.yield();
-    for (Label leaf : leaves) {
-      if (!(leaf instanceof CoreLabel)) {
-        throw new IllegalArgumentException("Only works on CoreLabel");
-      }
-      ((CoreLabel) leaf).setSentIndex(sentIndex);
-    }
-  }
 }

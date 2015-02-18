@@ -57,7 +57,7 @@ import edu.stanford.nlp.util.Pair;
  */
 public class MentionExtractor {
 
-  private final HeadFinder headFinder;
+  protected final HeadFinder headFinder;
 
   protected String currentDocumentID;
 
@@ -109,9 +109,6 @@ public class MentionExtractor {
   }
 
   protected int getHeadIndex(Tree t) {
-    // The trees passed in do not have the CoordinationTransformer
-    // applied, but that just means the SemanticHeadFinder results are
-    // slightly worse.
     Tree ht = t.headTerminal(headFinder);
     if(ht==null) return -1;  // temporary: a key which is matched to nothing
     CoreLabel l = (CoreLabel) ht.label();
@@ -365,19 +362,10 @@ public class MentionExtractor {
         }
         for(Pair<Integer, Integer> foundPair: foundPairs){
           if((foundPair.first == m1.headIndex && foundPair.second == m2.headIndex)){
-            switch (flag) {
-              case "APPOSITION":
-                m2.addApposition(m1);
-                break;
-              case "PREDICATE_NOMINATIVE":
-                m2.addPredicateNominatives(m1);
-                break;
-              case "RELATIVE_PRONOUN":
-                m2.addRelativePronoun(m1);
-                break;
-              default:
-                throw new RuntimeException("check flag in markMentionRelation (dcoref/MentionExtractor.java)");
-            }
+            if(flag.equals("APPOSITION")) m2.addApposition(m1);
+            else if(flag.equals("PREDICATE_NOMINATIVE")) m2.addPredicateNominatives(m1);
+            else if(flag.equals("RELATIVE_PRONOUN")) m2.addRelativePronoun(m1);
+            else throw new RuntimeException("check flag in markMentionRelation (dcoref/MentionExtractor.java)");
           }
         }
       }
@@ -428,7 +416,7 @@ public class MentionExtractor {
     }
     String annoStr = annoSb.toString();
     SieveCoreferenceSystem.logger.info("MentionExtractor ignores specified annotators, using annotators=" + annoStr);
-    pipelineProps.setProperty("annotators", annoStr);
+    pipelineProps.put("annotators", annoStr);
     return new StanfordCoreNLP(pipelineProps, false);
   }
 

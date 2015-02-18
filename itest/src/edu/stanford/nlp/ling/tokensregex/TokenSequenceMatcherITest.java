@@ -4,7 +4,6 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 import junit.framework.TestCase;
 
@@ -12,8 +11,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 public class TokenSequenceMatcherITest extends TestCase {
 
@@ -24,7 +21,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     synchronized(TokenSequenceMatcherITest.class) {
       if (pipeline == null) {
         pipeline = new AnnotationPipeline();
-        pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+        pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
         pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
         pipeline.addAnnotator(new POSTaggerAnnotator(false));
         pipeline.addAnnotator(new NumberAnnotator(false, false));
@@ -250,14 +247,14 @@ public class TokenSequenceMatcherITest extends TestCase {
 
     // Test sequence with groups
     TokenSequencePattern p = TokenSequencePattern.compile(
-        new SequencePattern.SequencePatternExpr(
-            new SequencePattern.GroupPatternExpr(
-                new SequencePattern.RepeatPatternExpr(
-                    getSequencePatternExpr("[A-Za-z]+"), 1, 2)),
-            getNodePatternExpr("of"),
-            new SequencePattern.GroupPatternExpr(
-                new SequencePattern.RepeatPatternExpr(
-                    getSequencePatternExpr("[A-Za-z]+"), 1, 3))));
+            new SequencePattern.SequencePatternExpr(
+                    new SequencePattern.GroupPatternExpr(
+                            new SequencePattern.RepeatPatternExpr(
+                                    getSequencePatternExpr("[A-Za-z]+"), 1, 2)),
+                    getNodePatternExpr("of"),
+                    new SequencePattern.GroupPatternExpr(
+                            new SequencePattern.RepeatPatternExpr(
+                                    getSequencePatternExpr("[A-Za-z]+"), 1, 3))));
 
     TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     boolean match = m.find();
@@ -288,14 +285,14 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
 
     p = TokenSequencePattern.compile(
-        new SequencePattern.SequencePatternExpr(
-            new SequencePattern.GroupPatternExpr(
-                new SequencePattern.RepeatPatternExpr(
-                    getNodePatternExpr("[A-Za-z]+"), 2, 2)),
-            getNodePatternExpr("of"),
-            new SequencePattern.GroupPatternExpr(
-                new SequencePattern.RepeatPatternExpr(
-                    getNodePatternExpr("[A-Za-z]+"), 1, 3, false))));
+            new SequencePattern.SequencePatternExpr(
+                    new SequencePattern.GroupPatternExpr(
+                            new SequencePattern.RepeatPatternExpr(
+                                    getNodePatternExpr("[A-Za-z]+"), 2, 2)),
+                    getNodePatternExpr("of"),
+                    new SequencePattern.GroupPatternExpr(
+                            new SequencePattern.RepeatPatternExpr(
+                                    getNodePatternExpr("[A-Za-z]+"), 1, 3, false))));
 
     m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     match = m.find();
@@ -564,78 +561,6 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
-  public void testTokenSequenceMatcherAll2() throws IOException {
-    String text = "DATE1 PROD1 PRICE1 PROD2 PRICE2 PROD3 PRICE3 DATE2 PROD4 PRICE4 PROD5 PRICE5 PROD6 PRICE6";
-    CoreMap doc = createDocument(text);
-    TokenSequencePattern p = TokenSequencePattern.compile(
-        "(/DATE.*/) (?: /PROD.*/ /PRICE.*/)* (/PROD.*/) (/PRICE.*/)");
-
-    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    m.setFindType(SequenceMatcher.FindType.FIND_ALL);
-    // Test finding of ALL matching sequences
-    boolean match = m.find();
-    assertTrue(match);
-    assertEquals(3, m.groupCount());
-    assertEquals("DATE1", m.group(1));
-    assertEquals("PROD3", m.group(2));
-    assertEquals("PRICE3", m.group(3));
-    match = m.find();
-    assertTrue(match);
-    assertEquals(3, m.groupCount());
-    assertEquals("DATE1", m.group(1));
-    assertEquals("PROD2", m.group(2));
-    assertEquals("PRICE2", m.group(3));
-    match = m.find();
-    assertTrue(match);
-    assertEquals(3, m.groupCount());
-    assertEquals("DATE1", m.group(1));
-    assertEquals("PROD1", m.group(2));
-    assertEquals("PRICE1", m.group(3));
-    match = m.find();
-    assertTrue(match);
-    assertEquals(3, m.groupCount());
-    assertEquals("DATE2", m.group(1));
-    assertEquals("PROD6", m.group(2));
-    assertEquals("PRICE6", m.group(3));
-    match = m.find();
-    assertTrue(match);
-    assertEquals(3, m.groupCount());
-    assertEquals("DATE2", m.group(1));
-    assertEquals("PROD5", m.group(2));
-    assertEquals("PRICE5", m.group(3));
-    match = m.find();
-    assertTrue(match);
-    assertEquals(3, m.groupCount());
-    assertEquals("DATE2", m.group(1));
-    assertEquals("PROD4", m.group(2));
-    assertEquals("PRICE4", m.group(3));
-    match = m.find();
-    assertFalse(match);
-  }
-
-  public void testTokenSequenceMatcherNonOverlapping() throws IOException {
-    String text = "DATE1 PROD1 PRICE1 PROD2 PRICE2 PROD3 PRICE3 DATE2 PROD4 PRICE4 PROD5 PRICE5 PROD6 PRICE6";
-    CoreMap doc = createDocument(text);
-    TokenSequencePattern p = TokenSequencePattern.compile(
-        "(/DATE.*/) ((/PROD.*/ /PRICE.*/)+)");
-
-    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    boolean match = m.find();
-    assertTrue(match);
-    assertEquals(3, m.groupCount());
-    assertEquals("DATE1", m.group(1));
-    assertEquals("PROD1 PRICE1 PROD2 PRICE2 PROD3 PRICE3", m.group(2));
-    assertEquals("PROD3 PRICE3", m.group(3));
-    match = m.find();
-    assertTrue(match);
-    assertEquals(3, m.groupCount());
-    assertEquals("DATE2", m.group(1));
-    assertEquals("PROD4 PRICE4 PROD5 PRICE5 PROD6 PRICE6", m.group(2));
-    assertEquals("PROD6 PRICE6", m.group(3));
-    match = m.find();
-    assertFalse(match);
-  }
-
   public void testTokenSequenceMatcher4() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -896,7 +821,7 @@ public class TokenSequenceMatcherITest extends TestCase {
 
     // Test sequence with groups
 //    TokenSequencePattern p = TokenSequencePattern.compile( "(?$contextprev /.*/) (?$treat [{{treat}} & /.*/]) (?$contextnext [/.*/])");
-    TokenSequencePattern p = TokenSequencePattern.compile("(?$contextprev /.*/) (?$test [{tag:NNP} & /.*/]) (?$contextnext [/.*/])");
+    TokenSequencePattern p = TokenSequencePattern.compile( "(?$contextprev /.*/) (?$test [{tag:NNP} & /.*/]) (?$contextnext [/.*/])");
 
     TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     boolean match = m.find();
@@ -995,8 +920,8 @@ public class TokenSequenceMatcherITest extends TestCase {
   }
 
   public void testMultiplePatterns() throws IOException {
-    TokenSequencePattern p1 = TokenSequencePattern.compile("(?$dt \"atropine\") []{0,15} " +
-        "(?$se  \"social\" \"avoidant\" \"behaviour\"|\"dysuria\"|\"hyperglycaemia\"| \"mental\" \"disorder\"|\"vertigo\"|\"flutter\"| \"chest\" \"pain\"| \"elevated\" \"blood\" \"pressure\"|\"mania\"| \"rash\" \"erythematous\"|\"manic\"| \"papular\" \"rash\"|\"death\"| \"atrial\" \"arrhythmia\"| \"dry\" \"eyes\"| \"loss\" \"of\" \"libido\"| \"rash\" \"papular\"|\"hypersensitivity\"| \"blood\" \"pressure\" \"increased\"|\"dyspepsia\"| \"accommodation\" \"disorder\"| \"reflexes\" \"increased\"|\"lesions\"|\"asthenia\"| \"gastrointestinal\" \"pain\"|\"excitement\"| \"breast\" \"feeding\"|\"hypokalaemia\"| \"cerebellar\" \"syndrome\"|\"nervousness\"| \"pulmonary\" \"oedema\"| \"inspiratory\" \"stridor\"| \"taste\" \"altered\"|\"paranoia\"| \"psychotic\" \"disorder\"| \"open\" \"angle\" \"glaucoma\"|\"photophobia\"| \"dry\" \"eye\"|\"osteoarthritis\"| \"keratoconjunctivitis\" \"sicca\"| \"haemoglobin\" \"increased\"| \"ventricular\" \"extrasystoles\"|\"hallucinations\"|\"conjunctivitis\"|\"paralysis\"| \"qrs\" \"complex\"|\"anxiety\"| \"conjunctival\" \"disorder\"|\"coma\"|\"strabismus\"|\"thirst\"|\"para\"| \"sicca\" \"syndrome\"| \"atrioventricular\" \"dissociation\"|\"desquamation\"|\"crusting\"| \"abdominal\" \"distension\"|\"blindness\"|\"hypotension\"|\"dermatitis\"| \"sinus\" \"tachycardia\"| \"abdominal\" \"distention\"| \"lacrimation\" \"decreased\"|\"sicca\"| \"paralytic\" \"ileus\"| \"urinary\" \"hesitation\"|\"withdrawn\"| \"erectile\" \"dysfunction\"|\"keratoconjunctivitis\"|\"anaphylaxis\"| \"psychiatric\" \"disorders\"| \"altered\" \"taste\"|\"somnolence\"|\"extrasystoles\"|\"ageusia\"| \"intraocular\" \"pressure\" \"increased\"| \"left\" \"ventricular\" \"failure\"|\"impotence\"|\"drowsiness\"|\"conjunctiva\"| \"delayed\" \"gastric\" \"emptying\"| \"gastrointestinal\" \"sounds\" \"abnormal\"| \"qt\" \"prolonged\"| \"supraventricular\" \"tachycardia\"|\"weakness\"|\"hypertonia\"| \"confusional\" \"state\"|\"anhidrosis\"|\"myopia\"|\"dyspnoea\"| \"speech\" \"impairment\" \"nos\"| \"rash\" \"maculo\" \"papular\"|\"petechiae\"|\"tachypnea\"| \"acute\" \"angle\" \"closure\" \"glaucoma\"| \"gastrooesophageal\" \"reflux\" \"disease\"|\"hypokalemia\"| \"left\" \"heart\" \"failure\"| \"myocardial\" \"infarction\"| \"site\" \"reaction\"| \"ventricular\" \"fibrillation\"|\"fibrillation\"| \"maculopapular\" \"rash\"| \"impaired\" \"gastric\" \"emptying\"|\"amnesia\"| \"labored\" \"respirations\"| \"decreased\" \"lacrimation\"|\"mydriasis\"|\"headache\"| \"dry\" \"mouth\"|\"scab\"| \"cardiac\" \"syncope\"| \"visual\" \"acuity\" \"reduced\"|\"tension\"| \"blurred\" \"vision\"| \"bloated\" \"feeling\"| \"labored\" \"breathing\"| \"stridor\" \"inspiratory\"| \"skin\" \"exfoliation\"| \"memory\" \"loss\"|\"syncope\"| \"rash\" \"scarlatiniform\"|\"hyperpyrexia\"| \"cardiac\" \"flutter\"|\"heartburn\"| \"bowel\" \"sounds\" \"decreased\"|\"blepharitis\"|\"tachycardia\"| \"excessive\" \"thirst\"|\"confusion\"| \"rash\" \"macular\"| \"taste\" \"loss\"| \"respiratory\" \"failure\"|\"hesitancy\"|\"dysmetria\"|\"disorientation\"| \"decreased\" \"hemoglobin\"| \"atrial\" \"fibrillation\"| \"urinary\" \"retention\"| \"dry\" \"skin\"|\"dehydration\"|\"hyponatraemia\"|\"dysgeusia\"|\"disorder\"| \"increased\" \"intraocular\" \"pressure\"| \"speech\" \"disorder\"| \"feeling\" \"abnormal\"|\"pain\"| \"anaphylactic\" \"shock\"|\"hallucination\"| \"abdominal\" \"pain\"| \"junctional\" \"tachycardia\"| \"bun\" \"increased\"| \"ventricular\" \"flutter\"| \"scarlatiniform\" \"rash\"|\"agitation\"| \"feeling\" \"hot\"|\"hyponatremia\"| \"decreased\" \"bowel\" \"sounds\"|\"cyanosis\"|\"dysarthria\"| \"heat\" \"intolerance\"|\"hyperglycemia\"|\"reflux\"| \"angle\" \"closure\" \"glaucoma\"| \"electrocardiogram\" \"qt\" \"prolonged\"| \"vision\" \"blurred\"| \"blood\" \"urea\" \"increased\"|\"dizziness\"|\"arrhythmia\"|\"erythema\"|\"vomiting\"| \"difficulty\" \"in\" \"micturition\"|\"infarction\"|\"laryngospasm\"|\"hypoglycaemia\"|\"hypoglycemia\"| \"elevated\" \"hemoglobin\"| \"skin\" \"warm\"| \"ventricular\" \"arrhythmia\"|\"dissociation\"| \"warm\" \"skin\"| \"follicular\" \"conjunctivitis\"|\"urticaria\"|\"fatigue\"| \"cardiac\" \"fibrillation\"| \"decreased\" \"sweating\"| \"decreased\" \"visual\" \"acuity\"|\"lethargy\"| \"acute\" \"angle\" \"closure\" \"glaucoma\"| \"nodal\" \"rhythm\"|\"borborygmi\"|\"hyperreflexia\"| \"respiratory\" \"depression\"|\"diarrhea\"|\"leukocytosis\"| \"speech\" \"disturbance\"|\"ataxia\"|\"cycloplegia\"|\"tachypnoea\"|\"eczema\"| \"supraventricular\" \"extrasystoles\"|\"ileus\"| \"cardiac\" \"arrest\"| \"ventricular\" \"tachycardia\"|\"laryngitis\"|\"delirium\"|\"lactation\"|\"glaucoma\"|\"obstruction\"|\"hypohidrosis\"|\"parity\"|\"palpitations\"| \"temperature\" \"intolerance\"|\"constipation\"|\"cyclophoria\"| \"acute\" \"coronary\" \"syndrome\"| \"arrhythmia\" \"supraventricular\"|\"arrest\"|\"lesion\"|\"nausea\"| \"sweating\" \"decreased\"|\"keratitis\"|\"dyskinesia\"| \"pulmonary\" \"function\" \"test\" \"decreased\"|\"stridor\"|\"swelling\"|\"dysphagia\"| \"haemoglobin\" \"decreased\"|\"diarrhoea\"| \"ileus\" \"paralytic\"|\"clonus\"|\"insomnia\"| \"electrocardiogram\" \"qrs\" \"complex\"| \"nasal\" \"congestion\"| \"nasal\" \"dryness\"|\"sweating\"|\"rash\"| \"nodal\" \"arrhythmia\"|\"irritability\"|\"hyperhidrosis\"| \"ventricular\" \"failure\")");
+    TokenSequencePattern p1 = TokenSequencePattern.compile( "(?$dt \"atropine\") []{0,15} " +
+            "(?$se  \"social\" \"avoidant\" \"behaviour\"|\"dysuria\"|\"hyperglycaemia\"| \"mental\" \"disorder\"|\"vertigo\"|\"flutter\"| \"chest\" \"pain\"| \"elevated\" \"blood\" \"pressure\"|\"mania\"| \"rash\" \"erythematous\"|\"manic\"| \"papular\" \"rash\"|\"death\"| \"atrial\" \"arrhythmia\"| \"dry\" \"eyes\"| \"loss\" \"of\" \"libido\"| \"rash\" \"papular\"|\"hypersensitivity\"| \"blood\" \"pressure\" \"increased\"|\"dyspepsia\"| \"accommodation\" \"disorder\"| \"reflexes\" \"increased\"|\"lesions\"|\"asthenia\"| \"gastrointestinal\" \"pain\"|\"excitement\"| \"breast\" \"feeding\"|\"hypokalaemia\"| \"cerebellar\" \"syndrome\"|\"nervousness\"| \"pulmonary\" \"oedema\"| \"inspiratory\" \"stridor\"| \"taste\" \"altered\"|\"paranoia\"| \"psychotic\" \"disorder\"| \"open\" \"angle\" \"glaucoma\"|\"photophobia\"| \"dry\" \"eye\"|\"osteoarthritis\"| \"keratoconjunctivitis\" \"sicca\"| \"haemoglobin\" \"increased\"| \"ventricular\" \"extrasystoles\"|\"hallucinations\"|\"conjunctivitis\"|\"paralysis\"| \"qrs\" \"complex\"|\"anxiety\"| \"conjunctival\" \"disorder\"|\"coma\"|\"strabismus\"|\"thirst\"|\"para\"| \"sicca\" \"syndrome\"| \"atrioventricular\" \"dissociation\"|\"desquamation\"|\"crusting\"| \"abdominal\" \"distension\"|\"blindness\"|\"hypotension\"|\"dermatitis\"| \"sinus\" \"tachycardia\"| \"abdominal\" \"distention\"| \"lacrimation\" \"decreased\"|\"sicca\"| \"paralytic\" \"ileus\"| \"urinary\" \"hesitation\"|\"withdrawn\"| \"erectile\" \"dysfunction\"|\"keratoconjunctivitis\"|\"anaphylaxis\"| \"psychiatric\" \"disorders\"| \"altered\" \"taste\"|\"somnolence\"|\"extrasystoles\"|\"ageusia\"| \"intraocular\" \"pressure\" \"increased\"| \"left\" \"ventricular\" \"failure\"|\"impotence\"|\"drowsiness\"|\"conjunctiva\"| \"delayed\" \"gastric\" \"emptying\"| \"gastrointestinal\" \"sounds\" \"abnormal\"| \"qt\" \"prolonged\"| \"supraventricular\" \"tachycardia\"|\"weakness\"|\"hypertonia\"| \"confusional\" \"state\"|\"anhidrosis\"|\"myopia\"|\"dyspnoea\"| \"speech\" \"impairment\" \"nos\"| \"rash\" \"maculo\" \"papular\"|\"petechiae\"|\"tachypnea\"| \"acute\" \"angle\" \"closure\" \"glaucoma\"| \"gastrooesophageal\" \"reflux\" \"disease\"|\"hypokalemia\"| \"left\" \"heart\" \"failure\"| \"myocardial\" \"infarction\"| \"site\" \"reaction\"| \"ventricular\" \"fibrillation\"|\"fibrillation\"| \"maculopapular\" \"rash\"| \"impaired\" \"gastric\" \"emptying\"|\"amnesia\"| \"labored\" \"respirations\"| \"decreased\" \"lacrimation\"|\"mydriasis\"|\"headache\"| \"dry\" \"mouth\"|\"scab\"| \"cardiac\" \"syncope\"| \"visual\" \"acuity\" \"reduced\"|\"tension\"| \"blurred\" \"vision\"| \"bloated\" \"feeling\"| \"labored\" \"breathing\"| \"stridor\" \"inspiratory\"| \"skin\" \"exfoliation\"| \"memory\" \"loss\"|\"syncope\"| \"rash\" \"scarlatiniform\"|\"hyperpyrexia\"| \"cardiac\" \"flutter\"|\"heartburn\"| \"bowel\" \"sounds\" \"decreased\"|\"blepharitis\"|\"tachycardia\"| \"excessive\" \"thirst\"|\"confusion\"| \"rash\" \"macular\"| \"taste\" \"loss\"| \"respiratory\" \"failure\"|\"hesitancy\"|\"dysmetria\"|\"disorientation\"| \"decreased\" \"hemoglobin\"| \"atrial\" \"fibrillation\"| \"urinary\" \"retention\"| \"dry\" \"skin\"|\"dehydration\"|\"hyponatraemia\"|\"dysgeusia\"|\"disorder\"| \"increased\" \"intraocular\" \"pressure\"| \"speech\" \"disorder\"| \"feeling\" \"abnormal\"|\"pain\"| \"anaphylactic\" \"shock\"|\"hallucination\"| \"abdominal\" \"pain\"| \"junctional\" \"tachycardia\"| \"bun\" \"increased\"| \"ventricular\" \"flutter\"| \"scarlatiniform\" \"rash\"|\"agitation\"| \"feeling\" \"hot\"|\"hyponatremia\"| \"decreased\" \"bowel\" \"sounds\"|\"cyanosis\"|\"dysarthria\"| \"heat\" \"intolerance\"|\"hyperglycemia\"|\"reflux\"| \"angle\" \"closure\" \"glaucoma\"| \"electrocardiogram\" \"qt\" \"prolonged\"| \"vision\" \"blurred\"| \"blood\" \"urea\" \"increased\"|\"dizziness\"|\"arrhythmia\"|\"erythema\"|\"vomiting\"| \"difficulty\" \"in\" \"micturition\"|\"infarction\"|\"laryngospasm\"|\"hypoglycaemia\"|\"hypoglycemia\"| \"elevated\" \"hemoglobin\"| \"skin\" \"warm\"| \"ventricular\" \"arrhythmia\"|\"dissociation\"| \"warm\" \"skin\"| \"follicular\" \"conjunctivitis\"|\"urticaria\"|\"fatigue\"| \"cardiac\" \"fibrillation\"| \"decreased\" \"sweating\"| \"decreased\" \"visual\" \"acuity\"|\"lethargy\"| \"acute\" \"angle\" \"closure\" \"glaucoma\"| \"nodal\" \"rhythm\"|\"borborygmi\"|\"hyperreflexia\"| \"respiratory\" \"depression\"|\"diarrhea\"|\"leukocytosis\"| \"speech\" \"disturbance\"|\"ataxia\"|\"cycloplegia\"|\"tachypnoea\"|\"eczema\"| \"supraventricular\" \"extrasystoles\"|\"ileus\"| \"cardiac\" \"arrest\"| \"ventricular\" \"tachycardia\"|\"laryngitis\"|\"delirium\"|\"lactation\"|\"glaucoma\"|\"obstruction\"|\"hypohidrosis\"|\"parity\"|\"palpitations\"| \"temperature\" \"intolerance\"|\"constipation\"|\"cyclophoria\"| \"acute\" \"coronary\" \"syndrome\"| \"arrhythmia\" \"supraventricular\"|\"arrest\"|\"lesion\"|\"nausea\"| \"sweating\" \"decreased\"|\"keratitis\"|\"dyskinesia\"| \"pulmonary\" \"function\" \"test\" \"decreased\"|\"stridor\"|\"swelling\"|\"dysphagia\"| \"haemoglobin\" \"decreased\"|\"diarrhoea\"| \"ileus\" \"paralytic\"|\"clonus\"|\"insomnia\"| \"electrocardiogram\" \"qrs\" \"complex\"| \"nasal\" \"congestion\"| \"nasal\" \"dryness\"|\"sweating\"|\"rash\"| \"nodal\" \"arrhythmia\"|\"irritability\"|\"hyperhidrosis\"| \"ventricular\" \"failure\")");
     TokenSequencePattern p2 = TokenSequencePattern.compile( "(?$dt \"disease\") []{0,15} " +
             "(?$se  \"social\" \"avoidant\" \"behaviour\"|\"dysuria\"|\"hyperglycaemia\"| \"mental\" \"disorder\"|\"vertigo\"|\"flutter\"| \"chest\" \"pain\"| \"elevated\" \"blood\" \"pressure\"|\"mania\"| \"rash\" \"erythematous\"|\"manic\"| \"papular\" \"rash\"|\"death\"| \"atrial\" \"arrhythmia\"| \"dry\" \"eyes\"| \"loss\" \"of\" \"libido\"| \"rash\" \"papular\"|\"hypersensitivity\"| \"blood\" \"pressure\" \"increased\"|\"dyspepsia\"| \"accommodation\" \"disorder\"| \"reflexes\" \"increased\"|\"lesions\"|\"asthenia\"| \"gastrointestinal\" \"pain\"|\"excitement\"| \"breast\" \"feeding\"|\"hypokalaemia\"| \"cerebellar\" \"syndrome\"|\"nervousness\"| \"pulmonary\" \"oedema\"| \"inspiratory\" \"stridor\"| \"taste\" \"altered\"|\"paranoia\"| \"psychotic\" \"disorder\"| \"open\" \"angle\" \"glaucoma\"|\"photophobia\"| \"dry\" \"eye\"|\"osteoarthritis\"| \"keratoconjunctivitis\" \"sicca\"| \"haemoglobin\" \"increased\"| \"ventricular\" \"extrasystoles\"|\"hallucinations\"|\"conjunctivitis\"|\"paralysis\"| \"qrs\" \"complex\"|\"anxiety\"| \"conjunctival\" \"disorder\"|\"coma\"|\"strabismus\"|\"thirst\"|\"para\"| \"sicca\" \"syndrome\"| \"atrioventricular\" \"dissociation\"|\"desquamation\"|\"crusting\"| \"abdominal\" \"distension\"|\"blindness\"|\"hypotension\"|\"dermatitis\"| \"sinus\" \"tachycardia\"| \"abdominal\" \"distention\"| \"lacrimation\" \"decreased\"|\"sicca\"| \"paralytic\" \"ileus\"| \"urinary\" \"hesitation\"|\"withdrawn\"| \"erectile\" \"dysfunction\"|\"keratoconjunctivitis\"|\"anaphylaxis\"| \"psychiatric\" \"disorders\"| \"altered\" \"taste\"|\"somnolence\"|\"extrasystoles\"|\"ageusia\"| \"intraocular\" \"pressure\" \"increased\"| \"left\" \"ventricular\" \"failure\"|\"impotence\"|\"drowsiness\"|\"conjunctiva\"| \"delayed\" \"gastric\" \"emptying\"| \"gastrointestinal\" \"sounds\" \"abnormal\"| \"qt\" \"prolonged\"| \"supraventricular\" \"tachycardia\"|\"weakness\"|\"hypertonia\"| \"confusional\" \"state\"|\"anhidrosis\"|\"myopia\"|\"dyspnoea\"| \"speech\" \"impairment\" \"nos\"| \"rash\" \"maculo\" \"papular\"|\"petechiae\"|\"tachypnea\"| \"acute\" \"angle\" \"closure\" \"glaucoma\"| \"gastrooesophageal\" \"reflux\" \"disease\"|\"hypokalemia\"| \"left\" \"heart\" \"failure\"| \"myocardial\" \"infarction\"| \"site\" \"reaction\"| \"ventricular\" \"fibrillation\"|\"fibrillation\"| \"maculopapular\" \"rash\"| \"impaired\" \"gastric\" \"emptying\"|\"amnesia\"| \"labored\" \"respirations\"| \"decreased\" \"lacrimation\"|\"mydriasis\"|\"headache\"| \"dry\" \"mouth\"|\"scab\"| \"cardiac\" \"syncope\"| \"visual\" \"acuity\" \"reduced\"|\"tension\"| \"blurred\" \"vision\"| \"bloated\" \"feeling\"| \"labored\" \"breathing\"| \"stridor\" \"inspiratory\"| \"skin\" \"exfoliation\"| \"memory\" \"loss\"|\"syncope\"| \"rash\" \"scarlatiniform\"|\"hyperpyrexia\"| \"cardiac\" \"flutter\"|\"heartburn\"| \"bowel\" \"sounds\" \"decreased\"|\"blepharitis\"|\"tachycardia\"| \"excessive\" \"thirst\"|\"confusion\"| \"rash\" \"macular\"| \"taste\" \"loss\"| \"respiratory\" \"failure\"|\"hesitancy\"|\"dysmetria\"|\"disorientation\"| \"decreased\" \"hemoglobin\"| \"atrial\" \"fibrillation\"| \"urinary\" \"retention\"| \"dry\" \"skin\"|\"dehydration\"|\"hyponatraemia\"|\"dysgeusia\"|\"disorder\"| \"increased\" \"intraocular\" \"pressure\"| \"speech\" \"disorder\"| \"feeling\" \"abnormal\"|\"pain\"| \"anaphylactic\" \"shock\"|\"hallucination\"| \"abdominal\" \"pain\"| \"junctional\" \"tachycardia\"| \"bun\" \"increased\"| \"ventricular\" \"flutter\"| \"scarlatiniform\" \"rash\"|\"agitation\"| \"feeling\" \"hot\"|\"hyponatremia\"| \"decreased\" \"bowel\" \"sounds\"|\"cyanosis\"|\"dysarthria\"| \"heat\" \"intolerance\"|\"hyperglycemia\"|\"reflux\"| \"angle\" \"closure\" \"glaucoma\"| \"electrocardiogram\" \"qt\" \"prolonged\"| \"vision\" \"blurred\"| \"blood\" \"urea\" \"increased\"|\"dizziness\"|\"arrhythmia\"|\"erythema\"|\"vomiting\"| \"difficulty\" \"in\" \"micturition\"|\"infarction\"|\"laryngospasm\"|\"hypoglycaemia\"|\"hypoglycemia\"| \"elevated\" \"hemoglobin\"| \"skin\" \"warm\"| \"ventricular\" \"arrhythmia\"|\"dissociation\"| \"warm\" \"skin\"| \"follicular\" \"conjunctivitis\"|\"urticaria\"|\"fatigue\"| \"cardiac\" \"fibrillation\"| \"decreased\" \"sweating\"| \"decreased\" \"visual\" \"acuity\"|\"lethargy\"| \"acute\" \"angle\" \"closure\" \"glaucoma\"| \"nodal\" \"rhythm\"|\"borborygmi\"|\"hyperreflexia\"| \"respiratory\" \"depression\"|\"diarrhea\"|\"leukocytosis\"| \"speech\" \"disturbance\"|\"ataxia\"|\"cycloplegia\"|\"tachypnoea\"|\"eczema\"| \"supraventricular\" \"extrasystoles\"|\"ileus\"| \"cardiac\" \"arrest\"| \"ventricular\" \"tachycardia\"|\"laryngitis\"|\"delirium\"|\"lactation\"|\"glaucoma\"|\"obstruction\"|\"hypohidrosis\"|\"parity\"|\"palpitations\"| \"temperature\" \"intolerance\"|\"constipation\"|\"cyclophoria\"| \"acute\" \"coronary\" \"syndrome\"| \"arrhythmia\" \"supraventricular\"|\"arrest\"|\"lesion\"|\"nausea\"| \"sweating\" \"decreased\"|\"keratitis\"|\"dyskinesia\"| \"pulmonary\" \"function\" \"test\" \"decreased\"|\"stridor\"|\"swelling\"|\"dysphagia\"| \"haemoglobin\" \"decreased\"|\"diarrhoea\"| \"ileus\" \"paralytic\"|\"clonus\"|\"insomnia\"| \"electrocardiogram\" \"qrs\" \"complex\"| \"nasal\" \"congestion\"| \"nasal\" \"dryness\"|\"sweating\"|\"rash\"| \"nodal\" \"arrhythmia\"|\"irritability\"|\"hyperhidrosis\"| \"ventricular\" \"failure\")");
     CoreMap doc = createDocument("atropine we need to have many many words here but we don't sweating");
@@ -1109,33 +1034,12 @@ public class TokenSequenceMatcherITest extends TestCase {
     match = m.find();
     assertFalse(match);
 
-    p = TokenSequencePattern.compile( "[ { word>=2002 } ]+");
+    p = TokenSequencePattern.compile( "[ { word>=2000 } ]+");
     m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     match = m.find();
     assertTrue(match);
     assertEquals(0, m.groupCount());
     assertEquals("2002", m.group());
-    match = m.find();
-    assertFalse(match);
-
-    p = TokenSequencePattern.compile( "[ { word>2002 } ]+");
-    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    match = m.find();
-    assertFalse(match);
-
-    // Check no {} with or
-    p = TokenSequencePattern.compile( "[ word > 2002 | word==2002 ]+");
-    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    match = m.find();
-    assertTrue(match);
-    assertEquals(0, m.groupCount());
-    assertEquals("2002", m.group());
-    match = m.find();
-    assertFalse(match);
-
-    // Check no {} with and
-    p = TokenSequencePattern.compile( "[ word>2002 & word==2002 ]+");
-    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     match = m.find();
     assertFalse(match);
 
@@ -1148,20 +1052,16 @@ public class TokenSequenceMatcherITest extends TestCase {
     match = m.find();
     assertFalse(match);
 
-    p = TokenSequencePattern.compile( "[ { word<=2002 } ]+");
+    p = TokenSequencePattern.compile( "[ { word<=2000 } ]+");
     m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     match = m.find();
     assertTrue(match);
     assertEquals(0, m.groupCount());
     assertEquals("3", m.group());
     match = m.find();
-    assertTrue(match);
-    assertEquals(0, m.groupCount());
-    assertEquals("2002", m.group());
-    match = m.find();
     assertFalse(match);
 
-    p = TokenSequencePattern.compile( "[ { word<2002 } ]+");
+    p = TokenSequencePattern.compile( "[ { word<2000 } ]+");
     m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     match = m.find();
     assertTrue(match);
@@ -1341,7 +1241,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     match = m.find();
     assertFalse(match);
 
-    p = TokenSequencePattern.compile("(?m) /four\\s*-?\\s*years/");
+    p = TokenSequencePattern.compile( "(?m) /four\\s*-?\\s*years/");
     m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     match = m.find();
     assertTrue(match);
@@ -1354,7 +1254,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     match = m.find();
     assertFalse(match);
 
-    p = TokenSequencePattern.compile("(?m){2,3} /four\\s*-?\\s*years/");
+    p = TokenSequencePattern.compile( "(?m){2,3} /four\\s*-?\\s*years/");
     m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     match = m.find();
     assertTrue(match);
@@ -1372,7 +1272,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     match = m.find();
     assertFalse(match);
 
-    p = TokenSequencePattern.compile("(?m){1,3} /four\\s*-?\\s*years/ ==> &annotate( { ner=YEAR } )");
+    p = TokenSequencePattern.compile( "(?m){1,3} /four\\s*-?\\s*years/ ==> &annotate( { ner=YEAR } )");
     m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     match = m.find();
     assertTrue(match);
@@ -1436,44 +1336,6 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertEquals("as Bishop of London in", matched.get(3).group());
   }
 
-  public void testStringPatternMatchCaseInsensitive() throws IOException {
-    CoreMap doc = createDocument(testText1);
-
-    // Test simple sequence
-    Env env = TokenSequencePattern.getNewEnv();
-    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
-    TokenSequencePattern p = TokenSequencePattern.compile(env, "/archbishop/ /of/ /canterbury/");
-    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    assertTrue(m.find());
-    assertEquals("Archbishop of Canterbury", m.group());
-    assertFalse(m.find());
-
-    p = TokenSequencePattern.compile(env, "/ARCHBISHOP/ /OF/ /CANTERBURY/");
-    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    assertTrue(m.find());
-    assertEquals("Archbishop of Canterbury", m.group());
-    assertFalse(m.find());
-  }
-
-  public void testStringMatchCaseInsensitive() throws IOException {
-    CoreMap doc = createDocument(testText1);
-
-    // Test simple sequence
-    Env env = TokenSequencePattern.getNewEnv();
-    env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
-    TokenSequencePattern p = TokenSequencePattern.compile(env, "archbishop of canterbury");
-    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    assertTrue(m.find());
-    assertEquals("Archbishop of Canterbury", m.group());
-    assertFalse(m.find());
-
-    p = TokenSequencePattern.compile(env, "ARCHBISHOP OF CANTERBURY");
-    m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    assertTrue(m.find());
-    assertEquals("Archbishop of Canterbury", m.group());
-    assertFalse(m.find());
-  }
-
   //just to test if a pattern is compiling or not
   public void testCompile() {
     String s = "(?$se \"matching\" \"this\"|\"don't\")";
@@ -1483,45 +1345,6 @@ public class TokenSequenceMatcherITest extends TestCase {
     boolean match = m.find();
     assertTrue(match);
     //assertEquals(m.group(), "matching this");
-  }
-
-  //This DOES NOT work right now!!
-//  public void testCompile2(){
-//    Env env = TokenSequencePattern.getNewEnv();
-//    env.bind("wordname",CoreAnnotations.TextAnnotation.class);
-//    String s = "[" + CoreAnnotations.TextAnnotation.class.getName()+":\"name\"]{1,2}";
-//    TokenSequencePattern p = TokenSequencePattern.compile(env, s);
-//    for(Map.Entry<String, Object> vars: env.getVariables().entrySet()){
-//      if(vars.getValue().equals(CoreAnnotations.TextAnnotation.class)){
-//        System.out.println("Found " + vars.getKey() + " binding for " + vars.getValue());
-//      }
-//    }
-//  }
-
-  public void testCaseInsensitive1(){
-    Env env = TokenSequencePattern.getNewEnv();
-    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
-    env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
-    String s = "for /President/";
-    CoreMap doc = createDocument("for president");
-    TokenSequencePattern p = TokenSequencePattern.compile(env, s);
-    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    boolean match = m.find();
-    assertTrue(match);
-  }
-
-  public void testCaseInsensitive2(){
-    Env env = TokenSequencePattern.getNewEnv();
-    env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE);
-    env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE);
-
-    String s = "for president";
-    CoreMap doc = createDocument("for President");
-
-    TokenSequencePattern p = TokenSequencePattern.compile(env, s);
-    TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
-    boolean match = m.find();
-    assertTrue(match);
   }
 
 }

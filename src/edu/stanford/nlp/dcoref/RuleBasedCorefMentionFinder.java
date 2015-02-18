@@ -14,10 +14,9 @@ import edu.stanford.nlp.ling.MultiTokenTag;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.parser.common.ParserAnnotations;
-import edu.stanford.nlp.parser.common.ParserConstraint;
+import edu.stanford.nlp.parser.lexparser.ParserConstraint;
+import edu.stanford.nlp.parser.lexparser.ParserAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.AnnotationPipeline;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.HeadFinder;
@@ -48,7 +47,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
   public RuleBasedCorefMentionFinder(boolean allowReparsing) {
     SieveCoreferenceSystem.logger.fine("Using SEMANTIC HEAD FINDER!!!!!!!!!!!!!!!!!!!");
-    this.headFinder = new SemanticHeadFinder();
+    headFinder = new SemanticHeadFinder();
     this.allowReparsing = allowReparsing;
   }
 
@@ -318,9 +317,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
         // Add everything except separated dashes! The separated dashes mess with the parser too badly.
         CoreLabel label = tokens.get(i);
         if ( ! "-".equals(label.word())) {
-          // necessary to copy tokens in case the parser does things like
-          // put new indices on the tokens
-          extentTokens.add((CoreLabel) label.labelFactory().newLabel(label));
+          extentTokens.add(tokens.get(i));
         } else {
           approximateness++;
         }
@@ -414,13 +411,12 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
                        "token = |" + token + "|" + index + "|, approx=" + approximateness);
     for (Tree leaf : leaves) {
       if (token.equals(leaf.value())) {
-        //System.err.println("Found something: returning " + leaf);
+        // System.err.println("Found it at position " + ind + "; returning " + leaf);
         return leaf;
       }
     }
-    int fallback = Math.max(0, leaves.size() - 2);
-    SieveCoreferenceSystem.logger.warning("RuleBasedCorefMentionFinder: Last resort: returning as head: " + leaves.get(fallback));
-    return leaves.get(fallback); // last except for the added period.
+    SieveCoreferenceSystem.logger.warning("RuleBasedCorefMentionFinder: Last resort: returning as head: " + leaves.get(leaves.size() - 2));
+    return leaves.get(leaves.size() - 2); // last except for the added period.
   }
 
   private static CoreLabel initCoreLabel(String token) {
@@ -450,23 +446,8 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
   private Annotator getParser() {
     if(parserProcessor == null){
-      Annotator parser = StanfordCoreNLP.getExistingAnnotator("parse");
-      if (parser == null) {
-        // TODO: these assertions rule out the possibility of alternately named parse/pos annotators
-        throw new AssertionError("Failed to get parser - this should not be possible");
-      }
-      if (parser.requires().contains(Annotator.POS_REQUIREMENT)) {
-        Annotator tagger = StanfordCoreNLP.getExistingAnnotator("pos");
-        if (tagger == null) {
-          throw new AssertionError("Parser required tagger, but failed to find the pos annotator");
-        }
-        List<Annotator> annotators = Generics.newArrayList();
-        annotators.add(tagger);
-        annotators.add(parser);        
-        parserProcessor = new AnnotationPipeline(annotators);
-      } else {
-        parserProcessor = parser;
-      }
+      parserProcessor = StanfordCoreNLP.getExistingAnnotator("parse");
+      assert(parserProcessor != null);
     }
     return parserProcessor;
   }
@@ -486,9 +467,6 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   }
 
   private Tree safeHead(Tree top, int endIndex) {
-    // The trees passed in do not have the CoordinationTransformer
-    // applied, but that just means the SemanticHeadFinder results are
-    // slightly worse.
     Tree head = top.headTerminal(headFinder);
     // One obscure failure case is that the added period becomes the head. Disallow this.
     if (head != null) {

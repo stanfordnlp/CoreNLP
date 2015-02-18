@@ -9,7 +9,6 @@ import edu.stanford.nlp.util.Generics;
 import java.io.Reader;
 import java.util.*;
 
-// todo [cdm 2014]: This class is all but dead. Delete it.
 /**
  * Class for getting an annotated treebank.
  *
@@ -40,7 +39,11 @@ public class TreebankAnnotator {
 
 
   public static List<Tree> getTrees(String path, int low, int high, int minLength, int maxLength) {
-    Treebank treebank = new DiskTreebank(in -> new PennTreeReader(in, new LabeledScoredTreeFactory(new WordFactory()), new BobChrisTreeNormalizer()));
+    Treebank treebank = new DiskTreebank(new TreeReaderFactory() {
+      public TreeReader newTreeReader(Reader in) {
+        return new PennTreeReader(in, new LabeledScoredTreeFactory(new WordFactory()), new BobChrisTreeNormalizer());
+      }
+    });
     treebank.loadPath(path, new NumberRangeFileFilter(low, high, true));
     List<Tree> trees = new ArrayList<Tree>();
     for (Tree tree : treebank) {
