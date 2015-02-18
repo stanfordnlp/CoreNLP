@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
@@ -17,13 +16,13 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 
 /**
- * 
+ *
  * @author David McClosky
  */
 public class SemanticGraphTest extends TestCase {
 
   SemanticGraph graph;
-  
+
   @Override
     public void setUp() {
     synchronized(SemanticGraphTest.class) {
@@ -43,12 +42,12 @@ public class SemanticGraphTest extends TestCase {
       // the tree should parse correctly
       throw new RuntimeException(e);
     }
-    
+
     return SemanticGraphFactory.makeFromTree(tree, SemanticGraphFactory.Mode.BASIC, true, true);
   }
 
   public void testShortestPath() {
-    
+
     //graph.prettyPrint();
     IndexedWord word1 = graph.getNodeByIndex(10);
     IndexedWord word2 = graph.getNodeByIndex(14);
@@ -60,12 +59,12 @@ public class SemanticGraphTest extends TestCase {
     // System.out.println("word eq: " + (word1.hashCode() == word2.hashCode()));
     // System.out.println("word eq: " + (word1.toString().equals(word2.toString())));
 
-    List<SemanticGraphEdge> edges = 
+    List<SemanticGraphEdge> edges =
       graph.getShortestUndirectedPathEdges(word1, word2);
     // System.out.println("path: " + edges);
     assertNotNull(edges);
 
-    List<IndexedWord> nodes = 
+    List<IndexedWord> nodes =
       graph.getShortestUndirectedPathNodes(word1, word2);
     // System.out.println("path: " + nodes);
     assertNotNull(nodes);
@@ -83,7 +82,7 @@ public class SemanticGraphTest extends TestCase {
     assertEquals(1, nodes.size());
     assertEquals(word1, nodes.get(0));
   }
-  
+
   public void testGetCommonAncestor(){
     IndexedWord common = graph.getCommonAncestor(graph.getNodeByIndex(43), graph.getNodeByIndex(44));
     assertEquals(45, common.index());
@@ -159,7 +158,7 @@ public class SemanticGraphTest extends TestCase {
     graph.addEdge(vertices.get(1), vertices.get(3), EnglishGrammaticalRelations.DIRECT_OBJECT, 1.0, false);
     verifyTopologicalSort(graph);
 
-    // now create a graph with a directed loop, which we should not 
+    // now create a graph with a directed loop, which we should not
     // be able to topologically sort
     graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
     vertices = graph.vertexListSorted();
@@ -172,7 +171,7 @@ public class SemanticGraphTest extends TestCase {
     }
   }
 
-  /** 
+  /**
    * Tests that a particular topological sort is correct by verifying
    * for each node that it appears in the sort and all of its children
    * occur later in the sort

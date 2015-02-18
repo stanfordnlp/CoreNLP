@@ -433,13 +433,12 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    * <code>indentLevel</code>.
    *
    * @param indentLevel how many levels to indent (0 for root node)
-   *
    */
   private void toPrettyString(int indentLevel, StringBuilder buf) {
     for (int i = 0; i < indentLevel; i++) {
       buf.append("  ");
     }
-    buf.append(shortName + " (" + longName + ")").append(": ").append(targetPatterns);
+    buf.append(shortName).append(" (").append(longName).append("): ").append(targetPatterns);
     for (GrammaticalRelation child : children) {
       buf.append('\n');
       child.toPrettyString(indentLevel + 1, buf);

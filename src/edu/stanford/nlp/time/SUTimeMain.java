@@ -9,12 +9,10 @@ import edu.stanford.nlp.ling.tokensregex.MatchedExpression;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.stats.PrecisionRecallStats;
-import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.util.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import java.io.*;
 import java.text.DateFormat;
@@ -24,7 +22,6 @@ import java.util.*;
 import java.util.logging.LogManager;
 import java.util.regex.Pattern;
 
-import static edu.stanford.nlp.time.SUTimeMain.InputType.TIMEBANK_CSV;
 
 /**
  * Main program for testing SUTime

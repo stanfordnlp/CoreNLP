@@ -1,6 +1,5 @@
 package edu.stanford.nlp.time;
 
-import edu.stanford.nlp.util.Pair;
 import org.joda.time.*;
 import org.joda.time.chrono.ISOChronology;
 import org.joda.time.field.DividedDateTimeField;
@@ -16,7 +15,7 @@ import static org.joda.time.DurationFieldType.*;
 import edu.stanford.nlp.util.Generics;
 
 /**
- * Extensions to joda time
+ * Extensions to Joda time.
  *
  * @author Angel Chang
  * @author Gabor Angeli

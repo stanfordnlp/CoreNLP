@@ -30,7 +30,7 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.GrammaticalRelation.Language;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
-import java.util.Arrays;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
-import static edu.stanford.nlp.trees.GrammaticalRelation.GOVERNOR;
 
 /**
  * ChineseGrammaticalRelations is a
@@ -445,19 +444,19 @@ public class ChineseGrammaticalRelations {
    * <pre>
    * <code>
    * Input:
-   *   (NP-PRD (CP (WHNP-3 (-NONE- *OP*)) 
+   *   (NP-PRD (CP (WHNP-3 (-NONE- *OP*))
    *       (CP (IP (NP-SBJ (-NONE- *pro*))
-   *         (VP (NP-TMP (NT 以前)) 
-   *             (ADVP (AD 不)) 
-   *             (ADVP (AD 曾)) 
-   *             (VP (VV 遇到) 
-   *           (AS 过) 
-   *           (NP-OBJ (-NONE- *T*-3))))) 
-   *           (DEC 的))) 
-   *         (NP (NP (ADJP (JJ 新)) 
-   *           (NP (NN 情况))) 
-   *       (PU 、) 
-   *       (NP (ADJP (JJ 新)) 
+   *         (VP (NP-TMP (NT 以前))
+   *             (ADVP (AD 不))
+   *             (ADVP (AD 曾))
+   *             (VP (VV 遇到)
+   *           (AS 过)
+   *           (NP-OBJ (-NONE- *T*-3)))))
+   *           (DEC 的)))
+   *         (NP (NP (ADJP (JJ 新))
+   *           (NP (NN 情况)))
+   *       (PU 、)
+   *       (NP (ADJP (JJ 新))
    *           (NP (NN 问题)))))
    *   The new problem that has not been encountered.
    * Output:
@@ -478,7 +477,7 @@ public class ChineseGrammaticalRelations {
 
   /**
    * The "non-finite clause" grammatical relation.
-   * This used to be verb modifier (vmod). 
+   * This used to be verb modifier (vmod).
    */
   public static final GrammaticalRelation NONFINITE_CLAUSE_MODIFIER =
     new GrammaticalRelation(Language.Chinese,
@@ -701,7 +700,7 @@ public class ChineseGrammaticalRelations {
    *   mark(开始-20,因为-18)
    *
    * Input:
-   *   (LCP (IP (NP-SBJ (-NONE- *pro*)) 
+   *   (LCP (IP (NP-SBJ (-NONE- *pro*))
    *     (VP (VV 积累) (AS 了) (NP-OBJ (NN 经验)))) (LC 以后))
    * Output (formerly reverse(lccomp)):
    *   mark(积累, 以后)

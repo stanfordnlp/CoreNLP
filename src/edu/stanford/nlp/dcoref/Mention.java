@@ -1411,21 +1411,22 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
     if(!nerString.equals("O")) return "definite";
 
-    List<IndexedWord> quant = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.DETERMINER);
-    List<IndexedWord> poss = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.POSSESSION_MODIFIER);
-    String det = "";
-    if(!quant.isEmpty()) {
-      det = quant.get(0).lemma();
-      if(dict.determiners.contains(det)) {
-        return "definite";
+    Set<IndexedWord> quant = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.DETERMINER);
+    Set<IndexedWord> poss = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.POSSESSION_MODIFIER);
+    if (!quant.isEmpty()) {
+      for (IndexedWord word : quant) {
+        String det = word.lemma();
+        if (dict.determiners.contains(det)) {
+          return "definite";
+        } else if (dict.quantifiers2.contains(det)) {
+          return "quantified";
+        }
       }
-    }
-    else if(!poss.isEmpty()) {
+    } else if (!poss.isEmpty()) {
       return "definite";
-    }
-    else {
+    } else {
       quant = dependency.getChildrenWithReln(headIndexedWord, EnglishGrammaticalRelations.NUMERIC_MODIFIER);
-      if(dict.quantifiers2.contains(det) || !quant.isEmpty()) {
+      if (!quant.isEmpty()) {
         return "quantified";
       }
     }

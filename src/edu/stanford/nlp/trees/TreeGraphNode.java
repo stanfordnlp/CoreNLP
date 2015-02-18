@@ -1,30 +1,21 @@
 package edu.stanford.nlp.trees;
 
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.LabelFactory;
-import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Filter;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
-
-import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
-import static edu.stanford.nlp.trees.GrammaticalRelation.GOVERNOR;
 
 /**
  * <p>
- * A <code>TreeGraphNode</code> is simply a 
- * {@link Tree <code>Tree</code>} 
+ * A <code>TreeGraphNode</code> is simply a
+ * {@link Tree <code>Tree</code>}
  * with some additional functionality.  For example, the
  * <code>parent()</code> method works without searching from the root.
- * Labels are always assumed to be 
+ * Labels are always assumed to be
  * {@link CoreLabel <code>CoreLabel</code>}
  *
  * <p>This class makes the horrible mistake of changing the semantics of
@@ -32,7 +23,6 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.GOVERNOR;
  * despite the semantics of the superclass's equality.</p>
  *
  * @author Bill MacCartney
- * @see TreeGraph
  */
 public class TreeGraphNode extends Tree implements HasParent {
 

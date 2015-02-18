@@ -22,7 +22,6 @@ import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.DocumentPreprocessor.DocType;
-import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.ScoredObject;
@@ -68,7 +67,7 @@ public class ParseFiles {
   final TreePrint treePrint;
 
   /** Parse the files with names given in the String array args elements from
-   *  index argIndex on.  Convenience method which builds and invokes a ParseFiles object.  
+   *  index argIndex on.  Convenience method which builds and invokes a ParseFiles object.
    */
   static void parseFiles(String[] args, int argIndex, boolean tokenized, TokenizerFactory<? extends HasWord> tokenizerFactory, String elementDelimiter, String sentenceDelimiter, Function<List<HasWord>, List<HasWord>> escaper, String tagDelimiter, Options op, TreePrint treePrint, LexicalizedParser pqFactory) {
     ParseFiles pf = new ParseFiles(op, treePrint, pqFactory);
