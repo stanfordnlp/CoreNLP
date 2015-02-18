@@ -864,7 +864,20 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     IndexedWord[] nodes = new IndexedWord[max - min >= 0 ? max - min + 1 : 0];
     for(CoreNLPProtos.DependencyGraph.Node in: proto.getNodeList()){
       CoreLabel token = sentence.get(in.getIndex() - 1); // index starts at 1!
-      IndexedWord word = new IndexedWord(docid, in.getSentenceIndex(), in.getIndex(), token);
+      IndexedWord word = new IndexedWord(token);
+
+      // for backwards compatibility - new annotations should have
+      // these fields set, but annotations older than August 2014 might not
+      if (word.docID() == null) {
+        word.setDocID(docid);
+      }
+      if (word.sentIndex() < 0) {
+        word.setSentIndex(in.getSentenceIndex());
+      }
+      if (word.index() < 0) {
+        word.setIndex(in.getIndex());
+      }
+
       word.set(ValueAnnotation.class, word.get(TextAnnotation.class));
       if(in.hasCopyAnnotation()){ word.set(CopyAnnotation.class, in.getCopyAnnotation()); }
       assert in.getIndex() == word.index();

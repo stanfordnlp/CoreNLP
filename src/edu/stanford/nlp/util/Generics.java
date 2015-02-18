@@ -25,13 +25,13 @@ import edu.stanford.nlp.util.concurrent.SynchronizedInterner;
  * painful and verbose.  For example, rather than declaring
  *
  * <pre>
- * {@code Map<String, List<Pair<IndexedWord, GrammaticalRelation>>> = new HashMap<String, List<Pair<IndexedWord, GrammaticalRelation>>>()}
+ * {@code  Map<String,ClassicCounter<List<String>>> = new HashMap<String,ClassicCounter<List<String>>>()}
  * </pre>
  *
  * you just call <code>Generics.newHashMap()</code>:
  *
  * <pre>
- * {@code Map<String, List<Pair<IndexedWord, GrammaticalRelation>>> = Generics.newHashMap()}
+ * {@code Map<String,ClassicCounter<List<String>>> = Generics.newHashMap()}
  * </pre>
  *
  * Java type-inference will almost always just <em>do the right thing</em>

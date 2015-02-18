@@ -243,9 +243,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   }
 
   public boolean getPrintSingletons() {
-    return PropertiesUtils.getBool(properties, "output.printSingletonEntities", false); 
+    return PropertiesUtils.getBool(properties, "output.printSingletonEntities", false);
   }
-   
+
 
   public static boolean isXMLOutputPresent() {
     try {
@@ -1110,7 +1110,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     return ObjectBank.getLineIterator(fileName, new ObjectBank.PathToFileFunction());
   }
 
-  private AnnotationSerializer loadSerializer(String serializerClass, String name, Properties properties) {
+  private static AnnotationSerializer loadSerializer(String serializerClass, String name, Properties properties) {
     AnnotationSerializer serializer = null;
     try {
       // Try loading with properties

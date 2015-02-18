@@ -1360,7 +1360,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if(dependency.getRoots().isEmpty()) return null;
     // root relation
     if(dependency.getFirstRoot().equals(headIndexedWord)) return "root";
-    if(!dependency.vertexSet().contains(dependency.getParent(headIndexedWord))) return null;
+    if(!dependency.containsVertex(dependency.getParent(headIndexedWord))) return null;
     GrammaticalRelation relation = dependency.reln(dependency.getParent(headIndexedWord), headIndexedWord);
 
     // adjunct relations
@@ -1443,8 +1443,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     }
 
     // or has a sibling
-    Collection<IndexedWord> siblings = dependency.getSiblings(headIndexedWord);
-    for(IndexedWord sibling : siblings) {
+    for(IndexedWord sibling : dependency.getSiblings(headIndexedWord)) {
       if(dict.negations.contains(sibling.lemma()) && !dependency.hasParentWithReln(headIndexedWord, EnglishGrammaticalRelations.NOMINAL_SUBJECT)) return 1;
     }
     // check the parent
@@ -1491,8 +1490,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     if(headIndexedWord == null) return 0;
 
     // check adverbial clause with marker "as"
-    Collection<IndexedWord> siblings = dependency.getSiblings(headIndexedWord);
-    for(IndexedWord sibling : siblings) {
+    for(IndexedWord sibling : dependency.getSiblings(headIndexedWord)) {
       if(dict.reportVerb.contains(sibling.lemma()) && dependency.hasParentWithReln(sibling,EnglishGrammaticalRelations.ADV_CLAUSE_MODIFIER)) {
         IndexedWord marker = dependency.getChildWithReln(sibling,EnglishGrammaticalRelations.MARKER);
         if (marker != null && marker.lemma().equals("as")) {

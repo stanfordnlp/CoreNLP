@@ -23,17 +23,6 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
   public static final IndexedWord NO_WORD = new IndexedWord(null, -1, -1);
 
   /**
-   * Various printing options for toString
-   */
-  public static final String WORD_FORMAT = "WORD_FORMAT";
-  public static final String WORD_TAG_FORMAT = "WORD_TAG_FORMAT";
-  public static final String WORD_TAG_INDEX_FORMAT = "WORD_TAG_INDEX_FORMAT";
-  public static final String VALUE_FORMAT = "VALUE_FORMAT";
-  public static final String COMPLETE_FORMAT = "COMPLETE_FORMAT";
-
-  private static String printFormat = WORD_TAG_FORMAT;
-
-  /**
    * Default constructor; uses {@link CoreLabel} default constructor
    */
   public IndexedWord() {
@@ -86,24 +75,6 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
    */
   public IndexedWord(String docID, int sentenceIndex, int index) {
     super();
-    this.set(CoreAnnotations.DocIDAnnotation.class, docID);
-    this.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
-    this.set(CoreAnnotations.IndexAnnotation.class, index);
-  }
-
-
-  /**
-   * Copies the given label and then sets the docID, sentenceIndex,
-   * and Index; if these differ from those in label, the parameters
-   * will be used (not the label values).
-   *
-   * @param docID The document ID (arbitrary string)
-   * @param sentenceIndex The sentence number in the document (normally 0-based)
-   * @param index The index of the word in the sentence (normally 0-based)
-   * @param label The CoreLabel to initialize all other fields from.
-   */
-  public IndexedWord(String docID, int sentenceIndex, int index, CoreLabel label) {
-    this(label);
     this.set(CoreAnnotations.DocIDAnnotation.class, docID);
     this.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
     this.set(CoreAnnotations.IndexAnnotation.class, index);
@@ -216,62 +187,11 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
   }
 
   /**
-   * Computes the toString based on whatever the printFormat is
-   * currently set as.
+   * Returns the value-tag of this label.
    */
   @Override
   public String toString() {
-    return toString(printFormat);
-  }
-
-  public static void setPrintFormat(String printFormat) {
-    IndexedWord.printFormat = printFormat;
-  }
-
-  /**
-   * Prints the toString in the form of format.
-   *
-   * @param format One of the constants defined for this class. (You must use
-   *     one of these constants, because the Strings are compared by ==.)
-   * @return A printed representation
-   */
-  public String toString(String format) {
-
-    if (this.equals(NO_WORD)) return "NO_WORD";
-    StringBuilder result = new StringBuilder();
-
-    // word
-    if (format == WORD_FORMAT ||
-        format == WORD_TAG_FORMAT ||
-        format == WORD_TAG_INDEX_FORMAT) {
-      result.append(word());
-
-      // tag
-      if (format == WORD_TAG_FORMAT ||
-          format == WORD_TAG_INDEX_FORMAT) {
-        String tag = tag();
-        if (tag != null && tag.length() != 0) {
-          result.append('-').append(tag);
-        }
-
-        // index
-        if (format == WORD_TAG_INDEX_FORMAT) {
-          result.append('-').append(sentIndex()).append(':').append(index());
-        }
-      }
-
-      // value format
-    } else if (format == VALUE_FORMAT) {
-      result.append(value());
-      if (index() >= 0) {
-        result.append(':').append(index());
-      }
-
-    } else {
-      return super.toString();
-    }
-
-    return result.toString();
+    return toString(CoreLabel.VALUE_TAG_FORMAT);
   }
 
   public static LabelFactory factory() {

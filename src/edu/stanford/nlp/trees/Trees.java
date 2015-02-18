@@ -775,4 +775,18 @@ public class Trees {
     }
   }
 
+
+  /**
+   * Set the sentence index of all the leaves in the tree
+   * (only works on CoreLabel)
+   */
+  public static void setSentIndex(Tree tree, int sentIndex) {
+    List<Label> leaves = tree.yield();
+    for (Label leaf : leaves) {
+      if (!(leaf instanceof CoreLabel)) {
+        throw new IllegalArgumentException("Only works on CoreLabel");
+      }
+      ((CoreLabel) leaf).setSentIndex(sentIndex);
+    }
+  }
 }

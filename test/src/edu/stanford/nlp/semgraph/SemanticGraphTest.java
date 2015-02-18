@@ -2,10 +2,13 @@ package edu.stanford.nlp.semgraph;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import junit.framework.TestCase;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
@@ -81,15 +84,61 @@ public class SemanticGraphTest extends TestCase {
     assertEquals(word1, nodes.get(0));
   }
   
+  public void testGetCommonAncestor(){
+    IndexedWord common = graph.getCommonAncestor(graph.getNodeByIndex(43), graph.getNodeByIndex(44));
+    assertEquals(45, common.index());
+
+    common = graph.getCommonAncestor(graph.getNodeByIndex(41), graph.getNodeByIndex(39));
+    assertEquals(41, common.index());
+
+    common = graph.getCommonAncestor(graph.getNodeByIndex(39), graph.getNodeByIndex(41));
+    assertEquals(41, common.index());
+
+    common = graph.getCommonAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(42));
+    assertEquals(41, common.index());
+
+    // too far for this method
+    common = graph.getCommonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(42));
+    assertEquals(null, common);
+
+    common = graph.getCommonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(10));
+    assertEquals(10, common.index());
+
+    common = graph.getCommonAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(40));
+    assertEquals(40, common.index());
+
+    // a couple tests at the top of the graph
+    common = graph.getCommonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(1));
+    assertEquals(10, common.index());
+
+    common = graph.getCommonAncestor(graph.getNodeByIndex(1), graph.getNodeByIndex(10));
+    assertEquals(10, common.index());
+  }
+
   public void testCommonAncestor(){
-    IndexedWord word1 = graph.getNodeByIndex(43);
-    IndexedWord word2 = graph.getNodeByIndex(44);
-    IndexedWord common = graph.getCommonAncestor(word1, word2);
-    // System.out.println("word1: " + word1);
-    // System.out.println("word2: " + word2);
-    // System.out.println("common: " + common);
-    // System.out.println("common ancestor between  " + word1.value()+"-"+word1.index() + " and " + word2.value()+"-"+word2.index() + " is " + common.value()+"-"+common.index());
-    assertEquals(45,common.index());
+    assertEquals(1, graph.commonAncestor(graph.getNodeByIndex(43), graph.getNodeByIndex(44)));
+
+    assertEquals(1, graph.commonAncestor(graph.getNodeByIndex(41), graph.getNodeByIndex(39)));
+
+    assertEquals(1, graph.commonAncestor(graph.getNodeByIndex(39), graph.getNodeByIndex(41)));
+
+    assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(42)));
+
+    assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(42), graph.getNodeByIndex(40)));
+
+    // too far for this method
+    assertEquals(-1, graph.commonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(42)));
+    // assertEquals(null, common);
+
+    assertEquals(0, graph.commonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(10)));
+
+    assertEquals(0, graph.commonAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(40)));
+    // assertEquals(40, common.index());
+
+    // a couple tests at the top of the graph
+    assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(10), graph.getNodeByIndex(1)));
+
+    assertEquals(2, graph.commonAncestor(graph.getNodeByIndex(1), graph.getNodeByIndex(10)));
   }
 
   public void testTopologicalSort() {
@@ -145,5 +194,45 @@ public class SemanticGraphTest extends TestCase {
         assertTrue(parentIndex < childIndex);
       }
     }
+  }
+
+  public void testGetPathToRoot() {
+    verifyPath(graph.getPathToRoot(graph.getNodeByIndex(1)), 4, 10);
+    verifyPath(graph.getPathToRoot(graph.getNodeByIndex(10))); // empty path
+    verifyPath(graph.getPathToRoot(graph.getNodeByIndex(34)), 35, 28, 10);
+  }
+
+  public void verifyPath(List<IndexedWord> path, int ... expected) {
+    assertEquals(expected.length, path.size());
+    for (int i = 0; i < expected.length; ++i) {
+      assertEquals(expected[i], path.get(i).index());
+    }
+  }
+
+  public void testGetSiblings() {
+    verifySet(graph.getSiblings(graph.getNodeByIndex(43)), 42, 44, 48);
+    verifySet(graph.getSiblings(graph.getNodeByIndex(10))); // empty set
+    verifySet(graph.getSiblings(graph.getNodeByIndex(42)), 43, 44, 48);
+  }
+
+  public void verifySet(Collection<IndexedWord> nodes, int ... expected) {
+    Set<Integer> results = Generics.newTreeSet();
+    for (IndexedWord node : nodes) {
+      results.add(node.index());
+    }
+    Set<Integer> expectedIndices = Generics.newTreeSet();
+    for (Integer index : expected) {
+      expectedIndices.add(index);
+    }
+    assertEquals(expectedIndices, results);
+  }
+
+  public void testIsAncestor() {
+    //System.err.println(graph.toString(CoreLabel.VALUE_TAG_INDEX_FORMAT));
+    assertEquals(1, graph.isAncestor(graph.getNodeByIndex(42), graph.getNodeByIndex(45)));
+    assertEquals(2, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(38)));
+    assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(37)));
+    assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(10)));
+    assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(45), graph.getNodeByIndex(42)));
   }
 }

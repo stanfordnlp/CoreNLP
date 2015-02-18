@@ -232,11 +232,10 @@ public class ParserAnnotator extends SentenceAnnotator {
   @Override
   public void doOneFailedSentence(Annotation annotation, CoreMap sentence) {
     final List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
-    // TODO: xTree should use existing tags if there are any (?)
     Tree tree = ParserUtils.xTree(words);
     for (CoreLabel word : words) {
       if (word.tag() == null) {
-        word.setTag("X");
+        word.setTag("XX");
       }
     }
     finishSentence(sentence, tree);

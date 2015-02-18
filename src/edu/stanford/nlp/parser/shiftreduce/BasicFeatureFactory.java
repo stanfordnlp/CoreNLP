@@ -245,6 +245,27 @@ public class BasicFeatureFactory extends FeatureFactory {
     addUnaryQueueFeatures(features, nextLabel, nodeName + "EN-" + nodeValue);
   }
 
+  /**
+   * Also did not seem to help
+   */
+  public void addExtraTrigramFeatures(List<String> features, CoreLabel s0Label, CoreLabel s1Label, CoreLabel s2Label, CoreLabel q0Label, CoreLabel q1Label) {
+    addTrigramFeature(features, "S0wS1wS2c-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.HEADWORD, s2Label, FeatureComponent.VALUE);
+    addTrigramFeature(features, "S0wS1cS2w-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.VALUE, s2Label, FeatureComponent.HEADWORD);
+    addTrigramFeature(features, "S0cS1wS2w-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD, s2Label, FeatureComponent.HEADWORD);
+
+    addTrigramFeature(features, "S0wS1wQ0t-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADTAG);
+    addTrigramFeature(features, "S0wS1cQ0w-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.VALUE, q0Label, FeatureComponent.HEADWORD);
+    addTrigramFeature(features, "S0cS1wQ0w-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADWORD);
+
+    addTrigramFeature(features, "S0cQ0tQ1t-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADTAG, q0Label, FeatureComponent.HEADTAG);
+    addTrigramFeature(features, "S0wQ0tQ1t-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.HEADTAG, q0Label, FeatureComponent.HEADTAG);
+    addTrigramFeature(features, "S0cQ0wQ1t-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADTAG);
+    addTrigramFeature(features, "S0cQ0tQ1w-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADTAG, q0Label, FeatureComponent.HEADWORD);
+    addTrigramFeature(features, "S0wQ0wQ1t-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADTAG);
+    addTrigramFeature(features, "S0wQ0tQ1w-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.HEADTAG, q0Label, FeatureComponent.HEADWORD);
+    addTrigramFeature(features, "S0cQ0wQ1w-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADWORD);
+  }
+
   @Override
   public List<String> featurize(State state, List<String> features) {
     final TreeShapedStack<Tree> stack = state.stack;
@@ -340,6 +361,7 @@ public class BasicFeatureFactory extends FeatureFactory {
     addTrigramFeature(features, "S0wS1cS2c-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.VALUE, s2Label, FeatureComponent.VALUE);
     addTrigramFeature(features, "S0cS1wS2c-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD, s2Label, FeatureComponent.VALUE);
     addTrigramFeature(features, "S0cS1cS2w-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.VALUE, s2Label, FeatureComponent.HEADWORD);
+
     addTrigramFeature(features, "S0cS1cQ0t-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.VALUE, q0Label, FeatureComponent.HEADTAG);
     addTrigramFeature(features, "S0wS1cQ0t-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.VALUE, q0Label, FeatureComponent.HEADTAG);
     addTrigramFeature(features, "S0cS1wQ0t-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADTAG);

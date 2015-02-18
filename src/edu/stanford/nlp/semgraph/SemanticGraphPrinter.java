@@ -7,6 +7,7 @@ import java.io.StringReader;
 import java.util.List;
 import java.util.Properties;
 
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
@@ -85,15 +86,15 @@ public class SemanticGraphPrinter {
         System.out.println("TEST SEMANTIC GRAPH - graph ----------------------------");
         System.out.println(g1.toString());
         System.out.println("readable ----------------------------");
-        System.out.println(g1.toString("readable"));
+        System.out.println(g1.toString(SemanticGraph.OutputFormat.READABLE));
         System.out.println("List of dependencies ----------------------------");
         System.out.println(g1.toList());
         System.out.println("xml ----------------------------");
-        System.out.println(g1.toString("xml"));
+        System.out.println(g1.toString(SemanticGraph.OutputFormat.XML));
         System.out.println("dot ----------------------------");
         System.out.println(g1.toDotFormat());
         System.out.println("dot (simple) ----------------------------");
-        System.out.println(g1.toDotFormat("Simple", IndexedWord.WORD_FORMAT));
+        System.out.println(g1.toDotFormat("Simple", CoreLabel.VALUE_FORMAT));
 
         // System.out.println(" graph ----------------------------");
         // System.out.println(t.allTypedDependenciesCCProcessed(false));

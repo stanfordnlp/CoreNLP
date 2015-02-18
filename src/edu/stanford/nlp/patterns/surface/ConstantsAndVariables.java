@@ -581,7 +581,7 @@ public class ConstantsAndVariables implements Serializable{
   // @Option(name = "wekaOptions")
   // public String wekaOptions = "";
 
-  String backgroundSymbol = "O";
+  public String backgroundSymbol = "O";
   
   int wordShaper = WordShapeClassifier.WORDSHAPECHRIS2;
   private Map<String, String> wordShapeCache = new HashMap<String, String>();
