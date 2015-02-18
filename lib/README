@@ -192,15 +192,15 @@ LAST UPDATE: 2013-11-12
 LAST UPDATE BY: John Bauer
 
 -----------------------------------------------------------------------
-JFlex.jar
+jflex-1.5.0.jar
 
-ORIGINAL JAR NAME: JFlex.jar
+ORIGINAL JAR NAME: jflex-1.5.0.jar
 
-VERSION: 1.4.3
+VERSION: 1.5.0
 
-RELEASE DATE: 2009-01-31
+RELEASE DATE: 2014-01-21
 
-SOURCE AVAILABLE: yes, jflex-1.4.3-src.zip
+SOURCE AVAILABLE: yes, jflex-1.5.0-src.zip
 
 DESCRIPTION: compiles .flex files into .java
 
@@ -208,7 +208,7 @@ URL: http://jflex.de/
 
 USED BY: jflex the tokenizer
 
-LAST UPDATE: 2011-03-19
+LAST UPDATE: 2014-03-16
 
 LAST UPDATE BY: John Bauer
 

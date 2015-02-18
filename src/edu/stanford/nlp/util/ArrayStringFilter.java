@@ -1,5 +1,7 @@
 package edu.stanford.nlp.util;
 
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Filters Strings based on whether they exactly match any string in
@@ -63,6 +65,38 @@ public class ArrayStringFilter implements Filter<String> {
   @Override
   public String toString() {
     return mode.toString() + ":" + StringUtils.join(words, ",");
+  }
+
+  @Override
+  public int hashCode() {
+    int result = 1;
+    for (String word : words) {
+      result += word.hashCode();
+    }
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (other == this) {
+      return true;
+    }
+    if (!(other instanceof ArrayStringFilter)) {
+      return false;
+    }
+    ArrayStringFilter filter = (ArrayStringFilter) other;
+    if (filter.mode != this.mode || filter.length != filter.length) {
+      return false;
+    }
+    Set<String> myWords = new HashSet<String>();
+    for (String word : this.words) {
+      myWords.add(word);
+    }
+    Set<String> otherWords = new HashSet<String>();
+    for (String word : filter.words) {
+      otherWords.add(word);
+    }
+    return myWords.equals(otherWords);
   }
 
   private static final long serialVersionUID = 1;
