@@ -1,9 +1,6 @@
 package edu.stanford.nlp.patterns.surface;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
@@ -71,10 +68,15 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
         for (int i = s; i < e; i++) {
           CoreLabel l = sent.get(i);
           l.set(PatternsAnnotations.MatchedPattern.class, true);
+
+          if(!l.containsKey(PatternsAnnotations.MatchedPatterns.class))
+            l.set(PatternsAnnotations.MatchedPatterns.class, new HashSet<SurfacePattern>());
+          l.get(PatternsAnnotations.MatchedPatterns.class).add(matchedPat);
+
           // if (restrictToMatched) {
           // tokensMatchedPattern.add(sentid, i);
           // }
-          for (Entry<Class, Object> ig : constVars.ignoreWordswithClassesDuringSelection.get(label).entrySet()) {
+          for (Entry<Class, Object> ig : constVars.getIgnoreWordswithClassesDuringSelection().get(label).entrySet()) {
             if (l.containsKey(ig.getKey()) && l.get(ig.getKey()).equals(ig.getValue())) {
               doNotUse = true;
             }
@@ -85,7 +87,7 @@ public class ApplyPatternsMulti implements Callable<Pair<TwoDimensionalCounter<P
           } else {
             if (!containsStop || !removeStopWordsFromSelectedPhrases) {
               
-              if (label == null || l.get(constVars.answerClass.get(label)) == null || !l.get(constVars.answerClass.get(label)).equals(label.toString())) {
+              if (label == null || l.get(constVars.getAnswerClass().get(label)) == null || !l.get(constVars.getAnswerClass().get(label)).equals(label.toString())) {
                 useWordNotLabeled = true;
               }
               phrase += " " + l.word();

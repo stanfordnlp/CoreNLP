@@ -22,12 +22,6 @@ public class TokenizerAnnotatorTest extends TestCase {
           "."
   });
 
-  private static List<String> spanishTokens = Arrays.asList(new String[] {
-          "Da",
-          "me",
-          "lo",
-    });
-
   public void testNewVersion() {
     Annotation ann = new Annotation(text);
     Annotator annotator = new TokenizerAnnotator("en");
@@ -43,21 +37,6 @@ public class TokenizerAnnotatorTest extends TestCase {
       assertEquals("Bung token in new CoreLabel usage", it2.next(), word.get(CoreAnnotations.TextAnnotation.class));
     }
     assertFalse("Too few tokens in new CoreLabel usage", it2.hasNext());
-  }
-
-  public void testSpanish() {
-    Annotation ann = new Annotation("Damelo");
-    Properties props = new Properties();
-    props.setProperty("annotators", "tokenize");
-    props.setProperty("tokenize.language", "es");
-    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-    pipeline.annotate(ann);
-
-    Iterator<String> it = spanishTokens.iterator();
-    for (CoreLabel word : ann.get(CoreAnnotations.TokensAnnotation.class)) {
-      assertEquals("Bung token in new CoreLabel usage", it.next(), word.get(CoreAnnotations.TextAnnotation.class));
-    }
-    assertFalse("Too few tokens in new CoreLabel usage", it.hasNext());
   }
 
   public void testNotSpanish() {

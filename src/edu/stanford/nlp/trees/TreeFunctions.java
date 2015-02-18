@@ -4,7 +4,7 @@ import edu.stanford.nlp.ling.CategoryWordTagFactory;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.StringLabel;
 import edu.stanford.nlp.ling.StringLabelFactory;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 
 import java.io.IOException;
 import java.io.StringReader;

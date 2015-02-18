@@ -2,6 +2,7 @@ package edu.stanford.nlp.util;
 
 import java.util.*;
 import java.io.Serializable;
+import java.util.function.Function;
 
 import edu.stanford.nlp.util.MapFactory;
 

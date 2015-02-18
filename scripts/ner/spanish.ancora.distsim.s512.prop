@@ -8,8 +8,6 @@ useDistSim = true
 
 map = word=0,answer=1
 
-saveFeatureIndexToDisk = true
-
 useTitle = true
 useSpanishTitle = true
 useClassFeature=true
@@ -36,7 +34,8 @@ disjunctionWidth=5
 
 type=crf
 
-saveFeatureIndexToDisk=true
+saveFeatureIndexToDisk = true
+
 readerAndWriter=edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter
 
 useObservedSequencesOnly=true

@@ -415,19 +415,27 @@ public class IOBUtils {
         sb.append(token);
 
       } else if (label.equals(RewriteSymbol) || label.equals("REWAL") || label.equals("REWTA")) {
-        if (token.equals("ت") || token.equals("ه")) {
-          sb.append(applyRewrites ? "ة" : token);
-        } else if (token.equals("ل")) {
-          sb.append((addPrefixMarker ? prefixMarker : "") +
-                    (addSpace ? " " : "") + 
-                    (applyRewrites ? "ال" : "ل"));
-        } else if (token.equals("ي") || token.equals("ا")) {
-          sb.append(applyRewrites ? "ى" : token);
-        } else if (token.equals("ى")) {
-          sb.append(applyRewrites ? "ي" : token);
-        } else {
-          // Nonsense rewrite predicted by the classifier--just assume CONT
-          sb.append(token);
+        switch (token) {
+          case "ت":
+          case "ه":
+            sb.append(applyRewrites ? "ة" : token);
+            break;
+          case "ل":
+            sb.append((addPrefixMarker ? prefixMarker : "") +
+                (addSpace ? " " : "") +
+                (applyRewrites ? "ال" : "ل"));
+            break;
+          case "ي":
+          case "ا":
+            sb.append(applyRewrites ? "ى" : token);
+            break;
+          case "ى":
+            sb.append(applyRewrites ? "ي" : token);
+            break;
+          default:
+            // Nonsense rewrite predicted by the classifier--just assume CONT
+            sb.append(token);
+            break;
         }
       } else {
         throw new RuntimeException("Unknown label: " + label);
@@ -458,20 +466,24 @@ public class IOBUtils {
     for (int i = 0; i < labeledSequence.size(); i++) {
       String token = labeledSequence.get(i).get(CoreAnnotations.CharAnnotation.class);
       String label = labeledSequence.get(i).get(CoreAnnotations.AnswerAnnotation.class);
-      if (label.equals(BeginSymbol)) {
-        if (i != wordBegin) {
+      switch (label) {
+        case BeginSymbol:
+          if (i != wordBegin) {
+            segments.add(segment.toString());
+            segment.setLength(0);
+          }
+          segment.append(token);
+          break;
+        case BoundarySymbol:
           segments.add(segment.toString());
           segment.setLength(0);
-        }
-        segment.append(token);
-      } else if (label.equals(BoundarySymbol)) {
-        segments.add(segment.toString());
-        segment.setLength(0);
-        annotateMarkersOnWord(labeledSequence, wordBegin, i, segments);
-        segments.clear();
-        wordBegin = i + 1;
-      } else {
-        segment.append(token);
+          annotateMarkersOnWord(labeledSequence, wordBegin, i, segments);
+          segments.clear();
+          wordBegin = i + 1;
+          break;
+        default:
+          segment.append(token);
+          break;
       }
     }
     segments.add(segment.toString());

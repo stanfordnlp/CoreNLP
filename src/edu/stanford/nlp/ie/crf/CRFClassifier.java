@@ -875,7 +875,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           }
           groupSuffix += "-c:"+i;
 
-          int groupIndex = templateGroupIndex.indexOf(groupSuffix, true);
+          int groupIndex = templateGroupIndex.addToIndex(groupSuffix);
           featureIndexToTemplateIndex.put(index, groupIndex);
         }
       }
@@ -1535,7 +1535,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
   /**
    * Load auxiliary data to be used in constructing features and labels
-   * Intended to be overriden by subclasses
+   * Intended to be overridden by subclasses
    */
   protected Collection<List<IN>> loadAuxiliaryData(Collection<List<IN>> docs, DocumentReaderAndWriter<IN> readerAndWriter) {
     return docs;
@@ -1746,12 +1746,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     for (int i = beginIndex; i < endIndex; i++) {
       int oldIndex = nodeFeatureOriginalIndices.get(i);
       String f = featureIndex.get(oldIndex);
-      int index = newFeatureIndex.indexOf(f, true);
+      int index = newFeatureIndex.addToIndex(f);
       newNodeFeatureIndex.add(index);
     }
     for (Integer edgeFIndex: edgeFeatureOriginalIndices) {
       String f = featureIndex.get(edgeFIndex);
-      int index = newFeatureIndex.indexOf(f, true);
+      int index = newFeatureIndex.addToIndex(f);
       newEdgeFeatureIndex.add(index);
     }
 
@@ -2522,8 +2522,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       System.err.println("done.");
 
     } catch (Exception e) {
-      System.err.println("Failed");
-      e.printStackTrace();
+      throw new RuntimeIOException("Failed to save classifier", e);
     } finally {
       IOUtils.closeIgnoringExceptions(oos);
     }
@@ -2541,11 +2540,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       oos.writeObject(classIndex);
       oos.writeObject(featureIndex);
       oos.writeObject(flags);
-      if (flags.useEmbedding)
+      if (flags.useEmbedding) {
         oos.writeObject(embeddings);
+      }
       // For some reason, writing out the array of FeatureFactory
       // objects doesn't seem to work.  The resulting classifier
-      // doesn't have the lexicon (distsim object) correctly saved.
+      // doesn't have the lexicon (distsim object) correctly saved.  So now custom write the list
       oos.writeObject(featureFactories.size());
       for (FeatureFactory ff : featureFactories) {
         oos.writeObject(ff);
@@ -2579,15 +2579,13 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   public void loadClassifier(ObjectInputStream ois, Properties props) throws ClassCastException, IOException,
       ClassNotFoundException {
     Object o = ois.readObject();
-    // TODO: when we next break serialization, get rid of this fork and only read the List<Index>
+    // TODO: when we next break serialization, get rid of this fork and only read the List<Index> (i.e., keep first case)
     if (o instanceof List) {
       labelIndices = (List<Index<CRFLabel>>) o;
     } else {
       Index<CRFLabel>[] indexArray = (Index<CRFLabel>[]) o;
       labelIndices = new ArrayList<Index<CRFLabel>>(indexArray.length);
-      for (Index<CRFLabel> index : indexArray) {
-        labelIndices.add(index);
-      }
+      Collections.addAll(labelIndices, indexArray);
     }
     classIndex = (Index<String>) ois.readObject();
     featureIndex = (Index<String>) ois.readObject();
@@ -2602,12 +2600,13 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       featureFactories = Generics.newArrayList();
       featureFactories.add((FeatureFactory) featureFactory);
     } else if (featureFactory instanceof Integer) {
+      // this is the current format (2014) since writing list didn't work (see note in save).
       int size = (Integer) featureFactory;
-      featureFactories = Generics.newArrayList();
+      featureFactories = Generics.newArrayList(size);
       for (int i = 0; i < size; ++i) {
         featureFactory = ois.readObject();
         if (!(featureFactory instanceof FeatureFactory)) {
-          throw new RuntimeIOException();
+          throw new RuntimeIOException("Should have FeatureFactory but got " + featureFactory.getClass());
         }
         featureFactories.add((FeatureFactory) featureFactory);
       }
@@ -2616,6 +2615,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     if (props != null) {
       flags.setProperties(props, false);
     }
+
     reinit();
 
     windowSize = ois.readInt();
@@ -2891,17 +2891,26 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         wordList.add(line.trim());
       }
       System.err.println("Found a dictionary of size " + wordList.size());
+      br.close();
 
-      br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(crf.flags.embeddingVectors))));
       crf.embeddings = Generics.newHashMap();
-      double[] vector = null;
       int count = 0;
-
+      int vectorSize = -1;
+      boolean warned = false;
+      br = IOUtils.readerFromString(crf.flags.embeddingVectors);
       for (String line ; (line = br.readLine()) != null; ) {
-        vector = ArrayUtils.toDoubleArray(line.trim().split(" "));
+        double[] vector = ArrayUtils.toDoubleArray(line.trim().split(" "));
+        if (vectorSize < 0) {
+          vectorSize = vector.length;
+        } else {
+          if (vectorSize != vector.length && ! warned) {
+            System.err.println("Inconsistent vector lengths: " + vectorSize + " vs. " + vector.length);
+            warned = true;
+          }
+        }
         crf.embeddings.put(wordList.get(count++), vector);
       }
-      System.err.println("Found " + count + " matching embeddings of dimension " + vector.length);
+      System.err.println("Found " + count + " matching embeddings of dimension " + vectorSize);
     }
 
     if (crf.flags.loadClassIndexFrom != null) {

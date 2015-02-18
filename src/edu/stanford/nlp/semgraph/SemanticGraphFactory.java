@@ -23,48 +23,55 @@ public class SemanticGraphFactory {
   private static final boolean INCLUDE_PUNCTUATION_DEPENDENCIES = false;
 
   public enum Mode {
-    COLLAPSED_TREE, 
-    COLLAPSED, 
-    CCPROCESSED, 
+    COLLAPSED_TREE,
+    /** collapse: Whether to do "collapsing" of pairs of dependencies into
+     *  single dependencies, e.g., for prepositions and conjunctions.
+     */
+    COLLAPSED,
+    /** ccProcess: Whether to do processing of CC complements resulting from
+     *  collapsing.  This argument is ignored unless <code>collapse</code> is
+     * <code>true</code>.
+     */
+    CCPROCESSED,
     BASIC
-  };
+  }
 
-  /** 
+  /**
    * Produces an Uncollapsed SemanticGraph with no extras.
    */
   public static SemanticGraph generateUncollapsedDependencies(Tree tree) {
     return makeFromTree(tree, Mode.BASIC, false, true);
   }
 
-  /** 
+  /**
    * Produces a Collapsed SemanticGraph with no extras.
    */
   public static SemanticGraph generateCollapsedDependencies(Tree tree) {
     return makeFromTree(tree, Mode.COLLAPSED, false, true);
   }
 
-  /** 
+  /**
    * Produces a CCProcessed SemanticGraph with no extras.
    */
   public static SemanticGraph generateCCProcessedDependencies(Tree tree) {
     return makeFromTree(tree, Mode.CCPROCESSED, false, true);
   }
 
-  /** 
+  /**
    * Produces an Uncollapsed SemanticGraph with no extras.
    */
   public static SemanticGraph generateUncollapsedDependencies(GrammaticalStructure gs) {
     return makeFromTree(gs, Mode.BASIC, false, true, null);
   }
 
-  /** 
+  /**
    * Produces a Collapsed SemanticGraph with no extras.
    */
   public static SemanticGraph generateCollapsedDependencies(GrammaticalStructure gs) {
     return makeFromTree(gs, Mode.COLLAPSED, false, true, null);
   }
 
-  /** 
+  /**
    * Produces a CCProcessed SemanticGraph with no extras.
    */
   public static SemanticGraph generateCCProcessedDependencies(GrammaticalStructure gs) {
@@ -88,14 +95,8 @@ public class SemanticGraphFactory {
    * {@link GrammaticalStructure}. <p/>
    *
    * @param tree A tree representing a phrase structure parse
-   * @param collapse Whether to do "collapsing" of pairs of dependencies into
-   * single dependencies, e.g., for prepositions and conjunctions
-   * @param ccProcess Whether to do processing of CC complements resulting from
-   * collapsing.  This argument is ignored unless <code>collapse</code> is
-   * <code>true</code>
    * @param includeExtras Whether to include extra dependencies, which may
    * result in a non-tree
-   * @param lemmatize Whether to compute lemma for each node
    * @param threadSafe Whether to make sure processing is thread-safe
    * @param filter A filter to exclude certain dependencies; ignored if null
    * @return A SemanticGraph
@@ -280,7 +281,6 @@ public class SemanticGraphFactory {
    * Note: CDM changed the return of this from a List to a Set in 2011. This seemed more
    * sensible.  Hopefully it doesn't break anything....
    */
-  // XXX why is this a List rather than a Set (i.e. are the duplicates useful)?
   public static Set<IndexedWord> getVerticesFromEdgeSet(Iterable<SemanticGraphEdge> edges) {
     Set<IndexedWord> retSet = Generics.newHashSet();
     for (SemanticGraphEdge edge : edges) {

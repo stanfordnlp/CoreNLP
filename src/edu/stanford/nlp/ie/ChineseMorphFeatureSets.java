@@ -35,11 +35,7 @@ public class ChineseMorphFeatureSets implements Serializable {
   public ChineseMorphFeatureSets(String featureDir) {
     try {
       File dir = new File(featureDir);
-      File[] files = dir.listFiles(new FilenameFilter() {
-        public boolean accept(File dir, String name) {
-          return name.endsWith(".gb");
-        }
-      });
+      File[] files = dir.listFiles((dir1, name) -> name.endsWith(".gb"));
       for (File file : files) {
         getFeatures(file);
       }

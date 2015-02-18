@@ -608,14 +608,10 @@ public class TreeBinarizer implements TreeTransformer {
     // TreebankLangParserParams tlpp = new EnglishTreebankParserParams();
     // TreeReaderFactory trf = new LabeledScoredTreeReaderFactory();
     // Looks like it must build CategoryWordTagFactory!!
-    TreeReaderFactory trf = new TreeReaderFactory() {
-	public TreeReader newTreeReader(Reader in) {
-	  return new PennTreeReader(in,
-				    new LabeledScoredTreeFactory(
-					      new CategoryWordTagFactory()),
-				    new BobChrisTreeNormalizer());
-	}
-      };
+    TreeReaderFactory trf = in -> new PennTreeReader(in,
+            new LabeledScoredTreeFactory(
+                new CategoryWordTagFactory()),
+            new BobChrisTreeNormalizer());
 
     String fileExt = "mrg";
     HeadFinder hf = new ModCollinsHeadFinder();

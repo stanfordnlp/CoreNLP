@@ -42,7 +42,7 @@ public class TTags {
    *  a closed class - purposely conservative.
    * TODO: make this an option you can set; need to pass in TaggerConfig object and then can say = config.getClosedTagThreshold());
    */
-  private final int closedTagThreshold = Integer.valueOf(TaggerConfig.CLOSED_CLASS_THRESHOLD);
+  private final int closedTagThreshold = Integer.parseInt(TaggerConfig.CLOSED_CLASS_THRESHOLD);
 
   /** If true, when a model is trained, all tags that had fewer tokens than
    *  closedTagThreshold will be considered closed.
@@ -310,7 +310,7 @@ public class TTags {
   }
 
   protected int add(String tag) {
-    return index.indexOf(tag, true);
+    return index.addToIndex(tag);
   }
 
   public String getTag(int i) {
@@ -438,14 +438,19 @@ public class TTags {
       for (String tag : tags) {
         char ch = tag.charAt(0);
         if (ch == 'V') {
-          if ("VBD".equals(tag)) {
-            seenVBD = true;
-          } else if ("VBN".equals(tag)) {
-            seenVBN = true;
-          } else if ("VB".equals(tag)) {
-            seenVB = true;
-          } else if ("VBP".equals(tag)) {
-            seenVBP = true;
+          switch (tag) {
+            case "VBD":
+              seenVBD = true;
+              break;
+            case "VBN":
+              seenVBN = true;
+              break;
+            case "VB":
+              seenVB = true;
+              break;
+            case "VBP":
+              seenVBP = true;
+              break;
           }
         }
       }

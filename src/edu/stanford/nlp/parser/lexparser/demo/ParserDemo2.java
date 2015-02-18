@@ -80,7 +80,7 @@ class ParserDemo2 {
       System.out.println("The words of the sentence:");
       for (Label lab : parse.yield()) {
         if (lab instanceof CoreLabel) {
-          System.out.println(((CoreLabel) lab).toString("{map}"));
+          System.out.println(((CoreLabel) lab).toString(CoreLabel.OutputFormat.VALUE_MAP));
         } else {
           System.out.println(lab);
         }

@@ -478,12 +478,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   }
 
   public Iterable<E> incomingEdgeIterable(final V vertex) {
-    return new Iterable<E>() {
-      @Override
-      public Iterator<E> iterator() {
-        return new EdgeIterator<V, E>(incomingEdges, vertex);
-      }
-    };
+    return () -> new EdgeIterator<V, E>(incomingEdges, vertex);
   }
 
   public Iterator<E> outgoingEdgeIterator(final V vertex) {
@@ -491,12 +486,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   }
 
   public Iterable<E> outgoingEdgeIterable(final V vertex) {
-    return new Iterable<E>() {
-      @Override
-      public Iterator<E> iterator() {
-        return new EdgeIterator<V, E>(outgoingEdges, vertex);
-      }
-    };
+    return () -> new EdgeIterator<V, E>(outgoingEdges, vertex);
   }
 
   public Iterator<E> edgeIterator() {
@@ -504,12 +494,7 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   }
 
   public Iterable<E> edgeIterable() {
-    return new Iterable<E>() {
-      @Override
-      public Iterator<E> iterator() {
-        return new EdgeIterator<V, E>(DirectedMultiGraph.this);
-      }
-    };
+    return () -> new EdgeIterator<V, E>(DirectedMultiGraph.this);
   }
 
   static class EdgeIterator<V, E> implements Iterator<E> {

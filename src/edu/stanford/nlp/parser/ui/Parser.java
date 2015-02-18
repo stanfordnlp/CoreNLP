@@ -103,19 +103,11 @@ public class Parser extends javax.swing.JFrame {
     loadDataItem.setMnemonic('o');
     loadDataItem.setText("Load File");
     loadDataItem.setToolTipText("Load a data file.");
-    loadDataItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        loadDataItemActionPerformed(evt);
-      }
-    });
+    loadDataItem.addActionListener(evt -> loadDataItemActionPerformed(evt));
 
     jMenu1.add(loadDataItem);
     loadParserItem.setText("Load Parser");
-    loadParserItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        loadParserItemActionPerformed(evt);
-      }
-    });
+    loadParserItem.addActionListener(evt -> loadParserItemActionPerformed(evt));
 
     jMenu1.add(loadParserItem);
     jMenu1.add(jSeparator1);
@@ -123,11 +115,7 @@ public class Parser extends javax.swing.JFrame {
     exitItem.setMnemonic('x');
     exitItem.setText("Exit");
     exitItem.setToolTipText("Exits the program.");
-    exitItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        exitItemActionPerformed(evt);
-      }
-    });
+    exitItem.addActionListener(evt -> exitItemActionPerformed(evt));
 
     jMenu1.add(exitItem);
     jMenuBar1.add(jMenu1);

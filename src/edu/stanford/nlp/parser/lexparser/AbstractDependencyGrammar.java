@@ -169,7 +169,7 @@ public abstract class AbstractDependencyGrammar implements DependencyGrammar {
       } else {
         binStr = tagProjection.project(tagStr);
       }
-      tagBin[t] = tagBinIndex.indexOf(binStr, true);
+      tagBin[t] = tagBinIndex.addToIndex(binStr);
       if (DEBUG) {
         System.err.println("initTagBins: Mapped " + tagStr + " (" + t +
                            ") to " + binStr + " (" + tagBin[t] + ")");

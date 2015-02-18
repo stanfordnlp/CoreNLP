@@ -190,12 +190,16 @@ public class DefaultLexicalMapper implements Mapper, Serializable {
 
     for(int i = 0; i < options.length; i++) {
       final String opt = options[i];
-      if (opt.equals("ATBVocalizedSection")) {
-        useATBVocalizedSectionMapping = true;
-      } else if (opt.equals("StripSegMarkersInUTF8")) {
-        stripSegmentationMarkersInUTF8 = true;
-      } else if (opt.equals("StripMorphMarkersInUTF8")) {
-        stripMorphemeMarkersInUTF8 = true;
+      switch (opt) {
+        case "ATBVocalizedSection":
+          useATBVocalizedSectionMapping = true;
+          break;
+        case "StripSegMarkersInUTF8":
+          stripSegmentationMarkersInUTF8 = true;
+          break;
+        case "StripMorphMarkersInUTF8":
+          stripMorphemeMarkersInUTF8 = true;
+          break;
       }
     }
   }

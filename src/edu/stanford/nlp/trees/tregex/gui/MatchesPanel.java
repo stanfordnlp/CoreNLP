@@ -263,15 +263,13 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
       }
     }
 
-    if (! newModel.isEmpty())
-      SwingUtilities.invokeLater(new Runnable() {
-        @Override
-        public void run() {
-          list.setModel(newModel);
-          list.setSelectedIndex(0);
-          sendToListeners();
-        }
+    if (! newModel.isEmpty()) {
+      SwingUtilities.invokeLater(() -> {
+        list.setModel(newModel);
+        list.setSelectedIndex(0);
+        sendToListeners();
       });
+    }
 
     setMatchedParts(matchedParts);
     this.setPreferredSize(this.getSize());
