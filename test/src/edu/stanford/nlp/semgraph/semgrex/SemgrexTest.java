@@ -373,6 +373,17 @@ public class SemgrexTest extends TestCase {
             "E", "H", "I");
   }
 
+  /**
+   * Tests that if there are different paths from A to I, those paths show up for exactly the right depths
+   */
+  public void testMultipleDepths() {
+    SemanticGraph graph = makeComplicatedGraph();
+    runTest("{} 3,3<< {word:A}", graph, "F", "G", "I");
+    runTest("{} 4,4<< {word:A}", graph, "H", "J");
+    runTest("{} 5,5<< {word:A}", graph, "I");
+    runTest("{} 6,6<< {word:A}", graph, "J");
+  }
+
   public void testNamedNode() {
     SemanticGraph graph = makeComplicatedGraph();
     
@@ -622,6 +633,30 @@ public class SemgrexTest extends TestCase {
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
     assertEquals("ate", matcher.getNode("gov").toString());
+    assertEquals("blueberry", matcher.getNode("dep").toString());
+    assertEquals("nn", matcher.getRelnString("foo").toString());
+    assertFalse(matcher.find());
+
+    pattern = SemgrexPattern.compile("{idx:3}=dep <<=foo {idx:0}=gov");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("ate", matcher.getNode("gov").toString());
+    assertEquals("blueberry", matcher.getNode("dep").toString());
+    assertEquals("dobj", matcher.getRelnString("foo").toString());
+    assertFalse(matcher.find());
+
+    pattern = SemgrexPattern.compile("{idx:3}=dep <=foo {idx:2}=gov");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("muffins", matcher.getNode("gov").toString());
+    assertEquals("blueberry", matcher.getNode("dep").toString());
+    assertEquals("nn", matcher.getRelnString("foo").toString());
+    assertFalse(matcher.find());
+
+    pattern = SemgrexPattern.compile("{idx:2}=gov >=foo {idx:3}=dep");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("muffins", matcher.getNode("gov").toString());
     assertEquals("blueberry", matcher.getNode("dep").toString());
     assertEquals("nn", matcher.getRelnString("foo").toString());
     assertFalse(matcher.find());

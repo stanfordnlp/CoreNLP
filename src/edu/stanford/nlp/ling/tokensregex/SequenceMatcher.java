@@ -486,6 +486,9 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       cStates = todo.pop();
       int s = cStates.curPosition+1;
       for(int i = s; i < regionEnd; i++){
+        if (Thread.interrupted()) {
+          throw new RuntimeInterruptedException();
+        }
         boolean match = cStates.match(i);
         if (cStates == null || cStates.size() == 0) {
           break;

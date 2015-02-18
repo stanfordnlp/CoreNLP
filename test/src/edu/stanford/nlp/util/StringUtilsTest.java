@@ -107,4 +107,45 @@ public class StringUtilsTest extends TestCase {
     assertEquals("が", StringUtils.normalize("が"));
     assertEquals("か", StringUtils.normalize("か"));
   }
+
+  private static final char[] escapeInputs = {
+          '\\', '\\', '\\', '\\', '\\',
+          '\\', '\\', '\\', '\\', '\\',
+          '"', '"', '"',
+  };
+
+  private static final String[] csvInputs = {
+          "", ",", "foo", "foo,bar", "foo,    bar",
+          ",foo,bar,", "foo,\"bar\"", "\"foo,foo2\"", "1997, \"Ford\" ,E350", "foo,\"\",bar",
+          "1999,Chevy,\"Venture \"\"Extended Edition, Large\"\"\",,5000.00", "\"\"\",foo,\"", "\"\"\"\",foo",
+  };
+
+  private static final String[][] csvOutputs = {
+          {},
+          {""},
+          {"foo"},
+          {"foo", "bar"},
+          {"foo", "    bar"},
+
+          {"", "foo", "bar"},
+          {"foo", "bar"},
+          {"foo,foo2"},
+          {"1997"," Ford ","E350"},
+          {"foo", "", "bar"},
+
+          {"1999", "Chevy", "Venture \"Extended Edition, Large\"","", "5000.00"},
+          {"\",foo,"},
+          {"\"", "foo"},
+  };
+
+  public void testCSV() {
+    assertEquals("Bung test", csvInputs.length, csvOutputs.length);
+    for (int i = 0; i < csvInputs.length; i++) {
+      String[] answer = StringUtils.splitOnCharWithQuoting(csvInputs[i], ',', '"', escapeInputs[i]);
+      assertTrue("Bad CSV line handling of ex " + i +": " + Arrays.toString(csvOutputs[i]) +
+              " vs. " + Arrays.toString(answer),
+              Arrays.equals(csvOutputs[i], answer));
+    }
+  }
+
 }
