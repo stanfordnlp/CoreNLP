@@ -1,6 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -322,6 +323,12 @@ public class QuotationAnnotatorTest extends TestCase {
     assertEquals((int) quote.get(CoreAnnotations.QuotationIndexAnnotation.class), quoteIndex);
     assertEquals((int) quote.get(CoreAnnotations.SentenceBeginAnnotation.class), sentenceBegin);
     assertEquals((int) quote.get(CoreAnnotations.SentenceEndAnnotation.class), sentenceEnd);
+    List<CoreLabel> quoteTokens = quote.get(CoreAnnotations.TokensAnnotation.class);
+    if (quoteTokens != null && quote.get(CoreAnnotations.QuotationsAnnotation.class) == null) {
+      for (CoreLabel qt : quoteTokens) {
+        assertEquals((int) qt.get(CoreAnnotations.QuotationIndexAnnotation.class), quoteIndex);
+      }
+    }
   }
 
 
