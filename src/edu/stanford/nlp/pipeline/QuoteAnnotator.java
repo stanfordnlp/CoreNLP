@@ -121,19 +121,20 @@ public class QuoteAnnotator implements Annotator {
                                                List<CoreMap> sentences,
                                               String text, String docID) {
     List<CoreMap> cmQuotes = new ArrayList<>();
-    int tokenOffset = 0;
-    int currTok = 0;
     for (Pair<Integer, Integer> p : quotes) {
       int begin = p.first();
       int end = p.second();
 
       // find the tokens for this quote
       List<CoreLabel> quoteTokens = new ArrayList<>();
+      int tokenOffset = -1;
+      int currTok = 0;
       if (tokens != null) {
         while (currTok < tokens.size() && tokens.get(currTok).beginPosition() < begin) {
           currTok++;
         }
         int i = currTok;
+        tokenOffset = i;
         while (i < tokens.size() && tokens.get(i).endPosition() <= end) {
           quoteTokens.add(tokens.get(i));
           i++;
@@ -158,10 +159,8 @@ public class QuoteAnnotator implements Annotator {
       }
 
       // create a quote annotation with text and token offsets
-      int currQuoteSize = cmQuotes.size();
       Annotation quote = makeQuote(text, begin, end, quoteTokens,
           tokenOffset, beginSentence, endSentence, docID);
-      tokenOffset += quoteTokens.size();
 
       // add quote in
       cmQuotes.add(quote);
@@ -241,7 +240,7 @@ public class QuoteAnnotator implements Annotator {
     if (quoteTokens != null) {
       quote.set(CoreAnnotations.TokensAnnotation.class, quoteTokens);
       quote.set(CoreAnnotations.TokenBeginAnnotation.class, tokenOffset);
-      quote.set(CoreAnnotations.TokenEndAnnotation.class, tokenOffset + quoteTokens.size());
+      quote.set(CoreAnnotations.TokenEndAnnotation.class, tokenOffset + quoteTokens.size() - 1);
     }
     quote.set(CoreAnnotations.SentenceBeginAnnotation.class, sentenceBeginIndex);
     quote.set(CoreAnnotations.SentenceEndAnnotation.class, sentenceEndIndex);
