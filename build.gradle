@@ -49,7 +49,7 @@ dependencies {
 // Eclipse plugin setup
 eclipse {
   classpath {
-    defaultOutputDir = file('classes/')
+    defaultOutputDir = file('bin/')
     file {
       beforeMerged { classpath ->
         classpath.entries.removeAll { entry -> entry.kind == 'lib' }
