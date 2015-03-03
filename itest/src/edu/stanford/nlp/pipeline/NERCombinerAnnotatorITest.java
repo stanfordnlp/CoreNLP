@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Properties;
 
 
-/** 
+/**
  * @author Angel Chang
  * @author John Bauer
  */
@@ -23,9 +23,9 @@ public class NERCombinerAnnotatorITest extends TestCase {
   public static final String NER_7CLASS = DefaultPaths.DEFAULT_NER_MUC_MODEL;
   public static final String NER_MISCCLASS = DefaultPaths.DEFAULT_NER_CONLL_MODEL;
 
-  static NERCombinerAnnotator nerAnnotator = null;
-  static AnnotationPipeline unthreadedPipeline = null;
-  static AnnotationPipeline threaded4Pipeline = null;
+  private static NERCombinerAnnotator nerAnnotator = null;
+  private static AnnotationPipeline unthreadedPipeline = null;
+  private static AnnotationPipeline threaded4Pipeline = null;
 
   /**
    * Creates the tagger annotator if it isn't already created
@@ -42,7 +42,7 @@ public class NERCombinerAnnotatorITest extends TestCase {
         props.setProperty("ner.applyNumericClassifiers", "false");
         props.setProperty("ner.useSUTime", "false");
         props.setProperty("ner.model", NER_3CLASS);
-        NERClassifierCombiner ner = NERCombinerAnnotator.createNERClassifierCombiner("ner", props);
+        NERClassifierCombiner ner = NERClassifierCombiner.createNERClassifierCombiner("ner", props);
         NERCombinerAnnotator threaded4Annotator = new NERCombinerAnnotator(ner, false, 4, -1);
 
         threaded4Pipeline = new AnnotationPipeline();
@@ -75,7 +75,7 @@ public class NERCombinerAnnotatorITest extends TestCase {
     verifyAnswers(ANSWERS, document);
   }
 
-  public void verifyAnswers(String[][] expected, Annotation document) {
+  public static void verifyAnswers(String[][] expected, Annotation document) {
     int sentenceIndex = 0;
     for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
@@ -100,7 +100,7 @@ public class NERCombinerAnnotatorITest extends TestCase {
 
   private static Iterator<Annotation> getTestData(String inputString, boolean includeAnswer)
   {
-    ColumnTabDocumentReaderWriter colReader = new ColumnTabDocumentReaderWriter();
+    ColumnTabDocumentReaderWriter<CoreMap> colReader = new ColumnTabDocumentReaderWriter<>();
     if (includeAnswer) {
       colReader.init("word=0,tag=1,answer=2");
     } else {
