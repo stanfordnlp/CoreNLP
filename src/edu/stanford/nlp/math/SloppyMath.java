@@ -304,7 +304,7 @@ public final class SloppyMath {
 
   /**
    * Computes n choose k in an efficient way.  Works with
-   * k == 0 or k == n but undefined if k &lt; 0 or k &gt; n
+   * k == 0 or k == n but undefined if k < 0 or k > n
    *
    * @return fact(n) / fact(k) * fact(n-k)
    */
@@ -546,7 +546,7 @@ public final class SloppyMath {
   /**
    * Find a one-tailed Fisher's exact probability.  Chance of having seen
    * this or a more extreme departure from what you would have expected
-   * given independence.  I.e., k &ge; the value passed in.
+   * given independence.  I.e., k >= the value passed in.
    * Warning: this was done just for collocations, where you are
    * concerned with the case of k being larger than predicted.  It doesn't
    * correctly handle other cases, such as k being smaller than expected.

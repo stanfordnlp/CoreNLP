@@ -617,7 +617,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
   public boolean chineseSplitPunctLR = false;
 
   /**
-   * Chinese: mark VVs that are sister of IP (communication &amp;
+   * Chinese: mark VVs that are sister of IP (communication &
    * small-clause-taking verbs).  Good: give 0.5%
    */
   public boolean markVVsisterIP = true;
@@ -709,7 +709,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
   /** Chinese: if an IP has no subject (including no empty-category
    * subject), then it should only have an NP (adjunct) daughter if
    * it's a coordinate IP and the NP scopes over the conjunct
-   * IPs. (sometimes this NP daughter is adjoined in an IP -&gt; NP
+   * IPs. (sometimes this NP daughter is adjoined in an IP -> NP
    * IP_coord structure, sometimes the IP conjuncts are at the same
    * level as the NP).  In other cases NP adjuncts should be inside
    * VP.  So: an IP dominating neither a non-subject NP nor another IP

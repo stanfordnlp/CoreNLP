@@ -1257,7 +1257,7 @@ public class QuantifiableEntityNormalizer {
 
   /**
    * Identifies contiguous MONEY, TIME, DATE, or PERCENT entities
-   * and tags each of their constituents with a "normalizedQuantity"
+   * and tags each of their consitituents with a "normalizedQuantity"
    * label which contains the appropriate normalized string corresponding to
    * the full quantity. Quantities are not concatenated
    *
