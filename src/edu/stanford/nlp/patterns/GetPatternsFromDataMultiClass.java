@@ -282,17 +282,11 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     constVars = new ConstantsAndVariables(props, seedSets, answerClass, generalizeClasses, ignoreClasses);
 
-    //Execution.fillOptions(constVars, props);
-    //constVars.ignoreWordswithClassesDuringSelection = ignoreClasses;
-    //constVars.addGeneralizeClasses(generalizeClasses);
-    //constVars.setSeedLabelDictionary(seedSets);
-
     if (constVars.writeMatchedTokensFiles && constVars.batchProcessSents) {
       throw new RuntimeException(
           "writeMatchedTokensFiles and batchProcessSents cannot be true at the same time (not implemented; also doesn't make sense to save a large sentences json file)");
     }
 
-    //constVars.setUp(props);
     if (constVars.debug < 1) {
       Redwood.hideChannelsEverywhere(ConstantsAndVariables.minimaldebug);
     }
@@ -313,57 +307,13 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     wordsPatExtracted = new HashMap<String, TwoDimensionalCounter<CandidatePhrase, E>>();
 
-    //File invIndexDir = null;
-    //boolean createInvIndex = true;
-//    if (constVars.loadInvertedIndexDir != null) {
-//      createInvIndex = false;
-//
-//      constVars.invertedIndex = InvertedIndexByTokens.loadIndex(constVars.loadInvertedIndexDir);
-//      if (constVars.invertedIndex.isBatchProcessed() != constVars.batchProcessSents) {
-//        throw new RuntimeException("The index was created with batchProcessSents as " + constVars.invertedIndex.isBatchProcessed()
-//            + ". Use the same flag or create a new index");
-//      }
-//      Redwood.log(Redwood.DBG, "Loaded index from " + constVars.loadInvertedIndexDir);
-//    }
-    // else if(constVars.saveInvertedIndexDir != null){
-
-    // if(constVars.diskBackedInvertedIndex){
-    // invIndexDir = new File(constVars.saveInvertedIndexDir+"/cache");
-    // IOUtils.deleteDirRecursively(invIndexDir);
-    // IOUtils.ensureDir(invIndexDir);
-    // }}
-
-//    else if (constVars.saveInvertedIndexDir == null) {
-//
-//      String dir = System.getProperty("java.io.tmpdir");
-//      invIndexDir = File.createTempFile(dir, ".dir");
-//      invIndexDir.delete();
-//      invIndexDir.deleteOnExit();
-//    }
-
-//    Set<String> specialwords4Index = new HashSet<String>();
-//    specialwords4Index.addAll(Arrays.asList("fw", "FW", "sw", "SW", "OTHERSEM", "othersem"));
-
     for (String label : answerClass.keySet()) {
       wordsPatExtracted.put(label, new TwoDimensionalCounter<CandidatePhrase, E>());
-//      specialwords4Index.add(label);
-//      specialwords4Index.add(label.toLowerCase());
     }
 
     scorePhrases = new ScorePhrases(props, constVars);
     createPats = new CreatePatterns(props, constVars);
     assert !(constVars.doNotApplyPatterns && (PatternFactory.useStopWordsBeforeTerm || PatternFactory.numWordsCompoundMax > 1)) : " Cannot have both doNotApplyPatterns and (useStopWordsBeforeTerm true or numWordsCompound > 1)!";
-
-//    String prefixFileForIndex = null;
-//    if (constVars.usingDirForSentsInIndex) {
-//      prefixFileForIndex = constVars.saveSentencesSerDir;
-//    }
-
-
-    //  constVars.invertedIndex = new SentenceIndex(constVars.matchLowerCaseContext, constVars.getStopWords(), specialwords4Index,
-     //   constVars.batchProcessSents);
-      // new InvertedIndexByTokens(constVars.matchLowerCaseContext, constVars.getStopWords(), specialwords4Index,
-      //    constVars.batchProcessSents, prefixFileForIndex);
 
     if(constVars.invertedIndexDirectory == null){
       File f  = File.createTempFile("inv","index");
@@ -462,120 +412,12 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       if(createIndex)
         constVars.invertedIndex.add(sentsf, true);
 
+      //TODO: write non batch sentences as well
       if(constVars.batchProcessSents){
         Redwood.log(Redwood.DBG, "Saving the labeled seed sents (if given the option) to the same file " + sentsIter.second());
         IOUtils.writeObjectToFile(sentsf, sentsIter.second());
       }
     }
-
-
-//    if (constVars.batchProcessSents) {
-//        for (File f : Data.sentsFiles) {
-//
-//          if(!f.exists())
-//            throw new RuntimeException("File " + f + " does not exist. Something is wrong. Contact the author with full details.");
-//
-//          Redwood.log(Redwood.DBG, "Reading file from " + f.getAbsolutePath());
-//
-//          Map<String, DataInstance> sentsf = IOUtils.readObjectFromFile(f);
-//
-//          for(Entry<String, DataInstance> en: sentsf.entrySet()){
-//            Data.sentId2File.put(en.getKey(), f);
-//          }
-//
-//          totalNumSents += sentsf.size();
-//
-//          if(computeDataFreq){
-//            Data.computeRawFreqIfNull(sentsf, PatternFactory.numWordsCompound);
-//          }
-//
-//
-//          Redwood.log(Redwood.DBG, "Initializing sents from " + f + " with " + sentsf.size()
-//              + " sentences, either by labeling with the seed set or just setting the right classes");
-//          for (String l : constVars.getAnswerClass().keySet()) {
-//            Redwood.log(Redwood.DBG, "labelUsingSeedSets is " + labelUsingSeedSets + " and seed set size for " + l + " is " + (seedSets == null?"null":seedSets.size()));
-//
-//            Set<CandidatePhrase> seed = seedSets == null || !labelUsingSeedSets ? new HashSet<CandidatePhrase>() : (seedSets.containsKey(l) ? seedSets.get(l)
-//                : new HashSet<CandidatePhrase>());
-//
-//            runLabelSeedWords(sentsf, constVars.getAnswerClass().get(l), l, seed, constVars, labelUsingSeedSets);
-//
-//
-//            if (constVars.addIndvWordsFromPhrasesExceptLastAsNeg) {
-//              Set<CandidatePhrase> otherseed = new HashSet<CandidatePhrase>();
-//              for (CandidatePhrase s : seed) {
-//                String[] t = s.getPhrase().split("\\s+");
-//                for (int i = 0; i < t.length - 1; i++) {
-//                  if (!seed.contains(t[i])) {
-//                    otherseed.add(new CandidatePhrase(t[i]));
-//                  }
-//                }
-//              }
-//              runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed, constVars, labelUsingSeedSets);
-//            }
-//
-//          }
-//
-//          if (constVars.getOtherSemanticClassesWords() != null)
-//            runLabelSeedWords(sentsf, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", constVars.getOtherSemanticClassesWords(), constVars, labelUsingSeedSets);
-//
-//          if(constVars.removeOverLappingLabelsFromSeed){
-//            removeOverLappingLabels(sentsf);
-//          }
-//
-//          constVars.invertedIndex.add(sentsf, true);
-//
-//
-//          Redwood.log(Redwood.DBG, "Saving the labeled seed sents (if given the option) to the same file " + f);
-//          IOUtils.writeObjectToFile(sentsf, f);
-//        }
-//
-//    } else {
-//
-//      //not batch processing sentences
-//
-//      totalNumSents = Data.sents.size();
-//
-//      if(computeDataFreq){
-//        Data.computeRawFreqIfNull(Data.sents, PatternFactory.numWordsCompound);
-//      }
-//
-//
-//      Redwood.log(Redwood.DBG, "Initializing sents " + Data.sents.size()
-//          + " sentences, either by labeling with the seed set or just setting the right classes");
-//      for (String l : constVars.getAnswerClass().keySet()) {
-//
-//        Set<CandidatePhrase> seed = seedSets == null || !labelUsingSeedSets ? new HashSet<CandidatePhrase>() : (seedSets.containsKey(l) ? seedSets.get(l)
-//            : new HashSet<CandidatePhrase>());
-//
-//        runLabelSeedWords(Data.sents, constVars.getAnswerClass().get(l), l, seed, constVars, labelUsingSeedSets);
-//
-//        if (constVars.addIndvWordsFromPhrasesExceptLastAsNeg) {
-//          Set<CandidatePhrase> otherseed = new HashSet<CandidatePhrase>();
-//          for (CandidatePhrase s : seed) {
-//            String[] t = s.getPhrase().split("\\s+");
-//            for (int i = 0; i < t.length - 1; i++) {
-//              if (!seed.contains(t[i])) {
-//                otherseed.add(new CandidatePhrase(t[i]));
-//              }
-//            }
-//          }
-//          runLabelSeedWords(Data.sents, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", otherseed, constVars, labelUsingSeedSets);
-//        }
-//      }
-//
-//
-//      if (constVars.getOtherSemanticClassesWords() != null)
-//        runLabelSeedWords(Data.sents, PatternsAnnotations.OtherSemanticLabel.class, "OTHERSEM", constVars.getOtherSemanticClassesWords() , constVars, labelUsingSeedSets);
-//
-//      if(constVars.removeOverLappingLabelsFromSeed){
-//        removeOverLappingLabels(Data.sents);
-//      }
-//
-//      if(createIndex)
-//        constVars.invertedIndex.add(Data.sents, true);
-//
-//    }
 
 
     Redwood.log(Redwood.DBG, "Done loading/creating inverted index of tokens and labeling data with total of "
