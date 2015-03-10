@@ -67,7 +67,7 @@ public class ApplyPatterns<E extends Pattern>  implements Callable<Triple<TwoDim
             int s = m.start("$term");
             int e = m.end("$term");
 
-            assert e-s <= PatternFactory.numWordsCompoundMapped.get(label) : "How come the pattern is extracting phrases longer than numWordsCompound";
+            assert e-s <= PatternFactory.numWordsCompoundMapped.get(label) : "How come the pattern " + pEn.getKey()  + " is extracting phrases longer than numWordsCompound of " + PatternFactory.numWordsCompoundMapped.get(label) + " for label " + label;
 
             String phrase = "";
             String phraseLemma = "";

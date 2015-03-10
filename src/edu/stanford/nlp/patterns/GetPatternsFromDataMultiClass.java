@@ -2271,8 +2271,8 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     //for (int i = 0; i < numIter; i++) {
       Counter<E> patternThisIter = getPatterns(label, learnedPatterns.get(label).keySet(), p0, p0Set, ignorePatterns);
       patterns.addAll(patternThisIter);
-      learnedPatterns.get(label).addAll(patternThisIter);
-      learnedPatternsEachIter.get(label).put(numIter, patternThisIter);
+      learnedPatterns.get(label).addAll(patterns);
+      learnedPatternsEachIter.get(label).put(numIter, patterns);
 
       if (sentsOutFile != null)
         sentsOutFile = sentsOutFile + "_" + numIter + "iter.ser";
