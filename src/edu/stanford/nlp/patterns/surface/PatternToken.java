@@ -99,7 +99,7 @@ public class PatternToken implements Serializable {
 
     if (notAllowedClasses != null && notAllowedClasses.size() > 0) {
       for (String na : notAllowedClasses)
-        restrictions.add("!{" + na + "}");
+        restrictions.add("!{" + na + ":" + na +"}");
     }
     str += "[" + StringUtils.join(restrictions, " & ") + "]{1,"
         + numWordsCompound + "}";

@@ -187,10 +187,10 @@ public class ScorePhrases<E extends Pattern> {
     if(constVars.doNotExtractPhraseAnyWordLabeledOtherClass){
       for(String l: constVars.getAnswerClass().keySet()){
         if(!l.equals(label)){
-          notAllowedClasses.add(l+":"+l);
+          notAllowedClasses.add(l);
         }
       }
-      notAllowedClasses.add("OTHERSEM:OTHERSEM");
+      notAllowedClasses.add("OTHERSEM");
     }
 
 
@@ -199,12 +199,13 @@ public class ScorePhrases<E extends Pattern> {
 
     if(constVars.patternType.equals(PatternFactory.PatternType.SURFACE)) {
       surfacePatternsLearnedThisIterConverted = new HashMap<TokenSequencePattern, E>();
-      TokenSequencePattern pat = null;
+      String patternStr = null;
       try{
-        pat = TokenSequencePattern.compile(constVars.env.get(label), pattern.toString(notAllowedClasses));
+        patternStr = pattern.toString(notAllowedClasses);
+        TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), patternStr);
         surfacePatternsLearnedThisIterConverted.put(pat, pattern);
       }catch(Exception e){
-        System.err.println("Error applying patterrn " + pat);
+        System.err.println("Error applying patterrn " + patternStr + ". Probably an ill formed pattern (can be because of special symbols in label names). Contact the software developer.");
         throw e;
       }
     }else if(constVars.patternType.equals(PatternFactory.PatternType.DEP)){

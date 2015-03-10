@@ -28,7 +28,7 @@ public class GoogleNGramsSQLBacked {
   @Option(name="googleNgram_hostname", gloss="where psql is located.")
   static String googleNgram_hostname = "jonsson";
 
-  @Option(name="googleNgram_dbname", gloss="the database name", required=true)
+  @Option(name="googleNgram_dbname", gloss="the database name")
   static String googleNgram_dbname;
 
   @Option(name="googleNgram_username")
@@ -46,6 +46,7 @@ public class GoogleNGramsSQLBacked {
 
   static void connect () throws SQLException{
     if(connection == null) {
+      assert googleNgram_dbname != null : "set googleNgram_dbname variable through the properties file";
       connection = DriverManager.getConnection(
         "jdbc:postgresql://" + googleNgram_hostname + "/" + googleNgram_dbname, googleNgram_username, "");
     }
