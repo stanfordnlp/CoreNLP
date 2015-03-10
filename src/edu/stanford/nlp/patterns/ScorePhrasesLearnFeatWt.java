@@ -1182,22 +1182,14 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       LogisticClassifier logcl = ((LogisticClassifier) classifier);
 
       String l = (String) logcl.getLabelForInternalPositiveClass();
-      boolean flipsign = false;
-      if (l.equals(Boolean.FALSE.toString())) {
-        flipsign = true;
-      }
-      Counter<ScorePhraseMeasures> feat = null;
+      Counter<ScorePhraseMeasures> feat;
       if (forLearningPatterns)
         feat = getPhraseFeaturesForPattern(label, word);
       else
         feat = this.getFeatures(label, word, patternsThatExtractedPat, allSelectedPatterns);
 
-      RVFDatum<String, ScorePhraseMeasures> d = new RVFDatum<String, ScorePhraseMeasures>(feat, Boolean.FALSE.toString());
-      //TODO: do we need probability?
-//      score = logcl.probabilityOf(d);
-//      if (flipsign)
-//        score = 1 - score;
-      score = logcl.scoresOf(d).getCount(Boolean.TRUE.toString());
+      RVFDatum<String, ScorePhraseMeasures> d = new RVFDatum<String, ScorePhraseMeasures>(feat, Boolean.TRUE.toString());
+      score = logcl.probabilityOf(d);
 
     } else if( scoreClassifierType.equals(ClassifierType.SHIFTLR)){
       //convert to basicdatum -- restriction of ShiftLR right now
