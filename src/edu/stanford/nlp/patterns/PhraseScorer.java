@@ -90,7 +90,7 @@ public abstract class PhraseScorer<E extends Pattern> {
   }
 
   public static double getGoogleNgramScore(CandidatePhrase g) {
-    double count = GoogleNGramsSQLBacked.getCount(g.getPhrase());
+    double count = GoogleNGramsSQLBacked.getCount(g.getPhrase().toLowerCase()) + GoogleNGramsSQLBacked.getCount(g.getPhrase());
     if (count != -1) {
       if(!Data.rawFreq.containsKey(g))
         //returning 1 because usually lower this tf-idf score the better. if we don't have raw freq info, give it a bad score
