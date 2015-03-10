@@ -462,7 +462,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
 
   //this chooses the ones that are not close to the positive phrases!
-  Set<CandidatePhrase> chooseUnknownAsNegatives(Set<CandidatePhrase> candidatePhrases, String label, double percentage, Collection<CandidatePhrase> positivePhrases, Map<String, Collection<CandidatePhrase>> knownNegativePhrases, BufferedWriter logFile) throws IOException {
+  Set<CandidatePhrase> chooseUnknownAsNegatives(Set<CandidatePhrase> candidatePhrases, String label, Collection<CandidatePhrase> positivePhrases, Map<String,
+    Collection<CandidatePhrase>> knownNegativePhrases, BufferedWriter logFile) throws IOException {
 
     List<List<CandidatePhrase>> threadedCandidates = GetPatternsFromDataMultiClass.getThreadBatches(CollectionUtils.toList(candidatePhrases), constVars.numThreads);
 
@@ -508,6 +509,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
     //Collection<CandidatePhrase> removed = Counters.retainBottom(sims, (int) (sims.size() * percentage));
     //System.out.println("not choosing " + removed + " as the negative phrases. percentage is " + percentage + " and allMaxsim was " + allMaxSim);
+
     return sims.keySet();
   }
 
@@ -1007,7 +1009,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     System.out.println("all positive phrases of size " + allPositivePhrases.size() + " are  " + allPositivePhrases);
     for(CandidatePhrase candidate: allPositivePhrases) {
-      Counter<ScorePhraseMeasures> feat = null;
+      Counter<ScorePhraseMeasures> feat;
       //CandidatePhrase candidate = new CandidatePhrase(l.word());
       if (forLearningPattern) {
         feat = getPhraseFeaturesForPattern(answerLabel, candidate);
@@ -1026,8 +1028,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     Redwood.log(Redwood.DBG, "Number of unknown phrases is " + allUnknownPhrases.size());
 
     if(constVars.subsampleUnkAsNegUsingSim){
-      double subSampleUnkAsNegUsingSimPercentage = 1.0;
-      Set<CandidatePhrase> chosenUnknown = chooseUnknownAsNegatives(allUnknownPhrases, answerLabel, subSampleUnkAsNegUsingSimPercentage, allPositivePhrases, allPossibleNegativePhrases, logFile);
+      Set<CandidatePhrase> chosenUnknown = chooseUnknownAsNegatives(allUnknownPhrases, answerLabel, allPositivePhrases, allPossibleNegativePhrases, logFile);
       Redwood.log(Redwood.DBG, "Choosing " + chosenUnknown.size() + " unknowns as negative based to their similarity to the positive phrases");
       allNegativePhrases.addAll(chosenUnknown);
     }
@@ -1038,7 +1039,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     if(allNegativePhrases.size() > numpos) {
       Redwood.log(Redwood.WARN, "Num of negative (" + allNegativePhrases.size() + ") is higher than number of positive phrases (" + numpos + ") = " +
         (allNegativePhrases.size() / (double)numpos) + ". " +
-        "Capping the number by taking the first numPositives as negative. Consider decreasing perSelectNeg and perSelectRand");
+        "Capping the number by taking the first numPositives as negative. Consider decreasing perSelectRand");
       int i = 0;
       Set<CandidatePhrase> selectedNegPhrases = new HashSet<CandidatePhrase>();
       for(CandidatePhrase p : allNegativePhrases){

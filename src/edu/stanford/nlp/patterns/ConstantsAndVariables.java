@@ -477,8 +477,6 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name="fuzzyMatch")
   public boolean fuzzyMatch = false;
 
-
-
   public Set<String> getLabels() {
     return labels;
   }

@@ -1918,7 +1918,8 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
           //This happens when dealing with the collapseddependencies
           if (pats == null) {
             if(!constVars.patternType.equals(PatternFactory.PatternType.DEP))
-              throw new RuntimeException("Why are patterns null for sentence " + sentId + " and token " + i + "(" + tokens.get(i) + "). pat4Sent has token ids " + pat4Sent.keySet() + (constVars.batchProcessSents ? "" : ". The sentence is " + Data.sents.get(sentId)) + ". If you have switched batchProcessSents, recompute the patterns.");
+              throw new RuntimeException("Why are patterns null for sentence " + sentId + " and token " + i + "(" + tokens.get(i) + "). pat4Sent has token ids " + pat4Sent.keySet() +
+                (constVars.batchProcessSents ? "" : ". The sentence is " + Data.sents.get(sentId)) + ". If you have changed parameters, recompute all patterns.");
             continue;
           }
 
@@ -2334,9 +2335,10 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     System.out.println("\n\nAll patterns learned:");
 
     for(Map.Entry<String, Map<Integer, Counter<E>>> en2: this.learnedPatternsEachIter.entrySet()) {
+      System.out.println(en2.getKey()+":");
       for (Map.Entry<Integer, Counter<E>> en : en2.getValue().entrySet()) {
-        System.out.println("\n");
-        System.out.println(en.getKey() + ":\t\t" + StringUtils.join(en.getValue().keySet(), "\n"));
+        System.out.println("Iteration " + en.getKey());
+        System.out.println(StringUtils.join(en.getValue().keySet(), "\n"));
       }
     }
     System.out.println("\n\nAll words learned:");
@@ -3182,8 +3184,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     boolean useTargetNERRestriction = Boolean.parseBoolean(props.getProperty("useTargetNERRestriction"));
     boolean useTargetParserParentRestriction = Boolean.parseBoolean(props.getProperty(Flags.useTargetParserParentRestriction));
     boolean useContextNERRestriction = Boolean.parseBoolean(props.getProperty("useContextNERRestriction"));
-
-    boolean addEvalSentsToTrain = Boolean.parseBoolean(props.getProperty("addEvalSentsToTrain"));
+    boolean addEvalSentsToTrain = Boolean.parseBoolean(props.getProperty("addEvalSentsToTrain","true"));
     String evalFileWithGoldLabels = props.getProperty("evalFileWithGoldLabels");
 
     if (file == null && (evalFileWithGoldLabels == null || addEvalSentsToTrain == false)) {
@@ -3307,14 +3308,19 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         List<File> allFiles = GetPatternsFromDataMultiClass.getAllFiles(evalFileWithGoldLabels);
         int numFile = 0;
         String evalFileFormat = props.getProperty("evalFileFormat");
-        if (evalFileFormat == null || evalFileFormat.equalsIgnoreCase("text") || evalFileFormat.equalsIgnoreCase("txt")) {
+        if (evalFileFormat == null || evalFileFormat.equalsIgnoreCase("text") || evalFileFormat.equalsIgnoreCase("txt") || evalFileFormat.startsWith("text")) {
           for (File f : allFiles) {
             numFile++;
             Redwood.log(Redwood.DBG, "Annotating text in " + f + ". Num file " + numFile);
-            List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(new BufferedReader(new FileReader(f)), labels,
-              setClassForTheseLabels, true, f.getName());
-            evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath, useTargetNERRestriction || useContextNERRestriction, "",
-              useTargetParserParentRestriction, props.getProperty(Flags.numThreads), patternType));
+            if(evalFileFormat.equalsIgnoreCase("textCoNLLStyle")){
+              Map<String, DataInstance> sentsEval = AnnotatedTextReader.parseColumnFile(new BufferedReader(new FileReader(f)), labels, setClassForTheseLabels, true, f.getName());
+              evalsents.putAll(runPOSNERParseOnTokens(sentsEval, props));
+            } else{
+              List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(new BufferedReader(new FileReader(f)), labels,
+                setClassForTheseLabels, true, f.getName());
+              evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath, useTargetNERRestriction || useContextNERRestriction, "",
+                useTargetParserParentRestriction, props.getProperty(Flags.numThreads), patternType));
+            }
           }
 
         } else if (fileFormat.equalsIgnoreCase("ser")) {
@@ -3322,10 +3328,9 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
             evalsents.putAll((Map<? extends String, ? extends DataInstance>) IOUtils.readObjectFromFile(f));
           }
         }
-        // if (addEvalSentsToTrain) {
-        Redwood.log(Redwood.DBG, "Adding " + evalsents.size() + " eval sents to the training set");
-
-        // }
+        if (addEvalSentsToTrain) {
+          Redwood.log(Redwood.DBG, "Adding " + evalsents.size() + " eval sents to the training set");
+        }
 
         IOUtils.writeObjectToFile(evalsents, saveEvalSentencesSerFileFile);
 
