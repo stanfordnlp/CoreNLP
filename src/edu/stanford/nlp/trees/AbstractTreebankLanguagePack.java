@@ -365,7 +365,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * Returns a {@link Function Function} object that maps Strings to Strings according
    * to this TreebankLanguagePack's basicCategory() method.
    *
-   * @return The String->String Function object
+   * @return The String-&gt;String Function object
    */
   @Override
   public Function<String,String> getBasicCategoryFunction() {
@@ -475,7 +475,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * Returns a {@link Function Function} object that maps Strings to Strings according
    * to this TreebankLanguagePack's categoryAndFunction() method.
    *
-   * @return The String->String Function object
+   * @return The String-&gt;String Function object
    */
   @Override
   public Function<String,String> getCategoryAndFunctionFunction() {

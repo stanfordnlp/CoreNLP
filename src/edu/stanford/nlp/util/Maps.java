@@ -45,7 +45,7 @@ public class Maps {
   }
 
   /**
-   * Compose two maps map1:x->y and map2:y->z to get a map x->z
+   * Compose two maps map1:x-&gt;y and map2:y-&gt;z to get a map x-&gt;z
    *
    * @return The composed map
    */
@@ -58,7 +58,7 @@ public class Maps {
   }
 
   /**
-   * Inverts a map x->y to a map y->x assuming unique preimages.  If they are not unique, you get an arbitrary ones as the values in the inverted map.
+   * Inverts a map x-&gt;y to a map y-&gt;x assuming unique preimages.  If they are not unique, you get an arbitrary ones as the values in the inverted map.
    *
    * @return The inverted map
    */
@@ -73,7 +73,7 @@ public class Maps {
   }
 
   /**
-   * Inverts a map x->y to a map y->pow(x) not assuming unique preimages.
+   * Inverts a map x-&gt;y to a map y-&gt;pow(x) not assuming unique preimages.
    *
    * @return The inverted set
    */
@@ -153,7 +153,7 @@ public class Maps {
    * get all values corresponding to the indices (if they exist in the map)
    * @param map
    * @param indices
-   * @return
+   * @return a submap corresponding to the indices
    */
   public static<T,V> Map<T, V> getAll(Map<T, V> map, Collection<T> indices){
     Map<T,V> result = new HashMap<T,V>();

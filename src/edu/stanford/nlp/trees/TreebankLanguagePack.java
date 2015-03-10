@@ -316,7 +316,7 @@ public interface TreebankLanguagePack extends Serializable {
    * Returns a {@link Function Function} object that maps Strings to Strings according
    * to this TreebankLanguagePack's basicCategory method.
    *
-   * @return the String->String Function object
+   * @return the String-&gt;String Function object
    */
   public Function<String,String> getBasicCategoryFunction();
 
@@ -336,7 +336,7 @@ public interface TreebankLanguagePack extends Serializable {
    * Returns a {@link Function Function} object that maps Strings to Strings according
    * to this TreebankLanguagePack's categoryAndFunction method.
    *
-   * @return the String->String Function object
+   * @return the String-&gt;String Function object
    */
   public Function<String,String> getCategoryAndFunctionFunction();
 

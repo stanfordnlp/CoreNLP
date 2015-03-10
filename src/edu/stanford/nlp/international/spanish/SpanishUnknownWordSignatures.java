@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * These utilities are used to characterize unknown words within the
  * POS tagger and the parser.
  *
- * @see ExtractorFramesRare
+ * @see edu.stanford.nlp.tagger.maxent.ExtractorFramesRare
  * @see SpanishUnknownWordModel
  *
  * @author Jon Gauthier
