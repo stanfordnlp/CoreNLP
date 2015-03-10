@@ -549,7 +549,6 @@ public class ScorePhrases<E extends Pattern> {
     String identifier, Set<CandidatePhrase> ignoreWords, boolean computeProcDataFreq) throws IOException, ClassNotFoundException {
 
     Set<CandidatePhrase> alreadyLabeledWords = new HashSet<CandidatePhrase>();
-    //TwoDimensionalCounter<CandidatePhrase, E> wordsandLemmaPatExtracted = new TwoDimensionalCounter<CandidatePhrase, E>();
     if (constVars.doNotApplyPatterns) {
       // if want to get the stats by the lossy way of just counting without
       // applying the patterns
@@ -558,17 +557,6 @@ public class ScorePhrases<E extends Pattern> {
         Pair<Map<String, DataInstance>, File> sentsf = sentsIter.next();
         this.statsWithoutApplyingPatterns(sentsf.first(), patternsForEachToken, patternsLearnedThisIter, wordsPatExtracted);
       }
-
-      /*
-        if (constVars.batchProcessSents) {
-        for (File f : Data.sentsFiles) {
-          Redwood.log(Redwood.DBG, "Calculating stats from sents file " + f);
-          Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
-          this.statsWithoutApplyingPatterns(sents, patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
-        }
-      } else
-        this.statsWithoutApplyingPatterns(Data.sents, patternsForEachToken, patternsLearnedThisIter, wordsandLemmaPatExtracted);
-      */
     } else {
       if (patternsLearnedThisIter.size() > 0) {
         this.applyPats(patternsLearnedThisIter, label, wordsPatExtracted, matchedTokensByPat, alreadyLabeledWords);
@@ -603,8 +591,6 @@ public class ScorePhrases<E extends Pattern> {
         if (!constVars.getOtherSemanticClassesWords().contains(en) && (en.getPhraseLemma() ==null || !constVars.getOtherSemanticClassesWords().contains(CandidatePhrase.createOrGet(en.getPhraseLemma()))) && !alreadyLabeledWords.contains(en)){
           terms.addAll(en, wordsPatExtracted.getCounter(en));
         }
-//        wordsPatExtracted.addAll(en,
-//            wordsandLemmaPatExtracted.getCounter(en));
       }
       removeKeys(terms, constVars.getStopWords());
 
@@ -625,10 +611,7 @@ public class ScorePhrases<E extends Pattern> {
 
       Counter<CandidatePhrase> finalwords = chooseTopWords(phraseScores, terms,
           phraseScores, ignoreWordsAll, constVars.thresholdWordExtract);
-      // for (String w : finalwords.keySet()) {
-      // System.out.println("Features for " + w + ": "
-      // + this.phraseScoresRaw.getCounter(w));
-      // }
+
       phraseScorer.printReasonForChoosing(finalwords);
 
       scoreForAllWordsThisIteration.clear();

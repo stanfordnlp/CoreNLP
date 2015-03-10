@@ -165,6 +165,9 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
 
         if (constVars.usePatternEvalWordClass) {
           Integer num = constVars.getWordClassClusters().get(g);
+          if(num == null){
+            num = constVars.getWordClassClusters().get(g.toLowerCase());
+          }
           if (num != null
               && constVars.distSimWeights.get(label).containsKey(num)) {
             externalFeatWtsNormalized.setCount(gc,

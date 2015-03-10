@@ -98,35 +98,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     GeneralDataset<String, ScorePhraseMeasures> dataset = choosedatums(forLearningPatterns, label, wordsPatExtracted, allSelectedPatterns, computeRawFreq);
 
-    /*
-      if(constVars.batchProcessSents){
-
-      for(File f: Data.sentsFiles){
-        Redwood.log(Redwood.DBG,"Sampling sentences from " + f);
-        Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
-        if(computeRawFreq)
-          Data.computeRawFreqIfNull(sents, constVars.numWordsCompound);
-        dataset.addAll(choosedatums(label, forLearningPatterns, sents, constVars.getAnswerClass().get(label), label,
-            constVars.getOtherSemanticClassesWords(), constVars.getIgnoreWordswithClassesDuringSelection().get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
-            allSelectedPatterns));
-      }
-    } else{
-      if(computeRawFreq)
-        Data.computeRawFreqIfNull(Data.sents, constVars.numWordsCompound);
-      dataset.addAll(choosedatums(label, forLearningPatterns, Data.sents, constVars.getAnswerClass().get(label), label,
-        constVars.getOtherSemanticClassesWords(), constVars.getIgnoreWordswithClassesDuringSelection().get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
-        allSelectedPatterns));
-    }*/
     edu.stanford.nlp.classify.Classifier classifier;
-//    if (scoreClassifierType.equals(ClassifierType.DT)) {
-//      ClassifierFactory wekaFactory = new WekaDatumClassifierFactory<String, ScorePhraseMeasures>("weka.classifiers.trees.J48", constVars.wekaOptions);
-//      classifier = wekaFactory.trainClassifier(dataset);
-//      Classifier cls = ((WekaDatumClassifier) classifier).getClassifier();
-//      J48 j48decisiontree = (J48) cls;
-//      System.out.println(j48decisiontree.toSummaryString());
-//      System.out.println(j48decisiontree.toString());
-//
-//    } else
+
     if (scoreClassifierType.equals(ClassifierType.LR)) {
       LogisticClassifierFactory<String, ScorePhraseMeasures> logfactory = new LogisticClassifierFactory<String, ScorePhraseMeasures>();
       LogPrior lprior = new LogPrior();
@@ -248,9 +221,19 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       phl = phraseLemma.split("\\s+");
     int i =0;
     for(String w: phrase.split("\\s+")) {
+
       Integer cluster = constVars.getWordClassClusters().get(w);
       if (cluster == null && phl!=null)
           cluster = constVars.getWordClassClusters().get(phl[i]);
+
+      //try lowercase
+      if(cluster == null){
+        cluster = constVars.getWordClassClusters().get(w.toLowerCase());
+        if (cluster == null && phl!=null)
+          cluster = constVars.getWordClassClusters().get(phl[i].toLowerCase());
+      }
+
+
       if(cluster != null)
         cl.incrementCount(cluster);
       i++;
@@ -885,14 +868,20 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     if((expandPos || expandNeg) && !constVars.useWordVectorsToComputeSim){
       for(CandidatePhrase s: CollectionUtils.union(constVars.getLearnedWords(answerLabel).keySet(), constVars.getSeedLabelDictionary().get(answerLabel))){
         String[] toks = s.getPhrase().split("\\s+");
-        if(!constVars.getWordClassClusters().containsKey(s.getPhrase())){
+        Integer num = constVars.getWordClassClusters().get(s.getPhrase());
+        if(num  == null)
+          num = constVars.getWordClassClusters().get(s.getPhrase().toLowerCase());
+        if(num == null){
           for(String tok: toks){
-            if(constVars.getWordClassClusters().containsKey(tok)){
-              distSimClustersOfPositive.incrementCount(constVars.getWordClassClusters().get(tok));
+            Integer toknum =constVars.getWordClassClusters().get(tok);
+            if(toknum == null)
+              toknum =constVars.getWordClassClusters().get(tok.toLowerCase());
+            if(toknum != null){
+              distSimClustersOfPositive.incrementCount(toknum);
             }
           }
         } else
-        distSimClustersOfPositive.incrementCount(constVars.getWordClassClusters().get(s.getPhrase()));
+        distSimClustersOfPositive.incrementCount(num);
       }
     }
 
@@ -1273,6 +1262,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 //      double distSimWt = getDistSimWtScore(word.getPhrase(), label);
 //      scoreslist.setCount(ScorePhraseMeasures.DISTSIM, distSimWt);
       Integer wordclass = constVars.getWordClassClusters().get(word.getPhrase());
+      if(wordclass == null){
+        wordclass = constVars.getWordClassClusters().get(word.getPhrase().toLowerCase());
+      }
       scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.DISTSIM.toString()+"-"+wordclass), 1.0);
     }
 

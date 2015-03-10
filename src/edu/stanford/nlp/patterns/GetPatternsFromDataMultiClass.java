@@ -441,8 +441,6 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         if (!f.exists()) {
           Redwood.log(Redwood.DBG, "externalweightsfile for the label " + label + " does not exist: learning weights!");
           LearnImportantFeatures lmf = new LearnImportantFeatures();
-          // if (answerClass.size() > 1 || this.labelDictionary.size() > 1)
-          // throw new RuntimeException("not implemented");
           Execution.fillOptions(lmf, props);
           lmf.answerClass = answerClass.get(label);
           lmf.answerLabel = label;
@@ -3106,29 +3104,21 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         }
 
         if (!batchProcessSents) {
-          for(Map.Entry<String, DataInstance> d: sents.entrySet()){
-            for(CoreLabel l : d.getValue().getTokens()){
-              for(String label: labels) {
-                if(l.containsKey(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class)){
-                  CandidatePhrase p = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(label);
-              }}
-            }
-          }
+//          for(Map.Entry<String, DataInstance> d: sents.entrySet()){
+//            for(CoreLabel l : d.getValue().getTokens()){
+//              for(String label: labels) {
+//                if(l.containsKey(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class)){
+//                  CandidatePhrase p = l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).get(label);
+//                }
+//              }
+//            }
+//          }
           String outfilename= (saveSentencesSerDir == null ? tempSaveSentencesDir : saveSentencesSerDir) + "/sents_" + numFilesTillNow;
-          Redwood.log("Saving sentences in " + outfilename);
+          Redwood.log(Redwood.FORCE, "Saving sentences in " + outfilename);
           IOUtils.writeObjectToFile(sents, outfilename);
         }
-
-        //IOUtils.writeObjectToFile(CandidatePhrase.candidatePhraseMap, (saveSentencesSerDir == null? tempSaveSentencesDir: saveSentencesSerDir) + "/candidatePhraseMap.ser");
-
       } else if (fileFormat.equalsIgnoreCase("ser")) {
-        //usingDirForSentsInIndex = false;
         for (File f : GetPatternsFromDataMultiClass.getAllFiles(file)) {
-//          if(f.getName().equalsIgnoreCase("candidatePhraseMap.ser")){
-//            ConcurrentHashMap<String, CandidatePhrase> candidatPhraseMap = IOUtils.readObjectFromFile(f);
-//            CandidatePhrase.setCandidatePhraseMap(candidatPhraseMap);
-//
-//          }else{
           Redwood.log(Redwood.DBG, "reading from ser file " + f);
           if (!batchProcessSents)
             sents.putAll((Map<String, DataInstance>) IOUtils.readObjectFromFile(f));
@@ -3137,7 +3127,6 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
             IOUtils.cp(f, newf);
             Data.sentsFiles.add(newf);
           }
-         // }
         }
       } else {
         throw new RuntimeException(

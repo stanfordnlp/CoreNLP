@@ -128,6 +128,9 @@ public abstract class PhraseScorer<E extends Pattern> {
 
   public double getDistSimWtScore(String ph, String label) {
     Integer num = constVars.getWordClassClusters().get(ph);
+    if(num == null){
+      num = constVars.getWordClassClusters().get(ph.toLowerCase());
+    }
     if (num != null && constVars.distSimWeights.get(label).containsKey(num)) {
       return constVars.distSimWeights.get(label).getCount(num);
     } else {
@@ -141,6 +144,9 @@ public abstract class PhraseScorer<E extends Pattern> {
       for (String w : t) {
         double score = OOVExternalFeatWt;
         Integer numw = constVars.getWordClassClusters().get(w);
+        if(num == null){
+          num = constVars.getWordClassClusters().get(w.toLowerCase());
+        }
         if (numw != null
             && constVars.distSimWeights.get(label).containsKey(numw))
           score = constVars.distSimWeights.get(label).getCount(numw);
