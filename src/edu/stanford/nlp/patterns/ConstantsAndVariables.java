@@ -698,21 +698,21 @@ public class ConstantsAndVariables implements Serializable {
 
   /**
    * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
-   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
+   * <code>PhEvalInPatLogP</code>. See usePhrase* for meanings.
    */
   @Option(name = "usePatternEvalSemanticOdds")
   public boolean usePatternEvalSemanticOdds = false;
 
   /**
    * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
-   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
+   * <code>PhEvalInPatLogP</code>. See usePhrase* for meanings.
    */
   @Option(name = "usePatternEvalEditDistSame")
   public boolean usePatternEvalEditDistSame = false;
 
   /**
    * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
-   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
+   * <code>PhEvalInPatLogP</code>. See usePhrase* for meanings.
    */
   @Option(name = "usePatternEvalEditDistOther")
   public boolean usePatternEvalEditDistOther = false;

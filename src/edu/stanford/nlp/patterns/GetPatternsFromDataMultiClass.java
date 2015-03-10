@@ -3094,6 +3094,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         //read files inside the directory
         if(f.isDirectory()){
           for(File fin: IOUtils.iterFilesRecursive(new File(seedWordsFile))){
+            Redwood.log(Redwood.DBG, "Reading seed words from " + fin + " for label " + label);
             for (String line : IOUtils.readLines(fin)) {
               line = line.trim();
               if (line.isEmpty() || line.startsWith("#")) {
