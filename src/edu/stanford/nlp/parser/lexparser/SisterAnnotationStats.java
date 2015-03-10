@@ -24,13 +24,13 @@ public class SisterAnnotationStats implements TreeVisitor {
 
 
   /**
-   * nodeRules is a HashMap -&gt; Counter: label-&gt;rewrite-&gt;count
+   * nodeRules is a HashMap -> Counter: label->rewrite->count
    */
   private Map nodeRules = new HashMap();
 
   /**
-   * leftRules and rightRules are HashMap -&gt; HashMap -&gt; Counter:
-   * label-&gt;sister_label-&gt;rewrite-&gt;count
+   * leftRules and rightRules are HashMap -> HashMap -> Counter:
+   * label->sister_label->rewrite->count
    */
   private Map leftRules = new HashMap();
   private Map rightRules = new HashMap();

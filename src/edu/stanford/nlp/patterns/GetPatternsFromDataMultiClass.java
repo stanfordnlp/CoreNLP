@@ -1181,8 +1181,9 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
                 matchedPhrases.add(index + i, sc);
 
                 if(graph != null){
+                  try{
                   GetPatternsFromDataMultiClass.getFeatures(graph, graph.getNodeByIndex(index+ i + 1), false, features, null);
-
+                  }catch(Exception e){e.printStackTrace();}
                 }
 
                 CandidatePhrase longPh = longestMatchedPhrases.get(index+i);

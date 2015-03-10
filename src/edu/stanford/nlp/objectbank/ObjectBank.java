@@ -71,21 +71,21 @@ import java.io.Serializable;
  * a collection of files in the directory /u/nlp/data/gre/questions.  Each file
  * contains several Puzzle documents which look like:
  * <pre>
- * &lt;puzzle&gt;
- *    &lt;preamble&gt; some text &lt;/preamble&gt;
- *    &lt;question&gt; some intro text
- *      &lt;answer&gt; answer1 &lt;/answer&gt;
- *      &lt;answer&gt; answer2 &lt;/answer&gt;
- *      &lt;answer&gt; answer3 &lt;/answer&gt;
- *      &lt;answer&gt; answer4 &lt;/answer&gt;
- *    &lt;/question&gt;
- *    &lt;question&gt; another question
- *      &lt;answer&gt; answer1 &lt;/answer&gt;
- *      &lt;answer&gt; answer2 &lt;/answer&gt;
- *      &lt;answer&gt; answer3 &lt;/answer&gt;
- *      &lt;answer&gt; answer4 &lt;/answer&gt;
- *    &lt;/question&gt;
- * &lt;/puzzle&gt;
+ * &lt;puzzle>
+ *    &lt;preamble> some text &lt;/preamble>
+ *    &lt;question> some intro text
+ *      &lt;answer> answer1 &lt;/answer>
+ *      &lt;answer> answer2 &lt;/answer>
+ *      &lt;answer> answer3 &lt;/answer>
+ *      &lt;answer> answer4 &lt;/answer>
+ *    &lt;/question>
+ *    &lt;question> another question
+ *      &lt;answer> answer1 &lt;/answer>
+ *      &lt;answer> answer2 &lt;/answer>
+ *      &lt;answer> answer3 &lt;/answer>
+ *      &lt;answer> answer4 &lt;/answer>
+ *    &lt;/question>
+ * &lt;/puzzle>
  * </pre>
  * <p/>
  * First you need to build a ReaderIteratorFactory which will provide java.io.Readers
@@ -100,9 +100,9 @@ import java.io.Serializable;
  * java.io.Readers vended by the ReaderIteratorFactory, split them up into
  * documents (Strings) and
  * then convert the Strings into Objects.  In this case we want to keep everything
- * between each set of &lt;puzzle&gt; &lt;/puzzle&gt; tags so we would use a BeginEndTokenizerFactory.
+ * between each set of &lt;puzzle> &lt;/puzzle> tags so we would use a BeginEndTokenizerFactory.
  * You would also need to write a class which extends Function and whose apply method
- * converts the String between the &lt;puzzle&gt; &lt;/puzzle&gt; tags into Puzzle objects.
+ * converts the String between the &lt;puzzle> &lt;/puzzle> tags into Puzzle objects.
  * <p/>
  * <pre>
  * public class PuzzleParser implements Function {

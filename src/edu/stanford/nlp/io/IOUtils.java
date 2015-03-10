@@ -1734,7 +1734,7 @@ public class IOUtils {
   /**
    * Given a filepath, delete all files in the directory recursively
    * @param dir
-   * @return {@code true} if the deletion is successful, {@code false} otherwise
+   * @return
    */
   public static boolean deleteDirRecursively(File dir) {
     if (dir.isDirectory()) {

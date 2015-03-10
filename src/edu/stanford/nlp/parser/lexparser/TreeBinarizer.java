@@ -283,7 +283,7 @@ public class TreeBinarizer implements TreeTransformer {
   }
 
   /**
-   * For a dotted rule VP^S -&gt; RB VP NP PP . where VP is the head
+   * For a dotted rule VP^S -> RB VP NP PP . where VP is the head
    * makes label of the form: @VP^S| [ RB [VP] ... PP ]
    * where the constituent after the @ is the passive that we are building
    * and  the constituent in brackets is the head
@@ -329,8 +329,8 @@ public class TreeBinarizer implements TreeTransformer {
   }
 
   /**
-   * for a dotted rule VP^S -&gt; RB VP NP PP . where VP is the head
-   * makes label of the form: @VP^S| VP_ ... PP&gt; RB[
+   * for a dotted rule VP^S -> RB VP NP PP . where VP is the head
+   * makes label of the form: @VP^S| VP_ ... PP> RB[
    */
   private Label makeSyntheticLabel2(Tree t, int left, int right, int headLoc, int markovOrder) {
     String topCat = t.label().value();

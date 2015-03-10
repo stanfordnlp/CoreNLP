@@ -127,8 +127,7 @@ import java.util.regex.PatternSyntaxException;
  * The following properties are recognized:
  * </p>
  * <table border="1">
- *   <caption>Properties for ColumnDataClassifier</caption>
- * <tr><th><b>Property Name</b></th><th><b>Type</b></th><th><b>Default Value</b></th><th><b>Description</b></th><th><b>FeatName</b></th></tr>
+ * <tr><td><b>Property Name</b></td><td><b>Type</b></td><td><b>Default Value</b></td><td><b>Description</b></td><td><b>FeatName</b></td></tr>
  * <tr><td> loadClassifier </td><td>String</td><td>n/a</td><td>Path of serialized classifier file to load</td></tr>
  * <tr><td> serializeTo</td><td>String</td><td>n/a</td><td>Path to serialize classifier to</td></tr>
  * <tr><td> printTo</td><td>String</td><td>n/a</td><td>Path to print a text representation of the linear classifier to</td></tr>

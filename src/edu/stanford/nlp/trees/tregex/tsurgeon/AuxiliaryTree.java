@@ -53,7 +53,7 @@ class AuxiliaryTree {
   }
 
   /**
-   * Copies the Auxiliary tree.  Also, puts the new names-&gt;nodes map in the TsurgeonMatcher that called copy.
+   * Copies the Auxiliary tree.  Also, puts the new names->nodes map in the TsurgeonMatcher that called copy.
    * <br>
    * The trees and labels to use when making the copy are specified
    * with treeFactory and labelFactory.  This lets the tsurgeon script
@@ -167,9 +167,9 @@ class AuxiliaryTree {
   }
 
 
-  /* ******************************************************* *
+  /***********************************************************
    * below here is init stuff for getting node -> names maps *
-   * ******************************************************* */
+   ***********************************************************/
 
   // There are two ways in which you can can match the start of a name
   // expression.

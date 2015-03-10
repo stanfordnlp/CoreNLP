@@ -670,9 +670,8 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     return trainTransformer;
   }
 
-  /** @return A triple of binaryTrainTreebank, binarySecondaryTrainTreebank, binaryTuneTreebank.
+  /** @return a pair of binaryTrainTreebank,binaryTuneTreebank.
    */
-  @SuppressWarnings("UnusedDeclaration")
   public static Triple<Treebank, Treebank, Treebank> getAnnotatedBinaryTreebankFromTreebank(Treebank trainTreebank,
       Treebank secondaryTreebank,
       Treebank tuneTreebank,
@@ -754,7 +753,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       binarizer.dumpStats();
     }
 
-    return new Triple<>(trainTreebank, secondaryTreebank, tuneTreebank);
+    return new Triple<Treebank, Treebank, Treebank>(trainTreebank, secondaryTreebank, tuneTreebank);
   }
 
   private static void removeDeleteSplittersFromSplitters(TreebankLanguagePack tlp, Options op) {
@@ -1015,7 +1014,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    *   </li>
    *
    *   <li> <b>Parse one or more files, given a serialized grammar and a list of files</b>
-   *    <code>java -mx512m edu.stanford.nlp.parser.lexparser.LexicalizedParser [-v] serializedGrammarPath filename [filename]*</code>
+   *    <code>java -mx512m edu.stanford.nlp.parser.lexparser.LexicalizedParser [-v] serializedGrammarPath filename [filename] ...</code>
    *   </li>
    *
    *   <li> <b>Test and report scores for a serialized grammar on trees in an output directory</b>
@@ -1033,26 +1032,22 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    * most current treebanks).  It can be specified like a range of pages to be
    * printed, for instance as <code>200-2199</code> or
    * <code>1-300,500-725,9000</code> or just as <code>1</code> (if all your
-   * trees are in a single file, either omit this parameter or just give a dummy
-   * argument such as {@code 0}).
-   * If the filename to parse is "-" then the parser parses from stdin.
-   * If no files are supplied to parse, then a hardwired sentence
-   * is parsed.
-   *
-   * <p>
+   * trees are in a single file, just give a dummy argument such as
+   * <code>0</code> or <code>1</code>).
    * The parser can write a grammar as either a serialized Java object file
    * or in a text format (or as both), specified with the following options:
-   * <blockquote><code>
-   * java edu.stanford.nlp.parser.lexparser.LexicalizedParser
-   * [-v] -train
-   * trainFilesPath [fileRange] [-saveToSerializedFile grammarPath]
-   * [-saveToTextFile grammarPath]
-   * </code></blockquote>
    *
    * <p>
-   * In the same position as the verbose flag ({@code -v}), many other
+   * <code>java edu.stanford.nlp.parser.lexparser.LexicalizedParser
+   * [-v] -train
+   * trainFilesPath [fileRange] [-saveToSerializedFile grammarPath]
+   * [-saveToTextFile grammarPath]</code><p>
+   * If no files are supplied to parse, then a hardwired sentence
+   * is parsed. <p>
+   *
+   * In the same position as the verbose flag (<code>-v</code>), many other
    * options can be specified.  The most useful to an end user are:
-   * <ul>
+   * <UL>
    * <LI><code>-tLPP class</code> Specify a different
    * TreebankLangParserParams, for when using a different language or
    * treebank (the default is English Penn Treebank). <i>This option MUST occur
@@ -1171,7 +1166,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    * can use multiple threads.  This option tells the parser how many
    * threads to use.  A negative number indicates to use as many
    * threads as the machine has cores.
-   * </ul>
+   * </UL>
    * See also the package documentation for more details and examples of use.
    *
    * @param args Command line arguments, as above
@@ -1326,7 +1321,9 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
       } else {
         int oldIndex = argIndex;
         argIndex = op.setOptionOrWarn(args, argIndex);
-        optionArgs.addAll(Arrays.asList(args).subList(oldIndex, argIndex));
+        for (int i = oldIndex; i < argIndex; i++) {
+          optionArgs.add(args[i]);
+        }
       }
     } // end while loop through arguments
 
