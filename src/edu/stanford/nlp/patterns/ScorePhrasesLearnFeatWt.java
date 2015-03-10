@@ -36,6 +36,10 @@ import edu.stanford.nlp.util.logging.Redwood;
  */
 public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> {
 
+  @Option(name = "scoreClassifierType")
+  ClassifierType scoreClassifierType = ClassifierType.LR;
+
+
   static Map<String, double[]> wordVectors = null;
 
   public ScorePhrasesLearnFeatWt(ConstantsAndVariables constvar) {
@@ -70,8 +74,6 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     OOVGoogleNgramScore = 0;
   }
 
-  @Option(name = "scoreClassifierType")
-  ClassifierType scoreClassifierType = ClassifierType.LR;
 
   public enum ClassifierType {
     DT, LR, RF, SVM, SHIFTLR, LINEAR
@@ -95,7 +97,6 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     GeneralDataset<String, ScorePhraseMeasures> dataset = choosedatums(forLearningPatterns, label, wordsPatExtracted, allSelectedPatterns, computeRawFreq);
-
 
     /*
       if(constVars.batchProcessSents){
