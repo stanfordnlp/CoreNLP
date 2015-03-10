@@ -3289,7 +3289,8 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
   }
 
 
-  public static<E extends Pattern> Map<E, String> loadFromSavedPatternsWordsDir(GetPatternsFromDataMultiClass<E> model, Properties props, boolean labelSentsUsingModel, boolean applyPatsUsingModel, int numIterationsOfSavedPatternsToLoad) throws IOException, ClassNotFoundException {
+  public static<E extends Pattern> Map<E, String> loadFromSavedPatternsWordsDir(GetPatternsFromDataMultiClass<E> model, Properties props, boolean labelSentsUsingModel, boolean applyPatsUsingModel,
+                                                                                int numIterationsOfSavedPatternsToLoad) throws IOException, ClassNotFoundException {
     Map<E, String> labelsForPattterns = new HashMap<E, String>();
     String patternsWordsDir = props.getProperty(Flags.patternsWordsDir);
     String sentsOutFile = props.getProperty("sentsOutFile");
@@ -3346,19 +3347,19 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       Set<CandidatePhrase> alreadyLabeledWords = new HashSet<CandidatePhrase>();
       while(sentsIter.hasNext()){
         Pair<Map<String, DataInstance>, File> sents = sentsIter.next();
+        if(labelSentsUsingModel){
+          Redwood.log(Redwood.DBG, "labeling sentences from " + sents.second() + " with the already learned words");
+          assert sents.first() != null : "Why are sents null";
+          model.labelWords(label, sents.first(), model.constVars.getLearnedWords(label).keySet(), sentsOutFile, matchedTokensByPat);
+          if(sents.second().exists())
+            IOUtils.writeObjectToFile(sents, sents.second());
+        }
         if (model.constVars.restrictToMatched || applyPatsUsingModel) {
           Redwood.log(Redwood.DBG,"Applying patterns to " + sents.first().size() + " sentences");
           model.constVars.invertedIndex.add(sents.first(), true);
           model.constVars.invertedIndex.add(sents.first(), true);
           model.scorePhrases.applyPats(model.getLearnedPatterns(label), label, wordsandLemmaPatExtracted, matchedTokensByPat, alreadyLabeledWords);
         }
-        if(labelSentsUsingModel){
-            Redwood.log(Redwood.DBG, "labeling sentences from " + sents.second() + " with the already learned words");
-            assert sents.first() != null : "Why are sents null";
-            model.labelWords(label, sents.first(), model.constVars.getLearnedWords(label).keySet(), sentsOutFile, matchedTokensByPat);
-          if(sents.second().exists())
-            IOUtils.writeObjectToFile(sents, sents.second());
-      }
       }
 
 
