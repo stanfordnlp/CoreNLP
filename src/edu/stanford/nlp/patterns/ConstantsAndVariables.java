@@ -919,15 +919,14 @@ public class ConstantsAndVariables implements Serializable {
         otherSemanticClassesWords = Collections
             .synchronizedSet(new HashSet<CandidatePhrase>());
       for (String file : otherSemanticClassesFiles.split("[;,]")) {
-        for (String w : IOUtils.linesFromFile(file)) {
-
-          String[] t = w.split("\\s+");
-          if (t.length <= PatternFactory.numWordsCompound)
-            otherSemanticClassesWords.add(CandidatePhrase.createOrGet(w));
-
+        for (File f : listFileIncludingItself(file)) {
+          for (String w : IOUtils.readLines(f)) {
+            String[] t = w.split("\\s+");
+            if (t.length <= PatternFactory.numWordsCompound)
+              otherSemanticClassesWords.add(CandidatePhrase.createOrGet(w));
+          }
         }
       }
-
       System.out.println("Size of othersemantic class variables is "
         + otherSemanticClassesWords.size());
     } else {
@@ -1008,6 +1007,14 @@ public class ConstantsAndVariables implements Serializable {
   if(goldEntitiesEvalFiles !=null && evaluate)
     goldEntities = readGoldEntities(goldEntitiesEvalFiles);
     alreadySetUp = true;
+  }
+
+
+  public static Iterable<File> listFileIncludingItself(String file) {
+    File f = new File(file);
+    if(!f.isDirectory())
+      return Arrays.asList(f);
+    else return IOUtils.iterFilesRecursive(f);
   }
 
   // The format of goldEntitiesEvalFiles is assumed same as

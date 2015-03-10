@@ -1974,11 +1974,23 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
               if (constVars.getOtherSemanticClassesWords().contains(token.word()) || constVars.getOtherSemanticClassesWords().contains(token.lemma()))
                 negToken = true;
 
+            if(!negToken){
+              for(String labelA : constVars.getLabels()){
+                if(!labelA.equals(label)){
+                  if(constVars.getSeedLabelDictionary().get(labelA).contains(longestMatchingPhrase) || constVars.getSeedLabelDictionary().get(labelA).contains(tokenWordOrLemma)
+                    || constVars.getLearnedWords(labelA).containsKey(longestMatchingPhrase) || constVars.getLearnedWords(labelA).containsKey(tokenWordOrLemma)){
+                    negToken = true;
+                    break;
+                  }
+                }
+              }
+            }
+
             for (E sindex : pats) {
               if (negToken) {
-                negWords.add(new Pair<E, CandidatePhrase>(sindex, tokenWordOrLemma));
+                negWords.add(new Pair<E, CandidatePhrase>(sindex, longestMatchingPhrase));
               } else {
-                unlabWords.add(new Pair<E, CandidatePhrase>(sindex, tokenWordOrLemma));
+                unlabWords.add(new Pair<E, CandidatePhrase>(sindex, longestMatchingPhrase));
               }
 
             }
@@ -3091,9 +3103,8 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       if(t.length == 2){
         String seedWordsFile = t[1];
         File f = new File(seedWordsFile);
-        //read files inside the directory
-        if(f.isDirectory()){
-          for(File fin: IOUtils.iterFilesRecursive(new File(seedWordsFile))){
+
+        for(File fin: ConstantsAndVariables.listFileIncludingItself(seedWordsFile)){
             Redwood.log(Redwood.DBG, "Reading seed words from " + fin + " for label " + label);
             for (String line : IOUtils.readLines(fin)) {
               line = line.trim();
@@ -3103,15 +3114,6 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
               seedWords4Label.add(CandidatePhrase.createOrGet(line));
             }
           }
-        }else{
-          for (String line : IOUtils.readLines(seedWordsFile)) {
-            line = line.trim();
-            if (line.isEmpty() || line.startsWith("#")) {
-              continue;
-            }
-            seedWords4Label.add(CandidatePhrase.createOrGet(line));
-          }
-        }
       }
       seedWords.put(label, seedWords4Label);
       Redwood.log(ConstantsAndVariables.minimaldebug, "Number of seed words for label " + label + " is " + seedWords4Label.size());
