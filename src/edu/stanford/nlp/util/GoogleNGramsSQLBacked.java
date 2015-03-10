@@ -76,6 +76,7 @@ public class GoogleNGramsSQLBacked {
    * @throws SQLException
    */
   public static long getCount(String str) {
+    String query = null;
     try{
     connect();
     str = str.trim();
@@ -87,7 +88,7 @@ public class GoogleNGramsSQLBacked {
 
     String phrase = escapeString(str);
 
-    String query = "select count from " + table + " where phrase='" + phrase+"';";
+    query = "select count from " + table + " where phrase='" + phrase+"';";
     Statement stmt = connection.createStatement();
     ResultSet result = stmt.executeQuery(query);
     if(result.next()){
@@ -95,6 +96,7 @@ public class GoogleNGramsSQLBacked {
     }else
       return -1;
     }catch(SQLException e){
+      System.err.println("Error getting count for " + str+ ". The query was " + query);
       e.printStackTrace();
       throw new RuntimeException(e);
     }
