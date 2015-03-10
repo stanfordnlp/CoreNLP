@@ -21,16 +21,16 @@ public class TokenSequenceMatcherITest extends TestCase {
 
   @Override
   public void setUp() throws Exception {
-    synchronized(TokenSequenceMatcherITest.class) {
-      if (pipeline == null) {
-        pipeline = new AnnotationPipeline();
-        pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
-        pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
-        pipeline.addAnnotator(new POSTaggerAnnotator(false));
-        pipeline.addAnnotator(new NumberAnnotator(false, false));
-//        pipeline.addAnnotator(new QuantifiableEntityNormalizingAnnotator(false));
-      }
-    }
+//    synchronized(TokenSequenceMatcherITest.class) {
+//      if (pipeline == null) {
+//        pipeline = new AnnotationPipeline();
+//        pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
+//        pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
+//        pipeline.addAnnotator(new POSTaggerAnnotator(false));
+//        pipeline.addAnnotator(new NumberAnnotator(false, false));
+////        pipeline.addAnnotator(new QuantifiableEntityNormalizingAnnotator(false));
+//      }
+//    }
   }
 
   private static CoreMap createDocument(String text) {
@@ -1523,5 +1523,10 @@ public class TokenSequenceMatcherITest extends TestCase {
     boolean match = m.find();
     assertTrue(match);
   }
+
+   public void testCompile2(){
+    String s = "[{word:/\\Q*\\E/}] [{word:\"beat\"}]  (?$term [{tag:/NN.*/}]{1,2})";
+     TokenSequencePattern.compile(s);
+   }
 
 }

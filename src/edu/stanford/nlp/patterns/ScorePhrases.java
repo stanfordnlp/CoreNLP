@@ -199,8 +199,14 @@ public class ScorePhrases<E extends Pattern> {
 
     if(constVars.patternType.equals(PatternFactory.PatternType.SURFACE)) {
       surfacePatternsLearnedThisIterConverted = new HashMap<TokenSequencePattern, E>();
-      TokenSequencePattern pat = TokenSequencePattern.compile(constVars.env.get(label), pattern.toString(notAllowedClasses));
-      surfacePatternsLearnedThisIterConverted.put(pat, pattern);
+      TokenSequencePattern pat = null;
+      try{
+        pat = TokenSequencePattern.compile(constVars.env.get(label), pattern.toString(notAllowedClasses));
+        surfacePatternsLearnedThisIterConverted.put(pat, pattern);
+      }catch(Exception e){
+        System.err.println("Error applying patterrn " + pat);
+        throw e;
+      }
     }else if(constVars.patternType.equals(PatternFactory.PatternType.DEP)){
       depPatternsLearnedThisIterConverted = new HashMap<SemgrexPattern, E>();
       SemgrexPattern pat = SemgrexPattern.compile(pattern.toString(notAllowedClasses), new edu.stanford.nlp.semgraph.semgrex.Env(constVars.env.get(label).getVariables()));
