@@ -669,10 +669,10 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name = "usePatternEvalWordShape")
   public boolean usePatternEvalWordShape = false;
 
-  @Option(name="usePhraseEvalWordShapeStr", gloss="uses the word shape str as a feature")
+  @Option(name="usePatternEvalWordShapeStr", gloss="uses the word shape str as a feature")
   public boolean usePatternEvalWordShapeStr = false;
 
-  @Option(name="usePhraseEvalFirstCapital", gloss="words starts with a capital letter")
+  @Option(name="usePatternEvalFirstCapital", gloss="words starts with a capital letter")
   public boolean usePatternEvalFirstCapital;
 
   /**
