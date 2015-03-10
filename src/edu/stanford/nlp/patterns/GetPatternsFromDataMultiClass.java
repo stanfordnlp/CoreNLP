@@ -150,7 +150,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
   //Same as learnedPatterns but with iteration information
   Map<String, Map<Integer, Counter<E>>> learnedPatternsEachIter = new HashMap<String, Map<Integer, Counter<E>>>();
 
-  public Map<String, TwoDimensionalCounter<String, E>> wordsPatExtracted = new HashMap<String, TwoDimensionalCounter<String, E>>();
+  public Map<String, TwoDimensionalCounter<CandidatePhrase, E>> wordsPatExtracted = new HashMap<String, TwoDimensionalCounter<CandidatePhrase, E>>();
 
   Properties props;
   public ScorePhrases scorePhrases;
@@ -311,7 +311,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     Redwood.log(Redwood.DBG, "Running with debug output");
     Redwood.log(ConstantsAndVariables.extremedebug, "Running with extreme debug output");
 
-    wordsPatExtracted = new HashMap<String, TwoDimensionalCounter<String, E>>();
+    wordsPatExtracted = new HashMap<String, TwoDimensionalCounter<CandidatePhrase, E>>();
 
     //File invIndexDir = null;
     //boolean createInvIndex = true;
@@ -345,7 +345,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 //    specialwords4Index.addAll(Arrays.asList("fw", "FW", "sw", "SW", "OTHERSEM", "othersem"));
 
     for (String label : answerClass.keySet()) {
-      wordsPatExtracted.put(label, new TwoDimensionalCounter<String, E>());
+      wordsPatExtracted.put(label, new TwoDimensionalCounter<CandidatePhrase, E>());
 //      specialwords4Index.add(label);
 //      specialwords4Index.add(label.toLowerCase());
     }
@@ -2047,7 +2047,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       Counters.removeKeys(en.getValue(), pats);
 
     if (wordsPatExtracted.containsKey(label))
-      for (Entry<String, ClassicCounter<E>> en : this.wordsPatExtracted.get(label).entrySet()) {
+      for (Entry<CandidatePhrase, ClassicCounter<E>> en : this.wordsPatExtracted.get(label).entrySet()) {
         Counters.removeKeys(en.getValue(), pats);
       }
   }
@@ -2241,12 +2241,12 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     Map<String, CollectionValuedMap<E, Triple<String, Integer, Integer>>> matchedTokensByPatAllLabels = new HashMap<String, CollectionValuedMap<E, Triple<String, Integer, Integer>>>();
     Map<String, Collection<Triple<String, Integer, Integer>>> matchedTokensForPhrases = new HashMap<>();
-    Map<String, TwoDimensionalCounter<String, E>> termsAllLabels = new HashMap<String, TwoDimensionalCounter<String, E>>();
+    Map<String, TwoDimensionalCounter<CandidatePhrase, E>> termsAllLabels = new HashMap<String, TwoDimensionalCounter<CandidatePhrase, E>>();
 
     Map<String, Set<CandidatePhrase>> ignoreWordsAll = new HashMap<String, Set<CandidatePhrase>>();
     for (String label : constVars.getSeedLabelDictionary().keySet()) {
       matchedTokensByPatAllLabels.put(label, new CollectionValuedMap<E, Triple<String, Integer, Integer>>());
-      termsAllLabels.put(label, new TwoDimensionalCounter<String, E>());
+      termsAllLabels.put(label, new TwoDimensionalCounter<CandidatePhrase, E>());
       if (constVars.useOtherLabelsWordsasNegative) {
         Set<CandidatePhrase> w = new HashSet<CandidatePhrase>();
         for (Entry<String, Set<CandidatePhrase>> en : constVars.getSeedLabelDictionary().entrySet()) {
@@ -2451,7 +2451,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
   private Pair<Counter<E>, Counter<CandidatePhrase>> iterateExtractApply4Label(String label, E p0, Counter<CandidatePhrase> p0Set,
       BufferedWriter wordsOutput, String sentsOutFile, BufferedWriter patternsOut, Set<E> ignorePatterns,
       Set<CandidatePhrase> ignoreWords, CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat,
-      TwoDimensionalCounter<String, E> terms, int numIter) throws IOException, ClassNotFoundException {
+      TwoDimensionalCounter<CandidatePhrase, E> terms, int numIter) throws IOException, ClassNotFoundException {
 
     if (!learnedPatterns.containsKey(label)) {
       learnedPatterns.put(label, new ClassicCounter<E>());
@@ -3517,17 +3517,6 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       assert (new File(patternsWordsDir + "/" + label).exists());
 
 
-     /* if(!model.constVars.useDBForTokenPatterns){
-        assert model.constVars.allPatternsDir != null && new File(model.constVars.allPatternsDir).exists() : "Should save allPatternsFile when saving the model and use that";
-        model.patsForEachToken = new PatternsForEachToken(props, IOUtils.readObjectFromFile(model.constVars.allPatternsDir+"/allpatterns.ser"));
-        model.constVars.setPatternIndex( IOUtils.readObjectFromFile(model.constVars.allPatternsDir+"/patternshashindex.ser"));
-      }else {
-        props.setProperty("createTable", "false");
-        props.setProperty("deleteExisting", "false");
-        model.patsForEachToken = new PatternsForEachToken(props);
-        model.constVars.setPatternIndex(model.patsForEachToken.readPatternIndexFromDB());
-      }
-*/
       readClassesInEnv(patternsWordsDir + "/env.txt", model.constVars.env, ConstantsAndVariables.globalEnv);
 
       File patf = new File(patternsWordsDir + "/" + label + "/patternsEachIter.ser");
@@ -3565,14 +3554,14 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
       Iterator<Pair<Map<String, DataInstance>, File>> sentsIter = new ConstantsAndVariables.DataSentsIterator(model.constVars.batchProcessSents);
       TwoDimensionalCounter<Pair<String, String>, E> wordsandLemmaPatExtracted = new TwoDimensionalCounter<Pair<String, String>, E>();
-
+      Set<CandidatePhrase> alreadyLabeledWords = new HashSet<CandidatePhrase>();
       while(sentsIter.hasNext()){
         Pair<Map<String, DataInstance>, File> sents = sentsIter.next();
         if (model.constVars.restrictToMatched || applyPatsUsingModel) {
           Redwood.log(Redwood.DBG,"Applying patterns to " + sents.first().size() + " sentences");
           model.constVars.invertedIndex.add(sents.first(), true);
           model.constVars.invertedIndex.add(sents.first(), true);
-          model.scorePhrases.applyPats(model.getLearnedPatterns(label), label, wordsandLemmaPatExtracted, matchedTokensByPat);
+          model.scorePhrases.applyPats(model.getLearnedPatterns(label), label, wordsandLemmaPatExtracted, matchedTokensByPat, alreadyLabeledWords);
         }
         if(labelSentsUsingModel){
             Redwood.log(Redwood.DBG, "labeling sentences from " + sents.second() + " with the already learned words");
