@@ -64,7 +64,7 @@ public abstract class PhraseScorer<E extends Pattern> {
   double getPatTFIDFScore(CandidatePhrase word,  Counter<E> patsThatExtractedThis,   Counter<E> allSelectedPatterns) {
 
     if(Data.processedDataFreq.getCount(word) == 0.0) {
-      Redwood.log(Redwood.WARN, "How come the processed corpus freq has count of " + word + " 0. The count in raw freq is " + Data.rawFreq.getCount(word) + " and the Data.rawFreq size is " + Data.rawFreq.size() + ". Some phrases are " + Counters.toString(Data.rawFreq, 1000));
+      Redwood.log(Redwood.WARN, "How come the processed corpus freq has count of " + word + " 0. The count in raw freq is " + Data.rawFreq.getCount(word) + " and the Data.rawFreq size is " + Data.rawFreq.size());
       return 0;
     } else {
       double total = 0;
@@ -92,8 +92,11 @@ public abstract class PhraseScorer<E extends Pattern> {
   public static double getGoogleNgramScore(CandidatePhrase g) {
     double count = GoogleNGramsSQLBacked.getCount(g.getPhrase());
     if (count != -1) {
-      assert (Data.rawFreq.containsKey(g));
-      return (1 + Data.rawFreq.getCount(g)
+      if(!Data.rawFreq.containsKey(g))
+        //returning 1 because usually lower this tf-idf score the better. if we don't have raw freq info, give it a bad score
+        return 1;
+      else
+        return (1 + Data.rawFreq.getCount(g)
           * Math.sqrt(Data.ratioGoogleNgramFreqWithDataFreq))
           / count;
     }
