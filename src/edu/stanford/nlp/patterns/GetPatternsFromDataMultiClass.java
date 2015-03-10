@@ -739,10 +739,14 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       s.set(CoreAnnotations.TokensAnnotation.class, en.getValue().getTokens());
       temp.add(s);
       Annotation doc = new Annotation(temp);
-      pipeline.annotate(doc);
+      try {
+        pipeline.annotate(doc);
+        if (useTargetParserParentRestriction)
+          inferParentParseTag(s.get(TreeAnnotation.class));
+      }catch(Exception e){
+        e.printStackTrace();
+      }
 
-      if (useTargetParserParentRestriction)
-        inferParentParseTag(s.get(TreeAnnotation.class));
     }
 
     Redwood.log(Redwood.DBG, "Done annotating text");
