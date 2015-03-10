@@ -3500,6 +3500,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         Map<Integer, Counter<E>> patterns = IOUtils.readObjectFromFile(patf);
         if(numIterationsOfSavedPatternsToLoad < Integer.MAX_VALUE){
           for(Integer i : patterns.keySet()){
+            System.out.println("Removing patterns from iteration " + i);
             if(i >= numIterationsOfSavedPatternsToLoad){
               patterns.remove(i);
             }
@@ -3508,7 +3509,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         //model.constVars.getPatternIndex().finishCommit();
         model.setLearnedPatterns(Counters.flatten(patterns), label);
         model.setLearnedPatternsEachIter(patterns, label);
-        Redwood.log(Redwood.DBG, "Loaded " + patterns.size() + " patterns from " + patf);
+        Redwood.log(Redwood.DBG, "Loaded " + model.getLearnedPatterns().get(label).size() + " patterns from " + patf);
       }
 
 
@@ -3526,6 +3527,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       while(sentsIter.hasNext()){
         Pair<Map<String, DataInstance>, File> sents = sentsIter.next();
         if (model.constVars.restrictToMatched || applyPatsUsingModel) {
+          Redwood.log(Redwood.DBG,"Applying patterns to " + sents.first().size() + " sentences");
           model.constVars.invertedIndex.add(sents.first(), true);
           model.constVars.invertedIndex.add(sents.first(), true);
           model.scorePhrases.applyPats(model.getLearnedPatterns(label), label, wordsandLemmaPatExtracted, matchedTokensByPat);
