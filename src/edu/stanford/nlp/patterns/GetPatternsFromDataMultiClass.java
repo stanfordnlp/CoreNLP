@@ -1720,17 +1720,19 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
           //make a copy of pats because we are changing numwordscompound etc.
           Set newpats = new HashSet<E>();
-          if(PatternFactory.numWordsCompoundMapped.get(label) != PatternFactory.numWordsCompoundMax){
-            for (E s : pats) {
-
-              if (s instanceof SurfacePattern) {
-                SurfacePattern snew = ((SurfacePattern) s).copyNewToken();
-                snew.setNumWordsCompound(PatternFactory.numWordsCompoundMapped.get(label));
-                newpats.add(snew);
-              }
+          boolean changedpats = false;
+          for (E s : pats) {
+            if(s instanceof SurfacePattern){
+              changedpats = true;
+              SurfacePattern snew = ((SurfacePattern) s).copyNewToken();
+              snew.setNumWordsCompound(PatternFactory.numWordsCompoundMapped.get(label));
+              newpats.add(snew);
             }
-            pats = newpats;
           }
+
+          if(changedpats)
+            pats = newpats;
+
           //This happens when dealing with the collapseddependencies
           if (pats == null) {
             if(!constVars.patternType.equals(PatternFactory.PatternType.DEP))
@@ -2274,7 +2276,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     Counter<E> patterns = new ClassicCounter<E>();
 
     Counter<E> patternThisIter = getPatterns(label, learnedPatterns.get(label).keySet(), p0, p0Set, ignorePatterns);
-    
+
     patterns.addAll(patternThisIter);
 
       learnedPatterns.get(label).addAll(patterns);
