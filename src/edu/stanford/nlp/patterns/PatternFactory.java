@@ -10,7 +10,6 @@ import java.util.*;
  * Created by sonalg on 10/27/14.
  */
 public class PatternFactory {
-  //TODO: set this class
   /**
    * allow to match stop words before a target term. This is to match something
    * like "I am on some X" if the pattern is "I am on X"

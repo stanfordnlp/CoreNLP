@@ -853,6 +853,8 @@ public class ConstantsAndVariables implements Serializable {
       return;
     }
 
+    Redwood.log(Redwood.DBG, "Setting up ConstantsAndVariables");
+
     Execution.fillOptions(this, props);
     Execution.fillOptions(PatternFactory.class, props);
     Execution.fillOptions(SurfacePatternFactory.class, props);

@@ -64,7 +64,7 @@ public abstract class PhraseScorer<E extends Pattern> {
   double getPatTFIDFScore(CandidatePhrase word,  Counter<E> patsThatExtractedThis,   Counter<E> allSelectedPatterns) {
 
     if(Data.processedDataFreq.getCount(word) == 0.0) {
-      Redwood.log(Redwood.WARN, "How come the processed corpus freq has count of " + word + " 0. The count in raw freq is " + Data.rawFreq.getCount(word) + " and the Data.rawFreq size is " + Data.rawFreq.size());
+      Redwood.log(Redwood.WARN, "How come the processed corpus freq has count of " + word + " 0. The count in raw freq is " + Data.rawFreq.getCount(word) + " and the Data.rawFreq size is " + Data.rawFreq.size() + ". Some phrases are " + Counters.toString(Data.rawFreq, 1000));
       return 0;
     } else {
       double total = 0;
