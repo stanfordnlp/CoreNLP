@@ -3499,12 +3499,15 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       if (patf.exists()) {
         Map<Integer, Counter<E>> patterns = IOUtils.readObjectFromFile(patf);
         if(numIterationsOfSavedPatternsToLoad < Integer.MAX_VALUE){
+          Set<Integer> toremove = new HashSet<Integer>();
           for(Integer i : patterns.keySet()){
             System.out.println("Removing patterns from iteration " + i);
             if(i >= numIterationsOfSavedPatternsToLoad){
-              patterns.remove(i);
+              toremove.add(i);
             }
           }
+          for(Integer i: toremove)
+            patterns.remove(i);
         }
         //model.constVars.getPatternIndex().finishCommit();
         model.setLearnedPatterns(Counters.flatten(patterns), label);
