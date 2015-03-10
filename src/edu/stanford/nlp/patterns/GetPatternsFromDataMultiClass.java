@@ -744,6 +744,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         if (useTargetParserParentRestriction)
           inferParentParseTag(s.get(TreeAnnotation.class));
       }catch(Exception e){
+        System.out.println("Ignoring error: for sentence  " + StringUtils.joinWords(en.getValue().getTokens(), " "));
         e.printStackTrace();
       }
 
