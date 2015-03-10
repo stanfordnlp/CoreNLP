@@ -111,7 +111,7 @@ public class ScorePhrases<E extends Pattern> {
        CandidatePhrase w = termIter.next();
      nextTen += ";\t" + w + ":" + newdt.getCount(w);
      }
-     Redwood.log(Redwood.DBG, "Next five phrases were " + nextTen);
+     Redwood.log(Redwood.DBG, "Next ten phrases were " + nextTen);
     return finalwords;
   }
 
@@ -634,7 +634,7 @@ public class ScorePhrases<E extends Pattern> {
       Counter<CandidatePhrase> phraseScores = phraseScorer.scorePhrases(label,
           terms, wordsPatExtracted, allSelectedPatterns,
           alreadyIdentifiedWords, false);
-
+      System.out.println("count for word U.S. is " + phraseScores.getCount(CandidatePhrase.createOrGet("U.S.")));
       Set<CandidatePhrase> ignoreWordsAll ;
       if(ignoreWords !=null && !ignoreWords.isEmpty()){
         ignoreWordsAll = CollectionUtils.unionAsSet(ignoreWords, constVars.getOtherSemanticClassesWords());
@@ -644,6 +644,7 @@ public class ScorePhrases<E extends Pattern> {
 
       ignoreWordsAll.addAll(constVars.getSeedLabelDictionary().get(label));
       ignoreWordsAll.addAll(constVars.getLearnedWords().get(label).keySet());
+      System.out.println("ignoreWordsAll contains word U.S. is " + ignoreWordsAll.contains(CandidatePhrase.createOrGet("U.S.")));
 
       Counter<CandidatePhrase> finalwords = chooseTopWords(phraseScores, terms,
           phraseScores, ignoreWordsAll, constVars.thresholdWordExtract);
