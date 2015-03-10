@@ -102,16 +102,16 @@ public class ScorePhrases<E extends Pattern> {
         ignoreWords.add(w);
       }
     }
-     String nextFive = "";
+     String nextTen = "";
      int n = 0;
      while (termIter.hasNext()) {
      n++;
-     if (n > 5)
+     if (n > 10)
      break;
        CandidatePhrase w = termIter.next();
-     nextFive += ";\t" + w + ":" + newdt.getCount(w);
+     nextTen += ";\t" + w + ":" + newdt.getCount(w);
      }
-     Redwood.log(Redwood.DBG, "Next five phrases were " + nextFive);
+     Redwood.log(Redwood.DBG, "Next five phrases were " + nextTen);
     return finalwords;
   }
 

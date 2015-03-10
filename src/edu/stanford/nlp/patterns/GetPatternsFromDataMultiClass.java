@@ -1001,9 +1001,9 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         if (!fuzzyMatch || doNotLabelTheseWords.contains(l2[i]) || doNotLabelTheseWords.contains(subl2[i]) || l2[i].length() <= minLen4Fuzzy || subl2[i].length() <= minLen4Fuzzy)
           compareFuzzy = false;
         if (compareFuzzy == false || l1[j].length() <= minLen4Fuzzy) {
-          d1 = l1[j].equals(l2[i]) ? true : false;
+          d1 = (ignoreCaseSeedMatch && l1[j].equalsIgnoreCase(l2[i])) || l1[j].equals(l2[i]) ? true : false;
           if (!d1 && fuzzyMatch)
-            d2 = subl2[i].equals(l1[j]) ? true : false;
+            d2 = (ignoreCaseSeedMatch && subl2[i].equalsIgnoreCase(l1[j])) || subl2[i].equals(l1[j]) ? true : false;
         } else {
           String combo = l1[j] + "#" + l2[i];
           if ((ignoreCaseSeedMatch && l1[j].equalsIgnoreCase(l2[i])) || l1[j].equals(l2[i])  || seenFuzzyMatches.contains(combo))
