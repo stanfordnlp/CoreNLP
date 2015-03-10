@@ -3090,12 +3090,26 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       Set<CandidatePhrase> seedWords4Label = new HashSet<CandidatePhrase>();
       if(t.length == 2){
         String seedWordsFile = t[1];
-        for (String line : IOUtils.readLines(seedWordsFile)) {
-          line = line.trim();
-          if (line.isEmpty() || line.startsWith("#")) {
-            continue;
+        File f = new File(seedWordsFile);
+        //read files inside the directory
+        if(f.isDirectory()){
+          for(File fin: IOUtils.iterFilesRecursive(new File(seedWordsFile))){
+            for (String line : IOUtils.readLines(fin)) {
+              line = line.trim();
+              if (line.isEmpty() || line.startsWith("#")) {
+                continue;
+              }
+              seedWords4Label.add(CandidatePhrase.createOrGet(line));
+            }
           }
-          seedWords4Label.add(CandidatePhrase.createOrGet(line));
+        }else{
+          for (String line : IOUtils.readLines(seedWordsFile)) {
+            line = line.trim();
+            if (line.isEmpty() || line.startsWith("#")) {
+              continue;
+            }
+            seedWords4Label.add(CandidatePhrase.createOrGet(line));
+          }
         }
       }
       seedWords.put(label, seedWords4Label);

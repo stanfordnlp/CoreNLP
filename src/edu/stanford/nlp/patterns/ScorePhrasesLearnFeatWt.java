@@ -145,7 +145,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       SVMLightClassifierFactory<String, ScorePhraseMeasures> svmcf = new SVMLightClassifierFactory<String, ScorePhraseMeasures>(true);
       classifier = svmcf.trainClassifier(dataset);
       Set<String> labels = Generics.newHashSet(Arrays.asList("true"));
-      List<Triple<ScorePhraseMeasures, String, Double>> topfeatures = ((SVMLightClassifier<String, ScorePhraseMeasures>) classifier).getTopFeatures(labels, 0, true, -1, true);
+      List<Triple<ScorePhraseMeasures, String, Double>> topfeatures = ((SVMLightClassifier<String, ScorePhraseMeasures>) classifier).getTopFeatures(labels, 0, true, 600, true);
       Redwood.log(ConstantsAndVariables.minimaldebug, "The weights are " + StringUtils.join(topfeatures, "\n"));
     }else if(scoreClassifierType.equals(ClassifierType.SHIFTLR)){
 
@@ -170,7 +170,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       LinearClassifierFactory<String, ScorePhraseMeasures> lcf = new LinearClassifierFactory<String, ScorePhraseMeasures>();
       classifier = lcf.trainClassifier(dataset);
       Set<String> labels = Generics.newHashSet(Arrays.asList("true"));
-      List<Triple<ScorePhraseMeasures, String, Double>> topfeatures = ((LinearClassifier<String, ScorePhraseMeasures>) classifier).getTopFeatures(labels, 0, true, -1, true);
+      List<Triple<ScorePhraseMeasures, String, Double>> topfeatures = ((LinearClassifier<String, ScorePhraseMeasures>) classifier).getTopFeatures(labels, 0, true, 600, true);
       Redwood.log(ConstantsAndVariables.minimaldebug, "The weights are " + StringUtils.join(topfeatures, "\n"));
     }else
       throw new RuntimeException("cannot identify classifier " + scoreClassifierType);
@@ -1156,6 +1156,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       scoreslist.setCount(ScorePhraseMeasures.ISFIRSTCAPITAL, StringUtils.isCapitalized(word.getPhrase())?1.0:0.0);
     }
 
+    if(constVars.usePatternEvalBOW){
+      for(String s: word.getPhrase().split("\\s+"))
+        scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.BOW +"-"+ s), 1.0);
+    }
+
     phraseScoresRaw.setCounter(word, scoreslist);
     return scoreslist;
   }
@@ -1324,6 +1329,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     if(constVars.usePhraseEvalFirstCapital){
       scoreslist.setCount(ScorePhraseMeasures.ISFIRSTCAPITAL, StringUtils.isCapitalized(word.getPhrase())? 1.0 :0);
+    }
+
+    if(constVars.usePhraseEvalBOW){
+      for(String s: word.getPhrase().split("\\s+"))
+        scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.BOW +"-"+ s), 1.0);
     }
 
     phraseScoresRaw.setCounter(word, scoreslist);

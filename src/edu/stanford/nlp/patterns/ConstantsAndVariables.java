@@ -477,6 +477,8 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name="fuzzyMatch")
   public boolean fuzzyMatch = false;
 
+
+
   public Set<String> getLabels() {
     return labels;
   }
@@ -536,7 +538,7 @@ public class ConstantsAndVariables implements Serializable {
 
   static public class ScorePhraseMeasures implements Comparable {
 
-    String name;
+        String name;
     static int num = 0;
     int numObj;
     static Map<String, ScorePhraseMeasures> createdObjects = new ConcurrentHashMap<String, ScorePhraseMeasures>();
@@ -577,6 +579,7 @@ public class ConstantsAndVariables implements Serializable {
     static final ScorePhraseMeasures WORDVECNEGSIMMAX = new ScorePhraseMeasures("WordVecNegSimMax");
     static final ScorePhraseMeasures ISFIRSTCAPITAL = new ScorePhraseMeasures("IsFirstLetterCapital");
     static final ScorePhraseMeasures WORDSHAPESTR = new  ScorePhraseMeasures("WordShapeStr");
+    static final ScorePhraseMeasures BOW = new ScorePhraseMeasures("Word");
     @Override
     public int compareTo(Object o) {
       if(!(o instanceof  ScorePhraseMeasures))
@@ -652,6 +655,11 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name="usePhraseEvalFirstCapital", gloss="words starts with a capital letter")
   public boolean usePhraseEvalFirstCapital;
 
+  /**
+   * use bag of words
+   */
+  @Option(name="usePhraseEvalBOW")
+  public boolean usePhraseEvalBOW = false;
 
   /**
    * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
@@ -708,6 +716,13 @@ public class ConstantsAndVariables implements Serializable {
    */
   @Option(name = "usePatternEvalEditDistOther")
   public boolean usePatternEvalEditDistOther = false;
+
+  /**
+   * use bag of words
+   */
+  @Option(name="usePatternEvalBOW")
+  public boolean usePatternEvalBOW = false;
+
 
   /**
    * These are used to learn weights for features if using logistic regression.
