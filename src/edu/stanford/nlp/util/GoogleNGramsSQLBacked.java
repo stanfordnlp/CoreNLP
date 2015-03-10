@@ -80,6 +80,10 @@ public class GoogleNGramsSQLBacked {
     try{
     connect();
     str = str.trim();
+    if(str.contains("'")){
+      str = StringUtils.escapeString(str, new char[]{'\''},'\'');
+    }
+
     int ngram = str.split("\\s+").length;
     String table = tablenamePrefix + ngram;
 
@@ -207,6 +211,10 @@ public class GoogleNGramsSQLBacked {
       System.out.println(getCounts(Arrays.asList("cancer","disease")));
       System.out.println("Get count 1 gram " + getTotalCount(1));
 
+      if(props.getProperty("phrase") != null) {
+        String p = props.getProperty("phrase");
+        System.out.println("count for phrase " + p + " is " + getCount(p));
+      }
       closeConnection();
 
     }catch(Exception e){
