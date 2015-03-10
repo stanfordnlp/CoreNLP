@@ -3553,6 +3553,8 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 //          model.labelWords(label, Data.sents, model.getLearnedWords(label).keySet(), sentsOutFile, matchedTokensByPat);
 //      }
     }
+    System.out.flush();
+    System.err.flush();
   }
 
   private void setLearnedPatternsEachIter(Map<Integer, Counter<E>> patterns, String label) {
