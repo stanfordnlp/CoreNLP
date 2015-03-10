@@ -43,6 +43,7 @@ public class GoogleNGramsSQLBacked {
   static Set<String> existingTablenames = null;
 
   static Connection connection = null;
+  private static String DBName;
 
   static void connect () throws SQLException{
     if(connection == null) {
@@ -261,4 +262,10 @@ public class GoogleNGramsSQLBacked {
       e.printStackTrace();
     }
   }
+
+  public static void setDBName(String DBName) {
+    googleNgram_dbname = DBName;
+  }
+
+
 }
