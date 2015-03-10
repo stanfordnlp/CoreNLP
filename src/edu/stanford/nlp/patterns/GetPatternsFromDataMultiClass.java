@@ -3474,7 +3474,8 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
   }
 
 
-  public static<E extends Pattern> void loadFromSavedPatternsWordsDir(GetPatternsFromDataMultiClass<E> model, Properties props, boolean labelSentsUsingModel, boolean applyPatsUsingModel, int numIterationsOfSavedPatternsToLoad) throws IOException, ClassNotFoundException {
+  public static<E extends Pattern> Map<E, String> loadFromSavedPatternsWordsDir(GetPatternsFromDataMultiClass<E> model, Properties props, boolean labelSentsUsingModel, boolean applyPatsUsingModel, int numIterationsOfSavedPatternsToLoad) throws IOException, ClassNotFoundException {
+    Map<E, String> labelsForPattterns = new HashMap<E, String>();
     String patternsWordsDir = props.getProperty(Flags.patternsWordsDir);
     String sentsOutFile = props.getProperty("sentsOutFile");
 
@@ -3510,7 +3511,11 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
             patterns.remove(i);
         }
         //model.constVars.getPatternIndex().finishCommit();
-        model.setLearnedPatterns(Counters.flatten(patterns), label);
+        Counter<E> pats = Counters.flatten(patterns);
+        for(E p : pats.keySet()){
+          labelsForPattterns.put(p, label);
+        }
+        model.setLearnedPatterns(pats, label);
         model.setLearnedPatternsEachIter(patterns, label);
         Redwood.log(Redwood.DBG, "Loaded " + model.getLearnedPatterns().get(label).size() + " patterns from " + patf);
       }
@@ -3560,6 +3565,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     }
     System.out.flush();
     System.err.flush();
+    return labelsForPattterns;
   }
 
   private void setLearnedPatternsEachIter(Map<Integer, Counter<E>> patterns, String label) {
