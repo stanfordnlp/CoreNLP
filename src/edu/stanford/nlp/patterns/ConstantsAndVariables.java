@@ -878,8 +878,10 @@ public class ConstantsAndVariables implements Serializable {
     Execution.fillOptions(SurfacePatternFactory.class, props);
     Execution.fillOptions(DepPatternFactory.class, props);
 
-    if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty())
+    if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty()) {
+      Redwood.log(Redwood.DBG, "Ignore word regex is " + wordIgnoreRegex);
       PatternFactory.ignoreWordRegex = Pattern.compile(wordIgnoreRegex);
+    }
 
     for (String label : labels) {
       env.put(label, TokenSequencePattern.getNewEnv());
