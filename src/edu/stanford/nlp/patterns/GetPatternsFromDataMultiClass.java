@@ -278,7 +278,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     Data.sents = sents;
     Execution.fillOptions(Data.class, props);
     Execution.fillOptions(ConstantsAndVariables.class, props);
-    PatternFactory.setUp(props, PatternFactory.PatternType.valueOf(props.getProperty(Flags.patternType)));
+    PatternFactory.setUp(props, PatternFactory.PatternType.valueOf(props.getProperty(Flags.patternType)), seedSets.keySet());
 
     constVars = new ConstantsAndVariables(props, seedSets, answerClass, generalizeClasses, ignoreClasses);
 
@@ -352,7 +352,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     scorePhrases = new ScorePhrases(props, constVars);
     createPats = new CreatePatterns(props, constVars);
-    assert !(constVars.doNotApplyPatterns && (PatternFactory.useStopWordsBeforeTerm || PatternFactory.numWordsCompound > 1)) : " Cannot have both doNotApplyPatterns and (useStopWordsBeforeTerm true or numWordsCompound > 1)!";
+    assert !(constVars.doNotApplyPatterns && (PatternFactory.useStopWordsBeforeTerm || PatternFactory.numWordsCompoundMax > 1)) : " Cannot have both doNotApplyPatterns and (useStopWordsBeforeTerm true or numWordsCompound > 1)!";
 
 //    String prefixFileForIndex = null;
 //    if (constVars.usingDirForSentsInIndex) {
@@ -419,7 +419,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       totalNumSents += sentsf.size();
 
       if(computeDataFreq){
-        Data.computeRawFreqIfNull(sentsf, PatternFactory.numWordsCompound);
+        Data.computeRawFreqIfNull(sentsf, PatternFactory.numWordsCompoundMax);
       }
 
 
@@ -627,7 +627,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       Counter<CandidatePhrase> dictOddsWeightsLabel = new ClassicCounter<CandidatePhrase>();
       Counter<CandidatePhrase> otherSemanticClassFreq = new ClassicCounter<CandidatePhrase>();
       for (CandidatePhrase s : constVars.getOtherSemanticClassesWords()) {
-        for (String s1 : StringUtils.getNgrams(Arrays.asList(s.getPhrase().split("\\s+")), 1, PatternFactory.numWordsCompound))
+        for (String s1 : StringUtils.getNgrams(Arrays.asList(s.getPhrase().split("\\s+")), 1, PatternFactory.numWordsCompoundMax))
           otherSemanticClassFreq.incrementCount(CandidatePhrase.createOrGet(s1));
       }
       otherSemanticClassFreq = Counters.add(otherSemanticClassFreq, 1.0);
@@ -637,7 +637,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       for (String label : seedSets.keySet()) {
         Counter<CandidatePhrase> classFreq = new ClassicCounter<CandidatePhrase>();
         for (CandidatePhrase s : seedSets.get(label)) {
-          for (String s1 : StringUtils.getNgrams(Arrays.asList(s.getPhrase().split("\\s+")), 1, PatternFactory.numWordsCompound))
+          for (String s1 : StringUtils.getNgrams(Arrays.asList(s.getPhrase().split("\\s+")), 1, PatternFactory.numWordsCompoundMax))
             classFreq.incrementCount(CandidatePhrase.createOrGet(s1));
         }
         classFreq = Counters.add(classFreq, 1.0);
@@ -1956,7 +1956,9 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
             // Positive
             for (E s : pats) {
               //E s = constVars.patternIndex.get(sindex);
-
+              if(s instanceof SurfacePattern){
+                ((SurfacePattern)s).setNumWordsCompound(PatternFactory.numWordsCompoundMapped.get(label));
+              }
               //patternsandWords4Label.getCounter(sindex).incrementCount(longestMatchingPhrase);
               posWords.add(new Pair<E, CandidatePhrase>(s, longestMatchingPhrase));
               //posnegPatternsandWords4Label.getCounter(sindex).incrementCount(longestMatchingPhrase);
@@ -1989,6 +1991,9 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
             }
 
             for (E sindex : pats) {
+              if(sindex instanceof SurfacePattern){
+                ((SurfacePattern)sindex).setNumWordsCompound(PatternFactory.numWordsCompoundMapped.get(label));
+              }
               if (negToken) {
                 negWords.add(new Pair<E, CandidatePhrase>(sindex, longestMatchingPhrase));
               } else {
@@ -2174,8 +2179,8 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
                 longest = longest != null && longest.getPhrase().length() > phEn.getKey().getPhrase().length() ? longest: phEn.getKey();
                 l.get(PatternsAnnotations.LongestMatchedPhraseForEachLabel.class).put(label, longest);
 
-                for (int k = Math.max(0, index - PatternFactory.numWordsCompound); k < tokens.size()
-                    && k <= index + PatternFactory.numWordsCompound + 1; k++) {
+                for (int k = Math.max(0, index - PatternFactory.numWordsCompoundMapped.get(label)); k < tokens.size()
+                    && k <= index + PatternFactory.numWordsCompoundMapped.get(label) + 1; k++) {
                   contextWordsRecalculatePats.add(k);
                 }
 

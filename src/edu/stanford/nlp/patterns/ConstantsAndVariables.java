@@ -927,7 +927,7 @@ public class ConstantsAndVariables implements Serializable {
         for (File f : listFileIncludingItself(file)) {
           for (String w : IOUtils.readLines(f)) {
             String[] t = w.split("\\s+");
-            if (t.length <= PatternFactory.numWordsCompound)
+            if (t.length <= PatternFactory.numWordsCompoundMax)
               otherSemanticClassesWords.add(CandidatePhrase.createOrGet(w));
           }
         }

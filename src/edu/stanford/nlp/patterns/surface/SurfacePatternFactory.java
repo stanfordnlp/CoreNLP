@@ -152,16 +152,17 @@ public class SurfacePatternFactory extends PatternFactory {
 
 
       PatternToken twithoutPOS = null;
+      //TODO: right now using numWordsCompoundMax.
       if (addPatWithoutPOS) {
         twithoutPOS = new PatternToken(tag, false,
-          numWordsCompound > 1, numWordsCompound,
+          numWordsCompoundMax > 1, numWordsCompoundMax,
           nerTag, useTargetNERRestriction, useTargetParserParentRestriction, token.get(CoreAnnotations.GrandparentAnnotation.class));
       }
 
       PatternToken twithPOS = null;
       if (usePOS4Pattern) {
         twithPOS = new PatternToken(tag, true,
-          numWordsCompound > 1, numWordsCompound,
+          numWordsCompoundMax > 1, numWordsCompoundMax,
           nerTag, useTargetNERRestriction, useTargetParserParentRestriction, token.get(CoreAnnotations.GrandparentAnnotation.class));
       }
 

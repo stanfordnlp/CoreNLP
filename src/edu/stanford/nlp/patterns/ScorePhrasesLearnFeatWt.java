@@ -47,7 +47,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     if(constvar.useWordVectorsToComputeSim && (constvar.subsampleUnkAsNegUsingSim|| constvar.expandPositivesWhenSampling || constvar.expandNegativesWhenSampling || constVars.usePhraseEvalWordVector) && wordVectors == null) {
       if(Data.rawFreq == null){
           Data.rawFreq = new ClassicCounter<CandidatePhrase>();
-          Data.computeRawFreqIfNull(PatternFactory.numWordsCompound, constvar.batchProcessSents);
+          Data.computeRawFreqIfNull(PatternFactory.numWordsCompoundMax, constvar.batchProcessSents);
       }
       Redwood.log(Redwood.DBG, "Reading word vectors");
       wordVectors = new HashMap<String, double[]>();
@@ -531,7 +531,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     Random r = new Random(0);
     List<Integer> lengths = new ArrayList<Integer>();
-    for(int i = 1;i <= PatternFactory.numWordsCompound; i++)
+    for(int i = 1;i <= PatternFactory.numWordsCompoundMapped.get(label); i++)
       lengths.add(i);
     int length = CollectionUtils.sample(lengths, r);
 
@@ -914,7 +914,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       Map<String, DataInstance> sents = sentsf.first();
       Redwood.log(Redwood.DBG, "Sampling datums from " + sentsf.second());
       if (computeRawFreq)
-        Data.computeRawFreqIfNull(sents, PatternFactory.numWordsCompound);
+        Data.computeRawFreqIfNull(sents, PatternFactory.numWordsCompoundMax);
 
       List<List<String>> threadedSentIds = GetPatternsFromDataMultiClass.getThreadBatches(new ArrayList<String>(sents.keySet()), constVars.numThreads);
       ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
@@ -1158,7 +1158,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     if(constVars.usePatternEvalBOW){
       for(String s: word.getPhrase().split("\\s+"))
-        scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.BOW +"-"+ s), 1.0);
+        scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.BOW +"-"+ s.toLowerCase()), 1.0);
     }
 
     phraseScoresRaw.setCounter(word, scoreslist);

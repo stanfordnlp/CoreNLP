@@ -36,7 +36,7 @@ public class PatternToken implements Serializable {
     this.useTag = useTag;
     this.numWordsCompound = numWordsCompound;
     if (!getCompoundPhrases)
-      numWordsCompound = 1;
+      this.numWordsCompound = 1;
     this.nerTag = nerTag;
     this.useNER = useNER;
     this.useTargetParserParentRestriction = useTargetParserParentRestriction;
