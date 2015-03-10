@@ -478,10 +478,10 @@ public class ConstantsAndVariables implements Serializable {
   public boolean fuzzyMatch = false;
 
   /**
-   * Ignore case when matching seed words
+   * Ignore case when matching seed words. It's a map so something like {name->true,place->false}
    */
   @Option(name="ignoreCaseSeedMatch")
-  public boolean ignoreCaseSeedMatch = false;
+  public Map<String, String> ignoreCaseSeedMatch = new HashMap<String, String>();
 
 
   public Set<String> getLabels() {
@@ -1088,7 +1088,7 @@ public class ConstantsAndVariables implements Serializable {
         }
       }else{
         readInMemory= true;
-        return new Pair<>(Data.sents, new File(""));
+        return new Pair<>(Data.sents, new File(Data.inMemorySaveFileLocation));
       }
     }
   }

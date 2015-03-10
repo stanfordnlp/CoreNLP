@@ -23,6 +23,9 @@ public class Data {
   public static Map<String, File> sentId2File = null;
 
   public static Map<String, DataInstance> sents = null;
+  //save the in-memory sents to this file
+  public static String inMemorySaveFileLocation= "";
+
   public static Counter<CandidatePhrase> processedDataFreq = null;
   public static Counter<String> domainNGramRawFreq = new ClassicCounter<String>();;
 
