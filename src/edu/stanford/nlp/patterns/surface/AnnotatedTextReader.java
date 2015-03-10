@@ -76,7 +76,7 @@ public class AnnotatedTextReader {
           l.set(CoreAnnotations.IndexAnnotation.class, tokenindex);
           l.set(CoreAnnotations.ValueAnnotation.class, l.word());
           String label = l.get(CoreAnnotations.AnswerAnnotation.class);
-          
+
           assert label != null : "label cannot be null";
 
           l.set(CoreAnnotations.TextAnnotation.class, l.word());

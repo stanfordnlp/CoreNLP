@@ -2275,11 +2275,11 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
         Pair<Counter<E>, Counter<CandidatePhrase>> learnedPatWords4label = iterateExtractApply4Label(label, p0 != null ? p0.get(label) : null,
             p0Set != null ? p0Set.get(label) : null, wordsOutput.get(label), sentout, patternsOutput.get(label),
-            ignorePatterns != null ? ignorePatterns.get(label) : null, 1, ignoreWordsAll.get(label), matchedTokensByPatAllLabels.get(label),
-            termsAllLabels.get(label));
+            ignorePatterns != null ? ignorePatterns.get(label) : null, ignoreWordsAll.get(label), matchedTokensByPatAllLabels.get(label),
+            termsAllLabels.get(label), i);
 
         learnedWordsThisIter.put(label, learnedPatWords4label.second());
-        if (learnedPatWords4label.first().size() > 0) {
+        if (learnedPatWords4label.first().size() > 0 && constVars.getLearnedWords(label).size() < constVars.maxExtractNumWords) {
           keepRunning = true;
         }
       }
@@ -2428,10 +2428,10 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     return pats.build().toString();
   }
 
-  public Pair<Counter<E>, Counter<CandidatePhrase>> iterateExtractApply4Label(String label, E p0, Counter<CandidatePhrase> p0Set,
-      BufferedWriter wordsOutput, String sentsOutFile, BufferedWriter patternsOut, Set<E> ignorePatterns, int numIter,
+  private Pair<Counter<E>, Counter<CandidatePhrase>> iterateExtractApply4Label(String label, E p0, Counter<CandidatePhrase> p0Set,
+      BufferedWriter wordsOutput, String sentsOutFile, BufferedWriter patternsOut, Set<E> ignorePatterns,
       Set<CandidatePhrase> ignoreWords, CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat,
-      TwoDimensionalCounter<String, E> terms) throws IOException, ClassNotFoundException {
+      TwoDimensionalCounter<String, E> terms, int numIter) throws IOException, ClassNotFoundException {
 
     if (!learnedPatterns.containsKey(label)) {
       learnedPatterns.put(label, new ClassicCounter<E>());
@@ -2448,14 +2448,14 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     Counter<CandidatePhrase> identifiedWords = new ClassicCounter<CandidatePhrase>();
     Counter<E> patterns = new ClassicCounter<E>();
-    for (int i = 0; i < numIter; i++) {
+    //for (int i = 0; i < numIter; i++) {
       Counter<E> patternThisIter = getPatterns(label, learnedPatterns.get(label).keySet(), p0, p0Set, ignorePatterns);
       patterns.addAll(patternThisIter);
       learnedPatterns.get(label).addAll(patternThisIter);
-      learnedPatternsEachIter.get(label).put(i, patternThisIter);
+      learnedPatternsEachIter.get(label).put(numIter, patternThisIter);
 
       if (sentsOutFile != null)
-        sentsOutFile = sentsOutFile + "_" + i + "iter.ser";
+        sentsOutFile = sentsOutFile + "_" + numIter + "iter.ser";
 
       Counter<String> scoreForAllWordsThisIteration = new ClassicCounter<String>();
 
@@ -2498,18 +2498,8 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
           wordsOutput.flush();
         }
       }
-      if (patterns.size() == 0 && identifiedWords.size() == 0) {
-        if (constVars.getLearnedWords().get(label).size() >= constVars.maxExtractNumWords) {
-          System.out.println("Ending because no new words identified and total words learned till now >= max words " + constVars.maxExtractNumWords);
-          break;
-        }
-        if (constVars.tuneThresholdKeepRunning) {
-          constVars.thresholdSelectPattern = 0.8 * constVars.thresholdSelectPattern;
-          System.out.println("\n\nTuning thresholds to keep running. New Pattern threshold is  " + constVars.thresholdSelectPattern);
-        } else
-          break;
-      }
-    }
+
+    //}
     if (patternsOut != null)
       this.writePatternsToFile(patterns, patternsOut);
 
@@ -3516,6 +3506,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         }
         //model.constVars.getPatternIndex().finishCommit();
         model.setLearnedPatterns(Counters.flatten(patterns), label);
+        model.setLearnedPatternsEachIter(patterns, label);
         Redwood.log(Redwood.DBG, "Loaded " + patterns.size() + " patterns from " + patf);
       }
 
@@ -3561,6 +3552,10 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 //          model.labelWords(label, Data.sents, model.getLearnedWords(label).keySet(), sentsOutFile, matchedTokensByPat);
 //      }
     }
+  }
+
+  private void setLearnedPatternsEachIter(Map<Integer, Counter<E>> patterns, String label) {
+     this.learnedPatternsEachIter.put(label, patterns);
   }
 
   private static void readClassesInEnv(String s, Map<String, Env> env, Env globalEnv) throws ClassNotFoundException {
