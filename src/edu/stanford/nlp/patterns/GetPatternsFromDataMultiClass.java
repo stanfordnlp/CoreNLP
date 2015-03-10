@@ -276,7 +276,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     Data.sents = sents;
     Execution.fillOptions(Data.class, props);
     Execution.fillOptions(ConstantsAndVariables.class, props);
-    PatternFactory.setUp(props, PatternFactory.PatternType.valueOf(props.getProperty("patternType")));
+    PatternFactory.setUp(props, PatternFactory.PatternType.valueOf(props.getProperty(Flags.patternType)));
 
     constVars = new ConstantsAndVariables(props, seedSets, answerClass, generalizeClasses, ignoreClasses);
 
@@ -696,6 +696,57 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         }
       }
     }
+  }
+
+  public static Map<String, DataInstance> runPOSNERParseOnTokens(Map<String, DataInstance> sents, Properties propsoriginal){
+
+    PatternFactory.PatternType type = PatternFactory.PatternType.valueOf(propsoriginal.getProperty(Flags.patternType));
+    Properties props = new Properties();
+    List<String> anns = new ArrayList<String>();
+    anns.add("pos");
+    anns.add("lemma");
+
+    boolean useTargetParserParentRestriction = Boolean.parseBoolean(propsoriginal.getProperty(Flags.useTargetParserParentRestriction));
+    boolean useTargetNERRestriction = Boolean.parseBoolean(propsoriginal.getProperty(Flags.useTargetNERRestriction));
+    String posModelPath = props.getProperty(Flags.posModelPath);
+    String numThreads = propsoriginal.getProperty(Flags.numThreads);
+
+    if (useTargetParserParentRestriction){
+      anns.add("parse");
+    } else if(type.equals(PatternFactory.PatternType.DEP))
+      anns.add("depparse");
+
+    if (useTargetNERRestriction) {
+      anns.add("ner");
+    }
+
+    props.setProperty("annotators", StringUtils.join(anns, ","));
+    props.setProperty("parse.maxlen", "80");
+    props.setProperty("nthreads", numThreads);
+    props.setProperty("threads", numThreads);
+    // props.put( "tokenize.options",
+    // "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
+
+    if (posModelPath != null) {
+      props.setProperty("pos.model", posModelPath);
+    }
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props, false);
+    Redwood.log(Redwood.DBG, "Annotating text");
+
+    for(Map.Entry<String, DataInstance> en: sents.entrySet()) {
+      List<CoreMap> temp = new ArrayList<CoreMap>();
+      CoreMap s= new ArrayCoreMap();
+      s.set(CoreAnnotations.TokensAnnotation.class, en.getValue().getTokens());
+      temp.add(s);
+      Annotation doc = new Annotation(temp);
+      pipeline.annotate(doc);
+
+      if (useTargetParserParentRestriction)
+        inferParentParseTag(s.get(TreeAnnotation.class));
+    }
+
+    Redwood.log(Redwood.DBG, "Done annotating text");
+    return sents;
   }
 
   public static Map<String, DataInstance> runPOSNEROnTokens(List<CoreMap> sentsCM, String posModelPath, boolean useTargetNERRestriction,
@@ -3066,6 +3117,14 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     return values;
   }
 
+  public static class Flags {
+    static public String useTargetParserParentRestriction = "useTargetParserParentRestriction";
+    public static String useTargetNERRestriction = "useTargetNERRestriction";
+    public static String posModelPath = "posModelPath";
+    public static String numThreads = "numThreads";
+    public static String patternType = "patternType";
+  }
+
   public static Pair processSents(Properties props, Set<String> labels) throws IOException, ExecutionException, InterruptedException, ClassNotFoundException {
     String fileFormat = props.getProperty("fileFormat");
     Map<String, DataInstance> sents = null;
@@ -3092,7 +3151,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     String posModelPath = props.getProperty("posModelPath");
     boolean lowercase = Boolean.parseBoolean(props.getProperty("lowercaseText"));
     boolean useTargetNERRestriction = Boolean.parseBoolean(props.getProperty("useTargetNERRestriction"));
-    boolean useTargetParserParentRestriction = Boolean.parseBoolean(props.getProperty("useTargetParserParentRestriction"));
+    boolean useTargetParserParentRestriction = Boolean.parseBoolean(props.getProperty(Flags.useTargetParserParentRestriction));
     boolean useContextNERRestriction = Boolean.parseBoolean(props.getProperty("useContextNERRestriction"));
 
     boolean addEvalSentsToTrain = Boolean.parseBoolean(props.getProperty("addEvalSentsToTrain"));
@@ -3103,10 +3162,10 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         + " and addEvalSentsToTrain is " + addEvalSentsToTrain);
     }
 
-    if(props.getProperty("patternType") == null)
+    if(props.getProperty(Flags.patternType) == null)
       throw new RuntimeException("PattenrType not specified. Options are SURFACE and DEP");
 
-    PatternFactory.PatternType patternType = PatternFactory.PatternType.valueOf(props.getProperty("patternType"));
+    PatternFactory.PatternType patternType = PatternFactory.PatternType.valueOf(props.getProperty(Flags.patternType));
     File saveSentencesSerDir = null;
     File tempSaveSentencesDir = null;
     //boolean usingDirForSentsInIndex = true;
@@ -3148,7 +3207,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
           Iterator<String> reader = IOUtils.readLines(f).iterator();
           while(reader.hasNext()){
             numFilesTillNow = tokenize(reader, posModelPath, lowercase, useTargetNERRestriction || useContextNERRestriction, f.getName() + "-" + numFilesTillNow+"-",
-              useTargetParserParentRestriction, props.getProperty("numThreads"), batchProcessSents, numMaxSentencesPerBatchFile,
+              useTargetParserParentRestriction, props.getProperty(Flags.numThreads), batchProcessSents, numMaxSentencesPerBatchFile,
               saveSentencesSerDir == null? tempSaveSentencesDir : saveSentencesSerDir, sentsthis, numFilesTillNow, patternType);
           }
 
@@ -3226,7 +3285,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
             List<CoreMap> sentsCMs = AnnotatedTextReader.parseFile(new BufferedReader(new FileReader(f)), labels,
               setClassForTheseLabels, true, f.getName());
             evalsents.putAll(runPOSNEROnTokens(sentsCMs, posModelPath, useTargetNERRestriction || useContextNERRestriction, "",
-              useTargetParserParentRestriction, props.getProperty("numThreads"), patternType));
+              useTargetParserParentRestriction, props.getProperty(Flags.numThreads), patternType));
           }
 
         } else if (fileFormat.equalsIgnoreCase("ser")) {
