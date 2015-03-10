@@ -3144,6 +3144,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     public static String numThreads = "numThreads";
     public static String patternType = "patternType";
     public static String numIterationsOfSavedPatternsToLoad = "numIterationsOfSavedPatternsToLoad";
+    public static String patternsWordsDir = "patternsWordsDir";
   }
 
   public static Pair processSents(Properties props, Set<String> labels) throws IOException, ExecutionException, InterruptedException, ClassNotFoundException {
@@ -3474,7 +3475,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
 
   public static<E extends Pattern> void loadFromSavedPatternsWordsDir(GetPatternsFromDataMultiClass<E> model, Properties props, boolean labelSentsUsingModel, boolean applyPatsUsingModel, int numIterationsOfSavedPatternsToLoad) throws IOException, ClassNotFoundException {
-    String patternsWordsDir = props.getProperty("patternsWordsDir");
+    String patternsWordsDir = props.getProperty(Flags.patternsWordsDir);
     String sentsOutFile = props.getProperty("sentsOutFile");
 
     for (String label : model.constVars.getLabels()) {
