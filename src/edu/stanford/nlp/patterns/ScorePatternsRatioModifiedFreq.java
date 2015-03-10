@@ -191,7 +191,7 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
         && scorePhrasesInPatSelection) {
       Properties props2 = new Properties();
       props2.putAll(props);
-      props2.setProperty("phraseScorerClass", "edu.stanford.nlp.patterns.surface.ScorePhrasesLearnFeatWt");
+      props2.setProperty("phraseScorerClass", "edu.stanford.nlp.patterns.ScorePhrasesLearnFeatWt");
       ScorePhrases scoreclassifier = new ScorePhrases(props2, constVars);
       System.out.println("file is " + props.getProperty("domainNGramsFile"));
       Execution.fillOptions(Data.class, props2);
