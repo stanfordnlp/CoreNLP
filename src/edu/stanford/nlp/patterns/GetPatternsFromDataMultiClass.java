@@ -985,7 +985,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
    * @return starting index of the sublist
    */
   public static List<Integer> getSubListIndex(String[] l1, String[] l2, String[] subl2, Set<String> doNotLabelTheseWords, HashSet<String> seenFuzzyMatches,
-      int minLen4Fuzzy, boolean fuzzyMatch) {
+      int minLen4Fuzzy, boolean fuzzyMatch, boolean ignoreCaseSeedMatch) {
     if (l1.length > l2.length)
       return null;
     EditDistance editDistance = new EditDistance(true);
@@ -1006,13 +1006,13 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
             d2 = subl2[i].equals(l1[j]) ? true : false;
         } else {
           String combo = l1[j] + "#" + l2[i];
-          if (l1[j].equals(l2[i]) || seenFuzzyMatches.contains(combo))
+          if ((ignoreCaseSeedMatch && l1[j].equalsIgnoreCase(l2[i])) || l1[j].equals(l2[i])  || seenFuzzyMatches.contains(combo))
             d1 = true;
           else {
             d1 = editDistance.score(l1[j], l2[i]) <= 1;
             if (!d1) {
               String combo2 = l1[j] + "#" + subl2[i];
-              if (l1[j].equals(subl2[i]) || seenFuzzyMatches.contains(combo2))
+              if ((ignoreCaseSeedMatch && l1[j].equalsIgnoreCase(subl2[i]) )||l1[j].equals(subl2[i]) || seenFuzzyMatches.contains(combo2))
                 d2 = true;
               else {
                 d2 = editDistance.score(l1[j], subl2[i]) <= 1;
@@ -1110,7 +1110,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     for (List<String> keys: threadedSentIds) {
       Callable<Map<String, DataInstance>> task = new LabelWithSeedWords(seedWords, sents, keys, answerclass, label, constVars.fuzzyMatch, constVars.minLen4FuzzyForPattern, constVars.backgroundSymbol, constVars.getEnglishWords(),
-        stringTransformationFunction, constVars.writeMatchedTokensIdsForEachPhrase, overwriteExistingLabels, constVars.patternType);
+        stringTransformationFunction, constVars.writeMatchedTokensIdsForEachPhrase, overwriteExistingLabels, constVars.patternType, constVars.ignoreCaseSeedMatch);
       Map<String, DataInstance> sentsi  = executor.submit(task).get();
       sents.putAll(sentsi);
     }
@@ -1161,10 +1161,11 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     boolean overwriteExistingLabels;
     PatternFactory.PatternType patternType;
     boolean fuzzyMatch = false;
+    boolean ignoreCaseSeedMatch = false;
 
     public LabelWithSeedWords(Collection<CandidatePhrase> seedwords, Map<String, DataInstance> sents, List<String> keyset, Class labelclass, String label, boolean fuzzyMatch,
                               int minLen4FuzzyForPattern, String backgroundSymbol, Set<String> doNotLabelDictWords,
-                              Function<CoreLabel, String> stringTransformation, boolean writeMatchedTokensIdsForEachPhrase, boolean overwriteExistingLabels, PatternFactory.PatternType type) {
+                              Function<CoreLabel, String> stringTransformation, boolean writeMatchedTokensIdsForEachPhrase, boolean overwriteExistingLabels, PatternFactory.PatternType type, boolean ignoreCaseSeedMatch) {
       for (CandidatePhrase s : seedwords)
         this.seedwordsTokens.put(s, s.getPhrase().split("\\s+"));
       this.sents = sents;
@@ -1179,6 +1180,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       this.overwriteExistingLabels = overwriteExistingLabels;
       this.patternType = type;
       this.fuzzyMatch = fuzzyMatch;
+      this.ignoreCaseSeedMatch = ignoreCaseSeedMatch;
     }
 
     @SuppressWarnings("unchecked")
@@ -1218,7 +1220,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
           String[] s = sEn.getValue();
           CandidatePhrase sc = sEn.getKey();
           List<Integer> indices = getSubListIndex(s, tokens, tokenslemma, doNotLabelDictWords, seenFuzzyMatches,
-              minLen4FuzzyForPattern, fuzzyMatch);
+              minLen4FuzzyForPattern, fuzzyMatch, ignoreCaseSeedMatch);
 
           if (indices != null && !indices.isEmpty()){
             String ph = StringUtils.join(s, " ");

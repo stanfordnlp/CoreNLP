@@ -477,6 +477,11 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name="fuzzyMatch")
   public boolean fuzzyMatch = false;
 
+  /**
+   * Ignore case when matching seed words
+   */
+  @Option(name="ignoreCaseSeedMatch")
+  public boolean ignoreCaseSeedMatch = false;
 
 
   public Set<String> getLabels() {
