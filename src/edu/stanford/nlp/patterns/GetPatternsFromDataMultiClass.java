@@ -1718,6 +1718,19 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
           Set<E> pats = pat4Sent.get(i);
 
+          //make a copy of pats because we are changing numwordscompound etc.
+          Set newpats = new HashSet<E>();
+          if(PatternFactory.numWordsCompoundMapped.get(label) != PatternFactory.numWordsCompoundMax){
+            for (E s : pats) {
+
+              if (s instanceof SurfacePattern) {
+                SurfacePattern snew = ((SurfacePattern) s).copyNewToken();
+                snew.setNumWordsCompound(PatternFactory.numWordsCompoundMapped.get(label));
+                newpats.add(snew);
+              }
+            }
+            pats = newpats;
+          }
           //This happens when dealing with the collapseddependencies
           if (pats == null) {
             if(!constVars.patternType.equals(PatternFactory.PatternType.DEP))
@@ -1753,17 +1766,11 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
               continue;
             }
           }
+
           if (token.get(answerClass4Label).equals(label)) {
             // Positive
             for (E s : pats) {
-              //E s = constVars.patternIndex.get(sindex);
-              if(s instanceof SurfacePattern){
-                ((SurfacePattern)s).setNumWordsCompound(PatternFactory.numWordsCompoundMapped.get(label));
-              }
-              //patternsandWords4Label.getCounter(sindex).incrementCount(longestMatchingPhrase);
               posWords.add(new Pair<E, CandidatePhrase>(s, longestMatchingPhrase));
-              //posnegPatternsandWords4Label.getCounter(sindex).incrementCount(longestMatchingPhrase);
-              //allPatternsandWords4Label.getCounter(sindex).incrementCount(longestMatchingPhrase);
             }
 
           } else {
@@ -1792,9 +1799,6 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
             }
 
             for (E sindex : pats) {
-              if(sindex instanceof SurfacePattern){
-                ((SurfacePattern)sindex).setNumWordsCompound(PatternFactory.numWordsCompoundMapped.get(label));
-              }
               if (negToken) {
                 negWords.add(new Pair<E, CandidatePhrase>(sindex, longestMatchingPhrase));
               } else {
@@ -2268,9 +2272,11 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
     Counter<CandidatePhrase> identifiedWords = new ClassicCounter<CandidatePhrase>();
     Counter<E> patterns = new ClassicCounter<E>();
-    //for (int i = 0; i < numIter; i++) {
-      Counter<E> patternThisIter = getPatterns(label, learnedPatterns.get(label).keySet(), p0, p0Set, ignorePatterns);
-      patterns.addAll(patternThisIter);
+
+    Counter<E> patternThisIter = getPatterns(label, learnedPatterns.get(label).keySet(), p0, p0Set, ignorePatterns);
+    
+    patterns.addAll(patternThisIter);
+
       learnedPatterns.get(label).addAll(patterns);
       learnedPatternsEachIter.get(label).put(numIter, patterns);
 

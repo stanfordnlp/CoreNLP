@@ -82,7 +82,10 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
     this.genre = genre;
 
     hashcode = toString().hashCode();
+  }
 
+  public SurfacePattern copyNewToken(){
+    return new SurfacePattern(this.prevContext, token.copy(), this.nextContext, genre);
   }
 
   public static Token getContextToken(CoreLabel tokenj) {

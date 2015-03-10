@@ -137,4 +137,9 @@ public class PatternToken implements Serializable {
   public int hashCode() {
     return getTokenStr(null).hashCode();
   }
+
+  public PatternToken copy() {
+    PatternToken t = new PatternToken(tag, useTag, numWordsCompound > 1, numWordsCompound, nerTag, useNER, useTargetParserParentRestriction, grandparentParseTag);
+    return t;
+  }
 }
