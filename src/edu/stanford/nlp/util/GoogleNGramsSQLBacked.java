@@ -187,6 +187,41 @@ public class GoogleNGramsSQLBacked {
 
   }
 
+  //return rank of 1 gram in google ngeams if it is less than 20k. Otherwise -1.
+  public static int get1GramRank(String str){
+    String query = null;
+    try{
+      connect();
+      str = str.trim();
+      if(str.contains("'")){
+        str = StringUtils.escapeString(str, new char[]{'\''},'\'');
+      }
+
+      int ngram = str.split("\\s+").length;
+      if(ngram > 1)
+        return -1;
+      String table =  "googlengrams_1_ranked20k";
+
+      if(!existsTable(table))
+        return -1;
+
+      String phrase = escapeString(str);
+
+      query = "select rank from " + table + " where phrase='" + phrase+"';";
+      Statement stmt = connection.createStatement();
+      ResultSet result = stmt.executeQuery(query);
+      if(result.next()){
+        return result.getInt("rank");
+      }else
+        return -1;
+    }catch(SQLException e){
+      System.err.println("Error getting count for " + str+ ". The query was " + query);
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+
+  }
+
   static public void closeConnection() throws SQLException {
     if(connection != null)
       connection.close();
@@ -214,6 +249,11 @@ public class GoogleNGramsSQLBacked {
       if(props.getProperty("phrase") != null) {
         String p = props.getProperty("phrase");
         System.out.println("count for phrase " + p + " is " + getCount(p));
+      }
+
+      if(props.getProperty("rank") != null){
+        String p = props.getProperty("rank");
+        System.out.println("Rank of " + p+ " is " + get1GramRank(p));
       }
       closeConnection();
 
