@@ -199,10 +199,6 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
       System.out.println("file is " + props.getProperty("domainNGramsFile"));
       Execution.fillOptions(Data.class, props2);
       classifierScores = scoreclassifier.phraseScorer.scorePhrases(label, allCandidatePhrases,  true);
-      // scorePhrases(Data.sents, label, true,
-      // constVars.perSelectRand, constVars.perSelectNeg, null, null,
-      // dictOddsWordWeights);
-      // throw new RuntimeException("Not implemented currently");
     }
 
     Counter<CandidatePhrase> cachedScoresForThisIter = new ClassicCounter<CandidatePhrase>();

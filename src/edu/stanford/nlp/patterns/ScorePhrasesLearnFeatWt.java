@@ -611,7 +611,6 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     Map<String, DataInstance> sents;
     Class answerClass;
     String answerLabel;
-    boolean forLearningPattern;
     TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted;
     Counter<E> allSelectedPatterns;
     Counter<Integer> wordClassClustersOfPositive;
@@ -619,12 +618,11 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     boolean expandPos;
     boolean expandNeg;
 
-    public ChooseDatumsThread(String label, Map<String, DataInstance> sents, Collection<String> keys, boolean forLearningPattern, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted, Counter<E> allSelectedPatterns,
+    public ChooseDatumsThread(String label, Map<String, DataInstance> sents, Collection<String> keys, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted, Counter<E> allSelectedPatterns,
                               Counter<Integer> wordClassClustersOfPositive, Map<String, Collection<CandidatePhrase>> allPossiblePhrases, boolean expandPos, boolean expandNeg){
       this.answerLabel = label;
       this.sents = sents;
       this.keys = keys;
-      this.forLearningPattern = forLearningPattern;
       this.wordsPatExtracted = wordsPatExtracted;
       this.allSelectedPatterns = allSelectedPatterns;
       this.wordClassClustersOfPositive = wordClassClustersOfPositive;
@@ -911,8 +909,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
       //multi-threaded choose positive, negative and unknown
       for (List<String> keys : threadedSentIds) {
-        Callable<Quintuple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>,  Counter<CandidatePhrase>>> task = new ChooseDatumsThread(answerLabel, sents, keys, forLearningPattern, wordsPatExtracted, allSelectedPatterns,
-          distSimClustersOfPositive, allPossibleNegativePhrases, expandPos, expandNeg);
+        Callable<Quintuple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>,  Counter<CandidatePhrase>>> task = new ChooseDatumsThread(answerLabel, sents, keys,
+           wordsPatExtracted, allSelectedPatterns, distSimClustersOfPositive, allPossibleNegativePhrases, expandPos, expandNeg);
         Future<Quintuple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>,  Counter<CandidatePhrase>>> submit = executor.submit(task);
         list.add(submit);
       }
@@ -1087,6 +1085,86 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return similaritiesWithLabeledPhrases.get(phrase);
   }
 
+
+  Counter<ScorePhraseMeasures> getPhraseFeaturesForPattern(String label, CandidatePhrase word) {
+
+    if (phraseScoresRaw.containsFirstKey(word))
+      return phraseScoresRaw.getCounter(word);
+
+    Counter<ScorePhraseMeasures> scoreslist = new ClassicCounter<ScorePhraseMeasures>();
+
+    //Add features on the word, if any!
+    if(word.getFeatures()!= null){
+      scoreslist.addAll(Counters.transform(word.getFeatures(), x -> ScorePhraseMeasures.create(x)));
+    } else{
+      Redwood.log(ConstantsAndVariables.extremedebug, "features are null for " + word);
+    }
+
+
+    if (constVars.usePatternEvalSemanticOdds) {
+      double dscore = this.getDictOddsScore(word, label, 0);
+      scoreslist.setCount(ScorePhraseMeasures.SEMANTICODDS, dscore);
+    }
+
+    if (constVars.usePatternEvalGoogleNgram) {
+      Double gscore = getGoogleNgramScore(word);
+      if (gscore.isInfinite() || gscore.isNaN()) {
+        throw new RuntimeException("how is the google ngrams score " + gscore + " for " + word);
+      }
+      scoreslist.setCount(ScorePhraseMeasures.GOOGLENGRAM, gscore);
+    }
+
+    if (constVars.usePatternEvalDomainNgram) {
+      Double gscore = getDomainNgramScore(word.getPhrase());
+      if (gscore.isInfinite() || gscore.isNaN()) {
+        throw new RuntimeException("how is the domain ngrams score " + gscore + " for " + word + " when domain raw freq is " + Data.domainNGramRawFreq.getCount(word)
+          + " and raw freq is " + Data.rawFreq.getCount(word));
+
+      }
+      scoreslist.setCount(ScorePhraseMeasures.DOMAINNGRAM, gscore);
+    }
+
+    if (constVars.usePatternEvalWordClass) {
+      Integer wordclass = constVars.getWordClassClusters().get(word.getPhrase());
+      if(wordclass == null){
+        wordclass = constVars.getWordClassClusters().get(word.getPhrase().toLowerCase());
+      }
+      scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.DISTSIM.toString()+"-"+wordclass), 1.0);
+    }
+
+    if (constVars.usePatternEvalEditDistSame) {
+      double ed = constVars.getEditDistanceScoresThisClass(label, word.getPhrase());
+      assert ed <= 1 : " how come edit distance from the true class is " + ed  + " for word " + word;
+      scoreslist.setCount(ScorePhraseMeasures.EDITDISTSAME,  ed);
+    }
+    if (constVars.usePatternEvalEditDistOther) {
+      double ed = constVars.getEditDistanceScoresOtherClass(label, word.getPhrase());
+      assert ed <= 1 : " how come edit distance from the true class is " + ed  + " for word " + word;;
+      scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, ed);
+    }
+
+    if(constVars.usePatternEvalWordShape){
+      scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word.getPhrase(), label));
+    }
+
+    if(constVars.usePatternEvalWordShapeStr){
+      scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.WORDSHAPESTR + "-" + this.wordShape(word.getPhrase())), 1.0);
+    }
+
+    if(constVars.usePatternEvalFirstCapital){
+      scoreslist.setCount(ScorePhraseMeasures.ISFIRSTCAPITAL, StringUtils.isCapitalized(word.getPhrase())? 1.0 :0);
+    }
+
+    if(constVars.usePatternEvalBOW){
+      for(String s: word.getPhrase().split("\\s+"))
+        scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.BOW +"-"+ s), 1.0);
+    }
+
+    phraseScoresRaw.setCounter(word, scoreslist);
+    //System.out.println("scores for " + word + " are " + scoreslist);
+    return scoreslist;
+  }
+/*
   Counter<ScorePhraseMeasures> getPhraseFeaturesForPattern(String label, CandidatePhrase word) {
 
     if (phraseScoresRaw.containsFirstKey(word))
@@ -1153,7 +1231,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     phraseScoresRaw.setCounter(word, scoreslist);
     return scoreslist;
   }
-
+*/
+  
   public double scoreUsingClassifer(edu.stanford.nlp.classify.Classifier classifier, CandidatePhrase word, String label, boolean forLearningPatterns,
       Counter<E> patternsThatExtractedPat, Counter<E> allSelectedPatterns) {
 
@@ -1259,8 +1338,6 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     if (constVars.usePhraseEvalWordClass) {
-//      double distSimWt = getDistSimWtScore(word.getPhrase(), label);
-//      scoreslist.setCount(ScorePhraseMeasures.DISTSIM, distSimWt);
       Integer wordclass = constVars.getWordClassClusters().get(word.getPhrase());
       if(wordclass == null){
         wordclass = constVars.getWordClassClusters().get(word.getPhrase().toLowerCase());
