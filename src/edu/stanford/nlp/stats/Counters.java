@@ -3029,4 +3029,13 @@ public class Counters {
     }
     Counters.removeKeys(counter, remove);
   }
+
+  public static<E, E2> Counter<E> flatten(Map<E2, Counter<E>> hier){
+    Counter<E> flat = new ClassicCounter<E>();
+    for(Entry<E2, Counter<E>> en: hier.entrySet()){
+      flat.addAll(en.getValue());
+    }
+    return flat;
+  }
+
 }

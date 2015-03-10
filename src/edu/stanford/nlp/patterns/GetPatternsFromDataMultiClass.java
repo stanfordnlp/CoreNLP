@@ -147,6 +147,8 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
   Map<String, Boolean> writtenPatInJustification = new HashMap<String, Boolean>();
 
   Map<String, Counter<E>> learnedPatterns = new HashMap<String, Counter<E>>();
+  //Same as learnedPatterns but with iteration information
+  Map<String, Map<Integer, Counter<E>>> learnedPatternsEachIter = new HashMap<String, Map<Integer, Counter<E>>>();
 
   public Map<String, TwoDimensionalCounter<String, E>> wordsPatExtracted = new HashMap<String, TwoDimensionalCounter<String, E>>();
 
@@ -2009,16 +2011,20 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     return remove;
   }
 
-  void removeLearnedPattern(String label, E p) {
-    this.learnedPatterns.get(label).remove(p);
-    if (wordsPatExtracted.containsKey(label))
-      for (Entry<String, ClassicCounter<E>> en : this.wordsPatExtracted.get(label).entrySet()) {
-        en.getValue().remove(p);
-      }
-  }
+//  void removeLearnedPattern(String label, E p) {
+//    this.learnedPatterns.get(label).remove(p);
+//    if (wordsPatExtracted.containsKey(label))
+//      for (Entry<String, ClassicCounter<E>> en : this.wordsPatExtracted.get(label).entrySet()) {
+//        en.getValue().remove(p);
+//      }
+//  }
 
   void removeLearnedPatterns(String label, Collection<E> pats) {
     Counters.removeKeys(this.learnedPatterns.get(label), pats);
+
+    for(Map.Entry<Integer, Counter<E>> en: this.learnedPatternsEachIter.get(label).entrySet())
+      Counters.removeKeys(en.getValue(), pats);
+
     if (wordsPatExtracted.containsKey(label))
       for (Entry<String, ClassicCounter<E>> en : this.wordsPatExtracted.get(label).entrySet()) {
         Counters.removeKeys(en.getValue(), pats);
@@ -2326,10 +2332,13 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     }
 
     System.out.println("\n\nAll patterns learned:");
-    for (Entry<String, Counter<E>> en : this.learnedPatterns.entrySet()) {
-      System.out.println(en.getKey() + ":\t\t" + StringUtils.join(en.getValue().keySet(),"\n"));
-    }
 
+    for(Map.Entry<String, Map<Integer, Counter<E>>> en2: this.learnedPatternsEachIter.entrySet()) {
+      for (Map.Entry<Integer, Counter<E>> en : en2.getValue().entrySet()) {
+        System.out.println("\n");
+        System.out.println(en.getKey() + ":\t\t" + StringUtils.join(en.getValue().keySet(), "\n"));
+      }
+    }
     System.out.println("\n\nAll words learned:");
     for (Entry<String, Counter<CandidatePhrase>> en : this.constVars.getLearnedWords().entrySet()) {
       System.out.println(en.getKey() + ":\t\t" + en.getValue().keySet() + "\n\n");
@@ -2425,6 +2434,12 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     if (!learnedPatterns.containsKey(label)) {
       learnedPatterns.put(label, new ClassicCounter<E>());
     }
+
+    if (!learnedPatternsEachIter.containsKey(label)) {
+      learnedPatternsEachIter.put(label, new HashMap<Integer, Counter<E>>());
+    }
+
+
     if (!constVars.getLearnedWords().containsKey(label)) {
       constVars.getLearnedWords().put(label, new ClassicCounter<CandidatePhrase>());
     }
@@ -2435,6 +2450,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
       Counter<E> patternThisIter = getPatterns(label, learnedPatterns.get(label).keySet(), p0, p0Set, ignorePatterns);
       patterns.addAll(patternThisIter);
       learnedPatterns.get(label).addAll(patternThisIter);
+      learnedPatternsEachIter.get(label).put(i, patternThisIter);
 
       if (sentsOutFile != null)
         sentsOutFile = sentsOutFile + "_" + i + "iter.ser";
@@ -2530,6 +2546,13 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     return this.learnedPatterns;
   }
 
+  public Map<String, Map<Integer, Counter<E>>> getLearnedPatternsEachIter() {
+    return this.learnedPatternsEachIter;
+  }
+
+  public Map<Integer, Counter<E>> getLearnedPatternsEachIter(String label) {
+    return this.learnedPatternsEachIter.get(label);
+  }
 
 
   public void setLearnedPatterns(Counter<E> patterns, String label) {
@@ -3128,6 +3151,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     public static String posModelPath = "posModelPath";
     public static String numThreads = "numThreads";
     public static String patternType = "patternType";
+    public static String numIterationsOfSavedPatternsToLoad = "numIterationsOfSavedPatternsToLoad";
   }
 
   public static Pair processSents(Properties props, Set<String> labels) throws IOException, ExecutionException, InterruptedException, ClassNotFoundException {
@@ -3370,9 +3394,10 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
     boolean loadSavedPatternsWordsDir = Boolean.parseBoolean(props.getProperty("loadSavedPatternsWordsDir"));
     boolean labelSentsUsingModel = Boolean.parseBoolean(props.getProperty("labelSentsUsingModel","true"));
     boolean applyPatsUsingModel = Boolean.parseBoolean(props.getProperty("applyPatsUsingModel","true"));
+    int numIterationsOfSavedPatternsToLoad = Integer.parseInt(props.getProperty(Flags.numIterationsOfSavedPatternsToLoad,String.valueOf(Integer.MAX_VALUE)));
     //Load already save pattersn and phrases
     if (loadSavedPatternsWordsDir) {
-      loadFromSavedPatternsWordsDir(model , props, labelSentsUsingModel, applyPatsUsingModel);
+      loadFromSavedPatternsWordsDir(model , props, labelSentsUsingModel, applyPatsUsingModel, numIterationsOfSavedPatternsToLoad);
     }
 
     if (learn)
@@ -3400,9 +3425,9 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 
       for (String label : model.constVars.getLabels()) {
         IOUtils.ensureDir(new File(patternsWordsDir + "/" + label));
-        Counter<E> pats = model.getLearnedPatterns(label);
+        Map<Integer, Counter<E>> pats = model.getLearnedPatternsEachIter(label);
         //Counter<E> patsSur = model.constVars.transformPatternsToSurface(pats);
-        IOUtils.writeObjectToFile(pats, patternsWordsDir + "/" + label + "/patterns.ser");
+        IOUtils.writeObjectToFile(pats, patternsWordsDir + "/" + label + "/patternsEachIter.ser");
         BufferedWriter w = new BufferedWriter(new FileWriter(patternsWordsDir + "/" + label + "/phrases.txt"));
         model.writeWordsToFile(model.constVars.getLearnedWords(label), w);
         writeClassesInEnv(model.constVars.env, ConstantsAndVariables.globalEnv, patternsWordsDir + "/env.txt");
@@ -3453,7 +3478,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
   }
 
 
-  public static<E extends Pattern> void loadFromSavedPatternsWordsDir(GetPatternsFromDataMultiClass<E> model, Properties props, boolean labelSentsUsingModel, boolean applyPatsUsingModel) throws IOException, ClassNotFoundException {
+  public static<E extends Pattern> void loadFromSavedPatternsWordsDir(GetPatternsFromDataMultiClass<E> model, Properties props, boolean labelSentsUsingModel, boolean applyPatsUsingModel, int numIterationsOfSavedPatternsToLoad) throws IOException, ClassNotFoundException {
     String patternsWordsDir = props.getProperty("patternsWordsDir");
     String sentsOutFile = props.getProperty("sentsOutFile");
 
@@ -3474,19 +3499,18 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 */
       readClassesInEnv(patternsWordsDir + "/env.txt", model.constVars.env, ConstantsAndVariables.globalEnv);
 
-      File patf = new File(patternsWordsDir + "/" + label + "/patterns.ser");
+      File patf = new File(patternsWordsDir + "/" + label + "/patternsEachIter.ser");
       if (patf.exists()) {
-        Counter<E> patterns = IOUtils.readObjectFromFile(patf);
-        Counter<E> patternsIndexed = patterns;
-        //new ClassicCounter<E>();
-        for(Entry<E, Double> en: patterns.entrySet())
-        //{
-//          patternsIndexed.setCount(model.constVars.getPatternIndex().addToIndex(en.getKey()), en.getValue());
-        //  patternsIndexed.setCount(en.getKey(), en.getValue());
-
-        //}
+        Map<Integer, Counter<E>> patterns = IOUtils.readObjectFromFile(patf);
+        if(numIterationsOfSavedPatternsToLoad < Integer.MAX_VALUE){
+          for(Integer i : patterns.keySet()){
+            if(i >= numIterationsOfSavedPatternsToLoad){
+              patterns.remove(i);
+            }
+          }
+        }
         //model.constVars.getPatternIndex().finishCommit();
-        model.setLearnedPatterns(patternsIndexed, label);
+        model.setLearnedPatterns(Counters.flatten(patterns), label);
         Redwood.log(Redwood.DBG, "Loaded " + patterns.size() + " patterns from " + patf);
       }
 
