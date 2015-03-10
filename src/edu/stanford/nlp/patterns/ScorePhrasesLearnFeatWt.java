@@ -1146,6 +1146,14 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word.getPhrase(), label));
     }
 
+    if(constVars.usePatternEvalWordShapeStr){
+      scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.WORDSHAPE +"-"+ this.wordShape(word.getPhrase())), 1.0);
+    }
+
+    if(constVars.usePatternEvalFirstCapital){
+      scoreslist.setCount(ScorePhraseMeasures.ISFIRSTCAPITAL, StringUtils.isCapitalized(word.getPhrase())?1.0:0.0);
+    }
+
     phraseScoresRaw.setCounter(word, scoreslist);
     return scoreslist;
   }
@@ -1314,6 +1322,14 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     if(constVars.usePhraseEvalWordShape){
       scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word.getPhrase(), label));
+    }
+
+    if(constVars.usePhraseEvalWordShapeStr){
+      scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.WORDSHAPESTR + "-" + this.wordShape(word.getPhrase())), 1.0);
+    }
+
+    if(constVars.usePhraseEvalFirstCapital){
+      scoreslist.setCount(ScorePhraseMeasures.ISFIRSTCAPITAL, StringUtils.isCapitalized(word.getPhrase())? 1.0 :0);
     }
 
     phraseScoresRaw.setCounter(word, scoreslist);

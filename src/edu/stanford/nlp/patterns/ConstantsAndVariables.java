@@ -477,6 +477,8 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name="fuzzyMatch")
   public boolean fuzzyMatch = false;
 
+
+
   public Set<String> getLabels() {
     return labels;
   }
@@ -535,6 +537,7 @@ public class ConstantsAndVariables implements Serializable {
 
 
   static public class ScorePhraseMeasures implements Comparable {
+
     String name;
     static int num = 0;
     int numObj;
@@ -574,8 +577,8 @@ public class ConstantsAndVariables implements Serializable {
     static final ScorePhraseMeasures WORDVECPOSSIMMAX = new ScorePhraseMeasures("WordVecPosSimMax");
     static final ScorePhraseMeasures WORDVECNEGSIMAVG = new ScorePhraseMeasures("WordVecNegSimAvg");
     static final ScorePhraseMeasures WORDVECNEGSIMMAX = new ScorePhraseMeasures("WordVecNegSimMax");
-
-
+    static final ScorePhraseMeasures ISFIRSTCAPITAL = new ScorePhraseMeasures("IsFirstLetterCapital");
+    static final ScorePhraseMeasures WORDSHAPESTR = new  ScorePhraseMeasures("WordShapeStr");
     @Override
     public int compareTo(Object o) {
       if(!(o instanceof  ScorePhraseMeasures))
@@ -642,8 +645,15 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name = "usePhraseEvalEditDistOther")
   public boolean usePhraseEvalEditDistOther = false;
 
-  @Option(name = "usePhraseEvalWordShape")
+  @Option(name = "usePhraseEvalWordShape", gloss="% of phrases of that label that have the same word shape")
   public boolean usePhraseEvalWordShape = false;
+
+  @Option(name="usePhraseEvalWordShapeStr", gloss="uses the word shape str as a feature")
+  public boolean usePhraseEvalWordShapeStr = false;
+
+  @Option(name="usePhraseEvalFirstCapital", gloss="words starts with a capital letter")
+  public boolean usePhraseEvalFirstCapital;
+
 
   /**
    * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
@@ -658,6 +668,12 @@ public class ConstantsAndVariables implements Serializable {
    */
   @Option(name = "usePatternEvalWordShape")
   public boolean usePatternEvalWordShape = false;
+
+  @Option(name="usePhraseEvalWordShapeStr", gloss="uses the word shape str as a feature")
+  public boolean usePatternEvalWordShapeStr = false;
+
+  @Option(name="usePhraseEvalFirstCapital", gloss="words starts with a capital letter")
+  public boolean usePatternEvalFirstCapital;
 
   /**
    * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or

@@ -152,12 +152,17 @@ public abstract class PhraseScorer<E extends Pattern> {
     }
   }
 
-  public double getWordShapeScore(String word, String label){
+  public String wordShape(String word){
     String wordShape = constVars.getWordShapeCache().get(word);
     if(wordShape == null){
       wordShape = WordShapeClassifier.wordShape(word, constVars.wordShaper);
       constVars.getWordShapeCache().put(word, wordShape);
     }
+    return wordShape;
+  }
+
+  public double getWordShapeScore(String word, String label){
+    String wordShape = wordShape(word);
     double thislabel = 0, alllabels =0;
     for(Entry<String, Counter<String>> en: constVars.getWordShapesForLabels().entrySet()){
       if(en.getKey().equals(label))
