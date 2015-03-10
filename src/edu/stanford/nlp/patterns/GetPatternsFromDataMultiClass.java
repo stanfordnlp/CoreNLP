@@ -3501,8 +3501,8 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         if(numIterationsOfSavedPatternsToLoad < Integer.MAX_VALUE){
           Set<Integer> toremove = new HashSet<Integer>();
           for(Integer i : patterns.keySet()){
-            System.out.println("Removing patterns from iteration " + i);
             if(i >= numIterationsOfSavedPatternsToLoad){
+              System.out.println("Removing patterns from iteration " + i);
               toremove.add(i);
             }
           }
