@@ -94,7 +94,7 @@ public class PatternToken implements Serializable {
     }
 
     if (useTargetParserParentRestriction) {
-      restrictions.add("{grandparentparsetag:" + grandparentParseTag + "}");
+      restrictions.add("{grandparentparsetag:\"" + grandparentParseTag + "\"}");
     }
 
     if (notAllowedClasses != null && notAllowedClasses.size() > 0) {
