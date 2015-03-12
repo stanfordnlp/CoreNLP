@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
 import edu.stanford.nlp.naturalli.ClauseSplitterSearchProblem.*;
+import edu.stanford.nlp.util.logging.Redwood;
 
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
@@ -282,9 +283,12 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
    */
   public static ClauseSplitter load(String serializedModel) throws IOException {
     try {
-      System.err.println("Loading clause searcher from " + serializedModel + " ...");
+      long start = System.currentTimeMillis();
+      System.err.print("Loading clause searcher from " + serializedModel + "...");
       Pair<Classifier<ClauseClassifierLabel,String>, Featurizer> data = IOUtils.readObjectFromURLOrClasspathOrFileSystem(serializedModel);
-      return tree -> new ClauseSplitterSearchProblem(tree, Optional.of(data.first), Optional.of(data.second));
+      ClauseSplitter rtn =  tree -> new ClauseSplitterSearchProblem(tree, Optional.of(data.first), Optional.of(data.second));
+      System.err.println("done [" + Redwood.formatTimeDifference(System.currentTimeMillis() - start) + "]");
+      return rtn;
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException("Invalid model at path: " + serializedModel, e);
     }

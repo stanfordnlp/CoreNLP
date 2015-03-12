@@ -6,6 +6,7 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
@@ -18,6 +19,7 @@ import static org.junit.Assert.*;
  *
  * @author Gabor Angeli
  */
+@Ignore  // TODO(gabor) ignore for now
 public class OpenIEITest {
   protected static StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties(){{
     setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");

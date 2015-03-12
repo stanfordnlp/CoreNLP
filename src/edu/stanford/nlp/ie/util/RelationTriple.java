@@ -8,6 +8,8 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.PriorityQueue;
 
@@ -232,18 +234,16 @@ public class RelationTriple implements Comparable<RelationTriple> {
   }
 
   /** A list of patterns to match relation extractions against */
-  private static final List<SemgrexPattern> PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
+  private static List<SemgrexPattern> PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
     // { blue cats play [quietly] with yarn,
     //   Jill blew kisses at Jack,
     //   cats are standing next to dogs }
-    add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/prepc?/ ({}=prep >pobj ( {}=object ?>appos {}=appos ) ) ?>dobj {pos:/N.*/}=relObj"));
     add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/prepc?_.*/=prepEdge ( {}=object ?>appos {} = appos ) ?>dobj {pos:/N.*/}=relObj"));
     // { fish like to swim }
     add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
     // { cats have tails }
     add(SemgrexPattern.compile("{$}=verb ?>auxpass {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
     // { Durin, son of Thorin }
-    add(SemgrexPattern.compile("{$}=subject >appos=subjIgnored ( {}=verb >prep ( {} >pobj {}=object ) )"));
     add(SemgrexPattern.compile("{$}=subject >appos=subjIgnored ( {}=verb >/prep_.*/=prepEdge {}=object )"));
     // { cats are cute,
     //   horses are grazing peacefully }
@@ -259,6 +259,12 @@ public class RelationTriple implements Comparable<RelationTriple> {
     // { There are dogs in heaven }
     add(SemgrexPattern.compile("{lemma:be}=verb ?>expl {} >/.subj(pass)?/ ( {}=subject >/prepc?_.*/=prepEdge ( {}=object ?>appos {} = appos ) ?>dobj {pos:/N.*/}=relObj )"));
   }});
+
+  /**
+   * A counter keeping track of how many times a given pattern has matched. This allows us to learn to iterate
+   * over patterns in the optimal order.
+   */
+  private static final Counter<SemgrexPattern> PATTERN_HITS = new ClassicCounter<>();
 
   /** A set of valid arcs denoting a subject entity we are interested in */
   public static final Set<String> VALID_SUBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
@@ -394,6 +400,17 @@ public class RelationTriple implements Comparable<RelationTriple> {
     PATTERN_LOOP: for (SemgrexPattern pattern : PATTERNS) {  // For every candidate pattern...
       SemgrexMatcher m = pattern.matcher(parse);
       if (m.matches()) {  // ... see if it matches the sentence
+        // some JIT on the pattern ordering
+        // note[Gabor]: This actually helps quite a bit; 72->86 sentences per second for the entire OpenIE pipeline.
+        PATTERN_HITS.incrementCount(pattern);
+        if (((int) PATTERN_HITS.totalCount()) % 1000 == 0) {
+          ArrayList<SemgrexPattern> newPatterns = new ArrayList<>(PATTERNS);
+          Collections.sort(newPatterns, (x, y) ->
+              (int) (PATTERN_HITS.getCount(y) - PATTERN_HITS.getCount(x))
+          );
+          PATTERNS = newPatterns;
+        }
+        // Main code
         int numKnownDependents = 2;  // subject and object, at minimum
         // Object
         IndexedWord object = m.getNode("appos");

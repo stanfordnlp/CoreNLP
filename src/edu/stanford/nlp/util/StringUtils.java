@@ -217,7 +217,7 @@ public class StringUtils {
 
 
   public static String joinWords(Iterable<? extends HasWord> l, String glue) {
-    StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder(l instanceof Collection ? ((Collection) l).size() : 64);
     boolean first = true;
     for (HasWord o : l) {
       if ( ! first) {
@@ -408,6 +408,27 @@ public class StringUtils {
    */
   public static String join(Object[] elements, String glue) {
     return (join(Arrays.asList(elements), glue));
+  }
+
+  /**
+   * Joins an array of elements in a given span.
+   * @param elements The elements to join.
+   * @param start The start index to join from.
+   * @param end The end (non-inclusive) to join until.
+   * @param glue The glue to hold together the elements.
+   * @return The string form of the sub-array, joined on the given glue.
+   */
+  public static String join(Object[] elements, int start, int end, String glue) {
+    StringBuilder b = new StringBuilder(127);
+    boolean isFirst = true;
+    for (int i = start; i < end; ++i) {
+      if (isFirst) {
+        b.append(elements[i].toString());
+      } else {
+        b.append(glue).append(elements[i].toString());
+      }
+    }
+    return b.toString();
   }
 
   /**

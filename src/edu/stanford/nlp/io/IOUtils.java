@@ -1537,8 +1537,8 @@ public class IOUtils {
     //System.err.println("getBZip2PipedInputStream: Running command: "+cmd);
     Process p = rt.exec(cmd);
     Writer errWriter = new BufferedWriter(new OutputStreamWriter(System.err));
-    StreamGobbler errGobler = new StreamGobbler(p.getErrorStream(), errWriter);
-    errGobler.start();
+    StreamGobbler errGobbler = new StreamGobbler(p.getErrorStream(), errWriter);
+    errGobbler.start();
     return p.getInputStream();
   }
 
