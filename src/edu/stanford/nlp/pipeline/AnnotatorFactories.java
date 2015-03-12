@@ -369,18 +369,18 @@ public class AnnotatorFactories {
   //
   // Mentions annotator
   //
-  public static AnnotatorFactory entityMentions(Properties properties, final AnnotatorImplementations annotatorImplementation) {
+  public static AnnotatorFactory mentions(Properties properties, final AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        return annotatorImplementation.mentions(properties, Annotator.STANFORD_ENTITY_MENTIONS);
+        return annotatorImplementation.mentions(properties, Annotator.STANFORD_MENTIONS);
       }
 
       @Override
       public String additionalSignature() {
         // keep track of all relevant properties for this annotator here!
-        return PropertiesUtils.getSignature(Annotator.STANFORD_ENTITY_MENTIONS, properties, EntityMentionsAnnotator.SUPPORTED_PROPERTIES);
+        return PropertiesUtils.getSignature(Annotator.STANFORD_MENTIONS, properties, MentionsAnnotator.SUPPORTED_PROPERTIES);
       }
     };
   }
@@ -571,6 +571,23 @@ public class AnnotatorFactories {
       @Override
       public Annotator create() {
         return annotatorImpl.natlog(properties);
+      }
+
+      @Override
+      protected String additionalSignature() {
+        return "";
+      }
+    };
+  }
+
+  //
+  // RelationTriples
+  //
+  public static AnnotatorFactory openie(Properties properties, final AnnotatorImplementations annotatorImpl) {
+    return new AnnotatorFactory(properties, annotatorImpl) {
+      @Override
+      public Annotator create() {
+        return annotatorImpl.openie(properties);
       }
 
       @Override
