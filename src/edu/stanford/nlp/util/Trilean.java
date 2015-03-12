@@ -206,6 +206,23 @@ public class Trilean {
     }
   }
 
+  public static Trilean fromString(String value) {
+    switch(value.toLowerCase()) {
+      case "true":
+      case "t":
+        return TRUE;
+      case "false":
+      case "f":
+        return FALSE;
+      case "unknown":
+      case "unk":
+      case "u":
+        return UNKNOWN;
+      default:
+        throw new IllegalArgumentException("Cannot parse Trilean from string: " + value);
+    }
+  }
+
   /** The static value for True */
   public static Trilean TRUE = new Trilean(true, false);
   /** The static value for False */
