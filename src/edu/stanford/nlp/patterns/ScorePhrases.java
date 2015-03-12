@@ -194,7 +194,6 @@ public class ScorePhrases<E extends Pattern> {
     }
 
 
-    //TODO: apply patterns according to type
     Map<TokenSequencePattern, E> surfacePatternsLearnedThisIterConverted = null;
     Map<SemgrexPattern, E> depPatternsLearnedThisIterConverted = null;
 
@@ -374,7 +373,7 @@ public class ScorePhrases<E extends Pattern> {
 //    Set<String> specialWords = constVars.invertedIndex.getSpecialWordsList();
 
     for(Map.Entry<String, Env> en: constVars.env.entrySet()){
-      en.getValue().getVariables().putAll(Token.env.getVariables());
+      en.getValue().getVariables().putAll(ConstantsAndVariables.globalEnv.getVariables());
     }
 
     Map<E, Map<String, DataInstance>> sentencesForPatterns = getSentences(constVars.invertedIndex.queryIndex(patterns.keySet()));

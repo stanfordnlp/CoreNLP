@@ -21,6 +21,8 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.GoldAnswerAnnotation;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.tokensregex.Env;
+import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
 import edu.stanford.nlp.patterns.dep.DataInstanceDep;
 import edu.stanford.nlp.patterns.surface.*;
 import edu.stanford.nlp.patterns.ConstantsAndVariables.ScorePhraseMeasures;
@@ -3342,7 +3344,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         IOUtils.writeObjectToFile(pats, patternsWordsDir + "/" + label + "/patterns.ser");
         BufferedWriter w = new BufferedWriter(new FileWriter(patternsWordsDir + "/" + label + "/phrases.txt"));
         model.writeWordsToFile(model.constVars.getLearnedWords(label), w);
-
+        writeClassesInEnv(model.constVars.env, ConstantsAndVariables.globalEnv, patternsWordsDir + "/env.txt");
         w.close();
       }
     }
@@ -3409,6 +3411,7 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
         model.constVars.setPatternIndex(model.patsForEachToken.readPatternIndexFromDB());
       }
 */
+      readClassesInEnv(patternsWordsDir + "/env.txt", model.constVars.env, ConstantsAndVariables.globalEnv);
 
       File patf = new File(patternsWordsDir + "/" + label + "/patterns.ser");
       if (patf.exists()) {
@@ -3468,6 +3471,42 @@ public class  GetPatternsFromDataMultiClass<E extends Pattern> implements Serial
 //          model.labelWords(label, Data.sents, model.getLearnedWords(label).keySet(), sentsOutFile, matchedTokensByPat);
 //      }
     }
+  }
+
+  private static void readClassesInEnv(String s, Map<String, Env> env, Env globalEnv) throws ClassNotFoundException {
+
+    for(String line: IOUtils.readLines(s)){
+      String[] toks = line.split("###");
+      if(toks.length == 3){
+        String label = toks[0];
+        String name = toks[1];
+        Class c = Class.forName(toks[2]);
+        if(!env.containsKey(label))
+          env.put(label, TokenSequencePattern.getNewEnv());
+        env.get(label).bind(name, c);
+      }else
+      if(toks.length ==2){
+        String name = toks[0];
+        Class c = Class.forName(toks[1]);
+        globalEnv.bind(name, c);
+      }else
+        throw new RuntimeException("Ill formed env file!");
+    }
+  }
+
+  private static void writeClassesInEnv(Map<String, Env> env, Env globalEnv, String file) throws IOException {
+    BufferedWriter w = new BufferedWriter(new FileWriter(file));
+    for(Entry<String, Env> en: env.entrySet()){
+      for(Entry<String, Object> en2: en.getValue().getVariables().entrySet()){
+        if(en2.getValue() instanceof Class)
+          w.write(en.getKey()+"###"+en2.getKey()+"###"+((Class)en2.getValue()).getName()+"\n");
+      }
+    }
+    for(Entry<String, Object> en2: globalEnv.getVariables().entrySet()){
+      if(en2.getValue() instanceof Class)
+        w.write(en2.getKey()+"###"+ ((Class)en2.getValue()).getName()+"\n");
+    }
+    w.close();
   }
 
   public static String elapsedTime(Date d1, Date d2){
