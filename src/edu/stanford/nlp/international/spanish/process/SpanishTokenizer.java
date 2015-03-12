@@ -29,7 +29,7 @@ import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 
 /**
  * Tokenizer for raw Spanish text. This tokenization scheme is a derivative
- * of PTB tokenization, but with extra rules for Spanish contractions and
+ * of PTB tokenization, but with extra rules for Spanish contractions and 
  * assimilations. It is based heavily on the FrenchTokenizer.
  * <p>
  * The tokenizer tokenizes according to the modified AnCora corpus tokenization
@@ -154,7 +154,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     } else {
       throw new IllegalArgumentException("Invalid contraction provided to processContraction");
     }
-
+   
     compoundBuffer.add(copyCoreLabel(cl, second));
     return copyCoreLabel(cl, first);
   }
@@ -288,7 +288,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
           } else if (fields[0].equals("splitContractions")) {
             splitContractionOption = true;
           } else {
-            lexerProperties.setProperty(option, "true");
+            lexerProperties.put(option, "true");
           }
 
         } else if (fields.length == 2) {
@@ -303,7 +303,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
           } else if (fields[0].equals("splitContractions")) {
             splitContractionOption = Boolean.valueOf(fields[1]);
           } else {
-            lexerProperties.setProperty(fields[0], fields[1]);
+            lexerProperties.put(fields[0], fields[1]);
           }
 
         } else {
@@ -328,14 +328,14 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     tf.setOptions(ANCORA_OPTIONS);
     return tf;
   }
-
+  
   /**
    * a factory that vends CoreLabel tokens with default tokenization.
    */
   public static TokenizerFactory<CoreLabel> coreLabelFactory() {
     return SpanishTokenizerFactory.newCoreLabelTokenizerFactory();
   }
-
+  
   public static TokenizerFactory<CoreLabel> factory() {
     return coreLabelFactory();
   }
