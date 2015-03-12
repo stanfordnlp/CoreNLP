@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -777,7 +776,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
       Counter<F> features = datum.asFeaturesCounter();
       for (F feature : features.keySet()) {
         double count = features.getCount(feature);
-        writer.format(Locale.ENGLISH, " %s:%f", this.featureIndex.indexOf(feature), count);
+        writer.format(" %s:%f", this.featureIndex.indexOf(feature), count);
       }
       writer.println();
     }

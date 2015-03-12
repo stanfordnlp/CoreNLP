@@ -239,7 +239,7 @@ public class LexicalizedParserITest extends TestCase {
 
   private static final String chineseTest2 = "这里 是 新闻 之 夜 ．";
   private static final String expectedChineseTree2 = "(ROOT (IP (NP (PN 这里)) (VP (VC 是) (NP (DNP (NP (NN 新闻)) (DEG 之)) (NP (NN 夜)))) (PU ．)))";
-  private static final String expectedChineseDeps2 = "nsubj(夜-5, 这里-1) cop(夜-5, 是-2) assmod(夜-5, 新闻-3) case(新闻-3, 之-4) root(ROOT-0, 夜-5)";
+  private static final String expectedChineseDeps2 = "top(是-2, 这里-1) root(ROOT-0, 是-2) assmod(夜-5, 新闻-3) assm(新闻-3, 之-4) attr(是-2, 夜-5)";
 
   public static void testChineseDependenciesSemanticHead() {
     Tree tree = chineseParser.parse(chineseTest2);

@@ -85,11 +85,10 @@ class AuxiliaryTree {
         }
       }
       clone = node.treeFactory().newTreeNode(node.label().labelFactory().newLabel(node.label()),newChildren);
+      if (nodesToNames.containsKey(node)) {
+        newNamesToNodes.put(nodesToNames.get(node),clone);
+      }
     }
-
-    if (nodesToNames.containsKey(node))
-      newNamesToNodes.put(nodesToNames.get(node),clone);
-
     return new Pair<Tree,Tree>(clone,newFoot);
   }
 
@@ -173,8 +172,8 @@ class AuxiliaryTree {
     for (Tree node : t.subTreeList()) {
       Matcher m = namePattern.matcher(node.label().value());
       if (m.find()) {
-        namesToNodes.put(m.group(2), node);
-        nodesToNames.put(node, m.group(2));
+        namesToNodes.put(m.group(1),node);
+        nodesToNames.put(node,m.group(1));
         node.label().setValue(m.group(1));
       }
       node.label().setValue(unescape(node.label().value()));
