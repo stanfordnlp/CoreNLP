@@ -209,7 +209,9 @@ public class ParserAnnotator extends SentenceAnnotator {
   @Override
   protected void doOneSentence(Annotation annotation, CoreMap sentence) {
     // If "noSquash" is set, don't re-annotate sentences which already have a tree annotation
-    if (noSquash && sentence.get(TreeCoreAnnotations.TreeAnnotation.class) != null) {
+    if (noSquash &&
+        sentence.get(TreeCoreAnnotations.TreeAnnotation.class) != null &&
+        !"X".equalsIgnoreCase(sentence.get(TreeCoreAnnotations.TreeAnnotation.class).label().value())) {
       return;
     }
 
