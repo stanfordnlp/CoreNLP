@@ -171,19 +171,60 @@ public class ClauseSearcher {
       }
     }
 
-    // Remove dangling nodes
-    List<IndexedWord> danglingNodes = new ArrayList<>();
-    for (IndexedWord vertex : tree.vertexSet()) {
-      if (!tree.incomingEdgeIterator(vertex).hasNext() && !tree.getRoots().contains(vertex)) {
-        danglingNodes.add(vertex);
+    // Brute force ensure tree
+    // Remove incoming edges from roots
+    List<SemanticGraphEdge> rootIncomingEdges = new ArrayList<>();
+    for (IndexedWord root : tree.getRoots()) {
+      for (SemanticGraphEdge incomingEdge : tree.incomingEdgeIterable(root)) {
+        rootIncomingEdges.add(incomingEdge);
       }
     }
-    for (IndexedWord vertex : danglingNodes) {
-      assert !tree.outgoingEdgeIterator(vertex).hasNext();
-      tree.removeVertex(vertex);
+    for (SemanticGraphEdge edge : rootIncomingEdges) {
+      tree.removeEdge(edge);
+    }
+    // Loop until it becomes a tree.
+    boolean changed = true;
+    while (changed) {  // I just want trees to be trees; is that so much to ask!?
+      changed = false;
+      List<IndexedWord> danglingNodes = new ArrayList<>();
+      List<SemanticGraphEdge> invalidEdges = new ArrayList<>();
+
+      for (IndexedWord vertex : tree.vertexSet()) {
+        // Collect statistics
+        boolean hasOutgoing = tree.outgoingEdgeIterator(vertex).hasNext();
+        Iterator<SemanticGraphEdge> incomingIter = tree.incomingEdgeIterator(vertex);
+        boolean hasIncoming = incomingIter.hasNext();
+        boolean hasMultipleIncoming = false;
+        if (hasIncoming) {
+          incomingIter.next();
+          hasMultipleIncoming = incomingIter.hasNext();
+        }
+
+        // Register actions
+        if (!hasIncoming && !tree.getRoots().contains(vertex)) {
+          danglingNodes.add(vertex);
+        } else {
+          if (hasMultipleIncoming) {
+            for (SemanticGraphEdge edge : new IterableIterator<>(incomingIter)) {
+              invalidEdges.add(edge);
+            }
+          }
+        }
+      }
+
+      // Perform actions
+      for (IndexedWord vertex : danglingNodes) {
+        tree.removeVertex(vertex);
+        changed = true;
+      }
+      for (SemanticGraphEdge edge : invalidEdges) {
+        tree.removeEdge(edge);
+        changed = true;
+      }
     }
 
     // Return
+    assert isTree(tree);
     return extraEdges;
   }
 
@@ -247,6 +288,10 @@ public class ClauseSearcher {
       wordsToAdd.add(node);
       for (SemanticGraphEdge edge : originalTree.outgoingEdgeIterable(node)) {
         if (!ignoredEdges.contains(edge)) {
+          if (toModify.containsVertex(edge.getDependent())) {
+            // Case: we're adding a subtree that's not disjoint from toModify. This is bad news.
+            return;
+          }
           edgesToAdd.add(edge);
           fringe.add(edge.getDependent());
         }

@@ -180,12 +180,19 @@ public class RelationTriple implements Comparable<RelationTriple> {
     add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >/xcomp/ ( {}=object ?>/appos/ {}=appos )"));
     // { cats have tails }
     add(SemgrexPattern.compile("{$}=verb ?>/auxpass/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>/appos/ {}=appos )"));
+    // { Durin, son of Thorin }
+    add(SemgrexPattern.compile("{$}=subject >appos=subjIgnored ( {}=verb >prep ( {} >pobj {}=object ) )"));
+    add(SemgrexPattern.compile("{$}=subject >appos=subjIgnored ( {}=verb >/prep_.*/=prepEdge {}=object )"));
     // { cats are cute  }
     add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop/ {}=verb"));
     // { Unicredit 's Bank Austria Creditanstalt }
-    add(SemgrexPattern.compile("{$}=object >/poss/=verb {}=subject"));
+    add(SemgrexPattern.compile("[ {$}=object & !{ner:O}=object ] >/poss/=verb !{ner:O}=subject "));
     // { Obama in Tucson }
-    add(SemgrexPattern.compile("[ !{ner:/O/} & {tag:/NNP/}=subject ] >/prep_.*/=verb {}=object"));
+    add(SemgrexPattern.compile("[ !{ner:O} & {tag:NNP}=subject ] >/prep_.*/=verb {}=object"));
+    // { Tim 's father, Tom }
+    add(SemgrexPattern.compile("{$}=verb  >/poss/=verb {}=subject >/appos/ {}=object"));
+    // { Tom and Jerry were fighting }
+    add(SemgrexPattern.compile("{$}=verb  >nsubjpass ( {}=subject >/conj_and/=subjIgnored {}=object )"));
   }});
 
   /** A set of valid arcs denoting an entity we are interested in */
@@ -313,6 +320,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
         Optional<String> subjNoopArc = Optional.empty();
         Optional<String> objNoopArc = Optional.empty();
         if (verb != null) {
+          // Case: a standard extraction with a main verb
           for (SemanticGraphEdge edge : parse.outgoingEdgeIterable(verb)) {
             if ("advmod".equals(edge.getRelation().toString()) || "amod".equals(edge.getRelation().toString())) {
               String tag = edge.getDependent().backingLabel().tag();
@@ -322,7 +330,12 @@ public class RelationTriple implements Comparable<RelationTriple> {
               }
             }
           }
+          // Special case for possessive with verb
+          if ("poss".equals(m.getRelnString("verb"))) {
+            verbChunk.add(mockNode(verb.backingLabel(), -1, "'s", "POS"), ((double) verb.backingLabel().index()) - 0.9);
+          }
         } else {
+          // Case: an implicit extraction where the 'verb' comes from a relation arc.
           String verbName = m.getRelnString("verb");
           if ("poss".equals(verbName)) {
             IndexedWord subject = m.getNode("subject");
@@ -374,6 +387,14 @@ public class RelationTriple implements Comparable<RelationTriple> {
           continue PATTERN_LOOP;  // Too many outgoing edges; we didn't consume them all.
         }
         List<CoreLabel> relation = verbChunk.toSortedList();
+
+        // Last chance to register ignored edges
+        if (!subjNoopArc.isPresent()) {
+          subjNoopArc = Optional.ofNullable(m.getRelnString("subjIgnored"));
+        }
+        if (!objNoopArc.isPresent()) {
+          objNoopArc = Optional.ofNullable(m.getRelnString("objIgnored"));
+        }
 
         // Subject+Object
         Optional<List<CoreLabel>> subjectSpan = getValidEntityChunk(parse, m.getNode("subject"), subjNoopArc);

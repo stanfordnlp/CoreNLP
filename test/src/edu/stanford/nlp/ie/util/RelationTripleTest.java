@@ -275,13 +275,23 @@ public class RelationTripleTest extends TestCase {
 
   public void testPossessive() {
     Optional<RelationTriple> extraction = mkExtraction(
-        "1\tUnicredit\t4\tposs\n" +
-        "2\tBank\t4\tnn\n" +
-        "3\tAustria\t4\tnn\n" +
-        "4\tCreditanstalt\t0\troot\n"
+        "1\tUnicredit\t4\tposs\tNNP\tORGANIZATION\n" +
+        "2\tBank\t4\tnn\tNNP\tORGANIZATION\n" +
+        "3\tAustria\t4\tnn\tNNP\tORGANIZATION\n" +
+        "4\tCreditanstalt\t0\troot\tNNP\tORGANIZATION\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tUnicredit\t's\tBank Austria Creditanstalt", extraction.get().toString());
+  }
+
+  public void testPossessiveWithObject() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tTim\t2\tposs\n" +
+        "2\tfather\t0\troot\n" +
+        "3\tTom\t2\tappos\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tTim\t's father\tTom", extraction.get().toString());
   }
 
   public void testApposInObject() {
@@ -293,6 +303,16 @@ public class RelationTripleTest extends TestCase {
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tNewspaper\tpublished in\tArizona", extraction.get().toString());
+  }
+
+  public void testApposAsSubj() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tDurin\t0\troot\n" +
+        "2\tson\t1\tappos\n" +
+        "3\tThorin\t2\tprep_of\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tDurin\tson of\tThorin", extraction.get().toString());
   }
 
   public void testPPExtraction() {
@@ -313,14 +333,15 @@ public class RelationTripleTest extends TestCase {
     assertEquals("1.0\tPietro Badoglio\tin\tsouthern Italy", extraction.get().toString());
   }
 
-  // Note[gabor]: I think this might be better suited to be done at clause splitting?
-//  public void testVMod() {
-//    Optional<RelationTriple> extraction = mkExtraction(
-//        "1\tCats\t0\troot\n" +
-//        "3\tplaying\t1\tvmod\n" +
-//        "4\tsand\t3\tprep_in\n"
-//    );
-//    assertTrue("No extraction for sentence!", extraction.isPresent());
-//    assertEquals("1.0\tCats\tplaying in\tsand", extraction.get().toString());
-//  }
+  public void testPassiveReflexive() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tTom\t4\tnsubjpass\n" +
+        "2\tJerry\t1\tconj_and\n" +
+        "3\twere\t4\tauxpass\n" +
+        "4\tfighting\t0\troot\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tTom\tfighting\tJerry", extraction.get().toString());
+  }
+
 }
