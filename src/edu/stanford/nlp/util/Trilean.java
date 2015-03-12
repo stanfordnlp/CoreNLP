@@ -149,6 +149,63 @@ public class Trilean {
     }
   }
 
+  /**
+   * Returns whether this Trilean is equal either to the given Trilean, or the given Boolean.
+   */
+  @SuppressWarnings("SimplifiableIfStatement")
+  @Override
+  public boolean equals(Object other) {
+    if (other instanceof Trilean) {
+      return ((Trilean) other).value == this.value;
+    } else if (other instanceof Boolean) {
+      return from(((Boolean) other)).value == this.value;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * <p>
+   *  Implementation note: this hash code should be consistent with {@link Boolean#hashCode}.
+   * </p>
+   */
+  public int hashCode() {
+    if (this.isTrue()) {
+      return Boolean.hashCode(true);
+    } else if (this.isFalse()) {
+      return Boolean.hashCode(false);
+    } else {
+      return Byte.hashCode(value);
+    }
+  }
+
+  /**
+   * Returns a String representation of this Trilean: either "true", "false", or "unknown".
+   */
+  public String toString() {
+    if (isTrue()) {
+      return "true";
+    } else if (isFalse()) {
+      return "false";
+    } else {
+      return "unknown";
+    }
+  }
+
+  /**
+   * Create the Trilean value for the given Boolean
+   * @param bool The boolean to parse, into either {@link Trilean#TRUE} or {@link Trilean#FALSE}.
+   * @return One of {@link Trilean#TRUE} or {@link Trilean#FALSE}.
+   */
+  public static Trilean from(boolean bool) {
+    if (bool) {
+      return TRUE;
+    } else {
+      return FALSE;
+    }
+  }
+
   /** The static value for True */
   public static Trilean TRUE = new Trilean(true, false);
   /** The static value for False */
