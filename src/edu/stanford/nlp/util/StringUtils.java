@@ -424,6 +424,7 @@ public class StringUtils {
     for (int i = start; i < end; ++i) {
       if (isFirst) {
         b.append(elements[i].toString());
+        isFirst = false;
       } else {
         b.append(glue).append(elements[i].toString());
       }
