@@ -19,10 +19,7 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -313,13 +310,19 @@ public class Util {
    * @param tokens The tokens in the sentence.
    * @param a The first span.
    * @param b The second span.
+   * @param parse The parse tree to traverse looking for coreference chains to exploit.
    *
    * @return True if these two spans contain exactly the same NER.
    */
-  public static boolean nerOverlap(List<CoreLabel> tokens, Span a, Span b) {
+  public static boolean nerOverlap(List<CoreLabel> tokens, Span a, Span b, Optional<SemanticGraph> parse) {
     Span nerA = extractNER(tokens, a);
     Span nerB = extractNER(tokens, b);
     return nerA.equals(nerB);
+  }
+
+  /** @see Util#nerOverlap(List, Span, Span, Optional) */
+  public static boolean nerOverlap(List<CoreLabel> tokens, Span a, Span b) {
+    return nerOverlap(tokens, a, b, Optional.empty());
   }
 
   /**

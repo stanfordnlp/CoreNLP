@@ -358,6 +358,17 @@ public class RelationTripleTest extends TestCase {
     assertEquals("1.0\tScania-Vabis\testablished\tits first production plant", extraction.get().toString());
   }
 
+  public void testOfWhich() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\twhich\t4\tprep_of\n" +
+        "2\tBono\t4\tnsubj\n" +
+        "3\tis\t4\tcop\n" +
+        "4\tco-founder\t0\troot\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tBono\tis co-founder of\twhich", extraction.get().toString());
+  }
+
   public void testObjInRelation() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tScania-Vabis\t2\tnsubj\tNNP\tORGANIZATION\n" +

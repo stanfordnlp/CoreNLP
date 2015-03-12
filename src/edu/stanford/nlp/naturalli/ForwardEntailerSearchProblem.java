@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
  * @author Gabor Angeli
  */
 public class ForwardEntailerSearchProblem {
+
   /**
    * The parse of this fragment. The vertices in the parse tree should be a subset
    * (possibly not strict) of the tokens above.

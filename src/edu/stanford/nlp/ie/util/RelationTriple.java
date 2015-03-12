@@ -571,11 +571,11 @@ public class RelationTriple implements Comparable<RelationTriple> {
 
   }
 
-  public static Optional<RelationTriple> optimizeForKB(RelationTriple input, CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentions) {
+  public static Optional<RelationTriple> optimizeForKB(RelationTriple input, Optional<CoreMap> sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentions) {
     // Get some metadata
-    String docid = sentence.get(CoreAnnotations.DocIDAnnotation.class);
+    String docid = sentence.isPresent() ? sentence.get().get(CoreAnnotations.DocIDAnnotation.class) : null;
     if (docid == null) { docid = "no_doc_id"; }
-    Integer sentenceIndex = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
+    Integer sentenceIndex = sentence.isPresent() ? sentence.get().get(CoreAnnotations.SentenceIndexAnnotation.class) : null;
     if (sentenceIndex == null) { sentenceIndex = -1; }
 
     // Pass 1: resolve Coref

@@ -163,9 +163,15 @@ public class ClauseSplitterSearchProblem {
    */
   public static class TrainingOptions {
     @Execution.Option(name = "negativeSubsampleRatio", gloss = "The percent of negative datums to take")
-    public double negativeSubsampleRatio = 0.10;
+    public double negativeSubsampleRatio = 1.00;
     @Execution.Option(name = "positiveDatumWeight", gloss = "The weight to assign every positive datum.")
-    public float positiveDatumWeight = 50.0f;
+    public float positiveDatumWeight = 10.0f;
+    @Execution.Option(name = "unknownDatumWeight", gloss = "The weight to assign every unknown datum (everything extracted with an unconfirmed relation).")
+    public float unknownDatumWeight = 1.0f;
+    @Execution.Option(name = "clauseSplitWeight", gloss = "The weight to assign for clause splitting datums. Higher values push towards higher recall.")
+    public float clauseSplitWeight = 1.0f;
+    @Execution.Option(name = "clauseIntermWeight", gloss = "The weight to assign for intermediate splits. Higher values push towards higher recall.")
+    public float clauseIntermWeight = 2.0f;
     @Execution.Option(name = "seed", gloss = "The random seed to use")
     public int seed = 42;
     @SuppressWarnings("unchecked")

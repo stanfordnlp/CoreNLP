@@ -34,7 +34,7 @@ public class OpenIE implements Annotator {
 
   private static enum Optimization { GENERAL, KB }
 
-  @Execution.Option(name="optimize_for", gloss="{General, KB}: Optimize the system for particular tasks (e.g., knowledge base completion tasks -- try to make the subject and object coherent named entities).")
+  @Execution.Option(name="optimizefor", gloss="{General, KB}: Optimize the system for particular tasks (e.g., knowledge base completion tasks -- try to make the subject and object coherent named entities).")
   private Optimization optimizeFor = Optimization.GENERAL;
 
   @Execution.Option(name="splitter.model", gloss="The location of the clause splitting model.")
@@ -55,7 +55,7 @@ public class OpenIE implements Annotator {
   @Execution.Option(name="affinity_models", gloss="The directory (or classpath directory) containing the affinity models for pp/obj attachments.")
   private String affinityModels = "edu/stanford/nlp/naturalli/";
 
-  @Execution.Option(name="affinity_probability_cap", gloss="The directory (or classpath directory) containing the affinity models for pp/obj attachments.")
+  @Execution.Option(name="affinity_probability_cap", gloss="The affinity to consider 1.0")
   private double affinityProbabilityCap = 1.0 / 3.0;
 
   private final NaturalLogicWeights weights;
@@ -136,7 +136,7 @@ public class OpenIE implements Annotator {
         case GENERAL:
           return Optional.of(rel);
         case KB:
-          return RelationTriple.optimizeForKB(rel, sentence, canonicalMentionMap);
+          return RelationTriple.optimizeForKB(rel, Optional.of(sentence), canonicalMentionMap);
         default:
           throw new IllegalStateException("Unknown enum constant: " + optimizeFor);
       }

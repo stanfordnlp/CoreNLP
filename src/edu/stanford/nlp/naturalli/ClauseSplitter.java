@@ -7,9 +7,11 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.*;
@@ -73,6 +75,7 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
     // Generally useful objects
     OpenIE openie = new OpenIE(new Properties() {{
       setProperty("splitter.nomodel", "true");
+      setProperty("optimizefor", "GENERAL");
     }});
     Random rand = new Random(options.seed);
     WeightedDataset<ClauseClassifierLabel, String> dataset = new WeightedDataset<>();
@@ -91,11 +94,13 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
       // Parse training datum
       CoreMap sentence = triple.first;
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-      Span subjectSpan = Util.extractNER(tokens, triple.second);
-      Span objectSpan = Util.extractNER(tokens, triple.third);
+      SemanticGraph tree = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+      Span subjectSpan = triple.second; //Util.extractNER(tokens, triple.second);
+      Span objectSpan = triple.third; //Util.extractNER(tokens, triple.third);
+      log(StringUtils.toString(tokens));
+      log("  -> " + StringUtils.toString(tokens.subList(subjectSpan.start(), subjectSpan.end())) + " :: " + StringUtils.toString(tokens.subList(objectSpan.start(), objectSpan.end())));
       // Create raw clause searcher (no classifier)
-      ClauseSplitterSearchProblem problem = new ClauseSplitterSearchProblem(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class));
-      Pointer<Boolean> anyCorrect = new Pointer<>(false);
+      ClauseSplitterSearchProblem problem = new ClauseSplitterSearchProblem(tree);
 
       // Run search
       problem.search(fragmentAndScore -> {
@@ -105,44 +110,53 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
         SentenceFragment fragment = fragmentSupplier.get();
         // Search for extractions
         List<RelationTriple> extractions = openie.relationsInFragments(openie.entailmentsFromClause(fragment));
-        Trilean correct = Trilean.UNKNOWN;
+        Trilean correct = Trilean.FALSE;
         RelationTriple bestExtraction = null;
+        String prefix = "  x ";
         for (RelationTriple extraction : extractions) {
           // Clean up the guesses
-          Span subjectGuess = Util.extractNER(tokens, Span.fromValues(extraction.subject.get(0).index() - 1, extraction.subject.get(extraction.subject.size() - 1).index()));
-          Span objectGuess = Util.extractNER(tokens, Span.fromValues(extraction.object.get(0).index() - 1, extraction.object.get(extraction.object.size() - 1).index()));
+          Span subjectGuess = Span.fromValues(extraction.subject.get(0).index() - 1, extraction.subject.get(extraction.subject.size() - 1).index());
+          Span objectGuess = Span.fromValues(extraction.object.get(0).index() - 1, extraction.object.get(extraction.object.size() - 1).index());
           // Check if it matches
           if ((subjectGuess.equals(subjectSpan) && objectGuess.equals(objectSpan)) ||
               (subjectGuess.equals(objectSpan) && objectGuess.equals(subjectSpan))
               ) {
+            prefix = "  * ";
             correct = Trilean.TRUE;
-            anyCorrect.set(true);
             bestExtraction = extraction;
           } else if ( Util.nerOverlap(tokens, subjectSpan, subjectGuess) && Util.nerOverlap(tokens, objectSpan, objectGuess) ||
                       Util.nerOverlap(tokens, subjectSpan, objectGuess) && Util.nerOverlap(tokens, objectSpan, subjectGuess) ) {
-            anyCorrect.set(true);
-            if (bestExtraction == null) {
+            if (!correct.isTrue()) {
+              prefix = "  ~ ";
               bestExtraction = extraction;
+              correct = Trilean.TRUE;
             }
-            correct = Trilean.TRUE;  // TODO(gabor) "contains" is maybe too lenient.
           } else {
-            if (bestExtraction == null) {
+            if (!correct.isTrue()) {
+              prefix = "  ? ";
               bestExtraction = extraction;
+              correct = Trilean.UNKNOWN;
             }
-            correct = Trilean.FALSE;
           }
         }
         // Process the datum
-        if ((bestExtraction != null || fragment.length() == 1) && !features.isEmpty() && correct.isKnown()) {
-          for (int i = 0; i < features.size(); ++i) {
+        if (!features.isEmpty()) {
+          log(prefix + info(fragment, tokens, tree));
+          if (bestExtraction != null) { log("    " + bestExtraction); }
+          for (int i = (correct.isFalse() ? features.size() - 1 : 0); i < features.size(); ++i) {
             Counter<String> decision = features.get(i);
             // (get output label)
-            ClauseClassifierLabel label = ClauseClassifierLabel.NOT_A_CLAUSE;
-            if (correct.toBoolean(false) && i == features.size() - 1) {
-              label = ClauseClassifierLabel.CLAUSE_SPLIT;
-            } else if (correct.toBoolean(false)) {
-              label = ClauseClassifierLabel.CLAUSE_INTERM;
+            ClauseClassifierLabel label;
+            if (correct.isFalse()) {
+              label = ClauseClassifierLabel.NOT_A_CLAUSE;
+            } else {
+              if (i == features.size() - 1) {
+                label = ClauseClassifierLabel.CLAUSE_SPLIT;
+              } else {
+                label = ClauseClassifierLabel.CLAUSE_INTERM;
+              }
             }
+            if (bestExtraction != null) { log("    " + label); }
             // (create datum)
             RVFDatum<ClauseClassifierLabel, String> datum = new RVFDatum<>(decision);
             datum.setLabel(label);
@@ -151,14 +165,36 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
               datasetDumpWriter.get().println("" + label + "\t" +
                   StringUtils.join(decision.entrySet().stream().map(entry -> "" + entry.getKey() + "->" + entry.getValue()), ";"));
             }
+            // (get datum weight)
+            float weight;
+            if (correct.isTrue()) {
+              weight = options.positiveDatumWeight;
+            } else if (correct.isUnknown()) {
+              weight = options.unknownDatumWeight;
+            } else {
+              weight = 1.0f;
+            }
+            switch (label) {
+              case CLAUSE_INTERM:
+                weight *= options.clauseIntermWeight;
+                break;
+              case CLAUSE_SPLIT:
+                weight *= options.clauseSplitWeight;
+                break;
+              default:
+                weight *= 1.0f;
+                break;
+            }
             // (add datum to dataset)
-            if (correct.toBoolean(false) || rand.nextDouble() > (1.0 - options.negativeSubsampleRatio)) {  // Subsample
-              dataset.add(datum, correct.toBoolean(false) ? options.positiveDatumWeight : 1.0f);
+            if (weight > 0.0) {
+              if (label != ClauseClassifierLabel.NOT_A_CLAUSE || rand.nextDouble() > (1.0 - options.negativeSubsampleRatio)) {
+                dataset.add(datum, weight);
+              }
             }
           }
         }
         return true;
-      }, new LinearClassifier<>(new ClassicCounter<>()), featurizer, 1000);
+      }, new LinearClassifier<>(new ClassicCounter<>()), featurizer, 10000);
       // Debug info
       if (numExamplesProcessed.incrementAndGet() % 100 == 0) {
         log("processed " + numExamplesProcessed + " training sentences: " + dataset.size() + " datums");
@@ -209,6 +245,19 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
     return tree -> new ClauseSplitterSearchProblem(tree, Optional.of(fullClassifier), Optional.of(featurizer));
   }
 
+  /**
+   * TODO(gabor) DELETE ME
+   */
+  static String info(SentenceFragment fragment, List<CoreLabel> tokens, SemanticGraph tree) {
+    IndexedWord node = fragment.parseTree.getFirstRoot();
+    String rtn = fragment.toString() + "  ::  " + node;
+    while (!node.equals(tree.getFirstRoot())) {
+      SemanticGraphEdge edge = tree.incomingEdgeIterator(node).next();
+      node = edge.getGovernor();
+      rtn = rtn + " <-" + edge.getRelation() + "- " + node;
+    }
+    return rtn;
+  }
 
 
   /**
