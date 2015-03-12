@@ -5,6 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Predicate;
+import java.util.function.Function;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -20,13 +22,8 @@ import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.util.*;
 
-import java.util.function.Predicate;
-import java.util.function.Function;
-
 import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
 import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
-
-
 
 
 /**
@@ -186,7 +183,7 @@ public abstract class GrammaticalStructure implements Serializable {
     }
     // add dependencies, using heads
     this.puncFilter = puncFilter;
-    NoPunctFilter puncDepFilter = new NoPunctFilter(puncFilter);
+    // NoPunctFilter puncDepFilter = new NoPunctFilter(puncFilter);
     NoPunctTypedDependencyFilter puncTypedDepFilter = new NoPunctTypedDependencyFilter(puncFilter);
 
     DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph = new DirectedMultiGraph<TreeGraphNode, GrammaticalRelation>();
@@ -1029,14 +1026,14 @@ public abstract class GrammaticalStructure implements Serializable {
     }
 
     if (conllx) {
-      
+
       List<Tree> leaves = tree.getLeaves();
       Tree uposTree = UniversalPOSMapper.mapTree(tree);
       List<Label> uposLabels = uposTree.preTerminalYield();
       String[] words = new String[leaves.size()];
       String[] pos = new String[leaves.size()];
       String[] upos = new String[leaves.size()];
-      
+
       String[] relns = new String[leaves.size()];
       int[] govs = new int[leaves.size()];
 
@@ -1194,7 +1191,7 @@ public abstract class GrammaticalStructure implements Serializable {
 
     // Create a node outside the tree useful for root dependencies;
     // we want to keep those if they were stored in the conll file
-    
+
     CoreLabel rootLabel = new CoreLabel();
     rootLabel.setValue("ROOT");
     rootLabel.setWord("ROOT");
@@ -1289,9 +1286,7 @@ public abstract class GrammaticalStructure implements Serializable {
     } else {
       try {
         altDepReader = altDepReaderClass.getConstructor(String[].class).newInstance((Object) depReaderArgs);
-      } catch (IllegalArgumentException e) {
-        throw new RuntimeException(e);
-      } catch (SecurityException e) {
+      } catch (IllegalArgumentException | SecurityException | InvocationTargetException e) {
         throw new RuntimeException(e);
       } catch (InstantiationException e) {
         e.printStackTrace();
@@ -1299,8 +1294,6 @@ public abstract class GrammaticalStructure implements Serializable {
       } catch (IllegalAccessException e) {
         System.err.println(depReaderArgs.length + " argument constructor to " + altDepReaderName + " is not public.");
         return null;
-      } catch (InvocationTargetException e) {
-        throw new RuntimeException(e);
       } catch (NoSuchMethodException e) {
         System.err.println("String arguments constructor to " + altDepReaderName + " does not exist.");
         return null;
@@ -1722,8 +1715,7 @@ public abstract class GrammaticalStructure implements Serializable {
         // System.err.println(t);
       }
 
-      if (test) {// print the grammatical structure, the basic, collapsed and
-        // CCprocessed
+      if (test) { // print the grammatical structure, the basic, collapsed and CCprocessed
 
         System.out.println("============= parse tree =======================");
         tree.pennPrint();
@@ -1732,11 +1724,26 @@ public abstract class GrammaticalStructure implements Serializable {
         System.out.println("------------- GrammaticalStructure -------------");
         System.out.println(gs);
 
+        boolean allConnected = true;
+        boolean connected;
+        Collection<TypedDependency> bungRoots = null;
         System.out.println("------------- basic dependencies ---------------");
-        System.out.println(StringUtils.join(gs.typedDependencies(Extras.NONE), "\n"));
+        List<TypedDependency> gsb = gs.typedDependencies(Extras.NONE);
+        System.out.println(StringUtils.join(gsb, "\n"));
+        connected = GrammaticalStructure.isConnected(gsb);
+        if ( ! connected && bungRoots == null) {
+          bungRoots = GrammaticalStructure.getRoots(gsb);
+        }
+        allConnected = connected && allConnected;
 
         System.out.println("------------- non-collapsed dependencies (basic + extra) ---------------");
-        System.out.println(StringUtils.join(gs.typedDependencies(Extras.MAXIMAL), "\n"));
+        List<TypedDependency> gse = gs.typedDependencies(Extras.MAXIMAL);
+        System.out.println(StringUtils.join(gse, "\n"));
+        connected = GrammaticalStructure.isConnected(gse);
+        if ( ! connected && bungRoots == null) {
+          bungRoots = GrammaticalStructure.getRoots(gse);
+        }
+        allConnected = connected && allConnected;
 
         System.out.println("------------- collapsed dependencies -----------");
         System.out.println(StringUtils.join(gs.typedDependenciesCollapsed(Extras.MAXIMAL), "\n"));
@@ -1745,14 +1752,20 @@ public abstract class GrammaticalStructure implements Serializable {
         System.out.println(StringUtils.join(gs.typedDependenciesCollapsedTree(), "\n"));
 
         System.out.println("------------- CCprocessed dependencies --------");
-        System.out.println(StringUtils.join(gs.typedDependenciesCCprocessed(Extras.MAXIMAL), "\n"));
+        List<TypedDependency> gscc = gs.typedDependenciesCollapsed(Extras.MAXIMAL);
+        System.out.println(StringUtils.join(gscc, "\n"));
 
         System.out.println("-----------------------------------------------");
-        // connectivity test
-        boolean connected = GrammaticalStructure.isConnected(gs.typedDependenciesCollapsed(Extras.MAXIMAL));
-        System.out.println("collapsed dependencies form a connected graph: " + connected);
-        if (!connected) {
-          System.out.println("possible offending nodes: " + GrammaticalStructure.getRoots(gs.typedDependenciesCollapsed(Extras.MAXIMAL)));
+        // connectivity tests
+        connected = GrammaticalStructure.isConnected(gscc);
+        if ( ! connected && bungRoots == null) {
+          bungRoots = GrammaticalStructure.getRoots(gscc);
+        }
+        allConnected = connected && allConnected;
+        if (allConnected) {
+          System.out.println("dependencies form connected graphs.");
+        } else {
+          System.out.println("dependency graph NOT connected! possible offending nodes: " + bungRoots);
         }
 
         // test for collapsed dependencies being a tree:

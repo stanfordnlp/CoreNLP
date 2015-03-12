@@ -488,7 +488,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
     boolean printSentenceLengths = PropertiesUtils.getBool(options,"printSentenceLengths", false);
     String xmlElementDelimiter = options.getProperty("xml", null);
     DocType docType = xmlElementDelimiter == null ? DocType.Plain : DocType.XML;
-    String sentenceDelimiter = options.containsKey("-noTokenization") ? System.getProperty("line.separator") : null;
+    String sentenceDelimiter = options.containsKey("noTokenization") ? System.getProperty("line.separator") : null;
     String tagDelimiter = options.getProperty("tag", null);
     String[] sentenceDelims = null;
 

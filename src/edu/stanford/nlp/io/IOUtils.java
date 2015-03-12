@@ -17,7 +17,9 @@ import java.util.zip.GZIPOutputStream;
 /**
  * Helper Class for various I/O related things.
  *
- * @author Kayur Patel, Teg Grenager
+ * @author Kayur Patel
+ * @author Teg Grenager
+ * @author Christopher Manning
  */
 
 public class IOUtils {

@@ -28,6 +28,7 @@
 
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.tregex.Macros;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
@@ -413,26 +414,28 @@ public class Tsurgeon {
    * of tsurgeon operations into a pair.
    *
    * @param reader Reader to read patterns from
-   * @return A pair of a tregex and tsurgeon pattern read from a file, or <code>null</code>
-   *    when the operations in the Reader have been exhausted
+   * @return A pair of a tregex and tsurgeon pattern read from a file, or {@code null}
+   *    when the operations present in the Reader have been exhausted
    * @throws IOException If any IO problem
    */
   public static Pair<TregexPattern, TsurgeonPattern> getOperationFromReader(BufferedReader reader, TregexPatternCompiler compiler) throws IOException {
     String patternString = getTregexPatternFromReader(reader);
     // System.err.println("Read tregex pattern: " + patternString);
-    if ("".equals(patternString)) {
+    if (patternString != null && patternString.isEmpty()) {
       return null;
     }
     TregexPattern matchPattern = compiler.compile(patternString);
 
     TsurgeonPattern collectedPattern = getTsurgeonOperationsFromReader(reader);
-    return new Pair<TregexPattern,TsurgeonPattern>(matchPattern,collectedPattern);
+    return new Pair<>(matchPattern,collectedPattern);
   }
 
   /**
    * Assumes that we are at the beginning of a tsurgeon script file and gets the string for the
-   * tregex pattern leading the file
-   * @return tregex pattern string
+   * tregex pattern leading the file.
+   *
+   * @return tregex pattern string. Maybe be empty, never null
+   * @throws IOException If the usual kinds of IO errors occur
    */
   public static String getTregexPatternFromReader(BufferedReader reader) throws IOException {
     StringBuilder matchString = new StringBuilder();
@@ -453,7 +456,7 @@ public class Tsurgeon {
    * Assumes the given reader has only tsurgeon operations (not a tregex pattern), and parses
    * these out, collecting them into one operation.  Stops on a whitespace line.
    *
-   * @throws IOException
+   * @throws IOException If the usual kinds of IO errors occur
    */
   public static TsurgeonPattern getTsurgeonOperationsFromReader(BufferedReader reader) throws IOException {
     List<TsurgeonPattern> operations = new ArrayList<TsurgeonPattern>();
@@ -469,8 +472,9 @@ public class Tsurgeon {
       operations.add(parseOperation(thisLine));
     }
 
-    if (operations.size() == 0)
+    if (operations.isEmpty()) {
       throw new TsurgeonParseException("No Tsurgeon operation provided.");
+    }
 
     return collectOperations(operations);
   }
@@ -509,13 +513,28 @@ public class Tsurgeon {
    * Parses a tsurgeon script file and compiles all operations in the file into a list
    * of pairs of tregex and tsurgeon patterns.
    *
-   * @param filename file containing the tsurgeon script
+   * @param filename A file, classpath resource or URL (perhaps gzipped) containing the tsurgeon script
    * @return A pair of a tregex and tsurgeon pattern read from a file
    * @throws IOException If there is any I/O problem
    */
   public static List<Pair<TregexPattern, TsurgeonPattern>> getOperationsFromFile(String filename, String encoding, TregexPatternCompiler compiler) throws IOException {
+    BufferedReader reader = IOUtils.readerFromString(filename, encoding);
+    List<Pair<TregexPattern,TsurgeonPattern>> operations = getOperationsFromReader(reader, compiler);
+    reader.close();
+    return operations;
+  }
+
+
+  /**
+   * Parses and compiles all operations from a BufferedReader into a list
+   * of pairs of tregex and tsurgeon patterns.
+   *
+   * @param reader A BufferedReader to read the operations
+   * @return A pair of a tregex and tsurgeon pattern read from reader
+   * @throws IOException If there is any I/O problem
+   */
+  public static List<Pair<TregexPattern, TsurgeonPattern>> getOperationsFromReader(BufferedReader reader, TregexPatternCompiler compiler) throws IOException {
     List<Pair<TregexPattern,TsurgeonPattern>> operations = new ArrayList<Pair<TregexPattern, TsurgeonPattern>>();
-    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), encoding));
     for ( ; ; ) {
       Pair<TregexPattern, TsurgeonPattern> operation = getOperationFromReader(reader, compiler);
       if (operation == null) {
@@ -523,9 +542,10 @@ public class Tsurgeon {
       }
       operations.add(operation);
     }
-    reader.close();
     return operations;
   }
+
+
 
   /**
    * Applies {#processPattern} to a collection of trees.
@@ -606,10 +626,7 @@ public class Tsurgeon {
       TsurgeonParser parser =
         new TsurgeonParser(new StringReader(operationString + "\n"));
       return parser.Root();
-    } catch(ParseException e) {
-      throw new TsurgeonParseException("Error parsing Tsurgeon expression: " +
-                                       operationString, e);
-    } catch(TokenMgrError e) {
+    } catch (ParseException | TokenMgrError e) {
       throw new TsurgeonParseException("Error parsing Tsurgeon expression: " +
                                        operationString, e);
     }
@@ -620,8 +637,9 @@ public class Tsurgeon {
    * across a sequence of operations.  For example, if you want to insert a named node and then coindex it with another node,
    * you will need to collect the insertion and coindexation operations into a single TsurgeonPattern so that tsurgeon is aware
    * of the name of the new node and coindexation becomes possible.
+   *
    * @param patterns a list of {@link TsurgeonPattern} operations that you want to collect together into a single compound operation
-   * @return a new {@link TsurgeonPattern} that performs all the operations in the sequence of the <code>patterns</code> argument
+   * @return a new {@link TsurgeonPattern} that performs all the operations in the sequence of the {@code patterns} argument
    */
   public static TsurgeonPattern collectOperations(List<TsurgeonPattern> patterns) {
     return new TsurgeonPatternRoot(patterns.toArray(new TsurgeonPattern[patterns.size()]));

@@ -1116,7 +1116,8 @@ public class SeqClassifierFlags implements Serializable {
           normalizeTimex = true;
         }
       } else if (key.equalsIgnoreCase("goodCoNLL")) {
-        // This was developed for CMMClassifier after the original 2003 CoNLL work. It isn't right for CRFClassifier.
+        // This was developed for CMMClassifier after the original 2003 CoNLL work.
+        // It is for an MEMM.  You shouldn't use it with CRFClassifier.
         if (Boolean.parseBoolean(val)) {
           // featureFactory = "edu.stanford.nlp.ie.NERFeatureFactory";
           readerAndWriter = "edu.stanford.nlp.sequences.CoNLLDocumentReaderAndWriter";
@@ -1148,7 +1149,10 @@ public class SeqClassifierFlags implements Serializable {
           useLastRealWord = true;
           useNextRealWord = true;
           // smooth
-          sigma = 50.0; // increased Aug 2006 from 20; helpful with less features
+          // This was originally 20, but in Aug 2006 increased to 50, because that helped
+          // for English, but actually even smaller than 20 helps for languages like
+          // Spanish, so dropped in 2014 to 5.0.
+          sigma = 5.0;
           // normalize
           normalize = true;
           normalizeTimex = true;
@@ -1159,6 +1163,7 @@ public class SeqClassifierFlags implements Serializable {
           useLemmas = true; // no-op except for German
           usePrevNextLemmas = true; // no-op except for German
           strictGoodCoNLL = true; // don't add some CpC features added later
+          removeStrictGoodCoNLLDuplicates = true; // added in 2014; the duplicated features don't help
           inputEncoding = "iso-8859-1"; // needed for CoNLL German and Spanish files
           // optimization
           useQN = true;

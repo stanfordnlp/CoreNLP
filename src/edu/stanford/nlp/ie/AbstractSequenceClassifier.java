@@ -187,6 +187,10 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     }
   }
 
+  public Set<String> getKnownLCWords() {
+    return knownLCWords;
+  }
+
   /**
    * Makes a DocumentReaderAndWriter based on the flags the CRFClassifier
    * was constructed with.  Will create an instance of the class specified in
@@ -350,6 +354,14 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     };
   }
 
+  /** Takes a list of tokens and provides the K best sequence labelings of these tokens with their scores.
+   *
+   *  @param doc The List of tokens
+   *  @param answerField The key for each token into which the label for the token will be written
+   *  @param k The number of best sequence labelings to generate
+   *  @return A Counter where each key is a List of tokens with labels written in the answerField and its value
+   *          is the score (conditional probability) assigned to this labeling of the sequence.
+   */
   public Counter<List<IN>> classifyKBest(List<IN> doc, Class<? extends CoreAnnotation<String>> answerField, int k) {
 
     if (doc.isEmpty()) {
@@ -1097,7 +1109,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     for (List<IN> doc: documents) {
       numWords += doc.size();
       numDocs++;
-      if (flags.multiThreadClassifier != 0) {
+      if (wrapper != null) {
         wrapper.put(doc);
         while (wrapper.peek()) {
           List<IN> results = wrapper.poll();
@@ -1110,7 +1122,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
         resultsCounted = resultsCounted && countResults(results, entityTP, entityFP, entityFN);
       }
     }
-    if (flags.multiThreadClassifier != 0) {
+    if (wrapper != null) {
       wrapper.join();
       while (wrapper.peek()) {
         List<IN> results = wrapper.poll();
@@ -1247,23 +1259,16 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
                               Counter<String> entityFP,
                               Counter<String> entityFN) {
     String bg = (flags.evaluateBackground ? null : flags.backgroundSymbol);
-    if (flags.entitySubclassification.equalsIgnoreCase("iob2")) {
-      bg = flags.backgroundSymbol;
-      return countResultsIOB2(doc, entityTP, entityFP, entityFN, bg);
-    } else if (flags.iobTags) {
-      bg = flags.backgroundSymbol;
-      return countResultsIOB(doc, entityTP, entityFP, entityFN, bg);
-    } else if (flags.sighanPostProcessing) {
+    if (flags.sighanPostProcessing) {
       // TODO: this is extremely indicative of being a Chinese Segmenter,
       // but it would still be better to have something more concrete
       return countResultsSegmenter(doc, entityTP, entityFP, entityFN);
-    } else {
-      return countResults(doc, entityTP, entityFP, entityFN, bg);
     }
+    return IOBUtils.countEntityResults(doc, entityTP, entityFP, entityFN, bg);
   }
 
   // TODO: could make this a parameter for the model
-  public static final String CUT_LABEL = "Cut";
+  private static final String CUT_LABEL = "Cut";
 
   public static boolean countResultsSegmenter(List<? extends CoreMap> doc,
                                               Counter<String> entityTP,
@@ -1290,268 +1295,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
 
-  public static boolean countResultsIOB2(List<? extends CoreMap> doc,
-                                         Counter<String> entityTP,
-                                         Counter<String> entityFP,
-                                         Counter<String> entityFN,
-                                         String background) {
-    boolean entityCorrect = true;
-    // the annotations
-    String previousGold = background;
-    String previousGuess = background;
-    // the part after the I- or B- in the annotation
-    String previousGoldEntity = "";
-    String previousGuessEntity = "";
-
-    for (CoreMap word : doc) {
-      String gold = word.get(CoreAnnotations.GoldAnswerAnnotation.class);
-      String guess = word.get(CoreAnnotations.AnswerAnnotation.class);
-      String goldEntity = (!gold.equals(background)) ? gold.substring(2) : "";
-      String guessEntity = (!guess.equals(background)) ? guess.substring(2) : "";
-
-      //System.out.println(gold + " (" + goldEntity + ") ; " + guess + " (" + guessEntity + ")");
-
-      boolean newGold = (!gold.equals(background) &&
-                         (!goldEntity.equals(previousGoldEntity)) || gold.startsWith("B-"));
-      boolean newGuess = (!guess.equals(background) &&
-                          (!guessEntity.equals(previousGuessEntity)) || guess.startsWith("B-"));
-      boolean goldEnded = (!previousGold.equals(background) &&
-                           (gold.startsWith("B-") || !goldEntity.equals(previousGoldEntity)));
-      boolean guessEnded = (!previousGuess.equals(background) &&
-                            (guess.startsWith("B-") || !guessEntity.equals(previousGuessEntity)));
-
-      //System.out.println("  " + newGold + " " + newGuess + " " + goldEnded + " " + guessEnded);
-
-      if (goldEnded && !guessEnded) {
-        entityFN.incrementCount(previousGoldEntity, 1.0);
-        entityCorrect = gold.equals(background) && guess.equals(background);
-      }
-      if (goldEnded && guessEnded) {
-        if (entityCorrect) {
-          entityTP.incrementCount(previousGoldEntity, 1.0);
-        } else {
-          entityFN.incrementCount(previousGoldEntity, 1.0);
-          entityFP.incrementCount(previousGuessEntity, 1.0);
-        }
-        entityCorrect = gold.equals(guess);
-      }
-      if (!goldEnded && guessEnded) {
-        entityCorrect = false;
-        entityFP.incrementCount(previousGuessEntity, 1.0);
-      }
-      // nothing to do if neither gold nor guess have ended
-
-      if (newGold && !newGuess) {
-        entityCorrect = false;
-      }
-      if (newGold && newGuess) {
-        entityCorrect = guessEntity.equals(goldEntity);
-      }
-      if (!newGold && newGuess) {
-        entityCorrect = false;
-      }
-
-      previousGold = gold;
-      previousGuess = guess;
-      previousGoldEntity = goldEntity;
-      previousGuessEntity = guessEntity;
-    }
-
-    // At the end, we need to check the last entity
-    if (!previousGold.equals(background)) {
-      if (entityCorrect) {
-        entityTP.incrementCount(previousGoldEntity, 1.0);
-      } else {
-        entityFN.incrementCount(previousGoldEntity, 1.0);
-      }
-    }
-    if (!previousGuess.equals(background)) {
-      if (!entityCorrect) {
-        entityFP.incrementCount(previousGuessEntity, 1.0);
-      }
-    }
-
-    return true;
-  }
-
-  public static boolean countResultsIOB(List<? extends CoreMap> doc,
-                                        Counter<String> entityTP,
-                                        Counter<String> entityFP,
-                                        Counter<String> entityFN,
-                                        String background) {
-    // first, check that all answers exist and are either O, B-, or I-
-    for (CoreMap line : doc) {
-      String gold = line.get(CoreAnnotations.GoldAnswerAnnotation.class);
-      String guess = line.get(CoreAnnotations.AnswerAnnotation.class);
-
-      if (gold == null) {
-        System.err.println("Blank gold answer");
-        return false;
-      }
-      if (guess == null) {
-        System.err.println("Blank guess");
-        return false;
-      }
-      if (!gold.equals(background) && !gold.startsWith("B-") &&
-          !gold.startsWith("I-")) {
-        System.err.println("Unexpected gold answer " + gold);
-        return false;
-      }
-      if (!guess.equals(background) && !guess.startsWith("B-") &&
-          !guess.startsWith("I-")) {
-        System.err.println("Unexpected guess " + guess);
-        return false;
-      }
-      // todo: verify that gold entities are in a good pattern
-    }
-
-    // We count entities in three categories.  When we have an entity
-    // in the gold, it is a true positive if the start of the entity
-    // is correctly guessed, all of the I- tags are correctly guessed,
-    // and the next guess tag after the last gold I- tag is not the
-    // same I- tag.  Otherwise, it is a false negative.  We then apply
-    // the same logic to the guesses, counting false positives for
-    // anything that did not correctly match the gold.
-    int index = 0;
-    while (index < doc.size()) {
-      index = tallyOneEntityIOB(doc, index,
-                                CoreAnnotations.GoldAnswerAnnotation.class,
-                                CoreAnnotations.AnswerAnnotation.class,
-                                entityTP, entityFN, background);
-    }
-    index = 0;
-    while (index < doc.size()) {
-      index = tallyOneEntityIOB(doc, index,
-                                CoreAnnotations.AnswerAnnotation.class,
-                                CoreAnnotations.GoldAnswerAnnotation.class,
-                                null, entityFP, background);
-    }
-
-    return true;
-  }
-
-  public static int tallyOneEntityIOB(List<? extends CoreMap> doc,
-                                      int index,
-                                      Class<? extends CoreAnnotation<String>> source,
-                                      Class<? extends CoreAnnotation<String>> target,
-                                      Counter<String> positive,
-                                      Counter<String> negative,
-                                      String background) {
-    CoreMap line = doc.get(index);
-    String gold = line.get(source);
-    String guess = line.get(target);
-
-    // uninteresting
-    if (gold.equals(background)) {
-      return index + 1;
-    }
-    String entity = gold.substring(2);
-    boolean correct = gold.equals(guess);
-    ++index;
-    while (index < doc.size()) {
-      line = doc.get(index);
-      gold = line.get(source);
-      guess = line.get(target);
-
-      if (!gold.equals("I-" + entity)) {
-        if (guess.equals("I-" + entity)) {
-          correct = false;
-        }
-        break;
-      }
-      if (!gold.equals(guess)) {
-        correct = false;
-      }
-      ++index;
-    }
-    if (correct) {
-      if (positive != null) {
-        positive.incrementCount(entity, 1.0);
-      }
-    } else {
-      negative.incrementCount(entity, 1.0);
-    }
-    return index;
-  }
-
-  /**
-   * Count the successes and failures of the model on the given document.
-   * Fills numbers in to counters for true positives, false positives,
-   * and false negatives, and also keeps track of the entities seen.
-   * <br>
-   * Returns false if we ever encounter null for gold or guess.
-   */
-  public static boolean countResults(List<? extends CoreMap> doc,
-                                     Counter<String> entityTP,
-                                     Counter<String> entityFP,
-                                     Counter<String> entityFN,
-                                     String background) {
-    int index = 0;
-    int goldIndex = 0, guessIndex = 0;
-    String lastGold = background, lastGuess = background;
-
-    // As we go through the document, there are two events we might be
-    // interested in.  One is when a gold entity ends, and the other
-    // is when a guessed entity ends.  If the gold and guessed
-    // entities end at the same time, started at the same time, and
-    // match entity type, we have a true positive.  Otherwise we
-    // either have a false positive or a false negative.
-    for (CoreMap line : doc) {
-      String gold = line.get(CoreAnnotations.GoldAnswerAnnotation.class);
-      String guess = line.get(CoreAnnotations.AnswerAnnotation.class);
-
-      if (gold == null || guess == null)
-        return false;
-
-      if (lastGold != null && !lastGold.equals(gold) && !lastGold.equals(background)) {
-        if (lastGuess.equals(lastGold) && !lastGuess.equals(guess) && goldIndex == guessIndex) {
-          entityTP.incrementCount(lastGold, 1.0);
-        } else {
-          entityFN.incrementCount(lastGold, 1.0);
-        }
-      }
-
-      if (lastGuess != null && !lastGuess.equals(guess) && !lastGuess.equals(background)) {
-        if (lastGuess.equals(lastGold) && !lastGuess.equals(guess) && goldIndex == guessIndex && !lastGold.equals(gold)) {
-          // correct guesses already tallied
-          // only need to tally false positives
-        } else {
-          entityFP.incrementCount(lastGuess, 1.0);
-        }
-      }
-
-      if (lastGold == null || !lastGold.equals(gold)) {
-        lastGold = gold;
-        goldIndex = index;
-      }
-
-      if (lastGuess == null || !lastGuess.equals(guess)) {
-        lastGuess = guess;
-        guessIndex = index;
-      }
-      ++index;
-    }
-
-    // We also have to account for entities at the very end of the
-    // document, since the above logic only occurs when we see
-    // something that tells us an entity has ended
-    if (lastGold != null && !lastGold.equals(background)) {
-      if (lastGold.equals(lastGuess) && goldIndex == guessIndex) {
-        entityTP.incrementCount(lastGold, 1.0);
-      } else {
-        entityFN.incrementCount(lastGold, 1.0);
-      }
-    }
-    if (lastGuess != null && !lastGuess.equals(background)) {
-      if (lastGold.equals(lastGuess) && goldIndex == guessIndex) {
-        // correct guesses already tallied
-      } else {
-        entityFP.incrementCount(lastGuess, 1.0);
-      }
-    }
-    return true;
-  }
-
   /**
    * Given counters of true positives, false positives, and false
    * negatives, prints out precision, recall, and f1 for each key.
@@ -1572,7 +1315,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     double tp = entityTP.totalCount();
     double fp = entityFP.totalCount();
     double fn = entityFN.totalCount();
-    printedHeader = printPRLine("Totals", tp, fp, fn, printedHeader);
+    printPRLine("Totals", tp, fp, fn, printedHeader);
   }
 
   /**
@@ -1592,7 +1335,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
       System.err.println("         Entity\tP\tR\tF1\tTP\tFP\tFN");
       printedHeader = true;
     }
-    System.err.format("%15s\t%.4f\t%.4f\t%.4f\t%.0f\t%.0f\t%.0f\n",
+    System.err.format("%15s\t%.4f\t%.4f\t%.4f\t%.0f\t%.0f\t%.0f%n",
                       entity, precision, recall, f1,
                       tp, fp, fn);
     return printedHeader;

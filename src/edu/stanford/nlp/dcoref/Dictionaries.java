@@ -258,7 +258,7 @@ public class Dictionaries {
    *  Lines starting with # are ignored
    *  The file is cased but stored in in-memory data structures uncased.
    *  The results are:
-   *  demonyms is a has from each country (etc.) to a set of demonymic Strings;
+   *  demonyms is a hash from each country (etc.) to a set of demonymic Strings;
    *  adjectiveNation is a set of demonymic Strings;
    *  demonymSet has all country (etc.) names and all demonymic Strings.
    */
@@ -372,7 +372,7 @@ public class Dictionaries {
    * Load Bergsma and Lin (2006) gender and number list.
    * <br>
    * The list is converted from raw text and numbers to a serialized
-   * map, which saves quite a bit of time loading.  
+   * map, which saves quite a bit of time loading.
    * See edu.stanford.nlp.dcoref.util.ConvertGenderFile
    */
   private void loadGenderNumber(String file, String neutralWordsFile) {
