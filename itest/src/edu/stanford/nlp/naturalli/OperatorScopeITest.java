@@ -364,9 +364,10 @@ public class OperatorScopeITest {
 
   @Test
   public void fracasSentencesWithAtLeastAFew() {
-//    checkScope("{ At least a few } [ committee members ] [ are from Scandinavia ]");
-//    checkScope("{ At least a few } [ committee members ] [ are from Sweden ]");
-    checkScope("{ At least a few } [ female committee members ] [ are from Scandinavia ]");
+    checkScope("{ At least a few } [ committee members ] [ are from Scandinavia ]");
+    checkScope("{ At least a few } [ committee members ] [ are from Sweden ]");
+    // TODO(gabor) how do any of these work? Why is it only this one that's commented out?
+//    checkScope("{ At least a few } [ female committee members ] [ are from Scandinavia ]");
   }
 
   @Test
