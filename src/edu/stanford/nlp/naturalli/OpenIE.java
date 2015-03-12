@@ -105,11 +105,13 @@ public class OpenIE implements Annotator {
 
   /**
    * The search algorithm, starting with a full sentence and iteratively shortening it to its entailed sentences.
-   * @param sentence The sentence to begin with.
+   * @param sentenceOrNull The sentence to begin with.
    * @param originalTree The original tree of the sentence we are beginning with
+   * @param indexToMaskIndex In case the sentence is longer than 64 words, we can map back just to the raw clause.
    * @return A list of search results, corresponding to shortenings of the sentence.
    */
-  private List<SearchResult> search(List<CoreLabel> sentence, SemanticGraph originalTree) {
+  private List<SearchResult> search(List<CoreLabel> sentenceOrNull, SemanticGraph originalTree,
+                                    byte[] indexToMaskIndex) {
     // Pre-process the tree
     originalTree = new SemanticGraph(originalTree);
     // (remove common determiners)
@@ -176,7 +178,7 @@ public class OpenIE implements Annotator {
       int nextIndex = state.currentIndex + 1;
       while (nextIndex < topologicalVertices.size()) {
         IndexedWord nextWord = topologicalVertices.get(nextIndex);
-        if (  ((state.deletionMask >>> (nextWord.index() - 1)) & 0x1l) == 0) {
+        if (  ((state.deletionMask >>> (indexToMaskIndex[nextWord.index() - 1])) & 0x1l) == 0) {
           fringe.push(new SearchState(state.deletionMask, nextIndex, state.tree, null, state, state.score));
           break;
         } else {
@@ -187,9 +189,15 @@ public class OpenIE implements Annotator {
       // Check if we can delete this subtree
       boolean canDelete = state.tree.getFirstRoot() != currentWord;
       for (SemanticGraphEdge edge : state.tree.incomingEdgeIterable(currentWord)) {
-        // Get token information
-        CoreLabel token = sentence.get(edge.getDependent().index() - 1);
-        Polarity tokenPolarity = token.get(NaturalLogicAnnotations.PolarityAnnotation.class);
+        Polarity tokenPolarity = Polarity.DEFAULT;
+        if (sentenceOrNull != null) {
+          // Get token information
+          CoreLabel token = sentenceOrNull.get(edge.getDependent().index() - 1);
+          tokenPolarity = token.get(NaturalLogicAnnotations.PolarityAnnotation.class);
+          if (tokenPolarity == null) {
+            tokenPolarity = Polarity.DEFAULT;
+          }
+        }
         // Get the relation for this deletion
         NaturalLogicRelation lexicalRelation = NaturalLogicRelation.forDependencyDeletion(edge.getRelation().toString());
         NaturalLogicRelation projectedRelation = tokenPolarity.projectLexicalRelation(lexicalRelation);
@@ -203,9 +211,9 @@ public class OpenIE implements Annotator {
         SemanticGraph treeWithDeletions = new SemanticGraph(state.tree);
         for (IndexedWord vertex : state.tree.descendants(currentWord)) {
           treeWithDeletions.removeVertex(vertex);
-          newMask |= (0x1l << (vertex.index() - 1));
-          assert vertex.index() <= 64;
-          assert ((newMask >>> (vertex.index() - 1)) & 0x1l) == 1;
+          newMask |= (0x1l << (indexToMaskIndex[vertex.index() - 1]));
+          assert indexToMaskIndex[vertex.index() - 1] < 64;
+          assert ((newMask >>> (indexToMaskIndex[vertex.index() - 1])) & 0x1l) == 1;
         }
         SemanticGraph resultTree = new SemanticGraph(treeWithDeletions);
         for (SemanticGraphEdge edge : andsToAdd) {
@@ -235,7 +243,7 @@ public class OpenIE implements Annotator {
         nextIndex = state.currentIndex + 1;
         while (nextIndex < topologicalVertices.size()) {
           IndexedWord nextWord = topologicalVertices.get(nextIndex);
-          if (  ((newMask >>> (nextWord.index() - 1)) & 0x1l) == 0) {
+          if (  ((newMask >>> (indexToMaskIndex[nextWord.index() - 1])) & 0x1l) == 0) {
             assert treeWithDeletions.containsVertex(topologicalVertices.get(nextIndex));
             fringe.push(new SearchState(newMask, nextIndex, treeWithDeletions, null, state, newScore));
             break;
@@ -501,6 +509,38 @@ public class OpenIE implements Annotator {
     }
   }
 
+  public List<RelationTriple> relationInClause(SemanticGraph tree) {
+    if (tree.size() == 0) {
+      if (tree.getRoots().size() == 0) {
+        System.err.println("WARNING: empty tree passed to " + this.getClass().getSimpleName() + ".relationInClause()");
+      }
+      return Collections.emptyList();
+    }
+    // Set the index mapping
+    List<IndexedWord> vertices = tree.vertexListSorted();
+    byte[] indexToMaskIndex = new byte[vertices.get(vertices.size() - 1).index()];
+    byte i = 0;
+    for (IndexedWord vertex : vertices) {
+      indexToMaskIndex[vertex.index() - 1] = i;
+      i += 1;
+    }
+    // Run the search
+    List<SearchResult> results = search(null, tree, indexToMaskIndex);
+    // Process the result
+    List<RelationTriple> triples = new ArrayList<>();
+    Optional<RelationTriple> rootExtraction = RelationTriple.segment(tree, Optional.empty());
+    if (rootExtraction.isPresent()) {
+      triples.add(rootExtraction.get());
+    }
+    for (SearchResult result : results) {
+      SentenceFragment fragment = new SentenceFragment(result.tree, false);
+      Optional<RelationTriple> extraction = RelationTriple.segment(result.tree, Optional.of(result.confidence));
+      if (extraction.isPresent()) {
+        triples.add(extraction.get());
+      }
+    }
+    return triples;
+  }
 
   /**
    * <p>
@@ -537,7 +577,16 @@ public class OpenIE implements Annotator {
       // Add search results
       for (SemanticGraph tree : clauses) {
         if (tree.size() > 0) {
-          List<SearchResult> results = search(tokens, tree);
+          // Set the index mapping
+          byte[] indexToMaskIndex = new byte[sentence.size()];
+          byte i = 0;
+          for (IndexedWord vertex : tree.vertexListSorted()) {
+            indexToMaskIndex[vertex.index() - 1] = i;
+            i += 1;
+          }
+          // Run the search
+          List<SearchResult> results = search(tokens, tree, indexToMaskIndex);
+          // Process the results
           for (SearchResult result : results) {
             SentenceFragment fragment = new SentenceFragment(result.tree, false);
             fragments.add(fragment);

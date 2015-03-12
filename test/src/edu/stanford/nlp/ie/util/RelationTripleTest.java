@@ -247,4 +247,34 @@ public class RelationTripleTest extends TestCase {
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tObama\twas named\t2009 Nobel Peace Prize Laureate", extraction.get().toString());
   }
+
+  public void testPassiveNSubj() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tHRE\t3\tnsubjpass\n" +
+        "2\twas\t3\tauxpass\n" +
+        "3\tfounded\t0\troot\n" +
+        "5\t1991\t3\tprep_in\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tHRE\twas founded in\t1991", extraction.get().toString());
+
+    extraction = mkExtraction(
+        "1\tfounded\t0\troot\n" +
+        "2\tHRE\t1\tnsubjpass\n" +
+        "3\t2003\t1\tprep_in\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tHRE\tfounded in\t2003", extraction.get().toString());
+  }
+
+  // Note[gabor]: I think this might be better suited to be done at clause splitting?
+//  public void testVMod() {
+//    Optional<RelationTriple> extraction = mkExtraction(
+//        "1\tCats\t0\troot\n" +
+//        "3\tplaying\t1\tvmod\n" +
+//        "4\tsand\t3\tprep_in\n"
+//    );
+//    assertTrue("No extraction for sentence!", extraction.isPresent());
+//    assertEquals("1.0\tCats\tplaying in\tsand", extraction.get().toString());
+//  }
 }

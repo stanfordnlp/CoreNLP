@@ -174,13 +174,15 @@ public class RelationTriple implements Comparable<RelationTriple> {
   /** A list of patterns to match relation extractions against */
   private static final List<SemgrexPattern> PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
     // { blue cats play [quietly] with yarn }
-    add(SemgrexPattern.compile("{$}=verb ?>/cop|auxpass/ {}=be >/.subj(pass)?/ {}=subject >/prep/ ({}=prep >/pobj/ {}=object)"));
-    // (w / collapsed dependencies)
+    add(SemgrexPattern.compile("{$}=verb ?>/cop|auxpass/ {}=be >/.subj(pass)?/ {}=subject >/prepc?/ ({}=prep >/pobj/ {}=object)"));
     add(SemgrexPattern.compile("{$}=verb ?>/cop|auxpass/ {}=be >/.subj(pass)?/ {}=subject >/prepc?_.*/=prepEdge {}=object"));
     // { fish like to swim }
     add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >/xcomp/ {}=object"));
     // { cats have tails }
     add(SemgrexPattern.compile("{$}=verb ?>/auxpass/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ {}=object"));
+    // { cats , playing in sand , }
+//    add(SemgrexPattern.compile("{$}=subject >/vmod/ ( {pos:/V.*/}=verb >/prepc?/ ({}=prep >/pobj/ {}=object) )"));
+//    add(SemgrexPattern.compile("{$}=subject >/vmod/ ( {pos:/V.*/}=verb >/prepc?_.*/=prepEdge {}=object )"));
     // { cats are cute  }
     add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop/ {}=verb"));
   }});
