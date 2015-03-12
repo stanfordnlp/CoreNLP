@@ -2,6 +2,7 @@ package edu.stanford.nlp.optimization;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Arrays;
 
 /**
  * Conjugate-gradient implementation based on the code in Numerical
@@ -41,11 +42,7 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
   private static final int resetFrequency = 10;
 
   static double[] copyArray(double[] a) {
-    double[] result = new double[a.length];
-    for (int i = 0; i < a.length; i++) {
-      result[i] = a[i];
-    }
-    return result;
+    return Arrays.copyOf(a, a.length);
   }
 
   //  private static String arrayToString(double[] x) {
@@ -66,7 +63,7 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
     if (num < x.length) {
       sb.append("...");
     }
-    sb.append(")");
+    sb.append(')');
     return sb.toString();
   }
 
@@ -262,9 +259,7 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
     final int ITMAX = 100;
     final double TOL = 1.0e-4;
 
-    boolean ok1, ok2;
-    double d = 0.0, d1, d2, du, e = 0.0;
-    double fu, olde, tol1, tol2, u, u1, u2, xm;
+    double d = 0.0, e = 0.0;
 
     double a = (ax < cx ? ax : cx);
     double b = (ax > cx ? ax : cx);
@@ -279,29 +274,30 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
     double dw = dx;
     for (int iteration = 0; iteration < ITMAX; iteration++) {
       //System.err.println("dbrent "+iteration+" x "+x+" fx "+fx);
-      xm = 0.5 * (a + b);
-      tol1 = TOL * fabs(x); //+ZEPS (was 1e-10);
-      tol2 = 2.0 * tol1;
+      double xm = 0.5 * (a + b);
+      double tol1 = TOL * fabs(x);
+      double tol2 = 2.0 * tol1;
       if (fabs(x - xm) <= (tol2 - 0.5 * (b - a))) {
         if (dbVerbose) {
-          System.err.println("dbrent returning because min is cornered " + a + " (" + function.valueAt(a) + ") ~ " + x + " (" + fx + ") " + b + " (" + function.valueAt(b) + ")");
+          System.err.println("dbrent returning because min is cornered " + a + " (" + function.valueAt(a) + ") ~ " + x + " (" + fx + ") " + b + " (" + function.valueAt(b) + ')');
         }
         return x;
       }
+      double u;
       if (fabs(e) > tol1) {
-        d1 = 2.0 * (b - a);
-        d2 = d1;
+        double d1 = 2.0 * (b - a);
+        double d2 = d1;
         if (dw != dx) {
           d1 = (w - x) * dx / (dx - dw);
         }
         if (dv != dx) {
           d2 = (v - x) * dx / (dx - dv);
         }
-        u1 = x + d1;
-        u2 = x + d2;
-        ok1 = ((a - u1) * (u1 - b) > 0.0 && dx * d1 <= 0.0);
-        ok2 = ((a - u2) * (u2 - b) > 0.0 && dx * d2 <= 0.0);
-        olde = e;
+        double u1 = x + d1;
+        double u2 = x + d2;
+        boolean ok1 = ((a - u1) * (u1 - b) > 0.0 && dx * d1 <= 0.0);
+        boolean ok2 = ((a - u2) * (u2 - b) > 0.0 && dx * d2 <= 0.0);
+        double olde = e;
         e = d;
         if (ok1 || ok2) {
           if (ok1 && ok2) {
@@ -328,6 +324,7 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
         e = (dx >= 0.0 ? a - x : b - x);
         d = 0.5 * e;
       }
+      double fu;
       if (fabs(d) >= tol1) {
         u = x + d;
         fu = function.valueAt(u);
@@ -341,7 +338,7 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
           return x;
         }
       }
-      du = function.derivativeAt(u);
+      double du = function.derivativeAt(u);
       if (fu <= fx) {
         if (u >= x) {
           a = x;
@@ -428,8 +425,8 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
       System.err.println("Bad bracket order!");
     }
     if (verbose) {
-      System.err.println("Bracketing found: " + ax + " " + xx + " " + bx);
-      System.err.println("Bracketing found: " + oneDim.valueAt(ax) + " " + oneDim.valueAt(xx) + " " + oneDim.valueAt(bx));
+      System.err.println("Bracketing found: " + ax + ' ' + xx + ' ' + bx);
+      System.err.println("Bracketing found: " + oneDim.valueAt(ax) + ' ' + oneDim.valueAt(xx) + ' ' + oneDim.valueAt(bx));
       //System.err.println("Bracketing found: "+arrayToString(oneDim.vectorOf(ax),3)+" "+arrayToString(oneDim.vectorOf(xx),3)+" "+arrayToString(oneDim.vectorOf(bx),3));
     }
     // find the extreme pt
@@ -445,22 +442,24 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
     return oneDim.vectorOf(xmin);
   }
 
+  @Override
   public double[] minimize(DiffFunction function, double functionTolerance, double[] initial) {
     return minimize(function, functionTolerance, initial, ITMAX);
   }
 
-  public double[] minimize(DiffFunction dfunction, double functionTolerance, double[] initial, int maxIterations) {
+  @Override
+  public double[] minimize(DiffFunction dFunction, double functionTolerance, double[] initial, int maxIterations) {
     // check for derivatives
 
-    int dimension = dfunction.domainDimension();
+    int dimension = dFunction.domainDimension();
     //lastXx = 1.0;
 
     // evaluate function
-    double fp = dfunction.valueAt(initial);
+    double fp = dFunction.valueAt(initial);
     if (verbose) {
       System.err.println("Initial: " + fp);
     }
-    double[] xi = copyArray(dfunction.derivativeAt(initial));
+    double[] xi = copyArray(dFunction.derivativeAt(initial));
     if (verbose) {
       System.err.println("Initial at: " + arrayToString(initial, numToPrint));
       System.err.println("Initial deriv: " + arrayToString(xi, numToPrint));
@@ -482,7 +481,7 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
     for (int iterations = 1; iterations < maxIterations; iterations++) {
 
       if (!silent) {
-        System.err.print("Iter " + iterations + " ");
+        System.err.print("Iter " + iterations + ' ');
       }
       // do a line min along descent direction
       //System.err.println("Minimizing from ("+p[0]+","+p[1]+") along ("+xi[0]+","+xi[1]+")\n");
@@ -490,8 +489,8 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
         System.err.println("Minimizing along " + arrayToString(xi, numToPrint));
       }
       //System.err.println("Current is "+fp);
-      double[] p2 = lineMinimize(dfunction, p, xi);
-      double fp2 = dfunction.valueAt(p2);
+      double[] p2 = lineMinimize(dFunction, p, xi);
+      double fp2 = dFunction.valueAt(p2);
       //System.err.println("Result is "+fp2+" (from "+fp+") at ("+p2[0]+","+p2[1]+")\n");
       if (verbose) {
         System.err.println("Result is " + fp2 + " after " + iterations);
@@ -528,7 +527,7 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
       }
       fp = fp2;
       // find the new gradient
-      xi = copyArray(dfunction.derivativeAt(p));
+      xi = copyArray(dFunction.derivativeAt(p));
       //System.err.print("mx "+arrayMax(xi)+" mn "+arrayMin(xi));
 
       if (!simpleGDStep && !simpleGD && (iterations % resetFrequency != 0)) {

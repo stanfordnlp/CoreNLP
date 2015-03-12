@@ -180,14 +180,14 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
           if (fields[0].equals("splitCompounds")) {
             splitCompoundOption = true;
           } else {
-            lexerProperties.put(option, "true");
+            lexerProperties.setProperty(option, "true");
           }
 
         } else if (fields.length == 2) {
           if (fields[0].equals("splitCompounds")) {
             splitCompoundOption = Boolean.valueOf(fields[1]);
           } else {
-            lexerProperties.put(fields[0], fields[1]);
+            lexerProperties.setProperty(fields[0], fields[1]);
           }
 
         } else {
