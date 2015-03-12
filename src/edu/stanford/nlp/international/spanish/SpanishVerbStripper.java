@@ -91,9 +91,9 @@ public final class SpanishVerbStripper implements Serializable {
     } catch (UnsupportedEncodingException e) {
       e.printStackTrace();
     } catch (FileNotFoundException e) {
-      throw new RuntimeException("Could not load Spanish data file " + dictPath);
+      System.err.println("Could not load Spanish data file " + dictPath);
     } catch (IOException e) {
-      throw new RuntimeException("Could not load Spanish data file " + dictPath);
+      System.err.println("Could not load Spanish data file " + dictPath);
     }
   }
 

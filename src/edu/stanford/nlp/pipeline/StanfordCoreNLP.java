@@ -347,6 +347,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool.register(STANFORD_SENTIMENT, AnnotatorFactories.sentiment(properties, annotatorImplementation));
     pool.register(STANFORD_COLUMN_DATA_CLASSIFIER,AnnotatorFactories.columnDataClassifier(properties,annotatorImplementation));
     pool.register(STANFORD_DEPENDENCIES, AnnotatorFactories.dependencies(properties, annotatorImplementation));
+    pool.register(STANFORD_NATLOG, AnnotatorFactories.natlog(properties, annotatorImplementation));
+    pool.register(STANFORD_OPENIE, AnnotatorFactories.openie(properties, annotatorImplementation));
     // Add more annotators here
 
     // add annotators loaded via reflection from classnames specified
@@ -734,6 +736,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     String defaultExtension;
     switch (outputFormat) {
       case XML: defaultExtension = ".xml"; break;
+      case JSON: defaultExtension = ".json"; break;
       case TEXT: defaultExtension = ".out"; break;
       case SERIALIZED: defaultExtension = ".ser.gz"; break;
       default: throw new IllegalArgumentException("Unknown output format " + outputFormat);

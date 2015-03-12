@@ -1,0 +1,349 @@
+package edu.stanford.nlp.naturalli;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * The catalog of the seven Natural Logic relations.
+ * Set-theoretically, if we assume A and B are two sets (e.g., denotations),
+ * and D is the universe of discourse,
+ * then the relations between A and B are defined as follows:
+ *
+ * <ul>
+ *   <li>Equivalence: A = B</li>
+ *   <li>Forward entailment: A \\subset B</li>
+ *   <li>Reverse entailment: A \\supset B</li>
+ *   <li>Negation: A \\intersect B = \\empty \\land A \\union B = D </li>
+ *   <li>Alternation: A \\intersect B = \\empty </li>
+ *   <li>Cover: A \\union B = D </li>
+ * </ul>
+ *
+ * @author Gabor Angeli
+ */
+public enum NaturalLogicRelation {
+  EQUIVALENT(0, true, false),
+  FORWARD_ENTAILMENT(1, true, false),
+  REVERSE_ENTAILMENT(2, false, false),
+  NEGATION(3, false, true),
+  ALTERNATION(4, false, true),
+  COVER(5, false, false),
+  INDEPENDENCE(6, false, false);
+
+  public final int fixedIndex;
+  public final boolean isEntailed, isNegated;
+
+  NaturalLogicRelation(int fixedIndex, boolean isEntailed, boolean isNegated) {
+    this.fixedIndex = fixedIndex;
+    this.isEntailed = isEntailed;
+    this.isNegated = isNegated;
+  }
+
+  protected static NaturalLogicRelation byFixedIndex(int index) {
+    switch (index) {
+      case 0: return EQUIVALENT;
+      case 1: return FORWARD_ENTAILMENT;
+      case 2: return REVERSE_ENTAILMENT;
+      case 3: return NEGATION;
+      case 4: return ALTERNATION;
+      case 5: return COVER;
+      case 6: return INDEPENDENCE;
+      default: throw new IllegalArgumentException("Unknown index for Natural Logic relation: " + index);
+    }
+  }
+
+  /**
+   * The MacCartney "join table" -- this determines the transitivity of entailment if we chain two relations together.
+   * These should already be projected up through the sentence, so that the relations being joined are relations between
+   * <i>sentences</i> rather than relations between <i>lexical items</i> (see {@link Polarity#projectLexicalRelation(NaturalLogicRelation)},
+   * set by {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotator} using the {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.PolarityAnnotation}).
+   * @param other The relation to join this relation with.
+   * @return The new joined relation.
+   */
+  public NaturalLogicRelation join(NaturalLogicRelation other) {
+    switch (this) {
+      case EQUIVALENT:
+        return other;
+      case FORWARD_ENTAILMENT:
+        switch (other) {
+          case EQUIVALENT:
+          case FORWARD_ENTAILMENT:
+            return FORWARD_ENTAILMENT;
+          case NEGATION:
+          case ALTERNATION:
+            return COVER;
+          case REVERSE_ENTAILMENT:
+          case COVER:
+          case INDEPENDENCE:
+            return INDEPENDENCE;
+        }
+      case REVERSE_ENTAILMENT:
+        switch (other) {
+          case EQUIVALENT:
+          case REVERSE_ENTAILMENT:
+            return REVERSE_ENTAILMENT;
+          case NEGATION:
+          case COVER:
+            return COVER;
+          case FORWARD_ENTAILMENT:
+          case ALTERNATION:
+          case INDEPENDENCE:
+            return INDEPENDENCE;
+        }
+      case NEGATION:
+        switch (other) {
+          case EQUIVALENT:
+            return NEGATION;
+          case FORWARD_ENTAILMENT:
+            return COVER;
+          case REVERSE_ENTAILMENT:
+            return ALTERNATION;
+          case NEGATION:
+            return EQUIVALENT;
+          case ALTERNATION:
+            return REVERSE_ENTAILMENT;
+          case COVER:
+            return FORWARD_ENTAILMENT;
+          case INDEPENDENCE:
+            return INDEPENDENCE;
+        }
+      case ALTERNATION:
+        switch (other) {
+          case EQUIVALENT:
+          case REVERSE_ENTAILMENT:
+            return ALTERNATION;
+          case NEGATION:
+          case COVER:
+            return FORWARD_ENTAILMENT;
+          case FORWARD_ENTAILMENT:
+          case ALTERNATION:
+          case INDEPENDENCE:
+            return INDEPENDENCE;
+        }
+      case COVER:
+        switch (other) {
+          case EQUIVALENT:
+          case FORWARD_ENTAILMENT:
+            return COVER;
+          case NEGATION:
+          case ALTERNATION:
+            return REVERSE_ENTAILMENT;
+          case REVERSE_ENTAILMENT:
+          case COVER:
+          case INDEPENDENCE:
+            return INDEPENDENCE;
+        }
+      case INDEPENDENCE:
+        return INDEPENDENCE;
+    }
+    throw new IllegalStateException("[should be impossible]: Incomplete join table for " + this + " joined with " + other);
+  }
+
+  private static final Map<String, NaturalLogicRelation> insertArcToNaturalLogicRelation = Collections.unmodifiableMap(new HashMap<String, NaturalLogicRelation>() {{
+    put("acomp", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("advcl", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("advmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("amod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("appos", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("aux", NaturalLogicRelation.INDEPENDENCE);  // he left -/-> he should leave
+    put("auxpass", NaturalLogicRelation.INDEPENDENCE);  // some cat adopts -/-> some cat got adopted
+    put("cc", NaturalLogicRelation.REVERSE_ENTAILMENT);  // match dep_conj
+    put("ccomp", NaturalLogicRelation.INDEPENDENCE);  // interesting project here... "he said x" -> "x"?
+    put("conj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // match dep_cc
+    put("cop", NaturalLogicRelation.INDEPENDENCE);  //
+    put("csubj", NaturalLogicRelation.INDEPENDENCE);  // don't drop subjects.
+    put("csubjpass", NaturalLogicRelation.INDEPENDENCE);  // as above
+    put("dep", NaturalLogicRelation.INDEPENDENCE);  //
+    put("det", NaturalLogicRelation.EQUIVALENT);  //
+    put("discourse", NaturalLogicRelation.EQUIVALENT);  //
+    put("dobj", NaturalLogicRelation.INDEPENDENCE);  // don't drop objects.
+    put("expl", NaturalLogicRelation.EQUIVALENT);  // though we shouldn't see this...
+    put("goeswith", NaturalLogicRelation.EQUIVALENT);  // also shouldn't see this
+    put("iobj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // she gave me a raise -> she gave a raise
+    put("mark", NaturalLogicRelation.INDEPENDENCE);  //
+    put("mwe", NaturalLogicRelation.INDEPENDENCE);  // shouldn't see this
+    put("neg", NaturalLogicRelation.NEGATION);  //
+    put("nn", NaturalLogicRelation.INDEPENDENCE);  //
+    put("npadvmod", NaturalLogicRelation.INDEPENDENCE);  // not sure about this one
+    put("nsubj", NaturalLogicRelation.INDEPENDENCE);  //
+    put("nsubjpass", NaturalLogicRelation.INDEPENDENCE);  //
+    put("num", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("number", NaturalLogicRelation.INDEPENDENCE);  //
+    put("parataxis", NaturalLogicRelation.INDEPENDENCE);  // or, reverse?
+    put("pcomp", NaturalLogicRelation.INDEPENDENCE);  // though, not so in collapsed dependencies
+    put("pobj", NaturalLogicRelation.INDEPENDENCE);  // must delete whole preposition
+    put("poss", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("posseive", NaturalLogicRelation.INDEPENDENCE);  // see dep_poss
+    put("preconj", NaturalLogicRelation.INDEPENDENCE);  // forbidden to see this
+    put("predet", NaturalLogicRelation.INDEPENDENCE);  // forbidden to see this
+    put("prep", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prt", NaturalLogicRelation.INDEPENDENCE);  //
+    put("punct", NaturalLogicRelation.EQUIVALENT);  //
+    put("quantmod", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("rcmod", NaturalLogicRelation.FORWARD_ENTAILMENT);  // "there are great tennors --rcmod--> who are modest"
+    put("root", NaturalLogicRelation.INDEPENDENCE);  // err.. never delete
+    put("tmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("vmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("xcomp", NaturalLogicRelation.INDEPENDENCE);  //
+    put("conj_and", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj_or", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("prep_aboard", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_about", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_above", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_across", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_after", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_against", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_along", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_amid", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_among", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_anti", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_around", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_as", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_at", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_before", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_behind", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_below", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_beneath", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_beside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_besides", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_between", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_beyond", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_but", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_by", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_concerning", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_considering", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_despite", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_down", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_during", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_except", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_excepting", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_excluding", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_following", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_in", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_inside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_into", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_like", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_minus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_near", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_off", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_onto", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_opposite", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_outside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_over", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_past", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_per", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_plus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_regarding", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_round", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_save", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_since", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_than", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_through", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_toward", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_towards", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_under", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_underneath", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_unlike", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_until", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_up", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_upon", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_versus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_via", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_within", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_without", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_according_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_as_per", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_compared_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_instead_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_preparatory_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_across_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_as_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_compared_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_irrespective_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_previous_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_ahead_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_aside_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_due_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_next_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_prior_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_along_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_away_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_depending_on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_near_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_pursuant_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_alongside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_based_on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_except_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_off_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_regardless_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_apart_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_because_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_exclusive_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_out_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_subsequent_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_as_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_close_by", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_contrary_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_outside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_such_as", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_as_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_close_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_followed_by", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_owing_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_thanks_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_as_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_contrary_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_inside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_preliminary_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_together_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_by_means_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_in_case_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_in_place_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_on_behalf_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_with_respect_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_in_accordance_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_in_front_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_in_spite_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_on_top_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_in_addition_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_in_lieu_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_on_account_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_with_regard_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+  }});
+
+  /**
+   * Returns the natural logic relation corresponding to the given dependency arc being inserted into a sentence.
+   */
+  public static NaturalLogicRelation forDependencyInsertion(String dependencyLabel) {
+    NaturalLogicRelation rel = insertArcToNaturalLogicRelation.get(dependencyLabel.toLowerCase());
+    if (rel != null) {
+      return rel;
+    } else {
+      throw new IllegalArgumentException("Unknown dependency arc label: " + dependencyLabel);
+    }
+  }
+
+  /**
+   * Returns the natural logic relation corresponding to the given dependency arc being deleted from a sentence.
+   */
+  public static NaturalLogicRelation forDependencyDeletion(String dependencyLabel) {
+    NaturalLogicRelation rel = forDependencyInsertion(dependencyLabel);
+    switch (rel) {
+      case EQUIVALENT: return EQUIVALENT;
+      case FORWARD_ENTAILMENT: return REVERSE_ENTAILMENT;
+      case REVERSE_ENTAILMENT: return FORWARD_ENTAILMENT;
+      case NEGATION: return NEGATION;
+      case ALTERNATION: return COVER;
+      case COVER: return ALTERNATION;
+      case INDEPENDENCE: return INDEPENDENCE;
+      default:
+        throw new IllegalStateException("Unhandled natural logic relation: " + rel);
+    }
+  }
+}

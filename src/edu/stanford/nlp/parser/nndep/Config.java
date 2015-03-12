@@ -233,7 +233,6 @@ public class Config
       if (l.name().equalsIgnoreCase(languageStr))
         return l;
     }
-
     return null;
   }
 

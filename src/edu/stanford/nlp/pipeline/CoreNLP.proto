@@ -70,29 +70,33 @@ message Sentence {
 //
 message Token {
   // Fields set by the default annotators [new CoreNLP(new Properties())]
-  required string word            = 1;    // the word's gloss (post-tokenization)
-  optional string pos             = 2;    // The word's part of speech tag
-  optional string value           = 3;    // The word's 'value', (e.g., parse tree node)
-  optional string category        = 4;    // The word's 'category' (e.g., parse tree node)
-  optional string before          = 5;    // The whitespace/xml before the token
-  optional string after           = 6;    // The whitespace/xml after the token
-  optional string originalText    = 7;    // The original text for this token
-  optional string ner             = 8;    // The word's NER tag
-  optional string normalizedNER   = 9;    // The word's normalized NER tag
-  optional string lemma           = 10;   // The word's lemma
-  optional uint32 beginChar       = 11;   // The character offset begin
-  optional uint32 endChar         = 12;   // The character offset end
-  optional uint32 utterance       = 13;   // The utterance tag used in dcoref
-  optional string speaker         = 14;   // The speaker speaking this word
-  optional uint32 beginIndex      = 15;   // The begin index of, e.g., a span
-  optional uint32 endIndex        = 16;   // The begin index of, e.g., a span
-  optional uint32 tokenBeginIndex = 17;   // The begin index of the token
-  optional uint32 tokenEndIndex   = 18;   // The end index of the token
-  optional Timex  timexValue      = 19;   // The time this word refers to
-  optional bool   hasXmlContext   = 21;   // Used by clean xml annotator
-  repeated string xmlContext      = 22;   // Used by clean xml annotator
-  optional uint32 corefClusterID  = 23;   // The [primary] cluster id for this token
-  optional string answer          = 24;   // A temporary annotation which is occasionally left in
+  required string word              = 1;    // the word's gloss (post-tokenization)
+  optional string pos               = 2;    // The word's part of speech tag
+  optional string value             = 3;    // The word's 'value', (e.g., parse tree node)
+  optional string category          = 4;    // The word's 'category' (e.g., parse tree node)
+  optional string before            = 5;    // The whitespace/xml before the token
+  optional string after             = 6;    // The whitespace/xml after the token
+  optional string originalText      = 7;    // The original text for this token
+  optional string ner               = 8;    // The word's NER tag
+  optional string normalizedNER     = 9;    // The word's normalized NER tag
+  optional string lemma             = 10;   // The word's lemma
+  optional uint32 beginChar         = 11;   // The character offset begin
+  optional uint32 endChar           = 12;   // The character offset end
+  optional uint32 utterance         = 13;   // The utterance tag used in dcoref
+  optional string speaker           = 14;   // The speaker speaking this word
+  optional uint32 beginIndex        = 15;   // The begin index of, e.g., a span
+  optional uint32 endIndex          = 16;   // The begin index of, e.g., a span
+  optional uint32 tokenBeginIndex   = 17;   // The begin index of the token
+  optional uint32 tokenEndIndex     = 18;   // The end index of the token
+  optional Timex  timexValue        = 19;   // The time this word refers to
+  optional bool   hasXmlContext     = 21;   // Used by clean xml annotator
+  repeated string xmlContext        = 22;   // Used by clean xml annotator
+  optional uint32 corefClusterID    = 23;   // The [primary] cluster id for this token
+  optional string answer            = 24;   // A temporary annotation which is occasionally left in
+  //  optional string projectedCategory = 25;   // The syntactic category of the maximal constituent headed by the word. Not used anywhere, so deleted.
+  optional uint32 headWordIndex     = 26;   // The index of the head word of this word.
+  optional Operator operator        = 27;   // If this is an operator, which one is it and what is its scope (as per Natural Logic)?
+  optional Polarity polarity        = 28;   // The polarity of this word, according to Natural Logic
 
   // Fields set by other annotators in CoreNLP
   optional string gender          = 51;  // gender annotation (machine reading)
@@ -219,4 +223,43 @@ message Relation {
   optional string subtype        = 5;
   // Implicit
   //       uint32 sentence       @see implicit in sentence
+}
+
+//
+// A Natural Logic operator
+//
+message Operator {
+  required string name                = 1;
+  required int32  quantifierSpanBegin = 2;
+  required int32  quantifierSpanEnd   = 3;
+  required int32  subjectSpanBegin    = 4;
+  required int32  subjectSpanEnd      = 5;
+  required int32  objectSpanBegin     = 6;
+  required int32  objectSpanEnd       = 7;
+}
+
+//
+// The seven informative Natural Logic relations
+//
+enum NaturalLogicRelation {
+  EQUIVALENCE        = 0;
+  FORWARD_ENTAILMENT = 1;
+  REVERSE_ENTAILMENT = 2;
+  NEGATION           = 3;
+  ALTERNATION        = 4;
+  COVER              = 5;
+  INDEPENDENCE       = 6;
+}
+
+//
+// The polarity of a word, according to Natural Logic
+//
+message Polarity {
+  required NaturalLogicRelation projectEquivalence       = 1;
+  required NaturalLogicRelation projectForwardEntailment = 2;
+  required NaturalLogicRelation projectReverseEntailment = 3;
+  required NaturalLogicRelation projectNegation          = 4;
+  required NaturalLogicRelation projectAlternation       = 5;
+  required NaturalLogicRelation projectCover             = 6;
+  required NaturalLogicRelation projectIndependence      = 7;
 }
