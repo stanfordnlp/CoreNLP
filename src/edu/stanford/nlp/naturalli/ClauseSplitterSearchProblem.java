@@ -1,9 +1,7 @@
 package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.classify.*;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.math.SloppyMath;
+import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -12,6 +10,7 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.PriorityQueue;
+import edu.stanford.nlp.naturalli.ClauseSplitter.ClauseClassifierLabel;
 
 import java.io.*;
 import java.util.*;
@@ -62,7 +61,7 @@ public class ClauseSplitterSearchProblem {
   /**
    * The classifier for whether a particular dependency edge defines a clause boundary.
    */
-  private final Optional<Classifier<Boolean, String>> isClauseClassifier;
+  private final Optional<Classifier<ClauseSplitter.ClauseClassifierLabel, String>> isClauseClassifier;
   /**
    * An optional featurizer to use with the clause classifier ({@link ClauseSplitterSearchProblem#isClauseClassifier}).
    * If that classifier is defined, this should be as well.
@@ -85,7 +84,7 @@ public class ClauseSplitterSearchProblem {
     public final int distanceFromSubj;
     public final SemanticGraphEdge ppOrNull;
     public final Consumer<SemanticGraph> thunk;
-    public final boolean isDone;
+    public boolean isDone;
 
     public State(SemanticGraphEdge edge, SemanticGraphEdge subjectOrNull, int distanceFromSubj, SemanticGraphEdge ppOrNull,
                  Consumer<SemanticGraph> thunk, boolean isDone) {
@@ -110,6 +109,17 @@ public class ClauseSplitterSearchProblem {
 
     public SemanticGraph originalTree() {
       return ClauseSplitterSearchProblem.this.tree;
+    }
+
+    public State withIsDone(ClauseClassifierLabel argmax) {
+      if (argmax == ClauseClassifierLabel.CLAUSE_SPLIT) {
+        isDone = true;
+      } else if (argmax == ClauseClassifierLabel.CLAUSE_INTERM) {
+        isDone = false;
+      } else {
+        throw new IllegalStateException("Invalid classifier label for isDone: " + argmax);
+      }
+      return this;
     }
   }
 
@@ -160,7 +170,7 @@ public class ClauseSplitterSearchProblem {
     public int seed = 42;
     @SuppressWarnings("unchecked")
     @Execution.Option(name = "classifierFactory", gloss = "The class of the classifier factory to use for training the various classifiers")
-    public Class<? extends ClassifierFactory<Boolean, String, Classifier<Boolean, String>>> classifierFactory = (Class<? extends ClassifierFactory<Boolean, String, Classifier<Boolean, String>>>) ((Object) LinearClassifierFactory.class);
+    public Class<? extends ClassifierFactory<ClauseSplitter.ClauseClassifierLabel, String, Classifier<ClauseSplitter.ClauseClassifierLabel, String>>> classifierFactory = (Class<? extends ClassifierFactory<ClauseSplitter.ClauseClassifierLabel, String, Classifier<ClauseSplitter.ClauseClassifierLabel, String>>>) ((Object) LinearClassifierFactory.class);
   }
 
   /**
@@ -176,11 +186,11 @@ public class ClauseSplitterSearchProblem {
    *
    * @param tree               The dependency tree to search over.
    * @param isClauseClassifier The classifier for whether a given dependency arc should be a new clause. If this is not given, all arcs are treated as clause separators.
-   * @param featurizer         The featurizer for the classifier. If no featurizer is given, one should be given in {@link ClauseSplitterSearchProblem#search(java.util.function.Predicate, edu.stanford.nlp.stats.Counter, java.util.function.Function, int)}, or else the classifier will be useless.
+   * @param featurizer         The featurizer for the classifier. If no featurizer is given, one should be given in {@link ClauseSplitterSearchProblem#search(java.util.function.Predicate, Classifier, java.util.function.Function, int)}, or else the classifier will be useless.
    * @see ClauseSplitter#load(String)
    */
   protected ClauseSplitterSearchProblem(SemanticGraph tree,
-                                        Optional<Classifier<Boolean, String>> isClauseClassifier,
+                                        Optional<Classifier<ClauseSplitter.ClauseClassifierLabel, String>> isClauseClassifier,
                                         Optional<Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>> featurizer
   ) {
     this.tree = new SemanticGraph(tree);
@@ -376,7 +386,7 @@ public class ClauseSplitterSearchProblem {
       throw new IllegalArgumentException("For now, only linear classifiers are supported");
     }
     search(candidateFragments,
-        ((LinearClassifier<Boolean,String>) isClauseClassifier.get()).weightsAsMapOfCounters().get(true),
+        isClauseClassifier.get(),
         this.featurizer.get(),
         10000);
   }
@@ -386,14 +396,14 @@ public class ClauseSplitterSearchProblem {
    * This function also defines the default action space to use during search.
    *
    * @param candidateFragments The callback function.
-   * @param weights The weights to use during search.
+   * @param classifier The classifier for whether an arc should be on the path to a clause split, a clause split itself, or neither.
    * @param featurizer The featurizer to use during search, to be dot producted with the weights.
    */
   protected void search(
       // The output specs
       final Predicate<Triple<Double, List<Counter<String>>, Supplier<SentenceFragment>>> candidateFragments,
       // The learning specs
-      final Counter<String> weights,
+      final Classifier<ClauseSplitter.ClauseClassifierLabel, String> classifier,
       final Function<Triple<State, Action, State>, Counter<String>> featurizer,
       final int maxTicks
   ) {
@@ -481,7 +491,7 @@ public class ClauseSplitterSearchProblem {
                 addSubtree(toModify, outgoingEdge.getDependent(), "nsubj", tree,
                     subjectOrNull.getDependent(), Collections.singleton(outgoingEdge));
                 assert Util.isTree(toModify);
-              }), true
+              }), false
           ));
         } else {
           return Optional.empty();
@@ -490,7 +500,7 @@ public class ClauseSplitterSearchProblem {
     });
 
     for (IndexedWord root : tree.getRoots()) {
-      search(root, candidateFragments, weights, featurizer, actionSpace, maxTicks);
+      search(root, candidateFragments, classifier, featurizer, actionSpace, maxTicks);
     }
   }
 
@@ -507,7 +517,7 @@ public class ClauseSplitterSearchProblem {
    *                             <li>The features along the path to this fragment. The last element of this is the features from the most recent step.</li>
    *                             <li>The sentence fragment. Because it is relatively expensive to compute the resulting tree, this is returned as a lazy {@link Supplier}.</li>
    *                           </ol>
-   * @param weights The weights to use during searching. This is traditionally from a trained classifier (e.g., with {@link ClauseSplitter#load(String)}).
+   * @param classifier The classifier for whether an arc should be on the path to a clause split, a clause split itself, or neither.
    * @param featurizer The featurizer to use. Make sure this matches the weights!
    * @param actionSpace The action space we are allowed to take. Each action defines a means of splitting a clause on a dependency boundary.
    */
@@ -517,7 +527,7 @@ public class ClauseSplitterSearchProblem {
       // The output specs
       final Predicate<Triple<Double, List<Counter<String>>, Supplier<SentenceFragment>>> candidateFragments,
       // The learning specs
-      final Counter<String> weights,
+      final Classifier<ClauseSplitter.ClauseClassifierLabel,String> classifier,
       final Function<Triple<State, Action, State>, Counter<String>> featurizer,
       final Collection<Action> actionSpace,
       final int maxTicks
@@ -545,25 +555,26 @@ public class ClauseSplitterSearchProblem {
       State lastState = lastStatePair.first;
       List<Counter<String>> featuresSoFar = lastStatePair.second;
       IndexedWord rootWord = lastState.edge == null ? root : lastState.edge.getDependent();
-//      System.err.println("Looking at " + rootWord);
 
       // Register thunk
-      if (!candidateFragments.test(Triple.makeTriple(logProbSoFar, featuresSoFar, () -> {
-        SemanticGraph copy = new SemanticGraph(tree);
-        lastState.thunk.andThen(x -> {
-          // Add the extra edges back in, if they don't break the tree-ness of the extraction
-          for (IndexedWord newTreeRoot : x.getRoots()) {
-            for (SemanticGraphEdge extraEdge : extraEdgesByGovernor.get(newTreeRoot)) {
-              assert Util.isTree(x);
-              //noinspection unchecked
-              addSubtree(x, newTreeRoot, extraEdge.getRelation().toString(), tree, extraEdge.getDependent(), tree.getIncomingEdgesSorted(newTreeRoot));
-              assert Util.isTree(x);
+      if (lastState.isDone) {
+        if (!candidateFragments.test(Triple.makeTriple(logProbSoFar, featuresSoFar, () -> {
+          SemanticGraph copy = new SemanticGraph(tree);
+          lastState.thunk.andThen(x -> {
+            // Add the extra edges back in, if they don't break the tree-ness of the extraction
+            for (IndexedWord newTreeRoot : x.getRoots()) {
+              for (SemanticGraphEdge extraEdge : extraEdgesByGovernor.get(newTreeRoot)) {
+                assert Util.isTree(x);
+                //noinspection unchecked
+                addSubtree(x, newTreeRoot, extraEdge.getRelation().toString(), tree, extraEdge.getDependent(), tree.getIncomingEdgesSorted(newTreeRoot));
+                assert Util.isTree(x);
+              }
             }
-          }
-        }).accept(copy);
-        return new SentenceFragment(copy, false);
-      }))) {
-        break;
+          }).accept(copy);
+          return new SentenceFragment(copy, false);
+        }))) {
+          break;
+        }
       }
 
       // Find relevant auxilliary terms
@@ -597,10 +608,12 @@ public class ClauseSplitterSearchProblem {
                 ppEdgeOrNull);
             if (candidate.isPresent()) {
               Counter<String> features = featurizer.apply(Triple.makeTriple(lastState, action, candidate.get()));
-              double probability = SloppyMath.sigmoid(Counters.dotProduct(features, weights));
+              Counter<ClauseClassifierLabel> scores = classifier.scoresOf(new RVFDatum<>(features));
+              scores.remove(ClauseClassifierLabel.NOT_A_CLAUSE);
+              double probability = Counters.max(scores);
               if (probability > max) {
                 max = probability;
-                argmax = Pair.makePair(candidate.get(), new ArrayList<Counter<String>>(featuresSoFar) {{
+                argmax = Pair.makePair(candidate.get().withIsDone(Counters.argmax(scores)), new ArrayList<Counter<String>>(featuresSoFar) {{
                   add(features);
                 }});
               }
