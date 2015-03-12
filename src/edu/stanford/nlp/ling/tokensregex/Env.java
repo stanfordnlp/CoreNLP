@@ -3,6 +3,8 @@ package edu.stanford.nlp.ling.tokensregex;
 import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.types.Tags;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
+
+import java.io.Serializable;
 import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
