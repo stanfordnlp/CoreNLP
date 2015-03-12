@@ -236,12 +236,12 @@ public class RelationTriple implements Comparable<RelationTriple> {
     // { blue cats play [quietly] with yarn,
     //   Jill blew kisses at Jack,
     //   cats are standing next to dogs }
-    add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/prepc?/ ({}=prep >/pobj/ ( {}=object ?>/appos/ {}=appos ) ) ?>dobj {pos:/N.*/}=relObj"));
-    add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/prepc?_.*/=prepEdge ( {}=object ?>/appos/ {} = appos ) ?>dobj {pos:/N.*/}=relObj"));
+    add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/prepc?/ ({}=prep >pobj ( {}=object ?>appos {}=appos ) ) ?>dobj {pos:/N.*/}=relObj"));
+    add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/prepc?_.*/=prepEdge ( {}=object ?>appos {} = appos ) ?>dobj {pos:/N.*/}=relObj"));
     // { fish like to swim }
-    add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >/xcomp/ ( {}=object ?>/appos/ {}=appos )"));
+    add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
     // { cats have tails }
-    add(SemgrexPattern.compile("{$}=verb ?>/auxpass/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>/appos/ {}=appos )"));
+    add(SemgrexPattern.compile("{$}=verb ?>auxpass {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
     // { Durin, son of Thorin }
     add(SemgrexPattern.compile("{$}=subject >appos=subjIgnored ( {}=verb >prep ( {} >pobj {}=object ) )"));
     add(SemgrexPattern.compile("{$}=subject >appos=subjIgnored ( {}=verb >/prep_.*/=prepEdge {}=object )"));
@@ -249,15 +249,15 @@ public class RelationTriple implements Comparable<RelationTriple> {
     //   horses are grazing peacefully }
     add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop|aux(pass)?/ {}=verb"));
     // { Unicredit 's Bank Austria Creditanstalt }
-    add(SemgrexPattern.compile("[ {$}=object & !{ner:O}=object ] >/poss/=verb !{ner:O}=subject "));
+    add(SemgrexPattern.compile("[ {$}=object & !{ner:O}=object ] >poss=verb !{ner:O}=subject "));
     // { Obama in Tucson }
     add(SemgrexPattern.compile("[ !{ner:O} & {tag:NNP}=subject ] >/prep_.*/=verb {}=object"));
     // { Tim 's father, Tom }
-    add(SemgrexPattern.compile("{$}=verb >/poss/=verb {}=subject >/appos/ {}=object"));
+    add(SemgrexPattern.compile("{$}=verb >poss=verb {}=subject >appos {}=object"));
     // { Tom and Jerry were fighting }
-    add(SemgrexPattern.compile("{$}=verb >nsubjpass ( {}=subject >/conj_and/=subjIgnored {}=object )"));
+    add(SemgrexPattern.compile("{$}=verb >nsubjpass ( {}=subject >conj_and=subjIgnored {}=object )"));
     // { There are dogs in heaven }
-    add(SemgrexPattern.compile("{lemma:be}=verb ?>expl {} >/.subj(pass)?/ ( {}=subject >/prepc?_.*/=prepEdge ( {}=object ?>/appos/ {} = appos ) ?>dobj {pos:/N.*/}=relObj )"));
+    add(SemgrexPattern.compile("{lemma:be}=verb ?>expl {} >/.subj(pass)?/ ( {}=subject >/prepc?_.*/=prepEdge ( {}=object ?>appos {} = appos ) ?>dobj {pos:/N.*/}=relObj )"));
   }});
 
   /** A set of valid arcs denoting a subject entity we are interested in */

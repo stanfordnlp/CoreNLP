@@ -1626,7 +1626,8 @@ public class SemanticGraph implements Serializable {
    * are copied.
    */
   public SemanticGraph(SemanticGraph g) {
-    this(g, null);
+    graph = new DirectedMultiGraph<>(g.graph);
+    roots = wordMapFactory.newSet(g.roots);
   }
 
   /**

@@ -287,6 +287,9 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
    */
   private void annotateOperators(CoreMap sentence) {
     SemanticGraph tree = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+    if (tree == null) {
+      tree = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+    }
     for (SemgrexPattern pattern : PATTERNS) {
       SemgrexMatcher matcher = pattern.matcher(tree);
       while (matcher.find()) {
@@ -438,7 +441,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   /** {@inheritDoc} */
   @Override
   protected long maxTime() {
-    return Long.MAX_VALUE;
+    return -1;
   }
 
   /** {@inheritDoc} */

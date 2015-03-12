@@ -4,6 +4,8 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.util.Lazy;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.*;
@@ -251,17 +253,17 @@ public class ForwardEntailerSearchProblem {
 
       if (canDelete) {
         // Register the deletion
-        long newMask = state.deletionMask;
-        SemanticGraph treeWithDeletions = new SemanticGraph(state.tree);
-        for (IndexedWord vertex : state.tree.descendants(currentWord)) {
-          treeWithDeletions.removeVertex(vertex);
-          newMask |= (0x1l << (indexToMaskIndex[vertex.index() - 1]));
-          assert indexToMaskIndex[vertex.index() - 1] < 64;
-          assert ((newMask >>> (indexToMaskIndex[vertex.index() - 1])) & 0x1l) == 1;
-        }
-        SemanticGraph resultTree = new SemanticGraph(treeWithDeletions);
-        andsToAdd.stream().filter(edge -> resultTree.containsVertex(edge.getGovernor()) && resultTree.containsVertex(edge.getDependent()))
-            .forEach(edge -> resultTree.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), Double.NEGATIVE_INFINITY, false));
+        Lazy<Pair<SemanticGraph,Long>> treeWithDeletionsAndNewMask = Lazy.of(() -> {
+          SemanticGraph impl = new SemanticGraph(state.tree);
+          long newMask = state.deletionMask;
+          for (IndexedWord vertex : state.tree.descendants(currentWord)) {
+            impl.removeVertex(vertex);
+            newMask |= (0x1l << (indexToMaskIndex[vertex.index() - 1]));
+            assert indexToMaskIndex[vertex.index() - 1] < 64;
+            assert ((newMask >>> (indexToMaskIndex[vertex.index() - 1])) & 0x1l) == 1;
+          }
+          return Pair.makePair(impl, newMask);
+        });
         // Compute the score of the sentence
         double newScore = state.score;
         for (SemanticGraphEdge edge : state.tree.incomingEdgeIterable(currentWord)) {
@@ -272,6 +274,9 @@ public class ForwardEntailerSearchProblem {
         }
         // Register the result
         if (newScore > 0.0) {
+          SemanticGraph resultTree = new SemanticGraph(treeWithDeletionsAndNewMask.get().first);
+          andsToAdd.stream().filter(edge -> resultTree.containsVertex(edge.getGovernor()) && resultTree.containsVertex(edge.getDependent()))
+              .forEach(edge -> resultTree.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), Double.NEGATIVE_INFINITY, false));
           results.add(new SearchResult(resultTree,
               aggregateDeletedEdges(state, state.tree.incomingEdgeIterable(currentWord), determinerRemovals),
               newScore));
@@ -281,6 +286,8 @@ public class ForwardEntailerSearchProblem {
         nextIndex = state.currentIndex + 1;
         while (nextIndex < topologicalVertices.size()) {
           IndexedWord nextWord = topologicalVertices.get(nextIndex);
+          long newMask = treeWithDeletionsAndNewMask.get().second;
+          SemanticGraph treeWithDeletions = treeWithDeletionsAndNewMask.get().first;
           if (  ((newMask >>> (indexToMaskIndex[nextWord.index() - 1])) & 0x1l) == 0) {
             assert treeWithDeletions.containsVertex(topologicalVertices.get(nextIndex));
             fringe.push(new SearchState(newMask, nextIndex, treeWithDeletions, null, state, newScore));
