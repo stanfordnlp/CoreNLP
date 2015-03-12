@@ -111,6 +111,14 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     add(SemgrexPattern.compile("{}=quantifier >"+GEN_SUBJ+" {}=pivot >>expl {}"));
   }});
 
+  // { Cats eat _some_ mice,
+  //   Cats eat _most_ mice }
+  /**
+   * A pattern for just trivial unary quantification, in case a quantifier doesn't match any of the patterns in
+   * {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotator#PATTERNS}.
+   */
+  private static SemgrexPattern UNARY_PATTERN = SemgrexPattern.compile("{pos:/N.*/}=subject >"+DET+" "+QUANTIFIER);
+
   /** A helper method for
    * {@link NaturalLogicAnnotator#getModifierSubtreeSpan(edu.stanford.nlp.semgraph.SemanticGraph, edu.stanford.nlp.ling.IndexedWord)} and
    * {@link NaturalLogicAnnotator#getSubtreeSpan(edu.stanford.nlp.semgraph.SemanticGraph, edu.stanford.nlp.ling.IndexedWord)}.
@@ -236,6 +244,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     Pair<Integer, Integer> objSpan;
     if (subject == null && object == null) {
       subjSpan = getSubtreeSpan(tree, pivot);
+      subjSpan = excludeFromSpan(subjSpan, quantifierSpan);
       objSpan = Pair.makePair(subjSpan.second, subjSpan.second);
     } else if (subject == null) {
       subjSpan = includeInSpan(getSubtreeSpan(tree, object), getGeneralizedSubtreeSpan(tree, pivot, Collections.singleton("prep")));
@@ -397,6 +406,51 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   }
 
   /**
+   * Annotate any unary quantifiers that weren't found in the main {@link NaturalLogicAnnotator#annotateOperators(CoreMap)} method.
+   * @param sentence The sentence to annotate.
+   */
+  private void annotateUnaries(CoreMap sentence) {
+    // Get tree and tokens
+    SemanticGraph tree = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+    if (tree == null) {
+      tree = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+    }
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+
+    // Get operator exists mask
+    boolean[] isOperator = new boolean[tokens.size()];
+    for (int i = 0; i < isOperator.length; ++i) {
+      OperatorSpec spec = tokens.get(i).get(OperatorAnnotation.class);
+      if (spec != null) {
+        for (int k = spec.quantifierBegin; k < spec.quantifierEnd; ++k) {
+          isOperator[k] = true;
+        }
+      }
+    }
+
+    // Match Semgrex
+    SemgrexMatcher matcher = UNARY_PATTERN.matcher(tree);
+    while (matcher.find()) {
+      // Get relevant nodes
+      IndexedWord quantifier = matcher.getNode("quantifier");
+      IndexedWord subject = matcher.getNode("subject");
+      // ... If there is not already an operator there
+      if (!isOperator[quantifier.index() - 1]) {
+        Optional<Triple<Operator, Integer, Integer>> quantifierInfo = validateQuantiferByHead(sentence, quantifier);
+        // ... and if we found a quantifier span
+        if (quantifierInfo.isPresent()) {
+          // Then add the unary operator!
+          OperatorSpec scope = computeScope(tree, quantifierInfo.get().first,
+              subject, Pair.makePair(quantifierInfo.get().second, quantifierInfo.get().third),
+              null, false, null);
+          CoreLabel token = tokens.get(quantifier.index() - 1);
+          token.set(OperatorAnnotation.class, scope);
+        }
+      }
+    }
+  }
+
+  /**
    * Annotate every token for its polarity, based on the operators found. This function will set the
    * {@link edu.stanford.nlp.naturalli.NaturalLogicAnnotations.PolarityAnnotation} for every token.
    *
@@ -469,6 +523,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   @Override
   protected void doOneSentence(Annotation annotation, CoreMap sentence) {
     annotateOperators(sentence);
+    annotateUnaries(sentence);
     if (doPolarity) {
       annotatePolarity(sentence);
     }

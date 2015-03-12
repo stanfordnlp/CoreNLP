@@ -257,6 +257,11 @@ public class OperatorScopeITest {
   }
 
   @Test
+  public void unarySome() {
+    checkScope(3, 4, annotate("Cats eat some mice")[2]);
+  }
+
+  @Test
   public void fracasSentencesWithAll() {
     checkScope("{ All } [ APCOM managers ] [ have company cars ]");
     checkScope("{ All } [ Canadian residents ] [ can travel freely within Europe ]");

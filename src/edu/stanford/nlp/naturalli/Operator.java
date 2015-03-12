@@ -65,6 +65,7 @@ public enum Operator {
   // "Most" quantifiers
   // TODO(gabor) check these
   MOST("most",                  FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
+  MORE("more",                  FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
   MANY("many",                  FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
   ENOUGH("enough",              FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
   MORE_THAN("more than __num_", FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
