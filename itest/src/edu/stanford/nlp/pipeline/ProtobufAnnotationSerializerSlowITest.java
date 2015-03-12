@@ -27,6 +27,7 @@ import static junit.framework.Assert.*;
  */
 public class ProtobufAnnotationSerializerSlowITest {
 
+
   /**
    * If set to true, all the annotators are tested with a long document,
    * rather than with the default shorter text snippet.
@@ -64,7 +65,10 @@ public class ProtobufAnnotationSerializerSlowITest {
     if (doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
         if (sentence.containsKey(CoreAnnotations.TokensAnnotation.class)) {
-          sentence.set(CoreAnnotations.NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(sentence));
+          boolean hasTokenBeginAnnotation = sentence.size() > 0 && sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).has(CoreAnnotations.TokenBeginAnnotation.class);
+          if (hasTokenBeginAnnotation) {
+            sentence.set(CoreAnnotations.NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(sentence));
+          }
         }
       }
     }
@@ -342,7 +346,28 @@ public class ProtobufAnnotationSerializerSlowITest {
 
       sameAsRead(doc, readDoc);
     } catch (Exception e) { throw new RuntimeException(e); }
+  }
 
+  @Test
+  public void testSerializeSSplitTokensRegression() {
+    try {
+      AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+      // Write
+      Annotation doc = new StanfordCoreNLP(new Properties(){{
+        setProperty("annotators", "tokenize,ssplit");
+      }}).process(prideAndPrejudiceChapters1to5);
+      ByteArrayOutputStream ks = new ByteArrayOutputStream();
+      serializer.write(doc, ks).close();
+
+      // Read
+      InputStream kis = new ByteArrayInputStream(ks.toByteArray());
+      Pair<Annotation, InputStream> pair = serializer.read(kis);
+      pair.second.close();
+      Annotation readDoc = pair.first;
+      kis.close();
+
+      sameAsRead(doc, readDoc);
+    } catch (Exception e) { throw new RuntimeException(e); }
   }
 
   /**
@@ -410,7 +435,11 @@ public class ProtobufAnnotationSerializerSlowITest {
         kis.close();
 
         sameAsRead(doc, readDoc);
-      } catch (Exception e) { throw new RuntimeException(e); }
+      } catch (RuntimeException e) { 
+        throw e;
+      } catch (Exception e) { 
+        throw new RuntimeException(e); 
+      }
     }
   }
 }
