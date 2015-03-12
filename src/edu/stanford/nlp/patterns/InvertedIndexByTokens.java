@@ -1,4 +1,4 @@
-package edu.stanford.nlp.patterns.surface;
+package edu.stanford.nlp.patterns;
 
 import java.io.*;
 import java.util.*;
@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.patterns.surface.Token;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.Execution;
@@ -40,9 +41,9 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
 
 
   @Override
-  public void add(Map<String, List<CoreLabel>> sents, boolean addProcessedText) {
-    for (Map.Entry<String, List<CoreLabel>> sEn : sents.entrySet()) {
-      add(sEn.getValue(), sEn.getKey(), addProcessedText);
+  public void add(Map<String,DataInstance> sents, boolean addProcessedText) {
+    for (Map.Entry<String, DataInstance> sEn : sents.entrySet()) {
+      add(sEn.getValue().getTokens(), sEn.getKey(), addProcessedText);
     }
   }
 
@@ -60,7 +61,7 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
         add(val, sentId);
       }
       if(addProcessedText){
-        String val  =Token.getKeyForClass(PatternsAnnotations.ProcessedTextAnnotation.class) +":"+ l.get(PatternsAnnotations.ProcessedTextAnnotation.class);
+        String val  = Token.getKeyForClass(PatternsAnnotations.ProcessedTextAnnotation.class) +":"+ l.get(PatternsAnnotations.ProcessedTextAnnotation.class);
         if(!stopWords.contains(val.toLowerCase()))
           add(val, sentId);
       }
@@ -131,7 +132,7 @@ public class InvertedIndexByTokens<E extends Pattern> extends SentenceIndex<E> i
 
     if(sentences != null && sentences.size() > 0)
       inv.add(sentences, true);
-    System.out.println("Created index with size " + inv.size());
+    System.out.println("Created index with size " + inv.size() + ". Don't worry if it's zero and you are using batch process sents.");
     return inv;
   }
 

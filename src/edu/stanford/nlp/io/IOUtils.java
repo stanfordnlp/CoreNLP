@@ -415,15 +415,12 @@ public class IOUtils {
     }
     // if not found in the CLASSPATH, load from the file system
     if (is == null) {
-      if (name.endsWith(".gz")) {
-        try {
-          is = new GZIPInputStream(new FileInputStream(name));
-        } catch (IOException e) {
-          is = new FileInputStream(name);
-        }
-      } else {
-        is = new FileInputStream(name);
-      }
+      is = new FileInputStream(name);
+    }
+    if (name.endsWith(".gz")) {
+      try {
+        is = new GZIPInputStream(is);
+      } catch (IOException e) { }
     }
     return is;
   }
@@ -459,6 +456,11 @@ public class IOUtils {
       URL u = new URL(textFileOrUrl);
       URLConnection uc = u.openConnection();
       in = uc.getInputStream();
+      if (textFileOrUrl.endsWith(".gz")) {
+        try {
+          in = new GZIPInputStream(in);
+        } catch (IOException e) { }
+      }
     } else {
       try {
         in = findStreamInClasspathOrFileSystem(textFileOrUrl);

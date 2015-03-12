@@ -97,11 +97,7 @@ public class DependencyParser {
    * handles both training and inference.
    */
   private Classifier classifier;
-
   private ParsingSystem system;
-
-  private Map<String, Integer> embedID;
-  private double[][] embeddings;
 
   private final Config config;
 
@@ -268,7 +264,8 @@ public class DependencyParser {
   }
 
   public Dataset genTrainExamples(List<CoreMap> sents, List<DependencyTree> trees) {
-    Dataset ret = new Dataset(config.numTokens, system.transitions.size());
+    int numTrans = system.numTransitions();
+    Dataset ret = new Dataset(config.numTokens, numTrans);
 
     Counter<Integer> tokPosCount = new IntCounter<>();
     System.err.println(Config.SEPARATOR);
@@ -290,7 +287,7 @@ public class DependencyParser {
           String oracle = system.getOracle(c, trees.get(i));
           List<Integer> feature = getFeatures(c);
           List<Integer> label = new ArrayList<>();
-          for (int j = 0; j < system.transitions.size(); ++j) {
+          for (int j = 0; j < numTrans; ++j) {
             String str = system.transitions.get(j);
             if (str.equals(oracle)) label.add(1);
             else if (system.canApply(c, str)) label.add(0);
@@ -306,9 +303,7 @@ public class DependencyParser {
     }
     System.err.println("#Train Examples: " + ret.n);
 
-    preComputed = new ArrayList<>(config.numPreComputed);
     List<Integer> sortedTokens = Counters.toSortedList(tokPosCount, false);
-
     preComputed = new ArrayList<>(sortedTokens.subList(0, Math.min(config.numPreComputed, sortedTokens.size())));
 
     return ret;
@@ -371,6 +366,13 @@ public class DependencyParser {
     knownLabels = Util.generateDict(label);
     knownLabels.add(0, rootLabel);
 
+    // Avoid the case that rootLabel equals to one of the other labels
+    for (int k = 1; k < knownLabels.size(); ++ k)
+      if (knownLabels.get(k).equals(rootLabel)) {
+        knownLabels.remove(k);
+        break;
+      }
+
     knownWords.add(0, Config.UNKNOWN);
     knownWords.add(1, Config.NULL);
     knownWords.add(2, Config.ROOT);
@@ -382,10 +384,10 @@ public class DependencyParser {
     knownLabels.add(0, Config.NULL);
     generateIDs();
 
-    System.out.println(Config.SEPARATOR);
-    System.out.println("#Word: " + knownWords.size());
-    System.out.println("#POS:" + knownPos.size());
-    System.out.println("#Label: " + knownLabels.size());
+    System.err.println(Config.SEPARATOR);
+    System.err.println("#Word: " + knownWords.size());
+    System.err.println("#POS:" + knownPos.size());
+    System.err.println("#Label: " + knownLabels.size());
   }
 
   public void writeModelFile(String modelFile) {
@@ -466,7 +468,7 @@ public class DependencyParser {
 
       output.close();
     } catch (IOException e) {
-      System.out.println(e);
+      throw new RuntimeIOException(e);
     }
   }
 
@@ -509,43 +511,20 @@ public class DependencyParser {
       String s;
       BufferedReader input = IOUtils.readerFromString(modelFile);
 
-      int nDict, nPOS, nLabel;
-      int eSize, hSize, nTokens, nPreComputed;
-      nDict = nPOS = nLabel = eSize = hSize = nTokens = nPreComputed = 0;
-
-      for (int k = 0; k < 7; ++k) {
-        s = input.readLine();
-        if (verbose) {
-          System.err.println(s);
-        }
-        int number = Integer.parseInt(s.substring(s.indexOf('=') + 1));
-        switch (k) {
-          case 0:
-            nDict = number;
-            break;
-          case 1:
-            nPOS = number;
-            break;
-          case 2:
-            nLabel = number;
-            break;
-          case 3:
-            eSize = number;
-            break;
-          case 4:
-            hSize = number;
-            break;
-          case 5:
-            nTokens = number;
-            break;
-          case 6:
-            nPreComputed = number;
-            break;
-          default:
-            break;
-        }
-      }
-
+      s = input.readLine();
+      int nDict = Integer.parseInt(s.substring(s.indexOf('=') + 1));
+      s = input.readLine();
+      int nPOS = Integer.parseInt(s.substring(s.indexOf('=') + 1));
+      s = input.readLine();
+      int nLabel = Integer.parseInt(s.substring(s.indexOf('=') + 1));
+      s = input.readLine();
+      int eSize = Integer.parseInt(s.substring(s.indexOf('=') + 1));
+      s = input.readLine();
+      int hSize = Integer.parseInt(s.substring(s.indexOf('=') + 1));
+      s = input.readLine();
+      int nTokens = Integer.parseInt(s.substring(s.indexOf('=') + 1));
+      s = input.readLine();
+      int nPreComputed = Integer.parseInt(s.substring(s.indexOf('=') + 1));
 
       knownWords = new ArrayList<String>();
       knownPos = new ArrayList<String>();
@@ -624,39 +603,41 @@ public class DependencyParser {
   // TODO this should be a function which returns the embeddings array + embedID
   // otherwise the class needlessly carries around the extra baggage of `embeddings`
   // (never again used) for the entire training process
-  private void readEmbedFile(String embedFile) {
-    embedID = new HashMap<String, Integer>();
-    if (embedFile == null)
-      return;
-    BufferedReader input = null;
-    try {
-      input = IOUtils.readerFromString(embedFile);
-      List<String> lines = new ArrayList<String>();
-      for (String s; (s = input.readLine()) != null; ) {
-        lines.add(s);
+  private double[][] readEmbedFile(String embedFile, Map<String, Integer> embedID) {
+
+    double[][] embeddings = null;
+    if (embedFile != null) {
+      BufferedReader input = null;
+      try {
+        input = IOUtils.readerFromString(embedFile);
+        List<String> lines = new ArrayList<String>();
+        for (String s; (s = input.readLine()) != null; ) {
+          lines.add(s);
+        }
+
+        int nWords = lines.size();
+        String[] splits = lines.get(0).split("\\s+");
+
+        int dim = splits.length - 1;
+        embeddings = new double[nWords][dim];
+        System.err.println("Embedding File " + embedFile + ": #Words = " + nWords + ", dim = " + dim);
+
+        if (dim != config.embeddingSize)
+            throw new IllegalArgumentException("The dimension of embedding file does not match config.embeddingSize");
+
+        for (int i = 0; i < lines.size(); ++i) {
+          splits = lines.get(i).split("\\s+");
+          embedID.put(splits[0], i);
+          for (int j = 0; j < dim; ++j)
+            embeddings[i][j] = Double.parseDouble(splits[j + 1]);
+        }
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      } finally {
+        IOUtils.closeIgnoringExceptions(input);
       }
-
-      int nWords = lines.size();
-      String[] splits = lines.get(0).split("\\s+");
-
-      int dim = splits.length - 1;
-      embeddings = new double[nWords][dim];
-      System.err.println("Embedding File " + embedFile + ": #Words = " + nWords + ", dim = " + dim);
-
-      if (dim != config.embeddingSize)
-          throw new IllegalArgumentException("The dimension of embedding file does not match config.embeddingSize");
-
-      for (int i = 0; i < lines.size(); ++i) {
-        splits = lines.get(i).split("\\s+");
-        embedID.put(splits[0], i);
-        for (int j = 0; j < dim; ++j)
-          embeddings[i][j] = Double.parseDouble(splits[j + 1]);
-      }
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    } finally {
-      IOUtils.closeIgnoringExceptions(input);
     }
+    return embeddings;
   }
 
   /**
@@ -669,21 +650,22 @@ public class DependencyParser {
    * @param embedFile File containing word embeddings for words used in
    *                  training corpus
    */
-  public void train(String trainFile, String devFile, String modelFile, String embedFile) {
+  public void train(String trainFile, String devFile, String modelFile, String embedFile, String preModel) {
     System.err.println("Train File: " + trainFile);
     System.err.println("Dev File: " + devFile);
     System.err.println("Model File: " + modelFile);
     System.err.println("Embedding File: " + embedFile);
+    System.err.println("Pre-trained Model File: " + preModel);
 
     List<CoreMap> trainSents = new ArrayList<>();
     List<DependencyTree> trainTrees = new ArrayList<DependencyTree>();
-    Util.loadConllFile(trainFile, trainSents, trainTrees);
+    Util.loadConllFile(trainFile, trainSents, trainTrees, config.unlabeled, config.cPOS);
     Util.printTreeStats("Train", trainTrees);
 
     List<CoreMap> devSents = new ArrayList<CoreMap>();
     List<DependencyTree> devTrees = new ArrayList<DependencyTree>();
     if (devFile != null) {
-      Util.loadConllFile(devFile, devSents, devTrees);
+      Util.loadConllFile(devFile, devSents, devTrees, config.unlabeled, config.cPOS);
       Util.printTreeStats("Dev", devTrees);
     }
     genDictionaries(trainSents, trainTrees);
@@ -694,7 +676,7 @@ public class DependencyParser {
     system = new ArcStandard(config.tlp, lDict, true);
 
     // Initialize a classifier; prepare for training
-    setupClassifierForTraining(trainSents, trainTrees, embedFile);
+    setupClassifierForTraining(trainSents, trainTrees, embedFile, preModel);
 
     System.err.println(Config.SEPARATOR);
     config.printParameters();
@@ -723,7 +705,7 @@ public class DependencyParser {
 
         List<DependencyTree> predicted = devSents.stream().map(this::predictInner).collect(toList());
 
-        double uas = system.getUASScore(devSents, predicted, devTrees);
+        double uas = config.noPunc ? system.getUASnoPunc(devSents, predicted, devTrees) : system.getUAS(devSents, predicted, devTrees);
         System.err.println("UAS: " + uas);
 
         if (config.saveIntermediate && uas > bestUAS) {
@@ -747,7 +729,7 @@ public class DependencyParser {
       // Do final UAS evaluation and save if final model beats the
       // best intermediate one
       List<DependencyTree> predicted = devSents.stream().map(this::predictInner).collect(toList());
-      double uas = system.getUASScore(devSents, predicted, devTrees);
+      double uas = config.noPunc ? system.getUASnoPunc(devSents, predicted, devTrees) : system.getUAS(devSents, predicted, devTrees);
 
       if (uas > bestUAS) {
         System.err.printf("Final model UAS: %f%n", uas);
@@ -761,6 +743,13 @@ public class DependencyParser {
   }
 
   /**
+  * @see #train(String, String, String, String, String)
+  */
+  public void train(String trainFile, String devFile, String modelFile, String embedFile) {
+    train(trainFile, devFile, modelFile, embedFile, null);
+  }
+
+  /**
    * @see #train(String, String, String, String)
    */
   public void train(String trainFile, String devFile, String modelFile) {
@@ -768,7 +757,7 @@ public class DependencyParser {
   }
 
   /**
-   * @see #train(String, String, String, String)
+   * @see #train(String, String, String)
    */
   public void train(String trainFile, String modelFile) {
     train(trainFile, null, modelFile);
@@ -777,11 +766,11 @@ public class DependencyParser {
   /**
    * Prepare a classifier for training with the given dataset.
    */
-  private void setupClassifierForTraining(List<CoreMap> trainSents, List<DependencyTree> trainTrees, String embedFile) {
+  private void setupClassifierForTraining(List<CoreMap> trainSents, List<DependencyTree> trainTrees, String embedFile, String preModel) {
     double[][] E = new double[knownWords.size() + knownPos.size() + knownLabels.size()][config.embeddingSize];
     double[][] W1 = new double[config.hiddenSize][config.embeddingSize * config.numTokens];
     double[] b1 = new double[config.hiddenSize];
-    double[][] W2 = new double[knownLabels.size() * 2 - 1][config.hiddenSize];
+    double[][] W2 = new double[system.numTransitions()][config.hiddenSize];
 
     // Randomly initialize weight matrices / vectors
     Random random = Util.getRandom();
@@ -797,7 +786,8 @@ public class DependencyParser {
         W2[i][j] = random.nextDouble() * 2 * config.initRange - config.initRange;
 
     // Read embeddings into `embedID`, `embeddings`
-    readEmbedFile(embedFile);
+     Map<String, Integer> embedID = new HashMap<String, Integer>();
+     double[][] embeddings = readEmbedFile(embedFile, embedID);
 
     // Try to match loaded embeddings with words in dictionary
     int foundEmbed = 0;
@@ -809,18 +799,107 @@ public class DependencyParser {
         if (embedID.containsKey(str)) index = embedID.get(str);
         else if (embedID.containsKey(str.toLowerCase())) index = embedID.get(str.toLowerCase());
       }
-
       if (index >= 0) {
         ++foundEmbed;
         for (int j = 0; j < E[i].length; ++j)
           E[i][j] = embeddings[index][j];
       } else {
         for (int j = 0; j < E[i].length; ++j)
-          E[i][j] = random.nextDouble() * config.initRange * 2 - config.initRange;
+          //E[i][j] = random.nextDouble() * config.initRange * 2 - config.initRange;
+          //E[i][j] = random.nextDouble() * 0.2 - 0.1;
+          //E[i][j] = random.nextGaussian() * Math.sqrt(0.1);
+          E[i][j] = random.nextDouble() * 0.02 - 0.01;
       }
     }
     System.err.println("Found embeddings: " + foundEmbed + " / " + knownWords.size());
 
+    if (preModel != null) {
+        try {
+          System.err.println("Loading pre-trained model file: " + preModel + " ... ");
+          String s;
+          BufferedReader input = IOUtils.readerFromString(preModel);
+
+          s = input.readLine();
+          int nDict = Integer.parseInt(s.substring(s.indexOf('=') + 1));
+          s = input.readLine();
+          int nPOS = Integer.parseInt(s.substring(s.indexOf('=') + 1));
+          s = input.readLine();
+          int nLabel = Integer.parseInt(s.substring(s.indexOf('=') + 1));
+          s = input.readLine();
+          int eSize = Integer.parseInt(s.substring(s.indexOf('=') + 1));
+          s = input.readLine();
+          int hSize = Integer.parseInt(s.substring(s.indexOf('=') + 1));
+          s = input.readLine();
+          int nTokens = Integer.parseInt(s.substring(s.indexOf('=') + 1));
+          s = input.readLine();
+
+          String[] splits;
+          for (int k = 0; k < nDict; ++k) {
+            s = input.readLine();
+            splits = s.split(" ");
+            if (wordIDs.containsKey(splits[0]) && eSize == config.embeddingSize) {
+              int index = getWordID(splits[0]);
+              for (int i = 0; i < eSize; ++i)
+                E[index][i] = Double.parseDouble(splits[i + 1]);
+            }
+          }
+
+          for (int k = 0; k < nPOS; ++k) {
+            s = input.readLine();
+            splits = s.split(" ");
+            if (posIDs.containsKey(splits[0]) && eSize == config.embeddingSize) {
+              int index = getPosID(splits[0]);
+              for (int i = 0; i < eSize; ++i)
+                E[index][i] = Double.parseDouble(splits[i + 1]);
+            }
+          }
+
+          for (int k = 0; k < nLabel; ++k) {
+            s = input.readLine();
+            splits = s.split(" ");
+            if (labelIDs.containsKey(splits[0]) && eSize == config.embeddingSize) {
+              int index = getLabelID(splits[0]);
+              for (int i = 0; i < eSize; ++i)
+                E[index][i] = Double.parseDouble(splits[i + 1]);
+            }
+          }
+
+          boolean copyLayer1 = hSize == config.hiddenSize && config.embeddingSize == eSize && config.numTokens == nTokens;
+          if (copyLayer1) {
+            System.err.println("Copying parameters W1 && b1...");
+          }
+          for (int j = 0; j < eSize * nTokens; ++j) {
+            s = input.readLine();
+            if (copyLayer1) {
+              splits = s.split(" ");
+              for (int i = 0; i < hSize; ++i)
+                    W1[i][j] = Double.parseDouble(splits[i]);
+            }
+          }
+
+          s = input.readLine();
+          if (copyLayer1) {
+            splits = s.split(" ");
+            for (int i = 0; i < hSize; ++i)
+              b1[i] = Double.parseDouble(splits[i]);
+          }
+
+          boolean copyLayer2 = (nLabel * 2 - 1 == system.numTransitions()) && hSize == config.hiddenSize;
+          if (copyLayer2)
+            System.err.println("Copying parameters W2...");
+          for (int j = 0; j < hSize; ++j) {
+              s = input.readLine();
+              if (copyLayer2) {
+                splits = s.split(" ");
+                for (int i = 0; i < nLabel * 2 - 1; ++i)
+                  W2[i][j] = Double.parseDouble(splits[i]);
+              }
+          }
+          input.close();
+        } catch (IOException e) {
+          throw new RuntimeIOException(e);
+        }
+    }
     Dataset trainSet = genTrainExamples(trainSents, trainTrees);
     classifier = new Classifier(config, trainSet, E, W1, b1, W2, preComputed);
   }
@@ -832,7 +911,7 @@ public class DependencyParser {
    * for general parsing purposes.
    */
   private DependencyTree predictInner(CoreMap sentence) {
-    int numTrans = system.transitions.size();
+    int numTrans = system.numTransitions();
 
     Configuration c = system.initialConfiguration(sentence);
     while (!system.isTerminal(c)) {
@@ -980,22 +1059,31 @@ public class DependencyParser {
     Timing timer = new Timing();
     List<CoreMap> testSents = new ArrayList<>();
     List<DependencyTree> testTrees = new ArrayList<DependencyTree>();
-    Util.loadConllFile(testFile, testSents, testTrees);
+    Util.loadConllFile(testFile, testSents, testTrees, config.unlabeled, config.cPOS);
+
     // count how much to parse
     int numWords = 0;
+    int numOOVWords = 0;
     int numSentences = 0;
     for (CoreMap testSent : testSents) {
       numSentences += 1;
-      numWords += testSent.get(CoreAnnotations.TokensAnnotation.class).size();
+      List<CoreLabel> tokens = testSent.get(CoreAnnotations.TokensAnnotation.class);
+      for (int k = 0; k < tokens.size(); ++ k) {  
+        String word = tokens.get(k).word();
+        numWords += 1;
+        if (!wordIDs.containsKey(word))
+          numOOVWords += 1;
+      }
     }
+    System.err.printf("OOV Words: %d / %d = %.2f%%\n", numOOVWords, numWords, numOOVWords * 100.0 / numWords);
 
     List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(toList());
     Map<String, Double> result = system.evaluate(testSents, predicted, testTrees);
     
-    double uasNoPunc = result.get("UASwoPunc");
-    double lasNoPunc = result.get("LASwoPunc");
-    System.err.printf("UAS = %.4f%n", uasNoPunc);
-    System.err.printf("LAS = %.4f%n", lasNoPunc);
+    double uas = config.noPunc ? result.get("UASnoPunc") : result.get("UAS");
+    double las = config.noPunc ? result.get("LASnoPunc") : result.get("LAS");
+    System.err.printf("UAS = %.4f%n", uas);
+    System.err.printf("LAS = %.4f%n", las);
 
     long millis = timer.stop();
     double wordspersec = numWords / (((double) millis) / 1000);
@@ -1006,7 +1094,7 @@ public class DependencyParser {
     if (outFile != null) {
         Util.writeConllFile(outFile, testSents, predicted);
     }
-    return lasNoPunc;
+    return las;
   }
 
   private void parseTextFile(BufferedReader input, PrintWriter output) {
@@ -1151,7 +1239,7 @@ public class DependencyParser {
     // Train with CoNLL-X data
     if (props.containsKey("trainFile"))
       parser.train(props.getProperty("trainFile"), props.getProperty("devFile"), props.getProperty("model"),
-          props.getProperty("embedFile"));
+          props.getProperty("embedFile"), props.getProperty("preModel"));
 
     boolean loaded = false;
     // Test with CoNLL-X data

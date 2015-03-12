@@ -1,4 +1,4 @@
-package edu.stanford.nlp.patterns.surface;
+package edu.stanford.nlp.patterns;
 
 import edu.stanford.nlp.util.Execution.Option;
 
