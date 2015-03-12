@@ -1,5 +1,6 @@
 package edu.stanford.nlp.semgraph;
 
+import edu.stanford.nlp.ling.AnnotationLookup;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.LabeledWord;
@@ -13,6 +14,8 @@ import edu.stanford.nlp.util.MapList;
 
 import java.io.StringWriter;
 import java.util.*;
+import java.util.function.Function;
+import java.util.regex.Pattern;
 
 
 /**
@@ -726,6 +729,7 @@ public class SemanticGraphUtils {
     return buf.toString();
   }
 
+
   /**
    * Given a SemanticGraph, creates a SemgrexPattern string based off of this graph.
    * NOTE: the word() value of the vertice is the name to reference
@@ -739,14 +743,39 @@ public class SemanticGraphUtils {
   }
 
   public static String semgrexFromGraph(SemanticGraph sg, Collection<IndexedWord> wildcardNodes,
-      boolean useTag, boolean useWord, Map<IndexedWord, String> nodeNameMap) throws Exception {
+                                        boolean useTag, boolean useWord, Map<IndexedWord, String> nodeNameMap) throws Exception {
+    Function<IndexedWord, String> transformNode = o ->{
+      String str = "";
+      if(useWord)
+        str = "{word: /" + Pattern.quote(o.word()) + "/";
+      if(useTag){
+        if(!str.isEmpty())
+          str += "; ";
+        str = "tag: " + o.tag();
+      }
+      if(!str.isEmpty())
+        str += "}";
+      return str;
+    };
+
+      return semgrexFromGraph(sg, wildcardNodes, nodeNameMap, transformNode);
+  }
+
+  /**
+   * nodeValuesTranformation is a function that converts a vertex (IndexedWord) to the value.
+   * For an example, see <code>semgrexFromGraph</code>
+   * function implementations (if useWord and useTag is true, the value is "{word: vertex.word; tag: vertex.tag}").
+   * @throws Exception
+   */
+  public static String semgrexFromGraph(SemanticGraph sg, Collection<IndexedWord> wildcardNodes,
+     Map<IndexedWord, String> nodeNameMap, Function<IndexedWord, String> wordTransformation) throws Exception {
     IndexedWord patternRoot = sg.getFirstRoot();
     StringWriter buf = new StringWriter();
     Set<IndexedWord> tabu = Generics.newHashSet();
     Set<SemanticGraphEdge> seenEdges = Generics.newHashSet();
 
     buf.append(semgrexFromGraphHelper(patternRoot, sg, tabu, seenEdges, true, true, wildcardNodes,
-        useTag, useWord, nodeNameMap, false));
+      nodeNameMap, false, wordTransformation));
 
     String patternString = buf.toString();
     return patternString;
@@ -766,12 +795,12 @@ public class SemanticGraphUtils {
 
   /**
    * Recursive call to generate the Semgrex pattern based off of this SemanticGraph.
-   * Currently presumes the only elements to match on are the tags.
-   * TODO: consider tag generalization, and matching off of other features?
+   * nodeValuesTranformation is a function that converts a vertex (IndexedWord) to the value. For an example, see <code>semgrexFromGraph</code>
+   * function implementations.
    */
   protected static String semgrexFromGraphHelper(IndexedWord vertice, SemanticGraph sg,
       Set<IndexedWord> tabu, Set<SemanticGraphEdge> seenEdges, boolean useWordAsLabel, boolean nameEdges, Collection<IndexedWord> wildcardNodes,
-      boolean useTag, boolean useWord, Map<IndexedWord, String> nodeNameMap, boolean orderedNodes) {
+      Map<IndexedWord, String> nodeNameMap, boolean orderedNodes, Function<IndexedWord, String> nodeValuesTransformation) {
     StringWriter buf = new StringWriter();
 
     // If the node is a wildcarded one, treat it as a {}, meaning any match.  Currently these will not
@@ -779,16 +808,32 @@ public class SemanticGraphUtils {
     if (wildcardNodes != null && wildcardNodes.contains(vertice)) {
       buf.append("{}");
     } else {
-      buf.append("{");
-      if (useTag) {
-        buf.append("tag:"); buf.append(vertice.tag());
-        if (useWord)
-          buf.append(";");
+
+      String vertexStr = nodeValuesTransformation.apply(vertice);
+      if(vertexStr != null && !vertexStr.isEmpty()){
+        buf.append(vertexStr);
       }
-      if (useWord) {
-        buf.append("word:"); buf.append(vertice.word());
-      }
-      buf.append("}");
+//      buf.append("{");
+//      int i = 0;
+//      for(String corekey: useNodeCoreAnnotations){
+//        AnnotationLookup.KeyLookup lookup = AnnotationLookup.getCoreKey(corekey);
+//        assert lookup != null : "Invalid key " + corekey;
+//        if(i > 0)
+//          buf.append("; ");
+//        String value = vertice.containsKey(lookup.coreKey) ? vertice.get(lookup.coreKey).toString() : "null";
+//        buf.append(corekey+":"+nodeValuesTransformation.apply(value));
+//        i++;
+//      }
+//      if (useTag) {
+//
+//        buf.append("tag:"); buf.append(vertice.tag());
+//        if (useWord)
+//          buf.append(";");
+//      }
+//      if (useWord) {
+//        buf.append("word:"); buf.append(wordTransformation.apply(vertice.word()));
+//      }
+//      buf.append("}");
     }
     if (nodeNameMap != null) {
       buf.append("=");
@@ -837,23 +882,25 @@ public class SemanticGraphUtils {
         }
       } else {
         buf.append(semgrexFromGraphHelper(tgtVert, sg, tabu, seenEdges, useWordAsLabel, nameEdges,
-            wildcardNodes, useTag, useWord, nodeNameMap, orderedNodes));
+            wildcardNodes, nodeNameMap, orderedNodes, nodeValuesTransformation));
         if (applyParens)
           buf.append(")");
       }
     }
     return buf.toString();
   }
-  
+
+  /** Same as semgrexFromGraph except the node traversal is ordered by sorting
+   */
   public static String semgrexFromGraphOrderedNodes(SemanticGraph sg, Collection<IndexedWord> wildcardNodes,
-      boolean useTag, boolean useWord, Map<IndexedWord, String> nodeNameMap) throws Exception {
+      Map<IndexedWord, String> nodeNameMap, Function<IndexedWord, String> wordTransformation) throws Exception {
     IndexedWord patternRoot = sg.getFirstRoot();
     StringWriter buf = new StringWriter();
     Set<IndexedWord> tabu = Generics.newHashSet();
     Set<SemanticGraphEdge> seenEdges = Generics.newHashSet();
 
     buf.append(semgrexFromGraphHelper(patternRoot, sg, tabu, seenEdges, true, true, wildcardNodes,
-        useTag, useWord, nodeNameMap, true));
+      nodeNameMap, true, wordTransformation));
 
     String patternString = buf.toString();
     return patternString;

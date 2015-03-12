@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
@@ -26,7 +28,7 @@ public class SemgrexBatchParser {
   /** Maximum stream size in characters */
   private static final int MAX_STREAM_SIZE = 1024 * 1024;
   
-	public List<SemgrexPattern> compileStream(InputStream is) throws IOException {
+	public Counter<SemgrexPattern> compileStream(InputStream is) throws IOException {
 	  BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 	  reader.mark(MAX_STREAM_SIZE);
 	  Map<String, String> macros = preprocess(reader);
@@ -34,15 +36,16 @@ public class SemgrexBatchParser {
 	  return parse(reader, macros);
 	}
 	
-	private List<SemgrexPattern> parse(BufferedReader reader, Map<String, String> macros) throws IOException {
-	  List<SemgrexPattern> patterns = new ArrayList<SemgrexPattern>();
+	private Counter<SemgrexPattern> parse(BufferedReader reader, Map<String, String> macros) throws IOException {
+	  Counter<SemgrexPattern> patterns = new ClassicCounter<SemgrexPattern>();
 	  for(String line; (line = reader.readLine()) != null; ) {
       line = line.trim();
       if(line.length() == 0 || line.startsWith("#")) continue;
       if(line.startsWith("macro ")) continue;
       line = replaceMacros(line, macros);
-      SemgrexPattern pattern = SemgrexPattern.compile(line);
-      patterns.add(pattern);
+      String[] tok = line.split("\t",2);
+      SemgrexPattern pattern = SemgrexPattern.compile(tok[0]);
+      patterns.setCount(pattern, tok.length > 1? Double.parseDouble(tok[1]): 1.0);
 	  }
 	  return patterns;
 	}
