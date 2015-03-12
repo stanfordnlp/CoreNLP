@@ -1696,7 +1696,9 @@ public class EnglishGrammaticalRelations {
    * @return The EnglishGrammaticalRelation with that name
    */
   public static GrammaticalRelation valueOf(String s) {
-    return GrammaticalRelation.valueOf(s, values);
+    synchronized (values) {
+      return GrammaticalRelation.valueOf(s, values);
+    }
 
 //    // TODO does this need to be changed?
 //    // modification NOTE: do not commit until go-ahead
