@@ -20,14 +20,6 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 
-/** Provides accessors for various grammatical, semantic, and world knowledge
- *  lexicons and word lists primarily used by the Sieve coreference system,
- *  but sometimes also drawn on from other code.
- *
- *  The source of the dictionaries on Stanford NLP machines is
- *  /u/nlp/data/coref/gazetteers/dcoref/ . In models jars, they live in
- *  edu/stanford/nlp/models/dcoref .
- */
 public class Dictionaries {
 
   public enum MentionType {
@@ -266,7 +258,7 @@ public class Dictionaries {
    *  Lines starting with # are ignored
    *  The file is cased but stored in in-memory data structures uncased.
    *  The results are:
-   *  demonyms is a hash from each country (etc.) to a set of demonymic Strings;
+   *  demonyms is a has from each country (etc.) to a set of demonymic Strings;
    *  adjectiveNation is a set of demonymic Strings;
    *  demonymSet has all country (etc.) names and all demonymic Strings.
    */
@@ -380,7 +372,7 @@ public class Dictionaries {
    * Load Bergsma and Lin (2006) gender and number list.
    * <br>
    * The list is converted from raw text and numbers to a serialized
-   * map, which saves quite a bit of time loading.
+   * map, which saves quite a bit of time loading.  
    * See edu.stanford.nlp.dcoref.util.ConvertGenderFile
    */
   private void loadGenderNumber(String file, String neutralWordsFile) {
@@ -388,7 +380,9 @@ public class Dictionaries {
       getWordsFromFile(neutralWordsFile, neutralWords, false);
       Map<List<String>, Gender> temp = IOUtils.readObjectFromURLOrClasspathOrFileSystem(file);
       genderNumber.putAll(temp);
-    } catch (IOException | ClassNotFoundException e) {
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    } catch (ClassNotFoundException e) {
       throw new RuntimeIOException(e);
     }
   }

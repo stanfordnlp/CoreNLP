@@ -26,8 +26,8 @@ public class NumberRangeFileFilter implements FileFilter {
    * to accept, and whether to also traverse
    * folders for recursive search.
    *
-   * @param min     The minimum number file to accept (checks &ge; this one)
-   * @param max     The maximum number file to accept (checks &le; this one)
+   * @param min     The minimum number file to accept (checks >= this one)
+   * @param max     The maximum number file to accept (checks <= this one)
    * @param recurse go into folders
    */
   public NumberRangeFileFilter(int min, int max, boolean recurse) {

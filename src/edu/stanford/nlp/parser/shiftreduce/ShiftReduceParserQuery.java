@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
@@ -16,9 +17,6 @@ import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.parser.common.ParserQuery;
 import edu.stanford.nlp.parser.lexparser.Debinarizer;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.tregex.TregexPattern;
-import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
-import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ScoredComparator;
 import edu.stanford.nlp.util.ScoredObject;
@@ -27,13 +25,13 @@ public class ShiftReduceParserQuery implements ParserQuery {
   Debinarizer debinarizer = new Debinarizer(false);
 
   List<? extends HasWord> originalSentence;
-  private State initialState, finalState;
+  State initialState, finalState;
   Tree debinarized;
 
   boolean success;
   boolean unparsable;
 
-  private List<State> bestParses;
+  List<State> bestParses;
 
   final ShiftReduceParser parser;
 
@@ -56,16 +54,8 @@ public class ShiftReduceParserQuery implements ParserQuery {
     return parseInternal();
   }
 
-  // TODO: we are assuming that sentence final punctuation always has
-  // either . or PU as the tag.
-  private static TregexPattern rearrangeFinalPunctuationTregex =
-    TregexPattern.compile("__ !> __ <- (__=top <- (__ <<- (/[.]|PU/=punc < /[.!?。！？]/ ?> (__=single <: =punc))))");
-
-  private static TsurgeonPattern rearrangeFinalPunctuationTsurgeon =
-    Tsurgeon.parseOperation("[move punc >-1 top] [if exists single prune single]");
-
   private boolean parseInternal() {
-    final int maxBeamSize = Math.max(parser.op.testOptions().beamSize, 1);
+    final int maxBeamSize = parser.op.testOptions().beamSize;
 
     success = true;
     unparsable = false;
@@ -80,10 +70,11 @@ public class ShiftReduceParserQuery implements ParserQuery {
       beam = new PriorityQueue<State>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State bestState = null;
       for (State state : oldBeam) {
-        Collection<ScoredObject<Integer>> predictedTransitions = parser.model.findHighestScoringTransitions(state, true, maxBeamSize, constraints);
+        List<String> features = parser.featureFactory.featurize(state);
+        Collection<ScoredObject<Integer>> predictedTransitions = parser.findHighestScoringTransitions(state, features, true, maxBeamSize, constraints);
         // System.err.println("Examining state: " + state);
         for (ScoredObject<Integer> predictedTransition : predictedTransitions) {
-          Transition transition = parser.model.transitionIndex.get(predictedTransition.object());
+          Transition transition = parser.transitionIndex.get(predictedTransition.object());
           State newState = transition.apply(state, predictedTransition.score());
           // System.err.println("  Transition: " + transition + " (" + predictedTransition.score() + ")");
           if (bestState == null || bestState.score() < newState.score()) {
@@ -104,7 +95,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
         // This will probably result in a bad parse, but at least it
         // will result in some sort of parse.
         for (State state : oldBeam) {
-          Transition transition = parser.model.findEmergencyTransition(state, constraints);
+          Transition transition = parser.findEmergencyTransition(state, constraints);
           if (transition != null) {
             State newState = transition.apply(state);
             if (bestState == null || bestState.score() < newState.score()) {
@@ -134,7 +125,6 @@ public class ShiftReduceParserQuery implements ParserQuery {
       Collections.reverse(bestParses);
       finalState = bestParses.get(0);
       debinarized = debinarizer.transformTree(finalState.stack.peek());
-      debinarized = Tsurgeon.processPattern(rearrangeFinalPunctuationTregex, rearrangeFinalPunctuationTsurgeon, debinarized);
     }
     return success;
   }
@@ -188,7 +178,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   @Override
   public List<ScoredObject<Tree>> getBestPCFGParses() {
     ScoredObject<Tree> parse = new ScoredObject<Tree>(debinarized, finalState.score);
-    return Collections.singletonList(parse);
+    return Collections.singletonList(parse);    
   }
 
   @Override
@@ -233,7 +223,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   public boolean saidMemMessage() {
     return false;
   }
-
+  
   @Override
   public boolean parseSucceeded() {
     return success;

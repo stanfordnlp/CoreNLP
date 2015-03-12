@@ -2,7 +2,7 @@ package edu.stanford.nlp.trees.international.pennchinese;
 
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.trees.*;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.ling.HasWord;
 
@@ -69,7 +69,7 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
    */
   @Override
   public boolean isPunctuationWord(String str) {
-    return chineseCommaAcceptFilter().test(str) || chineseEndSentenceAcceptFilter().test(str) || chineseDouHaoAcceptFilter().test(str) || chineseQuoteMarkAcceptFilter().test(str) || chineseParenthesisAcceptFilter().test(str) || chineseColonAcceptFilter().test(str) || chineseDashAcceptFilter().test(str) || chineseOtherAcceptFilter().test(str);
+    return chineseCommaAcceptFilter().accept(str) || chineseEndSentenceAcceptFilter().accept(str) || chineseDouHaoAcceptFilter().accept(str) || chineseQuoteMarkAcceptFilter().accept(str) || chineseParenthesisAcceptFilter().accept(str) || chineseColonAcceptFilter().accept(str) || chineseDashAcceptFilter().accept(str) || chineseOtherAcceptFilter().accept(str);
 
   }
 
@@ -77,14 +77,12 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
   /**
    * Accepts a String that is a sentence end
    * punctuation tag, and rejects everything else.
-   * TODO FIXME: this is testing whether it is a sentence final word,
-   * not a sentence final tag.
    *
    * @return Whether this is a sentence final punctuation tag
    */
   @Override
   public boolean isSentenceFinalPunctuationTag(String str) {
-    return chineseEndSentenceAcceptFilter().test(str);
+    return chineseEndSentenceAcceptFilter().accept(str);
   }
 
 
@@ -144,7 +142,7 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
    */
   @Override
   public boolean isEvalBIgnoredPunctuationTag(String str) {
-    return Filters.collectionAcceptFilter(tags).test(str);
+    return Filters.collectionAcceptFilter(tags).accept(str);
   }
 
 
@@ -236,52 +234,52 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
     m += other.length;
   }
 
-  public static Predicate<String> chineseCommaAcceptFilter() {
+  public static Filter<String> chineseCommaAcceptFilter() {
     return Filters.collectionAcceptFilter(comma);
   }
 
-  public static Predicate<String> chineseEndSentenceAcceptFilter() {
+  public static Filter<String> chineseEndSentenceAcceptFilter() {
     return Filters.collectionAcceptFilter(endSentence);
   }
 
-  public static Predicate<String> chineseDouHaoAcceptFilter() {
+  public static Filter<String> chineseDouHaoAcceptFilter() {
     return Filters.collectionAcceptFilter(douHao);
   }
 
-  public static Predicate<String> chineseQuoteMarkAcceptFilter() {
+  public static Filter<String> chineseQuoteMarkAcceptFilter() {
     return Filters.collectionAcceptFilter(quoteMark);
   }
 
-  public static Predicate<String> chineseParenthesisAcceptFilter() {
+  public static Filter<String> chineseParenthesisAcceptFilter() {
     return Filters.collectionAcceptFilter(parenthesis);
   }
 
-  public static Predicate<String> chineseColonAcceptFilter() {
+  public static Filter<String> chineseColonAcceptFilter() {
     return Filters.collectionAcceptFilter(colon);
   }
 
-  public static Predicate<String> chineseDashAcceptFilter() {
+  public static Filter<String> chineseDashAcceptFilter() {
     return Filters.collectionAcceptFilter(dash);
   }
 
-  public static Predicate<String> chineseOtherAcceptFilter() {
+  public static Filter<String> chineseOtherAcceptFilter() {
     return Filters.collectionAcceptFilter(other);
   }
 
 
-  public static Predicate<String> chineseLeftParenthesisAcceptFilter() {
+  public static Filter<String> chineseLeftParenthesisAcceptFilter() {
     return Filters.collectionAcceptFilter(leftParenthesis);
   }
 
-  public static Predicate<String> chineseRightParenthesisAcceptFilter() {
+  public static Filter<String> chineseRightParenthesisAcceptFilter() {
     return Filters.collectionAcceptFilter(rightParenthesis);
   }
 
-  public static Predicate<String> chineseLeftQuoteMarkAcceptFilter() {
+  public static Filter<String> chineseLeftQuoteMarkAcceptFilter() {
     return Filters.collectionAcceptFilter(leftQuoteMark);
   }
 
-  public static Predicate<String> chineseRightQuoteMarkAcceptFilter() {
+  public static Filter<String> chineseRightQuoteMarkAcceptFilter() {
     return Filters.collectionAcceptFilter(rightQuoteMark);
   }
 
@@ -300,12 +298,12 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
   }
 
   @Override
-  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilt) {
+  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilt) {
     return new ChineseGrammaticalStructureFactory(puncFilt);
   }
 
   @Override
-  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilt, HeadFinder hf) {
+  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilt, HeadFinder hf) {
     return new ChineseGrammaticalStructureFactory(puncFilt, hf);
   }
 

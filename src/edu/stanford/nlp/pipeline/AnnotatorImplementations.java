@@ -2,11 +2,10 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
-import edu.stanford.nlp.naturalli.NaturalLogicAnnotator;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.ReflectionLoading;
 
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.*;
 
 /**
@@ -21,10 +20,17 @@ import java.util.*;
 public class AnnotatorImplementations {
 
   /**
+   * Tokenize, according to whitespace only
+   */
+  public Annotator whitespaceTokenizer(Properties properties) {
+    return new WhitespaceTokenizerAnnotator(properties);
+  }
+
+  /**
    * Tokenize, emulating the Penn Treebank
    */
-  public Annotator tokenizer(Properties properties, boolean verbose, String options) {
-    return new TokenizerAnnotator(verbose, properties, options);
+  public Annotator ptbTokenizer(Properties properties, boolean verbose, String options) {
+    return new PTBTokenizerAnnotator(verbose, options);
   }
 
   /**
@@ -66,9 +72,9 @@ public class AnnotatorImplementations {
   }
 
   /**
-   * Annotate for named entities -- note that this combines multiple NER tag sets, and some auxiliary things (like temporal tagging)
+   * Annotate for named entities -- note that this combines multiple NER tag sets, and some auxilliary things (like temporal tagging)
    */
-  public Annotator ner(Properties properties) throws IOException {
+  public Annotator ner(Properties properties) throws FileNotFoundException {
 
     List<String> models = new ArrayList<String>();
     String modelNames = properties.getProperty("ner.model");
@@ -109,14 +115,7 @@ public class AnnotatorImplementations {
    * Run RegexNER -- rule-based NER based on a deterministic mapping file
    */
   public Annotator tokensRegexNER(Properties properties, String name) {
-    return new TokensRegexNERAnnotator(name, properties);
-  }
-
-  /**
-   * Annotate mentions
-   */
-  public Annotator mentions(Properties properties, String name) {
-    return new EntityMentionsAnnotator(name, properties);
+    return new TokensRegexNERAnnotator("regexner", properties);
   }
 
   /**
@@ -193,33 +192,6 @@ public class AnnotatorImplementations {
    */
   public Annotator sentiment(Properties properties, String name) {
     return new SentimentAnnotator(name, properties);
-  }
-
-  /**
-   * Annotate dependency relations in sentences
-   */
-  public Annotator dependencies(Properties properties) {
-    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
-        Annotator.STANFORD_DEPENDENCIES + '.');
-    return new DependencyParseAnnotator(relevantProperties);
-  }
-
-  /**
-   * Annotate operators (e.g., quantifiers) and polarity of tokens in a sentence
-   */
-  public Annotator natlog(Properties properties) {
-    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
-        Annotator.STANFORD_NATLOG + '.');
-    return new NaturalLogicAnnotator(relevantProperties);
-  }
-
-  /**
-   * Annotate quotes and extract them like sentences
-   */
-  public Annotator quote(Properties properties) {
-    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
-        Annotator.STANFORD_QUOTE + '.');
-    return new QuoteAnnotator(relevantProperties);
   }
 
 }

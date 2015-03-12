@@ -67,7 +67,7 @@ public class AnnotationPipeline implements Annotator {
       }
       annotator.annotate(annotation);
       if (TIME) {
-        long elapsed = t.stop();
+        int elapsed = (int) t.stop();
         MutableLong m = it.next();
         m.incValue(elapsed);
       }
@@ -221,7 +221,7 @@ public class AnnotationPipeline implements Annotator {
     Timing tim = new Timing();
     AnnotationPipeline ap = new AnnotationPipeline();
     boolean verbose = false;
-    ap.addAnnotator(new TokenizerAnnotator(verbose, "en"));
+    ap.addAnnotator(new PTBTokenizerAnnotator(verbose));
     ap.addAnnotator(new WordsToSentencesAnnotator(verbose));
     // ap.addAnnotator(new NERCombinerAnnotator(verbose));
     // ap.addAnnotator(new OldNERAnnotator(verbose));

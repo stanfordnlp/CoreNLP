@@ -225,12 +225,8 @@ public final class SloppyMath {
   static final double LOGTOLERANCE = 30.0;
   static final float LOGTOLERANCE_F = 20.0f;
 
-
-  /** Approximation to gamma function.  See e.g., http://www.rskey.org/CMS/index.php/the-library/11 .
-   *  Fairly accurate, especially for n greater than 8.
-   */
   public static double gamma(double n) {
-    return Math.sqrt(2.0*Math.PI/n) * Math.pow((n/Math.E)*Math.sqrt(n*Math.sinh((1.0/n)+(1/(810*Math.pow(n,6))))),n);
+    return Math.sqrt(2.0*Math.PI/n) * Math.pow((n/Math.E)*Math.sqrt(n*Math.sinh((1.0/n)+(1/810*Math.pow(n,6)))),n);
   }
 
   /**
@@ -251,7 +247,7 @@ public final class SloppyMath {
    *
    * @param lx First number, in log form
    * @param ly Second number, in log form
-   * @return {@code log(exp(lx) + exp(ly))}
+   * @return log(exp(lx) + exp(ly))
    */
   public static float logAdd(float lx, float ly) {
     float max, negDiff;
@@ -282,7 +278,7 @@ public final class SloppyMath {
    *
    * @param lx First number, in log form
    * @param ly Second number, in log form
-   * @return {@code log(exp(lx) + exp(ly))}
+   * @return log(exp(lx) + exp(ly))
    */
   public static double logAdd(double lx, double ly) {
     double max, negDiff;
@@ -304,7 +300,7 @@ public final class SloppyMath {
 
   /**
    * Computes n choose k in an efficient way.  Works with
-   * k == 0 or k == n but undefined if k &lt; 0 or k &gt; n
+   * k == 0 or k == n but undefined if k < 0 or k > n
    *
    * @return fact(n) / fact(k) * fact(n-k)
    */
@@ -337,48 +333,46 @@ public final class SloppyMath {
    * multiply b by itself e times.  Uses power of two trick.
    * e must be nonnegative!!!  no checking!!!  For e &lt;= 0,
    * the exponent is treated as 0, and 1 is returned.  0^0 also
-   * returns 1. Biased to do quickly small exponents, like the CRF needs.
-   * Note that some code claims you can get more speed ups with special cases:
-   * http://sourceforge.net/p/jafama/code/ci/master/tree/src/net/jafama/FastMath.java
-   * but I couldn't verify any gains beyond special casing 2. May depend on workload.
+   * returns 1.
+   * Biased to do quickly small exponents, like the CRF needs.
+   * Todo: Claim is that it will be faster if use if, not switch, and also do 3 (and even 4, 5) via cases:
+   * http://jafama.svn.sourceforge.net/viewvc/jafama/src/odk/lang/FastMath.java?view=markup
    *
    * @param b base
    * @param e exponent
    * @return b^e
    */
   public static int intPow(int b, int e) {
-    if (e <= 1) {
-      if (e == 1) {
-        return b;
-      } else {
-        return 1; // this is also what you get for e < 0 !
-      }
-    } else {
-      if (e == 2) {
-        return b * b;
-      } else {
-        int result = 1;
-        while (e > 0) {
-          if ((e & 1) != 0) {
-            result *= b;
-          }
-          b *= b;
-          e >>= 1;
+    switch (e) {
+    case 0:
+      return 1;
+    case 1:
+      return b;
+    case 2:
+      return b * b;
+    default:
+      int result = 1;
+      int currPow = b;
+      while (e > 0) {
+        if ((e & 1) != 0) {
+          result *= currPow;
         }
-        return result;
+        currPow *= currPow;
+        e >>= 1;
       }
+      return result;
     }
   }
 
   /**
-     * Exponentiation like we learned in grade school:
-     * multiply b by itself e times.  Uses power of two trick.
-     * e must be nonnegative!!!  no checking!!!
-     *
-     * @param b base
-     * @param e exponent
-     * @return b^e
-     */
+   * Exponentiation like we learned in grade school:
+   * multiply b by itself e times.  Uses power of two trick.
+   * e must be nonnegative!!!  no checking!!!
+   *
+   * @param b base
+   * @param e exponent
+   * @return b^e
+   */
   public static float intPow(float b, int e) {
     float result = 1.0f;
     float currPow = b;
@@ -495,7 +489,7 @@ public final class SloppyMath {
 
     double ans = 1.0;
     // do (n-r)x...x((n-r)-((m-k)-1))/n x...x (n-((m-k-1)))
-    // leaving rest of denominator to get to multiply by (n-(m-1))
+    // leaving rest of denominator to get to multimply by (n-(m-1))
     // that's k things which goes into next loop
     for (int nr = n - r, n0 = n; nr > (n - r) - (m - k); nr--, n0--) {
       // System.out.println("Multiplying by " + nr);
@@ -546,7 +540,7 @@ public final class SloppyMath {
   /**
    * Find a one-tailed Fisher's exact probability.  Chance of having seen
    * this or a more extreme departure from what you would have expected
-   * given independence.  I.e., k &ge; the value passed in.
+   * given independence.  I.e., k >= the value passed in.
    * Warning: this was done just for collocations, where you are
    * concerned with the case of k being larger than predicted.  It doesn't
    * correctly handle other cases, such as k being smaller than expected.
@@ -642,8 +636,7 @@ public final class SloppyMath {
   }
 
 
-  private static float[] acosCache; // = null;
-
+  private static float[] acosCache = null;
   /**
    * Compute acos very quickly by directly looking up the value.
    * @param cosValue The cosine of the angle to fine.
@@ -671,13 +664,13 @@ public final class SloppyMath {
   public static double poisson(int x, double lambda) {
     if (x<0 || lambda<=0.0) throw new RuntimeException("Bad arguments: " + x + " and " + lambda);
     double p = (Math.exp(-lambda) * Math.pow(lambda, x)) / factorial(x);
-    if (Double.isInfinite(p) || p<=0.0) throw new RuntimeException(Math.exp(-lambda) +" "+ Math.pow(lambda, x) + ' ' + factorial(x));
+    if (Double.isInfinite(p) || p<=0.0) throw new RuntimeException(Math.exp(-lambda) +" "+ Math.pow(lambda, x) +" "+ factorial(x));
     return p;
   }
 
   /**
    * Uses floating point so that it can represent the really big numbers that come up.
-   * @param x Argument to take factorial of
+   * @param x Argumet to take factorial of
    * @return Factorial of argument
    */
   public static double factorial(int x) {
@@ -692,7 +685,7 @@ public final class SloppyMath {
    * Tests the hypergeometric distribution code, or other functions
    * provided in this module.
    *
-   * @param args Either none, and the log add routines are tested, or the
+   * @param args Either none, and the log add rountines are tested, or the
    *             following 4 arguments: k (cell), n (total), r (row), m (col)
    */
   public static void main(String[] args) {

@@ -3,6 +3,7 @@ package edu.stanford.nlp.parser.dvparser;
 import java.io.FileFilter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -78,7 +79,7 @@ public class DVParser {
     }
     return parses;
   }
-
+  
   static IdentityHashMap<Tree, List<Tree>> getTopParses(LexicalizedParser parser, Options op,
                                                         Collection<Tree> trees, TreeTransformer transformer,
                                                         boolean outputUpdates) {
@@ -102,7 +103,7 @@ public class DVParser {
 
   public void train(List<Tree> sentences, IdentityHashMap<Tree, byte[]> compressedParses, Treebank testTreebank, String modelPath, String resultsRecordPath) throws IOException {
     // process:
-    //   we come up with a cost and a derivative for the model
+    //   we come up with a cost and a derivative for the model 
     //   we always use the gold tree as the example to train towards
     //   every time through, we will look at the top N trees from
     //     the LexicalizedParser and pick the best one according to
@@ -128,7 +129,7 @@ public class DVParser {
     // for AdaGrad
     double[] sumGradSquare = new double[dvModel.totalParamSize()];
     Arrays.fill(sumGradSquare, 1.0);
-
+    
     int numBatches = sentences.size() / op.trainOptions.batchSize + 1;
     System.err.println("Training on " + sentences.size() + " trees in " + numBatches + " batches");
     System.err.println("Times through each training batch: " + op.trainOptions.trainingIterations);
@@ -144,7 +145,7 @@ public class DVParser {
 
         System.err.println("======================================");
         System.err.println("Iteration " + iter + " batch " + batch);
-
+      
         // Each batch will be of the specified batch size, except the
         // last batch will include any leftover trees at the end of
         // the list
@@ -153,7 +154,7 @@ public class DVParser {
         if (endTree + op.trainOptions.batchSize > shuffledSentences.size()) {
           endTree = shuffledSentences.size();
         }
-
+        
         executeOneTrainingBatch(shuffledSentences.subList(startTree, endTree), compressedParses, sumGradSquare);
 
         long totalElapsed = timing.report();
@@ -189,15 +190,15 @@ public class DVParser {
             saveModel(tempName);
           }
 
-          String statusLine = ("CHECKPOINT:" +
-                               " iteration " + iter +
-                               " batch " + batch +
-                               " labelF1 " + NF.format(labelF1) +
-                               " tagF1 " + NF.format(tagF1) +
+          String statusLine = ("CHECKPOINT:" + 
+                               " iteration " + iter + 
+                               " batch " + batch + 
+                               " labelF1 " + NF.format(labelF1) + 
+                               " tagF1 " + NF.format(tagF1) + 
                                " bestLabelF1 " + NF.format(bestLabelF1) +
-                               " model " + tempName +
-                               op.trainOptions +
-                               " word vectors: " + op.lexOptions.wordVectorFile +
+                               " model " + tempName + 
+                               op.trainOptions + 
+                               " word vectors: " + op.lexOptions.wordVectorFile + 
                                " numHid: " + op.lexOptions.numHid);
           System.err.println(statusLine);
           if (resultsRecordPath != null) {
@@ -211,7 +212,7 @@ public class DVParser {
         }
       }
       long totalElapsed = timing.report();
-
+      
       if (maxTrainTimeMillis > 0 && totalElapsed > maxTrainTimeMillis) {
         // no need to debug output, we're done now
         System.err.println("Max training time exceeded, exiting");
@@ -235,14 +236,14 @@ public class DVParser {
     // 1: QNMinimizer, 2: SGD
     switch (MINIMIZER) {
     case (1): {
-      QNMinimizer qn = new QNMinimizer(op.trainOptions.qnEstimates, true);
+      QNMinimizer qn = new QNMinimizer(op.trainOptions.qnEstimates, true);    
       qn.useMinPackSearch();
       qn.useDiagonalScaling();
       qn.terminateOnAverageImprovement(true);
       qn.terminateOnNumericalZero(true);
       qn.terminateOnRelativeNorm(true);
-
-      theta = qn.minimize(gcFunc, op.trainOptions.qnTolerance, theta, op.trainOptions.qnIterationsPerBatch);
+      
+      theta = qn.minimize(gcFunc, op.trainOptions.qnTolerance, theta, op.trainOptions.qnIterationsPerBatch);   	
       break;
     }
     case 2:{
@@ -280,8 +281,8 @@ public class DVParser {
         for (int feature =0; feature<gradf.length;feature++ ) {
           sumGradSquare[feature] = sumGradSquare[feature] + gradf[feature]*gradf[feature];
           theta[feature] = theta[feature] - (op.trainOptions.learningRate * gradf[feature]/(Math.sqrt(sumGradSquare[feature])+eps));
-        }
-      }
+        }    		
+      } 
       break;
     }
     default: {
@@ -304,7 +305,7 @@ public class DVParser {
     this.op = parser.getOp();
 
     if (op.trainOptions.randomSeed == 0) {
-      op.trainOptions.randomSeed = System.nanoTime();
+      op.trainOptions.randomSeed = (new Random()).nextLong();
       System.err.println("Random seed not set, using randomly chosen seed of " + op.trainOptions.randomSeed);
     } else {
       System.err.println("Random seed set to " + op.trainOptions.randomSeed);
@@ -339,7 +340,7 @@ public class DVParser {
       throw new AssertionError("Binary transform and score size not the same");
     }
   }
-
+  
   public boolean runGradientCheck(List<Tree> sentences, IdentityHashMap<Tree, byte[]> compressedParses) {
     System.err.println("Gradient check: converting " + sentences.size() + " compressed trees");
     IdentityHashMap<Tree, List<Tree>> topParses = CacheParseHypotheses.convertToTrees(sentences, compressedParses, op.trainOptions.trainingThreads);
@@ -435,7 +436,7 @@ public class DVParser {
    * <br>
    *  nohup java -mx6g edu.stanford.nlp.parser.dvparser.DVParser -cachedTrees /scr/nlp/data/dvparser/wsj/cached.wsj.train.simple.ser.gz -train -testTreebank  /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj/22 2200-2219 -debugOutputFrequency 400 -nofilter -trainingThreads 5 -parser /u/nlp/data/lexparser/wsjPCFG.nocompact.simple.ser.gz -trainingIterations 40 -batchSize 25 -model /scr/nlp/data/dvparser/wsj/wsj.combine.v2.ser.gz -unkWord "*UNK*" -dvCombineCategories &gt; /scr/nlp/data/dvparser/wsj/wsj.combine.v2.out 2&gt;&amp;1 &amp;
    */
-  public static void main(String[] args)
+  public static void main(String[] args) 
     throws IOException, ClassNotFoundException
   {
     if (args.length == 0) {
@@ -474,7 +475,7 @@ public class DVParser {
     // command line will override these defaults.
     // TODO: if/when we integrate back into the main branch and
     // rebuild models, we can get rid of this
-    List<String> argsWithDefaults = new ArrayList<String>(Arrays.asList(new String[] {
+    List<String> argsWithDefaults = new ArrayList<String>(Arrays.asList(new String[] { 
           "-wordVectorFile", Options.LexOptions.DEFAULT_WORD_VECTOR_FILE,
           "-dvKBest", Integer.toString(TrainOptions.DEFAULT_K_BEST),
           "-batchSize", Integer.toString(TrainOptions.DEFAULT_BATCH_SIZE),
@@ -574,10 +575,10 @@ public class DVParser {
           trainSentences.add(pair.first());
           trainCompressedParses.put(pair.first(), pair.second());
         }
-
+        
         System.err.println("Read in " + cache.size() + " trees from " + path);
       }
-    }
+    } 
 
     if (trainTreebankPath != null) {
       // TODO: make the transformer a member of the model?
@@ -617,12 +618,12 @@ public class DVParser {
       testTreebank.loadPath(testTreebankPath, testTreebankFilter);
       System.err.println("Read in " + testTreebank.size() + " trees for testing");
     }
-
+     
 //    runGradientCheck= true;
     if (runGradientCheck) {
       System.err.println("Running gradient check on " + trainSentences.size() + " trees");
       dvparser.runGradientCheck(trainSentences, trainCompressedParses);
-    }
+    } 
 
     if (runTraining) {
       System.err.println("Training the RNN parser");
@@ -637,9 +638,10 @@ public class DVParser {
       EvaluateTreebank evaluator = new EvaluateTreebank(dvparser.attachModelToLexicalizedParser());
       evaluator.testOnTreebank(testTreebank);
     }
-
-
+    
+    
     System.err.println("Successfully ran DVParser");
   }
 
+  private static final long serialVersionUID = 1;
 }

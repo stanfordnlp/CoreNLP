@@ -35,7 +35,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.io.ExtensionFileFilter;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.StringLabelFactory;
 import edu.stanford.nlp.trees.*;
@@ -555,7 +554,6 @@ public abstract class TregexPattern implements Serializable {
    * <li> <code>-hf &lt;headfinder-class-name&gt;</code> use the specified {@link HeadFinder} class to determine headship relations.
    * <li> <code>-hfArg &lt;string&gt;</code> pass a string argument in to the {@link HeadFinder} class's constructor.  <code>-hfArg</code> can be used multiple times to pass in multiple arguments.
    * <li> <code>-trf &lt;TreeReaderFactory-class-name&gt;</code> use the specified {@link TreeReaderFactory} class to read trees from files.
-   * <li> <code>-e &lt;extension&gt;</code> Only attempt to read files with the given extension. If not provided, will attempt to read all files.</li>
    * <li> <code>-v</code> print every tree that contains no matches of the specified pattern, but print no matches to the pattern.
    *
    * <li> <code>-x</code> Instead of the matched subtree, print the matched subtree's identifying number as defined in <tt>tgrep2</tt>:a
@@ -584,8 +582,6 @@ public abstract class TregexPattern implements Serializable {
     String headFinderOption = "-hf";
     String headFinderArgOption = "-hfArg";
     String trfOption = "-trf";
-    String extensionOption = "-e";
-    String extension = null;
     String headFinderClassName = null;
     String[] headFinderArgs = StringUtils.EMPTY_STRING_ARRAY;
     String treeReaderFactoryClassName = null;
@@ -616,7 +612,6 @@ public abstract class TregexPattern implements Serializable {
     flagMap.put(headFinderOption,1);
     flagMap.put(headFinderArgOption,1);
     flagMap.put(trfOption,1);
-    flagMap.put(extensionOption, 1);
     flagMap.put(macroOption, 1);
     flagMap.put(yieldOnly, 0);
     flagMap.put(quietMode, 0);
@@ -648,7 +643,7 @@ public abstract class TregexPattern implements Serializable {
     }
 
     if (args.length < 1) {
-      errPW.println("Usage: java edu.stanford.nlp.trees.tregex.TregexPattern [-T] [-C] [-w] [-f] [-o] [-n] [-s] [-filter]  [-hf class] [-trf class] [-h handle]* [-e ext] pattern [filepath]");
+      errPW.println("Usage: java edu.stanford.nlp.trees.tregex.TregexPattern [-T] [-C] [-w] [-f] [-o] [-n] [-s] [-filter]  [-hf class] [-trf class] [-h handle]* pattern [filepath]");
       return;
     }
     String matchString = args[0];
@@ -666,9 +661,6 @@ public abstract class TregexPattern implements Serializable {
     if (argsMap.containsKey(trfOption)) {
       treeReaderFactoryClassName = argsMap.get(trfOption)[0];
       errPW.println("Using tree reader factory " + treeReaderFactoryClassName + "...");
-    }
-    if (argsMap.containsKey(extensionOption)) {
-      extension = argsMap.get(extensionOption)[0];
     }
     if (argsMap.containsKey(printAllTrees)) {
       TRegexTreeVisitor.printTree = true;
@@ -751,9 +743,8 @@ public abstract class TregexPattern implements Serializable {
         int last = args.length - 1;
         errPW.println("Reading trees from file(s) " + args[last]);
         TreeReaderFactory trf = getTreeReaderFactory(treeReaderFactoryClassName);
-
         treebank = new DiskTreebank(trf, encoding);
-        treebank.loadPath(args[last], extension, true);
+        treebank.loadPath(args[last], null, true);
       }
       TRegexTreeVisitor vis = new TRegexTreeVisitor(p, handles, encoding);
 

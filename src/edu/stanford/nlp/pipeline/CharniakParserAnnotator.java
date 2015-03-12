@@ -8,7 +8,6 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.parser.common.ParserUtils;
 import edu.stanford.nlp.parser.charniak.CharniakParser;
 import edu.stanford.nlp.trees.EnglishGrammaticalStructureFactory;
-import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.GrammaticalStructureFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
@@ -65,7 +64,7 @@ public class CharniakParserAnnotator implements Annotator {
           tree = ParserUtils.xTree(words);
         }
 
-        ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree, GrammaticalStructure.Extras.NONE);
+        ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree);
       }
     } else {
       throw new RuntimeException("unable to find sentences in: " + annotation);

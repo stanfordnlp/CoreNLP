@@ -28,8 +28,6 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.international.french.FrenchUnknownWordSignatures;
-import edu.stanford.nlp.international.spanish.SpanishUnknownWordSignatures;
-import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -43,11 +41,9 @@ import java.util.*;
  * <table>
  * <tr><td>Name</td><td>Args</td><td>Effect</td></tr>
  * <tr><td>wordshapes</td><td>left, right</td>
- *     <td>Word shape features, e.g., transform Foo5 into Xxx#
+ *     <td>Word shape features, eg transform Foo5 into Xxx#
  *         (not exactly like that, but that general idea).
  *         Creates individual features for each word left ... right.
- *         If just one argument wordshapes(-2) is given, then end is taken as 0.
-  *        If left is not less than or equal to right, no features are made.
  *         Fairly English-specific.</td></tr>
  * <tr><td>unicodeshapes</td><td>left, right</td>
  *     <td>Same thing, but works for unicode characters generally.</td></tr>
@@ -64,8 +60,8 @@ import java.util.*;
  *     <td>Features for concatenated prefix and suffix.  One feature for
  *         each of length 1 ... length.</td></tr>
  * <tr><td>capitalizationsuffix</td><td>length</td>
- *     <td>Current word only.  Combines character suffixes up to size length with a
- *         binary value for whether the word contains any capital letters.</td></tr>
+ *     <td>Current word only.  Combines the suffix with a binary value
+ *         for whether the word contains any capital letters.</td></tr>
  * <tr><td>distsim</td><td>filename, left, right</td>
  *     <td>Individual features for each position left ... right.
  *         Compares that word with the dictionary in filename.</td></tr>
@@ -188,29 +184,6 @@ public class ExtractorFramesRare {
     new ExtractorFrenchPluralSuffix();
 
   private static final Extractor[] french_unknown_extractors = { cWordFrenchNounSuffix, cWordFrenchAdvSuffix, cWordFrenchVerbSuffix, cWordFrenchAdjSuffix, cWordFrenchPluralSuffix };
-
-  /**
-   * Extracts Spanish gender patterns.
-   */
-  private static final ExtractorSpanishGender cWordSpanishGender =
-    new ExtractorSpanishGender();
-
-  /**
-   * Matches conditional-tense verb suffixes.
-   */
-  private static final ExtractorSpanishConditionalSuffix cWordSpanishConditionalSuffix =
-    new ExtractorSpanishConditionalSuffix();
-
-  /**
-   * Matches imperfect-tense verb suffixes (-er, -ir verbs).
-   */
-  private static final ExtractorSpanishImperfectErIrSuffix cWordSpanishImperfectErIrSuffix =
-    new ExtractorSpanishImperfectErIrSuffix();
-
-  private static final Extractor[] spanish_unknown_extractors = {
-    cWordSpanishGender, cWordSpanishConditionalSuffix,
-    cWordSpanishImperfectErIrSuffix
-  };
 
 
   private ExtractorFramesRare() {
@@ -1255,8 +1228,8 @@ class ExtractorWordPref extends RareExtractor {
 
 class ExtractorsConjunction extends RareExtractor {
 
-  private final Extractor extractor1;
-  private final Extractor extractor2;
+  private Extractor extractor1;
+  private Extractor extractor2;
 
   volatile boolean isLocal, isDynamic;
 
@@ -1290,13 +1263,6 @@ class ExtractorsConjunction extends RareExtractor {
 
   @Override public boolean isLocal() { return isLocal; }
   @Override public boolean isDynamic() { return isDynamic; }
-
-  @Override
-  public String toString() {
-    return StringUtils.getShortClassName(this) + '(' + extractor1 + ',' + extractor2 + ')';
-  }
-
-
 }
 
 
@@ -1554,44 +1520,5 @@ class ExtractorFrenchPluralSuffix extends CWordBooleanExtractor {
   @Override
   boolean extractFeature(String cword) {
     return FrenchUnknownWordSignatures.hasPossiblePlural(cword);
-  }
-}
-
-
-class ExtractorSpanishGender extends RareExtractor {
-
-  private static final long serialVersionUID = -7359312929174070404L;
-
-  @Override
-  String extract(History h, PairsHolder pH) {
-    String cword = pH.getWord(h, 0);
-    if (SpanishUnknownWordSignatures.hasMasculineSuffix(cword))
-      return "m";
-    else if (SpanishUnknownWordSignatures.hasFeminineSuffix(cword))
-      return "f";
-    else
-      return "";
-  }
-}
-
-
-class ExtractorSpanishConditionalSuffix extends CWordBooleanExtractor {
-
-  private static final long serialVersionUID = 4383251116043848632L;
-
-  @Override
-  boolean extractFeature(String cword) {
-    return SpanishUnknownWordSignatures.hasConditionalSuffix(cword);
-  }
-}
-
-
-class ExtractorSpanishImperfectErIrSuffix extends CWordBooleanExtractor {
-
-  private static final long serialVersionUID = -5804047931816433075L;
-
-  @Override
-  boolean extractFeature(String cword) {
-    return SpanishUnknownWordSignatures.hasImperfectErIrSuffix(cword);
   }
 }

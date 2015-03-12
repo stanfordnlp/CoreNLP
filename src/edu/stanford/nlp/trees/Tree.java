@@ -8,7 +8,6 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.*;
-import java.util.function.Predicate;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasIndex;
@@ -487,7 +486,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     return constituentsSet;
   }
 
-  public Set<Constituent> constituents(ConstituentFactory cf, boolean charLevel, Predicate<Tree> filter) {
+  public Set<Constituent> constituents(ConstituentFactory cf, boolean charLevel, Filter<Tree> filter) {
     Set<Constituent> constituentsSet = Generics.newHashSet();
     constituents(constituentsSet, 0, cf, charLevel, filter, -1, 0);
     return constituentsSet;
@@ -544,7 +543,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @param depth           The current depth
    * @return Index of right frontier of Constituent
    */
-  private int constituents(Set<Constituent> constituentsSet, int left, ConstituentFactory cf, boolean charLevel, Predicate<Tree> filter, int maxDepth, int depth) {
+  private int constituents(Set<Constituent> constituentsSet, int left, ConstituentFactory cf, boolean charLevel, Filter<Tree> filter, int maxDepth, int depth) {
 
     if(isPreTerminal())
       return left + ((charLevel) ? firstChild().value().length() : 1);
@@ -560,7 +559,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       // System.err.println("  position went to " + position);
     }
 
-    if ((filter == null || filter.test(this)) &&
+    if ((filter == null || filter.accept(this)) &&
         (maxDepth < 0 || depth <= maxDepth)) {
       //Compute span of entire tree at the end of recursion
       constituentsSet.add(cf.newConstituent(left, position - 1, label(), score()));
@@ -1082,10 +1081,10 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
   /**
-   * Finds the head words of each tree and assigns
-   * HeadWordLabelAnnotation on each node pointing to the correct
-   * CoreLabel.  This relies on the nodes being CoreLabels, so it
-   * throws an IllegalArgumentException if this is ever not true.
+   * Finds the head words of each tree and assigns HeadWordAnnotation
+   * to each node pointing to the correct node.  This relies on the
+   * nodes being CoreLabels, so it throws an IllegalArgumentException
+   * if this is ever not true.
    */
   public void percolateHeadAnnotations(HeadFinder hf) {
     if (!(label() instanceof CoreLabel)) {
@@ -1098,8 +1097,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     }
 
     if (isPreTerminal()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, (CoreLabel) children()[0].label());
-      nodeLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, nodeLabel);
+      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, children()[0]);
+      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, this);
       return;
     }
 
@@ -1111,18 +1110,18 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     if (head == null) {
       throw new NullPointerException("HeadFinder " + hf + " returned null for " + this);
     } else if (head.isLeaf()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, (CoreLabel) head.label());
-      nodeLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, (CoreLabel) head.parent(this).label());
+      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, head);
+      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, head.parent(this));
     } else if (head.isPreTerminal()) {
-      nodeLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, (CoreLabel) head.children()[0].label());
-      nodeLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, (CoreLabel) head.label());
+      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, head.children()[0]);
+      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, head);
     } else {
       if (!(head.label() instanceof CoreLabel)) {
         throw new AssertionError("Horrible bug");
       }
       CoreLabel headLabel = (CoreLabel) head.label();
-      nodeLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class));
-      nodeLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagLabelAnnotation.class));
+      nodeLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class));
+      nodeLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, headLabel.get(TreeCoreAnnotations.HeadTagAnnotation.class));
     }
   }
 
@@ -1205,7 +1204,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     return dependencies(Filters.<Dependency<Label, Label, Object>>acceptFilter());
   }
 
-  public Set<Dependency<Label, Label, Object>> dependencies(Predicate<Dependency<Label, Label, Object>> f) {
+  public Set<Dependency<Label, Label, Object>> dependencies(Filter<Dependency<Label, Label, Object>> f) {
     return dependencies(f, true, true, false);
   }
 
@@ -1247,7 +1246,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *          accepted by the Filter
    * @return Set of dependencies (each a Dependency)
    */
-  public Set<Dependency<Label, Label, Object>> dependencies(Predicate<Dependency<Label, Label, Object>> f, boolean isConcrete, boolean copyLabel, boolean copyPosTag) {
+  public Set<Dependency<Label, Label, Object>> dependencies(Filter<Dependency<Label, Label, Object>> f, boolean isConcrete, boolean copyLabel, boolean copyPosTag) {
     Set<Dependency<Label, Label, Object>> deps = Generics.newHashSet();
     for (Tree node : this) {
       // Skip leaves and unary re-writes
@@ -1279,7 +1278,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
               new UnnamedConcreteDependency(headLabel, depLabel) :
               new UnnamedDependency(headLabel, depLabel);
 
-          if (f.test(dependency)) {
+          if (f.accept(dependency)) {
             deps.add(dependency);
           }
         }
@@ -1303,7 +1302,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *           <code>CoreLabel</code>s, which each contain a tag(), word(),
    *           and value(), the last two of which are identical).
    */
-  public Set<Dependency<Label, Label, Object>> mapDependencies(Predicate<Dependency<Label, Label, Object>> f, HeadFinder hf) {
+  public Set<Dependency<Label, Label, Object>> mapDependencies(Filter<Dependency<Label, Label, Object>> f, HeadFinder hf) {
     if (hf == null) {
       throw new IllegalArgumentException("mapDependencies: need HeadFinder");
     }
@@ -1332,7 +1331,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
          //System.err.println("transformed to " + dml.toString("value{map}"));
         if (dwt != hwt) {
           Dependency<Label, Label, Object> p = new UnnamedDependency(hwt.label(), dwt.label());
-          if (f.test(p)) {
+          if (f.accept(p)) {
             deps.add(p);
           }
         }
@@ -1358,7 +1357,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *           <code>CoreLabel</code>s, which each contain a tag(), word(),
    *           and value(), the last two of which are identical).
    */
-  public Set<Dependency<Label, Label, Object>> mapDependencies(Predicate<Dependency<Label, Label, Object>> f, HeadFinder hf, String rootName) {
+  public Set<Dependency<Label, Label, Object>> mapDependencies(Filter<Dependency<Label, Label, Object>> f, HeadFinder hf, String rootName) {
     Set<Dependency<Label, Label, Object>> deps = mapDependencies(f, hf);
     if(rootName != null) {
       Label hl = headTerminal(hf).label();
@@ -1523,7 +1522,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * is used.
    * <p/>
    * <i>Implementation note:</i> when we summon up enough courage, this
-   * method will be changed to take and return a {@code List<W extends TaggedWord>}.
+   * method will be changed to take and return a List<W extends TaggedWord>.
    *
    * @param ty The list in which the tagged yield of the tree will be
    *           placed. Normally, this will be empty when the routine is called,
@@ -1544,10 +1543,12 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
   public List<LabeledWord> labeledYield(List<LabeledWord> ty) {
-    if (isPreTerminal()) {
-      ty.add(new LabeledWord(firstChild().label(), label()));
+    Tree[] kids = children();
+    // this inlines the content of isPreTerminal()
+    if (kids.length == 1 && kids[0].isLeaf()) {
+      ty.add(new LabeledWord(kids[0].label(), label()));
     } else {
-      for (Tree kid : children()) {
+      for (Tree kid : kids) {
         kid.labeledYield(ty);
       }
     }
@@ -1555,29 +1556,29 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
   public List<CoreLabel> taggedLabeledYield() {
-    List<CoreLabel> ty = new ArrayList<CoreLabel>();
-    taggedLabeledYield(ty, 0);
-    return ty;
+  	List<CoreLabel> ty = new ArrayList<CoreLabel>();
+  	taggedLabeledYield(ty,0);
+  	return ty;
   }
 
   private int taggedLabeledYield(List<CoreLabel> ty, int termIdx) {
-    if (isPreTerminal()) {
-      CoreLabel taggedWord = new CoreLabel();
-      final String tag = (value() == null) ? "" : value();
-      taggedWord.setValue(tag);
-      taggedWord.setTag(tag);
-      taggedWord.setIndex(termIdx);
-      taggedWord.setWord(firstChild().value());
-      ty.add(taggedWord);
+  	if(isPreTerminal()) {
+  		CoreLabel taggedWord = new CoreLabel();
+  		final String tag = (value() == null) ? "" : value();
+  		taggedWord.setValue(tag);
+  		taggedWord.setTag(tag);
+  		taggedWord.setIndex(termIdx);
+  		taggedWord.setWord(firstChild().value());
+  		ty.add(taggedWord);
 
-      return termIdx + 1;
+  		return termIdx + 1;
 
-    } else {
-      for (Tree kid : getChildrenAsList())
-        termIdx = kid.taggedLabeledYield(ty, termIdx);
-    }
+  	} else {
+  		for(Tree kid : getChildrenAsList())
+  			termIdx = kid.taggedLabeledYield(ty, termIdx);
+  	}
 
-    return termIdx;
+		return termIdx;
   }
 
   /**
@@ -1882,36 +1883,6 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     return t;
   }
 
-  /**
-   * Returns a deep copy of everything but the leaf labels.  The leaf
-   * labels are reused from the original tree.  This is useful for
-   * cases such as the dependency converter, which wants to finish
-   * with the same labels in the dependencies as the parse tree.
-   */
-  public Tree treeSkeletonConstituentCopy() {
-    return treeSkeletonConstituentCopy(treeFactory(), label().labelFactory());
-  }
-
-  public Tree treeSkeletonConstituentCopy(TreeFactory tf, LabelFactory lf) {
-    if (isLeaf()) {
-      // Reuse the current label for a leaf.  This way, trees which
-      // are based on tokens in a sentence can have the same tokens
-      // even after a "deep copy".
-      // TODO: the LabeledScoredTreeFactory copies the label for a new
-      // leaf.  Perhaps we could add a newLeafNoCopy or something like
-      // that for efficiency.
-      Tree newLeaf = tf.newLeaf(label());
-      newLeaf.setLabel(label());
-      return newLeaf;
-    }
-    Label label = lf.newLabel(label());
-    Tree[] kids = children();
-    List<Tree> newKids = new ArrayList<Tree>(kids.length);
-    for (Tree kid : kids) {
-      newKids.add(kid.treeSkeletonConstituentCopy(tf, lf));
-    }
-    return tf.newTreeNode(label, newKids);
-  }
 
   /**
    * Create a transformed Tree.  The tree is traversed in a depth-first,
@@ -1965,7 +1936,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *                   keep this node, false to mean delete it
    * @return a filtered copy of the tree
    */
-  public Tree spliceOut(final Predicate<Tree> nodeFilter) {
+  public Tree spliceOut(final Filter<Tree> nodeFilter) {
     return spliceOut(nodeFilter, treeFactory());
   }
 
@@ -1987,7 +1958,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    *                   the root node is deleted.
    * @return a filtered copy of the tree.
    */
-  public Tree spliceOut(final Predicate<Tree> nodeFilter, final TreeFactory tf) {
+  public Tree spliceOut(final Filter<Tree> nodeFilter, final TreeFactory tf) {
     List<Tree> l = spliceOutHelper(nodeFilter, tf);
     if (l.isEmpty()) {
       return null;
@@ -1999,7 +1970,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
 
-  private List<Tree> spliceOutHelper(Predicate<Tree> nodeFilter, TreeFactory tf) {
+  private List<Tree> spliceOutHelper(Filter<Tree> nodeFilter, TreeFactory tf) {
     // recurse over all children first
     Tree[] kids = children();
     List<Tree> l = new ArrayList<Tree>();
@@ -2007,7 +1978,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       l.addAll(kid.spliceOutHelper(nodeFilter, tf));
     }
     // check if this node is being spliced out
-    if (nodeFilter.test(this)) {
+    if (nodeFilter.accept(this)) {
       // no, so add our children and return
       Tree t;
       if ( ! l.isEmpty()) {
@@ -2047,7 +2018,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return a filtered copy of the tree, including the possibility of
    *         <code>null</code> if the root node of the tree is filtered
    */
-  public Tree prune(final Predicate<Tree> filter) {
+  public Tree prune(final Filter<Tree> filter) {
     return prune(filter, treeFactory());
   }
 
@@ -2064,9 +2035,9 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return a filtered copy of the tree, including the possibility of
    *         <code>null</code> if the root node of the tree is filtered
    */
-  public Tree prune(Predicate<Tree> filter, TreeFactory tf) {
+  public Tree prune(Filter<Tree> filter, TreeFactory tf) {
     // is the current node to be pruned?
-    if ( ! filter.test(this)) {
+    if ( ! filter.accept(this)) {
       return null;
     }
     // if not, recurse over all children
@@ -2851,12 +2822,6 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     }
   }
 
-  /** Index all spans (constituents) in the tree.
-   *  For this, spans uses 0-based indexing and the span records the fencepost
-   *  to the left of the first word and after the last word of the span.
-   *  The spans are only recorded if the Tree has labels of a class which
-   *  extends CoreMap.
-   */
   public void indexSpans() {
     indexSpans(0);
   }
@@ -2869,7 +2834,6 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * Assigns span indices (BeginIndexAnnotation and EndIndexAnnotation) to all nodes in a tree.
    * The beginning index is equivalent to the IndexAnnotation of the first leaf in the constituent.
    * The end index is equivalent to the first integer after the IndexAnnotation of the last leaf in the constituent.
-   *
    * @param startIndex Begin indexing at this value
    */
   public Pair<Integer, Integer> indexSpans(MutableInteger startIndex) {
@@ -2894,7 +2858,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       afl.set(CoreAnnotations.BeginIndexAnnotation.class, start);
       afl.set(CoreAnnotations.EndIndexAnnotation.class, end);
     }
-    return new Pair<>(start, end);
+    return new Pair<Integer, Integer>(start, end);
   }
 
 }

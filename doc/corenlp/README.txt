@@ -42,14 +42,6 @@ LICENSE
 CHANGES
 ---------------------------------
 
-2015-01-29    3.5.1     NER, dependency parser, SPIED improvements; 
-                        general bugfixes 
-
-2014-10-26    3.5.0     Upgrade to Java 1.8; add annotators for 
-                        dependency parsing and relation extraction 
-
-2014-08-27    3.4.1     Add Spanish models 
-
 2014-06-16      3.4     Add shift reduce parser 
 
 2014-01-04    3.3.1     Bugfix release

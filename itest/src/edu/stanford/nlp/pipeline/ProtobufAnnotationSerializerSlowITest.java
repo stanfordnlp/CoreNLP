@@ -27,7 +27,6 @@ import static junit.framework.Assert.*;
  */
 public class ProtobufAnnotationSerializerSlowITest {
 
-
   /**
    * If set to true, all the annotators are tested with a long document,
    * rather than with the default shorter text snippet.
@@ -65,10 +64,7 @@ public class ProtobufAnnotationSerializerSlowITest {
     if (doc.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       for (CoreMap sentence : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
         if (sentence.containsKey(CoreAnnotations.TokensAnnotation.class)) {
-          boolean hasTokenBeginAnnotation = sentence.size() > 0 && sentence.get(CoreAnnotations.TokensAnnotation.class).get(0).has(CoreAnnotations.TokenBeginAnnotation.class);
-          if (hasTokenBeginAnnotation) {
-            sentence.set(CoreAnnotations.NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(sentence));
-          }
+          sentence.set(CoreAnnotations.NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(sentence));
         }
       }
     }
@@ -188,11 +184,10 @@ public class ProtobufAnnotationSerializerSlowITest {
    * @return A (unique) array of all the possible annotators, in no particular order.
    */
   private static String[] possibleAnnotators() {
-    Set<String> annotators = new LinkedHashSet<>();
+    Set<String> annotators = new HashSet<String>();
     for (Field f : Annotator.class.getDeclaredFields()) {
       if (f.getName().toLowerCase().startsWith("stanford") &&
-          (f.getModifiers() & Modifier.STATIC) != 0 &&
-          !f.getName().toUpperCase().equals("STANFORD_COLUMN_DATA_CLASSIFIER")) { // ignore the column data classifier
+          (f.getModifiers() & Modifier.STATIC) != 0) {
         try {
           annotators.add((String) f.get(null));
         } catch (IllegalAccessException e) {
@@ -203,41 +198,6 @@ public class ProtobufAnnotationSerializerSlowITest {
     return annotators.toArray(new String[annotators.size()]);
   }
 
-  private void testAnnotators(String annotators) {
-    try {
-      AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
-      // Write
-      Annotation doc = new StanfordCoreNLP(new Properties(){{
-        setProperty("annotators", annotators);
-      }}).process(THOROUGH_TEST ? prideAndPrejudiceChapters1to5 : prideAndPrejudiceFirstBit);
-      ByteArrayOutputStream ks = new ByteArrayOutputStream();
-      serializer.write(doc, ks).close();
-
-      // Read
-      InputStream kis = new ByteArrayInputStream(ks.toByteArray());
-      Pair<Annotation, InputStream> pair = serializer.read(kis);
-      pair.second.close();
-      Annotation readDoc = pair.first;
-      kis.close();
-
-      sameAsRead(doc, readDoc);
-    } catch (Exception e) { throw new RuntimeException(e); }
-  }
-
-  /*
-  @Test
-  public void testMentions() {
-    testAnnotators("tokenize,ssplit,pos,lemma,ner,mentions");
-  }
-  */
-
-
-  @Test
-  public void testSentiment() {
-    testAnnotators("tokenize,ssplit,pos,parse,sentiment");
-  }
-
-  /*
   @Test
   public void testGetPossibleAnnotators() {
     assertNotNull(possibleAnnotators());
@@ -275,7 +235,7 @@ public class ProtobufAnnotationSerializerSlowITest {
 
     // Check size
     assertTrue("" + compressedProto.length, compressedProto.length < 290000);
-    assertTrue("" + uncompressedProto.length, uncompressedProto.length < 1100000);
+    assertTrue("" + uncompressedProto.length, uncompressedProto.length < 1000000);
   }
 
   @Test
@@ -363,39 +323,39 @@ public class ProtobufAnnotationSerializerSlowITest {
   }
 
   @Test
-  public void testSerializeLanguage() {
-    testAnnotators("tokenize,ssplit,parse");
-    testAnnotators("tokenize,ssplit,pos,depparse");
-  }
+  public void testSerializeRelation() {
+    try {
+      AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+      // Write
+      Annotation doc = new StanfordCoreNLP(new Properties(){{
+        setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,relation");
+      }}).process(prideAndPrejudiceChapters1to5);
+      ByteArrayOutputStream ks = new ByteArrayOutputStream();
+      serializer.write(doc, ks).close();
 
-  @Test
-  public void testRelation() {
-    testAnnotators("tokenize,ssplit,pos,lemma,ner,parse,relation");
-  }
+      // Read
+      InputStream kis = new ByteArrayInputStream(ks.toByteArray());
+      Pair<Annotation, InputStream> pair = serializer.read(kis);
+      pair.second.close();
+      Annotation readDoc = pair.first;
+      kis.close();
 
-  @Test
-  public void testSerializeSSplitTokensRegression() {
-    testAnnotators("tokenize,ssplit");
-  }
+      sameAsRead(doc, readDoc);
+    } catch (Exception e) { throw new RuntimeException(e); }
 
-  @Test
-  public void testSerializeNatLog() {
-    testAnnotators("tokenize,ssplit,pos,lemma,parse,natlog");
   }
-  */
 
   /**
    * Is the protobuf annotator "CoreNLP complete?"
    * That is, does it effectively save every combination of annotators possible?
    */
-  /*
   @Test
   public void testAllAnnotatorCombinations() {
     String[] possibleAnnotators = possibleAnnotators();
     Properties props = new Properties();
     for (int i = 1; i < (0x1 << (possibleAnnotators.length)); ++i) {
       // Get annotators
-      Set<String> annotatorsToConsider = new LinkedHashSet<>();
+      Set<String> annotatorsToConsider = new HashSet<String>();
       for (int k = 0; k < possibleAnnotators.length; ++k) {
         int mask = (0x1 << k);
         if ((i & mask) != 0) { annotatorsToConsider.add(possibleAnnotators[k]); }
@@ -403,8 +363,8 @@ public class ProtobufAnnotationSerializerSlowITest {
 
       // Sort annotators
       new StanfordCoreNLP();  // construct annotator pool
-      List<String> annotators = new ArrayList<>();
-      Set<String> annotatorsAdded = new LinkedHashSet<>();
+      List<String> annotators = new ArrayList<String>();
+      Set<String> annotatorsAdded = new HashSet<String>();
       boolean wasChanged = true;
       while (wasChanged) {
         wasChanged = false;
@@ -428,9 +388,29 @@ public class ProtobufAnnotationSerializerSlowITest {
       if (!annotatorsToConsider.isEmpty()) { continue; }  // continue if we couldn't add all the annotators
 
       // Create pipeline
-      testAnnotators(StringUtils.join(annotators, ","));
+      props.setProperty("annotators", StringUtils.join(annotators, ","));
+      StanfordCoreNLP pipeline;
+      pipeline = new StanfordCoreNLP(props);
+
+
+      // Test pipeline
+      try {
+        System.out.println("Testing " + props.getProperty("annotators"));
+        AnnotationSerializer serializer = new ProtobufAnnotationSerializer();
+        // Write
+        Annotation doc = pipeline.process(THOROUGH_TEST ? prideAndPrejudiceChapters1to5 : prideAndPrejudiceFirstBit);
+        ByteArrayOutputStream ks = new ByteArrayOutputStream();
+        serializer.write(doc, ks).close();
+
+        // Read
+        InputStream kis = new ByteArrayInputStream(ks.toByteArray());
+        Pair<Annotation, InputStream> pair = serializer.read(kis);
+        pair.second.close();
+        Annotation readDoc = pair.first;
+        kis.close();
+
+        sameAsRead(doc, readDoc);
+      } catch (Exception e) { throw new RuntimeException(e); }
     }
   }
-  */
-
 }

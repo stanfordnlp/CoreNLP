@@ -101,28 +101,11 @@
       <!-- <compilerarg value="-Xmaxerrs"/>
            <compilerarg value="20"/> -->
         <compilerarg value="-Xlint:cast"/>
-        <compilerarg value="-Xlint:classfile"/>
-        <compilerarg value="-Xlint:divzero"/>
-        <compilerarg value="-Xlint:empty"/>
         <compilerarg value="-Xlint:finally"/>
         <compilerarg value="-Xlint:path"/>
-        <compilerarg value="-Xlint:try"/>
-<!--
-        <compilerarg value="-Xlint:deprecation"/>
-        <compilerarg value="-Xlint:dep-ann"/>
-        <compilerarg value="-Xlint:fallthrough"/>
-        <compilerarg value="-Xlint:options"/>
-        <compilerarg value="-Xlint:overrides"/>
-        <compilerarg value="-Xlint:processing"/>
-        <compilerarg value="-Xlint:rawtypes"/>
-        <compilerarg value="-Xlint:serial"/>
-        <compilerarg value="-Xlint:static"/>
-        <compilerarg value="-Xlint:unchecked"/>
-        <compilerarg value="-Xlint:varargs"/>
--->
-<!--    <compilerarg value="-Xlint:all"/>
+   <!-- <compilerarg value="-Xlint"/>
         <compilerarg value="-Xmaxwarns"/>
-        <compilerarg value="10000"/>  -->
+        <compilerarg value="10000"/> -->
     </javac>
   </target>
 
@@ -250,15 +233,15 @@
       <echo message="Building from ${source.path}/@{webapp.path}"/>
 
       <!-- First, compile the .jsp into .java -->
-      <jasper2
+      <jasper2 
          validateXml="false" 
          uriroot="${source.path}/@{webapp.path}" 
          webXmlFragment="${source.path}/@{webapp.path}/WEB-INF/generated.xml" 
          addWebXmlMappings="true"
          outputDir="${build.path}/@{webapp.path}/WEB-INF/src" /> 
-
+      
       <mkdir dir="${build.path}/@{webapp.path}/WEB-INF/classes"/>
-
+      
       <!-- Then compile the .java into .class -->
       <javac destdir="${build.path}/@{webapp.path}/WEB-INF/classes"
              optimize="${compile.optimize}"
@@ -322,11 +305,7 @@
     <buildjsp webapp.path="edu/stanford/nlp/parser/webapp"
               webapp.war="parser.war"
               webapp.jar="javanlp-core.jar">
-      <webapp.lib>
-        <lib dir="/u/nlp/data/StanfordCoreNLPModels">
-          <include name="stanford-spanish-corenlp-models-current.jar"/>
-        </lib>
-      </webapp.lib>
+      <webapp.lib/> <!-- don't need anything! -->
       <webapp.data>
         <zipfileset prefix="WEB-INF/data"
                     file="/u/nlp/data/lexparser/englishPCFG.ser.gz"/>
@@ -338,8 +317,6 @@
                     file="/u/nlp/data/gale/segtool/stanford-seg/classifiers-2010/05202008-ctb6.processed-chris6.lex.gz"/>
         <zipfileset prefix="WEB-INF/data/chinesesegmenter"
                     dir="/u/nlp/data/gale/segtool/stanford-seg/releasedata"/>
-        <zipfileset prefix="WEB-INF/data"
-                    file="/u/nlp/data/lexparser/spanishPCFG.ser.gz"/>
         <zipfileset file="${data.path}/webapps/favicon.ico"/>
       </webapp.data>
     </buildjsp>
@@ -387,7 +364,10 @@
       </lib>
       <lib dir="${basedir}/lib">
         <include name="commons-lang3-3.1.jar"/>
-        <include name="xom-1.2.10.jar"/>
+        <include name="xom-1.2.8.jar"/>
+        <include name="xalan.jar"/>
+        <include name="serializer.jar"/>
+        <include name="xercesImpl.jar"/>
         <include name="xml-apis.jar"/>
         <include name="joda-time.jar"/>
         <include name="jollyday-0.4.7.jar"/>
@@ -409,30 +389,5 @@
     </war>
   </target>
 
-  <property environment="env" />
-
-  <condition property="version1.7">
-    <equals arg1="${ant.java.version}" arg2="1.7" />
-  </condition>
-
-  <target name="tregex-osx" if="version1.7" depends="jar"
-          description="Build an OS X app for TregexGUI">
-    <fail unless="env.JAVA_HOME"
-          message="Environment variable JAVA_HOME not set." />
-
-    <taskdef name="bundleapp"
-             classname="com.oracle.appbundler.AppBundlerTask"
-             classpath="lib/appbundler-1.0.jar" />
-
-    <bundleapp outputdirectory="."
-               name="Stanford Tregex"
-               displayname="Stanford Tregex"
-               icon="doc/tregex/nlp-logo-6x6.icns"
-               identifier="edu.stanford.nlp.trees.tregex.gui.TregexGUI"
-               mainclassname="edu.stanford.nlp.trees.tregex.gui.TregexGUI">
-      <runtime dir="${env.JAVA_HOME}" />
-      <classpath file="javanlp-core.jar" />
-    </bundleapp>
-  </target>
-
 </project>
+

@@ -1257,7 +1257,7 @@ public class QuantifiableEntityNormalizer {
 
   /**
    * Identifies contiguous MONEY, TIME, DATE, or PERCENT entities
-   * and tags each of their constituents with a "normalizedQuantity"
+   * and tags each of their consitituents with a "normalizedQuantity"
    * label which contains the appropriate normalized string corresponding to
    * the full quantity. Quantities are not concatenated
    *
@@ -1271,45 +1271,6 @@ public class QuantifiableEntityNormalizer {
   public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> l, boolean concatenate) {
     addNormalizedQuantitiesToEntities(l, concatenate, false);
   }
-
-  private static boolean checkStrings(String s1, String s2) {
-    if (s1 == null || s2 == null) {
-      return s1 == s2;
-    } else {
-      return s1.equals(s2);
-    }
-  }
-
-  private static boolean checkNumbers(Number n1, Number n2) {
-    if (n1 == null || n2 == null) {
-      return n1 == n2;
-    } else {
-      return n1.equals(n2);
-    }
-  }
-
-  public static <E extends CoreMap> boolean isCompatible(String tag, E prev, E cur) {
-    if ("NUMBER".equals(tag) || "ORDINAL".equals(tag)) {
-      // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
-      Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
-      Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
-      boolean compatible = checkNumbers(n1,n2);
-      if (!compatible) return compatible;
-    }
-
-    if ("TIME".equals(tag) || "SET".equals(tag) || "DATE".equals(tag) || "DURATION".equals(tag)) {
-      // Check timex...
-      Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
-      Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
-      String tid1 = (timex1 != null)? timex1.tid():null;
-      String tid2 = (timex2 != null)? timex2.tid():null;
-      boolean compatible = checkStrings(tid1,tid2);
-      if (!compatible) return compatible;
-    }
-
-    return true;
-  }
-
   /**
    * Identifies contiguous MONEY, TIME, DATE, or PERCENT entities
    * and tags each of their constituents with a "normalizedQuantity"
@@ -1351,10 +1312,9 @@ public class QuantifiableEntityNormalizer {
         }
       }
 
-      E wprev = (i > 0)? list.get(i-1):null;
       // if the current wi is a non-continuation and the last one was a
       // quantity, we close and process the last segment.
-      if ((currNerTag == null || ! currNerTag.equals(prevNerTag) || !isCompatible(prevNerTag, wprev, wi)) && quantifiable.contains(prevNerTag)) {
+      if ((currNerTag == null || ! currNerTag.equals(prevNerTag)) && quantifiable.contains(prevNerTag)) {
         String compModifier = null;
         // special handling of TIME
         switch (prevNerTag) {

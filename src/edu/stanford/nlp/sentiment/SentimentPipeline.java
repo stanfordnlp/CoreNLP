@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -14,6 +15,7 @@ import java.util.Properties;
 import org.ejml.simple.SimpleMatrix;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
@@ -24,6 +26,7 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 
@@ -35,16 +38,12 @@ import edu.stanford.nlp.util.Generics;
  * <code>-parserModel</code> Which parser model to use, defaults to englishPCFG.ser.gz <br>
  * <code>-sentimentModel</code> Which sentiment model to use, defaults to sentiment.ser.gz <br>
  * <code>-file</code> Which file to process. <br>
- * <code>-fileList</code> A comma separated list of files to process. <br>
  * <code>-stdin</code> Read one line at a time from stdin. <br>
- * <code>-output</code> pennTrees: Output trees with scores at each binarized node.  vectors: Number tree nodes and print out the vectors.  probabilities: Output the scores for different labels for each node. Defaults to printing just the root. <br>
- * <code>-filterUnknown</code> remove unknown trees from the input.  Only applies to TREES input, in which case the trees must be binarized with sentiment labels <br>
- * <code>-help</code> Print out help <br>
+ * <code>-output</code> pennTrees: Output trees with scores at each binarized node.  vectors: Number tree nodes and print out the vectors.  Defaults to printing just the root. <br>
  *
  * @author John Bauer
  */
 public class SentimentPipeline {
-
   private static final NumberFormat NF = new DecimalFormat("0.0000");
 
   static enum Output {
@@ -54,8 +53,6 @@ public class SentimentPipeline {
   static enum Input {
     TEXT, TREES
   }
-
-  private SentimentPipeline() {} // static methods
 
   /**
    * Sets the labels on the tree (except the leaves) to be the integer
@@ -222,7 +219,7 @@ public class SentimentPipeline {
           trees.add(tree);
         }
       }
-
+      
       List<Annotation> annotations = Generics.newArrayList();
       for (Tree tree : trees) {
         CoreMap sentence = new Annotation(Sentence.listToString(tree.yield()));
@@ -249,7 +246,7 @@ public class SentimentPipeline {
 
     boolean filterUnknown = false;
 
-    List<Output> outputFormats = Collections.singletonList(Output.ROOT);
+    List<Output> outputFormats = Arrays.asList(new Output[] { Output.ROOT });
     Input inputFormat = Input.TEXT;
 
     String tlppClass = DEFAULT_TLPP_CLASS;
@@ -356,27 +353,30 @@ public class SentimentPipeline {
       // for each file.
       for (String file : fileList.split(",")) {
         List<Annotation> annotations = getAnnotations(tokenizer, inputFormat, file, filterUnknown);
-        FileOutputStream fout = new FileOutputStream(file + ".out");
-        PrintStream pout = new PrintStream(fout);
         for (Annotation annotation : annotations) {
           pipeline.annotate(annotation);
 
+          FileOutputStream fout = new FileOutputStream(file + ".out");
+          PrintStream pout = new PrintStream(fout);
           for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
             pout.println(sentence);
             outputTree(pout, sentence, outputFormats);
           }
+          pout.flush();
+          fout.close();
         }
-        pout.flush();
-        fout.close();
       }
     } else {
       // Process stdin.  Each line will be treated as a single sentence.
       System.err.println("Reading in text from stdin.");
       System.err.println("Please enter one sentence per line.");
       System.err.println("Processing will end when EOF is reached.");
-      BufferedReader reader = IOUtils.readerFromStdin("utf-8");
-
-      for (String line; (line = reader.readLine()) != null; ) {
+      BufferedReader reader = new BufferedReader(IOUtils.encodedInputStreamReader(System.in, "utf-8"));
+      while (true) {
+        String line = reader.readLine();
+        if (line == null) {
+          break;
+        }
         line = line.trim();
         if (line.length() > 0) {
           Annotation annotation = tokenizer.process(line);
@@ -390,8 +390,7 @@ public class SentimentPipeline {
           System.out.println("");
         }
       }
-
+      
     }
   }
-
 }

@@ -21,26 +21,15 @@ class ParserDemo {
    * The main method demonstrates the easiest way to load a parser.
    * Simply call loadModel and specify the path of a serialized grammar
    * model, which can be a file, a resource on the classpath, or even a URL.
-   * For example, this demonstrates loading a grammar from the models jar
-   * file, which you therefore need to include on the classpath for ParserDemo
-   * to work.
-   *
-   * Usage: {@code java ParserDemo [[model] textFile]}
-   * e.g.: java ParserDemo edu/stanford/nlp/models/lexparser/chineseFactored.ser.gz data/chinese-onesent-utf8.txt
-   *
+   * For example, this demonstrates loading from the models jar file, which
+   * you therefore need to include in the classpath for ParserDemo to work.
    */
   public static void main(String[] args) {
-    String parserModel = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
+    LexicalizedParser lp = LexicalizedParser.loadModel("edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz");
     if (args.length > 0) {
-      parserModel = args[0];
-    }
-    LexicalizedParser lp = LexicalizedParser.loadModel(parserModel);
-
-    if (args.length == 0) {
-      demoAPI(lp);
+      demoDP(lp, args[0]);
     } else {
-      String textFile = (args.length > 1) ? args[1] : args[0];
-      demoDP(lp, textFile);
+      demoAPI(lp);
     }
   }
 
@@ -49,16 +38,12 @@ class ParserDemo {
    * trees.  Note that the trees are printed by calling pennPrint on
    * the Tree object.  It is also possible to pass a PrintWriter to
    * pennPrint if you want to capture the output.
-   * This code will work with any supported language.
    */
   public static void demoDP(LexicalizedParser lp, String filename) {
     // This option shows loading, sentence-segmenting and tokenizing
     // a file using DocumentPreprocessor.
-    TreebankLanguagePack tlp = lp.treebankLanguagePack(); // a PennTreebankLanguagePack for English
-    GrammaticalStructureFactory gsf = null;
-    if (tlp.supportsGrammaticalStructures()) {
-      gsf = tlp.grammaticalStructureFactory();
-    }
+    TreebankLanguagePack tlp = new PennTreebankLanguagePack();
+    GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();
     // You could also create a tokenizer here (as below) and pass it
     // to DocumentPreprocessor
     for (List<HasWord> sentence : new DocumentPreprocessor(filename)) {
@@ -66,12 +51,10 @@ class ParserDemo {
       parse.pennPrint();
       System.out.println();
 
-      if (gsf != null) {
-        GrammaticalStructure gs = gsf.newGrammaticalStructure(parse);
-        Collection tdl = gs.typedDependenciesCCprocessed();
-        System.out.println(tdl);
-        System.out.println();
-      }
+      GrammaticalStructure gs = gsf.newGrammaticalStructure(parse);
+      Collection tdl = gs.typedDependenciesCCprocessed();
+      System.out.println(tdl);
+      System.out.println();
     }
   }
 
@@ -82,7 +65,7 @@ class ParserDemo {
    * TreePrint object.  Note that the options used when creating the
    * TreePrint can determine what results to print out.  Once again,
    * one can capture the output by passing a PrintWriter to
-   * TreePrint.printTree. This code is for English.
+   * TreePrint.printTree.
    */
   public static void demoAPI(LexicalizedParser lp) {
     // This option shows parsing a list of correctly tokenized words
@@ -101,7 +84,7 @@ class ParserDemo {
     List<CoreLabel> rawWords2 = tok.tokenize();
     parse = lp.apply(rawWords2);
 
-    TreebankLanguagePack tlp = lp.treebankLanguagePack(); // PennTreebankLanguagePack for English
+    TreebankLanguagePack tlp = new PennTreebankLanguagePack();
     GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();
     GrammaticalStructure gs = gsf.newGrammaticalStructure(parse);
     List<TypedDependency> tdl = gs.typedDependenciesCCprocessed();

@@ -1,6 +1,5 @@
 package edu.stanford.nlp.trees.international.pennchinese;
 
-import java.io.Serializable;
 import java.util.regex.Pattern;
 import java.util.*;
 
@@ -11,7 +10,7 @@ import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.io.EncodingPrintWriter;
 
@@ -105,12 +104,12 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
   }
 
 
-  private static class ChineseEmptyFilter implements Predicate<Tree>, Serializable {
+  private static class ChineseEmptyFilter implements Filter<Tree> {
 
     private static final long serialVersionUID = 8914098359495987617L;
 
     /** Doesn't accept nodes that only cover an empty. */
-    public boolean test(Tree t) {
+    public boolean accept(Tree t) {
       Tree[] kids = t.children();
       Label l = t.label();
       if ((l != null) && l.value() != null && // there appears to be a mistake in CTB3 where the label "-NONE-1" is used once
@@ -127,7 +126,7 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
 
   }
 
-  private final Predicate<Tree> chineseEmptyFilter = new ChineseEmptyFilter();
+  private final Filter<Tree> chineseEmptyFilter = new ChineseEmptyFilter();
 
   private static final TregexPattern[] splitPuncTregex = {
     TregexPattern.compile("PU=punc < 她｛")
@@ -195,7 +194,7 @@ public class CTBErrorCorrectingTreeNormalizer extends BobChrisTreeNormalizer {
       }
       if (subtree.isPreTerminal()) {
         if (subtree.value().matches("NP")) {
-          if (ChineseTreebankLanguagePack.chineseDouHaoAcceptFilter().test(subtree.firstChild().value())) {
+          if (ChineseTreebankLanguagePack.chineseDouHaoAcceptFilter().accept(subtree.firstChild().value())) {
             if (DEBUG) {
               EncodingPrintWriter.err.println("Correcting error: NP preterminal over douhao; preterminal changed to PU: " + subtree, ChineseTreebankLanguagePack.ENCODING);
             }

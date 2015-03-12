@@ -92,8 +92,8 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
   //--- JM added for Distributions
 
   /**
-   * Assuming that c has a total count &lt; 1, returns a new Distribution using the counts in c as probabilities.
-   * If c has a total count &gt; 1, returns a normalized distribution with no remaining mass.
+   * Assuming that c has a total count < 1, returns a new Distribution using the counts in c as probabilities.
+   * If c has a total count > 1, returns a normalized distribution with no remaining mass.
    */
   public static <E> Distribution<E> getDistributionFromPartiallySpecifiedCounter(Counter<E> c, int numKeys){
     Distribution<E> d;

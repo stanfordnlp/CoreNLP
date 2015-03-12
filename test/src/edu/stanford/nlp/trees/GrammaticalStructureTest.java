@@ -92,11 +92,11 @@ public class GrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
       
       assertEquals("Unexpected basic dependencies for tree "+testTree,
-          testAnswerTokens,  tokenSet(gs.typedDependencies(GrammaticalStructure.Extras.MAXIMAL)));
+          testAnswerTokens,  tokenSet(gs.typedDependencies(true)));
       assertEquals("Unexpected collapsed dependencies for tree "+testTree,
-          testAnswerCollapsedTokens,  tokenSet(gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL)));
+          testAnswerCollapsedTokens,  tokenSet(gs.typedDependenciesCollapsed(true)));
       assertEquals("Unexpected cc-processed dependencies for tree "+testTree,
-          testAnswerCCProcessedTokens,  tokenSet(gs.typedDependenciesCCprocessed(GrammaticalStructure.Extras.MAXIMAL)));
+          testAnswerCCProcessedTokens,  tokenSet(gs.typedDependenciesCCprocessed(true)));
     }
     
   }

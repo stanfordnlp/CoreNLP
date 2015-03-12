@@ -1,4 +1,4 @@
-Stanford Lexicalized Parser v3.5.1 - 2015-01-29
+Stanford Lexicalized Parser v3.4 - 2014-06-16
 -----------------------------------------------
 
 Copyright (c) 2002-2012 The Board of Trustees of The Leland Stanford Junior
@@ -205,14 +205,6 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
-
-2015-01-29    3.5.1     Dependency parser improvements; general 
-                        bugfixes 
-
-2014-10-26    3.5.0     Upgrade to Java 1.8; add neural-network 
-                        dependency parser 
-
-2014-08-27    3.4.1     Add Spanish models 
 
 2014-06-16      3.4     Shift-reduce parser 
 

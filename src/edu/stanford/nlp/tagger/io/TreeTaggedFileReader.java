@@ -12,7 +12,7 @@ import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 public class TreeTaggedFileReader implements TaggedFileReader {
   final Treebank treebank;
@@ -20,7 +20,7 @@ public class TreeTaggedFileReader implements TaggedFileReader {
   final TreeReaderFactory trf;
   final TreeTransformer transformer;
   final TreeNormalizer normalizer;
-  final Predicate<Tree> treeFilter;
+  final Filter<Tree> treeFilter;
 
   final Iterator<Tree> treeIterator;
 
@@ -73,7 +73,7 @@ public class TreeTaggedFileReader implements TaggedFileReader {
   private void findNext() {
     while (treeIterator.hasNext()) {
       next = treeIterator.next();
-      if (treeFilter == null || treeFilter.test(next)) {
+      if (treeFilter == null || treeFilter.accept(next)) {
         return;
       }
     }

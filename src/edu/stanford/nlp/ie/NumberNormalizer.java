@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  * Unlike QuantifiableEntityNormalizer that normalizes various
  *   types of quantifiable entities like money and dates,
  * NumberNormalizer only normalizes numeric expressions
- *   (e.g. one =&gt; 1, two hundred =&gt; 200.0 )
+ *   (e.g. one => 1, two hundred => 200.0 )
  *
  * <br>
  * This code is somewhat hacked together, so should be reworked.
@@ -399,14 +399,14 @@ public class NumberNormalizer {
    * Each token is annotated with the numeric value and type
    * - CoreAnnotations.NumericTypeAnnotation.class: ORDINAL, UNIT (hundred, thousand,..., dozen, gross,...), NUMBER
    * - CoreAnnotations.NumericValueAnnotation.class: Number representing the numeric value of the token
-   *   ( two thousand =&gt; 2 1000 )
+   *   ( two thousand => 2 1000 )
    *
    * Tries also to separate individual numbers like four five six,
    *   while keeping numbers like four hundred and seven together
    * Annotate tokens belonging to each composite number with
    * - CoreAnnotations.NumericCompositeTypeAnnotation.class: ORDINAL (1st, 2nd), NUMBER (one hundred)
    * - CoreAnnotations.NumericCompositeValueAnnotation.class: Number representing the composite numeric value
-   *   ( two thousand =&gt; 2000 2000 )
+   *   ( two thousand => 2000 2000 )
    *
    * Also returns list of CoreMap representing the identified numbers
    *

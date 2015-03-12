@@ -4,9 +4,6 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
-
 /**
  * Implements an Index that supports constant-time lookup in
  * both directions (via {@code get(int)} and {@code indexOf(E)}.
@@ -28,7 +25,6 @@ import edu.stanford.nlp.io.RuntimeIOException;
  * @since 1.0
  * @author <a href="mailto:yeh1@stanford.edu">Eric Yeh</a> (added write to/load from buffer)
  */
-// todo [cdm 2014]: Delete "extends AbstractCollection<E>" but this will break serialization....
 public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, RandomAccess {
 
   // these variables are also used in IntArrayIndex
@@ -144,38 +140,14 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     locked = false;
   }
 
-  /** {@inheritDoc} */
+  /**
+   * Returns the integer index of the Object in the Index or -1 if the Object is not already in the Index.
+   * @param o the Object whose index is desired.
+   * @return the index of the Object argument.  Returns -1 if the object is not in the index.
+   */
   @Override
   public int indexOf(E o) {
-    Integer index = indexes.get(o);
-    if (index == null) {
-        return -1;
-    }
-    return index;
-  }
-
-  @Override
-  public int addToIndex(E o) {
-    Integer index = indexes.get(o);
-    if (index == null) {
-      if ( ! locked) {
-        try {
-          semaphore.acquire();
-          index = indexes.get(o);
-          if (index == null) {
-            index = objects.size();
-            objects.add(o);
-            indexes.put(o, index);
-          }
-          semaphore.release();
-        } catch (InterruptedException e) {
-          throw new RuntimeInterruptedException(e);
-        }
-      } else {
-        return -1;
-      }
-    }
-    return index;
+    return indexOf(o, false);
   }
 
   /**
@@ -193,13 +165,27 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
    * @return The index of the Object argument.  Returns -1 if the object is not in the index.
    */
   @Override
-  @Deprecated
   public int indexOf(E o, boolean add) {
-    if (add) {
-      return addToIndex(o);
-    } else {
-      return indexOf(o);
+    Integer index = indexes.get(o);
+    if (index == null) {
+      if (add && ! locked) {
+        try {
+          semaphore.acquire();
+          index = indexes.get(o);
+          if (index == null) {
+            index = objects.size();
+            objects.add(o);
+            indexes.put(o, index);
+          }
+          semaphore.release();
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+      } else {
+        return -1;
+      }
     }
+    return index;
   }
 
   private final Semaphore semaphore = new Semaphore(1);
@@ -317,9 +303,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
   }
 
   /**
-   * This assumes each line is of the form (number=value) and it adds each value in order of the lines in the file.
-   * Warning: This ignores the value of number, and just indexes each value it encounters in turn!
-   *
+   * This assumes each line is of the form (number=value) and it adds each value in order of the lines in the file
    * @param file Which file to load
    * @return An index built out of the lines in the file
    */
@@ -327,7 +311,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     Index<String> index = new HashIndex<String>();
     BufferedReader br = null;
     try {
-      br = IOUtils.readerFromString(file);
+      br = new BufferedReader(new FileReader(file));
       for (String line; (line = br.readLine()) != null; ) {
         int start = line.indexOf('=');
         if (start == -1 || start == line.length() - 1) {
@@ -336,10 +320,16 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
         index.add(line.substring(start + 1));
       }
       br.close();
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
+    } catch (Exception e) {
+      e.printStackTrace();
     } finally {
-      IOUtils.closeIgnoringExceptions(br);
+      if (br != null) {
+        try {
+          br.close();
+        } catch (IOException ioe) {
+          // forget it
+        }
+      }
     }
     return index;
   }
@@ -465,6 +455,16 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     };
     newIndex.lock();
     return newIndex;
+  }
+
+  @Override
+  public boolean remove(Object o){
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean removeAll(Collection<?> e){
+    throw new UnsupportedOperationException();
   }
 
   /**

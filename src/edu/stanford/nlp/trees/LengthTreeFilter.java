@@ -1,7 +1,6 @@
 package edu.stanford.nlp.trees;
 
-import java.io.Serializable;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 /** 
  * Only accept trees that are short enough (less than or equal to length).
@@ -9,14 +8,14 @@ import java.util.function.Predicate;
  *
  *  @author John Bauer
  */
-public class LengthTreeFilter implements Predicate<Tree>, Serializable {
+public class LengthTreeFilter implements Filter<Tree> {
   private int length;
 
   public LengthTreeFilter(int length) {
     this.length = length;
   }
 
-  public boolean test(Tree tree) {
+  public boolean accept(Tree tree) {
     return tree.yield().size() <= length;
   }
 

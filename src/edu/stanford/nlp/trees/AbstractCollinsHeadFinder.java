@@ -1,7 +1,5 @@
 package edu.stanford.nlp.trees;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Map;
 
 /**
@@ -10,12 +8,12 @@ import java.util.Map;
  * like (this is for "left" or "right":
  * <pre>
  * for categoryList in categoryLists
- *   for index = 1 to n [or n to 1 if R-&gt;L]
+ *   for index = 1 to n [or n to 1 if R->L]
  *     for category in categoryList
  *       if category equals daughter[index] choose it.
  * </pre>
  * <p>
- * with a final default that goes with the direction (L-&gt;R or R-&gt;L)
+ * with a final default that goes with the direction (L->R or R->L)
  * For most constituents, there will be only one category in the list,
  * the exception being, in Collins' original version, NP.
  * </p>
@@ -232,14 +230,7 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
         }
         return traverseLocate(kids, defaultRule, true);
       } else {
-        // TreePrint because TreeGraphNode only prints the node number,
-        // doesn't print the tree structure
-        TreePrint printer = new TreePrint("penn");
-        StringWriter buffer = new StringWriter();
-        printer.printTree(t, new PrintWriter(buffer));
-        // TODO: we could get really fancy and define our own
-        // exception class to represent this
-        throw new IllegalArgumentException("No head rule defined for " + motherCat + " using " + this.getClass() + " in " + buffer.toString());
+        throw new IllegalArgumentException("No head rule defined for " + motherCat + " using " + this.getClass() + " in " + t);
       }
     }
     for (int i = 0; i < how.length; i++) {

@@ -2,6 +2,7 @@ package edu.stanford.nlp.ie.pascal;
 
 import edu.stanford.nlp.stats.ClassicCounter;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.ArrayList;
 

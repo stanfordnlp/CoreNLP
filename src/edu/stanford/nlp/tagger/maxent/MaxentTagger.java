@@ -37,13 +37,10 @@ import edu.stanford.nlp.maxent.Problem;
 import edu.stanford.nlp.maxent.iis.LambdaSolve;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.objectbank.ReaderIteratorFactory;
-import edu.stanford.nlp.process.DocumentPreprocessor;
-import edu.stanford.nlp.process.ListProcessor;
-import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.process.TokenizerFactory;
-import edu.stanford.nlp.process.PTBTokenizer.PTBTokenizerFactory;
 import edu.stanford.nlp.process.TransformXML;
-import edu.stanford.nlp.process.WhitespaceTokenizer;
+import edu.stanford.nlp.process.*;
+import edu.stanford.nlp.process.PTBTokenizer.PTBTokenizerFactory;
 import edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter.OutputStyle;
 import edu.stanford.nlp.tagger.common.Tagger;
@@ -161,11 +158,11 @@ import java.text.DecimalFormat;
  * <tr><td>trainFile</td><td>String</td><td>N/A</td><td>Train</td>
      <td>
        Path to the file holding the training data; specifying this option puts the tagger in training mode.  Only one of 'trainFile','testFile','textFile', and 'dump' may be specified.<br>
-       There are three formats possible.  The first is a text file of tagged data. Each line is considered a separate sentence.  In each sentence, words are separated by whitespace.  Each word must have a tag, which is separated from the token using the specified {@code tagSeparator}.  This format, called TEXT, is the default format.<br />
+       There are three formats possible.  The first is a text file of tagged data, Each line is considered a separate sentence.  In each sentence, words are separated by whitespace.  Each word must have a tag, which is separated using the specified tagSeparator.  This format, called TEXT, is the default format.<br />
        The second format is a file of Penn Treebank formatted tree files.  Trees are loaded one at a time and the tagged words in a tree are used as a training sentence.  To specify this format, preface the filename with "{@code format=TREES,}".  <br />
-       The final possible format is TSV files (tab-separated columns).  To specify a TSV file, set {@code trainFile} to "{@code format=TSV,wordColumn=x,tagColumn=y,filename}".  Column numbers are indexed from 0, and sentences are separated with blank lines. The default wordColumn is 0 and default tagColumn is 1.
+       The final possible format is TSV files (tab-separated columns).  To specify a TSV file, set trainFile to "{@code format=TSV,wordColumn=x,tagColumn=y,filename}".  Column numbers are indexed from 0, and sentences are separated with blank lines. The default wordColumn is 0 and default tagColumn is 1.
        <br>
-       A file can be in a different character set encoding than the tagger's default encoding by prefacing the filename with {@code "encoding=ENC"}.
+       A file can be in a different encoding than the tagger's default encoding by prefacing the filename with "encoding=ENC".
        You can specify the tagSeparator character in a TEXT file by prefacing the filename with "tagSeparator=c". <br/>
        Tree files can be fed through TreeTransformers and TreeNormalizers.  To specify a transformer, preface the filename with "treeTransformer=CLASSNAME".  To specify a normalizer, preface the filename with "treeNormalizer=CLASSNAME".
        You can also filter trees using a Filter&lt;Tree&gt;, which can be specified with "treeFilter=CLASSNAME".  A specific range of trees to be used can be specified with treeRange=X-Y.  Multiple parts of the range can be separated by : as opposed to the normal separator of ,.
@@ -184,8 +181,8 @@ import java.text.DecimalFormat;
  * <tr><td>tokenizerFactory</td><td>String</td><td>edu.stanford.nlp.<br>process.PTBTokenizer</td><td>Tag,Test</td><td>Fully qualified class name of the tokenizer to use.  edu.stanford.nlp.process.PTBTokenizer does basic English tokenization.</td></tr>
  * <tr><td>tokenizerOptions</td><td>String</td><td></td><td>Tag,Test</td><td>Known options for the particular tokenizer used. A comma-separated list. For PTBTokenizer, options of interest include <code>americanize=false</code> and <code>asciiQuotes</code> (for German). Note that any choice of tokenizer options that conflicts with the tokenization used in the tagger training data will likely degrade tagger performance.</td></tr>
  * <tr><td>arch</td><td>String</td><td>generic</td><td>Train</td><td>Architecture of the model, as a comma-separated list of options, some with a parenthesized integer argument written k here: this determines what features are used to build your model.  See {@link ExtractorFrames} and {@link ExtractorFramesRare} for more information.</td></tr>
- * <tr><td>wordFunction</td><td>String</td><td>(none)</td><td>Train</td><td>A function to apply to the text before training or testing.  Must inherit from edu.stanford.nlp.util.Function&lt;String, String&gt;.  Can be blank.</td></tr>
- * <tr><td>lang</td><td>String</td><td>english</td><td>Train</td><td>Language from which the part of speech tags are drawn. This option determines which tags are considered closed-class (only fixed set of words can be tagged with a closed-class tag, such as prepositions). Defined languages are 'english' (Penn tagset), 'polish' (very rudimentary), 'french', 'chinese', 'arabic', 'german', and 'medline'.  </td></tr>
+ * <tr><td>wordFunction</td><td>String</td><td>(none)</td><td>Train</td><td>A function to apply to the text before training or testing.  Must inherit from java.util.function.Function&lt;String, String&gt;.  Can be blank.</td></tr>
+ * <tr><td>lang</td><td>String</td><td>english</td><td>Train</td><td>Language from which the part of speech tags are drawn. This option determines which tags are considered closed-class (only fixed set of words can be tagged with a closed-class tag, such as prepositions). Defined languages are 'english' (Penn tagset), 'polish' (very rudimentary), 'chinese', 'arabic', 'german', and 'medline'.  </td></tr>
  * <tr><td>openClassTags</td><td>String</td><td>N/A</td><td>Train</td><td>Space separated list of tags that should be considered open-class.  All tags encountered that are not in this list are considered closed-class.  E.g. format: "NN VB"</td></tr>
  * <tr><td>closedClassTags</td><td>String</td><td>N/A</td><td>Train</td><td>Space separated list of tags that should be considered closed-class.  All tags encountered that are not in this list are considered open-class.</td></tr>
  * <tr><td>learnClosedClassTags</td><td>boolean</td><td>false</td><td>Train</td><td>If true, induce which tags are closed-class by counting as closed-class tags all those tags which have fewer unique word tokens than closedClassTagThreshold. </td></tr>
@@ -243,8 +240,8 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
   public MaxentTagger(TaggerConfig config) {
-    // todo: maybe this shouldn't do this but replace the zero arg constructor.
-    // i.e., call init() not readModelAndInit(). This method is currently UNUSUED. Make non-public.
+    // maybe this shouldn't do this but replace the zero arg constructor.
+    // i.e., call init() not readModelAndInit()
     this(config.getModel(), config);
   }
 
@@ -320,10 +317,6 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
 
   public String getTag(int index) {
     return tags.getTag(index);
-  }
-
-  public Set<String> tagSet() {
-    return tags.tagSet();
   }
 
   private LambdaSolveTagger prob;
@@ -744,7 +737,8 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
   /** This reads the complete tagger from a single model stored in a file, at a URL,
-   *  or as a resource in a jar file, and inits the tagger using a
+   *  or as a resource
+   *  in a jar file, and inits the tagger using a
    *  combination of the properties passed in and parameters from the file.
    *  <p>
    *  <i>Note for the future:</i> This assumes that the TaggerConfig in the file
@@ -899,6 +893,11 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     return dict.sum(word) < rareWordThresh;
   }
 
+  // todo: clean this up. It seems like we'd be better off without this method. Used once in (MT's) PrefixTagger
+  public TTags getTags() {
+    return tags;
+  }
+
   /**
    * Tags the tokenized input string and returns the tagged version.
    * This method requires the input to already be tokenized.
@@ -933,12 +932,12 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   }
 
   /**
-   * Expects a sentence and returns a tagged sentence.
+   * Expects a sentence and returns a tagged sentence.  The input Sentence items
    *
-   * @param in This needs to be a sentence (List of words)
-   * @return A sentence of TaggedWord
+   *
+   * @param in This needs to be a Sentence
+   * @return A Sentence of TaggedWord
    */
-  @Override
   public List<TaggedWord> apply(List<? extends HasWord> in) {
     TestSentence testSentence = new TestSentence(this);
     return testSentence.tagSentence(in, false);
@@ -986,7 +985,6 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
    * want to tag a single List instead of a List of Lists.  If you
    * supply tagSentence with a List of HasTag, and set reuseTags to
    * true, the tagger will reuse the supplied tags.
-   *
    * @param sentence sentence to tag
    * @param reuseTags whether or not to reuse the given tag
    * @return tagged sentence
@@ -1142,7 +1140,6 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     byte[][] fnumArr = samples.getFnumArr();
     System.err.println("Samples from " + config.getFile());
     System.err.println("Number of features: " + feats.size());
-    System.err.println("Tag set: " + maxentTagger.tags.tagSet());
     Problem p = new Problem(samples, feats);
     LambdaSolveTagger prob = new LambdaSolveTagger(p, 0.0001, fnumArr);
     maxentTagger.prob = prob;
@@ -1660,7 +1657,7 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
     printErrWordsPerSec(millis, numWords);
   }
 
-  public  <X extends HasWord> void runTagger(Iterable<List<X>> document,
+  public <X extends HasWord> void runTagger(Iterable<List<X>> document,
                                             BufferedWriter writer,
                                             OutputStyle outputStyle)
     throws IOException

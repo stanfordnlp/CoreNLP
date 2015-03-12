@@ -2,7 +2,7 @@ package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.process.TokenizerFactory;
 import java.util.function.Function;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.ling.HasWord;
 
@@ -98,7 +98,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The filter
    */
-  public Predicate<String> punctuationTagAcceptFilter();
+  public Filter<String> punctuationTagAcceptFilter();
 
 
   /**
@@ -107,7 +107,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The filter
    */
-  public Predicate<String> punctuationTagRejectFilter();
+  public Filter<String> punctuationTagRejectFilter();
 
   /**
    * Returns a filter that accepts a String that is a punctuation
@@ -117,7 +117,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Predicate<String> punctuationWordAcceptFilter();
+  public Filter<String> punctuationWordAcceptFilter();
 
 
   /**
@@ -128,7 +128,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Predicate<String> punctuationWordRejectFilter();
+  public Filter<String> punctuationWordRejectFilter();
 
 
   /**
@@ -137,7 +137,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Predicate<String> sentenceFinalPunctuationTagAcceptFilter();
+  public Filter<String> sentenceFinalPunctuationTagAcceptFilter();
 
 
   /**
@@ -150,7 +150,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Predicate<String> evalBIgnoredPunctuationTagAcceptFilter();
+  public Filter<String> evalBIgnoredPunctuationTagAcceptFilter();
 
 
   /**
@@ -162,7 +162,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The Filter
    */
-  public Predicate<String> evalBIgnoredPunctuationTagRejectFilter();
+  public Filter<String> evalBIgnoredPunctuationTagRejectFilter();
 
 
   /**
@@ -225,7 +225,7 @@ public interface TreebankLanguagePack extends Serializable {
    * @param puncFilter A filter which should reject punctuation words (as Strings)
    * @return A GrammaticalStructureFactory suitable for this language/treebank
    */
-  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter);
+  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilter);
 
 
   /**
@@ -235,7 +235,7 @@ public interface TreebankLanguagePack extends Serializable {
    * @param typedDependencyHF A HeadFinder which finds heads for typed dependencies
    * @return A GrammaticalStructureFactory suitable for this language/treebank
    */
-  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter, HeadFinder typedDependencyHF);
+  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilter, HeadFinder typedDependencyHF);
 
   /**
    * Whether or not we have typed dependencies for this language.  If
@@ -316,7 +316,7 @@ public interface TreebankLanguagePack extends Serializable {
    * Returns a {@link Function Function} object that maps Strings to Strings according
    * to this TreebankLanguagePack's basicCategory method.
    *
-   * @return the String-&gt;String Function object
+   * @return the String->String Function object
    */
   public Function<String,String> getBasicCategoryFunction();
 
@@ -336,7 +336,7 @@ public interface TreebankLanguagePack extends Serializable {
    * Returns a {@link Function Function} object that maps Strings to Strings according
    * to this TreebankLanguagePack's categoryAndFunction method.
    *
-   * @return the String-&gt;String Function object
+   * @return the String->String Function object
    */
   public Function<String,String> getCategoryAndFunctionFunction();
 
@@ -355,7 +355,7 @@ public interface TreebankLanguagePack extends Serializable {
    *
    * @return The filter
    */
-  public Predicate<String> startSymbolAcceptFilter();
+  public Filter<String> startSymbolAcceptFilter();
 
 
   /**
