@@ -165,7 +165,7 @@ public class ClauseSplitterSearchProblem {
     @Execution.Option(name = "negativeSubsampleRatio", gloss = "The percent of negative datums to take")
     public double negativeSubsampleRatio = 1.00;
     @Execution.Option(name = "positiveDatumWeight", gloss = "The weight to assign every positive datum.")
-    public float positiveDatumWeight = 10.0f;
+    public float positiveDatumWeight = 100.0f;
     @Execution.Option(name = "unknownDatumWeight", gloss = "The weight to assign every unknown datum (everything extracted with an unconfirmed relation).")
     public float unknownDatumWeight = 1.0f;
     @Execution.Option(name = "clauseSplitWeight", gloss = "The weight to assign for clause splitting datums. Higher values push towards higher recall.")

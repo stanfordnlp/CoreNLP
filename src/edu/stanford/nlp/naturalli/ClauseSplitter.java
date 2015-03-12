@@ -97,8 +97,8 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
       SemanticGraph tree = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
       Span subjectSpan = triple.second; //Util.extractNER(tokens, triple.second);
       Span objectSpan = triple.third; //Util.extractNER(tokens, triple.third);
-      log(StringUtils.toString(tokens));
-      log("  -> " + StringUtils.toString(tokens.subList(subjectSpan.start(), subjectSpan.end())) + " :: " + StringUtils.toString(tokens.subList(objectSpan.start(), objectSpan.end())));
+//      log(StringUtils.toString(tokens));
+//      log("  -> " + StringUtils.toString(tokens.subList(subjectSpan.start(), subjectSpan.end())) + " :: " + StringUtils.toString(tokens.subList(objectSpan.start(), objectSpan.end())));
       // Create raw clause searcher (no classifier)
       ClauseSplitterSearchProblem problem = new ClauseSplitterSearchProblem(tree);
 
@@ -141,8 +141,8 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
         }
         // Process the datum
         if (!features.isEmpty()) {
-          log(prefix + info(fragment, tokens, tree));
-          if (bestExtraction != null) { log("    " + bestExtraction); }
+//          log(prefix + info(fragment, tokens, tree));
+//          if (bestExtraction != null) { log("    " + bestExtraction); }
           for (int i = (correct.isFalse() ? features.size() - 1 : 0); i < features.size(); ++i) {
             Counter<String> decision = features.get(i);
             // (get output label)
@@ -156,13 +156,13 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
                 label = ClauseClassifierLabel.CLAUSE_INTERM;
               }
             }
-            if (bestExtraction != null) { log("    " + label); }
+//            if (bestExtraction != null) { log("    " + label); }
             // (create datum)
             RVFDatum<ClauseClassifierLabel, String> datum = new RVFDatum<>(decision);
             datum.setLabel(label);
             // (dump datum to debug log)
             if (datasetDumpWriter.isPresent()) {
-              datasetDumpWriter.get().println("" + label + "\t" +
+              datasetDumpWriter.get().println("" + label + "\t" + correct + "\t" +
                   StringUtils.join(decision.entrySet().stream().map(entry -> "" + entry.getKey() + "->" + entry.getValue()), ";"));
             }
             // (get datum weight)
