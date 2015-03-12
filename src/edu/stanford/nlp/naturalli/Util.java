@@ -220,6 +220,7 @@ public class Util {
    */
   public static boolean isTree(SemanticGraph tree) {
     for (IndexedWord vertex : tree.vertexSet()) {
+      // Check one and only one incoming edge
       if (tree.getRoots().contains(vertex)) {
         if (tree.incomingEdgeIterator(vertex).hasNext()) {
           return false;
@@ -234,7 +235,33 @@ public class Util {
           return false;
         }
       }
+      // Check incoming and outgoing edges match
+      for (SemanticGraphEdge edge : tree.outgoingEdgeIterable(vertex)) {
+        boolean foundReverse = false;
+        for (SemanticGraphEdge reverse : tree.incomingEdgeIterable(edge.getDependent())) {
+          if (reverse == edge) { foundReverse = true; }
+        }
+        if (!foundReverse) {
+          return false;
+        }
+      }
+      for (SemanticGraphEdge edge : tree.incomingEdgeIterable(vertex)) {
+        boolean foundReverse = false;
+        for (SemanticGraphEdge reverse : tree.outgoingEdgeIterable(edge.getGovernor())) {
+          if (reverse == edge) { foundReverse = true; }
+        }
+        if (!foundReverse) {
+          return false;
+        }
+      }
     }
+    // Check topological sort -- sometimes fails?
+//    try {
+//      tree.topologicalSort();
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//      return false;
+//    }
     return true;
   }
 }

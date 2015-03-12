@@ -479,11 +479,6 @@ public class IOUtils {
       }
     }
 
-    if (textFileOrUrl.endsWith(".gz")) {
-      // gunzip it if necessary
-      in = new GZIPInputStream(in, GZIP_FILE_BUFFER_SIZE);
-    }
-
     // buffer this stream.  even gzip streams benefit from buffering,
     // such as for the shift reduce parser
     in = new BufferedInputStream(in);

@@ -129,14 +129,17 @@ public class ForwardEntailerSearchProblem {
    *
    * @return A list of search results, corresponding to shortenings of the sentence.
    */
+  @SuppressWarnings("unchecked")
   private List<SearchResult> searchImplementation() {
     // Pre-process the tree
     SemanticGraph parseTree = new SemanticGraph(this.parseTree);
+    assert Util.isTree(parseTree);
     // (remove common determiners)
     List<String> determinerRemovals = new ArrayList<>();
     parseTree.getLeafVertices().stream().filter(vertex -> vertex.word().equalsIgnoreCase("the") || vertex.word().equalsIgnoreCase("a") ||
         vertex.word().equalsIgnoreCase("an")).forEach(vertex -> {
       parseTree.removeVertex(vertex);
+      assert Util.isTree(parseTree);
       determinerRemovals.add("det");
     });
     // (cut conj_and nodes)
@@ -151,10 +154,14 @@ public class ForwardEntailerSearchProblem {
         }
         if (conjAnd != null) {
           parseTree.removeEdge(conjAnd);
+          assert Util.isTree(parseTree);
           andsToAdd.add(conjAnd);
         }
       }
     }
+    // Clean the tree
+    Util.cleanTree(parseTree);
+    assert Util.isTree(parseTree);
 
     // Outputs
     List<SearchResult> results = new ArrayList<>();
@@ -166,16 +173,25 @@ public class ForwardEntailerSearchProblem {
         results.add(new SearchResult(parseTree, determinerRemovals, score));
       } else {
         SemanticGraph treeWithAnds = new SemanticGraph(parseTree);
+        assert Util.isTree(treeWithAnds);
         for (SemanticGraphEdge and : andsToAdd) {
           treeWithAnds.addEdge(and.getGovernor(), and.getDependent(), and.getRelation(), Double.NEGATIVE_INFINITY, false);
         }
+        assert Util.isTree(treeWithAnds);
         results.add(new SearchResult(treeWithAnds, determinerRemovals,
             Math.pow(weights.deletionProbability("det"), (double) determinerRemovals.size())));
       }
     }
 
     // Initialize the search
-    List<IndexedWord> topologicalVertices = parseTree.topologicalSort();
+    assert Util.isTree(parseTree);
+    List<IndexedWord> topologicalVertices;
+    try {
+      topologicalVertices = parseTree.topologicalSort();
+    } catch (IllegalStateException e) {
+      System.err.println("Could not topologically sort the vertices! Using left-to-right traversal.");
+      topologicalVertices = parseTree.vertexListSorted();
+    }
     if (topologicalVertices.isEmpty()) {
       return results;
     }
@@ -207,18 +223,25 @@ public class ForwardEntailerSearchProblem {
       // Check if we can delete this subtree
       boolean canDelete = state.tree.getFirstRoot() != currentWord;
       for (SemanticGraphEdge edge : state.tree.incomingEdgeIterable(currentWord)) {
-        Polarity tokenPolarity = Polarity.DEFAULT;
         // Get token information
         CoreLabel token = edge.getDependent().backingLabel();
-        tokenPolarity = token.get(NaturalLogicAnnotations.PolarityAnnotation.class);
+        OperatorSpec operator;
+        NaturalLogicRelation lexicalRelation;
+        Polarity tokenPolarity = token.get(NaturalLogicAnnotations.PolarityAnnotation.class);
         if (tokenPolarity == null) {
           tokenPolarity = Polarity.DEFAULT;
         }
         // Get the relation for this deletion
-        NaturalLogicRelation lexicalRelation = NaturalLogicRelation.forDependencyDeletion(edge.getRelation().toString());
+        if ( (operator = token.get(NaturalLogicAnnotations.OperatorAnnotation.class)) != null) {
+          lexicalRelation = operator.instance.deleteRelation;
+        } else {
+          lexicalRelation = NaturalLogicRelation.forDependencyDeletion(edge.getRelation().toString());
+        }
         NaturalLogicRelation projectedRelation = tokenPolarity.projectLexicalRelation(lexicalRelation);
         // Make sure this is a valid entailment
-        if (!projectedRelation.isEntailed) { canDelete = false; }
+        if (!projectedRelation.isEntailed) {
+          canDelete = false;
+        }
       }
 
       if (canDelete) {
@@ -243,9 +266,11 @@ public class ForwardEntailerSearchProblem {
           newScore *= multiplier;
         }
         // Register the result
-        results.add(new SearchResult(resultTree,
-            aggregateDeletedEdges(state, state.tree.incomingEdgeIterable(currentWord), determinerRemovals),
-            newScore));
+        if (newScore > 0.0) {
+          results.add(new SearchResult(resultTree,
+              aggregateDeletedEdges(state, state.tree.incomingEdgeIterable(currentWord), determinerRemovals),
+              newScore));
+        }
 
         // Push the state with this subtree deleted
         nextIndex = state.currentIndex + 1;

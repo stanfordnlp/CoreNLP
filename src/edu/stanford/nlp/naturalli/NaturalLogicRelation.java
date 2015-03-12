@@ -1,5 +1,7 @@
 package edu.stanford.nlp.naturalli;
 
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -482,12 +484,8 @@ public enum NaturalLogicRelation {
     }
   }
 
-  /**
-   * Returns the natural logic relation corresponding to the given dependency arc being deleted from a sentence.
-   */
-  public static NaturalLogicRelation forDependencyDeletion(String dependencyLabel) {
-    NaturalLogicRelation rel = forDependencyInsertion(dependencyLabel);
-    switch (rel) {
+  private static NaturalLogicRelation insertionToDeletion(NaturalLogicRelation insertionRel) {
+    switch (insertionRel) {
       case EQUIVALENT: return EQUIVALENT;
       case FORWARD_ENTAILMENT: return REVERSE_ENTAILMENT;
       case REVERSE_ENTAILMENT: return FORWARD_ENTAILMENT;
@@ -496,7 +494,16 @@ public enum NaturalLogicRelation {
       case COVER: return ALTERNATION;
       case INDEPENDENCE: return INDEPENDENCE;
       default:
-        throw new IllegalStateException("Unhandled natural logic relation: " + rel);
+        throw new IllegalStateException("Unhandled natural logic relation: " + insertionRel);
     }
   }
+
+  /**
+   * Returns the natural logic relation corresponding to the given dependency arc being deleted from a sentence.
+   */
+  public static NaturalLogicRelation forDependencyDeletion(String dependencyLabel) {
+    NaturalLogicRelation rel = forDependencyInsertion(dependencyLabel);
+    return insertionToDeletion(rel);
+  }
+
 }
