@@ -192,69 +192,6 @@ public class TsurgeonTest extends TestCase {
     }
   }
 
-  // Extended syntax for createSubtree: support arbitrary tree literals
-  public void testCreateSubtreesExtended() {
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("createSubtree (F (G 1) H@ I) left right");
-
-    TregexPattern tregex = TregexPattern.compile("A < B=left < C=right");
-    // Verify when there are only two nodes
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2))", "(A (F (G 1) (H (B 1) (C 2)) I))");
-    // We allow backwards nodes as well
-    runTest(tregex, tsurgeon, "(A (C 1) (B 2))", "(A (F (G 1) (H (C 1) (B 2)) I))");
-    // Check nodes in between
-    runTest(tregex, tsurgeon, "(A (B 1) (D 3) (C 2))", "(A (F (G 1) (H (B 1) (D 3) (C 2)) I))");
-    // Check nodes outside the span
-    runTest(tregex, tsurgeon, "(A (D 3) (B 1) (C 2))", "(A (D 3) (F (G 1) (H (B 1) (C 2)) I))");
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2) (D 3))", "(A (F (G 1) (H (B 1) (C 2)) I) (D 3))");
-    runTest(tregex, tsurgeon, "(A (D 3) (B 1) (C 2) (E 4))", "(A (D 3) (F (G 1) (H (B 1) (C 2)) I) (E 4))");
-
-    // Check when the two endpoints are the same
-    tregex = TregexPattern.compile("A < B=left < B=right");
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2))", "(A (F (G 1) (H (B 1)) I) (C 2))");
-
-    // Check double operation - should make two F nodes and then stop
-    runTest(tregex, tsurgeon, "(A (B 1) (B 2))", "(A (F (G 1) (H (B 1)) I) (F (G 1) (H (B 2)) I))");
-
-    // Check when we only have one argument to createSubtree
-    tsurgeon = Tsurgeon.parseOperation("createSubtree (F (G 1) H@ I) child");
-    tregex = TregexPattern.compile("A < B=child");
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2))", "(A (F (G 1) (H (B 1)) I) (C 2))");
-    runTest(tregex, tsurgeon, "(A (B 1) (B 2))", "(A (F (G 1) (H (B 1)) I) (F (G 1) (H (B 2)) I))");
-
-    // Check that incorrectly formatted operations don't successfully parse
-    try {
-      tsurgeon = Tsurgeon.parseOperation("createSubtree (F (G 1) H@ I)");
-      throw new AssertionError("Expected to fail parsing");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-
-    try {
-      tsurgeon = Tsurgeon.parseOperation("createSubtree (F (G 1) H@ I) a b c");
-      throw new AssertionError("Expected to fail parsing");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-
-    // Missing foot
-    try {
-      tsurgeon = Tsurgeon.parseOperation("createSubtree (F (G 1) H I) a b c");
-      throw new AssertionError("Expected to fail parsing");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-
-    // Verify that it fails when the parents are different
-    tsurgeon = Tsurgeon.parseOperation("createSubtree (F (G 1) H@ I) left right");
-    tregex = TregexPattern.compile("A << B=left << C=right");
-    try {
-      runTest(tregex, tsurgeon, "(A (B 1) (D (C 2)))", "(A (B 1) (D (C 2)))");
-      throw new AssertionError("Expected a runtime failure");
-    } catch (TsurgeonRuntimeException e) {
-      // yay
-    }
-  }
-
   public void testDelete() {
     TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("delete bob");
 

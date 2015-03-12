@@ -3,6 +3,8 @@ package edu.stanford.nlp.ling.tokensregex;
 import edu.stanford.nlp.ling.tokensregex.types.Expressions;
 import edu.stanford.nlp.ling.tokensregex.types.Tags;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
+
+import java.io.Serializable;
 import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
@@ -25,7 +27,7 @@ import java.util.regex.Pattern;
  * </ul>
  * </p>
  */
-public class Env {
+public class Env implements Serializable {
   /**
    * Parser that converts a string into a SequencePattern.
    * @see edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParser
