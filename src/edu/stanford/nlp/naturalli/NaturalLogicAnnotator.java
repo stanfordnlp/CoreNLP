@@ -265,13 +265,23 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
    * @return An optional triple consisting of the particular quantifier we matched, as well as the span of that quantifier in the sentence.
    */
   private Optional<Triple<Operator,Integer,Integer>> validateQuantiferByHead(CoreMap sentence, IndexedWord quantifier) {
-    int end = quantifier.index();
-    for (int start = Math.max(0, end - 10); start < end; ++start) {
-      Function<CoreLabel,String> glossFn = (label) -> "CD".equals(label.tag()) ? "--NUM--" : label.lemma();
-      String gloss = StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class), " ", glossFn, start, end).toLowerCase();
-      for (Operator q : Operator.values()) {
-        if (q.surfaceForm.equals(gloss)) {
-          return Optional.of(Triple.makeTriple(q, start + 1, end + 1));
+    // Some useful variables
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    Function<CoreLabel, String> glossFn = (label) -> "CD".equals(label.tag()) ? "--NUM--" : label.lemma();
+    int quantIndex = quantifier.index();
+
+    // Look forward a bit too, if the head is a number.
+    int[] positiveOffsetToCheck = "CD".equals(tokens.get(quantIndex - 1).tag()) ? new int[]{2, 1, 0} : new int[]{0};
+
+    // Try searching backwards for the right quantifier
+    for (int offsetEnd : positiveOffsetToCheck) {
+      int end = quantIndex + offsetEnd;
+      for (int start = Math.max(0, quantIndex - 10); start < quantIndex; ++start) {
+        String gloss = StringUtils.join(tokens, " ", glossFn, start, end).toLowerCase();
+        for (Operator q : Operator.valuesByLengthDesc) {
+          if (q.surfaceForm.equals(gloss)) {
+            return Optional.of(Triple.makeTriple(q, start + 1, end + 1));
+          }
         }
       }
     }
@@ -317,12 +327,44 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
           quantifierInfo = validateQuantiferByHead(sentence, quantifier);
         }
 
+        // Awful hacks to regularize the subject of things like "one of" and "there are"
+        // (fix up 'there are')
+        if ("be".equals(subject == null ? null : subject.lemma())) {
+          boolean hasExpl = false;
+          IndexedWord newSubject = null;
+          for (SemanticGraphEdge outgoingEdge : tree.outgoingEdgeIterable(subject)) {
+            if ("nsubj".equals(outgoingEdge.getRelation().toString())) {
+              newSubject = outgoingEdge.getDependent();
+            } else if ("expl".equals(outgoingEdge.getRelation().toString())) {
+              hasExpl = true;
+            }
+          }
+          if (hasExpl) {
+            subject = newSubject;
+          }
+        }
+        // (fix up '$n$ of')
+        if ("CD".equals(subject == null ? null : subject.tag())) {
+          for (SemanticGraphEdge outgoingEdge : tree.outgoingEdgeIterable(subject)) {
+            String rel = outgoingEdge.getRelation().toString();
+            if ("prep".equals(rel)) {
+              for (SemanticGraphEdge pobj : tree.outgoingEdgeIterable(outgoingEdge.getDependent())) {
+                if ("pobj".equals(pobj.getRelation().toString())) {
+                  subject = pobj.getDependent();
+                }
+              }
+            } else if ("prep_of".equals(rel)) {
+              subject = outgoingEdge.getDependent();
+            }
+          }
+        }
+
         // Set tokens
         if (quantifierInfo.isPresent()) {
           // Compute span
           OperatorSpec scope = computeScope(tree, quantifierInfo.get().first,
-              matcher.getNode("pivot"), Pair.makePair(quantifierInfo.get().second, quantifierInfo.get().third), subject,
-              namedEntityQuantifier, matcher.getNode("object"));
+              matcher.getNode("pivot"), Pair.makePair(quantifierInfo.get().second, quantifierInfo.get().third),
+              subject, namedEntityQuantifier, matcher.getNode("object"));
           // Set annotation
           CoreLabel token = sentence.get(CoreAnnotations.TokensAnnotation.class).get(quantifier.index() - 1);
           OperatorSpec oldScope = token.get(OperatorAnnotation.class);

@@ -2,10 +2,7 @@ package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.util.Pair;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static edu.stanford.nlp.naturalli.NaturalLogicRelation.*;
 
@@ -59,7 +56,7 @@ public enum Operator {
   THERE_BE("there be",             FORWARD_ENTAILMENT, "additive", "additive"),
   THERE_BE_A_FEW("there be a few", FORWARD_ENTAILMENT, "additive", "additive"),
   THERE_EXIST("there exist",       FORWARD_ENTAILMENT, "additive", "additive"),
-  NUM_OF_THE("--num-- of the",     FORWARD_ENTAILMENT, "additive", "additive"),
+  NUM_OF("--num-- of",             FORWARD_ENTAILMENT, "additive", "additive"),
 
   // "Not All" quantifiers
   NOT_ALL("not all",     INDEPENDENCE, "additive", "anti-multiplicative"),
@@ -90,6 +87,17 @@ public enum Operator {
     for (Operator q : Operator.values()) {
       add(q.surfaceForm);
     }
+  }});
+
+  /**
+   * An ordered list of the known operators, by token length (descending). This ensures that we're matching the
+   * widest scoped operator.
+   */
+  public static final List<Operator> valuesByLengthDesc = Collections.unmodifiableList(new ArrayList<Operator>(){{
+    for (Operator op : values()) {
+      add(op);
+    }
+    Collections.sort(this, (a, b) -> b.surfaceForm.split(" ").length - a.surfaceForm.split(" ").length);
   }});
 
   public final String surfaceForm;
