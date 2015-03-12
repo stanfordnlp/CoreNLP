@@ -258,13 +258,13 @@ public abstract class GrammaticalStructure extends TreeGraph {
         basicGraph.add(parent, t, GrammaticalRelation.DEPENDENT);
       }
     }
-    StackTraceElement[] trace = Thread.currentThread().getStackTrace();
-    if (trace.length > 500) {
-      System.err.println("On the way to stack over flow where basicgraph is !!" + basicGraph);
-      System.err.println(Arrays.toString(trace));
-      throw new StackOverflowError();
-      // trigger some diagnostic action, print a stack trace or have a breakpoint here
-    }
+//    StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+//    if (trace.length > 500) {
+//      System.err.println("On the way to stack over flow where basicgraph is !!" + basicGraph);
+//      System.err.println(Arrays.toString(trace));
+//      throw new StackOverflowError();
+//      // trigger some diagnostic action, print a stack trace or have a breakpoint here
+//    }
     for (TreeGraphNode kid : t.children()) {
       attachStrandedNodes(kid, root, (kid.headWordNode() != t.headWordNode()), puncFilter, basicGraph);
     }    
