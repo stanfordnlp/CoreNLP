@@ -71,10 +71,6 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
     this(ner, verbose, 1, 0, Integer.MAX_VALUE);
   }
 
-  public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime) {
-    this(ner, verbose, nThreads, maxTime, Integer.MAX_VALUE);
-  }
-
   public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime, int maxSentenceLength) {
     VERBOSE = verbose;
     this.ner = ner;
