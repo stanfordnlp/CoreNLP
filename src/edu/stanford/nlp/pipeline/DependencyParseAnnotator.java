@@ -9,9 +9,7 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.PropertiesUtils;
 
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class adds dependency parse information to an Annotation.
@@ -32,6 +30,9 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
    * Maximum parse time (in milliseconds) for a sentence
    */
   private final long maxTime;
+  /**
+   * If true, include the extra arcs in the dependency representaion.
+   */
   private static final long DEFAULT_MAXTIME = Long.MAX_VALUE;
   private final GrammaticalStructure.Extras extraDependencies;
 
@@ -45,7 +46,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
 
     nThreads = PropertiesUtils.getInt(properties, "testThreads", DEFAULT_NTHREADS);
     maxTime = PropertiesUtils.getLong(properties, "sentenceTimeout", DEFAULT_MAXTIME);
-    extraDependencies = MetaClass.cast(properties.getProperty("extradependencies", "NONE"), GrammaticalStructure.Extras.class);
+    extraDependencies = MetaClass.cast(properties.getProperty(StanfordCoreNLP.STANFORD_DEPENDENCIES + ".extradependencies", "NONE"), GrammaticalStructure.Extras.class);
   }
 
   @Override
@@ -69,6 +70,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
     sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
     sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
     sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
+
   }
 
   @Override
