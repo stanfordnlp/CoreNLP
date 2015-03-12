@@ -164,7 +164,7 @@ public enum NaturalLogicRelation {
     put("csubj", NaturalLogicRelation.INDEPENDENCE);  // don't drop subjects.
     put("csubjpass", NaturalLogicRelation.INDEPENDENCE);  // as above
     put("dep", NaturalLogicRelation.INDEPENDENCE);  //
-    put("det", NaturalLogicRelation.EQUIVALENT);  // todo(gabor) better treatment of generics?
+    put("det", NaturalLogicRelation.FORWARD_ENTAILMENT);  // todo(gabor) better treatment of generics?
     put("discourse", NaturalLogicRelation.EQUIVALENT);  //
     put("dobj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // but, "he studied NLP at Stanford" -> "he studied NLP"
     put("expl", NaturalLogicRelation.EQUIVALENT);  // though we shouldn't see this...
@@ -458,7 +458,7 @@ public enum NaturalLogicRelation {
     put("punct", NaturalLogicRelation.EQUIVALENT);  //
     put("purpcl", NaturalLogicRelation.REVERSE_ENTAILMENT);  // deprecated into advmod
     put("quantmod", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
-    put("rcmod", NaturalLogicRelation.FORWARD_ENTAILMENT);  // "there are great tennors --rcmod--> who are modest"
+    put("rcmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  // "there are great tenors --rcmod--> who are modest"
     put("root", NaturalLogicRelation.INDEPENDENCE);  // err.. never delete
     put("tmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("vmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //

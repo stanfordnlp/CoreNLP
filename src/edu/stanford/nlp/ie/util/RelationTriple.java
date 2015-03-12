@@ -199,7 +199,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
 
   /** A set of valid arcs denoting an entity we are interested in */
   private static final Set<String> VALID_ENTITY_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("nn"); add("aux"); add("num"); add("prep"); add("nsubj"); add("prep_*"); add("poss");
+    add("amod"); add("nn"); add("aux"); add("num"); add("prep"); add("nsubj"); add("prep_*"); add("poss"); add("tmod");
   }});
 
   /** A set of valid arcs denoting an entity we are interested in */

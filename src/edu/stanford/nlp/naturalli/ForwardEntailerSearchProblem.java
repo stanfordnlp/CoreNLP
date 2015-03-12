@@ -224,24 +224,28 @@ public class ForwardEntailerSearchProblem {
       // Check if we can delete this subtree
       boolean canDelete = state.tree.getFirstRoot() != currentWord;
       for (SemanticGraphEdge edge : state.tree.incomingEdgeIterable(currentWord)) {
-        // Get token information
-        CoreLabel token = edge.getDependent().backingLabel();
-        OperatorSpec operator;
-        NaturalLogicRelation lexicalRelation;
-        Polarity tokenPolarity = token.get(NaturalLogicAnnotations.PolarityAnnotation.class);
-        if (tokenPolarity == null) {
-          tokenPolarity = Polarity.DEFAULT;
-        }
-        // Get the relation for this deletion
-        if ( (operator = token.get(NaturalLogicAnnotations.OperatorAnnotation.class)) != null) {
-          lexicalRelation = operator.instance.deleteRelation;
-        } else {
-          lexicalRelation = NaturalLogicRelation.forDependencyDeletion(edge.getRelation().toString());
-        }
-        NaturalLogicRelation projectedRelation = tokenPolarity.projectLexicalRelation(lexicalRelation);
-        // Make sure this is a valid entailment
-        if (!projectedRelation.isEntailed) {
+        if ("CD".equals(edge.getGovernor().tag())) {
           canDelete = false;
+        } else {
+          // Get token information
+          CoreLabel token = edge.getDependent().backingLabel();
+          OperatorSpec operator;
+          NaturalLogicRelation lexicalRelation;
+          Polarity tokenPolarity = token.get(NaturalLogicAnnotations.PolarityAnnotation.class);
+          if (tokenPolarity == null) {
+            tokenPolarity = Polarity.DEFAULT;
+          }
+          // Get the relation for this deletion
+          if ((operator = token.get(NaturalLogicAnnotations.OperatorAnnotation.class)) != null) {
+            lexicalRelation = operator.instance.deleteRelation;
+          } else {
+            lexicalRelation = NaturalLogicRelation.forDependencyDeletion(edge.getRelation().toString());
+          }
+          NaturalLogicRelation projectedRelation = tokenPolarity.projectLexicalRelation(lexicalRelation);
+          // Make sure this is a valid entailment
+          if (!projectedRelation.isEntailed) {
+            canDelete = false;
+          }
         }
       }
 
