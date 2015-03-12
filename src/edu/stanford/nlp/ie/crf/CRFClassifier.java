@@ -56,11 +56,11 @@ import java.util.zip.GZIPOutputStream;
  * or testing models, input files are expected to
  * be one token per line with the columns indicating things like the word,
  * POS, chunk, and answer class.  The default for
- * <code>ColumnDocumentReaderAndWriter</code> training data is 3 column input,
+ * {@code ColumnDocumentReaderAndWriter} training data is 3 column input,
  * with the columns containing a word, its POS, and its gold class, but
- * this can be specified via the <code>map</code> property.
+ * this can be specified via the {@code map} property.
  * </p><p>
- * When run on a file with <code>-textFile</code>,
+ * When run on a file with {@code -textFile} or {@code -textFiles},
  * the file is assumed to be plain English text (or perhaps simple HTML/XML),
  * and a reasonable attempt is made at English tokenization by
  * {@link PlainTextDocumentReaderAndWriter}.  The class used to read
