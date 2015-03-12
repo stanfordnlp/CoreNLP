@@ -802,7 +802,7 @@ public class MetaClass {
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
-    } else if (PrintWriter.class.isAssignableFrom(clazz)) {
+    } else if (PrintStream.class.isAssignableFrom(clazz)) {
       // (case: input stream)
       if (value.equalsIgnoreCase("stdout") || value.equalsIgnoreCase("out")) { return (E) System.out; }
       if (value.equalsIgnoreCase("stderr") || value.equalsIgnoreCase("err")) { return (E) System.err; }
