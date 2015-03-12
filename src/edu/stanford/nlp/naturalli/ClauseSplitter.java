@@ -50,6 +50,18 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
     public String toString() {
       return this.name();
     }
+    public static ClauseClassifierLabel fromIndex(int index) {
+      switch (index) {
+        case 0:
+          return NOT_A_CLAUSE;
+        case 1:
+          return CLAUSE_INTERM;
+        case 2:
+          return CLAUSE_SPLIT;
+        default:
+          throw new IllegalArgumentException("Not a valid index: " + index);
+      }
+    }
   }
 
   /**

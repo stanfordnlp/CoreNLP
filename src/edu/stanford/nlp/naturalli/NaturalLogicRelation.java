@@ -480,7 +480,7 @@ public enum NaturalLogicRelation {
     if (rel != null) {
       return rel;
     } else {
-      System.err.println("Unknown dependency arc for NaturalLogicRelation: " + dependencyLabel);
+//      System.err.println("Unknown dependency arc for NaturalLogicRelation: " + dependencyLabel);
       if (dependencyLabel.startsWith("prep_")) {
         return NaturalLogicRelation.REVERSE_ENTAILMENT;
       } else if (dependencyLabel.startsWith("conj_")) {
