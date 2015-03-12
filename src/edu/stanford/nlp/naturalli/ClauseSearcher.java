@@ -36,7 +36,26 @@ import java.util.zip.GZIPOutputStream;
 import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 /**
- * A search problem for finding clauses in a sentence.
+ * <p>
+ *   A search problem for finding clauses in a sentence.
+ * </p>
+ *
+ * <p>
+ *   For usage at test time, load a model from
+ *   {@link ClauseSearcher#factory(File)}, and then take the top clauses of a given tree
+ *   with {@link ClauseSearcher#topClauses(double)}, yielding a list of
+ *   {@link edu.stanford.nlp.naturalli.SentenceFragment}s.
+ * </p>
+ * <pre>
+ *   {@code
+ *     ClauseSearcher searcher = ClauseSearcher.factory("/model/path/");
+ *     List<SentenceFragment> sentences = searcher.topClauses(threshold);
+ *   }
+ * </pre>
+ *
+ * <p>
+ *   For training, see {@link ClauseSearcher#trainFactory(Stream, File, File)}.
+ * </p>
  *
  * @author Gabor Angeli
  */
@@ -130,6 +149,7 @@ public class ClauseSearcher {
     public float positiveDatumWeight = 10.0f;
     @Execution.Option(name = "seed", gloss = "The random seed to use")
     public int seed = 42;
+    @SuppressWarnings("unchecked")
     @Execution.Option(name = "classifierFactory", gloss = "The class of the classifier factory to use for training the various classifiers")
     public Class<? extends ClassifierFactory<Boolean, String, Classifier<Boolean, String>>> classifierFactory = (Class<? extends ClassifierFactory<Boolean, String, Classifier<Boolean, String>>>) ((Object) LinearClassifierFactory.class);
   }
@@ -207,9 +227,7 @@ public class ClauseSearcher {
         }
       }
     }
-    for (IndexedWord v : toDelete) {
-      tree.removeVertex(v);
-    }
+    toDelete.forEach(tree::removeVertex);
 
     // Clean edges
     Iterator<SemanticGraphEdge> iter = tree.edgeIterable().iterator();
@@ -235,9 +253,7 @@ public class ClauseSearcher {
         }
       }
     }
-    for (SemanticGraphEdge edge : extraEdges) {
-      tree.removeEdge(edge);
-    }
+    extraEdges.forEach(tree::removeEdge);
     // Add apposition edges (simple coref)
     for (SemanticGraphEdge extraEdge : new ArrayList<>(extraEdges)) {  // note[gabor] prevent concurrent modification exception
       for (SemanticGraphEdge candidateAppos : tree.incomingEdgeIterable(extraEdge.getDependent())) {
@@ -260,9 +276,7 @@ public class ClauseSearcher {
         rootIncomingEdges.add(incomingEdge);
       }
     }
-    for (SemanticGraphEdge edge : rootIncomingEdges) {
-      tree.removeEdge(edge);
-    }
+    rootIncomingEdges.forEach(tree::removeEdge);
     // Loop until it becomes a tree.
     boolean changed = true;
     while (changed) {  // I just want trees to be trees; is that so much to ask!?
@@ -272,7 +286,6 @@ public class ClauseSearcher {
 
       for (IndexedWord vertex : tree.vertexSet()) {
         // Collect statistics
-        boolean hasOutgoing = tree.outgoingEdgeIterator(vertex).hasNext();
         Iterator<SemanticGraphEdge> incomingIter = tree.incomingEdgeIterator(vertex);
         boolean hasIncoming = incomingIter.hasNext();
         boolean hasMultipleIncoming = false;
@@ -309,6 +322,13 @@ public class ClauseSearcher {
     return extraEdges;
   }
 
+  /**
+   * The basic method for splitting off a clause of a tree.
+   * This modifies the tree in place.
+   *
+   * @param tree The tree to split a clause from.
+   * @param toKeep The edge representing the clause to keep.
+   */
   private static void simpleClause(SemanticGraph tree, SemanticGraphEdge toKeep) {
     Queue<IndexedWord> fringe = new LinkedList<>();
     List<IndexedWord> nodesToRemove = new ArrayList<>();
@@ -333,19 +353,35 @@ public class ClauseSearcher {
       }
     }
     // Remove nodes
-    for (IndexedWord node : nodesToRemove) {
-      tree.removeVertex(node);
-    }
+    nodesToRemove.forEach(tree::removeVertex);
     // Set new root
     tree.setRoot(toKeep.getDependent());
   }
 
+  /**
+   * A helper to add a single word to a given dependency tree
+   * @param toModify The tree to add the word to.
+   * @param root The root of the tree where we should be adding the word.
+   * @param rel The relation to add the word with.
+   * @param coreLabel The word to add.
+   */
+  @SuppressWarnings("UnusedDeclaration")
   private static void addWord(SemanticGraph toModify, IndexedWord root, String rel, CoreLabel coreLabel) {
     IndexedWord dependent = new IndexedWord(coreLabel);
     toModify.addVertex(dependent);
     toModify.addEdge(root, dependent, GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, rel), Double.NEGATIVE_INFINITY, false);
   }
 
+  /**
+   * A helper to add an entire subtree to a given dependency tree.
+   *
+   * @param toModify The tree to add the subtree to.
+   * @param root The root of the tree where we should be adding the subtree.
+   * @param rel The relation to add the subtree with.
+   * @param originalTree The orignal tree (i.e., {@link edu.stanford.nlp.naturalli.ClauseSearcher#tree}).
+   * @param subject The root of the clause to add.
+   * @param ignoredEdges The edges to ignore adding when adding this subtree.
+   */
   private static void addSubtree(SemanticGraph toModify, IndexedWord root, String rel, SemanticGraph originalTree, IndexedWord subject, Collection<SemanticGraphEdge> ignoredEdges) {
     if (toModify.containsVertex(subject)) {
       return;  // This subtree already exists.
@@ -384,9 +420,7 @@ public class ClauseSearcher {
     toModify.addEdge(root, subject, GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, rel), Double.NEGATIVE_INFINITY, false);
 
     // (add nodes)
-    for (IndexedWord node : wordsToAdd) {
-      toModify.addVertex(node);
-    }
+    wordsToAdd.forEach(toModify::addVertex);
     // (add edges)
     for (SemanticGraphEdge edge : edgesToAdd) {
       assert !toModify.incomingEdgeIterator(edge.getDependent()).hasNext();
@@ -396,6 +430,8 @@ public class ClauseSearcher {
 
   /**
    * A little utility function to make sure a SemanticGraph is a tree.
+   * @param tree The tree to check.
+   * @return True if this {@link edu.stanford.nlp.semgraph.SemanticGraph} is a tree (versus a DAG, or Graph).
    */
   private static boolean isTree(SemanticGraph tree) {
     for (IndexedWord vertex : tree.vertexSet()) {
@@ -423,8 +459,10 @@ public class ClauseSearcher {
    * @param toCopy The CoreLabel to copy from initially.
    * @param word   The new word to add.
    * @param POS    The new part of speech to add.
-   * @return
+   *
+   * @return A CoreLabel copying most fields from toCopy, but with a new word and POS tag (as well as a new index).
    */
+  @SuppressWarnings("UnusedDeclaration")
   private CoreLabel mockNode(CoreLabel toCopy, String word, String POS) {
     CoreLabel mock = new CoreLabel(toCopy);
     mock.setWord(word);
@@ -437,14 +475,16 @@ public class ClauseSearcher {
   }
 
   /**
-   * TODO(gabor) JavaDoc
-   * @param thresholdProbability
-   * @return
+   * Get the top few clauses from this searcher, cutting off at the given minimum
+   * probability.
+   * @param thresholdProbability The threshold under which to stop returning clauses. This should be between 0 and 1.
+   * @return The resulting {@link edu.stanford.nlp.naturalli.SentenceFragment} objects, representing the top clauses of the sentence.
    */
   public List<SentenceFragment> topClauses(double thresholdProbability) {
     List<SentenceFragment> results = new ArrayList<>();
     search(triple -> {
-      if (triple.first >= thresholdProbability) {
+      double prob = Math.exp(triple.first);
+      if (prob >= thresholdProbability) {
         results.add(triple.third.get());
         return true;
       } else {
@@ -455,8 +495,11 @@ public class ClauseSearcher {
   }
 
   /**
-   * TODO(gabor) JavaDoc
-   * @param candidateFragments
+   * Search, using the default weights / featurizer. This is the most common entry method for the raw search,
+   * though {@link edu.stanford.nlp.naturalli.ClauseSearcher#topClauses(double)} may be a more convenient method for
+   * an end user.
+   *
+   * @param candidateFragments The callback function for results. The return value defines whether to continue searching.
    */
   public void search(final Predicate<Triple<Double, List<Counter<String>>, Supplier<SentenceFragment>>> candidateFragments) {
     if (!isClauseClassifier.isPresent() ||
@@ -470,13 +513,14 @@ public class ClauseSearcher {
   }
 
   /**
-   * TODO(gabor) JavaDoc
+   * Search from the root of the tree.
+   * This function also defines the default action space to use during search.
    *
-   * @param candidateFragments
-   * @param weights
-   * @param featurizer
+   * @param candidateFragments The callback function.
+   * @param weights The weights to use during search.
+   * @param featurizer The featurizer to use during search, to be dot producted with the weights.
    */
-  public void search(
+  protected void search(
       // The output specs
       final Predicate<Triple<Double, List<Counter<String>>, Supplier<SentenceFragment>>> candidateFragments,
       // The learning specs
@@ -569,15 +613,23 @@ public class ClauseSearcher {
   }
 
   /**
-   * TODO(gabor) JavaDoc
+   * The core implementation of the search.
    *
-   * @param root
-   * @param candidateFragments
-   * @param weights
-   * @param featurizer
-   * @param actionSpace
+   * @param root The root word to search from. Traditionally, this is the root of the sentence.
+   * @param candidateFragments The callback for the resulting sentence fragments.
+   *                           This is a predicate of a triple of values.
+   *                           The return value of the predicate determines whether we should continue searching.
+   *                           The triple is a triple of
+   *                           <ol>
+   *                             <li>The log probability of the sentence fragment, according to the featurizer and the weights</li>
+   *                             <li>The features along the path to this fragment. The last element of this is the features from the most recent step.</li>
+   *                             <li>The sentence fragment. Because it is relatively expensive to compute the resulting tree, this is returned as a lazy {@link Supplier}.</li>
+   *                           </ol>
+   * @param weights The weights to use during searching. This is traditionally from a trained classifier (e.g., with {@link ClauseSearcher#factory(File)}).
+   * @param featurizer The featurizer to use. Make sure this matches the weights!
+   * @param actionSpace The action space we are allowed to take. Each action defines a means of splitting a clause on a dependency boundary.
    */
-  public void search(
+  protected void search(
       // The root to search from
       IndexedWord root,
       // The output specs
@@ -683,9 +735,10 @@ public class ClauseSearcher {
 
 
   /**
-   * TODO(gabor) JavaDoc
-   * @param classifier
-   * @param dataset
+   * A helper function for dumping the accuracy of the trained classifier.
+   *
+   * @param classifier The classifier to evaluate.
+   * @param dataset The dataset to evaluate the classifier on.
    */
   private static void dumpAccuracy(Classifier<Boolean, String> classifier, GeneralDataset<Boolean, String> dataset) {
     DecimalFormat df = new DecimalFormat("0.000");
@@ -698,14 +751,21 @@ public class ClauseSearcher {
   }
 
   /**
-   * TODO(gabor) JavaDoc
+   * Train a clause searcher factory. That is, train a classifier for which arcs should be
+   * new clauses.
    *
-   * @param trainingData
-   * @param featurizer
-   * @param options
-   * @param modelPath
-   * @param trainingDataDump
-   * @return
+   * @param trainingData The training data. This is a stream of triples of:
+   *                     <ol>
+   *                       <li>The sentence containing a known extraction.</li>
+   *                       <li>The span of the subject in the sentence, as a token span.</li>
+   *                       <li>The span of the object in the sentence, as a token span.</li>
+   *                     </ol>
+   * @param featurizer The featurizer to use for this classifier.
+   * @param options The training options.
+   * @param modelPath The path to save the model to. This is useful for {@link ClauseSearcher#factory(File)}.
+   * @param trainingDataDump The path to save the training data, as a set of labeled featurized datums.
+   *
+   * @return A factory for creating searchers from a given dependency tree.
    */
   public static Function<SemanticGraph, ClauseSearcher> trainFactory(
       Stream<Triple<CoreMap, Span, Span>> trainingData,
@@ -736,16 +796,13 @@ public class ClauseSearcher {
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       Span subjectSpan = Util.extractNER(tokens, triple.second);
       Span objectSpan = Util.extractNER(tokens, triple.third);
-//      log("inference on " + StringUtils.join(tokens.subList(0, Math.min(10, tokens.size())).stream().map(CoreLabel::word), " "));
       // Create raw clause searcher (no classifier)
-      SemanticGraph tree = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
       ClauseSearcher problem = new ClauseSearcher(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class));
       Pointer<Boolean> anyCorrect = new Pointer<>(false);
 
       // Run search
       problem.search(fragmentAndScore -> {
         // Parse the search output
-        double score = fragmentAndScore.first;
         List<Counter<String>> features = fragmentAndScore.second;
         Supplier<SentenceFragment> fragmentSupplier = fragmentAndScore.third;
         SentenceFragment fragment = fragmentSupplier.get();
@@ -773,7 +830,8 @@ public class ClauseSearcher {
               bestExtraction = extraction;
             }
           } else {
-            if (bestExtraction == null && !correct) {
+            assert !correct;
+            if (bestExtraction == null) {
               bestExtraction = extraction;
             }
             correct = false;
@@ -848,11 +906,9 @@ public class ClauseSearcher {
 
 
   /**
-   * TODO(gabor) JavaDoc
-   * @param trainingData
-   * @param modelPath
-   * @param trainingDataDump
-   * @return
+   * A helper function for training with the default featurizer and training options.
+   *
+   * @see edu.stanford.nlp.naturalli.ClauseSearcher#trainFactory(Stream, Featurizer, TrainingOptions, Optional, Optional)
    */
   public static Function<SemanticGraph, ClauseSearcher> trainFactory(
       Stream<Triple<CoreMap, Span, Span>> trainingData,
@@ -870,7 +926,6 @@ public class ClauseSearcher {
       if (edgeRelShort.contains("_")) {
         edgeRelShort = edgeRelShort.substring(0, edgeRelShort.indexOf("_"));
       }
-      String edgeRelSpecific = to.edge == null ? null : to.edge.getRelation().getSpecific();
 
       // -- Featurize --
       // Variables to aggregate
@@ -923,8 +978,10 @@ public class ClauseSearcher {
 
 
   /**
-   * TODO(gabor) JavaDoc
-   * @return
+   * Load a factory model from a given path. This can be trained with
+   * {@link edu.stanford.nlp.naturalli.ClauseSearcher#trainFactory(Stream, Featurizer, TrainingOptions, Optional, Optional)}.
+   *
+   * @return A function taking a dependency tree, and returning a clause searcher.
    */
   public static Function<SemanticGraph, ClauseSearcher> factory(File serializedModel) throws IOException {
     try {
