@@ -16,13 +16,13 @@ public class TimingTest extends TestCase {
 
   /** There's a lot of time slop in these tests so they don't fire by mistake.
    *  You definitely get them more than 10% off sometimes. :(
-   *  And then we got a test failure that was over 40% off on the first test. :(
+   *  And then we got a test failure that was over 70% off on the first test. :(
    */
   public void testTiming() {
     Timing t = new Timing();
     sleepTen();
     long val2 = t.reportNano();
-    assertEquals("Wrong nanosleep", 10000000, val2, 5000000);
+    assertEquals("Wrong nanosleep", 10000000, val2, 10000000);
     // System.err.println(val2);
     sleepTen();
     long val = t.report();
