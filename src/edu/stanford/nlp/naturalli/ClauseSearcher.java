@@ -857,8 +857,8 @@ public class ClauseSearcher {
       // 6. POS tag info
       feats.incrementCount(signature + "&parent_pos:" + to.edge.getGovernor().tag());
       feats.incrementCount(signature + "&child_pos:" + to.edge.getDependent().tag());
-      feats.incrementCount(signature + "&pos_signature:" + to.edge.getGovernor().tag() + "->" + to.edge.getDependent().tag());
-      feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&pos_signature:" + to.edge.getGovernor().tag() + "->" + to.edge.getDependent().tag());
+      feats.incrementCount(signature + "&pos_signature:" + to.edge.getGovernor().tag() + "_" + to.edge.getDependent().tag());
+      feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&pos_signature:" + to.edge.getGovernor().tag() + "_" + to.edge.getDependent().tag());
     }
     return feats;
   };
