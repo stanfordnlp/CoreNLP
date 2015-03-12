@@ -99,9 +99,7 @@ public class ParserAnnotator extends SentenceAnnotator {
   public ParserAnnotator(String annotatorName, Properties props) {
     String model = props.getProperty(annotatorName + ".model", LexicalizedParser.DEFAULT_PARSER_LOC);
     if (model == null) {
-      throw new IllegalArgumentException("No model specified for " +
-                                         "Parser annotator " +
-                                         annotatorName);
+      throw new IllegalArgumentException("No model specified for Parser annotator " + annotatorName);
     }
     this.VERBOSE = PropertiesUtils.getBool(props, annotatorName + ".debug", false);
 
@@ -211,7 +209,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     }
     Tree tree = null;
     // generate the constituent tree
-    if (maxSentenceLength <= 0 || words.size() < maxSentenceLength) {
+    if (maxSentenceLength <= 0 || words.size() <= maxSentenceLength) {
       try {
         final List<ParserConstraint> constraints = sentence.get(ParserAnnotations.ConstraintAnnotation.class);
         tree = doOneSentence(constraints, words);

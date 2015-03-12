@@ -93,6 +93,27 @@ public class TsurgeonTest extends TestCase {
     assertFalse(matcher.find());
   }
 
+  public void testAdjoinWithNamedNode() {
+    TsurgeonPattern tsurgeon =
+      Tsurgeon.parseOperation("[adjoinF (D (E=target foot@)) bar] " +
+                              "[insert (G 1) $+ target]");
+    TregexPattern tregex = TregexPattern.compile("B=bar !>> D");
+    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (G 1) (E (B C))))");
+
+    tsurgeon =
+      Tsurgeon.parseOperation("[adjoinF (D (E=target foot@)) bar] " +
+                              "[insert (G 1) >0 target]");
+    tregex = TregexPattern.compile("B=bar !>> D");
+    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (E (G 1) (B C))))");
+
+    // Named leaf
+    tsurgeon =
+      Tsurgeon.parseOperation("[adjoinF (D (E foot@) F=target) bar] " +
+                              "[insert (G 1) >0 target]");
+    tregex = TregexPattern.compile("B=bar !>> D");
+    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (E (B C)) (F (G 1))))");
+  }
+
   public void testAuxiliaryTreeErrors() {
     TsurgeonPattern tsurgeon;
     try {
@@ -236,6 +257,24 @@ public class TsurgeonTest extends TestCase {
     tsurgeon = Tsurgeon.parseOperation("insert (D (E\\\\=blah 6)) >0 bar");
     tregex = TregexPattern.compile("B=bar !<D");
     runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A (B (D (E\\ 6)) 0) (C 1))");
+  }
+
+  public void testInsertWithNamedNode() {
+    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("[insert (D=target E) $+ bar] " +
+                                                       "[insert (F 1) >0 target]");
+    TregexPattern tregex = TregexPattern.compile("B=bar !$- D");
+    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (F 1) E) (B C))");
+
+    tsurgeon = Tsurgeon.parseOperation("[insert (D=target E) $+ bar] " +
+                                       "[insert (F 1) $+ target]");
+    tregex = TregexPattern.compile("B=bar !$- D");
+    runTest(tregex, tsurgeon, "(A (B C))", "(A (F 1) (D E) (B C))");
+
+    // Named leaf
+    tsurgeon = Tsurgeon.parseOperation("[insert (D E=target) $+ bar] " +
+                                       "[insert (F 1) $+ target]");
+    tregex = TregexPattern.compile("B=bar !$- D");
+    runTest(tregex, tsurgeon, "(A (B C))", "(A (D (F 1) E) (B C))");
   }
 
   public void testRelabel() {
