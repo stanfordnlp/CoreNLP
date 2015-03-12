@@ -23,6 +23,9 @@ public class ArrayStringFilter implements Filter<String> {
   }
 
   public ArrayStringFilter(Mode mode, String ... words) {
+    if (mode == null) {
+      throw new NullPointerException("Cannot handle null mode");
+    }
     this.mode = mode;
     this.words = new String[words.length];
     for (int i = 0; i < words.length; ++i) {

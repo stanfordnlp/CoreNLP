@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 public class MulticoreWrapper<I,O> {
 
   // Default: never time out
-  private long maxSubmitBlockTime = -1;
+  private long maxBlockTime = -1;
 
   private final int nThreads;
   private int submittedItemCounter = 0;
@@ -103,7 +103,7 @@ public class MulticoreWrapper<I,O> {
    *
    * @param t
    */
-  public void setMaxBlockTime(long t) { maxSubmitBlockTime = t; }
+  public void setMaxBlockTime(long t) { maxBlockTime = t; }
 
   /**
    * Return status information about the underlying threadpool.
@@ -133,8 +133,8 @@ public class MulticoreWrapper<I,O> {
   public synchronized void put(I item) throws RejectedExecutionException {
     Integer procId;
     try {
-      procId = maxSubmitBlockTime < 0 ? idleProcessors.take() :
-        idleProcessors.poll(maxSubmitBlockTime, TimeUnit.MILLISECONDS);
+      procId = maxBlockTime < 0 ? idleProcessors.take() :
+        idleProcessors.poll(maxBlockTime, TimeUnit.MILLISECONDS);
       if (procId == null) {
         throw new RejectedExecutionException("Couldn't submit item to threadpool: " + item.toString());
       }
