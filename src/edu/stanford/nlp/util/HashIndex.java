@@ -3,7 +3,6 @@ package edu.stanford.nlp.util;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.Semaphore;
-import java.util.function.Supplier;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -33,7 +32,7 @@ import edu.stanford.nlp.io.RuntimeIOException;
 public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, RandomAccess {
 
   // these variables are also used in IntArrayIndex
-  private final List<E> objects;  // <-- Should really almost always be an ArrayList
+  private final ArrayList<E> objects;
   private final Map<E,Integer> indexes;
   private boolean locked; // = false; // Mutable
 
@@ -272,18 +271,8 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
     indexes = Generics.newHashMap(capacity);
   }
 
-  /**
-   * Create a new <code>HashIndex</code>, backed by the given collection types.
-   * @param objLookupFactory The constructor for the object lookup -- traditionally an {@link ArrayList}.
-   * @param indexLookupFactory The constructor for the index lookup -- traditionally a {@link HashMap}.
-   */
-  public HashIndex(Supplier<List<E>> objLookupFactory, Supplier<Map<E,Integer>> indexLookupFactory) {
-    this(objLookupFactory.get(), indexLookupFactory.get());
-
-  }
-
   /** Private constructor for supporting the unmodifiable view. */
-  private HashIndex(List<E> objects, Map<E,Integer> indexes) {
+  private HashIndex(ArrayList<E> objects, Map<E,Integer> indexes) {
     super();
     this.objects = objects;
     this.indexes = indexes;

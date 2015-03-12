@@ -144,28 +144,11 @@ public class Counters {
    * @return The maximum value of the Counter
    */
   public static <E> double max(Counter<E> c) {
-    return max(c, Double.NEGATIVE_INFINITY);  // note[gabor]: Should the default actually be 0 rather than negative_infinity?
-  }
-
-  /**
-   * Returns the value of the maximum entry in this counter. This is also the
-   * L_infinity norm. An empty counter is given a max value of
-   * Double.NEGATIVE_INFINITY.
-   *
-   * @param c The Counter to find the max of
-   * @param valueIfEmpty The value to return if this counter is empty (i.e., the maximum is not well defined.
-   * @return The maximum value of the Counter
-   */
-  public static <E> double max(Counter<E> c, double valueIfEmpty) {
-    if (c.size() == 0) {
-      return valueIfEmpty;
-    } else {
-      double max = Double.NEGATIVE_INFINITY;
-      for (double v : c.values()) {
-        max = Math.max(max, v);
-      }
-      return max;
+    double max = Double.NEGATIVE_INFINITY;
+    for (double v : c.values()) {
+      max = Math.max(max, v);
     }
+    return max;
   }
 
   /**
@@ -205,10 +188,17 @@ public class Counters {
    * @return The key in the Counter with the largest count.
    */
   public static <E> E argmax(Counter<E> c) {
-    return argmax(c, (x, y) -> 0, null);
-
+    double max = Double.NEGATIVE_INFINITY;
+    E argmax = null;
+    for (E key : c.keySet()) {
+      double count = c.getCount(key);
+      if (argmax == null || count > max) { // || (count == max && tieBreaker.compare(key, argmax) < 0)
+        max = count;
+        argmax = key;
+      }
+    }
+    return argmax;
   }
-
 
   /**
    * Finds and returns the key in this Counter with the smallest count.
@@ -235,26 +225,9 @@ public class Counters {
    * null if count is empty.
    *
    * @param c The Counter
-   * @param tieBreaker the tie breaker for when elements have the same value.
    * @return The key in the Counter with the largest count.
    */
   public static <E> E argmax(Counter<E> c, Comparator<E> tieBreaker) {
-    return argmax(c, tieBreaker, (E) null);
-  }
-
-  /**
-   * Finds and returns the key in the Counter with the largest count. Returning
-   * null if count is empty.
-   *
-   * @param c The Counter
-   * @param tieBreaker the tie breaker for when elements have the same value.
-   * @param defaultIfEmpty The value to return if the counter is empty.
-   * @return The key in the Counter with the largest count.
-   */
-  public static <E> E argmax(Counter<E> c, Comparator<E> tieBreaker, E defaultIfEmpty) {
-    if (c.size() == 0) {
-      return defaultIfEmpty;
-    }
     double max = Double.NEGATIVE_INFINITY;
     E argmax = null;
     for (E key : c.keySet()) {
