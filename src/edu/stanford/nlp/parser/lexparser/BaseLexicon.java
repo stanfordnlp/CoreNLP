@@ -10,7 +10,11 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.HashIndex;
+import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.ReflectionLoading;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,7 +24,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.text.NumberFormat;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -105,8 +108,8 @@ public class BaseLexicon implements Lexicon {
   protected boolean useSignatureForKnownSmoothing;
 
   /**
-   * Only used when training, specifically when training on sentences
-   * that weren't part of annotated (e.g., markovized, etc.) data.
+   * Only used when training, specifically when training on sentenes
+   * that weren't part of annotated (eg markovized, etc) data
    */
   private Map<String, Counter<String>> baseTagCounts = Generics.newHashMap();
 
@@ -169,17 +172,6 @@ public class BaseLexicon implements Lexicon {
     IntTaggedWord iW = new IntTaggedWord(wordIndex.indexOf(word), nullTag);
     return seenCounter.getCount(iW) > 0.0;
   }
-
-  /** {@inheritDoc} */
-  @Override
-  public Set<String> tagSet(Function<String,String> basicCategoryFunction) {
-    Set<String> tagSet = new HashSet<String>();
-    for (String tag : tagIndex.objectsList()) {
-      tagSet.add(basicCategoryFunction.apply(tag));
-    }
-    return tagSet;
-  }
-
 
   /**
    * Returns the possible POS taggings for a word.

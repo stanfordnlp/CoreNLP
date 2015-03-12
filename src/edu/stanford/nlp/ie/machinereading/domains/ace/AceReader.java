@@ -250,7 +250,6 @@ public class AceReader extends GenericDataSetReader {
       for(int i = 0; i < tokens.size(); i ++){
         CoreLabel l = new CoreLabel();
         l.setWord(tokens.get(i).getLiteral());
-        l.set(CoreAnnotations.ValueAnnotation.class, l.word());
         l.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, tokens.get(i).getByteStart());
         l.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, tokens.get(i).getByteEnd());
         words.add(l);

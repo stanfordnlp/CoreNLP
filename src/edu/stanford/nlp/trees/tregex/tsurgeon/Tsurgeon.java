@@ -468,10 +468,6 @@ public class Tsurgeon {
       // System.err.println("Read tsurgeon op: " + thisLine);
       operations.add(parseOperation(thisLine));
     }
-
-    if (operations.size() == 0)
-      throw new TsurgeonParseException("No Tsurgeon operation provided.");
-
     return collectOperations(operations);
   }
 
