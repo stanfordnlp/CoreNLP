@@ -491,8 +491,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           .setDep(edge.getRelation().toString())
           .setIsExtra(edge.isExtra())
           .setSourceCopy(edge.getSource().copyCount())
-          .setTargetCopy(edge.getTarget().copyCount())
-          .setLanguage(toProto(edge.getRelation().getLanguage())));
+          .setTargetCopy(edge.getTarget().copyCount()));
+//          .setLanguage(toProto(edge.getRelation().getLanguage())));  // TODO(gabor) uncomment me after KBP release
     }
     // Return
     return builder.build();
@@ -610,8 +610,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return CoreNLPProtos.Language.Hebrew;
       case Spanish:
         return CoreNLPProtos.Language.Spanish;
-      case Unknown:
-        return CoreNLPProtos.Language.Unknown;
+//      case Unknown:
+//        return CoreNLPProtos.Language.Unknown;  // TODO(gabor) uncomment me after KBP is released!
       default:
         throw new IllegalStateException("Unknown language: " + lang);
     }
@@ -896,8 +896,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return Languages.Language.Hebrew;
       case Spanish:
         return Languages.Language.Spanish;
-      case Unknown:
-        return Languages.Language.Unknown;
+//      case Unknown:
+//        return Languages.Language.Unknown;  // TODO(gabor) uncomment me after KBP is released!
       default:
         throw new IllegalStateException("Unknown language: " + lang);
     }
@@ -964,7 +964,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       synchronized (globalLock) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
         assert ie.hasDep();
-        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep(), fromProto(ie.getLanguage()));
+//        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep(), fromProto(ie.getLanguage()));  // TODO(gabor) uncomment me after KBP release
+        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep());
         graph.addEdge(source, target, rel, 1.0, ie.hasIsExtra() && ie.getIsExtra());
       }
     }
