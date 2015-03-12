@@ -38,9 +38,13 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSearchProblem> {
 
   public enum ClauseClassifierLabel {
-    CLAUSE_SPLIT,
-    CLAUSE_INTERM,
-    NOT_A_CLAUSE;
+    CLAUSE_SPLIT(2),
+    CLAUSE_INTERM(1),
+    NOT_A_CLAUSE(0);
+    public final byte index;
+    ClauseClassifierLabel(int val) {
+      this.index = (byte) val;
+    }
     /** Seriously, why would Java not have this by default? */
     @Override
     public String toString() {

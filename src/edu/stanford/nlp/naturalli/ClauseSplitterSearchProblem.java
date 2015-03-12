@@ -225,7 +225,7 @@ public class ClauseSplitterSearchProblem {
    *
    * @param tree The dependency tree to search over.
    */
-  protected ClauseSplitterSearchProblem(SemanticGraph tree) {
+  public ClauseSplitterSearchProblem(SemanticGraph tree) {
     this(tree, Optional.empty(), Optional.empty());
   }
 
@@ -404,12 +404,15 @@ public class ClauseSplitterSearchProblem {
   /**
    * Search from the root of the tree.
    * This function also defines the default action space to use during search.
+   * This is NOT recommended to be used at test time.
+   *
+   * @see edu.stanford.nlp.naturalli.ClauseSplitterSearchProblem#search(Predicate)
    *
    * @param candidateFragments The callback function.
    * @param classifier The classifier for whether an arc should be on the path to a clause split, a clause split itself, or neither.
    * @param featurizer The featurizer to use during search, to be dot producted with the weights.
    */
-  protected void search(
+  public void search(
       // The output specs
       final Predicate<Triple<Double, List<Counter<String>>, Supplier<SentenceFragment>>> candidateFragments,
       // The learning specs
