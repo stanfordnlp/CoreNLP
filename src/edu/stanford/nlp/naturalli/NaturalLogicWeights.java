@@ -188,6 +188,13 @@ public class NaturalLogicWeights {
       return ppDeletionProbability(edge, neighbors);
     } else if (edgeRel.contains("obj")) {
       return objDeletionProbability(edge, neighbors);
+    } else if (edgeRel.equals("amod")) {
+      String word = (edge.getDependent().lemma() != null ? edge.getDependent().lemma() : edge.getDependent().word()).toLowerCase();
+      if (Util.PRIVATIVE_ADJECTIVES.contains(word)) {
+        return 0.0;
+      } else {
+        return objDeletionProbability(edge, neighbors);
+      }
     } else {
       return deletionProbability(edgeRel);
     }

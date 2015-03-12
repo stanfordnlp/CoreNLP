@@ -345,4 +345,65 @@ public class Util {
     log("r  (interm):  " + df.format(pr.second));
     log("f1 (interm):  " + df.format(2 * pr.first * pr.second / (pr.first + pr.second)));
   }
+
+  /**
+   * The dictionary of privative adjectives, as per http://hci.stanford.edu/cstr/reports/2014-04.pdf
+   */
+  public static final Set<String> PRIVATIVE_ADJECTIVES = Collections.unmodifiableSet(new HashSet<String>(){{
+     add("believed");
+     add("debatable");
+     add("disputed");
+     add("dubious");
+     add("hypothetical");
+     add("impossible");
+     add("improbable");
+     add("plausible");
+     add("putative");
+     add("questionable");
+     add("so called");
+     add("supposed");
+     add("suspicious");
+     add("theoretical");
+     add("uncertain");
+     add("unlikely");
+     add("would - be");
+     add("apparent");
+     add("arguable");
+     add("assumed");
+     add("likely");
+     add("ostensible");
+     add("possible");
+     add("potential");
+     add("predicted");
+     add("presumed");
+     add("probable");
+     add("seeming");
+     add("anti");
+     add("fake");
+     add("fictional");
+     add("fictitious");
+     add("imaginary");
+     add("mythical");
+     add("phony");
+     add("false");
+     add("artificial");
+     add("erroneous");
+     add("mistaken");
+     add("mock");
+     add("pseudo");
+     add("simulated");
+     add("spurious");
+     add("deputy");
+     add("faulty");
+     add("virtual");
+     add("doubtful");
+     add("erstwhile");
+     add("ex");
+     add("expected");
+     add("former");
+     add("future");
+     add("onetime");
+     add("past");
+     add("proposed");
+  }});
 }

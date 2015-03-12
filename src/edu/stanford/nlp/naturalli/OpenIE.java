@@ -12,6 +12,7 @@ import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -41,7 +42,7 @@ public class OpenIE implements Annotator {
   /**
    * A pattern for rewriting "NN is a JJ NN" to NN is JJ"
    */
-  private static SemgrexPattern adjectivePattern = SemgrexPattern.compile("{} >nsubj {}=subj >cop {}=be >det {word:/the|an?|some/} >amod {}=adj ?>/prep_.*/=prep {}=pobj");
+  private static SemgrexPattern adjectivePattern = SemgrexPattern.compile("{}=obj >nsubj {}=subj >cop {}=be >det {word:/the|an?|some/} >amod {}=adj ?>/prep_.*/=prep {}=pobj");
 
   @Execution.Option(name="optimizefor", gloss="{General, KB}: Optimize the system for particular tasks (e.g., knowledge base completion tasks -- try to make the subject and object coherent named entities).")
   private Optimization optimizeFor = Optimization.GENERAL;
@@ -128,14 +129,23 @@ public class OpenIE implements Annotator {
           .stream().map(x -> x.changeScore(x.score * fragment.score)).collect(Collectors.toList());
 
       // A special case for adjective entailments
+      List<SentenceFragment> adjFragments = new ArrayList<>();
       SemgrexMatcher matcher = adjectivePattern.matcher(fragment.parseTree);
-      while (matcher.find()) {
+      OUTER: while (matcher.find()) {
         // (get nodes)
         IndexedWord subj = matcher.getNode("subj");
         IndexedWord be = matcher.getNode("be");
         IndexedWord adj = matcher.getNode("adj");
+        IndexedWord obj = matcher.getNode("obj");
         IndexedWord pobj = matcher.getNode("pobj");
         String prep = matcher.getRelnString("prep");
+        // (if the adjective, or any earlier adjective, is privative, then all bets are off)
+        for (SemanticGraphEdge edge : fragment.parseTree.outgoingEdgeIterable(obj)) {
+          if ("amod".equals(edge.getRelation().toString()) && edge.getDependent().index() <= adj.index() &&
+              Util.PRIVATIVE_ADJECTIVES.contains(edge.getDependent().word().toLowerCase())) {
+            continue OUTER;
+          }
+        }
         // (create the core tree)
         SemanticGraph tree = new SemanticGraph();
         tree.addRoot(adj);
@@ -149,8 +159,9 @@ public class OpenIE implements Annotator {
           tree.addEdge(adj, pobj, GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, prep), Double.NEGATIVE_INFINITY, false);
         }
         // (add tree)
-        list.add(new SentenceFragment(tree, false));
+        adjFragments.add(new SentenceFragment(tree, false));
       }
+      list.addAll(adjFragments);
       return list;
     }
   }
