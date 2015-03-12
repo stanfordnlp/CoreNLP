@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
 public class OperatorScopeITest {
 
   private static final StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties(){{
-    setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse");
+    setProperty("annotators", "tokenize,ssplit,pos,lemma,parse");
     setProperty("ssplit.isOneSentence", "true");
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");

@@ -131,8 +131,9 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
       min = Math.min(node.index(), min);
       max = Math.max(node.index(), max);
       for (SemanticGraphEdge edge : tree.getOutEdgesSorted(node)) {
-        if (edge.getGovernor() == node &&   // Sometimes multiple nodes have the same index?
-            edge.getGovernor() != edge.getDependent() &&  // Just in case...
+        if (
+//            edge.getGovernor() == node &&   // Sometimes multiple nodes have the same index?  // TODO(gabor) why do these crash the test?
+//            edge.getGovernor() != edge.getDependent() &&  // Just in case...
             !"punct".equals(edge.getRelation().getShortName())) {  // ignore punctuation
           fringe.add(edge.getDependent());
         }
@@ -267,7 +268,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   private Optional<Triple<Operator,Integer,Integer>> validateQuantiferByHead(CoreMap sentence, IndexedWord quantifier) {
     int end = quantifier.index();
     for (int start = Math.max(0, end - 10); start < end; ++start) {
-      Function<CoreLabel,String> glossFn = (label) -> "CD".equals(label.tag()) ? "--num--" : label.lemma();
+      Function<CoreLabel,String> glossFn = (label) -> "CD".equals(label.tag()) ? "--NUM--" : label.lemma();
       String gloss = StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class), " ", glossFn, start, end).toLowerCase();
       for (Operator q : Operator.values()) {
         if (q.surfaceForm.equals(gloss)) {
