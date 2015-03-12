@@ -40,9 +40,9 @@ public class OpenIE implements Annotator {
   private static enum Optimization { GENERAL, KB }
 
   /**
-   * A pattern for rewriting "NN is a JJ NN" to NN is JJ"
+   * A pattern for rewriting "NN_1 is a JJ NN_2" --> NN_1 is JJ"
    */
-  private static SemgrexPattern adjectivePattern = SemgrexPattern.compile("{}=obj >nsubj {}=subj >cop {}=be >det {word:/the|an?|some/} >amod {}=adj ?>/prep_.*/=prep {}=pobj");
+  private static SemgrexPattern adjectivePattern = SemgrexPattern.compile("{}=obj >nsubj {}=subj >cop {}=be >det {word:/an?/} >amod {}=adj ?>/prep_.*/=prep {}=pobj");
 
   @Execution.Option(name="optimizefor", gloss="{General, KB}: Optimize the system for particular tasks (e.g., knowledge base completion tasks -- try to make the subject and object coherent named entities).")
   private Optimization optimizeFor = Optimization.GENERAL;
@@ -116,7 +116,8 @@ public class OpenIE implements Annotator {
   }
 
   public List<SentenceFragment> clausesInSentence(CoreMap sentence) {
-    return clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class));
+    List<SentenceFragment> clauses =  clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class));
+    return clauses;
   }
 
   @SuppressWarnings("unchecked")
