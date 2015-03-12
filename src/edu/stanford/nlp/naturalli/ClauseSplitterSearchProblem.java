@@ -614,10 +614,12 @@ public class ClauseSplitterSearchProblem {
             if (candidate.isPresent()) {
               Counter<String> features = featurizer.apply(Triple.makeTriple(lastState, action, candidate.get()));
               Counter<ClauseClassifierLabel> scores = classifier.scoresOf(new RVFDatum<>(features));
-              Counters.logNormalizeInPlace(scores);
+              if (scores.size() > 0) {
+                Counters.logNormalizeInPlace(scores);
+              }
               scores.remove(ClauseClassifierLabel.NOT_A_CLAUSE);
               double logProbability = Counters.max(scores, Double.NEGATIVE_INFINITY);
-              if (logProbability > max) {
+              if (logProbability >= max) {
                 max = logProbability;
                 argmax = Pair.makePair(candidate.get().withIsDone(Counters.argmax(scores, (x, y) -> 0, ClauseClassifierLabel.CLAUSE_SPLIT)), new ArrayList<Counter<String>>(featuresSoFar) {{
                   add(features);

@@ -1,5 +1,7 @@
 package edu.stanford.nlp.naturalli;
 
+import edu.stanford.nlp.classify.Classifier;
+import edu.stanford.nlp.classify.GeneralDataset;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -13,12 +15,18 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.IterableIterator;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static edu.stanford.nlp.util.logging.Redwood.log;
 
 /**
  * TODO(gabor) JavaDoc
@@ -312,5 +320,26 @@ public class Util {
     Span nerA = extractNER(tokens, a);
     Span nerB = extractNER(tokens, b);
     return nerA.equals(nerB);
+  }
+
+  /**
+   * A helper function for dumping the accuracy of the trained classifier.
+   *
+   * @param classifier The classifier to evaluate.
+   * @param dataset The dataset to evaluate the classifier on.
+   */
+  public static void dumpAccuracy(Classifier<ClauseSplitter.ClauseClassifierLabel, String> classifier, GeneralDataset<ClauseSplitter.ClauseClassifierLabel, String> dataset) {
+    DecimalFormat df = new DecimalFormat("0.000");
+    log("size:         " + dataset.size());
+    log("split count:  " + StreamSupport.stream(dataset.spliterator(), false).filter(x -> x.label() == ClauseSplitter.ClauseClassifierLabel.CLAUSE_SPLIT).collect(Collectors.toList()).size());
+    log("interm count: " + StreamSupport.stream(dataset.spliterator(), false).filter(x -> x.label() == ClauseSplitter.ClauseClassifierLabel.CLAUSE_INTERM).collect(Collectors.toList()).size());
+    Pair<Double, Double> pr = classifier.evaluatePrecisionAndRecall(dataset, ClauseSplitter.ClauseClassifierLabel.CLAUSE_SPLIT);
+    log("p  (split):   " + df.format(pr.first));
+    log("r  (split):   " + df.format(pr.second));
+    log("f1 (split):   " + df.format(2 * pr.first * pr.second / (pr.first + pr.second)));
+    pr = classifier.evaluatePrecisionAndRecall(dataset, ClauseSplitter.ClauseClassifierLabel.CLAUSE_INTERM);
+    log("p  (interm):  " + df.format(pr.first));
+    log("r  (interm):  " + df.format(pr.second));
+    log("f1 (interm):  " + df.format(2 * pr.first * pr.second / (pr.first + pr.second)));
   }
 }

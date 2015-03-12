@@ -15,14 +15,11 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.*;
 
 import java.io.*;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import java.util.zip.GZIPOutputStream;
 
 import edu.stanford.nlp.naturalli.ClauseSplitterSearchProblem.*;
@@ -189,7 +186,7 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
     // Step 3: Check accuracy of classifier
     forceTrack("Training accuracy");
     dataset.randomize(options.seed);
-    dumpAccuracy(fullClassifier, dataset);
+    Util.dumpAccuracy(fullClassifier, dataset);
     endTrack("Training accuracy");
 
     int numFolds = 5;
@@ -201,7 +198,7 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
       Classifier<ClauseClassifierLabel, String> classifier = classifierFactory.trainClassifier(foldData.first);
       endTrack("Training");
       forceTrack("Test");
-      dumpAccuracy(classifier, foldData.second);
+      Util.dumpAccuracy(classifier, foldData.second);
       endTrack("Test");
       endTrack("Fold " + (fold + 1));
     }
@@ -242,27 +239,6 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException("Invalid model at path: " + serializedModel, e);
     }
-  }
-
-  /**
-   * A helper function for dumping the accuracy of the trained classifier.
-   *
-   * @param classifier The classifier to evaluate.
-   * @param dataset The dataset to evaluate the classifier on.
-   */
-  public static void dumpAccuracy(Classifier<ClauseClassifierLabel, String> classifier, GeneralDataset<ClauseClassifierLabel, String> dataset) {
-    DecimalFormat df = new DecimalFormat("0.000");
-    log("size:         " + dataset.size());
-    log("split count:  " + StreamSupport.stream(dataset.spliterator(), false).filter(x -> x.label() == ClauseClassifierLabel.CLAUSE_SPLIT).collect(Collectors.toList()).size());
-    log("interm count: " + StreamSupport.stream(dataset.spliterator(), false).filter(x -> x.label() == ClauseClassifierLabel.CLAUSE_INTERM).collect(Collectors.toList()).size());
-    Pair<Double, Double> pr = classifier.evaluatePrecisionAndRecall(dataset, ClauseClassifierLabel.CLAUSE_SPLIT);
-    log("p  (split):   " + df.format(pr.first));
-    log("r  (split):   " + df.format(pr.second));
-    log("f1 (split):   " + df.format(2 * pr.first * pr.second / (pr.first + pr.second)));
-    pr = classifier.evaluatePrecisionAndRecall(dataset, ClauseClassifierLabel.CLAUSE_INTERM);
-    log("p  (interm):  " + df.format(pr.first));
-    log("r  (interm):  " + df.format(pr.second));
-    log("f1 (interm):  " + df.format(2 * pr.first * pr.second / (pr.first + pr.second)));
   }
 
 
