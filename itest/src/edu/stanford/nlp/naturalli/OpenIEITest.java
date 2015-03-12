@@ -47,7 +47,7 @@ public class OpenIEITest {
   public void assertExtracted(Set<String> expected, String text) {
     Collection<RelationTriple> extractions = annotate(text).get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
     Set<String> guess = extractions.stream().map(RelationTriple::toString).collect(Collectors.toSet());
-    assertEquals(StringUtils.join(expected.stream().sorted(), "\n"), StringUtils.join(guess.stream().sorted(), "\n"));
+    assertEquals(StringUtils.join(expected.stream().sorted(), "\n").toLowerCase(), StringUtils.join(guess.stream().sorted(), "\n").toLowerCase());
   }
 
   public void assertEntailed(String expected, String text) {
@@ -60,6 +60,7 @@ public class OpenIEITest {
     }
     assertTrue("The sentence '" + expected + "' was not entailed from '" + text + "'", found);
   }
+
 
   @Test
   public void testAnnotatorRuns() {
@@ -85,6 +86,9 @@ public class OpenIEITest {
       add("Barack Hussein Obama II\tis 44th President of\tUnited States");
       add("Barack Hussein Obama II\tis current President of\tUnited States");
       add("Barack Hussein Obama II\tis President of\tUnited States");
+      add("Barack Hussein Obama II\tis\tPresident");
+      add("Barack Hussein Obama II\tis\tcurrent President");
+      add("Barack Hussein Obama II\tis\t44th President");
     }}, "Barack Hussein Obama II is the 44th and current President of the United States, and the first African American to hold the office.");
   }
 
@@ -94,8 +98,59 @@ public class OpenIEITest {
       add("Obama\tis graduate of\tColumbia University");
       add("Obama\tis graduate of\tHarvard Law School");
       add("Obama\tborn in\tHonolulu Hawaii");
-      add("he\tserved as\tpresident of the Harvard Law Review");
+      add("he\tserved as\tpresident of Harvard Law Review");
       add("he\tserved as\tpresident");
+      add("Obama\tis\tgraduate");
     }}, "Born in Honolulu, Hawaii, Obama is a graduate of Columbia University and Harvard Law School, where he served as president of the Harvard Law Review");
+  }
+
+  @Test
+  public void testExtractionsObamaWikiThree() {
+    assertExtracted(new HashSet<String>() {{
+      add("He\twas\tcommunity organizer in Chicago");
+      add("He\twas\tcommunity organizer");
+      add("He\tearning\tlaw degree");
+    }}, "He was a community organizer in Chicago before earning his law degree.");
+  }
+
+  @Test
+  public void testExtractionsObamaWikiFour() {
+    assertExtracted(new HashSet<String>() {{
+      add("He\tworked as\tcivil rights attorney");
+      add("He\tworked as\trights attorney");
+      add("He\ttaught\tconstitutional law");
+      add("He\ttaught\tlaw");
+      add("He\ttaught at\tUniversity of Chicago Law School");
+      add("He\ttaught at\tUniversity of Chicago Law School from 1992");
+      add("He\ttaught at\tUniversity");
+//      add("He\ttaught to\t2004");  // shouldn't be here, but sometimes appears?
+    }}, "He worked as a civil rights attorney and taught constitutional law at the University of Chicago Law School from 1992 to 2004");
+  }
+
+  @Test
+  public void testExtractionsObamaWikiFive() {
+    assertExtracted(new HashSet<String>() {{
+      add("He\tserved\tthree terms");
+      add("He\trepresenting\t13th District in Illinois Senate");
+      add("He\trepresenting\t13th District");
+      add("He\trepresenting\tDistrict in Illinois Senate");
+      add("He\trepresenting\tDistrict");
+      add("He\trunning unsuccessfully for\tUnited States House of Representatives in 2000");
+      add("He\trunning unsuccessfully for\tUnited States House of Representatives");
+      add("He\trunning unsuccessfully for\tUnited States House");
+      add("He\trunning for\tUnited States House of Representatives in 2000");
+      add("He\trunning for\tUnited States House of Representatives");
+      add("He\trunning for\tUnited States House");
+    }}, "He served three terms representing the 13th District in the Illinois Senate from 1997 to 2004, running unsuccessfully for the United States House of Representatives in 2000.");
+  }
+
+  @Test
+  public void testExtractionsObamaWikiSix() {
+    assertExtracted(new HashSet<String>() {{
+      add("He\tdefeated\tRepublican nominee John McCain");
+      add("He\tdefeated\tnominee John McCain");
+      add("He\twas inaugurated as\tpresident on January 20 2009");
+      add("He\twas inaugurated as\tpresident");
+    }}, "He then defeated Republican nominee John McCain in the general election, and was inaugurated as president on January 20, 2009.");
   }
 }

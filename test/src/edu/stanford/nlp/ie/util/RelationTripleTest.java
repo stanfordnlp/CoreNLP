@@ -174,4 +174,76 @@ public class RelationTripleTest extends TestCase {
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("cats\thave\ttails", extraction.get().toString());
   }
+
+  public void testFishLikeToSwim() {
+    Optional<RelationTriple> extraction = mkExtraction(
+            "1\tfish\t2\tnsubj\n" +
+            "2\tlike\t0\troot\n" +
+            "3\tto\t4\taux\n" +
+            "4\tswim\t2\txcomp\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("fish\tlike\tto swim", extraction.get().toString());
+  }
+
+  public void testCatsAreCute() {
+    Optional<RelationTriple> extraction = mkExtraction(
+            "1\tcats\t3\tnsubj\n" +
+            "2\tare\t3\tcop\n" +
+            "3\tcute\t0\troot\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("cats\tare\tcute", extraction.get().toString());
+  }
+
+  public void testHeWasInaugurated() {
+    Optional<RelationTriple> extraction = mkExtraction(
+            "1\the\t3\tnsubjpass\n" +
+            "2\twas\t3\tauxpass\n" +
+            "3\tinaugurated\t0\troot\n" +
+            "5\tpresident\t3\tprep_as\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("he\twas inaugurated as\tpresident", extraction.get().toString());
+  }
+
+  public void testPPAttachment() {
+    Optional<RelationTriple> extraction = mkExtraction(
+            "1\the\t2\tnsubj\n" +
+            "2\tserved\t0\troot\n" +
+            "3\tpresident\t2\tprep_as\n" +
+            "4\tHarvard\t6\taux\n" +
+            "5\tLaw\t6\taux\n" +
+            "6\tReview\t3\tprep_of\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("he\tserved as\tpresident of Harvard Law Review", extraction.get().toString());
+  }
+
+  public void testPPAttachmentTwo() {
+    Optional<RelationTriple> extraction = mkExtraction(
+            "1\the\t4\tnsubj\n" +
+            "2\twas\t4\tcop\n" +
+            "3\tcommunity\t4\tnn\n" +
+            "4\torganizer\t0\troot\n" +
+            "6\tChicago\t4\tprep_in\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("he\twas\tcommunity organizer in Chicago", extraction.get().toString());
+  }
+
+  public void testXComp() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tObama\t3\tnsubjpass\n" +
+        "2\twas\t3\tauxpass\n" +
+        "3\tnamed\t0\troot\n" +
+        "4\t2009\t8\tnum\n" +
+        "5\tNobel\t8\tnn\n" +
+        "6\tPeace\t8\tnn\n" +
+        "7\tPrize\t8\tnn\n" +
+        "8\tLaureate\t3\txcomp\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("Obama\twas named\t2009 Nobel Peace Prize Laureate", extraction.get().toString());
+  }
 }

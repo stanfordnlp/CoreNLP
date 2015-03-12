@@ -17,6 +17,7 @@ import java.util.*;
  *
  * @author Gabor Angeli
  */
+@SuppressWarnings("UnusedDeclaration")
 public class RelationTriple {
   /** The subject (first argument) of this triple */
   public final List<CoreLabel> subject;
@@ -132,51 +133,74 @@ public class RelationTriple {
   /** A list of patterns to match relation extractions against */
   private static final List<SemgrexPattern> PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
     // { blue cats play [quietly] with yarn }
-    add(SemgrexPattern.compile("{$}=verb ?>/cop/ {}=be >/nsubj(pass)?/ {}=subject >/prep/ ({}=prep >/pobj/ {}=object)"));
+    add(SemgrexPattern.compile("{$}=verb ?>/cop|auxpass/ {}=be >/.subj(pass)?/ {}=subject >/prep/ ({}=prep >/pobj/ {}=object)"));
     // (w / collapsed dependencies)
-    add(SemgrexPattern.compile("{$}=verb ?>/cop/ {}=be >/nsubj(pass)?/ {}=subject >/prepc?_.*/=prepEdge {}=object"));
+    add(SemgrexPattern.compile("{$}=verb ?>/cop|auxpass/ {}=be >/.subj(pass)?/ {}=subject >/prepc?_.*/=prepEdge {}=object"));
+    // { fish like to swim }
+    add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >/xcomp/ {}=object"));
     // { cats have tails }
-    add(SemgrexPattern.compile("{$}=verb >/nsubj(pass)?/ {}=subject >/[di]obj/ {}=object"));
+    add(SemgrexPattern.compile("{$}=verb ?>/auxpass/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ {}=object"));
+    // { cats are cute  }
+    add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop/ {}=verb"));
   }});
 
   /** A set of valid arcs denoting an entity we are interested in */
   private static final Set<String> VALID_ENTITY_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("nn");
+    add("amod"); add("nn"); add("aux"); add("num"); add("prep"); add("nsubj");
   }});
 
   /** A set of valid arcs denoting an entity we are interested in */
   private static final Set<String> VALID_ADVERB_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("advmod"); add("conj"); add("cc"); add("conj_and"); add("conj_or");
+    add("amod"); add("advmod"); add("conj"); add("cc"); add("conj_and"); add("conj_or"); add("auxpass");
   }});
 
+  private static CoreLabel mockNode(CoreLabel toCopy, int offset, String word, String POS) {
+    CoreLabel mock = new CoreLabel(toCopy);
+    mock.setWord(word);
+    mock.setLemma(word);
+    mock.setValue(word);
+    mock.setNER("O");
+    mock.setTag(POS);
+    mock.setIndex(toCopy.index() + offset);
+    return mock;
+  }
 
   /**
    * @see RelationTriple#getValidEntityChunk(edu.stanford.nlp.semgraph.SemanticGraph, edu.stanford.nlp.ling.IndexedWord)
    * @see RelationTriple#getValidAdverbChunk(edu.stanford.nlp.semgraph.SemanticGraph, edu.stanford.nlp.ling.IndexedWord)
    */
-  private static Optional<List<CoreLabel>> getValidChunk(SemanticGraph parse, IndexedWord root, Set<String> validArcs) {
+  private static Optional<List<CoreLabel>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot, Set<String> validArcs) {
     PriorityQueue<CoreLabel> chunk = new FixedPrioritiesPriorityQueue<>();
     Queue<IndexedWord> fringe = new LinkedList<>();
+    IndexedWord root = originalRoot;
     fringe.add(root);
+
+    boolean isCopula = false;
+    for (SemanticGraphEdge edge : parse.outgoingEdgeIterable(originalRoot)) {
+      if (edge.getRelation().getShortName().equals("cop")) {
+        isCopula = true;
+      }
+    }
 
     while (!fringe.isEmpty()) {
       root = fringe.poll();
       chunk.add(root.backingLabel(), -root.index());
       for (SemanticGraphEdge edge : parse.incomingEdgeIterable(root)) {
-        if (edge.getRelation().getLongName().startsWith("conj_")) {
-          CoreLabel mockAnd = new CoreLabel(root);
-          String andPart = edge.getRelation().getSpecific();
-          mockAnd.setWord(andPart);
-          mockAnd.setLemma(andPart);
-          mockAnd.setValue(andPart);
-          mockAnd.setNER("O");
-          mockAnd.setTag("PP");
-          mockAnd.setIndex(root.index() - 1);
-          chunk.add(mockAnd, -mockAnd.index());
+        if (edge.getDependent() != originalRoot) {
+          if (edge.getRelation().getShortName().equals("prep") || edge.getRelation().getShortName().equals("prepc")) {
+            chunk.add(mockNode(edge.getGovernor().backingLabel(), 1, edge.getRelation().getSpecific(), "PP"), -(((double) edge.getGovernor().index()) + 0.9));
+          }
+          if (edge.getRelation().getShortName().equals("conj")) {
+            chunk.add(mockNode(root.backingLabel(), -1, edge.getRelation().getSpecific(), "CC"), -(((double) root.index()) - 0.9));
+          }
         }
       }
       for (SemanticGraphEdge edge : parse.getOutEdgesSorted(root)) {
-        if (!validArcs.contains(edge.getRelation().getShortName())) {
+        String shortName = edge.getRelation().getShortName();
+        //noinspection StatementWithEmptyBody
+        if (isCopula && (shortName.equals("cop") || shortName.contains("subj"))) {
+          // noop; ignore nsubj and cop for extractions with copula
+        } else if (!validArcs.contains(edge.getRelation().getShortName())) {
           return Optional.empty();
         } else {
           fringe.add(edge.getDependent());
@@ -222,17 +246,21 @@ public class RelationTriple {
    * @return A relation triple, if this sentence matches one of the patterns of a valid relation triple.
    */
   public static Optional<RelationTriple> segment(SemanticGraph parse) {
-    for (SemgrexPattern pattern : PATTERNS) {  // For every candidate pattern...
+    PATTERN_LOOP: for (SemgrexPattern pattern : PATTERNS) {  // For every candidate pattern...
       SemgrexMatcher m = pattern.matcher(parse);
       if (m.matches()) {  // ... see if it matches the sentence
         // Verb
         PriorityQueue<CoreLabel> verbChunk = new FixedPrioritiesPriorityQueue<>();
         IndexedWord verb = m.getNode("verb");
         IndexedWord prep = m.getNode("prep");
-        List<IndexedWord> adverbs = new ArrayList<IndexedWord>();
+        List<IndexedWord> adverbs = new ArrayList<>();
         for (SemanticGraphEdge edge : parse.outgoingEdgeIterable(verb)) {
-          if ("advmod".equals(edge.getRelation().getShortName()) || "amod".equals(edge.getRelation().getShortName())) {
-            adverbs.add(edge.getDependent());
+          if ("advmod".equals(edge.getRelation().toString()) || "amod".equals(edge.getRelation().toString())) {
+            String tag = edge.getDependent().backingLabel().tag();
+            if (tag == null ||
+               (!tag.startsWith("W") && !edge.getDependent().backingLabel().word().equalsIgnoreCase("then"))) {  // prohibit advmods like "where"
+              adverbs.add(edge.getDependent());
+            }
           }
         }
         IndexedWord be = m.getNode("be");
@@ -251,7 +279,7 @@ public class RelationTriple {
                 adverbialModifiers.add(token);
               }
             } else {
-              return Optional.empty();  // Invalid adverbial phrase
+              continue PATTERN_LOOP;  // Invalid adverbial phrase
             }
             numKnownDependents += 1;
           }
@@ -261,19 +289,12 @@ public class RelationTriple {
         }
         // (add preposition edge)
         if (prepEdge != null) {
-          String prepPart = prepEdge.substring("prep_".length());
-          CoreLabel mockPrep = new CoreLabel(verb.backingLabel());
-          mockPrep.setWord(prepPart);
-          mockPrep.setLemma(prepPart);
-          mockPrep.setValue(prepPart);
-          mockPrep.setNER("O");
-          mockPrep.setTag("PP");
-          mockPrep.setIndex(verb.index() + 1);
-          verbChunk.add(mockPrep, -mockPrep.index());
+          verbChunk.add(mockNode(verb.backingLabel(), 1, prepEdge.substring(prepEdge.indexOf("_") + 1), "PP"), -(verb.index() + 10));
         }
         // (check for additional edges)
         if (parse.outDegree(verb) > numKnownDependents) {
-          return Optional.empty();  // Too many outgoing edges; we didn't consume them all.
+          //noinspection UnnecessaryLabelOnContinueStatement
+          continue PATTERN_LOOP;  // Too many outgoing edges; we didn't consume them all.
         }
         List<CoreLabel> relation = verbChunk.toSortedList();
 
