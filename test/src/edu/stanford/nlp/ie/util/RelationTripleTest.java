@@ -48,6 +48,12 @@ public class RelationTripleTest extends TestCase {
       } else {
         tree.addVertex(new IndexedWord(label));
       }
+      if (fields.length > 4) {
+        label.setTag(fields[4]);
+      }
+      if (fields.length > 5) {
+        label.setNER(fields[5]);
+      }
     }
     int i = 0;
     for (String line : conll.split("\n")) {
@@ -287,6 +293,24 @@ public class RelationTripleTest extends TestCase {
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tNewspaper\tpublished in\tArizona", extraction.get().toString());
+  }
+
+  public void testPPExtraction() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tObama\t0\troot\tNNP\tPERSON\n" +
+        "2\tTucson\t1\tprep_in\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tObama\tin\tTucson", extraction.get().toString());
+
+    extraction = mkExtraction(
+        "1\tPietro\t2\tnn\tNNP\tPERSON\n" +
+        "2\tBadoglio\t0\troot\tNNP\tPERSON\n" +
+        "3\tsouthern\t4\tamod\n" +
+        "4\tItaly\t2\tprep_in\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tPietro Badoglio\tin\tsouthern Italy", extraction.get().toString());
   }
 
   // Note[gabor]: I think this might be better suited to be done at clause splitting?

@@ -184,6 +184,8 @@ public class RelationTriple implements Comparable<RelationTriple> {
     add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop/ {}=verb"));
     // { Unicredit 's Bank Austria Creditanstalt }
     add(SemgrexPattern.compile("{$}=object >/poss/=verb {}=subject"));
+    // { Obama in Tucson }
+    add(SemgrexPattern.compile("[ !{ner:/O/} & {tag:/NNP/}=subject ] >/prep_.*/=verb {}=object"));
   }});
 
   /** A set of valid arcs denoting an entity we are interested in */
@@ -208,10 +210,11 @@ public class RelationTriple implements Comparable<RelationTriple> {
   }
 
   /**
-   * @see RelationTriple#getValidEntityChunk(edu.stanford.nlp.semgraph.SemanticGraph, edu.stanford.nlp.ling.IndexedWord)
-   * @see RelationTriple#getValidAdverbChunk(edu.stanford.nlp.semgraph.SemanticGraph, edu.stanford.nlp.ling.IndexedWord)
+   * @see RelationTriple#getValidEntityChunk(edu.stanford.nlp.semgraph.SemanticGraph, edu.stanford.nlp.ling.IndexedWord, Optional)
+   * @see RelationTriple#getValidAdverbChunk(edu.stanford.nlp.semgraph.SemanticGraph, edu.stanford.nlp.ling.IndexedWord, Optional)
    */
-  private static Optional<List<CoreLabel>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot, Set<String> validArcs) {
+  private static Optional<List<CoreLabel>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot,
+                                                         Set<String> validArcs, Optional<String> ignoredArc) {
     PriorityQueue<CoreLabel> chunk = new FixedPrioritiesPriorityQueue<>();
     Queue<IndexedWord> fringe = new LinkedList<>();
     IndexedWord root = originalRoot;
@@ -239,10 +242,12 @@ public class RelationTriple implements Comparable<RelationTriple> {
       }
       for (SemanticGraphEdge edge : parse.getOutEdgesSorted(root)) {
         String shortName = edge.getRelation().getShortName();
+        String name = edge.getRelation().toString();
         //noinspection StatementWithEmptyBody
-        if (isCopula && (shortName.equals("cop") || shortName.contains("subj")) ||
-            shortName.equals("poss")) {
-          // noop; ignore nsubj, cop, and poss for extractions with copula / possessives
+        if (isCopula && (shortName.equals("cop") || shortName.contains("subj"))) {
+          // noop; ignore nsubj, cop for extractions with copula
+        } else if (ignoredArc.isPresent() && ignoredArc.get().equals(name)) {
+          // noop; ignore explicitly requested noop arc.
         } else if (!validArcs.contains(edge.getRelation().getShortName().replaceAll("_.*","_*"))) {
           return Optional.empty();
         } else {
@@ -259,10 +264,11 @@ public class RelationTriple implements Comparable<RelationTriple> {
    * Otherwise, return {@link java.util.Optional#empty()}}.
    * @param parse The parse tree we are extracting a subtree from.
    * @param root The root of the subtree.
+   * @param noopArc An optional edge type to ignore in gathering the chunk.
    * @return If this subtree is a valid entity, we return its yield. Otherwise, we return empty.
    */
-  private static Optional<List<CoreLabel>> getValidEntityChunk(SemanticGraph parse, IndexedWord root) {
-    return getValidChunk(parse, root, VALID_ENTITY_ARCS);
+  private static Optional<List<CoreLabel>> getValidEntityChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
+    return getValidChunk(parse, root, VALID_ENTITY_ARCS, noopArc);
   }
 
   /**
@@ -270,10 +276,11 @@ public class RelationTriple implements Comparable<RelationTriple> {
    * Otherwise, return {@link java.util.Optional#empty()}}.
    * @param parse The parse tree we are extracting a subtree from.
    * @param root The root of the subtree.
+   * @param noopArc An optional edge type to ignore in gathering the chunk.
    * @return If this subtree is a valid adverb, we return its yield. Otherwise, we return empty.
    */
-  private static Optional<List<CoreLabel>> getValidAdverbChunk(SemanticGraph parse, IndexedWord root) {
-    return getValidChunk(parse, root, VALID_ADVERB_ARCS);
+  private static Optional<List<CoreLabel>> getValidAdverbChunk(SemanticGraph parse, IndexedWord root, Optional<String> noopArc) {
+    return getValidChunk(parse, root, VALID_ADVERB_ARCS, noopArc);
   }
 
   /**
@@ -303,6 +310,8 @@ public class RelationTriple implements Comparable<RelationTriple> {
         PriorityQueue<CoreLabel> verbChunk = new FixedPrioritiesPriorityQueue<>();
         IndexedWord verb = m.getNode("verb");
         List<IndexedWord> adverbs = new ArrayList<>();
+        Optional<String> subjNoopArc = Optional.empty();
+        Optional<String> objNoopArc = Optional.empty();
         if (verb != null) {
           for (SemanticGraphEdge edge : parse.outgoingEdgeIterable(verb)) {
             if ("advmod".equals(edge.getRelation().toString()) || "amod".equals(edge.getRelation().toString())) {
@@ -314,13 +323,18 @@ public class RelationTriple implements Comparable<RelationTriple> {
             }
           }
         } else {
-          switch (m.getRelnString("verb")) {
-            case "poss":
-              IndexedWord subject = m.getNode("subject");
-              verb = new IndexedWord(mockNode(subject.backingLabel(), 1, "'s", "POS"));
-              break;
-            default:
-              throw new IllegalStateException("Pattern matched without a verb!");
+          String verbName = m.getRelnString("verb");
+          if ("poss".equals(verbName)) {
+            IndexedWord subject = m.getNode("subject");
+            verb = new IndexedWord(mockNode(subject.backingLabel(), 1, "'s", "POS"));
+            objNoopArc = Optional.of("poss");
+          } else if (verbName != null && verbName.startsWith("prep_")) {
+            verbName = verbName.substring("prep_".length());
+            IndexedWord subject = m.getNode("subject");
+            verb = new IndexedWord(mockNode(subject.backingLabel(), 1, verbName, "IN"));
+            subjNoopArc = Optional.of("prep_" + verbName);
+          } else {
+            throw new IllegalStateException("Pattern matched without a verb!");
           }
         }
         verbChunk.add(verb.backingLabel(), -verb.index());
@@ -336,7 +350,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
         if (!adverbs.isEmpty()) {
           Set<CoreLabel> adverbialModifiers = new HashSet<>();
           for (IndexedWord adv : adverbs) {
-            Optional<List<CoreLabel>> adverbChunk = getValidAdverbChunk(parse, adv);
+            Optional<List<CoreLabel>> adverbChunk = getValidAdverbChunk(parse, adv, Optional.empty());
             if (adverbChunk.isPresent()) {
               for (CoreLabel token : adverbChunk.get()) {
                 adverbialModifiers.add(token);
@@ -362,8 +376,8 @@ public class RelationTriple implements Comparable<RelationTriple> {
         List<CoreLabel> relation = verbChunk.toSortedList();
 
         // Subject+Object
-        Optional<List<CoreLabel>> subjectSpan = getValidEntityChunk(parse, m.getNode("subject"));
-        Optional<List<CoreLabel>> objectSpan = getValidEntityChunk(parse, object);
+        Optional<List<CoreLabel>> subjectSpan = getValidEntityChunk(parse, m.getNode("subject"), subjNoopArc);
+        Optional<List<CoreLabel>> objectSpan = getValidEntityChunk(parse, object, objNoopArc);
         // Create relation
         if (subjectSpan.isPresent() && objectSpan.isPresent()) {  // ... and has a valid subject+object
           // Success! Found a valid extraction.

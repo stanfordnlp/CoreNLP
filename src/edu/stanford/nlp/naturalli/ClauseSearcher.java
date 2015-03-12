@@ -98,6 +98,7 @@ public class ClauseSearcher {
       extraEdgesByGovernor.put(vertex, new ArrayList<>());
     }
     List<SemanticGraphEdge> extraEdges = cleanTree(this.tree);
+    assert isTree(this.tree);
     for (SemanticGraphEdge edge : extraEdges) {
       extraEdgesByGovernor.get(edge.getGovernor()).add(edge);
     }
@@ -122,7 +123,9 @@ public class ClauseSearcher {
       // Clean punctuation
       char tag = vertex.backingLabel().tag().charAt(0);
       if (tag == '.' || tag == ',' || tag == '(' || tag == ')' || tag == ':') {
-        toDelete.add(vertex);
+        if (!tree.outgoingEdgeIterator(vertex).hasNext()) {  // This should really never happen, but it does.
+          toDelete.add(vertex);
+        }
       }
     }
     for (IndexedWord v : toDelete) { tree.removeVertex(v); }
@@ -136,7 +139,9 @@ public class ClauseSearcher {
         iter.remove();
       } else if (edge.getRelation().toString().equals("punct")) {
         // Clean punctuation (again)
-        iter.remove();
+        if (!tree.outgoingEdgeIterator(edge.getDependent()).hasNext()) {  // This should really never happen, but it does.
+          iter.remove();
+        }
       }
     }
 
@@ -144,7 +149,9 @@ public class ClauseSearcher {
     List<SemanticGraphEdge> extraEdges = new ArrayList<>();
     for (SemanticGraphEdge edge : tree.edgeIterable()) {
       if (edge.isExtra()) {
-        extraEdges.add(edge);
+        if (tree.incomingEdgeList(edge.getDependent()).size() > 1) {
+          extraEdges.add(edge);
+        }
       }
     }
     for (SemanticGraphEdge edge : extraEdges) {
@@ -163,6 +170,20 @@ public class ClauseSearcher {
         }
       }
     }
+
+    // Remove dangling nodes
+    List<IndexedWord> danglingNodes = new ArrayList<>();
+    for (IndexedWord vertex : tree.vertexSet()) {
+      if (!tree.incomingEdgeIterator(vertex).hasNext() && !tree.getRoots().contains(vertex)) {
+        danglingNodes.add(vertex);
+      }
+    }
+    for (IndexedWord vertex : danglingNodes) {
+      assert !tree.outgoingEdgeIterator(vertex).hasNext();
+      tree.removeVertex(vertex);
+    }
+
+    // Return
     return extraEdges;
   }
 
@@ -204,12 +225,19 @@ public class ClauseSearcher {
   }
 
   private static void addSubtree(SemanticGraph toModify, IndexedWord root, String rel, SemanticGraph originalTree, IndexedWord subject, Collection<SemanticGraphEdge> ignoredEdges) {
+    if (toModify.containsVertex(subject)) {
+      return;  // This subtree already exists.
+    }
     Queue<IndexedWord> fringe = new LinkedList<>();
     Collection<IndexedWord> wordsToAdd = new ArrayList<>();
     Collection<SemanticGraphEdge> edgesToAdd = new ArrayList<>();
     // Search for subtree to add
     for (SemanticGraphEdge edge : originalTree.outgoingEdgeIterable(subject)) {
       if (!ignoredEdges.contains(edge)) {
+        if (toModify.containsVertex(edge.getDependent())) {
+          // Case: we're adding a subtree that's not disjoint from toModify. This is bad news.
+          return;
+        }
         edgesToAdd.add(edge);
         fringe.add(edge.getDependent());
       }
@@ -235,8 +263,32 @@ public class ClauseSearcher {
     }
     // (add edges)
     for (SemanticGraphEdge edge : edgesToAdd) {
+      assert !toModify.incomingEdgeIterator(edge.getDependent()).hasNext();
       toModify.addEdge(edge.getGovernor(), edge.getDependent(), edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
+  }
+
+  /**
+   * A little utility function to make sure a SemanticGraph is a tree.
+   */
+  private static boolean isTree(SemanticGraph tree) {
+    for (IndexedWord vertex : tree.vertexSet()) {
+      if (tree.getRoots().contains(vertex)) {
+        if (tree.incomingEdgeIterator(vertex).hasNext()) {
+          return false;
+        }
+      } else {
+        Iterator<SemanticGraphEdge> iter = tree.incomingEdgeIterator(vertex);
+        if (!iter.hasNext()) {
+          return false;
+        }
+        iter.next();
+        if (iter.hasNext()) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   private CoreLabel mockNode(CoreLabel toCopy, String word, String POS) {
@@ -287,7 +339,11 @@ public class ClauseSearcher {
             subjectOrNull == null ? source.subjectOrNull : subjectOrNull,
             subjectOrNull == null ? (source.distanceFromSubj + 1) : 0,
             ppOrNull,
-            source.thunk.andThen(toModify -> simpleClause(toModify, outgoingEdge)), false
+            source.thunk.andThen(toModify -> {
+              assert isTree(toModify);
+              simpleClause(toModify, outgoingEdge);
+              assert isTree(toModify);
+            }), false
         ));
       }
     });
@@ -306,9 +362,11 @@ public class ClauseSearcher {
             subjectOrNull == null ? (source.distanceFromSubj + 1) : 0,
             ppOrNull,
             source.thunk.andThen(toModify -> {
+              assert isTree(toModify);
               simpleClause(toModify, outgoingEdge);
               addSubtree(toModify, outgoingEdge.getDependent(), "nsubjpass", tree, outgoingEdge.getGovernor(), Collections.singleton(outgoingEdge));
 //              addWord(toModify, outgoingEdge.getDependent(), "auxpass", mockNode(outgoingEdge.getDependent().backingLabel(), "is", "VBZ"));
+              assert isTree(toModify);
             }), true
         ));
       }
@@ -329,9 +387,11 @@ public class ClauseSearcher {
               0,
               ppOrNull,
               source.thunk.andThen(toModify -> {
+                assert isTree(toModify);
                 simpleClause(toModify, outgoingEdge);
                 addSubtree(toModify, outgoingEdge.getDependent(), "nsubj", tree,
                     subjectOrNull.getDependent(), Collections.singleton(outgoingEdge));
+                assert isTree(toModify);
               }), true
           ));
         } else {
@@ -379,10 +439,10 @@ public class ClauseSearcher {
             // Add the extra edges back in, if they don't break the tree-ness of the extraction
             for (IndexedWord newTreeRoot : x.getRoots()) {
               for (SemanticGraphEdge extraEdge : extraEdgesByGovernor.get(newTreeRoot)) {
-                if (!x.containsVertex(extraEdge.getDependent())) {
-                  //noinspection unchecked
-                  addSubtree(x, newTreeRoot, extraEdge.getRelation().toString(), tree, extraEdge.getDependent(), tree.getIncomingEdgesSorted(newTreeRoot));
-                }
+                assert isTree(x);
+                //noinspection unchecked
+                addSubtree(x, newTreeRoot, extraEdge.getRelation().toString(), tree, extraEdge.getDependent(), tree.getIncomingEdgesSorted(newTreeRoot));
+                assert isTree(x);
               }
             }
           }).accept(copy);
