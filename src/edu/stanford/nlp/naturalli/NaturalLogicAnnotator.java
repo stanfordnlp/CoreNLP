@@ -100,6 +100,8 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     add(SemgrexPattern.compile("{}=object >"+GEN_SUBJ+" {pos:NNP}=Subject >"+GEN_COP+" {}=pivot"));
     // { Some cats do n't like dogs }
     add(SemgrexPattern.compile("{}=pivot >neg "+QUANTIFIER+" >"+GEN_OBJ+" {}=object"));
+    // { Obama was not born in Dallas }
+    add(SemgrexPattern.compile("{}=pivot >/neg/ {}=quantifier >"+GEN_PREP+" {}=object"));
     // { All of the cats hate dogs. }
     add(SemgrexPattern.compile("{pos:/V.*/}=pivot >"+GEN_SUBJ+" ( "+QUANTIFIER+" >prep {}=subject ) >"+GEN_OBJ+" {}=object"));
     add(SemgrexPattern.compile("{pos:/V.*/}=pivot >dep ( "+QUANTIFIER+" >prep {}=subject ) >"+GEN_SUBJ+" {}=object"));  // as above, but handle a common parse error
