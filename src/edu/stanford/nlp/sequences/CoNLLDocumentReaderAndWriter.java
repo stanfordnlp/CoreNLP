@@ -241,7 +241,7 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
     String lastAnsBase = "";
     Counter<String> miscCounter = new ClassicCounter<>();
     StringBuilder inProgressMisc = new StringBuilder();
-    for (Iterator<List<CoreLabel>> it = rw.getIterator(new FileReader(args[0])); it.hasNext(); ) {
+    for (Iterator<List<CoreLabel>> it = rw.getIterator(IOUtils.readerFromString(args[0])); it.hasNext(); ) {
       List<CoreLabel> doc = it.next();
       numDocs++;
       for (CoreLabel fl : doc) {
@@ -283,7 +283,7 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
           inProgressMisc = maybeIncrementCounter(inProgressMisc, miscCounter);
         }
         lastAnsBase = ansBase;
-      } // for tokenis
+      } // for tokens
     } // for documents
     System.out.println("File " + args[0] + " has " + numDocs + " documents, " +
             numTokens + " (non-blank line) tokens and " +
