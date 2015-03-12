@@ -105,7 +105,7 @@ class Util {
   }
 
   // TODO replace with GrammaticalStructure#readCoNLLGrammaticalStructureCollection
-  public static void loadConllFile(String inFile, List<CoreMap> sents, List<DependencyTree> trees, boolean unlabeled, boolean cPOS)
+  public static void loadConllFile(String inFile, List<CoreMap> sents, List<DependencyTree> trees, boolean labeled)
   {
     CoreLabelTokenFactory tf = new CoreLabelTokenFactory(false);
 
@@ -130,7 +130,7 @@ class Util {
           sentenceTokens = new ArrayList<>();
         } else {
           String word = splits[1],
-                  pos = cPOS ? splits[3] : splits[4],
+                  pos = splits[4],
                   depType = splits[7];
           int head = Integer.parseInt(splits[6]);
 
@@ -140,13 +140,12 @@ class Util {
           token.set(CoreAnnotations.CoNLLDepTypeAnnotation.class, depType);
           sentenceTokens.add(token);
 
-          if (!unlabeled)
+          if (labeled)
             tree.add(head, depType);
           else
             tree.add(head, Config.UNKNOWN);
         }
-      }    
-    } catch (IOException e) {
+      }    } catch (IOException e) {
       throw new RuntimeIOException(e);
     } finally {
       IOUtils.closeIgnoringExceptions(reader);
@@ -155,7 +154,7 @@ class Util {
 
   public static void loadConllFile(String inFile, List<CoreMap> sents, List<DependencyTree> trees)
   {
-    loadConllFile(inFile, sents, trees, false, false);
+    loadConllFile(inFile, sents, trees, true);
   }
 
   public static void writeConllFile(String outFile, List<CoreMap> sentences, List<DependencyTree> trees)
@@ -215,4 +214,5 @@ class Util {
   {
     printTreeStats("", trees);
   }
+
 }

@@ -2,6 +2,7 @@ package edu.stanford.nlp.util;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasOffset;
 import edu.stanford.nlp.ling.HasWord;
@@ -1639,20 +1640,16 @@ public class StringUtils {
    */
   public static String makeTextTable(Object[][] table, Object[] rowLabels, Object[] colLabels, int padLeft, int padRight, boolean tsv) {
     StringBuilder buff = new StringBuilder();
-    if (colLabels != null) {
-      // top row
-      buff.append(makeAsciiTableCell("", padLeft, padRight, tsv)); // the top left cell
-      for (int j = 0; j < table[0].length; j++) { // assume table is a rectangular matrix
-        buff.append(makeAsciiTableCell(colLabels[j], padLeft, padRight, (j != table[0].length - 1) && tsv));
-      }
-      buff.append('\n');
+    // top row
+    buff.append(makeAsciiTableCell("", padLeft, padRight, tsv)); // the top left cell
+    for (int j = 0; j < table[0].length; j++) { // assume table is a rectangular matrix
+      buff.append(makeAsciiTableCell(colLabels[j], padLeft, padRight, (j != table[0].length - 1) && tsv));
     }
+    buff.append('\n');
     // all other rows
     for (int i = 0; i < table.length; i++) {
       // one row
-      if (rowLabels != null) {
-        buff.append(makeAsciiTableCell(rowLabels[i], padLeft, padRight, tsv));
-      }
+      buff.append(makeAsciiTableCell(rowLabels[i], padLeft, padRight, tsv));
       for (int j = 0; j < table[i].length; j++) {
         buff.append(makeAsciiTableCell(table[i][j], padLeft, padRight, (j != table[0].length - 1) && tsv));
       }
@@ -2114,4 +2111,21 @@ public class StringUtils {
     return Normalizer.normalize(d, Normalizer.Form.NFKC);
   }
 
+  /**
+   * Convert a list of labels into a string, by simply joining them with spaces.
+   * @param words The words to join.
+   * @return A string representation of the sentence, tokenized by a single space.
+   */
+  public static String toString(List<CoreLabel> words) {
+    return join(words.stream().map(CoreLabel::word), " ");
+  }
+
+  /**
+   * Convert a CoreMap representing a sentence into a string, by simply joining them with spaces.
+   * @param sentence The sentence to stringify.
+   * @return A string representation of the sentence, tokenized by a single space.
+   */
+  public static String toString(CoreMap sentence) {
+    return toString(sentence.get(CoreAnnotations.TokensAnnotation.class));
+  }
 }

@@ -153,23 +153,7 @@ public class Config
    */
   public boolean saveIntermediate = true;
 
-
   /**
-   * Train a labeled parser if labeled = true, and a unlabeled one otherwise.
-   */
-  public boolean unlabeled = false;
-
-  /**
-   * Use coarse POS instead of fine-grained POS if cPOS = true.
-   */
-  public boolean cPOS = false;
-
-  /**
-  *  Exclude punctuations in evaluation if noPunc = true.
-  */
-  public boolean noPunc = true;
-
-  /** 
    * Describes language-specific properties necessary for training and
    * testing. By default,
    * {@link edu.stanford.nlp.trees.PennTreebankLanguagePack} will be
@@ -222,9 +206,6 @@ public class Config
     evalPerIter = PropertiesUtils.getInt(props, "evalPerIter", evalPerIter);
     clearGradientsPerIter = PropertiesUtils.getInt(props, "clearGradientsPerIter", clearGradientsPerIter);
     saveIntermediate = PropertiesUtils.getBool(props, "saveIntermediate", saveIntermediate);
-    unlabeled = PropertiesUtils.getBool(props, "unlabeled", unlabeled);
-    cPOS = PropertiesUtils.getBool(props, "cPOS", cPOS);
-    noPunc = PropertiesUtils.getBool(props, "noPunc", noPunc);
 
     // Runtime parsing options
     sentenceDelimiter = PropertiesUtils.getString(props, "sentenceDelimiter", sentenceDelimiter);
@@ -272,8 +253,5 @@ public class Config
     System.err.printf("evalPerIter = %d%n", evalPerIter);
     System.err.printf("clearGradientsPerIter = %d%n", clearGradientsPerIter);
     System.err.printf("saveItermediate = %b%n", saveIntermediate);
-    System.err.printf("unlabeled = %b%n", unlabeled);
-    System.err.printf("cPOS = %b%n", cPOS);
-    System.err.printf("noPunc = %b%n", noPunc);
   }
 }

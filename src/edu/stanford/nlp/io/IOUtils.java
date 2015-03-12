@@ -412,15 +412,20 @@ public class IOUtils {
     // windows File.separator is \, but getting resources only works with /
     if (is == null) {
       is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/"));
+      // Classpath doesn't like double slashes (e.g., /home/user//foo.txt)
+      if (is == null) {
+        is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
+      }
     }
     // if not found in the CLASSPATH, load from the file system
-    if (is == null) {
-      is = new FileInputStream(name);
-    }
+    if (is == null) is = new FileInputStream(name);
+    // make sure it's not a GZIP stream
     if (name.endsWith(".gz")) {
       try {
-        is = new GZIPInputStream(is);
-      } catch (IOException e) { }
+        return new GZIPInputStream(is);
+      } catch (IOException e) {
+        System.err.println("Resource or file looks like a gzip file, but is not: " + name);
+      }
     }
     return is;
   }
@@ -456,11 +461,6 @@ public class IOUtils {
       URL u = new URL(textFileOrUrl);
       URLConnection uc = u.openConnection();
       in = uc.getInputStream();
-      if (textFileOrUrl.endsWith(".gz")) {
-        try {
-          in = new GZIPInputStream(in);
-        } catch (IOException e) { }
-      }
     } else {
       try {
         in = findStreamInClasspathOrFileSystem(textFileOrUrl);
@@ -1006,7 +1006,8 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir The root directory.
+   * @param dir
+   *          The root directory.
    * @return All files within the directory.
    */
   public static Iterable<File> iterFilesRecursive(final File dir) {
@@ -1016,8 +1017,10 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir The root directory.
-   * @param ext A string that must be at the end of all files (e.g. ".txt")
+   * @param dir
+   *          The root directory.
+   * @param ext
+   *          A string that must be at the end of all files (e.g. ".txt")
    * @return All files within the directory ending in the given extension.
    */
   public static Iterable<File> iterFilesRecursive(final File dir,
@@ -1028,8 +1031,10 @@ public class IOUtils {
   /**
    * Iterate over all the files in the directory, recursively.
    *
-   * @param dir The root directory.
-   * @param pattern A regular expression that the file path must match. This uses
+   * @param dir
+   *          The root directory.
+   * @param pattern
+   *          A regular expression that the file path must match. This uses
    *          Matcher.find(), so use ^ and $ to specify endpoints.
    * @return All files within the directory.
    */
@@ -1119,7 +1124,7 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = readerFromString(filename, encoding);
+    Reader r = new InputStreamReader(getInputStreamFromURLOrClasspathOrFileSystem(filename), encoding);
     return IOUtils.slurpReader(r);
   }
 
@@ -1150,6 +1155,13 @@ public class IOUtils {
   /**
    * Returns all the text at the given URL.
    */
+  public static String slurpGBURL(URL u) throws IOException {
+    return IOUtils.slurpURL(u, "GB18030");
+  }
+
+  /**
+   * Returns all the text at the given URL.
+   */
   public static String slurpURLNoExceptions(URL u, String encoding) {
     try {
       return IOUtils.slurpURL(u, encoding);
@@ -1175,12 +1187,9 @@ public class IOUtils {
       return "";
     }
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
+    String temp;
     StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
-    for (String temp; (temp = br.readLine()) != null;
-
-
-
-            ) {
+    while ((temp = br.readLine()) != null) {
       buff.append(temp);
       buff.append(lineSeparator);
     }
@@ -1663,7 +1672,7 @@ public class IOUtils {
   public static List<String> linesFromFile(String filename,String encoding, boolean ignoreHeader) {
     try {
       List<String> lines = new ArrayList<String>();
-      BufferedReader in = getBufferedReaderFromClasspathOrFileSystem(filename, encoding);
+      BufferedReader in = new BufferedReader(new EncodingFileReader(filename,encoding));
       String line;
       int i = 0;
       while ((line = in.readLine()) != null) {

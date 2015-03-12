@@ -721,8 +721,8 @@ public class SUTime {
   public static final Time AFTERNOON = createTemporal(StandardTemporalType.TIME_OF_DAY, "AF", new InexactTime(new Range(NOON, new InexactTime(new Partial(DateTimeFieldType.hourOfDay(), 18)))));
   public static final Time EVENING = createTemporal(StandardTemporalType.TIME_OF_DAY, "EV", new InexactTime(new Range(new InexactTime(new Partial(DateTimeFieldType.hourOfDay(), 18)), new InexactTime(new Partial(DateTimeFieldType
       .hourOfDay(), 20)))));
-  public static final Time NIGHT = createTemporal(StandardTemporalType.TIME_OF_DAY, "NI",
-          new InexactTime(MIDNIGHT, new Range(new InexactTime(new Partial(DateTimeFieldType.hourOfDay(), 14)), HOUR.multiplyBy(10))));
+  public static final Time NIGHT = createTemporal(StandardTemporalType.TIME_OF_DAY, "NI", new InexactTime(new Range(new InexactTime(new Partial(DateTimeFieldType.hourOfDay(), 19)), new InexactTime(new Partial(DateTimeFieldType
+      .hourOfDay(), 5)))));
   public static final Time SUNRISE = createTemporal(StandardTemporalType.TIME_OF_DAY, "MO", TimexMod.EARLY.name(), new PartialTime());
   public static final Time SUNSET = createTemporal(StandardTemporalType.TIME_OF_DAY, "EV", TimexMod.EARLY.name(), new PartialTime());
   public static final Time DAWN = createTemporal(StandardTemporalType.TIME_OF_DAY, "MO", TimexMod.EARLY.name(), new PartialTime());
@@ -846,7 +846,7 @@ public class SUTime {
       }
     };
 
-    final TimexType timexType;
+    TimexType timexType;
     TimeUnit unit = TimeUnit.UNKNOWN;
     Duration period = SUTime.DURATION_NONE;
 
@@ -1785,34 +1785,6 @@ public class SUTime {
       return bd;
     }
 
-    private Range getIntersectedRange(CompositePartialTime cpt, Range r, Duration d) {
-      Time beginTime = r.beginTime();
-      Time endTime = r.endTime();
-      if (beginTime != TIME_UNKNOWN && endTime != TIME_UNKNOWN) {
-        Time t1 = cpt.intersect(r.beginTime());
-        if (t1 instanceof PartialTime) {
-          ((PartialTime) t1).withStandardFields();
-        }
-        Time t2 = cpt.intersect(r.endTime());
-        if (t2 instanceof PartialTime) {
-          ((PartialTime) t2).withStandardFields();
-        }
-        return new Range(t1, t2, d);
-      } else if (beginTime != TIME_UNKNOWN && endTime == TIME_UNKNOWN) {
-        Time t1 = cpt.intersect(r.beginTime());
-        if (t1 instanceof PartialTime) {
-          ((PartialTime) t1).withStandardFields();
-        }
-        Time t2 = t1.add(d);
-        if (t2 instanceof PartialTime) {
-          ((PartialTime) t2).withStandardFields();
-        }
-        return new Range(t1, t2, d);
-      } else {
-        throw new RuntimeException("Unsupport range: " + r);
-      }
-    }
-
     @Override
     public Range getRange(int flags, Duration granularity) {
       Duration d = getDuration();
@@ -1820,7 +1792,9 @@ public class SUTime {
         Range r = tod.getRange(flags, granularity);
         if (r != null) {
           CompositePartialTime cpt = new CompositePartialTime(this, poy, dow, null);
-          return getIntersectedRange(cpt, r, d);
+          Time t1 = cpt.intersect(r.beginTime());
+          Time t2 = cpt.intersect(r.endTime());
+          return new Range(t1, t2, d);
         } else {
           return super.getRange(flags, granularity);
         }
@@ -1829,7 +1803,15 @@ public class SUTime {
         Range r = dow.getRange(flags, granularity);
         if (r != null) {
           CompositePartialTime cpt = new CompositePartialTime(this, poy, dow, null);
-          return getIntersectedRange(cpt, r, d);
+          Time t1 = cpt.intersect(r.beginTime());
+          if (t1 instanceof PartialTime) {
+            ((PartialTime) t1).withStandardFields();
+          }
+          Time t2 = cpt.intersect(r.endTime());
+          if (t2 instanceof PartialTime) {
+            ((PartialTime) t2).withStandardFields();
+          }
+          return new Range(t1, t2, d);
         } else {
           return super.getRange(flags, granularity);
         }
@@ -1838,7 +1820,9 @@ public class SUTime {
         Range r = poy.getRange(flags, granularity);
         if (r != null) {
           CompositePartialTime cpt = new CompositePartialTime(this, poy, null, null);
-          return getIntersectedRange(cpt, r, d);
+          Time t1 = cpt.intersect(r.beginTime());
+          Time t2 = cpt.intersect(r.endTime());
+          return new Range(t1, t2, d);
         } else {
           return super.getRange(flags, granularity);
         }
@@ -2155,12 +2139,6 @@ public class SUTime {
     public InexactTime(Time base, Duration duration, Range range) {
       this.base = base;
       this.duration = duration;
-      this.range = range;
-      this.approx = true;
-    }
-
-    public InexactTime(Time base, Range range) {
-      this.base = base;
       this.range = range;
       this.approx = true;
     }
@@ -4110,10 +4088,10 @@ public class SUTime {
   }
 
   /**
-   * Duration specified in terms of milliseconds.
+   * Duration specified in terms of milliseconds
    */
   public static class DurationWithMillis extends Duration {
-    private final ReadableDuration base;
+    ReadableDuration base;
 
     public DurationWithMillis(long ms) {
       this.base = new org.joda.time.Duration(ms);
@@ -4176,8 +4154,8 @@ public class SUTime {
    * A range of durations.  For instance, 2 to 3 days.
    */
   public static class DurationRange extends Duration {
-    private final Duration minDuration;
-    private final Duration maxDuration;
+    Duration minDuration;
+    Duration maxDuration;
 
     public DurationRange(DurationRange d, Duration min, Duration max) {
       super(d);
@@ -4309,12 +4287,6 @@ public class SUTime {
     public Range(Time begin, Time end, Duration duration) {
       this.begin = begin;
       this.end = end;
-      this.duration = duration;
-    }
-
-    public Range(Time begin, Duration duration) {
-      this.begin = begin;
-      this.end = TIME_UNKNOWN;
       this.duration = duration;
     }
 

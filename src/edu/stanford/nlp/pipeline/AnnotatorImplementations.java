@@ -3,6 +3,7 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotator;
+import edu.stanford.nlp.naturalli.OpenIE;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.ReflectionLoading;
 
@@ -116,7 +117,7 @@ public class AnnotatorImplementations {
    * Annotate mentions
    */
   public Annotator mentions(Properties properties, String name) {
-    return new EntityMentionsAnnotator(name, properties);
+    return new MentionsAnnotator(name, properties);
   }
 
   /**
@@ -214,12 +215,12 @@ public class AnnotatorImplementations {
   }
 
   /**
-   * Annotate quotes and extract them like sentences
+   * Annotate {@link edu.stanford.nlp.ie.util.RelationTriple}s from text.
    */
-  public Annotator quote(Properties properties) {
+  public Annotator openie(Properties properties) {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
-        Annotator.STANFORD_QUOTE + '.');
-    return new QuoteAnnotator(relevantProperties);
+        Annotator.STANFORD_OPENIE + '.');
+    return new OpenIE(relevantProperties);
   }
 
 }

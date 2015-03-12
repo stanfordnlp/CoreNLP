@@ -143,7 +143,7 @@
  * annotators=tokenize,ssplit,pos,lemma,ner,parse,coref
  * pos.model=models/left3words-wsj-0-18.tagger
  * ner.model.3class=models/ner-en-3class.crf.gz
- * ner.model.7class=models/all.7class.crf.gz
+ * ner.model.7class=models/muc.7class.crf.gz
  * ner.model.distsim=models/conll.distsim.crf.ser.gz
  * #nfl.gazetteer = models/NFLgazetteer.txt
  * #nfl.relation.model = models/nfl_relation_model.ser

@@ -15,9 +15,9 @@ package edu.stanford.nlp.optimization;
  */
 public class HybridMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
-  private final Minimizer<DiffFunction> firstMinimizer; // = new SMDMinimizer<DiffFunction>();
-  private final Minimizer<DiffFunction> secondMinimizer; // = new QNMinimizer(15);
-  private final int iterationCutoff; // = 1000;
+  Minimizer<DiffFunction> firstMinimizer = new SMDMinimizer<DiffFunction>();
+  Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(15);
+  int iterationCutoff = 1000;
 
   public HybridMinimizer(Minimizer<DiffFunction> minimizerOne, Minimizer<DiffFunction> minimizerTwo, int iterationCutoff){
     this.firstMinimizer = minimizerOne;
@@ -25,7 +25,6 @@ public class HybridMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     this.iterationCutoff = iterationCutoff;
   }
 
-  @Override
   public void setEvaluators(int iters, Evaluator[] evaluators) {
     if (firstMinimizer instanceof HasEvaluators) {
       ((HasEvaluators) firstMinimizer).setEvaluators(iters, evaluators);
@@ -35,14 +34,12 @@ public class HybridMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     }
   }
 
-  /** {@inheritDoc} */
-  @Override
+
   public double[] minimize(DiffFunction function, double functionTolerance, double[] initial) {
     return minimize(function, functionTolerance, initial, -1);
   }
 
-  /** {@inheritDoc} */
-  @Override
+
   public double[] minimize(DiffFunction function, double functionTolerance, double[] initial, int maxIterations) {
     double[] x = firstMinimizer.minimize(function,functionTolerance,initial,iterationCutoff);
     return secondMinimizer.minimize(function,functionTolerance,x,maxIterations);

@@ -242,14 +242,4 @@ public class ArrayMathTest extends TestCase {
     helpTestSafeSumAndMean(d4);
   }
 
-  public void testJensenShannon() {
-    double[] a = { 0.1, 0.1, 0.7, 0.1, 0.0, 0.0 };
-    double[] b = { 0.0, 0.1, 0.1, 0.7, 0.1, 0.0 };
-    assertEquals(0.46514844544032313, ArrayMath.jensenShannonDivergence(a, b), 1e-5);
-
-    double[] c = { 1.0, 0.0, 0.0 };
-    double[] d = { 0.0, 0.5, 0.5 };
-    assertEquals(1.0, ArrayMath.jensenShannonDivergence(c, d), 1e-5);
-  }
-
 }

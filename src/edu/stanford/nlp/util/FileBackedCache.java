@@ -54,13 +54,13 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *
  * <p>
  *   The serialization behavior can be safely changed by overwriting:
- * </p>
  *   <ul>
  *     <li>@See FileBackedCache#newInputStream</li>
  *     <li>@See FileBackedCache#newOutputStream</li>
  *     <li>@See FileBackedCache#writeNextObject</li>
  *     <li>@See FileBackedCache#readNextObject</li>
  *   </ul>
+ * </p>
  *
  * @param <KEY> The key to cache by
  * @param <T> The object to cache

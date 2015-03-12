@@ -16,13 +16,14 @@ import java.util.*;
  * {@link edu.stanford.nlp.ie.NERFeatureFactory}. Documentation for the flags
  * for Chinese word segmentation can be found in the Javadoc of
  * {@link edu.stanford.nlp.wordseg.ChineseSegmenterFeatureFactory}.
+ * <br>
  *
  * <i>IMPORTANT NOTE IF CHANGING THIS FILE:</i> <b>MAKE SURE</b> TO
  * ONLY ADD NEW VARIABLES AT THE END OF THE LIST OF VARIABLES (and not
  * to change existing variables)! Otherwise you usually break all
  * currently serialized classifiers!!! Search for "ADD VARIABLES ABOVE
  * HERE" below.
- *
+ * <br>
  * Some general flags are described here
  * <table border="1">
  * <tr>
@@ -876,7 +877,7 @@ public class SeqClassifierFlags implements Serializable {
   public String embeddingWords = null;
   public String embeddingVectors = null;
   public boolean transitionEdgeOnly = false;
-  // L1-prior used in QNMinimizer's OWLQN
+  // L1-prior used in OWLQN
   public double priorLambda = 0;
   public boolean addCapitalFeatures = false;
   public int arbitraryInputLayerSize = -1;
@@ -1027,22 +1028,6 @@ public class SeqClassifierFlags implements Serializable {
    */
   public String priorModelFactory;
 
-  /** Put in undirected (left/right) bag of words features for local
-   *  neighborhood. Seems much worse than regular useDisjunctive.
-   */
-  public boolean useUndirectedDisjunctive;
-
-  public boolean splitSlashHyphenWords;
-
-  /** If this number is strictly positive (greater than 0; 0 means unlimited),
-   *  then add at most this many words to the knownLCwords.  (Words will only
-   *  be added if useKnownLCWords is true.) By default, this is set to 10,000,
-   *  so it will work on a few documents, but not cause unlimited memory growth
-   *  if a SequenceClassifier is run for a long time!
-   */
-  public int maxAdditionalKnownLCWords = 10_000;
-
-
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -1050,10 +1035,8 @@ public class SeqClassifierFlags implements Serializable {
   public transient Properties props = null;
 
 
-  /**
-   * Create a new SeqClassifierFlags object initialized with default values.
-   */
-  public SeqClassifierFlags() { }
+  public SeqClassifierFlags() {
+  }
 
   /**
    * Create a new SeqClassifierFlags object and initialize it using values in
@@ -1429,10 +1412,6 @@ public class SeqClassifierFlags implements Serializable {
         useTypeSeqs3 = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useDisjunctive")) {
         useDisjunctive = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useUndirectedDisjunctive")) {
-        useUndirectedDisjunctive = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("splitSlashHyphenWords")) {
-        splitSlashHyphenWords = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("disjunctionWidth")) {
         disjunctionWidth = Integer.parseInt(val);
       } else if (key.equalsIgnoreCase("useDisjunctiveShapeInteraction")) {
@@ -2559,8 +2538,6 @@ public class SeqClassifierFlags implements Serializable {
         removeStrictGoodCoNLLDuplicates = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("priorModelFactory")) {
         priorModelFactory = val;
-      } else if (key.equalsIgnoreCase("maxAdditionalKnownLCWords")) {
-        maxAdditionalKnownLCWords = Integer.parseInt(val);
 
         // ADD VALUE ABOVE HERE
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {

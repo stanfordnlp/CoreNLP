@@ -69,9 +69,6 @@ import edu.stanford.nlp.util.StringUtils;
  *     token and the whitespace around it that a list of tokens can be
  *     faithfully converted back to the original String.  Valid only if the
  *     LexedTokenFactory is an instance of CoreLabelTokenFactory.  The
- *
- *
- *
  *     keys used in it are: TextAnnotation for the tokenized form,
  *     OriginalTextAnnotation for the original string, BeforeAnnotation and
  *     AfterAnnotation for the whitespace before and after a token, and
@@ -560,9 +557,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
      * Constructs a new PTBTokenizer that returns CoreLabel objects and
      * uses the options passed in.
      *
-     * @param options A String of options. For the default, recommended
-     *                options for PTB-style tokenization compatibility, pass
-     *                in an empty String.
+     * @param options A String of options
      * @return A TokenizerFactory that returns CoreLabel objects o
      */
     public static PTBTokenizerFactory<CoreLabel> newCoreLabelTokenizerFactory(String options) {

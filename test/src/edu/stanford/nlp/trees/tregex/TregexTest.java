@@ -1445,15 +1445,6 @@ public class TregexTest extends TestCase {
     assertTrue(matcher.find());
     assertEquals(null, matcher.getNode("c"));
     assertFalse(matcher.find());
-
-    tree = treeFromString("(ROOT (INTJ (CC But) (S (NP (DT the) (NNP RTC)) (ADVP (RB also)) (VP (VBZ requires) (`` ``) (S (FRAG (VBG working) ('' '') (NP (NP (NN capital)) (S (VP (TO to) (VP (VB maintain) (SBAR (S (NP (NP (DT the) (JJ bad) (NNS assets)) (PP (IN of) (NP (NP (NNS thrifts)) (SBAR (WHNP (WDT that)) (S (VP (VBP are) (VBN sold) (, ,) (PP (IN until) (NP (DT the) (NNS assets))))))))) (VP (MD can) (VP (VB be) (VP (VBN sold) (ADVP (RB separately))))))))))))))) (S (VP (. .)))))");
-    // a pattern used to rearrange punctuation nodes in the srparser
-    pattern = TregexPattern.compile("__ !> __ <- (__=top <- (__ <<- (/[.]|PU/=punc < /[.!?。！？]/ ?> (__=single <: =punc))))");
-    matcher = pattern.matcher(tree);
-    assertTrue(matcher.find());
-    assertEquals("(. .)", matcher.getNode("punc").toString());
-    assertEquals("(VP (. .))", matcher.getNode("single").toString());
-    assertFalse(matcher.find());
   }
 
   /**

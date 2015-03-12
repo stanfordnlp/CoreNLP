@@ -428,7 +428,7 @@ public class MentionExtractor {
     }
     String annoStr = annoSb.toString();
     SieveCoreferenceSystem.logger.info("MentionExtractor ignores specified annotators, using annotators=" + annoStr);
-    pipelineProps.setProperty("annotators", annoStr);
+    pipelineProps.put("annotators", annoStr);
     return new StanfordCoreNLP(pipelineProps, false);
   }
 
