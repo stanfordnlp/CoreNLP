@@ -476,6 +476,23 @@ public enum NaturalLogicRelation {
    * Returns the natural logic relation corresponding to the given dependency arc being inserted into a sentence.
    */
   public static NaturalLogicRelation forDependencyInsertion(String dependencyLabel) {
+    return forDependencyInsertion(dependencyLabel, true);
+  }
+
+  /**
+   * Returns the natural logic relation corresponding to the given dependency arc being inserted into a sentence.
+   * @param dependencyLabel The label we are checking the relation for.
+   * @param isSubject Whether this is on the subject side of a relation (e.g., for CONJ_OR edges)
+   */
+  public static NaturalLogicRelation forDependencyInsertion(String dependencyLabel, boolean isSubject) {
+    if (!isSubject) {
+      switch (dependencyLabel) {
+        // 'or' in the object position behaves as and.
+        case "conj_or":
+        case "conj_nor":
+          return forDependencyInsertion("conj_and", false);
+      }
+    }
     NaturalLogicRelation rel = insertArcToNaturalLogicRelation.get(dependencyLabel.toLowerCase());
     if (rel != null) {
       return rel;
@@ -509,7 +526,16 @@ public enum NaturalLogicRelation {
    * Returns the natural logic relation corresponding to the given dependency arc being deleted from a sentence.
    */
   public static NaturalLogicRelation forDependencyDeletion(String dependencyLabel) {
-    NaturalLogicRelation rel = forDependencyInsertion(dependencyLabel);
+    return forDependencyDeletion(dependencyLabel, true);
+  }
+
+  /**
+   * Returns the natural logic relation corresponding to the given dependency arc being deleted from a sentence.
+   * @param dependencyLabel The label we are checking the relation for
+   * @param isSubject Whether this is on the subject side of a relation (e.g., for CONJ_OR edges)
+   */
+  public static NaturalLogicRelation forDependencyDeletion(String dependencyLabel, boolean isSubject) {
+    NaturalLogicRelation rel = forDependencyInsertion(dependencyLabel, isSubject);
     return insertionToDeletion(rel);
   }
 

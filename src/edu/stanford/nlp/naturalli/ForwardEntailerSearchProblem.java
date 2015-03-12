@@ -169,6 +169,31 @@ public class ForwardEntailerSearchProblem {
     Util.cleanTree(parseTree);
     assert Util.isTree(parseTree);
 
+    // Find the subject / object split
+    // This takes max O(n^2) time, expected O(n*log(n)) time.
+    // Optimal is O(n), but I'm too lazy to implement it.
+    boolean isSubject[] = new boolean[65];
+    for (IndexedWord vertex : parseTree.vertexSet()) {
+      // Search up the tree for a subj node; if found, mark that vertex as a subject.
+      Iterator<SemanticGraphEdge> incomingEdges = parseTree.incomingEdgeIterator(vertex);
+      SemanticGraphEdge edge = null;
+      if (incomingEdges.hasNext()) {
+        edge = incomingEdges.next();
+      }
+      while (edge != null) {
+        if (edge.getRelation().toString().endsWith("subj")) {
+          isSubject[vertex.index() - 1] = true;
+          break;
+        }
+        incomingEdges = parseTree.incomingEdgeIterator(edge.getGovernor());
+        if (incomingEdges.hasNext()) {
+          edge = incomingEdges.next();
+        } else {
+          edge = null;
+        }
+      }
+    }
+
     // Outputs
     List<SearchResult> results = new ArrayList<>();
     if (!determinerRemovals.isEmpty()) {
@@ -244,7 +269,8 @@ public class ForwardEntailerSearchProblem {
           if ((operator = token.get(NaturalLogicAnnotations.OperatorAnnotation.class)) != null) {
             lexicalRelation = operator.instance.deleteRelation;
           } else {
-            lexicalRelation = NaturalLogicRelation.forDependencyDeletion(edge.getRelation().toString());
+            lexicalRelation = NaturalLogicRelation.forDependencyDeletion(edge.getRelation().toString(),
+                isSubject[edge.getDependent().index() - 1]);
           }
           NaturalLogicRelation projectedRelation = tokenPolarity.projectLexicalRelation(lexicalRelation);
           // Make sure this is a valid entailment

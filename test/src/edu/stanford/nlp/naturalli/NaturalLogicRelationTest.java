@@ -56,6 +56,13 @@ public class NaturalLogicRelationTest {
   }
 
   @Test
+  public void conjOrPeculiarities() {
+    assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj_or"));
+    assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj_or", true));
+    assertEquals(NaturalLogicRelation.REVERSE_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj_or", false));
+  }
+
+  @Test
   public void someDeletionRelations() {
     assertEquals(NaturalLogicRelation.INDEPENDENCE, NaturalLogicRelation.forDependencyDeletion("nsubj"));
     assertEquals(NaturalLogicRelation.REVERSE_ENTAILMENT, NaturalLogicRelation.forDependencyDeletion("quantmod"));
