@@ -18,7 +18,7 @@ public class SemgrexPatternITest extends TestCase {
 
   @Test
   public void testNER() throws Exception{
-    String sentence = "John lives in Washington.";
+    String sentence = "John lives in California.";
     Properties props = new Properties();
     props.setProperty("annotators","tokenize, ssplit, pos, lemma, ner, parse");
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
@@ -27,7 +27,7 @@ public class SemgrexPatternITest extends TestCase {
     CoreMap sent = doc.get(CoreAnnotations.SentencesAnnotation.class).get(0);
     SemanticGraph graph = sent.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
     graph.prettyPrint();
-    String patStr = "({word:/lives/} >/prep_in/ {word:/\\QCalifornia\\E|\\QWashington\\E/} >nsubj {ner:PERSON})";
+    String patStr = "({word:/lives/} >/prep_in/ {word:/California/} >nsubj {ner:PERSON})";
     SemgrexPattern pat = SemgrexPattern.compile(patStr);
     SemgrexMatcher mat = pat.matcher(graph, true);
     assertTrue(mat.find());
