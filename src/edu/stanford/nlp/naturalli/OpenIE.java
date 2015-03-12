@@ -38,13 +38,19 @@ public class OpenIE implements Annotator {
   private Optimization optimizeFor = Optimization.GENERAL;
 
   @Execution.Option(name="openie.splitter.model", gloss="The location of the clause splitting model.")
-  private String splitterModel = "/home/gabor/tmp/clauseSearcherModel.ser.gz";
+  private String splitterModel = "edu/stanford/nlp/naturalli/clauseSearcherModel.ser.gz";
 
   @Execution.Option(name="openie.splitter.threshold", gloss="The minimum threshold for accepting a clause.")
   private double splitterThreshold = 0.5;
 
   @Execution.Option(name="openie.max_entailments_per_clause", gloss="The maximum number of entailments allowed per sentence of input.")
   private int entailmentsPerSentence = 100;
+
+  @Execution.Option(name="openie.affinity_models", gloss="The directory (or classpath directory) containing the affinity models for pp/obj attachments.")
+  private String affinityModels = "edu/stanford/nlp/naturalli/";
+
+  @Execution.Option(name="openie.affinity_probability_cap", gloss="The directory (or classpath directory) containing the affinity models for pp/obj attachments.")
+  private double affinityProbabilityCap = 1.0 / 3.0;
 
   private final NaturalLogicWeights weights;
 
@@ -68,9 +74,9 @@ public class OpenIE implements Annotator {
     props.keySet().stream().filter(key -> key.toString().startsWith("openie.")).forEach(key -> myProps.setProperty(key.toString(), props.getProperty(key.toString())));
     // Fill the properties
     Execution.fillOptions(this, myProps);
-    this.weights = new NaturalLogicWeights();  // TODO(gabor) load natlog weights
     // Create the components
     try {
+      this.weights = new NaturalLogicWeights(affinityModels, affinityProbabilityCap);
       clauseSplitter = ClauseSplitter.load(splitterModel);
     } catch (IOException e) {
       throw new RuntimeIOException("Could not load clause splitter model at: " + splitterModel);

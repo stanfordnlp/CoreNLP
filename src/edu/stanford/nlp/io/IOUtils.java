@@ -412,9 +412,21 @@ public class IOUtils {
     // windows File.separator is \, but getting resources only works with /
     if (is == null) {
       is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/"));
+      // Classpath doesn't like double slashes (e.g., /home/user//foo.txt)
+      if (is == null) {
+        is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
+      }
     }
     // if not found in the CLASSPATH, load from the file system
     if (is == null) is = new FileInputStream(name);
+    // make sure it's not a GZIP stream
+    if (name.endsWith(".gz")) {
+      try {
+        return new GZIPInputStream(is);
+      } catch (IOException e) {
+        System.err.println("Resource or file looks like a gzip file, but is not: " + name);
+      }
+    }
     return is;
   }
 
