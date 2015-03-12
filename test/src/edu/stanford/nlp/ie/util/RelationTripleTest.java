@@ -156,8 +156,7 @@ public class RelationTripleTest extends TestCase {
         "1\tblue\t2\tamod\n" +
         "2\tcats\t3\tnsubj\n" +
         "3\tplay\t0\troot\n" +
-        "4\twith\t3\tprep\n" +
-        "5\tyarn\t4\tpobj\n"
+        "5\tyarn\t3\tprep_with\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tblue cats\tplay with\tyarn", extraction.get().toString());
@@ -169,8 +168,7 @@ public class RelationTripleTest extends TestCase {
             "2\tcats\t3\tnsubj\n" +
             "3\tplay\t0\troot\n" +
             "4\tquietly\t3\tadvmod\n" +
-            "5\twith\t3\tprep\n" +
-            "6\tyarn\t5\tpobj\n"
+            "6\tyarn\t3\tprep_with\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tblue cats\tplay quietly with\tyarn", extraction.get().toString());
