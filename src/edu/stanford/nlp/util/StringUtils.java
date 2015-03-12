@@ -339,9 +339,11 @@ public class StringUtils {
   }
 
   /**
-   * Joins each elem in the {@code Collection} with the given glue.
+   * Joins each elem in the {@link Iterable} with the given glue.
    * For example, given a list of {@code Integers}, you can create
    * a comma-separated list by calling {@code join(numbers, ", ")}.
+   *
+   * @see StringUtils#join(Stream, String)
    */
   public static <X> String join(Iterable<X> l, String glue) {
     StringBuilder sb = new StringBuilder();
@@ -358,10 +360,25 @@ public class StringUtils {
   }
 
   /**
+   * Joins each elem in the {@link Stream} with the given glue.
+   * For example, given a list of {@code Integers}, you can create
+   * a comma-separated list by calling {@code join(numbers, ", ")}.
+   *
    * @see StringUtils#join(Iterable, String)
    */
-  public static <X> String join(Stream<X> collection, String glue) {
-    return join(new IterableIterator<X>(collection.iterator()), glue);
+  public static <X> String join(Stream<X> l, String glue) {
+    StringBuilder sb = new StringBuilder();
+    boolean first = true;
+    Iterator<X> iter = l.iterator();
+    while (iter.hasNext()) {
+      if ( ! first) {
+        sb.append(glue);
+      } else {
+        first = false;
+      }
+      sb.append(iter.next());
+    }
+    return sb.toString();
   }
 
 // Omitted; I'm pretty sure this are redundant with the above
@@ -2093,5 +2110,4 @@ public class StringUtils {
     d = diacriticalMarksPattern.matcher(d).replaceAll("");
     return Normalizer.normalize(d, Normalizer.Form.NFKC);
   }
-
 }

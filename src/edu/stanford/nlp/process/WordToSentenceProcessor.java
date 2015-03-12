@@ -210,10 +210,12 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
    * @see #WordToSentenceProcessor(String, Set, Set, Set, String, NewlineIsSentenceBreak, SequencePattern, Set, boolean, boolean)
    */
   public List<List<IN>> wordsToSentences(List<? extends IN> words) {
-    IdentityHashMap<Object, Boolean> isSentenceBoundary = new IdentityHashMap<Object, Boolean>();
+    IdentityHashMap<Object, Boolean> isSentenceBoundary = null; // is null unless used by sentenceBoundaryMultiTokenPattern
+
     if (sentenceBoundaryMultiTokenPattern != null) {
       // Do initial pass using tokensregex to identify multi token patterns that need to be matched
       // and add the last token to our table of sentence boundary tokens
+      isSentenceBoundary = new IdentityHashMap<Object, Boolean>();
       SequenceMatcher<? super IN> matcher = sentenceBoundaryMultiTokenPattern.getMatcher(words);
       while (matcher.find()) {
         List nodes = matcher.groupNodes();
@@ -308,6 +310,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
         }
       } else {
         lastTokenWasNewline = false;
+        Boolean isb;
         if (xmlBreakElementsToDiscard != null && matchesXmlBreakElementToDiscard(word)) {
           newSent = true;
           if (DEBUG) {
@@ -317,7 +320,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
           insideRegion = false;
           newSent = true;
           // Marked sentence boundaries
-        } else if (isSentenceBoundary.containsKey(o) && isSentenceBoundary.get(o)) {
+        } else if ((isSentenceBoundary != null) && ((isb = isSentenceBoundary.get(o)) != null) && isb) {
           if (!discardToken) currentSentence.add(o);
           if (DEBUG) {
             System.err.println("  is sentence boundary (matched multi-token pattern); " + debugText);

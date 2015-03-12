@@ -77,7 +77,7 @@ public class NERGUI {
 
     //Create and set up the window.
     frame = new JFrame("Stanford Named Entity Recognizer");
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     frame.getContentPane().setLayout(new BorderLayout());
     frame.getContentPane().setPreferredSize(new Dimension(WIDTH, HEIGHT));
 
