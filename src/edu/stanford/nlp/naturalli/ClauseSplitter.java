@@ -40,7 +40,12 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
   public enum ClauseClassifierLabel {
     CLAUSE_SPLIT,
     CLAUSE_INTERM,
-    NOT_A_CLAUSE
+    NOT_A_CLAUSE;
+    /** Seriously, why would Java not have this by default? */
+    @Override
+    public String toString() {
+      return this.name();
+    }
   }
 
   /**
