@@ -97,7 +97,7 @@ public class PennTreeReader implements TreeReader {
     String first = (st.hasNext() ? st.peek() : null);
     if (first != null && first.startsWith("*x*x*x")) {
       if (DEBUG) {
-        System.err.printf("%s: Skipping past whacked out header (%s)\n",this.getClass().getName(),first);
+        System.err.printf("%s: Skipping past whacked out header (%s)%n",this.getClass().getName(),first);
       }
       int foundCount = 0;
       while (foundCount < 4 && st.hasNext()) {
@@ -109,7 +109,7 @@ public class PennTreeReader implements TreeReader {
     }
 
     if (DEBUG) {
-      System.err.printf("%s: Built from\n %s ", this.getClass().getName(), in.getClass().getName());
+      System.err.printf("%s: Built from%n %s ", this.getClass().getName(), in.getClass().getName());
       System.err.println(' ' + ((tf == null) ? "no tf" : tf.getClass().getName()));
       System.err.println(' ' + ((tn == null) ? "no tn" : tn.getClass().getName()));
       System.err.println(' ' + ((st == null) ? "no st" : st.getClass().getName()));

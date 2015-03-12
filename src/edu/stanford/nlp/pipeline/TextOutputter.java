@@ -113,17 +113,17 @@ public class TextOutputter {
         // display MachineReading entities and relations
         List<EntityMention> entities = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
         if (entities != null) {
-          System.err.println("Extracted the following MachineReading entity mentions:");
+          os.println("Extracted the following MachineReading entity mentions:");
           for (EntityMention e : entities) {
-            System.err.println("\t" + e);
+            os.println("\t" + e);
           }
         }
         List<RelationMention> relations = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
         if(relations != null){
-          System.err.println("Extracted the following MachineReading relation mentions:");
+          os.println("Extracted the following MachineReading relation mentions:");
           for(RelationMention r: relations){
             if(r.printableObject(beam)){
-              System.err.println(r);
+              os.println(r);
             }
           }
         }

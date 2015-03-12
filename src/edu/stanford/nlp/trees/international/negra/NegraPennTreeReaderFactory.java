@@ -25,7 +25,7 @@ public class NegraPennTreeReaderFactory implements TreeReaderFactory, Serializab
 
 
   public NegraPennTreeReaderFactory() {
-    this(2, false, false, new NegraPennLanguagePack());
+    this(2, false, true, new NegraPennLanguagePack());
   }
 
   public NegraPennTreeReaderFactory(TreebankLanguagePack tlp) {
