@@ -310,7 +310,6 @@ public class ConstantsAndVariables implements Serializable {
    */
   public Map<String, Env> env = new HashMap<String, Env>();
 
-  public static Env globalEnv = TokenSequencePattern.getNewEnv();
 
 
   /**

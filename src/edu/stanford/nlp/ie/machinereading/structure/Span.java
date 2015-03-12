@@ -208,4 +208,11 @@ public class Span implements Serializable, Iterable<Integer> {
       throw new IllegalStateException("This should be impossible...");
     }
   }
+
+  /**
+   * A silly translation between a pair and a span.
+   */
+  public static Span fromPair(Pair<Integer, Integer> span) {
+    return fromValues(span.first, span.second);
+  }
 }

@@ -586,6 +586,23 @@ public class AnnotatorFactories {
   }
 
   //
+  // RelationTriples
+  //
+  public static AnnotatorFactory openie(Properties properties, final AnnotatorImplementations annotatorImpl) {
+    return new AnnotatorFactory(properties, annotatorImpl) {
+      @Override
+      public Annotator create() {
+        return annotatorImpl.openie(properties);
+      }
+
+      @Override
+      protected String additionalSignature() {
+        return "";
+      }
+    };
+  }
+
+  //
   // Quote Extractor
   //
   public static AnnotatorFactory quote(Properties properties, final AnnotatorImplementations annotatorImpl) {

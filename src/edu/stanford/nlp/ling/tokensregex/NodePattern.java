@@ -2,7 +2,6 @@ package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.util.StringUtils;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -10,7 +9,7 @@ import java.util.List;
  *
  * @author Angel Chang
  */
-public abstract class NodePattern<T> implements Serializable{
+public abstract class NodePattern<T> {
 
   public static final NodePattern ANY_NODE = new AnyNodePattern();
 
