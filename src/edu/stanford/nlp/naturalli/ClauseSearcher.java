@@ -32,6 +32,10 @@ public class ClauseSearcher {
    * The length of the sentence, as determined from the tree.
    */
   public final int sentenceLength;
+  /**
+   * A mapping from a word to the extra edges that come out of it.
+   */
+  private final Map<IndexedWord, Collection<SemanticGraphEdge>> extraEdgesByGovernor = new HashMap<>();
 
   /**
    * A mapping from edges in the tree, to an index.
@@ -76,7 +80,7 @@ public class ClauseSearcher {
   public static interface Action {
     public String signature();
 
-    public State applyTo(SemanticGraph tree, State source,
+    public Optional<State> applyTo(SemanticGraph tree, State source,
                          SemanticGraphEdge outgoingEdge,
                          SemanticGraphEdge subjectOrNull,
                          SemanticGraphEdge ppOrNull);
@@ -84,10 +88,19 @@ public class ClauseSearcher {
 
   public ClauseSearcher(SemanticGraph tree) {
     this.tree = new SemanticGraph(tree);
-    cleanTree(this.tree);
+    // Index edges
     this.tree.edgeIterable().forEach(edgeToIndex::addToIndex);
+    // Get length
     List<IndexedWord> sortedVertices = tree.vertexListSorted();
     sentenceLength = sortedVertices.get(sortedVertices.size() - 1).index();
+    // Register extra edges
+    for (IndexedWord vertex : sortedVertices) {
+      extraEdgesByGovernor.put(vertex, new ArrayList<>());
+    }
+    List<SemanticGraphEdge> extraEdges = cleanTree(this.tree);
+    for (SemanticGraphEdge edge : extraEdges) {
+      extraEdgesByGovernor.get(edge.getGovernor()).add(edge);
+    }
   }
 
 
@@ -97,9 +110,12 @@ public class ClauseSearcher {
    * <ul>
    *   <li>Sometimes there's a node from a word to itself. This seems wrong.</li>
    * </ul>
-   * @param tree The tree to clean (in place!)
+   *
+   * @param tree The tree to clean (in place!).
+   *
+   * @return A list of extra edges, which are valid but were removed.
    */
-  private static void cleanTree(SemanticGraph tree) {
+  private static List<SemanticGraphEdge> cleanTree(SemanticGraph tree) {
     // Clean nodes
     List<IndexedWord> toDelete = new ArrayList<>();
     for (IndexedWord vertex : tree.vertexSet()) {
@@ -110,6 +126,7 @@ public class ClauseSearcher {
       }
     }
     for (IndexedWord v : toDelete) { tree.removeVertex(v); }
+
     // Clean edges
     Iterator<SemanticGraphEdge> iter = tree.edgeIterable().iterator();
     while (iter.hasNext()) {
@@ -122,6 +139,31 @@ public class ClauseSearcher {
         iter.remove();
       }
     }
+
+    // Remove extra edges
+    List<SemanticGraphEdge> extraEdges = new ArrayList<>();
+    for (SemanticGraphEdge edge : tree.edgeIterable()) {
+      if (edge.isExtra()) {
+        extraEdges.add(edge);
+      }
+    }
+    for (SemanticGraphEdge edge : extraEdges) {
+      tree.removeEdge(edge);
+    }
+    // Add apposition edges (simple coref)
+    for (SemanticGraphEdge extraEdge : new ArrayList<>(extraEdges)) {  // note[gabor] prevent concurrent modification exception
+      for (SemanticGraphEdge candidateAppos : tree.incomingEdgeIterable(extraEdge.getDependent())) {
+        if (candidateAppos.getRelation().toString().equals("appos")) {
+          extraEdges.add(new SemanticGraphEdge(extraEdge.getGovernor(), candidateAppos.getGovernor(), extraEdge.getRelation(), extraEdge.getWeight(), extraEdge.isExtra()));
+        }
+      }
+      for (SemanticGraphEdge candidateAppos : tree.outgoingEdgeIterable(extraEdge.getDependent())) {
+        if (candidateAppos.getRelation().toString().equals("appos")) {
+          extraEdges.add(new SemanticGraphEdge(extraEdge.getGovernor(), candidateAppos.getDependent(), extraEdge.getRelation(), extraEdge.getWeight(), extraEdge.isExtra()));
+        }
+      }
+    }
+    return extraEdges;
   }
 
   private static void simpleClause(SemanticGraph tree, SemanticGraphEdge toKeep) {
@@ -217,8 +259,8 @@ public class ClauseSearcher {
       return "$STOP$";
     }
     @Override
-    public State applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge ppOrNull) {
-      return new State(source, true);
+    public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge ppOrNull) {
+      return Optional.of(new State(source, true));
     }
   };
 
@@ -239,14 +281,14 @@ public class ClauseSearcher {
         return "simple";
       }
       @Override
-      public State applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge ppOrNull) {
-        return new State(
+      public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge ppOrNull) {
+        return Optional.of(new State(
             outgoingEdge,
             subjectOrNull == null ? source.subjectOrNull : subjectOrNull,
             subjectOrNull == null ? (source.distanceFromSubj + 1) : 0,
             ppOrNull,
             source.thunk.andThen(toModify -> simpleClause(toModify, outgoingEdge)), false
-        );
+        ));
       }
     });
 
@@ -257,8 +299,8 @@ public class ClauseSearcher {
         return "clone_root_as_nsubjpass";
       }
       @Override
-      public State applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge ppOrNull) {
-        return new State(
+      public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge ppOrNull) {
+        return Optional.of(new State(
             outgoingEdge,
             subjectOrNull == null ? source.subjectOrNull : subjectOrNull,
             subjectOrNull == null ? (source.distanceFromSubj + 1) : 0,
@@ -268,7 +310,33 @@ public class ClauseSearcher {
               addSubtree(toModify, outgoingEdge.getDependent(), "nsubjpass", tree, outgoingEdge.getGovernor(), Collections.singleton(outgoingEdge));
 //              addWord(toModify, outgoingEdge.getDependent(), "auxpass", mockNode(outgoingEdge.getDependent().backingLabel(), "is", "VBZ"));
             }), true
-        );
+        ));
+      }
+    });
+
+    // COPY SUBJECT
+    actionSpace.add(new Action() {
+      @Override
+      public String signature() {
+        return "clone_nsubj";
+      }
+      @Override
+      public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge ppOrNull) {
+        if (subjectOrNull != null && !outgoingEdge.equals(subjectOrNull)) {
+          return Optional.of(new State(
+              outgoingEdge,
+              subjectOrNull,
+              0,
+              ppOrNull,
+              source.thunk.andThen(toModify -> {
+                simpleClause(toModify, outgoingEdge);
+                addSubtree(toModify, outgoingEdge.getDependent(), "nsubj", tree,
+                    subjectOrNull.getDependent(), Collections.singleton(outgoingEdge));
+              }), true
+          ));
+        } else {
+          return Optional.empty();
+        }
       }
     });
 
@@ -307,7 +375,17 @@ public class ClauseSearcher {
       if (lastState.isDone) {
         candidateFragments.accept(Triple.makeTriple(logProbSoFar, featuresSoFar, () -> {
           SemanticGraph copy = new SemanticGraph(tree);
-          lastState.thunk.accept(copy);
+          lastState.thunk.andThen( x -> {
+            // Add the extra edges back in, if they don't break the tree-ness of the extraction
+            for (IndexedWord newTreeRoot : x.getRoots()) {
+              for (SemanticGraphEdge extraEdge : extraEdgesByGovernor.get(newTreeRoot)) {
+                if (!x.containsVertex(extraEdge.getDependent())) {
+                  //noinspection unchecked
+                  addSubtree(x, newTreeRoot, extraEdge.getRelation().toString(), tree, extraEdge.getDependent(), tree.getIncomingEdgesSorted(newTreeRoot));
+                }
+              }
+            }
+          }).accept(copy);
           return new SentenceFragment(copy, false);
         }));
       } else {
@@ -331,7 +409,7 @@ public class ClauseSearcher {
           if (action == STOP) {
             // Special case the STOP action
             State candidate = action.applyTo(tree, lastState,
-                lastState.edge, lastState.subjectOrNull, lastState.ppOrNull);
+                lastState.edge, lastState.subjectOrNull, lastState.ppOrNull).get();
             Counter<String> features = featurizer.apply(Triple.makeTriple(lastState, action, candidate));
             features.addAll(featuresSoFar);
             double probability = SloppyMath.sigmoid(Counters.dotProduct(features, weights));
@@ -344,20 +422,23 @@ public class ClauseSearcher {
               double max = Double.NEGATIVE_INFINITY;
               Pair<State, Counter<String>> argmax = null;
               for (SemanticGraphEdge ppEdgeOrNull : ppEdges) {
-                State candidate = action.applyTo(tree, lastState,
+                Optional<State> candidate = action.applyTo(tree, lastState,
                     outgoingEdge, subjOrNull,
                     ppEdgeOrNull);
-                Counter<String> features = featurizer.apply(Triple.makeTriple(lastState, action, candidate));
-                double probability = SloppyMath.sigmoid(Counters.dotProduct(features, weights));
-                if (probability > max) {
-                  max = probability;
-                  argmax = Pair.makePair(candidate, features);
+                if (candidate.isPresent()) {
+                  Counter<String> features = featurizer.apply(Triple.makeTriple(lastState, action, candidate.get()));
+                  double probability = SloppyMath.sigmoid(Counters.dotProduct(features, weights));
+                  if (probability > max) {
+                    max = probability;
+                    argmax = Pair.makePair(candidate.get(), features);
+                  }
                 }
               }
               // 2. Register the child state
-              assert argmax != null;
-              argmax.second.addAll(featuresSoFar);
-              fringe.add(argmax, Math.log(max));
+              if (argmax != null) {
+                argmax.second.addAll(featuresSoFar);
+                fringe.add(argmax, Math.log(max));
+              }
             }
           }
         }

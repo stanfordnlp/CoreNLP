@@ -518,6 +518,9 @@ public class OpenIE implements Annotator {
     }
     // Set the index mapping
     List<IndexedWord> vertices = tree.vertexListSorted();
+    if (vertices.size() >= 64) {
+      return Collections.emptyList();
+    }
     byte[] indexToMaskIndex = new byte[vertices.get(vertices.size() - 1).index()];
     byte i = 0;
     for (IndexedWord vertex : vertices) {
@@ -533,7 +536,6 @@ public class OpenIE implements Annotator {
       triples.add(rootExtraction.get());
     }
     for (SearchResult result : results) {
-      SentenceFragment fragment = new SentenceFragment(result.tree, false);
       Optional<RelationTriple> extraction = RelationTriple.segment(result.tree, Optional.of(result.confidence));
       if (extraction.isPresent()) {
         triples.add(extraction.get());

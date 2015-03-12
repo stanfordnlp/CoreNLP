@@ -3,14 +3,13 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.parser.nndep.DependencyParser;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class adds dependency parse information to an Annotation.
@@ -31,6 +30,10 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
    * Maximum parse time (in milliseconds) for a sentence
    */
   private final long maxTime;
+  /**
+   * If true, include the extra arcs in the dependency representaion.
+   */
+  private final boolean includeExtras;
   private static final long DEFAULT_MAXTIME = Long.MAX_VALUE;
 
   public DependencyParseAnnotator() {
@@ -43,6 +46,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
 
     nThreads = PropertiesUtils.getInt(properties, "testThreads", DEFAULT_NTHREADS);
     maxTime = PropertiesUtils.getLong(properties, "sentenceTimeout", DEFAULT_MAXTIME);
+    includeExtras = PropertiesUtils.getBool(properties, StanfordCoreNLP.STANFORD_DEPENDENCIES + ".includeExtras", false);
   }
 
   @Override
@@ -59,13 +63,15 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
   protected void doOneSentence(Annotation annotation, CoreMap sentence) {
     GrammaticalStructure gs = parser.predict(sentence);
 
-    SemanticGraph deps = SemanticGraphFactory.generateCollapsedDependencies(gs),
-        uncollapsedDeps = SemanticGraphFactory.generateUncollapsedDependencies(gs),
-        ccDeps = SemanticGraphFactory.generateCCProcessedDependencies(gs);
+
+    SemanticGraph deps = SemanticGraphFactory.makeFromTree(gs, SemanticGraphFactory.Mode.COLLAPSED, includeExtras, true, null),
+        uncollapsedDeps = SemanticGraphFactory.makeFromTree(gs, SemanticGraphFactory.Mode.BASIC, includeExtras, true, null),
+        ccDeps = SemanticGraphFactory.makeFromTree(gs, SemanticGraphFactory.Mode.CCPROCESSED, includeExtras, true, null);
 
     sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
     sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, uncollapsedDeps);
     sentence.set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, ccDeps);
+
   }
 
   @Override

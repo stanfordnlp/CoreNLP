@@ -174,17 +174,16 @@ public class RelationTriple implements Comparable<RelationTriple> {
   /** A list of patterns to match relation extractions against */
   private static final List<SemgrexPattern> PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
     // { blue cats play [quietly] with yarn }
-    add(SemgrexPattern.compile("{$}=verb ?>/cop|auxpass/ {}=be >/.subj(pass)?/ {}=subject >/prepc?/ ({}=prep >/pobj/ {}=object)"));
-    add(SemgrexPattern.compile("{$}=verb ?>/cop|auxpass/ {}=be >/.subj(pass)?/ {}=subject >/prepc?_.*/=prepEdge {}=object"));
+    add(SemgrexPattern.compile("{$}=verb ?>/cop|auxpass/ {}=be >/.subj(pass)?/ {}=subject >/prepc?/ ({}=prep >/pobj/ ( {}=object ?>/appos/ {}=appos ) )"));
+    add(SemgrexPattern.compile("{$}=verb ?>/cop|auxpass/ {}=be >/.subj(pass)?/ {}=subject >/prepc?_.*/=prepEdge ( {}=object ?>/appos/ {} = appos )"));
     // { fish like to swim }
-    add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >/xcomp/ {}=object"));
+    add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >/xcomp/ ( {}=object ?>/appos/ {}=appos )"));
     // { cats have tails }
-    add(SemgrexPattern.compile("{$}=verb ?>/auxpass/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ {}=object"));
-    // { cats , playing in sand , }
-//    add(SemgrexPattern.compile("{$}=subject >/vmod/ ( {pos:/V.*/}=verb >/prepc?/ ({}=prep >/pobj/ {}=object) )"));
-//    add(SemgrexPattern.compile("{$}=subject >/vmod/ ( {pos:/V.*/}=verb >/prepc?_.*/=prepEdge {}=object )"));
+    add(SemgrexPattern.compile("{$}=verb ?>/auxpass/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>/appos/ {}=appos )"));
     // { cats are cute  }
     add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop/ {}=verb"));
+    // { Unicredit 's Bank Austria Creditanstalt }
+    add(SemgrexPattern.compile("{$}=object >/poss/=verb {}=subject"));
   }});
 
   /** A set of valid arcs denoting an entity we are interested in */
@@ -241,8 +240,9 @@ public class RelationTriple implements Comparable<RelationTriple> {
       for (SemanticGraphEdge edge : parse.getOutEdgesSorted(root)) {
         String shortName = edge.getRelation().getShortName();
         //noinspection StatementWithEmptyBody
-        if (isCopula && (shortName.equals("cop") || shortName.contains("subj"))) {
-          // noop; ignore nsubj and cop for extractions with copula
+        if (isCopula && (shortName.equals("cop") || shortName.contains("subj")) ||
+            shortName.equals("poss")) {
+          // noop; ignore nsubj, cop, and poss for extractions with copula / possessives
         } else if (!validArcs.contains(edge.getRelation().getShortName().replaceAll("_.*","_*"))) {
           return Optional.empty();
         } else {
@@ -293,25 +293,44 @@ public class RelationTriple implements Comparable<RelationTriple> {
     PATTERN_LOOP: for (SemgrexPattern pattern : PATTERNS) {  // For every candidate pattern...
       SemgrexMatcher m = pattern.matcher(parse);
       if (m.matches()) {  // ... see if it matches the sentence
+        // Object
+        IndexedWord object = m.getNode("appos");
+        if (object == null) {
+          object = m.getNode("object");
+        }
+        assert object != null;
         // Verb
         PriorityQueue<CoreLabel> verbChunk = new FixedPrioritiesPriorityQueue<>();
         IndexedWord verb = m.getNode("verb");
-        IndexedWord prep = m.getNode("prep");
         List<IndexedWord> adverbs = new ArrayList<>();
-        for (SemanticGraphEdge edge : parse.outgoingEdgeIterable(verb)) {
-          if ("advmod".equals(edge.getRelation().toString()) || "amod".equals(edge.getRelation().toString())) {
-            String tag = edge.getDependent().backingLabel().tag();
-            if (tag == null ||
-               (!tag.startsWith("W") && !edge.getDependent().backingLabel().word().equalsIgnoreCase("then"))) {  // prohibit advmods like "where"
-              adverbs.add(edge.getDependent());
+        if (verb != null) {
+          for (SemanticGraphEdge edge : parse.outgoingEdgeIterable(verb)) {
+            if ("advmod".equals(edge.getRelation().toString()) || "amod".equals(edge.getRelation().toString())) {
+              String tag = edge.getDependent().backingLabel().tag();
+              if (tag == null ||
+                  (!tag.startsWith("W") && !edge.getDependent().backingLabel().word().equalsIgnoreCase("then"))) {  // prohibit advmods like "where"
+                adverbs.add(edge.getDependent());
+              }
             }
           }
+        } else {
+          switch (m.getRelnString("verb")) {
+            case "poss":
+              IndexedWord subject = m.getNode("subject");
+              verb = new IndexedWord(mockNode(subject.backingLabel(), 1, "'s", "POS"));
+              break;
+            default:
+              throw new IllegalStateException("Pattern matched without a verb!");
+          }
         }
-        IndexedWord be = m.getNode("be");
-        String prepEdge = m.getRelnString("prepEdge");
         verbChunk.add(verb.backingLabel(), -verb.index());
         int numKnownDependents = 2;  // subject and object, at minimum
+        // Prepositions
+        IndexedWord prep = m.getNode("prep");
+        String prepEdge = m.getRelnString("prepEdge");
         if (prep != null) { verbChunk.add(prep.backingLabel(), -prep.index()); numKnownDependents += 1; }
+        // Auxilliary "be"
+        IndexedWord be = m.getNode("be");
         if (be != null) { verbChunk.add(be.backingLabel(), -be.index()); numKnownDependents += 1; }
         // (adverbs have to be well-formed)
         if (!adverbs.isEmpty()) {
@@ -343,12 +362,12 @@ public class RelationTriple implements Comparable<RelationTriple> {
         List<CoreLabel> relation = verbChunk.toSortedList();
 
         // Subject+Object
-        Optional<List<CoreLabel>> subject = getValidEntityChunk(parse, m.getNode("subject"));
-        Optional<List<CoreLabel>> object = getValidEntityChunk(parse, m.getNode("object"));
+        Optional<List<CoreLabel>> subjectSpan = getValidEntityChunk(parse, m.getNode("subject"));
+        Optional<List<CoreLabel>> objectSpan = getValidEntityChunk(parse, object);
         // Create relation
-        if (subject.isPresent() && object.isPresent()) {  // ... and has a valid subject+object
+        if (subjectSpan.isPresent() && objectSpan.isPresent()) {  // ... and has a valid subject+object
           // Success! Found a valid extraction.
-          return Optional.of(new WithTree(subject.get(), relation, object.get(), parse, confidence.orElse(1.0)));
+          return Optional.of(new WithTree(subjectSpan.get(), relation, objectSpan.get(), parse, confidence.orElse(1.0)));
         }
       }
     }

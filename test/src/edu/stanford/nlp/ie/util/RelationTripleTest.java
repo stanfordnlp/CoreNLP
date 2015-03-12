@@ -267,6 +267,28 @@ public class RelationTripleTest extends TestCase {
     assertEquals("1.0\tHRE\tfounded in\t2003", extraction.get().toString());
   }
 
+  public void testPossessive() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tUnicredit\t4\tposs\n" +
+        "2\tBank\t4\tnn\n" +
+        "3\tAustria\t4\tnn\n" +
+        "4\tCreditanstalt\t0\troot\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tUnicredit\t's\tBank Austria Creditanstalt", extraction.get().toString());
+  }
+
+  public void testApposInObject() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tNewspaper\t2\tnsubj\n" +
+        "2\tpublished\t0\troot\n" +
+        "3\tTucson\t2\tprep_in\n" +
+        "4\tArizona\t3\tappos\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tNewspaper\tpublished in\tArizona", extraction.get().toString());
+  }
+
   // Note[gabor]: I think this might be better suited to be done at clause splitting?
 //  public void testVMod() {
 //    Optional<RelationTriple> extraction = mkExtraction(

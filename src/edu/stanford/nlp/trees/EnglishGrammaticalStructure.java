@@ -729,6 +729,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
           if (DEBUG)
             System.err.print("referent: changing " + td);
           td.setDep(ant);
+          td.setExtra();
           if (DEBUG)
             System.err.println(" to " + td);
         }
