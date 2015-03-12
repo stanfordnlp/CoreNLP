@@ -26,12 +26,10 @@ public class PTBTokenizerITest extends TestCase {
       testResults.add(w.word());
     }
 
-    // Compare tokens before checking size so get better output if unequal
-    int compareSize = Math.min(goldResults.size(), testResults.size());
-    for (int i = 0; i < compareSize; ++i) {
+    assertEquals(goldResults.size(), testResults.size());
+    for (int i = 0; i < testResults.size(); ++i) {
       assertEquals(goldResults.get(i), testResults.get(i));
     }
-    assertEquals(goldResults.size(), testResults.size());
   }
 
   private static BufferedReader getReaderFromInJavaNlp(String filename)
@@ -59,7 +57,8 @@ public class PTBTokenizerITest extends TestCase {
   {
     BufferedReader goldReader = getReaderFromInJavaNlp("ptblexer.gold");
     List<String> goldResults = new ArrayList<String>();
-    for (String line; (line = goldReader.readLine()) != null; ) {
+    String line;
+    while ((line = goldReader.readLine()) != null) {
       goldResults.add(line.trim());
     }
 
@@ -69,5 +68,6 @@ public class PTBTokenizerITest extends TestCase {
     testReader = getReaderFromInJavaNlp("ptblexer.crlf.test");
     compareResults(testReader, goldResults);
   }
+
 
 }

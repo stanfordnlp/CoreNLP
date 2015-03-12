@@ -1028,7 +1028,6 @@ public class SeqClassifierFlags implements Serializable {
    */
   public String priorModelFactory;
 
-  public boolean useUndirectedDisjunctive;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -1413,8 +1412,6 @@ public class SeqClassifierFlags implements Serializable {
         useTypeSeqs3 = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useDisjunctive")) {
         useDisjunctive = Boolean.parseBoolean(val);
-      } else if (key.equalsIgnoreCase("useUndirectedDisjunctive")) {
-        useUndirectedDisjunctive = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("disjunctionWidth")) {
         disjunctionWidth = Integer.parseInt(val);
       } else if (key.equalsIgnoreCase("useDisjunctiveShapeInteraction")) {

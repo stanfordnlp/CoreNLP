@@ -137,7 +137,7 @@
   NIGHT = {	      
       type: TIME_OF_DAY,
       label: "NI",
-      value: InexactTime( MIDNIGHT, TimeRange ( IsoTime( 19, NONE, NONE), Duration(HOUR, 10) ) )
+      value: InexactTime( TimeRange ( IsoTime( 19, NONE, NONE), IsoTime ( 5, NONE, NONE) ) )
   }
 
   SUNRISE = {

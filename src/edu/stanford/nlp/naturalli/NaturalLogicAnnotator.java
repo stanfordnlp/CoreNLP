@@ -100,6 +100,8 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     add(SemgrexPattern.compile("{}=object >"+GEN_SUBJ+" {pos:NNP}=Subject >"+GEN_COP+" {}=pivot"));
     // { Some cats do n't like dogs }
     add(SemgrexPattern.compile("{}=pivot >neg "+QUANTIFIER+" >"+GEN_OBJ+" {}=object"));
+    // { Obama was not born in Dallas }
+    add(SemgrexPattern.compile("{}=pivot >/neg/ {}=quantifier >"+GEN_PREP+" {}=object"));
     // { All of the cats hate dogs. }
     add(SemgrexPattern.compile("{pos:/V.*/}=pivot >"+GEN_SUBJ+" ( "+QUANTIFIER+" >prep {}=subject ) >"+GEN_OBJ+" {}=object"));
     add(SemgrexPattern.compile("{pos:/V.*/}=pivot >dep ( "+QUANTIFIER+" >prep {}=subject ) >"+GEN_SUBJ+" {}=object"));  // as above, but handle a common parse error
@@ -129,7 +131,9 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
       min = Math.min(node.index(), min);
       max = Math.max(node.index(), max);
       for (SemanticGraphEdge edge : tree.getOutEdgesSorted(node)) {
-        if (!"punct".equals(edge.getRelation().getShortName())) {  // ignore punctuation
+        if (edge.getGovernor() == node &&   // Sometimes multiple nodes have the same index?
+            edge.getGovernor() != edge.getDependent() &&  // Just in case...
+            !"punct".equals(edge.getRelation().getShortName())) {  // ignore punctuation
           fringe.add(edge.getDependent());
         }
       }
@@ -142,6 +146,10 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     add("prep");
   }});
 
+  private static final Set<String> NOUN_COMPONENT_ARCS = Collections.unmodifiableSet(new HashSet<String>() {{
+    add("nn");
+  }});
+
   /**
    * Returns the yield span for the word rooted at the given node, but only traversing a fixed set of relations.
    * @param tree The dependency graph to get the span from.
@@ -150,6 +158,17 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
    */
   private static Pair<Integer, Integer> getModifierSubtreeSpan(SemanticGraph tree, IndexedWord root) {
     return getGeneralizedSubtreeSpan(tree, root, MODIFIER_ARCS);
+  }
+
+  /**
+   * Returns the yield span for the word rooted at the given node, but only traversing relations indicative
+   * of staying in the same noun phrase.
+   * @param tree The dependency graph to get the span from.
+   * @param root The root word of the span.
+   * @return A one indexed span rooted at the given word.
+   */
+  private static Pair<Integer, Integer> getProperNounSubtreeSpan(SemanticGraph tree, IndexedWord root) {
+    return getGeneralizedSubtreeSpan(tree, root, NOUN_COMPONENT_ARCS);
   }
 
   /**
@@ -200,6 +219,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
    *   <li>If both a subject and an object exist, we take the subject minus the quantifier, and the object plus the pivot. </li>
    *   <li>If only an object exists, we make the subject the object, and create a dummy object to signify a one-place quantifier. </li>
    *   <li>If neither the subject or object exist, the pivot is the subject and there is no object. </li>
+   *   <li>If the subject is a proper noun, only mark the object itself with the subject span. </li>
    * </ul>
    *
    * But:
@@ -211,7 +231,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
    */
   private OperatorSpec computeScope(SemanticGraph tree, Operator operator,
                                     IndexedWord pivot, Pair<Integer, Integer> quantifierSpan,
-                                    IndexedWord subject, IndexedWord object) {
+                                    IndexedWord subject, boolean isProperNounSubject, IndexedWord object) {
     Pair<Integer, Integer> subjSpan;
     Pair<Integer, Integer> objSpan;
     if (subject == null && object == null) {
@@ -221,7 +241,12 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
       subjSpan = includeInSpan(getSubtreeSpan(tree, object), getGeneralizedSubtreeSpan(tree, pivot, Collections.singleton("prep")));
       objSpan = Pair.makePair(subjSpan.second, subjSpan.second);
     } else {
-      Pair<Integer, Integer> subjectSubtree = getSubtreeSpan(tree, subject);
+      Pair<Integer, Integer> subjectSubtree;
+      if (isProperNounSubject) {
+        subjectSubtree = getProperNounSubtreeSpan(tree, subject);
+      } else {
+        subjectSubtree = getSubtreeSpan(tree, subject);
+      }
       subjSpan = excludeFromSpan(subjectSubtree, quantifierSpan);
       objSpan = excludeFromSpan(includeInSpan(getSubtreeSpan(tree, object), getModifierSubtreeSpan(tree, pivot)), subjectSubtree);
     }
@@ -242,7 +267,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   private Optional<Triple<Operator,Integer,Integer>> validateQuantiferByHead(CoreMap sentence, IndexedWord quantifier) {
     int end = quantifier.index();
     for (int start = Math.max(0, end - 10); start < end; ++start) {
-      Function<CoreLabel,String> glossFn = (label) -> "CD".equals(label.tag()) ? "__NUM__" : label.lemma();
+      Function<CoreLabel,String> glossFn = (label) -> "CD".equals(label.tag()) ? "--num--" : label.lemma();
       String gloss = StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class), " ", glossFn, start, end).toLowerCase();
       for (Operator q : Operator.values()) {
         if (q.surfaceForm.equals(gloss)) {
@@ -283,7 +308,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
         Optional<Triple<Operator,Integer,Integer>> quantifierInfo;
         if (namedEntityQuantifier) {
           // named entities have the "all" semantics by default.
-          quantifierInfo = Optional.of(Triple.makeTriple(Operator.ALL, quantifier.index(), quantifier.index()));  // note: empty quantifier span given
+          quantifierInfo = Optional.of(Triple.makeTriple(Operator.IMPLICIT_NAMED_ENTITY, quantifier.index(), quantifier.index()));  // note: empty quantifier span given
         } else {
           // find the quantifier, and return some info about it.
           quantifierInfo = validateQuantiferByHead(sentence, quantifier);
@@ -293,7 +318,8 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
         if (quantifierInfo.isPresent()) {
           // Compute span
           OperatorSpec scope = computeScope(tree, quantifierInfo.get().first,
-              matcher.getNode("pivot"), Pair.makePair(quantifierInfo.get().second, quantifierInfo.get().third), subject, matcher.getNode("object"));
+              matcher.getNode("pivot"), Pair.makePair(quantifierInfo.get().second, quantifierInfo.get().third), subject,
+              namedEntityQuantifier, matcher.getNode("object"));
           // Set annotation
           CoreLabel token = sentence.get(CoreAnnotations.TokensAnnotation.class).get(quantifier.index() - 1);
           OperatorSpec oldScope = token.get(OperatorAnnotation.class);
@@ -430,6 +456,6 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   /** {@inheritDoc} */
   @Override
   public Set<Requirement> requires() {
-    return TOKENIZE_SSPLIT_PARSE;
+    return Collections.EMPTY_SET;  // TODO(gabor) set me!
   }
 }
