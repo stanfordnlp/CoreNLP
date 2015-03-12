@@ -6,14 +6,18 @@ import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Pair;
@@ -33,6 +37,11 @@ import java.util.stream.Collectors;
 public class OpenIE implements Annotator {
 
   private static enum Optimization { GENERAL, KB }
+
+  /**
+   * A pattern for rewriting "NN is a JJ NN" to NN is JJ"
+   */
+  private static SemgrexPattern adjectivePattern = SemgrexPattern.compile("{} >nsubj {}=subj >cop {}=be >det {word:/the|an?|some/} >amod {}=adj ?>/prep_.*/=prep {}=pobj");
 
   @Execution.Option(name="optimizefor", gloss="{General, KB}: Optimize the system for particular tasks (e.g., knowledge base completion tasks -- try to make the subject and object coherent named entities).")
   private Optimization optimizeFor = Optimization.GENERAL;
@@ -114,8 +123,35 @@ public class OpenIE implements Annotator {
     if (fragment.parseTree.size() == 0) {
       return Collections.EMPTY_LIST;
     } else {
-      return forwardEntailer.apply(fragment.parseTree).search()
+      // Get the forward entailments
+      List<SentenceFragment> list = forwardEntailer.apply(fragment.parseTree).search()
           .stream().map(x -> x.changeScore(x.score * fragment.score)).collect(Collectors.toList());
+
+      // A special case for adjective entailments
+      SemgrexMatcher matcher = adjectivePattern.matcher(fragment.parseTree);
+      while (matcher.find()) {
+        // (get nodes)
+        IndexedWord subj = matcher.getNode("subj");
+        IndexedWord be = matcher.getNode("be");
+        IndexedWord adj = matcher.getNode("adj");
+        IndexedWord pobj = matcher.getNode("pobj");
+        String prep = matcher.getRelnString("prep");
+        // (create the core tree)
+        SemanticGraph tree = new SemanticGraph();
+        tree.addRoot(adj);
+        tree.addVertex(subj);
+        tree.addVertex(be);
+        tree.addEdge(adj, be, GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, "cop"), Double.NEGATIVE_INFINITY, false);
+        tree.addEdge(adj, subj, GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, "nsubj"), Double.NEGATIVE_INFINITY, false);
+        // (add pp attachment, if it existed)
+        if (pobj != null) {
+          assert prep != null;
+          tree.addEdge(adj, pobj, GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, prep), Double.NEGATIVE_INFINITY, false);
+        }
+        // (add tree)
+        list.add(new SentenceFragment(tree, false));
+      }
+      return list;
     }
   }
 
