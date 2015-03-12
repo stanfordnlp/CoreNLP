@@ -28,7 +28,7 @@ public enum NaturalLogicRelation {
   NEGATION(3, false, true),
   ALTERNATION(4, false, true),
   COVER(5, false, false),
-  INDEPENDENCE(6, false, false);
+  INDEPENDENCE(6, false, false), ;
 
   public final int fixedIndex;
   public final boolean isEntailed, isNegated;

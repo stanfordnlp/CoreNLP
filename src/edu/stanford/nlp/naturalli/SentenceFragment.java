@@ -42,6 +42,16 @@ public class SentenceFragment {
     return words.size();
   }
 
+  /**
+   * Changes the score of this fragment in place.
+   * @param score The new score of the fragment
+   * @return This sentence fragment.
+   */
+  public SentenceFragment changeScore(double score) {
+    this.score = score;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

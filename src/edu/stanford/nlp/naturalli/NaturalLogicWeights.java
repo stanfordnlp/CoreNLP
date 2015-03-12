@@ -1,6 +1,7 @@
 package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
@@ -15,6 +16,10 @@ public class NaturalLogicWeights {
 
   private TwoDimensionalCounter<String, String> ppAffinity = new TwoDimensionalCounter<>();
   private Counter<String> dobjAffinity = new ClassicCounter<>();
+
+  public NaturalLogicWeights() {
+
+  }
 
   public NaturalLogicWeights(String PP_AFFINITY, String DOBJ_AFFINITY) {
     // Preposition affinities
@@ -51,6 +56,17 @@ public class NaturalLogicWeights {
     }
   }
 
+  public double deletionProbability(String edgeType) {
+    // TODO(gabor)
+    return 1.0;
+  }
+
+  public double deletionProbability(SemanticGraphEdge edge, Iterable<SemanticGraphEdge> neighbors) {
+    // TODO(gabor)
+    return 1.0;
+  }
+
+  /*
   private double backoffEdgeProbability(String edgeRel) {
     return 1.0;  // TODO(gabor) should probably learn these...
   }
@@ -78,6 +94,7 @@ public class NaturalLogicWeights {
       return backoffEdgeProbability(edgeRel);
     }
   }
+  */
 
   public static NaturalLogicWeights fromString(String str) {
     return new NaturalLogicWeights(null, null);  // TODO(gabor)

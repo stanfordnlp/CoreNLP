@@ -1,17 +1,10 @@
 package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.classify.*;
-import edu.stanford.nlp.ie.machinereading.structure.Span;
-import edu.stanford.nlp.ie.util.RelationTriple;
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -21,19 +14,12 @@ import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.PriorityQueue;
 
 import java.io.*;
-import java.text.DecimalFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-import java.util.zip.GZIPOutputStream;
-
-import static edu.stanford.nlp.util.logging.Redwood.Util.*;
 
 /**
  * <p>
@@ -42,8 +28,8 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *
  * <p>
  *   For usage at test time, load a model from
- *   {@link ClauseSearcher#factory(File)}, and then take the top clauses of a given tree
- *   with {@link ClauseSearcher#topClauses(double)}, yielding a list of
+ *   {@link ClauseSplitter#load(String)}, and then take the top clauses of a given tree
+ *   with {@link ClauseSplitterSearchProblem#topClauses(double)}, yielding a list of
  *   {@link edu.stanford.nlp.naturalli.SentenceFragment}s.
  * </p>
  * <pre>
@@ -54,12 +40,12 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  * </pre>
  *
  * <p>
- *   For training, see {@link ClauseSearcher#trainFactory(Stream, File, File)}.
+ *   For training, see {@link ClauseSplitter#train(Stream, File, File)}.
  * </p>
  *
  * @author Gabor Angeli
  */
-public class ClauseSearcher {
+public class ClauseSplitterSearchProblem {
 
   /**
    * The tree to search over.
@@ -78,10 +64,10 @@ public class ClauseSearcher {
    */
   private final Optional<Classifier<Boolean, String>> isClauseClassifier;
   /**
-   * An optional featurizer to use with the clause classifier ({@link ClauseSearcher#isClauseClassifier}).
+   * An optional featurizer to use with the clause classifier ({@link ClauseSplitterSearchProblem#isClauseClassifier}).
    * If that classifier is defined, this should be as well.
    */
-  private final Optional<Function<Triple<ClauseSearcher.State, ClauseSearcher.Action, ClauseSearcher.State>, Counter<String>>> featurizer;
+  private final Optional<Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>> featurizer;
 
   /**
    * A mapping from edges in the tree, to an index.
@@ -123,7 +109,7 @@ public class ClauseSearcher {
     }
 
     public SemanticGraph originalTree() {
-      return ClauseSearcher.this.tree;
+      return ClauseSplitterSearchProblem.this.tree;
     }
   }
 
@@ -180,22 +166,22 @@ public class ClauseSearcher {
   /**
    * Mostly just an alias, but make sure our featurizer is serializable!
    */
-  public static interface Featurizer extends Function<Triple<ClauseSearcher.State, ClauseSearcher.Action, ClauseSearcher.State>, Counter<String>>, Serializable { }
+  public static interface Featurizer extends Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>, Serializable { }
 
   /**
    * Create a searcher manually, suppling a dependency tree, an optional classifier for when to split clauses,
    * and a featurizer for that classifier.
-   * You almost certainly want to use {@link edu.stanford.nlp.naturalli.ClauseSearcher#factory(java.io.File)} instead of this
+   * You almost certainly want to use {@link ClauseSplitter#load(String)} instead of this
    * constructor.
    *
    * @param tree               The dependency tree to search over.
    * @param isClauseClassifier The classifier for whether a given dependency arc should be a new clause. If this is not given, all arcs are treated as clause separators.
-   * @param featurizer         The featurizer for the classifier. If no featurizer is given, one should be given in {@link ClauseSearcher#search(java.util.function.Predicate, edu.stanford.nlp.stats.Counter, java.util.function.Function, int)}, or else the classifier will be useless.
-   * @see edu.stanford.nlp.naturalli.ClauseSearcher#factory(java.io.File)
+   * @param featurizer         The featurizer for the classifier. If no featurizer is given, one should be given in {@link ClauseSplitterSearchProblem#search(java.util.function.Predicate, edu.stanford.nlp.stats.Counter, java.util.function.Function, int)}, or else the classifier will be useless.
+   * @see ClauseSplitter#load(String)
    */
-  public ClauseSearcher(SemanticGraph tree,
-                        Optional<Classifier<Boolean, String>> isClauseClassifier,
-                        Optional<Function<Triple<ClauseSearcher.State, ClauseSearcher.Action, ClauseSearcher.State>, Counter<String>>> featurizer
+  protected ClauseSplitterSearchProblem(SemanticGraph tree,
+                                        Optional<Classifier<Boolean, String>> isClauseClassifier,
+                                        Optional<Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>> featurizer
   ) {
     this.tree = new SemanticGraph(tree);
     this.isClauseClassifier = isClauseClassifier;
@@ -223,7 +209,7 @@ public class ClauseSearcher {
    *
    * @param tree The dependency tree to search over.
    */
-  protected ClauseSearcher(SemanticGraph tree) {
+  protected ClauseSplitterSearchProblem(SemanticGraph tree) {
     this(tree, Optional.empty(), Optional.empty());
   }
 
@@ -401,7 +387,7 @@ public class ClauseSearcher {
    * @param toModify The tree to add the subtree to.
    * @param root The root of the tree where we should be adding the subtree.
    * @param rel The relation to add the subtree with.
-   * @param originalTree The orignal tree (i.e., {@link edu.stanford.nlp.naturalli.ClauseSearcher#tree}).
+   * @param originalTree The orignal tree (i.e., {@link ClauseSplitterSearchProblem#tree}).
    * @param subject The root of the clause to add.
    * @param ignoredEdges The edges to ignore adding when adding this subtree.
    */
@@ -521,7 +507,7 @@ public class ClauseSearcher {
 
   /**
    * Search, using the default weights / featurizer. This is the most common entry method for the raw search,
-   * though {@link edu.stanford.nlp.naturalli.ClauseSearcher#topClauses(double)} may be a more convenient method for
+   * though {@link ClauseSplitterSearchProblem#topClauses(double)} may be a more convenient method for
    * an end user.
    *
    * @param candidateFragments The callback function for results. The return value defines whether to continue searching.
@@ -663,7 +649,7 @@ public class ClauseSearcher {
    *                             <li>The features along the path to this fragment. The last element of this is the features from the most recent step.</li>
    *                             <li>The sentence fragment. Because it is relatively expensive to compute the resulting tree, this is returned as a lazy {@link Supplier}.</li>
    *                           </ol>
-   * @param weights The weights to use during searching. This is traditionally from a trained classifier (e.g., with {@link ClauseSearcher#factory(File)}).
+   * @param weights The weights to use during searching. This is traditionally from a trained classifier (e.g., with {@link ClauseSplitter#load(String)}).
    * @param featurizer The featurizer to use. Make sure this matches the weights!
    * @param actionSpace The action space we are allowed to take. Each action defines a means of splitting a clause on a dependency boundary.
    */
@@ -862,209 +848,5 @@ public class ClauseSearcher {
     }
     return feats;
   };
-
-  /**
-   * A helper function for dumping the accuracy of the trained classifier.
-   *
-   * @param classifier The classifier to evaluate.
-   * @param dataset The dataset to evaluate the classifier on.
-   */
-  private static void dumpAccuracy(Classifier<Boolean, String> classifier, GeneralDataset<Boolean, String> dataset) {
-    DecimalFormat df = new DecimalFormat("0.000");
-    log("size:       " + dataset.size());
-    log("true count: " + StreamSupport.stream(dataset.spliterator(), false).filter(RVFDatum::label).collect(Collectors.toList()).size());
-    Pair<Double, Double> pr = classifier.evaluatePrecisionAndRecall(dataset, true);
-    log("precision:  " + df.format(pr.first));
-    log("recall:     " + df.format(pr.second));
-    log("f1:         " + df.format(2 * pr.first * pr.second / (pr.first + pr.second)));
-  }
-
-  /**
-   * Train a clause searcher factory. That is, train a classifier for which arcs should be
-   * new clauses.
-   *
-   * @param trainingData The training data. This is a stream of triples of:
-   *                     <ol>
-   *                       <li>The sentence containing a known extraction.</li>
-   *                       <li>The span of the subject in the sentence, as a token span.</li>
-   *                       <li>The span of the object in the sentence, as a token span.</li>
-   *                     </ol>
-   * @param featurizer The featurizer to use for this classifier.
-   * @param options The training options.
-   * @param modelPath The path to save the model to. This is useful for {@link ClauseSearcher#factory(File)}.
-   * @param trainingDataDump The path to save the training data, as a set of labeled featurized datums.
-   *
-   * @return A factory for creating searchers from a given dependency tree.
-   */
-  public static Function<SemanticGraph, ClauseSearcher> trainFactory(
-      Stream<Triple<CoreMap, Span, Span>> trainingData,
-      Featurizer featurizer,
-      TrainingOptions options,
-      Optional<File> modelPath,
-      Optional<File> trainingDataDump) {
-    // Parse options
-    ClassifierFactory<Boolean, String, Classifier<Boolean,String>> classifierFactory = MetaClass.create(options.classifierFactory).createInstance();
-    // Generally useful objects
-    OpenIE openie = new OpenIE();
-    Random rand = new Random(options.seed);
-    WeightedDataset<Boolean, String> dataset = new WeightedDataset<>();
-    AtomicInteger numExamplesProcessed = new AtomicInteger(0);
-    final Optional<PrintWriter> datasetDumpWriter = trainingDataDump.map(file -> {
-      try {
-        return new PrintWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(trainingDataDump.get()))));
-      } catch (IOException e) {
-        throw new RuntimeIOException(e);
-      }
-    });
-
-    // Step 1: Inference over training sentences
-    forceTrack("Training inference");
-    trainingData.forEach(triple -> {
-      // Parse training datum
-      CoreMap sentence = triple.first;
-      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-      Span subjectSpan = Util.extractNER(tokens, triple.second);
-      Span objectSpan = Util.extractNER(tokens, triple.third);
-      // Create raw clause searcher (no classifier)
-      ClauseSearcher problem = new ClauseSearcher(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class));
-      Pointer<Boolean> anyCorrect = new Pointer<>(false);
-
-      // Run search
-      problem.search(fragmentAndScore -> {
-        // Parse the search output
-        List<Counter<String>> features = fragmentAndScore.second;
-        Supplier<SentenceFragment> fragmentSupplier = fragmentAndScore.third;
-        SentenceFragment fragment = fragmentSupplier.get();
-        // Search for extractions
-        List<RelationTriple> extractions = openie.relationInClause(fragment.parseTree);
-        boolean correct = false;
-        RelationTriple bestExtraction = null;
-        for (RelationTriple extraction : extractions) {
-          // Clean up the guesses
-          Span subjectGuess = Util.extractNER(tokens, Span.fromValues(extraction.subject.get(0).index() - 1, extraction.subject.get(extraction.subject.size() - 1).index()));
-          Span objectGuess = Util.extractNER(tokens, Span.fromValues(extraction.object.get(0).index() - 1, extraction.object.get(extraction.object.size() - 1).index()));
-          // Check if it matches
-          if ((subjectGuess.equals(subjectSpan) && objectGuess.equals(objectSpan)) ||
-              (subjectGuess.equals(objectSpan) && objectGuess.equals(subjectSpan))
-              ) {
-            correct = true;
-            anyCorrect.set(true);
-            bestExtraction = extraction;
-          } else if ((subjectGuess.contains(subjectSpan) && objectGuess.contains(objectSpan)) ||
-              (subjectGuess.contains(objectSpan) && objectGuess.contains(subjectSpan))
-              ) {
-            correct = true;
-            anyCorrect.set(true);
-            if (bestExtraction == null) {
-              bestExtraction = extraction;
-            }
-          } else {
-            if (bestExtraction == null) {
-              bestExtraction = extraction;
-            }
-            correct = false;
-          }
-        }
-        // Process the datum
-        if ((bestExtraction != null || fragment.length() == 1) && !features.isEmpty()) {
-          for (Counter<String> decision : features) {
-            // Compute datum
-            RVFDatum<Boolean, String> datum = new RVFDatum<>(decision);
-            datum.setLabel(correct);
-            // Dump datum to debug log
-            if (datasetDumpWriter.isPresent()) {
-              datasetDumpWriter.get().println("" + correct + "\t" +
-                  (decision == features.get(features.size() - 1)) + "\t" +
-                  StringUtils.join(decision.entrySet().stream().map(entry -> "" + entry.getKey() + "->" + entry.getValue()), ";"));
-            }
-            // Add datum to dataset
-            if (correct || rand.nextDouble() > (1.0 - options.negativeSubsampleRatio)) {  // Subsample
-              dataset.add(datum, correct ? options.positiveDatumWeight : 1.0f);
-            }
-          }
-        }
-        return true;
-      }, new ClassicCounter<>(), featurizer, 10000);
-      // Debug info
-      if (numExamplesProcessed.incrementAndGet() % 100 == 0) {
-        log("processed " + numExamplesProcessed + " training sentences: " + dataset.size() + " datums");
-      }
-    });
-    // Close dataset dump
-    datasetDumpWriter.ifPresent(PrintWriter::close);
-    endTrack("Training inference");
-
-    // Step 2: Train classifier
-    forceTrack("Training");
-    Classifier<Boolean,String> fullClassifier = classifierFactory.trainClassifier(dataset);
-    endTrack("Training");
-    if (modelPath.isPresent()) {
-      Pair<Classifier<Boolean,String>, Featurizer> toSave = Pair.makePair(fullClassifier, featurizer);
-      try {
-        IOUtils.writeObjectToFile(toSave, modelPath.get());
-        log("SUCCESS: wrote model to " + modelPath.get().getPath());
-      } catch (IOException e) {
-        log("ERROR: failed to save model to path: " + modelPath.get().getPath());
-        err(e);
-      }
-    }
-
-    // Step 3: Check accuracy of classifier
-    forceTrack("Training accuracy");
-    dataset.randomize(options.seed);
-    dumpAccuracy(fullClassifier, dataset);
-    endTrack("Training accuracy");
-
-    int numFolds = 5;
-    forceTrack("" + numFolds + " fold cross-validation");
-    for (int fold = 0; fold < numFolds; ++fold) {
-      forceTrack("Fold " + (fold + 1));
-      forceTrack("Training");
-      Pair<GeneralDataset<Boolean, String>, GeneralDataset<Boolean, String>> foldData = dataset.splitOutFold(fold, numFolds);
-      Classifier<Boolean, String> classifier = classifierFactory.trainClassifier(foldData.first);
-      endTrack("Training");
-      forceTrack("Test");
-      dumpAccuracy(classifier, foldData.second);
-      endTrack("Test");
-      endTrack("Fold " + (fold + 1));
-    }
-    endTrack("" + numFolds + " fold cross-validation");
-
-
-    // Step 5: return factory
-    return tree -> new ClauseSearcher(tree, Optional.of(fullClassifier), Optional.of(featurizer));
-  }
-
-
-
-  /**
-   * A helper function for training with the default featurizer and training options.
-   *
-   * @see edu.stanford.nlp.naturalli.ClauseSearcher#trainFactory(Stream, Featurizer, TrainingOptions, Optional, Optional)
-   */
-  public static Function<SemanticGraph, ClauseSearcher> trainFactory(
-      Stream<Triple<CoreMap, Span, Span>> trainingData,
-      File modelPath,
-      File trainingDataDump) {
-    // Train
-    return trainFactory(trainingData, DEFAULT_FEATURIZER, new TrainingOptions(), Optional.of(modelPath), Optional.of(trainingDataDump));
-  }
-
-
-  /**
-   * Load a factory model from a given path. This can be trained with
-   * {@link edu.stanford.nlp.naturalli.ClauseSearcher#trainFactory(Stream, Featurizer, TrainingOptions, Optional, Optional)}.
-   *
-   * @return A function taking a dependency tree, and returning a clause searcher.
-   */
-  public static Function<SemanticGraph, ClauseSearcher> factory(File serializedModel) throws IOException {
-    try {
-      System.err.println("Loading clause searcher from " + serializedModel.getPath() + " ...");
-      Pair<Classifier<Boolean,String>, Featurizer> data = IOUtils.readObjectFromFile(serializedModel);
-      return tree -> new ClauseSearcher(tree, Optional.of(data.first), Optional.of(data.second));
-    } catch (ClassNotFoundException e) {
-      throw new IllegalStateException("Invalid model at path: " + serializedModel.getPath(), e);
-    }
-  }
 
 }
