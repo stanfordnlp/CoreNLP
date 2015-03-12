@@ -7,7 +7,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.Generics;
 
 /**
@@ -24,8 +24,8 @@ public class NegraPennTreeNormalizer extends TreeNormalizer {
   protected final TreebankLanguagePack tlp;
   private boolean insertNPinPP = false;
 
-  private final Filter<Tree> emptyFilter;
-  private final Filter<Tree> aOverAFilter;
+  private final Predicate<Tree> emptyFilter;
+  private final Predicate<Tree> aOverAFilter;
 
   public NegraPennTreeNormalizer() {
     this(new NegraPennLanguagePack());
@@ -39,9 +39,9 @@ public class NegraPennTreeNormalizer extends TreeNormalizer {
     this.tlp = tlp;
     this.nodeCleanup = nodeCleanup;
 
-    emptyFilter = new Filter<Tree>() {
+    emptyFilter = new Predicate<Tree>() {
       private static final long serialVersionUID = -606371737889816130L;
-      public boolean accept(Tree t) {
+      public boolean test(Tree t) {
         Tree[] kids = t.children();
         Label l = t.label();
         if ((l != null) && l.value() != null && (l.value().matches("^\\*T.*$")) && !t.isLeaf() && kids.length == 1 && kids[0].isLeaf())
@@ -49,9 +49,9 @@ public class NegraPennTreeNormalizer extends TreeNormalizer {
         return true;
       }
     };
-    aOverAFilter = new Filter<Tree>() {
+    aOverAFilter = new Predicate<Tree>() {
       private static final long serialVersionUID = -606371737889816130L;
-      public boolean accept(Tree t) {
+      public boolean test(Tree t) {
         if (t.isLeaf() || t.isPreTerminal() || t.children().length != 1)
           return true;
         if (t.label() != null && t.label().equals(t.children()[0].label()))

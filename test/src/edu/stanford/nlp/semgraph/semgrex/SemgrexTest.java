@@ -3,25 +3,25 @@ package edu.stanford.nlp.semgraph.semgrex;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
-import java.io.StringReader;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
+import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.semgrex.*;
+import edu.stanford.nlp.semgraph.SemanticGraphFactory;
+
 
 /**
  * @author John Bauer
  */
 public class SemgrexTest extends TestCase {
+
   public void testMatchAll() {
-    SemanticGraph graph = 
+    SemanticGraph graph =
       SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
     Set<IndexedWord> words = graph.vertexSet();
 
@@ -69,37 +69,37 @@ public class SemgrexTest extends TestCase {
   public void testWordMatch() {
     runTest("{word:Bill}", "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "Bill");
-    runTest("!{word:Bill}", 
+    runTest("!{word:Bill}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "ate", "muffins", "blueberry");
-    runTest("!{word:Fred}", 
+    runTest("!{word:Fred}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "ate", "Bill", "muffins", "blueberry");
-    runTest("!{word:ate}", 
+    runTest("!{word:ate}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "Bill", "muffins", "blueberry");
-    runTest("{word:/^(?!Bill).*$/}", 
+    runTest("{word:/^(?!Bill).*$/}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "ate", "muffins", "blueberry");
-    runTest("{word:/^(?!Fred).*$/}", 
+    runTest("{word:/^(?!Fred).*$/}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "ate", "Bill", "muffins", "blueberry");
-    runTest("{word:/^(?!ate).*$/}", 
+    runTest("{word:/^(?!ate).*$/}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "Bill", "muffins", "blueberry");
-    runTest("{word:muffins} >nn {word:blueberry}", 
+    runTest("{word:muffins} >nn {word:blueberry}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "muffins");
-    runTest("{} << {word:ate}=a", 
+    runTest("{} << {word:ate}=a",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "Bill", "muffins", "blueberry");
-    runTest("{} << !{word:ate}=a", 
+    runTest("{} << !{word:ate}=a",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "blueberry");
     // blueberry should match twice because it has two ancestors
-    runTest("{} << {}=a", 
+    runTest("{} << {}=a",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
-            "Bill", "muffins", "blueberry", "blueberry"); 
+            "Bill", "muffins", "blueberry", "blueberry");
   }
 
   public void testSimpleDependency() {
@@ -114,45 +114,45 @@ public class SemgrexTest extends TestCase {
     runTest("{} > {}", "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "ate", "ate", "muffins");
   }
- 
+
   public void testNamedDependency() {
-    runTest("{} << {word:ate}", 
+    runTest("{} << {word:ate}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "Bill", "muffins", "blueberry");
-    runTest("{} >> {word:blueberry}", 
+    runTest("{} >> {word:blueberry}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "ate", "muffins");
-    runTest("{} >> {word:Bill}", 
+    runTest("{} >> {word:Bill}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "ate");
-    runTest("{} < {word:ate}", 
+    runTest("{} < {word:ate}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "Bill", "muffins");
-    runTest("{} > {word:blueberry}", 
+    runTest("{} > {word:blueberry}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "muffins");
-    runTest("{} > {word:muffins}", 
+    runTest("{} > {word:muffins}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "ate");
   }
 
   public void testNamedGovernor() {
-    runTest("{word:blueberry} << {}", 
+    runTest("{word:blueberry} << {}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "blueberry");
-    runTest("{word:ate} << {}", 
+    runTest("{word:ate} << {}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]");
-    runTest("{word:blueberry} >> {}", 
+    runTest("{word:blueberry} >> {}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]");
-    runTest("{word:muffins} >> {}", 
+    runTest("{word:muffins} >> {}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "muffins");
-    runTest("{word:Bill} >> {}", 
+    runTest("{word:Bill} >> {}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]");
-    runTest("{word:muffins} < {}", 
+    runTest("{word:muffins} < {}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "muffins");
-    runTest("{word:muffins} > {}", 
+    runTest("{word:muffins} > {}",
             "[ate subj:Bill dobj:[muffins nn:blueberry]]",
             "muffins");
   }
@@ -204,7 +204,7 @@ public class SemgrexTest extends TestCase {
     // TODO: implement referencing regexes
   }
 
-  static public SemanticGraph makeComplicatedGraph() {
+  public static SemanticGraph makeComplicatedGraph() {
     SemanticGraph graph = new SemanticGraph();
     String[] words = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"};
     IndexedWord[] nodes = new IndexedWord[words.length];
@@ -217,7 +217,7 @@ public class SemgrexTest extends TestCase {
     }
     graph.setRoot(nodes[0]);
     // this graph isn't supposed to make sense
-    graph.addEdge(nodes[0], nodes[1], 
+    graph.addEdge(nodes[0], nodes[1],
                   EnglishGrammaticalRelations.MODIFIER, 1.0, false);
     graph.addEdge(nodes[0], nodes[2],
                   EnglishGrammaticalRelations.DIRECT_OBJECT, 1.0, false);
@@ -352,33 +352,44 @@ public class SemgrexTest extends TestCase {
 
     runTest("{} 0,2<< {word:A}", graph, "B", "C", "D", "E");
 
-    runTest("{} 0,10<< {word:A}", graph, 
+    runTest("{} 0,10<< {word:A}", graph,
             "B", "C", "D", "E", "F", "G", "H", "I", "J");
 
-    runTest("{} 0,10>> {word:J}", graph, 
+    runTest("{} 0,10>> {word:J}", graph,
             "A", "B", "C", "D", "E", "F", "G", "H", "I");
 
-    runTest("{} 2,3>> {word:J}", graph, 
+    runTest("{} 2,3>> {word:J}", graph,
             "B", "C", "D", "E", "F", "G", "H");
 
-    runTest("{} 2,2>> {word:J}", graph, 
+    runTest("{} 2,2>> {word:J}", graph,
             "E", "H");
 
     // use this method to avoid the toString() test, since we expect it
     // to use 2,2>> instead of 2>>
-    runTest(SemgrexPattern.compile("{} 2>> {word:J}"), graph, 
+    runTest(SemgrexPattern.compile("{} 2>> {word:J}"), graph,
             "E", "H");
 
-    runTest("{} 1,2>> {word:J}", graph, 
+    runTest("{} 1,2>> {word:J}", graph,
             "E", "H", "I");
+  }
+
+  /**
+   * Tests that if there are different paths from A to I, those paths show up for exactly the right depths
+   */
+  public void testMultipleDepths() {
+    SemanticGraph graph = makeComplicatedGraph();
+    runTest("{} 3,3<< {word:A}", graph, "F", "G", "I");
+    runTest("{} 4,4<< {word:A}", graph, "H", "J");
+    runTest("{} 5,5<< {word:A}", graph, "I");
+    runTest("{} 6,6<< {word:A}", graph, "J");
   }
 
   public void testNamedNode() {
     SemanticGraph graph = makeComplicatedGraph();
-    
+
     runTest("{} >dobj ({} >expl {})", graph, "A");
 
-    SemgrexPattern pattern = 
+    SemgrexPattern pattern =
       SemgrexPattern.compile("{} >dobj ({} >expl {}=foo)");
     SemgrexMatcher matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
@@ -395,7 +406,7 @@ public class SemgrexTest extends TestCase {
     assertEquals("A", matcher.getMatch().toString());
     assertFalse(matcher.find());
 
-    pattern = 
+    pattern =
       SemgrexPattern.compile("{} >dobj ({} >expl {}=foo) >mod ({} >mark {})");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
@@ -404,7 +415,7 @@ public class SemgrexTest extends TestCase {
     assertEquals("A", matcher.getMatch().toString());
     assertFalse(matcher.find());
 
-    pattern = 
+    pattern =
       SemgrexPattern.compile("{} >dobj ({} >expl {}=foo) >mod ({} > {})");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
@@ -413,7 +424,7 @@ public class SemgrexTest extends TestCase {
     assertEquals("A", matcher.getMatch().toString());
     assertFalse(matcher.find());
 
-    pattern = 
+    pattern =
       SemgrexPattern.compile("{} >dobj ({} >expl {}=foo) >mod ({} > {}=foo)");
     matcher = pattern.matcher(graph);
     assertTrue(matcher.find());
@@ -422,7 +433,7 @@ public class SemgrexTest extends TestCase {
     assertEquals("A", matcher.getMatch().toString());
     assertFalse(matcher.find());
 
-    pattern = 
+    pattern =
       SemgrexPattern.compile("{} >dobj ({} >expl {}=foo) >mod ({}=foo > {})");
     matcher = pattern.matcher(graph);
     assertFalse(matcher.find());
@@ -589,7 +600,7 @@ public class SemgrexTest extends TestCase {
   public void testInitialConditions() {
     SemanticGraph graph = makeComplicatedGraph();
 
-    SemgrexPattern pattern = 
+    SemgrexPattern pattern =
       SemgrexPattern.compile("{}=a >> {}=b : {}=a >> {}=c");
     Map<String, IndexedWord> variables = new HashMap<String, IndexedWord>();
     variables.put("b", graph.getNodeByIndex(5));
@@ -604,25 +615,92 @@ public class SemgrexTest extends TestCase {
     assertFalse(matcher.find());
   }
 
-  static public void outputResults(String pattern, String graph, 
+  /**
+   * Test that a particular AnnotationLookup is honored
+   */
+  public void testIndex() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    runTest("{idx:0}", graph, "ate");
+    runTest("{idx:1}", graph, "Bill");
+    runTest("{idx:2}", graph, "muffins");
+    runTest("{idx:3}", graph, "blueberry");
+    runTest("{idx:4}", graph);
+  }
+
+  public void testLemma() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    for (IndexedWord word : graph.vertexSet()) {
+      word.setLemma(word.word());
+    }
+    runTest("{lemma:ate}", graph, "ate");
+
+    Tree tree = Tree.valueOf("(ROOT (S (NP (PRP I)) (VP (VBP love) (NP (DT the) (NN display))) (. .)))");
+    graph = SemanticGraphFactory.generateCCProcessedDependencies(tree);
+    for (IndexedWord word : graph.vertexSet()) {
+      word.setLemma(word.word());
+    }
+    // This set of three tests also provides some coverage for a
+    // bizarre error a user found where multiple copies of the same
+    // IndexedWord were created
+    runTest("{}=Obj <dobj {lemma:love}=Pred", graph, "display/NN");
+    runTest("{}=Obj <dobj {}=Pred", graph, "display/NN");
+    runTest("{lemma:love}=Pred >dobj {}=Obj ", graph, "love/VBP");
+  }
+
+  public void testNamedRelation() {
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill dobj:[muffins nn:blueberry]]");
+    SemgrexPattern pattern = SemgrexPattern.compile("{idx:0}=gov >>=foo {idx:3}=dep");
+    SemgrexMatcher matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("ate", matcher.getNode("gov").toString());
+    assertEquals("blueberry", matcher.getNode("dep").toString());
+    assertEquals("nn", matcher.getRelnString("foo"));
+    assertFalse(matcher.find());
+
+    pattern = SemgrexPattern.compile("{idx:3}=dep <<=foo {idx:0}=gov");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("ate", matcher.getNode("gov").toString());
+    assertEquals("blueberry", matcher.getNode("dep").toString());
+    assertEquals("dobj", matcher.getRelnString("foo"));
+    assertFalse(matcher.find());
+
+    pattern = SemgrexPattern.compile("{idx:3}=dep <=foo {idx:2}=gov");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("muffins", matcher.getNode("gov").toString());
+    assertEquals("blueberry", matcher.getNode("dep").toString());
+    assertEquals("nn", matcher.getRelnString("foo"));
+    assertFalse(matcher.find());
+
+    pattern = SemgrexPattern.compile("{idx:2}=gov >=foo {idx:3}=dep");
+    matcher = pattern.matcher(graph);
+    assertTrue(matcher.find());
+    assertEquals("muffins", matcher.getNode("gov").toString());
+    assertEquals("blueberry", matcher.getNode("dep").toString());
+    assertEquals("nn", matcher.getRelnString("foo"));
+    assertFalse(matcher.find());
+  }
+
+  public static void outputResults(String pattern, String graph,
                                    String ... ignored) {
-    outputResults(SemgrexPattern.compile(pattern), 
+    outputResults(SemgrexPattern.compile(pattern),
                   SemanticGraph.valueOf(graph));
   }
-  
-  static public void outputResults(String pattern, SemanticGraph graph, 
+
+  public static void outputResults(String pattern, SemanticGraph graph,
                                    String ... ignored) {
     outputResults(SemgrexPattern.compile(pattern), graph);
   }
-  
-  static public void outputResults(SemgrexPattern pattern, SemanticGraph graph,
+
+  public static void outputResults(SemgrexPattern pattern, SemanticGraph graph,
                                    String ... ignored) {
     System.out.println("Matching pattern " + pattern + " to\n" + graph +
-                       "  :" + (pattern.matcher(graph).matches() ? 
+                       "  :" + (pattern.matcher(graph).matches() ?
                                 "matches" : "doesn't match"));
     System.out.println();
     pattern.prettyPrint();
-    System.out.println();    
+    System.out.println();
     SemgrexMatcher matcher = pattern.matcher(graph);
     while (matcher.find()) {
       System.out.println("  " + matcher.getMatch());
@@ -632,31 +710,38 @@ public class SemgrexTest extends TestCase {
           System.out.println("    " + name + ": " + matcher.getNode(name));
         }
       }
+
+      Set<String> relNames = matcher.getRelationNames();
+      if (relNames != null) {
+        for (String name : relNames) {
+          System.out.println("    " + name + ": " + matcher.getRelnString(name));
+        }
+      }
     }
   }
 
-  public void comparePatternToString(String pattern) {
+  public static void comparePatternToString(String pattern) {
     SemgrexPattern semgrex = SemgrexPattern.compile(pattern);
     String tostring = semgrex.toString();
     tostring = tostring.replaceAll(" +", " ");
     assertEquals(pattern.trim(), tostring.trim());
   }
-  
-  public void runTest(String pattern, String graph, 
-                      String ... expectedMatches) {
+
+  public static void runTest(String pattern, String graph,
+                             String... expectedMatches) {
     comparePatternToString(pattern);
     runTest(SemgrexPattern.compile(pattern), SemanticGraph.valueOf(graph),
             expectedMatches);
   }
 
-  public void runTest(String pattern, SemanticGraph graph, 
-                      String ... expectedMatches) {
+  public static void runTest(String pattern, SemanticGraph graph,
+                             String... expectedMatches) {
     comparePatternToString(pattern);
     runTest(SemgrexPattern.compile(pattern), graph, expectedMatches);
   }
 
-  public void runTest(SemgrexPattern pattern, SemanticGraph graph,
-                      String ... expectedMatches) {
+  public static void runTest(SemgrexPattern pattern, SemanticGraph graph,
+                             String... expectedMatches) {
     // results are not in the order I would expect.  Using a counter
     // allows them to be in any order
     IntCounter<String> counts = new IntCounter<String>();
@@ -670,29 +755,30 @@ public class SemgrexTest extends TestCase {
     for (int i = 0; i < expectedMatches.length; ++i) {
       if (!matcher.find()) {
         throw new AssertionFailedError("Expected " + expectedMatches.length +
-                                       " matches for pattern " + pattern + 
+                                       " matches for pattern " + pattern +
                                        " on " + graph + ", only got " + i);
       }
       String match = matcher.getMatch().toString();
       if (!counts.containsKey(match)) {
-        throw new AssertionFailedError("Unexpected match " + match + 
-                                       " for pattern " + pattern + 
+        throw new AssertionFailedError("Unexpected match " + match +
+                                       " for pattern " + pattern +
                                        " on " + graph);
       }
       counts.decrementCount(match);
       if (counts.getCount(match) < 0) {
         throw new AssertionFailedError("Found too many matches for " + match +
-                                       " for pattern " + pattern + 
+                                       " for pattern " + pattern +
                                        " on " + graph);
       }
     }
     if (matcher.findNextMatchingNode()) {
-      throw new AssertionFailedError("Found more than " + 
-                                     expectedMatches.length + 
-                                     " matches for pattern " + pattern + 
+      throw new AssertionFailedError("Found more than " +
+                                     expectedMatches.length +
+                                     " matches for pattern " + pattern +
                                      " on " + graph + "... extra match is " +
                                      matcher.getMatch());
     }
   }
+
 }
 

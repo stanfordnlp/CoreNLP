@@ -20,17 +20,10 @@ import java.util.*;
 public class AnnotatorImplementations {
 
   /**
-   * Tokenize, according to whitespace only
-   */
-  public Annotator whitespaceTokenizer(Properties properties) {
-    return new WhitespaceTokenizerAnnotator(properties);
-  }
-
-  /**
    * Tokenize, emulating the Penn Treebank
    */
-  public Annotator ptbTokenizer(Properties properties, boolean verbose, String options) {
-    return new PTBTokenizerAnnotator(verbose, options);
+  public Annotator tokenizer(Properties properties, boolean verbose, String options) {
+    return new TokenizerAnnotator(verbose, properties, options);
   }
 
   /**
@@ -192,6 +185,15 @@ public class AnnotatorImplementations {
    */
   public Annotator sentiment(Properties properties, String name) {
     return new SentimentAnnotator(name, properties);
+  }
+
+  /**
+   * Annotate dependency relations in sentences
+   */
+  public Annotator dependencies(Properties properties) {
+    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
+        Annotator.STANFORD_DEPENDENCIES + '.');
+    return new DependencyParseAnnotator(relevantProperties);
   }
 
 }

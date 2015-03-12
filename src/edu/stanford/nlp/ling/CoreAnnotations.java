@@ -1,15 +1,11 @@
 package edu.stanford.nlp.ling;
 
+import edu.stanford.nlp.util.*;
+
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
-
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.IntPair;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.Triple;
 
 /**
  * <p>
@@ -1353,17 +1349,6 @@ public class CoreAnnotations {
   }
 
   /**
-   * Used in nlp.trees. When nodes are duplicated in Stanford Dependencies
-   * conversion (to represent conjunction of PPs with preposition collapsing,
-   * this gets set to a positive number on duplicated nodes.
-   */
-  public static class CopyAnnotation implements CoreAnnotation<Integer> {
-    public Class<Integer> getType() {
-      return Integer.class;
-    }
-  }
-
-  /**
    * Used in SimpleXMLAnnotator. The value is an XML element name String for the
    * innermost element in which this token was contained.
    */
@@ -1626,5 +1611,13 @@ public class CoreAnnotations {
    public Class<Double> getType(){
      return Double.class;
    }
+  }
+
+  public static class ColumnDataClassifierAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() { return String.class; }
+  }
+
+  public static class LabelIDAnnotation implements CoreAnnotation<Integer>{
+    public Class<Integer> getType() { return Integer.class; }
   }
 }

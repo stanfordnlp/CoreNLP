@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +103,8 @@ public class ReadSentimentDataset {
     }
   }
 
+  private ReadSentimentDataset() {} // static class
+
   public static Tree convertTree(List<Integer> parentPointers, List<String> sentence, Map<List<String>, Integer> phraseIds, Map<Integer, Double> sentimentScores, PTBEscapingProcessor escaper) {
     int maxNode = 0;
     for (Integer parent : parentPointers) {
@@ -149,7 +150,7 @@ public class ReadSentimentDataset {
       List<String> words = CollectionUtils.transformAsList(leaves, TRANSFORM_TREE_TO_WORD);
       // First we look for a copy of the phrase with -LRB- -RRB-
       // instead of ().  The sentiment trees sometimes have both, and
-      // the escaped versions seem to have more reasonable scores.  
+      // the escaped versions seem to have more reasonable scores.
       // If a particular phrase doesn't have -LRB- -RRB- we fall back
       // to the unescaped versions.
       Integer phraseId = phraseIds.get(CollectionUtils.transformAsList(words, TRANSFORM_PARENS));
@@ -201,7 +202,7 @@ public class ReadSentimentDataset {
     try {
       FileOutputStream fos = new FileOutputStream(filename);
       BufferedWriter bout = new BufferedWriter(new OutputStreamWriter(fos));
-      
+
       for (Integer id : treeIds) {
         bout.write(trees.get(id).toString());
         bout.write("\n");

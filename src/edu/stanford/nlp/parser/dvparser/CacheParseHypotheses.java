@@ -9,28 +9,23 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.NumberRangeFileFilter;
-import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.trees.BasicCategoryTreeTransformer;
 import edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory;
-import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.SynchronizedTreeTransformer;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
-import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 
@@ -39,7 +34,7 @@ public class CacheParseHypotheses {
   static final TreeReaderFactory trf = new LabeledScoredTreeReaderFactory(CoreLabel.factory(), new TreeNormalizer());
 
   final BasicCategoryTreeTransformer treeBasicCategories;
-  final public Filter<Tree> treeFilter;
+  final public Predicate<Tree> treeFilter;
 
   public CacheParseHypotheses(LexicalizedParser parser) {
     treeBasicCategories = new BasicCategoryTreeTransformer(parser.treebankLanguagePack());
@@ -149,7 +144,7 @@ public class CacheParseHypotheses {
     public Pair<Tree, byte[]> process(Tree tree) {
       List<Tree> topParses = DVParser.getTopParsesForOneTree(parser, dvKBest, tree, transformer);
       // this block is a test to make sure the conversion code is working...
-      List<Tree> converted = cacher.convertToTrees(cacher.convertToBytes(topParses)); 
+      List<Tree> converted = cacher.convertToTrees(cacher.convertToBytes(topParses));
       List<Tree> simplified = CollectionUtils.transformAsList(topParses, cacher.treeBasicCategories);
       simplified = CollectionUtils.filterAsList(simplified, cacher.treeFilter);
       if (simplified.size() != topParses.size()) {

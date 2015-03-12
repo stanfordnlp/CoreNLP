@@ -3,6 +3,23 @@ package edu.stanford.nlp.pipeline;
 option java_package = "edu.stanford.nlp.pipeline";
 option java_outer_classname = "CoreNLPProtos";
 
+//
+// An enumeration for the valid languages allowed in CoreNLP
+//
+enum Language {
+  Unknown  = 0;
+  Arabic   = 1;
+  Chinese  = 2;
+  English  = 3;
+  German   = 4;
+  French   = 5;
+  Hebrew   = 6;
+  Spanish  = 7;
+}
+
+//
+// A document; that is, the equivalent of an Annotation.
+//
 message Document {
   required string     text        = 1;
   repeated Sentence   sentence    = 2;
@@ -29,10 +46,15 @@ message Sentence {
   optional uint32          characterOffsetBegin                = 5;
   optional uint32          characterOffsetEnd                  = 6;
   optional ParseTree       parseTree                           = 7;
+  optional ParseTree       binarizedParseTree                  = 31;
+  optional ParseTree       annotatedParseTree                  = 32;
+  optional string          sentiment                           = 33;
   optional DependencyGraph basicDependencies                   = 8;
   optional DependencyGraph collapsedDependencies               = 9;
   optional DependencyGraph collapsedCCProcessedDependencies    = 10;
   optional uint32          paragraph                           = 11;
+
+  optional string          text                                = 12;
 
   // Fields set by other annotators in CoreNLP
   optional bool            hasRelationAnnotations              = 51;
@@ -109,15 +131,18 @@ message DependencyGraph {
   }
 
   message Edge {
-    required uint32 source  = 1;
-    required uint32 target  = 2;
-    optional string dep     = 3;
-    optional bool   isExtra = 4;
+    required uint32 source     = 1;
+    required uint32 target     = 2;
+    optional string dep        = 3;
+    optional bool   isExtra    = 4;
+    optional uint32 sourceCopy = 5;
+    optional uint32 targetCopy = 6;
+    optional Language language = 7;
   }
   
-  repeated Node   node = 1;
-  repeated Edge   edge = 2;
-  repeated uint32 root = 3 [packed=true];
+  repeated Node     node     = 1;
+  repeated Edge     edge     = 2;
+  repeated uint32   root     = 3 [packed=true];
 }
 
 //

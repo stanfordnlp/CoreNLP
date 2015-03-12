@@ -307,7 +307,7 @@ public class GenericTimeExpressionPatterns implements TimeExpressionPatterns {
                     }
                   }
                   SUTime.Duration period = temporal.getPeriod();
-                  if (period != null & scale != 1) {
+                  if (period != null && scale != 1) {
                     period = period.multiplyBy(scale);
                   }
                   return new Expressions.PrimitiveValue("PeriodicTemporalSet",

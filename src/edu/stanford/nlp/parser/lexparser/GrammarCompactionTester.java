@@ -475,7 +475,7 @@ public class GrammarCompactionTester {
   }
 
   private static int translate(int i, Index<String> oldIndex, Index<String> newIndex) {
-    return newIndex.indexOf(oldIndex.get(i), true);
+    return newIndex.addToIndex(oldIndex.get(i));
   }
 
   // WTF is this?
@@ -483,7 +483,7 @@ public class GrammarCompactionTester {
     String s = n.get(i);
     if (s.equals("NP^PP")) {
       System.out.println("changed");
-      return n.indexOf("NP-987928374", true);
+      return n.addToIndex("NP-987928374");
     }
     return i;
   }

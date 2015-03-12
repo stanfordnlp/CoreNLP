@@ -6,8 +6,6 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.HashIndex;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -15,6 +13,7 @@ import java.util.regex.Pattern;
 
 /**
  * A class for holding Chinese morphological features used for word segmentation and POS tagging.
+ *
  * @author Galen Andrew
  */
 public class ChineseMorphFeatureSets implements Serializable {

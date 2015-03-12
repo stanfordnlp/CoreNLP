@@ -171,7 +171,7 @@ public class IntTaggedWord implements Serializable, Comparable<IntTaggedWord> {
         word = STOP_WORD_INT;
         break;
       default:
-        word = wordIndex.indexOf(wordString, true);
+        word = wordIndex.addToIndex(wordString);
         break;
     }
     switch (tagString) {
@@ -182,7 +182,7 @@ public class IntTaggedWord implements Serializable, Comparable<IntTaggedWord> {
         tag = (short) STOP_TAG_INT;
         break;
       default:
-        tag = (short) tagIndex.indexOf(tagString, true);
+        tag = (short) tagIndex.addToIndex(tagString);
         break;
     }
   }

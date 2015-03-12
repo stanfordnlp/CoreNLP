@@ -20,8 +20,25 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * StringUtils is a class for random String things, including output
- * formatting and command line argument parsing.
+ * StringUtils is a class for random String things, including output formatting and command line argument parsing.
+ * <p>
+ * Many of these methods will be familiar to perl users: {@link #join(Iterable)}, {@link #split(String, String)}, {@link
+ * #trim(String, int)}, {@link #find(String, String)}, {@link #lookingAt(String, String)}, and {@link #matches(String,
+ * String)}.
+ * <p>
+ * There are also useful methods for padding Strings/Objects with spaces on the right or left for printing even-width
+ * table columns: {@link #padLeft(int, int)}, {@link #pad(String, int)}.
+ *
+ * <p>Example: print a comma-separated list of numbers:</p>
+ * <p><code>System.out.println(StringUtils.pad(nums, &quot;, &quot;));</code></p>
+ * <p>Example: print a 2D array of numbers with 8-char cells:</p>
+ * <p><code>for(int i = 0; i &lt; nums.length; i++) {<br>
+ * &nbsp;&nbsp;&nbsp; for(int j = 0; j &lt; nums[i].length; j++) {<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ * System.out.print(StringUtils.leftPad(nums[i][j], 8));<br>
+ * &nbsp;&nbsp;&nbsp; <br>
+ * &nbsp;&nbsp;&nbsp; System.out.println();<br>
+ * </code></p>
  *
  * @author Dan Klein
  * @author Christopher Manning
@@ -1208,9 +1225,10 @@ public class StringUtils {
    * splitChar.  However, it provides a quoting facility: it is possible to
    * quote strings with the quoteChar.
    * If the quoteChar occurs within the quotedExpression, it must be prefaced
-   * by the escapeChar
+   * by the escapeChar.
+   * This routine can be useful for processing a line of a CSV file.
    *
-   * @param s         The String to split
+   * @param s         The String to split into fields. Cannot be null.
    * @param splitChar The character to split on
    * @param quoteChar The character to quote items with
    * @param escapeChar The character to escape the quoteChar with
@@ -1225,10 +1243,11 @@ public class StringUtils {
       char curr = s.charAt(i);
       if (curr == splitChar) {
         // add last buffer
-        if (b.length() > 0) {
-          result.add(b.toString());
-          b = new StringBuilder();
-        }
+        // cdm 2014: Do this even if the field is empty!
+        // if (b.length() > 0) {
+        result.add(b.toString());
+        b = new StringBuilder();
+        // }
         i++;
       } else if (curr == quoteChar) {
         // find next instance of quoteChar
@@ -1253,6 +1272,7 @@ public class StringUtils {
         i++;
       }
     }
+    // RFC 4180 disallows final comma. At any rate, don't produce a field after it unless non-empty
     if (b.length() > 0) {
       result.add(b.toString());
     }
@@ -2035,6 +2055,24 @@ public class StringUtils {
    */
   public static Collection<String> getNgramsString(String s, int minSize, int maxSize){
     return getNgrams(Arrays.asList(s.split("\\s+")), minSize, maxSize);
+  }
+
+  /**
+   * Build a list of character-based ngrams from the given string.
+   */
+  public static Collection<String> getCharacterNgrams(String s, int minSize, int maxSize) {
+    Collection<String> ngrams = new ArrayList<String>();
+    int len = s.length();
+
+    for (int i = 0; i < len; i++) {
+      for (int ngramSize = minSize;
+           ngramSize > 0 && ngramSize <= maxSize && i + ngramSize <= len;
+           ngramSize++) {
+        ngrams.add(s.substring(i, i + ngramSize));
+      }
+    }
+
+    return ngrams;
   }
 
   private static Pattern diacriticalMarksPattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}");

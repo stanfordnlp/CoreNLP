@@ -38,8 +38,8 @@ import edu.stanford.nlp.util.PropertiesUtils;
  
  // Substitute newlines with newlineChar.
  // Otherwise, treat them like whitespace
- private boolean tokenizeNL;
- private String newlineChar;
+ private boolean tokenizeNLs;
+ public static final String NEWLINE_TOKEN = "*NL*";
 
  // Use \u2026 for ellipses
  private boolean useUTF8Ellipsis;
@@ -64,17 +64,13 @@ import edu.stanford.nlp.util.PropertiesUtils;
  // Escape parens for ATB parsing
  private boolean atbEscaping;
 
- // Normalize newlines to this token
- public static final String NEWLINE_TOKEN = "*NL*";
- private static final String SYSTEM_NEWLINE = System.getProperty("line.separator");
-
  private Map<String,String> normMap;
  
  public ArabicLexer(Reader r, LexedTokenFactory<?> tf, Properties props) {
    this(r);
    this.tokenFactory = tf;
    
-   tokenizeNL = PropertiesUtils.getBool(props, "tokenizeNLs", false);
+   tokenizeNLs = PropertiesUtils.getBool(props, "tokenizeNLs", false);
    useUTF8Ellipsis = PropertiesUtils.getBool(props, "useUTF8Ellipsis", false);
    invertible = PropertiesUtils.getBool(props, "invertible", false);
    normArDigits = PropertiesUtils.getBool(props, "normArDigits", false);
@@ -298,11 +294,6 @@ import edu.stanford.nlp.util.PropertiesUtils;
     return getNext(normText, text);
   }
 
-  private Object getNewline() {
-    String nlString = tokenizeNL ? NEWLINE_TOKEN : SYSTEM_NEWLINE;
-    return getNext(nlString, yytext());
-  }
-
   private Object getEllipsis() {
     String ellipsisString = useUTF8Ellipsis ? "\u2026" : "...";
     return getNext(ellipsisString, yytext());
@@ -344,10 +335,13 @@ FULLURL = https?:\/\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
 EMAIL = [a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0]*@([^ \t\n\f\r\"<>|().\u00A0]+\.)+[a-zA-Z]{2,4}
 
+PAREN = -LRB-|-RRB-
+
 %%
 
 {ELLIPSIS}  { return getEllipsis(); }
 
+{PAREN}     |
 {FULLURL}   |
 {LIKELYURL} |
 {EMAIL}     |
@@ -370,7 +364,10 @@ EMAIL = [a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0]*@([^ \t\n\f\r\"<>|().\u00A0]+\.)+[a
 {ARWORD}    |
 {FORNWORD}  { return getNext(true); }
 
-{CR}        { return getNewline(); }
+{CR}        { if (tokenizeNLs) {
+                return getNext(NEWLINE_TOKEN, yytext());
+              }
+            } 
 {SPACES}    { }
 .           { System.err.printf("Untokenizable: %s%n", yytext());
 	      return getNext(true);

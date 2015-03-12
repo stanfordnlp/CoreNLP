@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Set;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
@@ -55,7 +54,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   }
 
   private boolean parseInternal() {
-    final int maxBeamSize = parser.op.testOptions().beamSize;
+    final int maxBeamSize = Math.max(parser.op.testOptions().beamSize, 1);
 
     success = true;
     unparsable = false;
@@ -70,11 +69,10 @@ public class ShiftReduceParserQuery implements ParserQuery {
       beam = new PriorityQueue<State>(maxBeamSize + 1, ScoredComparator.ASCENDING_COMPARATOR);
       State bestState = null;
       for (State state : oldBeam) {
-        List<String> features = parser.featureFactory.featurize(state);
-        Collection<ScoredObject<Integer>> predictedTransitions = parser.findHighestScoringTransitions(state, features, true, maxBeamSize, constraints);
+        Collection<ScoredObject<Integer>> predictedTransitions = parser.model.findHighestScoringTransitions(state, true, maxBeamSize, constraints);
         // System.err.println("Examining state: " + state);
         for (ScoredObject<Integer> predictedTransition : predictedTransitions) {
-          Transition transition = parser.transitionIndex.get(predictedTransition.object());
+          Transition transition = parser.model.transitionIndex.get(predictedTransition.object());
           State newState = transition.apply(state, predictedTransition.score());
           // System.err.println("  Transition: " + transition + " (" + predictedTransition.score() + ")");
           if (bestState == null || bestState.score() < newState.score()) {
@@ -95,7 +93,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
         // This will probably result in a bad parse, but at least it
         // will result in some sort of parse.
         for (State state : oldBeam) {
-          Transition transition = parser.findEmergencyTransition(state, constraints);
+          Transition transition = parser.model.findEmergencyTransition(state, constraints);
           if (transition != null) {
             State newState = transition.apply(state);
             if (bestState == null || bestState.score() < newState.score()) {
@@ -178,7 +176,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   @Override
   public List<ScoredObject<Tree>> getBestPCFGParses() {
     ScoredObject<Tree> parse = new ScoredObject<Tree>(debinarized, finalState.score);
-    return Collections.singletonList(parse);    
+    return Collections.singletonList(parse);
   }
 
   @Override
@@ -223,7 +221,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   public boolean saidMemMessage() {
     return false;
   }
-  
+
   @Override
   public boolean parseSucceeded() {
     return success;

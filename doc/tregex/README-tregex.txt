@@ -1,4 +1,4 @@
-Tregex v3.4 - 2014-06-16
+Tregex v3.5.0 - 2014-10-26
 ----------------------------------------------
 
 Copyright (c) 2003-2012 The Board of Trustees of 

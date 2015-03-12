@@ -32,6 +32,10 @@ LICENSE
 CHANGES
 ------------------------------------
 
+2014-10-26    3.5.0     Upgrade to Java 1.8 
+
+2014-08-27    3.4.1     Update for compatibility 
+
 2014-06-16      3.4     Update Arabic segmenter 
 
 2014-01-04    3.3.1     Bugfix release 

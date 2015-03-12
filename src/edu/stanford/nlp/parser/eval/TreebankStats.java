@@ -6,8 +6,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -30,9 +28,9 @@ import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Utility class for extracting a variety of statistics from multi-lingual treebanks.
- * 
+ *
  * TODO(spenceg) Add sample standard deviation
- * 
+ *
  * @author Spence Green
  */
 public class TreebankStats {
@@ -267,10 +265,10 @@ public class TreebankStats {
       for(Integer len : lengths)
         if(len <= maxLen)
           lens++;
-      
-      return (double) lens / (double) lengths.size(); 
+
+      return (double) lens / (double) lengths.size();
     }
-    
+
     public void addPhrasalBranch(String label, int factor) {
       phrasalBranching2.incrementCount(label, factor);
       phrasalBranchingNum2.incrementCount(label);
@@ -313,7 +311,7 @@ public class TreebankStats {
       for(String posTag : sortedKeys)
         System.out.println(" " + posTag + ":\t\t" + (int) posTags.getCount(posTag));
       System.out.println("======================================================");
-      
+
       if(displayWords) {
         System.out.println(">>> Word counts");
         sortedKeys = new ArrayList<String>(words.keySet());
@@ -414,7 +412,7 @@ public class TreebankStats {
     usage.append("  -o        : Print OOV words.").append(nl);
     return usage.toString();
   }
-  
+
   private static Map<String,Integer> optArgDefs() {
     Map<String,Integer> optArgDefs = Generics.newHashMap(4);
     optArgDefs.put("s", 1);
@@ -423,9 +421,9 @@ public class TreebankStats {
     optArgDefs.put("o", 0);
     return optArgDefs;
   }
-  
+
   /**
-   * 
+   *
    * @param args
    */
   public static void main(String[] args) {
@@ -445,7 +443,7 @@ public class TreebankStats {
       System.err.println(usage());
       System.exit(-1);
     }
-    
+
     Language language = Language.valueOf(parsedArgs[0]);
     List<String> corpusPaths = new ArrayList<String>(parsedArgs.length-1);
     for (int i = 1; i < parsedArgs.length; ++i) {

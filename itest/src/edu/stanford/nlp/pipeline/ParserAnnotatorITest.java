@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import edu.stanford.nlp.dcoref.Constants;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
@@ -18,7 +17,7 @@ import edu.stanford.nlp.util.CoreMap;
 
 /**
  * A really weak-sauce test for the ParserAnnotator.
- * 
+ *
  * @author dramage
  */
 public class ParserAnnotatorITest extends TestCase {
@@ -30,6 +29,14 @@ public class ParserAnnotatorITest extends TestCase {
 
   private static ParserAnnotator parser = null;
 
+  // TODO: kind of silly to make so many copies of the ParserAnnotator
+  private static AnnotationPipeline timeoutPipeline = null;
+  private static AnnotationPipeline threaded3TimeoutPipeline = null;
+  private static AnnotationPipeline threaded4TimeoutPipeline = null;
+
+  private static AnnotationPipeline threaded3Pipeline = null;
+  private static AnnotationPipeline threaded4Pipeline = null;
+
   public void setUp() throws Exception {
     synchronized(ParserAnnotatorITest.class) {
       if (pipeline != null)
@@ -37,22 +44,42 @@ public class ParserAnnotatorITest extends TestCase {
 
       parser = new ParserAnnotator(false, -1);
       pipeline = new AnnotationPipeline();
-      pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+      pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
       pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
       pipeline.addAnnotator(new POSTaggerAnnotator(false));
       pipeline.addAnnotator(parser);
 
       noPOSPipeline = new AnnotationPipeline();
-      noPOSPipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+      noPOSPipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
       noPOSPipeline.addAnnotator(new WordsToSentencesAnnotator(false));
       noPOSPipeline.addAnnotator(parser);
 
       noParserPipeline = new AnnotationPipeline();
-      noParserPipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+      noParserPipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
       noParserPipeline.addAnnotator(new WordsToSentencesAnnotator(false));
 
       parserOnlyPipeline = new AnnotationPipeline();
       parserOnlyPipeline.addAnnotator(parser);
+
+      Properties props = new Properties();
+      props.setProperty("parse.maxtime", "1");
+      props.setProperty("annotators", "tokenize, ssplit, parse");
+      timeoutPipeline = new StanfordCoreNLP(props);
+
+      props = new Properties();
+      props.setProperty("parse.maxtime", "1");
+      props.setProperty("parse.nthreads", "3");
+      props.setProperty("annotators", "tokenize, ssplit, parse");
+      threaded3TimeoutPipeline = new StanfordCoreNLP(props);
+
+      props.setProperty("parse.nthreads", "4");
+      threaded4TimeoutPipeline = new StanfordCoreNLP(props);
+
+      props.setProperty("parse.maxtime", "-1");
+      threaded4Pipeline = new StanfordCoreNLP(props);
+
+      props.setProperty("parse.nthreads", "3");
+      threaded3Pipeline = new StanfordCoreNLP(props);
     }
   }
 
@@ -75,15 +102,29 @@ public class ParserAnnotatorITest extends TestCase {
     }
   }
 
-  public void testParserAnnotator() throws Exception {    
-    Annotation document = new Annotation(TEXT);    
+  public void testParserAnnotator() {
+    Annotation document = new Annotation(TEXT);
     pipeline.annotate(document);
-    
+
     int i = 0;
     for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
       Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
       assertEquals(parse.toString(), ANSWER[i++]);
     }
+  }
+
+  public void testThreadedAnnotator() {
+    Annotation document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
+    threaded4Pipeline.annotate(document);
+    verifyAnswers(document, ANSWER);
+
+    document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
+    threaded3Pipeline.annotate(document);
+    verifyAnswers(document, ANSWER);
+
+    document = new Annotation(TEXT);
+    threaded4Pipeline.annotate(document);
+    verifyAnswers(document, ANSWER);
   }
 
   public void testMaxLen() {
@@ -93,12 +134,8 @@ public class ParserAnnotatorITest extends TestCase {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     Annotation document = new Annotation(TEXT);
     pipeline.annotate(document);
-    
-    int i = 0;
-    for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
-      Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
-      assertEquals(XPARSES[i++], parse.toString());
-    } 
+
+    verifyAnswers(document, XPARSES);
 
     props.setProperty("parse.maxlen", "8");
     pipeline = new StanfordCoreNLP(props);
@@ -135,10 +172,39 @@ public class ParserAnnotatorITest extends TestCase {
                result.indexOf("SBAR") >= 0);
   }
 
+  /**
+   * Tests that if you run a parser annotator with an absurdly low
+   * timeout, all sentences are successfully labeled with X trees, as
+   * opposed to null trees or not timing out
+   */
+  public void testTimeout() {
+    Annotation document = new Annotation(TEXT);
+    timeoutPipeline.annotate(document);
+    verifyAnswers(document, XPARSES);
+  }
+
+  /**
+   * Tests that if you run a threaded parser annotator on input text,
+   * all sentences get successfully converted into X trees after they
+   * time out.  Incidentally, this sort of tests that the threaded
+   * parser annotator adds output in the right order.
+   */
+  public void testThreadedTimeout() {
+    for (int i = 0; i < 20; ++i) {
+      Annotation document = new Annotation(TEXT + TEXT);
+      threaded3TimeoutPipeline.annotate(document);
+      verifyAnswers(document, XPARSES);
+
+      document = new Annotation(TEXT + TEXT + TEXT + TEXT + TEXT);
+      threaded4TimeoutPipeline.annotate(document);
+      verifyAnswers(document, XPARSES);
+    }
+  }
+
 
   private void assertParseOK(ParserAnnotator parser) {
     AnnotationPipeline pipeline = new AnnotationPipeline();
-    pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+    pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
     pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
     pipeline.addAnnotator(parser);
     Annotation document = new Annotation("John Bauer works at Stanford.");
@@ -173,7 +239,18 @@ public class ParserAnnotatorITest extends TestCase {
 
   }
 
-  static final String TEXT = "I saw him ordering them to saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .";
+
+  public void verifyAnswers(Annotation document, String[] expected) {
+    int i = 0;
+    for (CoreMap sentence : document.get(CoreAnnotations.SentencesAnnotation.class)) {
+      Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+      assertFalse("Sentence " + i + " was null", parse == null);
+      assertEquals(expected[i++ % expected.length], parse.toString());
+    }
+  }
+
+
+  static final String TEXT = "I saw him ordering them to saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .  ";
 
   static final String[] ANSWER = {
       // TODO: this is actually the wrong parse!
@@ -185,9 +262,9 @@ public class ParserAnnotatorITest extends TestCase {
   };
 
   static final String[] XPARSES = {
-    "(X (X I) (X saw) (X him) (X ordering) (X them) (X to) (X saw) (X .))",
-    "(X (X Jack) (X 's) (X father) (X has) (X n't) (X played) (X golf) (X since) (X 20) (X years) (X ago) (X .))",
-    "(X (X I) (X 'm) (X going) (X to) (X the) (X bookstore) (X to) (X return) (X a) (X book) (X Jack) (X and) (X his) (X friends) (X bought) (X me) (X .))"
+    "(X (XX I) (XX saw) (XX him) (XX ordering) (XX them) (XX to) (XX saw) (XX .))",
+    "(X (XX Jack) (XX 's) (XX father) (XX has) (XX n't) (XX played) (XX golf) (XX since) (XX 20) (XX years) (XX ago) (XX .))",
+    "(X (XX I) (XX 'm) (XX going) (XX to) (XX the) (XX bookstore) (XX to) (XX return) (XX a) (XX book) (XX Jack) (XX and) (XX his) (XX friends) (XX bought) (XX me) (XX .))"
   };
 }
 

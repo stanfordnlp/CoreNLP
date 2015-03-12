@@ -2,6 +2,7 @@ package edu.stanford.nlp.patterns.surface;
 
 import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import edu.stanford.nlp.patterns.surface.GetPatternsFromDataMultiClass.PatternScoring;
 import edu.stanford.nlp.stats.ClassicCounter;
@@ -10,57 +11,56 @@ import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.logging.Redwood;
 
-public class ScorePatternsFreqBased extends ScorePatterns {
+public class ScorePatternsFreqBased<E> extends ScorePatterns<E> {
 
   public ScorePatternsFreqBased(
       ConstantsAndVariables constVars,
       PatternScoring patternScoring,
-      String label,
-      TwoDimensionalCounter<SurfacePattern, String> patternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> negPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> unLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> negandUnLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> allPatternsandWords4Label, Properties props) {
-    super(constVars, patternScoring, label, patternsandWords4Label,
-        negPatternsandWords4Label, unLabeledPatternsandWords4Label,
-        negandUnLabeledPatternsandWords4Label, allPatternsandWords4Label, props);
+      String label, Set<String> allCandidatePhrases,
+      TwoDimensionalCounter<E, String> patternsandWords4Label,
+      TwoDimensionalCounter<E, String> negPatternsandWords4Label,
+      TwoDimensionalCounter<E, String> unLabeledPatternsandWords4Label,
+      Properties props) {
+    super(constVars, patternScoring, label, allCandidatePhrases, patternsandWords4Label,
+        negPatternsandWords4Label, unLabeledPatternsandWords4Label,  props);
   }
 
   @Override
   public void setUp(Properties props){}
   
   @Override
-  Counter<SurfacePattern> score() {
+  Counter<E> score() {
 
-    Counter<SurfacePattern> currentPatternWeights4Label = new ClassicCounter<SurfacePattern>();
+    Counter<E> currentPatternWeights4Label = new ClassicCounter<E>();
 
-    Counter<SurfacePattern> pos_i = new ClassicCounter<SurfacePattern>();
-    Counter<SurfacePattern> all_i = new ClassicCounter<SurfacePattern>();
-    Counter<SurfacePattern> neg_i = new ClassicCounter<SurfacePattern>();
-    Counter<SurfacePattern> unlab_i = new ClassicCounter<SurfacePattern>();
+    Counter<E> pos_i = new ClassicCounter<E>();
+    Counter<E> neg_i = new ClassicCounter<E>();
+    Counter<E> unlab_i = new ClassicCounter<E>();
 
-    for (Entry<SurfacePattern, ClassicCounter<String>> en : negPatternsandWords4Label
+    for (Entry<E, ClassicCounter<String>> en : negPatternsandWords4Label
         .entrySet()) {
       neg_i.setCount(en.getKey(), en.getValue().size());
     }
 
-    for (Entry<SurfacePattern, ClassicCounter<String>> en : unLabeledPatternsandWords4Label
+    for (Entry<E, ClassicCounter<String>> en : unLabeledPatternsandWords4Label
         .entrySet()) {
       unlab_i.setCount(en.getKey(), en.getValue().size());
     }
 
-    for (Entry<SurfacePattern, ClassicCounter<String>> en : patternsandWords4Label
+    for (Entry<E, ClassicCounter<String>> en : patternsandWords4Label
         .entrySet()) {
       pos_i.setCount(en.getKey(), en.getValue().size());
     }
 
-    for (Entry<SurfacePattern, ClassicCounter<String>> en : allPatternsandWords4Label
-        .entrySet()) {
-      all_i.setCount(en.getKey(), en.getValue().size());
-    }
+    Counter<E> all_i = Counters.add(pos_i, neg_i);
+    all_i.addAll(unlab_i);
+//    for (Entry<Integer, ClassicCounter<String>> en : allPatternsandWords4Label
+//        .entrySet()) {
+//      all_i.setCount(en.getKey(), en.getValue().size());
+//    }
 
-    Counter<SurfacePattern> posneg_i = Counters.add(pos_i, neg_i);
-    Counter<SurfacePattern> logFi = new ClassicCounter<SurfacePattern>(pos_i);
+    Counter<E> posneg_i = Counters.add(pos_i, neg_i);
+    Counter<E> logFi = new ClassicCounter<E>(pos_i);
     Counters.logInPlace(logFi);
 
     if (patternScoring.equals(PatternScoring.RlogF)) {
@@ -84,24 +84,24 @@ public class ScorePatternsFreqBased extends ScorePatterns {
           Counters.division(pos_i, neg_i), logFi);
     } else if (patternScoring.equals(PatternScoring.YanGarber02)) {
 
-      Counter<SurfacePattern> acc = Counters.division(pos_i,
+      Counter<E> acc = Counters.division(pos_i,
           Counters.add(pos_i, neg_i));
       double thetaPrecision = 0.8;
       Counters.retainAbove(acc, thetaPrecision);
-      Counter<SurfacePattern> conf = Counters.product(
+      Counter<E> conf = Counters.product(
           Counters.division(pos_i, all_i), logFi);
-      for (SurfacePattern p : acc.keySet()) {
+      for (E p : acc.keySet()) {
         currentPatternWeights4Label.setCount(p, conf.getCount(p));
       }
     } else if (patternScoring.equals(PatternScoring.LinICML03)) {
 
-      Counter<SurfacePattern> acc = Counters.division(pos_i,
+      Counter<E> acc = Counters.division(pos_i,
           Counters.add(pos_i, neg_i));
       double thetaPrecision = 0.8;
       Counters.retainAbove(acc, thetaPrecision);
-      Counter<SurfacePattern> conf = Counters.product(Counters.division(
+      Counter<E> conf = Counters.product(Counters.division(
           Counters.add(pos_i, Counters.scale(neg_i, -1)), all_i), logFi);
-      for (SurfacePattern p : acc.keySet()) {
+      for (E p : acc.keySet()) {
         currentPatternWeights4Label.setCount(p, conf.getCount(p));
       }
     } else {

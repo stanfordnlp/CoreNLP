@@ -835,13 +835,13 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     }
 
     if (testFile != null) {
-      nsc.classifyAndWriteAnswers(testFile, nsc.makeReaderAndWriter());
+      nsc.classifyAndWriteAnswers(testFile, nsc.makeReaderAndWriter(), true);
     }
 
     if (textFile != null) {
       DocumentReaderAndWriter<CoreLabel> readerAndWriter =
         new PlainTextDocumentReaderAndWriter<CoreLabel>();
-      nsc.classifyAndWriteAnswers(textFile, readerAndWriter);
+      nsc.classifyAndWriteAnswers(textFile, readerAndWriter, false);
     }
   } // end main
 

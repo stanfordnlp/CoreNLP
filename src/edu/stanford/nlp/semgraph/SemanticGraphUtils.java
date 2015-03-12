@@ -135,7 +135,7 @@ public class SemanticGraphUtils {
   public static List<IndexedWord> getChildrenWithRelnPrefix(SemanticGraph graph, IndexedWord vertex, String relnPrefix) {
     if (vertex.equals(IndexedWord.NO_WORD))
       return new ArrayList<IndexedWord>();
-    if (!graph.vertexSet().contains(vertex)) {
+    if (!graph.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     List<IndexedWord> childList = new ArrayList<IndexedWord>();
@@ -153,7 +153,7 @@ public class SemanticGraphUtils {
   public static List<IndexedWord> getChildrenWithRelnPrefix(SemanticGraph graph, IndexedWord vertex, Collection<String> relnPrefixes) {
     if (vertex.equals(IndexedWord.NO_WORD))
       return new ArrayList<IndexedWord>();
-    if (!graph.vertexSet().contains(vertex)) {
+    if (!graph.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     List<IndexedWord> childList = new ArrayList<IndexedWord>();
@@ -241,7 +241,7 @@ public class SemanticGraphUtils {
    * Finds the descendents of the given node in graph, avoiding the given set of nodes
    */
   public static Set<IndexedWord> tabuDescendants(SemanticGraph sg, IndexedWord vertex, Collection<IndexedWord> tabu) {
-    if (!sg.vertexSet().contains(vertex)) {
+    if (!sg.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
@@ -257,7 +257,7 @@ public class SemanticGraphUtils {
    */
   public static Set<IndexedWord> tabuDescendants(SemanticGraph sg, IndexedWord vertex, Collection<IndexedWord> tabu,
                                                  Collection<GrammaticalRelation> tabuRelns) {
-    if (!sg.vertexSet().contains(vertex)) {
+    if (!sg.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
@@ -268,7 +268,7 @@ public class SemanticGraphUtils {
 
   public static Set<IndexedWord> descendantsTabuRelns(SemanticGraph sg, IndexedWord vertex,
                                                       Collection<GrammaticalRelation> tabuRelns) {
-    if (!sg.vertexSet().contains(vertex)) {
+    if (!sg.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
@@ -279,7 +279,7 @@ public class SemanticGraphUtils {
 
   public static Set<IndexedWord> descendantsTabuTestAndRelns(SemanticGraph sg, IndexedWord vertex,
       Collection<GrammaticalRelation> tabuRelns, IndexedWordUnaryPred tabuTest) {
-    if (!sg.vertexSet().contains(vertex)) {
+    if (!sg.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
@@ -290,7 +290,7 @@ public class SemanticGraphUtils {
 
   public static Set<IndexedWord> descendantsTabuTestAndRelns(SemanticGraph sg, IndexedWord vertex,
       Collection<IndexedWord> tabuNodes, Collection<GrammaticalRelation> tabuRelns, IndexedWordUnaryPred tabuTest) {
-    if (!sg.vertexSet().contains(vertex)) {
+    if (!sg.containsVertex(vertex)) {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
@@ -316,7 +316,7 @@ public class SemanticGraphUtils {
     }
 
     descendantSet.add(curr);
-    for (IndexedWord child : sg.getChildList(curr)) {
+    for (IndexedWord child : sg.getChildren(curr)) {
       for (SemanticGraphEdge edge : sg.getAllEdges(curr, child)) {
         if (relnsToAvoid != null && relnsToAvoid.contains(edge.getRelation()))
           continue;
@@ -373,14 +373,14 @@ public class SemanticGraphUtils {
    * ordering returned by vertexList (presumably in order).  This is to ensure
    * accesses to the InfoFile word table do not fall off after a SemanticGraph has
    * been edited.
-   *
-   * NOTE: the vertices will be replaced, as JGraphT does not permit in-place
-   * modification of the nodes.
+   * <br>
+   * NOTE: the vertices will be replaced, as JGraphT does not permit
+   * in-place modification of the nodes.  (TODO: we no longer use
+   * JGraphT, so this should be fixed)
    */
   public static SemanticGraph resetVerticeOrdering(SemanticGraph sg) {
     SemanticGraph nsg = new SemanticGraph();
     List<IndexedWord> vertices = sg.vertexListSorted();
-    List<SemanticGraphEdge> edges = sg.edgeListSorted();
     int index = 1;
     Map<IndexedWord, IndexedWord> oldToNewVertices = Generics.newHashMap();
     List<IndexedWord> newVertices = new ArrayList<IndexedWord>();
@@ -402,7 +402,7 @@ public class SemanticGraphUtils {
     }
     nsg.setRoots(newRoots);
 
-    for (SemanticGraphEdge edge : edges) {
+    for (SemanticGraphEdge edge : sg.edgeIterable()) {
       IndexedWord newGov = oldToNewVertices.get(edge.getGovernor());
       IndexedWord newDep = oldToNewVertices.get(edge.getDependent());
       nsg.addEdge(newGov, newDep, edge.getRelation(), edge.getWeight(), edge.isExtra());
@@ -467,17 +467,19 @@ public class SemanticGraphUtils {
    * Replaces a node in the given SemanticGraph with the new node,
    * replacing its position in the node edges.
    */
-  public static void replaceNode(IndexedWord newNode, IndexedWord oldNode,
-      SemanticGraph sg) {
+  public static void replaceNode(IndexedWord newNode, IndexedWord oldNode, SemanticGraph sg) {
     // Obtain the edges where the old node was the governor and the dependent.
     // Remove the old node, insert the new, and re-insert the edges.
+    // Save the edges in a list so that remove operations don't affect
+    // the iterator or our ability to find the edges in the first place
     List<SemanticGraphEdge> govEdges = sg.outgoingEdgeList(oldNode);
     List<SemanticGraphEdge> depEdges = sg.incomingEdgeList(oldNode);
     boolean oldNodeRemoved = sg.removeVertex(oldNode);
     if (oldNodeRemoved) {
       // If the new node is not present, be sure to add it in.
-      if (!sg.containsVertex(newNode))
+      if (!sg.containsVertex(newNode)) {
         sg.addVertex(newNode);
+      }
       for (SemanticGraphEdge govEdge : govEdges) {
         sg.removeEdge(govEdge);
         sg.addEdge(newNode, govEdge.getDependent(), govEdge.getRelation(), govEdge.getWeight(), govEdge.isExtra());
@@ -851,7 +853,8 @@ public class SemanticGraphUtils {
     if(!orderedNodes){
      edgeIter = sg.outgoingEdgeIterable(vertice); 
     } else{
-      edgeIter = CollectionUtils.sorted(sg.outgoingEdgeList(vertice), (arg0, arg1) -> (arg0.getRelation().toString().compareTo(arg1.getRelation().toString())));
+      edgeIter = CollectionUtils.sorted(sg.outgoingEdgeList(vertice), (arg0, arg1) -> 
+        (arg0.getRelation().toString().compareTo(arg1.getRelation().toString())));
     }
       
     
@@ -933,37 +936,14 @@ public class SemanticGraphUtils {
 
 
   /**
-   * Given a <code>SemanticGraph</code>, returns a new graph (with new node), with
-   * the lemma fields in place.
-   *
-   * NOTE: unfortunately, cannot lemmatize in place, due to brittleness with modifying
-   * existing nodes in JGraph.  TODO: is that still true?
+   * Given a <code>SemanticGraph</code>, sets the lemmas on its label
+   * objects based on their word and tag.
    */
-  public static SemanticGraph lemmatize(SemanticGraph sg) {
-    // Need to call replacenode on each, otherwise the graph will fall
-    // apart.  Eat one time cost to allow lemmas to be retained.
-    // Also, maintain a list of the current to new root mappings, and reset
-    SemanticGraph newGraph = new SemanticGraph(sg);
-    List<IndexedWord> prevRoots =
-      new ArrayList<IndexedWord>(newGraph.getRoots());
-    List<IndexedWord> newRoots = new ArrayList<IndexedWord>();
-    Map<IndexedWord, IndexedWord> wordsToReplacements =
-      new IdentityHashMap<IndexedWord, IndexedWord>();
-    for (IndexedWord node : newGraph.vertexSet()) {
-      IndexedWord newWord = new IndexedWord(node);
+  public static void lemmatize(SemanticGraph sg) {
+    for (IndexedWord node : sg.vertexSet()) {
       String lemma = Morphology.stemStatic(node.word(), node.tag()).word();
-      newWord.setLemma(lemma);
-      wordsToReplacements.put(node, newWord);
+      node.setLemma(lemma);
     }
-
-    for (Map.Entry<IndexedWord, IndexedWord> replace :
-           wordsToReplacements.entrySet()) {
-      replaceNode(replace.getValue(), replace.getKey(), newGraph);
-      if (prevRoots.contains(replace.getKey()))
-        newRoots.add(replace.getValue());
-    }
-    newGraph.setRoots(newRoots);
-    return newGraph;
   }
 
   /**

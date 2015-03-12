@@ -363,7 +363,6 @@ public class ColumnDataClassifier {
    *  words with features like useSplitWords.
    */
   private static final Pattern tab = Pattern.compile("\\t");
-  private static final Pattern comma = Pattern.compile(",");
 
 
   /** Read a data set from a file and convert it into a Dataset object.
@@ -439,9 +438,9 @@ public class ColumnDataClassifier {
   //Split according to whether we are using tsv file (default) or csv files
   private String[] splitLineToFields(String line) {
     if(globalFlags.csvFormat) {
-      String[] strings = comma.split(line);
-      for(int i = 0; i < strings.length; ++i) {
-        if(strings[i].startsWith("\"") && strings[i].endsWith("\""))
+      String[] strings = StringUtils.splitOnCharWithQuoting(line, ',', '"', '"');
+      for (int i = 0; i < strings.length; ++i) {
+        if (strings[i].startsWith("\"") && strings[i].endsWith("\""))
           strings[i] = strings[i].substring(1,strings[i].length()-1);
       }
       return strings;
@@ -1690,6 +1689,8 @@ public class ColumnDataClassifier {
       } else if (key.equals("splitWordsWithPTBTokenizer")) {
         System.out.println("splitting with ptb tokenizer");
         myFlags[col].splitWordsWithPTBTokenizer=Boolean.parseBoolean(val);
+      } else if(key.equals("showTokenization")){
+        myFlags[col].showTokenization = Boolean.parseBoolean(val);
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
       }
@@ -1906,6 +1907,12 @@ public class ColumnDataClassifier {
     System.err.println("Average macro-averaged F1: " + nf2.format(averageMacroF1));
     System.err.println();
     return new Pair<Double,Double>(averageAccuracy, averageMacroF1);
+  }
+
+  public String classOf(Datum<String,String> example) {
+    if(classifier==null)
+      throw new RuntimeException("Classifier is not initialized");
+    return classifier.classOf(example);
   }
 
   static class Flags implements Serializable {

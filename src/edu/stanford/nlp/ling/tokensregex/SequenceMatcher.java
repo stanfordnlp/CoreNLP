@@ -55,7 +55,7 @@ import static edu.stanford.nlp.ling.tokensregex.SequenceMatcher.FindType.FIND_NO
  *
  * <p>
  * NOTE: When find is used, matches are attempted starting from the specified start index of the sequence
- *   The match with the earliest starting index is returned. 
+ *   The match with the earliest starting index is returned.
  * </p>
  *
  * @author Angel Chang
@@ -88,14 +88,14 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   Iterator<Integer> curMatchIter = null;
   MatchedStates<T> curMatchStates = null;
 
-  // Branching limit for searching with back tracking
+  // Branching limit for searching with back tracking. Higher value makes the search faster but uses more memory.
   int branchLimit = 2;
 
   protected SequenceMatcher(SequencePattern<T> pattern, List<? extends T> elements)
   {
     this.pattern = pattern;
     // NOTE: It is important elements DO NOT change as we do matches
-    // TODO: Should we just make a copy of the elements?  
+    // TODO: Should we just make a copy of the elements?
     this.elements = elements;
     if (elements == null) {
       throw new IllegalArgumentException("Cannot match against null elements");
@@ -106,6 +106,11 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     this.varGroupBindings = pattern.varGroupBindings;
     matchedGroups = new MatchedGroup[pattern.totalGroups];
   }
+
+  public void setBranchLimit(int blimit){
+    this.branchLimit = blimit;
+  }
+
 
   /**
    * Interface that specifies what to replace a matched pattern with
@@ -486,6 +491,9 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       cStates = todo.pop();
       int s = cStates.curPosition+1;
       for(int i = s; i < regionEnd; i++){
+        if (Thread.interrupted()) {
+          throw new RuntimeInterruptedException();
+        }
         boolean match = cStates.match(i);
         if (cStates == null || cStates.size() == 0) {
           break;
@@ -567,7 +575,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
       throw new IndexOutOfBoundsException("Invalid region end=" + end + ", need to be between 0 and " + elements.size());
     }
     if (start > end) {
-      throw new IndexOutOfBoundsException("Invalid region end=" + end + ", need to be larger then start=" + start);      
+      throw new IndexOutOfBoundsException("Invalid region end=" + end + ", need to be larger then start=" + start);
     }
     this.regionStart = start;
     this.nextMatchStart = start;
@@ -856,8 +864,8 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     //       (has remove function and generate new id every time)
     Index<Pair<Integer,Integer>> bidIndex = new HashIndex<Pair<Integer,Integer>>();
     // Map of branch id to branch state
-    Map<Integer,BranchState> branchStates = Generics.newHashMap();
-    Set<MatchedStates> activeMatchedStates = Generics.newHashSet();
+    Map<Integer,BranchState> branchStates = new HashMap<Integer, BranchState>();//Generics.newHashMap();
+    Set<MatchedStates> activeMatchedStates = new HashSet<MatchedStates>();//= Generics.newHashSet();
 
     /**
      * Links specified MatchedStates to us (list of MatchedStates
@@ -885,7 +893,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
 
     protected int newBid(int parent, int child)
     {
-      return bidIndex.indexOf(new Pair<Integer,Integer>(parent,child), true);
+      return bidIndex.addToIndex(new Pair<Integer,Integer>(parent,child));
     }
 
     protected int size()
@@ -898,8 +906,8 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
      */
     private void condense()
     {
-      Set<Integer> curBidSet = Generics.newHashSet();
-      Set<Integer> keepBidStates = Generics.newHashSet();
+      Set<Integer> curBidSet = new HashSet<Integer>();//Generics.newHashSet();
+      Set<Integer> keepBidStates = new HashSet<Integer>();//Generics.newHashSet();
       for (MatchedStates ms:activeMatchedStates) {
         // Trim out unneeded states info
         List<State> states = ms.states;
@@ -1287,7 +1295,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
      */
     protected MatchedStates split(int branchLimit)
     {
-      Set<Integer> curBidSet = Generics.newHashSet();
+      Set<Integer> curBidSet = new HashSet<Integer>();//Generics.newHashSet();
       for (State state:states) {
         curBidSet.add(state.bid);
       }
@@ -1299,7 +1307,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
 
       MatchedStates<T> newStates = new MatchedStates<T>(matcher, branchStates);
       int v = Math.min(branchLimit, (bids.size()+1)/2);
-      Set<Integer> keepBidSet = Generics.newHashSet();
+      Set<Integer> keepBidSet = new HashSet<Integer>();//Generics.newHashSet();
       keepBidSet.addAll(bids.subList(0, v));
       swapAndClear();
       for (State s:oldStates) {
@@ -1372,7 +1380,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
             matched0 = true;
           }
         }
-        done = !matched0; 
+        done = !matched0;
       }
 
       branchStates.condense();
@@ -1415,7 +1423,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
      */
     private Collection<Integer> getMatchIndices()
     {
-      Set<Integer> allMatchIndices = Generics.newHashSet();
+      Set<Integer> allMatchIndices = new HashSet<Integer>();// Generics.newHashSet();
       for (int i = 0; i < states.size(); i++) {
         State state = states.get(i);
         if (state.tstate.equals(SequencePattern.MATCH_STATE)) {
@@ -1526,7 +1534,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     {
       this.states.add(new State(bid, state));
     }
-    
+
     private void clean()
     {
       branchStates.unlink(this);

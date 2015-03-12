@@ -22,7 +22,8 @@ import java.util.zip.GZIPOutputStream;
 
 public class IOUtils {
 
-  private static final int SLURPBUFFSIZE = 16000;
+  private static final int SLURP_BUFFER_SIZE = 16000;
+  private static final int GZIP_FILE_BUFFER_SIZE = 65536;
 
   public static final String eolChar = System.getProperty("line.separator");
   public static final String defaultEncoding = "utf-8";
@@ -383,6 +384,7 @@ public class IOUtils {
 
   /**
    * Locates this file either in the CLASSPATH or in the file system. The CLASSPATH takes priority.
+   *
    * @param name The file or resource name
    * @throws FileNotFoundException If the file does not exist
    * @return The InputStream of name, or null if not found
@@ -452,14 +454,16 @@ public class IOUtils {
 
     if (textFileOrUrl.endsWith(".gz")) {
       // gunzip it if necessary
-      in = new GZIPInputStream(in, 65536);
+      in = new GZIPInputStream(in, GZIP_FILE_BUFFER_SIZE);
     }
 
-    // buffer this stream
+    // buffer this stream.  even gzip streams benefit from buffering,
+    // such as for the shift reduce parser
     in = new BufferedInputStream(in);
 
     return in;
   }
+
 
   /**
    * Quietly opens a File. If the file ends with a ".gz" extension,
@@ -478,6 +482,7 @@ public class IOUtils {
     }
   }
 
+
   /**
    * Open a BufferedReader to a File. If the file's getName() ends in .gz,
    * it is interpreted as a gzipped file (and uncompressed). The file is then
@@ -493,12 +498,38 @@ public class IOUtils {
       is = inputStreamFromFile(file);
       return new BufferedReader(new InputStreamReader(is, "UTF-8"));
     } catch (IOException ioe) {
-      throw new RuntimeIOException(ioe);
-    } finally {
       IOUtils.closeIgnoringExceptions(is);
+      throw new RuntimeIOException(ioe);
     }
   }
 
+
+  // todo [cdm 2014]: get rid of this method, using other methods. This will change the semantics to null meaning UTF-8, but that seems better in 2015.
+  /**
+   * Open a BufferedReader to a File. If the file's getName() ends in .gz,
+   * it is interpreted as a gzipped file (and uncompressed). The file is then
+   * turned into a BufferedReader with the given encoding.
+   * If the encoding passed in is null, then the system default encoding is used.
+   *
+   * @param file What to read from
+   * @param encoding What charset to use. A null String is interpreted as platform default encoding
+   * @return The BufferedReader
+   * @throws RuntimeIOException If there is an I/O problem
+   */
+  public static BufferedReader readerFromFile(File file, String encoding) {
+    InputStream is = null;
+    try {
+      is = inputStreamFromFile(file);
+      if (encoding == null) {
+        return new BufferedReader(new InputStreamReader(is));
+      } else {
+        return new BufferedReader(new InputStreamReader(is, encoding));
+      }
+    } catch (IOException ioe) {
+      IOUtils.closeIgnoringExceptions(is);
+      throw new RuntimeIOException(ioe);
+    }
+  }
 
 
   /**
@@ -528,10 +559,11 @@ public class IOUtils {
 
 
   /**
-   * Open a BufferedReader to a file or URL specified by a String name. If the
-   * String starts with https?://, then it is first tried as a URL, otherwise it
-   * is next tried as a resource on the CLASSPATH, and then finally it is tried
-   * as a local file or other network-available file. If the String ends in .gz, it
+   * Open a BufferedReader to a file, class path entry or URL specified by a String name.
+   * If the String starts with https?://, then it is first tried as a URL. It
+   * is next tried as a resource on the CLASSPATH, and then it is tried
+   * as a local file. Finally, it is then tried again in case it is some network-available
+   * file accessible by URL. If the String ends in .gz, it
    * is interpreted as a gzipped file (and uncompressed). The file is then
    * interpreted as a utf-8 text file.
    *
@@ -552,6 +584,7 @@ public class IOUtils {
    * as a local file or other network-available file . If the String ends in .gz, it
    * is interpreted as a gzipped file (and uncompressed), else it is interpreted as
    * a regular text file in the given encoding.
+   * If the encoding passed in is null, then the system default encoding is used.
    *
    * @param textFileOrUrl What to read from
    * @param encoding CharSet encoding. Maybe be null, in which case the
@@ -820,7 +853,7 @@ public class IOUtils {
     private final int bufferSize;
     private EolPreservingLineReaderIterable( Reader reader )
     {
-      this(reader, SLURPBUFFSIZE);
+      this(reader, SLURP_BUFFER_SIZE);
     }
     private EolPreservingLineReaderIterable( Reader reader, int bufferSize )
     {
@@ -893,11 +926,7 @@ public class IOUtils {
                 return true; // end of line reached
               }
             }
-            if (charBuffer[i] == '\r') {
-              lastWasLF = true;
-            } else {
-              lastWasLF = false;
-            }
+            lastWasLF = (charBuffer[i] == '\r');
           }
           sb.append(charBuffer, charBufferPos, charsInBuffer - charBufferPos);
           // reset character buffer pos
@@ -1138,7 +1167,7 @@ public class IOUtils {
     }
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
     String temp;
-    StringBuilder buff = new StringBuilder(16000); // make biggish
+    StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
     while ((temp = br.readLine()) != null) {
       buff.append(temp);
       buff.append(lineSeparator);
@@ -1171,9 +1200,8 @@ public class IOUtils {
     String encoding = getUrlEncoding(uc);
     InputStream is = uc.getInputStream();
     BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
-    String temp;
-    StringBuilder buff = new StringBuilder(16000); // make biggish
-    while ((temp = br.readLine()) != null) {
+    StringBuilder buff = new StringBuilder(SLURP_BUFFER_SIZE); // make biggish
+    for (String temp; (temp = br.readLine()) != null; ) {
       buff.append(temp);
       buff.append(lineSeparator);
     }
@@ -1254,9 +1282,9 @@ public class IOUtils {
     BufferedReader r = new BufferedReader(reader);
     StringBuilder buff = new StringBuilder();
     try {
-      char[] chars = new char[SLURPBUFFSIZE];
+      char[] chars = new char[SLURP_BUFFER_SIZE];
       while (true) {
-        int amountRead = r.read(chars, 0, SLURPBUFFSIZE);
+        int amountRead = r.read(chars, 0, SLURP_BUFFER_SIZE);
         if (amountRead < 0) {
           break;
         }
@@ -1290,7 +1318,8 @@ public class IOUtils {
   }
 
   /**
-   * Read in a CSV formatted file with a header row
+   * Read in a CSV formatted file with a header row.
+   *
    * @param path - path to CSV file
    * @param quoteChar - character for enclosing strings, defaults to "
    * @param escapeChar - character for escaping quotes appearing in quoted strings; defaults to " (i.e. "" is used for " inside quotes, consistent with Excel)
@@ -1779,6 +1808,7 @@ public class IOUtils {
     }
   }
 
+
   /**
    * A raw file copy function -- this is not public since no error checks are made as to the
    * consistency of the filed being copied. Use instead:
@@ -1790,10 +1820,20 @@ public class IOUtils {
   private static void copyFile(File source, File target) throws IOException {
     FileChannel sourceChannel = new FileInputStream( source ).getChannel();
     FileChannel targetChannel = new FileOutputStream( target ).getChannel();
-    sourceChannel.transferTo(0, sourceChannel.size(), targetChannel);
+
+    // allow for the case that it doesn't all transfer in one go (though it probably does for a file cp)
+    long pos = 0;
+    long toCopy = sourceChannel.size();
+    while (toCopy > 0) {
+      long bytes = sourceChannel.transferTo(pos, toCopy, targetChannel);
+      pos += bytes;
+      toCopy -= bytes;
+    }
+
     sourceChannel.close();
     targetChannel.close();
   }
+
 
   /**
    * <p>An implementation of cp, as close to the Unix command as possible.
@@ -1928,6 +1968,7 @@ public class IOUtils {
     for (int i = 0; i < rtn.length; ++i) {
       rtn[i] = linesReversed.get(rtn.length - i - 1);
     }
+    raf.close();
     return rtn;
   }
 
@@ -1986,6 +2027,5 @@ public class IOUtils {
     //noinspection ResultOfMethodCallIgnored
     file.delete();
   }
-
 
 }

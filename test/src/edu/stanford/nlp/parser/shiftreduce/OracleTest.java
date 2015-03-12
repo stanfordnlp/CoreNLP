@@ -5,8 +5,8 @@ import junit.framework.TestCase;
 import edu.stanford.nlp.parser.lexparser.Options;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.Treebank;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +18,7 @@ public class OracleTest extends TestCase {
     assertEquals(total, parents.size());
   }
 
-  public int recursiveTestBuildParentMap(Tree tree, Map<Tree, Tree> parents) {
+  public static int recursiveTestBuildParentMap(Tree tree, Map<Tree, Tree> parents) {
     int children = tree.children().length;
     for (Tree child : tree.children()) {
       assertEquals(tree, parents.get(child));
@@ -44,24 +44,24 @@ public class OracleTest extends TestCase {
     return binarizedTrees;
   }
 
-  /** 
+  /**
    * Tests that if you give the Oracle a tree and ask it for a
    * sequence of transitions, applying the given transition each time,
    * it produces the original tree again.
    */
   public void testEndToEndCompoundUnaries() {
     List<Tree> binarizedTrees = buildTestTreebank();
-    Oracle oracle = new Oracle(binarizedTrees, true);
+    Oracle oracle = new Oracle(binarizedTrees, true, Collections.singleton("ROOT"));
     runEndToEndTest(binarizedTrees, oracle);
   }
 
   public void testEndToEndSingleUnaries() {
     List<Tree> binarizedTrees = buildTestTreebank();
-    Oracle oracle = new Oracle(binarizedTrees, false);
+    Oracle oracle = new Oracle(binarizedTrees, false, Collections.singleton("ROOT"));
     runEndToEndTest(binarizedTrees, oracle);
   }
 
-  public void runEndToEndTest(List<Tree> binarizedTrees, Oracle oracle) {
+  public static void runEndToEndTest(List<Tree> binarizedTrees, Oracle oracle) {
     for (int index = 0; index < binarizedTrees.size(); ++index) {
       State state = ShiftReduceParser.initialStateFromGoldTagTree(binarizedTrees.get(index));
       while (!state.isFinished()) {

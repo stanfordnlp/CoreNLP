@@ -140,39 +140,14 @@ public class SequencePattern<T> implements Serializable {
     return this.pattern();
   }
 
-  //TODO: At some point, implement equals and hashCode functions for all classes
-  /*
-  @Override
-  public boolean equals(Object o){
-    if(! (o instanceof SequencePattern)){
-      return false;
+  public <T2> SequencePattern<T2> transform(NodePatternTransformer<T,T2> transformer) {
+    if (action != null) {
+      throw new UnsupportedOperationException("transform on actions not yet implemented");
     }
-    if(o == this)
-      return true;
-    SequencePattern os = (SequencePattern) o;
-    if(this.pattern() == null){
-      if(os.pattern() == null)
-        return true;
-      else return false;
-
-    } else if(!this.pattern().equals(os.pattern()))
-      return false;
-    if(this.getPatternExpr() == null){
-      if(os.getPatternExpr() == null)
-        return true;
-      else
-        return false;
-    } else if(!this.getPatternExpr().equals(os.getPatternExpr()))
-      return false;
-    if(this.getAction() == null){
-      if(os.getAction() == null)
-        return true;
-      else
-        return false;
-    }else if (!this.getAction().equals(os.getAction()))
-      return false;
-    return true;
-  }*/
+    SequencePattern.PatternExpr transformedPattern = this.patternExpr.transform(transformer);
+    // TODO: Make string unique by indicating this pattern was transformed
+    return new SequencePattern<T2>(this.patternStr, transformedPattern, null);
+  }
 
   public String pattern() {
     return patternStr;
@@ -321,6 +296,8 @@ public class SequencePattern<T> implements Serializable {
 
     /** Returns an optimized version of this pattern - default is a noop */
     protected PatternExpr optimize() { return this; }
+
+    protected abstract PatternExpr transform(NodePatternTransformer transformer);
   }
 
   /** Represents one element to be matched. */
@@ -349,6 +326,11 @@ public class SequencePattern<T> implements Serializable {
     protected int assignGroupIds(int start) { return start; }
     @Override
     protected void updateBindings(VarGroupBindings bindings) {}
+
+    @Override
+    protected PatternExpr transform(NodePatternTransformer transformer) {
+      return new NodePatternExpr(transformer.transform(nodePattern));
+    }
 
     public String toString() {
       return nodePattern.toString();
@@ -380,6 +362,10 @@ public class SequencePattern<T> implements Serializable {
     protected int assignGroupIds(int start) { return start; }
     @Override
     protected void updateBindings(VarGroupBindings bindings) {}
+    @Override
+    protected PatternExpr transform(NodePatternTransformer transformer) {
+      return new MultiNodePatternExpr(transformer.transform(multiNodePattern));
+    }
 
     public String toString() {
       return multiNodePattern.toString();
@@ -418,6 +404,10 @@ public class SequencePattern<T> implements Serializable {
     protected int assignGroupIds(int start) { return start; }
     @Override
     protected void updateBindings(VarGroupBindings bindings) {}
+    @Override
+    protected PatternExpr transform(NodePatternTransformer transformer) {
+      return new SpecialNodePatternExpr(name, stateFactory);
+    }
 
     public String toString() {
       return name;
@@ -512,6 +502,15 @@ public class SequencePattern<T> implements Serializable {
       return new SequencePatternExpr(newPatterns);
     }
 
+    @Override
+    protected PatternExpr transform(NodePatternTransformer transformer) {
+      List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
+      for (PatternExpr p:patterns) {
+        newPatterns.add(p.transform(transformer));
+      }
+      return new SequencePatternExpr(newPatterns);
+    }
+
     public String toString() {
       return StringUtils.join(patterns, " ");
     }
@@ -548,6 +547,12 @@ public class SequencePattern<T> implements Serializable {
     protected PatternExpr copy()
     {
       return new BackRefPatternExpr(matcher, captureGroupId);
+    }
+
+    @Override
+    protected PatternExpr transform(NodePatternTransformer transformer) {
+      // TODO: Implement me!!!
+      throw new UnsupportedOperationException("BackRefPatternExpr.transform not implemented yet!!! Please implement me!!!");
     }
 
     public String toString() {
@@ -592,6 +597,11 @@ public class SequencePattern<T> implements Serializable {
     @Override
     protected PatternExpr optimize() {
       return new ValuePatternExpr(expr.optimize(), value);
+    }
+
+    @Override
+    protected PatternExpr transform(NodePatternTransformer transformer) {
+      return new ValuePatternExpr(expr.transform(transformer), value);
     }
 
     @Override
@@ -664,6 +674,12 @@ public class SequencePattern<T> implements Serializable {
     protected PatternExpr optimize()
     {
       return new GroupPatternExpr(pattern.optimize(), capture, captureGroupId, varname);
+    }
+
+    @Override
+    protected PatternExpr transform(NodePatternTransformer transformer)
+    {
+      return new GroupPatternExpr(pattern.transform(transformer), capture, captureGroupId, varname);
     }
 
     public String toString() {
@@ -780,6 +796,11 @@ public class SequencePattern<T> implements Serializable {
     {
       return new RepeatPatternExpr(pattern.optimize(), minMatch, maxMatch, greedyMatch);
     }
+    @Override
+    protected PatternExpr transform(NodePatternTransformer transformer)
+    {
+      return new RepeatPatternExpr(pattern.transform(transformer), minMatch, maxMatch, greedyMatch);
+    }
 
     public String toString() {
       StringBuilder sb = new StringBuilder();
@@ -854,6 +875,16 @@ public class SequencePattern<T> implements Serializable {
       List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
       for (PatternExpr p:patterns) {
         newPatterns.add(p.copy());
+      }
+      return new OrPatternExpr(newPatterns);
+    }
+
+    @Override
+    protected PatternExpr transform(NodePatternTransformer transformer)
+    {
+      List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
+      for (PatternExpr p:patterns) {
+        newPatterns.add(p.transform(transformer));
       }
       return new OrPatternExpr(newPatterns);
     }
@@ -1088,6 +1119,16 @@ public class SequencePattern<T> implements Serializable {
       List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
       for (PatternExpr p:patterns) {
         newPatterns.add(p.optimize());
+      }
+      return new AndPatternExpr(newPatterns);
+    }
+
+    @Override
+    protected PatternExpr transform(NodePatternTransformer transformer)
+    {
+      List<PatternExpr> newPatterns = new ArrayList<PatternExpr>(patterns.size());
+      for (PatternExpr p:patterns) {
+        newPatterns.add(p.transform(transformer));
       }
       return new AndPatternExpr(newPatterns);
     }
