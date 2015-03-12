@@ -28,7 +28,7 @@ public class Util {
     }
     nerGuesses.remove("O");
     nerGuesses.remove(null);
-    if (nerGuesses.size() > 0) {
+    if (nerGuesses.size() > 0 && Counters.max(nerGuesses) >= span.size() / 2) {
       return Counters.argmax(nerGuesses);
     } else {
       return "O";

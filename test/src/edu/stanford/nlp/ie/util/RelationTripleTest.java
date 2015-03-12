@@ -105,6 +105,7 @@ public class RelationTripleTest extends TestCase {
   }
 
 
+
   public void testToSentenceNoIndices() {
     assertEquals(new ArrayList<CoreLabel>(){{
       add(mkWord("blue", -1));
@@ -342,6 +343,51 @@ public class RelationTripleTest extends TestCase {
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tTom\tfighting\tJerry", extraction.get().toString());
+  }
+
+  public void testPossessiveInEntity() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tScania-Vabis\t2\tnsubj\n" +
+        "2\testablished\t0\troot\n" +
+        "3\tits\t6\tposs\n" +
+        "4\tfirst\t6\tamod\n" +
+        "5\tproduction\t6\tnn\n" +
+        "6\tplant\t2\tdobj\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tScania-Vabis\testablished\tits first production plant", extraction.get().toString());
+  }
+
+  public void testObjInRelation() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tScania-Vabis\t2\tnsubj\tNNP\tORGANIZATION\n" +
+        "2\testablished\t0\troot\tVB\tO\n" +
+        "3\tproduction\t4\tnn\tNN\tO\n" +
+        "4\tplant\t2\tdobj\tNN\tO\n" +
+        "5\tSödertälje\t2\tprep_outside\tNN\tO\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tScania-Vabis\testablished production plant outside\tSödertälje", extraction.get().toString());
+
+    extraction = mkExtraction(
+        "1\tHun\t2\tnn\tNNP\tPERSON\n" +
+        "2\tSen\t3\tnsubj\tNNP\tPERSON\n" +
+        "3\tplayed\t0\troot\tVBD\tO\n" +
+        "4\tgolf\t3\tdobj\tNN\tO\n" +
+        "5\tShinawatra\t3\tprep_with\tNNP\tPERSON\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tHun Sen\tplayed golf with\tShinawatra", extraction.get().toString());
+
+    extraction = mkExtraction(
+        "1\tHun\t2\tnn\tNNP\tPERSON\n" +
+        "2\tSen\t3\tnsubj\tNNP\tPERSON\n" +
+        "3\tplayed\t0\troot\tVBD\tO\n" +
+        "4\tgolf\t3\tdobj\tNN\tO\n" +
+        "5\tShinawatra\t3\tprep_with\tNNP\tPERSON\n" +
+        "6\tCambodia\t3\tdobj\tNNP\tLOCATION\n"
+    );
+    assertFalse("No extraction for sentence!", extraction.isPresent());
   }
 
 }

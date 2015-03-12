@@ -13,6 +13,7 @@ import edu.stanford.nlp.util.PriorityQueue;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * A (subject, relation, object) triple; e.g., as used in the KBP challenges or in OpenIE systems.
@@ -173,9 +174,10 @@ public class RelationTriple implements Comparable<RelationTriple> {
 
   /** A list of patterns to match relation extractions against */
   private static final List<SemgrexPattern> PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
-    // { blue cats play [quietly] with yarn }
-    add(SemgrexPattern.compile("{$}=verb ?>/cop|auxpass/ {}=be >/.subj(pass)?/ {}=subject >/prepc?/ ({}=prep >/pobj/ ( {}=object ?>/appos/ {}=appos ) )"));
-    add(SemgrexPattern.compile("{$}=verb ?>/cop|auxpass/ {}=be >/.subj(pass)?/ {}=subject >/prepc?_.*/=prepEdge ( {}=object ?>/appos/ {} = appos )"));
+    // { blue cats play [quietly] with yarn,
+    //   Jill blew kisses at Jack }
+    add(SemgrexPattern.compile("{$}=verb ?>/cop|auxpass/ {}=be >/.subj(pass)?/ {}=subject >/prepc?/ ({}=prep >/pobj/ ( {}=object ?>/appos/ {}=appos ) ) ?>dobj {pos:/N.*/}=relObj"));
+    add(SemgrexPattern.compile("{$}=verb ?>/cop|auxpass/ {}=be >/.subj(pass)?/ {}=subject >/prepc?_.*/=prepEdge ( {}=object ?>/appos/ {} = appos ) ?>dobj {pos:/N.*/}=relObj"));
     // { fish like to swim }
     add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >/xcomp/ ( {}=object ?>/appos/ {}=appos )"));
     // { cats have tails }
@@ -197,7 +199,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
 
   /** A set of valid arcs denoting an entity we are interested in */
   private static final Set<String> VALID_ENTITY_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("nn"); add("aux"); add("num"); add("prep"); add("nsubj"); add("prep_*");
+    add("amod"); add("nn"); add("aux"); add("num"); add("prep"); add("nsubj"); add("prep_*"); add("poss");
   }});
 
   /** A set of valid arcs denoting an entity we are interested in */
@@ -220,6 +222,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
    * @see RelationTriple#getValidEntityChunk(edu.stanford.nlp.semgraph.SemanticGraph, edu.stanford.nlp.ling.IndexedWord, Optional)
    * @see RelationTriple#getValidAdverbChunk(edu.stanford.nlp.semgraph.SemanticGraph, edu.stanford.nlp.ling.IndexedWord, Optional)
    */
+  @SuppressWarnings("StatementWithEmptyBody")
   private static Optional<List<CoreLabel>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot,
                                                          Set<String> validArcs, Optional<String> ignoredArc) {
     PriorityQueue<CoreLabel> chunk = new FixedPrioritiesPriorityQueue<>();
@@ -307,6 +310,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
     PATTERN_LOOP: for (SemgrexPattern pattern : PATTERNS) {  // For every candidate pattern...
       SemgrexMatcher m = pattern.matcher(parse);
       if (m.matches()) {  // ... see if it matches the sentence
+        int numKnownDependents = 2;  // subject and object, at minimum
         // Object
         IndexedWord object = m.getNode("appos");
         if (object == null) {
@@ -321,12 +325,25 @@ public class RelationTriple implements Comparable<RelationTriple> {
         Optional<String> objNoopArc = Optional.empty();
         if (verb != null) {
           // Case: a standard extraction with a main verb
+          IndexedWord relObj = m.getNode("relObj");
           for (SemanticGraphEdge edge : parse.outgoingEdgeIterable(verb)) {
             if ("advmod".equals(edge.getRelation().toString()) || "amod".equals(edge.getRelation().toString())) {
+              // Add adverb modifiers
               String tag = edge.getDependent().backingLabel().tag();
               if (tag == null ||
                   (!tag.startsWith("W") && !edge.getDependent().backingLabel().word().equalsIgnoreCase("then"))) {  // prohibit advmods like "where"
                 adverbs.add(edge.getDependent());
+              }
+            } else if (edge.getDependent().equals(relObj)) {
+              // Add additional object to the relation
+              Optional<List<CoreLabel>> relObjSpan = getValidChunk(parse, relObj, Collections.singleton("nn"), Optional.empty());
+              if (!relObjSpan.isPresent()) {
+                continue PATTERN_LOOP;
+              } else {
+                for (CoreLabel token : relObjSpan.get()) {
+                  verbChunk.add(token, -token.index());
+                }
+                numKnownDependents += 1;
               }
             }
           }
@@ -351,7 +368,6 @@ public class RelationTriple implements Comparable<RelationTriple> {
           }
         }
         verbChunk.add(verb.backingLabel(), -verb.index());
-        int numKnownDependents = 2;  // subject and object, at minimum
         // Prepositions
         IndexedWord prep = m.getNode("prep");
         String prepEdge = m.getRelnString("prepEdge");
@@ -365,9 +381,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
           for (IndexedWord adv : adverbs) {
             Optional<List<CoreLabel>> adverbChunk = getValidAdverbChunk(parse, adv, Optional.empty());
             if (adverbChunk.isPresent()) {
-              for (CoreLabel token : adverbChunk.get()) {
-                adverbialModifiers.add(token);
-              }
+              adverbialModifiers.addAll(adverbChunk.get().stream().collect(Collectors.toList()));
             } else {
               continue PATTERN_LOOP;  // Invalid adverbial phrase
             }
@@ -532,6 +546,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
       }
     }
 
+    @SuppressWarnings("StringBufferReplaceableByString")
     @Override
     public String toString() {
       return new StringBuilder()

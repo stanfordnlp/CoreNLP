@@ -15,8 +15,18 @@ import java.util.stream.Collectors;
  * @author Gabor Angeli
  */
 public class SentenceFragment {
+  /**
+   * The words in this sentence fragment (e.g., for use as the gloss of the fragment).
+   */
   public final List<CoreLabel> words = new ArrayList<>();
+  /**
+   * The parse tree for this sentence fragment.
+   */
   public final SemanticGraph parseTree;
+  /**
+   * A score for this fragment. This is 1.0 by default.
+   */
+  public double score = 1.0;
 
   public SentenceFragment(SemanticGraph tree, boolean copy) {
     if (copy) {
