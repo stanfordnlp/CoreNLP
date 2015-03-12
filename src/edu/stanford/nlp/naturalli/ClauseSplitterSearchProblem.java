@@ -195,8 +195,8 @@ public class ClauseSplitterSearchProblem {
     for (IndexedWord vertex : sortedVertices) {
       extraEdgesByGovernor.put(vertex, new ArrayList<>());
     }
-    List<SemanticGraphEdge> extraEdges = cleanTree(this.tree);
-    assert isTree(this.tree);
+    List<SemanticGraphEdge> extraEdges = Util.cleanTree(this.tree);
+    assert Util.isTree(this.tree);
     for (SemanticGraphEdge edge : extraEdges) {
       extraEdgesByGovernor.get(edge.getGovernor()).add(edge);
     }
@@ -211,124 +211,6 @@ public class ClauseSplitterSearchProblem {
    */
   protected ClauseSplitterSearchProblem(SemanticGraph tree) {
     this(tree, Optional.empty(), Optional.empty());
-  }
-
-
-  /**
-   * Fix some bizarre peculiarities with certain trees.
-   * So far, these include:
-   * <ul>
-   * <li>Sometimes there's a node from a word to itself. This seems wrong.</li>
-   * </ul>
-   *
-   * @param tree The tree to clean (in place!).
-   * @return A list of extra edges, which are valid but were removed.
-   */
-  private static List<SemanticGraphEdge> cleanTree(SemanticGraph tree) {
-    // Clean nodes
-    List<IndexedWord> toDelete = new ArrayList<>();
-    for (IndexedWord vertex : tree.vertexSet()) {
-      // Clean punctuation
-      char tag = vertex.backingLabel().tag().charAt(0);
-      if (tag == '.' || tag == ',' || tag == '(' || tag == ')' || tag == ':') {
-        if (!tree.outgoingEdgeIterator(vertex).hasNext()) {  // This should really never happen, but it does.
-          toDelete.add(vertex);
-        }
-      }
-    }
-    toDelete.forEach(tree::removeVertex);
-
-    // Clean edges
-    Iterator<SemanticGraphEdge> iter = tree.edgeIterable().iterator();
-    while (iter.hasNext()) {
-      SemanticGraphEdge edge = iter.next();
-      if (edge.getDependent().index() == edge.getGovernor().index()) {
-        // Clean self-edges
-        iter.remove();
-      } else if (edge.getRelation().toString().equals("punct")) {
-        // Clean punctuation (again)
-        if (!tree.outgoingEdgeIterator(edge.getDependent()).hasNext()) {  // This should really never happen, but it does.
-          iter.remove();
-        }
-      }
-    }
-
-    // Remove extra edges
-    List<SemanticGraphEdge> extraEdges = new ArrayList<>();
-    for (SemanticGraphEdge edge : tree.edgeIterable()) {
-      if (edge.isExtra()) {
-        if (tree.incomingEdgeList(edge.getDependent()).size() > 1) {
-          extraEdges.add(edge);
-        }
-      }
-    }
-    extraEdges.forEach(tree::removeEdge);
-    // Add apposition edges (simple coref)
-    for (SemanticGraphEdge extraEdge : new ArrayList<>(extraEdges)) {  // note[gabor] prevent concurrent modification exception
-      for (SemanticGraphEdge candidateAppos : tree.incomingEdgeIterable(extraEdge.getDependent())) {
-        if (candidateAppos.getRelation().toString().equals("appos")) {
-          extraEdges.add(new SemanticGraphEdge(extraEdge.getGovernor(), candidateAppos.getGovernor(), extraEdge.getRelation(), extraEdge.getWeight(), extraEdge.isExtra()));
-        }
-      }
-      for (SemanticGraphEdge candidateAppos : tree.outgoingEdgeIterable(extraEdge.getDependent())) {
-        if (candidateAppos.getRelation().toString().equals("appos")) {
-          extraEdges.add(new SemanticGraphEdge(extraEdge.getGovernor(), candidateAppos.getDependent(), extraEdge.getRelation(), extraEdge.getWeight(), extraEdge.isExtra()));
-        }
-      }
-    }
-
-    // Brute force ensure tree
-    // Remove incoming edges from roots
-    List<SemanticGraphEdge> rootIncomingEdges = new ArrayList<>();
-    for (IndexedWord root : tree.getRoots()) {
-      for (SemanticGraphEdge incomingEdge : tree.incomingEdgeIterable(root)) {
-        rootIncomingEdges.add(incomingEdge);
-      }
-    }
-    rootIncomingEdges.forEach(tree::removeEdge);
-    // Loop until it becomes a tree.
-    boolean changed = true;
-    while (changed) {  // I just want trees to be trees; is that so much to ask!?
-      changed = false;
-      List<IndexedWord> danglingNodes = new ArrayList<>();
-      List<SemanticGraphEdge> invalidEdges = new ArrayList<>();
-
-      for (IndexedWord vertex : tree.vertexSet()) {
-        // Collect statistics
-        Iterator<SemanticGraphEdge> incomingIter = tree.incomingEdgeIterator(vertex);
-        boolean hasIncoming = incomingIter.hasNext();
-        boolean hasMultipleIncoming = false;
-        if (hasIncoming) {
-          incomingIter.next();
-          hasMultipleIncoming = incomingIter.hasNext();
-        }
-
-        // Register actions
-        if (!hasIncoming && !tree.getRoots().contains(vertex)) {
-          danglingNodes.add(vertex);
-        } else {
-          if (hasMultipleIncoming) {
-            for (SemanticGraphEdge edge : new IterableIterator<>(incomingIter)) {
-              invalidEdges.add(edge);
-            }
-          }
-        }
-      }
-
-      // Perform actions
-      for (IndexedWord vertex : danglingNodes) {
-        tree.removeVertex(vertex);
-        changed = true;
-      }
-      for (SemanticGraphEdge edge : invalidEdges) {
-        tree.removeEdge(edge);
-        changed = true;
-      }
-    }
-
-    // Return
-    assert isTree(tree);
-    return extraEdges;
   }
 
   /**
@@ -437,30 +319,6 @@ public class ClauseSplitterSearchProblem {
     }
   }
 
-  /**
-   * A little utility function to make sure a SemanticGraph is a tree.
-   * @param tree The tree to check.
-   * @return True if this {@link edu.stanford.nlp.semgraph.SemanticGraph} is a tree (versus a DAG, or Graph).
-   */
-  private static boolean isTree(SemanticGraph tree) {
-    for (IndexedWord vertex : tree.vertexSet()) {
-      if (tree.getRoots().contains(vertex)) {
-        if (tree.incomingEdgeIterator(vertex).hasNext()) {
-          return false;
-        }
-      } else {
-        Iterator<SemanticGraphEdge> iter = tree.incomingEdgeIterator(vertex);
-        if (!iter.hasNext()) {
-          return false;
-        }
-        iter.next();
-        if (iter.hasNext()) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
 
   /**
    * Create a mock node, to be added to the dependency tree but which is not part of the original sentence.
@@ -556,9 +414,9 @@ public class ClauseSplitterSearchProblem {
             subjectOrNull == null ? (source.distanceFromSubj + 1) : 0,
             ppOrNull,
             source.thunk.andThen(toModify -> {
-              assert isTree(toModify);
+              assert Util.isTree(toModify);
               simpleClause(toModify, outgoingEdge);
-              assert isTree(toModify);
+              assert Util.isTree(toModify);
             }), false
         ));
       }
@@ -618,11 +476,11 @@ public class ClauseSplitterSearchProblem {
               0,
               ppOrNull,
               source.thunk.andThen(toModify -> {
-                assert isTree(toModify);
+                assert Util.isTree(toModify);
                 simpleClause(toModify, outgoingEdge);
                 addSubtree(toModify, outgoingEdge.getDependent(), "nsubj", tree,
                     subjectOrNull.getDependent(), Collections.singleton(outgoingEdge));
-                assert isTree(toModify);
+                assert Util.isTree(toModify);
               }), true
           ));
         } else {
@@ -696,10 +554,10 @@ public class ClauseSplitterSearchProblem {
           // Add the extra edges back in, if they don't break the tree-ness of the extraction
           for (IndexedWord newTreeRoot : x.getRoots()) {
             for (SemanticGraphEdge extraEdge : extraEdgesByGovernor.get(newTreeRoot)) {
-              assert isTree(x);
+              assert Util.isTree(x);
               //noinspection unchecked
               addSubtree(x, newTreeRoot, extraEdge.getRelation().toString(), tree, extraEdge.getDependent(), tree.getIncomingEdgesSorted(newTreeRoot));
-              assert isTree(x);
+              assert Util.isTree(x);
             }
           }
         }).accept(copy);

@@ -1,10 +1,10 @@
 package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 
-import java.util.*;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * A class to find the forward entailments warranted by a particular sentence or clause.
@@ -13,7 +13,8 @@ import java.util.function.BiFunction;
  *
  * @author Gabor Angeli
  */
-public class ForwardEntailer implements BiFunction<List<CoreLabel>, SemanticGraph, ForwardEntailerSearchProblem> {
+@SuppressWarnings("UnusedDeclaration")
+public class ForwardEntailer implements Function<SemanticGraph, ForwardEntailerSearchProblem> {
 
   /**
    * The maximum number of ticks top search for. Otherwise, the search will be exhaustive.
@@ -61,19 +62,19 @@ public class ForwardEntailer implements BiFunction<List<CoreLabel>, SemanticGrap
    * Create a new search problem instance, given a sentence (possibly fragment), and the corresponding
    * parse tree.
    *
-   * @param tokens The sentence to begin with.
    * @param parseTree The original tree of the sentence we are beginning with
    *
    * @return A new search problem instance.
    */
   @Override
-  public ForwardEntailerSearchProblem apply(List<CoreLabel> tokens, SemanticGraph parseTree) {
-    for (CoreLabel token : tokens) {
-      if (!token.containsKey(NaturalLogicAnnotations.PolarityAnnotation.class)) {
+  public ForwardEntailerSearchProblem apply(SemanticGraph parseTree) {
+    for (IndexedWord vertex : parseTree.vertexSet()) {
+      CoreLabel token = vertex.backingLabel();
+      if (token != null && !token.containsKey(NaturalLogicAnnotations.PolarityAnnotation.class)) {
         throw new IllegalArgumentException("Cannot run Natural Logic forward entailment without polarity annotations set. See " + NaturalLogicAnnotator.class.getSimpleName());
       }
     }
-    return new ForwardEntailerSearchProblem(tokens, parseTree, maxResults, maxTicks, weights);
+    return new ForwardEntailerSearchProblem(parseTree, maxResults, maxTicks, weights);
   }
 
 

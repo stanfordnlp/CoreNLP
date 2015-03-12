@@ -19,10 +19,6 @@ import java.util.stream.Collectors;
  */
 public class ForwardEntailerSearchProblem {
   /**
-   * The tokens in this sentence / fragment.
-   */
-  public final List<CoreLabel> tokens;
-  /**
    * The parse of this fragment. The vertices in the parse tree should be a subset
    * (possibly not strict) of the tokens above.
    */
@@ -95,11 +91,10 @@ public class ForwardEntailerSearchProblem {
    * Create a new search problem, fully specified.
    * @see edu.stanford.nlp.naturalli.ForwardEntailer
    */
-  protected ForwardEntailerSearchProblem(List<CoreLabel> tokens, SemanticGraph parseTree,
+  protected ForwardEntailerSearchProblem(SemanticGraph parseTree,
                                          int maxResults, int maxTicks,
                                          NaturalLogicWeights weights
                                       ) {
-    this.tokens = tokens;
     this.parseTree = parseTree;
     this.maxResults = maxResults;
     this.maxTicks = maxTicks;
@@ -120,8 +115,13 @@ public class ForwardEntailerSearchProblem {
    *
    * @return A list of entailed fragments.
    */
+  @SuppressWarnings("unchecked")
   public List<SentenceFragment> search() {
-    return searchImplementation().stream().map(x -> new SentenceFragment(x.tree, false).changeScore(x.confidence) ).collect(Collectors.toList());
+    if (parseTree.vertexSet().size() > 63) {
+      return Collections.EMPTY_LIST;
+    } else {
+      return searchImplementation().stream().map(x -> new SentenceFragment(x.tree, false).changeScore(x.confidence)).collect(Collectors.toList());
+    }
   }
 
   /**
@@ -188,7 +188,7 @@ public class ForwardEntailerSearchProblem {
       // Overhead with popping a node.
       if (numTicks >= maxTicks) { return results; }
       numTicks += 1;
-      if (results.size() >= maxTicks) { return results; }
+      if (results.size() >= maxResults) { return results; }
       SearchState state = fringe.pop();
       IndexedWord currentWord = topologicalVertices.get(state.currentIndex);
 
@@ -208,13 +208,11 @@ public class ForwardEntailerSearchProblem {
       boolean canDelete = state.tree.getFirstRoot() != currentWord;
       for (SemanticGraphEdge edge : state.tree.incomingEdgeIterable(currentWord)) {
         Polarity tokenPolarity = Polarity.DEFAULT;
-        if (tokens != null) {
-          // Get token information
-          CoreLabel token = tokens.get(edge.getDependent().index() - 1);
-          tokenPolarity = token.get(NaturalLogicAnnotations.PolarityAnnotation.class);
-          if (tokenPolarity == null) {
-            tokenPolarity = Polarity.DEFAULT;
-          }
+        // Get token information
+        CoreLabel token = edge.getDependent().backingLabel();
+        tokenPolarity = token.get(NaturalLogicAnnotations.PolarityAnnotation.class);
+        if (tokenPolarity == null) {
+          tokenPolarity = Polarity.DEFAULT;
         }
         // Get the relation for this deletion
         NaturalLogicRelation lexicalRelation = NaturalLogicRelation.forDependencyDeletion(edge.getRelation().toString());

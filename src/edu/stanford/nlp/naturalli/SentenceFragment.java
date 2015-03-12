@@ -52,6 +52,23 @@ public class SentenceFragment {
     return this;
   }
 
+  /**
+   * Return the tokens in this fragment, but padded with null so that the index in this
+   * sentence matches the index of the parse tree.
+   */
+  public List<CoreLabel> paddedWords() {
+    int maxIndex = -1;
+    for (IndexedWord vertex : parseTree.vertexSet()) {
+      maxIndex = Math.max(maxIndex, vertex.index());
+    }
+    List<CoreLabel> tokens = new ArrayList<>(maxIndex);
+    for (int i = 0; i < maxIndex; ++i) { tokens.add(null); }
+    for (CoreLabel token : this.words) {
+      tokens.set(token.index() - 1, token);
+    }
+    return tokens;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

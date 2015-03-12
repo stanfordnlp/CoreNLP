@@ -129,7 +129,9 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
       min = Math.min(node.index(), min);
       max = Math.max(node.index(), max);
       for (SemanticGraphEdge edge : tree.getOutEdgesSorted(node)) {
-        if (!"punct".equals(edge.getRelation().getShortName())) {  // ignore punctuation
+        if (edge.getGovernor() == node &&   // Sometimes multiple nodes have the same index?
+            edge.getGovernor() != edge.getDependent() &&  // Just in case...
+            !"punct".equals(edge.getRelation().getShortName())) {  // ignore punctuation
           fringe.add(edge.getDependent());
         }
       }

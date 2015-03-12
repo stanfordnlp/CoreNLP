@@ -21,7 +21,6 @@ import edu.stanford.nlp.util.StringUtils;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,14 +32,17 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
 public class OpenIE implements Annotator {
 
-
   private static enum Optimization { GENERAL, KB }
+
   @Execution.Option(name="openie.optimize_for", gloss="{General, KB}: Optimize the system for particular tasks (e.g., knowledge base completion tasks -- try to make the subject and object coherent named entities).")
   private Optimization optimizeFor = Optimization.GENERAL;
+
   @Execution.Option(name="openie.splitter.model", gloss="The location of the clause splitting model.")
-  private String splitterModel = "/home/gabor/tmp/clauseSearcher.ser.gz";
+  private String splitterModel = "/home/gabor/tmp/clauseSearcherModel.ser.gz";
+
   @Execution.Option(name="openie.splitter.threshold", gloss="The minimum threshold for accepting a clause.")
   private double splitterThreshold = 0.5;
+
   @Execution.Option(name="openie.max_entailments_per_clause", gloss="The maximum number of entailments allowed per sentence of input.")
   private int entailmentsPerSentence = 100;
 
@@ -48,7 +50,7 @@ public class OpenIE implements Annotator {
 
   public final Function<SemanticGraph, ClauseSplitterSearchProblem> clauseSplitter;
 
-  public final BiFunction<List<CoreLabel>, SemanticGraph, ForwardEntailerSearchProblem> forwardEntailer;
+  public final Function<SemanticGraph, ForwardEntailerSearchProblem> forwardEntailer;
 
   /** Create a new OpenIE system, with default properties */
   @SuppressWarnings("UnusedDeclaration")
@@ -86,7 +88,8 @@ public class OpenIE implements Annotator {
   }
 
   public List<SentenceFragment> entailmentsFromClause(SentenceFragment fragment) {
-    return forwardEntailer.apply(fragment.words, fragment.parseTree).search();
+    return forwardEntailer.apply(fragment.parseTree).search()
+        .stream().map(x -> x.changeScore(x.score * fragment.score)).collect(Collectors.toList());
   }
 
   public List<SentenceFragment> entailmentsFromClauses(Collection<SentenceFragment> fragments) {
