@@ -35,6 +35,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -79,6 +80,9 @@ import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 
 import edu.stanford.nlp.io.NumberRangesFileFilter;
+import edu.stanford.nlp.swing.FontDetector;
+import edu.stanford.nlp.trees.HeadFinder;
+import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.tregex.gui.MatchesPanel.MatchesPanelListener;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
@@ -96,6 +100,7 @@ import edu.stanford.nlp.util.ReflectionLoading;
 public class TregexGUI extends JFrame implements ActionListener, MatchesPanelListener {
 
   private static TregexGUI instance; // = null;
+
   private JMenuItem preferences;
   private JMenuItem loadFiles;
   private JMenuItem saveMatches;
@@ -105,7 +110,13 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   private JMenuItem tDiff;
   private JMenuItem quit;//for when we're not running on a mac
   private JMenuItem copy;
+  private JMenuItem searchMenuItem;
+  private JMenuItem prevMatch;
+  private JMenuItem nextMatch;
+  private JMenuItem prevTreeMatch;
+  private JMenuItem nextTreeMatch;
   private JMenuItem clearFileList;
+
   //file choosing components for loading trees
   private JFileChooser chooser; // = null;
   private static File chooserFile;
@@ -113,7 +124,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
   final TreeTransformer transformer;
 
   //preferences, about panel so that we don't have to remake each time
-  private JDialog preferenceDialog; // = null;
+  private PreferencesPanel preferenceDialog; // = null;
   private JDialog aboutBox; // = null;
 
   private static final String TRANSFORMER = "transformer";
@@ -164,6 +175,24 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     copy.addActionListener(new TransferActionListener());
     edit.add(copy);
 
+    JMenu search = new JMenu("Search");
+    searchMenuItem = new JMenuItem("Search");
+    searchMenuItem.addActionListener(this);
+    search.add(searchMenuItem);
+    prevMatch = new JMenuItem("Display previous match");
+    prevMatch.addActionListener(this);
+    search.add(prevMatch);
+    nextMatch = new JMenuItem("Display next match");
+    nextMatch.addActionListener(this);
+    search.add(nextMatch);
+    search.addSeparator();
+    prevTreeMatch = new JMenuItem("Show previous match within tree");
+    prevTreeMatch.addActionListener(this);
+    search.add(prevTreeMatch);
+    nextTreeMatch = new JMenuItem("Show next match within tree");
+    nextTreeMatch.addActionListener(this);
+    search.add(nextTreeMatch);
+
     preferences = new JMenuItem("Options...");
     preferences.addActionListener(this);
     tDiff = new JCheckBoxMenuItem("Tdiff");
@@ -177,9 +206,13 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
 
     mbar.add(file);
     mbar.add(edit);
+    mbar.add(search);
     mbar.add(tools);
 
     setShortcutKeys(); //sets for appropriate operating system
+
+    loadPreferences();
+
     return mbar;
   }
 
@@ -199,6 +232,12 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.META_MASK));
     copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.META_MASK));
 
+    searchMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.META_MASK));
+    prevMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.META_MASK));
+    nextMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.META_MASK));
+    prevTreeMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.SHIFT_MASK | InputEvent.META_DOWN_MASK));
+    nextTreeMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.SHIFT_MASK | InputEvent.META_MASK));
+
   }
 
   private void setWindowsShortcutKeys() {
@@ -208,6 +247,12 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     saveHistory.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.SHIFT_MASK+InputEvent.CTRL_MASK));
     quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK)); // cdm: maybe should be Control or Alt F4
     copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
+
+    searchMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_MASK));
+    prevMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_MASK));
+    nextMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_MASK));
+    prevTreeMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK));
+    nextTreeMatch.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.SHIFT_MASK | InputEvent.CTRL_MASK));
 
   }
 
@@ -293,7 +338,7 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     } else {
       transformer = ReflectionLoading.loadByReflection(transformerClass);
     }
-    
+
     initAboutBox();
     Container content = getContentPane();
     content.setBackground(Color.lightGray);
@@ -398,6 +443,89 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
     return chooser;
   }
 
+
+  /**
+   * Load and apply application preferences.
+   */
+  void loadPreferences() {
+    //general parameters
+    InputPanel.getInstance().enableTsurgeon(Preferences.getEnableTsurgeon());
+    MatchesPanel.getInstance().setShowOnlyMatchedPortion(Preferences.getMatchPortionOnly());
+    //display stuff
+    MatchesPanel.getInstance().setHighlightColor(Preferences.getHighlightColor());
+    InputPanel.getInstance().setNumRecentPatterns(Preferences.getHistorySize());
+    MatchesPanel.getInstance().setMaxMatches(Preferences.getMaxMatches());
+
+    //tree display stuff
+    DisplayMatchesPanel.getInstance().setMatchedColor(Preferences.getMatchedColor());
+    DisplayMatchesPanel.getInstance().setDefaultColor(Preferences.getTreeColor());
+    DisplayMatchesPanel.getInstance().setFontName(Preferences.getFont());
+    MatchesPanel.getInstance().setFontName(Preferences.getFont());
+
+    int fontSize = Preferences.getFontSize();
+    if(fontSize != 0)
+      DisplayMatchesPanel.getInstance().setFontSize(Preferences.getFontSize());
+
+    //advanced stuff
+    HeadFinder hf = Preferences.getHeadFinder();
+    InputPanel.getInstance().setHeadFinder(hf);
+
+    TreeReaderFactory trf = Preferences.getTreeReaderFactory();
+    FilePanel.getInstance().setTreeReaderFactory(trf);
+
+    String hfName = hf.getClass().getSimpleName();
+    String trfName = trf.getClass().getSimpleName();
+    String encoding = Preferences.getEncoding();
+    if(encoding != null && !encoding.equals(""))
+      FileTreeModel.setCurEncoding(encoding);
+    if (PreferencesPanel.isChinese(hfName, trfName))
+      setChineseFont();
+    else if (PreferencesPanel.isArabic(hfName, trfName))
+      setArabicFont();
+
+    if (preferenceDialog == null)
+      preferenceDialog = new PreferencesPanel(this);
+    preferenceDialog.checkEncodingAndDisplay(hfName, trfName);
+  }
+
+  private static void setChineseFont() {
+    Thread t = new Thread() {
+      @Override
+      public void run() {
+        List<Font> fonts = FontDetector.supportedFonts(FontDetector.CHINESE);
+        String fontName = "";
+        if ( ! fonts.isEmpty()) {
+          fontName = fonts.get(0).getName();
+        } else if (FontDetector.hasFont("Watanabe Mincho")) {
+          fontName = "Watanabe Mincho";
+        }
+
+        if(!fontName.equals("")) {
+          DisplayMatchesPanel.getInstance().setFontName(fontName);
+          MatchesPanel.getInstance().setFontName(fontName);
+        }
+      }
+    };
+    t.start();
+  }
+
+  private static void setArabicFont() {
+    Thread t = new Thread() {
+      @Override
+      public void run() {
+        List<Font> fonts = FontDetector.supportedFonts(FontDetector.ARABIC);
+        String fontName = "";
+        if (fonts.size() > 0) {
+          fontName = fonts.get(0).getName();
+        }
+        if(!fontName.equals("")) {
+          DisplayMatchesPanel.getInstance().setFontName(fontName);
+          MatchesPanel.getInstance().setFontName(fontName);
+        }
+      }
+    };
+    t.start();
+  }
 
   /*
    * Method for bringing up the load file dialog box and conveying
@@ -739,6 +867,16 @@ public class TregexGUI extends JFrame implements ActionListener, MatchesPanelLis
       doSaveHistory();
     } else if (source == clearFileList) {
       doClearFileList();
+    } else if (source == searchMenuItem) {
+      InputPanel.getInstance().runSearch();
+    } else if (source == prevMatch) {
+      MatchesPanel.getInstance().selectPreviousMatch();
+    } else if (source == nextMatch) {
+      MatchesPanel.getInstance().selectNextMatch();
+    } else if (source == prevTreeMatch) {
+      DisplayMatchesPanel.getInstance().showPrevMatchedPart();
+    } else if (source == nextTreeMatch) {
+      DisplayMatchesPanel.getInstance().showNextMatchedPart();
     }
   }
 
