@@ -20,23 +20,23 @@ import java.util.List;
  */
 public class CRFCliqueTree<E> implements ListeningSequenceModel {
 
-  private final FactorTable[] factorTables;
-  private final double z; // norm constant
-  private final Index<E> classIndex;
+  protected final FactorTable[] factorTables;
+  protected final double z; // norm constant
+  protected final Index<E> classIndex;
   private final E backgroundSymbol;
   private final int backgroundIndex;
   // the window size, which is also the clique size
-  private final int windowSize;
+  protected final int windowSize;
   // the number of possible classes for each label
   private final int numClasses;
   private final int[] possibleValues;
 
-  /** Initialize a clique tree. */
+  /** Initialize a clique tree */
   public CRFCliqueTree(FactorTable[] factorTables, Index<E> classIndex, E backgroundSymbol) {
     this(factorTables, classIndex, backgroundSymbol, factorTables[0].totalMass());
   }
 
-  /** This extra constructor was added to support the CRFCliqueTreeForPartialLabels. */
+  /** This extra constructor was added to support the CRFCliqueTreeForPartialLabels */
   CRFCliqueTree(FactorTable[] factorTables, Index<E> classIndex, E backgroundSymbol, double z) {
     this.factorTables = factorTables;
     this.z = z;

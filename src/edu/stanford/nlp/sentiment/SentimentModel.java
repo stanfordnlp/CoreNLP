@@ -41,11 +41,6 @@ public class SentimentModel implements Serializable {
    */
   public final Map<String, SimpleMatrix> unaryClassification;
 
-  /**
-   * Map from vocabulary words to word vectors.
-   *
-   * @see #getWordVector(String) 
-   */
   public Map<String, SimpleMatrix> wordVectors;
 
   /**
@@ -323,81 +318,12 @@ public class SentimentModel implements Serializable {
     numUnaryMatrices = unaryClassification.size();
     unaryClassificationSize = numClasses * (numHid + 1);
 
-    //System.err.println(this);
-  }
-
-  /**
-   * Dumps *all* the matrices in a mostly readable format.
-   */
-  @Override
-  public String toString() {
-    StringBuilder output = new StringBuilder();
-
-    if (binaryTransform.size() > 0) {
-      if (binaryTransform.size() == 1) {
-        output.append("Binary transform matrix\n");
-      } else {
-        output.append("Binary transform matrices\n");
-      }
-      for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> matrix : binaryTransform) {
-        if (!matrix.getFirstKey().equals("") || !matrix.getSecondKey().equals("")) {
-          output.append(matrix.getFirstKey() + " " + matrix.getSecondKey() + ":\n");
-        }
-        output.append(NeuralUtils.toString(matrix.getValue(), "%.8f"));
-      }
-    }
-
-    if (binaryTensors.size() > 0) {
-      if (binaryTensors.size() == 1) {
-        output.append("Binary transform tensor\n");
-      } else {
-        output.append("Binary transform tensors\n");
-      }
-      for (TwoDimensionalMap.Entry<String, String, SimpleTensor> matrix : binaryTensors) {
-        if (!matrix.getFirstKey().equals("") || !matrix.getSecondKey().equals("")) {
-          output.append(matrix.getFirstKey() + " " + matrix.getSecondKey() + ":\n");
-        }
-        output.append(matrix.getValue().toString("%.8f"));
-      }
-    }
-
-    if (binaryClassification.size() > 0) {
-      if (binaryClassification.size() == 1) {
-        output.append("Binary classification matrix\n");
-      } else {
-        output.append("Binary classification matrices\n");
-      }
-      for (TwoDimensionalMap.Entry<String, String, SimpleMatrix> matrix : binaryClassification) {
-        if (!matrix.getFirstKey().equals("") || !matrix.getSecondKey().equals("")) {
-          output.append(matrix.getFirstKey() + " " + matrix.getSecondKey() + ":\n");
-        }
-        output.append(NeuralUtils.toString(matrix.getValue(), "%.8f"));
-      }
-    }
-
-    if (unaryClassification.size() > 0) {
-      if (unaryClassification.size() == 1) {
-        output.append("Unary classification matrix\n");
-      } else {
-        output.append("Unary classification matrices\n");
-      }
-      for (Map.Entry<String, SimpleMatrix> matrix : unaryClassification.entrySet()) {
-        if (!matrix.getKey().equals("")) {
-          output.append(matrix.getKey() + ":\n");
-        }
-        output.append(NeuralUtils.toString(matrix.getValue(), "%.8f"));
-      }
-    }
-
-    output.append("Word vectors\n");
-    for (Map.Entry<String, SimpleMatrix> matrix : wordVectors.entrySet()) {
-      output.append("'" + matrix.getKey() + "'");
-      output.append("\n");
-      output.append(NeuralUtils.toString(matrix.getValue(), "%.8f"));
-      output.append("\n");
-    }
-
-    return output.toString();
+    // System.err.println("Binary transform matrices:");
+    // System.err.println(binaryTransform);
+    // System.err.println("Binary classification matrices:");
+    // System.err.println(binaryClassification);
+    // System.err.println("Unary classification matrices:");
+    // System.err.println(unaryClassification);
   }
 
   SimpleTensor randomBinaryTensor() {
@@ -424,10 +350,9 @@ public class SentimentModel implements Serializable {
    */
   SimpleMatrix randomClassificationMatrix() {
     SimpleMatrix score = new SimpleMatrix(numClasses, numHid + 1);
+    // Leave the bias column with 0 values
     double range = 1.0 / (Math.sqrt((double) numHid));
     score.insertIntoThis(0, 0, SimpleMatrix.random(numClasses, numHid, -range, range, rand));
-    // bias column goes from 0 to 1 initially
-    score.insertIntoThis(0, numHid, SimpleMatrix.random(numClasses, 1, 0.0, 1.0, rand));
     return score.scale(op.trainOptions.scalingForInit);
   }
 
@@ -436,7 +361,7 @@ public class SentimentModel implements Serializable {
   }
 
   static SimpleMatrix randomWordVector(int size, Random rand) {
-    return NeuralUtils.randomGaussian(size, 1, rand).scale(0.1);
+    return NeuralUtils.randomGaussian(size, 1, rand);
   }
 
   void initRandomWordVectors(List<Tree> trainingTrees) {
@@ -549,22 +474,10 @@ public class SentimentModel implements Serializable {
     }
   }
 
-  /**
-   * Retrieve a learned word vector for the given word.
-   *
-   * If the word is OOV, returns a vector associated with an
-   * {@code <unk>} term.
-   */
   public SimpleMatrix getWordVector(String word) {
     return wordVectors.get(getVocabWord(word));
   }
 
-  /**
-   * Get the known vocabulary word associated with the given word.
-   *
-   * @return The form of the given word known by the model, or
-   *         {@link #UNKNOWN_WORD} if this word has not been observed
-   */
   public String getVocabWord(String word) {
     if (op.lowercaseWordVectors) {
       word = word.toLowerCase();

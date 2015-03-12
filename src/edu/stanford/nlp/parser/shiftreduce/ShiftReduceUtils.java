@@ -15,7 +15,7 @@ class ShiftReduceUtils {
     }
     CoreLabel label = ErasureUtils.uncheckedCast(tree.label());
     CoreLabel childLabel = ErasureUtils.uncheckedCast(tree.children()[0].label());
-    if (label.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class) == childLabel.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class)) {
+    if (label.get(TreeCoreAnnotations.HeadWordAnnotation.class) == childLabel.get(TreeCoreAnnotations.HeadWordAnnotation.class)) {
       return BinaryTransition.Side.LEFT;
     } else {
       return BinaryTransition.Side.RIGHT;
@@ -36,7 +36,8 @@ class ShiftReduceUtils {
   /** Returns a 0-based index of the head of the tree.  Assumes the leaves had been indexed from 1 */
   static int headIndex(Tree tree) {
     CoreLabel label = ErasureUtils.uncheckedCast(tree.label());
-    CoreLabel headLabel = label.get(TreeCoreAnnotations.HeadWordLabelAnnotation.class);
+    Tree head = label.get(TreeCoreAnnotations.HeadWordAnnotation.class);
+    CoreLabel headLabel = ErasureUtils.uncheckedCast(head.label());
     return headLabel.index() - 1;
   }
 

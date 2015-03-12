@@ -3,9 +3,11 @@ package edu.stanford.nlp.trees;
 import java.io.StringReader;
 import java.util.List;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.LabelFactory;
+import edu.stanford.nlp.util.StringUtils;
 
 /**
  * <p>
@@ -41,9 +43,10 @@ public class TreeGraphNode extends Tree implements HasParent {
   protected TreeGraphNode[] children = ZERO_TGN_CHILDREN;
 
   /**
-   * For internal nodes, the head word of this subtree.
+   * The {@link GrammaticalStructure <code>GrammaticalStructure</code>} of which this
+   * node is part.
    */
-  private TreeGraphNode headWordNode;
+  protected GrammaticalStructure tg;
 
   /**
    * A leaf node should have a zero-length array for its
@@ -53,8 +56,13 @@ public class TreeGraphNode extends Tree implements HasParent {
    */
   protected static final TreeGraphNode[] ZERO_TGN_CHILDREN = new TreeGraphNode[0];
 
-  private static final LabelFactory mlf = CoreLabel.factory();
+  private static LabelFactory mlf = CoreLabel.factory();
 
+  /**
+   * Create a new empty <code>TreeGraphNode</code>.
+   */
+  public TreeGraphNode() {
+  }
 
   /**
    * Create a new <code>TreeGraphNode</code> with the supplied
@@ -77,6 +85,24 @@ public class TreeGraphNode extends Tree implements HasParent {
   public TreeGraphNode(Label label, List<Tree> children) {
     this(label);
     setChildren(children);
+  }
+
+  /**
+   * Create a new <code>TreeGraphNode</code> having the same tree
+   * structure and label values as an existing tree (but no shared
+   * storage).
+   * @param t     the tree to copy
+   * @param graph the graph of which this node is a part
+   */
+  public TreeGraphNode(Tree t, GrammaticalStructure graph) {
+    this(t, (TreeGraphNode) null);
+    this.setTreeGraph(graph);
+  }
+
+  // XXX TODO it's not really clear what graph the copy should be a part of
+  public TreeGraphNode(TreeGraphNode t) {
+    this(t, t.parent);
+    this.setTreeGraph(t.treeGraph());
   }
 
   /**
@@ -130,15 +156,6 @@ public class TreeGraphNode extends Tree implements HasParent {
   @Override
   public CoreLabel label() {
     return label;
-  }
-
-  @Override
-  public void setLabel(Label label) {
-    if (label instanceof CoreLabel) {
-      this.setLabel((CoreLabel) label);
-    } else {
-      this.setLabel((CoreLabel) mlf.newLabel(label));
-    }
   }
 
   /**
@@ -201,14 +218,10 @@ public class TreeGraphNode extends Tree implements HasParent {
     } else {
       if (children instanceof TreeGraphNode[]) {
         this.children = (TreeGraphNode[]) children;
-        for (TreeGraphNode child : this.children) {
-          child.setParent(this);
-        }
       } else {
         this.children = new TreeGraphNode[children.length];
         for (int i = 0; i < children.length; i++) {
           this.children[i] = (TreeGraphNode)children[i];
-          this.children[i].setParent(this);
         }
       }
     }
@@ -227,60 +240,24 @@ public class TreeGraphNode extends Tree implements HasParent {
     }
   }
 
-  @Override
-  public Tree setChild(int i, Tree t) {
-    if (!(t instanceof TreeGraphNode)) {
-      throw new IllegalArgumentException("Horrible error");
-    }
-    ((TreeGraphNode) t).setParent(this);
-    return super.setChild(i, t);
+  /**
+   * Get the <code>GrammaticalStructure</code> of which this node is a
+   * part.
+   */
+  protected GrammaticalStructure treeGraph() {
+    return tg;
   }
 
   /**
-   * Adds a child in the ith location.  Does so without overwriting
-   * the parent pointers of the rest of the children, which might be
-   * relevant in case there are add and remove operations mixed
-   * together.
+   * Set pointer to the <code>GrammaticalStructure</code> of which this node
+   * is a part.  Operates recursively to set pointer for all
+   * descendants too.
    */
-  @Override
-  public void addChild(int i, Tree t) {
-    if (!(t instanceof TreeGraphNode)) {
-      throw new IllegalArgumentException("Horrible error");
+  protected void setTreeGraph(GrammaticalStructure tg) {
+    this.tg = tg;
+    for (TreeGraphNode child : children) {
+      child.setTreeGraph(tg);
     }
-    ((TreeGraphNode) t).setParent(this);
-    TreeGraphNode[] kids = this.children;
-    TreeGraphNode[] newKids = new TreeGraphNode[kids.length + 1];
-    if (i != 0) {
-      System.arraycopy(kids, 0, newKids, 0, i);
-    }
-    newKids[i] = (TreeGraphNode) t;
-    if (i != kids.length) {
-      System.arraycopy(kids, i, newKids, i + 1, kids.length - i);
-    }
-    this.children = newKids;
-  }
-
-  /**
-   * Removes the ith child from the TreeGraphNode.  Needs to override
-   * the parent removeChild so it can avoid setting the parent
-   * pointers on the remaining children.  This is useful if you want
-   * to add and remove children from one node to another node; this way,
-   * it won't matter what order you do the add and remove operations.
-   */
-  @Override
-  public Tree removeChild(int i) {
-    TreeGraphNode[] kids = children();
-    TreeGraphNode kid = kids[i];
-    TreeGraphNode[] newKids = new TreeGraphNode[kids.length - 1];
-    for (int j = 0; j < newKids.length; j++) {
-      if (j < i) {
-        newKids[j] = kids[j];
-      } else {
-        newKids[j] = kids[j + 1];
-      }
-    }
-    this.children = newKids;
-    return kid;
   }
 
   /**
@@ -321,6 +298,14 @@ public class TreeGraphNode extends Tree implements HasParent {
         } else {
           setHeadWordNode(hwn);
         }
+
+        TreeGraphNode htn = head.headTagNode();
+        if (htn == null && head.isLeaf()) { // below us is a leaf
+          setHeadTagNode(this);
+        } else {
+          setHeadTagNode(htn);
+        }
+
       } else {
         System.err.println("Head is null: " + this);
       }
@@ -339,8 +324,12 @@ public class TreeGraphNode extends Tree implements HasParent {
    * @return the node containing the head word for this node
    */
   public TreeGraphNode headWordNode() {
-    return headWordNode;
-   }
+    TreeGraphNode hwn = safeCast(label.get(TreeCoreAnnotations.HeadWordAnnotation.class));
+    if (hwn == null || (hwn.treeGraph() != null && !(hwn.treeGraph().equals(this.treeGraph())))) {
+      return null;
+    }
+    return hwn;
+  }
 
   /**
    * Store the node containing the head word for this node by
@@ -354,7 +343,41 @@ public class TreeGraphNode extends Tree implements HasParent {
    * @param hwn the node containing the head word for this node
    */
   private void setHeadWordNode(final TreeGraphNode hwn) {
-    this.headWordNode = hwn;
+    label.set(TreeCoreAnnotations.HeadWordAnnotation.class, hwn);
+  }
+
+  /**
+   * Return the node containing the head tag for this node (or
+   * <code>null</code> if none), as recorded in this node's {@link
+   * CoreLabel <code>CoreLabel</code>}.  (In contrast to {@link
+   * edu.stanford.nlp.ling.CategoryWordTag
+   * <code>CategoryWordTag</code>}, we store head words and head
+   * tags as references to nodes, not merely as
+   * <code>String</code>s.)
+   *
+   * @return the node containing the head tag for this node
+   */
+  public TreeGraphNode headTagNode() {
+    TreeGraphNode htn = safeCast(label.get(TreeCoreAnnotations.HeadTagAnnotation.class));
+    if (htn == null || (htn.treeGraph() != null && !(htn.treeGraph().equals(this.treeGraph())))) {
+      return null;
+    }
+    return htn;
+  }
+
+  /**
+   * Store the node containing the head tag for this node by
+   * storing it in this node's {@link CoreLabel
+   * <code>CoreLabel</code>}.  (In contrast to {@link
+   * edu.stanford.nlp.ling.CategoryWordTag
+   * <code>CategoryWordTag</code>}, we store head words and head
+   * tags as references to nodes, not merely as
+   * <code>String</code>s.)
+   *
+   * @param htn the node containing the head tag for this node
+   */
+  private void setHeadTagNode(final TreeGraphNode htn) {
+    label.set(TreeCoreAnnotations.HeadTagAnnotation.class, htn);
   }
 
   /**
@@ -492,12 +515,17 @@ public class TreeGraphNode extends Tree implements HasParent {
     return buf.toString();
   }
 
+//  public String toPrimes() {
+//    int copy = label().copyCount();
+//    return StringUtils.repeat('\'', copy);
+//  }
 
   @Override
   public String toString() {
     return toString(CoreLabel.DEFAULT_FORMAT);
   }
 
+  //TODO: is it important to have the toPrimes() string attached to this? (SG) Currently it is not.
   public String toString(CoreLabel.OutputFormat format) {
     return label.toString(format);
   }

@@ -20,6 +20,8 @@ import edu.stanford.nlp.util.PropertiesUtils;
 import junit.framework.TestCase;
 
 import edu.stanford.nlp.util.StringUtils;
+import org.hamcrest.CoreMatchers;
+import org.junit.matchers.JUnitMatchers;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertThat;
@@ -90,8 +92,8 @@ public class DependencyParserITest extends TestCase {
     Collection<TypedDependency> dependencies = ccProcessed.typedDependencies();
 
     GrammaticalRelation expected = EnglishGrammaticalRelations.getConj("and");
-    assertThat(dependencies.stream().map(TypedDependency::reln).collect(toList()),
-            hasItem(expected));
+    assertThat(dependencies.stream().map(d -> d.reln()).collect(toList()),
+        hasItem(expected));
   }
 
   /**

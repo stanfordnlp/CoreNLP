@@ -63,6 +63,9 @@ public class ParserAnnotator extends SentenceAnnotator {
 
   private final boolean saveBinaryTrees;
 
+  /** If true, don't re-annotate sentences that already have a tree annotation */
+  private final boolean noSquash;
+
   public ParserAnnotator(boolean verbose, int maxSent) {
     this(System.getProperty("parse.model", LexicalizedParser.DEFAULT_PARSER_LOC), verbose, maxSent, StringUtils.EMPTY_STRING_ARRAY);
   }
@@ -93,6 +96,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     }
     this.nThreads = 1;
     this.saveBinaryTrees = false;
+    this.noSquash = false;
   }
 
 
@@ -137,6 +141,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     this.nThreads = PropertiesUtils.getInt(props, annotatorName + ".nthreads", PropertiesUtils.getInt(props, "nthreads", 1));
     boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);
     this.saveBinaryTrees = PropertiesUtils.getBool(props, annotatorName + ".binaryTrees", usesBinary);
+    this.noSquash = PropertiesUtils.getBool(props, annotatorName + ".nosquash", false);
   }
 
   public static String signature(String annotatorName, Properties props) {
@@ -203,6 +208,13 @@ public class ParserAnnotator extends SentenceAnnotator {
 
   @Override
   protected void doOneSentence(Annotation annotation, CoreMap sentence) {
+    // If "noSquash" is set, don't re-annotate sentences which already have a tree annotation
+    if (noSquash &&
+        sentence.get(TreeCoreAnnotations.TreeAnnotation.class) != null &&
+        !"X".equalsIgnoreCase(sentence.get(TreeCoreAnnotations.TreeAnnotation.class).label().value())) {
+      return;
+    }
+
     final List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if (VERBOSE) {
       System.err.println("Parsing: " + words);

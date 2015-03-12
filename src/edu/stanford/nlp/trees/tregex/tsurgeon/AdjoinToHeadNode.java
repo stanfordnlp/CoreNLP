@@ -29,7 +29,7 @@ class AdjoinToHeadNode extends AdjoinNode {
       // find match
       Tree targetNode = childMatcher[0].evaluate(tree, tregex);
       // put children underneath target in foot of auxilary tree
-      AuxiliaryTree ft = adjunctionTree().copy(this, tree.treeFactory(), tree.label().labelFactory());
+      AuxiliaryTree ft = adjunctionTree().copy(this);
       ft.foot.setChildren(targetNode.getChildrenAsList());
       // put children of auxiliary tree under target.  root of auxiliary tree is ignored.  root of original is maintained.
       targetNode.setChildren(ft.tree.getChildrenAsList());

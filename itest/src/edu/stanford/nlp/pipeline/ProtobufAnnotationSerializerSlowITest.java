@@ -369,11 +369,6 @@ public class ProtobufAnnotationSerializerSlowITest {
     testAnnotators("tokenize,ssplit");
   }
 
-  @Test
-  public void testSerializeNatLog() {
-    testAnnotators("tokenize,ssplit,pos,lemma,parse,natlog");
-  }
-
   /**
    * Is the protobuf annotator "CoreNLP complete?"
    * That is, does it effectively save every combination of annotators possible?

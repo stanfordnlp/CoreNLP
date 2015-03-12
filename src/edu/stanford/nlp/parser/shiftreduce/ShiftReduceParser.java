@@ -241,11 +241,10 @@ public class ShiftReduceParser extends ParserGrammar implements Serializable {
       LabeledScoredTreeNode tagNode = new LabeledScoredTreeNode(tagLabel);
       tagNode.addChild(wordNode);
 
-      // TODO: can we get away with not setting these on the wordLabel?
-      wordLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, wordLabel);
-      wordLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, tagLabel);
-      tagLabel.set(TreeCoreAnnotations.HeadWordLabelAnnotation.class, wordLabel);
-      tagLabel.set(TreeCoreAnnotations.HeadTagLabelAnnotation.class, tagLabel);
+      wordLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, wordNode);
+      wordLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, tagNode);
+      tagLabel.set(TreeCoreAnnotations.HeadWordAnnotation.class, wordNode);
+      tagLabel.set(TreeCoreAnnotations.HeadTagAnnotation.class, tagNode);
 
       preterminals.add(tagNode);
     }

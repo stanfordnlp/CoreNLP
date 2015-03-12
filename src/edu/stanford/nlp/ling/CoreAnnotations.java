@@ -428,6 +428,20 @@ public class CoreAnnotations {
   }
 
   /**
+   * Keys from AbstractMapLabel (descriptions taken from that class)
+   */
+  /**
+   * The standard key for storing a projected category in the map, as a String.
+   * For any word (leaf node), the projected category is the syntactic category
+   * of the maximal constituent headed by the word. Used in SemanticGraph.
+   */
+  public static class ProjectedCategoryAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+
+  /**
    * The standard key for a propbank label which is of type Argument
    */
   public static class ArgumentAnnotation implements CoreAnnotation<String> {
