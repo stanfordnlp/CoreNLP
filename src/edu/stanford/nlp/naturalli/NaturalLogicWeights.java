@@ -85,7 +85,13 @@ public class NaturalLogicWeights {
 
   public double deletionProbability(String edgeType) {
     // TODO(gabor) this is effectively assuming hard NatLog weights
-    return 1.0;
+    if (edgeType.contains("prep")) {
+      return 0.9;
+    } else if (edgeType.contains("obj")) {
+      return 0.0;
+    } else {
+      return 1.0;
+    }
   }
 
   public double objDeletionProbability(SemanticGraphEdge edge, Iterable<SemanticGraphEdge> neighbors) {
