@@ -43,7 +43,7 @@ public class SemgrexBatchParser {
       if(line.length() == 0 || line.startsWith("#")) continue;
       if(line.startsWith("macro ")) continue;
       line = replaceMacros(line, macros);
-      String[] tok = line.split("\t",2);
+      String[] tok = line.split("\t");
       SemgrexPattern pattern = SemgrexPattern.compile(tok[0]);
       patterns.setCount(pattern, tok.length > 1? Double.parseDouble(tok[1]): 1.0);
 	  }
