@@ -2,8 +2,10 @@ package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreAnnotation;
+import edu.stanford.nlp.ling.CoreLabel;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * A collection of {@link edu.stanford.nlp.ling.CoreAnnotation}s for various Natural Logic data.
@@ -37,11 +39,11 @@ public class NaturalLogicAnnotations {
   /**
    * The set of sentences which are entailed by the original sentence, according to Natural Logic semantics.
    */
-  public static final class EntailedSentencesAnnotation implements CoreAnnotation<Collection<SentenceFragment>> {
+  public static final class ImpliedSentencesAnnotation implements CoreAnnotation<Collection<List<CoreLabel>>> {
     @SuppressWarnings("unchecked")
     @Override
-    public Class<Collection<SentenceFragment>> getType() {
-      return (Class<Collection<SentenceFragment>>) ((Object) Collection.class);
+    public Class<Collection<List<CoreLabel>>> getType() {
+      return (Class<Collection<List<CoreLabel>>>) ((Object) Collection.class);
     }
   }
 

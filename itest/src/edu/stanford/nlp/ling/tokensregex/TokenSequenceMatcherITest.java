@@ -1,5 +1,6 @@
 package edu.stanford.nlp.ling.tokensregex;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.util.CoreMap;
@@ -8,8 +9,10 @@ import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
 import junit.framework.TestCase;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1523,5 +1526,4 @@ public class TokenSequenceMatcherITest extends TestCase {
     boolean match = m.find();
     assertTrue(match);
   }
-
 }
