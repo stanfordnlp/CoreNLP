@@ -16,28 +16,23 @@ import java.util.regex.Pattern;
  */
 public class EnglishPatterns {
 
-  public static final String[] copularVerbs = {
-          "be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "`s", "art", "ar", "wase"};
-
-  public static final String[] beGetVerbs = {
-          "be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "`s", "art", "ar", "wase",
-          "get", "getting", "gets", "got", "gotten" };
-
   public static final String timeWordRegex =
     "/^(?i:Mondays?|Tuesdays?|Wednesdays?|Thursdays?|Fridays?|Saturdays?|Sundays?|years?|months?|weeks?|days?|mornings?|evenings?|nights?|January|Jan\\.|February|Feb\\.|March|Mar\\.|April|Apr\\.|May|June|July|August|Aug\\.|September|Sept\\.|October|Oct\\.|November|Nov\\.|December|Dec\\.|today|yesterday|tomorrow|spring|summer|fall|autumn|winter)$/";
 
   public static final String timeWordLotRegex =
       "/^(?i:Mondays?|Tuesdays?|Wednesdays?|Thursdays?|Fridays?|Saturdays?|Sundays?|years?|months?|weeks?|days?|mornings?|evenings?|nights?|January|Jan\\.|February|Feb\\.|March|Mar\\.|April|Apr\\.|May|June|July|August|Aug\\.|September|Sept\\.|October|Oct\\.|November|Nov\\.|December|Dec\\.|today|yesterday|tomorrow|spring|summer|fall|autumn|winter|lot)$/";
 
+  // TODO: remove everything but "to be".  Must do this carefully to
+  // make sure we like all the dependency changes that happen
   public static final String copularWordRegex =
-    "/^(?i:" + StringUtils.join(copularVerbs, "|") + ")$/";
+    "/^(?i:" + StringUtils.join(SemanticHeadFinder.copulaVerbs, "|") + ")$/";
 
   public static final String clausalComplementRegex =
     "/^(?i:seem|seems|seemed|seeming|resemble|resembles|resembled|resembling|become|becomes|became|becoming|remain|remains|remained|remaining)$/";
 
   // r is for texting r = are
   public static final String passiveAuxWordRegex =
-      "/^(?i:" +StringUtils.join(beGetVerbs, "|") + ")$/";
+      "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|seem|seems|seemed|seeming|appear|appears|appeared|become|becomes|became|becoming|get|got|getting|gets|gotten|remains|remained|remain)$/";
 
   public static final String beAuxiliaryRegex =
         "/^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/";
