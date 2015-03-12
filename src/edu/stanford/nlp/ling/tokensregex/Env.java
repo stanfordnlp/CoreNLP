@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * </ul>
  * </p>
  */
-public class Env implements Serializable {
+public class Env {
   /**
    * Parser that converts a string into a SequencePattern.
    * @see edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParser
