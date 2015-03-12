@@ -203,6 +203,7 @@ public enum NaturalLogicRelation {
     put("prep_after", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_against", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_along", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_alongside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_amid", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_among", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_anti", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -225,6 +226,7 @@ public enum NaturalLogicRelation {
     put("prep_down", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_during", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_except", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_en", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_excepting", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_excluding", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_following", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -243,6 +245,7 @@ public enum NaturalLogicRelation {
     put("prep_on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_onto", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_opposite", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_out", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_outside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_over", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_past", NaturalLogicRelation.REVERSE_ENTAILMENT);  //

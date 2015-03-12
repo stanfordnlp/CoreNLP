@@ -27,6 +27,11 @@ public class SentenceFragment {
     words.addAll(this.parseTree.vertexListSorted().stream().map(IndexedWord::backingLabel).collect(Collectors.toList()));
   }
 
+  /** The length of this fragment, in words */
+  public int length() {
+    return words.size();
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
