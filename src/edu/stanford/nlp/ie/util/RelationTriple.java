@@ -106,11 +106,11 @@ public class RelationTriple implements Comparable<RelationTriple> {
   }
 
   public Pair<Integer, Integer> subjectTokenSpan() {
-    return getSpan(subject, CoreLabel::index, CoreLabel::index);
+    return getSpan(subject, x -> x.index() - 1, x -> x.index() - 1);
   }
 
   public Pair<Integer, Integer> objectTokenSpan() {
-    return getSpan(subject, CoreLabel::index, CoreLabel::index);
+    return getSpan(subject, x -> x.index() - 1, x -> x.index() - 1);
   }
 
   /** An optional method, returning the dependency tree this triple was extracted from */
