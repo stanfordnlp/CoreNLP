@@ -441,11 +441,7 @@ public class Tsurgeon {
         // A blank line after getting some real content (not just comments or nothing)
         break;
       }
-      Matcher m = commentPattern.matcher(thisLine);
-      if (m.matches()) {
-        // delete it
-        thisLine = m.replaceFirst("");
-      }
+      thisLine = removeComments(thisLine);
       if ( ! emptyLinePattern.matcher(thisLine).matches()) {
         matchString.append(thisLine);
       }

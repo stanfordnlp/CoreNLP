@@ -1030,15 +1030,13 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
             say("M");
             break;
           default:
-            sayln("Invalid line search option for QNMinimizer. ");
-            System.exit(1);
-            break;
-
+            throw new IllegalArgumentException("Invalid line search option for QNMinimizer.");
           }
         }
 
         newValue = newPoint[f];
-        System.err.print(" " + nf.format(newPoint[a]));
+        say(" ");
+        say(nf.format(newPoint[a]));
         say("] ");
 
         // This shouldn't actually evaluate anything since that should have been

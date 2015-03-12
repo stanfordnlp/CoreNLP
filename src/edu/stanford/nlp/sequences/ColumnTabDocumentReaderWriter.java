@@ -361,7 +361,12 @@ public class ColumnTabDocumentReaderWriter<IN extends CoreMap> implements Docume
                 docId = newDocId;
                 itemCnt++;
               }
-              IN wi = tokenFactory.makeToken(map, info);
+              IN wi;
+              if (info.length == map.length) {
+                wi = tokenFactory.makeToken(map, info);
+              } else {
+                wi = tokenFactory.makeToken(map, Arrays.asList(info).subList(0, map.length).toArray(new String[map.length]));
+              }
               words.add(wi);
             }
           } else {

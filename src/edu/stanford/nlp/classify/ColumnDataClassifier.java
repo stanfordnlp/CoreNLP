@@ -160,12 +160,18 @@ import java.util.regex.PatternSyntaxException;
  * <tr><td> useAllSplitWordPairs</td><td>boolean</td><td>false</td><td>Make features from all pairs of "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>ASWP-<i>str1</i>-<i>str2</i></td></tr>
  * <tr><td> useAllSplitWordTriples</td><td>boolean</td><td>false</td><td>Make features from all triples of "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>ASWT-<i>str1</i>-<i>str2</i>-<i>str3</i></td></tr>
  * <tr><td> useSplitWordNGrams</td><td>boolean</td><td>false</td><td>Make features of adjacent word n-grams of lengths between minWordNGramLeng and maxWordNGramLeng inclusive. Note that these are word sequences, not character n-grams.</td><td>SW#-<i>str1-str2-strN</i></td></tr>
+ *
+ * <tr><td> splitWordCount</td><td>boolean</td><td>false</td><td>The value of this real-valued feature is the number of split word tokens in the column.</td><td>SWNUM</td></tr>
+ * <tr><td> logSplitWordCount</td><td>boolean</td><td>false</td><td>The value of this real-valued feature is the log of the number of split word tokens in the column.</td><td>LSWNUM</td></tr>
+ * <tr><td> binnedSplitWordCounts</td><td>String</td><td>null</td><td>If non-null, treat as a sequence of comma-separated integer bounds, where items above the previous bound (if any) up to the next bound (inclusive) are binned (e.g., "1,5,15,30,60"). The feature represents the number of split words in this column.</td><td>SWNUMBIN-<i>range</i></td></tr>
+
  * <tr><td> maxWordNGramLeng</td><td>int</td><td>-1</td><td>If this number is positive, word n-grams above this size will not be used in the model</td></tr>
  * <tr><td> minWordNGramLeng</td><td>int</td><td>1</td><td>Must be positive. word n-grams below this size will not be used in the model</td></tr>
  * <tr><td> wordNGramBoundaryRegexp</td><td>String</td><td>null</td><td>If this is defined and the regexp matches, then the ngram stops</td></tr>
  * <tr><td> useSplitFirstLastWords</td><td>boolean</td><td>false</td><td>Make a feature from each of the first and last "words" that are returned as splitWords.  This is equivalent to having word bigrams with boundary tokens at each end of the sequence (they get a special feature).  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SFW-<i>str</i>, SLW-<i>str</i></td></tr>
  * <tr><td> useSplitNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams - internal as well as edge all treated the same - after the data string has been split into tokens.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#-<i>str</i></td></tr>
  * <tr><td> useSplitPrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefixes and suffixes of each token, after splitting string with splitWordsRegexp.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#B-<i>str</i>, S#E-<i>str</i></td></tr>
+
  * <tr><td> useNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams - internal as well as edge all treated the same.</td><td>#-<i>str</i></td></tr>
  * <tr><td> usePrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefix and suffix substrings of the string.</td><td>#B-<i>str</i>, #E-<i>str</i></td></tr>
  * <tr><td> lowercase</td><td>boolean</td><td>false</td><td>Make the input string lowercase so all features work uncased</td></tr>
@@ -223,6 +229,10 @@ import java.util.regex.PatternSyntaxException;
  * @author Angel Chang (add options for using l1reg)
  */
 public class ColumnDataClassifier {
+
+  // todo [cdm 2014]: support reading files with comment lines starting with "#" or to ignore a first column headers line
+  // todo [cdm 2014]: be able to run on a test file without gold answers. For doing Kaggle competitions.
+  // todo [cdm 2014]: support lowercaseSplitWordPairs.
 
   private static final double DEFAULT_VALUE = 1.0; // default value for setting categorical, boolean features
   private static final String DEFAULT_IGNORE_REGEXP = "\\s+";
@@ -419,6 +429,10 @@ public class ColumnDataClassifier {
           if (inTestPhase) {
             lineInfos.add(strings);
           }
+          if (strings.length < flags.length) {
+            throw new RuntimeException("Error: Line has too few tab-separated columns (" + maxColumns +
+                    ") for " + flags.length + " columns required by specified properties: " + line);
+          }
           dataset.add(makeDatumFromStrings(strings));
         }
         if (lineNo > 0 && minColumns != maxColumns) {
@@ -427,7 +441,7 @@ public class ColumnDataClassifier {
                   filename + " varies between " + minColumns + " and " + maxColumns);
         }
       } catch (Exception e) {
-        throw new RuntimeException("Dataset could not be processed", e);
+        throw new RuntimeException("Dataset could not be loaded", e);
       }
     }
 
@@ -524,7 +538,7 @@ public class ColumnDataClassifier {
    * Write out an answer, and update statistics.
    */
   private void writeAnswer(String[] strs, String clAnswer, Distribution<String> cntr, Counter<String> contingency, Classifier<String,String> c, double sim) {
-    String goldAnswer = strs[globalFlags.goldAnswerColumn];
+    String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
     String printedText = "";
     if (globalFlags.displayedColumn >= 0) {
       printedText = strs[globalFlags.displayedColumn];
@@ -726,6 +740,7 @@ public class ColumnDataClassifier {
    * @return The constructed Datum
    */
   private Datum<String,String> makeDatum(String[] strs) {
+    String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
     List<String> theFeatures = new ArrayList<String>();
     Collection<String> globalFeatures = Generics.newHashSet();
     if (globalFlags.useClassFeature) {
@@ -735,7 +750,7 @@ public class ColumnDataClassifier {
 
     for (int i = 0; i < flags.length; i++) {
       Collection<String> featuresC = Generics.newHashSet();//important that this is a hash set to prevent same feature from being added multiple times
-      makeDatum(strs[i], flags[i], featuresC, strs[globalFlags.goldAnswerColumn]);
+      makeDatum(strs[i], flags[i], featuresC, goldAnswer);
       addAllInterningAndPrefixing(theFeatures, featuresC, i + "-");
     }
 
@@ -743,7 +758,7 @@ public class ColumnDataClassifier {
       printFeatures(strs, theFeatures);
     }
     //System.out.println("Features are: " + theFeatures);
-    return new BasicDatum<String,String>(theFeatures, strs[globalFlags.goldAnswerColumn]);
+    return new BasicDatum<String,String>(theFeatures, goldAnswer);
   }
 
   /**
@@ -755,6 +770,7 @@ public class ColumnDataClassifier {
    * @return The constructed RVFDatum
    */
   private RVFDatum<String,String> makeRVFDatum(String[] strs) {
+    String goldAnswer = globalFlags.goldAnswerColumn < strs.length ? strs[globalFlags.goldAnswerColumn]: "";
     ClassicCounter<String> theFeatures = new ClassicCounter<String>();
     ClassicCounter<String> globalFeatures = new ClassicCounter<String>();
     if (globalFlags.useClassFeature) {
@@ -764,7 +780,7 @@ public class ColumnDataClassifier {
 
     for (int i = 0; i < flags.length; i++) {
       ClassicCounter<String> featuresC = new ClassicCounter<String>();
-      makeDatum(strs[i], flags[i], featuresC, strs[globalFlags.goldAnswerColumn]);
+      makeDatum(strs[i], flags[i], featuresC, goldAnswer);
       addAllInterningAndPrefixingRVF(theFeatures, featuresC, i + "-");
     }
 
@@ -772,7 +788,7 @@ public class ColumnDataClassifier {
       printFeatures(strs, theFeatures);
     }
     //System.out.println("Features are: " + theFeatures);
-    return new RVFDatum<String,String>(theFeatures, strs[globalFlags.goldAnswerColumn]);
+    return new RVFDatum<String,String>(theFeatures, goldAnswer);
   }
 
   private void addAllInterningAndPrefixingRVF(ClassicCounter<String> accumulator, ClassicCounter<String> addend, String prefix) {
@@ -849,6 +865,8 @@ public class ColumnDataClassifier {
      * Extracts all the features from a certain input column.
      *
      * @param cWord The String to extract data from
+     * @param goldAns The goldAnswer for this whole datum or emptyString if none.
+     *                    This is used only for filling in the binned lengths histogram counters
      */
     private void makeDatum(String cWord, Flags flags, Object featuresC, String goldAns) {
 
@@ -939,6 +957,22 @@ public class ColumnDataClassifier {
           System.err.println(Arrays.toString(bits));
         }
 
+        if (flags.splitWordCount) {
+          addFeature(featuresC, "SWNUM", bits.length);
+        }
+        if (flags.logSplitWordCount) {
+          addFeature(featuresC, "LSWNUM", Math.log(bits.length));
+        }
+        if (flags.binnedSplitWordCounts != null) {
+          String featureName = null;
+          for (int i = 0; i <= flags.binnedSplitWordCounts.length; i++) {
+            if (i == flags.binnedSplitWordCounts.length || bits.length <= flags.binnedSplitWordCounts[i]) {
+              featureName = "SWNUMBIN-" + ((i == 0) ? 0 : (flags.binnedSplitWordCounts[i - 1] + 1)) + '-' + ((i == flags.binnedSplitWordCounts.length) ? "Inf" : Integer.toString(flags.binnedSplitWordCounts[i]));
+              break;
+            }
+          }
+          addFeature(featuresC, featureName, DEFAULT_VALUE);
+        }
         // add features over splitWords
         for (int i = 0; i < bits.length; i++) {
           if (flags.useSplitWords) {
@@ -1012,7 +1046,7 @@ public class ColumnDataClassifier {
             addFeature(featuresC,"SSHAPE-" + shape,DEFAULT_VALUE);
           }
         }
-      }
+      } // end if uses some split words features
 
       if (flags.wordShape > WordShapeClassifier.NOWORDSHAPE) {
         String shape = edu.stanford.nlp.process.WordShapeClassifier.wordShape(cWord, flags.wordShape);
@@ -1420,9 +1454,7 @@ public class ColumnDataClassifier {
         key = matcher.group(2);
       }
       if (col >= myFlags.length) {
-        Flags[] newFl = new Flags[col + 1];
-        System.arraycopy(myFlags, 0, newFl, 0, myFlags.length);
-        myFlags = newFl;
+        myFlags = Arrays.copyOf(myFlags, col + 1);
       }
       if (myFlags[col] == null) {
         myFlags[col] = new Flags();
@@ -1440,7 +1472,19 @@ public class ColumnDataClassifier {
         }
       } else if (key.equals("binnedLengthsStatistics")) {
         if (Boolean.parseBoolean(val)) {
-          myFlags[col].binnedLengthsCounter = new TwoDimensionalCounter<String,String>();
+          myFlags[col].binnedLengthsCounter = new TwoDimensionalCounter<String, String>();
+        }
+      } else if (key.equals("splitWordCount")) {
+        myFlags[col].splitWordCount = Boolean.parseBoolean(val);
+      } else if (key.equals("logSplitWordCount")) {
+        myFlags[col].logSplitWordCount = Boolean.parseBoolean(val);
+      } else if (key.equals("binnedSplitWordCounts")) {
+        if (val != null) {
+          String[] binnedSplitWordCountStrs = val.split("[, ]+");
+          myFlags[col].binnedSplitWordCounts = new int[binnedSplitWordCountStrs.length];
+          for (int i = 0; i < myFlags[col].binnedSplitWordCounts.length; i++) {
+            myFlags[col].binnedSplitWordCounts[i] = Integer.parseInt(binnedSplitWordCountStrs[i]);
+          }
         }
       } else if (key.equals("countChars")) {
         myFlags[col].countChars = val.toCharArray();
@@ -2049,6 +2093,10 @@ public class ColumnDataClassifier {
 
     static boolean csvFormat = false; //train and test files are in csv format
     boolean splitWordsWithPTBTokenizer = false;
+
+    boolean splitWordCount;
+    boolean logSplitWordCount;
+    int[] binnedSplitWordCounts;
 
     @Override
     public String toString() {

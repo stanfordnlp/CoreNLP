@@ -1,7 +1,20 @@
 package edu.stanford.nlp.process;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
@@ -12,8 +25,12 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.objectbank.XMLBeginEndIterator;
+
 import java.util.function.Function;
+
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Produces a list of sentences from either a plain text or XML document.
@@ -210,7 +227,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
     private final Set<String> delimFollowers;
     private Function<String, String[]> splitTag;
     private List<HasWord> nextSent = null;
-    private final List<HasWord> nextSentCarryover = new ArrayList<HasWord>();
+    private final List<HasWord> nextSentCarryover = Generics.newArrayList();
 
     public PlainTextIterator() {
       // Establish how to find sentence boundaries
@@ -263,7 +280,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
     }
 
     private void primeNext() {
-      nextSent = new ArrayList<HasWord>(nextSentCarryover);
+      nextSent = Generics.newArrayList(nextSentCarryover);
       nextSentCarryover.clear();
       boolean seenBoundary = false;
 
@@ -407,89 +424,103 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
   } // end class XMLIterator
 
 
+  private static String usage() {
+    StringBuilder sb = new StringBuilder();
+    String nl = System.getProperty("line.separator");
+    sb.append(String.format("Usage: java %s [OPTIONS] [file] [< file]%n%n", DocumentPreprocessor.class.getName()));
+    sb.append("Options:").append(nl);
+    sb.append("-xml delim              : XML input with associated delimiter.").append(nl);
+    sb.append("-encoding type          : Input encoding (default: UTF-8).").append(nl);
+    sb.append("-printSentenceLengths   : ").append(nl);
+    sb.append("-noTokenization         : Split on newline delimiters only.").append(nl);
+    sb.append("-suppressEscaping       : Suppress PTB escaping.").append(nl);
+    sb.append("-tokenizerOptions opts  : Specify custom tokenizer options.").append(nl);
+    sb.append("-tag delim              : Input tokens are tagged. Split tags.").append(nl);
+    sb.append("-whitespaceTokenization : Whitespace tokenization only.").append(nl);
+    return sb.toString();
+  }
+
+  private static Map<String,Integer> argOptionDefs() {
+    Map<String,Integer> argOptionDefs = Generics.newHashMap();
+    argOptionDefs.put("help", 0);
+    argOptionDefs.put("xml", 1);
+    argOptionDefs.put("encoding", 1);
+    argOptionDefs.put("printSentenceLengths", 0);
+    argOptionDefs.put("noTokenization", 0);
+    argOptionDefs.put("suppressEscaping", 0);
+    argOptionDefs.put("tag", 1);
+    argOptionDefs.put("tokenizerOptions", 1);
+    argOptionDefs.put("whitespaceTokenization", 0);
+    return argOptionDefs;
+  }
+  
   /**
-   * This provides a simple test method for DocumentPreprocessor. <br/>
-   * Usage:
-   * java
-   * DocumentPreprocessor filename [-xml tag] [-suppressEscaping] [-noTokenization]
-   * <p>
-   * A filename is required. The code doesn't run as a filter currently.
-   * <p>
-   * tag is the element name of the XML from which to extract text.  It can
-   * be a regular expression which is called on the element with the
-   * matches() method, such as 'TITLE|P'.
-   *
+   * A simple, deterministic sentence-splitter. This method only supports the English
+   * tokenizer, so for other languages you should run the tokenizer first and then
+   * run this sentence splitter with the "-whitespaceTokenization" option.
+   * 
    * @param args Command-line arguments
    */
   public static void main(String[] args) throws IOException {
-    if (args.length < 1) {
-      System.err.println("usage: DocumentPreprocessor OPT* filename");
-      System.err.println("    OPT = -xml TAG|-encoding ENC|-tokenizerOptions opts|-tag delim|...");
-      return;
+    final Properties options = StringUtils.argsToProperties(args, argOptionDefs());
+    if (options.containsKey("help")) {
+      System.err.println(usage());
+      System.exit(-1);
     }
 
-    String encoding = "utf-8";
-    boolean printSentenceLengths = false;
-    DocType docType = DocType.Plain;
-    String xmlElementDelimiter = null;
-    TokenizerFactory<? extends HasWord> tf = PTBTokenizer.factory(new CoreLabelTokenFactory(), "");
-    String sentenceDelimiter = null;
-    String tagDelimiter = null;
-    boolean printOriginalText = false;
+    // Command-line flags
+    String encoding = options.getProperty("encoding", "utf-8");
+    boolean printSentenceLengths = PropertiesUtils.getBool(options,"printSentenceLengths", false);
+    String xmlElementDelimiter = options.getProperty("xml", null);
+    DocType docType = xmlElementDelimiter == null ? DocType.Plain : DocType.XML;
+    String sentenceDelimiter = options.containsKey("-noTokenization") ? System.getProperty("line.separator") : null;
+    String tagDelimiter = options.getProperty("tag", null);
     String[] sentenceDelims = null;
-
-    int i = 0;
-    for ( ; i < args.length; i++) {
-      if (args[i].isEmpty() || ! args[i].startsWith("-")) {
-        break;
-      }
-      if (args[i].equals("-xml")) {
-        docType = DocType.XML;
-        i++;
-        xmlElementDelimiter = args[i];
-
-      } else if (args[i].equals("-encoding") && i+1 < args.length) {
-        i++;
-        encoding = args[i];
-
-      } else if (args[i].equals("-printSentenceLengths")) {
-        printSentenceLengths = true;
-
-      } else if (args[i].equals("-suppressEscaping")) {
-        tf = PTBTokenizer.factory(new CoreLabelTokenFactory(), "ptb3Escaping=false");
-
-      } else if (args[i].equals("-tokenizerOptions") && i+1 < args.length) {
-        i++;
-        tf = PTBTokenizer.factory(new CoreLabelTokenFactory(), args[i]);
-
-      } else if (args[i].equals("-noTokenization")) {
-        tf = null;
-        sentenceDelimiter = System.getProperty("line.separator");
-
-      } else if (args[i].equals("-whitespaceTokenization")) {
-        tf = null;
-        List<String> whitespaceDelims =
-            new ArrayList<String>(Arrays.asList(DocumentPreprocessor.DEFAULT_SENTENCE_DELIMS));
-        whitespaceDelims.add(WhitespaceLexer.NEWLINE);
-        sentenceDelims = whitespaceDelims.toArray(new String[whitespaceDelims.size()]);
-
-      } else if (args[i].equals("-tag")) {
-        i++;
-        tagDelimiter = args[i];
-
-      } else if (args[i].equals("-printOriginalText")) {
-        printOriginalText = true;
-        tf = PTBTokenizer.factory(new CoreLabelTokenFactory(), "invertible=true");
-
-      } else {
-        System.err.println("Unknown option: " + args[i]);
-      }
+    
+    // Setup the TokenizerFactory
+    int numFactoryFlags = 0;
+    boolean suppressEscaping = options.containsKey("suppressEscaping");
+    if (suppressEscaping) numFactoryFlags += 1;
+    boolean customTokenizer = options.containsKey("tokenizerOptions");
+    if (customTokenizer) numFactoryFlags += 1;
+    boolean printOriginalText = options.containsKey("printOriginalText");
+    if (printOriginalText) numFactoryFlags += 1;
+    boolean whitespaceTokenization = options.containsKey("whitespaceTokenization");
+    if (whitespaceTokenization) numFactoryFlags += 1;
+    if (numFactoryFlags > 1) {
+      System.err.println("Only one tokenizer flag allowed at a time: ");
+      System.err.println("  -suppressEscaping, -tokenizerOptions, -printOriginalText, -whitespaceTokenization");
+      System.exit(-1);
     }
+    
+    TokenizerFactory<? extends HasWord> tf = null;
+    if (suppressEscaping) {
+      tf = PTBTokenizer.factory(new CoreLabelTokenFactory(), "ptb3Escaping=false");
+    } else if (customTokenizer) {
+      tf = PTBTokenizer.factory(new CoreLabelTokenFactory(), options.getProperty("tokenizerOptions"));
+    } else if (printOriginalText) {
+      tf = PTBTokenizer.factory(new CoreLabelTokenFactory(), "invertible=true");
+    } else if (whitespaceTokenization) {
+      List<String> whitespaceDelims =
+          new ArrayList<String>(Arrays.asList(DocumentPreprocessor.DEFAULT_SENTENCE_DELIMS));
+      whitespaceDelims.add(WhitespaceLexer.NEWLINE);
+      sentenceDelims = whitespaceDelims.toArray(new String[whitespaceDelims.size()]);
+    } else {
+      tf = PTBTokenizer.factory(new CoreLabelTokenFactory(), "");
+    }
+    
+    String fileList = options.getProperty("", null);
+    String[] files = fileList == null ? new String[1] : fileList.split("\\s+");
 
     int numSents = 0;
     PrintWriter pw = new PrintWriter(new OutputStreamWriter(System.out, encoding), true);
-    for ( ; i < args.length; i++) {
-      DocumentPreprocessor docPreprocessor = new DocumentPreprocessor(args[i], docType, encoding);
+    for (String file : files) {
+      DocumentPreprocessor docPreprocessor;
+      if (file == null || file.length() == 0) {
+        docPreprocessor = new DocumentPreprocessor(new InputStreamReader(System.in, encoding));
+      } else {
+        docPreprocessor = new DocumentPreprocessor(file, docType, encoding);
+      }
       if (docType == DocType.XML) {
         docPreprocessor.setElementDelimiter(xmlElementDelimiter);
       }
@@ -498,7 +529,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
         docPreprocessor.setSentenceDelimiter(sentenceDelimiter);
       }
       if (tagDelimiter != null) {
-        docPreprocessor.setTagDelimiter(args[++i]);
+        docPreprocessor.setTagDelimiter(tagDelimiter);
       }
       if (sentenceDelims != null) {
         docPreprocessor.setSentenceFinalPuncWords(sentenceDelims);
@@ -531,5 +562,4 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
     pw.close();
     System.err.println("Read in " + numSents + " sentences.");
   }
-
 }

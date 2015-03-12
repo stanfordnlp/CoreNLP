@@ -21,6 +21,7 @@ import java.util.regex.*;
 /**
  * This class provides methods for reading plain text documents and writing out
  * those documents once classified in several different formats.
+ * The output formats are named: slashTags, xml, inlineXML, tsv, tabbedEntities.
  * <p>
  * <i>Implementation note:</i> see
  * itest/src/edu/stanford/nlp/ie/crf/CRFClassifierITest.java for examples and
