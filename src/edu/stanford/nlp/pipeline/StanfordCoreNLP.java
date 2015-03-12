@@ -339,6 +339,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool.register(STANFORD_LEMMA, AnnotatorFactories.lemma(properties, annotatorImplementation));
     pool.register(STANFORD_NER, AnnotatorFactories.nerTag(properties, annotatorImplementation));
     pool.register(STANFORD_REGEXNER, AnnotatorFactories.regexNER(properties, annotatorImplementation));
+    pool.register(STANFORD_MENTIONS, AnnotatorFactories.mentions(properties, annotatorImplementation));
     pool.register(STANFORD_GENDER, AnnotatorFactories.gender(properties, annotatorImplementation));
     pool.register(STANFORD_TRUECASE, AnnotatorFactories.truecase(properties, annotatorImplementation));
     pool.register(STANFORD_PARSE, AnnotatorFactories.parse(properties, annotatorImplementation));
@@ -742,7 +743,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       case SERIALIZED: defaultExtension = ".ser.gz"; break;
       default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
     }
-    final String serializerClass = properties.getProperty("serializer");
+    final String serializerClass = properties.getProperty("serializer", GenericAnnotationSerializer.class.getName());
     final String inputSerializerClass = properties.getProperty("inputSerializer", serializerClass);
     final String inputSerializerName = (serializerClass.equals(inputSerializerClass))? "serializer":"inputSerializer";
     final String outputSerializerClass = properties.getProperty("outputSerializer", serializerClass);

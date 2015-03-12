@@ -4,6 +4,7 @@ import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.WordToSentenceProcessor;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 
@@ -30,8 +31,14 @@ public class AnnotatorFactories {
         String extraOptions = null;
         boolean keepNewline = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
             "false"));
-        if (properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
-          keepNewline = true;
+
+        String hasSsplit = properties.getProperty("annotators");
+        if (hasSsplit != null && hasSsplit.contains(StanfordCoreNLP.STANFORD_SSPLIT)) {
+          WordToSentenceProcessor.NewlineIsSentenceBreak nlsb = WordToSentenceProcessor.stringToNewlineIsSentenceBreak(properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY,
+              StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
+          if (nlsb != WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER) {
+            keepNewline = true;
+          }
         }
         if (keepNewline) {
           extraOptions = "tokenizeNLs,";
@@ -348,13 +355,32 @@ public class AnnotatorFactories {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        return annotatorImplementation.tokensRegexNER(properties, "regexner");
+        return annotatorImplementation.tokensRegexNER(properties, Annotator.STANFORD_REGEXNER);
       }
 
       @Override
       public String additionalSignature() {
         // keep track of all relevant properties for this annotator here!
-        return PropertiesUtils.getSignature("regexner", properties, TokensRegexNERAnnotator.SUPPORTED_PROPERTIES);
+        return PropertiesUtils.getSignature(Annotator.STANFORD_REGEXNER, properties, TokensRegexNERAnnotator.SUPPORTED_PROPERTIES);
+      }
+    };
+  }
+
+  //
+  // Mentions annotator
+  //
+  public static AnnotatorFactory mentions(Properties properties, final AnnotatorImplementations annotatorImplementation) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        return annotatorImplementation.mentions(properties, Annotator.STANFORD_MENTIONS);
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        return PropertiesUtils.getSignature(Annotator.STANFORD_MENTIONS, properties, MentionsAnnotator.SUPPORTED_PROPERTIES);
       }
     };
   }
@@ -532,7 +558,7 @@ public class AnnotatorFactories {
 
       @Override
       protected String additionalSignature() {
-        return "";
+        return DependencyParseAnnotator.signature(StanfordCoreNLP.STANFORD_DEPENDENCIES, properties);
       }
     };
   }

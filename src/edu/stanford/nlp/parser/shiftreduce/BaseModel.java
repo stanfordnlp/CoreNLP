@@ -15,11 +15,12 @@ import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ScoredObject;
 
 public abstract class BaseModel implements Serializable {
+
   final ShiftReduceOptions op;
 
   // This is shared with the owning ShiftReduceParser (for now, at least)
   final Index<Transition> transitionIndex;
-  final Set<String> knownStates;
+  final Set<String> knownStates; // the set of goal categories of a reduce = the set of phrasal categories in a grammar
   final Set<String> rootStates;
   final Set<String> rootOnlyStates;
 
@@ -126,12 +127,14 @@ public abstract class BaseModel implements Serializable {
    * @param serializedPath Where serialized models go.  If the appropriate options are set, the method can use this to save intermediate models.
    * @param tagger The tagger to use when evaluating devTreebank.  TODO: it would make more sense for ShiftReduceParser to retag the trees first
    * @param random A random number generator to use for any random numbers.  Useful to make sure results can be reproduced.
-   * @param binarizedTrainTrees The treebank to train from.  
+   * @param binarizedTrainTrees The treebank to train from.
    * @param transitionLists binarizedTrainTrees converted into lists of transitions that will reproduce the same tree.
    * @param devTreebank a set of trees which can be used for dev testing (assuming the user provided a dev treebank)
    * @param nThreads how many threads the model can use for training
    */
   public abstract void trainModel(String serializedPath, Tagger tagger, Random random, List<Tree> binarizedTrainTrees, List<List<Transition>> transitionLists, Treebank devTreebank, int nThreads);
+
+  abstract Set<String> tagSet();
 
   private static final long serialVersionUID = -175375535849840611L;
 }

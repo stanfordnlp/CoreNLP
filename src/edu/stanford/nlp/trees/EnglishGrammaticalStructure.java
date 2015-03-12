@@ -358,7 +358,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * </dl>
    */
   @Override
-  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, boolean includeExtras) {
+  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, Extras includeExtras) {
     if (DEBUG) {
       printListSorted("collapseDependencies: CCproc: " + CCprocess + " includeExtras: " + includeExtras, list);
     }
@@ -402,15 +402,17 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       printListSorted("After conj:", list);
     }
 
-    if (includeExtras) {
+    if (includeExtras.doRef) {
       addRef(list);
       if (DEBUG) {
         printListSorted("After adding ref:", list);
       }
 
-      collapseReferent(list);
-      if (DEBUG) {
-        printListSorted("After collapse referent:", list);
+      if (includeExtras.collapseRef) {
+        collapseReferent(list);
+        if (DEBUG) {
+          printListSorted("After collapse referent:", list);
+        }
       }
     }
 
@@ -421,7 +423,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
 
-    if (includeExtras) {
+    if (includeExtras.doSubj) {
       addExtraNSubj(list);
       if (DEBUG) {
         printListSorted("After adding extra nsubj:", list);
@@ -446,7 +448,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
   @Override
   protected void collapseDependenciesTree(List<TypedDependency> list) {
-    collapseDependencies(list, false, false);
+    collapseDependencies(list, false, Extras.NONE);
   }
 
   /**
@@ -726,12 +728,14 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
         // creation of a unit cycle that probably leaves something else
         // disconnected) [cdm Jan 2010]
         if (td.dep().equals(dep) && td.reln() != REFERENT && !td.gov().equals(ant)) {
-          if (DEBUG)
+          if (DEBUG) {
             System.err.print("referent: changing " + td);
+          }
           td.setDep(ant);
           td.setExtra();
-          if (DEBUG)
+          if (DEBUG) {
             System.err.println(" to " + td);
+          }
         }
       }
     }

@@ -610,22 +610,22 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel {
     return new CRFCliqueTree<E>(factorTables, classIndex, backgroundSymbol);
   }
 
-  private static FactorTable getFactorTable(double[] weights, double wscale, int[][] weightIndices, int[][] data,
+  private static FactorTable getFactorTable(double[] weights, double wScale, int[][] weightIndices, int[][] data,
       List<Index<CRFLabel>> labelIndices, int numClasses) {
 
     FactorTable factorTable = null;
 
     for (int j = 0, sz = labelIndices.size(); j < sz; j++) {
-      Index labelIndex = labelIndices.get(j);
+      Index<CRFLabel> labelIndex = labelIndices.get(j);
       FactorTable ft = new FactorTable(numClasses, j + 1);
 
       // ... and each possible labeling for that clique
       for (int k = 0, liSize = labelIndex.size(); k < liSize; k++) {
-        int[] label = ((CRFLabel) labelIndex.get(k)).getLabel();
+        int[] label = labelIndex.get(k).getLabel();
         double weight = 0.0;
         for (int m = 0; m < data[j].length; m++) {
           int wi = weightIndices[data[j][m]][k];
-          weight += wscale * weights[wi];
+          weight += wScale * weights[wi];
         }
         // try{
         ft.setValue(label, weight);
@@ -658,7 +658,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel {
     FactorTable factorTable = null;
 
     for (int j = 0, sz = labelIndices.size(); j < sz; j++) {
-      Index labelIndex = labelIndices.get(j);
+      Index<CRFLabel> labelIndex = labelIndices.get(j);
       FactorTable ft = new FactorTable(numClasses, j + 1);
       double[] featureVal = null;
       if (featureValByCliqueSize != null)
@@ -666,7 +666,7 @@ public class CRFCliqueTree<E> implements ListeningSequenceModel {
 
       // ... and each possible labeling for that clique
       for (int k = 0, liSize = labelIndex.size(); k < liSize; k++) {
-        int[] label = ((CRFLabel) labelIndex.get(k)).getLabel();
+        int[] label = labelIndex.get(k).getLabel();
         double cliquePotential = cliquePotentialFunc.computeCliquePotential(j+1, k, data[j], featureVal, posInSent);
         // for (int m = 0; m < data[j].length; m++) {
         //   weight += weights[data[j][m]][k];
