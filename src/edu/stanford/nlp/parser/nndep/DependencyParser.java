@@ -504,7 +504,7 @@ public class DependencyParser {
   private void loadModelFile(String modelFile, boolean verbose) {
     Timing t = new Timing();
     try {
-
+      // System.err.println(Config.SEPARATOR);
       System.err.println("Loading depparse model file: " + modelFile + " ... ");
       String s;
       BufferedReader input = IOUtils.readerFromString(modelFile);
@@ -643,8 +643,9 @@ public class DependencyParser {
       embeddings = new double[nWords][dim];
       System.err.println("Embedding File " + embedFile + ": #Words = " + nWords + ", dim = " + dim);
 
+      //TODO: how if the embedding dim. does not match..?
       if (dim != config.embeddingSize)
-          throw new IllegalArgumentException("The dimension of embedding file does not match config.embeddingSize");
+        System.err.println("ERROR: embedding dimension mismatch");
 
       for (int i = 0; i < lines.size(); ++i) {
         splits = lines.get(i).split("\\s+");
@@ -991,16 +992,13 @@ public class DependencyParser {
 
     List<DependencyTree> predicted = testSents.stream().map(this::predictInner).collect(toList());
     Map<String, Double> result = system.evaluate(testSents, predicted, testTrees);
-    
-    double uasNoPunc = result.get("UASwoPunc");
     double lasNoPunc = result.get("LASwoPunc");
-    System.err.printf("UAS = %.4f%n", uasNoPunc);
+    System.err.printf("UAS = %.4f%n", result.get("UASwoPunc"));
     System.err.printf("LAS = %.4f%n", lasNoPunc);
-
     long millis = timer.stop();
     double wordspersec = numWords / (((double) millis) / 1000);
     double sentspersec = numSentences / (((double) millis) / 1000);
-    System.err.printf("%s parsed %d words in %d sentences in %.1fs at %.1f w/s, %.1f sent/s.%n",
+    System.err.printf("%s tagged %d words in %d sentences in %.1fs at %.1f w/s, %.1f sent/s.%n",
             StringUtils.getShortClassName(this), numWords, numSentences, millis / 1000.0, wordspersec, sentspersec);
 
     if (outFile != null) {
@@ -1158,6 +1156,7 @@ public class DependencyParser {
     if (props.containsKey("testFile")) {
       parser.loadModelFile(props.getProperty("model"));
       loaded = true;
+
       parser.testCoNLL(props.getProperty("testFile"), props.getProperty("outFile"));
     }
 
@@ -1192,4 +1191,5 @@ public class DependencyParser {
       parser.parseTextFile(input, output);
     }
   }
+
 }

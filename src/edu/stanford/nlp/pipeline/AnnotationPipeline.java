@@ -67,7 +67,7 @@ public class AnnotationPipeline implements Annotator {
       }
       annotator.annotate(annotation);
       if (TIME) {
-        long elapsed = t.stop();
+        int elapsed = (int) t.stop();
         MutableLong m = it.next();
         m.incValue(elapsed);
       }

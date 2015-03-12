@@ -459,7 +459,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
   protected boolean findMatchStartNoBacktracking(int start, boolean matchAllTokens)
   {
     boolean matchAll = true;
-    MatchedStates<T> cStates = getStartStates();
+    MatchedStates cStates = getStartStates();
     // Save cStates for FIND_ALL ....
     curMatchStates = cStates;
     for(int i = start; i < regionEnd; i++){
@@ -702,7 +702,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     return elements.get(i);
   }
 
-  /** Returns a non-null MatchedStates, which has a non-empty states list inside. */
   private MatchedStates<T> getStartStates()
   {
     return new MatchedStates<T>(this, pattern.root);

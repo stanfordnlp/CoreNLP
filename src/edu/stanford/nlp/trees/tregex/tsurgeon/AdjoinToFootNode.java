@@ -30,7 +30,7 @@ class AdjoinToFootNode extends AdjoinNode {
       Tree targetNode = childMatcher[0].evaluate(tree, tregex);
       Tree parent = targetNode.parent(tree);
       // substitute original node for foot of auxiliary tree.  Foot node is ignored
-      AuxiliaryTree ft = adjunctionTree().copy(this, tree.treeFactory(), tree.label().labelFactory());
+      AuxiliaryTree ft = adjunctionTree().copy(this);
       // System.err.println("ft=" + ft + "; ft.foot=" + ft.foot + "; ft.tree=" + ft.tree);
       Tree parentOfFoot = ft.foot.parent(ft.tree);
       if (parentOfFoot == null) {

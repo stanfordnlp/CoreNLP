@@ -29,7 +29,7 @@ class HoldTreeNode extends TsurgeonPattern {
 
     @Override
     public Tree evaluate(Tree tree, TregexMatcher tregex) {
-      return subTree.copy(this, tree.treeFactory(), tree.label().labelFactory()).tree;
+      return subTree.copy(this).tree;
     }
   }
 

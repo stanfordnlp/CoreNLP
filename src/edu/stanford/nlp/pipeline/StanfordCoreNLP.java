@@ -347,8 +347,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool.register(STANFORD_SENTIMENT, AnnotatorFactories.sentiment(properties, annotatorImplementation));
     pool.register(STANFORD_COLUMN_DATA_CLASSIFIER,AnnotatorFactories.columnDataClassifier(properties,annotatorImplementation));
     pool.register(STANFORD_DEPENDENCIES, AnnotatorFactories.dependencies(properties, annotatorImplementation));
-    pool.register(STANFORD_NATLOG, AnnotatorFactories.natlog(properties, annotatorImplementation));
-    pool.register(STANFORD_OPENIE, AnnotatorFactories.openie(properties, annotatorImplementation));
     // Add more annotators here
 
     // add annotators loaded via reflection from classnames specified
@@ -736,17 +734,15 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     String defaultExtension;
     switch (outputFormat) {
       case XML: defaultExtension = ".xml"; break;
-      case JSON: defaultExtension = ".json"; break;
-      case CONLL: defaultExtension = ".conll"; break;
       case TEXT: defaultExtension = ".out"; break;
       case SERIALIZED: defaultExtension = ".ser.gz"; break;
       default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
     }
     final String serializerClass = properties.getProperty("serializer");
     final String inputSerializerClass = properties.getProperty("inputSerializer", serializerClass);
-    final String inputSerializerName = (serializerClass.equals(inputSerializerClass))? "serializer":"inputSerializer";
+    final String inputSerializerName = (serializerClass == inputSerializerClass)? "serializer":"inputSerializer";
     final String outputSerializerClass = properties.getProperty("outputSerializer", serializerClass);
-    final String outputSerializerName = (serializerClass.equals(outputSerializerClass))? "serializer":"outputSerializer";
+    final String outputSerializerName = (serializerClass == outputSerializerClass)? "serializer":"outputSerializer";
 
     final String extension = properties.getProperty("outputExtension", defaultExtension);
     final boolean replaceExtension = Boolean.parseBoolean(properties.getProperty("replaceExtension", "false"));

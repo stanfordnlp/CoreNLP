@@ -1,9 +1,6 @@
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.LabelFactory;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
@@ -54,19 +51,10 @@ class AuxiliaryTree {
 
   /**
    * Copies the Auxiliary tree.  Also, puts the new names->nodes map in the TsurgeonMatcher that called copy.
-   * <br>
-   * The trees and labels to use when making the copy are specified
-   * with treeFactory and labelFactory.  This lets the tsurgeon script
-   * produce trees which are of the same type as the input trees.
-   * Each of the tsurgeon relations which copies a tree should include
-   * pass in the correct factories.
    */
-  public AuxiliaryTree copy(TsurgeonMatcher matcher, TreeFactory treeFactory, LabelFactory labelFactory) {
-    if (labelFactory == null) {
-      labelFactory = CoreLabel.factory();
-    }
+  public AuxiliaryTree copy(TsurgeonMatcher matcher) {
     Map<String,Tree> newNamesToNodes = Generics.newHashMap();
-    Pair<Tree,Tree> result = copyHelper(tree, newNamesToNodes, treeFactory, labelFactory);
+    Pair<Tree,Tree> result = copyHelper(tree,newNamesToNodes);
     //if(! result.first().dominates(result.second()))
       //System.err.println("Error -- aux tree copy doesn't dominate foot copy.");
     matcher.newNodeNames.putAll(newNamesToNodes);
@@ -74,20 +62,20 @@ class AuxiliaryTree {
   }
 
   // returns Pair<node,foot>
-  private Pair<Tree,Tree> copyHelper(Tree node, Map<String,Tree> newNamesToNodes, TreeFactory treeFactory, LabelFactory labelFactory) {
+  private Pair<Tree,Tree> copyHelper(Tree node,Map<String,Tree> newNamesToNodes) {
     Tree clone;
     Tree newFoot = null;
     if (node.isLeaf()) {
       if (node == foot) { // found the foot node; pass it up.
-        clone = treeFactory.newTreeNode(node.label(), new ArrayList<Tree>(0));
+        clone = node.treeFactory().newTreeNode(node.label(),new ArrayList<Tree>(0));
         newFoot = clone;
       } else {
-        clone = treeFactory.newLeaf(labelFactory.newLabel(node.label()));
+        clone = node.treeFactory().newLeaf(node.label().labelFactory().newLabel(node.label()));
       }
     } else {
       List<Tree> newChildren = new ArrayList<Tree>(node.children().length);
       for (Tree child : node.children()) {
-        Pair<Tree,Tree> newChild = copyHelper(child, newNamesToNodes, treeFactory, labelFactory);
+        Pair<Tree,Tree> newChild = copyHelper(child,newNamesToNodes);
         newChildren.add(newChild.first());
         if (newChild.second() != null) {
           if (newFoot != null) {
@@ -96,7 +84,7 @@ class AuxiliaryTree {
           newFoot = newChild.second();
         }
       }
-      clone = treeFactory.newTreeNode(labelFactory.newLabel(node.label()),newChildren);
+      clone = node.treeFactory().newTreeNode(node.label().labelFactory().newLabel(node.label()),newChildren);
     }
 
     if (nodesToNames.containsKey(node))

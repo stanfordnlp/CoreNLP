@@ -90,8 +90,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
   }
 
   public boolean usesSUTime() {
-    // if applyNumericClassifiers is false, SUTime isn't run regardless of setting of useSUTime
-    return useSUTime && applyNumericClassifiers;
+    return useSUTime;
   }
 
   private static <INN extends CoreMap> void copyAnswerFieldsToNERField(List<INN> l) {

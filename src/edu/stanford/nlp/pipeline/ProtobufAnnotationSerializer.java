@@ -12,8 +12,6 @@ import edu.stanford.nlp.international.Languages;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.naturalli.*;
-import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
@@ -36,7 +34,7 @@ import java.util.*;
  *   A serializer using Google's protocol buffer format.
  *   The files produced by this serializer, in addition to being language-independent,
  *   are a little over 10% the size and 4x faster to read+write versus the default Java serialization
- *   (see {@link GenericAnnotationSerializer}), when both files are compressed with gzip.
+ *   (see GenericAnnotationSerializer), when both files are compressed with gzip.
  * </p>
  *
  * <p>
@@ -117,7 +115,6 @@ import java.util.*;
  *     </pre>
  *   </li>
  * </ol>
- *
  *
  * @author Gabor Angeli
  */
@@ -289,8 +286,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       builder.setHasXmlContext(false);
     }
     if (coreLabel.containsKey(CorefClusterIdAnnotation.class)) { builder.setCorefClusterID(getAndRegister(coreLabel, keysToSerialize, CorefClusterIdAnnotation.class)); }
-    if (coreLabel.containsKey(NaturalLogicAnnotations.OperatorAnnotation.class)) { builder.setOperator(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.OperatorAnnotation.class))); }
-    if (coreLabel.containsKey(NaturalLogicAnnotations.PolarityAnnotation.class)) { builder.setPolarity(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.PolarityAnnotation.class))); }
     // Non-default annotators
     if (getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class) != null) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }
     if (coreLabel.containsKey(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
@@ -456,10 +451,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (!Double.isNaN(parseTree.score())) {
       builder.setScore(parseTree.score());
     }
-    Integer sentiment;
-    if (parseTree.label() instanceof CoreMap && (sentiment = ((CoreMap) parseTree.label()).get(RNNCoreAnnotations.PredictedClass.class)) != null) {
-      builder.setSentiment(CoreNLPProtos.Sentiment.valueOf(sentiment));
-    }
     // Return
     return builder.build();
   }
@@ -500,8 +491,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           .setDep(edge.getRelation().toString())
           .setIsExtra(edge.isExtra())
           .setSourceCopy(edge.getSource().copyCount())
-          .setTargetCopy(edge.getTarget().copyCount())
-          .setLanguage(toProto(edge.getRelation().getLanguage())));
+          .setTargetCopy(edge.getTarget().copyCount()));
+//          .setLanguage(toProto(edge.getRelation().getLanguage())));  // TODO(gabor) uncomment me after KBP release
     }
     // Return
     return builder.build();
@@ -619,36 +610,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return CoreNLPProtos.Language.Hebrew;
       case Spanish:
         return CoreNLPProtos.Language.Spanish;
-      case Unknown:
-        return CoreNLPProtos.Language.Unknown;
+//      case Unknown:
+//        return CoreNLPProtos.Language.Unknown;  // TODO(gabor) uncomment me after KBP is released!
       default:
         throw new IllegalStateException("Unknown language: " + lang);
     }
-  }
-
-  /**
-   * Return a Protobuf operator from an OperatorSpec (Natural Logic).
-   */
-  public static CoreNLPProtos.Operator toProto(OperatorSpec op) {
-    return CoreNLPProtos.Operator.newBuilder()
-        .setName(op.instance.name()).setQuantifierSpanBegin(op.quantifierBegin).setQuantifierSpanEnd(op.quantifierEnd)
-        .setSubjectSpanBegin(op.subjectBegin).setSubjectSpanEnd(op.subjectEnd)
-        .setObjectSpanBegin(op.objectBegin).setObjectSpanEnd(op.objectEnd).build();
-  }
-
-  /**
-   * Return a Protobuf polarity from a CoreNLP Polarity (Natural Logic).
-   */
-  public static CoreNLPProtos.Polarity toProto(Polarity pol) {
-    return CoreNLPProtos.Polarity.newBuilder()
-        .setProjectEquivalence(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.EQUIVALENT).fixedIndex))
-        .setProjectForwardEntailment(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.FORWARD_ENTAILMENT).fixedIndex))
-        .setProjectReverseEntailment(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.REVERSE_ENTAILMENT).fixedIndex))
-        .setProjectNegation(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.NEGATION).fixedIndex))
-        .setProjectAlternation(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.ALTERNATION).fixedIndex))
-        .setProjectCover(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.COVER).fixedIndex))
-        .setProjectIndependence(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.INDEPENDENCE).fixedIndex))
-        .build();
   }
 
   /**
@@ -684,8 +650,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasHasXmlContext() && proto.getHasXmlContext()) { word.set(XmlContextAnnotation.class, proto.getXmlContextList()); }
     if (proto.hasCorefClusterID()) { word.set(CorefClusterIdAnnotation.class, proto.getCorefClusterID()); }
     if (proto.hasAnswer()) { word.set(AnswerAnnotation.class, proto.getAnswer()); }
-    if (proto.hasOperator()) { word.set(NaturalLogicAnnotations.OperatorAnnotation.class, fromProto(proto.getOperator())); }
-    if (proto.hasPolarity()) { word.set(NaturalLogicAnnotations.PolarityAnnotation.class, fromProto(proto.getPolarity())); }
     // Non-default annotators
     if (proto.hasGender()) { word.set(GenderAnnotation.class, proto.getGender()); }
     if (proto.hasTrueCase()) { word.set(TrueCaseAnnotation.class, proto.getTrueCase()); }
@@ -903,10 +867,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         IntPair span = new IntPair(proto.getYieldBeginIndex(), proto.getYieldEndIndex());
         value.set(SpanAnnotation.class, span);
       }
-      // Set sentiment
-      if (proto.hasSentiment()) {
-        value.set(RNNCoreAnnotations.PredictedClass.class, proto.getSentiment().getNumber());
-      }
     }
     // Set score
     if (proto.hasScore()) { node.setScore(proto.getScore()); }
@@ -920,9 +880,6 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     return node;
   }
 
-  /**
-   * Return a CoreNLP language from a Protobuf language
-   */
   public static Languages.Language fromProto(CoreNLPProtos.Language lang) {
     switch (lang) {
       case Arabic:
@@ -939,43 +896,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return Languages.Language.Hebrew;
       case Spanish:
         return Languages.Language.Spanish;
-      case Unknown:
-        return Languages.Language.Unknown;
+//      case Unknown:
+//        return Languages.Language.Unknown;  // TODO(gabor) uncomment me after KBP is released!
       default:
         throw new IllegalStateException("Unknown language: " + lang);
     }
-  }
-
-  /**
-   * Return a CoreNLP Operator (Natural Logic operator) from a Protobuf operator
-   */
-  public static OperatorSpec fromProto(CoreNLPProtos.Operator operator) {
-    String opName = operator.getName().toLowerCase();
-    Operator op = null;
-    for (Operator candidate : Operator.values()) {
-      if (candidate.name().toLowerCase().equals(opName)) {
-        op = candidate;
-        break;
-      }
-    }
-    return new OperatorSpec(op, operator.getQuantifierSpanBegin(), operator.getQuantifierSpanEnd(),
-        operator.getSubjectSpanBegin(), operator.getSubjectSpanEnd(),
-        operator.getObjectSpanBegin(), operator.getObjectSpanEnd());
-  }
-
-  /**
-   * Return a CoreNLP Polarity (Natural Logic polarity) from a Protobuf operator
-   */
-  public static Polarity fromProto(CoreNLPProtos.Polarity polarity) {
-    byte[] projectionFn = new byte[7];
-    projectionFn[0] = (byte) polarity.getProjectEquivalence().getNumber();
-    projectionFn[1] = (byte) polarity.getProjectForwardEntailment().getNumber();
-    projectionFn[2] = (byte) polarity.getProjectReverseEntailment().getNumber();
-    projectionFn[3] = (byte) polarity.getProjectNegation().getNumber();
-    projectionFn[4] = (byte) polarity.getProjectAlternation().getNumber();
-    projectionFn[5] = (byte) polarity.getProjectCover().getNumber();
-    projectionFn[6] = (byte) polarity.getProjectIndependence().getNumber();
-    return new Polarity(projectionFn);
   }
 
   /**
@@ -1039,7 +964,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       synchronized (globalLock) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
         assert ie.hasDep();
-        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep(), fromProto(ie.getLanguage()));
+//        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep(), fromProto(ie.getLanguage()));  // TODO(gabor) uncomment me after KBP release
+        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep());
         graph.addEdge(source, target, rel, 1.0, ie.hasIsExtra() && ie.getIsExtra());
       }
     }
