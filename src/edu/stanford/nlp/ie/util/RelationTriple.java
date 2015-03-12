@@ -82,7 +82,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
    * This method will additionally strip out punctuation as well.
    */
    public String subjectLemmaGloss() {
-    return StringUtils.join(subject.stream().filter(x -> x.tag().matches("[\\.\\?,:;'\"!]") ).map(CoreLabel::lemma), " ");
+    return StringUtils.join(subject.stream().filter(x -> x.tag().matches("[\\.\\?,:;'\"!]")).map(CoreLabel::lemma), " ");
   }
 
   /** The object of this relation triple, as a String */
@@ -100,7 +100,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
    * This method will additionally strip out punctuation as well.
    */
   public String objectLemmaGloss() {
-    return StringUtils.join(object.stream().filter(x -> x.tag().matches("[\\.\\?,:;'\"!]") ).map(CoreLabel::lemma), " ");
+    return StringUtils.join(object.stream().filter(x -> x.tag().matches("[\\.\\?,:;'\"!]")).map(CoreLabel::lemma), " ");
   }
 
   /**
@@ -548,7 +548,8 @@ public class RelationTriple implements Comparable<RelationTriple> {
             CollectionUtils.intersection(new HashSet<>(subjectSpan.get()), new HashSet<>(objectSpan.get())).isEmpty()
             ) {  // ... and has a valid subject+object
           // Success! Found a valid extraction.
-          return Optional.of(new WithTree(subjectSpan.get(), relation, objectSpan.get(), parse, confidence.orElse(1.0)));
+          WithTree extraction = new WithTree(subjectSpan.get(), relation, objectSpan.get(), parse, confidence.orElse(1.0));
+          return Optional.of(extraction);
         }
       }
     }
