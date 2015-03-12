@@ -5,6 +5,7 @@ import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.Pair;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -22,6 +23,7 @@ import static org.junit.Assert.assertTrue;
  * @author Gabor Angeli
  */
 @SuppressWarnings("unchecked")
+@Ignore  // TODO(gabor) ignore until the models get formally added
 public class NaturalLogicWeightsITest {
 
   private static Supplier<NaturalLogicWeights> weights = new Supplier<NaturalLogicWeights>() {
