@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * StringUtils is a class for random String things, including output
@@ -337,6 +338,13 @@ public class StringUtils {
       sb.append(o);
     }
     return sb.toString();
+  }
+
+  /**
+   * @see StringUtils#join(Iterable, String)
+   */
+  public static <X> String join(Stream<X> collection, String glue) {
+    return join(new IterableIterator<X>(collection.iterator()), glue);
   }
 
 // Omitted; I'm pretty sure this are redundant with the above
@@ -2047,4 +2055,5 @@ public class StringUtils {
     d = diacriticalMarksPattern.matcher(d).replaceAll("");
     return Normalizer.normalize(d, Normalizer.Form.NFKC);
   }
+
 }
