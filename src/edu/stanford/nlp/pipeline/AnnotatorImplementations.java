@@ -102,8 +102,9 @@ public class AnnotatorImplementations {
 
     int nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
     long maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
+    int maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlength", Integer.MAX_VALUE);
 
-    return new NERCombinerAnnotator(nerCombiner, verbose, nThreads, maxTime);
+    return new NERCombinerAnnotator(nerCombiner, verbose, nThreads, maxTime, maxSentenceLength);
   }
 
   /**
