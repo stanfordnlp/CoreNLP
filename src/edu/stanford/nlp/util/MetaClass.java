@@ -688,10 +688,6 @@ public class MetaClass {
     }else if(Character.class.isAssignableFrom(clazz) || char.class.isAssignableFrom(clazz)){
       //(case: char)
       return (E) new Character((char) Integer.parseInt(value));
-    }else if(Lazy.class.isAssignableFrom(clazz)) {
-      //(case: Lazy)
-      final String v = value;
-      return (E) Lazy.of(() -> MetaClass.castWithoutKnowingType(v) );
     }else if(Optional.class.isAssignableFrom(clazz)) {
       //(case: Optional)
       return (E) ((value == null || "null".equals(value.toLowerCase()) || "empty".equals(value.toLowerCase()) || "none".equals(value.toLowerCase())) ? Optional.empty() : Optional.of(castWithoutKnowingType(value)));

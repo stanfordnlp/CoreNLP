@@ -77,14 +77,6 @@ public class RelationTriple implements Comparable<RelationTriple> {
     return subject.get(subject.size() - 1);
   }
 
-  /**
-   * The subject of this relation triple, as a String of the subject's lemmas.
-   * This method will additionally strip out punctuation as well.
-   */
-   public String subjectLemmaGloss() {
-    return StringUtils.join(subject.stream().filter(x -> x.tag().matches("[\\.\\?,:;'\"!]")).map(CoreLabel::lemma), " ");
-  }
-
   /** The object of this relation triple, as a String */
   public String objectGloss() {
     return StringUtils.join(object.stream().map(CoreLabel::word), " ");
@@ -95,27 +87,9 @@ public class RelationTriple implements Comparable<RelationTriple> {
     return object.get(object.size() - 1);
   }
 
-  /**
-   * The object of this relation triple, as a String of the object's lemmas.
-   * This method will additionally strip out punctuation as well.
-   */
-  public String objectLemmaGloss() {
-    return StringUtils.join(object.stream().filter(x -> x.tag().matches("[\\.\\?,:;'\"!]")).map(CoreLabel::lemma), " ");
-  }
-
-  /**
-   * The relation of this relation triple, as a String
-   */
+  /** The relation of this relation triple, as a String */
   public String relationGloss() {
     return StringUtils.join(relation.stream().map(CoreLabel::word), " ");
-  }
-
-  /**
-   * The relation of this relation triple, as a String of the relation's lemmas.
-   * This method will additionally strip out punctuation as well, and lower-cases the relation.
-   */
-  public String relationLemmaGloss() {
-    return StringUtils.join(relation.stream().filter(x -> x.tag().matches("[\\.\\?,:;'\"!]") ).map(CoreLabel::lemma), " ").toLowerCase();
   }
 
   /** A textual representation of the confidence. */
@@ -548,8 +522,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
             CollectionUtils.intersection(new HashSet<>(subjectSpan.get()), new HashSet<>(objectSpan.get())).isEmpty()
             ) {  // ... and has a valid subject+object
           // Success! Found a valid extraction.
-          WithTree extraction = new WithTree(subjectSpan.get(), relation, objectSpan.get(), parse, confidence.orElse(1.0));
-          return Optional.of(extraction);
+          return Optional.of(new WithTree(subjectSpan.get(), relation, objectSpan.get(), parse, confidence.orElse(1.0)));
         }
       }
     }

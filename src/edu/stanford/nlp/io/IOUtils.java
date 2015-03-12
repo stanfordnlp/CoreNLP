@@ -10,7 +10,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -2044,28 +2043,6 @@ public class IOUtils {
     }
     //noinspection ResultOfMethodCallIgnored
     file.delete();
-  }
-
-  /**
-   * Start a simple console. Read lines from stdin, and pass each line to the callback.
-   * Returns on typing "exit" or "quit".
-   * @param callback The function to run for every line of input.
-   * @throws IOException Thrown from the underlying input stream.
-   */
-  public static void console(Consumer<String> callback) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    String line;
-    System.out.print("> ");
-    while ( (line = reader.readLine()) != null) {
-      switch (line.toLowerCase()) {
-        case "exit":
-        case "quit":
-          return;
-        default:
-          callback.accept(line);
-      }
-      System.out.print("> ");
-    }
   }
 
 }

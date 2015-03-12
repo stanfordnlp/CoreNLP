@@ -252,7 +252,7 @@ public class ForwardEntailerSearchProblem {
       }
 
       // Check if we can delete this subtree
-      boolean canDelete = !state.tree.getFirstRoot().equals(currentWord);
+      boolean canDelete = state.tree.getFirstRoot() != currentWord;
       for (SemanticGraphEdge edge : state.tree.incomingEdgeIterable(currentWord)) {
         if ("CD".equals(edge.getGovernor().tag())) {
           canDelete = false;
