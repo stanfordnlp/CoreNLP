@@ -279,6 +279,11 @@ public class NERServer {
    * resource name, which must correspond to the name of a resource in the
    * /classifiers/ directory of the jar file.
    * <p>
+   * Default port is 4465.
+   * </p><p>
+   * When run in server mode, additional properties can be specified
+   * on the command line and will be passed to the model loaded.
+   * </p><p>
    * Usage: <code>java edu.stanford.nlp.ie.NERServer [-loadClassifier file|-loadJarClassifier resource|-client] -port portNumber</code>
    *
    * @param args Command-line arguments (described above)
@@ -290,7 +295,7 @@ public class NERServer {
     String loadFile = props.getProperty("loadClassifier");
     String loadJarFile = props.getProperty("loadJarClassifier");
     String client = props.getProperty("client");
-    String portStr = props.getProperty("port");
+    String portStr = props.getProperty("port", "4465");
     props.remove("port"); // so later code doesn't complain
     if (portStr == null || portStr.equals("")) {
       System.err.println(USAGE);

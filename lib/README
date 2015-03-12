@@ -323,7 +323,7 @@ LAST UPDATE BY: Spence Green
 -----------------------------------------------------------------
 protobuf.jar
 ORIGINAL JAR NAME: <compiled from source>
-VERSION: 4.1
+VERSION: 2.4.1
 RELEASE DATE: April 2011
 SOURCE AVAILABLE: yes
 DESCRIPTION: Google's protocol buffer library
@@ -345,15 +345,15 @@ LAST UPDATE:2014-04-07
 LAST UPDATE BY:Sonal Gupta
 
 -----------------------------------------------------------------------
-lucene-analyzers-common-4.2.1.jar
-lucene-core-4.2.1.jar
-lucene-demo-4.2.1.jar
-lucene-queries-4.2.1.jar
-lucene-queryparser-4.2.1.jar
-ORIGINAL JAR NAME: lucene-core-3.0.3.jar
-                   lucene-demos-3.0.3.jar
-VERSION: 4.2.1
-RELEASE DATE: 02 Apr 2013
+lucene-analyzers-common-4.10.3.jar
+lucene-core-4.10.3.jar
+lucene-demo-4.10.3.jar
+lucene-queries-4.10.3.jar
+lucene-queryparser-4.10.3.jar
+ORIGINAL JAR NAME: lucene-core-4.2.1.jar
+                   lucene-demos-4.2.1.jar
+VERSION: 4.10.3
+RELEASE DATE: 29 Dec 2014
 SOURCE AVAILABLE: yes
 DESCRIPTION: "Apache Lucene is a high-performance, full-featured text
 search engine library written entirely in Java. It is a technology
@@ -363,8 +363,8 @@ in has version number, as before. Broken into several Jars in this version."
 URL: http://lucene.apache.org/
 USED BY: patterns.surface
 
-LAST UPDATE: 2013-04-05
-LAST UPDATE BY: Keith Siilats
+LAST UPDATE: 2015-01-15
+LAST UPDATE BY: Melvin Johnson Premkumar
 
 -----------------------------------------------------------------
 foo.jar

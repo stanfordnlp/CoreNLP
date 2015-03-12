@@ -3,6 +3,9 @@ package edu.stanford.nlp.ling.tokensregex;
 import edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParser;
 import edu.stanford.nlp.util.*;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.*;
 
 /**
@@ -269,6 +272,7 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
   public String toString(){
     return this.pattern();
   }
+
 
   /**
    * Create a multi-pattern matcher for matching across multiple TokensRegex patterns

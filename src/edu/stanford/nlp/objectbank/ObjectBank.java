@@ -38,6 +38,7 @@ import java.io.Serializable;
  * <p/>
  *
  * <h3>Example Usages:</h3>
+ *
  * The general case is covered below, but the most common thing people
  * <i>actually</i> want to do is read lines from a file.  There are special
  * methods to make this easy!  You use the <code>getLineIterator</code> method.
@@ -55,6 +56,16 @@ import java.io.Serializable;
  * More complex uses of getLineIterator let you interpret each line of a file
  * as an object of arbitrary type via a transformer Function.
  *
+ * For more general uses with existing classes, you first construct a collection of sources, then a class that
+ * will make the objects of interest from instances of those sources, and then set up an ObjectBank that can
+ * vend those objects:
+ * <pre><code>
+ *   ReaderIteratorFactory rif = new ReaderIteratorFactory(Arrays.asList(new String[] { "file1", "file2", "file3" }));
+ *   IteratorFromReaderFactory<Mention> corefIFRF = new MUCCorefIteratorFromReaderFactory(true);
+ *   for (Mention m : new ObjectBank(rif, corefIFRF)) {
+ *     ...
+ *   }
+ * </code></pre>
  * <p/>
  * As an example of the general power of this class, suppose you have
  * a collection of files in the directory /u/nlp/data/gre/questions.  Each file
@@ -89,9 +100,9 @@ import java.io.Serializable;
  * java.io.Readers vended by the ReaderIteratorFactory, split them up into
  * documents (Strings) and
  * then convert the Strings into Objects.  In this case we want to keep everything
- * between each set of <puzzle> </puzzle> tags so we would use a BeginEndTokenizerFactory.
+ * between each set of &lt;puzzle> &lt;/puzzle> tags so we would use a BeginEndTokenizerFactory.
  * You would also need to write a class which extends Function and whose apply method
- * converts the String between the <puzzle> </puzzle> tags into Puzzle objects.
+ * converts the String between the &lt;puzzle> &lt;/puzzle> tags into Puzzle objects.
  * <p/>
  * <pre>
  * public class PuzzleParser implements Function {
@@ -279,9 +290,8 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
    */
   @Override
   public boolean contains(Object o) {
-    Iterator<E> iter = iterator();
-    while (iter.hasNext()) {
-      if (iter.next() == o) {
+    for (E e : this) {
+      if (e == o) {
         return true;
       }
     }

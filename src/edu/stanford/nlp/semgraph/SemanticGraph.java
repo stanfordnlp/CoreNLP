@@ -147,7 +147,8 @@ public class SemanticGraph implements Serializable {
    * @return A ordered list of edges in the graph.
    */
   public List<SemanticGraphEdge> edgeListSorted() {
-    ArrayList<SemanticGraphEdge> edgeList = new ArrayList<>();
+    ArrayList<SemanticGraphEdge> edgeList =
+      new ArrayList<SemanticGraphEdge>();
     for (SemanticGraphEdge edge : edgeIterable()) {
       edgeList.add(edge);
     }

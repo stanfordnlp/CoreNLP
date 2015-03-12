@@ -2,7 +2,6 @@ package edu.stanford.nlp.util;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasOffset;
 import edu.stanford.nlp.ling.HasWord;
@@ -2111,21 +2110,4 @@ public class StringUtils {
     return Normalizer.normalize(d, Normalizer.Form.NFKC);
   }
 
-  /**
-   * Convert a list of labels into a string, by simply joining them with spaces.
-   * @param words The words to join.
-   * @return A string representation of the sentence, tokenized by a single space.
-   */
-  public static String toString(List<CoreLabel> words) {
-    return join(words.stream().map(CoreLabel::word), " ");
-  }
-
-  /**
-   * Convert a CoreMap representing a sentence into a string, by simply joining them with spaces.
-   * @param sentence The sentence to stringify.
-   * @return A string representation of the sentence, tokenized by a single space.
-   */
-  public static String toString(CoreMap sentence) {
-    return toString(sentence.get(CoreAnnotations.TokensAnnotation.class));
-  }
 }

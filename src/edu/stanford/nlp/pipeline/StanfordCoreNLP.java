@@ -339,7 +339,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool.register(STANFORD_LEMMA, AnnotatorFactories.lemma(properties, annotatorImplementation));
     pool.register(STANFORD_NER, AnnotatorFactories.nerTag(properties, annotatorImplementation));
     pool.register(STANFORD_REGEXNER, AnnotatorFactories.regexNER(properties, annotatorImplementation));
-    pool.register(STANFORD_MENTIONS, AnnotatorFactories.mentions(properties, annotatorImplementation));
+    pool.register(STANFORD_ENTITY_MENTIONS, AnnotatorFactories.entityMentions(properties, annotatorImplementation));
     pool.register(STANFORD_GENDER, AnnotatorFactories.gender(properties, annotatorImplementation));
     pool.register(STANFORD_TRUECASE, AnnotatorFactories.truecase(properties, annotatorImplementation));
     pool.register(STANFORD_PARSE, AnnotatorFactories.parse(properties, annotatorImplementation));
@@ -349,7 +349,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool.register(STANFORD_COLUMN_DATA_CLASSIFIER,AnnotatorFactories.columnDataClassifier(properties,annotatorImplementation));
     pool.register(STANFORD_DEPENDENCIES, AnnotatorFactories.dependencies(properties, annotatorImplementation));
     pool.register(STANFORD_NATLOG, AnnotatorFactories.natlog(properties, annotatorImplementation));
-    pool.register(STANFORD_OPENIE, AnnotatorFactories.openie(properties, annotatorImplementation));
     // Add more annotators here
 
     // add annotators loaded via reflection from classnames specified
