@@ -123,7 +123,10 @@ public class ForwardEntailerSearchProblem {
     if (parseTree.vertexSet().size() > 63) {
       return Collections.EMPTY_LIST;
     } else {
-      return searchImplementation().stream().map(x -> new SentenceFragment(x.tree, false).changeScore(x.confidence)).collect(Collectors.toList());
+      return searchImplementation().stream()
+          .map(x -> new SentenceFragment(x.tree, false).changeScore(x.confidence))
+          .filter(x -> x.words.size() > 0 )
+          .collect(Collectors.toList());
     }
   }
 

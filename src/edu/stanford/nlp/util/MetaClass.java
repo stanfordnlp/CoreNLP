@@ -781,6 +781,15 @@ public class MetaClass {
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
+    } else if (PrintStream.class.isAssignableFrom(clazz)) {
+      // (case: input stream)
+      if (value.equalsIgnoreCase("stdout") || value.equalsIgnoreCase("out")) { return (E) System.out; }
+      if (value.equalsIgnoreCase("stderr") || value.equalsIgnoreCase("err")) { return (E) System.err; }
+      try {
+        return (E) new PrintStream(new FileOutputStream(value));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     } else if (OutputStream.class.isAssignableFrom(clazz)) {
       // (case: output stream)
       if (value.equalsIgnoreCase("stdout") || value.equalsIgnoreCase("out")) { return (E) System.out; }
@@ -799,15 +808,6 @@ public class MetaClass {
       if (value.equalsIgnoreCase("stdin") || value.equalsIgnoreCase("in")) { return (E) System.in; }
       try {
         return (E) IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(value);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    } else if (PrintStream.class.isAssignableFrom(clazz)) {
-      // (case: input stream)
-      if (value.equalsIgnoreCase("stdout") || value.equalsIgnoreCase("out")) { return (E) System.out; }
-      if (value.equalsIgnoreCase("stderr") || value.equalsIgnoreCase("err")) { return (E) System.err; }
-      try {
-        return (E) IOUtils.getPrintWriter(value);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

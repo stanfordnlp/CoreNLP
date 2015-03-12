@@ -131,9 +131,8 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
       min = Math.min(node.index(), min);
       max = Math.max(node.index(), max);
       for (SemanticGraphEdge edge : tree.getOutEdgesSorted(node)) {
-        if (
-//            edge.getGovernor() == node &&   // Sometimes multiple nodes have the same index?  // TODO(gabor) why do these crash the test?
-//            edge.getGovernor() != edge.getDependent() &&  // Just in case...
+        if (edge.getGovernor().equals(node) &&
+            !(edge.getGovernor().equals(edge.getDependent())) &&
             !"punct".equals(edge.getRelation().getShortName())) {  // ignore punctuation
           fringe.add(edge.getDependent());
         }
