@@ -2109,5 +2109,4 @@ public class StringUtils {
     d = diacriticalMarksPattern.matcher(d).replaceAll("");
     return Normalizer.normalize(d, Normalizer.Form.NFKC);
   }
-
 }
