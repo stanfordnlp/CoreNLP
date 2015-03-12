@@ -45,16 +45,20 @@ public class QuotationAnnotatorTest extends TestCase {
 
   public void testDoubleEnclosedInSingle() {
     String text = "'\"Hello,\" he said, \"how are you doing?\"'";
-    List<CoreMap> quotes = runQuotes(text, 1);
+    List<CoreMap> quotes = runQuotes(text, 3);
     assertEquals("'\"Hello,\" he said, \"how are you doing?\"'", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("\"Hello,\"", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("\"how are you doing?\"", quotes.get(2).get(CoreAnnotations.TextAnnotation.class));
     assertEmbedded("\"Hello,\"", text, quotes);
     assertEmbedded("\"how are you doing?\"", text, quotes);
   }
 
   public void testSingleEnclosedInDouble() {
     String text = "\"'Hello,' he said, 'how are you doing?'\"";
-    List<CoreMap> quotes = runQuotes(text, 1);
+    List<CoreMap> quotes = runQuotes(text, 3);
     assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("'Hello,'", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("'how are you doing?'", quotes.get(2).get(CoreAnnotations.TextAnnotation.class));
     assertEmbedded("'Hello,'", text, quotes);
     assertEmbedded("'how are you doing?'", text, quotes);
   }
@@ -71,7 +75,7 @@ public class QuotationAnnotatorTest extends TestCase {
         "am afraid I shall find it difficult to procure\n" +
         "\n" +
         "food for you.'\"";
-    List<CoreMap> quotes = runQuotes(text, 1);
+    List<CoreMap> quotes = runQuotes(text, 3);
     assertEmbedded("'Enter,'", text, quotes);
     String second = "'and I will\n" +
         "\n" +
@@ -85,16 +89,6 @@ public class QuotationAnnotatorTest extends TestCase {
         "\n" +
         "food for you.'";
     assertEmbedded(second, text, quotes);
-  }
-
-  public void testEmbeddedQuotesTwo() {
-    String text = "It was all very well to say 'Drink me,' but the wise little Alice was\n" +
-        "not going to do THAT in a hurry. 'No, I'll \"look\" first,' she said, 'and\n" +
-        "see whether it's marked \"poison\" or not';";
-    List<CoreMap> quotes = runQuotes(text, 3);
-    assertEmbedded("\"poison\"", "'and\n" +
-        "see whether it's marked \"poison\" or not'", quotes);
-    assertEmbedded("\"look\"", "'No, I'll \"look\" first,'", quotes);
   }
 
   public void testQuotesFollowEachother() {

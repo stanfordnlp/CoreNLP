@@ -32,7 +32,7 @@ import static org.junit.matchers.JUnitMatchers.hasItem;
  */
 public class DependencyParserITest extends TestCase {
 
-  private static final double EnglishSdLas = 89.46997859637266;
+  private static final double EnglishSdLas = 89.58544553340093;
 
   /**
    * Test that the NN dependency parser performance doesn't change.

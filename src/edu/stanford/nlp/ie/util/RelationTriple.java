@@ -110,7 +110,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
   }
 
   public Pair<Integer, Integer> objectTokenSpan() {
-    return getSpan(object, x -> x.index() - 1, x -> x.index() - 1);
+    return getSpan(subject, x -> x.index() - 1, x -> x.index() - 1);
   }
 
   /** An optional method, returning the dependency tree this triple was extracted from */
