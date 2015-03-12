@@ -1,16 +1,18 @@
 package edu.stanford.nlp.ie.util;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
-import edu.stanford.nlp.util.FixedPrioritiesPriorityQueue;
+import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.PriorityQueue;
-import edu.stanford.nlp.util.StringUtils;
 
+import java.text.DecimalFormat;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * A (subject, relation, object) triple; e.g., as used in the KBP challenges or in OpenIE systems.
@@ -50,6 +52,17 @@ public class RelationTriple implements Comparable<RelationTriple> {
     this(subject, relation, object, 1.0);
   }
 
+  /**
+   * Returns all the tokens in the extraction, in the order subject then relation then object.
+   */
+  public List<CoreLabel> allTokens() {
+    List<CoreLabel> allTokens = new ArrayList<>();
+    allTokens.addAll(subject);
+    allTokens.addAll(relation);
+    allTokens.addAll(object);
+    return allTokens;
+  }
+
   /** The subject of this relation triple, as a String */
   public String subjectGloss() {
     return StringUtils.join(subject.stream().map(CoreLabel::word), " ");
@@ -63,6 +76,11 @@ public class RelationTriple implements Comparable<RelationTriple> {
   /** The relation of this relation triple, as a String */
   public String relationGloss() {
     return StringUtils.join(relation.stream().map(CoreLabel::word), " ");
+  }
+
+  /** A textual representation of the confidence. */
+  public String confidenceGloss() {
+    return new DecimalFormat("0.000").format(confidence);
   }
 
   /** An optional method, returning the dependency tree this triple was extracted from */
@@ -334,5 +352,207 @@ public class RelationTriple implements Comparable<RelationTriple> {
     }
     // Failed to match any pattern; return failure
     return Optional.empty();
+  }
+
+
+  /**
+   * A {@link edu.stanford.nlp.ie.util.RelationTriple}, optimized for tasks such as KBP
+   * where we care about named entities, and care about things like provenance and coref.
+   */
+  protected static class AsKBEntry extends RelationTriple {
+    public final String docid;
+    public final int sentenceIndex;
+    private final Optional<List<CoreLabel>> originalSubject;
+    private final Optional<List<CoreLabel>> originalObject;
+
+    /**
+     * {@inheritDoc}
+     */
+    public AsKBEntry(List<CoreLabel> subject, List<CoreLabel> relation, List<CoreLabel> object, double confidence,
+                     String docid, int sentenceIndex,
+                     Optional<List<CoreLabel>> originalSubject, Optional<List<CoreLabel>> originalObject) {
+      super(subject, relation, object, confidence);
+      this.docid = docid;
+      this.sentenceIndex = sentenceIndex;
+      this.originalSubject = originalSubject;
+      this.originalObject = originalObject;
+    }
+
+    /** @see edu.stanford.nlp.ie.util.RelationTriple.AsKBEntry#AsKBEntry(java.util.List, java.util.List, java.util.List, double, String, int, Optional, Optional) */
+    public AsKBEntry(RelationTriple source, String docid, int sentenceIndex) {
+      this(source.subject, source.relation, source.object, source.confidence, docid, sentenceIndex,
+          Optional.empty(), Optional.empty());
+    }
+
+    /** The subject of this relation triple, as a String */
+    @Override
+    public String subjectGloss() {
+      if (subject.get(0).lemma() != null) {
+        return StringUtils.join(subject.stream().map(CoreLabel::lemma), " ");
+      } else {
+        return super.relationGloss();
+      }
+    }
+
+    /** The object of this relation triple, as a String */
+    @Override
+    public String objectGloss() {
+      if (object.get(0).lemma() != null) {
+        return StringUtils.join(object.stream().map(CoreLabel::lemma), " ");
+      } else {
+        return super.objectGloss();
+      }
+    }
+
+    /** The relation of this relation triple, as a String */
+    @Override
+    public String relationGloss() {
+      if (relation.get(0).lemma() != null) {
+        return StringUtils.join(relation.stream().map(CoreLabel::lemma), " ");
+      } else {
+        return super.relationGloss();
+      }
+    }
+
+    private Pair<Integer, Integer> getSpan(List<CoreLabel> tokens, Function<CoreLabel, Integer> toMin, Function<CoreLabel, Integer> toMax) {
+      int min = Integer.MAX_VALUE;
+      int max = Integer.MIN_VALUE;
+      for (CoreLabel token : tokens) {
+        min = Math.min(min, toMin.apply(token));
+        max = Math.max(max, toMax.apply(token) + 1);
+      }
+      return Pair.makePair(min, max);
+    }
+
+    public Pair<Integer, Integer> subjectTokenSpan() {
+      return getSpan(subject, CoreLabel::index, CoreLabel::index);
+    }
+
+    public Pair<Integer, Integer> objectTokenSpan() {
+      return getSpan(subject, CoreLabel::index, CoreLabel::index);
+    }
+
+    public Optional<Pair<Integer, Integer>> originalSubjectTokenSpan() {
+      return originalSubject.map(x -> getSpan(x, CoreLabel::index, CoreLabel::index));
+    }
+
+    public Optional<Pair<Integer, Integer>> originalObjectTokenSpan() {
+      return originalObject.map(x -> getSpan(x, CoreLabel::index, CoreLabel::index));
+    }
+
+    public Pair<Integer, Integer> extractionTokenSpan() {
+      return getSpan(allTokens(), CoreLabel::index, CoreLabel::index);
+    }
+
+    public Pair<Integer, Integer> subjectCharacterSpan() {
+      return getSpan(subject, CoreLabel::beginPosition, CoreLabel::endPosition);
+    }
+
+    public Pair<Integer, Integer> objectCharacterSpan() {
+      return getSpan(subject, CoreLabel::beginPosition, CoreLabel::endPosition);
+    }
+
+    public Optional<Pair<Integer, Integer>> originalSubjectCharacterSpan() {
+      return originalSubject.map(x -> getSpan(x, CoreLabel::beginPosition, CoreLabel::endPosition));
+    }
+
+    public Optional<Pair<Integer, Integer>> originalObjectCharacterSpan() {
+      return originalObject.map(x -> getSpan(x, CoreLabel::beginPosition, CoreLabel::endPosition));
+    }
+
+    public Pair<Integer, Integer> extractionCharacterSpan() {
+      return getSpan(allTokens(), CoreLabel::beginPosition, CoreLabel::endPosition);
+    }
+
+    private static String gloss(Pair<Integer,Integer> pair) {
+      return "" + pair.first + "\t" + pair.second;
+    }
+
+    private static String gloss(Optional<Pair<Integer,Integer>> pair) {
+      if (pair.isPresent()) {
+        return "" + pair.get().first + "\t" + pair.get().second;
+      } else {
+        return "0\t0";
+      }
+    }
+
+    @Override
+    public String toString() {
+      return new StringBuilder()
+          .append(confidenceGloss()).append("\t")
+          .append(subjectGloss().replace('\t', ' ')).append("\t")
+          .append(relationGloss().replace('\t', ' ')).append("\t")
+          .append(objectGloss().replace('\t', ' ')).append("\t")
+          .append(docid.replace('\t', ' ')).append("\t")
+          .append(sentenceIndex).append("\t")
+          .append(gloss(subjectTokenSpan())).append("\t")
+          .append(gloss(objectTokenSpan())).append("\t")
+          .append(gloss(extractionTokenSpan())).append("\t")
+          .append(gloss(subjectCharacterSpan())).append("\t")
+          .append(gloss(objectCharacterSpan())).append("\t")
+          .append(gloss(extractionCharacterSpan())).append("\t")
+          .append(gloss(originalSubjectTokenSpan())).append("\t")
+          .append(gloss(originalObjectTokenSpan())).append("\t")
+          .append(gloss(originalSubjectTokenSpan())).append("\t")
+          .append(gloss(originalObjectTokenSpan())).append("\t")
+          .toString();
+    }
+
+  }
+
+  public static Optional<RelationTriple> optimizeForKB(RelationTriple input, CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentions) {
+    // Get some metadata
+    String docid = sentence.get(CoreAnnotations.DocIDAnnotation.class);
+    if (docid == null) { docid = "no_doc_id"; }
+    Integer sentenceIndex = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
+    if (sentenceIndex == null) { sentenceIndex = -1; }
+
+    // Pass 1: resolve Coref
+    List<CoreLabel> subject = null;
+    for (int i = input.subject.size() - 1; i >= 0; --i) {
+      if ( (subject = canonicalMentions.get(input.subject.get(i))) != null) {
+        break;
+      }
+    }
+    if (subject == null) {
+      subject = input.subject;
+    }
+    List<CoreLabel> object = null;
+    for (int i = input.object.size() - 1; i >= 0; --i) {
+      if ( (object = canonicalMentions.get(input.object.get(i))) != null) {
+        break;
+      }
+    }
+    if (object == null) {
+      object = input.object;
+    }
+
+    // Pass 2: Filter prepositions
+    for (CoreLabel subjToken : subject) {
+      if ("PRP".equals(subjToken.tag())) {
+        return Optional.empty();
+      }
+    }
+    for (CoreLabel objToken : object) {
+      if ("PRP".equals(objToken.tag())) {
+        return Optional.empty();
+      }
+    }
+
+    // Pass 3: Filter invalid subjects
+    boolean hasNER = false;
+    for (CoreLabel subjToken : subject) {
+      if (!"O".equals(subjToken.ner())) {
+        hasNER = true;
+      }
+    }
+    if (!hasNER) {
+      return Optional.empty();
+    }
+
+    // Return
+    return Optional.of(new AsKBEntry(subject, input.relation, object, input.confidence, docid, sentenceIndex,
+        subject == input.subject ? Optional.empty() : Optional.of(input.subject),
+        object == input.object ? Optional.empty() : Optional.of(input.object) ));
   }
 }

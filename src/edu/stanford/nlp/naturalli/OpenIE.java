@@ -1,5 +1,7 @@
 package edu.stanford.nlp.naturalli;
 
+import edu.stanford.nlp.dcoref.CorefChain;
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -12,12 +14,17 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Execution;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A simple OpenIE system based on valid Natural Logic deletions of a sentence.
@@ -32,9 +39,10 @@ public class OpenIE implements Annotator {
   private String PP_AFFINITY = "/home/gabor/workspace/naturalli/etc/pp_affinity.tsv.gz"; //"edu/stanford/nlp/naturalli/pp_affinity.tab";
   @Execution.Option(name="openie.dobj_affinity", gloss="A tab separated file of 'verb  dobj_affinity' values, where affinity is between 0 and 1")
   private String DOBJ_AFFINITY = "/home/gabor/workspace/naturalli/etc/dobj_affinity.tsv.gz"; // "edu/stanford/nlp/naturalli/dobj_affinity.tab";
-
+  @Execution.Option(name="openie.max_results_per_clause", gloss="The maximum number of results to return for a single segmented clause")
+  private int MAX_RESULTS_PER_CLAUSE = 100;
   private static enum Optimization { GENERAL, KB }
-  @Execution.Option(name="openie.optimize.for", gloss="{General, KB}: Optimize the system for particular tasks (e.g., knowledge base completion tasks -- try to make the subject and object coherent named entities).")
+  @Execution.Option(name="openie.optimize_for", gloss="{General, KB}: Optimize the system for particular tasks (e.g., knowledge base completion tasks -- try to make the subject and object coherent named entities).")
   private Optimization OPTIMIZE_FOR = Optimization.GENERAL;
 
   private final NaturalLogicWeights WEIGHTS;
@@ -152,11 +160,15 @@ public class OpenIE implements Annotator {
 
     // Initialize the search
     List<IndexedWord> topologicalVertices = originalTree.topologicalSort();
+    if (topologicalVertices.isEmpty()) {
+      return results;
+    }
     Stack<SearchState> fringe = new Stack<>();
     fringe.push(new SearchState(0l, 0, originalTree, null, null, 1.0));
 
     // Start the search
     while (!fringe.isEmpty()) {
+      if (results.size() >= MAX_RESULTS_PER_CLAUSE) { return results; }
       SearchState state = fringe.pop();
       IndexedWord currentWord = topologicalVertices.get(state.currentIndex);
 
@@ -324,7 +336,7 @@ public class OpenIE implements Annotator {
 
   /** The pattern for a clause to be split off of the sentence */
   private static final List<SemgrexPattern> CLAUSE_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
-    String clauseBreakers = "vmod|partmod|infmod|prepc.*|advcl|purpcl|conj(_and)?|prep_.*|dep";
+    String clauseBreakers = "vmod|partmod|infmod|prepc.*|advcl|purpcl|conj(_and)?|prep_.*";
     add(SemgrexPattern.compile("{$} ?>/.subj(pass)?/ {}=subject >/" + clauseBreakers + "/ ( {pos:/V.*/}=clause ?>/.subj(pass)?/ {}=clausesubj )"));
     add(SemgrexPattern.compile("{$} ?>/.subj(pass)?/ {}=subject >/.obj|prep.*/ ( !{pos:/N*/} >/" + clauseBreakers + "/ ( {pos:/V.*/}=clause ?>/.subj(pass)?/ {}=clausesubj ) )"));
   }});
@@ -413,37 +425,43 @@ public class OpenIE implements Annotator {
    */
   private List<SemanticGraph> coarseClauseSplitting(SemanticGraph rawTree) {
     List<SemanticGraph> clauses = new ArrayList<>();
-    SemanticGraph original = null;
+    List<SemanticGraph> toRecurse = new ArrayList<>();
+    SemanticGraph original = new SemanticGraph(rawTree);
     for (SemgrexPattern pattern : CLAUSE_PATTERNS) {
-      SemgrexMatcher matcher = pattern.matcher(original != null ? original : rawTree);
-      while (matcher.find()) {
-        if (original == null) {
-          original = new SemanticGraph(rawTree);
-        }
-        IndexedWord subjectOrNull = matcher.getNode("subject");
-        IndexedWord clauseRoot = matcher.getNode("clause");
-        IndexedWord clauseSubjectOrNull = matcher.getNode("clausesubj");
-        SemanticGraph clause;
-        if (clauseSubjectOrNull != null || subjectOrNull == null) {
-          // Case: independent clause; no need to copy the subject
-          clause = splitOffTree(original, clauseRoot, null);
+      boolean foundMatch = true;
+      while (foundMatch) {
+        SemgrexMatcher matcher = pattern.matcher(original);
+        if (matcher.find()) {  // Note(gabor): Can't do 'while' here or else we risk a ConcurrentModificationException
+          IndexedWord subjectOrNull = matcher.getNode("subject");
+          IndexedWord clauseRoot = matcher.getNode("clause");
+          IndexedWord clauseSubjectOrNull = matcher.getNode("clausesubj");
+          SemanticGraph clause;
+          if (clauseSubjectOrNull != null || subjectOrNull == null) {
+            // Case: independent clause; no need to copy the subject
+            clause = splitOffTree(original, clauseRoot, null);
+          } else {
+            // Case: copy subject from main clause
+            //noinspection ConstantConditions
+            assert subjectOrNull != null;
+            clause = splitOffTree(original, clauseRoot, subjectOrNull);
+          }
+          if (original.isEmpty()) {
+            clauses.add(clause);
+          } else {
+            toRecurse.add(clause);
+          }
         } else {
-          // Case: copy subject from main clause
-          //noinspection ConstantConditions
-          assert subjectOrNull != null;
-          clause = splitOffTree(original, clauseRoot, subjectOrNull);
-        }
-        if (original.isEmpty()) {
-          clauses.add(clause);
-        } else {
-          clauses.addAll(coarseClauseSplitting(clause));
+          foundMatch = false;
         }
       }
     }
+    // Recursive case: recurse on clauses
+    // Note(gabor): This should be outside of the pattern matching loop, or else we risk a ConcurrentModificationException.
+    for (SemanticGraph clause : toRecurse) {
+      clauses.addAll(coarseClauseSplitting(clause));
+    }
     // Base case: just add the original tree
-    if (clauses.isEmpty()) {
-      clauses.add(tweakCC(rawTree));
-    } else if (original != null && original.vertexSet().size() > 0) {
+    if (original.vertexSet().size() > 0) {
       clauses.add(tweakCC(original));
     }
     // Return
@@ -458,7 +476,7 @@ public class OpenIE implements Annotator {
    * </ul>
    * @param tree The tree to clean (in place!)
    */
-  private void cleanTree(SemanticGraph tree) {
+  private static void cleanTree(SemanticGraph tree) {
     // Clean nodes
     List<IndexedWord> toDelete = new ArrayList<>();
     for (IndexedWord vertex : tree.vertexSet()) {
@@ -494,7 +512,7 @@ public class OpenIE implements Annotator {
    * </p>
    */
   @SuppressWarnings("unchecked")
-  public void annotateSentence(CoreMap sentence) {
+  public void annotateSentence(CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
     SemanticGraph fullTree = new SemanticGraph(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class));
     cleanTree(fullTree);
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
@@ -518,19 +536,28 @@ public class OpenIE implements Annotator {
       }
       // Add search results
       for (SemanticGraph tree : clauses) {
-        List<SearchResult> results = search(tokens, tree);
-        for (SearchResult result : results) {
-          SentenceFragment fragment = new SentenceFragment(result.tree, false);
-          fragments.add(fragment);
-          Optional<RelationTriple> extraction = RelationTriple.segment(result.tree, Optional.of(result.confidence));
-          if (extraction.isPresent()) {
-            extractions.add(extraction.get());
+        if (tree.size() > 0) {
+          List<SearchResult> results = search(tokens, tree);
+          for (SearchResult result : results) {
+            SentenceFragment fragment = new SentenceFragment(result.tree, false);
+            fragments.add(fragment);
+            Optional<RelationTriple> extraction = RelationTriple.segment(result.tree, Optional.of(result.confidence));
+            if (extraction.isPresent()) {
+              extractions.add(extraction.get());
+            }
           }
         }
       }
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
-      Collections.sort(extractions);
-      sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, extractions);
+      switch (OPTIMIZE_FOR) {
+        case GENERAL:
+          Collections.sort(extractions);
+          sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, extractions);
+        case KB:
+          List<RelationTriple> triples = extractions.stream().map(x -> RelationTriple.optimizeForKB(x, sentence, canonicalMentionMap)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+          Collections.sort(triples);
+          sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, triples);
+      }
     }
   }
 
@@ -540,8 +567,34 @@ public class OpenIE implements Annotator {
    */
   @SuppressWarnings("UnusedDeclaration")
   public Collection<RelationTriple> relationsForSentence(CoreMap sentence) {
-    annotateSentence(sentence);
+    annotateSentence(sentence, new IdentityHashMap<>());
     return sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
+  }
+
+  /**
+   * A utility to get useful information out of a CorefMention. In particular, it reutnrs the CoreLabels which are
+   * associated with this mention, and it returns a score for how much we think this mention should be the canonical
+   * mention.
+   *
+   * @param doc The document this mention is referenced into.
+   * @param mention The mention itself.
+   * @return A pair of the tokens in the mention, and a score for how much we like this mention as the canonical mention.
+   */
+  private static Pair<List<CoreLabel>, Double> grokCorefMention(Annotation doc, CorefChain.CorefMention mention) {
+    List<CoreLabel> tokens = doc.get(CoreAnnotations.SentencesAnnotation.class).get(mention.sentNum - 1).get(CoreAnnotations.TokensAnnotation.class);
+    List<CoreLabel> mentionAsTokens = tokens.subList(mention.startIndex - 1, mention.endIndex - 1);
+    // Try to assess this mention's NER type
+    Counter<String> nerVotes = new ClassicCounter<>();
+    for (CoreLabel token : mentionAsTokens) {
+      if (token.ner() != null && !"O".equals(token.ner())) {
+        nerVotes.incrementCount(token.ner());
+      }
+    }
+    String ner = Counters.argmax(nerVotes, (o1, o2) -> o1 == null ? 0 : o1.compareTo(o2));
+    double nerCount = nerVotes.getCount(ner);
+    double nerScore = nerCount * nerCount / ((double) mentionAsTokens.size());
+    // Return
+    return Pair.makePair(mentionAsTokens, nerScore);
   }
 
   /**
@@ -554,7 +607,38 @@ public class OpenIE implements Annotator {
    */
   @Override
   public void annotate(Annotation annotation) {
-    annotation.get(CoreAnnotations.SentencesAnnotation.class).forEach(this::annotateSentence);
+    // Accumulate Coref data
+    Map<Integer, CorefChain> corefChains = annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class);
+    Map<CoreLabel, List<CoreLabel>> canonicalMentionMap = new IdentityHashMap<>();
+    if (corefChains != null) {
+      for (CorefChain chain : corefChains.values()) {
+        // Metadata
+        List<CoreLabel> canonicalMention = null;
+        double canonicalMentionScore = Double.NEGATIVE_INFINITY;
+        Set<CoreLabel> tokensToMark = new HashSet<>();
+        List<CorefChain.CorefMention> mentions = chain.getMentionsInTextualOrder();
+        // Iterate over mentions
+        for (int i = 0; i < mentions.size(); ++i) {
+          // Get some data on this mention
+          Pair<List<CoreLabel>, Double> info = grokCorefMention(annotation, mentions.get(i));
+          // Figure out if it should be the canonical mention
+          double score = info.second + ((double) i) / ((double) mentions.size()) + (mentions.get(i) == chain.getRepresentativeMention() ? 1.0 : 0.0);
+          if (canonicalMention == null || score > canonicalMentionScore) {
+            canonicalMention = info.first;
+            canonicalMentionScore = score;
+          }
+          // Register the participating tokens
+          tokensToMark.addAll(info.first);
+        }
+        // Mark the tokens as coreferent
+        assert canonicalMention != null;
+        for (CoreLabel token : tokensToMark) {
+          canonicalMentionMap.put(token, canonicalMention);
+        }
+      }
+    }
+
+    annotation.get(CoreAnnotations.SentencesAnnotation.class).forEach(x -> this.annotateSentence(x, canonicalMentionMap));
   }
 
   /** {@inheritDoc} */

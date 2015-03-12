@@ -144,6 +144,7 @@ public enum NaturalLogicRelation {
     put("advcl", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("purpcl", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("advmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("agent", NaturalLogicRelation.INDEPENDENCE);  //
     put("amod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("appos", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("aux", NaturalLogicRelation.INDEPENDENCE);  // he left -/-> he should leave
@@ -174,7 +175,7 @@ public enum NaturalLogicRelation {
     put("pcomp", NaturalLogicRelation.INDEPENDENCE);  // though, not so in collapsed dependencies
     put("pobj", NaturalLogicRelation.INDEPENDENCE);  // must delete whole preposition
     put("poss", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("posseive", NaturalLogicRelation.INDEPENDENCE);  // see dep_poss
+    put("possessive", NaturalLogicRelation.INDEPENDENCE);  // see dep_poss
     put("preconj", NaturalLogicRelation.INDEPENDENCE);  // forbidden to see this
     put("predet", NaturalLogicRelation.INDEPENDENCE);  // forbidden to see this
     put("prep", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -189,7 +190,12 @@ public enum NaturalLogicRelation {
     put("infmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("xcomp", NaturalLogicRelation.INDEPENDENCE);  //
     put("conj_and", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj_and\\/or", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj_but", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("conj_or", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("conj_nor", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("conj_plus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj_x", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_aboard", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_about", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_above", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -224,7 +230,9 @@ public enum NaturalLogicRelation {
     put("prep_following", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_if", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_in", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_including", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_inside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_into", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_like", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -246,6 +254,7 @@ public enum NaturalLogicRelation {
     put("prep_since", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_than", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_through", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_throughout", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_toward", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_towards", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -256,6 +265,7 @@ public enum NaturalLogicRelation {
     put("prep_up", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_upon", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_versus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prep_vs.", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_via", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prep_within", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -350,6 +360,7 @@ public enum NaturalLogicRelation {
     put("prepc_except", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prepc_excepting", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prepc_excluding", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("prepc_far_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prepc_following", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prepc_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prepc_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -457,7 +468,14 @@ public enum NaturalLogicRelation {
     if (rel != null) {
       return rel;
     } else {
-      throw new IllegalArgumentException("Unknown dependency arc label: " + dependencyLabel);
+      System.err.println("Unknown dependency arc for NaturalLogicRelation: " + dependencyLabel);
+      if (dependencyLabel.startsWith("prep_")) {
+        return NaturalLogicRelation.REVERSE_ENTAILMENT;
+      } else if (dependencyLabel.startsWith("conj_")) {
+        return NaturalLogicRelation.REVERSE_ENTAILMENT;
+      } else {
+        return NaturalLogicRelation.INDEPENDENCE;
+      }
     }
   }
 
