@@ -34,7 +34,7 @@ import java.util.*;
  *   A serializer using Google's protocol buffer format.
  *   The files produced by this serializer, in addition to being language-independent,
  *   are a little over 10% the size and 4x faster to read+write versus the default Java serialization
- *   (see {@link GenericAnnotationSerializer}), when both files are compressed with gzip.
+ *   (see GenericAnnotationSerializer), when both files are compressed with gzip.
  * </p>
  *
  * <p>
