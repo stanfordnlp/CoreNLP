@@ -146,7 +146,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
   /**
    * A {@link edu.stanford.nlp.ie.util.RelationTriple}, but with the tree saved as well.
    */
-  protected static class WithTree extends RelationTriple {
+  public static class WithTree extends RelationTriple {
     public final SemanticGraph sourceTree;
 
     /**
@@ -359,7 +359,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
    * A {@link edu.stanford.nlp.ie.util.RelationTriple}, optimized for tasks such as KBP
    * where we care about named entities, and care about things like provenance and coref.
    */
-  protected static class AsKBEntry extends RelationTriple {
+  public static class AsKBEntry extends RelationTriple {
     public final String docid;
     public final int sentenceIndex;
     private final Optional<List<CoreLabel>> originalSubject;

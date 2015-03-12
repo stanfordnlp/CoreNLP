@@ -336,7 +336,7 @@ public class OpenIE implements Annotator {
 
   /** The pattern for a clause to be split off of the sentence */
   private static final List<SemgrexPattern> CLAUSE_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
-    String clauseBreakers = "vmod|partmod|infmod|prepc.*|advcl|purpcl|conj(_and)?|prep_.*";
+    String clauseBreakers = "vmod|rcmod|[cxpa]comp|partmod|appos|infmod|prepc.*|advcl|purpcl|conj(_and|but|plus)?|prep_.*";
     add(SemgrexPattern.compile("{$} ?>/.subj(pass)?/ {}=subject >/" + clauseBreakers + "/ ( {pos:/V.*/}=clause ?>/.subj(pass)?/ {}=clausesubj )"));
     add(SemgrexPattern.compile("{$} ?>/.subj(pass)?/ {}=subject >/.obj|prep.*/ ( !{pos:/N*/} >/" + clauseBreakers + "/ ( {pos:/V.*/}=clause ?>/.subj(pass)?/ {}=clausesubj ) )"));
   }});
