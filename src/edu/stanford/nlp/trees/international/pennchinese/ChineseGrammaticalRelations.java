@@ -82,9 +82,7 @@ public class ChineseGrammaticalRelations {
   }
 
   public static GrammaticalRelation valueOf(String s) {
-    synchronized (values) {
-      return GrammaticalRelation.valueOf(s, values());
-    }
+    return GrammaticalRelation.valueOf(s, values());
   }
 
   ////////////////////////////////////////////////////////////

@@ -97,7 +97,7 @@ public class FuzzyInterval<E extends FuzzyInterval.FuzzyComparable<E>> extends I
   }
 
   private int restrictFlags(int flags) {
-    // Eliminiate inconsistent choices in flags
+    // Eliminate inconsistent choices in flags
     int f11 = extractRelationSubflags(flags, REL_FLAGS_SS_SHIFT);
     int f22 = extractRelationSubflags(flags, REL_FLAGS_EE_SHIFT);
     int f12 = extractRelationSubflags(flags, REL_FLAGS_SE_SHIFT);
@@ -125,9 +125,9 @@ public class FuzzyInterval<E extends FuzzyInterval.FuzzyComparable<E>> extends I
       f12 = f12 & REL_FLAGS_BEFORE;
       f22 = f22 & REL_FLAGS_BEFORE;
     } else if ((f12 & REL_FLAGS_AFTER) == 0) {
-      f11 = f11 & (REL_FLAGS_BEFORE | REL_FLAGS_BEFORE);
-      f12 = f12 & (REL_FLAGS_BEFORE | REL_FLAGS_BEFORE);
-      f22 = f22 & (REL_FLAGS_BEFORE | REL_FLAGS_BEFORE);
+      f11 = f11 & (REL_FLAGS_SAME | REL_FLAGS_BEFORE);
+      f12 = f12 & (REL_FLAGS_SAME | REL_FLAGS_BEFORE);
+      f22 = f22 & (REL_FLAGS_SAME | REL_FLAGS_BEFORE);
     }
     if (f22 == REL_FLAGS_AFTER) {
       f21 = f21 & REL_FLAGS_AFTER;
