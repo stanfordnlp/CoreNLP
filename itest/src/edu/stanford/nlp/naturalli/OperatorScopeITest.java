@@ -118,11 +118,6 @@ public class OperatorScopeITest {
   }
 
   @Test
-  public void negationMidSentence() {
-    checkScope(3, 6, 6, 6, annotate("Obama was not born in Dallas")[2]);
-  }
-
-  @Test
   public void all_X_verb_Y() {
     checkScope(1, 2, 2, 4, annotate("All cats eat mice.")[0]);
     checkScope(1, 2, 2, 4, annotate("All cats have tails.")[0]);
