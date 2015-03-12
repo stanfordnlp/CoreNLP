@@ -1,17 +1,18 @@
-package edu.stanford.nlp.patterns.surface;
+package edu.stanford.nlp.patterns;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import edu.stanford.nlp.patterns.surface.Data;
-import edu.stanford.nlp.patterns.surface.ConstantsAndVariables.ScorePhraseMeasures;
+import edu.stanford.nlp.patterns.ConstantsAndVariables.ScorePhraseMeasures;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
+import edu.stanford.nlp.util.GoogleNGramsSQLBacked;
 import edu.stanford.nlp.util.logging.Redwood;
 
 /**
@@ -20,20 +21,20 @@ import edu.stanford.nlp.util.logging.Redwood;
  *
  */
 public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer<E>{
-  
+
   public ScorePhrasesAverageFeatures(ConstantsAndVariables constvar) {
     super(constvar);
   }
 
 
-  private TwoDimensionalCounter<String, ScorePhraseMeasures> phraseScoresNormalized = new TwoDimensionalCounter<String, ScorePhraseMeasures>();
+  private TwoDimensionalCounter<CandidatePhrase, ScorePhraseMeasures> phraseScoresNormalized = new TwoDimensionalCounter<CandidatePhrase, ScorePhraseMeasures>();
 
   
   @Override
-  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, E> terms,
-      TwoDimensionalCounter<String, E> wordsPatExtracted, Counter<E> allSelectedPatterns,
-      Set<String> alreadyIdentifiedWords, boolean forLearningPatterns) {
-    Map<String, Counter<ScorePhraseMeasures>> scores = new HashMap<String, Counter<ScorePhraseMeasures>>();
+  public Counter<CandidatePhrase> scorePhrases(String label, TwoDimensionalCounter<CandidatePhrase, E> terms,
+      TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted, Counter<E> allSelectedPatterns,
+      Set<CandidatePhrase> alreadyIdentifiedWords, boolean forLearningPatterns) {
+    Map<CandidatePhrase, Counter<ScorePhraseMeasures>> scores = new HashMap<CandidatePhrase, Counter<ScorePhraseMeasures>>();
     if (Data.domainNGramsFile != null)
       Data.loadDomainNGrams();
 
@@ -41,9 +42,9 @@ public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer
     Redwood.log(ConstantsAndVariables.extremedebug, "Considering terms: " + terms.firstKeySet());
 
     // calculate TF-IDF like scores
-    Counter<String> tfidfScores = new ClassicCounter<String>();
+    Counter<CandidatePhrase> tfidfScores = new ClassicCounter<CandidatePhrase>();
     if (constVars.usePhraseEvalPatWtByFreq) {
-      for (Entry<String, ClassicCounter<E>> en : terms.entrySet()) {
+      for (Entry<CandidatePhrase, ClassicCounter<E>> en : terms.entrySet()) {
         double score = getPatTFIDFScore(en.getKey(), en.getValue(), allSelectedPatterns);
         tfidfScores.setCount(en.getKey(), score);
       }
@@ -51,49 +52,45 @@ public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer
       Counters.divideInPlace(tfidfScores, Data.processedDataFreq);
     }
 
-    Counter<String> externalFeatWtsNormalized = new ClassicCounter<String>();
-    Counter<String> domainNgramNormScores = new ClassicCounter<String>();
-    Counter<String> googleNgramNormScores = new ClassicCounter<String>();
-    Counter<String> editDistanceOtherBinaryScores = new ClassicCounter<String>();
-    Counter<String> editDistanceSameBinaryScores = new ClassicCounter<String>();
+    Counter<CandidatePhrase> externalFeatWtsNormalized = new ClassicCounter<CandidatePhrase>();
+    Counter<CandidatePhrase> domainNgramNormScores = new ClassicCounter<CandidatePhrase>();
+    Counter<CandidatePhrase> googleNgramNormScores = new ClassicCounter<CandidatePhrase>();
+    Counter<CandidatePhrase> editDistanceOtherBinaryScores = new ClassicCounter<CandidatePhrase>();
+    Counter<CandidatePhrase> editDistanceSameBinaryScores = new ClassicCounter<CandidatePhrase>();
 
-    for (String g : terms.firstKeySet()) {
-
+    for (CandidatePhrase gc : terms.firstKeySet()) {
+      String g = gc.getPhrase();
       if (constVars.usePhraseEvalEditDistOther) {
-        editDistanceOtherBinaryScores.setCount(g, 1 - constVars.getEditDistanceScoresOtherClassThreshold(g));
+        editDistanceOtherBinaryScores.setCount(gc, 1 - constVars.getEditDistanceScoresOtherClassThreshold(label, g));
       }
 
       if (constVars.usePhraseEvalEditDistSame)
-        editDistanceSameBinaryScores.setCount(g, constVars.getEditDistanceScoresThisClassThreshold(label, g));
+        editDistanceSameBinaryScores.setCount(gc, constVars.getEditDistanceScoresThisClassThreshold(label, g));
 
       if (constVars.usePhraseEvalDomainNgram) {
         // calculate domain-ngram wts
         if (Data.domainNGramRawFreq.containsKey(g)) {
-          assert (Data.rawFreq.containsKey(g));
-          domainNgramNormScores.setCount(g, getDomainNgramScore(g));
+          assert (Data.rawFreq.containsKey(gc));
+          domainNgramNormScores.setCount(gc, getDomainNgramScore(g));
         }else
           System.err.println("why is " + g + " not present in domainNgram");
       }
 
-      if (constVars.usePhraseEvalGoogleNgram) {
-        if (Data.googleNGram.containsKey(g)) {
-          assert (Data.rawFreq.containsKey(g));
-          googleNgramNormScores.setCount(g, ((1 + Data.rawFreq.getCount(g) * Math.sqrt(Data.ratioGoogleNgramFreqWithDataFreq)) / Data.googleNGram.getCount(g)));
-        }
-      }
+      if (constVars.usePhraseEvalGoogleNgram)
+        googleNgramNormScores.setCount(gc, getGoogleNgramScore(gc));
 
       if (constVars.usePhraseEvalWordClass) {
         // calculate dist sim weights
         Integer num = constVars.getWordClassClusters().get(g);
         if (num != null && constVars.distSimWeights.get(label).containsKey(num)) {
-          externalFeatWtsNormalized.setCount(g, constVars.distSimWeights.get(label).getCount(num));
+          externalFeatWtsNormalized.setCount(gc, constVars.distSimWeights.get(label).getCount(num));
         } else
-          externalFeatWtsNormalized.setCount(g, OOVExternalFeatWt);
+          externalFeatWtsNormalized.setCount(gc, OOVExternalFeatWt);
       }
     }
 
-    Counter<String> normTFIDFScores = GetPatternsFromDataMultiClass.normalizeSoftMaxMinMaxScores(tfidfScores, true, true, false);
-    Counter<String> dictOdddsScores = null;
+    Counter<CandidatePhrase> normTFIDFScores = GetPatternsFromDataMultiClass.normalizeSoftMaxMinMaxScores(tfidfScores, true, true, false);
+    Counter<CandidatePhrase> dictOdddsScores = null;
     if (constVars.usePhraseEvalSemanticOdds){
       assert constVars.dictOddsWeights != null : "usePhraseEvalSemanticOdds is true but dictOddsWeights is null for the label " + label;
       dictOdddsScores = GetPatternsFromDataMultiClass.normalizeSoftMaxMinMaxScores(constVars.dictOddsWeights.get(label), true, true, false);
@@ -105,7 +102,7 @@ public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer
     // Counters.max(googleNgramNormScores);
     // Counters.max(externalFeatWtsNormalized);
 
-    for (String word : terms.firstKeySet()) {
+    for (CandidatePhrase word : terms.firstKeySet()) {
       if (alreadyIdentifiedWords.contains(word))
         continue;
       Counter<ScorePhraseMeasures> scoreslist = new ClassicCounter<ScorePhraseMeasures>();
@@ -160,27 +157,33 @@ public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer
       }
       
       if(constVars.usePhraseEvalWordShape){
-        scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word, label));
+        scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word.getPhrase(), label));
       }
       
       scores.put(word, scoreslist);
       phraseScoresNormalized.setCounter(word, scoreslist);
     }
-    Counter<String> phraseScores = new ClassicCounter<String>();
-    for (Entry<String, Counter<ScorePhraseMeasures>> wEn : scores
+    Counter<CandidatePhrase> phraseScores = new ClassicCounter<CandidatePhrase>();
+    for (Entry<CandidatePhrase, Counter<ScorePhraseMeasures>> wEn : scores
         .entrySet()) {
-      double avgScore = Counters.mean(wEn.getValue());
-      phraseScores.setCount(wEn.getKey(), avgScore);
+      Double avgScore = Counters.mean(wEn.getValue());
+      if(!avgScore.isInfinite() && !avgScore.isNaN())
+        phraseScores.setCount(wEn.getKey(), avgScore);
+      else
+        Redwood.log(Redwood.DBG, "Ignoring " + wEn.getKey() + " because score is " + avgScore);
     }
     return phraseScores;
   }
 
 
   @Override
-  public Counter<String> scorePhrases(String label, Set<String> terms, boolean forLearningPatterns)
+  public Counter<CandidatePhrase> scorePhrases(String label, Set<CandidatePhrase> terms, boolean forLearningPatterns)
       throws IOException {
     throw new RuntimeException("not implemented");
   }
 
-
+  @Override
+  public void printReasonForChoosing(Counter<CandidatePhrase> phrases) {
+    //TODO
+  }
 }

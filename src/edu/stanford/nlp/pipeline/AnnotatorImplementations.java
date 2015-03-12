@@ -117,7 +117,7 @@ public class AnnotatorImplementations {
    * Annotate mentions
    */
   public Annotator mentions(Properties properties, String name) {
-    return new MentionsAnnotator(name, properties);
+    return new EntityMentionsAnnotator(name, properties);
   }
 
   /**
@@ -221,6 +221,15 @@ public class AnnotatorImplementations {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
         Annotator.STANFORD_OPENIE + '.');
     return new OpenIE(relevantProperties);
+  }
+
+  /**
+   * Annotate quotes and extract them like sentences
+   */
+  public Annotator quote(Properties properties) {
+    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
+        Annotator.STANFORD_QUOTE + '.');
+    return new QuoteAnnotator(relevantProperties);
   }
 
 }

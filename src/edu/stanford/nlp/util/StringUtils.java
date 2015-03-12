@@ -1640,16 +1640,20 @@ public class StringUtils {
    */
   public static String makeTextTable(Object[][] table, Object[] rowLabels, Object[] colLabels, int padLeft, int padRight, boolean tsv) {
     StringBuilder buff = new StringBuilder();
-    // top row
-    buff.append(makeAsciiTableCell("", padLeft, padRight, tsv)); // the top left cell
-    for (int j = 0; j < table[0].length; j++) { // assume table is a rectangular matrix
-      buff.append(makeAsciiTableCell(colLabels[j], padLeft, padRight, (j != table[0].length - 1) && tsv));
+    if (colLabels != null) {
+      // top row
+      buff.append(makeAsciiTableCell("", padLeft, padRight, tsv)); // the top left cell
+      for (int j = 0; j < table[0].length; j++) { // assume table is a rectangular matrix
+        buff.append(makeAsciiTableCell(colLabels[j], padLeft, padRight, (j != table[0].length - 1) && tsv));
+      }
+      buff.append('\n');
     }
-    buff.append('\n');
     // all other rows
     for (int i = 0; i < table.length; i++) {
       // one row
-      buff.append(makeAsciiTableCell(rowLabels[i], padLeft, padRight, tsv));
+      if (rowLabels != null) {
+        buff.append(makeAsciiTableCell(rowLabels[i], padLeft, padRight, tsv));
+      }
       for (int j = 0; j < table[i].length; j++) {
         buff.append(makeAsciiTableCell(table[i][j], padLeft, padRight, (j != table[0].length - 1) && tsv));
       }

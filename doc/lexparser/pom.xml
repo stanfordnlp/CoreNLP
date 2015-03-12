@@ -6,7 +6,7 @@
   <packaging>jar</packaging>
   <name>Stanford Parser</name>
   <description>Stanford Parser processes raw text in English, Chinese, German, Arabic, and French, and extracts constituency parse trees.</description>
-  <url>http://nlp.stanford.edu/software/corenlp.shtml</url>
+  <url>http://nlp.stanford.edu/software/lex-parser.shtml</url>
   <licenses>
     <license>
       <name>GNU General Public License Version 2</name>

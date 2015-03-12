@@ -25,7 +25,8 @@ public class CoNLLOutputterTest extends TestCase {
         "1\tBetter\t_\t_\t_\t_\t_\n" +
         "2\tthan\t_\t_\t_\t_\t_\n" +
         "3\tXML\t_\t_\t_\t_\t_\n" +
-        "4\t.\t_\t_\t_\t_\t_";
+        "4\t.\t_\t_\t_\t_\t_\n\n";
     assertEquals(expected, actual);
   }
+
 }

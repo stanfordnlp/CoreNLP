@@ -660,7 +660,6 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   /**
    * Gazette Stuff.
    */
-
   private static class GazetteInfo implements Serializable {
     final String feature;
     final int loc;
@@ -739,7 +738,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   private Set<String> femaleNames; // = null;
 
   private final Pattern titlePattern = Pattern.compile("(?:Mr|Ms|Mrs|Dr|Miss|Sen|Judge|Sir)\\.?"); // todo: should make static final and add more titles
-
+  private static final Pattern splitSlashHyphenWordsPattern = Pattern.compile("[-/]");
 
   protected Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
     CoreLabel p3 = cInfo.get(loc - 3);
@@ -785,6 +784,12 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       }
     }
 
+    if (flags.splitSlashHyphenWords) {
+      String[] bits = splitSlashHyphenWordsPattern.split(cWord);
+      for (String bit : bits) {
+        featuresC.add(bit + "WFRAG");
+      }
+    }
 
     if (flags.useInternal && flags.useExternal ) {
 
@@ -1325,6 +1330,15 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
           if (flags.useDisjunctiveShapeInteraction) {
             featuresC.add(getWord(dp) + '-' + cShape + "-DISJP-CS");
           }
+        }
+      }
+
+      if (flags.useUndirectedDisjunctive) {
+        for (int i = 1; i <= flags.disjunctionWidth; i++) {
+          CoreLabel dn = cInfo.get(loc + i);
+          CoreLabel dp = cInfo.get(loc - i);
+          featuresC.add(getWord(dn) + "-DISJ");
+          featuresC.add(getWord(dp) + "-DISJ");
         }
       }
 

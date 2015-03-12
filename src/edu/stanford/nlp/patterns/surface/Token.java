@@ -2,6 +2,7 @@ package edu.stanford.nlp.patterns.surface;
 
 import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.patterns.PatternFactory;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.Serializable;
@@ -13,17 +14,33 @@ import java.util.regex.Pattern;
  * Created by sonalg on 10/16/14.
  */
 public class Token implements Serializable {
+
+  //Can be semgrex.Env but does not matter
   static public Env env = TokenSequencePattern.getNewEnv();
+
   static Map<Class, String> class2KeyMapping = new ConcurrentHashMap<Class, String>();
+
   //All the restrictions of a token: for example, word:xyz
   Map<Class, String> classORrestrictions;
+
   //TODO: may be change this to map to true values?
   String envBindBooleanRestriction;
-  final Pattern alphaNumeric = Pattern.compile("^[\\p{Alnum}\\s\\.]+$");
+
+  final Pattern alphaNumeric = Pattern.compile("^[\\p{Alnum}\\s]+$");
 
   int numMinOcc = 1;
   int numMaxOcc = 1;
 
+  PatternFactory.PatternType type;
+
+  public Token(PatternFactory.PatternType type){
+    this.type  = type;
+  }
+
+  public Token(Class c, String s, PatternFactory.PatternType type){
+    this(type);
+    addORRestriction(c, s);
+  }
 
   public Map<String, String> classORRestrictionsAsString(){
     if(classORrestrictions== null || classORrestrictions.isEmpty())
@@ -49,8 +66,38 @@ public class Token implements Serializable {
   }
 
   @Override
-  public String toString(){
+  public String toString() {
+    if (type.equals(PatternFactory.PatternType.SURFACE))
+      return toStringSurface();
+    else if (type.equals(PatternFactory.PatternType.DEP))
+      return toStringDep();
+    else
+      throw new UnsupportedOperationException();
+  }
 
+  private String toStringDep() {
+    String str = "";
+    if(classORrestrictions!= null && !this.classORrestrictions.isEmpty()) {
+      for (Map.Entry<Class, String> en : this.classORrestrictions.entrySet()) {
+        String orgVal = en.getValue().toString();
+        String val;
+
+
+        if(!alphaNumeric.matcher(orgVal).matches())
+          val = "/" + Pattern.quote(orgVal.replaceAll("/","\\\\/"))+ "/";
+        else
+          val = orgVal;
+
+        if (str.isEmpty())
+          str = "{" + class2KeyMapping.get(en.getKey()) + ":" + val + "}";
+        else
+          str += " | " + "{" + class2KeyMapping.get(en.getKey()) + ":" + val + "}";
+      }
+    }
+    return str.trim();
+  }
+
+  private String toStringSurface(){
     String str = "";
     if(classORrestrictions!= null && !this.classORrestrictions.isEmpty()) {
       for (Map.Entry<Class, String> en : this.classORrestrictions.entrySet()) {
@@ -119,6 +166,7 @@ public class Token implements Serializable {
       throw new RuntimeException("cannot add restriction to something that is binding to an env variable");
     if(classORrestrictions == null)
       classORrestrictions = new TreeMap<Class, String>(new ClassComparator());
+    assert value!=null;
     classORrestrictions.put(classR, value);
   }
 

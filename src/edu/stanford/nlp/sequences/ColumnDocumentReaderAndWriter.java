@@ -17,7 +17,7 @@ import edu.stanford.nlp.util.StringUtils;
 
 
 /**
- * DocumentReader for column format
+ * DocumentReader for column format.
  *
  * @author Jenny Finkel
  */
@@ -59,7 +59,7 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
   private class ColumnDocParser implements Serializable, Function<String,List<CoreLabel>> {
 
     private static final long serialVersionUID = -6266332661459630572L;
-    private final Pattern whitePattern = Pattern.compile("\\s+");
+    private final Pattern whitePattern = Pattern.compile("\\s+"); // should this really only do a tab?
 
     int lineCount = 0;
 
@@ -82,6 +82,10 @@ public class ColumnDocumentReaderAndWriter implements DocumentReaderAndWriter<Co
         CoreLabel wi;
         try {
           wi = new CoreLabel(map, info);
+          // Since the map normally only specified answer, we copy it to GoldAnswer unless they've put something else there!
+          if ( ! wi.containsKey(CoreAnnotations.GoldAnswerAnnotation.class) && wi.containsKey(CoreAnnotations.AnswerAnnotation.class)) {
+            wi.set(CoreAnnotations.GoldAnswerAnnotation.class, wi.get(CoreAnnotations.AnswerAnnotation.class));
+          }
         } catch (RuntimeException e) {
           System.err.println("Error on line " + lineCount + ": " + line);
           throw e;

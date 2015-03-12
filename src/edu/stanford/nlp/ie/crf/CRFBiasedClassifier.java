@@ -26,10 +26,11 @@ import java.util.*;
  * with {@link CRFClassifier} and supports most command-line parameters
  * available in {@link CRFClassifier}.  In addition to this,
  * CRFBiasedClassifier also interprets the parameter -classBias, as in:
- * <p/><code>
+ * <p><code>
  * java -server -mx500m edu.stanford.nlp.ie.crf.CRFBiasedClassifier -loadClassifier model.gz -testFile test.txt -classBias A:0.5,B:1.5
  * </code>
- * <p/>The command above sets a bias of 0.5 towards class A and a bias of
+ * <p>
+ * The command above sets a bias of 0.5 towards class A and a bias of
  * 1.5 towards class B. These biases (which internally are treated as
  * feature weights in the log-linear model underpinning the CRF
  * classifier) can take any real value. As the weight of A tends to plus
