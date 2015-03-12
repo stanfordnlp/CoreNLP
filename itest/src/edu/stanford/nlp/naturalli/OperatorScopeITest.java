@@ -364,9 +364,9 @@ public class OperatorScopeITest {
 
   @Test
   public void fracasSentencesWithAtLeastAFew() {
-    checkScope("{ At least a few } [ committee members ] [ are from Scandinavia ]");
-    checkScope("{ At least a few } [ committee members ] [ are from Sweden ]");
-//    checkScope("{ At least a few } [ female committee members ] [ are from Scandinavia ]");  // TODO(gabor) enable me again! This is getting grossly mis-parsed
+//    checkScope("{ At least a few } [ committee members ] [ are from Scandinavia ]");
+//    checkScope("{ At least a few } [ committee members ] [ are from Sweden ]");
+    checkScope("{ At least a few } [ female committee members ] [ are from Scandinavia ]");
   }
 
   @Test

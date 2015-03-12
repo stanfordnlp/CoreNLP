@@ -1,5 +1,6 @@
 package edu.stanford.nlp.naturalli;
 
+import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -244,7 +245,16 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     Pair<Integer, Integer> objSpan;
     if (subject == null && object == null) {
       subjSpan = getSubtreeSpan(tree, pivot);
-      subjSpan = excludeFromSpan(subjSpan, quantifierSpan);
+      if (Span.fromPair(subjSpan).contains(Span.fromPair(quantifierSpan))) {
+        // Don't consume the quantifier -- take only the part after the quantifier
+        subjSpan = Pair.makePair(Math.max(subjSpan.first, quantifierSpan.second), subjSpan.second);
+        if (subjSpan.second <= subjSpan.first) {
+          subjSpan = Pair.makePair(subjSpan.first, subjSpan.first + 1);
+        }
+      } else {
+        // Exclude the quantifier from the span
+        subjSpan = excludeFromSpan(subjSpan, quantifierSpan);
+      }
       objSpan = Pair.makePair(subjSpan.second, subjSpan.second);
     } else if (subject == null) {
       subjSpan = includeInSpan(getSubtreeSpan(tree, object), getGeneralizedSubtreeSpan(tree, pivot, Collections.singleton("prep")));
@@ -433,6 +443,11 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     while (matcher.find()) {
       // Get relevant nodes
       IndexedWord quantifier = matcher.getNode("quantifier");
+      String word = quantifier.word().toLowerCase();
+      if (word.equals("a") || word.equals("an") || word.equals("the") ||
+          "CD".equals(quantifier.tag())) {
+        continue;  // These are absurdly common, and uninformative, and we're just going to shoot ourselves in the foot from parsing errors and idiomatic expressions.
+      }
       IndexedWord subject = matcher.getNode("subject");
       // ... If there is not already an operator there
       if (!isOperator[quantifier.index() - 1]) {
