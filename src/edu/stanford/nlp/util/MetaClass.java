@@ -1,7 +1,5 @@
 package edu.stanford.nlp.util;
 
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.PennTreeReader;
@@ -688,6 +686,9 @@ public class MetaClass {
     }else if(Character.class.isAssignableFrom(clazz) || char.class.isAssignableFrom(clazz)){
       //(case: char)
       return (E) new Character((char) Integer.parseInt(value));
+    }else if(Optional.class.isAssignableFrom(clazz)) {
+      //(case: Optional)
+      return (E) ((value == null || "null".equals(value.toLowerCase()) || "empty".equals(value.toLowerCase()) || "none".equals(value.toLowerCase())) ? Optional.empty() : Optional.of(castWithoutKnowingType(value)));
     }else if(java.util.Date.class.isAssignableFrom(clazz)){
       //(case: date)
       try {
@@ -704,24 +705,6 @@ public class MetaClass {
         return (E) cal;
       } catch (NumberFormatException e) {
         return null;
-      }
-    } else if(FileWriter.class.isAssignableFrom(clazz)){
-      try {
-        return (E) new FileWriter(new File(value));
-      } catch (IOException e) {
-        throw new RuntimeIOException(e);
-      }
-    } else if(BufferedReader.class.isAssignableFrom(clazz)){
-      try {
-        return (E) IOUtils.getBufferedReaderFromClasspathOrFileSystem(value);
-      } catch (IOException e) {
-        throw new RuntimeIOException(e);
-      }
-    } else if(FileReader.class.isAssignableFrom(clazz)){
-      try {
-        return (E) new FileReader(new File(value));
-      } catch (IOException e) {
-        throw new RuntimeIOException(e);
       }
     } else if(File.class.isAssignableFrom(clazz)){
       return (E) new File(value);
@@ -794,8 +777,12 @@ public class MetaClass {
     } else if (InputStream.class.isAssignableFrom(clazz)) {
       // (case: input stream)
       if (value.equalsIgnoreCase("stdin") || value.equalsIgnoreCase("in")) { return (E) System.in; }
+      File toReadFrom = cast(value, File.class);
       try {
-        return (E) IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(value);
+        if (!toReadFrom.exists() || !toReadFrom.canRead()) {
+          throw new IllegalStateException("Could not create input stream (cannot read file): " + value);
+        }
+        return (E) new FileInputStream((File) cast(value, File.class));
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

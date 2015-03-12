@@ -412,20 +412,15 @@ public class IOUtils {
     // windows File.separator is \, but getting resources only works with /
     if (is == null) {
       is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/"));
-      // Classpath doesn't like double slashes (e.g., /home/user//foo.txt)
-      if (is == null) {
-        is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
-      }
     }
     // if not found in the CLASSPATH, load from the file system
-    if (is == null) is = new FileInputStream(name);
-    // make sure it's not a GZIP stream
+    if (is == null) {
+      is = new FileInputStream(name);
+    }
     if (name.endsWith(".gz")) {
       try {
-        return new GZIPInputStream(is);
-      } catch (IOException e) {
-        System.err.println("Resource or file looks like a gzip file, but is not: " + name);
-      }
+        is = new GZIPInputStream(is);
+      } catch (IOException e) { }
     }
     return is;
   }
@@ -461,6 +456,11 @@ public class IOUtils {
       URL u = new URL(textFileOrUrl);
       URLConnection uc = u.openConnection();
       in = uc.getInputStream();
+      if (textFileOrUrl.endsWith(".gz")) {
+        try {
+          in = new GZIPInputStream(in);
+        } catch (IOException e) { }
+      }
     } else {
       try {
         in = findStreamInClasspathOrFileSystem(textFileOrUrl);
@@ -1663,7 +1663,7 @@ public class IOUtils {
   public static List<String> linesFromFile(String filename,String encoding, boolean ignoreHeader) {
     try {
       List<String> lines = new ArrayList<String>();
-      BufferedReader in = new BufferedReader(new EncodingFileReader(filename,encoding));
+      BufferedReader in = getBufferedReaderFromClasspathOrFileSystem(filename, encoding);
       String line;
       int i = 0;
       while ((line = in.readLine()) != null) {
