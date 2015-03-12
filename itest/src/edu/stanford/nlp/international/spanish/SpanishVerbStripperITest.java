@@ -115,7 +115,6 @@ public class SpanishVerbStripperITest extends TestCase {
     assertEquals("oír", verbStripper.stripVerb("oírse"));
     assertEquals("escribamos", verbStripper.stripVerb("escribámosela"));
     assertEquals("sentemos", verbStripper.stripVerb("sentémonos"));
-    assertEquals("haber", verbStripper.stripVerb("haberlo"));
   }
 
 }

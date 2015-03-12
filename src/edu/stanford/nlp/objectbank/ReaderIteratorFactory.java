@@ -38,7 +38,7 @@ public class ReaderIteratorFactory implements Iterable<Reader> {
   /**
    * Constructs a ReaderIteratorFactory from the input sources
    * contained in the Collection.  The Collection should contain
-   * Objects of type File, String, URL and/or Reader.  See class
+   * Objects of type File, String, URL and Reader.  See class
    * description for details.
    *
    * @param c Collection of input sources.

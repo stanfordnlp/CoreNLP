@@ -1,5 +1,7 @@
 package edu.stanford.nlp.util;
 
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.PennTreeReader;
@@ -702,6 +704,24 @@ public class MetaClass {
         return (E) cal;
       } catch (NumberFormatException e) {
         return null;
+      }
+    } else if(FileWriter.class.isAssignableFrom(clazz)){
+      try {
+        return (E) new FileWriter(new File(value));
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+    } else if(BufferedReader.class.isAssignableFrom(clazz)){
+      try {
+        return (E) IOUtils.getBufferedReaderFromClasspathOrFileSystem(value);
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
+      }
+    } else if(FileReader.class.isAssignableFrom(clazz)){
+      try {
+        return (E) new FileReader(new File(value));
+      } catch (IOException e) {
+        throw new RuntimeIOException(e);
       }
     } else if(File.class.isAssignableFrom(clazz)){
       return (E) new File(value);

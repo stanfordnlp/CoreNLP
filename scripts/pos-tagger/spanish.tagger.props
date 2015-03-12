@@ -1,6 +1,6 @@
 ## tagger training invoked at Wed Jul 30 08:33:18 PDT 2014 with arguments:
                    model = spanish.tagger
-                    arch = left3words,naacl2003unknowns,allwordshapes(-1,1)
+                    arch = left3words,naacl2003unknowns,allwordshapes(-1,1),spanishunknowns
             wordFunction = 
                trainFile = format=TREES,/u/nlp/data/spanish/ancora/ancora.train
          closedClassTags = 

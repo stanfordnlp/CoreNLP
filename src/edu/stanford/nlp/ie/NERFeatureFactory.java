@@ -1328,15 +1328,6 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         }
       }
 
-      if (flags.useUndirectedDisjunctive) {
-        for (int i = 1; i <= flags.disjunctionWidth; i++) {
-          CoreLabel dn = cInfo.get(loc + i);
-          CoreLabel dp = cInfo.get(loc - i);
-          featuresC.add(getWord(dn) + "-DISJ");
-          featuresC.add(getWord(dp) + "-DISJ");
-        }
-      }
-
       if (flags.useWideDisjunctive) {
         for (int i = 1; i <= flags.wideDisjunctionWidth; i++) {
           featuresC.add(getWord(cInfo.get(loc + i)) + "-DISJWN");

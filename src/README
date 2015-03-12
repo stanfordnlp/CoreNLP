@@ -1,0 +1,9 @@
+README for src
+--------------
+This is where the source java files should go.
+These files should be checked into CVS and kept up to date.
+Keep this file here so CVS doesn't think this is an empty directory.
+
+Contact: Joseph Smarr (jsmarr@stanford.edu)
+Last Modified: 10/11/02
+

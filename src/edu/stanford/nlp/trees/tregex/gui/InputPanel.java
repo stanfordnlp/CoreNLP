@@ -79,8 +79,8 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   private JButton cancel;
   private JButton help;
   private JTextArea tregexPattern;
-  private JComboBox<String> recentTregexPatterns;
-  private DefaultComboBoxModel<String> recentTregexPatternsModel;
+  private JComboBox recentTregexPatterns;
+  private DefaultComboBoxModel recentTregexPatternsModel;
   private int numRecentPatterns = 5;// we save the last n patterns in our combo box, where n = numRecentPatterns
   private JTextArea tsurgeonScript;
   private TregexPatternCompiler compiler;//this should change only when someone changes the headfinder/basic category finder
@@ -249,8 +249,8 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   //separated out to make constructor more readable
   private JPanel makeTregexPatternArea() {
     //combo box with recent searches
-    recentTregexPatternsModel = new DefaultComboBoxModel<>();
-    recentTregexPatterns = new JComboBox<>(recentTregexPatternsModel);
+    recentTregexPatternsModel = new DefaultComboBoxModel();
+    recentTregexPatterns = new JComboBox(recentTregexPatternsModel);
     recentTregexPatterns.setMinimumSize(new Dimension(120, 24));
     recentTregexPatterns.addActionListener(this);
 
@@ -442,7 +442,6 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
     parent.repaint();
   }
 
-  @Override
   public void actionPerformed(ActionEvent e) {
     Object source = e.getSource();
     if (source == findMatches) {
@@ -472,7 +471,6 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
     }
   }
 
-  @Override
   public void stateChanged(ChangeEvent e) {
     JSlider source = (JSlider) e.getSource();
     int fontSize = source.getValue();
@@ -757,9 +755,8 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
 
 
   /**
-   * Called when a pattern cannot be compiled or some other error occurs; resets gui to valid state.
-   * Thread safe.
-   *
+   * Called when a pattern cannot be compiled or some other error occurs; resets gui to valid state
+   * Thread safe
    * @param txt Error message text (friendly text appropriate for users)
    * @param e The exception that caused the problem
    */
