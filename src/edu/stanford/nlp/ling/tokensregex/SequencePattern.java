@@ -2,10 +2,6 @@ package edu.stanford.nlp.ling.tokensregex;
 
 import edu.stanford.nlp.util.*;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 
@@ -81,15 +77,12 @@ import java.util.function.Function;
  *                         see {@link MultiCoreMapNodePattern} for example) </li>
  * <li> Conjunctions - conjunctions of sequence patterns (works for some cases)</li>
  * </ol>
- *
- * </p>
- * <p>Note that this and the inherited classes do not implement any custom equals and hashCode functions.
  * </p>
  *
  * @author Angel Chang
  * @see SequenceMatcher
  */
-public class SequencePattern<T> implements Serializable {
+public class SequencePattern<T> {
   // TODO:
   //  1. Validate backref capture groupid
   //  2. Actions
@@ -99,7 +92,6 @@ public class SequencePattern<T> implements Serializable {
   private String patternStr;
   private PatternExpr patternExpr;
   private SequenceMatchAction<T> action;
-
   State root;
   int totalGroups = 0;
 
@@ -139,40 +131,6 @@ public class SequencePattern<T> implements Serializable {
   public String toString() {
     return this.pattern();
   }
-
-  //TODO: At some point, implement equals and hashCode functions for all classes
-  /*
-  @Override
-  public boolean equals(Object o){
-    if(! (o instanceof SequencePattern)){
-      return false;
-    }
-    if(o == this)
-      return true;
-    SequencePattern os = (SequencePattern) o;
-    if(this.pattern() == null){
-      if(os.pattern() == null)
-        return true;
-      else return false;
-
-    } else if(!this.pattern().equals(os.pattern()))
-      return false;
-    if(this.getPatternExpr() == null){
-      if(os.getPatternExpr() == null)
-        return true;
-      else
-        return false;
-    } else if(!this.getPatternExpr().equals(os.getPatternExpr()))
-      return false;
-    if(this.getAction() == null){
-      if(os.getAction() == null)
-        return true;
-      else
-        return false;
-    }else if (!this.getAction().equals(os.getAction()))
-      return false;
-    return true;
-  }*/
 
   public String pattern() {
     return patternStr;
@@ -293,7 +251,7 @@ public class SequencePattern<T> implements Serializable {
   /**
    * Represents a sequence pattern expressions (before translating into NFA).
    */
-  public abstract static class PatternExpr implements Serializable {
+  public abstract static class PatternExpr {
 
     protected abstract Frag build();
 
@@ -1707,36 +1665,6 @@ public class SequencePattern<T> implements Serializable {
       }
     }
   }
-
-
-
-  private void readObject(ObjectInputStream ois)
-    throws IOException, ClassNotFoundException {
-    patternStr = (String)ois.readObject();
-
-    patternExpr = (PatternExpr) ois.readObject();
-    //this.patternStr = patternStr;
-    //this.patternExpr = nodeSequencePattern;
-    action = (SequenceMatchAction) ois.readObject();
-
-    patternExpr = new GroupPatternExpr(patternExpr, true);
-    patternExpr = patternExpr.optimize();
-    this.totalGroups = patternExpr.assignGroupIds(0);
-    Frag f = patternExpr.build();
-    f.connect(MATCH_STATE);
-    this.root = f.start;
-    varGroupBindings = new VarGroupBindings(totalGroups+1);
-    patternExpr.updateBindings(varGroupBindings);
-  }
-
-
-  private void writeObject(ObjectOutputStream oos)
-    throws IOException {
-    oos.writeObject(toString());
-    oos.writeObject(this.getPatternExpr());
-    oos.writeObject(this.getAction());
-
-  }  //  public void writeObject()
 
   // States for matching conjunctions
   // - Basic, not well tested implementation that may not work for all cases ...

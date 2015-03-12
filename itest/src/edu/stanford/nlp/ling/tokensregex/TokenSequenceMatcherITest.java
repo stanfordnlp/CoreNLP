@@ -1,6 +1,5 @@
 package edu.stanford.nlp.ling.tokensregex;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.util.CoreMap;
@@ -8,10 +7,8 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Timing;
 import junit.framework.TestCase;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -1486,23 +1483,4 @@ public class TokenSequenceMatcherITest extends TestCase {
     //assertEquals(m.group(), "matching this");
   }
 
-  public void testSerialization(){
-
-    TokenSequencePattern p = TokenSequencePattern.compile("(?: (/[A-Za-z]+/{2,2}) /of/ (/[A-Za-z]+/{1,3}?) ) & (?: (/.*/*) /Bishop/ /.*/*? )");
-    TokenSequencePattern p2 = TokenSequencePattern.compile("(?: (/[A-Za-z]+/{2,2}) /of/ (/[A-Za-z]+/{1,3}?) ) & (?: (/.*/*) /Bishop/ /.*/*? )");
-    List<TokenSequencePattern> pats = Arrays.asList(p, p2);
-    try {
-      System.out.println("p is " + p);
-      File f = File.createTempFile("/tmp","temp");
-      f.deleteOnExit();
-      IOUtils.writeObjectToFile(pats, f);
-      List<TokenSequencePattern> readpats = IOUtils.readObjectFromFile(f);
-      assertEquals(readpats.size(), 2);
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
-    }
-
-  }
 }
