@@ -33,6 +33,10 @@ public class NaturalLogicWeights {
     this.upperProbabilityCap = 1.0;
   }
 
+  public NaturalLogicWeights(double upperProbabilityCap) {
+    this.upperProbabilityCap = upperProbabilityCap;
+  }
+
   public NaturalLogicWeights(String affinityModels, double upperProbabilityCap) throws IOException {
     this.upperProbabilityCap = upperProbabilityCap;
 

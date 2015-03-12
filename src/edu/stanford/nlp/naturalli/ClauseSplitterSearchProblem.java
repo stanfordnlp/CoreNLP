@@ -360,7 +360,11 @@ public class ClauseSplitterSearchProblem {
   public List<SentenceFragment> topClauses(double thresholdProbability) {
     List<SentenceFragment> results = new ArrayList<>();
     search(triple -> {
+      assert triple.first <= 0.0;
       double prob = Math.exp(triple.first);
+      assert prob <= 1.0;
+      assert prob >= 0.0;
+      assert !Double.isNaN(prob);
       if (prob >= thresholdProbability) {
         SentenceFragment fragment = triple.third.get();
         fragment.score = prob;
@@ -551,6 +555,7 @@ public class ClauseSplitterSearchProblem {
       }
       // Useful variables
       double logProbSoFar = fringe.getPriority();
+      assert logProbSoFar <= 0.0;
       Pair<State, List<Counter<String>>> lastStatePair = fringe.removeFirst();
       State lastState = lastStatePair.first;
       List<Counter<String>> featuresSoFar = lastStatePair.second;
@@ -609,20 +614,22 @@ public class ClauseSplitterSearchProblem {
             if (candidate.isPresent()) {
               Counter<String> features = featurizer.apply(Triple.makeTriple(lastState, action, candidate.get()));
               Counter<ClauseClassifierLabel> scores = classifier.scoresOf(new RVFDatum<>(features));
+              Counters.logNormalizeInPlace(scores);
               scores.remove(ClauseClassifierLabel.NOT_A_CLAUSE);
-              double probability = Counters.max(scores, 0.0);
-              if (probability > max) {
-                max = probability;
+              double logProbability = Counters.max(scores, Double.NEGATIVE_INFINITY);
+              if (logProbability > max) {
+                max = logProbability;
                 argmax = Pair.makePair(candidate.get().withIsDone(Counters.argmax(scores, (x, y) -> 0, ClauseClassifierLabel.CLAUSE_SPLIT)), new ArrayList<Counter<String>>(featuresSoFar) {{
                   add(features);
                 }});
+                assert logProbability <= 0.0;
               }
             }
           }
           // 2. Register the child state
           if (argmax != null && !seenWords.contains(argmax.first.edge.getDependent())) {
 //            System.err.println("  pushing " + action.signature() + " with " + argmax.first.edge);
-            fringe.add(argmax, Math.log(max));
+            fringe.add(argmax, max);
           }
         }
       }
@@ -692,6 +699,7 @@ public class ClauseSplitterSearchProblem {
       }
 
       // 4. Other edges at child
+      int childNeighborCount = 0;
       for (SemanticGraphEdge childNeighbor : from.originalTree().outgoingEdgeIterable(to.edge.getDependent())) {
         String childNeighborRel = childNeighbor.getRelation().toString();
         if (childNeighborRel.contains("subj")) {
@@ -700,10 +708,15 @@ public class ClauseSplitterSearchProblem {
         if (childNeighborRel.contains("obj")) {
           childHasObj = true;
         }
+        childNeighborCount += 1;
         // (add feature)
         feats.incrementCount(signature + "&child_neighbor:" + childNeighborRel);
         feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&child_neighbor:" + childNeighborRel);
       }
+      // 4.1 Number of other edges at child
+      feats.incrementCount(signature + "&child_neighbor_count:" + (childNeighborCount < 3 ? childNeighborCount : ">2"));
+      feats.incrementCount(signature + "&edge_type:" + edgeRelShort + "&child_neighbor_count:" + (childNeighborCount < 3 ? childNeighborCount : ">2"));
+
 
       // 5. Subject/Object stats
       feats.incrementCount(signature + "&parent_neighbor_subj:" + parentHasSubj);

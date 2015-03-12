@@ -49,6 +49,9 @@ public class OpenIE implements Annotator {
   @Execution.Option(name="max_entailments_per_clause", gloss="The maximum number of entailments allowed per sentence of input.")
   private int entailmentsPerSentence = 100;
 
+  @Execution.Option(name="ignoreaffinity", gloss="If true, don't use the affinity models for dobj and pp attachment.")
+  private boolean ignoreAffinity = false;
+
   @Execution.Option(name="affinity_models", gloss="The directory (or classpath directory) containing the affinity models for pp/obj attachments.")
   private String affinityModels = "edu/stanford/nlp/naturalli/";
 
@@ -76,7 +79,7 @@ public class OpenIE implements Annotator {
     Execution.fillOptions(this, props);
     // Create the components
     try {
-      this.weights = new NaturalLogicWeights(affinityModels, affinityProbabilityCap);
+      this.weights = ignoreAffinity ? new NaturalLogicWeights(affinityProbabilityCap) : new NaturalLogicWeights(affinityModels, affinityProbabilityCap);
       if (noModel) {
         System.err.println("Not loading a splitter model");
         clauseSplitter = new ClauseSplitter() {

@@ -462,7 +462,7 @@ public enum NaturalLogicRelation {
     put("root", NaturalLogicRelation.INDEPENDENCE);  // err.. never delete
     put("tmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("vmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("xcomp", NaturalLogicRelation.INDEPENDENCE);  //
+    put("xcomp", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
   }});
 
   /**

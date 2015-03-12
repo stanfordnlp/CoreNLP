@@ -151,8 +151,7 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
             datum.setLabel(label);
             // (dump datum to debug log)
             if (datasetDumpWriter.isPresent()) {
-              datasetDumpWriter.get().println("" + correct + "\t" +
-                  (decision == features.get(features.size() - 1)) + "\t" +
+              datasetDumpWriter.get().println("" + label + "\t" +
                   StringUtils.join(decision.entrySet().stream().map(entry -> "" + entry.getKey() + "->" + entry.getValue()), ";"));
             }
             // (add datum to dataset)

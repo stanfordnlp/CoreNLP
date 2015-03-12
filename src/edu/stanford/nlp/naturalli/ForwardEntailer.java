@@ -48,7 +48,7 @@ public class ForwardEntailer implements Function<SemanticGraph, ForwardEntailerS
    * @see ForwardEntailer#ForwardEntailer(int, int, NaturalLogicWeights)
    */
   public ForwardEntailer(int maxResults, NaturalLogicWeights weights) {
-    this(maxResults, maxResults * 5, weights);
+    this(maxResults, maxResults * 25, weights);
   }
 
   /**
