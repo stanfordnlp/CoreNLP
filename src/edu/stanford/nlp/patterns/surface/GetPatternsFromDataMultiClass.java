@@ -711,7 +711,7 @@ public class GetPatternsFromDataMultiClass<E extends Pattern> implements Seriali
       props.setProperty("parse.maxlen", "80");
       props.setProperty("threads", numThreads);
 
-      props.put("tokenize.options", "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
+      props.setProperty("tokenize.options", "ptb3Escaping=false,normalizeParentheses=false,escapeForwardSlashAsterisk=false");
 
       if (posModelPath != null) {
         props.setProperty("pos.model", posModelPath);

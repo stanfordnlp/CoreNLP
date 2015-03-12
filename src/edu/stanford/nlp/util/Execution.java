@@ -452,8 +452,7 @@ public class Execution {
         // split the key
         int lastDotIndex = rawKeyStr.lastIndexOf('.');
         if (lastDotIndex < 0) {
-          err("Unrecognized option: " + key);
-          continue;
+          fatal("Unrecognized option: " + key);
         }
         if (!rawKeyStr.startsWith("log.")) {  // ignore Redwood options
           String className = rawKeyStr.substring(0, lastDotIndex);
@@ -526,7 +525,7 @@ public class Execution {
     //(convert to map)
     Properties options = StringUtils.argsToProperties(args);
     for (String key : props.stringPropertyNames()) {
-      options.put(key, props.getProperty(key));
+      options.setProperty(key, props.getProperty(key));
     }
     //(bootstrap)
     Map<String, Field> bootstrapMap = fillOptionsImpl(null, BOOTSTRAP_CLASSES, options, false); //bootstrap
