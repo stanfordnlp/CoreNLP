@@ -78,6 +78,10 @@ public class Util {
     if (tokens.get(seed.start()).ner() == null) {
       return seed;
     }
+    if (seed.start() < 0 || seed.end() > tokens.size()) {
+      return Span.fromValues(Math.max(0, seed.start()), Math.min(tokens.size(), seed.end()));
+    }
+
     // Find the span's beginning
     int begin = seed.start();
     while (begin < seed.end() - 1 && "O".equals(tokens.get(begin).ner())) {
@@ -93,7 +97,7 @@ public class Util {
     }
     // Find the span's end
     int end = seed.end() - 1;
-    while (end > begin && "O".equals(tokens.get(end - 1).ner())) {
+    while (end > begin && "O".equals(tokens.get(end).ner())) {
       end -= 1;
     }
     String endNER = tokens.get(end).ner();
