@@ -279,10 +279,6 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
     // { cats have tails }
     add(SemgrexPattern.compile("{$}=verb ?>/aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
-    // { Durin, son of Thorin }
-    add(SemgrexPattern.compile("{$}=subject >appos=subjIgnored ( {}=verb >/prep_.*/=prepEdge {}=object )"));
-    // { Tim 's father, Tom }
-    add(SemgrexPattern.compile("{$}=verb >poss=verb {}=subject >appos {}=object"));
     // { cats are cute,
     //   horses are grazing peacefully }
     add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop|aux(pass)?/ {}=verb"));
@@ -305,15 +301,19 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     // { NER , NER ,,
     //   Obama, 28, ...,
     //   Obama (28) ...}
-    add(TokenSequencePattern.compile("(?$subject [ner:/PERSON|ORGANIZATION|LOCATION/]+ ) /,/ (?$object [ner:/NUMBER|DURATION/]+ ) /,/"));
-    add(TokenSequencePattern.compile("(?$subject [ner:/PERSON|ORGANIZATION|LOCATION/]+ ) /\\(/ (?$object [ner:/NUMBER|DURATION/]+ ) /\\)/"));
+    add(TokenSequencePattern.compile("(?$subject [ner:/PERSON|ORGANIZATION|LOCATION/]+ ) /,/ (?$object [ner:/NUMBER|DURATION|PERSON|ORGANIZATION/]+ ) /,/"));
+    add(TokenSequencePattern.compile("(?$subject [ner:/PERSON|ORGANIZATION|LOCATION/]+ ) /\\(/ (?$object [ner:/NUMBER|DURATION|PERSON|ORGANIZATION/]+ ) /\\)/"));
   }});
 
   /**
    * A set of nominal patterns using dependencies, that don't require being in a coherent clause, but do require NER information.
    */
   private static List<SemgrexPattern> NOUN_DEPENDENCY_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
-//    { President Obama }
+    // { Durin, son of Thorin }
+    add(SemgrexPattern.compile("{}=subject >appos ( {}=relation >/prep_.*|poss/=relaux {}=object)"));
+    // { Thorin's son, Durin }
+    add(SemgrexPattern.compile("{}=relation >/prep_*|poss/=relaux {}=subject >appos {}=object"));
+    //  { President Obama }
     add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/amod|nn/=arc {ner:/..+/}=object"));
     // { Chris Manning of Stanford }
     add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/prep_.*/=relation {ner:/..+/}=object"));
@@ -426,51 +426,92 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
           }
           if (subjectSpan.end() == objectSpan.start() - 1 &&
               (tokens.get(subjectSpan.end()).word().matches("[\\.,:;\\('\"]") ||
-                  tokens.get(subjectSpan.end()).tag().equals("CC"))) {
+                  "CC".equals(tokens.get(subjectSpan.end()).tag()))) {
             continue; // We're straddling a clause
           }
           if (objectSpan.end() == subjectSpan.start() - 1 &&
               (tokens.get(objectSpan.end()).word().matches("[\\.,:;\\('\"]") ||
-                  tokens.get(objectSpan.end()).tag().equals("CC"))) {
+                  "CC".equals(tokens.get(objectSpan.end()).tag()))) {
             continue; // We're straddling a clause
           }
           // Get the relation
           if (subjectTokens.size() > 0 && objectTokens.size() > 0) {
-            List<CoreLabel> relationTokens = new ArrayList<>();
-            // (add the 'be')
-            relationTokens.add(new CoreLabel() {{
-              setWord("is");
-              setLemma("be");
-              setTag("VBZ");
-              setNER("O");
-              setBeginPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
-              setEndPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
-              setSentIndex(subjectTokens.get(subjectTokens.size() - 1).sentIndex());
-              setIndex(-1);
-            }});
-            // (add an optional prep)
-            String rel = matcher.getRelnString("relation");
-            String prep = null;
-            if (rel != null && rel.startsWith("prep_")) {
-              prep = rel.substring("prep_".length());
-            } else if (rel != null && rel.startsWith("prepc_")) {
-              prep = rel.substring("prepc_".length());
-            } else if (rel != null && rel.equals("poss")) {
-              relationTokens.clear();
-              prep = "'s";
-            }
-            if (prep != null) {
-              final String p = prep;
+            LinkedList<CoreLabel> relationTokens = new LinkedList<>();
+            IndexedWord relNode = matcher.getNode("relation");
+            if (relNode != null) {
+              // (add the relation)
+              relationTokens.add(relNode.backingLabel());
+              // (check for aux information)
+              String relaux = matcher.getRelnString("relaux");
+              if (relaux != null && relaux.startsWith("prep_")) {
+                relationTokens.add(new CoreLabel() {{
+                  setWord(relaux.substring("prep_".length()));
+                  setLemma(relaux.substring("prep_".length()));
+                  setTag("PP");
+                  setNER("O");
+                  setBeginPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
+                  setEndPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
+                  setSentIndex(subjectTokens.get(subjectTokens.size() - 1).sentIndex());
+                  setIndex(-1);
+                }});
+              } else if (relaux != null && "poss".equals(relaux)) {
+                relationTokens.addFirst(new CoreLabel() {{
+                  setWord("'s");
+                  setLemma("'s");
+                  setTag("PP");
+                  setNER("O");
+                  setBeginPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
+                  setEndPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
+                  setSentIndex(subjectTokens.get(subjectTokens.size() - 1).sentIndex());
+                  setIndex(-1);
+                }});
+                relationTokens.addLast(new CoreLabel() {{
+                  setWord("is");
+                  setLemma("be");
+                  setTag("VBZ");
+                  setNER("O");
+                  setBeginPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
+                  setEndPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
+                  setSentIndex(subjectTokens.get(subjectTokens.size() - 1).sentIndex());
+                  setIndex(-1);
+                }});
+              }
+            } else {
+              // (add the 'be')
               relationTokens.add(new CoreLabel() {{
-                setWord(p);
-                setLemma(p);
-                setTag("PP");
+                setWord("is");
+                setLemma("be");
+                setTag("VBZ");
                 setNER("O");
                 setBeginPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
                 setEndPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
                 setSentIndex(subjectTokens.get(subjectTokens.size() - 1).sentIndex());
                 setIndex(-1);
               }});
+              // (add an optional prep)
+              String rel = matcher.getRelnString("relation");
+              String prep = null;
+              if (rel != null && rel.startsWith("prep_")) {
+                prep = rel.substring("prep_".length());
+              } else if (rel != null && rel.startsWith("prepc_")) {
+                prep = rel.substring("prepc_".length());
+              } else if (rel != null && rel.equals("poss")) {
+                relationTokens.clear();
+                prep = "'s";
+              }
+              if (prep != null) {
+                final String p = prep;
+                relationTokens.add(new CoreLabel() {{
+                  setWord(p);
+                  setLemma(p);
+                  setTag("PP");
+                  setNER("O");
+                  setBeginPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
+                  setEndPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
+                  setSentIndex(subjectTokens.get(subjectTokens.size() - 1).sentIndex());
+                  setIndex(-1);
+                }});
+              }
             }
             // Add extraction
             String relationGloss = StringUtils.join(relationTokens.stream().map(CoreLabel::word), " ");

@@ -307,7 +307,7 @@ public class RelationTripleTest extends TestCase {
         "3\tTom\t2\tappos\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
-    assertEquals("1.0\tTim\t's father\tTom", extraction.get().toString());
+    assertEquals("1.0\tTim\t's father is\tTom", extraction.get().toString());
   }
 
   public void testApposInObject() {
@@ -505,8 +505,8 @@ public class RelationTripleTest extends TestCase {
   public void testUSPresidentObama() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tUnited\t2\tnn\tNNP\tLOCATION\n" +
-        "2\tStates\t4\tnsubj\tNNP\tLOCATION\n" +
-        "3\t's\t2\tposs\tPOS\tO\n" +
+        "2\tStates\t4\tposs\tNNP\tLOCATION\n" +
+        "3\t's\t2\tpossessive\tPOS\tO\n" +
         "4\tpresident\t0\troot\tNN\tO\n" +
         "5\tObama\t2\tappos\tNNP\tPERSON\n"
     );
@@ -517,8 +517,8 @@ public class RelationTripleTest extends TestCase {
   public void testUSsAllyBritain() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tUnited\t2\tnn\tNNP\tLOCATION\n" +
-        "2\tStates\t4\tnsubj\tNNP\tLOCATION\n" +
-        "3\t's\t2\tposs\tPOS\tO\n" +
+        "2\tStates\t4\tposs\tNNP\tLOCATION\n" +
+        "3\t's\t2\tpossessive\tPOS\tO\n" +
         "4\tally\t0\troot\tNN\tO\n" +
         "5\tBritain\t2\tappos\tNNP\tPERSON\n"
     );
@@ -617,5 +617,22 @@ public class RelationTripleTest extends TestCase {
         "4\t,\t3\tpunct\t.\tO\n"
     );
     assertFalse("Found extraction when we shouldn't have! Extraction: " + (extraction.isPresent() ? extraction.get() : ""), extraction.isPresent());
+  }
+
+  public void testCompoundPossessive() {
+    String conll =
+        "1\tIBM\t4\tposs\tNNP\tORGANIZATION\n" +
+        "2\t's\t1\tpossessive\tPOS\tO\n" +
+        "3\tCEO\t4\tnn\tNNP\tTITLE\n" +
+        "4\tRometty\t0\troot\tNNP\tORGANIZATION\n";
+    Optional<RelationTriple> extraction = mkExtraction(conll, 0);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tRometty\tis\tCEO", extraction.get().toString());
+    extraction = mkExtraction(conll, 1);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tIBM\t's\tRometty", extraction.get().toString());
+    extraction = mkExtraction(conll, 2);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tRometty\tis CEO of\tIBM", extraction.get().toString());
   }
 }
