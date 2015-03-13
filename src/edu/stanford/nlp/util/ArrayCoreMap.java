@@ -335,6 +335,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
           new ConcurrentHashMap<>(12, 0.75f, 1);
 
   private static final int SHORTER_STRING_CHARSTRING_START_SIZE = 64;
+  private static final int SHORTER_STRING_MAX_SIZE_BEFORE_HASHING = 5;
 
   /**
    * {@inheritDoc}
@@ -344,7 +345,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
     StringBuilder s = new StringBuilder(SHORTER_STRING_CHARSTRING_START_SIZE);
     s.append('[');
     Set<String> whatSet = null;
-    if (size > 5 && what.length > 5) {
+    if (size > SHORTER_STRING_MAX_SIZE_BEFORE_HASHING && what.length > SHORTER_STRING_MAX_SIZE_BEFORE_HASHING) {
       // if there's a lot of stuff, hash.
       whatSet = new HashSet<>(Arrays.asList(what));
     }

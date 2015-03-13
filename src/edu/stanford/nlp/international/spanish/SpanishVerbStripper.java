@@ -296,10 +296,10 @@ public final class SpanishVerbStripper implements Serializable {
    *
    * Converts e.g.
    *
-   *   - decírmelo -> decir
-   *   - mudarse -> mudar
-   *   - contándolos -> contando
-   *   - hazlo -> haz
+   *   - decírmelo -&gt; decir
+   *   - mudarse -&gt; mudar
+   *   - contándolos -&gt; contando
+   *   - hazlo -&gt; haz
    *
    * @return A verb form stripped of attached pronouns, or <tt>null</tt>
    *           if no pronouns were located / stripped.

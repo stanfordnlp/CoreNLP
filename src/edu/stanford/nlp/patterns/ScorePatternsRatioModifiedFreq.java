@@ -165,6 +165,9 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
 
         if (constVars.usePatternEvalWordClass) {
           Integer num = constVars.getWordClassClusters().get(g);
+          if(num == null){
+            num = constVars.getWordClassClusters().get(g.toLowerCase());
+          }
           if (num != null
               && constVars.distSimWeights.get(label).containsKey(num)) {
             externalFeatWtsNormalized.setCount(gc,
@@ -191,15 +194,11 @@ public class ScorePatternsRatioModifiedFreq<E> extends ScorePatterns<E> {
         && scorePhrasesInPatSelection) {
       Properties props2 = new Properties();
       props2.putAll(props);
-      props2.setProperty("phraseScorerClass", "edu.stanford.nlp.patterns.surface.ScorePhrasesLearnFeatWt");
+      props2.setProperty("phraseScorerClass", "edu.stanford.nlp.patterns.ScorePhrasesLearnFeatWt");
       ScorePhrases scoreclassifier = new ScorePhrases(props2, constVars);
       System.out.println("file is " + props.getProperty("domainNGramsFile"));
       Execution.fillOptions(Data.class, props2);
       classifierScores = scoreclassifier.phraseScorer.scorePhrases(label, allCandidatePhrases,  true);
-      // scorePhrases(Data.sents, label, true,
-      // constVars.perSelectRand, constVars.perSelectNeg, null, null,
-      // dictOddsWordWeights);
-      // throw new RuntimeException("Not implemented currently");
     }
 
     Counter<CandidatePhrase> cachedScoresForThisIter = new ClassicCounter<CandidatePhrase>();

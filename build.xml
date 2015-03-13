@@ -101,11 +101,28 @@
       <!-- <compilerarg value="-Xmaxerrs"/>
            <compilerarg value="20"/> -->
         <compilerarg value="-Xlint:cast"/>
+        <compilerarg value="-Xlint:classfile"/>
+        <compilerarg value="-Xlint:divzero"/>
+        <compilerarg value="-Xlint:empty"/>
         <compilerarg value="-Xlint:finally"/>
         <compilerarg value="-Xlint:path"/>
-   <!-- <compilerarg value="-Xlint"/>
+        <compilerarg value="-Xlint:try"/>
+<!--
+        <compilerarg value="-Xlint:deprecation"/>
+        <compilerarg value="-Xlint:dep-ann"/>
+        <compilerarg value="-Xlint:fallthrough"/>
+        <compilerarg value="-Xlint:options"/>
+        <compilerarg value="-Xlint:overrides"/>
+        <compilerarg value="-Xlint:processing"/>
+        <compilerarg value="-Xlint:rawtypes"/>
+        <compilerarg value="-Xlint:serial"/>
+        <compilerarg value="-Xlint:static"/>
+        <compilerarg value="-Xlint:unchecked"/>
+        <compilerarg value="-Xlint:varargs"/>
+-->
+<!--    <compilerarg value="-Xlint:all"/>
         <compilerarg value="-Xmaxwarns"/>
-        <compilerarg value="10000"/> -->
+        <compilerarg value="10000"/>  -->
     </javac>
   </target>
 

@@ -175,7 +175,6 @@ public class JSONOutputter extends AnnotationOutputter {
           .replace("\n", "\\n")
           .replace("\r", "\\r")
           .replace("\t", "\\t")
-          .replace("'", "\\'")
           .replace("\"", "\\\"");
     }
 

@@ -7,7 +7,7 @@ import edu.stanford.nlp.naturalli.OpenIE;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.ReflectionLoading;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -69,7 +69,7 @@ public class AnnotatorImplementations {
   /**
    * Annotate for named entities -- note that this combines multiple NER tag sets, and some auxiliary things (like temporal tagging)
    */
-  public Annotator ner(Properties properties) throws FileNotFoundException {
+  public Annotator ner(Properties properties) throws IOException {
 
     List<String> models = new ArrayList<String>();
     String modelNames = properties.getProperty("ner.model");
