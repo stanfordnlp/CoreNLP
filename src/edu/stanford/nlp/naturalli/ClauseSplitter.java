@@ -7,11 +7,9 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.*;
@@ -81,6 +79,7 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
    *
    * @return A factory for creating searchers from a given dependency tree.
    */
+  @SuppressWarnings("unchecked")
   public static ClauseSplitter train(
       Stream<Triple<CoreMap, Span, Span>> trainingData,
       Featurizer featurizer,
@@ -128,8 +127,6 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
         // Search for extractions
         List<RelationTriple> extractions = openie.relationsInFragments(openie.entailmentsFromClause(fragment));
         Trilean correct = Trilean.FALSE;
-        RelationTriple bestExtraction = null;
-        String prefix = "  x ";
         for (RelationTriple extraction : extractions) {
           // Clean up the guesses
           Span subjectGuess = Span.fromValues(extraction.subject.get(0).index() - 1, extraction.subject.get(extraction.subject.size() - 1).index());
@@ -138,20 +135,14 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
           if ((subjectGuess.equals(subjectSpan) && objectGuess.equals(objectSpan)) ||
               (subjectGuess.equals(objectSpan) && objectGuess.equals(subjectSpan))
               ) {
-            prefix = "  * ";
             correct = Trilean.TRUE;
-            bestExtraction = extraction;
           } else if ( Util.nerOverlap(tokens, subjectSpan, subjectGuess) && Util.nerOverlap(tokens, objectSpan, objectGuess) ||
                       Util.nerOverlap(tokens, subjectSpan, objectGuess) && Util.nerOverlap(tokens, objectSpan, subjectGuess) ) {
             if (!correct.isTrue()) {
-              prefix = "  ~ ";
-              bestExtraction = extraction;
               correct = Trilean.TRUE;
             }
           } else {
             if (!correct.isTrue()) {
-              prefix = "  ? ";
-              bestExtraction = extraction;
               correct = Trilean.UNKNOWN;
             }
           }
@@ -211,7 +202,7 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
           }
         }
         return true;
-      }, new LinearClassifier<>(new ClassicCounter<>()), featurizer, 10000);
+      }, new LinearClassifier<>(new ClassicCounter<>()), Collections.EMPTY_MAP, featurizer, 10000);
       // Debug info
       if (numExamplesProcessed.incrementAndGet() % 100 == 0) {
         log("processed " + numExamplesProcessed + " training sentences: " + dataset.size() + " datums");
@@ -261,21 +252,6 @@ public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSe
     // Step 5: return factory
     return tree -> new ClauseSplitterSearchProblem(tree, Optional.of(fullClassifier), Optional.of(featurizer));
   }
-
-  /**
-   * TODO(gabor) DELETE ME
-   */
-  static String info(SentenceFragment fragment, List<CoreLabel> tokens, SemanticGraph tree) {
-    IndexedWord node = fragment.parseTree.getFirstRoot();
-    String rtn = fragment.toString() + "  ::  " + node;
-    while (!node.equals(tree.getFirstRoot())) {
-      SemanticGraphEdge edge = tree.incomingEdgeIterator(node).next();
-      node = edge.getGovernor();
-      rtn = rtn + " <-" + edge.getRelation() + "- " + node;
-    }
-    return rtn;
-  }
-
 
   /**
    * A helper function for training with the default featurizer and training options.

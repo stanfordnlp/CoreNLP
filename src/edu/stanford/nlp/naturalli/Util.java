@@ -158,6 +158,7 @@ public class Util {
     List<IndexedWord> toDelete = new ArrayList<>();
     for (IndexedWord vertex : tree.vertexSet()) {
       // Clean punctuation
+      if (vertex.tag() == null) { continue; }
       char tag = vertex.backingLabel().tag().charAt(0);
       if (tag == '.' || tag == ',' || tag == '(' || tag == ')' || tag == ':') {
         if (!tree.outgoingEdgeIterator(vertex).hasNext()) {  // This should really never happen, but it does.

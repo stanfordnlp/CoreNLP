@@ -46,6 +46,20 @@ import java.util.stream.Stream;
  */
 public class ClauseSplitterSearchProblem {
 
+  protected static final Map<String, List<String>> HARD_SPLITS = Collections.unmodifiableMap(new HashMap<String, List<String>>() {{
+    put("comp", new ArrayList<String>() {{
+      add("simple");
+    }});
+    put("ccomp", new ArrayList<String>() {{
+      add("simple");
+    }});
+    put("xcomp", new ArrayList<String>() {{
+      add("clone_dobj");
+      add("clone_nsubj");
+      add("simple");
+    }});
+  }});
+
   /**
    * The tree to search over.
    */
@@ -192,7 +206,7 @@ public class ClauseSplitterSearchProblem {
    *
    * @param tree               The dependency tree to search over.
    * @param isClauseClassifier The classifier for whether a given dependency arc should be a new clause. If this is not given, all arcs are treated as clause separators.
-   * @param featurizer         The featurizer for the classifier. If no featurizer is given, one should be given in {@link ClauseSplitterSearchProblem#search(java.util.function.Predicate, Classifier, java.util.function.Function, int)}, or else the classifier will be useless.
+   * @param featurizer         The featurizer for the classifier. If no featurizer is given, one should be given in {@link ClauseSplitterSearchProblem#search(java.util.function.Predicate, Classifier, Map, java.util.function.Function, int)}, or else the classifier will be useless.
    * @see ClauseSplitter#load(String)
    */
   protected ClauseSplitterSearchProblem(SemanticGraph tree,
@@ -394,6 +408,7 @@ public class ClauseSplitterSearchProblem {
     if (!isClauseClassifier.isPresent()) {
       search(candidateFragments,
           new LinearClassifier<>(new ClassicCounter<>()),
+          HARD_SPLITS,
           this.featurizer.isPresent() ? this.featurizer.get() : DEFAULT_FEATURIZER,
           10000);
     } else {
@@ -402,6 +417,7 @@ public class ClauseSplitterSearchProblem {
       }
       search(candidateFragments,
           isClauseClassifier.get(),
+          HARD_SPLITS,
           this.featurizer.get(),
           10000);
     }
@@ -423,6 +439,7 @@ public class ClauseSplitterSearchProblem {
       final Predicate<Triple<Double, List<Counter<String>>, Supplier<SentenceFragment>>> candidateFragments,
       // The learning specs
       final Classifier<ClauseSplitter.ClauseClassifierLabel, String> classifier,
+      final Map<String, List<String>> hardCodedSplits,
       final Function<Triple<State, Action, State>, Counter<String>> featurizer,
       final int maxTicks
   ) {
@@ -557,8 +574,28 @@ public class ClauseSplitterSearchProblem {
     });
 
     for (IndexedWord root : tree.getRoots()) {
-      search(root, candidateFragments, classifier, featurizer, actionSpace, maxTicks);
+      search(root, candidateFragments, classifier, hardCodedSplits, featurizer, actionSpace, maxTicks);
     }
+  }
+
+  /**
+   * Re-order the action space based on the specified order of names.
+   */
+  private Collection<Action> orderActions(Collection<Action> actionSpace, List<String> order) {
+    List<Action> tmp = new ArrayList<>(actionSpace);
+    List<Action> out = new ArrayList<>();
+    for (String key : order) {
+      Iterator<Action> iter = tmp.iterator();
+      while (iter.hasNext()) {
+        Action a = iter.next();
+        if (a.signature().equals(key)) {
+          out.add(a);
+          iter.remove();
+        }
+      }
+    }
+    out.addAll(tmp);
+    return out;
   }
 
   /**
@@ -585,6 +622,7 @@ public class ClauseSplitterSearchProblem {
       final Predicate<Triple<Double, List<Counter<String>>, Supplier<SentenceFragment>>> candidateFragments,
       // The learning specs
       final Classifier<ClauseSplitter.ClauseClassifierLabel,String> classifier,
+      Map<String, ? extends List<String>> hardCodedSplits,
       final Function<Triple<State, Action, State>, Counter<String>> featurizer,
       final Collection<Action> actionSpace,
       final int maxTicks
@@ -648,10 +686,12 @@ public class ClauseSplitterSearchProblem {
       }
 
       // Iterate over children
-      // For each action...
-      for (Action action : actionSpace) {
-        // For each outgoing edge...
-        for (SemanticGraphEdge outgoingEdge : tree.outgoingEdgeIterable(rootWord)) {
+      // For each outgoing edge...
+      for (SemanticGraphEdge outgoingEdge : tree.outgoingEdgeIterable(rootWord)) {
+        List<String> forcedArc = hardCodedSplits.get(outgoingEdge.getRelation().toString());
+        boolean forceArc = forcedArc != null;
+        // For each action...
+        for (Action action : (forcedArc == null ? actionSpace : orderActions(actionSpace, forcedArc))) {
           // Check the prerequisite
           if (!action.prerequisitesMet(tree, outgoingEdge)) {
             continue;
@@ -661,14 +701,26 @@ public class ClauseSplitterSearchProblem {
               outgoingEdge, subjOrNull,
               objOrNull);
           if (candidate.isPresent()) {
+            double logProbability;
+            ClauseClassifierLabel bestLabel;
             Counter<String> features = featurizer.apply(Triple.makeTriple(lastState, action, candidate.get()));
-            Counter<ClauseClassifierLabel> scores = classifier.scoresOf(new RVFDatum<>(features));
-            if (scores.size() > 0) {
-              Counters.logNormalizeInPlace(scores);
+            if (forceArc) {
+              logProbability = 0.0;
+              bestLabel = ClauseClassifierLabel.CLAUSE_SPLIT;
+              forceArc = false;
+            } else if (features.containsKey("__undocumented_junit_no_classifier")) {
+              logProbability = Double.NEGATIVE_INFINITY;
+              bestLabel = ClauseClassifierLabel.CLAUSE_INTERM;
+            } else {
+              Counter<ClauseClassifierLabel> scores = classifier.scoresOf(new RVFDatum<>(features));
+              if (scores.size() > 0) {
+                Counters.logNormalizeInPlace(scores);
+              }
+              scores.remove(ClauseClassifierLabel.NOT_A_CLAUSE);
+              logProbability = Counters.max(scores, Double.NEGATIVE_INFINITY);
+              bestLabel = Counters.argmax(scores, (x, y) -> 0, ClauseClassifierLabel.CLAUSE_SPLIT);
             }
-            scores.remove(ClauseClassifierLabel.NOT_A_CLAUSE);
-            double logProbability = Counters.max(scores, Double.NEGATIVE_INFINITY);
-            Pair<State, List<Counter<String>>> childState = Pair.makePair(candidate.get().withIsDone(Counters.argmax(scores, (x, y) -> 0, ClauseClassifierLabel.CLAUSE_SPLIT)), new ArrayList<Counter<String>>(featuresSoFar) {{
+            Pair<State, List<Counter<String>>> childState = Pair.makePair(candidate.get().withIsDone(bestLabel), new ArrayList<Counter<String>>(featuresSoFar) {{
               add(features);
             }});
             // 2. Register the child state
