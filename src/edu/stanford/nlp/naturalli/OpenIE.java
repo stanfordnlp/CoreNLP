@@ -228,6 +228,7 @@ public class OpenIE implements Annotator {
   @SuppressWarnings("unchecked")
   public void annotateSentence(CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+
     if (tokens.size() > 63) {
       System.err.println("Very long sentence (>63 tokens); " + this.getClass().getSimpleName() + " is not attempting to extract relations.");
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
