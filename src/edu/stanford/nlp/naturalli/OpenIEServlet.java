@@ -134,10 +134,10 @@ public class OpenIEServlet extends HttpServlet {
         }
         // Write results
         out.println("{ " +
-            "ok:true, " +
-            "entailments: [" + StringUtils.join(entailments, ",") + "], " +
-            "triples: [" + StringUtils.join(triples, ",") + "], " +
-            "msg: \"\"" +
+            "\"ok\":true, " +
+            "\"entailments\": [" + StringUtils.join(entailments, ",") + "], " +
+            "\"triples\": [" + StringUtils.join(triples, ",") + "], " +
+            "\"msg\": \"\"" +
         " }");
       } catch (Throwable t) {
         out.println("{ok:false, entailments:[], triples:[], msg:" + quote(t.getMessage()) + "}");
