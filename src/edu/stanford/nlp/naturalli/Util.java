@@ -93,7 +93,7 @@ public class Util {
     }
     // Find the span's end
     int end = seed.end() - 1;
-    while (end > begin && "O".equals(tokens.get(end).ner())) {
+    while (end > begin && "O".equals(tokens.get(end - 1).ner())) {
       end -= 1;
     }
     String endNER = tokens.get(end).ner();

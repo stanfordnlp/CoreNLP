@@ -21,9 +21,17 @@ import static org.junit.Assert.*;
 public class OpenIEITest {
   /*
   protected static StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties() {{
-    setProperty("annotators", "tokenize,ssplit,pos,lemma,parse,natlog,openie");
-    setProperty("ssplit.isOneSentence", "true");
+    setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,natlog,openie");
+
+    setProperty("openie.splitter.threshold", "0.25");
+    setProperty("openie.splitter.model", "/home/gabor/tmp/clauseSplitterModel_all.ser.gz");
+    setProperty("openie.affinity_models", "/home/gabor/workspace/naturalli/etc/");
+    setProperty("openie.optimze_for", "GENERAL");
     setProperty("openie.ignoreaffinity", "false");
+    setProperty("openie.max_entailments_per_clause", "500");
+    setProperty("openie.triple.strict", "true");
+
+    setProperty("ssplit.isOneSentence", "true");
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
     setProperty("enforceRequirements", "true");
@@ -109,10 +117,12 @@ public class OpenIEITest {
   public void testExtractionsObamaWikiTwo() {
     assertExtracted(new HashSet<String>() {{
       add("Obama\tis graduate of\tColumbia University");
-      add("Obama\tis graduate of\tHarvard Law School");
-      add("Obama\tborn in\tHonolulu Hawaii");
+//      add("Obama\tis graduate of\tHarvard Law School");
+      add("Obama\tborn in\tHawaii");
+      add("Obama\tborn in\tHonolulu");
       add("he\tserved as\tpresident of Harvard Law Review");
       add("he\tserved as\tpresident");
+      add("he\tpresident of\tHarvard Law Review");
       add("Obama\tis\tgraduate");
     }}, "Born in Honolulu, Hawaii, Obama is a graduate of Columbia University and Harvard Law School, where he served as president of the Harvard Law Review.");
   }
@@ -123,6 +133,7 @@ public class OpenIEITest {
       add("He\twas\tcommunity organizer in Chicago");
       add("He\twas\tcommunity organizer");
       add("He\tearning\tlaw degree");
+      add("He\tearning\this law degree");
     }}, "He was a community organizer in Chicago before earning his law degree.");
   }
 
@@ -133,10 +144,10 @@ public class OpenIEITest {
       add("He\tworked as\trights attorney");
       add("He\ttaught\tconstitutional law");
       add("He\ttaught\tlaw");
-      add("He\ttaught at\tUniversity of Chicago Law School");
-      add("He\ttaught at\tUniversity of Chicago Law School from 1992");
-      add("He\ttaught at\tUniversity");
-      add("He\ttaught to\t2004");  // shouldn't be here, but sometimes appears?
+      add("He\ttaught law at\tUniversity of Chicago Law School");
+      add("He\ttaught law at\tUniversity of Chicago Law School from 1992");
+      add("He\ttaught law at\tUniversity");
+      add("He\ttaught law to\t2004");  // shouldn't be here, but sometimes appears?
     }}, "He worked as a civil rights attorney and taught constitutional law at the University of Chicago Law School from 1992 to 2004.");
   }
 
@@ -162,11 +173,13 @@ public class OpenIEITest {
     assertExtracted(new HashSet<String>() {{
       add("He\tdefeated\tRepublican nominee John McCain");
       add("He\tdefeated\tnominee John McCain");
+      add("He\tdefeated nominee John McCain in\telection");
+      add("He\tdefeated nominee John McCain in\tgeneral election");
       add("He\twas inaugurated as\tpresident on January 20 2009");
       add("He\twas inaugurated as\tpresident");
+      add("He\twas\tinaugurated");
     }}, "He then defeated Republican nominee John McCain in the general election, and was inaugurated as president on January 20, 2009.");
   }
-
   */
 
   @Test

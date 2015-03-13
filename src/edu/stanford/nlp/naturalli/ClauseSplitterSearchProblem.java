@@ -391,14 +391,20 @@ public class ClauseSplitterSearchProblem {
    * @param candidateFragments The callback function for results. The return value defines whether to continue searching.
    */
   public void search(final Predicate<Triple<Double, List<Counter<String>>, Supplier<SentenceFragment>>> candidateFragments) {
-    if (!isClauseClassifier.isPresent() ||
-        !(isClauseClassifier.get() instanceof LinearClassifier)) {
-      throw new IllegalArgumentException("For now, only linear classifiers are supported");
+    if (!isClauseClassifier.isPresent()) {
+      search(candidateFragments,
+          new LinearClassifier<>(new ClassicCounter<>()),
+          this.featurizer.isPresent() ? this.featurizer.get() : DEFAULT_FEATURIZER,
+          10000);
+    } else {
+      if (!(isClauseClassifier.get() instanceof LinearClassifier)) {
+        throw new IllegalArgumentException("For now, only linear classifiers are supported");
+      }
+      search(candidateFragments,
+          isClauseClassifier.get(),
+          this.featurizer.get(),
+          10000);
     }
-    search(candidateFragments,
-        isClauseClassifier.get(),
-        this.featurizer.get(),
-        10000);
   }
 
   /**

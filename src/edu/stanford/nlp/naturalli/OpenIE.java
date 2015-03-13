@@ -48,7 +48,7 @@ public class OpenIE implements Annotator {
   private Optimization optimizeFor = Optimization.GENERAL;
 
   @Execution.Option(name="splitter.model", gloss="The location of the clause splitting model.")
-  private String splitterModel = "edu/stanford/nlp/naturalli/clauseSearcherModel.ser.gz";
+  private String splitterModel = "edu/stanford/nlp/naturalli/clauseSplitterModel.ser.gz";
 
   @Execution.Option(name="splitter.nomodel", gloss="If true, don't load a clause splitter model. This is primarily useful for training.")
   private boolean noModel = false;
@@ -105,7 +105,7 @@ public class OpenIE implements Annotator {
         clauseSplitter = ClauseSplitter.load(splitterModel);
       }
     } catch (IOException e) {
-      throw new RuntimeIOException("Could not load clause splitter model at: " + splitterModel);
+      throw new RuntimeIOException("Could not load clause splitter model at " + splitterModel + ": " + e.getMessage());
     }
     forwardEntailer = new ForwardEntailer(entailmentsPerSentence, weights);
   }
@@ -116,22 +116,22 @@ public class OpenIE implements Annotator {
   }
 
   public List<SentenceFragment> clausesInSentence(CoreMap sentence) {
-    List<SentenceFragment> clauses =  clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class));
-    return clauses;
+    return clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class));
   }
 
   @SuppressWarnings("unchecked")
-  public List<SentenceFragment> entailmentsFromClause(SentenceFragment fragment) {
-    if (fragment.parseTree.size() == 0) {
+  public List<SentenceFragment> entailmentsFromClause(SentenceFragment clause) {
+    if (clause.parseTree.size() == 0) {
       return Collections.EMPTY_LIST;
     } else {
       // Get the forward entailments
-      List<SentenceFragment> list = forwardEntailer.apply(fragment.parseTree).search()
-          .stream().map(x -> x.changeScore(x.score * fragment.score)).collect(Collectors.toList());
+      List<SentenceFragment> list = forwardEntailer.apply(clause.parseTree).search()
+          .stream().map(x -> x.changeScore(x.score * clause.score)).collect(Collectors.toList());
+      list.add(clause);
 
       // A special case for adjective entailments
       List<SentenceFragment> adjFragments = new ArrayList<>();
-      SemgrexMatcher matcher = adjectivePattern.matcher(fragment.parseTree);
+      SemgrexMatcher matcher = adjectivePattern.matcher(clause.parseTree);
       OUTER: while (matcher.find()) {
         // (get nodes)
         IndexedWord subj = matcher.getNode("subj");
@@ -141,7 +141,7 @@ public class OpenIE implements Annotator {
         IndexedWord pobj = matcher.getNode("pobj");
         String prep = matcher.getRelnString("prep");
         // (if the adjective, or any earlier adjective, is privative, then all bets are off)
-        for (SemanticGraphEdge edge : fragment.parseTree.outgoingEdgeIterable(obj)) {
+        for (SemanticGraphEdge edge : clause.parseTree.outgoingEdgeIterable(obj)) {
           if ("amod".equals(edge.getRelation().toString()) && edge.getDependent().index() <= adj.index() &&
               Util.PRIVATIVE_ADJECTIVES.contains(edge.getDependent().word().toLowerCase())) {
             continue OUTER;
@@ -167,8 +167,12 @@ public class OpenIE implements Annotator {
     }
   }
 
-  public List<SentenceFragment> entailmentsFromClauses(Collection<SentenceFragment> fragments) {
-    return fragments.stream().flatMap(x -> entailmentsFromClause(x).stream()).collect(Collectors.toList());
+  public List<SentenceFragment> entailmentsFromClauses(Collection<SentenceFragment> clauses) {
+    List<SentenceFragment> entailments = new ArrayList<>();
+    for (SentenceFragment clause : clauses) {
+      entailments.addAll(entailmentsFromClause(clause));
+    }
+    return entailments;
   }
 
   public Optional<RelationTriple> relationInFragment(SentenceFragment fragment) {
@@ -233,7 +237,8 @@ public class OpenIE implements Annotator {
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_LIST);
     } else {
-      List<SentenceFragment> fragments = entailmentsFromClauses(clausesInSentence(sentence));
+      List<SentenceFragment> clauses = clausesInSentence(sentence);
+      List<SentenceFragment> fragments = entailmentsFromClauses(clauses);
       fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), false));
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
       List<RelationTriple> extractions = relationsInFragments(fragments, sentence, canonicalMentionMap);

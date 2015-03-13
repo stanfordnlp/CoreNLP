@@ -82,7 +82,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
    * This method will additionally strip out punctuation as well.
    */
    public String subjectLemmaGloss() {
-    return StringUtils.join(subject.stream().filter(x -> x.tag().matches("[\\.\\?,:;'\"!]")).map(CoreLabel::lemma), " ");
+    return StringUtils.join(subject.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(CoreLabel::lemma), " ");
   }
 
   /** The object of this relation triple, as a String */
@@ -100,7 +100,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
    * This method will additionally strip out punctuation as well.
    */
   public String objectLemmaGloss() {
-    return StringUtils.join(object.stream().filter(x -> x.tag().matches("[\\.\\?,:;'\"!]")).map(CoreLabel::lemma), " ");
+    return StringUtils.join(object.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(CoreLabel::lemma), " ");
   }
 
   /**
