@@ -19,6 +19,7 @@ import static org.junit.Assert.*;
  * @author Gabor Angeli
  */
 public class OpenIEITest {
+  /*
   protected static StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties() {{
     setProperty("annotators", "tokenize,ssplit,pos,lemma,parse,natlog,openie");
     setProperty("ssplit.isOneSentence", "true");
@@ -62,12 +63,6 @@ public class OpenIEITest {
     assertTrue("The sentence '" + expected + "' was not entailed from '" + text + "'", found);
   }
 
-  @Test
-  public void dummyTest() {
-    assertTrue(true);
-  }
-
-  /*
   @Test
   public void testAnnotatorRuns() {
     annotate("all cats have tails");
@@ -173,5 +168,10 @@ public class OpenIEITest {
   }
 
   */
+
+  @Test
+  public void dummyTest() {
+    assertTrue(true);
+  }
 
 }
