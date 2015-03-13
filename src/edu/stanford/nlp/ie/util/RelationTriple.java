@@ -281,21 +281,15 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     add(SemgrexPattern.compile("{$}=verb ?>/aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
     // { Durin, son of Thorin }
     add(SemgrexPattern.compile("{$}=subject >appos=subjIgnored ( {}=verb >/prep_.*/=prepEdge {}=object )"));
+    // { Tim 's father, Tom }
+    add(SemgrexPattern.compile("{$}=verb >poss=verb {}=subject >appos {}=object"));
     // { cats are cute,
     //   horses are grazing peacefully }
     add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop|aux(pass)?/ {}=verb"));
-    // { Tim 's father, Tom }
-    add(SemgrexPattern.compile("{$}=verb >poss=verb {}=subject >appos {}=object"));
     // { Tom and Jerry were fighting }
     add(SemgrexPattern.compile("{$}=verb >nsubjpass ( {}=subject >conj_and=subjIgnored {}=object )"));
     // { There are dogs in heaven }
     add(SemgrexPattern.compile("{lemma:be}=verb ?>expl {} >/.subj(pass)?/ ( {}=subject >/prepc?_.*/=prepEdge ( {}=object ?>appos {} = appos ) ?>dobj {pos:/N.*/}=relObj )"));
-
-    // TODO(gabor) move to nominal patterns?
-    // { Unicredit 's Bank Austria Creditanstalt }
-    add(SemgrexPattern.compile("[ {$}=object & !{ner:O}=object ] >poss=verb !{ner:O}=subject "));
-    // { Obama in Tucson }
-//    add(SemgrexPattern.compile("[ !{ner:O} & {tag:NNP}=subject ] >/prep_.*/=verb {}=object"));
   }});
 
   /**
@@ -311,8 +305,8 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     // { NER , NER ,,
     //   Obama, 28, ...,
     //   Obama (28) ...}
-    add(TokenSequencePattern.compile("(?$subject [ner:/..+/]+ ) /,/ (?$object [ner:/..+/]+ ) /,/"));
-    add(TokenSequencePattern.compile("(?$subject [ner:/..+/]+ ) /\\(/ (?$object [ner:/..+/]+ ) /\\)/"));
+    add(TokenSequencePattern.compile("(?$subject [ner:/PERSON|ORGANIZATION|LOCATION/]+ ) /,/ (?$object [ner:/NUMBER|DURATION/]+ ) /,/"));
+    add(TokenSequencePattern.compile("(?$subject [ner:/PERSON|ORGANIZATION|LOCATION/]+ ) /\\(/ (?$object [ner:/NUMBER|DURATION/]+ ) /\\)/"));
   }});
 
   /**
@@ -323,6 +317,8 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/amod|nn/=arc {ner:/..+/}=object"));
     // { Chris Manning of Stanford }
     add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/prep_.*/=relation {ner:/..+/}=object"));
+    // { Unicredit 's Bank Austria Creditanstalt }
+    add(SemgrexPattern.compile("[ {}=object & !{ner:O}=object ] >poss=relation !{ner:O}=subject "));
   }});
 
   /**
@@ -337,6 +333,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    */
   public static List<RelationTriple> extract(SemanticGraph parse, List<CoreLabel> tokens) {
     List<RelationTriple> extractions = new ArrayList<>();
+    Set<Triple<Span,String,Span>> alreadyExtracted = new HashSet<>();
 
     // Run Token Patterns
     for (TokenSequencePattern tokenPattern : NOUN_TOKEN_PATTERNS) {
@@ -397,7 +394,11 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
             }});
           }
           // Add extraction
-          extractions.add(new RelationTriple(subjectTokens, relationTokens, objectTokens));
+          String relationGloss = StringUtils.join(relationTokens.stream().map(CoreLabel::word), " ");
+          if (!alreadyExtracted.contains(Triple.makeTriple(subjectSpan, relationGloss, objectSpan))) {
+            extractions.add(new RelationTriple(subjectTokens, relationTokens, objectTokens));
+            alreadyExtracted.add(Triple.makeTriple(subjectSpan, relationGloss, objectSpan));
+          }
         }
       }
 
@@ -415,12 +416,23 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
           // Create object
           IndexedWord object = matcher.getNode("object");
           Span objectSpan = Util.extractNER(tokens, Span.fromValues(object.index() - 1, object.index()));
-          if (Span.overlaps(subjectSpan, objectSpan)) {
-            continue;
-          }
           List<CoreLabel> objectTokens = new ArrayList<>();
           for (int i : objectSpan) {
             objectTokens.add(tokens.get(i));
+          }
+          // Check that the pair is valid
+          if (Span.overlaps(subjectSpan, objectSpan)) {
+            continue;  // We extracted an identity
+          }
+          if (subjectSpan.end() == objectSpan.start() - 1 &&
+              (tokens.get(subjectSpan.end()).word().matches("[\\.,:;\\('\"]") ||
+                  tokens.get(subjectSpan.end()).tag().equals("CC"))) {
+            continue; // We're straddling a clause
+          }
+          if (objectSpan.end() == subjectSpan.start() - 1 &&
+              (tokens.get(objectSpan.end()).word().matches("[\\.,:;\\('\"]") ||
+                  tokens.get(objectSpan.end()).tag().equals("CC"))) {
+            continue; // We're straddling a clause
           }
           // Get the relation
           if (subjectTokens.size() > 0 && objectTokens.size() > 0) {
@@ -443,6 +455,9 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
               prep = rel.substring("prep_".length());
             } else if (rel != null && rel.startsWith("prepc_")) {
               prep = rel.substring("prepc_".length());
+            } else if (rel != null && rel.equals("poss")) {
+              relationTokens.clear();
+              prep = "'s";
             }
             if (prep != null) {
               final String p = prep;
@@ -458,7 +473,11 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
               }});
             }
             // Add extraction
-            extractions.add(new RelationTriple(subjectTokens, relationTokens, objectTokens));
+            String relationGloss = StringUtils.join(relationTokens.stream().map(CoreLabel::word), " ");
+            if (!alreadyExtracted.contains(Triple.makeTriple(subjectSpan, relationGloss, objectSpan))) {
+              extractions.add(new RelationTriple(subjectTokens, relationTokens, objectTokens));
+              alreadyExtracted.add(Triple.makeTriple(subjectSpan, relationGloss, objectSpan));
+            }
           }
         }
       }
