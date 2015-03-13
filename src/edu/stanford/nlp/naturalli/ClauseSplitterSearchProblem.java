@@ -82,17 +82,17 @@ public class ClauseSplitterSearchProblem {
     public final int edgeIndex;
     public final SemanticGraphEdge subjectOrNull;
     public final int distanceFromSubj;
-    public final SemanticGraphEdge ppOrNull;
+    public final SemanticGraphEdge objectOrNull;
     public final Consumer<SemanticGraph> thunk;
     public boolean isDone;
 
-    public State(SemanticGraphEdge edge, SemanticGraphEdge subjectOrNull, int distanceFromSubj, SemanticGraphEdge ppOrNull,
+    public State(SemanticGraphEdge edge, SemanticGraphEdge subjectOrNull, int distanceFromSubj, SemanticGraphEdge objectOrNull,
                  Consumer<SemanticGraph> thunk, boolean isDone) {
       this.edge = edge;
       this.edgeIndex = edgeToIndex.indexOf(edge);
       this.subjectOrNull = subjectOrNull;
       this.distanceFromSubj = distanceFromSubj;
-      this.ppOrNull = ppOrNull;
+      this.objectOrNull = objectOrNull;
       this.thunk = thunk;
       this.isDone = isDone;
     }
@@ -102,7 +102,7 @@ public class ClauseSplitterSearchProblem {
       this.edgeIndex = edgeToIndex.indexOf(edge);
       this.subjectOrNull = source.subjectOrNull;
       this.distanceFromSubj = source.distanceFromSubj;
-      this.ppOrNull = source.ppOrNull;
+      this.objectOrNull = source.objectOrNull;
       this.thunk = source.thunk;
       this.isDone = isDone;
     }
@@ -436,12 +436,12 @@ public class ClauseSplitterSearchProblem {
       }
 
       @Override
-      public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge ppOrNull) {
+      public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge objectOrNull) {
         return Optional.of(new State(
             outgoingEdge,
             subjectOrNull == null ? source.subjectOrNull : subjectOrNull,
             subjectOrNull == null ? (source.distanceFromSubj + 1) : 0,
-            ppOrNull,
+            objectOrNull == null ? source.objectOrNull : objectOrNull,
             source.thunk.andThen(toModify -> {
               assert Util.isTree(toModify);
               simpleClause(toModify, outgoingEdge);
@@ -481,12 +481,12 @@ public class ClauseSplitterSearchProblem {
       }
 
       @Override
-      public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge ppOrNull) {
+      public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge objectOrNull) {
         return Optional.of(new State(
             outgoingEdge,
             subjectOrNull == null ? source.subjectOrNull : subjectOrNull,
             subjectOrNull == null ? (source.distanceFromSubj + 1) : 0,
-            ppOrNull,
+            objectOrNull == null ? source.objectOrNull : objectOrNull,
             source.thunk.andThen(toModify -> {
               assert Util.isTree(toModify);
               simpleClause(toModify, outgoingEdge);
@@ -506,18 +506,47 @@ public class ClauseSplitterSearchProblem {
       }
 
       @Override
-      public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge ppOrNull) {
+      public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge objectOrNull) {
         if (subjectOrNull != null && !outgoingEdge.equals(subjectOrNull)) {
           return Optional.of(new State(
               outgoingEdge,
               subjectOrNull,
               0,
-              ppOrNull,
+              objectOrNull == null ? source.objectOrNull : objectOrNull,
               source.thunk.andThen(toModify -> {
                 assert Util.isTree(toModify);
                 simpleClause(toModify, outgoingEdge);
                 addSubtree(toModify, outgoingEdge.getDependent(), "nsubj", tree,
                     subjectOrNull.getDependent(), Collections.singleton(outgoingEdge));
+                assert Util.isTree(toModify);
+              }), false
+          ));
+        } else {
+          return Optional.empty();
+        }
+      }
+    });
+
+    // COPY OBJECT
+    actionSpace.add(new Action() {
+      @Override
+      public String signature() {
+        return "clone_dobj";
+      }
+
+      @Override
+      public Optional<State> applyTo(SemanticGraph tree, State source, SemanticGraphEdge outgoingEdge, SemanticGraphEdge subjectOrNull, SemanticGraphEdge objectOrNull) {
+        if (objectOrNull != null && !outgoingEdge.equals(objectOrNull)) {
+          return Optional.of(new State(
+              outgoingEdge,
+              subjectOrNull == null ? source.subjectOrNull : subjectOrNull,
+              subjectOrNull == null ? (source.distanceFromSubj + 1) : 0,
+              objectOrNull,
+              source.thunk.andThen(toModify -> {
+                assert Util.isTree(toModify);
+                simpleClause(toModify, outgoingEdge);
+                addSubtree(toModify, outgoingEdge.getDependent(), "dobj", tree,
+                    objectOrNull.getDependent(), Collections.singleton(outgoingEdge));
                 assert Util.isTree(toModify);
               }), false
           ));
@@ -562,8 +591,6 @@ public class ClauseSplitterSearchProblem {
   ) {
     // (the fringe)
     PriorityQueue<Pair<State, List<Counter<String>>>> fringe = new FixedPrioritiesPriorityQueue<>();
-    // (a helper list)
-    List<SemanticGraphEdge> ppEdges = new ArrayList<>();
     // (avoid duplicate work)
     Set<IndexedWord> seenWords = new HashSet<>();
 
@@ -609,55 +636,46 @@ public class ClauseSplitterSearchProblem {
       }
 
       // Find relevant auxilliary terms
-      ppEdges.clear();
-      ppEdges.add(null);
       SemanticGraphEdge subjOrNull = null;
+      SemanticGraphEdge objOrNull = null;
       for (SemanticGraphEdge auxEdge : tree.outgoingEdgeIterable(rootWord)) {
         String relString = auxEdge.getRelation().toString();
-        if (relString.startsWith("prep")) {
-          ppEdges.add(auxEdge);
+        if (relString.contains("obj")) {
+          objOrNull = auxEdge;
         } else if (relString.contains("subj")) {
           subjOrNull = auxEdge;
         }
       }
 
       // Iterate over children
+      // For each action...
       for (Action action : actionSpace) {
-        // For each action...
+        // For each outgoing edge...
         for (SemanticGraphEdge outgoingEdge : tree.outgoingEdgeIterable(rootWord)) {
           // Check the prerequisite
           if (!action.prerequisitesMet(tree, outgoingEdge)) {
             continue;
           }
-          // For each outgoing edge...
-          // 1. Find the best aux information to carry along
-          double max = Double.NEGATIVE_INFINITY;
-          Pair<State, List<Counter<String>>> argmax = null;
-          for (SemanticGraphEdge ppEdgeOrNull : ppEdges) {
-            Optional<State> candidate = action.applyTo(tree, lastState,
-                outgoingEdge, subjOrNull,
-                ppEdgeOrNull);
-            if (candidate.isPresent()) {
-              Counter<String> features = featurizer.apply(Triple.makeTriple(lastState, action, candidate.get()));
-              Counter<ClauseClassifierLabel> scores = classifier.scoresOf(new RVFDatum<>(features));
-              if (scores.size() > 0) {
-                Counters.logNormalizeInPlace(scores);
-              }
-              scores.remove(ClauseClassifierLabel.NOT_A_CLAUSE);
-              double logProbability = Counters.max(scores, Double.NEGATIVE_INFINITY);
-              if (logProbability >= max) {
-                max = logProbability;
-                argmax = Pair.makePair(candidate.get().withIsDone(Counters.argmax(scores, (x, y) -> 0, ClauseClassifierLabel.CLAUSE_SPLIT)), new ArrayList<Counter<String>>(featuresSoFar) {{
-                  add(features);
-                }});
-                assert logProbability <= 0.0;
-              }
+          // 1. Compute the child state
+          Optional<State> candidate = action.applyTo(tree, lastState,
+              outgoingEdge, subjOrNull,
+              objOrNull);
+          if (candidate.isPresent()) {
+            Counter<String> features = featurizer.apply(Triple.makeTriple(lastState, action, candidate.get()));
+            Counter<ClauseClassifierLabel> scores = classifier.scoresOf(new RVFDatum<>(features));
+            if (scores.size() > 0) {
+              Counters.logNormalizeInPlace(scores);
             }
-          }
-          // 2. Register the child state
-          if (argmax != null && !seenWords.contains(argmax.first.edge.getDependent())) {
+            scores.remove(ClauseClassifierLabel.NOT_A_CLAUSE);
+            double logProbability = Counters.max(scores, Double.NEGATIVE_INFINITY);
+            Pair<State, List<Counter<String>>> childState = Pair.makePair(candidate.get().withIsDone(Counters.argmax(scores, (x, y) -> 0, ClauseClassifierLabel.CLAUSE_SPLIT)), new ArrayList<Counter<String>>(featuresSoFar) {{
+              add(features);
+            }});
+            // 2. Register the child state
+            if (!seenWords.contains(childState.first.edge.getDependent())) {
 //            System.err.println("  pushing " + action.signature() + " with " + argmax.first.edge);
-            fringe.add(argmax, max);
+              fringe.add(childState, logProbability);
+            }
           }
         }
       }
