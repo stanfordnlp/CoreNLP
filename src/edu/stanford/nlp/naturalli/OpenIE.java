@@ -228,22 +228,31 @@ public class OpenIE implements Annotator {
   @SuppressWarnings("unchecked")
   public void annotateSentence(CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
     List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-
-    if (tokens.size() > 63) {
-      System.err.println("Very long sentence (>63 tokens); " + this.getClass().getSimpleName() + " is not attempting to extract relations.");
-      sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
-      sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_LIST);
-    } else if (tokens.size() < 2) {
+    if (tokens.size() < 2) {
       System.err.println("Very short sentence (<2 tokens); " + this.getClass().getSimpleName() + " is skipping it.");
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_LIST);
     } else {
-      List<SentenceFragment> clauses = clausesInSentence(sentence);
-      List<SentenceFragment> fragments = entailmentsFromClauses(clauses);
-      fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), false));
-      sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
-      List<RelationTriple> extractions = relationsInFragments(fragments, sentence, canonicalMentionMap);
-      sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, extractions);
+      SemanticGraph parse = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+      if (parse == null) {
+        parse = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+      }
+      if (parse == null) {
+        throw new IllegalStateException("Cannot run OpenIE without a parse tree!");
+      }
+      List<RelationTriple> extractions = RelationTriple.extract(parse, tokens);
+      if (tokens.size() > 63) {
+        System.err.println("Very long sentence (>63 tokens); " + this.getClass().getSimpleName() + " is not attempting to extract clauses.");
+        sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
+        sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_LIST);
+      } else {
+        List<SentenceFragment> clauses = clausesInSentence(sentence);
+        List<SentenceFragment> fragments = entailmentsFromClauses(clauses);
+        fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), false));
+        extractions.addAll(relationsInFragments(fragments, sentence, canonicalMentionMap));
+        sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
+        sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, extractions);
+      }
     }
   }
 

@@ -6,6 +6,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
 import edu.stanford.nlp.naturalli.Util;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
  * @author Gabor Angeli
  */
 @SuppressWarnings("UnusedDeclaration")
-public class RelationTriple implements Comparable<RelationTriple> {
+public class RelationTriple implements Comparable<RelationTriple>, Iterable<CoreLabel> {
   /** The subject (first argument) of this triple */
   public final List<CoreLabel> subject;
   /** The relation (second argument) of this triple */
@@ -205,6 +206,11 @@ public class RelationTriple implements Comparable<RelationTriple> {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public Iterator<CoreLabel> iterator() {
+    return CollectionUtils.concatIterators(subject.iterator(), relation.iterator(), object.iterator());
+  }
 
 
   /**
@@ -458,6 +464,21 @@ public class RelationTriple implements Comparable<RelationTriple> {
       }
     }
 
+    // Filter downward polarity extractions
+    Iterator<RelationTriple> iter = extractions.iterator();
+    while (iter.hasNext()) {
+      RelationTriple term = iter.next();
+      boolean shouldRemove = false;
+      for (CoreLabel token : term) {
+        if (token.get(NaturalLogicAnnotations.PolarityAnnotation.class) != null &&
+            token.get(NaturalLogicAnnotations.PolarityAnnotation.class).isDownwards() ) {
+          shouldRemove = true;
+        }
+      }
+      if (shouldRemove) { iter.remove(); }  // Don't extract things in downward polarity contexts.
+    }
+
+    // Return
     return extractions;
   }
 
