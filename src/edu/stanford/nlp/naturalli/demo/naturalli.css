@@ -97,3 +97,23 @@ body {
   text-align: center;
 }
 
+h2 {
+  color:  #000080;
+  padding-bottom: 1ex;
+}
+
+.triples {
+  font-size: large;
+  text-align: center;
+}
+
+.triple-table {
+  margin: 0 auto !important;
+  float: none !important;
+}
+
+td {
+  text-align: left;
+  padding-right: 2ex;
+  padding-bottom: 1ex;
+}

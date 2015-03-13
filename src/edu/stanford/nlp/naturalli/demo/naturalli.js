@@ -1,25 +1,28 @@
 
 function handleError(message) {
-  console.log("FAILURE!");
   $( "#q" ).prop('disabled', false);
   $( "#query-button").unbind( "click" );
   $( "#query-button" ).click(function(event) { $( "#form-query" ).submit(); });
   $( "#triples-container").html('<div style="color:red; font-size:xx-large;">ERROR</div> <div style="color: black; font-size: 12pt">(' + message + ')<div>');
 }
 
-function querySuccess(query) {
-  console.log("fn-rtn");
+function querySuccess(elem) {
   return function(response) {
-    console.log("SUCCESS!");
     $( "#q" ).prop('disabled', false);
     $( "#query-button").unbind( "click" );
     $( "#query-button" ).click(function(event) { $( "#form-query" ).submit(); });
-    console.log(response.triples);
-    var gloss = ""
-    for (i = 0; i < response.triples.length; ++i) {
-      gloss += '(' + response.triples[i][0] + '; ' + response.triples[i][1] + '; ' + response.triples[i][2] + ') <br/>';
+    if (response.triples.length > 0) {
+      var gloss = '<table class="triple-table">';
+      for (i = 0; i < response.triples.length; ++i) {
+        gloss += '<tr><td>(</td><td>' + response.triples[i][0] + ';</td>';
+        gloss += '<td>' + response.triples[i][1] + ';</td>';
+        gloss += '<td>' + response.triples[i][2] + '</td><td>)</td></tr>';
+      }
+      gloss += '</table>';
+      $(elem).html(gloss);
+    } else {
+      $(elem).html('<i>(no responses)</i>');
     }
-    $( "#triples-container" ).html(gloss);
   }
 }
 
@@ -38,10 +41,14 @@ $(document).ready(function(){
   $( "#form-query" ).submit(function( event ) {
     // (don't actually submit anything)
     event.preventDefault();
+    // (set the headers)
+    $( "#system-header" ).css("visibility", "visible");
+    $( "#ollie-header" ).css("visibility", "visible");
     // (create a default if not input was given)
     if ( $( '#q' ).val().trim() == '') { $( '#q' ).val('faeries are dancing in the field where I lost my bike.'); }
     // (start loading icon)
     $( '#triples-container' ).html('loading...');
+    $( '#ollie-container' ).html('loading...');
     // (submission data)
     target = $(this).attr('action');
     getData = $(this).serialize();
@@ -50,12 +57,17 @@ $(document).ready(function(){
     $( "#q" ).prop('disabled', true);
     $( "#query-button").unbind( "click" );
     // (ajax request)
-    console.log("Querying...");
     $.ajax({
-      url: target,
+      url: 'http://plato42.stanford.edu:8080/openie/',
       data: getData,
       dataType: 'json',
-      success: querySuccess(value)
+      success: querySuccess("#triples-container")
+    });
+    $.ajax({
+      url: 'http://plato42.stanford.edu:8080/ollie/',
+      data: getData,
+      dataType: 'json',
+      success: querySuccess("#ollie-container")
     });
   });
 

@@ -31,7 +31,7 @@
             </center>
             <div class="col-md-12">
                 <!-- Query Box -->
-                <form id="form-query" class="form-inline" role="form" action="http://plato42.stanford.edu:8080/openie/">
+                <form id="form-query" class="form-inline" role="form" action="#">
                     <div class="input-group">
                         <input id="q" type="text" name="q" class="form-control input-lg"
                                placeholder="e.g., faeries are dancing in the field where I lost my bike."
@@ -44,10 +44,15 @@
 
         <!-- Truth Value -->
         <div id="triples-row" class="row" style="margin-top:2em;">
-            <div class="col-md-2"></div>
-            <div id="triples-container" class="col-md-8 centered">
+
+            <div id="triples-left" class="col-md-6 centered">
+                <h2 id="system-header" style="visibility: hidden;">Our System</h2>
+                <div id="triples-container" class="triples"></div>
             </div>
-            <div class="col-md-2"></div>
+            <div id="triples-right" class="col-md-6 centered">
+                <h2 id="ollie-header" style="visibility: hidden;">Ollie</h2>
+                <div id="ollie-container" class="triples"></div>
+            </div>
         </div>
 
     </div>

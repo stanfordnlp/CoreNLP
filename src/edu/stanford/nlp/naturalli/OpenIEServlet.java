@@ -17,9 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * A simple web frontend to the Open IE System.
@@ -177,7 +175,7 @@ public class OpenIEServlet extends HttpServlet {
       annotate(ann);
       // Collect results
       List<String> entailments = new ArrayList<>();
-      List<String> triples = new ArrayList<>();
+      Set<String> triples = new LinkedHashSet<>();
       for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
         for (SentenceFragment fragment : sentence.get(NaturalLogicAnnotations.EntailedSentencesAnnotation.class)) {
           entailments.add(quote(fragment.toString()));
