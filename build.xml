@@ -322,6 +322,8 @@
       <zipfileset prefix="WEB-INF/data"
                   file="/u/nlp/data/depparser/nn/distrib/english_SD.gz"/>
       <zipfileset prefix="WEB-INF/data"
+                  file="/u/nlp/data/lexparser/englishPCFG.ser.gz"/>
+      <zipfileset prefix="WEB-INF/data"
                    file="/home/gabor/workspace/naturalli/etc/clauseSplitterModel.ser.gz"/>
       <zipfileset prefix="WEB-INF/data"
                    file="/home/gabor/workspace/naturalli/etc/pp.tab.gz"/>

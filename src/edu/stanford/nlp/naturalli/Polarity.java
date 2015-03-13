@@ -222,20 +222,6 @@ public class Polarity {
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Polarity)) return false;
-    Polarity polarity = (Polarity) o;
-    return Arrays.equals(projectionFunction, polarity.projectionFunction);
-
-  }
-
-  @Override
-  public int hashCode() {
-    return Arrays.hashCode(projectionFunction);
-  }
-
-  @Override
   public String toString() {
     if (isUpwards()) {
       return "up";
@@ -244,5 +230,18 @@ public class Polarity {
     } else {
       return "flat";
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Polarity)) return false;
+    Polarity polarity = (Polarity) o;
+    return Arrays.equals(projectionFunction, polarity.projectionFunction);
+  }
+
+  @Override
+  public int hashCode() {
+    return projectionFunction != null ? Arrays.hashCode(projectionFunction) : 0;
   }
 }

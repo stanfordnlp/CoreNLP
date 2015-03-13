@@ -1,9 +1,12 @@
 package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.ie.util.RelationTriple;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -13,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -24,26 +28,70 @@ import java.util.Properties;
  */
 public class OpenIEServlet extends HttpServlet {
   StanfordCoreNLP pipeline = null;
+  StanfordCoreNLP backoff = null;
 
+  /**
+   * Set the properties to the paths they appear at on the servlet.
+   * See build.xml for where these paths get copied.
+   * @throws ServletException Thrown by the implementation
+   */
   public void init()  throws ServletException {
-    String dataDir = getServletContext().getRealPath("/WEB-INF/data");
-    System.setProperty("de.jollyday.config",
-        getServletContext().getRealPath("/WEB-INF/classes/holidays/jollyday.properties"));
+    Properties commonProps = new Properties() {{
+      setProperty("openie.splitter.threshold", "0.10");
+      setProperty("openie.optimze_for", "GENERAL");
+      setProperty("openie.ignoreaffinity", "false");
+      setProperty("openie.max_entailments_per_clause", "1000");
+      setProperty("openie.triple.strict", "true");
+    }};
+    try {
+      String dataDir = getServletContext().getRealPath("/WEB-INF/data");
+      System.setProperty("de.jollyday.config",
+          getServletContext().getRealPath("/WEB-INF/classes/holidays/jollyday.properties"));
+      commonProps.setProperty("pos.model", dataDir + "/english-left3words-distsim.tagger");
+      commonProps.setProperty("ner.model", dataDir + "/english.all.3class.distsim.crf.ser.gz," + dataDir + "/english.conll.4class.distsim.crf.ser.gz," + dataDir + "/english.muc.7class.distsim.crf.ser.gz");
+      commonProps.setProperty("depparse.model", dataDir + "/english_SD.gz");
+      commonProps.setProperty("parse.model", dataDir + "/englishPCFG.ser.gz");
+      commonProps.setProperty("sutime.rules", dataDir + "/defs.sutime.txt," + dataDir + "/english.sutime.txt," + dataDir + "/english.hollidays.sutime.txt");
+      commonProps.setProperty("openie.splitter.model", dataDir + "/clauseSplitterModel.ser.gz");
+      commonProps.setProperty("openie.affinity_models", dataDir);
+    } catch (NullPointerException e) {
+      System.err.println("Could not load servlet context. Are you on the command line?");
+    }
     if (this.pipeline == null) {
-      this.pipeline = new StanfordCoreNLP(new Properties(){{
-        setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,natlog,openie");
-        setProperty("pos.model", dataDir + "/english-left3words-distsim.tagger");
-        setProperty("ner.model", dataDir + "/english.all.3class.distsim.crf.ser.gz," + dataDir + "/english.conll.4class.distsim.crf.ser.gz," + dataDir + "/english.muc.7class.distsim.crf.ser.gz");
-        setProperty("depparse.model", dataDir + "/english_SD.gz");
-        setProperty("sutime.rules", dataDir + "/defs.sutime.txt," + dataDir + "/english.sutime.txt," + dataDir + "/english.hollidays.sutime.txt");
-        setProperty("openie.splitter.model", dataDir + "/clauseSplitterModel.ser.gz");
-        setProperty("openie.affinity_models", dataDir);
-        setProperty("openie.splitter.threshold", "0.10");
-        setProperty("openie.optimze_for", "GENERAL");
-        setProperty("openie.ignoreaffinity", "false");
-        setProperty("openie.max_entailments_per_clause", "1000");
-        setProperty("openie.triple.strict", "true");
-      }});
+      Properties fullProps = new Properties(commonProps);
+      fullProps.setProperty("annotators", "tokenize,ssplit,pos,lemma,depparse,ner,natlog,openie");
+      this.pipeline = new StanfordCoreNLP(fullProps);
+    }
+    if (this.backoff == null) {
+      Properties backoffProps = new Properties(commonProps);
+      backoffProps.setProperty("annotators", "parse,natlog,openie");
+      backoffProps.setProperty("enforceRequirements", "false");
+      this.backoff = new StanfordCoreNLP(backoffProps);
+
+    }
+  }
+
+  /**
+   * Annotate a document (which is usually just a sentence).
+   */
+  public void annotate(Annotation ann) {
+    pipeline.annotate(ann);
+    if (ann.get(CoreAnnotations.SentencesAnnotation.class).size() == 1) {
+      CoreMap sentence = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+      if (sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class) != null) {
+        if (sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class).isEmpty()) {
+          for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+            token.remove(NaturalLogicAnnotations.OperatorAnnotation.class);
+            token.remove(NaturalLogicAnnotations.PolarityAnnotation.class);
+          }
+          sentence.remove(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
+          sentence.remove(NaturalLogicAnnotations.EntailedSentencesAnnotation.class);
+          sentence.remove(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+          sentence.remove(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+          sentence.remove(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
+          backoff.annotate(ann);
+        }
+      }
     }
   }
 
@@ -106,6 +154,53 @@ public class OpenIEServlet extends HttpServlet {
     return sb.toString();
   }
 
+  /**
+   * Actually perform the GET request, given all the relevant information (already sanity checked).
+   * This is the meat of the servlet code.
+   * @param out The writer to write the output to.
+   * @param q The query string.
+   */
+  private void doGet(PrintWriter out, String q) {
+    // Clean the string a bit
+    q = q.trim();
+    if (q.length() == 0) {
+      return;
+    }
+    char lastChar = q.charAt(q.length() - 1);
+    if (lastChar != '.' && lastChar != '!' && lastChar != '?') {
+      q = q + ".";
+    }
+    // Annotate
+    Annotation ann = new Annotation(q);
+    try {
+      // Annotate
+      annotate(ann);
+      // Collect results
+      List<String> entailments = new ArrayList<>();
+      List<String> triples = new ArrayList<>();
+      for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
+        for (SentenceFragment fragment : sentence.get(NaturalLogicAnnotations.EntailedSentencesAnnotation.class)) {
+          entailments.add(quote(fragment.toString()));
+        }
+        for (RelationTriple fragment : sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
+          triples.add("[ " + quote(fragment.subjectLemmaGloss()) + ", " + quote(fragment.relationLemmaGloss()) + ", " + quote(fragment.objectLemmaGloss()) + " ]");
+        }
+      }
+      // Write results
+      out.println("{ " +
+          "\"ok\":true, " +
+          "\"entailments\": [" + StringUtils.join(entailments, ",") + "], " +
+          "\"triples\": [" + StringUtils.join(triples, ",") + "], " +
+          "\"msg\": \"\"" +
+          " }");
+    } catch (Throwable t) {
+      out.println("{ok:false, entailments:[], triples:[], msg:" + quote(t.getMessage()) + "}");
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     if (request.getCharacterEncoding() == null) {
       request.setCharacterEncoding("utf-8");
@@ -117,37 +212,31 @@ public class OpenIEServlet extends HttpServlet {
     if (raw == null || "".equals(raw)) {
       out.println("{ok:false, entailments:[], triples=[], msg=\"\"}");
     } else {
-      Annotation ann = new Annotation(raw);
-      try {
-        // Annotate
-        pipeline.annotate(ann);
-        // Collect results
-        List<String> entailments = new ArrayList<>();
-        List<String> triples = new ArrayList<>();
-        for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
-          for (SentenceFragment fragment : sentence.get(NaturalLogicAnnotations.EntailedSentencesAnnotation.class)) {
-            entailments.add(quote(fragment.toString()));
-          }
-          for (RelationTriple fragment : sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
-            triples.add("[ " + quote(fragment.subjectLemmaGloss()) + ", " + quote(fragment.relationLemmaGloss()) + ", " + quote(fragment.objectLemmaGloss()) + " ]");
-          }
-        }
-        // Write results
-        out.println("{ " +
-            "\"ok\":true, " +
-            "\"entailments\": [" + StringUtils.join(entailments, ",") + "], " +
-            "\"triples\": [" + StringUtils.join(triples, ",") + "], " +
-            "\"msg\": \"\"" +
-        " }");
-      } catch (Throwable t) {
-        out.println("{ok:false, entailments:[], triples:[], msg:" + quote(t.getMessage()) + "}");
-      }
+      doGet(out, raw);
     }
 
     out.close();
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     doGet(request, response);
+  }
+
+  /**
+   * A helper so that we can see how the servlet sees the world, modulo model paths, at least.
+   */
+  public static void main(String[] args) throws ServletException, IOException {
+    OpenIEServlet servlet = new OpenIEServlet();
+    servlet.init();
+    IOUtils.console(line -> {
+      StringWriter str = new StringWriter();
+      PrintWriter out = new PrintWriter(str);
+      servlet.doGet(new PrintWriter(out), line);
+      out.close();
+      System.out.println(str.toString());
+    });
   }
 }
