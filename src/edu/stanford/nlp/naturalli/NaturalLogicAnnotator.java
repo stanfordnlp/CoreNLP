@@ -240,7 +240,8 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
    */
   private OperatorSpec computeScope(SemanticGraph tree, Operator operator,
                                     IndexedWord pivot, Pair<Integer, Integer> quantifierSpan,
-                                    IndexedWord subject, boolean isProperNounSubject, IndexedWord object) {
+                                    IndexedWord subject, boolean isProperNounSubject, IndexedWord object,
+                                    int sentenceLength) {
     Pair<Integer, Integer> subjSpan;
     Pair<Integer, Integer> objSpan;
     if (subject == null && object == null) {
@@ -272,7 +273,8 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     return new OperatorSpec(operator,
         quantifierSpan.first - 1, quantifierSpan.second - 1,
         subjSpan.first - 1, subjSpan.second - 1,
-        objSpan.first - 1, objSpan.second - 1);
+        objSpan.first - 1, objSpan.second - 1,
+        sentenceLength);
   }
 
   /**
@@ -316,6 +318,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
    */
   private void annotateOperators(CoreMap sentence) {
     SemanticGraph tree = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
     if (tree == null) {
       tree = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
     }
@@ -383,7 +386,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
           // Compute span
           OperatorSpec scope = computeScope(tree, quantifierInfo.get().first,
               matcher.getNode("pivot"), Pair.makePair(quantifierInfo.get().second, quantifierInfo.get().third),
-              subject, namedEntityQuantifier, matcher.getNode("object"));
+              subject, namedEntityQuantifier, matcher.getNode("object"), tokens.size());
           // Set annotation
           CoreLabel token = sentence.get(CoreAnnotations.TokensAnnotation.class).get(quantifier.index() - 1);
           OperatorSpec oldScope = token.get(OperatorAnnotation.class);
@@ -409,7 +412,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     for (OperatorSpec quantifier : quantifiers) {
       for (int i = quantifier.quantifierBegin; i < quantifier.quantifierEnd; ++i) {
         if (i != quantifier.quantifierHead) {
-          sentence.get(CoreAnnotations.TokensAnnotation.class).get(i).remove(OperatorAnnotation.class);
+          tokens.get(i).remove(OperatorAnnotation.class);
         }
       }
     }
@@ -457,7 +460,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
           // Then add the unary operator!
           OperatorSpec scope = computeScope(tree, quantifierInfo.get().first,
               subject, Pair.makePair(quantifierInfo.get().second, quantifierInfo.get().third),
-              null, false, null);
+              null, false, null, tokens.size());
           CoreLabel token = tokens.get(quantifier.index() - 1);
           token.set(OperatorAnnotation.class, scope);
         }

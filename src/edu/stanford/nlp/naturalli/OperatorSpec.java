@@ -30,6 +30,21 @@ public class OperatorSpec {
     this.objectEnd = objectEnd;
   }
 
+  protected OperatorSpec(
+      Operator instance,
+      int quantifierBegin, int quantifierEnd,
+      int subjectBegin, int subjectEnd,
+      int objectBegin, int objectEnd,
+      int sentenceLength) {
+    this(instance,
+        Math.max(0, Math.min(sentenceLength - 1, quantifierBegin)),
+        Math.max(0, Math.min(sentenceLength, quantifierEnd)),
+        Math.max(0, Math.min(sentenceLength - 1, subjectBegin)),
+        Math.max(0, Math.min(sentenceLength, subjectEnd)),
+        Math.max(0, Math.min(sentenceLength - 1, objectBegin)),
+        Math.max(0, Math.min(sentenceLength, objectEnd)));
+  }
+
   /**
    * If true, this is an explicit quantifier, such as "all" or "some."
    * The other option is for this to be an implicit quantification, for instance with proper names:
