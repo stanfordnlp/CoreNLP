@@ -35,6 +35,7 @@ public class OpenIEServlet extends HttpServlet {
    */
   public void init()  throws ServletException {
     Properties commonProps = new Properties() {{
+      setProperty("depparse.extradependencies", "ref_only_uncollapsed");
       setProperty("openie.splitter.threshold", "0.10");
       setProperty("openie.optimze_for", "GENERAL");
       setProperty("openie.ignoreaffinity", "false");
