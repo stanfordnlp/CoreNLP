@@ -4,6 +4,9 @@ import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.tokensregex.TokenSequenceMatcher;
+import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
+import edu.stanford.nlp.naturalli.Util;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
@@ -261,7 +264,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
   }
 
   /** A list of patterns to match relation extractions against */
-  private static List<SemgrexPattern> PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
+  private static List<SemgrexPattern> VERB_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
     // { blue cats play [quietly] with yarn,
     //   Jill blew kisses at Jack,
     //   cats are standing next to dogs }
@@ -275,23 +278,194 @@ public class RelationTriple implements Comparable<RelationTriple> {
     // { cats are cute,
     //   horses are grazing peacefully }
     add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop|aux(pass)?/ {}=verb"));
-    // { Unicredit 's Bank Austria Creditanstalt }
-    add(SemgrexPattern.compile("[ {$}=object & !{ner:O}=object ] >poss=verb !{ner:O}=subject "));
-    // { Obama in Tucson }
-    add(SemgrexPattern.compile("[ !{ner:O} & {tag:NNP}=subject ] >/prep_.*/=verb {}=object"));
     // { Tim 's father, Tom }
     add(SemgrexPattern.compile("{$}=verb >poss=verb {}=subject >appos {}=object"));
     // { Tom and Jerry were fighting }
     add(SemgrexPattern.compile("{$}=verb >nsubjpass ( {}=subject >conj_and=subjIgnored {}=object )"));
     // { There are dogs in heaven }
     add(SemgrexPattern.compile("{lemma:be}=verb ?>expl {} >/.subj(pass)?/ ( {}=subject >/prepc?_.*/=prepEdge ( {}=object ?>appos {} = appos ) ?>dobj {pos:/N.*/}=relObj )"));
+
+    // TODO(gabor) move to nominal patterns?
+    // { Unicredit 's Bank Austria Creditanstalt }
+    add(SemgrexPattern.compile("[ {$}=object & !{ner:O}=object ] >poss=verb !{ner:O}=subject "));
+    // { Obama in Tucson }
+//    add(SemgrexPattern.compile("[ !{ner:O} & {tag:NNP}=subject ] >/prep_.*/=verb {}=object"));
   }});
 
   /**
-   * A counter keeping track of how many times a given pattern has matched. This allows us to learn to iterate
-   * over patterns in the optimal order.
+   * A set of nominal patterns, that don't require being in a coherent clause, but do require NER information.
    */
-  private static final Counter<SemgrexPattern> PATTERN_HITS = new ClassicCounter<>();
+  private static List<TokenSequencePattern> NOUN_TOKEN_PATTERNS = Collections.unmodifiableList(new ArrayList<TokenSequencePattern>() {{
+    // { NER nominal_verb NER,
+    //   United States president Obama }
+    add(TokenSequencePattern.compile("(?$object [ner:/PERSON|ORGANIZATION|LOCATION+/]+ ) (?$beof_comp [ {tag:/NN.*/} & !{ner:/PERSON|ORGANIZATION|LOCATION/} ]+ ) (?$subject [ner:/PERSON|ORGANIZATION|LOCATION/]+ )"));
+    // { NER 's nominal_verb NER,
+    //   America 's president , Obama }
+    add(TokenSequencePattern.compile("(?$object [ner:/PERSON|ORGANIZATION|LOCATION+/]+ ) /'s/ (?$beof_comp [ {tag:/NN.*/} & !{ner:/PERSON|ORGANIZATION|LOCATION/} ]+ ) /,/? (?$subject [ner:/PERSON|ORGANIZATION|LOCATION/]+ )"));
+    // { NER , NER ,,
+    //   Obama, 28, ...,
+    //   Obama (28) ...}
+    add(TokenSequencePattern.compile("(?$subject [ner:/..+/]+ ) /,/ (?$object [ner:/..+/]+ ) /,/"));
+    add(TokenSequencePattern.compile("(?$subject [ner:/..+/]+ ) /\\(/ (?$object [ner:/..+/]+ ) /\\)/"));
+  }});
+
+  /**
+   * A set of nominal patterns using dependencies, that don't require being in a coherent clause, but do require NER information.
+   */
+  private static List<SemgrexPattern> NOUN_DEPENDENCY_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
+//    { President Obama }
+    add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/amod|nn/=arc {ner:/..+/}=object"));
+    // { Chris Manning of Stanford }
+    add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/prep_.*/=relation {ner:/..+/}=object"));
+  }});
+
+  /**
+   * Extract the nominal patterns from this sentence.
+   *
+   * @see RelationTriple#NOUN_TOKEN_PATTERNS
+   * @see RelationTriple#NOUN_DEPENDENCY_PATTERNS
+   *
+   * @param parse The parse tree of the sentence to annotate.
+   * @param tokens The tokens of the sentence to annotate.
+   * @return A list of {@link RelationTriple}s. Note that these do not have an associated tree with them.
+   */
+  public static List<RelationTriple> extract(SemanticGraph parse, List<CoreLabel> tokens) {
+    List<RelationTriple> extractions = new ArrayList<>();
+
+    // Run Token Patterns
+    for (TokenSequencePattern tokenPattern : NOUN_TOKEN_PATTERNS) {
+      TokenSequenceMatcher tokenMatcher = tokenPattern.matcher(tokens);
+      while (tokenMatcher.find()) {
+        // Create subject
+        List<? extends CoreMap> subject = tokenMatcher.groupNodes("$subject");
+        Span subjectSpan = Util.extractNER(tokens, Span.fromValues(((CoreLabel) subject.get(0)).index() - 1, ((CoreLabel) subject.get(subject.size() - 1)).index()));
+        List<CoreLabel> subjectTokens = new ArrayList<>();
+        for (int i : subjectSpan) {
+          subjectTokens.add(tokens.get(i));
+        }
+        // Create object
+        List<? extends CoreMap> object = tokenMatcher.groupNodes("$object");
+        Span objectSpan = Util.extractNER(tokens, Span.fromValues(((CoreLabel) object.get(0)).index() - 1, ((CoreLabel) object.get(object.size() - 1)).index()));
+        if (Span.overlaps(subjectSpan, objectSpan)) {
+          continue;
+        }
+        List<CoreLabel> objectTokens = new ArrayList<>();
+        for (int i : objectSpan) {
+          objectTokens.add(tokens.get(i));
+        }
+        // Create relation
+        if (subjectTokens.size() > 0 && objectTokens.size() > 0) {
+          List<CoreLabel> relationTokens = new ArrayList<>();
+          // (add the 'be')
+          relationTokens.add(new CoreLabel() {{
+            setWord("is");
+            setLemma("be");
+            setTag("VBZ");
+            setNER("O");
+            setBeginPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
+            setEndPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
+            setSentIndex(subjectTokens.get(subjectTokens.size() - 1).sentIndex());
+            setIndex(-1);
+          }});
+          // (add a complement to the 'be')
+          List<? extends CoreMap> beofComp = tokenMatcher.groupNodes("$beof_comp");
+          if (beofComp != null) {
+            // (add the complement
+            for (CoreMap token : beofComp) {
+              if (token instanceof CoreLabel) {
+                relationTokens.add((CoreLabel) token);
+              } else {
+                relationTokens.add(new CoreLabel(token));
+              }
+            }
+            // (add the 'of')
+            relationTokens.add(new CoreLabel() {{
+              setWord("of");
+              setLemma("of");
+              setTag("IN");
+              setNER("O");
+              setBeginPosition(objectTokens.get(0).beginPosition());
+              setEndPosition(objectTokens.get(0).beginPosition());
+              setSentIndex(objectTokens.get(0).sentIndex());
+              setIndex(-1);
+            }});
+          }
+          // Add extraction
+          extractions.add(new RelationTriple(subjectTokens, relationTokens, objectTokens));
+        }
+      }
+
+      // Run Semgrex Matches
+      for (SemgrexPattern semgrex : NOUN_DEPENDENCY_PATTERNS) {
+        SemgrexMatcher matcher = semgrex.matcher(parse);
+        while (matcher.find()) {
+          // Create subject
+          IndexedWord subject = matcher.getNode("subject");
+          Span subjectSpan = Util.extractNER(tokens, Span.fromValues(subject.index() - 1, subject.index()));
+          List<CoreLabel> subjectTokens = new ArrayList<>();
+          for (int i : subjectSpan) {
+            subjectTokens.add(tokens.get(i));
+          }
+          // Create object
+          IndexedWord object = matcher.getNode("object");
+          Span objectSpan = Util.extractNER(tokens, Span.fromValues(object.index() - 1, object.index()));
+          if (Span.overlaps(subjectSpan, objectSpan)) {
+            continue;
+          }
+          List<CoreLabel> objectTokens = new ArrayList<>();
+          for (int i : objectSpan) {
+            objectTokens.add(tokens.get(i));
+          }
+          // Get the relation
+          if (subjectTokens.size() > 0 && objectTokens.size() > 0) {
+            List<CoreLabel> relationTokens = new ArrayList<>();
+            // (add the 'be')
+            relationTokens.add(new CoreLabel() {{
+              setWord("is");
+              setLemma("be");
+              setTag("VBZ");
+              setNER("O");
+              setBeginPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
+              setEndPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
+              setSentIndex(subjectTokens.get(subjectTokens.size() - 1).sentIndex());
+              setIndex(-1);
+            }});
+            // (add an optional prep)
+            String rel = matcher.getRelnString("relation");
+            String prep = null;
+            if (rel != null && rel.startsWith("prep_")) {
+              prep = rel.substring("prep_".length());
+            } else if (rel != null && rel.startsWith("prepc_")) {
+              prep = rel.substring("prepc_".length());
+            }
+            if (prep != null) {
+              final String p = prep;
+              relationTokens.add(new CoreLabel() {{
+                setWord(p);
+                setLemma(p);
+                setTag("PP");
+                setNER("O");
+                setBeginPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
+                setEndPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
+                setSentIndex(subjectTokens.get(subjectTokens.size() - 1).sentIndex());
+                setIndex(-1);
+              }});
+            }
+            // Add extraction
+            extractions.add(new RelationTriple(subjectTokens, relationTokens, objectTokens));
+          }
+        }
+      }
+    }
+
+    return extractions;
+  }
+
+  /**
+   * A counter keeping track of how many times a given pattern has matched. This allows us to learn to iterate
+   * over patterns in the optimal order; this is just an efficiency tweak (but an effective one!).
+   */
+  private static final Counter<SemgrexPattern> VERB_PATTERN_HITS = new ClassicCounter<>();
 
   /** A set of valid arcs denoting a subject entity we are interested in */
   public static final Set<String> VALID_SUBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
@@ -424,18 +598,18 @@ public class RelationTriple implements Comparable<RelationTriple> {
    * @return A relation triple, if this sentence matches one of the patterns of a valid relation triple.
    */
   public static Optional<RelationTriple> segment(SemanticGraph parse, Optional<Double> confidence, boolean consumeAll) {
-    PATTERN_LOOP: for (SemgrexPattern pattern : PATTERNS) {  // For every candidate pattern...
+    PATTERN_LOOP: for (SemgrexPattern pattern : VERB_PATTERNS) {  // For every candidate pattern...
       SemgrexMatcher m = pattern.matcher(parse);
       if (m.matches()) {  // ... see if it matches the sentence
         // some JIT on the pattern ordering
         // note[Gabor]: This actually helps quite a bit; 72->86 sentences per second for the entire OpenIE pipeline.
-        PATTERN_HITS.incrementCount(pattern);
-        if (((int) PATTERN_HITS.totalCount()) % 1000 == 0) {
-          ArrayList<SemgrexPattern> newPatterns = new ArrayList<>(PATTERNS);
+        VERB_PATTERN_HITS.incrementCount(pattern);
+        if (((int) VERB_PATTERN_HITS.totalCount()) % 1000 == 0) {
+          ArrayList<SemgrexPattern> newPatterns = new ArrayList<>(VERB_PATTERNS);
           Collections.sort(newPatterns, (x, y) ->
-              (int) (PATTERN_HITS.getCount(y) - PATTERN_HITS.getCount(x))
+              (int) (VERB_PATTERN_HITS.getCount(y) - VERB_PATTERN_HITS.getCount(x))
           );
-          PATTERNS = newPatterns;
+          VERB_PATTERNS = newPatterns;
         }
         // Main code
         int numKnownDependents = 2;  // subject and object, at minimum

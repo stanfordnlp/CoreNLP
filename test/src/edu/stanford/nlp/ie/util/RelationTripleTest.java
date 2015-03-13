@@ -27,13 +27,17 @@ public class RelationTripleTest extends TestCase {
     return w;
   }
 
+  protected Optional<RelationTriple> mkExtraction(String conll) {
+    return mkExtraction(conll, 0);
+  }
+
   /**
    * Create a relation from a CoNLL format like:
    * <pre>
    *   word_index  word  parent_index  incoming_relation
    * </pre>
    */
-  protected Optional<RelationTriple> mkExtraction(String conll) {
+  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex) {
     List<CoreLabel> sentence = new ArrayList<>();
     SemanticGraph tree = new SemanticGraph();
     for (String line : conll.split("\n")) {
@@ -74,7 +78,16 @@ public class RelationTripleTest extends TestCase {
       }
       i += 1;
     }
-    return RelationTriple.segment(tree, Optional.empty());
+    // Run extractor
+    Optional<RelationTriple> segmented = RelationTriple.segment(tree, Optional.empty());
+    if (segmented.isPresent()) {
+      return segmented;
+    }
+    List<RelationTriple> extracted = RelationTriple.extract(tree, sentence);
+    if (extracted.size() > listIndex) {
+      return Optional.of(extracted.get(listIndex));
+    }
+    return Optional.empty();
   }
 
   protected RelationTriple blueCatsPlayWithYarnNoIndices() {
@@ -317,24 +330,6 @@ public class RelationTripleTest extends TestCase {
     assertEquals("1.0\tDurin\tson of\tThorin", extraction.get().toString());
   }
 
-  public void testPPExtraction() {
-    Optional<RelationTriple> extraction = mkExtraction(
-        "1\tObama\t0\troot\tNNP\tPERSON\n" +
-        "2\tTucson\t1\tprep_in\n"
-    );
-    assertTrue("No extraction for sentence!", extraction.isPresent());
-    assertEquals("1.0\tObama\tin\tTucson", extraction.get().toString());
-
-    extraction = mkExtraction(
-        "1\tPietro\t2\tnn\tNNP\tPERSON\n" +
-        "2\tBadoglio\t0\troot\tNNP\tPERSON\n" +
-        "3\tsouthern\t4\tamod\n" +
-        "4\tItaly\t2\tprep_in\n"
-    );
-    assertTrue("No extraction for sentence!", extraction.isPresent());
-    assertEquals("1.0\tPietro Badoglio\tin\tsouthern Italy", extraction.get().toString());
-  }
-
   public void testPassiveReflexive() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tTom\t4\tnsubjpass\n" +
@@ -399,7 +394,7 @@ public class RelationTripleTest extends TestCase {
         "5\tShinawatra\t3\tprep_with\tNNP\tPERSON\n" +
         "6\tCambodia\t3\tdobj\tNNP\tLOCATION\n"
     );
-    assertFalse("No extraction for sentence!", extraction.isPresent());
+    assertFalse("Should not have found extraction for sentence! Incorrectly found: " + extraction.orElse(null), extraction.isPresent());
   }
 
   public void testVBG() {
@@ -471,4 +466,116 @@ public class RelationTripleTest extends TestCase {
     assertEquals("1.0\tGeorge Boyd\thas joined\tNottingham Forest", extraction.get().toString());
   }
 
+  public void testUSPresidentObama1() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tUnited\t5\tnn\tNNP\tORGANIZATION\n" +
+        "2\tStates\t5\tnn\tNNP\tORGANIZATION\n" +
+        "3\tpresident\t5\tnn\tNNP\tO\n" +
+        "4\tBarack\t5\tnn\tNNP\tPERSON\n" +
+        "5\tObama\t0\troot\tNNP\tPERSON\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tBarack Obama\tis president of\tUnited States", extraction.get().toString());
+  }
+
+  public void testUSPresidentObama2() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tUnited\t5\tnn\tNNP\tORGANIZATION\n" +
+        "2\tStates\t5\tnn\tNNP\tORGANIZATION\n" +
+        "3\tpresident\t5\tnn\tNNP\tTITLE\n" +
+        "4\tBarack\t5\tnn\tNNP\tPERSON\n" +
+        "5\tObama\t0\troot\tNNP\tPERSON\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tBarack Obama\tis president of\tUnited States", extraction.get().toString());
+  }
+
+  public void testUSAllyBritain() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tUnited\t4\tnn\tNNP\tLOCATION\n" +
+        "2\tStates\t4\tnn\tNNP\tLOCATION\n" +
+        "3\tally\t4\tnn\tNN\tO\n" +
+        "4\tBritain\t0\troot\tNNP\tLOCATION\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tBritain\tis ally of\tUnited States", extraction.get().toString());
+  }
+
+  public void testUSPresidentObama() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tUnited\t2\tnn\tNNP\tLOCATION\n" +
+        "2\tStates\t4\tnsubj\tNNP\tLOCATION\n" +
+        "3\t's\t2\tposs\tPOS\tO\n" +
+        "4\tpresident\t0\troot\tNN\tO\n" +
+        "5\tObama\t2\tappos\tNNP\tPERSON\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tObama\tis president of\tUnited States", extraction.get().toString());
+  }
+
+  public void testUSsAllyBritain() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tUnited\t2\tnn\tNNP\tLOCATION\n" +
+        "2\tStates\t4\tnsubj\tNNP\tLOCATION\n" +
+        "3\t's\t2\tposs\tPOS\tO\n" +
+        "4\tally\t0\troot\tNN\tO\n" +
+        "5\tBritain\t2\tappos\tNNP\tPERSON\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tBritain\tis ally of\tUnited States", extraction.get().toString());
+  }
+
+  public void testPresidentObama() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tPresident\t2\tnn\tPOS\tTITLE\n" +
+        "2\tObama\t0\troot\tNNP\tPERSON\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tObama\tis\tPresident", extraction.get().toString());
+  }
+
+  public void testAmericanActorChrisPratt() {
+    String conll =
+        "1\tAmerican\t4\tamod\tNN\tLOCATION\n" +
+        "2\tactor\t4\tnn\tNN\tTITLE\n" +
+        "3\tChris\t4\tnn\tNNP\tPERSON\n" +
+        "4\tPratt\t0\troot\tNNP\tPERSON\n";
+    Optional<RelationTriple> extraction = mkExtraction(conll, 0);
+    assertTrue("No first extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tChris Pratt\tis actor of\tAmerican", extraction.get().toString());
+    extraction = mkExtraction(conll, 1);
+    assertTrue("No second extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tChris Pratt\tis\tAmerican", extraction.get().toString());
+    extraction = mkExtraction(conll, 2);
+    assertTrue("No third extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tChris Pratt\tis\tactor", extraction.get().toString());
+  }
+
+  public void testChrisManningOfStanford() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tChris\t2\tnn\tNNP\tPERSON\n" +
+        "2\tManning\t0\troot\tNNP\tPERSON\n" +
+        "3\tStanford\t2\tprep_of\tNNP\tORGANIZATION\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tChris Manning\tis of\tStanford", extraction.get().toString());
+  }
+
+  public void testPPExtraction() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tObama\t0\troot\tNNP\tPERSON\n" +
+        "2\tTucson\t1\tprep_in\tNNP\tLOCATION\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tObama\tis in\tTucson", extraction.get().toString());
+
+    extraction = mkExtraction(
+        "1\tPietro\t2\tnn\tNNP\tPERSON\n" +
+        "2\tBadoglio\t0\troot\tNNP\tPERSON\n" +
+        "3\tsouthern\t4\tamod\tJJ\tO\n" +
+        "4\tItaly\t2\tprep_in\tNN\tLOCATION\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tPietro Badoglio\tis in\tItaly", extraction.get().toString());
+  }
 }

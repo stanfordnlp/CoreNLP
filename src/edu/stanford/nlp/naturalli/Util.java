@@ -75,6 +75,12 @@ public class Util {
     if (seed == null) {
       return new Span(0, 1);
     }
+    if (seed.start() < 0 || seed.end() < 0) {
+      return new Span(0, 0);
+    }
+    if (seed.start() >= tokens.size() || seed.end() > tokens.size()) {
+      return new Span(tokens.size(),tokens.size());
+    }
     if (tokens.get(seed.start()).ner() == null) {
       return seed;
     }
