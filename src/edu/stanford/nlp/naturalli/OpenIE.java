@@ -93,6 +93,10 @@ public class OpenIE implements Annotator {
     // Create the components
     try {
       this.weights = ignoreAffinity ? new NaturalLogicWeights(affinityProbabilityCap) : new NaturalLogicWeights(affinityModels, affinityProbabilityCap);
+    } catch (IOException e) {
+      throw new RuntimeIOException("Could not load affinity model at " + affinityModels + ": " + e.getMessage());
+    }
+    try {
       if (noModel) {
         System.err.println("Not loading a splitter model");
         clauseSplitter = new ClauseSplitter() {

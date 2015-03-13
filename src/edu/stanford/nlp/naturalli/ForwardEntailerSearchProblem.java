@@ -237,6 +237,7 @@ public class ForwardEntailerSearchProblem {
       numTicks += 1;
       if (results.size() >= maxResults) { return results; }
       SearchState state = fringe.pop();
+      assert state.score > 0.0;
       IndexedWord currentWord = topologicalVertices.get(state.currentIndex);
 
       // Push the case where we don't delete
@@ -309,20 +310,20 @@ public class ForwardEntailerSearchProblem {
           results.add(new SearchResult(resultTree,
               aggregateDeletedEdges(state, state.tree.incomingEdgeIterable(currentWord), determinerRemovals),
               newScore));
-        }
 
-        // Push the state with this subtree deleted
-        nextIndex = state.currentIndex + 1;
-        while (nextIndex < topologicalVertices.size()) {
-          IndexedWord nextWord = topologicalVertices.get(nextIndex);
-          long newMask = treeWithDeletionsAndNewMask.get().second;
-          SemanticGraph treeWithDeletions = treeWithDeletionsAndNewMask.get().first;
-          if (  ((newMask >>> (indexToMaskIndex[nextWord.index() - 1])) & 0x1l) == 0) {
-            assert treeWithDeletions.containsVertex(topologicalVertices.get(nextIndex));
-            fringe.push(new SearchState(newMask, nextIndex, treeWithDeletions, null, state, newScore));
-            break;
-          } else {
-            nextIndex += 1;
+          // Push the state with this subtree deleted
+          nextIndex = state.currentIndex + 1;
+          while (nextIndex < topologicalVertices.size()) {
+            IndexedWord nextWord = topologicalVertices.get(nextIndex);
+            long newMask = treeWithDeletionsAndNewMask.get().second;
+            SemanticGraph treeWithDeletions = treeWithDeletionsAndNewMask.get().first;
+            if (  ((newMask >>> (indexToMaskIndex[nextWord.index() - 1])) & 0x1l) == 0) {
+              assert treeWithDeletions.containsVertex(topologicalVertices.get(nextIndex));
+              fringe.push(new SearchState(newMask, nextIndex, treeWithDeletions, null, state, newScore));
+              break;
+            } else {
+              nextIndex += 1;
+            }
           }
         }
       }

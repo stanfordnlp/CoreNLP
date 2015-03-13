@@ -26,6 +26,7 @@ public class NaturalLogicWeights {
   private final Map<Quadruple<String, String, String, String>, Double> verbSubjObjPPAffinity = new HashMap<>();
   private final Map<Quadruple<String, String, String, String>, Double> verbSubjPPPPAffinity = new HashMap<>();
   private final Map<Quadruple<String, String, String, String>, Double> verbSubjPPObjAffinity = new HashMap<>();
+  private final Map<String, Double> verbObjAffinity = new HashMap<>();
   private final double upperProbabilityCap;
 
 
@@ -78,13 +79,21 @@ public class NaturalLogicWeights {
     subjPPPPReader.close();
 
     // Subj PP PP attachments
-    BufferedReader subjPPObjReader = IOUtils.getBufferedReaderFromClasspathOrFileSystem(affinityModels + "/subj_pp_pp.tab.gz", "utf8");
+    BufferedReader subjPPObjReader = IOUtils.getBufferedReaderFromClasspathOrFileSystem(affinityModels + "/subj_pp_obj.tab.gz", "utf8");
     while ( (line = subjPPObjReader.readLine()) != null) {
       String[] fields = line.split("\t");
       Quadruple<String, String, String, String> key = Quadruple.makeQuadruple(fields[0].intern(), fields[1].intern(), fields[2].intern(), fields[3].intern());
       verbSubjPPObjAffinity.put(key, Double.parseDouble(fields[4]));
     }
     subjPPObjReader.close();
+
+    // Subj PP PP attachments
+    BufferedReader objReader = IOUtils.getBufferedReaderFromClasspathOrFileSystem(affinityModels + "/obj.tab.gz", "utf8");
+    while ( (line = objReader.readLine()) != null) {
+      String[] fields = line.split("\t");
+      verbObjAffinity.put(fields[0], Double.parseDouble(fields[1]));
+    }
+    objReader.close();
   }
 
   public double deletionProbability(String edgeType) {
@@ -124,6 +133,9 @@ public class NaturalLogicWeights {
         // Case: subj+obj
         rawScore = verbSubjPPObjAffinity.get(Quadruple.makeQuadruple(verb, subj.get(), pp.get(), obj));
       }
+    }
+    if (rawScore == null) {
+      rawScore = verbObjAffinity.get(verb);
     }
     if (rawScore == null) {
       return deletionProbability(edge.getRelation().toString());
@@ -193,7 +205,7 @@ public class NaturalLogicWeights {
       if (Util.PRIVATIVE_ADJECTIVES.contains(word)) {
         return 0.0;
       } else {
-        return objDeletionProbability(edge, neighbors);
+        return 1.0;
       }
     } else {
       return deletionProbability(edgeRel);
