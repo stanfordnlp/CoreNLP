@@ -458,4 +458,17 @@ public class RelationTripleTest extends TestCase {
     assertEquals("1.0\tObama\tBorn in\tHonolulu Hawaii", extraction.get().toString());
   }
 
+  public void testGeorgeBoydRegression() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tGeorge\t2\tnn\n" +
+        "2\tBoyd\t4\tnsubj\n" +
+        "3\thas\t4\taux\n" +
+        "4\tjoined\t0\troot\n" +
+        "5\tNottingham\t6\tnn\n" +
+        "6\tForest\t4\tdobj\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tGeorge Boyd\thas joined\tNottingham Forest", extraction.get().toString());
+  }
+
 }

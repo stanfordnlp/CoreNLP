@@ -269,7 +269,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
     // { fish like to swim }
     add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
     // { cats have tails }
-    add(SemgrexPattern.compile("{$}=verb ?>auxpass {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
+    add(SemgrexPattern.compile("{$}=verb ?>/aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/[di]obj|xcomp/ ( {}=object ?>appos {}=appos )"));
     // { Durin, son of Thorin }
     add(SemgrexPattern.compile("{$}=subject >appos=subjIgnored ( {}=verb >/prep_.*/=prepEdge {}=object )"));
     // { cats are cute,
