@@ -349,6 +349,24 @@ public class ClauseSplitterSearchProblem {
     }
   }
 
+  /**
+   * Stips aux and mark edges when we are splitting into a clause.
+   * @param toModify
+   */
+  private void stripAuxMark(SemanticGraph toModify) {
+    List<SemanticGraphEdge> toClean = new ArrayList<>();
+    for (SemanticGraphEdge edge : toModify.outgoingEdgeIterable(toModify.getFirstRoot())) {
+      String rel = edge.getRelation().toString();
+      if ("aux".equals(rel) || "mark".equals(rel) && !toModify.outgoingEdgeIterator(edge.getDependent()).hasNext()) {
+        toClean.add(edge);
+      }
+    }
+    for (SemanticGraphEdge edge : toClean) {
+      toModify.removeEdge(edge);
+      toModify.removeVertex(edge.getDependent());
+    }
+  }
+
 
   /**
    * Create a mock node, to be added to the dependency tree but which is not part of the original sentence.
@@ -462,6 +480,9 @@ public class ClauseSplitterSearchProblem {
             source.thunk.andThen(toModify -> {
               assert Util.isTree(toModify);
               simpleClause(toModify, outgoingEdge);
+              if (outgoingEdge.getRelation().toString().endsWith("comp")) {
+                stripAuxMark(toModify);
+              }
               assert Util.isTree(toModify);
             }), false
         ));
@@ -535,6 +556,7 @@ public class ClauseSplitterSearchProblem {
                 simpleClause(toModify, outgoingEdge);
                 addSubtree(toModify, outgoingEdge.getDependent(), "nsubj", tree,
                     subjectOrNull.getDependent(), Collections.singleton(outgoingEdge));
+                stripAuxMark(toModify);
                 assert Util.isTree(toModify);
               }), false
           ));
@@ -561,9 +583,13 @@ public class ClauseSplitterSearchProblem {
               objectOrNull,
               source.thunk.andThen(toModify -> {
                 assert Util.isTree(toModify);
+                // Split the clause
                 simpleClause(toModify, outgoingEdge);
-                addSubtree(toModify, outgoingEdge.getDependent(), "dobj", tree,
+                // Attach the new subject
+                addSubtree(toModify, outgoingEdge.getDependent(), "nsubj", tree,
                     objectOrNull.getDependent(), Collections.singleton(outgoingEdge));
+                // Strip bits we don't want
+                stripAuxMark(toModify);
                 assert Util.isTree(toModify);
               }), false
           ));
@@ -688,13 +714,16 @@ public class ClauseSplitterSearchProblem {
       // Iterate over children
       // For each outgoing edge...
       for (SemanticGraphEdge outgoingEdge : tree.outgoingEdgeIterable(rootWord)) {
-        List<String> forcedArc = hardCodedSplits.get(outgoingEdge.getRelation().toString());
-        boolean forceArc = forcedArc != null;
+        List<String> forcedArcOrder = hardCodedSplits.get(outgoingEdge.getRelation().toString());
+        boolean doneForcedArc = false;
         // For each action...
-        for (Action action : (forcedArc == null ? actionSpace : orderActions(actionSpace, forcedArc))) {
+        for (Action action : (forcedArcOrder == null ? actionSpace : orderActions(actionSpace, forcedArcOrder))) {
           // Check the prerequisite
           if (!action.prerequisitesMet(tree, outgoingEdge)) {
             continue;
+          }
+          if (forcedArcOrder != null && doneForcedArc) {
+            break;
           }
           // 1. Compute the child state
           Optional<State> candidate = action.applyTo(tree, lastState,
@@ -704,10 +733,10 @@ public class ClauseSplitterSearchProblem {
             double logProbability;
             ClauseClassifierLabel bestLabel;
             Counter<String> features = featurizer.apply(Triple.makeTriple(lastState, action, candidate.get()));
-            if (forceArc) {
+            if (forcedArcOrder != null && !doneForcedArc) {
               logProbability = 0.0;
               bestLabel = ClauseClassifierLabel.CLAUSE_SPLIT;
-              forceArc = false;
+              doneForcedArc = true;
             } else if (features.containsKey("__undocumented_junit_no_classifier")) {
               logProbability = Double.NEGATIVE_INFINITY;
               bestLabel = ClauseClassifierLabel.CLAUSE_INTERM;

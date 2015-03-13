@@ -104,7 +104,7 @@ public class OpenIETest {
   public void testXCompObj() {
     assertEquals(new HashSet<String>() {{
       add("I persuaded Fred to leave the room");
-      add("Fred to leave the room");
+      add("Fred leave the room");
     }}, clauses(
         "1\tI\t2\tnsubj\n" +
         "2\tpersuaded\t0\troot\n" +
@@ -120,7 +120,7 @@ public class OpenIETest {
   public void testXCompSubj() {
     assertEquals(new HashSet<String>() {{
       add("I was persuaded to leave the room");
-      add("I to leave the room");
+      add("I leave the room");
     }}, clauses(
         "1\tI\t3\tnsubjpass\n" +
         "2\twas\t3\tauxpass\n" +
@@ -136,7 +136,7 @@ public class OpenIETest {
   public void testCComp() {
     assertEquals(new HashSet<String>() {{
       add("I suggested that he leave the room");
-      add("that he leave the room");
+      add("he leave the room");
     }}, clauses(
         "1\tI\t2\tnsubj\n" +
         "2\tsuggested\t0\troot\n" +
