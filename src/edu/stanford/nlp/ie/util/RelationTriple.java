@@ -116,7 +116,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
    */
   public String relationLemmaGloss() {
     return StringUtils.join(relation.stream()
-        .filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]") && !x.word().matches("\\.,;'\"\\?!")).map(CoreLabel::lemma), " ").toLowerCase();
+        .filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]") && !x.lemma().matches("[\\.,;'\"\\?!]")).map(CoreLabel::lemma), " ").toLowerCase();
   }
 
   /** A textual representation of the confidence. */
