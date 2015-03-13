@@ -115,7 +115,7 @@ public class RelationTriple implements Comparable<RelationTriple> {
    * This method will additionally strip out punctuation as well, and lower-cases the relation.
    */
   public String relationLemmaGloss() {
-    return StringUtils.join(relation.stream().filter(x -> x.tag().matches("[\\.\\?,:;'\"!]") ).map(CoreLabel::lemma), " ").toLowerCase();
+    return StringUtils.join(relation.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]") ).map(CoreLabel::lemma), " ").toLowerCase();
   }
 
   /** A textual representation of the confidence. */
