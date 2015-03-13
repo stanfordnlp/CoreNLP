@@ -72,6 +72,7 @@ public class ClauseSplitterSearchProblem {
    * A mapping from a word to the extra edges that come out of it.
    */
   private final Map<IndexedWord, Collection<SemanticGraphEdge>> extraEdgesByGovernor = new HashMap<>();
+  private final Map<IndexedWord, Collection<SemanticGraphEdge>> extraEdgesByDependent = new HashMap<>();
   /**
    * The classifier for whether a particular dependency edge defines a clause boundary.
    */
@@ -224,11 +225,13 @@ public class ClauseSplitterSearchProblem {
     // Register extra edges
     for (IndexedWord vertex : sortedVertices) {
       extraEdgesByGovernor.put(vertex, new ArrayList<>());
+      extraEdgesByDependent.put(vertex, new ArrayList<>());
     }
     List<SemanticGraphEdge> extraEdges = Util.cleanTree(this.tree);
     assert Util.isTree(this.tree);
     for (SemanticGraphEdge edge : extraEdges) {
       extraEdgesByGovernor.get(edge.getGovernor()).add(edge);
+      extraEdgesByDependent.get(edge.getDependent()).add(edge);
     }
   }
 
@@ -250,7 +253,8 @@ public class ClauseSplitterSearchProblem {
    * @param tree The tree to split a clause from.
    * @param toKeep The edge representing the clause to keep.
    */
-  private static void simpleClause(SemanticGraph tree, SemanticGraphEdge toKeep) {
+  @SuppressWarnings("unchecked")
+  private void simpleClause(SemanticGraph tree, SemanticGraphEdge toKeep) {
     Queue<IndexedWord> fringe = new LinkedList<>();
     List<IndexedWord> nodesToRemove = new ArrayList<>();
     // Find nodes to remove
@@ -277,6 +281,29 @@ public class ClauseSplitterSearchProblem {
     nodesToRemove.forEach(tree::removeVertex);
     // Set new root
     tree.setRoot(toKeep.getDependent());
+
+    // Follow 'ref' edges
+    Map<IndexedWord, IndexedWord> refReplaceMap = new HashMap<>();
+    // (find replacements)
+    for (IndexedWord vertex : tree.vertexSet()) {
+      for (SemanticGraphEdge edge : extraEdgesByDependent.get(vertex)) {
+        if ("ref".equals(edge.getRelation().toString()) &&  // it's a ref edge...
+            !tree.containsVertex(edge.getGovernor())) {     // ...that doesn't already exist in the tree.
+          refReplaceMap.put(vertex, edge.getGovernor());
+        }
+      }
+    }
+    // (do replacements)
+    for (Map.Entry<IndexedWord, IndexedWord> entry : refReplaceMap.entrySet()) {
+      Iterator<SemanticGraphEdge> iter = tree.incomingEdgeIterator(entry.getKey());
+      if (!iter.hasNext()) { continue; }
+      SemanticGraphEdge incomingEdge = iter.next();
+      IndexedWord governor = incomingEdge.getGovernor();
+      tree.removeVertex(entry.getKey());
+      addSubtree(tree, governor, incomingEdge.getRelation().toString(),
+          this.tree, entry.getValue(), this.tree.incomingEdgeList(tree.getFirstRoot()));
+    }
+
   }
 
   /**

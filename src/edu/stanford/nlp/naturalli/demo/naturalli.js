@@ -45,7 +45,7 @@ $(document).ready(function(){
     $( "#system-header" ).css("visibility", "visible");
     $( "#ollie-header" ).css("visibility", "visible");
     // (create a default if not input was given)
-    if ( $( '#q' ).val().trim() == '') { $( '#q' ).val('faeries are dancing in the field where I lost my bike.'); }
+    if ( $( '#q' ).val().trim() == '') { $( '#q' ).val('This is a demo for an ACL paper which is under review.'); }
     // (start loading icon)
     $( '#triples-container' ).html('loading...');
     $( '#ollie-container' ).html('loading...');
