@@ -41,7 +41,7 @@ public class OperatorSpec {
         Math.max(0, Math.min(sentenceLength, quantifierEnd)),
         Math.max(0, Math.min(sentenceLength - 1, subjectBegin)),
         Math.max(0, Math.min(sentenceLength, subjectEnd)),
-        Math.max(0, Math.min(sentenceLength - 1, objectBegin)),
+        Math.max(0, objectBegin == sentenceLength ? sentenceLength : Math.min(sentenceLength - 1, objectBegin)),
         Math.max(0, Math.min(sentenceLength, objectEnd)));
   }
 
