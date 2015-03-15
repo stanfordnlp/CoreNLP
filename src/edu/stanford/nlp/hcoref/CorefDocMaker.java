@@ -160,7 +160,7 @@ public class CorefDocMaker {
     Document doc = new Document(input, mentions);
     
     // find headword for gold mentions
-    findGoldMentionHeads(doc);
+    if(input.goldMentions!=null) findGoldMentionHeads(doc);
     
     // document preprocessing: initialization (assign ID), mention processing (gender, number, type, etc), speaker extraction, etc
     Preprocessor.preprocess(doc, dict, singletonPredictor, headFinder);

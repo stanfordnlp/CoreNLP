@@ -154,7 +154,7 @@ public class CorefProperties {
       "ChineseHeadMatch"));
   
   public static boolean doScore(Properties props) {
-    return PropertiesUtils.getBool(props, SCORE_PROP, true);
+    return PropertiesUtils.getBool(props, SCORE_PROP, false);
   }
   public static boolean checkTime(Properties props) {
     return PropertiesUtils.getBool(props, TIMER_PROP, false);
@@ -163,7 +163,7 @@ public class CorefProperties {
     return PropertiesUtils.getBool(props, MEMORY_PROP, false);
   }
   public static boolean useConstituencyTree(Properties props) {
-    return PropertiesUtils.getBool(props, PARSER_PROP, true);
+    return PropertiesUtils.getBool(props, PARSER_PROP, false);
   }
   
   /** Input data for CorefDocMaker. It is traindata for training, or testdata for evaluation */ 
@@ -186,7 +186,7 @@ public class CorefProperties {
     return PropertiesUtils.getString(props, PATH_SCORER_PROP, "/scr/nlp/data/conll-2012/scorer/v8.01/scorer.pl");
   }
   public static CorefInputType getInputType(Properties props) {
-    String inputType = PropertiesUtils.getString(props, INPUT_TYPE_PROP, "conll");
+    String inputType = PropertiesUtils.getString(props, INPUT_TYPE_PROP, "raw");
     return CorefInputType.valueOf(inputType.toUpperCase());
   }
   public static Locale getLanguage(Properties props) {
@@ -199,7 +199,7 @@ public class CorefProperties {
     return PropertiesUtils.getBool(props, PRINT_MDLOG_PROP, false);
   }
   public static boolean doPostProcessing(Properties props) {
-    return PropertiesUtils.getBool(props, POSTPROCESSING_PROP, true);
+    return PropertiesUtils.getBool(props, POSTPROCESSING_PROP, false);
   }
   
   /** if true, use conll auto files, else use conll gold files */
@@ -222,17 +222,7 @@ public class CorefProperties {
         props.getProperty(PATH_MODEL_PROP.replace("SIEVENAME", sievename), "TODO")).getAbsolutePath();
   }
   public static boolean debug(Properties props) {
-    return PropertiesUtils.getBool(props, DEBUG_PROP, true);
-  }
-  
-  // TODO: remove this?
-  public static final String DIVIDE_BY_NP_PROP = "hcoref.divideByNP";
-  public static boolean divideByNP(Properties props) {
-    return PropertiesUtils.getBool(props, DIVIDE_BY_NP_PROP, true);
-  }
-  public static final String DIVIDE_ALL_PROP = "hcoref.divideAll";
-  public static boolean divideAll(Properties props) {
-    return PropertiesUtils.getBool(props, DIVIDE_ALL_PROP, true);
+    return PropertiesUtils.getBool(props, DEBUG_PROP, false);
   }
   
   public static ClassifierType getClassifierType(Properties props, String sievename) {
@@ -354,7 +344,7 @@ public class CorefProperties {
     return PropertiesUtils.getString(props, ANALYSIS_SKIP_ATYPE_PROP, null);
   }
   public static boolean useSemantics(Properties props) {
-    return PropertiesUtils.getBool(props, USE_SEMANTICS_PROP, false);
+    return PropertiesUtils.getBool(props, USE_SEMANTICS_PROP, true);
   }
   public static String getPathSerializedWordVectors(Properties props) {
     return PropertiesUtils.getString(props, WORD2VEC_SERIALIZED_PROP, "/220/cleanup/vector.ser");
@@ -366,7 +356,7 @@ public class CorefProperties {
 //    return PropertiesUtils.getString(props, CURRENT_SIEVE_PROP, null);
 //  }
   public static boolean loadWordEmbedding(Properties props) {
-    return PropertiesUtils.getBool(props, LOAD_WORD_EMBEDDING_PROP, false);
+    return PropertiesUtils.getBool(props, LOAD_WORD_EMBEDDING_PROP, true);
   }
   public static String getPathWord2Vec(Properties props) {
     return PropertiesUtils.getString(props, WORD2VEC_PROP, null);

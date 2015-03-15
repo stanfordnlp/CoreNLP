@@ -77,9 +77,8 @@ public class Preprocessor {
     // extract gold clusters if we have
     if(doc.goldMentions!=null) {
       extractGoldClusters(doc);
+      CorefPrinter.printMentionDetection(doc.goldMentionsByID);
     }
-    
-    CorefPrinter.printMentionDetection(doc.goldMentionsByID);
   }
 
   /** Extract gold coref cluster information. */
@@ -213,10 +212,6 @@ public class Preprocessor {
           p.hasTwin = true;
           g.hasTwin = true;
         }
-      }
-      // temp for dev: for making easy to recognize twinless mention (this is buggy if we have many mentions)
-      for(Mention p : predicts){
-        if(!p.hasTwin) p.mentionID += 10000;
       }
     }
   }

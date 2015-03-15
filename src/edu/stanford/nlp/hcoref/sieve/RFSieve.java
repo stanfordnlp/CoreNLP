@@ -101,7 +101,7 @@ public class RFSieve extends Sieve {
       Document document, int mentionDist, Dictionaries dict, Properties props, String sievename) {
     try {
       
-      boolean label = document.isCoref(m, candidate);
+      boolean label = (document.goldMentions==null)? false : document.isCoref(m, candidate);
       Counter<String> features = new ClassicCounter<String>();
       CorefCluster mC = document.corefClusters.get(m.corefClusterID);
       CorefCluster aC = document.corefClusters.get(candidate.corefClusterID);
@@ -155,7 +155,9 @@ public class RFSieve extends Sieve {
           features.incrementCount("B-SPEAKER-PER0");
         }
         
-        if(document.docInfo.containsKey("DOC_ID")) features.incrementCount("B-DOCSOURCE-"+document.docInfo.get("DOC_ID").split("/")[1]);
+        if(document.docInfo!=null && document.docInfo.containsKey("DOC_ID")) {
+          features.incrementCount("B-DOCSOURCE-"+document.docInfo.get("DOC_ID").split("/")[1]);
+        }
         
         features.incrementCount("M-LENGTH", m.originalSpan.size());
         features.incrementCount("A-LENGTH", candidate.originalSpan.size());
@@ -726,9 +728,7 @@ public class RFSieve extends Sieve {
       return new RVFDatum<Boolean, String>(features, label);
     } catch (Exception e) {
       System.err.println("Datum Extraction failed in Sieve.java while processing document: "+document.docInfo.get("DOC_ID")+" part: "+document.docInfo.get("DOC_PART"));
-      e.printStackTrace();
-      System.exit(1);
-      return null;
+      throw new RuntimeException(e);
     }
   }
   

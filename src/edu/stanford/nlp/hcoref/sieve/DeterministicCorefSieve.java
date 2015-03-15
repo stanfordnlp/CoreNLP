@@ -135,7 +135,9 @@ public abstract class DeterministicCorefSieve extends Sieve {
 //            }
 
           // print dcoref log
-          if(!PropertiesUtils.getBool(props, "useRawText")) sbLog.append(CorefPrinter.printErrorLogDcoref(m, ant, document, dict, mIdx, this.getClass().getName()));
+          if(CorefProperties.debug(props)) {
+            sbLog.append(CorefPrinter.printErrorLogDcoref(m, ant, document, dict, mIdx, this.getClass().getName()));
+          }
           
           int removeID = c1.clusterID;
           CorefCluster.mergeClusters(c2, c1);

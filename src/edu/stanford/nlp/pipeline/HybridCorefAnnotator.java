@@ -158,19 +158,19 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
   public static void main(String[] args) {
     Properties props = StringUtils.argsToProperties(args);
     StanfordCoreNLP corenlp = new StanfordCoreNLP(props);
-    String text = "Since the implementation of the Individual Visit Scheme between Hong Kong and the mainland , more and more mainland tourists are coming to visit Hong Kong."
-+"From the beginning up till now , more than seven million individual tourists , have come to Hong Kong."
-+"Well , we now , er , believe more will be coming ."
-+"At this point , it has been about two years . "
-+"Also , the current number of 34 cities will be increased ."
-+"Hong Kong was developed from a fishing harbor one hundred years ago to become today 's international metropolis ."
-+"Here , eastern and western cultures have gathered , and the new and the old coexist ."
-+"When in Hong Kong , you can wander among skyscrapers , heartily enjoy shopping sprees in well - known stores and malls for goods from various countries , and taste delicious snacks from all over the world at tea shops or at street stands in Mong Kok ."
-+"You can go to burn incense and make a vow at the Repulse Bay , where all deities gather ."
-+"You can enjoy the most charming sun - filled sandy beaches in Hong Kong."
-+"You can ascend Victoria Peak to get a panoramic view of Victoria Harbor 's beautiful scenery ."
-+"Or hop onto a trolley with over a century of history , and feel the city 's blend of the old and the modern in slow motion ."; 
-        //"Barack Obama is the president of United States. He visited California last week.";
+//    String text = "Since the implementation of the Individual Visit Scheme between Hong Kong and the mainland , more and more mainland tourists are coming to visit Hong Kong. "
+//                  +"From the beginning up till now , more than seven million individual tourists , have come to Hong Kong. "
+//                  +"Well , we now , er , believe more will be coming . "
+//                  +"At this point , it has been about two years . "
+//                  +"Also , the current number of 34 cities will be increased . "
+//                  +"Hong Kong was developed from a fishing harbor one hundred years ago to become today 's international metropolis . "
+//                  +"Here , eastern and western cultures have gathered , and the new and the old coexist . "
+//                  +"When in Hong Kong , you can wander among skyscrapers , heartily enjoy shopping sprees in well - known stores and malls for goods from various countries , and taste delicious snacks from all over the world at tea shops or at street stands in Mong Kok . "
+//                  +"You can go to burn incense and make a vow at the Repulse Bay , where all deities gather . "
+//                  +"You can enjoy the most charming sun - filled sandy beaches in Hong Kong. "
+//                  +"You can ascend Victoria Peak to get a panoramic view of Victoria Harbor 's beautiful scenery . "
+//                  +"Or hop onto a trolley with over a century of history , and feel the city 's blend of the old and the modern in slow motion ."; 
+    String text = "Barack Obama is the president of United States. He visited California last week.";
     Annotation document = new Annotation(text);
     corenlp.annotate(document);
     

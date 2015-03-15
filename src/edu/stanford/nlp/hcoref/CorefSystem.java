@@ -54,6 +54,11 @@ public class CorefSystem {
 
 
   public static void runCoref(String[] args) throws Exception {
+    Redwood.hideChannelsEverywhere(
+        "debug-cluster", "debug-mention", "debug-preprocessor", "debug-docreader", "debug-mergethres",
+        "debug-featureselection", "debug-md"
+        );
+    
     /*
        property, environment setting
     */
@@ -288,11 +293,6 @@ public class CorefSystem {
     return res;
   }
   public static void main(String[] args) throws Exception {
-    Redwood.hideChannelsEverywhere(
-        "debug-cluster", "debug-mention", "debug-preprocessor", "debug-docreader", "debug-mergethres",
-        "debug-featureselection", "debug-md"
-        );
-    
     Date startTime = new Date();
     System.err.printf("Start time: %s\n", startTime);
     runCoref(args);
