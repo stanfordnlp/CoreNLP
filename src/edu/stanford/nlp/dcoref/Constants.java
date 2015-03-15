@@ -46,7 +46,7 @@ public class Constants {
   public static final boolean PRINT_CONLL_OUTPUT = false;
 
   /** Default path for conll scorer script */
-  public static final String conllMentionEvalScript = "/scr/nlp/data/conll-2011/scorer/v4/scorer.pl";
+  public static final String conllMentionEvalScript = "/scr/nlp/data/conll-2011/scorer/v7/scorer.pl";
 
   /** if true, skip coreference resolution. do mention detection only */
   public static final boolean SKIP_COREF = false;

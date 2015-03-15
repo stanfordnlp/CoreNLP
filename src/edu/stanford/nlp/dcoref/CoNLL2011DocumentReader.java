@@ -186,7 +186,7 @@ public class CoNLL2011DocumentReader {
     }
   }
 
-  public static class Document {
+  public static class Document implements Serializable {
     String documentIdPart;
     String documentID;
     String partNo;

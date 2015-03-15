@@ -224,7 +224,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
    * head string, mention type, NER label, Number, Gender, Animacy
    * @throws Exception
    */
-  public void process(Dictionaries dict, Semantics semantics, MentionExtractor mentionExtractor) throws Exception {
+  public void process(Dictionaries dict, Semantics semantics) throws Exception {
     setHeadString();
     setType(dict);
     setNERString();
@@ -235,12 +235,12 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     setPerson(dict);
     setDiscourse();
     headIndexedWord = dependency.getNodeByIndexSafe(headWord.index());
-    if(semantics!=null) setSemantics(dict, semantics, mentionExtractor);
+    if(semantics!=null) setSemantics(dict, semantics);
   }
 
-  public void process(Dictionaries dict, Semantics semantics, MentionExtractor mentionExtractor,
+  public void process(Dictionaries dict, Semantics semantics,
       LogisticClassifier<String, String> singletonPredictor) throws Exception {
-    process(dict, semantics, mentionExtractor);
+    process(dict, semantics);
     if(singletonPredictor != null) setSingleton(singletonPredictor, dict);
   }
 
@@ -387,7 +387,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     }
   }
 
-  private void setSemantics(Dictionaries dict, Semantics semantics, MentionExtractor mentionExtractor) throws Exception {
+  private void setSemantics(Dictionaries dict, Semantics semantics) throws Exception {
 
     preprocessedTerms = this.preprocessSearchTerm();
 

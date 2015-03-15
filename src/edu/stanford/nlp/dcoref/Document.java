@@ -42,9 +42,11 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.math.NumberMatchingRegex;
 import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
@@ -120,7 +122,9 @@ public class Document implements Serializable {
   protected Map<Pair<Integer, Integer>, Boolean> acronymCache;
 
   /** Map of speaker name/id to speaker info */
-  transient private Map<String, SpeakerInfo> speakerInfoMap = Generics.newHashMap();
+  private Map<String, SpeakerInfo> speakerInfoMap = Generics.newHashMap();
+  
+  public Counter<String> properNouns = new ClassicCounter<String>();
 
   public Document() {
     positions = Generics.newHashMap();
@@ -158,7 +162,7 @@ public class Document implements Serializable {
     processDiscourse(dict);
     printMentionDetection();
   }
-
+  
   /** Process discourse information */
   protected void processDiscourse(Dictionaries dict) {
     docType = findDocType(dict);

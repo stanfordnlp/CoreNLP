@@ -916,7 +916,8 @@ public class SieveCoreferenceSystem {
               // Skip singletons according to the singleton predictor
               // (only for non-NE mentions)
               // Recasens, de Marneffe, and Potts (NAACL 2013)
-              if (m1.isSingleton && m2.isSingleton) continue;
+//              if (m1.isSingleton && m2.isSingleton) continue;
+              if (m1.isSingleton || m2.isSingleton) continue;
               if (m1.corefClusterID == m2.corefClusterID) continue;
               CorefCluster c1 = corefClusters.get(m1.corefClusterID);
               CorefCluster c2 = corefClusters.get(m2.corefClusterID);
