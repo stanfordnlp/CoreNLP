@@ -2,8 +2,7 @@ package edu.stanford.nlp.trees.international.pennchinese;
 
 import edu.stanford.nlp.trees.AbstractCollinsHeadFinder;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
-
-import java.util.HashMap;
+import edu.stanford.nlp.util.Generics;
 
 
 /**
@@ -30,7 +29,7 @@ public class ChineseHeadFinder extends AbstractCollinsHeadFinder {
   public ChineseHeadFinder(TreebankLanguagePack tlp) {
     super(tlp);
 
-    nonTerminalInfo = new HashMap<String,String[][]>();
+    nonTerminalInfo = Generics.newHashMap();
     // these are first-cut rules
 
     String left = (coordSwitch ? "right" : "left");

@@ -138,7 +138,7 @@ public abstract class TregexMatcher {
   }
 
   /**
-   * Similar to find, but matches count only if <code>node</code> is
+   * Similar to {@code find()}, but matches only if {@code node} is
    * the root of the match.  All other matches are ignored.  If you
    * know you are looking for matches with a particular root, this is
    * much faster than iterating over all matches and taking only the
@@ -147,7 +147,7 @@ public abstract class TregexMatcher {
    * <br>
    * If called multiple times with the same node, this will return
    * subsequent matches in the same manner as find() returns
-   * subsequent matches in the same tree.  If you want to call this on
+   * subsequent matches in the same tree.  If you want to call this using
    * the same TregexMatcher on more than one node, call reset() first;
    * otherwise, an AssertionError will be thrown.
    */

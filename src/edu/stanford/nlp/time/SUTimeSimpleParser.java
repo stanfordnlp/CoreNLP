@@ -1,6 +1,5 @@
 package edu.stanford.nlp.time;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +12,7 @@ import edu.stanford.nlp.pipeline.WordsToSentencesAnnotator;
 import edu.stanford.nlp.time.SUTime.Temporal;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Simple wrapper around SUTime for parsing lots of strings outside of Annotation objects.
@@ -44,7 +44,7 @@ public class SUTimeSimpleParser {
 
   static {
     pipeline = makeNumericPipeline();
-    cache = new HashMap<String, Temporal>();
+    cache = Generics.newHashMap();
   }
   
   private static AnnotationPipeline makeNumericPipeline() {  

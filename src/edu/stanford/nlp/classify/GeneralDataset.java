@@ -9,6 +9,7 @@ import edu.stanford.nlp.ling.Datum;
 import edu.stanford.nlp.ling.RVFDatum;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
@@ -288,7 +289,7 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   			subset.add(this.getDatum(datumNum));
   		}
   	} else {
-  		Set<Integer> indicedSampled = new HashSet<Integer>();
+  		Set<Integer> indicedSampled = Generics.newHashSet();
   		while (subset.size() < sampleSize) {
   			int datumNum = rand.nextInt(this.size());
   			if (!indicedSampled.contains(datumNum)) {

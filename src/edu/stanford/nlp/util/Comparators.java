@@ -46,6 +46,19 @@ public class Comparators {
   }
 
   /**
+   * Returns a new <code>Comparator</code> which is the reverse of the
+   * given <code>Comparator</code>.
+   */
+  public static <T> Comparator<T> reverse(final Comparator<? super T> c) {
+    return new Comparator<T>() {
+      public int compare(T o1, T o2) {
+        int x = c.compare(o1, o2);
+        return -x;
+      }
+    };
+  }
+
+  /**
    * Returns a consistent ordering over two elements even if one of them is null
    * (as long as compareTo() is stable, of course).
    * 

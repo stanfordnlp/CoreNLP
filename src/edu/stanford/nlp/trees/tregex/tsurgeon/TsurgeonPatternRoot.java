@@ -2,9 +2,9 @@ package edu.stanford.nlp.trees.tregex.tsurgeon;
 
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.util.Generics;
 
 import java.util.Map;
-import java.util.HashMap;
 
 /**
  * @author Roger Levy (rog@nlp.stanford.edu)
@@ -27,7 +27,7 @@ class TsurgeonPatternRoot extends TsurgeonPattern {
    */
   @Override
   public Tree evaluate(Tree t, TregexMatcher m) {
-    newNodeNames = new HashMap<String,Tree>();
+    newNodeNames = Generics.newHashMap();
     coindexer.setLastIndex(t);
     for (TsurgeonPattern child : children) {
       t = child.evaluate(t, m);

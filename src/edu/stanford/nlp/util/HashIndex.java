@@ -32,7 +32,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
 
   // these variables are also used in IntArrayIndex
   ArrayList<E> objects = new ArrayList<E>();
-  HashMap<E,Integer> indexes = new HashMap<E,Integer>();
+  Map<E,Integer> indexes = Generics.newHashMap();
   boolean locked; // = false;
 
   /**
@@ -245,7 +245,7 @@ public class HashIndex<E> extends AbstractCollection<E> implements Index<E>, Ran
   public HashIndex(int capacity) {
     super();
     objects = new ArrayList<E>(capacity);
-    indexes = new HashMap<E,Integer>(capacity);
+    indexes = Generics.newHashMap(capacity);
   }
 
   /**

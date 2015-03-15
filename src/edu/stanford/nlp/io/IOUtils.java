@@ -422,17 +422,30 @@ public class IOUtils {
     return in;
   }
 
-  public static BufferedReader readReaderFromString(String textFileOrUrl)
+  /**
+   * Open a BufferedReader to a file or URL specified by a String name. If the
+   * String starts with https?://, then it is first tried as a URL, otherwise it
+   * is next tried as a resource on the CLASSPATH, and then finally it is tried
+   * as a local file or other network-available file . If the String ends in .gz, it
+   * is interpreted as a gzipped file (and uncompressed). The file is then
+   * interpreted as a utf-8 text file.
+   *
+   * @param textFileOrUrl What to read from
+   * @return The BufferedReader
+   * @throws IOException If there is an I/O problem
+   */
+  public static BufferedReader readerFromString(String textFileOrUrl)
           throws IOException {
     return new BufferedReader(new InputStreamReader(
-            getInputStreamFromURLOrClasspathOrFileSystem(textFileOrUrl)));
+            getInputStreamFromURLOrClasspathOrFileSystem(textFileOrUrl), "UTF-8"));
   }
 
   /**
    * Open a BufferedReader to a file or URL specified by a String name. If the
-   * String starts with https?://, then it is interpreted as a URL, otherwise it
-   * is interpreted as a local file. If the String ends in .gz, it is
-   * interpreted as a gzipped file (and uncompressed), else it is interpreted as
+   * String starts with https?://, then it is first tried as a URL, otherwise it
+   * is next tried as a resource on the CLASSPATH, and then finally it is tried
+   * as a local file or other network-available file . If the String ends in .gz, it
+   * is interpreted as a gzipped file (and uncompressed), else it is interpreted as
    * a regular text file in the given encoding.
    *
    * @param textFileOrUrl What to read from
@@ -974,7 +987,7 @@ public class IOUtils {
       } else {
         String[] cells = StringUtils.splitOnCharWithQuoting(line,',',quoteChar,escapeChar);
         assert(cells.length == labels.length);
-        Map<String,String> cellMap = new HashMap<String,String>();
+        Map<String,String> cellMap = Generics.newHashMap();
         for (int i=0; i<labels.length; i++) cellMap.put(labels[i],cells[i]);
         rows.add(cellMap);
       }
@@ -1172,7 +1185,7 @@ public class IOUtils {
   {
     BufferedReader br = IOUtils.getBufferedFileReader(infile);
     String line;
-    Set<String> set = new HashSet<String>();
+    Set<String> set = Generics.newHashSet();
     while ((line = br.readLine()) != null) {
       line = line.trim();
       if (line.length() > 0) {
@@ -1211,7 +1224,7 @@ public class IOUtils {
 
   public static Map<String,String> readMap(String filename) throws IOException
   {
-    Map<String,String> map = new HashMap<String,String>();
+    Map<String,String> map = Generics.newHashMap();
     try {
       BufferedReader br = IOUtils.getBufferedFileReader(filename);
       String line;

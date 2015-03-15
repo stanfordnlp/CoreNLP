@@ -1,11 +1,11 @@
 package edu.stanford.nlp.trees.treebank;
 
-import java.util.HashMap;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 
 import edu.stanford.nlp.international.arabic.pipeline.ATBArabicDataset;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -89,7 +89,7 @@ public final class TreebankPreprocessor {
   private static String configFile = null;
   private static String outputPath = null;
 
-  public static final Map<String,Integer> optionArgDefs = new HashMap<String,Integer>();
+  public static final Map<String,Integer> optionArgDefs = Generics.newHashMap();
   static {
     optionArgDefs.put("-d", 1);
     optionArgDefs.put("-v", 0);

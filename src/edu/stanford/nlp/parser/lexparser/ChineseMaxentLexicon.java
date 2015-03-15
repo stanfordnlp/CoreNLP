@@ -51,7 +51,7 @@ public class ChineseMaxentLexicon implements Lexicon {
   private final int universalThreshold = 0;
 
   private LinearClassifier scorer;
-  private Map<String, String> functionWordTags = new HashMap<String, String>();
+  private Map<String, String> functionWordTags = Generics.newHashMap();
   private Distribution<String> tagDist;
   private final Index<String> wordIndex;
   private final Index<String> tagIndex;

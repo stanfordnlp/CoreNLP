@@ -1,6 +1,7 @@
 package edu.stanford.nlp.trees.international.arabic;
 
 import edu.stanford.nlp.io.EncodingPrintWriter;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.IOException;
@@ -22,7 +23,7 @@ public class ArabicUtils {
 
 
   public static Map<String,String> presToLogicalMap(){
-    Map<String,String> rules = new HashMap<String,String>();
+    Map<String,String> rules = Generics.newHashMap();
 
         // PRESENTATION FORM TO LOGICAL FORM NORMALIZATION (presentation form is rarely used - but some UN documents have it).
     rules.put("\\ufc5e","\u0020\u064c\u0651"); // ligature shadda with dammatan isloated
@@ -79,7 +80,7 @@ public class ArabicUtils {
 
   public static Map<String,String> getArabicIBMNormalizerMap(){
 
-    Map<String,String> rules = new HashMap<String,String>();
+    Map<String,String> rules = Generics.newHashMap();
 
     try{
       rules.put("[\\u0622\\u0623\\u0625]","\u0627"); // hamza normalization: maddah-n-alef, hamza-on-alef, hamza-under-alef mapped to bare alef

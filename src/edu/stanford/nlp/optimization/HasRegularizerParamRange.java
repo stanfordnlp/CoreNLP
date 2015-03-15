@@ -7,6 +7,6 @@ import java.util.Set;
  *
  * @author Mengqiu Wang
  */
-public interface HasL1ParamRange {
-  public Set<Integer> getL1ParamRange(double[] x);
+public interface HasRegularizerParamRange {
+  public Set<Integer> getRegularizerParamRange(double[] x);
 }

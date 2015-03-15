@@ -42,9 +42,9 @@ public class NERFeatureFactoryITest extends TestCase {
 
     Set<String> features;
     features = new HashSet<String>(factory.featuresC(paddedSentence, 4));
-    checkFeatures(features, "BAR-GAZ2", "John-WORD", "BAZ-GAZ2", "FOO-GAZ1");
+    checkFeatures(features, "BAR-GAZ", "BAZ-GAZ", "FOO-GAZ", "BAR-GAZ2", "BAZ-GAZ2", "FOO-GAZ1", "John-WORD");
     features = new HashSet<String>(factory.featuresC(paddedSentence, 5));
-    checkFeatures(features, "BAR-GAZ2", "BAZ-GAZ2", "Bauer-WORD");
+    checkFeatures(features, "BAR-GAZ", "BAZ-GAZ", "BAR-GAZ2", "BAZ-GAZ2", "Bauer-WORD");
     features = new HashSet<String>(factory.featuresC(paddedSentence, 6));
     checkFeatures(features, "has-WORD");
   }

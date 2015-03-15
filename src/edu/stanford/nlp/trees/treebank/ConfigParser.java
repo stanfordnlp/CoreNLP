@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -94,7 +94,7 @@ public class ConfigParser implements Iterable<Properties> {
 
     //For Pair<Pattern,Pattern>, the first pattern matches the parameter name
     //while the second (optionally) accepts the parameter values
-    patternsMap = new HashMap<String,Pair<Pattern,Pattern>>();
+    patternsMap = Generics.newHashMap();
     patternsMap.put(paramName, new Pair<Pattern,Pattern>(matchName,null));
     patternsMap.put(paramType, new Pair<Pattern,Pattern>(matchType,null));
     patternsMap.put(paramPath, new Pair<Pattern,Pattern>(matchPath,null));

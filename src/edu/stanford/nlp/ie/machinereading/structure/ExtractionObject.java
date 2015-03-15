@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -14,6 +13,7 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -196,7 +196,7 @@ public class ExtractionObject implements Serializable {
   public static String concatenateTypes(String t1, String t2) {
     String [] t1Toks = t1.split(TYPE_SEP);
     String [] t2Toks = t2.split(TYPE_SEP);
-    Set<String> uniqueTypes = new HashSet<String>();
+    Set<String> uniqueTypes = Generics.newHashSet();
     for(String t: t1Toks) uniqueTypes.add(t);
     for(String t: t2Toks) uniqueTypes.add(t);
     String [] types = new String[uniqueTypes.size()];

@@ -1,11 +1,6 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Index;
 
 /**
@@ -15,8 +10,7 @@ import edu.stanford.nlp.util.Index;
  * <i>Implementation note: the contents of this class tend to overlap somewhat
  * with {@link EnglishUnknownWordModel} and were originally included in {@link BaseLexicon}.
  *
- * @author Dan Klein
- * @author Galen Andrew
+ * @author Roger Levy
  * @author Christopher Manning
  * @author Anna Rafferty
  */
@@ -34,9 +28,9 @@ public class ArabicUnknownWordModel extends BaseUnknownWordModel {
   protected int unknownSuffixSize = 0;
   protected int unknownPrefixSize = 0;
 
-  public ArabicUnknownWordModel(Options op, Lexicon lex, 
-                                Index<String> wordIndex, 
-                                Index<String> tagIndex, 
+  public ArabicUnknownWordModel(Options op, Lexicon lex,
+                                Index<String> wordIndex,
+                                Index<String> tagIndex,
                                 ClassicCounter<IntTaggedWord> unSeenCounter) {
     super(op, lex, wordIndex, tagIndex, unSeenCounter, null, null, null);
     unknownLevel = op.lexOptions.useUnknownWordSignatures;
@@ -59,7 +53,7 @@ public class ArabicUnknownWordModel extends BaseUnknownWordModel {
    * lines containing the data.
    */
   public ArabicUnknownWordModel(Options op, Lexicon lex,
-                                Index<String> wordIndex, 
+                                Index<String> wordIndex,
                                 Index<String> tagIndex) {
     this(op, lex, wordIndex, tagIndex, new ClassicCounter<IntTaggedWord>());
   }

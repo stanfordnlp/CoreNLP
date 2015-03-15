@@ -161,7 +161,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
   private Map<String,CollectionValuedMap<Integer,String>> srlMap = null;
 
   private void readSRLFile(String srlFile) {
-    srlMap = new HashMap<String,CollectionValuedMap<Integer,String>>();
+    srlMap = Generics.newHashMap();
     for (String line : ObjectBank.getLineIterator(new File(srlFile))) {
       String[] bits = line.split("\\s+", 3);
       String filename = bits[0];
@@ -262,7 +262,7 @@ public final class MemoryTreebank extends Treebank implements FileProcessor, Lis
                   }
                   Map<Integer,String> roleMap = ((CoreLabel)t1.label()).get(CoreAnnotations.CoNLLSRLAnnotation.class);
                   if (roleMap == null) {
-                    roleMap = new HashMap<Integer, String>();
+                    roleMap = Generics.newHashMap();
                     ((CoreLabel)t1.label()).set(CoreAnnotations.CoNLLSRLAnnotation.class, roleMap);
                   }
                   roleMap.put(verbIndex, argType);

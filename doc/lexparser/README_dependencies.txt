@@ -1,4 +1,4 @@
-STANFORD DEPENDENCIES.  Stanford Parser v2.0.4 - 2012-11-12
+STANFORD DEPENDENCIES.  Stanford Parser v2.0.5 - 2013-04-05
 -----------------------------------------------------------
 
 The manual for the English version of the Stanford Dependencies
@@ -41,6 +41,31 @@ For more discussion of the design principles, please see:
 
 These papers can be cited as references for the English Stanford
 Dependencies.
+
+
+--------------------------------------
+CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v2.0.5, MARCH 2013
+
+We have begun a more major effort to improve the suitability and coverage of
+Stanford Dependencies on less formal text types, and to clean up a couple of
+the more quirky dependencies in the original set. These changes are still
+ongoing, but in this first installment, we have removed 3 dependencies and
+added 2:
+ - abbrev was removed, and is now viewed as just a case of appos.
+ - complm was removed, and is now viewed as just a case of mark.
+    (This is consistent with an HPSG-like usage of mark.)
+ - purpcl was removed, and is now viewed as just a case of advcl.
+ - discourse was added. The lack of a dependency type for
+    interjections was an omission even in the early versions, but it
+    became essential as we expanded our consideration of informal
+    text types. It is used for interjections, fillers, discourse markers
+    and emoticons.
+  - goeswith was added. In badly edited text, it is used to join the
+    two parts of a word.
+
+A few other changes and improvements were also made, including improvements
+in the recognition of advcl. There has been a reduction of "dep" dependencies
+of about 14% on newswire (and higher on more informal text genres).
 
 
 --------------------------------------

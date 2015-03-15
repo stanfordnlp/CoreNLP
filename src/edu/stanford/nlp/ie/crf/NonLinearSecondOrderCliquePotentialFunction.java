@@ -14,6 +14,8 @@ public class NonLinearSecondOrderCliquePotentialFunction implements CliquePotent
   double[][] outputLayerWeights4Edge; // first index is the output class, second index is the number of hidden units
   double[][] inputLayerWeights; // first index is number of hidden units in layer one, second index is the input feature indices
   double[][] outputLayerWeights; // first index is the output class, second index is the number of hidden units
+  double[] layerOneCache, hiddenLayerCache;
+  double[] layerOneCache4Edge, hiddenLayerCache4Edge;
   SeqClassifierFlags flags;
 
   public NonLinearSecondOrderCliquePotentialFunction(double[][] inputLayerWeights4Edge, double[][] outputLayerWeights4Edge, double[][] inputLayerWeights, double[][] outputLayerWeights, SeqClassifierFlags flags) {
@@ -22,6 +24,57 @@ public class NonLinearSecondOrderCliquePotentialFunction implements CliquePotent
     this.inputLayerWeights = inputLayerWeights;
     this.outputLayerWeights = outputLayerWeights;
     this.flags = flags;
+  }
+
+  public double[] hiddenLayerOutput(double[][] inputLayerWeights, int[] nodeCliqueFeatures, SeqClassifierFlags aFlag, double[] featureVal, int cliqueSize) {
+    double[] layerCache = null;
+    double[] hlCache = null;
+    int layerOneSize = inputLayerWeights.length;
+    if (cliqueSize > 1) {
+      if (layerOneCache4Edge == null || layerOneSize != layerOneCache4Edge.length)
+        layerOneCache4Edge = new double[layerOneSize];
+      layerCache = layerOneCache4Edge;
+    } else {
+      if (layerOneCache == null || layerOneSize != layerOneCache.length)
+        layerOneCache = new double[layerOneSize];
+      layerCache = layerOneCache;
+    }
+    for (int i = 0; i < layerOneSize; i++) {
+      double[] ws = inputLayerWeights[i];
+      double lOneW = 0;
+      double dotProd = 0;
+      for (int m = 0; m < nodeCliqueFeatures.length; m++) {
+        dotProd = ws[nodeCliqueFeatures[m]];
+        if (featureVal != null)
+          dotProd *= featureVal[m];
+        lOneW += dotProd;
+      }
+      layerCache[i] = lOneW;
+    }
+    if (!aFlag.useHiddenLayer)
+      return layerCache;
+      
+    // transform layer one through hidden
+    if (cliqueSize > 1) {
+      if (hiddenLayerCache4Edge == null || layerOneSize != hiddenLayerCache4Edge.length)
+        hiddenLayerCache4Edge = new double[layerOneSize];
+      hlCache = hiddenLayerCache4Edge;
+    } else {
+      if (hiddenLayerCache == null || layerOneSize != hiddenLayerCache.length)
+        hiddenLayerCache = new double[layerOneSize];
+      hlCache = hiddenLayerCache;
+    }
+    for (int i = 0; i < layerOneSize; i++) {
+      if (aFlag.useSigmoid) {
+        hlCache[i] = sigmoid(layerCache[i]);
+      } else {
+        hlCache[i] = Math.tanh(layerCache[i]);
+      }
+    }
+    return hlCache;
+  }
+  private static double sigmoid(double x) {
+    return 1 / (1 + Math.exp(-x));
   }
 
   @Override
@@ -35,8 +88,8 @@ public class NonLinearSecondOrderCliquePotentialFunction implements CliquePotent
       inputWeights = inputLayerWeights;
       outputWeights = outputLayerWeights;
     }
+    double[] hiddenLayer = hiddenLayerOutput(inputWeights, cliqueFeatures, flags, featureVal, cliqueSize);
 
-    double[] hiddenLayer = NonLinearCliquePotentialFunction.hiddenLayerOutput(inputWeights, cliqueFeatures, flags, featureVal);
     int outputLayerSize = inputWeights.length / outputWeights[0].length;
 
     // transform the hidden layer to output layer through linear transformation

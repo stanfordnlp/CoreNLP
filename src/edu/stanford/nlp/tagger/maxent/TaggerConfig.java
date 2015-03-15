@@ -3,16 +3,17 @@ package edu.stanford.nlp.tagger.maxent;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.*;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Reads and stores configuration information for a POS tagger.
  *
  * <i>Implementation note:</i> To add a new parameter: (1) define a default
- * String value, (2) add it to defaultValues hash, (3) add line to constructor,
+ * String value, (2) add it to defaultValues map, (3) add line to constructor,
  * (4) add getter method, (5) add to dump() method, (6) add to printGenProps()
  * method, (7) add to class javadoc of MaxentTagger.
  *
@@ -69,9 +70,9 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
 
   public static final String ENCODING_PROPERTY = "encoding",
   TAG_SEPARATOR_PROPERTY = "tagSeparator";
-  
 
-  private static final HashMap<String, String> defaultValues = new HashMap<String, String>();
+
+  private static final Map<String, String> defaultValues = Generics.newHashMap();
   static {
     defaultValues.put("arch", ARCH);
     defaultValues.put("wordFunction", WORD_FUNCTION);
@@ -196,8 +197,8 @@ public class TaggerConfig extends Properties /* Inherits implementation of seria
 
     this.setProperty("search", props.getProperty("search", this.getProperty("search")).trim().toLowerCase());
     String srch = this.getProperty("search");
-    if ( ! (srch.equals("cg") || srch.equals("iis") || srch.equals("owlqn") || srch.equals("qn"))) {
-      throw new RuntimeException("'search' must be one of 'iis', 'cg', 'qn' or 'owlqn': " + srch);
+    if ( ! (srch.equals("cg") || srch.equals("iis") || srch.equals("owlqn") || srch.equals("qn") || srch.equals("owlqn2"))) {
+      throw new RuntimeException("'search' must be one of 'iis', 'cg', 'qn' or 'owlqn' or 'owlqn2': " + srch);
     }
 
     this.setProperty("sigmaSquared", props.getProperty("sigmaSquared", this.getProperty("sigmaSquared")));

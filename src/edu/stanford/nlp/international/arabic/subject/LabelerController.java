@@ -94,10 +94,7 @@ public class LabelerController {
         System.err.printf("%s: Loading MaxEnt tagger...", this.getClass().getName());
         tagger = new MaxentTagger(TAGGER_MODEL);
         System.err.println("\nDone!");
-      } catch (IOException e) {
-        System.err.printf("%s: Could not load POS tagger model %s\n", this.getClass().getName(), TAGGER_MODEL);
-        e.printStackTrace();
-      } catch (Exception e) {
+      } catch (RuntimeException e) {
         System.err.printf("%s: Could not load POS tagger model %s\n", this.getClass().getName(), TAGGER_MODEL);
         e.printStackTrace();
       }

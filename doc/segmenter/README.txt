@@ -32,6 +32,8 @@ LICENSE
 CHANGES
 ------------------------------------
 
+2013-04-04    1.6.8     ctb7 model, -nthreads option 
+
 2012-11-11    1.6.7     Bugfixes to both Arabic and Chinese 
                         segmenters; Chinese segmenter can now load 
                         files from jar 

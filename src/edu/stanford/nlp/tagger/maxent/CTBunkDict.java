@@ -1,10 +1,11 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.util.Generics;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -14,7 +15,7 @@ public class CTBunkDict {
   private final static String defaultFilename = "ctb_amb";
   private static CTBunkDict CTBunkDictSingleton = null;
 
-  private static HashMap<String, Set<String>> CTBunk_dict;
+  private static Map<String, Set<String>> CTBunk_dict;
 
 
   private static CTBunkDict getInstance() {
@@ -32,7 +33,7 @@ public class CTBunkDict {
 
 
   private static void readCTBunkDict(String filename)   {
-    CTBunk_dict = new HashMap<String, Set <String>>();
+    CTBunk_dict = Generics.newHashMap();
 
     try{
 
@@ -43,7 +44,7 @@ public class CTBunkDict {
         Set<String> words=CTBunk_dict.get(tag);
 
         if(words==null){
-          words = new HashSet<String>();
+          words = Generics.newHashSet();
           CTBunk_dict.put(tag,words);
         }
         words.add(fields[0]);

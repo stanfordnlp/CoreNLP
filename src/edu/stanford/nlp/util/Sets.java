@@ -21,7 +21,7 @@ public class Sets {
    * Returns the set cross product of s1 and s2, as <code>Pair</code>s
    */
   public static <E,F> Set<Pair<E,F>> cross(Set<E> s1, Set<F> s2) {
-    Set<Pair<E,F>> s = new HashSet<Pair<E,F>>();
+    Set<Pair<E,F>> s = Generics.newHashSet();
     for (E o1 : s1) {
       for (F o2 : s2) {
         s.add(new Pair<E,F>(o1, o2));
@@ -34,7 +34,7 @@ public class Sets {
    * Returns the difference of sets s1 and s2.
    */
   public static <E> Set<E> diff(Set<E> s1, Set<E> s2) {
-    Set<E> s = new HashSet<E>();
+    Set<E> s = Generics.newHashSet();
     for (E o : s1) {
       if (!s2.contains(o)) {
         s.add(o);
@@ -47,7 +47,7 @@ public class Sets {
    * Returns the symmetric difference of sets s1 and s2 (i.e. all elements that are in only one of the two sets)
    */
   public static <E> Set<E> symmetricDiff(Set<E> s1, Set<E> s2) {
-    Set<E> s = new HashSet<E>();
+    Set<E> s = Generics.newHashSet();
     for (E o : s1) {
       if (!s2.contains(o)) {
         s.add(o);
@@ -65,7 +65,7 @@ public class Sets {
    * Returns the union of sets s1 and s2.
    */
   public static <E> Set<E> union(Set<E> s1, Set<E> s2) {
-    Set<E> s = new HashSet<E>();
+    Set<E> s = Generics.newHashSet();
     s.addAll(s1);
     s.addAll(s2);
     return s;
@@ -75,7 +75,7 @@ public class Sets {
    * Returns the intersection of sets s1 and s2.
    */
   public static <E> Set<E> intersection(Set<E> s1, Set<E> s2) {
-    Set<E> s = new HashSet<E>();
+    Set<E> s = Generics.newHashSet();
     s.addAll(s1);
     s.retainAll(s2);
     return s;
@@ -97,8 +97,8 @@ public class Sets {
    */
   public static <E> Set<Set<E>> powerSet(Set<E> s) {
     if (s.isEmpty()) {
-      Set<Set<E>> h = new HashSet<Set<E>>();
-      Set<E> h0 = new HashSet<E>(0);
+      Set<Set<E>> h = Generics.newHashSet();
+      Set<E> h0 = Generics.newHashSet(0);
       h.add(h0);
       return h;
     } else {
@@ -109,7 +109,7 @@ public class Sets {
       Set<Set<E>> pow1 = powerSet(s);
       // for (Iterator j = pow1.iterator(); j.hasNext();) {
       for (Set<E> t : pow1) {
-        // Set<E> t = new HashSet<E>((Set<E>) j.next());
+        // Set<E> t = Generics.newHashSet((Set<E>) j.next());
         t.add(elt);
         pow.add(t);
       }
@@ -119,7 +119,7 @@ public class Sets {
   }
 
   public static void main(String[] args) {
-    Set<String> h = new HashSet<String>();
+    Set<String> h = Generics.newHashSet();
     h.add("a");
     h.add("b");
     h.add("c");

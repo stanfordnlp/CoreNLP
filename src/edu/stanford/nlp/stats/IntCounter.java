@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ import java.util.Map.Entry;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Factory;
 import edu.stanford.nlp.util.Filter;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MapFactory;
 import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.util.logging.PrettyLogger;
@@ -676,7 +676,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * This set may have 0 elements but will not be null.
    */
   public Set<E> keysAbove(int countThreshold) {
-    Set<E> keys = new HashSet<E>();
+    Set<E> keys = Generics.newHashSet();
     for (E key : map.keySet()) {
       if (getIntCount(key) >= countThreshold) {
         keys.add(key);
@@ -690,7 +690,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * This set may have 0 elements but will not be null.
    */
   public Set<E> keysBelow(int countThreshold) {
-    Set<E> keys = new HashSet<E>();
+    Set<E> keys = Generics.newHashSet();
     for (E key : map.keySet()) {
       if (getIntCount(key) <= countThreshold) {
         keys.add(key);
@@ -704,7 +704,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * This set may have 0 elements but will not be null.
    */
   public Set<E> keysAt(int count) {
-    Set<E> keys = new HashSet<E>();
+    Set<E> keys = Generics.newHashSet();
     for (E key : map.keySet()) {
       if (getIntCount(key) == count) {
         keys.add(key);

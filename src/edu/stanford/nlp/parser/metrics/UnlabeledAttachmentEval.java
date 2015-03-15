@@ -1,7 +1,6 @@
 package edu.stanford.nlp.parser.metrics;
 
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -21,6 +20,7 @@ import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 /** 
@@ -88,7 +88,7 @@ public class UnlabeledAttachmentEval extends AbstractEval {
   protected Set<?> makeObjects(Tree tree) {
     if (tree == null) {
       System.err.println("Warning: null tree");
-      return new HashSet<Dependency<Label, Label, Object>>();
+      return Generics.newHashSet();
     }
     if (headFinder != null) {
       tree.percolateHeads(headFinder);
@@ -109,7 +109,7 @@ public class UnlabeledAttachmentEval extends AbstractEval {
     usage.append("  -e         : Input encoding.\n");
   }
 
-  public static final Map<String,Integer> optionArgDefs = new HashMap<String,Integer>();
+  public static final Map<String,Integer> optionArgDefs = Generics.newHashMap();
   static {
     optionArgDefs.put("-v", 0);
     optionArgDefs.put("-l", 1);

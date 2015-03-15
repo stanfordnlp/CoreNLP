@@ -11,7 +11,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +32,7 @@ import edu.stanford.nlp.trees.international.french.FrenchTreeReader;
 import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Performs the pre-processing of raw (XML) FTB trees for the EMNLP2011 and CL2011 experiments.
@@ -97,7 +97,7 @@ public final class SplitCanditoTrees {
     throws IOException
   {
     final TreeReaderFactory trf = new FrenchTreeReaderFactory();
-    Map<String, Tree> treeMap = new HashMap<String, Tree>();
+    Map<String, Tree> treeMap = Generics.newHashMap();
     for (String filename : filenames) {
       File file = new File(filename);
       String canonicalFilename =

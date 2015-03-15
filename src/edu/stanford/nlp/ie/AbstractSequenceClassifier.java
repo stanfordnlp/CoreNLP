@@ -222,7 +222,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   public Set<String> labels() {
-    return new HashSet<String>(classIndex.objectsList());
+    return Generics.newHashSet(classIndex.objectsList());
   }
 
   /**
@@ -233,8 +233,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *
    * @param sentence The List of IN to be classified.
    * @return The classified List of IN, where the classifier output for
-   *         each token is stored in its 
-   *         {@link edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation} 
+   *         each token is stored in its
+   *         {@link edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation}
    *         field.
    */
   public List<IN> classifySentence(List<? extends HasWord> sentence) {
@@ -687,8 +687,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *
    * @param document A {@link List} of something that extends {@link CoreMap}.
    * @return The same {@link List}, but with the elements annotated with their
-   *         answers (stored under the 
-   *         {@link edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation} 
+   *         answers (stored under the
+   *         {@link edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation}
    *         key).
    */
   public abstract List<IN> classify(List<IN> document);
@@ -1033,12 +1033,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     int numWords = 0;
     int numDocs = 0;
 
-    ThreadsafeProcessor<List<IN>, List<IN>> threadProcessor = 
+    ThreadsafeProcessor<List<IN>, List<IN>> threadProcessor =
         new ThreadsafeProcessor<List<IN>, List<IN>>() {
       @Override
       public List<IN> process(List<IN> doc) {
         doc = classify(doc);
-        
+
         int completedNo = threadCompletionCounter.incrementAndGet();
         if (VERBOSE) System.err.println(completedNo + " examples completed");
         return doc;
@@ -1051,9 +1051,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
     MulticoreWrapper<List<IN>, List<IN>> wrapper = null;
     if (flags.multiThreadClassifier != 0) {
-      wrapper = new MulticoreWrapper<List<IN>, List<IN>>(flags.multiThreadClassifier, threadProcessor); 
+      wrapper = new MulticoreWrapper<List<IN>, List<IN>>(flags.multiThreadClassifier, threadProcessor);
     }
-      
+
     for (List<IN> doc: documents) {
       numWords += doc.size();
       numDocs++;
@@ -1238,13 +1238,13 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
       //System.out.println(gold + " (" + goldEntity + ") ; " + guess + " (" + guessEntity + ")");
 
-      boolean newGold = (!gold.equals(background) && 
+      boolean newGold = (!gold.equals(background) &&
                          (!goldEntity.equals(previousGoldEntity)) || gold.startsWith("B-"));
-      boolean newGuess = (!guess.equals(background) && 
+      boolean newGuess = (!guess.equals(background) &&
                           (!guessEntity.equals(previousGuessEntity)) || guess.startsWith("B-"));
-      boolean goldEnded = (!previousGold.equals(background) && 
+      boolean goldEnded = (!previousGold.equals(background) &&
                            (gold.startsWith("B-") || !goldEntity.equals(previousGoldEntity)));
-      boolean guessEnded = (!previousGuess.equals(background) && 
+      boolean guessEnded = (!previousGuess.equals(background) &&
                             (guess.startsWith("B-") || !guessEntity.equals(previousGuessEntity)));
 
       //System.out.println("  " + newGold + " " + newGuess + " " + goldEnded + " " + guessEnded);
@@ -1718,9 +1718,8 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
 
   /**
    * This function will load a classifier that is stored inside a jar file (if
-   * it is so stored). The classifier should be specified as its full filename,
-   * but the path in the jar file (<code>/classifiers/</code>) is coded in this
-   * class. If the classifier is not stored in the jar file or this is not run
+   * it is so stored). The classifier should be specified as its full path
+   * in a jar. If the classifier is not stored in the jar file or this is not run
    * from inside a jar file, then this function will throw a RuntimeException.
    *
    * @param modelName

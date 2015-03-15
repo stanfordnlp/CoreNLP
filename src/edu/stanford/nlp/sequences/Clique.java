@@ -1,6 +1,7 @@
 package edu.stanford.nlp.sequences;
 
 import edu.stanford.nlp.util.ArrayUtils;
+import edu.stanford.nlp.util.Generics;
 
 import java.io.*;
 import java.util.*;
@@ -23,7 +24,7 @@ public class Clique implements Serializable {
   private static final long serialVersionUID = -8109637472035159453L;
 
   private int[] relativeIndices;
-  protected static Map<CliqueEqualityWrapper, Clique> interner = new HashMap<CliqueEqualityWrapper, Clique>();
+  protected static Map<CliqueEqualityWrapper, Clique> interner = Generics.newHashMap();
 
   private static class CliqueEqualityWrapper {
     private Clique c;

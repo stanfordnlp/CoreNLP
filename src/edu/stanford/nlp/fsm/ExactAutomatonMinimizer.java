@@ -98,7 +98,7 @@ public class ExactAutomatonMinimizer implements AutomatonMinimizer {
   //  }
 
   protected <Y> Map<ExactBlock<Arc>, Set<Y>> sortIntoBlocks(Collection<Y> nodes) {
-    Map<ExactBlock<Arc>, Set<Y>> blockToMembers = new HashMap<ExactBlock<Arc>, Set<Y>>(); // IdentityHashMap();
+    Map<ExactBlock<Arc>, Set<Y>> blockToMembers = Generics.newHashMap(); // IdentityHashMap();
     for (Y o : nodes) {
       ExactBlock<Arc> block = getBlock(o);
       if (block == null) {
@@ -110,7 +110,7 @@ public class ExactAutomatonMinimizer implements AutomatonMinimizer {
   }
 
   protected void makeBlock(Collection<Arc> members) {
-    ExactBlock<Arc> block = new ExactBlock<Arc>(new HashSet<Arc>(members));
+    ExactBlock<Arc> block = new ExactBlock<Arc>(Generics.newHashSet(members));
     for (Arc member : block.getMembers()) {
       if (member != SINK_NODE) {
         memberToBlock.put(member, block);
@@ -130,7 +130,7 @@ public class ExactAutomatonMinimizer implements AutomatonMinimizer {
   }
 
   protected static Collection<Arc> difference(Collection<Arc> block, Collection<Arc> members) {
-    Set<Arc> difference = new HashSet<Arc>();
+    Set<Arc> difference = Generics.newHashSet();
     for (Arc member : block) {
       if (!members.contains(member)) {
         difference.add(member);

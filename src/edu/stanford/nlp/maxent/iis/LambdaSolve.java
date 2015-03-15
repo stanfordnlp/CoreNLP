@@ -1,10 +1,3 @@
-/**
- * Title:        StanfordMaxEnt<p>
- * Description:  A Maximum Entropy Toolkit<p>
- * Copyright:    Copyright (c) Kristina Toutanova<p>
- * Company:      Stanford University<p>
- */
-
 package edu.stanford.nlp.maxent.iis;
 
 import edu.stanford.nlp.io.InDataStreamFile;
@@ -25,24 +18,26 @@ import java.io.ObjectOutputStream;
 
 /**
  * This is the main class that does the core computation in IIS.
+ * (Parts of it still get invoked in the POS tagger, even when not using IIS.)
  *
  * @author Kristina Toutanova
  * @version 1.0
  */
 public class LambdaSolve {
+
   /**
    * These are the model parameters that have to be learned
    */
   public double[] lambda;
-  public boolean[] lambda_converged;
-  public double eps;
-  public double newtonerr;
+  protected boolean[] lambda_converged;  // Now only allocated and used if you're using IIS.
+  protected double eps; // only used by IIS. Convergence threshold / allowed "newtonErr"
+  // protected double newtonerr;
 
   /**
    * This flag is true if all (x,y)  have the same f# in which case the newton equation solving is avoided
    */
-  public boolean fixedFnumXY;
-  public Problem p;
+  private boolean fixedFnumXY;
+  protected Problem p;
 
   /**
    * Conditional probabilities.
@@ -67,29 +62,30 @@ public class LambdaSolve {
    * This is an array of empirical expectations for the features
    */
   protected double[] ftildeArr;
-  private static boolean smooth = false;
-  private static boolean VERBOSE = false;
+
+  private static final boolean smooth = false;
+  private static final boolean VERBOSE = false;
 
   /**
    * If this is true, assume that active features are binary, and one
    * does not have to multiply in a feature value.
    */
-  private static boolean ASSUME_BINARY = false;
-  private double[] aux;  // auxillary array to be used by some procedures for computing objective functions and their derivatives
-  private double[][] sum;// auxillary array
-  private double[][] sub;// auxillary array
+  private boolean ASSUME_BINARY = false;
+
+  private double[] aux;  // auxiliary array to be used by some procedures for computing objective functions and their derivatives
+  private double[][] sum;// auxiliary array
+  private double[][] sub;// auxiliary array
   public boolean weightRanks = false;
-  public boolean convertValues = false;
+  private boolean convertValues = false;
 
 
   public LambdaSolve(Problem p1, double eps1, double nerr1) {
     p = p1;
     eps = eps1;
-    newtonerr = nerr1;
-    lambda = new double[p.fSize];
-    lambda_converged = new boolean[p.fSize];
+    // newtonerr = nerr1;
+    // lambda = new double[p.fSize];
     probConds = new double[p.data.xSize][];
-    System.out.println("xSize is " + p.data.xSize);
+    System.err.println("xSize is " + p.data.xSize);
 
     for (int i = 0; i < p.data.xSize; i++) {
       probConds[i] = new double[p.data.numY(i)];
@@ -244,6 +240,7 @@ public class LambdaSolve {
   public void improvedIterative() {
     boolean flag;
     int iterations = 0;
+    lambda_converged = new boolean[p.fSize];
     int numNConverged = p.fSize;
     do {
       if (VERBOSE) {
@@ -277,6 +274,7 @@ public class LambdaSolve {
    */
   public void improvedIterative(int iters) {
     int iterations = 0;
+    lambda_converged = new boolean[p.fSize];
     int numNConverged = p.fSize;
     //double lOld=logLikelihood();
     do {
@@ -329,7 +327,7 @@ public class LambdaSolve {
   boolean iterate(int index, double err, MutableDouble ret) {
     double deltaL = 0.0;
     deltaL = newton(deltaL, index, err);
-    //System.out.println("delta is "+deltaL+" feature "+index+" expectation "+ftildeArr[index]);
+    //System.err.println("delta is "+deltaL+" feature "+index+" expectation "+ftildeArr[index]);
 
     if (Math.abs(deltaL + lambda[index]) > 200) {
       if ((deltaL + lambda[index]) > 200) {
@@ -356,7 +354,6 @@ public class LambdaSolve {
    */
   double newton(double lambda0, int index, double err) {
     double lambdaN = lambda0;
-    double lambdaP = lambda0;
     int i = 0;
     if (fixedFnumXY) {
       double plambda = fExpected(p.functions.get(index));
@@ -364,7 +361,7 @@ public class LambdaSolve {
     }
     do {
       i++;
-      lambdaP = lambdaN;
+      double lambdaP = lambdaN;
       double gPrimeVal = gprime(lambdaP, index);
       if (Double.isNaN(gPrimeVal)) {
         System.err.println("gPrime of " + lambdaP + " " + index + " is NaN " + gPrimeVal);
@@ -398,7 +395,6 @@ public class LambdaSolve {
    * This method updates the conditional probabilities in the model, resulting from the
    * update of lambda[index] to lambda[index]+deltaL .
    */
-
   void updateConds(int index, double deltaL) {
     //  for each x that (x,y)=true / exists y
     //  recalculate pcond(y,x) for all y
@@ -418,10 +414,9 @@ public class LambdaSolve {
       s = s + probConds[x][y];
       zlambda[x] = zlambdaX;
       if (Math.abs(s - 1) > 0.001) {
-        //System.out.println(x+" index "+i+" deltaL " +deltaL+" tag "+yTag+" zlambda "+zlambda[x]);
+        //System.err.println(x+" index "+i+" deltaL " +deltaL+" tag "+yTag+" zlambda "+zlambda[x]);
       }
     }
-
   }
 
 
@@ -486,11 +481,11 @@ public class LambdaSolve {
     boolean flag = true;
     for (int f = 0; f < lambda.length; f++) {
       if (Math.abs(lambda[f]) > 100) {
-        System.out.println(" Lambda too big " + lambda[f]);
-        System.out.println(" empirical " + ftildeArr[f] + " expeced " + fExpected(p.functions.get(f)));
+        System.err.println("lambda " + f + " too big " + lambda[f]);
+        System.err.println("empirical " + ftildeArr[f] + " expected " + fExpected(p.functions.get(f)));
       }
     }
-    System.out.println(" x size" + p.data.xSize + " " + " ysize " + p.data.ySize);
+    System.err.println(" x size" + p.data.xSize + " " + " ysize " + p.data.ySize);
     double summAllExp = 0;
     for (int i = 0; i < ftildeArr.length; i++) {
       double exp = Math.abs(ftildeArr[i] - fExpected(p.functions.get(i)));
@@ -499,11 +494,11 @@ public class LambdaSolve {
       //if(true)
       {
         flag = false;
-        System.out.println("Constraint not satisfied  " + i + " " + fExpected(p.functions.get(i)) + " " + ftildeArr[i] + " lambda " + lambda[i]);
+        System.err.println("Constraint not satisfied  " + i + " " + fExpected(p.functions.get(i)) + " " + ftildeArr[i] + " lambda " + lambda[i]);
       }
     }
 
-    System.out.println(" The sum of all empirical expectations is " + summAllExp);
+    System.err.println(" The sum of all empirical expectations is " + summAllExp);
     for (int x = 0; x < p.data.xSize; x++) {
       double s = 0.0;
       for (int y = 0; y < probConds[x].length; y++) {
@@ -511,9 +506,9 @@ public class LambdaSolve {
       }
       if (Math.abs(s - 1) > 0.0001) {
         for (int y = 0; y < probConds[x].length; y++)
-            //System.out.println(y+" : "+ probConds[x][y]);
+            //System.err.println(y+" : "+ probConds[x][y]);
         {
-          System.out.println("probabilities do not sum to one " + x + " " + (float) s);
+          System.err.println("probabilities do not sum to one " + x + " " + (float) s);
         }
       }
     }
@@ -616,7 +611,7 @@ public class LambdaSolve {
     double alfa = 0.0;
     GSF(alfa, f);
     double gsfValNew = 0.0;
-    while (true && (iterations < 30)) {
+    while (iterations < 30) {
       iterations++;
       double alfanext = alfa + r * Math.log(1 - r * GSFPrime(alfa, f) / GSFSecond(alfa, f));
       gsfValNew = GSF(alfanext, f);
@@ -767,10 +762,10 @@ public class LambdaSolve {
       // for each feature , save its row
       for (int i = 0; i < p.fSize; i++) {
         int[] values = p.functions.get(i).indexedValues;
-        for (int k = 0; k < values.length; k++) {
+        for (int value : values) {
           pf.print(i + 1);
           pf.print(". ");
-          pf.print(values[k]);
+          pf.print(value);
           pf.print(" ");
           pf.println(1);
         }// k
@@ -887,7 +882,7 @@ public class LambdaSolve {
       s -= sum * fLambda;
 
       if (Math.abs(fLambda) > 200) {   // was 50
-        System.out.println("lambda " + fNo + " too big: " + fLambda);
+        System.err.println("lambda " + fNo + " too big: " + fLambda);
       }
 
       for (int i = 0, length = f.len(); i < length; i++) {
@@ -906,19 +901,18 @@ public class LambdaSolve {
     for (int x = 0; x < probConds.length; x++) {
       //again
       zlambda[x] = ArrayMath.logSum(probConds[x]); // cpu samples #4,#15: 4.5%
-      //System.out.println("zlambda "+x+" "+zlambda[x]);
+      //System.err.println("zlambda "+x+" "+zlambda[x]);
       s += zlambda[x] * p.data.ptildeX(x) * p.data.getNumber();
 
       for (int y = 0; y < probConds[x].length; y++) {
         probConds[x][y] = divide(probConds[x][y], zlambda[x]); // cpu samples #13: 1.6%
-        //System.out.println("prob "+x+" "+y+" "+probConds[x][y]);
+        //System.err.println("prob "+x+" "+y+" "+probConds[x][y]);
       } //y
 
     }//x
 
     if (s < 0) {
-      System.out.println("neg log lik smaller than 0 " + s);
-      //System.exit(0);
+      throw new IllegalStateException("neg log lik smaller than 0: " + s);
     }
 
     return s;
@@ -956,7 +950,7 @@ public class LambdaSolve {
       s -= sum * fLambda;
 
       if (Math.abs(fLambda) > 200) {   // was 50
-        System.out.println("lambda " + fNo + " too big: " + fLambda);
+        System.err.println("lambda " + fNo + " too big: " + fLambda);
       }
 
       for (int i = 0, length = f.len(); i < length; i++) {
@@ -975,19 +969,18 @@ public class LambdaSolve {
     for (int x = 0; x < probConds.length; x++) {
       //again
       zlambda[x] = ArrayMath.logSum(probConds[x]); // cpu samples #4,#15: 4.5%
-      //System.out.println("zlambda "+x+" "+zlambda[x]);
+      //System.err.println("zlambda "+x+" "+zlambda[x]);
       s += zlambda[x] * exp.ptildeX(x) * exp.getNumber();
 
       for (int y = 0; y < probConds[x].length; y++) {
         probConds[x][y] = divide(probConds[x][y], zlambda[x]); // cpu samples #13: 1.6%
-        //System.out.println("prob "+x+" "+y+" "+probConds[x][y]);
+        //System.err.println("prob "+x+" "+y+" "+probConds[x][y]);
       } //y
 
     }//x
 
     if (s < 0) {
-      System.out.println("neg log lik smaller than 0 " + s);
-      System.exit(0);
+      throw new IllegalStateException("neg log lik smaller than 0: " + s);
     }
 
     return s;
@@ -1080,7 +1073,7 @@ public class LambdaSolve {
 
 
       if (Math.abs(fLambda) > 200) {   // was 50
-        System.out.println("lambda " + fNo + " too big: " + fLambda);
+        System.err.println("lambda " + fNo + " too big: " + fLambda);
       }
 
       for (int i = 0, length = f.len(); i < length; i++) {
@@ -1100,12 +1093,12 @@ public class LambdaSolve {
     for (int x = 0; x < probConds.length; x++) {
       //again
       zlambda[x] = ArrayMath.logSum(probConds[x]); // cpu samples #4,#15: 4.5%
-      //System.out.println("zlambda "+x+" "+zlambda[x]);
+      //System.err.println("zlambda "+x+" "+zlambda[x]);
 
 
       for (int y = 0; y < probConds[x].length; y++) {
         probConds[x][y] = divide(probConds[x][y], zlambda[x]); // cpu samples #13: 1.6%
-        //System.out.println("prob "+x+" "+y+" "+probConds[x][y]);
+        //System.err.println("prob "+x+" "+y+" "+probConds[x][y]);
 
         s -= exp.values[x][y] * probConds[x][y] * exp.ptildeX(x) * exp.getNumber();
         aux[x] += exp.values[x][y] * probConds[x][y];
@@ -1165,14 +1158,14 @@ public class LambdaSolve {
     //add up in pcond y|x the unnormalized scores
 
     for (int fNo = 0, fSize = p.fSize; fNo < fSize; fNo++) {
-      // add for all occurences of the function the values to probConds
+      // add for all occurrences of the function the values to probConds
       Feature f = p.functions.get(fNo);
       double fLambda = lambda[fNo];
 
       //if(sum==0){continue;}
 
       if (Math.abs(fLambda) > 200) {   // was 50
-        System.out.println("lambda " + fNo + " too big: " + fLambda);
+        System.err.println("lambda " + fNo + " too big: " + fLambda);
       }
 
       for (int i = 0, length = f.len(); i < length; i++) {
@@ -1241,7 +1234,7 @@ public class LambdaSolve {
         }
       }
 
-      System.out.println(" for x " + x + " number graphs " + zlambda[x]);
+      System.err.println(" for x " + x + " number graphs " + zlambda[x]);
 
       if (zlambda[x] > 0) {
         localloss /= zlambda[x];

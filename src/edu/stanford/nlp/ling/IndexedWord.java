@@ -152,8 +152,8 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
 
 
   /**
-   * This hashcode uses only the docID, sentenceIndex, and index
-   * See compareTo for more info
+   * This hashCode uses only the docID, sentenceIndex, and index.
+   * See compareTo for more info.
    */
   @Override
   public int hashCode() {
@@ -164,11 +164,11 @@ public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
       sensible = true;
     }
     if (has(CoreAnnotations.SentenceIndexAnnotation.class)) {
-      result = 29 * result + get(CoreAnnotations.SentenceIndexAnnotation.class);
+      result = 29 * result + get(CoreAnnotations.SentenceIndexAnnotation.class).hashCode();
       sensible = true;
     }
     if (has(CoreAnnotations.IndexAnnotation.class)) {
-      result = 29 * result + get(CoreAnnotations.IndexAnnotation.class);
+      result = 29 * result + get(CoreAnnotations.IndexAnnotation.class).hashCode();
       sensible = true;
     }
     if ( ! sensible) {

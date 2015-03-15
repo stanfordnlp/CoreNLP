@@ -8,6 +8,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.semgrex.ssurgeon.pred.SsurgPred;
 import edu.stanford.nlp.semgraph.semgrex.*;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * This represents a source pattern and a subsequent edit script, or a sequence
@@ -125,7 +126,7 @@ public class SsurgeonPattern {
       // NOTE: Semgrex can match two named nodes to the same node.  In this case, we simply,
       // check the named nodes, and if there are any collisions, we throw out this match.
       Set<String> nodeNames = matcher.getNodeNames();
-      Set<IndexedWord> seen = new HashSet<IndexedWord>();
+      Set<IndexedWord> seen = Generics.newHashSet();
       for (String name : nodeNames) {
         IndexedWord curr = matcher.getNode(name);
         if (seen.contains(curr))
@@ -144,7 +145,7 @@ public class SsurgeonPattern {
       // Generate a new graph, since we don't want to mutilate the original graph.
       // We use the same nodes, since the matcher operates off of those.
       SemanticGraph tgt = SemanticGraphFactory.duplicateKeepNodes(sg);
-      nodeMap = new HashMap<String, IndexedWord>();
+      nodeMap = Generics.newHashMap();
       for (SsurgeonEdit edit : editScript) {      
         edit.evaluate(tgt, matcher);
       }
@@ -170,7 +171,7 @@ public class SsurgeonPattern {
       }
       // We reset the named node map with each edit set, since these edits
       // should exist in a separate graph for each unique Semgrex match.
-      nodeMap = new HashMap<String, IndexedWord>();
+      nodeMap = Generics.newHashMap();
       SemanticGraph tgt = new SemanticGraph(sg);
       for (SsurgeonEdit edit : editScript) {      
         edit.evaluate(tgt, matcher);

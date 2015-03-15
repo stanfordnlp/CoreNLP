@@ -14,6 +14,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.parser.ui.TreeJPanel;
 import edu.stanford.nlp.trees.Constituent;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 
 /**
@@ -271,7 +272,7 @@ public class ScrollableTreeJPanel extends TreeJPanel   {
   }
 
 
-  private Set<Constituent> diffConstituents = new HashSet<Constituent>();
+  private Set<Constituent> diffConstituents = Generics.newHashSet();
   public void setDiffConstituents(Set<Constituent> diffConstituents) {
     this.diffConstituents = diffConstituents;
   }

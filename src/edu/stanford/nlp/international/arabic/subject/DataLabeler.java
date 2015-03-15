@@ -1,10 +1,10 @@
 package edu.stanford.nlp.international.arabic.subject;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -33,7 +33,7 @@ public final class DataLabeler {
   }
 
   private static Map<String, Integer> optionArgDefs() {
-    Map<String,Integer> optionArgDefs = new HashMap<String,Integer>();
+    Map<String,Integer> optionArgDefs = Generics.newHashMap();
     optionArgDefs.put("v", 0);
     optionArgDefs.put("g", 0);
     optionArgDefs.put("f", 1);

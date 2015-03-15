@@ -5,11 +5,11 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.ArrayMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -37,7 +37,7 @@ public class OneVsAllClassifier<L,F> implements Classifier<L,F> {
   L defaultLabel;
 
   public OneVsAllClassifier(Index<F> featureIndex, Index<L> labelIndex) {
-    this(featureIndex, labelIndex, new HashMap<L, Classifier<String,F>>(), null);
+    this(featureIndex, labelIndex, Generics.<L, Classifier<String, F>>newHashMap(), null);
   }
 
   public OneVsAllClassifier(Index<F> featureIndex, Index<L> labelIndex, Map<L, Classifier<String, F>> binaryClassifiers) {
@@ -100,7 +100,7 @@ public class OneVsAllClassifier<L,F> implements Classifier<L,F> {
   {
     Index<L> labelIndex = dataset.labelIndex();
     Index<F> featureIndex = dataset.featureIndex();
-    Map<L, Classifier<String, F>> classifiers = new HashMap<L, Classifier<String, F>>();
+    Map<L, Classifier<String, F>> classifiers = Generics.newHashMap();
     for (L label:trainLabels) {
       int i = labelIndex.indexOf(label);
       System.err.println("Training " + label + "=" + i + ", posIndex=" + posIndex);

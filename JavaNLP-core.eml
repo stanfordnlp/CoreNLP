@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component LANGUAGE_LEVEL="JDK_1_6">
+<component LANGUAGE_LEVEL="JDK_1_6" inheritJdk="true">
 	<output-test url="file://$MODULE_DIR$/classes"/>
 	<exclude-output/>
 	<contentEntry url="file://$MODULE_DIR$">
@@ -90,5 +90,8 @@
 		<srcroot url="jar://$MODULE_DIR$/libsrc/log4j-1.2.16-src.zip!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/log4j-1.2.16-src.zip!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/log4j-1.2.16.jar!/"/>
+	</lib>
+	<lib name="ejml-0.19-nogui.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/ejml-0.19-nogui.jar!/"/>
 	</lib>
 </component>

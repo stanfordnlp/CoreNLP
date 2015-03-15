@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.regex.*;
 
 import edu.stanford.nlp.trees.treebank.Mapper;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Applies a default set of lexical transformations that have been empirically validated
@@ -42,7 +43,7 @@ public class GaleP4LexMapper implements Mapper {
   public GaleP4LexMapper() {
 
     //Tags for the canChangeEncoding() method
-    parentTagsToEscape = new HashSet<String>();
+    parentTagsToEscape = Generics.newHashSet();
     parentTagsToEscape.add("PUNC");
     parentTagsToEscape.add("LATIN");
     parentTagsToEscape.add("-NONE-");

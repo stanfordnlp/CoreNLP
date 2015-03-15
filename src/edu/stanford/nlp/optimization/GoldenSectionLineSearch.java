@@ -1,10 +1,11 @@
 package edu.stanford.nlp.optimization;
 
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Arrays;
 
 /**
@@ -18,7 +19,7 @@ public class GoldenSectionLineSearch implements LineSearcher {
   private static final double GOLDEN_SECTION = (GOLDEN_RATIO / (1.0 + GOLDEN_RATIO));
   private static boolean VERBOSE = true;
 
-  private HashMap<Double, Double> memory = new HashMap<Double, Double>(); //remember where it was called and what were the values
+  private Map<Double, Double> memory = Generics.newHashMap(); //remember where it was called and what were the values
   private boolean geometric;
 
   private double tol;
@@ -166,7 +167,7 @@ public class GoldenSectionLineSearch implements LineSearcher {
 
   public void discretizeCompute(Function<Double, Double> function, int numPoints, double low, double high) {
     double inc = (high - low) / numPoints;
-    memory = new HashMap<Double, Double>();
+    memory = Generics.newHashMap();
     for (int i = 0; i < numPoints; i++) {
       double x = low + i * inc;
       double y = function.apply(x);

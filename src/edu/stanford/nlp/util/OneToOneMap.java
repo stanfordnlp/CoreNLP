@@ -27,13 +27,13 @@ public class OneToOneMap<L,R> implements Serializable{
   
   //------------------------------------------------------------
   
-  private HashMap<L,R> m_leftAsKey;
-  private HashMap<R,L> m_rightAsKey;
+  private Map<L,R> m_leftAsKey;
+  private Map<R,L> m_rightAsKey;
   
   public OneToOneMap()
   {
-    m_leftAsKey = new HashMap<L, R>();
-    m_rightAsKey = new HashMap<R, L>(); 
+    m_leftAsKey = Generics.newHashMap();
+    m_rightAsKey = Generics.newHashMap(); 
   }
   
   

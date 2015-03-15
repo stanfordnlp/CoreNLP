@@ -9,8 +9,9 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.stats.IntCounter;
+import edu.stanford.nlp.util.Generics;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
@@ -24,7 +25,7 @@ import java.io.DataOutputStream;
  */
 class TagCount {
 
-  private HashMap<String, Integer> map = new HashMap<String, Integer>();
+  private Map<String, Integer> map = Generics.newHashMap();
   private int ambClassId = -1; /* This is a numeric ID shared by all words that have the same set of possible tags. */
 
   private String[] getTagsCache; // = null;
@@ -81,7 +82,7 @@ class TagCount {
     try {
 
       int numTags = rf.readInt();
-      map = new HashMap<String, Integer>(numTags);
+      map = Generics.newHashMap(numTags);
 
       for (int i = 0; i < numTags; i++) {
 	String tag = rf.readUTF();

@@ -2,8 +2,7 @@ package edu.stanford.nlp.trees.international.pennchinese;
 
 import edu.stanford.nlp.trees.AbstractCollinsHeadFinder;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
-
-import java.util.HashMap;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * A headfinder for Chinese based on rules described in Sun/Jurafsky NAACL '04.
@@ -27,7 +26,7 @@ public class SunJurafskyChineseHeadFinder extends AbstractCollinsHeadFinder {
 
     defaultRule = new String[]{"right"};
 
-    nonTerminalInfo = new HashMap<String, String[][]>();
+    nonTerminalInfo = Generics.newHashMap();
 
     nonTerminalInfo.put("ROOT", new String[][]{{"left", "IP"}});
     nonTerminalInfo.put("PAIR", new String[][]{{"left", "IP"}});

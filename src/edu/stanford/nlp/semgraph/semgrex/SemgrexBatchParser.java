@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -74,7 +74,7 @@ public class SemgrexBatchParser {
 	}
 	
   private Map<String, String> preprocess(BufferedReader reader) throws IOException {
-    Map<String, String> macros = new HashMap<String, String>();
+    Map<String, String> macros = Generics.newHashMap();
     for(String line; (line = reader.readLine()) != null; ) {
       line = line.trim();
       if(line.startsWith("macro ")){

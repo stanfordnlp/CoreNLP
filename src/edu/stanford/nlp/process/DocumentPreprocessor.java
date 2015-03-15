@@ -13,6 +13,7 @@ import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.objectbank.XMLBeginEndIterator;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Produces a list of sentences from either a plain text or XML document.
@@ -36,6 +37,8 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
 
   public static enum DocType {Plain, XML}
 
+  public static final String[] DEFAULT_SENTENCE_DELIMS = {".", "?", "!"};
+  
   // inputReader is used in a fairly yucky way at the moment to communicate
   // from a XMLIterator across to a PlainTextIterator.  Maybe redo by making
   // the inner classes static and explicitly passing things around.
@@ -44,7 +47,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
 
   //Configurable options
   private TokenizerFactory<? extends HasWord> tokenizerFactory = PTBTokenizer.coreLabelFactory();
-  private String[] sentenceFinalPuncWords = {".", "?", "!"};
+  private String[] sentenceFinalPuncWords = DEFAULT_SENTENCE_DELIMS;
   private Function<List<HasWord>,List<HasWord>> escaper = null;
   private String sentenceDelimiter = null;
   /**
@@ -201,15 +204,15 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
     public PlainTextIterator() {
       // Establish how to find sentence boundaries
       boolean eolIsSignificant = false;
-      sentDelims = new HashSet<String>();
+      sentDelims = Generics.newHashSet();
       if (sentenceDelimiter == null) {
         if (sentenceFinalPuncWords != null) {
           sentDelims.addAll(Arrays.asList(sentenceFinalPuncWords));
         }
-        delimFollowers = new HashSet<String>(Arrays.asList(sentenceFinalFollowers));
+        delimFollowers = Generics.newHashSet(Arrays.asList(sentenceFinalFollowers));
       } else {
         sentDelims.add(sentenceDelimiter);
-        delimFollowers = new HashSet<String>();
+        delimFollowers = Generics.newHashSet();
         eolIsSignificant = wsPattern.matcher(sentenceDelimiter).matches();
         if(eolIsSignificant) { // For Stanford English Tokenizer
           sentDelims.add(PTBLexer.NEWLINE_TOKEN);
@@ -218,6 +221,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
 
       // Setup the tokenizer
       if (tokenizerFactory == null) {
+        eolIsSignificant = sentDelims.contains(WhitespaceLexer.NEWLINE);
         tokenizer = WhitespaceTokenizer.
           newWordWhitespaceTokenizer(inputReader, eolIsSignificant);
       } else {
@@ -415,6 +419,7 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
     String sentenceDelimiter = null;
     String tagDelimiter = null;
     boolean printOriginalText = false;
+    String[] sentenceDelims = null;
 
     int i = 0;
     for ( ; i < args.length; i++) {
@@ -444,6 +449,13 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
         tf = null;
         sentenceDelimiter = System.getProperty("line.separator");
 
+      } else if (args[i].equals("-whitespaceTokenization")) {
+        tf = null;
+        List<String> whitespaceDelims = 
+            new ArrayList<String>(Arrays.asList(DocumentPreprocessor.DEFAULT_SENTENCE_DELIMS));
+        whitespaceDelims.add(WhitespaceLexer.NEWLINE);
+        sentenceDelims = whitespaceDelims.toArray(new String[whitespaceDelims.size()]);
+        
       } else if (args[i].equals("-tag")) {
         i++;
         tagDelimiter = args[i];
@@ -470,6 +482,9 @@ public class DocumentPreprocessor implements Iterable<List<HasWord>> {
       }
       if (tagDelimiter != null) {
         docPreprocessor.setTagDelimiter(args[++i]);
+      }
+      if (sentenceDelims != null) {
+        docPreprocessor.setSentenceFinalPuncWords(sentenceDelims);
       }
 
       for (List<HasWord> sentence : docPreprocessor) {

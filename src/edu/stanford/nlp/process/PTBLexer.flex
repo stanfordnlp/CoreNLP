@@ -633,7 +633,8 @@ TWITTER_NAME = @[a-zA-Z_][a-zA-Z_0-9]*
 TWITTER_CATEGORY = #{WORD}
 TWITTER = {TWITTER_NAME}|{TWITTER_CATEGORY}
 
-/* This block becomes ABBREV1 and is usually followed by lower case words. */
+
+/* --- This block becomes ABBREV1 and is usually followed by lower case words. --- */
 /* Abbreviations - induced from 1987 WSJ by hand */
 ABMONTH = Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec
 /* "May." isn't an abbreviation. "Jun." and "Jul." barely occur, but don't seem dangerous */
@@ -649,31 +650,29 @@ ABSTATE = Ala|Ariz|[A]rk|Calif|Colo|Conn|Dak|Del|Fla|Ga|[I]ll|Ind|Kans?|Ky|La|[M
 /* Special case: Change the class of Pty when followed by Ltd to not sentence break (in main code below)... */
 ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Dept|Bhd|Assn|Univ|Intl|Sys
 /* Don't included fl. oz. since Oz turns up too much in caseless tokenizer. ft now allows upper after it for "Fort" use. */
-ABNUM = Nos?|Prop|Ph|tel|est|ext|sq
+ABNUM = Ph|tel|est|ext|sq
 /* p used to be in ABNUM list, but it can't be any more, since the lexer
    is now caseless.  We don't want to have it recognized for P.  Both
    p. and P. are now under ABBREV4. ABLIST also went away as no-op [a-e] */
-/* est. is "estimated" -- common in some financial contexts. ext. is extension, ca. is circa */
 ABPTIT = Jr|Sr|Bros|(Ed|Ph)\.D|Blvd|Rd|Esq
 
-/* This block becomes ABBREV2 and is usually followed by upper case words. */
-/* In the caseless world S.p.A. "Società Per Azioni (Italian: shared company)" is got as a regular acronym */
-ACRO = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
-/* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. */
-ABTITLE = Mr|Mrs|Ms|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|Ste?|Ave|Pres|Lieut|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft
-ABCOMP2 = Invt|Elec|Natl|M[ft]g
-
-/* See also special cases for ca. fig. prop. in the code below. */
-
 /* ABBREV1 abbreviations are normally followed by lower case words.
-   If they're followed by an uppercase one, we assume there is also a
-   sentence boundary */
+ *  If they're followed by an uppercase one, we assume there is also a
+ *  sentence boundary.
+ */
 ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|etc|al|seq)\.
 
+/* --- This block becomes ABBREV2 and is usually followed by upper case words. --- */
+/* In the caseless world S.p.A. "Società Per Azioni (Italian: shared company)" is got as a regular acronym */
+/* ACRO Is a bad case -- can go either way! */
+ACRO = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
+/* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. */
+ABTITLE = Mr|Mrs|Ms|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|Ste?|Ave|Pres|Lieut|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc
+ABCOMP2 = Invt|Elec|Natl|M[ft]g
 
 /* ABRREV2 abbreviations are normally followed by an upper case word.
-   We assume they aren't used sentence finally */
-/* ACRO Is a bad case -- can go either way! */
+ *  We assume they aren't used sentence finally.
+ */
 ABBREV4 = [A-Za-z]|{ABTITLE}|vs|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|{ACRO}|{ABCOMP2}
 ABBREV2 = {ABBREV4}\.
 ACRONYM = ({ACRO})\.
@@ -681,6 +680,17 @@ ACRONYM = ({ACRO})\.
 /* in the WSJ Alex. is generally an abbreviation for Alex. Brown, brokers! */
 /* Added Wm. for William and Jos. for Joseph */
 /* In tables: Mkt. for market Div. for division of company, Chg., Yr.: year */
+
+/* --- ABBREV3 abbreviations are allowed only before numbers. ---
+ * Otherwise, they aren't recognized as abbreviations (unless they also
+ * appear in ABBREV1 or ABBREV2.
+ * est. is "estimated" -- common in some financial contexts. ext. is extension, ca. is circa.
+ */
+/* Maybe also "op." for "op. cit." but also get a photo op. */
+ABBREV3 = (ca|figs?|prop|nos?|art|bldg|prop|pp|op)\.
+
+/* See also a couple of special cases for pty. in the code below. */
+
 
 /* phone numbers. keep multi dots pattern separate, so not confused with decimal numbers. */
 PHONE = (\([0-9]{2,3}\)[ \u00A0]?|(\+\+?)?([0-9]{2,4}[\- \u00A0])?[0-9]{2,4}[\- \u00A0])[0-9]{3,4}[\- \u00A0]?[0-9]{3,5}|((\+\+?)?[0-9]{2,4}\.)?[0-9]{2,4}\.[0-9]{3,4}\.[0-9]{3,5}
@@ -702,6 +712,11 @@ DBLQUOT = \"|&quot;
 /* Cap'n for captain, c'est for french */
 TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est
 TBSPEC2 = {APOS}[0-9][0-9]
+
+/* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
+SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
+ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)
+
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
 MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\u00D7\u00F7\u0387\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0600-\u0603\u0606-\u060A\u060C\u0614\u061B\u061E\u066A\u066D\u0703-\u070D\u07F6\u07F7\u07F8\u0964\u0965\u0E4F\u1FBD\u2016\u2017\u2020-\u2023\u2030-\u2038\u203B\u203E-\u2042\u2044\u207A-\u207F\u208A-\u208E\u2100-\u214F\u2190-\u21FF\u2200-\u2BFF\u3012\u30FB\uFF01-\uFF0F\uFF1A-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF65]
@@ -815,7 +830,6 @@ gonna|gotta|lemme|gimme|wanna
                         }
 /* Any acronym can be treated as sentence final iff followed by this list of words (pronouns, determiners, and prepositions, etc.). "U.S." is the single big source of errors.  Character classes make this rule case sensitive! (This is needed!!) */
 {ACRONYM}/({SPACENLS})([A]bout|[A]ccording|[A]dditionally|[A]fter|[A]n|[A]|[A]s|[A]t|[B]ut|[E]arlier|[H]e|[H]er|[H]ere|[H]owever|[I]f|[I]n|[I]t|[L]ast|[M]any|[M]ore|[M]r\.|[M]s\.|[N]ow|[O]nce|[O]ne|[O]ther|[O]ur|[S]he|[S]ince|[S]o|[S]ome|[S]uch|[T]hat|[T]he|[T]heir|[T]hen|[T]here|[T]hese|[T]hey|[T]his|[W]e|[W]hen|[W]hile|[W]hat|[Y]et|[Y]ou|{SGML}){SPACENL} {
-                          String s;
                           // try to work around an apparent jflex bug where it
                           // gets a space at the token end by getting
                           // wrong the length of the trailing context.
@@ -827,6 +841,7 @@ gonna|gotta|lemme|gimme|wanna
                               break;
                             }
                           }
+                          String s;
                           if (strictTreebank3 && ! "U.S.".equals(yytext())) {
                             yypushback(1); // return a period for next time
                             s = yytext();
@@ -837,9 +852,22 @@ gonna|gotta|lemme|gimme|wanna
                           return getNext(s, yytext());
                         }
 /* Special case to get ca., fig. or Prop. before numbers */
-(ca|fig|prop)\./{SPACE}[:digit:]   { return getNext(); }
+{ABBREV3}/{SPACENL}?[:digit:]   {
+                          // try to work around an apparent jflex bug where it
+                          // gets a space at the token end by getting
+                          // wrong the length of the trailing context.
+                          while (yylength() > 0) {
+                            char last = yycharat(yylength()-1);
+                            if (last == ' ' || last == '\t' || (last >= '\n' && last <= '\r' || last == '\u0085')) {
+                              yypushback(1);
+                            } else {
+                              break;
+                            }
+                          }
+			  return getNext();
+			}
 /* Special case to get pty. ltd. or pty limited */
-pty\./{SPACE}(ltd|lim)  { return getNext(); }
+pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
 {ABBREV1}/{SENTEND}     {
                           String s;
                           if (strictTreebank3 && ! "U.S.".equals(yytext())) {
@@ -896,6 +924,22 @@ pty\./{SPACE}(ltd|lim)  { return getNext(); }
                   else {
                     return getNext();
                   }
+                }
+{SMILEY}/[^A-Za-z] { String txt = yytext();
+                  String origText = txt;
+                  if (normalizeParentheses) {
+                    txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
+                    txt = RIGHT_PAREN_PATTERN.matcher(txt).replaceAll(closeparen);
+                  }
+                  return getNext(txt, origText);
+                }
+{ASIANSMILEY}        { String txt = yytext();
+                  String origText = txt;
+                  if (normalizeParentheses) {
+                    txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
+                    txt = RIGHT_PAREN_PATTERN.matcher(txt).replaceAll(closeparen);
+                  }
+                  return getNext(txt, origText);
                 }
 \{              { if (normalizeOtherBrackets) {
                     return getNext(openbrace, yytext()); }

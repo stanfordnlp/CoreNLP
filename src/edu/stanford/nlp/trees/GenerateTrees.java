@@ -9,7 +9,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -22,6 +21,7 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -37,8 +37,8 @@ public class GenerateTrees {
     TERMINALS, NONTERMINALS, TSURGEON
   }
 
-  Map<String, Counter<List<String>>> nonTerminals = new HashMap<String, Counter<List<String>>>();
-  Map<String, Counter<String>> terminals = new HashMap<String, Counter<String>>();
+  Map<String, Counter<List<String>>> nonTerminals = Generics.newHashMap();
+  Map<String, Counter<String>> terminals = Generics.newHashMap();
   List<Pair<TregexPattern, TsurgeonPattern>> tsurgeons = new ArrayList<Pair<TregexPattern, TsurgeonPattern>>();
 
   Random random = new Random();

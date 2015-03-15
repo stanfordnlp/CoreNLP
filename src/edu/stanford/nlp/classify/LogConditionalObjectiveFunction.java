@@ -124,7 +124,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       }
     } else{
       //This is used for Stochastic Methods that don't need anything but the gradient (SGD)
-      calculateStochasticGradientOnly(x,batch);
+      calculateStochasticGradientLocal(x,batch);
     }
 
   }
@@ -445,7 +445,7 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
 
 
 
-  public void calculateStochasticGradientOnly(double[] x, int[] batch) {
+  public void calculateStochasticGradientLocal(double[] x, int[] batch) {
     if (values != null) {
       rvfcalculate(x);
       return;
@@ -614,6 +614,50 @@ public class LogConditionalObjectiveFunction<L, F> extends AbstractStochasticCac
       value -= dV;
     }
     return value;
+  }
+
+  @Override
+  public void calculateStochasticGradient(double[] x, int[] batch) {
+    if (derivative == null) {                                                                          
+      derivative = new double[domainDimension()];                                                      
+    } 
+    Arrays.fill(derivative, 0.0);
+    double[] sums = new double[numClasses];
+    double[] probs = new double[numClasses];
+    double[] counts = new double[numClasses];
+    Arrays.fill(counts, 0.0);
+    for (int d : batch) {
+
+      //Sets the index based on the current batch
+      int[] features = data[d];
+      // activation
+      Arrays.fill(sums, 0.0);
+      for (int c = 0; c < numClasses; c++) {
+        for (int f = 0; f < features.length; f++) {
+          int i = indexOf(features[f], c);
+          sums[c] += x[i];
+        }
+      }
+      // expectation (slower routine replaced by fast way)
+      // double total = Double.NEGATIVE_INFINITY;
+      // for (int c=0; c<numClasses; c++) {
+      //   total = SloppyMath.logAdd(total, sums[c]);
+      // }
+      double total = ArrayMath.logSum(sums);
+      int ld = labels[d];
+      for (int c = 0; c < numClasses; c++) {
+        probs[c] = Math.exp(sums[c] - total);
+        for (int f = 0; f < features.length; f++) {
+          int i = indexOf(features[f], c);
+          derivative[i] += probs[ld] * probs[c];
+        }
+      }
+      // observed
+      for (int f = 0; f < features.length; f++) {
+        int i = indexOf(features[f], labels[d]);
+        derivative[i] -= probs[ld];
+      }
+    }
   }
 
   protected void calculateStochasticAlgorithmicDifferentiation(double[] x, double[] v, int[] batch) {

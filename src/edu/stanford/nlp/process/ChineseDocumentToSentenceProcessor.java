@@ -13,7 +13,6 @@ import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -29,6 +28,7 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -41,18 +41,28 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
 
   private static final long serialVersionUID = 4054964767812217460L;
 
-  private static Set<Character> fullStopsSet = new HashSet<Character>(Arrays.asList(new Character[]{'\u3002', '\uff01', '\uff1f', '!', '?'}));
+  private static final Set<Character> fullStopsSet = Generics.newHashSet(Arrays.asList(new Character[]{'\u3002', '\uff01', '\uff1f', '!', '?'}));
   // not \uff0e . (too often separates English first/last name, etc.)
 
-  private static Set<Character> rightMarkSet = new HashSet<Character>(Arrays.asList(new Character[]{'\u201d', '\u2019', '\u300b', '\u300f', '\u3009', '\u300d', '\uff1e', '\uff07', '\uff09', '\'', '"', ')', ']', '>'}));
+  private static final Set<Character> rightMarkSet = Generics.newHashSet(Arrays.asList(new Character[]{'\u201d', '\u2019', '\u300b', '\u300f', '\u3009', '\u300d', '\uff1e', '\uff07', '\uff09', '\'', '"', ')', ']', '>'}));
 
-  private static String normalizationTableFile = null;
+  // private final String normalizationTableFile;
   private String encoding = "UTF-8";
-  private List<Pair<String,String>> normalizationTable = null;
+  private final List<Pair<String,String>> normalizationTable;
 
 
-  private void initNormalizationTable() {
-    if (normalizationTable == null && normalizationTableFile != null) {
+  public ChineseDocumentToSentenceProcessor() {
+    this(null);
+  }
+
+  /** @param normalizationTableFile A file listing character pairs for
+   *     normalization.  Currently the normalization table must be in UTF-8.
+   *     If this parameter is <code>null</code>, the default normalization
+   *     of the zero-argument constructor is used.
+   */
+  public ChineseDocumentToSentenceProcessor(String normalizationTableFile) {
+    // this.normalizationTableFile = normalizationTableFile;
+    if (normalizationTableFile != null) {
       normalizationTable = new ArrayList<Pair<String,String>>();
       for (String line : ObjectBank.getLineIterator(new File(normalizationTableFile), encoding)) {
         Pattern pairPattern = Pattern.compile("([^\\s]+)\\s+([^\\s]+)");
@@ -63,20 +73,9 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
           System.err.println("Didn't match: "+line);
         }
       }
+    } else {
+      normalizationTable = null;
     }
-  }
-
-  public ChineseDocumentToSentenceProcessor() {
-  }
-
-  /** @param normalizationTableFile A file listing character pairs for
-   *     normalization.  Currently the normalization table must be in UTF-8.
-   *     If this parameter is <code>null</code>, the default normalization
-   *     of the zero-argument constructor is used.
-   */
-  public ChineseDocumentToSentenceProcessor(String normalizationTableFile) {
-    ChineseDocumentToSentenceProcessor.normalizationTableFile = normalizationTableFile;
-    initNormalizationTable();
   }
   /*
   public ChineseDocumentToSentenceProcessor(String normalizationTableFile, String encoding) {
@@ -136,7 +135,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
       System.err.println("usage: java ChineseDocumentToSentenceProcessor [-segmentIBM] -file filename [-encoding encoding]");
       return;
     }
-    cp = new ChineseDocumentToSentenceProcessor(ChineseDocumentToSentenceProcessor.normalizationTableFile);
+    cp = new ChineseDocumentToSentenceProcessor();
     if (props.containsKey("encoding")) {
       System.err.println("WARNING: for now the default encoding is "+cp.encoding+". It's not changeable for now");
     }
@@ -245,7 +244,7 @@ public class ChineseDocumentToSentenceProcessor implements Serializable {
    * @param inputString Chinese document text which contains HTML tags
    * @return a List of sentence strings
    */
-  public List<String> fromHTML(String inputString) throws IOException {
+  public static List<String> fromHTML(String inputString) throws IOException {
     //HTMLParser parser = new HTMLParser();
     //return fromPlainText(parser.parse(inputString));
     List<String> ans = new ArrayList<String>();

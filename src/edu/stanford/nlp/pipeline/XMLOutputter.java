@@ -85,6 +85,10 @@ public class XMLOutputter {
       for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
         Element sentElem = new Element("sentence", NAMESPACE_URI);
         sentElem.addAttribute(new Attribute("id", Integer.toString(sentCount)));
+        Integer lineNumber = sentence.get(CoreAnnotations.LineNumberAnnotation.class);
+        if (lineNumber != null) {
+          sentElem.addAttribute(new Attribute("line", Integer.toString(lineNumber)));
+        }
         sentCount ++;
 
         // add the word table with all token-level annotations
@@ -179,7 +183,7 @@ public class XMLOutputter {
     if(graph != null) {
       Element depInfo = new Element("dependencies", curNS);
       depInfo.addAttribute(new Attribute("type", dependencyType));
-      // The SemanticGraph doesn't explicitely encode the ROOT node,
+      // The SemanticGraph doesn't explicitly encode the ROOT node,
       // so we print that out ourselves
       for (IndexedWord root : graph.getRoots()) {
         String rel = GrammaticalRelation.ROOT.getLongName();
@@ -216,7 +220,7 @@ public class XMLOutputter {
     if (isExtra) {
       depElem.addAttribute(new Attribute("extra", "true"));
     }
-    
+
     Element govElem = new Element("governor", curNS);
     govElem.addAttribute(new Attribute("idx", Integer.toString(source)));
     govElem.appendChild(sourceWord);
@@ -224,7 +228,7 @@ public class XMLOutputter {
       govElem.addAttribute(new Attribute("copy", Integer.toString(sourceCopy)));
     }
     depElem.appendChild(govElem);
-    
+
     Element dependElem = new Element("dependent", curNS);
     dependElem.addAttribute(new Attribute("idx", Integer.toString(target)));
     dependElem.appendChild(targetWord);
@@ -232,7 +236,7 @@ public class XMLOutputter {
       dependElem.addAttribute(new Attribute("copy", Integer.toString(targetCopy)));
     }
     depElem.appendChild(dependElem);
-    
+
     depInfo.appendChild(depElem);
   }
 
@@ -384,7 +388,7 @@ public class XMLOutputter {
       nm.appendChild(entity.getNormalizedName());
       top.appendChild(nm);
     }
-    
+
     if (entity.getSubType() != null){
       Element subtype = new Element("subtype", curNS);
       subtype.appendChild(entity.getSubType());
@@ -394,7 +398,7 @@ public class XMLOutputter {
     span.addAttribute(new Attribute("start", Integer.toString(entity.getHeadTokenStart())));
     span.addAttribute(new Attribute("end", Integer.toString(entity.getHeadTokenEnd())));
     top.appendChild(span);
-    
+
     top.appendChild(makeProbabilitiesElement(entity, curNS));
     return top;
   }
@@ -411,14 +415,14 @@ public class XMLOutputter {
       subtype.appendChild(relation.getSubType());
       top.appendChild(relation.getSubType());
     }
-    
+
     List<EntityMention> ents = relation.getEntityMentionArgs();
     Element args = new Element("arguments", curNS);
     for (EntityMention e : ents) {
       args.appendChild(toXML(e, curNS));
     }
     top.appendChild(args);
-    
+
     top.appendChild(makeProbabilitiesElement(relation, curNS));
     return top;
   }
@@ -440,7 +444,7 @@ public class XMLOutputter {
     }
     return probs;
   }
-  
+
 
 
 }

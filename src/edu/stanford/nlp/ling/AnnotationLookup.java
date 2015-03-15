@@ -1,10 +1,10 @@
 package edu.stanford.nlp.ling;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import edu.stanford.nlp.ling.CoreLabel.GenericAnnotation;
 import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Generics;
 
 /** @author Anna Rafferty */
 public class AnnotationLookup {
@@ -103,8 +103,7 @@ public class AnnotationLookup {
     return null;
   }
 
-  private static Map<Class<CoreAnnotation<?>>,Class<?>> valueCache
-  = new HashMap<Class<CoreAnnotation<?>>,Class<?>>();
+  private static Map<Class<CoreAnnotation<?>>,Class<?>> valueCache = Generics.newHashMap();
 
   /**
    * Returns the runtime value type associated with the given key.  Caches

@@ -2,6 +2,7 @@ package edu.stanford.nlp.semgraph;
 
 //import edu.stanford.nlp.ling.IndexedFeatureLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.*;
@@ -84,7 +85,7 @@ public class SemanticGraphFormatter {
       return "[]";
     }
     out = new StringBuilder();           // not thread-safe!!!
-    used = new HashSet<IndexedWord>();
+    used = Generics.newHashSet();
     if (sg.getRoots().size() == 1) {
       formatSGNode(sg, sg.getFirstRoot(), 1);
     } else {
@@ -127,7 +128,7 @@ public class SemanticGraphFormatter {
   private String formatSGNodeOneline(SemanticGraph sg,
       IndexedWord node) {
     StringBuilder sb = new StringBuilder();
-    Set<IndexedWord> usedOneline = new HashSet<IndexedWord>();
+    Set<IndexedWord> usedOneline = Generics.newHashSet();
     formatSGNodeOnelineHelper(sg, node, sb, usedOneline);
     return sb.toString();
   }

@@ -20,6 +20,7 @@ import edu.stanford.nlp.sequences.ExactBestSequenceFinder;
 import edu.stanford.nlp.sequences.SequenceModel;
 import edu.stanford.nlp.tagger.common.TaggerConstants;
 import edu.stanford.nlp.util.ArrayUtils;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 import java.io.OutputStreamWriter;
@@ -64,7 +65,7 @@ public class TestSentence implements SequenceModel {
   private int endSizePairs; // = 0;
 
   private volatile History history;
-  protected volatile Map<String,double[]> localScores = new HashMap<String,double[]>();
+  protected volatile Map<String,double[]> localScores = Generics.newHashMap();
   protected volatile double[][] localContextScores;
 
   protected final MaxentTagger maxentTagger;

@@ -4131,7 +4131,7 @@ public class SUTime {
     }
 
     public ExplicitTemporalSet setTimeZone(DateTimeZone tz) {
-      Set<Temporal> tzTemporals = new HashSet<Temporal>(temporals.size());
+      Set<Temporal> tzTemporals = Generics.newHashSet(temporals.size());
       for (Temporal t:temporals) {
         tzTemporals.add(Temporal.setTimeZone(t, tz));
       }
@@ -4186,7 +4186,7 @@ public class SUTime {
         return this;
       if (other == TIME_UNKNOWN || other == DURATION_UNKNOWN)
         return this;
-      Set<Temporal> newTemporals = new HashSet<Temporal>();
+      Set<Temporal> newTemporals = Generics.newHashSet();
       for (Temporal t : temporals) {
         Temporal t2 = t.intersect(other);
         if (t2 != null)

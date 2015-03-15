@@ -27,13 +27,12 @@
 package edu.stanford.nlp.dcoref;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import edu.stanford.nlp.dcoref.Semantics;
+import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
@@ -44,6 +43,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -57,15 +57,16 @@ import edu.stanford.nlp.util.Pair;
  */
 public class MentionExtractor {
 
-  protected HeadFinder headFinder;
+  protected final HeadFinder headFinder;
 
   protected String currentDocumentID;
 
-  protected Dictionaries dictionaries;
-  protected Semantics semantics;
+  protected final Dictionaries dictionaries;
+  protected final Semantics semantics;
 
   public CorefMentionFinder mentionFinder;
   protected StanfordCoreNLP stanfordProcessor;
+  protected LogisticClassifier<String, String> singletonPredictor;
 
   /** The maximum mention ID: for preventing duplicated mention ID assignment */
   protected int maxID = -1;
@@ -87,7 +88,7 @@ public class MentionExtractor {
   /**
    * Extracts the info relevant for coref from the next document in the corpus
    * @return List of mentions found in each sentence ordered according to the tree traversal.
-   * @throws Exception 
+   * @throws Exception
    */
   public Document nextDoc() throws Exception { return null; }
 
@@ -146,7 +147,7 @@ public class MentionExtractor {
    *                 Optionally, if scoring is desired, mentions must have mentionID and originalRef set.
    *                 All the other Mention fields are set here.
    * @return List of mentions ordered according to the tree traversal
-   * @throws Exception 
+   * @throws Exception
    */
   public List<List<Mention>> arrange(
       Annotation anno,
@@ -164,7 +165,7 @@ public class MentionExtractor {
       List<CoreLabel> sentence = words.get(sent);
       Tree tree = trees.get(sent);
       List<Mention> mentions = unorderedMentions.get(sent);
-      HashMap<String, List<Mention>> mentionsToTrees = new HashMap<String, List<Mention>>();
+      Map<String, List<Mention>> mentionsToTrees = Generics.newHashMap();
 
       // merge the parse tree of the entire sentence with the sentence words
       if(doMergeLabels) mergeLabels(tree, sentence);
@@ -208,7 +209,7 @@ public class MentionExtractor {
         mentionsForTree.add(mention);
 
         // generates all fields required for coref, such as gender, number, etc.
-        mention.process(dictionaries, semantics, this);
+        mention.process(dictionaries, semantics, this, singletonPredictor);
       }
 
       //
@@ -252,20 +253,20 @@ public class MentionExtractor {
   }
 
   static boolean inside(int i, Mention m) {
-    return (i >= m.startIndex && i < m.endIndex);
+    return i >= m.startIndex && i < m.endIndex;
   }
 
   /** Find syntactic relations (e.g., appositives) in a sentence */
   private void findSyntacticRelations(Tree tree, List<Mention> orderedMentions) {
-    Set<Pair<Integer, Integer>> appos = new HashSet<Pair<Integer, Integer>>();
+    Set<Pair<Integer, Integer>> appos = Generics.newHashSet();
     findAppositions(tree, appos);
     markMentionRelation(orderedMentions, appos, "APPOSITION");
 
-    Set<Pair<Integer, Integer>> preNomi = new HashSet<Pair<Integer, Integer>>();
+    Set<Pair<Integer, Integer>> preNomi = Generics.newHashSet();
     findPredicateNominatives(tree, preNomi);
     markMentionRelation(orderedMentions, preNomi, "PREDICATE_NOMINATIVE");
 
-    Set<Pair<Integer, Integer>> relativePronounPairs = new HashSet<Pair<Integer, Integer>>();
+    Set<Pair<Integer, Integer>> relativePronounPairs = Generics.newHashSet();
     findRelativePronouns(tree, relativePronounPairs);
     markMentionRelation(orderedMentions, relativePronounPairs, "RELATIVE_PRONOUN");
   }
@@ -285,8 +286,8 @@ public class MentionExtractor {
         if(np3!=null) addFoundPair(np2, np3, t, foundPairs);
       }
     } catch (Exception e) {
-      e.printStackTrace();
-      System.exit(0);
+      // shouldn't happen....
+      throw new RuntimeException(e);
     }
   }
 
@@ -310,6 +311,7 @@ public class MentionExtractor {
     findTreePattern(tree, appositionPattern3, appos);
     findTreePattern(tree, appositionPattern4, appos);
   }
+
   private void findPredicateNominatives(Tree tree, Set<Pair<Integer, Integer>> preNomi) {
     String predicateNominativePattern = "S < (NP=m1 $.. (VP < ((/VB/ < /^(am|are|is|was|were|'m|'re|'s|be)$/) $.. NP=m2)))";
     String predicateNominativePattern2 = "S < (NP=m1 $.. (VP < (VP < ((/VB/ < /^(be|been|being)$/) $.. NP=m2))))";
@@ -317,10 +319,12 @@ public class MentionExtractor {
     findTreePattern(tree, predicateNominativePattern, preNomi);
     findTreePattern(tree, predicateNominativePattern2, preNomi);
   }
+
   private void findRelativePronouns(Tree tree, Set<Pair<Integer, Integer>> relativePronounPairs) {
     String relativePronounPattern = "NP < (NP=m1 $.. (SBAR < (WHNP < WP|WDT=m2)))";
     findTreePattern(tree, relativePronounPattern, relativePronounPairs);
   }
+
   private static void markMentionRelation(List<Mention> orderedMentions, Set<Pair<Integer, Integer>> foundPairs, String flag) {
     for(Mention m1 : orderedMentions){
       for(Mention m2 : orderedMentions){
@@ -358,7 +362,7 @@ public class MentionExtractor {
   }
 
   /** Load Stanford Processor: skip unnecessary annotator */
-  protected StanfordCoreNLP loadStanfordProcessor(Properties props) {
+  protected static StanfordCoreNLP loadStanfordProcessor(Properties props) {
     boolean replicateCoNLL = Boolean.parseBoolean(props.getProperty(Constants.REPLICATECONLL_PROP, "false"));
 
     Properties pipelineProps = new Properties(props);

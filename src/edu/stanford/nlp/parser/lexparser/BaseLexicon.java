@@ -10,6 +10,7 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ReflectionLoading;
@@ -69,6 +70,7 @@ public class BaseLexicon implements Lexicon {
   protected boolean smartMutation;
 
   protected final Index<String> wordIndex;
+  
   protected final Index<String> tagIndex;
 
 
@@ -83,11 +85,11 @@ public class BaseLexicon implements Lexicon {
   /** Set of all tags as IntTaggedWord. Alive in both train and runtime
    *  phases, but transient.
    */
-  protected transient Set<IntTaggedWord> tags = new HashSet<IntTaggedWord>();
+  protected transient Set<IntTaggedWord> tags = Generics.newHashSet();
 
-  protected transient Set<IntTaggedWord> words = new HashSet<IntTaggedWord>();
+  protected transient Set<IntTaggedWord> words = Generics.newHashSet();
 
-  // protected transient Set<IntTaggedWord> sigs=new HashSet<IntTaggedWord>();
+  // protected transient Set<IntTaggedWord> sigs=Generics.newHashSet();
 
   /** Records the number of times word/tag pair was seen in training data.
    *  Includes word/tag pairs where one is a wildcard not a real word/tag.
@@ -109,7 +111,7 @@ public class BaseLexicon implements Lexicon {
    * Only used when training, specifically when training on sentenes
    * that weren't part of annotated (eg markovized, etc) data
    */
-  private Map<String, Counter<String>> baseTagCounts = new HashMap<String, Counter<String>>();
+  private Map<String, Counter<String>> baseTagCounts = Generics.newHashMap();
 
   public BaseLexicon(Index<String> wordIndex, Index<String> tagIndex) {
     this(new Options(), wordIndex, tagIndex);
@@ -254,7 +256,7 @@ public class BaseLexicon implements Lexicon {
                                                           // items in them
     }
     // for (Iterator ruleI = rules.iterator(); ruleI.hasNext();) {
-    tags = new HashSet<IntTaggedWord>();
+    tags = Generics.newHashSet();
     for (IntTaggedWord iTW : seenCounter.keySet()) {
       if (iTW.word() == nullWord && iTW.tag() != nullTag) {
         tags.add(iTW);
@@ -785,7 +787,7 @@ public class BaseLexicon implements Lexicon {
 
   
   protected void examineIntersection(Set<String> s1, Set<String> s2) {
-    Set<String> knownTypes = new HashSet<String>(s1);
+    Set<String> knownTypes = Generics.newHashSet(s1);
     knownTypes.retainAll(s2);
     if (knownTypes.size() != 0) {
       System.err.printf("|intersect|: %d%n", knownTypes.size());

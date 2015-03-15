@@ -124,7 +124,7 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
     SemanticGraph graph = new SemanticGraph();
 
     // first construct the actual nodes; keep them indexed by their index
-    Map<Integer, IndexedWord> nodes = new HashMap<Integer, IndexedWord>();
+    Map<Integer, IndexedWord> nodes = Generics.newHashMap();
     for(IntermediateNode in: ig.nodes){
       CoreLabel token = sentence.get(in.index - 1); // index starts at 1!
       IndexedWord word = new IndexedWord(in.docId, in.sentIndex, in.index, token);
@@ -416,7 +416,7 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
     String line = reader.readLine().trim();
     if(line.length() == 0) return null;
     int clusterCount = Integer.valueOf(line);
-    Map<Integer, CorefChain> chains = new HashMap<Integer, CorefChain>();
+    Map<Integer, CorefChain> chains = Generics.newHashMap();
     // read each cluster
     for(int c = 0; c < clusterCount; c ++) {
       line = reader.readLine().trim();
@@ -424,7 +424,7 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
       int cid = Integer.valueOf(bits[0]);
       int mentionCount = Integer.valueOf(bits[1]);
       Map<IntPair, Set<CorefChain.CorefMention>> mentionMap =
-              new HashMap<IntPair, Set<CorefChain.CorefMention>>();
+              Generics.newHashMap();
       CorefChain.CorefMention representative = null;
       // read each mention in this cluster
       for(int m = 0; m < mentionCount; m ++) {
@@ -469,7 +469,7 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
         Set<CorefChain.CorefMention> mentionsWithThisHead =
                 mentionMap.get(key);
         if(mentionsWithThisHead == null) {
-          mentionsWithThisHead = new HashSet<CorefChain.CorefMention>();
+          mentionsWithThisHead = Generics.newHashSet();
           mentionMap.put(key, mentionsWithThisHead);
         }
         mentionsWithThisHead.add(mention);

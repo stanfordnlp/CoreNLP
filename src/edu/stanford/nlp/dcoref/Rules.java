@@ -2,7 +2,6 @@ package edu.stanford.nlp.dcoref;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -15,7 +14,11 @@ import edu.stanford.nlp.dcoref.Dictionaries.Person;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.math.NumberMatchingRegex;
+import edu.stanford.nlp.stats.Counters;
+import edu.stanford.nlp.stats.IntCounter;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Sets;
 
 
 /**
@@ -23,7 +26,7 @@ import edu.stanford.nlp.util.Pair;
  * The name of the method for mention detection starts with detection,
  * for entity coref starts with entity, and for event coref starts with event.
  * 
- * @author heeyoung
+ * @author heeyoung, recasens
  */
 public class Rules {
 
@@ -93,7 +96,7 @@ public class Rules {
   }
   /** Word inclusion except stop words  */
   public static boolean entityWordsIncluded(CorefCluster mentionCluster, CorefCluster potentialAntecedent, Mention mention, Mention ant) {
-    Set<String> wordsExceptStopWords = new HashSet<String>(mentionCluster.words);
+    Set<String> wordsExceptStopWords = Generics.newHashSet(mentionCluster.words);
     wordsExceptStopWords.removeAll(Arrays.asList(new String[]{ "the","this", "mr.", "miss", "mrs.", "dr.", "ms.", "inc.", "ltd.", "corp.", "'s"}));
     wordsExceptStopWords.remove(mention.headString.toLowerCase());
     if(potentialAntecedent.words.containsAll(wordsExceptStopWords)) return true;
@@ -354,9 +357,9 @@ public class Rules {
     boolean thisHasExtra = false;
     int lengthThis = m.originalSpan.size();
     int lengthM = ant.originalSpan.size();
-    Set<String> thisWordSet = new HashSet<String>();
-    Set<String> antWordSet = new HashSet<String>();
-    Set<String> locationModifier = new HashSet<String>(Arrays.asList("east", "west", "north", "south",
+    Set<String> thisWordSet = Generics.newHashSet();
+    Set<String> antWordSet = Generics.newHashSet();
+    Set<String> locationModifier = Generics.newHashSet(Arrays.asList("east", "west", "north", "south",
         "eastern", "western", "northern", "southern", "upper", "lower"));
 
     for (int i=0; i< lengthThis ; i++){
@@ -392,11 +395,11 @@ public class Rules {
       return true;
     }
 
-    Set<String> locationM = new HashSet<String>();
-    Set<String> locationA = new HashSet<String>();
+    Set<String> locationM = Generics.newHashSet();
+    Set<String> locationA = Generics.newHashSet();
     String mString = m.spanToString().toLowerCase();
     String aString = a.spanToString().toLowerCase();
-    Set<String> locationModifier = new HashSet<String>(Arrays.asList("east", "west", "north", "south",
+    Set<String> locationModifier = Generics.newHashSet(Arrays.asList("east", "west", "north", "south",
         "eastern", "western", "northern", "southern", "northwestern", "southwestern", "northeastern",
         "southeastern", "upper", "lower"));
 
@@ -441,8 +444,8 @@ public class Rules {
         || !a.removePhraseAfterHead().toLowerCase().endsWith(a.headString)) {
       return false;
     }
-    Set<String> mProperNouns = new HashSet<String>();
-    Set<String> aProperNouns = new HashSet<String>();
+    Set<String> mProperNouns = Generics.newHashSet();
+    Set<String> aProperNouns = Generics.newHashSet();
     for (CoreLabel w : m.sentenceWords.subList(m.startIndex, m.headIndex)){
       if (w.get(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("NNP")) {
         mProperNouns.add(w.get(CoreAnnotations.TextAnnotation.class));
@@ -465,11 +468,11 @@ public class Rules {
     return true;
   }
 
-  static final HashSet<String> NUMBERS = new HashSet<String>(Arrays.asList(new String[]{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "hundred", "thousand", "million", "billion"}));
+  static final Set<String> NUMBERS = Generics.newHashSet(Arrays.asList(new String[]{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "hundred", "thousand", "million", "billion"}));
 
   /** Check whether there is a new number in later mention */
   public static boolean entityNumberInLaterMention(Mention mention, Mention ant) {
-    Set<String> antecedentWords = new HashSet<String>();
+    Set<String> antecedentWords = Generics.newHashSet();
     for (CoreLabel w : ant.originalSpan){
       antecedentWords.add(w.get(CoreAnnotations.TextAnnotation.class));
     }
@@ -487,8 +490,8 @@ public class Rules {
 
   /** Have extra proper noun except strings involved in semantic match */
   public static boolean entityHaveExtraProperNoun(Mention m, Mention a, Set<String> exceptWords) {
-    Set<String> mProper = new HashSet<String>();
-    Set<String> aProper = new HashSet<String>();
+    Set<String> mProper = Generics.newHashSet();
+    Set<String> aProper = Generics.newHashSet();
     String mString = m.spanToString();
     String aString = a.spanToString();
 
@@ -649,4 +652,131 @@ public class Rules {
     }
     return false;
   }
+
+  // Return true if the two mentions are less than n mentions apart in the same sent
+  public static boolean entityTokenDistance(Mention m1, Mention m2) {
+    if( (m2.sentNum == m1.sentNum) && (m1.startIndex - m2.startIndex < 6) ) return true;
+    return false;
+  }
+
+  // COREF_DICT strict: all the mention pairs between the two clusters must match in the dict
+  public static boolean entityClusterAllCorefDictionary(CorefCluster menCluster, CorefCluster antCluster, 
+      Dictionaries dict, int dictColumn, int freq){
+    boolean ret = false;
+    for(Mention men : menCluster.getCorefMentions()){
+      if(men.isPronominal()) continue;
+      for(Mention ant : antCluster.getCorefMentions()){   
+        if(ant.isPronominal() || men.headWord.lemma().equals(ant.headWord.lemma())) continue;
+        if(entityCorefDictionary(men, ant, dict, dictColumn, freq)){
+          ret = true;
+        } else {
+          return false;
+        }
+      }
+    }
+    return ret; 
+  }
+   
+   // COREF_DICT pairwise: the two mentions match in the dict
+   public static boolean entityCorefDictionary(Mention men, Mention ant, Dictionaries dict, int dictVersion, int freq){  
+          
+     Pair<String, String> mention_pair = new Pair<String, String>(
+         men.getSplitPattern()[dictVersion-1].toLowerCase(), 
+         ant.getSplitPattern()[dictVersion-1].toLowerCase());     
+     
+     int high_freq = -1;
+     if(dictVersion == 1){ 
+       high_freq = 75;
+     } else if(dictVersion == 2){
+       high_freq = 16;
+     } else if(dictVersion == 3){
+       high_freq = 16;
+     } else if(dictVersion == 4){
+       high_freq = 16;
+     }
+     
+     if(dict.corefDict.get(dictVersion-1).getCount(mention_pair) > high_freq) return true;
+
+     if(dict.corefDict.get(dictVersion-1).getCount(mention_pair) > freq){
+         if(dict.corefDictPMI.getCount(mention_pair) > 0.18) return true;
+         if(!dict.corefDictPMI.containsKey(mention_pair)) return true;
+     }     
+     return false; 
+   }
+   
+   public static boolean contextIncompatible(Mention men, Mention ant, Dictionaries dict) {
+     String antHead = ant.headWord.word();
+     if ( (ant.mentionType == MentionType.PROPER) 
+           && ant.sentNum != men.sentNum 
+           && !isContextOverlapping(ant,men) 
+           && dict.NE_signatures.containsKey(antHead)) {
+       IntCounter<String> ranks = Counters.toRankCounter(dict.NE_signatures.get(antHead));
+       List<String> context;
+       if (!men.getPremodifierContext().isEmpty()) {
+         context = men.getPremodifierContext();
+       } else {
+         context = men.getContext();
+       }
+       if (!context.isEmpty()) {
+         int highestRank = 100000;
+         for (String w: context) {
+           if (ranks.containsKey(w) && ranks.getIntCount(w) < highestRank) {
+             highestRank = ranks.getIntCount(w);
+           }
+           // check in the other direction
+           if (dict.NE_signatures.containsKey(w)) {
+             IntCounter<String> reverseRanks = Counters.toRankCounter(dict.NE_signatures.get(w));
+             if (reverseRanks.containsKey(antHead) && reverseRanks.getIntCount(antHead) < highestRank) {
+               highestRank = reverseRanks.getIntCount(antHead);
+             }
+           }
+         }
+         if (highestRank > 10) return true;
+       }
+     }
+     return false;
+   }
+
+   public static boolean sentenceContextIncompatible(Mention men, Mention ant, Dictionaries dict) {
+     if ( (ant.mentionType != MentionType.PROPER)
+          && (ant.sentNum != men.sentNum)
+          && (men.mentionType != MentionType.PROPER) 
+          && !isContextOverlapping(ant,men)) {
+       List<String> context1 = !ant.getPremodifierContext().isEmpty() ? ant.getPremodifierContext() : ant.getContext();
+       List<String> context2 = !men.getPremodifierContext().isEmpty() ? men.getPremodifierContext() : men.getContext();
+       if (!context1.isEmpty() && !context2.isEmpty()) {
+         int highestRank = 100000;
+         for (String w1: context1) {
+           for (String w2: context2) {
+             // check the forward direction
+             if (dict.NE_signatures.containsKey(w1)) {
+               IntCounter<String> ranks = Counters.toRankCounter(dict.NE_signatures.get(w1));
+               if (ranks.containsKey(w2) && ranks.getIntCount(w2) < highestRank) {
+                 highestRank = ranks.getIntCount(w2);
+               }
+             }
+             // check in the other direction
+             if (dict.NE_signatures.containsKey(w2)) {
+               IntCounter<String> reverseRanks = Counters.toRankCounter(dict.NE_signatures.get(w2));
+               if (reverseRanks.containsKey(w1) && reverseRanks.getIntCount(w1) < highestRank) {
+                 highestRank = reverseRanks.getIntCount(w1);
+               }
+             }
+           }
+         }
+         if (highestRank > 10) return true;
+       }
+     }
+     return false;
+   }
+   
+   private static boolean isContextOverlapping(Mention m1, Mention m2) {
+     Set<String> context1 = Generics.newHashSet();
+     Set<String> context2 = Generics.newHashSet();
+     context1.addAll(m1.getContext());
+     context2.addAll(m2.getContext());
+     return Sets.intersects(context1, context2);
+   }
+
+
 }

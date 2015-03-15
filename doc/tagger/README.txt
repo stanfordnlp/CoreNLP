@@ -1,4 +1,4 @@
-Stanford POS Tagger, v3.1.4 - 2012-11-11
+Stanford POS Tagger, v3.1.5 - 2013-04-04
 Copyright (c) 2002-2012 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
@@ -54,7 +54,7 @@ accessed via the command line. To run the demonstration GUI you should
 be able to use any of the following 3 methods:
 
 1)
-java -mx200m -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTaggerGUI models/left3words-wsj-0-18.tagger
+java -mx200m -classpath stanford-postagger.jar edu.stanford.nlp.tagger.maxent.MaxentTaggerGUI models/wsj-0-18-left3words.tagger
 
 2)
 Providing your system gives java enough memory by default, you can also
@@ -68,8 +68,8 @@ giving the command:
 
 To run the tagger from the command line, you can start with the provided
 script appropriate for you operating system:
-    ./stanford-postagger.sh models/left3words-wsj-0-18.tagger sample-input.txt
-    stanford-postagger models\left3words-wsj-0-18.tagger sample-input.txt
+    ./stanford-postagger.sh models/wsj-0-18-left3words.tagger sample-input.txt
+    stanford-postagger models\wsj-0-18-left3words.tagger sample-input.txt
 The output should match what is found in sample-output.txt
 
 The tagger has three modes: tagging, training, and testing.  Tagging
@@ -185,7 +185,7 @@ TaggerDemo.java
   should be able to compile and run it with:
 
   javac -cp stanford-postagger.jar TaggerDemo.java
-  java -cp ".:stanford-postagger.jar" TaggerDemo models/left3words-wsj-0-18.tagger sample-input.txt
+  java -cp ".:stanford-postagger.jar" TaggerDemo models/wsj-0-18-left3words.tagger sample-input.txt
 
   (If you are on Windows, you need to replace the ":" with a ";" in the
   -cp argument, and should use a "\" in place of the "/" in the filename....)
@@ -201,6 +201,9 @@ processing.
 
 CHANGES
 -----------------------------------------------
+
+2013-04-04    3.1.5     Speed improvements, ctb7 model, -nthreads 
+                        option 
 
 2012-11-11    3.1.4     Updated Chinese model 
 

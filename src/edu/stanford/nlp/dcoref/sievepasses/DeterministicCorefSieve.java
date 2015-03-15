@@ -37,6 +37,7 @@ import java.util.Set;
 import edu.stanford.nlp.dcoref.Constants;
 import edu.stanford.nlp.dcoref.CorefCluster;
 import edu.stanford.nlp.dcoref.Dictionaries;
+import edu.stanford.nlp.dcoref.Dictionaries.MentionType;
 import edu.stanford.nlp.dcoref.Dictionaries.Number;
 import edu.stanford.nlp.dcoref.Dictionaries.Person;
 import edu.stanford.nlp.dcoref.Document;
@@ -319,6 +320,44 @@ public abstract class DeterministicCorefSieve  {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+    
+    if(flags.USE_DISTANCE && Rules.entityTokenDistance(mention2, ant)){
+      return false;
+    }
+    
+    if(flags.USE_COREF_DICT){
+
+      // Head match
+      if(ant.headWord.lemma().equals(mention2.headWord.lemma())) return false;
+      
+      // Constraint: ignore pairs commonNoun - properNoun
+      if(ant.mentionType != MentionType.PROPER && 
+         ( mention2.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).startsWith("NNP") 
+           || !mention2.headWord.word().substring(1).equals(mention2.headWord.word().substring(1).toLowerCase()) ) ) return false;      
+      
+      // Constraint: ignore plurals
+      if(ant.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNS")
+          && mention2.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("NNS")) return false;
+     
+      // Constraint: ignore mentions with indefinite determiners
+      if(dict.indefinitePronouns.contains(ant.originalSpan.get(0).lemma()) 
+          || dict.indefinitePronouns.contains(mention2.originalSpan.get(0).lemma())) return false;  
+      
+      // Constraint: ignore coordinated mentions
+      if(ant.isCoordinated() || mention2.isCoordinated()) return false;
+
+      // Constraint: context incompatibility
+      if(Rules.contextIncompatible(mention2, ant, dict)) return false;
+
+      // Constraint: sentence context incompatibility when the mentions are common nouns
+      if(Rules.sentenceContextIncompatible(mention2, ant, dict)) return false;
+      
+      if(Rules.entityClusterAllCorefDictionary(mentionCluster, potentialAntecedent, dict, 1, 8)) return true;            
+      if(Rules.entityCorefDictionary(mention, ant, dict, 2, 2)) return true;     
+      if(Rules.entityCorefDictionary(mention, ant, dict, 3, 2)) return true; 
+      if(Rules.entityCorefDictionary(mention, ant, dict, 4, 2)) return true;           
+    }
+    
     if(flags.DO_PRONOUN){
       Mention m;
       if (mention.predicateNominatives!=null && mention.predicateNominatives.contains(mention2)) {

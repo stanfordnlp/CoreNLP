@@ -20,12 +20,25 @@ import java.util.regex.Pattern;
 
 import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 
+// todo [cdm 2013]: The treatment of roots in this class should probably be redone.
+// todo [cdm 2013]: Probably we should put fake root node in graph and arc(s) from it.
+// todo [cdm 2013]: At any rate, printing methods should print the root
+
 /**
  * Represents a semantic graph of a sentence or document, with IndexedWord
  * objects for nodes.
  * <p>
- * Note that given the kinds of representations that we normally use with
- * typedDependenciesCollapsed that there can be (small) cycles in a
+ * Notes:
+ * <br/>
+ * The root is not at present represented as a vertex in the graph.
+ * At present you need to get a root/roots
+ * from the separate roots variable and to know about it.
+ * This should maybe be changed, because otherwise, doing things like
+ * simply getting the set of nodes or edges from the graph doesn't give
+ * you root nodes or edges.
+ * <br/>
+ * Given the kinds of representations that we normally use with
+ * typedDependenciesCollapsed, there can be (small) cycles in a
  * SemanticGraph, and these cycles may involve the node that is conceptually the
  * root of the graph, so there may be no node without a parent node. You can
  * better get at the root(s) via the variable and methods provided.
@@ -118,7 +131,7 @@ public class SemanticGraph implements Serializable {
    * it.  Therefore, it is expensive; call edgeIterable() if possible.
    */
   public Set<SemanticGraphEdge> getEdgeSet() {
-    Set<SemanticGraphEdge> edges = new HashSet<SemanticGraphEdge>();
+    Set<SemanticGraphEdge> edges = Generics.newHashSet();
     for (SemanticGraphEdge edge : edgeIterable()) {
       edges.add(edge);
     }
@@ -321,8 +334,9 @@ public class SemanticGraph implements Serializable {
     return null;
   }
 
-  // if "det" is true, the search for a child is restricted to the "determiner"
-  // grammatical relation
+  // todo [cdm 2013]: Completely RTE-specific methods like this one should be used to a static class of helper methods under RTE
+  // If "det" is true, the search for a child is restricted to the "determiner"
+  // grammatical relation.
   public boolean matchPatternToVertex(String pattern, IndexedWord vertex, boolean det) {
     if (!vertexSet().contains(vertex)) {
       throw new IllegalArgumentException();
@@ -396,6 +410,7 @@ public class SemanticGraph implements Serializable {
     return true;
   }
 
+  // todo [cdm 2013]: Completely RTE-specific methods like this one should be used to a static class of helper methods under RTE
   public boolean matchPatternToVertex(String pattern, IndexedWord vertex) {
     if (!vertexSet().contains(vertex)) {
       throw new IllegalArgumentException();
@@ -428,8 +443,8 @@ public class SemanticGraph implements Serializable {
         List<IndexedWord> children = getChildList(vertex);
         boolean match = false;
         for (IndexedWord child : children) {
-          String lemma = (child.get(CoreAnnotations.LemmaAnnotation.class) == null ? "" : child.get(CoreAnnotations.LemmaAnnotation.class));
-          if (lemma.equals("")) {
+          String lemma = child.get(CoreAnnotations.LemmaAnnotation.class);
+          if (lemma == null || lemma.equals("")) {
             lemma = child.word().toLowerCase();
           }
           if (lemma.equals(word)) {
@@ -555,20 +570,18 @@ public class SemanticGraph implements Serializable {
 
   }
 
-  /*
-   * Find the path from the given node to a root; the path does not include the
+  /**
+   * Find the path from the given node to a root. The path does not include the
    * given node. Returns an empty list if vertex is a root. Returns null if a
    * root is inaccessible (should never happen).
    */
-
   public List<IndexedWord> getPathToRoot(IndexedWord vertex) {
     return getPathToRoot(vertex, new Vector<IndexedWord>());
   }
 
-  /*
-   * Return the real syntactic parent of vertex
+  /**
+   * Return the real syntactic parent of vertex.
    */
-
   public IndexedWord getParent(IndexedWord vertex) {
     List<IndexedWord> path = getPathToRoot(vertex);
 
@@ -646,7 +659,7 @@ public class SemanticGraph implements Serializable {
       throw new IllegalArgumentException();
     }
     // Do a depth first search
-    Set<IndexedWord> descendantSet = new HashSet<IndexedWord>();
+    Set<IndexedWord> descendantSet = Generics.newHashSet();
     descendantsHelper(vertex, descendantSet);
     return descendantSet;
   }
@@ -711,7 +724,6 @@ public class SemanticGraph implements Serializable {
 
   /**
    * Returns the relation that node a has with node b.
-   *
    */
   public GrammaticalRelation reln(IndexedWord a, IndexedWord b) {
     if (!vertexSet().contains(a)) {
@@ -812,7 +824,7 @@ public class SemanticGraph implements Serializable {
     // If no apparent root candidates are available, likely due to loop back
     // edges (rcmod), find the node that dominates the most nodes, and let
     // that be the new root. Note this implementation epitomizes K.I.S.S., and
-    // is brain dead and inoptimal, and will require further work.
+    // is brain dead and non-optimal, and will require further work.
     ClassicCounter<Pair<IndexedWord, IndexedWord>> nodeDists = new ClassicCounter<Pair<IndexedWord, IndexedWord>>();
     TreeSet<IndexedWord> nodes = new TreeSet<IndexedWord>(vertexSet());
 
@@ -829,8 +841,7 @@ public class SemanticGraph implements Serializable {
     }
 
     // K.I.S.S. alg: just sum up and see who's on top, values don't have much
-    // meaning outside
-    // of determining dominance.
+    // meaning outside of determining dominance.
     ClassicCounter<IndexedWord> dominatedEdgeCount = new ClassicCounter<IndexedWord>();
     TreeSet<IndexedWord> nodesList = new TreeSet<IndexedWord>(vertexSet());
     for (IndexedWord outer : nodesList) {
@@ -856,7 +867,8 @@ public class SemanticGraph implements Serializable {
     roots.addAll(words);
   }
 
-  /**
+  /*
+   * This method is invalidated by updated JGraph
    * Call this after performing a sequence of edits on vertices in the graph.
    * Because JGrapht maintains a set of indices based upon the vertices
    * themselves, any modifications to them will result in those indices being
@@ -866,9 +878,6 @@ public class SemanticGraph implements Serializable {
    * pulling electronic components out of the board and placing them back in, or
    * reseating them, to ensure the connections are proper).
    *
-   * TODO: delete this, as invalidated by updated JGraph
-   */
-  /*
    * public synchronized void reseat() { List<IndexedFeatureLabel> vertices =
    * new ArrayList<IndexedFeatureLabel>(vertexSet()); List<SemanticGraphEdge>
    * edges = new ArrayList<SemanticGraphEdge>(edgeSet());
@@ -954,10 +963,8 @@ public class SemanticGraph implements Serializable {
   /**
    * Returns true if vertex has an incoming relation reln
    *
-   * @param vertex
-   *          a node in this graph
-   * @param reln
-   *          the relation we want to check
+   * @param vertex A node in this graph
+   * @param reln The relation we want to check
    * @return true if vertex has an incoming relation reln
    */
   public boolean hasParentWithReln(IndexedWord vertex, GrammaticalRelation reln) {
@@ -1113,8 +1120,9 @@ public class SemanticGraph implements Serializable {
     return false;
   }
 
-  // Returns true iff this vertex stands in the "aux" relation to (any of)
-  // its parent(s).
+  /** Returns true iff this vertex stands in the "aux" relation to (any of)
+   *  its parent(s).
+   */
   public boolean isAuxiliaryVerb(IndexedWord vertex) {
     Set<GrammaticalRelation> relns = relns(vertex);
     if (relns.isEmpty())
@@ -1128,7 +1136,7 @@ public class SemanticGraph implements Serializable {
   }
 
   public Set<IndexedWord> getLeafVertices() {
-    Set<IndexedWord> result = new HashSet<IndexedWord>();
+    Set<IndexedWord> result = Generics.newHashSet();
     Set<IndexedWord> vertices = vertexSet();
     for (IndexedWord v : vertices) {
       if (outDegree(v) == 0) {
@@ -1146,10 +1154,10 @@ public class SemanticGraph implements Serializable {
    * @return true if the graph contains no cycles.
    */
   public boolean isDag() {
-    Set<IndexedWord> unused = new HashSet<IndexedWord>(vertexSet());
+    Set<IndexedWord> unused = Generics.newHashSet(vertexSet());
     while (!unused.isEmpty()) {
       IndexedWord arbitrary = unused.iterator().next();
-      boolean result = isDagHelper(arbitrary, unused, new HashSet<IndexedWord>());
+      boolean result = isDagHelper(arbitrary, unused, Generics.<IndexedWord>newHashSet());
       if (result) {
         return false;
       }
@@ -1229,12 +1237,12 @@ public class SemanticGraph implements Serializable {
     }
 
     StringBuilder sb = new StringBuilder();
-    Set<IndexedWord> used = new HashSet<IndexedWord>();
+    Set<IndexedWord> used = Generics.newHashSet();
     for (IndexedWord root : rootNodes) {
       sb.append("-> ").append(root).append(" (root)\n");
       recToString(root, sb, 1, used);
     }
-    Set<IndexedWord> nodes = new HashSet<IndexedWord>(vertexSet());
+    Set<IndexedWord> nodes = Generics.newHashSet(vertexSet());
     nodes.removeAll(used);
     while (!nodes.isEmpty()) {
       IndexedWord node = nodes.iterator().next();
@@ -1262,7 +1270,7 @@ public class SemanticGraph implements Serializable {
   private static String space(int width) {
     StringBuilder b = new StringBuilder();
     for (int i = 0; i < width; i++) {
-      b.append(" ");
+      b.append(' ');
     }
     return b.toString();
   }
@@ -1317,7 +1325,7 @@ public class SemanticGraph implements Serializable {
     for (IndexedWord word : vertexSet()) {
       for (SemanticGraphEdge edge : getIncomingEdgesSorted(word)) {
         GrammaticalRelation relation = edge.getRelation();
-        // Extract the specific: need to account for possiblity that relation
+        // Extract the specific: need to account for possibility that relation
         // can
         // be a String or GrammaticalRelation (how did it happen this way?)
         String specific = relation.getSpecific();
@@ -1438,6 +1446,8 @@ public class SemanticGraph implements Serializable {
     return buf.toString();
   }
 
+  // todo [cdm 2013]: These next two methods should really be toString options on indexed word but are different from all the current ones....
+
   private static String toDepStyle(IndexedWord fl) {
     StringBuilder buf = new StringBuilder();
     buf.append(fl.word());
@@ -1493,7 +1503,7 @@ public class SemanticGraph implements Serializable {
 
   public String toCompactString(boolean showTags) {
     StringBuilder sb = new StringBuilder();
-    Set<IndexedWord> used = new HashSet<IndexedWord>();
+    Set<IndexedWord> used = Generics.newHashSet();
     Collection<IndexedWord> roots = getRoots();
     if (roots.isEmpty()) {
       if (size() == 0) {
@@ -1634,7 +1644,7 @@ public class SemanticGraph implements Serializable {
 
   public SemanticGraph() {
     graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>();
-    roots = new HashSet<IndexedWord>();
+    roots = Generics.newHashSet();
   }
 
   /**
@@ -1647,14 +1657,13 @@ public class SemanticGraph implements Serializable {
     Collection<IndexedWord> oldRoots =
       new ArrayList<IndexedWord>(g.getRoots());
     Set<IndexedWord> vertexes = g.vertexSet();
-    HashMap<IndexedWord, IndexedWord> prevToNewMap =
-      new HashMap<IndexedWord, IndexedWord>();
+    Map<IndexedWord, IndexedWord> prevToNewMap = Generics.newHashMap();
     for (IndexedWord vertex : vertexes) {
       IndexedWord newVertex = new IndexedWord(vertex);
       addVertex(newVertex);
       prevToNewMap.put(vertex, newVertex);
     }
-    roots = new HashSet<IndexedWord>();
+    roots = Generics.newHashSet();
     for (IndexedWord oldRoot : oldRoots) {
       roots.add(prevToNewMap.get(oldRoot));
     }
@@ -1675,14 +1684,14 @@ public class SemanticGraph implements Serializable {
     Collection<IndexedWord> oldRoots =
       new ArrayList<IndexedWord>(g.getRoots());
     if (prevToNewMap == null)
-      prevToNewMap = new HashMap<IndexedWord, IndexedWord>();
+      prevToNewMap = Generics.newHashMap();
     Set<IndexedWord> vertexes = g.vertexSet();
     for (IndexedWord vertex : vertexes) {
       IndexedWord newVertex = new IndexedWord(vertex);
       addVertex(newVertex);
       prevToNewMap.put(vertex, newVertex);
     }
-    roots = new HashSet<IndexedWord>();
+    roots = Generics.newHashSet();
     for (IndexedWord oldRoot : oldRoots) {
       roots.add(prevToNewMap.get(oldRoot));
     }
@@ -1714,7 +1723,7 @@ public class SemanticGraph implements Serializable {
     Morphology morphology = (lemmatize) ? new Morphology() : null;
     graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>();
 
-    roots = new HashSet<IndexedWord>();
+    roots = Generics.newHashSet();
 
     for (TypedDependency d : dependencies) {
       TreeGraphNode gov = d.gov();
@@ -1807,7 +1816,7 @@ public class SemanticGraph implements Serializable {
   private static class SemanticGraphParsingTask extends StringParsingTask<SemanticGraph> {
 
     private SemanticGraph sg;
-    private Set<Integer> indexesUsed = new HashSet<Integer>();
+    private Set<Integer> indexesUsed = Generics.newHashSet();
 
     public SemanticGraphParsingTask(String s) {
       super(s);

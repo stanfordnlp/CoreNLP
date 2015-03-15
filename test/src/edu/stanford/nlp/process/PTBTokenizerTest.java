@@ -21,8 +21,16 @@ public class PTBTokenizerTest extends TestCase {
     "U.S. insurance: Conseco acquires Kemper Corp. \n</HEADLINE>\n<P>\nU.S insurance",
     "Based in Eugene,Ore., PakTech needs a new distributor after Sydney-based Creative Pack Pty. Ltd. went into voluntary administration.",
     "The Iron Age (ca. 1300 – ca. 300 BC).",
-    "Indo\u00ADnesian ship\u00ADing \u00AD",
-    "Gimme a phone, I'm gonna call."
+    "Indo\u00ADnesian ship\u00ADping \u00AD",
+    "Gimme a phone, I'm gonna call.",
+    "\"John & Mary's dog,\" Jane thought (to herself).\n\"What a #$%!\na- ``I like AT&T''.\"",
+    "I said at 4:45pm.",
+    "I can't believe they wanna keep 40% of that.\"\n``Whatcha think?''\n\"I don't --- think so...,\"",
+    "You `paid' US$170,000?!\nYou should've paid only$16.75.",
+    "1. Buy a new Chevrolet (37%-owned in the U.S..) . 15%",
+    "I like you ;-) but do you care :(. I'm happy ^_^ but shy (x.x)!",
+    "Diamond (``Not even the chair'') lives near Udaipur (84km). {1. A potential Palmer trade:}",
+    "No. I like No. 24 and no.47."
   };
 
   private String[][] ptbGold = {
@@ -33,8 +41,23 @@ public class PTBTokenizerTest extends TestCase {
       "distributor", "after", "Sydney-based", "Creative", "Pack", "Pty.", "Ltd.",
       "went", "into", "voluntary", "administration", "." },
     { "The", "Iron", "Age", "-LRB-", "ca.", "1300", "--", "ca.", "300", "BC", "-RRB-", "." },
-    { "Indonesian", "shiping", "-" },
-    { "Gim", "me", "a", "phone", ",", "I", "'m", "gon", "na", "call", "." }
+    { "Indonesian", "shipping", "-" },
+    { "Gim", "me", "a", "phone", ",", "I", "'m", "gon", "na", "call", "."},
+    { "``", "John", "&", "Mary", "'s", "dog", ",", "''", "Jane", "thought", "-LRB-", "to", "herself", "-RRB-",
+      ".", "``", "What", "a", "#", "$", "%", "!", "a", "-", "``", "I", "like", "AT&T", "''", ".", "''" },
+    { "I", "said", "at", "4:45", "pm", "."},
+    { "I", "ca", "n't", "believe", "they", "wan", "na", "keep", "40", "%", "of", "that", ".", "''",
+      "``", "Whatcha", "think", "?", "''", "``", "I", "do", "n't", "--", "think", "so", "...", ",", "''" },
+          // We don't yet split "Whatcha" but probably should following model of "Whaddya" --> What d ya. Maybe What cha
+    { "You", "`", "paid", "'", "US$", "170,000", "?!", "You", "should", "'ve", "paid", "only", "$", "16.75", "." },
+    { "1", ".", "Buy", "a", "new", "Chevrolet",
+      "-LRB-", "37", "%", "-", "owned", "in", "the", "U.S.", ".", "-RRB-", ".", "15", "%" },
+          // Unclear if 37%-owned is right or wrong under old PTB....  Maybe should be 37 %-owned even though sort of crazy
+    { "I", "like", "you", ";--RRB-", "but", "do", "you", "care",  ":-LRB-", ".",
+      "I", "'m", "happy", "^_^", "but", "shy", "-LRB-x.x-RRB-", "!" },
+    { "Diamond", "-LRB-", "``", "Not", "even",  "the", "chair", "''", "-RRB-", "lives", "near", "Udaipur", "-LRB-", "84km", "-RRB-", ".",
+      "-LCB-", "1", ".", "A", "potential", "Palmer", "trade", ":", "-RCB-"},
+    { "No", ".", "I", "like", "No.", "24", "and", "no.", "47", "." },
   };
 
   public void testPTBTokenizerWord() {

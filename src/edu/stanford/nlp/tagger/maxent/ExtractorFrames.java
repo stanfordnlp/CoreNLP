@@ -698,7 +698,7 @@ class ExtractorWordShapeClassifier extends Extractor {
   // note that if you want to bring it back, make it a map from wsc to
   // cache rather than just a single cache.  -- horatio
   //private static final Map<String, String> shapes =
-  //  new HashMap<String, String>();
+  //  Generics.newHashMap();
   // --- should be:
   //private static final Map<String, Map<String, String>> ...
 

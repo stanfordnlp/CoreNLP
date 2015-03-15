@@ -801,9 +801,8 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     //       (has remove function and generate new id every time)
     Index<Pair<Integer,Integer>> bidIndex = new HashIndex<Pair<Integer,Integer>>();
     // Map of branch id to branch state
-    Map<Integer,BranchState> branchStates = new HashMap<Integer,BranchState>();
-
-    Set<MatchedStates> activeMatchedStates;
+    Map<Integer,BranchState> branchStates = Generics.newHashMap();
+    Set<MatchedStates> activeMatchedStates = Generics.newHashSet();
 
     /**
      * Links specified MatchedStates to us (list of MatchedStates
@@ -812,9 +811,6 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
      */
     private void link(MatchedStates s)
     {
-      if (activeMatchedStates == null) {
-        activeMatchedStates = new HashSet<MatchedStates>();
-      }
       activeMatchedStates.add(s);
     }
 
@@ -847,8 +843,8 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
      */
     private void condense()
     {
-      Set<Integer> curBidSet = new HashSet<Integer>();
-      Set<Integer> keepBidStates = new HashSet<Integer>();
+      Set<Integer> curBidSet = Generics.newHashSet();
+      Set<Integer> keepBidStates = Generics.newHashSet();
       for (MatchedStates ms:activeMatchedStates) {
         // Trim out unneeded states info
         List<State> states = ms.states;
@@ -1236,7 +1232,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
      */
     protected MatchedStates split(int branchLimit)
     {
-      Set<Integer> curBidSet = new HashSet<Integer>();
+      Set<Integer> curBidSet = Generics.newHashSet();
       for (State state:states) {
         curBidSet.add(state.bid);
       }
@@ -1250,7 +1246,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
 
       MatchedStates<T> newStates = new MatchedStates<T>(matcher, branchStates);
       int v = Math.min(branchLimit, (bids.size()+1)/2);
-      Set<Integer> keepBidSet = new HashSet<Integer>();
+      Set<Integer> keepBidSet = Generics.newHashSet();
       keepBidSet.addAll(bids.subList(0, v));
       swapAndClear();
       for (State s:oldStates) {
@@ -1366,7 +1362,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
      */
     private Collection<Integer> getMatchIndices()
     {
-      Set<Integer> allMatchIndices = new HashSet<Integer>();
+      Set<Integer> allMatchIndices = Generics.newHashSet();
       for (int i = 0; i < states.size(); i++) {
         State state = states.get(i);
         if (state.tstate.equals(SequencePattern.MATCH_STATE)) {

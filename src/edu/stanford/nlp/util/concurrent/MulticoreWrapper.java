@@ -19,6 +19,9 @@ import java.util.concurrent.TimeUnit;
  * Provides convenient multicore processing for threadsafe objects. Objects that can
  * be wrapped by MulticoreWrapper must implement the ThreadsafeProcessor interface.
  *
+ * See edu.stanford.nlp.util.concurrent.MulticoreWrapperTest and
+ * edu.stanford.nlp.tagger.maxent.documentation.MulticoreWrapperDemo for examples of use.
+ *
  * TODO(spenceg): Handle exceptions gracefully in the queue.
  * TODO(spenceg): This code does not support multiple consumers, i.e., multi-threaded calls
  * to peek() and poll().
@@ -31,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 public class MulticoreWrapper<I,O> {
 
   private long maxSubmitBlockTime = 0;
-  
+
   private final int nThreads;
   private int lastSubmittedItemId = 0;
   // Which id was the last id returned.  Only meaningful in the case
@@ -50,8 +53,8 @@ public class MulticoreWrapper<I,O> {
 
   /**
    * Constructor.
-   * 
-   * @param nThreads -- if less than or equal to 0, then automatically determine the number
+   *
+   * @param nThreads If less than or equal to 0, then automatically determine the number
    *                    of threads. Otherwise, the size of the underlying threadpool.
    * @param processor
    */
@@ -61,7 +64,7 @@ public class MulticoreWrapper<I,O> {
 
   /**
    * Constructor.
-   * 
+   *
    * @param numThreads -- if less than or equal to 0, then automatically determine the number
    *                    of threads. Otherwise, the size of the underlying threadpool.
    * @param processor
@@ -81,7 +84,7 @@ public class MulticoreWrapper<I,O> {
     // Sanity check: Fixed thread pool so prevent timeouts.
     // Default should be false
     threadPool.allowCoreThreadTimeOut(false);
-    
+
     // Setup the processors, one per thread
     processorList.add(processor);
     idleProcessors.add(0);
@@ -90,25 +93,23 @@ public class MulticoreWrapper<I,O> {
       idleProcessors.add(i);
     }
   }
-  
+
   /**
    * Maximum amount of time to block on a call to put() in milliseconds.
    * Default 0, which indicates to never time out.
-   * 
+   *
    * @param t
    */
   public void setMaxBlockTime(long t) { maxSubmitBlockTime = t; }
-  
+
   /**
    * Return status information about the underlying threadpool.
-   * 
-   * @return
    */
   @Override
   public String toString() {
-    return String.format("active: %d/%d  submitted: %d  completed: %d  input_q: %d  output_q: %d  idle_q: %d", 
-        threadPool.getActiveCount(), 
-        threadPool.getPoolSize(), 
+    return String.format("active: %d/%d  submitted: %d  completed: %d  input_q: %d  output_q: %d  idle_q: %d",
+        threadPool.getActiveCount(),
+        threadPool.getPoolSize(),
         threadPool.getTaskCount(),
         threadPool.getCompletedTaskCount(),
         threadPool.getQueue().size(),
@@ -181,8 +182,6 @@ public class MulticoreWrapper<I,O> {
 
   /**
    * Blocks until all active processes finish.
-   *
-   * @return True on successful shutdown, false otherwise.
    */
   public void join() {
     // Make blocking calls to the last processes that are running

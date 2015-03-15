@@ -47,7 +47,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -66,6 +65,7 @@ import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Factory;
 import edu.stanford.nlp.util.FixedPrioritiesPriorityQueue;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PriorityQueue;
@@ -604,7 +604,7 @@ public class Counters {
    * removed entries.
    */
   public static <E> Set<E> retainNonZeros(Counter<E> counter) {
-    Set<E> removed = new HashSet<E>();
+    Set<E> removed = Generics.newHashSet();
     for (E key : counter.keySet()) {
       if (counter.getCount(key) == 0.0) {
         removed.add(key);
@@ -628,7 +628,7 @@ public class Counters {
    * @return The set of discarded entries.
    */
   public static <E> Set<E> retainAbove(Counter<E> counter, double countThreshold) {
-    Set<E> removed = new HashSet<E>();
+    Set<E> removed = Generics.newHashSet();
     for (E key : counter.keySet()) {
       if (counter.getCount(key) < countThreshold) {
         removed.add(key);
@@ -652,7 +652,7 @@ public class Counters {
    * @return The set of discarded entries.
    */
   public static <E> Set<E> retainBelow(Counter<E> counter, double countMaxThreshold) {
-    Set<E> removed = new HashSet<E>();
+    Set<E> removed = Generics.newHashSet();
     for (E key : counter.keySet()) {
       if (counter.getCount(key) > countMaxThreshold) {
         removed.add(key);
@@ -674,7 +674,7 @@ public class Counters {
    * @return The set of discarded entries.
    */
   public static Set<String> retainMatchingKeys(Counter<String> counter, List<Pattern> matchPatterns) {
-    Set<String> removed = new HashSet<String>();
+    Set<String> removed = Generics.newHashSet();
     for (String key : counter.keySet()) {
       boolean matched = false;
       for (Pattern pattern : matchPatterns) {
@@ -703,7 +703,7 @@ public class Counters {
    * @return The set of discarded entries.
    */
   public static<E> Set<E> retainKeys(Counter<E> counter, Collection<E> matchKeys) {
-    Set<E> removed = new HashSet<E>();
+    Set<E> removed = Generics.newHashSet();
     for (E key : counter.keySet()) {
       boolean matched = matchKeys.contains(key);
       if (!matched) {
@@ -741,7 +741,7 @@ public class Counters {
    *         threshold.
    */
   public static <E> Set<E> keysAbove(Counter<E> c, double countThreshold) {
-    Set<E> keys = new HashSet<E>();
+    Set<E> keys = Generics.newHashSet();
     for (E key : c.keySet()) {
       if (c.getCount(key) >= countThreshold) {
         keys.add(key);
@@ -755,7 +755,7 @@ public class Counters {
    * This set may have 0 elements but will not be null.
    */
   public static <E> Set<E> keysBelow(Counter<E> c, double countThreshold) {
-    Set<E> keys = new HashSet<E>();
+    Set<E> keys = Generics.newHashSet();
     for (E key : c.keySet()) {
       if (c.getCount(key) <= countThreshold) {
         keys.add(key);
@@ -769,7 +769,7 @@ public class Counters {
    * have 0 elements but will not be null.
    */
   public static <E> Set<E> keysAt(Counter<E> c, double count) {
-    Set<E> keys = new HashSet<E>();
+    Set<E> keys = Generics.newHashSet();
     for (E key : c.keySet()) {
       if (c.getCount(key) == count) {
         keys.add(key);
@@ -1506,7 +1506,7 @@ public class Counters {
    */
   public static <E> Counter<E> average(Counter<E> c1, Counter<E> c2) {
     Counter<E> average = c1.getFactory().create();
-    Set<E> allKeys = new HashSet<E>(c1.keySet());
+    Set<E> allKeys = Generics.newHashSet(c1.keySet());
     allKeys.addAll(c2.keySet());
     for (E key : allKeys) {
       average.setCount(key, (c1.getCount(key) + c2.getCount(key)) * 0.5);
@@ -1615,7 +1615,7 @@ public class Counters {
       }
     }
     // left overs
-    Set<E> rest = new HashSet<E>(b.keySet());
+    Set<E> rest = Generics.newHashSet(b.keySet());
     rest.removeAll(a.keySet());
 
     for (E key : rest) {
@@ -2593,7 +2593,7 @@ public class Counters {
             // return a HashMap backed by the same numeric type to
             // keep the precision of the returned counter consistent with
             // this one's precision
-            return fromMap(new HashMap<E, N>(), type);
+            return fromMap(Generics.<E, N>newHashMap(), type);
           }
         };
       }

@@ -13,7 +13,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +38,7 @@ import edu.stanford.nlp.swing.TooltipJList;
 import edu.stanford.nlp.trees.Constituent;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 
@@ -53,7 +53,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
   private static MatchesPanel instance = null;
   private JList list;
   // todo: Change the below to just be a List<List<Tree>> paralleling list above
-  private HashMap<TreeFromFile,List<Tree>> matchedParts;
+  private Map<TreeFromFile,List<Tree>> matchedParts;
   private List<MatchesPanelListener> listeners;
   private Color highlightColor = Color.CYAN;
   private boolean showOnlyMatchedPortion = false;
@@ -79,7 +79,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
     list = new TooltipJList(model);
     list.setCellRenderer(new MatchCellRenderer());
     list.setTransferHandler(new TreeTransferHandler());
-    matchedParts = new HashMap<TreeFromFile,List<Tree>>();
+    matchedParts = Generics.newHashMap();
     list.addListSelectionListener(this);
     MouseInputAdapter mouseListener = new MouseInputAdapter() {
       private boolean dragNDrop = false;
@@ -177,7 +177,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
   }
 
   public void removeAllMatches() {
-    setMatchedParts(new HashMap<TreeFromFile, List<Tree>>());
+    setMatchedParts(Generics.<TreeFromFile, List<Tree>>newHashMap());
     ((DefaultListModel) list.getModel()).removeAllElements();
     list.setSelectedIndex(-1);
     this.sendToListeners();
@@ -198,7 +198,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
    *
    * @param matches trees that match the expression
    */
-  public void setMatches(List<TreeFromFile> matches, HashMap<TreeFromFile, List<Tree>> matchedParts) {
+  public void setMatches(List<TreeFromFile> matches, Map<TreeFromFile, List<Tree>> matchedParts) {
     // cdm Nov 2010: I rewrote this so the performance wasn't dreadful.
     // In the old days, one by one updates to active Swing components gave dreadful performance, so
     // I changed that, but that wasn't really the problem, it was that the if part didn't honor
@@ -215,7 +215,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
       FileTreeNode refTreebank = FilePanel.getInstance().getActiveTreebanks().get(0); //First selected treebank is the reference
       String refFileName = refTreebank.getFilename();
       List<Tree> treeList = null;
-      Map<TreeFromFile, List<Tree>> filteredMatchedParts = new HashMap<TreeFromFile,List<Tree>>();
+      Map<TreeFromFile, List<Tree>> filteredMatchedParts = Generics.newHashMap();
 
       for (TreeFromFile t2 : matches) {
         if (t2.getFilename() == null || t2.getSentenceId() < 0) { //Trees were not read by PennTreeReader.
@@ -242,7 +242,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
         } //else skip this tree
         if(newModel.size() >= maxMatches) break;
       }
-      matchedParts = (HashMap<TreeFromFile, List<Tree>>) filteredMatchedParts;
+      matchedParts = filteredMatchedParts;
 
     } else if (!showOnlyMatchedPortion || matchedParts == null) {
       int i = 0;
@@ -415,7 +415,7 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
     }
   }
 
-  public HashMap<TreeFromFile, List<Tree>> getMatchedParts() {
+  public Map<TreeFromFile, List<Tree>> getMatchedParts() {
     return matchedParts;
   }
 
@@ -423,9 +423,9 @@ public class MatchesPanel extends JPanel implements ListSelectionListener {
    * Set the matched parts to the given hash/list - if null is passed in,
    * resets matchedParts to an empty hash.
    */
-  private void setMatchedParts(HashMap<TreeFromFile, List<Tree>> matchedParts) {
+  private void setMatchedParts(Map<TreeFromFile, List<Tree>> matchedParts) {
     if(matchedParts == null)
-      this.matchedParts = new HashMap<TreeFromFile, List<Tree>>();
+      this.matchedParts = Generics.newHashMap();
     else
       this.matchedParts = matchedParts;
   }

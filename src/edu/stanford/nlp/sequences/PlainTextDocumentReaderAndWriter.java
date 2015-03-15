@@ -9,6 +9,7 @@ import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.process.WordToSentenceProcessor;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.XMLUtils;
 
@@ -53,7 +54,7 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
     }
 
     private static final Map<String, OutputStyle> shortNames =
-      new HashMap<String, OutputStyle>();
+      Generics.newHashMap();
     static {
       for (OutputStyle style : OutputStyle.values())
         shortNames.put(style.shortName, style);

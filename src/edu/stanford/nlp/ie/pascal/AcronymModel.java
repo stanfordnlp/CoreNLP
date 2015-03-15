@@ -2,6 +2,9 @@ package edu.stanford.nlp.ie.pascal;
 
 import java.util.*;
 import java.io.*;
+
+import edu.stanford.nlp.util.Generics;
+
  /**
   * Scores Pascal challenge workshop information templates.
   * This score reflects which fields are present/absent, how well acronyms
@@ -133,7 +136,7 @@ public class AcronymModel implements RelationalModel {
   private double computeProb(String wsname, String wsacronym, String confname,
                             String confacronym, String wsurl, String confurl){
 
-    HashSet<String> presentFields = new HashSet<String>();
+    Set<String> presentFields = Generics.newHashSet();
     if( wsname != null && !wsname.equals("null") && !wsname.equals("") )
       presentFields.add("workshopname");
     if( wsacronym != null && !wsacronym.equals("null") && !wsacronym.equals(""))

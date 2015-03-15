@@ -1,9 +1,10 @@
 package edu.stanford.nlp.trees;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Collection;
+
+import edu.stanford.nlp.util.Generics;
 
 /**
  * A <code>TreeGraph</code> is a tree with additional directed,
@@ -28,7 +29,7 @@ public class TreeGraph implements Serializable {
   /**
    * A map from arbitrary integer indices to nodes.
    */
-  private Map<Integer, TreeGraphNode> indexMap = new HashMap<Integer, TreeGraphNode>();
+  private Map<Integer, TreeGraphNode> indexMap = Generics.newHashMap();
 
   /**
    * Construct a new <code>TreeGraph</code> having the same tree

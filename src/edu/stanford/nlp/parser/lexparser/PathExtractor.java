@@ -2,9 +2,9 @@ package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Generics;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +16,7 @@ import java.util.Map;
 class PathExtractor extends AbstractTreeExtractor<Map<String, List<List<String>>>> {
   private static final String END = "END";
   //protected final Index<String> stateIndex;
-  private Map<String, List<List<String>>> allPaths = new HashMap<String, List<List<String>>>();
+  private Map<String, List<List<String>>> allPaths = Generics.newHashMap();
   private HeadFinder hf;
 
   public PathExtractor(HeadFinder hf, Options op) {

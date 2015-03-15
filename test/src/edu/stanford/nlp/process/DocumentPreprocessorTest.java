@@ -16,6 +16,7 @@ import java.util.NoSuchElementException;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Sentence;
+import edu.stanford.nlp.util.StringUtils;
 
 
 public class DocumentPreprocessorTest extends TestCase {
@@ -38,6 +39,25 @@ public class DocumentPreprocessorTest extends TestCase {
     for (int i = 0; i < results.size(); ++i) {
       assertEquals(expectedResults[i], results.get(i));
     }
+  }
+  
+  public void testSetSentencePunctWords(){
+    String test = "This is a test of the preprocessor2... it should split this text into sentences?This should be a different sentence.";
+    String []expectedResults = {"This is a test of the preprocessor2 ...",
+        "it should split this text into sentences ?","This should be a different sentence ."};
+    ArrayList<String> results = new ArrayList<String>();
+    DocumentPreprocessor document =
+      new DocumentPreprocessor(new BufferedReader(new StringReader(test)));
+    String[] sentenceFinalPuncWords = {".", "?","!","...","\n"};
+    document.setSentenceFinalPuncWords(sentenceFinalPuncWords);
+    for (List<HasWord> sentence : document) {  
+      results.add(Sentence.listToString(sentence));
+    }
+    assertEquals(expectedResults.length, results.size());
+    for (int i = 0; i < results.size(); ++i) {
+      assertEquals(expectedResults[i], results.get(i));
+    }
+    
   }
 
   public static void compareXMLResults(String input,

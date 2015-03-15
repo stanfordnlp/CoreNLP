@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,6 +11,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.international.arabic.Buckwalter;
 import edu.stanford.nlp.trees.treebank.Mapper;
 import edu.stanford.nlp.trees.international.arabic.ATBTreeUtils;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Applies a default set of lexical transformations that have been empirically validated
@@ -75,15 +75,15 @@ public class DefaultLexicalMapper implements Mapper, Serializable {
 
   public DefaultLexicalMapper() {
     parentTagsToEscape =
-      Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(parentTagString.split("\\s+"))));
+      Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(parentTagString.split("\\s+"))));
 
 //    utf8Clitics =
-//      Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(utf8CliticString.split("\\s+"))));
+//      Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(utf8CliticString.split("\\s+"))));
 
     Buckwalter bw = new Buckwalter(true);
     String bwString = bw.apply(utf8CliticString);
     bwClitics =
-      Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(bwString.split("\\s+"))));
+      Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(bwString.split("\\s+"))));
   }
 
   private String mapUtf8(String element) {

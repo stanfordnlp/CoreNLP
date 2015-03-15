@@ -17,6 +17,7 @@ import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.arabic.*;
 import edu.stanford.nlp.trees.tregex.*;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 
@@ -58,7 +59,7 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams {
     optionsString = new StringBuilder();
     optionsString.append("ArabicTreebankParserParams\n");
 
-    annotationPatterns = new HashMap<String,Pair<TregexPattern,Function<TregexMatcher,String>>>();
+    annotationPatterns = Generics.newHashMap();
     activeAnnotations = new ArrayList<Pair<TregexPattern,Function<TregexMatcher,String>>>();
 
     //Initialize the headFinder here
@@ -637,13 +638,13 @@ public class ArabicTreebankParserParams extends AbstractTreebankParserParams {
     private String key;
 
     private static final String nnTags = "DTNN DTNNP DTNNPS DTNNS NN NNP NNS NNPS";
-    private static final Set<String> nnTagClass = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(nnTags.split("\\s+"))));
+    private static final Set<String> nnTagClass = Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(nnTags.split("\\s+"))));
 
     private static final String jjTags = "ADJ_NUM DTJJ DTJJR JJ JJR";
-    private static final Set<String> jjTagClass = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(jjTags.split("\\s+"))));
+    private static final Set<String> jjTagClass = Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(jjTags.split("\\s+"))));
 
     private static final String vbTags = "VBD VBP";
-    private static final Set<String> vbTagClass = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(vbTags.split("\\s+"))));
+    private static final Set<String> vbTagClass = Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(vbTags.split("\\s+"))));
 
     private static final TreebankLanguagePack tlp = new ArabicTreebankLanguagePack();
 

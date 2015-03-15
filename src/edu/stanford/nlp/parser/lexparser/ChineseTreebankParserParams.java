@@ -1211,7 +1211,7 @@ public class ChineseTreebankParserParams extends AbstractTreebankParserParams {
   {
     try {
       return ChineseGrammaticalStructure.
-        readCoNLLXGrammaticStructureCollection(filename);
+              readCoNLLXGrammaticalStructureCollection(filename);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }

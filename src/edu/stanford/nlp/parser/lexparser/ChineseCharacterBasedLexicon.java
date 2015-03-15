@@ -7,6 +7,7 @@ import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.stats.*;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.StringUtils;
@@ -127,7 +128,7 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
     }
 
     Set<Symbol> singletons = Counters.keysBelow(charCounter, 1.5);
-    knownChars = new HashSet<Symbol>(charCounter.keySet());
+    knownChars = Generics.newHashSet(charCounter.keySet());
 
     Timing.tick("Counting nGrams...");
     GeneralizedCounter[] POSspecificCharNGrams = new GeneralizedCounter[CONTEXT_LENGTH + 1];
@@ -197,8 +198,8 @@ public class ChineseCharacterBasedLexicon implements Lexicon {
     POSDistribution = Distribution.getDistribution(POSCounter);
     Timing.tick("Creating character prior distribution...");
 
-    charDistributions = new HashMap<List, Distribution>();
-    //    charDistributions = new HashMap<List, Distribution>();  // 1.5
+    charDistributions = Generics.newHashMap();
+    //    charDistributions = Generics.newHashMap();  // 1.5
     //    charCounter.incrementCount(Symbol.UNKNOWN, singletons.size());
     int numberOfKeys = charCounter.size() + singletons.size();
     Distribution<Symbol> prior = Distribution.goodTuringSmoothedCounter(charCounter, numberOfKeys);

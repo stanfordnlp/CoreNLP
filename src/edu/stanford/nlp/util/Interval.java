@@ -441,9 +441,20 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return (check1 && check2);
   }
 
+  public boolean containsOpen(E p)
+  {
+    // Check that the start point is before p
+    boolean check1 = first.compareTo(p) <= 0;
+    // Check that the end point is after p
+    boolean check2 = second.compareTo(p) >= 0;
+    return (check1 && check2);
+  }
+
   public boolean contains(Interval<E> other)
   {
-    return (contains(other.getBegin()) && contains(other.getEnd()));
+    boolean containsOtherBegin = (other.includesBegin())? contains(other.getBegin()): containsOpen(other.getBegin());
+    boolean containsOtherEnd = (other.includesEnd())? contains(other.getEnd()): containsOpen(other.getEnd());
+    return (containsOtherBegin && containsOtherEnd);
   }
 
     /**
@@ -867,6 +878,14 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     int result = super.hashCode();
     result = 31 * result + flags;
     return result;
+  }
+
+  public static double getMidPoint(Interval<Integer> interval) {
+    return (interval.getBegin() + interval.getEnd())/2;
+  }
+
+  public static double getRadius(Interval<Integer> interval) {
+    return (interval.getEnd() - interval.getBegin())/2;
   }
 
   private static final long serialVersionUID = 1;

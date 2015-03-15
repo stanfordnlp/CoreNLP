@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -40,6 +39,7 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
@@ -229,7 +229,7 @@ public class AceReader extends GenericDataSetReader {
     String docId = aceDocument.getId();
 
     // map entity mention ID strings to their EntityMention counterparts
-    Map<String, EntityMention> entityMentionMap = new HashMap<String, EntityMention>();
+    Map<String, EntityMention> entityMentionMap = Generics.newHashMap();
 
     /*
     for (int sentenceIndex = 0; sentenceIndex < aceDocument.getSentenceCount(); sentenceIndex++) {

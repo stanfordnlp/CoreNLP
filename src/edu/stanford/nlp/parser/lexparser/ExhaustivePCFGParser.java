@@ -109,8 +109,13 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
    * (as regular expression) the state Pattern given.  See the
    * documentation of the ParserConstraint class for information on
    * specifying a ParserConstraint.
+   * <br>
+   * Implementation note: It would be cleaner to make this a
+   * Collections.emptyList, but that actually significantly slows down
+   * the processing in the case of empty lists.  Checking for null
+   * saves quite a bit of time.
    */
-  protected List<ParserConstraint> constraints = Collections.emptyList();
+  protected List<ParserConstraint> constraints = null;
 
   private CoreLabel getCoreLabel(int labelIndex) {
     if (originalCoreLabels[labelIndex] != null) {
@@ -849,9 +854,11 @@ oScore[split][end][br.rightChild] = totR;
     int end = start + diff;
 
     final List<ParserConstraint> constraints = getConstraints();
-    for (ParserConstraint c : constraints) {
-      if ((start > c.start && start < c.end && end > c.end) || (end > c.start && end < c.end && start < c.start)) {
-        return;
+    if (constraints != null) {
+      for (ParserConstraint c : constraints) {
+        if ((start > c.start && start < c.end && end > c.end) || (end > c.start && end < c.end && start < c.start)) {
+          return;
+        }
       }
     }
 
@@ -900,31 +907,33 @@ oScore[split][end][br.rightChild] = totR;
           // find the split that can use this rule to make the max score
           for (int split = min; split <= max; split++) {
 
-            boolean skip = false;
-            for (ParserConstraint c : constraints) {
-              if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
-                skip = true;
-                break;
-              }
-              if ((start == c.start && split == c.end)) {
-                String tag = stateIndex.get(leftState);
-                Matcher m = c.state.matcher(tag);
-                if (!m.matches()) {
+            if (constraints != null) {
+              boolean skip = false;
+              for (ParserConstraint c : constraints) {
+                if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
                   skip = true;
                   break;
                 }
-              }
-              if ((split == c.start && end == c.end)) {
-                String tag = stateIndex.get(rightChild);
-                Matcher m = c.state.matcher(tag);
-                if (!m.matches()) {
-                  skip = true;
-                  break;
+                if ((start == c.start && split == c.end)) {
+                  String tag = stateIndex.get(leftState);
+                  Matcher m = c.state.matcher(tag);
+                  if (!m.matches()) {
+                    skip = true;
+                    break;
+                  }
+                }
+                if ((split == c.start && end == c.end)) {
+                  String tag = stateIndex.get(rightChild);
+                  Matcher m = c.state.matcher(tag);
+                  if (!m.matches()) {
+                    skip = true;
+                    break;
+                  }
                 }
               }
-            }
-            if (skip) {
-              continue;
+              if (skip) {
+                continue;
+              }
             }
 
             float lS = iScore_start[split][leftState];
@@ -977,20 +986,14 @@ oScore[split][end][br.rightChild] = totR;
           if (spillGuts) System.err.println("Could build " + stateIndex.get(parentState) + " from " + start + " to " + end + " score " + bestIScore);
           if (oldIScore == Float.NEGATIVE_INFINITY) {
             if (start > narrowLExtent_end[parentState]) {
-              narrowLExtent_end[parentState] = start;
+              narrowLExtent_end[parentState] = wideLExtent_end[parentState] = start;
+            } else if (start < wideLExtent_end[parentState]) {
               wideLExtent_end[parentState] = start;
-            } else {
-              if (start < wideLExtent_end[parentState]) {
-                wideLExtent_end[parentState] = start;
-              }
             }
             if (end < narrowRExtent_start[parentState]) {
-              narrowRExtent_start[parentState] = end;
+              narrowRExtent_start[parentState] = wideRExtent_start[parentState] = end;
+            } else if (end > wideRExtent_start[parentState]) {
               wideRExtent_start[parentState] = end;
-            } else {
-              if (end > wideRExtent_start[parentState]) {
-                wideRExtent_start[parentState] = end;
-              }
             }
           }
         } // end if foundBetter
@@ -1033,33 +1036,35 @@ oScore[split][end][br.rightChild] = totR;
           // find the split that can use this rule to make the max score
           for (int split = min; split <= max; split++) {
 
-            boolean skip = false;
-            for (ParserConstraint c : constraints) {
-              if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
-                skip = true;
-                break;
-              }
-              if ((start == c.start && split == c.end)) {
-                String tag = stateIndex.get(leftChild);
-                Matcher m = c.state.matcher(tag);
-                if (!m.matches()) {
-                  //if (!tag.startsWith(c.state+"^")) {
+            if (constraints != null) {
+              boolean skip = false;
+              for (ParserConstraint c : constraints) {
+                if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
                   skip = true;
                   break;
                 }
-              }
-              if ((split == c.start && end == c.end)) {
-                String tag = stateIndex.get(rightState);
-                Matcher m = c.state.matcher(tag);
-                if (!m.matches()) {
-                  //if (!tag.startsWith(c.state+"^")) {
-                  skip = true;
-                  break;
+                if ((start == c.start && split == c.end)) {
+                  String tag = stateIndex.get(leftChild);
+                  Matcher m = c.state.matcher(tag);
+                  if (!m.matches()) {
+                    //if (!tag.startsWith(c.state+"^")) {
+                    skip = true;
+                    break;
+                  }
+                }
+                if ((split == c.start && end == c.end)) {
+                  String tag = stateIndex.get(rightState);
+                  Matcher m = c.state.matcher(tag);
+                  if (!m.matches()) {
+                    //if (!tag.startsWith(c.state+"^")) {
+                    skip = true;
+                    break;
+                  }
                 }
               }
-            }
-            if (skip) {
-              continue;
+              if (skip) {
+                continue;
+              }
             }
 
             float lS = iScore_start[split][leftChild];
@@ -1109,20 +1114,14 @@ oScore[split][end][br.rightChild] = totR;
           if (spillGuts) System.err.println("Could build " + stateIndex.get(parentState) + " from " + start + " to " + end + " with score " + bestIScore);
           if (oldIScore == Float.NEGATIVE_INFINITY) {
             if (start > narrowLExtent_end[parentState]) {
-              narrowLExtent_end[parentState] = start;
+              narrowLExtent_end[parentState] = wideLExtent_end[parentState] = start;
+            } else if (start < wideLExtent_end[parentState]) {
               wideLExtent_end[parentState] = start;
-            } else {
-              if (start < wideLExtent_end[parentState]) {
-                wideLExtent_end[parentState] = start;
-              }
             }
             if (end < narrowRExtent_start[parentState]) {
-              narrowRExtent_start[parentState] = end;
+              narrowRExtent_start[parentState] = wideRExtent_start[parentState] = end;
+            } else if (end > wideRExtent_start[parentState]) {
               wideRExtent_start[parentState] = end;
-            } else {
-              if (end > wideRExtent_start[parentState]) {
-                wideRExtent_start[parentState] = end;
-              }
             }
           }
         } // end if foundBetter
@@ -1141,20 +1140,22 @@ oScore[split][end][br.rightChild] = totR;
       UnaryRule[] unaries = ug.closedRulesByChild(state);
       for (UnaryRule ur : unaries) {
 
-        boolean skip = false;
-        for (ParserConstraint c : constraints) {
-          if ((start == c.start && end == c.end)) {
-            String tag = stateIndex.get(ur.parent);
-            Matcher m = c.state.matcher(tag);
-            if (!m.matches()) {
-              //if (!tag.startsWith(c.state+"^")) {
-              skip = true;
-              break;
+        if (constraints != null) {
+          boolean skip = false;
+          for (ParserConstraint c : constraints) {
+            if ((start == c.start && end == c.end)) {
+              String tag = stateIndex.get(ur.parent);
+              Matcher m = c.state.matcher(tag);
+              if (!m.matches()) {
+                //if (!tag.startsWith(c.state+"^")) {
+                skip = true;
+                break;
+              }
             }
           }
-        }
-        if (skip) {
-          continue;
+          if (skip) {
+            continue;
+          }
         }
 
         int parentState = ur.parent;
@@ -1179,20 +1180,14 @@ oScore[split][end][br.rightChild] = totR;
           iScore_start_end[parentState] = tot;
           if (cur == Float.NEGATIVE_INFINITY) {
             if (start > narrowLExtent_end[parentState]) {
-              narrowLExtent_end[parentState] = start;
+              narrowLExtent_end[parentState] = wideLExtent_end[parentState] = start;
+            } else if (start < wideLExtent_end[parentState]) {
               wideLExtent_end[parentState] = start;
-            } else {
-              if (start < wideLExtent_end[parentState]) {
-                wideLExtent_end[parentState] = start;
-              }
             }
             if (end < narrowRExtent_start[parentState]) {
-              narrowRExtent_start[parentState] = end;
+              narrowRExtent_start[parentState] = wideRExtent_start[parentState] = end;
+            } else if (end > wideRExtent_start[parentState]) {
               wideRExtent_start[parentState] = end;
-            } else {
-              if (end > wideRExtent_start[parentState]) {
-                wideRExtent_start[parentState] = end;
-              }
             }
           }
         } // end if foundBetter
@@ -1812,8 +1807,8 @@ oScore[split][end][br.rightChild] = totR;
    */
   public List<ScoredObject<Tree>> getKBestParses(int k) {
 
-    cand = new HashMap<Vertex,PriorityQueue<Derivation>>();
-    dHat = new HashMap<Vertex,LinkedList<Derivation>>();
+    cand = Generics.newHashMap();
+    dHat = Generics.newHashMap();
 
     int start = 0;
     int end = length;
@@ -2006,8 +2001,8 @@ oScore[split][end][br.rightChild] = totR;
     return bs;
   }
 
-  private Map<Vertex,PriorityQueue<Derivation>> cand = new HashMap<Vertex,PriorityQueue<Derivation>>();
-  private Map<Vertex,LinkedList<Derivation>> dHat = new HashMap<Vertex,LinkedList<Derivation>>();
+  private Map<Vertex,PriorityQueue<Derivation>> cand = Generics.newHashMap();
+  private Map<Vertex,LinkedList<Derivation>> dHat = Generics.newHashMap();
 
   private PriorityQueue<Derivation> getCandidates(Vertex v, int k) {
     PriorityQueue<Derivation> candV = cand.get(v);

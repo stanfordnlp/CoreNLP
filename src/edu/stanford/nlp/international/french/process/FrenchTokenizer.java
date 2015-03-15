@@ -5,7 +5,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -19,6 +18,7 @@ import edu.stanford.nlp.process.AbstractTokenizer;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.LexedTokenFactory;
 import edu.stanford.nlp.process.Tokenizer;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -149,7 +149,7 @@ public class FrenchTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   }
 
   private static Map<String,Integer> argOptionDefs() {
-    Map<String,Integer> argOptionDefs = new HashMap<String,Integer>();
+    Map<String,Integer> argOptionDefs = Generics.newHashMap();
     argOptionDefs.put("help", 0);
     argOptionDefs.put("ftb", 0);
     argOptionDefs.put("lowerCase", 0);

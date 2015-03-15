@@ -17,7 +17,7 @@ public class FontDetector {
   public static final int ARABIC = 1;
 
 
-  public static final String[][] unicodeRanges = new String[NUM_LANGUAGES][];
+  private static final String[][] unicodeRanges = new String[NUM_LANGUAGES][];
 
   static {
     unicodeRanges[CHINESE] = new String[]{"\u3001", "\uFF01", "\uFFEE", "\u0374", "\u3126"};

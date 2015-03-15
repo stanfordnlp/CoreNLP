@@ -1,9 +1,6 @@
 package edu.stanford.nlp.pipeline;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -22,7 +19,6 @@ import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
  * Wrapper for the maxent part of speech tagger.
  *
  * @author Anna Rafferty
- *
  */
 public class POSTaggerAnnotator implements Annotator {
 
@@ -37,7 +33,7 @@ public class POSTaggerAnnotator implements Annotator {
   }
 
   public POSTaggerAnnotator(boolean verbose) {
-    this(System.getProperty("pos.model", MaxentTagger.DEFAULT_NLP_GROUP_MODEL_PATH), verbose);
+    this(System.getProperty("pos.model", MaxentTagger.DEFAULT_JAR_PATH), verbose);
   }
 
   public POSTaggerAnnotator(String posLoc, boolean verbose) {
@@ -79,15 +75,7 @@ public class POSTaggerAnnotator implements Annotator {
       timer.doing("Loading POS Model [" + loc + ']');
     }
     MaxentTagger tagger;
-    try {
-      tagger = new MaxentTagger(loc);
-    } catch (IOException e) {
-      RuntimeException runtimeException = new RuntimeException(e);
-      throw runtimeException;
-    } catch (ClassNotFoundException e) {
-      RuntimeException runtimeException = new RuntimeException(e);
-      throw runtimeException;
-    }
+    tagger = new MaxentTagger(loc);
     if (verbose) {
       timer.done();
     }
@@ -151,4 +139,5 @@ public class POSTaggerAnnotator implements Annotator {
   public Set<Requirement> requirementsSatisfied() {
     return Collections.singleton(POS_REQUIREMENT);
   }
+
 }

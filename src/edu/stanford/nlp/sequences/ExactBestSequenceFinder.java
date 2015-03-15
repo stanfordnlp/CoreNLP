@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sequences;
 
+import edu.stanford.nlp.util.Pair;
 import java.util.Arrays;
 
 
@@ -99,12 +100,23 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
     }
   }
 
+  public Pair<int[], Double> bestSequenceWithLinearConstraints(SequenceModel ts, double[][] linearConstraints) {
+    return bestSequenceNew(ts, linearConstraints);
+  }
+
   private static int[] bestSequenceNew(SequenceModel ts) {
+    return bestSequenceNew(ts, null).first();
+  }
+
+  private static Pair<int[], Double> bestSequenceNew(SequenceModel ts, double[][] linearConstraints) {
     // Set up tag options
     int length = ts.length();
     int leftWindow = ts.leftWindow();
     int rightWindow = ts.rightWindow();
     int padLength = length + leftWindow + rightWindow;
+    if (linearConstraints != null && linearConstraints.length != padLength)
+      throw new RuntimeException("linearConstraints.length (" +  linearConstraints.length + ") does not match padLength (" + padLength + ") of SequenceModel" + ", length=="+length+", leftW="+leftWindow+", rightW="+rightWindow);
+      
     int[][] tags = new int[padLength][];
     int[] tagNum = new int[padLength];
     if (DEBUG) { System.err.println("Doing bestSequence length " + length + "; leftWin " + leftWindow + "; rightWin " + rightWindow + "; padLength " + padLength); }
@@ -152,7 +164,6 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
 
         // Here now you get ts.scoresOf() for all classifications at a position at once, wwhereas the old code called ts.scoreOf() on each item.
         // CDM May 2007: The way this is done gives incorrect results if there are repeated values in the values of ts.getPossibleValues(pos) -- in particular if the first value of the array is repeated later.  I tried replacing it with the modulo version, but that only worked for left-to-right, not bidirectional inference, but I still think that if you sorted things out, you should be able to do it with modulos and the result would be conceptually simpler and robust to repeated values.  But in the meantime, I fixed the POS tagger to not give repeated values (which was a bug in the tagger).
-        // if (product % tagNum[pos] == 0) {
         if (tempTags[pos] == tags[pos][0]) {
           // get all tags at once
           double[] scores = ts.scoresOf(tempTags, pos);
@@ -188,6 +199,11 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
         if (pos == leftWindow) {
           // no predecessor type
           score[pos][product] = windowScore[pos][product];
+          if (linearConstraints != null) {
+            if (DEBUG && linearConstraints[pos][product % tagNum[pos]] != 0)
+              System.err.println("Applying linear constraints=" + linearConstraints[pos][product % tagNum[pos]] + " to preScore="+ windowScore[pos][product] + " at pos="+pos+" for tag="+(product % tagNum[pos]));
+            score[pos][product] += linearConstraints[pos][product % tagNum[pos]];
+          }
           trace[pos][product] = -1;
         } else {
           // loop over possible predecessor types
@@ -198,6 +214,15 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
           for (int newTagNum = 0; newTagNum < tagNum[pos - leftWindow - 1]; newTagNum++) {
             int predProduct = newTagNum * factor + sharedProduct;
             double predScore = score[pos - 1][predProduct] + windowScore[pos][product];
+
+            if (linearConstraints != null) {
+              if (DEBUG && pos == 2 && linearConstraints[pos][product % tagNum[pos]] != 0) {
+                System.err.println("Applying linear constraints=" + linearConstraints[pos][product % tagNum[pos]] + " to preScore="+ predScore + " at pos="+pos+" for tag="+(product % tagNum[pos]));
+                System.err.println("predScore:" + predScore + " = score["+(pos - 1)+"]["+predProduct+"]:" + score[pos - 1][predProduct] + " + windowScore["+pos+"]["+product+"]:" + windowScore[pos][product]);
+              }
+              predScore += linearConstraints[pos][product % tagNum[pos]];
+            }
+
             if (predScore > score[pos][product]) {
               score[pos][product] = predScore;
               trace[pos][product] = predProduct;
@@ -226,7 +251,7 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
       bestCurrentProduct = trace[pos + 1][bestNextProduct];
       tempTags[pos - leftWindow] = tags[pos - leftWindow][bestCurrentProduct / (productSizes[pos] / tagNum[pos - leftWindow])];
     }
-    return tempTags;
+    return new Pair<int[], Double>(tempTags, bestFinalScore);
   }
 
   private static int[] bestSequenceOld(SequenceModel ts) {
@@ -253,7 +278,7 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
       curProduct *= tagNum[i];
     for (int pos = leftWindow+rightWindow; pos < padLength; pos++) {
       if (pos > leftWindow+rightWindow)
-	curProduct /= tagNum[pos-leftWindow-rightWindow-1]; // shift off
+	      curProduct /= tagNum[pos-leftWindow-rightWindow-1]; // shift off
       curProduct *= tagNum[pos]; // shift on
       productSizes[pos-rightWindow] = curProduct;
     }
@@ -264,15 +289,14 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
       windowScore[pos] = new double[productSizes[pos]];
       Arrays.fill(tempTags,tags[0][0]);
       for (int product=0; product<productSizes[pos]; product++) {
-	int p = product;
-	for (int curPos = pos+rightWindow; curPos >= pos-leftWindow; curPos--) {
-	  tempTags[curPos] = tags[curPos][p % tagNum[curPos]];
-	  p /= tagNum[curPos];
-	}
-	windowScore[pos][product] = ts.scoreOf(tempTags, pos);
+	      int p = product;
+	      for (int curPos = pos+rightWindow; curPos >= pos-leftWindow; curPos--) {
+	        tempTags[curPos] = tags[curPos][p % tagNum[curPos]];
+	        p /= tagNum[curPos];
+	      }
+	      windowScore[pos][product] = ts.scoreOf(tempTags, pos);
       }
     }
-
 
     // Set up score and backtrace arrays
     double[][] score = new double[padLength][];
@@ -290,26 +314,26 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
       //System.err.print(".");
       // loop over window product types
       for (int product=0; product<productSizes[pos]; product++) {
-	// check for initial spot
-	if (pos==leftWindow) {
-	  // no predecessor type
-	  score[pos][product] = windowScore[pos][product];
-	  trace[pos][product] = -1;
-	} else {
-	  // loop over possible predecessor types
-	  score[pos][product] = Double.NEGATIVE_INFINITY;
-	  trace[pos][product] = -1;
-	  int sharedProduct = product / tagNum[pos+rightWindow];
-	  int factor = productSizes[pos] / tagNum[pos+rightWindow];
-	  for (int newTagNum=0; newTagNum<tagNum[pos-leftWindow-1]; newTagNum++) {
-	    int predProduct = newTagNum*factor+sharedProduct;
-	    double predScore = score[pos-1][predProduct]+windowScore[pos][product];
-	    if (predScore > score[pos][product]) {
-	      score[pos][product] = predScore;
-	      trace[pos][product] = predProduct;
-	    }
-	  }
-	}
+	      // check for initial spot
+	      if (pos==leftWindow) {
+	        // no predecessor type
+	        score[pos][product] = windowScore[pos][product];
+	        trace[pos][product] = -1;
+	      } else {
+	        // loop over possible predecessor types
+	        score[pos][product] = Double.NEGATIVE_INFINITY;
+	        trace[pos][product] = -1;
+	        int sharedProduct = product / tagNum[pos+rightWindow];
+	        int factor = productSizes[pos] / tagNum[pos+rightWindow];
+	        for (int newTagNum=0; newTagNum<tagNum[pos-leftWindow-1]; newTagNum++) {
+	          int predProduct = newTagNum*factor+sharedProduct;
+	          double predScore = score[pos-1][predProduct]+windowScore[pos][product];
+	          if (predScore > score[pos][product]) {
+	            score[pos][product] = predScore;
+	            trace[pos][product] = predProduct;
+	          }
+	        }
+	      }
       }
     }
 
@@ -318,8 +342,8 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
     int bestCurrentProduct = -1;
     for (int product=0; product<productSizes[leftWindow+length-1]; product++) {
       if (score[leftWindow+length-1][product] > bestFinalScore) {
-	bestCurrentProduct = product;
-	bestFinalScore = score[leftWindow+length-1][product];
+	      bestCurrentProduct = product;
+	      bestFinalScore = score[leftWindow+length-1][product];
       }
     }
     int lastProduct = bestCurrentProduct;

@@ -169,7 +169,7 @@ public class CoreNLPServlet extends HttpServlet {
       
       // Inject the brat stylesheet (removing this line breaks visualisation).
       out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
-          bratLocation + "/style.css\"/>");
+                  bratLocation + "/style-vis.css\"/>");
       
       // Include the Javascript libraries necessary to run brat.
       out.println("<script type=\"text/javascript\" src=\"" + bratLocation +

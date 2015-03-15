@@ -4,6 +4,7 @@ import edu.stanford.nlp.trees.CompositeTreeTransformer;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -267,7 +268,7 @@ public class Options implements Serializable {
       i += 2;
     } else if (args[i].equalsIgnoreCase("-deleteSplitters") && (i+1 < args.length)) {
       String[] toDel = args[i+1].split(" *, *");
-      trainOptions.deleteSplitters = new HashSet<String>(Arrays.asList(toDel));
+      trainOptions.deleteSplitters = Generics.newHashSet(Arrays.asList(toDel));
       i += 2;
     } else if (args[i].equalsIgnoreCase("-postSplitWithBaseCategory")) {
       trainOptions.postSplitWithBaseCategory = true;
@@ -751,12 +752,115 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-noRebinarization")) {
       trainOptions.noRebinarization = true;
       i += 1;
+    } else if (args[i].equalsIgnoreCase("-dvKBest")) {
+        trainOptions.dvKBest = Integer.parseInt(args[i + 1]);
+        rerankerKBest = trainOptions.dvKBest;
+        i += 2;
+    } else if (args[i].equalsIgnoreCase("-regCost")) {
+        trainOptions.regCost = Double.parseDouble(args[i + 1]);
+        i += 2;
+    } else if (args[i].equalsIgnoreCase("-dvIterations")) {
+      trainOptions.dvIterations = Integer.parseInt(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-dvBatchSize")) {
+      trainOptions.dvBatchSize = Integer.parseInt(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-qnIterationsPerBatch")) {
+      trainOptions.qnIterationsPerBatch = Integer.parseInt(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-qnEstimates")) {
+      trainOptions.qnEstimates = Integer.parseInt(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-qnTolerance")) {
+      trainOptions.qnTolerance = Double.parseDouble(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-debugOutputSeconds")) {
+      trainOptions.debugOutputSeconds = Integer.parseInt(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-maxTrainTimeSeconds")) {
+      trainOptions.maxTrainTimeSeconds = Integer.parseInt(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-dvSeed")) {
+      trainOptions.dvSeed = Long.parseLong(args[i + 1]);
+      i += 2;      
+    } else if (args[i].equalsIgnoreCase("-wordVectorFile")) {
+      lexOptions.wordVectorFile = args[i + 1];
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-numHid")) {
+      lexOptions.numHid = Integer.parseInt(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-learningRate")) {
+      trainOptions.learningRate = Double.parseDouble(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-deltaMargin")) {
+      trainOptions.deltaMargin = Double.parseDouble(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-unknownNumberVector")) {
+      trainOptions.unknownNumberVector = true;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-noUnknownNumberVector")) {
+      trainOptions.unknownNumberVector = false;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-unknownDashedWordVectors")) {
+      trainOptions.unknownDashedWordVectors = true;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-noUnknownDashedWordVectors")) {
+      trainOptions.unknownDashedWordVectors = false;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-unknownCapsVector")) {
+      trainOptions.unknownCapsVector = true;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-noUnknownCapsVector")) {
+      trainOptions.unknownCapsVector = false;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-unknownChineseYearVector")) {
+      trainOptions.unknownChineseYearVector = true;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-noUnknownChineseYearVector")) {
+      trainOptions.unknownChineseYearVector = false;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-unknownChineseNumberVector")) {
+      trainOptions.unknownChineseNumberVector = true;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-noUnknownChineseNumberVector")) {
+      trainOptions.unknownChineseNumberVector = false;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-unknownChinesePercentVector")) {
+      trainOptions.unknownChinesePercentVector = true;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-noUnknownChinesePercentVector")) {
+      trainOptions.unknownChinesePercentVector = false;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-dvSimplifiedModel")) {
+      trainOptions.dvSimplifiedModel = true;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-scalingForInit")) {
+      trainOptions.scalingForInit = Double.parseDouble(args[i + 1]);
+      i += 2;
     } else if (args[i].equalsIgnoreCase("-rerankerKBest")) {
       rerankerKBest = Integer.parseInt(args[i + 1]);
       i += 2;
     } else if (args[i].equalsIgnoreCase("-baseParserWeight")) {
       baseParserWeight = Double.parseDouble(args[i + 1]);
       i += 2;
+    } else if (args[i].equalsIgnoreCase("-unkWord")) {
+      trainOptions.unkWord = args[i + 1];
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-lowercaseWordVectors")) {
+      trainOptions.lowercaseWordVectors = true;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-noLowercaseWordVectors")) {
+      trainOptions.lowercaseWordVectors = false;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-transformMatrixType")) {
+      trainOptions.transformMatrixType = TrainOptions.TransformMatrixType.valueOf(args[i + 1]);
+      i += 2;
+    } else if (args[i].equalsIgnoreCase("-useContextWords")) {
+      trainOptions.useContextWords = true;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-noUseContextWords")) {
+      trainOptions.useContextWords = false;
+      i += 1;
     }
     return i;
   }
@@ -782,6 +886,19 @@ public class Options implements Serializable {
      */
     public int useUnknownWordSignatures = 0;
 
+    /**
+     * RS: file for Turian's word vectors 
+     * The default value is an example of size 25 word vectors on the nlp machines
+     */
+    public static final String DEFAULT_WORD_VECTOR_FILE = "/scr/nlp/deeplearning/datasets/turian/embeddings-scaled.EMBEDDING_SIZE=25.txt";
+    public String wordVectorFile = DEFAULT_WORD_VECTOR_FILE;
+    /**
+     * Number of hidden units in the word vectors.  As setting of 0
+     * will make it try to extract the size from the data file.
+     */
+    public int numHid = 0;
+    
+    
     /**
      * Words more common than this are tagged with MLE P(t|w). Default 100. The
      * smoothing is sufficiently slight that changing this has little effect.

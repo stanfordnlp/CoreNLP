@@ -1,17 +1,18 @@
 package edu.stanford.nlp.wordseg;
 
-import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.fsm.DFSA;
+import edu.stanford.nlp.fsm.DFSAState;
+import edu.stanford.nlp.fsm.DFSATransition;
+import edu.stanford.nlp.io.EncodingPrintWriter;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.fsm.DFSA;
-import edu.stanford.nlp.fsm.DFSAState;
-import edu.stanford.nlp.fsm.DFSATransition;
-import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.process.WordSegmenter;
-import edu.stanford.nlp.io.EncodingPrintWriter;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.util.*;
 import java.io.*;
@@ -35,7 +36,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
 
   private static final boolean DEBUG = false;
 
-  private Set<String> words = new HashSet<String>();
+  private Set<String> words = Generics.newHashSet();
   private int len=-1;
   private int edgesNb=0;
   private static final int maxLength = 10;

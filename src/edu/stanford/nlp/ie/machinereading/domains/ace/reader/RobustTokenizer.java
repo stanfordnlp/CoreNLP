@@ -9,7 +9,6 @@ package edu.stanford.nlp.ie.machinereading.domains.ace.reader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -20,6 +19,7 @@ import java.io.BufferedReader;
 
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.AbstractTokenizer;
+import edu.stanford.nlp.util.Generics;
 
 public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word> {
   
@@ -598,7 +598,7 @@ public class RobustTokenizer<T extends Word> extends AbstractTokenizer<Word> {
 
     /** Creates a new instance of AbreviationMap with some know abbreviations */
     public AbbreviationMap(boolean caseInsensitive)  {
-      mAbbrevSet = new HashSet<String>(normalizeCase(caseInsensitive, Arrays.asList(new String[]{
+      mAbbrevSet = Generics.newHashSet(normalizeCase(caseInsensitive, Arrays.asList(new String[]{
           "1.",
           "10.",
           "11.",

@@ -1,11 +1,10 @@
 package edu.stanford.nlp.trees.international.negra;
 
-import java.util.HashMap;
-
 import edu.stanford.nlp.trees.AbstractCollinsHeadFinder;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
+import edu.stanford.nlp.util.Generics;
 
 
 /**
@@ -45,7 +44,7 @@ public class NegraHeadFinder extends AbstractCollinsHeadFinder {
   public NegraHeadFinder(TreebankLanguagePack tlp) {
     super(tlp);
 
-    nonTerminalInfo = new HashMap<String, String[][]>();
+    nonTerminalInfo = Generics.newHashMap();
 
     left = (coordSwitch ? "right" : "left");
     right = (coordSwitch ? "left" : "right");

@@ -1,0 +1,315 @@
+% Copyright 2011 by Daniele Pighin
+%
+% This file may be distributed and/or modified
+%
+% 1. under the LaTeX Project Public License and/or
+% 2. under the GNU Public License.
+%
+% See the file doc/generic/tikz-dependency/licenses/LICENSE for more details.
+%
+% Changelog
+%
+% 1.1 (Jan 17, 2012)
+%  - Added the possibility to use simple arcs as edges (keys: arc edge/segmented edge)
+%  - Added "edge start x offset" and "edge end x offset" to fine tune edge start/end point position
+%  - Added \depstyle to define styles more easily
+%  - Added "simple" theme, based on the parse on page 1 of [Nivre and McDonald, 2008 ACL-HLT] 
+%  - Added instructions to draw bubble parses
+%  - Fixed bug that would cause groupedges not to be straight under some circumstances;
+%
+% 1.0 (Nov 26, 2011)
+%  - First public release
+
+\ProvidesPackage{tikz-dependency}[2011/01/08 v1.1 Macros to draw dependency trees]
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+
+\RequirePackage{tikz,environ}
+\usetikzlibrary{matrix,arrows,backgrounds,calc,patterns,positioning,fit,shapes}
+
+\pgfdeclarelayer{depgroups}
+\pgfsetlayers{depgroups,main}
+
+\newcounter{dt@labelid}
+\newif\ifdt@linkbelow
+\newif\ifdt@arcedge
+\tikzset{
+   /depgraph/.cd,
+   /depgraph/.search also = {/tikz},
+   dep id/.code = {\def\dt@depid{#1}},
+   dep id = dependency,
+   % fix the distance of the edge
+   edge height/.code = {\pgfmathsetlengthmacro{\dt@linkheight}{#1}},
+   edge height = 0pt,
+   % the distant of the horizontal line of the edge style  for two adjacent words
+   edge unit distance/.code = {\pgfmathsetlengthmacro{\dt@linkstep}{#1}},
+   edge unit distance = 3ex,
+   % the horizontal offset defining the trapezoidal look
+   edge slant/.code = {\pgfmathsetlengthmacro{\dt@linkslant}{#1}},
+   edge slant = 3pt,
+   % the horizontal offset defining the starting/ending position of the edge style
+   edge horizontal padding/.code = {\pgfmathsetlengthmacro{\dt@linkoffset}{#1}},
+   edge horizontal padding = 4pt,
+   % vertical offset of the edge style from the word
+   edge vertical padding/.code = {\pgfmathsetlengthmacro{\dt@linkdist}{#1}}, 
+   edge vertical padding = 0ex,
+   % should links be placed above or below the sentence
+   edge below/.is if = dt@linkbelow,
+   edge below/.default=true,
+   edge above/.code = {\dt@linkbelowfalse},
+   % arc edge
+   arc edge/.is if = dt@arcedge,
+   segmented edge/.code = {\dt@arcedgefalse},
+   arc angle/.store in = \dt@arcangle,
+   arc angle = 60,
+   % an explicit offset to compensate the x position of the edge
+   edge start x offset/.code = {\pgfmathsetlengthmacro{\dt@EdgeStartOffsetX}{#1}},
+   edge start x offset = 0,
+   edge end x offset/.code = {\pgfmathsetlengthmacro{\dt@EdgeEndOffsetX}{#1}},
+   edge end x offset = 0,
+   % the layer that links should connect 
+   % (should be set to "1" for edge above, and to the number of rows 
+   % in the matrix for edge below)
+   target layer/.store in = \dt@tgtlayer,
+   target layer/.default = 0,
+   target layer = 0,
+   % styling options
+   reserved/edge style/.style = {->, >=stealth, black, solid, rounded corners = 2, line cap = round, segmented edge},
+   edge style/.style = {reserved/edge style/.append style = {#1}},
+   reserved/label style/.style = {
+      anchor = mid,
+      draw, solid,
+      black,
+      scale = .7,
+      text height = 1.5ex, text depth = 0.25ex, % needed to center text vertically
+      inner sep=.5ex, 
+      outer sep = 0pt,
+      rounded corners = 2pt, 
+      text = black, 
+      fill = white},
+   label style/.style = {reserved/label style/.append style = {#1}},
+   hide label/.style = {reserved/label style/.append style = {opacity = 0, text opacity = 0}},
+   show label/.style = {reserved/label style/.append style = {opacity = 1, text opacity = 1}},
+   text only label/.style = {reserved/label style/.append style = {opacity=0, text opacity=1}},
+   reserved/text style/.style = {
+      text height=1.5ex, text depth = 0.25ex, % needed to center text vertically
+      inner sep = .5ex},
+   text style/.style = {reserved/text style/.append style = {#1}},
+   % group styling
+   reserved/group style/.style = {
+      inner sep = 0,
+      draw, solid,
+      outer sep = .5ex,
+      rounded corners = 2pt},
+   group style/.style = {reserved/group style/.append style = {#1}},
+   % themes for text
+   text theme/.is choice,
+   text theme/default/.style = {text style={black}},
+   text theme/brazil/.style = {text style={blue!60!black}},
+   text theme/iron/.style = {text style={black!80}},
+   text theme/copper/.style = {text style={brown!60!black}},
+   text theme/night/.style = {text style={black}},
+   text theme/grassy/.style = {text style={green!40!black}},
+   text theme/simple/.style = {text style={black}},
+   % themes for labels
+   label theme/.is choice,
+   label theme/default/.style = {label style={fill=white, draw=black}},
+   label theme/night/.style = {label style={text=white, fill=black, font=\bfseries}},
+   label theme/brazil/.style = {label style={thick, black, fill=yellow, text=black, font=\bfseries}},
+   label theme/iron/.style = {label style={top color=black!60, bottom color=black!80, draw=black!80, text=white, font=\bfseries}},
+   label theme/copper/.style = {label style={top color=brown!80!pink, bottom color=brown!60!black, draw=brown!80, text=white, font=\bfseries}},
+   label theme/grassy/.style = {label style={bottom color=green!60!black, top color=green!20!black, draw=green!40!black, text=white, font=\bfseries}},
+   label theme/simple/.style = {label style={draw=none,fill=none,above,font=\scriptsize}},
+   % themes for edges
+   edge theme/.is choice,
+   edge theme/default/.style = {edge style={thin,black}},
+   edge theme/night/.style = {edge style={thick}},
+   edge theme/brazil/.style = {edge style={thick,green!60!black}},
+   edge theme/iron/.style = {edge style={thick, black!80}},
+   edge theme/copper/.style = {edge style={thick, brown!80}},
+   edge theme/grassy/.style = {edge style={thick, green!40!black}},
+   edge theme/simple/.style = {arc edge, arc angle=79},
+   % themes styles
+   theme/.style = {label theme = #1, edge theme = #1, text theme = #1},
+}
+
+\newcommand{\depstyle}[2]{\tikzset{#1/.style = {/depgraph/.cd, #2}}}
+
+
+\newenvironment{dependency}[1][]{%
+   \begin{tikzpicture}[/depgraph/.cd, #1]
+      \begin{scope}
+}{%
+      \end{scope}%
+   \end{tikzpicture}%
+}
+
+\NewEnviron{deptext}[1][]{%
+   \begin{scope}
+      \matrix (\dt@depid)[%
+         nodes = {/depgraph/reserved/text style},
+         column sep = 0,
+         row sep = -.5ex,
+         matrix of nodes,
+         ampersand replacement = \&,
+         nodes in empty cells,
+         #1] {
+            \BODY%
+         };%
+         \pgfmathtruncatemacro\dt@tmp{\pgfmatrixcurrentrow}
+         \xdef\dt@numrows{\dt@tmp}
+   \end{scope}%
+}
+
+\newcommand{\depkeys}[1]{\tikzset{/depgraph/.cd, #1}}
+
+\newcommand{\settgtlayer}{%
+   \ifnum\dt@tgtlayer=0%
+      \ifdt@linkbelow%
+         \pgfmathtruncatemacro{\dt@tgtlayer}{\dt@numrows}%
+      \else%
+         \pgfmathtruncatemacro{\dt@tgtlayer}{1}%
+      \fi%
+   \fi%
+}
+
+\newcommand{\deproot}[3][]{% options, root offset, root reserved/label style
+   \begin{scope}
+      \depkeys{#1}
+      \pgfmathsetmacro{\offa}{#2}
+      \settgtlayer
+      \def\anchorpoint{north}
+      \ifdt@linkbelow
+         \def\anchorpoint{south}
+      \fi
+      \def\source{\dt@depid-\dt@tgtlayer-#2}
+
+      \ifdim\dt@linkheight=0pt
+         \pgfmathsetmacro{\distance}{\dt@linkstep * 4}
+      \else
+         \pgfmathsetlengthmacro{\distance}{\dt@linkheight}
+      \fi
+      \pgfmathsetlengthmacro{\dt@startdist}{\dt@linkdist}
+      \ifdt@linkbelow
+         \pgfmathsetmacro{\distance}{-(\dt@linkstep * 4)}
+      \pgfmathsetlengthmacro{\dt@startdist}{-\dt@startdist}
+      \fi
+      \node at (\source) (\rootref) [yshift=\distance, /depgraph/.cd, reserved/label style, #1] {#3};
+      \draw [/depgraph/.cd, reserved/edge style, #1] (\rootref) -- ($(\source.\anchorpoint) + (0, \dt@startdist)$);
+   \end{scope}
+}
+
+\newcommand{\depedge}[4][]{% options, source offset, target offset, dep name
+   \begin{scope}
+   \depkeys{#1}
+   \pgfmathsetmacro{\offa}{#2}
+   \pgfmathsetmacro{\offb}{#3}
+   \settgtlayer
+   \def\source{\wordref{\dt@tgtlayer}{#2}}
+   \def\dest{\wordref{\dt@tgtlayer}{#3}}
+   \def\depname{#4}
+   \ifdim\dt@linkheight=0pt
+      \pgfmathsetlengthmacro{\distance}{abs(\offb - \offa)*\dt@linkstep}
+   \else
+      \pgfmathsetlengthmacro{\distance}{\dt@linkheight}
+   \fi
+   \groupedge[#1]{\source}{\dest}{\depname}{\distance}
+   \end{scope}}
+
+\newlength{\xca}
+\newlength{\yca}
+\newlength{\xcb}
+\newlength{\ycb}
+
+\newcommand{\wordref}[2]{\dt@depid-#1-#2}
+
+\newcommand{\rootref}{\dt@depid-root}
+
+\newcommand{\matrixref}{\dt@depid}
+
+% \storelabelnode
+% 
+% \edef#1 the name of the last reserved/label style, stored in \dt@lastlabel
+%
+% #1 - a macro
+\newcommand{\storelabelnode}[1]{\edef#1{\dt@lastlabel}}
+
+\newcommand{\storefirstcorner}[1]{\edef#1{\dt@lastlabel-edge-first-corner}}
+\newcommand{\storesecondcorner}[1]{\edef#1{\dt@lastlabel-edge-second-corner}}
+
+\newcommand{\wordgroup}[5][]{% options, layer, col-start, col-end, identifier
+   \begin{scope}[/depgraph/.cd, #1]
+      \pgfonlayer{depgroups}
+      \node (#5) [fit = (\wordref{#2}{#3}) (\wordref{#2}{#4}), /depgraph/.cd, reserved/group style, #1] {};
+      \endpgfonlayer
+   \end{scope}
+}
+
+\newcommand{\groupedge}[5][]{% options, source, target, depname, distance
+   \begin{scope}[/depgraph/.cd, #1]
+      \def\anchorpoint{north}
+      \ifdt@linkbelow
+         \def\anchorpoint{south}
+      \fi
+      \pgfextractx{\xca}{\pgfpointanchor{#2}{\anchorpoint}}
+      \pgfextractx{\xcb}{\pgfpointanchor{#3}{\anchorpoint}}
+      \pgfextracty{\yca}{\pgfpointanchor{#2}{\anchorpoint}}
+      \pgfextracty{\ycb}{\pgfpointanchor{#3}{\anchorpoint}}
+      \pgfmathsetlengthmacro{\ydiff}{\yca-\ycb}
+      \ifdim\xca>\xcb
+         \pgfmathsetlengthmacro{\doff}{-\dt@linkoffset}
+         \pgfmathsetlengthmacro{\dslant}{-\dt@linkslant}
+      \else
+         \pgfmathsetlengthmacro{\doff}{\dt@linkoffset}
+         \pgfmathsetlengthmacro{\dslant}{\dt@linkslant}
+      \fi
+      \addtocounter{dt@labelid}{1}
+      \xdef\dt@lastlabel{\dt@depid-\the\value{dt@labelid}}
+      \pgfmathsetlengthmacro{\dt@startdist}{\dt@linkdist}
+      \pgfmathsetlengthmacro{\dt@enddist}{#5}
+      \ifdt@linkbelow
+         \pgfmathsetlengthmacro{\dt@startdist}{-\dt@startdist}
+         \pgfmathsetlengthmacro{\dt@enddist}{-\dt@enddist}
+      \fi
+
+      % Calculate edge anchors. -edge-first-corner and -edge-second-corner are only
+      % meaningful for segmented edge, but we also draw the nodes for arc edge, someone
+      % may always find these anchors useful...
+      \node (\dt@lastlabel-edge-origin) [coordinate] at ($(#2.\anchorpoint) + (\doff,\dt@startdist) + (\dt@EdgeStartOffsetX,0)$) {};
+      \node (\dt@lastlabel-edge-first-corner) [coordinate] at ($(\dt@lastlabel-edge-origin) + (\dslant,\dt@enddist)$) {};
+      \node (\dt@lastlabel-edge-second-corner) [coordinate] at ($(#3.\anchorpoint) + (-\dslant,\dt@enddist+\dt@startdist+\ydiff)$) {};
+      \node (\dt@lastlabel-edge-endpoint) [coordinate] at ($(#3.\anchorpoint) + (0,\dt@startdist) + (\dt@EdgeEndOffsetX,0)$) {}; 
+
+      \ifdt@arcedge
+         % link above, left to right
+         \pgfmathsetmacro{\dt@arcin}{180-\dt@arcangle}
+         \pgfmathsetmacro{\dt@arcout}{\dt@arcangle}
+         \ifdt@linkbelow
+            % link below
+            \pgfmathsetmacro{\dt@arcin}{-\dt@arcin}
+            \pgfmathsetmacro{\dt@arcout}{-\dt@arcout}
+         \fi
+         \ifdim\xca>\xcb
+            % right to left
+            \pgfmathsetmacro{\dt@temp}{\dt@arcin}
+            \pgfmathsetmacro{\dt@arcin}{\dt@arcout}
+            \pgfmathsetmacro{\dt@arcout}{\dt@temp}
+         \fi
+         %\draw [/depgraph/.cd, reserved/edge style, rounded corners = #5/5, #1] 
+         \draw [out=\dt@arcout, in=\dt@arcin,/depgraph/.cd, reserved/edge style, rounded corners = #5/5, #1] 
+            (\dt@lastlabel-edge-origin) 
+            to node (\dt@lastlabel) [/depgraph/.cd, #1, reserved/label style] {#4} 
+            (\dt@lastlabel-edge-endpoint);
+         
+      \else   
+         \draw [/depgraph/.cd, reserved/edge style, rounded corners = #5/5, #1] 
+            (\dt@lastlabel-edge-origin) --
+            (\dt@lastlabel-edge-first-corner) --
+            (\dt@lastlabel-edge-second-corner) --
+            (\dt@lastlabel-edge-endpoint);
+            \node (\dt@lastlabel) [/depgraph/.cd, #1, reserved/label style] at
+            ($ .5*(\dt@lastlabel-edge-second-corner) + .5*(\dt@lastlabel-edge-first-corner) $)
+            {#4};
+      \fi
+   \end{scope}
+}
+

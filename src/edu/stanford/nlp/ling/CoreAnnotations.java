@@ -295,6 +295,17 @@ public class CoreAnnotations {
   }
 
   /**
+   * Line number for a sentence in a document delimited by newlines
+   * instead of punctuation.  May skip numbers if there are blank
+   * lines not represented as sentences.  Indexed from 1 rather than 0.
+   */
+  public static class LineNumberAnnotation implements CoreAnnotation<Integer> {
+    public Class<Integer> getType() {
+      return Integer.class;
+    }
+  }
+
+  /**
    * Contains the "value" - an ill-defined string used widely in MapLabel.
    */
   public static class ValueAnnotation implements CoreAnnotation<String> {

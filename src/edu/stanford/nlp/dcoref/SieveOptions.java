@@ -25,6 +25,9 @@ public class SieveOptions {
   public boolean USE_ALIAS;
   public boolean USE_SLOT_MATCH;
   public boolean USE_DISCOURSEMATCH;
+  public boolean USE_DISTANCE;
+  public boolean USE_NUMBER_ANIMACY_NE_AGREE;
+  public boolean USE_COREF_DICT;
   
   public String toString() {
     StringBuilder os = new StringBuilder();
@@ -53,6 +56,9 @@ public class SieveOptions {
     if(USE_ALIAS) os.append(", USE_ALIAS");
     if(USE_SLOT_MATCH) os.append(", USE_SLOT_MATCH");
     if(USE_DISCOURSEMATCH) os.append(", USE_DISCOURSEMATCH");
+    if(USE_DISTANCE) os.append(", USE_DISTANCE");
+    if(USE_NUMBER_ANIMACY_NE_AGREE) os.append(", USE_NUMBER_ANIMACY_NE_AGREE");
+    if(USE_COREF_DICT) os.append(", USE_COREF_DICT");
     os.append("}");
     return os.toString();
   }
@@ -82,5 +88,8 @@ public class SieveOptions {
     USE_ALIAS = false;
     USE_SLOT_MATCH = false;
     USE_DISCOURSEMATCH = false;
+    USE_DISTANCE = false;
+    USE_NUMBER_ANIMACY_NE_AGREE = false;
+    USE_COREF_DICT = false;
   }
 }

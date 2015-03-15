@@ -1,9 +1,10 @@
 package edu.stanford.nlp.ie;
 
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.ie.pascal.AcronymModel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 
@@ -40,10 +41,10 @@ public class SeminarsPrior<IN extends CoreMap> extends EntityCachingAbstractSequ
 
   public double scoreOf(int[] sequence) {
 
-    Set<String> speakers = new HashSet<String>();
-    Set<String> locations = new HashSet<String>();
-    Set<String> stimes = new HashSet<String>();
-    Set<String> etimes = new HashSet<String>();
+    Set<String> speakers = Generics.newHashSet();
+    Set<String> locations = Generics.newHashSet();
+    Set<String> stimes = Generics.newHashSet();
+    Set<String> etimes = Generics.newHashSet();
 
     List<Entity> speakersL = new ArrayList<Entity>();
     List<Entity> locationsL = new  ArrayList<Entity>();
@@ -171,7 +172,7 @@ public class SeminarsPrior<IN extends CoreMap> extends EntityCachingAbstractSequ
     return p;
   }
   
-  private static Map<Pair<String, String>, Boolean> aliasLocCache = new HashMap<Pair<String, String>, Boolean>();
+  private static Map<Pair<String, String>, Boolean> aliasLocCache = Generics.newHashMap();
 
   private static AcronymModel acronymModel;
 

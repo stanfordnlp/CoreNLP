@@ -20,6 +20,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.IntCounter;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.MapFactory;
@@ -97,7 +98,7 @@ public class SplittingGrammarExtractor {
   /**
    * The original states in the trees
    */
-  Set<String> originalStates = new HashSet<String>();
+  Set<String> originalStates = Generics.newHashSet();
 
   /**
    * The current number of times a particular state has been split
@@ -1115,13 +1116,13 @@ public class SplittingGrammarExtractor {
     // counting the total mass
     TwoDimensionalMap<String, String, double[][]> tempUnaryBetas = new TwoDimensionalMap<String, String, double[][]>();
     ThreeDimensionalMap<String, String, String, double[][][]> tempBinaryBetas = new ThreeDimensionalMap<String, String, String, double[][][]>();
-    Map<String, double[]> totalStateMass = new HashMap<String, double[]>();
+    Map<String, double[]> totalStateMass = Generics.newHashMap();
     recalculateTemporaryBetas(false, totalStateMass, tempUnaryBetas, tempBinaryBetas);
 
     // Next, for each tree we count the effect of merging its
     // annotations.  We only consider the most recently split
     // annotations as candidates for merging.
-    Map<String, double[]> deltaAnnotations = new HashMap<String, double[]>();
+    Map<String, double[]> deltaAnnotations = Generics.newHashMap();
     for (Tree tree : trees) {
       countMergeEffects(tree, totalStateMass, deltaAnnotations);
     }
@@ -1363,7 +1364,7 @@ public class SplittingGrammarExtractor {
   }
 
   Map<String, int[]> buildMergeCorrespondence(List<Triple<String, Integer, Double>> deltas) {
-    Map<String, int[]> mergeCorrespondence = new HashMap<String, int[]>();
+    Map<String, int[]> mergeCorrespondence = Generics.newHashMap();
     for (String state : originalStates) {
       int states = getStateSplitCount(state);
       int[] correspondence = new int[states];
@@ -1461,7 +1462,7 @@ public class SplittingGrammarExtractor {
     // counting the total mass...
     TwoDimensionalMap<String, String, double[][]> tempUnaryBetas = new TwoDimensionalMap<String, String, double[][]>();
     ThreeDimensionalMap<String, String, String, double[][][]> tempBinaryBetas = new ThreeDimensionalMap<String, String, String, double[][][]>();
-    Map<String, double[]> totalStateMass = new HashMap<String, double[]>();
+    Map<String, double[]> totalStateMass = Generics.newHashMap();
     recalculateTemporaryBetas(false, totalStateMass, tempUnaryBetas, tempBinaryBetas);
 
     // ... but note we don't actually rescale the betas.

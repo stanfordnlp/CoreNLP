@@ -11,7 +11,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -30,6 +29,7 @@ import edu.stanford.nlp.trees.international.french.FrenchTreebankLanguagePack;
 import edu.stanford.nlp.trees.tregex.TregexParseException;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.DataFilePaths;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Produces the pre-processed version of the FTB used in the experiments of
@@ -213,7 +213,7 @@ public class FTBDataset extends AbstractDataset {
 
   private Set<String> makeSplitSet(String splitFileName) {
     splitFileName = DataFilePaths.convert(splitFileName);
-    Set<String> splitSet = new HashSet<String>();
+    Set<String> splitSet = Generics.newHashSet();
     LineNumberReader reader = null;
     try {
       reader = new LineNumberReader(new FileReader(splitFileName));

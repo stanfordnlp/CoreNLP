@@ -2,7 +2,6 @@ package edu.stanford.nlp.pipeline;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -22,6 +21,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
 
@@ -149,7 +149,7 @@ public class DeterministicCorefAnnotator implements Annotator {
 
         for (CorefChain corefChain : result.values()) {
           if(corefChain.getMentionsInTextualOrder().size() < 2) continue;
-          Set<CoreLabel> coreferentTokens = new HashSet<CoreLabel>();
+          Set<CoreLabel> coreferentTokens = Generics.newHashSet();
           for (CorefMention mention : corefChain.getMentionsInTextualOrder()) {
             CoreMap sentence = annotation.get(CoreAnnotations.SentencesAnnotation.class).get(mention.sentNum - 1);
             CoreLabel token = sentence.get(CoreAnnotations.TokensAnnotation.class).get(mention.headIndex - 1);

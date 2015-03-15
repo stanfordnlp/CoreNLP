@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.StringLabelFactory;
 import edu.stanford.nlp.trees.*;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Timing;
@@ -403,7 +404,7 @@ public abstract class TregexPattern implements Serializable {
    * @return a TregexMatcher
    */
   public TregexMatcher matcher(Tree t) {
-    return matcher(t, t, null, new HashMap<String, Tree>(), new VariableStrings());
+    return matcher(t, t, null, Generics.<String, Tree>newHashMap(), new VariableStrings());
   }
 
   /**
@@ -572,7 +573,7 @@ public abstract class TregexPattern implements Serializable {
     String encoding = "UTF-8";
     String macroOption = "-macros";
     String macroFilename = "";
-    Map<String,Integer> flagMap = new HashMap<String,Integer>();
+    Map<String,Integer> flagMap = Generics.newHashMap();
     flagMap.put(extractSubtreesOption,2);
     flagMap.put(extractSubtreesFileOption,2);
     flagMap.put(subtreeCodeOption,0);

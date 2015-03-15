@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Token Sequence Pattern for regular expressions for sequences over tokens (as the more general <code>CoreMap</code>)
+ * Token Sequence Pattern for regular expressions for sequences over tokens (as the more general <code>CoreMap</code>).
  * Sequences over tokens can be matched like strings.
  * <p>
  * To use
@@ -38,7 +38,7 @@ import java.util.List;
  *     <li>To retrieve group using id: <code>m.group(id)</code> or <code>m.groupNodes(id)</code>
  *     <br> NOTE: Capturing groups are indexed from left to right, starting at one.  Group zero is the entire matched sequence.
  *     </li>
- *     <li>To retrieve group using bind variable name: <code>m.group("$var")</code> or <code>m.groupNodes("$var")</code>
+ *     <li>To retrieve group using bound variable name: <code>m.group("$var")</code> or <code>m.groupNodes("$var")</code>
  *     </li>
  *  </ul>
  *  See {@link SequenceMatchResult} for more accessor functions to retrieve matches.

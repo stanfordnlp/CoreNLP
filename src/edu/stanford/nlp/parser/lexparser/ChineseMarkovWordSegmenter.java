@@ -9,8 +9,9 @@ import edu.stanford.nlp.stats.Distribution;
 import edu.stanford.nlp.stats.GeneralizedCounter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.Treebank;
-import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.DeltaIndex;
+import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.process.WordSegmenter;
 
@@ -93,9 +94,9 @@ public class ChineseMarkovWordSegmenter implements WordSegmenter {
     lex.finishTraining();
 
     int numTags = tagIndex.size();
-    POSes = new HashSet<String>(tagIndex.objectsList());
+    POSes = Generics.newHashSet(tagIndex.objectsList());
     initialPOSDist = Distribution.laplaceSmoothedDistribution(initial, numTags, 0.5);
-    markovPOSDists = new HashMap<String, Distribution>();
+    markovPOSDists = Generics.newHashMap();
     Set entries = ruleCounter.lowestLevelCounterEntrySet();
     for (Iterator iter = entries.iterator(); iter.hasNext();) {
       Map.Entry entry = (Map.Entry) iter.next();

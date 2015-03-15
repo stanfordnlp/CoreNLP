@@ -1,13 +1,13 @@
 package edu.stanford.nlp.ling;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 import edu.stanford.nlp.ling.AnnotationLookup.KeyLookup;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 
@@ -91,6 +91,7 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
    *
    * @param label Basis for this label
    */
+  @SuppressWarnings("unchecked")
   public CoreLabel(Label label) {
     super(0);
     if (label instanceof CoreMap) {
@@ -131,9 +132,9 @@ public class CoreLabel extends ArrayCoreMap implements Label, HasWord, HasTag, H
   public static interface GenericAnnotation<T> extends CoreAnnotation<T> {  }
   //Unchecked is below because eclipse can't handle the level of type inference if we correctly parameterize GenericAnnotation with String
   @SuppressWarnings("unchecked")
-  public static HashMap<String, Class<? extends GenericAnnotation>> genericKeys = new HashMap<String, Class<? extends GenericAnnotation>>();
+  public static final Map<String, Class<? extends GenericAnnotation>> genericKeys = Generics.newHashMap();
   @SuppressWarnings("unchecked")
-  public static HashMap<Class<? extends GenericAnnotation>, String> genericValues = new HashMap<Class<? extends GenericAnnotation>, String>();
+  public static final Map<Class<? extends GenericAnnotation>, String> genericValues = Generics.newHashMap();
 
 
   @SuppressWarnings("unchecked")

@@ -42,8 +42,8 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -59,6 +59,7 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
+import edu.stanford.nlp.util.Generics;
 
 
 /**
@@ -851,7 +852,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
     private int totalMatches; // = 0;
     private final TregexPattern p;
     private final List<TreeFromFile> matchedTrees;
-    private final HashMap<TreeFromFile,List<Tree>> matchedParts;
+    private final Map<TreeFromFile,List<Tree>> matchedParts;
     private String filename = "";
 
 
@@ -859,10 +860,10 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
       this.p = p;
       //this.handles = handles;
       matchedTrees = new ArrayList<TreeFromFile>();
-      matchedParts = new HashMap<TreeFromFile, List<Tree>>();
+      matchedParts = Generics.newHashMap();
     }
 
-    public HashMap<TreeFromFile,List<Tree>> getMatchedParts() {
+    public Map<TreeFromFile,List<Tree>> getMatchedParts() {
       return matchedParts;
     }
 
@@ -1155,7 +1156,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   " A disjunctive list of literal strings can be given separated by '|'." +
   " The special string '__' (two underscores) can be used to match any" +
   " node.  (WARNING!!  Use of the '__' node description may seriously" +
-  " slow down search.)  If a label description is preceeded by '@', the" +
+  " slow down search.)  If a label description is preceded by '@', the" +
   " label will match any node whose <em>basicCategory</em> matches the" +
   " description.  <em>NB: A single '@' thus scopes over a disjunction" +
   " specified by '|': @NP|VP means things with basic category NP or VP." +
@@ -1165,7 +1166,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   " to the ends of node labels." +
   " <p> " +
   " In a chain of relations, all relations are relative to the first node in " +
-  " the chain. Nodes can be grouped using parens '(' and ')' to change this. " +
+  " the chain. Nodes can be grouped using parentheses '(' and ')' to change this. " +
   " For example, <code> (S &lt; VP &lt; NP) </code> means" +
   " \"an S over a VP and also over an NP\"." +
   " If instead what you want is an S above a VP above an NP, you should write" +
@@ -1216,8 +1217,9 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   " can be part of the functionality of a TreeReader specified in Preferences.)" +
 
   " <p><h3>Segmenting patterns</h3>" +
-  " The \":\" operator allows you to segment a pattern into two pieces.  This can simplify your pattern writing.  For example," +
-  " the pattern" +
+  " The \":\" operator allows you to segment a pattern into two pieces.  This can simplify your pattern writing." +
+  " The semantics is that both patterns must match a tree, but the match of the first pattern" +
+  "  is returned as the matching node. For example, the pattern" +
   " <blockquote>" +
   "   S : NP" +
   " </blockquote>" +

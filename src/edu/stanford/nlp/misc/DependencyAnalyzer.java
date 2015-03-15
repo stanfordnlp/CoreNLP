@@ -7,6 +7,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.stanford.nlp.util.Generics;
+
 /**
  * Parses the output of DependencyExtractor into a tree, and constructs
  * transitive dependency closures of any set of classes.
@@ -27,13 +29,13 @@ public class DependencyAnalyzer {
     /**
      * The set of Identifiers that are directly dependent on this one.
      */
-    public HashSet<Identifier> ingoingDependencies = new HashSet<Identifier>();
+    public Set<Identifier> ingoingDependencies = Generics.newHashSet();
 
     /**
      * The set of Identifiers upon which this Identifier is directly
      * dependent.
      */
-    public HashSet<Identifier> outgoingDependencies = new HashSet<Identifier>();
+    public Set<Identifier> outgoingDependencies = Generics.newHashSet();
 
     /**
      * True if this Identifier represents a class. It might be nicer
@@ -71,14 +73,14 @@ public class DependencyAnalyzer {
 
   } // end static class Identifier
 
-  private HashMap<String,Identifier> identifiers = new HashMap<String,Identifier>();
+  private Map<String,Identifier> identifiers = Generics.newHashMap();
 
   /**
    * Adds the starting classes to depQueue and closure.
    * Allows * as a wildcard for class names.
    */
   void addStartingClasses(LinkedList<Identifier> depQueue,
-                          HashSet<Identifier> closure,
+                          Set<Identifier> closure,
                           List<String> startingClasses) {
     // build patterns out of the given class names
     // escape . and $, turn * into .* for a regular expression
@@ -133,7 +135,7 @@ public class DependencyAnalyzer {
    *         that are the transitive closure of the starting classes.
    */
   public Collection<Identifier> transitiveClosure(List<String> startingClassNames) {
-    HashSet<Identifier> closure = new HashSet<Identifier>();
+    Set<Identifier> closure = Generics.newHashSet();
 
     // The depQueue is the queue of items in the closure whose dependencies
     // have yet to be scanned.
@@ -190,7 +192,7 @@ public class DependencyAnalyzer {
 
     ArrayList<Identifier> sortedClosure = new ArrayList<Identifier>(closure);
     Collections.sort(sortedClosure);
-    HashSet<String> alreadyOutput = new HashSet<String>();
+    Set<String> alreadyOutput = Generics.newHashSet();
     for (Identifier identifier : sortedClosure) {
       String name = identifier.name;
       if (name.startsWith("edu.stanford.nlp")) {

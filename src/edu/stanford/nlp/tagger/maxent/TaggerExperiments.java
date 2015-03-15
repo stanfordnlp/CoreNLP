@@ -28,6 +28,7 @@
 package edu.stanford.nlp.tagger.maxent;
 
 import edu.stanford.nlp.maxent.Experiments;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 import java.io.File;
@@ -35,7 +36,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Arrays;
 
@@ -53,7 +53,7 @@ public class TaggerExperiments extends Experiments {
   private static final String zeroSt = "0";
 
   private final TaggerFeatures feats;
-  private final Set<FeatureKey> sTemplates = new HashSet<FeatureKey>();
+  private final Set<FeatureKey> sTemplates = Generics.newHashSet();
   private final HistoryTable tHistories = new HistoryTable();
 
   private final int numFeatsGeneral;
@@ -174,7 +174,7 @@ public class TaggerExperiments extends Experiments {
           if (maxentTagger.possibleTagsOnly) {
             String word = ExtractorFrames.cWord.extract(tHistories.getHistory(xValue));
             String[] tags = maxentTagger.dict.getTags(word);
-            Set<String> s = new HashSet<String>(Arrays.asList(maxentTagger.tags.deterministicallyExpandTags(tags)));
+            Set<String> s = Generics.newHashSet(Arrays.asList(maxentTagger.tags.deterministicallyExpandTags(tags)));
             if(DEBUG)
               System.err.printf("possible tags for %s: %s\n", word, Arrays.toString(s.toArray()));
             if(!s.contains(fK.tag))
@@ -205,7 +205,7 @@ public class TaggerExperiments extends Experiments {
               if(maxentTagger.possibleTagsOnly) {
                 String word = ExtractorFrames.cWord.extract(tHistories.getHistory(x));
                 String[] tags = maxentTagger.dict.getTags(word);
-                Set<String> s = new HashSet<String>(Arrays.asList(maxentTagger.tags.deterministicallyExpandTags(tags)));
+                Set<String> s = Generics.newHashSet(Arrays.asList(maxentTagger.tags.deterministicallyExpandTags(tags)));
                 if(!s.contains(fK.tag))
                   continue;
               }
@@ -240,7 +240,7 @@ public class TaggerExperiments extends Experiments {
           // look up the tag # in the index
           if (maxentTagger.fAssociations.size() <= fK.num) {
             for (int i = maxentTagger.fAssociations.size(); i <= fK.num; ++i) {
-              maxentTagger.fAssociations.add(new HashMap<String, int[]>());
+              maxentTagger.fAssociations.add(Generics.<String, int[]>newHashMap());
             }
           }
           Map<String, int[]> fValueAssociations = maxentTagger.fAssociations.get(fK.num);

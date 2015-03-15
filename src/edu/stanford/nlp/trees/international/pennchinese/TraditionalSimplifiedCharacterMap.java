@@ -9,13 +9,13 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * This class is a Function which transforms a String of traditional
@@ -37,7 +37,7 @@ import edu.stanford.nlp.util.Function;
  * @author John Bauer
  */
 public class TraditionalSimplifiedCharacterMap implements Function<String, String> {
-  Map<String, String> map = new HashMap<String, String>();
+  Map<String, String> map = Generics.newHashMap();
 
   String[][] HARDCODED = {{"鹼", "碱"},
                           {"於", "于"},
@@ -67,7 +67,7 @@ public class TraditionalSimplifiedCharacterMap implements Function<String, Strin
 
   void init(BufferedReader reader) {
     try {
-      Set<String> hardcodedSet = new HashSet<String>();
+      Set<String> hardcodedSet = Generics.newHashSet();
       for (String[] transform : HARDCODED) {
         hardcodedSet.add(transform[0]);
         String traditional = transform[0];

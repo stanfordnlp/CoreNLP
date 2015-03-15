@@ -2,7 +2,6 @@ package edu.stanford.nlp.dcoref;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +25,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -54,8 +54,8 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       findHead(s, mentions);
 
       // todo [cdm 2013]: This block seems to do nothing - the two sets are never used
-      Set<IntPair> mentionSpanSet = new HashSet<IntPair>();
-      Set<IntPair> namedEntitySpanSet = new HashSet<IntPair>();
+      Set<IntPair> mentionSpanSet = Generics.newHashSet();
+      Set<IntPair> namedEntitySpanSet = Generics.newHashSet();
       for(Mention m : mentions) {
         mentionSpanSet.add(new IntPair(m.startIndex, m.endIndex));
         if(!m.headWord.get(CoreAnnotations.NamedEntityTagAnnotation.class).equals("O")) {
@@ -80,8 +80,8 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
       List<Mention> mentions = new ArrayList<Mention>();
       predictedMentions.add(mentions);
-      Set<IntPair> mentionSpanSet = new HashSet<IntPair>();
-      Set<IntPair> namedEntitySpanSet = new HashSet<IntPair>();
+      Set<IntPair> mentionSpanSet = Generics.newHashSet();
+      Set<IntPair> namedEntitySpanSet = Generics.newHashSet();
 
       extractNamedEntityMentions(s, mentions, mentionSpanSet, namedEntitySpanSet);
       extractNPorPRP(s, mentions, mentionSpanSet, namedEntitySpanSet);
@@ -172,7 +172,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     final String mentionPattern = "NP < (/^(?:NP|NNP|NML)/=m1 $.. (/^CC|,/ $.. /^(?:NP|NNP|NML)/=m2))";
     TregexPattern tgrepPattern = TregexPattern.compile(mentionPattern);
     TregexMatcher matcher = tgrepPattern.matcher(tree);
-    Map<IntPair, Tree> spanToMentionSubTree = new HashMap<IntPair, Tree>();
+    Map<IntPair, Tree> spanToMentionSubTree = Generics.newHashMap();
     while (matcher.find()) {
       matcher.getMatch();
       Tree m1 = matcher.getNode("m1");
@@ -399,7 +399,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   protected static void removeSpuriousMentions(CoreMap s, List<Mention> mentions, Dictionaries dict) {
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
-    Set<Mention> remove = new HashSet<Mention>();
+    Set<Mention> remove = Generics.newHashSet();
 
 
     for(Mention m : mentions){
@@ -472,24 +472,44 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
   /** Check whether pleonastic 'it'. E.g., It is possible that ... */
   private static boolean isPleonastic(Mention m, Tree tree) {
-    if(!m.spanToString().equalsIgnoreCase("it")) return false;
+    if ( ! m.spanToString().equalsIgnoreCase("it")) return false;
     final String[] patterns = {
-        "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (VP < (VBN $.. /S|SBAR/))))",
+        // cdm 2013: I spent a while on these patterns. I fixed a syntax error in five patterns ($.. split with space), so it now shouldn't exception in checkPleonastic. This gave 0.02% on CoNLL11 dev
+        // I tried some more precise paterns but they didn't help. Indeed, they tended to hurt vs. the higher recall patterns.
+
+        //"NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (VP < (VBN $.. /S|SBAR/))))", // overmatches
+        // "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (/^V.*/ < /^(?i:is|was|be|becomes|become|became)$/ $.. (@VP < (VBN < expected|hoped $.. @SBAR))))",  // this one seems more accurate, but ...
+        "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (/^V.*/ < /^(?i:is|was|be|becomes|become|became)$/ $.. (@VP < (VBN $.. @S|SBAR))))",  // in practice, go with this one (best results)
+
         "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (ADJP $.. (/S|SBAR/))))",
         "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (ADJP < (/S|SBAR/))))",
+        // "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (/^V.*/ < /^(?i:is|was|be|becomes|become|became)$/ $.. (@ADJP < (/^(?:JJ|VB)/ < /^(?i:(?:hard|tough|easi)(?:er|est)?|(?:im|un)?(?:possible|interesting|worthwhile|likely|surprising|certain)|disappointing|pointless|easy|fine|okay)$/) [ < @S|SBAR | $.. (@S|SBAR !< (IN !< for|For|FOR|that|That|THAT)) ] )))", // does worse than above 2 on CoNLL11 dev
+
         "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (NP < /S|SBAR/)))",
         "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:is|was|become|became)/) $.. (NP $.. ADVP $.. /S|SBAR/)))",
-        "NP < (PRP=m1) $.. (VP < (MD $ .. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (VP < (VBN $.. /S|SBAR/))))))",
-        "NP < (PRP=m1) $.. (VP < (MD $ .. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (ADJP $.. (/S|SBAR/))))))",
-        "NP < (PRP=m1) $.. (VP < (MD $ .. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (ADJP < (/S|SBAR/))))))",
-        "NP < (PRP=m1) $.. (VP < (MD $ .. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (NP < /S|SBAR/)))))",
-        "NP < (PRP=m1) $.. (VP < (MD $ .. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (NP $.. ADVP $.. /S|SBAR/)))))",
+        // "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (/^V.*/ < /^(?i:is|was|be|becomes|become|became)$/ $.. (@NP $.. @ADVP $.. @SBAR)))", // cleft examples, generalized to not need ADVP; but gave worse CoNLL12 dev numbers....
+
+        // these next 5 had buggy space in "$ ..", which I fixed
+        "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (VP < (VBN $.. /S|SBAR/))))))", 
+
+        "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (ADJP $.. (/S|SBAR/))))))", // extraposed. OK 1/2 correct; need non-adverbial case
+        "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (ADJP < (/S|SBAR/))))))", // OK: 3/3 good matches on dev; but 3/4 wrong on WSJ
+        // certain can be either but relatively likely pleonastic with it ... be
+        // "@NP < (PRP=m1 < it|IT|It) $.. (@VP < (MD $.. (@VP < ((/^V.*/ < /^(?:be|become)/) $.. (@ADJP < (/^JJ/ < /^(?i:(?:hard|tough|easi)(?:er|est)?|(?:im|un)?(?:possible|interesting|worthwhile|likely|surprising|certain)|disappointing|pointless|easy|fine|okay))$/) [ < @S|SBAR | $.. (@S|SBAR !< (IN !< for|For|FOR|that|That|THAT)) ] )))))", // GOOD REPLACEMENT ; 2nd clause is for extraposed ones
+
+        "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (NP < /S|SBAR/)))))",
+        "NP < (PRP=m1) $.. (VP < (MD $.. (VP < ((/^V.*/ < /^(?:be|become)/) $.. (NP $.. ADVP $.. /S|SBAR/)))))",
+
         "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:seems|appears|means|follows)/) $.. /S|SBAR/))",
+
         "NP < (PRP=m1) $.. (VP < ((/^V.*/ < /^(?:turns|turned)/) $.. PRT $.. /S|SBAR/))"
     };
 
-    for(String p : patterns){
-      if(checkPleonastic(m, tree, p)) return true;
+    for (String p : patterns) {
+      if (checkPleonastic(m, tree, p)) {
+        System.err.printf("XXXX %s%n", tree);
+        return true;
+      }
     }
     return false;
   }
@@ -500,15 +520,14 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       TregexMatcher matcher = tgrepPattern.matcher(tree);
       while (matcher.find()) {
         Tree np1 = matcher.getNode("m1");
-        if(((CoreLabel)np1.label()).get(CoreAnnotations.BeginIndexAnnotation.class)+1 == m.headWord.get(CoreAnnotations.IndexAnnotation.class)) {
+        if (((CoreLabel)np1.label()).get(CoreAnnotations.BeginIndexAnnotation.class)+1 == m.headWord.get(CoreAnnotations.IndexAnnotation.class)) {
           return true;
         }
       }
     } catch (Exception e) {
-      return false;
+      e.printStackTrace();
     }
     return false;
   }
+
 }
-
-

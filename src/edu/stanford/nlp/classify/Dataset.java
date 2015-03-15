@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -22,6 +21,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.objectbank.ObjectBank;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Pair;
@@ -164,7 +164,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
 
   public Dataset<L, F> getRandomSubDataset(double p, int seed) {
     int newSize = (int)(p * size());
-    Set<Integer> indicesToKeep = new HashSet<Integer>();
+    Set<Integer> indicesToKeep = Generics.newHashSet();
     Random r = new Random(seed);
     int s = size();
     while (indicesToKeep.size() < newSize) {
@@ -263,7 +263,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     for (int i=0; i < this.size(); i++)
     {
       BasicDatum<L, F> datum = (BasicDatum<L, F>) getDatum(i);
-      Set<F> featureSet   = new HashSet<F>(datum.asFeatures());
+      Set<F> featureSet   = Generics.newHashSet(datum.asFeatures());
       for (F key : featureSet) {
         featureCounts.incrementCount(key, 1.0);
       }
@@ -510,7 +510,7 @@ public class Dataset<L, F> extends GeneralDataset<L, F> {
     pw.println();
     for (int i = 0; i < labels.length; i++) {
       pw.print(labelIndex.get(i));
-      Set<Integer> feats = new HashSet<Integer>();
+      Set<Integer> feats = Generics.newHashSet();
       for (int j = 0; j < data[i].length; j++) {
         int feature = data[i][j];
         feats.add(Integer.valueOf(feature));

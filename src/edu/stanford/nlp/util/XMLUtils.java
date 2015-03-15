@@ -107,7 +107,7 @@ public class XMLUtils {
   /**
    * Block-level HTML tags that are rendered with surrounding line breaks.
    */
-  public static final Set<String> breakingTags = new HashSet<String>(Arrays.asList(new String[] {"blockquote", "br", "div", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "li", "ol", "p", "pre", "ul", "tr", "td"}));
+  public static final Set<String> breakingTags = Generics.newHashSet(Arrays.asList(new String[] {"blockquote", "br", "div", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "li", "ol", "p", "pre", "ul", "tr", "td"}));
 
   /**
    * @param r       the reader to read the XML/HTML from
@@ -808,7 +808,7 @@ public class XMLUtils {
         isSingleTag = false;
       }
       tag = tag.substring(begin, end);
-      attributes = new HashMap<String,String>();
+      attributes = Generics.newHashMap();
       begin = 0;
       end = findSpace(tag, 0);
 

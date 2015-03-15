@@ -30,8 +30,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +46,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
@@ -56,7 +55,7 @@ public class Document implements Serializable {
 
   private static final long serialVersionUID = -4139866807494603953L;
 
-  public enum DocType { CONVERSATION, ARTICLE };
+  public enum DocType { CONVERSATION, ARTICLE }
 
   /** The type of document: conversational or article */
   public DocType docType;
@@ -95,9 +94,9 @@ public class Document implements Serializable {
    * Each mention occurrence with sentence # and position within sentence
    * (Nth mention, not Nth token)
    */
-  public HashMap<Mention, IntTuple> positions;
+  public Map<Mention, IntTuple> positions;
 
-  public final HashMap<IntTuple, Mention> mentionheadPositions;
+  public final Map<IntTuple, Mention> mentionheadPositions;
 
   /** List of gold links in a document by positions */
   private List<Pair<IntTuple,IntTuple>> goldLinks;
@@ -116,16 +115,16 @@ public class Document implements Serializable {
   public Set<Pair<Integer, Integer>> incompatibles;
 
   public Document() {
-    positions = new HashMap<Mention, IntTuple>();
-    mentionheadPositions = new HashMap<IntTuple, Mention>();
-    roleSet = new HashSet<Mention>();
-    corefClusters = new HashMap<Integer, CorefCluster>();
+    positions = Generics.newHashMap();
+    mentionheadPositions = Generics.newHashMap();
+    roleSet = Generics.newHashSet();
+    corefClusters = Generics.newHashMap();
     goldCorefClusters = null;
-    allPredictedMentions = new HashMap<Integer, Mention>();
-    allGoldMentions = new HashMap<Integer, Mention>();
-    speakers = new HashMap<Integer, String>();
-    speakerPairs = new HashSet<Pair<Integer, Integer>>();
-    incompatibles = new HashSet<Pair<Integer, Integer>>();
+    allPredictedMentions = Generics.newHashMap();
+    allGoldMentions = Generics.newHashMap();
+    speakers = Generics.newHashMap();
+    speakerPairs = Generics.newHashSet();
+    incompatibles = Generics.newHashSet();
   }
 
   public Document(Annotation anno, List<List<Mention>> predictedMentions,
@@ -149,6 +148,7 @@ public class Document implements Serializable {
     processDiscourse(dict);
     printMentionDetection();
   }
+
   /** Process discourse information */
   protected void processDiscourse(Dictionaries dict) {
     docType = findDocType(dict);
@@ -158,10 +158,9 @@ public class Document implements Serializable {
     // find 'speaker mention' for each mention
     for(Mention m : allPredictedMentions.values()) {
       int utter = m.headWord.get(CoreAnnotations.UtteranceAnnotation.class);
-      int speakerMentionID;
       try{
-        speakerMentionID = Integer.parseInt(m.headWord.get(CoreAnnotations.SpeakerAnnotation.class));
-        if(utter!=0) {
+        int speakerMentionID = Integer.parseInt(m.headWord.get(CoreAnnotations.SpeakerAnnotation.class));
+        if (utter != 0) {
           speakerPairs.add(new Pair<Integer, Integer>(m.mentionID, speakerMentionID));
           speakerPairs.add(new Pair<Integer, Integer>(speakerMentionID, m.mentionID));
         }
@@ -176,6 +175,7 @@ public class Document implements Serializable {
       }
     }
   }
+
   /** Document initialize */
   protected void initialize() {
     if(goldOrderedMentionsBySentence==null) assignOriginalID();
@@ -206,7 +206,7 @@ public class Document implements Serializable {
         m.sentNum = i;
 
         assert(!corefClusters.containsKey(m.mentionID));
-        corefClusters.put(m.mentionID, new CorefCluster(m.mentionID, new HashSet<Mention>(Arrays.asList(m))));
+        corefClusters.put(m.mentionID, new CorefCluster(m.mentionID, Generics.newHashSet(Arrays.asList(m))));
         m.corefClusterID = m.mentionID;
 
         IntTuple headPosition = new IntTuple(2);
@@ -273,8 +273,8 @@ public class Document implements Serializable {
       List<Mention> golds = goldOrderedMentionsBySentence.get(sentNum);
       List<Mention> predicts = predictedOrderedMentionsBySentence.get(sentNum);
 
-      Map<IntPair, Mention> goldMentionPositions = new HashMap<IntPair, Mention>();
-      Map<Integer, LinkedList<Mention>> goldMentionHeadPositions = new HashMap<Integer, LinkedList<Mention>>();
+      Map<IntPair, Mention> goldMentionPositions = Generics.newHashMap();
+      Map<Integer, LinkedList<Mention>> goldMentionHeadPositions = Generics.newHashMap();
       for(Mention g : golds) {
         goldMentionPositions.put(new IntPair(g.startIndex, g.endIndex), g);
         if(!goldMentionHeadPositions.containsKey(g.headIndex)) {
@@ -284,7 +284,7 @@ public class Document implements Serializable {
       }
 
       List<Mention> remains = new ArrayList<Mention>();
-      for(Mention p : predicts) {
+      for (Mention p : predicts) {
         IntPair pos = new IntPair(p.startIndex, p.endIndex);
         if(goldMentionPositions.containsKey(pos)) {
           Mention g = goldMentionPositions.get(pos);
@@ -292,19 +292,19 @@ public class Document implements Serializable {
           p.twinless = false;
           g.twinless = false;
           goldMentionHeadPositions.get(g.headIndex).remove(g);
-          if(goldMentionHeadPositions.get(g.headIndex).size()==0) {
+          if(goldMentionHeadPositions.get(g.headIndex).isEmpty()) {
             goldMentionHeadPositions.remove(g.headIndex);
           }
         }
         else remains.add(p);
       }
-      for(Mention r : remains){
+      for (Mention r : remains){
         if(goldMentionHeadPositions.containsKey(r.headIndex)) {
           Mention g = goldMentionHeadPositions.get(r.headIndex).poll();
           r.mentionID = g.mentionID;
           r.twinless = false;
           g.twinless = false;
-          if(goldMentionHeadPositions.get(g.headIndex).size()==0) {
+          if(goldMentionHeadPositions.get(g.headIndex).isEmpty()) {
             goldMentionHeadPositions.remove(g.headIndex);
           }
         }
@@ -338,7 +338,7 @@ public class Document implements Serializable {
   /** Find document type: Conversation or article  */
   private DocType findDocType(Dictionaries dict) {
     boolean speakerChange = false;
-    Set<Integer> discourseWithIorYou = new HashSet<Integer>();
+    Set<Integer> discourseWithIorYou = Generics.newHashSet();
 
     for(CoreMap sent : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
       for(CoreLabel w : sent.get(CoreAnnotations.TokensAnnotation.class)) {
@@ -378,9 +378,9 @@ public class Document implements Serializable {
     }
   }
 
-  /** Extract gold coref cluster information */
+  /** Extract gold coref cluster information. */
   public void extractGoldCorefClusters(){
-    goldCorefClusters = new HashMap<Integer, CorefCluster>();
+    goldCorefClusters = Generics.newHashMap();
     for (List<Mention> mentions : goldOrderedMentionsBySentence) {
       for (Mention m : mentions) {
         int id = m.goldCorefClusterID;
@@ -389,10 +389,9 @@ public class Document implements Serializable {
         }
         CorefCluster c = goldCorefClusters.get(id);
         if (c == null) {
-          goldCorefClusters.put(id, new CorefCluster());
+          c = new CorefCluster(id);
+          goldCorefClusters.put(id, c);
         }
-        c = goldCorefClusters.get(id);
-        c.clusterID = id;
         c.corefMentions.add(m);
       }
     }
@@ -409,9 +408,9 @@ public class Document implements Serializable {
     List<Pair<IntTuple, IntTuple>> links = new ArrayList<Pair<IntTuple,IntTuple>>();
 
     // position of each mention in the input matrix, by id
-    HashMap<Integer, IntTuple> positions = new HashMap<Integer, IntTuple>();
+    Map<Integer, IntTuple> positions = Generics.newHashMap();
     // positions of antecedents
-    HashMap<Integer, List<IntTuple>> antecedents = new HashMap<Integer, List<IntTuple>>();
+    Map<Integer, List<IntTuple>> antecedents = Generics.newHashMap();
     for(int i = 0; i < goldOrderedMentionsBySentence.size(); i ++){
       for(int j = 0; j < goldOrderedMentionsBySentence.get(i).size(); j ++){
         Mention m = goldOrderedMentionsBySentence.get(i).get(j);
@@ -575,14 +574,14 @@ public class Document implements Serializable {
     if(beginQuotation.second() <= 1 && beginQuotation.first() > 0) {
       if(findSpeaker(utterNum, beginQuotation.first()-1, sentences, 0,
           sentences.get(beginQuotation.first()-1).get(CoreAnnotations.TokensAnnotation.class).size(), dict))
-        return ;
+        return;
     }
 
     if(endQuotation.second() == sentences.get(endQuotation.first()).size()-1
         && sentences.size() > endQuotation.first()+1) {
       if(findSpeaker(utterNum, endQuotation.first()+1, sentences, 0,
           sentences.get(endQuotation.first()+1).get(CoreAnnotations.TokensAnnotation.class).size(), dict))
-        return ;
+        return;
     }
   }
 
@@ -745,4 +744,5 @@ public class Document implements Serializable {
     SieveCoreferenceSystem.logger.fine("# of found gold mentions: "+foundGoldCount + " / # of gold mentions: "+allGoldMentions.size());
     SieveCoreferenceSystem.logger.fine("gold mentions == ");
   }
+
 }

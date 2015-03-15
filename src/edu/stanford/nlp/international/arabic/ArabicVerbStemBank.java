@@ -4,7 +4,9 @@ import java.io.*;
 import java.util.*;
 
 import edu.stanford.nlp.international.arabic.pipeline.*;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.trees.treebank.Mapper;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * A singleton class backed by a map between words and stems. The present input format is
@@ -20,14 +22,15 @@ public class ArabicVerbStemBank {
   private final Buckwalter b2a;
   private final Mapper lexMapper;
   private ArabicVerbStemBank() {
-    verbStems = new HashMap<String,String>();
+    verbStems = Generics.newHashMap();
     b2a = new Buckwalter();
     lexMapper = new DefaultLexicalMapper();
   }
 
-  public static ArabicVerbStemBank getInstance() {
-    if(thisInstance == null)
+  public synchronized static ArabicVerbStemBank getInstance() {
+    if(thisInstance == null) {
       thisInstance = new ArabicVerbStemBank();
+    }
     return thisInstance;
   }
 
@@ -38,10 +41,9 @@ public class ArabicVerbStemBank {
   }
 
   public void load(String filename) {
-    int lineId = 0;
     try {
-      BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filename)),"UTF-8"));
-      for(lineId = 1; br.ready(); lineId++) {
+      BufferedReader br = IOUtils.readerFromString(filename);
+      while (br.ready()) {
         String[] toks = br.readLine().split("\\t");
         List<String> toksList = Arrays.asList(toks);
 

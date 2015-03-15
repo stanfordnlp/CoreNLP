@@ -7,6 +7,7 @@ import edu.stanford.nlp.ling.tokensregex.SequenceMatchRules;
 import edu.stanford.nlp.ling.tokensregex.types.Value;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Function;
+import edu.stanford.nlp.util.Generics;
 import org.joda.time.*;
 import org.joda.time.format.*;
 
@@ -365,7 +366,7 @@ public class TimeFormatter {
       minValue = property.getMinimumValueOverall();
       maxValue = property.getMaximumValueOverall();
       this.validValues = new ArrayList<String>(maxValue-minValue+1);
-      this.valueMapping = new HashMap<String,Integer>();
+      this.valueMapping = Generics.newHashMap();
       for (int i = minValue; i <= maxValue; i++) {
         property.set(i);
         if (isShort != null) {
@@ -499,7 +500,7 @@ public class TimeFormatter {
     static List<String> validValues;
     static {
       validValues = new ArrayList<String>(DateTimeZone.getAvailableIDs());
-      valueMapping = new HashMap<String,DateTimeZone>();
+      valueMapping = Generics.newHashMap();
       for (String str:validValues) {
         valueMapping.put(str.toLowerCase(), DateTimeZone.forID(str));
       }

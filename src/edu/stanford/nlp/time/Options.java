@@ -74,7 +74,7 @@ public class Options {
         binderClasses[i] = props.getProperty(binderPrefix);
       }
     }
-    if (nBinders > 0) {
+    if (nBinders > 0 && System.getProperty("STS") == null) {
       binders = new Env.Binder[nBinders];
       for (int i = 0; i < nBinders; i++) {
         int bi = i+1;

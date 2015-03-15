@@ -1,10 +1,11 @@
 package edu.stanford.nlp.trees.international.negra;
 
-import edu.stanford.nlp.ling.StringLabel;
-import edu.stanford.nlp.ling.LabelFactory;
 import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.ling.LabelFactory;
+import edu.stanford.nlp.ling.StringLabel;
+import edu.stanford.nlp.util.Generics;
 
-import java.util.HashMap;
+
 import java.util.Map;
 
 /* An object for edge labels as implemented in the Negra treebank.
@@ -58,7 +59,7 @@ public class NegraLabel extends StringLabel {
       NegraLabel result;
       if(oldLabel instanceof NegraLabel) {
         NegraLabel l = (NegraLabel) oldLabel;
-        result = new NegraLabel(l.value(), l.getEdge(), new HashMap<String,String>());
+        result = new NegraLabel(l.value(), l.getEdge(), Generics.<String,String>newHashMap());
         for (Map.Entry<String,String> e : l.features.entrySet()) {
           result.features.put(e.getKey(), e.getValue());
         }
@@ -83,7 +84,7 @@ public class NegraLabel extends StringLabel {
   }
 
   public NegraLabel(String str) {
-    this(str, new HashMap<String,String>());
+    this(str, Generics.<String,String>newHashMap());
   }
 
   public NegraLabel(String str, Map<String,String> features) {

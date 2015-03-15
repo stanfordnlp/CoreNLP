@@ -2,8 +2,7 @@ package edu.stanford.nlp.trees.international.pennchinese;
 
 import edu.stanford.nlp.trees.AbstractCollinsHeadFinder;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
-
-import java.util.HashMap;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * A headfinder implementing Dan Bikel's head rules.
@@ -27,7 +26,7 @@ public class BikelChineseHeadFinder extends AbstractCollinsHeadFinder {
   public BikelChineseHeadFinder(TreebankLanguagePack tlp) {
     super(tlp);
 
-    nonTerminalInfo = new HashMap<java.lang.String,java.lang.String[][]>();
+    nonTerminalInfo = Generics.newHashMap();
     // these are first-cut rules
 
     defaultRule = new String[]{"right"};

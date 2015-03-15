@@ -1,13 +1,13 @@
 package edu.stanford.nlp.graph;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.util.CollectionUtils;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Finds connected components in the graph, currently uses inefficient list for
@@ -31,7 +31,7 @@ public class ConnectedComponents<V, E> {
   }
 
   private static <V, E> Set<V> bfs(LinkedList<V> todo, DirectedMultiGraph<V, E> graph, List<V> verticesLeft) {
-    Set<V> cc = new HashSet<V>();
+    Set<V> cc = Generics.newHashSet();
     while (todo.size() > 0) {
       V node = todo.removeFirst();
       cc.add(node);

@@ -31,15 +31,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.ie.machinereading.domains.ace.AceReader;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations;
@@ -53,6 +53,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 
 /**
  * Extracts {@code <COREF>} mentions from a file annotated in ACE format (ACE2004, ACE2005).
@@ -96,6 +97,12 @@ public class ACEMentionExtractor extends MentionExtractor {
     if(corpusPath.charAt(corpusPath.length()-1)!= File.separatorChar) corpusPath+= File.separatorChar;
 
     files = new File(corpusPath).list();
+  }
+  
+  public ACEMentionExtractor(Dictionaries dict, Properties props, Semantics semantics,
+      LogisticClassifier<String, String> singletonModel) throws Exception {
+    this(dict, props, semantics);
+    singletonPredictor = singletonModel;
   }
 
   public void resetDocs() {
@@ -225,11 +232,11 @@ public class ACEMentionExtractor extends MentionExtractor {
       previousOffset = t.get(t.size()-1).get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
       Counter<Integer> startCounts = new ClassicCounter<Integer>();
       Counter<Integer> endCounts = new ClassicCounter<Integer>();
-      HashMap<Integer, Set<Integer>> endID = new HashMap<Integer, Set<Integer>>();
+      Map<Integer, Set<Integer>> endID = Generics.newHashMap();
       for (Mention m : mentions) {
         startCounts.incrementCount(m.startIndex);
         endCounts.incrementCount(m.endIndex);
-        if(!endID.containsKey(m.endIndex)) endID.put(m.endIndex, new HashSet<Integer>());
+        if(!endID.containsKey(m.endIndex)) endID.put(m.endIndex, Generics.<Integer>newHashSet());
         endID.get(m.endIndex).add(m.goldCorefClusterID);
       }
       for (int j = 0 ; j < tokens.length; j++){

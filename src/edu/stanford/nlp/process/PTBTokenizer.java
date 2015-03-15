@@ -37,10 +37,11 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.util.PropertiesUtils;
-import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
+import edu.stanford.nlp.util.StringUtils;
 
 
 /**
@@ -628,7 +629,7 @@ public class PTBTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
    * Command-line option specification.
    */
   private static Map<String,Integer> optionArgDefs() {
-    Map<String,Integer> optionArgDefs = new HashMap<String,Integer>();
+    Map<String,Integer> optionArgDefs = Generics.newHashMap();
     optionArgDefs.put("options", 1);
     optionArgDefs.put("ioFileList", 0);
     optionArgDefs.put("lowerCase", 0);
