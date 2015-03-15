@@ -32,10 +32,6 @@ LICENSE
 CHANGES
 ------------------------------------
 
-2014-01-04    3.3.1     Bugfix release 
-
-2013-11-12    3.3.0     Update for compatibility 
-
 2013-06-19    3.2.0     Improve handling of line-by-line input 
 
 2013-04-04    1.6.8     ctb7 model, -nthreads option 

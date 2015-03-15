@@ -23,14 +23,7 @@ public class MatchedExpression {
   /** Text representing the matched expression */
   protected String text;
 
-  /**
-   * Character offsets (relative to original text)
-   * TODO: Fix up
-   *  If matched using regular text patterns,
-   *     the character offsets are with respect to the annotation (usually sentence)
-   *     from which the text was matched against
-   *  If matched using tokens, the character offsets are with respect to the overall document
-   */
+  /** Character offsets (relative to original text) */
   protected Interval<Integer> charOffsets;
   /**Token offsets (relative to original text tokenization) */
   protected Interval<Integer> tokenOffsets;

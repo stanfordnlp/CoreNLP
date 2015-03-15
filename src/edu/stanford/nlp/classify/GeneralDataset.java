@@ -16,10 +16,6 @@ import edu.stanford.nlp.util.Pair;
 
 /**
  * The purpose of this interface is to unify {@link Dataset} and {@link RVFDataset}.
- * <p>
- * Note: Despite these being value classes, at present there are no equals() and hashCode() methods
- * defined so you just get the default ones from Object, so different objects aren't equal.
- * </p>
  *
  * @author Kristina Toutanova (kristina@cs.stanford.edu)
  * @author Anna Rafferty (various refactoring with subclasses)
@@ -58,6 +54,9 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
   }
 
   public int[][] getDataArray() {
+    if (size == 0) {
+      return new int[0][]; // If we trim the data to size 0, we can never grow it again...
+    }
     data = trimToSize(data);
     return data;
   }
@@ -220,46 +219,8 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     }
   }
 
-  /** Divide out a (devtest) split of the dataset versus the rest of it (as a training set).
-   *
-   *  @param start Begin devtest with this index (inclusive)
-   *  @param end End devtest before this index (exclusive)
-   *  @return A Pair of data sets, the first being the remainder of size this.size() - (end-start)
-   *          and the second being of size (end-start)
-   */
-  public abstract Pair<GeneralDataset<L, F>, GeneralDataset<L, F>> split (int start, int end);
-
-  /** Divide out a (devtest) split from the start of the dataset and the rest of it (as a training set).
-   *
-   *  @param fractionSplit The first fractionSplit of datums (rounded down) will be the second split
-   *  @return A Pair of data sets, the first being the remainder of size ceiling(this.size() * (1-p)) drawn
-   *          from the end of the dataset and the second of size floor(this.size() * p) drawn from the
-   *          start of the dataset.
-   */
-  public abstract Pair<GeneralDataset<L, F>, GeneralDataset<L, F>> split (double fractionSplit);
-
-  /** Divide out a (devtest) split of the dataset versus the rest of it (as a training set).
-   *
-   *  @param fold The number of this fold (must be between 0 and (numFolds - 1)
-   *  @param numFolds The number of folds to divide the data into (must be greater than or equal to the
-   *                  size of the data set)
-   *  @return A Pair of data sets, the first being roughly (numFolds-1)/numFolds of the data items
-   *         (for use as training data_, and the second being 1/numFolds of the data, taken from the
-   *         fold<sup>th</sup> part of the data (for use as devTest data)
-   */
-  public Pair<GeneralDataset<L, F>, GeneralDataset<L, F>> splitOutFold(int fold, int numFolds) {
-    if (numFolds < 2 || numFolds > size() || fold < 0 || fold >= numFolds) {
-      throw new IllegalArgumentException("Illegal request for fold " + fold + " of " + numFolds +
-              " on data set of size " + size());
-    }
-    int normalFoldSize = size()/numFolds;
-    int start = normalFoldSize * fold;
-    int end = start + normalFoldSize;
-    if (fold == (numFolds - 1)) {
-      end = size();
-    }
-    return split(start, end);
-  }
+  public abstract Pair<GeneralDataset<L, F>, GeneralDataset<L, F>> split (int start, int end) ;
+  public abstract Pair<GeneralDataset<L, F>, GeneralDataset<L, F>> split (double p) ;
 
   /**
    * Returns the number of examples ({@link Datum}s) in the Dataset.
@@ -296,20 +257,14 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
    * Randomizes the data array in place.
    * Note: this cannot change the values array or the datum weights,
    * so redefine this for RVFDataset and WeightedDataset!
-   * This uses the Fisher-Yates (or Durstenfeld-Knuth) shuffle, which is unbiased.
-   * The same algorithm is used by shuffle() in j.u.Collections, and so you should get compatible
-   * results if using it on a Collection with the same seed (as of JDK1.7, at least).
-   *
-   * @param randomSeed A seed for the Random object (allows you to reproduce the same ordering)
+   * @param randomSeed
    */
-  // todo: Probably should be renamed 'shuffle' to be consistent with Java Collections API
-  public void randomize(long randomSeed) {
+  public void randomize(int randomSeed) {
     Random rand = new Random(randomSeed);
-    for (int j = size - 1; j > 0; j--) {
-      // swap each item with some lower numbered item
+    for(int j = size - 1; j > 0; j --){
       int randIndex = rand.nextInt(j);
 
-      int[] tmp = data[randIndex];
+      int [] tmp = data[randIndex];
       data[randIndex] = data[j];
       data[j] = tmp;
 
@@ -319,67 +274,34 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     }
   }
 
-  /**
-   * Randomizes the data array in place.
-   * Note: this cannot change the values array or the datum weights,
-   * so redefine this for RVFDataset and WeightedDataset!
-   * This uses the Fisher-Yates (or Durstenfeld-Knuth) shuffle, which is unbiased.
-   * The same algorithm is used by shuffle() in j.u.Collections, and so you should get compatible
-   * results if using it on a Collection with the same seed (as of JDK1.7, at least).
-   *
-   * @param randomSeed A seed for the Random object (allows you to reproduce the same ordering)
-   */
-  public <E> void shuffleWithSideInformation(long randomSeed, List<E> sideInformation) {
-    if (size != sideInformation.size()) {
-      throw new IllegalArgumentException("shuffleWithSideInformation: sideInformation not of same size as Dataset");
-    }
-    Random rand = new Random(randomSeed);
-    for (int j = size - 1; j > 0; j--) {
-      // swap each item with some lower numbered item
-      int randIndex = rand.nextInt(j);
-
-      int[] tmp = data[randIndex];
-      data[randIndex] = data[j];
-      data[j] = tmp;
-
-      int tmpl = labels[randIndex];
-      labels[randIndex] = labels[j];
-      labels[j] = tmpl;
-
-      E tmpE = sideInformation.get(randIndex);
-      sideInformation.set(randIndex, sideInformation.get(j));
-      sideInformation.set(j, tmpE);
-    }
-  }
-
-  public GeneralDataset<L,F> sampleDataset(long randomSeed, double sampleFrac, boolean sampleWithReplacement) {
-    int sampleSize = (int)(this.size()*sampleFrac);
-    Random rand = new Random(randomSeed);
-    GeneralDataset<L,F> subset;
-    if (this instanceof RVFDataset) {
-      subset = new RVFDataset<L,F>();
-    } else if (this instanceof Dataset) {
-      subset = new Dataset<L,F>();
-    }
-    else {
-      throw new RuntimeException("Can't handle this type of GeneralDataset.");
-    }
-    if (sampleWithReplacement) {
-      for(int i = 0; i < sampleSize; i++){
-        int datumNum = rand.nextInt(this.size());
-        subset.add(this.getDatum(datumNum));
-      }
-    } else {
-      Set<Integer> indicedSampled = Generics.newHashSet();
-      while (subset.size() < sampleSize) {
-        int datumNum = rand.nextInt(this.size());
-        if (!indicedSampled.contains(datumNum)) {
-          subset.add(this.getDatum(datumNum));
-          indicedSampled.add(datumNum);
-        }
-      }
-    }
-    return subset;
+  public GeneralDataset<L,F> sampleDataset(int randomSeed, double sampleFrac, boolean sampleWithReplacement) {
+  	int sampleSize = (int)(this.size()*sampleFrac);
+  	Random rand = new Random(randomSeed);
+  	GeneralDataset<L,F> subset;
+  	if(this instanceof RVFDataset)
+  		subset = new RVFDataset<L,F>();
+  	else if (this instanceof Dataset) {
+  		subset = new Dataset<L,F>();
+  	}
+  	else {
+  		throw new RuntimeException("Can't handle this type of GeneralDataset.");
+  	}
+  	if (sampleWithReplacement) {
+  		for(int i = 0; i < sampleSize; i++){
+  			int datumNum = rand.nextInt(this.size());
+  			subset.add(this.getDatum(datumNum));
+  		}
+  	} else {
+  		Set<Integer> indicedSampled = Generics.newHashSet();
+  		while (subset.size() < sampleSize) {
+  			int datumNum = rand.nextInt(this.size());
+  			if (!indicedSampled.contains(datumNum)) {
+  				subset.add(this.getDatum(datumNum));
+    			indicedSampled.add(datumNum);
+  			}
+  		}
+  	}
+  	return subset;
   }
 
   /**
@@ -567,7 +489,7 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
 
     };
   }
-
+   
   public ClassicCounter<L> numDatumsPerLabel(){
     ClassicCounter<L> numDatums = new ClassicCounter<L>();
     for(int i : labels){
@@ -575,18 +497,4 @@ public abstract class GeneralDataset<L, F>  implements Serializable, Iterable<RV
     }
     return numDatums;
   }
-
-  /**
-   * Prints the sparse feature matrix using
-   * {@link #printSparseFeatureMatrix(PrintWriter)} to {@link System#out
-   * System.out}.
-   */
-  public abstract void printSparseFeatureMatrix();
-
-  /**
-   * prints a sparse feature matrix representation of the Dataset.  Prints the actual
-   * {@link Object#toString()} representations of features.
-   */
-  public abstract void printSparseFeatureMatrix(PrintWriter pw);
-
 }

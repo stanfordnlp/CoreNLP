@@ -109,7 +109,7 @@
     </javac>
   </target>
 
-  <target name="test" depends="classpath,compile"
+  <target name="test" depends="classpath"
           description="Run core unit tests">
     <echo message="${ant.project.name}" />
     <junit fork="true" maxmemory="1g" printsummary="off" outputtoformatters="false" forkmode="perBatch" haltonfailure="true">
@@ -126,7 +126,7 @@
     </junit>
   </target>
 
-  <target name="itest" depends="classpath,compile"
+  <target name="itest" depends="classpath"
           description="Run core integration tests">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="8g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
@@ -144,7 +144,7 @@
     </junit>
   </target>
 
-  <target name="slowitest" depends="classpath,compile"
+  <target name="slowitest" depends="classpath"
           description="Run really slow integration tests">
     <echo message="${ant.project.name}" />
     <junit fork="yes" maxmemory="8g" printsummary="off" outputtoformatters="false" forkmode="perTest" haltonfailure="true">
@@ -280,15 +280,15 @@
       </lib>
       <lib dir="${basedir}/lib">
         <include name="commons-lang3-3.1.jar"/>
-        <include name="xom-1.2.10.jar"/>
+        <include name="xom-1.2.7.jar"/>
         <include name="joda-time.jar"/>
-        <include name="jollyday-0.4.7.jar"/>
+        <include name="jollyday.jar"/>
       </lib>
       <zipfileset prefix="WEB-INF/data"
-                  file="/u/nlp/data/pos-tagger/distrib/english-left3words-distsim.tagger"/>
+                  file="/u/nlp/data/pos-tagger/english/english-left3words-distsim.tagger"/>
       <zipfileset prefix="WEB-INF/data/rules"
                   file="${source.path}/edu/stanford/nlp/time/rules/*"/>
-      <zipfileset prefix="WEB-INF/data/holidays"
+      <zipfileset prefix="WEB-INF/classes/holidays"
                     file="${source.path}/edu/stanford/nlp/time/holidays/*"/>
       <zipfileset file="${data.path}/webapps/favicon.ico"/>
       <zipfileset file="${source.path}/edu/stanford/nlp/time/suservlet/header.jsp"/>

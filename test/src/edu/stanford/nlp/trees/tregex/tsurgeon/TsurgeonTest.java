@@ -31,137 +31,6 @@ public class TsurgeonTest extends TestCase {
     }
   }
 
-  public void testAdjoin() {
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("adjoin (FOO (BAR@)) foo");
-    TregexPattern tregex = TregexPattern.compile("B=foo");
-    runTest(tregex, tsurgeon, "(A (B 1 2))", "(A (FOO (BAR 1 2)))");
-    runTest(tregex, tsurgeon, "(A (C 1 2))", "(A (C 1 2))");
-    runTest(tregex, tsurgeon, "(A (B (B 1 2)))", "(A (FOO (BAR (FOO (BAR 1 2)))))");
-
-    Tree tree = treeFromString("(A (B 1 2))");
-    TregexMatcher matcher = tregex.matcher(tree);
-    assertTrue(matcher.find());
-    assertEquals("(B 1 2)", matcher.getNode("foo").toString());
-    Tree updated = tsurgeon.evaluate(tree, matcher);
-    assertEquals("(A (FOO (BAR 1 2)))", updated.toString());
-    // TODO: do we want the tsurgeon to implicitely update the matched node?
-    // System.err.println(matcher.getNode("foo"));
-    assertFalse(matcher.find());
-  }
-
-  public void testAdjoinH() {
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("adjoinH (FOO (BAR@)) foo");
-    TregexPattern tregex = TregexPattern.compile("B=foo !< BAR");
-    runTest(tregex, tsurgeon, "(A (B 1 2))", "(A (B (BAR 1 2)))");
-    runTest(tregex, tsurgeon, "(A (C 1 2))", "(A (C 1 2))");
-    runTest(tregex, tsurgeon, "(A (B (B 1 2)))", "(A (B (BAR (B (BAR 1 2)))))");
-
-    Tree tree = treeFromString("(A (B 1 2))");
-    TregexMatcher matcher = tregex.matcher(tree);
-    assertTrue(matcher.find());
-    assertEquals("(B 1 2)", matcher.getNode("foo").toString());
-    Tree updated = tsurgeon.evaluate(tree, matcher);
-    assertEquals("(A (B (BAR 1 2)))", updated.toString());
-    assertEquals("(B (BAR 1 2))", matcher.getNode("foo").toString());
-    assertFalse(matcher.find());
-  }
-
-
-  public void testAdjoinF() {
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("adjoinF (FOO (BAR@)) foo");
-    TregexPattern tregex = TregexPattern.compile("B=foo !> FOO");
-    runTest(tregex, tsurgeon, "(A (B 1 2))", "(A (FOO (B 1 2)))");
-    runTest(tregex, tsurgeon, "(A (C 1 2))", "(A (C 1 2))");
-    runTest(tregex, tsurgeon, "(A (B (B 1 2)))", "(A (FOO (B (FOO (B 1 2)))))");
-
-    Tree tree = treeFromString("(A (B 1 2))");
-    TregexMatcher matcher = tregex.matcher(tree);
-    assertTrue(matcher.find());
-    assertEquals("(B 1 2)", matcher.getNode("foo").toString());
-    Tree updated = tsurgeon.evaluate(tree, matcher);
-    assertEquals("(A (FOO (B 1 2)))", updated.toString());
-    assertEquals("(B 1 2)", matcher.getNode("foo").toString());
-    assertFalse(matcher.find());
-  }
-
-  public void testAuxiliaryTreeErrors() {
-    TsurgeonPattern tsurgeon;
-    try {
-      tsurgeon = Tsurgeon.parseOperation("adjoin (FOO (BAR)) foo");
-      throw new RuntimeException("Should have failed for not having a foot");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-
-    try {
-      tsurgeon = Tsurgeon.parseOperation("adjoin (FOO (BAR@) (BAZ@)) foo");
-      throw new RuntimeException("Should have failed for having two feet");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-
-    try {
-      tsurgeon = Tsurgeon.parseOperation("adjoin (FOO@ (BAR)) foo");
-      throw new RuntimeException("Non-leaves cannot be foot nodes");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-  }
-
-  public void testCreateSubtrees() {
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("createSubtree FOO left right");
-
-    TregexPattern tregex = TregexPattern.compile("A < B=left < C=right");
-    // Verify when there are only two nodes
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2))", "(A (FOO (B 1) (C 2)))");
-    // We allow backwards nodes as well
-    runTest(tregex, tsurgeon, "(A (C 1) (B 2))", "(A (FOO (C 1) (B 2)))");
-    // Check nodes in between
-    runTest(tregex, tsurgeon, "(A (B 1) (D 3) (C 2))", "(A (FOO (B 1) (D 3) (C 2)))");
-    // Check nodes outside the span
-    runTest(tregex, tsurgeon, "(A (D 3) (B 1) (C 2))", "(A (D 3) (FOO (B 1) (C 2)))");
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2) (D 3))", "(A (FOO (B 1) (C 2)) (D 3))");
-    runTest(tregex, tsurgeon, "(A (D 3) (B 1) (C 2) (E 4))", "(A (D 3) (FOO (B 1) (C 2)) (E 4))");
-
-    // Check when the two endpoints are the same
-    tregex = TregexPattern.compile("A < B=left < B=right");
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2))", "(A (FOO (B 1)) (C 2))");
-
-    // Check double operation - should make two FOO nodes and then stop
-    runTest(tregex, tsurgeon, "(A (B 1) (B 2))", "(A (FOO (B 1)) (FOO (B 2)))");
-
-    // Check when we only have one argument to createSubtree
-    tsurgeon = Tsurgeon.parseOperation("createSubtree FOO child");
-    tregex = TregexPattern.compile("A < B=child");
-    runTest(tregex, tsurgeon, "(A (B 1) (C 2))", "(A (FOO (B 1)) (C 2))");
-    runTest(tregex, tsurgeon, "(A (B 1) (B 2))", "(A (FOO (B 1)) (FOO (B 2)))");
-
-    // Check that incorrectly formatted operations don't successfully parse
-    try {
-      tsurgeon = Tsurgeon.parseOperation("createSubtree FOO");
-      throw new AssertionError("Expected to fail parsing");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-
-    try {
-      tsurgeon = Tsurgeon.parseOperation("createSubtree FOO a b c");
-      throw new AssertionError("Expected to fail parsing");
-    } catch (TsurgeonParseException e) {
-      // yay
-    }
-
-    // Verify that it fails when the parents are different
-    tsurgeon = Tsurgeon.parseOperation("createSubtree FOO left right");
-    tregex = TregexPattern.compile("A << B=left << C=right");
-    try {
-      runTest(tregex, tsurgeon, "(A (B 1) (D (C 2)))", "(A (B 1) (D (C 2)))");
-      throw new AssertionError("Expected a runtime failure");
-    } catch (TsurgeonRuntimeException e) {
-      // yay
-    }
-  }
-
   public void testDelete() {
     TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("delete bob");
 
@@ -297,7 +166,7 @@ public class TsurgeonTest extends TestCase {
             "(barfoo (curlew 0) (avocet 1))");
   }
 
-  public void testReplaceNode() {
+  public void testReplace() {
     TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("replace foo blah");
     TregexPattern tregex = TregexPattern.compile("B=foo : C=blah");
     runTest(tregex, tsurgeon, "(A (B 0) (C 1))", "(A (C 1) (C 1))");
@@ -311,36 +180,6 @@ public class TsurgeonTest extends TestCase {
     runTest(tregex, tsurgeon, 
             "( (S (FILLER (NP-SBJ-1 (NNP Koito))) (VP (VBZ has) (VP (VBN refused) (S (NP-SBJ (-NONE- *-1)) (VP (TO to) (VP (VB grant) (NP (NNP Mr.) (NNP Pickens)) (NP (NP (NNS seats)) (PP-LOC (IN on) (NP (PRP$ its) (NN board))))))) (, ,) (S-ADV (NP-SBJ (-NONE- *-1)) (VP (VBG asserting) (SBAR (-NONE- 0) (S (NP-SBJ (PRP he)) (VP (VBZ is) (NP-PRD (NP (DT a) (NN greenmailer)) (VP (VBG trying) (S (NP-SBJ (-NONE- *)) (VP (TO to) (VP (VB pressure) (NP (NP (NNP Koito) (POS 's)) (JJ other) (NNS shareholders)) (PP-CLR (IN into) (S-NOM (NP-SBJ (-NONE- *)) (VP (VBG buying) (NP (PRP him)) (PRT (RP out)) (PP-MNR (IN at) (NP (DT a) (NN profit)))))))))))))))))) (. .)))",
             "( (S (FILLER (NP-SBJ-1 (NNP Koito))) (VP (VBZ has) (VP (VBN refused) (S (NP-SBJ (NP-SBJ-1 (NNP Koito))) (VP (TO to) (VP (VB grant) (NP (NNP Mr.) (NNP Pickens)) (NP (NP (NNS seats)) (PP-LOC (IN on) (NP (PRP$ its) (NN board))))))) (, ,) (S-ADV (NP-SBJ (NP-SBJ-1 (NNP Koito))) (VP (VBG asserting) (SBAR (-NONE- 0) (S (NP-SBJ (PRP he)) (VP (VBZ is) (NP-PRD (NP (DT a) (NN greenmailer)) (VP (VBG trying) (S (NP-SBJ (-NONE- *)) (VP (TO to) (VP (VB pressure) (NP (NP (NNP Koito) (POS 's)) (JJ other) (NNS shareholders)) (PP-CLR (IN into) (S-NOM (NP-SBJ (-NONE- *)) (VP (VBG buying) (NP (PRP him)) (PRT (RP out)) (PP-MNR (IN at) (NP (DT a) (NN profit)))))))))))))))))) (. .)))");
-  }
-
-  public void testReplaceTree() {
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("replace foo (BAR 1)");
-    TregexPattern tregex = TregexPattern.compile("B=foo");
-    runTest(tregex, tsurgeon, "(A (B 0) (B 1) (C 2))", "(A (BAR 1) (BAR 1) (C 2))");
-
-    // test that a single replacement at the root is allowed
-    runTest(tregex, tsurgeon, "(B (C 1))", "(BAR 1)");
-
-    tsurgeon = Tsurgeon.parseOperation("replace foo (BAR 1) (BAZ 2)");
-    runTest(tregex, tsurgeon, "(A (B 0) (B 1) (C 2))", "(A (BAR 1) (BAZ 2) (BAR 1) (BAZ 2) (C 2))");
-
-    try {
-      runTest(tregex, tsurgeon, "(B 0)", "(B 0)");
-      throw new RuntimeException("Expected a failure");
-    } catch (TsurgeonRuntimeException e) {
-      // good, we expected to fail if you try to replace the root node with two nodes
-    }
-  }
-
-  /**
-   * Test (part of) an actual tree that we use in the Chinese transforming reader
-   */
-  public void testChineseReplaceTree() {
-    String input = "(IP (IP (PP (P 像) (NP (NP (NR 赖斯) (PU ，) (NR 赖斯)) (NP (PN 本身)))) (PU 她｛) (NP (NN ｂｒｅａｔｈ)) (PU ｝) (IJ 呃) (VP (VV 担任) (NP (NN 国务卿)) (VP (ADVP (AD 比较)) (VP (VA 晚))))))";
-    String expected = "(IP (IP (PP (P 像) (NP (NP (NR 赖斯) (PU ，) (NR 赖斯)) (NP (PN 本身)))) (PN 她) (PU ｛) (NP (NN ｂｒｅａｔｈ)) (PU ｝) (IJ 呃) (VP (VV 担任) (NP (NN 国务卿)) (VP (ADVP (AD 比较)) (VP (VA 晚))))))";
-    TregexPattern tregex = TregexPattern.compile("PU=punc < 她｛");
-    TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("replace punc (PN 她) (PU ｛)");
-    runTest(tregex, tsurgeon, input, expected);
   }
 
   public void testInsertDelete() {
@@ -412,14 +251,6 @@ public class TsurgeonTest extends TestCase {
 
   public void outputResults(TregexPattern tregex, TsurgeonPattern tsurgeon,
                             String input) {
-    System.out.println("Tsurgeon: " + tsurgeon);
-    System.out.println("Tregex: " + tregex);
-    TregexMatcher m = tregex.matcher(treeFromString(input));
-    if (m.find()) {
-      System.err.println(" Matched");
-    } else {
-      System.err.println(" Did not match");
-    }
     Tree result = Tsurgeon.processPattern(tregex, tsurgeon, treeFromString(input));
     System.out.println(result);
   }

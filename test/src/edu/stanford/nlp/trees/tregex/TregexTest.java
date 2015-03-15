@@ -25,14 +25,6 @@ public class TregexTest extends TestCase {
     }
   }
 
-  public static Tree[] treesFromString(String ... s) {
-    Tree[] trees = new Tree[s.length];
-    for (int i = 0; i < s.length; ++i) {
-      trees[i] = treeFromString(s[i]);
-    }
-    return trees;
-  }
-
   public void testNoResults() {
     final TregexPattern pMWE = TregexPattern.compile("/^MW/");
     Tree tree = treeFromString("(Foo)");
@@ -791,9 +783,6 @@ public class TregexTest extends TestCase {
 
     runTest("(NP < NN | < NNS)", "((NP NN) (NP foo) (NP NNS))",
             "(NP NN)", "(NP NNS)");
-    runTest("(NP (< NN | < NNS) & > S)",
-            "(foo (S (NP NN) (NP foo) (NP NNS)) (NP NNS))",
-            "(NP NN)", "(NP NNS)");
     runTest("(NP [< NN | < NNS] & > S)",
             "(foo (S (NP NN) (NP foo) (NP NNS)) (NP NNS))",
             "(NP NN)", "(NP NNS)");
@@ -1253,162 +1242,6 @@ public class TregexTest extends TestCase {
     // and "name" are, resulting in the groups not matching.
   }
 
-
-  public void testParenthesizedExpressions() {
-    String[] treeStrings = { "( (S (S (PP (IN In) (NP (CD 1941) )) (, ,) (NP (NP (NNP Raeder) ) (CC and) (NP (DT the) (JJ German) (NN navy) )) (VP (VBD threatened) (S (VP (TO to) (VP (VB attack) (NP (DT the) (NNP Panama) (NNP Canal) )))))) (, ,) (RB so) (S (NP (PRP we) ) (VP (VBD created) (NP (NP (DT the) (NNP Southern) (NNP Command) ) (PP-LOC (IN in) (NP (NNP Panama) ))))) (. .) ))",
-                             "(S (S (NP-SBJ (NNP Japan) ) (VP (MD can) (VP (VP (VB grow) ) (CC and) (VP (RB not) (VB cut) (PRT (RB back) ))))) (, ,) (CC and) (RB so) (S (ADVP (RB too) ) (, ,) (NP (NP (NNP New) (NNP Zealand) )) ))))",
-                             "( (S (S (NP-SBJ (PRP You) ) (VP (VBP make) (NP (DT a) (NN forecast) ))) (, ,) (CC and) (RB then) (S (NP-SBJ (PRP you) ) (VP (VBP become) (NP-PRD (PRP$ its) (NN prisoner) ))) (. .)))" };
-
-    Tree[] trees = treesFromString(treeStrings);
-
-    // First pattern: no parenthesized expressions.  All three trees should match once.
-    TregexPattern pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ $+ (RB=adv $+ /^S/)))");
-    TregexMatcher matcher = pattern.matcher(trees[0]);
-    assertTrue(matcher.find());
-    assertFalse(matcher.find());
-
-    matcher = pattern.matcher(trees[1]);
-    assertTrue(matcher.find());
-    assertFalse(matcher.find());
-    
-    matcher = pattern.matcher(trees[2]);
-    assertTrue(matcher.find());
-    assertFalse(matcher.find());
-    
-    // Second pattern: single relation in parentheses.  First tree should not match.
-    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ (< and) $+ (RB=adv $+ /^S/)))");
-    matcher = pattern.matcher(trees[0]);
-    assertFalse(matcher.find());
-
-    matcher = pattern.matcher(trees[1]);
-    assertTrue(matcher.find());
-    assertFalse(matcher.find());
-    
-    matcher = pattern.matcher(trees[2]);
-    assertTrue(matcher.find());
-    assertFalse(matcher.find());
-    
-    // Third pattern: single relation in parentheses and negated.  Only first tree should match.
-    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ !(< and) $+ (RB=adv $+ /^S/)))");
-    matcher = pattern.matcher(trees[0]);
-    assertTrue(matcher.find());
-    assertFalse(matcher.find());
-
-    matcher = pattern.matcher(trees[1]);
-    assertFalse(matcher.find());
-    
-    matcher = pattern.matcher(trees[2]);
-    assertFalse(matcher.find());
-    
-    // Fourth pattern: double relation in parentheses, no negation.
-    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ (< and $+ RB) $+ (RB=adv $+ /^S/)))");
-    matcher = pattern.matcher(trees[0]);
-    assertFalse(matcher.find());
-
-    matcher = pattern.matcher(trees[1]);
-    assertTrue(matcher.find());
-    assertFalse(matcher.find());
-    
-    matcher = pattern.matcher(trees[2]);
-    assertTrue(matcher.find());
-    assertFalse(matcher.find());
-    
-    // Fifth pattern: double relation in parentheses, negated.
-    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ !(< and $+ RB) $+ (RB=adv $+ /^S/)))");
-    matcher = pattern.matcher(trees[0]);
-    assertTrue(matcher.find());
-    assertFalse(matcher.find());
-
-    matcher = pattern.matcher(trees[1]);
-    assertFalse(matcher.find());
-    
-    matcher = pattern.matcher(trees[2]);
-    assertFalse(matcher.find());
-
-    // Six pattern: double relation in parentheses, negated.  The only
-    // tree with "and then" is the third one, so that is the one tree
-    // that should not match.
-    pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ !(< and $+ (RB < then)) $+ (RB=adv $+ /^S/)))");
-    matcher = pattern.matcher(trees[0]);
-    assertTrue(matcher.find());
-    assertFalse(matcher.find());
-
-    matcher = pattern.matcher(trees[1]);
-    assertTrue(matcher.find());
-    assertFalse(matcher.find());
-    
-    matcher = pattern.matcher(trees[2]);
-    assertFalse(matcher.find());
-  }
-
-  /** 
-   * The PARENT_EQUALS relation allows for a simplification of what
-   * would have been a pair of rules in the dependencies.
-   */
-  public void testParentEquals() {
-    runTest("A <= B", "(A (B 1))", "(A (B 1))");
-    // Note that if the child node is the same as the parent node, a
-    // double match is expected if there is nothing to eliminate it in
-    // the expression
-    runTest("A <= A", "(A (A 1) (B 2))", "(A (A 1) (B 2))", "(A (A 1) (B 2))", "(A 1)");
-    // This is the kind of expression where this relation can be useful
-    runTest("A <= (A < B)", "(A (A (B 1)))", "(A (A (B 1)))", "(A (B 1))");
-    runTest("A <= (A < B)", "(A (A (B 1)) (A (C 2)))", "(A (A (B 1)) (A (C 2)))", "(A (B 1))");
-    runTest("A <= (A < B)", "(A (A (C 2)))");
-  }
-
-  /** 
-   * Test a few possible ways to make disjunctions at the root level.
-   * Note that disjunctions at lower levels can always be created by
-   * repeating the relation, but that is not true at the root, since
-   * the root "relation" is implicit.
-   */
-  public void testRootDisjunction() {
-    runTest("A | B", "(A (B 1))", "(A (B 1))", "(B 1)");
-
-    runTest("(A) | (B)", "(A (B 1))", "(A (B 1))", "(B 1)");
-
-    runTest("A < B | A < C", "(A (B 1) (C 2))", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
-
-    runTest("A < B | B < C", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
-    runTest("A < B | B < C", "(A (B (C 1)) (C 2))", "(A (B (C 1)) (C 2))", "(B (C 1))");
-
-    runTest("A | B | C", "(A (B (C 1)) (C 2))", "(A (B (C 1)) (C 2))", "(B (C 1))", "(C 1)", "(C 2)");
-
-    // The binding of the | should look like this:
-    // A ( (< B) | (< C) )
-    runTest("A < B | < C", "(A (B 1))", "(A (B 1))");
-    runTest("A < B | < C", "(A (B 1) (C 2))", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
-    runTest("A < B | < C", "(B (C 1))");
-  }
-
-
-  /**
-   * Tests the subtree pattern, <code>&lt;...</code>, which checks for
-   * an exact subtree under our current tree
-   */
-  public void testSubtreePattern() {
-    // test the obvious expected matches and several expected match failures
-    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (D 3))", "(A (B 1) (C 2) (D 3))");
-    runTest("A <... { B ; C ; D }", "(Z (A (B 1) (C 2) (D 3)))", "(A (B 1) (C 2) (D 3))");
-    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (D 3) (E 4))");
-    runTest("A <... { B ; C ; D }", "(A (E 4) (B 1) (C 2) (D 3))");
-    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2) (E 4) (D 3))");
-    runTest("A <... { B ; C ; D }", "(A (B 1) (C 2))");
-
-    // every test above should return the opposite when negated
-    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (D 3))");
-    runTest("A !<... { B ; C ; D }", "(Z (A (B 1) (C 2) (D 3)))");
-    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (D 3) (E 4))", "(A (B 1) (C 2) (D 3) (E 4))");
-    runTest("A !<... { B ; C ; D }", "(A (E 4) (B 1) (C 2) (D 3))", "(A (E 4) (B 1) (C 2) (D 3))");
-    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2) (E 4) (D 3))", "(A (B 1) (C 2) (E 4) (D 3))");
-    runTest("A !<... { B ; C ; D }", "(A (B 1) (C 2))", "(A (B 1) (C 2))");
-
-    // test a couple various forms of nesting
-    runTest("A <... { (B < C) ; D }", "(A (B (C 2)) (D 3))", "(A (B (C 2)) (D 3))");
-    runTest("A <... { (B <... { C ; D }) ; E }", "(A (B (C 2) (D 3)) (E 4))", "(A (B (C 2) (D 3)) (E 4))");
-    runTest("A <... { (B !< C) ; D }", "(A (B (C 2)) (D 3))");
-  }
 
   /**
    * Stores an input and the expected output.  Obviously this is only

@@ -49,7 +49,6 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
   private SeqClassifierFlags flags; // = null;
 
 
-  @Override
   public void init(SeqClassifierFlags flags) {
     this.flags = flags;
   }
@@ -61,7 +60,6 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
   }
 
 
-  @Override
   public Iterator<List<CoreLabel>> getIterator(Reader r) {
     return new CoNLLIterator(r);
   }
@@ -131,11 +129,8 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
    * (SBIEO); always marking the first word of an entity (IOB2);
    * the reverse IOE1 and IOE2 and IO.
    * This code is very specific to the particular CoNLL way of labeling
-   * classes.  It will work on any of these styles of input. However, note
-   * that IO is a lossy mapping, which necessarily loses information if
-   * two entities of the same class are adjacent.
-   * If the labels are not of the form "X-Y+" then they will be
-   * left unaltered, regardless of the value of style.
+   * classes.  It will work on any of these styles of input, however, except
+   * for IO which necessarily loses information.
    *
    * @param tokens List of read in tokens with AnswerAnnotation
    * @param style Output style; one of iob[12], ioe[12], io, sbieo
@@ -336,7 +331,6 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
    *  @param doc The document: A List of CoreLabel
    *  @param out Where to send the answers to
    */
-  @Override
   @SuppressWarnings({"StringEquality"})
   public void printAnswers(List<CoreLabel> doc, PrintWriter out) {
     // boolean tagsMerged = flags.mergeTags;
@@ -393,7 +387,6 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
         }
         numTokens++;
         if (ansBase.equals("O")) {
-           // don't need to do anything
         } else if (ansBase.equals(lastAnsBase)) {
           if (ansPrefix.equals("B")) {
             numEntities++;

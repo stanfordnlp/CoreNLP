@@ -15,16 +15,14 @@ import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 
 class ParserDemo2 {
 
-  /** This example shows a few more ways of providing input to a parser.
-   *
-   *  Usage: ParserDemo2 [grammar [textFile]]
-   */
+  /** Usage: ParserDemo2 [[grammar] textFile] */
   public static void main(String[] args) throws IOException {
     String grammar = args.length > 0 ? args[0] : "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
     String[] options = { "-maxLength", "80", "-retainTmpSubcategories" };
     LexicalizedParser lp = LexicalizedParser.loadModel(grammar, options);
     TreebankLanguagePack tlp = lp.getOp().langpack();
     GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();
+
 
     Iterable<List<? extends HasWord>> sentences;
     if (args.length > 1) {
@@ -44,7 +42,6 @@ class ParserDemo2 {
       }
       String sent2 = ("This is a slightly longer and more complex " +
                       "sentence requiring tokenization.");
-      // Use the default tokenizer for this TreebankLanguagePack
       Tokenizer<? extends HasWord> toke =
         tlp.getTokenizerFactory().getTokenizer(new StringReader(sent2));
       List<? extends HasWord> sentence2 = toke.tokenize();
@@ -78,12 +75,8 @@ class ParserDemo2 {
 
     }
 
-    // This method turns the String into a single sentence using the
-    // default tokenizer for the TreebankLanguagePack.
     String sent3 = "This is one last test!";
     lp.parse(sent3).pennPrint();
   }
-
-  private ParserDemo2() {} // static methods only
 
 }

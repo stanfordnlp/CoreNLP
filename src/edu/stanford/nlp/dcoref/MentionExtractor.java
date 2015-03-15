@@ -57,7 +57,7 @@ import edu.stanford.nlp.util.Pair;
  */
 public class MentionExtractor {
 
-  private final HeadFinder headFinder;
+  protected final HeadFinder headFinder;
 
   protected String currentDocumentID;
 
@@ -109,9 +109,6 @@ public class MentionExtractor {
   }
 
   protected int getHeadIndex(Tree t) {
-    // The trees passed in do not have the CoordinationTransformer
-    // applied, but that just means the SemanticHeadFinder results are
-    // slightly worse.
     Tree ht = t.headTerminal(headFinder);
     if(ht==null) return -1;  // temporary: a key which is matched to nothing
     CoreLabel l = (CoreLabel) ht.label();

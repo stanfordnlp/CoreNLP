@@ -98,7 +98,7 @@ echo "Classpath is $CLASSPATH" >> serializedParsers.log
 # English with extras PCFG simplified grammar
 # This dumbed down parser is used by the RNN parser.  
 # See /scr/nlp/data/dvparser for more details.
-( echo "Running english pcfg (simplified for use in the RNN parser) on $host -server" ; time java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.AmericanizeFunction -evals "factDA,tsv" -goodPCFG -noRightRec -dominatesV 0 -baseNP 0 -saveToSerializedFile englishPCFG.nocompact.simple.ser.gz -maxLength 40  -compactGrammar 0 -train /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 100-2199,9000-9099  -train2 /u/nlp/data/lexparser/extraTrain 1-4000 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 2200-2219 ) >>& ./serializedParsers.log
+( echo "Running english pcfg (simplified for use in the RNN parser) on $host -server" ; time java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -wordFunction edu.stanford.nlp.process.AmericanizeFunction -evals "factDA,tsv" -goodPCFG -noRightRec -dominatesV 0 -baseNP 0 -saveToSerializedFile english.nocompact.simple.ser.gz -maxLength 40  -compactGrammar 0 -train /afs/ir/data/linguistic-data/Treebank/Treebank3Stanford/parsed/mrg/wsj 100-2199,9000-9099  -train2 /u/nlp/data/lexparser/extraTrain 1-4000 0.5 -taggedFiles tagSeparator=_,/u/nlp/data/pos-tagger/english/train-tech-english -testTreebank /afs/ir/data/linguistic-data/Treebank/3/parsed/mrg/wsj 2200-2219 ) >>& ./serializedParsers.log
 
 
 # Xinhua Mainland Chinese PCFG binary
@@ -145,7 +145,6 @@ java -mx1500m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA
 # This now works
 ( echo "Running xinhuaFactored from serialized (check without specifying -tLPP) on $host -server" ; time java -server -mx1800m edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -maxLength 40 -loadFromSerializedFile xinhuaFactored.ser.gz -test $ctb 001-025 ) >>& ./serializedParsers.log
 
-( echo "Running chinesePCFG (simplified for use in the RNN parser) on $host -server" ; time java -server -mx4g edu.stanford.nlp.parser.lexparser.LexicalizedParser -evals "factDA,tsv" -tLPP edu.stanford.nlp.parser.lexparser.ChineseTreebankParserParams -chineseFactored -PCFG -hMarkov 1 -nomarkNPconj -compactGrammar 0 -saveToSerializedFile chinesePCFG.simple.ser.gz -maxLength 40 -train $ctb7train -test $ctb7test ) >>& ./serializedParsers.log
 
 # German Factored binary from Negra (version 2)
 # $negra 3 is the dev set 

@@ -63,7 +63,7 @@ public class CRFClassifierNoisyLabel<IN extends CoreMap> extends CRFClassifier<I
     super(flags);
   }
 
-  static double[][] readErrorMatrix(String fileName, Index<String> tagIndex, boolean useLogProb) {
+  static double[][] readErrorMatrix(String fileName, Index<String> tagIndex) {
     int numTags = tagIndex.size();
     int matrixSize = numTags;
 
@@ -82,9 +82,9 @@ public class CRFClassifierNoisyLabel<IN extends CoreMap> extends CRFClassifier<I
       System.exit(-1);
     }
 
-    double[][] matrix = parseMatrix(matrixLines, tagIndex, matrixSize, false, useLogProb);
+    double[][] matrix = parseMatrix(matrixLines, tagIndex, matrixSize, false);
 
-    System.err.println("Error Matrix P(Observed|Truth): ");
+    System.err.println("Error Matrix: ");
     System.err.println(ArrayUtils.toString(matrix));
 
     return matrix;
@@ -96,7 +96,7 @@ public class CRFClassifierNoisyLabel<IN extends CoreMap> extends CRFClassifier<I
         if (tagIndex == null) {
           loadTagIndex();
         }
-        errorMatrix = readErrorMatrix(flags.errorMatrix, tagIndex, true);
+        errorMatrix = readErrorMatrix(flags.errorMatrix, tagIndex);
       }
     }
     return new CRFLogConditionalObjectiveFunctionNoisyLabel(data, labels, windowSize, classIndex,

@@ -17,13 +17,11 @@ import edu.stanford.nlp.util.StringUtils;
  * @author John Bauer
  */
 public class DcorefBenchmarkSlowITest extends TestCase {
-  public static String runCorefTest(boolean deleteOnExit) throws Exception {
+  public void testDcoref() throws Exception {
     final File WORK_DIR_FILE = File.createTempFile("DcorefBenchmarkTest", "");
     WORK_DIR_FILE.delete();
     WORK_DIR_FILE.mkdir();
-    if (deleteOnExit) {
-      WORK_DIR_FILE.deleteOnExit();
-    }
+    WORK_DIR_FILE.deleteOnExit();
 
     String baseLogFile = WORK_DIR_FILE + File.separator + "log";
 
@@ -32,6 +30,8 @@ public class DcorefBenchmarkSlowITest extends TestCase {
     System.err.println("Current dir:"+current);
     String currentDir = System.getProperty("user.dir");
     System.err.println("Current dir using System:" +currentDir);
+
+    String expectedResults = IOUtils.slurpFile("edu/stanford/nlp/dcoref/expected.txt");
 
     String[] corefArgs = { "-props", "edu/stanford/nlp/dcoref/coref.properties",
                            "-" + Constants.LOG_PROP, baseLogFile,
@@ -45,12 +45,7 @@ public class DcorefBenchmarkSlowITest extends TestCase {
     System.err.println(logFile);
 
     String actualResults = IOUtils.slurpFile(logFile);
-    return actualResults;
-  }
 
-  public void testDcoref() throws Exception {
-    String expectedResults = IOUtils.slurpFile("edu/stanford/nlp/dcoref/expected.txt");
-    String actualResults = runCorefTest(true);
     String[] expectedLines = expectedResults.trim().split("[\n\r]+");
     String[] actualLines = actualResults.trim().split("[\n\r]+");
 
@@ -68,9 +63,5 @@ public class DcorefBenchmarkSlowITest extends TestCase {
       assertEquals(expectedLine, actualLine);
     }
     System.err.println(line);
-  }
-
-  public static void main(String[] args) throws Exception {
-    runCorefTest(false);
   }
 }

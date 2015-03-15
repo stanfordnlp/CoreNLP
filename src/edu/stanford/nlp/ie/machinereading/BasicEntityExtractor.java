@@ -266,7 +266,11 @@ public class BasicEntityExtractor implements Extractor {
    * type.
    *
    * @param sentence
-   *          A sentence annotated with NamedEntityTagAnnotation
+   *          A sentence, ideally annotated with NamedEntityTagAnnotation
+   * @param nerTag
+   *          The name of the NER tag to copy, e.g. "DATE". Use "ALL" for all tags - added by sonalg
+   * @param entityType
+   *          The type of the {@link EntityMention} objects created
    */
   public void makeAnnotationFromAllNERTags(CoreMap sentence) {
     List<CoreLabel> words = sentence.get(CoreAnnotations.TokensAnnotation.class);

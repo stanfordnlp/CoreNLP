@@ -450,7 +450,7 @@ public class NumberNormalizer {
     List<CoreMap> numbers = new ArrayList<CoreMap>();
     while (matcher.find()) {
       @SuppressWarnings("unused")
-      List<CoreMap> matchedTokens = matcher.groupNodes();
+      List<? extends CoreMap> matchedTokens = matcher.groupNodes();
       int numStart = matcher.start();
       int possibleNumEnd = -1;
       int lastUnitPos = -1;
@@ -679,7 +679,7 @@ public class NumberNormalizer {
     List<CoreMap> numberRanges = new ArrayList<CoreMap>();
     TokenSequenceMatcher matcher = rangePattern.getMatcher(numerizedTokens);
     while (matcher.find()) {
-      List<CoreMap> matched = matcher.groupNodes();
+      List<? extends CoreMap> matched = matcher.groupNodes();
       if (matched.size() == 1) {
         numberRanges.add(matched.get(0));
       } else {

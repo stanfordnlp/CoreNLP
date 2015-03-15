@@ -9,6 +9,7 @@ import java.util.Properties;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * Reads and stores configuration information for a POS tagger.
@@ -92,6 +93,7 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     defaultValues.put("learnClosedClassTags", LEARN_CLOSED_CLASS);
     defaultValues.put("verbose", VERBOSE);
     defaultValues.put("verboseResults", VERBOSE_RESULTS);
+    defaultValues.put("sgml", SGML);
     defaultValues.put("openClassTags", "");
     defaultValues.put("lang", LANG);
     defaultValues.put("tokenizerFactory", TOKENIZER_FACTORY);
@@ -283,10 +285,6 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
 
   public boolean getOutputLemmas() {
     return getOutputOptionsContains("lemmatize");
-  }
-
-  public boolean keepEmptySentences() {
-    return getOutputOptionsContains("keepEmptySentences");    
   }
 
   public boolean getOutputOptionsContains(String sought) {
@@ -548,8 +546,8 @@ public class TaggerConfig extends Properties /* Inherits implementation of Seria
     out.println("# outputFormat = " + OUTPUT_FORMAT);
     out.println();
 
-    out.println("# Output format options. Comma separated list.");
-    out.println("# currently \"lemmatize\" and \"keepEmptySentences\" are supported.");
+    out.println("# Output format options. Comma separated list, but");
+    out.println("# currently \"lemmatize\" is the only supported option.");
     out.println("# outputFormatOptions = " + OUTPUT_FORMAT_OPTIONS);
     out.println();
 

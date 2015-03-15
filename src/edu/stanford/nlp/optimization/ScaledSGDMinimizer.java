@@ -160,6 +160,7 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
     return "ScaledSGD" + bSize + "_g" + g + "_f" + f ;
   }
 
+
   @Override
   protected void takeStep(AbstractStochasticCachingDiffFunction dfunction){
     for(int i = 0; i < x.length; i++){
@@ -187,6 +188,7 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
     sList.add(s);
     yList.add(y);
     updateDiag(diag,s,y);
+
   }
 
 
@@ -200,6 +202,11 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
     yList = new ArrayList<double[]>();
   }
 
+
+
+
+
+
   private void updateDiag(double[] diag,double[] s,double[] y){
 
     if(method == 0){
@@ -210,7 +217,9 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
 
   }
 
-  public void updateDiagBFGS(double[] diag,double[] s,double[] y){
+
+  private void updateDiagBFGS(double[] diag,double[] s,double[] y){
+
     double sDs = 0.0;
     double sy = 0.0;
     for(int i=0;i<s.length;i++){
@@ -230,7 +239,11 @@ public class ScaledSGDMinimizer<Q extends AbstractStochasticCachingDiffFunction>
     }else{
       say("!");
     }
+
   }
+
+
+
 
   private void updateDiagMinErr(double[] diag,double[] s,double[] y){
 

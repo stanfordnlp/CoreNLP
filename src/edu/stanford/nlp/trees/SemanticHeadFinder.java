@@ -4,10 +4,6 @@ import edu.stanford.nlp.ling.HasCategory;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
-import edu.stanford.nlp.trees.tregex.TregexMatcher;
-import edu.stanford.nlp.trees.tregex.TregexPattern;
-import edu.stanford.nlp.util.ArrayUtils;
-import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Generics;
 
 import java.util.Arrays;
@@ -55,7 +51,7 @@ import java.util.Set;
  */
 public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
-  private static final boolean DEBUG = System.getProperty("SemanticHeadFinder", null) != null;
+  private static final boolean DEBUG = false;
 
   /* A few times the apostrophe is missing on "'s", so we have "s" */
   /* Tricky auxiliaries: "na" is from "gonna", "ve" from "Weve", etc.  "of" as non-standard for "have" */
@@ -75,15 +71,13 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   private final Set<String> verbalTags;
   private final Set<String> unambiguousAuxiliaryTags;
 
-  private final boolean makeCopulaHead;
-
 
   public SemanticHeadFinder() {
     this(new PennTreebankLanguagePack(), true);
   }
 
-  public SemanticHeadFinder(boolean noCopulaHead) {
-    this(new PennTreebankLanguagePack(), noCopulaHead);
+  public SemanticHeadFinder(boolean cop) {
+    this(new PennTreebankLanguagePack(), cop);
   }
 
 
@@ -91,13 +85,12 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
    *
    * @param tlp The TreebankLanguagePack, used by the superclass to get basic
    *     category of constituents.
-   * @param noCopulaHead If true, a copular verb 
-   *     (be, seem, appear, stay, remain, resemble, become)
+   * @param cop If true, a copular verb (be, seem, appear, stay, remain, resemble, become)
    *     is not treated as head when it has an AdjP or NP complement.  If false,
    *     a copula verb is still always treated as a head.  But it will still
    *     be treated as an auxiliary in periphrastic tenses with a VP complement.
    */
-  public SemanticHeadFinder(TreebankLanguagePack tlp, boolean noCopulaHead) {
+  public SemanticHeadFinder(TreebankLanguagePack tlp, boolean cop) {
     super(tlp);
     ruleChanges();
 
@@ -109,28 +102,20 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
 
     //copula verbs having an NP complement
     copulars = Generics.newHashSet();
-    if (noCopulaHead) {
+    if (cop) {
       copulars.addAll(Arrays.asList(copulaVerbs));
     }
 
-    // TODO: reverse the polarity of noCopulaHead
-    this.makeCopulaHead = !noCopulaHead;
-
     verbalTags = Generics.newHashSet(Arrays.asList(verbTags));
     unambiguousAuxiliaryTags = Generics.newHashSet(Arrays.asList(unambiguousAuxTags));
-  }
 
-  @Override
-  public boolean makesCopulaHead() {
-    return makeCopulaHead;
+
   }
 
   //makes modifications of Collins' rules to better fit with semantic notions of heads
   private void ruleChanges() {
     //  NP: don't want a POS to be the head
     nonTerminalInfo.put("NP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP" }, {"left", "NP", "PRP"}, {"rightdis", "$", "ADJP", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "QP", "DT", "WDT", "NML", "PRN", "RB", "RBR", "ADVP"}, {"left", "POS"}});
-    nonTerminalInfo.put("NX", nonTerminalInfo.get("NP"));
-    nonTerminalInfo.put("NML", nonTerminalInfo.get("NP"));
     // WHNP clauses should have the same sort of head as an NP
     // but it a WHNP has a NP and a WHNP under it, the WHNP should be the head.  E.g.,  (WHNP (WHNP (WP$ whose) (JJ chief) (JJ executive) (NN officer))(, ,) (NP (NNP James) (NNP Gatward))(, ,))
     nonTerminalInfo.put("WHNP", new String[][]{{"rightdis", "NN", "NNP", "NNPS", "NNS", "NX", "NML", "JJR", "WP"}, {"left", "WHNP", "NP"}, {"rightdis", "$", "ADJP", "PRN", "FW"}, {"right", "CD"}, {"rightdis", "JJ", "JJS", "RB", "QP"}, {"left", "WHPP", "WHADJP", "WP$", "WDT"}});
@@ -155,11 +140,9 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     nonTerminalInfo.put("UCP", new String[][]{{"left"}});
 
     // CONJP: we want different heads for "but also" and "but not" and we don't want "not" to be the head in "not to mention"; now make "mention" head of "not to mention"
-    nonTerminalInfo.put("CONJP", new String[][]{{"right", "CC", "VB", "JJ", "RB", "IN" }});
+    nonTerminalInfo.put("CONJP", new String[][]{{"right", "VB", "JJ", "RB", "IN", "CC"}});
 
-    // FRAG: crap rule needs to be change if you want to parse
-    // glosses; but it is correct to have ADJP and ADVP before S
-    // because of weird parses of reduced sentences.
+    // FRAG: crap rule needs to be change if you want to parse glosses; but it is correct to have ADJP and ADVP before S because of weird parses of reduced sentences.
     nonTerminalInfo.put("FRAG", new String[][]{{"left", "IN"}, {"right", "RB"}, {"left", "NP"}, {"left", "ADJP", "ADVP", "FRAG", "S", "SBAR", "VP"}});
 
     // PRN: sentence first
@@ -235,51 +218,6 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     return headIdx;
   }
 
-  // Note: The first two SBARQ patterns only work when the SQ
-  // structure has already been removed in CoordinationTransformer.
-  static final TregexPattern[] headOfCopulaTregex = {
-    // Matches phrases such as "what is wrong"
-    TregexPattern.compile("SBARQ < (WHNP $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $++ ADJP=head))"),
-
-    // matches WHNP $+ VB<copula $+ NP
-    // for example, "Who am I to judge?"
-    // !$++ ADJP matches against "Why is the dog pink?"
-    TregexPattern.compile("SBARQ < (WHNP=head $++ (/^VB/ < " + EnglishGrammaticalRelations.copularWordRegex + " $+ NP !$++ ADJP))"),
-
-    // Actually somewhat limited in scope, this detects "Tuesday it is", 
-    // "Such a great idea this was", etc
-    TregexPattern.compile("SINV < (NP=head $++ (NP $++ (VP < (/^(?:VB|AUX)/ < " + EnglishGrammaticalRelations.copularWordRegex + "))))"),
-  };
-
-  static final TregexPattern[] headOfConjpTregex = {
-    TregexPattern.compile("CONJP < (CC <: /^(?i:but|and)$/ $+ (RB=head <: /^(?i:not)$/))"),
-    TregexPattern.compile("CONJP < (CC <: /^(?i:but)$/ [ ($+ (RB=head <: /^(?i:also|rather)$/)) | ($+ (ADVP=head <: (RB <: /^(?i:also|rather)$/))) ])"),
-    TregexPattern.compile("CONJP < (CC <: /^(?i:and)$/ [ ($+ (RB=head <: /^(?i:yet)$/)) | ($+ (ADVP=head <: (RB <: /^(?i:yet)$/))) ])"),
-  };
-
-  static final TregexPattern noVerbOverTempTregex = TregexPattern.compile("/^VP/ < NP-TMP !< /^V/ !< NNP|NN|NNPS|NNS|NP|JJ|ADJP|S");
-
-  /** 
-   * We use this to avoid making a -TMP or -ADV the head of a copular phrase.
-   * For example, in the sentence "It is hands down the best dessert ...", 
-   * we want to avoid using "hands down" as the head.
-   */
-  static final Filter<Tree> REMOVE_TMP_AND_ADV = new Filter<Tree>() {
-    public boolean accept(Tree tree) {
-      if (tree == null) 
-        return false;
-      Label label = tree.label();
-      if (label == null) 
-        return false;
-      if (label.value().contains("-TMP") || label.value().contains("-ADV"))
-        return false;
-      if (label.value().startsWith("VP") && noVerbOverTempTregex.matcher(tree).matches()) {
-        return false;
-      }
-      return true;
-    }
-  };
-    
   /**
    * Determine which daughter of the current parse tree is the
    * head.  It assumes that the daughters already have had their
@@ -296,34 +234,6 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     if (DEBUG) {
       System.err.println("At " + motherCat + ", my parent is " + parent);
     }
-
-    // Some conj expressions seem to make more sense with the "not" or
-    // other key words as the head.  For example, "and not" means
-    // something completely different than "and".  Furthermore,
-    // downstream code was written assuming "not" would be the head...
-    if (motherCat.equals("CONJP")) {
-      for (TregexPattern pattern : headOfConjpTregex) {
-        TregexMatcher matcher = pattern.matcher(t);
-        if (matcher.matchesAt(t)) {
-          return matcher.getNode("head");
-        }
-      }
-      // if none of the above patterns match, use the standard method
-    }
-
-    if (motherCat.equals("SBARQ") || motherCat.equals("SINV")) { 
-      if (!makeCopulaHead) {
-        for (TregexPattern pattern : headOfCopulaTregex) {
-          TregexMatcher matcher = pattern.matcher(t);
-          if (matcher.matchesAt(t)) {
-            return matcher.getNode("head");
-          }
-        }
-      }
-      // if none of the above patterns match, use the standard method
-    }
-
-    Tree[] tmpFilteredChildren = null;
 
     // do VPs with auxiliary as special case
     if ((motherCat.equals("VP") || motherCat.equals("SQ") || motherCat.equals("SINV"))) {
@@ -344,10 +254,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
         // problematic for other auxiliaries, like 'he has an answer'
         // But maybe doing ADJP is fine!
         String[] how = { "left", "VP", "ADJP" };
-        if (tmpFilteredChildren == null) {
-          tmpFilteredChildren = ArrayUtils.filter(kids, REMOVE_TMP_AND_ADV);
-        }
-        Tree pti = traverseLocate(tmpFilteredChildren, how, false);
+        Tree pti = traverseLocate(kids, how, false);
         if (DEBUG) {
           System.err.println("Determined head (case 1) for " + t.value() + " is: " + pti);
         }
@@ -369,11 +276,11 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
         } else {
           how = new String[]{"left", "VP", "ADJP", "NP", "WHADJP", "WHNP"};
         }
-        // Avoid undesirable heads by filtering them from the list of potential children
-        if (tmpFilteredChildren == null) {
-          tmpFilteredChildren = ArrayUtils.filter(kids, REMOVE_TMP_AND_ADV);
+        Tree pti = traverseLocate(kids, how, false);
+        // don't allow a temporal to become head
+        if (pti != null && pti.label() != null && pti.label().value().contains("-TMP")) {
+          pti = null;
         }
-        Tree pti = traverseLocate(tmpFilteredChildren, how, false);
         // In SQ, only allow an NP to become head if there is another one to the left (then it's probably predicative)
         if (motherCat.equals("SQ") && pti != null && pti.label() != null && pti.label().value().startsWith("NP")) {
             boolean foundAnotherNp = false;

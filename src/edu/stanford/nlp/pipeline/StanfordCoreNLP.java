@@ -89,8 +89,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   public static final String CUSTOM_ANNOTATOR_PREFIX = "customAnnotatorClass.";
   private static final String PROPS_SUFFIX = ".properties";
   public static final String NEWLINE_SPLITTER_PROPERTY = "ssplit.eolonly";
-  public static final String NEWLINE_IS_SENTENCE_BREAK_PROPERTY = "ssplit.newlineIsSentenceBreak";
-  public static final String DEFAULT_NEWLINE_IS_SENTENCE_BREAK = "two";
 
   public static final String DEFAULT_OUTPUT_FORMAT = isXMLOutputPresent() ? "xml" : "text";
 
@@ -310,12 +308,11 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                           "false"))) {
           return new WhitespaceTokenizerAnnotator(properties);
         } else {
-          String options = properties.getProperty("tokenize.options", PTBTokenizerAnnotator.DEFAULT_OPTIONS);
-          boolean keepNewline = Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY, "false"));
-          // If they
-          if (properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
-            keepNewline = true;
-          }
+          String options = properties.getProperty("tokenize.options",
+                  PTBTokenizerAnnotator.DEFAULT_OPTIONS);
+          boolean keepNewline =
+                  Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY,
+                          "false"));
           // If the user specifies "tokenizeNLs=false" in tokenize.options, then this default will
           // be overridden.
           if (keepNewline) {
@@ -344,8 +341,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
           os.append(NEWLINE_SPLITTER_PROPERTY + ":" +
                   Boolean.valueOf(properties.getProperty(NEWLINE_SPLITTER_PROPERTY,
                           "false")));
-          os.append(NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ":" + 
-                    properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY, DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
         }
         return os.toString();
       }
@@ -515,7 +510,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
             String [] elements = bounds.split(",");
             htmlElementsToDiscard = Generics.newHashSet(Arrays.asList(elements));
           }
-          String nlsb = properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY, DEFAULT_NEWLINE_IS_SENTENCE_BREAK);
+          String nlsb = properties.getProperty("ssplit.newlineIsSentenceBreak", "two");
 
           return new WordsToSentencesAnnotator(false, boundaryTokenRegex, boundariesToDiscard, htmlElementsToDiscard,
                   nlsb, boundaryMultiTokenRegex, tokenRegexesToDiscard);
@@ -542,8 +537,8 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                     properties.getProperty("ssplit.boundariesToDiscard", ""));
             os.append("ssplit.htmlBoundariesToDiscard:" +
                     properties.getProperty("ssplit.htmlBoundariesToDiscard", ""));
-            os.append(NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ":" +
-                    properties.getProperty(NEWLINE_IS_SENTENCE_BREAK_PROPERTY, DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
+            os.append("ssplit.newlineIsSentenceBreak:" +
+                    properties.getProperty("ssplit.newlineIsSentenceBreak", "two"));
           }
         }
         return os.toString();

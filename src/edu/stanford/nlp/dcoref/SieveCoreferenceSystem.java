@@ -286,7 +286,7 @@ public class SieveCoreferenceSystem {
     semantics = (useSemantics)? new Semantics(dictionaries) : null;
 
     if(useSingletonPredictor){
-      singletonPredictor = getSingletonPredictorFromSerializedFile(props.getProperty(Constants.SINGLETON_MODEL_PROP, DefaultPaths.DEFAULT_DCOREF_SINGLETON_MODEL));
+      singletonPredictor = getSingletonPredictorFromSerializedFile(DefaultPaths.DEFAULT_DCOREF_SINGLETON_MODEL);
     }
   }
 
@@ -298,9 +298,6 @@ public class SieveCoreferenceSystem {
     os.append(Constants.SINGLETON_PROP + ":" +
         props.getProperty(Constants.SINGLETON_PROP,
                 "false"));
-    os.append(Constants.SINGLETON_MODEL_PROP + ":" +
-        props.getProperty(Constants.SINGLETON_MODEL_PROP,
-                DefaultPaths.DEFAULT_DCOREF_SINGLETON_MODEL));
     os.append(Constants.SCORE_PROP + ":" +
             props.getProperty(Constants.SCORE_PROP,
                     "false"));
@@ -922,7 +919,8 @@ public class SieveCoreferenceSystem {
               // Skip singletons according to the singleton predictor
               // (only for non-NE mentions)
               // Recasens, de Marneffe, and Potts (NAACL 2013)
-              if (m1.isSingleton && m1.mentionType != MentionType.PROPER && m2.isSingleton && m2.mentionType != MentionType.PROPER) continue;
+//              if (m1.isSingleton && m2.isSingleton) continue;
+              if (m1.isSingleton || m2.isSingleton) continue;
               if (m1.corefClusterID == m2.corefClusterID) continue;
               
               // selectively run dcoref

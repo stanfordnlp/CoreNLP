@@ -85,7 +85,7 @@ public class IOUtilsTest extends TestCase {
     Assert.assertEquals("!zipped!text", StringUtils.join(iterable, "!"));
   }
 
-  private static void checkLineIterable(boolean includeEol) throws IOException {
+  private void checkLineIterable(boolean includeEol) throws IOException {
     String[] expected = {
             "abcdefhij\r\n",
             "klnm\r\n",
@@ -123,15 +123,15 @@ public class IOUtilsTest extends TestCase {
     File b = new File(dir, "x/y/b.txt");
     File c = new File(dir, "c.txt");
     File d = new File(dir, "dtxt");
-
+    
     write("A", a);
     write("B", b);
     write("C", c);
     write("D", d);
-
+    
     Set<File> actual = toSet(IOUtils.iterFilesRecursive(dir));
     Assert.assertEquals(toSet(Arrays.asList(a, b, c, d)), actual);
-
+    
     actual = toSet(IOUtils.iterFilesRecursive(dir, ".txt"));
     Assert.assertEquals(toSet(Arrays.asList(b, c)), actual);
 
@@ -165,6 +165,47 @@ public class IOUtilsTest extends TestCase {
     }
     return set;
   }
+
+  /**
+   * Tests that slurpFile can get files from within the classpath
+   */
+  public void testSlurpFile() {
+    String contents;
+    try {
+      contents = IOUtils.slurpFile("edu/stanford/nlp/io/test.txt", "utf-8");
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+
+    assertEquals("This is a test sentence.", contents.trim());
+
+    try {
+      contents = IOUtils.slurpFile("edu/stanford/nlp/io/test.txt");
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
+
+    assertEquals("This is a test sentence.", contents.trim());
+
+    try {
+      contents = IOUtils.slurpFile("edu/stanford/nlp/io/test.txtzzz");
+      throw new AssertionError("Should not have found unknown file");
+    } catch (IOException e) {
+      // yay
+    }
+
+    contents = IOUtils.slurpFileNoExceptions("edu/stanford/nlp/io/test.txt");
+    assertEquals("This is a test sentence.", contents.trim());
+
+
+    try {
+      contents = IOUtils.slurpFileNoExceptions("edu/stanford/nlp/io/test.txtzzz");
+      throw new AssertionError("Should not have found unknown file");
+    } catch (RuntimeIOException e) {
+      // yay
+    }
+  }
+
   public void testCpSourceFileTargetNotExists() throws IOException {
     File source = File.createTempFile("foo", ".file");
     IOUtils.writeStringToFile("foo", source.getPath(), "utf-8");

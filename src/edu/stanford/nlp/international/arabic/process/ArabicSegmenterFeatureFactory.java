@@ -24,8 +24,6 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
   
   private static final long serialVersionUID = -4560226365250020067L;
   
-  private static final String DOMAIN_MARKER = "@";
-  
   public void init(SeqClassifierFlags flags) {
     super.init(flags);
   }
@@ -49,15 +47,6 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
       addAllInterningAndSuffixing(features, featuresCp3C(cInfo, loc), "Cp3C");
     }
 
-    String domain = cInfo.get(loc).get(CoreAnnotations.DomainAnnotation.class);
-    if (domain != null) {
-      Collection<String> domainFeatures = Generics.newHashSet();
-      for (String feature : features) {
-        domainFeatures.add(feature + DOMAIN_MARKER + domain);
-      }
-      features.addAll(domainFeatures);
-    }
-    
     return features;
   }
 
@@ -91,21 +80,25 @@ public class ArabicSegmenterFeatureFactory<IN extends CoreLabel> extends Feature
     // Character-level class features
     boolean seenPunc = false;
     boolean seenDigit = false;
-    for (int i = 0, limit = charc.length(); i < limit; ++i) {
+    for (int i = 0; i < charc.length(); ++i) {
       char charcC = charc.charAt(i);
-      seenPunc = seenPunc || Characters.isPunctuation(charcC);
-      seenDigit = seenDigit || Character.isDigit(charcC);
+      if ( ! seenPunc && Characters.isPunctuation(charcC)) {
+        seenPunc = true;
+        features.add("haspunc");        
+      }
+      if ( ! seenDigit && Character.isDigit(charcC)) {
+        seenDigit = true;
+        features.add("hasdigit");        
+      }
       String cuBlock = Characters.unicodeBlockStringOf(charcC);
       features.add(cuBlock + "-uBlock");
       String cuType = String.valueOf(Character.getType(charcC));
       features.add(cuType + "-uType");
     }
-    if (seenPunc) features.add("haspunc");        
-    if (seenDigit) features.add("hasdigit");        
 
     // Indicator transition feature
     features.add("cliqueC");
-    
+
     return features;
   }
 

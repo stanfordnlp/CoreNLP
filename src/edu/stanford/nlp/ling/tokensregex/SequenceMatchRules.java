@@ -404,7 +404,7 @@ public class SequenceMatchRules {
       MatchedExpression.SingleAnnotationExtractor valueExtractor = createAnnotationExtractor(env, r);
       valueExtractor.valueExtractor =
               new CoreMapFunctionApplier< List<? extends CoreMap>, Value>(
-                      env, r.annotationField,
+                      r.annotationField,
                       new SequencePatternExtractRule<CoreMap, Value>(
                               pattern,
                               new SequenceMatchResultExtractor<CoreMap>(env, action, result), r.matchFindType, r.matchWithResults));
@@ -461,18 +461,18 @@ public class SequenceMatchRules {
       if (r.annotationField != null && r.annotationField != CoreMap.class) {
         valueExtractor.valueExtractor =
               new CoreMapFunctionApplier< List<? extends CoreMap>, Value >(
-                      env, r.annotationField,
+                      r.annotationField,
                       new SequencePatternExtractRule<CoreMap, Value>(
                               pattern,
                               new SequenceMatchResultExtractor<CoreMap>(env, action, result), r.matchFindType, r.matchWithResults));
         r.extractRule = new CoreMapExtractRule< List<? extends CoreMap>, MatchedExpression >(
-              env, r.annotationField,
+              r.annotationField,
               new SequencePatternExtractRule<CoreMap, MatchedExpression>(pattern,
                       new SequenceMatchedExpressionExtractor( valueExtractor, r.matchedExpressionGroup), r.matchFindType, r.matchWithResults));
       } else {
         valueExtractor.valueExtractor =
                 new CoreMapToListFunctionApplier< Value >(
-                        env, new SequencePatternExtractRule<CoreMap, Value>(
+                        new SequencePatternExtractRule<CoreMap, Value>(
                                 pattern,
                                 new SequenceMatchResultExtractor<CoreMap>(env, action, result), r.matchFindType, r.matchWithResults));
         r.extractRule = new CoreMapToListExtractRule< MatchedExpression >(
@@ -516,12 +516,12 @@ public class SequenceMatchRules {
       Pattern pattern = env.getStringPattern(expr);
       valueExtractor.valueExtractor =
               new CoreMapFunctionApplier< String, Value >(
-                      env, r.annotationField,
+                      r.annotationField,
                       new StringPatternExtractRule<Value>(
                               pattern,
                               new StringMatchResultExtractor(env, action, result)));
       r.extractRule = new CoreMapExtractRule< String, MatchedExpression >(
-              env, r.annotationField,
+              r.annotationField,
               new StringPatternExtractRule<MatchedExpression>(pattern,
                       new StringMatchedExpressionExtractor( valueExtractor, r.matchedExpressionGroup)));
       r.filterRule = new AnnotationMatchedFilter(valueExtractor);
@@ -720,22 +720,17 @@ public class SequenceMatchRules {
    */
   public static class CoreMapExtractRule<T,O> implements ExtractRule<CoreMap, O>
   {
-    Env env;
     Class annotationField;
     ExtractRule<T,O> extractRule;
 
-    public CoreMapExtractRule(Env env, Class annotationField, ExtractRule<T,O> extractRule) {
+    public CoreMapExtractRule(Class annotationField, ExtractRule<T,O> extractRule) {
       this.annotationField = annotationField;
       this.extractRule = extractRule;
-      this.env = env;
     }
 
     public boolean extract(CoreMap cm, List<O> out) {
-      env.push(Expressions.VAR_SELF, cm);
       T field = (T) cm.get(annotationField);
-      boolean res = extractRule.extract(field, out);
-      env.pop(Expressions.VAR_SELF);
-      return res;
+      return extractRule.extract(field, out);
     }
 
   }
@@ -913,43 +908,33 @@ public class SequenceMatchRules {
 
   public static class CoreMapFunctionApplier<T,O> implements Function<CoreMap, O>
   {
-    Env env;
     Class annotationField;
     Function<T,O> func;
 
-    public CoreMapFunctionApplier(Env env, Class annotationField, Function<T,O> func) {
+    public CoreMapFunctionApplier(Class annotationField, Function<T,O> func) {
       this.annotationField = annotationField;
       if (annotationField == null) {
         throw new IllegalArgumentException("Annotation field cannot be null");
       }
       this.func = func;
-      this.env = env;
     }
 
     public O apply(CoreMap cm) {
-      if (env != null) { env.push(Expressions.VAR_SELF, cm); }
       T field = (T) cm.get(annotationField);
-      O res = func.apply(field);
-      if (env != null) { env.pop(Expressions.VAR_SELF); }
-      return res;
+      return func.apply(field);
     }
   }
 
   public static class CoreMapToListFunctionApplier<O> implements Function<CoreMap, O>
   {
-    Env env;
     Function<List<? extends CoreMap>,O> func;
 
-    public CoreMapToListFunctionApplier(Env env, Function<List<? extends CoreMap>,O> func) {
+    public CoreMapToListFunctionApplier(Function<List<? extends CoreMap>,O> func) {
       this.func = func;
-      this.env = env;
     }
 
     public O apply(CoreMap cm) {
-      if (env != null) { env.push(Expressions.VAR_SELF, cm); }
-      O res = func.apply(Arrays.asList(cm));
-      if (env != null) { env.pop(Expressions.VAR_SELF); }
-      return res;
+      return func.apply(Arrays.asList(cm));
     }
   }
 }

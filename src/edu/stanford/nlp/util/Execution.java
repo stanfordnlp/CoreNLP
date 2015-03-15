@@ -347,17 +347,13 @@ public class Execution {
         continue;
       }
 
-      boolean someOptionFilled = false;
-      boolean someOptionFound = false;
       for (Field f : fields) {
         Option o = f.getAnnotation(Option.class);
         if (o != null) {
-          someOptionFound = true;
           //(check if field is static)
           if ((f.getModifiers() & Modifier.STATIC) == 0 && instances == null) {
-            continue;
+            fatal("An instance object must be provided if an option is applied to a non-static field: " + c + "." + f);
           }
-          someOptionFilled = true;
           //(required marker)
           Pair<Boolean, Boolean> mark = Pair.makePair(false, false);
           if (o.required()) {
@@ -393,10 +389,6 @@ public class Execution {
           }
         }
       }
-      //(check to ensure that something got filled, if any @Option annotation was found)
-      if (someOptionFound && !someOptionFilled) {
-        warn("found @Option annotations in class " + c + ", but didn't set any of them (all options were instance variables and no instance given?)");
-      }
     }
 
     //--Fill Options
@@ -414,7 +406,7 @@ public class Execution {
       }
       // (fill the field)
       if (target != null) {
-        // (case: declared option)z
+        // (case: declared option)
         fillField(class2object.get(target.getDeclaringClass()), target, value);
       } else if (ensureAllOptions) {
         // (case: undeclared option)
@@ -431,7 +423,7 @@ public class Execution {
           try {
             clazz = ClassLoader.getSystemClassLoader().loadClass(className);
           } catch (Exception e) {
-            err("Could not set option: " + rawKey + "; either the option is mistyped, not defined, or the class " + className + " does not exist.");
+            err("Could not set option: " + rawKey + "; no such class: " + className);
           }
           // get the field
           if (clazz != null) {
@@ -440,12 +432,7 @@ public class Execution {
             } catch (Exception e) {
               err("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
             }
-            if (target != null) {
-              log("option overrides " + target + " to '" + value + "'");
-              fillField(class2object.get(target.getDeclaringClass()), target, value);
-            } else {
-              err("Could not set option: " + rawKey + "; no such field: " + fieldName + " in class: " + className);
-            }
+            fillField(class2object.get(target.getDeclaringClass()), target, value);
           }
         }
       }
@@ -610,7 +597,7 @@ public class Execution {
       log(FORCE, t);
       exitCode = 1;
     }
-    endTracksTo("main");  // end main
+    endTrack("main"); //ends main
     if (exit) {
       System.exit(exitCode);
     }

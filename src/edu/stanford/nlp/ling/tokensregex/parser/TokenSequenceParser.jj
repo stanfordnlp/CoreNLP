@@ -69,11 +69,6 @@ public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
         return Long.valueOf(str);
       }
     }
-
-    private String parseQuotedString(String str) {
-      // Trim start/end quote and unescape \"
-      return str.substring(1,str.length()-1).replaceAll("\\\\\"", "\"");
-    }
 }
 
 PARSER_END(TokenSequenceParser)
@@ -176,7 +171,7 @@ Expression Expression(Env env) : {
 } {
   (
     LOOKAHEAD(4)
-    expr = NestedFunctionCallExpression(env) |
+    expr = FunctionCallExpression(env) |
     LOOKAHEAD(4)
     expr = NestedVarExpression(env) |
     LOOKAHEAD(4)
@@ -265,7 +260,7 @@ Value BasicValue(Env env) : {
 }   {
         tok = <REGEX> { return new Expressions.RegexValue(/*"REGEX",*/ tok.image.substring(1,tok.image.length()-1)); }
         |
-        tok = <STR> { return new Expressions.PrimitiveValue<String>("STRING", parseQuotedString(tok.image) ); }
+        tok = <STR> { return new Expressions.PrimitiveValue<String>("STRING", tok.image.substring(1,tok.image.length()-1) ); }
         |
         tok = IntegerToken() { return new Expressions.PrimitiveValue<Number>("INTEGER", parseInteger(tok.image)); }
         |
@@ -378,38 +373,6 @@ Expression NestedVarExpression(Env env) : {
   { return expr;   }
 }
 
-Expression NestedFunctionCallExpression(Env env) : {
-  Expression expr;
-  Expression fieldExpr;
-  String s;
-  Token tok;
-  int i;
-} {
-  ( expr = FunctionCallExpression(env)
-   (
-     LOOKAHEAD(3)
-     i = Index()
-    { expr = new Expressions.IndexedExpression(expr, i);   }
-     |
-     LOOKAHEAD(3)
-     "["
-     fieldExpr = Expression(env)
-     { expr = new Expressions.FieldExpression(expr, fieldExpr); }
-     "]"
-     |
-     LOOKAHEAD(3)
-     "."
-     expr = MethodCallExpression(env, expr)
-     |
-     LOOKAHEAD(3)
-     "."
-     s = RelaxedString()
-     { expr = new Expressions.FieldExpression(expr, s); }
-    )*
-  )
-  { return expr;   }
-}
-
 Expression ListExpression(Env env) : {
   List<Expression> exprs = new ArrayList<Expression>();
   Expression expr;
@@ -446,7 +409,7 @@ Expression BasicCondExpression(Env env) : {
   }
   |
   LOOKAHEAD(3)
-    expr1 = NestedFunctionCallExpression(env)
+    expr1 = FunctionCallExpression(env)
     { return new Expressions.ConditionalExpression(expr1); }
 }
 
@@ -534,7 +497,7 @@ SequencePattern.PatternExpr SeqRegex(Env env) : {
 Object StringNumberValue(Env env) : {
 	Token tok = null;
 }   {
-        tok = <STR> { return parseQuotedString(tok.image); }
+        tok = <STR> { return tok.image.substring(1,tok.image.length()-1); }
         |
         tok = IntegerToken() { return parseInteger(tok.image); }
         |
@@ -1057,7 +1020,7 @@ Token RelaxedStringToken() : {
 String RelaxedString() : {
    Token value = null;
 } {
-  value = <STR> { return parseQuotedString(value.image); }
+  value = <STR> { return value.image.substring(1,value.image.length()-1); }
   | ( value = <IDENTIFIER> )
     { return value.image; }
 }
@@ -1071,11 +1034,11 @@ String VarName() : {
   | ( value = <REGEXVAR> )
     { return value.image; }
   | ( value = <STR> )
-    { return parseQuotedString(value.image); }
+    { return value.image.substring(1,value.image.length()-1); }
 } */
 
 String RelaxedStringNoIdentifier() : {
    Token value = null;
 } {
-  value = <STR> { return parseQuotedString(value.image); }
+  value = <STR> { return value.image.substring(1,value.image.length()-1); }
 }

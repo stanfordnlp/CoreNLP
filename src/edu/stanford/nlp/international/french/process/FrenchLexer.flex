@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 import java.util.Properties;
 
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
 import edu.stanford.nlp.process.LexedTokenFactory;
@@ -13,7 +12,7 @@ import edu.stanford.nlp.process.LexedTokenFactory;
 /**
  *  A tokenizer for French. Adapted from PTBTokenizer, but with extra
  *  rules for French orthography.
-
+ 
  *  @author Spence Green
  */
 
@@ -95,7 +94,7 @@ import edu.stanford.nlp.process.LexedTokenFactory;
    * @param tf The LexedTokenFactory that will be invoked to convert
    *    each substring extracted by the lexer into some kind of Object
    *    (such as a Word or CoreLabel).
-   * @param props Options to the tokenizer (see constructor Javadoc)
+   * @param options Options to the tokenizer (see constructor Javadoc)
    */
   public FrenchLexer(Reader r, LexedTokenFactory<?> tf, Properties props) {
     this(r);
@@ -190,8 +189,8 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   private boolean ptb3Dashes;
   private boolean escapeForwardSlashAsterisk = false;
   private boolean strictTreebank3;
-
-
+  
+  
   /*
    * This has now been extended to cover the main Windows CP1252 characters,
    * at either their correct Unicode codepoints, or in their invalid
@@ -299,25 +298,22 @@ import edu.stanford.nlp.process.LexedTokenFactory;
   private Object getNext(String txt, String originalText) {
     return getNext(txt, originalText, null);
   }
-
+  
   private Object getNext(String txt, String originalText, String annotation) {
     txt = removeSoftHyphens(txt);
-    Label w = (Label) tokenFactory.makeToken(txt, yychar, yylength());
-    if (invertible || annotation != null) {
-      CoreLabel word = (CoreLabel) w;
-      if (invertible) {
-        String str = prevWordAfter.toString();
-        prevWordAfter.setLength(0);
-        word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
-        word.set(CoreAnnotations.BeforeAnnotation.class, str);
-        prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
-        prevWord = word;
-      }
-      if (annotation != null) {
-        word.set(CoreAnnotations.ParentAnnotation.class, annotation);
-      }
+    CoreLabel word = (CoreLabel) tokenFactory.makeToken(txt, yychar, yylength());
+    if (invertible) {
+      String str = prevWordAfter.toString();
+      prevWordAfter.setLength(0);
+      word.set(CoreAnnotations.OriginalTextAnnotation.class, originalText);
+      word.set(CoreAnnotations.BeforeAnnotation.class, str);
+      prevWord.set(CoreAnnotations.AfterAnnotation.class, str);
+      prevWord = word;
     }
-    return w;
+    if (annotation != null) {
+      word.set(CoreAnnotations.ParentAnnotation.class, annotation);      
+    }
+    return word;
   }
 
   private Object getNormalizedAmpNext() {
@@ -475,7 +471,7 @@ cannot			{ yypushback(3) ; return getNext(); }
                           return getNext(asciiQuotes(origTxt), origTxt);
 			}
 {WORD}/{OBJPRON}        { return getNext(); }
-
+			
 {OBJPRON}               { final String origTxt = yytext();
                           return getNext(asciiDash(origTxt), origTxt);
                         }
@@ -674,8 +670,8 @@ cannot			{ yypushback(3) ; return getNext(); }
               return getNext();
           }
         }
-<<EOF>> { if (invertible) {
-            prevWordAfter.append(yytext());
+<<EOF>> { if (invertible) { 
+            prevWordAfter.append(yytext()); 
             String str = prevWordAfter.toString();
             prevWordAfter.setLength(0);
             prevWord.set(CoreAnnotations.AfterAnnotation.class, str);

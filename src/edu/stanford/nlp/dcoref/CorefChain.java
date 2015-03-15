@@ -234,7 +234,7 @@ public class CorefChain implements Serializable {
     @Override
     public String toString(){
       StringBuilder s = new StringBuilder();
-      s.append('"').append(mentionSpan).append('"').append(" in sentence ").append(sentNum);
+      s.append("\"").append(mentionSpan).append("\"").append(" in sentence ").append(sentNum);
       return s.toString();
       //      return "(sentence:" + sentNum + ", startIndex:" + startIndex + "-endIndex:" + endIndex + ")";
     }
@@ -330,8 +330,8 @@ public class CorefChain implements Serializable {
     this.representative = representative;
     this.mentionMap = mentionMap;
     this.mentions = new ArrayList<CorefMention>();
-    for (Set<CorefMention> ms: mentionMap.values()) {
-      for (CorefMention m: ms) {
+    for(Set<CorefMention> ms: mentionMap.values()){
+      for(CorefMention m: ms) {
         this.mentions.add(m);
       }
     }
@@ -339,7 +339,7 @@ public class CorefChain implements Serializable {
   }
 
   public String toString(){
-    return "CHAIN" + this.chainID + '-' + mentions;
+    return "CHAIN"+this.chainID+ "-" +mentions.toString();
   }
 
   private static final long serialVersionUID = 3657691243506528L;
