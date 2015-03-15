@@ -125,6 +125,8 @@ public class Document implements Serializable {
   private Map<String, SpeakerInfo> speakerInfoMap = Generics.newHashMap();
   
   public Counter<String> properNouns = new ClassicCounter<String>();
+  public Counter<String> phraseCounter = new ClassicCounter<String>();
+  public Counter<String> headwordCounter = new ClassicCounter<String>();
 
   public Document() {
     positions = Generics.newHashMap();
