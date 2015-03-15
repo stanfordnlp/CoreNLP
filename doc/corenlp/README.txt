@@ -1,13 +1,12 @@
-Stanford CoreNLP  v224n - 2013-09-24
-Stanford's Suite of NLP Tools
------------------------------
+Stanford CoreNLP - Stanford's Suite of NLP Tools
+------------------------------------------------
 
-Copyright (c) 2009-2012 The Board of Trustees of 
+Copyright © 2009-2014 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
 DOCUMENTATION
 
-Please look at the URL below for documention for Stanford CoreNLP:
+Please look at the URL below for documentation for Stanford CoreNLP:
 
   http://nlp.stanford.edu/software/corenlp.shtml
 
@@ -15,7 +14,7 @@ LICENSE
 
 //
 // StanfordCoreNLP -- a suite of NLP tools
-// Copyright (c) 2012 The Board of Trustees of 
+// Copyright © 2009-2014 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -29,8 +28,8 @@ LICENSE
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 // For more information, bug reports, fixes, contact:
 //    Christopher Manning
@@ -43,20 +42,22 @@ LICENSE
 CHANGES
 ---------------------------------
 
-2014-01-04    3.3.1     Bugfix release 
+2014-06-16      3.4     Add shift reduce parser 
 
-2013-11-12    3.3.0     Add sentiment model, minor sutime improvements 
+2014-01-04    3.3.1     Bugfix release
 
-2013-06-19    3.2.0     New RNN parser model, more efficient tagger 
+2013-11-12    3.3.0     Add sentiment model, minor sutime improvements
 
-2013-04-04    1.3.5     Speed improvements, coref improvements, 
-                        Chinese version, -nthreads option 
+2013-06-19    3.2.0     New RNN parser model, more efficient tagger
 
-2012-11-12    1.3.4     Improved ner model and dependency code, 
+2013-04-04    1.3.5     Speed improvements, coref improvements,
+                        Chinese version, -nthreads option
+
+2012-11-12    1.3.4     Improved ner model and dependency code,
                         now possible to change annotator pool for
                         later StanfordCoreNLP objects
 
-2012-07-09    1.3.3     Minor bug fixes 
+2012-07-09    1.3.3     Minor bug fixes
 
 2012-05-22    1.3.2     Improvements to sutime
 
@@ -74,7 +75,7 @@ CHANGES
 2011-05-15    1.0.4     More efficient dcoref data structure
                         Supports already-tokenized input text
 
-2011-04-17    1.0.3     Compatible with other releases 
+2011-04-17    1.0.3     Compatible with other releases
                         Support loading arbitrary annotators
                         Tagger bug fixes, such as "EOS" token
 

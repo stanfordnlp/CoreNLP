@@ -10,6 +10,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.XMLUtils;
 

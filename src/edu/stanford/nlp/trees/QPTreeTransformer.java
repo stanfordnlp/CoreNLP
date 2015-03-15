@@ -3,6 +3,9 @@ package edu.stanford.nlp.trees;
 
 
 import edu.stanford.nlp.ling.LabelFactory;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
+import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.ArrayList;
@@ -33,6 +36,7 @@ public class QPTreeTransformer implements TreeTransformer {
   /**
    * Right now (Jan 2013) we only deal with the following QP structures:
    * <ul>
+   * <li> NP (QP ...) (QP (CC and/or) ...)
    * <li> QP (RB IN CD|DT ...)   well over, more than
    * <li> QP (JJR IN CD|DT ...)  fewer than
    * <li> QP (IN JJS CD|DT ...)  at least
@@ -48,28 +52,47 @@ public class QPTreeTransformer implements TreeTransformer {
   }
 
 
+  private static TregexPattern flattenNPoverQPTregex =
+    TregexPattern.compile("NP < (QP=left $+ (QP=right < CC))");
+
+  private static TsurgeonPattern flattenNPoverQPTsurgeon =
+    Tsurgeon.parseOperation("[createSubtree QP left right] [excise left left] [excise right right]");
+
+  private static TregexPattern multiwordXSTregex =
+    // TODO: should add NN and $ to the numeric expressions captured
+    //   NN is for words such as "half" which are probably misparsed
+    // TODO: <3 (IN < as|than) is to avoid one weird case in PTB, 
+    // "more than about".  Perhaps there is some way to generalize this
+    // TODO: "all but X"
+    // TODO: "all but about X"
+    TregexPattern.compile("QP <1 /^RB|JJ|IN/=left [ ( <2 /^JJ|IN/=right <3 /^CD|DT/ ) | ( <2 /^JJ|IN/ <3 ( IN=right < /^(?i:as|than)$/ ) <4 /^CD|DT/ ) ] ");
+
+  private static TsurgeonPattern multiwordXSTsurgeon =
+    Tsurgeon.parseOperation("createSubtree XS left right");
+
   /**
    * Transforms t if it contains one of the following QP structure:
-   * QP (RB IN CD|DT ...)   well over, more than
-   * QP (JJR IN CD|DT ...)  fewer than
-   * QP (IN JJS CD|DT ...)  at least
-   * QP (... CC ...)        between 5 and 10
+   * <ul>
+   * <li> NP (QP ...) (QP (CC and/or) ...)
+   * <li> QP (RB IN CD|DT ...)   well over, more than
+   * <li> QP (JJR IN CD|DT ...)  fewer than
+   * <li> QP (IN JJS CD|DT ...)  at least
+   * <li> QP (... CC ...)        between 5 and 10
+   * </ul>
    *
    * @param t a tree to be transformed
    * @return t transformed
    */
   public static Tree QPtransform(Tree t) {
+    t = Tsurgeon.processPattern(flattenNPoverQPTregex, flattenNPoverQPTsurgeon, t);
+    t = Tsurgeon.processPattern(multiwordXSTregex, multiwordXSTsurgeon, t);
+
     doTransform(t);
     return t;
   }
 
-
-
   /**
    * Given a tree t, if this tree contains a QP of the form
-   * QP (RB IN CD|DT ...)   well over, more than
-   * QP (JJR IN CD|DT ...)  fewer than
-   * QP (IN JJS CD|DT ...)  at least
    * QP (... CC ...)        between 5 and 10
    * it will transform it
    *
@@ -79,18 +102,6 @@ public class QPTreeTransformer implements TreeTransformer {
     if (t.value().startsWith("QP")) {
       //look at the children
       List<Tree> children = t.getChildrenAsList();
-      if (children.size() >= 3 && children.get(0).isPreTerminal()) {
-        //go through the children and check if they match the structure we want
-        String child1 = children.get(0).value();
-        String child2 = children.get(1).value();
-        String child3 = children.get(2).value();
-        if((child3.startsWith("CD") || child3.startsWith("DT")) &&
-           (child1.startsWith("RB") || child1.startsWith("JJ") || child1.startsWith("IN")) &&
-           (child2.startsWith("IN") || child2.startsWith("JJ"))) {
-          transformQP(t);
-          children = t.getChildrenAsList();
-        }
-      }
       // If the children include a CC, we split that into left and
       // right subtrees with the CC in the middle so the headfinders
       // have an easier time interpreting the tree later on
@@ -166,27 +177,6 @@ public class QPTreeTransformer implements TreeTransformer {
     newChildren.add(children.get(0));
     newChildren.add(rightQP);
     t.setChildren(newChildren);
-  }
-
-
-  private static void transformQP(Tree t) {
-    List<Tree> children = t.getChildrenAsList();
-    TreeFactory tf = t.treeFactory();
-    LabelFactory lf = t.label().labelFactory();
-
-    //create the new XS having the first two children of the QP
-    Tree left = tf.newTreeNode(lf.newLabel("XS"), null);
-    for (int i = 0; i < 2; i++) {
-      left.addChild(children.get(i));
-    }
-
-    // remove all the two first children of t before
-    for (int i = 0; i < 2; i++) {
-      t.removeChild(0);
-    }
-
-    // add XS as the first child
-    t.addChild(0, left);
   }
 
 

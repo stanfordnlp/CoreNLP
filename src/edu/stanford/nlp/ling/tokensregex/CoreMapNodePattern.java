@@ -301,7 +301,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
     }
 
     public boolean normalize() {
-      return (flags & NORMALiZE) != 0;
+      return (flags & NORMALIZE) != 0;
     }
 
     public String getNormalized(String str) {

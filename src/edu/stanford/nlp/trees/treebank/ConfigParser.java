@@ -48,6 +48,7 @@ public class ConfigParser implements Iterable<Properties> {
   public static final String paramMaxLen = "MAXLEN";        //Max yield of the trees in the data set
   public static final String paramMorph = "MORPH";          //Add the pre-terminal morphological analysis to the leaf (using the delimiter)
   public static final String paramTransform = "TVISITOR";   //Apply a custom TreeVisitor to each tree in the dataset
+  public static final String paramCCTagset = "CC_TAGSET"; // specific to French.  TODO: move it to the French dataset
 
   //Absolute parameters
   private static final Pattern matchName = Pattern.compile(paramName + DELIM);
@@ -71,6 +72,8 @@ public class ConfigParser implements Iterable<Properties> {
 
   private static final Pattern matchEncode = Pattern.compile(paramEncode + DELIM);
   private static final Pattern matchEncodeArgs = Pattern.compile("Buckwalter|UTF8");
+
+  private static final Pattern matchCCTagset = Pattern.compile(paramCCTagset + DELIM);
 
   private static final Pattern booleanArgs = Pattern.compile("true|false");
 
@@ -117,6 +120,7 @@ public class ConfigParser implements Iterable<Properties> {
     patternsMap.put(paramMaxLen, new Pair<Pattern,Pattern>(matchMaxLen,null));
     patternsMap.put(paramMorph, new Pair<Pattern,Pattern>(matchMorph,null));
     patternsMap.put(paramTransform, new Pair<Pattern,Pattern>(matchTransform,null));
+    patternsMap.put(paramCCTagset, new Pair<Pattern,Pattern>(matchCCTagset,null));
   }
 
   public Iterator<Properties> iterator() {
@@ -176,8 +180,9 @@ public class ConfigParser implements Iterable<Properties> {
           }
         }
         if(!matched) {
-          System.err.printf("%s: Unknown token in %s (line %d)\n", this.getClass().getName(), configFile, reader.getLineNumber());
-          System.exit(-1);
+          String error = (this.getClass().getName() + ": Unknown token in " + configFile + " (line " + reader.getLineNumber() + ")\n");
+          System.err.printf(error);
+          throw new IllegalArgumentException(error);
         }
       }
 

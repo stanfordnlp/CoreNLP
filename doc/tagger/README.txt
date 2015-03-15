@@ -1,4 +1,4 @@
-Stanford POS Tagger, v3.3.1 - 2014-01-04
+Stanford POS Tagger, v3.4 - 2014-06-16
 Copyright (c) 2002-2012 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
@@ -201,6 +201,8 @@ processing.
 
 CHANGES
 -----------------------------------------------
+
+2014-06-16      3.4     Using CC tagset for French 
 
 2014-01-04    3.3.1     Bugfix release 
 

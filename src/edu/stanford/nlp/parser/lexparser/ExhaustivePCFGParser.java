@@ -34,6 +34,8 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.parser.KBestViterbiParser;
+import edu.stanford.nlp.parser.common.ParserAnnotations;
+import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.Tree;

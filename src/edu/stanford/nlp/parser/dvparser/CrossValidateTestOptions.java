@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.parser.lexparser.ArgUtils;
+import edu.stanford.nlp.parser.common.ArgUtils;
 import edu.stanford.nlp.parser.lexparser.EvaluateTreebank;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.trees.Treebank;

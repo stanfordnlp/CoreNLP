@@ -63,9 +63,9 @@
       </classpath>
     </taskdef>
 
-    <taskdef classname="JFlex.anttask.JFlexTask" name="jflex">
+    <taskdef classname="jflex.anttask.JFlexTask" name="jflex">
       <classpath>
-        <pathelement location="${project.core}/lib/JFlex.jar"/>
+        <pathelement location="${project.core}/lib/jflex-1.5.1.jar"/>
       </classpath>
     </taskdef>
 

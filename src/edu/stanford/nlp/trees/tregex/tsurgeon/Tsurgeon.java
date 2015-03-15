@@ -50,7 +50,7 @@ import java.io.*;
  * java edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon -treeFile atree
  *        exciseNP renameVerb
  * </blockquote>
- * The file <code>atree</code> has Penn Treebank (S-expression) format trees.
+ * The file {@code atree} has Penn Treebank (S-expression) format trees.
  * The other (here, two) files have Tsurgeon operations.  These consist of
  * a list of pairs of a tregex expression on one or more
  * lines, a blank line, and then some number of lines of Tsurgeon operations and then
@@ -94,7 +94,13 @@ import java.io.*;
  * <code>collectOperations</code> to collect all the surgery patterns
  * into one TsurgeonPattern, and then to call processPatternOnTrees.
  * Either of these latter methods is much faster.
- * <p>
+ * </p><p>
+ * The parser also has the ability to collect multiple
+ * TsurgeonPatterns into one pattern by itself by enclosing each
+ * pattern in <code>[ ... ]</code>.  For example,
+ * <br>
+ * <code>Tsurgeon.parseOperation("[relabel foo BAR] [prune bar]")</code>
+ * </p><p>
  * For more information on using Tsurgeon from the command line,
  * see the {@link #main} method and the package Javadoc.
  *
@@ -159,11 +165,15 @@ public class Tsurgeon {
    * <h4>Legal operation syntax:</h4>
    *
    * <ul>
-   *   <li><code>delete &#60;name&#62;</code>  deletes the node and everything below it.
-   *   <li><code>prune &#60;name&#62;</code>  Like delete, but if, after the pruning, the parent has no children anymore, the parent is pruned too.  Pruning continues to affect all ancestors until one is found with remaining children.  This may result in a null tree.
+   *
+   * <li><code>delete &#60;name&#62;</code>  deletes the node and everything below it.
+   *
+   * <li><code>prune &#60;name&#62;</code>  Like delete, but if, after the pruning, the parent has no children anymore, the parent is pruned too.  Pruning continues to affect all ancestors until one is found with remaining children.  This may result in a null tree.
+   *
    * <li><code>excise &#60;name1&#62; &#60;name2&#62;</code>
    *   The name1 node should either dominate or be the same as the name2 node.  This excises out everything from
    * name1 to name2.  All the children of name2 go into the parent of name1, where name1 was.
+   *
    * <li><code>relabel &#60;name&#62; &#60;new-label&#62;</code> Relabels the node to have the new label. <br>
    * There are three possible forms: <br>
    * <code>relabel nodeX VP</code> - for changing a node label to an
@@ -195,42 +205,50 @@ public class Tsurgeon {
    * To get an "=" or a "%" in the replacement, using \ escaping.
    * Also, as in the example you can escape a slash in the middle of
    * the second and third forms with \\/ and \\\\. <br>
+   *
    * <li><code>insert &#60;name&#62; &#60;position&#62;</code> or <code>insert &lt;tree&gt; &#60;position&#62;</code>
    *   inserts the named node or tree into the position specified.
-   * <li><code>move &#60;name&#62; &#60;position&#62;</code> moves the named node into the specified position
+   *
+   * <li><code>move &#60;name&#62; &#60;position&#62;</code> moves the named node into the specified position.
    * <p>Right now the  only ways to specify position are:
    * <p>
    *      <code>$+ &#60;name&#62;</code>     the left sister of the named node<br>
    *      <code>$- &#60;name&#62;</code>     the right sister of the named node<br>
    *      <code>&gt;i &#60;name&#62;</code> the i_th daughter of the named node<br>
    *      <code>&gt;-i &#60;name&#62;</code> the i_th daughter, counting from the right, of the named node.
+   *
    * <li><code>replace &#60;name1&#62; &#60;name2&#62;</code>
    *     deletes name1 and inserts a copy of name2 in its place.
+   *
    * <li><code>replace &#60;name&#62; &#60;tree&#62; &#60;tree2&#62;...</code>
    *     deletes name and inserts the new tree(s) in its place.  If
    *     more than one replacement tree is given, each of the new
    *     subtrees will be added in order where the old tree was.
    *     Multiple subtrees at the root is an illegal operation and
    *     will throw an exception.
-   * <li><code>createSubtree &#60;new-label&#62; &#60;name1&#62; [&#60;name2&#62;]</code> 
-   *     Create a subtree out of all the nodes from
-   *     <code>&#60;name1&#62;</code> through
-   *     <code>&#60;name2&#62;</code> and puts the new subtree where
+   *
+   * <li>{@code createSubtree <new-label> <name1> [<name2>]}
+   *     Create a subtree out of all the nodes from {@code <name1>} through
+   *     {@code <name2>} and puts the new subtree where
    *     that span used to be.  To limit the operation to just one
-   *     node, elide <code>&#60;name2&#62;</code>.
+   *     node, elide {@code <name2>}.
+   *
    * <li><code>adjoin &#60;auxiliary_tree&#62; &lt;name&gt;</code> Adjoins the specified auxiliary tree into the named node.
    *     The daughters of the target node will become the daughters of the foot of the auxiliary tree.
    * <li><code>adjoinH &#60;auxiliary_tree&#62; &lt;name&gt;</code> Similar to adjoin, but preserves the target node
    *     and makes it the root of &lt;tree&gt;. (It is still accessible as <code>name</code>.  The root of the
    *     auxiliary tree is ignored.)
+   *
    * <li> <code>adjoinF &#60;auxiliary_tree&#62; &lt;name&gt;</code></dt>  Similar to adjoin,
    *     but preserves the target node and makes it the foot of &lt;tree&gt;.
    *     (It is still accessible as <code>name</code>, and retains its status as parent of its children.
    *     The root of the auxiliary tree is ignored.)
+   *
    * <li> <dt><code>coindex &#60;name1&#62; &#60;name2&#62; ... &#60;nameM&#62; </code> Puts a (Penn Treebank style)
    *     coindexation suffix of the form "-N" on each of nodes name_1 through name_m.  The value of N will be
    *     automatically generated in reference to the existing coindexations in the tree, so that there is never
    *     an accidental clash of indices across things that are not meant to be coindexed.
+   *
    * </ul>
    *
    * <p>
@@ -246,7 +264,7 @@ public class Tsurgeon {
    * </p><p>
    * Tsurgeon applies the same operation to the same tree for as long
    * as the given tregex operation matches.  This means that infinite
-   * loops are very easy to cause.  One common situation this comes up
+   * loops are very easy to cause.  One common situation where this comes up
    * is with an insert operation will repeats infinitely many times
    * unless you add an expression to the tregex that matches against
    * the inserted pattern.  For example, this pattern will infinite loop:
@@ -268,7 +286,15 @@ public class Tsurgeon {
    * </blockquote>
    *
    * </p>
+   * <p>
+
+   * Tsurgeon has (very) limited support for conditional statements.
+   * If a pattern is prefaced with
+   * <code>if exists &lt;name&gt;</code>,
+   * the rest of the pattern will only execute if
+   * the named node was found in the corresponding TregexMatcher.
    *
+   * </p>
    *
    * @param args a list of names of files each of which contains a single tregex matching pattern plus a list, one per line,
    *        of transformation operations to apply to the matched pattern.
@@ -520,10 +546,11 @@ public class Tsurgeon {
    */
   public static Tree processPattern(TregexPattern matchPattern, TsurgeonPattern p, Tree t) {
     TregexMatcher m = matchPattern.matcher(t);
-    while(m.find()) {
+    while (m.find()) {
       t = p.evaluate(t,m);
-      if(t==null)
+      if (t==null) {
         break;
+      }
       m = matchPattern.matcher(t);
     }
     return t;
@@ -572,7 +599,7 @@ public class Tsurgeon {
     try {
       TsurgeonParser parser =
         new TsurgeonParser(new StringReader(operationString + "\n"));
-      return new TsurgeonPatternRoot(new TsurgeonPattern[] {parser.Root()} );
+      return parser.Root();
     } catch(ParseException e) {
       throw new TsurgeonParseException("Error parsing Tsurgeon expression: " +
                                        operationString, e);

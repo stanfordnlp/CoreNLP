@@ -14,22 +14,11 @@ import edu.stanford.nlp.trees.*;
  */
 public class FrenchTreeReaderFactory implements TreeReaderFactory, Serializable {
 
-  private static final long serialVersionUID = 6928967570430642163L;
- 
-  private final boolean readPennFormat;
-  
-  public FrenchTreeReaderFactory() {
-    this(false);
-  }
-  
-  public FrenchTreeReaderFactory(boolean pennFormat) {
-    readPennFormat = pennFormat;
-  }
+  private static final long serialVersionUID = 8943534517L;
+
+  public FrenchTreeReaderFactory() { }
   
   public TreeReader newTreeReader(Reader in) {
-    if(readPennFormat) {
-      return new PennTreeReader(in, new LabeledScoredTreeFactory(), new FrenchTreeNormalizer(),new PennTreebankTokenizer(in));
-    }
-    return new FrenchTreeReader(in);
+    return new PennTreeReader(in, new LabeledScoredTreeFactory(), new FrenchTreeNormalizer(false), new PennTreebankTokenizer(in));
   }
 }

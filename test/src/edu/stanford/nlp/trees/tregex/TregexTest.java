@@ -33,6 +33,23 @@ public class TregexTest extends TestCase {
     return trees;
   }
 
+  /** This was buggy in 2010. But John Bauer fixed it. */
+  public void testJoãoSilva() {
+    final TregexPattern tregex1 = TregexPattern.compile(
+            "PNT=p >>- (__=l >, (__=t <- (__=r <, __=m <- (__ <, CONJ <- __=z))))");
+    final TregexPattern tregex2 = TregexPattern.compile(
+            "PNT=p >>- (/(.+)/#1%var=l >, (__=t <- (__=r <, /(.+)/#1%var=m <- (__ <, CONJ <- /(.+)/#1%var=z))))");
+    final TregexPattern tregex3 = TregexPattern.compile(
+            "PNT=p >>- (__=l >, (__=t <- (__=r <, ~l <- (__ <, CONJ <- ~l))))");
+    Tree tree = treeFromString("(T (X (N (N Moe (PNT ,)))) (NP (X (N Curly)) (NP (CONJ and) (X (N Larry)))))");
+    TregexMatcher matcher1 = tregex1.matcher(tree);
+    assertTrue(matcher1.find());
+    TregexMatcher matcher2 = tregex2.matcher(tree);
+    assertTrue(matcher2.find());
+    TregexMatcher matcher3 = tregex3.matcher(tree);
+    assertTrue(matcher3.find());
+  }
+
   public void testNoResults() {
     final TregexPattern pMWE = TregexPattern.compile("/^MW/");
     Tree tree = treeFromString("(Foo)");
@@ -1270,11 +1287,11 @@ public class TregexTest extends TestCase {
     matcher = pattern.matcher(trees[1]);
     assertTrue(matcher.find());
     assertFalse(matcher.find());
-    
+
     matcher = pattern.matcher(trees[2]);
     assertTrue(matcher.find());
     assertFalse(matcher.find());
-    
+
     // Second pattern: single relation in parentheses.  First tree should not match.
     pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ (< and) $+ (RB=adv $+ /^S/)))");
     matcher = pattern.matcher(trees[0]);
@@ -1283,11 +1300,11 @@ public class TregexTest extends TestCase {
     matcher = pattern.matcher(trees[1]);
     assertTrue(matcher.find());
     assertFalse(matcher.find());
-    
+
     matcher = pattern.matcher(trees[2]);
     assertTrue(matcher.find());
     assertFalse(matcher.find());
-    
+
     // Third pattern: single relation in parentheses and negated.  Only first tree should match.
     pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ !(< and) $+ (RB=adv $+ /^S/)))");
     matcher = pattern.matcher(trees[0]);
@@ -1296,10 +1313,10 @@ public class TregexTest extends TestCase {
 
     matcher = pattern.matcher(trees[1]);
     assertFalse(matcher.find());
-    
+
     matcher = pattern.matcher(trees[2]);
     assertFalse(matcher.find());
-    
+
     // Fourth pattern: double relation in parentheses, no negation.
     pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ (< and $+ RB) $+ (RB=adv $+ /^S/)))");
     matcher = pattern.matcher(trees[0]);
@@ -1308,11 +1325,11 @@ public class TregexTest extends TestCase {
     matcher = pattern.matcher(trees[1]);
     assertTrue(matcher.find());
     assertFalse(matcher.find());
-    
+
     matcher = pattern.matcher(trees[2]);
     assertTrue(matcher.find());
     assertFalse(matcher.find());
-    
+
     // Fifth pattern: double relation in parentheses, negated.
     pattern = TregexPattern.compile("/^S/ < (/^S/ $++ (/^[,]|CC|CONJP$/ !(< and $+ RB) $+ (RB=adv $+ /^S/)))");
     matcher = pattern.matcher(trees[0]);
@@ -1321,7 +1338,7 @@ public class TregexTest extends TestCase {
 
     matcher = pattern.matcher(trees[1]);
     assertFalse(matcher.find());
-    
+
     matcher = pattern.matcher(trees[2]);
     assertFalse(matcher.find());
 
@@ -1336,12 +1353,12 @@ public class TregexTest extends TestCase {
     matcher = pattern.matcher(trees[1]);
     assertTrue(matcher.find());
     assertFalse(matcher.find());
-    
+
     matcher = pattern.matcher(trees[2]);
     assertFalse(matcher.find());
   }
 
-  /** 
+  /**
    * The PARENT_EQUALS relation allows for a simplification of what
    * would have been a pair of rules in the dependencies.
    */
@@ -1357,7 +1374,7 @@ public class TregexTest extends TestCase {
     runTest("A <= (A < B)", "(A (A (C 2)))");
   }
 
-  /** 
+  /**
    * Test a few possible ways to make disjunctions at the root level.
    * Note that disjunctions at lower levels can always be created by
    * repeating the relation, but that is not true at the root, since
@@ -1408,6 +1425,11 @@ public class TregexTest extends TestCase {
     runTest("A <... { (B < C) ; D }", "(A (B (C 2)) (D 3))", "(A (B (C 2)) (D 3))");
     runTest("A <... { (B <... { C ; D }) ; E }", "(A (B (C 2) (D 3)) (E 4))", "(A (B (C 2) (D 3)) (E 4))");
     runTest("A <... { (B !< C) ; D }", "(A (B (C 2)) (D 3))");
+  }
+
+  public void testDisjunctionVariableAssignments() {
+    outputResults("UCP [ <- (ADJP=adjp < JJR) | <, NNP=np ]", "(NP (UCP (NNP U.S.) (CC and) (ADJP (JJ northern) (JJ European))) (NNS diplomats))");
+
   }
 
   /**

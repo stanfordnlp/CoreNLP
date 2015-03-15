@@ -74,6 +74,9 @@ public class Execution {
   @SuppressWarnings("FieldCanBeLocal")
   @Option(name = "strict", gloss = "If true, make sure that all options passed in are used somewhere")
   private static boolean strict = false;
+  @SuppressWarnings("FieldCanBeLocal")
+  @Option(name = "exec.verbose", gloss = "If true, print options as they are set.")
+  private static boolean verbose = false;
 
   static {
     try {
@@ -169,6 +172,17 @@ public class Execution {
 	 */
 
   private static void fillField(Object instance, Field f, String value) {
+    //--Verbose
+    if (verbose) {
+      Option opt = f.getAnnotation(Option.class);
+      StringBuilder b = new StringBuilder("setting ").append(f.getDeclaringClass().getName()).append("#").append(f.getName()).append(" ");
+      if (opt != null) {
+        b.append("[").append(opt.name()).append("] ");
+      }
+      b.append("to: ").append(value);
+      log(b.toString());
+    }
+
     try {
       //--Permissions
       boolean accessState = true;

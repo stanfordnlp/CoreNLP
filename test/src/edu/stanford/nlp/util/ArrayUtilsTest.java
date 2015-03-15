@@ -1,5 +1,6 @@
 package edu.stanford.nlp.util;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -7,7 +8,7 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 /**
- * @author Christopher Manning 
+ * @author Christopher Manning
  * @author John Bauer
  */
 public class ArrayUtilsTest extends TestCase {
@@ -65,14 +66,11 @@ public class ArrayUtilsTest extends TestCase {
 
   public void testAsSet() {
     String[] items = {"larry", "moe", "curly"};
-    Set<String> set = new HashSet<String>();
-    for (String item: items) {
-      set.add(item);
-    }
+    Set<String> set = new HashSet<String>(Arrays.asList(items));
     assertEquals(set, ArrayUtils.asSet(items));
   }
-  
-  
+
+
   public void testgetSubListIndex() {
     String[] t1 = {"this", "is", "test"};
     String[] t2 = {"well","this","is","not","this","is","test","also"};

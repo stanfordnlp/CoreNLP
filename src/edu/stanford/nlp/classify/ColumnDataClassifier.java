@@ -59,6 +59,7 @@ import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.Triple;
 
 
@@ -138,7 +139,7 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td> printTo</td><td>String</td><td>n/a</td><td>Path to print a text representation of the linear classifier to</td></tr>
  * <tr><td> trainFile</td><td>String</td><td>n/a</td><td>Path of file to use as training data</td></tr>
  * <tr><td> testFile</td><td>String</td><td>n/a</td><td>Path of file to use as test data</td></tr>
- * <tr><td> encoding</td><td>String</td><td><i>platform default</i></td><td>Character encoding of training and test file, e.g. utf-8 or iso-8859-1</td></tr>
+ * <tr><td> encoding</td><td>String</td><td><i>utf-8</i></td><td>Character encoding of training and test file, e.g., utf-8, GB18030, or iso-8859-1</td></tr>
  * <tr><td> displayedColumn</td><td>int</td><td>1</td><td>Column number that will be printed out to stdout in the output next to the gold class and the chosen class.  This is just an aide memoire.  If the value is negative, nothing is printed. </td></tr>
  * <tr><td> displayAllAnswers</td><td>boolean</td><td>false</td><td>If true, print all classes and their probability, sorted by probability, rather than just the highest scoring and correct classes. </td></tr>
  * <tr><td> goldAnswerColumn</td><td>int</td><td>0</td><td>Column number that contains the correct class for each data item (again, columns are numbered from 0 up).</td></tr>
@@ -156,8 +157,8 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td> countChars</td><td>String</td><td>null</td><td>If non-null, count the number of occurrences of each character in the String, and make a feature for each character, binned according to <code>countCharsBins</code></td><td>Char-<i>ch</i>-<i>range</i></td></tr>
  * <tr><td> countCharsBins</td><td>String</td><td>"0,1"</td><td>Treat as a sequence of comma separated integer bounds, where character counts above the previous bound up to and including the next bound are binned. For instance, a value of "0,2" will give 3 bins, dividing a character count into bins of 0, 1-or-2, and 3-or-more occurrences.</td><td></td></tr>
  * <tr><td> splitWordsRegexp</td><td>String</td><td>null</td><td>If defined, use this as a regular expression on which to split the whole string (as in the String.split() function, which will return the things between delimiters, and discard the delimiters).  The resulting split-up "words" will be used in classifier features iff one of the other "useSplit" options is turned on.</td></tr>
- * <tr><td> splitWordsTokenizerRegexp</td><td>String</td><td>null</td><td>If defined, use this as a regular expression to cut initial pieces off a String.  This regular expression <i>should always match</i> the String, and the size of the token is the number of characters matched.  So, for example, one can group letter and number characters but do nothing else with a regular expression like <code>([A-Za-z]+|[0-9]+|.)</code>.  (If the regular expression doesn't match, the first character of the string is treated as a one character word, and then matching is tried again, but in this case a warning message is printed.)  Note that, for Java regular expressions with disjunctions like this, the match is the first matching disjunction, not the longest matching disjunction, so patterns with common prefixes need to be ordered from most specific (longest) to least specific (shortest).)  The resulting split up "words" will be used in classifier features iff one of the other "useSplit" options is turned on.  Note that as usual for Java String processing, backslashes must be doubled in the regular expressions that you write.</td></tr>
- * <tr><td> splitWordsIgnoreRegexp</td><td>String</td><td>null</td><td>If defined, this regexp is used to determine character sequences which should not be returned as tokens when using the splitWordsTokenizerRegexp.  Typically, these might be whitespace tokens (i.e., \\s+).</td></tr>
+ * <tr><td> splitWordsTokenizerRegexp</td><td>String</td><td>null</td><td>If defined, use this as a regular expression to cut initial pieces off a String.  Either this regular expression or <code>splitWordsIgnoreRegexp</code> <i>should always match</i> the start of the String, and the size of the token is the number of characters matched.  So, for example, one can group letter and number characters but do nothing else with a regular expression like <code>([A-Za-z]+|[0-9]+|.)</code>, where the last disjunct will match any other single character.  (If neither regular expression matches, the first character of the string is treated as a one character word, and then matching is tried again, but in this case a warning message is printed.)  Note that, for Java regular expressions with disjunctions like this, the match is the first matching disjunction, not the longest matching disjunction, so patterns with common prefixes need to be ordered from most specific (longest) to least specific (shortest).)  The resulting split up "words" will be used in classifier features iff one of the other "useSplit" options is turned on.  Note that as usual for Java String processing, backslashes must be doubled in the regular expressions that you write.</td></tr>
+ * <tr><td> splitWordsIgnoreRegexp</td><td>String</td><td>\\s+</td><td>If non-empty, this regexp is used to determine character sequences which should not be returned as tokens when using <code>splitWordsTokenizerRegexp</code> or <code>splitWordsRegexp</code>. With the former, first the program attempts to match this regular expression at the start of the string (with <code>lookingAt()</code>) and if it matches, those characters are discarded, but if it doesn't match then <code>splitWordsTokenizerRegexp</code> is tried. With <code>splitWordsRegexp</code>, this is used to filter tokens (with <code>matches()</code> resulting from the splitting.  By default this regular expression is set to be all whitespace tokens (i.e., \\s+). Set it to an empty string to get all tokens returned.</td></tr>
  * <tr><td> useSplitWords</td><td>boolean</td><td>false</td><td>Make features from the "words" that are returned by dividing the string on splitWordsRegexp or splitWordsTokenizerRegexp.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SW-<i>str</i></td></tr>
  * <tr><td> useLowercaseSplitWords</td><td>boolean</td><td>false</td><td>Make features from the "words" that are returned by dividing the string on splitWordsRegexp or splitWordsTokenizerRegexp and then lowercasing the result.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.  Note that this can be specified independently of useSplitWords. You can put either or both original cased and lowercased words in as features.</td><td>SW-<i>str</i></td></tr>
  * <tr><td> useSplitWordPairs</td><td>boolean</td><td>false</td><td>Make features from the pairs of adjacent "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SWP-<i>str1</i>-<i>str2</i></td></tr>
@@ -169,11 +170,11 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td> wordNGramBoundaryRegexp</td><td>String</td><td>null</td><td>If this is defined and the regexp matches, then the ngram stops</td></tr>
  * <tr><td> useSplitFirstLastWords</td><td>boolean</td><td>false</td><td>Make a feature from each of the first and last "words" that are returned as splitWords.  This is equivalent to having word bigrams with boundary tokens at each end of the sequence (they get a special feature).  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SFW-<i>str</i>, SLW-<i>str</i></td></tr>
  * <tr><td> useSplitNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams - internal as well as edge all treated the same - after the data string has been split into tokens.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#-<i>str</i></td></tr>
- * <tr><td> useSplitPrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefixes and suffixes after splitting with splitWordsRegexp.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#B-<i>str</i>, S#E-<i>str</i></td></tr>
+ * <tr><td> useSplitPrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefixes and suffixes of each token, after splitting string with splitWordsRegexp.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>S#B-<i>str</i>, S#E-<i>str</i></td></tr>
  * <tr><td> useNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams - internal as well as edge all treated the same.</td><td>#-<i>str</i></td></tr>
- * <tr><td> usePrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefix and suffix strings.</td><td>#B-<i>str</i>, #E-<i>str</i></td></tr>
- * <tr><td> lowercase</td><td>boolean</td><td>false</td><td>Make the input string lowercase so all features work unicase</td></tr>
- * <tr><td> lowercaseNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams all lowercase (for both useNGrams and usePrefixSuffixNGrams)</td></tr>
+ * <tr><td> usePrefixSuffixNGrams</td><td>boolean</td><td>false</td><td>Make features from prefix and suffix substrings of the string.</td><td>#B-<i>str</i>, #E-<i>str</i></td></tr>
+ * <tr><td> lowercase</td><td>boolean</td><td>false</td><td>Make the input string lowercase so all features work uncased</td></tr>
+ * <tr><td> lowercaseNGrams</td><td>boolean</td><td>false</td><td>Make features from letter n-grams all lowercase (for all of useNGrams, usePrefixSuffixNGrams, useSplitNGrams, and useSplitPrefixSuffixNGrams)</td></tr>
  * <tr><td> maxNGramLeng</td><td>int</td><td>-1</td><td>If this number is positive, n-grams above this size will not be used in the model</td></tr>
  * <tr><td> minNGramLeng</td><td>int</td><td>2</td><td>Must be positive. n-grams below this size will not be used in the model</td></tr>
  * <tr><td> partialNGramRegexp</td><td>String</td><td>null</td><td>If this is defined and the regexp matches, then n-grams are made only from the matching text (if no capturing groups are defined) or from the first capturing group of the regexp, if there is one.  This substring is used for both useNGrams and usePrefixSuffixNGrams.</td></tr>
@@ -215,7 +216,7 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td>featureFormat</td><td>boolean</td><td>false</td><td>Assumes the input file isn't text strings but already featurized.  One column is treated as the class column (as defined by <code>goldAnswerColumn</code>, and all other columns are treated as features of the instance.  (If answers are not present, set <code>goldAnswerColumn</code> to a negative number.)</td></tr>
  * <tr><td>trainFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the trainFile is in SVMLight format (see <a href="http://svmlight.joachims.org/">SVMLight web page</a> for more information)</td></tr>
  * <tr><td>testFromSVMLight</td><td>boolean</td><td>false</td><td>Assumes the testFile is in SVMLight format</td></tr>
- * <tr><td>printSVMLightFormatTo</td><td>String</td><td>null</td><td>If non-null, print the featurized training data to an SVMLight format file (usually used with exitAfterTrainingFeaturization)</td></tr>
+ * <tr><td>printSVMLightFormatTo</td><td>String</td><td>null</td><td>If non-null, print the featurized training data to an SVMLight format file (usually used with exitAfterTrainingFeaturization). This is just an option to write out data in a particular format. After that, you're on your own using some other piece of software that reads SVMlight format files.</td></tr>
  * <tr><td>crossValidationFolds</td><td>int</td><td>-1</td><td>If positive, the training data is divided in to this many folds and cross-validation is done on the training data (prior to testing on test data, if it is also specified)</td></tr>
  * <tr><td>shuffleTrainingData</td><td>boolean</td><td>false</td><td>If true, the training data is shuffled prior to training and cross-validation. This is vital in cross-validation if the training data is otherwise sorted by class.</td></tr>
  * <tr><td>shuffleSeed</td><td>long</td><td>0</td><td>If non-zero, and the training data is being shuffled, this is used as the seed for the Random. Otherwise, System.nanoTime() is used.</td></tr>
@@ -228,6 +229,7 @@ import edu.stanford.nlp.util.Triple;
 public class ColumnDataClassifier {
 
   private static final double DEFAULT_VALUE = 1.0; // default value for setting categorical, boolean features
+  private static final String DEFAULT_IGNORE_REGEXP = "\\s+";
 
   private final Flags[] flags;
   private final Flags globalFlags; // simply points to flags[0]
@@ -235,74 +237,66 @@ public class ColumnDataClassifier {
 
 
   /**
-   * Entry point for taking a String (formatted as a line of a TSV file)
-   * and translating it into a Datum of features.
+   * Entry point for taking a String (formatted as a line of a TSV file) and
+   * translating it into a Datum of features. If real-valued features are used,
+   * this method returns an RVFDatum; otherwise, categorical features are used.
+   *
+   * @param line Line of file
+   * @return A Datum (may be an RVFDatum; never null)
+   */
+  public Datum<String,String> makeDatumFromLine(String line) {
+    return makeDatumFromStrings(tab.split(line));
+  }
+
+
+  /**
+   * Takes a String[] of elements and translates them into a Datum of features.
    * If real-valued features are used, this method accesses makeRVFDatumFromLine
    * and returns an RVFDatum; otherwise, categorical features are used.
    *
-   * @param line Line of file
-   * @param lineNo The line number. This is just used in error messages if there is an input format problem. You can make it 0.
-   * @return A Datum (may be an RVFDatum)
+   * @param strings The elements that features a made from (the tab-split columns of a TSV file)
+   * @return A Datum (may be an RVFDatum; never null)
    */
-  public Datum<String,String> makeDatumFromLine(String line, int lineNo) {
+  public Datum<String,String> makeDatumFromStrings(String[] strings) {
     if (globalFlags.usesRealValues) {
-      return makeRVFDatumFromLine(line,lineNo);
+      return makeRVFDatumFromStrings(strings);
     }
 
     if (globalFlags.featureFormat) {
-      String[] fields = tab.split(line);
       Collection<String> theFeatures = new ArrayList<String>();
-      for (int i = 0; i < fields.length; i++) {
+      for (int i = 0; i < strings.length; i++) {
         if (i != globalFlags.goldAnswerColumn)
             if (globalFlags.significantColumnId) {
-              theFeatures.add(String.format("%d:%s", i, fields[i]));
+              theFeatures.add(String.format("%d:%s", i, strings[i]));
             } else {
-              theFeatures.add(fields[i]);
+              theFeatures.add(strings[i]);
             }
       }
-      return new BasicDatum<String,String>(theFeatures, fields[globalFlags.goldAnswerColumn]);
+      return new BasicDatum<String,String>(theFeatures, strings[globalFlags.goldAnswerColumn]);
     } else {
-      String[] wi = makeSimpleLineInfo(line, lineNo);
-      // System.err.println("Read in " + wi);
-      return makeDatum(wi);
+      // System.err.println("Read in " + strings);
+      return makeDatum(strings);
     }
   }
 
 
-  private RVFDatum<String,String> makeRVFDatumFromLine(String line, int lineNo) {
+  private RVFDatum<String,String> makeRVFDatumFromStrings(String[] strings) {
     if (globalFlags.featureFormat) {
-      String[] fields = tab.split(line);
       ClassicCounter<String> theFeatures = new ClassicCounter<String>();
-      for (int i = 0; i < fields.length; i++) {
+      for (int i = 0; i < strings.length; i++) {
         if (i != globalFlags.goldAnswerColumn) {
           if (flags[i] != null && (flags[i].isRealValued || flags[i].logTransform || flags[i].logitTransform || flags[i].sqrtTransform)) {
-            addFeatureValue(fields[i], flags[i], theFeatures);
+            addFeatureValue(strings[i], flags[i], theFeatures);
           } else {
-            theFeatures.setCount(fields[i], 1.0);
+            theFeatures.setCount(strings[i], 1.0);
           }
         }
       }
-      return new RVFDatum<String,String>(theFeatures, fields[globalFlags.goldAnswerColumn]);
+      return new RVFDatum<String,String>(theFeatures, strings[globalFlags.goldAnswerColumn]);
     } else {
-      String[] wi = makeSimpleLineInfo(line, lineNo);
-      // System.err.println("Read in " + wi);
-      return makeRVFDatum(wi);
+      // System.err.println("Read in " + strings);
+      return makeRVFDatum(strings);
     }
-  }
-
-  // NB: This is meant to do splitting strictly only on tabs, and to thus
-  // work with things that are exactly TSV files.  It shouldn't split on
-  // all whitespace, because it is useful to be able to have spaces inside
-  // fields for short text documents, and then to be able to split them into
-  // words with features like useSplitWords.
-  private static final Pattern tab = Pattern.compile("\\t");
-
-  private static String[] makeSimpleLineInfo(String line, int lineNo) {
-    String[] strings = tab.split(line);
-    if (strings.length < 2) {
-      throw new RuntimeException("Line format error at line " + lineNo + ": " + line);
-    }
-    return strings;
   }
 
 
@@ -327,7 +321,7 @@ public class ColumnDataClassifier {
    */
   public Pair<GeneralDataset<String,String>, List<String[]>> readAndReturnTrainingExamples(String fileName) {
     if (globalFlags.printFeatures != null) {
-      newFeaturePrinter(globalFlags.printFeatures, "train");
+      newFeaturePrinter(globalFlags.printFeatures, "train", Flags.encoding);
     }
     Pair<GeneralDataset<String,String>, List<String[]>> dataInfo = readDataset(fileName, true);
     GeneralDataset<String,String> train = dataInfo.first();
@@ -365,6 +359,15 @@ public class ColumnDataClassifier {
   }
 
 
+  /** NB: This is meant to do splitting strictly only on tabs, and to thus
+   *  work with things that are exactly TSV files.  It shouldn't split on
+   *  all whitespace, because it is useful to be able to have spaces inside
+   *  fields for short text documents, and then to be able to split them into
+   *  words with features like useSplitWords.
+   */
+  private static final Pattern tab = Pattern.compile("\\t");
+
+
   /** Read a data set from a file and convert it into a Dataset object.
    *  In test phase, returns the {@code List<String[]>} with the data columns for printing purposes.
    *  Otherwise, returns {@code null} for the second item.
@@ -374,6 +377,8 @@ public class ColumnDataClassifier {
    *  @return A Pair of a GeneralDataSet of Datums and a List of datums in String form.
    */
   private Pair<GeneralDataset<String,String>, List<String[]>> readDataset(String filename, boolean inTestPhase) {
+    Timing tim = new Timing();
+    System.err.print("Reading dataset from " + filename + " ... ");
     GeneralDataset<String,String> dataset;
     List<String[]> lineInfos = null;
     if ((inTestPhase && Flags.testFromSVMLight) || (!inTestPhase && Flags.trainFromSVMLight)) {
@@ -400,22 +405,36 @@ public class ColumnDataClassifier {
           dataset = new Dataset<String,String>();
         }
         int lineNo = 0;
+        int minColumns = Integer.MAX_VALUE;
+        int maxColumns = 0;
         for (String line : ObjectBank.getLineIterator(new File(filename), Flags.encoding)) {
           lineNo++;
+          String[] strings = tab.split(line);
+          if (strings.length < 2) {
+            throw new RuntimeException("Line format error at line " + lineNo + ": " + line);
+          }
+          if (strings.length < minColumns) {
+            minColumns = strings.length;
+          }
+          if (strings.length > maxColumns) {
+            maxColumns = strings.length;
+          }
           if (inTestPhase) {
-            String[] wi = makeSimpleLineInfo(line, lineNo);
-            lineInfos.add(wi);
+            lineInfos.add(strings);
           }
-          Datum<String,String> d = makeDatumFromLine(line, lineNo);
-          if (d != null) {
-            dataset.add(d);
-          }
+          dataset.add(makeDatumFromStrings(strings));
+        }
+        if (lineNo > 0 && minColumns != maxColumns) {
+          System.err.println();
+          System.err.println("WARNING: Number of tab-separated columns in " +
+                  filename + " varies between " + minColumns + " and " + maxColumns);
         }
       } catch (Exception e) {
         throw new RuntimeException("Dataset could not be processed", e);
       }
     }
 
+    System.err.println("done [" + tim.toSecondsString() + "s, " + dataset.size() + " items].");
     return new Pair<GeneralDataset<String,String>,List<String[]>>(dataset, lineInfos);
   }
 
@@ -520,7 +539,7 @@ public class ColumnDataClassifier {
     }
 
     String line;
-    if ("".equals(printedText)) {
+    if (printedText.isEmpty()) {
       line = goldAnswer + '\t' + results;
      } else {
       line = printedText + '\t' + goldAnswer + '\t' + results;
@@ -618,7 +637,7 @@ public class ColumnDataClassifier {
     }
 
     Counter<String> contingency = new ClassicCounter<String>();  // store tp,fp,fn,tn
-    for (int i = 0; i < test.size; i++) {
+    for (int i = 0, sz = test.size(); i < sz; i++) {
       String[] simpleLineInfo = lineInfos.get(i);
       Datum<String,String> d;
       if (globalFlags.usesRealValues) {
@@ -686,7 +705,7 @@ public class ColumnDataClassifier {
     if (globalFlags.printFeatures != null) {
       closeFeaturePrinter();
     }
-    return writeResultsSummary(test.size, contingency, cl.labels());
+    return writeResultsSummary(test.size(), contingency, cl.labels());
   }
 
 
@@ -747,9 +766,10 @@ public class ColumnDataClassifier {
   }
 
   private void addAllInterningAndPrefixingRVF(ClassicCounter<String> accumulator, ClassicCounter<String> addend, String prefix) {
+    assert prefix != null;
     for (String protoFeat : addend.keySet()) {
       double count = addend.getCount(protoFeat);
-      if (!"".equals(prefix)) {
+      if ( ! prefix.isEmpty()) {
         protoFeat = prefix + protoFeat;
       }
       if (globalFlags.intern) {
@@ -760,8 +780,9 @@ public class ColumnDataClassifier {
   }
 
   private void addAllInterningAndPrefixing(Collection<String> accumulator, Collection<String> addend, String prefix) {
+    assert prefix != null;
     for (String protoFeat : addend) {
-      if ( ! "".equals(prefix)) {
+      if ( ! prefix.isEmpty()) {
         protoFeat = prefix + protoFeat;
       }
       if (globalFlags.intern) {
@@ -829,7 +850,7 @@ public class ColumnDataClassifier {
         cWord = IOUtils.slurpFileNoExceptions(cWord);
       }
       if (flags.lowercase) {
-        cWord = cWord.toLowerCase();
+        cWord = cWord.toLowerCase(Locale.ENGLISH);
       }
 
       if (flags.useString) {
@@ -1025,7 +1046,7 @@ public class ColumnDataClassifier {
       prefixSuffixNGrams = flags.usePrefixSuffixNGrams;
     }
     if (flags.lowercaseNGrams) {
-      toNGrams = toNGrams.toLowerCase();
+      toNGrams = toNGrams.toLowerCase(Locale.ENGLISH);
     }
     if (flags.partialNGramRegexp != null) {
       Matcher m = flags.partialNGramPattern.matcher(toNGrams);
@@ -1076,12 +1097,12 @@ public class ColumnDataClassifier {
 
   private static PrintWriter cliqueWriter;
 
-  private static void newFeaturePrinter(String prefix, String suffix) {
+  private static void newFeaturePrinter(String prefix, String suffix, String encoding) {
     if (cliqueWriter != null) {
       closeFeaturePrinter();
     }
     try {
-      cliqueWriter = new PrintWriter(new FileOutputStream(prefix + '.' + suffix), true);
+      cliqueWriter = IOUtils.getPrintWriter(prefix + '.' + suffix, encoding);
     } catch (IOException ioe) {
       cliqueWriter = null;
     }
@@ -1288,7 +1309,8 @@ public class ColumnDataClassifier {
           al.add(word.substring(0, m.end()));
           word = word.substring(m.end());
         } else {
-          System.err.println("Warning: regexpTokenize pattern " + tokenizerRegexp + " didn't match on " + word);
+          System.err.println("Warning: regexpTokenize pattern " + tokenizerRegexp + " didn't match on |" +
+                  word.substring(0, 1) + "| of |" + word + '|');
           // System.err.println("Default matched 1 char: " +
           //		       word.substring(0, 1));
           al.add(word.substring(0, 1));
@@ -1345,7 +1367,6 @@ public class ColumnDataClassifier {
       ObjectInputStream ois = null;
       try {
         // load the classifier
-        //ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(loadPath)));
         ois = IOUtils.readStreamFromString(loadPath);
         classifier = ErasureUtils.<LinearClassifier<String,String>>uncheckedCast(ois.readObject());
         myFlags = (Flags[]) ois.readObject();
@@ -1523,12 +1544,16 @@ public class ColumnDataClassifier {
           System.err.println("Ill-formed splitWordsTokenizerRegexp: " + val);
         }
       } else if (key.equals("splitWordsIgnoreRegexp")) {
-        try {
-          myFlags[col].splitWordsIgnorePattern = Pattern.compile(val);
-        } catch (PatternSyntaxException pse) {
-          System.err.println("Ill-formed splitWordsIgnoreRegexp: " + val);
+        String trimVal = val.trim();
+        if (trimVal.isEmpty()) {
+          myFlags[col].splitWordsIgnorePattern = null;
+        } else {
+          try {
+            myFlags[col].splitWordsIgnorePattern = Pattern.compile(trimVal);
+          } catch (PatternSyntaxException pse) {
+            System.err.println("Ill-formed splitWordsIgnoreRegexp: " + trimVal);
+          }
         }
-
       } else if (key.equals("useSplitWords")) {
         myFlags[col].useSplitWords = Boolean.parseBoolean(val);
       } else if (key.equals("useSplitWordPairs")) {
@@ -1632,7 +1657,7 @@ public class ColumnDataClassifier {
         myFlags[col].shuffleTrainingData = Boolean.parseBoolean(val);
       } else if (key.equals("shuffleSeed")) {
         myFlags[col].shuffleSeed = Long.parseLong(val);
-      } else if (key.length() > 0 && !key.equals("prop")) {
+      } else if ( ! key.isEmpty() && ! key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
       }
     }
@@ -1756,8 +1781,7 @@ public class ColumnDataClassifier {
     String serializeTo = Flags.serializeTo;
     if (serializeTo != null) {
       System.err.println("Serializing classifier to " + serializeTo + "...");
-      //ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(serializeTo)));
-      ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(IOUtils.getFileOutputStream(serializeTo)));
+      ObjectOutputStream oos = IOUtils.writeStreamFromString(serializeTo);
       oos.writeObject(classifier);
       // Fiddle: Don't write a testFile to the serialized classifier.  It makes no sense and confuses people
       String testFile = globalFlags.testFile;
@@ -1797,7 +1821,7 @@ public class ColumnDataClassifier {
 
   private void testClassifier(String testFile) {
     if (globalFlags.printFeatures != null) {
-      newFeaturePrinter(globalFlags.printFeatures, "test");
+      newFeaturePrinter(globalFlags.printFeatures, "test", Flags.encoding);
     }
 
     Pair<GeneralDataset<String,String>,List<String[]>> testInfo = readTestExamples(testFile);
@@ -1883,7 +1907,7 @@ public class ColumnDataClassifier {
 
     Pattern splitWordsPattern = null;
     Pattern splitWordsTokenizerPattern = null;
-    Pattern splitWordsIgnorePattern = null;
+    Pattern splitWordsIgnorePattern = Pattern.compile(DEFAULT_IGNORE_REGEXP);
     boolean useSplitWords = false;
     boolean useSplitWordPairs = false;
     boolean useSplitFirstLastWords = false;

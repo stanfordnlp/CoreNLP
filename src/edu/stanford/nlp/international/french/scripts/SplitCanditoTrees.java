@@ -28,8 +28,8 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
-import edu.stanford.nlp.trees.international.french.FrenchTreeReader;
-import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
+import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReader;
+import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReaderFactory;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.Generics;
@@ -96,14 +96,16 @@ public final class SplitCanditoTrees {
   static Map<String, Tree> readTrees(String[] filenames)
     throws IOException
   {
-    final TreeReaderFactory trf = new FrenchTreeReaderFactory();
+    // TODO: perhaps we can just pass in CC_TAGSET and get rid of replacePOSTags
+    // need to test that
+    final TreeReaderFactory trf = new FrenchXMLTreeReaderFactory(false); 
     Map<String, Tree> treeMap = Generics.newHashMap();
     for (String filename : filenames) {
       File file = new File(filename);
       String canonicalFilename =
         file.getName().substring(0, file.getName().lastIndexOf('.'));
 
-      FrenchTreeReader tr = (FrenchTreeReader)
+      FrenchXMLTreeReader tr = (FrenchXMLTreeReader)
         trf.newTreeReader(new BufferedReader
                           (new InputStreamReader
                            (new FileInputStream(file),"ISO8859_1")));

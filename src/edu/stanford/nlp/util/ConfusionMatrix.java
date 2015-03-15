@@ -69,7 +69,6 @@ public class ConfusionMatrix<U> {
 	
   /**
    * Sets the width used to separate cells in the table.
-   * @param newDelim
    */
   public void setDelimPadSize(int newPadSize) {
     this.delimPadSize = newPadSize;
@@ -123,8 +122,6 @@ public class ConfusionMatrix<U> {
   
   /**
    * Increments the entry for this guess and gold by 1.
-   * @param guess
-   * @param gold
    */
   public void add(U guess, U gold) {
     add(guess, gold, 1);
@@ -132,9 +129,6 @@ public class ConfusionMatrix<U> {
   
   /**
    * Increments the entry for this guess and gold by the given increment amount.
-   * @param guess
-   * @param gold
-   * @param increment
    */
   public synchronized void add(U guess, U gold, int increment) {
       Pair<U, U> pair = new Pair<U, U>(guess, gold);
@@ -147,9 +141,6 @@ public class ConfusionMatrix<U> {
   
   /**
    * Retrieves the number of entries with this guess and gold.
-   * @param guess
-   * @param gold
-   * @return
    */
   public Integer get(U guess, U gold) {
     Pair<U, U> pair = new Pair<U, U>(guess, gold);
@@ -163,7 +154,6 @@ public class ConfusionMatrix<U> {
   /**
    * Returns the set of distinct class labels
    * entered into this confusion table.
-   * @return
    */
   public Set<U> uniqueLabels() {
     HashSet<U> ret = new HashSet<U>();
@@ -177,8 +167,6 @@ public class ConfusionMatrix<U> {
   /**
    * Returns the contingency table for the given class label, where all other
    * class labels are treated as negative.
-   * @param positiveLabel
-   * @return
    */
   public Contingency getContingency(U positiveLabel) {
     int tp = 0;
@@ -206,8 +194,6 @@ public class ConfusionMatrix<U> {
   
   /**
    * Returns the current set of unique labels, sorted by their string order.
-   * 
-   * @return
    */
   private List<U> sortKeys() {
     Set<U> labels = uniqueLabels();
@@ -252,9 +238,6 @@ public class ConfusionMatrix<U> {
   
   /**
    * Marginal over the given gold, or column sum
-   * 
-   * @param gold
-   * @return
    */
   private Integer goldMarginal(U gold) {
     Integer sum = 0;
@@ -267,9 +250,6 @@ public class ConfusionMatrix<U> {
   
   /**
    * Marginal over given guess, or row sum
-   * 
-   * @param guess
-   * @return
    */
   private Integer guessMarginal(U guess) {
     Integer sum = 0;
@@ -290,8 +270,6 @@ public class ConfusionMatrix<U> {
 
   /**
    * Prints the current confusion in table form to a string, with contingency
-   * 
-   * @return
    */
   public String printTable() {
     List<U> sortedLabels = sortKeys();

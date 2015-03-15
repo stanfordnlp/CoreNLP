@@ -176,10 +176,10 @@ public class NBLinearClassifierFactory<L, F> extends AbstractLinearClassifierFac
             //System.out.println("test i: "+ i + " "+ new BasicDatum(featureIndex.objects(data[i])));
             score -= c.logProbabilityOf(new BasicDatum<L, F>(featureIndex.objects(data[i]))).getCount(labelIndex.get(labels[i]));
           }
-          //System.err.printf("%d: %8g\n", j, score);
+          //System.err.printf("%d: %8g%n", j, score);
           sumScore += score;
         }
-        System.err.printf(": %8g\n", sumScore);
+        System.err.printf(": %8g%n", sumScore);
         return sumScore;
       }
     };

@@ -27,7 +27,7 @@ import java.util.*;
  *       regular expression into a SequencePattern.
  *   </li>
  *   <li>Optionally implement a {@link MultiPatternMatcher.NodePatternTrigger}
- *        for optimzing matches across multiple patterns</li>
+ *        for optimizing matches across multiple patterns</li>
  *   <li>Optionally implement a {@link NodesMatchChecker} to support backreferences</li>
  * </ul>
  * See {@link TokenSequencePattern} for an example of how this class can be extended
@@ -97,8 +97,10 @@ public class SequencePattern<T> {
   // binding of group number to variable name
   VarGroupBindings varGroupBindings;
 
-  // Priority associated with pattern
+  // Priority associated with the pattern (higher priority patterns should take precedence over lower priority ones)
   double priority = 0.0;
+  // Weight associated with the pattern
+  double weight = 0.0;
 
   protected SequencePattern(SequencePattern.PatternExpr nodeSequencePattern) {
     this(null, nodeSequencePattern);
@@ -143,6 +145,14 @@ public class SequencePattern<T> {
 
   public void setPriority(double priority) {
     this.priority = priority;
+  }
+
+  public double getWeight() {
+    return weight;
+  }
+
+  public void setWeight(double weight) {
+    this.weight = weight;
   }
 
   public SequenceMatchAction<T> getAction() {
@@ -627,7 +637,7 @@ public class SequencePattern<T> {
     }
   }
 
-  // Expression that represents a pattern that repeats for a number of times
+  /**  Expression that represents a pattern that repeats for a number of times. */
   public static class RepeatPatternExpr extends PatternExpr {
 
     private final PatternExpr pattern;
@@ -739,7 +749,7 @@ public class SequencePattern<T> {
     }
   }
 
-  // Expression that represents a disjunction
+  /**  Expression that represents a disjunction. */
   public static class OrPatternExpr extends PatternExpr {
 
     private final List<PatternExpr> patterns;
@@ -828,6 +838,12 @@ public class SequencePattern<T> {
     }
 
     private PatternExpr optimizeOr() {
+      PatternExpr optimizedStringSeqs = optimizeOrStringSeqs();
+      // Go through patterns and get candidate sequences with the same start...
+      return optimizedStringSeqs;
+    }
+
+    private PatternExpr optimizeOrStringSeqs() {
       // Try to collapse OR of NodePattern with just strings into a StringInSetAnnotationPattern
       List<PatternExpr> opts = new ArrayList<PatternExpr>(patterns.size());
       // Map from annotation key (Class), ignoreCase (Boolean) to set of patterns/strings
@@ -901,13 +917,13 @@ public class SequencePattern<T> {
       Map<PatternExpr, Boolean> alreadyOptimized = new IdentityHashMap<PatternExpr, Boolean>();
       List<PatternExpr> finalOptimizedPatterns = new ArrayList<PatternExpr>(patterns.size());
       // optimize strings
-      for (Pair<Class,Boolean> key:stringPatterns.keySet()) {
-        Pair<Collection<PatternExpr>, Set<String>> saved = stringPatterns.get(key);
+      for (Map.Entry<Pair<Class, Boolean>, Pair<Collection<PatternExpr>, Set<String>>> entry : stringPatterns.entrySet()) {
+        Pair<Collection<PatternExpr>, Set<String>> saved = entry.getValue();
         Set<String> set = saved.second;
-        int flags = (key.second)? NodePattern.CASE_INSENSITIVE:0;
+        int flags = (entry.getKey().second)? NodePattern.CASE_INSENSITIVE:0;
         if (set.size() > OPTIMIZE_MIN_SIZE) {
           PatternExpr optimized = new NodePatternExpr(
-                  new CoreMapNodePattern(key.first, new CoreMapNodePattern.StringInSetAnnotationPattern(set, flags)));
+                  new CoreMapNodePattern(entry.getKey().first, new CoreMapNodePattern.StringInSetAnnotationPattern(set, flags)));
           finalOptimizedPatterns.add(optimized);
           for (PatternExpr p:saved.first) {
             alreadyOptimized.put(p, true);
@@ -915,12 +931,13 @@ public class SequencePattern<T> {
         }
       }
       // optimize string sequences
-      for (Pair<Class,Boolean> key:stringSeqPatterns.keySet()) {
-        Pair<Collection<PatternExpr>, Set<List<String>>> saved = stringSeqPatterns.get(key);
+      for (Map.Entry<Pair<Class, Boolean>, Pair<Collection<PatternExpr>, Set<List<String>>>> entry : stringSeqPatterns.entrySet()) {
+        Pair<Collection<PatternExpr>, Set<List<String>>> saved = entry.getValue();
         Set<List<String>> set = saved.second;
         if (set.size() > OPTIMIZE_MIN_SIZE) {
+          Pair<Class, Boolean> key = entry.getKey();
           PatternExpr optimized = new MultiNodePatternExpr(
-                  new MultiCoreMapNodePattern.StringSequenceAnnotationPattern(key.first, set, key.second));
+                  new MultiCoreMapNodePattern.StringSequenceAnnotationPattern(key.first(), set, key.second()));
           finalOptimizedPatterns.add(optimized);
           for (PatternExpr p:saved.first) {
             alreadyOptimized.put(p, true);
@@ -1052,8 +1069,8 @@ public class SequencePattern<T> {
    */
   static class State {
     /**
-     * Set of next states from this current state
-     * NOTE: Most of the time, next is just one state
+     * Set of next states from this current state.
+     * NOTE: Most of the time, next is just one state.
      */
     Set<State> next;
     boolean hasSavedValue;
@@ -1075,7 +1092,7 @@ public class SequencePattern<T> {
     }
 
     /**
-     * Non-consuming match
+     * Non-consuming match.
      * @param bid - Branch id
      * @param matchedStates - State of the matching so far (to be updated by the matching process)
      * @return true if match
@@ -1086,7 +1103,7 @@ public class SequencePattern<T> {
     }
 
     /**
-     * Consuming match
+     * Consuming match.
      * @param bid - Branch id
      * @param matchedStates - State of the matching so far (to be updated by the matching process)
      * @return true if match
@@ -1102,7 +1119,7 @@ public class SequencePattern<T> {
     }
 
     /**
-     * Given the current matched states, attempts to run NFA from this state
+     * Given the current matched states, attempts to run NFA from this state.
      *  If consuming:  tries to match the next element - goes through states until an element is consumed or match is false
      *  If non-consuming: does not match the next element - goes through non element consuming states
      * In both cases, matchedStates should be updated as follows:
@@ -1130,7 +1147,7 @@ public class SequencePattern<T> {
     }
 
     /**
-     * Add state to the set of next states
+     * Add state to the set of next states.
      * @param nextState - state to add
      */
     protected void add(State nextState) {
@@ -1152,7 +1169,7 @@ public class SequencePattern<T> {
   }
 
   /**
-   * Final accepting state
+   * Final accepting state.
    */
   private static class MatchState extends State {
     @Override
@@ -1164,7 +1181,7 @@ public class SequencePattern<T> {
   }
 
   /**
-   * State with associated value
+   * State with associated value.
    */
   private static class ValueState extends State {
     final Object value;
@@ -1226,7 +1243,7 @@ public class SequencePattern<T> {
   }
 
   /**
-   * State for matching multiple elements/nodes
+   * State for matching multiple elements/nodes.
    */
   private static class MultiNodePatternState extends State {
 
@@ -1288,7 +1305,7 @@ public class SequencePattern<T> {
   }
 
   /**
-   * State that matches a pattern that can occur multiple times
+   * State that matches a pattern that can occur multiple times.
    */
   private static class RepeatState extends State {
 
@@ -1455,7 +1472,7 @@ public class SequencePattern<T> {
   }
 
   /**
-   * State for matching the start of a group
+   * State for matching the start of a group.
    */
   static class GroupStartState extends State {
 
@@ -1484,7 +1501,7 @@ public class SequencePattern<T> {
   }
 
   /**
-   * State for matching the end of a group
+   * State for matching the end of a group.
    */
   static class GroupEndState extends State {
 
@@ -1690,7 +1707,7 @@ public class SequencePattern<T> {
   }
 
   /**
-   * State for matching the end of a conjunction
+   * State for matching the end of a conjunction.
    */
   static class ConjEndState extends State {
 
@@ -1731,7 +1748,7 @@ public class SequencePattern<T> {
   }
 
   /**
-   * State for matching start of sequence
+   * State for matching start of sequence.
    */
   static class SeqStartState extends State {
 
@@ -1753,7 +1770,7 @@ public class SequencePattern<T> {
   }
 
   /**
-   * State for matching end of sequence
+   * State for matching end of sequence.
    */
   static class SeqEndState extends State {
 
@@ -1833,5 +1850,7 @@ public class SequencePattern<T> {
         out.add(state);
       } */
     }
-  }
-}
+
+  } // end static class Frag
+
+} // end class SequencePattern
