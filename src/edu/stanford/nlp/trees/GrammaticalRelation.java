@@ -87,6 +87,8 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
 
   private static final long serialVersionUID = 892618003417550128L;
 
+  private static final boolean DEBUG = false;
+
   public abstract static class GrammaticalRelationAnnotation implements CoreAnnotation<Set<TreeGraphNode>> {
     @SuppressWarnings({"unchecked", "RedundantCast"})
     public Class<Set<TreeGraphNode>> getType() {  return (Class) Set.class; }
@@ -353,7 +355,14 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       TregexMatcher m = p.matcher(root);
       while (m.findAt(t)) {
         nodeList.add(m.getNode("target"));
-        //System.out.println("found " + this + "(" + t + ", " + m.getNode("target") + ") using pattern " + p);
+        if (DEBUG) {
+          System.err.println("found " + this + "(" + t + ", " + m.getNode("target") + ") using pattern " + p);
+          for (String nodeName : m.getNodeNames()) {
+            if (nodeName.equals("target")) 
+              continue;
+            System.err.println("  node " + nodeName + ": " + m.getNode(nodeName));
+          }
+        }
       }
     }
     return nodeList;

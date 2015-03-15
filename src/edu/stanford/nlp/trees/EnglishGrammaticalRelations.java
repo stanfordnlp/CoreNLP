@@ -289,8 +289,8 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "nsubj", "nominal subject",
         NominalSubjectGRAnnotation.class, SUBJECT, "S|SQ|SBARQ|SINV|SBAR|PRN", tregexCompiler,
         new String[] {
-          "S < ((NP|WHNP=target !< EX !< (/^NN/ < (" + timeWordRegex + "))) $++ VP)",
-          "S < ( NP=target < (/^NN/ < " + timeWordRegex + ") !$++ NP $++VP)",
+          "S < ((NP|WHNP=target !< EX !<# (/^NN/ < (" + timeWordRegex + "))) $++ VP)",
+          "S < ( NP=target <# (/^NN/ < " + timeWordRegex + ") !$++ NP $++VP)",
           "SQ|PRN < (NP=target !< EX $++ VP)",
           "SQ < ((NP=target !< EX) $- /^(?:VB|AUX)/ !$++ VP)",
           "SQ < ((NP=target !< EX) $- (RB $- /^(?:VB|AUX)/) ![$++ VP])",
@@ -425,10 +425,10 @@ public class EnglishGrammaticalRelations {
           // match "give it next week"
           "VP < (NP < (NP $+ (/^(NP|WHNP)$/=target !< (/^NN/ < " + timeWordLotRegex + "))))!< (/^(?:VB|AUX)/ < " + copularWordRegex + ")",  // this time one also included "lot"
           // basic direct object cases
-          "VP !<(/^(?:VB|AUX)/ < " + copularWordRegex + ") < (NP|WHNP=target [ [ !< (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP < (/^NN/ < " + timeWordRegex + ")) ] )",
+          "VP !<(/^(?:VB|AUX)/ < " + copularWordRegex + ") < (NP|WHNP=target [ [ !<# (/^NN/ < " + timeWordRegex + ") !$+ NP ] | $+ NP-TMP | $+ (NP <# (/^NN/ < " + timeWordRegex + ")) ] )",
           // cdm Jul 2010: No longer require WHNP as first child of SBARQ below: often not because of adverbials, quotes, etc., and removing restriction does no harm
           // this next pattern used to assume no empty NPs. Corrected.  If you adjust this pattern, also adjust the corresponding one for attr!
-          "SBARQ < (WHNP=target !< WRB !< (/^NN/ < " + timeWordRegex + ")) <+(SQ|SINV|S|VP) (VP !< NP|TO !< (S < (VP < TO)) !< (/^(?:VB|AUX)/ < " + copularWordRegex + " $++ (VP < VBN|VBD)) !<- PRT !<- (PP <: IN) $-- (NP !< /^-NONE-$/))",
+          "SBARQ < (WHNP=target !< WRB !<# (/^NN/ < " + timeWordRegex + ")) <+(SQ|SINV|S|VP) (VP !< NP|TO !< (S < (VP < TO)) !< (/^(?:VB|AUX)/ < " + copularWordRegex + " $++ (VP < VBN|VBD)) !<- PRT !<- (PP <: IN) $-- (NP !< /^-NONE-$/))",
           // matches direct object in relative clauses "I saw the book that you bought"
           "SBAR < (WHNP=target !< WRB) < (S < NP < (VP !< SBAR !<+(VP) (PP <- IN) !< (S < (VP < TO))))",
 
@@ -458,7 +458,7 @@ public class EnglishGrammaticalRelations {
     new GrammaticalRelation(Language.English, "iobj", "indirect object",
         IndirectObjectGRAnnotation.class, OBJECT, "VP", tregexCompiler,
         new String[] {
-          "VP < (NP=target !< /\\$/ !< (/^NN/ < " + timeWordRegex + ") $+ (NP !< (/^NN/ < " + timeWordRegex + ")))",
+          "VP < (NP=target !< /\\$/ !<# (/^NN/ < " + timeWordRegex + ") $+ (NP !<# (/^NN/ < " + timeWordRegex + ")))",
           // this next one was meant to fix common mistakes of our parser, but is perhaps too dangerous to keep
           "VP < (NP=target < (NP !< /\\$/ $++ (NP !< (/^NN/ < " + timeWordLotRegex + ")) !$ CC|CONJP !$ /^,$/ !$++ /^:$/))",
         });
@@ -1186,15 +1186,15 @@ public class EnglishGrammaticalRelations {
         TemporalModifierGRAnnotation.class, NP_ADVERBIAL_MODIFIER, "VP|S|ADJP|PP|SBAR|SBARQ|NP", tregexCompiler,
         new String[] {
           "VP|ADJP < NP-TMP=target",
-          "VP|ADJP < (NP=target < (/^NN/ < " + timeWordRegex + ") !$+ (/^JJ/ < old))",
+          "VP|ADJP < (NP=target <# (/^NN/ < " + timeWordRegex + ") !$+ (/^JJ/ < old))",
           // CDM Jan 2010: For constructions like "during the same period last year"
           "@PP < (IN|TO|VBG|FW $++ (@NP $+ NP-TMP=target))",
-          "@PP < (IN|TO|VBG|FW $++ (@NP $+ (NP=target < (/^NN/ < " + timeWordRegex + "))))",
+          "@PP < (IN|TO|VBG|FW $++ (@NP $+ (NP=target <# (/^NN/ < " + timeWordRegex + "))))",
           "S < (NP-TMP=target $++ VP [ $++ NP | $-- NP] )",
-          "S < (NP=target < (/^NN/ < " + timeWordRegex + ") $++ (NP $++ VP))",
+          "S < (NP=target <# (/^NN/ < " + timeWordRegex + ") $++ (NP $++ VP))",
           // matches when relative clauses as temporal modifiers of verbs!
           "SBAR < (@WHADVP < (WRB < when)) < (S < (NP $+ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP) ))) !$-- CC $-- NP > NP=target",
-          "SBARQ < (@WHNP=target < (/^NN/ <# " + timeWordRegex + ")) < (SQ < @NP)",
+          "SBARQ < (@WHNP=target <# (/^NN/ < " + timeWordRegex + ")) < (SQ < @NP)",
           "NP < NP-TMP=target"
           });
   public static class TemporalModifierGRAnnotation extends GrammaticalRelationAnnotation { }

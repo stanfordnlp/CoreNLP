@@ -115,10 +115,10 @@ public class Sentence {
     List<CoreLabel> sent = new ArrayList<CoreLabel>(words.size());
     for (HasWord word : words) {
       CoreLabel cl = new CoreLabel();
-      cl.setValue(((Label) word).value());
-      if (word instanceof HasWord) {
-        cl.setWord(((HasWord) word).word());
+      if (word instanceof Label) {
+        cl.setValue(((Label) word).value());
       }
+      cl.setWord(word.word());
       if (word instanceof HasTag) {
         cl.setTag(((HasTag) word).tag());
       }
