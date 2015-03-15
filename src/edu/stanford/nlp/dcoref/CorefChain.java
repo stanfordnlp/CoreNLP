@@ -265,7 +265,7 @@ public class CorefChain implements Serializable {
     private static final long serialVersionUID = 3657691243504173L;
   }
 
-  protected static class CorefMentionComparator implements Comparator<CorefMention> {
+  public static class CorefMentionComparator implements Comparator<CorefMention> {
     @Override
     public int compare(CorefMention m1, CorefMention m2) {
       if(m1.sentNum < m2.sentNum) return -1;

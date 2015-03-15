@@ -9,8 +9,8 @@ import java.util.logging.Logger;
  */
 public abstract class CorefScorer {
 
-  enum SubScoreType {Recall, Precision, F1}
-  enum ScoreType { MUC, BCubed, Pairwise }
+  public enum SubScoreType {Recall, Precision, F1}
+  public enum ScoreType { MUC, BCubed, Pairwise }
 
   double precisionNumSum;
   double precisionDenSum;

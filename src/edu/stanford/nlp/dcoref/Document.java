@@ -513,7 +513,7 @@ public class Document implements Serializable {
     }
   }
 
-  protected List<Pair<IntTuple, IntTuple>> getGoldLinks() {
+  public List<Pair<IntTuple, IntTuple>> getGoldLinks() {
     if(goldLinks==null) this.extractGoldLinks();
     return goldLinks;
   }
