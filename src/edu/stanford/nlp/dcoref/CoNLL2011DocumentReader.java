@@ -299,7 +299,7 @@ public class CoNLL2011DocumentReader {
           sb.append(' ');
         }
 
-        String str = fields[FIELD_PARSE_BIT];
+        String str = fields[FIELD_PARSE_BIT].replace("NOPARSE", "X");
         String tagword = "(" + fields[FIELD_POS_TAG] + " " + fields[FIELD_WORD] + ")";
         // Replace stars
         int si = str.indexOf('*');
