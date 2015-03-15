@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.Arrays;
 
 
@@ -63,6 +62,10 @@ public class TaggerExperiments extends Experiments {
 
   private final TemplateHash tFeature;
 
+  private byte[][] fnumArr;
+
+
+
   // This constructor is only used by unit tests.
   TaggerExperiments(MaxentTagger maxentTagger) {
     this.maxentTagger = maxentTagger;
@@ -72,6 +75,7 @@ public class TaggerExperiments extends Experiments {
     feats = new TaggerFeatures(maxentTagger.tags, this);
   }
 
+  /** This method gets feature statistics from a training file found in the TaggerConfig. */
   protected TaggerExperiments(TaggerConfig config, MaxentTagger maxentTagger) throws IOException {
     this(maxentTagger);
 
@@ -95,7 +99,7 @@ public class TaggerExperiments extends Experiments {
       vArray[i][1] = indY;
 
       if (i > 0 && (i % 10000) == 0) {
-        System.err.printf("%d ",i);
+        System.err.printf("%d ", i);
         if (i % 100000 == 0) { System.err.println(); }
       }
     }
@@ -137,13 +141,17 @@ public class TaggerExperiments extends Experiments {
     return true;
   }
 
+  byte[][] getFnumArr() {
+    return fnumArr;
+  }
+
   /** This method uses and deletes a file tempXXXXXX.x in the current directory! */
   private void getFeaturesNew() {
     // todo: Change to rethrow a RuntimeIOException.
-    // todo: Move the fnumArr variable to this class. Btw, can it overflow?
+    // todo: can fnumArr overflow?
     try {
       System.err.println("TaggerExperiments.getFeaturesNew: initializing fnumArr.");
-      maxentTagger.fnumArr = new byte[xSize][ySize]; // what is the maximum number of active features
+      fnumArr = new byte[xSize][ySize]; // what is the maximum number of active features
       File hFile = File.createTempFile("temp",".x", new File("./"));
       RandomAccessFile hF = new RandomAccessFile(hFile, "rw");
       System.err.println("  length of sTemplates keys: " + sTemplates.size());
@@ -212,7 +220,7 @@ public class TaggerExperiments extends Experiments {
               numElements++;
 
               hF.writeInt(x);
-              maxentTagger.fnumArr[x][y]++;
+              fnumArr[x][y]++;
             }
             TaggerFeature tF = new TaggerFeature(current, current + numElements - 1, fK,
                                                  maxentTagger.tags, this);
@@ -225,7 +233,7 @@ public class TaggerExperiments extends Experiments {
           } else {
 
             for(int x : xValues) {
-              maxentTagger.fnumArr[x][y]++;
+              fnumArr[x][y]++;
             }
             // this is the second time to write these values
             TaggerFeature tF = new TaggerFeature(positions[0], positions[1], fK,
@@ -278,10 +286,10 @@ public class TaggerExperiments extends Experiments {
       for (int x = 0; x < xSize; x++) {
         int numGt = 0;
         for (int y = 0; y < ySize; y++) {
-          if (maxentTagger.fnumArr[x][y] > 0) {
+          if (fnumArr[x][y] > 0) {
             numGt++;
-            if (max < maxentTagger.fnumArr[x][y]) {
-              max = maxentTagger.fnumArr[x][y];
+            if (max < fnumArr[x][y]) {
+              max = fnumArr[x][y];
             }
           } else {
             // if 00

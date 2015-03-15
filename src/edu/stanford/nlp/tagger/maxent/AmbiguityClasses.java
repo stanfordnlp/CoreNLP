@@ -91,7 +91,7 @@ public class AmbiguityClasses {
 
   public void save(String filename) {
     try {
-      OutDataStreamFile rf = new OutDataStreamFile(filename);
+      DataOutputStream rf = IOUtils.getDataOutputStream(filename);
       Object[] arrClasses = classes.objectsList().toArray();//s.keySet().toArray();
 //      System.out.println("Number of ambiguity classes is " + arrClasses.length);
 //      rf.writeInt(arrClasses.length);
@@ -105,7 +105,7 @@ public class AmbiguityClasses {
 
   }// save
 
-  public void save(OutDataStreamFile file) {
+  public void save(DataOutputStream file) {
     try {
       Object[] arrClasses = classes.objectsList().toArray();//s.keySet().toArray();
 //      System.out.println("Number of ambiguity classes is " + arrClasses.length);

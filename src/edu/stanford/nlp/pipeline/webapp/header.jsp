@@ -1,4 +1,4 @@
-<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.lang3.StringEscapeUtils" %>
 
 <%!
   String SELECTED(boolean value) {
@@ -49,7 +49,7 @@ bottom: 0px;
                 style="width: 400px; height: 8em" rows=31 cols=7><% 
          String input = request.getParameter("input");
          if (input != null) {
-           %><%=StringEscapeUtils.escapeHtml(input)%><%
+           %><%=StringEscapeUtils.escapeHtml4(input)%><%
          }
          %></textarea>
     </td></tr>

@@ -1,14 +1,12 @@
 /**
  * Title:        StanfordMaxEnt<p>
  * Description:  A Maximum Entropy Toolkit<p>
- * Copyright:    Copyright (c) Kristina Toutanova<p>
+ * Copyright:    Copyright (c) Trustees of Leland Stanford Junior University<p>
  * Company:      Stanford University<p>
  */
 
 package edu.stanford.nlp.maxent;
 
-import edu.stanford.nlp.io.InDataStreamFile;
-import edu.stanford.nlp.io.OutDataStreamFile;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.IntPair;
@@ -33,7 +31,7 @@ public class Feature {
    * The pairs (x,y) are coded as x*ySize+y. The values are kept in valuesI.
    * For example, if a feature has only two non-zero values, e.g f(1,2)=3
    * and f(6,3)=0.74, then indexedValues will have values
-   * indexedValues={1*ySize+2,6*ySzie+2} and valuesI will be {3,.74}
+   * indexedValues={1*ySize+2,6*ySize+2} and valuesI will be {3,.74}
    */
   public int[] indexedValues;
 
@@ -41,12 +39,12 @@ public class Feature {
    * These are the non-zero values we want to keep for the points in
    * indexedValues.
    */
-  public double[] valuesI;
-  static Experiments domain;
-  protected Map<Integer,Double> hashValues;
-  public double sum; // the sum of all values
+  private double[] valuesI;
+  static Experiments domain;  // todo [cdm 2013]: This needs to be removed! Try to put field in Features class, rather than adding as field to every object.
+  private Map<Integer,Double> hashValues;
+  protected double sum; // the sum of all values
 
-  public Index<IntPair> instanceIndex;
+  protected Index<IntPair> instanceIndex;
 
   public Feature() {
   }
@@ -61,22 +59,17 @@ public class Feature {
     for (int i = 0; i < vals.length; i++) {
       if (vals[i] != 0.0) {
         Integer in = Integer.valueOf(indexOf(e.get(i)[0], e.get(i)[1]));// new Integer(e.get(i)[0]*e.ySize+e.get(i)[1]);
-        Object val = setNonZeros.get(in);
-        if (val == null) {
-          setNonZeros.put(in, new Double(vals[i]));
-        }// if
-        else if (((Double) val).doubleValue() != vals[i]) {
-          System.out.println(" Incorrect function specification");
-          System.out.println(" Has two values for one point ");
-          System.exit(1);
-        }// if
+        Double oldVal = setNonZeros.put(in, Double.valueOf(vals[i]));
+        if (oldVal != null && oldVal.doubleValue() != vals[i]) {
+          throw new IllegalStateException("Incorrect function specification: Feature has two values at one point: " + oldVal + " and " + vals[i]);
+        }
       }//if
     }// for
-    Object[] keys = setNonZeros.keySet().toArray();
+    Integer[] keys = setNonZeros.keySet().toArray(new Integer[setNonZeros.keySet().size()]);
     indexedValues = new int[keys.length];
     valuesI = new double[keys.length];
     for (int j = 0; j < keys.length; j++) {
-      indexedValues[j] = ((Integer) keys[j]).intValue();
+      indexedValues[j] = keys[j].intValue();
       valuesI[j] = setNonZeros.get(keys[j]).doubleValue();
     } // for
     domain = e;
@@ -161,8 +154,8 @@ public class Feature {
 
 
   /**
-   * used to sequentially set the values of a feature -- index is the pace in the arrays ; key goes into
-   * indexedValues, and value goes into valuesI
+   * Used to sequentially set the values of a feature -- index is the pace in the arrays ; key goes into
+   * indexedValues, and value goes into valuesI.
    */
   public void setValue(int index, int key, double value) {
     indexedValues[index] = key;
@@ -190,23 +183,9 @@ public class Feature {
 
 
   public void setSum() {
-    for (int i = 0; i < valuesI.length; i++) {
-      sum += valuesI[i];
+    for (double value : valuesI) {
+      sum += value;
     }
-  }
-
-
-  public double sumValues() {
-    return sum;
-  }
-
-
-  public void save(OutDataStreamFile oF) {
-    throw new UnsupportedOperationException();
-  }
-
-  public void read(InDataStreamFile inf) {
-    throw new UnsupportedOperationException();
   }
 
 
@@ -217,16 +196,6 @@ public class Feature {
       return 0;
     }
   }
-
-
-  /**
-   * @return true if the feature does not have non-zero values
-   */
-  public boolean isEmpty() {
-    return len() == 0;
-  }
-
-  // void getValues(){}
 
 
   /**
@@ -247,7 +216,7 @@ public class Feature {
 
   /**
    * This is rarely used because it is slower and requires initHashVals() to be called beforehand
-   * to initiallize the hashValues
+   * to initialize the hashValues.
    */
   public double getVal(int x, int y) {
     Double val = hashValues.get(Integer.valueOf(indexOf(x, y)));
@@ -256,12 +225,11 @@ public class Feature {
     } else {
       return val.doubleValue();
     }
-
   }
 
 
   /**
-   * Creates a hashmap with keys pairs (x,y) and values the value of the function at the pair;
+   * Creates a HashMap with keys indices from pairs (x,y) and values the value of the function at the pair;
    * required for use of getVal(x,y)
    */
   public void initHashVals() {
@@ -276,7 +244,7 @@ public class Feature {
 
 
   /**
-   * @return the emptirical expectation of the feature
+   * @return The empirical expectation of the feature.
    */
   public double ftilde() {
     double s = 0.0;

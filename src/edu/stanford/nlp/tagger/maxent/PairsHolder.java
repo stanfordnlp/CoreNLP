@@ -73,7 +73,7 @@ public class PairsHolder {
   /* Methods unused. Commented for now:
   public void save(String filename) {
     try {
-      OutDataStreamFile rf = new OutDataStreamFile(filename);
+      DataOutputStream rf = IOUtils.getDataOutputStream(filename);
       int sz = arr.size();
       rf.writeInt(sz);
       for (int i = 0; i < sz; i++) {

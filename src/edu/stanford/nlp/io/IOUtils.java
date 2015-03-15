@@ -55,7 +55,7 @@ public class IOUtils {
   }
 
   /**
-   * Write an object to a specified File.
+   * Write an object to a specified File. The file is silently gzipped regardless of name.
    *
    * @param o Object to be written to file
    * @param file The temp File
@@ -130,6 +130,14 @@ public class IOUtils {
     }
   }
 
+  private static OutputStream getBufferedOutputStream(String path) throws IOException {
+    OutputStream os = new BufferedOutputStream(new FileOutputStream(path));
+    if (path.endsWith(".gz")) {
+      os = new GZIPOutputStream(os);
+    }
+    return os;
+  }
+
   //++ todo [cdm, Aug 2012]: None of the methods below in this block are used. Delete them all?
   //++ They're also kind of weird in unnecessarily bypassing using a Writer.
 
@@ -142,12 +150,7 @@ public class IOUtils {
    * @throws IOException In case of failure
    */
   public static void writeStringToFile(String contents, String path, String encoding) throws IOException {
-    OutputStream writer;
-    if (path.endsWith(".gz")) {
-      writer = new GZIPOutputStream(new FileOutputStream(path));
-    } else {
-      writer = new BufferedOutputStream(new FileOutputStream(path));
-    }
+    OutputStream writer = getBufferedOutputStream(path);
     writer.write(contents.getBytes(encoding));
     writer.close();
   }
@@ -256,7 +259,7 @@ public class IOUtils {
 
 
   /**
-   * Read an object from a stored file.
+   * Read an object from a stored file. It is silently ungzipped, regardless of name.
    *
    * @param file The file pointing to the object to be retrieved
    * @throws IOException If file cannot be read
@@ -270,6 +273,14 @@ public class IOUtils {
     Object o = ois.readObject();
     ois.close();
     return ErasureUtils.uncheckedCast(o);
+  }
+
+  public static DataInputStream getDataInputStream(String filenameUrlOrClassPath) throws IOException {
+    return new DataInputStream(getInputStreamFromURLOrClasspathOrFileSystem(filenameUrlOrClassPath));
+  }
+
+  public static DataOutputStream getDataOutputStream(String filename) throws IOException {
+    return new DataOutputStream(getBufferedOutputStream((filename)));
   }
 
   /**
@@ -423,10 +434,17 @@ public class IOUtils {
   }
 
   /**
+   * Open a BufferedReader on stdin. Use the user's default encoding.
+   */
+  public static BufferedReader readerFromStdin() throws IOException {
+    return new BufferedReader(new InputStreamReader(System.in));
+  }
+
+  /**
    * Open a BufferedReader to a file or URL specified by a String name. If the
    * String starts with https?://, then it is first tried as a URL, otherwise it
    * is next tried as a resource on the CLASSPATH, and then finally it is tried
-   * as a local file or other network-available file . If the String ends in .gz, it
+   * as a local file or other network-available file. If the String ends in .gz, it
    * is interpreted as a gzipped file (and uncompressed). The file is then
    * interpreted as a utf-8 text file.
    *
@@ -586,6 +604,7 @@ public class IOUtils {
             }
           }
 
+          @Override
           public void remove() {
             throw new UnsupportedOperationException();
           }
@@ -1066,6 +1085,7 @@ public class IOUtils {
     //--Return
     return lines;
   }
+
   public static LinkedList<String[]> readCSVStrictly(String filename, int numColumns) throws IOException {
     return readCSVStrictly(slurpFile(filename).toCharArray(), numColumns);
   }
@@ -1361,9 +1381,6 @@ public class IOUtils {
     }
   }
 
-  public static void main(String[] args) {
-    System.out.println(backupName(args[0]));
-  }
 
   public static String getExtension(String fileName) {
     if(!fileName.contains("."))

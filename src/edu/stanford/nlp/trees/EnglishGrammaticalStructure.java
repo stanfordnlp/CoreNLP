@@ -131,6 +131,14 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   }
 
   @Override
+  protected void postProcessDependencies(List<TypedDependency> list) {
+    convertRel(list);
+    if (DEBUG) {
+      printListSorted("After converting rel:", list);
+    }
+  }
+
+  @Override
   protected void getExtras(List<TypedDependency> list) {
     addRef(list);
     if (DEBUG) {
@@ -141,6 +149,84 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After adding xsubj:", list);
     }
+  }
+
+  /**
+   * What we do in this method is look for temporary dependencies of
+   * the type "rel".  These occur in sentences such as "I saw the man
+   * who you love".  In that case, we should produce dobj(love, who).
+   * On the other hand, in the sentence "... which Mr. Bush was
+   * fighting for", we should have pobj(for, which).  
+   */
+  private void convertRel(List<TypedDependency> list) {
+    List<TypedDependency> newDeps = new ArrayList<TypedDependency>();
+    for (TypedDependency rel : list) {
+      if (rel.reln() != RELATIVE) {
+        continue;
+      }
+
+      boolean foundPrep = false;
+      for (TypedDependency prep : list) {
+        if (prep.reln() != PREPOSITIONAL_MODIFIER) {
+          continue;
+        }
+        if (prep.gov() != rel.gov()) {
+          continue;
+        }
+
+        // at this point, we have two dependencies as in the Mr. Bush
+        // example.  it should be rel(fighting, which) and
+        // prep(fighting, for).  We now look to see if there is a
+        // corresponding pobj associated with the dependent of the
+        // prep relation.  If not, we will connect the dep of the prep
+        // relation and the head of the rel relation.  Otherwise, the
+        // original rel relation will become a dobj.
+        boolean foundPobj = false;
+        for (TypedDependency pobj : list) {
+          if (pobj.reln() != PREPOSITIONAL_OBJECT && pobj.reln() != PREPOSITIONAL_COMPLEMENT) {
+            continue;
+          }
+          if (pobj.gov() != prep.dep()) {
+            continue;
+          }
+          // we did find a pobj/pcomp, so it is not necessary to
+          // change this rel.
+          foundPobj = true;
+          break;
+        }
+        
+        if (!foundPobj) {
+          foundPrep = true;
+          TypedDependency newDep = new TypedDependency(PREPOSITIONAL_OBJECT, prep.dep(), rel.dep());
+          newDeps.add(newDep);
+          rel.setReln(KILL);
+        }
+      }
+      if (!foundPrep) {
+        rel.setReln(DIRECT_OBJECT);
+      }
+    }
+
+    filterKill(list);
+    for (TypedDependency dep : newDeps) {
+      if (!list.contains(dep)) {
+        list.add(dep);
+      }
+    }
+  }
+
+  /**
+   * Alters a list in place by removing all the KILL relations
+   */
+  private void filterKill(List<TypedDependency> deps) {
+    List<TypedDependency> filtered = Generics.newArrayList();
+    for (TypedDependency dep : deps) {
+      if (dep.reln() != KILL) {
+        filtered.add(dep);
+      }
+    }
+    deps.clear();
+    deps.addAll(filtered);
   }
 
 

@@ -100,7 +100,7 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
     }
   }
 
-  public Pair<int[], Double> bestSequenceWithLinearConstraints(SequenceModel ts, double[][] linearConstraints) {
+  public static Pair<int[], Double> bestSequenceWithLinearConstraints(SequenceModel ts, double[][] linearConstraints) {
     return bestSequenceNew(ts, linearConstraints);
   }
 
@@ -116,7 +116,7 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
     int padLength = length + leftWindow + rightWindow;
     if (linearConstraints != null && linearConstraints.length != padLength)
       throw new RuntimeException("linearConstraints.length (" +  linearConstraints.length + ") does not match padLength (" + padLength + ") of SequenceModel" + ", length=="+length+", leftW="+leftWindow+", rightW="+rightWindow);
-      
+
     int[][] tags = new int[padLength][];
     int[] tagNum = new int[padLength];
     if (DEBUG) { System.err.println("Doing bestSequence length " + length + "; leftWin " + leftWindow + "; rightWin " + rightWindow + "; padLength " + padLength); }
@@ -162,7 +162,7 @@ public class ExactBestSequenceFinder implements BestSequenceFinder {
           }
         }
 
-        // Here now you get ts.scoresOf() for all classifications at a position at once, wwhereas the old code called ts.scoreOf() on each item.
+        // Here now you get ts.scoresOf() for all classifications at a position at once, whereas the old code called ts.scoreOf() on each item.
         // CDM May 2007: The way this is done gives incorrect results if there are repeated values in the values of ts.getPossibleValues(pos) -- in particular if the first value of the array is repeated later.  I tried replacing it with the modulo version, but that only worked for left-to-right, not bidirectional inference, but I still think that if you sorted things out, you should be able to do it with modulos and the result would be conceptually simpler and robust to repeated values.  But in the meantime, I fixed the POS tagger to not give repeated values (which was a bug in the tagger).
         if (tempTags[pos] == tags[pos][0]) {
           // get all tags at once

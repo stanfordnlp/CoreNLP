@@ -18,7 +18,7 @@ import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.CoreMap;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 public class SUTimeServlet extends HttpServlet
 {
@@ -159,10 +159,10 @@ public class SUTimeServlet extends HttpServlet
     for (int i = 0; i < pieces.size(); ++i) {
       if (tagged.get(i)) {
         out.print("<span style=\"background-color: #FF8888\">");
-        out.print(StringEscapeUtils.escapeHtml(pieces.get(i)));
+        out.print(StringEscapeUtils.escapeHtml4(pieces.get(i)));
         out.print("</span>");
       } else {
-        out.print(StringEscapeUtils.escapeHtml(pieces.get(i)));
+        out.print(StringEscapeUtils.escapeHtml4(pieces.get(i)));
       }
     }
     out.println("</td></tr></table>");
@@ -182,15 +182,15 @@ public class SUTimeServlet extends HttpServlet
                 timexAnn.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
         int end =
                 timexAnn.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
-        out.print("<td>" + StringEscapeUtils.escapeHtml(query.substring(begin, end)) + "</td>");
-        out.print("<td>" + ((timex.value() != null)? StringEscapeUtils.escapeHtml(timex.value()):"") + "</td>");
+        out.print("<td>" + StringEscapeUtils.escapeHtml4(query.substring(begin, end)) + "</td>");
+        out.print("<td>" + ((timex.value() != null)? StringEscapeUtils.escapeHtml4(timex.value()):"") + "</td>");
         if (includeOffsets) {
           out.print("<td>" + begin + "</td>");
           out.print("<td>" + end + "</td>");
           out.print("<td>" + timexAnn.get(CoreAnnotations.TokenBeginAnnotation.class) + "</td>");
           out.print("<td>" + timexAnn.get(CoreAnnotations.TokenEndAnnotation.class) + "</td>");
         }
-        out.print("<td>" + StringEscapeUtils.escapeHtml(timex.toString()) + "</td>");
+        out.print("<td>" + StringEscapeUtils.escapeHtml4(timex.toString()) + "</td>");
         out.println("</tr>");
       }
       out.println("</table>");
@@ -204,7 +204,7 @@ public class SUTimeServlet extends HttpServlet
       List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
       for (CoreLabel token : tokens) {
         String tokenOutput =
-                StringEscapeUtils.escapeHtml(token.word() + "/" + token.tag());
+                StringEscapeUtils.escapeHtml4(token.word() + "/" + token.tag());
         out.print(tokenOutput + " ");
       }
       out.println("<br>");
@@ -228,7 +228,7 @@ public class SUTimeServlet extends HttpServlet
     PrintWriter out = response.getWriter();
     if (dateError) {
       out.println("<br><br>Warning: unparseable date " + 
-                  StringEscapeUtils.escapeHtml(dateString));
+                  StringEscapeUtils.escapeHtml4(dateString));
     }
 
     if (query != null && !query.equals("")) {

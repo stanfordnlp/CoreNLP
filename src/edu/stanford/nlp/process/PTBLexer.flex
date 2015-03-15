@@ -354,6 +354,33 @@ import edu.stanford.nlp.util.StringUtils;
    * em dash    97      0151    2014    8212
    */
 
+  /* Bracket characters:
+   *
+   * Original Treebank 3 WSJ 
+   * Uses -LRB- -RRB- as the representation for ( ) and -LCB- -RCB- as the representation for { }. 
+   * There are no occurrences of [ ], though there is some mention of -LSB- -RSB- in early documents.
+   * There are no occurrences of < >.
+   * All brackets are tagged -LRB- -RRB-  [This stays constant.]
+   *
+   * Treebank 3 Brown corpus
+   * Has -LRB- -RRB-
+   * Has a few instances of unescaped [ ] in compounds (the token "A[fj]"
+   *
+   * Ontonotes (r4) 
+   * Uses -LRB- -RRB- -LCB- -RCB- -LSB- -RSB-.
+   * Has a very few uses of < and > in longer forms, which are not escaped.
+   * 
+   * LDC2012T13-eng_web_tbk (Google web treebank)
+   * Has -LRB- -RRB-
+   * Has { and } used unescaped, treated as brackets.
+   * Has < and > used unescaped, sometimes treated as brackets.  Sometimes << and >> are treated as brackets!
+   * Has [ and ] used unescaped, treated as brackets.
+   *
+   * Reasonable conclusions for now:
+   * - Never escape < >
+   * - Still by default escape [ ] { } but it can be turned off.  Use -LSB- -RSB- -LCB- -RCB-.
+   */
+
   public static final String openparen = "-LRB-";
   public static final String closeparen = "-RRB-";
   public static final String openbrace = "-LCB-";
@@ -565,9 +592,16 @@ import edu.stanford.nlp.util.StringUtils;
 
 %}
 
-/* Don't allow SGML to cross lines, even though it can...
-   Really SGML shouldn't be here at all, it's kind of legacy. */
-SGML = <\/?[A-Za-z!?][^>\r\n]*>
+/* Todo: Really SGML shouldn't be here at all, it's kind of legacy.
+   But we continue to tokenize some simple standard forms of concrete
+   SGML syntax, since it tends to give robustness.
+( +([A-Za-z][A-Za-z0-9:.-]*( *= *['\"][^\r\n'\"]*['\"])?|['\"][^\r\n'\"]*['\"]| *\/))*
+SGML = <([!?][A-Za-z-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:.-]*([ ]+([A-Za-z][A-Za-z0-9:.-]*([ ]*=[ ]*['\"][^\r\n'\"]*['\"])?|['\"][^\r\n'\"]*['\"]|[ ]*\/))*[ ]*)>
+( +[A-Za-z][A-Za-z0-9:.-]*)*
+FOO = ([ ]+[A-Za-z][A-Za-z0-9:.-]*)*
+SGML = <([!?][A-Za-z-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:.-]* *)>
+ */
+SGML = \<([!\?][A-Za-z\-][^>\r\n]*|\/?[A-Za-z][A-Za-z0-9:\.\-]*([ ]+([A-Za-z][A-Za-z0-9:\.\-]*|[A-Za-z][A-Za-z0-9:\.\-]*[ ]*=[ ]*['\"][^\r\n'\"]*['\"]|['\"][^\r\n'\"]*['\"]|[ ]*\/))*[ ]*)\>
 SPMDASH = &(MD|mdash|ndash);|[\u0096\u0097\u2013\u2014\u2015]
 SPAMP = &amp;
 SPPUNC = &(HT|TL|UR|LR|QC|QL|QR|odq|cdq|#[0-9]+);
@@ -696,8 +730,8 @@ ABBREV3 = (ca|figs?|prop|nos?|art|bldg|prop|pp|op)\.
 PHONE = (\([0-9]{2,3}\)[ \u00A0]?|(\+\+?)?([0-9]{2,4}[\- \u00A0])?[0-9]{2,4}[\- \u00A0])[0-9]{3,4}[\- \u00A0]?[0-9]{3,5}|((\+\+?)?[0-9]{2,4}\.)?[0-9]{2,4}\.[0-9]{3,4}\.[0-9]{3,5}
 /* Fake duck feet appear sometimes in WSJ, and aren't likely to be SGML, less than, etc., so group. */
 FAKEDUCKFEET = <<|>>
-OPBRAC = [<\[]|&lt;
-CLBRAC = [>\]]|&gt;
+LESSTHAN = <|&lt;
+GREATERTHAN = >|&gt;
 HYPHEN = [-_\u058A\u2010\u2011]
 HYPHENS = \-+
 LDOTS = \.{3,5}|(\.[ \u00A0]){2,4}\.|[\u0085\u2026]
@@ -866,8 +900,8 @@ gonna|gotta|lemme|gimme|wanna
                           }
 			  return getNext();
 			}
-/* Special case to get pty. ltd. or pty limited */
-pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
+/* Special case to get pty. ltd. or pty limited. Also added "Co." since someone complained, but usually a comma after it. */
+(pt[eyEY]|co)\./{SPACE}(ltd|lim)  { return getNext(); }
 {ABBREV1}/{SENTEND}     {
                           String s;
                           if (strictTreebank3 && ! "U.S.".equals(yytext())) {
@@ -910,21 +944,11 @@ pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
                         }
 {DBLQUOT}/[A-Za-z0-9$]  { return handleQuotes(yytext(), true); }
 {DBLQUOT}               { return handleQuotes(yytext(), false); }
-0x7f            { if (invertible) {
-                     prevWordAfter.append(yytext());
-                  } }
-{OPBRAC}        { if (normalizeOtherBrackets) {
-                    return getNext(openparen, yytext()); }
-                  else {
-                    return getNext();
-                  }
-                }
-{CLBRAC}        { if (normalizeOtherBrackets) {
-                    return getNext(closeparen, yytext()); }
-                  else {
-                    return getNext();
-                  }
-                }
+0x7f                    { if (invertible) {
+                            prevWordAfter.append(yytext());
+                        } }
+{LESSTHAN}              { return getNext("<", yytext()); }
+{GREATERTHAN}           { return getNext(">", yytext()); }
 {SMILEY}/[^A-Za-z] { String txt = yytext();
                   String origText = txt;
                   if (normalizeParentheses) {
@@ -949,6 +973,18 @@ pt[eyEY]\./{SPACE}(ltd|lim)  { return getNext(); }
                 }
 \}              { if (normalizeOtherBrackets) {
                     return getNext(closebrace, yytext()); }
+                  else {
+                    return getNext();
+                  }
+                }
+\[              { if (normalizeOtherBrackets) {
+                    return getNext("-LSB-", yytext()); }
+                  else {
+                    return getNext();
+                  }
+                }
+\]              { if (normalizeOtherBrackets) {
+                    return getNext("-RSB-", yytext()); }
                   else {
                     return getNext();
                   }
