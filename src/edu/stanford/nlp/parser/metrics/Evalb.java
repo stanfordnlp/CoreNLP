@@ -7,6 +7,8 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +27,6 @@ import edu.stanford.nlp.trees.LabeledScoredConstituentFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.Triple;
@@ -63,7 +64,7 @@ public class Evalb extends AbstractEval {
    */
   @Override
   protected Set<Constituent> makeObjects(Tree tree) {
-    Set<Constituent> set = Generics.newHashSet();
+    Set<Constituent> set = new HashSet<Constituent>();
     if(tree != null) set.addAll(tree.constituents(cf));
     return set;
   }
@@ -143,7 +144,7 @@ public class Evalb extends AbstractEval {
     return sb.toString();
   }
   private static Map<String,Integer> optionArgDefs() {
-    Map<String,Integer> optionArgDefs = Generics.newHashMap();
+    Map<String,Integer> optionArgDefs = new HashMap<String,Integer>();
     optionArgDefs.put("v", 0);
     optionArgDefs.put("l", 1);
     optionArgDefs.put("y", 1);
@@ -183,7 +184,7 @@ public class Evalb extends AbstractEval {
     }
     String goldFile = parsedArgs[0];
     String guessFile = parsedArgs[1];
-
+  
     // Command-line has been parsed. Configure the metric for evaluation.
     tlpp.setInputEncoding(encoding);
     final PrintWriter pwOut = tlpp.pw();
@@ -235,7 +236,7 @@ public class Evalb extends AbstractEval {
         skippedGuessTrees++;
         continue;
       }
-
+      
       final Tree evalGuess = tc.transformTree(guessTree);
       final Tree evalGold = tc.transformTree(goldTree);
 
@@ -244,7 +245,7 @@ public class Evalb extends AbstractEval {
       if(doCatLevel) evalbCat.evaluate(evalGuess, evalGold, ((VERBOSE) ? pwOut : null));
       if(sortByF1) storeTrees(queue,guessTree,goldTree,metric.getLastF1());
     }
-
+    
     if(guessItr.hasNext() || goldItr.hasNext()) {
       System.err.printf("Guess/gold files do not have equal lengths (guess: %d gold: %d)%n.", guessLineId, goldLineId);
     }
@@ -287,14 +288,14 @@ public class Evalb extends AbstractEval {
         guessPw.println(trees.third().toString());
 
         //Output the set differences
-        Set<Constituent> goldDeps = Generics.newHashSet();
+        Set<Constituent> goldDeps = new HashSet<Constituent>();
         goldDeps.addAll(trees.second().constituents(cFact));
         goldDeps.removeAll(trees.third().constituents(cFact));
         for(Constituent c : goldDeps)
           goldDepPw.print(c.toString() + "  ");
         goldDepPw.println();
 
-        Set<Constituent> guessDeps = Generics.newHashSet();
+        Set<Constituent> guessDeps = new HashSet<Constituent>();
         guessDeps.addAll(trees.third().constituents(cFact));
         guessDeps.removeAll(trees.second().constituents(cFact));
         for(Constituent c : guessDeps)

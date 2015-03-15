@@ -3,7 +3,7 @@
 <%@ page import="edu.stanford.nlp.time.Options" %>
 <%@ page import="edu.stanford.nlp.time.suservlet.SUTimeServlet" %>
 
-<%@ page import="org.apache.commons.lang3.StringEscapeUtils" %>
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 
 <html>
 <head>
@@ -18,6 +18,16 @@
   <script type="text/javascript" src="/sutime/prototype.js"></script>
   <script type="text/javascript" src="/sutime/calendarview.js"></script>
   <script>
+     function readRulesChanged() {
+       var field = input.readRules;
+       if (field.checked) {
+        $(rulesDiv).style.display = "";
+        $(relheurlevelDiv).style.display = "none";
+       } else {
+        $(rulesDiv).style.display = "none";
+        $(relheurlevelDiv).style.display = "";
+       }
+     }
      function displayOptions() {
        var field = input.annotator;
        if (annotator.options[annotator.options.selectedIndex].value == "sutime") {
@@ -38,6 +48,7 @@
         input.q.value = "Last summer, they met every Tuesday afternoon, from 1:00 pm to 3:00 pm."
      }
      function onLoad() {
+        readRulesChanged();
         displayOptions();
         setupCalendars();
         if (input.q.value == "") {
@@ -67,7 +78,7 @@ Date:
 <input type="text" id="d" name="d" <%
   String dateString = request.getParameter("d");
   if (dateString != null) {
-    %>value="<%=StringEscapeUtils.escapeHtml4(dateString)%>"<%
+    %>value="<%=StringEscapeUtils.escapeHtml(dateString)%>"<%
   }%>  />
 <input type="button" value="Calendar" id="popupCalendar"/>
 </td><td>
@@ -88,7 +99,7 @@ Please enter your text here (<a href="javascript:sampleSentence()">sample senten
          rows="31" cols="7"><%
   String query = request.getParameter("q");
   if (query != null && !query.equals("")) {
-    %><%=StringEscapeUtils.escapeHtml4(query)%><%
+    %><%=StringEscapeUtils.escapeHtml(query)%><%
   }
 %></textarea>
 <br>
@@ -108,7 +119,10 @@ Please enter your text here (<a href="javascript:sampleSentence()">sample senten
    <%= SUTimeServlet.parseBoolean(request.getParameter("includeRange")) ? 
        "checked" : "" %> /> Include range <br>
 <br>
-<div id="rulesDiv" name="rulesDiv">
+<input type="checkbox" name="readRules" onchange="javascript:readRulesChanged()"
+  <%= SUTimeServlet.parseBoolean(request.getParameter("readRules")) ?
+        "checked" : "" %> >Read rules from file</input>
+<div id="rulesDiv" name="rulesDiv" style="display:none;">
   <br> Rules:
   <select name="rules">
     <option value="english" selected="true">English</option>

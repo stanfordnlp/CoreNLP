@@ -7,11 +7,9 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.trees.Tree;
-import java.util.function.Function;
 
 
 /**
@@ -56,12 +54,6 @@ public interface Lexicon extends Serializable {
    * @return Whether the word is in the lexicon
    */
   boolean isKnown(String word);
-
-  /** Return the Set of tags used by this tagger (available after training the tagger).
-   *
-   * @return The Set of tags used by this tagger
-   */
-  Set<String> tagSet(Function<String,String> basicCategoryFunction);
 
   /**
    * Get an iterator over all rules (pairs of (word, POS)) for this word.
@@ -128,7 +120,7 @@ public interface Lexicon extends Serializable {
 
   /**
    * If training on a per-word basis instead of on a per-tree basis,
-   * we will want to increment the tree count as this happens.
+   * we will want to increment the tree count as this happens
    */
   void incrementTreesRead(double weight);
 
@@ -186,7 +178,6 @@ public interface Lexicon extends Serializable {
 
   public UnknownWordModel getUnknownWordModel();
 
-  // todo [cdm Sep 2013]: It seems like we could easily remove this from the interface
   public void setUnknownWordModel(UnknownWordModel uwm);
 
 }

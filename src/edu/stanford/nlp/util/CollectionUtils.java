@@ -6,9 +6,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
@@ -22,7 +31,6 @@ import edu.stanford.nlp.stats.Counters;
  * @author Joseph Smarr (jsmarr@stanford.edu)
  */
 public class CollectionUtils {
-
   /**
    * Private constructor to prevent direct instantiation.
    */
@@ -33,16 +41,16 @@ public class CollectionUtils {
 
   public static List<Integer> asList(int[] a) {
     List<Integer> result = new ArrayList<Integer>(a.length);
-    for (int j : a) {
-      result.add(Integer.valueOf(j));
+    for (int i = 0; i < a.length; i++) {
+      result.add(Integer.valueOf(a[i]));
     }
     return result;
   }
 
   public static List<Double> asList(double[] a) {
     List<Double> result = new ArrayList<Double>(a.length);
-    for (double v : a) {
-      result.add(new Double(v));
+    for (int i = 0; i < a.length; i++) {
+      result.add(new Double(a[i]));
     }
     return result;
   }
@@ -78,11 +86,11 @@ public class CollectionUtils {
 
   /** Returns a new Set containing all the objects in the specified array. */
   public static <T> Set<T> asSet(T[] o) {
-    return Generics.newHashSet(Arrays.asList(o));
+    return new HashSet<T>(Arrays.asList(o));
   }
 
   public static <T> Set<T> intersection(Set<T> set1, Set<T> set2) {
-    Set<T> intersect = Generics.newHashSet();
+    Set<T> intersect = new HashSet<T>();
     for (T t : set1) {
       if (set2.contains(t)) {
         intersect.add(t);
@@ -103,22 +111,12 @@ public class CollectionUtils {
   }
 
   public static <T> Set<T> unionAsSet(Collection<T> set1, Collection<T> set2) {
-    Set<T> union = Generics.newHashSet();
+    Set<T> union = new HashSet<T>();
     for (T t : set1) {
       union.add(t);
     }
     for (T t : set2) {
       union.add(t);
-    }
-    return union;
-  }
-
-  public static <T> Set<T> unionAsSet(Collection<T>... sets) {
-    Set<T> union = Generics.newHashSet();
-    for(Collection<T> set: sets){
-      for (T t : set) {
-        union.add(t);
-      }
     }
     return union;
   }
@@ -133,24 +131,6 @@ public class CollectionUtils {
    */
   public static <T> Collection<T> diff(Collection<T> list1, Collection<T> list2) {
     Collection<T> diff = new ArrayList<T>();
-    for (T t : list1) {
-      if (!list2.contains(t)) {
-        diff.add(t);
-      }
-    }
-    return diff;
-  }
-
-  /**
-   * Returns all objects in list1 that are not in list2
-   *
-   * @param <T> Type of items in the collection
-   * @param list1 First collection
-   * @param list2 Second collection
-   * @return The collection difference list1 - list2
-   */
-  public static <T> Set<T> diffAsSet(Collection<T> list1, Collection<T> list2) {
-    Set<T> diff = new HashSet<T>();
     for (T t : list1) {
       if (!list2.contains(t)) {
         diff.add(t);
@@ -180,7 +160,7 @@ public class CollectionUtils {
    *          String constructor.
    */
   public static <T> Collection<T> loadCollection(File file, Class<T> c, CollectionFactory<T> cf) throws Exception {
-    Constructor<T> m = c.getConstructor(new Class[] { String.class });
+    Constructor<T> m = c.getConstructor(new Class[] { Class.forName("java.lang.String") });
     Collection<T> result = cf.newCollection();
     BufferedReader in = new BufferedReader(new FileReader(file));
     String line = in.readLine();
@@ -244,8 +224,8 @@ public class CollectionUtils {
 
   public static <K, V> Map<K, V> getMapFromString(String s, Class<K> keyClass, Class<V> valueClass, MapFactory<K, V> mapFactory) throws ClassNotFoundException,
       NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-    Constructor<K> keyC = keyClass.getConstructor(new Class[] { String.class });
-    Constructor<V> valueC = valueClass.getConstructor(new Class[] { String.class });
+    Constructor<K> keyC = keyClass.getConstructor(new Class[] { Class.forName("java.lang.String") });
+    Constructor<V> valueC = valueClass.getConstructor(new Class[] { Class.forName("java.lang.String") });
     if (s.charAt(0) != '{')
       throw new RuntimeException("");
     s = s.substring(1); // get rid of first brace
@@ -496,14 +476,20 @@ public class CollectionUtils {
   }
 
   public static <C extends Comparable<C>> Comparator<List<C>> getListComparator() {
-    return (list1, list2) -> compareLists(list1, list2);
+    return new Comparator<List<C>>() {
+      public int compare(List<C> list1, List<C> list2) {
+        return compareLists(list1, list2);
+      }
+    };
   }
 
   /**
    * Return the items of an Iterable as a sorted list.
    *
-   * @param <T> The type of items in the Iterable.
-   * @param items The collection to be sorted.
+   * @param <T>
+   *          The type of items in the Iterable.
+   * @param items
+   *          The collection to be sorted.
    * @return A list containing the same items as the Iterable, but sorted.
    */
   public static <T extends Comparable<T>> List<T> sorted(Iterable<T> items) {
@@ -515,8 +501,10 @@ public class CollectionUtils {
   /**
    * Return the items of an Iterable as a sorted list.
    *
-   * @param <T> The type of items in the Iterable.
-   * @param items The collection to be sorted.
+   * @param <T>
+   *          The type of items in the Iterable.
+   * @param items
+   *          The collection to be sorted.
    * @return A list containing the same items as the Iterable, but sorted.
    */
   public static <T> List<T> sorted(Iterable<T> items, Comparator<T> comparator) {
@@ -528,8 +516,10 @@ public class CollectionUtils {
   /**
    * Create a list out of the items in the Iterable.
    *
-   * @param <T> The type of items in the Iterable.
-   * @param items The items to be made into a list.
+   * @param <T>
+   *          The type of items in the Iterable.
+   * @param items
+   *          The items to be made into a list.
    * @return A list consisting of the items of the Iterable, in the same order.
    */
   public static <T> List<T> toList(Iterable<T> items) {
@@ -541,12 +531,14 @@ public class CollectionUtils {
   /**
    * Create a set out of the items in the Iterable.
    *
-   * @param <T> The type of items in the Iterable.
-   * @param items The items to be made into a set.
+   * @param <T>
+   *          The type of items in the Iterable.
+   * @param items
+   *          The items to be made into a set.
    * @return A set consisting of the items from the Iterable.
    */
   public static <T> Set<T> toSet(Iterable<T> items) {
-    Set<T> set = Generics.newHashSet();
+    Set<T> set = new HashSet<T>();
     addAll(set, items);
     return set;
   }
@@ -763,7 +755,7 @@ public class CollectionUtils {
    * for them for limited-use hashing.
    */
   public static <ObjType, Hashable> Collection<ObjType> uniqueNonhashableObjects(Collection<ObjType> objects, Function<ObjType, Hashable> customHasher) {
-    Map<Hashable, ObjType> hashesToObjects = Generics.newHashMap();
+    Map<Hashable, ObjType> hashesToObjects = new HashMap<Hashable, ObjType>();
     for (ObjType object : objects) {
       hashesToObjects.put(customHasher.apply(object), object);
     }
@@ -862,7 +854,7 @@ public class CollectionUtils {
    *
    */
   public static<T1, T2> Set<T2> transformAsSet(Collection<? extends T1> original, Function<T1, ? extends T2> f){
-    Set<T2> transformed = Generics.newHashSet();
+    Set<T2> transformed = new HashSet<T2>();
     for(T1 t: original){
       transformed.add(f.apply(t));
     }
@@ -886,84 +878,13 @@ public class CollectionUtils {
    * Filters the objects in the collection according to the given Filter and returns a list
    *
    */
-  public static<T> List<T> filterAsList(Collection<? extends T> original, Predicate<? super T> f){
+  public static<T> List<T> filterAsList(Collection<? extends T> original, Filter<? super T> f){
     List<T> transformed = new ArrayList<T>();
     for (T t: original) {
-      if (f.test(t)) {
+      if (f.accept(t)) {
         transformed.add(t);
       }
     }
     return transformed;
-  }
-
-  /**
-   * Get all values corresponding to the indices (if they exist in the map).
-   *
-   * @param map Any map from T to V
-   * @param indices A collection of indices of type T
-   * @return The corresponding list of values of type V
-   */
-  public static<T,V> List<V> getAll(Map<T, V> map, Collection<T> indices) {
-    List<V> result = new ArrayList<V>();
-    for(T i: indices)
-      if(map.containsKey(i)){
-        result.add(map.get(i));
-      }
-    return result;
-  }
-
-  public static<T extends Comparable<? super T>> int maxIndex(List<T> list){
-   T max = null;
-   int i = 0;
-   int maxindex = -1;
-   for(T t: list)
-   {
-     if(max == null || t.compareTo(max) > 0)
-     {
-       max = t;
-       maxindex = i;
-     }
-     i++;
-   }
-   return maxindex;
-  }
-
-
-  /**
-   * Concatenate a number of iterators together, to form one big iterator.
-   * This should respect the remove() functionality of the constituent iterators.
-   *
-   * @param iterators The iterators to concatenate.
-   * @param <E> The type of the iterators.
-   * @return An iterator consisting of all the component iterators concatenated together in order.
-   */
-  public static <E> Iterator<E> concatIterators(final Iterator<E>... iterators) {
-    return new Iterator<E>() {
-      Iterator<E> lastIter = null;
-      List<Iterator<E>> iters = new LinkedList<>(Arrays.asList(iterators));
-      @Override
-      public boolean hasNext() {
-        return !iters.isEmpty() && iters.get(0).hasNext();
-      }
-      @Override
-      public E next() {
-        if (!hasNext()) {
-          throw new IllegalArgumentException("Iterator is empty!");
-        }
-        E next = iters.get(0).next();
-        lastIter = iters.get(0);
-        while (!iters.isEmpty() && !iters.get(0).hasNext()) {
-          iters.remove(0);
-        }
-        return next;
-      }
-      @Override
-      public void remove() {
-        if (lastIter == null) {
-          throw new IllegalStateException("Call next() before calling remove()!");
-        }
-        lastIter.remove();
-      }
-    };
   }
 }

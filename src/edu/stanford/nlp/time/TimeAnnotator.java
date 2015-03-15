@@ -4,6 +4,7 @@ import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.Annotator;
+import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -16,7 +17,7 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
- * Annotate temporal expressions in text with {@link SUTime}.
+ * Annotate temporal expressions with {@link SUTime}.
  * The expressions recognized by SUTime are loosely based on GUTIME.
  *
  * After annotation, the {@link TimeAnnotations.TimexAnnotations} annotation
@@ -24,9 +25,7 @@ import java.util.Set;
  * will represent one temporal expression.
  *
  * If a reference time is set (via {@link edu.stanford.nlp.ling.CoreAnnotations.DocDateAnnotation}),
- * then temporal expressions are resolved with respect to the document date.  You set it on an
- * Annotation as follows:
- * <blockquote>{@code annotation.set(CoreAnnotations.DocDateAnnotation.class, "2013-07-14");}</blockquote>
+ * then temporal expressions are resolved with respect the to document date.
  * <p>
  * <br>
  * <b>Input annotations</b>
@@ -166,30 +165,22 @@ import java.util.Set;
 public class TimeAnnotator implements Annotator {
 
   private final TimeExpressionExtractorImpl timexExtractor;
-  private final boolean quiet;
 
   public TimeAnnotator() {
-    this(false);
-  }
-
-  public TimeAnnotator(boolean quiet) {
     timexExtractor = new TimeExpressionExtractorImpl();
-    this.quiet = quiet;
   }
 
   public TimeAnnotator(String name, Properties props) {
     timexExtractor = new TimeExpressionExtractorImpl(name, props);
-    this.quiet = false;
   }
 
-  @Override
   public void annotate(Annotation annotation) {
     SUTime.TimeIndex timeIndex = new SUTime.TimeIndex();
     String docDate = annotation.get(CoreAnnotations.DocDateAnnotation.class);
-    if(docDate == null) {
+    if(docDate == null){
       Calendar cal = annotation.get(CoreAnnotations.CalendarAnnotation.class);
-      if(cal == null) {
-        if (!quiet) { Redwood.log(Redwood.WARN, "No document date specified"); }
+      if(cal == null){
+        Redwood.log(Redwood.WARN, "No document date specified");
       } else {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd:hh:mm:ss");
         docDate = dateFormat.format(cal.getTime());
@@ -203,10 +194,10 @@ public class TimeAnnotator implements Annotator {
       for (CoreMap sentence: sentences) {
         // make sure that token character offsets align with the actual sentence text
         // They may not align due to token normalizations, such as "(" to "-LRB-".
-        CoreMap alignedSentence =  NumberSequenceClassifier.alignSentence(sentence);
+        CoreMap alignedSentence =  NumberSequenceClassifier.alignSentence(sentence); 
         // uncomment the next line for verbose dumping of tokens....
         // System.err.println("SENTENCE: " + ((ArrayCoreMap) sentence).toShorterString());
-        List<CoreMap> timeExpressions =
+        List<CoreMap> timeExpressions = 
           timexExtractor.extractTimeExpressionCoreMaps(alignedSentence, docDate, timeIndex);
         if (timeExpressions != null) {
           allTimeExpressions.addAll(timeExpressions);
@@ -227,7 +218,7 @@ public class TimeAnnotator implements Annotator {
     }
     annotation.set(TimeAnnotations.TimexAnnotations.class, allTimeExpressions);
   }
-
+  
   /**
    * Helper method for people not working from a complete Annotation.
    * @return a list of CoreMap.  Each CoreMap represents a detected temporal expression.
@@ -249,5 +240,4 @@ public class TimeAnnotator implements Annotator {
   public Set<Requirement> requirementsSatisfied() {
     return Collections.singleton(SUTIME_REQUIREMENT);
   }
-
 }

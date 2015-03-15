@@ -2,7 +2,6 @@ package edu.stanford.nlp.international.arabic;
 
 import java.io.Serializable;
 import java.util.*;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Manually-generated (unvocalized) word lists for different Arabic word categories.
@@ -22,7 +21,7 @@ public final class ArabicWordLists implements Serializable {
   public static Set<String> getDimirMunfasala() { return Collections.unmodifiableSet(dimirMunfasala); }
   public static Set<String> getDimirMutasala() { return Collections.unmodifiableSet(dimirMutasala); }
 
-  private static final Set<String> dimirMunfasala = Generics.newHashSet();
+  private static final Set<String> dimirMunfasala = new HashSet<String>();
   static {
     dimirMunfasala.add("انا");
     dimirMunfasala.add("هو");
@@ -36,7 +35,7 @@ public final class ArabicWordLists implements Serializable {
     dimirMunfasala.add("هن");
   }
 
-  private static final Set<String> dimirMutasala = Generics.newHashSet();
+  private static final Set<String> dimirMutasala = new HashSet<String>();
   static {
     dimirMutasala.add("ي");
     dimirMutasala.add("ه");
@@ -50,7 +49,7 @@ public final class ArabicWordLists implements Serializable {
     dimirMutasala.add("هما");
   }
   
-  private static final Set<String> innaSisters = Generics.newHashSet();
+  private static final Set<String> innaSisters = new HashSet<String>();
   static {
     innaSisters.add("ان");
     innaSisters.add("لكن");
@@ -58,7 +57,7 @@ public final class ArabicWordLists implements Serializable {
     innaSisters.add("لان");
   }
 
-  private static final Set<String> kanSisters = Generics.newHashSet();
+  private static final Set<String> kanSisters = new HashSet<String>();
   static {
     kanSisters.add("كان");
     kanSisters.add("كانت");
@@ -67,7 +66,7 @@ public final class ArabicWordLists implements Serializable {
     kanSisters.add("كن");
   }
 
-  private static final Set<String> tmpNouns = Generics.newHashSet();
+  private static final Set<String> tmpNouns = new HashSet<String>();
   static {
     tmpNouns.add("الان");
     tmpNouns.add("يوم");

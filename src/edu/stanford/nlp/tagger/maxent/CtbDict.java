@@ -4,10 +4,11 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Map;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
-import edu.stanford.nlp.util.Generics;
+
 
 public class CtbDict {
 
@@ -33,16 +34,16 @@ public class CtbDict {
   }
 
 
-  public Map <String, Set <String>> ctb_pre_dict;
-  public Map <String, Set <String>> ctb_suf_dict;
+  public HashMap <String, Set <String>> ctb_pre_dict;
+  public HashMap <String, Set <String>> ctb_suf_dict;
 
 
   private void readCtbDict(String filename) throws IOException {
     BufferedReader ctbDetectorReader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "GB18030"));
     String ctbDetectorLine;
 
-    ctb_pre_dict = Generics.newHashMap();
-    ctb_suf_dict = Generics.newHashMap();
+    ctb_pre_dict = new HashMap<String, Set <String>>();
+    ctb_suf_dict = new HashMap<String, Set <String>>();
 
     while ((ctbDetectorLine = ctbDetectorReader.readLine()) != null) {
       String[] fields = ctbDetectorLine.split("	");
@@ -51,13 +52,13 @@ public class CtbDict {
       Set<String> sufs=ctb_suf_dict.get(tag);
 
       if(pres==null){
-        pres = Generics.newHashSet();
+        pres = new HashSet<String>();
         ctb_pre_dict.put(tag,pres);
       }
       pres.add(fields[1]);
 
       if(sufs==null){
-        sufs = Generics.newHashSet();
+        sufs = new HashSet<String>();
         ctb_suf_dict.put(tag,sufs);
       }
       sufs.add(fields[2]);

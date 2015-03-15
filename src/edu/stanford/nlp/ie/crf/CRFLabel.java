@@ -16,7 +16,7 @@ public class CRFLabel implements Serializable {
   private static final long serialVersionUID = 7403010868396790276L;
 
   private final int[] label;
-  private int hashCode = -1;
+  int hashCode = -1;
 
   // todo: When rebuilding, change this to a better hash function like 31
   private static final int maxNumClasses = 10;

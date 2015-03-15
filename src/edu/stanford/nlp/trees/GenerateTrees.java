@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -21,7 +22,6 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
 import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -29,41 +29,6 @@ import edu.stanford.nlp.util.Pair;
  * <br>
  * To run this script, run with an input file, an output file, and a
  * number of trees specified.
- * <br>
- * A more complete example is as following:
- * <code><pre>
-
-# This grammar produces trees that look like
-# (S A (V B C)) -> (S X (V Y Z))
-# (S D E F) -> (S X Y Z)
-
-nonterminals
-ROOT S
-S A V
-V B C
-S D E F
-
-terminals
-A avocet albatross artichoke
-B barium baseball brontosaurus
-C canary cardinal crow
-D delphinium dolphin dragon
-E egret emu estuary
-F finch flock finglonger
-
-tsurgeon
-S << /A|D/=n1 << /B|E/=n2 << /C|F/=n3
-
-relabel n1 X
-relabel n2 Y
-relabel n3 Z
-
-</pre></code>
- *
- * <br>
- * You then run the problem with
- * <br>
- * <code>java edu.stanford.nlp.trees.GenerateTrees input.txt output.txt 100</code>
  *
  * @author John Bauer
  */
@@ -72,8 +37,8 @@ public class GenerateTrees {
     TERMINALS, NONTERMINALS, TSURGEON
   }
 
-  Map<String, Counter<List<String>>> nonTerminals = Generics.newHashMap();
-  Map<String, Counter<String>> terminals = Generics.newHashMap();
+  Map<String, Counter<List<String>>> nonTerminals = new HashMap<String, Counter<List<String>>>();
+  Map<String, Counter<String>> terminals = new HashMap<String, Counter<String>>();
   List<Pair<TregexPattern, TsurgeonPattern>> tsurgeons = new ArrayList<Pair<TregexPattern, TsurgeonPattern>>();
 
   Random random = new Random();

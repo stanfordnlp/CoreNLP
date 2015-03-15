@@ -6,12 +6,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-/**
- *
- * @author Sonal Gupta
- * @param <V> Type of the vertices
- * @param <E> Type of the edges
- */
 public interface Graph<V,E> extends Serializable {
 
   /**

@@ -2,15 +2,13 @@ package edu.stanford.nlp.pipeline;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.PropertiesUtils;
-
+import edu.stanford.nlp.util.Timing;
 
 /**
  * This class adds NER information to an annotation using the RegexNERSequenceClassifier.
@@ -18,32 +16,17 @@ import edu.stanford.nlp.util.PropertiesUtils;
  * into Lists of CoreLabels. Adds NER information to each CoreLabel as a NamedEntityTagAnnotation.
  *
  * @author jtibs
+ *
  */
+
 public class RegexNERAnnotator implements Annotator {
 
   private final RegexNERSequenceClassifier classifier;
+  private final Timing timer;
   private final boolean verbose;
 
-  public static PropertiesUtils.Property[] SUPPORTED_PROPERTIES = new PropertiesUtils.Property[]{
-          new PropertiesUtils.Property("mapping", DefaultPaths.DEFAULT_REGEXNER_RULES, "Mapping file to use."),
-          new PropertiesUtils.Property("ignorecase", "false", "Whether to ignore case or not when matching patterns."),
-          new PropertiesUtils.Property("validpospattern", "", "Regular expression pattern for matching POS tags."),
-          new PropertiesUtils.Property("verbose", "false", ""),
-  };
-
-  public RegexNERAnnotator(String name, Properties properties) {
-    String mapping = properties.getProperty(name + ".mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
-    boolean ignoreCase = Boolean.parseBoolean(properties.getProperty(name + ".ignorecase", "false"));
-    String validPosPattern = properties.getProperty(name + ".validpospattern", RegexNERSequenceClassifier.DEFAULT_VALID_POS);
-    boolean overwriteMyLabels = true;
-    boolean verbose = Boolean.parseBoolean(properties.getProperty(name + ".verbose", "false"));
-
-    classifier = new RegexNERSequenceClassifier(mapping, ignoreCase, overwriteMyLabels, validPosPattern);
-    this.verbose = verbose;
-  }
-
   public RegexNERAnnotator(String mapping) {
-    this(mapping, false);
+    this(mapping, false, true, RegexNERSequenceClassifier.DEFAULT_VALID_POS, false);
   }
 
   public RegexNERAnnotator(String mapping, boolean ignoreCase) {
@@ -56,13 +39,14 @@ public class RegexNERAnnotator implements Annotator {
 
   public RegexNERAnnotator(String mapping, boolean ignoreCase, boolean overwriteMyLabels, String validPosPattern, boolean verbose) {
     classifier = new RegexNERSequenceClassifier(mapping, ignoreCase, overwriteMyLabels, validPosPattern);
+    timer = new Timing();
     this.verbose = verbose;
   }
 
-  @Override
   public void annotate(Annotation annotation) {
     if (verbose) {
-      System.err.print("Adding RegexNER annotations ... ");
+      timer.start();
+      System.err.print("Adding RegexNER annotation...");
     }
 
     if (! annotation.containsKey(CoreAnnotations.SentencesAnnotation.class))
@@ -81,8 +65,8 @@ public class RegexNERAnnotator implements Annotator {
       for (int start = 0; start < tokens.size(); start++) {
         CoreLabel token = tokens.get(start);
         String answerType = token.get(CoreAnnotations.AnswerAnnotation.class);
-        if (answerType == null) continue;
         String NERType = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+        if (answerType == null) continue;
 
         int answerEnd = findEndOfAnswerAnnotation(tokens, start);
         int NERStart = findStartOfNERAnnotation(tokens, start);
@@ -102,7 +86,7 @@ public class RegexNERAnnotator implements Annotator {
     }
 
     if (verbose)
-      System.err.println("done.");
+      timer.stop("done.");
   }
 
   private static int findEndOfAnswerAnnotation(List<CoreLabel> tokens, int start) {
@@ -129,7 +113,7 @@ public class RegexNERAnnotator implements Annotator {
 
   @Override
   public Set<Requirement> requires() {
-    return StanfordCoreNLP.TOKENIZE_SSPLIT_POS;
+    return StanfordCoreNLP.TOKENIZE_AND_SSPLIT;
   }
 
   @Override

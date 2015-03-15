@@ -43,9 +43,7 @@ import java.util.*;
  * <table>
  * <tr><td>Name</td><td>Args</td><td>Effect</td></tr>
  * <tr><td>words</td><td>begin, end</td>
- *     <td>Individual features for words begin ... end.
- *     If just one argument words(-2) is given, then end is taken as 0. If
- *     begin is not less than or equal to end, no features are made.</td></tr>
+ *     <td>Individual features for words begin ... end</td></tr>
  * <tr><td>tags</td><td>begin, end</td>
  *     <td>Individual features for tags begin ... end</td></tr>
  * <tr><td>biword</td><td>w1, w2</td>
@@ -76,12 +74,11 @@ import java.util.*;
  * <tr><td>allwordshapes</td><td>left, right</td>
  *     <td>Word shape features, eg transform Foo5 into Xxx#
  *         (not exactly like that, but that general idea).
- *         Creates individual features for each word left ... right.
+ *         Creates individual features for each word left ... right
  *         Compare with the feature "wordshapes" in ExtractorFramesRare,
- *         which is only applied to rare words. Fairly English-specific.
- *         Slightly increases accuracy.</td></tr>
+ *         which is only applied to rare words.</td></tr>
  * <tr><td>allunicodeshapes</td><td>left, right</td>
- *     <td>Same thing, but works for unicode characters more generally.</td></tr>
+ *     <td>Same thing, but works for some unicode characters, too.</td></tr>
  * <tr><td>allunicodeshapeconjunction</td><td>left, right</td>
  *     <td>Instead of individual word shape features, combines several
  *         word shapes into one feature.</td></tr>
@@ -106,7 +103,8 @@ import java.util.*;
  * accurate, than the bidirectional architectures.
  * 'naacl2003unknowns' was our traditional set of unknown word
  * features, but you can now specify features more flexibility via the
- * various other supported keywords.
+ * various other supported keywords. The 'shapes' options map words to
+ * equivalence classes, which slightly increase accuracy.
  * <br>
  * @author Kristina Toutanova
  * @author Michel Galley
@@ -271,15 +269,11 @@ public class ExtractorFrames {
         int lWindow = Extractor.getParenthesizedNum(arg, 1);
         int rWindow = Extractor.getParenthesizedNum(arg, 2);
         extrs.add(new ExtractorWordShapeConjunction(lWindow, rWindow, "chris4"));
-      } else if (arg.equalsIgnoreCase("spanishauxiliaries")) {
-        extrs.add(new ExtractorSpanishAuxiliaryTag());
-        extrs.add(new ExtractorSpanishSemiauxiliaryTag());
       } else if (arg.equalsIgnoreCase("naacl2003unknowns") ||
                  arg.equalsIgnoreCase("lnaacl2003unknowns") ||
                  arg.equalsIgnoreCase("caselessnaacl2003unknowns") ||
                  arg.equalsIgnoreCase("naacl2003conjunctions") ||
                  arg.equalsIgnoreCase("frenchunknowns") ||
-                 arg.equalsIgnoreCase("spanishunknowns") ||
                  arg.startsWith("wordshapes(") ||
                  arg.startsWith("wordshapeconjunction(") ||
                  arg.equalsIgnoreCase("motleyUnknown") ||
@@ -704,7 +698,7 @@ class ExtractorWordShapeClassifier extends Extractor {
   // note that if you want to bring it back, make it a map from wsc to
   // cache rather than just a single cache.  -- horatio
   //private static final Map<String, String> shapes =
-  //  Generics.newHashMap();
+  //  new HashMap<String, String>();
   // --- should be:
   //private static final Map<String, Map<String, String>> ...
 
@@ -776,54 +770,3 @@ class ExtractorWordShapeConjunction extends Extractor {
 
 }
 
-
-/**
- * Extracts a boolean indicating whether the given word is preceded by
- * an auxiliary verb.
- */
-class ExtractorSpanishAuxiliaryTag extends Extractor {
-
-  public ExtractorSpanishAuxiliaryTag() {
-    super(-1, true);
-  }
-
-  @Override
-  String extract(History h, PairsHolder pH) {
-    String tag = super.extract(h, pH);
-    boolean isAux = tag.length() >= 2 && tag.substring(0, 2).equals("va");
-
-    return isAux ? "1" : "0";
-  }
-
-  @Override
-  public String toString() {
-    return "ExtractorSpanishAuxiliaryTag";
-  }
-
-}
-
-
-/**
- * Extracts a boolean indicating whether the given word is preceded by
- * a semiauxiliary verb.
- */
-class ExtractorSpanishSemiauxiliaryTag extends Extractor {
-
-  public ExtractorSpanishSemiauxiliaryTag() {
-    super(-1, true);
-  }
-
-  @Override
-  String extract(History h, PairsHolder pH) {
-    String tag = super.extract(h, pH);
-    boolean isSemiAux = tag.length() >= 2 && tag.substring(0, 2).equals("vs");
-
-    return isSemiAux ? "1" : "0";
-  }
-
-  @Override
-  public String toString() {
-    return "ExtractorSpanishSemiauxiliaryTag";
-  }
-
-}

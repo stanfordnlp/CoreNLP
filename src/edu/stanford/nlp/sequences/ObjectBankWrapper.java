@@ -31,7 +31,6 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
   private final SeqClassifierFlags flags;
   private final ObjectBank<List<IN>> wrapped;
   private final Set<String> knownLCWords;
-  private final int knownLCWordsSizeLimit;
 
 
   public ObjectBankWrapper(SeqClassifierFlags flags, ObjectBank<List<IN>> wrapped, Set<String> knownLCWords) {
@@ -39,11 +38,6 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
     this.flags = flags;
     this.wrapped = wrapped;
     this.knownLCWords = knownLCWords;
-    if (flags.maxAdditionalKnownLCWords > 0 && ((long) flags.maxAdditionalKnownLCWords) + knownLCWords.size() < Integer.MAX_VALUE) {
-      knownLCWordsSizeLimit = knownLCWords.size() + flags.maxAdditionalKnownLCWords;
-    } else {
-      knownLCWordsSizeLimit = Integer.MAX_VALUE;
-    }
   }
 
 
@@ -135,14 +129,15 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
 
       // word shape
       if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) && (!flags.useShapeStrings)) {
-        // TODO: if we pass in a FeatureFactory, as suggested by an earlier comment,
-        // we should use that FeatureFactory's getWord function
+        // TODO: if we pass in a FeatureFactory, as suggested by an
+        // earlier comment, we should use that FeatureFactory's
+        // getWord function
         String word = fl.get(CoreAnnotations.TextAnnotation.class);
         if (flags.wordFunction != null) {
           word = flags.wordFunction.apply(word);
         }
-        if (flags.useKnownLCWords && ! word.isEmpty() && knownLCWords.size() < knownLCWordsSizeLimit) {
-          int ch = word.codePointAt(0);
+        if (word.length() > 0) {
+          char ch = word.charAt(0);
           if (Character.isLowerCase(ch)) {
             knownLCWords.add(word);
           }
@@ -160,10 +155,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
         fl.set(CoreAnnotations.CharAnnotation.class,intern(fix(fl.get(CoreAnnotations.CharAnnotation.class))));
       } else {
         fl.set(CoreAnnotations.TextAnnotation.class, intern(fix(fl.get(CoreAnnotations.TextAnnotation.class))));
-        // only override GoldAnswer if not set - so that a DocumentReaderAndWriter can set it right in the first place.
-        if (fl.get(CoreAnnotations.AnswerAnnotation.class) == null) {
-          fl.set(CoreAnnotations.GoldAnswerAnnotation.class, fl.get(CoreAnnotations.AnswerAnnotation.class));
-        }
+        fl.set(CoreAnnotations.GoldAnswerAnnotation.class, fl.get(CoreAnnotations.AnswerAnnotation.class));
       }
     }
   }
@@ -242,18 +234,14 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
     }
   }
 
-  /** Change some form of IOB/IOE encoding via forms like "I-PERS" to
-   *  IO encoding as just "PERS".
-   *
-   *  @param doc The document for which the AnswerAnnotation will be changed (in place)
-   */
+
   private void mergeTags(List<IN> doc) {
     for (IN wi : doc) {
       String answer = wi.get(CoreAnnotations.AnswerAnnotation.class);
       if (answer == null) {
         continue;
       }
-      if ( ! answer.equals(flags.backgroundSymbol)) {
+      if (!answer.equals(flags.backgroundSymbol)) {
         int index = answer.indexOf('-');
         if (index >= 0) {
           answer = answer.substring(index + 1);

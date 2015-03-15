@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -17,7 +18,6 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.trees.TreeVisitor;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.util.DataFilePaths;
-import edu.stanford.nlp.util.Generics;
 
 /**
  *
@@ -69,9 +69,9 @@ public abstract class AbstractDataset implements Dataset {
     //Read the raw file as UTF-8 irrespective of output encoding
 //    treebank = new DiskTreebank(new ArabicTreeReaderFactory.ArabicRawTreeReaderFactory(true), "UTF-8");
 
-    configuredOptions = Generics.newHashSet();
+    configuredOptions = new HashSet<String>();
 
-    requiredOptions = Generics.newHashSet();
+    requiredOptions = new HashSet<String>();
     requiredOptions.add(ConfigParser.paramName);
     requiredOptions.add(ConfigParser.paramPath);
     requiredOptions.add(ConfigParser.paramEncode);
@@ -195,7 +195,7 @@ public abstract class AbstractDataset implements Dataset {
 
   protected Set<String> buildSplitMap(String path) {
     path = DataFilePaths.convert(path);
-    Set<String> fileSet = Generics.newHashSet();
+    Set<String> fileSet = new HashSet<String>();
     LineNumberReader reader = null;
     try {
       reader = new LineNumberReader(new FileReader(path));

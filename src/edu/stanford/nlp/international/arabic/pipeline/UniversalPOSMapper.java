@@ -1,6 +1,7 @@
 package edu.stanford.nlp.international.arabic.pipeline;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,7 +9,6 @@ import edu.stanford.nlp.international.arabic.ArabicMorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatures;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification.MorphoFeatureType;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Maps LDC-provided Bies mappings to the Universal POS tag set described in
@@ -28,7 +28,7 @@ public class UniversalPOSMapper extends LDCPosMapper {
   public UniversalPOSMapper(){
     super(false); //Don't add the determiner split
     
-    universalMap = Generics.newHashMap();
+    universalMap = new HashMap<String,String>();
     morphoSpec = new ArabicMorphoFeatureSpecification();
   }
   

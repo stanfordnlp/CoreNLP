@@ -1,6 +1,7 @@
 package edu.stanford.nlp.parser.tools;
 
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -12,7 +13,6 @@ import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -43,7 +43,7 @@ public class CountTrees {
     usage = sb.toString();
   }
   
-  public static final Map<String,Integer> optionArgDefinitions = Generics.newHashMap();
+  public static final Map<String,Integer> optionArgDefinitions = new HashMap<String,Integer>();
   static {
     optionArgDefinitions.put("l", 1);
     optionArgDefinitions.put("e", 1);

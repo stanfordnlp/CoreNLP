@@ -1,11 +1,9 @@
 package edu.stanford.nlp.trees.tregex;
 
 import edu.stanford.nlp.stats.IntCounter;
-import edu.stanford.nlp.util.ArrayMap;
-import edu.stanford.nlp.util.MapFactory;
-import edu.stanford.nlp.util.MutableInteger;
 
 import java.util.Map;
+import java.util.HashMap;
 
 /** A class that takes care of the stuff necessary for variable strings.
  *
@@ -17,13 +15,8 @@ class VariableStrings {
   private final IntCounter<String> numVarsSet;
 
   public VariableStrings() {
-    varsToStrings = ArrayMap.newArrayMap();
-    numVarsSet = new IntCounter<String>(MapFactory.<String, MutableInteger>arrayMapFactory());
-  }
-
-  public void reset() {
-    numVarsSet.clear();
-    varsToStrings.clear();
+    varsToStrings = new HashMap<String,String>();
+    numVarsSet = new IntCounter<String>();
   }
 
   public boolean isSet(String o) {

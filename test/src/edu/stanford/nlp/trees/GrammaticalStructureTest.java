@@ -52,20 +52,20 @@ public class GrammaticalStructureTest extends TestCase {
     // the expected dependency answers (basic)
     String[] testAnswers = new String[] {        
         "root(ROOT-0, died-2) nsubj(died-2, Sam-1) tmod(died-2, today-3)",
-        "nsubj(saw-2, I-1) root(ROOT-0, saw-2) det(book-4, the-3) dobj(saw-2, book-4) dobj(bought-7, which-5) ref(book-4, which-5) dobj(bought-7, which-5) nsubj(bought-7, you-6) rcmod(book-4, bought-7)"
+        "nsubj(saw-2, I-1) root(ROOT-0, saw-2) det(book-4, the-3) dobj(saw-2, book-4) dobj(bought-7, which-5) ref(book-4, which-5) rel(bought-7, which-5) nsubj(bought-7, you-6) rcmod(book-4, bought-7)"
     };
       
     // the expected dependency answers (collapsed dependencies)
     String[] testAnswersCollapsed = new String[] {
         "root(ROOT-0, died-2) nsubj(died-2, Sam-1) tmod(died-2, today-3)",
-        "nsubj(saw-2, I-1) root(ROOT-0, saw-2) det(book-4, the-3) dobj(saw-2, book-4) dobj(bought-7, book-4) nsubj(bought-7, you-6) rcmod(book-4, bought-7)"
+        "nsubj(saw-2, I-1) root(ROOT-0, saw-2) det(book-4, the-3) dobj(saw-2, book-4) dobj(bought-7, book-4) rel(bought-7, which-5) nsubj(bought-7, you-6) rcmod(book-4, bought-7)"
         
     };
     
     // the expected dependency answers (conjunctions processed)
     String[] testAnswersCCProcessed = new String[] {
         "root(ROOT-0, died-2) nsubj(died-2, Sam-1) tmod(died-2, today-3)",
-        "nsubj(saw-2, I-1) root(ROOT-0, saw-2) det(book-4, the-3) dobj(saw-2, book-4) dobj(bought-7, book-4) nsubj(bought-7, you-6) rcmod(book-4, bought-7)"
+        "nsubj(saw-2, I-1) root(ROOT-0, saw-2) det(book-4, the-3) dobj(saw-2, book-4) dobj(bought-7, book-4) rel(bought-7, which-5) nsubj(bought-7, you-6) rcmod(book-4, bought-7)"
     };
     
     for (int i = 0; i < testTrees.length; i++) {
@@ -92,11 +92,11 @@ public class GrammaticalStructureTest extends TestCase {
       GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
       
       assertEquals("Unexpected basic dependencies for tree "+testTree,
-          testAnswerTokens,  tokenSet(gs.typedDependencies(GrammaticalStructure.Extras.MAXIMAL)));
+          testAnswerTokens,  tokenSet(gs.typedDependencies(true)));
       assertEquals("Unexpected collapsed dependencies for tree "+testTree,
-          testAnswerCollapsedTokens,  tokenSet(gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL)));
+          testAnswerCollapsedTokens,  tokenSet(gs.typedDependenciesCollapsed(true)));
       assertEquals("Unexpected cc-processed dependencies for tree "+testTree,
-          testAnswerCCProcessedTokens,  tokenSet(gs.typedDependenciesCCprocessed(GrammaticalStructure.Extras.MAXIMAL)));
+          testAnswerCCProcessedTokens,  tokenSet(gs.typedDependenciesCCprocessed(true)));
     }
     
   }

@@ -39,8 +39,8 @@
   <property name="compile.debug"       value="true"/>
   <property name="compile.deprecation" value="false"/>
   <property name="compile.optimize"    value="true"/>
-  <property name="compile.source"      value="1.8" />
-  <property name="compile.target"      value="1.8" />
+  <property name="compile.source"      value="1.6" />
+  <property name="compile.target"      value="1.6" />
 
 
 
@@ -84,10 +84,10 @@
 
   <target name="classpath" description="Sets the classpath">
       <path id="compile.classpath">
-        <fileset dir="${basedir}">
+       <!-- <fileset dir="${basedir}/lib">
           <include name="*.jar"/>
-          <exclude name="stanford-parser*"/>
-        </fileset>
+          <exclude name="javanlp*"/>
+        </fileset> -->
       </path>
   </target>
 

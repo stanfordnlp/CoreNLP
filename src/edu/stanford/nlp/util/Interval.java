@@ -1,8 +1,6 @@
 package edu.stanford.nlp.util;
 
 import java.io.Serializable;
-import java.util.Comparator;
-import java.util.function.Function;
 
 /**
  * Represents a interval of a generic type E that is comparable.
@@ -27,14 +25,14 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
    * Flag indicating that an interval's begin point is not inclusive
    * (by default, begin points are inclusive)
    */
-  public static final int INTERVAL_OPEN_BEGIN = 0x01;
+  public static int INTERVAL_OPEN_BEGIN = 0x01;
   /**
    * Flag indicating that an interval's end point is not inclusive
    * (by default, begin points are inclusive)
    */
-  public static final int INTERVAL_OPEN_END = 0x02;
+  public static int INTERVAL_OPEN_END = 0x02;
 
-  private final int flags;
+  private int flags;
 
   /**
    * RelType gives the basic types of relations between two intervals
@@ -392,16 +390,15 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
   }
 
   /**
-   * Returns this interval.
+   * Returns this interval
    * @return this interval
    */
-  @Override
   public Interval<E> getInterval() {
     return this;
   }
 
   /**
-   * Returns the start point.
+   * Returns the start point
    * @return the start point of this interval
    */
   public E getBegin()
@@ -410,7 +407,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
   }
 
   /**
-   * Returns the end point.
+   * Returns the end point
    * @return the end point of this interval
    */
   public E getEnd()
@@ -444,20 +441,9 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return (check1 && check2);
   }
 
-  public boolean containsOpen(E p)
-  {
-    // Check that the start point is before p
-    boolean check1 = first.compareTo(p) <= 0;
-    // Check that the end point is after p
-    boolean check2 = second.compareTo(p) >= 0;
-    return (check1 && check2);
-  }
-
   public boolean contains(Interval<E> other)
   {
-    boolean containsOtherBegin = (other.includesBegin())? contains(other.getBegin()): containsOpen(other.getBegin());
-    boolean containsOtherEnd = (other.includesEnd())? contains(other.getEnd()): containsOpen(other.getEnd());
-    return (containsOtherBegin && containsOtherEnd);
+    return (contains(other.getBegin()) && contains(other.getEnd()));
   }
 
     /**
@@ -629,7 +615,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     }
   }
 
-  protected static int toRelFlags(int comp, int shift)
+  protected int toRelFlags(int comp, int shift)
   {
     int flags = 0;
     if (comp == 0) {
@@ -666,7 +652,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     return flags;
   }
 
-  protected static int addIntervalRelationFlags(int flags, boolean checkFuzzy) {
+  protected int addIntervalRelationFlags(int flags, boolean checkFuzzy) {
     int f11 = extractRelationSubflags(flags, REL_FLAGS_SS_SHIFT);
     int f22 = extractRelationSubflags(flags, REL_FLAGS_EE_SHIFT);
     int f12 = extractRelationSubflags(flags, REL_FLAGS_SE_SHIFT);
@@ -740,7 +726,7 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
 
   /**
    * Utility function to check if a particular flag is set
-   *   given a particular set of flags.
+   *   given a particular set of flags
    * @param flags flags to check
    * @param flag bit for flag of interest (is this flag set or not)
    * @return true if flag is set for flags
@@ -882,29 +868,6 @@ public class Interval<E extends Comparable<E>> extends Pair<E,E> implements HasI
     result = 31 * result + flags;
     return result;
   }
-
-  public static double getMidPoint(Interval<Integer> interval) {
-    return (interval.getBegin() + interval.getEnd())/2.0;
-  }
-
-  public static double getRadius(Interval<Integer> interval) {
-    return (interval.getEnd() - interval.getBegin())/2.0;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T extends HasInterval<Integer>> Comparator<T> lengthEndpointsComparator() {
-    return ErasureUtils.uncheckedCast(HasInterval.LENGTH_ENDPOINTS_COMPARATOR);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T extends HasInterval<Integer>> Function<T, Double> lengthScorer() {
-    return ErasureUtils.uncheckedCast(LENGTH_SCORER);
-  }
-
-  public static final Function<HasInterval<Integer>, Double> LENGTH_SCORER = in -> {
-    Interval<Integer> interval = in.getInterval();
-    return (double) (interval.getEnd() - interval.getBegin());
-  };
 
   private static final long serialVersionUID = 1;
 }

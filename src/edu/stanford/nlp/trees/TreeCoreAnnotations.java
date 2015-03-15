@@ -1,7 +1,7 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.CoreAnnotation;
-import edu.stanford.nlp.ling.CoreLabel;
+
 
 /**
  * Set of common annotations for {@link edu.stanford.nlp.util.CoreMap}s 
@@ -30,32 +30,17 @@ public class TreeCoreAnnotations {
   }
 
   /**
-   * The CoreMap key for getting the binarized version of the
-   * syntactic parse tree of a sentence.
-   *
-   * This key is typically set on sentence annotations.  It is only
-   * set if the parser annotator was specifically set to parse with
-   * this (parse.saveBinarized).  The sentiment annotator requires
-   * this kind of tree, but otherwise it is not typically used.
-   */
-  public static class BinarizedTreeAnnotation implements CoreAnnotation<Tree> {
-    public Class<Tree> getType() {
-      return Tree.class;
-    }
-  }
-
-  /**
    * The standard key for storing a head word in the map as a pointer to
-   * the head label.
+   * another node.
    */
-  public static class HeadWordLabelAnnotation implements CoreAnnotation<CoreLabel> {
-    public Class<CoreLabel> getType() {  return CoreLabel.class; } }
+  public static class HeadWordAnnotation implements CoreAnnotation<Tree> {
+    public Class<Tree> getType() {  return Tree.class; } }
 
   /**
    * The standard key for storing a head tag in the map as a pointer to
-   * the head label.
+   * another node.
    */
-  public static class HeadTagLabelAnnotation implements CoreAnnotation<CoreLabel> {
-    public Class<CoreLabel> getType() {  return CoreLabel.class; } }
+  public static class HeadTagAnnotation implements CoreAnnotation<Tree> {
+    public Class<Tree> getType() {  return Tree.class; } }
 
 }

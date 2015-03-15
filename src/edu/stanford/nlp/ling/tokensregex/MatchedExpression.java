@@ -6,15 +6,15 @@ import edu.stanford.nlp.pipeline.ChunkAnnotationUtils;
 import edu.stanford.nlp.pipeline.CoreMapAttributeAggregator;
 import edu.stanford.nlp.util.Comparators;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.function.Function;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Interval;
 import edu.stanford.nlp.util.IntervalTree;
+import edu.stanford.nlp.util.TypesafeMap;
 
 import java.util.*;
 
 /**
- * Matched Expression represents a chunk of text that was matched from an original segment of text).
+ * Matched Expression represents a chunk of text that was matched from an original segment of text)
  *
  * @author Angel Chang
  */
@@ -22,14 +22,7 @@ public class MatchedExpression {
   /** Text representing the matched expression */
   protected String text;
 
-  /**
-   * Character offsets (relative to original text).
-   * TODO: Fix up
-   *  If matched using regular text patterns,
-   *     the character offsets are with respect to the annotation (usually sentence)
-   *     from which the text was matched against
-   *  If matched using tokens, the character offsets are with respect to the overall document
-   */
+  /** Character offsets (relative to original text) */
   protected Interval<Integer> charOffsets;
   /**Token offsets (relative to original text tokenization) */
   protected Interval<Integer> tokenOffsets;
@@ -37,7 +30,7 @@ public class MatchedExpression {
   protected Interval<Integer> chunkOffsets;
   protected CoreMap annotation;
 
-  // TODO: Should we keep some context from the source so we can perform more complex evaluation?
+  // TODO: Should we keep some context from the source so we can perform more complex evaluation? */
   /** Function indicating how to extract an value from annotation built from this expression */
   protected SingleAnnotationExtractor extractFunc;
 
@@ -67,12 +60,11 @@ public class MatchedExpression {
     public Function<MatchedExpression,?> resultAnnotationExtractor;
     public Map<Class, CoreMapAttributeAggregator> tokensAggregators;
 
-    @Override
     public Value apply(CoreMap in) {
       return valueExtractor.apply(in);
     }
 
-    private static void setAnnotations(CoreMap cm, List<Class> annotationKeys, Object obj) {
+    private void setAnnotations(CoreMap cm, List<Class> annotationKeys, Object obj) {
       if (annotationKeys.size() > 1 && obj instanceof List) {
         // List of annotationKeys, obj also list, we should try to match the objects to annotationKeys
         List list = (List) obj;
@@ -314,8 +306,8 @@ public class MatchedExpression {
                                                       List<? extends MatchedExpression> matchedExprs)
   {
     if (matchedExprs == null) return list;
-    Map<Integer, Integer> tokenBeginToListIndexMap = new HashMap<Integer, Integer>();//Generics.newHashMap();
-    Map<Integer, Integer> tokenEndToListIndexMap = new HashMap<Integer, Integer>();//Generics.newHashMap();
+    Map<Integer, Integer> tokenBeginToListIndexMap = new HashMap<Integer, Integer>();
+    Map<Integer, Integer> tokenEndToListIndexMap = new HashMap<Integer, Integer>();
     for (int i = 0; i < list.size(); i++) {
       CoreMap cm = list.get(i);
       if (cm.has(CoreAnnotations.TokenBeginAnnotation.class) && cm.has(CoreAnnotations.TokenEndAnnotation.class)) {
@@ -353,12 +345,12 @@ public class MatchedExpression {
   public static <T extends MatchedExpression> List<T> removeNullValues(List<T> chunks)
   {
     List<T> okayChunks = new ArrayList<T>(chunks.size());
-    for (T chunk : chunks) {
-      Value v = chunk.value;
+    for (int i = 0; i < chunks.size(); i++) {
+      Value v = chunks.get(i).value;
       if (v == null || v.get() == null) {
         //skip
       } else {
-        okayChunks.add(chunk);
+        okayChunks.add(chunks.get(i));
       }
     }
     return okayChunks;
@@ -367,6 +359,7 @@ public class MatchedExpression {
   public static <T extends MatchedExpression> List<T> removeNested(List<T> chunks)
   {
     if (chunks.size() > 1) {
+      // TODO: presort chunks by priority, length, given order
       for (int i = 0; i < chunks.size(); i++) {
         chunks.get(i).order = i;
       }
@@ -379,6 +372,7 @@ public class MatchedExpression {
   public static <T extends MatchedExpression> List<T> removeOverlapping(List<T> chunks)
   {
     if (chunks.size() > 1) {
+      // TODO: presort chunks by priority, length, given order
       for (int i = 0; i < chunks.size(); i++) {
         chunks.get(i).order = i;
       }
@@ -389,45 +383,56 @@ public class MatchedExpression {
   }
 
   @SuppressWarnings("unused")
-  public static final Function<CoreMap, Interval<Integer>> COREMAP_TO_TOKEN_OFFSETS_INTERVAL_FUNC =
-      in -> Interval.toInterval(
-            in.get(CoreAnnotations.TokenBeginAnnotation.class),
-            in.get(CoreAnnotations.TokenEndAnnotation.class));
+  public final static Function<CoreMap, Interval<Integer>> COREMAP_TO_TOKEN_OFFSETS_INTERVAL_FUNC =
+    new Function<CoreMap, Interval<Integer>>() {
+      public Interval<Integer> apply(CoreMap in) {
+        return Interval.toInterval(
+              in.get(CoreAnnotations.TokenBeginAnnotation.class),
+              in.get(CoreAnnotations.TokenEndAnnotation.class));
+      }
+    };
 
-  public static final Function<CoreMap, Interval<Integer>> COREMAP_TO_CHAR_OFFSETS_INTERVAL_FUNC =
-      in -> Interval.toInterval(
-              in.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
-              in.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+  public final static Function<CoreMap, Interval<Integer>> COREMAP_TO_CHAR_OFFSETS_INTERVAL_FUNC =
+          new Function<CoreMap, Interval<Integer>>() {
+            public Interval<Integer> apply(CoreMap in) {
+              return Interval.toInterval(
+                      in.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class),
+                      in.get(CoreAnnotations.CharacterOffsetEndAnnotation.class));
+            }
+          };
 
-  public static final Function<MatchedExpression, Interval<Integer>> EXPR_TO_TOKEN_OFFSETS_INTERVAL_FUNC =
+  public static Function<MatchedExpression, Interval<Integer>> EXPR_TO_TOKEN_OFFSETS_INTERVAL_FUNC =
     new Function<MatchedExpression, Interval<Integer>>() {
-      @Override
       public Interval<Integer> apply(MatchedExpression in) {
         return in.tokenOffsets;
       }
     };
 
-  public static final Comparator<MatchedExpression> EXPR_PRIORITY_COMPARATOR =
-      (e1, e2) -> {
-        double s1 = e1.getPriority();
-        double s2 = e2.getPriority();
-        if (s1 == s2) {
-          return 0;
-        } else {
-          return (s1 > s2)? -1:1;
-        }
-      };
+  public final static Comparator<MatchedExpression> EXPR_PRIORITY_COMPARATOR =
+    new Comparator<MatchedExpression>() {
+    public int compare(MatchedExpression e1, MatchedExpression e2) {
+      double s1 = e1.getPriority();
+      double s2 = e2.getPriority();
+      if (s1 == s2) {
+        return 0;
+      } else {
+        return (s1 > s2)? -1:1;
+      }
+    }
+  };
 
-  public static final Comparator<MatchedExpression> EXPR_ORDER_COMPARATOR =
-      (e1, e2) -> {
-        int s1 = e1.getOrder();
-        int s2 = e2.getOrder();
-        if (s1 == s2) {
-          return 0;
-        } else {
-          return (s1 < s2)? -1:1;
-        }
-      };
+  public final static Comparator<MatchedExpression> EXPR_ORDER_COMPARATOR =
+    new Comparator<MatchedExpression>() {
+    public int compare(MatchedExpression e1, MatchedExpression e2) {
+      int s1 = e1.getOrder();
+      int s2 = e2.getOrder();
+      if (s1 == s2) {
+        return 0;
+      } else {
+        return (s1 < s2)? -1:1;
+      }
+    }
+  };
 
   // Compares two matched expressions.
   // Use to order matched expressions by:
@@ -436,9 +441,8 @@ public class MatchedExpression {
   // If e1 and e2 are the same length:
   //    Returns -1 if e1 has value, but e2 doesn't (1 if e2 has value, but e1 doesn't)
   //    Otherwise, both e1 and e2 has value or no value
-  public static final Comparator<MatchedExpression> EXPR_LENGTH_COMPARATOR =
+  public final static Comparator<MatchedExpression> EXPR_LENGTH_COMPARATOR =
     new Comparator<MatchedExpression>() {
-      @Override
       public int compare(MatchedExpression e1, MatchedExpression e2) {
         if (e1.getValue() == null && e2.getValue() != null) {
           return 1;
@@ -456,17 +460,15 @@ public class MatchedExpression {
       }
     };
 
-  public static final Comparator<MatchedExpression> EXPR_TOKEN_OFFSET_COMPARATOR =
+  public final static Comparator<MatchedExpression> EXPR_TOKEN_OFFSET_COMPARATOR =
     new Comparator<MatchedExpression>() {
-      @Override
       public int compare(MatchedExpression e1, MatchedExpression e2) {
         return (e1.tokenOffsets.compareTo(e2.tokenOffsets));
       }
     };
 
-  public static final Comparator<MatchedExpression> EXPR_TOKEN_OFFSETS_NESTED_FIRST_COMPARATOR =
+  public final static Comparator<MatchedExpression> EXPR_TOKEN_OFFSETS_NESTED_FIRST_COMPARATOR =
     new Comparator<MatchedExpression>() {
-      @Override
       public int compare(MatchedExpression e1, MatchedExpression e2) {
         Interval.RelType rel = e1.tokenOffsets.getRelation(e2.tokenOffsets);
         if (rel.equals(Interval.RelType.CONTAIN)) {
@@ -479,24 +481,31 @@ public class MatchedExpression {
       }
     };
 
+  public final static Comparator<MatchedExpression> EXPR_TOKEN_OFFSETS_CONTAINS_FIRST_COMPARATOR =
+          new Comparator<MatchedExpression>() {
+            public int compare(MatchedExpression e1, MatchedExpression e2) {
+              Interval.RelType rel = e1.tokenOffsets.getRelation(e2.tokenOffsets);
+              if (rel.equals(Interval.RelType.CONTAIN)) {
+                return -1;
+              } else if (rel.equals(Interval.RelType.INSIDE)) {
+                return 1;
+              } else {
+                return 0;
+              }
+            }
+          };
+
   // Compares two matched expressions.
   // Use to order matched expressions by:
    //   score
   //    length (longest first), then whether it has value or not (has value first),
   //    original order
-  //    and then beginning token offset (smaller offset first)
-  public static final Comparator<MatchedExpression> EXPR_PRIORITY_LENGTH_COMPARATOR =
-          Comparators.chain(EXPR_PRIORITY_COMPARATOR, EXPR_LENGTH_COMPARATOR,
+  //    and then begining token offset (smaller offset first)
+  public final static Comparator<MatchedExpression> EXPR_PRIORITY_LENGTH_COMPARATOR =
+          Comparators.chain(EXPR_TOKEN_OFFSETS_CONTAINS_FIRST_COMPARATOR, EXPR_PRIORITY_COMPARATOR, EXPR_LENGTH_COMPARATOR,
                   EXPR_ORDER_COMPARATOR, EXPR_TOKEN_OFFSET_COMPARATOR);
 
-  public static final Comparator<MatchedExpression> EXPR_LENGTH_PRIORITY_COMPARATOR =
-          Comparators.chain(EXPR_LENGTH_COMPARATOR, EXPR_PRIORITY_COMPARATOR,
+  public final static Comparator<MatchedExpression> EXPR_LENGTH_PRIORITY_COMPARATOR =
+          Comparators.chain(EXPR_TOKEN_OFFSETS_CONTAINS_FIRST_COMPARATOR, EXPR_LENGTH_COMPARATOR, EXPR_PRIORITY_COMPARATOR,
                   EXPR_ORDER_COMPARATOR, EXPR_TOKEN_OFFSET_COMPARATOR);
-
-  public final static Function<MatchedExpression, Double> EXPR_WEIGHT_SCORER = new Function<MatchedExpression, Double>() {
-    @Override
-    public Double apply(MatchedExpression in) {
-      return in.weight;
-    }
-  };
 }

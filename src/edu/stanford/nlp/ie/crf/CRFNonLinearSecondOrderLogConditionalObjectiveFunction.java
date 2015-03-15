@@ -4,6 +4,8 @@ import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.optimization.AbstractCachingDiffFunction;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.Triple;
 import edu.stanford.nlp.util.Quadruple;
 
 import java.util.*;
@@ -75,7 +77,7 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
       return HUBER_PRIOR;
     } else if ("QUARTIC".equalsIgnoreCase(priorTypeStr)) {
       return QUARTIC_PRIOR;
-    } else if (priorTypeStr.equalsIgnoreCase("NONE")) {
+    } else if ("NONE".equalsIgnoreCase(priorTypeStr)) {
       return NO_PRIOR;
     } else {
       throw new IllegalArgumentException("Unknown prior type: " + priorTypeStr);
@@ -150,7 +152,7 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
     return domainDimension;
   }
 
-  @Override
+  @Override 
   public double[] initial() {
     double[] initial = new double[domainDimension()];
     // randomly initialize weights
@@ -346,8 +348,9 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
     Quadruple<double[][], double[][], double[][], double[][]> allParams = separateWeights(x);
     double[][] W4Edge = allParams.first(); // inputLayerWeights4Edge
     double[][] U4Edge = allParams.second(); // outputLayerWeights4Edge
-    double[][] W = allParams.third(); // inputLayerWeights
-    double[][] U = allParams.fourth(); // outputLayerWeights
+    double[][] W = allParams.third(); // inputLayerWeights 
+    double[][] U = allParams.fourth(); // outputLayerWeights 
+
     return new NonLinearSecondOrderCliquePotentialFunction(W4Edge, U4Edge, W, U, flags);
   }
 
@@ -363,8 +366,8 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
     Quadruple<double[][], double[][], double[][], double[][]> allParams = separateWeights(x);
     double[][] W4Edge = allParams.first(); // inputLayerWeights4Edge
     double[][] U4Edge = allParams.second(); // outputLayerWeights4Edge
-    double[][] W = allParams.third(); // inputLayerWeights
-    double[][] U = allParams.fourth(); // outputLayerWeights
+    double[][] W = allParams.third(); // inputLayerWeights 
+    double[][] U = allParams.fourth(); // outputLayerWeights 
 
     double[][] Y4Edge = null;
     double[][] Y = null;
@@ -396,11 +399,9 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
       int[][][] docData = data[m];
       int[] docLabels = labels[m];
 
-      NonLinearSecondOrderCliquePotentialFunction cliquePotentialFunction = new NonLinearSecondOrderCliquePotentialFunction(W4Edge, U4Edge, W, U, flags);
-
       // make a clique tree for this document
       CRFCliqueTree cliqueTree = CRFCliqueTree.getCalibratedCliqueTree(docData, labelIndices, numClasses, classIndex,
-        backgroundSymbol, cliquePotentialFunction, null);
+        backgroundSymbol, new NonLinearSecondOrderCliquePotentialFunction(W4Edge, U4Edge, W, U, flags), null);
 
       // compute the log probability of the document given the model with the parameters x
       int[] given = new int[window - 1];
@@ -448,20 +449,20 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
           if (j == 0) {
             inputSize = inputLayerSize;
             outputSize = outputLayerSize;
-            As = cliquePotentialFunction.hiddenLayerOutput(W, cliqueFeatures, flags, null, j+1);
+            As = NonLinearCliquePotentialFunction.hiddenLayerOutput(W, cliqueFeatures, flags, null);
           } else {
             inputSize = inputLayerSize4Edge;
             outputSize = outputLayerSize4Edge;
-            As = cliquePotentialFunction.hiddenLayerOutput(W4Edge, cliqueFeatures, flags, null, j+1);
+            As = NonLinearCliquePotentialFunction.hiddenLayerOutput(W4Edge, cliqueFeatures, flags, null);
           }
 
           fDeriv = new double[inputSize];
           double fD = 0;
           for (int q = 0; q < inputSize; q++) {
             if (useSigmoid) {
-              fD = As[q] * (1 - As[q]);
+              fD = As[q] * (1 - As[q]); 
             } else {
-              fD = 1 - As[q] * As[q];
+              fD = 1 - As[q] * As[q]; 
             }
             fDeriv[q] = fD;
           }
@@ -612,7 +613,7 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
               }
             }
           }
-
+          
           for (int k = 0; k < labelIndex.size(); k++) { // labelIndex.size() == numClasses
             int[] label = labelIndex.get(k).getLabel();
             double p = cliqueTree.prob(i, label); // probability of these labels occurring in this clique with these features
@@ -817,5 +818,4 @@ public class CRFNonLinearSecondOrderLogConditionalObjectiveFunction extends Abst
     }
     return d;
   }
-
 }

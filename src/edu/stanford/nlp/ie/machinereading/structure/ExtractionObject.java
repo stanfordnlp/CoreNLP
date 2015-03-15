@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -13,7 +14,6 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -115,7 +115,8 @@ public class ExtractionObject implements Serializable {
   public boolean equals(Object other) {
     if(! (other instanceof ExtractionObject)) return false;
     ExtractionObject o = (ExtractionObject) other;
-    return o.objectId.equals(objectId) && o.sentence.get(CoreAnnotations.TextAnnotation.class).equals(sentence.get(CoreAnnotations.TextAnnotation.class));
+    if(o.objectId.equals(objectId) && o.sentence == sentence) return true;
+    return false;
   }
 
   static class CompByExtent implements Comparator<ExtractionObject> {
@@ -195,7 +196,7 @@ public class ExtractionObject implements Serializable {
   public static String concatenateTypes(String t1, String t2) {
     String [] t1Toks = t1.split(TYPE_SEP);
     String [] t2Toks = t2.split(TYPE_SEP);
-    Set<String> uniqueTypes = Generics.newHashSet();
+    Set<String> uniqueTypes = new HashSet<String>();
     for(String t: t1Toks) uniqueTypes.add(t);
     for(String t: t2Toks) uniqueTypes.add(t);
     String [] types = new String[uniqueTypes.size()];
@@ -245,7 +246,6 @@ public class ExtractionObject implements Serializable {
    * @param nilLabel
    */
   public boolean printableObject(double beam, String nilLabel) {
-    if (typeProbabilities == null) { return false; }
     List<Pair<String, Double>> sorted = Counters.toDescendingMagnitudeSortedListWithCounts(typeProbabilities);
     
     // first choice not nil

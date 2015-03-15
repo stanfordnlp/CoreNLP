@@ -1,11 +1,12 @@
 package edu.stanford.nlp.wordseg.demo;
 
 import java.io.*;
-import java.util.List;
 import java.util.Properties;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
+import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 
 
 /** This is a very simple demo of calling the Chinese Word Segmenter
@@ -23,32 +24,25 @@ import edu.stanford.nlp.ling.CoreLabel;
 
 public class SegDemo {
 
-  private static final String basedir = System.getProperty("SegDemo", "data");
-
   public static void main(String[] args) throws Exception {
-    System.setOut(new PrintStream(System.out, true, "utf-8"));
+    if (args.length != 1) {
+      System.err.println("usage: java -mx1g SegDemo filename");
+      return;
+    }
 
     Properties props = new Properties();
-    props.setProperty("sighanCorporaDict", basedir);
+    props.setProperty("sighanCorporaDict", "data");
     // props.setProperty("NormalizationTable", "data/norm.simp.utf8");
     // props.setProperty("normTableEncoding", "UTF-8");
     // below is needed because CTBSegDocumentIteratorFactory accesses it
-    props.setProperty("serDictionary", basedir + "/dict-chris6.ser.gz");
-    if (args.length > 0) {
-      props.setProperty("testFile", args[0]);
-    }
+    props.setProperty("serDictionary","data/dict-chris6.ser.gz");
+    props.setProperty("testFile", args[0]);
     props.setProperty("inputEncoding", "UTF-8");
     props.setProperty("sighanPostProcessing", "true");
 
     CRFClassifier<CoreLabel> segmenter = new CRFClassifier<CoreLabel>(props);
-    segmenter.loadClassifierNoExceptions(basedir + "/ctb.gz", props);
-    for (String filename : args) {
-      segmenter.classifyAndWriteAnswers(filename);
-    }
-
-    String sample = "我住在美国。";
-    List<String> segmented = segmenter.segmentString(sample);
-    System.out.println(segmented);
+    segmenter.loadClassifierNoExceptions("data/ctb.gz", props);
+    segmenter.classifyAndWriteAnswers(args[0]);
   }
 
 }

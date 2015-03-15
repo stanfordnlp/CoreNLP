@@ -1,11 +1,10 @@
 package edu.stanford.nlp.optimization;
 
-import java.util.function.Function;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Function;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.Arrays;
 
 /**
@@ -19,7 +18,7 @@ public class GoldenSectionLineSearch implements LineSearcher {
   private static final double GOLDEN_SECTION = (GOLDEN_RATIO / (1.0 + GOLDEN_RATIO));
   private static boolean VERBOSE = true;
 
-  private Map<Double, Double> memory = Generics.newHashMap(); //remember where it was called and what were the values
+  private HashMap<Double, Double> memory = new HashMap<Double, Double>(); //remember where it was called and what were the values
   private boolean geometric;
 
   private double tol;
@@ -167,7 +166,7 @@ public class GoldenSectionLineSearch implements LineSearcher {
 
   public void discretizeCompute(Function<Double, Double> function, int numPoints, double low, double high) {
     double inc = (high - low) / numPoints;
-    memory = Generics.newHashMap();
+    memory = new HashMap<Double, Double>();
     for (int i = 0; i < numPoints; i++) {
       double x = low + i * inc;
       double y = function.apply(x);
@@ -197,12 +196,25 @@ public class GoldenSectionLineSearch implements LineSearcher {
   public static void main(String[] args) {
     GoldenSectionLineSearch min =
         new GoldenSectionLineSearch(true, 0.00001, 0.001, 121.0);
-    Function<Double, Double> f1 = x -> Math.log(x * x - x + 1);
+    Function<Double, Double> f1 = new Function<Double, Double>() {
+      public Double apply(Double x) {
+        return Math.log(x * x - x + 1);
+      }
+    };
     System.out.println(min.minimize(f1));
     System.out.println();
 
     min = new GoldenSectionLineSearch(false, 0.00001, 0.0, 1.0);
-    Function<Double,Double> f2 = x -> x < 0.1 ? 0.0: (x > 0.2 ? 0.0: (x - 0.1) * (x - 0.2));
+    Function<Double,Double> f2 = new Function<Double,Double>() {
+       public Double apply(Double x) {
+         // this function used to fail in Galen's version; min should be 0.2
+         // return - x * (2 * x - 1) * (x - 0.8);
+         // this function fails if you don't find an initial bracketing
+         return x < 0.1 ? 0.0: (x > 0.2 ? 0.0: (x - 0.1) * (x - 0.2));
+         // return - Math.sin(x * Math.PI);
+         // return -(3 + 6 * x - 4 * x * x);
+       }
+    };
 
     System.out.println(min.minimize(f2));
   } // end main

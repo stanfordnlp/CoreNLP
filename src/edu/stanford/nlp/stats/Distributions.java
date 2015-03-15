@@ -1,8 +1,7 @@
 package edu.stanford.nlp.stats;
 
+import java.util.HashSet;
 import java.util.Set;
-
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Static methods for operating on {@link Distributions}s.
@@ -26,7 +25,7 @@ public class Distributions {
       throw new RuntimeException("Tried to compare two Distribution<K> objects but d1.numberOfKeys != d2.numberOfKeys");
     }
 
-    Set<K> allKeys = Generics.newHashSet(d1.getCounter().keySet());
+    Set<K> allKeys = new HashSet<K>(d1.getCounter().keySet());
     allKeys.addAll(d2.getCounter().keySet());
     if (allKeys.size() > d1.getNumberOfKeys()){
       throw new RuntimeException("Tried to compare two Distribution<K> objects but d1.counter intersect d2.counter > numberOfKeys");
@@ -126,7 +125,7 @@ public class Distributions {
         p2 = (1.0 - assignedMass2) / numKeysRemaining;
         double logFract = Math.log(p1 / p2);
         if (logFract == Double.POSITIVE_INFINITY) {
-          System.out.println("Distributions.klDivergence (remaining mass) returning +inf: p1=" + p1 + ", p2=" +p2);
+          System.out.println("Didtributions.kldivergence (remaining mass) returning +inf: p1=" + p1 + ", p2=" +p2);
           System.out.flush();
           return Double.POSITIVE_INFINITY; // can't recover
         }
@@ -136,7 +135,7 @@ public class Distributions {
     return result;
   }
 
-  /**
+    /**
    * Calculates the Jensen-Shannon divergence between the two distributions.
    * That is, it calculates 1/2 [KL(d1 || avg(d1,d2)) + KL(d2 || avg(d1,d2))] .
    *
@@ -150,7 +149,7 @@ public class Distributions {
     return js;
   }
 
-  /**
+    /**
    * Calculates the skew divergence between the two distributions.
    * That is, it calculates KL(d1 || (d2*skew + d1*(1-skew))) .
    * In other words, how well can d1 be represented by a "smoothed" d2.

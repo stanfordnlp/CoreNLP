@@ -1,11 +1,12 @@
 package edu.stanford.nlp.ie;
 
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.HashIndex;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -13,7 +14,6 @@ import java.util.regex.Pattern;
 
 /**
  * A class for holding Chinese morphological features used for word segmentation and POS tagging.
- *
  * @author Galen Andrew
  */
 public class ChineseMorphFeatureSets implements Serializable {
@@ -21,8 +21,8 @@ public class ChineseMorphFeatureSets implements Serializable {
   private static final long serialVersionUID = -1055526945031459198L;
 
   private Index<String> featIndex = new HashIndex<String>();
-  private Map<String, Set<Character>> singletonFeatures = Generics.newHashMap();
-  private Map<String, Pair<Set<Character>, Set<Character>>> affixFeatures = Generics.newHashMap();
+  private Map<String, Set<Character>> singletonFeatures = new HashMap<String, Set<Character>>();
+  private Map<String, Pair<Set<Character>, Set<Character>>> affixFeatures = new HashMap<String, Pair<Set<Character>, Set<Character>>>();
 
   public Map<String, Set<Character>> getSingletonFeatures() {
     return singletonFeatures;
@@ -35,7 +35,11 @@ public class ChineseMorphFeatureSets implements Serializable {
   public ChineseMorphFeatureSets(String featureDir) {
     try {
       File dir = new File(featureDir);
-      File[] files = dir.listFiles((dir1, name) -> name.endsWith(".gb"));
+      File[] files = dir.listFiles(new FilenameFilter() {
+        public boolean accept(File dir, String name) {
+          return name.endsWith(".gb");
+        }
+      });
       for (File file : files) {
         getFeatures(file);
       }
@@ -71,7 +75,7 @@ public class ChineseMorphFeatureSets implements Serializable {
     featIndex.add(singleFeatName);
     String singleFeatIndexString = Integer.toString(featIndex.indexOf(singleFeatName));
 
-    Set<Character> featureSet = Generics.newHashSet();
+    Set<Character> featureSet = new HashSet<Character>();
     String line;
     Pattern typedDoubleFeatPattern = Pattern.compile("([A-Za-z]+)\\s+(.)\\s+(.)\\s*");
     Pattern typedSingleFeatPattern = Pattern.compile("([A-Za-z]+)\\s+(.)\\s*");
@@ -134,7 +138,7 @@ public class ChineseMorphFeatureSets implements Serializable {
           } else {
             p.setSecond(featureSet);
           }
-          featureSet = Generics.newHashSet();
+          featureSet = new HashSet<Character>();
         }
         featType = FeatType.PREFIX;
         if (line.startsWith("prefix")) {
@@ -171,12 +175,12 @@ public class ChineseMorphFeatureSets implements Serializable {
     if (isPrefix) {
       feature = p.first();
       if (feature == null) {
-        p.setFirst(feature = Generics.newHashSet());
+        p.setFirst(feature = new HashSet<Character>());
       }
     } else {
       feature = p.second();
       if (feature == null) {
-        p.setSecond(feature = Generics.newHashSet());
+        p.setSecond(feature = new HashSet<Character>());
       }
     }
     feature.add(featChar);

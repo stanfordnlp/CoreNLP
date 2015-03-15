@@ -29,14 +29,14 @@ public class ParentAnnotationStats implements TreeVisitor {
 
   private final boolean doTags;
 
-  private Map<String,ClassicCounter<List<String>>> nodeRules = Generics.newHashMap();
-  private Map<List<String>,ClassicCounter<List<String>>> pRules = Generics.newHashMap();
-  private Map<List<String>,ClassicCounter<List<String>>> gPRules = Generics.newHashMap();
+  private Map<String,ClassicCounter<List<String>>> nodeRules = new HashMap<String,ClassicCounter<List<String>>>();
+  private Map<List<String>,ClassicCounter<List<String>>> pRules = new HashMap<List<String>,ClassicCounter<List<String>>>();
+  private Map<List<String>,ClassicCounter<List<String>>> gPRules = new HashMap<List<String>,ClassicCounter<List<String>>>();
 
   // corresponding ones for tags
-  private Map<String,ClassicCounter<List<String>>> tagNodeRules = Generics.newHashMap();
-  private Map<List<String>,ClassicCounter<List<String>>> tagPRules = Generics.newHashMap();
-  private Map<List<String>,ClassicCounter<List<String>>> tagGPRules = Generics.newHashMap();
+  private Map<String,ClassicCounter<List<String>>> tagNodeRules = new HashMap<String,ClassicCounter<List<String>>>();
+  private Map<List<String>,ClassicCounter<List<String>>> tagPRules = new HashMap<List<String>,ClassicCounter<List<String>>>();
+  private Map<List<String>,ClassicCounter<List<String>>> tagGPRules = new HashMap<List<String>,ClassicCounter<List<String>>>();
 
   /**
    * Minimum support * KL to be included in output and as feature
@@ -155,7 +155,11 @@ public class ParentAnnotationStats implements TreeVisitor {
       }
       System.out.println("----");
       System.out.println("Sorted descending support * KL");
-      Collections.sort(answers, (o1, o2) -> o2.second().compareTo(o1.second()));
+      Collections.sort(answers, new Comparator<Pair<List<String>, Double>>() {
+        public int compare(Pair<List<String>, Double> o1, Pair<List<String>, Double> o2) {
+          return o2.second().compareTo(o1.second());
+        }
+      });
       for (int i = 0, size = answers.size(); i < size; i++) {
         Pair p = (Pair) answers.get(i);
         double psd = ((Double) p.second()).doubleValue();
@@ -251,7 +255,11 @@ public class ParentAnnotationStats implements TreeVisitor {
       }
       System.out.println("----");
       System.out.println("Sorted descending support * KL");
-      Collections.sort(answers, (o1, o2) -> o2.second().compareTo(o1.second()));
+      Collections.sort(answers, new Comparator<Pair<List<String>, Double>>() {
+          public int compare(Pair<List<String>, Double> o1, Pair<List<String>, Double> o2) {
+            return o2.second().compareTo(o1.second());
+          }
+        });
       for (int i = 0, size = answers.size(); i < size; i++) {
         Pair p = (Pair) answers.get(i);
         double psd = ((Double) p.second()).doubleValue();
@@ -323,7 +331,11 @@ public class ParentAnnotationStats implements TreeVisitor {
           answers.add(new Pair<List<String>, Double>(key, new Double(kl * support2)));
         }
       }
-      Collections.sort(answers, (o1, o2) -> o2.second().compareTo(o1.second()));
+      Collections.sort(answers, new Comparator<Pair<List<String>,Double>>() {
+          public int compare(Pair<List<String>, Double> o1, Pair<List<String>, Double> o2) {
+            return o2.second().compareTo(o1.second());
+          }
+        });
       for (int i = 0, size = answers.size(); i < size; i++) {
         Pair<List<String>,Double> p = answers.get(i);
         double psd = p.second().doubleValue();
@@ -399,7 +411,11 @@ public class ParentAnnotationStats implements TreeVisitor {
           answers.add(new Pair<List<String>,Double>(key, new Double(kl * support2)));
         }
       }
-      Collections.sort(answers, (o1, o2) -> o2.second().compareTo(o1.second()));
+      Collections.sort(answers, new Comparator<Pair<List<String>, Double>>() {
+          public int compare(Pair<List<String>, Double> o1, Pair<List<String>, Double> o2) {
+            return o2.second().compareTo(o1.second());
+          }
+        });
       for (int i = 0, size = answers.size(); i < size; i++) {
         Pair p = (Pair) answers.get(i);
         double psd = ((Double) p.second()).doubleValue();
@@ -447,7 +463,11 @@ public class ParentAnnotationStats implements TreeVisitor {
         }
       }
 
-      Treebank treebank = new DiskTreebank(in -> new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new BobChrisTreeNormalizer()));
+      Treebank treebank = new DiskTreebank(new TreeReaderFactory() {
+        public TreeReader newTreeReader(Reader in) {
+          return new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new BobChrisTreeNormalizer());
+        }
+      });
       treebank.loadPath(args[i]);
 
       if (useCutOff) {
@@ -491,7 +511,7 @@ public class ParentAnnotationStats implements TreeVisitor {
   public static Set<String> getSplitCategories(Treebank t, boolean doTags, int algorithm, double phrasalCutOff, double tagCutOff, TreebankLanguagePack tlp) {
     ParentAnnotationStats pas = new ParentAnnotationStats(tlp, doTags);
     t.apply(pas);
-    Set<String> splitters = Generics.newHashSet();
+    Set<String> splitters = new HashSet<String>();
     pas.getSplitters(phrasalCutOff, pas.nodeRules, pas.pRules, pas.gPRules, splitters);
     pas.getSplitters(tagCutOff, pas.tagNodeRules, pas.tagPRules, pas.tagGPRules, splitters);
     return splitters;

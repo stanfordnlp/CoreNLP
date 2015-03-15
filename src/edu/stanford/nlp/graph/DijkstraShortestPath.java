@@ -2,26 +2,31 @@ package edu.stanford.nlp.graph;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.stanford.nlp.stats.ClassicCounter;
+import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.BinaryHeapPriorityQueue;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
 
 public class DijkstraShortestPath {
   private DijkstraShortestPath() {} // static method only
 
-  public static <V, E> List<V> getShortestPath(Graph<V, E> graph,
+  public static <V, E> List<V> getShortestPath(DirectedMultiGraph<V, E> graph, 
                                                V node1, V node2, 
                                                boolean directionSensitive) {
     if (node1.equals(node2)) {
       return Collections.singletonList(node2);
     }
 
-    Set<V> visited = Generics.newHashSet();
+    Set<V> visited = new HashSet<V>();
     
-    Map<V, V> previous = Generics.newHashMap();
+    Map<V, V> previous = new HashMap<V, V>();
     
     BinaryHeapPriorityQueue<V> unsettledNodes = 
       new BinaryHeapPriorityQueue<V>();

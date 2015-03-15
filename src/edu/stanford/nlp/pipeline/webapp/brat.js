@@ -57,7 +57,6 @@ head.ready(function() {
     $.ajax(ajax_url, {
         'data': {
             'action': 'getConfiguration',
-            'protocol': 1,
             'name': conf_name,
         },
         'success': function(config_data) {
@@ -86,7 +85,6 @@ head.ready(function() {
             'data': {
                 'action': 'convert',
                 'data': stanfordXML,
-                'protocol': 1,
                 'src': 'stanford-' + type
             },
             'type': 'post',

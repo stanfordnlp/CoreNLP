@@ -26,10 +26,16 @@
 
 package edu.stanford.nlp.parser.lexparser;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
+import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.process.DistSimClassifier;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.util.Index;
-
+import edu.stanford.nlp.util.Timing;
 
 /**
  * This is a basic unknown word model for English.  It supports 5 different
@@ -64,8 +70,14 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
                                  Index<String> tagIndex,
                                  ClassicCounter<IntTaggedWord> unSeenCounter) {
     super(op, lex, wordIndex, tagIndex, unSeenCounter, null, null, null);
+    unknownLevel = op.lexOptions.useUnknownWordSignatures;
     if (unknownLevel < MIN_UNKNOWN || unknownLevel > MAX_UNKNOWN) {
-      throw new IllegalArgumentException("Invalid value for useUnknownWordSignatures: " + unknownLevel);
+      System.err.println("Invalid value for useUnknownWordSignatures: " + unknownLevel);
+      if (unknownLevel < MIN_UNKNOWN) {
+        unknownLevel = MIN_UNKNOWN;
+      } else if (unknownLevel > MAX_UNKNOWN) {
+        unknownLevel = MAX_UNKNOWN;
+      }
     }
     this.smartMutation = op.lexOptions.smartMutation;
     this.unknownSuffixSize = op.lexOptions.unknownSuffixSize;
@@ -138,7 +150,7 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
   @Override
   public int getSignatureIndex(int index, int sentencePosition, String word) {
     String uwSig = getSignature(word, sentencePosition);
-    int sig = wordIndex.addToIndex(uwSig);
+    int sig = wordIndex.indexOf(uwSig, true);
     if (DEBUG_UWM) {
       System.err.println("Signature (" + unknownLevel + "): mapped " + word +
                          " (" + index + ") to " + uwSig + " (" + sig + ")");
@@ -166,7 +178,7 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
   public String getSignature(String word, int loc) {
     StringBuilder sb = new StringBuilder("UNK");
     switch (unknownLevel) {
-      case 8:
+      case 8: 
         getSignature8(word, sb);
         break;
       case 7:
@@ -198,7 +210,8 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
   } // end getSignature()
 
 
-  private static void getSignature7(String word, int loc, StringBuilder sb) {
+  @SuppressWarnings({"MethodMayBeStatic"})
+  private void getSignature7(String word, int loc, StringBuilder sb) {
     // New Sep 2008. Like 2 but rely more on Caps somewhere than initial Caps
     // {-ALLC, -INIT, -UC somewhere, -LC, zero} +
     // {-DASH, zero} +
@@ -433,7 +446,8 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
   }
 
 
-  private static void getSignature4(String word, int loc, StringBuilder sb) {
+  @SuppressWarnings({"MethodMayBeStatic"})
+  private void getSignature4(String word, int loc, StringBuilder sb) {
     boolean hasDigit = false;
     boolean hasNonDigit = false;
     boolean hasLetter = false;
@@ -508,7 +522,8 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
   }
 
 
-  private static void getSignature3(String word, int loc, StringBuilder sb) {
+  @SuppressWarnings({"MethodMayBeStatic"})
+  private void getSignature3(String word, int loc, StringBuilder sb) {
     // This basically works right, except note that 'S' is applied to all
     // capitalized letters in first word of sentence, not just first....
     sb.append('-');
@@ -555,7 +570,8 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
   }
 
 
-  private static void getSignature2(String word, int loc, StringBuilder sb) {
+  @SuppressWarnings({"MethodMayBeStatic"})
+  private void getSignature2(String word, int loc, StringBuilder sb) {
     // {-ALLC, -INIT, -UC, -LC, zero} +
     // {-DASH, zero} +
     // {-NUM, -DIG, zero} +
@@ -601,7 +617,7 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
       }
     } else if (wlen > 3) {
       // don't do for very short words: "yes" isn't an "-es" word
-      // try doing toLower for further densening and skipping digits
+      // try doing to lower for further densening and skipping digits
       char ch = word.charAt(word.length() - 1);
       sb.append(Character.toLowerCase(ch));
     }
@@ -609,7 +625,8 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
   }
 
 
-  private static void getSignature1(String word, int loc, StringBuilder sb) {
+  @SuppressWarnings({"MethodMayBeStatic"})
+  private void getSignature1(String word, int loc, StringBuilder sb) {
     sb.append('-');
     sb.append(word.substring(Math.max(word.length() - 2, 0), word.length()));
     sb.append('-');
@@ -628,7 +645,7 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
     }
   }
 
-
+  @SuppressWarnings({"MethodMayBeStatic"})
   private void getSignature8(String word, StringBuilder sb) {
     sb.append('-');
     boolean digit = true;
@@ -638,7 +655,7 @@ public class EnglishUnknownWordModel extends BaseUnknownWordModel {
         digit = false;
       }
     }
-    // digit = false;  // todo: Just turned off while we test it.
+    digit = false;  // todo: Just turned off while we test it.
     if (digit) {
       sb.append("NUMBER");
     } else {

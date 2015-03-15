@@ -1,6 +1,7 @@
 package edu.stanford.nlp.trees.international.negra;
-
-import edu.stanford.nlp.io.Lexer;
+import java.util.*;
+import java.io.*;
+import edu.stanford.nlp.io.*;
 
 /** A lexer for the NEGRA corpus export format.  Inherits ACCEPT and
  * IGNORE fields from

@@ -13,7 +13,6 @@ import edu.stanford.nlp.util.*;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -24,7 +23,7 @@ import java.util.regex.Pattern;
  * Unlike QuantifiableEntityNormalizer that normalizes various
  *   types of quantifiable entities like money and dates,
  * NumberNormalizer only normalizes numeric expressions
- *   (e.g. one =&gt; 1, two hundred =&gt; 200.0 )
+ *   (e.g. one => 1, two hundred => 200.0 )
  *
  * <br>
  * This code is somewhat hacked together, so should be reworked.
@@ -110,7 +109,7 @@ public class NumberNormalizer {
   //       QuantifiableEntityNormalizer also has bn (for billion)
   //       should consolidate
   //       here we use Number representation instead of double...
-  private static final  Map<String,Number> word2NumMap = Generics.newHashMap();
+  private static final  Map<String,Number> word2NumMap = new HashMap<String,Number>();
   static
   {
     // Special words for numbers
@@ -160,7 +159,7 @@ public class NumberNormalizer {
   }
 
   // similar to QuantifiableEntityNormalizer.ordinalsToValues
-  private static final Map<String,Number> ordWord2NumMap = Generics.newHashMap();
+  private static final Map<String,Number> ordWord2NumMap = new HashMap<String,Number>();
   static {
     ordWord2NumMap.put("zeroth", 0);
     ordWord2NumMap.put("first", 1);
@@ -392,21 +391,19 @@ public class NumberNormalizer {
 
   private static final Env env = getNewEnv();
 
-  private static final TokenSequencePattern numberPattern = TokenSequencePattern.compile(
-          env, "$NUMTERM ( [/,/ & $BEFORE_WS]? [$POSINTTERM & $BEFORE_WS]  )* ( [/,/ & $BEFORE_WS]? [/and/ & $BEFORE_WS] [$POSINTTERM & $BEFORE_WS]+ )? ");
   /**
    * Find and mark numbers (does not need NumberSequenceClassifier)
    * Each token is annotated with the numeric value and type
    * - CoreAnnotations.NumericTypeAnnotation.class: ORDINAL, UNIT (hundred, thousand,..., dozen, gross,...), NUMBER
    * - CoreAnnotations.NumericValueAnnotation.class: Number representing the numeric value of the token
-   *   ( two thousand =&gt; 2 1000 )
+   *   ( two thousand => 2 1000 )
    *
    * Tries also to separate individual numbers like four five six,
    *   while keeping numbers like four hundred and seven together
    * Annotate tokens belonging to each composite number with
    * - CoreAnnotations.NumericCompositeTypeAnnotation.class: ORDINAL (1st, 2nd), NUMBER (one hundred)
    * - CoreAnnotations.NumericCompositeValueAnnotation.class: Number representing the composite numeric value
-   *   ( two thousand =&gt; 2000 2000 )
+   *   ( two thousand => 2000 2000 )
    *
    * Also returns list of CoreMap representing the identified numbers
    *
@@ -447,11 +444,14 @@ public class NumberNormalizer {
     }
     // TODO: Should we allow "," in written out numbers?
     // TODO: Handle "-" that is not with token?
-    TokenSequenceMatcher matcher = numberPattern.getMatcher(tokens);
+    TokenSequencePattern pattern = TokenSequencePattern.compile(
+            env, "$NUMTERM ( [/,/ & $BEFORE_WS]? [$POSINTTERM & $BEFORE_WS]  )* ( [/,/ & $BEFORE_WS]? [/and/ & $BEFORE_WS] [$POSINTTERM & $BEFORE_WS]+ )? ");
+//            env, "$NUMTERM ( $POSINTTERM /,/? )* ( /and/ $POSINTTERM+ )? ");
+    TokenSequenceMatcher matcher = pattern.getMatcher(tokens);
     List<CoreMap> numbers = new ArrayList<CoreMap>();
     while (matcher.find()) {
       @SuppressWarnings("unused")
-      List<CoreMap> matchedTokens = matcher.groupNodes();
+      List<? extends CoreMap> matchedTokens = matcher.groupNodes();
       int numStart = matcher.start();
       int possibleNumEnd = -1;
       int lastUnitPos = -1;
@@ -466,154 +466,150 @@ public class NumberNormalizer {
         Number prevNum = (prev != null)? prev.get(CoreAnnotations.NumericValueAnnotation.class):null;
         String w = token.word();
         w = w.trim().toLowerCase();
-        switch (w) {
-          case ",":
-            if (lastUnit != null && lastUnitPos == i - 1) {
-              // OKAY, this may be one big number
-              possibleNumEnd = i;
-              possibleNumEndUnit = lastUnit;
-            } else {
-              // Not one big number
-              if (numStart < i) {
-                numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, i));
-                numStart = i + 1;
-                possibleNumEnd = -1;
-                possibleNumEndUnit = null;
-                lastUnit = null;
-                lastUnitPos = -1;
-              }
-            }
-            if (numStart == i) {
-              numStart = i + 1;
-            }
-            break;
-          case "and":
-            // Check if number before and was unit
-            String prevWord = prev.word();
-            if (lastUnitPos == i - 1 || (lastUnitPos == i - 2 && ",".equals(prevWord))) {
-              // Okay
-            } else {
-              // Two separate numbers
-              if (numStart < possibleNumEnd) {
-                numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, possibleNumEnd));
-                if (possibleNumStart >= possibleNumEnd) {
-                  numStart = possibleNumStart;
-                } else {
-                  numStart = i + 1;
-                }
-              } else if (numStart < i) {
-                numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, i));
-                numStart = i + 1;
-              }
-              if (lastUnitPos < numStart) {
-                lastUnit = null;
-                lastUnitPos = -1;
-              }
+        if (",".equals(w)) {
+          if (lastUnit != null && lastUnitPos == i-1) {
+            // OKAY, this may be one big number
+            possibleNumEnd = i;
+            possibleNumEndUnit = lastUnit;
+          } else {
+            // Not one big number
+            if (numStart < i) {
+              numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, i));
+              numStart = i+1;
               possibleNumEnd = -1;
               possibleNumEndUnit = null;
+              lastUnit = null;
+              lastUnitPos = -1;
             }
-            break;
-          default:
-            // NUMBER or ORDINAL
-            String numType = token.get(CoreAnnotations.NumericTypeAnnotation.class);
-            if ("UNIT".equals(numType)) {
-              // Compare this unit with previous
-              if (lastUnit == null || lastUnit.longValue() > num.longValue()) {
-                // lastUnit larger than this unit
-                // maybe four thousand two hundred?
-                // OKAY, probably one big number
+          }
+          if (numStart == i) {
+            numStart = i+1;
+          }
+        } else if ("and".equals(w)) {
+          // Check if number before and was unit
+          String prevWord = prev.word();
+          if (lastUnitPos == i-1 || (lastUnitPos == i-2 && ",".equals(prevWord))) {
+            // Okay
+          } else {
+            // Two separate numbers
+            if (numStart < possibleNumEnd) {
+              numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, possibleNumEnd));
+              if (possibleNumStart >= possibleNumEnd) {
+                numStart = possibleNumStart;
               } else {
-                if (numStart < possibleNumEnd) {
-                  // Units are increasing - check if this unit is >= unit before "," (if so, need to split into chunks)
-                  // Not one big number  ( had a comma )
-                  if (num.longValue() >= possibleNumEndUnit.longValue()) {
-                    numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, possibleNumEnd));
-                    if (possibleNumStart >= possibleNumEnd) {
-                      numStart = possibleNumStart;
-                    } else {
-                      numStart = i;
+                numStart = i+1;
+              }
+            } else if (numStart < i) {
+              numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, i));
+              numStart = i+1;
+            }
+            if (lastUnitPos < numStart) {
+              lastUnit = null;
+              lastUnitPos = -1;
+            }
+            possibleNumEnd = -1;
+            possibleNumEndUnit = null;
+          }
+        } else {
+          // NUMBER or ORDINAL
+          String numType = token.get(CoreAnnotations.NumericTypeAnnotation.class);
+          if ("UNIT".equals(numType)) {
+            // Compare this unit with previous
+            if (lastUnit == null || lastUnit.longValue() > num.longValue()) {
+              // lastUnit larger than this unit
+              // maybe four thousand two hundred?
+              // OKAY, probably one big number
+            } else {
+              if (numStart < possibleNumEnd) {
+                // Units are increasing - check if this unit is >= unit before "," (if so, need to split into chunks)
+                // Not one big number  ( had a comma )
+                if (num.longValue() >= possibleNumEndUnit.longValue()) {
+                  numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, possibleNumEnd));
+                  if (possibleNumStart >= possibleNumEnd) {
+                    numStart = possibleNumStart;
+                  } else {
+                    numStart = i;
+                  }
+                  possibleNumEnd = -1;
+                  possibleNumEndUnit = null;
+                }
+              } else {
+                // unit is increasing - can be okay, maybe five hundred thousand?
+                // what about four hundred five thousand
+                // unit might also be the same, as in thousand thousand,
+                // which we convert to million
+              }
+            }
+            lastUnit = num;
+            lastUnitPos = i;
+          } else {
+            // Normal number
+            if (num == null) {
+              logger.warning("NO NUMBER: " + token.word());
+              continue;
+            }
+            if (prevNum != null) {
+              if (num.doubleValue() > 0) {
+                if (num.doubleValue() < 10) {
+                  // This number is a digit
+                  // Treat following as two separate numbers
+                  //    \d+ [0-9]
+                  //    [one to nine]  [0-9]
+                  if (NumberNormalizer.numPattern.matcher(prev.word()).matches() ||
+                          prevNum.longValue() < 10 || prevNum.longValue() % 10 != 0 ) {
+                    // two separate numbers
+                    if (numStart < i) {
+                      numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, i));
                     }
+                    numStart = i;
                     possibleNumEnd = -1;
                     possibleNumEndUnit = null;
+                    lastUnit = null;
+                    lastUnitPos = -1;
                   }
                 } else {
-                  // unit is increasing - can be okay, maybe five hundred thousand?
-                  // what about four hundred five thousand
-                  // unit might also be the same, as in thousand thousand,
-                  // which we convert to million
-                }
-              }
-              lastUnit = num;
-              lastUnitPos = i;
-            } else {
-              // Normal number
-              if (num == null) {
-                logger.warning("NO NUMBER: " + token.word());
-                continue;
-              }
-              if (prevNum != null) {
-                if (num.doubleValue() > 0) {
-                  if (num.doubleValue() < 10) {
-                    // This number is a digit
-                    // Treat following as two separate numbers
-                    //    \d+ [0-9]
-                    //    [one to nine]  [0-9]
-                    if (NumberNormalizer.numPattern.matcher(prev.word()).matches() ||
-                        prevNum.longValue() < 10 || prevNum.longValue() % 10 != 0) {
-                      // two separate numbers
-                      if (numStart < i) {
-                        numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, i));
-                      }
-                      numStart = i;
-                      possibleNumEnd = -1;
-                      possibleNumEndUnit = null;
-                      lastUnit = null;
-                      lastUnitPos = -1;
+                  String prevNumType = prev.get(CoreAnnotations.NumericTypeAnnotation.class);
+                  if ("UNIT".equals(prevNumType)) {
+                    // OKAY
+                  } else if (!ordinalUnitPattern.matcher(w).matches()) {
+                    // Start of new number
+                    if (numStart < i) {
+                      numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, i));
                     }
-                  } else {
-                    String prevNumType = prev.get(CoreAnnotations.NumericTypeAnnotation.class);
-                    if ("UNIT".equals(prevNumType)) {
-                      // OKAY
-                    } else if (!ordinalUnitPattern.matcher(w).matches()) {
-                      // Start of new number
-                      if (numStart < i) {
-                        numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, i));
-                      }
-                      numStart = i;
-                      possibleNumEnd = -1;
-                      possibleNumEndUnit = null;
-                      lastUnit = null;
-                      lastUnitPos = -1;
-                    }
+                    numStart = i;
+                    possibleNumEnd = -1;
+                    possibleNumEndUnit = null;
+                    lastUnit = null;
+                    lastUnitPos = -1;
                   }
                 }
-              }
-              if ("ORDINAL".equals(numType)) {
-                if (possibleNumEnd >= 0) {
-                  if (numStart < possibleNumEnd) {
-                    numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, possibleNumEnd));
-                  }
-                  if (possibleNumStart > possibleNumEnd) {
-                    numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, possibleNumStart, i + 1));
-                  } else {
-                    numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, possibleNumEnd + 1, i + 1));
-                  }
-                } else {
-                  if (numStart < i + 1) {
-                    numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, i + 1));
-                  }
-                }
-                numStart = i + 1;
-                possibleNumEnd = -1;
-                possibleNumEndUnit = null;
-                lastUnit = null;
-                lastUnitPos = -1;
-              }
-              if (possibleNumStart < possibleNumEnd) {
-                possibleNumStart = i;
               }
             }
-            break;
+            if ("ORDINAL".equals(numType)) {
+              if (possibleNumEnd >= 0) {
+                if (numStart < possibleNumEnd) {
+                  numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, possibleNumEnd));
+                }
+                if (possibleNumStart > possibleNumEnd) {
+                  numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, possibleNumStart, i+1));
+                } else {
+                  numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, possibleNumEnd+1, i+1));
+                }
+              } else {
+                if (numStart < i+1) {
+                  numbers.add(ChunkAnnotationUtils.getAnnotatedChunk(annotation, numStart, i+1));
+                }
+              }
+              numStart = i+1;
+              possibleNumEnd = -1;
+              possibleNumEndUnit = null;
+              lastUnit = null;
+              lastUnitPos = -1;
+            }
+            if (possibleNumStart < possibleNumEnd) {
+              possibleNumStart = i;
+            }
+          }
         }
       }
       if (numStart < matcher.end()) {
@@ -622,7 +618,6 @@ public class NumberNormalizer {
     }
     for (CoreMap n:numbers) {
       String exp = n.get(CoreAnnotations.TextAnnotation.class);
-      if (exp.trim().equals("")) { continue; }
       List<CoreLabel> ts = n.get(CoreAnnotations.TokensAnnotation.class);
       String label = ts.get(ts.size() - 1).get(CoreAnnotations.NumericTypeAnnotation.class);
       if ("UNIT".equals(label)) {
@@ -657,7 +652,6 @@ public class NumberNormalizer {
    * @param annotation - annotation where numbers have already been identified
    * @return list of CoreMap representing the identified number ranges
    */
-  private static final TokenSequencePattern rangePattern = TokenSequencePattern.compile(env, "(?:$NUMCOMPTERM /-|to/ $NUMCOMPTERM) | $NUMRANGE");
   public static List<CoreMap> findNumberRanges(CoreMap annotation)
   {
     List<CoreMap> numerizedTokens = annotation.get(CoreAnnotations.NumerizedTokensAnnotation.class);
@@ -683,9 +677,10 @@ public class NumberNormalizer {
       }
     }
     List<CoreMap> numberRanges = new ArrayList<CoreMap>();
-    TokenSequenceMatcher matcher = rangePattern.getMatcher(numerizedTokens);
+    TokenSequencePattern pattern = TokenSequencePattern.compile(env, "(?:$NUMCOMPTERM /-|to/ $NUMCOMPTERM) | $NUMRANGE");
+    TokenSequenceMatcher matcher = pattern.getMatcher(numerizedTokens);
     while (matcher.find()) {
-      List<CoreMap> matched = matcher.groupNodes();
+      List<? extends CoreMap> matched = matcher.groupNodes();
       if (matched.size() == 1) {
         numberRanges.add(matched.get(0));
       } else {
@@ -748,10 +743,14 @@ public class NumberNormalizer {
     //merge numbers
     final Integer startTokenOffsetFinal = startTokenOffset;
     List<CoreMap> mergedNumbers = numberAggregator.merge(annotation.get(CoreAnnotations.TokensAnnotation.class), numbers,
-        in -> Interval.toInterval(
-              in.get(CoreAnnotations.TokenBeginAnnotation.class) - startTokenOffsetFinal,
-              in.get(CoreAnnotations.TokenEndAnnotation.class) - startTokenOffsetFinal)
-    );
+          new Function<CoreMap, Interval<Integer>>() {
+            @Override
+            public Interval<Integer> apply(CoreMap in) {
+              return Interval.toInterval(
+                    in.get(CoreAnnotations.TokenBeginAnnotation.class) - startTokenOffsetFinal,
+                    in.get(CoreAnnotations.TokenEndAnnotation.class) - startTokenOffsetFinal);
+            }
+          });
     //restore token offsets
     if (!savedTokenBegins.isEmpty() && !savedTokenEnds.isEmpty()) {
       for (CoreMap c : mergedNumbers) {
@@ -787,10 +786,14 @@ public class NumberNormalizer {
     final Integer startTokenOffsetFinal = startTokenOffset;
     List<CoreMap> mergedNumbersWithRanges = CollectionUtils.mergeListWithSortedMatchedPreAggregated(
             annotation.get(CoreAnnotations.NumerizedTokensAnnotation.class), numberRanges,
-        (CoreMap in) -> Interval.toInterval(
-              in.get(CoreAnnotations.TokenBeginAnnotation.class) - startTokenOffsetFinal,
-              in.get(CoreAnnotations.TokenEndAnnotation.class) - startTokenOffsetFinal)
-    );
+          new Function<CoreMap, Interval<Integer>>() {
+            @Override
+            public Interval<Integer> apply(CoreMap in) {
+              return Interval.toInterval(
+                    in.get(CoreAnnotations.TokenBeginAnnotation.class) - startTokenOffsetFinal,
+                    in.get(CoreAnnotations.TokenEndAnnotation.class) - startTokenOffsetFinal);
+            }
+          });
     annotation.set(CoreAnnotations.NumerizedTokensAnnotation.class, mergedNumbersWithRanges);
     return mergedNumbersWithRanges;
   }

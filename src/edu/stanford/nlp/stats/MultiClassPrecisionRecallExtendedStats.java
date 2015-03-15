@@ -4,7 +4,7 @@ import edu.stanford.nlp.classify.Classifier;
 import edu.stanford.nlp.classify.GeneralDataset;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.Datum;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Triple;
@@ -51,9 +51,7 @@ public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisi
   }
 
   public <F> double score(Classifier<L,F> classifier, GeneralDataset<L,F> data) {
-    labelIndex = new HashIndex<L>();
-    labelIndex.addAll(classifier.labels());
-    labelIndex.addAll(data.labelIndex.objectsList());
+    setLabelIndex(data.labelIndex);
     clearCounts();
     int[] labelsArr = data.getLabelsArray();
     for (int i = 0; i < data.size(); i++) {

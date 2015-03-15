@@ -1,6 +1,5 @@
 package edu.stanford.nlp.trees.international.arabic;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +15,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -232,11 +231,11 @@ public class ArabicTreeNormalizer extends BobChrisTreeNormalizer {
   /**
    * Remove traces and pronoun deletion markers.
    */
-  public static class ArabicEmptyFilter implements Predicate<Tree>, Serializable {
+  public static class ArabicEmptyFilter implements Filter<Tree> {
 
     private static final long serialVersionUID = 7417844982953945964L;
 
-    public boolean test(Tree t) {
+    public boolean accept(Tree t) {
       // Pronoun deletions
       if(t.isPreTerminal() && (t.value().equals("PRON_1S") || t.value().equals("PRP")) &&
           (t.firstChild().value().equals("nullp") || t.firstChild().value().equals("نللة") || t.firstChild().value().equals("-~a")))

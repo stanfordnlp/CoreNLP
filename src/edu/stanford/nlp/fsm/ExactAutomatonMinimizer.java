@@ -3,6 +3,8 @@ package edu.stanford.nlp.fsm;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,12 +32,12 @@ public class ExactAutomatonMinimizer implements AutomatonMinimizer {
 
   private static final Arc SINK_NODE = new Arc(null);
 
-
+  
   protected TransducerGraph getUnminimizedFA() {
     return unminimizedFA;
   }
 
-  protected Collection<?> getSymbols() {
+  protected Collection<? extends Object> getSymbols() {
     return getUnminimizedFA().getInputs();
   }
 
@@ -96,7 +98,7 @@ public class ExactAutomatonMinimizer implements AutomatonMinimizer {
   //  }
 
   protected <Y> Map<ExactBlock<Arc>, Set<Y>> sortIntoBlocks(Collection<Y> nodes) {
-    Map<ExactBlock<Arc>, Set<Y>> blockToMembers = Generics.newHashMap(); // IdentityHashMap();
+    Map<ExactBlock<Arc>, Set<Y>> blockToMembers = new HashMap<ExactBlock<Arc>, Set<Y>>(); // IdentityHashMap();
     for (Y o : nodes) {
       ExactBlock<Arc> block = getBlock(o);
       if (block == null) {
@@ -108,7 +110,7 @@ public class ExactAutomatonMinimizer implements AutomatonMinimizer {
   }
 
   protected void makeBlock(Collection<Arc> members) {
-    ExactBlock<Arc> block = new ExactBlock<Arc>(Generics.newHashSet(members));
+    ExactBlock<Arc> block = new ExactBlock<Arc>(new HashSet<Arc>(members));
     for (Arc member : block.getMembers()) {
       if (member != SINK_NODE) {
         memberToBlock.put(member, block);
@@ -128,7 +130,7 @@ public class ExactAutomatonMinimizer implements AutomatonMinimizer {
   }
 
   protected static Collection<Arc> difference(Collection<Arc> block, Collection<Arc> members) {
-    Set<Arc> difference = Generics.newHashSet();
+    Set<Arc> difference = new HashSet<Arc>();
     for (Arc member : block) {
       if (!members.contains(member)) {
         difference.add(member);

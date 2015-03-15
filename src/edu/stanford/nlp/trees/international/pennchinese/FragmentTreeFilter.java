@@ -2,14 +2,12 @@ package edu.stanford.nlp.trees.international.pennchinese;
 
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
-
-import java.io.Serializable;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 /**
  * Filters the fragments which end documents in Chinese Treebank
  */
-public class FragmentTreeFilter implements Predicate<Tree>, Serializable {
+public class FragmentTreeFilter implements Filter<Tree> {
   static final TregexPattern threeNodePattern = 
     TregexPattern.compile("FRAG=root <, (PU <: /（/) <2 (VV <: /完/) <- (PU=a <: /）/) <3 =a : =root !> (__ > __)");
 
@@ -31,18 +29,9 @@ public class FragmentTreeFilter implements Predicate<Tree>, Serializable {
   static final TregexPattern singlePuncPattern =
     TregexPattern.compile("PU=punc !> __ <: __");
 
-  static final TregexPattern metaPattern =
-    TregexPattern.compile("META !> __ <: NN");
+  static final TregexPattern[] patterns = { threeNodePattern, oneNodePattern, automaticInitialPattern, manuallySegmentedPattern, onthewayPattern, singlePuncFragPattern, singlePuncPattern };
 
-  // The ctb tree reader uses CHTBTokenizer, which filters out SGML
-  // and accidentally catches five trees in ctb7.  
-  // TODO: One alternative would be to get rid of the specialized tokenizer
-  static final TregexPattern bracketPattern =
-    TregexPattern.compile("/[<>]/");
-
-  static final TregexPattern[] patterns = { threeNodePattern, oneNodePattern, automaticInitialPattern, manuallySegmentedPattern, onthewayPattern, singlePuncFragPattern, singlePuncPattern, metaPattern, bracketPattern };
-
-  public boolean test(Tree tree) {
+  public boolean accept(Tree tree) {
     for (TregexPattern pattern : patterns) {
       if (pattern.matcher(tree).find()) {
         return false;

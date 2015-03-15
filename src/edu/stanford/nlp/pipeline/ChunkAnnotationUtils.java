@@ -1,6 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ling.AnnotationLookup;
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;
@@ -11,6 +12,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -465,11 +467,6 @@ public class ChunkAnnotationUtils {
         }
       }
     }
-    // Set sentence indices
-    for (int i = 0; i < sentences.size(); i++) {
-      CoreMap sentence = sentences.get(i);
-      sentence.set(CoreAnnotations.SentenceIndexAnnotation.class, i);
-    }
     return true;
   }
   /**
@@ -728,7 +725,7 @@ public class ChunkAnnotationUtils {
   {
     return getAnnotatedChunksUsingSortedCharOffsets(annotation, charOffsets, true, null, null, true);
   }
-
+  
   /**
    * Create a list of new chunk Annotation with basic chunk information
    *   CharacterOffsetBeginAnnotation - set to CharacterOffsetBeginAnnotation of first token in chunk
@@ -805,7 +802,7 @@ public class ChunkAnnotationUtils {
     }
     if (chunks.size() != charOffsets.size()) {
       logger.warning("WARNING: Only " + chunks.size() + "/" + charOffsets.size()
-              + " chunks found.  Check if offsets are sorted/nonoverlapping");
+              + " chunks found.  Check if offsets are sorted/nonoverlapping");      
     }
     return chunks;
   }
@@ -827,7 +824,7 @@ public class ChunkAnnotationUtils {
           try {
             Class valueClass = AnnotationLookup.getValueType(lookup.coreKey);
             if (valueClass == String.class) {
-              chunk.set(lookup.coreKey, value);
+              chunk.set(lookup.coreKey, value);              
             } else {
              Method valueOfMethod = valueClass.getMethod("valueOf", String.class);
               if (valueOfMethod != null) {

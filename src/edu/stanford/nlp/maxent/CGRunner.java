@@ -13,7 +13,7 @@ import edu.stanford.nlp.optimization.*;
 import edu.stanford.nlp.util.ReflectionLoading;
 
 /**
- * This class will call an optimization method such as Conjugate Gradient or
+ * This class will call an optimization method such as Conjugate Gradient or 
  * Quasi-Newton  on a LambdaSolve object to find
  * optimal parameters, including imposing a Gaussian prior on those
  * parameters.
@@ -40,7 +40,7 @@ public class CGRunner {
 
 
   /**
-   * Set up a LambdaSolve problem for solution by a Minimizer.
+   * Set up a LambdaSolve problem for solution by Conjugate Gradient.
    * Uses a Gaussian prior with a sigma<sup>2</sup> of 0.5.
    *
    * @param prob     The problem to solve
@@ -51,7 +51,7 @@ public class CGRunner {
   }
 
   /**
-   * Set up a LambdaSolve problem for solution by a Minimizer,
+   * Set up a LambdaSolve problem for solution by Conjugate Gradient,
    * specifying a value for sigma<sup>2</sup>.
    *
    * @param prob             The problem to solve
@@ -67,7 +67,7 @@ public class CGRunner {
   }
 
   /**
-   * Set up a LambdaSolve problem for solution by a Minimizer.
+   * Set up a LambdaSolve problem for solution by Conjugate Gradient.
    *
    * @param prob             The problem to solve
    * @param filename         Used (with extension) to save intermediate results.
@@ -89,12 +89,12 @@ public class CGRunner {
 
 
   /**
-   * Set up a LambdaSolve problem for solution by a Minimizer.
+   * Set up a LambdaSolve problem for solution by Conjugate Gradient.
    *
    * @param prob             The problem to solve
    * @param filename         Used (with extension) to save intermediate results.
    * @param tol              Tolerance of errors (passed to CG)
-   * @param sigmaSquareds    The prior sigma<sup>2</sup> for each feature: this doubled will be
+   * @param sigmaSquareds    The prior sigma<sup>2</sup> for eah feature: this doubled will be
    *                         used to divide the lambda<sup>2</sup> values as the
    *                         prior penalty. This array must have size the number of features.
    *                         If it is null, no regularization will be performed.
@@ -108,27 +108,19 @@ public class CGRunner {
     this.priorSigmaS = -1.0; // not used
   }
 
-  private void printOptimizationResults(LikelihoodFunction df, MonitorFunction monitor) {
-    double negLogLike = df.valueAt(prob.lambda);
-    System.err.printf("After optimization neg (penalized) log cond likelihood: %1.2f%n", negLogLike);
-    if (monitor != null) {
-      monitor.reportMonitoring(negLogLike);
-    }
-    int numNonZero = 0;
-    for (int i = 0; i < prob.lambda.length; i++) {
-      if (prob.lambda[i] != 0.0) {
-        // 0.0 == -0.0 in IEEE math!
-        numNonZero++;
-      }
-    }
-    System.err.printf("Non-zero parameters: %d/%d (%1.2f%%)%n", numNonZero, prob.lambda.length,
-        (100.0 * numNonZero) / prob.lambda.length);
+
+  /**
+    * Solves the problem using QN.  The solution is stored in the
+    * <code>lambda</code> array of <code>prob</code>.
+    */
+  public void solve() {
+    solveQN();
   }
 
 
-  /**
-   * Solves the problem using a quasi-newton method (L-BFGS).  The solution
-   * is stored in the {@code lambda} array of {@code prob}.
+   /**
+   * Solves the problem using QN.  The solution is stored in the
+   * <code>lambda</code> array of <code>prob</code>.
    */
   public void solveQN() {
     LikelihoodFunction df = new LikelihoodFunction(prob, tol, useGaussianPrior, priorSigmaS, sigmaSquareds);
@@ -136,24 +128,15 @@ public class CGRunner {
     Minimizer<DiffFunction> cgm = new QNMinimizer(monitor, 10);
 
     // all parameters are started at 0.0
-    prob.lambda = cgm.minimize(df, tol, new double[df.domainDimension()]);
-    printOptimizationResults(df, monitor);
-  }
-
-  public void solveOWLQN2(double weight) {
-    LikelihoodFunction df = new LikelihoodFunction(prob, tol, useGaussianPrior, priorSigmaS, sigmaSquareds);
-    MonitorFunction monitor = new MonitorFunction(prob, df, filename);
-    Minimizer<DiffFunction> cgm = new QNMinimizer(monitor, 10);
-    ((QNMinimizer) cgm).useOWLQN(true, weight);
-
-    // all parameters are started at 0.0
-    prob.lambda = cgm.minimize(df, tol, new double[df.domainDimension()]);
-    printOptimizationResults(df, monitor);
+    double[] result = cgm.minimize(df, tol, new double[df.domainDimension()]);
+    prob.lambda = result;
+    monitor.reportMonitoring(df.valueAt(result));
+    System.err.println("after optimization value is " + df.valueAt(result));
   }
 
   /**
-   * Solves the problem using conjugate gradient (CG).  The solution
-   * is stored in the {@code lambda} array of {@code prob}.
+   * Solves the problem using CG.  The solution is stored in the
+   * <code>lambda</code> array of <code>prob</code>.
    */
   public void solveCG() {
     LikelihoodFunction df = new LikelihoodFunction(prob, tol, useGaussianPrior, priorSigmaS, sigmaSquareds);
@@ -161,13 +144,15 @@ public class CGRunner {
     Minimizer<DiffFunction> cgm = new CGMinimizer(monitor);
 
     // all parameters are started at 0.0
-    prob.lambda = cgm.minimize(df, tol, new double[df.domainDimension()]);
-    printOptimizationResults(df, monitor);
+    double[] result = cgm.minimize(df, tol, new double[df.domainDimension()]);
+    prob.lambda = result;
+    monitor.reportMonitoring(df.valueAt(result));
+    System.err.println("after optimization value is " + df.valueAt(result));
   }
 
   /**
-   * Solves the problem using OWLQN.  The solution
-   * is stored in the {@code lambda} array of {@code prob}.  Note that the
+   * Solves the problem using OWLQN.  The solution is stored in the
+   * <code>lambda</code> array of <code>prob</code>.  Note that the
    * likelihood function will be a penalized L2 likelihood function unless you
    * have turned this off via setting the priorSigmaS to 0.0.
    *
@@ -178,10 +163,10 @@ public class CGRunner {
   public void solveL1(double weight) {
     LikelihoodFunction df = new LikelihoodFunction(prob, tol, useGaussianPrior, priorSigmaS, sigmaSquareds);
     Minimizer<DiffFunction> owl = ReflectionLoading.loadByReflection("edu.stanford.nlp.optimization.OWLQNMinimizer", weight);
-    prob.lambda = owl.minimize(df, tol, new double[df.domainDimension()]);
-    printOptimizationResults(df, null);
+    double[] result = owl.minimize(df, tol, new double[df.domainDimension()]);
+    prob.lambda = result;
+    System.err.println("after optimization value is " + df.valueAt(result));
   }
-
 
   /**
    * This class implements the DiffFunction interface for Minimizer
@@ -213,7 +198,6 @@ public class CGRunner {
       }
     }
 
-    @Override
     public int domainDimension() {
       return model.lambda.length;
     }
@@ -227,7 +211,6 @@ public class CGRunner {
     }
 
 
-    @Override
     public double valueAt(double[] lambda) {
       valueAtCalls++;
       model.lambda = lambda;
@@ -247,7 +230,6 @@ public class CGRunner {
     }
 
 
-    @Override
     public double[] derivativeAt(double[] lambda) {
       boolean eq = true;
       for (int j = 0; j < lambda.length; j++) {
@@ -298,8 +280,7 @@ public class CGRunner {
       this.filename = filename;
     }
 
-    @Override
-    @SuppressWarnings({"ConstantConditions", "PointlessBooleanExpression"})
+    @SuppressWarnings({"ConstantConditions"})
     public double valueAt(double[] lambda) {
       double likelihood = lf.likelihood();
       // this line is printed in the middle of the normal line of QN minimization, so put println at beginning
@@ -322,7 +303,6 @@ public class CGRunner {
       return "Iter. " + iterations + ": " + "neg. log cond. likelihood = " + likelihood + " [" + lf.numCalls() + " calls to valueAt]";
     }
 
-    @Override
     public int domainDimension() {
       return lf.domainDimension();
     }

@@ -1,6 +1,5 @@
 package edu.stanford.nlp.util;
 
-import edu.stanford.nlp.ling.CoreLabel;
 import junit.framework.TestCase;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +10,6 @@ import edu.stanford.nlp.ling.CoreAnnotations;
  * Test various operations of the ArrayCoreMap: equals, toString, etc.
  */
 public class ArrayCoreMapTest extends TestCase {
-
   public void testCreate() {
     ArrayCoreMap foo = new ArrayCoreMap();
     assertEquals(0, foo.size());
@@ -215,7 +213,7 @@ public class ArrayCoreMapTest extends TestCase {
     foo.set(CoreAnnotations.ParagraphsAnnotation.class, p1);
 
     foo.toString();
-    int fh = foo.hashCode();
+    foo.hashCode();
 
     ArrayCoreMap bar = new ArrayCoreMap();
     bar.set(CoreAnnotations.TextAnnotation.class, "foo");
@@ -229,11 +227,10 @@ public class ArrayCoreMapTest extends TestCase {
     bar.set(CoreAnnotations.ParagraphsAnnotation.class, p2);
 
     bar.toString();
-    int bh = bar.hashCode();
+    bar.hashCode();
 
     assertEquals(foo, bar);
     assertEquals(bar, foo);
-    assertEquals(fh, bh);
 
     ArrayCoreMap baz = new ArrayCoreMap();
     baz.set(CoreAnnotations.TextAnnotation.class, "foo");
@@ -280,61 +277,4 @@ public class ArrayCoreMapTest extends TestCase {
     barfooParagraph.add(bar);
     assertEquals(baz, biff);
   }
-
-  public void testCoreLabelSetWordBehavior() {
-    CoreLabel foo = new CoreLabel();
-    foo.set(CoreAnnotations.TextAnnotation.class, "foo");
-    foo.set(CoreAnnotations.PartOfSpeechAnnotation.class, "B");
-    foo.set(CoreAnnotations.LemmaAnnotation.class, "fool");
-
-    // Lemma gets removed with word
-    ArrayCoreMap copy = new ArrayCoreMap(foo);
-    assertEquals(copy, foo);
-    foo.setWord("foo");
-    assertEquals(copy, foo);  // same word set
-    foo.setWord("bar");
-    assertFalse(copy.equals(foo));  // lemma removed
-    foo.setWord("foo");
-    assertFalse(copy.equals(foo));  // still removed
-    foo.set(CoreAnnotations.LemmaAnnotation.class, "fool");
-    assertEquals(copy, foo);  // back to normal
-
-    // Hash code is consistent
-    int hashCode = foo.hashCode();
-    assertEquals(copy.hashCode(), hashCode);
-    foo.setWord("bar");
-    assertFalse(hashCode == foo.hashCode());
-    foo.setWord("foo");
-    assertFalse(hashCode == foo.hashCode());
-
-    // Hash code doesn't care between a value of null and the key not existing
-    assertTrue(foo.lemma() == null);
-    int lemmalessHashCode = foo.hashCode();
-    foo.remove(CoreAnnotations.LemmaAnnotation.class);
-    assertEquals(lemmalessHashCode, foo.hashCode());
-    foo.setLemma(null);
-    assertEquals(lemmalessHashCode, foo.hashCode());
-    foo.setLemma("fool");
-    assertEquals(hashCode, foo.hashCode());
-
-    // Check equals
-    foo.setWord("bar");
-    foo.setWord("foo");
-    ArrayCoreMap nulledCopy = new ArrayCoreMap(foo);
-    assertEquals(nulledCopy, foo);
-    foo.remove(CoreAnnotations.LemmaAnnotation.class);
-    assertEquals(nulledCopy, foo);
-  }
-
-  public void testCopyConstructor() {
-    ArrayCoreMap biff = new ArrayCoreMap();
-    biff.set(CoreAnnotations.TextAnnotation.class, "foo");
-    biff.set(CoreAnnotations.PartOfSpeechAnnotation.class, "B");
-    biff.set(CoreAnnotations.LemmaAnnotation.class, "fozzle");
-    ArrayCoreMap boff = new ArrayCoreMap(biff);
-    assertEquals(3, boff.size());
-    assertEquals(biff, boff);
-    assertEquals("fozzle", boff.get(CoreAnnotations.LemmaAnnotation.class));
-  }
-
 }

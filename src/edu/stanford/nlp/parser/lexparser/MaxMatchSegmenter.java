@@ -5,9 +5,8 @@ import java.util.*;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
-import edu.stanford.nlp.process.WordSegmenter;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.process.WordSegmenter;
 
 
 /**
@@ -17,7 +16,7 @@ import edu.stanford.nlp.util.Generics;
  */
 public class MaxMatchSegmenter implements WordSegmenter {
 
-  private final Set<String> words = Generics.newHashSet();
+  private final Set<String> words = new HashSet<String>();
   private static final int maxLength = 10;
 
   @Override

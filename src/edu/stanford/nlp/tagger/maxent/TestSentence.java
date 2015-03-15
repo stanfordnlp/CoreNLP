@@ -15,14 +15,11 @@ import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.math.SloppyMath;
 import edu.stanford.nlp.sequences.BestSequenceFinder;
 import edu.stanford.nlp.sequences.ExactBestSequenceFinder;
 import edu.stanford.nlp.sequences.SequenceModel;
-import edu.stanford.nlp.tagger.common.Tagger;
+import edu.stanford.nlp.tagger.common.TaggerConstants;
 import edu.stanford.nlp.util.ArrayUtils;
-import edu.stanford.nlp.util.ConfusionMatrix;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 import java.io.OutputStreamWriter;
@@ -43,7 +40,7 @@ public class TestSentence implements SequenceModel {
 
   protected final boolean VERBOSE;
   protected static final String naTag = "NA";
-  private static final String[] naTagArr = { naTag };
+  protected static final String[] naTagArr = { naTag };
   protected static final boolean DBG = false;
   protected static final int kBestSize = 1;
 
@@ -67,7 +64,7 @@ public class TestSentence implements SequenceModel {
   private int endSizePairs; // = 0;
 
   private volatile History history;
-  protected volatile Map<String,double[]> localScores = Generics.newHashMap();
+  protected volatile Map<String,double[]> localScores = new HashMap<String,double[]>();
   protected volatile double[][] localContextScores;
 
   protected final MaxentTagger maxentTagger;
@@ -79,13 +76,12 @@ public class TestSentence implements SequenceModel {
     if (maxentTagger.config != null) {
       tagSeparator = maxentTagger.config.getTagSeparator();
       encoding = maxentTagger.config.getEncoding();
-      VERBOSE = maxentTagger.config.getVerbose();
     } else {
       tagSeparator = TaggerConfig.getDefaultTagSeparator();
       encoding = "utf-8";
-      VERBOSE = false;
     }
     history = new History(pairs, maxentTagger.extractors);
+    VERBOSE = maxentTagger.config.getVerbose();
   }
 
   public void setCorrectTags(List<? extends HasTag> sentence) {
@@ -115,7 +111,7 @@ public class TestSentence implements SequenceModel {
         sent.add(s.get(j).word());
       }
     }
-    sent.add(Tagger.EOS_WORD);
+    sent.add(TaggerConstants.EOS_WORD);
     if (reuseTags) {
       this.originalTags = new ArrayList<String>(sz + 1);
       for (int j = 0; j < sz; ++j) {
@@ -125,7 +121,7 @@ public class TestSentence implements SequenceModel {
           originalTags.add(null);
         }
       }
-      originalTags.add(Tagger.EOS_TAG);
+      originalTags.add(TaggerConstants.EOS_TAG);
     }
     size = sz + 1;
     if (VERBOSE) {
@@ -173,7 +169,7 @@ public class TestSentence implements SequenceModel {
 
   ArrayList<TaggedWord> getTaggedSentence() {
     final boolean hasOffset;
-    hasOffset = origWords != null && origWords.size() > 0 && (origWords.get(0) instanceof HasOffset);
+    hasOffset = origWords != null && (origWords.get(0) instanceof HasOffset);
     ArrayList<TaggedWord> taggedSentence = new ArrayList<TaggedWord>();
     for (int j = 0; j < size - 1; j++) {
       String tag = finalTags[j];
@@ -230,7 +226,7 @@ public class TestSentence implements SequenceModel {
         for (int j = 0; j < tags.length; j++) {
           // score the j-th tag
           String tag = tags[j];
-          boolean approximate = maxentTagger.hasApproximateScoring();
+          boolean approximate = maxentTagger.defaultScore > 0.0;
           int tagindex = approximate ? maxentTagger.tags.getIndex(tag) : j;
           // System.err.println("Mapped from j="+ j + " " + tag + " to " + tagindex);
           probabilities[current][hyp][tagindex] = probs[j];
@@ -288,18 +284,6 @@ public class TestSentence implements SequenceModel {
       }
       pw.println(sw);
     }
-  }
-
-  /**
-   * Update a confusion matrix with the errors from this sentence.
-   *
-   * @param finalTags Chosen tags for sentence
-   * @param confusionMatrix Confusion matrix to write to
-   */
-  protected void updateConfusionMatrix(String[] finalTags,
-                                       ConfusionMatrix<String> confusionMatrix) {
-    for (int i = 0; i < correctTags.length; i++)
-      confusionMatrix.add(finalTags[i], correctTags[i]);
   }
 
 
@@ -366,7 +350,7 @@ public class TestSentence implements SequenceModel {
   // This scores the current assignment in PairsHolder at
   // current position h.current (returns normalized scores)
   private double[] getScores(History h) {
-    if (maxentTagger.hasApproximateScoring()) {
+    if (maxentTagger.defaultScore > 0) {
       return getApproximateScores(h);
     }
     return getExactScores(h);
@@ -394,10 +378,11 @@ public class TestSentence implements SequenceModel {
     double[] scores = getHistories(tags, h); // log score for each active tag, unnormalized
 
     // Number of tags that get assigned a default score:
-    int nDefault = maxentTagger.ySize - tags.length;
+    double nDefault = maxentTagger.ySize - tags.length;
     double logScore = ArrayMath.logSum(scores);
-    double logScoreInactiveTags = maxentTagger.getInactiveTagDefaultScore(nDefault);
-    double logTotal = SloppyMath.logAdd(logScore, logScoreInactiveTags);
+    double logScoreInactiveTags = Math.log(nDefault*maxentTagger.defaultScore);
+    double logTotal =
+      ArrayMath.logSum(new double[] {logScore, logScoreInactiveTags});
     ArrayMath.addInPlace(scores, -logTotal);
 
     return scores;
@@ -409,20 +394,9 @@ public class TestSentence implements SequenceModel {
     Extractors ex = maxentTagger.extractors, exR = maxentTagger.extractorsRare;
     String w = pairs.getWord(h.current);
     double[] lS, lcS;
-    lS = localScores.get(w);
-    if (lS == null) {
+    if((lS = localScores.get(w)) == null) {
       lS = getHistories(tags, h, ex.local, rare ? exR.local : null);
       localScores.put(w,lS);
-    } else if (lS.length != tags.length) {
-      // This case can occur when a word was given a specific forced
-      // tag, and then later it shows up without the forced tag.
-      // TODO: if a word is given a forced tag, we should always get
-      // its features rather than use the cache, just in case the tag
-      // given is not the same tag as before
-      lS = getHistories(tags, h, ex.local, rare ? exR.local : null);
-      if (tags.length > 1) {
-        localScores.put(w,lS);
-      }
     }
     if((lcS = localContextScores[h.current]) == null) {
       lcS = getHistories(tags, h, ex.localContext, rare ? exR.localContext : null);
@@ -435,14 +409,14 @@ public class TestSentence implements SequenceModel {
   }
 
   private double[] getHistories(String[] tags, History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
-    if(maxentTagger.hasApproximateScoring())
+    if(maxentTagger.defaultScore > 0)
       return getApproximateHistories(tags, h, extractors, extractorsRare);
     return getExactHistories(h, extractors, extractorsRare);
   }
 
   private double[] getExactHistories(History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
     double[] scores = new double[maxentTagger.ySize];
-    int szCommon = maxentTagger.extractors.size();
+    int szCommon = maxentTagger.extractors.getSize();
 
     for (Pair<Integer,Extractor> e : extractors) {
       int kf = e.first();
@@ -481,7 +455,7 @@ public class TestSentence implements SequenceModel {
   private double[] getApproximateHistories(String[] tags, History h, List<Pair<Integer,Extractor>> extractors, List<Pair<Integer,Extractor>> extractorsRare) {
 
     double[] scores = new double[tags.length];
-    int szCommon = maxentTagger.extractors.size();
+    int szCommon = maxentTagger.extractors.getSize();
 
     for (Pair<Integer,Extractor> e : extractors) {
       int kf = e.first();
@@ -531,7 +505,7 @@ public class TestSentence implements SequenceModel {
    */
   void printUnknown(int numSent, PrintFile pfu) {
     NumberFormat nf = new DecimalFormat("0.0000");
-    int numTags = maxentTagger.numTags();
+    int numTags = maxentTagger.tags.getSize();
     double[][][] probabilities = new double[size][kBestSize][numTags];
     calculateProbs(probabilities);
     for (int current = 0; current < size; current++) {
@@ -581,11 +555,10 @@ public class TestSentence implements SequenceModel {
   // to the file pfu except for
   void printTop(PrintFile pfu) {
     NumberFormat nf = new DecimalFormat("0.0000");
-    int numTags = maxentTagger.numTags();
+    int numTags = maxentTagger.tags.getSize();
     double[][][] probabilities = new double[size][kBestSize][numTags];
     calculateProbs(probabilities);
-
-    for (int current = 0; current < correctTags.length; current++) {
+    for (int current = 0; current < size; current++) {
       pfu.print(sent.get(current));
       double[] probs = new double[3];
       String[] tag3 = new String[3];
@@ -728,7 +701,7 @@ public class TestSentence implements SequenceModel {
 
     String word = sent.get(pos - leftWindow());
     if (maxentTagger.dict.isUnknown(word)) {
-      Set<String> open = maxentTagger.tags.getOpenTags();  // todo: really want array of String or int here
+      Set<String> open = maxentTagger.tags.getOpenTags();
       arr1 = open.toArray(new String[open.size()]);
     } else {
       arr1 = maxentTagger.dict.getTags(word);

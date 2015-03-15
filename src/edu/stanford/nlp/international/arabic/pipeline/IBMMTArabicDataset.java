@@ -9,7 +9,6 @@ import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.trees.treebank.ConfigParser;
 import edu.stanford.nlp.trees.treebank.Dataset;
 import edu.stanford.nlp.trees.treebank.Mapper;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Applies the same orthographic transformations developed for ATB parse trees to flat
@@ -36,14 +35,14 @@ public class IBMMTArabicDataset implements Dataset {
   protected final StringBuilder toStringBuffer;
 
   public IBMMTArabicDataset() {
-    configuredOptions = Generics.newHashSet();
+    configuredOptions = new HashSet<String>();
     toStringBuffer = new StringBuilder();
     pathsToData = new ArrayList<File>();
 
     escaper = new IBMArabicEscaper(true);
     escaper.disableWarnings();
 
-    requiredOptions = Generics.newHashSet();
+    requiredOptions = new HashSet<String>();
     requiredOptions.add(ConfigParser.paramName);
     requiredOptions.add(ConfigParser.paramPath);
   }

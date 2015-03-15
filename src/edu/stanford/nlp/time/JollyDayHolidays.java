@@ -6,8 +6,8 @@ import de.jollyday.config.Holidays;
 // import de.jollyday.configuration.ConfigurationProvider;
 import de.jollyday.impl.XMLManager;
 import edu.stanford.nlp.ling.tokensregex.Env;
+import edu.stanford.nlp.net.ClasspathURLStreamHandler;
 import edu.stanford.nlp.util.CollectionValuedMap;
-import edu.stanford.nlp.util.Generics;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.Partial;
 
@@ -23,36 +23,23 @@ import java.util.*;
  * @author Angel Chang
  */
 public class JollyDayHolidays implements Env.Binder {
-
-  private HolidayManager holidayManager;
-  // private CollectionValuedMap<String, JollyHoliday> holidays;
-  private Map<String, JollyHoliday> holidays;
-  private String varPrefix = "JH_";
+  HolidayManager holidayManager;
+  //CollectionValuedMap<String, JollyHoliday> holidays;
+  Map<String, JollyHoliday> holidays;
+  String varPrefix = "JH_";
 
   @Override
   public void init(String prefix, Properties props) {
-    String xmlPath = props.getProperty(prefix + "xml", "edu/stanford/nlp/models/sutime/jollyday/Holidays_sutime.xml");
-    String xmlPathType = props.getProperty(prefix + "pathtype", "classpath");
+    String country = props.getProperty(prefix + "country", "sutime");
     varPrefix = props.getProperty(prefix + "prefix", varPrefix);
-    System.err.println(prefix);
-    System.err.println("Initializing JollyDayHoliday for sutime with " + xmlPathType + ":" + xmlPath);
     Properties managerProps = new Properties();
     managerProps.setProperty("manager.impl", "edu.stanford.nlp.time.JollyDayHolidays$MyXMLManager");
     try {
-      URL holidayXmlUrl;
-      if (xmlPathType.equalsIgnoreCase("classpath")) {
-        holidayXmlUrl = getClass().getClassLoader().getResource(xmlPath);
-      } else if (xmlPathType.equalsIgnoreCase("file")) {
-        holidayXmlUrl = new URL("file:///" + xmlPath);
-      } else if (xmlPathType.equalsIgnoreCase("url")) {
-        holidayXmlUrl = new URL(xmlPath);
-      } else {
-        throw new IllegalArgumentException("Unsupported " + prefix + "pathtype = " + xmlPathType);
-      }
-      holidayManager = HolidayManager.getInstance(holidayXmlUrl, managerProps);
+      holidayManager = HolidayManager.getInstance(new URL("classpath", null, 0, "edu/stanford/nlp/models/sutime/jollyday/Holidays_sutime.xml", new ClasspathURLStreamHandler()), managerProps);
     } catch (java.net.MalformedURLException e) {
       throw new RuntimeException(e);
     }
+    System.err.println("Initializing JollyDayHoliday for " + country);
     if (!(holidayManager instanceof MyXMLManager)) {
       throw new AssertionError("Did not get back JollyDayHolidays$MyXMLManager");
     }
@@ -60,7 +47,6 @@ public class JollyDayHolidays implements Env.Binder {
     holidays = getAllHolidaysMap(config);
   }
 
-  @Override
   public void bind(Env env) {
     if (holidays != null) {
       for (String s:holidays.keySet()) {
@@ -72,7 +58,7 @@ public class JollyDayHolidays implements Env.Binder {
 
   public Map<String, JollyHoliday> getAllHolidaysMap(Set<de.jollyday.config.Holiday> allHolidays)
   {
-    Map<String, JollyHoliday> map = Generics.newHashMap();
+    Map<String, JollyHoliday> map = new HashMap<String, JollyHoliday>();
     for (de.jollyday.config.Holiday h:allHolidays) {
       String descKey = h.getDescriptionPropertiesKey();
       if (descKey != null) {
@@ -136,7 +122,7 @@ public class JollyDayHolidays implements Env.Binder {
 
   public static Set<de.jollyday.config.Holiday> getAllHolidays(Configuration config)
   {
-    Set<de.jollyday.config.Holiday> allHolidays = Generics.newHashSet();
+    Set<de.jollyday.config.Holiday> allHolidays = new HashSet<de.jollyday.config.Holiday>();
     getAllHolidays(config, allHolidays);
     return allHolidays;
   }
@@ -154,18 +140,17 @@ public class JollyDayHolidays implements Env.Binder {
   }
 
   public static class JollyHoliday extends SUTime.Time {
-
-    private final HolidayManager holidayManager;
-    private final de.jollyday.config.Holiday base;
-    private final String label;
+    HolidayManager holidayManager;
+    de.jollyday.config.Holiday base;
+    String label;
 
     public JollyHoliday(String label, HolidayManager holidayManager, de.jollyday.config.Holiday base) {
       this.label = label;
       this.holidayManager = holidayManager;
       this.base = base;
     }
+    public JollyHoliday() {}
 
-    @Override
     public String toFormattedString(int flags) {
       if (getTimeLabel() != null) {
         return getTimeLabel();
@@ -176,23 +161,12 @@ public class JollyDayHolidays implements Env.Binder {
       return label;
     }
 
-    @Override
     public boolean isGrounded()  { return false; }
-
-    @Override
     public SUTime.Time getTime() { return this; }
-
     // TODO: compute duration/range => uncertainty of this time
-    @Override
     public SUTime.Duration getDuration() { return SUTime.DURATION_NONE; }
-
-    @Override
     public SUTime.Range getRange(int flags, SUTime.Duration granularity) { return new SUTime.Range(this,this); }
-
-    @Override
     public String toISOString() { return base.toString(); }
-
-    @Override
     public SUTime.Time intersect(SUTime.Time t) {
       SUTime.Time resolved = resolve(t, 0);
       if (resolved != this) {
@@ -201,8 +175,6 @@ public class JollyDayHolidays implements Env.Binder {
         return super.intersect(t);
       }
     }
-
-    @Override
     public SUTime.Time resolve(SUTime.Time t, int flags) {
       Partial p = (t != null)? t.getJodaTimePartial():null;
       if (p != null) {
@@ -221,10 +193,8 @@ public class JollyDayHolidays implements Env.Binder {
       return this;
     }
 
-    @Override
     public SUTime.Time add(SUTime.Duration offset) {
-      return new SUTime.RelativeTime(this, SUTime.TemporalOp.OFFSET_EXACT, offset);
+      return new SUTime.RelativeTime(this, SUTime.TemporalOp.OFFSET, offset);
     }
   }
-
 }

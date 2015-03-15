@@ -309,13 +309,13 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
   public ArrayHeap(Comparator<? super E> cmp) {
     this.cmp = cmp;
     indexToEntry = new ArrayList<HeapEntry<E>>();
-    objectToEntry = Generics.newHashMap();
+    objectToEntry = new HashMap<E,HeapEntry<E>>();
   }
 
   public ArrayHeap(Comparator<? super E> cmp, int initCapacity) {
     this.cmp = cmp;
     indexToEntry = new ArrayList<HeapEntry<E>>(initCapacity);
-    objectToEntry = Generics.newHashMap(initCapacity);
+    objectToEntry = new HashMap<E,HeapEntry<E>>(initCapacity);
   }
 
   public List<E> asList() {

@@ -5,14 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 /**
@@ -27,27 +25,23 @@ import edu.stanford.nlp.util.Pair;
 public class SemgrexBatchParser {
   /** Maximum stream size in characters */
   private static final int MAX_STREAM_SIZE = 1024 * 1024;
-
-  public List<SemgrexPattern> compileStream(InputStream is) throws IOException {
-    return compileStream(is, null);
-  }
-
-	public List<SemgrexPattern> compileStream(InputStream is, Env env) throws IOException {
+  
+	public List<SemgrexPattern> compileStream(InputStream is) throws IOException {
 	  BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 	  reader.mark(MAX_STREAM_SIZE);
 	  Map<String, String> macros = preprocess(reader);
 	  reader.reset();
-	  return parse(reader, macros, env);
+	  return parse(reader, macros);
 	}
 	
-	private List<SemgrexPattern> parse(BufferedReader reader, Map<String, String> macros, Env env) throws IOException {
+	private List<SemgrexPattern> parse(BufferedReader reader, Map<String, String> macros) throws IOException {
 	  List<SemgrexPattern> patterns = new ArrayList<SemgrexPattern>();
 	  for(String line; (line = reader.readLine()) != null; ) {
       line = line.trim();
       if(line.length() == 0 || line.startsWith("#")) continue;
       if(line.startsWith("macro ")) continue;
       line = replaceMacros(line, macros);
-      SemgrexPattern pattern = SemgrexPattern.compile(line, env);
+      SemgrexPattern pattern = SemgrexPattern.compile(line);
       patterns.add(pattern);
 	  }
 	  return patterns;
@@ -80,7 +74,7 @@ public class SemgrexBatchParser {
 	}
 	
   private Map<String, String> preprocess(BufferedReader reader) throws IOException {
-    Map<String, String> macros = Generics.newHashMap();
+    Map<String, String> macros = new HashMap<String, String>();
     for(String line; (line = reader.readLine()) != null; ) {
       line = line.trim();
       if(line.startsWith("macro ")){

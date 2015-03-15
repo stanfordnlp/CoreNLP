@@ -6,6 +6,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -21,16 +23,15 @@ import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Utility class for extracting a variety of statistics from multi-lingual treebanks.
- *
+ * 
  * TODO(spenceg) Add sample standard deviation
- *
+ * 
  * @author Spence Green
  */
 public class TreebankStats {
@@ -39,7 +40,7 @@ public class TreebankStats {
   private final TreebankLangParserParams tlpp;
   private final List<String> pathNames;
 
-  private enum Split {Train,Dev,Test}
+  private enum Split {Train,Dev,Test};
   private Map<Split,Set<String>> splitFileLists;
   private boolean useSplit = false;
   private boolean makeVocab = false;
@@ -53,16 +54,16 @@ public class TreebankStats {
   }
 
   public boolean useSplit(String prefix) {
-    Map<Split,File> splitMap = Generics.newHashMap();
+    Map<Split,File> splitMap = new HashMap<Split,File>();
     splitMap.put(Split.Train,new File(prefix + ".train"));
     splitMap.put(Split.Test,new File(prefix + ".test"));
     splitMap.put(Split.Dev,new File(prefix + ".dev"));
 
-    splitFileLists = Generics.newHashMap();
+    splitFileLists = new HashMap<Split,Set<String>>();
     for(Map.Entry<Split, File> entry : splitMap.entrySet()) {
       File f = entry.getValue();
       if(!f.exists()) return false;
-      Set<String> files = Generics.newHashSet();
+      Set<String> files = new HashSet<String>();
       for(String fileName : IOUtils.readLines(f))
         files.add(fileName);
       splitFileLists.put(entry.getKey(), files);
@@ -76,7 +77,7 @@ public class TreebankStats {
   private ObservedCorpusStats gatherStats(DiskTreebank tb, String name) {
     ObservedCorpusStats ocs = new ObservedCorpusStats(name);
 
-    if(makeVocab) trainVocab = Generics.newHashSet();
+    if(makeVocab) trainVocab = new HashSet<String>();
 
     System.out.println("Reading treebank:");
     for(Tree t : tb) {
@@ -97,7 +98,7 @@ public class TreebankStats {
    * @param ocs
    * @param addToVocab
    */
-  private static Pair<Integer,Integer> dissectTree(Tree t, ObservedCorpusStats ocs, boolean addToVocab) {
+  private Pair<Integer,Integer> dissectTree(Tree t, ObservedCorpusStats ocs, boolean addToVocab) {
     final Stack<Pair<Integer,Tree>> stack = new Stack<Pair<Integer,Tree>>();
     stack.push(new Pair<Integer,Tree>(0,t));
 
@@ -134,7 +135,7 @@ public class TreebankStats {
     return new Pair<Integer,Integer>(maxDepth,maxBreadth);
   }
 
-  private static void display(ObservedCorpusStats corpStats, boolean displayWords, boolean displayOOV) {
+  private void display(ObservedCorpusStats corpStats, boolean displayWords, boolean displayOOV) {
     System.out.println("####################################################################");
     System.out.println("## " + corpStats.getName());
     System.out.println("####################################################################");
@@ -142,7 +143,7 @@ public class TreebankStats {
     corpStats.display(displayWords, displayOOV);
   }
 
-  private static ObservedCorpusStats aggregateStats(List<ObservedCorpusStats> allStats) {
+  private ObservedCorpusStats aggregateStats(List<ObservedCorpusStats> allStats) {
     if(allStats.size() == 0) return null;
     else if(allStats.size() == 1) return allStats.get(0);
 
@@ -194,28 +195,32 @@ public class TreebankStats {
       makeVocab = true;
       for(String path : pathNames) {
         DiskTreebank tb = tlpp.diskTreebank();
-        tb.loadPath(path, pathname -> true);
+        tb.loadPath(path, new FileFilter() {
+          public boolean accept(File pathname) {
+            return true;
+          }
+        });
 
-        ObservedCorpusStats stats = gatherStats(tb, languageName.toString() + "  " + path);
+        ObservedCorpusStats stats = gatherStats(tb, languageName.toString() + "  " + path.toString());
         display(stats, displayWords, displayOOV);
         makeVocab = false;
       }
 
     } else {
-      trainVocab = Generics.newHashSet();
+      trainVocab = new HashSet<String>();
       DiskTreebank tb = tlpp.diskTreebank();
       for(String path : pathNames)
-        tb.loadPath(path, pathname -> !pathname.isDirectory());
+        tb.loadPath(path, new FileFilter() {
+          public boolean accept(File pathname) { return !pathname.isDirectory(); }
+        });
 
       ObservedCorpusStats allStats = gatherStats(tb, languageName.toString());
       display(allStats, displayWords, displayOOV);
     }
   }
 
-  protected static class SplitFilter implements FileFilter {
-
+  protected class SplitFilter implements FileFilter {
     private final Set<String> filterMap;
-
     public SplitFilter(Set<String> fileList) {
       filterMap = fileList;
     }
@@ -267,10 +272,10 @@ public class TreebankStats {
       for(Integer len : lengths)
         if(len <= maxLen)
           lens++;
-
-      return (double) lens / (double) lengths.size();
+      
+      return (double) lens / (double) lengths.size(); 
     }
-
+    
     public void addPhrasalBranch(String label, int factor) {
       phrasalBranching2.incrementCount(label, factor);
       phrasalBranchingNum2.incrementCount(label);
@@ -313,7 +318,7 @@ public class TreebankStats {
       for(String posTag : sortedKeys)
         System.out.println(" " + posTag + ":\t\t" + (int) posTags.getCount(posTag));
       System.out.println("======================================================");
-
+      
       if(displayWords) {
         System.out.println(">>> Word counts");
         sortedKeys = new ArrayList<String>(words.keySet());
@@ -357,7 +362,7 @@ public class TreebankStats {
         meanBranchingByLabel.incrementCount(label, mean);
       }
 
-      oovWords = Generics.newHashSet(words.keySet());
+      oovWords = new HashSet<String>(words.keySet());
       oovWords.removeAll(trainVocab);
       OOVRate = (double) oovWords.size() / (double) words.keySet().size();
     }
@@ -414,18 +419,18 @@ public class TreebankStats {
     usage.append("  -o        : Print OOV words.").append(nl);
     return usage.toString();
   }
-
+  
   private static Map<String,Integer> optArgDefs() {
-    Map<String,Integer> optArgDefs = Generics.newHashMap(4);
+    Map<String,Integer> optArgDefs = new HashMap<String,Integer>(4);
     optArgDefs.put("s", 1);
     optArgDefs.put("w", 0);
     optArgDefs.put("f", 0);
     optArgDefs.put("o", 0);
     return optArgDefs;
   }
-
+  
   /**
-   *
+   * 
    * @param args
    */
   public static void main(String[] args) {
@@ -445,7 +450,7 @@ public class TreebankStats {
       System.err.println(usage());
       System.exit(-1);
     }
-
+    
     Language language = Language.valueOf(parsedArgs[0]);
     List<String> corpusPaths = new ArrayList<String>(parsedArgs.length-1);
     for (int i = 1; i < parsedArgs.length; ++i) {

@@ -6,14 +6,12 @@ import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.math.ArrayMath;
-import edu.stanford.nlp.util.CallbackFunction;
-import edu.stanford.nlp.util.Generics;
 
 
 /**
@@ -95,7 +93,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   private int maxFevals = -1;
   private int mem = 10; // the number of s,y pairs to retain for BFGS
   private int its = 0; // the number of iterations
-  private final Function monitor;
+  private Function monitor = null;
   private boolean quiet;
   private static final NumberFormat nf = new DecimalFormat("0.000E0");
   private static final NumberFormat nfsec = new DecimalFormat("0.00"); // for times
@@ -122,20 +120,15 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   private boolean useRelativeNorm = true;
   private boolean useNumericalZero = true;
   private boolean useEvalImprovement = false;
-  private boolean useMaxItr = false;
-  private int maxItr = 0;
 
   private boolean suppressTestPrompt = false;
   private int terminateOnEvalImprovementNumOfEpoch = 1;
 
   private int evaluateIters = 0;    // Evaluate every x iterations (0 = no evaluation)
-  private int startEvaluateIters = 0; // starting evaluation after x iterations
   private Evaluator[] evaluators;  // separate set of evaluators to check how optimization is going
 
-  private transient CallbackFunction iterCallbackFunction = null;
-
   public enum eState {
-    TERMINATE_MAXEVALS, TERMINATE_RELATIVENORM, TERMINATE_GRADNORM, TERMINATE_AVERAGEIMPROVE, CONTINUE, TERMINATE_EVALIMPROVE, TERMINATE_MAXITR
+    TERMINATE_MAXEVALS, TERMINATE_RELATIVENORM, TERMINATE_GRADNORM, TERMINATE_AVERAGEIMPROVE, CONTINUE, TERMINATE_EVALIMPROVE
   }
 
   public enum eLineSearch {
@@ -146,29 +139,36 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     DIAGONAL, SCALAR
   }
 
-  private eLineSearch lsOpt = eLineSearch.MINPACK;
-  private eScaling scaleOpt = eScaling.DIAGONAL;
-  private eState state = eState.CONTINUE;
-
-
-  public QNMinimizer() {
-    this((Function) null);
-  }
+  eLineSearch lsOpt = eLineSearch.MINPACK;// eLineSearch.MINPACK;
+  eScaling scaleOpt = eScaling.DIAGONAL;// eScaling.DIAGONAL;
+  eState state = eState.CONTINUE;
 
   public QNMinimizer(int m) {
-    this(null, m);
+    mem = m;
   }
 
   public QNMinimizer(int m, boolean useRobustOptions) {
-    this(null, m, useRobustOptions);
+    mem = m;
+    if (useRobustOptions) {
+      this.setRobustOptions();
+    }
+  }
+
+  public QNMinimizer() {
   }
 
   public QNMinimizer(Function monitor) {
     this.monitor = monitor;
   }
 
+  public QNMinimizer(FloatFunction monitor) {
+    System.err.println("Doesn't support floats yet");
+    System.exit(1);
+  }
+
   public QNMinimizer(Function monitor, int m) {
-    this(monitor, m, false);
+    this.monitor = monitor;
+    mem = m;
   }
 
   public QNMinimizer(Function monitor, int m, boolean useRobustOptions) {
@@ -177,10 +177,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     if (useRobustOptions) {
       this.setRobustOptions();
     }
-  }
-
-  public QNMinimizer(FloatFunction monitor) {
-    throw new UnsupportedOperationException("Doesn't support floats yet");
   }
 
   public void setOldOptions() {
@@ -205,16 +201,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     this.evaluators = evaluators;
   }
 
-  public void setEvaluators(int iters, int startEvaluateIters, Evaluator[] evaluators) {
-    this.evaluateIters = iters;
-    this.startEvaluateIters = startEvaluateIters;
-    this.evaluators = evaluators;
-  }
-
-  public void setIterationCallbackFunction(CallbackFunction func){
-    iterCallbackFunction = func;
-  }
-
   public void terminateOnRelativeNorm(boolean toTerminate) {
     useRelativeNorm = toTerminate;
   }
@@ -229,13 +215,6 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
   public void terminateOnEvalImprovement(boolean toTerminate) {
     useEvalImprovement = toTerminate;
-  }
-
-  public void terminateOnMaxItr(int maxItr) {
-    if (maxItr > 0) {
-      useMaxItr = true;
-      this.maxItr = maxItr;
-    }
   }
 
   public void suppressTestPrompt(boolean suppressTestPrompt) {
@@ -293,25 +272,28 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   }
 
   /**
+   *
    * The Record class is used to collect information about the function value
    * over a series of iterations. This information is used to determine
    * convergence, and to (attempt to) ensure numerical errors are not an issue.
    * It can also be used for plotting the results of the optimization routine.
    *
    * @author akleeman
+   *
    */
+
   public class Record {
     // convergence options.
     // have average difference like before
     // zero gradient.
 
     // for convergence test
-    private final List<Double> evals = new ArrayList<Double>();
-    private final List<Double> values = new ArrayList<Double>();
+    List<Double> evals = new ArrayList<Double>();
+    List<Double> values = new ArrayList<Double>();
     List<Double> gNorms = new ArrayList<Double>();
     // List<Double> xNorms = new ArrayList<Double>();
-    private final List<Integer> funcEvals = new ArrayList<Integer>();
-    private final List<Double> time = new ArrayList<Double>();
+    List<Integer> funcEvals = new ArrayList<Integer>();
+    List<Double> time = new ArrayList<Double>();
     // gNormInit: This makes it so that if for some reason
     // you try and divide by the initial norm before it's been
     // initialized you don't get a NAN but you will also never
@@ -330,8 +312,21 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     private boolean memoryConscious = true;
     private PrintWriter outputFile = null;
 
-    private int noImproveItrCount = 0;
-    private double[] xBest;
+    public Record() {
+    }
+
+    public Record(PrintWriter output) {
+      outputFile = output;
+    }
+
+    public Record(boolean beQuiet) {
+      this.quiet = beQuiet;
+    }
+
+    public Record(boolean beQuiet, Function monitor) {
+      this.quiet = beQuiet;
+      this.mon = monitor;
+    }
 
     public Record(boolean beQuiet, Function monitor, double tolerance) {
       this.quiet = beQuiet;
@@ -454,28 +449,20 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
       int size = values.size();
       double newestVal = values.get(size - 1);
       double previousVal = (size >= 10 ? values.get(size - 10) : values.get(0));
-      double averageImprovement = (previousVal - newestVal) / (size >= 10 ? 10 : size);
+      double averageImprovement = (previousVal - newestVal) / size;
       int evalsSize = evals.size();
 
-      if (useMaxItr && its >= maxItr)
-        return eState.TERMINATE_MAXITR;
-
-      if (useEvalImprovement) {
-        int bestInd = -1;
-        double bestScore = Double.NEGATIVE_INFINITY;
-        for (int i = 0; i < evalsSize; i++) {
-          if (evals.get(i) >= bestScore) {
-            bestScore = evals.get(i);
-            bestInd = i;
-          }
-        }
-        if (bestInd == evalsSize-1) { // copy xBest
-          if (xBest == null)
-            xBest = Arrays.copyOf(xLast, xLast.length);
-          else
-            System.arraycopy( xLast, 0, xBest, 0, xLast.length );
-        }
-        if ((evalsSize - bestInd) >= terminateOnEvalImprovementNumOfEpoch)
+      if (useEvalImprovement && evalsSize > terminateOnEvalImprovementNumOfEpoch) {
+        int begin = evalsSize - terminateOnEvalImprovementNumOfEpoch;
+        double baseline = evals.get(begin);
+        boolean improved = false;
+        for (int i = begin; i < evalsSize; i++) {
+          if (evals.get(i) > baseline) {
+            improved = true;
+            break;
+          }  
+        } 
+        if (!improved)
           return eState.TERMINATE_EVALIMPROVE;
       }
 
@@ -522,11 +509,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
       return ((System.currentTimeMillis() - startTime)) / 1000.0;
     }
 
-    public double[] getBest() {
-      return xBest;
-    }
-
-  } // end class Record
+  }
 
   /**
    * The QNInfo class is used to store information about the Quasi Newton
@@ -662,7 +645,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
      * hessian through scaling or diagonal update, and then storing of the
      * secant pairs s = x - previousX and y = grad - previousGrad.
      *
-     * Things can go wrong, if any non convex behavior is detected (s^T y &lt; 0)
+     * Things can go wrong, if any non convex behavior is detected (s^T y < 0)
      * or numerical errors are likely the update is skipped.
      *
      */
@@ -987,9 +970,14 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
     // Beginning of the loop.
     do {
+
       try {
         sayln();
-        boolean doEval = (its >= 0 && its >= startEvaluateIters && evaluateIters > 0 && its % evaluateIters == 0);
+        boolean doEval = (its > 0 && evaluateIters > 0 && its % evaluateIters == 0);
+        double evalScore = Double.NEGATIVE_INFINITY;
+        if (doEval) {
+          evalScore = doEvaluation(x);
+        }
         its += 1;
         double newValue;
         double[] newPoint = new double[3]; // initialized in loop
@@ -1036,13 +1024,15 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
             say("M");
             break;
           default:
-            throw new IllegalArgumentException("Invalid line search option for QNMinimizer.");
+            sayln("Invalid line search option for QNMinimizer. ");
+            System.exit(1);
+            break;
+
           }
         }
 
         newValue = newPoint[f];
-        say(" ");
-        say(nf.format(newPoint[a]));
+        System.err.print(" " + nf.format(newPoint[a]));
         say("] ");
 
         // This shouldn't actually evaluate anything since that should have been
@@ -1057,19 +1047,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
           newGrad = pseudoGradientOWL(newX, newGrad, dfunction);
         }
 
-        double evalScore = Double.NEGATIVE_INFINITY;
-        if (doEval) {
-          evalScore = doEvaluation(newX);
-        }
-
         // Add the current value and gradient to the records, this also monitors
         // X and writes to output
         rec.add(newValue, newGrad, newX, fevals, evalScore);
-
-        //If you wanna call a function and do whatever with the information
-        if(iterCallbackFunction != null){
-          iterCallbackFunction.callback(newX, its, newValue, newGrad);
-        }
 
         // shift
         value = newValue;
@@ -1115,11 +1095,8 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
     if (evaluateIters > 0) {
       // do final evaluation
-      double evalScore = (useEvalImprovement ? doEvaluation(rec.getBest()) : doEvaluation(x));
-      sayln("final evalScore is: " + evalScore);
+      doEvaluation(x);
     }
-
-
 
     //
     // Announce the reason minimization has terminated.
@@ -1141,16 +1118,10 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
           .println("QNMinimizer terminated due to average improvement: | newest_val - previous_val | / |newestVal| < TOL ");
       success = true;
       break;
-    case TERMINATE_MAXITR:
-      System.err
-          .println("QNMinimizer terminated due to reached max iteration " + maxItr );
-      success = true;
-      break;
     case TERMINATE_EVALIMPROVE:
       System.err
           .println("QNMinimizer terminated due to no improvement on eval ");
       success = true;
-      x = rec.getBest();
       break;
     default:
       System.err.println("QNMinimizer terminated without converging");
@@ -1193,39 +1164,27 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     }
   }
 
-  // todo [cdm 2013]: Can this be sped up by returning a Pair rather than copying array?
   private double evaluateFunction(DiffFunction dfunc, double[] x, double[] grad) {
     System.arraycopy(dfunc.derivativeAt(x), 0, grad, 0, grad.length);
     fevals += 1;
     return dfunc.valueAt(x);
   }
 
-  /** To set QNMinimizer to use L1 regularization, call this method before use,
-   *  with the boolean set true, and the appropriate lambda parameter.
-   *
-   *  @param use Whether to use Orthant-wise optimization
-   * @param lambda The L1 regularization parameter.
-   */
   public void useOWLQN(boolean use, double lambda) {
     this.useOWLQN = use;
     this.lambdaOWL = lambda;
   }
 
-  private static Set<Integer> initializeParamRange(Function func, double[] x) {
-    Set<Integer> paramRange;
-    if (func instanceof HasRegularizerParamRange) {
-      paramRange = ((HasRegularizerParamRange)func).getRegularizerParamRange(x);
+  private double[] projectOWL(double[] x, double[] orthant, Function func) {
+    Set<Integer> paramRange = null;
+    if (func instanceof HasL1ParamRange) {
+      paramRange = ((HasL1ParamRange)func).getL1ParamRange(x);
     } else {
-      paramRange = Generics.newHashSet(x.length);
-      for (int i = 0; i < x.length; i++) {
+      paramRange = new HashSet<Integer>(x.length);
+      for (int i = 0; i < x.length; i++)
         paramRange.add(i);
-      }
     }
-    return paramRange;
-  }
 
-  private static double[] projectOWL(double[] x, double[] orthant, Function func) {
-    Set<Integer> paramRange = initializeParamRange(func, x);
     for (int i : paramRange) {
       if (x[i] * orthant[i] <= 0)
         x[i] = 0;
@@ -1233,27 +1192,49 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     return x;
   }
 
-  private static double l1NormOWL(double[] x, Function func) {
-    Set<Integer> paramRange = initializeParamRange(func, x);
-    double sum = 0.0;
+  private double l1NormOWL(double[] x, Function func) {
+    Set<Integer> paramRange = null;
+    if (func instanceof HasL1ParamRange) {
+      paramRange = ((HasL1ParamRange)func).getL1ParamRange(x);
+    } else {
+      paramRange = new HashSet<Integer>(x.length);
+      for (int i = 0; i < x.length; i++)
+        paramRange.add(i);
+    }
+    double sum = 0;
     for (int i: paramRange) {
       sum += Math.abs(x[i]);
     }
+
     return sum;
   }
 
-  private static void constrainSearchDir(double[] dir, double[] fg, double[] x, Function func) {
-    Set<Integer> paramRange = initializeParamRange(func, x);
+  private void constrainSearchDir(double[] dir, double[] fg, double[] x, Function func) {    
+    Set<Integer> paramRange = null;
+    if (func instanceof HasL1ParamRange) {
+      paramRange = ((HasL1ParamRange)func).getL1ParamRange(x);
+    } else {
+      paramRange = new HashSet<Integer>(x.length);
+      for (int i = 0; i < x.length; i++)
+        paramRange.add(i);
+    }
     for (int i: paramRange) {
-      if (dir[i] * fg[i] >= 0.0) {
-        dir[i] = 0.0;
+      if (dir[i] * fg[i] >= 0) {
+        dir[i] = 0;
       }
     }
   }
 
   private double[] pseudoGradientOWL(double[] x, double[] grad, Function func) {
-    Set<Integer> paramRange = initializeParamRange(func, x); // initialized below
     double[] newGrad = new double[grad.length];
+    Set<Integer> paramRange = null;
+    if (func instanceof HasL1ParamRange) {
+      paramRange = ((HasL1ParamRange)func).getL1ParamRange(x);
+    } else {
+      paramRange = new HashSet<Integer>(x.length);
+      for (int i = 0; i < x.length; i++)
+        paramRange.add(i);
+    }
 
     // compute pseudo gradient
     for (int i = 0; i < x.length; i++) {
@@ -1326,7 +1307,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
       // Evaluate the function and gradient values
       double value  =  func.valueAt(newX);
-
+      
       // Compute the L1 norm of the variables and add it to the object value
       double norm = l1NormOWL(newX, func);
       value += norm * lambdaOWL;

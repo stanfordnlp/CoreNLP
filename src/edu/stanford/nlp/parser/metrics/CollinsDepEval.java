@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -22,7 +24,6 @@ import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -71,13 +72,13 @@ public class CollinsDepEval extends AbstractEval {
   }
 
   private Map<CollinsRelation,Set<CollinsDependency>> makeCollinsObjects(Tree t) {
-    final Map<CollinsRelation,Set<CollinsDependency>> relMap = Generics.newHashMap();
+    final Map<CollinsRelation,Set<CollinsDependency>> relMap = new HashMap<CollinsRelation,Set<CollinsDependency>>();
     final Set<CollinsDependency> deps = CollinsDependency.extractNormalizedFromTree(t, startSymbol, hf);
 
     for(CollinsDependency dep : deps) {
       if(DEBUG) System.out.println(dep.toString());
       if(relMap.get(dep.getRelation()) == null)
-        relMap.put(dep.getRelation(), Generics.<CollinsDependency>newHashSet());
+        relMap.put(dep.getRelation(), new HashSet<CollinsDependency>());
       relMap.get(dep.getRelation()).add(dep);
     }
     if(DEBUG) System.out.println();
@@ -98,7 +99,7 @@ public class CollinsDepEval extends AbstractEval {
     if(DEBUG) System.out.println("gold:");
     Map<CollinsRelation,Set<CollinsDependency>> goldDeps = makeCollinsObjects(gold);
 
-    Set<CollinsRelation> relations = Generics.newHashSet();
+    Set<CollinsRelation> relations = new HashSet<CollinsRelation>();
     relations.addAll(guessDeps.keySet());
     relations.addAll(goldDeps.keySet());
 
@@ -109,9 +110,9 @@ public class CollinsDepEval extends AbstractEval {
       Set<CollinsDependency> thisGoldDeps = goldDeps.get(rel);
 
       if (thisGuessDeps == null)
-        thisGuessDeps = Generics.newHashSet();
+        thisGuessDeps = new HashSet<CollinsDependency>();
       if (thisGoldDeps == null)
-        thisGoldDeps = Generics.newHashSet();
+        thisGoldDeps = new HashSet<CollinsDependency>();
 
       double currentPrecision = precision(thisGuessDeps, thisGoldDeps);
       double currentRecall = precision(thisGoldDeps, thisGuessDeps);
@@ -143,7 +144,7 @@ public class CollinsDepEval extends AbstractEval {
   @Override
   public void display(boolean verbose, PrintWriter pw) {
     final NumberFormat nf = new DecimalFormat("0.00");
-    final Set<CollinsRelation> cats = Generics.newHashSet();
+    final Set<CollinsRelation> cats = new HashSet<CollinsRelation>();
     final Random rand = new Random();
     cats.addAll(precisions.keySet());
     cats.addAll(recalls.keySet());
@@ -194,7 +195,7 @@ public class CollinsDepEval extends AbstractEval {
     return usage.toString();
   }
   private static Map<String,Integer> optionArgDefs() {
-    Map<String,Integer> optionArgDefs = Generics.newHashMap();
+    Map<String,Integer> optionArgDefs = new HashMap<String,Integer>();
     optionArgDefs.put("v", 0);
     optionArgDefs.put("l", 1);
     optionArgDefs.put("g", 1);

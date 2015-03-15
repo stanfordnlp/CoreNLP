@@ -1,16 +1,16 @@
 package edu.stanford.nlp.trees.treebank;
 
+import java.util.HashMap;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 
 import edu.stanford.nlp.international.arabic.pipeline.ATBArabicDataset;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
- * A data preparation pipeline for treebanks.
+ * A data preparation pipeline for treebanks
  * <p>
  * A simple framework for preparing various kinds of treebank data. The original goal was to prepare the
  * Penn Arabic Treebank (PATB) trees for parsing. This pipeline arose from the
@@ -51,8 +51,8 @@ public final class TreebankPreprocessor {
     StringBuilder sb = new StringBuilder(cmdLineFormat);
 
     //Add other parameters here
-    sb.append(String.format("  -v         : Show verbose output%n"));
-    sb.append(String.format("  -d <name>  : Make a distributable package with the specified name%n"));
+    sb.append("  -v         : Show verbose output\n");
+    sb.append("  -d <name>  : Make a distributable package with the specified name\n");
 
     return sb.toString();
   }
@@ -70,17 +70,17 @@ public final class TreebankPreprocessor {
         ds = (Dataset) c.newInstance();
       }
     } catch (ClassNotFoundException e) {
-      System.err.printf("Dataset type %s does not exist%n", dsType);
+      System.err.printf("Dataset type %s does not exist\n", dsType);
     } catch (InstantiationException e) {
-      System.err.printf("Unable to instantiate dataset type %s%n", dsType);
+      System.err.printf("Unable to instantiate dataset type %s\n", dsType);
     } catch (IllegalAccessException e) {
-      System.err.printf("Unable to access dataset type %s%n", dsType);
+      System.err.printf("Unable to access dataset type %s\n", dsType);
     }
 
     return ds;
   }
 
-  private static final int MIN_ARGS = 1;
+  private final static int MIN_ARGS = 1;
 
   //Command line options
   private static boolean VERBOSE = false;
@@ -89,7 +89,7 @@ public final class TreebankPreprocessor {
   private static String configFile = null;
   private static String outputPath = null;
 
-  public static final Map<String,Integer> optionArgDefs = Generics.newHashMap();
+  public static final Map<String,Integer> optionArgDefs = new HashMap<String,Integer>();
   static {
     optionArgDefs.put("-d", 1);
     optionArgDefs.put("-v", 0);
@@ -144,8 +144,8 @@ public final class TreebankPreprocessor {
     System.out.println("##################################");
     System.out.println("# Stanford Treebank Preprocessor #");
     System.out.println("##################################");
-    System.out.printf("Start time: %s%n", startTime);
-    System.out.printf("Configuration: %s%n%n", configFile);
+    System.out.printf("Start time: %s\n", startTime);
+    System.out.printf("Configuration: %s\n\n", configFile);
 
 
     final ConfigParser cp = new ConfigParser(configFile);
@@ -162,7 +162,7 @@ public final class TreebankPreprocessor {
 
       Dataset ds = getDatasetClass(dsParams);
       if(ds == null) {
-        System.out.printf("Unable to instantiate TYPE for dataset %s. Check the javadocs%n",nameOfDataset);
+        System.out.printf("Unable to instantiate TYPE for dataset %s. Check the javadocs\n",nameOfDataset);
         continue;
       }
 
@@ -172,7 +172,7 @@ public final class TreebankPreprocessor {
 
       boolean lacksRequiredOptions = !(ds.setOptions(dsParams));
       if(lacksRequiredOptions) {
-        System.out.printf("Skipping dataset %s as it lacks required parameters. Check the javadocs%n", nameOfDataset);
+        System.out.printf("Skipping dataset %s as it lacks required parameters. Check the javadocs\n", nameOfDataset);
         continue;
       }
 
@@ -182,7 +182,7 @@ public final class TreebankPreprocessor {
         distrib.addFiles(ds.getFilenames());
 
       if(VERBOSE)
-        System.out.printf("%s%n", ds.toString());
+        System.out.println(ds.toString() + "\n");
     }
 
     if(MAKE_DISTRIB)
@@ -200,8 +200,7 @@ public final class TreebankPreprocessor {
 
     Date stopTime = new Date();
     long elapsedTime = stopTime.getTime() - startTime.getTime();
-    System.out.printf("Completed processing at %s%n",stopTime);
-    System.out.printf("Elapsed time: %d seconds%n", (int) (elapsedTime / 1000F));
+    System.out.printf("Completed processing at %s\n",stopTime);
+    System.out.printf("Elapsed time: %d seconds\n", (int) (elapsedTime / 1000F));
   }
-
 }

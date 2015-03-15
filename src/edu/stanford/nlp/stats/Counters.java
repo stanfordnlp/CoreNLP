@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -64,8 +65,7 @@ import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Factory;
 import edu.stanford.nlp.util.FixedPrioritiesPriorityQueue;
-import java.util.function.Function;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PriorityQueue;
@@ -75,7 +75,7 @@ import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
 /**
- * Static methods for operating on a {@link Counter}.
+ * Static methods for operating on {@link Counter}s.
  * <p>
  * All methods that change their arguments change the <i>first</i> argument
  * (only), and have "InPlace" in their name. This class also provides access to
@@ -93,7 +93,8 @@ public class Counters {
 
   private static final double LOG_E_2 = Math.log(2.0);
 
-  private Counters() {} // only static methods
+  private Counters() {
+  } // only static methods
 
   //
   // Log arithmetic operations
@@ -102,7 +103,8 @@ public class Counters {
   /**
    * Returns ArrayMath.logSum of the values in this counter.
    *
-   * @param c Argument counter (which is not modified)
+   * @param c
+   *          Argument counter (which is not modified)
    * @return ArrayMath.logSum of the values in this counter.
    */
   public static <E> double logSum(Counter<E> c) {
@@ -117,7 +119,8 @@ public class Counters {
    * the value of c1 becomes v1 - log(e^v1 + e^v2 + e^v3). After this, e^v1 +
    * e^v2 + e^v3 = 1.0, so Counters.logSum(c) = 0.0 (approximately).
    *
-   * @param c The Counter to log normalize in place
+   * @param c
+   *          The Counter to log normalize in place
    */
   @SuppressWarnings( { "UnnecessaryUnboxing" })
   public static <E> void logNormalizeInPlace(Counter<E> c) {
@@ -137,42 +140,27 @@ public class Counters {
 
   /**
    * Returns the value of the maximum entry in this counter. This is also the
-   * L_infinity norm. An empty counter is given a max value of
+   * Linfinity norm. An empty counter is given a max value of
    * Double.NEGATIVE_INFINITY.
    *
-   * @param c The Counter to find the max of
+   * @param c
+   *          The Counter to find the max of
    * @return The maximum value of the Counter
    */
   public static <E> double max(Counter<E> c) {
-    return max(c, Double.NEGATIVE_INFINITY);  // note[gabor]: Should the default actually be 0 rather than negative_infinity?
-  }
-
-  /**
-   * Returns the value of the maximum entry in this counter. This is also the
-   * L_infinity norm. An empty counter is given a max value of
-   * Double.NEGATIVE_INFINITY.
-   *
-   * @param c The Counter to find the max of
-   * @param valueIfEmpty The value to return if this counter is empty (i.e., the maximum is not well defined.
-   * @return The maximum value of the Counter
-   */
-  public static <E> double max(Counter<E> c, double valueIfEmpty) {
-    if (c.size() == 0) {
-      return valueIfEmpty;
-    } else {
-      double max = Double.NEGATIVE_INFINITY;
-      for (double v : c.values()) {
-        max = Math.max(max, v);
-      }
-      return max;
+    double max = Double.NEGATIVE_INFINITY;
+    for (double v : c.values()) {
+      max = Math.max(max, v);
     }
+    return max;
   }
 
   /**
    * Takes in a Collection of something and makes a counter, incrementing once
    * for each object in the collection.
    *
-   * @param c The Collection to turn into a counter
+   * @param c
+   *          The Collection to turn into a counter
    * @return The counter made out of the collection
    */
   public static <E> Counter<E> asCounter(Collection<E> c) {
@@ -186,7 +174,8 @@ public class Counters {
   /**
    * Returns the value of the smallest entry in this counter.
    *
-   * @param c The Counter (not modified)
+   * @param c
+   *          The Counter (not modified)
    * @return The minimum value in the Counter
    */
   public static <E> double min(Counter<E> c) {
@@ -201,19 +190,30 @@ public class Counters {
    * Finds and returns the key in the Counter with the largest count. Returning
    * null if count is empty.
    *
-   * @param c The Counter
+   * @param c
+   *          The Counter
    * @return The key in the Counter with the largest count.
    */
   public static <E> E argmax(Counter<E> c) {
-    return argmax(c, (x, y) -> 0, null);
-
+    double max = Double.NEGATIVE_INFINITY;
+    E argmax = null;
+    for (E key : c.keySet()) {
+      double count = c.getCount(key);
+      if (argmax == null || count > max) {// || (count == max &&
+                                          // tieBreaker.compare(key, argmax) <
+                                          // 0)) {
+        max = count;
+        argmax = key;
+      }
+    }
+    return argmax;
   }
-
 
   /**
    * Finds and returns the key in this Counter with the smallest count.
    *
-   * @param c The Counter
+   * @param c
+   *          The Counter
    * @return The key in the Counter with the smallest count.
    */
   public static <E> E argmin(Counter<E> c) {
@@ -222,7 +222,9 @@ public class Counters {
 
     for (E key : c.keySet()) {
       double count = c.getCount(key);
-      if (argmin == null || count < min) { // || (count == min && tieBreaker.compare(key, argmin) < 0)
+      if (argmin == null || count < min) {// || (count == min &&
+                                          // tieBreaker.compare(key, argmin) <
+                                          // 0)) {
         min = count;
         argmin = key;
       }
@@ -234,27 +236,11 @@ public class Counters {
    * Finds and returns the key in the Counter with the largest count. Returning
    * null if count is empty.
    *
-   * @param c The Counter
-   * @param tieBreaker the tie breaker for when elements have the same value.
+   * @param c
+   *          The Counter
    * @return The key in the Counter with the largest count.
    */
   public static <E> E argmax(Counter<E> c, Comparator<E> tieBreaker) {
-    return argmax(c, tieBreaker, (E) null);
-  }
-
-  /**
-   * Finds and returns the key in the Counter with the largest count. Returning
-   * null if count is empty.
-   *
-   * @param c The Counter
-   * @param tieBreaker the tie breaker for when elements have the same value.
-   * @param defaultIfEmpty The value to return if the counter is empty.
-   * @return The key in the Counter with the largest count.
-   */
-  public static <E> E argmax(Counter<E> c, Comparator<E> tieBreaker, E defaultIfEmpty) {
-    if (c.size() == 0) {
-      return defaultIfEmpty;
-    }
     double max = Double.NEGATIVE_INFINITY;
     E argmax = null;
     for (E key : c.keySet()) {
@@ -270,7 +256,8 @@ public class Counters {
   /**
    * Finds and returns the key in this Counter with the smallest count.
    *
-   * @param c The Counter
+   * @param c
+   *          The Counter
    * @return The key in the Counter with the smallest count.
    */
   public static <E> E argmin(Counter<E> c, Comparator<E> tieBreaker) {
@@ -290,7 +277,8 @@ public class Counters {
   /**
    * Returns the mean of all the counts (totalCount/size).
    *
-   * @param c The Counter to find the mean of.
+   * @param c
+   *          The Counter to find the mean of.
    * @return The mean of all the counts (totalCount/size).
    */
   public static <E> double mean(Counter<E> c) {
@@ -314,9 +302,12 @@ public class Counters {
    * Sets each value of target to be target[k]+scale*arg[k] for all keys k in
    * target.
    *
-   * @param target A Counter that is modified
-   * @param arg The Counter whose contents are added to target
-   * @param scale How the arg Counter is scaled before being added
+   * @param target
+   *          A Counter that is modified
+   * @param arg
+   *          The Counter whose contents are added to target
+   * @param scale
+   *          How the arg Counter is scaled before being added
    */
   // TODO: Rewrite to use arg.entrySet()
   public static <E> void addInPlace(Counter<E> target, Counter<E> arg, double scale) {
@@ -340,6 +331,7 @@ public class Counters {
   /**
    * Sets each value of double[] target to be
    * target[idx.indexOf(k)]+a.getCount(k) for all keys k in arg
+   *
    */
   public static <E> void addInPlace(double[] target, Counter<E> arg, Index<E> idx) {
     for (Map.Entry<E, Double> entry : arg.entrySet()) {
@@ -348,20 +340,8 @@ public class Counters {
   }
 
   /**
-   * For all keys (u,v) in arg1 and arg2, sets return[u,v] to be summation of both.
-   * @param <T1>
-   * @param <T2>
-   */
-  public static <T1, T2> TwoDimensionalCounter<T1, T2> add(TwoDimensionalCounter<T1, T2> arg1, TwoDimensionalCounter<T1, T2> arg2) {
-    TwoDimensionalCounter<T1, T2> add = new TwoDimensionalCounter<T1, T2>();
-    Counters.addInPlace(add , arg1);
-    Counters.addInPlace(add , arg2);
-    return add;
-  }
-
-   /**
    * For all keys (u,v) in arg, sets target[u,v] to be target[u,v] + scale *
-   * arg[u,v].
+   * arg[u,v]
    *
    * @param <T1>
    * @param <T2>
@@ -374,7 +354,7 @@ public class Counters {
   }
 
   /**
-   * For all keys (u,v) in arg, sets target[u,v] to be target[u,v] + arg[u,v].
+   * For all keys (u,v) in arg, sets target[u,v] to be target[u,v] + arg[u,v]
    *
    * @param <T1>
    * @param <T2>
@@ -396,7 +376,7 @@ public class Counters {
       target.incrementCount(key, value);
     }
   }
-
+  
   /**
    * For all keys (u,v) in target, sets target[u,v] to be target[u,v] + value
    *
@@ -408,7 +388,7 @@ public class Counters {
         addInPlace(target.getCounter(outer), value);
       }
   }
-
+  
   /**
    * Sets each value of target to be target[k]+
    * num-of-times-it-occurs-in-collection if the key is present in the arg
@@ -441,6 +421,7 @@ public class Counters {
   /**
    * Sets each value of double[] target to be
    * target[idx.indexOf(k)]-a.getCount(k) for all keys k in arg
+   *
    */
   public static <E> void subtractInPlace(double[] target, Counter<E> arg, Index<E> idx) {
     for (Map.Entry<E, Double> entry : arg.entrySet()) {
@@ -472,9 +453,11 @@ public class Counters {
   /**
    * Divides each value in target by the given divisor, in place.
    *
-   * @param target The values in this Counter will be changed throughout by the
+   * @param target
+   *          The values in this Counter will be changed throught by the
    *          multiplier
-   * @param divisor The number by which to change each number in the Counter
+   * @param divisor
+   *          The number by which to change each number in the Counter
    * @return The target Counter is returned (for easier method chaining)
    */
   public static <E> Counter<E> divideInPlace(Counter<E> target, double divisor) {
@@ -511,7 +494,7 @@ public class Counters {
     Counters.retainNonZeros(target);
     return target;
   }
-
+  
   /**
    * Normalizes the target counter in-place, so the sum of the resulting values
    * equals 1.
@@ -519,21 +502,9 @@ public class Counters {
    * @param <E> Type of elements in Counter
    */
   public static <E> void normalize(Counter<E> target) {
-    divideInPlace(target, target.totalCount());
+    multiplyInPlace(target, 1.0 / target.totalCount());
   }
-
-  /**
-   * L1 normalize a counter. Return a counter that is a probability distribution,
-   * so the sum of the resulting value equals 1.
-   *
-   * @param c The {@link Counter} to be L1 normalized. This counter is not
-   *          modified.
-   * @return A new L1-normalized Counter based on c.
-   */
-  public static <E, C extends Counter<E>> C asNormalizedCounter(C c) {
-    return scale(c, 1.0 / c.totalCount());
-  }
-
+  
   /**
    * Normalizes the target counter in-place, so the sum of the resulting values
    * equals 1.
@@ -583,7 +554,7 @@ public class Counters {
   }
 
   /**
-   * Removes all entries from c except for the top {@code num}.
+   * Removes all entries from c except for the top <code>num</code>
    */
   public static <E> void retainTop(Counter<E> c, int num) {
     int numToPurge = c.size() - num;
@@ -598,7 +569,7 @@ public class Counters {
   }
 
   /**
-   * Removes all entries from c except for the top {@code num}.
+   * Removes all entries from c except for the top <code>num</code>
    */
   public static <E extends Comparable<E>> void retainTopKeyComparable(Counter<E> c, int num) {
     int numToPurge = c.size() - num;
@@ -614,22 +585,18 @@ public class Counters {
   }
 
   /**
-   * Removes all entries from c except for the bottom {@code num}.
+   * Removes all entries from c except for the bottom <code>num</code>
    */
-  public static <E> List<E> retainBottom(Counter<E> c, int num) {
+  public static <E> void retainBottom(Counter<E> c, int num) {
     int numToPurge = c.size() - num;
     if (numToPurge <= 0) {
-      return Generics.newArrayList();
+      return;
     }
 
-    List<E> removed = new ArrayList<E>();
     List<E> l = Counters.toSortedList(c);
     for (int i = 0; i < numToPurge; i++) {
-      E rem = l.get(i);
-      removed.add(rem);
-      c.remove(rem);
+      c.remove(l.get(i));
     }
-    return removed;
   }
 
   /**
@@ -637,7 +604,7 @@ public class Counters {
    * removed entries.
    */
   public static <E> Set<E> retainNonZeros(Counter<E> counter) {
-    Set<E> removed = Generics.newHashSet();
+    Set<E> removed = new HashSet<E>();
     for (E key : counter.keySet()) {
       if (counter.getCount(key) == 0.0) {
         removed.add(key);
@@ -653,14 +620,15 @@ public class Counters {
    * Removes all entries with counts below the given threshold, returning the
    * set of removed entries.
    *
-   * @param counter The counter.
+   * @param counter
+   *          The counter.
    * @param countThreshold
    *          The minimum count for an entry to be kept. Entries (strictly) less
    *          than this threshold are discarded.
    * @return The set of discarded entries.
    */
   public static <E> Set<E> retainAbove(Counter<E> counter, double countThreshold) {
-    Set<E> removed = Generics.newHashSet();
+    Set<E> removed = new HashSet<E>();
     for (E key : counter.keySet()) {
       if (counter.getCount(key) < countThreshold) {
         removed.add(key);
@@ -673,65 +641,40 @@ public class Counters {
   }
 
   /**
-   * Removes all entries with counts below the given threshold, returning the
-   * set of removed entries.
-   *
-   * @param counter The counter.
-   * @param countThreshold
-   *          The minimum count for an entry to be kept. Entries (strictly) less
-   *          than this threshold are discarded.
-   * @return The set of discarded entries.
-   */
-  public static <E1, E2> Set<Pair<E1, E2>> retainAbove(
-      TwoDimensionalCounter<E1, E2> counter, double countThreshold) {
-
-    Set<Pair<E1, E2>> removed = new HashSet<Pair<E1, E2>>();
-    for (Entry<E1, ClassicCounter<E2>> en : counter.entrySet()) {
-      for (Entry<E2, Double> en2 : en.getValue().entrySet()) {
-        if (counter.getCount(en.getKey(), en2.getKey()) < countThreshold) {
-          removed.add(new Pair<E1, E2>(en.getKey(), en2.getKey()));
-        }
-      }
-    }
-    for (Pair<E1, E2> key : removed) {
-      counter.remove(key.first(), key.second());
-    }
-    return removed;
-  }
-
-  /**
    * Removes all entries with counts above the given threshold, returning the
    * set of removed entries.
    *
-   * @param counter The counter.
+   * @param counter
+   *          The counter.
    * @param countMaxThreshold
    *          The maximum count for an entry to be kept. Entries (strictly) more
    *          than this threshold are discarded.
    * @return The set of discarded entries.
    */
-  public static <E> Counter<E> retainBelow(Counter<E> counter, double countMaxThreshold) {
-    Counter<E> removed = new ClassicCounter<E>();
+  public static <E> Set<E> retainBelow(Counter<E> counter, double countMaxThreshold) {
+    Set<E> removed = new HashSet<E>();
     for (E key : counter.keySet()) {
-      double count = counter.getCount(key);
       if (counter.getCount(key) > countMaxThreshold) {
-        removed.setCount(key, count);
+        removed.add(key);
       }
     }
-    for (Entry<E, Double> key : removed.entrySet()) {
-      counter.remove(key.getKey());
+    for (E key : removed) {
+      counter.remove(key);
     }
     return removed;
   }
 
   /**
-   * Removes all entries with keys that does not match one of the given patterns.
+   * Removes all entries with keys that does not match one of the given patterns
    *
-   * @param counter The counter.
-   * @param matchPatterns pattern for key to match
+   * @param counter
+   *          The counter.
+   * @param matchPatterns
+   *          pattern for key to match
    * @return The set of discarded entries.
    */
   public static Set<String> retainMatchingKeys(Counter<String> counter, List<Pattern> matchPatterns) {
-    Set<String> removed = Generics.newHashSet();
+    Set<String> removed = new HashSet<String>();
     for (String key : counter.keySet()) {
       boolean matched = false;
       for (Pattern pattern : matchPatterns) {
@@ -751,14 +694,16 @@ public class Counters {
   }
 
   /**
-   * Removes all entries with keys that does not match the given set of keys.
+   * Removes all entries with keys that does not match the given set of keys
    *
-   * @param counter The counter
-   * @param matchKeys Keys to match
+   * @param counter
+   *          The counter.
+   * @param matchKeys
+   *          Keys to match
    * @return The set of discarded entries.
    */
   public static<E> Set<E> retainKeys(Counter<E> counter, Collection<E> matchKeys) {
-    Set<E> removed = Generics.newHashSet();
+    Set<E> removed = new HashSet<E>();
     for (E key : counter.keySet()) {
       boolean matched = matchKeys.contains(key);
       if (!matched) {
@@ -785,30 +730,18 @@ public class Counters {
   }
 
   /**
-   * Removes all entries with keys (first key set) in the given collection
-   *
-   * @param <E>
-   * @param counter
-   * @param removeKeysCollection
-   */
-  public static <E, F> void removeKeys(TwoDimensionalCounter<E, F> counter, Collection<E> removeKeysCollection) {
-
-    for (E key : removeKeysCollection)
-      counter.remove(key);
-  }
-
-  /**
    * Returns the set of keys whose counts are at or above the given threshold.
    * This set may have 0 elements but will not be null.
    *
-   * @param c The Counter to examine
+   * @param c
+   *          The Counter to examine
    * @param countThreshold
    *          Items equal to or above this number are kept
    * @return A (non-null) Set of keys whose counts are at or above the given
    *         threshold.
    */
   public static <E> Set<E> keysAbove(Counter<E> c, double countThreshold) {
-    Set<E> keys = Generics.newHashSet();
+    Set<E> keys = new HashSet<E>();
     for (E key : c.keySet()) {
       if (c.getCount(key) >= countThreshold) {
         keys.add(key);
@@ -822,7 +755,7 @@ public class Counters {
    * This set may have 0 elements but will not be null.
    */
   public static <E> Set<E> keysBelow(Counter<E> c, double countThreshold) {
-    Set<E> keys = Generics.newHashSet();
+    Set<E> keys = new HashSet<E>();
     for (E key : c.keySet()) {
       if (c.getCount(key) <= countThreshold) {
         keys.add(key);
@@ -836,7 +769,7 @@ public class Counters {
    * have 0 elements but will not be null.
    */
   public static <E> Set<E> keysAt(Counter<E> c, double count) {
-    Set<E> keys = Generics.newHashSet();
+    Set<E> keys = new HashSet<E>();
     for (E key : c.keySet()) {
       if (c.getCount(key) == count) {
         keys.add(key);
@@ -851,23 +784,12 @@ public class Counters {
 
   /**
    * Returns the counter with keys modified according to function F. Eager
-   * evaluation. If two keys are same after the transformation, one of the values is randomly chosen (depending on how the keyset is traversed)
+   * evaluation.
    */
   public static <T1, T2> Counter<T2> transform(Counter<T1> c, Function<T1, T2> f) {
     Counter<T2> c2 = new ClassicCounter<T2>();
     for (T1 key : c.keySet()) {
       c2.setCount(f.apply(key), c.getCount(key));
-    }
-    return c2;
-  }
-
-  /**
-   * Returns the counter with keys modified according to function F. If two keys are same after the transformation, their values get added up.
-   */
-  public static <T1, T2> Counter<T2> transformWithValuesAdd(Counter<T1> c, Function<T1, T2> f) {
-    Counter<T2> c2 = new ClassicCounter<T2>();
-    for (T1 key : c.keySet()) {
-      c2.incrementCount(f.apply(key), c.getCount(key));
     }
     return c2;
   }
@@ -888,7 +810,11 @@ public class Counters {
    * @return A Comparator using this ordering
    */
   public static <E> Comparator<E> toComparator(final Counter<E> counter) {
-    return (o1, o2) -> Double.compare(counter.getCount(o1), counter.getCount(o2));
+    return new Comparator<E>() {
+      public int compare(E o1, E o2) {
+        return Double.compare(counter.getCount(o1), counter.getCount(o2));
+      }
+    };
   }
 
   /**
@@ -903,12 +829,14 @@ public class Counters {
    * @return A Comparator using this ordering
    */
   public static <E extends Comparable<E>> Comparator<E> toComparatorWithKeys(final Counter<E> counter) {
-    return (o1, o2) -> {
-      int res = Double.compare(counter.getCount(o1), counter.getCount(o2));
-      if (res == 0) {
-        return o1.compareTo(o2);
-      } else {
-        return res;
+    return new Comparator<E>() {
+      public int compare(E o1, E o2) {
+        int res = Double.compare(counter.getCount(o1), counter.getCount(o2));
+        if (res == 0) {
+          return o1.compareTo(o2);
+        } else {
+          return res;
+        }
       }
     };
   }
@@ -925,7 +853,11 @@ public class Counters {
    * @return A Comparator using this ordering
    */
   public static <E> Comparator<E> toComparatorDescending(final Counter<E> counter) {
-    return (o1, o2) -> Double.compare(counter.getCount(o2), counter.getCount(o1));
+    return new Comparator<E>() {
+      public int compare(E o1, E o2) {
+        return Double.compare(counter.getCount(o2), counter.getCount(o1));
+      }
+    };
   }
 
   /**
@@ -946,19 +878,21 @@ public class Counters {
    * </pre>
    */
   public static <E> Comparator<E> toComparator(final Counter<E> counter, final boolean ascending, final boolean useMagnitude) {
-    return (o1, o2) -> {
-      if (ascending) {
-        if (useMagnitude) {
-          return Double.compare(Math.abs(counter.getCount(o1)), Math.abs(counter.getCount(o2)));
+    return new Comparator<E>() {
+      public int compare(E o1, E o2) {
+        if (ascending) {
+          if (useMagnitude) {
+            return Double.compare(Math.abs(counter.getCount(o1)), Math.abs(counter.getCount(o2)));
+          } else {
+            return Double.compare(counter.getCount(o1), counter.getCount(o2));
+          }
         } else {
-          return Double.compare(counter.getCount(o1), counter.getCount(o2));
-        }
-      } else {
-        // Descending
-        if (useMagnitude) {
-          return Double.compare(Math.abs(counter.getCount(o2)), Math.abs(counter.getCount(o1)));
-        } else {
-          return Double.compare(counter.getCount(o2), counter.getCount(o1));
+          // Descending
+          if (useMagnitude) {
+            return Double.compare(Math.abs(counter.getCount(o2)), Math.abs(counter.getCount(o1)));
+          } else {
+            return Double.compare(counter.getCount(o2), counter.getCount(o1));
+          }
         }
       }
     };
@@ -1012,7 +946,7 @@ public class Counters {
     }
     return rankCounter;
   }
-
+  
   /**
    * Converts a counter to tied ranks; ranks start from 1
    *
@@ -1021,30 +955,30 @@ public class Counters {
   public static <E> Counter<E> toTiedRankCounter(Counter<E> c) {
     Counter<E> rankCounter = new ClassicCounter<E>();
     List<Pair<E, Double>> sortedList = toSortedListWithCounts(c);
-
+    
     int i = 0;
     Iterator<Pair<E, Double>> it = sortedList.iterator();
     while(it.hasNext()) {
       Pair<E, Double> iEn = it.next();
       double icount = iEn.second();
       E iKey = iEn.first();
-
+      
       List<Integer> l = new ArrayList<Integer>();
       List<E> keys = new ArrayList<E>();
-
-
+      
+       
       l.add(i+1);
       keys.add(iKey);
-
+      
       for(int j = i +1; j < sortedList.size(); j++){
         Pair<E, Double> jEn = sortedList.get(j);
         if( icount == jEn.second()){
           l.add(j+1);
-          keys.add(jEn.first());
+          keys.add(jEn.first());          
         }else
           break;
       }
-
+      
       if(l.size() > 1){
         double sum = 0;
         for(Integer d: l)
@@ -1088,23 +1022,11 @@ public class Counters {
       l.add(new Pair<E, Double>(e, c.getCount(e)));
     }
     // descending order
-    Collections.sort(l, (a, b) -> Double.compare(b.second, a.second));
-    return l;
-  }
-
-  /**
-   * A List of the keys in c, sorted by the given comparator, paired with
-   * counts.
-   *
-   * @return A List of the keys in c, sorted from highest count to lowest.
-   */
-  public static <E> List<Pair<E, Double>> toSortedListWithCounts(Counter<E> c, Comparator<Pair<E,Double>> comparator) {
-    List<Pair<E, Double>> l = new ArrayList<Pair<E, Double>>(c.size());
-    for (E e : c.keySet()) {
-      l.add(new Pair<E, Double>(e, c.getCount(e)));
-    }
-    // descending order
-    Collections.sort(l, comparator);
+    Collections.sort(l, new Comparator<Pair<E, Double>>() {
+      public int compare(Pair<E, Double> a, Pair<E, Double> b) {
+        return Double.compare(b.second, a.second);
+      }
+    });
     return l;
   }
 
@@ -1112,7 +1034,8 @@ public class Counters {
    * Returns a {@link edu.stanford.nlp.util.PriorityQueue} whose elements are
    * the keys of Counter c, and the score of each key in c becomes its priority.
    *
-   * @param c Input Counter
+   * @param c
+   *          Input Counter
    * @return A PriorityQueue where the count is a key's priority
    */
   // TODO: rewrite to use entrySet()
@@ -1249,16 +1172,6 @@ public class Counters {
     return dotProd;
   }
 
-
-  public static <E> Counter<E> add(Counter<E> c1, Collection<E> c2) {
-    Counter<E> result = c1.getFactory().create();
-    addInPlace(result, c1);
-    for (E key : c2) {
-      result.incrementCount(key, 1);
-    }
-    return result;
-  }
-
   public static <E> Counter<E> add(Counter<E> c1, Counter<E> c2) {
     Counter<E> result = c1.getFactory().create();
     for (E key : Sets.union(c1.keySet(), c2.keySet())) {
@@ -1268,9 +1181,6 @@ public class Counters {
     return result;
   }
 
-  /**
-   * increments every key in the counter by value
-   */
   public static <E> Counter<E> add(Counter<E> c1, double value) {
     Counter<E> result = c1.getFactory().create();
     for (E key : c1.keySet()) {
@@ -1278,7 +1188,7 @@ public class Counters {
     }
     return result;
   }
-
+  
   /**
    * This method does not check entries for NAN or INFINITY values in the
    * doubles returned. It also only iterates over the counter with the smallest
@@ -1347,21 +1257,6 @@ public class Counters {
     }
     return result;
   }
-
-  /**
-   * Returns c1 divided by c2. Safe - will not calculate scores for keys that are zero or that do not exist in c2
-   *
-   * @return c1 divided by c2.
-   */
-  public static <E> Counter<E> divisionNonNaN(Counter<E> c1, Counter<E> c2) {
-    Counter<E> result = c1.getFactory().create();
-    for (E key : Sets.union(c1.keySet(), c2.keySet())) {
-      if(c2.getCount(key) != 0)
-        result.setCount(key, c1.getCount(key) / c2.getCount(key));
-    }
-    return result;
-  }
-
 
   /**
    * Calculates the entropy of the given counter (in bits). This method
@@ -1445,17 +1340,13 @@ public class Counters {
   /**
    * Calculates the Jensen-Shannon divergence between the two counters. That is,
    * it calculates 1/2 [KL(c1 || avg(c1,c2)) + KL(c2 || avg(c1,c2))] .
-   * This code assumes that the Counters have only non-negative values in them.
    *
    * @return The Jensen-Shannon divergence between the distributions
    */
   public static <E> double jensenShannonDivergence(Counter<E> c1, Counter<E> c2) {
-    // need to normalize the counters first before averaging them! Else buggy if not a probability distribution
-    Counter<E> d1 = asNormalizedCounter(c1);
-    Counter<E> d2 = asNormalizedCounter(c2);
-    Counter<E> average = average(d1, d2);
-    double kl1 = klDivergence(d1, average);
-    double kl2 = klDivergence(d2, average);
+    Counter<E> average = average(c1, c2);
+    double kl1 = klDivergence(c1, average);
+    double kl2 = klDivergence(c2, average);
     return (kl1 + kl2) / 2.0;
   }
 
@@ -1467,10 +1358,8 @@ public class Counters {
    * @return The skew divergence between the distributions
    */
   public static <E> double skewDivergence(Counter<E> c1, Counter<E> c2, double skew) {
-    Counter<E> d1 = asNormalizedCounter(c1);
-    Counter<E> d2 = asNormalizedCounter(c2);
-    Counter<E> average = linearCombination(d2, skew, d1, (1.0 - skew));
-    return klDivergence(d1, average);
+    Counter<E> average = linearCombination(c2, skew, c1, (1.0 - skew));
+    return klDivergence(c1, average);
   }
 
   /**
@@ -1478,7 +1367,8 @@ public class Counters {
    * <i>Implementation note:</i> The method name favors legibility of the L over
    * the convention of using lowercase names for methods.
    *
-   * @param c The Counter
+   * @param c
+   *          The Counter
    * @return Its length
    */
   public static <E, C extends Counter<E>> double L2Norm(C c) {
@@ -1487,8 +1377,8 @@ public class Counters {
 
   /**
    * Return the sum of squares (squared L2 norm).
-   *
-   * @param c The Counter
+   * 
+   * @param c
    * @return the L2 norm of the values in c
    */
   public static <E, C extends Counter<E>> double sumSquares(C c) {
@@ -1505,7 +1395,8 @@ public class Counters {
    * name favors legibility of the L over the convention of using lowercase
    * names for methods.
    *
-   * @param c The Counter
+   * @param c
+   *          The Counter
    * @return Its length
    */
   public static <E, C extends Counter<E>> double L1Norm(C c) {
@@ -1522,7 +1413,8 @@ public class Counters {
   /**
    * L2 normalize a counter.
    *
-   * @param c The {@link Counter} to be L2 normalized. This counter is not
+   * @param c
+   *          The {@link Counter} to be L2 normalized. This counter is not
    *          modified.
    * @return A new l2-normalized Counter based on c.
    */
@@ -1614,7 +1506,7 @@ public class Counters {
    */
   public static <E> Counter<E> average(Counter<E> c1, Counter<E> c2) {
     Counter<E> average = c1.getFactory().create();
-    Set<E> allKeys = Generics.newHashSet(c1.keySet());
+    Set<E> allKeys = new HashSet<E>(c1.keySet());
     allKeys.addAll(c2.keySet());
     for (E key : allKeys) {
       average.setCount(key, (c1.getCount(key) + c2.getCount(key)) * 0.5);
@@ -1723,7 +1615,7 @@ public class Counters {
       }
     }
     // left overs
-    Set<E> rest = Generics.newHashSet(b.keySet());
+    Set<E> rest = new HashSet<E>(b.keySet());
     rest.removeAll(a.keySet());
 
     for (E key : rest) {
@@ -1746,8 +1638,10 @@ public class Counters {
   /**
    * Returns a new Counter which is scaled by the given scale factor.
    *
-   * @param c The counter to scale. It is not changed
-   * @param s The constant to scale the counter by
+   * @param c
+   *          The counter to scale. It is not changed
+   * @param s
+   *          The constant to scale the counter by
    * @return A new Counter which is the argument scaled by the given scale
    *         factor.
    */
@@ -1763,8 +1657,10 @@ public class Counters {
   /**
    * Returns a new Counter which is the input counter with log tf scaling
    *
-   * @param c The counter to scale. It is not changed
-   * @param base The base of the logarithm used for tf scaling by 1 + log tf
+   * @param c
+   *          The counter to scale. It is not changed
+   * @param base
+   *          The base of the logarithm used for tf scaling by 1 + log tf
    * @return A new Counter which is the argument scaled by the given scale
    *         factor.
    */
@@ -1794,8 +1690,10 @@ public class Counters {
    * Loads a Counter from a text file. File must have the format of one
    * key/count pair per line, separated by whitespace.
    *
-   * @param filename The path to the file to load the Counter from
-   * @param c The Class to instantiate each member of the set. Must have a
+   * @param filename
+   *          the path to the file to load the Counter from
+   * @param c
+   *          the Class to instantiate each member of the set. Must have a
    *          String constructor.
    * @return The counter loaded from the file.
    */
@@ -1809,8 +1707,10 @@ public class Counters {
    * Loads a Counter from a text file. File must have the format of one
    * key/count pair per line, separated by whitespace.
    *
-   * @param filename The path to the file to load the Counter from
-   * @param c The Class to instantiate each member of the set. Must have a
+   * @param filename
+   *          the path to the file to load the Counter from
+   * @param c
+   *          the Class to instantiate each member of the set. Must have a
    *          String constructor.
    * @return The counter loaded from the file.
    */
@@ -1954,19 +1854,22 @@ public class Counters {
    *
    * Note that this method subsumes many of the other toString methods, e.g.:
    *
-   * toString(c, k) and toBiggestValuesFirstString(c, k) =&gt; toSortedString(c, k,
+   * toString(c, k) and toBiggestValuesFirstString(c, k) => toSortedString(c, k,
    * "%s=%f", ", ", "[%s]")
    *
-   * toVerticalString(c, k) =&gt; toSortedString(c, k, "%2$g\t%1$s", "\n", "%s\n")
+   * toVerticalString(c, k) => toSortedString(c, k, "%2$g\t%1$s", "\n", "%s\n")
    *
-   * @param counter A Counter.
-   * @param k The number of keys to include. Use Integer.MAX_VALUE to include
+   * @param counter
+   *          A Counter.
+   * @param k
+   *          The number of keys to include. Use Integer.MAX_VALUE to include
    *          all keys.
    * @param itemFormat
    *          The format string for key/count pairs, where the key is first and
    *          the value is second. To display the value first, use argument
    *          indices, e.g. "%2$f %1$s".
-   * @param joiner The string used between pairs of key/value strings.
+   * @param joiner
+   *          The string used between pairs of key/value strings.
    * @param wrapperFormat
    *          The format string for wrapping text around the joined items, where
    *          the joined item string value is "%s".
@@ -1987,7 +1890,8 @@ public class Counters {
    * Returns a string representation of a Counter, displaying the keys and their
    * counts in decreasing order of count. At most k keys are displayed.
    *
-   * @param counter A Counter.
+   * @param counter
+   *          A Counter.
    * @param k
    *          The number of keys to include. Use Integer.MAX_VALUE to include
    *          all keys.
@@ -2007,7 +1911,8 @@ public class Counters {
    * Returns a string representation of a Counter, where (key, value) pairs are
    * sorted by key, and formatted as specified.
    *
-   * @param counter The Counter.
+   * @param counter
+   *          The Counter.
    * @param itemFormat
    *          The format string for key/count pairs, where the key is first and
    *          the value is second. To display the value first, use argument
@@ -2032,8 +1937,10 @@ public class Counters {
    * maxKeysToPrint elements with largest counts. If maxKeysToPrint is
    * non-positive, all elements are printed.
    *
-   * @param counter The Counter
-   * @param maxKeysToPrint Max keys to print
+   * @param counter
+   *          The Counter
+   * @param maxKeysToPrint
+   *          Max keys to print
    * @return A partial string representation
    */
   public static <E> String toString(Counter<E> counter, int maxKeysToPrint) {
@@ -2088,7 +1995,8 @@ public class Counters {
     return toPriorityQueue(c).toString();
   }
 
-  // TODO this method seems badly written. It should exploit topK printing of PriorityQueue
+  // TODO this method seems badly written. It should exploit topK printing of
+  // PriorityQueue
   public static <E> String toBiggestValuesFirstString(Counter<E> c, int k) {
     PriorityQueue<E> pq = toPriorityQueue(c);
     PriorityQueue<E> largestK = new BinaryHeapPriorityQueue<E>();
@@ -2132,15 +2040,18 @@ public class Counters {
   }
 
   /**
-   * Returns a {@code String} representation of the {@code k} keys
+   * Returns a <code>String</code> representation of the <code>k</code> keys
    * with the largest counts in the given {@link Counter}, using the given
    * format string.
    *
-   * @param c A Counter
-   * @param k How many keys to print
-   * @param fmt A format string, such as "%.0f\t%s" (do not include final "%n").
-   *            If swap is false, you will get val, key as arguments, if true, key, val.
-   * @param swap Whether the count should appear after the key
+   * @param c
+   *          a Counter
+   * @param k
+   *          how many keys to print
+   * @param fmt
+   *          a format string, such as "%.0f\t%s" (do not include final "%n")
+   * @param swap
+   *          whether the count should appear after the key
    */
   public static <E> String toVerticalString(Counter<E> c, int k, String fmt, boolean swap) {
     PriorityQueue<E> q = Counters.toPriorityQueue(c);
@@ -2212,13 +2123,13 @@ public class Counters {
   public static <E> double[] asArray(Counter<E> counter, Index<E> index) {
     return Counters.asArray(counter, index, index.size());
   }
-
+  
   /**
    * Convert a counter to an array using a specified key index. This method does *not* expand
    * the index, so all keys in the set keys(counter) - keys(index) are not added to the
    * output array. Also note that if counter is being used as a sparse array, the result
    * will be a dense array with zero entries.
-   *
+   * 
    * @return the values corresponding to the index
    */
   public static <E> double[] asArray(Counter<E> counter, Index<E> index, int dimension) {
@@ -2235,7 +2146,7 @@ public class Counters {
     }
     return array;
   }
-
+  
   /**
    * Convert a counter to an array, the order of the array is random
    */
@@ -2249,8 +2160,8 @@ public class Counters {
     }
     return array;
   }
-
-
+  
+  
   /**
    * Creates a new TwoDimensionalCounter where all the counts are scaled by d.
    * Internally, uses Counters.scale();
@@ -2265,8 +2176,6 @@ public class Counters {
     }
     return result;
   }
-
-  static final Random RAND = new Random();
 
   /**
    * Does not assumes c is normalized.
@@ -2283,7 +2192,6 @@ public class Counters {
     // } else {
     //   throw new RuntimeException("Results won't be stable since Counters keys are comparable.");
     // }
-    if (rand == null) rand = RAND;
     double r = rand.nextDouble() * c.totalCount();
     double total = 0.0;
 
@@ -2362,18 +2270,11 @@ public class Counters {
    * alternative implementations.
    */
   public static <E> boolean equals(Counter<E> o1, Counter<E> o2) {
-    return equals(o1, o2, 0.0);
-  }
-
-  /**
-   * Equality comparison between two counters, allowing for a tolerance fudge factor.
-   */
-  public static <E> boolean equals(Counter<E> o1, Counter<E> o2, double tolerance) {
     if (o1 == o2) {
       return true;
     }
 
-    if (Math.abs(o1.totalCount() - o2.totalCount()) > tolerance) {
+    if (o1.totalCount() != o2.totalCount()) {
       return false;
     }
 
@@ -2382,13 +2283,12 @@ public class Counters {
     }
 
     for (E key : o1.keySet()) {
-      if (Math.abs(o1.getCount(key) - o2.getCount(key)) > tolerance) {
+      if (o1.getCount(key) != o2.getCount(key)) {
         return false;
       }
     }
 
     return true;
-
   }
 
   /**
@@ -2693,7 +2593,7 @@ public class Counters {
             // return a HashMap backed by the same numeric type to
             // keep the precision of the returned counter consistent with
             // this one's precision
-            return fromMap(Generics.<E, N>newHashMap(), type);
+            return fromMap(new HashMap<E, N>(), type);
           }
         };
       }
@@ -2861,25 +2761,6 @@ public class Counters {
   }
 
   /**
-   * Check if this counter is a uniform distribution.
-   * That is, it should sum to 1.0, and every value should be equal to every other value.
-   * @param distribution The distribution to check.
-   * @param tolerance The tolerance for floating point error, in both the equality and total count checks.
-   * @param <E> The type of the counter.
-   * @return True if this counter is the uniform distribution over its domain.
-   */
-  public static <E> boolean isUniformDistribution(Counter<E> distribution, double tolerance) {
-    double value = Double.NaN;
-    double totalCount = 0.0;
-    for (double val : distribution.values()) {
-      if (Double.isNaN(value)) { value = val; }
-      if (Math.abs(val - value) > tolerance) { return false; }
-      totalCount += val;
-    }
-    return Math.abs(totalCount - 1.0) < tolerance;
-  }
-
-  /**
    * Default comparator for breaking ties in argmin and argmax.
    * //TODO: What type should this be?
    * // Unused, so who cares?
@@ -2947,20 +2828,20 @@ public class Counters {
      target.setCount(e, Math.min(target.getCount(e), other.getCount(e)));
    }
   }
-
+  
   /**
-   * Retains the minimal set of top keys such that their count sum is more than thresholdCount.
+   * Retains the minimal set of top keys such that their count sum is more than thresholdCount. 
    * @param counter
    * @param thresholdCount
    */
   public static<E> void retainTopMass(Counter<E> counter, double thresholdCount){
     PriorityQueue<E> queue = Counters.toPriorityQueue(counter);
     counter.clear();
-
+    
     double mass = 0;
     while (mass < thresholdCount && !queue.isEmpty()) {
       double value = queue.getPriority();
-      E key = queue.removeFirst();
+      E key = queue.removeFirst();  
       counter.setCount(key, value);
       mass += value;
     }
@@ -2972,7 +2853,7 @@ public class Counters {
     }
     counter.recomputeTotal();
   }
-
+  
   public static<E> double pearsonsCorrelationCoefficient(Counter<E> x, Counter<E> y){
     double stddevX = Counters.standardDeviation(x);
     double stddevY = Counters.standardDeviation(y);
@@ -2984,13 +2865,13 @@ public class Counters {
     Counters.divideInPlace(t2, stddevY);
     return Counters.dotProduct(t1, t2)/ (double)(x.size() -1);
   }
-
+  
   public static<E> double spearmanRankCorrelation(Counter<E> x, Counter<E> y){
     Counter<E> xrank = Counters.toTiedRankCounter(x);
     Counter<E> yrank = Counters.toTiedRankCounter(y);
     return Counters.pearsonsCorrelationCoefficient(xrank, yrank);
   }
-
+  
   /**
    * ensures that counter t has all keys in keys. If the counter does not have the keys, then add the key with count value.
    * Note that it does not change counts that exist in the counter
@@ -3001,7 +2882,7 @@ public class Counters {
         t.setCount(k, value);
     }
   }
-
+  
   public static<E> List<E> topKeys(Counter<E> t, int topNum){
     List<E> list = new ArrayList<E>();
     PriorityQueue<E> q = Counters.toPriorityQueue(t);
@@ -3012,7 +2893,7 @@ public class Counters {
     }
     return list;
   }
-
+  
   public static<E> List<Pair<E, Double>> topKeysWithCounts(Counter<E> t, int topNum){
     List<Pair<E, Double>> list = new ArrayList<Pair<E, Double>>();
     PriorityQueue<E> q = Counters.toPriorityQueue(t);
@@ -3024,45 +2905,4 @@ public class Counters {
     }
     return list;
   }
-
-  public static<E> Counter<E> getFCounter(Counter<E> precision, Counter<E> recall, double beta){
-    Counter<E> fscores = new ClassicCounter<E>();
-    for(E k: precision.keySet()){
-      fscores.setCount(k, precision.getCount(k)*recall.getCount(k)*(1+beta*beta)/(beta*beta*precision.getCount(k) + recall.getCount(k)));
-    }
-    return fscores;
-  }
-
-  public static <E> void transformValuesInPlace(Counter<E> counter, Function<Double, Double> func){
-    for(E key: counter.keySet()){
-      counter.setCount(key, func.apply(counter.getCount(key)));
-    }
-  }
-
-  public static<E> Counter<E> getCounts(Counter<E> c, Collection<E> keys){
-    Counter<E> newcounter = new ClassicCounter<E>();
-    for(E k : keys)
-      newcounter.setCount(k, c.getCount(k));
-    return newcounter;
-  }
-
-
-  public static<E> void retainKeys(Counter<E> counter, Function<E, Boolean> retainFunction) {
-    Set<E> remove = new HashSet<E>();
-    for(Entry<E, Double> en: counter.entrySet()){
-      if(!retainFunction.apply(en.getKey())){
-        remove.add(en.getKey());
-      }
-    }
-    Counters.removeKeys(counter, remove);
-  }
-
-  public static<E, E2> Counter<E> flatten(Map<E2, Counter<E>> hier){
-    Counter<E> flat = new ClassicCounter<E>();
-    for(Entry<E2, Counter<E>> en: hier.entrySet()){
-      flat.addAll(en.getValue());
-    }
-    return flat;
-  }
-
 }

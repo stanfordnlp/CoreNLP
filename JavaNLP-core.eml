@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component inheritJdk="true">
+<component LANGUAGE_LEVEL="JDK_1_6">
+	<output-test url="file://$MODULE_DIR$/classes"/>
 	<exclude-output/>
 	<contentEntry url="file://$MODULE_DIR$">
 		<testFolder url="file://$MODULE_DIR$/test/src"/>
@@ -18,6 +19,11 @@
 		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/tomcat/jasper.jar!/"/>
+	</lib>
+	<lib name="servlet-api.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/tomcat/servlet-api.jar!/"/>
 	</lib>
 	<lib name="tomcat-juli.jar" scope="COMPILE">
 		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
@@ -50,21 +56,20 @@
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/junit.jar!/"/>
 	</lib>
 	<lib name="javax.servlet.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/javax.servlet.jar!/"/>
 	</lib>
 	<lib name="AppleJavaExtensions.jar" scope="COMPILE">
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/AppleJavaExtensions.jar!/"/>
 	</lib>
-	<lib name="jflex-1.5.1.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/jflex-1.5.1-src.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/jflex-1.5.1-src.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/jflex-1.5.1.jar!/"/>
+	<lib name="JFlex.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/jflex-1.4.3-src.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/jflex-1.4.3-src.zip!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/JFlex.jar!/"/>
 	</lib>
-	<lib name="xom-1.2.10.jar" scope="COMPILE">
-		<srcroot url="file://libsrc/xom-1.2.10-src.zip"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/xom-1.2.10.jar!/"/>
+	<lib name="xom-1.2.8.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/xom-src-1.2.8.zip!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/xom-src-1.2.8.zip!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/xom-1.2.8.jar!/"/>
 	</lib>
 	<lib name="joda-time.jar" scope="COMPILE">
 		<srcroot url="jar://$MODULE_DIR$/libsrc/joda-time-2.1-sources.jar!/"/>
@@ -76,47 +81,14 @@
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/jollyday-0.4.7-sources.jar!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/jollyday-0.4.7.jar!/"/>
 	</lib>
+	<lib name="commons-lang-2.5.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/commons-lang-2.5-sources.jar!/"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/commons-lang-2.5-sources.jar!/"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/commons-lang-2.5.jar!/"/>
+	</lib>
 	<lib name="log4j-1.2.16.jar" scope="COMPILE">
 		<srcroot url="jar://$MODULE_DIR$/libsrc/log4j-1.2.16-src.zip!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/log4j-1.2.16-src.zip!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/log4j-1.2.16.jar!/"/>
-	</lib>
-	<lib name="ejml-0.23.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/ejml-0.23-src.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/ejml-0.23-src.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/ejml-0.23.jar!/"/>
-	</lib>
-	<lib name="commons-lang3-3.1.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/commons-lang3-3.1-sources.jar!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/commons-lang3-3.1-sources.jar!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/commons-lang3-3.1.jar!/"/>
-	</lib>
-	<lib name="protobuf.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/protobuf-src.jar!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/protobuf-src.jar!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/protobuf.jar!/"/>
-	</lib>
-	<lib name="javacc.jar" scope="COMPILE">
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/javacc.jar!/"/>
-	</lib>
-	<lib name="javax.json.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/javax.json-api-1.0-sources.jar!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/javax.json-api-1.0-sources.jar!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/javax.json.jar!/"/>
-	</lib>
-	<lib name="$MODULE_DIR$/lib/lucene-analyzers-common-4.2.1.jar" scope="COMPILE">
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/lucene-analyzers-common-4.2.1.jar!/"/>
-	</lib>
-	<lib name="$MODULE_DIR$/lib/lucene-core-4.2.1.jar" scope="COMPILE">
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/lucene-core-4.2.1.jar!/"/>
-	</lib>
-	<lib name="$MODULE_DIR$/lib/lucene-demo-4.2.1.jar" scope="COMPILE">
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/lucene-demo-4.2.1.jar!/"/>
-	</lib>
-	<lib name="$MODULE_DIR$/lib/lucene-queries-4.2.1.jar" scope="COMPILE">
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/lucene-queries-4.2.1.jar!/"/>
-	</lib>
-	<lib name="$MODULE_DIR$/lib/lucene-queryparser-4.2.1.jar" scope="COMPILE">
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/lucene-queryparser-4.2.1.jar!/"/>
 	</lib>
 </component>

@@ -2,11 +2,11 @@ package edu.stanford.nlp.international.morph;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification.MorphoFeatureType;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Holds a set of morphosyntactic features for a given surface form.
@@ -24,7 +24,7 @@ public class MorphoFeatures implements Serializable {
   protected String altTag;
   
   public MorphoFeatures() {
-    fSpec = Generics.newHashMap();
+    fSpec = new HashMap<MorphoFeatureType,String>();
   }
   
   public MorphoFeatures(MorphoFeatures other) {

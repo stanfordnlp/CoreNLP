@@ -8,14 +8,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import edu.stanford.nlp.util.*;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.ErasureUtils;
+import edu.stanford.nlp.util.Factory;
+import edu.stanford.nlp.util.Filter;
+import edu.stanford.nlp.util.MapFactory;
+import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.util.logging.PrettyLogger;
 import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 
@@ -114,21 +118,21 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * given Filter. Passing in a filter that always returns true is equivalent
    * to calling {@link #totalCount()}.
    */
-  public int totalIntCount(Predicate<E> filter) {
+  public int totalIntCount(Filter<E> filter) {
     int total = 0;
     for (E key : map.keySet()) {
-      if (filter.test(key)) {
+      if (filter.accept(key)) {
         total += getIntCount(key);
       }
     }
     return (total);
   }
 
-  public double totalDoubleCount(Predicate<E> filter) {
+  public double totalDoubleCount(Filter<E> filter) {
     return totalIntCount(filter);
   }
 
-  public double totalCount(Predicate<E> filter) {
+  public double totalCount(Filter<E> filter) {
     return totalDoubleCount(filter);
   }
 
@@ -672,7 +676,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * This set may have 0 elements but will not be null.
    */
   public Set<E> keysAbove(int countThreshold) {
-    Set<E> keys = Generics.newHashSet();
+    Set<E> keys = new HashSet<E>();
     for (E key : map.keySet()) {
       if (getIntCount(key) >= countThreshold) {
         keys.add(key);
@@ -686,7 +690,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * This set may have 0 elements but will not be null.
    */
   public Set<E> keysBelow(int countThreshold) {
-    Set<E> keys = Generics.newHashSet();
+    Set<E> keys = new HashSet<E>();
     for (E key : map.keySet()) {
       if (getIntCount(key) <= countThreshold) {
         keys.add(key);
@@ -700,7 +704,7 @@ public class IntCounter<E> extends AbstractCounter<E> implements Serializable {
    * This set may have 0 elements but will not be null.
    */
   public Set<E> keysAt(int count) {
-    Set<E> keys = Generics.newHashSet();
+    Set<E> keys = new HashSet<E>();
     for (E key : map.keySet()) {
       if (getIntCount(key) == count) {
         keys.add(key);

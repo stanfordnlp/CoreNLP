@@ -1,14 +1,14 @@
-STANFORD DEPENDENCIES.  Stanford Parser v3.5.1
+STANFORD DEPENDENCIES.  Stanford Parser v2.0.4 - 2012-11-12
 -----------------------------------------------------------
 
 The manual for the English version of the Stanford Dependencies
 representation:
 
-    StanfordDependenciesManual.pdf
+    dependencies_manual.pdf
 
 should be consulted for the current set of dependency representations
 and the correct commands for generating Stanford Dependencies together
-with any of the Stanford Parser, another parser, or a treebank.
+with either the Stanford Parser or another parser.
 
 A typed dependencies representation is also available for Chinese.  For
 the moment the documentation consists of the code, and a brief
@@ -17,22 +17,7 @@ presentation in this paper:
 Pi-Chuan Chang, Huihsin Tseng, Dan Jurafsky, and Christopher
 D. Manning. 2009.  Discriminative Reordering with Chinese Grammatical
 Relations Features.  Third Workshop on Syntax and Structure in Statistical
-Translation. http://nlp.stanford.edu/pubs/ssst09-chang.pdf
-
-
---------------------------------------
-UNIVERSAL DEPENDENCIES
-
-We are at present involved in a group developing a cross-linguistically
-valid Universal Dependencies representation and treebanks:
-
-      http://universaldependencies.github.io/docs/
-
-It is our intention to transition Stanford NLP tools to Universal
-Dependencies, but there is not yet any model support for Universal
-Dependencies in this release.  (However, there is no reason that you
-yourself cannot train a POS tagger and a neural-net dependency parser
-for Universal Dependencies.
+Translation.
 
 
 --------------------------------------
@@ -56,109 +41,6 @@ For more discussion of the design principles, please see:
 
 These papers can be cited as references for the English Stanford
 Dependencies.
-
-
---------------------------------------
-CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.5.1
-
-A couple of small fixes were made, leading to ccomp and advcl being
-recognized in a couple of new environments.
-
---------------------------------------
-CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.4
-
-One major change was made to the dependency taxonomy:
-
- - We decided to collapse together the two dependencies partmod and infmod,
- since they have similar function and mainly differ in the form of the verbal
- head, which is anyways recorded in the POS tag. Those two relations are
- removed from the taxonomy, and a new relation vmod covering the union of both
- was added.
-
---------------------------------------
-CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.3.1
-
-A couple of fixes/improvements were made in the dependency conversion,
-and one change was made to the taxonomy of relations.
-
- - The partmod and infmod relations were deleted, and replaced with
-vmod for reduced, non-finite verbal modifiers. The distinction between
-these two relations can be recovered from the POS tag of the dependent.
- - A couple of improvements were made to the conversion, the largest
- one being recognizing pobj inside a PP not headed by something tagged
- as IN or TO.
-
-
---------------------------------------
-CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.3
-
-Some fixes/improvements were made in the dependency conversion, and one
-change was made to the taxonomy of relations.
-
- - For currency amount expressions with a currency symbol like "$", it
-   had previously been the case that "$" was the head, and then each
-   number word modified it as a number. We realized that this was
-   unnecessarily inconsistent. For the expression "two thousand dollars",
-   "dollars" is the head, but "thousand" is a num modifier of it, and
-   number is used for the parts of a number multi-word expression only.
-   This analysis is now also used for cases with a currency symbol. E.g.,
-   "for $ 52.7 million": prep(for, $) num($, million) number(million, 52.7).
-   Similarly, for "the $ 2.29 billion value", we changed the analysis from
-   num(value, $) number($, billion) to amod(value, $) num($, billion).
-   This corresponds to hwat you got for "a two dollar value".
-   This is actually the most common change (at least on WSJ newswire!).
- - Remove the attr relation. Some cases disappear by making the question
-   phrase of WHNP be NP questions the root. Others (predicative NP
-   complements) become xcomp.
- - Less aggressive labeling of participial form VPs as xcomp. More of them
-   are correctly labeled partmod (but occasionally a true xcomp is also
-   mislabeled as partmod).
- - Small rule changes to recognize a few more ccomp and parataxis.
-
-
---------------------------------------
-CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.2, JUNE 2013
-
-An improved dependency conversion means that our dependency trees are
-not always projective, one deletion was made from the taxonomy of
-relations, and various small converter fixes were made:
- - rel was removed. rel was originally used as the relation for an
-    overt relativizer in a relative clause. But it was never a real
-    grammatical relation, and we gradually started labeling easy cases
-    as nsubj or dobj. In this release, rel is removed, pobj cases are
-    also labeled, and the remaining hard cases are labeled as dep.
- - As a result of correctly labeling a pobj in questions and relative
-   clauses, the converter now sometimes produces non-projective dependency
-   trees (ones with crossing dependencies, if the words are laid out in
-   their normal order in a line, and all dependency arcs are drawn above
-   them). This is not a bug, it's an improvement in the generated
-   dependencies, but you should be aware that Stanford Dependencies
-   trees are now occasionally non-projective. (Some simple dependency
-   parsing algorithms only produce projective dependency trees.)
-
---------------------------------------
-CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v2.0.5, MARCH 2013
-
-We have begun a more major effort to improve the suitability and coverage of
-Stanford Dependencies on less formal text types, and to clean up a couple of
-the more quirky dependencies in the original set. These changes are still
-ongoing, but in this first installment, we have removed 3 dependencies and
-added 2:
- - abbrev was removed, and is now viewed as just a case of appos.
- - complm was removed, and is now viewed as just a case of mark.
-    (This is consistent with an HPSG-like usage of mark.)
- - purpcl was removed, and is now viewed as just a case of advcl.
- - discourse was added. The lack of a dependency type for
-    interjections was an omission even in the early versions, but it
-    became essential as we expanded our consideration of informal
-    text types. It is used for interjections, fillers, discourse markers
-    and emoticons.
-  - goeswith was added. In badly edited text, it is used to join the
-    two parts of a word.
-
-A few other changes and improvements were also made, including improvements
-in the recognition of advcl. There has been a reduction of "dep" dependencies
-of about 14% on newswire (and higher on more informal text genres).
 
 
 --------------------------------------

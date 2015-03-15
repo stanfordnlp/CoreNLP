@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -17,14 +18,13 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.objectbank.ObjectBank;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
 
 public class TrueCaseAnnotator implements Annotator {
 
   @SuppressWarnings("unchecked")
   private CRFBiasedClassifier trueCaser;
   
-  private Map<String,String> mixedCaseMap = Generics.newHashMap();
+  private Map<String,String> mixedCaseMap = new HashMap<String,String>();
   
   private boolean VERBOSE = true;
   
@@ -103,29 +103,24 @@ public class TrueCaseAnnotator implements Annotator {
     String trueCase = l.getString(CoreAnnotations.TrueCaseAnnotation.class);
     String text = l.word();
     String trueCaseText = text;
-
-    switch (trueCase) {
-      case "UPPER":
-        trueCaseText = text.toUpperCase();
-        break;
-      case "LOWER":
-        trueCaseText = text.toLowerCase();
-        break;
-      case "INIT_UPPER":
-        trueCaseText = text.substring(0, 1).toUpperCase() + text.substring(1);
-        break;
-      case "O":
-        // The model predicted mixed case, so lookup the map:
-        if (mixedCaseMap.containsKey(text))
-          trueCaseText = mixedCaseMap.get(text);
-        break;
+    
+    if (trueCase.equals("UPPER")) {
+      trueCaseText = text.toUpperCase();
+    } else if (trueCase.equals("LOWER")) {
+      trueCaseText = text.toLowerCase();
+    } else if (trueCase.equals("INIT_UPPER")) {
+      trueCaseText = text.substring(0,1).toUpperCase() + text.substring(1);
+    } else if (trueCase.equals("O")) {
+      // The model predicted mixed case, so lookup the map:
+      if(mixedCaseMap.containsKey(text))
+        trueCaseText = mixedCaseMap.get(text);
     }
     
     l.set(CoreAnnotations.TrueCaseTextAnnotation.class, trueCaseText);
   }
   
   public static Map<String,String> loadMixedCaseMap(String mapFile) {
-    Map<String,String> map = Generics.newHashMap();
+    Map<String,String> map = new HashMap<String,String>();
     try {
       InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(mapFile);
       BufferedReader br = new BufferedReader(new InputStreamReader(is));

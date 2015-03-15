@@ -12,6 +12,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,6 @@ import edu.stanford.nlp.trees.WordCatConstituent;
 import edu.stanford.nlp.trees.WordCatEqualityChecker;
 import edu.stanford.nlp.trees.WordCatEquivalenceClasser;
 import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.StringUtils;
@@ -112,7 +112,7 @@ public class ChineseCharacterBasedLexiconTraining {
   }
 
   public static void main(String[] args) throws IOException {
-    Map<String,Integer> flagsToNumArgs = Generics.newHashMap();
+    Map<String,Integer> flagsToNumArgs = new HashMap<String, Integer>();
     flagsToNumArgs.put("-parser", Integer.valueOf(3));
     flagsToNumArgs.put("-lex", Integer.valueOf(3));
     flagsToNumArgs.put("-test", Integer.valueOf(2));

@@ -25,7 +25,7 @@ public class RerouteChannel extends LogRecordHandler {
       if (oldChannelName.equals(channel)) {
         // make a new version of the Record with a different channel name
         channels[i] = newChannelName;
-        Record reroutedRecord = new Record(record.content, channels, record.depth, record.timesstamp);
+        Record reroutedRecord = new Record(record.content, channels, record.depth, record.callingClass, record.callingMethod, record.timesstamp);
         results.add(reroutedRecord);
         return results;
       }

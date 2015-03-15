@@ -7,8 +7,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
-import java.util.function.Predicate;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Filter;
 
 /**
  * Tree normalizer for Negra Penn Treebank format.
@@ -24,8 +23,8 @@ public class NegraPennTreeNormalizer extends TreeNormalizer {
   protected final TreebankLanguagePack tlp;
   private boolean insertNPinPP = false;
 
-  private final Predicate<Tree> emptyFilter;
-  private final Predicate<Tree> aOverAFilter;
+  private final Filter<Tree> emptyFilter;
+  private final Filter<Tree> aOverAFilter;
 
   public NegraPennTreeNormalizer() {
     this(new NegraPennLanguagePack());
@@ -39,9 +38,9 @@ public class NegraPennTreeNormalizer extends TreeNormalizer {
     this.tlp = tlp;
     this.nodeCleanup = nodeCleanup;
 
-    emptyFilter = new Predicate<Tree>() {
+    emptyFilter = new Filter<Tree>() {
       private static final long serialVersionUID = -606371737889816130L;
-      public boolean test(Tree t) {
+      public boolean accept(Tree t) {
         Tree[] kids = t.children();
         Label l = t.label();
         if ((l != null) && l.value() != null && (l.value().matches("^\\*T.*$")) && !t.isLeaf() && kids.length == 1 && kids[0].isLeaf())
@@ -49,9 +48,9 @@ public class NegraPennTreeNormalizer extends TreeNormalizer {
         return true;
       }
     };
-    aOverAFilter = new Predicate<Tree>() {
+    aOverAFilter = new Filter<Tree>() {
       private static final long serialVersionUID = -606371737889816130L;
-      public boolean test(Tree t) {
+      public boolean accept(Tree t) {
         if (t.isLeaf() || t.isPreTerminal() || t.children().length != 1)
           return true;
         if (t.label() != null && t.label().equals(t.children()[0].label()))
@@ -166,8 +165,8 @@ public class NegraPennTreeNormalizer extends TreeNormalizer {
   }
 
 
-  private Set<String> prepositionTags = Generics.newHashSet(Arrays.asList(new String[]{"APPR", "APPRART"}));
-  private Set<String> postpositionTags = Generics.newHashSet(Arrays.asList(new String[]{"APPO", "APZR"}));
+  private Set<String> prepositionTags = new HashSet<String>(Arrays.asList(new String[]{"APPR", "APPRART"}));
+  private Set<String> postpositionTags = new HashSet<String>(Arrays.asList(new String[]{"APPO", "APZR"}));
 
 
   private void insertNPinPPall(Tree t) {

@@ -2,6 +2,7 @@ package edu.stanford.nlp.parser.tools;
 
 import java.io.PrintWriter;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -12,7 +13,6 @@ import edu.stanford.nlp.trees.DiskTreebank;
 import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -37,7 +37,7 @@ public class ManipulateTopBracket {
     return usage.toString();
   }
   private static Map<String,Integer> argDefs() {
-    Map<String,Integer> argDefs = Generics.newHashMap();
+    Map<String,Integer> argDefs = new HashMap<String,Integer>();
     argDefs.put("e", 1);
     argDefs.put("v", 0);
     argDefs.put("l", 1);

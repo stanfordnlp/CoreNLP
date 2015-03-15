@@ -1,6 +1,7 @@
 package edu.stanford.nlp.trees.international.arabic;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -10,8 +11,7 @@ import edu.stanford.nlp.trees.LabeledScoredTreeFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeFactory;
 import edu.stanford.nlp.trees.international.arabic.ArabicTreeNormalizer.ArabicEmptyFilter;
-import java.util.function.Predicate;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Filter;
 
 /**
  * Various static convenience methods for processing Arabic parse trees.
@@ -21,7 +21,7 @@ import edu.stanford.nlp.util.Generics;
  */
 public class ATBTreeUtils {
 
-  private static final Predicate<Tree> emptyFilter = new ArabicEmptyFilter();
+  private static final Filter<Tree> emptyFilter = new ArabicEmptyFilter();
   private static final TreeFactory tf = new LabeledScoredTreeFactory();
 
   //The default segmentation marker. Can be changed for processing e.g. IBM Arabic.
@@ -35,7 +35,7 @@ public class ATBTreeUtils {
   
   //Reserved tokens class
   private static final String reservedWordList = "-PLUS- -LRB- -RRB-";
-  public static final Set<String> reservedWords = Generics.newHashSet();
+  public static final Set<String> reservedWords = new HashSet<String>();
   static {
   	reservedWords.addAll(Arrays.asList(reservedWordList.split("\\s+")));
   }

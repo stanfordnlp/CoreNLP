@@ -1,6 +1,12 @@
 package edu.stanford.nlp.parser.lexparser;
 
+import edu.stanford.nlp.ling.TaggedWord;
+import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.Pair;
+
+import java.util.Collection;
+import java.util.Collections;
 
 
 /**

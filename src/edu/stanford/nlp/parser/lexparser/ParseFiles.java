@@ -16,14 +16,13 @@ import java.util.List;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Sentence;
-import edu.stanford.nlp.parser.common.ParserQuery;
-import edu.stanford.nlp.parser.common.ParsingThreadsafeProcessor;
-import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.parser.metrics.AbstractEval;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.DocumentPreprocessor.DocType;
+import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.*;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
@@ -62,19 +61,19 @@ public class ParseFiles {
 
   final Options op;
 
-  final LexicalizedParser pqFactory;
+  final ParserQueryFactory pqFactory;
 
   final TreePrint treePrint;
 
   /** Parse the files with names given in the String array args elements from
-   *  index argIndex on.  Convenience method which builds and invokes a ParseFiles object.
+   *  index argIndex on.  Convenience method which builds and invokes a ParseFiles object.  
    */
-  static void parseFiles(String[] args, int argIndex, boolean tokenized, TokenizerFactory<? extends HasWord> tokenizerFactory, String elementDelimiter, String sentenceDelimiter, Function<List<HasWord>, List<HasWord>> escaper, String tagDelimiter, Options op, TreePrint treePrint, LexicalizedParser pqFactory) {
+  static void parseFiles(String[] args, int argIndex, boolean tokenized, TokenizerFactory<? extends HasWord> tokenizerFactory, String elementDelimiter, String sentenceDelimiter, Function<List<HasWord>, List<HasWord>> escaper, String tagDelimiter, Options op, TreePrint treePrint, ParserQueryFactory pqFactory) {
     ParseFiles pf = new ParseFiles(op, treePrint, pqFactory);
     pf.parseFiles(args, argIndex, tokenized, tokenizerFactory, elementDelimiter, sentenceDelimiter, escaper, tagDelimiter);
   }
 
-  public ParseFiles(Options op, TreePrint treePrint, LexicalizedParser pqFactory) {
+  public ParseFiles(Options op, TreePrint treePrint, ParserQueryFactory pqFactory) {
     this.op = op;
     this.pqFactory = pqFactory;
     this.treePrint = treePrint;

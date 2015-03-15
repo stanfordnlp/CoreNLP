@@ -76,13 +76,8 @@ public class UnnamedDependency implements Dependency<Label, Label, Object> {
   }
   
   protected String getText(Label label) {
-    if (label instanceof HasWord) {
-      String word = ((HasWord) label).word();
-      if (word != null) {
-        return word;
-      }
-    }
-    return label.value();
+    return ((label instanceof HasWord) ? 
+            ((HasWord) label).word() : label.value());
   }
 
   @Override
@@ -122,13 +117,12 @@ public class UnnamedDependency implements Dependency<Label, Label, Object> {
    * Otherwise the default toString() is used.
    */
   public String toString(String format) {
-    switch (format) {
-      case "xml":
-        return "  <dep>\n    <governor>" + XMLUtils.escapeXML(governor().value()) + "</governor>\n    <dependent>" + XMLUtils.escapeXML(dependent().value()) + "</dependent>\n  </dep>";
-      case "predicate":
-        return "dep(" + governor() + "," + dependent() + ")";
-      default:
-        return toString();
+    if ("xml".equals(format)) {
+      return "  <dep>\n    <governor>" + XMLUtils.escapeXML(governor().value()) + "</governor>\n    <dependent>" + XMLUtils.escapeXML(dependent().value()) + "</dependent>\n  </dep>";
+    } else if ("predicate".equals(format)) {
+      return "dep(" + governor() + "," + dependent() + ")";
+    } else {
+      return toString();
     }
   }
   

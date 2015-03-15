@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.metrics;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import edu.stanford.nlp.trees.Constituent;
@@ -8,8 +9,7 @@ import edu.stanford.nlp.trees.LabeledScoredConstituentFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreeFilters;
-import java.util.function.Predicate;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Filter;
 
 /**
  * An AbstractEval which doesn't just evaluate all constituents, but
@@ -21,17 +21,17 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 public class FilteredEval extends AbstractEval {
-  Predicate<Tree> subtreeFilter;
+  Filter<Tree> subtreeFilter;
 
   private final ConstituentFactory cf = new LabeledScoredConstituentFactory();
 
-  public FilteredEval(String str, boolean runningAverages, Predicate<Tree> subtreeFilter) {
+  public FilteredEval(String str, boolean runningAverages, Filter<Tree> subtreeFilter) {
     super(str, runningAverages);
     this.subtreeFilter = subtreeFilter;
   }
 
   protected Set<?> makeObjects(Tree tree) {
-    Set<Constituent> set = Generics.newHashSet();
+    Set<Constituent> set = new HashSet<Constituent>();
     if (tree != null) {
       set.addAll(tree.constituents(cf, false, subtreeFilter));
     }

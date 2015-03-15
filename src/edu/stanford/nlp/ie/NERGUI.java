@@ -3,7 +3,6 @@ package edu.stanford.nlp.ie;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.ner.CMMClassifier;
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import javax.swing.*;
@@ -14,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -193,61 +193,44 @@ public class NERGUI {
     public void actionPerformed(ActionEvent e) {
       String com = e.getActionCommand();
 
-      switch (com) {
-        case "Open File": {
-          File file = getFile(true);
-          if (file != null) {
-            openFile(file);
-          }
-          break;
+      if (com.equals("Open File")) {
+        File file = getFile(true);
+        if (file != null) {
+          openFile(file);
         }
-        case "Load URL":
-          String url = getURL();
-          if (url != null) {
-            openURL(url);
-          }
-          break;
-        case "Exit":
-          exit();
-          break;
-        case "Clear":
-          clearDocument();
-          break;
-        case "Load CRF From File": {
-          File file = getFile(true);
-          if (file != null) {
-            loadClassifier(file, true);
-          }
-          break;
+      } else if (com.equals("Load URL")) {
+        String url = getURL();
+        if (url != null) {
+          openURL(url);
         }
-        case "Load CMM From File": {
-          File file = getFile(true);
-          if (file != null) {
-            loadClassifier(file, false);
-          }
-          break;
+      } else if (com.equals("Exit")) {
+        exit();
+      } else if (com.equals("Clear")) {
+        clearDocument();
+      } else if (com.equals("Load CRF From File")) {
+        File file = getFile(true);
+        if (file != null) {
+          loadClassifier(file, true);
         }
-        case "Load Default CRF":
-          loadDefaultClassifier(true);
-          break;
-        case "Load Default CMM":
-          loadDefaultClassifier(false);
-          break;
-        case "Extract":
-          extract();
-          break;
-        case "Save Untagged File":
-          saveUntaggedContents(loadedFile);
-          break;
-        case "Save Untagged File As ...":
-          saveUntaggedContents(getFile(false));
-          break;
-        case "Save Tagged File As ...":
-          saveFile(getFile(false), taggedContents);
-          break;
-        default:
-          System.err.println("Unknown Action: " + e);
-          break;
+      } else if (com.equals("Load CMM From File")) {
+        File file = getFile(true);
+        if (file != null) {
+          loadClassifier(file, false);
+        }
+      } else if (com.equals("Load Default CRF")) {
+        loadDefaultClassifier(true);
+      } else if (com.equals("Load Default CMM")) {
+        loadDefaultClassifier(false);
+      } else if (com.equals("Extract")) {
+        extract();
+      } else if (com.equals("Save Untagged File")) {
+        saveUntaggedContents(loadedFile);
+      } else if (com.equals("Save Untagged File As ...")) {
+        saveUntaggedContents(getFile(false));
+      } else if (com.equals("Save Tagged File As ...")) {
+        saveFile (getFile(false), taggedContents);
+      } else {
+        System.err.println("Unknown Action: "+e);
       }
     }
   }
@@ -664,7 +647,7 @@ public class NERGUI {
                                                      String backgroundSymbol) {
     int numColors = tags.size() - 1;
     Color[] colors = getNColors(numColors);
-    Map<String, Color> result = Generics.newHashMap();
+    Map<String, Color> result = new HashMap<String, Color>();
 
     int i = 0;
     for (String tag : tags) {
@@ -741,9 +724,11 @@ public class NERGUI {
   public static void main(String[] args) {
     //Schedule a job for the event-dispatching thread:
     //creating and showing this application's GUI.
-    SwingUtilities.invokeLater(() -> {
-      NERGUI gui = new NERGUI();
-      gui.createAndShowGUI();
-    });
+    SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          NERGUI gui = new NERGUI();
+          gui.createAndShowGUI();
+        }
+      });
   }
 }

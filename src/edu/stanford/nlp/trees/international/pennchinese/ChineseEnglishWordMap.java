@@ -32,7 +32,6 @@
 package edu.stanford.nlp.trees.international.pennchinese;
 
 import edu.stanford.nlp.trees.TreebankLanguagePack;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.*;
@@ -52,7 +51,7 @@ public class ChineseEnglishWordMap implements Serializable {
    */
   private static final long serialVersionUID = 7655332268578049993L;
 
-  private Map<String, Set<String>> map = Generics.newHashMap(10000); // large dictionary!
+  private Map<String, Set<String>> map = new HashMap<String, Set<String>>(10000); // large dictionary!
 
   private static final String defaultPattern = "[^ ]+ ([^ ]+)[^/]+/(.+)/";
   private static final String defaultDelimiter = "[/;]";
@@ -153,7 +152,7 @@ public class ChineseEnglishWordMap implements Serializable {
       return trans;
     }
 
-    Set<String> set = Generics.newHashSet();
+    Set<String> set = new HashSet<String>();
 
     for (String t : trans) {
       t = normalize(t);
@@ -258,7 +257,7 @@ public class ChineseEnglishWordMap implements Serializable {
    */
   public Map<String, Set<String>> getReverseMap() {
     Set<Map.Entry<String,Set<String>>> entries = map.entrySet();
-    Map<String, Set<String>> rMap = Generics.newHashMap(entries.size());
+    Map<String, Set<String>> rMap = new HashMap<String, Set<String>>(entries.size());
     for (Map.Entry<String,Set<String>> me : entries) {
       String k = me.getKey();
       Set<String> transList = me.getValue();
@@ -332,7 +331,7 @@ public class ChineseEnglishWordMap implements Serializable {
    * Otherwise UTF-8 is assumed.
    */
   public static void main(String[] args) throws IOException {
-    Map<String, Integer> flagsToNumArgs = Generics.newHashMap();
+    Map<String, Integer> flagsToNumArgs = new HashMap<String, Integer>();
     flagsToNumArgs.put("-dictPath" , 1);
     flagsToNumArgs.put("-encoding" , 1);
     Map<String, String[]> argMap = StringUtils.argsToMap(args, flagsToNumArgs);

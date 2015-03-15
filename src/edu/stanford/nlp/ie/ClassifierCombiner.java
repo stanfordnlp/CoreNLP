@@ -4,11 +4,9 @@ import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.ner.CMMClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.FileNotFoundException;
@@ -32,8 +30,7 @@ import java.util.*;
  * properties. We also maintain the older usage when only two base classifiers were accepted,
  * specified using -loadClassifier and -loadAuxClassifier.
  * <p>
- * ms 2009: removed all NER functionality (see NERClassifierCombiner), changed code so it
- * accepts an arbitrary number of base classifiers, removed dead code.
+ * ms 2009: removed all NER functionality (see NERClassifierCombiner), changed code so it accepts an arbitrary number of base classifiers, removed dead code.
  *
  * @author Chris Cox
  * @author Mihai Surdeanu
@@ -41,31 +38,20 @@ import java.util.*;
 public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSequenceClassifier<IN> {
 
   private static final boolean DEBUG = false;
-
   private List<AbstractSequenceClassifier<IN>> baseClassifiers;
 
-  /**
-   * NORMAL means that if one classifier uses PERSON, later classifiers can't also add PERSON, for example. <br>
-   * HIGH_RECALL allows later models do set PERSON as long as it doesn't clobber existing annotations.
-   */
-  static enum CombinationMode {
-    NORMAL, HIGH_RECALL
-  }
-
-  static final CombinationMode DEFAULT_COMBINATION_MODE = CombinationMode.NORMAL;
-  static final String COMBINATION_MODE_PROPERTY = "ner.combinationMode";
-  final CombinationMode combinationMode;
+  private static final String DEFAULT_AUX_CLASSIFIER_PATH="/u/nlp/data/ner/goodClassifiers/english.muc.7class.distsim.crf.ser.gz";
+  private static final String DEFAULT_CLASSIFIER_PATH="/u/nlp/data/ner/goodClassifiers/english.all.3class.distsim.crf.ser.gz";
 
   /**
    * @param p Properties File that specifies <code>loadClassifier</code>
    * and <code>loadAuxClassifier</code> properties or, alternatively, <code>loadClassifier[1-10]</code> properties.
    * @throws FileNotFoundException If classifier files not found
    */
-  public ClassifierCombiner(Properties p) throws IOException {
+  public ClassifierCombiner(Properties p) throws FileNotFoundException {
     super(p);
-    this.combinationMode = extractCombinationModeSafe(p);
     String loadPath1, loadPath2;
-    List<String> paths = new ArrayList<>();
+    List<String> paths = new ArrayList<String>();
 
     //
     // preferred configuration: specify up to 10 base classifiers using loadClassifier1 to loadClassifier10 properties
@@ -95,36 +81,10 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     // fall back strategy: use the two default paths on NLP machines
     //
     else {
-      paths.add(DefaultPaths.DEFAULT_NER_THREECLASS_MODEL);
-      paths.add(DefaultPaths.DEFAULT_NER_MUC_MODEL);
+      paths.add(DEFAULT_CLASSIFIER_PATH);
+      paths.add(DEFAULT_AUX_CLASSIFIER_PATH);
       loadClassifiers(paths);
     }
-  }
-
-  /** Loads a series of base classifiers from the paths specified using the
-   *  Properties specified.
-   *
-   *  @param props Properties for the classifier to use (encodings, output format, etc.)
-   *  @param combinationMode How to handle multiple classifiers specifying the same entity type
-   *  @param loadPaths Paths to the base classifiers
-   *  @throws IOException If IO errors in loading classifier files
-   */
-  public ClassifierCombiner(Properties props, CombinationMode combinationMode, String... loadPaths) throws IOException {
-    super(props);
-    this.combinationMode = combinationMode;
-    List<String> paths = new ArrayList<>(Arrays.asList(loadPaths));
-    loadClassifiers(paths);
-  }
-
-  /** Loads a series of base classifiers from the paths specified using the
-   *  Properties specified.
-   *
-   *  @param combinationMode How to handle multiple classifiers specifying the same entity type
-   *  @param loadPaths Paths to the base classifiers
-   *  @throws IOException If IO errors in loading classifier files
-   */
-  public ClassifierCombiner(CombinationMode combinationMode, String... loadPaths) throws IOException {
-    this(new Properties(), combinationMode, loadPaths);
   }
 
   /** Loads a series of base classifiers from the paths specified.
@@ -132,60 +92,31 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
    * @param loadPaths Paths to the base classifiers
    * @throws FileNotFoundException If classifier files not found
    */
-  public ClassifierCombiner(String... loadPaths) throws IOException {
-    this(DEFAULT_COMBINATION_MODE, loadPaths);
+  public ClassifierCombiner(String... loadPaths) throws FileNotFoundException {
+    super(new Properties());
+    List<String> paths = new ArrayList<String>(Arrays.asList(loadPaths));
+    loadClassifiers(paths);
   }
 
 
-  /** Combines a series of base classifiers.
+  /** Combines a series of base classifiers
    *
    * @param classifiers The base classifiers
    */
-  @SafeVarargs
   public ClassifierCombiner(AbstractSequenceClassifier<IN>... classifiers) {
     super(new Properties());
-    this.combinationMode = DEFAULT_COMBINATION_MODE;
-    baseClassifiers = new ArrayList<>(Arrays.asList(classifiers));
+    baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>(Arrays.asList(classifiers));
     flags.backgroundSymbol = baseClassifiers.get(0).flags.backgroundSymbol;
   }
 
-  /**
-   * Either finds COMBINATION_MODE_PROPERTY or returns a default value
-   */
-  public static CombinationMode extractCombinationMode(Properties p) {
-    String mode = p.getProperty(COMBINATION_MODE_PROPERTY);
-    if (mode == null) {
-      return DEFAULT_COMBINATION_MODE;
-    } else {
-      return CombinationMode.valueOf(mode.toUpperCase());
-    }
-  }
 
-  /**
-   * Either finds COMBINATION_MODE_PROPERTY or returns a default
-   * value.  If the value is not a legal value, a warning is printed.
-   */
-  public static CombinationMode extractCombinationModeSafe(Properties p) {
-    try {
-      return extractCombinationMode(p);
-    } catch (IllegalArgumentException e) {
-      System.err.print("Illegal value of " + COMBINATION_MODE_PROPERTY + ": " + p.getProperty(COMBINATION_MODE_PROPERTY));
-      System.err.print("  Legal values:");
-      for (CombinationMode mode : CombinationMode.values()) {
-        System.err.print("  " + mode);
-      }
-      System.err.println();
-      return CombinationMode.NORMAL;
-    }
-  }
-
-  private void loadClassifiers(List<String> paths) throws IOException {
+  private void loadClassifiers(List<String> paths) throws FileNotFoundException {
     baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>();
     for(String path: paths){
       AbstractSequenceClassifier<IN> cls = loadClassifierFromPath(path);
       baseClassifiers.add(cls);
       if(DEBUG){
-        System.err.printf("Successfully loaded classifier #%d from %s.%n", baseClassifiers.size(), path);
+        System.err.printf("Successfully loaded classifier #%d from %s.\n", baseClassifiers.size(), path);
       }
     }
     if (baseClassifiers.size() > 0) {
@@ -195,7 +126,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
 
 
   public static <INN extends CoreMap & HasWord> AbstractSequenceClassifier<INN> loadClassifierFromPath(String path)
-      throws IOException {
+      throws FileNotFoundException {
     //try loading as a CRFClassifier
     try {
        return ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(path));
@@ -208,13 +139,15 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     } catch (Exception e) {
       //fail
       //System.err.println("Couldn't load classifier from path :"+path);
-      throw new IOException("Couldn't load classifier from " + path, e);
+      FileNotFoundException fnfe = new FileNotFoundException();
+      fnfe.initCause(e);
+      throw fnfe;
     }
   }
 
   @Override
   public Set<String> labels() {
-    Set<String> labs = Generics.newHashSet();
+    Set<String> labs = new HashSet<String>();
     for(AbstractSequenceClassifier<? extends CoreMap> cls: baseClassifiers)
       labs.addAll(cls.labels());
     return labs;
@@ -239,22 +172,16 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     for(int i = 1; i < baseDocuments.size(); i ++)
       assert(baseDocuments.get(0).size() == baseDocuments.get(i).size());
 
-    String background = baseClassifiers.get(0).flags.backgroundSymbol;
-
     // baseLabels.get(i) points to the labels assigned by baseClassifiers.get(i)
     List<Set<String>> baseLabels = new ArrayList<Set<String>>();
-    Set<String> seenLabels = Generics.newHashSet();
+    Set<String> seenLabels = new HashSet<String>();
     for (AbstractSequenceClassifier<? extends CoreMap> baseClassifier : baseClassifiers) {
       Set<String> labs = baseClassifier.labels();
-      if (combinationMode != CombinationMode.HIGH_RECALL) {
-        labs.removeAll(seenLabels);
-      } else {
-        labs.remove(baseClassifier.flags.backgroundSymbol);
-        labs.remove(background);
-      }
+      labs.removeAll(seenLabels);
       seenLabels.addAll(labs);
       baseLabels.add(labs);
     }
+    String background = baseClassifiers.get(0).flags.backgroundSymbol;
 
     if (DEBUG) {
       for(int i = 0; i < baseLabels.size(); i ++)

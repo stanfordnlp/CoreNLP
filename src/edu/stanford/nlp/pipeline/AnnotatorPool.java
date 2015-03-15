@@ -1,8 +1,7 @@
 package edu.stanford.nlp.pipeline;
 
+import java.util.HashMap;
 import java.util.Map;
-
-import edu.stanford.nlp.util.Generics;
 
 /**
  * An object for keeping track of Annotators. Typical use is to allow multiple
@@ -24,8 +23,8 @@ public class AnnotatorPool {
    * Create an empty AnnotatorPool.
    */
   public AnnotatorPool() {
-    this.annotators = Generics.newHashMap();
-    this.factories = Generics.newHashMap();
+    this.annotators = new HashMap<String, Annotator>();
+    this.factories = new HashMap<String, AnnotatorFactory>();
   }
 
   /**
@@ -48,16 +47,12 @@ public class AnnotatorPool {
       if(! oldSig.equals(newSig)) {
         // the new annotator uses different properties so we need to update!
         // TODO: this printout should be logged instead of going to stderr. we need to standardize logging
-        // System.err.println("Replacing old annotator \"" + name + "\" with signature ["
-        //         + oldSig + "] with new annotator with signature [" + newSig + "]");
+        System.err.println("Replacing old annotator \"" + name + "\" with signature ["
+                + oldSig + "] with new annotator with signature [" + newSig + "]");
         this.factories.put(name, factory);
         newAnnotator = true;
 
         // delete the existing annotator; we'll create one with the new props on demand
-        // removing the annotator like this will not affect any
-        // existing pipelines which use the old annotator, but if
-        // those are all gone, then the old annotator will be garbage
-        // collected and memory will be freed up
         annotators.remove(name);
       }
       // nothing to do if an annotator with same name and signature already exists

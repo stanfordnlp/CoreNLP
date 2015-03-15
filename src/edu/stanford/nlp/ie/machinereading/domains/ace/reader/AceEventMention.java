@@ -2,10 +2,9 @@
 package edu.stanford.nlp.ie.machinereading.domains.ace.reader;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Stores one ACE event mention
@@ -23,7 +22,7 @@ public class AceEventMention extends AceMention {
 
   public AceEventMention(String id, AceCharSeq extent, AceCharSeq anchor) {
     super(id, extent);
-    mRolesToArguments = Generics.newHashMap();
+    mRolesToArguments = new HashMap<String, AceEventMentionArgument>();
     this.mAnchor = anchor;
   }
 

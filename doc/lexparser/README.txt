@@ -1,24 +1,21 @@
-Stanford Lexicalized Parser v3.5.1 - 2015-01-29
+Stanford Lexicalized Parser v2.0.4 - 2012-11-12
 -----------------------------------------------
 
 Copyright (c) 2002-2012 The Board of Trustees of The Leland Stanford Junior
 University. All Rights Reserved.
 
-Original core parser code by Dan Klein.  Support code, additional
-modules, languages, features, internationalization, compaction, typed
-dependencies, etc. by Christopher Manning, Roger Levy, Teg Grenager,
-Galen Andrew, Marie-Catherine de Marneffe, Jenny Finkel, Spence Green,
-Bill MacCartney, Anna Rafferty, Huihsin Tseng, Pi-Chuan Chang,
-Wolfgang Maier, Richard Eckart, Richard Socher, and John Bauer.
+Original core parser code by Dan Klein.  Support code, additional modules,
+languages, features, internationalization, compaction, typed dependencies,
+etc. by Christopher Manning, Roger Levy, Teg Grenager, Galen Andrew,
+Marie-Catherine de Marneffe, Jenny Finkel, Spence Green, Bill MacCartney, Anna
+Rafferty, Huihsin Tseng, Pi-Chuan Chang, Wolfgang Maier, and Richard Eckart.
 
 This release prepared by John Bauer.
 
-This package contains 4 parsers: a high-accuracy unlexicalized PCFG; a
-lexicalized dependency parser; a factored model, where the estimates
-of dependencies and an unlexicalized PCFG are jointly optimized to
-give a lexicalized PCFG treebank parser; and an RNN parser, where
-recursive neural networks trained with semantic word vectors are used
-to score parse trees.  Also included are grammars for various
+This package contains 3 parsers: a high-accuracy unlexicalized PCFG, a
+lexicalized dependency parser, and a factored model, where the estimates
+of dependencies and an unlexicalized PCFG are jointly optimized to give a
+lexicalized PCFG treebank parser.  Also included are grammars for various
 languages for use with these parsers.
 
 For more information about the parser API, point a web browser at the
@@ -32,8 +29,8 @@ Secondly, you should also look at the Parser FAQ on the web:
 
     http://nlp.stanford.edu/software/parser-faq.shtml
 
-This software requires Java 6 (JDK 1.6.0+).  (You must have installed it
-separately. Check that the command "java -version" works and gives 1.6+.)
+This software requires Java 5 (JDK 1.5.0+).  (You must have installed it
+separately. Check that the command "java -version" works and gives 1.5+.)
 
 
 QUICKSTART
@@ -110,15 +107,18 @@ paths), but you should be able to see what we did.
 Arabic
 Trained on parts 1-3 of the Penn Arabic Treebank (ATB) using the
 pre-processing described in (Green and Manning, 2010). The default input
-encoding is UTF-8 Arabic script. You can convert text in Buckwalter encoding to UTF-8
-with the package edu.stanford.nlp.international.arabic.Buckwalter which is included 
-in stanford-parser.jar.
+encoding is UTF-8 Arabic script.  To parse with Buckwalter encoding, we
+recommend conversion to UTF-8 using the package
 
-The parser *requires* segmentation and tokenization of raw text per the ATB standard
-prior to parsing. You can generate this segmentation and tokenization with the Stanford 
-Word Segmenter, which is available separately at:
+    edu.stanford.nlp.international.arabic.Buckwalter
 
-  http://nlp.stanford.edu/software/segmenter.shtml
+which is included in stanford-parser.jar.
+
+Note that the parser *requires* clitic segmentation per the ATB standard
+prior to parsing. A freely available package for performing this segmentation
+is MADA+TOKAN:
+
+    http://www1.cs.columbia.edu/~rambow/software-downloads/MADA_Distribution.html
 
 Chinese
 There are Chinese grammars trained just on mainland material from
@@ -127,10 +127,11 @@ input encoding is GB18030.
 
 French
 Trained on the functionally annotated section of the French Treebank
-(FTB) using the pre-processing described in (Green et al., 2011). For raw text input,
-a tokenizer is enabled by default that produces FTB tokenization. To disable this
-tokenizer, use the "-tokenized" option. To tokenize raw text separately, see
-the usage information in edu.stanford.nlp.international.french.process.FrenchTokenizer.
+(FTB) using the pre-processing described in (Green et al., 2011). Tokenization
+according to the FTB standard is required prior to parsing. A freely available
+set of tokenization tools can be found at:
+
+    http://gforge.inria.fr/projects/lingwb/
 
 German
 Trained on the Negra corpus. Details are included in (Rafferty and
@@ -205,28 +206,6 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
-
-2015-01-29    3.5.1     Dependency parser improvements; general 
-                        bugfixes 
-
-2014-10-26    3.5.0     Upgrade to Java 1.8; add neural-network 
-                        dependency parser 
-
-2014-08-27    3.4.1     Add Spanish models 
-
-2014-06-16      3.4     Shift-reduce parser 
-
-2014-01-04    3.3.1     Bugfix release, dependency improvements 
-
-2013-11-12    3.3.0     Remove the attr dependency, add imperatives to 
-                        English training data 
-
-2013-06-19    3.2.0     New RNN model for WSJ and English with 
-                        improved test set accuracy, rel dependency 
-                        removed 
-
-2013-04-05    2.0.5     Dependency improvements, ctb7 model, -nthreads 
-                        option 
 
 2012-11-12    2.0.4     Dependency speed improvements; other 
                         dependency changes 

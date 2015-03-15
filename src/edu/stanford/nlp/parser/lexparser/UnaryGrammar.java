@@ -1,6 +1,5 @@
 package edu.stanford.nlp.parser.lexparser;
 
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 
 import java.io.*;
@@ -62,7 +61,7 @@ public class UnaryGrammar implements Serializable, Iterable<UnaryRule> {
 
   /** Remove A -&gt; A UnaryRules from bestRulesUnderMax. */
   public final void purgeRules() {
-    Map<UnaryRule,UnaryRule> bR = Generics.newHashMap();
+    Map<UnaryRule,UnaryRule> bR = new HashMap<UnaryRule,UnaryRule>();
     for (UnaryRule ur : bestRulesUnderMax.keySet()) {
       if (ur.parent != ur.child) {
         bR.put(ur, ur);
@@ -243,7 +242,7 @@ public class UnaryGrammar implements Serializable, Iterable<UnaryRule> {
 
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
     stream.defaultReadObject();
-    Set<UnaryRule> allRules = Generics.newHashSet(coreRules.keySet());
+    Set<UnaryRule> allRules = new HashSet<UnaryRule>(coreRules.keySet());
     init();
     for (UnaryRule ur : allRules) {
       addRule(ur);
@@ -257,13 +256,13 @@ public class UnaryGrammar implements Serializable, Iterable<UnaryRule> {
   @SuppressWarnings("unchecked")
   private void init() {
     int numStates = index.size();
-    coreRules = Generics.newHashMap();
+    coreRules = new HashMap<UnaryRule,UnaryRule>();
     rulesWithParent = new List[numStates];
     rulesWithChild = new List[numStates];
     closedRulesWithParent = new List[numStates];
     closedRulesWithChild = new List[numStates];
-    bestRulesUnderMax = Generics.newHashMap();
-    // backTrace = Generics.newHashMap();
+    bestRulesUnderMax = new HashMap<UnaryRule,UnaryRule>();
+    // backTrace = new HashMap<UnaryRule,Integer>();
     for (int s = 0; s < numStates; s++) {
       rulesWithParent[s] = new ArrayList<UnaryRule>();
       rulesWithChild[s] = new ArrayList<UnaryRule>();

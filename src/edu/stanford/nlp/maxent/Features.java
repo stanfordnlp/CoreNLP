@@ -9,6 +9,8 @@
 
 package edu.stanford.nlp.maxent;
 
+import edu.stanford.nlp.io.InDataStreamFile;
+import edu.stanford.nlp.io.OutDataStreamFile;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.IntPair;
 
@@ -53,8 +55,22 @@ public class Features {
   }
 
   public void print() {
+
     for (int i = 0; i < size(); i++) {
       get(i).print();
+    }
+
+  }
+
+  public void save(String filename) {
+    try {
+      OutDataStreamFile rF = new OutDataStreamFile(filename);
+      rF.writeInt(size());
+      for (int i = 0; i < size(); i++) {
+        (get(i)).save(rF);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
@@ -93,11 +109,12 @@ public class Features {
       System.out.println(fSt);
       int number = Integer.parseInt(fSt);
       System.out.println("fSize is " + number);
+      String line;
       int[] arrIndexes = new int[maxValue];
       double[] arrValues = new double[maxValue];
 
       for (int f = 0; f < number; f++) {
-        String line = in.readLine();
+        line = in.readLine();
 
         int indSp = -1;
         int current = 0;
@@ -134,6 +151,21 @@ public class Features {
 
       }// for f
 
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+
+  public void read(String filename) {
+    try {
+      InDataStreamFile rF = new InDataStreamFile(filename);
+      int numFeats = rF.readInt();
+      for (int i = 0; i < numFeats; i++) {
+        Feature tF = new Feature();
+        tF.read(rF);
+        this.add(tF);
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }

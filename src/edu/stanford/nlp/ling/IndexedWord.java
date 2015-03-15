@@ -1,35 +1,19 @@
 package edu.stanford.nlp.ling;
 
-import java.util.Set;
-
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.TypesafeMap;
+import edu.stanford.nlp.util.CoreMap;
 
 /**
- * This class provides a {@link CoreLabel} that uses its
+ * This class is mainly for use with RTE in terms of the methods it provides,
+ * but on a more general level, it provides a {@link CoreLabel} that uses its
  * DocIDAnnotation, SentenceIndexAnnotation, and IndexAnnotation to implement
  * Comparable/compareTo, hashCode, and equals.  This means no other annotations,
  * including the identity of the word, are taken into account when using these
- * methods. Historically, this class was introduced for and is mainly used in
- * the RTE package, and it provides a number of methods that are really specific
- * to that use case. A second use case is now the Stanford Dependencies code,
- * where this class directly implements the "copy nodes" of section 4.6 of the
- * Stanford Dependencies Manual, rather than these being placed directly in the
- * backing CoreLabel. This was so there can stay one CoreLabel per token, despite
- * there being multiple IndexedWord nodes, additional ones representing copy
- * nodes.
- * <p>
- * The actual implementation is to wrap a {@code CoreLabel}.
- * This avoids breaking the {@code equals()} and
- * {@code hashCode()} contract and also avoids expensive copying
- * when used to represent the same data as the original
- * {@code CoreLabel}.
+ * methods.
  *
  * @author rafferty
- * @author John Bauer
- * @author Sonal Gupta
+ *
  */
-public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
+public class IndexedWord extends CoreLabel implements Comparable<IndexedWord> {
 
   private static final long serialVersionUID = 3739633991145239829L;
 
@@ -38,15 +22,22 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
    */
   public static final IndexedWord NO_WORD = new IndexedWord(null, -1, -1);
 
-  private final CoreLabel label;
+  /**
+   * Various printing options for toString
+   */
+  public static final String WORD_FORMAT = "WORD_FORMAT";
+  public static final String WORD_TAG_FORMAT = "WORD_TAG_FORMAT";
+  public static final String WORD_TAG_INDEX_FORMAT = "WORD_TAG_INDEX_FORMAT";
+  public static final String VALUE_FORMAT = "VALUE_FORMAT";
+  public static final String COMPLETE_FORMAT = "COMPLETE_FORMAT";
 
-  private int copyCount; // = 0;
+  private static String printFormat = WORD_TAG_FORMAT;
 
   /**
    * Default constructor; uses {@link CoreLabel} default constructor
    */
   public IndexedWord() {
-    label = new CoreLabel();
+    super();
   }
 
 
@@ -58,14 +49,9 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
    * @param w A Label to initialize this IndexedWord from
    */
   public IndexedWord(Label w) {
-    if (w instanceof CoreLabel) {
-      this.label = (CoreLabel) w;
-    } else {
-      label = new CoreLabel(w);
-      if (label.word() == null) {
-        label.setWord(label.value());
-      }
-    }
+    super(w);
+    if (this.word() == null)
+      this.setWord(this.value());
   }
 
   /**
@@ -77,7 +63,17 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
    * @param w A Label to initialize this IndexedWord from
    */
   public IndexedWord(CoreLabel w) {
-    label = w;
+    this((CoreMap) w);
+  }
+
+  /**
+   * Copy Constructor - relies on {@link CoreLabel} copy constructor
+   * @param w A Label to initialize this IndexedWord from
+   */
+  public IndexedWord(CoreMap w) {
+    super(w);
+    if (this.word() == null)
+      this.setWord(this.value());
   }
 
   /**
@@ -89,191 +85,30 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
    * @param index The index of the word in the sentence (normally 0-based)
    */
   public IndexedWord(String docID, int sentenceIndex, int index) {
-    label = new CoreLabel();
-    label.set(CoreAnnotations.DocIDAnnotation.class, docID);
-    label.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
-    label.set(CoreAnnotations.IndexAnnotation.class, index);
+    super();
+    this.set(CoreAnnotations.DocIDAnnotation.class, docID);
+    this.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
+    this.set(CoreAnnotations.IndexAnnotation.class, index);
   }
 
-  public IndexedWord makeCopy(int count) {
-    CoreLabel labelCopy = new CoreLabel(label);
-    IndexedWord copy = new IndexedWord(labelCopy);
-    copy.setCopyCount(count);
-    return copy;
-  }
-
-  public IndexedWord makeSoftCopy(int count) {
-    IndexedWord copy = new IndexedWord(label);
-    copy.setCopyCount(count);
-    return copy;
-  }
 
   /**
-   * TODO: get rid of this.  Only used in two places in RTE (in rewriter code)
+   * Copies the given label and then sets the docID, sentenceIndex,
+   * and Index; if these differ from those in label, the parameters
+   * will be used (not the label values).
+   *
+   * @param docID The document ID (arbitrary string)
+   * @param sentenceIndex The sentence number in the document (normally 0-based)
+   * @param index The index of the word in the sentence (normally 0-based)
+   * @param label The CoreLabel to initialize all other fields from.
    */
-  public CoreLabel backingLabel() { return label; }
-
-  @Override
-  public <VALUE> VALUE get(Class<? extends TypesafeMap.Key<VALUE>> key) {
-    return label.get(key);
+  public IndexedWord(String docID, int sentenceIndex, int index, CoreLabel label) {
+    this(label);
+    this.set(CoreAnnotations.DocIDAnnotation.class, docID);
+    this.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
+    this.set(CoreAnnotations.IndexAnnotation.class, index);
   }
 
-  @Override
-  public <VALUE> boolean has(Class<? extends TypesafeMap.Key<VALUE>> key) {
-    return label.has(key);
-  }
-
-  @Override
-  public <VALUE> boolean containsKey(Class<? extends TypesafeMap.Key<VALUE>> key) {
-    return label.containsKey(key);
-  }
-
-  @Override
-  public <VALUE> VALUE set(Class<? extends TypesafeMap.Key<VALUE>> key, VALUE value) {
-    return label.set(key, value);
-  }
-
-  @Override
-  public <KEY extends TypesafeMap.Key<String>> String getString(Class<KEY> key) {
-    return label.getString(key);
-  }
-
-  @Override
-  public <VALUE> VALUE remove(Class<? extends Key<VALUE>> key) {
-    return label.remove(key);
-  }
-
-  @Override
-  public Set<Class<?>> keySet() {
-    return label.keySet();
-  }
-
-  @Override
-  public int size() {
-    return label.size();
-  }
-
-  @Override
-  public String value() {
-    return label.value();
-  }
-
-  @Override
-  public void setValue(String value) {
-    label.setValue(value);
-  }
-
-  @Override
-  public String tag() {
-    return label.tag();
-  }
-
-  @Override
-  public void setTag(String tag) {
-    label.setTag(tag);
-  }
-
-  @Override
-  public String word() {
-    return label.word();
-  }
-
-  @Override
-  public void setWord(String word) {
-    label.setWord(word);
-  }
-
-  @Override
-  public String lemma() {
-    return label.lemma();
-  }
-
-  @Override
-  public void setLemma(String lemma) {
-    label.setLemma(lemma);
-  }
-
-  @Override
-  public String ner() {
-    return label.ner();
-  }
-
-  @Override
-  public void setNER(String ner) {
-    label.setNER(ner);
-  }
-
-  @Override
-  public String docID() {
-    return label.docID();
-  }
-
-  @Override
-  public void setDocID(String docID) {
-    label.setDocID(docID);
-  }
-
-  @Override
-  public int index() {
-    return label.index();
-  }
-
-  @Override
-  public void setIndex(int index) {
-    label.setIndex(index);
-  }
-
-  @Override
-  public int sentIndex() {
-    return label.sentIndex();
-  }
-
-  @Override
-  public void setSentIndex(int sentIndex) {
-    label.setSentIndex(sentIndex);
-  }
-
-  @Override
-  public String originalText() {
-    return label.originalText();
-  }
-
-  @Override
-  public void setOriginalText(String originalText) {
-    label.setOriginalText(originalText);
-  }
-
-  @Override
-  public int beginPosition() {
-    return label.beginPosition();
-  }
-
-  @Override
-  public int endPosition() {
-    return label.endPosition();
-  }
-
-  @Override
-  public void setBeginPosition(int beginPos) {
-    label.setBeginPosition(beginPos);
-  }
-
-  @Override
-  public void setEndPosition(int endPos) {
-    label.setEndPosition(endPos);
-  }
-
-  public int copyCount() {
-    return copyCount;
-  }
-
-  public void setCopyCount(int count) {
-    this.copyCount = count;
-  }
-
-  public String toPrimes() {
-    return StringUtils.repeat('\'', copyCount);
-  }
 
   /**
    * This .equals is dependent only on docID, sentenceIndex, and index.
@@ -288,12 +123,12 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
 
     //now compare on appropriate keys
     final IndexedWord otherWord = (IndexedWord) o;
-    Integer myInd = get(CoreAnnotations.IndexAnnotation.class);
-    Integer otherInd = otherWord.get(CoreAnnotations.IndexAnnotation.class);
-    if (myInd == null) {
-      if (otherInd != null)
+    String myDocID = getString(CoreAnnotations.DocIDAnnotation.class);
+    String otherDocID = otherWord.getString(CoreAnnotations.DocIDAnnotation.class);
+    if (myDocID == null) {
+      if (otherDocID != null)
       return false;
-    } else if ( ! myInd.equals(otherInd)) {
+    } else if ( ! myDocID.equals(otherDocID)) {
       return false;
     }
     Integer mySentInd = get(CoreAnnotations.SentenceIndexAnnotation.class);
@@ -304,31 +139,24 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
     } else if ( ! mySentInd.equals(otherSentInd)) {
       return false;
     }
-    String myDocID = getString(CoreAnnotations.DocIDAnnotation.class);
-    String otherDocID = otherWord.getString(CoreAnnotations.DocIDAnnotation.class);
-    if (myDocID == null) {
-      if (otherDocID != null)
+    Integer myInd = get(CoreAnnotations.IndexAnnotation.class);
+    Integer otherInd = otherWord.get(CoreAnnotations.IndexAnnotation.class);
+    if (myInd == null) {
+      if (otherInd != null)
       return false;
-    } else if ( ! myDocID.equals(otherDocID)) {
-      return false;
-    }
-    if (copyCount() != otherWord.copyCount()) {
+    } else if ( ! myInd.equals(otherInd)) {
       return false;
     }
     return true;
   }
 
 
-  private int cachedHashCode = 0;
   /**
-   * This hashCode uses only the docID, sentenceIndex, and index.
-   * See compareTo for more info.
+   * This hashcode uses only the docID, sentenceIndex, and index
+   * See compareTo for more info
    */
   @Override
   public int hashCode() {
-    if (cachedHashCode != 0) {
-      return cachedHashCode;
-    }
     boolean sensible = false;
     int result = 0;
     if (get(CoreAnnotations.DocIDAnnotation.class) != null) {
@@ -336,17 +164,16 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
       sensible = true;
     }
     if (has(CoreAnnotations.SentenceIndexAnnotation.class)) {
-      result = 29 * result + get(CoreAnnotations.SentenceIndexAnnotation.class).hashCode();
+      result = 29 * result + get(CoreAnnotations.SentenceIndexAnnotation.class);
       sensible = true;
     }
     if (has(CoreAnnotations.IndexAnnotation.class)) {
-      result = 29 * result + get(CoreAnnotations.IndexAnnotation.class).hashCode();
+      result = 29 * result + get(CoreAnnotations.IndexAnnotation.class);
       sensible = true;
     }
     if ( ! sensible) {
       System.err.println("WARNING!!!  You have hashed an IndexedWord with no docID, sentIndex or wordIndex. You will almost certainly lose");
     }
-    cachedHashCode = result;
     return result;
   }
 
@@ -366,7 +193,6 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
    *  @param w The IndexedWord to compare with
    *  @return Whether this is less than w or not in the ordering
    */
-  @Override
   public int compareTo(IndexedWord w) {
     if (this.equals(IndexedWord.NO_WORD)) {
       if (w.equals(IndexedWord.NO_WORD)) {
@@ -386,61 +212,91 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
     int sentComp = sentIndex() - w.sentIndex();
     if (sentComp != 0) return sentComp;
 
-    int indexComp = index() - w.index();
-    if (indexComp != 0) return indexComp;
-
-    return copyCount() - w.copyCount();
+    return index() - w.index();
   }
 
   /**
-   * Returns the value-tag of this label.
+   * Computes the toString based on whatever the printFormat is
+   * currently set as.
    */
   @Override
   public String toString() {
-    return toString(CoreLabel.OutputFormat.VALUE_TAG);
+    return toString(printFormat);
   }
 
-  public String toString(CoreLabel.OutputFormat format) {
-    return label.toString(format) + toPrimes();
+  public static void setPrintFormat(String printFormat) {
+    IndexedWord.printFormat = printFormat;
   }
 
   /**
-   * {@inheritDoc}
+   * Prints the toString in the form of format.
+   *
+   * @param format One of the constants defined for this class. (You must use
+   *     one of these constants, because the Strings are compared by ==.)
+   * @return A printed representation
    */
-  @Override
-  public void setFromString(String labelStr) {
-    throw new UnsupportedOperationException("Cannot set from string");
-  }
+  public String toString(String format) {
 
+    if (this.equals(NO_WORD)) return "NO_WORD";
+    StringBuilder result = new StringBuilder();
+
+    // word
+    if (format == WORD_FORMAT ||
+        format == WORD_TAG_FORMAT ||
+        format == WORD_TAG_INDEX_FORMAT) {
+      result.append(word());
+
+      // tag
+      if (format == WORD_TAG_FORMAT ||
+          format == WORD_TAG_INDEX_FORMAT) {
+        String tag = tag();
+        if (tag != null && tag.length() != 0) {
+          result.append('-').append(tag);
+        }
+
+        // index
+        if (format == WORD_TAG_INDEX_FORMAT) {
+          result.append('-').append(sentIndex()).append(':').append(index());
+        }
+      }
+
+      // value format
+    } else if (format == VALUE_FORMAT) {
+      result.append(value());
+      if (index() >= 0) {
+        result.append(':').append(index());
+      }
+
+    } else {
+      return super.toString();
+    }
+
+    return result.toString();
+  }
 
   public static LabelFactory factory() {
     return new LabelFactory() {
 
-      @Override
       public Label newLabel(String labelStr) {
-        CoreLabel coreLabel = new CoreLabel();
-        coreLabel.setValue(labelStr);
-        return new IndexedWord(coreLabel);
+        IndexedWord label = new IndexedWord();
+        label.setValue(labelStr);
+        return label;
       }
 
-      @Override
       public Label newLabel(String labelStr, int options) {
         return newLabel(labelStr);
       }
 
-      @Override
       public Label newLabel(Label oldLabel) {
         return new IndexedWord(oldLabel);
       }
 
-      @Override
       public Label newLabelFromString(String encodedLabelStr) {
         throw new UnsupportedOperationException("This code branch left blank" +
         " because we do not understand what this method should do.");
       }
     };
   }
-
   /**
    * {@inheritDoc}
    */
@@ -448,5 +304,4 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
   public LabelFactory labelFactory() {
     return IndexedWord.factory();
   }
-
 }

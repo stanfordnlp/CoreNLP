@@ -2,6 +2,7 @@ package edu.stanford.nlp.parser.metrics;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -17,7 +18,6 @@ import edu.stanford.nlp.trees.LabeledScoredConstituentFactory;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Character level segmentation and tagging metric from (Tsarfaty, 2006). For evaluating parse
@@ -42,7 +42,7 @@ public class TsarfatyEval extends AbstractEval {
 
   @Override
   protected Set<?> makeObjects(Tree tree) {
-    Set<Constituent> deps = Generics.newHashSet();
+    Set<Constituent> deps = new HashSet<Constituent>();
     if(tree != null) extractDeps(tree, 0, deps);
     return deps;
   }
@@ -107,32 +107,26 @@ public class TsarfatyEval extends AbstractEval {
 
       if(args[i].startsWith("-")) {
 
-        switch (args[i]) {
-          case "-l":
-            Language lang = Language.valueOf(args[++i].trim());
-            tlpp = Languages.getLanguageParams(lang);
+        if(args[i].equals("-l")) {
+          Language lang = Language.valueOf(args[++i].trim());
+          tlpp = Languages.getLanguageParams(lang);
 
-            break;
-          case "-y":
-            maxGoldYield = Integer.parseInt(args[++i].trim());
+        } else if(args[i].equals("-y")) {
+          maxGoldYield = Integer.parseInt(args[++i].trim());
 
-            break;
-          case "-t":
-            tagMode = true;
+        } else if(args[i].equals("-t")) {
+          tagMode = true;
 
-            break;
-          case "-v":
-            VERBOSE = true;
+        } else if(args[i].equals("-v")) {
+          VERBOSE = true;
 
-            break;
-          case "-g":
-            maxGuessYield = Integer.parseInt(args[++i].trim());
-            skipGuess = true;
+        } else if(args[i].equals("-g")) {
+          maxGuessYield = Integer.parseInt(args[++i].trim());
+          skipGuess = true;
 
-            break;
-          default:
-            System.out.println(usage.toString());
-            System.exit(-1);
+        } else {
+          System.out.println(usage.toString());
+          System.exit(-1);
         }
 
       } else {

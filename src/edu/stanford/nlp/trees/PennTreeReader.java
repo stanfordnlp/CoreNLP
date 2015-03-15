@@ -3,11 +3,9 @@ package edu.stanford.nlp.trees;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
-import java.util.regex.Pattern;
 
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.ling.HasIndex;
-import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 
 /**
@@ -15,15 +13,6 @@ import edu.stanford.nlp.ling.HasWord;
  * files. The reader is implemented as a push-down automaton (PDA) that parses the Lisp-style
  * format in which the trees are stored. This reader is compatible with both PTB
  * and PATB trees.
- * <br>
- * One small detail to note is that the <code>PennTreeReader</code>
- * silently replaces \* with * and \/ with /.  Two possible designs
- * for this were to make the <code>PennTreeReader</code> always do
- * this or to make the <code>TreeNormalizers</code> do this.  We
- * decided to put it in the <code>PennTreeReader</code> class itself
- * to avoid the problem of people making new
- * <code>TreeNormalizers</code> and forgetting to include the
- * unescaping.
  *
  * @author Christopher Manning
  * @author Roger Levy
@@ -98,7 +87,7 @@ public class PennTreeReader implements TreeReader {
     String first = (st.hasNext() ? st.peek() : null);
     if (first != null && first.startsWith("*x*x*x")) {
       if (DEBUG) {
-        System.err.printf("%s: Skipping past whacked out header (%s)%n",this.getClass().getName(),first);
+        System.err.printf("%s: Skipping past whacked out header (%s)\n",this.getClass().getName(),first);
       }
       int foundCount = 0;
       while (foundCount < 4 && st.hasNext()) {
@@ -110,7 +99,7 @@ public class PennTreeReader implements TreeReader {
     }
 
     if (DEBUG) {
-      System.err.printf("%s: Built from%n %s ", this.getClass().getName(), in.getClass().getName());
+      System.err.printf("%s: Built from\n %s ", this.getClass().getName(), in.getClass().getName());
       System.err.println(' ' + ((tf == null) ? "no tf" : tf.getClass().getName()));
       System.err.println(' ' + ((tn == null) ? "no tn" : tn.getClass().getName()));
       System.err.println(' ' + ((st == null) ? "no st" : st.getClass().getName()));
@@ -156,97 +145,75 @@ public class PennTreeReader implements TreeReader {
         if (treeNormalizer != null && treeFactory != null) {
           t = treeNormalizer.normalizeWholeTree(t, treeFactory);
         }
-        t.indexLeaves(true);
       }
     }
 
     return t;
   }
 
-  private static final Pattern STAR_PATTERN = Pattern.compile("\\\\\\*");
-  private static final Pattern SLASH_PATTERN = Pattern.compile("\\\\/");
-
 
   private Tree getTreeFromInputStream() throws NoSuchElementException {
     int wordIndex = 1;
 
     // FSA
-    label:
     while (tokenizer.hasNext()) {
       String token = tokenizer.next();
 
-      switch (token) {
-        case leftParen:
+      if (token.equals(leftParen)) {
 
-          // cdm 20100225: This next line used to have "" instead of null, but the traditional and current tree normalizers depend on the label being null not "" when there is no label on a tree (like the outermost English PTB level)
-          String label = (tokenizer.peek().equals(leftParen)) ? null : tokenizer.next();
-          if (rightParen.equals(label)) {//Skip past empty trees
-            continue;
-          } else if (treeNormalizer != null) {
-            label = treeNormalizer.normalizeNonterminal(label);
-          }
+        // cdm 20100225: This next line used to have "" instead of null, but the traditional and current tree normalizers depend on the label being null not "" when there is no label on a tree (like the outermost English PTB level)
+        String label = (tokenizer.peek().equals(leftParen)) ? null : tokenizer.next();
+        if (rightParen.equals(label)) {//Skip past empty trees
+          continue;
+        } else if (treeNormalizer != null) {
+          label = treeNormalizer.normalizeNonterminal(label);
+        }
 
-          if (label != null) {
-            label = STAR_PATTERN.matcher(label).replaceAll("*");
-            label = SLASH_PATTERN.matcher(label).replaceAll("/");
-          }
+        Tree newTree = treeFactory.newTreeNode(label, null); // dtrs are added below
+        if(currentTree == null)
+          stack.add(newTree);
+        else {
+          currentTree.addChild(newTree);
+          stack.add(currentTree);
+        }
 
-          Tree newTree = treeFactory.newTreeNode(label, null); // dtrs are added below
+        currentTree = newTree;
 
-          if (currentTree == null)
-            stack.add(newTree);
-          else {
-            currentTree.addChild(newTree);
-            stack.add(currentTree);
-          }
-
-          currentTree = newTree;
-
+      } else if(token.equals(rightParen)) {
+        if (stack.isEmpty()) {
+          // Warn that file has too many right parens
+          System.err.println("PennTreeReader: warning: file has extra non-matching right parenthesis [ignored]");
           break;
-        case rightParen:
-          if (stack.isEmpty()) {
-            // Warn that file has too many right parens
-            System.err.println("PennTreeReader: warning: file has extra non-matching right parenthesis [ignored]");
-            break label;
-          }
+        }
 
-          //Accept
-          currentTree = stack.remove(stack.size() - 1);  // i.e., stack.pop()
+        //Accept
+        currentTree = stack.remove(stack.size() - 1);  // i.e., stack.pop()
+        if (stack.isEmpty()) return currentTree;
 
-          if (stack.isEmpty()) return currentTree;
+      } else {
 
+        if (currentTree == null) {
+          // A careful Reader should warn here, but it's kind of useful to
+          // suppress this because then the TreeReader doesn't print a ton of
+          // messages if there is a README file in a directory of Trees.
+          // System.err.println("PennTreeReader: warning: file has extra token not in a s-expression tree: " + token + " [ignored]");
           break;
-        default:
+        }
 
-          if (currentTree == null) {
-            // A careful Reader should warn here, but it's kind of useful to
-            // suppress this because then the TreeReader doesn't print a ton of
-            // messages if there is a README file in a directory of Trees.
-            // System.err.println("PennTreeReader: warning: file has extra token not in a s-expression tree: " + token + " [ignored]");
-            break label;
-          }
+        String terminal = (treeNormalizer == null) ? token : treeNormalizer.normalizeTerminal(token);
+        Tree leaf = treeFactory.newLeaf(terminal);
+        if(leaf.label() instanceof HasIndex) {
+          HasIndex hi = (HasIndex) leaf.label();
+          hi.setIndex(wordIndex);
+        }
+        if(leaf.label() instanceof HasWord) {
+          HasWord hw = (HasWord) leaf.label();
+          hw.setWord(leaf.label().value());
+        }
+        wordIndex++;
 
-          String terminal = (treeNormalizer == null) ? token : treeNormalizer.normalizeTerminal(token);
-          terminal = STAR_PATTERN.matcher(terminal).replaceAll("*");
-          terminal = SLASH_PATTERN.matcher(terminal).replaceAll("/");
-          Tree leaf = treeFactory.newLeaf(terminal);
-          if (leaf.label() instanceof HasIndex) {
-            HasIndex hi = (HasIndex) leaf.label();
-            hi.setIndex(wordIndex);
-          }
-          if (leaf.label() instanceof HasWord) {
-            HasWord hw = (HasWord) leaf.label();
-            hw.setWord(leaf.label().value());
-          }
-          if (leaf.label() instanceof HasTag) {
-            HasTag ht = (HasTag) leaf.label();
-            ht.setTag(currentTree.label().value());
-          }
-          wordIndex++;
-
-          currentTree.addChild(leaf);
-          // cdm: Note: this implementation just isn't as efficient as the old recursive descent parser (see 2008 code), where all the daughters are gathered before the tree is made....
-          break;
+        currentTree.addChild(leaf);
+        // cdm: Note: this implementation just isn't as efficient as the old recursive descent parser (see 2008 code), where all the daughters are gathered before the tree is made....
       }
     }
 

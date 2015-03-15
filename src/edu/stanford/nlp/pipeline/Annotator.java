@@ -1,9 +1,9 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.util.ArraySet;
-
 import java.util.Collections;
 import java.util.Set;
+
+import edu.stanford.nlp.util.ArraySet;
 
 /**
  * This is an interface for adding annotations to a fully annotated
@@ -36,9 +36,8 @@ import java.util.Set;
  * @author Jenny Finkel
  */
 public interface Annotator {
-
   /**
-   * Given an Annotation, perform a task on this Annotation.
+   * Given an annotation, perform a task on this annotaiton.
    */
   public void annotate(Annotation annotation) ;
 
@@ -61,7 +60,7 @@ public interface Annotator {
    * TsurgeonAnnotator, cannot use a stricter equals() than the
    * superclass.  It is hard to get stricter than ==.
    */
-  public class Requirement {
+  public class Requirement { 
     public final String name;
     public Requirement(String name) {
       this.name = name;
@@ -70,7 +69,7 @@ public interface Annotator {
     public String toString() {
       return name;
     }
-  }
+  };
 
   /**
    * Returns a set of requirements for which tasks this annotator can
@@ -96,19 +95,12 @@ public interface Annotator {
   public static final String STANFORD_LEMMA = "lemma";
   public static final String STANFORD_NER = "ner";
   public static final String STANFORD_REGEXNER = "regexner";
-  public static final String STANFORD_ENTITY_MENTIONS = "entitymentions";
   public static final String STANFORD_GENDER = "gender";
+  static final String STANFORD_NFL_TOKENIZE = "nfltokenize"; // hidden annotator constructed automagically for the NFL domain
+  public static final String STANFORD_NFL = "nfl";
   public static final String STANFORD_TRUECASE = "truecase";
   public static final String STANFORD_PARSE = "parse";
   public static final String STANFORD_DETERMINISTIC_COREF = "dcoref";
-  public static final String STANFORD_RELATION = "relation";
-  public static final String STANFORD_SENTIMENT = "sentiment";
-  public static final String STANFORD_COLUMN_DATA_CLASSIFIER = "cdc";
-  public static final String STANFORD_DEPENDENCIES = "depparse";
-  public static final String STANFORD_NATLOG = "natlog";
-  public static final String STANFORD_OPENIE = "openie";
-  public static final String STANFORD_QUOTE = "quote";
-
 
   public static final Requirement TOKENIZE_REQUIREMENT = new Requirement(STANFORD_TOKENIZE);
   public static final Requirement CLEAN_XML_REQUIREMENT = new Requirement(STANFORD_CLEAN_XML);
@@ -117,13 +109,11 @@ public interface Annotator {
   public static final Requirement LEMMA_REQUIREMENT = new Requirement(STANFORD_LEMMA);
   public static final Requirement NER_REQUIREMENT = new Requirement(STANFORD_NER);
   public static final Requirement GENDER_REQUIREMENT = new Requirement(STANFORD_GENDER);
+  public static final Requirement NFL_TOKENIZE_REQUIREMENT = new Requirement(STANFORD_NFL_TOKENIZE);
+  public static final Requirement NFL_REQUIREMENT = new Requirement(STANFORD_NFL);
   public static final Requirement TRUECASE_REQUIREMENT = new Requirement(STANFORD_TRUECASE);
   public static final Requirement PARSE_REQUIREMENT = new Requirement(STANFORD_PARSE);
   public static final Requirement DETERMINISTIC_COREF_REQUIREMENT = new Requirement(STANFORD_DETERMINISTIC_COREF);
-  public static final Requirement RELATION_EXTRACTOR_REQUIREMENT = new Requirement(STANFORD_RELATION);
-  public static final Requirement NATLOG_REQUIREMENT = new Requirement(STANFORD_NATLOG);
-  public static final Requirement OPENIE_REQUIREMENT = new Requirement(STANFORD_OPENIE);
-  public static final Requirement QUOTE_REQUIREMENT = new Requirement(STANFORD_QUOTE);
 
   /**
    * These are annotators which StanfordCoreNLP does not know how to
@@ -139,16 +129,10 @@ public interface Annotator {
   public static final Requirement NUMBER_REQUIREMENT = new Requirement("number");
   public static final Requirement TIME_WORDS_REQUIREMENT = new Requirement("timewords");
   public static final Requirement QUANTIFIABLE_ENTITY_NORMALIZATION_REQUIREMENT = new Requirement("quantifiable_entity_normalization");
-  public static final Requirement COLUMN_DATA_CLASSIFIER = new Requirement("column_data_classifer");
-
-  /**
-   * The Stanford Parser can produce this if it is specifically requested
-   */
-  public static final Requirement BINARIZED_TREES_REQUIREMENT = new Requirement("binarized_trees");
 
   /**
    * These are typical combinations of annotators which may be used as
-   * requirements by other annotators.
+   * requirements by other annotators
    */
   public static final Set<Requirement> TOKENIZE_AND_SSPLIT = Collections.unmodifiableSet(new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT));
   public static final Set<Requirement> TOKENIZE_SSPLIT_POS = Collections.unmodifiableSet(new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT));
@@ -157,5 +141,4 @@ public interface Annotator {
   public static final Set<Requirement> TOKENIZE_SSPLIT_PARSE_NER = Collections.unmodifiableSet(new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, PARSE_REQUIREMENT, NER_REQUIREMENT));
   public static final Set<Requirement> TOKENIZE_SSPLIT_POS_LEMMA = Collections.unmodifiableSet(new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, LEMMA_REQUIREMENT));
   public static final Set<Requirement> PARSE_AND_TAG = Collections.unmodifiableSet(new ArraySet<Requirement>(POS_REQUIREMENT, PARSE_REQUIREMENT));
-  public static final Set<Requirement> PARSE_TAG_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<Requirement>(POS_REQUIREMENT, PARSE_REQUIREMENT, BINARIZED_TREES_REQUIREMENT));
 }

@@ -1,12 +1,13 @@
 package edu.stanford.nlp.fsm;
 
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Scored;
 
 import java.util.*;
 
 /**
- * DFSAState represents the state of a deterministic finite state
+ * DFSAState
+ * <p/>
+ * Class for representing the state of a deterministic finite state
  * automaton without epsilon transitions.
  *
  * @author Dan Klein
@@ -62,7 +63,7 @@ public final class DFSAState<T,S> implements Scored {
   }
 
   public Set<DFSAState<T,S>> successorStates() {
-    Set<DFSAState<T,S>> successors = Generics.newHashSet();
+    Set<DFSAState<T,S>> successors = new HashSet<DFSAState<T,S>>();
     Collection<DFSATransition<T, S>> transitions = inputToTransition.values();
     for (DFSATransition<T,S> transition : transitions) {
       successors.add(transition.getTarget());
@@ -114,7 +115,7 @@ public final class DFSAState<T,S> implements Scored {
   }
 
   public Set<DFSAState<T, S>> statesReachable() {
-    Set<DFSAState<T, S>> visited = Generics.newHashSet();
+    Set<DFSAState<T, S>> visited = new HashSet<DFSAState<T, S>>();
     List<DFSAState<T, S>> toVisit = new ArrayList<DFSAState<T, S>>();
     toVisit.add(this);
     exploreStates(toVisit, visited);
@@ -136,7 +137,7 @@ public final class DFSAState<T,S> implements Scored {
     this.dfsa = dfsa;
     this.stateID = id;
     this.accepting = false;
-    this.inputToTransition = Generics.newHashMap();
+    this.inputToTransition = new HashMap<T,DFSATransition<T,S>>();
     this.score = Double.NEGATIVE_INFINITY;
   }
 

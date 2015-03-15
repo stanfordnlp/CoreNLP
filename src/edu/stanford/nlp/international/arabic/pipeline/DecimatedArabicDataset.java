@@ -6,7 +6,6 @@ import java.util.*;
 import edu.stanford.nlp.trees.treebank.ConfigParser;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.arabic.ATBTreeUtils;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Decimates a set of ATB parse trees. For every 10 parse trees, eight are added to the training set, and one
@@ -69,7 +68,7 @@ public class DecimatedArabicDataset extends ATBArabicDataset {
       taggedOutput = makeTagged;
 
       //Setup the decimation output files
-      outFilenames = Generics.newHashMap();
+      outFilenames = new HashMap<String,String>();
       outFilenames.put(trainExtension, filePrefix + trainExtension);
       outFilenames.put(testExtension, filePrefix + testExtension);
       outFilenames.put(devExtension, filePrefix + devExtension);
@@ -88,7 +87,7 @@ public class DecimatedArabicDataset extends ATBArabicDataset {
       String curOutFileName = "";
       try {
 
-        outFiles = Generics.newHashMap();
+        outFiles = new HashMap<String,PrintWriter>();
 
         for(String keyForFile : outFilenames.keySet()) {
 

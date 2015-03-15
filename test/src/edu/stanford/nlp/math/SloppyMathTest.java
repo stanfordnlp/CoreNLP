@@ -64,32 +64,5 @@ public class SloppyMathTest extends TestCase {
     assertEquals(1158.56201f, SloppyMath.intPow(4.1f, 5), 1e-2);
   }
 
-  public void testArccos() {
-    assertEquals(Math.PI, SloppyMath.acos(-1.0), 0.001);
-    assertEquals(0, SloppyMath.acos(1.0), 0.001);
-    assertEquals(Math.PI / 2, SloppyMath.acos(0.0), 0.001);
-    for (double x = -1.0; x < 1.0; x += 0.001) {
-      assertEquals(Math.acos(x), SloppyMath.acos(x), 0.001);
-    }
-    try {
-      SloppyMath.acos(-1.0000001);
-      assertFalse(true);
-    } catch (IllegalArgumentException e) { }
-    try {
-      SloppyMath.acos(1.0000001);
-      assertFalse(true);
-    } catch (IllegalArgumentException e) { }
-  }
-
-  public void testPythonMod() {
-    assertEquals(0, SloppyMath.pythonMod(9, 3));
-    assertEquals(0, SloppyMath.pythonMod(-9, 3));
-    assertEquals(0, SloppyMath.pythonMod(9, -3));
-    assertEquals(0, SloppyMath.pythonMod(-9, -3));
-    assertEquals(2, SloppyMath.pythonMod(8, 3));
-    assertEquals(1, SloppyMath.pythonMod(-8, 3));
-    assertEquals(-1, SloppyMath.pythonMod(8, -3));
-    assertEquals(-2, SloppyMath.pythonMod(-8, -3));
-  }
 }
 

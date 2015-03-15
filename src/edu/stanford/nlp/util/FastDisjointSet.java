@@ -67,7 +67,7 @@ public class FastDisjointSet<T> implements DisjointSet<T> {
   }
 
   public FastDisjointSet(Set<? extends T> objectSet) {
-    objectToElement = Generics.newHashMap();
+    objectToElement = new HashMap<T, Element>();
     for (Iterator<? extends T> i = objectSet.iterator(); i.hasNext();) {
       // create an element
       T o = i.next();

@@ -2,6 +2,7 @@ package edu.stanford.nlp.wordseg;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,13 +14,11 @@ import edu.stanford.nlp.sequences.Clique;
 import edu.stanford.nlp.sequences.FeatureFactory;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.trees.international.pennchinese.RadicalMap;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 
 
 /**
- * A Chinese segmenter Feature Factory for the GALE project.
- * (Modified from the feature factory for Sighan Bakeoff 2005.)
+ * A Chinese segmenter Feature Factory for GALE project. (modified from Sighan Bakeoff 2005.)
  * <p>
  * c is Chinese character ("char").  c means current, n means next and p means previous.
  * </p>
@@ -52,21 +51,21 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
   public void init(SeqClassifierFlags flags) {
     super.init(flags);
   }
-
-  private synchronized void createTADetector() {
+  
+  synchronized private void createTADetector() {
     if (taDetector == null) {
       taDetector = new TagAffixDetector(flags);
     }
   }
 
-  private synchronized void createOutDict() {
+  synchronized private void createOutDict() {
     if (outDict == null) {
       System.err.println("reading "+flags.outDict2+" as a seen lexicon");
       outDict = new CorpusDictionary(flags.outDict2);
     }
-  }
+  }    
 
-
+  
   /**
    * Extracts all the features from the input data at a certain index.
    *
@@ -75,16 +74,13 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
    */
   @Override
   public Collection<String> getCliqueFeatures(PaddedList<IN> cInfo, int loc, Clique clique) {
-    Collection<String> features = Generics.newHashSet();
+    Collection<String> features = new HashSet<String>();
 
     if (clique == cliqueC) {
       addAllInterningAndSuffixing(features, featuresC(cInfo, loc), "C");
     } else if (clique == cliqueCpC) {
       addAllInterningAndSuffixing(features, featuresCpC(cInfo, loc), "CpC");
       addAllInterningAndSuffixing(features, featuresCnC(cInfo, loc-1), "CnC");
-    } else if (clique == cliqueCpCp2C) {
-      addAllInterningAndSuffixing(features, featuresCpCp2C(cInfo, loc), "CpCp2C");
-
     } else if (clique == cliqueCpCp2Cp3C) {
       addAllInterningAndSuffixing(features, featuresCpCp2Cp3C(cInfo, loc), "CpCp2Cp3C");
     }
@@ -193,26 +189,13 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
     /* N-gram features. N is upto 2. */
 
     if (flags.useWord1) {
-      // features.add(charc +"c");
-      // features.add(charc2+"c2");
-      // features.add(charp +"p");
-      // features.add(charp + charc  +"pc");
-      // features.add(charc + charc2  +"cc2");
+      features.add(charc +"c");
+      features.add(charc2+"c2");
+      features.add(charp +"p");
+      features.add(charp + charc  +"pc");
+      features.add(charc + charc2  +"cc2");
       // cdm: need hyphen so you can see which of charp or charc2 is null....
-      // features.add(charp + "-" + charc2 + "pc2");
-
-      features.add(charc +"::c");
-      features.add(charc2+"::c2");
-      features.add(charp +"::p");
-      features.add(charp2 +"::p2");
-      // trying to restore the features that Huishin described in SIGHAN 2005 paper
-      features.add(charc +charc2  +"::cn");
-      features.add(charc +charc3  +"::cn2");
-      features.add(charp +charc  +"::pc");
-      features.add(charp +charc2  +"::pn");
-      features.add(charp2 +charp  +"::p2p");
-      features.add(charp2 +charc  +"::p2c");
-      features.add(charc2 +charc  +"::n2c");
+      features.add(charp + "-" + charc2 + "pc2");
     }
 
     if (flags.dictionary != null || flags.serializedDictionary != null) {
@@ -319,14 +302,12 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
     CoreLabel p = cInfo.get(loc - 1);
     CoreLabel p2 = cInfo.get(loc - 2);
     CoreLabel p3 = cInfo.get(loc - 3);
-
     String charc = c.getString(CoreAnnotations.CharAnnotation.class);
     String charc2 = c2.getString(CoreAnnotations.CharAnnotation.class);
     String charc3 = c3.getString(CoreAnnotations.CharAnnotation.class);
     String charp = p.getString(CoreAnnotations.CharAnnotation.class);
     String charp2 = p2.getString(CoreAnnotations.CharAnnotation.class);
     String charp3 = p3.getString(CoreAnnotations.CharAnnotation.class);
-
     Integer cI = c.get(CoreAnnotations.UTypeAnnotation.class);
     String uTypec = (cI != null ? cI.toString() : "");
     Integer c2I = c2.get(CoreAnnotations.UTypeAnnotation.class);
@@ -349,30 +330,15 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
      * N-gram features. N is upto 2.
      */
     if (flags.useWord2) {
-      // features.add(charc +"c");
-      // features.add(charc2+"c2");
-      // features.add(charp +"p");
-      // features.add(charp + charc  +"pc");
-      // features.add(charc + charc2  +"cc2");
-      // // cdm: need hyphen so you can see which of charp or charc2 is null....
-      // features.add(charp + "-" + charc2 + "pc2");
-
-
-      features.add(charc +"::c");
-      features.add(charc2+"::c1");
-      features.add(charp +"::p");
-      features.add(charp2 +"::p2");
-      // trying to restore the features that Huihsin described in SIGHAN 2005 paper
-      features.add(charc +charc2  +"::cn"); // (*)
-      features.add(charp +charc  +"::pc");
-      features.add(charp +charc2  +"::pn");
-      features.add(charp2 +charp  +"::p2p");
-      features.add(charp2 +charc  +"::p2c");
-      features.add(charc2 +charc  +"::n2c"); // todo: this is messed up: Same as one above at (*); should be cn2 = charc + charc3 + "::cn2"
-
+      features.add(charc +"c");
+      features.add(charc2+"c2");
+      features.add(charp +"p");
+      features.add(charp + charc  +"pc");
+      features.add(charc + charc2  +"cc2");
+      // cdm: need hyphen so you can see which of charp or charc2 is null....
+      features.add(charp + "-" + charc2 + "pc2");
     }
     if (flags.useFeaturesCpC4gram || flags.useFeaturesCpC5gram || flags.useFeaturesCpC6gram) {
-      // todo: Both these features duplicate ones already in useWord2
       features.add(charp2 + charp  +"p2p");
       features.add(charp2 + "p2");
     }
@@ -641,17 +607,9 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
     features.add("cliqueCpC");
 
     return features;
-  } // end featuresCpC
+  }
 
 
-  /** For a CRF, this shouldn't be necessary, since the features duplicate
-   *  those from CpC, but Huihsin found some valuable, presumably becuase
-   *  it modified the regularization a bit.
-   *
-   *  @param cInfo The list of characters
-   *  @param loc Position of c in list
-   *  @return Collection of String features (sparse set of boolean features
-   */
   protected Collection<String> featuresCnC(PaddedList<? extends CoreLabel> cInfo, int loc) {
     Collection<String> features = new ArrayList<String>();
     if (flags.useWordn) {
@@ -676,108 +634,6 @@ public class Gale2007ChineseSegmenterFeatureFactory<IN extends CoreLabel> extend
     }
     return features;
   } //end of CnC
-
-
-  /** Second order clique features
-   *
-   *  @param cInfo The list of characters
-   *  @param loc Position of c in list
-   *  @return Collection of String features (sparse set of boolean features
-   */
-  protected Collection<String> featuresCpCp2C(PaddedList<? extends CoreLabel> cInfo, int loc) {
-    Collection<String> features = new ArrayList<String>();
-    CoreLabel c = cInfo.get(loc);
-    CoreLabel c2 = cInfo.get(loc + 1);
-    CoreLabel c3 = cInfo.get(loc + 2);
-    CoreLabel p = cInfo.get(loc - 1);
-    CoreLabel p2 = cInfo.get(loc - 2);
-    CoreLabel p3 = cInfo.get(loc - 3);
-
-    String charc = c.getString(CoreAnnotations.CharAnnotation.class);
-    String charc2 = c2.getString(CoreAnnotations.CharAnnotation.class);
-    String charc3 = c3.getString(CoreAnnotations.CharAnnotation.class);
-    String charp = p.getString(CoreAnnotations.CharAnnotation.class);
-    String charp2 = p2.getString(CoreAnnotations.CharAnnotation.class);
-    String charp3 = p3.getString(CoreAnnotations.CharAnnotation.class);
-
-    // N-gram features. N is up to 3
-    if (flags.useWord3) {
-      features.add(charc +"::c");
-      features.add(charc2+"::n");
-      features.add(charp +"::p");
-      features.add(charp2 +"::p2");
-      // trying to restore the features that Huihsin described in SIGHAN 2005 paper
-      features.add(charc + charc2  +"::cn");
-      features.add(charc + charc2 + charc3 + "::cnn2");
-      features.add(charp + charc  +"::pc");
-      features.add(charp + charc2  +"::pn");
-      features.add(charp2 + charp  +"::p2p");
-      features.add(charp3 + charp2 + charp + "::p3p2p");
-      features.add(charp2 + charc  +"::p2c");
-      features.add(charc + charc3  +"::cn2");
-
-    }
-
-    if (flags.useShapeStrings) {
-      if (flags.useShapeStrings1) {
-        features.add(p.getString(CoreAnnotations.ShapeAnnotation.class) + "ps");
-        features.add(c.getString(CoreAnnotations.ShapeAnnotation.class) + "cs");
-        features.add(c2.getString(CoreAnnotations.ShapeAnnotation.class) + "c2s");
-      }
-      if (flags.useShapeStrings3) {
-        features.add(p.getString(CoreAnnotations.ShapeAnnotation.class) + c.getString(CoreAnnotations.ShapeAnnotation.class) + c2.getString(CoreAnnotations.ShapeAnnotation.class) + "pscsc2s");
-      }
-      if (flags.useShapeStrings4) {
-        features.add(p2.getString(CoreAnnotations.ShapeAnnotation.class) + p.getString(CoreAnnotations.ShapeAnnotation.class) + c.getString(CoreAnnotations.ShapeAnnotation.class) + c2.getString(CoreAnnotations.ShapeAnnotation.class) + "p2spscsc2s");
-      }
-      if (flags.useShapeStrings5) {
-        features.add(p2.getString(CoreAnnotations.ShapeAnnotation.class) + p.getString(CoreAnnotations.ShapeAnnotation.class) + c.getString(CoreAnnotations.ShapeAnnotation.class) + c2.getString(CoreAnnotations.ShapeAnnotation.class) + c3.getString(CoreAnnotations.ShapeAnnotation.class) + "p2spscsc2sc3s");
-      }
-      if (flags.useWordShapeConjunctions2) {
-        features.add(p.getString(CoreAnnotations.ShapeAnnotation.class) + charc + "pscc");
-        features.add(charp + c.getString(CoreAnnotations.ShapeAnnotation.class) + "pccs");
-      }
-      if (flags.useWordShapeConjunctions3) {
-        features.add(p2.getString(CoreAnnotations.ShapeAnnotation.class) + p.getString(CoreAnnotations.ShapeAnnotation.class) + charc + "p2spscc");
-        features.add(p.getString(CoreAnnotations.ShapeAnnotation.class) + charc + c2.getString(CoreAnnotations.ShapeAnnotation.class) + "psccc2s");
-        features.add(charc + c2.getString(CoreAnnotations.ShapeAnnotation.class) + c3.getString(CoreAnnotations.ShapeAnnotation.class) + "ccc2sc3s");
-      }
-    }
-
-    /*
-      Radical N-gram features. N is upto 4.
-      Smoothing method of N-gram, because there are too many characters in Chinese.
-      (It works better than N-gram when they are used individually. less sparse)
-    */
-
-    char rcharc, rcharc2, rcharp, rcharp2;
-    if (charc.length()==0) { rcharc='n'; } else { rcharc= RadicalMap.getRadical(charc.charAt(0));}
-    if (charc2.length()==0) { rcharc2='n'; } else { rcharc2=RadicalMap.getRadical(charc2.charAt(0));}
-    if (charp.length()==0)  { rcharp='n';  } else { rcharp=RadicalMap.getRadical(charp.charAt(0));  }
-    if (charp2.length()==0) { rcharp2='n'; } else { rcharp2=RadicalMap.getRadical(charp2.charAt(0));}
-
-    if (flags.useRad2) {
-      features.add(rcharc+"rc");
-      features.add(rcharc2+"rc2");
-      features.add(rcharp+"rp");
-      features.add(rcharp  +  rcharc+"rprc");
-      features.add(rcharc +rcharc2 +"rcrc2");
-      features.add(rcharp +  rcharc  +rcharc2 +"rprcrc2");
-    }
-    if (flags.useRad2b) {
-      features.add(rcharc+"rc");
-      features.add(rcharc2+"rc2");
-      features.add(rcharp+"rp");
-      features.add(rcharp  +  rcharc+"rprc");
-      features.add(rcharc +rcharc2 +"rcrc2");
-      features.add(rcharp2 +rcharp +"rp2rp");
-    }
-
-    features.add("cliqueCpCp2C");
-
-    return features;
-  } // end featuresCpCp2C
-
 
   protected Collection<String> featuresCpCp2Cp3C(PaddedList<? extends CoreLabel> cInfo, int loc) {
     Collection<String> features = new ArrayList<String>();

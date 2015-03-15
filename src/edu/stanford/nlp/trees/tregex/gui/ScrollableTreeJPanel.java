@@ -14,7 +14,6 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.parser.ui.TreeJPanel;
 import edu.stanford.nlp.trees.Constituent;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 
 /**
@@ -33,9 +32,7 @@ public class ScrollableTreeJPanel extends TreeJPanel   {
   private String fontName = "";
   private int style = Font.PLAIN;
   private Dimension preferredSize = null;
-
   private List<Tree> matchedParts = new ArrayList<Tree>();
-  private List<Point2D.Double> matchedPartCoordinates = new ArrayList<Point2D.Double>();
 
   public ScrollableTreeJPanel() {
     super();
@@ -191,12 +188,9 @@ public class ScrollableTreeJPanel extends TreeJPanel   {
     for (int i = 0; i < t.children().length; i++) {
       Tree child = t.children()[i];
       double cWidth;
-      if(matchedParts != null && matchedParts.contains(child)) {
-        // Track where we've painted this matched child
-        Point2D.Double coord = new Point2D.Double(childStartX, childStartY);
-        matchedPartCoordinates.add(coord);
-        cWidth = paintTree(child, coord, g2, fM, matchedColor);
-      } else {
+      if(matchedParts != null && matchedParts.contains(child))
+        cWidth = paintTree(child, new Point2D.Double(childStartX, childStartY), g2, fM, matchedColor);
+      else {
         Color col = defaultColor;
         if(((CoreLabel) child.label()).has(CoreAnnotations.DoAnnotation.class))
           col = (((CoreLabel) child.label()).get(CoreAnnotations.DoAnnotation.class)) ? tdiffColor : defaultColor;
@@ -243,10 +237,6 @@ public class ScrollableTreeJPanel extends TreeJPanel   {
     this.matchedParts = matchedParts;
   }
 
-  public List<Point2D.Double> getMatchedPartCoordinates() {
-    return matchedPartCoordinates;
-  }
-
   public int getFontSize() {
     return fontSize;
   }
@@ -281,7 +271,7 @@ public class ScrollableTreeJPanel extends TreeJPanel   {
   }
 
 
-  private Set<Constituent> diffConstituents = Generics.newHashSet();
+  private Set<Constituent> diffConstituents = new HashSet<Constituent>();
   public void setDiffConstituents(Set<Constituent> diffConstituents) {
     this.diffConstituents = diffConstituents;
   }

@@ -16,7 +16,6 @@ import edu.stanford.nlp.stats.*;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -29,6 +28,9 @@ import java.util.regex.Pattern;
  */
 public class ChineseMaxentLexicon implements Lexicon {
 
+  /**
+   * 
+   */
   private static final long serialVersionUID = 238834703409896852L;
   private static final boolean verbose = true;
   public static final boolean seenTagsOnly = false;
@@ -49,7 +51,7 @@ public class ChineseMaxentLexicon implements Lexicon {
   private final int universalThreshold = 0;
 
   private LinearClassifier scorer;
-  private Map<String, String> functionWordTags = Generics.newHashMap();
+  private Map<String, String> functionWordTags = new HashMap<String, String>();
   private Distribution<String> tagDist;
   private final Index<String> wordIndex;
   private final Index<String> tagIndex;
@@ -80,17 +82,6 @@ public class ChineseMaxentLexicon implements Lexicon {
   public boolean isKnown(String word) {
     return tagsForWord.containsKey(word);
   }
-
-  /** {@inheritDoc} */
-  @Override
-  public Set<String> tagSet(Function<String,String> basicCategoryFunction) {
-    Set<String> tagSet = new HashSet<String>();
-    for (String tag : tagIndex.objectsList()) {
-      tagSet.add(basicCategoryFunction.apply(tag));
-    }
-    return tagSet;
-  }
-
 
   private void ensureProbs(int word) {
     ensureProbs(word, true);
@@ -168,7 +159,7 @@ public class ChineseMaxentLexicon implements Lexicon {
   }
 
   private String getTag(String word) {
-    int iW = wordIndex.addToIndex(word);
+    int iW = wordIndex.indexOf(word, true);
     ensureProbs(iW, false);
     return Counters.argmax(logProbs);
   }
@@ -212,7 +203,7 @@ public class ChineseMaxentLexicon implements Lexicon {
 
     if (featExtractor == null) {
       featExtractor = new ChineseWordFeatureExtractor(featureLevel);
-    }
+    }    
 
     this.datumCounter = new IntCounter<TaggedWord>();
   }
@@ -280,7 +271,8 @@ public class ChineseMaxentLexicon implements Lexicon {
 
     WeightedDataset data = new WeightedDataset(datumCounter.size());
 
-    for (TaggedWord word : datumCounter.keySet()) {
+    for (Iterator<TaggedWord> it = datumCounter.keySet().iterator(); it.hasNext();) {
+      TaggedWord word = it.next();
       int count = datumCounter.getIntCount(word);
       if (trainOnLowCount && count > trainCountThreshold) {
         continue;
@@ -439,7 +431,7 @@ public class ChineseMaxentLexicon implements Lexicon {
   @Override
   public void train(Collection<Tree> trees, Collection<Tree> rawTrees) {
     train(trees);
-
+    
   }
 
 

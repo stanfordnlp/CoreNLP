@@ -2,11 +2,10 @@ package edu.stanford.nlp.util.logging;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import edu.stanford.nlp.util.Generics;
 
 /**
  *  A class to redirect the output of Redwood to another logging mechanism,
@@ -112,7 +111,7 @@ public class RedirectOutputHandler<LoggerClass, ChannelEquivalent> extends Outpu
   //
 
   public static RedirectOutputHandler<Logger, Level> fromJavaUtilLogging(Logger logger) {
-    Map <Object, Level> channelMapping = Generics.newHashMap();
+    Map <Object, Level> channelMapping = new HashMap<Object, Level>();
     channelMapping.put(Redwood.WARN, Level.WARNING);
     channelMapping.put(Redwood.DBG, Level.FINE);
     channelMapping.put(Redwood.ERR, Level.SEVERE);

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -59,7 +61,11 @@ public class EquivalenceClassEval<IN, OUT> {
    * Maps all objects to the equivalence class <code>null</code>
    */
   @SuppressWarnings("unchecked")
-  public static final EquivalenceClasser NULL_EQUIVALENCE_CLASSER = o -> null;
+  public static final EquivalenceClasser NULL_EQUIVALENCE_CLASSER = new EquivalenceClasser() {
+    public Object equivalenceClass(Object o) {
+      return null;
+    }
+  };
   
   public static final  <T,U> EquivalenceClasser<T,U> nullEquivalenceClasser() {
     return ErasureUtils.<EquivalenceClasser<T,U>>uncheckedCast(NULL_EQUIVALENCE_CLASSER);
@@ -187,8 +193,8 @@ public class EquivalenceClassEval<IN, OUT> {
       internalGolds = new ArrayList<IN>(golds.size());
     }
     else {
-      internalGuesses = Generics.newHashSet(guesses.size());
-      internalGolds = Generics.newHashSet(golds.size());
+      internalGuesses = new HashSet<IN>(guesses.size());
+      internalGolds = new HashSet<IN>(golds.size());
     }
     internalGuesses.addAll(guesses);
     internalGolds.addAll(golds);
@@ -233,7 +239,7 @@ public class EquivalenceClassEval<IN, OUT> {
    */
   public void display(PrintWriter pw) {
     pw.println("*********Final " + summaryName + " eval stats by antecedent category***********");
-    Set<OUT> keys = Generics.newHashSet();
+    Set<OUT> keys = new HashSet<OUT>();
     keys.addAll(guessed.keySet());
     keys.addAll(gold.keySet());
     displayHelper(keys, pw, guessed, guessedCorrect, gold, goldCorrect);
@@ -251,7 +257,7 @@ public class EquivalenceClassEval<IN, OUT> {
    * Displays the results of the previous Collection pair evaluation.
    */
   public void displayLast(PrintWriter pw) {
-    Set<OUT> keys = Generics.newHashSet();
+    Set<OUT> keys = new HashSet<OUT>();
     keys.addAll(previousGuessed.keySet());
     keys.addAll(previousGold.keySet());
     displayHelper(keys, pw, previousGuessed, previousGuessedCorrect, previousGold, previousGoldCorrect);
@@ -400,7 +406,7 @@ public class EquivalenceClassEval<IN, OUT> {
 
   /* find pads for each key based on length of longest key */
   private static <OUT> Map<OUT, String> getPads(Set<OUT> keys) {
-    Map<OUT, String> pads = Generics.newHashMap();
+    Map<OUT, String> pads = new HashMap<OUT, String>();
     int max = 0;
     for (OUT key : keys) {
       String keyString = key==null ? "null" : key.toString();
@@ -424,21 +430,25 @@ public class EquivalenceClassEval<IN, OUT> {
     final Pattern p = Pattern.compile("^([^:]*):(.*)$");
     Collection<String> guesses = Arrays.asList(new String[]{"S:a", "S:b", "VP:c", "VP:d", "S:a"});
     Collection<String> golds = Arrays.asList(new String[]{"S:a", "S:b", "S:b", "VP:d", "VP:a"});
-    EqualityChecker<String> e = (o1, o2) -> {
-      Matcher m1 = p.matcher(o1);
-      m1.find();
-      String s1 = m1.group(2);
-      System.out.println(s1);
-      Matcher m2 = p.matcher(o2);
-      m2.find();
-      String s2 = m2.group(2);
-      System.out.println(s2);
-      return s1.equals(s2);
+    EqualityChecker<String> e = new EqualityChecker<String>() {
+      public boolean areEqual(String o1, String o2) {
+        Matcher m1 = p.matcher(o1);
+        m1.find();
+        String s1 = m1.group(2);
+        System.out.println(s1);
+        Matcher m2 = p.matcher(o2);
+        m2.find();
+        String s2 = m2.group(2);
+        System.out.println(s2);
+        return s1.equals(s2);
+      }
     };
-    EquivalenceClasser<String, String> eq = o -> {
-      Matcher m = p.matcher(o);
-      m.find();
-      return m.group(1);
+    EquivalenceClasser<String, String> eq = new EquivalenceClasser<String, String>() {
+      public String equivalenceClass(String o) {
+        Matcher m = p.matcher(o);
+        m.find();
+        return m.group(1);
+      }
     };
     EquivalenceClassEval<String, String> eval = new EquivalenceClassEval<String, String>(eq, e, "testing");
     eval.setBagEval(false);
@@ -473,7 +483,7 @@ public class EquivalenceClassEval<IN, OUT> {
       return o1.equals(o2);
     }
   };
-
+  
   @SuppressWarnings("unchecked")
   public static final <T> EqualityChecker<T> defaultChecker() {
     return DEFAULT_CHECKER;
@@ -560,8 +570,8 @@ public class EquivalenceClassEval<IN, OUT> {
         internalGuesses = new ArrayList<T>(guesses.size());
         internalGolds = new ArrayList<T>(golds.size());
       } else {
-        internalGuesses = Generics.newHashSet(guesses.size());
-        internalGolds = Generics.newHashSet(golds.size());
+        internalGuesses = new HashSet<T>(guesses.size());
+        internalGolds = new HashSet<T>(golds.size());
       }
       internalGuesses.addAll(guesses);
       internalGolds.addAll(golds);

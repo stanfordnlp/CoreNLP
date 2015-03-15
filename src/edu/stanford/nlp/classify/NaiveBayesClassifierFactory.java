@@ -34,7 +34,6 @@ import edu.stanford.nlp.optimization.Minimizer;
 import edu.stanford.nlp.optimization.QNMinimizer;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.HashIndex;
@@ -52,13 +51,13 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
   public static final int JL = 0;
   public static final int CL = 1;
   public static final int UCL = 2;
-  private int kind = JL;
-  private double alphaClass;
-  private double alphaFeature;
-  private double sigma;
-  private int prior = LogPrior.LogPriorType.NULL.ordinal();
-  private Index<L> labelIndex;
-  private Index<F> featureIndex;
+  int kind = JL;
+  double alphaClass;
+  double alphaFeature;
+  double sigma;
+  int prior = LogPrior.LogPriorType.NULL.ordinal();
+  Index<L> labelIndex;
+  Index<F> featureIndex;
 
   public NaiveBayesClassifierFactory() {
   }
@@ -73,7 +72,7 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
 
   private NaiveBayesClassifier<L, F> trainClassifier(int[][] data, int[] labels, int numFeatures,
       int numClasses, Index<L> labelIndex, Index<F> featureIndex) {
-    Set<L> labelSet = Generics.newHashSet();
+    Set<L> labelSet = new HashSet<L>();
     NBWeights nbWeights = trainWeights(data, labels, numFeatures, numClasses);
     Counter<L> priors = new ClassicCounter<L>();
     double[] pr = nbWeights.priors;
@@ -164,7 +163,7 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
    * Here the data is assumed to be for every instance, array of length numFeatures
    * and the value of the feature is stored including zeroes.
    *
-   * @return {@literal label,fno,value -> weight}
+   * @return label,fno,value -> weight
    */
   private NBWeights trainWeights(int[][] data, int[] labels, int numFeatures, int numClasses) {
     if (kind == JL) {
@@ -242,10 +241,10 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
 
   static int[] numberValues(int[][] data, int numFeatures) {
     int[] numValues = new int[numFeatures];
-    for (int[] row : data) {
-      for (int j = 0; j < row.length; j++) {
-        if (numValues[j] < row[j] + 1) {
-          numValues[j] = row[j] + 1;
+    for (int i = 0; i < data.length; i++) {
+      for (int j = 0; j < data[i].length; j++) {
+        if (numValues[j] < data[i][j] + 1) {
+          numValues[j] = data[i][j] + 1;
         }
       }
     }
@@ -333,7 +332,7 @@ public class NaiveBayesClassifierFactory<L, F> implements ClassifierFactory<L, F
     String trainFile = args[0];
     String testFile = args[1];
     NominalDataReader nR = new NominalDataReader();
-    Map<Integer, Index<String>> indices = Generics.newHashMap();
+    HashMap<Integer, Index<String>> indices = new HashMap<Integer, Index<String>>();
     List<RVFDatum<String, Integer>> train = nR.readData(trainFile, indices);
     List<RVFDatum<String, Integer>> test = nR.readData(testFile, indices);
     System.out.println("Constrained conditional likelihood no prior :");

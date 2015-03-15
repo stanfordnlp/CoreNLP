@@ -3,13 +3,14 @@ package edu.stanford.nlp.fsm;
 import edu.stanford.nlp.util.DisjointSet;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.FastDisjointSet;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.UnorderedPair;
 
 import java.util.*;
 
 /**
- * DFSAMinimizer minimizes (unweighted) deterministic finite state
+ * DFSAMinimizer
+ * <p/>
+ * Class for minimizing (unweighted) deterministic finite state
  * automata.
  *
  * @author Dan Klein
@@ -20,7 +21,8 @@ public final class DFSAMinimizer {
   static boolean debug = false;
 
 
-  private DFSAMinimizer() {} // static methods class
+  private DFSAMinimizer() {
+  }
 
 
   static class IntPair {
@@ -45,7 +47,7 @@ public final class DFSAMinimizer {
     // assign ids
     int id = 0;
     DFSAState<T, S>[] state = ErasureUtils.<DFSAState<T, S>[]>uncheckedCast(new DFSAState[numStates]);
-    Map<DFSAState<T, S>, Integer> stateToID = Generics.newHashMap();
+    Map<DFSAState<T, S>, Integer> stateToID = new HashMap<DFSAState<T, S>, Integer>();
     for (DFSAState<T, S> state1 : states) {
       state[id] = state1;
       stateToID.put(state1, Integer.valueOf(id));
@@ -71,11 +73,11 @@ public final class DFSAMinimizer {
           DFSAState<T, S> state2 = state[j];
           IntPair ip = new IntPair(i, j);
           // check if some input distinguishes this pair
-          Set<T> inputs = Generics.newHashSet();
+          Set<T> inputs = new HashSet<T>();
           inputs.addAll(state1.continuingInputs());
           inputs.addAll(state2.continuingInputs());
           boolean distinguishable = false;
-          Set<IntPair> pendingIPairs = Generics.newHashSet();
+          Set<IntPair> pendingIPairs = new HashSet<IntPair>();
           Iterator<T> inputI = inputs.iterator();
           while (inputI.hasNext() && !distinguishable) {
             T input = inputI.next();
@@ -141,7 +143,7 @@ public final class DFSAMinimizer {
         }
       }
     }
-    Map<DFSAState<T, S>, DFSAState<T, S>> stateToRep = Generics.newHashMap();
+    Map<DFSAState<T, S>, DFSAState<T, S>> stateToRep = new HashMap<DFSAState<T, S>, DFSAState<T, S>>();
     for (DFSAState<T, S> state1 : states) {
       DFSAState<T, S> rep = stateClasses.find(state1);
       stateToRep.put(state1, rep);
@@ -171,8 +173,8 @@ public final class DFSAMinimizer {
 
   static <T, S> void unweightedMinimizeOld(DFSA<T, S> dfsa) {
     Set<DFSAState<T, S>> states = dfsa.states();
-    Map<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>, List<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>>> stateUPairToDependentUPairList = Generics.newHashMap(states.size() * states.size() / 2 + 1);
-    Map<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>, Boolean> stateUPairToDistinguished = Generics.newHashMap(states.size() * states.size() / 2 + 1);
+    Map<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>, List<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>>> stateUPairToDependentUPairList = new HashMap<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>, List<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>>>(states.size() * states.size() / 2 + 1);
+    Map<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>, Boolean> stateUPairToDistinguished = new HashMap<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>, Boolean>(states.size() * states.size() / 2 + 1);
     int[] c = new int[states.size() * states.size() / 2 + 1];
     int streak = 0;
     int collisions = 0;
@@ -229,10 +231,10 @@ public final class DFSAMinimizer {
         continue;
       }
       // check if some input distinguishes this pair
-      Set<T> inputs = Generics.newHashSet(state1.continuingInputs());
+      Set<T> inputs = new HashSet<T>(state1.continuingInputs());
       inputs.addAll(state2.continuingInputs());
       boolean distinguishable = false;
-      Set<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>> pendingUPairs = Generics.newHashSet();
+      Set<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>> pendingUPairs = new HashSet<UnorderedPair<DFSAState<T, S>, DFSAState<T, S>>>();
       Iterator<T> inputI = inputs.iterator();
       while (inputI.hasNext() && !distinguishable) {
         T input = inputI.next();
@@ -293,7 +295,7 @@ public final class DFSAMinimizer {
         stateClasses.union(state1, state2);
       }
     }
-    Map<DFSAState<T, S>, DFSAState<T, S>> stateToRep = Generics.newHashMap();
+    Map<DFSAState<T, S>, DFSAState<T, S>> stateToRep = new HashMap<DFSAState<T, S>, DFSAState<T, S>>();
     for (DFSAState<T, S> state : states) {
       DFSAState<T, S> rep = stateClasses.find(state);
       stateToRep.put(state, rep);

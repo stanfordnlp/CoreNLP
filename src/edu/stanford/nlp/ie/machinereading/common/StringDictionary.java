@@ -1,18 +1,13 @@
 package edu.stanford.nlp.ie.machinereading.common;
 
-import java.io.BufferedReader;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.util.Generics;
-
 public class StringDictionary {
+  public class IndexAndCount {
+    public int mIndex;
 
-  public static class IndexAndCount {
-
-    public final int mIndex;
     public int mCount;
 
     IndexAndCount(int i, int c) {
@@ -22,7 +17,7 @@ public class StringDictionary {
   }
 
   /** Name of this dictionary */
-  private final String mName;
+  private String mName;
 
   /**
    * Access type: If true, create a dictionary entry if the entry does not exist
@@ -31,16 +26,16 @@ public class StringDictionary {
   private boolean mCreate;
 
   /** The actual dictionary */
-  private Map<String, IndexAndCount> mDict;
+  private HashMap<String, IndexAndCount> mDict;
 
   /** Inverse mapping from integer keys to the string values */
-  private Map<Integer, String> mInverse;
+  private HashMap<Integer, String> mInverse;
 
   public StringDictionary(String name) {
     mName = name;
     mCreate = false;
-    mDict = Generics.newHashMap();
-    mInverse = Generics.newHashMap();
+    mDict = new HashMap<String, IndexAndCount>();
+    mInverse = new HashMap<Integer, String>();
   }
 
   public void setMode(boolean mode) {
@@ -57,11 +52,11 @@ public class StringDictionary {
 
   public IndexAndCount getIndexAndCount(String s) {
     IndexAndCount ic = mDict.get(s);
-    if (mCreate) {
+    if (mCreate == true) {
       if (ic == null) {
         ic = new IndexAndCount(mDict.size(), 0);
         mDict.put(s, ic);
-        mInverse.put(Integer.valueOf(ic.mIndex), s);
+        mInverse.put(new Integer(ic.mIndex), s);
       }
       ic.mCount++;
     }
@@ -76,11 +71,11 @@ public class StringDictionary {
    */
   public int get(String s, boolean shouldThrow) {
     IndexAndCount ic = mDict.get(s);
-    if (mCreate) {
+    if (mCreate == true) {
       if (ic == null) {
         ic = new IndexAndCount(mDict.size(), 0);
         mDict.put(s, ic);
-        mInverse.put(Integer.valueOf(ic.mIndex), s);
+        mInverse.put(new Integer(ic.mIndex), s);
       }
       ic.mCount++;
     }
@@ -121,7 +116,7 @@ public class StringDictionary {
   }
 
   /**
-   * Saves all dictionary entries that appeared {@literal >} threshold times Note: feature
+   * Saves all dictionary entries that appeared > threshold times Note: feature
    * indices are changed to contiguous values starting at 0. This is needed in
    * order to minimize the memory allocated for the expanded feature vectors
    * (average perceptron).
@@ -131,11 +126,12 @@ public class StringDictionary {
     String fileName = path + java.io.File.separator + prefix + "." + mName;
     java.io.PrintStream os = new java.io.PrintStream(new java.io.FileOutputStream(fileName));
 
+    Set<String> keys = mDict.keySet();
     int index = 0;
-    for (Map.Entry<String, IndexAndCount> entry : mDict.entrySet()) {
-      IndexAndCount ic = entry.getValue();
+    for (String key : keys) {
+      IndexAndCount ic = mDict.get(key);
       if (ic.mCount > threshold) {
-        os.println(entry.getKey() + ' ' + index + ' ' + ic.mCount);
+        os.println(key + " " + index + " " + ic.mCount);
         index++;
       }
     }
@@ -157,9 +153,10 @@ public class StringDictionary {
   public void load(String path, String prefix) throws java.io.IOException {
 
     String fileName = path + java.io.File.separator + prefix + "." + mName;
-    BufferedReader is = IOUtils.readerFromString(fileName);
+    java.io.BufferedReader is = new java.io.BufferedReader(new java.io.FileReader(fileName));
 
-    for (String line; (line = is.readLine()) != null; ) {
+    String line;
+    while ((line = is.readLine()) != null) {
       ArrayList<String> tokens = SimpleTokenize.tokenize(line);
       if (tokens.size() != 3) {
         throw new RuntimeException("Invalid dictionary line: " + line);
@@ -172,7 +169,7 @@ public class StringDictionary {
 
       IndexAndCount ic = new IndexAndCount(index, count);
       mDict.put(tokens.get(0), ic);
-      mInverse.put(Integer.valueOf(index), tokens.get(0));
+      mInverse.put(new Integer(index), tokens.get(0));
     }
 
     is.close();
@@ -182,5 +179,4 @@ public class StringDictionary {
   public java.util.Set<String> keys() {
     return mDict.keySet();
   }
-
 }

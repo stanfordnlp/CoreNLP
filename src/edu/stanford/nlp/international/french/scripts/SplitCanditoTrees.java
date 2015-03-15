@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,11 +29,10 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeReaderFactory;
 import edu.stanford.nlp.trees.TreeTransformer;
-import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReader;
-import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReaderFactory;
+import edu.stanford.nlp.trees.international.french.FrenchTreeReader;
+import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Performs the pre-processing of raw (XML) FTB trees for the EMNLP2011 and CL2011 experiments.
@@ -96,16 +96,14 @@ public final class SplitCanditoTrees {
   static Map<String, Tree> readTrees(String[] filenames)
     throws IOException
   {
-    // TODO: perhaps we can just pass in CC_TAGSET and get rid of replacePOSTags
-    // need to test that
-    final TreeReaderFactory trf = new FrenchXMLTreeReaderFactory(false); 
-    Map<String, Tree> treeMap = Generics.newHashMap();
+    final TreeReaderFactory trf = new FrenchTreeReaderFactory();
+    Map<String, Tree> treeMap = new HashMap<String, Tree>();
     for (String filename : filenames) {
       File file = new File(filename);
       String canonicalFilename =
         file.getName().substring(0, file.getName().lastIndexOf('.'));
 
-      FrenchXMLTreeReader tr = (FrenchXMLTreeReader)
+      FrenchTreeReader tr = (FrenchTreeReader)
         trf.newTreeReader(new BufferedReader
                           (new InputStreamReader
                            (new FileInputStream(file),"ISO8859_1")));
@@ -316,6 +314,9 @@ public final class SplitCanditoTrees {
 
   /**
    * Converts a tree to the Morfette training format.
+   * 
+   * @param tree
+   * @return
    */
   private static String treeToMorfette(Tree tree) {
     StringBuilder sb = new StringBuilder();

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -39,12 +40,11 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 
 /**
  *
- * Simple wrapper of Mihai's ACE code to ie.machinereading.structure objects.
+ * Simple wrapper of Mihai's ACE code to ie.machinereading.structure objects
  *
  * @author David McClosky
  *
@@ -229,7 +229,7 @@ public class AceReader extends GenericDataSetReader {
     String docId = aceDocument.getId();
 
     // map entity mention ID strings to their EntityMention counterparts
-    Map<String, EntityMention> entityMentionMap = Generics.newHashMap();
+    Map<String, EntityMention> entityMentionMap = new HashMap<String, EntityMention>();
 
     /*
     for (int sentenceIndex = 0; sentenceIndex < aceDocument.getSentenceCount(); sentenceIndex++) {
@@ -249,7 +249,6 @@ public class AceReader extends GenericDataSetReader {
       for(int i = 0; i < tokens.size(); i ++){
         CoreLabel l = new CoreLabel();
         l.setWord(tokens.get(i).getLiteral());
-        l.set(CoreAnnotations.ValueAnnotation.class, l.word());
         l.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, tokens.get(i).getByteStart());
         l.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, tokens.get(i).getByteEnd());
         words.add(l);
@@ -490,9 +489,7 @@ public class AceReader extends GenericDataSetReader {
     AceReader r = new AceReader(new StanfordCoreNLP(props, false), false);
     r.setLoggerLevel(Level.INFO);
     r.parse("/scr/nlp/data/ACE2005/");
-    // Annotation a = r.parse("/user/mengqiu/scr/twitter/nlp/corpus_prep/standalone/ar/data");
-    // BasicEntityExtractor.saveCoNLLFiles("/tmp/conll", a, false, false);
-    System.err.println("done");
+    System.out.println("done");
   }
 
 }

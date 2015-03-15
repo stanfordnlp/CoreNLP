@@ -3,8 +3,8 @@ package edu.stanford.nlp.tagger.maxent;
 import junit.framework.TestCase;
 //import edu.stanford.nlp.tagger.maxent.TTags;
 
-import java.util.Set;
-import edu.stanford.nlp.util.Generics;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class TTagsTest extends TestCase {
     private TTags tt;
@@ -69,7 +69,8 @@ public class TTagsTest extends TestCase {
 	}
 	tt.markClosed("fake44");
 	tt.add("boat");
-	tt.save("testoutputfile", Generics.<String, Set<String>>newHashMap());
+	tt.save("testoutputfile", 
+                new HashMap<String, HashSet<String>>());
 	TTags t2 = new TTags();
 	t2.read("testoutputfile");
 	assertEquals(tt.getSize(), t2.getSize());

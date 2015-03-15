@@ -1,11 +1,11 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.io.IOUtils;
-import java.util.function.Function;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.MutableInteger;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.ling.CoreAnnotations;
 
 import java.util.*;
 import java.io.*;
@@ -180,47 +180,6 @@ public class Trees {
     }
   }
 
-  /**
-   * Given a tree, set the tags on the leaf nodes if they are not
-   * already set.  Do this by using the preterminal's value as a tag.
-   */
-  public static void setLeafTagsIfUnset(Tree tree) {
-    if (tree.isPreTerminal()) {
-      Tree leaf = tree.children()[0];
-      if (!(leaf.label() instanceof HasTag)) {
-        return;
-      }
-      HasTag label = (HasTag) leaf.label();
-      if (label.tag() == null) {
-        label.setTag(tree.value());
-      }
-    } else {
-      for (Tree child : tree.children()) {
-        setLeafTagsIfUnset(child);
-      }
-    }
-  }
-
-  /**
-   * Replace the labels of the leaves with the given leaves.
-   */
-  public static void setLeafLabels(Tree tree, List<Label> labels) {
-    Iterator<Tree> leafIterator = tree.getLeaves().iterator();
-    Iterator<Label> labelIterator = labels.iterator();
-    while (leafIterator.hasNext() && labelIterator.hasNext()) {
-      Tree leaf = leafIterator.next();
-      Label label = labelIterator.next();
-      leaf.setLabel(label);
-      //leafIterator.next().setLabel(labelIterator.next());
-    }
-    if (leafIterator.hasNext()) {
-      throw new IllegalArgumentException("Tree had more leaves than the labels provided");
-    }
-    if (labelIterator.hasNext()) {
-      throw new IllegalArgumentException("More labels provided than tree had leaves");
-    }
-  }
-
 
   /**
    * returns the maximal projection of <code>head</code> in
@@ -352,29 +311,23 @@ public class Trees {
     return -1;
   }
 
-  /** Returns a String reporting what kinds of Tree and Label nodes this
-   *  Tree contains.
-   *
+  /** Return information about the objects in this Tree.
    *  @param t The tree to examine.
-   *  @return A human-readable String reporting what kinds of Tree and Label nodes this
-   *      Tree contains.
+   *  @return A human-readable String
    */
-  public static String toStructureDebugString(Tree t) {
+  public static String toDebugStructureString(Tree t) {
+    StringBuilder sb = new StringBuilder();
     String tCl = StringUtils.getShortClassName(t);
     String tfCl = StringUtils.getShortClassName(t.treeFactory());
     String lCl = StringUtils.getShortClassName(t.label());
     String lfCl = StringUtils.getShortClassName(t.label().labelFactory());
-    Set<String> otherClasses = Generics.newHashSet();
-    String leafLabels = null;
-    String tagLabels = null;
-    String phraseLabels = null;
-    String leaves = null;
-    String nodes = null;
+    Set<String> otherClasses = new HashSet<String>();
     for (Tree st : t) {
       String stCl = StringUtils.getShortClassName(st);
       String stfCl = StringUtils.getShortClassName(st.treeFactory());
       String slCl = StringUtils.getShortClassName(st.label());
       String slfCl = StringUtils.getShortClassName(st.label().labelFactory());
+
       if ( ! tCl.equals(stCl)) {
         otherClasses.add(stCl);
       }
@@ -387,60 +340,18 @@ public class Trees {
       if ( ! lfCl.equals(slfCl)) {
         otherClasses.add(slfCl);
       }
-      if (st.isPhrasal()) {
-        if (nodes == null) {
-          nodes = stCl;
-        } else if ( ! nodes.equals(stCl)) {
-          nodes = "mixed";
-        }
-        if (phraseLabels == null) {
-          phraseLabels = slCl;
-        } else if ( ! phraseLabels.equals(slCl)) {
-          phraseLabels = "mixed";
-        }
-      } else if (st.isPreTerminal()) {
-        if (nodes == null) {
-          nodes = stCl;
-        } else if ( ! nodes.equals(stCl)) {
-          nodes = "mixed";
-        }
-        if (tagLabels == null) {
-          tagLabels = StringUtils.getShortClassName(slCl);
-        } else if ( ! tagLabels.equals(slCl)) {
-          tagLabels = "mixed";
-        }
-      } else if (st.isLeaf()) {
-        if (leaves == null) {
-          leaves = stCl;
-        } else if ( ! leaves.equals(stCl)) {
-          leaves = "mixed";
-        }
-        if (leafLabels == null) {
-          leafLabels = slCl;
-        } else if ( ! leafLabels.equals(slCl)) {
-          leafLabels = "mixed";
-        }
-      } else {
-        throw new IllegalStateException("Bad tree state: " + t);
-      }
-    } // end for Tree st : this
-    StringBuilder sb = new StringBuilder();
+    }
     sb.append("Tree with root of class ").append(tCl).append(" and factory ").append(tfCl);
-    sb.append(" and root label class ").append(lCl).append(" and factory ").append(lfCl);
+    sb.append(" with label class ").append(lCl).append(" and factory ").append(lfCl);
     if ( ! otherClasses.isEmpty()) {
-      sb.append(" and the following classes also found within the tree: ").append(otherClasses);
-      return " with " + nodes + " interior nodes and " + leaves +
-        " leaves, and " + phraseLabels + " phrase labels, " +
-        tagLabels + " tag labels, and " + leafLabels + " leaf labels.";
-    } else {
-      sb.append(" (and uniform use of these Tree and Label classes throughout the tree).");
+      sb.append(" with the following classes also found within the tree: ").append(otherClasses);
     }
     return sb.toString();
   }
 
 
   /** Turns a sentence into a flat phrasal tree.
-   *  The structure is S -&gt; tag*.  And then each tag goes to a word.
+   *  The structure is S -> tag*.  And then each tag goes to a word.
    *  The tag is either found from the label or made "WD".
    *  The tag and phrasal node have a StringLabel.
    *
@@ -452,7 +363,7 @@ public class Trees {
   }
 
   /** Turns a sentence into a flat phrasal tree.
-   *  The structure is S -&gt; tag*.  And then each tag goes to a word.
+   *  The structure is S -> tag*.  And then each tag goes to a word.
    *  The tag is either found from the label or made "WD".
    *  The tag and phrasal node have a StringLabel.
    *
@@ -761,7 +672,6 @@ public class Trees {
     return commonAncestor;
   }
 
-  // todo [cdm 2015]: These next two methods duplicate the Tree.valueOf methods!
   /**
    * Simple tree reading utility method.  Given a tree formatted as a PTB string, returns a Tree made by a specific TreeFactory.
    */
@@ -798,36 +708,4 @@ public class Trees {
     }
   }
 
-  /**
-   * Converts the tree labels to CoreLabels.
-   * We need this because we store additional info in the CoreLabel, like token span.
-   * @param tree
-   */
-  public static void convertToCoreLabels(Tree tree) {
-    Label l = tree.label();
-    if (!(l instanceof CoreLabel)) {
-      CoreLabel cl = new CoreLabel();
-      cl.setValue(l.value());
-      tree.setLabel(cl);
-    }
-
-    for (Tree kid : tree.children()) {
-      convertToCoreLabels(kid);
-    }
-  }
-
-
-  /**
-   * Set the sentence index of all the leaves in the tree
-   * (only works on CoreLabel)
-   */
-  public static void setSentIndex(Tree tree, int sentIndex) {
-    List<Label> leaves = tree.yield();
-    for (Label leaf : leaves) {
-      if (!(leaf instanceof CoreLabel)) {
-        throw new IllegalArgumentException("Only works on CoreLabel");
-      }
-      ((CoreLabel) leaf).setSentIndex(sentIndex);
-    }
-  }
 }

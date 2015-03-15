@@ -10,7 +10,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Triple;
@@ -47,7 +46,7 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar {
   }
 
   public Map<Pair<Integer, String>, List<Triple<Integer, String, Double>>> getMap(String filename) {
-    Map<Pair<Integer, String>, List<Triple<Integer, String, Double>>> hashMap = Generics.newHashMap();
+    Map<Pair<Integer, String>, List<Triple<Integer, String, Double>>> hashMap = new HashMap<Pair<Integer, String>, List<Triple<Integer, String, Double>>>();
     try {
       BufferedReader wordMapBReader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "UTF-8"));
 
@@ -60,7 +59,7 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar {
           continue;
         }
 
-        Pair<Integer, String> iTW = new Pair<Integer, String>(wordIndex.addToIndex(m.group(1)), m.group(2));
+        Pair<Integer, String> iTW = new Pair<Integer, String>(wordIndex.indexOf(m.group(1), true), m.group(2));
         double score = Double.parseDouble(m.group(5));
 
         List<Triple<Integer, String, Double>> tripleList = hashMap.get(iTW);
@@ -69,7 +68,7 @@ public class ChineseSimWordAvgDepGrammar extends MLEDependencyGrammar {
           hashMap.put(iTW, tripleList);
         }
 
-        tripleList.add(new Triple<Integer, String, Double>(wordIndex.addToIndex(m.group(3)), m.group(4), score));
+        tripleList.add(new Triple<Integer, String, Double>(wordIndex.indexOf(m.group(3), true), m.group(4), score));
       }
     } catch (IOException e) {
       throw new RuntimeException("Problem reading similar words file!");

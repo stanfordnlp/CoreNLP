@@ -7,11 +7,10 @@
 
 package edu.stanford.nlp.tagger.maxent;
 
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.HashMap;
 
 
 /**
@@ -66,7 +65,7 @@ class ListInstances {
 
   /*
   Methods unused: commented for now.
-  public void save(DataOutputStream rf) {
+  public void save(OutDataStreamFile rf) {
     try {
       rf.writeInt(v.size());
       int[] arr = getInstances();
@@ -78,7 +77,7 @@ class ListInstances {
     }
   }
 
-  public void read(DataInputStream rf) {
+  public void read(InDataStreamFile rf) {
     try {
       int len = rf.readInt();
       for (int i = 0; i < len; i++) {
@@ -97,7 +96,7 @@ class ListInstances {
 public class TemplateHash {
 
   // the positions of the feature extractors
-  private final Map<Pair<Integer,String>,ListInstances> tempHash = Generics.newHashMap();
+  private final HashMap<Pair<Integer,String>,ListInstances> tempHash = new HashMap<Pair<Integer,String>,ListInstances>();
 
   private final MaxentTagger maxentTagger;
 
@@ -131,7 +130,7 @@ public class TemplateHash {
 
   protected void add(int nFeatFrame, History history, int number) {
     Pair<Integer,String> wT;
-    int general = maxentTagger.extractors.size();
+    int general = maxentTagger.extractors.getSize();
 
     if (nFeatFrame < general) {
       wT = new Pair<Integer,String>(nFeatFrame, maxentTagger.extractors.extract(nFeatFrame, history));
@@ -157,7 +156,7 @@ public class TemplateHash {
 
   protected void addPrev(int nFeatFrame, History history) {
     Pair<Integer,String> wT;
-    int general = maxentTagger.extractors.size();
+    int general = maxentTagger.extractors.getSize();
 
     if (nFeatFrame < general) {
       wT = new Pair<Integer,String>(nFeatFrame, maxentTagger.extractors.extract(nFeatFrame, history));
@@ -182,7 +181,7 @@ public class TemplateHash {
   }
 
   /* Methods unused. Commented for now.
-  public void save(DataOutputStream rf) {
+  public void save(OutDataStreamFile rf) {
     try {
       Pair[] keys = new Pair[tempHash.keySet().size()];
       tempHash.keySet().toArray(keys);

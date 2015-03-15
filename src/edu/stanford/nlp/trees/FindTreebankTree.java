@@ -65,8 +65,12 @@ public class FindTreebankTree {
     FileFilter filter = null;
     if (!fileRegex.equals("")) {
       final Pattern filePattern = Pattern.compile(fileRegex);
-      filter = pathname -> (pathname.isDirectory() ||
-              filePattern.matcher(pathname.getName()).matches());
+      filter = new FileFilter() {
+          public boolean accept(File pathname) {
+            return (pathname.isDirectory() || 
+                    filePattern.matcher(pathname.getName()).matches());
+          }
+        };
     }
 
     for (String path : paths) {

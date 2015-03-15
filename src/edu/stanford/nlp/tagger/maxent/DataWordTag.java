@@ -19,12 +19,13 @@ public class DataWordTag extends DataGeneric {
 
   private final History h;
   private final int yNum;
-  private final String tag;
+  private final TTags ttags;
 
-  DataWordTag(History h, int y, String tag) {
+
+  DataWordTag(History h, int y, TTags ttags) {
     this.h = h;
     this.yNum = y;
-    this.tag = tag;
+    this.ttags = ttags;
   }
 
 
@@ -32,9 +33,10 @@ public class DataWordTag extends DataGeneric {
     return h;
   }
 
+  // fill that with appropriate body
   @Override
   public String getY() {
-    return tag;
+    return ttags.getTag(yNum);
   }
 
   public int getYInd() {

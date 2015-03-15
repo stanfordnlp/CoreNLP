@@ -196,12 +196,12 @@ public class GrammarCompactionTester {
       }
     }
 
-    op.trainOptions.sisterSplitters = Generics.newHashSet(Arrays.asList(op.tlpParams.sisterSplitters()));
+    op.trainOptions.sisterSplitters = new HashSet<String>(Arrays.asList(op.tlpParams.sisterSplitters()));
     if (op.trainOptions.compactGrammar() == 4) {
       System.out.println("Instantiating fsm.LossyGrammarCompactor");
       try {
         Class[] argTypes = new Class[13];
-        Class strClass = String.class;
+        Class strClass = Class.forName("java.lang.String");
         for (int j = 0; j < argTypes.length; j++) {
           argTypes[j] = strClass;
         }
@@ -228,7 +228,7 @@ public class GrammarCompactionTester {
       System.out.println("Instantiating fsm.CategoryMergingGrammarCompactor");
       try {
         Class[] argTypes = new Class[6];
-        Class strClass = String.class;
+        Class strClass = Class.forName("java.lang.String");
         for (int j = 0; j < argTypes.length; j++) {
           argTypes[j] = strClass;
         }
@@ -475,7 +475,7 @@ public class GrammarCompactionTester {
   }
 
   private static int translate(int i, Index<String> oldIndex, Index<String> newIndex) {
-    return newIndex.addToIndex(oldIndex.get(i));
+    return newIndex.indexOf(oldIndex.get(i), true);
   }
 
   // WTF is this?
@@ -483,18 +483,18 @@ public class GrammarCompactionTester {
     String s = n.get(i);
     if (s.equals("NP^PP")) {
       System.out.println("changed");
-      return n.addToIndex("NP-987928374");
+      return n.indexOf("NP-987928374", true);
     }
     return i;
   }
 
   public boolean equalsBinary(List<BinaryRule> l1, List<BinaryRule> l2) {
     // put each into a map to itself
-    Map<BinaryRule, BinaryRule> map1 = Generics.newHashMap();
+    Map<BinaryRule, BinaryRule> map1 = new HashMap<BinaryRule, BinaryRule>();
     for (BinaryRule o : l1) {
       map1.put(o, o);
     }
-    Map<BinaryRule, BinaryRule> map2 = Generics.newHashMap();
+    Map<BinaryRule, BinaryRule> map2 = new HashMap<BinaryRule, BinaryRule>();
     for (BinaryRule o : l2) {
       map2.put(o, o);
     }
@@ -518,11 +518,11 @@ public class GrammarCompactionTester {
 
   public boolean equalsUnary(List<UnaryRule> l1, List<UnaryRule> l2) {
     // put each into a map to itself
-    Map<UnaryRule, UnaryRule> map1 = Generics.newHashMap();
+    Map<UnaryRule, UnaryRule> map1 = new HashMap<UnaryRule, UnaryRule>();
     for (UnaryRule o : l1) {
       map1.put(o, o);
     }
-    Map<UnaryRule, UnaryRule> map2 = Generics.newHashMap();
+    Map<UnaryRule, UnaryRule> map2 = new HashMap<UnaryRule, UnaryRule>();
     for (UnaryRule o : l2) {
       map2.put(o, o);
     }

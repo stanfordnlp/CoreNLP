@@ -1,6 +1,6 @@
 package edu.stanford.nlp.ling.tokensregex;
 
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,18 +55,18 @@ public interface SequenceMatchAction<T> {
   }
 
   public final static class BranchAction<T> implements SequenceMatchAction<T> {
-    Predicate<SequenceMatchResult<T>> filter;
+    Filter<SequenceMatchResult<T>> filter;
     SequenceMatchAction<T> acceptBranch;
     SequenceMatchAction<T> rejectBranch;
 
-    public BranchAction(Predicate<SequenceMatchResult<T>> filter, SequenceMatchAction<T> acceptBranch, SequenceMatchAction<T> rejectBranch) {
+    public BranchAction(Filter<SequenceMatchResult<T>> filter, SequenceMatchAction<T> acceptBranch, SequenceMatchAction<T> rejectBranch) {
       this.filter = filter;
       this.acceptBranch = acceptBranch;
       this.rejectBranch = rejectBranch;
     }
 
     public SequenceMatchResult<T> apply(SequenceMatchResult<T> seqMatchResult, int... groups) {
-      if (filter.test(seqMatchResult)) {
+      if (filter.accept(seqMatchResult)) {
         return (acceptBranch != null)? acceptBranch.apply(seqMatchResult):null;
       } else {
         return (rejectBranch != null)? rejectBranch.apply(seqMatchResult):null;

@@ -30,6 +30,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -48,8 +49,7 @@ import edu.stanford.nlp.trees.TreeLengthComparator;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
-import java.util.function.Function;
-import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.Pair;
@@ -138,7 +138,7 @@ public class FactoredParser {
     // System.out.println(tlpParams.getClass());
     TreebankLanguagePack tlp = op.tlpParams.treebankLanguagePack();
 
-    op.trainOptions.sisterSplitters = Generics.newHashSet(Arrays.asList(op.tlpParams.sisterSplitters()));
+    op.trainOptions.sisterSplitters = new HashSet<String>(Arrays.asList(op.tlpParams.sisterSplitters()));
     //    BinarizerFactory.TreeAnnotator.setTreebankLang(tlpParams);
     PrintWriter pw = op.tlpParams.pw();
 

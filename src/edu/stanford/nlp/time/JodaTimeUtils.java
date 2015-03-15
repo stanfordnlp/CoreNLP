@@ -7,15 +7,14 @@ import org.joda.time.field.OffsetDateTimeField;
 import org.joda.time.field.RemainderDateTimeField;
 import org.joda.time.field.ScaledDurationField;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.joda.time.DateTimeFieldType.*;
 import static org.joda.time.DurationFieldType.*;
 
-import edu.stanford.nlp.util.Generics;
-
 /**
- * Extensions to Joda time.
+ * Extensions to joda time
  *
  * @author Angel Chang
  * @author Gabor Angeli
@@ -25,8 +24,8 @@ public class JodaTimeUtils {
   private JodaTimeUtils() {} // static methods only
 
   // Standard ISO fields
-  private static final Chronology isoUTCChronology = ISOChronology.getInstanceUTC();
-  private static final DateTimeFieldType[] standardISOFields = {
+  public static final Chronology isoUTCChronology = ISOChronology.getInstanceUTC();
+  public static final DateTimeFieldType[] standardISOFields = {
           DateTimeFieldType.year(),
           DateTimeFieldType.monthOfYear(),
           DateTimeFieldType.dayOfMonth(),
@@ -35,7 +34,7 @@ public class JodaTimeUtils {
           DateTimeFieldType.secondOfMinute(),
           DateTimeFieldType.millisOfSecond()
   };
-  private static final DateTimeFieldType[] standardISOWeekFields = {
+  public static final DateTimeFieldType[] standardISOWeekFields = {
           DateTimeFieldType.year(),
           DateTimeFieldType.weekOfWeekyear(),
           DateTimeFieldType.dayOfWeek(),
@@ -44,12 +43,12 @@ public class JodaTimeUtils {
           DateTimeFieldType.secondOfMinute(),
           DateTimeFieldType.millisOfSecond()
   };
-  private static final DateTimeFieldType[] standardISODateFields = {
+  public static final DateTimeFieldType[] standardISODateFields = {
           DateTimeFieldType.year(),
           DateTimeFieldType.monthOfYear(),
           DateTimeFieldType.dayOfMonth(),
   };
-  private static final DateTimeFieldType[] standardISOTimeFields = {
+  public static final DateTimeFieldType[] standardISOTimeFields = {
           DateTimeFieldType.hourOfDay(),
           DateTimeFieldType.minuteOfHour(),
           DateTimeFieldType.secondOfMinute(),
@@ -219,28 +218,6 @@ public class JodaTimeUtils {
     }
   }
 
-  protected static boolean hasYYYYMMDD(ReadablePartial base)
-  {
-    if (base == null) {
-      return false;
-    } else {
-      return base.isSupported(DateTimeFieldType.year()) &&
-             base.isSupported(DateTimeFieldType.monthOfYear()) &&
-             base.isSupported(DateTimeFieldType.dayOfMonth());
-    }
-  }
-
-  protected static boolean hasYYMMDD(ReadablePartial base)
-  {
-    if (base == null) {
-      return false;
-    } else {
-      return base.isSupported(DateTimeFieldType.yearOfCentury()) &&
-             base.isSupported(DateTimeFieldType.monthOfYear()) &&
-             base.isSupported(DateTimeFieldType.dayOfMonth());
-    }
-  }
-
   protected static boolean hasField(ReadablePeriod base, DurationFieldType field)
   {
     if (base == null) {
@@ -260,7 +237,7 @@ public class JodaTimeUtils {
 
   public static Set<DurationFieldType> getSupportedDurationFields(Partial p)
   {
-    Set<DurationFieldType> supportedDurations = Generics.newHashSet();
+    Set<DurationFieldType> supportedDurations = new HashSet<DurationFieldType>();
     for (int i = 0; i < p.size(); i++) {
       supportedDurations.add(p.getFieldType(i).getDurationType());
     }
@@ -371,7 +348,7 @@ public class JodaTimeUtils {
   protected static DurationFieldType getMostGeneral(Period p)
   {
     for (int i = 0; i < p.size(); i++) {
-      if (p.getValue(i) != 0) {
+      if (p.getValue(i) > 0) {
         return p.getFieldType(i);
       }
     }
@@ -380,7 +357,7 @@ public class JodaTimeUtils {
   protected static DurationFieldType getMostSpecific(Period p)
   {
     for (int i = p.size()-1; i >= 0; i--) {
-      if (p.getValue(i) != 0) {
+      if (p.getValue(i) > 0) {
         return p.getFieldType(i);
       }
     }
@@ -595,8 +572,6 @@ public class JodaTimeUtils {
   // Uses p2 to resolve dow for p1
   public static Partial resolveDowToDay(Partial p1, Partial p2)
   {
-    // Discard anything that's more specific than dayOfMonth for p2
-    p2 = JodaTimeUtils.discardMoreSpecificFields(p2, DateTimeFieldType.dayOfMonth());
     if (isCompatible(p1,p2)) {
       if (p1.isSupported(DateTimeFieldType.dayOfWeek())) {
         if (!p1.isSupported(DateTimeFieldType.dayOfMonth())) {
@@ -641,16 +616,6 @@ public class JodaTimeUtils {
     }
     return p1;
   }
-  public static Partial resolveWeek(Partial p)
-  {
-    // Figure out week
-    if (p.isSupported(DateTimeFieldType.dayOfMonth()) && p.isSupported(DateTimeFieldType.monthOfYear()) && p.isSupported(DateTimeFieldType.year())) {
-      Instant t = getInstant(p);
-//      return getPartial(t.toInstant(), p.without(DateTimeFieldType.dayOfMonth()).without(DateTimeFieldType.monthOfYear()).with(DateTimeFieldType.weekOfWeekyear(), 1));
-      return getPartial(t.toInstant(), p.with(DateTimeFieldType.weekOfWeekyear(), 1));
-    } else return p;
-  }
-
   public static Instant getInstant(Partial p)
   {
     if (p == null) return null;
@@ -806,7 +771,13 @@ public class JodaTimeUtils {
    * Return the TIMEX string for the time given
    */
   public static String timexTimeValue(ReadableDateTime time){
-    return String.valueOf(time.getYear()) + '-' + zeroPad(time.getMonthOfYear(), 2) + '-' + zeroPad(time.getDayOfMonth(), 2) + 'T' + zeroPad(time.getHourOfDay(), 2) + ':' + zeroPad(time.getMinuteOfHour(), 2);
+    return new StringBuilder()
+        .append(time.getYear()).append("-")                    //year
+        .append(zeroPad(time.getMonthOfYear(),2)).append("-")  //month
+        .append(zeroPad(time.getDayOfMonth(),2)).append("T")   //day
+        .append(zeroPad(time.getHourOfDay(),2)).append(":")    //hour
+        .append(zeroPad(time.getMinuteOfHour(),2))             //minute
+        .toString();
   }
 
   public static class ConversionOptions{
@@ -1013,7 +984,7 @@ public class JodaTimeUtils {
     //--OK
     return true;
   }
-
+  
   /**
    * Return the TIMEX string for the duration represented by the given period; approximately if
    * approximate is set to true.
@@ -1040,7 +1011,7 @@ public class JodaTimeUtils {
       b.append(opts.approximate ? "X" : years / 10).append("E");
       years = years % 10;
     }
-    //(years)
+    //(years) 
     if(years != 0 && consistentWithForced("Y", opts.forceUnits)){
       b.append(opts.approximate ? "X" : years).append("Y");
     }
@@ -1088,5 +1059,7 @@ public class JodaTimeUtils {
   public static String timexDurationValue(ReadableDateTime begin, ReadableDateTime end){
     return timexDurationValue( new Period(end.getMillis()-begin.getMillis()) );
   }
+
+
 
 }

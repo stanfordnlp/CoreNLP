@@ -1,4 +1,4 @@
-Stanford Classifier v3.5.1 - 2015-01-29
+Stanford Classifier v2.1.7 - 2012-11-11
 -------------------------------------------------
 
 Copyright (c) 2003-2012 The Board of Trustees of 
@@ -75,23 +75,6 @@ LICENSE
 -------------------------
 CHANGES
 -------------------------
-
-2015-01-29    3.5.1     New input/output options, support for GloVe 
-                        word vectors 
-
-2014-10-26    3.5.0     Upgrade to Java 1.8 
-
-2014-08-27    3.4.1     Update for compatibility 
-
-2014-06-16      3.4     Update for compatibility 
-
-2014-01-04    3.3.1     Bugfix release 
-
-2013-11-12    3.3.0     Update for compatibility 
-
-2013-06-19    3.2.0     Update for compatibility 
-
-2013-04-04    2.1.8     Update to maintain compatibility 
 
 2012-11-11    2.1.7     new pair-of-words features 
 

@@ -10,7 +10,10 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.HashIndex;
+import edu.stanford.nlp.util.Index;
+import edu.stanford.nlp.util.ReflectionLoading;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,7 +23,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.text.NumberFormat;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -67,7 +69,6 @@ public class BaseLexicon implements Lexicon {
   protected boolean smartMutation;
 
   protected final Index<String> wordIndex;
-
   protected final Index<String> tagIndex;
 
 
@@ -82,11 +83,11 @@ public class BaseLexicon implements Lexicon {
   /** Set of all tags as IntTaggedWord. Alive in both train and runtime
    *  phases, but transient.
    */
-  protected transient Set<IntTaggedWord> tags = Generics.newHashSet();
+  protected transient Set<IntTaggedWord> tags = new HashSet<IntTaggedWord>();
 
-  protected transient Set<IntTaggedWord> words = Generics.newHashSet();
+  protected transient Set<IntTaggedWord> words = new HashSet<IntTaggedWord>();
 
-  // protected transient Set<IntTaggedWord> sigs=Generics.newHashSet();
+  // protected transient Set<IntTaggedWord> sigs=new HashSet<IntTaggedWord>();
 
   /** Records the number of times word/tag pair was seen in training data.
    *  Includes word/tag pairs where one is a wildcard not a real word/tag.
@@ -105,10 +106,10 @@ public class BaseLexicon implements Lexicon {
   protected boolean useSignatureForKnownSmoothing;
 
   /**
-   * Only used when training, specifically when training on sentences
-   * that weren't part of annotated (e.g., markovized, etc.) data.
+   * Only used when training, specifically when training on sentenes
+   * that weren't part of annotated (eg markovized, etc) data
    */
-  private Map<String, Counter<String>> baseTagCounts = Generics.newHashMap();
+  private Map<String, Counter<String>> baseTagCounts = new HashMap<String, Counter<String>>();
 
   public BaseLexicon(Index<String> wordIndex, Index<String> tagIndex) {
     this(new Options(), wordIndex, tagIndex);
@@ -144,7 +145,6 @@ public class BaseLexicon implements Lexicon {
    * @param word The word as an int index to an Index
    * @return Whether the word is in the lexicon
    */
-  @Override
   public boolean isKnown(int word) {
     return (word < rulesWithWord.length && word >= 0 && !rulesWithWord[word].isEmpty());
   }
@@ -162,24 +162,12 @@ public class BaseLexicon implements Lexicon {
    * @param word The word as a String
    * @return Whether the word is in the lexicon
    */
-  @Override
   public boolean isKnown(String word) {
     if (!wordIndex.contains(word))
       return false;
     IntTaggedWord iW = new IntTaggedWord(wordIndex.indexOf(word), nullTag);
     return seenCounter.getCount(iW) > 0.0;
   }
-
-  /** {@inheritDoc} */
-  @Override
-  public Set<String> tagSet(Function<String,String> basicCategoryFunction) {
-    Set<String> tagSet = new HashSet<String>();
-    for (String tag : tagIndex.objectsList()) {
-      tagSet.add(basicCategoryFunction.apply(tag));
-    }
-    return tagSet;
-  }
-
 
   /**
    * Returns the possible POS taggings for a word.
@@ -193,7 +181,7 @@ public class BaseLexicon implements Lexicon {
    *         <code>tag -&gt; word<code> rule.)
    */
   public Iterator<IntTaggedWord> ruleIteratorByWord(String word, int loc) {
-    return ruleIteratorByWord(wordIndex.addToIndex(word), loc, null);
+    return ruleIteratorByWord(wordIndex.indexOf(word, true), loc, null);
   }
 
   /** Generate the possible taggings for a word at a sentence position.
@@ -207,7 +195,6 @@ public class BaseLexicon implements Lexicon {
    * @param loc  Its index in the sentence (usually only relevant for unknown words)
    *  @return A list of possible taggings
    */
-  @Override
   public Iterator<IntTaggedWord> ruleIteratorByWord(int word, int loc, String featureSpec) {
     // if (rulesWithWord == null) { // tested in isKnown already
     // initRulesWithWord();
@@ -250,9 +237,8 @@ public class BaseLexicon implements Lexicon {
     return wordTaggings.iterator();
  }
 
-  @Override
   public Iterator<IntTaggedWord> ruleIteratorByWord(String word, int loc, String featureSpec) {
-    return ruleIteratorByWord(wordIndex.addToIndex(word), loc, featureSpec);
+    return ruleIteratorByWord(wordIndex.indexOf(word, true), loc, featureSpec);
   }
 
   protected void initRulesWithWord() {
@@ -260,7 +246,7 @@ public class BaseLexicon implements Lexicon {
       System.err.print("\nInitializing lexicon scores ... ");
     }
     // int numWords = words.size()+sigs.size()+1;
-    int unkWord = wordIndex.addToIndex(UNKNOWN_WORD);
+    int unkWord = wordIndex.indexOf(UNKNOWN_WORD, true);
     int numWords = wordIndex.size();
     rulesWithWord = new List[numWords];
     for (int w = 0; w < numWords; w++) {
@@ -268,7 +254,7 @@ public class BaseLexicon implements Lexicon {
                                                           // items in them
     }
     // for (Iterator ruleI = rules.iterator(); ruleI.hasNext();) {
-    tags = Generics.newHashSet();
+    tags = new HashSet<IntTaggedWord>();
     for (IntTaggedWord iTW : seenCounter.keySet()) {
       if (iTW.word() == nullWord && iTW.tag() != nullTag) {
         tags.add(iTW);
@@ -342,16 +328,15 @@ public class BaseLexicon implements Lexicon {
 
   @Override
   public void initializeTraining(double numTrees) {
-    this.uwModelTrainer =
+    this.uwModelTrainer = 
       ReflectionLoading.loadByReflection(uwModelTrainerClass);
-    uwModelTrainer.initializeTraining(op, this, wordIndex, tagIndex,
+    uwModelTrainer.initializeTraining(op, this, wordIndex, tagIndex, 
                                       numTrees);
   }
 
   /**
    * Trains this lexicon on the Collection of trees.
    */
-  @Override
   public void train(Collection<Tree> trees) {
     train(trees, 1.0);
   }
@@ -360,7 +345,6 @@ public class BaseLexicon implements Lexicon {
    * Trains this lexicon on the Collection of trees.
    * Also trains the unknown word model pointed to by this lexicon.
    */
-  @Override
   public void train(Collection<Tree> trees, double weight) {
     // scan data
     for (Tree tree : trees) {
@@ -368,12 +352,10 @@ public class BaseLexicon implements Lexicon {
     }
   }
 
-  @Override
   public void train(Tree tree, double weight) {
     train(tree.taggedYield(), weight);
   }
 
-  @Override
   public final void train(List<TaggedWord> sentence, double weight) {
     uwModelTrainer.incrementTreesRead(weight);
     int loc = 0;
@@ -383,13 +365,11 @@ public class BaseLexicon implements Lexicon {
     }
   }
 
-  @Override
   public final void incrementTreesRead(double weight) {
     uwModelTrainer.incrementTreesRead(weight);
   }
 
-  @Override
-  public final void trainUnannotated(List<TaggedWord> sentence,
+  public final void trainUnannotated(List<TaggedWord> sentence, 
                                      double weight) {
     uwModelTrainer.incrementTreesRead(weight);
     int loc = 0;
@@ -413,11 +393,10 @@ public class BaseLexicon implements Lexicon {
     }
   }
 
-  @Override
   public void train(TaggedWord tw, int loc, double weight) {
     uwModelTrainer.train(tw, loc, weight);
-
-    IntTaggedWord iTW =
+    
+    IntTaggedWord iTW = 
       new IntTaggedWord(tw.word(), tw.tag(), wordIndex, tagIndex);
     seenCounter.incrementCount(iTW, weight);
     IntTaggedWord iT = new IntTaggedWord(nullWord, iTW.tag);
@@ -540,7 +519,6 @@ public class BaseLexicon implements Lexicon {
    *          distribution when sentence initial</i>
    * @return A float score, usually, log P(word|tag)
    */
-  @Override
   public float score(IntTaggedWord iTW, int loc, String word, String featureSpec) {
     // both actual
     double c_TW = seenCounter.getCount(iTW);
@@ -668,7 +646,7 @@ public class BaseLexicon implements Lexicon {
     }
 
     String tag = tagIndex.get(iTW.tag());
-
+    
     // Categorical cutoff if score is too low
     if (pb_W_T > -100.0) {
       return (float) pb_W_T;
@@ -700,8 +678,8 @@ public class BaseLexicon implements Lexicon {
         double score = 0.0;
         // score = scoreAll(trees);
         if (testOptions.verbose) {
-          System.err.println("Tuning lexicon: s0 " + smooth[0] +
-                             " s1 " + smooth[1] + " is " + score);
+          System.err.println("Tuning lexicon: s0 " + smooth[0] + 
+                             " s1 " + smooth[1] + " is " + score); 
         }
         if (score > bestScore) {
           System.arraycopy(smooth, 0, bestSmooth, 0, smooth.length);
@@ -742,7 +720,6 @@ public class BaseLexicon implements Lexicon {
    * UnknownWordModel in the case of a model more complicated than the
    * unSeenCounter
    */
-  @Override
   public void readData(BufferedReader in) throws IOException {
     final String SEEN = "SEEN";
     String line;
@@ -777,7 +754,6 @@ public class BaseLexicon implements Lexicon {
    * Writes out data from this Object to the Writer w. Rules are separated by
    * newline, and rule elements are delimited by \t.
    */
-  @Override
   public void writeData(Writer w) throws IOException {
     PrintWriter out = new PrintWriter(w);
 
@@ -796,7 +772,6 @@ public class BaseLexicon implements Lexicon {
   /** Returns the number of rules (tag rewrites as word) in the Lexicon.
    *  This method assumes that the lexicon has been initialized.
    */
-  @Override
   public int numRules() {
     int accumulated = 0;
     for (List<IntTaggedWord> lis : rulesWithWord) {
@@ -808,9 +783,9 @@ public class BaseLexicon implements Lexicon {
 
   private static final int STATS_BINS = 15;
 
-
-  protected static void examineIntersection(Set<String> s1, Set<String> s2) {
-    Set<String> knownTypes = Generics.newHashSet(s1);
+  
+  protected void examineIntersection(Set<String> s1, Set<String> s2) {
+    Set<String> knownTypes = new HashSet<String>(s1);
     knownTypes.retainAll(s2);
     if (knownTypes.size() != 0) {
       System.err.printf("|intersect|: %d%n", knownTypes.size());
@@ -820,7 +795,7 @@ public class BaseLexicon implements Lexicon {
       System.err.println();
     }
   }
-
+  
   /** Print some statistics about this lexicon. */
   public void printLexStats() {
     System.out.println("BaseLexicon statistics");
@@ -938,7 +913,7 @@ public class BaseLexicon implements Lexicon {
     for (int i = 0; i < total; i++) {
       String tag = tagIndex.get(i);
       String baseTag = tlp.basicCategory(tag);
-      int j = tagIndex.addToIndex(baseTag);
+      int j = tagIndex.indexOf(baseTag, true);
       tagsToBaseTags[i] = j;
     }
   }
@@ -978,7 +953,7 @@ public class BaseLexicon implements Lexicon {
     for (int i = 3; i < args.length; i++) {
       if (lex.isKnown(args[i])) {
         System.out.println(args[i] + " is a known word.  Log probabilities [log P(w|t)] for its taggings are:");
-        for (Iterator<IntTaggedWord> it = lex.ruleIteratorByWord(wordIndex.addToIndex(args[i]), i - 3, null); it.hasNext(); ) {
+        for (Iterator<IntTaggedWord> it = lex.ruleIteratorByWord(wordIndex.indexOf(args[i], true), i - 3, null); it.hasNext(); ) {
           IntTaggedWord iTW = it.next();
           System.out.println(StringUtils.pad(iTW, 24) + nf.format(lex.score(iTW, i - 3, wordIndex.get(iTW.word), null)));
         }
@@ -1005,19 +980,16 @@ public class BaseLexicon implements Lexicon {
     }
   }
 
-  @Override
   public UnknownWordModel getUnknownWordModel() {
     return uwModel;
   }
 
-  @Override
   public final void setUnknownWordModel(UnknownWordModel uwm) {
     this.uwModel = uwm;
   }
 
   // TODO(spenceg): Debug method for getting a treebank with CoreLabels. This is for training
   // the FactoredLexicon.
-  @Override
   public void train(Collection<Tree> trees, Collection<Tree> rawTrees) {
     train(trees);
   }

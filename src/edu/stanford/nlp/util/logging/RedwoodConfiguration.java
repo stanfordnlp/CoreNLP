@@ -1,15 +1,14 @@
 
 package edu.stanford.nlp.util.logging;
 
-import java.io.File;
-import java.io.OutputStream;
+import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import edu.stanford.nlp.util.Generics;
 
 /**
  * A class which encapsulates configuration settings for Redwood.
@@ -18,15 +17,16 @@ import edu.stanford.nlp.util.Generics;
  * @author Gabor Angeli (angeli at cs.stanford)
  */
 public class RedwoodConfiguration {
+  //-- Properties Regular Expressions --
+  private static Pattern consoleColor = Pattern.compile("^log\\.console\\.(.*?)Color$");
+  private static Pattern fileColor = Pattern.compile("^log\\.file\\.(.*?)Color$");
+  private static Pattern consoleStyle = Pattern.compile("^log\\.console\\.(.*?)Style$");
+  private static Pattern fileStyle = Pattern.compile("^log\\.file\\.(.*?)Style$");
 
   /**
    * A list of tasks to run when the configuration is applied
    */
   private LinkedList<Runnable> tasks = new LinkedList<Runnable>();
-
-  private OutputHandler outputHandler = Redwood.ConsoleHandler.out();
-  private File defaultFile = new File("/dev/null");
-  private int channelWidth = 0;
 
   /**
    * Private constructor to prevent use of "new RedwoodConfiguration()"
@@ -40,315 +40,227 @@ public class RedwoodConfiguration {
     for(Runnable task : tasks){ task.run(); }
   }
 
-  /**
-   * Capture a system stream
-   * @param stream The stream to capture; one of System.out or System.err
-   * @return this
-   */
-  public RedwoodConfiguration capture(final OutputStream stream) {
-    if (stream == System.out) {
-      tasks.add(() -> Redwood.captureSystemStreams(true, Redwood.realSysErr == System.err));
-    } else if (stream == System.err) {
-      tasks.add(() -> Redwood.captureSystemStreams(Redwood.realSysOut == System.out, true));
-    } else {
-      throw new IllegalArgumentException("Must capture one of stderr or stdout");
-    }
-    return this;
-  }
-
-  public RedwoodConfiguration restore(final OutputStream stream) {
-    if (stream == System.out) {
-      tasks.add(() -> Redwood.captureSystemStreams(false, Redwood.realSysErr == System.err));
-    } else if (stream == System.err) {
-      tasks.add(() -> Redwood.captureSystemStreams(Redwood.realSysOut == System.out, false));
-    } else {
-      throw new IllegalArgumentException("Must capture one of stderr or stdout");
-    }
-    return this;
-  }
-
-  /**
-   * Determine where, in the end, console output should go.
-   * The default is stdout.
-   * @param method An output, one of: stdout, stderr, or java.util.logging
-   * @return this
-   */
-  public RedwoodConfiguration output(final String method) {
-    if (method.equalsIgnoreCase("stdout") || method.equalsIgnoreCase("out")){
-      edu.stanford.nlp.util.logging.JavaUtilLoggingAdaptor.adapt();
-      this.outputHandler = Redwood.ConsoleHandler.out();
-    } else if (method.equalsIgnoreCase("stderr") || method.equalsIgnoreCase("err")) {
-        edu.stanford.nlp.util.logging.JavaUtilLoggingAdaptor.adapt();
-        this.outputHandler = Redwood.ConsoleHandler.err();
-    } else if (method.equalsIgnoreCase("java.util.logging")){
-      edu.stanford.nlp.util.logging.JavaUtilLoggingAdaptor.adapt();
-      this.outputHandler = RedirectOutputHandler.fromJavaUtilLogging(Logger.getLogger("``error``"));
-    } else {
-      throw new IllegalArgumentException("Unknown value for log.method");
-    }
-    return this;
-  }
-
-  /**
-   * Set the width of the channels (or 0 to not show channels)
-   * @param width The left margin in which to show channels
-   * @return this
-   */
-  public RedwoodConfiguration channelWidth(final int width) {
-    tasks.add(() -> RedwoodConfiguration.this.channelWidth = width);
-    return this;
-  }
 
   /**
    * Clear any custom configurations to Redwood
    * @return this
    */
   public RedwoodConfiguration clear(){
-    this.tasks = new LinkedList<Runnable>();
-    this.tasks.add(() -> {
+    tasks = new LinkedList<Runnable>();
+    tasks.add(new Runnable(){ public void run(){
       Redwood.clearHandlers();
       Redwood.restoreSystemStreams();
-    });
-    this.outputHandler = Redwood.ConsoleHandler.out();
+      Redwood.clearLoggingClasses();
+    } });
     return this;
-  }
-
-
-
-  public static interface Thunk {
-    public void apply(RedwoodConfiguration config, Redwood.RecordHandlerTree root);
-  }
-
-  @SuppressWarnings("UnusedDeclaration")
-  public static class Handlers {
-    //
-    // Leaf destinations
-    //
-    /**
-     * Output to a file. This is a leaf node.
-     * Consider using "defaultFile" instead.
-     * @param path The file to write to
-     */
-    public static Thunk file(final String path) {
-      return new Thunk() {
-        @Override
-        public void apply(final RedwoodConfiguration config, Redwood.RecordHandlerTree root) {
-          root.addChild(new Redwood.FileHandler(path){{ this.leftMargin = config.channelWidth; }});
-        }
-      };
-    }
-    /**
-     * Output to a file. This is a leaf node.
-     * Consider using "defaultFile" instead.
-     * @param path The file to write to
-     */
-    public static Thunk file(File path) { return file(path.getPath()); }
-    /**
-     * Output to a file. This is a leaf node.
-     * Consider using this instead of specifying a custom path.
-     */
-    public static final Thunk defaultFile = new Thunk() {
-      @Override
-      public void apply(final RedwoodConfiguration config, Redwood.RecordHandlerTree root) {
-        root.addChild(new Redwood.FileHandler(config.defaultFile.getPath()){{ this.leftMargin = config.channelWidth; }});
-      }
-    };
-    /**
-     * Output to a standard output. This is a leaf node.
-     * Consider using "output" instead, unless you really
-     * want to log only to stdout now and forever in the future.
-     */
-    public static final Thunk stdout = (config, root) -> {
-      Redwood.ConsoleHandler handler = Redwood.ConsoleHandler.out();
-      handler.leftMargin = config.channelWidth;
-      root.addChild(handler);
-    };
-    /**
-     * Output to a standard error. This is a leaf node.
-     * Consider using "output" instead, unless you really
-     * want to log only to stderr now and forever in the future.
-     */
-    public static final Thunk stderr = (config, root) -> {
-      Redwood.ConsoleHandler handler = Redwood.ConsoleHandler.err();
-      handler.leftMargin = config.channelWidth;
-      root.addChild(handler);
-    };
-    /**
-     * Output to the default location specified by the output() method.
-     * Consider using this rather than stderr or stdout.
-     */
-    public static final Thunk output = (config, root) -> {
-      config.outputHandler.leftMargin = config.channelWidth;
-      root.addChild(config.outputHandler);
-    };
-
-    //
-    // Filters
-    //
-    /**
-     * Hide the debug channel only.
-     */
-    public static final LogRecordHandler hideDebug = new VisibilityHandler() {{
-      alsoHide(Redwood.DBG);
-    }};
-    /**
-     * Hide the error channel only.
-     */
-    public static final LogRecordHandler hideError = new VisibilityHandler() {{
-      alsoHide(Redwood.ERR);
-    }};
-    /**
-     * Hide the warning channel only.
-     */
-    public static final LogRecordHandler hideWarn = new VisibilityHandler() {{
-      alsoHide(Redwood.WARN);
-    }};
-    /**
-     * Show only errors (e.g., to send them to an error file)
-     */
-    public static final LogRecordHandler showOnlyError = new VisibilityHandler() {{
-      hideAll();
-      alsoShow(Redwood.ERR);
-    }};
-    /**
-     * Hide these channels, in addition to anything already hidden by upstream handlers.
-     */
-    public static LogRecordHandler hideChannels(final Object... channelsToHide) {
-      return new VisibilityHandler() {{
-        for (Object channel : channelsToHide) {
-          alsoHide(channel);
-        }
-      }};
-    }
-    /**
-     * Show only these channels, as far as downstream handlers are concerned.
-     */
-    public static LogRecordHandler showOnlyChannels(final Object... channelsToShow) {
-      return new VisibilityHandler() {{
-        hideAll();
-        for (Object channel : channelsToShow) {
-          alsoShow(channel);
-        }
-      }};
-    }
-    /**
-     * Rename a channel to be something else
-     */
-    public static LogRecordHandler reroute(final Object src, final Object dst) {
-      return new RerouteChannel(src, dst);
-    }
-
-    /**
-     * Collapse records in a heuristic way to make reading easier. This is particularly relevant to branches which
-     * go to a physical console, or a file which you'd like to keep small.
-     */
-    public static final LogRecordHandler collapseApproximate = new RepeatedRecordHandler(RepeatedRecordHandler.APPROXIMATE);
-    /**
-     * Collapse records which are duplicates into a single message, followed by a message detailing how many times
-     * it was repeated.
-     */
-    public static final LogRecordHandler collapseExact = new RepeatedRecordHandler(RepeatedRecordHandler.EXACT);
-
-    //
-    // Combinators
-    //
-    /**
-     * Send any incoming messages multiple ways.
-     * For example, you may want to send the same output to console and a file.
-     * @param destinations The destinations for log messages coming into this node.
-     */
-    public static Thunk branch(final Thunk... destinations) {
-      return new Thunk() {
-        @Override
-        public void apply(RedwoodConfiguration config, Redwood.RecordHandlerTree root) {
-          for (Thunk destination : destinations) {
-            destination.apply(config, root);
-          }
-        }
-      };
-    }
-
-    /**
-     * Apply each of the handlers to incoming log messages, in sequence.
-     * @param handlers The handlers to apply
-     * @param destination The final destination of the messages, after processing
-     */
-    public static Thunk chain(final LogRecordHandler[] handlers, final Thunk destination) {
-      return new Thunk() {
-        private Redwood.RecordHandlerTree buildChain(RedwoodConfiguration config, LogRecordHandler[] handlers, int i) {
-          Redwood.RecordHandlerTree rtn = new Redwood.RecordHandlerTree(handlers[i]);
-          if (i < handlers.length - 1) {
-            rtn.addChildTree( buildChain(config, handlers, i + 1) );
-          } else {
-            destination.apply(config, rtn);
-          }
-          return rtn;
-        }
-        @Override
-        public void apply(RedwoodConfiguration config, Redwood.RecordHandlerTree root) {
-          if (handlers.length == 0) {
-            destination.apply(config, root);
-          } else {
-            root.addChildTree(buildChain(config, handlers, 0));
-          }
-        }
-      };
-    }
-
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
-    public static Thunk chain(LogRecordHandler handler1, Thunk destination) { return chain(new LogRecordHandler[]{ handler1 }, destination); }
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
-    public static Thunk chain(LogRecordHandler handler1, LogRecordHandler handler2, Thunk destination) { return chain(new LogRecordHandler[]{ handler1, handler2 }, destination); }
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
-    public static Thunk chain(LogRecordHandler handler1, LogRecordHandler handler2, LogRecordHandler handler3, Thunk destination) { return chain(new LogRecordHandler[]{ handler1, handler2, handler3 }, destination); }
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
-    public static Thunk chain(LogRecordHandler handler1, LogRecordHandler handler2, LogRecordHandler handler3, LogRecordHandler handler4, Thunk destination) { return chain(new LogRecordHandler[]{ handler1, handler2, handler3, handler4 }, destination); }
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
-    public static Thunk chain(LogRecordHandler handler1, LogRecordHandler handler2, LogRecordHandler handler3, LogRecordHandler handler4, LogRecordHandler handler5, Thunk destination) { return chain(new LogRecordHandler[]{ handler1, handler2, handler3, handler4, handler5 }, destination); }
-
-
-    /**
-     * A NOOP, as the name implies. Useful for appending to the end of lists to make commas match.
-     */
-    public static Thunk noop = (config, root) -> {
-    };
   }
 
   /**
-   * <p><Add handlers to Redwood. This is the main way to tell Redwood to do stuff.
-   * Use this by calling a combination of methods in Handlers. It may be useful
-   * to "import static RedwoodConfiguration.Handlers.*"</p>
-   *
-   * <p>For example:</p>
-   * <pre>
-   *   handlers(branch(
-   *     chain( hideDebug, collapseApproximate, branch( output, file("stderr.log") ),
-   *     chain( showOnlyError, file("err.log") ).
-   *     chain( showOnlyChannels("results", "evaluate"), file("results.log") ),
-   *     chain( file("redwood.log") ),
-   *   noop))
-   * </pre>
-   *
-   * @param paths A number of paths to add.
+   * Add a console pipeline to the Redwood handler tree,
+   * printing to stdout.
+   * Calling this multiple times will result in messages being printed
+   * multiple times.
    * @return this
    */
-  public RedwoodConfiguration handlers(Thunk... paths) {
-    for (final Thunk thunk : paths) {
-      tasks.add(() -> thunk.apply(RedwoodConfiguration.this, Redwood.rootHandler()));
-    }
+  public RedwoodConfiguration stdout(){
+    LogRecordHandler visibility = new VisibilityHandler();
+    LogRecordHandler console = Redwood.ConsoleHandler.out();
+    return this
+        .rootHandler(visibility)
+        .handler(visibility, console);
+  }
+
+  /**
+   * Add a console pipeline to the Redwood handler tree,
+   * printing to stderr.
+   * Calling this multiple times will result in messages being printed
+   * multiple times.
+   * @return this
+   */
+  public RedwoodConfiguration stderr(){
+    LogRecordHandler visibility = new VisibilityHandler();
+    LogRecordHandler console = Redwood.ConsoleHandler.err();
+    return this
+        .rootHandler(visibility)
+        .handler(visibility, console);
+  }
+
+  /**
+   * Add a console pipeline to the Redwood handler tree,
+   * Calling this multiple times will result in messages being printed
+   * multiple times.
+   * @return this
+   */
+  public RedwoodConfiguration console(){ return stdout(); }
+
+  /**
+   * Add a file pipeline to the Redwood handler tree.
+   * That is, print log messages to a given file.
+   * Calling this multiple times will result in messages being printed
+   * to multiple files (or, multiple times to the same file).
+   * @param file The path of the file to log to. This path is not checked
+   * for correctness here.
+   * @return this
+   */
+  public RedwoodConfiguration file(String file, String ... channels){
+    LogRecordHandler visibility = new VisibilityHandler(channels);
+    LogRecordHandler console = new Redwood.FileHandler(file);
+    return this
+        .rootHandler(visibility)
+        .handler(visibility, console);
+  }
+
+  /**
+   * Add a custom Log Record Handler to the root of the tree
+   * @param handler The handler to add
+   * @return this
+   */
+  public RedwoodConfiguration rootHandler(final LogRecordHandler handler){
+    tasks.add(new Runnable(){ public void run(){ Redwood.appendHandler(handler); } });
+    Redwood.appendHandler(handler);
     return this;
   }
+
+  /**
+   * Add a handler to as a child of an existing parent
+   * @param parent The handler to extend
+   * @param child The new handler to add
+   * @return this
+   */
+  public RedwoodConfiguration handler(final LogRecordHandler parent, final LogRecordHandler child){
+    tasks.add(new Runnable() { public void run() { Redwood.appendHandler(parent, child);} });
+    return this;
+  }
+
+  /**
+   * Add a handler to as a child of an existing parent
+   * @param parent The handler to extend
+   * @param toAdd The new handler to add
+   * @param grandchild The subtree to attach to the new handler
+   * @return this
+   */
+  public RedwoodConfiguration splice(final LogRecordHandler parent, final LogRecordHandler toAdd, final LogRecordHandler grandchild){
+    tasks.add(new Runnable() { public void run() { Redwood.spliceHandler(parent, toAdd, grandchild);} });
+    return this;
+  }
+
+  /**
+   * Set a Java classname path to ignore when printing stack traces
+   * @param classToIgnoreInTraces The class name (with packages, etc) to ignore.
+   * @return this
+   */
+  public RedwoodConfiguration loggingClass(final String classToIgnoreInTraces){
+    tasks.add(new Runnable() { public void run() { Redwood.addLoggingClass(classToIgnoreInTraces); } });
+    return this;
+  }
+  /**
+   * Set a Java class to ignore when printing stack traces
+   * @param classToIgnoreInTraces The class to ignore.
+   * @return this
+   */
+  public RedwoodConfiguration loggingClass(final Class<?> classToIgnoreInTraces){
+    tasks.add(new Runnable() { public void run() { Redwood.addLoggingClass(classToIgnoreInTraces.getName()); } });
+    return this;
+  }
+
+  /**
+   * Collapse repeated records, using an approximate notion of equality
+   * (i.e. records begin or end with the same substring)
+   * This is useful for cases such as tracking iterations ("iter 1" and "iter 2" are considered the same record).
+   * @return this
+   */
+  public RedwoodConfiguration collapseApproximate(){
+    tasks.add(new Runnable() { public void run() { Redwood.spliceHandler(VisibilityHandler.class, new RepeatedRecordHandler(RepeatedRecordHandler.APPROXIMATE),OutputHandler.class); } });
+    return this;
+  }
+
+  /**
+   * Collapse repeated records, using exact string match on the record.
+   * This is generally useful for making very verbose logs more readable.
+   * @return this
+   */
+  public RedwoodConfiguration collapseExact(){
+    tasks.add(new Runnable() { public void run() { Redwood.spliceHandler(VisibilityHandler.class, new RepeatedRecordHandler(RepeatedRecordHandler.EXACT), OutputHandler.class); } });
+    return this;
+  }
+
+  /**
+   * Do not collapse repeated records
+   * @return this
+   */
+  public RedwoodConfiguration collapseNone(){
+    tasks.add(new Runnable() { public void run() { Redwood.removeHandler(RepeatedRecordHandler.class); } });
+    return this;
+  }
+
+  /**
+   * Capture stdout and route them through Redwood
+   * @return this
+   */
+  public RedwoodConfiguration captureStdout(){
+    tasks.add(new Runnable() { public void run() { Redwood.captureSystemStreams(true, false); } });
+    return this;
+  }
+
+  /**
+   * Capture stderr and route them through Redwood
+   * @return this
+   */
+  public RedwoodConfiguration captureStderr(){
+    tasks.add(new Runnable() { public void run() { Redwood.captureSystemStreams(false, true); } });
+    return this;
+  }
+
+  /**
+   * Capture stdout and stderr and route them through Redwood
+   * @return this
+   */
+  public RedwoodConfiguration captureStreams(){
+    return this.captureStdout().captureStderr();
+  }
+
   /**
    * Close tracks when the JVM shuts down.
    * @return this
    */
   public RedwoodConfiguration neatExit(){
-    tasks.add(() -> Runtime.getRuntime().addShutdownHook(new Thread(){
-      @Override public void run(){ Redwood.stop(); }
-    }));
+    tasks.add(new Runnable() { public void run() {
+      Runtime.getRuntime().addShutdownHook(new Thread(){
+        @Override public void run(){ Redwood.stop(); }
+      });
+    }});
     return this;
   }
 
+  /**
+   * Print channels to the left of log messages
+   * @param width The width (in characters) to print the channels
+   * @return this
+   */
+  public RedwoodConfiguration printChannels(final int width){
+     tasks.add(new Runnable() { public void run() { Redwood.Util.printChannels(width);} });
+    return this;
+  }
+
+  /**
+   * Hide the following channels.
+   * @param channels The names of the channels to hide.
+   * @return this
+   */
+  public RedwoodConfiguration hideChannels(final Object[] channels){
+     tasks.add(new Runnable() { public void run() { Redwood.hideChannels(channels); } });
+    return this;
+  }
+
+  /**
+   * Show only the following channels.
+   * @param channels The names of the channels to show.
+   * @return this
+   */
+  public RedwoodConfiguration showOnlyChannels(final Object[] channels){
+     tasks.add(new Runnable() { public void run() { Redwood.showOnlyChannels(channels); } });
+    return this;
+  }
 
   /**
    * An empty Redwood configuration.
@@ -365,9 +277,7 @@ public class RedwoodConfiguration {
    * @return  A basic Redwood Configuration.
    */
   public static RedwoodConfiguration standard(){
-    return new RedwoodConfiguration().clear().handlers(
-        Handlers.chain(Handlers.hideChannels(), Handlers.stderr)
-    );
+    return new RedwoodConfiguration().clear().console().loggingClass(Redwood.class);
   }
 
   /**
@@ -389,13 +299,7 @@ public class RedwoodConfiguration {
    * @return The value of the property at the key
    */
   private static String get(Properties p, String key, String defaultValue, Set<String> used){
-    Object cand = p.get(key);
-    String rtn;
-    if (cand == null) {
-      rtn = p.getProperty(key, defaultValue);
-    } else {
-      rtn = cand.toString();
-    }
+    String rtn = p.getProperty(key, defaultValue);
     used.add(key);
     return rtn;
   }
@@ -404,71 +308,148 @@ public class RedwoodConfiguration {
    * Configure Redwood (from scratch) based on a Properties file.
    * Currently recognized properties are:
    * <ul>
+   *   <li>log.method = {default, redwood, java.util.logging}: All logging output will go to this adapter; "default" means it will go to the method specified by the function call</li>
+   *   <li>log.method.name = [string]: A name for the java.util.logging logger</li>
+   *   <li>log.toStderr = {true,false}: Print to stderr rather than stdout</li>
+   *   <li>log.file = [filename]: Dump the output of the log to the given filename</li>
+   *   <li>log.collapse = {exact,approximate,none}: Collapse repeated records (based on either exact or approximate equality)</li>
+   *   <li>log.neatExit = {true,false}: Clean up logs on exception or regular system exit
+   *   <li>log.{console,file}.colorChannels = {true,false}: If true, randomly assign colors to different channels</li>
+   *   <li>log.{console,file}.{track,[channel]}]Color = {NONE,BLACK,RED,GREEN,YELLOW,BLUE,MAGENTA,CYAN,WHITE}: Color for printing tracks (e.g. log.file.trackColor = BLUE)
+   *   <li>log.{console,file}.{track,[channel]}Style = {NONE,BOLD,DIM,ITALIC,UNDERLINE,BLINK,CROSS_OUT}: Style for printing tracks (e.g. log.console.errStyle = BOLD)
    *   <li>log.captureStreams = {true,false}: Capture stdout and stderr and route them through Redwood</li>
    *   <li>log.captureStdout = {true,false}: Capture stdout and route it through Redwood</li>
    *   <li>log.captureStderr = {true,false}: Capture stdout and route it through Redwood</li>
-   *   <li>log.channels.width = {number}: Show the channels being logged to, at this width (default: 0; recommended: 20)</li>
-   *   <li>log.channels.debug = {true,false}: Show the debugging channel</li>
-   *   <li>log.file = By default, write to this file.
-   *   <li>log.neatExit = {true,false}: Clean up logs on exception or regular system exit</li>
-   *   <li>log.output = {stderr,stdout,java.util.logging}: Output messages to either stderr or stdout by default.</li>
+   *   <li>log.channels.hide = [channels]: Hide these channels (comma-separated list)</li>
+   *   <li>log.channels.show = [channels]: Show only these channels (comma-separated list)</li>
+   *   <li>log.channels.width = [int]: If nonzero, the channels for each logging statement will be printed to their left</li>
    * </ul>
    * @param props The properties to use in configuration
    * @return A new Redwood Configuration based on the passed properties, ignoring any existing custom configuration
    */
   public static RedwoodConfiguration parse(Properties props){
-    RedwoodConfiguration config = new RedwoodConfiguration().clear();
-    Set<String> used = Generics.newHashSet();
+    Set<String> used = new HashSet<String>();
+    //--Construct Pipeline
+    //(handlers)
+    Redwood.ConsoleHandler console = get(props,"log.toStderr","false",used).equalsIgnoreCase("true") ? Redwood.ConsoleHandler.err() : Redwood.ConsoleHandler.out();
+    VisibilityHandler visibility = new VisibilityHandler();
+    RepeatedRecordHandler repeat = null;
+    //(initialize pipeline)
+    RedwoodConfiguration config = new RedwoodConfiguration().clear().rootHandler(visibility);
+    //(collapse)
+    String collapseSetting = get(props,"log.collapse","none",used);
+    if(collapseSetting.equalsIgnoreCase("exact")){
+      repeat = new RepeatedRecordHandler(RepeatedRecordHandler.EXACT);
+      config = config.handler(visibility,repeat);
+    } else if(collapseSetting.equalsIgnoreCase("approximate")){
+      repeat = new RepeatedRecordHandler(RepeatedRecordHandler.APPROXIMATE);
+      config = config.handler(visibility, repeat);
+    } else if(collapseSetting.equalsIgnoreCase("none")){
+      //do nothing
+    } else {
+      throw new IllegalArgumentException("Unknown collapse type: " + collapseSetting);
+    }
+    //--Console
+    //((track color))
+    console.trackColor = Color.valueOf(get(props,"log.console.trackColor","NONE",used).toUpperCase());
+    console.trackStyle = Style.valueOf(get(props,"log.console.trackStyle","NONE",used).toUpperCase());
+    //((other colors))
+    for(Object propAsObj : props.keySet()) {
+      String prop = propAsObj.toString();
+      // color
+      Matcher m = consoleColor.matcher(prop);
+      if(m.find()){
+        String channel = m.group(1);
+        console.colorChannel(channel, Color.valueOf(get(props,prop,"NONE",used)));
+      }
+      // style
+      m = consoleStyle.matcher(prop);
+      if(m.find()){
+        String channel = m.group(1);
+        console.styleChannel(channel, Style.valueOf(get(props,prop,"NONE",used)));
+      }
+    }
+    //((random colors))
+    console.setColorChannels(Boolean.parseBoolean(get(props, "log.console.colorChannels", "false", used)));
+    //--File
+    String logFilename = get(props,"log.file",null,used);
+    if(logFilename != null){
+      Redwood.FileHandler file = new Redwood.FileHandler(logFilename);
+      config.handler(repeat == null ? visibility : repeat, file);
+      //((track colors))
+      file.trackColor = Color.valueOf(get(props,"log.file.trackColor","NONE",used).toUpperCase());
+      file.trackStyle = Style.valueOf(get(props,"log.file.trackStyle","NONE",used).toUpperCase());
+      //((other colors))
+      for(Object propAsObj : props.keySet()) {
+        String prop = propAsObj.toString();
+        // color
+        Matcher m = fileColor.matcher(prop);
+        if(m.find()){
+          String channel = m.group(1);
+          file.colorChannel(channel, Color.valueOf(get(props,prop,"NONE",used)));
+        }
+        // style
+        m = fileStyle.matcher(prop);
+        if(m.find()){
+          String channel = m.group(1);
+          file.styleChannel(channel, Style.valueOf(get(props,prop,"NONE",used)));
+        }
+      }
+      //((random colors))
+      file.setColorChannels(Boolean.parseBoolean(get(props,"log.file.colorChannels","false",used)));
+    }
 
-    //--Capture Streams
+    //--Method
+    String method = get(props,"log.method","default",used).toLowerCase();
+    if(method.equalsIgnoreCase("redwood")){
+      edu.stanford.nlp.util.logging.JavaUtilLoggingAdaptor.adapt();
+      config = config.handler(repeat == null ? visibility : repeat, console);
+    } else if(method.equalsIgnoreCase("java.util.logging")){
+      edu.stanford.nlp.util.logging.JavaUtilLoggingAdaptor.adapt();
+      String loggerName = get(props,"log.method.name","``error``",used);
+      if (loggerName.equals("``error``")) {
+        throw new IllegalArgumentException("Logger name (log.method.name) required to adapt with java.util.logging");
+      }
+      RedirectOutputHandler<Logger, Level> adapter = RedirectOutputHandler.fromJavaUtilLogging(Logger.getLogger(loggerName));
+      config = config.handler(repeat == null ? visibility : repeat, adapter);
+    } else if (method.equalsIgnoreCase("default")) {
+      config = config.handler(repeat == null ? visibility : repeat, console);
+    } else {
+      throw new IllegalArgumentException("Unknown value for log.method");
+    }
+    
+    //--System Streams
     if(get(props,"log.captureStreams","false",used).equalsIgnoreCase("true")){
-      config = config.capture(System.out).capture(System.err);
+      config = config.captureStreams();
     }
     if(get(props,"log.captureStdout","false",used).equalsIgnoreCase("true")){
-      config = config.capture(System.out);
+      config = config.captureStdout();
     }
     if(get(props,"log.captureStderr","false",used).equalsIgnoreCase("true")){
-      config = config.capture(System.err);
+      config = config.captureStderr();
     }
-
-    //--Collapse
-    String collapse = get(props, "log.collapse", "none", used);
-    List<LogRecordHandler> chain = new LinkedList<LogRecordHandler>();
-    if (collapse.equalsIgnoreCase("exact")) {
-      chain.add(new RepeatedRecordHandler(RepeatedRecordHandler.EXACT));
-    } else if (collapse.equalsIgnoreCase("approximate")) {
-      chain.add(new RepeatedRecordHandler(RepeatedRecordHandler.APPROXIMATE));
-    } else if (!collapse.equalsIgnoreCase("none")) {
-      throw new IllegalArgumentException("Unknown collapse mode (Redwood): " + collapse);
-    }
-
-    //--Channels.Debug
-    boolean debug = Boolean.parseBoolean(get(props, "log.channels.debug", "true", used));
-    if (!debug) {
-      chain.add(Handlers.hideDebug);
-    }
-
-    //--Channels.Width
-    config.channelWidth( Integer.parseInt(get(props, "log.channels.width", "0", used)) );
-
     //--Neat exit
     if(get(props,"log.neatExit","false",used).equalsIgnoreCase("true")){
       config = config.neatExit();
     }
-
-    //--File
-    String outputFile = get(props, "log.file", null, used);
-    if (outputFile != null) {
-      config.defaultFile = new File(outputFile);
-      config = config.handlers(Handlers.defaultFile);
+    //--Channel Visibility
+    // (parse properties)
+    String channelsToShow = get(props,"log.channels.show",null,used);
+    String channelsToHide = get(props,"log.channels.hide",null,used);
+    int channelWidth = Integer.parseInt(get(props, "log.channels.width", "10", used));
+    if (channelsToShow != null && channelsToHide != null) {
+      throw new IllegalArgumentException("Can't specify both log.channels.show and log.channels.hide");
     }
-
-    //--Console
-    config = config.output(get(props, "log.output", "stdout", used));
-
-    //--Console
-    config = config.handlers(Handlers.chain(chain.toArray(new LogRecordHandler[chain.size()]), Handlers.output));
-
+    // (set visibility)
+    if (channelsToShow != null) {
+      if(channelsToShow.equalsIgnoreCase("true")){
+        config = config.printChannels(channelWidth);
+      } else {
+        config = config.printChannels(channelWidth).showOnlyChannels(channelsToShow.split(","));
+      }
+    } else if (channelsToHide != null) {
+      config = config.printChannels(channelWidth).hideChannels(channelsToHide.split(","));
+    }
     //--Error Check
     for(Object propAsObj : props.keySet()) {
       String prop = propAsObj.toString();
@@ -487,20 +468,4 @@ public class RedwoodConfiguration {
   public static void apply(Properties props){
     parse(props).apply();
   }
-
-
-  /*
-  public static void main(String[] args) {
-    RedwoodConfiguration.empty().neatExit().capture(System.out).capture(System.err)
-        .channelWidth(20)
-        .handlers(
-            Handlers.chain(Handlers.hideDebug, Handlers.output),
-            Handlers.file("/tmp/redwood.log"))
-        .apply();
-    Redwood.log("foo");
-    Redwood.log(Redwood.DBG, "debug");
-    System.out.println("Bar");
-    System.err.println("Baz");
-  }
-  */
 }

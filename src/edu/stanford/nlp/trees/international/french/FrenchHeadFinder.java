@@ -2,8 +2,8 @@ package edu.stanford.nlp.trees.international.french;
 
 import edu.stanford.nlp.ling.CategoryWordTag;
 import edu.stanford.nlp.trees.*;
-import edu.stanford.nlp.util.Generics;
 
+import java.util.HashMap;
 
 /**
  * TODO wsg2010: Compare these head finding rules to those found in Arun Abishek's 
@@ -28,7 +28,7 @@ public class FrenchHeadFinder extends AbstractCollinsHeadFinder {
     // D (determiner), ET (foreign word), I (interjection), N (noun),
     // P (preposition), PREF (prefix), PRO (strong pronoun -- very confusing), V (verb), PUNC (punctuation)
 
-    nonTerminalInfo = Generics.newHashMap();
+    nonTerminalInfo = new HashMap<String, String[][]>();
 
     // "sentence"
     nonTerminalInfo.put(tlp.startSymbol(), new String[][]{{"left", "VN", "NP"}, {"left"}});
@@ -85,7 +85,7 @@ public class FrenchHeadFinder extends AbstractCollinsHeadFinder {
     nonTerminalInfo.put("MWET", new String[][] {{"left", "ET", "N"}, {"left"}});
 
     //TODO: wsg2011: For phrasal nodes that lacked a label.
-    nonTerminalInfo.put(FrenchXMLTreeReader.MISSING_PHRASAL, new String[][]{{"left"}});
+    nonTerminalInfo.put(FrenchTreeReader.MISSING_PHRASAL, new String[][]{{"left"}});
     
   }
 
@@ -104,10 +104,12 @@ public class FrenchHeadFinder extends AbstractCollinsHeadFinder {
     CategoryWordTag.suppressTerminalDetails = true;
     treebank.loadPath(args[0]);
     final HeadFinder chf = new FrenchHeadFinder();
-    treebank.apply(pt -> {
-      pt.percolateHeads(chf);
-      pt.pennPrint();
-      System.out.println();
+    treebank.apply(new TreeVisitor() {
+      public void visitTree(Tree pt) {
+        pt.percolateHeads(chf);
+        pt.pennPrint();
+        System.out.println();
+      }
     });
   }
 

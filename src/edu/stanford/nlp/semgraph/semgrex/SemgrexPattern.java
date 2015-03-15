@@ -4,14 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.trees.GrammaticalStructure;
-import edu.stanford.nlp.trees.MemoryTreebank;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeNormalizer;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.StringUtils;
 
 /**
  * A SemgrexPattern is a <code>tgrep</code>-type pattern for matching node
@@ -31,14 +24,13 @@ import edu.stanford.nlp.util.StringUtils;
  * matches "NN", "NNS", "NNP", etc. --wcmac) <p/>
  *
  * For example, <code>{lemma:slice;tag:/VB.* /}</code> represents any verb nodes
- * with "slice" as their lemma.  Attributes are extracted using 
- * <code>edu.stanford.nlp.ling.AnnotationLookup</code>. <p/>
- *
+ * with "slice" as their lemma. <p/>
+ * 
  * The root of the graph can be marked by the $ sign, that is <code>{$}</code>
  * represents the root node. <p/>
- *
+ *  
  * Relations are defined by a symbol representing the type of relationship and a
- * string or regular expression representing the value of the relationship. A
+ * string, or regular expression representing the value of the relationship. A
  * relationship string of <code>%</code> means any relationship.  It is
  * also OK simply to omit the relationship symbol altogether.
  * <p/>
@@ -53,19 +45,18 @@ import edu.stanford.nlp.util.StringUtils;
  * <tr><td>A &gt;&gt;reln B <td>A is the governer of a relation reln in a chain to B following gov-&gt;dep paths
  * <tr><td>A x,y&lt;&lt;reln B <td>A is the dependent of a relation reln in a chain to B following dep-&gt;gov paths between distances of x and y
  * <tr><td>A x,y&gt;&gt;reln B <td>A is the governer of a relation reln in a chain to B following gov-&gt;dep paths between distances of x and y
- * <tr><td>A == B <td>A and B are the same nodes in the same graph
  * <tr><td>A @ B <td>A is aligned to B
  * </table>
  * <p/>
  *
  * In a chain of relations, all relations are relative to the first
  * node in the chain. For example, "<code>{} &gt;nsubj {} &gt;dobj
- * {}</code>" means "any node that is the governor of both a nsubj and
+ * {}</code>" means "any node that is the governer of both a nsubj and
  * a dobj relation".  If instead what you want is a node that is the
  * governer of a nsubj relation with a node that is itself the
  * governer of dobj relation, you should write: "<code>{} &gt;nsubj
  * ({} &gt;dobj {})</code>". <p/>
- *
+ * 
  * If a relation type is specified for the &lt;&lt; relation, the
  * relation type is only used for the first relation in the sequence.
  * Therefore, if B depends on A with the relation type foo, the
@@ -123,7 +114,7 @@ import edu.stanford.nlp.util.StringUtils;
  * be stored in a map that maps names to nodes so that if a match is found, the
  * node corresponding to the named node can be extracted from the map.  For
  * example <code> ({tag:NN}=noun) </code> will match a singular noun node and
- * after a match is found, the map can be queried with the name to retrieved the
+ * after a match is found, the map can be queried with the name to retreived the
  * matched node using {@link SemgrexMatcher#getNode(String o)} with (String)
  * argument "noun" (<it>not</it> "=noun").  Note that you are not allowed to
  * name a node that is under the scope of a negation operator (the semantics
@@ -131,10 +122,10 @@ import edu.stanford.nlp.util.StringUtils;
  * Trying to do so will cause a {@link ParseException} to be thrown. Named nodes
  * <it>can be put within the scope of an optionality operator</it>. <p/>
  *
- * Named nodes that refer back to previously named nodes need not have a node
+ * Named nodes that refer back to previous named nodes need not have a node
  * description -- this is known as "backreferencing".  In this case, the
  * expression will match only when all instances of the same name get matched to
- * the same node.  For example: the pattern
+ * the same node.  For example: the pattern 
  * <code>{} &gt;dobj ({} &gt; {}=foo) &gt;mod ({} &gt; {}=foo) </code>
  * will match a graph in which there are two nodes, <code>X</code> and
  * <code>Y</code>, for which <code>X</code> is the grandparent of
@@ -142,29 +133,13 @@ import edu.stanford.nlp.util.StringUtils;
  * which goes through a <code>dobj</code> and one of which goes
  * through a <code>mod</code>. <p/>
  *
- * <p><h3>Naming relations</h3>
- *
- * It is also possible to name relations.  For example, you can write the pattern
- * <code>{idx:1} &gt;=reln {idx:2}</code>  The name of the relation will then 
- * be stored in the matcher and can be extracted with <code>getRelnName("reln")</code>  
- * At present, though, there is no backreferencing capability such as with the 
- * named nodes; this is only useful when using the API to extract the name of the 
- * relation used when making the match.
- * <p/>
- * In the case of ancestor and descendant relations, the <b>last</b>
- * relation in the sequence of relations is the name used.  
- * <p/>
- *
  * @author Chloe Kiddon
  */
 public abstract class SemgrexPattern implements Serializable {
-
   private static final long serialVersionUID = 1722052832350596732L;
   private boolean neg = false;
   private boolean opt = false;
-  private String patternString; // conceptually final, but can't do because of parsing
-
-  Env env;
+  private String patternString;
 
   // package private constructor
   SemgrexPattern() {
@@ -179,17 +154,17 @@ public abstract class SemgrexPattern implements Serializable {
   abstract void setChild(SemgrexPattern child);
 
   void negate() {
-    if (opt) {
+    neg = true;
+    if (neg && opt) {
       throw new RuntimeException("Node cannot be both negated and optional.");
     }
-    neg = true;
   }
 
   void makeOptional() {
-    if (neg) {
+    opt = true;
+    if (neg && opt) {
       throw new RuntimeException("Node cannot be both negated and optional.");
     }
-    opt = true;
   }
 
   boolean isNegated() {
@@ -213,13 +188,13 @@ public abstract class SemgrexPattern implements Serializable {
 
   /**
    * Get a {@link SemgrexMatcher} for this pattern in this graph.
-   *
+   * 
    * @param sg
    *          the SemanticGraph to match on
    * @return a SemgrexMatcher
    */
   public SemgrexMatcher matcher(SemanticGraph sg) {
-    return matcher(sg, sg.getFirstRoot(), Generics.<String, IndexedWord>newHashMap(), Generics.<String, String>newHashMap(),
+    return matcher(sg, sg.getFirstRoot(), new HashMap<String, IndexedWord>(), new HashMap<String, String>(),
         new VariableStrings(), false);
   }
 
@@ -228,12 +203,12 @@ public abstract class SemgrexPattern implements Serializable {
    * initial conditions on the variable assignments
    */
   public SemgrexMatcher matcher(SemanticGraph sg, Map<String, IndexedWord> variables) {
-    return matcher(sg, sg.getFirstRoot(), variables, Generics.<String, String>newHashMap(), new VariableStrings(), false);
+    return matcher(sg, sg.getFirstRoot(), variables, new HashMap<String, String>(), new VariableStrings(), false);
   }
 
   /**
    * Get a {@link SemgrexMatcher} for this pattern in this graph.
-   *
+   * 
    * @param sg
    *          the SemanticGraph to match on
    * @param ignoreCase
@@ -242,18 +217,18 @@ public abstract class SemgrexPattern implements Serializable {
    * @return a SemgrexMatcher
    */
   public SemgrexMatcher matcher(SemanticGraph sg, boolean ignoreCase) {
-    return matcher(sg, sg.getFirstRoot(), Generics.<String, IndexedWord>newHashMap(), Generics.<String, String>newHashMap(),
+    return matcher(sg, sg.getFirstRoot(), new HashMap<String, IndexedWord>(), new HashMap<String, String>(),
         new VariableStrings(), ignoreCase);
   }
 
   public SemgrexMatcher matcher(SemanticGraph hypGraph, Alignment alignment, SemanticGraph txtGraph) {
-    return matcher(hypGraph, alignment, txtGraph, true, hypGraph.getFirstRoot(), Generics.<String, IndexedWord>newHashMap(),
-        Generics.<String, String>newHashMap(), new VariableStrings(), false);
+    return matcher(hypGraph, alignment, txtGraph, true, hypGraph.getFirstRoot(), new HashMap<String, IndexedWord>(),
+        new HashMap<String, String>(), new VariableStrings(), false);
   }
 
   public SemgrexMatcher matcher(SemanticGraph hypGraph, Alignment alignment, SemanticGraph txtGraph, boolean ignoreCase) {
-    return matcher(hypGraph, alignment, txtGraph, true, hypGraph.getFirstRoot(), Generics.<String, IndexedWord>newHashMap(),
-        Generics.<String, String>newHashMap(), new VariableStrings(), ignoreCase);
+    return matcher(hypGraph, alignment, txtGraph, true, hypGraph.getFirstRoot(), new HashMap<String, IndexedWord>(),
+        new HashMap<String, String>(), new VariableStrings(), ignoreCase);
   }
 
   // compile method
@@ -261,17 +236,18 @@ public abstract class SemgrexPattern implements Serializable {
 
   /**
    * Creates a pattern from the given string.
-   *
+   * 
    * @param semgrex
    *          the pattern string
    * @return a SemgrexPattern for the string.
    */
-  public static SemgrexPattern compile(String semgrex, Env env) {
+  public static SemgrexPattern compile(String semgrex) {
+    // TODO: make this threadsafe by making SemgrexParser threadsafe.
+    // TODO: make semgrex parser objects non-public
     try {
       SemgrexParser parser = new SemgrexParser(new StringReader(semgrex + "\n"));
       SemgrexPattern newPattern = parser.Root();
-      newPattern.env = env;
-      newPattern.patternString = semgrex;
+      newPattern.setPatternString(semgrex);
       return newPattern;
     } catch (ParseException ex) {
       throw new SemgrexParseException("Error parsing semgrex pattern " + semgrex, ex);
@@ -280,12 +256,12 @@ public abstract class SemgrexPattern implements Serializable {
     }
   }
 
-  public static SemgrexPattern compile(String semgrex) {
-    return compile(semgrex, new Env());
-  }
-
   public String pattern() {
     return patternString;
+  }
+
+  public void setPatternString(String patternString) {
+    this.patternString = patternString;
   }
 
   // printing methods
@@ -295,42 +271,43 @@ public abstract class SemgrexPattern implements Serializable {
    * @return A single-line string representation of the pattern
    */
   @Override
-  public abstract String toString();
+  abstract public String toString();
 
   /**
-   * @param hasPrecedence indicates that this pattern has precedence in terms
+   * hasPrecedence indicates that this pattern has precedence in terms
    * of "order of operations", so there is no need to parenthesize the
    * expression
    */
-  public abstract String toString(boolean hasPrecedence);
+  abstract public String toString(boolean hasPrecedence);
 
   private void prettyPrint(PrintWriter pw, int indent) {
     for (int i = 0; i < indent; i++) {
       pw.print("   ");
     }
     pw.println(localString());
-    for (SemgrexPattern child : getChildren()) {
+    for (Iterator<SemgrexPattern> iter = getChildren().iterator(); iter.hasNext();) {
+      SemgrexPattern child = iter.next();
       child.prettyPrint(pw, indent + 1);
     }
   }
 
   /**
-   * Print a multi-line representation of the pattern illustrating its syntax.
+   * Print a multi-line respresentation of the pattern illustrating its syntax.
    */
   public void prettyPrint(PrintWriter pw) {
     prettyPrint(pw, 0);
   }
 
   /**
-   * Print a multi-line representation of the pattern illustrating its syntax.
+   * Print a multi-line respresentation of the pattern illustrating its syntax.
    */
   public void prettyPrint(PrintStream ps) {
     prettyPrint(new PrintWriter(new OutputStreamWriter(ps), true));
   }
 
   /**
-   * Print a multi-line representation of the pattern illustrating its syntax
-   * to {@code System.out}.
+   * Print a multi-line respresentation of the pattern illustrating its syntax
+   * to <code>System.out</code>.
    */
   public void prettyPrint() {
     prettyPrint(System.out);
@@ -339,102 +316,16 @@ public abstract class SemgrexPattern implements Serializable {
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof SemgrexPattern)) return false;
-    return o.toString().equals(this.toString());
+    if (((SemgrexPattern) o).toString().equals(this.toString()))
+      return true;
+    else
+      return false;
   }
 
   @Override
   public int hashCode() {
-    // if (this == null) return 0;
+    if (this == null) return 0;
     return this.toString().hashCode();
-  }
 
-  static final String PATTERN = "-pattern";
-  static final String TREE_FILE = "-treeFile";
-  static final String MODE = "-mode";
-  static final String DEFAULT_MODE = "BASIC";
-  static final String EXTRAS = "-extras";
-    
-  public static void help() {
-    System.err.println("Possible arguments for SemgrexPattern:");
-    System.err.println(PATTERN + ": what pattern to use for matching");
-    System.err.println(TREE_FILE + ": a file of trees to process");
-    System.err.println(MODE + ": what mode for dependencies.  basic, collapsed, or ccprocessed.  To get 'noncollapsed', use basic with extras");
-    System.err.println(EXTRAS + ": whether or not to use extras");
-    System.err.println();
-    System.err.println(PATTERN + " is required");
-  }
-
-  /**
-   * Prints out all matches of a semgrex pattern on a file of dependencies.
-   * <br>
-   * Usage:<br>
-   * java edu.stanford.nlp.semgraph.semgrex.SemgrexPattern [args]
-   * <br>
-   * See the help() function for a list of possible arguments to provide.
-   */
-  public static void main(String[] args) {
-    Map<String,Integer> flagMap = Generics.newHashMap();
-
-    flagMap.put(PATTERN, 1);
-    flagMap.put(TREE_FILE, 1);
-    flagMap.put(MODE, 1);
-    flagMap.put(EXTRAS, 1);
-
-    Map<String, String[]> argsMap = StringUtils.argsToMap(args, flagMap);
-    args = argsMap.get(null);
-
-    // TODO: allow patterns to be extracted from a file
-    if (!(argsMap.containsKey(PATTERN)) || argsMap.get(PATTERN).length == 0) {
-      help();
-      System.exit(2);
-    }
-    SemgrexPattern semgrex = SemgrexPattern.compile(argsMap.get(PATTERN)[0]);
-
-    String modeString = DEFAULT_MODE;
-    if (argsMap.containsKey(MODE) && argsMap.get(MODE).length > 0) {
-      modeString = argsMap.get(MODE)[0].toUpperCase();
-    }
-    SemanticGraphFactory.Mode mode = SemanticGraphFactory.Mode.valueOf(modeString);
-
-    boolean useExtras = true;
-    if (argsMap.containsKey(EXTRAS) && argsMap.get(EXTRAS).length > 0) {
-      useExtras = Boolean.valueOf(argsMap.get(EXTRAS)[0]);
-    }
-    
-    List<SemanticGraph> graphs = Generics.newArrayList();
-    // TODO: allow other sources of graphs, such as dependency files
-    if (argsMap.containsKey(TREE_FILE) && argsMap.get(TREE_FILE).length > 0) {
-      for (String treeFile : argsMap.get(TREE_FILE)) {
-        System.err.println("Loading file " + treeFile);
-        MemoryTreebank treebank = new MemoryTreebank(new TreeNormalizer());
-        treebank.loadPath(treeFile);
-        for (Tree tree : treebank) {
-          // TODO: allow other languages... this defaults to English
-          SemanticGraph graph = SemanticGraphFactory.makeFromTree(tree, mode, useExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, true, null);
-          graphs.add(graph);
-        }
-      }
-    }
-
-    for (SemanticGraph graph : graphs) {
-      SemgrexMatcher matcher = semgrex.matcher(graph);
-      if (!(matcher.find())) {
-        continue;
-      }
-      System.err.println("Matched graph:");
-      System.err.println(graph.toString(SemanticGraph.OutputFormat.LIST));
-      boolean found = true;
-      while (found) {
-        System.err.println("Matches at: " + matcher.getMatch().value() + "-" + matcher.getMatch().index());
-        List<String> nodeNames = Generics.newArrayList();
-        nodeNames.addAll(matcher.getNodeNames());
-        Collections.sort(nodeNames);
-        for (String name : nodeNames) {
-          System.err.println("  " + name + ": " + matcher.getNode(name).value() + "-" + matcher.getNode(name).index());
-        }
-        System.err.println();
-        found = matcher.find();
-      }
-    }
   }
 }

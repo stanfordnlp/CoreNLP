@@ -110,40 +110,6 @@ public final class FileSystem {
   }
   
   /**
-   * Make the given directory or throw a RuntimeException
-   */
-  public static void mkdirOrFail(String dir) {
-    mkdirOrFail(new File(dir));
-  }
-
-  /**
-   * Make the given directory or throw a RuntimeException
-   */
-  public static void mkdirOrFail(File dir) {
-    if (!dir.mkdirs()) {
-      String error = "Could not create " + dir;
-      System.err.println(error);
-      throw new RuntimeException(error);
-    }
-  }
-
-  public static void checkExistsOrFail(File file) {
-    if (!file.exists()) {
-      String error = "Output path " + file + " does not exist";
-      System.err.println(error);
-      throw new RuntimeException(error);
-    }
-  }
-
-  public static void checkNotExistsOrFail(File file) {
-    if (file.exists()) {
-      String error = "Output path " + file + " already exists";
-      System.err.println(error);
-      throw new RuntimeException(error);
-    }
-  }
-
-  /**
    * Unit test code
    */
   public static void main(String[] args) {

@@ -1,22 +1,23 @@
 package edu.stanford.nlp.graph;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.util.CollectionUtils;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Finds connected components in the graph, currently uses inefficient list for
  * variable 'verticesLeft'. It might give a problem for big graphs
- *
+ * 
  * @author sonalg 08/08/11
  */
 public class ConnectedComponents<V, E> {
 
-  public static <V, E> List<Set<V>> getConnectedComponents(Graph<V, E> graph) {
+  public static <V, E> List<Set<V>> getConnectedComponents(DirectedMultiGraph<V, E> graph) {
     List<Set<V>> ccs = new ArrayList<Set<V>>();
     LinkedList<V> todo = new LinkedList<V>();
     // TODO: why not a set?
@@ -29,8 +30,8 @@ public class ConnectedComponents<V, E> {
     return ccs;
   }
 
-  private static <V, E> Set<V> bfs(LinkedList<V> todo, Graph<V, E> graph, List<V> verticesLeft) {
-    Set<V> cc = Generics.newHashSet();
+  private static <V, E> Set<V> bfs(LinkedList<V> todo, DirectedMultiGraph<V, E> graph, List<V> verticesLeft) {
+    Set<V> cc = new HashSet<V>();
     while (todo.size() > 0) {
       V node = todo.removeFirst();
       cc.add(node);

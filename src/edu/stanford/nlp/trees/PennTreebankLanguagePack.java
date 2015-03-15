@@ -3,7 +3,7 @@ package edu.stanford.nlp.trees;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
-import java.util.function.Predicate;
+import edu.stanford.nlp.util.Filter;
 
 
 /**
@@ -22,15 +22,15 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
   }
 
 
-  private static final String[] pennPunctTags = {"''", "``", "-LRB-", "-RRB-", ".", ":", ","};
+  private static String[] pennPunctTags = {"''", "``", "-LRB-", "-RRB-", ".", ":", ","};
 
-  private static final String[] pennSFPunctTags = {"."};
+  private static String[] pennSFPunctTags = {"."};
 
-  private static final String[] collinsPunctTags = {"''", "``", ".", ":", ","};
+  private static String[] collinsPunctTags = {"''", "``", ".", ":", ","};
 
-  private static final String[] pennPunctWords = {"''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";"};
+  private static String[] pennPunctWords = {"''", "'", "``", "`", "-LRB-", "-RRB-", "-LCB-", "-RCB-", ".", "?", "!", ",", ":", "-", "--", "...", ";"};
 
-  private static final String[] pennSFPunctWords = {".", "!", "?"};
+  private static String[] pennSFPunctWords = {".", "!", "?"};
 
 
   /**
@@ -41,12 +41,12 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    * printing out lexicalized dependencies.  Note that ] ought to be
    * unnecessary, since it would end the annotation, not start it.
    */
-  private static final char[] annotationIntroducingChars = {'-', '=', '|', '#', '^', '~', '_', '['};
+  private static char[] annotationIntroducingChars = {'-', '=', '|', '#', '^', '~', '_', '['};
 
   /**
    * This is valid for "BobChrisTreeNormalizer" conventions only.
    */
-  private static final String[] pennStartSymbols = {"ROOT", "TOP"};
+  private static String[] pennStartSymbols = {"ROOT", "TOP"};
 
 
   /**
@@ -171,18 +171,13 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    * @return A GrammaticalStructure suitable for this language/treebank.
    */
   @Override
-  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter) {
+  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilter) {
     return new EnglishGrammaticalStructureFactory(puncFilter);
   }
 
   @Override
-  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter, HeadFinder hf) {
+  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilter, HeadFinder hf) {
     return new EnglishGrammaticalStructureFactory(puncFilter, hf);
-  }
-
-  @Override
-  public boolean supportsGrammaticalStructures() {
-    return true;
   }
 
   /** {@inheritDoc} */

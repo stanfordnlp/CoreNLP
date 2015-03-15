@@ -14,7 +14,6 @@ import java.text.NumberFormat;
  * @author Joseph Smarr
  */
 public class PrecisionRecallStats {
-
   /**
    * Count of true positives.
    */
@@ -37,7 +36,7 @@ public class PrecisionRecallStats {
     this(0, 0, 0);
   }
 
-  public <L,F> PrecisionRecallStats(Classifier<L,F> classifier,Dataset<L,F> data,L positiveClass)
+  public <L,F> PrecisionRecallStats(Classifier<L,F> classifier,Dataset<L,F> data,L positiveClass) 
   {
     for (int i=0; i < data.size(); ++i)
     {
@@ -65,21 +64,21 @@ public class PrecisionRecallStats {
    * Returns the current count of true positives.
    */
   public int getTP() {
-    return tpCount;
+    return (tpCount);
   }
 
   /**
    * Returns the current count of false positives.
    */
   public int getFP() {
-    return fpCount;
+    return (fpCount);
   }
 
   /**
    * Returns the current count of false negatives.
    */
   public int getFN() {
-    return fnCount;
+    return (fnCount);
   }
 
   /**
@@ -139,9 +138,9 @@ public class PrecisionRecallStats {
    */
   public double getPrecision() {
     if (tpCount == 0 && fpCount == 0) {
-      return 1.0;
+      return (1.0);
     }
-    return ((double) tpCount) / (tpCount + fpCount);
+    return (((double) tpCount) / (tpCount + fpCount));
   }
 
   /**
@@ -159,9 +158,9 @@ public class PrecisionRecallStats {
    */
   public double getRecall() {
     if (tpCount == 0 && fnCount == 0) {
-      return 1.0;
+      return (1.0);
     }
-    return ((double) tpCount) / (tpCount + fnCount);
+    return (((double) tpCount) / (tpCount + fnCount));
   }
 
   /**
@@ -177,21 +176,21 @@ public class PrecisionRecallStats {
    * Returns the current F1 measure (<tt>alpha=0.5</tt>).
    */
   public double getFMeasure() {
-    return getFMeasure(0.5);
+    return (getFMeasure(0.5));
   }
 
   /**
    * Returns the F-Measure with the given mixing parameter (must be between 0 and 1).
    * If either precision or recall are 0, return 0.0.
-   * <tt>F(alpha) = 1/(alpha/precision + (1-alpha)/recall)</tt>
+   * <tt>F(alpha) = 1/(alpha/precision + (1-aalpha)/recall)</tt>
    */
   public double getFMeasure(double alpha) {
     double pr = getPrecision();
     double re = getRecall();
     if (pr == 0 || re == 0) {
-      return 0.0;
+      return (0.0);
     }
-    return 1.0 / ((alpha / pr) + (1.0 - alpha) / re);
+    return (1.0 / ((alpha / pr) + (1.0 - alpha) / re));
   }
 
   /**
@@ -208,13 +207,12 @@ public class PrecisionRecallStats {
    */
   @Override
   public String toString() {
-    return "PrecisionRecallStats[tp=" + getTP() + ",fp=" + getFP() + ",fn=" + getFN() + "]";
+    return ("PrecisionRecallStats[tp=" + getTP() + ",fp=" + getFP() + ",fn=" + getFN() + "]");
   }
 
   public String toString(int numDigits) {
-    return "PrecisionRecallStats[tp=" + getTP() + ",fp=" + getFP() + ",fn=" + getFN() +
+    return ("PrecisionRecallStats[tp=" + getTP() + ",fp=" + getFP() + ",fn=" + getFN() +
             ",p=" + getPrecisionDescription(numDigits) + ",r=" + getRecallDescription(numDigits) +
-            ",f1=" + getF1Description(numDigits) + "]";
+            ",f1=" + getF1Description(numDigits) + "]");
   }
-
 }

@@ -6,15 +6,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import java.util.logging.Logger;
 
 import edu.stanford.nlp.ie.machinereading.common.SimpleTokenize;
 import edu.stanford.nlp.ie.machinereading.domains.ace.AceReader;
-import edu.stanford.nlp.util.Generics;
 
 /**
  * Stores the ACE elements annotated in this document
@@ -27,23 +26,23 @@ public class AceDocument extends AceElement {
   private String mSource;
 
   /** All entities */
-  private Map<String, AceEntity> mEntities;
+  private HashMap<String, AceEntity> mEntities;
   /** All entity mentions */
-  private Map<String, AceEntityMention> mEntityMentions;
+  private HashMap<String, AceEntityMention> mEntityMentions;
   /** All entity mentions in a given sentence, sorted in textual order */
   private ArrayList<ArrayList<AceEntityMention>> mSentenceEntityMentions;
 
   /** All relations */
-  private Map<String, AceRelation> mRelations;
+  private HashMap<String, AceRelation> mRelations;
   /** All relation mentions */
-  private Map<String, AceRelationMention> mRelationMentions;
+  private HashMap<String, AceRelationMention> mRelationMentions;
   /** All relation mentions in a given sentence, sorted in textual order */
   private ArrayList<ArrayList<AceRelationMention>> mSentenceRelationMentions;
 
   /** All events */
-  private Map<String, AceEvent> mEvents;
+  private HashMap<String, AceEvent> mEvents;
   /** All event mentions */
-  private Map<String, AceEventMention> mEventMentions;
+  private HashMap<String, AceEventMention> mEventMentions;
   /** All event mentions in a given sentence, sorted in textual order */
   private ArrayList<ArrayList<AceEventMention>> mSentenceEventMentions;
   
@@ -61,16 +60,16 @@ public class AceDocument extends AceElement {
   public AceDocument(String id) {
     super(id);
 
-    mEntities = Generics.newHashMap();
-    mEntityMentions = Generics.newHashMap();
+    mEntities = new HashMap<String, AceEntity>();
+    mEntityMentions = new HashMap<String, AceEntityMention>();
     mSentenceEntityMentions = new ArrayList<ArrayList<AceEntityMention>>();
 
-    mRelations = Generics.newHashMap();
-    mRelationMentions = Generics.newHashMap();
+    mRelations = new HashMap<String, AceRelation>();
+    mRelationMentions = new HashMap<String, AceRelationMention>();
     mSentenceRelationMentions = new ArrayList<ArrayList<AceRelationMention>>();
 
-    mEvents = Generics.newHashMap();
-    mEventMentions = Generics.newHashMap();
+    mEvents = new HashMap<String, AceEvent>();
+    mEventMentions = new HashMap<String, AceEventMention>();
     mSentenceEventMentions = new ArrayList<ArrayList<AceEventMention>>();
     
     mTokens = new Vector<AceToken>();
@@ -144,7 +143,7 @@ public class AceDocument extends AceElement {
     mEntities.put(e.getId(), e);
   }
 
-  public Map<String, AceEntityMention> getEntityMentions() {
+  public HashMap<String, AceEntityMention> getEntityMentions() {
     return mEntityMentions;
   }
 
@@ -164,7 +163,7 @@ public class AceDocument extends AceElement {
     mRelations.put(r.getId(), r);
   }
 
-  public Map<String, AceRelationMention> getRelationMentions() {
+  public HashMap<String, AceRelationMention> getRelationMentions() {
     return mRelationMentions;
   }
 
@@ -184,7 +183,7 @@ public class AceDocument extends AceElement {
     mEvents.put(r.getId(), r);
   }
 
-  public Map<String, AceEventMention> getEventMentions() {
+  public HashMap<String, AceEventMention> getEventMentions() {
     return mEventMentions;
   }
 

@@ -3,6 +3,7 @@ package edu.stanford.nlp.time;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -22,7 +23,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 import edu.stanford.nlp.util.Iterables;
 
 
@@ -41,7 +42,12 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
   public Iterator<Annotation> iterator() {
     return new Iterator<Annotation>() {
       private Iterator<BufferedReader> readers = Iterables.transform(files,
-          file -> IOUtils.readerFromFile(file)).iterator();
+          new Function<File, BufferedReader>() {
+            @Override
+            public BufferedReader apply(File file) {
+              return new BufferedReader(new InputStreamReader(IOUtils.openFile(file)));
+            }
+      }).iterator();
 
       private BufferedReader reader = findReader();
       private Annotation annotation = findAnnotation();
@@ -173,7 +179,6 @@ public class ParsedGigawordReader implements Iterable<Annotation> {
     return document;
   }
   */
-
   private static Annotation toAnnotation(String xml) throws IOException {
     Element docElem;
     try {

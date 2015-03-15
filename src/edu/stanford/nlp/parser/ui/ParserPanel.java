@@ -28,8 +28,10 @@ package edu.stanford.nlp.parser.ui;
 
 import edu.stanford.nlp.io.ui.OpenPageDialog;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.parser.common.ParserQuery;
+import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.parser.lexparser.ChineseLexiconAndWordSegmenter;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.parser.lexparser.ParserQuery;
 import edu.stanford.nlp.process.*;
 import edu.stanford.nlp.swing.FontDetector;
 import edu.stanford.nlp.trees.PennTreebankLanguagePack;
@@ -83,6 +85,7 @@ public class ParserPanel extends JPanel {
 
   private static TreebankLanguagePack tlp;
   private String encoding = "UTF-8";
+  private boolean segmentWords = false;
 
   // one second in milliseconds
   private static final int ONE_SECOND = 1000;
@@ -134,9 +137,7 @@ public class ParserPanel extends JPanel {
 
     jfcLocation = new JFileChooserLocation(jfc);
 
-    tlp = new PennTreebankLanguagePack();
-    encoding = tlp.getEncoding();
-    setFont();
+    setLanguage(UNTOKENIZED_ENGLISH);
 
     // create a timer
     timer = new javax.swing.Timer(ONE_SECOND, new TimerListener());
@@ -287,12 +288,33 @@ public class ParserPanel extends JPanel {
     statusLabel.setText(status);
   }
 
-  private void setFont() {
-    if (tlp instanceof ChineseTreebankLanguagePack) {
-      setChineseFont();
-    } else {
-      textPane.setFont(new Font("Sans Serif", Font.PLAIN, 14));
-      treePanel.setFont(new Font("Sans Serif", Font.PLAIN, 14));
+  /**
+   * Sets the language used by the ParserPanel to tokenize, parse, and
+   * display sentences.
+   *
+   * @param language One of several predefined language codes. e.g.
+   *                 <tt>UNTOKENIZED_ENGLISH</tt>, <tt>TOKENIZED_CHINESE</tt>, etc.
+   */
+  public void setLanguage(int language) {
+    switch (language) {
+      case UNTOKENIZED_ENGLISH:
+        tlp = new PennTreebankLanguagePack();
+        encoding = tlp.getEncoding();
+        textPane.setFont(new Font("Sans Serif", Font.PLAIN, 14));
+        treePanel.setFont(new Font("Sans Serif", Font.PLAIN, 14));
+        break;
+      case UNTOKENIZED_CHINESE:
+        segmentWords = true;
+        tlp = new ChineseTreebankLanguagePack();
+        encoding = "UTF-8"; // we support that not GB18030 currently....
+        setChineseFont();
+        break;
+      case TOKENIZED_CHINESE:
+        segmentWords = false;
+        tlp = new ChineseTreebankLanguagePack();
+        encoding = "UTF-8"; // we support that not GB18030 currently....
+        setChineseFont();
+        break;
     }
   }
 
@@ -306,9 +328,6 @@ public class ParserPanel extends JPanel {
     } else if (FontDetector.hasFont("Watanabe Mincho")) {
       textPane.setFont(new Font("Watanabe Mincho", Font.PLAIN, 14));
       treePanel.setFont(new Font("Watanabe Mincho", Font.PLAIN, 14));
-    } else {
-      textPane.setFont(new Font("Sans Serif", Font.PLAIN, 14));
-      treePanel.setFont(new Font("Sans Serif", Font.PLAIN, 14));
     }
   }
 
@@ -327,6 +346,10 @@ public class ParserPanel extends JPanel {
     String text = textPane.getText().substring(startIndex, endIndex + 1).trim();
 
     if (parser != null && text.length() > 0) {
+      if (segmentWords) {
+        ChineseLexiconAndWordSegmenter lex = (ChineseLexiconAndWordSegmenter) parser.getLexicon();
+        ChineseTreebankLanguagePack.setTokenizerFactory(WordSegmentingTokenizer.factory(lex));
+      }
       //Tokenizer<? extends HasWord> toke = tlp.getTokenizerFactory().getTokenizer(new CharArrayReader(text.toCharArray()));
       Tokenizer<? extends HasWord> toke = tlp.getTokenizerFactory().getTokenizer(new StringReader(text));
       List<? extends HasWord> wordList = toke.tokenize();
@@ -472,7 +495,11 @@ public class ParserPanel extends JPanel {
 
     cancel.setText("Cancel");
     cancel.setToolTipText("Cancel");
-    cancel.addActionListener(evt -> thread.cancelled = true);
+    cancel.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        thread.cancelled = true;
+      }
+    });
 
     thread.start();
 
@@ -545,7 +572,11 @@ public class ParserPanel extends JPanel {
       if (cancelled && failures == 0) {
         dialog.setVisible(false);
       } else {
-        button.addActionListener(evt -> dialog.setVisible(false));
+        button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+              dialog.setVisible(false);
+            }
+          });
       }
     }
 
@@ -822,20 +853,32 @@ public class ParserPanel extends JPanel {
 
     loadFileButton.setText("Load File");
     loadFileButton.setToolTipText("Load a data file.");
-    loadFileButton.addActionListener(evt -> loadFileButtonActionPerformed(evt));
+    loadFileButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        loadFileButtonActionPerformed(evt);
+      }
+    });
 
     loadButtonPanel.add(loadFileButton);
 
     loadParserButton.setText("Load Parser");
     loadParserButton.setToolTipText("Load a serialized parser.");
-    loadParserButton.addActionListener(evt -> loadParserButtonActionPerformed(evt));
+    loadParserButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        loadParserButtonActionPerformed(evt);
+      }
+    });
 
     loadButtonPanel.add(loadParserButton);
 
     saveOutputButton.setText("Save Output");
     saveOutputButton.setToolTipText("Save the processed output.");
     saveOutputButton.setEnabled(false);
-    saveOutputButton.addActionListener(evt -> saveOutputButtonActionPerformed(evt));
+    saveOutputButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        saveOutputButtonActionPerformed(evt);
+      }
+    });
 
     loadButtonPanel.add(saveOutputButton);
 
@@ -845,34 +888,54 @@ public class ParserPanel extends JPanel {
 
     backButton.setToolTipText("Scroll backward one sentence.");
     backButton.setEnabled(false);
-    backButton.addActionListener(evt -> backButtonActionPerformed(evt));
+    backButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        backButtonActionPerformed(evt);
+      }
+    });
 
     buttonPanel.add(backButton);
 
     forwardButton.setToolTipText("Scroll forward one sentence.");
     forwardButton.setEnabled(false);
-    forwardButton.addActionListener(evt -> forwardButtonActionPerformed(evt));
+    forwardButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        forwardButtonActionPerformed(evt);
+      }
+    });
 
     buttonPanel.add(forwardButton);
 
     parseButton.setText("Parse");
     parseButton.setToolTipText("Parse selected sentence.");
     parseButton.setEnabled(false);
-    parseButton.addActionListener(evt -> parseButtonActionPerformed(evt));
+    parseButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        parseButtonActionPerformed(evt);
+      }
+    });
 
     buttonPanel.add(parseButton);
 
     parseNextButton.setText("Parse >");
     parseNextButton.setToolTipText("Parse selected sentence and then scrolls forward one sentence.");
     parseNextButton.setEnabled(false);
-    parseNextButton.addActionListener(evt -> parseNextButtonActionPerformed(evt));
+    parseNextButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        parseNextButtonActionPerformed(evt);
+      }
+    });
 
     buttonPanel.add(parseNextButton);
 
     clearButton.setText("Clear");
     clearButton.setToolTipText("Clears parse tree.");
     clearButton.setEnabled(false);
-    clearButton.addActionListener(evt -> clearButtonActionPerformed(evt));
+    clearButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        clearButtonActionPerformed(evt);
+      }
+    });
 
     buttonPanel.add(clearButton);
 

@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -11,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MutableDouble;
 
 /**
@@ -34,7 +34,7 @@ public class GeneralizedCounter<K> implements Serializable {
 
   private static final Object[] zeroKey = new Object[0];
 
-  private Map<K,Object> map = Generics.newHashMap();
+  private Map<K,Object> map = new HashMap<K, Object>();
 
   private int depth;
   private double total;
@@ -247,7 +247,7 @@ public class GeneralizedCounter<K> implements Serializable {
    * equal to the depth of the GeneralizedCounter.
    */
   public Set<List<K>> keySet() {
-    return ErasureUtils.<Set<List<K>>>uncheckedCast(keySet(Generics.newHashSet(), zeroKey, true));
+    return ErasureUtils.<Set<List<K>>>uncheckedCast(keySet(new HashSet<Object>(), zeroKey, true));
   }
 
   /* this is (non-tail) recursive right now, haven't figured out a way
@@ -354,10 +354,10 @@ public class GeneralizedCounter<K> implements Serializable {
 
 
   /**
-   * returns a {@code double[]} array of length
-   * {@code depth+1}, containing the conditional counts on a
-   * {@code depth}-length list given each level of conditional
-   * distribution from 0 to {@code depth}.
+   * returns a <code>double[]</code> array of length
+   * <code>depth+1</code>, containing the conditional counts on a
+   * <code>depth</code>-length list given each level of conditional
+   * distribution from 0 to <code>depth</code>.
    */
   public double[] getCounts(List<K> l) {
     if (l.size() != depth) {
@@ -766,7 +766,7 @@ public class GeneralizedCounter<K> implements Serializable {
 
     @Override
     public Set<K> keySet() {
-      return ErasureUtils.<Set<K>>uncheckedCast(GeneralizedCounter.this.keySet(Generics.newHashSet(), zeroKey, false));
+      return ErasureUtils.<Set<K>>uncheckedCast(GeneralizedCounter.this.keySet(new HashSet<Object>(), zeroKey, false));
     }
 
     @Override
@@ -822,7 +822,7 @@ public class GeneralizedCounter<K> implements Serializable {
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("{");
+      StringBuffer sb = new StringBuffer("{");
       for (Iterator<Map.Entry<K, Double>> i = entrySet().iterator(); i.hasNext();) {
         Map.Entry<K, Double> e = i.next();
         sb.append(e.toString());
@@ -843,33 +843,30 @@ public class GeneralizedCounter<K> implements Serializable {
   }
 
   public String toString(String param) {
-    switch (param) {
-      case "contingency": {
-        StringBuilder sb = new StringBuilder();
-        for (K obj : ErasureUtils.sortedIfPossible(topLevelKeySet())) {
-          sb.append(obj);
-          sb.append(" = ");
-          GeneralizedCounter<K> gc = conditionalizeOnce(obj);
-          sb.append(gc);
-          sb.append("\n");
-        }
-        return sb.toString();
+    if (param.equals("contingency")) {
+      StringBuffer sb = new StringBuffer();
+      for (K obj: ErasureUtils.sortedIfPossible(topLevelKeySet())) {
+        sb.append(obj);
+        sb.append(" = ");
+        GeneralizedCounter<K> gc = conditionalizeOnce(obj);
+        sb.append(gc);
+        sb.append("\n");
       }
-      case "sorted": {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{\n");
-        for (K obj : ErasureUtils.sortedIfPossible(topLevelKeySet())) {
-          sb.append(obj);
-          sb.append(" = ");
-          GeneralizedCounter<K> gc = conditionalizeOnce(obj);
-          sb.append(gc);
-          sb.append("\n");
-        }
-        sb.append("}\n");
-        return sb.toString();
+      return sb.toString();
+    } else if (param.equals("sorted")) {
+      StringBuffer sb = new StringBuffer();
+      sb.append("{\n");
+      for (K obj: ErasureUtils.sortedIfPossible(topLevelKeySet())) {
+        sb.append(obj);
+        sb.append(" = ");
+        GeneralizedCounter<K> gc = conditionalizeOnce(obj);
+        sb.append(gc);
+        sb.append("\n");
       }
-      default:
-        return toString();
+      sb.append("}\n");
+      return sb.toString();
+    } else {
+      return toString();
     }
   }
 
@@ -882,7 +879,7 @@ public class GeneralizedCounter<K> implements Serializable {
     Object[] a1 = new Object[]{"a", "b"};
     Object[] a2 = new Object[]{"a", "b"};
 
-    System.out.println(Arrays.equals(a1, a2));
+    System.out.println(a1.equals(a2));
 
 
     GeneralizedCounter<String> gc = new GeneralizedCounter<String>(3);

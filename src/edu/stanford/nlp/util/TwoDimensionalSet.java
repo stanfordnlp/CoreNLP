@@ -26,10 +26,6 @@ public class TwoDimensionalSet<K1, K2> implements Serializable, Iterable<Pair<K1
     return new TwoDimensionalSet<K1, K2>(TwoDimensionalMap.<K1, K2, Boolean>treeMap()); 
   }
 
-  public static <K1, K2> TwoDimensionalSet<K1, K2> hashSet() { 
-    return new TwoDimensionalSet<K1, K2>(TwoDimensionalMap.<K1, K2, Boolean>hashMap()); 
-  }
-
   public boolean add(K1 k1, K2 k2) {
     return (backingMap.put(k1, k2, true) != null);
   }
@@ -38,19 +34,6 @@ public class TwoDimensionalSet<K1, K2> implements Serializable, Iterable<Pair<K1
     boolean result = false;
     for (Pair<? extends K1, ? extends K2> pair : set) {
       if (add(pair.first, pair.second)) {
-        result = true;
-      }
-    }
-    return result;
-  }
-
-  /**
-   * Adds all the keys in the given TwoDimensionalMap.  Returns true iff at least one key is added.
-   */
-  public boolean addAllKeys(TwoDimensionalMap<? extends K1, ? extends K2, ?> map) {
-    boolean result = false;
-    for (TwoDimensionalMap.Entry<? extends K1, ? extends K2, ?> entry : map) {
-      if (add(entry.getFirstKey(), entry.getSecondKey())) {
         result = true;
       }
     }
@@ -111,14 +94,6 @@ public class TwoDimensionalSet<K1, K2> implements Serializable, Iterable<Pair<K1
 
   public int size() {
     return backingMap.size();
-  }
-
-  public Set<K1> firstKeySet() {
-    return backingMap.firstKeySet();
-  }
-
-  public Set<K2> secondKeySet(K1 k1) {
-    return backingMap.getMap(k1).keySet();
   }
 
   /**

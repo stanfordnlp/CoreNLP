@@ -1,7 +1,7 @@
 package edu.stanford.nlp.objectbank;
 
 import edu.stanford.nlp.util.AbstractIterator;
-import java.util.function.Function;
+import edu.stanford.nlp.util.Function;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -38,7 +38,6 @@ import java.io.Serializable;
  * <p/>
  *
  * <h3>Example Usages:</h3>
- *
  * The general case is covered below, but the most common thing people
  * <i>actually</i> want to do is read lines from a file.  There are special
  * methods to make this easy!  You use the <code>getLineIterator</code> method.
@@ -56,36 +55,26 @@ import java.io.Serializable;
  * More complex uses of getLineIterator let you interpret each line of a file
  * as an object of arbitrary type via a transformer Function.
  *
- * For more general uses with existing classes, you first construct a collection of sources, then a class that
- * will make the objects of interest from instances of those sources, and then set up an ObjectBank that can
- * vend those objects:
- * <pre><code>
- *   ReaderIteratorFactory rif = new ReaderIteratorFactory(Arrays.asList(new String[] { "file1", "file2", "file3" }));
- *   IteratorFromReaderFactory<Mention> corefIFRF = new MUCCorefIteratorFromReaderFactory(true);
- *   for (Mention m : new ObjectBank(rif, corefIFRF)) {
- *     ...
- *   }
- * </code></pre>
  * <p/>
  * As an example of the general power of this class, suppose you have
  * a collection of files in the directory /u/nlp/data/gre/questions.  Each file
  * contains several Puzzle documents which look like:
  * <pre>
- * &lt;puzzle&gt;
- *    &lt;preamble&gt; some text &lt;/preamble&gt;
- *    &lt;question&gt; some intro text
- *      &lt;answer&gt; answer1 &lt;/answer&gt;
- *      &lt;answer&gt; answer2 &lt;/answer&gt;
- *      &lt;answer&gt; answer3 &lt;/answer&gt;
- *      &lt;answer&gt; answer4 &lt;/answer&gt;
- *    &lt;/question&gt;
- *    &lt;question&gt; another question
- *      &lt;answer&gt; answer1 &lt;/answer&gt;
- *      &lt;answer&gt; answer2 &lt;/answer&gt;
- *      &lt;answer&gt; answer3 &lt;/answer&gt;
- *      &lt;answer&gt; answer4 &lt;/answer&gt;
- *    &lt;/question&gt;
- * &lt;/puzzle&gt;
+ * &lt;puzzle>
+ *    &lt;preamble> some text &lt;/preamble>
+ *    &lt;question> some intro text
+ *      &lt;answer> answer1 &lt;/answer>
+ *      &lt;answer> answer2 &lt;/answer>
+ *      &lt;answer> answer3 &lt;/answer>
+ *      &lt;answer> answer4 &lt;/answer>
+ *    &lt;/question>
+ *    &lt;question> another question
+ *      &lt;answer> answer1 &lt;/answer>
+ *      &lt;answer> answer2 &lt;/answer>
+ *      &lt;answer> answer3 &lt;/answer>
+ *      &lt;answer> answer4 &lt;/answer>
+ *    &lt;/question>
+ * &lt;/puzzle>
  * </pre>
  * <p/>
  * First you need to build a ReaderIteratorFactory which will provide java.io.Readers
@@ -100,9 +89,9 @@ import java.io.Serializable;
  * java.io.Readers vended by the ReaderIteratorFactory, split them up into
  * documents (Strings) and
  * then convert the Strings into Objects.  In this case we want to keep everything
- * between each set of &lt;puzzle&gt; &lt;/puzzle&gt; tags so we would use a BeginEndTokenizerFactory.
+ * between each set of <puzzle> </puzzle> tags so we would use a BeginEndTokenizerFactory.
  * You would also need to write a class which extends Function and whose apply method
- * converts the String between the &lt;puzzle&gt; &lt;/puzzle&gt; tags into Puzzle objects.
+ * converts the String between the <puzzle> </puzzle> tags into Puzzle objects.
  * <p/>
  * <pre>
  * public class PuzzleParser implements Function {
@@ -272,7 +261,7 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
 
   /**
    * If you are keeping the contents in memory,
-   * this will clear the memory, and they will be
+   * this will clear hte memory, and they will be
    * recomputed the next time iterator() is
    * called.
    */
@@ -290,8 +279,9 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
    */
   @Override
   public boolean contains(Object o) {
-    for (E e : this) {
-      if (e == o) {
+    Iterator<E> iter = iterator();
+    while (iter.hasNext()) {
+      if (iter.next() == o) {
         return true;
       }
     }
@@ -330,7 +320,6 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
     rif = new ReaderIteratorFactory();
   }
 
-  @Override
   public Object[] toArray() {
     Iterator<E> iter = iterator();
     ArrayList<Object> al = new ArrayList<Object>();
@@ -401,14 +390,14 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
   }
 
   /**
-   * Iterator of Objects.
+   * Iterator of Objects
    */
   class OBIterator extends AbstractIterator<E> {
 
-    private final Iterator<Reader> readerIterator;
-    private Iterator<E> tok;
-    private E nextObject;
-    private Reader currReader; // = null;
+    Iterator<Reader> readerIterator;
+    Iterator<E> tok;
+    E nextObject;
+    Reader currReader; // = null;
 
     public OBIterator() {
       readerIterator = rif.iterator();
@@ -460,8 +449,7 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
       setNextObject();
       return tmp;
     }
-
-  } // end class OBIterator
+  }
 
   private static final long serialVersionUID = -4030295596701541770L;
 

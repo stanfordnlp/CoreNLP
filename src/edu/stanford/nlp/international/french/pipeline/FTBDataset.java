@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -24,13 +25,11 @@ import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.trees.MemoryTreebank;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.international.arabic.ATBTreeUtils;
+import edu.stanford.nlp.trees.international.french.FrenchTreeReaderFactory;
 import edu.stanford.nlp.trees.international.french.FrenchTreebankLanguagePack;
-import edu.stanford.nlp.trees.international.french.FrenchXMLTreeReaderFactory;
 import edu.stanford.nlp.trees.tregex.TregexParseException;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.DataFilePaths;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * Produces the pre-processed version of the FTB used in the experiments of
@@ -41,8 +40,6 @@ import edu.stanford.nlp.util.PropertiesUtils;
  */
 public class FTBDataset extends AbstractDataset {
 
-  private boolean CC_TAGSET = false;
-
   private Set<String> splitSet;
 
   public FTBDataset() {
@@ -50,13 +47,15 @@ public class FTBDataset extends AbstractDataset {
 
     //Need to use a MemoryTreebank so that we can compute gross corpus
     //stats for MWE pre-processing
-    // The treebank may be reset if setOptions changes CC_TAGSET
-    treebank = new MemoryTreebank(new FrenchXMLTreeReaderFactory(CC_TAGSET), FrenchTreebankLanguagePack.FTB_ENCODING);
+    treebank = new MemoryTreebank(new FrenchTreeReaderFactory(), FrenchTreebankLanguagePack.FTB_ENCODING);
     treeFileExtension = "xml";
   }
 
   /**
    * Return the ID of this tree according to the Candito split files.
+   *
+   * @param t
+   * @return
    */
   private String getCanditoTreeID(Tree t) {
     String canditoName = null;
@@ -197,9 +196,6 @@ public class FTBDataset extends AbstractDataset {
       splitSet = makeSplitSet(splitFileName);
     }
 
-    CC_TAGSET = PropertiesUtils.getBool(opts, ConfigParser.paramCCTagset, false);
-    treebank = new MemoryTreebank(new FrenchXMLTreeReaderFactory(CC_TAGSET), FrenchTreebankLanguagePack.FTB_ENCODING);
-
     if(lexMapper == null) {
       lexMapper = new DefaultMapper();
       lexMapper.setup(null, lexMapOptions.split(","));
@@ -217,7 +213,7 @@ public class FTBDataset extends AbstractDataset {
 
   private Set<String> makeSplitSet(String splitFileName) {
     splitFileName = DataFilePaths.convert(splitFileName);
-    Set<String> splitSet = Generics.newHashSet();
+    Set<String> splitSet = new HashSet<String>();
     LineNumberReader reader = null;
     try {
       reader = new LineNumberReader(new FileReader(splitFileName));

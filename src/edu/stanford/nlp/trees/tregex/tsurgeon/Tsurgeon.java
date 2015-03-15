@@ -1,5 +1,5 @@
 // Tsurgeon
-// Copyright (c) 2004-2014 The Board of Trustees of
+// Copyright (c) 2004-2010 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -28,22 +28,20 @@
 
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.tregex.Macros;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.ReflectionLoading;
 
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.io.*;
-import java.util.stream.Collectors;
 
 /** Tsurgeon provides a way of editing trees based on a set of operations that
  *  are applied to tree locations matching a tregex pattern.
@@ -52,7 +50,7 @@ import java.util.stream.Collectors;
  * java edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon -treeFile atree
  *        exciseNP renameVerb
  * </blockquote>
- * The file {@code atree} has Penn Treebank (S-expression) format trees.
+ * The file <code>atree</code> has Penn Treebank (S-expression) format trees.
  * The other (here, two) files have Tsurgeon operations.  These consist of
  * a list of pairs of a tregex expression on one or more
  * lines, a blank line, and then some number of lines of Tsurgeon operations and then
@@ -96,13 +94,7 @@ import java.util.stream.Collectors;
  * <code>collectOperations</code> to collect all the surgery patterns
  * into one TsurgeonPattern, and then to call processPatternOnTrees.
  * Either of these latter methods is much faster.
- * </p><p>
- * The parser also has the ability to collect multiple
- * TsurgeonPatterns into one pattern by itself by enclosing each
- * pattern in <code>[ ... ]</code>.  For example,
- * <br>
- * <code>Tsurgeon.parseOperation("[relabel foo BAR] [prune bar]")</code>
- * </p><p>
+ * <p>
  * For more information on using Tsurgeon from the command line,
  * see the {@link #main} method and the package Javadoc.
  *
@@ -156,7 +148,7 @@ public class Tsurgeon {
    *   <li><code>-po &#60;matchPattern&#62; &#60;operation&#62;</code>  Apply a single operation to every tree using the specified match pattern and the specified operation.  Use this option
    *   when you want to quickly try the effect of one pattern/surgery combination, and are too lazy to write a transformation file.
    *   <li><code>-s</code> Print each output tree on one line (default is pretty-printing).
-   *   <li><code>-m</code> For every tree that had a matching pattern, print "before" (prepended as "Operated on:") and "after" (prepended as "Result:").  Unoperated on trees just pass through the transducer as usual.
+   *   <li><code>-m</code> For every tree that had a matching pattern, print "before" (prepended as "Operated on:") and "after" (prepended as "Result:").  Unoperated trees just pass through the transducer as usual.
    *   <li><code>-encoding X</code> Uses character set X for input and output of trees.
    *   <li><code>-macros &#60;filename&#62;</code> A file of macros to use on the tregex pattern.  Macros should be one per line, with original and replacement separated by tabs.
    *   <li><code>-hf &lt;headfinder-class-name&gt;</code> use the specified {@link HeadFinder} class to determine headship relations.
@@ -167,15 +159,11 @@ public class Tsurgeon {
    * <h4>Legal operation syntax:</h4>
    *
    * <ul>
-   *
-   * <li><code>delete &#60;name&#62;</code>  deletes the node and everything below it.
-   *
-   * <li><code>prune &#60;name&#62;</code>  Like delete, but if, after the pruning, the parent has no children anymore, the parent is pruned too.  Pruning continues to affect all ancestors until one is found with remaining children.  This may result in a null tree.
-   *
+   *   <li><code>delete &#60;name&#62;</code>  deletes the node and everything below it.
+   *   <li><code>prune &#60;name&#62;</code>  Like delete, but if, after the pruning, the parent has no children anymore, the parent is pruned too.  Pruning continues to affect all ancestors until one is found with remaining children.  This may result in a null tree.
    * <li><code>excise &#60;name1&#62; &#60;name2&#62;</code>
    *   The name1 node should either dominate or be the same as the name2 node.  This excises out everything from
    * name1 to name2.  All the children of name2 go into the parent of name1, where name1 was.
-   *
    * <li><code>relabel &#60;name&#62; &#60;new-label&#62;</code> Relabels the node to have the new label. <br>
    * There are three possible forms: <br>
    * <code>relabel nodeX VP</code> - for changing a node label to an
@@ -207,77 +195,42 @@ public class Tsurgeon {
    * To get an "=" or a "%" in the replacement, using \ escaping.
    * Also, as in the example you can escape a slash in the middle of
    * the second and third forms with \\/ and \\\\. <br>
-   *
    * <li><code>insert &#60;name&#62; &#60;position&#62;</code> or <code>insert &lt;tree&gt; &#60;position&#62;</code>
    *   inserts the named node or tree into the position specified.
-   *
-   * <li><code>move &#60;name&#62; &#60;position&#62;</code> moves the named node into the specified position.
+   * <li><code>move &#60;name&#62; &#60;position&#62;</code> moves the named node into the specified position
    * <p>Right now the  only ways to specify position are:
    * <p>
    *      <code>$+ &#60;name&#62;</code>     the left sister of the named node<br>
    *      <code>$- &#60;name&#62;</code>     the right sister of the named node<br>
-   *      <code>&gt;i &#60;name&#62;</code> the i_th daughter of the named node<br>
-   *      <code>&gt;-i &#60;name&#62;</code> the i_th daughter, counting from the right, of the named node.
-   *
-   * <li><code>replace &#60;name1&#62; &#60;name2&#62;</code>
-   *     deletes name1 and inserts a copy of name2 in its place.
-   *
-   * <li><code>replace &#60;name&#62; &#60;tree&#62; &#60;tree2&#62;...</code>
-   *     deletes name and inserts the new tree(s) in its place.  If
-   *     more than one replacement tree is given, each of the new
-   *     subtrees will be added in order where the old tree was.
-   *     Multiple subtrees at the root is an illegal operation and
-   *     will throw an exception.
-   *
-   * <li>{@code createSubtree <auxiliary-tree-or-label> <name1> [<name2>]}
-   *     Create a subtree out of all the nodes from {@code <name1>} through
-   *     {@code <name2>}. The subtree is moved to the foot of the given
-   *     auxiliary tree, and the tree is inserted where the nodes of
-   *     the subtree used to reside. If a simple label is provided as
-   *     the first argument, the subtree is given a single parent with
-   *     a name corresponding to the label.  To limit the operation to
-   *     just one node, elide {@code <name2>}.
-   *
+   *      <code>&gt;i</code> the i_th daughter of the named node<br>
+   *      <code>&gt;-i</code> the i_th daughter, counting from the right, of the named node.
+   * <li><code>replace &#60;name1&#62; &#60;name2&#62;</code> or <code>replace &#60;name1&#62; &#60;tree&#62;</code>
+   *     deletes name1 and inserts tree or a copy of name2 in its place.
    * <li><code>adjoin &#60;auxiliary_tree&#62; &lt;name&gt;</code> Adjoins the specified auxiliary tree into the named node.
    *     The daughters of the target node will become the daughters of the foot of the auxiliary tree.
    * <li><code>adjoinH &#60;auxiliary_tree&#62; &lt;name&gt;</code> Similar to adjoin, but preserves the target node
    *     and makes it the root of &lt;tree&gt;. (It is still accessible as <code>name</code>.  The root of the
    *     auxiliary tree is ignored.)
-   *
    * <li> <code>adjoinF &#60;auxiliary_tree&#62; &lt;name&gt;</code></dt>  Similar to adjoin,
    *     but preserves the target node and makes it the foot of &lt;tree&gt;.
    *     (It is still accessible as <code>name</code>, and retains its status as parent of its children.
    *     The root of the auxiliary tree is ignored.)
-   *
    * <li> <dt><code>coindex &#60;name1&#62; &#60;name2&#62; ... &#60;nameM&#62; </code> Puts a (Penn Treebank style)
    *     coindexation suffix of the form "-N" on each of nodes name_1 through name_m.  The value of N will be
    *     automatically generated in reference to the existing coindexations in the tree, so that there is never
    *     an accidental clash of indices across things that are not meant to be coindexed.
-   *
    * </ul>
    *
-   * <p>
-   * In the context of <code>adjoin</code>, <code>adjoinH</code>,
-   * <code>adjoinF</code>, and <code>createSubtree</code>, an auxiliary
-   * tree is a tree in Penn Treebank format with <code>@</code> on
-   * exactly one of the leaves denoting the foot of the tree.
-   * The operations which use the foot use the labeled node.
-   * For example: <br>
-   * Tsurgeon: <code>adjoin (FOO (BAR@)) foo</code> <br>
-   * Tregex: <code>B=foo</code> <br>
-   * Input: <code>(A (B 1 2))</code>
-   * Output: <code>(A (FOO (BAR 1 2)))</code>
-   * </p><p>
    * Tsurgeon applies the same operation to the same tree for as long
    * as the given tregex operation matches.  This means that infinite
-   * loops are very easy to cause.  One common situation where this comes up
+   * loops are very easy to cause.  One common situation this comes up
    * is with an insert operation will repeats infinitely many times
    * unless you add an expression to the tregex that matches against
    * the inserted pattern.  For example, this pattern will infinite loop:
    *
    * <blockquote>
    * <code>
-   *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP"); <br>
+   *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP");
    *   TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("insert (NP foo) &gt;-1 node");
    * </code>
    * </blockquote>
@@ -286,21 +239,13 @@ public class Tsurgeon {
    *
    * <blockquote>
    * <code>
-   *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP !&lt;&lt; foo"); <br>
+   *   TregexPattern tregex = TregexPattern.compile("S=node &lt;&lt; NP !&lt;&lt; foo");
    *   TsurgeonPattern tsurgeon = Tsurgeon.parseOperation("insert (NP foo) &gt;-1 node");
    * </code>
    * </blockquote>
    *
    * </p>
-   * <p>
-
-   * Tsurgeon has (very) limited support for conditional statements.
-   * If a pattern is prefaced with
-   * <code>if exists &lt;name&gt;</code>,
-   * the rest of the pattern will only execute if
-   * the named node was found in the corresponding TregexMatcher.
    *
-   * </p>
    *
    * @param args a list of names of files each of which contains a single tregex matching pattern plus a list, one per line,
    *        of transformation operations to apply to the matched pattern.
@@ -326,7 +271,7 @@ public class Tsurgeon {
     String trfOption = "-trf";
     String macroOption = "-macros";
     String macroFilename = "";
-    Map<String,Integer> flagMap = Generics.newHashMap();
+    Map<String,Integer> flagMap = new HashMap<String,Integer>();
     flagMap.put(patternOperationOption,2);
     flagMap.put(treeFileOption,1);
     flagMap.put(trfOption,1);
@@ -345,7 +290,7 @@ public class Tsurgeon {
     if(argsMap.containsKey(macroOption)) macroFilename = argsMap.get(macroOption)[0];
 
     TreePrint tp = new TreePrint(treePrintFormats, new PennTreebankLanguagePack());
-    PrintWriter pwOut = new PrintWriter(new OutputStreamWriter(System.out, encoding), true);
+    PrintWriter pwOut = new PrintWriter(new OutputStreamWriter(System.out,encoding), true);
 
     TreeReaderFactory trf;
     if (argsMap.containsKey(trfOption)) {
@@ -359,9 +304,7 @@ public class Tsurgeon {
     if (argsMap.containsKey(treeFileOption)) {
       trees.loadPath(argsMap.get(treeFileOption)[0]);
     }
-    if (trees.isEmpty()) {
-      System.err.println("Warning: No trees specified to operate on.  Use -treeFile path option.");
-    }
+    List<Pair<TregexPattern,TsurgeonPattern>> ops = new ArrayList<Pair<TregexPattern,TsurgeonPattern>>();
 
     TregexPatternCompiler compiler;
     if (headFinderClassName == null) {
@@ -373,15 +316,13 @@ public class Tsurgeon {
       } else {
         hf = ReflectionLoading.loadByReflection(headFinderClassName, (Object[]) headFinderArgs);
       }
-      compiler = new TregexPatternCompiler(hf);
+      compiler = new TregexPatternCompiler(hf);      
     }
     Macros.addAllMacros(compiler, macroFilename, encoding);
-
-    List<Pair<TregexPattern,TsurgeonPattern>> ops = new ArrayList<>();
     if (argsMap.containsKey(patternOperationOption)) {
       TregexPattern matchPattern = compiler.compile(argsMap.get(patternOperationOption)[0]);
       TsurgeonPattern p = parseOperation(argsMap.get(patternOperationOption)[1]);
-      ops.add(new Pair<>(matchPattern,p));
+      ops.add(new Pair<TregexPattern,TsurgeonPattern>(matchPattern,p));
     } else {
       for (String arg : args) {
         List<Pair<TregexPattern,TsurgeonPattern>> pairs = getOperationsFromFile(arg, encoding, compiler);
@@ -419,28 +360,26 @@ public class Tsurgeon {
    * of tsurgeon operations into a pair.
    *
    * @param reader Reader to read patterns from
-   * @return A pair of a tregex and tsurgeon pattern read from a file, or {@code null}
-   *    when the operations present in the Reader have been exhausted
+   * @return A pair of a tregex and tsurgeon pattern read from a file, or <code>null</code>
+   *    when the operations in the Reader have been exhausted
    * @throws IOException If any IO problem
    */
   public static Pair<TregexPattern, TsurgeonPattern> getOperationFromReader(BufferedReader reader, TregexPatternCompiler compiler) throws IOException {
     String patternString = getTregexPatternFromReader(reader);
     // System.err.println("Read tregex pattern: " + patternString);
-    if (patternString != null && patternString.isEmpty()) {
+    if ("".equals(patternString)) {
       return null;
     }
     TregexPattern matchPattern = compiler.compile(patternString);
 
     TsurgeonPattern collectedPattern = getTsurgeonOperationsFromReader(reader);
-    return new Pair<>(matchPattern,collectedPattern);
+    return new Pair<TregexPattern,TsurgeonPattern>(matchPattern,collectedPattern);
   }
 
   /**
    * Assumes that we are at the beginning of a tsurgeon script file and gets the string for the
-   * tregex pattern leading the file.
-   *
-   * @return tregex pattern string. Maybe be empty, never null
-   * @throws IOException If the usual kinds of IO errors occur
+   * tregex pattern leading the file
+   * @return tregex pattern string
    */
   public static String getTregexPatternFromReader(BufferedReader reader) throws IOException {
     StringBuilder matchString = new StringBuilder();
@@ -449,7 +388,11 @@ public class Tsurgeon {
         // A blank line after getting some real content (not just comments or nothing)
         break;
       }
-      thisLine = removeComments(thisLine);
+      Matcher m = commentPattern.matcher(thisLine);
+      if (m.matches()) {
+        // delete it
+        thisLine = m.replaceFirst("");
+      }
       if ( ! emptyLinePattern.matcher(thisLine).matches()) {
         matchString.append(thisLine);
       }
@@ -461,10 +404,10 @@ public class Tsurgeon {
    * Assumes the given reader has only tsurgeon operations (not a tregex pattern), and parses
    * these out, collecting them into one operation.  Stops on a whitespace line.
    *
-   * @throws IOException If the usual kinds of IO errors occur
+   * @throws IOException
    */
   public static TsurgeonPattern getTsurgeonOperationsFromReader(BufferedReader reader) throws IOException {
-    List<TsurgeonPattern> operations = new ArrayList<>();
+    List<TsurgeonPattern> operations = new ArrayList<TsurgeonPattern>();
     for (String thisLine; (thisLine = reader.readLine()) != null; ) {
       if (emptyLinePattern.matcher(thisLine).matches()) {
         break;
@@ -476,11 +419,6 @@ public class Tsurgeon {
       // System.err.println("Read tsurgeon op: " + thisLine);
       operations.add(parseOperation(thisLine));
     }
-
-    if (operations.isEmpty()) {
-      throw new TsurgeonParseException("No Tsurgeon operation provided.");
-    }
-
     return collectOperations(operations);
   }
 
@@ -518,28 +456,13 @@ public class Tsurgeon {
    * Parses a tsurgeon script file and compiles all operations in the file into a list
    * of pairs of tregex and tsurgeon patterns.
    *
-   * @param filename A file, classpath resource or URL (perhaps gzipped) containing the tsurgeon script
+   * @param filename file containing the tsurgeon script
    * @return A pair of a tregex and tsurgeon pattern read from a file
    * @throws IOException If there is any I/O problem
    */
   public static List<Pair<TregexPattern, TsurgeonPattern>> getOperationsFromFile(String filename, String encoding, TregexPatternCompiler compiler) throws IOException {
-    BufferedReader reader = IOUtils.readerFromString(filename, encoding);
-    List<Pair<TregexPattern,TsurgeonPattern>> operations = getOperationsFromReader(reader, compiler);
-    reader.close();
-    return operations;
-  }
-
-
-  /**
-   * Parses and compiles all operations from a BufferedReader into a list
-   * of pairs of tregex and tsurgeon patterns.
-   *
-   * @param reader A BufferedReader to read the operations
-   * @return A pair of a tregex and tsurgeon pattern read from reader
-   * @throws IOException If there is any I/O problem
-   */
-  public static List<Pair<TregexPattern, TsurgeonPattern>> getOperationsFromReader(BufferedReader reader, TregexPatternCompiler compiler) throws IOException {
-    List<Pair<TregexPattern,TsurgeonPattern>> operations = new ArrayList<>();
+    List<Pair<TregexPattern,TsurgeonPattern>> operations = new ArrayList<Pair<TregexPattern, TsurgeonPattern>>();
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename), encoding));
     for ( ; ; ) {
       Pair<TregexPattern, TsurgeonPattern> operation = getOperationFromReader(reader, compiler);
       if (operation == null) {
@@ -547,21 +470,21 @@ public class Tsurgeon {
       }
       operations.add(operation);
     }
+    reader.close();
     return operations;
   }
 
-
-
   /**
    * Applies {#processPattern} to a collection of trees.
-   *
    * @param matchPattern A {@link TregexPattern} to be matched against a {@link Tree}.
    * @param p A {@link TsurgeonPattern} to apply.
    * @param inputTrees The input trees to be processed
    * @return A List of the transformed trees
    */
   public static List<Tree> processPatternOnTrees(TregexPattern matchPattern, TsurgeonPattern p, Collection<Tree> inputTrees) {
-    List<Tree> result = inputTrees.stream().map(tree -> processPattern(matchPattern, p, tree)).collect(Collectors.toList());
+    List<Tree> result = new ArrayList<Tree>();
+    for (Tree tree : inputTrees)
+      result.add(processPattern(matchPattern,p,tree));
     return result;
   }
 
@@ -574,12 +497,10 @@ public class Tsurgeon {
    */
   public static Tree processPattern(TregexPattern matchPattern, TsurgeonPattern p, Tree t) {
     TregexMatcher m = matchPattern.matcher(t);
-    TsurgeonMatcher tsm = p.matcher();
-    while (m.find()) {
-      t = tsm.evaluate(t, m);
-      if (t==null) {
+    while(m.find()) {
+      t = p.evaluate(t,m);
+      if(t==null)
         break;
-      }
       m = matchPattern.matcher(t);
     }
     return t;
@@ -595,10 +516,9 @@ public class Tsurgeon {
           System.err.println("Running pattern " + op.first());
         }
         TregexMatcher m = op.first().matcher(t);
-        TsurgeonMatcher tsm = op.second().matcher();
         while (m.find()) {
           matchedOnTree = true;
-          t = tsm.evaluate(t,m);
+          t = op.second().evaluate(t,m);
           if (t == null) {
             return null;
           }
@@ -628,9 +548,12 @@ public class Tsurgeon {
   public static TsurgeonPattern parseOperation(String operationString) {
     try {
       TsurgeonParser parser =
-        new TsurgeonParser(new StringReader(operationString + '\n'));
-      return parser.Root();
-    } catch (ParseException | TokenMgrError e) {
+        new TsurgeonParser(new StringReader(operationString + "\n"));
+      return new TsurgeonPatternRoot(new TsurgeonPattern[] {parser.Root()} );
+    } catch(ParseException e) {
+      throw new TsurgeonParseException("Error parsing Tsurgeon expression: " +
+                                       operationString, e);
+    } catch(TokenMgrError e) {
       throw new TsurgeonParseException("Error parsing Tsurgeon expression: " +
                                        operationString, e);
     }
@@ -641,9 +564,8 @@ public class Tsurgeon {
    * across a sequence of operations.  For example, if you want to insert a named node and then coindex it with another node,
    * you will need to collect the insertion and coindexation operations into a single TsurgeonPattern so that tsurgeon is aware
    * of the name of the new node and coindexation becomes possible.
-   *
    * @param patterns a list of {@link TsurgeonPattern} operations that you want to collect together into a single compound operation
-   * @return a new {@link TsurgeonPattern} that performs all the operations in the sequence of the {@code patterns} argument
+   * @return a new {@link TsurgeonPattern} that performs all the operations in the sequence of the <code>patterns</code> argument
    */
   public static TsurgeonPattern collectOperations(List<TsurgeonPattern> patterns) {
     return new TsurgeonPatternRoot(patterns.toArray(new TsurgeonPattern[patterns.size()]));
