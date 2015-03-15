@@ -110,7 +110,7 @@ public class ExhaustivePCFGParser implements Scorer, KBestViterbiParser {
    * documentation of the ParserConstraint class for information on
    * specifying a ParserConstraint.
    */
-  protected List<ParserConstraint> constraints;
+  protected List<ParserConstraint> constraints = Collections.emptyList();
 
   private CoreLabel getCoreLabel(int labelIndex) {
     if (originalCoreLabels[labelIndex] != null) {
@@ -849,11 +849,9 @@ oScore[split][end][br.rightChild] = totR;
     int end = start + diff;
 
     final List<ParserConstraint> constraints = getConstraints();
-    if (constraints != null) {
-      for (ParserConstraint c : constraints) {
-        if ((start > c.start && start < c.end && end > c.end) || (end > c.start && end < c.end && start < c.start)) {
-          return;
-        }
+    for (ParserConstraint c : constraints) {
+      if ((start > c.start && start < c.end && end > c.end) || (end > c.start && end < c.end && start < c.start)) {
+        return;
       }
     }
 
@@ -869,8 +867,7 @@ oScore[split][end][br.rightChild] = totR;
 
     for (int leftState = 0; leftState < numStates; leftState++) {
       int narrowR = narrowRExtent_start[leftState];
-      boolean iPossibleL = (narrowR < end); // can this left constituent leave space for a right constituent?
-      if (!iPossibleL) {
+      if (narrowR >= end) {  // can this left constituent leave space for a right constituent?
         continue;
       }
       BinaryRule[] leftRules = bg.splitRulesWithLC(leftState);
@@ -878,8 +875,7 @@ oScore[split][end][br.rightChild] = totR;
       for (BinaryRule rule : leftRules) {
         int rightChild = rule.rightChild;
         int narrowL = narrowLExtent_end[rightChild];
-        boolean iPossibleR = (narrowL >= narrowR); // can this right constituent fit next to the left constituent?
-        if (!iPossibleR) {
+        if (narrowL < narrowR) { // can this right constituent fit next to the left constituent?
           continue;
         }
         int min2 = wideLExtent_end[rightChild];
@@ -904,33 +900,31 @@ oScore[split][end][br.rightChild] = totR;
           // find the split that can use this rule to make the max score
           for (int split = min; split <= max; split++) {
 
-            if (constraints != null) {
-              boolean skip = false;
-              for (ParserConstraint c : constraints) {
-                if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
+            boolean skip = false;
+            for (ParserConstraint c : constraints) {
+              if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
+                skip = true;
+                break;
+              }
+              if ((start == c.start && split == c.end)) {
+                String tag = stateIndex.get(leftState);
+                Matcher m = c.state.matcher(tag);
+                if (!m.matches()) {
                   skip = true;
                   break;
                 }
-                if ((start == c.start && split == c.end)) {
-                  String tag = stateIndex.get(leftState);
-                  Matcher m = c.state.matcher(tag);
-                  if (!m.matches()) {
-                    skip = true;
-                    break;
-                  }
-                }
-                if ((split == c.start && end == c.end)) {
-                  String tag = stateIndex.get(rightChild);
-                  Matcher m = c.state.matcher(tag);
-                  if (!m.matches()) {
-                    skip = true;
-                    break;
-                  }
+              }
+              if ((split == c.start && end == c.end)) {
+                String tag = stateIndex.get(rightChild);
+                Matcher m = c.state.matcher(tag);
+                if (!m.matches()) {
+                  skip = true;
+                  break;
                 }
               }
-              if (skip) {
-                continue;
-              }
+            }
+            if (skip) {
+              continue;
             }
 
             float lS = iScore_start[split][leftState];
@@ -1005,8 +999,7 @@ oScore[split][end][br.rightChild] = totR;
     // do right restricted rules
     for (int rightState = 0; rightState < numStates; rightState++) {
       int narrowL = narrowLExtent_end[rightState];
-      boolean iPossibleR = (narrowL > start);
-      if (!iPossibleR) {
+      if (narrowL <= start) {
         continue;
       }
       BinaryRule[] rightRules = bg.splitRulesWithRC(rightState);
@@ -1016,8 +1009,7 @@ oScore[split][end][br.rightChild] = totR;
 
         int leftChild = rule.leftChild;
         int narrowR = narrowRExtent_start[leftChild];
-        boolean iPossibleL = (narrowR <= narrowL);
-        if (!iPossibleL) {
+        if (narrowR > narrowL) {
           continue;
         }
         int min2 = wideLExtent_end[rightState];
@@ -1041,35 +1033,33 @@ oScore[split][end][br.rightChild] = totR;
           // find the split that can use this rule to make the max score
           for (int split = min; split <= max; split++) {
 
-            if (constraints != null) {
-              boolean skip = false;
-              for (ParserConstraint c : constraints) {
-                if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
+            boolean skip = false;
+            for (ParserConstraint c : constraints) {
+              if (((start < c.start && end >= c.end) || (start <= c.start && end > c.end)) && split > c.start && split < c.end) {
+                skip = true;
+                break;
+              }
+              if ((start == c.start && split == c.end)) {
+                String tag = stateIndex.get(leftChild);
+                Matcher m = c.state.matcher(tag);
+                if (!m.matches()) {
+                  //if (!tag.startsWith(c.state+"^")) {
                   skip = true;
                   break;
                 }
-                if ((start == c.start && split == c.end)) {
-                  String tag = stateIndex.get(leftChild);
-                  Matcher m = c.state.matcher(tag);
-                  if (!m.matches()) {
-                    //if (!tag.startsWith(c.state+"^")) {
-                    skip = true;
-                    break;
-                  }
-                }
-                if ((split == c.start && end == c.end)) {
-                  String tag = stateIndex.get(rightState);
-                  Matcher m = c.state.matcher(tag);
-                  if (!m.matches()) {
-                    //if (!tag.startsWith(c.state+"^")) {
-                    skip = true;
-                    break;
-                  }
+              }
+              if ((split == c.start && end == c.end)) {
+                String tag = stateIndex.get(rightState);
+                Matcher m = c.state.matcher(tag);
+                if (!m.matches()) {
+                  //if (!tag.startsWith(c.state+"^")) {
+                  skip = true;
+                  break;
                 }
               }
-              if (skip) {
-                continue;
-              }
+            }
+            if (skip) {
+              continue;
             }
 
             float lS = iScore_start[split][leftChild];
@@ -1151,22 +1141,20 @@ oScore[split][end][br.rightChild] = totR;
       UnaryRule[] unaries = ug.closedRulesByChild(state);
       for (UnaryRule ur : unaries) {
 
-        if (constraints != null) {
-          boolean skip = false;
-          for (ParserConstraint c : constraints) {
-            if ((start == c.start && end == c.end)) {
-              String tag = stateIndex.get(ur.parent);
-              Matcher m = c.state.matcher(tag);
-              if (!m.matches()) {
-                //if (!tag.startsWith(c.state+"^")) {
-                skip = true;
-                break;
-              }
+        boolean skip = false;
+        for (ParserConstraint c : constraints) {
+          if ((start == c.start && end == c.end)) {
+            String tag = stateIndex.get(ur.parent);
+            Matcher m = c.state.matcher(tag);
+            if (!m.matches()) {
+              //if (!tag.startsWith(c.state+"^")) {
+              skip = true;
+              break;
             }
           }
-          if (skip) {
-            continue;
-          }
+        }
+        if (skip) {
+          continue;
         }
 
         int parentState = ur.parent;
@@ -2067,11 +2055,11 @@ oScore[split][end][br.rightChild] = totR;
       dHat.put(v,dHatV);
     }
     while (dHatV.size() < k) {
-      if ( ! dHatV.isEmpty()) {
+      if (!dHatV.isEmpty()) {
         Derivation derivation = dHatV.getLast();
         lazyNext(candV, derivation, kPrime);
       }
-      if ( ! candV.isEmpty()) {
+      if (!candV.isEmpty()) {
         Derivation d = candV.removeFirst();
         dHatV.add(d);
       } else {
@@ -2095,7 +2083,7 @@ oScore[split][end][br.rightChild] = totR;
       List<Double> childrenScores = new ArrayList<Double>(derivation.childrenScores);
       childrenScores.set(i, d.score);
       Derivation newDerivation = new Derivation(derivation.arc, j, newScore, childrenScores);
-      if ( ! candV.contains(newDerivation) && newScore > Double.NEGATIVE_INFINITY) {
+      if (!candV.contains(newDerivation) && newScore > Double.NEGATIVE_INFINITY) {
         candV.add(newDerivation, newScore);
       }
     }
@@ -2138,7 +2126,11 @@ oScore[split][end][br.rightChild] = totR;
   }
 
   void setConstraints(List<ParserConstraint> constraints) {
-    this.constraints = constraints;
+    if (constraints == null) {
+      this.constraints = Collections.emptyList();
+    } else {
+      this.constraints = constraints;
+    }
   }
 
   public ExhaustivePCFGParser(BinaryGrammar bg, UnaryGrammar ug, Lexicon lex, Options op, Index<String> stateIndex, Index<String> wordIndex, Index<String> tagIndex) {
@@ -2217,7 +2209,7 @@ oScore[split][end][br.rightChild] = totR;
       }
     }
     //    System.out.println("finished initializing iScore arrays");
-    if (op.doDep && ! op.testOptions.useFastFactored) {
+    if (op.doDep && !op.testOptions.useFastFactored) {
       //      System.out.println("initializing oScore arrays with length " + length + " and numStates " + numStates);
       oScore = new float[length][length + 1][];
       for (int start = 0; start < length; start++) {
@@ -2231,7 +2223,7 @@ oScore[split][end][br.rightChild] = totR;
     wideRExtent = new int[length][numStates];
     narrowLExtent = new int[length + 1][numStates];
     wideLExtent = new int[length + 1][numStates];
-    if (op.doDep && ! op.testOptions.useFastFactored) {
+    if (op.doDep && !op.testOptions.useFastFactored) {
       iPossibleByL = new boolean[length][numStates];
       iPossibleByR = new boolean[length + 1][numStates];
       oPossibleByL = new boolean[length][numStates];

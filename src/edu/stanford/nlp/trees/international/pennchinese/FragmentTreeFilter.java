@@ -29,7 +29,10 @@ public class FragmentTreeFilter implements Filter<Tree> {
   static final TregexPattern singlePuncPattern =
     TregexPattern.compile("PU=punc !> __ <: __");
 
-  static final TregexPattern[] patterns = { threeNodePattern, oneNodePattern, automaticInitialPattern, manuallySegmentedPattern, onthewayPattern, singlePuncFragPattern, singlePuncPattern };
+  static final TregexPattern metaPattern =
+    TregexPattern.compile("META !> __ <: NN");
+
+  static final TregexPattern[] patterns = { threeNodePattern, oneNodePattern, automaticInitialPattern, manuallySegmentedPattern, onthewayPattern, singlePuncFragPattern, singlePuncPattern, metaPattern };
 
   public boolean accept(Tree tree) {
     for (TregexPattern pattern : patterns) {

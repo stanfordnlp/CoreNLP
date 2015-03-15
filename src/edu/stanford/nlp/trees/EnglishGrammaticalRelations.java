@@ -197,19 +197,19 @@ public class EnglishGrammaticalRelations {
           // non-parenthetical or comma in suitable phrase with conj then adverb to left
           "VP|S|SBAR|SBARQ|SINV|SQ < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/ $+ (ADVP $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target))",
           // content phrase to the right of a comma or a parenthetical
-          "VP|S|SBAR|SBARQ|SINV|SQ < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/) < (/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/ $+ /^S$|^(?:A|N|V|PP|PRP|J|W|R)/=target)",
+          "VP|S|SBAR|SBARQ|SINV|SQ < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/) < (/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/ $+ /^S|SINV$|^(?:A|N|V|PP|PRP|J|W|R)/=target)",
 
           // non-parenthetical or comma in suitable phrase with conjunction to left
           "/^(?:ADJP|JJP|PP|QP|(?:WH)?NP(?:-TMP|-ADV)?|ADVP|UCP(?:-TMP|-ADV)?|NX|NML)$/ < (CC|CONJP $-- !/^(?:``|-LRB-|PRN)$/ $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target)",
           // non-parenthetical or comma in suitable phrase with conj then adverb to left
           "/^(?:ADJP|PP|(?:WH)?NP(?:-TMP|-ADV)?|ADVP|UCP(?:-TMP|-ADV)?|NX|NML)$/ < (CC|CONJP $-- !/^(?:``|-LRB-|PRN)$/ $+ (ADVP $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target))",
           // content phrase to the right of a comma or a parenthetical
-          "/^(?:ADJP|PP|(?:WH)?NP(?:-TMP|-ADV)?|ADVP|UCP(?:-TMP|-ADV)?|NX|NML)$/ < (CC|CONJP $-- !/^(?:``|-LRB-|PRN)$/) < (/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/ $+ /^S$|^(?:A|N|V|PP|PRP|J|W|R)/=target)",
+          "/^(?:ADJP|PP|(?:WH)?NP(?:-TMP|-ADV)?|ADVP|UCP(?:-TMP|-ADV)?|NX|NML)$/ < (CC|CONJP $-- !/^(?:``|-LRB-|PRN)$/) < (/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/ $+ /^S|SINV$|^(?:A|N|V|PP|PRP|J|W|R)/=target)",
 
           // content phrase to the left of a comma for at least NX
           "NX|NML < (CC|CONJP $- __) < (/^,$/ $- /^(?:A|N|V|PP|PRP|J|W|R|S)/=target)",
           // to take the conjunct in a preconjunct structure "either X or Y"
-          "/^(?:VP|S|SBAR|SBARQ|ADJP|PP|QP|(?:WH)?NP(?:-TMP|-ADV)?|ADVP|UCP(?:-TMP|-ADV)?|NX|NML)$/ < (CC $++ (CC|CONJP $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target))",
+          "/^(?:VP|S|SBAR|SBARQ|SINV|ADJP|PP|QP|(?:WH)?NP(?:-TMP|-ADV)?|ADVP|UCP(?:-TMP|-ADV)?|NX|NML)$/ < (CC $++ (CC|CONJP $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target))",
         });
   public static class ConjunctGRAnnotation extends GrammaticalRelationAnnotation { }
 
@@ -1424,7 +1424,14 @@ public class EnglishGrammaticalRelations {
         new String[]{
           "VP < (PRN=target < S|SINV|SBAR)", // parenthetical
           "VP $ (PRN=target [ < S|SINV|SBAR | < VP < @NP ] )", // parenthetical
-          "S|VP < (/^:$/ $+ /^S/=target)",  // colon between sentences
+          // The next relation handles a colon between sentences 
+          // and similar punct such as --
+          // Sometimes these are lists, especially in the case of ";",
+          // so we don't trigger if there is a CC|CONJP that occurs
+          // anywhere other than the first child
+          // First child can occur in rare circumstances such as
+          // "But even if he agrees -- which he won't -- etc etc"
+          "S|VP < (/^:$/ $+ /^S/=target) !<, (__ $++ CC|CONJP)",  
 
         });
 

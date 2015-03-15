@@ -214,6 +214,7 @@ public class SUTime {
    *         <br>Ex: Every Tuesday</li>
    *  </ul>
    * </li>
+   * </ol>
    */
   public abstract static class Temporal implements Cloneable, Serializable {
     public String mod;
@@ -375,11 +376,7 @@ public class SUTime {
     }
 
     public String toFormattedString(int flags) {
-      if (getTimeLabel() != null) {
-        return getTimeLabel();
-      } else {
-        return null;
-      }
+      return getTimeLabel();
     }
 
     // Temporal operations...
@@ -3093,6 +3090,24 @@ public class SUTime {
 
     private static final long serialVersionUID = 1;
   }
+  
+  // TODO: Timezone...
+  private static final Pattern PATTERN_ISO = Pattern.compile("(\\d\\d\\d\\d)-?(\\d\\d?)-?(\\d\\d?)(-?(?:T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?))?");
+  private static final Pattern PATTERN_ISO_DATETIME = Pattern.compile("(\\d\\d\\d\\d)(\\d\\d)(\\d\\d):(\\d\\d)(\\d\\d)");
+  private static final Pattern PATTERN_ISO_TIME = Pattern.compile("T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?");
+  private static final Pattern PATTERN_ISO_DATE_1 = Pattern.compile(".*(\\d\\d\\d\\d)\\/(\\d\\d?)\\/(\\d\\d?).*");
+  private static final Pattern PATTERN_ISO_DATE_2 = Pattern.compile(".*(\\d\\d\\d\\d)\\-(\\d\\d?)\\-(\\d\\d?).*");
+  
+  // Ambiguous pattern - interpret as MM/DD/YY(YY)
+  private static final Pattern PATTERN_ISO_AMBIGUOUS_1 = Pattern.compile(".*(\\d\\d?)\\/(\\d\\d?)\\/(\\d\\d(\\d\\d)?).*");
+
+  // Ambiguous pattern - interpret as MM-DD-YY(YY)
+  private static final Pattern PATTERN_ISO_AMBIGUOUS_2 = Pattern.compile(".*(\\d\\d?)\\-(\\d\\d?)\\-(\\d\\d(\\d\\d)?).*");
+
+  // Euro date
+  // Ambiguous pattern - interpret as DD.MM.YY(YY)
+  private static final Pattern PATTERN_ISO_AMBIGUOUS_3 = Pattern.compile(".*(\\d\\d?)\\.(\\d\\d?)\\.(\\d\\d(\\d\\d)?).*");
+  private static final Pattern PATTERN_ISO_TIME_OF_DAY = Pattern.compile(".*(\\d?\\d):(\\d\\d)(:(\\d\\d)(\\.\\d+)?)?(\\s*([AP])\\.?M\\.?)?(\\s+([+\\-]\\d+|[A-Z][SD]T|GMT([+\\-]\\d+)?))?.*");
 
   /**
    * Converts a string that represents some kind of date into ISO 8601 format and
@@ -3104,10 +3119,8 @@ public class SUTime {
   public static SUTime.Time parseDateTime(String dateStr)
   {
     if (dateStr == null) return null;
-    // Already ISO
-    // TODO: Timezone...
-    Pattern p = Pattern.compile("(\\d\\d\\d\\d)-?(\\d\\d?)-?(\\d\\d?)(-?(?:T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?))?");
-    Matcher m = p.matcher(dateStr);
+
+    Matcher m = PATTERN_ISO.matcher(dateStr);
     if (m.matches()) {
       String time = m.group(4);
       SUTime.IsoDate isoDate = new SUTime.IsoDate(m.group(1), m.group(2), m.group(3));
@@ -3119,59 +3132,51 @@ public class SUTime {
       }
     }
 
-    // ACE Format
-    p = Pattern.compile("(\\d\\d\\d\\d)(\\d\\d)(\\d\\d):(\\d\\d)(\\d\\d)");
-    m = p.matcher(dateStr);
+    m = PATTERN_ISO_DATETIME.matcher(dateStr);
     if (m.matches()) {
       SUTime.IsoDate date = new SUTime.IsoDate(m.group(1), m.group(2), m.group(3));
       SUTime.IsoTime time = new SUTime.IsoTime(m.group(4), m.group(5), null);
       return new SUTime.IsoDateTime(date,time);
     }
 
-    p = Pattern.compile("T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?");
-    m = p.matcher(dateStr);
+    m = PATTERN_ISO_TIME.matcher(dateStr);
     if (m.matches()) {
       return new SUTime.IsoTime(m.group(1), m.group(2), m.group(3), m.group(4));
     }
 
     SUTime.IsoDate isoDate = null;
     if (isoDate == null) {
-      p = Pattern.compile(".*(\\d\\d\\d\\d)\\/(\\d\\d?)\\/(\\d\\d?).*");
-      m = p.matcher(dateStr);
+      m = PATTERN_ISO_DATE_1.matcher(dateStr);
+
       if (m.matches()) {
         isoDate = new SUTime.IsoDate(m.group(1), m.group(2), m.group(3));
       }
     }
 
     if (isoDate == null) {
-      p = Pattern.compile(".*(\\d\\d\\d\\d)\\-(\\d\\d?)\\-(\\d\\d?).*");
-      m = p.matcher(dateStr);
+      m = PATTERN_ISO_DATE_2.matcher(dateStr);
       if (m.matches()) {
         isoDate = new SUTime.IsoDate(m.group(1), m.group(2), m.group(3));
       }
     }
 
     if (isoDate == null) {
-      // Ambiguous pattern - interpret as MM/DD/YY(YY)
-      p = Pattern.compile(".*(\\d\\d?)\\/(\\d\\d?)\\/(\\d\\d(\\d\\d)?).*");
-      m = p.matcher(dateStr);
+      m = PATTERN_ISO_AMBIGUOUS_1.matcher(dateStr);
+
       if (m.matches()) {
         isoDate = new SUTime.IsoDate(m.group(3), m.group(1), m.group(2));
       }
     }
+    
     if (isoDate == null) {
-      // Ambiguous pattern - interpret as MM-DD-YY(YY)
-      p = Pattern.compile(".*(\\d\\d?)\\-(\\d\\d?)\\-(\\d\\d(\\d\\d)?).*");
-      m = p.matcher(dateStr);
+      m = PATTERN_ISO_AMBIGUOUS_2.matcher(dateStr);
       if (m.matches()) {
         isoDate = new SUTime.IsoDate(m.group(3), m.group(1), m.group(2));
       }
     }
+    
     if (isoDate == null) {
-      // Euro date
-      // Ambiguous pattern - interpret as DD.MM.YY(YY)
-      p = Pattern.compile(".*(\\d\\d?)\\.(\\d\\d?)\\.(\\d\\d(\\d\\d)?).*");
-      m = p.matcher(dateStr);
+      m = PATTERN_ISO_AMBIGUOUS_3.matcher(dateStr);
       if (m.matches()) {
         isoDate = new SUTime.IsoDate(m.group(3), m.group(2), m.group(1));
       }
@@ -3180,8 +3185,7 @@ public class SUTime {
     // Now add Time of Day
     SUTime.IsoTime isoTime = null;
     if (isoTime == null) {
-      p = Pattern.compile(".*(\\d?\\d):(\\d\\d)(:(\\d\\d)(\\.\\d+)?)?(\\s*([AP])\\.?M\\.?)?(\\s+([+\\-]\\d+|[A-Z][SD]T|GMT([+\\-]\\d+)?))?.*");
-      m = p.matcher(dateStr);
+      m = PATTERN_ISO_TIME_OF_DAY.matcher(dateStr);
       if (m.matches()) {
         // TODO: Fix
         isoTime = new SUTime.IsoTime(m.group(1), m.group(2), m.group(4));
