@@ -237,6 +237,17 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
     return new TokenSequenceMatcher(this, tokens);
   }
 
+  /**
+   * Returns a TokenSequenceMatcher that can be used to match this pattern
+   * against the specified list of tokens.
+   *
+   * @param tokens List of tokens to match against
+   * @return TokenSequenceMatcher
+   */
+  public TokenSequenceMatcher matcher(List<? extends CoreMap> tokens) {
+    return getMatcher(tokens);
+  }
+
   @Override
   public String toString(){
     return this.pattern();

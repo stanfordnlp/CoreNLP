@@ -296,16 +296,17 @@ public class ArrayCoreMap implements CoreMap, Serializable {
    * state.  When a call to toString is about to return, this is reset
    * to null for that particular thread.
    */
-  private static ThreadLocal<IdentityHashSet<CoreMap>> toStringCalled = new ThreadLocal<IdentityHashSet<CoreMap>>();
+  private static final ThreadLocal<IdentityHashSet<CoreMap>> toStringCalled =
+          new ThreadLocal<IdentityHashSet<CoreMap>>() {
+            @Override protected IdentityHashSet<CoreMap> initialValue() {
+              return new IdentityHashSet<CoreMap>();
+            }
+          };
 
   @Override
   public String toString() {
     IdentityHashSet<CoreMap> calledSet = toStringCalled.get();
-    boolean createdCalledSet = (calledSet == null);
-    if (createdCalledSet) {
-      calledSet = new IdentityHashSet<CoreMap>();
-      toStringCalled.set(calledSet);
-    }
+    boolean createdCalledSet = calledSet.isEmpty();
 
     if (calledSet.contains(this)) {
       return "[...]";
@@ -325,7 +326,7 @@ public class ArrayCoreMap implements CoreMap, Serializable {
     s.append(']');
 
     if (createdCalledSet) {
-      toStringCalled.set(null);
+      toStringCalled.remove();
     } else {
       // Remove the object from the already called set so that
       // potential later calls in this object graph have something

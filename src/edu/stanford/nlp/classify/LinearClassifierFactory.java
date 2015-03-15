@@ -87,6 +87,342 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
   private int evalIters = -1;
   private Evaluator[] evaluators = null;
 
+  /** This is the {@code Factory<Minimizer<DiffFunction>>} that we use over and over again. */
+  private static class Factory15 implements Factory<Minimizer<DiffFunction>> {
+
+    private static final long serialVersionUID = 6215752553371189173L;
+
+    @Override
+    public Minimizer<DiffFunction> create() { return new QNMinimizer(15); }
+
+  }
+
+  public LinearClassifierFactory() {
+    this(new Factory15());
+    this.mem = 15;
+    this.useQuasiNewton();
+  }
+
+  /** NOTE: Constructors that take in a Minimizer create a LinearClassifierFactory that will reuse the minimizer
+   *  and will not be threadsafe (unless the Minimizer itself is ThreadSafe which is probably not the case).
+   */
+  public LinearClassifierFactory(Minimizer<DiffFunction> min) {
+    this(min, false);
+  }
+
+  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min) {
+    this(min, false);
+  }
+
+  public LinearClassifierFactory(boolean useSum) {
+    this(new Factory15(), useSum);
+    this.mem = 15;
+    this.useQuasiNewton();
+  }
+
+  public LinearClassifierFactory(double tol) {
+    this(new Factory15(), tol, false);
+    this.mem = 15;
+    this.useQuasiNewton();
+  }
+  public LinearClassifierFactory(Minimizer<DiffFunction> min, boolean useSum) {
+    this(min, 1e-4, useSum);
+  }
+  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, boolean useSum) {
+    this(min, 1e-4, useSum);
+  }
+  public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum) {
+    this(min, tol, useSum, 1.0);
+  }
+  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum) {
+    this(min, tol, useSum, 1.0);
+  }
+  public LinearClassifierFactory(double tol, boolean useSum, double sigma) {
+    this(new Factory15(), tol, useSum, sigma);
+    this.mem = 15;
+    this.useQuasiNewton();
+  }
+  public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, double sigma) {
+    this(min, tol, useSum, LogPrior.LogPriorType.QUADRATIC.ordinal(), sigma);
+  }
+  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, double sigma) {
+    this(min, tol, useSum, LogPrior.LogPriorType.QUADRATIC.ordinal(), sigma);
+  }
+  public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, int prior, double sigma) {
+    this(min, tol, useSum, prior, sigma, 0.0);
+  }
+  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, int prior, double sigma) {
+    this(min, tol, useSum, prior, sigma, 0.0);
+  }
+
+  public LinearClassifierFactory(double tol, boolean useSum, int prior, double sigma, double epsilon) {
+    this(new Factory15(), tol, useSum, new LogPrior(prior, sigma, epsilon));
+    this.mem = 15;
+    this.useQuasiNewton();
+  }
+
+  public LinearClassifierFactory(double tol, boolean useSum, int prior, double sigma, double epsilon, final int mem) {
+    this(new Factory15(), tol, useSum, new LogPrior(prior, sigma, epsilon));
+    this.useQuasiNewton();
+  }
+
+  /**
+   * Create a factory that builds linear classifiers from training data.
+   *
+   * @param min     The method to be used for optimization (minimization) (default: {@link QNMinimizer})
+   * @param tol     The convergence threshold for the minimization (default: 1e-4)
+   * @param useSum  Asks to the optimizer to minimize the sum of the
+   *                likelihoods of individual data items rather than their product (default: false)
+   *                NOTE: this is currently ignored!!!
+   * @param prior   What kind of prior to use, as an enum constant from class
+   *                LogPrior
+   * @param sigma   The strength of the prior (smaller is stronger for most
+   *                standard priors) (default: 1.0)
+   * @param epsilon A second parameter to the prior (currently only used
+   *                by the Huber prior)
+   */
+  public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, int prior, double sigma, double epsilon) {
+    this(min, tol, useSum, new LogPrior(prior, sigma, epsilon));
+  }
+  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, int prior, double sigma, double epsilon) {
+    this(min, tol, useSum, new LogPrior(prior, sigma, epsilon));
+  }
+
+  public LinearClassifierFactory(final Minimizer<DiffFunction> min, double tol, boolean useSum, LogPrior logPrior) {
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      private static final long serialVersionUID = -6439748445540743949L;
+
+      @Override
+      public Minimizer<DiffFunction> create() {
+        return min;
+      }
+    };
+    this.TOL = tol;
+    //this.useSum = useSum;
+    this.logPrior = logPrior;
+  }
+
+  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> minimizerCreator, double tol, boolean useSum, LogPrior logPrior) {
+    this.minimizerCreator = minimizerCreator;
+    this.TOL = tol;
+    //this.useSum = useSum;
+    this.logPrior = logPrior;
+  }
+
+  /**
+   * Set the tolerance.  1e-4 is the default.
+   */
+  public void setTol(double tol) {
+    this.TOL = tol;
+  }
+
+  /**
+   * Set the prior.
+   *
+   * @param logPrior One of the priors defined in
+   *              {@code LogConditionalObjectiveFunction}.
+   *              {@code LogPrior.QUADRATIC} is the default.
+   */
+  public void setPrior(LogPrior logPrior) {
+    this.logPrior = logPrior;
+  }
+
+  /**
+   * Set the verbose flag for {@link CGMinimizer}.
+   * Only used with conjugate-gradient minimization.
+   * {@code false} is the default.
+   */
+  public void setVerbose(boolean verbose) {
+    this.verbose = verbose;
+  }
+
+  /**
+   * Sets the minimizer.  {@link QNMinimizer} is the default.
+   */
+  public void setMinimizerCreator(Factory<Minimizer<DiffFunction>> minimizerCreator) {
+    this.minimizerCreator = minimizerCreator;
+  }
+
+  /**
+   * Sets the epsilon value for {@link LogConditionalObjectiveFunction}.
+   */
+  public void setEpsilon(double eps) {
+    logPrior.setEpsilon(eps);
+  }
+
+  public void setSigma(double sigma) {
+    logPrior.setSigma(sigma);
+  }
+
+  public double getSigma() {
+    return logPrior.getSigma();
+  }
+
+  /**
+   * Sets the minimizer to QuasiNewton. {@link QNMinimizer} is the default.
+   */
+  public void useQuasiNewton() {
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      private static final long serialVersionUID = 9028306475652690036L;
+      @Override
+      public Minimizer<DiffFunction> create() {
+        return new QNMinimizer(LinearClassifierFactory.this.mem);
+      }
+    };
+  }
+
+  public void useQuasiNewton(final boolean useRobust) {
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      private static final long serialVersionUID = -9108222058357693242L;
+      @Override
+      public Minimizer<DiffFunction> create() {
+        return new QNMinimizer(LinearClassifierFactory.this.mem, useRobust);
+      }
+    };
+  }
+
+  public void useStochasticQN(final double initialSMDGain, final int stochasticBatchSize){
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      private static final long serialVersionUID = -7760753348350678588L;
+      @Override
+      public Minimizer<DiffFunction> create() {
+        return new SQNMinimizer<DiffFunction>(LinearClassifierFactory.this.mem, initialSMDGain, stochasticBatchSize, false);
+      }
+    };
+  }
+
+  public void useStochasticMetaDescent(){
+    useStochasticMetaDescent(0.1, 15, StochasticCalculateMethods.ExternalFiniteDifference, 20);
+  }
+
+  public void useStochasticMetaDescent(final double initialSMDGain, final int stochasticBatchSize,
+                                       final StochasticCalculateMethods stochasticMethod,final int passes) {
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      private static final long serialVersionUID = 6860437108371914482L;
+      @Override
+      public Minimizer<DiffFunction> create() {
+        return new SMDMinimizer<DiffFunction>(initialSMDGain,stochasticBatchSize,stochasticMethod,passes);
+      }
+    };
+  }
+
+  public void useStochasticGradientDescent(){
+    useStochasticGradientDescent(0.1,15);
+  }
+
+  public void useStochasticGradientDescent(final double gainSGD, final int stochasticBatchSize){
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      private static final long serialVersionUID = 2564615420955196299L;
+      @Override
+      public Minimizer<DiffFunction> create() {
+        return new InefficientSGDMinimizer<DiffFunction>(gainSGD,stochasticBatchSize);
+      }
+    };
+  }
+
+  public void useInPlaceStochasticGradientDescent() {
+    useInPlaceStochasticGradientDescent(-1, -1, 1.0);
+  }
+
+  public void useInPlaceStochasticGradientDescent(final int SGDPasses, final int tuneSampleSize, final double sigma) {
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      private static final long serialVersionUID = -5319225231759162616L;
+      @Override
+      public Minimizer<DiffFunction> create() {
+        return new SGDMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
+      }
+    };
+  }
+
+  public void useHybridMinimizerWithInPlaceSGD(final int SGDPasses, final int tuneSampleSize, final double sigma) {
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      private static final long serialVersionUID = -3042400543337763144L;
+      @Override
+      public Minimizer<DiffFunction> create() {
+        Minimizer<DiffFunction> firstMinimizer = new SGDMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
+        Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
+        return new HybridMinimizer(firstMinimizer, secondMinimizer, SGDPasses);
+      }
+    };
+  }
+
+  public void useStochasticGradientDescentToQuasiNewton(final double SGDGain, final int batchSize, final int sgdPasses,
+                                                        final int qnPasses, final int hessSamples, final int QNMem,
+                                                        final boolean outputToFile) {
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      private static final long serialVersionUID = 5823852936137599566L;
+      @Override
+      public Minimizer<DiffFunction> create() {
+        return new SGDToQNMinimizer(SGDGain, batchSize, sgdPasses,
+                                    qnPasses, hessSamples, QNMem, outputToFile);
+      }
+    };
+  }
+
+  public void useHybridMinimizer() {
+    useHybridMinimizer(0.1, 15, StochasticCalculateMethods.ExternalFiniteDifference, 0);
+  }
+
+  public void useHybridMinimizer(final double initialSMDGain, final int stochasticBatchSize,
+                                 final StochasticCalculateMethods stochasticMethod, final int cutoffIteration){
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      public Minimizer<DiffFunction> create() {
+        Minimizer<DiffFunction> firstMinimizer = new SMDMinimizer<DiffFunction>(initialSMDGain, stochasticBatchSize,stochasticMethod,cutoffIteration);
+        Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
+        return new HybridMinimizer(firstMinimizer,secondMinimizer,cutoffIteration);
+      }
+    };
+  }
+
+  /**
+   * Set the mem value for {@link QNMinimizer}.
+   * Only used with quasi-newton minimization.  15 is the default.
+   *
+   * @param mem Number of previous function/derivative evaluations to store
+   *            to estimate second derivative.  Storing more previous evaluations
+   *            improves training convergence speed.  This number can be very
+   *            small, if memory conservation is the priority.  For large
+   *            optimization systems (of 100,000-1,000,000 dimensions), setting this
+   *            to 15 produces quite good results, but setting it to 50 can
+   *            decrease the iteration count by about 20% over a value of 15.
+   */
+  public void setMem(int mem) {
+    this.mem = mem;
+  }
+
+  /**
+   * Sets the minimizer to {@link CGMinimizer}, with the passed {@code verbose} flag.
+   */
+  public void useConjugateGradientAscent(boolean verbose) {
+    this.verbose = verbose;
+    useConjugateGradientAscent();
+  }
+
+  /**
+   * Sets the minimizer to {@link CGMinimizer}.
+   */
+  public void useConjugateGradientAscent() {
+    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
+      private static final long serialVersionUID = -561168861131879990L;
+
+      @Override
+      public Minimizer<DiffFunction> create() {
+        return new CGMinimizer(!LinearClassifierFactory.this.verbose);
+      }
+    };
+  }
+
+  /**
+   * NOTE: nothing is actually done with this value!
+   *
+   * SetUseSum sets the <code>useSum</code> flag: when turned on,
+   * the Summed Conditional Objective Function is used.  Otherwise, the
+   * LogConditionalObjectiveFunction is used.  The default is false.
+   */
+  public void setUseSum(boolean useSum) {
+    //this.useSum = useSum;
+  }
+
 
   private Minimizer<DiffFunction> getMinimizer() {
     // Create a new minimizer
@@ -210,12 +546,12 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    */
   public LinearClassifier<L,F> trainSemiSupGE(GeneralDataset<L, F> labeledDataset, List<? extends Datum<L, F>> unlabeledDataList) {
     List<F> GEFeatures = getHighPrecisionFeatures(labeledDataset,0.9,10);
-    return trainSemiSupGE(labeledDataset, unlabeledDataList, GEFeatures,0.5);
+    return trainSemiSupGE(labeledDataset, unlabeledDataList, GEFeatures, 0.5);
   }
 
   public LinearClassifier<L,F> trainSemiSupGE(GeneralDataset<L, F> labeledDataset, List<? extends Datum<L, F>> unlabeledDataList, double convexComboCoeff) {
     List<F> GEFeatures = getHighPrecisionFeatures(labeledDataset,0.9,10);
-    return trainSemiSupGE(labeledDataset, unlabeledDataList, GEFeatures,convexComboCoeff);
+    return trainSemiSupGE(labeledDataset, unlabeledDataList, GEFeatures, convexComboCoeff);
   }
 
 
@@ -292,314 +628,6 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
     heldOutSetSigma(train);
     double[][] weights = trainWeights(train);
     return new LinearClassifier<L, F>(weights, train.featureIndex(), train.labelIndex());
-  }
-
-  public LinearClassifierFactory() {
-    this(new Factory<Minimizer<DiffFunction>>() { public Minimizer<DiffFunction> create() { return new QNMinimizer(15); } });
-    this.mem = 15;
-    this.useQuasiNewton();
-  }
-
-  /** NOTE: Constructors that takes in a Minimizer creates a LinearClassifierFactory that will reuse the minimizer
-   *  and will not be threadsafe (unless the Minimizer itself is ThreadSafe which is probably not the case)
-   */
-  public LinearClassifierFactory(Minimizer<DiffFunction> min) {
-    this(min, false);
-  }
-
-  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min) {
-    this(min, false);
-  }
-
-  public LinearClassifierFactory(boolean useSum) {
-    this(new Factory<Minimizer<DiffFunction>>() { public Minimizer<DiffFunction> create() { return new QNMinimizer(15); } },
-         useSum);
-    this.mem = 15;
-    this.useQuasiNewton();
-  }
-
-  public LinearClassifierFactory(double tol) {
-    this(new Factory<Minimizer<DiffFunction>>() { public Minimizer<DiffFunction> create() { return new QNMinimizer(15); } },
-        tol, false);
-    this.mem = 15;
-    this.useQuasiNewton();
-  }
-  public LinearClassifierFactory(Minimizer<DiffFunction> min, boolean useSum) {
-    this(min, 1e-4, useSum);
-  }
-  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, boolean useSum) {
-    this(min, 1e-4, useSum);
-  }
-  public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum) {
-    this(min, tol, useSum, 1.0);
-  }
-  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum) {
-    this(min, tol, useSum, 1.0);
-  }
-  public LinearClassifierFactory(double tol, boolean useSum, double sigma) {
-    this(new Factory<Minimizer<DiffFunction>>() { public Minimizer<DiffFunction> create() { return new QNMinimizer(15); } },
-        tol, useSum, sigma);
-    this.mem = 15;
-    this.useQuasiNewton();
-  }
-  public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, double sigma) {
-    this(min, tol, useSum, LogPrior.LogPriorType.QUADRATIC.ordinal(), sigma);
-  }
-  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, double sigma) {
-    this(min, tol, useSum, LogPrior.LogPriorType.QUADRATIC.ordinal(), sigma);
-  }
-  public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, int prior, double sigma) {
-    this(min, tol, useSum, prior, sigma, 0.0);
-  }
-  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, int prior, double sigma) {
-    this(min, tol, useSum, prior, sigma, 0.0);
-  }
-  public LinearClassifierFactory(double tol, boolean useSum, int prior, double sigma, double epsilon) {
-    this(new Factory<Minimizer<DiffFunction>>() { public Minimizer<DiffFunction> create() { return new QNMinimizer(15); } },
-        tol, useSum, new LogPrior(prior, sigma, epsilon));
-    this.mem = 15;
-    this.useQuasiNewton();
-  }
-
-  public LinearClassifierFactory(double tol, boolean useSum, int prior, double sigma, double epsilon, final int mem) {
-    this(new Factory<Minimizer<DiffFunction>>() { public Minimizer<DiffFunction> create() { return new QNMinimizer(mem); } },
-        tol, useSum, new LogPrior(prior, sigma, epsilon));
-    this.useQuasiNewton();
-  }
-
-  /**
-   * Create a factory that builds linear classifiers from training data.
-   *
-   * @param min     The method to be used for optimization (minimization) (default: {@link QNMinimizer})
-   * @param tol     The convergence threshold for the minimization (default: 1e-4)
-   * @param useSum  Asks to the optimizer to minimize the sum of the
-   *                likelihoods of individual data items rather than their product (default: false)
-   *                NOTE: this is currently ignored!!!
-   * @param prior   What kind of prior to use, as an enum constant from class
-   *                LogPrior
-   * @param sigma   The strength of the prior (smaller is stronger for most
-   *                standard priors) (default: 1.0)
-   * @param epsilon A second parameter to the prior (currently only used
-   *                by the Huber prior)
-   */
-  public LinearClassifierFactory(Minimizer<DiffFunction> min, double tol, boolean useSum, int prior, double sigma, double epsilon) {
-    this(min, tol, useSum, new LogPrior(prior, sigma, epsilon));
-  }
-  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> min, double tol, boolean useSum, int prior, double sigma, double epsilon) {
-    this(min, tol, useSum, new LogPrior(prior, sigma, epsilon));
-  }
-
-  public LinearClassifierFactory(final Minimizer<DiffFunction> min, double tol, boolean useSum, LogPrior logPrior) {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return min;
-      }
-    };
-    this.TOL = tol;
-    //this.useSum = useSum;
-    this.logPrior = logPrior;
-  }
-
-  public LinearClassifierFactory(Factory<Minimizer<DiffFunction>> minimizerCreator, double tol, boolean useSum, LogPrior logPrior) {
-    this.minimizerCreator = minimizerCreator;
-    this.TOL = tol;
-    //this.useSum = useSum;
-    this.logPrior = logPrior;
-  }
-
-  /**
-   * Set the tolerance.  1e-4 is the default.
-   */
-  public void setTol(double tol) {
-    this.TOL = tol;
-  }
-
-  /**
-   * Set the prior.
-   *
-   * @param logPrior One of the priors defined in
-   *              {@code LogConditionalObjectiveFunction}.
-   *              {@code LogPrior.QUADRATIC} is the default.
-   */
-  public void setPrior(LogPrior logPrior) {
-    this.logPrior = logPrior;
-  }
-
-  /**
-   * Set the verbose flag for {@link CGMinimizer}.
-   * Only used with conjugate-gradient minimization.
-   * <code>false</code> is the default.
-   */
-  public void setVerbose(boolean verbose) {
-    this.verbose = verbose;
-  }
-
-  /**
-   * Sets the minimizer.  {@link QNMinimizer} is the default.
-   */
-  public void setMinimizerCreator(Factory<Minimizer<DiffFunction>> minimizerCreator) {
-    this.minimizerCreator = minimizerCreator;
-  }
-
-  /**
-   * Sets the epsilon value for {@link LogConditionalObjectiveFunction}.
-   */
-  public void setEpsilon(double eps) {
-    logPrior.setEpsilon(eps);
-  }
-
-  public void setSigma(double sigma) {
-    logPrior.setSigma(sigma);
-  }
-
-  public double getSigma() {
-    return logPrior.getSigma();
-  }
-
-  /**
-   * Sets the minimizer to QuasiNewton. {@link QNMinimizer} is the default.
-   */
-  public void useQuasiNewton() {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new QNMinimizer(LinearClassifierFactory.this.mem);
-      }
-    };
-  }
-
-  public void useQuasiNewton(final boolean useRobust) {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new QNMinimizer(LinearClassifierFactory.this.mem, useRobust);
-      }
-    };
-  }
-
-  public void useStochasticQN(final double initialSMDGain, final int stochasticBatchSize){
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new SQNMinimizer<DiffFunction>(LinearClassifierFactory.this.mem, initialSMDGain, stochasticBatchSize, false);
-      }
-    };
-  }
-
-  public void useStochasticMetaDescent(){
-    useStochasticMetaDescent(0.1,15,StochasticCalculateMethods.ExternalFiniteDifference,20);
-  }
-
-  public void useStochasticMetaDescent(final double initialSMDGain, final int stochasticBatchSize,
-                                       final StochasticCalculateMethods stochasticMethod,final int passes) {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new SMDMinimizer<DiffFunction>(initialSMDGain,stochasticBatchSize,stochasticMethod,passes);
-      }
-    };
-  }
-
-  public void useStochasticGradientDescent(){
-    useStochasticGradientDescent(0.1,15);
-  }
-
-  public void useStochasticGradientDescent(final double gainSGD, final int stochasticBatchSize){
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new SGDMinimizer<DiffFunction>(gainSGD,stochasticBatchSize);
-      }
-    };
-  }
-
-  public void useInPlaceStochasticGradientDescent() {
-    useInPlaceStochasticGradientDescent(-1, -1, 1.0);
-  }
-
-  public void useInPlaceStochasticGradientDescent(final int SGDPasses, final int tuneSampleSize, final double sigma) {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new StochasticInPlaceMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
-      }
-    };
-  }
-
-  public void useHybridMinimizerWithInPlaceSGD(final int SGDPasses, final int tuneSampleSize, final double sigma) {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        Minimizer<DiffFunction> firstMinimizer = new StochasticInPlaceMinimizer<DiffFunction>(sigma, SGDPasses, tuneSampleSize);
-        Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
-        return new HybridMinimizer(firstMinimizer, secondMinimizer, SGDPasses);
-      }
-    };
-  }
-
-  public void useStochasticGradientDescentToQuasiNewton(final double SGDGain, final int batchSize, final int sgdPasses,
-                                                        final int qnPasses, final int hessSamples, final int QNMem,
-                                                        final boolean outputToFile) {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new SGDToQNMinimizer(SGDGain, batchSize, sgdPasses,
-                                    qnPasses, hessSamples, QNMem, outputToFile);
-      }
-    };
-  }
-
-  public void useHybridMinimizer() {
-    useHybridMinimizer(0.1,15,StochasticCalculateMethods.ExternalFiniteDifference , 0);
-  }
-
-  public void useHybridMinimizer(final double initialSMDGain, final int stochasticBatchSize,
-                                 final StochasticCalculateMethods stochasticMethod, final int cutoffIteration){
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        Minimizer<DiffFunction> firstMinimizer = new SMDMinimizer<DiffFunction>(initialSMDGain, stochasticBatchSize,stochasticMethod,cutoffIteration);
-        Minimizer<DiffFunction> secondMinimizer = new QNMinimizer(mem);
-        return new HybridMinimizer(firstMinimizer,secondMinimizer,cutoffIteration);
-      }
-    };
-  }
-
-  /**
-   * Set the mem value for {@link QNMinimizer}.
-   * Only used with quasi-newton minimization.  15 is the default.
-   *
-   * @param mem Number of previous function/derivative evaluations to store
-   *            to estimate second derivative.  Storing more previous evaluations
-   *            improves training convergence speed.  This number can be very
-   *            small, if memory conservation is the priority.  For large
-   *            optimization systems (of 100,000-1,000,000 dimensions), setting this
-   *            to 15 produces quite good results, but setting it to 50 can
-   *            decrease the iteration count by about 20% over a value of 15.
-   */
-  public void setMem(int mem) {
-    this.mem = mem;
-  }
-
-  /**
-   * Sets the minimizer to {@link CGMinimizer}, with the passed {@code verbose} flag.
-   */
-  public void useConjugateGradientAscent(boolean verbose) {
-    this.verbose = verbose;
-    useConjugateGradientAscent();
-  }
-
-  /**
-   * Sets the minimizer to {@link CGMinimizer}.
-   */
-  public void useConjugateGradientAscent() {
-    this.minimizerCreator = new Factory<Minimizer<DiffFunction>>() {
-      public Minimizer<DiffFunction> create() {
-        return new CGMinimizer(!LinearClassifierFactory.this.verbose);
-      }
-    };
-  }
-
-  /**
-   * NOTE: nothing is actually done with this value!
-   *
-   * SetUseSum sets the <code>useSum</code> flag: when turned on,
-   * the Summed Conditional Objective Function is used.  Otherwise, the
-   * LogConditionalObjectiveFunction is used.  The default is false.
-   */
-  public void setUseSum(boolean useSum) {
-    //this.useSum = useSum;
   }
 
   /**
@@ -753,7 +781,7 @@ public class LinearClassifierFactory<L, F> extends AbstractLinearClassifierFacto
    * is carried out by <code>minimizer</code>
    * dataset the data set to optimize sigma on.
    * kfold
-   * 
+   *
    * @return an interim set of optimal weights: the weights
    */
   public double[] heldOutSetSigma(final GeneralDataset<L, F> trainSet, final GeneralDataset<L, F> devSet, final Scorer<L> scorer, LineSearcher minimizer) {

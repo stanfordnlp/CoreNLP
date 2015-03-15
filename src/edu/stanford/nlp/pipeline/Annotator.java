@@ -102,6 +102,8 @@ public interface Annotator {
   public static final String STANFORD_TRUECASE = "truecase";
   public static final String STANFORD_PARSE = "parse";
   public static final String STANFORD_DETERMINISTIC_COREF = "dcoref";
+  public static final String STANFORD_RELATION = "relation";
+
 
   public static final Requirement TOKENIZE_REQUIREMENT = new Requirement(STANFORD_TOKENIZE);
   public static final Requirement CLEAN_XML_REQUIREMENT = new Requirement(STANFORD_CLEAN_XML);
@@ -115,6 +117,7 @@ public interface Annotator {
   public static final Requirement TRUECASE_REQUIREMENT = new Requirement(STANFORD_TRUECASE);
   public static final Requirement PARSE_REQUIREMENT = new Requirement(STANFORD_PARSE);
   public static final Requirement DETERMINISTIC_COREF_REQUIREMENT = new Requirement(STANFORD_DETERMINISTIC_COREF);
+  public static final Requirement RELATION_EXTRACTOR_REQUIREMENT = new Requirement(STANFORD_RELATION);
 
   /**
    * These are annotators which StanfordCoreNLP does not know how to

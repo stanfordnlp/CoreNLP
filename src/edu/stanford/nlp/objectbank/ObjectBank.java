@@ -320,6 +320,7 @@ public class ObjectBank<E> implements Collection<E>, Serializable {
     rif = new ReaderIteratorFactory();
   }
 
+  @Override
   public Object[] toArray() {
     Iterator<E> iter = iterator();
     ArrayList<Object> al = new ArrayList<Object>();

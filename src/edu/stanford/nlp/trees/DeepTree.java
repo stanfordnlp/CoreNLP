@@ -11,32 +11,21 @@ import org.ejml.simple.SimpleMatrix;
  * @author Richard Socher
  */
 public class DeepTree {
-  Tree tree;
-  IdentityHashMap<Tree, SimpleMatrix> vectors; 
-  public double score;
-  
+
+  private final Tree tree;
+  private final IdentityHashMap<Tree, SimpleMatrix> vectors;
+  private final double score;
+
   public Tree getTree() {
     return tree;
   }
-  
-  public void setTree(Tree tree) {
-    this.tree = tree;
-  }
-  
+
   public IdentityHashMap<Tree, SimpleMatrix> getVectors() {
     return vectors;
   }
-  
-  public void setVectors(IdentityHashMap<Tree, SimpleMatrix> vectors) {
-    this.vectors = vectors;
-  }
-  
+
   public double getScore() {
     return score;
-  }
-  
-  public void setScore(double score) {
-    this.score = score;
   }
 
   public DeepTree(Tree tree, IdentityHashMap<Tree, SimpleMatrix> vectors, double score) {
@@ -50,13 +39,12 @@ public class DeepTree {
    * the highest scoring tree first
    */
   public static final Comparator<DeepTree> DESCENDING_COMPARATOR = new Comparator<DeepTree>() {
+
     /** Reverses the score comparison so that we can sort highest score first */
+    @Override
     public int compare(DeepTree o1, DeepTree o2) {
       return -Double.compare(o1.score, o2.score);
     }
 
-    public boolean equals(Object obj) {
-      return obj == this;
-    }
   };
 }

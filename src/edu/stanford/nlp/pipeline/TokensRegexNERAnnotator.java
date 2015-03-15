@@ -83,7 +83,7 @@ import java.util.regex.Pattern;
  *   </tr>
  *   <tr><td><code>noDefaultOverwriteLabels</code></td>
  *      <td>Comma separated list of output types for which default NER labels are not overwritten.
- *          For this types, only if the matched expression has NER type matchting the
+ *          For this types, only if the matched expression has NER type matching the
  *          specified overwriteableType for the regex will the NER type be overwritten.</td>
  *      <td><code></code></td></tr>
  *   <tr><td><code>ignoreCase</code></td><td><code>Boolean</code></td>
@@ -134,29 +134,33 @@ public class TokensRegexNERAnnotator implements Annotator {
   }
 
   private static Properties getProperties(String name, String mapping, boolean ignoreCase, String validPosRegex) {
+    String prefix = (name != null && !name.isEmpty())? name + ".":"";
     Properties props = new Properties();
-    props.setProperty(name + ".mapping", mapping);
-    props.setProperty(name +".ignorecase", String.valueOf(ignoreCase));
+    props.setProperty(prefix + "mapping", mapping);
+    props.setProperty(prefix + "ignorecase", String.valueOf(ignoreCase));
     if (validPosRegex != null) {
-      props.setProperty(name +".validpospattern", validPosRegex);
+      props.setProperty(prefix + "validpospattern", validPosRegex);
     }
     return props;
   }
 
   public TokensRegexNERAnnotator(String name, Properties properties) {
-    String backgroundSymbol = properties.getProperty(name + ".backgroundSymbol",
+    String prefix = (name != null && !name.isEmpty())? name + ".":"";
+    String backgroundSymbol = properties.getProperty(prefix + "backgroundSymbol",
             SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL + ",MISC");
     String[] backgroundSymbols = backgroundSymbol.split("\\s*,\\s*");
-    String[] mappings = PropertiesUtils.getStringArray(properties, name + ".mapping",
-            new String[] { DefaultPaths.DEFAULT_REGEXNER_RULES} );
-    String validPosRegex = properties.getProperty(name + ".validpospattern");
-    this.posMatchType = PosMatchType.valueOf(properties.getProperty(name + ".posmatchtype",
+    String mappingFiles = properties.getProperty(prefix + "mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
+    String[] mappings = mappingFiles.split("\\s*[,;]\\s*");
+    String validPosRegex = properties.getProperty(prefix + "validpospattern");
+    this.posMatchType = PosMatchType.valueOf(properties.getProperty(prefix + "posmatchtype",
             DEFAULT_POS_MATCH_TYPE.name()));
     boolean overwriteMyLabels = true;
 
-    this.noDefaultOverwriteLabels = CollectionUtils.asSet(PropertiesUtils.getStringArray(properties, name + ".noDefaultOverwriteLabels"));
-    this.ignoreCase = PropertiesUtils.getBool(properties, name + ".ignorecase", false);
-    this.verbose = PropertiesUtils.getBool(properties, name + ".verbose", false);
+    String noDefaultOverwriteLabelsProp = properties.getProperty(prefix + "noDefaultOverwriteLabels");
+    this.noDefaultOverwriteLabels = (noDefaultOverwriteLabelsProp != null)?
+            CollectionUtils.asSet(noDefaultOverwriteLabelsProp.split("\\s*,\\s*")):new HashSet<String>();
+    this.ignoreCase = PropertiesUtils.getBool(properties, prefix + "ignorecase", false);
+    this.verbose = PropertiesUtils.getBool(properties, prefix + "verbose", false);
 
     if (validPosRegex != null && !validPosRegex.equals("")) {
       validPosPattern = Pattern.compile(validPosRegex);
@@ -238,8 +242,9 @@ public class TokensRegexNERAnnotator implements Annotator {
       Entry entry = patternToEntry.get(m.pattern());
 
       // Check if we will overwrite the existing annotation with this annotation
-      int start = m.start();
-      int end = m.end();
+      int g = entry.annotateGroup;
+      int start = m.start(g);
+      int end = m.end(g);
 
       boolean overwriteOriginalNer = checkPosTags(entry, tokens, start, end);
       if (overwriteOriginalNer) {
@@ -251,8 +256,8 @@ public class TokensRegexNERAnnotator implements Annotator {
         }
       } else {
         if (verbose) {
-          System.err.println("Not annotating  '" + m.group() + "': " +
-                  StringUtils.joinFields(m.groupNodes(), CoreAnnotations.NamedEntityTagAnnotation.class)
+          System.err.println("Not annotating  '" + m.group(g) + "': " +
+                  StringUtils.joinFields(m.groupNodes(g), CoreAnnotations.NamedEntityTagAnnotation.class)
                   + " with " + entry.type + ", sentence is '" + StringUtils.joinWords(tokens, " ") + "'");
         }
       }
@@ -357,13 +362,15 @@ public class TokensRegexNERAnnotator implements Annotator {
     public String type; // the associated type
     public Set<String> overwritableTypes; // what types can be overwritten by this entry
     public double priority;
+    public int annotateGroup;
 
-    public Entry(String tokensRegex, String[] regex, String type, Set<String> overwritableTypes, double priority) {
+    public Entry(String tokensRegex, String[] regex, String type, Set<String> overwritableTypes, double priority, int annotateGroup) {
       this.tokensRegex = tokensRegex;
       this.regex = regex;
       this.type = type.intern();
       this.overwritableTypes = overwritableTypes;
       this.priority = priority;
+      this.annotateGroup = annotateGroup;
     }
 
     public String toString() {
@@ -432,8 +439,8 @@ public class TokensRegexNERAnnotator implements Annotator {
       String tokensRegex = null;
       String[] regexes = null;
       if (regex.startsWith("( ") && regex.endsWith(" )")) {
-        // Tokens regex
-        tokensRegex = regex;
+        // Tokens regex (remove start and end parenthesis)
+        tokensRegex = regex.substring(1,regex.length()-1).trim();
       } else {
         regexes = regex.split("\\s+");
       }
@@ -462,7 +469,9 @@ public class TokensRegexNERAnnotator implements Annotator {
         }
       }
 
-      Entry entry = new Entry(tokensRegex, regexes, type, overwritableTypes, priority);
+      // TODO: Get annotate group from input....
+      int annotateGroup = 0;
+      Entry entry = new Entry(tokensRegex, regexes, type, overwritableTypes, priority, annotateGroup);
       if (seenRegexes.containsKey(key)) {
         Entry oldEntry = seenRegexes.get(key);
         if (priority > oldEntry.priority) {

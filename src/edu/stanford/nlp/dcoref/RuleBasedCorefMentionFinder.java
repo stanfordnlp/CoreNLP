@@ -32,7 +32,7 @@ import edu.stanford.nlp.util.StringUtils;
 public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
   protected boolean assignIds = true;
-  protected int maxID = -1;
+//  protected int maxID = -1;
   private final HeadFinder headFinder;
   protected Annotator parserProcessor;
 
@@ -73,8 +73,8 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
    *  Extract all NP, PRP or NE, and filter out by manually written patterns.
    */
   @Override
-  public List<List<Mention>> extractPredictedMentions(Annotation doc, int _maxID, Dictionaries dict){
-    this.maxID = _maxID;
+  public List<List<Mention>> extractPredictedMentions(Annotation doc, int maxID, Dictionaries dict){
+//    this.maxID = _maxID;
     List<List<Mention>> predictedMentions = new ArrayList<List<Mention>>();
     for(CoreMap s : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
 
@@ -91,7 +91,19 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       setBarePlural(mentions);
       removeSpuriousMentions(s, mentions, dict);
     }
+    
+    // assign mention IDs
+    if(assignIds) assignMentionIDs(predictedMentions, maxID);
+    
     return predictedMentions;
+  }
+
+  protected void assignMentionIDs(List<List<Mention>> predictedMentions, int maxID) {
+    for(List<Mention> mentions : predictedMentions) {
+      for(Mention m : mentions) {
+        m.mentionID = (++maxID);
+      }
+    }
   }
 
   protected static void setBarePlural(List<Mention> mentions) {
@@ -118,8 +130,8 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
           int endIndex = w.get(CoreAnnotations.IndexAnnotation.class);
           if (beginIndex >= 0) {
             IntPair mSpan = new IntPair(beginIndex, endIndex);
-            int mentionId = assignIds? ++maxID:-1;
-            Mention m = new Mention(mentionId, beginIndex, endIndex, dependency, new ArrayList<CoreLabel>(sent.subList(beginIndex, endIndex)));
+            int dummyMentionId = -1;
+            Mention m = new Mention(dummyMentionId, beginIndex, endIndex, dependency, new ArrayList<CoreLabel>(sent.subList(beginIndex, endIndex)));
             mentions.add(m);
             mentionSpanSet.add(mSpan);
             beginIndex = -1;
@@ -142,15 +154,15 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       String nerString = w.get(CoreAnnotations.NamedEntityTagAnnotation.class);
       if(!nerString.equals(preNE)) {
         int endIndex = w.get(CoreAnnotations.IndexAnnotation.class) - 1;
-        if(!preNE.equals("O") && !preNE.equals("QUANTITY") && !preNE.equals("CARDINAL") && !preNE.equals("PERCENT")) {
+        if(!preNE.matches("O|QUANTITY|CARDINAL|PERCENT|DATE|DURATION|TIME|SET")){
           if(w.get(CoreAnnotations.TextAnnotation.class).equals("'s")) endIndex++;
           IntPair mSpan = new IntPair(beginIndex, endIndex);
           // Need to check if beginIndex < endIndex because, for
           // example, there could be a 's mislabeled by the NER and
           // attached to the previous NER by the earlier heuristic
           if(beginIndex < endIndex && !mentionSpanSet.contains(mSpan)) {
-            int mentionId = assignIds? ++maxID:-1;
-            Mention m = new Mention(mentionId, beginIndex, endIndex, dependency, new ArrayList<CoreLabel>(sent.subList(beginIndex, endIndex)));
+            int dummyMentionId = -1;
+            Mention m = new Mention(dummyMentionId, beginIndex, endIndex, dependency, new ArrayList<CoreLabel>(sent.subList(beginIndex, endIndex)));
             mentions.add(m);
             mentionSpanSet.add(mSpan);
             namedEntitySpanSet.add(mSpan);
@@ -161,11 +173,11 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       }
     }
     // NE at the end of sentence
-    if(!preNE.equals("O") && !preNE.equals("QUANTITY") && !preNE.equals("CARDINAL") && !preNE.equals("PERCENT")) {
+    if(!preNE.matches("O|QUANTITY|CARDINAL|PERCENT|DATE|DURATION|TIME|SET")) {
       IntPair mSpan = new IntPair(beginIndex, sent.size());
       if(!mentionSpanSet.contains(mSpan)) {
-        int mentionId = assignIds? ++maxID:-1;
-        Mention m = new Mention(mentionId, beginIndex, sent.size(), dependency, new ArrayList<CoreLabel>(sent.subList(beginIndex, sent.size())));
+        int dummyMentionId = -1;
+        Mention m = new Mention(dummyMentionId, beginIndex, sent.size(), dependency, new ArrayList<CoreLabel>(sent.subList(beginIndex, sent.size())));
         mentions.add(m);
         mentionSpanSet.add(mSpan);
         namedEntitySpanSet.add(mSpan);
@@ -190,8 +202,8 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       if (",".equals(sent.get(endIdx-1).word())) { endIdx--; } // try not to have span that ends with ,
       IntPair mSpan = new IntPair(beginIdx, endIdx);
       if(!mentionSpanSet.contains(mSpan) && !insideNE(mSpan, namedEntitySpanSet)) {
-        int mentionID = assignIds? ++maxID:-1;
-        Mention m = new Mention(mentionID, beginIdx, endIdx, dependency, new ArrayList<CoreLabel>(sent.subList(beginIdx, endIdx)), t);
+        int dummyMentionId = -1;
+        Mention m = new Mention(dummyMentionId, beginIdx, endIdx, dependency, new ArrayList<CoreLabel>(sent.subList(beginIdx, endIdx)), t);
         mentions.add(m);
         mentionSpanSet.add(mSpan);
       }
@@ -225,8 +237,8 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
     for(IntPair mSpan : spanToMentionSubTree.keySet()){
       if(!mentionSpanSet.contains(mSpan) && !insideNE(mSpan, namedEntitySpanSet)) {
-        int mentionID = assignIds? ++maxID:-1;
-        Mention m = new Mention(mentionID, mSpan.get(0), mSpan.get(1), dependency,
+        int dummyMentionId = -1;
+        Mention m = new Mention(dummyMentionId, mSpan.get(0), mSpan.get(1), dependency,
                                 new ArrayList<CoreLabel>(sent.subList(mSpan.get(0), mSpan.get(1))), spanToMentionSubTree.get(mSpan));
         mentions.add(m);
         mentionSpanSet.add(mSpan);

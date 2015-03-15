@@ -68,7 +68,17 @@ public class AnnotationLookup {
     AUTHOR_KEY(CoreAnnotations.AuthorAnnotation.class,"author"),
     SECTION_KEY(CoreAnnotations.SectionAnnotation.class,"section"),
     SECTIONID_KEY(CoreAnnotations.SectionIDAnnotation.class,"sectionID"),
-    SECTIONDATE_KEY(CoreAnnotations.SectionDateAnnotation.class,"sectionDate");
+    SECTIONDATE_KEY(CoreAnnotations.SectionDateAnnotation.class,"sectionDate"),
+
+    // Thang Sep13: for Genia NER
+    HEAD_KEY(CoreAnnotations.HeadWordStringAnnotation.class, "head"),
+    GOVERNOR_KEY(CoreAnnotations.GovernorAnnotation.class, "governor"),
+    GAZ_KEY(CoreAnnotations.GazAnnotation.class, "gaz"),
+    ABBR_KEY(CoreAnnotations.AbbrAnnotation.class, "abbr"),
+    ABSTR_KEY(CoreAnnotations.AbstrAnnotation.class, "abstr"),
+    FREQ_KEY(CoreAnnotations.FreqAnnotation.class, "freq"),
+    WEB_KEY(CoreAnnotations.WebAnnotation.class, "web");
+    
 
     public final Class coreKey;
     public final String oldKey;

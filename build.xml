@@ -168,7 +168,7 @@
           description="Clean and re-compile." />
 
   <!-- This file contains the .jsp build target -->
-  <import file="../../commonbuildjsp.xml" />
+  <import file="commonbuildjsp.xml" />
 
   <!-- This runs the specified class, using a separate Java VM -->
   <!-- Specify class to run via "run.class," arg, i.e., -->

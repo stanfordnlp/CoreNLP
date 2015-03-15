@@ -251,7 +251,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
    * Returns the features used by the singleton predictor (logistic
    * classifier) to decide whether the mention belongs to a singleton entity
    */
-  private ArrayList<String> getSingletonFeatures(Dictionaries dict){
+  protected ArrayList<String> getSingletonFeatures(Dictionaries dict){
     ArrayList<String> features = new ArrayList<String>();
     features.add(mentionType.toString());
     features.add(nerString);
@@ -523,39 +523,19 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
         gender = Gender.FEMALE;
       }
     } else {
-      if(Constants.USE_GENDER_LIST){
-        // Bergsma list
-        if(gender == Gender.UNKNOWN)  {
-          if ("PERSON".equals(nerString) || "PER".equals(nerString)) {
-            // Try to get gender of the named entity
-            // Start with first name until we get gender...
-            List<CoreLabel> nerToks = nerTokens();
-            for (CoreLabel t:nerToks) {
-              String name = t.word().toLowerCase();
-              if(dict.maleWords.contains(name)) {
-                gender = Gender.MALE;
-                SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tMale:\t" +  name + "\tspan:" + spanToString());
-                break;
-              }
-              else if(dict.femaleWords.contains(name))  {
-                gender = Gender.FEMALE;
-                SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tFemale:\t" +  name + "\tspan:" + spanToString());
-                break;
-              }
-            }
-          } else {
-            if(dict.maleWords.contains(headString)) {
-              gender = Gender.MALE;
-              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tMale:\t" +  headString + "\tspan:" + spanToString());
-            }
-            else if(dict.femaleWords.contains(headString))  {
-              gender = Gender.FEMALE;
-              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tFemale:\t" +  headString + "\tspan:" + spanToString());
-            }
-            else if(dict.neutralWords.contains(headString))   {
-              gender = Gender.NEUTRAL;
-              SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
-            }
+      // Bergsma list
+      if(gender == Gender.UNKNOWN)  {
+        if ("PERSON".equals(nerString) || "PER".equals(nerString)) {
+          // Try to get gender of the named entity
+          // Start with first name until we get gender...
+          List<CoreLabel> nerToks = nerTokens();
+          for (CoreLabel t:nerToks) {
+            String name = t.word().toLowerCase();
+          }
+        } else {
+          if(dict.neutralWords.contains(headString))   {
+            gender = Gender.NEUTRAL;
+            SieveCoreferenceSystem.logger.finer("[Bergsma List] New gender assigned:\tNeutral:\t" +  headString + "\tspan:" + spanToString());
           }
         }
       }
@@ -609,19 +589,6 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     }
 
     if(mentionType != MentionType.PRONOMINAL) {
-      if(Constants.USE_NUMBER_LIST){
-        if(number == Number.UNKNOWN){
-          if(dict.singularWords.contains(headString)) {
-            number = Number.SINGULAR;
-            SieveCoreferenceSystem.logger.finest("[Bergsma] Number set to:\tSINGULAR:\t" + headString);
-          }
-          else if(dict.pluralWords.contains(headString))  {
-            number = Number.PLURAL;
-            SieveCoreferenceSystem.logger.finest("[Bergsma] Number set to:\tPLURAL:\t" + headString);
-          }
-        }
-      }
-
       final String enumerationPattern = "NP < (NP=tmp $.. (/,|CC/ $.. NP))";
 
       TregexPattern tgrepPattern = TregexPattern.compile(enumerationPattern);
@@ -932,8 +899,17 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       } else {
         if (this.endIndex > m.endIndex) {
           return true;
-        } else {
+        } else if (this.endIndex < m.endIndex) {
           return false;
+        } else if (this.headIndex != m.headIndex) {
+          // Meaningless, but an arbitrary tiebreaker
+          return this.headIndex < m.headIndex;
+        } else if (this.mentionType != m.mentionType) {
+          // Meaningless, but an arbitrary tiebreaker
+          return this.mentionType.representativeness > m.mentionType.representativeness;
+        } else {
+          // Meaningless, but an arbitrary tiebreaker
+          return this.hashCode() < m.hashCode();
         }
       }
     }
@@ -1107,34 +1083,42 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   public boolean moreRepresentativeThan(Mention m){
     if(m==null) return true;
-    if(mentionType!=m.mentionType) {
-      if ((mentionType == MentionType.PROPER && m.mentionType != MentionType.PROPER)
-           || (mentionType == MentionType.NOMINAL && m.mentionType == MentionType.PRONOMINAL)) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
+    if (mentionType.representativeness > m.mentionType.representativeness) { return true; }
+    else if (m.mentionType.representativeness > mentionType.representativeness) { return false; }
+    else {
       // pick mention with better NER
-      if (nerString == null && m.nerString != null) return false;
       if (nerString != null && m.nerString == null) return true;
-      if (!nerString.equals(m.nerString)) {
-        if ("O".equals(nerString)) return false;
+      if (nerString == null && m.nerString != null) return false;
+      if (nerString != null && !nerString.equals(m.nerString)) {
         if ("O".equals(m.nerString)) return true;
-        if ("MISC".equals(nerString)) return false;
+        if ("O".equals(nerString)) return false;
         if ("MISC".equals(m.nerString)) return true;
+        if ("MISC".equals(nerString)) return false;
       }
-      if (headIndex - startIndex > m.headIndex - m.startIndex) {
-        return true;
-      } else if (sentNum < m.sentNum || (sentNum == m.sentNum && headIndex < m.headIndex)) {
-        return true;
-      } else {
-        return false;
+      // Ensure that both NER tags are neither MISC nor O, or are both not existent
+      assert nerString == null || nerString.equals(m.nerString) || (!nerString.equals("O") && !nerString.equals("MISC") && !m.nerString.equals("O") && !m.nerString.equals("MISC"));
+      // Return larger headIndex - startIndex
+      if (headIndex - startIndex > m.headIndex - m.startIndex) { return true; }
+      else if (headIndex - startIndex < m.headIndex - m.startIndex) { return false; }
+      // Return earlier sentence number
+      else if (sentNum < m.sentNum) { return true; }
+      else if (sentNum > m.sentNum) { return false; }
+      // Return earlier head index
+      else if (headIndex < m.headIndex) { return true; }
+      else if (headIndex > m.headIndex) { return false; }
+      // If the mentions are short, take the longer one
+      else if (originalSpan.size() <= 5 && originalSpan.size() > m.originalSpan.size()) { return true; }
+      else if (originalSpan.size() <= 5 && originalSpan.size() < m.originalSpan.size()) { return false; }
+      // If the mentions are long, take the shorter one (we're getting into the realm of nonsense by here)
+      else if (originalSpan.size() < m.originalSpan.size()) { return true; }
+      else if (originalSpan.size() > m.originalSpan.size()) { return false; }
+      else {
+        throw new IllegalStateException("Comparing a mention with itself for representativeness");
       }
     }
   }
 
-  //Returns filtered premodifiers (no determiners or numerals)
+  // Returns filtered premodifiers (no determiners or numerals)
   public ArrayList<ArrayList<IndexedWord>> getPremodifiers(){
 
     ArrayList<ArrayList<IndexedWord>> premod = new ArrayList<ArrayList<IndexedWord>>();

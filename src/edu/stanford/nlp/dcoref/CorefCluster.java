@@ -27,9 +27,7 @@
 package edu.stanford.nlp.dcoref;
 
 import java.io.Serializable;
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.logging.Logger;
 
 import edu.stanford.nlp.dcoref.Dictionaries.Animacy;
@@ -89,8 +87,20 @@ public class CorefCluster implements Serializable{
 
   public CorefCluster(int ID, Set<Mention> mentions){
     this(ID);
+    // Register mentions
     corefMentions.addAll(mentions);
-    for (Mention m : mentions) {
+    // Get list of mentions in textual order
+    List<Mention> sortedMentions = new ArrayList<Mention>(mentions.size());
+    sortedMentions.addAll(mentions);
+    Collections.sort(sortedMentions, new CorefChain.MentionComparator());
+    // Set default for first / representative mention
+    if (sortedMentions.size() > 0) {
+      firstMention = sortedMentions.get(0);
+      representative = sortedMentions.get(0); // will be updated below
+    }
+
+    for (Mention m : sortedMentions) {
+      // Add various information about mentions to cluster
       animacies.add(m.animacy);
       genders.add(m.gender);
       numbers.add(m.number);
@@ -101,14 +111,11 @@ public class CorefCluster implements Serializable{
           words.add(w.get(CoreAnnotations.TextAnnotation.class).toLowerCase());
         }
       }
-      if (firstMention == null) firstMention = m;
-      else {
-        if(m.appearEarlierThan(firstMention)) firstMention = m;
+      // Update representative mention, if appropriate
+      if (m != representative && m.moreRepresentativeThan(representative)) {
+        assert !representative.moreRepresentativeThan(m);
+        representative = m;
       }
-    }
-    representative = firstMention;
-    for (Mention m : mentions) {
-      if(m.moreRepresentativeThan(representative)) representative = m;
     }
   }
 
@@ -146,7 +153,10 @@ public class CorefCluster implements Serializable{
     to.heads.addAll(from.heads);
     to.corefMentions.addAll(from.corefMentions);
     to.words.addAll(from.words);
-    if(from.firstMention.appearEarlierThan(to.firstMention) && !from.firstMention.isPronominal()) to.firstMention = from.firstMention;
+    if(from.firstMention.appearEarlierThan(to.firstMention) && !from.firstMention.isPronominal()) {
+      assert !to.firstMention.appearEarlierThan(from.firstMention);
+      to.firstMention = from.firstMention;
+    }
     if(from.representative.moreRepresentativeThan(to.representative)) to.representative = from.representative;
     SieveCoreferenceSystem.logger.finer("merged clusters: "+toID+" += "+from.clusterID);
     to.printCorefCluster(SieveCoreferenceSystem.logger);

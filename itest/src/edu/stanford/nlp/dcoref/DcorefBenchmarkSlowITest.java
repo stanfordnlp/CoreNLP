@@ -26,12 +26,16 @@ public class DcorefBenchmarkSlowITest extends TestCase {
     String baseLogFile = WORK_DIR_FILE + File.separator + "log";
 
     System.err.println("Base log file name: " + WORK_DIR_FILE);
+    String current = new java.io.File( "." ).getCanonicalPath();
+    System.err.println("Current dir:"+current);
+    String currentDir = System.getProperty("user.dir");
+    System.err.println("Current dir using System:" +currentDir);
 
     String expectedResults = IOUtils.slurpFile("edu/stanford/nlp/dcoref/expected.txt");
 
     String[] corefArgs = { "-props", "edu/stanford/nlp/dcoref/coref.properties",
-                      "-" + Constants.LOG_PROP, baseLogFile,
-                      "-" + Constants.CONLL_OUTPUT_PROP, WORK_DIR_FILE.toString() };
+                           "-" + Constants.LOG_PROP, baseLogFile,
+                           "-" + Constants.CONLL_OUTPUT_PROP, WORK_DIR_FILE.toString() };
 
     Properties props = StringUtils.argsToProperties(corefArgs);
     System.err.println("Running dcoref with properties:");
@@ -56,7 +60,7 @@ public class DcorefBenchmarkSlowITest extends TestCase {
     for (int i = 0; i < expectedLines.length; ++i) {
       String expectedLine = expectedLines[expectedLines.length - 1 - i].trim().replaceAll("\\s+", " ");
       String actualLine = actualLines[line - i].trim().replaceAll("\\s+", " ");
-      assertEquals(expectedLine, actualLine.substring(0, expectedLine.length()));
+      assertEquals(expectedLine, actualLine);
     }
     System.err.println(line);
   }

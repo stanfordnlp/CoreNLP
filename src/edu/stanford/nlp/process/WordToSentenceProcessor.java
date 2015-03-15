@@ -217,7 +217,7 @@ public class WordToSentenceProcessor<IN> implements ListProcessor<IN, List<IN>> 
       SequenceMatcher<? super IN> matcher = sentenceBoundaryMultiTokenPattern.getMatcher(words);
       while (matcher.find()) {
         List nodes = matcher.groupNodes();
-        if (nodes != null & nodes.size() > 0) {
+        if (nodes != null && nodes.size() > 0) {
           isSentenceBoundary.put(nodes.get(nodes.size() - 1), true);
         }
       }

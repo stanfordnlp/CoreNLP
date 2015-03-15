@@ -17,7 +17,13 @@ public class SpeakerInfo {
   private String speakerName;
   private String[] speakerNameStrings; // tokenized speaker name
   private String speakerDesc;
+  // TODO: it is possible for this set to have Mentions with different
+  // corefClusterIds.  In that case, the results are actually not
+  // deterministic, since the cluster id of the speaker will depend on
+  // the order in which mentions are iterated over.  This will change
+  // from execution to execution in a HashSet.
   private Set<Mention> mentions = Generics.newHashSet();  // Mentions that corresponds to the speaker...
+  private Mention originalMention;            // the mention used when creating this SpeakerInfo
   private boolean speakerIdIsNumber;          // speaker id is a number (probably mention id)
   private boolean speakerIdIsAutoDetermined;  // speaker id was auto determined by system
   private Mention mainMention;
@@ -26,8 +32,9 @@ public class SpeakerInfo {
 
   private static final Pattern DEFAULT_SPEAKER_PATTERN = Pattern.compile("PER\\d+");
   protected static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+|_+");
-  public SpeakerInfo(String speakerName) {
+  public SpeakerInfo(String speakerName, Mention originalMention) {
     this.speakerId = speakerName;
+    this.originalMention = originalMention;
     int commaPos = speakerName.indexOf(',');
     if (commaPos > 0) {
       // drop everything after the ,
@@ -85,6 +92,9 @@ public class SpeakerInfo {
 
 
   public int getCorefClusterId() {
+    if (originalMention != null && originalMention.corefClusterID >= 0) {
+      return originalMention.corefClusterID;
+    }
     int corefClusterId = -1;     // Coref cluster id that corresponds to this speaker
     for (Mention m:mentions) {
       if (m.corefClusterID >= 0) {
@@ -93,6 +103,10 @@ public class SpeakerInfo {
       }
     }
     return corefClusterId;
+  }
+
+  public String toString() {
+    return speakerId;
   }
 
 }

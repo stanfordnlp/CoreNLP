@@ -22,18 +22,13 @@ public class DefaultPaths {
 
   public static final String DEFAULT_DCOREF_ANIMATE = "edu/stanford/nlp/models/dcoref/animate.unigrams.txt";
   public static final String DEFAULT_DCOREF_DEMONYM = "edu/stanford/nlp/models/dcoref/demonyms.txt";
-  public static final String DEFAULT_DCOREF_FEMALE = "edu/stanford/nlp/models/dcoref/female.unigrams.txt";
   public static final String DEFAULT_DCOREF_INANIMATE = "edu/stanford/nlp/models/dcoref/inanimate.unigrams.txt";
-  public static final String DEFAULT_DCOREF_MALE = "edu/stanford/nlp/models/dcoref/male.unigrams.txt";
   public static final String DEFAULT_DCOREF_NEUTRAL = "edu/stanford/nlp/models/dcoref/neutral.unigrams.txt";
-  public static final String DEFAULT_DCOREF_PLURAL = "edu/stanford/nlp/models/dcoref/plural.unigrams.txt";
-  public static final String DEFAULT_DCOREF_SINGULAR = "edu/stanford/nlp/models/dcoref/singular.unigrams.txt";
   public static final String DEFAULT_DCOREF_STATES = "edu/stanford/nlp/models/dcoref/state-abbreviations.txt";
 
   public static final String DEFAULT_DCOREF_COUNTRIES = "edu/stanford/nlp/models/dcoref/countries";
   public static final String DEFAULT_DCOREF_STATES_AND_PROVINCES = "edu/stanford/nlp/models/dcoref/statesandprovinces";
   public static final String DEFAULT_DCOREF_GENDER_NUMBER = "edu/stanford/nlp/models/dcoref/gender.data.gz";
-  public static final String DEFAULT_DCOREF_EXTRA_GENDER = "edu/stanford/nlp/models/dcoref/namegender.combine.txt";
   
   public static final String DEFAULT_DCOREF_SINGLETON_MODEL = "edu/stanford/nlp/models/dcoref/singleton.predictor.ser";
   public static final String DEFAULT_DCOREF_DICT1 = "edu/stanford/nlp/models/dcoref/coref.dict1.tsv";
@@ -45,6 +40,10 @@ public class DefaultPaths {
   public static final String DEFAULT_NFL_ENTITY_MODEL = "edu/stanford/nlp/models/machinereading/nfl/nfl_entity_model.ser";
   public static final String DEFAULT_NFL_RELATION_MODEL = "edu/stanford/nlp/models/machinereading/nfl/nfl_relation_model.ser";
   public static final String DEFAULT_NFL_GAZETTEER = "edu/stanford/nlp/models/machinereading/nfl/NFLgazetteer.txt";
+  
+  public static final String DEFAULT_SUP_RELATION_EX_ENTITY_MODEL = "edu/stanford/nlp/models/machinereading/nfl/nfl_entity_model.ser";
+  public static final String DEFAULT_SUP_RELATION_EX_RELATION_MODEL = "edu/stanford/nlp/models/machinereading/nfl/nfl_relation_model.ser";
+  public static final String DEFAULT_SUP_RELATION_GAZETTEER = "edu/stanford/nlp/models/machinereading/nfl/NFLgazetteer.txt";
 
 
   private DefaultPaths() {

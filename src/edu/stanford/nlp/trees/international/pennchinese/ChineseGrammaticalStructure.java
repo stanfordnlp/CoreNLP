@@ -179,10 +179,17 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
 
     Treebank tb = new MemoryTreebank();
     Properties props = StringUtils.argsToProperties(args);
+
+    String encoding = props.getProperty("encoding", "utf-8");
+    try {
+      System.setOut(new PrintStream(System.out, true, encoding));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
     String treeFileName = props.getProperty("treeFile");
     String treeDirname = props.getProperty("treeDir");
     String sentFileName = props.getProperty("sentFile");
-    String encoding = props.getProperty("encoding", "utf-8");
     boolean conllx = props.getProperty("conllx") != null;
     boolean basic = props.getProperty("basic") != null;
     boolean collapsed = props.getProperty("collapsed") != null;
