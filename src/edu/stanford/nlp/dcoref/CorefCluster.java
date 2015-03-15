@@ -46,15 +46,15 @@ public class CorefCluster implements Serializable{
 
   private static final long serialVersionUID = 8655265337578515592L;
 
-  public final Set<Mention> corefMentions;
-  public final int clusterID;
+  protected final Set<Mention> corefMentions;
+  protected final int clusterID;
 
   // Attributes for cluster - can include multiple attribute e.g., {singular, plural}
-  public final Set<Number> numbers;
-  public final Set<Gender> genders;
-  public final Set<Animacy> animacies;
-  public final Set<String> nerStrings;
-  public final Set<String> heads;
+  protected final Set<Number> numbers;
+  protected final Set<Gender> genders;
+  protected final Set<Animacy> animacies;
+  protected final Set<String> nerStrings;
+  protected final Set<String> heads;
 
   /** All words in this cluster - for word inclusion feature  */
   public final Set<String> words;

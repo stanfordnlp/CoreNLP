@@ -10,16 +10,16 @@ public class Constants {
   public static final boolean USE_TRUECASE = false;
 
   /** if true, use gold speaker tags */
-  public static final boolean USE_GOLD_SPEAKER_TAGS = true;
+  public static final boolean USE_GOLD_SPEAKER_TAGS = false;
 
   /** if false, use Stanford NER to predict NE labels */
-  public static final boolean USE_GOLD_NE = true;
+  public static final boolean USE_GOLD_NE = false;
 
   /** if false, use Stanford parse to parse */
-  public static final boolean USE_GOLD_PARSES = true;
+  public static final boolean USE_GOLD_PARSES = false;
 
   /** if false, use Stanford tagger to tag */
-  public static final boolean USE_GOLD_POS = true;
+  public static final boolean USE_GOLD_POS = false;
 
   /** if false, use mention prediction */
   public static final boolean USE_GOLD_MENTIONS = false;
@@ -46,7 +46,7 @@ public class Constants {
   public static final boolean PRINT_CONLL_OUTPUT = false;
 
   /** Default path for conll scorer script */
-  public static final String conllMentionEvalScript = "/scr/nlp/data/conll-2011/scorer/v7/scorer.pl";
+  public static final String conllMentionEvalScript = "/scr/nlp/data/conll-2011/scorer/v4/scorer.pl";
 
   /** if true, skip coreference resolution. do mention detection only */
   public static final boolean SKIP_COREF = false;

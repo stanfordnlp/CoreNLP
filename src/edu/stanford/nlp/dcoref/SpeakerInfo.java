@@ -3,7 +3,6 @@ package edu.stanford.nlp.dcoref;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.math.NumberMatchingRegex;
 
-import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -13,7 +12,7 @@ import java.util.regex.Pattern;
  *
  * @author Angel Chang
  */
-public class SpeakerInfo implements Serializable {
+public class SpeakerInfo {
   private String speakerId;
   private String speakerName;
   private String[] speakerNameStrings; // tokenized speaker name

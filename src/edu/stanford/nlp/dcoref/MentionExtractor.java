@@ -212,7 +212,7 @@ public class MentionExtractor {
         mentionsForTree.add(mention);
 
         // generates all fields required for coref, such as gender, number, etc.
-        mention.process(dictionaries, semantics, singletonPredictor);
+        mention.process(dictionaries, semantics, this, singletonPredictor);
       }
 
       //

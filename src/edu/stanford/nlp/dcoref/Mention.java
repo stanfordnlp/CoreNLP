@@ -148,8 +148,6 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   transient private String spanString = null;
   transient private String lowercaseNormalizedSpanString = null;
-  
-  public int headTokenIdx;
 
   @Override
   public Class<Mention> getType() {
@@ -224,7 +222,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
    * head string, mention type, NER label, Number, Gender, Animacy
    * @throws Exception
    */
-  public void process(Dictionaries dict, Semantics semantics) throws Exception {
+  public void process(Dictionaries dict, Semantics semantics, MentionExtractor mentionExtractor) throws Exception {
     setHeadString();
     setType(dict);
     setNERString();
@@ -235,12 +233,12 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     setPerson(dict);
     setDiscourse();
     headIndexedWord = dependency.getNodeByIndexSafe(headWord.index());
-    if(semantics!=null) setSemantics(dict, semantics);
+    if(semantics!=null) setSemantics(dict, semantics, mentionExtractor);
   }
 
-  public void process(Dictionaries dict, Semantics semantics,
+  public void process(Dictionaries dict, Semantics semantics, MentionExtractor mentionExtractor,
       LogisticClassifier<String, String> singletonPredictor) throws Exception {
-    process(dict, semantics);
+    process(dict, semantics, mentionExtractor);
     if(singletonPredictor != null) setSingleton(singletonPredictor, dict);
   }
 
@@ -254,7 +252,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
    * Returns the features used by the singleton predictor (logistic
    * classifier) to decide whether the mention belongs to a singleton entity
    */
-  public ArrayList<String> getSingletonFeatures(Dictionaries dict){
+  protected ArrayList<String> getSingletonFeatures(Dictionaries dict){
     ArrayList<String> features = new ArrayList<String>();
     features.add(mentionType.toString());
     features.add(nerString);
@@ -328,7 +326,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       return;
     } else if(dep.equals("nsubj") || dep.equals("csubj")) {
       isSubject = true;
-    } else if(dep.equals("dobj") || dep.equals("nsubjpass")){
+    } else if(dep.equals("dobj")){
       isDirectObject = true;
     } else if(dep.equals("iobj")){
       isIndirectObject = true;
@@ -369,7 +367,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
     }
   }
 
-  private void setSemantics(Dictionaries dict, Semantics semantics) throws Exception {
+  private void setSemantics(Dictionaries dict, Semantics semantics, MentionExtractor mentionExtractor) throws Exception {
 
     preprocessedTerms = this.preprocessSearchTerm();
 

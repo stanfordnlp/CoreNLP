@@ -24,12 +24,12 @@ public class ScorerMUC extends CorefScorer {
       rDen += g.corefMentions.size()-1;
       rNum += g.corefMentions.size();
 
-      Set<Integer> partitions = Generics.newHashSet();
+      Set<CorefCluster> partitions = Generics.newHashSet();
       for (Mention goldMention : g.corefMentions){
         if(!predictedMentions.containsKey(goldMention.mentionID)) {  // twinless goldmention
           rNum--;
         } else {
-          partitions.add(predictedMentions.get(goldMention.mentionID).corefClusterID);
+          partitions.add(doc.corefClusters.get(predictedMentions.get(goldMention.mentionID).corefClusterID));
         }
       }
       rNum -= partitions.size();
@@ -55,12 +55,12 @@ public class ScorerMUC extends CorefScorer {
       if(c.corefMentions.size()==0) continue;
       pDen += c.corefMentions.size()-1;
       pNum += c.corefMentions.size();
-      Set<Integer> partitions = Generics.newHashSet();
+      Set<CorefCluster> partitions = Generics.newHashSet();
       for (Mention predictedMention : c.corefMentions){
         if(!goldMentions.containsKey(predictedMention.mentionID)) {  // twinless goldmention
           pNum--;
         } else {
-          partitions.add(goldMentions.get(predictedMention.mentionID).goldCorefClusterID);
+          partitions.add(doc.goldCorefClusters.get(goldMentions.get(predictedMention.mentionID).goldCorefClusterID));
         }
       }
       pNum -= partitions.size();

@@ -186,11 +186,11 @@ public class CoNLL2011DocumentReader {
     }
   }
 
-  public static class Document implements Serializable {
+  public static class Document {
     String documentIdPart;
     String documentID;
     String partNo;
-    public List<List<String[]>> sentenceWordLists = new ArrayList<List<String[]>>();
+    List<List<String[]>> sentenceWordLists = new ArrayList<List<String[]>>();
 
     Annotation annotation;
     CollectionValuedMap<String,CoreMap> corefChainMap;

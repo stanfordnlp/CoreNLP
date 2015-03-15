@@ -42,11 +42,9 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.math.NumberMatchingRegex;
 import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
@@ -122,11 +120,7 @@ public class Document implements Serializable {
   protected Map<Pair<Integer, Integer>, Boolean> acronymCache;
 
   /** Map of speaker name/id to speaker info */
-  private Map<String, SpeakerInfo> speakerInfoMap = Generics.newHashMap();
-  
-  public Counter<String> properNouns = new ClassicCounter<String>();
-  public Counter<String> phraseCounter = new ClassicCounter<String>();
-  public Counter<String> headwordCounter = new ClassicCounter<String>();
+  transient private Map<String, SpeakerInfo> speakerInfoMap = Generics.newHashMap();
 
   public Document() {
     positions = Generics.newHashMap();
@@ -164,7 +158,7 @@ public class Document implements Serializable {
     processDiscourse(dict);
     printMentionDetection();
   }
-  
+
   /** Process discourse information */
   protected void processDiscourse(Dictionaries dict) {
     docType = findDocType(dict);
@@ -495,10 +489,8 @@ public class Document implements Serializable {
   /** Extract gold coref cluster information. */
   public void extractGoldCorefClusters(){
     goldCorefClusters = Generics.newHashMap();
-    for (int i = 0 ; i < goldOrderedMentionsBySentence.size() ; i++) {
-      List<Mention> mentions = goldOrderedMentionsBySentence.get(i);
+    for (List<Mention> mentions : goldOrderedMentionsBySentence) {
       for (Mention m : mentions) {
-        m.sentNum = i;
         int id = m.goldCorefClusterID;
         if (id == -1) {
           throw new RuntimeException("No gold info");
@@ -513,7 +505,7 @@ public class Document implements Serializable {
     }
   }
 
-  public List<Pair<IntTuple, IntTuple>> getGoldLinks() {
+  protected List<Pair<IntTuple, IntTuple>> getGoldLinks() {
     if(goldLinks==null) this.extractGoldLinks();
     return goldLinks;
   }
@@ -871,9 +863,4 @@ public class Document implements Serializable {
     SieveCoreferenceSystem.logger.fine("gold mentions == ");
   }
 
-  public boolean isCoref(Mention m1, Mention m2) {
-    return this.allGoldMentions.containsKey(m1.mentionID) 
-        && this.allGoldMentions.containsKey(m2.mentionID) 
-        && this.allGoldMentions.get(m1.mentionID).goldCorefClusterID == this.allGoldMentions.get(m2.mentionID).goldCorefClusterID;
-  }
 }

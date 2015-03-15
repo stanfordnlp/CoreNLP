@@ -330,7 +330,7 @@ public class Rules {
   public static boolean entityExactStringMatch(CorefCluster mentionCluster, CorefCluster potentialAntecedent, Dictionaries dict, Set<Mention> roleSet){
     boolean matched = false;
     for(Mention m : mentionCluster.corefMentions){
-      if(roleSet!=null && roleSet.contains(m)) return false;
+      if(roleSet.contains(m)) return false;
       if(m.isPronominal()) {
         continue;
       }
@@ -362,7 +362,7 @@ public class Rules {
       Mention ant,
       Dictionaries dict,
       Set<Mention> roleSet){
-    if(roleSet!=null && roleSet.contains(mention)) return false;
+    if(roleSet.contains(mention)) return false;
     if(mention.mentionType == MentionType.LIST || ant.mentionType == MentionType.LIST) return false;
     if(mention.isPronominal() || ant.isPronominal()
         || dict.allPronouns.contains(mention.lowercaseNormalizedSpanString())

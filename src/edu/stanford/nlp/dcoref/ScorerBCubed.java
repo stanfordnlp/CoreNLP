@@ -9,7 +9,7 @@ import java.util.*;
  */
 public class ScorerBCubed extends CorefScorer {
 
-  public enum BCubedType {B0, Ball, Brahman, Bcai, Bconll}
+  protected enum BCubedType {B0, Ball, Brahman, Bcai, Bconll}
 
   private final BCubedType type;
 
