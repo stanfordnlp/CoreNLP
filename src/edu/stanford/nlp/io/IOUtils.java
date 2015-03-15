@@ -460,6 +460,7 @@ public class IOUtils {
    * @return An Iterable containing the lines from the file.
    */
   public static Iterable<String> readLines(String path) {
+    if(path.endsWith(".gz")) return readLines(new File(path), GZIPInputStream.class);
     return readLines(new File(path));
   }
 
