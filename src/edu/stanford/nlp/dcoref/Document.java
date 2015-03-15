@@ -495,8 +495,10 @@ public class Document implements Serializable {
   /** Extract gold coref cluster information. */
   public void extractGoldCorefClusters(){
     goldCorefClusters = Generics.newHashMap();
-    for (List<Mention> mentions : goldOrderedMentionsBySentence) {
+    for (int i = 0 ; i < goldOrderedMentionsBySentence.size() ; i++) {
+      List<Mention> mentions = goldOrderedMentionsBySentence.get(i);
       for (Mention m : mentions) {
+        m.sentNum = i;
         int id = m.goldCorefClusterID;
         if (id == -1) {
           throw new RuntimeException("No gold info");
