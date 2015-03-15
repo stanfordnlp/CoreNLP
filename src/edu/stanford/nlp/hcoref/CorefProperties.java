@@ -347,7 +347,7 @@ public class CorefProperties {
     return PropertiesUtils.getBool(props, USE_SEMANTICS_PROP, true);
   }
   public static String getPathSerializedWordVectors(Properties props) {
-    return PropertiesUtils.getString(props, WORD2VEC_SERIALIZED_PROP, "/220/cleanup/vector.ser");
+    return PropertiesUtils.getString(props, WORD2VEC_SERIALIZED_PROP, "/scr/nlp/data/coref/wordvectors/en/vector.ser");
   }
   public static String getCurrentSieveForTrain(Properties props) {
     return PropertiesUtils.getString(props, CURRENT_SIEVE_FOR_TRAIN_PROP, null);
