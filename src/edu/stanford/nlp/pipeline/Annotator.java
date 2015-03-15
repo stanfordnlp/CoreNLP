@@ -101,6 +101,7 @@ public interface Annotator {
   public static final String STANFORD_TRUECASE = "truecase";
   public static final String STANFORD_PARSE = "parse";
   public static final String STANFORD_DETERMINISTIC_COREF = "dcoref";
+  public static final String STANFORD_COREF = "hcoref";
   public static final String STANFORD_RELATION = "relation";
   public static final String STANFORD_SENTIMENT = "sentiment";
   public static final String STANFORD_COLUMN_DATA_CLASSIFIER = "cdc";
@@ -118,7 +119,9 @@ public interface Annotator {
   public static final Requirement GENDER_REQUIREMENT = new Requirement(STANFORD_GENDER);
   public static final Requirement TRUECASE_REQUIREMENT = new Requirement(STANFORD_TRUECASE);
   public static final Requirement PARSE_REQUIREMENT = new Requirement(STANFORD_PARSE);
+  public static final Requirement DEPENDENCY_REQUIREMENT = new Requirement(STANFORD_DEPENDENCIES);
   public static final Requirement DETERMINISTIC_COREF_REQUIREMENT = new Requirement(STANFORD_DETERMINISTIC_COREF);
+  public static final Requirement COREF_REQUIREMENT = new Requirement(STANFORD_COREF);
   public static final Requirement RELATION_EXTRACTOR_REQUIREMENT = new Requirement(STANFORD_RELATION);
   public static final Requirement NATLOG_REQUIREMENT = new Requirement(STANFORD_NATLOG);
   public static final Requirement QUOTE_REQUIREMENT = new Requirement(STANFORD_QUOTE);
