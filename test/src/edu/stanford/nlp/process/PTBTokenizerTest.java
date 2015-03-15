@@ -178,8 +178,7 @@ public class PTBTokenizerTest extends TestCase {
     // note: after(x) and before(x+1) are the same
     assertEquals("     ", tokens.get(0).get(CoreAnnotations.AfterAnnotation.class));
     assertEquals("     ", tokens.get(1).get(CoreAnnotations.BeforeAnnotation.class));
-    // americanize is now off by default
-    assertEquals("colourful", tokens.get(3).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("colorful", tokens.get(3).get(CoreAnnotations.TextAnnotation.class));
     assertEquals("colourful", tokens.get(3).get(CoreAnnotations.OriginalTextAnnotation.class));
     assertEquals("", tokens.get(4).after());
     assertEquals("", tokens.get(5).before());
@@ -218,9 +217,9 @@ public class PTBTokenizerTest extends TestCase {
   };
 
   private String[][] sgmlGold = {
-    { "Significant", "improvements", "in", "peak", "FEV1", "were", "demonstrated", "with", "tiotropium/olodaterol",
-            "5/2", "μg", "-LRB-", "p", "=", "0.008", "-RRB-", ",", "5/5", "μg", "-LRB-", "p", "=", "0.012", "-RRB-",
-            ",", "and", "5/10", "μg", "-LRB-", "p", "<", "0.0001", "-RRB-", "versus", "tiotropium", "monotherapy",
+    { "Significant", "improvements", "in", "peak", "FEV1", "were", "demonstrated", "with", "tiotropium\\/olodaterol",
+            "5\\/2", "μg", "-LRB-", "p", "=", "0.008", "-RRB-", ",", "5\\/5", "μg", "-LRB-", "p", "=", "0.012", "-RRB-",
+            ",", "and", "5\\/10", "μg", "-LRB-", "p", "<", "0.0001", "-RRB-", "versus", "tiotropium", "monotherapy",
             "-LSB-", "51", "-RSB-", "." },
     { "Panasonic", "brand", "products", "are", "produced", "by", "Samsung", "Electronics", "Co.", "Ltd.", ".",
             "Sanyo", "products", "are", "n't", ".", },

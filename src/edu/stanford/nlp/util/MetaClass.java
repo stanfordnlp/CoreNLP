@@ -493,10 +493,7 @@ public class MetaClass {
     if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracket in encoded array: " + encoded); }
 		//(finite state automata)
 		for(int i=start; i<end; i++){
-      if (chars[i] == '\r') {
-        // Ignore funny windows carriage return
-        continue;
-      } else if(chars[i] == '\\'){
+			if(chars[i] == '\\'){
 				//(case: escaped character)
 				if(i == chars.length - 1) throw new IllegalArgumentException("Last character of encoded pair is escape character: " + encoded);
 				current.append(chars[i+1]);
@@ -561,10 +558,7 @@ public class MetaClass {
     if(chars[0] == '{'){ start += 1; end -= 1; if(chars[end] != '}') throw new IllegalArgumentException("Unclosed bracket in encoded map: " + encoded); }
     //(finite state automata)
     for(int i=start; i<end; i++){
-      if (chars[i] == '\r') {
-        // Ignore funny windows carriage return
-        continue;
-      } else if(chars[i] == '\\'){
+      if(chars[i] == '\\'){
         //(case: escaped character)
         if(i == chars.length - 1) throw new IllegalArgumentException("Last character of encoded pair is escape character: " + encoded);
         current.append(chars[i+1]);

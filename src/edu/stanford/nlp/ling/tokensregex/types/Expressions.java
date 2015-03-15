@@ -128,8 +128,6 @@ public class Expressions {
   public static final String TYPE_TOKENS = "TOKENS";
   public static final String TYPE_BOOLEAN = "BOOLEAN";
 
-  public final static String VAR_SELF = "_";
-
   public final static Value<Boolean> TRUE = new PrimitiveValue<Boolean>(Expressions.TYPE_BOOLEAN, true);
   public final static Value<Boolean> FALSE = new PrimitiveValue<Boolean>(Expressions.TYPE_BOOLEAN, false);
   public final static Value NIL = new PrimitiveValue("NIL", null);
@@ -537,9 +535,6 @@ public class Expressions {
       if (args != null) {
         if (args.length == 1 && args[0] instanceof CoreMap) {
           CoreMap cm = (CoreMap) args[0];
-          if (VAR_SELF.equals(varName))  {
-            return createValue(varName, cm);
-          }
           Class annotationKey = EnvLookup.lookupAnnotationKey(env, varName);
           if (annotationKey != null) {
             return createValue(varName, cm.get(annotationKey));

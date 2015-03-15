@@ -48,10 +48,6 @@
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/junit.jar!/"/>
 	</lib>
 	<lib name="javax.servlet.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/apache-tomcat-7.0.12-src/java"/>
-		<srcroot url="jar://$MODULE_DIR$/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/apache-tomcat-7.0.12-src/test"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/apache-tomcat-7.0.12-src/java"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/tomcat/apache-tomcat-7.0.12-src.zip!/apache-tomcat-7.0.12-src/test"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/javax.servlet.jar!/"/>
 	</lib>
 	<lib name="AppleJavaExtensions.jar" scope="COMPILE">
@@ -82,20 +78,29 @@
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/log4j-1.2.16-src.zip!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/log4j-1.2.16.jar!/"/>
 	</lib>
-	<lib name="ejml-0.23.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/ejml-0.23-src.zip!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/ejml-0.23-src.zip!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/ejml-0.23.jar!/"/>
+	<lib name="ejml-0.19-nogui.jar" scope="COMPILE">
+		<srcroot url="jar://$MODULE_DIR$/libsrc/ejml-0.19-src.zip!/ejml/src"/>
+		<srcroot url="jar://$MODULE_DIR$/libsrc/ejml-0.19-src.zip!/ejml/test"/>
+		<srcroot url="jar://$MODULE_DIR$/libsrc/ejml-0.19-src.zip!/ejml/examples/src"/>
+		<srcroot url="jar://$MODULE_DIR$/libsrc/ejml-0.19-src.zip!/ejml/examples/test"/>
+		<srcroot url="jar://$MODULE_DIR$/libsrc/ejml-0.19-src.zip!/ejml/benchmarks/src"/>
+		<srcroot url="jar://$MODULE_DIR$/libsrc/ejml-0.19-src.zip!/ejml/benchmarks/test"/>
+		<srcroot url="jar://$MODULE_DIR$/libsrc/ejml-0.19-src.zip!/ejml/experimental/src"/>
+		<srcroot url="jar://$MODULE_DIR$/libsrc/ejml-0.19-src.zip!/ejml/experimental/test"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/ejml-0.19-src.zip!/ejml/src"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/ejml-0.19-src.zip!/ejml/test"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/ejml-0.19-src.zip!/ejml/examples/src"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/ejml-0.19-src.zip!/ejml/examples/test"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/ejml-0.19-src.zip!/ejml/benchmarks/src"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/ejml-0.19-src.zip!/ejml/benchmarks/test"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/ejml-0.19-src.zip!/ejml/experimental/src"/>
+		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/ejml-0.19-src.zip!/ejml/experimental/test"/>
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/ejml-0.19-nogui.jar!/"/>
 	</lib>
 	<lib name="commons-lang3-3.1.jar" scope="COMPILE">
 		<srcroot url="jar://$MODULE_DIR$/libsrc/commons-lang3-3.1-sources.jar!/"/>
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/commons-lang3-3.1-sources.jar!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/commons-lang3-3.1.jar!/"/>
-	</lib>
-	<lib name="protobuf.jar" scope="COMPILE">
-		<srcroot url="jar://$MODULE_DIR$/libsrc/protobuf-src.jar!/"/>
-		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/protobuf-src.jar!/"/>
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/protobuf.jar!/"/>
 	</lib>
 	<lib name="javacc.jar" scope="COMPILE">
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/javacc.jar!/"/>

@@ -43,7 +43,6 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.DeltaIndex;
@@ -202,32 +201,13 @@ public class LexicalizedParserQuery implements ParserQuery {
       throw new UnsupportedOperationException("Can't parse a zero-length sentence!");
     }
 
-    List<HasWord> sentenceB;
-    if (op.wordFunction != null) {
-      sentenceB = Generics.newArrayList();
-      for (HasWord word : originalSentence) {
-        if (word instanceof Label) {
-          Label label = (Label) word;
-          Label newLabel = label.labelFactory().newLabel(label);
-          if (newLabel instanceof HasWord) {
-            sentenceB.add((HasWord) newLabel);
-          } else {
-            throw new AssertionError("This should have been a HasWord");
-          }
-        } else if (word instanceof HasTag) {
-          TaggedWord tw = new TaggedWord(word.word(), ((HasTag) word).tag());
-          sentenceB.add(tw);
-        } else {
-          sentenceB.add(new Word(word.word()));
-        }
-      }
-      for (HasWord word : sentenceB) {
+    for (HasWord word : sentence) {
+      if (op.wordFunction != null) {
         word.setWord(op.wordFunction.apply(word.word()));
       }
-    } else {
-      sentenceB = new ArrayList<HasWord>(sentence);
     }
 
+    List<HasWord> sentenceB = new ArrayList<HasWord>(sentence);
     if (op.testOptions.addMissingFinalPunctuation) {
       addSentenceFinalPunctIfNeeded(sentenceB, length);
     }
@@ -256,6 +236,7 @@ public class LexicalizedParserQuery implements ParserQuery {
 
     if (op.doPCFG) {
       if (!pparser.parse(sentenceB)) {
+        restoreOriginalWords(sentence);
         return parseSucceeded;
       }
       if (op.testOptions.verbose) {
@@ -269,6 +250,7 @@ public class LexicalizedParserQuery implements ParserQuery {
     }
     if (op.doDep && ! op.testOptions.useFastFactored) {
       if ( ! dparser.parse(sentenceB)) {
+        restoreOriginalWords(sentence);
         return parseSucceeded;
       }
       // cdm nov 2006: should move these printing bits to the main printing section,
@@ -283,14 +265,28 @@ public class LexicalizedParserQuery implements ParserQuery {
     }
     if (op.doPCFG && op.doDep) {
       if ( ! bparser.parse(sentenceB)) {
+        restoreOriginalWords(sentence);
         return parseSucceeded;
       } else {
         parseSucceeded = true;
       }
     }
+    restoreOriginalWords(sentence);
     return true;
   }
 
+
+  private <T extends HasWord> void restoreOriginalWords(List<T> sentence) {
+    if (originalSentence == null) {
+      return;
+    }
+    if (sentence.size() != originalSentence.size()) {
+      throw new IllegalStateException("originalWords and sentence of different sizes");
+    }
+    for (int i = 0; i < sentence.size(); i++) {
+      sentence.set(i, (T) originalSentence.get(i));
+    }
+  }
 
   @Override
   public void restoreOriginalWords(Tree tree) {

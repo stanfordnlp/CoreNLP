@@ -16,9 +16,6 @@ import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.rnn.RNNCoreAnnotations;
-import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
-import edu.stanford.nlp.sentiment.SentimentUtils;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
@@ -186,18 +183,6 @@ public class XMLOutputter {
 
           sentElem.appendChild(mrElem);
         }
-
-                
-        /**
-         * Adds sentiment as an attribute of this sentence.
-         */
-        Tree sentimentTree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
-        if (sentimentTree != null){
-          int sentiment = RNNCoreAnnotations.getPredictedClass(sentimentTree);
-          sentElem.addAttribute(new Attribute("sentimentValue", Integer.toString(sentiment)));
-          sentElem.addAttribute(new Attribute("sentiment", SentimentUtils.sentimentString(sentiment).replaceAll(" ", "")));
-        }
-
 
         // add the sentence to the root
         sentencesElem.appendChild(sentElem);

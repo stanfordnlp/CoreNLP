@@ -53,7 +53,7 @@ public class MorphaAnnotator implements Annotator{
         for (CoreLabel token : tokens) {
           String text = token.get(CoreAnnotations.TextAnnotation.class);
           String posTag = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-          addLemma(morphology, CoreAnnotations.LemmaAnnotation.class, token, text, posTag);
+          this.addLemma(morphology, CoreAnnotations.LemmaAnnotation.class, token, text, posTag);
         }
       }
     } else {

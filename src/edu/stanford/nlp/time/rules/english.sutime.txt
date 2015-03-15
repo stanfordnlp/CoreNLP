@@ -327,8 +327,6 @@
   { ruleType: "time", pattern: /MM?-dd?-(yyyy|yy)/ }
   { ruleType: "time", pattern: /HH?:mm(:ss)?/ }
   { ruleType: "time", pattern: /yyyy-MM/ }
-  # Time zones
-  #  { ruleType: "time", pattern: /ZZZ/ }
 
   # Euro - Ambiguous pattern - interpret as dd.MM.yy(yy)
   { ruleType: "time", pattern: /dd?\.MM?\.(yyyy|yy)/ }
@@ -480,8 +478,6 @@
   # i.e. "the first 9 months of 1997"
   { pattern: ( /the/ /first|initial|last|final|latest/ (?: ($NUM) /to|-/ )? ($NUM)? ([ { temporal::IS_TIME_UNIT } ]) ),
 	result: Duration( $1, $2, $3 ) }
-  { pattern: ( /the/ /first|initial|last|final|latest/ /half/ /of/ ([ { temporal::IS_TIME_UNIT } ]) ),
-	result: Duration( $1, $2, $3 ) }
 
   # i.e. "the fifth straight year", "the third straight month in a row", "the ninth day consecutively"
   # i.e. "the eighth consecutive day in a row"
@@ -508,8 +504,6 @@
   # i.e. "a decade", "a few decades", NOT "a few hundred decades"
   { pattern: ( (?: /the/ /past|next|following|coming|last|first|final/ | /a|an/ )? (/couple/ /of/? ) ([ { temporal::IS_TIME_UNIT } ]) ),
  	result: Duration ( Duration( NIL, NIL, $2 ), 2 ) }
-  { pattern: ( (?: /the/ /past|next|following|coming|last|first|final/ /half/ /of/ ) ([ { temporal::IS_TIME_UNIT } ]) ),
- 	result: InexactDuration ( Duration( NIL, NIL, $2 ) ) }
   { pattern: ( (?: /the/ /past|next|following|coming|last|first|final/ | /a|an/ )? (/few/) ([ { temporal::IS_TIME_UNIT } ]) ),
  	result: InexactDuration ( Duration( NIL, NIL, $2 ) ) }
 
@@ -574,14 +568,6 @@
   { name: "composite-date-expression-2",
 	pattern: ( /the/? (?$mod /beginning|start|middle|mid-?|end/ ) /of|in/? (?$date [ { temporal::IS_TIMEX_DATE } ]) ),
 	result: TemporalCompose(ADD_MODIFIER, $date[0].temporal, GetTag($mod[0], "Modifier") ) }
-
-  { name: "composite-date-expression-2a1",
-	pattern: ( /the/? (?$mod /first/ /half/) /of/ (?$date [ { temporal::IS_TIMEX_DATE } ]) ),
-	result: TemporalCompose(ADD_MODIFIER, $date[0].temporal, "EARLY" ) }
-
-  { name: "composite-date-expression-2a2",
-	pattern: ( /the/? (?$mod /second|last|latter/ /half/) /of/ (?$date [ { temporal::IS_TIMEX_DATE } ]) ),
-	result: TemporalCompose(ADD_MODIFIER, $date[0].temporal, "LATE" ) }
 
   { name: "composite-date-expression-2b",
 	pattern: ( /the/? (?$date [ { temporal::IS_TIMEX_DATE } ]) (/'/ /s/ | /'s/ )? (?$mod /beginning|end/) ),
@@ -671,7 +657,7 @@
 			    $time => TemporalCompose(INTERSECT, $time[0].temporal.value, PM),
 	            $hour[0].numcompvalue < 12 => IsoTime(Add($hour[0].numcompvalue, 12), 0, NIL),
 	            (  ($hour[0].numcompvalue == 12) && ($context =~ ( []* /evening|night/)) )
-				   => TemporalCompose(OFFSET_EXACT, IsoTime(0, 0, NIL), DAY),
+				   => TemporalCompose(OFFSET, IsoTime(0, 0, NIL), DAY),
 				:else => IsoTime($hour[0].numcompvalue, 0, NIL)
 			}
   }

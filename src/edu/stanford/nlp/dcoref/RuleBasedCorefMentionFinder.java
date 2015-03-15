@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -83,10 +82,10 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
    *  Extract all NP, PRP or NE, and filter out by manually written patterns.
    */
   @Override
-  public List<List<Mention>> extractPredictedMentions(Annotation doc, int maxID, Dictionaries dict) {
+  public List<List<Mention>> extractPredictedMentions(Annotation doc, int maxID, Dictionaries dict){
 //    this.maxID = _maxID;
     List<List<Mention>> predictedMentions = new ArrayList<List<Mention>>();
-    for (CoreMap s : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
+    for(CoreMap s : doc.get(CoreAnnotations.SentencesAnnotation.class)) {
 
       List<Mention> mentions = new ArrayList<Mention>();
       predictedMentions.add(mentions);
@@ -101,14 +100,14 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       setBarePlural(mentions);
       removeSpuriousMentions(s, mentions, dict);
     }
-
+    
     // assign mention IDs
     if(assignIds) assignMentionIDs(predictedMentions, maxID);
-
+    
     return predictedMentions;
   }
 
-  protected static void assignMentionIDs(List<List<Mention>> predictedMentions, int maxID) {
+  protected void assignMentionIDs(List<List<Mention>> predictedMentions, int maxID) {
     for(List<Mention> mentions : predictedMentions) {
       for(Mention m : mentions) {
         m.mentionID = (++maxID);
@@ -123,7 +122,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     }
   }
 
-  protected static void extractPremarkedEntityMentions(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
+  protected void extractPremarkedEntityMentions(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
     int beginIndex = -1;
@@ -155,7 +154,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     }
   }
 
-  protected static void extractNamedEntityMentions(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
+  protected void extractNamedEntityMentions(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
     String preNE = "O";
@@ -196,8 +195,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   }
 
   private static final TregexPattern npOrPrpMentionPattern = TregexPattern.compile("/^(?:NP|PRP)/");
-
-  protected static void extractNPorPRP(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
+  protected void extractNPorPRP(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
     tree.indexLeaves();
@@ -222,8 +220,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   }
   /** Extract enumerations (A, B, and C) */
   private static final TregexPattern enumerationsMentionPattern = TregexPattern.compile("NP < (/^(?:NP|NNP|NML)/=m1 $.. (/^CC|,/ $.. /^(?:NP|NNP|NML)/=m2))");
-
-  protected static void extractEnumerations(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
+  protected void extractEnumerations(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet){
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
     SemanticGraph dependency = s.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
@@ -274,7 +271,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       Tree head = findSyntacticHead(m, tree, sent);
       m.headIndex = ((CoreLabel) head.label()).get(CoreAnnotations.IndexAnnotation.class)-1;
       m.headWord = sent.get(m.headIndex);
-      m.headString = m.headWord.get(CoreAnnotations.TextAnnotation.class).toLowerCase(Locale.ENGLISH);
+      m.headString = m.headWord.get(CoreAnnotations.TextAnnotation.class).toLowerCase();
       int start = m.headIndex - m.startIndex;
       if (start < 0 || start >= m.originalSpan.size()) {
         SieveCoreferenceSystem.logger.warning("Invalid index for head " + start + "=" + m.headIndex + "-" + m.startIndex
@@ -368,7 +365,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       if(tokens.get(i).tag().startsWith("N")) lastNounIdx = i;
       else if(tokens.get(i).tag().startsWith("W")) break;
     }
-
+    
     List<Tree> leaves = root.getLeaves();
     Tree endLeaf = leaves.get(lastNounIdx);
     return endLeaf;
@@ -547,13 +544,13 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       if(dict.nonWords.contains(m.headString)) remove.add(m);
 
       // quantRule : not starts with 'any', 'all' etc
-      if (m.originalSpan.size() > 0 && dict.quantifiers.contains(m.originalSpan.get(0).get(CoreAnnotations.TextAnnotation.class).toLowerCase(Locale.ENGLISH))) remove.add(m);
+      if(m.originalSpan.size() > 0 && dict.quantifiers.contains(m.originalSpan.get(0).get(CoreAnnotations.TextAnnotation.class).toLowerCase())) remove.add(m);
 
       // partitiveRule
-      if (partitiveRule(m, sent, dict)) remove.add(m);
+      if(partitiveRule(m, sent, dict)) remove.add(m);
 
       // bareNPRule
-      if (headPOS.equals("NN") && !dict.temporals.contains(m.headString)
+      if(headPOS.equals("NN") && !dict.temporals.contains(m.headString)
           && (m.originalSpan.size()==1 || m.originalSpan.get(0).get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("JJ"))) {
         remove.add(m);
       }
@@ -561,22 +558,22 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
       // remove generic rule
       //  if(m.generic==true) remove.add(m);
 
-      if (m.headString.equals("%")) remove.add(m);
-      if (headNE.equals("PERCENT") || headNE.equals("MONEY")) remove.add(m);
+      if(m.headString.equals("%")) remove.add(m);
+      if(headNE.equals("PERCENT") || headNE.equals("MONEY")) remove.add(m);
 
       // adjective form of nations
-      if (dict.isAdjectivalDemonym(m.spanToString())) remove.add(m);
+      if(dict.adjectiveNation.contains(m.spanToString().toLowerCase())) remove.add(m);
 
       // stop list (e.g., U.S., there)
-      if (inStopList(m)) remove.add(m);
+      if(inStopList(m)) remove.add(m);
     }
 
     // nested mention with shared headword (except apposition, enumeration): pick larger one
-    for (Mention m1 : mentions){
-      for (Mention m2 : mentions){
-        if (m1==m2 || remove.contains(m1) || remove.contains(m2)) continue;
-        if (m1.sentNum==m2.sentNum && m1.headWord==m2.headWord && m2.insideIn(m1)) {
-          if (m2.endIndex < sent.size() && (sent.get(m2.endIndex).get(CoreAnnotations.PartOfSpeechAnnotation.class).equals(",")
+    for(Mention m1 : mentions){
+      for(Mention m2 : mentions){
+        if(m1==m2 || remove.contains(m1) || remove.contains(m2)) continue;
+        if(m1.sentNum==m2.sentNum && m1.headWord==m2.headWord && m2.insideIn(m1)) {
+          if(m2.endIndex < sent.size() && (sent.get(m2.endIndex).get(CoreAnnotations.PartOfSpeechAnnotation.class).equals(",")
               || sent.get(m2.endIndex).get(CoreAnnotations.PartOfSpeechAnnotation.class).equals("CC"))) {
             continue;
           }
@@ -588,13 +585,13 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   }
 
   private static boolean inStopList(Mention m) {
-    String mentionSpan = m.spanToString().toLowerCase(Locale.ENGLISH);
-    if (mentionSpan.equals("u.s.") || mentionSpan.equals("u.k.")
+    String mentionSpan = m.spanToString().toLowerCase();
+    if(mentionSpan.equals("u.s.") || mentionSpan.equals("u.k.")
         || mentionSpan.equals("u.s.s.r")) return true;
-    if (mentionSpan.equals("there") || mentionSpan.startsWith("etc.")
+    if(mentionSpan.equals("there") || mentionSpan.startsWith("etc.")
         || mentionSpan.equals("ltd.")) return true;
-    if (mentionSpan.startsWith("'s ")) return true;
-    if (mentionSpan.endsWith("etc.")) return true;
+    if(mentionSpan.startsWith("'s ")) return true;
+    if(mentionSpan.endsWith("etc.")) return true;
 
     return false;
   }
@@ -602,7 +599,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   private static boolean partitiveRule(Mention m, List<CoreLabel> sent, Dictionaries dict) {
     return m.startIndex >= 2
             && sent.get(m.startIndex - 1).get(CoreAnnotations.TextAnnotation.class).equalsIgnoreCase("of")
-            && dict.parts.contains(sent.get(m.startIndex - 2).get(CoreAnnotations.TextAnnotation.class).toLowerCase(Locale.ENGLISH));
+            && dict.parts.contains(sent.get(m.startIndex - 2).get(CoreAnnotations.TextAnnotation.class).toLowerCase());
   }
 
   /** Check whether pleonastic 'it'. E.g., It is possible that ... */
@@ -611,7 +608,7 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     if ( ! m.spanToString().equalsIgnoreCase("it")) return false;
     for (TregexPattern p : pleonasticPatterns) {
       if (checkPleonastic(m, tree, p)) {
-        // SieveCoreferenceSystem.logger.fine("RuleBasedCorefMentionFinder: matched pleonastic pattern '" + p + "' for " + tree);
+        SieveCoreferenceSystem.logger.fine("RuleBasedCorefMentionFinder: matched pleonastic pattern '" + p + "' for " + tree);
         return true;
       }
     }

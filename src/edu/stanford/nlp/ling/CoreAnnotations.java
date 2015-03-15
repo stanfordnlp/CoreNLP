@@ -1460,16 +1460,6 @@ public class CoreAnnotations {
   }
 
   /**
-   * Document title
-   * What is the document title
-   */
-  public static class DocTitleAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /**
    * Reference location for the document
    */
   public static class LocationAnnotation implements CoreAnnotation<String> {

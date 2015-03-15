@@ -222,19 +222,19 @@ public class CRFClassifierITest extends TestCase {
                           "It 's \n",
                   },
                   { "  \"anaesthetic  Smith is\"  ",
-                          "  ``/Oanaesthetic/O  Smith/PERSON is/O''/O  ",
+                          "  ``/Oanesthetic/O  Smith/PERSON is/O''/O  ",
                           "  \"anaesthetic  <PERSON>Smith</PERSON> is\"  ",
                           "<wi num=\"0\" entity=\"O\">``</wi>\n" +
-                                  "<wi num=\"1\" entity=\"O\">anaesthetic</wi>\n" +
+                                  "<wi num=\"1\" entity=\"O\">anesthetic</wi>\n" +
                                   "<wi num=\"2\" entity=\"PERSON\">Smith</wi>\n" +
                                   "<wi num=\"3\" entity=\"O\">is</wi>\n" +
                                   "<wi num=\"4\" entity=\"O\">&apos;&apos;</wi>\n",
                           "  <wi num=\"0\" entity=\"O\">``</wi>" +
-                                  "<wi num=\"1\" entity=\"O\">anaesthetic</wi>  " +
+                                  "<wi num=\"1\" entity=\"O\">anesthetic</wi>  " +
                                   "<wi num=\"2\" entity=\"PERSON\">Smith</wi> " +
                                   "<wi num=\"3\" entity=\"O\">is</wi>" +
                                   "<wi num=\"4\" entity=\"O\">&apos;&apos;</wi>  ",
-                          "``/O anaesthetic/O Smith/PERSON is/O ''/O \n",
+                          "``/O anesthetic/O Smith/PERSON is/O ''/O \n",
                           "\" anaesthetic <PERSON>Smith</PERSON> is \" \n",
 
                   },

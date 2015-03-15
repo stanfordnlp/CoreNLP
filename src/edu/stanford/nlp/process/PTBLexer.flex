@@ -156,6 +156,7 @@ import edu.stanford.nlp.util.StringUtils;
       } else if ("tokenizeNLs".equals(key)) {
         tokenizeNLs = val;
       } else if ("ptb3Escaping".equals(key)) {
+        americanize = val;
         normalizeSpace = val;
         normalizeAmpersandEntity = val;
         normalizeCurrency = val;
@@ -168,6 +169,7 @@ import edu.stanford.nlp.util.StringUtils;
         ptb3Ellipsis = val;
         unicodeEllipsis = val;
         ptb3Dashes = val;
+        escapeForwardSlashAsterisk = val;
       } else if ("americanize".equals(key)) {
         americanize = val;
       } else if ("normalizeSpace".equals(key)) {
@@ -255,7 +257,7 @@ import edu.stanford.nlp.util.StringUtils;
   /* Flags begin with historical ptb3Escaping behavior */
   private boolean invertible;
   private boolean tokenizeNLs;
-  private boolean americanize = false;
+  private boolean americanize = true;
   private boolean normalizeSpace = true;
   private boolean normalizeAmpersandEntity = true;
   private boolean normalizeCurrency = true;
@@ -268,7 +270,7 @@ import edu.stanford.nlp.util.StringUtils;
   private boolean ptb3Ellipsis = true;
   private boolean unicodeEllipsis;
   private boolean ptb3Dashes = true;
-  private boolean escapeForwardSlashAsterisk = false;
+  private boolean escapeForwardSlashAsterisk = true;
   private boolean strictTreebank3 = false;
   private boolean splitAssimilations = true;
 
@@ -584,7 +586,7 @@ THING3 = [A-Za-z0-9]+(-[A-Za-z]+){0,2}(\\?\/[A-Za-z0-9]+(-[A-Za-z]+){0,2}){1,2}
 APOS = ['\u0092\u2019]|&apos;
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
 APOSETCETERA = {APOS}|[\u0091\u2018\u201B]
-HTHING = [A-Za-z0-9][A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
+HTHING = [A-Za-z0-9][A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO}\.))+
 REDAUX = {APOS}([msdMSD]|re|ve|ll)
 /* For things that will have n't on the end. They can't end in 'n' */
 /* \u00AD is soft hyphen */
@@ -622,7 +624,7 @@ ABDAYS = Mon|Tue|Tues|Wed|Thu|Thurs|Fri
 /* Ma. or Me. isn't included as too many errors, and most sources use Mass. etc. */
 /* Fed. is tricky.  Usually sentence end, but not before "Governor" or "Natl. Mtg. Assn." */
 /* Make some states case sensitive, since they're also reasonably common words */
-ABSTATE = Ala|Ariz|[A]z|[A]rk|Calif|Colo|Conn|Ct|Dak|Del|Fla|Ga|[I]ll|Ind|Kans?|Ky|La|[M]ass|Md|Mich|Minn|[M]iss|Mo|Mont|Neb|Nev|Okla|[O]re|Pa|Penn|Tenn|Tex|Va|Vt|[W]ash|Wisc?|Wyo
+ABSTATE = Ala|Ariz|[A]rk|Calif|Colo|Conn|Dak|Del|Fla|Ga|[I]ll|Ind|Kans?|Ky|La|[M]ass|Md|Mich|Minn|[M]iss|Mo|Mont|Neb|Nev|Okla|[O]re|Pa|Penn|Tenn|Tex|Va|Vt|[W]ash|Wisc?|Wyo
 /* Bhd is Malaysian companies! Rt. is Hungarian? */
 /* Special case: Change the class of Pty when followed by Ltd to not sentence break (in main code below)... */
 ABCOMP = Inc|Cos?|Corp|Pp?t[ye]s?|Ltd|Plc|Rt|Bancorp|Dept|Bhd|Assn|Univ|Intl|Sys
@@ -642,8 +644,7 @@ ABBREV1 = ({ABMONTH}|{ABDAYS}|{ABSTATE}|{ABCOMP}|{ABNUM}|{ABPTIT}|etc|al|seq)\.
 /* --- This block becomes ABBREV2 and is usually followed by upper case words. --- */
 /* In the caseless world S.p.A. "Società Per Azioni (Italian: shared company)" is got as a regular acronym */
 /* ACRO Is a bad case -- can go either way! */
-ACRO = [A-Za-z](\.[A-Za-z])*|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
-ACRO2 = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
+ACRO = [A-Za-z](\.[A-Za-z])+|(Canada|Sino|Korean|EU|Japan|non)-U\.S|U\.S\.-(U\.K|U\.S\.S\.R)
 /* ABTITLE is mainly person titles, but also Mt for mountains and Ft for Fort. */
 ABTITLE = Mr|Mrs|Ms|[M]iss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|Ste?|Ave|Pres|Lieut|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc
 ABCOMP2 = Invt|Elec|Natl|M[ft]g
@@ -651,7 +652,7 @@ ABCOMP2 = Invt|Elec|Natl|M[ft]g
 /* ABRREV2 abbreviations are normally followed by an upper case word.
  *  We assume they aren't used sentence finally. Ph is in there for Ph. D
  */
-ABBREV4 = {ABTITLE}|vs|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|{ACRO}|{ABCOMP2}
+ABBREV4 = [A-Za-z]|{ABTITLE}|vs|Alex|Wm|Jos|Cie|a\.k\.a|cf|TREAS|Ph|{ACRO}|{ABCOMP2}
 ABBREV2 = {ABBREV4}\.
 ACRONYM = ({ACRO})\.
 /* Cie. is used by French companies sometimes before and sometimes at end as in English Co.  But we treat as allowed to have Capital following without being sentence end.  Cia. is used in Spanish/South American company abbreviations, which come before the company name, but we exclude that and lose, because in a caseless segmenter, it's too confusable with CIA. */
@@ -816,7 +817,7 @@ gonna|gotta|lemme|gimme|wanna
                             return getNext();
                           }
                         }
-/* Any acronym can be treated as sentence final iff followed by this list of words (pronouns, determiners, and prepositions, etc.). "U.S." is the single big source of errors.  Character classes make this rule case sensitive! (This is needed!!). A one letter acronym candidate like "Z." or "I." in this context usually isn't, and so we return the leter and pushback the period for next time. */
+/* Any acronym can be treated as sentence final iff followed by this list of words (pronouns, determiners, and prepositions, etc.). "U.S." is the single big source of errors.  Character classes make this rule case sensitive! (This is needed!!) */
 {ACRONYM}/({SPACENLS})([A]bout|[A]ccording|[A]dditionally|[A]fter|[A]n|[A]|[A]s|[A]t|[B]ut|[E]arlier|[H]e|[H]er|[H]ere|[H]owever|[I]f|[I]n|[I]t|[L]ast|[M]any|[M]ore|[M]r\.|[M]s\.|[N]ow|[O]nce|[O]ne|[O]ther|[O]ur|[S]he|[S]ince|[S]o|[S]ome|[S]uch|[T]hat|[T]he|[T]heir|[T]hen|[T]here|[T]hese|[T]hey|[T]his|[W]e|[W]hen|[W]hile|[W]hat|[Y]et|[Y]ou|{SGML}){SPACENL} {
                           // try to work around an apparent jflex bug where it
                           // gets a space at the token end by getting
@@ -830,15 +831,12 @@ gonna|gotta|lemme|gimme|wanna
                             }
                           }
                           String s;
-			  if (yylength() == 2) { // "I.", etc.
-			    yypushback(1); // return a period next time;
-			    s = yytext(); // return the word without the final period
-                          } else if (strictTreebank3 && ! "U.S.".equals(yytext())) {
+                          if (strictTreebank3 && ! "U.S.".equals(yytext())) {
                             yypushback(1); // return a period for next time
-                            s = yytext(); // return the word without the final period
+                            s = yytext();
                           } else {
-                            s = yytext(); // return the word WITH the final period
-                            yypushback(1); // (redpulication:) also return a period for next time
+                            s = yytext();
+                            yypushback(1); // return a period for next time
                           }
                           return getNext(s, yytext());
                         }
