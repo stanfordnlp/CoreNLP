@@ -85,7 +85,13 @@ public class QuasiDeterminizer implements TransducerGraph.GraphProcessor {
    * Takes time linear in number of arcs.
    */
   public TransducerGraph pushLambdas(TransducerGraph graph, ClassicCounter lambda) {
-    TransducerGraph result = graph.clone(); // arcs have been copied too so we don't mess up graph
+
+    TransducerGraph result = null;
+    try {
+      result = graph.clone(); // arcs have been copied too so we don't mess up graph
+    } catch (CloneNotSupportedException cnse) {
+      throw new RuntimeException(cnse);
+    }
     Set<TransducerGraph.Arc> arcs = result.getArcs();
     for (TransducerGraph.Arc arc : arcs) {
       double sourceLambda = lambda.getCount(arc.getSourceNode());
@@ -126,7 +132,7 @@ public class QuasiDeterminizer implements TransducerGraph.GraphProcessor {
     TransducerGraph.GraphProcessor qd = new QuasiDeterminizer();
     List pathList = new ArrayList();
     TransducerGraph graph = TransducerGraph.createRandomGraph(1000, 10, 1.0, 10, pathList);
-    StringBuffer b = new StringBuffer();
+    StringBuilder b = new StringBuilder();
     graph.depthFirstSearch(true, b);
     System.out.println(b.toString());
     System.out.println("Done creating random graph");

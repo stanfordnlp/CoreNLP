@@ -19,7 +19,7 @@ import edu.stanford.nlp.trees.international.negra.NegraPennLanguagePack;
  */
 public class PTBTokenizerTest extends TestCase {
 
-  private String[] ptbInputs = {
+  private final String[] ptbInputs = {
     "This is a sentence.",
     "U.S. insurance: Conseco acquires Kemper Corp. \n</HEADLINE>\n<P>\nU.S insurance",
     "Based in Eugene,Ore., PakTech needs a new distributor after Sydney-based Creative Pack Pty. Ltd. went into voluntary administration.",
@@ -34,10 +34,12 @@ public class PTBTokenizerTest extends TestCase {
     "I like you ;-) but do you care :(. I'm happy ^_^ but shy (x.x)!",
     "Diamond (``Not even the chair'') lives near Udaipur (84km). {1. A potential Palmer trade:}",
     "No. I like No. 24 and no.47.",
-    "You can get a B.S. or a B. A. or a Ph.D (sometimes a Ph. D) from Stanford."
+    "You can get a B.S. or a B. A. or a Ph.D (sometimes a Ph. D) from Stanford.",
+    "@Harry_Styles didn`t like Mu`ammar al-Qaddafi",
+    "Kenneth liked Windows 3.1, Windows 3.x, and Mesa A.B as I remember things.",
   };
 
-  private String[][] ptbGold = {
+  private final String[][] ptbGold = {
     { "This", "is", "a", "sentence", "." },
     { "U.S.", "insurance", ":", "Conseco", "acquires", "Kemper", "Corp.", ".",
       "</HEADLINE>", "<P>", "U.S", "insurance" },
@@ -63,6 +65,9 @@ public class PTBTokenizerTest extends TestCase {
       "-LCB-", "1", ".", "A", "potential", "Palmer", "trade", ":", "-RCB-"},
     { "No", ".", "I", "like", "No.", "24", "and", "no.", "47", "." },
     { "You", "can", "get", "a", "B.S.", "or", "a", "B.", "A.", "or", "a", "Ph.D", "-LRB-", "sometimes", "a", "Ph.", "D", "-RRB-", "from", "Stanford", "." },
+    { "@Harry_Styles", "did", "n`t", "like", "Mu`ammar", "al-Qaddafi" },
+    { "Kenneth", "liked", "Windows", "3.1", ",", "Windows", "3.x", ",", "and", "Mesa", "A.B", "as", "I", "remember", "things", ".",
+    }
   };
 
   public void testPTBTokenizerWord() {
@@ -83,12 +88,12 @@ public class PTBTokenizerTest extends TestCase {
     }
   }
 
-  private String[] corpInputs = {
+  private final String[] corpInputs = {
     "So, too, many analysts predict, will Exxon Corp., Chevron Corp. and Amoco Corp.",
     "So, too, many analysts predict, will Exxon Corp., Chevron Corp. and Amoco Corp.   ",
   };
 
-  private String[][] corpGold = {
+  private final String[][] corpGold = {
           { "So", ",", "too", ",", "many", "analysts", "predict", ",", "will", "Exxon",
             "Corp.", ",", "Chevron", "Corp.", "and", "Amoco", "Corp", "." }, // strictTreebank3
           { "So", ",", "too", ",", "many", "analysts", "predict", ",", "will", "Exxon",
@@ -137,7 +142,7 @@ public class PTBTokenizerTest extends TestCase {
     assertEquals(stemmedTokens, stemmedTokens2);
   }
 
-  private static String[] untokInputs = {
+  private final static String[] untokInputs = {
     "London - AFP reported junk .",
     "Paris - Reuters reported news .",
     "Sydney - News said - something .",
@@ -146,7 +151,7 @@ public class PTBTokenizerTest extends TestCase {
     "He said that `` Luxembourg needs surface - to - air missiles . ''",
   };
 
-  private static String[] untokOutputs = {
+  private final static String[] untokOutputs = {
     "London - AFP reported junk.",
     "Paris - Reuters reported news.",
     "Sydney - News said - something.",
@@ -201,7 +206,7 @@ public class PTBTokenizerTest extends TestCase {
     }
   }
 
-  private String[] sgmlInputs = {
+  private final String[] sgmlInputs = {
     "Significant improvements in peak FEV1 were demonstrated with tiotropium/olodaterol 5/2 μg (p = 0.008), 5/5 μg (p = 0.012), and 5/10 μg (p < 0.0001) versus tiotropium monotherapy [51].",
     "Panasonic brand products are produced by Samsung Electronics Co. Ltd. Sanyo products aren't.",
     "Oesophageal acid exposure (% time <pH 4) was similar in patients with or without complications (19.2% v 19.3% p>0.05).",
@@ -217,7 +222,7 @@ public class PTBTokenizerTest extends TestCase {
     "&lt;b...@canada.com&gt; funky@thedismalscience.net <myemail@where.com>",
   };
 
-  private String[][] sgmlGold = {
+  private final String[][] sgmlGold = {
     { "Significant", "improvements", "in", "peak", "FEV1", "were", "demonstrated", "with", "tiotropium/olodaterol",
             "5/2", "μg", "-LRB-", "p", "=", "0.008", "-RRB-", ",", "5/5", "μg", "-LRB-", "p", "=", "0.012", "-RRB-",
             ",", "and", "5/10", "μg", "-LRB-", "p", "<", "0.0001", "-RRB-", "versus", "tiotropium", "monotherapy",
@@ -280,6 +285,38 @@ public class PTBTokenizerTest extends TestCase {
     assertEquals("Tokenization length mismatch", goldTokens.size(), tokens.size());
     for (int i = 0, sz = goldTokens.size(); i < sz; i++) {
       assertEquals("Bad tokenization", goldTokens.get(i).word(), tokens.get(i).word());
+    }
+  }
+
+  private final String[] mtInputs = {
+    "Enter an option [?/Current]:{1}",
+    "for example, {1}http://www.autodesk.com{2}, or a path",
+    "enter {3}@{4} at the Of prompt.",
+    "{1}block name={2}",
+  };
+
+  private final String[][] mtGold = {
+    { "Enter", "an", "option", "-LSB-", "?", "/", "Current", "-RSB-", ":", "-LCB-", "1", "-RCB-" },
+    { "for", "example", ",", "-LCB-", "1", "-RCB-", "http://www.autodesk.com", "-LCB-", "2", "-RCB-", ",", "or", "a", "path" },
+    { "enter", "-LCB-", "3", "-RCB-", "@", "-LCB-", "4", "-RCB-", "at", "the", "Of", "prompt", "." },
+    { "-LCB-", "1", "-RCB-", "block", "name", "=", "-LCB-", "2", "-RCB-" },
+  };
+
+  public void testPTBTokenizerMT() {
+    assert(mtInputs.length == mtGold.length);
+    for (int sent = 0; sent < mtInputs.length; sent++) {
+      PTBTokenizer<Word> ptbTokenizer = PTBTokenizer.newPTBTokenizer(new StringReader(mtInputs[sent]));
+      int i = 0;
+      while (ptbTokenizer.hasNext()) {
+        Word w = ptbTokenizer.next();
+        try {
+          assertEquals("PTBTokenizer problem on string " + sent + " token " + i, mtGold[sent][i], w.value());
+        } catch (ArrayIndexOutOfBoundsException aioobe) {
+          // the assertion below outside the loop will fail
+        }
+        i++;
+      }
+      assertEquals("PTBTokenizer num tokens problem for case " + sent, i, mtGold[sent].length);
     }
   }
 

@@ -482,7 +482,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    * @return The index of the right frontier of the constituent
    */
   private int constituentsNodes(int left) {
-    if (isPreTerminal()) {
+    if (isLeaf()) {
       if (label() instanceof CoreLabel) {
         ((CoreLabel) label()).set(CoreAnnotations.SpanAnnotation.class, new IntPair(left, left));
       } else {
@@ -742,8 +742,8 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
     pw.println(sb.toString());
     Tree[] children = children();
     String newIndent = indent + pad;
-    for (int i = 0, n = children.length; i < n; i++) {
-      children[i].indentedListPrint(newIndent, pad, pw, printScores);
+    for (Tree child : children) {
+      child.indentedListPrint(newIndent, pad, pw, printScores);
     }
   }
 
@@ -868,7 +868,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       return;
     }
     pw.print("(");
-    String nodeString = onlyLabelValue ? value() : nodeString();
+    String nodeString = onlyLabelValue ? nodeString() : nodeString();
     pw.print(nodeString);
     // pw.flush();
     boolean parentIsNull = label() == null || label().value() == null;
@@ -1228,7 +1228,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
    */
   public Set<Dependency<Label, Label, Object>> mapDependencies(Filter<Dependency<Label, Label, Object>> f, HeadFinder hf) {
     if (hf == null) {
-      throw new IllegalArgumentException("mapDependencies: need headfinder");
+      throw new IllegalArgumentException("mapDependencies: need HeadFinder");
     }
     Set<Dependency<Label, Label, Object>> deps = Generics.newHashSet();
     for (Tree node : this) {
@@ -1241,7 +1241,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
       Tree hwt = node.headTerminal(hf);
       // System.err.println("have hf, found head preterm: " + hwt);
       if (hwt == null) {
-        throw new IllegalStateException("mapDependencies: headFinder failed!");
+        throw new IllegalStateException("mapDependencies: HeadFinder failed!");
       }
 
       for (Tree child : node.children()) {
@@ -1249,7 +1249,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
         // Tree dwt = child.headPreTerminal(hf);
         Tree dwt = child.headTerminal(hf);
         if (dwt == null) {
-          throw new IllegalStateException("mapDependencies: headFinder failed!");
+          throw new IllegalStateException("mapDependencies: HeadFinder failed!");
         }
         //System.err.println("kid is " + dl);
          //System.err.println("transformed to " + dml.toString("value{map}"));
@@ -1574,12 +1574,13 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
 
 
   /**
-   * Get the set of all node and leaf <code>Label</code>s,
+   * Get the set of all node and leaf {@code Label}s,
    * null or otherwise, contained in the tree.
    *
-   * @return the <code>Collection</code> (actually, Set) of all values
+   * @return the {@code Collection} (actually, Set) of all values
    *         in the tree.
    */
+  @Override
   public Collection<Label> labels() {
     Set<Label> n = Generics.newHashSet();
     n.add(label());
@@ -1591,6 +1592,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
 
+  @Override
   public void setLabels(Collection<Label> c) {
     throw new UnsupportedOperationException("Can't set Tree labels");
   }
@@ -1983,15 +1985,17 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
   }
 
   /**
-   * Returns first child if it is single and if the label at the current
+   * Returns first child if this is unary and if the label at the current
    * node is either "ROOT" or empty.
    *
+   * @return The first child if this is unary and if the label at the current
+   * node is either "ROOT" or empty, else this
    */
   public Tree skipRoot() {
     if(!isUnaryRewrite())
       return this;
     String lab = label().value();
-    return (lab == null || "ROOT".equals(lab) || "".equals(lab)) ? firstChild() : this;
+    return (lab == null || lab.isEmpty() || "ROOT".equals(lab)) ? firstChild() : this;
   }
 
   /**
@@ -2698,7 +2702,7 @@ public abstract class Tree extends AbstractCollection<Tree> implements Label, La
           hi.setIndex(startIndex);
         }
         startIndex++;
-      } 
+      }
     } else {
       for (Tree kid : children()) {
         startIndex = kid.indexLeaves(startIndex, overWrite);

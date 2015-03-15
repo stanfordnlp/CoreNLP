@@ -33,42 +33,42 @@ public class SemanticGraphFactory {
    * Produces an Uncollapsed SemanticGraph with no extras.
    */
   public static SemanticGraph generateUncollapsedDependencies(Tree tree) {
-    return makeFromTree(tree, Mode.BASIC, false, true, true);
+    return makeFromTree(tree, Mode.BASIC, false, true);
   }
 
   /** 
    * Produces a Collapsed SemanticGraph with no extras.
    */
   public static SemanticGraph generateCollapsedDependencies(Tree tree) {
-    return makeFromTree(tree, Mode.COLLAPSED, false, true, true);
+    return makeFromTree(tree, Mode.COLLAPSED, false, true);
   }
 
   /** 
    * Produces a CCProcessed SemanticGraph with no extras.
    */
   public static SemanticGraph generateCCProcessedDependencies(Tree tree) {
-    return makeFromTree(tree, Mode.CCPROCESSED, false, true, true);
+    return makeFromTree(tree, Mode.CCPROCESSED, false, true);
   }
 
   /** 
    * Produces an Uncollapsed SemanticGraph with no extras.
    */
   public static SemanticGraph generateUncollapsedDependencies(GrammaticalStructure gs, String docID, int index) {
-    return makeFromTree(gs, Mode.BASIC, false, true, true, null, docID, index);
+    return makeFromTree(gs, Mode.BASIC, false, true, null, docID, index);
   }
 
   /** 
    * Produces a Collapsed SemanticGraph with no extras.
    */
   public static SemanticGraph generateCollapsedDependencies(GrammaticalStructure gs, String docID, int index) {
-    return makeFromTree(gs, Mode.COLLAPSED, false, true, true, null, docID, index);
+    return makeFromTree(gs, Mode.COLLAPSED, false, true, null, docID, index);
   }
 
   /** 
    * Produces a CCProcessed SemanticGraph with no extras.
    */
   public static SemanticGraph generateCCProcessedDependencies(GrammaticalStructure gs, String docID, int index) {
-    return makeFromTree(gs, Mode.CCPROCESSED, false, true, true, null, docID, index);
+    return makeFromTree(gs, Mode.CCPROCESSED, false, true, null, docID, index);
   }
 
 
@@ -103,10 +103,10 @@ public class SemanticGraphFactory {
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,
                                            boolean includeExtras,
-                                           boolean lemmatize, boolean threadSafe,
+                                           boolean threadSafe,
                                            Filter<TypedDependency> filter) {
     return makeFromTree(tree, mode, includeExtras,
-                        lemmatize, threadSafe, filter, "", 0);
+                        threadSafe, filter, "", 0);
   }
 
   /**
@@ -141,7 +141,7 @@ public class SemanticGraphFactory {
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,
                                            boolean includeExtras,
-                                           boolean lemmatize, boolean threadSafe,
+                                           boolean threadSafe,
                                            Filter<TypedDependency> filter,
                                            String docID, int sentIndex) {
     Filter<String> wordFilt;
@@ -155,7 +155,7 @@ public class SemanticGraphFactory {
             new SemanticHeadFinder(true),
             threadSafe);
     return makeFromTree(gs, mode, includeExtras,
-                        lemmatize, threadSafe, filter, docID, sentIndex);
+                        threadSafe, filter, docID, sentIndex);
   }
 
 
@@ -164,7 +164,6 @@ public class SemanticGraphFactory {
   public static SemanticGraph makeFromTree(GrammaticalStructure gs,
                                            Mode mode,
                                            boolean includeExtras,
-                                           boolean lemmatize,
                                            boolean threadSafe,
                                            Filter<TypedDependency> filter,
                                            String docID, int sentIndex) {
@@ -197,8 +196,6 @@ public class SemanticGraphFactory {
       deps = depsFiltered;
     }
 
-    Collection<TreeGraphNode> roots = Generics.newHashSet();
-
     // there used to be an if clause that filtered out the case of empty
     // dependencies. However, I could not understand (or replicate) the error
     // it alluded to, and it led to empty dependency graphs for very short fragments,
@@ -206,14 +203,14 @@ public class SemanticGraphFactory {
     // See also the SemanticGraph constructor.
 
     //System.err.println(deps.toString());
-    return new SemanticGraph(deps, docID, sentIndex, lemmatize);
+    return new SemanticGraph(deps, docID, sentIndex);
   }
 
 
   public static SemanticGraph makeFromTree(GrammaticalStructure structure,
       String docID, int sentIndex) {
     return makeFromTree(structure, Mode.BASIC, false,
-                        false, false, null, docID, sentIndex);
+                        false, null, docID, sentIndex);
   }
 
 
@@ -222,24 +219,24 @@ public class SemanticGraphFactory {
                                            boolean includeExtras,
                                            Filter<TypedDependency> filter) {
     return makeFromTree(tree, mode, includeExtras,
-                        false, false, filter);
+                        false, filter);
   }
 
 
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,
                                            boolean includeExtras,
-                                           boolean lemmatize, boolean threadSafe) {
+                                           boolean threadSafe) {
     return makeFromTree(tree, mode, includeExtras,
-                        lemmatize, threadSafe, null);
+                        threadSafe, null);
   }
 
   public static SemanticGraph makeFromTree(GrammaticalStructure gs,
                                            Mode mode,
                                            boolean includeExtras,
-                                           boolean lemmatize, boolean threadSafe) {
+                                           boolean threadSafe) {
     return makeFromTree(gs, mode, includeExtras,
-                        lemmatize, threadSafe, null, "", 0);
+                        threadSafe, null, "", 0);
   }
 
 
@@ -250,7 +247,7 @@ public class SemanticGraphFactory {
    * @param collapse collapse dependencies iff this parameter is true
    */
   public static SemanticGraph makeFromTree(Tree tree, boolean collapse) {
-    return makeFromTree(tree, (collapse) ? Mode.COLLAPSED : Mode.BASIC, false, false, false, null);
+    return makeFromTree(tree, (collapse) ? Mode.COLLAPSED : Mode.BASIC, false, false, null);
   }
 
   /**
@@ -258,7 +255,7 @@ public class SemanticGraphFactory {
    * and extra dependencies are not included (convenience method for makeFromTree(Tree tree, boolean collapse))
    */
   public static SemanticGraph makeFromTree(Tree tree) {
-    return makeFromTree(tree, Mode.COLLAPSED, false, false, false, null);
+    return makeFromTree(tree, Mode.COLLAPSED, false, false, null);
   }
 
 

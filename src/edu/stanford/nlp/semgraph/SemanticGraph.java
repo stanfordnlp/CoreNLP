@@ -4,7 +4,6 @@ import edu.stanford.nlp.graph.DirectedMultiGraph;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.trees.*;
@@ -59,7 +58,7 @@ public class SemanticGraph implements Serializable {
    */
   private Collection<IndexedWord> roots;
 
-  private DirectedMultiGraph<IndexedWord, SemanticGraphEdge> graph;
+  private final DirectedMultiGraph<IndexedWord, SemanticGraphEdge> graph;
 
   public int edgeCount() {
     return graph.getNumEdges();
@@ -1713,18 +1712,11 @@ public class SemanticGraph implements Serializable {
     this(dependencies, "", 0);
   }
 
-  public SemanticGraph(Collection<TypedDependency> dependencies, String docID,
-      int sentIndex) {
-    this(dependencies, docID, sentIndex, false);
-  }
-
   /**
    *
    *
    */
-  public SemanticGraph(Collection<TypedDependency> dependencies, String docID,
-      int sentIndex, boolean lemmatize) {
-    Morphology morphology = (lemmatize) ? new Morphology() : null;
+  public SemanticGraph(Collection<TypedDependency> dependencies, String docID, int sentIndex) {
     graph = new DirectedMultiGraph<IndexedWord, SemanticGraphEdge>();
 
     roots = Generics.newHashSet();
@@ -1734,33 +1726,18 @@ public class SemanticGraph implements Serializable {
       TreeGraphNode dep = d.dep();
       GrammaticalRelation reln = d.reln();
 
-      // attention: the Labels [gov|dep].label() contain the words and their
-      // indices!
-      // but the CoreLabels govLabel/depLabel throw away the index information
-      CoreLabel govLabel = new CoreLabel(gov.label());
-      CoreLabel depLabel = new CoreLabel(dep.label());
-
       if (reln != ROOT) { // the root relation only points to the root: the governor is a fake node that we don't want to add in the graph
-        IndexedWord govVertex = new IndexedWord(docID, sentIndex, gov.index(), govLabel);
-        govVertex.setTag(gov.highestNodeWithSameHead().headTagNode().value());
-        IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), depLabel);
-        depVertex.setTag(dep.highestNodeWithSameHead().headTagNode().value());
-        if (lemmatize) {
-          govVertex.setLemma(morphology.lemma(govVertex.value(), govVertex.tag(), true));
-          depVertex.setLemma(morphology.lemma(depVertex.value(), depVertex.tag(), true));
-        }
-        addVertex(govVertex);
-        addVertex(depVertex);
+        IndexedWord govVertex = new IndexedWord(docID, sentIndex, gov.index(), gov.label());
+        IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), dep.label());
+        // It is unnecessary to call addVertex, since addEdge will
+        // implicitly add vertices if needed
+        //addVertex(govVertex);
+        //addVertex(depVertex);
         addEdge(govVertex, depVertex, reln, Double.NEGATIVE_INFINITY, d.extra());
-      }
+      } else { //it's the root and we add it
+        IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), dep.label());
 
-      else { //it's the root and we add it
-        IndexedWord depVertex = new IndexedWord(docID, sentIndex, dep.index(), depLabel);
-        depVertex.setTag(dep.highestNodeWithSameHead().headTagNode().value());
-        if (lemmatize) {
-          depVertex.setLemma(morphology.lemma(depVertex.value(), depVertex.tag(), true));
-        }
-
+        addVertex(depVertex);
         roots.add(depVertex);
       }
     }

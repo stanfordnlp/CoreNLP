@@ -1,4 +1,4 @@
-STANFORD DEPENDENCIES.  Stanford Parser v3.2.0 - 2013-06-19
+STANFORD DEPENDENCIES.  Stanford Parser v3.3.1
 -----------------------------------------------------------
 
 The manual for the English version of the Stanford Dependencies
@@ -41,6 +41,47 @@ For more discussion of the design principles, please see:
 
 These papers can be cited as references for the English Stanford
 Dependencies.
+
+
+--------------------------------------
+CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.3.1
+
+A couple of fixes/improvements were made in the dependency conversion,
+and one change was made to the taxonomy of relations.
+
+ - The partmod and infmod relations were deleted, and replaced with
+vmod for reduced, non-finite verbal modifiers. The distinction between
+these two relations can be recovered from the POS tag of the dependent.
+ - A couple of improvements were made to the conversion, the largest
+ one being recognizing pobj inside a PP not headed by something tagged
+ as IN or TO.
+
+
+--------------------------------------
+CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.3
+
+Some fixes/improvements were made in the dependency conversion, and one
+change was made to the taxonomy of relations.
+
+ - For currency amount expressions with a currency symbol like "$", it
+   had previously been the case that "$" was the head, and then each
+   number word modified it as a number. We realized that this was
+   unnecessarily inconsistent. For the expression "two thousand dollars",
+   "dollars" is the head, but "thousand" is a num modifier of it, and
+   number is used for the parts of a number multi-word expression only.
+   This analysis is now also used for cases with a currency symbol. E.g.,
+   "for $ 52.7 million": prep(for, $) num($, million) number(million, 52.7).
+   Similarly, for "the $ 2.29 billion value", we changed the analysis from
+   num(value, $) number($, billion) to amod(value, $) num($, billion).
+   This corresponds to hwat you got for "a two dollar value".
+   This is actually the most common change (at least on WSJ newswire!).
+ - Remove the attr relation. Some cases disappear by making the question
+   phrase of WHNP be NP questions the root. Others (predicative NP
+   complements) become xcomp.
+ - Less aggressive labeling of participial form VPs as xcomp. More of them
+   are correctly labeled partmod (but occasionally a true xcomp is also
+   mislabeled as partmod).
+ - Small rule changes to recognize a few more ccomp and parataxis.
 
 
 --------------------------------------

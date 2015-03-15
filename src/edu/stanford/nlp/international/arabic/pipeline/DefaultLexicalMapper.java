@@ -35,7 +35,7 @@ public class DefaultLexicalMapper implements Mapper, Serializable {
   private final Pattern bwQuran = Pattern.compile("`");
   private final Pattern bwNullAnaphoraMarker = Pattern.compile("\\[nll\\]");
 
-  public final Pattern latinPunc = Pattern.compile("([\u0021-\u002F\u003A-\u0040\\u005B\u005C\\u005D\u005E-\u0060\u007B-\u007E\u00A1-\u00BF\u2010-\u2027\u2030-\u205E\u20A0-\u20B5])+");
+  public final Pattern latinPunc = Pattern.compile("([\u0021-\u002F\u003A-\u0040\\u005B-\u0060\u007B-\u007E\u00A1-\u00BF\u00F7\u2010-\u2027\u2030-\u205E\u20A0-\u20BA])+");
   public final Pattern arabicPunc = Pattern.compile("([\u00AB\u00BB\u0609-\u060D\u061B-\u061F\u066A\u066C-\u066D\u06D4])+");
 
   public final Pattern arabicDigit = Pattern.compile("([\u06F0-\u06F9\u0660-\u0669])+");

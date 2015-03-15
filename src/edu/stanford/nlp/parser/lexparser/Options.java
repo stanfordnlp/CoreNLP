@@ -340,6 +340,9 @@ public class Options implements Serializable {
       trainOptions.HSEL_CUT = Integer.parseInt(args[i + 1]);
       trainOptions.hSelSplit = trainOptions.HSEL_CUT > 0;
       i += 2;
+    } else if (args[i].equalsIgnoreCase("-nohSelSplit")) {
+      trainOptions.hSelSplit = false;
+      i += 1;
     } else if (args[i].equalsIgnoreCase("-tagPA")) {
       trainOptions.tagPA = true;
       i += 1;
@@ -774,8 +777,8 @@ public class Options implements Serializable {
     } else if (args[i].equalsIgnoreCase("-qnTolerance")) {
       trainOptions.qnTolerance = Double.parseDouble(args[i + 1]);
       i += 2;
-    } else if (args[i].equalsIgnoreCase("-debugOutputSeconds")) {
-      trainOptions.debugOutputSeconds = Integer.parseInt(args[i + 1]);
+    } else if (args[i].equalsIgnoreCase("-debugOutputFrequency")) {
+      trainOptions.debugOutputFrequency = Integer.parseInt(args[i + 1]);
       i += 2;
     } else if (args[i].equalsIgnoreCase("-maxTrainTimeSeconds")) {
       trainOptions.maxTrainTimeSeconds = Integer.parseInt(args[i + 1]);
@@ -860,6 +863,12 @@ public class Options implements Serializable {
       i += 1;
     } else if (args[i].equalsIgnoreCase("-noUseContextWords")) {
       trainOptions.useContextWords = false;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-trainWordVectors")) {
+      trainOptions.trainWordVectors = true;
+      i += 1;
+    } else if (args[i].equalsIgnoreCase("-noTrainWordVectors")) {
+      trainOptions.trainWordVectors = false;
       i += 1;
     }
     return i;

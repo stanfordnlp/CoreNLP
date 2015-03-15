@@ -73,7 +73,7 @@ import edu.stanford.nlp.util.logging.Redwood.RedwoodChannels;
 public class ClassicCounter<E> implements Serializable, Counter<E>, Iterable<E> {
 
   Map<E, MutableDouble> map;  // accessed by DeltaCounter
-  private MapFactory<E, MutableDouble> mapFactory;
+  private final MapFactory<E, MutableDouble> mapFactory;
   private double totalCount; // = 0.0
   private double defaultValue; // = 0.0;
 

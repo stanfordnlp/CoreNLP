@@ -230,7 +230,9 @@ public class ValueFunctions {
     @Override
     public Number compute(Number... in) {
       if (isInteger(in[0]) && isInteger(in[1])) {
-        return in[0].longValue() / in[1].longValue();
+        if ( in[0].longValue() % in[1].longValue() == 0)
+          return in[0].longValue() / in[1].longValue();
+        else return in[0].doubleValue() / in[1].doubleValue();
       } else {
         return in[0].doubleValue() / in[1].doubleValue();
       }
@@ -245,6 +247,35 @@ public class ValueFunctions {
       } else {
         return in[0].doubleValue() % in[1].doubleValue();
       }
+    }
+  };
+
+  public static final ValueFunction MAX_FUNCTION = new NumericFunction("MAX", 2) {
+    @Override
+    public Number compute(Number... in) {
+      if (isInteger(in[0]) && isInteger(in[1])) {
+        return Math.max(in[0].longValue(), in[1].longValue());
+      } else {
+        return Math.max(in[0].doubleValue(), in[1].doubleValue());
+      }
+    }
+  };
+
+  public static final ValueFunction MIN_FUNCTION = new NumericFunction("MIN", 2) {
+    @Override
+    public Number compute(Number... in) {
+      if (isInteger(in[0]) && isInteger(in[1])) {
+        return Math.min(in[0].longValue(), in[1].longValue());
+      } else {
+        return Math.min(in[0].doubleValue(), in[1].doubleValue());
+      }
+    }
+  };
+
+  public static final ValueFunction POW_FUNCTION = new NumericFunction("POW", 2) {
+    @Override
+    public Number compute(Number... in) {
+      return Math.pow(in[0].doubleValue(), in[1].doubleValue());
     }
   };
 
@@ -336,6 +367,21 @@ public class ValueFunctions {
     }
   };
 
+  private static String join(Object[] args, String glue) {
+    String res = null;
+    if (args.length == 1) {
+      // Only one element - check if it is a list or array and do join on that
+      if (args[0] instanceof Iterable) {
+        res = StringUtils.join((Iterable) args[0], glue);
+      } else {
+        res = StringUtils.join(args, glue);
+      }
+    } else {
+      res = StringUtils.join(args, glue);
+    }
+    return res;
+  }
+
   public abstract static class StringFunction extends NamedValueFunction {
     protected String resultTypeName = Expressions.TYPE_STRING;
     protected int nargs = 2;
@@ -394,7 +440,7 @@ public class ValueFunctions {
   public static final ValueFunction CONCAT_FUNCTION = new StringFunction("CONCAT", -1) {
     @Override
     public String compute(String... in) {
-      return StringUtils.join(in, "");
+      return join(in, "");
     }
   };
 
@@ -409,6 +455,40 @@ public class ValueFunctions {
     @Override
     public String compute(String... in) {
       return in[0].toLowerCase();
+    }
+  };
+
+  public static final ValueFunction PRINT_FUNCTION = new NamedValueFunction("PRINT") {
+    @Override
+    public String getParamDesc() {
+      return "...";
+    }
+
+    @Override
+    public boolean checkArgs(List<Value> in) {
+      if (in.size() < 1) {
+        return false;
+      }
+      if (in.size() > 1 && (in.get(0) == null || !(in.get(0).get() instanceof String))) {
+        return false;
+      }
+      return true;
+    }
+
+    @Override
+    public Value apply(Env env, List<Value> in) {
+      if (in.size() > 1) {
+        String format = (String) in.get(0).get();
+        Object[] args = new Object[in.size()-1];
+        for (int i = 1; i < in.size(); i++) {
+          args[i-1] = in.get(i).get();
+        }
+        String res = String.format(format,  args);
+        System.out.print(res);
+      } else {
+        System.out.print(in.get(0));
+      }
+      return null;
     }
   };
 
@@ -465,7 +545,7 @@ public class ValueFunctions {
       for (int i = 1; i < in.size(); i++) {
         args[i-1] = in.get(i).get();
       }
-      String res = StringUtils.join(args, glue);
+      String res = join(args, glue);
       return new Expressions.PrimitiveValue(Expressions.TYPE_STRING, res);
     }
   };
@@ -691,10 +771,10 @@ public class ValueFunctions {
         return false;
       }
       if (clazz != null) {
-        if (in.get(0) == null || !(clazz.isAssignableFrom(in.get(0).get().getClass()))) {
+        if (in.get(0) == null || in.get(0).get() == null || !(clazz.isAssignableFrom(in.get(0).get().getClass()))) {
           return false;
         }
-        if (in.get(1) == null || !(clazz.isAssignableFrom(in.get(1).get().getClass()))) {
+        if (in.get(1) == null || in.get(1).get() == null || !(clazz.isAssignableFrom(in.get(1).get().getClass()))) {
           return false;
         }
       }
@@ -1429,6 +1509,45 @@ public class ValueFunctions {
     }
   };
 
+  public static final ValueFunction CALL_FUNCTION = new NamedValueFunction("CALL") {
+    @Override
+    public String getParamDesc() {
+      return "ValueFunction func or String funcname,...";
+    }
+
+    // First argument is function to apply
+    @Override
+    public boolean checkArgs(List<Value> in) {
+      if (in.size() < 1) {
+        return false;
+      }
+      if (in.get(0) == null ||
+        !(in.get(0).get() instanceof ValueFunction || in.get(0).get() instanceof String)) {
+        return false;
+      }
+      return true;
+    }
+    @Override
+    public Value apply(Env env, List<Value> in) {
+      Value res;
+      List<Value> args = new ArrayList<Value>(in.size()-1);
+      for (int i = 1; i < in.size(); i++) {
+        args.add(in.get(i));
+      }
+      if (in.get(0).get() instanceof ValueFunction) {
+        ValueFunction func = (ValueFunction) in.get(0).get();
+        res = func.apply(env, args);
+      } else if (in.get(0).get() instanceof String) {
+        Expressions.FunctionCallExpression func =
+          new Expressions.FunctionCallExpression((String) in.get(0).get(), args);
+        res = func.evaluate(env);
+      } else {
+        throw new IllegalArgumentException("Type mismatch on arg0: Cannot apply " + this + " to " + in);
+      }
+      return res;
+    }
+  };
+
   static final CollectionValuedMap<String, ValueFunction> registeredFunctions =
     new CollectionValuedMap<String,ValueFunction>(
       MapFactory.<String, Collection<ValueFunction>>linkedHashMapFactory(),
@@ -1439,6 +1558,9 @@ public class ValueFunctions {
     registeredFunctions.add("Multiply", MULTIPLY_FUNCTION);
     registeredFunctions.add("Divide", DIVIDE_FUNCTION);
     registeredFunctions.add("Mod", MOD_FUNCTION);
+    registeredFunctions.add("Min", MIN_FUNCTION);
+    registeredFunctions.add("Max", MAX_FUNCTION);
+    registeredFunctions.add("Pow", POW_FUNCTION);
     registeredFunctions.add("Negate", NEGATE_FUNCTION);
 
     registeredFunctions.add("And", AND_FUNCTION);
@@ -1480,6 +1602,8 @@ public class ValueFunctions {
     registeredFunctions.add("Annotate", ANNOTATION_FUNCTION);
     registeredFunctions.add("Aggregate", AGGREGATE_FUNCTION);
 
+    registeredFunctions.add("Call", CALL_FUNCTION);
+
     registeredFunctions.add("CreateRegex", CREATE_REGEX_FUNCTION);
 
     registeredFunctions.add("Select", COMPOSITE_VALUE_FUNCTION);
@@ -1504,6 +1628,9 @@ public class ValueFunctions {
     registeredFunctions.add("Get", ANNOTATION_FUNCTION);
     registeredFunctions.add("Get", OBJECT_FIELD_FUNCTION);
     registeredFunctions.add("Get", LIST_VALUE_FUNCTION);
+
+    // For debugging
+    registeredFunctions.add("Print", PRINT_FUNCTION);
   }
 
   public static void main(String[] args) {

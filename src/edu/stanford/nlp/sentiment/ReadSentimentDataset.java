@@ -25,6 +25,24 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 public class ReadSentimentDataset {
+  static final Function<Tree, String> TRANSFORM_TREE_TO_WORD = new Function<Tree, String>() {
+    public String apply(Tree tree) { 
+      return tree.label().value(); 
+    }
+  };
+
+  static final Function<String, String> TRANSFORM_PARENS = new Function<String, String>() {
+    public String apply(String word) {
+      if (word.equals("(")) {
+        return "-LRB-";
+      }
+      if (word.equals(")")) {
+        return "-RRB-";
+      }
+      return word;
+    }
+  };
+
   public static Tree convertTree(List<Integer> parentPointers, List<String> sentence, Map<List<String>, Integer> phraseIds, Map<Integer, Double> sentimentScores, PTBEscapingProcessor escaper) {
     int maxNode = 0;
     for (Integer parent : parentPointers) {
@@ -67,10 +85,16 @@ public class ReadSentimentDataset {
 
     for (int i = 0; i <= maxNode; ++i) {
       List<Tree> leaves = subtrees[i].getLeaves();
-      List<String> words = CollectionUtils.transformAsList(leaves, new Function<Tree, String>() { 
-          public String apply(Tree tree) { return tree.label().value(); }
-        });
-      Integer phraseId = phraseIds.get(words);
+      List<String> words = CollectionUtils.transformAsList(leaves, TRANSFORM_TREE_TO_WORD);
+      // First we look for a copy of the phrase with -LRB- -RRB-
+      // instead of ().  The sentiment trees sometimes have both, and
+      // the escaped versions seem to have more reasonable scores.  
+      // If a particular phrase doesn't have -LRB- -RRB- we fall back
+      // to the unescaped versions.
+      Integer phraseId = phraseIds.get(CollectionUtils.transformAsList(words, TRANSFORM_PARENS));
+      if (phraseId == null) {
+        phraseId = phraseIds.get(words);
+      }
       if (phraseId == null) {
         throw new RuntimeException("Could not find phrase id for phrase " + sentence);
       }
@@ -245,7 +269,7 @@ public class ReadSentimentDataset {
     }
 
     writeTrees(trainFilename, trees, splits.get(1));
-    writeTrees(devFilename, trees, splits.get(2));
-    writeTrees(testFilename, trees, splits.get(3));
+    writeTrees(testFilename, trees, splits.get(2));
+    writeTrees(devFilename, trees, splits.get(3));
   }
 }

@@ -43,9 +43,10 @@ import java.util.*;
  * <tr><td>wordshapes</td><td>left, right</td>
  *     <td>Word shape features, eg transform Foo5 into Xxx#
  *         (not exactly like that, but that general idea).
- *         Creates individual features for each word left ... right</td></tr>
+ *         Creates individual features for each word left ... right.
+ *         Fairly English-specific.</td></tr>
  * <tr><td>unicodeshapes</td><td>left, right</td>
- *     <td>Same thing, but works for some unicode characters, too.</td></tr>
+ *     <td>Same thing, but works for unicode characters generally.</td></tr>
  * <tr><td>unicodeshapeconjunction</td><td>left, right</td>
  *     <td>Instead of individual word shape features, combines several
  *         word shapes into one feature.</td></tr>
@@ -73,7 +74,7 @@ import java.util.*;
  * and extractors for specific word shape features, such as containing
  * or not containing a digit.
  * <br>
- * The macro "frenchunknowns" is a macro for five extractors speific
+ * The macro "frenchunknowns" is a macro for five extractors specific
  * to French, which test the end of the word to see if it matches
  * common suffixes for various POS classes and plural words.  Adding
  * this experiment did not improve accuracy over the regular
@@ -341,7 +342,7 @@ public class ExtractorFramesRare {
         String path = Extractor.getParenthesizedArg(arg, 1);
         int lWindow = Extractor.getParenthesizedNum(arg, 2);
         int rWindow = Extractor.getParenthesizedNum(arg, 3);
-        extrs.add(new ExtractorDistsim.ExtractorDistsimConjunction(path, lWindow, rWindow));
+        extrs.add(new ExtractorDistsimConjunction(path, lWindow, rWindow));
       } else if (arg.equalsIgnoreCase("lctagfeatures")) {
         extrs.addAll(Arrays.asList(lcTagFeatures(ttags)));
       }

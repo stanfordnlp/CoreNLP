@@ -6,9 +6,9 @@ public class RNNTrainOptions implements Serializable {
   public int batchSize = 27;
 
   /** Number of times through all the trees */
-  public int epochs = 1000;
+  public int epochs = 400;
 
-  public int debugOutputSeconds = 60 * 20;
+  public int debugOutputEpochs = 8;
 
   public int maxTrainTimeSeconds = 60 * 60 * 24;
 
@@ -32,8 +32,8 @@ public class RNNTrainOptions implements Serializable {
     return classWeights[i];
   }
 
-  /** Regularization cost for the transform matrices and tensors */
-  public double regTransform = 0.001;
+  /** Regularization cost for the transform matrix  */
+  public double regTransformMatrix = 0.001;
   
   /** Regularization cost for the classification matrices */
   public double regClassification = 0.0001;
@@ -52,13 +52,16 @@ public class RNNTrainOptions implements Serializable {
    */
   public int adagradResetFrequency = 1;
 
+  /** Regularization cost for the transform tensor  */
+  public double regTransformTensor = 0.001;
+  
   @Override
   public String toString() {
     StringBuilder result = new StringBuilder();
     result.append("TRAIN OPTIONS\n");
     result.append("batchSize=" + batchSize + "\n");
     result.append("epochs=" + epochs + "\n");
-    result.append("debugOutputSeconds=" + debugOutputSeconds + "\n");
+    result.append("debugOutputEpochs=" + debugOutputEpochs + "\n");
     result.append("maxTrainTimeSeconds=" + maxTrainTimeSeconds + "\n");
     result.append("learningRate=" + learningRate + "\n");
     result.append("scalingForInit=" + scalingForInit + "\n");
@@ -72,7 +75,8 @@ public class RNNTrainOptions implements Serializable {
       }
       result.append("\n");
     }
-    result.append("regTransform=" + regTransform + "\n");
+    result.append("regTransformMatrix=" + regTransformMatrix + "\n");
+    result.append("regTransformTensor=" + regTransformTensor + "\n");
     result.append("regClassification=" + regClassification + "\n");
     result.append("regWordVector=" + regWordVector + "\n");
     result.append("initialAdagradWeight=" + initialAdagradWeight + "\n");
@@ -87,8 +91,8 @@ public class RNNTrainOptions implements Serializable {
     } else if (args[argIndex].equalsIgnoreCase("-epochs")) {
       epochs = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
-    } else if (args[argIndex].equalsIgnoreCase("-debugOutputSeconds")) {
-      debugOutputSeconds = Integer.valueOf(args[argIndex + 1]);
+    } else if (args[argIndex].equalsIgnoreCase("-debugOutputEpochs")) {
+      debugOutputEpochs = Integer.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-maxTrainTimeSeconds")) {
       maxTrainTimeSeconds = Integer.valueOf(args[argIndex + 1]);
@@ -99,8 +103,11 @@ public class RNNTrainOptions implements Serializable {
     } else if (args[argIndex].equalsIgnoreCase("-scalingForInit")) {
       scalingForInit = Double.valueOf(args[argIndex + 1]);
       return argIndex + 2;
-    } else if (args[argIndex].equalsIgnoreCase("-regTransform")) {
-      regTransform = Double.valueOf(args[argIndex + 1]);
+    } else if (args[argIndex].equalsIgnoreCase("-regTransformMatrix")) {
+      regTransformMatrix = Double.valueOf(args[argIndex + 1]);
+      return argIndex + 2;
+    } else if (args[argIndex].equalsIgnoreCase("-regTransformTensor")) {
+      regTransformTensor = Double.valueOf(args[argIndex + 1]);
       return argIndex + 2;
     } else if (args[argIndex].equalsIgnoreCase("-regClassification")) {
       regClassification = Double.valueOf(args[argIndex + 1]);
