@@ -93,7 +93,7 @@ public class CoreMapNodePattern extends NodePattern<CoreMap> {
         } else if (value.startsWith("<")) {
           Double v = Double.parseDouble(value.substring(1));
           p.annotationPatterns.put(c, new NumericAnnotationPattern(v, NumericAnnotationPattern.CmpType.LT));
-        } else if (value.matches("[A-Za-z0-9_]+")) {
+        } else if (value.matches("[A-Za-z0-9_+-.]+")) {
           p.annotationPatterns.put(c, new StringAnnotationPattern(value));
         } else {
           throw new IllegalArgumentException("Invalid value " + value + " for key: " + attr);
