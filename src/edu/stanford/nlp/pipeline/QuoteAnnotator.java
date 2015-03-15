@@ -34,14 +34,16 @@ public class QuoteAnnotator implements Annotator {
   public static final Map<String, String> DIRECTED_QUOTES;
   static {
     Map<String, String> tmp = new HashMap<>();
-    tmp.put("“", "”");  // directed double
-    tmp.put("‘", "’");  // directed single
+    tmp.put("“", "”");  // directed double inward
+    tmp.put("‘", "’");  // directed single inward
     tmp.put("«", "»");  // guillemets
     tmp.put("‹","›");  // single guillemets
     tmp.put("「", "」");  // cjk brackets
     tmp.put("『", "』");  // cjk brackets
-    tmp.put("„","”");  // directed double down/up
-    tmp.put("‚","’");  // directed single down/up
+    tmp.put("„","”");  // directed double down/up left pointing
+    tmp.put("‚","’");  // directed single down/up left pointing
+    tmp.put("``","''");  // directed double latex style
+    tmp.put("`","'");  // directed single latex style
     DIRECTED_QUOTES = Collections.unmodifiableMap(tmp);
   }
   public static final String[] QUOTES = {"\"", "'", "’"};
@@ -102,6 +104,17 @@ public class QuoteAnnotator implements Annotator {
 
   }
 
+  public static Comparator<CoreMap> getQuoteComparator() {
+   return new Comparator<CoreMap>() {
+     @Override
+     public int compare(CoreMap o1, CoreMap o2) {
+       int s1 = o1.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+       int s2 = o2.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+       return s1 - s2;
+     }
+   };
+  }
+
   public static List<CoreMap> getCoreMapQuotes(List<Pair<Integer, Integer>> quotes,
                                                List<CoreLabel> tokens,
                                               String text, String docID) {
@@ -135,7 +148,12 @@ public class QuoteAnnotator implements Annotator {
       cmQuotes.add(quote);
     }
 
+    // sort quotes by beginning index
+    Comparator<CoreMap> quoteComparator = getQuoteComparator();
+    Collections.sort(cmQuotes, quoteComparator);
+
     // embed quotes
+    List<CoreMap> toRemove = new ArrayList<>();
     for (CoreMap cmQuote : cmQuotes) {
       int start = cmQuote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
       int end = cmQuote.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
@@ -147,9 +165,17 @@ public class QuoteAnnotator implements Annotator {
         if (start < startComp && end >= endComp) {
           // p contains comp
           embeddedQuotes.add(cmQuoteComp);
+          // now we want to remove it from the top-level quote list
+          toRemove.add(cmQuoteComp);
         }
       }
       cmQuote.set(CoreAnnotations.QuotationsAnnotation.class, embeddedQuotes);
+    }
+
+    // Remove all the quotes that we want to.
+    for (CoreMap r : toRemove) {
+      // remove that quote from the overall list
+      cmQuotes.remove(r);
     }
     return cmQuotes;
   }
@@ -186,12 +212,10 @@ public class QuoteAnnotator implements Annotator {
     return quote;
   }
 
-  // I'd like to try out a recursive method to see if that works!
   public static List<Pair<Integer, Integer>> getQuotes(String text) {
     return recursiveQuotes(text, 0, null);
   }
 
-  // I'd like to try out a recursive method to see if that works!
   public static List<Pair<Integer, Integer>> recursiveQuotes(String text, int offset, String prevQuote) {
     Map<String, List<Pair<Integer, Integer>>> quotesMap = new HashMap<>();
     int start = -1;
@@ -201,17 +225,29 @@ public class QuoteAnnotator implements Annotator {
       // Either I'm not in any quote or this one matches
       // the kind that I am.
       String c = text.substring(i, i + 1);
+
+      if (c.equals("`") && i < text.length() - 1 &&
+          text.charAt(i + 1) == '`') {
+        c += text.charAt(i + 1);
+      } else if (c.equals("'") && (quote != null && quote.equals("``")) &&
+          i < text.length() - 1 &&
+          text.charAt(i + 1) == '\'') {
+        c += text.charAt(i + 1);
+      }
+
       // opening
       if ((start < 0) && !matchesPrevQuote(c, prevQuote) &&
           ((c.equals("'") && isSingleQuoteStart(text, i)) ||
-            (c.equals("\"")))) {
+            (c.equals("\"") || DIRECTED_QUOTES.containsKey(c)))) {
         start = i;
-        quote = text.substring(start, start + 1);
+        quote = c;
         // closing
-      } else if (start >= 0 && end < 0 && c.equals(quote) &&
+      } else if ((start >= 0 && end < 0) &&
+          ((c.equals(quote) &&
           ((c.equals("'") && isSingleQuoteEnd(text, i)) ||
-           (c.equals("\"") && isDoubleQuoteEnd(text, i)))) {
-        end = i + 1;
+           (c.equals("\"") && isDoubleQuoteEnd(text, i)))) ||
+           (DIRECTED_QUOTES.containsKey(quote) && DIRECTED_QUOTES.get(quote).equals(c)))) {
+        end = i + c.length();
       }
 
       if (start >= 0 && end > 0) {
@@ -222,6 +258,10 @@ public class QuoteAnnotator implements Annotator {
         start = -1;
         end = -1;
         quote = null;
+      }
+
+      if (c.length() > 1) {
+        i += c.length() - 1;
       }
     }
 
@@ -235,28 +275,40 @@ public class QuoteAnnotator implements Annotator {
 //      quotesMap.get(quote).add(new Pair(start, text.length()));
 //    } else
     if (start >= 0) {
-      System.err.println("WARNING: unmatched quote of type " + quote + " at end of file!");
+      String warning = text;
+      if (text.length() > 150) {
+        warning = text.substring(0, 150) + "...";
+      }
+      System.err.println("WARNING: unmatched quote of type " +
+          quote + " found at index " + start + " in text segment: " + warning);
     }
 
     // recursively look for embedded quotes in these ones
-    List<Pair<Integer, Integer>> embedded = new ArrayList<>();
     List<Pair<Integer, Integer>> quotes = new ArrayList<>();
     // If I didn't find any quotes, but did find a quote-beginning, try again,
     // but without the part of the text before the single quote
-    if (quotesMap.size() < 1 && start >= 0) {
-      embedded = recursiveQuotes(text.substring(start, text.length()), start + offset, quote);
-    }
-    for (String qKind : quotesMap.keySet()) {
-      for (Pair<Integer, Integer> q : quotesMap.get(qKind)) {
-        if (q.first() < q.second() - 2) {
-          embedded = recursiveQuotes(text.substring(q.first() + 1, q.second() - 1), q.first() + 1 + offset, qKind);
+    if (quotesMap.isEmpty() && start >= 0) {
+      String toPass = text.substring(start + quote.length(), text.length() - (quote.length() - 1));
+      List<Pair<Integer, Integer>> embedded = recursiveQuotes(toPass, offset, null);
+      for (Pair<Integer, Integer> e : embedded) {
+        quotes.add(new Pair(e.first() + offset + start + quote.length(), e.second() + offset + start + 1));
+      }
+    } else {
+      for (String qKind : quotesMap.keySet()) {
+        for (Pair<Integer, Integer> q : quotesMap.get(qKind)) {
+          if (q.first() < q.second() - qKind.length() * 2) {
+            String toPass = text.substring(q.first() + qKind.length(), q.second() - qKind.length());
+            List<Pair<Integer, Integer>> embedded = recursiveQuotes(toPass,
+                q.first() + qKind.length() + offset, qKind);
+            for (Pair<Integer, Integer> e : embedded) {
+              quotes.add(new Pair(e.first() + offset, e.second() + offset));
+            }
+          }
+          quotes.add(new Pair(q.first() + offset, q.second() + offset));
         }
-        quotes.add(new Pair(q.first() + offset, q.second() + offset));
       }
     }
-    for (Pair<Integer, Integer> e : embedded) {
-      quotes.add(new Pair(e.first() + offset, e.second() + offset));
-    }
+
     return quotes;
   }
 
