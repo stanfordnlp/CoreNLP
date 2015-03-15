@@ -381,29 +381,16 @@ public class CustomAnnotationSerializer implements AnnotationSerializer {
     return s.replaceAll(SPACE_HOLDER, " ");
   }
   private static Dictionaries.MentionType parseMentionType(String s) {
-    if(s.equals("PRONOMINAL")) return Dictionaries.MentionType.PRONOMINAL;
-    if(s.equals("NOMINAL")) return Dictionaries.MentionType.NOMINAL;
-    if(s.equals("PROPER")) return Dictionaries.MentionType.PROPER;
-    throw new RuntimeException("Unknown value: " + s);
+    return Dictionaries.MentionType.valueOf(s);
   }
   private static Dictionaries.Number parseNumber(String s) {
-    if(s.equals("SINGULAR")) return Dictionaries.Number.SINGULAR;
-    if(s.equals("PLURAL")) return Dictionaries.Number.PLURAL;
-    if(s.equals("UNKNOWN")) return Dictionaries.Number.UNKNOWN;
-    throw new RuntimeException("Unknown value: " + s);
+    return Dictionaries.Number.valueOf(s);
   }
   private static Dictionaries.Gender parseGender(String s) {
-    if(s.equals("MALE")) return Dictionaries.Gender.MALE;
-    if(s.equals("FEMALE")) return Dictionaries.Gender.FEMALE;
-    if(s.equals("NEUTRAL")) return Dictionaries.Gender.NEUTRAL;
-    if(s.equals("UNKNOWN")) return Dictionaries.Gender.UNKNOWN;
-    throw new RuntimeException("Unknown value: " + s);
+    return Dictionaries.Gender.valueOf(s);
   }
   private static Dictionaries.Animacy parseAnimacy(String s) {
-    if(s.equals("ANIMATE")) return Dictionaries.Animacy.ANIMATE;
-    if(s.equals("INANIMATE")) return Dictionaries.Animacy.INANIMATE;
-    if(s.equals("UNKNOWN")) return Dictionaries.Animacy.UNKNOWN;
-    throw new RuntimeException("Unknown value: " + s);
+    return Dictionaries.Animacy.valueOf(s);
   }
 
   /**

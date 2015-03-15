@@ -13,4 +13,12 @@ public enum Color {
   private Color(String ansiCode){
     this.ansiCode = ansiCode;
   }
+
+  public String apply(String toColor) {
+    StringBuilder b = new StringBuilder();
+    if (Redwood.supportsAnsi) { b.append(ansiCode); }
+    b.append(toColor);
+    if (Redwood.supportsAnsi) { b.append("\033[0m"); }
+    return b.toString();
+  }
 }

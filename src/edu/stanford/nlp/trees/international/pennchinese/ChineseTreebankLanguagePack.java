@@ -19,10 +19,10 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
 
   private static final long serialVersionUID = 5757403475523638802L;
 
-  private static TokenizerFactory<? extends HasWord> tf;
+  private TokenizerFactory<? extends HasWord> tf;
 
-  public static void setTokenizerFactory(TokenizerFactory<? extends HasWord> tf) {
-    ChineseTreebankLanguagePack.tf = tf;
+  public void setTokenizerFactory(TokenizerFactory<? extends HasWord> tf) {
+    this.tf = tf;
   }
 
   @Override

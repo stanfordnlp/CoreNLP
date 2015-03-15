@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.channels.FileChannel;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -339,8 +340,8 @@ public class IOUtils {
     return ErasureUtils.uncheckedCast(o);
   }
 
-  public static int lineCount(File textFile) throws IOException {
-    BufferedReader r = new BufferedReader(new FileReader(textFile));
+  public static int lineCount(String textFileOrUrl) throws IOException {
+    BufferedReader r = readerFromString(textFileOrUrl);
     int numLines = 0;
     while (r.readLine() != null) {
       numLines++;
@@ -491,8 +492,7 @@ public class IOUtils {
    * @return An Iterable containing the lines from the file.
    */
   public static Iterable<String> readLines(String path) {
-    if(path.endsWith(".gz")) return readLines(new File(path), GZIPInputStream.class);
-    return readLines(new File(path));
+    return readLines(path, null);
   }
 
   /**
@@ -506,7 +506,7 @@ public class IOUtils {
    * @return An Iterable containing the lines from the file.
    */
   public static Iterable<String> readLines(String path, String encoding) {
-    return readLines(new File(path), null, encoding);
+    return new GetLinesIterable(path, null, encoding);
   }
 
   /**
@@ -554,63 +554,299 @@ public class IOUtils {
   public static Iterable<String> readLines(final File file,
                                            final Class<? extends InputStream> fileInputStreamWrapper,
                                            final String encoding) {
+    return new GetLinesIterable(file, fileInputStreamWrapper, encoding);
+  }
 
-    return new Iterable<String>() {
-      public Iterator<String> iterator() {
-        return new Iterator<String>() {
+  static class GetLinesIterable implements Iterable<String> {
+    final File file;
+    final String path;
+    final Class<? extends InputStream> fileInputStreamWrapper;
+    final String encoding;
 
-          protected BufferedReader reader = this.getReader();
-          protected String line = this.getLine();
+    // TODO: better programming style would be to make this two
+    // separate classes, but we don't expect to make more versions of
+    // this class anyway
+    GetLinesIterable(final File file,
+                     final Class<? extends InputStream> fileInputStreamWrapper,
+                     final String encoding) {
+      this.file = file;
+      this.path = null;
+      this.fileInputStreamWrapper = fileInputStreamWrapper;
+      this.encoding = encoding;
+    }
 
-          public boolean hasNext() {
-            return this.line != null;
-          }
+    GetLinesIterable(final String path,
+                     final Class<? extends InputStream> fileInputStreamWrapper,
+                     final String encoding) {
+      this.file = null;
+      this.path = path;
+      this.fileInputStreamWrapper = fileInputStreamWrapper;
+      this.encoding = encoding;
+    }
 
-          public String next() {
-            String nextLine = this.line;
-            if (nextLine == null) {
-              throw new NoSuchElementException();
-            }
-            line = getLine();
-            return nextLine;
-          }
-
-          protected String getLine() {
-            try {
-              String result = this.reader.readLine();
-              if (result == null) {
-                this.reader.close();
-              }
-              return result;
-            } catch (IOException e) {
-              throw new RuntimeIOException(e);
-            }
-          }
-
-          protected BufferedReader getReader() {
-            try {
-              InputStream stream = new FileInputStream(file);
-              if (fileInputStreamWrapper != null) {
-                stream = fileInputStreamWrapper.getConstructor(
-                        InputStream.class).newInstance(stream);
-              }
-              if (encoding == null) {
-                return new BufferedReader(new InputStreamReader(stream));
-              } else {
-                return new BufferedReader(new InputStreamReader(stream, encoding));
-              }
-            } catch (Exception e) {
-              throw new RuntimeIOException(e);
-            }
-          }
-
-          @Override
-          public void remove() {
-            throw new UnsupportedOperationException();
-          }
-        };
+    private InputStream getStream() throws IOException {
+      if (file != null) {
+        return new FileInputStream(file);
+      } else if (path != null) {
+        return getInputStreamFromURLOrClasspathOrFileSystem(path);
+      } else {
+        throw new AssertionError("No known path to read");
       }
-    };
+    }
+
+    public Iterator<String> iterator() {
+      return new Iterator<String>() {
+
+        protected BufferedReader reader = this.getReader();
+        protected String line = this.getLine();
+
+        public boolean hasNext() {
+          return this.line != null;
+        }
+
+        public String next() {
+          String nextLine = this.line;
+          if (nextLine == null) {
+            throw new NoSuchElementException();
+          }
+          line = getLine();
+          return nextLine;
+        }
+
+        protected String getLine() {
+          try {
+            String result = this.reader.readLine();
+            if (result == null) {
+              this.reader.close();
+            }
+            return result;
+          } catch (IOException e) {
+            throw new RuntimeIOException(e);
+          }
+        }
+
+        protected BufferedReader getReader() {
+          try {
+            InputStream stream = getStream();
+            if (fileInputStreamWrapper != null) {
+              stream = fileInputStreamWrapper.getConstructor(InputStream.class).newInstance(stream);
+            }
+            if (encoding == null) {
+              return new BufferedReader(new InputStreamReader(stream));
+            } else {
+              return new BufferedReader(new InputStreamReader(stream, encoding));
+            }
+          } catch (Exception e) {
+            throw new RuntimeIOException(e);
+          }
+        }
+
+        @Override
+          public void remove() {
+          throw new UnsupportedOperationException();
+        }
+      };
+    }
+  }
+
+  /**
+   * Given a reader, returns the lines from the reader as a iterable
+   * @param r  input reader
+   * @param includeEol whether to keep eol-characters in the returned strings
+   * @return iterable of lines (as strings)
+   */
+  public static final Iterable<String> getLineIterable( Reader r, boolean includeEol) {
+    if (includeEol) {
+      return new EolPreservingLineReaderIterable(r);
+    } else {
+      return new LineReaderIterable( (r instanceof BufferedReader)? (BufferedReader) r:new BufferedReader(r) );
+    }
+  }
+
+  public static final Iterable<String> getLineIterable( Reader r, int bufferSize, boolean includeEol) {
+    if (includeEol) {
+      return new EolPreservingLineReaderIterable(r, bufferSize);
+    } else {
+      return new LineReaderIterable( (r instanceof BufferedReader)? (BufferedReader) r:new BufferedReader(r, bufferSize) );
+    }
+  }
+
+  /**
+   * Line iterator that uses BufferedReader.readLine()
+   * EOL-characters are automatically discarded and not included in the strings returns
+   */
+  private static final class LineReaderIterable implements Iterable<String>
+  {
+    private final BufferedReader reader;
+
+    private LineReaderIterable( BufferedReader reader )
+    {
+      this.reader = reader;
+    }
+    @Override
+    public Iterator<String> iterator()
+    {
+      return new Iterator<String>() {
+        private String next = getNext();
+
+        private String getNext() {
+          try {
+            return reader.readLine();
+          } catch (IOException ex) {
+            throw new RuntimeIOException(ex);
+          }
+        }
+
+        @Override
+        public boolean hasNext()
+        {
+          return this.next != null;
+        }
+        @Override
+        public String next()
+        {
+          String nextLine = this.next;
+          if (nextLine == null) {
+            throw new NoSuchElementException();
+          }
+          next = getNext();
+          return nextLine;
+        }
+
+        @Override
+        public void remove()
+        {
+          throw new UnsupportedOperationException();
+        }
+      };
+    }
+  }
+
+  /**
+   * Line iterator that preserves the eol-character exactly as read from reader.
+   * Line endings are: \r\n,\n,\r
+   * Lines returns by this iterator will include the eol-characters
+   **/
+  private static final class EolPreservingLineReaderIterable implements Iterable<String>
+  {
+    private final Reader reader;
+    private final int bufferSize;
+    private EolPreservingLineReaderIterable( Reader reader )
+    {
+      this(reader, SLURPBUFFSIZE);
+    }
+    private EolPreservingLineReaderIterable( Reader reader, int bufferSize )
+    {
+      this.reader = reader;
+      this.bufferSize = bufferSize;
+    }
+    @Override
+    public Iterator<String> iterator()
+    {
+      return new Iterator<String>() {
+        private String next;
+        private boolean done = false;
+
+        private StringBuilder sb = new StringBuilder(80);
+        private char[] charBuffer = new char[bufferSize];
+        private int charBufferPos = -1;
+        private int charsInBuffer = 0;
+        boolean lastWasLF = false;
+
+        private String getNext() {
+          try {
+            while (true) {
+              if (charBufferPos < 0) {
+                charsInBuffer = reader.read(charBuffer);
+                if (charsInBuffer < 0) {
+                  // No more!!!
+                  if (sb.length() > 0) {
+                    String line = sb.toString();
+                    // resets the buffer
+                    sb.setLength(0);
+                    return line;
+                  } else {
+                    return null;
+                  }
+                }
+                charBufferPos = 0;
+              }
+
+              boolean eolReached = copyUntilEol();
+              if (eolReached) {
+                // eol reached
+                String line = sb.toString();
+                // resets the buffer
+                sb.setLength(0);
+                return line;
+              }
+            }
+          } catch (IOException ex) {
+            throw new RuntimeIOException(ex);
+          }
+        }
+
+        private boolean copyUntilEol() {
+          for (int i = charBufferPos; i < charsInBuffer; i++) {
+            if (charBuffer[i] == '\n') {
+              // line end
+              // copy into our string builder
+              sb.append(charBuffer, charBufferPos, i - charBufferPos + 1);
+              // advance character buffer pos
+              charBufferPos = i+1;
+              lastWasLF = false;
+              return true; // end of line reached
+            } else if (lastWasLF) {
+              // not a '\n' here - still need to terminate line (but don't include current character)
+              if (i > charBufferPos) {
+                sb.append(charBuffer, charBufferPos, i - charBufferPos);
+                // advance character buffer pos
+                charBufferPos = i;
+                lastWasLF = false;
+                return true; // end of line reached
+              }
+            }
+            if (charBuffer[i] == '\r') {
+              lastWasLF = true;
+            } else {
+              lastWasLF = false;
+            }
+          }
+          sb.append(charBuffer, charBufferPos, charsInBuffer - charBufferPos);
+          // reset character buffer pos
+          charBufferPos = -1;
+          return false;
+        }
+
+
+        @Override
+        public boolean hasNext()
+        {
+          if (done) return false;
+          if (next == null) {
+            next = getNext();
+          }
+          if (next == null) {
+            done = true;
+          }
+          return !done;
+        }
+        @Override
+        public String next()
+        {
+          if (!hasNext()) { throw new NoSuchElementException(); }
+          String res = next;
+          next = null;
+          return res;
+        }
+
+        @Override
+        public void remove()
+        {
+          throw new UnsupportedOperationException();
+        }
+      };
+    }
   }
 
   /**
@@ -730,8 +966,7 @@ public class IOUtils {
    * Returns all the text in the given File.
    */
   public static String slurpFile(File file) throws IOException {
-    Reader r = new FileReader(file);
-    return IOUtils.slurpReader(r);
+    return slurpFile(file, null);
   }
 
   /**
@@ -750,8 +985,8 @@ public class IOUtils {
    * Returns all the text in the given File.
    */
   public static String slurpGZippedFile(String filename) throws IOException {
-    Reader r = new InputStreamReader(new GZIPInputStream(new FileInputStream(
-            filename)));
+    Reader r = encodedInputStreamReader(new GZIPInputStream(new FileInputStream(
+            filename)), null);
     return IOUtils.slurpReader(r);
   }
 
@@ -759,8 +994,8 @@ public class IOUtils {
    * Returns all the text in the given File.
    */
   public static String slurpGZippedFile(File file) throws IOException {
-    Reader r = new InputStreamReader(new GZIPInputStream(new FileInputStream(
-            file)));
+    Reader r = encodedInputStreamReader(new GZIPInputStream(new FileInputStream(
+            file)), null);
     return IOUtils.slurpReader(r);
   }
 
@@ -773,14 +1008,16 @@ public class IOUtils {
    */
   public static String slurpFile(String filename, String encoding)
           throws IOException {
-    Reader r = new InputStreamReader(new FileInputStream(filename), encoding);
+    Reader r = new InputStreamReader(getInputStreamFromURLOrClasspathOrFileSystem(filename), encoding);
     return IOUtils.slurpReader(r);
   }
 
   /**
-   * Returns all the text in the given file with the given encoding. If the file
-   * cannot be read (non-existent, etc.), then and only then the method returns
-   * <code>null</code>.
+   * Returns all the text in the given file with the given
+   * encoding. If the file cannot be read (non-existent, etc.), then
+   * the method throws an unchecked RuntimeIOException.  If the caller
+   * is willing to tolerate missing files, they should catch that
+   * exception.
    */
   public static String slurpFileNoExceptions(String filename, String encoding) {
     try {
@@ -800,7 +1037,7 @@ public class IOUtils {
    * @return The text in the file.
    */
   public static String slurpFile(String filename) throws IOException {
-    return IOUtils.slurpReader(new FileReader(filename));
+    return slurpFile(filename, defaultEncoding);
   }
 
   /**
@@ -860,14 +1097,30 @@ public class IOUtils {
     return buff.toString();
   }
 
+  public static String getUrlEncoding(URLConnection connection) {
+    String contentType = connection.getContentType();
+    String[] values = contentType.split(";");
+    String charset = defaultEncoding;  // might or might not be right....
+
+    for (String value : values) {
+      value = value.trim();
+      if (value.toLowerCase(Locale.ENGLISH).startsWith("charset=")) {
+        charset = value.substring("charset=".length());
+      }
+    }
+    return charset;
+  }
+
+
   /**
    * Returns all the text at the given URL.
    */
   public static String slurpURL(URL u) throws IOException {
     String lineSeparator = System.getProperty("line.separator");
     URLConnection uc = u.openConnection();
+    String encoding = getUrlEncoding(uc);
     InputStream is = uc.getInputStream();
-    BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
     String temp;
     StringBuilder buff = new StringBuilder(16000); // make biggish
     while ((temp = br.readLine()) != null) {
@@ -912,34 +1165,32 @@ public class IOUtils {
   }
 
   /**
-   * Returns all the text in the given File.
-   *
-   * @return The text in the file. May be an empty string if the file is empty.
-   *         If the file cannot be read (non-existent, etc.), then and only then
-   *         the method returns <code>null</code>.
+   * Returns all the text in the given file with the given
+   * encoding. If the file cannot be read (non-existent, etc.), then
+   * the method throws an unchecked RuntimeIOException.  If the caller
+   * is willing to tolerate missing files, they should catch that
+   * exception.
    */
   public static String slurpFileNoExceptions(File file) {
     try {
-      return IOUtils.slurpReader(new FileReader(file));
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
+      return IOUtils.slurpReader(encodedInputStreamReader(new FileInputStream(file), null));
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     }
   }
 
   /**
-   * Returns all the text in the given File.
-   *
-   * @return The text in the file. May be an empty string if the file is empty.
-   *         If the file cannot be read (non-existent, etc.), then and only then
-   *         the method returns <code>null</code>.
+   * Returns all the text in the given file with the given
+   * encoding. If the file cannot be read (non-existent, etc.), then
+   * the method throws an unchecked RuntimeIOException.  If the caller
+   * is willing to tolerate missing files, they should catch that
+   * exception.
    */
   public static String slurpFileNoExceptions(String filename) {
     try {
       return slurpFile(filename);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
     }
   }
 
@@ -1143,8 +1394,15 @@ public class IOUtils {
   }
 
   public static PrintWriter getPrintWriter(File textFile) throws IOException {
+    return getPrintWriter(textFile, null);
+  }
+
+  public static PrintWriter getPrintWriter(File textFile, String encoding) throws IOException {
     File f = textFile.getAbsoluteFile();
-    return new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f))), true);
+    if (encoding == null) {
+      encoding = defaultEncoding;
+    }
+    return new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), encoding)), true);
   }
 
   public static PrintWriter getPrintWriter(String filename) throws IOException {
@@ -1447,6 +1705,100 @@ public class IOUtils {
       return new PrintWriter(new OutputStreamWriter(stream, encoding), autoFlush);
     }
   }
+
+  /**
+   * A raw file copy function -- this is not public since no error checks are made as to the
+   * consistency of the filed being copied. Use instead:
+   * @see IOUtils#cp(java.io.File, java.io.File, boolean)
+   * @param source The source file. This is guaranteed to exist, and is guaranteed to be a file.
+   * @param target The target file.
+   * @throws IOException Throws an exception if the copy fails.
+   */
+  private static void copyFile(File source, File target) throws IOException {
+    FileChannel sourceChannel = new FileInputStream( source ).getChannel();
+    FileChannel targetChannel = new FileOutputStream( target ).getChannel();
+    sourceChannel.transferTo(0, sourceChannel.size(), targetChannel);
+    sourceChannel.close();
+    targetChannel.close();
+  }
+
+  /**
+   * <p>An implementation of cp, as close to the Unix command as possible.
+   * Both directories and files are valid for either the source or the target;
+   * if the target exists, the semantics of Unix cp are [intended to be] obeyed.</p>
+   *
+   * @param source The source file or directory.
+   * @param target The target to write this file or directory to.
+   * @param recursive If true, recursively copy directory contents
+   * @throws IOException If either the copy fails (standard IO Exception), or the command is invalid
+   *                     (e.g., copying a directory without the recursive flag)
+   */
+  public static void cp(File source, File target, boolean recursive) throws IOException {
+    // Error checks
+    if (source.isDirectory() && !recursive) {
+      // cp a b -- a is a directory
+      throw new IOException("cp: omitting directory: " + source);
+    }
+    if (!target.getParentFile().exists()) {
+      // cp a b/c/d/e -- b/c/d doesn't exist
+      throw new IOException("cp: cannot copy to directory: " + recursive + " (parent doesn't exist)");
+    }
+    if (!target.getParentFile().isDirectory()) {
+      // cp a b/c/d/e -- b/c/d is a regular file
+      throw new IOException("cp: cannot copy to directory: " + recursive + " (parent isn't a directory)");
+    }
+    // Get true target
+    File trueTarget;
+    if (target.exists() && target.isDirectory()) {
+      trueTarget = new File(target.getPath() + File.separator + source.getName());
+    } else {
+      trueTarget = target;
+    }
+    // Copy
+    if (source.isFile()) {
+      // Case: copying a file
+      copyFile(source, trueTarget);
+    } else if (source.isDirectory()) {
+      // Case: copying a directory
+      File[] children = source.listFiles();
+      if (children == null) { throw new IOException("cp: could not list files in source: " + source); }
+
+      if (target.exists()) {
+        // Case: cp -r a b -- b exists
+        if (!target.isDirectory()) {
+          // cp -r a b -- b is a regular file
+          throw new IOException("cp: cannot copy directory into regular file: " + target);
+        }
+        if (trueTarget.exists() && !trueTarget.isDirectory()) {
+          // cp -r a b -- b/a is not a directory
+          throw new IOException("cp: overwriting a file with a directory: " + trueTarget);
+        }
+        if (!trueTarget.exists() && !trueTarget.mkdir()) {
+          // cp -r a b -- b/a cannot be created
+          throw new IOException("cp: could not create directory: " + trueTarget);
+        }
+      } else {
+        // Case: cp -r a b -- b does not exist
+        assert trueTarget == target;
+        if (!trueTarget.mkdir()) {
+          // cp -r a b -- canot create b as a directory
+          throw new IOException("cp: could not create target directory: " + trueTarget);
+        }
+      }
+      // Actually do the copy
+      for (File child : children) {
+        File childTarget = new File(trueTarget.getPath() + File.separator + child.getName());
+        cp(child, childTarget, recursive);
+      }
+    } else {
+      throw new IOException("cp: unknown file type: " + source);
+    }
+  }
+
+  /**
+   * @see IOUtils#cp(java.io.File, java.io.File, boolean)
+   */
+  public static void cp(File source, File target) throws IOException { cp(source, target, false); }
 
 
 }

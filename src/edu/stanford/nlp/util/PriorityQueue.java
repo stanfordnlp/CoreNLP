@@ -117,7 +117,7 @@ public interface PriorityQueue<E> extends Set<E> {
 
   /**
    * Returns a representation of the queue in decreasing priority order,
-   * displaying at most maxKeysToPring elements.
+   * displaying at most maxKeysToPrint elements.
    *
    * @param maxKeysToPrint The maximum number of keys to print. Less are
    *     printed if there are less than this number of items in the

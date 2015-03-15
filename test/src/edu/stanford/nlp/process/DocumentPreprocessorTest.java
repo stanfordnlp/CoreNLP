@@ -42,9 +42,9 @@ public class DocumentPreprocessorTest extends TestCase {
   }
   
   public void testSetSentencePunctWords(){
-    String test = "This is a test of the preprocessor2... it should split this text into sentences?This should be a different sentence.";
+    String test = "This is a test of the preprocessor2... it should split this text into sentences? This should be a different sentence.This should be attached to the previous sentence, though.";
     String []expectedResults = {"This is a test of the preprocessor2 ...",
-        "it should split this text into sentences ?","This should be a different sentence ."};
+        "it should split this text into sentences ?","This should be a different sentence.This should be attached to the previous sentence , though ."};
     ArrayList<String> results = new ArrayList<String>();
     DocumentPreprocessor document =
       new DocumentPreprocessor(new BufferedReader(new StringReader(test)));

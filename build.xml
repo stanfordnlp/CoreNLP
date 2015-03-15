@@ -15,8 +15,8 @@
   <property name="compile.debug"       value="true"/>
   <property name="compile.deprecation" value="false"/>
   <property name="compile.optimize"    value="true"/>
-  <property name="compile.source"      value="1.6" />
-  <property name="compile.target"      value="1.6" />
+  <property name="compile.source"      value="1.7" />
+  <property name="compile.target"      value="1.7" />
   <property name="compile.encoding"    value="utf-8" />
 
   <target name="classpath" description="Sets the classpath">
@@ -32,6 +32,27 @@
   <target name="clean" description="Delete old classes">
     <echo message="${ant.project.name}" />
     <delete dir="${build.path}"/>
+  </target>
+
+  <target name="javacceverything" depends="classpath"
+          description="javacc everything that can be javacced">
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+      <classpath>
+        <pathelement location="${project.core}/lib/ant-contrib-1.0b3.jar"/>
+      </classpath>
+    </taskdef>
+
+    <echo message="${ant.project.name}" />
+    <for param="javacc.target">
+      <path>
+        <fileset dir="${source.path}">
+          <include name="**/*.jj"/>
+        </fileset>
+      </path>
+      <sequential>
+        <javacc target="@{javacc.target}" javacchome="${basedir}/lib" />
+      </sequential>
+    </for>
   </target>
 
   <target name="flexeverything" depends="classpath"

@@ -11,7 +11,7 @@ import edu.stanford.nlp.util.Index;
 /**
  * An unknown word model for German; relies on BaseUnknownWordModel plus number matching.
  * An assumption of this model is that numbers (arabic digit sequences)
- * are tagged CARD. This is correct for all of NEGRA/Tiger/TuebaDZ.
+ * are tagged CARD. This is correct for all of NEGRA/Tiger/TueBaDZ.
  *
  * @author Roger Levy
  * @author Greg Donaker (corrections and modeling improvements)
@@ -30,7 +30,7 @@ public class GermanUnknownWordModel extends BaseUnknownWordModel {
                                 Map<Label,ClassicCounter<String>> tagHash,
                                 Map<String,Float> unknownGT,
                                 Set<String> seenEnd) {
-    super(op, lex, wordIndex, tagIndex, 
+    super(op, lex, wordIndex, tagIndex,
           unSeenCounter, tagHash, unknownGT, seenEnd);
   }
 
@@ -41,9 +41,9 @@ public class GermanUnknownWordModel extends BaseUnknownWordModel {
    * lines containing the data.
    */
   public GermanUnknownWordModel(Options op, Lexicon lex,
-                                Index<String> wordIndex, 
+                                Index<String> wordIndex,
                                 Index<String> tagIndex) {
-    this(op, lex, wordIndex, tagIndex, 
+    this(op, lex, wordIndex, tagIndex,
          new ClassicCounter<IntTaggedWord>(),
          Generics.<Label,ClassicCounter<String>>newHashMap(),
          Generics.<String,Float>newHashMap(),

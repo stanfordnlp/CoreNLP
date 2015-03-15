@@ -373,6 +373,30 @@ USED BY: edu.stanford.nlp.time
 LAST UPDATE: 2012-11-05
 LAST UPDATE BY: John Bauer
 -----------------------------------------------------------------------
+ejml-0.19-nogui.jar
+ORIGINAL JAR NAME: ejml-0.19.jar
+VERSION: 0.19
+RELEASE DATE: 2012-03-23
+SOURCE AVAILABLE: yes
+DESCRIPTION: Another matrix library for Java (perhaps fastest for medium
+    size vectors and matrices in 2012.  Otherwise, it's ojAlgo.
+URL: http://code.google.com/p/efficient-java-matrix-library/
+USED BY: Used in deep learning, especially RNN parser
+LAST UPDATE: 2012-07-17
+LAST UPDATE BY: Christopher Manning
+-----------------------------------------------------------------------
+javacc.jar
+ORIGINAL JAR NAME: javacc.jar
+VERSION: 6.0
+RELEASE DATE: August 2013
+SOURCE AVAILABLE: no
+DESCRIPTION: JavaCC is a parser/scanner generator for java
+             compiles .jj and .jjt files to .java
+URL: https://java.net/projects/javacc
+USED BY: tregex, tsurgeon, semgrex
+LAST UPDATE: 2013-08-28
+LAST UPDATE BY: John Bauer
+-----------------------------------------------------------------
 foo.jar
 
 ORIGINAL JAR NAME:

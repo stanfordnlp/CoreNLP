@@ -3,11 +3,7 @@ package edu.stanford.nlp.stats;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.util.Generics;
@@ -22,7 +18,7 @@ import edu.stanford.nlp.util.StringUtils;
  * (Copied from TwoDimensionalCounter)
  *
  * @author Teg Grenager
- * @author Angel Chang 
+ * @author Angel Chang
  */
 public class TwoDimensionalIntCounter<K1, K2> implements Serializable {
 
@@ -298,6 +294,34 @@ public class TwoDimensionalIntCounter<K1, K2> implements Serializable {
     return b.toString();
   }
 
+  public static <CK1 extends Comparable<CK1>, CK2 extends Comparable<CK2>> String toCSVString(
+          TwoDimensionalIntCounter<CK1, CK2> counter,
+          NumberFormat nf, Comparator<CK1> key1Comparator, Comparator<CK2> key2Comparator) {
+    List<CK1> firstKeys = new ArrayList<CK1>(counter.firstKeySet());
+    List<CK2> secondKeys = new ArrayList<CK2>(counter.secondKeySet());
+    Collections.sort(firstKeys, key1Comparator);
+    Collections.sort(secondKeys, key2Comparator);
+    StringBuilder b = new StringBuilder();
+    int secondKeysSize = secondKeys.size();
+    String[] headerRow = new String[secondKeysSize + 1];
+    headerRow[0] = "";
+
+    for (int j = 0; j < secondKeysSize; j++) {
+      headerRow[j + 1] = secondKeys.get(j).toString();
+    }
+    b.append(StringUtils.toCSVString(headerRow)).append('\n');
+    for (CK1 rowLabel : firstKeys) {
+      String[] row = new String[secondKeysSize + 1];
+      row[0] = rowLabel.toString();
+      for (int j = 0; j < secondKeysSize; j++) {
+        CK2 colLabel = secondKeys.get(j);
+        row[j + 1] = nf.format(counter.getCount(rowLabel, colLabel));
+      }
+      b.append(StringUtils.toCSVString(row)).append('\n');
+    }
+    return b.toString();
+  }
+
   public Set<K2> secondKeySet() {
     Set<K2> result = Generics.newHashSet();
     for (K1 k1 : firstKeySet()) {
@@ -398,15 +422,15 @@ public class TwoDimensionalIntCounter<K1, K2> implements Serializable {
   public TwoDimensionalIntCounter() {
     this(MapFactory.<K1,IntCounter<K2>>hashMapFactory(), MapFactory.<K2,MutableInteger>hashMapFactory());
   }
-  
+
   public TwoDimensionalIntCounter(int initialCapacity) {
     this(MapFactory.<K1,IntCounter<K2>>hashMapFactory(), MapFactory.<K2,MutableInteger>hashMapFactory(), initialCapacity);
   }
-  
+
   public TwoDimensionalIntCounter(MapFactory<K1,IntCounter<K2>> outerFactory, MapFactory<K2,MutableInteger> innerFactory) {
     this(outerFactory, innerFactory, 100);
   }
-  
+
   public TwoDimensionalIntCounter(MapFactory<K1,IntCounter<K2>> outerFactory, MapFactory<K2,MutableInteger> innerFactory, int initialCapacity) {
     innerMF = innerFactory;
     outerMF = outerFactory;

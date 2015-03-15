@@ -131,7 +131,7 @@ public class TemplateHash {
 
   protected void add(int nFeatFrame, History history, int number) {
     Pair<Integer,String> wT;
-    int general = maxentTagger.extractors.getSize();
+    int general = maxentTagger.extractors.size();
 
     if (nFeatFrame < general) {
       wT = new Pair<Integer,String>(nFeatFrame, maxentTagger.extractors.extract(nFeatFrame, history));
@@ -157,7 +157,7 @@ public class TemplateHash {
 
   protected void addPrev(int nFeatFrame, History history) {
     Pair<Integer,String> wT;
-    int general = maxentTagger.extractors.getSize();
+    int general = maxentTagger.extractors.size();
 
     if (nFeatFrame < general) {
       wT = new Pair<Integer,String>(nFeatFrame, maxentTagger.extractors.extract(nFeatFrame, history));

@@ -219,6 +219,28 @@ public class JodaTimeUtils {
     }
   }
 
+  protected static boolean hasYYYYMMDD(ReadablePartial base)
+  {
+    if (base == null) {
+      return false;
+    } else {
+      return base.isSupported(DateTimeFieldType.year()) &&
+             base.isSupported(DateTimeFieldType.monthOfYear()) &&
+             base.isSupported(DateTimeFieldType.dayOfMonth());
+    }
+  }
+
+  protected static boolean hasYYMMDD(ReadablePartial base)
+  {
+    if (base == null) {
+      return false;
+    } else {
+      return base.isSupported(DateTimeFieldType.yearOfCentury()) &&
+             base.isSupported(DateTimeFieldType.monthOfYear()) &&
+             base.isSupported(DateTimeFieldType.dayOfMonth());
+    }
+  }
+
   protected static boolean hasField(ReadablePeriod base, DurationFieldType field)
   {
     if (base == null) {

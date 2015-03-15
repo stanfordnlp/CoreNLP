@@ -9,6 +9,7 @@ import junit.framework.TestCase;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class TokenSequenceMatcherITest extends TestCase {
@@ -59,7 +60,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     return new SequencePattern.NodePatternExpr(CoreMapNodePattern.valueOf(textRegex));
   }
 
-  private static String testText = "the number were one, two and fifty.";
+  private static final String testText = "the number were one, two and fifty.";
   public void testTokenSequenceMatcherValue() throws IOException {
     CoreMap doc = createDocument(testText);
 
@@ -87,7 +88,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     assertFalse(match);
   }
 
-  private static String testText1 = "Mellitus was the first Bishop of London, the third Archbishop of Canterbury, and a member of the Gregorian mission  sent to England to convert the Anglo-Saxons. He arrived in 601 AD, and was consecrated as Bishop of London in 604.";
+  private static final String testText1 = "Mellitus was the first Bishop of London, the third Archbishop of Canterbury, and a member of the Gregorian mission  sent to England to convert the Anglo-Saxons. He arrived in 601 AD, and was consecrated as Bishop of London in 604.";
   public void testTokenSequenceMatcher1() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -436,7 +437,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     m.setFindType(SequenceMatcher.FindType.FIND_ALL);
     // Test finding of ALL matching sequences with conjunctions
-    // NOTE: Not all sequences are found for some reason - missing sequences starting with just Bishop....
+    // todo: Not all sequences are found for some reason - missing sequences starting with just Bishop....
     boolean match = m.find();
     assertTrue(match);
     assertEquals(3, m.groupCount());
@@ -470,7 +471,7 @@ public class TokenSequenceMatcherITest extends TestCase {
     TokenSequenceMatcher m = p.getMatcher(doc.get(CoreAnnotations.TokensAnnotation.class));
     m.setFindType(SequenceMatcher.FindType.FIND_ALL);
     // Test finding of ALL matching sequences
-    // NOTE: when using FIND_ALL greedy/recluctant modifiers are not enforced
+    // NOTE: when using FIND_ALL greedy/reluctant modifiers are not enforced
     //       perhaps should add syntax where some of them are enforced...
     boolean match = m.find();
     assertTrue(match);
@@ -918,6 +919,25 @@ public class TokenSequenceMatcherITest extends TestCase {
     timing.stop("testTokenSequenceOptimizeOrString no match");
   }
 
+  public void testMultiplePatterns() throws IOException {
+    TokenSequencePattern p1 = TokenSequencePattern.compile( "(?$dt \"atropine\") []{0,15} " +
+            "(?$se  \"social\" \"avoidant\" \"behaviour\"|\"dysuria\"|\"hyperglycaemia\"| \"mental\" \"disorder\"|\"vertigo\"|\"flutter\"| \"chest\" \"pain\"| \"elevated\" \"blood\" \"pressure\"|\"mania\"| \"rash\" \"erythematous\"|\"manic\"| \"papular\" \"rash\"|\"death\"| \"atrial\" \"arrhythmia\"| \"dry\" \"eyes\"| \"loss\" \"of\" \"libido\"| \"rash\" \"papular\"|\"hypersensitivity\"| \"blood\" \"pressure\" \"increased\"|\"dyspepsia\"| \"accommodation\" \"disorder\"| \"reflexes\" \"increased\"|\"lesions\"|\"asthenia\"| \"gastrointestinal\" \"pain\"|\"excitement\"| \"breast\" \"feeding\"|\"hypokalaemia\"| \"cerebellar\" \"syndrome\"|\"nervousness\"| \"pulmonary\" \"oedema\"| \"inspiratory\" \"stridor\"| \"taste\" \"altered\"|\"paranoia\"| \"psychotic\" \"disorder\"| \"open\" \"angle\" \"glaucoma\"|\"photophobia\"| \"dry\" \"eye\"|\"osteoarthritis\"| \"keratoconjunctivitis\" \"sicca\"| \"haemoglobin\" \"increased\"| \"ventricular\" \"extrasystoles\"|\"hallucinations\"|\"conjunctivitis\"|\"paralysis\"| \"qrs\" \"complex\"|\"anxiety\"| \"conjunctival\" \"disorder\"|\"coma\"|\"strabismus\"|\"thirst\"|\"para\"| \"sicca\" \"syndrome\"| \"atrioventricular\" \"dissociation\"|\"desquamation\"|\"crusting\"| \"abdominal\" \"distension\"|\"blindness\"|\"hypotension\"|\"dermatitis\"| \"sinus\" \"tachycardia\"| \"abdominal\" \"distention\"| \"lacrimation\" \"decreased\"|\"sicca\"| \"paralytic\" \"ileus\"| \"urinary\" \"hesitation\"|\"withdrawn\"| \"erectile\" \"dysfunction\"|\"keratoconjunctivitis\"|\"anaphylaxis\"| \"psychiatric\" \"disorders\"| \"altered\" \"taste\"|\"somnolence\"|\"extrasystoles\"|\"ageusia\"| \"intraocular\" \"pressure\" \"increased\"| \"left\" \"ventricular\" \"failure\"|\"impotence\"|\"drowsiness\"|\"conjunctiva\"| \"delayed\" \"gastric\" \"emptying\"| \"gastrointestinal\" \"sounds\" \"abnormal\"| \"qt\" \"prolonged\"| \"supraventricular\" \"tachycardia\"|\"weakness\"|\"hypertonia\"| \"confusional\" \"state\"|\"anhidrosis\"|\"myopia\"|\"dyspnoea\"| \"speech\" \"impairment\" \"nos\"| \"rash\" \"maculo\" \"papular\"|\"petechiae\"|\"tachypnea\"| \"acute\" \"angle\" \"closure\" \"glaucoma\"| \"gastrooesophageal\" \"reflux\" \"disease\"|\"hypokalemia\"| \"left\" \"heart\" \"failure\"| \"myocardial\" \"infarction\"| \"site\" \"reaction\"| \"ventricular\" \"fibrillation\"|\"fibrillation\"| \"maculopapular\" \"rash\"| \"impaired\" \"gastric\" \"emptying\"|\"amnesia\"| \"labored\" \"respirations\"| \"decreased\" \"lacrimation\"|\"mydriasis\"|\"headache\"| \"dry\" \"mouth\"|\"scab\"| \"cardiac\" \"syncope\"| \"visual\" \"acuity\" \"reduced\"|\"tension\"| \"blurred\" \"vision\"| \"bloated\" \"feeling\"| \"labored\" \"breathing\"| \"stridor\" \"inspiratory\"| \"skin\" \"exfoliation\"| \"memory\" \"loss\"|\"syncope\"| \"rash\" \"scarlatiniform\"|\"hyperpyrexia\"| \"cardiac\" \"flutter\"|\"heartburn\"| \"bowel\" \"sounds\" \"decreased\"|\"blepharitis\"|\"tachycardia\"| \"excessive\" \"thirst\"|\"confusion\"| \"rash\" \"macular\"| \"taste\" \"loss\"| \"respiratory\" \"failure\"|\"hesitancy\"|\"dysmetria\"|\"disorientation\"| \"decreased\" \"hemoglobin\"| \"atrial\" \"fibrillation\"| \"urinary\" \"retention\"| \"dry\" \"skin\"|\"dehydration\"|\"hyponatraemia\"|\"dysgeusia\"|\"disorder\"| \"increased\" \"intraocular\" \"pressure\"| \"speech\" \"disorder\"| \"feeling\" \"abnormal\"|\"pain\"| \"anaphylactic\" \"shock\"|\"hallucination\"| \"abdominal\" \"pain\"| \"junctional\" \"tachycardia\"| \"bun\" \"increased\"| \"ventricular\" \"flutter\"| \"scarlatiniform\" \"rash\"|\"agitation\"| \"feeling\" \"hot\"|\"hyponatremia\"| \"decreased\" \"bowel\" \"sounds\"|\"cyanosis\"|\"dysarthria\"| \"heat\" \"intolerance\"|\"hyperglycemia\"|\"reflux\"| \"angle\" \"closure\" \"glaucoma\"| \"electrocardiogram\" \"qt\" \"prolonged\"| \"vision\" \"blurred\"| \"blood\" \"urea\" \"increased\"|\"dizziness\"|\"arrhythmia\"|\"erythema\"|\"vomiting\"| \"difficulty\" \"in\" \"micturition\"|\"infarction\"|\"laryngospasm\"|\"hypoglycaemia\"|\"hypoglycemia\"| \"elevated\" \"hemoglobin\"| \"skin\" \"warm\"| \"ventricular\" \"arrhythmia\"|\"dissociation\"| \"warm\" \"skin\"| \"follicular\" \"conjunctivitis\"|\"urticaria\"|\"fatigue\"| \"cardiac\" \"fibrillation\"| \"decreased\" \"sweating\"| \"decreased\" \"visual\" \"acuity\"|\"lethargy\"| \"acute\" \"angle\" \"closure\" \"glaucoma\"| \"nodal\" \"rhythm\"|\"borborygmi\"|\"hyperreflexia\"| \"respiratory\" \"depression\"|\"diarrhea\"|\"leukocytosis\"| \"speech\" \"disturbance\"|\"ataxia\"|\"cycloplegia\"|\"tachypnoea\"|\"eczema\"| \"supraventricular\" \"extrasystoles\"|\"ileus\"| \"cardiac\" \"arrest\"| \"ventricular\" \"tachycardia\"|\"laryngitis\"|\"delirium\"|\"lactation\"|\"glaucoma\"|\"obstruction\"|\"hypohidrosis\"|\"parity\"|\"palpitations\"| \"temperature\" \"intolerance\"|\"constipation\"|\"cyclophoria\"| \"acute\" \"coronary\" \"syndrome\"| \"arrhythmia\" \"supraventricular\"|\"arrest\"|\"lesion\"|\"nausea\"| \"sweating\" \"decreased\"|\"keratitis\"|\"dyskinesia\"| \"pulmonary\" \"function\" \"test\" \"decreased\"|\"stridor\"|\"swelling\"|\"dysphagia\"| \"haemoglobin\" \"decreased\"|\"diarrhoea\"| \"ileus\" \"paralytic\"|\"clonus\"|\"insomnia\"| \"electrocardiogram\" \"qrs\" \"complex\"| \"nasal\" \"congestion\"| \"nasal\" \"dryness\"|\"sweating\"|\"rash\"| \"nodal\" \"arrhythmia\"|\"irritability\"|\"hyperhidrosis\"| \"ventricular\" \"failure\")");
+    TokenSequencePattern p2 = TokenSequencePattern.compile( "(?$dt \"disease\") []{0,15} " +
+            "(?$se  \"social\" \"avoidant\" \"behaviour\"|\"dysuria\"|\"hyperglycaemia\"| \"mental\" \"disorder\"|\"vertigo\"|\"flutter\"| \"chest\" \"pain\"| \"elevated\" \"blood\" \"pressure\"|\"mania\"| \"rash\" \"erythematous\"|\"manic\"| \"papular\" \"rash\"|\"death\"| \"atrial\" \"arrhythmia\"| \"dry\" \"eyes\"| \"loss\" \"of\" \"libido\"| \"rash\" \"papular\"|\"hypersensitivity\"| \"blood\" \"pressure\" \"increased\"|\"dyspepsia\"| \"accommodation\" \"disorder\"| \"reflexes\" \"increased\"|\"lesions\"|\"asthenia\"| \"gastrointestinal\" \"pain\"|\"excitement\"| \"breast\" \"feeding\"|\"hypokalaemia\"| \"cerebellar\" \"syndrome\"|\"nervousness\"| \"pulmonary\" \"oedema\"| \"inspiratory\" \"stridor\"| \"taste\" \"altered\"|\"paranoia\"| \"psychotic\" \"disorder\"| \"open\" \"angle\" \"glaucoma\"|\"photophobia\"| \"dry\" \"eye\"|\"osteoarthritis\"| \"keratoconjunctivitis\" \"sicca\"| \"haemoglobin\" \"increased\"| \"ventricular\" \"extrasystoles\"|\"hallucinations\"|\"conjunctivitis\"|\"paralysis\"| \"qrs\" \"complex\"|\"anxiety\"| \"conjunctival\" \"disorder\"|\"coma\"|\"strabismus\"|\"thirst\"|\"para\"| \"sicca\" \"syndrome\"| \"atrioventricular\" \"dissociation\"|\"desquamation\"|\"crusting\"| \"abdominal\" \"distension\"|\"blindness\"|\"hypotension\"|\"dermatitis\"| \"sinus\" \"tachycardia\"| \"abdominal\" \"distention\"| \"lacrimation\" \"decreased\"|\"sicca\"| \"paralytic\" \"ileus\"| \"urinary\" \"hesitation\"|\"withdrawn\"| \"erectile\" \"dysfunction\"|\"keratoconjunctivitis\"|\"anaphylaxis\"| \"psychiatric\" \"disorders\"| \"altered\" \"taste\"|\"somnolence\"|\"extrasystoles\"|\"ageusia\"| \"intraocular\" \"pressure\" \"increased\"| \"left\" \"ventricular\" \"failure\"|\"impotence\"|\"drowsiness\"|\"conjunctiva\"| \"delayed\" \"gastric\" \"emptying\"| \"gastrointestinal\" \"sounds\" \"abnormal\"| \"qt\" \"prolonged\"| \"supraventricular\" \"tachycardia\"|\"weakness\"|\"hypertonia\"| \"confusional\" \"state\"|\"anhidrosis\"|\"myopia\"|\"dyspnoea\"| \"speech\" \"impairment\" \"nos\"| \"rash\" \"maculo\" \"papular\"|\"petechiae\"|\"tachypnea\"| \"acute\" \"angle\" \"closure\" \"glaucoma\"| \"gastrooesophageal\" \"reflux\" \"disease\"|\"hypokalemia\"| \"left\" \"heart\" \"failure\"| \"myocardial\" \"infarction\"| \"site\" \"reaction\"| \"ventricular\" \"fibrillation\"|\"fibrillation\"| \"maculopapular\" \"rash\"| \"impaired\" \"gastric\" \"emptying\"|\"amnesia\"| \"labored\" \"respirations\"| \"decreased\" \"lacrimation\"|\"mydriasis\"|\"headache\"| \"dry\" \"mouth\"|\"scab\"| \"cardiac\" \"syncope\"| \"visual\" \"acuity\" \"reduced\"|\"tension\"| \"blurred\" \"vision\"| \"bloated\" \"feeling\"| \"labored\" \"breathing\"| \"stridor\" \"inspiratory\"| \"skin\" \"exfoliation\"| \"memory\" \"loss\"|\"syncope\"| \"rash\" \"scarlatiniform\"|\"hyperpyrexia\"| \"cardiac\" \"flutter\"|\"heartburn\"| \"bowel\" \"sounds\" \"decreased\"|\"blepharitis\"|\"tachycardia\"| \"excessive\" \"thirst\"|\"confusion\"| \"rash\" \"macular\"| \"taste\" \"loss\"| \"respiratory\" \"failure\"|\"hesitancy\"|\"dysmetria\"|\"disorientation\"| \"decreased\" \"hemoglobin\"| \"atrial\" \"fibrillation\"| \"urinary\" \"retention\"| \"dry\" \"skin\"|\"dehydration\"|\"hyponatraemia\"|\"dysgeusia\"|\"disorder\"| \"increased\" \"intraocular\" \"pressure\"| \"speech\" \"disorder\"| \"feeling\" \"abnormal\"|\"pain\"| \"anaphylactic\" \"shock\"|\"hallucination\"| \"abdominal\" \"pain\"| \"junctional\" \"tachycardia\"| \"bun\" \"increased\"| \"ventricular\" \"flutter\"| \"scarlatiniform\" \"rash\"|\"agitation\"| \"feeling\" \"hot\"|\"hyponatremia\"| \"decreased\" \"bowel\" \"sounds\"|\"cyanosis\"|\"dysarthria\"| \"heat\" \"intolerance\"|\"hyperglycemia\"|\"reflux\"| \"angle\" \"closure\" \"glaucoma\"| \"electrocardiogram\" \"qt\" \"prolonged\"| \"vision\" \"blurred\"| \"blood\" \"urea\" \"increased\"|\"dizziness\"|\"arrhythmia\"|\"erythema\"|\"vomiting\"| \"difficulty\" \"in\" \"micturition\"|\"infarction\"|\"laryngospasm\"|\"hypoglycaemia\"|\"hypoglycemia\"| \"elevated\" \"hemoglobin\"| \"skin\" \"warm\"| \"ventricular\" \"arrhythmia\"|\"dissociation\"| \"warm\" \"skin\"| \"follicular\" \"conjunctivitis\"|\"urticaria\"|\"fatigue\"| \"cardiac\" \"fibrillation\"| \"decreased\" \"sweating\"| \"decreased\" \"visual\" \"acuity\"|\"lethargy\"| \"acute\" \"angle\" \"closure\" \"glaucoma\"| \"nodal\" \"rhythm\"|\"borborygmi\"|\"hyperreflexia\"| \"respiratory\" \"depression\"|\"diarrhea\"|\"leukocytosis\"| \"speech\" \"disturbance\"|\"ataxia\"|\"cycloplegia\"|\"tachypnoea\"|\"eczema\"| \"supraventricular\" \"extrasystoles\"|\"ileus\"| \"cardiac\" \"arrest\"| \"ventricular\" \"tachycardia\"|\"laryngitis\"|\"delirium\"|\"lactation\"|\"glaucoma\"|\"obstruction\"|\"hypohidrosis\"|\"parity\"|\"palpitations\"| \"temperature\" \"intolerance\"|\"constipation\"|\"cyclophoria\"| \"acute\" \"coronary\" \"syndrome\"| \"arrhythmia\" \"supraventricular\"|\"arrest\"|\"lesion\"|\"nausea\"| \"sweating\" \"decreased\"|\"keratitis\"|\"dyskinesia\"| \"pulmonary\" \"function\" \"test\" \"decreased\"|\"stridor\"|\"swelling\"|\"dysphagia\"| \"haemoglobin\" \"decreased\"|\"diarrhoea\"| \"ileus\" \"paralytic\"|\"clonus\"|\"insomnia\"| \"electrocardiogram\" \"qrs\" \"complex\"| \"nasal\" \"congestion\"| \"nasal\" \"dryness\"|\"sweating\"|\"rash\"| \"nodal\" \"arrhythmia\"|\"irritability\"|\"hyperhidrosis\"| \"ventricular\" \"failure\")");
+    CoreMap doc = createDocument("atropine we need to have many many words here but we don't sweating");
+    MultiPatternMatcher<CoreMap> multiPatternMatcher = TokenSequencePattern.getMultiPatternMatcher(p1, p2);
+    List<String> expected = new ArrayList<String>();
+    expected.add("atropine we need to have many many words here but we do n't sweating");
+    Iterator<String> expectedIter = expected.iterator();
+
+    Iterable<SequenceMatchResult<CoreMap>> matches =
+            multiPatternMatcher.findAllNonOverlappingMatchesPerPattern(doc.get(CoreAnnotations.TokensAnnotation.class));
+    for (SequenceMatchResult<CoreMap> match:matches) {
+     assertEquals(expectedIter.next(), match.group());
+    }
+    assertFalse(expectedIter.hasNext());
+  }
+
   public void testTokenSequenceMatcherPosNNP() throws IOException {
     CoreMap doc = createDocument(testText1);
 
@@ -1275,7 +1295,7 @@ public class TokenSequenceMatcherITest extends TestCase {
   }
 
   //just to test if a pattern is compiling or not
-  public void testcompile() {
+  public void testCompile() {
     String s = "(?$se \"matching\" \"this\"|\"don't\")";
     CoreMap doc = createDocument("does this do matching this");
     TokenSequencePattern p =TokenSequencePattern.compile(s);

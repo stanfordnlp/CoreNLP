@@ -346,10 +346,6 @@ public class ParserPanel extends JPanel {
     String text = textPane.getText().substring(startIndex, endIndex + 1).trim();
 
     if (parser != null && text.length() > 0) {
-      if (segmentWords) {
-        ChineseLexiconAndWordSegmenter lex = (ChineseLexiconAndWordSegmenter) parser.getLexicon();
-        ChineseTreebankLanguagePack.setTokenizerFactory(WordSegmentingTokenizer.factory(lex));
-      }
       //Tokenizer<? extends HasWord> toke = tlp.getTokenizerFactory().getTokenizer(new CharArrayReader(text.toCharArray()));
       Tokenizer<? extends HasWord> toke = tlp.getTokenizerFactory().getTokenizer(new StringReader(text));
       List<? extends HasWord> wordList = toke.tokenize();

@@ -565,10 +565,24 @@ public class ArrayUtils {
     return false;
   }
 
-  /** Return a set containing the same elements as the specified array.
+  /** Return a Set containing the same elements as the specified array.
    */
   public static <T> Set<T> asSet(T[] a) {
     return Generics.newHashSet(Arrays.asList(a));
+  }
+
+  /** Return an immutable Set containing the same elements as the specified
+   *  array. Arrays with 0 or 1 elements are special cased to return the
+   *  efficient small sets from the Collections class.
+   */
+  public static <T> Set<T> asImmutableSet(T[] a) {
+    if (a.length == 0) {
+      return Collections.emptySet();
+    } else if (a.length == 1) {
+      return Collections.singleton(a[0]);
+    } else {
+      return Collections.unmodifiableSet(Generics.newHashSet(Arrays.asList(a)));
+    }
   }
 
   public static void fill(double[][] d, double val) {
@@ -848,16 +862,16 @@ public class ArrayUtils {
     List<T> secondAsList = Arrays.asList(second);
     return CollectionUtils.compareLists(firstAsList, secondAsList);
   }
-  
+
   /**
    * If l1 is a part of l2, it finds the starting index of l1 in l2
    * If l1 is not a sub-array of l2, then it returns -1
-   * note that l2 should have the exact elements and order as in l1 
+   * note that l2 should have the exact elements and order as in l1
    * @param l1 array you want to find in l2
    * @param l2
    * @return starting index of the sublist
    */
-  public static List<Integer> getSubListIndex(Object[] l1, Object[] l2){ 
+  public static List<Integer> getSubListIndex(Object[] l1, Object[] l2){
     if(l1.length > l2.length)
       return null;
     List<Integer> allIndices = new ArrayList<Integer>();
@@ -871,7 +885,7 @@ public class ArrayUtils {
           i++;
           j++;
           if(j == l1.length)
-          { 
+          {
             matched = true;
             break;
           }
@@ -894,23 +908,46 @@ public class ArrayUtils {
           allIndices.add(index - l1.length + 1);
         matched = false;
         lastUnmatchedIndex = index;
-        
+
         //break;
       }
     }
     //get starting point
-    
+
     return allIndices;
   }
-  
-  public static double[] normalize(double[] ar){
+
+  /** Returns a new array which has the numbers in the input array
+   *  L1-normalized.
+   *
+   *  @param ar Input array
+   *  @return New array that has L1 normalized form of input array
+   */
+  public static double[] normalize(double[] ar) {
     double[] ar2 = new double[ar.length];
-    double total = 0;
-    for(int i = 0; i < ar.length; i++)
-      total += ar[i];
-    for(int i = 0; i < ar.length; i++)
+    double total = 0.0;
+    for (double d : ar) {
+      total += d;
+    }
+    for (int i = 0; i < ar.length; i++) {
       ar2[i] = ar[i]/total;
+    }
     return ar2;
   }
   
+  public static Object[] subArray(Object[] arr, int startindexInclusive, int endindexExclusive){
+    if(arr == null)
+      return arr;
+    Class type = arr.getClass().getComponentType();
+    if(endindexExclusive < startindexInclusive || startindexInclusive > arr.length -1 )
+      return (Object[]) Array.newInstance(type, 0);
+    if(endindexExclusive > arr.length)
+      endindexExclusive = arr.length;
+    if(startindexInclusive < 0)
+      startindexInclusive = 0;
+    Object[] b = (Object[]) Array.newInstance(type, endindexExclusive - startindexInclusive);
+    System.arraycopy(arr, startindexInclusive, b, 0, endindexExclusive - startindexInclusive);
+    return b;
+  }
+
 }

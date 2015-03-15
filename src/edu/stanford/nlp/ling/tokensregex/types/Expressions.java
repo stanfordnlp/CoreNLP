@@ -145,6 +145,23 @@ public class Expressions {
     public Value evaluate(Env env, Object... args) {
       return expr.evaluate(env, args);
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof WrappedExpression)) return false;
+
+      WrappedExpression that = (WrappedExpression) o;
+
+      if (expr != null ? !expr.equals(that.expr) : that.expr != null) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return expr != null ? expr.hashCode() : 0;
+    }
   }
 
   /**
@@ -182,6 +199,26 @@ public class Expressions {
     }
 
     private static final long serialVersionUID = 2;
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof TypedExpression)) return false;
+
+      TypedExpression that = (TypedExpression) o;
+
+      if (tags != null ? !tags.equals(that.tags) : that.tags != null) return false;
+      if (typename != null ? !typename.equals(that.typename) : that.typename != null) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = typename != null ? typename.hashCode() : 0;
+      result = 31 * result + (tags != null ? tags.hashCode() : 0);
+      return result;
+    }
   }
 
   /**
@@ -202,6 +239,26 @@ public class Expressions {
 
     public String toString() {
       return getType() + "(" + value + ")";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof SimpleExpression)) return false;
+      if (!super.equals(o)) return false;
+
+      SimpleExpression that = (SimpleExpression) o;
+
+      if (value != null ? !value.equals(that.value) : that.value != null) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = super.hashCode();
+      result = 31 * result + (value != null ? value.hashCode() : 0);
+      return result;
     }
   }
 
@@ -235,6 +292,26 @@ public class Expressions {
     public boolean hasValue() {
       return (evaluated != null);
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof SimpleCachedExpression)) return false;
+
+      SimpleCachedExpression that = (SimpleCachedExpression) o;
+
+      if (disableCaching != that.disableCaching) return false;
+      if (evaluated != null ? !evaluated.equals(that.evaluated) : that.evaluated != null) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = evaluated != null ? evaluated.hashCode() : 0;
+      result = 31 * result + (disableCaching ? 1 : 0);
+      return result;
+    }
   }
 
   /**
@@ -263,6 +340,26 @@ public class Expressions {
 
     public boolean hasValue() {
       return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof SimpleValue)) return false;
+      if (!super.equals(o)) return false;
+
+      SimpleValue that = (SimpleValue) o;
+
+      if (value != null ? !value.equals(that.value) : that.value != null) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = super.hashCode();
+      result = 31 * result + (value != null ? value.hashCode() : 0);
+      return result;
     }
   }
 
@@ -317,6 +414,30 @@ public class Expressions {
         }
       }
       return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof VarAssignmentExpression)) return false;
+      if (!super.equals(o)) return false;
+
+      VarAssignmentExpression that = (VarAssignmentExpression) o;
+
+      if (bindAsValue != that.bindAsValue) return false;
+      if (valueExpr != null ? !valueExpr.equals(that.valueExpr) : that.valueExpr != null) return false;
+      if (varName != null ? !varName.equals(that.varName) : that.varName != null) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = super.hashCode();
+      result = 31 * result + (varName != null ? varName.hashCode() : 0);
+      result = 31 * result + (valueExpr != null ? valueExpr.hashCode() : 0);
+      result = 31 * result + (bindAsValue ? 1 : 0);
+      return result;
     }
   }
 
@@ -770,6 +891,26 @@ public class Expressions {
         throw new UnsupportedOperationException("Unsupported function value " + funcValue);
       }
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof FunctionCallExpression)) return false;
+
+      FunctionCallExpression that = (FunctionCallExpression) o;
+
+      if (function != null ? !function.equals(that.function) : that.function != null) return false;
+      if (params != null ? !params.equals(that.params) : that.params != null) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = function != null ? function.hashCode() : 0;
+      result = 31 * result + (params != null ? params.hashCode() : 0);
+      return result;
+    }
   }
 
   public static class MethodCallExpression extends Expressions.TypedExpression {
@@ -870,6 +1011,30 @@ public class Expressions {
       } catch (IllegalAccessException ex) {
         throw new RuntimeException("Cannot evaluate method " + function + " on object " + mainObj, ex);
       }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof MethodCallExpression)) return false;
+      if (!super.equals(o)) return false;
+
+      MethodCallExpression that = (MethodCallExpression) o;
+
+      if (function != null ? !function.equals(that.function) : that.function != null) return false;
+      if (object != null ? !object.equals(that.object) : that.object != null) return false;
+      if (params != null ? !params.equals(that.params) : that.params != null) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = super.hashCode();
+      result = 31 * result + (function != null ? function.hashCode() : 0);
+      result = 31 * result + (object != null ? object.hashCode() : 0);
+      result = 31 * result + (params != null ? params.hashCode() : 0);
+      return result;
     }
   }
 

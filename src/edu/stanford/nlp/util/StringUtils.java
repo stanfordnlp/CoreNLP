@@ -233,6 +233,66 @@ public class StringUtils {
     }, start, end);
   }
 
+  public static Function<Object,String> DEFAULT_TOSTRING = new Function<Object, String>() {
+    @Override
+    public String apply(Object in) {
+      return in.toString();
+    }
+  };
+  public static String joinFields(List<? extends CoreMap> l, final Class field, final String defaultFieldValue,
+                                  String glue, int start, int end, final Function<Object,String> toStringFunc) {
+    return join(l, glue, new Function<CoreMap, String>() {
+      public String apply(CoreMap in) {
+        Object val = in.get(field);
+        return (val != null)? toStringFunc.apply(val):defaultFieldValue;
+      }
+    }, start, end);
+  }
+
+  public static String joinFields(List<? extends CoreMap> l, final Class field, final String defaultFieldValue,
+                                  String glue, int start, int end) {
+    return joinFields(l, field, defaultFieldValue, glue, start, end, DEFAULT_TOSTRING);
+  }
+
+  public static String joinFields(List<? extends CoreMap> l, final Class field, final Function<Object,String> toStringFunc) {
+    return joinFields(l, field, "-", " ", 0, l.size(), toStringFunc);
+  }
+
+  public static String joinFields(List<? extends CoreMap> l, final Class field) {
+    return joinFields(l, field, "-", " ", 0, l.size());
+  }
+
+  public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final String defaultFieldValue,
+                                          final String fieldGlue, String glue, int start, int end, final Function<Object,String> toStringFunc) {
+    return join(l, glue, new Function<CoreMap, String>() {
+      public String apply(CoreMap in) {
+        StringBuilder sb = new StringBuilder();
+        for (Class field: fields) {
+          if (sb.length() > 0) {
+            sb.append(fieldGlue);
+          }
+          Object val = in.get(field);
+          String str = (val != null)? toStringFunc.apply(val):defaultFieldValue;
+          sb.append(str);
+        }
+        return sb.toString();
+      }
+    }, start, end);
+  }
+
+  public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final Function<Object,String> toStringFunc) {
+    return joinMultipleFields(l, fields, "-", "/", " ", 0, l.size(), toStringFunc);
+  }
+
+  public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields, final String defaultFieldValue,
+                                          final String fieldGlue, String glue, int start, int end) {
+    return joinMultipleFields(l, fields, defaultFieldValue, fieldGlue, glue, start, end, DEFAULT_TOSTRING);
+  }
+
+  public static String joinMultipleFields(List<? extends CoreMap> l, final Class[] fields) {
+    return joinMultipleFields(l, fields, "-", "/", " ", 0, l.size());
+  }
+
   /**
    * Joins all the tokens together (more or less) according to their original whitespace.
    * It assumes all whitespace was " "
@@ -346,7 +406,56 @@ public class StringUtils {
     return (Arrays.asList(str.split(regex)));
   }
 
+  public static String[] splitOnChar(String input, char delimiter) {
+    // State
+    String[] out = new String[input.length() + 1];
+    int nextIndex = 0;
+    int lastDelimiterIndex = -1;
+    char[] chars = input.toCharArray();
+    // Split
+    for ( int i = 0; i <= chars.length; ++i ) {
+      if (i >= chars.length || chars[i] == delimiter) {
+        char[] tokenChars = new char[i - (lastDelimiterIndex + 1)];
+        System.arraycopy(chars, lastDelimiterIndex + 1, tokenChars, 0, tokenChars.length);
+        out[nextIndex] = new String(tokenChars);
+        nextIndex += 1;
+        lastDelimiterIndex = i;
+      }
+    }
+    // Clean Result
+    String[] trimmedOut = new String[nextIndex];
+    System.arraycopy(out, 0, trimmedOut, 0, trimmedOut.length);
+    return trimmedOut;
+  }
 
+  /**
+   * Splits a string into whitespace tokenized fields based on a delimiter. For example,
+   * "aa bb | bb cc | ccc ddd" would be split into "[aa,bb],[bb,cc],[ccc,ddd]" based on
+   * the delimiter "|". This method uses the old StringTokenizer class, which is up to
+   * 3x faster than the regex-based "split()" methods.
+   * 
+   * @param delimiter
+   * @return
+   */
+  public static List<List<String>> splitFieldsFast(String str, String delimiter) {
+    List<List<String>> fields = Generics.newArrayList();
+    StringTokenizer tokenizer = new StringTokenizer(str.trim());
+    List<String> currentField = Generics.newArrayList();
+    while(tokenizer.hasMoreTokens()) {
+      String token = tokenizer.nextToken();
+      if (token.equals(delimiter)) {
+        fields.add(currentField);
+        currentField = Generics.newArrayList();
+      } else {
+        currentField.add(token.trim());
+      }
+    }
+    if (currentField.size() > 0) {
+      fields.add(currentField);
+    }
+    return fields;
+  }
+  
   /** Split a string into tokens.  Because there is a tokenRegex as well as a
    *  separatorRegex (unlike for the conventional split), you can do things
    *  like correctly split quoted strings or parenthesized arguments.
@@ -755,7 +864,7 @@ public class StringUtils {
           if (key.equalsIgnoreCase(PROP) || key.equalsIgnoreCase(PROPS) || key.equalsIgnoreCase(PROPERTIES) || key.equalsIgnoreCase(ARGUMENTS) || key.equalsIgnoreCase(ARGS))
           {
             try {
-              InputStream is = new BufferedInputStream(new FileInputStream(result.getProperty(key)));
+              InputStream is = IOUtils.getInputStreamFromURLOrClasspathOrFileSystem(result.getProperty(key));
               InputStreamReader reader = new InputStreamReader(is, "utf-8");
               result.remove(key); // location of this line is critical
               result.load(reader);
@@ -768,7 +877,7 @@ public class StringUtils {
             } catch (IOException e) {
               result.remove(key);
               System.err.println("argsToProperties could not read properties file: " + result.getProperty(key));
-              throw new RuntimeException(e);
+              throw new RuntimeIOException(e);
             }
           }
         }
@@ -1884,6 +1993,21 @@ public class StringUtils {
    */
   public static Collection<String> getNgrams(List<String> words, int minSize, int maxSize){
     List<List<String>> ng = CollectionUtils.getNGrams(words, minSize, maxSize);
+    Collection<String> ngrams = new ArrayList<String>();
+    for(List<String> n: ng)
+      ngrams.add(StringUtils.join(n," "));
+  
+    return ngrams;
+  }
+  
+  /**
+   * n grams for already splitted string. the ngrams are joined with a single space
+   */
+  public static Collection<String> getNgramsFromTokens(List<CoreLabel> words, int minSize, int maxSize){
+    List<String> wordsStr = new ArrayList<String>();
+    for(CoreLabel l : words)
+      wordsStr.add(l.word());
+    List<List<String>> ng = CollectionUtils.getNGrams(wordsStr, minSize, maxSize);
     Collection<String> ngrams = new ArrayList<String>();
     for(List<String> n: ng)
       ngrams.add(StringUtils.join(n," "));

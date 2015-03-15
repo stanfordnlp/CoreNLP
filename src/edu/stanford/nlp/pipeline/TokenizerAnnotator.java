@@ -27,7 +27,7 @@ import edu.stanford.nlp.util.Timing;
  * @author Jenny Finkel
  * @author John Bauer
  */
-abstract public class TokenizerAnnotator implements Annotator {
+public abstract class TokenizerAnnotator implements Annotator {
 
   private final boolean VERBOSE;
 
@@ -38,19 +38,20 @@ abstract public class TokenizerAnnotator implements Annotator {
   /**
    * Abstract: returns a tokenizer
    */
-  abstract Tokenizer<CoreLabel> getTokenizer(Reader r);
+  abstract public Tokenizer<CoreLabel> getTokenizer(Reader r);
 
   /**
    * Does the actual work of splitting TextAnnotation into CoreLabels,
    * which are then attached to the TokensAnnotation.
    */
+  @Override
   public void annotate(Annotation annotation) {
     Timing timer = null;
 
     if (VERBOSE) {
       timer = new Timing();
       timer.start();
-      System.err.print("PTB tokenizing ... ");
+      System.err.print("Tokenizing ... ");
     }
 
     if (annotation.has(CoreAnnotations.TextAnnotation.class)) {
@@ -64,7 +65,8 @@ abstract public class TokenizerAnnotator implements Annotator {
       annotation.set(CoreAnnotations.TokensAnnotation.class, tokens);
       if (VERBOSE) {
         timer.stop("done.");
-        System.err.println("output: "+annotation.get(CoreAnnotations.TokensAnnotation.class)+"\n");
+        System.err.println("output: " + annotation.get(CoreAnnotations.TokensAnnotation.class));
+        System.err.println();
       }
     } else {
       throw new RuntimeException("unable to find text in annotation: " + annotation);

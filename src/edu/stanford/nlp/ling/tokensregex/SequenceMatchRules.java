@@ -627,10 +627,20 @@ public class SequenceMatchRules {
     }
   }
 
+  /**
+   * Interface for a rule that extracts a list of matched items from a input
+   * @param <I>
+   * @param <O>
+   */
   public static interface ExtractRule<I,O> {
     public boolean extract(I in, List<O> out);
-  };
+  }
 
+  /**
+   * Extraction rule that filters the input before passing it on to the next extractor
+   * @param <I>
+   * @param <O>
+   */
   public static class FilterExtractRule<I,O> implements ExtractRule<I,O>
   {
     Filter<I> filter;
@@ -655,6 +665,12 @@ public class SequenceMatchRules {
     }
   }
 
+  /**
+   * Extraction rule that applies a list of rules in sequence and aggregates
+   *   all matches found
+   * @param <I>
+   * @param <O>
+   */
   public static class ListExtractRule<I,O> implements ExtractRule<I,O>
   {
     List<ExtractRule<I,O>> rules;
@@ -695,6 +711,11 @@ public class SequenceMatchRules {
     }
   }
 
+  /**
+   * Extraction rule to apply a extraction rule on a particular CoreMap field
+   * @param <T>
+   * @param <O>
+   */
   public static class CoreMapExtractRule<T,O> implements ExtractRule<CoreMap, O>
   {
     Class annotationField;

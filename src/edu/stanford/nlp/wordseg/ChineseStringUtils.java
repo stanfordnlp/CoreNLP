@@ -57,7 +57,6 @@ public class ChineseStringUtils {
            testContentIdx++) {
         CoreLabel pwi = wi;
         wi = wordIter.next();
-        //System.err.println(wi);
         boolean originalWhiteSpace = "1".equals(wi.get(CoreAnnotations.SpaceBeforeAnnotation.class));
 
         //  if the CRF says "START" (segmented), and it's not the first word..
@@ -110,7 +109,7 @@ public class ChineseStringUtils {
                 // cdm: you would get here if you had an ASCII number next to a
                 // Unihan range number.  Does that happen?  It presumably
                 // shouldn't do any harm.... [cdm, oct 2007]
-              } else {
+              } else if (flags.separateASCIIandRange) {
                 seg = true;
               }
             }

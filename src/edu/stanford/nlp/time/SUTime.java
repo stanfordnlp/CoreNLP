@@ -147,20 +147,65 @@ public class SUTime {
 
   protected static final int timexVersion = 3;
 
+  public static final SUTime.Time getCurrentTime() {
+    return new GroundedTime(new DateTime());
+  }
+
   // Index of time id to temporal object
   public static class TimeIndex {
+    Index<TimeExpression> temporalExprIndex = new HashIndex<TimeExpression>();
     Index<Temporal> temporalIndex = new HashIndex<Temporal>();
     Index<Temporal> temporalFuncIndex = new HashIndex<Temporal>();
+
+    SUTime.Time docDate;
 
     public TimeIndex() {
       addTemporal(SUTime.TIME_REF);
     }
 
     public void clear() {
+      temporalExprIndex.clear();
       temporalIndex.clear();
       temporalFuncIndex.clear();
-
+      // t0 is the document date (reserve)
+      temporalExprIndex.add(null);
       addTemporal(SUTime.TIME_REF);
+    }
+
+    public int getNumberOfTemporals() { return temporalIndex.size(); }
+    public int getNumberOfTemporalExprs() { return temporalExprIndex.size(); }
+    public int getNumberOfTemporalFuncs() { return temporalFuncIndex.size(); }
+
+    private static final Pattern ID_PATTERN = Pattern.compile("([a-zA-Z]*)(\\d+)");
+    public TimeExpression getTemporalExpr(String s) {
+      Matcher m = ID_PATTERN.matcher(s);
+      if (m.matches()) {
+        String prefix = m.group(1);
+        int id = Integer.valueOf(m.group(2));
+        if ("t".equals(prefix) || prefix.isEmpty()) {
+          return temporalExprIndex.get(id);
+        }
+      }
+      return null;
+    }
+
+    public Temporal getTemporal(String s) {
+      Matcher m = ID_PATTERN.matcher(s);
+      if (m.matches()) {
+        String prefix = m.group(1);
+        int id = Integer.valueOf(m.group(2));
+        if ("t".equals(prefix)) {
+          TimeExpression te = temporalExprIndex.get(id);
+          return (te != null)? te.getTemporal(): null;
+        } else if (prefix.isEmpty()) {
+          return temporalIndex.get(id);
+        }
+      }
+      return null;
+    }
+
+    public TimeExpression getTemporalExpr(int i) {
+      return temporalExprIndex.get(i);
     }
 
     public Temporal getTemporal(int i) {
@@ -171,12 +216,24 @@ public class SUTime {
       return temporalFuncIndex.get(i);
     }
 
+    public boolean addTemporalExpr(TimeExpression t) {
+      Temporal temp = t.getTemporal();
+      if (temp != null) {
+        addTemporal(temp);
+      }
+      return temporalExprIndex.add(t);
+    }
+
     public boolean addTemporal(Temporal t) {
       return temporalIndex.add(t);
     }
 
     public boolean addTemporalFunc(Temporal t) {
       return temporalFuncIndex.add(t);
+    }
+
+    public int indexOfTemporalExpr(TimeExpression t, boolean add) {
+      return temporalExprIndex.indexOf(t, add);
     }
 
     public int indexOfTemporal(Temporal t, boolean add) {
@@ -1425,7 +1482,7 @@ public class SUTime {
     private static final long serialVersionUID = 1;
   }
 
-  // Reference time (some kind of reference time)
+  /** Reference time (some kind of reference time). */
   public static class RefTime extends Time {
     String label;
 
@@ -1453,10 +1510,12 @@ public class SUTime {
       return label;
     }
 
+    @Override
     public Time add(Duration offset) {
       return new RelativeTime(this, TemporalOp.OFFSET, offset);
-    };
+    }
 
+    @Override
     public Time resolve(Time refTime, int flags) {
       if (this == TIME_REF) {
         return refTime;
@@ -2027,7 +2086,7 @@ public class SUTime {
       if (base != null) {
         p = base.getJodaTimePartial();
       }
-      if (p == null && range != null) {
+      if (p == null && range != null && range.mid() != null) {
         p = range.mid().getJodaTimePartial();
       }
       return p;
@@ -3090,14 +3149,14 @@ public class SUTime {
 
     private static final long serialVersionUID = 1;
   }
-  
+
   // TODO: Timezone...
   private static final Pattern PATTERN_ISO = Pattern.compile("(\\d\\d\\d\\d)-?(\\d\\d?)-?(\\d\\d?)(-?(?:T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?))?");
   private static final Pattern PATTERN_ISO_DATETIME = Pattern.compile("(\\d\\d\\d\\d)(\\d\\d)(\\d\\d):(\\d\\d)(\\d\\d)");
   private static final Pattern PATTERN_ISO_TIME = Pattern.compile("T(\\d\\d):?(\\d\\d)?:?(\\d\\d)?(?:[.,](\\d{1,3}))?([+-]\\d\\d:?\\d\\d)?");
   private static final Pattern PATTERN_ISO_DATE_1 = Pattern.compile(".*(\\d\\d\\d\\d)\\/(\\d\\d?)\\/(\\d\\d?).*");
   private static final Pattern PATTERN_ISO_DATE_2 = Pattern.compile(".*(\\d\\d\\d\\d)\\-(\\d\\d?)\\-(\\d\\d?).*");
-  
+
   // Ambiguous pattern - interpret as MM/DD/YY(YY)
   private static final Pattern PATTERN_ISO_AMBIGUOUS_1 = Pattern.compile(".*(\\d\\d?)\\/(\\d\\d?)\\/(\\d\\d(\\d\\d)?).*");
 
@@ -3167,14 +3226,14 @@ public class SUTime {
         isoDate = new SUTime.IsoDate(m.group(3), m.group(1), m.group(2));
       }
     }
-    
+
     if (isoDate == null) {
       m = PATTERN_ISO_AMBIGUOUS_2.matcher(dateStr);
       if (m.matches()) {
         isoDate = new SUTime.IsoDate(m.group(3), m.group(1), m.group(2));
       }
     }
-    
+
     if (isoDate == null) {
       m = PATTERN_ISO_AMBIGUOUS_3.matcher(dateStr);
       if (m.matches()) {

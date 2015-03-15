@@ -15,6 +15,7 @@ import java.util.List;
 */
 public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
 {
+  SequencePattern<T> pattern;     // Pattern we matched against
   List<? extends T> elements;      // Original sequence
   MatchedGroup[] matchedGroups;    // Groups that we matched
   Object[] matchedResults;         // Additional information about matches (per element)
@@ -24,13 +25,14 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
   int order;
 
   public List<? extends T> elements() { return elements; }
+  public SequencePattern<T> pattern() { return pattern; }
 
-  public static <T> BasicSequenceMatchResult<T> toBasicSequenceMatchResult(List<? extends T> elements) {
-    BasicSequenceMatchResult<T> matchResult = new BasicSequenceMatchResult<T>();
-    matchResult.elements = elements;
-    matchResult.matchedGroups = new MatchedGroup[0];
-    return matchResult;
-  }
+//  public static <T> BasicSequenceMatchResult<T> toBasicSequenceMatchResult(List<? extends T> elements) {
+//    BasicSequenceMatchResult<T> matchResult = new BasicSequenceMatchResult<T>();
+//    matchResult.elements = elements;
+//    matchResult.matchedGroups = new MatchedGroup[0];
+//    return matchResult;
+//  }
 
   public BasicSequenceMatchResult<T> toBasicSequenceMatchResult() {
     return copy();
@@ -38,6 +40,7 @@ public class BasicSequenceMatchResult<T> implements SequenceMatchResult<T>
 
   public BasicSequenceMatchResult<T> copy() {
     BasicSequenceMatchResult res = new BasicSequenceMatchResult<T>();
+    res.pattern = pattern;
     res.elements = elements;
     res.matchedGroups = new MatchedGroup[matchedGroups.length];
     res.nodesToStringConverter = nodesToStringConverter;

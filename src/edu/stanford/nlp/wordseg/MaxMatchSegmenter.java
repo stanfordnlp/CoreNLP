@@ -4,12 +4,14 @@ import edu.stanford.nlp.fsm.DFSA;
 import edu.stanford.nlp.fsm.DFSAState;
 import edu.stanford.nlp.fsm.DFSATransition;
 import edu.stanford.nlp.io.EncodingPrintWriter;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.process.WordSegmenter;
+import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
@@ -42,7 +44,6 @@ public class MaxMatchSegmenter implements WordSegmenter {
   private static final int maxLength = 10;
   private List<DFSAState<Word, Integer>> states;
   private DFSA<Word, Integer> lattice=null;
-  private Sighan2005DocumentReaderAndWriter writer = new Sighan2005DocumentReaderAndWriter();
   public enum MatchHeuristic { MINWORDS, MAXWORDS, MAXLEN }
 
   private static final Pattern chineseStartChars = Pattern.compile("^[\u4E00-\u9FFF]");
@@ -114,7 +115,7 @@ public class MaxMatchSegmenter implements WordSegmenter {
         printlnErr("skipping word: "+str);
         return;
       }
-      printlnErr("adding word: "+str);
+      // printlnErr("adding word: "+str);
       words.add(str);
     }
   }
@@ -289,7 +290,8 @@ public class MaxMatchSegmenter implements WordSegmenter {
 
   public static void main(String[] args) {
     Properties props = StringUtils.argsToProperties(args);
-    System.err.println(props.toString());
+    // System.err.println(props.toString());
+    SeqClassifierFlags flags = new SeqClassifierFlags(props);
     MaxMatchSegmenter seg = new MaxMatchSegmenter();
     String lexiconFile = props.getProperty("lexicon");
     if(lexiconFile != null) {
@@ -299,7 +301,12 @@ public class MaxMatchSegmenter implements WordSegmenter {
       System.exit(1);
     }
 
+    Sighan2005DocumentReaderAndWriter sighanRW = new Sighan2005DocumentReaderAndWriter();
+    sighanRW.init(flags);
+
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    StringReader strR = null;
+    PrintWriter stdoutW = new PrintWriter(System.out);
     int lineNb = 0;
     for(;;) {
       ++lineNb;
@@ -308,22 +315,29 @@ public class MaxMatchSegmenter implements WordSegmenter {
         String line = br.readLine();
         if(line == null)
           break;
+        String outputLine = null;
         if(props.getProperty("greedy") != null) {
           ArrayList<Word> sentence = seg.greedilySegmentWords(line);
-          System.out.println(Sentence.listToString(sentence));
+          outputLine = Sentence.listToString(sentence);
         } else if(props.getProperty("maxwords") != null) {
           seg.buildSegmentationLattice(line);
-          System.out.println
-            (Sentence.listToString(seg.segmentWords(MatchHeuristic.MAXWORDS)));
+          outputLine = Sentence.listToString(seg.segmentWords(MatchHeuristic.MAXWORDS));
         } else {
           seg.buildSegmentationLattice(line);
-          System.out.println(Sentence.listToString(seg.maxMatchSegmentation()));
+          outputLine = Sentence.listToString(seg.maxMatchSegmentation());
         }
+        strR = new StringReader(outputLine);
+        Iterator<List<CoreLabel>> itr = sighanRW.getIterator(strR);
+        while(itr.hasNext()) {
+          sighanRW.printAnswers(itr.next(), stdoutW);
+        }
+        // System.out.println(outputLine);
       }
       catch (IOException e) {
         break;
       }
     }
+    stdoutW.flush();
   }
 
   private static void printlnErr(String s) {

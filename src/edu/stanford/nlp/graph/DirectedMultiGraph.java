@@ -27,6 +27,11 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   public DirectedMultiGraph() {
   }
 
+  public DirectedMultiGraph(DirectedMultiGraph<V,E> graph) {
+    outgoingEdges = Generics.newHashMap(graph.outgoingEdges);
+    incomingEdges = Generics.newHashMap(graph.incomingEdges);
+  }
+
   /**
    * Be careful hashing these. They are mutable objects, and changing the object
    * will throw off the hash code, messing up your hash table

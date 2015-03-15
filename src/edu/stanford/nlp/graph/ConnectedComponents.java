@@ -17,7 +17,7 @@ import edu.stanford.nlp.util.Generics;
  */
 public class ConnectedComponents<V, E> {
 
-  public static <V, E> List<Set<V>> getConnectedComponents(DirectedMultiGraph<V, E> graph) {
+  public static <V, E> List<Set<V>> getConnectedComponents(Graph<V, E> graph) {
     List<Set<V>> ccs = new ArrayList<Set<V>>();
     LinkedList<V> todo = new LinkedList<V>();
     // TODO: why not a set?
@@ -30,7 +30,7 @@ public class ConnectedComponents<V, E> {
     return ccs;
   }
 
-  private static <V, E> Set<V> bfs(LinkedList<V> todo, DirectedMultiGraph<V, E> graph, List<V> verticesLeft) {
+  private static <V, E> Set<V> bfs(LinkedList<V> todo, Graph<V, E> graph, List<V> verticesLeft) {
     Set<V> cc = Generics.newHashSet();
     while (todo.size() > 0) {
       V node = todo.removeFirst();

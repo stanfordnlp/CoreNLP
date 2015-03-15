@@ -165,6 +165,11 @@ public class CollectionUtilsTest extends TestCase {
     Assert.assertFalse(CollectionUtils.isSubList(t1, t2));
 
   }
+  
+  public void testMaxIndex(){
+    List<Integer> t1 = Arrays.asList(2,-1,4);
+    Assert.assertEquals(2, CollectionUtils.maxIndex(t1));
+  }
 
 
 }

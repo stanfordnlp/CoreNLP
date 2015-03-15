@@ -12,7 +12,7 @@ import edu.stanford.nlp.util.CoreMap;
 
 /**
  * Each entity mention is described by a type (possibly subtype) and a span of text
- * 
+ *
  * @author Andrey Gusev
  * @author Mihai
  */
@@ -24,20 +24,20 @@ public class EntityMention extends ExtractionObject {
   private final String mentionType;
   private String corefID = "-1";
 
-  /** 
+  /**
    * Offsets the head span, e.g., "George Bush" in the extent "the president George Bush"
-   * The offsets are relative to the sentence containing this mention 
+   * The offsets are relative to the sentence containing this mention
    */
   private Span headTokenSpan;
 
   /**
    * Position of the syntactic head word of this mention, e.g., "Bush" for the head span "George Bush"
    * The offset is relative the sentence containing this mention
-   * Note: use headTokenSpan when sequence tagging entity mentions not this. 
-   *       This is meant to be used only for event/relation feature extraction! 
+   * Note: use headTokenSpan when sequence tagging entity mentions not this.
+   *       This is meant to be used only for event/relation feature extraction!
    */
   private int syntacticHeadTokenPosition;
-  
+
   private String normalizedName;
 
   public EntityMention(String objectId,
@@ -94,7 +94,7 @@ public class EntityMention extends ExtractionObject {
     Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
     return tree.getLeaves().get(syntacticHeadTokenPosition);
   }
-  
+
   public String getNormalizedName() { return normalizedName; }
   public void setNormalizedName(String n) { normalizedName = n; }
 
@@ -116,13 +116,10 @@ public class EntityMention extends ExtractionObject {
   }
 
   public boolean headIncludes(EntityMention otherEnt, boolean useSubType) {
-    if(otherEnt.getSyntacticHeadTokenPosition() >= getHeadTokenStart() && 
-        otherEnt.getSyntacticHeadTokenPosition() < getHeadTokenEnd() &&
-        ((type != null && otherEnt.type != null && type.equals(otherEnt.type)) || (type == null && otherEnt.type == null)) &&
-        (! useSubType || ((subType != null && otherEnt.subType != null && subType.equals(otherEnt.subType)) || (subType == null && otherEnt.subType == null)))){
-      return true;
-    }
-    return false;
+    return otherEnt.getSyntacticHeadTokenPosition() >= getHeadTokenStart() &&
+            otherEnt.getSyntacticHeadTokenPosition() < getHeadTokenEnd() &&
+            ((type != null && otherEnt.type != null && type.equals(otherEnt.type)) || (type == null && otherEnt.type == null)) &&
+            ( ! useSubType || ((subType != null && otherEnt.subType != null && subType.equals(otherEnt.subType)) || (subType == null && otherEnt.subType == null)));
   }
 
   public boolean equals(EntityMention otherEnt, boolean useSubType) {
@@ -157,9 +154,10 @@ public class EntityMention extends ExtractionObject {
     }
     return false;
   }
-  
-  /** 
-   * Compares the text spans of the two entity mentions
+
+  /**
+   * Compares the text spans of the two entity mentions.
+   *
    * @param otherEnt
    */
   public boolean textEquals(EntityMention otherEnt) {
@@ -239,7 +237,15 @@ public class EntityMention extends ExtractionObject {
     + (typeProbabilities != null ? ", probs=" + probsToString() : "")
     + "]";
   }
-  
+
+  @Override
+  public int hashCode() {
+    int result = mentionType != null ? mentionType.hashCode() : 0;
+    result = 31 * result + (headTokenSpan != null ? headTokenSpan.hashCode() : 0);
+    result = 31 * result + (normalizedName != null ? normalizedName.hashCode() : 0);
+    return result;
+  }
+
   static class CompByHead implements Comparator<EntityMention> {
     public int compare(EntityMention o1, EntityMention o2) {
       if(o1.getHeadTokenStart() < o2.getHeadTokenStart()){

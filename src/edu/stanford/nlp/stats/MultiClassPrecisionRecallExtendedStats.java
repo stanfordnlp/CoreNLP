@@ -51,7 +51,9 @@ public class MultiClassPrecisionRecallExtendedStats<L> extends MultiClassPrecisi
   }
 
   public <F> double score(Classifier<L,F> classifier, GeneralDataset<L,F> data) {
-    setLabelIndex(data.labelIndex);
+    labelIndex = new HashIndex<L>();
+    labelIndex.addAll(classifier.labels());
+    labelIndex.addAll(data.labelIndex.objectsList());
     clearCounts();
     int[] labelsArr = data.getLabelsArray();
     for (int i = 0; i < data.size(); i++) {

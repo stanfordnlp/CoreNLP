@@ -121,15 +121,18 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   private boolean useRelativeNorm = true;
   private boolean useNumericalZero = true;
   private boolean useEvalImprovement = false;
+  private boolean useMaxItr = false;
+  private int maxItr = 0;
 
   private boolean suppressTestPrompt = false;
   private int terminateOnEvalImprovementNumOfEpoch = 1;
 
   private int evaluateIters = 0;    // Evaluate every x iterations (0 = no evaluation)
+  private int startEvaluateIters = 0; // starting evaluation after x iterations
   private Evaluator[] evaluators;  // separate set of evaluators to check how optimization is going
 
   public enum eState {
-    TERMINATE_MAXEVALS, TERMINATE_RELATIVENORM, TERMINATE_GRADNORM, TERMINATE_AVERAGEIMPROVE, CONTINUE, TERMINATE_EVALIMPROVE
+    TERMINATE_MAXEVALS, TERMINATE_RELATIVENORM, TERMINATE_GRADNORM, TERMINATE_AVERAGEIMPROVE, CONTINUE, TERMINATE_EVALIMPROVE, TERMINATE_MAXITR
   }
 
   public enum eLineSearch {
@@ -199,6 +202,12 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     this.evaluators = evaluators;
   }
 
+  public void setEvaluators(int iters, int startEvaluateIters, Evaluator[] evaluators) {
+    this.evaluateIters = iters;
+    this.startEvaluateIters = startEvaluateIters;
+    this.evaluators = evaluators;
+  }
+
   public void terminateOnRelativeNorm(boolean toTerminate) {
     useRelativeNorm = toTerminate;
   }
@@ -213,6 +222,13 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
   public void terminateOnEvalImprovement(boolean toTerminate) {
     useEvalImprovement = toTerminate;
+  }
+
+  public void terminateOnMaxItr(int maxItr) {
+    if (maxItr > 0) {
+      useMaxItr = true;
+      this.maxItr = maxItr;
+    }
   }
 
   public void suppressTestPrompt(boolean suppressTestPrompt) {
@@ -435,7 +451,10 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
       double averageImprovement = (previousVal - newestVal) / size;
       int evalsSize = evals.size();
 
-      if (useEvalImprovement && evalsSize > terminateOnEvalImprovementNumOfEpoch) {
+      if (useMaxItr && its >= maxItr)
+        return eState.TERMINATE_MAXITR;
+
+      if (useEvalImprovement) {
         int bestInd = -1;
         double bestScore = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < evalsSize; i++) {
@@ -962,14 +981,9 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
 
     // Beginning of the loop.
     do {
-
       try {
         sayln();
-        boolean doEval = (its > 0 && evaluateIters > 0 && its % evaluateIters == 0);
-        double evalScore = Double.NEGATIVE_INFINITY;
-        if (doEval) {
-          evalScore = doEvaluation(x);
-        }
+        boolean doEval = (its >= 0 && its >= startEvaluateIters && evaluateIters > 0 && its % evaluateIters == 0);
         its += 1;
         double newValue;
         double[] newPoint = new double[3]; // initialized in loop
@@ -1037,6 +1051,11 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         if (useOWLQN) {
           // pseudo gradient
           newGrad = pseudoGradientOWL(newX, newGrad, dfunction);
+        }
+
+        double evalScore = Double.NEGATIVE_INFINITY;
+        if (doEval) {
+          evalScore = doEvaluation(newX);
         }
 
         // Add the current value and gradient to the records, this also monitors
@@ -1109,6 +1128,11 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     case TERMINATE_AVERAGEIMPROVE:
       System.err
           .println("QNMinimizer terminated due to average improvement: | newest_val - previous_val | / |newestVal| < TOL ");
+      success = true;
+      break;
+    case TERMINATE_MAXITR:
+      System.err
+          .println("QNMinimizer terminated due to reached max iteration " + maxItr );
       success = true;
       break;
     case TERMINATE_EVALIMPROVE:

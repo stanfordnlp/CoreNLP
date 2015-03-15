@@ -3,7 +3,6 @@ package edu.stanford.nlp.pipeline;
 import java.util.*;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 
 import junit.framework.Assert;
@@ -13,16 +12,16 @@ import junit.framework.TestCase;
 /** @author Adam Vogel */
 public class WordsToSentencesAnnotatorTest extends TestCase {
 
-  public void test() {
+  public void testAnnotator() {
     String text = "I saw Dr. Spock yesterday, he was speaking with Mr. McCoy.  They were walking down Mullholand Dr. talking about www.google.com.  Dr. Spock returns!";
-    testSentence(text, 3);
-  
-    // XXX: this test currently fails.
-    //text = "I visited Yahoo! research.  Dr. Spock, Ph.D., was working there and said it's an awful place!  What a waste of Ms. Pacman's last remaining life.";
-    //testSentence(text, 3);
+    runSentence(text, 3);
+
+    // This would fail for "Yahoo! Research", since we don't yet know to chunk "Yahoo!"
+    text = "I visited Google Research.  Dr. Spock, Ph.D., was working there and said it's an awful place!  What a waste of Ms. Pacman's last remaining life.";
+    runSentence(text, 3);
   }
 
-  public boolean testSentence(String text, int num_sentences) {
+  public static boolean runSentence(String text, int num_sentences) {
     Annotation doc = new Annotation(text);
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit");
@@ -44,4 +43,5 @@ public class WordsToSentencesAnnotatorTest extends TestCase {
     */
     return true;
   }
+
 }

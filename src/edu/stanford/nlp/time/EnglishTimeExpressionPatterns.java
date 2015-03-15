@@ -29,6 +29,7 @@ import static edu.stanford.nlp.time.EnglishTimeExpressionPatterns.PatternType.ST
  *
  * @author Angel Chang
  */
+@Deprecated
 public class EnglishTimeExpressionPatterns implements TimeExpressionPatterns {
   private static final Logger logger = Logger.getLogger(EnglishTimeExpressionPatterns.class.getName());
   protected static enum PatternType { TOKENS, STRING }

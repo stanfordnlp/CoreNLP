@@ -67,6 +67,7 @@ public class DeterministicCorefAnnotator implements Annotator {
 
       // extract trees and sentence words
       // we are only supporting the new annotation standard for this Annotator!
+      boolean hasSpeakerAnnotations = false;
       if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
         // int sentNum = 0;
         for (CoreMap sentence: annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
@@ -75,12 +76,24 @@ public class DeterministicCorefAnnotator implements Annotator {
           Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
           trees.add(tree);
 
+          if (!hasSpeakerAnnotations) {
+            // check for speaker annotations
+            for (CoreLabel t:tokens) {
+              if (t.get(CoreAnnotations.SpeakerAnnotation.class) != null) {
+                hasSpeakerAnnotations = true;
+                break;
+              }
+            }
+          }
           MentionExtractor.mergeLabels(tree, tokens);
           MentionExtractor.initializeUtterance(tokens);
         }
       } else {
         System.err.println("ERROR: this coreference resolution system requires SentencesAnnotation!");
         return;
+      }
+      if (hasSpeakerAnnotations) {
+        annotation.set(CoreAnnotations.UseMarkedDiscourseAnnotation.class, true);
       }
 
       // extract all possible mentions

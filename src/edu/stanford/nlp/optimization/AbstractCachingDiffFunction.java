@@ -24,11 +24,12 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
   }
 
   public boolean gradientCheck(int numOfChecks, int numOfRandomChecks, double[] x) {
-    double epsilon = 1e-10;
-    double diffThreshold = 0.001;
+    double epsilon = 1e-5;
+    double diffThreshold = 0.01;
     double diffPctThreshold = 0.1;
     double twoEpsilon = epsilon * 2;
     int xLen = x.length;
+    // System.err.println("\n\n\ncalling derivativeAt");
     derivativeAt(x);
     double[] savedDeriv = new double[xLen];
     System.arraycopy(derivative, 0, savedDeriv, 0, derivative.length); 
@@ -51,8 +52,10 @@ public abstract class AbstractCachingDiffFunction implements DiffFunction, HasIn
     for (int paramIndex: indicesToCheck) {
       oldX = x[paramIndex];
       x[paramIndex] = oldX + epsilon;
+      // System.err.println("\n\n\ncalling valueAt1");
       plusVal = valueAt(x);
       x[paramIndex] = oldX - epsilon;
+      // System.err.println("\n\n\ncalling valueAt2");
       minusVal = valueAt(x);
       appDeriv = (plusVal - minusVal) / twoEpsilon;
       calcDeriv = savedDeriv[paramIndex];
