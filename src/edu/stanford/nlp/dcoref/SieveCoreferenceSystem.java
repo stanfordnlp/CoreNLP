@@ -178,7 +178,7 @@ public class SieveCoreferenceSystem {
   private int additionalCorrectLinksCount;
   private int additionalLinksCount;
   
-  private String typesToResolve = null;
+  public String typesToResolve = null;
 
   public SieveCoreferenceSystem(Properties props) throws Exception {
     // initialize required fields
@@ -287,10 +287,6 @@ public class SieveCoreferenceSystem {
 
     if(useSingletonPredictor){
       singletonPredictor = getSingletonPredictorFromSerializedFile(DefaultPaths.DEFAULT_DCOREF_SINGLETON_MODEL);
-    }
-    
-    if(props.containsKey("typesToResolve")) {
-      this.typesToResolve = props.getProperty("typesToResolve");
     }
   }
 
