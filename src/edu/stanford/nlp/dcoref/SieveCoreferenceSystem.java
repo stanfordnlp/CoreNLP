@@ -162,7 +162,7 @@ public class SieveCoreferenceSystem {
   // Below are member variables used for scoring (not thread safe)
 
   /** Current sieve index */
-  private int currentSieve;
+//  private int currentSieve;
 
   /** counter for links in passes (Pair<correct links, total links>)  */
   private List<Pair<Integer, Integer>> linksCountInPass;
@@ -182,7 +182,7 @@ public class SieveCoreferenceSystem {
 
   public SieveCoreferenceSystem(Properties props) throws Exception {
     // initialize required fields
-    currentSieve = -1;
+//    currentSieve = -1;
 
     //
     // construct the sieve passes
@@ -841,7 +841,7 @@ public class SieveCoreferenceSystem {
 
     // Multi-pass sieve coreference resolution
     for (int i = 0; i < sieves.length ; i++){
-      currentSieve = i;
+//      currentSieve = i;
       DeterministicCorefSieve sieve = sieves[i];
       // Do coreference resolution using this pass
       coreference(document, sieve);
@@ -957,9 +957,9 @@ public class SieveCoreferenceSystem {
               if (sieve.coreferent(document, c1, c2, m1, m2, dictionaries, roleSet, semantics)) {
 
                 // print logs for analysis
-                if (doScore()) {
-                  printLogs(c1, c2, m1, m2, document, currentSieve);
-                }
+//                if (doScore()) {
+//                  printLogs(c1, c2, m1, m2, document, currentSieve);
+//                }
 
                 int removeID = c1.clusterID;
                 CorefCluster.mergeClusters(c2, c1);
@@ -975,27 +975,27 @@ public class SieveCoreferenceSystem {
     }
 
     // scoring
-    if(doScore()){
-      scoreMUC.get(currentSieve).calculateScore(document);
-      scoreBcubed.get(currentSieve).calculateScore(document);
-      scorePairwise.get(currentSieve).calculateScore(document);
-      if(currentSieve==0) {
-        scoreSingleDoc = new ArrayList<CorefScorer>();
-        scoreSingleDoc.add(new ScorerPairwise());
-        scoreSingleDoc.get(currentSieve).calculateScore(document);
-        additionalCorrectLinksCount = (int) scoreSingleDoc.get(currentSieve).precisionNumSum;
-        additionalLinksCount = (int) scoreSingleDoc.get(currentSieve).precisionDenSum;
-      } else {
-        scoreSingleDoc.add(new ScorerPairwise());
-        scoreSingleDoc.get(currentSieve).calculateScore(document);
-        additionalCorrectLinksCount = (int) (scoreSingleDoc.get(currentSieve).precisionNumSum - scoreSingleDoc.get(currentSieve-1).precisionNumSum);
-        additionalLinksCount = (int) (scoreSingleDoc.get(currentSieve).precisionDenSum - scoreSingleDoc.get(currentSieve-1).precisionDenSum);
-      }
-      linksCountInPass.get(currentSieve).setFirst(linksCountInPass.get(currentSieve).first() + additionalCorrectLinksCount);
-      linksCountInPass.get(currentSieve).setSecond(linksCountInPass.get(currentSieve).second() + additionalLinksCount);
-
-      printSieveScore(document, sieve);
-    }
+//    if(doScore()){
+//      scoreMUC.get(currentSieve).calculateScore(document);
+//      scoreBcubed.get(currentSieve).calculateScore(document);
+//      scorePairwise.get(currentSieve).calculateScore(document);
+//      if(currentSieve==0) {
+//        scoreSingleDoc = new ArrayList<CorefScorer>();
+//        scoreSingleDoc.add(new ScorerPairwise());
+//        scoreSingleDoc.get(currentSieve).calculateScore(document);
+//        additionalCorrectLinksCount = (int) scoreSingleDoc.get(currentSieve).precisionNumSum;
+//        additionalLinksCount = (int) scoreSingleDoc.get(currentSieve).precisionDenSum;
+//      } else {
+//        scoreSingleDoc.add(new ScorerPairwise());
+//        scoreSingleDoc.get(currentSieve).calculateScore(document);
+//        additionalCorrectLinksCount = (int) (scoreSingleDoc.get(currentSieve).precisionNumSum - scoreSingleDoc.get(currentSieve-1).precisionNumSum);
+//        additionalLinksCount = (int) (scoreSingleDoc.get(currentSieve).precisionDenSum - scoreSingleDoc.get(currentSieve-1).precisionDenSum);
+//      }
+//      linksCountInPass.get(currentSieve).setFirst(linksCountInPass.get(currentSieve).first() + additionalCorrectLinksCount);
+//      linksCountInPass.get(currentSieve).setSecond(linksCountInPass.get(currentSieve).second() + additionalLinksCount);
+//
+//      printSieveScore(document, sieve);
+//    }
     //Redwood.endTrack("Coreference: sieve " + sieve.getClass().getSimpleName());
   }
 
@@ -1207,20 +1207,20 @@ public class SieveCoreferenceSystem {
     scorePairwise.get(sieveClassNames.length - 1).printF1(logger, printF1First);
   }
 
-  private void printSieveScore(Document document, DeterministicCorefSieve sieve) {
-    logger.fine("===========================================");
-    logger.fine("pass"+currentSieve+": "+ sieve.flagsToString());
-    scoreMUC.get(currentSieve).printF1(logger);
-    scoreBcubed.get(currentSieve).printF1(logger);
-    scorePairwise.get(currentSieve).printF1(logger);
-    logger.fine("# of Clusters: "+document.corefClusters.size() + ",\t# of additional links: "+additionalLinksCount
-        +",\t# of additional correct links: "+additionalCorrectLinksCount
-        +",\tprecision of new links: "+1.0*additionalCorrectLinksCount/additionalLinksCount);
-    logger.fine("# of total additional links: "+linksCountInPass.get(currentSieve).second()
-        +",\t# of total additional correct links: "+linksCountInPass.get(currentSieve).first()
-        +",\taccumulated precision of this pass: "+1.0*linksCountInPass.get(currentSieve).first()/linksCountInPass.get(currentSieve).second());
-    logger.fine("--------------------------------------");
-  }
+//  private void printSieveScore(Document document, DeterministicCorefSieve sieve) {
+//    logger.fine("===========================================");
+//    logger.fine("pass"+currentSieve+": "+ sieve.flagsToString());
+//    scoreMUC.get(currentSieve).printF1(logger);
+//    scoreBcubed.get(currentSieve).printF1(logger);
+//    scorePairwise.get(currentSieve).printF1(logger);
+//    logger.fine("# of Clusters: "+document.corefClusters.size() + ",\t# of additional links: "+additionalLinksCount
+//        +",\t# of additional correct links: "+additionalCorrectLinksCount
+//        +",\tprecision of new links: "+1.0*additionalCorrectLinksCount/additionalLinksCount);
+//    logger.fine("# of total additional links: "+linksCountInPass.get(currentSieve).second()
+//        +",\t# of total additional correct links: "+linksCountInPass.get(currentSieve).first()
+//        +",\taccumulated precision of this pass: "+1.0*linksCountInPass.get(currentSieve).first()/linksCountInPass.get(currentSieve).second());
+//    logger.fine("--------------------------------------");
+//  }
   /** Print coref link info */
   private static void printLink(Logger logger, String header, IntTuple src, IntTuple dst, List<List<Mention>> orderedMentionsBySentence) {
     Mention srcMention = orderedMentionsBySentence.get(src.get(0)).get(src.get(1));

@@ -190,7 +190,7 @@ public class CoNLL2011DocumentReader {
     String documentIdPart;
     String documentID;
     String partNo;
-    List<List<String[]>> sentenceWordLists = new ArrayList<List<String[]>>();
+    public List<List<String[]>> sentenceWordLists = new ArrayList<List<String[]>>();
 
     Annotation annotation;
     CollectionValuedMap<String,CoreMap> corefChainMap;
