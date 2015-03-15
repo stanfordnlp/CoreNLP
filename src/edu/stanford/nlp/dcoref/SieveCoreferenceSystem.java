@@ -865,8 +865,7 @@ public class SieveCoreferenceSystem {
             }
 
             for (Mention m2 : l) {
-              // m2 - antecedent of m1                   l
-
+              // m2 - antecedent of m1
               if (m1.corefClusterID == m2.corefClusterID) continue;
               CorefCluster c1 = corefClusters.get(m1.corefClusterID);
               CorefCluster c2 = corefClusters.get(m2.corefClusterID);
