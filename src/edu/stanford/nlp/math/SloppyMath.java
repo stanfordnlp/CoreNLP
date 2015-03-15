@@ -163,7 +163,7 @@ public final class SloppyMath {
   /** Returns a mod where the sign of the answer is the same as the sign of the second
    *  argument.  This is how languages like Python do it. Helpful for array accesses.
    *
-   *  @param num The number
+   * @param num The number
    * @param modulus The modulus
    * @return num mod modulus, where the sign of the answer is the same as the sign of modulus
    */
@@ -225,8 +225,12 @@ public final class SloppyMath {
   static final double LOGTOLERANCE = 30.0;
   static final float LOGTOLERANCE_F = 20.0f;
 
+
+  /** Approximation to gamma function.  See e.g., http://www.rskey.org/CMS/index.php/the-library/11 .
+   *  Fairly accurate, especially for n greater than 8.
+   */
   public static double gamma(double n) {
-    return Math.sqrt(2.0*Math.PI/n) * Math.pow((n/Math.E)*Math.sqrt(n*Math.sinh((1.0/n)+(1/810*Math.pow(n,6)))),n);
+    return Math.sqrt(2.0*Math.PI/n) * Math.pow((n/Math.E)*Math.sqrt(n*Math.sinh((1.0/n)+(1/(810*Math.pow(n,6))))),n);
   }
 
   /**

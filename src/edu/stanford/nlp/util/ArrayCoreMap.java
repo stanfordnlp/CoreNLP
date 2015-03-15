@@ -588,7 +588,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
     int keysCode = 0;
     int valuesCode = 0;
     for (int i = 0; i < size; i++) {
-      keysCode += (i < keys.length ? keys[i].hashCode() : 0);
+      keysCode += (i < keys.length && values[i] != null ? keys[i].hashCode() : 0);
       valuesCode += (i < values.length && values[i] != null ? values[i].hashCode() : 0);
     }
 
@@ -636,12 +636,7 @@ public class ArrayCoreMap implements CoreMap /*, Serializable */ {
     // sort keys by class name
     List<Class> sortedKeys = new ArrayList<Class>(this.keySet());
     Collections.sort(sortedKeys,
-        new Comparator<Class>(){
-      @Override
-      public int compare(Class a, Class b) {
-        return a.getCanonicalName().compareTo(b.getCanonicalName());
-      }
-    });
+        (a, b) -> a.getCanonicalName().compareTo(b.getCanonicalName()));
 
     // log key/value pairs
     for (Class key : sortedKeys) {

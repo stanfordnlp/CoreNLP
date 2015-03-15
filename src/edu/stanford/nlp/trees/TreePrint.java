@@ -1,7 +1,6 @@
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseEnglishWordMap;
 import edu.stanford.nlp.util.*;
@@ -9,6 +8,7 @@ import edu.stanford.nlp.util.XMLUtils;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.Function;
 
 
 /**
@@ -412,20 +412,18 @@ public class TreePrint {
     }
 
     if (transChinese) {
-      TreeTransformer tt = new TreeTransformer() {
-        public Tree transformTree(Tree t) {
-          t = t.treeSkeletonCopy();
-          for (Tree subtree : t) {
-            if (subtree.isLeaf()) {
-              Label oldLabel = subtree.label();
-              String translation = ChineseEnglishWordMap.getInstance().getFirstTranslation(oldLabel.value());
-              if (translation == null) translation = "[UNK]";
-              Label newLabel = new StringLabel(oldLabel.value() + ':' + translation);
-              subtree.setLabel(newLabel);
-            }
+      TreeTransformer tt = t1 -> {
+        t1 = t1.treeSkeletonCopy();
+        for (Tree subtree : t1) {
+          if (subtree.isLeaf()) {
+            Label oldLabel = subtree.label();
+            String translation = ChineseEnglishWordMap.getInstance().getFirstTranslation(oldLabel.value());
+            if (translation == null) translation = "[UNK]";
+            Label newLabel = new StringLabel(oldLabel.value() + ':' + translation);
+            subtree.setLabel(newLabel);
           }
-          return t;
         }
+        return t1;
       };
       outputPSTree = tt.transformTree(outputPSTree);
     }
@@ -559,11 +557,14 @@ public class TreePrint {
           if (!dependencyFilter.accept(d)) {
             continue;
           }
-          CoreMap dep = (CoreMap) d.dependent();
-          CoreMap gov = (CoreMap) d.governor();
+          if (!(d.dependent() instanceof HasIndex) || !(d.governor() instanceof HasIndex)) {
+            throw new IllegalArgumentException("Expected labels to have indices");
+          }
+          HasIndex dep = (HasIndex) d.dependent();
+          HasIndex gov = (HasIndex) d.governor();
 
-          Integer depi = dep.get(CoreAnnotations.IndexAnnotation.class);
-          Integer govi = gov.get(CoreAnnotations.IndexAnnotation.class);
+          int depi = dep.index();
+          int govi = gov.index();
 
           CoreLabel w = tagged.get(depi-1);
 
@@ -684,7 +685,7 @@ public class TreePrint {
       Collection<TypedDependency> deps = gs.typedDependencies(false);
       List<Dependency<Label, Label, Object>> sortedDeps = new ArrayList<Dependency<Label, Label, Object>>();
       for (TypedDependency dep : deps) {
-        sortedDeps.add(new NamedDependency(dep.gov().label(), dep.dep().label(), dep.reln().toString()));
+        sortedDeps.add(new NamedDependency(dep.gov(), dep.dep(), dep.reln().toString()));
       }
       Collections.sort(sortedDeps, Dependencies.dependencyIndexComparator());
       return sortedDeps;
@@ -844,11 +845,7 @@ public class TreePrint {
       if (argsMap.keySet().contains("-useTLPTreeReader")) {
         trf = tlp.treeReaderFactory();
       } else {
-        trf = new TreeReaderFactory() {
-          public TreeReader newTreeReader(Reader in) {
-            return new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new TreeNormalizer());
-          }
-        };
+        trf = in -> new PennTreeReader(in, new LabeledScoredTreeFactory(new StringLabelFactory()), new TreeNormalizer());
       }
       trees = new DiskTreebank(trf);
       trees.loadPath(args[0]);
@@ -933,7 +930,7 @@ public class TreePrint {
    *         typed dependencies
    */
   private static String toString(Collection<TypedDependency> dependencies, boolean extraSep, boolean includeTags) {
-    String labelFormat = (includeTags) ? "value-tag-index" : "value-index";
+    CoreLabel.OutputFormat labelFormat = (includeTags) ? CoreLabel.OutputFormat.VALUE_TAG_INDEX : CoreLabel.OutputFormat.VALUE_INDEX;
     StringBuilder buf = new StringBuilder();
     if (extraSep) {
       List<TypedDependency> extraDeps =  new ArrayList<TypedDependency>();
@@ -976,22 +973,22 @@ public class TreePrint {
     for (TypedDependency td : dependencies) {
       String reln = td.reln().toString();
       String gov = td.gov().value();
-      String govTag = td.gov().label().tag();
+      String govTag = td.gov().tag();
       int govIdx = td.gov().index();
       String dep = td.dep().value();
-      String depTag = td.dep().label().tag();
+      String depTag = td.dep().tag();
       int depIdx = td.dep().index();
       boolean extra = td.extra();
       // add an attribute if the node is a copy
       // (this happens in collapsing when different prepositions are conjuncts)
       String govCopy = "";
-      Integer copyGov = td.gov().label.get(CoreAnnotations.CopyAnnotation.class);
-      if (copyGov != null) {
+      int copyGov = td.gov().copyCount();
+      if (copyGov > 0) {
         govCopy = " copy=\"" + copyGov + '\"';
       }
       String depCopy = "";
-      Integer copyDep = td.dep().label.get(CoreAnnotations.CopyAnnotation.class);
-      if (copyDep != null) {
+      int copyDep = td.dep().copyCount();
+      if (copyDep > 0) {
         depCopy = " copy=\"" + copyDep + '\"';
       }
       String govTagAttribute = (includeTags && govTag != null) ? " tag=\"" + govTag + "\"" : "";

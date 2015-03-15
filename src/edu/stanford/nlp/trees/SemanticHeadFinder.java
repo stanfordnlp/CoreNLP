@@ -61,7 +61,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   /* Tricky auxiliaries: "na" is from "gonna", "ve" from "Weve", etc.  "of" as non-standard for "have" */
   private static final String[] auxiliaries = {"will", "wo", "shall", "sha", "may", "might", "should", "would", "can", "could", "ca", "must", "has", "have", "had", "having", "get", "gets", "getting", "got", "gotten", "do", "does", "did", "to", "'ve", "ve", "v", "'d", "d", "'ll", "ll", "na", "of", "hav", "hvae", "as" };
   private static final String[] beGetVerbs = {"be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "art", "ar", "get", "getting", "gets", "got"};
-  private static final String[] copulaVerbs = {"be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "'re", "'s", "s", "wase", "seem", "seems", "seemed", "appear", "appears", "appeared", "stay", "stays", "stayed", "remain", "remains", "remained", "resemble", "resembles", "resembled", "become", "becomes", "became"};
+  static final String[] copulaVerbs = {"be", "being", "been", "am", "are", "r", "is", "ai", "was", "were", "'m", "m", "ar", "art", "'re", "'s", "s", "wase"};
 
   // include Charniak tags so can do BLLIP right
   private static final String[] verbTags = {"TO", "MD", "VB", "VBD", "VBP", "VBZ", "VBG", "VBN", "AUX", "AUXG"};
@@ -264,20 +264,18 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
    * For example, in the sentence "It is hands down the best dessert ...", 
    * we want to avoid using "hands down" as the head.
    */
-  static final Filter<Tree> REMOVE_TMP_AND_ADV = new Filter<Tree>() {
-    public boolean accept(Tree tree) {
-      if (tree == null) 
-        return false;
-      Label label = tree.label();
-      if (label == null) 
-        return false;
-      if (label.value().contains("-TMP") || label.value().contains("-ADV"))
-        return false;
-      if (label.value().startsWith("VP") && noVerbOverTempTregex.matcher(tree).matches()) {
-        return false;
-      }
-      return true;
+  static final Filter<Tree> REMOVE_TMP_AND_ADV = tree -> {
+    if (tree == null)
+      return false;
+    Label label = tree.label();
+    if (label == null)
+      return false;
+    if (label.value().contains("-TMP") || label.value().contains("-ADV"))
+      return false;
+    if (label.value().startsWith("VP") && noVerbOverTempTregex.matcher(tree).matches()) {
+      return false;
     }
+    return true;
   };
     
   /**

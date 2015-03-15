@@ -10,10 +10,8 @@ PARSER_BEGIN(TsurgeonParser)
 
 package edu.stanford.nlp.trees.tregex.tsurgeon;
 
-import java.io.StringReader;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Pair;
 import java.util.*;
 
 
@@ -58,6 +56,7 @@ PARSER_END(TsurgeonParser)
 
 TOKEN:
 { < IF: "if" >
+| < NOT: "not" >
 | < EXISTS: "exists" > : CONDITIONAL
 | < DELETE: "delete" > : OPERATION
 | < PRUNE:  "prune" > : OPERATION
@@ -77,7 +76,7 @@ TOKEN:
 { < NAME: ( ~[" ","\n","\r","[","]","(",")",":"] )+ > : DEFAULT }
 
 <OPERATION> TOKEN:
-{ 
+{
   < CLOSE_BRACKET: "]" >
 | < SELECTION: "#rightmost" | "#leftmost" >
 | < GENERAL_RELABEL: "/" ("\\/"|~["\n","\r"])* "/" ( ("=" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("%" (["0"-"9","_","a"-"z","A"-"Z"])+) | ("/" ("\\/"|"\\]"|"\\\\"|~["\n","\r","]","\\"])* "/") )+ >
@@ -112,15 +111,23 @@ TsurgeonPatternRoot Root() :
     jjtc000 = false;
   }
 /*@egen*/
-  { return new TsurgeonPatternRoot(result); } 
- | 
+  { return new TsurgeonPatternRoot(result); }
+ | LOOKAHEAD(2)
   ( <IF> <EXISTS> name = <NAME> result = Root() )/*@bgen(jjtree)*/
   {
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
   }
 /*@egen*/
-  { return new TsurgeonPatternRoot(new IfExistsNode(name.image, result.children)); }
+  { return new TsurgeonPatternRoot(new IfExistsNode(name.image, false, result.children)); }
+ | LOOKAHEAD(2)
+  ( <IF> <NOT> <EXISTS> name = <NAME> result = Root() )/*@bgen(jjtree)*/
+  {
+    jjtree.closeNodeScope(jjtn000, true);
+    jjtc000 = false;
+  }
+/*@egen*/
+  { return new TsurgeonPatternRoot(new IfExistsNode(name.image, true, result.children)); }
  |
   ( <OPEN_BRACKET> result = Root() <CLOSE_BRACKET>
     {
@@ -250,7 +257,7 @@ TsurgeonPattern Operation() :
       jjtc000 = false;
     }
 /*@egen*/
-    { return new ReplaceNode(child1,treeList); } 
+    { return new ReplaceNode(child1,treeList); }
 |  operator = <MOVE> child1 = NodeSelection() loc = Location()/*@bgen(jjtree)*/
     {
       jjtree.closeNodeScope(jjtn000, true);
@@ -274,16 +281,16 @@ TsurgeonPattern Operation() :
     }
 /*@egen*/
     { return new InsertNode(tree, loc); }
-| operator = <CREATE_SUBTREE> (( newLabel = <IDENTIFIER> ) | ( newLabel = <TREE_NODE_TERMINAL_LABEL> )) nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())/*@bgen(jjtree)*/
+| operator = <CREATE_SUBTREE> tree = TreeRoot(false) nodeSelections = NodeSelectionList(new ArrayList<TsurgeonPattern>())/*@bgen(jjtree)*/
     {
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
     }
 /*@egen*/
     { if (nodeSelections.size() == 1) {
-        return new CreateSubtreeNode(nodeSelections.get(0), newLabel.image);
+        return new CreateSubtreeNode(nodeSelections.get(0), tree);
       } else if (nodeSelections.size() == 2) {
-        return new CreateSubtreeNode(nodeSelections.get(0), nodeSelections.get(1), newLabel.image);
+        return new CreateSubtreeNode(nodeSelections.get(0), nodeSelections.get(1), tree);
       } else {
         throw new ParseException("Illegal number of nodes given to createSubtree (" + nodeSelections.size() + ")");
       }
@@ -391,7 +398,7 @@ List<TsurgeonPattern> NodeSelectionList(List<TsurgeonPattern> l) :
 {/*@bgen(jjtree) NodeSelectionList */
  try {
 /*@egen*/
- ( ( result = NodeSelection() ) { l.add(result); } 
+ ( ( result = NodeSelection() ) { l.add(result); }
  ( ( result = NodeSelection() ) {l.add(result); } )* )/*@bgen(jjtree)*/
    {
      jjtree.closeNodeScope(jjtn000, true);
@@ -463,12 +470,12 @@ TsurgeonPattern NodeSelection() :
 /*@egen*/
 }
 
-TsurgeonPattern NodeName() : 
+TsurgeonPattern NodeName() :
 {/*@bgen(jjtree) NodeName */
   SimpleNode jjtn000 = new SimpleNode(JJTNODENAME);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
-/*@egen*/ 
+/*@egen*/
   Token t;
 }
 {/*@bgen(jjtree) NodeName */
@@ -501,7 +508,7 @@ List<AuxiliaryTree> TreeList(boolean requiresFoot) :
 {/*@bgen(jjtree) TreeList */
  try {
 /*@egen*/
- ( ( tree = TreeRoot(requiresFoot) ) { trees.add(tree); } 
+ ( ( tree = TreeRoot(requiresFoot) ) { trees.add(tree); }
  ( ( tree = TreeRoot(requiresFoot) ) { trees.add(tree); } )* )/*@bgen(jjtree)*/
    {
      jjtree.closeNodeScope(jjtn000, true);
@@ -530,7 +537,7 @@ List<AuxiliaryTree> TreeList(boolean requiresFoot) :
  }
 /*@egen*/
 }
- 
+
 
 // the argument says whether there must be a foot node on the aux tree.
 AuxiliaryTree TreeRoot(boolean requiresFoot) :

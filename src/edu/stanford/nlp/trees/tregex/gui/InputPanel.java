@@ -80,6 +80,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   private JButton help;
   private JTextArea tregexPattern;
   private JComboBox recentTregexPatterns;
+  private DefaultComboBoxModel recentTregexPatternsModel;
   private int numRecentPatterns = 5;// we save the last n patterns in our combo box, where n = numRecentPatterns
   private JTextArea tsurgeonScript;
   private TregexPatternCompiler compiler;//this should change only when someone changes the headfinder/basic category finder
@@ -248,9 +249,11 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   //separated out to make constructor more readable
   private JPanel makeTregexPatternArea() {
     //combo box with recent searches
-    recentTregexPatterns = new JComboBox();
+    recentTregexPatternsModel = new DefaultComboBoxModel();
+    recentTregexPatterns = new JComboBox(recentTregexPatternsModel);
     recentTregexPatterns.setMinimumSize(new Dimension(120, 24));
     recentTregexPatterns.addActionListener(this);
+
     JLabel recentLabel = new JLabel("Recent: ");
     //interactive tregex pattern
     JLabel patternLabel = new JLabel("Pattern: ");
@@ -349,15 +352,10 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   }
 
 
-  public boolean getTsurgeonEnabled() {
-    return tsurgeonEnabled;
-  }
-
   public void enableTsurgeon(boolean enable) {
     if(tsurgeonEnabled == enable)
       return;//nothing changes
     enableTsurgeonHelper(enable);
-
   }
 
   //Doesn't check if tsurgeon is already in this enable state - used by enableTsurgeon and for
@@ -409,13 +407,11 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
    */
   public void updateFoundStats(final String pattern, final int treeMatches, final int totalMatches) {
     final String txt = "<html>Match stats: " + treeMatches + " unique trees found with " + totalMatches + " total matches.</html>";
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        foundStats.setPreferredSize(foundStats.getSize());
-        foundStats.setText(txt);
-        if(pattern != null)
-          addToHistoryList(pattern, treeMatches, totalMatches);
-      }
+    SwingUtilities.invokeLater(() -> {
+      foundStats.setPreferredSize(foundStats.getSize());
+      foundStats.setText(txt);
+      if(pattern != null)
+        addToHistoryList(pattern, treeMatches, totalMatches);
     });
   }
 
@@ -529,7 +525,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
 
   private void doRecent() {
     //this is called only when a user does something
-    Object recent = recentTregexPatterns.getSelectedItem();
+    Object recent = recentTregexPatternsModel.getSelectedItem();
     if (recent != null) {
       String selected = recent.toString();
       if (selected.length() != 0) {
@@ -563,14 +559,10 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
           }
           updateProgressBar(multiplier*(i+1));
         }
-        SwingUtilities.invokeLater(new Runnable() {
-
-          public void run() {
-            MatchesPanel.getInstance().setMatches(trees, null);
-            MatchesPanel.getInstance().focusOnList();
-            useProgressBar(false);
-          }
-
+        SwingUtilities.invokeLater(() -> {
+          MatchesPanel.getInstance().setMatches(trees, null);
+          MatchesPanel.getInstance().focusOnList();
+          useProgressBar(false);
         });//end SwingUtilities.invokeLater
 
       } //end run
@@ -580,7 +572,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   }
 
 
-  private void runSearch() {
+  void runSearch() {
     setTregexState(true);
     MatchesPanel.getInstance().removeAllMatches();
     this.setPreferredSize(this.getSize());
@@ -588,30 +580,24 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
       @Override
       public void run() {
         final String text = tregexPattern.getText().intern();
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            InputPanel.this.addRecentTregexPattern(text);
-            useProgressBar(true);
-          }
+        SwingUtilities.invokeLater(() -> {
+          InputPanel.this.addRecentTregexPattern(text);
+          useProgressBar(true);
         });
         final TRegexGUITreeVisitor visitor = getMatchTreeVisitor(text,this);
         if (visitor != null) {
 
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              useProgressBar(false);
-              updateFoundStats(text, visitor.getMatches().size(), visitor.numUniqueMatches());
-              //addToHistoryList(text, visitor.getMatches().size(), visitor.numUniqueMatches());
-              MatchesPanel.getInstance().setMatches(visitor.getMatches(), visitor.getMatchedParts());
-              MatchesPanel.getInstance().focusOnList();
-            }
+          SwingUtilities.invokeLater(() -> {
+            useProgressBar(false);
+            updateFoundStats(text, visitor.getMatches().size(), visitor.numUniqueMatches());
+            //addToHistoryList(text, visitor.getMatches().size(), visitor.numUniqueMatches());
+            MatchesPanel.getInstance().setMatches(visitor.getMatches(), visitor.getMatchedParts());
+            MatchesPanel.getInstance().focusOnList();
           });
         }
-        SwingUtilities.invokeLater(new Runnable() {
-          public void run() {
-            setTregexState(false);
-            InputPanel.this.searchThread = null;
-          }
+        SwingUtilities.invokeLater(() -> {
+          setTregexState(false);
+          InputPanel.this.searchThread = null;
         });
 
       }
@@ -637,16 +623,18 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   private void runScript() {
     setTsurgeonState(true);
     final String script = tsurgeonScript.getText();
+
     searchThread = new Thread() {
       @Override
       public void run() {
         try {
+          BufferedReader reader = new BufferedReader(new StringReader(script));
+          TsurgeonPattern operation = Tsurgeon.getTsurgeonOperationsFromReader(reader);
+
           final String text = tregexPattern.getText().intern();
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              InputPanel.this.addRecentTregexPattern(text);
-              useProgressBar(true);
-            }
+          SwingUtilities.invokeLater(() -> {
+            InputPanel.this.addRecentTregexPattern(text);
+            useProgressBar(true);
           });
           final TRegexGUITreeVisitor visitor = getMatchTreeVisitor(text,this);
           if (visitor == null) return; //means the tregex errored out
@@ -655,8 +643,6 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
             return;
           }
           //System.err.println("Running Script with matches: " + visitor.getMatches());
-          BufferedReader reader = new BufferedReader(new StringReader(script));
-          TsurgeonPattern operation = Tsurgeon.getTsurgeonOperationsFromReader(reader);
           List<TreeFromFile> trees = visitor.getMatches();
           final List<TreeFromFile> modifiedTrees = new ArrayList<TreeFromFile>();
           for (TreeFromFile tff : trees) {
@@ -670,12 +656,10 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
           returnToValidState(text, visitor, modifiedTrees);
         } catch (Exception e) {
           doError("Sorry, there was an error compiling or running the Tsurgeon script.  Please press Help if you need assistance.", e);
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              setTregexState(false);
-              setTsurgeonState(false);
-              InputPanel.this.searchThread = null;
-            }
+          SwingUtilities.invokeLater(() -> {
+            setTregexState(false);
+            setTsurgeonState(false);
+            InputPanel.this.searchThread = null;
           });
         }
       }
@@ -684,17 +668,15 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   }
 
   private void returnToValidState(final String pattern, final TRegexGUITreeVisitor visitor, final List<TreeFromFile> trees) {
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        int numUniqueMatches = 0;
-        if (trees.size() > 0) {
-          numUniqueMatches = visitor.numUniqueMatches();
-        }
-        updateFoundStats(pattern, trees.size(), numUniqueMatches);
-        MatchesPanel.getInstance().setMatches(trees, visitor.getMatchedParts());
-        useProgressBar(false);
-        setTsurgeonState(false);
+    SwingUtilities.invokeLater(() -> {
+      int numUniqueMatches = 0;
+      if (trees.size() > 0) {
+        numUniqueMatches = visitor.numUniqueMatches();
       }
+      updateFoundStats(pattern, trees.size(), numUniqueMatches);
+      MatchesPanel.getInstance().setMatches(trees, visitor.getMatchedParts());
+      useProgressBar(false);
+      setTsurgeonState(false);
     });
   }
 
@@ -704,10 +686,20 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   }
 
   private void addRecentTregexPattern(String pattern) {
-    if(recentTregexPatterns.getItemCount() >= numRecentPatterns) {
-      recentTregexPatterns.removeItemAt(numRecentPatterns - 1);
+    // If pattern already exists, just move it to the top of the list
+    int existingIndex = recentTregexPatternsModel.getIndexOf(pattern);
+    if (existingIndex != -1) {
+      recentTregexPatternsModel.removeElementAt(existingIndex);
+      recentTregexPatternsModel.insertElementAt(pattern, 0);
+      recentTregexPatterns.setSelectedIndex(0);
+
+      return;
     }
-    recentTregexPatterns.insertItemAt(pattern,0);
+
+    if(recentTregexPatternsModel.getSize() >= numRecentPatterns) {
+      recentTregexPatternsModel.removeElementAt(numRecentPatterns - 1);
+    }
+    recentTregexPatternsModel.insertElementAt(pattern,0);
     recentTregexPatterns.setSelectedIndex(0);
     recentTregexPatterns.revalidate();
   }
@@ -715,9 +707,9 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   public void setNumRecentPatterns(int n) {
     numRecentPatterns = n;
     //shrink down the number of recent patterns if necessary
-    ComboBoxModel model = recentTregexPatterns.getModel();
-    while(model.getSize() > n) {
-      recentTregexPatterns.removeItemAt(model.getSize()-1);
+    while(recentTregexPatternsModel.getSize() > n) {
+      int lastIndex = recentTregexPatternsModel.getSize() - 1;
+      recentTregexPatternsModel.removeElementAt(lastIndex);
     }
   }
 
@@ -742,11 +734,9 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
         if (t.isInterrupted()) { //get out as quickly as possible if interrupted
           t.interrupt();
           // cdm 2008: I added here resetting the buttons or else it didn't seem to happen; not quite sure this is the right place to do it but.
-          SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-              setTregexState(false);
-              InputPanel.this.searchThread = null;
-            }
+          SwingUtilities.invokeLater(() -> {
+            setTregexState(false);
+            InputPanel.this.searchThread = null;
           });
           return vis;
         }
@@ -771,14 +761,12 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
    * @param e The exception that caused the problem
    */
   public void doError(final String txt, final Throwable e) {
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        String extraData = e.getLocalizedMessage() != null ? e.getLocalizedMessage(): (e.getClass() != null) ? e.getClass().toString(): "";
-        JOptionPane.showMessageDialog(InputPanel.this, txt + '\n' + extraData, "Tregex Error", JOptionPane.ERROR_MESSAGE);
-        e.printStackTrace(); // send to stderr for debugging
-        useProgressBar(false);
-        updateFoundStats(null, 0, 0);
-      }
+    SwingUtilities.invokeLater(() -> {
+      String extraData = e.getLocalizedMessage() != null ? e.getLocalizedMessage(): (e.getClass() != null) ? e.getClass().toString(): "";
+      JOptionPane.showMessageDialog(InputPanel.this, txt + '\n' + extraData, "Tregex Error", JOptionPane.ERROR_MESSAGE);
+      e.printStackTrace(); // send to stderr for debugging
+      useProgressBar(false);
+      updateFoundStats(null, 0, 0);
     });
   }
 
@@ -789,11 +777,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   public void updateProgressBar(final double progress) {
     if(progressBar == null)
       return;
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        progressBar.setValue((int) progress);
-      }
-    });
+    SwingUtilities.invokeLater(() -> progressBar.setValue((int) progress));
   }
 
 
@@ -1007,6 +991,7 @@ public class InputPanel extends JPanel implements ActionListener, ChangeListener
   "      <dd><code>&gt;-i</code> the <i>i</i><sup>th</sup> daughter, counting from the right, of the named node.</dd></dl></dd>" +
   " <dt><code>replace &#60;name1&#62; &#60;tree&#62;</code></dt>" +
   " <dt><code>replace &#60;name1&#62; &#60;name2&#62;</code></dt> <dd>deletes name1 and inserts a tree or a copy of name2 in its place.</dd>" +
+  " <dt><code>createSubtree &#60;auxiliary-tree-or-label&#62; &#60;name1&#62; [&#60;name2&#62;]</code></dt>  <dd>Create a subtree out of all the nodes from <code>&#60;name1&#62;</code> through <code>&#60;name2&#62;</code>.The subtree is moved to the foot of the given auxiliary tree, and the tree is inserted where the nodes of the subtree used to reside. If a simple label is provided as the first argument, the subtree is given a single parent with a name corresponding to the label. To limit the operation to just one node, elide <code>&#60;name2&#62;</code>.</dd>" +
   " <dt><code>adjoin &#60;auxiliary_tree&#62; &lt;name&gt;</code></dt> <dd>Adjoins the specified auxiliary tree into the named node.  The daughters of the target node will become the daughters of the foot of the auxiliary tree.  (The node <code>name</code> is no longer accessible.)</dd>" +
   " <dt><code>adjoinH &#60;auxiliary_tree&#62; &lt;name&gt;</code></dt> <dd>Similar to adjoin, but preserves the target node and makes it the root of &lt;tree&gt;. (It is still accessible as <code>name</code>.  The root of the auxiliary tree is ignored.)</dd>" +
   " <dt><code>adjoinF &#60;auxiliary_tree&#62; &lt;name&gt;</code></dt> <dd> Similar to adjoin, but preserves the target node and makes it the foot of &lt;tree&gt;." +

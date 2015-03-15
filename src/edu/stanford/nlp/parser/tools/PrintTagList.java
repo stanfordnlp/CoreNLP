@@ -1,7 +1,5 @@
 package edu.stanford.nlp.parser.tools;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;

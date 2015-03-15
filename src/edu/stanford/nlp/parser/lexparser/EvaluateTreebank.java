@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import edu.stanford.nlp.io.NullOutputStream;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
@@ -39,9 +40,8 @@ import edu.stanford.nlp.trees.Treebank;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeTransformer;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.ReflectionLoading;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
@@ -111,7 +111,7 @@ public class EvaluateTreebank {
   }
 
   public EvaluateTreebank(Options op, Lexicon lex, ParserGrammar pqFactory) {
-    this(op, lex, pqFactory, loadTagger(op));
+    this(op, lex, pqFactory, pqFactory.loadTagger());
   }
 
   public EvaluateTreebank(Options op, Lexicon lex, ParserGrammar pqFactory, Function<List<? extends HasWord>,List<TaggedWord>> tagger) {
@@ -222,14 +222,6 @@ public class EvaluateTreebank {
       kbestPCFG = Math.max(kbestPCFG, op.testOptions.printPCFGkBest);
     }
 
-  }
-
-  private static Function<List<? extends HasWord>,List<TaggedWord>> loadTagger(Options op) {
-    if (op.testOptions.preTag) {
-      return ReflectionLoading.loadByReflection("edu.stanford.nlp.tagger.maxent.MaxentTagger", op.testOptions.taggerSerializedFile);
-    } else {
-      return null;
-    }
   }
 
   public double getLBScore() {
@@ -584,8 +576,15 @@ public class EvaluateTreebank {
     TreePrint treePrint = op.testOptions.treePrint(op.tlpParams);
     TreebankLangParserParams tlpParams = op.tlpParams;
     TreebankLanguagePack tlp = op.langpack();
-    PrintWriter pwOut = tlpParams.pw();
-    PrintWriter pwErr = tlpParams.pw(System.err);
+    PrintWriter pwOut, pwErr;
+    if (op.testOptions.quietEvaluation) {
+      NullOutputStream quiet = new NullOutputStream();
+      pwOut = tlpParams.pw(quiet);
+      pwErr = tlpParams.pw(quiet);
+    } else {
+      pwOut = tlpParams.pw();
+      pwErr = tlpParams.pw(System.err);
+    }
     if (op.testOptions.verbose) {
       pwErr.print("Testing ");
       pwErr.println(testTreebank.textualSummary(tlp));
@@ -651,6 +650,9 @@ public class EvaluateTreebank {
 
     //Done parsing...print the results of the evaluations
     treebankTotalTimer.done("Testing on treebank");
+    if (op.testOptions.quietEvaluation) {
+      pwErr = tlpParams.pw(System.err);
+    }
     if (saidMemMessage) {
       ParserUtils.printOutOfMemory(pwErr);
     }
@@ -658,7 +660,7 @@ public class EvaluateTreebank {
       EvalbFormatWriter.closeEVALBfiles();
     }
     if(numSkippedEvals != 0) {
-      pwOut.printf("Unable to evaluate %d parser hypotheses due to yield mismatch\n",numSkippedEvals);
+      pwErr.printf("Unable to evaluate %d parser hypotheses due to yield mismatch\n",numSkippedEvals);
     }
     // only created here so we know what parser types are supported...
     ParserQuery pq = pqFactory.parserQuery();

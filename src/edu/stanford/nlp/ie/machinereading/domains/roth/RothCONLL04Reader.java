@@ -25,6 +25,12 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.StringUtils;
 
+/**
+ *
+ * @author Mihai, David McClosky, and agusev
+ * @author Sonal Gupta (sonalg@stanford.edu)
+ *
+ */
 public class RothCONLL04Reader extends GenericDataSetReader {
   public RothCONLL04Reader() {
     super(null, true, true, true);
@@ -35,6 +41,7 @@ public class RothCONLL04Reader extends GenericDataSetReader {
     logger.setLevel(Level.SEVERE);
   }
 
+  @Override
   public Annotation read(String path) throws IOException {
     Annotation doc = new Annotation("");
 
@@ -49,6 +56,21 @@ public class RothCONLL04Reader extends GenericDataSetReader {
     }
 
     return doc;
+  }
+
+
+  private static String getNormalizedNERTag(String ner){
+    if(ner.equalsIgnoreCase("O"))
+      return "O";
+    else if(ner.equalsIgnoreCase("Peop"))
+      return "PERSON";
+    else if(ner.equalsIgnoreCase("Loc"))
+      return "LOCATION";
+    else if(ner.equalsIgnoreCase("Org"))
+      return "ORGANIZATION";
+    else if(ner.equalsIgnoreCase("Other"))
+      return "OTHER";
+    throw new RuntimeException("Cannot normalize ner tag " + ner);
   }
 
   private static Annotation readSentence(Annotation doc, String docId, Iterator<String> lineIterator) {
@@ -107,9 +129,11 @@ public class RothCONLL04Reader extends GenericDataSetReader {
 
         // Entities may be multiple words joined by '/'; we split these up
         List<String> words = StringUtils.split(pieces.get(5), "/");
+        //List<String> postags = StringUtils.split(pieces.get(4),"/");
+
         String text = StringUtils.join(words, " ");
         identifier = "entity" + pieces.get(0) + "-" + pieces.get(2);
-        String nerTag = pieces.get(1); // entity type of the word/expression
+        String nerTag = getNormalizedNERTag(pieces.get(1)); // entity type of the word/expression
 
         if (sentenceID == null)
           sentenceID = pieces.get(0);
@@ -129,13 +153,17 @@ public class RothCONLL04Reader extends GenericDataSetReader {
           indexToEntityMention.put(index, entity);
         }
 
+        // int i =0;
         for (String word : words) {
           CoreLabel label = new CoreLabel();
           label.setWord(word);
+          //label.setTag(postags.get(i));
           label.set(CoreAnnotations.TextAnnotation.class, word);
+          label.set(CoreAnnotations.ValueAnnotation.class, word);
           // we don't set TokenBeginAnnotation or TokenEndAnnotation since we're
           // not keeping track of character offsets
           tokens.add(label);
+          // i++;
         }
 
         textContent.append(text);
@@ -146,6 +174,7 @@ public class RothCONLL04Reader extends GenericDataSetReader {
     }
 
     sentence.set(CoreAnnotations.TextAnnotation.class, textContent.toString());
+    sentence.set(CoreAnnotations.ValueAnnotation.class, textContent.toString());
     sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
     sentence.set(CoreAnnotations.SentenceIDAnnotation.class, sentenceID);
 

@@ -3,7 +3,7 @@ package edu.stanford.nlp.stats;
 
 import edu.stanford.nlp.io.RecordIterator;
 import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import java.util.*;
 import java.io.*;
 
@@ -109,9 +109,7 @@ public interface DataSeries {
     public int size() { return sizeFn.apply(null); }
 
     private static Function<Object, Integer> constantSizeFn(final int size) {
-      return new Function<Object, Integer>() {
-        public Integer apply(Object o) { return size; }
-      };
+      return o -> size;
     }
 
   }

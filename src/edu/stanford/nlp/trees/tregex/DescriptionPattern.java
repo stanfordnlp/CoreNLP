@@ -1,6 +1,6 @@
 package edu.stanford.nlp.trees.tregex;
 
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.ArrayStringFilter;
@@ -39,11 +39,6 @@ class DescriptionPattern extends TregexPattern {
   // to make it so.
   private TregexPattern child;
   // also conceptually final, but it depends on the child
-  /**
-   * whether or not this node can change variables.  helps determine
-   * which nodes to change when backtracking
-   */
-  private boolean changesVariables;
   private final List<Pair<Integer,String>> variableGroups; // specifies the groups in a regex that are captured as matcher-global string variables
 
   private final Function<String, String> basicCatFunction;
@@ -272,9 +267,6 @@ class DescriptionPattern extends TregexPattern {
 
   public void setChild(TregexPattern n) {
     child = n;
-    changesVariables = ((descriptionMode != null || isLink) && name != null);
-    changesVariables = (changesVariables ||
-                        (child != null && child.getChangesVariables()));
   }
 
   @Override
@@ -284,11 +276,6 @@ class DescriptionPattern extends TregexPattern {
     } else {
       return Collections.singletonList(child);
     }
-  }
-
-  @Override
-  boolean getChangesVariables() {
-    return changesVariables;
   }
 
   @Override
@@ -356,11 +343,6 @@ class DescriptionPattern extends TregexPattern {
       } else {
         childMatcher.resetChildIter(nextTreeNodeMatchCandidate);
       }
-    }
-
-    @Override
-    boolean getChangesVariables() {
-      return myNode.getChangesVariables();
     }
 
     /* goes to the next node in the tree that is a successful match to my description pattern.

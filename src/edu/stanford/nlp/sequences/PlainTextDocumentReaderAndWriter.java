@@ -26,8 +26,8 @@ import java.util.regex.*;
  * itest/src/edu/stanford/nlp/ie/crf/CRFClassifierITest.java for examples and
  * test cases for the output options.
  *
- * It can be over anything that extends {@link CoreMap}, and the default is
- * {@link CoreLabel}
+ * This class works over a list of anything that extends {@link CoreMap}.
+ * The usual case is {@link CoreLabel}.
  *
  * @author Jenny Finkel
  * @author Christopher Manning (new output options organization)
@@ -35,26 +35,22 @@ import java.util.regex.*;
  */
 public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements DocumentReaderAndWriter<IN> {
 
-  // todo: This is hardwired for PTBTokenizer, and hence languages roughly
-  // like English. There should be flags which would allow it to be used with
-  // other languages/tokenizers, perhaps instead involving changes in
-  // CRFClassifier, etc.
-
   private static final long serialVersionUID = -2420535144980273136L;
 
   public enum OutputStyle {
     SLASH_TAGS    ("slashTags"),
     XML           ("xml"),
     INLINE_XML    ("inlineXML"),
-    TSV           ("tsv");
+    TSV           ("tsv"),
+    TABBED        ("tabbedEntities");
 
     private final String shortName;
     OutputStyle(String shortName) {
       this.shortName = shortName;
     }
 
-    private static final Map<String, OutputStyle> shortNames =
-      Generics.newHashMap();
+    private static final Map<String, OutputStyle> shortNames = Generics.newHashMap();
+
     static {
       for (OutputStyle style : OutputStyle.values())
         shortNames.put(style.shortName, style);
@@ -72,7 +68,12 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
         throw new IllegalArgumentException(name + " is not an OutputStyle");
       return result;
     }
-  }
+
+    public static boolean defaultToPreserveSpacing(String str) {
+      return str.equals(XML.shortName) || str.equals(INLINE_XML.shortName);
+    }
+
+  } // end enum Output style
 
   private static final Pattern sgml = Pattern.compile("<[^>]*>");
   private final WordToSentenceProcessor<IN> wts = new WordToSentenceProcessor<IN>(WordToSentenceProcessor.NewlineIsSentenceBreak.ALWAYS);
@@ -87,10 +88,11 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
   public PlainTextDocumentReaderAndWriter() {
   }
 
+  @Override
   public void init(SeqClassifierFlags flags) {
     String options = "tokenizeNLs=false,invertible=true";
     if (flags.tokenizerOptions != null) {
-      options = options + "," + flags.tokenizerOptions;
+      options = options + ',' + flags.tokenizerOptions;
     }
     TokenizerFactory<IN> factory;
     if (flags.tokenizerFactory != null) {
@@ -112,8 +114,8 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
     this.tokenizerFactory = tokenizerFactory;
   }
 
-  // todo: give options for document splitting. A line or the whole file or
-  // sentence splitting as now
+  // todo: give options for document splitting. A line or the whole file or sentence splitting as now
+  @Override
   public Iterator<List<IN>> getIterator(Reader r) {
     Tokenizer<IN> tokenizer = tokenizerFactory.getTokenizer(r);
     // PTBTokenizer.newPTBTokenizer(r, false, true);
@@ -143,9 +145,8 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
 
         String before = StringUtils.getNotNullString(w.get(CoreAnnotations.BeforeAnnotation.class));
         if (prepend.length() > 0) {
-          // todo: change to prepend.append(before); w.set(CoreAnnotations.BeforeAnnotation.class, prepend.toString());
-          w.set(CoreAnnotations.BeforeAnnotation.class, prepend.toString() + before);
-          // w.prependBefore(prepend.toString());
+          prepend.append(before);
+          w.set(CoreAnnotations.BeforeAnnotation.class, prepend.toString());
           prepend = new StringBuilder();
         }
         words.add(w);
@@ -176,15 +177,14 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
   /**
    * Print the classifications for the document to the given Writer. This method
    * now checks the <code>outputFormat</code> property, and can print in
-   * slashTags, inlineXML, or xml (stand-Off XML). For both the XML output
-   * formats, it preserves spacing, while for the slashTags format, it prints
-   * tokenized (since preserveSpacing output is somewhat dysfunctional with the
-   * slashTags format).
+   * slashTags, inlineXML, xml (stand-Off XML), tsv, or a 3-column tabbed format
+   * for easy entity retrieval. For both the XML output
+   * formats, it preserves spacing, while for the other formats, it prints
+   * tokenized (since preserveSpacing output is somewhat dysfunctional with these
+   * formats, but you can control this by calling getAnswers()).
    *
-   * @param list
-   *          List of tokens with classifier answers
-   * @param out
-   *          Where to print the output to
+   * @param list List of tokens with classifier answers
+   * @param out Where to print the output to
    */
   @Override
   public void printAnswers(List<IN> list, PrintWriter out) {
@@ -192,11 +192,11 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
     if (flags != null) {
       style = flags.outputFormat;
     }
-    if (style == null || "".equals(style)) {
+    if (style == null || style.isEmpty()) {
       style = "slashTags";
     }
     OutputStyle outputStyle = OutputStyle.fromShortName(style);
-    printAnswers(list, out, outputStyle, !"slashTags".equals(style));
+    printAnswers(list, out, outputStyle, OutputStyle.defaultToPreserveSpacing(style));
   }
 
   public String getAnswers(List<IN> l,
@@ -232,6 +232,20 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
         printAnswersTokenizedInlineXML(l, out);
       }
       break;
+      case TSV:
+        if (preserveSpacing) {
+          printAnswersAsIsTextTsv(l, out);
+        } else {
+          printAnswersTokenizedTextTsv(l, out);
+        }
+        break;
+      case TABBED:
+        if (preserveSpacing) {
+          printAnswersAsIsTextTabbed(l, out);
+        } else {
+          printAnswersTokenizedTextTabbed(l, out);
+        }
+        break;
     default:
       throw new IllegalArgumentException(outputStyle +
                                          " is an unsupported OutputStyle");
@@ -256,6 +270,99 @@ public class PlainTextDocumentReaderAndWriter<IN extends CoreMap> implements Doc
       out.print(StringUtils.getNotNullString(wi.get(CoreAnnotations.AnswerAnnotation.class)));
       out.print(StringUtils.getNotNullString(wi.get(CoreAnnotations.AfterAnnotation.class)));
     }
+  }
+
+  private static <IN extends CoreMap> void printAnswersTokenizedTextTsv(List<IN> l, PrintWriter out) {
+    for (IN wi : l) {
+      out.print(StringUtils.getNotNullString(wi.get(CoreAnnotations.TextAnnotation.class)));
+      out.print('\t');
+      out.println(StringUtils.getNotNullString(wi.get(CoreAnnotations.AnswerAnnotation.class)));
+    }
+    out.println(); // put a single newline at the end [added 20091024].
+  }
+
+  private static <IN extends CoreMap> void printAnswersAsIsTextTsv(List<IN> l, PrintWriter out) {
+    for (IN wi : l) {
+      out.print(StringUtils.getNotNullString(wi.get(CoreAnnotations.BeforeAnnotation.class)));
+      out.print(StringUtils.getNotNullString(wi.get(CoreAnnotations.TextAnnotation.class)));
+      out.print(StringUtils.getNotNullString(wi.get(CoreAnnotations.AfterAnnotation.class)));
+      out.print('\t');
+      out.println(StringUtils.getNotNullString(wi.get(CoreAnnotations.AnswerAnnotation.class)));
+    }
+  }
+
+  private void printAnswersAsIsTextTabbed(List<IN> l, PrintWriter out) {
+    final String background = flags.backgroundSymbol;
+    String lastEntityType = null;
+    for (IN wi : l) {
+      String entityType = wi.get(CoreAnnotations.AnswerAnnotation.class);
+      String token = StringUtils.getNotNullString(wi.get(CoreAnnotations.TextAnnotation.class));
+      String before = StringUtils.getNotNullString(wi.get(CoreAnnotations.BeforeAnnotation.class));
+      String after = StringUtils.getNotNullString(wi.get(CoreAnnotations.AfterAnnotation.class));
+
+      if (entityType.equals(lastEntityType)) {
+        // continue the same entity in column 1 or 3
+        out.print(before);
+        out.print(token);
+        out.print(after);
+      } else {
+        if (lastEntityType != null &&  ! background.equals(lastEntityType)) {
+          // different entity type.  If previous not background/start, write in column 2
+          out.print('\t');
+          out.print(lastEntityType);
+        }
+        if (background.equals(entityType)) {
+          // we'll print it in column 3. Normally, we're in column 2, unless we were at the start of doc
+          if (lastEntityType == null) {
+            out.print('\t');
+          }
+          out.print('\t');
+        } else {
+          // otherwise we're printing in column 1 again
+          out.println();
+        }
+        out.print(before);
+        out.print(token);
+        out.print(after);
+        lastEntityType = entityType;
+      }
+    }
+    out.println(); // finish line then add blank line
+    out.println();
+  }
+
+  private void printAnswersTokenizedTextTabbed(List<IN> l, PrintWriter out) {
+    final String background = flags.backgroundSymbol;
+    String lastEntityType = null;
+    for (IN wi : l) {
+      String entityType = wi.get(CoreAnnotations.AnswerAnnotation.class);
+      String token = StringUtils.getNotNullString(wi.get(CoreAnnotations.TextAnnotation.class));
+      if (entityType.equals(lastEntityType)) {
+        // continue the same entity in column 1 or 3
+        out.print(' ');
+        out.print(token);
+      } else {
+        if (lastEntityType != null && ! background.equals(lastEntityType)) {
+          // different entity type.  If previous not background/start, write in column 2
+          out.print('\t');
+          out.print(lastEntityType);
+        }
+        if (background.equals(entityType)) {
+          // we'll print it in column 3. Normally, we're in column 2, unless we were at the start of doc
+          if (lastEntityType == null) {
+            out.print('\t');
+          }
+          out.print('\t');
+        } else {
+          // otherwise we're printing in column 1 again
+          out.println();
+        }
+        out.print(token);
+        lastEntityType = entityType;
+      }
+    }
+    out.println(); // finish line then add blank line
+    out.println();
   }
 
   private static <IN extends CoreMap> void printAnswersXML(List<IN> doc, PrintWriter out) {

@@ -756,13 +756,11 @@ public class Distribution<E> implements Sampler<E>, ProbabilityDistribution<E> {
   public String toString() {
     NumberFormat nf = new DecimalFormat("0.0##E0");
     List<E> keyList = new ArrayList<E>(keySet());
-    Collections.sort(keyList, new Comparator<E>() {
-      public int compare(E o1, E o2) {
-        if (probabilityOf(o1) < probabilityOf(o2)) {
-          return 1;
-        } else {
-          return -1;
-        }
+    Collections.sort(keyList, (o1, o2) -> {
+      if (probabilityOf(o1) < probabilityOf(o2)) {
+        return 1;
+      } else {
+        return -1;
       }
     });
     StringBuilder sb = new StringBuilder();

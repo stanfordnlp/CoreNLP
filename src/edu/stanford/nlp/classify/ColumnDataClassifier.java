@@ -31,6 +31,22 @@
 
 package edu.stanford.nlp.classify;
 
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.BasicDatum;
+import edu.stanford.nlp.ling.Datum;
+import edu.stanford.nlp.ling.RVFDatum;
+import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.objectbank.ObjectBank;
+import edu.stanford.nlp.optimization.DiffFunction;
+import edu.stanford.nlp.optimization.Minimizer;
+import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.Tokenizer;
+import edu.stanford.nlp.process.TokenizerFactory;
+import edu.stanford.nlp.process.WordShapeClassifier;
+import edu.stanford.nlp.stats.*;
+import edu.stanford.nlp.util.*;
+
 import java.io.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -39,28 +55,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-
-import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.BasicDatum;
-import edu.stanford.nlp.ling.Datum;
-import edu.stanford.nlp.ling.RVFDatum;
-import edu.stanford.nlp.optimization.DiffFunction;
-import edu.stanford.nlp.optimization.Minimizer;
-import edu.stanford.nlp.process.WordShapeClassifier;
-import edu.stanford.nlp.stats.ClassicCounter;
-import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.stats.Counters;
-import edu.stanford.nlp.stats.Distribution;
-import edu.stanford.nlp.stats.TwoDimensionalCounter;
-import edu.stanford.nlp.objectbank.ObjectBank;
-import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.ReflectionLoading;
-import edu.stanford.nlp.util.StringUtils;
-import edu.stanford.nlp.util.Timing;
-import edu.stanford.nlp.util.Triple;
 
 
 /**
@@ -159,6 +153,7 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td> splitWordsRegexp</td><td>String</td><td>null</td><td>If defined, use this as a regular expression on which to split the whole string (as in the String.split() function, which will return the things between delimiters, and discard the delimiters).  The resulting split-up "words" will be used in classifier features iff one of the other "useSplit" options is turned on.</td></tr>
  * <tr><td> splitWordsTokenizerRegexp</td><td>String</td><td>null</td><td>If defined, use this as a regular expression to cut initial pieces off a String.  Either this regular expression or <code>splitWordsIgnoreRegexp</code> <i>should always match</i> the start of the String, and the size of the token is the number of characters matched.  So, for example, one can group letter and number characters but do nothing else with a regular expression like <code>([A-Za-z]+|[0-9]+|.)</code>, where the last disjunct will match any other single character.  (If neither regular expression matches, the first character of the string is treated as a one character word, and then matching is tried again, but in this case a warning message is printed.)  Note that, for Java regular expressions with disjunctions like this, the match is the first matching disjunction, not the longest matching disjunction, so patterns with common prefixes need to be ordered from most specific (longest) to least specific (shortest).)  The resulting split up "words" will be used in classifier features iff one of the other "useSplit" options is turned on.  Note that as usual for Java String processing, backslashes must be doubled in the regular expressions that you write.</td></tr>
  * <tr><td> splitWordsIgnoreRegexp</td><td>String</td><td>\\s+</td><td>If non-empty, this regexp is used to determine character sequences which should not be returned as tokens when using <code>splitWordsTokenizerRegexp</code> or <code>splitWordsRegexp</code>. With the former, first the program attempts to match this regular expression at the start of the string (with <code>lookingAt()</code>) and if it matches, those characters are discarded, but if it doesn't match then <code>splitWordsTokenizerRegexp</code> is tried. With <code>splitWordsRegexp</code>, this is used to filter tokens (with <code>matches()</code> resulting from the splitting.  By default this regular expression is set to be all whitespace tokens (i.e., \\s+). Set it to an empty string to get all tokens returned.</td></tr>
+ * <tr><td> splitWordsWithPTBTokenizer</td><td>boolean</td><td>false</td><td>If true, and <code>splitWordsRegexp</code> and <code>splitWordsTokenizerRegexp</code> are false, then will tokenize using the <code>PTBTokenizer</code></td></tr>
  * <tr><td> useSplitWords</td><td>boolean</td><td>false</td><td>Make features from the "words" that are returned by dividing the string on splitWordsRegexp or splitWordsTokenizerRegexp.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SW-<i>str</i></td></tr>
  * <tr><td> useLowercaseSplitWords</td><td>boolean</td><td>false</td><td>Make features from the "words" that are returned by dividing the string on splitWordsRegexp or splitWordsTokenizerRegexp and then lowercasing the result.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.  Note that this can be specified independently of useSplitWords. You can put either or both original cased and lowercased words in as features.</td><td>SW-<i>str</i></td></tr>
  * <tr><td> useSplitWordPairs</td><td>boolean</td><td>false</td><td>Make features from the pairs of adjacent "words" that are returned by dividing the string into splitWords.  Requires splitWordsRegexp or splitWordsTokenizerRegexp.</td><td>SWP-<i>str1</i>-<i>str2</i></td></tr>
@@ -220,6 +215,7 @@ import edu.stanford.nlp.util.Triple;
  * <tr><td>crossValidationFolds</td><td>int</td><td>-1</td><td>If positive, the training data is divided in to this many folds and cross-validation is done on the training data (prior to testing on test data, if it is also specified)</td></tr>
  * <tr><td>shuffleTrainingData</td><td>boolean</td><td>false</td><td>If true, the training data is shuffled prior to training and cross-validation. This is vital in cross-validation if the training data is otherwise sorted by class.</td></tr>
  * <tr><td>shuffleSeed</td><td>long</td><td>0</td><td>If non-zero, and the training data is being shuffled, this is used as the seed for the Random. Otherwise, System.nanoTime() is used.</td></tr>
+ * <tr><td>csvFormat</td><td>boolean</td><td>false</td><td>If true, reads train and test file in csv format, with support for quoted fields.</td></tr>
  * </table>
  *
  * @author Christopher Manning
@@ -234,6 +230,7 @@ public class ColumnDataClassifier {
   private final Flags[] flags;
   private final Flags globalFlags; // simply points to flags[0]
   private Classifier<String,String> classifier; // really only assigned once too (either in train or load in setProperties)
+  private TokenizerFactory<Word> ptbFactory;
 
 
   /**
@@ -245,7 +242,7 @@ public class ColumnDataClassifier {
    * @return A Datum (may be an RVFDatum; never null)
    */
   public Datum<String,String> makeDatumFromLine(String line) {
-    return makeDatumFromStrings(tab.split(line));
+    return makeDatumFromStrings(splitLineToFields(line));
   }
 
 
@@ -254,7 +251,7 @@ public class ColumnDataClassifier {
    * If real-valued features are used, this method accesses makeRVFDatumFromLine
    * and returns an RVFDatum; otherwise, categorical features are used.
    *
-   * @param strings The elements that features a made from (the tab-split columns of a TSV file)
+   * @param strings The elements that features are made from (the columns of a TSV/CSV file)
    * @return A Datum (may be an RVFDatum; never null)
    */
   public Datum<String,String> makeDatumFromStrings(String[] strings) {
@@ -409,7 +406,7 @@ public class ColumnDataClassifier {
         int maxColumns = 0;
         for (String line : ObjectBank.getLineIterator(new File(filename), Flags.encoding)) {
           lineNo++;
-          String[] strings = tab.split(line);
+          String[] strings = splitLineToFields(line);
           if (strings.length < 2) {
             throw new RuntimeException("Line format error at line " + lineNo + ": " + line);
           }
@@ -438,6 +435,19 @@ public class ColumnDataClassifier {
     return new Pair<GeneralDataset<String,String>,List<String[]>>(dataset, lineInfos);
   }
 
+  //Split according to whether we are using tsv file (default) or csv files
+  private String[] splitLineToFields(String line) {
+    if(globalFlags.csvFormat) {
+      String[] strings = StringUtils.splitOnCharWithQuoting(line, ',', '"', '"');
+      for (int i = 0; i < strings.length; ++i) {
+        if (strings[i].startsWith("\"") && strings[i].endsWith("\""))
+          strings[i] = strings[i].substring(1,strings[i].length()-1);
+      }
+      return strings;
+    }
+    else
+      return tab.split(line);
+  }
 
   /**
    * Write summary statistics about a group of answers.
@@ -841,7 +851,8 @@ public class ColumnDataClassifier {
      * @param cWord The String to extract data from
      */
     private void makeDatum(String cWord, Flags flags, Object featuresC, String goldAns) {
-       //System.err.println("Making features for " + cWord + " flags " + flags);
+
+      //System.err.println("Making features for " + cWord + " flags " + flags);
       if (flags == null) {
         // no features for this column
         return;
@@ -913,12 +924,15 @@ public class ColumnDataClassifier {
           addFeature(featuresC,featureName,DEFAULT_VALUE);
         }
       }
-      if (flags.splitWordsPattern != null || flags.splitWordsTokenizerPattern != null ) {
+      if (flags.splitWordsPattern != null || flags.splitWordsTokenizerPattern != null ||
+              flags.splitWordsWithPTBTokenizer) {
         String[] bits;
         if (flags.splitWordsTokenizerPattern != null) {
           bits = regexpTokenize(flags.splitWordsTokenizerPattern, flags.splitWordsIgnorePattern, cWord);
-        } else {
+        } else if (flags.splitWordsPattern != null) {
           bits = splitTokenize(flags.splitWordsPattern, flags.splitWordsIgnorePattern, cWord);
+        } else { //PTB tokenizer
+          bits = ptbTokenize(cWord);
         }
         if (flags.showTokenization) {
           System.err.print("Tokenization: ");
@@ -1016,6 +1030,18 @@ public class ColumnDataClassifier {
        //System.err.println("Made featuresC " + featuresC);
     }  //end makeDatum
 
+  //return the tokens using PTB tokenizer
+  private String[] ptbTokenize(String cWord) {
+    if(ptbFactory==null)
+      ptbFactory = PTBTokenizer.factory();
+    Tokenizer<Word> tokenizer = ptbFactory.getTokenizer(new StringReader(cWord));
+    List<Word> words = tokenizer.tokenize();
+    String[] res = new String[words.size()];
+    for(int i = 0; i < words.size(); ++i) {
+      res[i] = words.get(i).word();
+    }
+    return res;
+  }
 
   /**
    * Caches a hash of word to all substring features.  A <i>lot</i> of memory!
@@ -1385,8 +1411,9 @@ public class ColumnDataClassifier {
     for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements();) {
       String key = (String) e.nextElement();
       String val = props.getProperty(key);
+
       int col = 0;  // the default (first after class)
-      // System.err.println(key + " = " + val);
+       System.err.println(key + " = " + val);
       Matcher matcher = prefix.matcher(key);
       if (matcher.matches()) {
         col = Integer.parseInt(matcher.group(1));
@@ -1657,6 +1684,13 @@ public class ColumnDataClassifier {
         myFlags[col].shuffleTrainingData = Boolean.parseBoolean(val);
       } else if (key.equals("shuffleSeed")) {
         myFlags[col].shuffleSeed = Long.parseLong(val);
+      } else if (key.equals("csvFormat")) {
+        myFlags[col].csvFormat= Boolean.parseBoolean(val);
+      } else if (key.equals("splitWordsWithPTBTokenizer")) {
+        System.out.println("splitting with ptb tokenizer");
+        myFlags[col].splitWordsWithPTBTokenizer=Boolean.parseBoolean(val);
+      } else if(key.equals("showTokenization")){
+        myFlags[col].showTokenization = Boolean.parseBoolean(val);
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
       }
@@ -1875,6 +1909,12 @@ public class ColumnDataClassifier {
     return new Pair<Double,Double>(averageAccuracy, averageMacroF1);
   }
 
+  public String classOf(Datum<String,String> example) {
+    if(classifier==null)
+      throw new RuntimeException("Classifier is not initialized");
+    return classifier.classOf(example);
+  }
+
   static class Flags implements Serializable {
 
     // PLEASE ADD NEW FLAGS AT THE END OF THIS CLASS (SO AS TO NOT UNNECESSARILY BREAK SERIALIZED CLASSIFIERS)
@@ -2006,6 +2046,9 @@ public class ColumnDataClassifier {
     int crossValidationFolds = -1;
     boolean shuffleTrainingData = false;
     long shuffleSeed = 0;
+
+    static boolean csvFormat = false; //train and test files are in csv format
+    boolean splitWordsWithPTBTokenizer = false;
 
     @Override
     public String toString() {

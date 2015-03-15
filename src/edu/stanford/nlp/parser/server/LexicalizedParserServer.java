@@ -10,7 +10,9 @@ import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
+import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
 import edu.stanford.nlp.trees.Tree;
 
 /**
@@ -20,32 +22,45 @@ import edu.stanford.nlp.trees.Tree;
  */
 public class LexicalizedParserServer {
   final int port;
-  final String model;
 
   final ServerSocket serverSocket;
 
-  final LexicalizedParser parser;
+  final ParserGrammar parser;
+  final TreeBinarizer binarizer;
 
   //static final Charset utf8Charset = Charset.forName("utf-8");
 
   boolean stillRunning = true;
 
-  public LexicalizedParserServer(int port, String model) 
+  public LexicalizedParserServer(int port, String parserModel) 
     throws IOException
   {
-    this(port, model, LexicalizedParser.loadModel(model));
+    this(port, loadModel(parserModel, null));
   }
 
-  public LexicalizedParserServer(int port, String model, 
-                                 LexicalizedParser parser)
+  public LexicalizedParserServer(int port, String parserModel, String taggerModel) 
+    throws IOException
+  {
+    this(port, loadModel(parserModel, taggerModel));
+  }
+
+  public LexicalizedParserServer(int port, ParserGrammar parser)
     throws IOException
   {
     this.port = port;
     this.serverSocket = new ServerSocket(port);
-    this.model = model;
     this.parser = parser;
+    this.binarizer = TreeBinarizer.simpleTreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack());
   }
 
+
+  private static ParserGrammar loadModel(String parserModel, String taggerModel) {
+    if (taggerModel == null) {
+      return ParserGrammar.loadModel(parserModel);
+    } else {
+      return ParserGrammar.loadModel(parserModel, "-preTag", "-taggerSerializedFile", taggerModel);
+    }
+  }
 
   /**
    * Runs in a loop, getting requests from new clients until a client
@@ -101,12 +116,21 @@ public class LexicalizedParserServer {
     if (arg != null) {
       System.err.println(" ... with argument " + arg);
     }
-    if (command.equals("quit")) {
+    switch (command) {
+    case "quit":
       handleQuit();
-    } else if (command.equals("parse")) {
-      handleParse(arg, clientSocket.getOutputStream());
-    } else if (command.equals("tree")) {
+      break;
+    case "parse":
+      handleParse(arg, clientSocket.getOutputStream(), false);
+      break;
+    case "parse:binarized": 
+      // TODO: if commands get more complex, can do more intelligent
+      // parsing of commands
+      handleParse(arg, clientSocket.getOutputStream(), true);
+      break;
+    case "tree":
       handleTree(arg, clientSocket.getOutputStream());
+      break;
     }
 
     System.err.println("Handled request");
@@ -127,10 +151,10 @@ public class LexicalizedParserServer {
   public void handleTree(String arg, OutputStream outStream) 
     throws IOException
   {
-    if (arg == null) {
+    Tree tree = parse(arg, false);
+    if (tree == null) {
       return;
     }
-    Tree tree = parser.parse(arg);
     System.err.println(tree);
     if (tree != null) {
       ObjectOutputStream oos = new ObjectOutputStream(outStream);
@@ -142,13 +166,13 @@ public class LexicalizedParserServer {
   /**
    * Returns the result of applying the parser to arg as a string.
    */
-  public void handleParse(String arg, OutputStream outStream) 
+  public void handleParse(String arg, OutputStream outStream, boolean binarized) 
     throws IOException
   {
-    if (arg == null) {
+    Tree tree = parse(arg, binarized);
+    if (tree == null) {
       return;
     }
-    Tree tree = parser.parse(arg);
     System.err.println(tree);
     if (tree != null) {
       OutputStreamWriter osw = new OutputStreamWriter(outStream, "utf-8");
@@ -158,6 +182,16 @@ public class LexicalizedParserServer {
     }
   }
 
+  private Tree parse(String arg, boolean binarized) {
+    if (arg == null) {
+      return null;
+    }
+    Tree tree = parser.parse(arg);
+    if (binarized) {
+      tree = binarizer.transformTree(tree);
+    }
+    return tree;
+  }
 
   static final int DEFAULT_PORT = 4466;
 
@@ -169,6 +203,7 @@ public class LexicalizedParserServer {
 
     int port = DEFAULT_PORT;
     String model = LexicalizedParser.DEFAULT_PARSER_LOC;
+    String tagger = null;
 
     for (int i = 0; i < args.length; i += 2) {
       if (i + 1 >= args.length) {
@@ -185,10 +220,12 @@ public class LexicalizedParserServer {
         model = args[i + 1];
       } else if (arg.equalsIgnoreCase("port")) {
         port = Integer.valueOf(args[i + 1]);
+      } else if (arg.equalsIgnoreCase("tagger")) {
+        tagger = args[i + 1];
       }
     }
     
-    LexicalizedParserServer server = new LexicalizedParserServer(port, model);
+    LexicalizedParserServer server = new LexicalizedParserServer(port, model, tagger);
     System.err.println("Server ready!");
     server.listen();
   }

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -424,7 +425,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
       System.arraycopy(labels, 0, newLabels, 0, size);
       labels = newLabels;
     }
-    labels[size] = labelIndex.indexOf(label, true);
+    labels[size] = labelIndex.addToIndex(label);
   }
 
   private void addFeatures(Counter<F> features) {
@@ -443,7 +444,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     values[size] = new double[nFeatures];
     for (int i = 0; i < nFeatures; ++i) {
       F feature = featureNames.get(i);
-      int fID = featureIndex.indexOf(feature, true);
+      int fID = featureIndex.addToIndex(feature);
       if (fID >= 0) {
         data[size][i] = fID;
         values[size][i] = features.getCount(feature);
@@ -600,7 +601,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     for (F feature : featureSet) {
       int oldID = featureIndex.indexOf(feature);
       if (oldID >= 0) { // it's a valid feature in the index
-        int newID = newFeatureIndex.indexOf(feature, true);
+        int newID = newFeatureIndex.addToIndex(feature);
         featMap[oldID] = newID;
       }
     }
@@ -792,7 +793,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
       Counter<F> features = datum.asFeaturesCounter();
       for (F feature : features.keySet()) {
         double count = features.getCount(feature);
-        writer.format(" %s:%f", this.featureIndex.indexOf(feature), count);
+        writer.format(Locale.ENGLISH, " %s:%f", this.featureIndex.indexOf(feature), count);
       }
       writer.println();
     }

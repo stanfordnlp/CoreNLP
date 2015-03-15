@@ -61,10 +61,10 @@ public class StanfordCoreNlpDemo {
       out.println("The first sentence parse tree is:");
       tree.pennPrint(out);
       out.println("The first sentence basic dependencies are:"); 
-      System.out.println(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class).toString("plain"));
+      System.out.println(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class).toString(SemanticGraph.OutputFormat.LIST));
       out.println("The first sentence collapsed, CC-processed dependencies are:");
       SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
-      System.out.println(graph.toString("plain"));
+      System.out.println(graph.toString(SemanticGraph.OutputFormat.LIST));
     }
   }
 

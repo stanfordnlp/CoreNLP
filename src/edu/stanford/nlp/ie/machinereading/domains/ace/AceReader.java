@@ -16,7 +16,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import edu.stanford.nlp.ie.machinereading.GenericDataSetReader;
-import edu.stanford.nlp.ie.machinereading.BasicEntityExtractor;
 import edu.stanford.nlp.ie.machinereading.domains.ace.reader.AceCharSeq;
 import edu.stanford.nlp.ie.machinereading.domains.ace.reader.AceDocument;
 import edu.stanford.nlp.ie.machinereading.domains.ace.reader.AceEntity;
@@ -250,6 +249,7 @@ public class AceReader extends GenericDataSetReader {
       for(int i = 0; i < tokens.size(); i ++){
         CoreLabel l = new CoreLabel();
         l.setWord(tokens.get(i).getLiteral());
+        l.set(CoreAnnotations.ValueAnnotation.class, l.word());
         l.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, tokens.get(i).getByteStart());
         l.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, tokens.get(i).getByteEnd());
         words.add(l);

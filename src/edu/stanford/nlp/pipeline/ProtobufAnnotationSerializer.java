@@ -24,22 +24,101 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.*;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations.*;
 import edu.stanford.nlp.time.TimeAnnotations.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.*;
 
 /**
- * A serializer using Google's protocol buffer format.
- * Note that this serializes only a subset of the possible annotations
- * that can be attached to a sentence. Nonetheless, it is guaranteed to be
- * lossless with the default set of named annotators you can create from a
- * {@link StanfordCoreNLP} pipeline, with default properties defined for each annotator.
+ * <p>
+ *   A serializer using Google's protocol buffer format.
+ *   The files produced by this serializer, in addition to being language-independent,
+ *   are a little over 10% the size and 4x faster to read+write versus the default Java serialization
+ *   (see {@link GenericAnnotationSerializer}), when both files are compressed with gzip.
+ * </p>
+ *
+ * <p>
+ *   Note that this handles only a subset of the possible annotations
+ *   that can be attached to a sentence. Nonetheless, it is guaranteed to be
+ *   lossless with the default set of named annotators you can create from a
+ *   {@link StanfordCoreNLP} pipeline, with default properties defined for each annotator.
+ *   Note that the serializer does not gzip automatically -- this must be done by passing in a GZipOutputStream
+ *   and calling a GZipInputStream manually. For most Annotations, gzipping provides a notable decrease in size (~2.5x)
+ *   due to most of the data being raw Strings.
+ * </p>
+ *
+ * <p>
+ *   To allow lossy serialization, use {@link ProtobufAnnotationSerializer#ProtobufAnnotationSerializer(boolean)}.
+ *   Otherwise, an exception is thrown if an unknown key appears in the annotation which would not be saved to th
+ *   protocol buffer.
+ *   If such keys exist, and are a part of the standard CoreNLP pipeline, please let us know!
+ *   If you would like to serialize keys in addition to those serialized by default (e.g., you are attaching
+ *   your own annotations), then you should do the following:
+ * </p>
+ *
+ * <ol>
+ *   <li>
+ *     Create a .proto file which extends one or more of Document, Sentence, or Token. Each of these have fields
+ *     100-255 left open for user extensions. An example of such an extension is:
+ *     <pre>
+ *       package edu.stanford.nlp.pipeline;
+ *
+ *       option java_package = "com.example.my.awesome.nlp.app";
+ *       option java_outer_classname = "MyAppProtos";
+ *
+ *       import "CoreNLP.proto";
+ *
+ *       extend Sentence {
+ *         optional uint32 myNewField    = 101;
+ *       }
+ *     </pre>
+ *   </li>
+ *
+ *   <li>
+ *     Compile your .proto file with protoc. For example (from CORENLP_HOME):
+ *     <pre>
+ *        protoc -I=src/edu/stanford/nlp/pipeline/:/path/to/folder/contining/your/proto/file --java_out=/path/to/output/src/folder/  /path/to/proto/file
+ *     </pre>
+ *   </li>
+ *
+ *   <li>
+ *     <p>
+ *     Extend {@link ProtobufAnnotationSerializer} to serialize and deserialize your field.
+ *     Generally, this entail overriding two functions -- one to write the proto and one to read it.
+ *     In both cases, you usually want to call the superclass' implementation of the function, and add on to it
+ *     from there.
+ *     In our running example, adding a field to the {@link CoreNLPProtos.Sentence} proto, you would overwrite:
+ *     </p>
+ *
+ *     <ul>
+ *       <li>{@link ProtobufAnnotationSerializer#toProtoBuilder(edu.stanford.nlp.util.CoreMap, java.util.Set)}</li>
+ *       <li>{@link ProtobufAnnotationSerializer#fromProtoNoTokens(edu.stanford.nlp.pipeline.CoreNLPProtos.Sentence)}</li>
+ *     </ul>
+ *
+ *     <p>
+ *     Note, importantly, that for the serializer to be able to check for lossless serialization, all annotations added
+ *     to the proto must be registered as added by being removed from the set passed to
+ *     {@link ProtobufAnnotationSerializer#toProtoBuilder(edu.stanford.nlp.util.CoreMap, java.util.Set)} (and the analogous
+ *     functions for documents and tokens).
+ *     </p>
+ *
+ *     <p>
+ *       Lastly, the new annotations must be registered in the original .proto file; this can be achieved by including
+ *       a static block in the overwritten class:
+ *     </p>
+ *     <pre>
+ *       static {
+ *         ExtensionRegistry registry = ExtensionRegistry.newInstance();
+ *         registry.add(MyAppProtos.myNewField);
+ *         CoreNLPProtos.registerAllExtensions(registry);
+ *       }
+ *     </pre>
+ *   </li>
+ * </ol>
  *
  * @author Gabor Angeli
  */
 public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
+  /** A global lock; necessary since dependency tree creation is not threadsafe */
   private static final Object globalLock = "I'm a lock :)";
 
   /**
@@ -77,18 +156,45 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   public ProtobufAnnotationSerializer(boolean enforceLosslessSerialization) { this.enforceLosslessSerialization = enforceLosslessSerialization; }
 
+  /** {@inheritDoc} */
   @Override
   public OutputStream write(Annotation corpus, OutputStream os) throws IOException {
     CoreNLPProtos.Document serialized = toProto(corpus);
-    serialized.writeTo(os);
+    serialized.writeDelimitedTo(os);
     os.flush();
     return os;
   }
 
+  /** {@inheritDoc} */
   @Override
   public Pair<Annotation, InputStream> read(InputStream is) throws IOException, ClassNotFoundException, ClassCastException {
-    CoreNLPProtos.Document doc = CoreNLPProtos.Document.parseFrom(is);
+    CoreNLPProtos.Document doc = CoreNLPProtos.Document.parseDelimitedFrom(is);
     return Pair.makePair( fromProto(doc), is );
+  }
+
+  /**
+   * Read a single protocol buffer, which constitutes the entire stream.
+   * This is in contrast to the default, where mutliple buffers may come out of the stream,
+   * and therefore each one is prepended by the length of the buffer to follow.
+   *
+   * @param in The file to read.
+   * @return A parsed Annotation.
+   * @throws IOException In case the stream cannot be read from.
+   */
+  @SuppressWarnings("UnusedDeclaration")
+  public Annotation readUndelimited(File in) throws IOException {
+    FileInputStream delimited = new FileInputStream(in);
+    FileInputStream undelimited = new FileInputStream(in);
+    CoreNLPProtos.Document doc;
+    try {
+      doc = CoreNLPProtos.Document.parseFrom(delimited);
+    } catch (Exception e) {
+      doc = CoreNLPProtos.Document.parseDelimitedFrom(undelimited);
+    } finally {
+      delimited.close();
+      undelimited.close();
+    }
+    return fromProto(doc);
   }
 
   /**
@@ -111,8 +217,29 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A protocol buffer message corresponding to this CoreLabel
    */
   public CoreNLPProtos.Token toProto(CoreLabel coreLabel) {
-    CoreNLPProtos.Token.Builder builder = CoreNLPProtos.Token.newBuilder();
     Set<Class<?>> keysToSerialize = new HashSet<Class<?>>(coreLabel.keySet());
+    CoreNLPProtos.Token.Builder builder = toProtoBuilder(coreLabel, keysToSerialize);
+    // Completeness check
+    if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {
+      throw new LossySerializationException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
+    }
+    return builder.build();
+  }
+
+  /**
+   * <p>
+   *   The method to extend by subclasses of the Protobuf Annotator if custom additions are added to Tokens.
+   *   In contrast to {@link ProtobufAnnotationSerializer#toProto(edu.stanford.nlp.ling.CoreLabel)}, this function
+   *   returns a builder that can be extended.
+   * </p>
+   *
+   * @param coreLabel The sentence to save to a protocol buffer
+   * @param keysToSerialize A set tracking which keys have been saved. It's important to remove any keys added to the proto
+   *                        from this set, as the code tracks annotations to ensure lossless serializationA set tracking which keys have been saved. It's important to remove any keys added to the proto*
+   *                        from this set, as the code tracks annotations to ensure lossless serialization.
+   */
+  protected CoreNLPProtos.Token.Builder toProtoBuilder(CoreLabel coreLabel, Set<Class<?>> keysToSerialize) {
+    CoreNLPProtos.Token.Builder builder = CoreNLPProtos.Token.newBuilder();
     // Remove items serialized elsewhere from the required list
     keysToSerialize.remove(TextAnnotation.class);
     keysToSerialize.remove(SentenceIndexAnnotation.class);
@@ -125,6 +252,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     keysToSerialize.remove(NumericCompositeValueAnnotation.class);
     keysToSerialize.remove(NumericTypeAnnotation.class);
     keysToSerialize.remove(NumericValueAnnotation.class);
+    // Remove items which were never supposed to be there in the first place
+    keysToSerialize.remove(ForcedSentenceUntilEndAnnotation.class);
+    keysToSerialize.remove(ForcedSentenceEndAnnotation.class);
     // Required fields
     builder.setWord(coreLabel.word());
     // Optional fields
@@ -158,12 +288,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class) != null) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }
     if (coreLabel.containsKey(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
     if (coreLabel.containsKey(TrueCaseTextAnnotation.class)) { builder.setTrueCaseText(getAndRegister(coreLabel, keysToSerialize, TrueCaseTextAnnotation.class)); }
-    // Completeness check
-    if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {
-      throw new LossySerializationException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
-    }
     // Return
-    return builder.build();
+    return builder;
   }
 
   /**
@@ -175,16 +301,42 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @throws IllegalArgumentException If the sentence is not a valid sentence (e.g., is a document or a word).
    */
   public CoreNLPProtos.Sentence toProto(CoreMap sentence) {
+    Set<Class<?>> keysToSerialize = new HashSet<Class<?>>(sentence.keySet());
+    CoreNLPProtos.Sentence.Builder builder = toProtoBuilder(sentence, keysToSerialize);
+    // Completeness check
+    if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {
+      throw new LossySerializationException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
+    }
+    return builder.build();
+  }
+
+  /**
+   * <p>
+   *   The method to extend by subclasses of the Protobuf Annotator if custom additions are added to Tokens.
+   *   In contrast to {@link ProtobufAnnotationSerializer#toProto(edu.stanford.nlp.ling.CoreLabel)}, this function
+   *   returns a builder that can be extended.
+   * </p>
+   *
+   * @param sentence The sentence to save to a protocol buffer
+   * @param keysToSerialize A set tracking which keys have been saved. It's important to remove any keys added to the proto
+   *                        from this set, as the code tracks annotations to ensure lossless serializationA set tracking which keys have been saved. It's important to remove any keys added to the proto*
+   *                        from this set, as the code tracks annotations to ensure lossless serialization.
+   */
+  protected CoreNLPProtos.Sentence.Builder toProtoBuilder(CoreMap sentence, Set<Class<?>> keysToSerialize) {
     // Error checks
     if (sentence instanceof CoreLabel) { throw new IllegalArgumentException("CoreMap is actually a CoreLabel"); }
     CoreNLPProtos.Sentence.Builder builder = CoreNLPProtos.Sentence.newBuilder();
-    Set<Class<?>> keysToSerialize = new HashSet<Class<?>>(sentence.keySet());
     // Remove items serialized elsewhere from the required list
     keysToSerialize.remove(TextAnnotation.class);
     keysToSerialize.remove(NumerizedTokensAnnotation.class);
     // Required fields
     builder.setTokenOffsetBegin(getAndRegister(sentence, keysToSerialize, TokenBeginAnnotation.class));
     builder.setTokenOffsetEnd(getAndRegister(sentence, keysToSerialize, TokenEndAnnotation.class));
+    // Tokens
+    if (sentence.containsKey(TokensAnnotation.class)) {
+      for (CoreLabel tok : sentence.get(TokensAnnotation.class)) { builder.addToken(toProto(tok)); }
+      keysToSerialize.remove(TokensAnnotation.class);
+    }
     // Optional fields
     if (sentence.containsKey(SentenceIndexAnnotation.class)) { builder.setSentenceIndex(getAndRegister(sentence, keysToSerialize, SentenceIndexAnnotation.class)); }
     if (sentence.containsKey(CharacterOffsetBeginAnnotation.class)) { builder.setCharacterOffsetBegin(getAndRegister(sentence, keysToSerialize, CharacterOffsetBeginAnnotation.class)); }
@@ -197,6 +349,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).get(0).containsKey(ParagraphAnnotation.class)) {
       builder.setParagraph(getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).get(0).get(ParagraphAnnotation.class));
     }
+    if (sentence.containsKey(NumerizedTokensAnnotation.class)) { builder.setHasNumerizedTokensAnnotation(true); } else { builder.setHasNumerizedTokensAnnotation(false); }
     // Non-default annotators
     if (sentence.containsKey(EntityMentionsAnnotation.class)) {
       builder.setHasRelationAnnotations(true);
@@ -212,12 +365,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         builder.addRelation(toProto(relation));
       }
     }
-    // Completeness check
-    if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {
-      throw new LossySerializationException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
-    }
     // Return
-    return builder.build();
+    return builder;
   }
 
   /**
@@ -227,19 +376,39 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @return A protocol buffer message corresponding to this document
    */
   public CoreNLPProtos.Document toProto(Annotation doc) {
-    CoreNLPProtos.Document.Builder builder = CoreNLPProtos.Document.newBuilder();
     Set<Class<?>> keysToSerialize = new HashSet<Class<?>>(doc.keySet());
+    keysToSerialize.remove(TokensAnnotation.class);  // note(gabor): tokens are saved in the sentence
+    CoreNLPProtos.Document.Builder builder = toProtoBuilder(doc, keysToSerialize);
+    // Completeness Check
+    if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {
+      throw new LossySerializationException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
+    }
+    return builder.build();
+  }
+
+  /**
+   * <p>
+   *   The method to extend by subclasses of the Protobuf Annotator if custom additions are added to Tokens.
+   *   In contrast to {@link ProtobufAnnotationSerializer#toProto(edu.stanford.nlp.ling.CoreLabel)}, this function
+   *   returns a builder that can be extended.
+   * </p>
+   *
+   * @param doc The sentence to save to a protocol buffer
+   * @param keysToSerialize A set tracking which keys have been saved. It's important to remove any keys added to the proto
+   *                        from this set, as the code tracks annotations to ensure lossless serializationA set tracking which keys have been saved. It's important to remove any keys added to the proto*
+   *                        from this set, as the code tracks annotations to ensure lossless serialization.
+   */
+  protected CoreNLPProtos.Document.Builder toProtoBuilder(Annotation doc, Set<Class<?>> keysToSerialize) {
+    CoreNLPProtos.Document.Builder builder = CoreNLPProtos.Document.newBuilder();
     // Required fields
     builder.setText(doc.get(TextAnnotation.class));
     keysToSerialize.remove(TextAnnotation.class);
     // Optional fields
-    if (doc.containsKey(TokensAnnotation.class)) {
-      for (CoreLabel tok : doc.get(TokensAnnotation.class)) { builder.addToken(toProto(tok)); }
-      keysToSerialize.remove(TokensAnnotation.class);
-    }
     if (doc.containsKey(SentencesAnnotation.class)) {
       for (CoreMap sentence : doc.get(SentencesAnnotation.class)) { builder.addSentence(toProto(sentence)); }
       keysToSerialize.remove(SentencesAnnotation.class);
+    } else if (doc.containsKey(TokensAnnotation.class)) {
+      for (CoreLabel token : doc.get(TokensAnnotation.class)) { builder.addSentencelessToken(toProto(token)); }
     }
     if (doc.containsKey(DocIDAnnotation.class)) {
       builder.setDocID(doc.get(DocIDAnnotation.class));
@@ -251,12 +420,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       keysToSerialize.remove(CorefChainAnnotation.class);
     }
-    // Completeness Check
-    if (enforceLosslessSerialization && !keysToSerialize.isEmpty()) {
-      throw new LossySerializationException("Keys are not being serialized: " + StringUtils.join(keysToSerialize));
-    }
     // Return
-    return builder.build();
+    return builder;
   }
 
   /**
@@ -265,7 +430,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param parseTree The parse tree to convert.
    * @return A protocol buffer message corresponding to this tree.
    */
-  public static CoreNLPProtos.ParseTree toProto(Tree parseTree) {
+  public CoreNLPProtos.ParseTree toProto(Tree parseTree) {
     CoreNLPProtos.ParseTree.Builder builder = CoreNLPProtos.ParseTree.newBuilder();
     // Required fields
     for (Tree child : parseTree.children()) { builder.addChild(toProto(child)); }
@@ -290,10 +455,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param graph The dependency graph to save.
    * @return A protocol buffer message corresponding to this parse.
    */
-  public static CoreNLPProtos.DependencyGraph toProto(SemanticGraph graph) {
+  public CoreNLPProtos.DependencyGraph toProto(SemanticGraph graph) {
     CoreNLPProtos.DependencyGraph.Builder builder = CoreNLPProtos.DependencyGraph.newBuilder();
     // Roots
-    Set<IndexedWord> rootSet = new IdentityHashSet<IndexedWord>(graph.getRoots());
+    Set<Integer> rootSet = new IdentityHashSet<>();
+    for (IndexedWord root : graph.getRoots()) {
+      rootSet.add(root.index());
+    }
     // Nodes
     for (IndexedWord node : graph.vertexSet()) {
       // Register node
@@ -305,7 +473,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       builder.addNode(nodeBuilder.build());
       // Register root
-      if (rootSet.contains(node)) {
+      if (rootSet.contains(node.index())) {
         builder.addRoot(node.index());
       }
     }
@@ -315,7 +483,9 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           .setSource(edge.getSource().index())
           .setTarget(edge.getTarget().index())
           .setDep(edge.getRelation().toString())
-          .setIsExtra(edge.isExtra()));
+          .setIsExtra(edge.isExtra())
+          .setSourceCopy(edge.getSource().copyCount())
+          .setTargetCopy(edge.getTarget().copyCount()));
     }
     // Return
     return builder.build();
@@ -325,7 +495,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param chain The coref chain to convert.
    * @return A protocol buffer message corresponding to this chain.
    */
-  public static CoreNLPProtos.CorefChain toProto(CorefChain chain) {
+  public CoreNLPProtos.CorefChain toProto(CorefChain chain) {
     CoreNLPProtos.CorefChain.Builder builder = CoreNLPProtos.CorefChain.newBuilder();
     // Set ID
     builder.setChainID(chain.getChainID());
@@ -358,7 +528,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param timex The timex to convert.
    * @return A protocol buffer corresponding to this Timex object.
    */
-  public static CoreNLPProtos.Timex toProto(Timex timex) {
+  public CoreNLPProtos.Timex toProto(Timex timex) {
     CoreNLPProtos.Timex.Builder builder = CoreNLPProtos.Timex.newBuilder();
     if (timex.value() != null) { builder.setValue(timex.value()); }
     if (timex.altVal() != null) { builder.setAltValue(timex.altVal()); }
@@ -375,7 +545,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param ent The entity mention to serialize.
    * @return A protocol buffer corresponding to the serialized entity mention.
    */
-  public static CoreNLPProtos.Entity toProto(EntityMention ent) {
+  public CoreNLPProtos.Entity toProto(EntityMention ent) {
     CoreNLPProtos.Entity.Builder builder = CoreNLPProtos.Entity.newBuilder();
     // From ExtractionObject
     if (ent.getObjectId() != null) { builder.setObjectID(ent.getObjectId()); }
@@ -398,7 +568,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param rel The relation mention to serialize.
    * @return A protocol buffer corresponding to the serialized relation mention.
    */
-  public static CoreNLPProtos.Relation toProto(RelationMention rel) {
+  public CoreNLPProtos.Relation toProto(RelationMention rel) {
     CoreNLPProtos.Relation.Builder builder = CoreNLPProtos.Relation.newBuilder();
     // From ExtractionObject
     if (rel.getObjectId() != null) { builder.setObjectID(rel.getObjectId()); }
@@ -419,7 +589,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The serialized protobuf to read the CoreLabel from.
    * @return A CoreLabel, missing the fields that are not stored in the CoreLabel protobuf.
    */
-  private static CoreLabel fromProto(CoreNLPProtos.Token proto) {
+  protected CoreLabel fromProto(CoreNLPProtos.Token proto) {
     CoreLabel word = new CoreLabel();
     // Required fields
     word.setWord(proto.getWord());
@@ -455,12 +625,35 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
 
   /**
    * Create a CoreMap representing a sentence from this protocol buffer.
+   * This should not be used if you are reading a whole document, as it populates the tokens independent of the
+   * document tokens, which is not the behavior an {@link edu.stanford.nlp.pipeline.Annotation} expects.
+   *
+   * @param proto The protocol buffer to read from.
+   * @return A CoreMap representing the sentence.
+   */
+  public CoreMap fromProto(CoreNLPProtos.Sentence proto) {
+    CoreMap lossySentence = fromProtoNoTokens(proto);
+    // Add tokens -- missing by default as they're populated as sublists of the
+    // document tokens
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>();
+    for (CoreNLPProtos.Token token : proto.getTokenList()) {
+      tokens.add(fromProto(token));
+    }
+    lossySentence.set(TokensAnnotation.class, tokens);
+    // Add text -- missing by default as it's populated from the Document
+    lossySentence.set(TextAnnotation.class, recoverOriginalText(tokens, proto));
+    // Return
+    return lossySentence;
+  }
+
+  /**
+   * Create a CoreMap representing a sentence from this protocol buffer.
    * Note that the sentence is very lossy -- most glaringly, the tokens are missing, awaiting a document
    * to be filled in from.
    * @param proto The serialized protobuf to read the sentence from.
    * @return A CoreMap, representing a sentence as stored in the protocol buffer (and therefore missing some fields)
    */
-  private static CoreMap fromProto(CoreNLPProtos.Sentence proto) {
+  protected CoreMap fromProtoNoTokens(CoreNLPProtos.Sentence proto) {
     CoreMap sentence = new ArrayCoreMap();
     // Required fields
     sentence.set(TokenBeginAnnotation.class, proto.getTokenOffsetBegin());
@@ -494,17 +687,48 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The protocol buffer to read the document from.
    * @return An Annotation corresponding to the read protobuf.
    */
-  public static Annotation fromProto(CoreNLPProtos.Document proto) {
+  public Annotation fromProto(CoreNLPProtos.Document proto) {
     // Set text
     Annotation ann = new Annotation(proto.getText());
 
     // Add tokens
-    List<CoreLabel> tokens = new ArrayList<CoreLabel>(proto.getTokenCount());
-    for (CoreNLPProtos.Token token : proto.getTokenList()) {
-      CoreLabel coreLabel = fromProto(token);
-      // Set docid
-      if (proto.hasDocID()) { coreLabel.setDocID(proto.getDocID()); }
-      tokens.add(coreLabel);
+    List<CoreLabel> tokens = new ArrayList<CoreLabel>();
+    if (proto.getSentenceCount() > 0) {
+      // Populate the tokens from the sentence
+      for (CoreNLPProtos.Sentence sentence : proto.getSentenceList()) {
+        // It's conceivable that the sentences are not contiguous -- pad this with nulls
+        while (sentence.hasTokenOffsetBegin() && tokens.size() < sentence.getTokenOffsetBegin()) {
+          tokens.add(null);
+        }
+        // Read the sentence
+        for (CoreNLPProtos.Token token : sentence.getTokenList()) {
+          CoreLabel coreLabel = fromProto(token);
+          // Set docid
+          if (proto.hasDocID()) { coreLabel.setDocID(proto.getDocID()); }
+          if (token.hasTokenBeginIndex() && token.hasTokenEndIndex()) {
+            // This is usually true, if enough annotators are defined
+            while (tokens.size() < sentence.getTokenOffsetEnd()) {
+              tokens.add(null);
+            }
+            for (int i = token.getTokenBeginIndex(); i < token.getTokenEndIndex(); ++i) {
+              tokens.set(token.getTokenBeginIndex(), coreLabel);
+            }
+          } else {
+            // Assume this token spans a single token, and just add it to the tokens list
+            tokens.add(coreLabel);
+          }
+        }
+      }
+    } else if (proto.getSentencelessTokenCount() > 0) {
+      // Eek -- no sentences. Try to recover tokens directly
+      if (proto.getSentencelessTokenCount() > 0) {
+        for (CoreNLPProtos.Token token : proto.getSentencelessTokenList()) {
+          CoreLabel coreLabel = fromProto(token);
+          // Set docid
+          if (proto.hasDocID()) { coreLabel.setDocID(proto.getDocID()); }
+          tokens.add(coreLabel);
+        }
+      }
     }
     if (!tokens.isEmpty()) { ann.set(TokensAnnotation.class, tokens); }
 
@@ -512,18 +736,31 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     List<CoreMap> sentences = new ArrayList<CoreMap>(proto.getSentenceCount());
     for (int sentIndex = 0; sentIndex < proto.getSentenceCount(); ++sentIndex) {
       CoreNLPProtos.Sentence sentence = proto.getSentence(sentIndex);
-      CoreMap map = fromProto(sentence);
-      if (!tokens.isEmpty() && sentence.hasTokenOffsetBegin() && sentence.hasTokenOffsetEnd()) {
+      CoreMap map = fromProtoNoTokens(sentence);
+      if (!tokens.isEmpty() && sentence.hasTokenOffsetBegin() && sentence.hasTokenOffsetEnd() &&
+          map.get(TokensAnnotation.class) == null) {
         // Set tokens for sentence
-        map.set(TokensAnnotation.class, tokens.subList(sentence.getTokenOffsetBegin(), sentence.getTokenOffsetEnd()));
+        int tokenBegin = sentence.getTokenOffsetBegin();
+        int tokenEnd = sentence.getTokenOffsetEnd();
+        assert tokenBegin <= tokens.size() && tokenBegin <= tokenEnd;
+        assert tokenEnd <= tokens.size();
+        map.set(TokensAnnotation.class, tokens.subList(tokenBegin, tokenEnd));
         // Set sentence index + token index + paragraph index
-        for (int i = sentence.getTokenOffsetBegin(); i < sentence.getTokenOffsetEnd(); ++i) {
+        for (int i = tokenBegin; i < tokenEnd; ++i) {
           tokens.get(i).setSentIndex(sentIndex);
           tokens.get(i).setIndex(i - sentence.getTokenOffsetBegin() + 1);
           if (sentence.hasParagraph()) { tokens.get(i).set(ParagraphAnnotation.class, sentence.getParagraph()); }
         }
         // Set text
-        map.set(TextAnnotation.class, proto.getText().substring(sentence.getCharacterOffsetBegin(), sentence.getCharacterOffsetEnd()));
+        int characterBegin = sentence.getCharacterOffsetBegin();
+        int characterEnd = sentence.getCharacterOffsetEnd();
+        if (characterEnd <= proto.getText().length()) {
+          // The usual case -- get the text from the document text
+          map.set(TextAnnotation.class, proto.getText().substring(characterBegin, characterEnd));
+        } else {
+          // The document text is wrong -- guess the text from the tokens
+          map.set(TextAnnotation.class, recoverOriginalText(tokens.subList(tokenBegin, tokenEnd), sentence));
+        }
       }
       // End iteration
       sentences.add(map);
@@ -560,12 +797,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       if (sentence.hasCollapsedCCProcessedDependencies()) {
         map.set(CollapsedCCProcessedDependenciesAnnotation.class, fromProto(sentence.getCollapsedCCProcessedDependencies(), sentenceTokens, docid));
       }
-    }
-
-    // Redo some light annotation
-    for (CoreMap sentence : sentences) {
-      if (sentence.containsKey(TokensAnnotation.class)) {
-        sentence.set(NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(sentence));
+      // Redo some light annotation
+      if ( map.containsKey(TokensAnnotation.class) &&
+          (!sentence.hasHasNumerizedTokensAnnotation() || sentence.getHasNumerizedTokensAnnotation())) {
+        map.set(NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(map));
       }
     }
 
@@ -581,7 +816,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The serialized tree.
    * @return A Tree object corresponding to the saved tree. This will always be a {@link LabeledScoredTreeNode}.
    */
-  public static Tree fromProto(CoreNLPProtos.ParseTree proto) {
+  public Tree fromProto(CoreNLPProtos.ParseTree proto) {
     LabeledScoredTreeNode node = new LabeledScoredTreeNode();
     // Set label
     if (proto.hasValue()) {
@@ -619,7 +854,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param docid A docid must be supplied, as it is not saved by the serialized representation.
    * @return A semantic graph corresponding to the saved object, on the provided sentence.
    */
-  private static SemanticGraph fromProto(CoreNLPProtos.DependencyGraph proto, List<CoreLabel> sentence, String docid) {
+  private SemanticGraph fromProto(CoreNLPProtos.DependencyGraph proto, List<CoreLabel> sentence, String docid) {
     SemanticGraph graph = new SemanticGraph();
 
     // first construct the actual nodes; keep them indexed by their index
@@ -631,24 +866,40 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       min = in.getIndex() < min ? in.getIndex() : min;
       max = in.getIndex() > max ? in.getIndex() : max;
     }
-    IndexedWord[] nodes = new IndexedWord[max - min >= 0 ? max - min + 1 : 0];
+    TwoDimensionalMap<Integer, Integer, IndexedWord> nodes = TwoDimensionalMap.hashMap();
     for(CoreNLPProtos.DependencyGraph.Node in: proto.getNodeList()){
       CoreLabel token = sentence.get(in.getIndex() - 1); // index starts at 1!
-      IndexedWord word = new IndexedWord(docid, in.getSentenceIndex(), in.getIndex(), token);
-      word.set(ValueAnnotation.class, word.get(TextAnnotation.class));
-      if(in.hasCopyAnnotation()){ word.set(CopyAnnotation.class, in.getCopyAnnotation()); }
+      IndexedWord word;
+      if (in.hasCopyAnnotation() && in.getCopyAnnotation() > 0) {
+        // TODO: if we make a copy wrapper CoreLabel, use it here instead
+        word = new IndexedWord(new CoreLabel(token));
+        word.set(CopyAnnotation.class, in.getCopyAnnotation());
+      } else {
+        word = new IndexedWord(token);
+      }
+
+      // for backwards compatibility - new annotations should have
+      // these fields set, but annotations older than August 2014 might not
+      if (word.docID() == null && docid != null) {
+        word.setDocID(docid);
+      }
+      if (word.sentIndex() < 0 && in.getSentenceIndex() >= 0) {
+        word.setSentIndex(in.getSentenceIndex());
+      }
+      if (word.index() < 0 && in.getIndex() >= 0) {
+        word.setIndex(in.getIndex());
+      }      
+
       assert in.getIndex() == word.index();
-      nodes[in.getIndex() - min] = word;
-    }
-    for (IndexedWord node : nodes) {
-      if (node != null) { graph.addVertex(node); }
+      nodes.put(in.getIndex(), in.getCopyAnnotation(), word);
+      graph.addVertex(word);
     }
 
     // add all edges to the actual graph
     for(CoreNLPProtos.DependencyGraph.Edge ie: proto.getEdgeList()){
-      IndexedWord source = nodes[ie.getSource() - min];
+      IndexedWord source = nodes.get(ie.getSource(), ie.getSourceCopy());
       assert(source != null);
-      IndexedWord target = nodes[ie.getTarget() - min];
+      IndexedWord target = nodes.get(ie.getTarget(), ie.getTargetCopy());
       assert(target != null);
       synchronized (globalLock) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
@@ -661,7 +912,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.getRootCount() > 0) {
       Collection<IndexedWord> roots = new ArrayList<IndexedWord>();
       for(int rootI : proto.getRootList()){
-        roots.add(nodes[rootI - min]);
+        roots.add(nodes.get(rootI, 0)); // copies should never be roots...
       }
       graph.setRoots(roots);
     } else {
@@ -683,7 +934,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    *                        order to fill in the mention span strings.
    * @return A coreference chain.
    */
-  private static CorefChain fromProto(CoreNLPProtos.CorefChain proto, Annotation partialDocument) {
+  private CorefChain fromProto(CoreNLPProtos.CorefChain proto, Annotation partialDocument) {
     // Get chain ID
     int cid = proto.getChainID();
     // Get mentions
@@ -710,7 +961,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           mentionProto.getMentionID(),
           mentionProto.getSentenceIndex() + 1,
           new IntTuple(new int[]{ mentionProto.getSentenceIndex() + 1, mentionProto.getPosition() }),
-          mentionSpan.substring(1));
+          mentionSpan.substring(mentionSpan.length() > 0 ? 1 : 0));
       // Register mention
       IntPair key = new IntPair(mentionProto.getSentenceIndex() - 1, mentionProto.getHeadIndex() - 1);
       if (!mentions.containsKey(key)) { mentions.put(key, new HashSet<CorefChain.CorefMention>()); }
@@ -729,7 +980,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param proto The serialized protocol buffer to read from.
    * @return A timex, with as much information filled in as was gleaned from the protocol buffer.
    */
-  private static Timex fromProto(CoreNLPProtos.Timex proto) {
+  private Timex fromProto(CoreNLPProtos.Timex proto) {
     return new Timex(
         proto.hasType() ? proto.getType() : null,
         proto.hasValue() ? proto.getValue() : null,
@@ -747,7 +998,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param sentence The sentence this mention is attached to.
    * @return The entity mention corresponding to the serialized object.
    */
-  private static EntityMention fromProto(CoreNLPProtos.Entity proto, CoreMap sentence) {
+  private EntityMention fromProto(CoreNLPProtos.Entity proto, CoreMap sentence) {
     EntityMention rtn = new EntityMention(
         proto.hasObjectID() ? proto.getObjectID() : null,
         sentence,
@@ -769,7 +1020,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param sentence The sentence this mention is attached to.
    * @return The relation mention corresponding to the serialized object.
    */
-  private static RelationMention fromProto(CoreNLPProtos.Relation proto, CoreMap sentence) {
+  private RelationMention fromProto(CoreNLPProtos.Relation proto, CoreMap sentence) {
     List<ExtractionObject> args = new ArrayList<ExtractionObject>();
     for (CoreNLPProtos.Entity arg : proto.getArgList()) {
       args.add(fromProto(arg, sentence));
@@ -788,4 +1039,36 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     return rtn;
   }
 
+  /**
+   * Recover the {@link edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation} field of a sentence
+   * from the tokens. This is useful if the text was not set in the protocol buffer, and therefore
+   * needs to be reconstructed from tokens.
+   *
+   * @param tokens The list of tokens representing this sentence.
+   * @return The original text of the sentence.
+   */
+  protected String recoverOriginalText(List<CoreLabel> tokens, CoreNLPProtos.Sentence sentence) {
+    StringBuilder text = new StringBuilder();
+    CoreLabel last = null;
+    if (tokens.size() > 0) {
+      CoreLabel token = tokens.get(0);
+      if (token.originalText() != null) { text.append(token.originalText()); } else { text.append(token.word()); }
+      last = tokens.get(0);
+    }
+    for (int i = 1; i < tokens.size(); ++i) {
+      CoreLabel token = tokens.get(i);
+      if (token.before() != null) {
+        text.append(token.before());
+        assert last != null;
+        int missingWhitespace = (token.beginPosition() - last.endPosition()) - token.before().length();
+        while (missingWhitespace > 0) {
+          text.append(' ');
+          missingWhitespace -= 1;
+        }
+      }
+      if (token.originalText() != null) { text.append(token.originalText()); } else { text.append(token.word()); }
+      last = token;
+    }
+    return text.toString();
+  }
 }

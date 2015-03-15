@@ -97,6 +97,8 @@ public class CreatePatterns {
 
   ConstantsAndVariables constVars;
 
+  Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken ;
+
   public CreatePatterns(Properties props, ConstantsAndVariables constVars)
       throws IOException {
     this.constVars = constVars;
@@ -126,7 +128,7 @@ public class CreatePatterns {
     String strgeneric = "";
     String strOriginal = "";
     boolean isLabeledO = true;
-    for (Entry<String, Class<? extends TypesafeMap.Key<String>>> e : constVars.answerClass.entrySet()) {
+    for (Entry<String, Class<? extends TypesafeMap.Key<String>>> e : constVars.getAnswerClass().entrySet()) {
       if (!tokenj.get(e.getValue()).equals(constVars.backgroundSymbol)) {
         isLabeledO = false;
         if (strgeneric.isEmpty()) {
@@ -492,11 +494,14 @@ public class CreatePatterns {
 
   }
 
-  public Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> getAllPatterns(
-      String label, Map<String, List<CoreLabel>> sents)
+  public Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> getPatternsForEachToken(){
+    return patternsForEachToken;
+  }
+
+  public Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> getAllPatterns(Map<String, List<CoreLabel>> sents)
       throws InterruptedException, ExecutionException {
 
-    Map<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>> patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>();
+    patternsForEachToken = new HashMap<String, Map<Integer, Triple<Set<SurfacePattern>, Set<SurfacePattern>, Set<SurfacePattern>>>>();
     List<String> keyset = new ArrayList<String>(sents.keySet());
 
     int num = 0;

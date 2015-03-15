@@ -117,6 +117,7 @@ public class WordsToSentencesAnnotator implements Annotator {
     // get text and tokens from the document
     String text = annotation.get(CoreAnnotations.TextAnnotation.class);
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
+    String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
     // System.err.println("Tokens are: " + tokens);
 
     // assemble the sentence annotations
@@ -174,6 +175,19 @@ public class WordsToSentencesAnnotator implements Annotator {
       String sectionEnd = sentenceEndToken.get(CoreAnnotations.SectionEndAnnotation.class);
       if (sectionEnd != null) {
         sectionAnnotations = null;
+      }
+      
+      if (docID != null) {
+        sentence.set(CoreAnnotations.DocIDAnnotation.class, docID);
+      }
+
+      int index = 1;
+      for (CoreLabel token : sentenceTokens) {
+        token.setIndex(index++);
+        token.setSentIndex(sentences.size());
+        if (docID != null) {
+          token.setDocID(docID);
+        }
       }
 
       // add the sentence to the list

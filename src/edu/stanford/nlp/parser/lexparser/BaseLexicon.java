@@ -10,11 +10,7 @@ import edu.stanford.nlp.trees.TreebankLanguagePack;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.HashIndex;
-import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.ReflectionLoading;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,6 +20,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -108,8 +105,8 @@ public class BaseLexicon implements Lexicon {
   protected boolean useSignatureForKnownSmoothing;
 
   /**
-   * Only used when training, specifically when training on sentenes
-   * that weren't part of annotated (eg markovized, etc) data
+   * Only used when training, specifically when training on sentences
+   * that weren't part of annotated (e.g., markovized, etc.) data.
    */
   private Map<String, Counter<String>> baseTagCounts = Generics.newHashMap();
 
@@ -173,6 +170,17 @@ public class BaseLexicon implements Lexicon {
     return seenCounter.getCount(iW) > 0.0;
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public Set<String> tagSet(Function<String,String> basicCategoryFunction) {
+    Set<String> tagSet = new HashSet<String>();
+    for (String tag : tagIndex.objectsList()) {
+      tagSet.add(basicCategoryFunction.apply(tag));
+    }
+    return tagSet;
+  }
+
+
   /**
    * Returns the possible POS taggings for a word.
    *
@@ -185,7 +193,7 @@ public class BaseLexicon implements Lexicon {
    *         <code>tag -&gt; word<code> rule.)
    */
   public Iterator<IntTaggedWord> ruleIteratorByWord(String word, int loc) {
-    return ruleIteratorByWord(wordIndex.indexOf(word, true), loc, null);
+    return ruleIteratorByWord(wordIndex.addToIndex(word), loc, null);
   }
 
   /** Generate the possible taggings for a word at a sentence position.
@@ -244,7 +252,7 @@ public class BaseLexicon implements Lexicon {
 
   @Override
   public Iterator<IntTaggedWord> ruleIteratorByWord(String word, int loc, String featureSpec) {
-    return ruleIteratorByWord(wordIndex.indexOf(word, true), loc, featureSpec);
+    return ruleIteratorByWord(wordIndex.addToIndex(word), loc, featureSpec);
   }
 
   protected void initRulesWithWord() {
@@ -252,7 +260,7 @@ public class BaseLexicon implements Lexicon {
       System.err.print("\nInitializing lexicon scores ... ");
     }
     // int numWords = words.size()+sigs.size()+1;
-    int unkWord = wordIndex.indexOf(UNKNOWN_WORD, true);
+    int unkWord = wordIndex.addToIndex(UNKNOWN_WORD);
     int numWords = wordIndex.size();
     rulesWithWord = new List[numWords];
     for (int w = 0; w < numWords; w++) {
@@ -930,7 +938,7 @@ public class BaseLexicon implements Lexicon {
     for (int i = 0; i < total; i++) {
       String tag = tagIndex.get(i);
       String baseTag = tlp.basicCategory(tag);
-      int j = tagIndex.indexOf(baseTag, true);
+      int j = tagIndex.addToIndex(baseTag);
       tagsToBaseTags[i] = j;
     }
   }
@@ -970,7 +978,7 @@ public class BaseLexicon implements Lexicon {
     for (int i = 3; i < args.length; i++) {
       if (lex.isKnown(args[i])) {
         System.out.println(args[i] + " is a known word.  Log probabilities [log P(w|t)] for its taggings are:");
-        for (Iterator<IntTaggedWord> it = lex.ruleIteratorByWord(wordIndex.indexOf(args[i], true), i - 3, null); it.hasNext(); ) {
+        for (Iterator<IntTaggedWord> it = lex.ruleIteratorByWord(wordIndex.addToIndex(args[i]), i - 3, null); it.hasNext(); ) {
           IntTaggedWord iTW = it.next();
           System.out.println(StringUtils.pad(iTW, 24) + nf.format(lex.score(iTW, i - 3, wordIndex.get(iTW.word), null)));
         }

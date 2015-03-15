@@ -1,6 +1,7 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.ErasureUtils;
@@ -30,28 +31,43 @@ class ShiftReduceUtils {
     return l1.equals(l2);
   }
 
+  /** Returns a 0-based index of the head of the tree.  Assumes the leaves had been indexed from 1 */
   static int headIndex(Tree tree) {
     CoreLabel label = ErasureUtils.uncheckedCast(tree.label());
     Tree head = label.get(TreeCoreAnnotations.HeadWordAnnotation.class);
     CoreLabel headLabel = ErasureUtils.uncheckedCast(head.label());
-    return headLabel.index();
+    return headLabel.index() - 1;
   }
 
+  /** Returns a 0-based index of the left leaf of the tree.  Assumes the leaves had been indexed from 1 */
   static int leftIndex(Tree tree) {
     if (tree.isLeaf()) {
       CoreLabel label = ErasureUtils.uncheckedCast(tree.label());
-      return label.index();
+      return label.index() - 1;
     }
 
     return leftIndex(tree.children()[0]);
   }
     
+  /** Returns a 0-based index of the right leaf of the tree.  Assumes the leaves had been indexed from 1 */
   static int rightIndex(Tree tree) {
     if (tree.isLeaf()) {
       CoreLabel label = ErasureUtils.uncheckedCast(tree.label());
-      return label.index();
+      return label.index() - 1;
     }
 
     return rightIndex(tree.children()[tree.children().length - 1]);
+  }
+
+  static boolean constraintMatchesTreeTop(Tree top, ParserConstraint constraint) {
+    while (true) {
+      if (constraint.state.matcher(top.value()).matches()) {
+        return true;
+      } else if (top.children().length == 1) {
+        top = top.children()[0];
+      } else {
+        return false;
+      } 
+    }
   }
 }

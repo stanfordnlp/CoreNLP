@@ -27,7 +27,6 @@
 package edu.stanford.nlp.parser.lexparser;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
@@ -41,7 +40,7 @@ import edu.stanford.nlp.parser.metrics.ParserQueryEval;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.Tokenizer;
 import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.HashIndex;
 import edu.stanford.nlp.util.Index;
 import edu.stanford.nlp.tagger.io.TaggedFileRecord;
@@ -113,6 +112,11 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   @Override
   public String[] defaultCoreNLPFlags() {
     return getTLPParams().defaultCoreNLPFlags();
+  }
+
+  @Override
+  public boolean requiresTags() {
+    return false;
   }
 
   private static final String SERIALIZED_PARSER_PROPERTY = "edu.stanford.nlp.SerializedLexicalizedParser";
@@ -270,34 +274,6 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     return trainFromTreebank(trainTreebank, null, op);
   }
 
-
-  /**
-   * Converts a Sentence/List/String into a Tree.  If it can't be parsed,
-   * it is made into a trivial tree in which each word is attached to a
-   * dummy tag ("X") and then to a start nonterminal (also "X").  In all
-   * circumstances, the input will be treated as a single sentence to be
-   * parsed.
-   *
-   * @param words The input sentence (a List of words)
-   * @return A Tree that is the parse tree for the sentence.  If the parser
-   *         fails, a new Tree is synthesized which attaches all words to the
-   *         root.
-   * @throws IllegalArgumentException If argument isn't a List or String
-   */
-  @Override
-  public Tree apply(List<? extends HasWord> words) {
-    return parse(words);
-  }
-
-  /**
-   * Will parse the text in <code>sentence</code> as if it represented
-   * a single sentence by first processing it with a tokenizer.
-   */
-  public Tree parse(String sentence) {
-    TokenizerFactory<? extends HasWord> tf = op.tlpParams.treebankLanguagePack().getTokenizerFactory();
-    Tokenizer<? extends HasWord> tokenizer = tf.getTokenizer(new BufferedReader(new StringReader(sentence)));
-    return parse(tokenizer.tokenize());
-  }
 
   /**
    * Will process a list of strings into a list of HasWord and return

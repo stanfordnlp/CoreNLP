@@ -3,11 +3,10 @@ package edu.stanford.nlp.parser.shiftreduce;
 import java.util.Arrays;
 import java.util.List;
 
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.trees.LabeledScoredTreeNode;
+import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.TreeShapedStack;
+
 
 /**
  * Transition that makes a compound unary parse node in a partially
@@ -17,12 +16,15 @@ import edu.stanford.nlp.util.TreeShapedStack;
  * @author John Bauer
  */
 public class CompoundUnaryTransition implements Transition {
-  /** labels[0] is the top of the unary chain */
+  /**
+   * labels[0] is the top of the unary chain.
+   * A unary chain that results in a ROOT will have labels[0] == ROOT, for example.
+   */
   public final String[] labels;
 
   /** root transitions are illegal in the middle of the tree, naturally */
   public final boolean isRoot;
-  
+
   public CompoundUnaryTransition(List<String> labels, boolean isRoot) {
     this.labels = new String[labels.size()];
     for (int i = 0; i < labels.size(); ++i) {
@@ -35,14 +37,14 @@ public class CompoundUnaryTransition implements Transition {
    * Legal as long as there is at least one item on the state's stack
    * and that item has not already been unary transformed.
    */
-  public boolean isLegal(State state) {
+  public boolean isLegal(State state, List<ParserConstraint> constraints) {
     if (state.finished) {
       return false;
     }
     if (state.stack.size() == 0) {
       return false;
     }
-    Tree top = state.stack.peek();
+    final Tree top = state.stack.peek();
     if (top.children().length == 1 && !top.isPreTerminal()) {
       // Disallow unary transitions after we've already had a unary transition
       return false;
@@ -61,8 +63,37 @@ public class CompoundUnaryTransition implements Transition {
     if (isRoot && (state.stack.size() > 1 || !state.endOfQueue())) {
       return false;
     }
+
+    // Now we check the constraints...
+    // Constraints only apply to CompoundUnaryTransitions if the tree
+    // is exactly the right size and the tree has not already been
+    // constructed to match the constraint.  In that case, we check to
+    // see if the candidate transition contains the desired label.
+    if (constraints == null) {
+      return true;
+    }
+
+    for (ParserConstraint constraint : constraints) {
+      if (ShiftReduceUtils.leftIndex(top) != constraint.start || ShiftReduceUtils.rightIndex(top) != constraint.end - 1) {
+        continue;
+      }
+      if (constraint.state.matcher(top.value()).matches()) {
+        continue;
+      }
+      boolean found = false;
+      for (String label : labels) {
+        if (constraint.state.matcher(label).matches()) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        return false;
+      }
+    }
+
     return true;
-  } 
+  }
 
   /**
    * Add a unary node to the existing node on top of the stack
@@ -107,6 +138,6 @@ public class CompoundUnaryTransition implements Transition {
     return "CompoundUnary" + (isRoot ? "*" : "") + "(" + Arrays.asList(labels).toString() + ")";
   }
 
-  private static final long serialVersionUID = 1;  
+  private static final long serialVersionUID = 1;
 
 }

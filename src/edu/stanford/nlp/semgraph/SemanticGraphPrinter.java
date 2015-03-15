@@ -3,11 +3,14 @@ package edu.stanford.nlp.semgraph;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 import java.util.Properties;
 
-import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.process.PTBTokenizer;
@@ -54,15 +57,13 @@ public class SemanticGraphPrinter {
       LexicalizedParser lp = LexicalizedParser.loadModel("/u/nlp/data/lexparser/englishPCFG.ser.gz", options);
       BufferedReader reader = null;
       try {
-        reader = new BufferedReader(new FileReader(sentFileName));
-      } catch (FileNotFoundException e) {
-        System.err.println("Cannot find " + sentFileName);
-        System.exit(1);
+        reader = IOUtils.readerFromString(sentFileName);
+      } catch (IOException e) {
+        throw new RuntimeIOException("Cannot find or open " + sentFileName, e);
       }
       try {
         System.out.println("Processing sentence file " + sentFileName);
-        String line;
-        while ((line = reader.readLine()) != null) {
+        for  (String line; (line = reader.readLine()) != null; ) {
           System.out.println("Processing sentence: " + line);
           PTBTokenizer<Word> ptb = PTBTokenizer.newPTBTokenizer(new StringReader(line));
           List<Word> words = ptb.tokenize();
@@ -85,15 +86,15 @@ public class SemanticGraphPrinter {
         System.out.println("TEST SEMANTIC GRAPH - graph ----------------------------");
         System.out.println(g1.toString());
         System.out.println("readable ----------------------------");
-        System.out.println(g1.toString("readable"));
+        System.out.println(g1.toString(SemanticGraph.OutputFormat.READABLE));
         System.out.println("List of dependencies ----------------------------");
         System.out.println(g1.toList());
         System.out.println("xml ----------------------------");
-        System.out.println(g1.toString("xml"));
+        System.out.println(g1.toString(SemanticGraph.OutputFormat.XML));
         System.out.println("dot ----------------------------");
         System.out.println(g1.toDotFormat());
         System.out.println("dot (simple) ----------------------------");
-        System.out.println(g1.toDotFormat("Simple", IndexedWord.WORD_FORMAT));
+        System.out.println(g1.toDotFormat("Simple", CoreLabel.OutputFormat.VALUE));
 
         // System.out.println(" graph ----------------------------");
         // System.out.println(t.allTypedDependenciesCCProcessed(false));
@@ -101,7 +102,8 @@ public class SemanticGraphPrinter {
     }
 
     if (save != null) {
-
+      System.err.println("Save not implemented!");
     }
   } // end main
+
 }

@@ -14,14 +14,16 @@ public abstract class AnnotatorFactory implements Factory<Annotator> {
   private static final long serialVersionUID = -1554647325549869340L;
 
   protected final Properties properties;
+  private final AnnotatorImplementations implementations;
 
-  protected AnnotatorFactory(Properties properties) {
+  protected AnnotatorFactory(Properties properties, AnnotatorImplementations implementations) {
     // Let's copy the properties, just in case somebody messes with this object later.
     // By using stringPropertyNames(), we also pick up any defaults the Properties has.
     this.properties = new Properties();
     for (String key : properties.stringPropertyNames()) {
       this.properties.setProperty(key, properties.getProperty(key));
     }
+    this.implementations = implementations;
   }
 
   /**
@@ -37,7 +39,11 @@ public abstract class AnnotatorFactory implements Factory<Annotator> {
    * We use this to understand if the user wants to recreate
    * the same annotator type but with different parameters.
    */
-  public abstract String signature();
+  public String signature() {
+    return this.implementations.getClass().getName() + ":" + additionalSignature();
+  }
+
+  protected abstract String additionalSignature();
 
   /**
    * Can be used to get a signature by iterating over the properties
@@ -50,9 +56,10 @@ public abstract class AnnotatorFactory implements Factory<Annotator> {
     StringBuilder signature = new StringBuilder();
     for (String key : props.stringPropertyNames()) {
       if (key.startsWith(prefix)) {
-        signature.append(key + "=" + props.getProperty(key) + "\n");
+        signature.append(key).append("=").append(props.getProperty(key)).append("\n");
       }
     }
     return signature.toString();
   }
+
 }

@@ -37,7 +37,6 @@ public class CleanXmlAnnotator implements Annotator{
   public static final String DEFAULT_SENTENCE_ENDERS = "";
 
   /**
-<<<<<<< HEAD
    * This tells us what tags denote single sentences (tokens inside should not be sentence split on)
    */
   private Pattern singleSentenceTagMatcher = null;
@@ -45,10 +44,7 @@ public class CleanXmlAnnotator implements Annotator{
   public static final String DEFAULT_SINGLE_SENTENCE_TAGS = null;
 
   /**
-   * This tells us which XML tags wrap document date
-=======
    * This tells us which XML tags wrap document date.
->>>>>>> master
    */
   private final Pattern dateTagMatcher;
 

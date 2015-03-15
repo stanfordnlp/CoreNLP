@@ -1,6 +1,9 @@
 package edu.stanford.nlp.parser.shiftreduce;
 
 import java.io.Serializable;
+import java.util.List;
+
+import edu.stanford.nlp.parser.common.ParserConstraint;
 
 /**
  * An interface which defines a transition type in the shift-reduce
@@ -15,7 +18,7 @@ public interface Transition extends Serializable {
   /**
    * Whether or not it is legal to apply this transition to this state.
    */
-  public boolean isLegal(State state);
+  public boolean isLegal(State state, List<ParserConstraint> constraints);
 
   /**
    * Applies this transition to get a new state.

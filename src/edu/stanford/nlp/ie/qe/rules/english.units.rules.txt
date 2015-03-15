@@ -1,0 +1,68 @@
+SI_UNIT_MAP = {
+"meter": LENGTH_METER,
+"gram": WEIGHT_GRAM,
+"second": TIME_SECOND,
+"ampere": CURRENT_AMPERE,
+"liter": VOLUME_LITER
+}
+$SiUnits = CreateRegex(Keys(SI_UNIT_MAP))
+
+SI_SYM_UNIT_MAP = {
+"m": LENGTH_METER,
+"g": WEIGHT_GRAM,
+"s": TIME_SECOND,
+"A": CURRENT_AMPERE,
+"l": VOLUME_LITER
+}
+$SiSymUnits = CreateRegex(Keys(SI_SYM_UNIT_MAP))
+
+SYM_UNIT_MAP = {
+"m": LENGTH_METER,
+"g": WEIGHT_GRAM,
+"s": TIME_SECOND,
+"A": CURRENT_AMPERE,
+"K": TEMPERATURE_KELVIN,
+"l": VOLUME_LITER,
+"acre": AREA_ACRE,
+"tsp": VOLUME_TEASPOON,
+"Tbsp": VOLUME_TABLESPOON,
+"mi": LENGTH_MILE,
+"ft": LENGTH_FOOT,
+"'": LENGTH_FOOT,
+"in": LENGTH_INCH,
+"''": LENGTH_INCH,
+"yd": LENGTH_YARD,
+"lb": WEIGHT_POUND,
+"oz": WEIGHT_OUNCE,
+"°F": TEMPERATURE_FAHRENHEIT,
+"°C": TEMPERATURE_CELSIUS
+}
+$SymUnits = CreateRegex(Keys(SYM_UNIT_MAP))
+
+ENV.defaults["stage"] = 0
+{ pattern: ( /dollars?/ ), action: Tag($0, "Unit", MONEY_DOLLAR) }
+{ pattern: ( /cents?/ ), action: Tag($0, "Unit", MONEY_CENT) }
+{ pattern: ( /pounds?/ ), action: Tag($0, "Unit", MONEY_POUND) }
+{ pattern: ( /penny|pennies|pences?/ ), action: Tag($0, "Unit", MONEY_PENNY) }
+{ pattern: ( /yen/ ), action: Tag($0, "Unit", MONEY_YEN) }
+{ pattern: ( /euros?/ ), action: Tag($0, "Unit", MONEY_EURO) }
+{ pattern: ( /yuan/ ), action: Tag($0, "Unit", MONEY_YUAN) }
+{ pattern: ( /meters?/ ), action: Tag($0, "Unit", LENGTH_METER) }
+{ pattern: ( /metres?/ ), action: Tag($0, "Unit", LENGTH_METER) }
+{ pattern: ( /miles?/ ), action: Tag($0, "Unit", LENGTH_MILE) }
+{ pattern: ( /yards?/ ), action: Tag($0, "Unit", LENGTH_YARD) }
+{ pattern: ( /foot|feet/ ), action: Tag($0, "Unit", LENGTH_FOOT) }
+{ pattern: ( /inch(es)?/ ), action: Tag($0, "Unit", LENGTH_INCH) }
+{ pattern: ( /degrees?/? /Fahrenheit/ ), action: Tag($0, "Unit", TEMPERATURE_FAHRENHEIT) }
+{ pattern: ( /degrees?/? /Celsius/ ), action: Tag($0, "Unit", TEMPERATURE_CELSIUS) }
+{ pattern: ( /degrees?/ /F/ ), action: Tag($0, "Unit", TEMPERATURE_FAHRENHEIT) }
+{ pattern: ( /degrees?/ /C/ ), action: Tag($0, "Unit", TEMPERATURE_CELSIUS) }
+{ pattern: ( /°F/ ), action: Tag($0, "Unit", TEMPERATURE_FAHRENHEIT) }
+{ pattern: ( /°C/ ), action: Tag($0, "Unit", TEMPERATURE_CELSIUS) }
+{ pattern: ( /acres?/ ), action: Tag($0, "Unit", AREA_ACRE) }
+{ pattern: ( /litres?/ ), action: Tag($0, "Unit", VOLUME_LITER) }
+{ pattern: ( /liters?/ ), action: Tag($0, "Unit", VOLUME_LITER) }
+{ pattern: ( /tablespoons?/ ), action: Tag($0, "Unit", VOLUME_TABLESPOON) }
+{ pattern: ( /teaspoons?/ ), action: Tag($0, "Unit", VOLUME_TEASPOON) }
+{ pattern: ( /grams?/ ), action: Tag($0, "Unit", WEIGHT_GRAM) }
+{ pattern: ( /pounds?/ ), action: Tag($0, "Unit", WEIGHT_POUND) }

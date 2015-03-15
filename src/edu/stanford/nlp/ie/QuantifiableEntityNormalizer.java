@@ -987,56 +987,68 @@ public class QuantifiableEntityNormalizer {
 
     if (DEBUG) System.err.println("Quantifiable: working on " + s);
     String p = null;
-    if (entityType.equals("NUMBER")) {
-      p = "";
-      if (compModifier != null) {
-        p = compModifier;
+    switch (entityType) {
+      case "NUMBER": {
+        p = "";
+        if (compModifier != null) {
+          p = compModifier;
+        }
+        String q = normalizedNumberString(s, nextWord, numberFromSUTime);
+        if (q != null) {
+          p = p.concat(q);
+        } else {
+          p = null;
+        }
+        break;
       }
-      String q = normalizedNumberString(s, nextWord, numberFromSUTime);
-      if (q != null) {
-        p = p.concat(q);
-      } else {
-        p = null;
+      case "ORDINAL":
+        p = normalizedOrdinalString(s, numberFromSUTime);
+        break;
+      case "DURATION":
+        // SUTime marks some ordinals, e.g., "22nd time", as durations
+        p = normalizedDurationString(s, timexFromSUTime);
+        break;
+      case "MONEY": {
+        p = "";
+        if (compModifier != null) {
+          p = compModifier;
+        }
+        String q = normalizedMoneyString(s, numberFromSUTime);
+        if (q != null) {
+          p = p.concat(q);
+        } else {
+          p = null;
+        }
+        break;
       }
-    } else if (entityType.equals("ORDINAL")) {
-      p = normalizedOrdinalString(s, numberFromSUTime);
-    } else if (entityType.equals("DURATION")) {
-      // SUTime marks some ordinals, e.g., "22nd time", as durations
-      p = normalizedDurationString(s, timexFromSUTime);
-    } else if (entityType.equals("MONEY")) {
-      p = "";
-      if(compModifier!=null) {
-        p = compModifier;
+      case "DATE":
+        p = normalizedDateString(s, timexFromSUTime);
+        break;
+      case "TIME": {
+        p = "";
+        if (compModifier != null && !compModifier.matches("am|pm")) {
+          p = compModifier;
+        }
+        String q = normalizedTimeString(s, compModifier != null ? compModifier : "", timexFromSUTime);
+        if (q != null && q.length() == 1 && !q.equals("D")) {
+          p = p.concat(q);
+        } else {
+          p = q;
+        }
+        break;
       }
-      String q = normalizedMoneyString(s, numberFromSUTime);
-      if (q != null) {
-        p = p.concat(q);
-      } else {
-        p = null;
-      }
-    } else if (entityType.equals("DATE")) {
-      p = normalizedDateString(s, timexFromSUTime);
-    } else if (entityType.equals("TIME")) {
-      p = "";
-      if (compModifier != null && ! compModifier.matches("am|pm")) {
-        p = compModifier;
-      }
-      String q = normalizedTimeString(s, compModifier != null ? compModifier : "", timexFromSUTime);
-      if (q != null && q.length() == 1 && !q.equals("D")) {
-        p = p.concat(q);
-      } else {
-        p = q;
-      }
-    } else if (entityType.equals("PERCENT")) {
-      p = "";
-      if (compModifier != null) {
-        p = compModifier;
-      }
-      String q = normalizedPercentString(s, numberFromSUTime);
-      if (q != null) {
-        p = p.concat(q);
-      } else {
-        p = null;
+      case "PERCENT": {
+        p = "";
+        if (compModifier != null) {
+          p = compModifier;
+        }
+        String q = normalizedPercentString(s, numberFromSUTime);
+        if (q != null) {
+          p = p.concat(q);
+        } else {
+          p = null;
+        }
+        break;
       }
     }
     if (DEBUG) {
@@ -1259,6 +1271,45 @@ public class QuantifiableEntityNormalizer {
   public static <E extends CoreMap> void addNormalizedQuantitiesToEntities(List<E> l, boolean concatenate) {
     addNormalizedQuantitiesToEntities(l, concatenate, false);
   }
+
+  private static boolean checkStrings(String s1, String s2) {
+    if (s1 == null || s2 == null) {
+      return s1 == s2;
+    } else {
+      return s1.equals(s2);
+    }
+  }
+
+  private static boolean checkNumbers(Number n1, Number n2) {
+    if (n1 == null || n2 == null) {
+      return n1 == n2;
+    } else {
+      return n1.equals(n2);
+    }
+  }
+
+  public static <E extends CoreMap> boolean isCompatible(String tag, E prev, E cur) {
+    if ("NUMBER".equals(tag) || "ORDINAL".equals(tag)) {
+      // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
+      Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+      Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+      boolean compatible = checkNumbers(n1,n2);
+      if (!compatible) return compatible;
+    }
+
+    if ("TIME".equals(tag) || "SET".equals(tag) || "DATE".equals(tag) || "DURATION".equals(tag)) {
+      // Check timex...
+      Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
+      Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
+      String tid1 = (timex1 != null)? timex1.tid():null;
+      String tid2 = (timex2 != null)? timex2.tid():null;
+      boolean compatible = checkStrings(tid1,tid2);
+      if (!compatible) return compatible;
+    }
+
+    return true;
+  }
+
   /**
    * Identifies contiguous MONEY, TIME, DATE, or PERCENT entities
    * and tags each of their constituents with a "normalizedQuantity"
@@ -1300,39 +1351,44 @@ public class QuantifiableEntityNormalizer {
         }
       }
 
+      E wprev = (i > 0)? list.get(i-1):null;
       // if the current wi is a non-continuation and the last one was a
       // quantity, we close and process the last segment.
-      if ((currNerTag == null || ! currNerTag.equals(prevNerTag)) && quantifiable.contains(prevNerTag)) {
+      if ((currNerTag == null || ! currNerTag.equals(prevNerTag) || !isCompatible(prevNerTag, wprev, wi)) && quantifiable.contains(prevNerTag)) {
         String compModifier = null;
         // special handling of TIME
-        if (prevNerTag.equals("TIME")) {
-          processEntity(collector, prevNerTag, timeModifier, nextWord);
-        } else if (prevNerTag.equals(("DATE"))) {
-          //detect date range modifiers by looking at nearby words
-          E prev = (beforeIndex >= 0) ? list.get(beforeIndex) : null;
-          if (usesSUTime) {
-            // If sutime was used don't do any weird relabeling of more things as DATE
-            compModifier = detectDateRangeModifier(prev);
-          } else {
-            compModifier = detectDateRangeModifier(collector, list, beforeIndex, i);
-          }
-          if (!compModifier.equals(ISODateInstance.BOUNDED_RANGE))
+        switch (prevNerTag) {
+          case "TIME":
+            processEntity(collector, prevNerTag, timeModifier, nextWord);
+            break;
+          case ("DATE"):
+            //detect date range modifiers by looking at nearby words
+            E prev = (beforeIndex >= 0) ? list.get(beforeIndex) : null;
+            if (usesSUTime) {
+              // If sutime was used don't do any weird relabeling of more things as DATE
+              compModifier = detectDateRangeModifier(prev);
+            } else {
+              compModifier = detectDateRangeModifier(collector, list, beforeIndex, i);
+            }
+            if (!compModifier.equals(ISODateInstance.BOUNDED_RANGE))
+              processEntity(collector, prevNerTag, compModifier, nextWord);
+            //now repair this date if it's more than one word
+            //doesn't really matter which one we keep ideally we should be doing lemma/etc matching anyway
+            //but we vaguely try to deal with this by choosing the NNP or the CD
+            if (concatenate)
+              concatenateNumericString(collector, toRemove);
+            break;
+          default:
+            // detect "more than", "nearly", etc. by looking at nearby words.
+            if (prevNerTag.equals("MONEY") || prevNerTag.equals("NUMBER") ||
+                prevNerTag.equals("PERCENT")) {
+              compModifier = detectQuantityModifier(list, beforeIndex, i);
+            }
             processEntity(collector, prevNerTag, compModifier, nextWord);
-          //now repair this date if it's more than one word
-          //doesn't really matter which one we keep ideally we should be doing lemma/etc matching anyway
-          //but we vaguely try to deal with this by choosing the NNP or the CD
-          if (concatenate)
-            concatenateNumericString(collector, toRemove);
-        } else {
-          // detect "more than", "nearly", etc. by looking at nearby words.
-          if (prevNerTag.equals("MONEY") || prevNerTag.equals("NUMBER") ||
-              prevNerTag.equals("PERCENT")) {
-            compModifier = detectQuantityModifier(list, beforeIndex, i);
-          }
-          processEntity(collector, prevNerTag, compModifier, nextWord);
-          if (concatenate) {
-            concatenateNumericString(collector, toRemove);
-          }
+            if (concatenate) {
+              concatenateNumericString(collector, toRemove);
+            }
+            break;
         }
 
         collector = new ArrayList<E>();

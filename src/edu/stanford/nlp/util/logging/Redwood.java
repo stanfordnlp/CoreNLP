@@ -15,7 +15,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
+import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.IterableIterator;
 
 /**
  * A hierarchical channel based logger. Log messages are arranged hierarchically by depth
@@ -289,14 +291,11 @@ public class Redwood {
     //--Handle Record
     if(isThreaded){
       //(case: multithreaded)
-      final Runnable log = new Runnable(){
-        @Override
-        public void run(){
-          assert !isThreaded || control.isHeldByCurrentThread();
-          Record toPass = new Record(content,tags,depth,timestamp);
-          handlers.process(toPass, MessageType.SIMPLE,depth, toPass.timesstamp);
-          assert !isThreaded || control.isHeldByCurrentThread();
-        }
+      final Runnable log = () -> {
+        assert !isThreaded || control.isHeldByCurrentThread();
+        Record toPass = new Record(content,tags,depth,timestamp);
+        handlers.process(toPass, MessageType.SIMPLE,depth, toPass.timesstamp);
+        assert !isThreaded || control.isHeldByCurrentThread();
       };
       long threadId = Thread.currentThread().getId();
       attemptThreadControl( threadId, log );
@@ -373,21 +372,18 @@ public class Redwood {
     if(isClosed){ return; }
     //--Make Task
     final long timestamp = System.currentTimeMillis();
-    Runnable endTrack = new Runnable(){
-      @Override
-      public void run(){
-        assert !isThreaded || control.isHeldByCurrentThread();
-        String expected = titleStack.pop();
-        //(check name match)
-        if (!isThreaded && !expected.equalsIgnoreCase(title)){
-          throw new IllegalArgumentException("Track names do not match: expected: " + expected + " found: " + title);
-        }
-        //(decrement depth)
-        depth -= 1;
-        //(send signal)
-        handlers.process(null, MessageType.END_TRACK, depth, timestamp);
-        assert !isThreaded || control.isHeldByCurrentThread();
+    Runnable endTrack = () -> {
+      assert !isThreaded || control.isHeldByCurrentThread();
+      String expected = titleStack.pop();
+      //(check name match)
+      if (!isThreaded && !expected.equalsIgnoreCase(title)){
+        throw new IllegalArgumentException("Track names do not match: expected: " + expected + " found: " + title);
       }
+      //(decrement depth)
+      depth -= 1;
+      //(send signal)
+      handlers.process(null, MessageType.END_TRACK, depth, timestamp);
+      assert !isThreaded || control.isHeldByCurrentThread();
     };
     //--Run Task
     if(isThreaded){
@@ -429,12 +425,7 @@ public class Redwood {
   public static void finishThread(){
     //--Create Task
     final long threadId = Thread.currentThread().getId();
-    Runnable finish = new Runnable(){
-      @Override
-      public void run(){
-        releaseThreadControl(threadId);
-      }
-    };
+    Runnable finish = () -> releaseThreadControl(threadId);
     //--Run Task
     if(isThreaded){
       //(case: multithreaded)
@@ -832,20 +823,17 @@ public class Redwood {
     private void sort(){
       //(sort flags)
       if(!channelsSorted && channels.length > 1){
-        Arrays.sort(channels, new Comparator<Object>() {
-          @Override
-          public int compare(Object a, Object b) {
-            if (a == FORCE) {
-              return -1;
-            } else if (b == FORCE) {
-              return 1;
-            } else if (a instanceof Flag && !(b instanceof Flag)) {
-              return -1;
-            } else if (b instanceof Flag && !(a instanceof Flag)) {
-              return 1;
-            } else {
-              return a.toString().compareTo(b.toString());
-            }
+        Arrays.sort(channels, (a, b) -> {
+          if (a == FORCE) {
+            return -1;
+          } else if (b == FORCE) {
+            return 1;
+          } else if (a instanceof Flag && !(b instanceof Flag)) {
+            return -1;
+          } else if (b instanceof Flag && !(a instanceof Flag)) {
+            return 1;
+          } else {
+            return a.toString().compareTo(b.toString());
           }
         });
       }
@@ -911,7 +899,7 @@ public class Redwood {
     /** {@inheritDoc} */
     @Override
     public void print(Object[] channels, String line) {
-      printWriter.write(line);
+      printWriter.write(line == null ? "null" : line);
       printWriter.flush();
     }
   }
@@ -1001,54 +989,83 @@ public class Redwood {
      * @param runnables The Runnables representing the tasks being run, without the Redwood overhead
      * @return A new collection of Runnables with the Redwood overhead taken care of
      */
-    public static ArrayList<Runnable> thread(final String title, Iterable<Runnable> runnables){
+    public static Iterable<Runnable> thread(final String title, Iterable<Runnable> runnables){
       //--Preparation
       //(variables)
       final AtomicBoolean haveStarted = new AtomicBoolean(false);
       final ReentrantLock metaInfoLock = new ReentrantLock();
       final AtomicInteger numPending = new AtomicInteger(0);
+      final Iterator<Runnable> iter = runnables.iterator();
       //--Create Runnables
-      ArrayList<Runnable> rtn = new ArrayList<Runnable>();
-      for(final Runnable runnable : runnables){
-        rtn.add(new Runnable(){
-          @Override
-          public void run(){
-            try{
-              //(signal start of threads)
-              metaInfoLock.lock();
-              if(!haveStarted.getAndSet(true)){
-                startThreads(title); //<--this must be a blocking operation
-              }
-              metaInfoLock.unlock();
-              //(run runnable)
-              try{
-                runnable.run();
-              } catch (Exception e){
-                e.printStackTrace();
-                System.exit(1);
-              } catch (AssertionError e) {
-                e.printStackTrace();
-                System.exit(1);
-              }
-              //(signal end of thread)
-              finishThread();
-              //(signal end of threads)
-              int numStillPending = numPending.decrementAndGet();
-              if(numStillPending <= 0){
-                endThreads(title);
-              }
-            } catch(Throwable t){
-              t.printStackTrace();
-              System.exit(1);
-            }
+      return new IterableIterator<Runnable>(new Iterator<Runnable>() {
+        @Override
+        public boolean hasNext() {
+          synchronized (iter) {
+            return iter.hasNext();
           }
-        });
-        numPending.incrementAndGet();
-      }
-      //--Return
-      return rtn;
+        }
+        @Override
+        public synchronized Runnable next() {
+          final Runnable runnable;
+          synchronized (iter) {
+            runnable = iter.next();
+          }
+          // (don't flood the queu)
+          while (numPending.get() > 100) {
+            try { Thread.sleep(100); }
+            catch (InterruptedException e) { }
+          }
+          numPending.incrementAndGet();
+          // (add the job)
+          Runnable toReturn = new Runnable(){
+            public void run(){
+              boolean threadFinished = false;
+              try{
+                //(signal start of threads)
+                metaInfoLock.lock();
+                if(!haveStarted.getAndSet(true)){
+                  startThreads(title); //<--this must be a blocking operation
+                }
+                metaInfoLock.unlock();
+                //(run runnable)
+                try{
+                  runnable.run();
+                } catch (Exception e){
+                  e.printStackTrace();
+                  System.exit(1);
+                } catch (AssertionError e) {
+                  e.printStackTrace();
+                  System.exit(1);
+                }
+                //(signal end of thread)
+                finishThread();
+                threadFinished = true;
+                //(signal end of threads)
+                int numStillPending = numPending.decrementAndGet();
+                synchronized (iter) {
+                  if (numStillPending <= 0 && !iter.hasNext()) {
+                    endThreads(title);
+                  }
+                }
+              } catch(Throwable t){
+                t.printStackTrace();
+                if (!threadFinished) { finishThread(); }
+              }
+            }
+          };
+          return toReturn;
+        }
+
+        @Override
+        public void remove() {
+          synchronized (iter) {
+            iter.remove();
+          }
+        }
+      });
     }
-    public static ArrayList<Runnable> thread(Iterable<Runnable> runnables){ return thread("", runnables); }
+
+    public static Iterable<Runnable> thread(Iterable<Runnable> runnables){ return thread("", runnables); }
 
     /**
      * Thread a collection of runnables, and run them via a java Executor.
@@ -1061,7 +1078,7 @@ public class Redwood {
      */
     public static void threadAndRun(String title, Iterable<Runnable> runnables, int numThreads){
       // (short circuit if single thread)
-      if (numThreads <= 1 || isThreaded) {
+      if (numThreads <= 1 || isThreaded || (runnables instanceof Collection && ((Collection<Runnable>) runnables).size() <= 1)) {
         startTrack( "Threads (" + title + ")" );
         for (Runnable toRun : runnables) { toRun.run(); }
         endTrack( "Threads (" + title + ")" );
@@ -1087,7 +1104,7 @@ public class Redwood {
       threadAndRun(""+numThreads, runnables, numThreads);
     }
     public static void threadAndRun(Iterable<Runnable> runnables){
-      threadAndRun(runnables,Runtime.getRuntime().availableProcessors());
+      threadAndRun(runnables, Execution.threads);
     }
 
     /**
@@ -1229,27 +1246,24 @@ public class Redwood {
     LinkedList<Runnable> tasks = new LinkedList<Runnable>();
     for(int i=0; i<1000; i++){
       final int fI = i;
-      tasks.add(new Runnable(){
-        @Override
-        public void run(){
-          startTrack("Runnable " + fI);
-          log(Thread.currentThread().getId());
-          log("message " + fI + ".1");
-          log("message " + fI + ".2");
-          log("message " + fI + ".3");
-          log(FORCE,"message " + fI + ".4");
-          log("message " + fI + ".5");
-          forceTrack("Runnable " + fI + ".1");
-          endTrack("Runnable " + fI + ".1");
-          forceTrack("Runnable " + fI + ".2");
-          log("a message");
-          endTrack("Runnable " + fI + ".2");
-          forceTrack("Runnable " + fI + ".3");
-          log("a message");
-          log(FORCE,"A forced message");
-          endTrack("Runnable " + fI + ".3");
-          endTrack("Runnable " + fI);
-        }
+      tasks.add(() -> {
+        startTrack("Runnable " + fI);
+        log(Thread.currentThread().getId());
+        log("message " + fI + ".1");
+        log("message " + fI + ".2");
+        log("message " + fI + ".3");
+        log(FORCE,"message " + fI + ".4");
+        log("message " + fI + ".5");
+        forceTrack("Runnable " + fI + ".1");
+        endTrack("Runnable " + fI + ".1");
+        forceTrack("Runnable " + fI + ".2");
+        log("a message");
+        endTrack("Runnable " + fI + ".2");
+        forceTrack("Runnable " + fI + ".3");
+        log("a message");
+        log(FORCE,"A forced message");
+        endTrack("Runnable " + fI + ".3");
+        endTrack("Runnable " + fI);
       });
     }
     startTrack("Wrapper");
@@ -1363,19 +1377,16 @@ public class Redwood {
     startThreads("name");
     for(int i=0; i<50; i++){
       final int theI = i;
-      exec.execute(new Runnable(){
-        @Override
-        public void run() {
-          startTrack("Thread " + theI + " (" + Thread.currentThread().getId() + ")");
-          for(int time=0; time<5; time++){
-            log("tick " + time + " from " + theI + " (" + Thread.currentThread().getId() + ")");
-            try {
-              Thread.sleep(50);
-            } catch (Exception e) {}
-          }
-          endTrack("Thread " + theI + " (" + Thread.currentThread().getId() + ")");
-          finishThread();
+      exec.execute(() -> {
+        startTrack("Thread " + theI + " (" + Thread.currentThread().getId() + ")");
+        for(int time=0; time<5; time++){
+          log("tick " + time + " from " + theI + " (" + Thread.currentThread().getId() + ")");
+          try {
+            Thread.sleep(50);
+          } catch (Exception e) {}
         }
+        endTrack("Thread " + theI + " (" + Thread.currentThread().getId() + ")");
+        finishThread();
       });
 
     }

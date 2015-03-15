@@ -152,8 +152,7 @@ public class BuildBinarizedDataset {
     }
 
     LexicalizedParser parser = LexicalizedParser.loadModel(parserModel);
-    TreeBinarizer binarizer = new TreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack(), 
-                                                false, false, 0, false, false, 0.0, false, true, true);
+    TreeBinarizer binarizer = TreeBinarizer.simpleTreeBinarizer(parser.getTLPParams().headFinder(), parser.treebankLanguagePack());
 
     if (sentimentModelPath != null) {
       sentimentModel = SentimentModel.loadSerialized(sentimentModelPath);

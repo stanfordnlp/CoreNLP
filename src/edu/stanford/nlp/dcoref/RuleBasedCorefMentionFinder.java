@@ -17,6 +17,7 @@ import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.parser.common.ParserAnnotations;
 import edu.stanford.nlp.parser.common.ParserConstraint;
 import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.AnnotationPipeline;
 import edu.stanford.nlp.pipeline.Annotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.HeadFinder;
@@ -447,8 +448,23 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
 
   private Annotator getParser() {
     if(parserProcessor == null){
-      parserProcessor = StanfordCoreNLP.getExistingAnnotator("parse");
-      assert(parserProcessor != null);
+      Annotator parser = StanfordCoreNLP.getExistingAnnotator("parse");
+      if (parser == null) {
+        // TODO: these assertions rule out the possibility of alternately named parse/pos annotators
+        throw new AssertionError("Failed to get parser - this should not be possible");
+      }
+      if (parser.requires().contains(Annotator.POS_REQUIREMENT)) {
+        Annotator tagger = StanfordCoreNLP.getExistingAnnotator("pos");
+        if (tagger == null) {
+          throw new AssertionError("Parser required tagger, but failed to find the pos annotator");
+        }
+        List<Annotator> annotators = Generics.newArrayList();
+        annotators.add(tagger);
+        annotators.add(parser);        
+        parserProcessor = new AnnotationPipeline(annotators);
+      } else {
+        parserProcessor = parser;
+      }
     }
     return parserProcessor;
   }

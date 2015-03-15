@@ -2,11 +2,9 @@ package edu.stanford.nlp.parser.shiftreduce;
 
 import java.util.List;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.TreeShapedStack;
 
 public class BasicFeatureFactory extends FeatureFactory {
@@ -38,8 +36,8 @@ public class BasicFeatureFactory extends FeatureFactory {
     features.add(wtFeature + tag + "-" + word);
   }
 
-  public static void addBinaryFeatures(List<String> features, 
-                                       String name1, CoreLabel label1, FeatureComponent feature11, FeatureComponent feature12, 
+  public static void addBinaryFeatures(List<String> features,
+                                       String name1, CoreLabel label1, FeatureComponent feature11, FeatureComponent feature12,
                                        String name2, CoreLabel label2, FeatureComponent feature21, FeatureComponent feature22) {
     if (label1 == null) {
       if (label2 == null) {
@@ -245,6 +243,27 @@ public class BasicFeatureFactory extends FeatureFactory {
     addUnaryQueueFeatures(features, nextLabel, nodeName + "EN-" + nodeValue);
   }
 
+  /**
+   * Also did not seem to help
+   */
+  public void addExtraTrigramFeatures(List<String> features, CoreLabel s0Label, CoreLabel s1Label, CoreLabel s2Label, CoreLabel q0Label, CoreLabel q1Label) {
+    addTrigramFeature(features, "S0wS1wS2c-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.HEADWORD, s2Label, FeatureComponent.VALUE);
+    addTrigramFeature(features, "S0wS1cS2w-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.VALUE, s2Label, FeatureComponent.HEADWORD);
+    addTrigramFeature(features, "S0cS1wS2w-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD, s2Label, FeatureComponent.HEADWORD);
+
+    addTrigramFeature(features, "S0wS1wQ0t-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADTAG);
+    addTrigramFeature(features, "S0wS1cQ0w-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.VALUE, q0Label, FeatureComponent.HEADWORD);
+    addTrigramFeature(features, "S0cS1wQ0w-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADWORD);
+
+    addTrigramFeature(features, "S0cQ0tQ1t-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADTAG, q0Label, FeatureComponent.HEADTAG);
+    addTrigramFeature(features, "S0wQ0tQ1t-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.HEADTAG, q0Label, FeatureComponent.HEADTAG);
+    addTrigramFeature(features, "S0cQ0wQ1t-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADTAG);
+    addTrigramFeature(features, "S0cQ0tQ1w-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADTAG, q0Label, FeatureComponent.HEADWORD);
+    addTrigramFeature(features, "S0wQ0wQ1t-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADTAG);
+    addTrigramFeature(features, "S0wQ0tQ1w-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.HEADTAG, q0Label, FeatureComponent.HEADWORD);
+    addTrigramFeature(features, "S0cQ0wQ1w-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADWORD);
+  }
+
   @Override
   public List<String> featurize(State state, List<String> features) {
     final TreeShapedStack<Tree> stack = state.stack;
@@ -283,7 +302,7 @@ public class BasicFeatureFactory extends FeatureFactory {
     CoreLabel qP1Label = getQueueLabel(sentence, tokenPosition, -1); // previous location in queue
     CoreLabel qP2Label = getQueueLabel(sentence, tokenPosition, -2); // two locations prior in queue
 
-    // It's kind of unpleasant having this magic order of feature names.  
+    // It's kind of unpleasant having this magic order of feature names.
     // On the other hand, it does save some time with string concatenation.
     addUnaryStackFeatures(features, s0Label, "S0C-", "S0WT-", "S0T-", "S0WC-", "S0TC-");
     addUnaryStackFeatures(features, s1Label, "S1C-", "S1WT-", "S1T-", "S1WC-", "S1TC-");
@@ -340,6 +359,7 @@ public class BasicFeatureFactory extends FeatureFactory {
     addTrigramFeature(features, "S0wS1cS2c-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.VALUE, s2Label, FeatureComponent.VALUE);
     addTrigramFeature(features, "S0cS1wS2c-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD, s2Label, FeatureComponent.VALUE);
     addTrigramFeature(features, "S0cS1cS2w-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.VALUE, s2Label, FeatureComponent.HEADWORD);
+
     addTrigramFeature(features, "S0cS1cQ0t-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.VALUE, q0Label, FeatureComponent.HEADTAG);
     addTrigramFeature(features, "S0wS1cQ0t-", s0Label, FeatureComponent.HEADWORD, s1Label, FeatureComponent.VALUE, q0Label, FeatureComponent.HEADTAG);
     addTrigramFeature(features, "S0cS1wQ0t-", s0Label, FeatureComponent.VALUE, s1Label, FeatureComponent.HEADWORD, q0Label, FeatureComponent.HEADTAG);
@@ -360,6 +380,6 @@ public class BasicFeatureFactory extends FeatureFactory {
     return features;
   }
 
-  private static final long serialVersionUID = 1;  
+  private static final long serialVersionUID = 1;
 }
 

@@ -7,7 +7,7 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.AnnotationPipeline;
 import edu.stanford.nlp.pipeline.POSTaggerAnnotator;
-import edu.stanford.nlp.pipeline.PTBTokenizerAnnotator;
+import edu.stanford.nlp.pipeline.TokenizerAnnotator;
 import edu.stanford.nlp.pipeline.WordsToSentencesAnnotator;
 import edu.stanford.nlp.time.SUTime.Temporal;
 
@@ -52,10 +52,10 @@ public class SUTimeSimpleParser {
 
   private static AnnotationPipeline makeNumericPipeline() {
     AnnotationPipeline pipeline = new AnnotationPipeline();
-    pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+    pipeline.addAnnotator(new TokenizerAnnotator(false, "en"));
     pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
     pipeline.addAnnotator(new POSTaggerAnnotator(false));
-    pipeline.addAnnotator(new TimeAnnotator());
+    pipeline.addAnnotator(new TimeAnnotator(true));
 
     return pipeline;
   }

@@ -1,0 +1,72 @@
+map=word=0,answer=1,tag=2,head=3,governor=4,gaz=5,chunk=6,abbr=7,abstr=8,freq=9,web=10
+useQN=true
+qnSize=15
+sigma=5
+
+serializeTo=genia-nlpba-2004.crf.ser.gz
+
+trainFile=/u/nlp/data/ner/genia/genia.everything
+testFile=/u/nlp/data/ner/genia/eval/genia.everything
+
+readerAndWriter=edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter
+#numFolds=3
+#startFold=1
+#endFold=1
+mergeTags=true
+
+useAbstrFreq=true
+useFreq=true
+useWeb=true
+
+#useNPGovernor=true
+# useChunkySequences=true
+useClassFeature=true
+useParenMatching=true
+useHeadGov=true
+useWord=true
+useWordPairs=true
+useNGrams=true
+noMidNGrams=true
+maxNGramLeng=6
+# usePrev=true
+# useNext=true
+useTags=true
+useWordTag=true
+useTaggySequences=true
+useLongSequences=true
+# useExtraTaggySequences=true
+useSequences=true
+usePrevSequences=true
+maxLeft=1
+useTypeSeqs=true
+useTypeSeqs2=true
+useTypeySequences=true
+useOccurrencePatterns=true
+#useLastRealWord=true
+#useNextRealWord=true
+useReverse=false
+normalize=true
+normalizeTimex=true
+wordShape=chris2useLC
+useDisjunctive=true
+disjunctionWidth=5
+useDisjunctiveShapeInteraction=true
+useTaggySequencesShapeInteraction=true
+#
+# Feature Threshold
+#
+# featThreshFile=experiments/thresh1.txt
+
+#
+# Gazettes
+#
+useGazFeatures=true
+useMoreGazFeatures=true
+
+#
+# Abbreviations
+#
+useAbbr=true
+
+printClassifier=HighMagnitude
+printClassifierParam=1000

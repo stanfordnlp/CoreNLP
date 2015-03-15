@@ -48,7 +48,7 @@ public class NeuralUtils {
   }
 
   public static SimpleMatrix convertTextMatrix(String text) {
-    List<String> lines = CollectionUtils.filterAsList(Arrays.asList(text.split("\n")), new Filter<String>() { 
+    List<String> lines = CollectionUtils.filterAsList(Arrays.asList(text.split("\n")), new Filter<String>() {
         public boolean accept(String s) {
           return s.trim().length() > 0;
         }
@@ -77,24 +77,20 @@ public class NeuralUtils {
   public static double cosine(SimpleMatrix vector1, SimpleMatrix vector2){
     return dot(vector1, vector2)/(vector1.normF()*vector2.normF());
   }
-  
+
   /**
    * Compute dot product between two vectors.
    */
   public static double dot(SimpleMatrix vector1, SimpleMatrix vector2){
-    double score = Double.NaN;
-    if(vector1.numRows()==1){ // vector1: row vector, assume that vector2 is a row vector too 
-      score = vector1.mult(vector2.transpose()).get(0); 
+    if(vector1.numRows()==1){ // vector1: row vector, assume that vector2 is a row vector too
+      return vector1.mult(vector2.transpose()).get(0);
     } else if (vector1.numCols()==1){ // vector1: col vector, assume that vector2 is also a column vector.
-      score = vector1.transpose().mult(vector2).get(0);
+      return vector1.transpose().mult(vector2).get(0);
     } else {
-      System.err.println("! Error in neural.Utils.dot: vector1 is a matrix " + vector1.numRows() + " x " + vector1.numCols());
-      System.exit(1);
+      throw new AssertionError("Error in neural.Utils.dot: vector1 is a matrix " + vector1.numRows() + " x " + vector1.numCols());
     }
-
-    return score;
   }
-  
+
   /**
    * Given a sequence of Iterators over SimpleMatrix, fill in all of
    * the matrices with the entries in the theta vector.  Errors are
@@ -190,7 +186,7 @@ public class NeuralUtils {
     }
     double sum = output.elementSum();
     // will be safe, since exp should never return 0
-    return output.scale(1.0 / sum); 
+    return output.scale(1.0 / sum);
   }
 
   /**

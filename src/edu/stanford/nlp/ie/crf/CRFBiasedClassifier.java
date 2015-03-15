@@ -7,8 +7,9 @@ import edu.stanford.nlp.optimization.LineSearcher;
 import edu.stanford.nlp.sequences.Clique;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.FeatureFactory;
+import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PaddedList;
 import edu.stanford.nlp.util.StringUtils;
@@ -49,6 +50,8 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
     super(props);
   }
 
+  public CRFBiasedClassifier(SeqClassifierFlags flags) {super(flags); }
+
   @Override
   public CRFDatum<List<String>, CRFLabel> makeDatum(List<IN> info, int loc, List<FeatureFactory<IN>> featureFactories) {
 
@@ -63,7 +66,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
       windowCliques.removeAll(done);
       done.addAll(windowCliques);
       for (Clique c : windowCliques) {
-        for (FeatureFactory featureFactory : featureFactories) {
+        for (FeatureFactory<IN> featureFactory : featureFactories) {
           featuresC.addAll(featureFactory.getCliqueFeatures(pInfo, loc, c));
         }
         if(testTime && i==0)
@@ -121,6 +124,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
       evalFunction = e;
     }
 
+    @Override
     public Double apply(Double w) {
       crf.setBiasWeight(0,w);
       return evalFunction.apply(w);
@@ -183,7 +187,7 @@ public class CRFBiasedClassifier<IN extends CoreMap> extends CRFClassifier<IN> {
         int k = crf.flags.kBest;
         crf.classifyAndWriteAnswersKBest(testFile, k, readerAndWriter);
       } else {
-        crf.classifyAndWriteAnswers(testFile, readerAndWriter);
+        crf.classifyAndWriteAnswers(testFile, readerAndWriter, true);
       }
     }
   } // end main

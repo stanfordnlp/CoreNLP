@@ -255,20 +255,27 @@ public abstract class AbstractCollinsHeadFinder implements HeadFinder /* Seriali
    */
   protected Tree traverseLocate(Tree[] daughterTrees, String[] how, boolean lastResort) {
     int headIdx;
-    if (how[0].equals("left")) {
-      headIdx = findLeftHead(daughterTrees, how);
-    } else if (how[0].equals("leftdis")) {
-      headIdx = findLeftDisHead(daughterTrees, how);
-    } else if (how[0].equals("leftexcept")) {
-      headIdx = findLeftExceptHead(daughterTrees, how);
-    } else if (how[0].equals("right")) {
-      headIdx = findRightHead(daughterTrees, how);
-    } else if (how[0].equals("rightdis")) {
-      headIdx = findRightDisHead(daughterTrees, how);
-    } else if (how[0].equals("rightexcept")) {
-      headIdx = findRightExceptHead(daughterTrees, how);
-    } else {
-      throw new IllegalStateException("ERROR: invalid direction type " + how[0] + " to nonTerminalInfo map in AbstractCollinsHeadFinder.");
+    switch (how[0]) {
+      case "left":
+        headIdx = findLeftHead(daughterTrees, how);
+        break;
+      case "leftdis":
+        headIdx = findLeftDisHead(daughterTrees, how);
+        break;
+      case "leftexcept":
+        headIdx = findLeftExceptHead(daughterTrees, how);
+        break;
+      case "right":
+        headIdx = findRightHead(daughterTrees, how);
+        break;
+      case "rightdis":
+        headIdx = findRightDisHead(daughterTrees, how);
+        break;
+      case "rightexcept":
+        headIdx = findRightExceptHead(daughterTrees, how);
+        break;
+      default:
+        throw new IllegalStateException("ERROR: invalid direction type " + how[0] + " to nonTerminalInfo map in AbstractCollinsHeadFinder.");
     }
 
     // what happens if our rule didn't match anything

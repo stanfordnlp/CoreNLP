@@ -13,7 +13,7 @@ public class AnnotatorPoolTest extends TestCase {
   static class SampleAnnotatorFactory extends AnnotatorFactory {
     private static final long serialVersionUID = 1L;
     public SampleAnnotatorFactory(Properties props) {
-      super(props);
+      super(props, new AnnotatorImplementations());
     }
     @Override
     public Annotator create() {
@@ -42,6 +42,11 @@ public class AnnotatorPoolTest extends TestCase {
       StringBuilder os = new StringBuilder();
       os.append("sample.prop = " + properties.getProperty("sample.prop", ""));
       return os.toString();
+    }
+
+    @Override
+    protected String additionalSignature() {
+      return "";
     }
   }
 

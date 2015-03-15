@@ -8,7 +8,7 @@ import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.util.Filter;
 import edu.stanford.nlp.util.Filters;
-import edu.stanford.nlp.util.Function;
+import java.util.function.Function;
 
 
 /**
@@ -312,7 +312,12 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
         } else if (sawAtZero && i > 1 && ch == seenAtZero) {
           sawAtZero = false;
         } else {
+          // still skip past identical ones for weird negra-penn "---CJ" (should we just delete it?)
+          // if (i + 1 < leng && category.charAt(i + 1) == ch) {
+            // keep looping
+          // } else {
           break;
+          // }
         }
       }
     }
