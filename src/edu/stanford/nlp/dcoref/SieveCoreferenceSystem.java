@@ -57,6 +57,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.classify.LogisticClassifier;
 import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
+import edu.stanford.nlp.dcoref.Dictionaries.MentionType;
 import edu.stanford.nlp.dcoref.ScorerBCubed.BCubedType;
 import edu.stanford.nlp.dcoref.sievepasses.DeterministicCorefSieve;
 import edu.stanford.nlp.dcoref.sievepasses.ExactStringMatch;
@@ -176,6 +177,8 @@ public class SieveCoreferenceSystem {
   /** Additional scoring stats */
   private int additionalCorrectLinksCount;
   private int additionalLinksCount;
+  
+  private String typesToResolve = null;
 
   public SieveCoreferenceSystem(Properties props) throws Exception {
     // initialize required fields
@@ -284,6 +287,10 @@ public class SieveCoreferenceSystem {
 
     if(useSingletonPredictor){
       singletonPredictor = getSingletonPredictorFromSerializedFile(DefaultPaths.DEFAULT_DCOREF_SINGLETON_MODEL);
+    }
+    
+    if(props.containsKey("typesToResolve")) {
+      this.typesToResolve = props.getProperty("typesToResolve");
     }
   }
 
@@ -919,6 +926,21 @@ public class SieveCoreferenceSystem {
 //              if (m1.isSingleton && m2.isSingleton) continue;
               if (m1.isSingleton || m2.isSingleton) continue;
               if (m1.corefClusterID == m2.corefClusterID) continue;
+              
+              // selectively run dcoref
+              String types = "";
+              if(m2.mentionType==MentionType.PROPER) types += "n";  // named entity
+              else if(m2.mentionType==MentionType.NOMINAL) types += "c";
+              else if(m2.mentionType==MentionType.LIST) types += "l";
+              else if(m2.mentionType==MentionType.PRONOMINAL) types += "p";
+              types += "-";
+              if(m1.mentionType==MentionType.PROPER) types += "n"; // named entity
+              else if(m1.mentionType==MentionType.NOMINAL) types += "c";
+              else if(m1.mentionType==MentionType.LIST) types += "l";
+              else if(m1.mentionType==MentionType.PRONOMINAL) types += "p";
+              
+              if(typesToResolve!=null && !typesToResolve.contains(types)) continue;
+              
               CorefCluster c1 = corefClusters.get(m1.corefClusterID);
               CorefCluster c2 = corefClusters.get(m2.corefClusterID);
               if (c2 == null) {
