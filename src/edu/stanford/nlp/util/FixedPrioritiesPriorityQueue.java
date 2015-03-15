@@ -1,7 +1,13 @@
 package edu.stanford.nlp.util;
 
-import java.util.*;
 import java.io.Serializable;
+import java.util.AbstractSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+
 
 /**
  * A priority queue based on a binary heap.  This implementation trades
@@ -46,14 +52,14 @@ public class FixedPrioritiesPriorityQueue<E>
    * Returns true if the priority queue is non-empty
    */
   public boolean hasNext() {
-    return !isEmpty();
+    return ! isEmpty();
   }
 
   /**
    * Returns the element in the queue with highest priority, and pops it from
    * the queue.
    */
-  public E next() {
+  public E next() throws NoSuchElementException {
     return removeFirst();
   }
 
@@ -105,7 +111,7 @@ public class FixedPrioritiesPriorityQueue<E>
    * implementation!  Better not to use it.
    */
   public double getPriority(Object key) {
-    for (int i = 0; i < elements.size(); i++) {
+    for (int i = 0, sz = elements.size(); i < sz; i++) {
       if (elements.get(i).equals(key)) {
         return priorities[i];
       }
@@ -117,6 +123,7 @@ public class FixedPrioritiesPriorityQueue<E>
    * Gets the priority of the highest-priority element of the queue.
    */
   public double getPriority() {
+    // check empty other way around
     if (size() > 0)
       return priorities[0];
     throw new NoSuchElementException();
@@ -132,7 +139,7 @@ public class FixedPrioritiesPriorityQueue<E>
   /**
    * Returns the highest-priority element and removes it from the queue.
    */
-  public E removeFirst() {
+  public E removeFirst() throws NoSuchElementException {
     E first = getFirst();
     swap(0, size - 1);
     size--;
@@ -142,6 +149,7 @@ public class FixedPrioritiesPriorityQueue<E>
   }
 
   public List<E> toSortedList() {
+    // initialize with size
     List<E> list = new ArrayList<E>();
     while (hasNext()) {
       list.add(next());
@@ -245,11 +253,20 @@ public class FixedPrioritiesPriorityQueue<E>
    */
   @Override
   public String toString() {
-    return toString(size());
+    return toString(size(), null);
   }
 
   /** {@inheritDoc} */
   public String toString(int maxKeysToPrint) {
+    return toString(maxKeysToPrint, "%.3f");
+  }
+
+  /**
+   * Returns a representation of the queue in decreasing priority order,
+   * displaying at most maxKeysToPrint elements.
+   *
+   */
+  public String toString(int maxKeysToPrint, String dblFmt) {
     if (maxKeysToPrint <= 0) maxKeysToPrint = Integer.MAX_VALUE;
     FixedPrioritiesPriorityQueue<E> pq = clone();
     StringBuilder sb = new StringBuilder("[");
@@ -257,28 +274,37 @@ public class FixedPrioritiesPriorityQueue<E>
     while (numKeysPrinted < maxKeysToPrint && pq.hasNext()) {
       double priority = pq.getPriority();
       E element = pq.next();
-      sb.append(element.toString());
-      sb.append(" : ");
-      sb.append(priority);
+      sb.append(element);
+      sb.append('=');
+      if (dblFmt == null) {
+        sb.append(priority);
+      } else {
+        sb.append(String.format(dblFmt, priority));
+      }
       if (numKeysPrinted < size() - 1)
         sb.append(", ");
       numKeysPrinted++;
     }
-    if (numKeysPrinted < size())
+    if (numKeysPrinted < size()) {
       sb.append("...");
+    }
     sb.append("]");
     return sb.toString();
   }
+
 
   /**
    * Returns a clone of this priority queue.  Modifications to one will not
    * affect modifications to the other.
    */
   @Override
-  public FixedPrioritiesPriorityQueue<E> clone() {
-    FixedPrioritiesPriorityQueue<E> clonePQ = new FixedPrioritiesPriorityQueue<E>();
-    clonePQ.size = size;
-    clonePQ.capacity = capacity;
+  public final FixedPrioritiesPriorityQueue<E> clone() {
+    FixedPrioritiesPriorityQueue<E> clonePQ;
+    try {
+      clonePQ = ErasureUtils.uncheckedCast(super.clone());
+    } catch (CloneNotSupportedException cnse) {
+      throw new AssertionError("Should be able to clone.");
+    }
     clonePQ.elements = new ArrayList<E>(capacity);
     clonePQ.priorities = new double[capacity];
     if (size() > 0) {
@@ -288,23 +314,4 @@ public class FixedPrioritiesPriorityQueue<E>
     return clonePQ;
   }
 
-
-  // -----------------------------------------------------------------------
-
-  public static void main(String[] args) {
-    FixedPrioritiesPriorityQueue<String> pq = new FixedPrioritiesPriorityQueue<String>();
-    System.out.println(pq);
-    pq.add("one",1);
-    System.out.println(pq);
-    pq.add("three",3);
-    System.out.println(pq);
-    pq.add("one",1.1);
-    System.out.println(pq);
-    pq.add("two",2);
-    System.out.println(pq);
-    System.out.println(pq.toString(2));
-    while (pq.hasNext()) {
-      System.out.println(pq.next());
-    }
-  }
 }

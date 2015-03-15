@@ -1,0 +1,2348 @@
+nohup: ignoring input
+Making Phrasal release tar ball
+JAVANLP_HOME set to /u/horatio/codebase2/javanlp
+GIT branch:  release-3.3.1
+PASS: GIT branch  release-3.3.1
+Result of 'git fetch -v --dry-run':
+   = [up to date] master -> origin/master
+PASS: Repository checkout is current
+Result of 'git push --dry-run':
+   Everything up-to-date
+PASS: no unpushed changes
+PASS: no untracked changes
+PASS: no changes ready to be committed
+PASS: no uncommitted changes detected
+Current time:  Fri Jan 3 20:58:43 PST 2014
+Building in /u/horatio/codebase2/javanlp
+Buildfile: /juicy/u61/u/horatio/codebase2/javanlp/build.xml
+
+clean-all:
+
+clean:
+     [echo] core
+   [delete] Deleting directory /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes
+
+clean:
+     [echo] more
+   [delete] Deleting directory /juicy/u61/u/horatio/codebase2/javanlp/projects/more/classes
+
+clean:
+     [echo] research
+   [delete] Deleting directory /juicy/u61/u/horatio/codebase2/javanlp/projects/research/classes
+
+clean:
+     [echo] rte
+   [delete] Deleting directory /juicy/u61/u/horatio/codebase2/javanlp/projects/rte/classes
+
+clean:
+     [echo] mt
+   [delete] Deleting directory /juicy/u61/u/horatio/codebase2/javanlp/projects/mt/classes
+
+clean:
+     [echo] periphery
+   [delete] Deleting directory /juicy/u61/u/horatio/codebase2/javanlp/projects/periphery/classes
+
+compile-all:
+
+classpath:
+     [echo] core
+
+compile:
+     [echo] core
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes
+    [javac] Compiling 1389 source files to /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes
+    [javac] Note: Some input files use or override a deprecated API.
+    [javac] Note: Recompile with -Xlint:deprecation for details.
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+
+jsp:
+     [echo] core
+     [echo] Building .jsp edu/stanford/nlp/ie/ner/webapp
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes/edu/stanford/nlp/ie/ner/webapp/WEB-INF/classes
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes/edu/stanford/nlp/ie/ner/webapp/WEB-INF/lib
+    [javac] Compiling 3 source files to /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes/edu/stanford/nlp/ie/ner/webapp/WEB-INF/classes
+     [echo] Building .jsp edu/stanford/nlp/parser/webapp
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes/edu/stanford/nlp/parser/webapp/WEB-INF/classes
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes/edu/stanford/nlp/parser/webapp/WEB-INF/lib
+    [javac] Compiling 1 source file to /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes/edu/stanford/nlp/parser/webapp/WEB-INF/classes
+    [javac] Note: /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes/edu/stanford/nlp/parser/webapp/WEB-INF/src/org/apache/jsp/index_jsp.java uses unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+     [echo] Building .jsp edu/stanford/nlp/pipeline/webapp
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes/edu/stanford/nlp/pipeline/webapp/WEB-INF/classes
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes/edu/stanford/nlp/pipeline/webapp/WEB-INF/lib
+    [javac] Compiling 2 source files to /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes/edu/stanford/nlp/pipeline/webapp/WEB-INF/classes
+     [echo] Building .jsp edu/stanford/nlp/time/suservlet
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes/edu/stanford/nlp/time/suservlet/WEB-INF/classes
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes/edu/stanford/nlp/time/suservlet/WEB-INF/lib
+    [javac] Compiling 2 source files to /juicy/u61/u/horatio/codebase2/javanlp/projects/core/classes/edu/stanford/nlp/time/suservlet/WEB-INF/classes
+
+compile-all:
+
+classpath:
+     [echo] more
+
+compile:
+     [echo] more
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/more/classes
+    [javac] Compiling 920 source files to /juicy/u61/u/horatio/codebase2/javanlp/projects/more/classes
+    [javac] Note: Some input files use or override a deprecated API.
+    [javac] Note: Recompile with -Xlint:deprecation for details.
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+
+compile-all:
+
+classpath:
+     [echo] research
+
+compile:
+     [echo] research
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/research/classes
+    [javac] Compiling 2301 source files to /juicy/u61/u/horatio/codebase2/javanlp/projects/research/classes
+    [javac] Note: Some input files use or override a deprecated API.
+    [javac] Note: Recompile with -Xlint:deprecation for details.
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+
+jsp:
+     [echo] research
+     [echo] Building .jsp edu/stanford/nlp/kbp/entitylinking/servlet
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/research/classes/edu/stanford/nlp/kbp/entitylinking/servlet/WEB-INF/classes
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/research/classes/edu/stanford/nlp/kbp/entitylinking/servlet/WEB-INF/lib
+    [javac] Compiling 2 source files to /juicy/u61/u/horatio/codebase2/javanlp/projects/research/classes/edu/stanford/nlp/kbp/entitylinking/servlet/WEB-INF/classes
+     [echo] Building .jsp edu/stanford/nlp/kbp/slotfilling/ir/index/webapp
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/research/classes/edu/stanford/nlp/kbp/slotfilling/ir/index/webapp/WEB-INF/classes
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/research/classes/edu/stanford/nlp/kbp/slotfilling/ir/index/webapp/WEB-INF/lib
+    [javac] Compiling 2 source files to /juicy/u61/u/horatio/codebase2/javanlp/projects/research/classes/edu/stanford/nlp/kbp/slotfilling/ir/index/webapp/WEB-INF/classes
+     [echo] Building .jsp edu/stanford/nlp/time/guservlet
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/research/classes/edu/stanford/nlp/time/guservlet/WEB-INF/classes
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/research/classes/edu/stanford/nlp/time/guservlet/WEB-INF/lib
+    [javac] Compiling 1 source file to /juicy/u61/u/horatio/codebase2/javanlp/projects/research/classes/edu/stanford/nlp/time/guservlet/WEB-INF/classes
+
+compile-all:
+
+classpath:
+     [echo] rte
+
+compile:
+     [echo] rte
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/rte/classes
+    [javac] Compiling 641 source files to /juicy/u61/u/horatio/codebase2/javanlp/projects/rte/classes
+    [javac] Note: Some input files use or override a deprecated API.
+    [javac] Note: Recompile with -Xlint:deprecation for details.
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+
+compile-all:
+
+classpath:
+     [echo] mt
+
+compile:
+     [echo] mt
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/mt/classes
+    [javac] Compiling 469 source files to /juicy/u61/u/horatio/codebase2/javanlp/projects/mt/classes
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+     [copy] Copying 11 files to /juicy/u61/u/horatio/codebase2/javanlp/projects/mt/classes
+     [copy] Copying 1 file to /juicy/u61/u/horatio/codebase2/javanlp/projects/mt/classes
+
+compile-all:
+
+classpath:
+     [echo] periphery
+
+compile:
+     [echo] periphery
+    [mkdir] Created dir: /juicy/u61/u/horatio/codebase2/javanlp/projects/periphery/classes
+    [javac] Compiling 930 source files to /juicy/u61/u/horatio/codebase2/javanlp/projects/periphery/classes
+    [javac] Note: Some input files use or override a deprecated API.
+    [javac] Note: Recompile with -Xlint:deprecation for details.
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+
+compile-all:
+
+all:
+
+BUILD SUCCESSFUL
+Total time: 1 minute 44 seconds
+PASS: repository builds succuessfully
+/user/horatio/codebase2/javanlp/projects/mt
+
+#####
+EXTRACTING DEPENDENCIES
+#####
+
+Dependency dump file:
+	depdump
+Class directory:
+	../core/classes
+
+java -classpath /u/nlp/java/liball/DependencyFinder.jar:/u/nlp/java/liball/jakarta-oro.jar:/u/nlp/java/liball/log4j.jar:/u/nlp/java/liball/xalan.jar:/u/nlp/java/liball/xercesImpl.jar:/u/nlp/java/liball/xml-apis.jar com.jeantessier.dependencyfinder.cli.DependencyExtractor -maximize -out depdump ../core/classes
+log4j:WARN No appenders could be found for logger (com.jeantessier.classreader.TransientClassfileLoader).
+log4j:WARN Please initialize the log4j system properly.
+
+#####
+GENERATING CLOSURE
+#####
+Dependency dump file:
+	depdump
+
+Starting classes:
+	edu.stanford.nlp.classify.LogisticClassifier
+	edu.stanford.nlp.classify.LogisticClassifierFactory
+	edu.stanford.nlp.trees.DependencyScoring
+
+java -classpath /u/horatio/codebase2/javanlp/projects/core/classes edu.stanford.nlp.misc.DependencyAnalyzer depdump edu.stanford.nlp.classify.LogisticClassifier edu.stanford.nlp.classify.LogisticClassifierFactory edu.stanford.nlp.trees.DependencyScoring
+
+Class list:
+	edu/stanford/nlp/classify/AbstractLinearClassifierFactory.class
+	edu/stanford/nlp/classify/AdaptedGaussianPriorObjectiveFunction.class
+	edu/stanford/nlp/classify/BiasedLogConditionalObjectiveFunction.class
+	edu/stanford/nlp/classify/BiasedLogisticObjectiveFunction.class
+	edu/stanford/nlp/classify/Classifier.class
+	edu/stanford/nlp/classify/ClassifierCreator.class
+	edu/stanford/nlp/classify/ClassifierFactory.class
+	edu/stanford/nlp/classify/CrossValidator.class
+	edu/stanford/nlp/classify/CrossValidator$CrossValidationIterator.class
+	edu/stanford/nlp/classify/CrossValidator$SavedState.class
+	edu/stanford/nlp/classify/Dataset.class
+	edu/stanford/nlp/classify/GeneralDataset.class
+	edu/stanford/nlp/classify/GeneralDataset$1.class
+	edu/stanford/nlp/classify/GeneralizedExpectationObjectiveFunction.class
+	edu/stanford/nlp/classify/LinearClassifier.class
+	edu/stanford/nlp/classify/LinearClassifierFactory.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$1.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$10.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$11.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$12.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$13.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$2.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$3.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$4.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$5.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$6.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$7.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$8.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$9.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$Factory15.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$LinearClassifierCreator.class
+	edu/stanford/nlp/classify/LinearClassifierFactory$NegativeScorer.class
+	edu/stanford/nlp/classify/LogConditionalObjectiveFunction.class
+	edu/stanford/nlp/classify/LogPrior.class
+	edu/stanford/nlp/classify/LogPrior$1.class
+	edu/stanford/nlp/classify/LogPrior$LogPriorType.class
+	edu/stanford/nlp/classify/LogisticClassifier.class
+	edu/stanford/nlp/classify/LogisticClassifierFactory.class
+	edu/stanford/nlp/classify/LogisticObjectiveFunction.class
+	edu/stanford/nlp/classify/PRCurve.class
+	edu/stanford/nlp/classify/ProbabilisticClassifier.class
+	edu/stanford/nlp/classify/ProbabilisticClassifierCreator.class
+	edu/stanford/nlp/classify/RVFClassifier.class
+	edu/stanford/nlp/classify/RVFDataset.class
+	edu/stanford/nlp/classify/RVFDataset$1.class
+	edu/stanford/nlp/classify/SemiSupervisedLogConditionalObjectiveFunction.class
+	edu/stanford/nlp/classify/WeightedDataset.class
+	edu/stanford/nlp/international/morph/MorphoFeatureSpecification.class
+	edu/stanford/nlp/international/morph/MorphoFeatureSpecification$MorphoFeatureType.class
+	edu/stanford/nlp/international/morph/MorphoFeatures.class
+	edu/stanford/nlp/io/BZip2PipedOutputStream.class
+	edu/stanford/nlp/io/EncodingFileReader.class
+	edu/stanford/nlp/io/EncodingPrintWriter.class
+	edu/stanford/nlp/io/EncodingPrintWriter$err.class
+	edu/stanford/nlp/io/EncodingPrintWriter$out.class
+	edu/stanford/nlp/io/ExtensionFileFilter.class
+	edu/stanford/nlp/io/IOUtils.class
+	edu/stanford/nlp/io/IOUtils$1.class
+	edu/stanford/nlp/io/IOUtils$1$1.class
+	edu/stanford/nlp/io/IOUtils$EolPreservingLineReaderIterable.class
+	edu/stanford/nlp/io/IOUtils$EolPreservingLineReaderIterable$1.class
+	edu/stanford/nlp/io/IOUtils$GetLinesIterable.class
+	edu/stanford/nlp/io/IOUtils$GetLinesIterable$1.class
+	edu/stanford/nlp/io/IOUtils$LineReaderIterable.class
+	edu/stanford/nlp/io/IOUtils$LineReaderIterable$1.class
+	edu/stanford/nlp/io/NumberRangeFileFilter.class
+	edu/stanford/nlp/io/NumberRangesFileFilter.class
+	edu/stanford/nlp/io/RuntimeIOException.class
+	edu/stanford/nlp/ling/AnnotationLookup.class
+	edu/stanford/nlp/ling/AnnotationLookup$KeyLookup.class
+	edu/stanford/nlp/ling/AnnotationLookup$KeyLookup$1.class
+	edu/stanford/nlp/ling/AnnotationLookup$OldFeatureLabelKeys.class
+	edu/stanford/nlp/ling/BasicDatum.class
+	edu/stanford/nlp/ling/CategoryWordTag.class
+	edu/stanford/nlp/ling/CategoryWordTag$LabelFactoryHolder.class
+	edu/stanford/nlp/ling/CategoryWordTagFactory.class
+	edu/stanford/nlp/ling/CoreAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations.class
+	edu/stanford/nlp/ling/CoreAnnotations$AbbrAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$AbgeneAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$AbstrAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$AfterAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$AnswerAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$AnswerObjectAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$AntecedentAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ArgDescendentAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ArgumentAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$AuthorAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$BagOfWordsAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$BeAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$BeforeAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$BeginIndexAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$BestCliquesAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$BestFullAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CalendarAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CategoryAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CategoryFunctionalTagAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CharAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CharacterOffsetBeginAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CharacterOffsetEndAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ChineseCharAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ChineseIsSegmentedAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ChineseOrigSegAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ChineseSegAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ChunkAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CoNLLDepAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CoNLLDepParentIndexAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CoNLLDepTypeAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CoNLLPredicateAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CoNLLSRLAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CoarseTagAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CommonWordsAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ContextsAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CopyAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CostMagnificationAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$CovertIDAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$D2_LBeginAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$D2_LEndAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$D2_LMiddleAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$DayAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$DependentsAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$DictAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$DistSimAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$DoAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$DocDateAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$DocIDAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$DocSourceTypeAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$DocTitleAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$DocTypeAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$DomainAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$EndIndexAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$EntityClassAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$EntityRuleAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$EntityTypeAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$FeaturesAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$FemaleGazAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$FirstChildAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ForcedSentenceEndAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ForcedSentenceUntilEndAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$FreqAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$GazAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$GazetteerAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$GenericTokensAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$GeniaAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$GoldAnswerAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$GovernorAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$GrandparentAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$HaveAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$HeadWordStringAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$HeightAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$IDAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$IDFAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$INAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$IndexAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$InterpretationAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$IsDateRangeAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$IsURLAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$LBeginAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$LEndAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$LMiddleAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$LabelAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$LabelWeightAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$LastGazAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$LastTaggedAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$LeftChildrenNodeAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$LeftTermAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$LemmaAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$LengthAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$LineNumberAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$LinkAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$LocationAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$MaleGazAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$MarkingAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$MentionTokenAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$MentionsAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$MonthAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$MorphoCaseAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$MorphoGenAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$MorphoNumAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$MorphoPersAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$NERIDAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$NamedEntityTagAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$NeighborsAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$NormalizedNamedEntityTagAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$NotAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$NumTxtSentencesAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$NumericCompositeObjectAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$NumericCompositeTypeAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$NumericCompositeValueAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$NumericObjectAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$NumericTypeAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$NumericValueAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$NumerizedTokensAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$OriginalAnswerAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$OriginalCharAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$OriginalTextAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ParaPositionAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ParagraphAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ParagraphsAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ParentAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$PartOfSpeechAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$PercentAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$PhraseWordsAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$PhraseWordsTagAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$PolarityAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$PositionAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$PossibleAnswersAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$PredictedAnswerAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$PrevChildAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$PriorAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ProjectedCategoryAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ProtoAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$RoleAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SRLIDAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SRLInstancesAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SRL_ID.class
+	edu/stanford/nlp/ling/CoreAnnotations$SectionAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SectionDateAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SectionEndAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SectionIDAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SectionStartAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SemanticHeadTagAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SemanticHeadWordAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SemanticTagAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SemanticWordAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SentenceIDAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SentenceIndexAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SentencePositionAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SentencesAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ShapeAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SpaceBeforeAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SpanAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SpeakerAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$StackedNamedEntityTagAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$StateAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$StemAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$SubcategorizationAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$TagLabelAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$TextAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$TokenBeginAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$TokenEndAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$TokensAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$TopicAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$TrueCaseAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$TrueCaseTextAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$TrueTagAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$UBlockAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$UTypeAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$UnaryAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$UnknownAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$UseMarkedDiscourseAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$UtteranceAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$ValueAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$VerbSenseAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$WebAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$WordFormAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$WordPositionAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$WordSenseAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$WordnetSynAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$XmlContextAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$XmlElementAnnotation.class
+	edu/stanford/nlp/ling/CoreAnnotations$YearAnnotation.class
+	edu/stanford/nlp/ling/CoreLabel.class
+	edu/stanford/nlp/ling/CoreLabel$1.class
+	edu/stanford/nlp/ling/CoreLabel$CoreLabelFactory.class
+	edu/stanford/nlp/ling/CoreLabel$GenericAnnotation.class
+	edu/stanford/nlp/ling/Datum.class
+	edu/stanford/nlp/ling/Featurizable.class
+	edu/stanford/nlp/ling/HasCategory.class
+	edu/stanford/nlp/ling/HasContext.class
+	edu/stanford/nlp/ling/HasIndex.class
+	edu/stanford/nlp/ling/HasLemma.class
+	edu/stanford/nlp/ling/HasOffset.class
+	edu/stanford/nlp/ling/HasTag.class
+	edu/stanford/nlp/ling/HasWord.class
+	edu/stanford/nlp/ling/Label.class
+	edu/stanford/nlp/ling/LabelFactory.class
+	edu/stanford/nlp/ling/Labeled.class
+	edu/stanford/nlp/ling/LabeledWord.class
+	edu/stanford/nlp/ling/LabeledWord$LabelFactoryHolder.class
+	edu/stanford/nlp/ling/MultiTokenTag.class
+	edu/stanford/nlp/ling/MultiTokenTag$Tag.class
+	edu/stanford/nlp/ling/RVFDatum.class
+	edu/stanford/nlp/ling/Sentence.class
+	edu/stanford/nlp/ling/StringLabel.class
+	edu/stanford/nlp/ling/StringLabel$StringLabelFactoryHolder.class
+	edu/stanford/nlp/ling/StringLabelFactory.class
+	edu/stanford/nlp/ling/TaggedWord.class
+	edu/stanford/nlp/ling/TaggedWord$LabelFactoryHolder.class
+	edu/stanford/nlp/ling/TaggedWordFactory.class
+	edu/stanford/nlp/ling/ValueLabel.class
+	edu/stanford/nlp/ling/Word.class
+	edu/stanford/nlp/ling/Word$WordFactoryHolder.class
+	edu/stanford/nlp/ling/WordFactory.class
+	edu/stanford/nlp/ling/WordLemmaTag.class
+	edu/stanford/nlp/ling/WordLemmaTagFactory.class
+	edu/stanford/nlp/ling/WordTag.class
+	edu/stanford/nlp/ling/WordTag$LabelFactoryHolder.class
+	edu/stanford/nlp/ling/WordTagFactory.class
+	edu/stanford/nlp/math/ADMath.class
+	edu/stanford/nlp/math/ArrayMath.class
+	edu/stanford/nlp/math/ArrayMath$InvalidElementException.class
+	edu/stanford/nlp/math/DoubleAD.class
+	edu/stanford/nlp/math/SloppyMath.class
+	edu/stanford/nlp/objectbank/IdentityFunction.class
+	edu/stanford/nlp/objectbank/IteratorFromReaderFactory.class
+	edu/stanford/nlp/objectbank/LineIterator.class
+	edu/stanford/nlp/objectbank/LineIterator$LineIteratorFactory.class
+	edu/stanford/nlp/objectbank/ObjectBank.class
+	edu/stanford/nlp/objectbank/ObjectBank$OBIterator.class
+	edu/stanford/nlp/objectbank/ObjectBank$PathToFileFunction.class
+	edu/stanford/nlp/objectbank/ReaderIteratorFactory.class
+	edu/stanford/nlp/objectbank/ReaderIteratorFactory$ReaderIterator.class
+	edu/stanford/nlp/optimization/AbstractCachingDiffFunction.class
+	edu/stanford/nlp/optimization/AbstractStochasticCachingDiffFunction.class
+	edu/stanford/nlp/optimization/AbstractStochasticCachingDiffFunction$SamplingMethod.class
+	edu/stanford/nlp/optimization/AbstractStochasticCachingDiffUpdateFunction.class
+	edu/stanford/nlp/optimization/CGMinimizer.class
+	edu/stanford/nlp/optimization/CGMinimizer$OneDimDiffFunction.class
+	edu/stanford/nlp/optimization/CGMinimizer$Triple.class
+	edu/stanford/nlp/optimization/DiffFloatFunction.class
+	edu/stanford/nlp/optimization/DiffFunction.class
+	edu/stanford/nlp/optimization/Evaluator.class
+	edu/stanford/nlp/optimization/FloatFunction.class
+	edu/stanford/nlp/optimization/Function.class
+	edu/stanford/nlp/optimization/GoldenSectionLineSearch.class
+	edu/stanford/nlp/optimization/GoldenSectionLineSearch$1.class
+	edu/stanford/nlp/optimization/GoldenSectionLineSearch$2.class
+	edu/stanford/nlp/optimization/HasEvaluators.class
+	edu/stanford/nlp/optimization/HasInitial.class
+	edu/stanford/nlp/optimization/HasRegularizerParamRange.class
+	edu/stanford/nlp/optimization/HybridMinimizer.class
+	edu/stanford/nlp/optimization/InefficientSGDMinimizer.class
+	edu/stanford/nlp/optimization/InefficientSGDMinimizer$1.class
+	edu/stanford/nlp/optimization/LineSearcher.class
+	edu/stanford/nlp/optimization/Minimizer.class
+	edu/stanford/nlp/optimization/QNMinimizer.class
+	edu/stanford/nlp/optimization/QNMinimizer$1.class
+	edu/stanford/nlp/optimization/QNMinimizer$MaxEvaluationsExceeded.class
+	edu/stanford/nlp/optimization/QNMinimizer$QNInfo.class
+	edu/stanford/nlp/optimization/QNMinimizer$QNInfo$NegativeCurvature.class
+	edu/stanford/nlp/optimization/QNMinimizer$QNInfo$ZeroGradient.class
+	edu/stanford/nlp/optimization/QNMinimizer$Record.class
+	edu/stanford/nlp/optimization/QNMinimizer$SurpriseConvergence.class
+	edu/stanford/nlp/optimization/QNMinimizer$eLineSearch.class
+	edu/stanford/nlp/optimization/QNMinimizer$eScaling.class
+	edu/stanford/nlp/optimization/QNMinimizer$eState.class
+	edu/stanford/nlp/optimization/SGDMinimizer.class
+	edu/stanford/nlp/optimization/SGDToQNMinimizer.class
+	edu/stanford/nlp/optimization/SMDMinimizer.class
+	edu/stanford/nlp/optimization/SMDMinimizer$1.class
+	edu/stanford/nlp/optimization/SMDMinimizer$setLam.class
+	edu/stanford/nlp/optimization/SMDMinimizer$setMu.class
+	edu/stanford/nlp/optimization/SQNMinimizer.class
+	edu/stanford/nlp/optimization/SQNMinimizer$SurpriseConvergence.class
+	edu/stanford/nlp/optimization/ScaledSGDMinimizer.class
+	edu/stanford/nlp/optimization/ScaledSGDMinimizer$Weights.class
+	edu/stanford/nlp/optimization/ScaledSGDMinimizer$lagrange.class
+	edu/stanford/nlp/optimization/ScaledSGDMinimizer$setFixedGain.class
+	edu/stanford/nlp/optimization/StochasticCalculateMethods.class
+	edu/stanford/nlp/optimization/StochasticMinimizer.class
+	edu/stanford/nlp/optimization/StochasticMinimizer$PropertySetter.class
+	edu/stanford/nlp/optimization/StochasticMinimizer$setGain.class
+	edu/stanford/nlp/parser/KBestViterbiParser.class
+	edu/stanford/nlp/parser/Parser.class
+	edu/stanford/nlp/parser/ViterbiParser.class
+	edu/stanford/nlp/parser/ViterbiParserWithOptions.class
+	edu/stanford/nlp/parser/lexparser/AbstractDependencyGrammar.class
+	edu/stanford/nlp/parser/lexparser/AbstractTreeExtractor.class
+	edu/stanford/nlp/parser/lexparser/AbstractTreebankParserParams.class
+	edu/stanford/nlp/parser/lexparser/AbstractTreebankParserParams$1.class
+	edu/stanford/nlp/parser/lexparser/AbstractTreebankParserParams$AnnotatePunctuationFunction.class
+	edu/stanford/nlp/parser/lexparser/AbstractTreebankParserParams$RemoveGFSubcategoryStripper.class
+	edu/stanford/nlp/parser/lexparser/AbstractTreebankParserParams$SubcategoryStripper.class
+	edu/stanford/nlp/parser/lexparser/AbstractTreebankParserParams$TypedDependencyTyper.class
+	edu/stanford/nlp/parser/lexparser/AbstractTreebankParserParams$UnorderedTypedDependencyTyper.class
+	edu/stanford/nlp/parser/lexparser/AbstractTreebankParserParams$UnorderedUntypedDependencyTyper.class
+	edu/stanford/nlp/parser/lexparser/AbstractTreebankParserParams$UntypedDependencyTyper.class
+	edu/stanford/nlp/parser/lexparser/BaseLexicon.class
+	edu/stanford/nlp/parser/lexparser/BasicCategoryTagProjection.class
+	edu/stanford/nlp/parser/lexparser/BoundaryRemover.class
+	edu/stanford/nlp/parser/lexparser/CNFTransformers.class
+	edu/stanford/nlp/parser/lexparser/CNFTransformers$FromCNFTransformer.class
+	edu/stanford/nlp/parser/lexparser/CNFTransformers$ToCNFTransformer.class
+	edu/stanford/nlp/parser/lexparser/ChineseCharacterBasedLexicon.class
+	edu/stanford/nlp/parser/lexparser/ChineseCharacterBasedLexicon$Symbol.class
+	edu/stanford/nlp/parser/lexparser/ChineseLexicon.class
+	edu/stanford/nlp/parser/lexparser/ChineseLexiconAndWordSegmenter.class
+	edu/stanford/nlp/parser/lexparser/ChineseSimWordAvgDepGrammar.class
+	edu/stanford/nlp/parser/lexparser/ChineseTreebankParserParams.class
+	edu/stanford/nlp/parser/lexparser/ChineseTreebankParserParams$1.class
+	edu/stanford/nlp/parser/lexparser/CollinsPuncTransformer.class
+	edu/stanford/nlp/parser/lexparser/Debinarizer.class
+	edu/stanford/nlp/parser/lexparser/DependencyGrammar.class
+	edu/stanford/nlp/parser/lexparser/EnglishTreebankParserParams.class
+	edu/stanford/nlp/parser/lexparser/EnglishTreebankParserParams$1.class
+	edu/stanford/nlp/parser/lexparser/EnglishTreebankParserParams$2.class
+	edu/stanford/nlp/parser/lexparser/EnglishTreebankParserParams$EnglishSubcategoryStripper.class
+	edu/stanford/nlp/parser/lexparser/EnglishTreebankParserParams$EnglishTest.class
+	edu/stanford/nlp/parser/lexparser/EnglishTreebankParserParams$EnglishTrain.class
+	edu/stanford/nlp/parser/lexparser/Extractor.class
+	edu/stanford/nlp/parser/lexparser/IntDependency.class
+	edu/stanford/nlp/parser/lexparser/IntTaggedWord.class
+	edu/stanford/nlp/parser/lexparser/Interner.class
+	edu/stanford/nlp/parser/lexparser/Lexicon.class
+	edu/stanford/nlp/parser/lexparser/MLEDependencyGrammar.class
+	edu/stanford/nlp/parser/lexparser/MLEDependencyGrammar$EndHead.class
+	edu/stanford/nlp/parser/lexparser/MLEDependencyGrammarExtractor.class
+	edu/stanford/nlp/parser/lexparser/Options.class
+	edu/stanford/nlp/parser/lexparser/Options$LexOptions.class
+	edu/stanford/nlp/parser/lexparser/ParentAnnotationStats.class
+	edu/stanford/nlp/parser/lexparser/ParentAnnotationStats$1.class
+	edu/stanford/nlp/parser/lexparser/ParentAnnotationStats$2.class
+	edu/stanford/nlp/parser/lexparser/ParentAnnotationStats$3.class
+	edu/stanford/nlp/parser/lexparser/ParentAnnotationStats$4.class
+	edu/stanford/nlp/parser/lexparser/ParentAnnotationStats$5.class
+	edu/stanford/nlp/parser/lexparser/PostSplitter.class
+	edu/stanford/nlp/parser/lexparser/RandomWalk.class
+	edu/stanford/nlp/parser/lexparser/SisterAnnotationStats.class
+	edu/stanford/nlp/parser/lexparser/SisterAnnotationStats$1.class
+	edu/stanford/nlp/parser/lexparser/SisterAnnotationStats$2.class
+	edu/stanford/nlp/parser/lexparser/SisterAnnotationStats$3.class
+	edu/stanford/nlp/parser/lexparser/TagProjection.class
+	edu/stanford/nlp/parser/lexparser/TestOptions.class
+	edu/stanford/nlp/parser/lexparser/TestTagProjection.class
+	edu/stanford/nlp/parser/lexparser/TrainOptions.class
+	edu/stanford/nlp/parser/lexparser/TrainOptions$TransformMatrixType.class
+	edu/stanford/nlp/parser/lexparser/TreeAnnotator.class
+	edu/stanford/nlp/parser/lexparser/TreeAnnotatorAndBinarizer.class
+	edu/stanford/nlp/parser/lexparser/TreeAnnotatorAndBinarizer$TreeNullAnnotator.class
+	edu/stanford/nlp/parser/lexparser/TreeBinarizer.class
+	edu/stanford/nlp/parser/lexparser/TreeBinarizer$1.class
+	edu/stanford/nlp/parser/lexparser/TreeCollinizer.class
+	edu/stanford/nlp/parser/lexparser/TreebankAnnotator.class
+	edu/stanford/nlp/parser/lexparser/TreebankAnnotator$1.class
+	edu/stanford/nlp/parser/lexparser/TreebankLangParserParams.class
+	edu/stanford/nlp/parser/lexparser/UnknownWordModel.class
+	edu/stanford/nlp/parser/lexparser/UnknownWordModelTrainer.class
+	edu/stanford/nlp/parser/metrics/AbstractEval.class
+	edu/stanford/nlp/parser/metrics/AbstractEval$CatErrorEval.class
+	edu/stanford/nlp/parser/metrics/AbstractEval$RuleErrorEval.class
+	edu/stanford/nlp/parser/metrics/AbstractEval$ScoreEval.class
+	edu/stanford/nlp/parser/metrics/Eval.class
+	edu/stanford/nlp/parser/tools/PunctEquivalenceClasser.class
+	edu/stanford/nlp/process/AbstractTokenizer.class
+	edu/stanford/nlp/process/Americanize.class
+	edu/stanford/nlp/process/CoreLabelTokenFactory.class
+	edu/stanford/nlp/process/CoreTokenFactory.class
+	edu/stanford/nlp/process/LexedTokenFactory.class
+	edu/stanford/nlp/process/Morpha.class
+	edu/stanford/nlp/process/Morphology.class
+	edu/stanford/nlp/process/PTB2TextLexer.class
+	edu/stanford/nlp/process/PTBLexer.class
+	edu/stanford/nlp/process/PTBLexer$1.class
+	edu/stanford/nlp/process/PTBLexer$UntokenizableOptions.class
+	edu/stanford/nlp/process/PTBTokenizer.class
+	edu/stanford/nlp/process/PTBTokenizer$1.class
+	edu/stanford/nlp/process/PTBTokenizer$PTBTokenizerFactory.class
+	edu/stanford/nlp/process/SerializableFunction.class
+	edu/stanford/nlp/process/Tokenizer.class
+	edu/stanford/nlp/process/TokenizerAdapter.class
+	edu/stanford/nlp/process/TokenizerFactory.class
+	edu/stanford/nlp/process/WhitespaceLexer.class
+	edu/stanford/nlp/process/WhitespaceTokenizer.class
+	edu/stanford/nlp/process/WhitespaceTokenizer$WhitespaceTokenizerFactory.class
+	edu/stanford/nlp/process/WordSegmenter.class
+	edu/stanford/nlp/process/WordSegmentingTokenizer.class
+	edu/stanford/nlp/process/WordSegmentingTokenizer$WordSegmentingTokenizerFactory.class
+	edu/stanford/nlp/process/WordTokenFactory.class
+	edu/stanford/nlp/stats/AbstractCounter.class
+	edu/stanford/nlp/stats/AccuracyStats.class
+	edu/stanford/nlp/stats/ClassicCounter.class
+	edu/stanford/nlp/stats/ClassicCounter$1.class
+	edu/stanford/nlp/stats/ClassicCounter$1$1.class
+	edu/stanford/nlp/stats/ClassicCounter$2.class
+	edu/stanford/nlp/stats/ClassicCounter$2$1.class
+	edu/stanford/nlp/stats/ClassicCounter$2$1$1.class
+	edu/stanford/nlp/stats/ClassicCounter$ClassicCounterFactory.class
+	edu/stanford/nlp/stats/Counter.class
+	edu/stanford/nlp/stats/Counters.class
+	edu/stanford/nlp/stats/Counters$1.class
+	edu/stanford/nlp/stats/Counters$2.class
+	edu/stanford/nlp/stats/Counters$3.class
+	edu/stanford/nlp/stats/Counters$4.class
+	edu/stanford/nlp/stats/Counters$5.class
+	edu/stanford/nlp/stats/Counters$6.class
+	edu/stanford/nlp/stats/Counters$6$1.class
+	edu/stanford/nlp/stats/Counters$6$1$1.class
+	edu/stanford/nlp/stats/Counters$6$1$1$1.class
+	edu/stanford/nlp/stats/Counters$7.class
+	edu/stanford/nlp/stats/Counters$7$1.class
+	edu/stanford/nlp/stats/Counters$7$1$1.class
+	edu/stanford/nlp/stats/Counters$7$1$1$1.class
+	edu/stanford/nlp/stats/Counters$7$2.class
+	edu/stanford/nlp/stats/Counters$7$3.class
+	edu/stanford/nlp/stats/Counters$7$3$1.class
+	edu/stanford/nlp/stats/Counters$7$4.class
+	edu/stanford/nlp/stats/Counters$7$4$1.class
+	edu/stanford/nlp/stats/Counters$8.class
+	edu/stanford/nlp/stats/Counters$NaturalComparator.class
+	edu/stanford/nlp/stats/Distribution.class
+	edu/stanford/nlp/stats/Distribution$1.class
+	edu/stanford/nlp/stats/Distribution$DynamicDistribution.class
+	edu/stanford/nlp/stats/EquivalenceClasser.class
+	edu/stanford/nlp/stats/GeneralizedCounter.class
+	edu/stanford/nlp/stats/GeneralizedCounter$1.class
+	edu/stanford/nlp/stats/GeneralizedCounter$CounterView.class
+	edu/stanford/nlp/stats/GeneralizedCounter$Entry.class
+	edu/stanford/nlp/stats/GeneralizedCounter$OneDimensionalCounterView.class
+	edu/stanford/nlp/stats/IntCounter.class
+	edu/stanford/nlp/stats/IntCounter$1.class
+	edu/stanford/nlp/stats/IntCounter$1$1.class
+	edu/stanford/nlp/stats/IntCounter$1$1$1.class
+	edu/stanford/nlp/stats/IntCounter$2.class
+	edu/stanford/nlp/stats/IntCounter$3.class
+	edu/stanford/nlp/stats/IntCounter$3$1.class
+	edu/stanford/nlp/stats/IntCounter$NaturalComparator.class
+	edu/stanford/nlp/stats/MultiClassAccuracyStats.class
+	edu/stanford/nlp/stats/ProbabilityDistribution.class
+	edu/stanford/nlp/stats/Sampler.class
+	edu/stanford/nlp/stats/Scorer.class
+	edu/stanford/nlp/stats/SimpleGoodTuring.class
+	edu/stanford/nlp/stats/TwoDimensionalCounter.class
+	edu/stanford/nlp/stats/TwoDimensionalCounterInterface.class
+	edu/stanford/nlp/trees/AbstractCollinsHeadFinder.class
+	edu/stanford/nlp/trees/AbstractTreebankLanguagePack.class
+	edu/stanford/nlp/trees/AbstractTreebankLanguagePack$BasicCategoryStringFunction.class
+	edu/stanford/nlp/trees/AbstractTreebankLanguagePack$CategoryAndFunctionStringFunction.class
+	edu/stanford/nlp/trees/BobChrisTreeNormalizer.class
+	edu/stanford/nlp/trees/BobChrisTreeNormalizer$AOverAFilter.class
+	edu/stanford/nlp/trees/BobChrisTreeNormalizer$EmptyFilter.class
+	edu/stanford/nlp/trees/CollinsHeadFinder.class
+	edu/stanford/nlp/trees/CollinsHeadFinder$1.class
+	edu/stanford/nlp/trees/CollocationFinder.class
+	edu/stanford/nlp/trees/CollocationFinder$1.class
+	edu/stanford/nlp/trees/CollocationFinder$Collocation.class
+	edu/stanford/nlp/trees/CompositeTreeTransformer.class
+	edu/stanford/nlp/trees/CompositeTreebank.class
+	edu/stanford/nlp/trees/CompositeTreebank$CompositeTreebankIterator.class
+	edu/stanford/nlp/trees/Constituent.class
+	edu/stanford/nlp/trees/ConstituentFactory.class
+	edu/stanford/nlp/trees/CoordinationTransformer.class
+	edu/stanford/nlp/trees/CopulaHeadFinder.class
+	edu/stanford/nlp/trees/DateTreeTransformer.class
+	edu/stanford/nlp/trees/Dependencies.class
+	edu/stanford/nlp/trees/Dependencies$1.class
+	edu/stanford/nlp/trees/Dependencies$ComparatorHolder.class
+	edu/stanford/nlp/trees/Dependencies$ComparatorHolder$DependencyIdxComparator.class
+	edu/stanford/nlp/trees/Dependencies$DependentPuncTagRejectFilter.class
+	edu/stanford/nlp/trees/Dependencies$DependentPuncWordRejectFilter.class
+	edu/stanford/nlp/trees/Dependency.class
+	edu/stanford/nlp/trees/DependencyFactory.class
+	edu/stanford/nlp/trees/DependencyPrinter.class
+	edu/stanford/nlp/trees/DependencyReader.class
+	edu/stanford/nlp/trees/DependencyScoring.class
+	edu/stanford/nlp/trees/DependencyScoring$Score.class
+	edu/stanford/nlp/trees/DependencyScoring$TypedDependencyStringEquality.class
+	edu/stanford/nlp/trees/DependencyTreeTransformer.class
+	edu/stanford/nlp/trees/DependencyTyper.class
+	edu/stanford/nlp/trees/DiskTreebank.class
+	edu/stanford/nlp/trees/DiskTreebank$1.class
+	edu/stanford/nlp/trees/DiskTreebank$DiskTreebankIterator.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$AdjectivalComplementGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$AdjectivalModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$AdvClauseModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$AdverbialModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$AgentGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$AppositionalModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$ArgumentGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$AuxModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$AuxPassiveGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$ClausalComplementGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$ClausalPassiveSubjectGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$ClausalSubjectGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$ComplementGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$ConjunctGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$ControllingSubjectGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$CoordinationGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$CopulaGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$DeterminerGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$DirectObjectGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$DiscourseElementGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$ExpletiveGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$GoesWithGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$IndirectObjectGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$MarkerGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$ModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$MultiWordExpressionGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$NegationModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$NominalPassiveSubjectGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$NominalSubjectGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$NounCompoundModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$NpAdverbialModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$NumberModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$NumericModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$ObjectGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$ParataxisGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$PhrasalVerbParticleGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$PossessionModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$PossessiveModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$PreconjunctGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$PredeterminerGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$PredicateGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$PrepositionalComplementGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$PrepositionalModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$PrepositionalObjectGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$PunctuationGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$QuantifierModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$ReferentGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$RelativeClauseModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$RelativeGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$SemanticDependentGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$SubjectGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$TemporalModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$VerbalModifierGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations$XClausalComplementGRAnnotation.class
+	edu/stanford/nlp/trees/EnglishGrammaticalStructure.class
+	edu/stanford/nlp/trees/EnglishGrammaticalStructure$1.class
+	edu/stanford/nlp/trees/EnglishGrammaticalStructure$ExtraTreeDepFilter.class
+	edu/stanford/nlp/trees/EnglishGrammaticalStructure$FromDependenciesFactory.class
+	edu/stanford/nlp/trees/EnglishGrammaticalStructureFactory.class
+	edu/stanford/nlp/trees/GrammaticalRelation.class
+	edu/stanford/nlp/trees/GrammaticalRelation$DependentGRAnnotation.class
+	edu/stanford/nlp/trees/GrammaticalRelation$GovernorGRAnnotation.class
+	edu/stanford/nlp/trees/GrammaticalRelation$GrammaticalRelationAnnotation.class
+	edu/stanford/nlp/trees/GrammaticalRelation$KillGRAnnotation.class
+	edu/stanford/nlp/trees/GrammaticalRelation$Language.class
+	edu/stanford/nlp/trees/GrammaticalRelation$RootGRAnnotation.class
+	edu/stanford/nlp/trees/GrammaticalStructure.class
+	edu/stanford/nlp/trees/GrammaticalStructure$1.class
+	edu/stanford/nlp/trees/GrammaticalStructure$LazyLoadTreesByParsing.class
+	edu/stanford/nlp/trees/GrammaticalStructure$LazyLoadTreesByParsing$1.class
+	edu/stanford/nlp/trees/GrammaticalStructure$NameComparator.class
+	edu/stanford/nlp/trees/GrammaticalStructure$NoPunctFilter.class
+	edu/stanford/nlp/trees/GrammaticalStructure$NoPunctTypedDependencyFilter.class
+	edu/stanford/nlp/trees/GrammaticalStructure$TreeBankGrammaticalStructureWrapper.class
+	edu/stanford/nlp/trees/GrammaticalStructure$TreeBankGrammaticalStructureWrapper$GsIterator.class
+	edu/stanford/nlp/trees/GrammaticalStructureFactory.class
+	edu/stanford/nlp/trees/GrammaticalStructureFromDependenciesFactory.class
+	edu/stanford/nlp/trees/GraphLessGrammaticalStructure.class
+	edu/stanford/nlp/trees/GraphLessGrammaticalStructureFactory.class
+	edu/stanford/nlp/trees/HasParent.class
+	edu/stanford/nlp/trees/HeadFinder.class
+	edu/stanford/nlp/trees/Labeled.class
+	edu/stanford/nlp/trees/LabeledConstituent.class
+	edu/stanford/nlp/trees/LabeledConstituent$1.class
+	edu/stanford/nlp/trees/LabeledConstituent$ConstituentFactoryHolder.class
+	edu/stanford/nlp/trees/LabeledConstituent$ConstituentFactoryHolder$LabeledConstituentFactory.class
+	edu/stanford/nlp/trees/LabeledConstituent$LabelFactoryHolder.class
+	edu/stanford/nlp/trees/LabeledConstituent$LabeledConstituentLabelFactory.class
+	edu/stanford/nlp/trees/LabeledScoredTreeFactory.class
+	edu/stanford/nlp/trees/LabeledScoredTreeNode.class
+	edu/stanford/nlp/trees/LabeledScoredTreeNode$TreeFactoryHolder.class
+	edu/stanford/nlp/trees/LabeledScoredTreeReaderFactory.class
+	edu/stanford/nlp/trees/LeftHeadFinder.class
+	edu/stanford/nlp/trees/MemoryTreebank.class
+	edu/stanford/nlp/trees/MemoryTreebank$1.class
+	edu/stanford/nlp/trees/ModCollinsHeadFinder.class
+	edu/stanford/nlp/trees/NPTmpRetainingTreeNormalizer.class
+	edu/stanford/nlp/trees/NPTmpRetainingTreeNormalizer$1.class
+	edu/stanford/nlp/trees/NPTmpRetainingTreeNormalizer$2.class
+	edu/stanford/nlp/trees/NPTmpRetainingTreeNormalizer$3.class
+	edu/stanford/nlp/trees/NPTmpRetainingTreeNormalizer$4.class
+	edu/stanford/nlp/trees/NPTmpRetainingTreeNormalizer$NPTmpAdvRetainingTreeReaderFactory.class
+	edu/stanford/nlp/trees/NPTmpRetainingTreeNormalizer$NPTmpRetainingTreeReaderFactory.class
+	edu/stanford/nlp/trees/NamedDependency.class
+	edu/stanford/nlp/trees/NamedDependency$1.class
+	edu/stanford/nlp/trees/NamedDependency$DependencyFactoryHolder.class
+	edu/stanford/nlp/trees/NamedDependency$NamedDependencyFactory.class
+	edu/stanford/nlp/trees/PennTreeReader.class
+	edu/stanford/nlp/trees/PennTreeReaderFactory.class
+	edu/stanford/nlp/trees/PennTreebankLanguagePack.class
+	edu/stanford/nlp/trees/PennTreebankTokenizer.class
+	edu/stanford/nlp/trees/PennTreebankTokenizer$1.class
+	edu/stanford/nlp/trees/PennTreebankTokenizer$EnglishTreebankStreamTokenizer.class
+	edu/stanford/nlp/trees/QPTreeTransformer.class
+	edu/stanford/nlp/trees/SemanticHeadFinder.class
+	edu/stanford/nlp/trees/SimpleConstituent.class
+	edu/stanford/nlp/trees/SimpleConstituent$1.class
+	edu/stanford/nlp/trees/SimpleConstituent$ConstituentFactoryHolder.class
+	edu/stanford/nlp/trees/SimpleConstituent$ConstituentFactoryHolder$SimpleConstituentFactory.class
+	edu/stanford/nlp/trees/SimpleConstituent$LabelFactoryHolder.class
+	edu/stanford/nlp/trees/SimpleConstituent$SimpleConstituentLabelFactory.class
+	edu/stanford/nlp/trees/SimpleConstituentFactory.class
+	edu/stanford/nlp/trees/SimpleTree.class
+	edu/stanford/nlp/trees/SimpleTree$TreeFactoryHolder.class
+	edu/stanford/nlp/trees/SimpleTreeFactory.class
+	edu/stanford/nlp/trees/TransformingTreebank.class
+	edu/stanford/nlp/trees/TransformingTreebank$1.class
+	edu/stanford/nlp/trees/TransformingTreebank$2.class
+	edu/stanford/nlp/trees/TransformingTreebank$MyTreeTransformer.class
+	edu/stanford/nlp/trees/TransformingTreebank$MyTreeTransformer2.class
+	edu/stanford/nlp/trees/TransformingTreebank$MyTreeTransformer3.class
+	edu/stanford/nlp/trees/TransformingTreebank$TransformingTreebankIterator.class
+	edu/stanford/nlp/trees/Tree.class
+	edu/stanford/nlp/trees/Tree$TreeIterator.class
+	edu/stanford/nlp/trees/TreeCoreAnnotations.class
+	edu/stanford/nlp/trees/TreeCoreAnnotations$BinarizedTreeAnnotation.class
+	edu/stanford/nlp/trees/TreeCoreAnnotations$HeadTagAnnotation.class
+	edu/stanford/nlp/trees/TreeCoreAnnotations$HeadWordAnnotation.class
+	edu/stanford/nlp/trees/TreeCoreAnnotations$TreeAnnotation.class
+	edu/stanford/nlp/trees/TreeFactory.class
+	edu/stanford/nlp/trees/TreeFunctions.class
+	edu/stanford/nlp/trees/TreeFunctions$1.class
+	edu/stanford/nlp/trees/TreeFunctions$LabeledToDescriptiveCoreLabelTreeFunction.class
+	edu/stanford/nlp/trees/TreeFunctions$LabeledTreeToCategoryWordTagTreeFunction.class
+	edu/stanford/nlp/trees/TreeFunctions$LabeledTreeToStringLabeledTreeFunction.class
+	edu/stanford/nlp/trees/TreeGraph.class
+	edu/stanford/nlp/trees/TreeGraphNode.class
+	edu/stanford/nlp/trees/TreeGraphNode$TreeFactoryHolder.class
+	edu/stanford/nlp/trees/TreeGraphNodeFactory.class
+	edu/stanford/nlp/trees/TreeLeafLabelTransformer.class
+	edu/stanford/nlp/trees/TreeNormalizer.class
+	edu/stanford/nlp/trees/TreePrint.class
+	edu/stanford/nlp/trees/TreePrint$1.class
+	edu/stanford/nlp/trees/TreePrint$2.class
+	edu/stanford/nlp/trees/TreeReader.class
+	edu/stanford/nlp/trees/TreeReaderFactory.class
+	edu/stanford/nlp/trees/TreeTokenizerFactory.class
+	edu/stanford/nlp/trees/TreeTokenizerFactory$1.class
+	edu/stanford/nlp/trees/TreeTransformer.class
+	edu/stanford/nlp/trees/TreeVisitor.class
+	edu/stanford/nlp/trees/Treebank.class
+	edu/stanford/nlp/trees/Treebank$1.class
+	edu/stanford/nlp/trees/Treebank$CounterTreeProcessor.class
+	edu/stanford/nlp/trees/TreebankFactory.class
+	edu/stanford/nlp/trees/TreebankLanguagePack.class
+	edu/stanford/nlp/trees/Trees.class
+	edu/stanford/nlp/trees/TypedDependency.class
+	edu/stanford/nlp/trees/UnnamedConcreteDependency.class
+	edu/stanford/nlp/trees/UnnamedConcreteDependency$1.class
+	edu/stanford/nlp/trees/UnnamedConcreteDependency$DependencyFactoryHolder.class
+	edu/stanford/nlp/trees/UnnamedConcreteDependency$UnnamedConcreteDependencyFactory.class
+	edu/stanford/nlp/trees/UnnamedDependency.class
+	edu/stanford/nlp/trees/UnnamedDependency$1.class
+	edu/stanford/nlp/trees/UnnamedDependency$DependencyFactoryHolder.class
+	edu/stanford/nlp/trees/UnnamedDependency$UnnamedDependencyFactory.class
+	edu/stanford/nlp/trees/WordNetConnection.class
+	edu/stanford/nlp/trees/WordStemmer.class
+	edu/stanford/nlp/trees/fakeShortNameToGRel.class
+	edu/stanford/nlp/trees/fakeShortNameToGRel$1.class
+	edu/stanford/nlp/trees/international/pennchinese/BikelChineseHeadFinder.class
+	edu/stanford/nlp/trees/international/pennchinese/CEDict.class
+	edu/stanford/nlp/trees/international/pennchinese/CHTBLexer.class
+	edu/stanford/nlp/trees/international/pennchinese/CHTBTokenizer.class
+	edu/stanford/nlp/trees/international/pennchinese/CTBErrorCorrectingTreeNormalizer.class
+	edu/stanford/nlp/trees/international/pennchinese/CTBErrorCorrectingTreeNormalizer$1.class
+	edu/stanford/nlp/trees/international/pennchinese/CTBErrorCorrectingTreeNormalizer$CTBErrorCorrectingTreeReaderFactory.class
+	edu/stanford/nlp/trees/international/pennchinese/CTBErrorCorrectingTreeNormalizer$ChineseEmptyFilter.class
+	edu/stanford/nlp/trees/international/pennchinese/CTBTreeReaderFactory.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseCollinizer.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseEnglishWordMap.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseEnglishWordMap$SingletonHolder.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseEscaper.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$AdjectivalModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$AdverbialModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$ArgumentGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$AspectMarkerGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$AssociativeMarkerGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$AssociativeModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$AttributiveGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$AuxModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$AuxPassiveGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$BaGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$ClausalComplementGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$ClausalSubjectGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$ClauseModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$ComplementGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$ComplementizerGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$ControllingSubjectGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$CoordinationGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$DeterminerGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$DirectObjectGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$DvpMarkerGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$DvpModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$EtcGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$LocalizerComplementGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$ModalGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$ModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$NegationModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$NominalPassiveSubjectGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$NominalSubjectGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$NounCompoundModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$NumberModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$NumericModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$ObjectGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$OrdNumberGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$ParentheticalGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$ParticipialModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$PreconjunctGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$PrepositionalLocalizerModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$PrepositionalModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$PrepositionalObjectGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$PunctuationGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$RangeGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$RelativeClauseModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$ResultativeComplementGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$SemanticDependentGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$SubjectGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$TemporalClauseGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$TemporalGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$TimePostpositionGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$TopicGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$VerbCompoundGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$VerbModifierGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations$XClausalComplementGRAnnotation.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalStructure.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalStructure$FromDependenciesFactory.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalStructureFactory.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseHeadFinder.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseSemanticHeadFinder.class
+	edu/stanford/nlp/trees/international/pennchinese/ChineseTreebankLanguagePack.class
+	edu/stanford/nlp/trees/international/pennchinese/FragDiscardingPennTreeReader.class
+	edu/stanford/nlp/trees/international/pennchinese/RadicalMap.class
+	edu/stanford/nlp/trees/international/pennchinese/SunJurafskyChineseHeadFinder.class
+	edu/stanford/nlp/trees/tregex/CoordinationPattern.class
+	edu/stanford/nlp/trees/tregex/CoordinationPattern$CoordinationMatcher.class
+	edu/stanford/nlp/trees/tregex/DescriptionPattern.class
+	edu/stanford/nlp/trees/tregex/DescriptionPattern$1.class
+	edu/stanford/nlp/trees/tregex/DescriptionPattern$DescriptionMatcher.class
+	edu/stanford/nlp/trees/tregex/DescriptionPattern$DescriptionMode.class
+	edu/stanford/nlp/trees/tregex/Macros.class
+	edu/stanford/nlp/trees/tregex/ParseException.class
+	edu/stanford/nlp/trees/tregex/Relation.class
+	edu/stanford/nlp/trees/tregex/Relation$1.class
+	edu/stanford/nlp/trees/tregex/Relation$1$1.class
+	edu/stanford/nlp/trees/tregex/Relation$10.class
+	edu/stanford/nlp/trees/tregex/Relation$10$1.class
+	edu/stanford/nlp/trees/tregex/Relation$11.class
+	edu/stanford/nlp/trees/tregex/Relation$11$1.class
+	edu/stanford/nlp/trees/tregex/Relation$12.class
+	edu/stanford/nlp/trees/tregex/Relation$12$1.class
+	edu/stanford/nlp/trees/tregex/Relation$13.class
+	edu/stanford/nlp/trees/tregex/Relation$13$1.class
+	edu/stanford/nlp/trees/tregex/Relation$14.class
+	edu/stanford/nlp/trees/tregex/Relation$14$1.class
+	edu/stanford/nlp/trees/tregex/Relation$15.class
+	edu/stanford/nlp/trees/tregex/Relation$15$1.class
+	edu/stanford/nlp/trees/tregex/Relation$16.class
+	edu/stanford/nlp/trees/tregex/Relation$16$1.class
+	edu/stanford/nlp/trees/tregex/Relation$17.class
+	edu/stanford/nlp/trees/tregex/Relation$17$1.class
+	edu/stanford/nlp/trees/tregex/Relation$18.class
+	edu/stanford/nlp/trees/tregex/Relation$18$1.class
+	edu/stanford/nlp/trees/tregex/Relation$19.class
+	edu/stanford/nlp/trees/tregex/Relation$19$1.class
+	edu/stanford/nlp/trees/tregex/Relation$2.class
+	edu/stanford/nlp/trees/tregex/Relation$20.class
+	edu/stanford/nlp/trees/tregex/Relation$20$1.class
+	edu/stanford/nlp/trees/tregex/Relation$21.class
+	edu/stanford/nlp/trees/tregex/Relation$21$1.class
+	edu/stanford/nlp/trees/tregex/Relation$22.class
+	edu/stanford/nlp/trees/tregex/Relation$22$1.class
+	edu/stanford/nlp/trees/tregex/Relation$23.class
+	edu/stanford/nlp/trees/tregex/Relation$23$1.class
+	edu/stanford/nlp/trees/tregex/Relation$24.class
+	edu/stanford/nlp/trees/tregex/Relation$24$1.class
+	edu/stanford/nlp/trees/tregex/Relation$3.class
+	edu/stanford/nlp/trees/tregex/Relation$4.class
+	edu/stanford/nlp/trees/tregex/Relation$4$1.class
+	edu/stanford/nlp/trees/tregex/Relation$5.class
+	edu/stanford/nlp/trees/tregex/Relation$5$1.class
+	edu/stanford/nlp/trees/tregex/Relation$6.class
+	edu/stanford/nlp/trees/tregex/Relation$6$1.class
+	edu/stanford/nlp/trees/tregex/Relation$7.class
+	edu/stanford/nlp/trees/tregex/Relation$7$1.class
+	edu/stanford/nlp/trees/tregex/Relation$8.class
+	edu/stanford/nlp/trees/tregex/Relation$8$1.class
+	edu/stanford/nlp/trees/tregex/Relation$9.class
+	edu/stanford/nlp/trees/tregex/Relation$9$1.class
+	edu/stanford/nlp/trees/tregex/Relation$HasIthChild.class
+	edu/stanford/nlp/trees/tregex/Relation$HasIthChild$1.class
+	edu/stanford/nlp/trees/tregex/Relation$HeadedBy.class
+	edu/stanford/nlp/trees/tregex/Relation$HeadedBy$1.class
+	edu/stanford/nlp/trees/tregex/Relation$Heads.class
+	edu/stanford/nlp/trees/tregex/Relation$Heads$1.class
+	edu/stanford/nlp/trees/tregex/Relation$ImmediatelyHeadedBy.class
+	edu/stanford/nlp/trees/tregex/Relation$ImmediatelyHeadedBy$1.class
+	edu/stanford/nlp/trees/tregex/Relation$ImmediatelyHeads.class
+	edu/stanford/nlp/trees/tregex/Relation$ImmediatelyHeads$1.class
+	edu/stanford/nlp/trees/tregex/Relation$IthChildOf.class
+	edu/stanford/nlp/trees/tregex/Relation$IthChildOf$1.class
+	edu/stanford/nlp/trees/tregex/Relation$SearchNodeIterator.class
+	edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryDominates.class
+	edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryDominates$1.class
+	edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryFollows.class
+	edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryFollows$1.class
+	edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryIsDominatedBy.class
+	edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryIsDominatedBy$1.class
+	edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryPrecedes.class
+	edu/stanford/nlp/trees/tregex/Relation$UnbrokenCategoryPrecedes$1.class
+	edu/stanford/nlp/trees/tregex/SimpleCharStream.class
+	edu/stanford/nlp/trees/tregex/Token.class
+	edu/stanford/nlp/trees/tregex/TokenMgrError.class
+	edu/stanford/nlp/trees/tregex/TregexMatcher.class
+	edu/stanford/nlp/trees/tregex/TregexParseException.class
+	edu/stanford/nlp/trees/tregex/TregexParser.class
+	edu/stanford/nlp/trees/tregex/TregexParserConstants.class
+	edu/stanford/nlp/trees/tregex/TregexParserTokenManager.class
+	edu/stanford/nlp/trees/tregex/TregexPattern.class
+	edu/stanford/nlp/trees/tregex/TregexPattern$TRegexTreeReaderFactory.class
+	edu/stanford/nlp/trees/tregex/TregexPattern$TRegexTreeReaderFactory$1.class
+	edu/stanford/nlp/trees/tregex/TregexPattern$TRegexTreeVisitor.class
+	edu/stanford/nlp/trees/tregex/TregexPatternCompiler.class
+	edu/stanford/nlp/trees/tregex/VariableStrings.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/AdjoinNode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/AdjoinToFootNode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/AdjoinToHeadNode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/AuxiliaryTree.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/CoindexNodes.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/CoindexationGenerator.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/CreateSubtreeNode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/DeleteNode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/ExciseNode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/FetchNode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/HoldTreeNode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/InsertNode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/JJTTsurgeonParserState.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/MoveNode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/Node.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/ParseException.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/PruneNode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/RelabelNode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/RelabelNode$1.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/RelabelNode$RelabelMode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/ReplaceNode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/SimpleCharStream.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/SimpleNode.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/Token.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/TokenMgrError.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/TreeLocation.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/Tsurgeon.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParseException.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParser.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParser$1.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParser$JJCalls.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParser$LookaheadSuccess.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParserConstants.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParserTokenManager.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParserTreeConstants.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonPattern.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonPatternRoot.class
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonRuntimeException.class
+	edu/stanford/nlp/util/AbstractIterator.class
+	edu/stanford/nlp/util/ArrayCoreMap.class
+	edu/stanford/nlp/util/ArrayCoreMap$1.class
+	edu/stanford/nlp/util/ArrayCoreMap$1$1.class
+	edu/stanford/nlp/util/ArrayCoreMap$2.class
+	edu/stanford/nlp/util/ArrayCoreMap$3.class
+	edu/stanford/nlp/util/ArrayMap.class
+	edu/stanford/nlp/util/ArrayMap$1.class
+	edu/stanford/nlp/util/ArrayMap$Entry.class
+	edu/stanford/nlp/util/ArraySet.class
+	edu/stanford/nlp/util/ArrayStringFilter.class
+	edu/stanford/nlp/util/ArrayStringFilter$1.class
+	edu/stanford/nlp/util/ArrayStringFilter$Mode.class
+	edu/stanford/nlp/util/ArrayUtils.class
+	edu/stanford/nlp/util/BinaryHeapPriorityQueue.class
+	edu/stanford/nlp/util/BinaryHeapPriorityQueue$1.class
+	edu/stanford/nlp/util/BinaryHeapPriorityQueue$Entry.class
+	edu/stanford/nlp/util/ByteStreamGobbler.class
+	edu/stanford/nlp/util/CollectionFactory.class
+	edu/stanford/nlp/util/CollectionFactory$ArrayListFactory.class
+	edu/stanford/nlp/util/CollectionFactory$HashSetFactory.class
+	edu/stanford/nlp/util/CollectionFactory$LinkedListFactory.class
+	edu/stanford/nlp/util/CollectionFactory$SizedArrayListFactory.class
+	edu/stanford/nlp/util/CollectionFactory$TreeSetFactory.class
+	edu/stanford/nlp/util/CollectionUtils.class
+	edu/stanford/nlp/util/CollectionUtils$1.class
+	edu/stanford/nlp/util/CollectionValuedMap.class
+	edu/stanford/nlp/util/Comparators.class
+	edu/stanford/nlp/util/Comparators$1.class
+	edu/stanford/nlp/util/Comparators$2.class
+	edu/stanford/nlp/util/Comparators$3.class
+	edu/stanford/nlp/util/ConcatenationIterator.class
+	edu/stanford/nlp/util/CoreMap.class
+	edu/stanford/nlp/util/DeltaCollectionValuedMap.class
+	edu/stanford/nlp/util/DeltaCollectionValuedMap$1.class
+	edu/stanford/nlp/util/DeltaCollectionValuedMap$1$1.class
+	edu/stanford/nlp/util/DeltaCollectionValuedMap$1$2.class
+	edu/stanford/nlp/util/DeltaCollectionValuedMap$SimpleEntry.class
+	edu/stanford/nlp/util/DeltaMap.class
+	edu/stanford/nlp/util/DeltaMap$1.class
+	edu/stanford/nlp/util/DeltaMap$1$1.class
+	edu/stanford/nlp/util/DeltaMap$1$1NullingIterator.class
+	edu/stanford/nlp/util/DeltaMap$1$2.class
+	edu/stanford/nlp/util/DeltaMap$SimpleEntry.class
+	edu/stanford/nlp/util/ErasureUtils.class
+	edu/stanford/nlp/util/Factory.class
+	edu/stanford/nlp/util/FilePathProcessor.class
+	edu/stanford/nlp/util/FileProcessor.class
+	edu/stanford/nlp/util/Filter.class
+	edu/stanford/nlp/util/FilteredIterator.class
+	edu/stanford/nlp/util/FilteredIterator$1.class
+	edu/stanford/nlp/util/Filters.class
+	edu/stanford/nlp/util/Filters$CategoricalFilter.class
+	edu/stanford/nlp/util/Filters$CollectionAcceptFilter.class
+	edu/stanford/nlp/util/Filters$CombinedFilter.class
+	edu/stanford/nlp/util/Filters$ConjFilter.class
+	edu/stanford/nlp/util/Filters$DisjFilter.class
+	edu/stanford/nlp/util/Filters$NegatedFilter.class
+	edu/stanford/nlp/util/Filters$RandomFilter.class
+	edu/stanford/nlp/util/FixedPrioritiesPriorityQueue.class
+	edu/stanford/nlp/util/Function.class
+	edu/stanford/nlp/util/Generics.class
+	edu/stanford/nlp/util/HasInterval.class
+	edu/stanford/nlp/util/HasInterval$1.class
+	edu/stanford/nlp/util/HasInterval$2.class
+	edu/stanford/nlp/util/HasInterval$3.class
+	edu/stanford/nlp/util/HasInterval$4.class
+	edu/stanford/nlp/util/HashIndex.class
+	edu/stanford/nlp/util/HashIndex$1.class
+	edu/stanford/nlp/util/HashIndex$2.class
+	edu/stanford/nlp/util/HashableCoreMap.class
+	edu/stanford/nlp/util/HashableCoreMap$HashableCoreMapException.class
+	edu/stanford/nlp/util/IdentityHashSet.class
+	edu/stanford/nlp/util/Index.class
+	edu/stanford/nlp/util/IntPair.class
+	edu/stanford/nlp/util/IntQuadruple.class
+	edu/stanford/nlp/util/IntTriple.class
+	edu/stanford/nlp/util/IntTuple.class
+	edu/stanford/nlp/util/IntUni.class
+	edu/stanford/nlp/util/Interner.class
+	edu/stanford/nlp/util/Interval.class
+	edu/stanford/nlp/util/Interval$RelType.class
+	edu/stanford/nlp/util/MapFactory.class
+	edu/stanford/nlp/util/MapFactory$1.class
+	edu/stanford/nlp/util/MapFactory$ArrayMapFactory.class
+	edu/stanford/nlp/util/MapFactory$HashMapFactory.class
+	edu/stanford/nlp/util/MapFactory$IdentityHashMapFactory.class
+	edu/stanford/nlp/util/MapFactory$LinkedHashMapFactory.class
+	edu/stanford/nlp/util/MapFactory$TreeMapFactory.class
+	edu/stanford/nlp/util/MapFactory$WeakHashMapFactory.class
+	edu/stanford/nlp/util/Maps.class
+	edu/stanford/nlp/util/Maps$1.class
+	edu/stanford/nlp/util/MetaClass.class
+	edu/stanford/nlp/util/MetaClass$1.class
+	edu/stanford/nlp/util/MetaClass$ClassCreationException.class
+	edu/stanford/nlp/util/MetaClass$ClassFactory.class
+	edu/stanford/nlp/util/MetaClass$ConstructorNotFoundException.class
+	edu/stanford/nlp/util/MutableDouble.class
+	edu/stanford/nlp/util/MutableInteger.class
+	edu/stanford/nlp/util/Pair.class
+	edu/stanford/nlp/util/Pair$1.class
+	edu/stanford/nlp/util/Pair$ByFirstPairComparator.class
+	edu/stanford/nlp/util/Pair$ByFirstReversePairComparator.class
+	edu/stanford/nlp/util/Pair$BySecondPairComparator.class
+	edu/stanford/nlp/util/Pair$BySecondReversePairComparator.class
+	edu/stanford/nlp/util/Pair$MutableInternedPair.class
+	edu/stanford/nlp/util/PriorityQueue.class
+	edu/stanford/nlp/util/PropertiesUtils.class
+	edu/stanford/nlp/util/PropertiesUtils$Property.class
+	edu/stanford/nlp/util/ReflectionLoading.class
+	edu/stanford/nlp/util/ReflectionLoading$ReflectionLoadingException.class
+	edu/stanford/nlp/util/Scored.class
+	edu/stanford/nlp/util/ScoredComparator.class
+	edu/stanford/nlp/util/ScoredObject.class
+	edu/stanford/nlp/util/Sets.class
+	edu/stanford/nlp/util/StreamGobbler.class
+	edu/stanford/nlp/util/StringUtils.class
+	edu/stanford/nlp/util/StringUtils$1.class
+	edu/stanford/nlp/util/StringUtils$2.class
+	edu/stanford/nlp/util/StringUtils$3.class
+	edu/stanford/nlp/util/StringUtils$4.class
+	edu/stanford/nlp/util/Timing.class
+	edu/stanford/nlp/util/Triple.class
+	edu/stanford/nlp/util/TwoDimensionalMap.class
+	edu/stanford/nlp/util/TwoDimensionalMap$Entry.class
+	edu/stanford/nlp/util/TwoDimensionalMap$TwoDimensionalMapIterator.class
+	edu/stanford/nlp/util/TwoDimensionalMap$TwoDimensionalMapValueIterator.class
+	edu/stanford/nlp/util/TypesafeMap.class
+	edu/stanford/nlp/util/TypesafeMap$Key.class
+	edu/stanford/nlp/util/UTF8EquivalenceFunction.class
+	edu/stanford/nlp/util/XMLUtils.class
+	edu/stanford/nlp/util/XMLUtils$1.class
+	edu/stanford/nlp/util/XMLUtils$SAXErrorHandler.class
+	edu/stanford/nlp/util/XMLUtils$XMLTag.class
+	edu/stanford/nlp/util/concurrent/SynchronizedInterner.class
+	edu/stanford/nlp/util/concurrent/SynchronizedInterner$1.class
+	edu/stanford/nlp/util/logging/Color.class
+	edu/stanford/nlp/util/logging/JavaUtilLoggingAdaptor.class
+	edu/stanford/nlp/util/logging/JavaUtilLoggingAdaptor$RedwoodHandler.class
+	edu/stanford/nlp/util/logging/LogRecordHandler.class
+	edu/stanford/nlp/util/logging/OutputHandler.class
+	edu/stanford/nlp/util/logging/OutputHandler$1.class
+	edu/stanford/nlp/util/logging/OutputHandler$TrackInfo.class
+	edu/stanford/nlp/util/logging/PrettyLoggable.class
+	edu/stanford/nlp/util/logging/PrettyLogger.class
+	edu/stanford/nlp/util/logging/PrettyLogger$1.class
+	edu/stanford/nlp/util/logging/RedirectOutputHandler.class
+	edu/stanford/nlp/util/logging/Redwood.class
+	edu/stanford/nlp/util/logging/Redwood$1.class
+	edu/stanford/nlp/util/logging/Redwood$2.class
+	edu/stanford/nlp/util/logging/Redwood$3.class
+	edu/stanford/nlp/util/logging/Redwood$4.class
+	edu/stanford/nlp/util/logging/Redwood$5.class
+	edu/stanford/nlp/util/logging/Redwood$6.class
+	edu/stanford/nlp/util/logging/Redwood$7.class
+	edu/stanford/nlp/util/logging/Redwood$ConsoleHandler.class
+	edu/stanford/nlp/util/logging/Redwood$FileHandler.class
+	edu/stanford/nlp/util/logging/Redwood$Flag.class
+	edu/stanford/nlp/util/logging/Redwood$MessageType.class
+	edu/stanford/nlp/util/logging/Redwood$Record.class
+	edu/stanford/nlp/util/logging/Redwood$Record$1.class
+	edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree.class
+	edu/stanford/nlp/util/logging/Redwood$RecordHandlerTree$1.class
+	edu/stanford/nlp/util/logging/Redwood$RedwoodChannels.class
+	edu/stanford/nlp/util/logging/Redwood$Util.class
+	edu/stanford/nlp/util/logging/Redwood$Util$1.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$1.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$2.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$3.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$4.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$5.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$6.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$7.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$8.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$8$1.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$1.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$1$1.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$10.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$11.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$12.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$13.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$14.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$2.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$2$1.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$3.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$4.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$5.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$6.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$7.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$8.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Handlers$9.class
+	edu/stanford/nlp/util/logging/RedwoodConfiguration$Thunk.class
+	edu/stanford/nlp/util/logging/RedwoodPrintStream.class
+	edu/stanford/nlp/util/logging/RepeatedRecordHandler.class
+	edu/stanford/nlp/util/logging/RepeatedRecordHandler$1.class
+	edu/stanford/nlp/util/logging/RepeatedRecordHandler$ApproximateRepeatSemantics.class
+	edu/stanford/nlp/util/logging/RepeatedRecordHandler$ExactRepeatSemantics.class
+	edu/stanford/nlp/util/logging/RepeatedRecordHandler$PendingType.class
+	edu/stanford/nlp/util/logging/RepeatedRecordHandler$RepeatSemantics.class
+	edu/stanford/nlp/util/logging/RepeatedRecordHandler$RepeatedRecordInfo.class
+	edu/stanford/nlp/util/logging/RerouteChannel.class
+	edu/stanford/nlp/util/logging/Style.class
+	edu/stanford/nlp/util/logging/VisibilityHandler.class
+	edu/stanford/nlp/util/logging/VisibilityHandler$1.class
+	edu/stanford/nlp/util/logging/VisibilityHandler$State.class
+
+
+Source files:
+
+	edu/stanford/nlp/classify/AbstractLinearClassifierFactory.java
+	edu/stanford/nlp/classify/AdaptedGaussianPriorObjectiveFunction.java
+	edu/stanford/nlp/classify/BiasedLogConditionalObjectiveFunction.java
+	edu/stanford/nlp/classify/BiasedLogisticObjectiveFunction.java
+	edu/stanford/nlp/classify/Classifier.java
+	edu/stanford/nlp/classify/ClassifierCreator.java
+	edu/stanford/nlp/classify/ClassifierFactory.java
+	edu/stanford/nlp/classify/CrossValidator.java
+	edu/stanford/nlp/classify/Dataset.java
+	edu/stanford/nlp/classify/GeneralDataset.java
+	edu/stanford/nlp/classify/GeneralizedExpectationObjectiveFunction.java
+	edu/stanford/nlp/classify/LinearClassifier.java
+	edu/stanford/nlp/classify/LinearClassifierFactory.java
+	edu/stanford/nlp/classify/LogConditionalObjectiveFunction.java
+	edu/stanford/nlp/classify/LogPrior.java
+	edu/stanford/nlp/classify/LogisticClassifier.java
+	edu/stanford/nlp/classify/LogisticClassifierFactory.java
+	edu/stanford/nlp/classify/LogisticObjectiveFunction.java
+	edu/stanford/nlp/classify/PRCurve.java
+	edu/stanford/nlp/classify/ProbabilisticClassifier.java
+	edu/stanford/nlp/classify/ProbabilisticClassifierCreator.java
+	edu/stanford/nlp/classify/RVFClassifier.java
+	edu/stanford/nlp/classify/RVFDataset.java
+	edu/stanford/nlp/classify/SemiSupervisedLogConditionalObjectiveFunction.java
+	edu/stanford/nlp/classify/WeightedDataset.java
+	edu/stanford/nlp/international/morph/MorphoFeatureSpecification.java
+	edu/stanford/nlp/international/morph/MorphoFeatures.java
+	edu/stanford/nlp/io/BZip2PipedOutputStream.java
+	edu/stanford/nlp/io/EncodingFileReader.java
+	edu/stanford/nlp/io/EncodingPrintWriter.java
+	edu/stanford/nlp/io/ExtensionFileFilter.java
+	edu/stanford/nlp/io/IOUtils.java
+	edu/stanford/nlp/io/NumberRangeFileFilter.java
+	edu/stanford/nlp/io/NumberRangesFileFilter.java
+	edu/stanford/nlp/io/RuntimeIOException.java
+	edu/stanford/nlp/ling/AnnotationLookup.java
+	edu/stanford/nlp/ling/BasicDatum.java
+	edu/stanford/nlp/ling/CategoryWordTag.java
+	edu/stanford/nlp/ling/CategoryWordTagFactory.java
+	edu/stanford/nlp/ling/CoreAnnotation.java
+	edu/stanford/nlp/ling/CoreAnnotations.java
+	edu/stanford/nlp/ling/CoreLabel.java
+	edu/stanford/nlp/ling/Datum.java
+	edu/stanford/nlp/ling/Featurizable.java
+	edu/stanford/nlp/ling/HasCategory.java
+	edu/stanford/nlp/ling/HasContext.java
+	edu/stanford/nlp/ling/HasIndex.java
+	edu/stanford/nlp/ling/HasLemma.java
+	edu/stanford/nlp/ling/HasOffset.java
+	edu/stanford/nlp/ling/HasTag.java
+	edu/stanford/nlp/ling/HasWord.java
+	edu/stanford/nlp/ling/Label.java
+	edu/stanford/nlp/ling/LabelFactory.java
+	edu/stanford/nlp/ling/Labeled.java
+	edu/stanford/nlp/ling/LabeledWord.java
+	edu/stanford/nlp/ling/MultiTokenTag.java
+	edu/stanford/nlp/ling/RVFDatum.java
+	edu/stanford/nlp/ling/Sentence.java
+	edu/stanford/nlp/ling/StringLabel.java
+	edu/stanford/nlp/ling/StringLabelFactory.java
+	edu/stanford/nlp/ling/TaggedWord.java
+	edu/stanford/nlp/ling/TaggedWordFactory.java
+	edu/stanford/nlp/ling/ValueLabel.java
+	edu/stanford/nlp/ling/Word.java
+	edu/stanford/nlp/ling/WordFactory.java
+	edu/stanford/nlp/ling/WordLemmaTag.java
+	edu/stanford/nlp/ling/WordLemmaTagFactory.java
+	edu/stanford/nlp/ling/WordTag.java
+	edu/stanford/nlp/ling/WordTagFactory.java
+	edu/stanford/nlp/math/ADMath.java
+	edu/stanford/nlp/math/ArrayMath.java
+	edu/stanford/nlp/math/DoubleAD.java
+	edu/stanford/nlp/math/SloppyMath.java
+	edu/stanford/nlp/objectbank/IdentityFunction.java
+	edu/stanford/nlp/objectbank/IteratorFromReaderFactory.java
+	edu/stanford/nlp/objectbank/LineIterator.java
+	edu/stanford/nlp/objectbank/ObjectBank.java
+	edu/stanford/nlp/objectbank/ReaderIteratorFactory.java
+	edu/stanford/nlp/optimization/AbstractCachingDiffFunction.java
+	edu/stanford/nlp/optimization/AbstractStochasticCachingDiffFunction.java
+	edu/stanford/nlp/optimization/AbstractStochasticCachingDiffUpdateFunction.java
+	edu/stanford/nlp/optimization/CGMinimizer.java
+	edu/stanford/nlp/optimization/DiffFloatFunction.java
+	edu/stanford/nlp/optimization/DiffFunction.java
+	edu/stanford/nlp/optimization/Evaluator.java
+	edu/stanford/nlp/optimization/FloatFunction.java
+	edu/stanford/nlp/optimization/Function.java
+	edu/stanford/nlp/optimization/GoldenSectionLineSearch.java
+	edu/stanford/nlp/optimization/HasEvaluators.java
+	edu/stanford/nlp/optimization/HasInitial.java
+	edu/stanford/nlp/optimization/HasRegularizerParamRange.java
+	edu/stanford/nlp/optimization/HybridMinimizer.java
+	edu/stanford/nlp/optimization/InefficientSGDMinimizer.java
+	edu/stanford/nlp/optimization/LineSearcher.java
+	edu/stanford/nlp/optimization/Minimizer.java
+	edu/stanford/nlp/optimization/QNMinimizer.java
+	edu/stanford/nlp/optimization/SGDMinimizer.java
+	edu/stanford/nlp/optimization/SGDToQNMinimizer.java
+	edu/stanford/nlp/optimization/SMDMinimizer.java
+	edu/stanford/nlp/optimization/SQNMinimizer.java
+	edu/stanford/nlp/optimization/ScaledSGDMinimizer.java
+	edu/stanford/nlp/optimization/StochasticCalculateMethods.java
+	edu/stanford/nlp/optimization/StochasticMinimizer.java
+	edu/stanford/nlp/parser/KBestViterbiParser.java
+	edu/stanford/nlp/parser/Parser.java
+	edu/stanford/nlp/parser/ViterbiParser.java
+	edu/stanford/nlp/parser/ViterbiParserWithOptions.java
+	edu/stanford/nlp/parser/lexparser/AbstractDependencyGrammar.java
+	edu/stanford/nlp/parser/lexparser/AbstractTreeExtractor.java
+	edu/stanford/nlp/parser/lexparser/AbstractTreebankParserParams.java
+	edu/stanford/nlp/parser/lexparser/BaseLexicon.java
+	edu/stanford/nlp/parser/lexparser/BasicCategoryTagProjection.java
+	edu/stanford/nlp/parser/lexparser/BoundaryRemover.java
+	edu/stanford/nlp/parser/lexparser/CNFTransformers.java
+	edu/stanford/nlp/parser/lexparser/ChineseCharacterBasedLexicon.java
+	edu/stanford/nlp/parser/lexparser/ChineseLexicon.java
+	edu/stanford/nlp/parser/lexparser/ChineseLexiconAndWordSegmenter.java
+	edu/stanford/nlp/parser/lexparser/ChineseSimWordAvgDepGrammar.java
+	edu/stanford/nlp/parser/lexparser/ChineseTreebankParserParams.java
+	edu/stanford/nlp/parser/lexparser/CollinsPuncTransformer.java
+	edu/stanford/nlp/parser/lexparser/Debinarizer.java
+	edu/stanford/nlp/parser/lexparser/DependencyGrammar.java
+	edu/stanford/nlp/parser/lexparser/EnglishTreebankParserParams.java
+	edu/stanford/nlp/parser/lexparser/Extractor.java
+	edu/stanford/nlp/parser/lexparser/IntDependency.java
+	edu/stanford/nlp/parser/lexparser/IntTaggedWord.java
+	edu/stanford/nlp/parser/lexparser/Interner.java
+	edu/stanford/nlp/parser/lexparser/Lexicon.java
+	edu/stanford/nlp/parser/lexparser/MLEDependencyGrammar.java
+	edu/stanford/nlp/parser/lexparser/MLEDependencyGrammarExtractor.java
+	edu/stanford/nlp/parser/lexparser/Options.java
+	edu/stanford/nlp/parser/lexparser/ParentAnnotationStats.java
+	edu/stanford/nlp/parser/lexparser/PostSplitter.java
+	edu/stanford/nlp/parser/lexparser/RandomWalk.java
+	edu/stanford/nlp/parser/lexparser/SisterAnnotationStats.java
+	edu/stanford/nlp/parser/lexparser/TagProjection.java
+	edu/stanford/nlp/parser/lexparser/TestOptions.java
+	edu/stanford/nlp/parser/lexparser/TestTagProjection.java
+	edu/stanford/nlp/parser/lexparser/TrainOptions.java
+	edu/stanford/nlp/parser/lexparser/TreeAnnotator.java
+	edu/stanford/nlp/parser/lexparser/TreeAnnotatorAndBinarizer.java
+	edu/stanford/nlp/parser/lexparser/TreeBinarizer.java
+	edu/stanford/nlp/parser/lexparser/TreeCollinizer.java
+	edu/stanford/nlp/parser/lexparser/TreebankAnnotator.java
+	edu/stanford/nlp/parser/lexparser/TreebankLangParserParams.java
+	edu/stanford/nlp/parser/lexparser/UnknownWordModel.java
+	edu/stanford/nlp/parser/lexparser/UnknownWordModelTrainer.java
+	edu/stanford/nlp/parser/metrics/AbstractEval.java
+	edu/stanford/nlp/parser/metrics/Eval.java
+	edu/stanford/nlp/parser/tools/PunctEquivalenceClasser.java
+	edu/stanford/nlp/process/AbstractTokenizer.java
+	edu/stanford/nlp/process/Americanize.java
+	edu/stanford/nlp/process/CoreLabelTokenFactory.java
+	edu/stanford/nlp/process/CoreTokenFactory.java
+	edu/stanford/nlp/process/LexedTokenFactory.java
+	edu/stanford/nlp/process/Morpha.java
+	edu/stanford/nlp/process/Morphology.java
+	edu/stanford/nlp/process/PTB2TextLexer.java
+	edu/stanford/nlp/process/PTBLexer.java
+	edu/stanford/nlp/process/PTBTokenizer.java
+	edu/stanford/nlp/process/SerializableFunction.java
+	edu/stanford/nlp/process/Tokenizer.java
+	edu/stanford/nlp/process/TokenizerAdapter.java
+	edu/stanford/nlp/process/TokenizerFactory.java
+	edu/stanford/nlp/process/WhitespaceLexer.java
+	edu/stanford/nlp/process/WhitespaceTokenizer.java
+	edu/stanford/nlp/process/WordSegmenter.java
+	edu/stanford/nlp/process/WordSegmentingTokenizer.java
+	edu/stanford/nlp/process/WordTokenFactory.java
+	edu/stanford/nlp/stats/AbstractCounter.java
+	edu/stanford/nlp/stats/AccuracyStats.java
+	edu/stanford/nlp/stats/ClassicCounter.java
+	edu/stanford/nlp/stats/Counter.java
+	edu/stanford/nlp/stats/Counters.java
+	edu/stanford/nlp/stats/Distribution.java
+	edu/stanford/nlp/stats/EquivalenceClasser.java
+	edu/stanford/nlp/stats/GeneralizedCounter.java
+	edu/stanford/nlp/stats/IntCounter.java
+	edu/stanford/nlp/stats/MultiClassAccuracyStats.java
+	edu/stanford/nlp/stats/ProbabilityDistribution.java
+	edu/stanford/nlp/stats/Sampler.java
+	edu/stanford/nlp/stats/Scorer.java
+	edu/stanford/nlp/stats/SimpleGoodTuring.java
+	edu/stanford/nlp/stats/TwoDimensionalCounter.java
+	edu/stanford/nlp/stats/TwoDimensionalCounterInterface.java
+	edu/stanford/nlp/trees/AbstractCollinsHeadFinder.java
+	edu/stanford/nlp/trees/AbstractTreebankLanguagePack.java
+	edu/stanford/nlp/trees/BobChrisTreeNormalizer.java
+	edu/stanford/nlp/trees/CollinsHeadFinder.java
+	edu/stanford/nlp/trees/CollocationFinder.java
+	edu/stanford/nlp/trees/CompositeTreeTransformer.java
+	edu/stanford/nlp/trees/CompositeTreebank.java
+	edu/stanford/nlp/trees/Constituent.java
+	edu/stanford/nlp/trees/ConstituentFactory.java
+	edu/stanford/nlp/trees/CoordinationTransformer.java
+	edu/stanford/nlp/trees/CopulaHeadFinder.java
+	edu/stanford/nlp/trees/DateTreeTransformer.java
+	edu/stanford/nlp/trees/Dependencies.java
+	edu/stanford/nlp/trees/Dependency.java
+	edu/stanford/nlp/trees/DependencyFactory.java
+	edu/stanford/nlp/trees/DependencyPrinter.java
+	edu/stanford/nlp/trees/DependencyReader.java
+	edu/stanford/nlp/trees/DependencyScoring.java
+	edu/stanford/nlp/trees/DependencyTreeTransformer.java
+	edu/stanford/nlp/trees/DependencyTyper.java
+	edu/stanford/nlp/trees/DiskTreebank.java
+	edu/stanford/nlp/trees/EnglishGrammaticalRelations.java
+	edu/stanford/nlp/trees/EnglishGrammaticalStructure.java
+	edu/stanford/nlp/trees/EnglishGrammaticalStructureFactory.java
+	edu/stanford/nlp/trees/GrammaticalRelation.java
+	edu/stanford/nlp/trees/GrammaticalStructure.java
+	edu/stanford/nlp/trees/GrammaticalStructureFactory.java
+	edu/stanford/nlp/trees/GrammaticalStructureFromDependenciesFactory.java
+	edu/stanford/nlp/trees/HasParent.java
+	edu/stanford/nlp/trees/HeadFinder.java
+	edu/stanford/nlp/trees/Labeled.java
+	edu/stanford/nlp/trees/LabeledConstituent.java
+	edu/stanford/nlp/trees/LabeledScoredTreeFactory.java
+	edu/stanford/nlp/trees/LabeledScoredTreeNode.java
+	edu/stanford/nlp/trees/LabeledScoredTreeReaderFactory.java
+	edu/stanford/nlp/trees/LeftHeadFinder.java
+	edu/stanford/nlp/trees/MemoryTreebank.java
+	edu/stanford/nlp/trees/ModCollinsHeadFinder.java
+	edu/stanford/nlp/trees/NPTmpRetainingTreeNormalizer.java
+	edu/stanford/nlp/trees/NamedDependency.java
+	edu/stanford/nlp/trees/PennTreeReader.java
+	edu/stanford/nlp/trees/PennTreeReaderFactory.java
+	edu/stanford/nlp/trees/PennTreebankLanguagePack.java
+	edu/stanford/nlp/trees/PennTreebankTokenizer.java
+	edu/stanford/nlp/trees/QPTreeTransformer.java
+	edu/stanford/nlp/trees/SemanticHeadFinder.java
+	edu/stanford/nlp/trees/SimpleConstituent.java
+	edu/stanford/nlp/trees/SimpleConstituentFactory.java
+	edu/stanford/nlp/trees/SimpleTree.java
+	edu/stanford/nlp/trees/SimpleTreeFactory.java
+	edu/stanford/nlp/trees/TransformingTreebank.java
+	edu/stanford/nlp/trees/Tree.java
+	edu/stanford/nlp/trees/TreeCoreAnnotations.java
+	edu/stanford/nlp/trees/TreeFactory.java
+	edu/stanford/nlp/trees/TreeFunctions.java
+	edu/stanford/nlp/trees/TreeGraph.java
+	edu/stanford/nlp/trees/TreeGraphNode.java
+	edu/stanford/nlp/trees/TreeGraphNodeFactory.java
+	edu/stanford/nlp/trees/TreeLeafLabelTransformer.java
+	edu/stanford/nlp/trees/TreeNormalizer.java
+	edu/stanford/nlp/trees/TreePrint.java
+	edu/stanford/nlp/trees/TreeReader.java
+	edu/stanford/nlp/trees/TreeReaderFactory.java
+	edu/stanford/nlp/trees/TreeTokenizerFactory.java
+	edu/stanford/nlp/trees/TreeTransformer.java
+	edu/stanford/nlp/trees/TreeVisitor.java
+	edu/stanford/nlp/trees/Treebank.java
+	edu/stanford/nlp/trees/TreebankFactory.java
+	edu/stanford/nlp/trees/TreebankLanguagePack.java
+	edu/stanford/nlp/trees/Trees.java
+	edu/stanford/nlp/trees/TypedDependency.java
+	edu/stanford/nlp/trees/UnnamedConcreteDependency.java
+	edu/stanford/nlp/trees/UnnamedDependency.java
+	edu/stanford/nlp/trees/WordNetConnection.java
+	edu/stanford/nlp/trees/WordStemmer.java
+	edu/stanford/nlp/trees/international/pennchinese/BikelChineseHeadFinder.java
+	edu/stanford/nlp/trees/international/pennchinese/CEDict.java
+	edu/stanford/nlp/trees/international/pennchinese/CHTBLexer.java
+	edu/stanford/nlp/trees/international/pennchinese/CHTBTokenizer.java
+	edu/stanford/nlp/trees/international/pennchinese/CTBErrorCorrectingTreeNormalizer.java
+	edu/stanford/nlp/trees/international/pennchinese/CTBTreeReaderFactory.java
+	edu/stanford/nlp/trees/international/pennchinese/ChineseCollinizer.java
+	edu/stanford/nlp/trees/international/pennchinese/ChineseEnglishWordMap.java
+	edu/stanford/nlp/trees/international/pennchinese/ChineseEscaper.java
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations.java
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalStructure.java
+	edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalStructureFactory.java
+	edu/stanford/nlp/trees/international/pennchinese/ChineseHeadFinder.java
+	edu/stanford/nlp/trees/international/pennchinese/ChineseSemanticHeadFinder.java
+	edu/stanford/nlp/trees/international/pennchinese/ChineseTreebankLanguagePack.java
+	edu/stanford/nlp/trees/international/pennchinese/FragDiscardingPennTreeReader.java
+	edu/stanford/nlp/trees/international/pennchinese/RadicalMap.java
+	edu/stanford/nlp/trees/international/pennchinese/SunJurafskyChineseHeadFinder.java
+	edu/stanford/nlp/trees/tregex/CoordinationPattern.java
+	edu/stanford/nlp/trees/tregex/DescriptionPattern.java
+	edu/stanford/nlp/trees/tregex/Macros.java
+	edu/stanford/nlp/trees/tregex/ParseException.java
+	edu/stanford/nlp/trees/tregex/Relation.java
+	edu/stanford/nlp/trees/tregex/SimpleCharStream.java
+	edu/stanford/nlp/trees/tregex/Token.java
+	edu/stanford/nlp/trees/tregex/TokenMgrError.java
+	edu/stanford/nlp/trees/tregex/TregexMatcher.java
+	edu/stanford/nlp/trees/tregex/TregexParseException.java
+	edu/stanford/nlp/trees/tregex/TregexParser.java
+	edu/stanford/nlp/trees/tregex/TregexParserConstants.java
+	edu/stanford/nlp/trees/tregex/TregexParserTokenManager.java
+	edu/stanford/nlp/trees/tregex/TregexPattern.java
+	edu/stanford/nlp/trees/tregex/TregexPatternCompiler.java
+	edu/stanford/nlp/trees/tregex/VariableStrings.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/AdjoinNode.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/AdjoinToFootNode.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/AdjoinToHeadNode.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/AuxiliaryTree.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/CoindexNodes.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/CoindexationGenerator.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/CreateSubtreeNode.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/DeleteNode.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/ExciseNode.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/FetchNode.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/HoldTreeNode.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/InsertNode.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/JJTTsurgeonParserState.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/MoveNode.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/Node.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/ParseException.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/PruneNode.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/RelabelNode.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/ReplaceNode.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/SimpleCharStream.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/SimpleNode.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/Token.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/TokenMgrError.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/TreeLocation.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/Tsurgeon.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParseException.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParser.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParserConstants.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParserTokenManager.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParserTreeConstants.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonPattern.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonPatternRoot.java
+	edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonRuntimeException.java
+	edu/stanford/nlp/util/AbstractIterator.java
+	edu/stanford/nlp/util/ArrayCoreMap.java
+	edu/stanford/nlp/util/ArrayMap.java
+	edu/stanford/nlp/util/ArraySet.java
+	edu/stanford/nlp/util/ArrayStringFilter.java
+	edu/stanford/nlp/util/ArrayUtils.java
+	edu/stanford/nlp/util/BinaryHeapPriorityQueue.java
+	edu/stanford/nlp/util/ByteStreamGobbler.java
+	edu/stanford/nlp/util/CollectionFactory.java
+	edu/stanford/nlp/util/CollectionUtils.java
+	edu/stanford/nlp/util/CollectionValuedMap.java
+	edu/stanford/nlp/util/Comparators.java
+	edu/stanford/nlp/util/ConcatenationIterator.java
+	edu/stanford/nlp/util/CoreMap.java
+	edu/stanford/nlp/util/DeltaCollectionValuedMap.java
+	edu/stanford/nlp/util/DeltaMap.java
+	edu/stanford/nlp/util/ErasureUtils.java
+	edu/stanford/nlp/util/Factory.java
+	edu/stanford/nlp/util/FilePathProcessor.java
+	edu/stanford/nlp/util/FileProcessor.java
+	edu/stanford/nlp/util/Filter.java
+	edu/stanford/nlp/util/FilteredIterator.java
+	edu/stanford/nlp/util/Filters.java
+	edu/stanford/nlp/util/FixedPrioritiesPriorityQueue.java
+	edu/stanford/nlp/util/Function.java
+	edu/stanford/nlp/util/Generics.java
+	edu/stanford/nlp/util/HasInterval.java
+	edu/stanford/nlp/util/HashIndex.java
+	edu/stanford/nlp/util/HashableCoreMap.java
+	edu/stanford/nlp/util/IdentityHashSet.java
+	edu/stanford/nlp/util/Index.java
+	edu/stanford/nlp/util/IntPair.java
+	edu/stanford/nlp/util/IntQuadruple.java
+	edu/stanford/nlp/util/IntTriple.java
+	edu/stanford/nlp/util/IntTuple.java
+	edu/stanford/nlp/util/IntUni.java
+	edu/stanford/nlp/util/Interner.java
+	edu/stanford/nlp/util/Interval.java
+	edu/stanford/nlp/util/MapFactory.java
+	edu/stanford/nlp/util/Maps.java
+	edu/stanford/nlp/util/MetaClass.java
+	edu/stanford/nlp/util/MutableDouble.java
+	edu/stanford/nlp/util/MutableInteger.java
+	edu/stanford/nlp/util/Pair.java
+	edu/stanford/nlp/util/PriorityQueue.java
+	edu/stanford/nlp/util/PropertiesUtils.java
+	edu/stanford/nlp/util/ReflectionLoading.java
+	edu/stanford/nlp/util/Scored.java
+	edu/stanford/nlp/util/ScoredComparator.java
+	edu/stanford/nlp/util/ScoredObject.java
+	edu/stanford/nlp/util/Sets.java
+	edu/stanford/nlp/util/StreamGobbler.java
+	edu/stanford/nlp/util/StringUtils.java
+	edu/stanford/nlp/util/Timing.java
+	edu/stanford/nlp/util/Triple.java
+	edu/stanford/nlp/util/TwoDimensionalMap.java
+	edu/stanford/nlp/util/TypesafeMap.java
+	edu/stanford/nlp/util/UTF8EquivalenceFunction.java
+	edu/stanford/nlp/util/XMLUtils.java
+	edu/stanford/nlp/util/concurrent/SynchronizedInterner.java
+	edu/stanford/nlp/util/logging/Color.java
+	edu/stanford/nlp/util/logging/JavaUtilLoggingAdaptor.java
+	edu/stanford/nlp/util/logging/LogRecordHandler.java
+	edu/stanford/nlp/util/logging/OutputHandler.java
+	edu/stanford/nlp/util/logging/PrettyLoggable.java
+	edu/stanford/nlp/util/logging/PrettyLogger.java
+	edu/stanford/nlp/util/logging/RedirectOutputHandler.java
+	edu/stanford/nlp/util/logging/Redwood.java
+	edu/stanford/nlp/util/logging/RedwoodConfiguration.java
+	edu/stanford/nlp/util/logging/RedwoodPrintStream.java
+	edu/stanford/nlp/util/logging/RepeatedRecordHandler.java
+	edu/stanford/nlp/util/logging/RerouteChannel.java
+	edu/stanford/nlp/util/logging/Style.java
+	edu/stanford/nlp/util/logging/VisibilityHandler.java
+
+#####
+GENERATING JAR FILE
+#####
+
+JAR file:
+	src.jar
+Root directory:
+	../core/src
+
+jar cf /juicy/u61/u/horatio/codebase2/javanlp/projects/mt/src.jar edu/stanford/nlp/classify/AbstractLinearClassifierFactory.java \
+ edu/stanford/nlp/classify/AdaptedGaussianPriorObjectiveFunction.java \
+ edu/stanford/nlp/classify/BiasedLogConditionalObjectiveFunction.java \
+ edu/stanford/nlp/classify/BiasedLogisticObjectiveFunction.java \
+ edu/stanford/nlp/classify/Classifier.java \
+ edu/stanford/nlp/classify/ClassifierCreator.java \
+ edu/stanford/nlp/classify/ClassifierFactory.java \
+ edu/stanford/nlp/classify/CrossValidator.java \
+ edu/stanford/nlp/classify/Dataset.java \
+ edu/stanford/nlp/classify/GeneralDataset.java \
+ edu/stanford/nlp/classify/GeneralizedExpectationObjectiveFunction.java \
+ edu/stanford/nlp/classify/LinearClassifier.java \
+ edu/stanford/nlp/classify/LinearClassifierFactory.java \
+ edu/stanford/nlp/classify/LogConditionalObjectiveFunction.java \
+ edu/stanford/nlp/classify/LogPrior.java \
+ edu/stanford/nlp/classify/LogisticClassifier.java \
+ edu/stanford/nlp/classify/LogisticClassifierFactory.java \
+ edu/stanford/nlp/classify/LogisticObjectiveFunction.java \
+ edu/stanford/nlp/classify/PRCurve.java \
+ edu/stanford/nlp/classify/ProbabilisticClassifier.java \
+ edu/stanford/nlp/classify/ProbabilisticClassifierCreator.java \
+ edu/stanford/nlp/classify/RVFClassifier.java \
+ edu/stanford/nlp/classify/RVFDataset.java \
+ edu/stanford/nlp/classify/SemiSupervisedLogConditionalObjectiveFunction.java \
+ edu/stanford/nlp/classify/WeightedDataset.java \
+ edu/stanford/nlp/international/morph/MorphoFeatureSpecification.java \
+ edu/stanford/nlp/international/morph/MorphoFeatures.java \
+ edu/stanford/nlp/io/BZip2PipedOutputStream.java \
+ edu/stanford/nlp/io/EncodingFileReader.java \
+ edu/stanford/nlp/io/EncodingPrintWriter.java \
+ edu/stanford/nlp/io/ExtensionFileFilter.java \
+ edu/stanford/nlp/io/IOUtils.java \
+ edu/stanford/nlp/io/NumberRangeFileFilter.java \
+ edu/stanford/nlp/io/NumberRangesFileFilter.java \
+ edu/stanford/nlp/io/RuntimeIOException.java \
+ edu/stanford/nlp/ling/AnnotationLookup.java \
+ edu/stanford/nlp/ling/BasicDatum.java \
+ edu/stanford/nlp/ling/CategoryWordTag.java \
+ edu/stanford/nlp/ling/CategoryWordTagFactory.java \
+ edu/stanford/nlp/ling/CoreAnnotation.java \
+ edu/stanford/nlp/ling/CoreAnnotations.java \
+ edu/stanford/nlp/ling/CoreLabel.java \
+ edu/stanford/nlp/ling/Datum.java \
+ edu/stanford/nlp/ling/Featurizable.java \
+ edu/stanford/nlp/ling/HasCategory.java \
+ edu/stanford/nlp/ling/HasContext.java \
+ edu/stanford/nlp/ling/HasIndex.java \
+ edu/stanford/nlp/ling/HasLemma.java \
+ edu/stanford/nlp/ling/HasOffset.java \
+ edu/stanford/nlp/ling/HasTag.java \
+ edu/stanford/nlp/ling/HasWord.java \
+ edu/stanford/nlp/ling/Label.java \
+ edu/stanford/nlp/ling/LabelFactory.java \
+ edu/stanford/nlp/ling/Labeled.java \
+ edu/stanford/nlp/ling/LabeledWord.java \
+ edu/stanford/nlp/ling/MultiTokenTag.java \
+ edu/stanford/nlp/ling/RVFDatum.java \
+ edu/stanford/nlp/ling/Sentence.java \
+ edu/stanford/nlp/ling/StringLabel.java \
+ edu/stanford/nlp/ling/StringLabelFactory.java \
+ edu/stanford/nlp/ling/TaggedWord.java \
+ edu/stanford/nlp/ling/TaggedWordFactory.java \
+ edu/stanford/nlp/ling/ValueLabel.java \
+ edu/stanford/nlp/ling/Word.java \
+ edu/stanford/nlp/ling/WordFactory.java \
+ edu/stanford/nlp/ling/WordLemmaTag.java \
+ edu/stanford/nlp/ling/WordLemmaTagFactory.java \
+ edu/stanford/nlp/ling/WordTag.java \
+ edu/stanford/nlp/ling/WordTagFactory.java \
+ edu/stanford/nlp/math/ADMath.java \
+ edu/stanford/nlp/math/ArrayMath.java \
+ edu/stanford/nlp/math/DoubleAD.java \
+ edu/stanford/nlp/math/SloppyMath.java \
+ edu/stanford/nlp/objectbank/IdentityFunction.java \
+ edu/stanford/nlp/objectbank/IteratorFromReaderFactory.java \
+ edu/stanford/nlp/objectbank/LineIterator.java \
+ edu/stanford/nlp/objectbank/ObjectBank.java \
+ edu/stanford/nlp/objectbank/ReaderIteratorFactory.java \
+ edu/stanford/nlp/optimization/AbstractCachingDiffFunction.java \
+ edu/stanford/nlp/optimization/AbstractStochasticCachingDiffFunction.java \
+ edu/stanford/nlp/optimization/AbstractStochasticCachingDiffUpdateFunction.java \
+ edu/stanford/nlp/optimization/CGMinimizer.java \
+ edu/stanford/nlp/optimization/DiffFloatFunction.java \
+ edu/stanford/nlp/optimization/DiffFunction.java \
+ edu/stanford/nlp/optimization/Evaluator.java \
+ edu/stanford/nlp/optimization/FloatFunction.java \
+ edu/stanford/nlp/optimization/Function.java \
+ edu/stanford/nlp/optimization/GoldenSectionLineSearch.java \
+ edu/stanford/nlp/optimization/HasEvaluators.java \
+ edu/stanford/nlp/optimization/HasInitial.java \
+ edu/stanford/nlp/optimization/HasRegularizerParamRange.java \
+ edu/stanford/nlp/optimization/HybridMinimizer.java \
+ edu/stanford/nlp/optimization/InefficientSGDMinimizer.java \
+ edu/stanford/nlp/optimization/LineSearcher.java \
+ edu/stanford/nlp/optimization/Minimizer.java \
+ edu/stanford/nlp/optimization/QNMinimizer.java \
+ edu/stanford/nlp/optimization/SGDMinimizer.java \
+ edu/stanford/nlp/optimization/SGDToQNMinimizer.java \
+ edu/stanford/nlp/optimization/SMDMinimizer.java \
+ edu/stanford/nlp/optimization/SQNMinimizer.java \
+ edu/stanford/nlp/optimization/ScaledSGDMinimizer.java \
+ edu/stanford/nlp/optimization/StochasticCalculateMethods.java \
+ edu/stanford/nlp/optimization/StochasticMinimizer.java \
+ edu/stanford/nlp/parser/KBestViterbiParser.java \
+ edu/stanford/nlp/parser/Parser.java \
+ edu/stanford/nlp/parser/ViterbiParser.java \
+ edu/stanford/nlp/parser/ViterbiParserWithOptions.java \
+ edu/stanford/nlp/parser/lexparser/AbstractDependencyGrammar.java \
+ edu/stanford/nlp/parser/lexparser/AbstractTreeExtractor.java \
+ edu/stanford/nlp/parser/lexparser/AbstractTreebankParserParams.java \
+ edu/stanford/nlp/parser/lexparser/BaseLexicon.java \
+ edu/stanford/nlp/parser/lexparser/BasicCategoryTagProjection.java \
+ edu/stanford/nlp/parser/lexparser/BoundaryRemover.java \
+ edu/stanford/nlp/parser/lexparser/CNFTransformers.java \
+ edu/stanford/nlp/parser/lexparser/ChineseCharacterBasedLexicon.java \
+ edu/stanford/nlp/parser/lexparser/ChineseLexicon.java \
+ edu/stanford/nlp/parser/lexparser/ChineseLexiconAndWordSegmenter.java \
+ edu/stanford/nlp/parser/lexparser/ChineseSimWordAvgDepGrammar.java \
+ edu/stanford/nlp/parser/lexparser/ChineseTreebankParserParams.java \
+ edu/stanford/nlp/parser/lexparser/CollinsPuncTransformer.java \
+ edu/stanford/nlp/parser/lexparser/Debinarizer.java \
+ edu/stanford/nlp/parser/lexparser/DependencyGrammar.java \
+ edu/stanford/nlp/parser/lexparser/EnglishTreebankParserParams.java \
+ edu/stanford/nlp/parser/lexparser/Extractor.java \
+ edu/stanford/nlp/parser/lexparser/IntDependency.java \
+ edu/stanford/nlp/parser/lexparser/IntTaggedWord.java \
+ edu/stanford/nlp/parser/lexparser/Interner.java \
+ edu/stanford/nlp/parser/lexparser/Lexicon.java \
+ edu/stanford/nlp/parser/lexparser/MLEDependencyGrammar.java \
+ edu/stanford/nlp/parser/lexparser/MLEDependencyGrammarExtractor.java \
+ edu/stanford/nlp/parser/lexparser/Options.java \
+ edu/stanford/nlp/parser/lexparser/ParentAnnotationStats.java \
+ edu/stanford/nlp/parser/lexparser/PostSplitter.java \
+ edu/stanford/nlp/parser/lexparser/RandomWalk.java \
+ edu/stanford/nlp/parser/lexparser/SisterAnnotationStats.java \
+ edu/stanford/nlp/parser/lexparser/TagProjection.java \
+ edu/stanford/nlp/parser/lexparser/TestOptions.java \
+ edu/stanford/nlp/parser/lexparser/TestTagProjection.java \
+ edu/stanford/nlp/parser/lexparser/TrainOptions.java \
+ edu/stanford/nlp/parser/lexparser/TreeAnnotator.java \
+ edu/stanford/nlp/parser/lexparser/TreeAnnotatorAndBinarizer.java \
+ edu/stanford/nlp/parser/lexparser/TreeBinarizer.java \
+ edu/stanford/nlp/parser/lexparser/TreeCollinizer.java \
+ edu/stanford/nlp/parser/lexparser/TreebankAnnotator.java \
+ edu/stanford/nlp/parser/lexparser/TreebankLangParserParams.java \
+ edu/stanford/nlp/parser/lexparser/UnknownWordModel.java \
+ edu/stanford/nlp/parser/lexparser/UnknownWordModelTrainer.java \
+ edu/stanford/nlp/parser/metrics/AbstractEval.java \
+ edu/stanford/nlp/parser/metrics/Eval.java \
+ edu/stanford/nlp/parser/tools/PunctEquivalenceClasser.java \
+ edu/stanford/nlp/process/AbstractTokenizer.java \
+ edu/stanford/nlp/process/Americanize.java \
+ edu/stanford/nlp/process/CoreLabelTokenFactory.java \
+ edu/stanford/nlp/process/CoreTokenFactory.java \
+ edu/stanford/nlp/process/LexedTokenFactory.java \
+ edu/stanford/nlp/process/Morpha.java \
+ edu/stanford/nlp/process/Morphology.java \
+ edu/stanford/nlp/process/PTB2TextLexer.java \
+ edu/stanford/nlp/process/PTBLexer.java \
+ edu/stanford/nlp/process/PTBTokenizer.java \
+ edu/stanford/nlp/process/SerializableFunction.java \
+ edu/stanford/nlp/process/Tokenizer.java \
+ edu/stanford/nlp/process/TokenizerAdapter.java \
+ edu/stanford/nlp/process/TokenizerFactory.java \
+ edu/stanford/nlp/process/WhitespaceLexer.java \
+ edu/stanford/nlp/process/WhitespaceTokenizer.java \
+ edu/stanford/nlp/process/WordSegmenter.java \
+ edu/stanford/nlp/process/WordSegmentingTokenizer.java \
+ edu/stanford/nlp/process/WordTokenFactory.java \
+ edu/stanford/nlp/stats/AbstractCounter.java \
+ edu/stanford/nlp/stats/AccuracyStats.java \
+ edu/stanford/nlp/stats/ClassicCounter.java \
+ edu/stanford/nlp/stats/Counter.java \
+ edu/stanford/nlp/stats/Counters.java \
+ edu/stanford/nlp/stats/Distribution.java \
+ edu/stanford/nlp/stats/EquivalenceClasser.java \
+ edu/stanford/nlp/stats/GeneralizedCounter.java \
+ edu/stanford/nlp/stats/IntCounter.java \
+ edu/stanford/nlp/stats/MultiClassAccuracyStats.java \
+ edu/stanford/nlp/stats/ProbabilityDistribution.java \
+ edu/stanford/nlp/stats/Sampler.java \
+ edu/stanford/nlp/stats/Scorer.java \
+ edu/stanford/nlp/stats/SimpleGoodTuring.java \
+ edu/stanford/nlp/stats/TwoDimensionalCounter.java \
+ edu/stanford/nlp/stats/TwoDimensionalCounterInterface.java \
+ edu/stanford/nlp/trees/AbstractCollinsHeadFinder.java \
+ edu/stanford/nlp/trees/AbstractTreebankLanguagePack.java \
+ edu/stanford/nlp/trees/BobChrisTreeNormalizer.java \
+ edu/stanford/nlp/trees/CollinsHeadFinder.java \
+ edu/stanford/nlp/trees/CollocationFinder.java \
+ edu/stanford/nlp/trees/CompositeTreeTransformer.java \
+ edu/stanford/nlp/trees/CompositeTreebank.java \
+ edu/stanford/nlp/trees/Constituent.java \
+ edu/stanford/nlp/trees/ConstituentFactory.java \
+ edu/stanford/nlp/trees/CoordinationTransformer.java \
+ edu/stanford/nlp/trees/CopulaHeadFinder.java \
+ edu/stanford/nlp/trees/DateTreeTransformer.java \
+ edu/stanford/nlp/trees/Dependencies.java \
+ edu/stanford/nlp/trees/Dependency.java \
+ edu/stanford/nlp/trees/DependencyFactory.java \
+ edu/stanford/nlp/trees/DependencyPrinter.java \
+ edu/stanford/nlp/trees/DependencyReader.java \
+ edu/stanford/nlp/trees/DependencyScoring.java \
+ edu/stanford/nlp/trees/DependencyTreeTransformer.java \
+ edu/stanford/nlp/trees/DependencyTyper.java \
+ edu/stanford/nlp/trees/DiskTreebank.java \
+ edu/stanford/nlp/trees/EnglishGrammaticalRelations.java \
+ edu/stanford/nlp/trees/EnglishGrammaticalStructure.java \
+ edu/stanford/nlp/trees/EnglishGrammaticalStructureFactory.java \
+ edu/stanford/nlp/trees/GrammaticalRelation.java \
+ edu/stanford/nlp/trees/GrammaticalStructure.java \
+ edu/stanford/nlp/trees/GrammaticalStructureFactory.java \
+ edu/stanford/nlp/trees/GrammaticalStructureFromDependenciesFactory.java \
+ edu/stanford/nlp/trees/HasParent.java \
+ edu/stanford/nlp/trees/HeadFinder.java \
+ edu/stanford/nlp/trees/Labeled.java \
+ edu/stanford/nlp/trees/LabeledConstituent.java \
+ edu/stanford/nlp/trees/LabeledScoredTreeFactory.java \
+ edu/stanford/nlp/trees/LabeledScoredTreeNode.java \
+ edu/stanford/nlp/trees/LabeledScoredTreeReaderFactory.java \
+ edu/stanford/nlp/trees/LeftHeadFinder.java \
+ edu/stanford/nlp/trees/MemoryTreebank.java \
+ edu/stanford/nlp/trees/ModCollinsHeadFinder.java \
+ edu/stanford/nlp/trees/NPTmpRetainingTreeNormalizer.java \
+ edu/stanford/nlp/trees/NamedDependency.java \
+ edu/stanford/nlp/trees/PennTreeReader.java \
+ edu/stanford/nlp/trees/PennTreeReaderFactory.java \
+ edu/stanford/nlp/trees/PennTreebankLanguagePack.java \
+ edu/stanford/nlp/trees/PennTreebankTokenizer.java \
+ edu/stanford/nlp/trees/QPTreeTransformer.java \
+ edu/stanford/nlp/trees/SemanticHeadFinder.java \
+ edu/stanford/nlp/trees/SimpleConstituent.java \
+ edu/stanford/nlp/trees/SimpleConstituentFactory.java \
+ edu/stanford/nlp/trees/SimpleTree.java \
+ edu/stanford/nlp/trees/SimpleTreeFactory.java \
+ edu/stanford/nlp/trees/TransformingTreebank.java \
+ edu/stanford/nlp/trees/Tree.java \
+ edu/stanford/nlp/trees/TreeCoreAnnotations.java \
+ edu/stanford/nlp/trees/TreeFactory.java \
+ edu/stanford/nlp/trees/TreeFunctions.java \
+ edu/stanford/nlp/trees/TreeGraph.java \
+ edu/stanford/nlp/trees/TreeGraphNode.java \
+ edu/stanford/nlp/trees/TreeGraphNodeFactory.java \
+ edu/stanford/nlp/trees/TreeLeafLabelTransformer.java \
+ edu/stanford/nlp/trees/TreeNormalizer.java \
+ edu/stanford/nlp/trees/TreePrint.java \
+ edu/stanford/nlp/trees/TreeReader.java \
+ edu/stanford/nlp/trees/TreeReaderFactory.java \
+ edu/stanford/nlp/trees/TreeTokenizerFactory.java \
+ edu/stanford/nlp/trees/TreeTransformer.java \
+ edu/stanford/nlp/trees/TreeVisitor.java \
+ edu/stanford/nlp/trees/Treebank.java \
+ edu/stanford/nlp/trees/TreebankFactory.java \
+ edu/stanford/nlp/trees/TreebankLanguagePack.java \
+ edu/stanford/nlp/trees/Trees.java \
+ edu/stanford/nlp/trees/TypedDependency.java \
+ edu/stanford/nlp/trees/UnnamedConcreteDependency.java \
+ edu/stanford/nlp/trees/UnnamedDependency.java \
+ edu/stanford/nlp/trees/WordNetConnection.java \
+ edu/stanford/nlp/trees/WordStemmer.java \
+ edu/stanford/nlp/trees/international/pennchinese/BikelChineseHeadFinder.java \
+ edu/stanford/nlp/trees/international/pennchinese/CEDict.java \
+ edu/stanford/nlp/trees/international/pennchinese/CHTBLexer.java \
+ edu/stanford/nlp/trees/international/pennchinese/CHTBTokenizer.java \
+ edu/stanford/nlp/trees/international/pennchinese/CTBErrorCorrectingTreeNormalizer.java \
+ edu/stanford/nlp/trees/international/pennchinese/CTBTreeReaderFactory.java \
+ edu/stanford/nlp/trees/international/pennchinese/ChineseCollinizer.java \
+ edu/stanford/nlp/trees/international/pennchinese/ChineseEnglishWordMap.java \
+ edu/stanford/nlp/trees/international/pennchinese/ChineseEscaper.java \
+ edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalRelations.java \
+ edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalStructure.java \
+ edu/stanford/nlp/trees/international/pennchinese/ChineseGrammaticalStructureFactory.java \
+ edu/stanford/nlp/trees/international/pennchinese/ChineseHeadFinder.java \
+ edu/stanford/nlp/trees/international/pennchinese/ChineseSemanticHeadFinder.java \
+ edu/stanford/nlp/trees/international/pennchinese/ChineseTreebankLanguagePack.java \
+ edu/stanford/nlp/trees/international/pennchinese/FragDiscardingPennTreeReader.java \
+ edu/stanford/nlp/trees/international/pennchinese/RadicalMap.java \
+ edu/stanford/nlp/trees/international/pennchinese/SunJurafskyChineseHeadFinder.java \
+ edu/stanford/nlp/trees/tregex/CoordinationPattern.java \
+ edu/stanford/nlp/trees/tregex/DescriptionPattern.java \
+ edu/stanford/nlp/trees/tregex/Macros.java \
+ edu/stanford/nlp/trees/tregex/ParseException.java \
+ edu/stanford/nlp/trees/tregex/Relation.java \
+ edu/stanford/nlp/trees/tregex/SimpleCharStream.java \
+ edu/stanford/nlp/trees/tregex/Token.java \
+ edu/stanford/nlp/trees/tregex/TokenMgrError.java \
+ edu/stanford/nlp/trees/tregex/TregexMatcher.java \
+ edu/stanford/nlp/trees/tregex/TregexParseException.java \
+ edu/stanford/nlp/trees/tregex/TregexParser.java \
+ edu/stanford/nlp/trees/tregex/TregexParserConstants.java \
+ edu/stanford/nlp/trees/tregex/TregexParserTokenManager.java \
+ edu/stanford/nlp/trees/tregex/TregexPattern.java \
+ edu/stanford/nlp/trees/tregex/TregexPatternCompiler.java \
+ edu/stanford/nlp/trees/tregex/VariableStrings.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/AdjoinNode.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/AdjoinToFootNode.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/AdjoinToHeadNode.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/AuxiliaryTree.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/CoindexNodes.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/CoindexationGenerator.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/CreateSubtreeNode.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/DeleteNode.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/ExciseNode.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/FetchNode.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/HoldTreeNode.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/InsertNode.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/JJTTsurgeonParserState.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/MoveNode.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/Node.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/ParseException.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/PruneNode.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/RelabelNode.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/ReplaceNode.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/SimpleCharStream.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/SimpleNode.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/Token.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/TokenMgrError.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/TreeLocation.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/Tsurgeon.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParseException.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParser.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParserConstants.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParserTokenManager.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonParserTreeConstants.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonPattern.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonPatternRoot.java \
+ edu/stanford/nlp/trees/tregex/tsurgeon/TsurgeonRuntimeException.java \
+ edu/stanford/nlp/util/AbstractIterator.java \
+ edu/stanford/nlp/util/ArrayCoreMap.java \
+ edu/stanford/nlp/util/ArrayMap.java \
+ edu/stanford/nlp/util/ArraySet.java \
+ edu/stanford/nlp/util/ArrayStringFilter.java \
+ edu/stanford/nlp/util/ArrayUtils.java \
+ edu/stanford/nlp/util/BinaryHeapPriorityQueue.java \
+ edu/stanford/nlp/util/ByteStreamGobbler.java \
+ edu/stanford/nlp/util/CollectionFactory.java \
+ edu/stanford/nlp/util/CollectionUtils.java \
+ edu/stanford/nlp/util/CollectionValuedMap.java \
+ edu/stanford/nlp/util/Comparators.java \
+ edu/stanford/nlp/util/ConcatenationIterator.java \
+ edu/stanford/nlp/util/CoreMap.java \
+ edu/stanford/nlp/util/DeltaCollectionValuedMap.java \
+ edu/stanford/nlp/util/DeltaMap.java \
+ edu/stanford/nlp/util/ErasureUtils.java \
+ edu/stanford/nlp/util/Factory.java \
+ edu/stanford/nlp/util/FilePathProcessor.java \
+ edu/stanford/nlp/util/FileProcessor.java \
+ edu/stanford/nlp/util/Filter.java \
+ edu/stanford/nlp/util/FilteredIterator.java \
+ edu/stanford/nlp/util/Filters.java \
+ edu/stanford/nlp/util/FixedPrioritiesPriorityQueue.java \
+ edu/stanford/nlp/util/Function.java \
+ edu/stanford/nlp/util/Generics.java \
+ edu/stanford/nlp/util/HasInterval.java \
+ edu/stanford/nlp/util/HashIndex.java \
+ edu/stanford/nlp/util/HashableCoreMap.java \
+ edu/stanford/nlp/util/IdentityHashSet.java \
+ edu/stanford/nlp/util/Index.java \
+ edu/stanford/nlp/util/IntPair.java \
+ edu/stanford/nlp/util/IntQuadruple.java \
+ edu/stanford/nlp/util/IntTriple.java \
+ edu/stanford/nlp/util/IntTuple.java \
+ edu/stanford/nlp/util/IntUni.java \
+ edu/stanford/nlp/util/Interner.java \
+ edu/stanford/nlp/util/Interval.java \
+ edu/stanford/nlp/util/MapFactory.java \
+ edu/stanford/nlp/util/Maps.java \
+ edu/stanford/nlp/util/MetaClass.java \
+ edu/stanford/nlp/util/MutableDouble.java \
+ edu/stanford/nlp/util/MutableInteger.java \
+ edu/stanford/nlp/util/Pair.java \
+ edu/stanford/nlp/util/PriorityQueue.java \
+ edu/stanford/nlp/util/PropertiesUtils.java \
+ edu/stanford/nlp/util/ReflectionLoading.java \
+ edu/stanford/nlp/util/Scored.java \
+ edu/stanford/nlp/util/ScoredComparator.java \
+ edu/stanford/nlp/util/ScoredObject.java \
+ edu/stanford/nlp/util/Sets.java \
+ edu/stanford/nlp/util/StreamGobbler.java \
+ edu/stanford/nlp/util/StringUtils.java \
+ edu/stanford/nlp/util/Timing.java \
+ edu/stanford/nlp/util/Triple.java \
+ edu/stanford/nlp/util/TwoDimensionalMap.java \
+ edu/stanford/nlp/util/TypesafeMap.java \
+ edu/stanford/nlp/util/UTF8EquivalenceFunction.java \
+ edu/stanford/nlp/util/XMLUtils.java \
+ edu/stanford/nlp/util/concurrent/SynchronizedInterner.java \
+ edu/stanford/nlp/util/logging/Color.java \
+ edu/stanford/nlp/util/logging/JavaUtilLoggingAdaptor.java \
+ edu/stanford/nlp/util/logging/LogRecordHandler.java \
+ edu/stanford/nlp/util/logging/OutputHandler.java \
+ edu/stanford/nlp/util/logging/PrettyLoggable.java \
+ edu/stanford/nlp/util/logging/PrettyLogger.java \
+ edu/stanford/nlp/util/logging/RedirectOutputHandler.java \
+ edu/stanford/nlp/util/logging/Redwood.java \
+ edu/stanford/nlp/util/logging/RedwoodConfiguration.java \
+ edu/stanford/nlp/util/logging/RedwoodPrintStream.java \
+ edu/stanford/nlp/util/logging/RepeatedRecordHandler.java \
+ edu/stanford/nlp/util/logging/RerouteChannel.java \
+ edu/stanford/nlp/util/logging/Style.java \
+ edu/stanford/nlp/util/logging/VisibilityHandler.java \
+ 
+/user/horatio/codebase2/javanlp/projects/mt
+--2014-01-03 21:00:56--  http://www.cs.umd.edu/~snover/tercom/tercom-0.7.25.tgz
+Resolving www.cs.umd.edu... 128.8.127.3
+Connecting to www.cs.umd.edu|128.8.127.3|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 123407 (121K) [application/x-gzip]
+Saving to: “tercom-0.7.25.tgz”
+
+     0K .......... .......... .......... .......... .......... 41%  282K 0s
+    50K .......... .......... .......... .......... .......... 82%  568K 0s
+   100K .......... ..........                                 100%  234K=0.4s
+
+2014-01-03 21:00:57 (341 KB/s) - “tercom-0.7.25.tgz” saved [123407/123407]
+
+--2014-01-03 21:00:57--  http://www.umiacs.umd.edu/~snover/terp/downloads/terp.v1.tgz
+Resolving www.umiacs.umd.edu... 128.8.120.31
+Connecting to www.umiacs.umd.edu|128.8.120.31|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 6600243 (6.3M) [application/x-gzip]
+Saving to: “terp.v1.tgz”
+
+     0K .......... .......... .......... .......... ..........  0%  187K 34s
+    50K .......... .......... .......... .......... ..........  1%  288K 28s
+   100K .......... .......... .......... .......... ..........  2%  555K 22s
+   150K .......... .......... .......... .......... ..........  3%  287K 22s
+   200K .......... .......... .......... .......... ..........  3%  286K 22s
+   250K .......... .......... .......... .......... ..........  4%  556K 20s
+   300K .......... .......... .......... .......... ..........  5%  288K 20s
+   350K .......... .......... .......... .......... ..........  6%  557K 19s
+   400K .......... .......... .......... .......... ..........  6%  287K 19s
+   450K .......... .......... .......... .......... ..........  7%  286K 19s
+   500K .......... .......... .......... .......... ..........  8%  561K 18s
+   550K .......... .......... .......... .......... ..........  9%  286K 18s
+   600K .......... .......... .......... .......... .......... 10%  563K 17s
+   650K .......... .......... .......... .......... .......... 10%  286K 17s
+   700K .......... .......... .......... .......... .......... 11%  286K 17s
+   750K .......... .......... .......... .......... .......... 12%  560K 17s
+   800K .......... .......... .......... .......... .......... 13%  286K 17s
+   850K .......... .......... .......... .......... .......... 13%  289K 17s
+   900K .......... .......... .......... .......... .......... 14%  552K 16s
+   950K .......... .......... .......... .......... .......... 15%  287K 16s
+  1000K .......... .......... .......... .......... .......... 16%  556K 16s
+  1050K .......... .......... .......... .......... .......... 17%  287K 16s
+  1100K .......... .......... .......... .......... .......... 17%  289K 16s
+  1150K .......... .......... .......... .......... .......... 18%  552K 15s
+  1200K .......... .......... .......... .......... .......... 19%  287K 15s
+  1250K .......... .......... .......... .......... .......... 20%  549K 15s
+  1300K .......... .......... .......... .......... .......... 20%  288K 15s
+  1350K .......... .......... .......... .......... .......... 21%  286K 15s
+  1400K .......... .......... .......... .......... .......... 22%  557K 15s
+  1450K .......... .......... .......... .......... .......... 23%  287K 14s
+  1500K .......... .......... .......... .......... .......... 24%  560K 14s
+  1550K .......... .......... .......... .......... .......... 24%  285K 14s
+  1600K .......... .......... .......... .......... .......... 25%  287K 14s
+  1650K .......... .......... .......... .......... .......... 26%  558K 14s
+  1700K .......... .......... .......... .......... .......... 27%  287K 14s
+  1750K .......... .......... .......... .......... .......... 27%  288K 14s
+  1800K .......... .......... .......... .......... .......... 28%  559K 13s
+  1850K .......... .......... .......... .......... .......... 29%  287K 13s
+  1900K .......... .......... .......... .......... .......... 30%  549K 13s
+  1950K .......... .......... .......... .......... .......... 31%  289K 13s
+  2000K .......... .......... .......... .......... .......... 31%  288K 13s
+  2050K .......... .......... .......... .......... .......... 32%  541K 13s
+  2100K .......... .......... .......... .......... .......... 33%  290K 12s
+  2150K .......... .......... .......... .......... .......... 34%  551K 12s
+  2200K .......... .......... .......... .......... .......... 34%  289K 12s
+  2250K .......... .......... .......... .......... .......... 35%  286K 12s
+  2300K .......... .......... .......... .......... .......... 36%  547K 12s
+  2350K .......... .......... .......... .......... .......... 37%  289K 12s
+  2400K .......... .......... .......... .......... .......... 38%  289K 12s
+  2450K .......... .......... .......... .......... .......... 38%  550K 11s
+  2500K .......... .......... .......... .......... .......... 39%  285K 11s
+  2550K .......... .......... .......... .......... .......... 40%  556K 11s
+  2600K .......... .......... .......... .......... .......... 41%  289K 11s
+  2650K .......... .......... .......... .......... .......... 41%  288K 11s
+  2700K .......... .......... .......... .......... .......... 42%  551K 11s
+  2750K .......... .......... .......... .......... .......... 43%  287K 11s
+  2800K .......... .......... .......... .......... .......... 44%  550K 10s
+  2850K .......... .......... .......... .......... .......... 44%  288K 10s
+  2900K .......... .......... .......... .......... .......... 45%  286K 10s
+  2950K .......... .......... .......... .......... .......... 46%  556K 10s
+  3000K .......... .......... .......... .......... .......... 47%  286K 10s
+  3050K .......... .......... .......... .......... .......... 48%  292K 10s
+  3100K .......... .......... .......... .......... .......... 48%  537K 9s
+  3150K .......... .......... .......... .......... .......... 49%  288K 9s
+  3200K .......... .......... .......... .......... .......... 50%  553K 9s
+  3250K .......... .......... .......... .......... .......... 51%  289K 9s
+  3300K .......... .......... .......... .......... .......... 51%  291K 9s
+  3350K .......... .......... .......... .......... .......... 52%  536K 9s
+  3400K .......... .......... .......... .......... .......... 53%  289K 9s
+  3450K .......... .......... .......... .......... .......... 54%  553K 8s
+  3500K .......... .......... .......... .......... .......... 55%  288K 8s
+  3550K .......... .......... .......... .......... .......... 55%  287K 8s
+  3600K .......... .......... .......... .......... .......... 56%  552K 8s
+  3650K .......... .......... .......... .......... .......... 57%  286K 8s
+  3700K .......... .......... .......... .......... .......... 58%  558K 8s
+  3750K .......... .......... .......... .......... .......... 58%  287K 8s
+  3800K .......... .......... .......... .......... .......... 59%  289K 7s
+  3850K .......... .......... .......... .......... .......... 60%  546K 7s
+  3900K .......... .......... .......... .......... .......... 61%  288K 7s
+  3950K .......... .......... .......... .......... .......... 62%  293K 7s
+  4000K .......... .......... .......... .......... .......... 62%  526K 7s
+  4050K .......... .......... .......... .......... .......... 63%  290K 7s
+  4100K .......... .......... .......... .......... .......... 64%  548K 7s
+  4150K .......... .......... .......... .......... .......... 65%  286K 6s
+  4200K .......... .......... .......... .......... .......... 65%  296K 6s
+  4250K .......... .......... .......... .......... .......... 66%  524K 6s
+  4300K .......... .......... .......... .......... .......... 67%  292K 6s
+  4350K .......... .......... .......... .......... .......... 68%  293K 6s
+  4400K .......... .......... .......... .......... .......... 69%  525K 6s
+  4450K .......... .......... .......... .......... .......... 69%  290K 6s
+  4500K .......... .......... .......... .......... .......... 70%  537K 5s
+  4550K .......... .......... .......... .......... .......... 71%  293K 5s
+  4600K .......... .......... .......... .......... .......... 72%  293K 5s
+  4650K .......... .......... .......... .......... .......... 72%  527K 5s
+  4700K .......... .......... .......... .......... .......... 73%  290K 5s
+  4750K .......... .......... .......... .......... .......... 74%  380K 5s
+  4800K .......... .......... .......... .......... .......... 75%  376K 5s
+  4850K .......... .......... .......... .......... .......... 76%  288K 4s
+  4900K .......... .......... .......... .......... .......... 76%  544K 4s
+  4950K .......... .......... .......... .......... .......... 77%  291K 4s
+  5000K .......... .......... .......... .......... .......... 78%  382K 4s
+  5050K .......... .......... .......... .......... .......... 79%  372K 4s
+  5100K .......... .......... .......... .......... .......... 79%  290K 4s
+  5150K .......... .......... .......... .......... .......... 80%  545K 4s
+  5200K .......... .......... .......... .......... .......... 81%  290K 3s
+  5250K .......... .......... .......... .......... .......... 82%  295K 3s
+  5300K .......... .......... .......... .......... .......... 83%  530K 3s
+  5350K .......... .......... .......... .......... .......... 83%  287K 3s
+  5400K .......... .......... .......... .......... .......... 84%  537K 3s
+  5450K .......... .......... .......... .......... .......... 85%  293K 3s
+  5500K .......... .......... .......... .......... .......... 86%  294K 3s
+  5550K .......... .......... .......... .......... .......... 86%  524K 2s
+  5600K .......... .......... .......... .......... .......... 87%  291K 2s
+  5650K .......... .......... .......... .......... .......... 88%  533K 2s
+  5700K .......... .......... .......... .......... .......... 89%  294K 2s
+  5750K .......... .......... .......... .......... .......... 89%  294K 2s
+  5800K .......... .......... .......... .......... .......... 90%  521K 2s
+  5850K .......... .......... .......... .......... .......... 91%  290K 2s
+  5900K .......... .......... .......... .......... .......... 92%  379K 1s
+  5950K .......... .......... .......... .......... .......... 93%  376K 1s
+  6000K .......... .......... .......... .......... .......... 93%  289K 1s
+  6050K .......... .......... .......... .......... .......... 94%  550K 1s
+  6100K .......... .......... .......... .......... .......... 95%  290K 1s
+  6150K .......... .......... .......... .......... .......... 96%  377K 1s
+  6200K .......... .......... .......... .......... .......... 96%  378K 1s
+  6250K .......... .......... .......... .......... .......... 97%  289K 0s
+  6300K .......... .......... .......... .......... .......... 98%  545K 0s
+  6350K .......... .......... .......... .......... .......... 99%  289K 0s
+  6400K .......... .......... .......... .......... .....     100%  494K=18s
+
+2014-01-03 21:01:16 (351 KB/s) - “terp.v1.tgz” saved [6600243/6600243]
+
+tercom-0.7.25/tercom.7.25.jar
+terp.v1/dist/lib/terp.jar
+terp.v1/dist/lib/tercom.jar
+terp.v1/dist/lib/optimize_terp.jar
+terp.v1/dist/lib/create_phrasedb.jar
+Buildfile: /juicy/u61/u/horatio/codebase2/javanlp/projects/mt/phrasal.3.3.1/build.xml
+
+classpath:
+     [echo] Phrasal
+
+checkdeps:
+
+extdeps:
+
+compile:
+     [echo] .
+    [javac] Compiling 718 source files to /juicy/u61/u/horatio/codebase2/javanlp/projects/mt/phrasal.3.3.1/classes
+    [javac] Note: /juicy/u61/u/horatio/codebase2/javanlp/projects/mt/phrasal.3.3.1/src/edu/stanford/nlp/classify/AbstractLinearClassifierFactory.java uses or overrides a deprecated API.
+    [javac] Note: Recompile with -Xlint:deprecation for details.
+    [javac] Note: Some input files use unchecked or unsafe operations.
+    [javac] Note: Recompile with -Xlint:unchecked for details.
+
+BUILD SUCCESSFUL
+Total time: 13 seconds
+PASS: User distribution builds successfully
+SUCCESS: Stanford Phrasal distribution phrasal.3.3.1.tar.gz successfully built

@@ -481,6 +481,7 @@ public class DirectedMultiGraphTest extends TestCase {
    * Test the methods that return the sets of neighbors, parents &amp;
    * children for a variety of add and remove cases
    */
+  @SuppressWarnings("AssertEqualsBetweenInconvertibleTypes")
   public void testNeighbors() {
     DirectedMultiGraph<Integer, String> g = 
       new DirectedMultiGraph<Integer, String>();

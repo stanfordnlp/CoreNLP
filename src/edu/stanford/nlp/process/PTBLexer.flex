@@ -573,7 +573,7 @@ DOLSIGN2 = [\u00A2\u00A3\u00A4\u00A5\u0080\u20A0\u20AC\u060B\u0E3F\u20A4\uFFE0\u
 /* For some reason U+0237-U+024F (dotless j) isn't in [:letter:]. Recent additions? */
 LETTER = ([:letter:]|{SPLET}|[\u00AD\u0237-\u024F\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02FF\u0300-\u036F\u0370-\u037D\u0384\u0385\u03CF\u03F6\u03FC-\u03FF\u0483-\u0487\u04CF\u04F6-\u04FF\u0510-\u0525\u055A-\u055F\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0615-\u061A\u063B-\u063F\u064B-\u065E\u0670\u06D6-\u06EF\u06FA-\u06FF\u070F\u0711\u0730-\u074F\u0750-\u077F\u07A6-\u07B1\u07CA-\u07F5\u07FA\u0900-\u0903\u093C\u093E-\u094E\u0951-\u0955\u0962-\u0963\u0981-\u0983\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u0A01-\u0A03\u0A3C\u0A3E-\u0A4F\u0A81-\u0A83\u0ABC-\u0ACF\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0C01-\u0C03\u0C3E-\u0C56\u0D3E-\u0D44\u0D46-\u0D48\u0E30-\u0E3A\u0E47-\u0E4E\u0EB1-\u0EBC\u0EC8-\u0ECD])
 WORD = {LETTER}({LETTER}|{DIGIT})*([.!?]{LETTER}({LETTER}|{DIGIT})*)*
-FILENAME_EXT = bat|bmp|c|class|cgi|cpp|dll|doc|docx|exe|gif|gz|h|htm|html|jar|java|jpeg|jpg|mov|mp3|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|xml|zip
+FILENAME_EXT = bat|bmp|c|class|cgi|cpp|dll|doc|docx|exe|gif|gz|h|htm|html|jar|java|jpeg|jpg|mov|mp3|pdf|php|pl|png|ppt|ps|py|sql|tar|txt|wav|x|xml|zip
 FILENAME = ({LETTER}|{DIGIT})+([.]({LETTER}|{DIGIT})+)*([.]{FILENAME_EXT})
 /* The $ was for things like New$ */
 /* WAS: only keep hyphens with short one side like co-ed */
@@ -583,7 +583,7 @@ THINGA = [A-Z]+(([+&]|{SPAMP})[A-Z]+)+
 THING3 = [A-Za-z0-9]+(-[A-Za-z]+){0,2}(\\?\/[A-Za-z0-9]+(-[A-Za-z]+){0,2}){1,2}
 APOS = ['\u0092\u2019]|&apos;
 /* Includes extra ones that may appear inside a word, rightly or wrongly */
-APOSETCETERA = {APOS}|[\u0091\u2018\u201B]
+APOSETCETERA = {APOS}|[`\u0091\u2018\u201B]
 HTHING = [A-Za-z0-9][A-Za-z0-9.,\u00AD]*(-([A-Za-z0-9\u00AD]+|{ACRO2}\.))+
 REDAUX = {APOS}([msdMSD]|re|ve|ll)
 /* For things that will have n't on the end. They can't end in 'n' */
@@ -597,12 +597,12 @@ SREDAUX = n{APOSETCETERA}t
 /* [yY]' is for Y'know, y'all and I for I.  So exclude from one letter first */
 /* Rest are for French borrowings.  n allows n'ts in "don'ts" */
 /* Arguably, c'mon should be split to "c'm" + "on", but not yet. */
-APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|'twas|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l
+APOWORD = {APOS}n{APOS}?|[lLdDjJ]{APOS}|Dunkin{APOS}|somethin{APOS}|ol{APOS}|{APOS}em|[A-HJ-XZn]{APOSETCETERA}[:letter:]{2}[:letter:]*|{APOS}[2-9]0s|{APOS}till?|[:letter:][:letter:]*[aeiouyAEIOUY]{APOSETCETERA}[aeiouA-Z][:letter:]*|{APOS}cause|cont'd\.?|'twas|nor'easter|c'mon|e'er|s'mores|ev'ry|li'l|nat'l|O{APOSETCETERA}o
 APOWORD2 = y{APOS}
-FULLURL = https?:\/\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-]
+FULLURL = https?:\/\/[^ \t\n\f\r\"<>|(){}]+[^ \t\n\f\r\"<>|.!?(){},-]
 LIKELYURL = ((www\.([^ \t\n\f\r\"<>|.!?(){},]+\.)+[a-zA-Z]{2,4})|(([^ \t\n\f\r\"`'<>|.!?(){},-_$]+\.)+(com|net|org|edu)))(\/[^ \t\n\f\r\"<>|()]+[^ \t\n\f\r\"<>|.!?(){},-])?
 /* &lt;,< should match &gt;,>, but that's too complicated */
-EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0]*@([^ \t\n\f\r\"<>|().\u00A0]+\.)*([^ \t\n\f\r\"<>|().\u00A0]+)(&gt;|>)?
+EMAIL = (&lt;|<)?[a-zA-Z0-9][^ \t\n\f\r\"<>|()\u00A0{}]*@([^ \t\n\f\r\"<>|(){}.\u00A0]+\.)*([^ \t\n\f\r\"<>|(){}.\u00A0]+)(&gt;|>)?
 
 /* Technically, names should be capped at 15 characters.  However, then
    you get into weirdness with what happens to the rest of the characters. */
@@ -693,7 +693,7 @@ TBSPEC2 = {APOS}[0-9][0-9]
 
 /* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
 SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
-ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)
+ASIANSMILEY = [\^x=~<>]\.\[\^x=~<>]|[\-\^x=~<>']_[\-\^x=~<>']|\([\-\^x=~<>'][_.]?[\-\^x=~<>']\)|\([\^x=~<>']-[\^x=~<>'`]\)
 
 
 /* U+2200-U+2BFF has a lot of the various mathematical, etc. symbol ranges */
@@ -705,7 +705,14 @@ MISCSYMBOL = [+%&~\^|\\¦\u00A7¨\u00A9\u00AC\u00AE¯\u00B0-\u00B3\u00B4-\u00BA\
 
 %%
 
+c[+][+]                     { return getNext(); }
 cannot                  { if (splitAssimilations) {
+                            yypushback(3) ; return getNext();
+                          } else {
+                            return getNext();
+                          }
+                        }
+'twas                   { if (splitAssimilations) {
                             yypushback(3) ; return getNext();
                           } else {
                             return getNext();
@@ -769,7 +776,7 @@ gonna|gotta|lemme|gimme|wanna
 {TWITTER}               { return getNext(); }
 {REDAUX}/[^A-Za-z]      { return handleQuotes(yytext(), false);
                         }
-{SREDAUX}               { return handleQuotes(yytext(), false);
+{SREDAUX}/[^A-Za-z]     { return handleQuotes(yytext(), false);
                         }
 {DATE}                  { String txt = yytext();
                           if (escapeForwardSlashAsterisk) {
@@ -907,7 +914,7 @@ gonna|gotta|lemme|gimme|wanna
                         } }
 {LESSTHAN}              { return getNext("<", yytext()); }
 {GREATERTHAN}           { return getNext(">", yytext()); }
-{SMILEY}/[^A-Za-z] { String txt = yytext();
+{SMILEY}/[^A-Za-z0-9] { String txt = yytext();
                   String origText = txt;
                   if (normalizeParentheses) {
                     txt = LEFT_PAREN_PATTERN.matcher(txt).replaceAll(openparen);
@@ -995,7 +1002,9 @@ gonna|gotta|lemme|gimme|wanna
 '/[A-Za-z][^ \t\n\r\u00A0] { /* invert quote - often but not always right */
                   return handleQuotes(yytext(), true);
                 }
+/* This REDAUX is needed is needed in case string ends on "it's". See: testJacobEisensteinApostropheCase */
 {REDAUX}        { return handleQuotes(yytext(), false); }
+{SREDAUX}       { return handleQuotes(yytext(), false); }
 {QUOTES}        { return handleQuotes(yytext(), false); }
 {FAKEDUCKFEET}  { return getNext(); }
 {MISCSYMBOL}    { return getNext(); }

@@ -71,9 +71,17 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
 
   @Override
   public double[] initial() {
+    return initial(rand);
+  }
+  public double[] initial(boolean useRandomSeed) {
+    Random randToUse = useRandomSeed ? new Random() : rand;
+    return initial(rand);
+  }
+
+  public double[] initial(Random randGen) {
     double[] initial = new double[domainDimension()];
     for (int i = 0; i < initial.length; i++) {
-      initial[i] = rand.nextDouble() + smallConst;
+      initial[i] = randGen.nextDouble() + smallConst;
       // initial[i] = generator.nextDouble() * largeConst;
       // initial[i] = -1+2*(i);
       // initial[i] = (i == 0 ? 1 : 0);
@@ -95,6 +103,7 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
       return NO_PRIOR;
     } else if (priorTypeStr.equalsIgnoreCase("lasso") ||
                priorTypeStr.equalsIgnoreCase("ridge") ||
+               priorTypeStr.equalsIgnoreCase("gaussian") ||
                priorTypeStr.equalsIgnoreCase("ae-lasso") ||
                priorTypeStr.equalsIgnoreCase("sg-lasso") ||
                priorTypeStr.equalsIgnoreCase("g-lasso") ) {
@@ -427,6 +436,8 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
     }
 
     applyPrior(x, 1.0);
+
+    // System.err.println("\nfuncVal: " + value);
   }
 
   @Override
@@ -613,12 +624,11 @@ public class CRFLogConditionalObjectiveFunction extends AbstractStochasticCachin
   protected void applyPrior(double[] x, double batchScale) {
     // incorporate priors
     if (prior == QUADRATIC_PRIOR) {
-      double sigmaSq = sigma * sigma;
-      double lambda = 1 / 2.0 / sigmaSq;
+      double lambda = 1 / (sigma * sigma);
       for (int i = 0; i < x.length; i++) {
         double w = x[i];
-        value += batchScale * w * w * lambda;
-        derivative[i] += batchScale * w / sigmaSq;
+        value += batchScale * w * w * lambda * 0.5;
+        derivative[i] += batchScale * w * lambda;
       }
     } else if (prior == HUBER_PRIOR) {
       double sigmaSq = sigma * sigma;

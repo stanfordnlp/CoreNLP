@@ -11,8 +11,10 @@ import javax.swing.tree.TreePath;
 
 import edu.stanford.nlp.io.NumberRangesFileFilter;
 import edu.stanford.nlp.trees.DiskTreebank;
-import edu.stanford.nlp.trees.TreeReaderFactory;
+import edu.stanford.nlp.trees.TransformingTreebank;
 import edu.stanford.nlp.trees.Treebank;
+import edu.stanford.nlp.trees.TreeReaderFactory;
+import edu.stanford.nlp.trees.TreeTransformer;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.trees.tregex.gui.FileTreeNode.FileTreeNodeListener;
 import edu.stanford.nlp.trees.tregex.gui.TregexGUI.FilterType;
@@ -148,6 +150,10 @@ public class FileTreeModel extends DefaultTreeModel implements FileTreeNodeListe
     for(FileTreeNode fileNode : newFiles) {
       Treebank treebank = new DiskTreebank(trf, curEncoding);
       treebank.loadPath(fileNode.getFile(), null, true);
+      TreeTransformer transformer = TregexGUI.getInstance().transformer;
+      if (transformer != null) {
+        treebank = new TransformingTreebank(treebank, transformer);
+      }
       fileNode.setTreebank(treebank);
     }
     // System.out.println("Loadable files are: " + newFiles);

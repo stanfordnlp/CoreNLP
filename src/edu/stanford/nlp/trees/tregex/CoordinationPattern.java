@@ -1,5 +1,6 @@
 package edu.stanford.nlp.trees.tregex;
 
+import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.Tree;
 
 import java.util.Iterator;
@@ -44,10 +45,19 @@ class CoordinationPattern extends TregexPattern {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     if (isConj) {
+      if (isNegated()) {
+        sb.append("!(");
+      }
       for (TregexPattern node : children) {
         sb.append(node.toString());
       }
+      if (isNegated()) {
+        sb.append(")");
+      }
     } else {
+      if (isNegated()) {
+        sb.append("!");
+      }
       sb.append('[');
       for (Iterator<TregexPattern> iter = children.iterator(); iter.hasNext();) {
         TregexPattern node = iter.next();
@@ -70,8 +80,9 @@ class CoordinationPattern extends TregexPattern {
   public TregexMatcher matcher(Tree root, Tree tree,
                                IdentityHashMap<Tree, Tree> nodesToParents,
                                Map<String, Tree> namesToNodes,
-                               VariableStrings variableStrings) {
-    return new CoordinationMatcher(this, root, tree, nodesToParents, namesToNodes, variableStrings);
+                               VariableStrings variableStrings,
+                               HeadFinder headFinder) {
+    return new CoordinationMatcher(this, root, tree, nodesToParents, namesToNodes, variableStrings, headFinder);
   }
 
   private static class CoordinationMatcher extends TregexMatcher {
@@ -85,8 +96,9 @@ class CoordinationPattern extends TregexPattern {
     public CoordinationMatcher(CoordinationPattern n, Tree root, Tree tree,
                                IdentityHashMap<Tree, Tree> nodesToParents,
                                Map<String, Tree> namesToNodes,
-                               VariableStrings variableStrings) {
-      super(root, tree, nodesToParents, namesToNodes, variableStrings);
+                               VariableStrings variableStrings, 
+                               HeadFinder headFinder) {
+      super(root, tree, nodesToParents, namesToNodes, variableStrings, headFinder);
       myNode = n;
       children = new TregexMatcher[myNode.children.size()];
       // lazy initialize the children... don't set children[i] yet
@@ -146,7 +158,7 @@ class CoordinationPattern extends TregexPattern {
 
         while (true) {
           if (children[currChild] == null) {
-            children[currChild] = myNode.children.get(currChild).matcher(root, tree, nodesToParents, namesToNodes, variableStrings);
+            children[currChild] = myNode.children.get(currChild).matcher(root, tree, nodesToParents, namesToNodes, variableStrings, headFinder);
             children[currChild].resetChildIter(tree);
           }
           if (myNode.isNegated() != children[currChild].matches()) {
@@ -181,11 +193,13 @@ class CoordinationPattern extends TregexPattern {
         // these are the cases where a single child node can make you match
         for (; currChild < children.length; currChild++) {
           if (children[currChild] == null) {
-            children[currChild] = myNode.children.get(currChild).matcher(root, tree, nodesToParents, namesToNodes, variableStrings);
+            children[currChild] = myNode.children.get(currChild).matcher(root, tree, nodesToParents, namesToNodes, variableStrings, headFinder);
             children[currChild].resetChildIter(tree);
           }
           if (myNode.isNegated() != children[currChild].matches()) {
             // a negated node should only match once (before being reset)
+            // otherwise you get repeated matches for every node that
+            // causes the negated match to pass, which would be silly
             if (myNode.isNegated()) {
               currChild = children.length;
             }
@@ -198,7 +212,9 @@ class CoordinationPattern extends TregexPattern {
         for (int resetChild = 0; resetChild < currChild; ++resetChild) {
           // clean up variables that may have been set in previously
           // accepted nodes
-          children[resetChild].resetChildIter();
+          if (children[resetChild] != null) {
+            children[resetChild].resetChildIter();
+          }
         }
         return myNode.isOptional();
       }
@@ -206,8 +222,18 @@ class CoordinationPattern extends TregexPattern {
 
     @Override
     public Tree getMatch() {
-      // only DescriptionNodes can match
-      throw new UnsupportedOperationException();
+      // in general, only DescriptionNodes can match
+      // exception: if we are a positive disjunction, we care about
+      // exactly one of the children, so we return its match
+      if (!myNode.isConj && !myNode.isNegated()) {
+        if (currChild >= children.length || currChild < 0 || children[currChild] == null) {
+          return null;
+        } else {
+          return children[currChild].getMatch();
+        }
+      } else {
+        throw new UnsupportedOperationException();
+      }
     }
   } // end private class CoordinationMatcher
 

@@ -9,10 +9,10 @@ import java.io.Serializable;
 
 /**
  * This interface is used for reading data and writing
- * output into and out of {@link SequenceClassifier}s.
+ * output into and out of sequence classifiers.
  * If you subclass this interface, all of the other
  * mechanisms necessary for getting your data into a
- * {@link SequenceClassifier} will be taken care of
+ * sequence classifier will be taken care of
  * for you.  Subclasses <b>MUST</b> have an empty constructor as
  * they can be instantiated by reflection, and
  * there is a promise that the init method will

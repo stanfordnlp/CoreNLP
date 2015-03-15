@@ -616,7 +616,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
     }
   }
 
-  public List<? extends T> groupNodes(int group) {
+  public List<T> groupNodes(int group) {
     if (matchingCompleted && matched) {
       return super.groupNodes(group);
     } else {
