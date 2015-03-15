@@ -1,6 +1,7 @@
 package edu.stanford.nlp.dcoref;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.SemanticHeadFinder;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.Trees;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
@@ -36,9 +38,16 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
   private final HeadFinder headFinder;
   protected Annotator parserProcessor;
 
+  private final boolean allowReparsing;
+
   public RuleBasedCorefMentionFinder() {
+    this(Constants.ALLOW_REPARSING);
+  }
+
+  public RuleBasedCorefMentionFinder(boolean allowReparsing) {
     SieveCoreferenceSystem.logger.fine("Using SEMANTIC HEAD FINDER!!!!!!!!!!!!!!!!!!!");
     headFinder = new SemanticHeadFinder();
+    this.allowReparsing = allowReparsing;
   }
 
   /** When mention boundaries are given */
@@ -295,45 +304,71 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     // no exact match found
     // in this case, we parse the actual extent of the mention, embedded in a sentence
     // context, so as to make the parser work better :-)
+    if (allowReparsing) {
+      int approximateness = 0;
+      List<CoreLabel> extentTokens = new ArrayList<CoreLabel>();
+      extentTokens.add(initCoreLabel("It"));
+      extentTokens.add(initCoreLabel("was"));
+      final int ADDED_WORDS = 2;
+      for (int i = m.startIndex; i < endIdx; i++) {
+        // Add everything except separated dashes! The separated dashes mess with the parser too badly.
+        CoreLabel label = tokens.get(i);
+        if ( ! "-".equals(label.word())) {
+          extentTokens.add(tokens.get(i));
+        } else {
+          approximateness++;
+        }
+      }
+      extentTokens.add(initCoreLabel("."));
 
-    int approximateness = 0;
-    List<CoreLabel> extentTokens = new ArrayList<CoreLabel>();
-    extentTokens.add(initCoreLabel("It"));
-    extentTokens.add(initCoreLabel("was"));
-    final int ADDED_WORDS = 2;
-    for (int i = m.startIndex; i < endIdx; i++) {
-      // Add everything except separated dashes! The separated dashes mess with the parser too badly.
-      CoreLabel label = tokens.get(i);
-      if ( ! "-".equals(label.word())) {
-        extentTokens.add(tokens.get(i));
-      } else {
-        approximateness++;
+      // constrain the parse to the part we're interested in.
+      // Starting from ADDED_WORDS comes from skipping "It was".
+      // -1 to exclude the period.
+      // We now let it be any kind of nominal constituent, since there
+      // are VP and S ones
+      ParserConstraint constraint = new ParserConstraint(ADDED_WORDS, extentTokens.size() - 1, Pattern.compile(".*"));
+      List<ParserConstraint> constraints = Collections.singletonList(constraint);
+      Tree tree = parse(extentTokens, constraints);
+      convertToCoreLabels(tree);  // now unnecessary, as parser uses CoreLabels?
+      tree.indexSpans(m.startIndex - ADDED_WORDS);  // remember it has ADDED_WORDS extra words at the beginning
+      Tree subtree = findPartialSpan(tree, m.startIndex);
+      // There was a possible problem that with a crazy parse, extentHead could be one of the added words, not a real word!
+      // Now we make sure in findPartialSpan that it can't be before the real start, and in safeHead, we disallow something
+      // passed the right end (that is, just that final period).
+      Tree extentHead = safeHead(subtree, endIdx);
+      assert(extentHead != null);
+      // extentHead is a child in the local extent parse tree. we need to find the corresponding node in the main tree
+      // Because we deleted dashes, it's index will be >= the index in the extent parse tree
+      CoreLabel l = (CoreLabel) extentHead.label();
+      Tree realHead = funkyFindLeafWithApproximateSpan(root, l.value(), l.get(CoreAnnotations.BeginIndexAnnotation.class), approximateness);
+      assert(realHead != null);
+      return realHead;
+    }
+
+    // If reparsing wasn't allowed, try to find a span in the tree
+    // which happens to have the head
+    Tree wordMatch = findTreeWithSmallestSpan(root, m.startIndex, endIdx);
+    if (wordMatch != null) {
+      Tree head = safeHead(wordMatch, endIdx);
+      if (head != null) {
+        int index = ((CoreLabel) head.label()).get(CoreAnnotations.IndexAnnotation.class)-1;
+        if (index >= m.startIndex && index < endIdx) {
+          return head;
+        }
       }
     }
-    extentTokens.add(initCoreLabel("."));
 
-    // constrain the parse to the part we're interested in.
-    // Starting from ADDED_WORDS comes from skipping "It was".
-    // -1 to exclude the period.
-    // We now let it be any kind of nominal constituent, since there
-    // are VP and S ones
-    ParserConstraint constraint = new ParserConstraint(ADDED_WORDS, extentTokens.size() - 1, Pattern.compile(".*"));
-    List<ParserConstraint> constraints = Collections.singletonList(constraint);
-    Tree tree = parse(extentTokens, constraints);
-    convertToCoreLabels(tree);  // now unnecessary, as parser uses CoreLabels?
-    tree.indexSpans(m.startIndex - ADDED_WORDS);  // remember it has ADDED_WORDS extra words at the beginning
-    Tree subtree = findPartialSpan(tree, m.startIndex);
-    // There was a possible problem that with a crazy parse, extentHead could be one of the added words, not a real word!
-    // Now we make sure in findPartialSpan that it can't be before the real start, and in safeHead, we disallow something
-    // passed the right end (that is, just that final period).
-    Tree extentHead = safeHead(subtree, endIdx);
-    assert(extentHead != null);
-    // extentHead is a child in the local extent parse tree. we need to find the corresponding node in the main tree
-    // Because we deleted dashes, it's index will be >= the index in the extent parse tree
-    CoreLabel l = (CoreLabel) extentHead.label();
-    Tree realHead = funkyFindLeafWithApproximateSpan(root, l.value(), l.get(CoreAnnotations.BeginIndexAnnotation.class), approximateness);
-    assert(realHead != null);
-    return realHead;
+    // If that didn't work, guess that it's the last word
+
+    int lastNounIdx = endIdx-1;
+    for(int i=m.startIndex ; i < m.endIndex ; i++) {
+      if(tokens.get(i).tag().startsWith("N")) lastNounIdx = i;
+      else if(tokens.get(i).tag().startsWith("W")) break;
+    }
+    
+    List<Tree> leaves = root.getLeaves();
+    Tree endLeaf = leaves.get(lastNounIdx);
+    return endLeaf;
   }
 
   /** Find the tree that covers the portion of interest. */
@@ -456,6 +491,13 @@ public class RuleBasedCorefMentionFinder implements CorefMentionFinder {
     }
     // fallback: return top
     return top;
+  }
+
+  static Tree findTreeWithSmallestSpan(Tree tree, int start, int end) {
+    List<Tree> leaves = tree.getLeaves();
+    Tree startLeaf = leaves.get(start);
+    Tree endLeaf = leaves.get(end - 1);
+    return Trees.getLowestCommonAncestor(Arrays.asList(startLeaf, endLeaf), tree);
   }
 
   private static Tree findTreeWithSpan(Tree tree, int start, int end) {

@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -122,8 +123,12 @@ public class MulticoreWrapper<I,O> {
    * can be assigned to a thread.
    *
    * @param item Input to a Processor
+   * @throws RejectedExecutionException -- A RuntimeException when there is an
+   * uncaught exception in the queue. Resolution is for the calling class to shutdown
+   * the wrapper and create a new threadpool.
+   * 
    */
-  public synchronized void put(I item) {
+  public synchronized void put(I item) throws RejectedExecutionException {
     if (idleProcessors.peek() == null) blockingGetResult();
     int procId = idleProcessors.poll();
     int itemId = lastSubmittedItemId++;

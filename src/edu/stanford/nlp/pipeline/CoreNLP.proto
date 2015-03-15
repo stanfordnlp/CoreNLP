@@ -1,0 +1,184 @@
+package edu.stanford.nlp.pipeline;
+
+option java_package = "edu.stanford.nlp.pipeline";
+option java_outer_classname = "CoreNLPProtos";
+
+message Document {
+  required string     text        = 1;
+  repeated Token      token       = 2;
+  repeated Sentence   sentence    = 3;
+  repeated CorefChain corefChain  = 4;
+  optional string     docID       = 5;
+}
+
+//
+// The serialized version of a CoreMap representing a sentence.
+//
+message Sentence {
+  required uint32          tokenOffsetBegin                    = 1;
+  required uint32          tokenOffsetEnd                      = 2;
+  optional uint32          sentenceIndex                       = 3;
+  optional uint32          characterOffsetBegin                = 4;
+  optional uint32          characterOffsetEnd                  = 5;
+  optional ParseTree       parseTree                           = 6;
+  optional DependencyGraph basicDependencies                   = 7;
+  optional DependencyGraph collapsedDependencies               = 8;
+  optional DependencyGraph collapsedCCProcessedDependencies    = 9;
+  optional uint32          paragraph                           = 10;
+  
+  // Fields set by other annotators in CoreNLP
+  optional bool            hasRelationAnnotations              = 101;
+  repeated Entity          entity                              = 102;
+  repeated Relation        relation                            = 103;
+}
+
+//
+// The serialized version of a Token (a CoreLabel).
+//
+message Token {
+  // Fields set by the default annotators [new CoreNLP(new Properties())]
+  required string word            = 1;    // the word's gloss (post-tokenization)
+  optional string pos             = 2;    // The word's part of speech tag
+  optional string value           = 3;    // The word's 'value', (e.g., parse tree node)
+  optional string category        = 4;    // The word's 'category' (e.g., parse tree node)
+  optional string before          = 5;    // The whitespace/xml before the token
+  optional string after           = 6;    // The whitespace/xml after the token
+  optional string originalText    = 7;    // The original text for this token
+  optional string ner             = 8;    // The word's NER tag
+  optional string normalizedNER   = 9;    // The word's normalized NER tag
+  optional string lemma           = 10;   // The word's lemma
+  optional uint32 beginChar       = 11;   // The character offset begin
+  optional uint32 endChar         = 12;   // The character offset end
+  optional uint32 utterance       = 13;   // The utterance tag used in dcoref
+  optional string speaker         = 14;   // The speaker speaking this word
+  optional uint32 beginIndex      = 15;   // The begin index of, e.g., a span
+  optional uint32 endIndex        = 16;   // The begin index of, e.g., a span
+  optional uint32 tokenBeginIndex = 17;   // The begin index of the token
+  optional uint32 tokenEndIndex   = 18;   // The end index of the token
+  optional Timex  timexValue      = 19;   // The time this word refers to
+  optional bool   hasXmlContext   = 21;   // Used by clean xml annotator
+  repeated string xmlContext      = 22;   // Used by clean xml annotator
+  optional uint32 corefClusterID  = 23;   // The [primary] cluster id for this token
+  optional string answer          = 24;   // A temporary annotation which is occasionally left in
+
+  // Fields set by other annotators in CoreNLP
+  optional string gender          = 101;  // gender annotation (machine reading)
+  optional string trueCase        = 102;  // true case type of token
+  optional string trueCaseText    = 103;  // true case gloss of token
+
+  // Fields in the CoreLabel java class that are moved elsewhere
+  //       string text           @see Document#text + character offsets
+  //       uint32 sentenceIndex  @see Sentence#sentenceIndex
+  //       string docID          @see Document#docID
+  //       uint32 index          @see implicit in Sentence
+  //       uint32 paragraph      @see Sentence#paragraph
+}
+
+//
+// A syntactic parse tree, with scores.
+//
+message ParseTree {
+  repeated ParseTree child           = 1;
+  optional string    value           = 2;
+  optional uint32    yieldBeginIndex = 3;
+  optional uint32    yieldEndIndex   = 4;
+  optional double    score           = 5;
+}
+
+//
+// A dependency graph representation.
+//
+message DependencyGraph {
+  message Node {
+    required uint32 sentenceIndex  = 1;
+    required uint32 index          = 2;
+    optional uint32 copyAnnotation = 3;
+  }
+
+  message Edge {
+    required uint32 source  = 1;
+    required uint32 target  = 2;
+    optional string dep     = 3;
+    optional bool   isExtra = 4;
+  }
+  
+  repeated Node   node = 1;
+  repeated Edge   edge = 2;
+  repeated uint32 root = 3;
+}
+
+//
+// A coreference chain.
+// These fields are not *really* optional. CoreNLP will crash without them.
+//
+message CorefChain {
+  message CorefMention {
+    optional int32  mentionID          = 1;
+    optional string mentionType        = 2;
+    optional string number             = 3;
+    optional string gender             = 4;
+    optional string animacy            = 5;
+    optional uint32 startIndex         = 6;
+    optional uint32 endIndex           = 7;
+    optional uint32 headIndex          = 9;
+    optional uint32 sentenceIndex      = 10;
+    optional uint32 position           = 11;  // the second element of position
+  }
+
+  required int32        chainID        = 1;
+  repeated CorefMention mention        = 2;
+  required uint32       representative = 3;
+}
+
+//
+// A Timex object, representing a temporal expression (TIMe EXpression)
+// These fields are not *really* optional. CoreNLP will crash without them.
+//
+message Timex {
+  optional string value      = 1;
+  optional string altValue   = 2;
+  optional string text       = 3;
+  optional string type       = 4;
+  optional string tid        = 5;
+  optional uint32 beginPoint = 6;
+  optional uint32 endPoint   = 7;
+}
+
+//
+// A representation of an entity in a relation.
+// This corresponds to the EntityMention, and more broadly the
+// ExtractionObject classes.
+//
+message Entity {
+  optional uint32 headStart      = 6;
+  optional uint32 headEnd        = 7;
+  optional string mentionType    = 8;
+  optional string normalizedName = 9;
+  optional uint32 headTokenIndex = 10;
+  optional string corefID        = 11;
+  // inherited from ExtractionObject
+  optional string objectID = 1;
+  optional uint32 extentStart    = 2;
+  optional uint32 extentEnd      = 3;
+  optional string type           = 4;
+  optional string subtype        = 5;
+  // Implicit
+  //       uint32 sentence       @see implicit in sentence
+}
+
+//
+// A representation of a relation, mirroring RelationMention
+//
+message Relation {
+  repeated string argName   = 6;
+  repeated Entity arg       = 7;
+  optional string signature = 8;
+  // inherited from ExtractionObject
+  optional string objectID = 1;
+  optional uint32 extentStart    = 2;
+  optional uint32 extentEnd      = 3;
+  optional string type           = 4;
+  optional string subtype        = 5;
+  // Implicit
+  //       uint32 sentence       @see implicit in sentence
+}

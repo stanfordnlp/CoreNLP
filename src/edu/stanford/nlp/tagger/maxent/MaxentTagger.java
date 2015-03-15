@@ -68,11 +68,13 @@ import java.text.DecimalFormat;
  * You can tag things through the Java API or from the command line.
  * The two English taggers included in this distribution are:
  * <ul>
- * <li> A bi-directional dependency network tagger in models/bidirectional-distsim-wsj-0-18.tagger.
+ * <li> A bi-directional dependency network tagger in
+ *      {@code edu/stanford/nlp/models/pos-tagger/english-left3words/english-bidirectional-distsim.tagger}.
  *      Its accuracy was 97.32% on Penn Treebank WSJ secs. 22-24.</li>
- * <li> A model using only left sequence information and similar but less
+ * <li> A model using only left second-order sequence information and similar but less
  *      unknown words and lexical features as the previous model in
- *      models/left3words-wsj-0-18.tagger. This tagger runs a lot faster.
+ *      {@code edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger}
+ *      This tagger runs a lot faster, and is recommended for general use.
  *      Its accuracy was 96.92% on Penn Treebank WSJ secs. 22-24.</li>
  * </ul>
  *
@@ -117,10 +119,10 @@ import java.text.DecimalFormat;
  * <pre>java edu.stanford.nlp.tagger.maxent.MaxentTagger -genprops </pre>
  *
  * This gets you a default properties file with descriptions of each parameter you can set in
- * your trained model.  You can modify the properties file , or use the default options.  To train, run:
+ * your trained model.  You can modify the properties file, or use the default options.  To train, run:
  * <pre>java -mx1g edu.stanford.nlp.tagger.maxent.MaxentTagger -props myPropertiesFile.props </pre>
  *
- *  with the appropriate properties file specified; any argument you give in the properties file can also
+ *  with the appropriate properties file specified. Any argument you give in the properties file can also
  *  be specified on the command line.  You must have specified a model using -model, either in the properties file
  *  or on the command line, as well as a file containing tagged words using -trainFile.
  *
@@ -156,10 +158,10 @@ import java.text.DecimalFormat;
      <td>
        Path to the file holding the training data; specifying this option puts the tagger in training mode.  Only one of 'trainFile','testFile','textFile', and 'dump' may be specified.<br>
        There are three formats possible.  The first is a text file of tagged data, Each line is considered a separate sentence.  In each sentence, words are separated by whitespace.  Each word must have a tag, which is separated using the specified tagSeparator.  This format is the default format.<br>
-       Another possible format is a file of Penn Treebank formatted tree files.  Trees are loaded one at a time and the tagged words in the tree are used as the training sentence.  To specify this format, preface the filename with "<code>format=TREES,</code>".  <br>
-       The final possible format is TSV files.  To specify a TSV file, set trainFile to "<code>format=TSV,wordColumn=x,tagColumn=y,filename</code>".  Column numbers are indexed at 0, and sentences are separated with blank lines.
+       The second format is a file of Penn Treebank formatted tree files.  Trees are loaded one at a time and the tagged words in a tree are used as a training sentence.  To specify this format, preface the filename with "<code>format=TREES,</code>".  <br>
+       The final possible format is TSV files (tab-separated columns).  To specify a TSV file, set trainFile to "{@code format=TSV,wordColumn=x,tagColumn=y,filename}".  Column numbers are indexed from 0, and sentences are separated with blank lines.
        <br>
-       A file can be a different encoding than the tagger's default encoding by prefacing the filename with "encoding=ENC".<br>
+       A file can be in a different encoding than the tagger's default encoding by prefacing the filename with "encoding=ENC".<br>
        Tree files can be fed through TreeTransformers and TreeNormalizers.  To specify a transformer, preface the filename with "treeTransformer=CLASSNAME".  To specify a normalizer, preface the filename with "treeNormalizer=CLASSNAME".  You can also filter trees using a Filter&lt;Tree&gt;, which can be specified with "treeFilter=CLASSNAME".  A specific range of trees to be used can be specified with treeRange=X-Y.  Multiple parts of the range can be separated by : as opposed to the normal separator of ,  For example, one could use the argument "-treeRange=25-50:75-100". <br>
        Multiple files can be specified by making a semicolon separated list of files.  Each file can have its own format specifiers as above.<br>
        You will note that none of , ; or = can be in filenames.
@@ -562,34 +564,15 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     }
   }
 
-  private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-    DataInputStream rf = new DataInputStream(in);
-    readModelAndInit(null, rf, false);
-  }
-
-  private void writeObject(ObjectOutputStream out) throws IOException {
-    DataOutputStream dos = new DataOutputStream(out);
-    saveModel(dos);
-    dos.flush();
-  }
-
-  // serialize the ExtractorFrames and ExtractorFramesRare in filename
+  /** Serialize the ExtractorFrames and ExtractorFramesRare to os. */
   private void saveExtractors(OutputStream os) throws IOException {
-
     ObjectOutputStream out = new ObjectOutputStream(os);
     out.writeObject(extractors);
     out.writeObject(extractorsRare);
     out.flush();
   }
 
-  // Read the extractors from a filename.
-  private void readExtractors(String filename) throws IOException, ClassNotFoundException {
-    InputStream in = new BufferedInputStream(new FileInputStream(filename));
-    readExtractors(in);
-    in.close();
-  }
-
-  // Read the extractors from a stream.
+  /** Read the extractors from a stream. */
   private void readExtractors(InputStream file) throws IOException, ClassNotFoundException {
     ObjectInputStream in = new ObjectInputStream(file);
     extractors = (Extractors) in.readObject();
@@ -627,8 +610,9 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
   private void removeDeadRules() {
     for (Map<String, int[]> fAssociation : fAssociations) {
       List<String> deadRules = new ArrayList<String>();
-      for (String value : fAssociation.keySet()) {
-        int[] fAssociations = fAssociation.get(value);
+      for (Map.Entry<String, int[]> entry : fAssociation.entrySet()) {
+        String value = entry.getKey();
+        int[] fAssociations = entry.getValue();
 
         boolean found = false;
         for (int index = 0; index < ySize; ++index) {
@@ -681,8 +665,8 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     }
 
     for (Map<String, int[]> featureMap : fAssociations) {
-      for (String value : featureMap.keySet()) {
-        int[] fAssociations = featureMap.get(value);
+      for (Map.Entry<String, int[]> entry : featureMap.entrySet()) {
+        int[] fAssociations = entry.getValue();
         for (int index = 0; index < ySize; ++index) {
           if (fAssociations[index] >= 0) {
             fAssociations[index] = map[fAssociations[index]];
@@ -827,7 +811,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       for (int i = 0; i < extractors.size() + extractorsRare.size(); ++i) {
         fAssociations.add(Generics.<String, int[]>newHashMap());
       }
-      if (VERBOSE) System.err.printf("Reading %d feature keys...\n",sizeAssoc);
+      if (VERBOSE) System.err.printf("Reading %d feature keys...%n",sizeAssoc);
       PrintFile pfVP = null;
       if (VERBOSE) {
         pfVP = new PrintFile("pairs.txt");
@@ -854,7 +838,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
         fTagAssociations[tags.getIndex(fK.tag)] = numF;
       }
       if (VERBOSE) {
-        pfVP.close();
+        IOUtils.closeIgnoringExceptions(pfVP);
       }
       if (VERBOSE) {
         for (int k = 0; k < numFA.length; k++) {
@@ -1523,6 +1507,7 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
     }
 
     BufferedWriter writer = null;
+    BufferedReader br = null;
     try {
       String outFile = config.getOutputFile();
       if (outFile.length() > 0) {
@@ -1534,7 +1519,6 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
       //Now determine if we're tagging from stdin or from a file,
       //construct a reader accordingly
       boolean stdin = config.useStdin();
-      BufferedReader br;
       OutputStyle outputStyle = OutputStyle.fromShortName(config.getOutputFormat());
       if (!stdin) {
         String filename = config.getFile();
@@ -1553,9 +1537,8 @@ public class MaxentTagger implements Function<List<? extends HasWord>,ArrayList<
         runTaggerStdin(br, writer, outputStyle);
       }
     } finally {
-      if (writer != null) {
-        IOUtils.closeIgnoringExceptions(writer);
-      }
+      IOUtils.closeIgnoringExceptions(br);
+      IOUtils.closeIgnoringExceptions(writer);
     }
   }
 

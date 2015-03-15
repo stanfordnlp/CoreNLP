@@ -94,4 +94,17 @@ public class StringUtilsTest extends TestCase {
     assertEquals("", StringUtils.splitOnChar("\t\t\t\t", '\t')[4]);
 
   }
+
+  public void testNormalize() {
+    assertEquals("can't", StringUtils.normalize("can't"));
+    assertEquals("Beyonce", StringUtils.normalize("Beyoncé"));
+    assertEquals("krouzek", StringUtils.normalize("kroužek"));
+    assertEquals("office", StringUtils.normalize("o\uFB03ce"));
+    assertEquals("DZ", StringUtils.normalize("Ǆ"));
+    assertEquals("1⁄4", StringUtils.normalize("¼"));
+    assertEquals("한국어", StringUtils.normalize("한국어"));
+    assertEquals("조선말", StringUtils.normalize("조선말"));
+    assertEquals("が", StringUtils.normalize("が"));
+    assertEquals("か", StringUtils.normalize("か"));
+  }
 }

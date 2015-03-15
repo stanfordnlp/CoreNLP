@@ -61,7 +61,7 @@ public class GenderAnnotator implements Annotator {
 
   @Override
   public Set<Requirement> requires() {
-    return TOKENIZE_AND_SSPLIT;
+    return TOKENIZE_SSPLIT_POS;
   }
 
   @Override

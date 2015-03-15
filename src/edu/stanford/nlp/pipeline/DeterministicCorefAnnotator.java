@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import edu.stanford.nlp.dcoref.Constants;
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
 import edu.stanford.nlp.dcoref.Document;
@@ -24,6 +25,7 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntTuple;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * Implements the Annotator for the new deterministic coreference resolution system.
@@ -43,11 +45,14 @@ public class DeterministicCorefAnnotator implements Annotator {
   // for backward compatibility
   private final boolean OLD_FORMAT;
 
+  private final boolean allowReparsing;
+
   public DeterministicCorefAnnotator(Properties props) {
     try {
       corefSystem = new SieveCoreferenceSystem(props);
       mentionExtractor = new MentionExtractor(corefSystem.dictionaries(), corefSystem.semantics());
       OLD_FORMAT = Boolean.parseBoolean(props.getProperty("oldCorefFormat", "false"));
+      allowReparsing = PropertiesUtils.getBool(props, Constants.ALLOW_REPARSING_PROP, Constants.ALLOW_REPARSING);
     } catch (Exception e) {
       System.err.println("ERROR: cannot create DeterministicCorefAnnotator!");
       e.printStackTrace();
@@ -98,7 +103,7 @@ public class DeterministicCorefAnnotator implements Annotator {
 
       // extract all possible mentions
       // this is created for each new annotation because it is not threadsafe
-      RuleBasedCorefMentionFinder finder = new RuleBasedCorefMentionFinder();
+      RuleBasedCorefMentionFinder finder = new RuleBasedCorefMentionFinder(allowReparsing);
       List<List<Mention>> allUnprocessedMentions = finder.extractPredictedMentions(annotation, 0, corefSystem.dictionaries());
 
       // add the relevant info to mentions and order them for coref

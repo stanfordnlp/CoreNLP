@@ -97,8 +97,6 @@ public interface Annotator {
   public static final String STANFORD_NER = "ner";
   public static final String STANFORD_REGEXNER = "regexner";
   public static final String STANFORD_GENDER = "gender";
-  static final String STANFORD_NFL_TOKENIZE = "nfltokenize"; // hidden annotator constructed automagically for the NFL domain
-  public static final String STANFORD_NFL = "nfl";
   public static final String STANFORD_TRUECASE = "truecase";
   public static final String STANFORD_PARSE = "parse";
   public static final String STANFORD_DETERMINISTIC_COREF = "dcoref";
@@ -112,8 +110,6 @@ public interface Annotator {
   public static final Requirement LEMMA_REQUIREMENT = new Requirement(STANFORD_LEMMA);
   public static final Requirement NER_REQUIREMENT = new Requirement(STANFORD_NER);
   public static final Requirement GENDER_REQUIREMENT = new Requirement(STANFORD_GENDER);
-  public static final Requirement NFL_TOKENIZE_REQUIREMENT = new Requirement(STANFORD_NFL_TOKENIZE);
-  public static final Requirement NFL_REQUIREMENT = new Requirement(STANFORD_NFL);
   public static final Requirement TRUECASE_REQUIREMENT = new Requirement(STANFORD_TRUECASE);
   public static final Requirement PARSE_REQUIREMENT = new Requirement(STANFORD_PARSE);
   public static final Requirement DETERMINISTIC_COREF_REQUIREMENT = new Requirement(STANFORD_DETERMINISTIC_COREF);

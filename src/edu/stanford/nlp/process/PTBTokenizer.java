@@ -75,47 +75,58 @@ import edu.stanford.nlp.util.StringUtils;
  *     perhaps CharacterOffsetBeginAnnotation and CharacterOffsetEndAnnotation to record
  *     token begin/after end character offsets, if they were specified to be recorded
  *     in TokenFactory construction.  (Like the String class, begin and end
- *     are done so end - begin gives the token length.)
+ *     are done so end - begin gives the token length.) Default is false.
  * <li>tokenizeNLs: Whether end-of-lines should become tokens (or just
- *     be treated as part of whitespace).
+ *     be treated as part of whitespace). Default is false.
  * <li>ptb3Escaping: Enable all traditional PTB3 token transforms
  *     (like parentheses becoming -LRB-, -RRB-).  This is a macro flag that
- *     sets or clears all the options below.
+ *     sets or clears all the options below. (Default setting of the various
+ *     properties below that this flag controls is equivalent to it being set
+ *     to true.)
  * <li>americanize: Whether to rewrite common British English spellings
  *     as American English spellings. (This is useful if your training
  *     material uses American English spelling, such as the Penn Treebank.)
+ *     Default is true.
  * <li>normalizeSpace: Whether any spaces in tokens (phone numbers, fractions
  *     get turned into U+00A0 (non-breaking space).  It's dangerous to turn
  *     this off for most of our Stanford NLP software, which assumes no
- *     spaces in tokens.
+ *     spaces in tokens. Default is true.
  * <li>normalizeAmpersandEntity: Whether to map the XML &amp;amp; to an
- *      ampersand.
+ *      ampersand. Default is true.
  * <li>normalizeCurrency: Whether to do some awful lossy currency mappings
  *     to turn common currency characters into $, #, or "cents", reflecting
  *     the fact that nothing else appears in the old PTB3 WSJ.  (No Euro!)
+ *     Default is true.
  * <li>normalizeFractions: Whether to map certain common composed
  *     fraction characters to spelled out letter forms like "1/2".
+ *     Default is true.
  * <li>normalizeParentheses: Whether to map round parentheses to -LRB-,
- *     -RRB-, as in the Penn Treebank.
+ *     -RRB-, as in the Penn Treebank. Default is true.
  * <li>normalizeOtherBrackets: Whether to map other common bracket characters
  *     to -LCB-, -LRB-, -RCB-, -RRB-, roughly as in the Penn Treebank.
+ *     Default is true.
  * <li>asciiQuotes Whether to map all quote characters to the traditional ' and ".
+ *     Default is false.
  * <li>latexQuotes: Whether to map quotes to ``, `, ', '', as in Latex
  *     and the PTB3 WSJ (though this is now heavily frowned on in Unicode).
  *     If true, this takes precedence over the setting of unicodeQuotes;
- *     if both are false, no mapping is done.
+ *     if both are false, no mapping is done.  Default is true.
  * <li>unicodeQuotes: Whether to map quotes to the range U+2018 to U+201D,
  *     the preferred unicode encoding of single and double quotes.
- * <li>ptb3Ellipsis: Whether to map ellipses to three dots (...), the old PTB3 WSJ coding
- *     of an ellipsis. If true, this takes precedence over the setting of
- *     unicodeEllipsis; if both are false, no mapping is done.
+ *     Default is false.
+ * <li>ptb3Ellipsis: Whether to map ellipses to three dots (...), the
+ *     old PTB3 WSJ coding of an ellipsis. If true, this takes precedence
+ *     over the setting of unicodeEllipsis; if both are false, no mapping
+ *     is done. Default is true.
  * <li>unicodeEllipsis: Whether to map dot and optional space sequences to
- *     U+2026, the Unicode ellipsis character
+ *     U+2026, the Unicode ellipsis character. Default is false.
  * <li>ptb3Dashes: Whether to turn various dash characters into "--",
- *     the dominant encoding of dashes in the PTB3 WSJ
+ *     the dominant encoding of dashes in the PTB3 WSJ. Default is true.
+ * <li>keepAssimilations: true to tokenize "gonna", false to tokenize
+ *                        "gon na".  Default is true.
  * <li>escapeForwardSlashAsterisk: Whether to put a backslash escape in front
  *     of / and * as the old PTB3 WSJ does for some reason (something to do
- *     with Lisp readers??).
+ *     with Lisp readers??). Default is true.
  * <li>untokenizable: What to do with untokenizable characters (ones not
  *     known to the tokenizer).  Six options combining whether to log a
  *     warning for none, the first, or all, and whether to delete them or
@@ -126,13 +137,14 @@ import edu.stanford.nlp.util.StringUtils;
  *      WSJ tokenization in two cases.  Setting this improves compatibility
  *      for those cases.  They are: (i) When an acronym is followed by a
  *      sentence end, such as "U.K." at the end of a sentence, the PTB3
- *      has tokens of "U.K" and "." (except for the sole exception of "U.S.",
- *      when it returns tokens of "U.S." and "."), while by default
- *      PTBTokenizer duplicates the period in all cases,
- *      returning tokens of "U.K." and ".", and (ii) PTBTokenizer
+ *      has tokens of "Corp" and ".", while by default PTBTokenizer duplicates
+ *      the period returning tokens of "Corp." and ".", and (ii) PTBTokenizer
  *      will return numbers with a whole number and a fractional part like
- *      "5 7/8" as a single token (with a non-breaking space in the middle),
+ *      "5 7/8" as a single token, with a non-breaking space in the middle,
  *      while the PTB3 separates them into two tokens "5" and "7/8".
+ *      (Exception: for only "U.S." the treebank does have the two tokens
+ *      "U.S." and "." like our default; strictTreebank3 now does that too.)
+ *      The default is false.
  * </ol>
  * <p>
  * A single instance of a PTBTokenizer is not thread safe, as it uses

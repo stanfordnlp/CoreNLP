@@ -436,7 +436,7 @@ public class ArrayMath {
 
   /**
    * Divide the first array by the second elementwise,
-   * and store results in place. Assume arrays have 
+   * and store results in place. Assume arrays have
    * the same length
    */
   public static void pairwiseDivideInPlace(double[] a, double[] b) {
@@ -1461,8 +1461,15 @@ public class ArrayMath {
     shuffle(a, rand);
   }
 
+  /* Shuffle the integers in an array using a source of randomness.
+   * Uses the Fisher-Yates shuffle. Makes all orderings equally likely, iff
+   * the randomizer is good.
+   *
+   * @param a The array to shuffle
+   * @param rand The source of randomness
+   */
   public static void shuffle(int[] a, Random rand) {
-    for (int i=a.length-1; i>=1; i--) {
+    for (int i = a.length - 1; i > 0; i--) {
       int j = rand.nextInt(i+1); // a random index from 0 to i inclusive, may shuffle with itself
       int tmp = a[i];
       a[i] = a[j];

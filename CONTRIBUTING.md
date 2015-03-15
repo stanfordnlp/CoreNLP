@@ -13,4 +13,4 @@ Therefore, we can accept contributions on any of the following terms:
  * You can make your contribution available under a non-restrictive open source licensing, such as the Revised (or 3-clause) BSD license, with appropriate licensing information included with the submitted code.
  * You can sign and return to us a contributor license agreement, explicitly licensing us to be able to use the code. Contact us at: java-nlp-support@mailman.stanford.edu .
 
-You should do development against our master branch. You should make sure that all unit tests still pass. (In general, you will not be able to run our integration tests, since they rely on resources in our filesystem.
+You should do development against our master branch. You should make sure that all unit tests still pass. (In general, you will not be able to run our integration tests, since they rely on resources in our filesystem.)

@@ -42,7 +42,7 @@ public class TestSentence implements SequenceModel {
 
   protected final boolean VERBOSE;
   protected static final String naTag = "NA";
-  protected static final String[] naTagArr = { naTag };
+  private static final String[] naTagArr = { naTag };
   protected static final boolean DBG = false;
   protected static final int kBestSize = 1;
 
@@ -172,7 +172,7 @@ public class TestSentence implements SequenceModel {
 
   ArrayList<TaggedWord> getTaggedSentence() {
     final boolean hasOffset;
-    hasOffset = origWords != null && (origWords.get(0) instanceof HasOffset);
+    hasOffset = origWords != null && origWords.size() > 0 && (origWords.get(0) instanceof HasOffset);
     ArrayList<TaggedWord> taggedSentence = new ArrayList<TaggedWord>();
     for (int j = 0; j < size - 1; j++) {
       String tag = finalTags[j];

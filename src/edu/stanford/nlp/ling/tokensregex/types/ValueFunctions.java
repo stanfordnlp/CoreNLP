@@ -40,7 +40,23 @@ public class ValueFunctions {
       this.name = name;
     }
 
+    public String getDescription() { return ""; }
+
     public String getParamDesc() { return "..."; }
+
+    protected static String getParamDesc(String type, int nargs) {
+      if (nargs < 0) {
+        return type + "...";
+      } else if (nargs <= 3) {
+        String[] tmp = new String[nargs];
+        Arrays.fill(tmp, type);
+        return StringUtils.join(tmp, ",");
+      } else return type + "[" + nargs + "]";
+    }
+
+    protected static String getTypeName(Class c) {
+      return c.getCanonicalName();
+    }
 
     public String toString() {
       if (signature == null) {
@@ -95,7 +111,7 @@ public class ValueFunctions {
         if (p.typeName != null) {
           sb.append(p.typeName);
         } else {
-          sb.append(p.className);
+          sb.append(getTypeName(p.className));
         }
       }
       return sb.toString();
@@ -129,7 +145,7 @@ public class ValueFunctions {
   }
 
   public abstract static class NumericFunction extends NamedValueFunction {
-    protected String resultTypeName = "Number";
+    protected String resultTypeName = Expressions.TYPE_NUMBER;
     protected int nargs = 2;
 
     protected NumericFunction(String name, int nargs) {
@@ -141,6 +157,11 @@ public class ValueFunctions {
       super(name);
       this.resultTypeName = resultTypeName;
       this.nargs = nargs;
+    }
+
+    @Override
+    public String getParamDesc() {
+      return getParamDesc(Expressions.TYPE_NUMBER, nargs);
     }
 
     public abstract Number compute(Number...ns);
@@ -256,6 +277,11 @@ public class ValueFunctions {
     public abstract Boolean compute(Boolean...ns);
 
     @Override
+    public String getParamDesc() {
+      return getParamDesc(Expressions.TYPE_BOOLEAN, nargs);
+    }
+
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (nargs > 0 && in.size() != nargs) {
         return false;
@@ -328,6 +354,11 @@ public class ValueFunctions {
     public abstract String compute(String... strs);
 
     @Override
+    public String getParamDesc() {
+      return getParamDesc(Expressions.TYPE_STRING, nargs);
+    }
+
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (nargs > 0 && in.size() != nargs) {
         return false;
@@ -383,6 +414,11 @@ public class ValueFunctions {
 
   public static final ValueFunction FORMAT_FUNCTION = new NamedValueFunction("FORMAT") {
     @Override
+    public String getParamDesc() {
+      return Expressions.TYPE_STRING + ",...";
+    }
+
+    @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() < 1) {
         return false;
@@ -406,6 +442,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction JOIN_FUNCTION = new NamedValueFunction("JOIN") {
+    @Override
+    public String getParamDesc() {
+      return "String glue,...";
+    }
+
     @Override
     public boolean checkArgs(List<Value> in) {
       if (in.size() < 1) {
@@ -626,6 +667,11 @@ public class ValueFunctions {
       this.clazz = clazz;
     }
 
+    @Override
+    public String getParamDesc() {
+      return "(" + getTypeName(clazz) + "," + getTypeName(clazz) + ")";
+    }
+
     public Boolean compare(T o1, T o2) {
       int res = comparator.compare(o1,o2);
       switch (compType) {
@@ -670,6 +716,11 @@ public class ValueFunctions {
 
   public static final ValueFunction NOT_EQUALS_FUNCTION = new NamedValueFunction("EQUALS") {
     @Override
+    public String getParamDesc() {
+      return "Object,Object";
+    }
+
+    @Override
     public boolean checkArgs(List<Value> in) {
       return in.size() == 2;
     }
@@ -694,6 +745,11 @@ public class ValueFunctions {
 
   public static final ValueFunction EQUALS_FUNCTION = new NamedValueFunction("EQUALS") {
     @Override
+    public String getParamDesc() {
+      return "Object,Object";
+    }
+
+    @Override
     public boolean checkArgs(List<Value> in) {
       return in.size() == 2;
     }
@@ -716,6 +772,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction ANNOTATION_FUNCTION = new NamedValueFunction("ANNOTATION_VALUE") {
+    @Override
+    public String getParamDesc() {
+      return "CoreMap coremap,String fieldName|Class field,[Object value]";
+    }
+
     // First argument is what (CoreMap) to get annotation for
     // Second argument is field (Class or String) to get annotation for
     // Third argument (optional) is annotation value to set
@@ -780,6 +841,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction GET_ANNOTATION_TAG_FUNCTION = new NamedValueFunction("GET_ANNOTATION_TAG") {
+    @Override
+    public String getParamDesc() {
+      return "CoreMap or List<CoreMap>,String tag";
+    }
+
     // First argument is what (CoreMap or List<CoreMap>) to tag
     // Second argument is tag
     @Override
@@ -827,6 +893,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction SET_ANNOTATION_TAG_FUNCTION = new NamedValueFunction("SET_ANNOTATION_TAG") {
+    @Override
+    public String getParamDesc() {
+      return "CoreMap or List<CoreMap>,String tag,[Object value]";
+    }
+
     // First argument is what (CoreMap or List<CoreMap>) to tag
     // Second argument is tag
     // Third argument is tag value
@@ -874,6 +945,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction REMOVE_ANNOTATION_TAG_FUNCTION = new NamedValueFunction("REMOVE_ANNOTATION_TAG") {
+    @Override
+    public String getParamDesc() {
+      return "CoreMap or List<CoreMap>,String tag";
+    }
+
     // First argument is what (CoreMap) to tag
     // Second argument is tag
     @Override
@@ -917,6 +993,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction TAGS_VALUE_FUNCTION = new NamedValueFunction("TAGS_VALUE") {
+    @Override
+    public String getParamDesc() {
+      return getTypeName(Tags.class) + " tags,String field,[Object value]";
+    }
+
     // First argument is tags object
     // Second argument is tag
     // Third argument (optional) is tag value
@@ -947,6 +1028,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction SET_VALUE_TAG_FUNCTION = new NamedValueFunction("VALUE_TAG") {
+    @Override
+    public String getParamDesc() {
+      return "Value,String tag,[Object value]";
+    }
+
     // First argument is what to tag
     // Second argument is tag
     // Third argument is tag value
@@ -978,6 +1064,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction GET_VALUE_TAG_FUNCTION = new NamedValueFunction("GET_VALUE_TAG") {
+    @Override
+    public String getParamDesc() {
+      return "Value,String tag";
+    }
+
     // First argument is what to tag
     // Second argument is tag
     @Override
@@ -1004,7 +1095,12 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction REMOVE_VALUE_TAG_FUNCTION = new NamedValueFunction("REMOVE_VALUE_TAG") {
-    // First argument is what (CoreMap) to tag
+    @Override
+    public String getParamDesc() {
+      return "Value,String tag";
+    }
+
+    // First argument is what to tag
     // Second argument is tag
     @Override
     public boolean checkArgs(List<Value> in) {
@@ -1033,6 +1129,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction COMPOSITE_VALUE_FUNCTION = new NamedValueFunction("COMPOSITE_VALUE") {
+    @Override
+    public String getParamDesc() {
+      return Expressions.TYPE_COMPOSITE + " obj,String field,[Object value]";
+    }
+
     // First argument is composite value
     // Second argument is field to select
     // Third argument (optional) is value to set composite value field to
@@ -1063,6 +1164,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction COMPOSITE_KEYS_FUNCTION = new NamedValueFunction("COMPOSITE_KEYS") {
+    @Override
+    public String getParamDesc() {
+      return Expressions.TYPE_COMPOSITE;
+    }
+
     // First argument is composite value
     @Override
     public boolean checkArgs(List<Value> in) {
@@ -1085,6 +1191,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction OBJECT_FIELD_FUNCTION = new NamedValueFunction("OBJECT_FIELD") {
+    @Override
+    public String getParamDesc() {
+      return "Object obj,String fieldName,[Object value]";
+    }
+
     // First argument is object
     // Second argument is field to select
     // Third argument (optional) is value to assign to object field
@@ -1159,6 +1270,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction LIST_VALUE_FUNCTION = new NamedValueFunction("LIST_VALUE") {
+    @Override
+    public String getParamDesc() {
+      return "List list,int index,[Object value]";
+    }
+
     // First argument is List
     // Second argument is index of element to select
     // Third argument (optional) is value to assign list element
@@ -1203,6 +1319,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction MAP_VALUE_FUNCTION = new NamedValueFunction("MAP_VALUE") {
+    @Override
+    public String getParamDesc() {
+      return "Map map,Object key,[Object value]";
+    }
+
     // First argument is Map
     // Second argument is key of element to select
     // Third argument (optional) is value to assign to element
@@ -1247,6 +1368,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction MAP_KEYS_FUNCTION = new NamedValueFunction("MAP_KEYS") {
+    @Override
+    public String getParamDesc() {
+      return "Map";
+    }
+
     // First argument is Map
     @Override
     public boolean checkArgs(List<Value> in) {
@@ -1269,6 +1395,11 @@ public class ValueFunctions {
   };
 
   public static final ValueFunction AGGREGATE_FUNCTION = new NamedValueFunction("AGGREGATE") {
+    @Override
+    public String getParamDesc() {
+      return "ValueFunction func,Object initialValue,...";
+    }
+
     // First argument is function to apply
     // Second argument is initial value
     @Override
@@ -1299,7 +1430,9 @@ public class ValueFunctions {
   };
 
   static final CollectionValuedMap<String, ValueFunction> registeredFunctions =
-          new CollectionValuedMap<String,ValueFunction>(CollectionFactory.<ValueFunction>arrayListFactory());
+    new CollectionValuedMap<String,ValueFunction>(
+      MapFactory.<String, Collection<ValueFunction>>linkedHashMapFactory(),
+      CollectionFactory.<ValueFunction>arrayListFactory(),false);
   static {
     registeredFunctions.add("Add", ADD_FUNCTION);
     registeredFunctions.add("Subtract", SUBTRACT_FUNCTION);
@@ -1353,7 +1486,6 @@ public class ValueFunctions {
     registeredFunctions.add("Select", MAP_VALUE_FUNCTION);
     registeredFunctions.add("Select", TAGS_VALUE_FUNCTION);
     registeredFunctions.add("Select", ANNOTATION_FUNCTION);
-    registeredFunctions.add("Select", ANNOTATION_FUNCTION);
     registeredFunctions.add("Select", OBJECT_FIELD_FUNCTION);
     registeredFunctions.add("ListSelect", LIST_VALUE_FUNCTION);
 
@@ -1372,5 +1504,14 @@ public class ValueFunctions {
     registeredFunctions.add("Get", ANNOTATION_FUNCTION);
     registeredFunctions.add("Get", OBJECT_FIELD_FUNCTION);
     registeredFunctions.add("Get", LIST_VALUE_FUNCTION);
+  }
+
+  public static void main(String[] args) {
+    // Dumps the registered functions
+    for (String name: registeredFunctions.keySet()) {
+      for (ValueFunction vf: registeredFunctions.get(name)) {
+        System.out.println(name + ": " + vf);
+      }
+    }
   }
 }

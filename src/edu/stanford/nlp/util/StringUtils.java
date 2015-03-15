@@ -11,6 +11,7 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.Normalizer;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -2021,5 +2022,24 @@ public class StringUtils {
    */
   public static Collection<String> getNgramsString(String s, int minSize, int maxSize){
     return getNgrams(Arrays.asList(s.split("\\s+")), minSize, maxSize);
+  }
+
+  private static Pattern diacriticalMarksPattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}");
+  public static String normalize(String s) {
+    // Normalizes string and strips diacritics (map to ascii) by
+    // 1. taking the NFKD (compatibility decomposition -
+    //   in compatibility equivalence, formatting such as subscripting is lost -
+    //   see http://unicode.org/reports/tr15/)
+    // 2. Removing diacriticals
+    // 3. Recombining into NFKC form (compatibility composition)
+    // This process may be slow.
+    //
+    // The main purpose of the function is to remove diacritics for asciis,
+    //  but it may normalize other stuff as well.
+    // A more conservative approach is to do explicit folding just for ascii character
+    //   (see RuleBasedNameMatcher.normalize)
+    String d = Normalizer.normalize(s, Normalizer.Form.NFKD);
+    d = diacriticalMarksPattern.matcher(d).replaceAll("");
+    return Normalizer.normalize(d, Normalizer.Form.NFKC);
   }
 }

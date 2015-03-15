@@ -444,7 +444,7 @@ public class MachineReading {
       	}
       	
       	relationExtractor = new BasicRelationExtractor(rff, MachineReadingProperties.createUnrelatedRelations, makeRelationMentionFactory(MachineReadingProperties.relationMentionFactoryClass));
-        Execution.fillOptions(RelationExtractorProps.class, args);
+        Execution.fillOptions(relationExtractor, args);
       	//Arguments.parse(args,relationExtractor);
         MachineReadingProperties.logger.info("Training relation extraction model...");
         relationExtractor.train(dataset);

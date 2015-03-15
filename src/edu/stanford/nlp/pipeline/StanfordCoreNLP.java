@@ -28,7 +28,6 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
-import edu.stanford.nlp.ie.regexp.RegexNERSequenceClassifier;
 import edu.stanford.nlp.io.FileSequentialCollection;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -272,15 +271,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
         requirementsSatisfied.addAll(an.requirementsSatisfied());
       }
 
-      // the NFL domain requires several post-processing rules after
-      // tokenization.  add these transparently if the NFL annotator
-      // is required
-      if (name.equals(STANFORD_TOKENIZE) &&
-          annoNames.contains(STANFORD_NFL) &&
-          !annoNames.contains(STANFORD_NFL_TOKENIZE)) {
-        Annotator pp = pool.get(STANFORD_NFL_TOKENIZE);
-        this.addAnnotator(pp);
-      }
 
       alreadyAddedAnnoNames.add(name);
     }
@@ -665,24 +655,13 @@ public class StanfordCoreNLP extends AnnotationPipeline {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        String mapping = properties.getProperty("regexner.mapping", DefaultPaths.DEFAULT_REGEXNER_RULES);
-        String ignoreCase = properties.getProperty("regexner.ignorecase", "false");
-        String validPosPattern = properties.getProperty("regexner.validpospattern", RegexNERSequenceClassifier.DEFAULT_VALID_POS);
-        return new RegexNERAnnotator(mapping, Boolean.valueOf(ignoreCase), validPosPattern);
+        return new TokensRegexNERAnnotator("regexner", properties);
       }
 
       @Override
       public String signature() {
         // keep track of all relevant properties for this annotator here!
-        return "regexner.mapping:" +
-                properties.getProperty("regexner.mapping",
-                        DefaultPaths.DEFAULT_REGEXNER_RULES) +
-                "regexner.ignorecase:" +
-                properties.getProperty("regexner.ignorecase",
-                        "false") +
-                "regexner.validpospattern:" +
-                properties.getProperty("regexner.validpospattern",
-                        RegexNERSequenceClassifier.DEFAULT_VALID_POS);
+        return PropertiesUtils.getSignature("regexner", properties, TokensRegexNERAnnotator.SUPPORTED_PROPERTIES);
       }
     });
 
@@ -731,68 +710,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 "truecase.mixedcasefile:" +
                 properties.getProperty("truecase.mixedcasefile",
                         DefaultPaths.DEFAULT_TRUECASE_DISAMBIGUATION_LIST);
-      }
-    });
-
-    //
-    // Post-processing tokenization rules for the NFL domain
-    //
-    pool.register(STANFORD_NFL_TOKENIZE, new AnnotatorFactory(inputProps) {
-      private static final long serialVersionUID = 1L;
-      @Override
-      public Annotator create() {
-        final String className =
-          "edu.stanford.nlp.pipeline.NFLTokenizerAnnotator";
-        return ReflectionLoading.loadByReflection(className);
-      }
-
-      @Override
-      public String signature() {
-        // keep track of all relevant properties for this annotator here!
-        // no used props for this one
-        return "";
-      }
-    });
-
-    //
-    // Entity and relation extraction for the NFL domain
-    //
-    pool.register(STANFORD_NFL, new AnnotatorFactory(inputProps) {
-      private static final long serialVersionUID = 1L;
-      @Override
-      public Annotator create() {
-        // these paths now extracted inside c'tor
-        // String gazetteer = properties.getProperty("nfl.gazetteer", DefaultPaths.DEFAULT_NFL_GAZETTEER);
-        // String entityModel = properties.getProperty("nfl.entity.model", DefaultPaths.DEFAULT_NFL_ENTITY_MODEL);
-        // String relationModel = properties.getProperty("nfl.relation.model", DefaultPaths.DEFAULT_NFL_RELATION_MODEL);
-        final String className = "edu.stanford.nlp.pipeline.NFLAnnotator";
-        return ReflectionLoading.loadByReflection(className, properties);
-      }
-
-      @Override
-      public String signature() {
-        // keep track of all relevant properties for this annotator here!
-        return "nfl.verbose:" +
-                properties.getProperty("nfl.verbose",
-                        "false") +
-                "nfl.relations.use.max.recall:" +
-                properties.getProperty("nfl.relations.use.max.recall",
-                        "false") +
-                "nfl.relations.use.model.merging:" +
-                properties.getProperty("nfl.relations.use.model.merging",
-                        "false") +
-                "nfl.relations.use.basic.inference:" +
-                properties.getProperty("nfl.relations.use.basic.inference",
-                        "true") +
-                "nfl.gazetteer:" +
-                properties.getProperty("nfl.gazetteer",
-                        DefaultPaths.DEFAULT_NFL_GAZETTEER) +
-                "nfl.entity.model:" +
-                properties.getProperty("nfl.entity.model",
-                        DefaultPaths.DEFAULT_NFL_ENTITY_MODEL) +
-                "nfl.relation.model:" +
-                properties.getProperty("nfl.relation.model",
-                        DefaultPaths.DEFAULT_NFL_RELATION_MODEL);
       }
     });
 
@@ -903,6 +820,24 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     }
 
 
+    pool.register(STANFORD_RELATION, new AnnotatorFactory(inputProps) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        return new RelationExtractorAnnotator(properties);
+      }
+
+      @Override
+      public String signature() {
+        // keep track of all relevant properties for this annotator here!
+        return "sup.relation.verbose:" +
+        properties.getProperty("sup.relation.verbose",
+                "false") +
+        properties.getProperty("sup.relation.model",
+                DefaultPaths.DEFAULT_SUP_RELATION_EX_RELATION_MODEL);
+      }
+    });
+    
     //
     // add more annotators here!
     //
@@ -1049,7 +984,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     os.println("(if -props or -annotators is not passed in, default properties will be loaded via the classpath)");
     os.println("\t\"props\" - path to file with configuration properties");
     os.println("\t\"annotators\" - comma separated list of annotators");
-    os.println("\tThe following annotators are supported: cleanxml, tokenize, ssplit, pos, lemma, ner, truecase, parse, coref, dcoref, nfl");
+    os.println("\tThe following annotators are supported: cleanxml, tokenize, ssplit, pos, lemma, ner, truecase, parse, coref, dcoref, relation");
 
     os.println();
     os.println("\tIf annotator \"tokenize\" is defined:");
@@ -1080,9 +1015,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     os.println("\t\"truecase.mixedcasefile\" - path towards the mixed case file; default: " + DefaultPaths.DEFAULT_TRUECASE_DISAMBIGUATION_LIST);
 
     os.println();
-    os.println("\tIf annotator \"nfl\" is defined:");
-    os.println("\t\"nfl.gazetteer\" - path towards the gazetteer for the NFL domain");
-    os.println("\t\"nfl.relation.model\" - path towards the NFL relation extraction model");
+    os.println("\tIf annotator \"relation\" is defined:");
+    os.println("\t\"sup.relation.verbose\" - whether verbose or not");
+    os.println("\t\"sup.relation.model\" - path towards the relation extraction model");
 
     os.println();
     os.println("\tIf annotator \"parse\" is defined:");
@@ -1300,7 +1235,9 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 if (inputSerializerClass != null) {
                   AnnotationSerializer inputSerializer = loadSerializer(inputSerializerClass, inputSerializerName, properties);
                   InputStream is = new BufferedInputStream(new FileInputStream(file));
-                  annotation = inputSerializer.load(is);
+                  Pair<Annotation, InputStream> pair = inputSerializer.read(is);
+                  pair.second.close();
+                  annotation = pair.first;
                   IOUtils.closeIgnoringExceptions(is);
                 } else {
                   annotation = IOUtils.readObjectFromFile(file);
@@ -1363,8 +1300,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
                 if (outputSerializerClass != null) {
                   AnnotationSerializer outputSerializer = loadSerializer(outputSerializerClass, outputSerializerName, properties);
                   OutputStream fos = new BufferedOutputStream(new FileOutputStream(finalOutputFilename));
-                  outputSerializer.save(annotation, fos);
-                  fos.close();
+                  outputSerializer.write(annotation, fos).close();
                 } else {
                   IOUtils.writeObjectToFile(annotation, finalOutputFilename);
                 }

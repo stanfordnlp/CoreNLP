@@ -37,7 +37,7 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
           for (Pair<Class,NodePattern> v:p.getAnnotationPatterns()) {
             if (v.first == CoreAnnotations.TextAnnotation.class && v.second instanceof CoreMapNodePattern.StringAnnotationPattern) {
               return Triple.makeTriple(v.first, ((CoreMapNodePattern.StringAnnotationPattern) v.second).target,
-                      ((CoreMapNodePattern.StringAnnotationPattern) v.second).ignoreCase);
+                      ((CoreMapNodePattern.StringAnnotationPattern) v.second).ignoreCase());
             }
           }
         }
@@ -82,6 +82,7 @@ public class CoreMapNodePatternTrigger implements MultiPatternMatcher.NodePatter
         }
       }
     }
+    // TODO: triggers for normalized patterns...
     return triggeredPatterns;
   }
 }
