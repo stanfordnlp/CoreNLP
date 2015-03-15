@@ -21,11 +21,11 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
       ConstantsAndVariables constVars,
       PatternScoring patternScoring,
       String label,
-      TwoDimensionalCounter<SurfacePattern, String> patternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> negPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> unLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> negandUnLabeledPatternsandWords4Label,
-      TwoDimensionalCounter<SurfacePattern, String> allPatternsandWords4Label,
+      TwoDimensionalCounter<Integer, String> patternsandWords4Label,
+      TwoDimensionalCounter<Integer, String> negPatternsandWords4Label,
+      TwoDimensionalCounter<Integer, String> unLabeledPatternsandWords4Label,
+      TwoDimensionalCounter<Integer, String> negandUnLabeledPatternsandWords4Label,
+      TwoDimensionalCounter<Integer, String> allPatternsandWords4Label,
       TwoDimensionalCounter<String, ScorePhraseMeasures> phInPatScores,
       ScorePhrases scorePhrases, Properties props) {
     super(constVars, patternScoring, label, patternsandWords4Label,
@@ -45,7 +45,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
   }
 
   @Override
-  Counter<SurfacePattern> score() throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+  Counter<Integer> score() throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
     // TODO: changed
     Counter<String> externalWordWeightsNormalized = null;
     if (constVars.dictOddsWeights.containsKey(label))
@@ -53,16 +53,16 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
           .normalizeSoftMaxMinMaxScores(constVars.dictOddsWeights.get(label),
               true, true, false);
 
-    Counter<SurfacePattern> currentPatternWeights4Label = new ClassicCounter<SurfacePattern>();
+    Counter<Integer> currentPatternWeights4Label = new ClassicCounter<Integer>();
 
     boolean useFreqPhraseExtractedByPat = false;
     if (patternScoring.equals(PatternScoring.SqrtAllRatio))
       useFreqPhraseExtractedByPat = true;
 
-    Counter<SurfacePattern> numeratorPatWt = this.convert2OneDim(label,
+    Counter<Integer> numeratorPatWt = this.convert2OneDim(label,
         patternsandWords4Label, constVars.sqrtPatScore, false, null,
         useFreqPhraseExtractedByPat);
-    Counter<SurfacePattern> denominatorPatWt = null;
+    Counter<Integer> denominatorPatWt = null;
 
     if (patternScoring.equals(PatternScoring.PosNegUnlabOdds)) {
       // deno = negandUnLabeledPatternsandWords4Label;
@@ -101,8 +101,8 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
 
     //Multiplying by logP
     if (patternScoring.equals(PatternScoring.PhEvalInPatLogP) || patternScoring.equals(PatternScoring.LOGREGlogP)) {
-      Counter<SurfacePattern> logpos_i = new ClassicCounter<SurfacePattern>();
-      for (Entry<SurfacePattern, ClassicCounter<String>> en : patternsandWords4Label
+      Counter<Integer> logpos_i = new ClassicCounter<Integer>();
+      for (Entry<Integer, ClassicCounter<String>> en : patternsandWords4Label
           .entrySet()) {
         logpos_i.setCount(en.getKey(), Math.log(en.getValue().size()));
       }
@@ -112,8 +112,8 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
     return currentPatternWeights4Label;
   }
 
-  Counter<SurfacePattern> convert2OneDim(String label,
-      TwoDimensionalCounter<SurfacePattern, String> patternsandWords,
+  Counter<Integer> convert2OneDim(String label,
+      TwoDimensionalCounter<Integer, String> patternsandWords,
       boolean sqrtPatScore, boolean scorePhrasesInPatSelection,
       Counter<String> dictOddsWordWeights, boolean useFreqPhraseExtractedByPat)
       throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
@@ -122,7 +122,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
       Data.loadGoogleNGrams();
     }
 
-    Counter<SurfacePattern> patterns = new ClassicCounter<SurfacePattern>();
+    Counter<Integer> patterns = new ClassicCounter<Integer>();
 
     Counter<String> googleNgramNormScores = new ClassicCounter<String>();
     Counter<String> domainNgramNormScores = new ClassicCounter<String>();
@@ -136,7 +136,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
     if ((patternScoring.equals(PatternScoring.PhEvalInPat) || patternScoring
         .equals(PatternScoring.PhEvalInPatLogP)) && scorePhrasesInPatSelection) {
       Set<String> allPhrasesInQuestion = new HashSet<String>();
-      for (Entry<SurfacePattern, ClassicCounter<String>> d : patternsandWords
+      for (Entry<Integer, ClassicCounter<String>> d : patternsandWords
           .entrySet()) {
         allPhrasesInQuestion.addAll(d.getValue().keySet());
       }
@@ -213,7 +213,7 @@ public class ScorePatternsRatioModifiedFreq extends ScorePatterns {
 
     Counter<String> cachedScoresForThisIter = new ClassicCounter<String>();
 
-    for (Entry<SurfacePattern, ClassicCounter<String>> d : patternsandWords
+    for (Entry<Integer, ClassicCounter<String>> d : patternsandWords
         .entrySet()) {
 
       for (Entry<String, Double> e : d.getValue().entrySet()) {

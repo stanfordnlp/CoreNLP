@@ -30,8 +30,8 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
 
   
   @Override
-  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, SurfacePattern> terms,
-      TwoDimensionalCounter<String, SurfacePattern> wordsPatExtracted, Counter<SurfacePattern> allSelectedPatterns,
+  public Counter<String> scorePhrases(String label, TwoDimensionalCounter<String, Integer> terms,
+      TwoDimensionalCounter<String, Integer> wordsPatExtracted, Counter<Integer> allSelectedPatterns,
       Set<String> alreadyIdentifiedWords, boolean forLearningPatterns) {
     Map<String, Counter<ScorePhraseMeasures>> scores = new HashMap<String, Counter<ScorePhraseMeasures>>();
     if (Data.domainNGramsFile != null)
@@ -39,7 +39,7 @@ public class ScorePhrasesAverageFeatures extends PhraseScorer{
     // calculate TF-IDF like scores
     Counter<String> tfidfScores = new ClassicCounter<String>();
     if (constVars.usePhraseEvalPatWtByFreq) {
-      for (Entry<String, ClassicCounter<SurfacePattern>> en : terms.entrySet()) {
+      for (Entry<String, ClassicCounter<Integer>> en : terms.entrySet()) {
         double score = getPatTFIDFScore(en.getKey(), en.getValue(), allSelectedPatterns);
         tfidfScores.setCount(en.getKey(), score);
       }

@@ -2,7 +2,7 @@ package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.LabelFactory;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 
 import java.io.Reader;
 import java.util.regex.Pattern;
@@ -211,12 +211,12 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer {
       }
       return t;
     };
-    Filter<Tree> subtreeFilter = new Filter<Tree>() {
+    Predicate<Tree> subtreeFilter = new Predicate<Tree>() {
 
       private static final long serialVersionUID = -7250433816896327901L;
 
       @Override
-      public boolean accept(Tree t) {
+      public boolean test(Tree t) {
         Tree[] kids = t.children();
         Label l = t.label();
         // The special Switchboard non-terminals clause.
@@ -231,12 +231,12 @@ public class NPTmpRetainingTreeNormalizer extends BobChrisTreeNormalizer {
         return true;
       }
     };
-    Filter<Tree> nodeFilter = new Filter<Tree>() {
+    Predicate<Tree> nodeFilter = new Predicate<Tree>() {
 
       private static final long serialVersionUID = 9000955019205336311L;
 
       @Override
-      public boolean accept(Tree t) {
+      public boolean test(Tree t) {
         if (t.isLeaf() || t.isPreTerminal()) {
           return true;
         }

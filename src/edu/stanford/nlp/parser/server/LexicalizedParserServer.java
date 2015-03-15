@@ -9,11 +9,18 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collection;
+import java.util.List;
 
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.parser.common.ParserGrammar;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.parser.lexparser.TreeBinarizer;
+import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TypedDependency;
+import edu.stanford.nlp.util.Filters;
 
 /**
  * Serves requests to the given parser model on the given port.
@@ -55,11 +62,16 @@ public class LexicalizedParserServer {
 
 
   private static ParserGrammar loadModel(String parserModel, String taggerModel) {
+    ParserGrammar model;
     if (taggerModel == null) {
-      return ParserGrammar.loadModel(parserModel);
+      model = ParserGrammar.loadModel(parserModel);
     } else {
-      return ParserGrammar.loadModel(parserModel, "-preTag", "-taggerSerializedFile", taggerModel);
+      model = ParserGrammar.loadModel(parserModel, "-preTag", "-taggerSerializedFile", taggerModel);
+      // preload tagger so the first query doesn't take forever
+      model.loadTagger();
     }
+    model.setOptionFlags(model.defaultCoreNLPFlags());
+    return model;
   }
 
   /**
@@ -107,7 +119,12 @@ public class LexicalizedParserServer {
       return;
     line = line.trim();
     String[] pieces = line.split(" ", 2);
-    String command = pieces[0];
+    String[] commandPieces = pieces[0].split(":", 2);
+    String command = commandPieces[0];
+    String commandArgs = "";
+    if (commandPieces.length > 1) {
+      commandArgs = commandPieces[1];
+    }
     String arg = null;
     if (pieces.length > 1) {
       arg = pieces[1];
@@ -121,15 +138,19 @@ public class LexicalizedParserServer {
       handleQuit();
       break;
     case "parse":
-      handleParse(arg, clientSocket.getOutputStream(), false);
+      handleParse(arg, clientSocket.getOutputStream(), commandArgs.equals("binarized"));
       break;
-    case "parse:binarized": 
-      // TODO: if commands get more complex, can do more intelligent
-      // parsing of commands
-      handleParse(arg, clientSocket.getOutputStream(), true);
+    case "dependencies":
+      handleDependencies(arg, clientSocket.getOutputStream(), commandArgs);
       break;
     case "tree":
       handleTree(arg, clientSocket.getOutputStream());
+      break;
+    case "tokenize":
+      handleTokenize(arg, clientSocket.getOutputStream());
+      break;
+    case "lemma":
+      handleLemma(arg, clientSocket.getOutputStream());
       break;
     }
 
@@ -143,6 +164,72 @@ public class LexicalizedParserServer {
    */
   public void handleQuit() {
     stillRunning = false;
+  }
+
+  public void handleTokenize(String arg, OutputStream outStream) 
+    throws IOException
+  {
+    if (arg == null) {
+      return;
+    }
+    List<? extends HasWord> tokens = parser.tokenize(arg);
+    OutputStreamWriter osw = new OutputStreamWriter(outStream, "utf-8");
+    for (int i = 0; i < tokens.size(); ++i) {
+      HasWord word = tokens.get(i);
+      if (i > 0) {
+        osw.write(" ");
+      }
+      osw.write(word.toString());
+    }
+    osw.write("\n");
+    osw.flush();
+  }
+
+  public void handleLemma(String arg, OutputStream outStream) 
+    throws IOException
+  {
+    if (arg == null) {
+      return;
+    }
+    List<CoreLabel> tokens = parser.lemmatize(arg);
+    OutputStreamWriter osw = new OutputStreamWriter(outStream, "utf-8");
+    for (int i = 0; i < tokens.size(); ++i) {
+      CoreLabel word = tokens.get(i);
+      if (i > 0) {
+        osw.write(" ");
+      }
+      osw.write(word.lemma());
+    }
+    osw.write("\n");
+    osw.flush();
+  }
+
+  // TODO: when this method throws an exception (for whatever reason)
+  // a waiting client might hang.  There should be some graceful
+  // handling of that.
+  public void handleDependencies(String arg, OutputStream outStream, String commandArgs) 
+    throws IOException
+  {
+    Tree tree = parse(arg, false);
+    if (tree == null) {
+      return;
+    }
+    // TODO: this might throw an exception if the parser doesn't support dependencies.  Handle that cleaner?
+    GrammaticalStructure gs = parser.getTLPParams().getGrammaticalStructure(tree, parser.treebankLanguagePack().punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
+    Collection<TypedDependency> deps = null;
+    switch (commandArgs.toUpperCase()) {
+    case "COLLAPSED_TREE":
+      deps = gs.typedDependenciesCollapsedTree();
+      break;
+    default:
+      throw new UnsupportedOperationException("Dependencies type not implemented: " + commandArgs);
+    }
+    OutputStreamWriter osw = new OutputStreamWriter(outStream, "utf-8");
+    for (TypedDependency dep : deps) {
+      osw.write(dep.toString());
+      osw.write("\n");
+    }
+    osw.flush();
   }
 
   /**
@@ -193,6 +280,13 @@ public class LexicalizedParserServer {
     return tree;
   }
 
+  private static void help() {
+    System.err.println("-help:   display this message");
+    System.err.println("-model:  load this parser (default englishPCFG.ser.gz)");
+    System.err.println("-tagger: pretag with this tagger model");
+    System.err.println("-port:   run on this port (default 4466)");
+  }
+
   static final int DEFAULT_PORT = 4466;
 
   public static void main(String[] args) 
@@ -205,6 +299,7 @@ public class LexicalizedParserServer {
     String model = LexicalizedParser.DEFAULT_PARSER_LOC;
     String tagger = null;
 
+    // TODO: rewrite this a bit to allow for passing flags to the parser
     for (int i = 0; i < args.length; i += 2) {
       if (i + 1 >= args.length) {
         System.err.println("Unspecified argument " + args[i]);
@@ -222,6 +317,9 @@ public class LexicalizedParserServer {
         port = Integer.valueOf(args[i + 1]);
       } else if (arg.equalsIgnoreCase("tagger")) {
         tagger = args[i + 1];
+      } else if (arg.equalsIgnoreCase("help")) {
+        help();
+        System.exit(0);
       }
     }
     

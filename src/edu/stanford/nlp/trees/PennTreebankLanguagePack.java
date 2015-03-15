@@ -3,7 +3,7 @@ package edu.stanford.nlp.trees;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.PTBTokenizer;
-import edu.stanford.nlp.util.Filter;
+import java.util.function.Predicate;
 
 
 /**
@@ -171,12 +171,12 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    * @return A GrammaticalStructure suitable for this language/treebank.
    */
   @Override
-  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilter) {
+  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter) {
     return new EnglishGrammaticalStructureFactory(puncFilter);
   }
 
   @Override
-  public GrammaticalStructureFactory grammaticalStructureFactory(Filter<String> puncFilter, HeadFinder hf) {
+  public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter, HeadFinder hf) {
     return new EnglishGrammaticalStructureFactory(puncFilter, hf);
   }
 

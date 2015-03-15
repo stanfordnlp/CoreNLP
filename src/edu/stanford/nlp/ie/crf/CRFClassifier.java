@@ -2751,8 +2751,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    *
    * @return The default CRFClassifier in the jar file (if there is one)
    */
-  public static <IN extends CoreMap> CRFClassifier<IN> getDefaultClassifier() {
-    CRFClassifier<IN> crf = new CRFClassifier<IN>();
+  public static <INN extends CoreMap> CRFClassifier<INN> getDefaultClassifier() {
+    CRFClassifier<INN> crf = new CRFClassifier<INN>();
     crf.loadDefaultClassifier();
     return crf;
   }
@@ -2764,8 +2764,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    *
    * @return The default CRFClassifier in the jar file (if there is one)
    */
-  public static <IN extends CoreMap> CRFClassifier<IN> getDefaultClassifier(Properties props) {
-    CRFClassifier<IN> crf = new CRFClassifier<IN>();
+  public static <INN extends CoreMap> CRFClassifier<INN> getDefaultClassifier(Properties props) {
+    CRFClassifier<INN> crf = new CRFClassifier<INN>();
     crf.loadDefaultClassifier(props);
     return crf;
   }
@@ -2778,8 +2778,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * @param resourceName Name of classifier resource inside the jar file.
    * @return A CRFClassifier stored in the jar file
    */
-  public static <IN extends CoreMap> CRFClassifier<IN> getJarClassifier(String resourceName, Properties props) {
-    CRFClassifier<IN> crf = new CRFClassifier<IN>();
+  public static <INN extends CoreMap> CRFClassifier<INN> getJarClassifier(String resourceName, Properties props) {
+    CRFClassifier<INN> crf = new CRFClassifier<INN>();
     crf.loadJarClassifier(resourceName, props);
     return crf;
   }
@@ -2798,9 +2798,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * @throws ClassNotFoundException
    *           If there are problems interpreting the serialized data
    */
-  public static <IN extends CoreMap> CRFClassifier<IN> getClassifier(File file) throws IOException, ClassCastException,
+  public static <INN extends CoreMap> CRFClassifier<INN> getClassifier(File file) throws IOException, ClassCastException,
       ClassNotFoundException {
-    CRFClassifier<IN> crf = new CRFClassifier<IN>();
+    CRFClassifier<INN> crf = new CRFClassifier<INN>();
     crf.loadClassifier(file);
     return crf;
   }
@@ -2810,26 +2810,22 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * does not buffer the InputStream, so you should have buffered it before
    * calling this method.
    *
-   * @param in
-   *          InputStream to load classifier from
+   * @param in InputStream to load classifier from
    * @return The CRF classifier
    *
-   * @throws IOException
-   *           If there are problems accessing the input stream
-   * @throws ClassCastException
-   *           If there are problems interpreting the serialized data
-   * @throws ClassNotFoundException
-   *           If there are problems interpreting the serialized data
+   * @throws IOException If there are problems accessing the input stream
+   * @throws ClassCastException If there are problems interpreting the serialized data
+   * @throws ClassNotFoundException If there are problems interpreting the serialized data
    */
-  public static CRFClassifier<? extends CoreMap> getClassifier(InputStream in) throws IOException, ClassCastException,
+  public static <INN extends CoreMap> CRFClassifier<INN> getClassifier(InputStream in) throws IOException, ClassCastException,
       ClassNotFoundException {
-    CRFClassifier<? extends CoreMap> crf = new CRFClassifier<CoreMap>();
+    CRFClassifier<INN> crf = new CRFClassifier<INN>();
     crf.loadClassifier(in);
     return crf;
   }
 
-  public static CRFClassifier<CoreLabel> getClassifierNoExceptions(String loadPath) {
-    CRFClassifier<CoreLabel> crf = new CRFClassifier<CoreLabel>();
+  public static <INN extends CoreMap> CRFClassifier<INN> getClassifierNoExceptions(String loadPath) {
+    CRFClassifier<INN> crf = new CRFClassifier<INN>();
     crf.loadClassifierNoExceptions(loadPath);
     return crf;
   }
@@ -2841,9 +2837,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return crf;
   }
 
-  public static CRFClassifier<? extends CoreMap> getClassifier(String loadPath, Properties props) throws IOException, ClassCastException,
+  public static <INN extends CoreMap> CRFClassifier<INN> getClassifier(String loadPath, Properties props) throws IOException, ClassCastException,
       ClassNotFoundException {
-    CRFClassifier<? extends CoreMap> crf = new CRFClassifier<CoreMap>();
+    CRFClassifier<INN> crf = new CRFClassifier<INN>();
     crf.loadClassifier(loadPath, props);
     return crf;
   }
