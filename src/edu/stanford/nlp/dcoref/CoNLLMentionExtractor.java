@@ -104,6 +104,7 @@ public class CoNLLMentionExtractor extends MentionExtractor {
       return null;
     }
 
+    System.err.println("Processing doc: "+conllDoc.documentIdPart);
     Annotation anno = conllDoc.getAnnotation();
     List<CoreMap> sentences = anno.get(CoreAnnotations.SentencesAnnotation.class);
     for (CoreMap sentence:sentences) {
