@@ -656,6 +656,18 @@ public class SemanticGraph implements Serializable {
     }
     return nodes;
   }
+  
+  public List<IndexedWord> getAllNodesByPartOfSpeechPattern(String pattern) {
+    Pattern p = Pattern.compile(pattern);
+    List<IndexedWord> nodes = new ArrayList<IndexedWord>();
+    for (IndexedWord vertex : vertexSet()) {
+      String pos = vertex.tag();
+      if ((pos == null && pattern == null) || pos != null && p.matcher(pos).matches()) {
+        nodes.add(vertex);
+      }
+    }
+    return nodes;
+  }
 
   /**
    * Returns the set of descendants governed by this node in the graph.
