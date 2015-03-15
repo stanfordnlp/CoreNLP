@@ -90,9 +90,8 @@ public class TextOutputter extends AnnotationOutputter {
             "Text", "PartOfSpeech", "Lemma", "Answer", "NamedEntityTag", "CharacterOffsetBegin", "CharacterOffsetEnd", "NormalizedNamedEntityTag", "Timex", "TrueCase", "TrueCaseText" };
         for (CoreLabel token: tokens) {
           os.print(token.toShorterString(tokenAnnotations));
-          os.print(' ');
+          os.println();
         }
-        os.println();
 
         // display the parse tree for this sentence
         Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
@@ -100,13 +99,13 @@ public class TextOutputter extends AnnotationOutputter {
           options.constituentTreePrinter.printTree(tree, os);
         }
 
-        // It is possible turn off the semantic graphs, in which
+        // It is possible to turn off the semantic graphs, in which
         // case we don't want to recreate them using the dependency
         // printer.  This might be relevant if using corenlp for a
         // language which doesn't have dependencies, for example.
         if (sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) != null) {
           os.print(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).toList());
-          os.printf("%n");
+          os.println();
         }
 
         // display MachineReading entities and relations
@@ -150,22 +149,21 @@ public class TextOutputter extends AnnotationOutputter {
             os.println("Coreference set:");
           }
           // all offsets start at 1!
-          os.println("\t(" + mention.sentNum + "," +
-              mention.headIndex + ",[" +
-              mention.startIndex + "," +
-              mention.endIndex + "]) -> (" +
-              representative.sentNum + "," +
-              representative.headIndex + ",[" +
-              representative.startIndex + "," +
-              representative.endIndex + "]), that is: \"" +
-              mention.mentionSpan + "\" -> \"" +
-              representative.mentionSpan + "\"");
+          os.printf("\t(%d,%d,[%d,%d]) -> (%d,%d,[%d,%d]), that is: \"%s\" -> \"%s\"%n",
+                  mention.sentNum,
+                  mention.headIndex,
+                  mention.startIndex,
+                  mention.endIndex,
+                  representative.sentNum,
+                  representative.headIndex,
+                  representative.startIndex,
+                  representative.endIndex,
+                  mention.mentionSpan,
+                  representative.mentionSpan);
         }
       }
     }
-
     os.flush();
-
   }
 
   /** Static helper */
@@ -176,11 +174,12 @@ public class TextOutputter extends AnnotationOutputter {
   /** Static helper */
   public static void prettyPrint(Annotation annotation, PrintWriter os, StanfordCoreNLP pipeline) {
     try {
-      new TextOutputter().print(annotation, os, getOptions(pipeline));
+      TextOutputter.print(annotation, os, getOptions(pipeline));
       // already flushed
       // don't close, might not want to close underlying stream
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
   }
+
 }

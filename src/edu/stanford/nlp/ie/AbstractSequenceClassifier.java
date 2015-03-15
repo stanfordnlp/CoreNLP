@@ -979,7 +979,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     BufferedReader is = IOUtils.readerFromStdin(flags.inputEncoding);
     for (String line; (line = is.readLine()) != null; ) {
       Collection<List<IN>> documents = makeObjectBankFromString(line, readerWriter);
-      if (flags.keepEmptySentences && documents.size() == 0) {
+      if (flags.keepEmptySentences && documents.isEmpty()) {
         documents = Collections.<List<IN>>singletonList(Collections.<IN>emptyList());
       }
       classifyAndWriteAnswers(documents, readerWriter, false);
@@ -1472,11 +1472,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     if ((is = loadStreamFromClasspath(loadPath)) != null) {
       Timing.startDoing("Loading classifier from " + loadPath);
       loadClassifierNoExceptions(is, props);
-      try {
-        is.close();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+      IOUtils.closeIgnoringExceptions(is);
       Timing.endDoing();
     } else {
       loadClassifierNoExceptions(new File(loadPath), props);

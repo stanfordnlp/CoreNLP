@@ -30,11 +30,63 @@ public class QuotationAnnotatorTest extends TestCase {
     }
   }
 
+  public void testBasicInternalPunc() {
+    String text = "\"Impossible, Mr. Bennet, impossible, when I am not acquainted with him\n" +
+        " myself; how can you be so teasing?\"";
+    List<CoreMap> quotes = runQuotes(text, 1);
+    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+  }
+
   public void testBasicLatexQuotes() {
     String text = "`Hello,' he said, ``how are you doing?''";
     List<CoreMap> quotes = runQuotes(text, 2);
     assertEquals("`Hello,'", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
     assertEquals("``how are you doing?''", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
+  }
+
+  public void testLatexQuotesWithDirectedApostrophes() {
+    String text = "John`s he said, ``how are you doing?''";
+    List<CoreMap> quotes = runQuotes(text, 1);
+    assertEquals("``how are you doing?''", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+  }
+
+  public void testEmbeddedLatexQuotes() {
+    String text = "``Hello ``how are you doing?''''";
+    List<CoreMap> quotes = runQuotes(text, 1);
+    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEmbedded("``how are you doing?''", text, quotes);
+  }
+
+  public void testEmbeddedSingleLatexQuotes() {
+    String text = "`Hello `how are you doing?''";
+    List<CoreMap> quotes = runQuotes(text, 1);
+    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEmbedded("`how are you doing?'", text, quotes);
+  }
+
+  public void testEmbeddedLatexQuotesAllEndSamePlace() {
+    String text = "``Hello ``how `are ``you doing?'''''''";
+    List<CoreMap> quotes = runQuotes(text, 1);
+    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEmbedded("``how `are ``you doing?'''''", text, quotes);
+    assertEmbedded("`are ``you doing?'''", "``how `are ``you doing?'''''", quotes);
+    assertEmbedded("``you doing?''", "`are ``you doing?'''", quotes);
+  }
+
+  public void testTripleEmbeddedLatexQuotes() {
+    String text = "``Hel ``lo ``how'' are you'' doing?''";
+    List<CoreMap> quotes = runQuotes(text, 1);
+    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEmbedded("``lo ``how'' are you''", text, quotes);
+    assertEmbedded("``how''", "``lo ``how'' are you''", quotes);
+  }
+
+  public void testTripleEmbeddedUnicodeQuotes() {
+    String text = "“Hel «lo “how” are you» doing?”";
+    List<CoreMap> quotes = runQuotes(text, 1);
+    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEmbedded("«lo “how” are you»", text, quotes);
+    assertEmbedded("“how”", "«lo “how” are you»", quotes);
   }
 
   public void testBasicUnicodeQuotes() {
@@ -142,7 +194,6 @@ public class QuotationAnnotatorTest extends TestCase {
     assertEmbedded("\"look\"", "‘No, I'll \"look\" first,’", quotes);
   }
 
-
   public void testQuotesFollowEachother() {
     String text = "\"Where?\"\n" +
         "\n" +
@@ -150,16 +201,10 @@ public class QuotationAnnotatorTest extends TestCase {
         "\n" +
         "\"Bigger, he's behind the trunk!\" the girl whimpered.";
     List<CoreMap> quotes = runQuotes(text, 3);
-
+    assertEquals("\"Where?\"", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("\"I don't see 'im!\"", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("\"Bigger, he's behind the trunk!\"", quotes.get(2).get(CoreAnnotations.TextAnnotation.class));
   }
-
-
-  //TODO: think about what the behavior should be here
-//  public void testUnclosedFirstDoubleQuotes() {
-//    String text = "\"Hello, he said, \"how are you doing?\"";
-//    List<CoreMap> quotes = runQuotes(text, 1);
-//    assertEquals("\"how are you doing?\"", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-//  }
 
   public void testBasicSingleQuotes() {
     String text = "'Hello,' he said, 'how are you doing?'";
@@ -173,13 +218,6 @@ public class QuotationAnnotatorTest extends TestCase {
     List<CoreMap> quotes = runQuotes(text, 1);
     assertEquals("'Hello,'", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
   }
-
-  //TODO: think about what the behavior should be here
-//  public void testUnclosedFirstSingleQuotes() {
-//    String text = "'Hello, he said, 'how are you doing?'";
-//    List<CoreMap> quotes = runQuotes(text, 1);
-//    assertEquals("'how are you doing?'", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-//  }
 
   public void testMultiParagraphQuoteDouble() {
     String text = "Words blah bla \"Hello,\n\n \"I am the second paragraph.\n\n" +
@@ -266,18 +304,27 @@ public class QuotationAnnotatorTest extends TestCase {
 
   public static void assertEmbedded(String embedded, String bed, List<CoreMap> quotes) {
     // find bed
-    boolean found = false;
+    boolean found = assertEmbeddedHelper(embedded, bed, quotes);
+    assertTrue(found);
+  }
+
+  public static boolean assertEmbeddedHelper(String embedded, String bed, List<CoreMap> quotes) {
+    // find bed
     for(CoreMap b : quotes) {
       if (b.get(CoreAnnotations.TextAnnotation.class).equals(bed)) {
         // get the embedded quotes
         List<CoreMap> eqs = b.get(CoreAnnotations.QuotationsAnnotation.class);
         for (CoreMap eq : eqs) {
           if (eq.get(CoreAnnotations.TextAnnotation.class).equals(embedded)) {
-            found = true;
+            return true;
           }
         }
+      } else {
+        List<CoreMap> bEmbed = b.get(CoreAnnotations.QuotationsAnnotation.class);
+        boolean recurse = assertEmbeddedHelper(embedded, bed, bEmbed);
+        if (recurse) return true;
       }
     }
-    assertTrue(found);
+    return false;
   }
 }

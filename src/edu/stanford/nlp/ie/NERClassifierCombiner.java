@@ -1,6 +1,6 @@
 package edu.stanford.nlp.ie;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -15,8 +15,9 @@ import edu.stanford.nlp.util.StringUtils;
 
 /**
  * Subclass of ClassifierCombiner that behaves like a NER, by copying
- * the AnswerAnnotation labels to NERAnnotation. Also, it runs an additional
- * classifier (QuantifiableEntityNormalizer) to recognize numeric entities.
+ * the AnswerAnnotation labels to NERAnnotation. Also, it can run additional
+ * classifiers (NumberSequenceClassifier, QuantifiableEntityNormalizer, SUTime)
+ * to recognize numeric and date/time entities, depending on flag settings.
  *
  * @author Mihai Surdeanu
  */
@@ -28,10 +29,11 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
 
   private final boolean useSUTime;
 
+  // todo [cdm 2015]: Could avoid constructing this if applyNumericClassifiers is false
   private final AbstractSequenceClassifier<CoreLabel> nsc;
 
   public NERClassifierCombiner(Properties props)
-    throws FileNotFoundException
+    throws IOException
   {
     super(props);
     applyNumericClassifiers = PropertiesUtils.getBool(props, APPLY_NUMERIC_CLASSIFIERS_PROPERTY, APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
@@ -40,7 +42,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
   }
 
   public NERClassifierCombiner(String... loadPaths)
-    throws FileNotFoundException
+    throws IOException
   {
     this(APPLY_NUMERIC_CLASSIFIERS_DEFAULT, NumberSequenceClassifier.USE_SUTIME_DEFAULT, loadPaths);
   }
@@ -48,7 +50,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
   public NERClassifierCombiner(boolean applyNumericClassifiers,
                                boolean useSUTime,
                                String... loadPaths)
-    throws FileNotFoundException
+    throws IOException
   {
     super(loadPaths);
     this.applyNumericClassifiers = applyNumericClassifiers;
@@ -60,7 +62,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
                                boolean useSUTime,
                                Properties nscProps,
                                String... loadPaths)
-    throws FileNotFoundException
+    throws IOException
   {
     super(ClassifierCombiner.extractCombinationModeSafe(nscProps), loadPaths);
     this.applyNumericClassifiers = applyNumericClassifiers;
@@ -68,16 +70,18 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
     this.nsc = new NumberSequenceClassifier(new Properties(), useSUTime, nscProps);
   }
 
+  @SafeVarargs
   public NERClassifierCombiner(AbstractSequenceClassifier<CoreLabel>... classifiers)
-    throws FileNotFoundException
+    throws IOException
   {
     this(APPLY_NUMERIC_CLASSIFIERS_DEFAULT, NumberSequenceClassifier.USE_SUTIME_DEFAULT, classifiers);
   }
 
+  @SafeVarargs
   public NERClassifierCombiner(boolean applyNumericClassifiers,
                                boolean useSUTime,
                                AbstractSequenceClassifier<CoreLabel>... classifiers)
-    throws FileNotFoundException
+    throws IOException
   {
     super(classifiers);
     this.applyNumericClassifiers = applyNumericClassifiers;
