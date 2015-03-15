@@ -1,5 +1,6 @@
 package edu.stanford.nlp.sequences;
 
+import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.io.IOUtils;
@@ -169,6 +170,10 @@ public class CoNLLDocumentReaderAndWriter implements DocumentReaderAndWriter<Cor
     default:
       throw new RuntimeIOException("Unexpected input (many fields): " + line);
     }
+
+    //Value annotation is used in a lot of place in corenlp so setting here as the word itself
+    wi.set(CoreAnnotations.ValueAnnotation.class, wi.word());
+
     // The copy to GoldAnswerAnnotation is done before the recoding is done, and so it preserves the original coding.
     // This is important if the original coding is true, but the recoding is defective (like IOB2 to IO), since
     // it will allow correct evaluation later.

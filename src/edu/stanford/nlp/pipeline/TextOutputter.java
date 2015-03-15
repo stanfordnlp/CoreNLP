@@ -37,7 +37,7 @@ public class TextOutputter extends AnnotationOutputter {
   /**
    * The meat of the outputter
    */
-  private static void print(Annotation annotation, PrintWriter os, Options options) throws IOException {
+  private static void print(Annotation annotation, PrintWriter pw, Options options) throws IOException {
     double beam = options.beamPrintingOption;
 
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
@@ -48,80 +48,81 @@ public class TextOutputter extends AnnotationOutputter {
       List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
       int nSentences = (sentences != null)? sentences.size():0;
       int nTokens = (tokens != null)? tokens.size():0;
-      os.printf("Document: ID=%s (%d sentences, %d tokens)%n", docId, nSentences, nTokens);
+      pw.printf("Document: ID=%s (%d sentences, %d tokens)%n", docId, nSentences, nTokens);
     }
 
     // Display doctitle if available
     String docTitle =  annotation.get(CoreAnnotations.DocTitleAnnotation.class);
     if (docTitle != null) {
-      os.printf("Document Title: %s%n", docTitle);
+      pw.printf("Document Title: %s%n", docTitle);
     }
 
     // Display docdate if available
     String docDate =  annotation.get(CoreAnnotations.DocDateAnnotation.class);
     if (docDate != null) {
-      os.printf("Document Date: %s%n", docDate);
+      pw.printf("Document Date: %s%n", docDate);
     }
 
     // Display doctype if available
     String docType =  annotation.get(CoreAnnotations.DocTypeAnnotation.class);
     if (docType != null) {
-      os.printf("Document Type: %s%n", docType);
+      pw.printf("Document Type: %s%n", docType);
     }
 
     // Display docsourcetype if available
     String docSourceType =  annotation.get(CoreAnnotations.DocSourceTypeAnnotation.class);
     if (docSourceType != null) {
-      os.printf("Document Source Type: %s%n", docSourceType);
+      pw.printf("Document Source Type: %s%n", docSourceType);
     }
 
     // display each sentence in this annotation
     if (sentences != null) {
-      for(int i = 0, sz = sentences.size(); i < sz; i ++) {
+      for (int i = 0, sz = sentences.size(); i < sz; i ++) {
         CoreMap sentence = sentences.get(i);
         List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-        os.printf("Sentence #%d (%d tokens):%n", (i + 1), tokens.size());
+        pw.printf("Sentence #%d (%d tokens):%n", (i + 1), tokens.size());
 
         String text = sentence.get(CoreAnnotations.TextAnnotation.class);
-        os.println(text);
+        pw.println(text);
 
         // display the token-level annotations
         String[] tokenAnnotations = {
             "Text", "PartOfSpeech", "Lemma", "Answer", "NamedEntityTag", "CharacterOffsetBegin", "CharacterOffsetEnd", "NormalizedNamedEntityTag", "Timex", "TrueCase", "TrueCaseText" };
         for (CoreLabel token: tokens) {
-          os.print(token.toShorterString(tokenAnnotations));
-          os.println();
+          pw.print(token.toShorterString(tokenAnnotations));
+          pw.println();
         }
 
         // display the parse tree for this sentence
         Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
         if (tree != null) {
-          options.constituentTreePrinter.printTree(tree, os);
+          options.constituentTreePrinter.printTree(tree, pw);
         }
 
         // It is possible to turn off the semantic graphs, in which
         // case we don't want to recreate them using the dependency
-        // printer.  This might be relevant if using corenlp for a
+        // printer.  This might be relevant if using CoreNLP for a
         // language which doesn't have dependencies, for example.
         if (sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class) != null) {
-          os.print(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).toList());
-          os.println();
+          pw.print(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class).toList());
+          pw.println();
         }
 
         // display MachineReading entities and relations
         List<EntityMention> entities = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
         if (entities != null) {
-          os.println("Extracted the following MachineReading entity mentions:");
+          pw.println("Extracted the following MachineReading entity mentions:");
           for (EntityMention e : entities) {
-            os.println("\t" + e);
+            pw.print('\t');
+            pw.println(e);
           }
         }
         List<RelationMention> relations = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
-        if(relations != null){
-          os.println("Extracted the following MachineReading relation mentions:");
-          for(RelationMention r: relations){
-            if(r.printableObject(beam)){
-              os.println(r);
+        if (relations != null){
+          pw.println("Extracted the following MachineReading relation mentions:");
+          for (RelationMention r: relations) {
+            if (r.printableObject(beam)) {
+              pw.println(r);
             }
           }
         }
@@ -146,10 +147,10 @@ public class TextOutputter extends AnnotationOutputter {
             continue;
           if (!outputHeading) {
             outputHeading = true;
-            os.println("Coreference set:");
+            pw.println("Coreference set:");
           }
           // all offsets start at 1!
-          os.printf("\t(%d,%d,[%d,%d]) -> (%d,%d,[%d,%d]), that is: \"%s\" -> \"%s\"%n",
+          pw.printf("\t(%d,%d,[%d,%d]) -> (%d,%d,[%d,%d]), that is: \"%s\" -> \"%s\"%n",
                   mention.sentNum,
                   mention.headIndex,
                   mention.startIndex,
@@ -163,7 +164,7 @@ public class TextOutputter extends AnnotationOutputter {
         }
       }
     }
-    os.flush();
+    pw.flush();
   }
 
   /** Static helper */
@@ -172,9 +173,9 @@ public class TextOutputter extends AnnotationOutputter {
   }
 
   /** Static helper */
-  public static void prettyPrint(Annotation annotation, PrintWriter os, StanfordCoreNLP pipeline) {
+  public static void prettyPrint(Annotation annotation, PrintWriter pw, StanfordCoreNLP pipeline) {
     try {
-      TextOutputter.print(annotation, os, getOptions(pipeline));
+      TextOutputter.print(annotation, pw, getOptions(pipeline));
       // already flushed
       // don't close, might not want to close underlying stream
     } catch (IOException e) {

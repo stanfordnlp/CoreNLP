@@ -147,8 +147,7 @@ public class SemanticGraph implements Serializable {
    * @return A ordered list of edges in the graph.
    */
   public List<SemanticGraphEdge> edgeListSorted() {
-    ArrayList<SemanticGraphEdge> edgeList =
-      new ArrayList<SemanticGraphEdge>();
+    ArrayList<SemanticGraphEdge> edgeList = new ArrayList<>();
     for (SemanticGraphEdge edge : edgeIterable()) {
       edgeList.add(edge);
     }
@@ -1639,7 +1638,8 @@ public class SemanticGraph implements Serializable {
    * are copied.
    */
   public SemanticGraph(SemanticGraph g) {
-    this(g, null);
+    graph = new DirectedMultiGraph<>(g.graph);
+    roots = wordMapFactory.newSet(g.roots);
   }
 
   /**

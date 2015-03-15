@@ -3,6 +3,7 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Timing;
 
@@ -33,7 +34,7 @@ public class QuoteAnnotator implements Annotator {
   // vary widely.
   public static final Map<String, String> DIRECTED_QUOTES;
   static {
-    Map<String, String> tmp = new HashMap<>();
+    Map<String, String> tmp = Generics.newHashMap();
     tmp.put("“", "”");  // directed double inward
     tmp.put("‘", "’");  // directed single inward
     tmp.put("«", "»");  // guillemets
@@ -91,12 +92,13 @@ public class QuoteAnnotator implements Annotator {
     // TODO: the following, if you want the quote annotator to get these truly correct
     // Pre-process to make word terminal apostrophes specially encoded (Jones' dog)
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
+    List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
     List<Pair<Integer, Integer>> overall = getQuotes(text);
 
     String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
 
-    List<CoreMap> cmQuotes = getCoreMapQuotes(overall, tokens, text, docID);
+    List<CoreMap> cmQuotes = getCoreMapQuotes(overall, tokens, sentences, text, docID);
 
     // add quotes to document
     annotation.set(CoreAnnotations.QuotationsAnnotation.class, cmQuotes);
@@ -116,32 +118,49 @@ public class QuoteAnnotator implements Annotator {
 
   public static List<CoreMap> getCoreMapQuotes(List<Pair<Integer, Integer>> quotes,
                                                List<CoreLabel> tokens,
+                                               List<CoreMap> sentences,
                                               String text, String docID) {
     List<CoreMap> cmQuotes = new ArrayList<>();
-    int tokenOffset = 0;
-    int currTok = 0;
     for (Pair<Integer, Integer> p : quotes) {
       int begin = p.first();
       int end = p.second();
 
       // find the tokens for this quote
       List<CoreLabel> quoteTokens = new ArrayList<>();
+      int tokenOffset = -1;
+      int currTok = 0;
       if (tokens != null) {
         while (currTok < tokens.size() && tokens.get(currTok).beginPosition() < begin) {
           currTok++;
         }
         int i = currTok;
+        tokenOffset = i;
         while (i < tokens.size() && tokens.get(i).endPosition() <= end) {
           quoteTokens.add(tokens.get(i));
           i++;
         }
       }
 
+      // find the sentences for this quote
+      int beginSentence = -1;
+      int endSentence = -1;
+      if (sentences != null) {
+        for (CoreMap sentence : sentences) {
+          int sentBegin = sentence.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
+          int sentEnd = sentence.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
+          int sentIndex = sentence.get(CoreAnnotations.SentenceIndexAnnotation.class);
+          if (sentBegin <= begin) {
+            beginSentence = sentIndex;
+          }
+          if (sentEnd >= end && endSentence < 0) {
+            endSentence = sentIndex;
+          }
+        }
+      }
+
       // create a quote annotation with text and token offsets
-      int currQuoteSize = cmQuotes.size();
       Annotation quote = makeQuote(text, begin, end, quoteTokens,
-          currQuoteSize, tokenOffset, docID);
-      tokenOffset += quoteTokens.size();
+          tokenOffset, beginSentence, endSentence, docID);
 
       // add quote in
       cmQuotes.add(quote);
@@ -176,12 +195,39 @@ public class QuoteAnnotator implements Annotator {
       // remove that quote from the overall list
       cmQuotes.remove(r);
     }
+
+    // Set the quote index annotations properly
+    setQuoteIndices(cmQuotes);
     return cmQuotes;
+  }
+
+  private static void setQuoteIndices(List<CoreMap> topLevel) {
+    List<CoreMap> level = topLevel;
+    int index = 0;
+    while (!level.isEmpty()) {
+      List<CoreMap> nextLevel = Generics.newArrayList();
+      for (CoreMap quote : level) {
+        quote.set(CoreAnnotations.QuotationIndexAnnotation.class, index);
+        List<CoreLabel> quoteTokens = quote.get(CoreAnnotations.TokensAnnotation.class);
+        if (quoteTokens != null) {
+          for (CoreLabel qt : quoteTokens) {
+            qt.set(CoreAnnotations.QuotationIndexAnnotation.class, index);
+          }
+        }
+        index++;
+        if (quote.get(CoreAnnotations.QuotationsAnnotation.class) != null) {
+          nextLevel.addAll(quote.get(CoreAnnotations.QuotationsAnnotation.class));
+        }
+      }
+      level = nextLevel;
+    }
   }
 
   public static Annotation makeQuote(String text, int begin, int end,
                                      List<CoreLabel> quoteTokens,
-                                     int currQuoteSize, int tokenOffset,
+                                     int tokenOffset,
+                                     int sentenceBeginIndex,
+                                     int sentenceEndIndex,
                                      String docID) {
     // create a quote annotation with text and token offsets
     Annotation quote = new Annotation(text.substring(begin, end));
@@ -194,20 +240,11 @@ public class QuoteAnnotator implements Annotator {
     if (quoteTokens != null) {
       quote.set(CoreAnnotations.TokensAnnotation.class, quoteTokens);
       quote.set(CoreAnnotations.TokenBeginAnnotation.class, tokenOffset);
-      quote.set(CoreAnnotations.TokenEndAnnotation.class, tokenOffset + quoteTokens.size());
+      quote.set(CoreAnnotations.TokenEndAnnotation.class, tokenOffset + quoteTokens.size() - 1);
     }
-    quote.set(CoreAnnotations.SentenceIndexAnnotation.class, currQuoteSize);
+    quote.set(CoreAnnotations.SentenceBeginAnnotation.class, sentenceBeginIndex);
+    quote.set(CoreAnnotations.SentenceEndAnnotation.class, sentenceEndIndex);
 
-    if (quoteTokens != null) {
-      int index = 1;
-      for (CoreLabel token : quoteTokens) {
-        token.setIndex(index++);
-        token.setSentIndex(currQuoteSize);
-        if (docID != null) {
-          token.setDocID(docID);
-        }
-      }
-    }
     return quote;
   }
 
@@ -310,7 +347,7 @@ public class QuoteAnnotator implements Annotator {
     }
 
     // recursively look for embedded quotes in these ones
-    List<Pair<Integer, Integer>> quotes = new ArrayList<>();
+    List<Pair<Integer, Integer>> quotes = Generics.newArrayList();
     // If I didn't find any quotes, but did find a quote-beginning, try again,
     // but without the part of the text before the single quote
     if (quotesMap.isEmpty() && start >= 0) {

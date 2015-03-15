@@ -23,6 +23,9 @@ public class Data {
   public static Map<String, File> sentId2File = null;
 
   public static Map<String, DataInstance> sents = null;
+  //save the in-memory sents to this file
+  public static String inMemorySaveFileLocation= "";
+
   public static Counter<CandidatePhrase> processedDataFreq = null;
   public static Counter<String> domainNGramRawFreq = new ClassicCounter<String>();;
 
@@ -41,7 +44,6 @@ public class Data {
   public static Map<String, Map<String, List<Integer>>> matchedTokensForEachPhrase = new ConcurrentHashMap<String, Map<String, List<Integer>>>();
 
   public static void computeRawFreqIfNull(int numWordsCompound, boolean batchProcess) {
-
     ConstantsAndVariables.DataSentsIterator iter = new ConstantsAndVariables.DataSentsIterator(batchProcess);
     while(iter.hasNext()){
       computeRawFreqIfNull(iter.next().first(), numWordsCompound);
@@ -49,7 +51,8 @@ public class Data {
 
   }
   public static void computeRawFreqIfNull(Map<String, DataInstance> sents, int numWordsCompound) {
-      for (DataInstance l : sents.values()) {
+    Redwood.log(Redwood.DBG, "Computing raw freq for every 1-" + numWordsCompound + " consecutive words");
+    for (DataInstance l : sents.values()) {
         List<List<CoreLabel>> ngrams = CollectionUtils.getNGrams(l.getTokens(), 1, numWordsCompound);
         for (List<CoreLabel> n : ngrams) {
           String s = "";

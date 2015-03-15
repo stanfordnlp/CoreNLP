@@ -6,17 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -938,4 +928,42 @@ public class CollectionUtils {
    return maxindex;
   }
 
+
+  /**
+   * Concatenate a number of iterators together, to form one big iterator.
+   * This should respect the remove() functionality of the constituent iterators.
+   *
+   * @param iterators The iterators to concatenate.
+   * @param <E> The type of the iterators.
+   * @return An iterator consisting of all the component iterators concatenated together in order.
+   */
+  public static <E> Iterator<E> concatIterators(final Iterator<E>... iterators) {
+    return new Iterator<E>() {
+      Iterator<E> lastIter = null;
+      List<Iterator<E>> iters = new LinkedList<>(Arrays.asList(iterators));
+      @Override
+      public boolean hasNext() {
+        return !iters.isEmpty() && iters.get(0).hasNext();
+      }
+      @Override
+      public E next() {
+        if (!hasNext()) {
+          throw new IllegalArgumentException("Iterator is empty!");
+        }
+        E next = iters.get(0).next();
+        lastIter = iters.get(0);
+        while (!iters.isEmpty() && !iters.get(0).hasNext()) {
+          iters.remove(0);
+        }
+        return next;
+      }
+      @Override
+      public void remove() {
+        if (lastIter == null) {
+          throw new IllegalStateException("Call next() before calling remove()!");
+        }
+        lastIter.remove();
+      }
+    };
+  }
 }
