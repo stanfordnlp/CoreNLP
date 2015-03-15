@@ -147,6 +147,7 @@ public class LexicalizedParserITest extends TestCase {
     for (String word : words) {
       CoreLabel label = new CoreLabel();
       label.setWord(word);
+      label.setValue(word);
       sentence.add(label);
     }
     return sentence;

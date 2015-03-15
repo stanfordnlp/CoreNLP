@@ -48,10 +48,6 @@ import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.BasicDatum;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Datum;
-import edu.stanford.nlp.ling.Document;
-import edu.stanford.nlp.ling.HasTag;
-import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.ling.WordTag;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.math.ArrayMath;
 import edu.stanford.nlp.math.SloppyMath;
@@ -1049,9 +1045,9 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    *
    * @return A Default CMMClassifier from a jar file
    */
-  public static CMMClassifier getDefaultClassifier() {
+  public static CMMClassifier<? extends CoreLabel> getDefaultClassifier() {
 
-    CMMClassifier cmm = new CMMClassifier();
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<CoreLabel>();
     cmm.loadDefaultClassifier();
     return cmm;
 
@@ -1087,42 +1083,42 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
   }
 
 
-  public static CMMClassifier getClassifierNoExceptions(File file) {
-    CMMClassifier cmm = new CMMClassifier();
+  public static CMMClassifier<? extends CoreLabel> getClassifierNoExceptions(File file) {
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<CoreLabel>();
     cmm.loadClassifierNoExceptions(file);
     return cmm;
 
   }
 
-  public static CMMClassifier getClassifier(File file) throws IOException, ClassCastException, ClassNotFoundException {
+  public static CMMClassifier<? extends CoreLabel> getClassifier(File file) throws IOException, ClassCastException, ClassNotFoundException {
 
-    CMMClassifier cmm = new CMMClassifier();
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<CoreLabel>();
     cmm.loadClassifier(file);
     return cmm;
   }
 
-  public static CMMClassifier getClassifierNoExceptions(String loadPath) {
-    CMMClassifier cmm = new CMMClassifier();
+  public static CMMClassifier<CoreLabel> getClassifierNoExceptions(String loadPath) {
+    CMMClassifier<CoreLabel> cmm = new CMMClassifier<CoreLabel>();
     cmm.loadClassifierNoExceptions(loadPath);
     return cmm;
 
   }
 
-  public static CMMClassifier getClassifier(String loadPath) throws IOException, ClassCastException, ClassNotFoundException {
+  public static CMMClassifier<? extends CoreLabel> getClassifier(String loadPath) throws IOException, ClassCastException, ClassNotFoundException {
 
-    CMMClassifier cmm = new CMMClassifier();
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<CoreLabel>();
     cmm.loadClassifier(loadPath);
     return cmm;
   }
 
-  public static CMMClassifier getClassifierNoExceptions(InputStream in) {
-    CMMClassifier cmm = new CMMClassifier();
+  public static CMMClassifier<? extends CoreLabel> getClassifierNoExceptions(InputStream in) {
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<CoreLabel>();
     cmm.loadClassifierNoExceptions(new BufferedInputStream(in), null);
     return cmm;
   }
 
-  public static CMMClassifier getClassifier(InputStream in) throws IOException, ClassCastException, ClassNotFoundException {
-    CMMClassifier cmm = new CMMClassifier();
+  public static CMMClassifier<? extends CoreLabel> getClassifier(InputStream in) throws IOException, ClassCastException, ClassNotFoundException {
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<CoreLabel>();
     cmm.loadClassifier(new BufferedInputStream(in));
     return cmm;
   }
@@ -1170,7 +1166,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
 
   /** Make an individual Datum out of the data list info, focused at position
    *  loc.
-   *  @param info A List of WordInfo objects
+   *  @param info A List of IN objects
    *  @param loc  The position in the info list to focus feature creation on
    *  @param featureFactory The factory that constructs features out of the item
    *  @return A Datum (BasicDatum) representing this data instance
@@ -1341,18 +1337,22 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       }
     }
 
+    @Override
     public int length() {
       return lineInfos.size() - pre - post;
     }
 
+    @Override
     public int leftWindow() {
       return pre;
     }
 
+    @Override
     public int rightWindow() {
       return post;
     }
 
+    @Override
     public int[] getPossibleValues(int position) {
       //             if (position == 0 || position == lineInfos.size() - 1) {
       //                 int[] a = new int[1];
@@ -1368,6 +1368,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
       return tagArray;
     }
 
+    @Override
     public double scoreOf(int[] sequence) {
       throw new UnsupportedOperationException();
     }
@@ -1376,6 +1377,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     private int[] lastWindow = null;
     //private int lastPos = -1;
 
+    @Override
     public double scoreOf(int[] tags, int pos) {
       if (false) {
         return scoresOf(tags, pos)[tags[pos]];
@@ -1413,6 +1415,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     private long hit = 0;
     private long tot = 0;
 
+    @Override
     public double[] scoresOf(int[] tags, int pos) {
       if (VERBOSE) {
         int p = (100 * pos) / length();
@@ -1494,7 +1497,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     /**
      * Build a Scorer.
      *
-     * @param lineInfos  List of WordInfo data items to classify
+     * @param lineInfos  List of INN data items to classify
      * @param classifier The trained Classifier
      * @param pre        Number of previous tags that condition current tag
      * @param post       Number of following tags that condition previous tag

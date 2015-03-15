@@ -504,8 +504,8 @@ public class TreeBinarizer implements TreeTransformer {
     // XXXXX UPTO HERE!!!  ALMOST DONE!!!
     if (t.label().value().startsWith(tlp.startSymbol())) {
       // handle the ROOT tree properly
-      CategoryWordTag label = (CategoryWordTag) t.label();
       /*
+      //CategoryWordTag label = (CategoryWordTag) t.label();
       // binarize without the last kid and then add it back to the top tree
       Tree lastKid = (Tree)newChildren.remove(newChildren.size()-1);
       Tree tempTree = tf.newTreeNode(label, newChildren);
@@ -513,7 +513,7 @@ public class TreeBinarizer implements TreeTransformer {
       newChildren = tempTree.getChildrenAsList();
       newChildren.add(lastKid); // add it back
       */
-      result = tf.newTreeNode(label, newChildren); // label shouldn't have changed
+      result = tf.newTreeNode(t.label(), newChildren); // label shouldn't have changed
     } else {
 //      CategoryWordTag headLabel = (CategoryWordTag) headChild.label();
       String word = ((HasWord) headChild.label()).word();
