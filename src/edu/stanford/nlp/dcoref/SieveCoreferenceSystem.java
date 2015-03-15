@@ -149,14 +149,14 @@ public class SieveCoreferenceSystem {
   /**
    * Dictionaries of all the useful goodies (gender, animacy, number etc. lists)
    */
-  private final Dictionaries dictionaries;
+  public final Dictionaries dictionaries;
 
   /**
    * Semantic knowledge: WordNet
    */
-  private final Semantics semantics;
+  public final Semantics semantics;
 
-  private LogisticClassifier<String, String> singletonPredictor;
+  public LogisticClassifier<String, String> singletonPredictor;
 
   // Below are member variables used for scoring (not thread safe)
 
@@ -508,6 +508,9 @@ public class SieveCoreferenceSystem {
       }
 
       corefSystem.coref(document);  // Do Coreference Resolution
+      
+      logger.fine("New DOC: (after coref)");
+      printRawDoc(document, false);
 
       if(corefSystem.doScore()){
         //Identifying possible coreferring mentions in the corpus along with any recall/precision errors with gold corpus
@@ -978,7 +981,7 @@ public class SieveCoreferenceSystem {
   }
 
   /** Remove singletons, appositive, predicate nominatives, relative pronouns */
-  private static void postProcessing(Document document) {
+  public static void postProcessing(Document document) {
     Set<Mention> removeSet = Generics.newHashSet();
     Set<Integer> removeClusterSet = Generics.newHashSet();
 
@@ -1064,7 +1067,7 @@ public class SieveCoreferenceSystem {
     if ( ! errStr.isEmpty()) {
       summary += "\nERROR: " + errStr;
     }
-    Pattern pattern = Pattern.compile("\\d+.\\d\\d\\d+");
+    Pattern pattern = Pattern.compile("\\d+\\.\\d\\d\\d+");
     DecimalFormat df = new DecimalFormat("#.##");
     Matcher matcher = pattern.matcher(summary);
     while(matcher.find()) {
@@ -1434,7 +1437,7 @@ public class SieveCoreferenceSystem {
     logger.finer("END OF DISCOURSE STRUCTURE==============================");
   }
 
-  private static void printScoreSummary(String summary, Logger logger, boolean afterPostProcessing) {
+  public static void printScoreSummary(String summary, Logger logger, boolean afterPostProcessing) {
     String[] lines = summary.split("\n");
     if(!afterPostProcessing) {
       for(String line : lines) {
@@ -1455,7 +1458,7 @@ public class SieveCoreferenceSystem {
     }
   }
   /** Print average F1 of MUC, B^3, CEAF_E */
-  private static void printFinalConllScore(String summary) {
+  public static void printFinalConllScore(String summary) {
     Pattern f1 = Pattern.compile("Coreference:.*F1: (.*)%");
     Matcher f1Matcher = f1.matcher(summary);
     double[] F1s = new double[5];
@@ -1645,6 +1648,9 @@ public class SieveCoreferenceSystem {
       Counter<Integer> endCounts = new ClassicCounter<Integer>();
       Map<Integer, Set<Mention>> endMentions = Generics.newHashMap();
       for (Mention m : mentions) {
+        if(!gold && (document.corefClusters.get(m.corefClusterID)==null || document.corefClusters.get(m.corefClusterID).getCorefMentions().size()<=1)) {
+          continue;
+        }
         startCounts.incrementCount(m.startIndex);
         endCounts.incrementCount(m.endIndex);
         if(!endMentions.containsKey(m.endIndex)) endMentions.put(m.endIndex, Generics.<Mention>newHashSet());
@@ -1673,6 +1679,7 @@ public class SieveCoreferenceSystem {
 
       doc.append("\n");
     }
+    logger.fine("PRINT RAW DOC START");
     logger.fine(document.annotation.get(CoreAnnotations.DocIDAnnotation.class));
     if (gold) {
       logger.fine("New DOC: (GOLD MENTIONS) ==================================================");
@@ -1680,6 +1687,7 @@ public class SieveCoreferenceSystem {
       logger.fine("New DOC: (Predicted Mentions) ==================================================");
     }
     logger.fine(doc.toString());
+    logger.fine("PRINT RAW DOC END");
   }
   public static List<Pair<IntTuple, IntTuple>> getLinks(
       Map<Integer, CorefChain> result) {

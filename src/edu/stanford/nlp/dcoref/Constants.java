@@ -10,16 +10,16 @@ public class Constants {
   public static final boolean USE_TRUECASE = false;
 
   /** if true, use gold speaker tags */
-  public static final boolean USE_GOLD_SPEAKER_TAGS = false;
+  public static final boolean USE_GOLD_SPEAKER_TAGS = true;
 
   /** if false, use Stanford NER to predict NE labels */
-  public static final boolean USE_GOLD_NE = false;
+  public static final boolean USE_GOLD_NE = true;
 
   /** if false, use Stanford parse to parse */
-  public static final boolean USE_GOLD_PARSES = false;
+  public static final boolean USE_GOLD_PARSES = true;
 
   /** if false, use Stanford tagger to tag */
-  public static final boolean USE_GOLD_POS = false;
+  public static final boolean USE_GOLD_POS = true;
 
   /** if false, use mention prediction */
   public static final boolean USE_GOLD_MENTIONS = false;

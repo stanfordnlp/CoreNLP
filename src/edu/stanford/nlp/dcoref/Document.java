@@ -863,4 +863,9 @@ public class Document implements Serializable {
     SieveCoreferenceSystem.logger.fine("gold mentions == ");
   }
 
+  public boolean isCoref(Mention m1, Mention m2) {
+    return this.allGoldMentions.containsKey(m1.mentionID) 
+        && this.allGoldMentions.containsKey(m2.mentionID) 
+        && this.allGoldMentions.get(m1.mentionID).goldCorefClusterID == this.allGoldMentions.get(m2.mentionID).goldCorefClusterID;
+  }
 }

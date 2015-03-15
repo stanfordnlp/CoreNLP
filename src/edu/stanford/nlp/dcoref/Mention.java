@@ -148,6 +148,8 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
 
   transient private String spanString = null;
   transient private String lowercaseNormalizedSpanString = null;
+  
+  public int headTokenIdx;
 
   @Override
   public Class<Mention> getType() {
@@ -344,7 +346,7 @@ public class Mention implements CoreAnnotation<Mention>, Serializable {
       return;
     } else if(dep.equals("nsubj") || dep.equals("csubj")) {
       isSubject = true;
-    } else if(dep.equals("dobj")){
+    } else if(dep.equals("dobj") || dep.equals("nsubjpass")){
       isDirectObject = true;
     } else if(dep.equals("iobj")){
       isIndirectObject = true;
