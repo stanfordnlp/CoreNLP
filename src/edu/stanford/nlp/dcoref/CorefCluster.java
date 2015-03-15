@@ -46,8 +46,8 @@ public class CorefCluster implements Serializable{
 
   private static final long serialVersionUID = 8655265337578515592L;
 
-  public final Set<Mention> corefMentions;
-  public final int clusterID;
+  protected final Set<Mention> corefMentions;
+  protected final int clusterID;
 
   // Attributes for cluster - can include multiple attribute e.g., {singular, plural}
   public final Set<Number> numbers;
