@@ -14,10 +14,10 @@ import edu.stanford.nlp.util.CoreMap;
 
 
 /**
- * This class assumes that there is a {@code List<? extends CoreLabel>}
+ * This class assumes that there is a {@code List<CoreLabel>}
  * under the {@code TokensAnnotation} field, and runs it
  * through {@link edu.stanford.nlp.process.WordToSentenceProcessor}
- * and puts the new {@code List<List<? extends CoreLabel>>}
+ * and puts the new {@code List<Annotation>}
  * under the {@code SentencesAnnotation} field.
  *
  * @author Jenny Finkel
@@ -158,7 +158,7 @@ public class WordsToSentencesAnnotator implements Annotator {
         sentence.set(CoreAnnotations.LineNumberAnnotation.class, lineNumber);
       }
 
-      // Annotation sentence with section information
+      // Annotate sentence with section information.
       // Assume section start and end appear as first and last tokens of sentence
       CoreLabel sentenceStartToken = sentenceTokens.get(0);
       CoreLabel sentenceEndToken = sentenceTokens.get(sentenceTokens.size()-1);
@@ -176,7 +176,7 @@ public class WordsToSentencesAnnotator implements Annotator {
       if (sectionEnd != null) {
         sectionAnnotations = null;
       }
-      
+
       if (docID != null) {
         sentence.set(CoreAnnotations.DocIDAnnotation.class, docID);
       }

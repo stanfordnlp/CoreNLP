@@ -65,7 +65,7 @@ public class SpanishTokenizerITest extends TestCase {
 
   public void testSpanishTokenizerWord() {
     assert (ptbInputs.length == ptbGold.length);
-    final TokenizerFactory<CoreLabel> tf = SpanishTokenizer.coreLabelFactory();
+    final TokenizerFactory<CoreLabel> tf = SpanishTokenizer.ancoraFactory();
     tf.setOptions("");
     tf.setOptions("tokenizeNLs");
 

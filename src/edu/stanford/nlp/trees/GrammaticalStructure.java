@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.AbstractCoreLabel;
@@ -18,9 +19,13 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
+import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
+import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
+import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.*;
-import java.util.function.Predicate;
 
+import java.util.function.Predicate;
 import java.util.function.Function;
 
 import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
@@ -85,6 +90,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * @param t             A Tree to analyze
    * @param relations     A set of GrammaticalRelations to consider
    * @param relationsLock Something needed to make this thread-safe
+   * @param transformer   A transformer to apply to the tree before converting
    * @param hf            A HeadFinder for analysis
    * @param puncFilter    A Filter to reject punctuation. To delete punctuation
    *                      dependencies, this filter should return false on
@@ -93,8 +99,22 @@ public abstract class GrammaticalStructure implements Serializable {
    *                      should pass in a Filters.&lt;String&gt;acceptFilter().
    */
   public GrammaticalStructure(Tree t, Collection<GrammaticalRelation> relations,
-                              Lock relationsLock, HeadFinder hf, Predicate<String> puncFilter) {
-    this.root = new TreeGraphNode(t, this);
+                              Lock relationsLock, TreeTransformer transformer,
+                              HeadFinder hf, Predicate<String> puncFilter) {
+    TreeGraphNode treegraph = new TreeGraphNode(t, (TreeGraphNode) null);
+    // TODO: create the tree and reuse the leaf labels in one pass,
+    // avoiding a wasteful copy of the labels.
+    Trees.setLeafLabels(treegraph, t.yield());
+    Trees.setLeafTagsIfUnset(treegraph);
+    if (transformer != null) {
+      Tree transformed = transformer.transformTree(treegraph);
+      if (!(transformed instanceof TreeGraphNode)) {
+        throw new RuntimeException("Transformer did not change TreeGraphNode into another TreeGraphNode: " + transformer);
+      }
+      this.root = (TreeGraphNode) transformed;
+    } else {
+      this.root = treegraph;
+    }
     indexNodes(this.root);
     // add head word and tag to phrase nodes
     if (hf == null) {
@@ -342,7 +362,7 @@ public abstract class GrammaticalStructure implements Serializable {
 
   public GrammaticalStructure(Tree t, Collection<GrammaticalRelation> relations,
                               HeadFinder hf, Predicate<String> puncFilter) {
-    this(t, relations, null, hf, puncFilter);
+    this(t, relations, null, null, hf, puncFilter);
   }
 
   @Override
@@ -422,7 +442,7 @@ public abstract class GrammaticalStructure implements Serializable {
 
     for (TreeGraphNode gov : basicGraph.getAllVertices()) {
       for (TreeGraphNode dep : basicGraph.getChildren(gov)) {
-        GrammaticalRelation reln = getGrammaticalRelationCommonAncestor(gov.label(), dep.label(), basicGraph.getEdges(gov, dep));
+        GrammaticalRelation reln = getGrammaticalRelationCommonAncestor(gov.headWordNode().label(), gov.label(), dep.headWordNode().label(), dep.label(), basicGraph.getEdges(gov, dep));
         // System.err.println("  Gov: " + gov + " Dep: " + dep + " Reln: " + reln);
         basicDep.add(new TypedDependency(reln, new IndexedWord(gov.headWordNode().label()), new IndexedWord(dep.headWordNode().label())));
       }
@@ -586,22 +606,24 @@ public abstract class GrammaticalStructure implements Serializable {
       }
     }
 
-    return getGrammaticalRelationCommonAncestor(gov, dep, labels);
+    return getGrammaticalRelationCommonAncestor(gov, gov, dep, dep, labels);
   }
 
   /**
    * Returns the GrammaticalRelation which is the highest common
-   * ancestor of the list of relations passed in.  The IndexedWords
-   * are passed in only for debugging reasons.
+   * ancestor of the list of relations passed in.  The Labels are
+   * passed in only for debugging reasons.  gov &amp; dep are the
+   * labels with the text, govH and depH can be higher labels in the
+   * tree which represent the category
    */
-  private static GrammaticalRelation getGrammaticalRelationCommonAncestor(AbstractCoreLabel govH, AbstractCoreLabel depH, List<GrammaticalRelation> labels) {
+  private static GrammaticalRelation getGrammaticalRelationCommonAncestor(AbstractCoreLabel gov, AbstractCoreLabel govH, AbstractCoreLabel dep, AbstractCoreLabel depH, List<GrammaticalRelation> labels) {
     GrammaticalRelation reln = GrammaticalRelation.DEPENDENT;
 
     List<GrammaticalRelation> sortedLabels;
     if (labels.size() <= 1) {
       sortedLabels = labels;
     } else {
-      sortedLabels = new ArrayList(labels);
+      sortedLabels = new ArrayList<GrammaticalRelation>(labels);
       Collections.sort(sortedLabels, new NameComparator<GrammaticalRelation>());
     }
     // System.err.println(" gov " + govH + " dep " + depH + " arc labels: " + sortedLabels);
@@ -616,11 +638,11 @@ public abstract class GrammaticalStructure implements Serializable {
     }
     if (PRINT_DEBUGGING && reln.equals(GrammaticalRelation.DEPENDENT)) {
       String topCat = govH.get(CoreAnnotations.ValueAnnotation.class);
-      String topTag = govH.get(TreeCoreAnnotations.HeadTagAnnotation.class).value();
-      String topWord = govH.get(TreeCoreAnnotations.HeadWordAnnotation.class).value();
+      String topTag = gov.tag();
+      String topWord = gov.value();
       String botCat = depH.get(CoreAnnotations.ValueAnnotation.class);
-      String botTag = depH.get(TreeCoreAnnotations.HeadTagAnnotation.class).value();
-      String botWord = depH.get(TreeCoreAnnotations.HeadWordAnnotation.class).value();
+      String botTag = dep.tag();
+      String botWord = dep.value();
       System.err.println("### dep\t" + topCat + "\t" + topTag + "\t" + topWord +
                          "\t" + botCat + "\t" + botTag + "\t" + botWord + "\t");
     }
@@ -923,9 +945,14 @@ public abstract class GrammaticalStructure implements Serializable {
     }
 
     if (conllx) {
+      
       List<Tree> leaves = tree.getLeaves();
+      Tree uposTree = UniversalPOSMapper.mapTree(tree);
+      List<Label> uposLabels = uposTree.preTerminalYield();
       String[] words = new String[leaves.size()];
       String[] pos = new String[leaves.size()];
+      String[] upos = new String[leaves.size()];
+      
       String[] relns = new String[leaves.size()];
       int[] govs = new int[leaves.size()];
 
@@ -938,6 +965,7 @@ public abstract class GrammaticalStructure implements Serializable {
         int depPos = indexToPos.get(index) - 1;
         words[depPos] = leaf.value();
         pos[depPos] = leaf.parent(tree).value(); // use slow, but safe, parent look up
+        upos[depPos] = uposLabels.get(index - 1).value();
       }
 
       for (TypedDependency dep : deps) {
@@ -950,7 +978,7 @@ public abstract class GrammaticalStructure implements Serializable {
         if (words[i] == null) {
           continue;
         }
-        String out = String.format("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_\n", i + 1, words[i], pos[i], pos[i], govs[i], (relns[i] != null ? relns[i] : "erased"));
+        String out = String.format("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_\n", i + 1, words[i], upos[i], pos[i], govs[i], (relns[i] != null ? relns[i] : "erased"));
         bf.append(out);
       }
 
