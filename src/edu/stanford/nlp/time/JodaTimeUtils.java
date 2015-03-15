@@ -1,5 +1,6 @@
 package edu.stanford.nlp.time;
 
+import edu.stanford.nlp.util.Pair;
 import org.joda.time.*;
 import org.joda.time.chrono.ISOChronology;
 import org.joda.time.field.DividedDateTimeField;
@@ -371,7 +372,7 @@ public class JodaTimeUtils {
   protected static DurationFieldType getMostGeneral(Period p)
   {
     for (int i = 0; i < p.size(); i++) {
-      if (p.getValue(i) > 0) {
+      if (p.getValue(i) != 0) {
         return p.getFieldType(i);
       }
     }
@@ -380,7 +381,7 @@ public class JodaTimeUtils {
   protected static DurationFieldType getMostSpecific(Period p)
   {
     for (int i = p.size()-1; i >= 0; i--) {
-      if (p.getValue(i) > 0) {
+      if (p.getValue(i) != 0) {
         return p.getFieldType(i);
       }
     }
@@ -595,6 +596,8 @@ public class JodaTimeUtils {
   // Uses p2 to resolve dow for p1
   public static Partial resolveDowToDay(Partial p1, Partial p2)
   {
+    // Discard anything that's more specific than dayOfMonth for p2
+    p2 = JodaTimeUtils.discardMoreSpecificFields(p2, DateTimeFieldType.dayOfMonth());
     if (isCompatible(p1,p2)) {
       if (p1.isSupported(DateTimeFieldType.dayOfWeek())) {
         if (!p1.isSupported(DateTimeFieldType.dayOfMonth())) {
