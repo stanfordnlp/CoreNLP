@@ -87,7 +87,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   private static final String PROPS_SUFFIX = ".properties";
   public static final String NEWLINE_SPLITTER_PROPERTY = "ssplit.eolonly";
   public static final String NEWLINE_IS_SENTENCE_BREAK_PROPERTY = "ssplit.newlineIsSentenceBreak";
-  public static final String DEFAULT_NEWLINE_IS_SENTENCE_BREAK = "two";
+  public static final String DEFAULT_NEWLINE_IS_SENTENCE_BREAK = "never";
 
   public static final String DEFAULT_OUTPUT_FORMAT = isXMLOutputPresent() ? "xml" : "text";
 
@@ -339,6 +339,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool.register(STANFORD_LEMMA, AnnotatorFactories.lemma(properties, annotatorImplementation));
     pool.register(STANFORD_NER, AnnotatorFactories.nerTag(properties, annotatorImplementation));
     pool.register(STANFORD_REGEXNER, AnnotatorFactories.regexNER(properties, annotatorImplementation));
+    pool.register(STANFORD_ENTITY_MENTIONS, AnnotatorFactories.entityMentions(properties, annotatorImplementation));
     pool.register(STANFORD_GENDER, AnnotatorFactories.gender(properties, annotatorImplementation));
     pool.register(STANFORD_TRUECASE, AnnotatorFactories.truecase(properties, annotatorImplementation));
     pool.register(STANFORD_PARSE, AnnotatorFactories.parse(properties, annotatorImplementation));
@@ -348,6 +349,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool.register(STANFORD_COLUMN_DATA_CLASSIFIER,AnnotatorFactories.columnDataClassifier(properties,annotatorImplementation));
     pool.register(STANFORD_DEPENDENCIES, AnnotatorFactories.dependencies(properties, annotatorImplementation));
     pool.register(STANFORD_NATLOG, AnnotatorFactories.natlog(properties, annotatorImplementation));
+    pool.register(STANFORD_QUOTE, AnnotatorFactories.quote(properties, annotatorImplementation));
     // Add more annotators here
 
     // add annotators loaded via reflection from classnames specified
@@ -565,7 +567,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     os.println("(if -props or -annotators is not passed in, default properties will be loaded via the classpath)");
     os.println("\t\"props\" - path to file with configuration properties");
     os.println("\t\"annotators\" - comma separated list of annotators");
-    os.println("\tThe following annotators are supported: cleanxml, tokenize, ssplit, pos, lemma, ner, truecase, parse, coref, dcoref, relation");
+    os.println("\tThe following annotators are supported: cleanxml, tokenize, quote, ssplit, pos, lemma, ner, truecase, parse, coref, dcoref, relation");
 
     os.println();
     os.println("\tIf annotator \"tokenize\" is defined:");
@@ -736,15 +738,16 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     switch (outputFormat) {
       case XML: defaultExtension = ".xml"; break;
       case JSON: defaultExtension = ".json"; break;
+      case CONLL: defaultExtension = ".conll"; break;
       case TEXT: defaultExtension = ".out"; break;
       case SERIALIZED: defaultExtension = ".ser.gz"; break;
       default: throw new IllegalArgumentException("Unknown output format " + outputFormat);
     }
-    final String serializerClass = properties.getProperty("serializer");
+    final String serializerClass = properties.getProperty("serializer", GenericAnnotationSerializer.class.getName());
     final String inputSerializerClass = properties.getProperty("inputSerializer", serializerClass);
-    final String inputSerializerName = (serializerClass == inputSerializerClass)? "serializer":"inputSerializer";
+    final String inputSerializerName = (serializerClass.equals(inputSerializerClass))? "serializer":"inputSerializer";
     final String outputSerializerClass = properties.getProperty("outputSerializer", serializerClass);
-    final String outputSerializerName = (serializerClass == outputSerializerClass)? "serializer":"outputSerializer";
+    final String outputSerializerName = (serializerClass.equals(outputSerializerClass))? "serializer":"outputSerializer";
 
     final String extension = properties.getProperty("outputExtension", defaultExtension);
     final boolean replaceExtension = Boolean.parseBoolean(properties.getProperty("replaceExtension", "false"));

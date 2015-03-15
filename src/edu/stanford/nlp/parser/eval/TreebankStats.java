@@ -39,7 +39,7 @@ public class TreebankStats {
   private final TreebankLangParserParams tlpp;
   private final List<String> pathNames;
 
-  private enum Split {Train,Dev,Test};
+  private enum Split {Train,Dev,Test}
   private Map<Split,Set<String>> splitFileLists;
   private boolean useSplit = false;
   private boolean makeVocab = false;
@@ -97,7 +97,7 @@ public class TreebankStats {
    * @param ocs
    * @param addToVocab
    */
-  private Pair<Integer,Integer> dissectTree(Tree t, ObservedCorpusStats ocs, boolean addToVocab) {
+  private static Pair<Integer,Integer> dissectTree(Tree t, ObservedCorpusStats ocs, boolean addToVocab) {
     final Stack<Pair<Integer,Tree>> stack = new Stack<Pair<Integer,Tree>>();
     stack.push(new Pair<Integer,Tree>(0,t));
 
@@ -134,7 +134,7 @@ public class TreebankStats {
     return new Pair<Integer,Integer>(maxDepth,maxBreadth);
   }
 
-  private void display(ObservedCorpusStats corpStats, boolean displayWords, boolean displayOOV) {
+  private static void display(ObservedCorpusStats corpStats, boolean displayWords, boolean displayOOV) {
     System.out.println("####################################################################");
     System.out.println("## " + corpStats.getName());
     System.out.println("####################################################################");
@@ -142,7 +142,7 @@ public class TreebankStats {
     corpStats.display(displayWords, displayOOV);
   }
 
-  private ObservedCorpusStats aggregateStats(List<ObservedCorpusStats> allStats) {
+  private static ObservedCorpusStats aggregateStats(List<ObservedCorpusStats> allStats) {
     if(allStats.size() == 0) return null;
     else if(allStats.size() == 1) return allStats.get(0);
 
@@ -196,7 +196,7 @@ public class TreebankStats {
         DiskTreebank tb = tlpp.diskTreebank();
         tb.loadPath(path, pathname -> true);
 
-        ObservedCorpusStats stats = gatherStats(tb, languageName.toString() + "  " + path.toString());
+        ObservedCorpusStats stats = gatherStats(tb, languageName.toString() + "  " + path);
         display(stats, displayWords, displayOOV);
         makeVocab = false;
       }
@@ -212,8 +212,10 @@ public class TreebankStats {
     }
   }
 
-  protected class SplitFilter implements FileFilter {
+  protected static class SplitFilter implements FileFilter {
+
     private final Set<String> filterMap;
+
     public SplitFilter(Set<String> fileList) {
       filterMap = fileList;
     }

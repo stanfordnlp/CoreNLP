@@ -134,7 +134,7 @@ public class LeafAncestorEval {
 
   public void evaluate(Tree guess, Tree gold, PrintWriter pw) {
     if(gold == null || guess == null) {
-      System.err.printf("%s: Cannot compare against a null gold or guess tree!\n",this.getClass().getName());
+      System.err.printf("%s: Cannot compare against a null gold or guess tree!%n",this.getClass().getName());
       return;
     }
 
@@ -165,10 +165,10 @@ public class LeafAncestorEval {
       sentNum++;
 
     } else {
-      System.err.printf("%s: Number of guess (%d) gold (%d) don't match!\n",this.getClass().getName(),guessLineages.size(),goldLineages.size());
+      System.err.printf("%s: Number of guess (%d) gold (%d) don't match!%n",this.getClass().getName(),guessLineages.size(),goldLineages.size());
       System.err.println("Cannot evaluate!");
-      System.err.printf("GUESS tree:\n%s\n", guess.toString());
-      System.err.printf("GOLD tree:\n%s\n", gold.toString());
+      System.err.printf("GUESS tree:%n%s%n", guess.toString());
+      System.err.printf("GOLD tree:%n%s%n", gold.toString());
     }
   }
 
@@ -214,13 +214,14 @@ public class LeafAncestorEval {
 
     if(verbose) {
       Map<Double,List<CoreLabel>> avgMap = new TreeMap<Double,List<CoreLabel>>();
-      for (List<CoreLabel> lineage : catAvg.keySet()) {
-        double avg = catAvg.get(lineage) / catNum.get(lineage);
-        if(new Double(avg).equals(Double.NaN)) avg = -1.0;
-        if(avgMap.containsKey(avg))
-          avgMap.put(avg + (rand.nextDouble()/10000.0), lineage);
-        else
-          avgMap.put(avg, lineage);
+      for (Map.Entry<List<CoreLabel>, Double> entry : catAvg.entrySet()) {
+        double avg = entry.getValue() / catNum.get(entry.getKey());
+        if (Double.isNaN(avg)) { avg = -1.0; }
+        if (avgMap.containsKey(avg)) {
+          avgMap.put(avg + (rand.nextDouble() / 10000.0), entry.getKey());
+        } else {
+          avgMap.put(avg, entry.getKey());
+        }
       }
 
       pw.println("============================================================");
@@ -239,7 +240,7 @@ public class LeafAncestorEval {
       for (List<CoreLabel> lineage : avgMap.values()) {
         if(catNum.get(lineage) < 30.0) continue;
         double avg = catAvg.get(lineage) / catNum.get(lineage);
-        pw.printf(" %.3f\t%d\t%s\n",avg, (int) ((double)catNum.get(lineage)),toString(lineage));
+        pw.printf(" %.3f\t%d\t%s%n",avg, (int) ((double)catNum.get(lineage)),toString(lineage));
       }
 
       pw.println("============================================================");
@@ -278,20 +279,20 @@ public class LeafAncestorEval {
 
     for(Map.Entry<String, String[]> opt : argsMap.entrySet()) {
       String key = opt.getKey();
-      if(key == null) {
-        continue;
-
-      } else if(key.equals("-y")) {
-        MAX_GOLD_YIELD = Integer.valueOf(opt.getValue()[0]);
-
-      } else if(key.equals("-l")) {
-        LANGUAGE = Language.valueOf(opt.getValue()[0]);
-
-      } else if(key.equals("-v")) {
-        VERBOSE = true;
-
-      } else {
-        return false;
+      if (key != null) {
+        switch (key) {
+          case "-y":
+            MAX_GOLD_YIELD = Integer.parseInt(opt.getValue()[0]);
+            break;
+          case "-l":
+            LANGUAGE = Language.valueOf(opt.getValue()[0]);
+            break;
+          case "-v":
+            VERBOSE = true;
+            break;
+          default:
+            return false;
+        }
       }
     }
 
@@ -380,7 +381,7 @@ public class LeafAncestorEval {
     }
 
     pwOut.println("================================================================================");
-    if(skippedGuessTrees != 0) pwOut.printf("%s %d guess trees\n", "Unable to evaluate", skippedGuessTrees);
+    if(skippedGuessTrees != 0) pwOut.printf("%s %d guess trees%n", "Unable to evaluate", skippedGuessTrees);
     metric.display(true, pwOut);
     pwOut.close();
   }

@@ -1,8 +1,7 @@
 package edu.stanford.nlp.patterns.surface;
 
-import edu.stanford.nlp.util.concurrent.ConcurrentHashIndex;
+import edu.stanford.nlp.patterns.ConstantsAndVariables;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 

@@ -31,6 +31,7 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
   private final SeqClassifierFlags flags;
   private final ObjectBank<List<IN>> wrapped;
   private final Set<String> knownLCWords;
+  private final int knownLCWordsSizeLimit;
 
 
   public ObjectBankWrapper(SeqClassifierFlags flags, ObjectBank<List<IN>> wrapped, Set<String> knownLCWords) {
@@ -38,6 +39,11 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
     this.flags = flags;
     this.wrapped = wrapped;
     this.knownLCWords = knownLCWords;
+    if (flags.maxAdditionalKnownLCWords > 0 && ((long) flags.maxAdditionalKnownLCWords) + knownLCWords.size() < Integer.MAX_VALUE) {
+      knownLCWordsSizeLimit = knownLCWords.size() + flags.maxAdditionalKnownLCWords;
+    } else {
+      knownLCWordsSizeLimit = Integer.MAX_VALUE;
+    }
   }
 
 
@@ -129,15 +135,14 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
 
       // word shape
       if ((flags.wordShape > WordShapeClassifier.NOWORDSHAPE) && (!flags.useShapeStrings)) {
-        // TODO: if we pass in a FeatureFactory, as suggested by an
-        // earlier comment, we should use that FeatureFactory's
-        // getWord function
+        // TODO: if we pass in a FeatureFactory, as suggested by an earlier comment,
+        // we should use that FeatureFactory's getWord function
         String word = fl.get(CoreAnnotations.TextAnnotation.class);
         if (flags.wordFunction != null) {
           word = flags.wordFunction.apply(word);
         }
-        if (flags.useKnownLCWords && word.length() > 0) {
-          char ch = word.charAt(0);
+        if (flags.useKnownLCWords && ! word.isEmpty() && knownLCWords.size() < knownLCWordsSizeLimit) {
+          int ch = word.codePointAt(0);
           if (Character.isLowerCase(ch)) {
             knownLCWords.add(word);
           }
@@ -155,7 +160,10 @@ public class ObjectBankWrapper<IN extends CoreMap> extends ObjectBank<List<IN>> 
         fl.set(CoreAnnotations.CharAnnotation.class,intern(fix(fl.get(CoreAnnotations.CharAnnotation.class))));
       } else {
         fl.set(CoreAnnotations.TextAnnotation.class, intern(fix(fl.get(CoreAnnotations.TextAnnotation.class))));
-        fl.set(CoreAnnotations.GoldAnswerAnnotation.class, fl.get(CoreAnnotations.AnswerAnnotation.class));
+        // only override GoldAnswer if not set - so that a DocumentReaderAndWriter can set it right in the first place.
+        if (fl.get(CoreAnnotations.AnswerAnnotation.class) == null) {
+          fl.set(CoreAnnotations.GoldAnswerAnnotation.class, fl.get(CoreAnnotations.AnswerAnnotation.class));
+        }
       }
     }
   }

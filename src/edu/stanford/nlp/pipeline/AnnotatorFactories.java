@@ -4,6 +4,7 @@ import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.process.PTBTokenizer;
+import edu.stanford.nlp.process.WordToSentenceProcessor;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 
@@ -28,10 +29,20 @@ public class AnnotatorFactories {
       @Override
       public Annotator create() {
         String extraOptions = null;
-        boolean keepNewline = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
-            "false"));
-        if (properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY) != null) {
-          keepNewline = true;
+        boolean keepNewline = Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false")); // ssplit.eolonly
+
+        String hasSsplit = properties.getProperty("annotators");
+        if (hasSsplit != null && hasSsplit.contains(StanfordCoreNLP.STANFORD_SSPLIT)) { // ssplit
+          // Only possibly put in *NL* if not all one (the Boolean method treats null as false)
+          if ( ! Boolean.parseBoolean(properties.getProperty("ssplit.isOneSentence"))) {
+            // Set to { NEVER, ALWAYS, TWO_CONSECUTIVE } based on  ssplit.newlineIsSentenceBreak
+            String nlsbString = properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY,
+                    StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK);
+            WordToSentenceProcessor.NewlineIsSentenceBreak nlsb = WordToSentenceProcessor.stringToNewlineIsSentenceBreak(nlsbString);
+            if (nlsb != WordToSentenceProcessor.NewlineIsSentenceBreak.NEVER) {
+              keepNewline = true;
+            }
+          }
         }
         if (keepNewline) {
           extraOptions = "tokenizeNLs,";
@@ -53,17 +64,16 @@ public class AnnotatorFactories {
         if (properties.getProperty("tokenize.class") != null) {
           os.append(":tokenize.class:").append(properties.getProperty("tokenize.class"));
         }
-        if (Boolean.valueOf(properties.getProperty("tokenize.whitespace",
-            "false"))) {
-          os.append(TokenizerAnnotator.EOL_PROPERTY + ':').append(properties.getProperty(TokenizerAnnotator.EOL_PROPERTY,
-              "false"));
-          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ':').append(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
-              "false"));
-          return os.toString();
+        if (Boolean.valueOf(properties.getProperty("tokenize.whitespace", "false"))) {
+          os.append(TokenizerAnnotator.EOL_PROPERTY + ':').append(properties.getProperty(TokenizerAnnotator.EOL_PROPERTY, "false"));
+          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ':');
+          os.append(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
         } else {
-          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ':').append(Boolean.valueOf(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY,
-              "false")));
-          os.append(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ':').append(properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
+          os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ':');
+          os.append(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
+          os.append("ssplit.isOneSentence" + ':' + properties.getProperty("ssplit.isOneSentence", "false"));
+          os.append(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ':');
+          os.append(properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
         }
         return os.toString();
       }
@@ -348,13 +358,32 @@ public class AnnotatorFactories {
       private static final long serialVersionUID = 1L;
       @Override
       public Annotator create() {
-        return annotatorImplementation.tokensRegexNER(properties, "regexner");
+        return annotatorImplementation.tokensRegexNER(properties, Annotator.STANFORD_REGEXNER);
       }
 
       @Override
       public String additionalSignature() {
         // keep track of all relevant properties for this annotator here!
-        return PropertiesUtils.getSignature("regexner", properties, TokensRegexNERAnnotator.SUPPORTED_PROPERTIES);
+        return PropertiesUtils.getSignature(Annotator.STANFORD_REGEXNER, properties, TokensRegexNERAnnotator.SUPPORTED_PROPERTIES);
+      }
+    };
+  }
+
+  //
+  // Mentions annotator
+  //
+  public static AnnotatorFactory entityMentions(Properties properties, final AnnotatorImplementations annotatorImplementation) {
+    return new AnnotatorFactory(properties, annotatorImplementation) {
+      private static final long serialVersionUID = 1L;
+      @Override
+      public Annotator create() {
+        return annotatorImplementation.mentions(properties, Annotator.STANFORD_ENTITY_MENTIONS);
+      }
+
+      @Override
+      public String additionalSignature() {
+        // keep track of all relevant properties for this annotator here!
+        return PropertiesUtils.getSignature(Annotator.STANFORD_ENTITY_MENTIONS, properties, EntityMentionsAnnotator.SUPPORTED_PROPERTIES);
       }
     };
   }
@@ -532,7 +561,7 @@ public class AnnotatorFactories {
 
       @Override
       protected String additionalSignature() {
-        return "";
+        return DependencyParseAnnotator.signature(StanfordCoreNLP.STANFORD_DEPENDENCIES, properties);
       }
     };
   }
@@ -542,9 +571,28 @@ public class AnnotatorFactories {
   //
   public static AnnotatorFactory natlog(Properties properties, final AnnotatorImplementations annotatorImpl) {
     return new AnnotatorFactory(properties, annotatorImpl) {
+      private static final long serialVersionUID = 4825870963088507811L;
+
       @Override
       public Annotator create() {
         return annotatorImpl.natlog(properties);
+      }
+
+      @Override
+      protected String additionalSignature() {
+        return "";
+      }
+    };
+  }
+
+  //
+  // Quote Extractor
+  //
+  public static AnnotatorFactory quote(Properties properties, final AnnotatorImplementations annotatorImpl) {
+    return new AnnotatorFactory(properties, annotatorImpl) {
+      @Override
+      public Annotator create() {
+        return annotatorImpl.quote(properties);
       }
 
       @Override

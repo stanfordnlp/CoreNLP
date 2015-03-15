@@ -77,6 +77,8 @@ public class ChineseTreebankLanguagePack extends AbstractTreebankLanguagePack {
   /**
    * Accepts a String that is a sentence end
    * punctuation tag, and rejects everything else.
+   * TODO FIXME: this is testing whether it is a sentence final word,
+   * not a sentence final tag.
    *
    * @return Whether this is a sentence final punctuation tag
    */

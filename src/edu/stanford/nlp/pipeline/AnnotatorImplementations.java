@@ -109,7 +109,14 @@ public class AnnotatorImplementations {
    * Run RegexNER -- rule-based NER based on a deterministic mapping file
    */
   public Annotator tokensRegexNER(Properties properties, String name) {
-    return new TokensRegexNERAnnotator("regexner", properties);
+    return new TokensRegexNERAnnotator(name, properties);
+  }
+
+  /**
+   * Annotate mentions
+   */
+  public Annotator mentions(Properties properties, String name) {
+    return new EntityMentionsAnnotator(name, properties);
   }
 
   /**
@@ -204,6 +211,15 @@ public class AnnotatorImplementations {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
         Annotator.STANFORD_NATLOG + '.');
     return new NaturalLogicAnnotator(relevantProperties);
+  }
+
+  /**
+   * Annotate quotes and extract them like sentences
+   */
+  public Annotator quote(Properties properties) {
+    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
+        Annotator.STANFORD_QUOTE + '.');
+    return new QuoteAnnotator(relevantProperties);
   }
 
 }

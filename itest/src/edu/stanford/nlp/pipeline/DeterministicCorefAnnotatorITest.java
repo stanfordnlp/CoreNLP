@@ -29,9 +29,9 @@ public class DeterministicCorefAnnotatorITest extends TestCase {
       pipeline.addAnnotator(new ParserAnnotator(false, -1));
 
       Properties corefProps = new Properties();
-      corefProps.put(Constants.DEMONYM_PROP, DefaultPaths.DEFAULT_DCOREF_DEMONYM);
-      corefProps.put(Constants.ANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_ANIMATE);
-      corefProps.put(Constants.INANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_INANIMATE);
+      corefProps.setProperty(Constants.DEMONYM_PROP, DefaultPaths.DEFAULT_DCOREF_DEMONYM);
+      corefProps.setProperty(Constants.ANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_ANIMATE);
+      corefProps.setProperty(Constants.INANIMATE_PROP, DefaultPaths.DEFAULT_DCOREF_INANIMATE);
       pipeline.addAnnotator(new DeterministicCorefAnnotator(corefProps));
     }
   }

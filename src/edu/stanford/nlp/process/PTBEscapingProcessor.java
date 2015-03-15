@@ -8,6 +8,7 @@ import edu.stanford.nlp.ling.BasicDocument;
 import edu.stanford.nlp.ling.Document;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.util.StringUtils;
 
 import java.io.File;
 import java.net.URL;
@@ -27,17 +28,27 @@ import java.util.*;
 public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractListProcessor<IN, HasWord, L, F>
   implements Function<List<IN>, List<HasWord>> {
 
+  private static final char[] EMPTY_CHAR_ARRAY = new char[0];
+
   private static final char[] SUBST_CHARS = {'(', ')', '[', ']', '{', '}'};
   private static final String[] REPLACE_SUBSTS = {"-LRB-", "-RRB-", "-LSB-", "-RSB-", "-LCB-", "-RCB-"};
 
-  protected char[] substChars = SUBST_CHARS;
-  protected String[] replaceSubsts = REPLACE_SUBSTS;
-  protected char[] escapeChars = {'/', '*'};
-  protected String[] replaceEscapes = {"\\/", "\\*"};
+  private final char[] substChars;
+  private final String[] replaceSubsts;
 
-  protected boolean fixQuotes = true;
+  // starting about 2013, we no longer escape  * and /. We de-escape them when reading Treebank3
+  private final char[] escapeChars; // was  {'/', '*'};
+  private final String[] replaceEscapes; // was = {"\\/", "\\*"};
+
+  private final boolean fixQuotes;
+
 
   public PTBEscapingProcessor() {
+    this(true);
+  }
+
+  public PTBEscapingProcessor(boolean fixQuotes) {
+    this(EMPTY_CHAR_ARRAY, StringUtils.EMPTY_STRING_ARRAY, SUBST_CHARS, REPLACE_SUBSTS, fixQuotes);
   }
 
   public PTBEscapingProcessor(char[] escapeChars, String[] replaceEscapes, char[] substChars, String[] replaceSubsts, boolean fixQuotes) {
@@ -61,6 +72,7 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
   /** Escape a List of HasWords.  Implements the
    *  Function&lt;List&lt;HasWord&gt;, List&lt;HasWord&gt;&gt; interface.
    */
+  @Override
   public List<HasWord> apply(List<IN> hasWordsList) {
     return process(hasWordsList);
   }
@@ -76,6 +88,7 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
   /**
    * @param input must be a List of objects of type HasWord
    */
+  @Override
   public List<HasWord> process(List<? extends IN> input) {
     List<HasWord> output = new ArrayList<HasWord>();
     for (IN h : input) {
@@ -118,8 +131,7 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
     } else {
       // alternate from the beginning
       begin = true;
-      for (int i = 0; i < inputSize; i++) {
-        HasWord hw = input.get(i);
+      for (HasWord hw : input) {
         String tok = hw.word();
         if (tok.equals("\"")) {
           if (begin) {
@@ -232,7 +244,6 @@ public class PTBEscapingProcessor<IN extends HasWord, L, F> extends AbstractList
     } catch (Exception e) {
       e.printStackTrace();
     }
-
   }
 
 }

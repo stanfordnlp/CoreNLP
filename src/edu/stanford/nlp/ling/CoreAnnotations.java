@@ -167,6 +167,17 @@ public class CoreAnnotations {
   }
 
   /**
+   * The CoreMap key for getting the quotations contained by an annotation.
+   *
+   * This key is typically set only on document annotations.
+   */
+  public static class QuotationsAnnotation implements CoreAnnotation<List<CoreMap>> {
+    public Class<List<CoreMap>> getType() {
+      return ErasureUtils.uncheckedCast(List.class);
+    }
+  }
+
+  /**
    * The CoreMap key for getting the paragraphs contained by an annotation.
    *
    * This key is typically set only on document annotations.
@@ -924,13 +935,6 @@ public class CoreAnnotations {
   }
 
   /** Seems like this could be consolidated with something else... */
-  public static class OriginalAnswerAnnotation implements CoreAnnotation<String> {
-    public Class<String> getType() {
-      return String.class;
-    }
-  }
-
-  /** Seems like this could be consolidated with something else... */
   public static class OriginalCharAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
@@ -1373,7 +1377,7 @@ public class CoreAnnotations {
       return String.class;
     }
   }
-  
+
   //to get words of the phrase
   public static class PhraseWordsTagAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
@@ -1387,14 +1391,14 @@ public class CoreAnnotations {
       return ErasureUtils.uncheckedCast(List.class);
     }
   }
-  
+
   //to get prototype feature, see Haghighi Exemplar driven learning
   public static class ProtoAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }
   }
-  
+
   //which common words list does this word belong to
   public static class CommonWordsAnnotation implements CoreAnnotation<String> {
     public Class<String> getType() {
@@ -1592,7 +1596,7 @@ public class CoreAnnotations {
       return String.class;
     }
   }
-  
+
   public static class LabelWeightAnnotation implements CoreAnnotation<Double>{
    public Class<Double> getType(){
      return Double.class;

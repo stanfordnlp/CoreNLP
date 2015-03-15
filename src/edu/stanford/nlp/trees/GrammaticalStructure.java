@@ -5,6 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Predicate;
+import java.util.function.Function;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
 import edu.stanford.nlp.io.IOUtils;
@@ -19,19 +21,10 @@ import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
-import edu.stanford.nlp.trees.tregex.TregexPattern;
-import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
-import edu.stanford.nlp.trees.tregex.tsurgeon.Tsurgeon;
-import edu.stanford.nlp.trees.tregex.tsurgeon.TsurgeonPattern;
 import edu.stanford.nlp.util.*;
-
-import java.util.function.Predicate;
-import java.util.function.Function;
 
 import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
 import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
-
-
 
 
 /**
@@ -66,6 +59,71 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 public abstract class GrammaticalStructure implements Serializable {
 
   private static final boolean PRINT_DEBUGGING = System.getProperty("GrammaticalStructure", null) != null;
+
+  /**
+   * A specification for the types of extra edges to add to the dependency tree.
+   * If you're in doubt, use {@link edu.stanford.nlp.trees.GrammaticalStructure.Extras#NONE}.
+   */
+  public static enum Extras {
+    /**
+     * <p> Don't include any additional edges. </p>
+     * <p>
+     *   Note: In older code (2014 and before) including extras was a boolean flag. This option is the equivalent of
+     *   the <code>false</code> flag.
+     * </p>
+     */
+    NONE(false, false, false),
+    /**
+     * Include only the extra reference edges, and save them as reference edges without collapsing.
+     */
+    REF_ONLY_UNCOLLAPSED(true, false, false),
+    /**
+     * Include only the extra reference edges, but collapsing these edges to clone the edge type of the referent.
+     * So, for example, <i>My dog who eats sausage</i> may have a "ref" edge from <i>who</i> to <i>dog</i>
+     * that would be deleted and replaced with an "nsubj" edge from <i>eats</i> to <i>dog</i>.
+     */
+    REF_ONLY_COLLAPSED(true, false, true),
+    /**
+     * Add extra subjects only, not adding any of the other extra edge types.
+     */
+    SUBJ_ONLY(false, true, false),
+    /**
+     * @see edu.stanford.nlp.trees.GrammaticalStructure.Extras#SUBJ_ONLY
+     * @see edu.stanford.nlp.trees.GrammaticalStructure.Extras#REF_ONLY_UNCOLLAPSED
+     */
+    REF_UNCOLLAPSED_AND_SUBJ(true, true, false),
+    /**
+     * @see edu.stanford.nlp.trees.GrammaticalStructure.Extras#SUBJ_ONLY
+     * @see edu.stanford.nlp.trees.GrammaticalStructure.Extras#REF_ONLY_COLLAPSED
+     */
+    REF_COLLAPSED_AND_SUBJ(true, true, true),
+    /**
+     * <p>
+     *   Do the maximal amount of extra processing.
+     *   Currently, this is equivalent to {@link edu.stanford.nlp.trees.GrammaticalStructure.Extras#REF_COLLAPSED_AND_SUBJ}.
+     * </p>
+     * <p>
+     *   Note: In older code (2014 and before) including extras was a boolean flag. This option is the equivalent of
+     *   the <code>true</code> flag.
+     * </p>
+     */
+    MAXIMAL(true, true, true);
+
+    /** Add "ref" edges */
+    public final boolean doRef;
+    /** Add extra subject edges */
+    public final boolean doSubj;
+    /** collapse the "ref" edges */
+    public final boolean collapseRef;
+
+    /** Constructor. Nothing exciting here. */
+    Extras(boolean doRef, boolean doSubj, boolean collapseRef) {
+      this.doRef = doRef;
+      this.doSubj = doSubj;
+      this.collapseRef = collapseRef;
+    }
+
+  }
 
   protected final List<TypedDependency> typedDependencies;
   protected final List<TypedDependency> allTypedDependencies;
@@ -126,7 +184,7 @@ public abstract class GrammaticalStructure implements Serializable {
     }
     // add dependencies, using heads
     this.puncFilter = puncFilter;
-    NoPunctFilter puncDepFilter = new NoPunctFilter(puncFilter);
+    // NoPunctFilter puncDepFilter = new NoPunctFilter(puncFilter);
     NoPunctTypedDependencyFilter puncTypedDepFilter = new NoPunctTypedDependencyFilter(puncFilter);
 
     DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> basicGraph = new DirectedMultiGraph<TreeGraphNode, GrammaticalRelation>();
@@ -271,7 +329,7 @@ public abstract class GrammaticalStructure implements Serializable {
   public static GrammaticalStructure fromStringReps(List<String> tokens, List<String> posTags, List<String> deps) {
     if (tokens.size() != posTags.size()) {
       throw new RuntimeException(String.format(
-              "tokens.size(): %d != pos.size(): %d\n", tokens.size(), posTags
+              "tokens.size(): %d != pos.size(): %d%n", tokens.size(), posTags
                       .size()));
     }
 
@@ -335,7 +393,7 @@ public abstract class GrammaticalStructure implements Serializable {
       if (parentDash == -1) throwDepFormatException(depString);
       int childDash = childArg.lastIndexOf('-');
       if (childDash == -1) throwDepFormatException(depString);
-      //System.err.printf("parentArg: %s\n", parentArg);
+      //System.err.printf("parentArg: %s%n", parentArg);
       int parentIdx = Integer.parseInt(parentArg.substring(parentDash+1).replace("'", ""));
 
       int childIdx = Integer.parseInt(childArg.substring(childDash+1).replace("'", ""));
@@ -600,7 +658,7 @@ public abstract class GrammaticalStructure implements Serializable {
    */
   public GrammaticalRelation getGrammaticalRelation(IndexedWord gov, IndexedWord dep) {
     List<GrammaticalRelation> labels = Generics.newArrayList();
-    for (TypedDependency dependency : typedDependencies(true)) {
+    for (TypedDependency dependency : typedDependencies(Extras.MAXIMAL)) {
       if (dependency.gov().equals(gov) && dependency.dep().equals(dep)) {
         labels.add(dependency.reln());
       }
@@ -684,7 +742,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * @return The typed dependencies of this grammatical structure
    */
   public Collection<TypedDependency> typedDependencies() {
-    return typedDependencies(false);
+    return typedDependencies(Extras.NONE);
   }
 
 
@@ -695,7 +753,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * "nonCollapsed" option.
    */
   public Collection<TypedDependency> allTypedDependencies() {
-    return typedDependencies(true);
+    return typedDependencies(Extras.MAXIMAL);
   }
 
 
@@ -707,7 +765,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * returned may include "extras", and does not follow a tree structure.
    * @return The typed dependencies of this grammatical structure
    */
-  public List<TypedDependency> typedDependencies(boolean includeExtras) {
+  public List<TypedDependency> typedDependencies(Extras includeExtras) {
     List<TypedDependency> deps;
     // This copy has to be done because of the broken way
     // TypedDependency objects can be mutated by downstream methods
@@ -716,7 +774,7 @@ public abstract class GrammaticalStructure implements Serializable {
     // typedDependenciesCollapsed to get different results.  For
     // example, the English dependencies rename existing objects KILL
     // to note that they should be removed.
-    if (includeExtras) {
+    if (includeExtras != Extras.NONE) {
       deps = new ArrayList<TypedDependency>(allTypedDependencies.size());
       for (TypedDependency dep : allTypedDependencies) {
         deps.add(new TypedDependency(dep));
@@ -732,6 +790,14 @@ public abstract class GrammaticalStructure implements Serializable {
   }
 
   /**
+   * @see edu.stanford.nlp.trees.GrammaticalStructure#typedDependencies(edu.stanford.nlp.trees.GrammaticalStructure.Extras)
+   */
+  @Deprecated
+  public List<TypedDependency> typedDependencies(boolean includeExtras) {
+    return typedDependencies(includeExtras ? Extras.MAXIMAL : Extras.NONE);
+  }
+
+  /**
    * Get the typed dependencies after collapsing them.
    * Collapsing dependencies refers to turning certain function words
    * such as prepositions and conjunctions into arcs, so they disappear from
@@ -743,7 +809,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * @return A set of collapsed dependencies
    */
   public Collection<TypedDependency> typedDependenciesCollapsed() {
-    return typedDependenciesCollapsed(false);
+    return typedDependenciesCollapsed(Extras.NONE);
   }
 
   // todo [cdm 2012]: The semantics of this method is the opposite of the others.
@@ -762,7 +828,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * @return collapsed dependencies keeping a tree structure
    */
   public Collection<TypedDependency> typedDependenciesCollapsedTree() {
-    List<TypedDependency> tdl = typedDependencies(false);
+    List<TypedDependency> tdl = typedDependencies(Extras.NONE);
     collapseDependenciesTree(tdl);
     return tdl;
   }
@@ -776,10 +842,18 @@ public abstract class GrammaticalStructure implements Serializable {
    * returned may include "extras", like controlling subjects
    * @return collapsed dependencies
    */
-  public List<TypedDependency> typedDependenciesCollapsed(boolean includeExtras) {
+  public List<TypedDependency> typedDependenciesCollapsed(Extras includeExtras) {
     List<TypedDependency> tdl = typedDependencies(includeExtras);
     collapseDependencies(tdl, false, includeExtras);
     return tdl;
+  }
+
+  /**
+   * @see edu.stanford.nlp.trees.GrammaticalStructure#typedDependenciesCollapsed(edu.stanford.nlp.trees.GrammaticalStructure.Extras)
+   */
+  @Deprecated
+  public List<TypedDependency> typedDependenciesCollapsed(boolean includeExtras) {
+    return typedDependenciesCollapsed(includeExtras ? Extras.MAXIMAL : Extras.NONE);
   }
 
 
@@ -796,10 +870,18 @@ public abstract class GrammaticalStructure implements Serializable {
    * returned may include "extras", such as controlled subject links.
    * @return collapsed dependencies with CC processed
    */
-  public List<TypedDependency> typedDependenciesCCprocessed(boolean includeExtras) {
+  public List<TypedDependency> typedDependenciesCCprocessed(Extras includeExtras) {
     List<TypedDependency> tdl = typedDependencies(includeExtras);
     collapseDependencies(tdl, true, includeExtras);
     return tdl;
+  }
+
+  /**
+   * @see edu.stanford.nlp.trees.GrammaticalStructure#typedDependenciesCCprocessed(edu.stanford.nlp.trees.GrammaticalStructure.Extras)
+   */
+  @Deprecated
+  public List<TypedDependency> typedDependenciesCCprocessed(boolean includeExtras) {
+    return typedDependenciesCCprocessed(includeExtras ? Extras.MAXIMAL : Extras.NONE);
   }
 
 
@@ -815,7 +897,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * @return collapsed dependencies with CC processed
    */
   public List<TypedDependency> typedDependenciesCCprocessed() {
-    return typedDependenciesCCprocessed(true);
+    return typedDependenciesCCprocessed(Extras.MAXIMAL);
   }
 
 
@@ -828,7 +910,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * @param list A list of dependencies to process for possible collapsing
    * @param CCprocess apply CC process?
    */
-  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, boolean includeExtras) {
+  protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, Extras includeExtras) {
     // do nothing as default operation
   }
 
@@ -945,14 +1027,14 @@ public abstract class GrammaticalStructure implements Serializable {
     }
 
     if (conllx) {
-      
+
       List<Tree> leaves = tree.getLeaves();
       Tree uposTree = UniversalPOSMapper.mapTree(tree);
       List<Label> uposLabels = uposTree.preTerminalYield();
       String[] words = new String[leaves.size()];
       String[] pos = new String[leaves.size()];
       String[] upos = new String[leaves.size()];
-      
+
       String[] relns = new String[leaves.size()];
       int[] govs = new int[leaves.size()];
 
@@ -1036,14 +1118,14 @@ public abstract class GrammaticalStructure implements Serializable {
    * @throws IOException
    */
   public static List<GrammaticalStructure> readCoNLLXGrammaticalStructureCollection(String fileName, Map<String, GrammaticalRelation> shortNameToGRel, GrammaticalStructureFromDependenciesFactory factory) throws IOException {
-    LineNumberReader reader = new LineNumberReader(new FileReader(fileName));
+    LineNumberReader reader = new LineNumberReader(IOUtils.readerFromString(fileName));
     List<GrammaticalStructure> gsList = new LinkedList<GrammaticalStructure>();
 
     List<List<String>> tokenFields = new ArrayList<List<String>>();
 
     for (String inline = reader.readLine(); inline != null;
          inline = reader.readLine()) {
-      if (!"".equals(inline)) {
+      if ( ! inline.isEmpty()) {
         // read in a single sentence token by token
         List<String> fields = Arrays.asList(inline.split("\t"));
         if (fields.size() != CoNLLX_FieldCount) {
@@ -1110,7 +1192,7 @@ public abstract class GrammaticalStructure implements Serializable {
 
     // Create a node outside the tree useful for root dependencies;
     // we want to keep those if they were stored in the conll file
-    
+
     CoreLabel rootLabel = new CoreLabel();
     rootLabel.setValue("ROOT");
     rootLabel.setWord("ROOT");
@@ -1205,9 +1287,7 @@ public abstract class GrammaticalStructure implements Serializable {
     } else {
       try {
         altDepReader = altDepReaderClass.getConstructor(String[].class).newInstance((Object) depReaderArgs);
-      } catch (IllegalArgumentException e) {
-        throw new RuntimeException(e);
-      } catch (SecurityException e) {
+      } catch (IllegalArgumentException | SecurityException | InvocationTargetException e) {
         throw new RuntimeException(e);
       } catch (InstantiationException e) {
         e.printStackTrace();
@@ -1215,8 +1295,6 @@ public abstract class GrammaticalStructure implements Serializable {
       } catch (IllegalAccessException e) {
         System.err.println(depReaderArgs.length + " argument constructor to " + altDepReaderName + " is not public.");
         return null;
-      } catch (InvocationTargetException e) {
-        throw new RuntimeException(e);
       } catch (NoSuchMethodException e) {
         System.err.println("String arguments constructor to " + altDepReaderName + " does not exist.");
         return null;
@@ -1275,10 +1353,10 @@ public abstract class GrammaticalStructure implements Serializable {
       e.printStackTrace();
       return null;
     } catch (NoSuchMethodException e) {
-      if (depPrintArgs == null) {
-        System.err.printf("Can't find no-argument constructor %s().\n", altDepPrinterName);
+      if (depPrintArgs.length == 0) {
+        System.err.printf("Can't find no-argument constructor %s().%n", altDepPrinterName);
       } else {
-        System.err.printf("Can't find constructor %s(%s).\n", altDepPrinterName, Arrays.toString(depPrintArgs));
+        System.err.printf("Can't find constructor %s(%s).%n", altDepPrinterName, Arrays.toString(depPrintArgs));
       }
       return null;
     }
@@ -1552,7 +1630,7 @@ public abstract class GrammaticalStructure implements Serializable {
     } else if (treeFileName != null) {
       tb.loadPath(treeFileName);
     } else if (filter != null) {
-      tb.load(new BufferedReader(new InputStreamReader(System.in)));
+      tb.load(IOUtils.readerFromStdin());
     } else if (conllXFileName != null) {
       try {
         gsBank = params.readGrammaticalStructureFromFile(conllXFileName);
@@ -1638,8 +1716,7 @@ public abstract class GrammaticalStructure implements Serializable {
         // System.err.println(t);
       }
 
-      if (test) {// print the grammatical structure, the basic, collapsed and
-        // CCprocessed
+      if (test) { // print the grammatical structure, the basic, collapsed and CCprocessed
 
         System.out.println("============= parse tree =======================");
         tree.pennPrint();
@@ -1648,27 +1725,48 @@ public abstract class GrammaticalStructure implements Serializable {
         System.out.println("------------- GrammaticalStructure -------------");
         System.out.println(gs);
 
+        boolean allConnected = true;
+        boolean connected;
+        Collection<TypedDependency> bungRoots = null;
         System.out.println("------------- basic dependencies ---------------");
-        System.out.println(StringUtils.join(gs.typedDependencies(false), "\n"));
+        List<TypedDependency> gsb = gs.typedDependencies(Extras.NONE);
+        System.out.println(StringUtils.join(gsb, "\n"));
+        connected = GrammaticalStructure.isConnected(gsb);
+        if ( ! connected && bungRoots == null) {
+          bungRoots = GrammaticalStructure.getRoots(gsb);
+        }
+        allConnected = connected && allConnected;
 
         System.out.println("------------- non-collapsed dependencies (basic + extra) ---------------");
-        System.out.println(StringUtils.join(gs.typedDependencies(true), "\n"));
+        List<TypedDependency> gse = gs.typedDependencies(Extras.MAXIMAL);
+        System.out.println(StringUtils.join(gse, "\n"));
+        connected = GrammaticalStructure.isConnected(gse);
+        if ( ! connected && bungRoots == null) {
+          bungRoots = GrammaticalStructure.getRoots(gse);
+        }
+        allConnected = connected && allConnected;
 
         System.out.println("------------- collapsed dependencies -----------");
-        System.out.println(StringUtils.join(gs.typedDependenciesCollapsed(true), "\n"));
+        System.out.println(StringUtils.join(gs.typedDependenciesCollapsed(Extras.MAXIMAL), "\n"));
 
         System.out.println("------------- collapsed dependencies tree -----------");
         System.out.println(StringUtils.join(gs.typedDependenciesCollapsedTree(), "\n"));
 
         System.out.println("------------- CCprocessed dependencies --------");
-        System.out.println(StringUtils.join(gs.typedDependenciesCCprocessed(true), "\n"));
+        List<TypedDependency> gscc = gs.typedDependenciesCollapsed(Extras.MAXIMAL);
+        System.out.println(StringUtils.join(gscc, "\n"));
 
         System.out.println("-----------------------------------------------");
-        // connectivity test
-        boolean connected = GrammaticalStructure.isConnected(gs.typedDependenciesCollapsed(true));
-        System.out.println("collapsed dependencies form a connected graph: " + connected);
-        if (!connected) {
-          System.out.println("possible offending nodes: " + GrammaticalStructure.getRoots(gs.typedDependenciesCollapsed(true)));
+        // connectivity tests
+        connected = GrammaticalStructure.isConnected(gscc);
+        if ( ! connected && bungRoots == null) {
+          bungRoots = GrammaticalStructure.getRoots(gscc);
+        }
+        allConnected = connected && allConnected;
+        if (allConnected) {
+          System.out.println("dependencies form connected graphs.");
+        } else {
+          System.out.println("dependency graph NOT connected! possible offending nodes: " + bungRoots);
         }
 
         // test for collapsed dependencies being a tree:
@@ -1702,9 +1800,9 @@ public abstract class GrammaticalStructure implements Serializable {
             System.out.println("------------- basic dependencies ---------------");
           }
           if (altDepPrinter == null) {
-            printDependencies(gs, gs.typedDependencies(false), tree, conllx, false);
+            printDependencies(gs, gs.typedDependencies(Extras.NONE), tree, conllx, false);
           } else {
-            System.out.println(altDepPrinter.dependenciesToString(gs, gs.typedDependencies(false), tree));
+            System.out.println(altDepPrinter.dependenciesToString(gs, gs.typedDependencies(Extras.NONE), tree));
           }
         }
 
@@ -1719,14 +1817,14 @@ public abstract class GrammaticalStructure implements Serializable {
           if (basic || CCprocessed || collapsedTree || nonCollapsed) {
             System.out.println("----------- collapsed dependencies -----------");
           }
-          printDependencies(gs, gs.typedDependenciesCollapsed(true), tree, conllx, false);
+          printDependencies(gs, gs.typedDependenciesCollapsed(Extras.MAXIMAL), tree, conllx, false);
         }
 
         if (CCprocessed) {
           if (basic || collapsed || collapsedTree || nonCollapsed) {
             System.out.println("---------- CCprocessed dependencies ----------");
           }
-          List<TypedDependency> deps = gs.typedDependenciesCCprocessed(true);
+          List<TypedDependency> deps = gs.typedDependenciesCCprocessed(Extras.MAXIMAL);
           if (checkConnected) {
             if (!GrammaticalStructure.isConnected(deps)) {
               System.err.println("Graph is not connected for:");
@@ -1747,7 +1845,7 @@ public abstract class GrammaticalStructure implements Serializable {
         // default use: CCprocessed (to parallel what happens within the parser)
         if (!basic && !collapsed && !CCprocessed && !collapsedTree && !nonCollapsed) {
           // System.out.println("----------- CCprocessed dependencies -----------");
-          printDependencies(gs, gs.typedDependenciesCCprocessed(true), tree, conllx, false);
+          printDependencies(gs, gs.typedDependenciesCCprocessed(Extras.MAXIMAL), tree, conllx, false);
         }
       }
 
