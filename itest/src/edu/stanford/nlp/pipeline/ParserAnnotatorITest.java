@@ -111,6 +111,46 @@ public class ParserAnnotatorITest extends TestCase {
                result.indexOf("SBAR") >= 0);
   }
 
+
+  private void assertParseOK(ParserAnnotator parser) {
+    AnnotationPipeline pipeline = new AnnotationPipeline();
+    pipeline.addAnnotator(new PTBTokenizerAnnotator(false));
+    pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
+    pipeline.addAnnotator(parser);
+    Annotation document = new Annotation("John Bauer works at Stanford.");
+    pipeline.annotate(document);
+    assertEquals(1, document.get(CoreAnnotations.SentencesAnnotation.class).size());
+    CoreMap sentence = document.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+    Tree parse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+    assertEquals("(ROOT (S (NP (NNP John) (NNP Bauer)) (VP (VBZ works) (PP (IN at) (NP (NNP Stanford)))) (. .)))", parse.toString());
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    List<Label> leaves = parse.yield();
+    assertEquals(6, tokens.size());
+    assertEquals(6, leaves.size());
+    String[] expectedTags = {"NNP", "NNP", "VBZ", "IN", "NNP", "."};
+    for (int i = 0; i < tokens.size(); ++i) {
+      assertEquals(expectedTags[i], tokens.get(i).tag());
+      assertTrue(leaves.get(i) instanceof CoreLabel);
+      assertEquals(expectedTags[i], ((CoreLabel) leaves.get(i)).tag());
+    }
+
+  }
+
+  /**
+   * Test various ways of creating an annotator, making sure they don't crash.
+   */
+  public void testAnnotatorConstructors() {
+    assertParseOK(new ParserAnnotator(false, -1));
+    assertParseOK(new ParserAnnotator(true, -1));
+    assertParseOK(new ParserAnnotator(false, 100));
+    assertParseOK(new ParserAnnotator(true, 100));
+
+    Properties props = new Properties();
+    props.setProperty("annotators", "parse");
+    assertParseOK(new ParserAnnotator("parse", props));
+
+  }
+
   static final String text = "I saw him ordering them to saw. Jack 's father has n't played\ngolf since 20 years ago . I 'm going to the\nbookstore to return a book Jack and his friends bought me .";
 
   static final String[] answer = {

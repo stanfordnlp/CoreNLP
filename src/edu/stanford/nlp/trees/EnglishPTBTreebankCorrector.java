@@ -119,12 +119,13 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer {
 
   private static final String editStr =
 
-    // Bung tree fixing
+    // 1. Bung tree fixing
 
-    // NOTE: if you add more of these, make sure to group the string additions
+    // NOTE: if you add more of these, make sure to group the string concatenations
     // into chunks using parentheses, or the compiler will choke with a
     // StackOverflowError (!)
 
+    (
     // Fix a bad parse in wsj_0415.mrg
     ("@VP=adj < (NP < (NP=ex < (NN < growth)) < CC=bad < (NP=bd < (VB < service)))\n" +
     "excise ex ex\n" +
@@ -149,13 +150,29 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer {
     "adjoin (NP NN@) newnp\n" +
             '\n') +
 
-    // POS tag fixing
+    // Fix some cases of 'as well as' not made into a CONJP unit
+    // There are a few other wierd cases that should also be reviewed with the tregex
+    // well|Well|WELL , as|AS|As . as|AS|As !>(__ > @CONJP)
+    // but note that there are also non-CONJP uses as adverbial form of 'as good as'
+    // This bleeds retagging of 'well' inside NP below
+    ("@NP < (__=bad < well|Well|WELL $, (__=before < as|AS|As) $. (__=after < as|AS|As))\n" +
+    "adjoinH (CONJP RB@) bad\n" +
+    "relabel bad CONJP\n" +
+    "move before >1 bad\n" +
+    "move after >-1 bad\n" +
+    '\n' )
 
-    // Ones specific to a phrasal category
 
-    // NP
+    ) +
+
+    // 2. POS tag fixing
+
+    // 2.a. Ones specific to a phrasal category
+
+    // 2.a.i NP
 
     (
+
     ("@NP < (/^``$/ < /^`$/) < (POS=bad < /^'$/)\n" +
     "relabel bad /''/\n" +
             '\n') +
@@ -189,6 +206,11 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer {
             '\n') +
 
     ("@NP < (/^VB/=bad < won)\n" +
+    "relabel bad NN\n" +
+            '\n') +
+
+    // "well". Other rules for under INTJ further below.
+    ("@NP < (/^RB/=bad < well|WELL|Well)\n" +
     "relabel bad NN\n" +
             '\n') +
 
@@ -1011,10 +1033,15 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer {
     "relabel badder VB\n" +
             '\n') +
 
-    // ADJP
+    // ADJP rules
 
     (
     ("@ADJP < UH=bad\n" +
+    "relabel bad JJ\n" +
+            '\n') +
+
+    // "alive and well"
+    ("@ADJP < (JJ < alive) < CC < (RB=bad < well)\n" +
     "relabel bad JJ\n" +
             '\n') +
 
@@ -1151,6 +1178,12 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer {
     "relabel bad JJR\n" +
             '\n') +
 
+    // Under INTJ
+
+
+    ("@INTJ < (RB=bad < well|WELL|Well)\n" +
+    "relabel bad UH\n" +
+            '\n') +
 
     ("@INTJ < (NNP=bad < UH|HUH)\n" +
     "relabel bad UH\n" +
@@ -1650,6 +1683,12 @@ public class EnglishPTBTreebankCorrector implements TreebankTransformer {
     ("@NP < CD < (NNP < Drugs=bad)\n" +
      "relabel bad NNS\n" +
             '\n') +
+
+    // "well" that should be interjection, but done as (ADVP (RB well))
+    ("well|Well|WELL [ , /^[:,]$/ | !, __ ] . /^[:,]$/ > (RB > ADVP)\n" +
+    "relabel bad UH\n" +
+    "relabel badder INTJ\n" +
+    '\n') +
 
     // last minute; check more carefully
 

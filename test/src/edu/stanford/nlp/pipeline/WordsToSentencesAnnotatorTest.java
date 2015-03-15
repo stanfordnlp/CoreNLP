@@ -44,4 +44,23 @@ public class WordsToSentencesAnnotatorTest extends TestCase {
     return true;
   }
 
+
+
+  public void testSentenceSplitting() {
+    String text = "Date :\n01/02/2012\nContent :\nSome words are here .\n";
+    // System.out.println(text);
+    Properties props = new Properties();
+    props.setProperty("annotators", "tokenize, ssplit");
+    props.setProperty("ssplit.eolonly", "true");
+    props.setProperty("tokenize.whitespace", "true");
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+
+    Annotation document1 = new Annotation(text);
+    pipeline.annotate(document1);
+    List<CoreMap> sentences = document1.get(CoreAnnotations.SentencesAnnotation.class);
+    // System.out.println("* Num of sentences in text = "+sentences.size());
+    // System.out.println("Sentences is " + sentences);
+    assertEquals(4, sentences.size());
+  }
+
 }

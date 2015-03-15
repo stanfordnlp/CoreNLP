@@ -1175,14 +1175,14 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       new TestSequenceModel(getCliqueTree(documentDataAndLabels), labelDictionary, document);
   }
 
-  protected CliquePotentialFunction getCliquePotentialFunction() {
+  protected CliquePotentialFunction getCliquePotentialFunctionForTest() {
     if (cliquePotentialFunction == null) {
       cliquePotentialFunction = new LinearCliquePotentialFunction(weights);
     }
     return cliquePotentialFunction;
   }
 
-  public void updateWeights(double[] x) {
+  public void updateWeightsForTest(double[] x) {
     cliquePotentialFunction = cliquePotentialFunctionHelper.getCliquePotentialFunction(x);
   }
 
@@ -1463,7 +1463,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     double[][][] featureVal = p.third();
 
     return CRFCliqueTree.getCalibratedCliqueTree(data, labelIndices, classIndex.size(), classIndex,
-        flags.backgroundSymbol, getCliquePotentialFunction(), featureVal);
+        flags.backgroundSymbol, getCliquePotentialFunctionForTest(), featureVal);
   }
 
   public CRFCliqueTree<String> getCliqueTree(List<IN> document) {
@@ -1789,9 +1789,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   protected CRFLogConditionalObjectiveFunction getObjectiveFunction(int[][][][] data, int[][] labels) {
-    CRFLogConditionalObjectiveFunction func = new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
+    return new CRFLogConditionalObjectiveFunction(data, labels, windowSize, classIndex,
       labelIndices, map, flags.priorType, flags.backgroundSymbol, flags.sigma, null, flags.multiThreadGrad);
-    return func;
   }
 
   protected double[] trainWeights(int[][][][] data, int[][] labels, Evaluator[] evaluators, int pruneFeatureItr, double[][][][] featureVals) {
@@ -2653,65 +2652,82 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   }
 
   public void loadTagIndex() {
-    if (flags.useNERPriorBIO) {
-      if (tagIndex == null) {
-        tagIndex = new HashIndex<String>();
-        for (String tag: classIndex.objectsList()) {
-          String[] parts = tag.split("-");
-          if (parts.length > 1)
-            tagIndex.add(parts[parts.length-1]);
-        }
-        tagIndex.add(flags.backgroundSymbol);
+    if (tagIndex == null) {
+      tagIndex = new HashIndex<String>();
+      for (String tag: classIndex.objectsList()) {
+        String[] parts = tag.split("-");
+        // if (parts.length > 1)
+        tagIndex.add(parts[parts.length-1]);
       }
+      tagIndex.add(flags.backgroundSymbol);
+    }
+    if (flags.useNERPriorBIO) {
       if (entityMatrices == null)
         entityMatrices = readEntityMatrices(flags.entityMatrix, tagIndex);
     }
   }
 
-  public static Pair<double[][], double[][]> readEntityMatrices(String fileName, Index<String> tagIndex) {
-    int numTags = tagIndex.size();
-    double[][] matrix = new double[numTags-1][numTags-1];
-    for (int i = 0; i < numTags-1; i++)
-      matrix[i] = new double[numTags-1];
-    double[][] subMatrix = new double[numTags-1][numTags-1];
-    for (int i = 0; i < numTags-1; i++)
-      subMatrix[i] = new double[numTags-1];
+  /**
+   * @return a matrix where each entry m[i][j] is logP(j|i)
+   * in other words, each row vector is normalized log conditional likelihood
+   */
+   static double[][] parseMatrix(String[] lines, Index<String> tagIndex, int matrixSize, boolean smooth) {
+    double[][] matrix = new double[matrixSize][matrixSize];
+    for (int i = 0; i < matrix.length; i++)
+      matrix[i] = new double[matrixSize];
+    for (String line: lines) {
+      String[] parts = line.split("\t");
+      for (String part: parts) {
+        String[] subparts = part.split(" ");
+        String[] subsubparts = subparts[0].split(":");
+        double counts = Double.parseDouble(subparts[1]);
+        if (counts == 0.0 && smooth) // smoothing
+          counts = 1.0;
+        int tagIndex1 = tagIndex.indexOf(subsubparts[0]);
+        int tagIndex2 = tagIndex.indexOf(subsubparts[1]);
+        matrix[tagIndex1][tagIndex2] = counts;
+      }
+    }
+    for (int i = 0; i < matrix.length; i++) {
+      double sum = ArrayMath.sum(matrix[i]);
+      for (int j = 0; j < matrix[i].length; j++) {
+        // log conditional probability  
+        matrix[i][j] = Math.log(matrix[i][j] / sum);
+      }
+    }
+    return matrix;
+  }
 
+  static Pair<double[][], double[][]> readEntityMatrices(String fileName, Index<String> tagIndex) {
+    int numTags = tagIndex.size();
+    int matrixSize = numTags-1;
+
+    String[] matrixLines = new String[matrixSize];
+    String[] subMatrixLines = new String[matrixSize];
     try {
       BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(fileName))));
       String line = null;
       int lineCount = 0;
       while ((line = br.readLine()) != null) {
         line = line.trim();
-        String[] parts = line.split("\t");
-        for (String part: parts) {
-          String[] subparts = part.split(" ");
-          String[] subsubparts = subparts[0].split(":");
-          double counts = Double.parseDouble(subparts[1]);
-          if (counts == 0.0) // smoothing
-            counts = 1.0;
-          int tagIndex1 = tagIndex.indexOf(subsubparts[0]);
-          int tagIndex2 = tagIndex.indexOf(subsubparts[1]);
-          if (lineCount < numTags-1)
-            matrix[tagIndex1][tagIndex2] = counts;
-          else
-            subMatrix[tagIndex1][tagIndex2] = counts;
-        }
+        if (lineCount < matrixSize)
+          matrixLines[lineCount] = line;
+        else
+          subMatrixLines[lineCount-matrixSize] = line;
         lineCount++;
       }
     } catch (Exception ex) {
       ex.printStackTrace();
       System.exit(-1);
     }
+
+    double[][] matrix = parseMatrix(matrixLines, tagIndex, matrixSize, true);
+    double[][] subMatrix = parseMatrix(subMatrixLines, tagIndex, matrixSize, true);
+
+    // In Jenny's paper, use the square root of non-log prob for matrix, but not for subMatrix
     for (int i = 0; i < matrix.length; i++) {
-      double sum = ArrayMath.sum(matrix[i]);
       for (int j = 0; j < matrix[i].length; j++)
-        matrix[i][j] = Math.log(matrix[i][j] / sum) / 2;
-    }
-    for (int i = 0; i < subMatrix.length; i++) {
-      double sum = ArrayMath.sum(subMatrix[i]);
-      for (int j = 0; j < subMatrix[i].length; j++)
-        subMatrix[i][j] = Math.log(subMatrix[i][j] / sum);
+        matrix[i][j] = matrix[i][j] / 2;
     }
 
     System.err.println("Matrix: ");
@@ -2845,6 +2861,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       crf = new CRFClassifierWithLOP<CoreLabel>(flags);
     } else if (flags.priorType.equals("DROPOUT")) {
       crf = new CRFClassifierWithDropout<CoreLabel>(flags);
+    } else if (flags.useNoisyLabel) {
+      crf = new CRFClassifierNoisyLabel<CoreLabel>(flags);
     } else {
       crf = new CRFClassifier<CoreLabel>(flags);
     }
