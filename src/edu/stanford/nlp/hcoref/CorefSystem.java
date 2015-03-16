@@ -131,17 +131,17 @@ public class CorefSystem {
     }
     
     // run processes
-    Integer docCnt = 0;
+    int docCnt = 0;
     while (true) {
       Document document = cs.docMaker.nextDoc();
       if (document == null) break;
       wrapper.put(Pair.makePair(document, cs));
-      logOutput(wrapper, writerGold, writerBeforeCoref, writerAfterCoref, docCnt);
+      docCnt = logOutput(wrapper, writerGold, writerBeforeCoref, writerAfterCoref, docCnt);
     }
     
     // Finished reading the input. Wait for jobs to finish
     wrapper.join();
-    logOutput(wrapper, writerGold, writerBeforeCoref, writerAfterCoref, docCnt);
+    docCnt = logOutput(wrapper, writerGold, writerBeforeCoref, writerAfterCoref, docCnt);
     writerGold.close();
     writerBeforeCoref.close();
     writerAfterCoref.close();
@@ -169,12 +169,12 @@ public class CorefSystem {
   /**
    *  write output of coref system in conll format, and log. 
    */
-  private static void logOutput(
+  private static int logOutput(
       MulticoreWrapper<Pair<Document, CorefSystem>, StringBuilder[]> wrapper,
       PrintWriter writerGold, 
       PrintWriter writerBeforeCoref,
       PrintWriter writerAfterCoref, 
-      Integer docCnt) {
+      int docCnt) {
     while (wrapper.peek()) {
       StringBuilder[] output = wrapper.poll();
       writerGold.print(output[0]);
@@ -183,6 +183,7 @@ public class CorefSystem {
       System.err.println(output[3]);
       if ((docCnt++) % 10 == 0) System.err.println(docCnt + " th document done");
     }
+    return docCnt;
   }
 
   /** 
