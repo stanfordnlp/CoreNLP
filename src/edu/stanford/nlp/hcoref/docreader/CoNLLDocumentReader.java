@@ -165,7 +165,7 @@ public class CoNLLDocumentReader implements DocReader {
         docIterator = new DocumentIterator(curFile.getAbsolutePath(), options);
       }
       CoNLLDocument next = docIterator.next();
-      Redwood.log("Reading document: " + next.getDocumentID()+" part: "+next.getPartNo());
+      Redwood.log("debug-docreader", "Reading document: " + next.getDocumentID()+" part: "+next.getPartNo());
       return next;
     } catch (IOException ex) {
       throw new RuntimeIOException(ex);

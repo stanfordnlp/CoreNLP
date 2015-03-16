@@ -27,7 +27,7 @@ import edu.stanford.nlp.util.IntPair;
 public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
 
   public RuleBasedCorefMentionFinder(HeadFinder headFinder, Properties props) {
-    this(CorefProperties.ALLOW_REPARSING, headFinder, CorefProperties.getLanguage(props));
+    this(CorefProperties.allowReparsing(props), headFinder, CorefProperties.getLanguage(props));
   }
 
   public RuleBasedCorefMentionFinder(boolean allowReparsing, HeadFinder headFinder, Locale lang) {
