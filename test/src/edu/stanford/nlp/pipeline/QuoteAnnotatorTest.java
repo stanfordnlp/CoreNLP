@@ -16,6 +16,7 @@ public class QuoteAnnotatorTest extends TestCase {
 
   private static StanfordCoreNLP pipeline;
   private static StanfordCoreNLP pipelineNoSingleQuotes;
+  private static StanfordCoreNLP pipelineMaxFive;
 
   /**
    * Initialize the annotators at the start of the unit test.
@@ -36,7 +37,22 @@ public class QuoteAnnotatorTest extends TestCase {
         props.setProperty("customAnnotatorClass.quote2", "edu.stanford.nlp.pipeline.QuoteAnnotator");
         pipelineNoSingleQuotes = new StanfordCoreNLP(props);
       }
+
+      if (pipelineMaxFive == null) {
+        Properties props = new Properties();
+        props.setProperty("annotators", "tokenize, ssplit, quote3");
+        props.setProperty("customAnnotatorClass.quote3", "edu.stanford.nlp.pipeline.QuoteAnnotator");
+        props.setProperty("maxLength", "5");
+        pipelineMaxFive = new StanfordCoreNLP(props);
+      }
     }
+  }
+
+  public void testMaxLength() {
+    String text = "`Hel,' he said, ``how are \"you\" blar a \"farrrrrooom\"";
+    List<CoreMap> quotes = runQuotes(text, 2, pipelineMaxFive);
+    assertEquals("`Hel,'", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("\"you\"", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
   }
 
   public void testTis() {
