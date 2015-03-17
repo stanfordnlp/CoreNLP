@@ -12,7 +12,7 @@ import java.util.Properties;
 /**
  * @author Grace Muzny
  */
-public class QuotationAnnotatorTest extends TestCase {
+public class QuoteAnnotatorTest extends TestCase {
 
   private static StanfordCoreNLP pipeline;
 
@@ -22,13 +22,22 @@ public class QuotationAnnotatorTest extends TestCase {
    */
   @Override
   public void setUp() {
-    synchronized(QuotationAnnotatorTest.class) {
+    synchronized(QuoteAnnotatorTest.class) {
       if (pipeline == null) {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, quote");
         pipeline = new StanfordCoreNLP(props);
       }
     }
+  }
+
+  public void testTis() {
+    String text = "\"'Tis Impossible, “Mr. 'tis “Mr. Bennet” Bennet”, impossible, when 'tis I am not acquainted with him\n" +
+        " myself; how can you be so teasing?\"";
+    List<CoreMap> quotes = runQuotes(text, 1);
+    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEmbedded("“Mr. Bennet”", "“Mr. 'tis “Mr. Bennet” Bennet”", quotes);
+    assertEmbedded("“Mr. 'tis “Mr. Bennet” Bennet”", text, quotes);
   }
 
   public void testBasicInternalPunc() {
@@ -348,6 +357,7 @@ public class QuotationAnnotatorTest extends TestCase {
       if (b.get(CoreAnnotations.TextAnnotation.class).equals(bed)) {
         // get the embedded quotes
         List<CoreMap> eqs = b.get(CoreAnnotations.QuotationsAnnotation.class);
+//        System.out.println("eqs: " + eqs);
         for (CoreMap eq : eqs) {
           if (eq.get(CoreAnnotations.TextAnnotation.class).equals(embedded)) {
             return true;

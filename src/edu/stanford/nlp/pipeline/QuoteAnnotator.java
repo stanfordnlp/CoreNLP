@@ -351,11 +351,11 @@ public class QuoteAnnotator implements Annotator {
     // If I didn't find any quotes, but did find a quote-beginning, try again,
     // but without the part of the text before the single quote
     if (quotesMap.isEmpty() && start >= 0) {
-      String toPass = text.substring(start + quote.length(), text.length());//  - (quote.length() - 1));
+      String toPass = text.substring(start + quote.length(), text.length());
       List<Pair<Integer, Integer>> embedded = recursiveQuotes(toPass, offset, null);
       for (Pair<Integer, Integer> e : embedded) {
-        quotes.add(new Pair(e.first() + offset + start + quote.length(),
-            e.second() + offset + start + 1));
+        quotes.add(new Pair(e.first() + start + quote.length(),
+            e.second() + start + 1));
       }
     } else {
       for (String qKind : quotesMap.keySet()) {
