@@ -384,8 +384,6 @@ public abstract class CorefMentionFinder {
     
   }
   
-  public abstract void extractNPorPRP(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet);
-  
   public void findHead(CoreMap s, List<Mention> mentions) {
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);

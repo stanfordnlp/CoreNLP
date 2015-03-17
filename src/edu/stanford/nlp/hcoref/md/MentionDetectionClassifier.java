@@ -76,11 +76,6 @@ public class MentionDetectionClassifier implements Serializable {
       }
     }
     
-//    if(Boolean.parseBoolean(props.getProperty("useSemantics", "false"))) {
-//      // entire string in entity linking dict
-//      features.incrementCount("VALDICT-MENTIONSTRING", dict.dictScore.getCount(p.lowercaseNormalizedSpanString()));
-//    }
-    
     return features;
   }
   

@@ -32,7 +32,7 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
   public HybridCorefMentionFinder(HeadFinder headFinder, Properties props) throws ClassNotFoundException, IOException {
     this.headFinder = headFinder;
     this.lang = CorefProperties.getLanguage(props);
-    mdClassifier = (PropertiesUtils.getBool(props, CorefProperties.MD_TRAIN_PROP, false))? 
+    mdClassifier = (CorefProperties.isMentionDetectionTraining(props))? 
         null : IOUtils.readObjectFromFile(CorefProperties.getPathModel(props, "md"));
   }
 
@@ -69,7 +69,10 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
     // mention selection based on document-wise info
     removeSpuriousMentions(doc, predictedMentions, dict, Boolean.parseBoolean(props.getProperty("removeNested", "true")), lang);
     
-    if(!PropertiesUtils.getBool(props, CorefProperties.MD_TRAIN_PROP, false)) mdClassifier.classifyMentions(predictedMentions, dict, props);
+    // if this is for MD training, skip classification
+    if(!CorefProperties.isMentionDetectionTraining(props)) {
+      mdClassifier.classifyMentions(predictedMentions, dict, props);
+    }
 
     return predictedMentions;
   }

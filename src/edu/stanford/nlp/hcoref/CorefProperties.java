@@ -352,4 +352,7 @@ public class CorefProperties {
   public static boolean useGoldPOS(Properties props) {
     return PropertiesUtils.getBool(props, USE_GOLD_POS_PROP, true);
   }
+  public static boolean isMentionDetectionTraining(Properties props) {
+    return PropertiesUtils.getBool(props, CorefProperties.MD_TRAIN_PROP, false);
+  }
 }
