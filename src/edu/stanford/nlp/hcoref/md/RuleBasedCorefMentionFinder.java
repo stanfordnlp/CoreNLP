@@ -128,7 +128,7 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
       int endIdx = ((CoreLabel)mLeaves.get(mLeaves.size()-1).label()).get(CoreAnnotations.IndexAnnotation.class);
       if (",".equals(sent.get(endIdx-1).word())) { endIdx--; } // try not to have span that ends with ,
       IntPair mSpan = new IntPair(beginIdx, endIdx);
-      if(!mentionSpanSet.contains(mSpan) && (!insideNE(mSpan, namedEntitySpanSet)) ) {
+      if(!mentionSpanSet.contains(mSpan) && ( lang==Locale.CHINESE || !insideNE(mSpan, namedEntitySpanSet)) ) {
 //      if(!mentionSpanSet.contains(mSpan) && (!insideNE(mSpan, namedEntitySpanSet) || t.value().startsWith("PRP")) ) {
         int dummyMentionId = -1;
         Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basicDependency, collapsedDependency, new ArrayList<CoreLabel>(sent.subList(beginIdx, endIdx)), t);
