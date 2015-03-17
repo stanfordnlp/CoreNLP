@@ -15,6 +15,7 @@ import java.util.Properties;
 public class QuoteAnnotatorTest extends TestCase {
 
   private static StanfordCoreNLP pipeline;
+  private static StanfordCoreNLP pipelineNoSingleQuotes;
 
   /**
    * Initialize the annotators at the start of the unit test.
@@ -26,7 +27,14 @@ public class QuoteAnnotatorTest extends TestCase {
       if (pipeline == null) {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, quote");
+        props.setProperty("quote.singleQuotes", "true");
         pipeline = new StanfordCoreNLP(props);
+      }
+      if (pipelineNoSingleQuotes == null) {
+        Properties props = new Properties();
+        props.setProperty("annotators", "tokenize, ssplit, quote2");
+        props.setProperty("customAnnotatorClass.quote2", "edu.stanford.nlp.pipeline.QuoteAnnotator");
+        pipelineNoSingleQuotes = new StanfordCoreNLP(props);
       }
     }
   }
@@ -101,6 +109,20 @@ public class QuoteAnnotatorTest extends TestCase {
     assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
     assertEmbedded("«lo “how” are you»", text, quotes);
     assertEmbedded("“how”", "«lo “how” are you»", quotes);
+  }
+
+  public void testBasicIgnoreSingleQuotes() {
+    String text = "“Hello,” he 'said', “how are you doing?”";
+    List<CoreMap> quotes = runQuotes(text, 2, pipelineNoSingleQuotes);
+    assertEquals("“Hello,”", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEquals("“how are you doing?”", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
+
+    text = "\"'Tis Impossible, “Mr. 'tis “Mr. Bennet” Bennet”, impossible, when 'tis I am not acquainted with him\n" +
+        " myself; how can you be so teasing?\"";
+    quotes = runQuotes(text, 1, pipelineNoSingleQuotes);
+    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEmbedded("“Mr. Bennet”", "“Mr. 'tis “Mr. Bennet” Bennet”", quotes);
+    assertEmbedded("“Mr. 'tis “Mr. Bennet” Bennet”", text, quotes);
   }
 
   public void testBasicUnicodeQuotes() {
@@ -302,13 +324,11 @@ public class QuoteAnnotatorTest extends TestCase {
     assertEquals("\"My cow is better than any one of Jones' bovines!\"", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
   }
 
-  public static Annotation getDoc(String text) {
-    Annotation doc = new Annotation(text);
-    pipeline.annotate(doc);
-    return doc;
+  public List<CoreMap> runQuotes(String text, int numQuotes) {
+    return runQuotes(text, numQuotes, pipeline);
   }
 
-  public static List<CoreMap> runQuotes(String text, int numQuotes) {
+  public List<CoreMap> runQuotes(String text, int numQuotes, StanfordCoreNLP pipeline) {
     Annotation doc = new Annotation(text);
     pipeline.annotate(doc);
 
