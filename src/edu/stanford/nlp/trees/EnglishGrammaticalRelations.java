@@ -1567,7 +1567,7 @@ public class EnglishGrammaticalRelations {
   // GrammaticalRelation objects
   public static final Map<String, GrammaticalRelation> shortNameToGRel = new ConcurrentHashMap<String, GrammaticalRelation>();
   static {
-    for (GrammaticalRelation gr : values()) {
+    for (GrammaticalRelation gr : values(true)) {
       shortNameToGRel.put(gr.toString().toLowerCase(), gr);
     }
   }
@@ -1703,7 +1703,7 @@ public class EnglishGrammaticalRelations {
    * @return The EnglishGrammaticalRelation with that name
    */
   public static GrammaticalRelation valueOf(String s) {
-    return GrammaticalRelation.valueOf(s, values);
+    return GrammaticalRelation.valueOf(s, synchronizedValues);
 
 //    // TODO does this need to be changed?
 //    // modification NOTE: do not commit until go-ahead

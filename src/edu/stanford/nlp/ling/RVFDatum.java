@@ -112,7 +112,7 @@ public class RVFDatum<L, F> implements Datum<L, F> {
    */
   @Override
   public String toString() {
-    return "RVFDatum[features=" + asFeaturesCounter() + ",label=" + label() + "]";
+    return "RVFDatum[id="+id+", features=" + asFeaturesCounter() + ",label=" + label() + "]";
   }
 
   public L label() {
