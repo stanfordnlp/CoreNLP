@@ -319,16 +319,12 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
   }
 
 
-  private int cachedHashCode = 0;
   /**
    * This hashCode uses only the docID, sentenceIndex, and index.
    * See compareTo for more info.
    */
   @Override
   public int hashCode() {
-    if (cachedHashCode != 0) {
-      return cachedHashCode;
-    }
     boolean sensible = false;
     int result = 0;
     if (get(CoreAnnotations.DocIDAnnotation.class) != null) {
@@ -346,7 +342,6 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
     if ( ! sensible) {
       System.err.println("WARNING!!!  You have hashed an IndexedWord with no docID, sentIndex or wordIndex. You will almost certainly lose");
     }
-    cachedHashCode = result;
     return result;
   }
 

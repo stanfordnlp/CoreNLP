@@ -1,6 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.time.TimeAnnotations;
@@ -10,29 +9,26 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.PropertiesUtils;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * Annotator that marks entity mentions in a document.
- * Entity mentions are:
- * <ul>
- * <li> Named entities (identified by NER) </li>
- * <li> Quantifiable entities
- *   <ul>
- *   <li> Times (identified by TimeAnnotator) </li>
- *   <li> Measurements (identified by ???) </li>
- *   </ul>
- *   </li>
- * </ul>
+ * Entity mentions are
+ * - Named entities (identified by NER)
+ * - Quantifiable entities
+ *   - Times (identified by TimeAnnotator)
+ *   - Measurements (identified by ???)
  *
  * Each sentence is annotated with a list of the mentions
- * (MentionsAnnotation as a list of CoreMap).
+ *  (MentionsAnnotation as a list of CoreMap)
  *
  * @author Angel Chang
  */
 public class EntityMentionsAnnotator implements Annotator {
-
   // Currently relies on NER annotations being okay
   // - Replace with calling NER classifiers and timeAnnotator directly
   LabeledChunkIdentifier chunkIdentifier;
@@ -66,7 +62,7 @@ public class EntityMentionsAnnotator implements Annotator {
     }
   }
 
-  private static final Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = new Function<Pair<CoreLabel, CoreLabel>, Boolean>() {
+  private static Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = new Function<Pair<CoreLabel, CoreLabel>, Boolean>() {
     @Override
     public Boolean apply(Pair<CoreLabel, CoreLabel> in) {
       // First argument is the current token
@@ -110,51 +106,38 @@ public class EntityMentionsAnnotator implements Annotator {
   @Override
   public void annotate(Annotation annotation) {
 
-    List<CoreMap> allMentions = new ArrayList<>();
-    List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
+    List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
+    Integer annoTokenBegin = annotation.get(CoreAnnotations.TokenBeginAnnotation.class);
+    if (annoTokenBegin == null) { annoTokenBegin = 0; }
+    List<CoreMap> chunks = chunkIdentifier.getAnnotatedChunks(tokens, annoTokenBegin,
+            CoreAnnotations.TextAnnotation.class, CoreAnnotations.NamedEntityTagAnnotation.class, IS_TOKENS_COMPATIBLE);
+    annotation.set(CoreAnnotations.MentionsAnnotation.class, chunks);
 
-    int sentenceIndex = 0;
-    for (CoreMap sentence : sentences) {
-      List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
-      Integer annoTokenBegin = sentence.get(CoreAnnotations.TokenBeginAnnotation.class);
-      if (annoTokenBegin == null) {
-        annoTokenBegin = 0;
-      }
-      List<CoreMap> chunks = chunkIdentifier.getAnnotatedChunks(tokens, annoTokenBegin,
-              CoreAnnotations.TextAnnotation.class, CoreAnnotations.NamedEntityTagAnnotation.class, IS_TOKENS_COMPATIBLE);
-      sentence.set(CoreAnnotations.MentionsAnnotation.class, chunks);
+    // By now entity mentions have been annotated and TextAnnotation and NamedEntityAnnotation marked
+    // Some additional annotations
+    List<CoreMap> mentions = annotation.get(CoreAnnotations.MentionsAnnotation.class);
+    if (mentions != null) {
+      for (CoreMap mention: mentions) {
+        List<CoreLabel> mentionTokens = mention.get(CoreAnnotations.TokensAnnotation.class);
+        String name = (String) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
+                CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, mentionTokens);
+        if (name == null) {
+          name = mention.get(CoreAnnotations.TextAnnotation.class);
+        } else {
+          mention.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, name);
+        }
+        //mention.set(CoreAnnotations.EntityNameAnnotation.class, name);
+        String type = mention.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+        mention.set(CoreAnnotations.EntityTypeAnnotation.class, type);
 
-      // By now entity mentions have been annotated and TextAnnotation and NamedEntityAnnotation marked
-      // Some additional annotations
-      List<CoreMap> mentions = sentence.get(CoreAnnotations.MentionsAnnotation.class);
-      if (mentions != null) {
-        for (CoreMap mention : mentions) {
-          List<CoreLabel> mentionTokens = mention.get(CoreAnnotations.TokensAnnotation.class);
-          String name = (String) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
-                  CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, mentionTokens);
-          if (name == null) {
-            name = mention.get(CoreAnnotations.TextAnnotation.class);
-          } else {
-            mention.set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, name);
-          }
-          //mention.set(CoreAnnotations.EntityNameAnnotation.class, name);
-          String type = mention.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-          mention.set(CoreAnnotations.EntityTypeAnnotation.class, type);
-
-          // set sentence index annotation for mention
-          mention.set(CoreAnnotations.SentenceIndexAnnotation.class, sentenceIndex);
-          // Take first non nil as timex for the mention
-          Timex timex = (Timex) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
-                  TimeAnnotations.TimexAnnotation.class, mentionTokens);
-          if (timex != null) {
-            mention.set(TimeAnnotations.TimexAnnotation.class, timex);
-          }
+        // Take first non nil as timex for the mention
+        Timex timex = (Timex) CoreMapAttributeAggregator.FIRST_NON_NIL.aggregate(
+            TimeAnnotations.TimexAnnotation.class, mentionTokens);
+        if (timex != null) {
+          mention.set(TimeAnnotations.TimexAnnotation.class, timex);
         }
       }
-      allMentions.addAll(mentions);
-      sentenceIndex++;
     }
-    annotation.set(CoreAnnotations.MentionsAnnotation.class, allMentions);
   }
 
 
@@ -168,5 +151,4 @@ public class EntityMentionsAnnotator implements Annotator {
     // TODO: figure out what this produces
     return Collections.emptySet();
   }
-
 }

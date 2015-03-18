@@ -27,7 +27,7 @@ Kristina Toutanova, Dan Klein, Christopher Manning, and Yoram
 Singer. 2003. Feature-Rich Part-of-Speech Tagging with a Cyclic
 Dependency Network. In Proceedings of HLT-NAACL 2003 pages 252-259.
 
-The system requires Java 1.8+ to be installed. About 60 MB of memory is
+The system requires Java 1.6+ to be installed. About 60 MB of memory is
 required to run a trained tagger, depending on the OS, tagging model
 chosen, etc.  (i.e., you may need to give to java an option like java
 -mx120m). Plenty of memory is needed to train a tagger. It depends on
@@ -134,7 +134,7 @@ stanford-postagger-YYYY-MM-DD.jar
 
 src
 
-  A directory containing the Java 1.8 source code for the Stanford POS
+  A directory containing the Java 1.5 source code for the Stanford POS
   Tagger distribution.
 
 build.xml, Makefile

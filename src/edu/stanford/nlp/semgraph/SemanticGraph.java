@@ -147,7 +147,8 @@ public class SemanticGraph implements Serializable {
    * @return A ordered list of edges in the graph.
    */
   public List<SemanticGraphEdge> edgeListSorted() {
-    ArrayList<SemanticGraphEdge> edgeList = new ArrayList<>();
+    ArrayList<SemanticGraphEdge> edgeList =
+      new ArrayList<SemanticGraphEdge>();
     for (SemanticGraphEdge edge : edgeIterable()) {
       edgeList.add(edge);
     }
@@ -630,18 +631,6 @@ public class SemanticGraph implements Serializable {
     for (IndexedWord vertex : vertexSet()) {
       String w = vertex.word();
       if ((w == null && pattern == null) || w != null && p.matcher(w).matches()) {
-        nodes.add(vertex);
-      }
-    }
-    return nodes;
-  }
-  
-  public List<IndexedWord> getAllNodesByPartOfSpeechPattern(String pattern) {
-    Pattern p = Pattern.compile(pattern);
-    List<IndexedWord> nodes = new ArrayList<IndexedWord>();
-    for (IndexedWord vertex : vertexSet()) {
-      String pos = vertex.tag();
-      if ((pos == null && pattern == null) || pos != null && p.matcher(pos).matches()) {
         nodes.add(vertex);
       }
     }
@@ -1638,8 +1627,7 @@ public class SemanticGraph implements Serializable {
    * are copied.
    */
   public SemanticGraph(SemanticGraph g) {
-    graph = new DirectedMultiGraph<>(g.graph);
-    roots = wordMapFactory.newSet(g.roots);
+    this(g, null);
   }
 
   /**

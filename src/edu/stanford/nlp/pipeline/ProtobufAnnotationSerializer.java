@@ -36,7 +36,7 @@ import java.util.*;
  *   A serializer using Google's protocol buffer format.
  *   The files produced by this serializer, in addition to being language-independent,
  *   are a little over 10% the size and 4x faster to read+write versus the default Java serialization
- *   (see GenericAnnotationSerializer), when both files are compressed with gzip.
+ *   (see {@link GenericAnnotationSerializer}), when both files are compressed with gzip.
  * </p>
  *
  * <p>
@@ -500,8 +500,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           .setDep(edge.getRelation().toString())
           .setIsExtra(edge.isExtra())
           .setSourceCopy(edge.getSource().copyCount())
-          .setTargetCopy(edge.getTarget().copyCount()));
-//          .setLanguage(toProto(edge.getRelation().getLanguage())));  // TODO(gabor) uncomment me after KBP release
+          .setTargetCopy(edge.getTarget().copyCount())
+          .setLanguage(toProto(edge.getRelation().getLanguage())));
     }
     // Return
     return builder.build();
@@ -619,8 +619,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return CoreNLPProtos.Language.Hebrew;
       case Spanish:
         return CoreNLPProtos.Language.Spanish;
-//      case Unknown:
-//        return CoreNLPProtos.Language.Unknown;  // TODO(gabor) uncomment me after KBP is released!
+      case Unknown:
+        return CoreNLPProtos.Language.Unknown;
       default:
         throw new IllegalStateException("Unknown language: " + lang);
     }
@@ -641,7 +641,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   public static CoreNLPProtos.Polarity toProto(Polarity pol) {
     return CoreNLPProtos.Polarity.newBuilder()
-        .setProjectEquivalence(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.EQUIVALENT).fixedIndex))
+        .setProjectEquivalence(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.EQUIVALENCE).fixedIndex))
         .setProjectForwardEntailment(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.FORWARD_ENTAILMENT).fixedIndex))
         .setProjectReverseEntailment(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.REVERSE_ENTAILMENT).fixedIndex))
         .setProjectNegation(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.NEGATION).fixedIndex))
@@ -939,8 +939,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return Languages.Language.Hebrew;
       case Spanish:
         return Languages.Language.Spanish;
-//      case Unknown:
-//        return Languages.Language.Unknown;  // TODO(gabor) uncomment me after KBP is released!
+      case Unknown:
+        return Languages.Language.Unknown;
       default:
         throw new IllegalStateException("Unknown language: " + lang);
     }
@@ -1039,8 +1039,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       synchronized (globalLock) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
         assert ie.hasDep();
-//        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep(), fromProto(ie.getLanguage()));  // TODO(gabor) uncomment me after KBP release
-        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep());
+        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep(), fromProto(ie.getLanguage()));
         graph.addEdge(source, target, rel, 1.0, ie.hasIsExtra() && ie.getIsExtra());
       }
     }

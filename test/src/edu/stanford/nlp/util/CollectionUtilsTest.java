@@ -1,7 +1,11 @@
 package edu.stanford.nlp.util;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -167,54 +171,5 @@ public class CollectionUtilsTest extends TestCase {
     Assert.assertEquals(2, CollectionUtils.maxIndex(t1));
   }
 
-  public void testIteratorConcatEmpty(){
-    Iterator<String> iter = CollectionUtils.concatIterators();
-    assertFalse(iter.hasNext());
-  }
-
-  public void testIteratorConcatSingleIter(){
-    Iterator<String> iter = CollectionUtils.concatIterators(new ArrayList<String>(){{ add("foo"); }}.iterator());
-    assertTrue(iter.hasNext());
-    assertEquals("foo", iter.next());
-    assertFalse(iter.hasNext());
-  }
-
-  public void testIteratorConcatMultiIter(){
-    Iterator<String> iter = CollectionUtils.concatIterators(
-        new ArrayList<String>(){{ add("foo"); }}.iterator(),
-        new ArrayList<String>(){{ add("bar"); add("baz"); }}.iterator(),
-        new ArrayList<String>(){{ add("boo"); }}.iterator()
-        );
-    assertTrue(iter.hasNext()); assertEquals("foo", iter.next());
-    assertTrue(iter.hasNext()); assertEquals("bar", iter.next());
-    assertTrue(iter.hasNext()); assertEquals("baz", iter.next());
-    assertTrue(iter.hasNext()); assertEquals("boo", iter.next());
-    assertFalse(iter.hasNext());
-  }
-
-  public void testIteratorConcatEmptyIter(){
-    Iterator<String> iter = CollectionUtils.concatIterators(
-        new ArrayList<String>(){{ add("foo"); }}.iterator(),
-        new ArrayList<String>(){{ }}.iterator(),
-        new ArrayList<String>(){{ add("boo"); }}.iterator()
-    );
-    assertTrue(iter.hasNext()); assertEquals("foo", iter.next());
-    assertTrue(iter.hasNext()); assertEquals("boo", iter.next());
-    assertFalse(iter.hasNext());
-  }
-
-  public void testIteratorConcaatRemove(){
-    ArrayList<String> a = new ArrayList<String>(){{ add("foo"); }};
-    ArrayList<String> b = new ArrayList<String>(){{ }};
-    ArrayList<String> c = new ArrayList<String>(){{ add("bar"); add("baz"); }};
-    Iterator<String> iter = CollectionUtils.concatIterators( a.iterator(), b.iterator(), c.iterator() );
-    assertTrue(iter.hasNext()); assertEquals("foo", iter.next());
-    assertTrue(iter.hasNext()); assertEquals("bar", iter.next());
-    iter.remove();
-    assertTrue(iter.hasNext()); assertEquals("baz", iter.next());
-    assertEquals(new ArrayList<String>(){{ add("foo"); }}, a);
-    assertEquals(new ArrayList<String>(){{ }}, b);
-    assertEquals(new ArrayList<String>(){{ add("baz"); }}, c);
-  }
 
 }
