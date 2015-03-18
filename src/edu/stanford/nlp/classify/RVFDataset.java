@@ -390,6 +390,12 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     }
     return new RVFDatum<L, F>(c, labelIndex.get(labels[index]));
   }
+  
+  public RVFDatum<L, F> getRVFDatumWithId(int index) {
+    RVFDatum<L, F> datum = getRVFDatum(index);
+    datum.setID(getRVFDatumId(index));
+    return datum;
+  }
 
   public String getRVFDatumSource(int index) {
     return sourcesAndIds.get(index).first();
@@ -399,6 +405,16 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     return sourcesAndIds.get(index).second();
   }
 
+  public void addAllWithSourcesAndIds(RVFDataset<L, F> data) {
+    for(int index=0 ; index<data.size ; index++) {
+      add(data.getRVFDatumWithId(index), data.getRVFDatumSource(index), data.getRVFDatumId(index));
+    }
+  }
+  public void addAll(Iterable<? extends Datum<L,F>> data) {
+    for (Datum<L, F> d : data) {
+      add(d);
+    }
+  }
   private void addSourceAndId(String src, String id) {
     sourcesAndIds.add(new Pair<String, String>(src, id));
   }

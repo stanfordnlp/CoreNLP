@@ -32,8 +32,8 @@ Secondly, you should also look at the Parser FAQ on the web:
 
     http://nlp.stanford.edu/software/parser-faq.shtml
 
-This software requires Java 6 (JDK 1.6.0+).  (You must have installed it
-separately. Check that the command "java -version" works and gives 1.6+.)
+This software requires Java 8 (JDK 1.8.0+).  (You must have installed it
+separately. Check that the command "java -version" works and gives 1.8+.)
 
 
 QUICKSTART
