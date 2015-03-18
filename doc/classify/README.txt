@@ -15,7 +15,7 @@ This package contains a maximum entropy classifier.
 
 For more information about the classifier, point a web browser at the included javadoc directory, starting at the Package page for the edu.stanford.nlp.classify package, and looking also at the ColumnDataClassifier class documentation therein.
 
-This software requires Java 5 (JDK 1.6.0+).  (You must have installed it
+This software requires Java 8 (JDK 1.8.0+).  (You must have installed it
 separately. Check the command "java -version".)
 
 
