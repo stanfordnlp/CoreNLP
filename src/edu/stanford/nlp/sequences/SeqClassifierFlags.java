@@ -91,7 +91,7 @@ import java.util.*;
  * <td>Use SGD (SGD version selected by useInPlaceSGD or useSGD) for a certain
  * number of passes (SGDPasses) and then switches to QN. Gives the quick initial
  * convergence of SGD, with the desired convergence criterion of QN (there is
- * some rampup time for QN). NOTE: Remember to set useQN to false</td>
+ * some ramp up time for QN). NOTE: Remember to set useQN to false</td>
  * </tr>
  * <tr>
  * <td>evaluateIters</td>
@@ -552,10 +552,9 @@ public class SeqClassifierFlags implements Serializable {
   public boolean iobWrapper = false;
 
   public boolean iobTags = false;
-  public boolean useSegmentation = false; /*
-                                           * binary segmentation feature for
-                                           * character-based Chinese NER
-                                           */
+
+  /** Binary segmentation feature for character-based Chinese NER. */
+  public boolean useSegmentation = false;
 
   public boolean memoryThrift = false;
   public boolean timitDatum = false;
@@ -1032,7 +1031,7 @@ public class SeqClassifierFlags implements Serializable {
    */
   public boolean useUndirectedDisjunctive;
 
-  public boolean splitSlashHyphenWords;
+  public boolean splitSlashHyphenWords;  // unused with new enum below. Remove when breaking serialization.
 
   /** If this number is strictly positive (greater than 0; 0 means unlimited),
    *  then add at most this many words to the knownLCwords.  (Words will only
@@ -1042,12 +1041,15 @@ public class SeqClassifierFlags implements Serializable {
    */
   public int maxAdditionalKnownLCWords = 10_000;
 
+  public enum SlashHyphenEnum { NONE, WFRAG, WORD, BOTH };
 
+  public SlashHyphenEnum slashHyphenTreatment = SlashHyphenEnum.NONE;
 
   // "ADD VARIABLES ABOVE HERE"
 
   public transient List<String> phraseGazettes = null;
   public transient Properties props = null;
+
 
 
   /**
@@ -1069,8 +1071,7 @@ public class SeqClassifierFlags implements Serializable {
    * Initialize this object using values in Properties object. The properties
    * are printed to stderr as it works.
    *
-   * @param props
-   *          The properties object used for initialization
+   * @param props The properties object used for initialization
    */
   public final void setProperties(Properties props) {
     setProperties(props, true);
@@ -1079,10 +1080,8 @@ public class SeqClassifierFlags implements Serializable {
   /**
    * Initialize using values in Properties file.
    *
-   * @param props
-   *          The properties object used for initialization
-   * @param printProps
-   *          Whether to print the properties to stderr as it works.
+   * @param props The properties object used for initialization
+   * @param printProps Whether to print the properties to stderr as it works.
    */
   public void setProperties(Properties props, boolean printProps) {
     this.props = props;
@@ -1090,7 +1089,7 @@ public class SeqClassifierFlags implements Serializable {
     for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
       String key = (String) e.nextElement();
       String val = props.getProperty(key);
-      if (!(key.length() == 0 && val.length() == 0)) {
+      if (!(key.isEmpty() && val.isEmpty())) {
         if (printProps) {
           System.err.println(key + '=' + val);
         }
@@ -1432,7 +1431,11 @@ public class SeqClassifierFlags implements Serializable {
       } else if (key.equalsIgnoreCase("useUndirectedDisjunctive")) {
         useUndirectedDisjunctive = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("splitSlashHyphenWords")) {
-        splitSlashHyphenWords = Boolean.parseBoolean(val);
+        try {
+          slashHyphenTreatment = SlashHyphenEnum.valueOf(val.trim().toUpperCase());
+        } catch (IllegalArgumentException | NullPointerException iae) {
+          slashHyphenTreatment = SlashHyphenEnum.NONE;
+        }
       } else if (key.equalsIgnoreCase("disjunctionWidth")) {
         disjunctionWidth = Integer.parseInt(val);
       } else if (key.equalsIgnoreCase("useDisjunctiveShapeInteraction")) {
@@ -2621,7 +2624,7 @@ public class SeqClassifierFlags implements Serializable {
    */
   public String getNotNullTrueStringRep() {
     try {
-      String rep = "";
+      StringBuilder rep = new StringBuilder();
       String joiner = "\n";
       Field[] f = this.getClass().getFields();
       for (Field ff : f) {
@@ -2632,52 +2635,52 @@ public class SeqClassifierFlags implements Serializable {
         if (type.equals(Boolean.class) || type.equals(boolean.class)) {
           boolean val = ff.getBoolean(this);
           if (val) {
-            rep += joiner + name + "=" + val;
+            rep.append(joiner).append(name).append('=').append(val);
           }
         } else if (type.equals(String.class)) {
           String val = (String) ff.get(this);
           if (val != null)
-            rep += joiner + name + "=" + val;
+            rep.append(joiner).append(name).append('=').append(val);
         } else if (type.equals(Double.class)) {
           Double val = (Double) ff.get(this);
-          rep += joiner + name + "=" + val;
+          rep.append(joiner).append(name).append('=').append(val);
         } else if (type.equals(double.class)) {
           double val = ff.getDouble(this);
-          rep += joiner + name + "=" + val;
+          rep.append(joiner).append(name).append('=').append(val);
         } else if (type.equals(Integer.class)) {
           Integer val = (Integer) ff.get(this);
-          rep += joiner + name + "=" + val;
+          rep.append(joiner).append(name).append('=').append(val);
         } else if (type.equals(int.class)) {
           int val = ff.getInt(this);
-          rep += joiner + name + "=" + val;
+          rep.append(joiner).append(name).append('=').append(val);
         } else if (type.equals(Float.class)) {
           Float val = (Float) ff.get(this);
-          rep += joiner + name + "=" + val;
+          rep.append(joiner).append(name).append('=').append(val);
         } else if (type.equals(float.class)) {
           float val = ff.getFloat(this);
-          rep += joiner + name + "=" + val;
+          rep.append(joiner).append(name).append('=').append(val);
         } else if (type.equals(Byte.class)) {
           Byte val = (Byte) ff.get(this);
-          rep += joiner + name + "=" + val;
+          rep.append(joiner).append(name).append('=').append(val);
         } else if (type.equals(byte.class)) {
           byte val = ff.getByte(this);
-          rep += joiner + name + "=" + val;
+          rep.append(joiner).append(name).append('=').append(val);
         } else if (type.equals(char.class)) {
           char val = ff.getChar(this);
-          rep += joiner + name + "=" + val;
+          rep.append(joiner).append(name).append('=').append(val);
         } else if (type.equals(Long.class)) {
           Long val = (Long) ff.get(this);
-          rep += joiner + name + "=" + val;
+          rep.append(joiner).append(name).append('=').append(val);
         } else if (type.equals(long.class)) {
           long val = ff.getLong(this);
-          rep += joiner + name + "=" + val;
+          rep.append(joiner).append(name).append('=').append(val);
         }
       }
-      return rep;
+      return rep.toString();
     } catch (Exception e) {
       e.printStackTrace();
+      return "";
     }
-    return null;
   }
 
 } // end class SeqClassifierFlags

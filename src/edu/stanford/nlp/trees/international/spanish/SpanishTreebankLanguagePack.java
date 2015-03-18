@@ -61,7 +61,7 @@ public class SpanishTreebankLanguagePack extends AbstractTreebankLanguagePack {
    * Return a tokenizer which might be suitable for tokenizing text that will be used with this
    * Treebank/Language pair, without tokenizing carriage returns (i.e., treating them as white
    * space).  The implementation in AbstractTreebankLanguagePack returns a factory for {@link
-   * WhitespaceTokenizer}.
+   * edu.stanford.nlp.process.WhitespaceTokenizer}.
    *
    * @return A tokenizer
    */

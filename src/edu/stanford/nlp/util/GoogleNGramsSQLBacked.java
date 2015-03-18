@@ -28,7 +28,7 @@ public class GoogleNGramsSQLBacked {
   @Option(name="googleNgram_hostname", gloss="where psql is located.")
   static String googleNgram_hostname = "jonsson";
 
-  @Option(name="googleNgram_dbname", gloss="the database name", required=true)
+  @Option(name="googleNgram_dbname", gloss="the database name")
   static String googleNgram_dbname;
 
   @Option(name="googleNgram_username")
@@ -43,9 +43,11 @@ public class GoogleNGramsSQLBacked {
   static Set<String> existingTablenames = null;
 
   static Connection connection = null;
+  private static String DBName;
 
   static void connect () throws SQLException{
     if(connection == null) {
+      assert googleNgram_dbname != null : "set googleNgram_dbname variable through the properties file";
       connection = DriverManager.getConnection(
         "jdbc:postgresql://" + googleNgram_hostname + "/" + googleNgram_dbname, googleNgram_username, "");
     }
@@ -75,9 +77,14 @@ public class GoogleNGramsSQLBacked {
    * @throws SQLException
    */
   public static long getCount(String str) {
+    String query = null;
     try{
     connect();
     str = str.trim();
+    if(str.contains("'")){
+      str = StringUtils.escapeString(str, new char[]{'\''},'\'');
+    }
+
     int ngram = str.split("\\s+").length;
     String table = tablenamePrefix + ngram;
 
@@ -86,7 +93,7 @@ public class GoogleNGramsSQLBacked {
 
     String phrase = escapeString(str);
 
-    String query = "select count from " + table + " where phrase='" + phrase+"';";
+    query = "select count from " + table + " where phrase='" + phrase+"';";
     Statement stmt = connection.createStatement();
     ResultSet result = stmt.executeQuery(query);
     if(result.next()){
@@ -94,6 +101,7 @@ public class GoogleNGramsSQLBacked {
     }else
       return -1;
     }catch(SQLException e){
+      System.err.println("Error getting count for " + str+ ". The query was " + query);
       e.printStackTrace();
       throw new RuntimeException(e);
     }
@@ -180,6 +188,41 @@ public class GoogleNGramsSQLBacked {
 
   }
 
+  //return rank of 1 gram in google ngeams if it is less than 20k. Otherwise -1.
+  public static int get1GramRank(String str){
+    String query = null;
+    try{
+      connect();
+      str = str.trim();
+      if(str.contains("'")){
+        str = StringUtils.escapeString(str, new char[]{'\''},'\'');
+      }
+
+      int ngram = str.split("\\s+").length;
+      if(ngram > 1)
+        return -1;
+      String table =  "googlengrams_1_ranked20k";
+
+      if(!existsTable(table))
+        return -1;
+
+      String phrase = escapeString(str);
+
+      query = "select rank from " + table + " where phrase='" + phrase+"';";
+      Statement stmt = connection.createStatement();
+      ResultSet result = stmt.executeQuery(query);
+      if(result.next()){
+        return result.getInt("rank");
+      }else
+        return -1;
+    }catch(SQLException e){
+      System.err.println("Error getting count for " + str+ ". The query was " + query);
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+
+  }
+
   static public void closeConnection() throws SQLException {
     if(connection != null)
       connection.close();
@@ -204,10 +247,25 @@ public class GoogleNGramsSQLBacked {
       System.out.println(getCounts(Arrays.asList("cancer","disease")));
       System.out.println("Get count 1 gram " + getTotalCount(1));
 
+      if(props.getProperty("phrase") != null) {
+        String p = props.getProperty("phrase");
+        System.out.println("count for phrase " + p + " is " + getCount(p));
+      }
+
+      if(props.getProperty("rank") != null){
+        String p = props.getProperty("rank");
+        System.out.println("Rank of " + p+ " is " + get1GramRank(p));
+      }
       closeConnection();
 
     }catch(Exception e){
       e.printStackTrace();
     }
   }
+
+  public static void setDBName(String DBName) {
+    googleNgram_dbname = DBName;
+  }
+
+
 }

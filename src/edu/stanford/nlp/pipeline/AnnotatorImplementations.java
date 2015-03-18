@@ -3,10 +3,11 @@ package edu.stanford.nlp.pipeline;
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.naturalli.NaturalLogicAnnotator;
+import edu.stanford.nlp.naturalli.OpenIE;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.ReflectionLoading;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -68,7 +69,7 @@ public class AnnotatorImplementations {
   /**
    * Annotate for named entities -- note that this combines multiple NER tag sets, and some auxiliary things (like temporal tagging)
    */
-  public Annotator ner(Properties properties) throws FileNotFoundException {
+  public Annotator ner(Properties properties) throws IOException {
 
     List<String> models = new ArrayList<String>();
     String modelNames = properties.getProperty("ner.model");
@@ -101,8 +102,9 @@ public class AnnotatorImplementations {
 
     int nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
     long maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
+    int maxSentenceLength = PropertiesUtils.getInt(properties, "ner.maxlength", Integer.MAX_VALUE);
 
-    return new NERCombinerAnnotator(nerCombiner, verbose, nThreads, maxTime);
+    return new NERCombinerAnnotator(nerCombiner, verbose, nThreads, maxTime, maxSentenceLength);
   }
 
   /**
@@ -211,6 +213,15 @@ public class AnnotatorImplementations {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
         Annotator.STANFORD_NATLOG + '.');
     return new NaturalLogicAnnotator(relevantProperties);
+  }
+
+  /**
+   * Annotate {@link edu.stanford.nlp.ie.util.RelationTriple}s from text.
+   */
+  public Annotator openie(Properties properties) {
+    Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
+        Annotator.STANFORD_OPENIE + '.');
+    return new OpenIE(relevantProperties);
   }
 
   /**
