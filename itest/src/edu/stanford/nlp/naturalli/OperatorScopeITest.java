@@ -118,11 +118,6 @@ public class OperatorScopeITest {
   }
 
   @Test
-  public void negationMidSentence() {
-    checkScope(3, 6, 6, 6, annotate("Obama was not born in Dallas")[2]);
-  }
-
-  @Test
   public void all_X_verb_Y() {
     checkScope(1, 2, 2, 4, annotate("All cats eat mice.")[0]);
     checkScope(1, 2, 2, 4, annotate("All cats have tails.")[0]);
@@ -241,24 +236,13 @@ public class OperatorScopeITest {
 
   @Test
   public void there_are_np_pp() {
-    // TODO(gabor) this actually seems wrong...
     checkScope(2, 6, annotate("there are cats who like dogs")[1]);
-  }
-
-  @Test
-  public void one_of_the_X_Y() {
-    checkScope(3, 4, 4, 6, annotate("one of the cats have tails")[2]);
   }
 
   @Test
   public void regressionStrangeComma() {
     Optional<OperatorSpec>[] operators = annotate("all cats, have tails.");
     checkScope(1, 2, 3, 5, operators[0]);  // though, unclear if this should even be true?
-  }
-
-  @Test
-  public void unarySome() {
-    checkScope(3, 4, annotate("Cats eat some mice")[2]);
   }
 
   @Test
@@ -366,8 +350,7 @@ public class OperatorScopeITest {
   public void fracasSentencesWithAtLeastAFew() {
     checkScope("{ At least a few } [ committee members ] [ are from Scandinavia ]");
     checkScope("{ At least a few } [ committee members ] [ are from Sweden ]");
-    // TODO(gabor) how do any of these work? Why is it only this one that's commented out?
-//    checkScope("{ At least a few } [ female committee members ] [ are from Scandinavia ]");
+//    checkScope("{ At least a few } [ female committee members ] [ are from Scandinavia ]");  // TODO(gabor) enable me again! This is getting grossly mis-parsed
   }
 
   @Test
@@ -375,11 +358,11 @@ public class OperatorScopeITest {
     checkScope("{ Either } [ Smith Jones or Anderson ] [ signed the contract ]");
   }
 
-//  @Test  // TODO(gabor) these are actually a bit tricky; [one of] and [the] are separate constituents
-//  public void fracasSentencesWithOneOfThe() {
-//    checkScope("{ One of } [ the commissioners ] [ spends a lot of time at home ]");
-//    checkScope("{ One of } [ the leading tenors ] [ is Pavarotti ]");
-//  }
+  @Test
+  public void fracasSentencesWithOneOfThe() {
+    checkScope("{ One of the } [ commissioners ] [ spends a lot of time at home ]");
+    checkScope("{ One of the } [ leading tenors ] [ is Pavarotti ]");
+  }
 
   @Test
   public void fracasSentencesWithSeveral() {

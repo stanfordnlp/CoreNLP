@@ -10,7 +10,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -413,21 +412,9 @@ public class IOUtils {
     // windows File.separator is \, but getting resources only works with /
     if (is == null) {
       is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/"));
-      // Classpath doesn't like double slashes (e.g., /home/user//foo.txt)
-      if (is == null) {
-        is = IOUtils.class.getClassLoader().getResourceAsStream(name.replaceAll("\\\\", "/").replaceAll("/+", "/"));
-      }
     }
     // if not found in the CLASSPATH, load from the file system
     if (is == null) is = new FileInputStream(name);
-    // make sure it's not a GZIP stream
-    if (name.endsWith(".gz")) {
-      try {
-        return new GZIPInputStream(is);
-      } catch (IOException e) {
-        System.err.println("Resource or file looks like a gzip file, but is not: " + name);
-      }
-    }
     return is;
   }
 
@@ -462,11 +449,6 @@ public class IOUtils {
       URL u = new URL(textFileOrUrl);
       URLConnection uc = u.openConnection();
       in = uc.getInputStream();
-      if (textFileOrUrl.endsWith(".gz")) {
-        try {
-          in = new GZIPInputStream(in);
-        } catch (IOException e) { }
-      }
     } else {
       try {
         in = findStreamInClasspathOrFileSystem(textFileOrUrl);
@@ -483,6 +465,11 @@ public class IOUtils {
                   "class path, filename or URL"); // , e2);
         }
       }
+    }
+
+    if (textFileOrUrl.endsWith(".gz")) {
+      // gunzip it if necessary
+      in = new GZIPInputStream(in, GZIP_FILE_BUFFER_SIZE);
     }
 
     // buffer this stream.  even gzip streams benefit from buffering,
@@ -1538,8 +1525,8 @@ public class IOUtils {
     //System.err.println("getBZip2PipedInputStream: Running command: "+cmd);
     Process p = rt.exec(cmd);
     Writer errWriter = new BufferedWriter(new OutputStreamWriter(System.err));
-    StreamGobbler errGobbler = new StreamGobbler(p.getErrorStream(), errWriter);
-    errGobbler.start();
+    StreamGobbler errGobler = new StreamGobbler(p.getErrorStream(), errWriter);
+    errGobler.start();
     return p.getInputStream();
   }
 
@@ -1669,7 +1656,7 @@ public class IOUtils {
   public static List<String> linesFromFile(String filename,String encoding, boolean ignoreHeader) {
     try {
       List<String> lines = new ArrayList<String>();
-      BufferedReader in = getBufferedReaderFromClasspathOrFileSystem(filename, encoding);
+      BufferedReader in = new BufferedReader(new EncodingFileReader(filename,encoding));
       String line;
       int i = 0;
       while ((line = in.readLine()) != null) {
@@ -2044,28 +2031,6 @@ public class IOUtils {
     }
     //noinspection ResultOfMethodCallIgnored
     file.delete();
-  }
-
-  /**
-   * Start a simple console. Read lines from stdin, and pass each line to the callback.
-   * Returns on typing "exit" or "quit".
-   * @param callback The function to run for every line of input.
-   * @throws IOException Thrown from the underlying input stream.
-   */
-  public static void console(Consumer<String> callback) throws IOException {
-    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-    String line;
-    System.out.print("> ");
-    while ( (line = reader.readLine()) != null) {
-      switch (line.toLowerCase()) {
-        case "exit":
-        case "quit":
-          return;
-        default:
-          callback.accept(line);
-      }
-      System.out.print("> ");
-    }
   }
 
 }
