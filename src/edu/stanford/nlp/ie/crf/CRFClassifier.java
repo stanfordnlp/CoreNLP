@@ -1337,8 +1337,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * Takes a {@link List} of something that extends {@link CoreMap} and prints
    * the likelihood of each possible label at each point.
    *
-   * @param document
-   *          A {@link List} of something that extends CoreMap.
+   * @param document A {@link List} of something that extends CoreMap.
    */
   @Override
   public void printProbsDocument(List<IN> document) {
@@ -1350,19 +1349,17 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     // for (int i = 0; i < factorTables.length; i++) {
     for (int i = 0; i < cliqueTree.length(); i++) {
       IN wi = document.get(i);
-      System.out.print(wi.get(CoreAnnotations.TextAnnotation.class) + '\t');
-      for (Iterator<String> iter = classIndex.iterator(); iter.hasNext();) {
-        String label = iter.next();
+      System.out.print(wi.get(CoreAnnotations.TextAnnotation.class));
+      for (String label : classIndex) {
         int index = classIndex.indexOf(label);
         // double prob = Math.pow(Math.E, factorTables[i].logProbEnd(index));
         double prob = cliqueTree.prob(i, index);
-        System.out.print(label + '=' + prob);
-        if (iter.hasNext()) {
-          System.out.print("\t");
-        } else {
-          System.out.print("\n");
-        }
+        System.out.print('\t');
+        System.out.print(label);
+        System.out.print('=');
+        System.out.print(prob);
       }
+      System.out.println();
     }
   }
 
