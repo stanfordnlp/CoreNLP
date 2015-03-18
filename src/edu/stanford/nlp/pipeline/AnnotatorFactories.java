@@ -8,7 +8,7 @@ import edu.stanford.nlp.process.WordToSentenceProcessor;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.PropertiesUtils;
 
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.Set;
@@ -71,8 +71,7 @@ public class AnnotatorFactories {
         } else {
           os.append(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY + ':');
           os.append(properties.getProperty(StanfordCoreNLP.NEWLINE_SPLITTER_PROPERTY, "false"));
-          os.append("ssplit.isOneSentence" + ':');
-          os.append(properties.getProperty("ssplit.isOneSentence", "false"));
+          os.append("ssplit.isOneSentence" + ':' + properties.getProperty("ssplit.isOneSentence", "false"));
           os.append(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY + ':');
           os.append(properties.getProperty(StanfordCoreNLP.NEWLINE_IS_SENTENCE_BREAK_PROPERTY, StanfordCoreNLP.DEFAULT_NEWLINE_IS_SENTENCE_BREAK));
         }
@@ -331,7 +330,7 @@ public class AnnotatorFactories {
       public Annotator create() {
         try {
           return annotatorImplementation.ner(properties);
-        } catch (IOException e) {
+        } catch (FileNotFoundException e) {
           throw new RuntimeIOException(e);
         }
       }
@@ -587,29 +586,10 @@ public class AnnotatorFactories {
   }
 
   //
-  // RelationTriples
-  //
-  public static AnnotatorFactory openie(Properties properties, final AnnotatorImplementations annotatorImpl) {
-    return new AnnotatorFactory(properties, annotatorImpl) {
-      @Override
-      public Annotator create() {
-        return annotatorImpl.openie(properties);
-      }
-
-      @Override
-      protected String additionalSignature() {
-        return "";
-      }
-    };
-  }
-
-  //
   // Quote Extractor
   //
   public static AnnotatorFactory quote(Properties properties, final AnnotatorImplementations annotatorImpl) {
     return new AnnotatorFactory(properties, annotatorImpl) {
-      private static final long serialVersionUID = -2525567112379296672L;
-
       @Override
       public Annotator create() {
         return annotatorImpl.quote(properties);

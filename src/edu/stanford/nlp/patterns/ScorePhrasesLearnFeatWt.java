@@ -36,10 +36,6 @@ import edu.stanford.nlp.util.logging.Redwood;
  */
 public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> {
 
-  @Option(name = "scoreClassifierType")
-  ClassifierType scoreClassifierType = ClassifierType.LR;
-
-
   static Map<String, double[]> wordVectors = null;
 
   public ScorePhrasesLearnFeatWt(ConstantsAndVariables constvar) {
@@ -47,7 +43,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     if(constvar.useWordVectorsToComputeSim && (constvar.subsampleUnkAsNegUsingSim|| constvar.expandPositivesWhenSampling || constvar.expandNegativesWhenSampling || constVars.usePhraseEvalWordVector) && wordVectors == null) {
       if(Data.rawFreq == null){
           Data.rawFreq = new ClassicCounter<CandidatePhrase>();
-          Data.computeRawFreqIfNull(PatternFactory.numWordsCompoundMax, constvar.batchProcessSents);
+          Data.computeRawFreqIfNull(PatternFactory.numWordsCompound, constvar.batchProcessSents);
       }
       Redwood.log(Redwood.DBG, "Reading word vectors");
       wordVectors = new HashMap<String, double[]>();
@@ -74,6 +70,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     OOVGoogleNgramScore = 0;
   }
 
+  @Option(name = "scoreClassifierType")
+  ClassifierType scoreClassifierType = ClassifierType.LR;
 
   public enum ClassifierType {
     DT, LR, RF, SVM, SHIFTLR, LINEAR
@@ -98,8 +96,36 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     GeneralDataset<String, ScorePhraseMeasures> dataset = choosedatums(forLearningPatterns, label, wordsPatExtracted, allSelectedPatterns, computeRawFreq);
 
-    edu.stanford.nlp.classify.Classifier classifier;
 
+    /*
+      if(constVars.batchProcessSents){
+
+      for(File f: Data.sentsFiles){
+        Redwood.log(Redwood.DBG,"Sampling sentences from " + f);
+        Map<String, List<CoreLabel>> sents = IOUtils.readObjectFromFile(f);
+        if(computeRawFreq)
+          Data.computeRawFreqIfNull(sents, constVars.numWordsCompound);
+        dataset.addAll(choosedatums(label, forLearningPatterns, sents, constVars.getAnswerClass().get(label), label,
+            constVars.getOtherSemanticClassesWords(), constVars.getIgnoreWordswithClassesDuringSelection().get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
+            allSelectedPatterns));
+      }
+    } else{
+      if(computeRawFreq)
+        Data.computeRawFreqIfNull(Data.sents, constVars.numWordsCompound);
+      dataset.addAll(choosedatums(label, forLearningPatterns, Data.sents, constVars.getAnswerClass().get(label), label,
+        constVars.getOtherSemanticClassesWords(), constVars.getIgnoreWordswithClassesDuringSelection().get(label), constVars.perSelectRand, constVars.perSelectNeg, wordsPatExtracted,
+        allSelectedPatterns));
+    }*/
+    edu.stanford.nlp.classify.Classifier classifier;
+//    if (scoreClassifierType.equals(ClassifierType.DT)) {
+//      ClassifierFactory wekaFactory = new WekaDatumClassifierFactory<String, ScorePhraseMeasures>("weka.classifiers.trees.J48", constVars.wekaOptions);
+//      classifier = wekaFactory.trainClassifier(dataset);
+//      Classifier cls = ((WekaDatumClassifier) classifier).getClassifier();
+//      J48 j48decisiontree = (J48) cls;
+//      System.out.println(j48decisiontree.toSummaryString());
+//      System.out.println(j48decisiontree.toString());
+//
+//    } else
     if (scoreClassifierType.equals(ClassifierType.LR)) {
       LogisticClassifierFactory<String, ScorePhraseMeasures> logfactory = new LogisticClassifierFactory<String, ScorePhraseMeasures>();
       LogPrior lprior = new LogPrior();
@@ -118,7 +144,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       SVMLightClassifierFactory<String, ScorePhraseMeasures> svmcf = new SVMLightClassifierFactory<String, ScorePhraseMeasures>(true);
       classifier = svmcf.trainClassifier(dataset);
       Set<String> labels = Generics.newHashSet(Arrays.asList("true"));
-      List<Triple<ScorePhraseMeasures, String, Double>> topfeatures = ((SVMLightClassifier<String, ScorePhraseMeasures>) classifier).getTopFeatures(labels, 0, true, 600, true);
+      List<Triple<ScorePhraseMeasures, String, Double>> topfeatures = ((SVMLightClassifier<String, ScorePhraseMeasures>) classifier).getTopFeatures(labels, 0, true, -1, true);
       Redwood.log(ConstantsAndVariables.minimaldebug, "The weights are " + StringUtils.join(topfeatures, "\n"));
     }else if(scoreClassifierType.equals(ClassifierType.SHIFTLR)){
 
@@ -143,7 +169,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       LinearClassifierFactory<String, ScorePhraseMeasures> lcf = new LinearClassifierFactory<String, ScorePhraseMeasures>();
       classifier = lcf.trainClassifier(dataset);
       Set<String> labels = Generics.newHashSet(Arrays.asList("true"));
-      List<Triple<ScorePhraseMeasures, String, Double>> topfeatures = ((LinearClassifier<String, ScorePhraseMeasures>) classifier).getTopFeatures(labels, 0, true, 600, true);
+      List<Triple<ScorePhraseMeasures, String, Double>> topfeatures = ((LinearClassifier<String, ScorePhraseMeasures>) classifier).getTopFeatures(labels, 0, true, -1, true);
       Redwood.log(ConstantsAndVariables.minimaldebug, "The weights are " + StringUtils.join(topfeatures, "\n"));
     }else
       throw new RuntimeException("cannot identify classifier " + scoreClassifierType);
@@ -221,19 +247,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       phl = phraseLemma.split("\\s+");
     int i =0;
     for(String w: phrase.split("\\s+")) {
-
       Integer cluster = constVars.getWordClassClusters().get(w);
       if (cluster == null && phl!=null)
           cluster = constVars.getWordClassClusters().get(phl[i]);
-
-      //try lowercase
-      if(cluster == null){
-        cluster = constVars.getWordClassClusters().get(w.toLowerCase());
-        if (cluster == null && phl!=null)
-          cluster = constVars.getWordClassClusters().get(phl[i].toLowerCase());
-      }
-
-
       if(cluster != null)
         cl.incrementCount(cluster);
       i++;
@@ -445,8 +461,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
 
   //this chooses the ones that are not close to the positive phrases!
-  Set<CandidatePhrase> chooseUnknownAsNegatives(Set<CandidatePhrase> candidatePhrases, String label, Collection<CandidatePhrase> positivePhrases, Map<String,
-    Collection<CandidatePhrase>> knownNegativePhrases, BufferedWriter logFile) throws IOException {
+  Set<CandidatePhrase> chooseUnknownAsNegatives(Set<CandidatePhrase> candidatePhrases, String label, double percentage, Collection<CandidatePhrase> positivePhrases, Map<String, Collection<CandidatePhrase>> knownNegativePhrases, BufferedWriter logFile) throws IOException {
 
     List<List<CandidatePhrase>> threadedCandidates = GetPatternsFromDataMultiClass.getThreadBatches(CollectionUtils.toList(candidatePhrases), constVars.numThreads);
 
@@ -492,7 +507,6 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
     //Collection<CandidatePhrase> removed = Counters.retainBottom(sims, (int) (sims.size() * percentage));
     //System.out.println("not choosing " + removed + " as the negative phrases. percentage is " + percentage + " and allMaxsim was " + allMaxSim);
-
     return sims.keySet();
   }
 
@@ -514,7 +528,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     Random r = new Random(0);
     List<Integer> lengths = new ArrayList<Integer>();
-    for(int i = 1;i <= PatternFactory.numWordsCompoundMapped.get(label); i++)
+    for(int i = 1;i <= PatternFactory.numWordsCompound; i++)
       lengths.add(i);
     int length = CollectionUtils.sample(lengths, r);
 
@@ -611,6 +625,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     Map<String, DataInstance> sents;
     Class answerClass;
     String answerLabel;
+    boolean forLearningPattern;
     TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted;
     Counter<E> allSelectedPatterns;
     Counter<Integer> wordClassClustersOfPositive;
@@ -618,11 +633,12 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     boolean expandPos;
     boolean expandNeg;
 
-    public ChooseDatumsThread(String label, Map<String, DataInstance> sents, Collection<String> keys, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted, Counter<E> allSelectedPatterns,
+    public ChooseDatumsThread(String label, Map<String, DataInstance> sents, Collection<String> keys, boolean forLearningPattern, TwoDimensionalCounter<CandidatePhrase, E> wordsPatExtracted, Counter<E> allSelectedPatterns,
                               Counter<Integer> wordClassClustersOfPositive, Map<String, Collection<CandidatePhrase>> allPossiblePhrases, boolean expandPos, boolean expandNeg){
       this.answerLabel = label;
       this.sents = sents;
       this.keys = keys;
+      this.forLearningPattern = forLearningPattern;
       this.wordsPatExtracted = wordsPatExtracted;
       this.allSelectedPatterns = allSelectedPatterns;
       this.wordClassClustersOfPositive = wordClassClustersOfPositive;
@@ -866,20 +882,14 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     if((expandPos || expandNeg) && !constVars.useWordVectorsToComputeSim){
       for(CandidatePhrase s: CollectionUtils.union(constVars.getLearnedWords(answerLabel).keySet(), constVars.getSeedLabelDictionary().get(answerLabel))){
         String[] toks = s.getPhrase().split("\\s+");
-        Integer num = constVars.getWordClassClusters().get(s.getPhrase());
-        if(num  == null)
-          num = constVars.getWordClassClusters().get(s.getPhrase().toLowerCase());
-        if(num == null){
+        if(!constVars.getWordClassClusters().containsKey(s.getPhrase())){
           for(String tok: toks){
-            Integer toknum =constVars.getWordClassClusters().get(tok);
-            if(toknum == null)
-              toknum =constVars.getWordClassClusters().get(tok.toLowerCase());
-            if(toknum != null){
-              distSimClustersOfPositive.incrementCount(toknum);
+            if(constVars.getWordClassClusters().containsKey(tok)){
+              distSimClustersOfPositive.incrementCount(constVars.getWordClassClusters().get(tok));
             }
           }
         } else
-        distSimClustersOfPositive.incrementCount(num);
+        distSimClustersOfPositive.incrementCount(constVars.getWordClassClusters().get(s.getPhrase()));
       }
     }
 
@@ -901,7 +911,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       Map<String, DataInstance> sents = sentsf.first();
       Redwood.log(Redwood.DBG, "Sampling datums from " + sentsf.second());
       if (computeRawFreq)
-        Data.computeRawFreqIfNull(sents, PatternFactory.numWordsCompoundMax);
+        Data.computeRawFreqIfNull(sents, PatternFactory.numWordsCompound);
 
       List<List<String>> threadedSentIds = GetPatternsFromDataMultiClass.getThreadBatches(new ArrayList<String>(sents.keySet()), constVars.numThreads);
       ExecutorService executor = Executors.newFixedThreadPool(constVars.numThreads);
@@ -909,8 +919,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
       //multi-threaded choose positive, negative and unknown
       for (List<String> keys : threadedSentIds) {
-        Callable<Quintuple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>,  Counter<CandidatePhrase>>> task = new ChooseDatumsThread(answerLabel, sents, keys,
-           wordsPatExtracted, allSelectedPatterns, distSimClustersOfPositive, allPossibleNegativePhrases, expandPos, expandNeg);
+        Callable<Quintuple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>,  Counter<CandidatePhrase>>> task = new ChooseDatumsThread(answerLabel, sents, keys, forLearningPattern, wordsPatExtracted, allSelectedPatterns,
+          distSimClustersOfPositive, allPossibleNegativePhrases, expandPos, expandNeg);
         Future<Quintuple<Set<CandidatePhrase>, Set<CandidatePhrase>, Set<CandidatePhrase>, Counter<CandidatePhrase>,  Counter<CandidatePhrase>>> submit = executor.submit(task);
         list.add(submit);
       }
@@ -996,7 +1006,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     System.out.println("all positive phrases of size " + allPositivePhrases.size() + " are  " + allPositivePhrases);
     for(CandidatePhrase candidate: allPositivePhrases) {
-      Counter<ScorePhraseMeasures> feat;
+      Counter<ScorePhraseMeasures> feat = null;
       //CandidatePhrase candidate = new CandidatePhrase(l.word());
       if (forLearningPattern) {
         feat = getPhraseFeaturesForPattern(answerLabel, candidate);
@@ -1015,7 +1025,8 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     Redwood.log(Redwood.DBG, "Number of unknown phrases is " + allUnknownPhrases.size());
 
     if(constVars.subsampleUnkAsNegUsingSim){
-      Set<CandidatePhrase> chosenUnknown = chooseUnknownAsNegatives(allUnknownPhrases, answerLabel, allPositivePhrases, allPossibleNegativePhrases, logFile);
+      double subSampleUnkAsNegUsingSimPercentage = 1.0;
+      Set<CandidatePhrase> chosenUnknown = chooseUnknownAsNegatives(allUnknownPhrases, answerLabel, subSampleUnkAsNegUsingSimPercentage, allPositivePhrases, allPossibleNegativePhrases, logFile);
       Redwood.log(Redwood.DBG, "Choosing " + chosenUnknown.size() + " unknowns as negative based to their similarity to the positive phrases");
       allNegativePhrases.addAll(chosenUnknown);
     }
@@ -1026,7 +1037,7 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     if(allNegativePhrases.size() > numpos) {
       Redwood.log(Redwood.WARN, "Num of negative (" + allNegativePhrases.size() + ") is higher than number of positive phrases (" + numpos + ") = " +
         (allNegativePhrases.size() / (double)numpos) + ". " +
-        "Capping the number by taking the first numPositives as negative. Consider decreasing perSelectRand");
+        "Capping the number by taking the first numPositives as negative. Consider decreasing perSelectNeg and perSelectRand");
       int i = 0;
       Set<CandidatePhrase> selectedNegPhrases = new HashSet<CandidatePhrase>();
       for(CandidatePhrase p : allNegativePhrases){
@@ -1085,86 +1096,6 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     return similaritiesWithLabeledPhrases.get(phrase);
   }
 
-
-  Counter<ScorePhraseMeasures> getPhraseFeaturesForPattern(String label, CandidatePhrase word) {
-
-    if (phraseScoresRaw.containsFirstKey(word))
-      return phraseScoresRaw.getCounter(word);
-
-    Counter<ScorePhraseMeasures> scoreslist = new ClassicCounter<ScorePhraseMeasures>();
-
-    //Add features on the word, if any!
-    if(word.getFeatures()!= null){
-      scoreslist.addAll(Counters.transform(word.getFeatures(), x -> ScorePhraseMeasures.create(x)));
-    } else{
-      Redwood.log(ConstantsAndVariables.extremedebug, "features are null for " + word);
-    }
-
-
-    if (constVars.usePatternEvalSemanticOdds) {
-      double dscore = this.getDictOddsScore(word, label, 0);
-      scoreslist.setCount(ScorePhraseMeasures.SEMANTICODDS, dscore);
-    }
-
-    if (constVars.usePatternEvalGoogleNgram) {
-      Double gscore = getGoogleNgramScore(word);
-      if (gscore.isInfinite() || gscore.isNaN()) {
-        throw new RuntimeException("how is the google ngrams score " + gscore + " for " + word);
-      }
-      scoreslist.setCount(ScorePhraseMeasures.GOOGLENGRAM, gscore);
-    }
-
-    if (constVars.usePatternEvalDomainNgram) {
-      Double gscore = getDomainNgramScore(word.getPhrase());
-      if (gscore.isInfinite() || gscore.isNaN()) {
-        throw new RuntimeException("how is the domain ngrams score " + gscore + " for " + word + " when domain raw freq is " + Data.domainNGramRawFreq.getCount(word)
-          + " and raw freq is " + Data.rawFreq.getCount(word));
-
-      }
-      scoreslist.setCount(ScorePhraseMeasures.DOMAINNGRAM, gscore);
-    }
-
-    if (constVars.usePatternEvalWordClass) {
-      Integer wordclass = constVars.getWordClassClusters().get(word.getPhrase());
-      if(wordclass == null){
-        wordclass = constVars.getWordClassClusters().get(word.getPhrase().toLowerCase());
-      }
-      scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.DISTSIM.toString()+"-"+wordclass), 1.0);
-    }
-
-    if (constVars.usePatternEvalEditDistSame) {
-      double ed = constVars.getEditDistanceScoresThisClass(label, word.getPhrase());
-      assert ed <= 1 : " how come edit distance from the true class is " + ed  + " for word " + word;
-      scoreslist.setCount(ScorePhraseMeasures.EDITDISTSAME,  ed);
-    }
-    if (constVars.usePatternEvalEditDistOther) {
-      double ed = constVars.getEditDistanceScoresOtherClass(label, word.getPhrase());
-      assert ed <= 1 : " how come edit distance from the true class is " + ed  + " for word " + word;;
-      scoreslist.setCount(ScorePhraseMeasures.EDITDISTOTHER, ed);
-    }
-
-    if(constVars.usePatternEvalWordShape){
-      scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word.getPhrase(), label));
-    }
-
-    if(constVars.usePatternEvalWordShapeStr){
-      scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.WORDSHAPESTR + "-" + this.wordShape(word.getPhrase())), 1.0);
-    }
-
-    if(constVars.usePatternEvalFirstCapital){
-      scoreslist.setCount(ScorePhraseMeasures.ISFIRSTCAPITAL, StringUtils.isCapitalized(word.getPhrase())? 1.0 :0);
-    }
-
-    if(constVars.usePatternEvalBOW){
-      for(String s: word.getPhrase().split("\\s+"))
-        scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.BOW +"-"+ s), 1.0);
-    }
-
-    phraseScoresRaw.setCounter(word, scoreslist);
-    //System.out.println("scores for " + word + " are " + scoreslist);
-    return scoreslist;
-  }
-/*
   Counter<ScorePhraseMeasures> getPhraseFeaturesForPattern(String label, CandidatePhrase word) {
 
     if (phraseScoresRaw.containsFirstKey(word))
@@ -1215,24 +1146,10 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word.getPhrase(), label));
     }
 
-    if(constVars.usePatternEvalWordShapeStr){
-      scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.WORDSHAPE +"-"+ this.wordShape(word.getPhrase())), 1.0);
-    }
-
-    if(constVars.usePatternEvalFirstCapital){
-      scoreslist.setCount(ScorePhraseMeasures.ISFIRSTCAPITAL, StringUtils.isCapitalized(word.getPhrase())?1.0:0.0);
-    }
-
-    if(constVars.usePatternEvalBOW){
-      for(String s: word.getPhrase().split("\\s+"))
-        scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.BOW +"-"+ s.toLowerCase()), 1.0);
-    }
-
     phraseScoresRaw.setCounter(word, scoreslist);
     return scoreslist;
   }
-*/
-  
+
   public double scoreUsingClassifer(edu.stanford.nlp.classify.Classifier classifier, CandidatePhrase word, String label, boolean forLearningPatterns,
       Counter<E> patternsThatExtractedPat, Counter<E> allSelectedPatterns) {
 
@@ -1255,14 +1172,22 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
       LogisticClassifier logcl = ((LogisticClassifier) classifier);
 
       String l = (String) logcl.getLabelForInternalPositiveClass();
-      Counter<ScorePhraseMeasures> feat;
+      boolean flipsign = false;
+      if (l.equals(Boolean.FALSE.toString())) {
+        flipsign = true;
+      }
+      Counter<ScorePhraseMeasures> feat = null;
       if (forLearningPatterns)
         feat = getPhraseFeaturesForPattern(label, word);
       else
         feat = this.getFeatures(label, word, patternsThatExtractedPat, allSelectedPatterns);
 
-      RVFDatum<String, ScorePhraseMeasures> d = new RVFDatum<String, ScorePhraseMeasures>(feat, Boolean.TRUE.toString());
-      score = logcl.probabilityOf(d);
+      RVFDatum<String, ScorePhraseMeasures> d = new RVFDatum<String, ScorePhraseMeasures>(feat, Boolean.FALSE.toString());
+      //TODO: do we need probability?
+//      score = logcl.probabilityOf(d);
+//      if (flipsign)
+//        score = 1 - score;
+      score = logcl.scoresOf(d).getCount(Boolean.TRUE.toString());
 
     } else if( scoreClassifierType.equals(ClassifierType.SHIFTLR)){
       //convert to basicdatum -- restriction of ShiftLR right now
@@ -1338,10 +1263,9 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
     }
 
     if (constVars.usePhraseEvalWordClass) {
+//      double distSimWt = getDistSimWtScore(word.getPhrase(), label);
+//      scoreslist.setCount(ScorePhraseMeasures.DISTSIM, distSimWt);
       Integer wordclass = constVars.getWordClassClusters().get(word.getPhrase());
-      if(wordclass == null){
-        wordclass = constVars.getWordClassClusters().get(word.getPhrase().toLowerCase());
-      }
       scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.DISTSIM.toString()+"-"+wordclass), 1.0);
     }
 
@@ -1390,19 +1314,6 @@ public class ScorePhrasesLearnFeatWt<E extends Pattern> extends PhraseScorer<E> 
 
     if(constVars.usePhraseEvalWordShape){
       scoreslist.setCount(ScorePhraseMeasures.WORDSHAPE, this.getWordShapeScore(word.getPhrase(), label));
-    }
-
-    if(constVars.usePhraseEvalWordShapeStr){
-      scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.WORDSHAPESTR + "-" + this.wordShape(word.getPhrase())), 1.0);
-    }
-
-    if(constVars.usePhraseEvalFirstCapital){
-      scoreslist.setCount(ScorePhraseMeasures.ISFIRSTCAPITAL, StringUtils.isCapitalized(word.getPhrase())? 1.0 :0);
-    }
-
-    if(constVars.usePhraseEvalBOW){
-      for(String s: word.getPhrase().split("\\s+"))
-        scoreslist.setCount(ScorePhraseMeasures.create(ScorePhraseMeasures.BOW +"-"+ s), 1.0);
     }
 
     phraseScoresRaw.setCounter(word, scoreslist);

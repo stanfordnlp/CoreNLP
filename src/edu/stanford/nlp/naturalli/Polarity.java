@@ -3,7 +3,6 @@ package edu.stanford.nlp.naturalli;
 import edu.stanford.nlp.util.Pair;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,11 +15,6 @@ import java.util.List;
  */
 @SuppressWarnings("UnusedDeclaration")
 public class Polarity {
-
-  /**
-   * The default (very permissive) polarity.
-   */
-  public static final Polarity DEFAULT = new Polarity(Collections.singletonList(Pair.makePair(Monotonicity.MONOTONE, MonotonicityType.BOTH)));
 
   /** The projection function, as a table from a relations fixed index to the projected fixed index */
   private final byte[] projectionFunction = new byte[7];
@@ -69,8 +63,8 @@ public class Polarity {
    */
   private NaturalLogicRelation project(NaturalLogicRelation input, Monotonicity mono, MonotonicityType type) {
     switch (input) {
-      case EQUIVALENT:
-        return NaturalLogicRelation.EQUIVALENT;
+      case EQUIVALENCE:
+        return NaturalLogicRelation.EQUIVALENCE;
       case FORWARD_ENTAILMENT:
         switch (mono) {
           case MONOTONE:
@@ -222,6 +216,20 @@ public class Polarity {
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Polarity)) return false;
+    Polarity polarity = (Polarity) o;
+    return Arrays.equals(projectionFunction, polarity.projectionFunction);
+
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(projectionFunction);
+  }
+
+  @Override
   public String toString() {
     if (isUpwards()) {
       return "up";
@@ -230,18 +238,5 @@ public class Polarity {
     } else {
       return "flat";
     }
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Polarity)) return false;
-    Polarity polarity = (Polarity) o;
-    return Arrays.equals(projectionFunction, polarity.projectionFunction);
-  }
-
-  @Override
-  public int hashCode() {
-    return projectionFunction != null ? Arrays.hashCode(projectionFunction) : 0;
   }
 }

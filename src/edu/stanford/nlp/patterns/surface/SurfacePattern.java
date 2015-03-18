@@ -21,7 +21,6 @@ import edu.stanford.nlp.util.*;
 
 public class SurfacePattern extends Pattern implements Serializable, Comparable<SurfacePattern>{
 
-
   @Override
   public CollectionValuedMap<String, String> getRelevantWords() {
     CollectionValuedMap<String, String> relwordsThisPat = new CollectionValuedMap<>();
@@ -82,10 +81,7 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
     this.genre = genre;
 
     hashcode = toString().hashCode();
-  }
 
-  public SurfacePattern copyNewToken(){
-    return new SurfacePattern(this.prevContext, token.copy(), this.nextContext, genre);
   }
 
   public static Token getContextToken(CoreLabel tokenj) {
@@ -474,10 +470,6 @@ public class SurfacePattern extends Pattern implements Serializable, Comparable<
       return true;
     else
       return false;
-  }
-
-  public void setNumWordsCompound(Integer numWordsCompound) {
-    token.numWordsCompound = numWordsCompound;
   }
 
   // public static SurfacePattern parse(String s) {

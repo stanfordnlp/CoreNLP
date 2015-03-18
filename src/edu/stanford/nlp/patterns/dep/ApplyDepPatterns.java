@@ -73,7 +73,7 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
           //Higher branch values makes the faster but uses more memory
           //m.setBranchLimit(5);
 
-          Collection<ExtractedPhrase> matched = getMatchedTokensIndex(graph, pEn.getKey(), sent, label);
+          Collection<ExtractedPhrase> matched = getMatchedTokensIndex(graph, pEn.getKey(), sent);
 
           for (ExtractedPhrase match : matched) {
 
@@ -89,14 +89,14 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
             //find if the neighboring words are labeled - if so - club them together
             if(constVars.clubNeighboringLabeledWords) {
               for (int i = s - 1; i >= 0; i--) {
-                if (tokens.get(i).get(constVars.getAnswerClass().get(label)).equals(label) && (e - i + 1) <= PatternFactory.numWordsCompoundMapped.get(label)) {
+                if (tokens.get(i).get(constVars.getAnswerClass().get(label)).equals(label) && (e - i + 1) <= PatternFactory.numWordsCompound) {
                   s = i;
                   //System.out.println("for phrase " + match + " clubbing earlier word. new s is " + s);
                 } else break;
               }
 
               for (int i = e; i < tokens.size(); i++) {
-                if (tokens.get(i).get(constVars.getAnswerClass().get(label)).equals(label) && (i-s + 1) <= PatternFactory.numWordsCompoundMapped.get(label)) {
+                if (tokens.get(i).get(constVars.getAnswerClass().get(label)).equals(label) && (i-s + 1) <= PatternFactory.numWordsCompound) {
                   e = i;
                   //System.out.println("for phrase " + match + " clubbing next word. new e is " + e);
                 } else break;
@@ -176,11 +176,11 @@ public class ApplyDepPatterns <E extends Pattern>  implements Callable<Pair<TwoD
     }
   };
 
-  private Collection<ExtractedPhrase> getMatchedTokensIndex(SemanticGraph graph, SemgrexPattern pattern, DataInstance sent, String label) {
+  private Collection<ExtractedPhrase> getMatchedTokensIndex(SemanticGraph graph, SemgrexPattern pattern, DataInstance sent) {
 
 
     //TODO: look at the ignoreCommonTags flag
-    ExtractPhraseFromPattern extract = new ExtractPhraseFromPattern(false, PatternFactory.numWordsCompoundMapped.get(label));
+    ExtractPhraseFromPattern extract = new ExtractPhraseFromPattern(false, PatternFactory.numWordsCompound);
     Collection<IntPair> outputIndices = new ArrayList<IntPair>();
     boolean findSubTrees = true;
     List<CoreLabel> tokensC = sent.getTokens();

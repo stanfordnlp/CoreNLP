@@ -127,9 +127,9 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   /**
    * Handles contractions like del and al, marked by the lexer
    *
-   * del =&gt; de + l =&gt; de + el
-   * al =&gt; a + l =&gt; a + el
-   * con[mts]igo =&gt; con + [mts]i
+   * del => de + l => de + el
+   * al => a + l => a + el
+   * con[mts]igo => con + [mts]i
    *
    */
   private CoreLabel processContraction(CoreLabel cl) {
@@ -162,9 +162,9 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   /**
    * Handles verbs with attached suffixes, marked by the lexer:
    *
-   * Escribamosela =&gt; Escribamo + se + la =&gt; escribamos + se + la
-   * Sentaos =&gt; senta + os =&gt; sentad + os
-   * Damelo =&gt; da + me + lo
+   * Escribamosela => Escribamo + se + la => escribamos + se + la
+   * Sentaos => senta + os => sentad + os
+   * Damelo => da + me + lo
    *
    */
   private CoreLabel processVerb(CoreLabel cl) {
@@ -232,7 +232,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
      *
      * @param options a String of options, separated by commas
      * @return A TokenizerFactory that returns the right token types
-     * @param factory a factory for the token type that the tokenizer will return
+     * @oaram factory a factory for the token type that the tokenizer will return
      */
     public static <T extends HasWord> SpanishTokenizerFactory<T> newSpanishTokenizerFactory(
       LexedTokenFactory<T> factory, String options) {

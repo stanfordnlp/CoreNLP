@@ -119,22 +119,13 @@ change was made to the taxonomy of relations.
 --------------------------------------
 CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v3.2, JUNE 2013
 
-An improved dependency conversion means that our dependency trees are
-not always projective, one deletion was made from the taxonomy of
-relations, and various small converter fixes were made:
+Various small fixes were made to the dependencies conversion,
+and one change to the taxonomy of relations:
  - rel was removed. rel was originally used as the relation for an
     overt relativizer in a relative clause. But it was never a real
     grammatical relation, and we gradually started labeling easy cases
     as nsubj or dobj. In this release, rel is removed, pobj cases are
     also labeled, and the remaining hard cases are labeled as dep.
- - As a result of correctly labeling a pobj in questions and relative
-   clauses, the converter now sometimes produces non-projective dependency
-   trees (ones with crossing dependencies, if the words are laid out in
-   their normal order in a line, and all dependency arcs are drawn above
-   them). This is not a bug, it's an improvement in the generated
-   dependencies, but you should be aware that Stanford Dependencies
-   trees are now occasionally non-projective. (Some simple dependency
-   parsing algorithms only produce projective dependency trees.)
 
 --------------------------------------
 CHANGES IN ENGLISH TYPED DEPENDENCIES CODE -- v2.0.5, MARCH 2013

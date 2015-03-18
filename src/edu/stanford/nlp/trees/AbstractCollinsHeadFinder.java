@@ -10,12 +10,12 @@ import java.util.Map;
  * like (this is for "left" or "right":
  * <pre>
  * for categoryList in categoryLists
- *   for index = 1 to n [or n to 1 if R-&gt;L]
+ *   for index = 1 to n [or n to 1 if R->L]
  *     for category in categoryList
  *       if category equals daughter[index] choose it.
  * </pre>
  * <p>
- * with a final default that goes with the direction (L-&gt;R or R-&gt;L)
+ * with a final default that goes with the direction (L->R or R->L)
  * For most constituents, there will be only one category in the list,
  * the exception being, in Collins' original version, NP.
  * </p>

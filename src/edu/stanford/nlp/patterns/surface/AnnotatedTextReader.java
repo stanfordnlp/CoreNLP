@@ -2,20 +2,19 @@ package edu.stanford.nlp.patterns.surface;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
-import edu.stanford.nlp.patterns.DataInstance;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.PTBTokenizer.PTBTokenizerFactory;
-import edu.stanford.nlp.sequences.CoNLLDocumentReaderAndWriter;
-import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.ArrayCoreMap;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
@@ -30,81 +29,6 @@ import edu.stanford.nlp.util.TypesafeMap;
  * 
  */
 public class AnnotatedTextReader {
-
-    public static Map<String, DataInstance> parseColumnFile(BufferedReader reader,
-                                                Set<String> categoriesAllowed,
-                                                Map<String, Class<? extends TypesafeMap.Key<String>>> setClassForTheseLabels,
-                                                boolean setGoldClass, String sentIDprefix ){
-
-      CoNLLDocumentReaderAndWriter conllreader = new CoNLLDocumentReaderAndWriter();
-      Properties props = new Properties();
-      SeqClassifierFlags flags = new SeqClassifierFlags(props);
-      flags.entitySubclassification = "noprefix";
-      flags.retainEntitySubclassification = false;
-      conllreader.init(flags);
-
-      Iterator<List<CoreLabel>> dociter = conllreader.getIterator(reader);;
-      int num = -1;
-      Map<String, DataInstance> sents = new HashMap<String, DataInstance>();
-      while(dociter.hasNext()){
-
-        List<CoreLabel> doc = dociter.next();
-
-        List<String> words = new ArrayList<String>();
-        List<CoreLabel> sentcore = new ArrayList<CoreLabel>();
-
-
-        int tokenindex = 0;
-        for(CoreLabel l: doc){
-
-          if(l.word().equals(CoNLLDocumentReaderAndWriter.BOUNDARY) || l.word().equals("-DOCSTART-")){
-            if(words.size() > 0){
-              num++;
-              String docid = sentIDprefix + "-"+String.valueOf(num);
-              DataInstance sentInst = DataInstance.getNewSurfaceInstance(sentcore);
-              sents.put(docid, sentInst);
-
-              words = new ArrayList<String>();
-              sentcore = new ArrayList<CoreLabel>();
-              tokenindex = 0;
-            }
-            continue;
-          }
-          tokenindex ++;
-          words.add(l.word());
-
-          l.set(CoreAnnotations.IndexAnnotation.class, tokenindex);
-          l.set(CoreAnnotations.ValueAnnotation.class, l.word());
-          String label = l.get(CoreAnnotations.AnswerAnnotation.class);
-
-          assert label != null : "label cannot be null";
-
-          l.set(CoreAnnotations.TextAnnotation.class, l.word());
-          l.set(CoreAnnotations.OriginalTextAnnotation.class, l.word());
-
-          if (setGoldClass){
-            l.set(CoreAnnotations.GoldAnswerAnnotation.class, label);
-          }
-
-          if (setClassForTheseLabels != null
-            && setClassForTheseLabels.containsKey(label))
-            l.set(setClassForTheseLabels.get(label), label);
-
-          sentcore.add(l);
-
-        }
-
-        if(words.size() > 0){
-          num++;
-          String docid = sentIDprefix + "-"+String.valueOf(num);;
-          DataInstance sentInst = DataInstance.getNewSurfaceInstance(sentcore);
-          sents.put(docid, sentInst);
-        }
-      }
-      return sents;
-
-    }
-
   public static List<CoreMap> parseFile(
       BufferedReader reader,
       Set<String> categoriesAllowed,

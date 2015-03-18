@@ -10,6 +10,7 @@ import java.util.*;
  * Created by sonalg on 10/27/14.
  */
 public class PatternFactory {
+  //TODO: set this class
   /**
    * allow to match stop words before a target term. This is to match something
    * like "I am on some X" if the pattern is "I am on X"
@@ -23,15 +24,9 @@ public class PatternFactory {
   @Execution.Option(name = "useTargetNERRestriction")
   public static boolean useTargetNERRestriction = false;
 
-  /**
-   * Can just write a number (if same for all labels) or "Label1,2;Label2,3;...."
-   */
   @Execution.Option(name = "numWordsCompound")
-  public static String numWordsCompound = "2";
+  public static int numWordsCompound = 2;
 
-  public static Map<String, Integer> numWordsCompoundMapped = new HashMap<String, Integer>();
-
-  public static int numWordsCompoundMax = 2;
   /**
    * Use lemma instead of words for the context tokens
    */
@@ -49,26 +44,8 @@ public class PatternFactory {
    */
   public static java.util.regex.Pattern ignoreWordRegex = java.util.regex.Pattern.compile("a^");
 
-  public static void setUp(Properties props, PatternType patternType, Set<String> labels) {
+  public static void setUp(Properties props, PatternType patternType) {
     Execution.fillOptions(PatternFactory.class, props);
-    numWordsCompoundMax = 0;
-    if (numWordsCompound.contains(",") || numWordsCompound.contains(";")) {
-      String[] toks = numWordsCompound.split(";");
-      for(String t: toks) {
-        String[] toks2 = t.split(",");
-        int numWords = Integer.valueOf(toks2[1]);
-        numWordsCompoundMapped.put(toks2[0], numWords);
-        if(numWords > numWordsCompoundMax){
-          numWordsCompoundMax = numWords;
-        }
-      }
-    } else
-    {
-      numWordsCompoundMax = Integer.valueOf(numWordsCompound);
-      for(String label: labels){
-        numWordsCompoundMapped.put(label, Integer.valueOf(numWordsCompound));
-      }
-    }
     if(patternType.equals(PatternType.SURFACE))
       SurfacePatternFactory.setUp(props);
     else if(patternType.equals(PatternType.DEP))

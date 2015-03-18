@@ -32,6 +32,7 @@ import java.util.Map;
 
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.util.Generics;
 
 
 /**
@@ -47,8 +48,7 @@ public abstract class TsurgeonPattern {
   final String label;
   final TsurgeonPattern[] children;
 
-  TsurgeonPattern root; // TODO: can remove? Nothing seems to look at it.
-
+  TsurgeonPattern root; // TODO: can remove?
   protected void setRoot(TsurgeonPatternRoot root) {
     this.root = root;
     for (TsurgeonPattern child : children) {
@@ -87,7 +87,6 @@ public abstract class TsurgeonPattern {
   public TsurgeonMatcher matcher() {
     throw new UnsupportedOperationException("Only the root node can produce the top level matcher");
   }
-
+  
   public abstract TsurgeonMatcher matcher(Map<String,Tree> newNodeNames, CoindexationGenerator coindexer);
-
 }
