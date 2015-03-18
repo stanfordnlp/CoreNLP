@@ -124,7 +124,7 @@ public class CoNLLDocumentReader implements DocReader {
       Collections.sort(this.fileList);
     }
     curFileIndex = 0;
-    logger.info("Reading " + fileList.size() + " CoNll2011 files from " + filepath);
+    logger.info("Reading " + fileList.size() + " CoNLL files from " + filepath);
   }
 
   private static List<File> getFiles(String filepath, Pattern filter)
@@ -165,7 +165,7 @@ public class CoNLLDocumentReader implements DocReader {
         docIterator = new DocumentIterator(curFile.getAbsolutePath(), options);
       }
       CoNLLDocument next = docIterator.next();
-      Redwood.log("Reading document: " + next.getDocumentID()+" part: "+next.getPartNo());
+      Redwood.log("debug-docreader", "Reading document: " + next.getDocumentID()+" part: "+next.getPartNo());
       return next;
     } catch (IOException ex) {
       throw new RuntimeIOException(ex);

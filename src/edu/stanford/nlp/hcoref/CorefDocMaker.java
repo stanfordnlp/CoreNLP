@@ -68,7 +68,7 @@ public class CorefDocMaker {
 
     Properties pipelineProps = new Properties(props);
     StringBuilder annoSb = new StringBuilder("");
-    if (!CorefProperties.USE_GOLD_POS)  {
+    if (!CorefProperties.useGoldPOS(props))  {
       annoSb.append("pos, lemma");
     } else {
       annoSb.append("lemma");
@@ -76,10 +76,10 @@ public class CorefDocMaker {
     if(CorefProperties.USE_TRUECASE) {
       annoSb.append(", truecase");
     }   
-    if (!CorefProperties.USE_GOLD_NE)  {
+    if (!CorefProperties.useGoldNE(props))  {
       annoSb.append(", ner");
     }   
-    if (!CorefProperties.USE_GOLD_PARSES)  {
+    if (!CorefProperties.useGoldParse(props))  {
       if(CorefProperties.useConstituencyTree(props)) annoSb.append(", parse");
       else annoSb.append(", depparse");
     }   

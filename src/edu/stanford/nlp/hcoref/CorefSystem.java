@@ -131,17 +131,17 @@ public class CorefSystem {
     }
     
     // run processes
-    Integer docCnt = 0;
+    int docCnt = 0;
     while (true) {
       Document document = cs.docMaker.nextDoc();
       if (document == null) break;
       wrapper.put(Pair.makePair(document, cs));
-      logOutput(wrapper, writerGold, writerBeforeCoref, writerAfterCoref, docCnt);
+      docCnt = logOutput(wrapper, writerGold, writerBeforeCoref, writerAfterCoref, docCnt);
     }
     
     // Finished reading the input. Wait for jobs to finish
     wrapper.join();
-    logOutput(wrapper, writerGold, writerBeforeCoref, writerAfterCoref, docCnt);
+    docCnt = logOutput(wrapper, writerGold, writerBeforeCoref, writerAfterCoref, docCnt);
     writerGold.close();
     writerBeforeCoref.close();
     writerAfterCoref.close();
@@ -169,27 +169,28 @@ public class CorefSystem {
   /**
    *  write output of coref system in conll format, and log. 
    */
-  private static void logOutput(
+  private static int logOutput(
       MulticoreWrapper<Pair<Document, CorefSystem>, StringBuilder[]> wrapper,
       PrintWriter writerGold, 
       PrintWriter writerBeforeCoref,
       PrintWriter writerAfterCoref, 
-      Integer docCnt) {
+      int docCnt) {
     while (wrapper.peek()) {
       StringBuilder[] output = wrapper.poll();
       writerGold.print(output[0]);
       writerBeforeCoref.print(output[1]);
       writerAfterCoref.print(output[2]);
       System.err.println(output[3]);
-      if ((docCnt++) % 10 == 0) System.err.println(docCnt + " th document done");
+      if ((docCnt++) % 10 == 0) System.err.println(docCnt + " document(s) processed");
     }
+    return docCnt;
   }
 
   /** 
    * main entry of coreference system.
    * 
-   * @param document Input document for coref format (Annotation and optional gold information)
-   * @param output For output of coref system
+   * @param document Input document for coref format (Annotation and optional information)
+   * @param output For output of coref system (conll format and log. list size should be 4.)
    * @return Map of coref chain ID and corresponding chain
    * @throws Exception
    */
@@ -220,16 +221,28 @@ public class CorefSystem {
   }
   
   /** 
-   * wrapper for coref(Document document, StringBuilder[] output)
+   * main entry of coreference system.
+   * 
+   * @param document Input document for coref format (Annotation and optional information)
+   * @return Map of coref chain ID and corresponding chain
+   * @throws Exception
    */
   public Map<Integer, CorefChain> coref(Document document) throws Exception {
     return coref(document, new StringBuilder[4]);
   }
-  
+
+  /** 
+   * main entry of coreference system.
+   * 
+   * @param anno Input annotation.
+   * @return Map of coref chain ID and corresponding chain
+   * @throws Exception
+   */
   public Map<Integer, CorefChain> coref(Annotation anno) throws Exception {
     return coref(docMaker.makeDocument(anno));
   }
   
+  /** extract final coreference output from coreference document format */
   public Map<Integer, CorefChain> makeCorefOutput(Document document) {
     Map<Integer, CorefChain> result = Generics.newHashMap();
     for(CorefCluster c : document.corefClusters.values()) {

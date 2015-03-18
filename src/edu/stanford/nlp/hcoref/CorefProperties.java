@@ -35,7 +35,9 @@ public class CorefProperties {
   public static final String USE_SEMANTICS_PROP = "hcoref.useSemantics";    // load semantics if true
   public static final String CURRENT_SIEVE_FOR_TRAIN_PROP = "hcoref.currentSieveForTrain";
   public static final String STORE_TRAINDATA_PROP = "hcoref.storeTrainData";
-//  public static final String CURRENT_SIEVE_PROP = "hcoref.currentSieve";
+  public static final String USE_GOLD_NE_PROP = "hcoref.useGoldNE";
+  public static final String USE_GOLD_PARSES_PROP = "hcoref.useGoldParse";
+  public static final String USE_GOLD_POS_PROP = "hcoref.useGoldPOS";
   
   // logging & system check & analysis
   public static final String DEBUG_PROP = "hcoref.debug";
@@ -110,27 +112,8 @@ public class CorefProperties {
   public static final Locale LANGUAGE_DEFAULT = Locale.ENGLISH;
   public static final int MONITOR_DIST_CMD_FINISHED_WAIT_MILLIS = 60000;
   
-  
   /** if true, use truecase annotator */
   public static final boolean USE_TRUECASE = false;
-
-  /** if true, use gold speaker tags */
-  public static final boolean USE_GOLD_SPEAKER_TAGS = true;
-
-  /** if false, use Stanford NER to predict NE labels */
-  public static final boolean USE_GOLD_NE = true;
-
-  /** if false, use Stanford parse to parse */
-  public static final boolean USE_GOLD_PARSES = true;
-
-  /** if false, use Stanford tagger to tag */
-  public static final boolean USE_GOLD_POS = true;
-
-  /** if false, use mention prediction */
-  public static final boolean USE_GOLD_MENTIONS = false;
-
-  /** if true, use given mention boundaries */
-  public static final boolean USE_GOLD_MENTION_BOUNDARIES = false;
 
   /** if true, remove appositives, predicate nominatives in post processing */
   public static final boolean REMOVE_APPOSITION_PREDICATENOMINATIVES = true;
@@ -138,15 +121,6 @@ public class CorefProperties {
   /** if true, remove singletons in post processing */
   public static final boolean REMOVE_SINGLETONS = true;
 
-  /** if true, read *auto_conll, if false, read *gold_conll */
-  public static final boolean USE_CONLL_AUTO = true;
-
-  /** if true, print in conll output format */
-  public static final boolean PRINT_CONLL_OUTPUT = false;
-
-  /** Whether or not the RuleBasedCorefMentionFinder can reparse a phrase to find its head */
-  public static final boolean ALLOW_REPARSING = true;
-  
   // current list of dcoref sieves
   private static final Set<String> dcorefSieveNames = new HashSet<String>(Arrays.asList("MarkRole", "DiscourseMatch", 
       "ExactStringMatch", "RelaxedExactStringMatch", "PreciseConstructs", "StrictHeadMatch1", 
@@ -367,5 +341,18 @@ public class CorefProperties {
   
   public static boolean allowReparsing(Properties props) {
     return PropertiesUtils.getBool(props, ALLOW_REPARSING_PROP, true);
+  }
+  
+  public static boolean useGoldNE(Properties props) {
+    return PropertiesUtils.getBool(props, USE_GOLD_NE_PROP, true);
+  }
+  public static boolean useGoldParse(Properties props) {
+    return PropertiesUtils.getBool(props, USE_GOLD_PARSES_PROP, true);
+  }
+  public static boolean useGoldPOS(Properties props) {
+    return PropertiesUtils.getBool(props, USE_GOLD_POS_PROP, true);
+  }
+  public static boolean isMentionDetectionTraining(Properties props) {
+    return PropertiesUtils.getBool(props, CorefProperties.MD_TRAIN_PROP, false);
   }
 }

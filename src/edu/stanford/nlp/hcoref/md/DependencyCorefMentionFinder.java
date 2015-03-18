@@ -1,5 +1,6 @@
 package edu.stanford.nlp.hcoref.md;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -9,6 +10,7 @@ import java.util.Set;
 import edu.stanford.nlp.hcoref.CorefProperties;
 import edu.stanford.nlp.hcoref.data.Dictionaries;
 import edu.stanford.nlp.hcoref.data.Mention;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -26,13 +28,18 @@ import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 public class DependencyCorefMentionFinder extends CorefMentionFinder {
 
-  public DependencyCorefMentionFinder(Properties props) {
+  public DependencyCorefMentionFinder(Properties props) throws ClassNotFoundException, IOException {
     this.lang = CorefProperties.getLanguage(props);
+    mdClassifier = (CorefProperties.isMentionDetectionTraining(props))? 
+        null : IOUtils.readObjectFromFile(CorefProperties.getPathModel(props, "md"));
   }
 
+  public MentionDetectionClassifier mdClassifier = null;
+  
   /** Main method of mention detection.
    *  Extract all NP, PRP or NE, and filter out by manually written patterns.
    */
@@ -56,7 +63,7 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder {
       addNamedEntityStrings(s, neStrings, namedEntitySpanSet);
       mentionSpanSetList.add(mentionSpanSet);
     }
-//    if(useNewMD) extractNamedEntityModifiers(sentences, mentionSpanSetList, predictedMentions, neStrings);
+//    extractNamedEntityModifiers(sentences, mentionSpanSetList, predictedMentions, neStrings);
     
     for(int i=0 ; i<sentences.size() ; i++ ) {
       findHead(sentences.get(i), predictedMentions.get(i));
@@ -64,8 +71,10 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder {
     // mention selection based on document-wise info
     removeSpuriousMentions(doc, predictedMentions, dict, Boolean.parseBoolean(props.getProperty("removeNested", "true")), lang);
 
-//    // assign mention IDs
-//    if(assignIds) assignMentionIDs(predictedMentions, maxID);
+    // if this is for MD training, skip classification
+    if(!CorefProperties.isMentionDetectionTraining(props)) {
+      mdClassifier.classifyMentions(predictedMentions, dict, props);
+    }
 
     return predictedMentions;
   }
@@ -318,19 +327,6 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder {
       m.headWord = sent.get(m.headIndex);
       m.headString = m.headWord.word().toLowerCase(Locale.ENGLISH);
     }
-  }
-
-  public static boolean partitiveRule(Mention m, List<CoreLabel> sent, Dictionaries dict) {
-    return m.startIndex >= 2
-            && sent.get(m.startIndex - 1).get(CoreAnnotations.TextAnnotation.class).equalsIgnoreCase("of")
-            && dict.parts.contains(sent.get(m.startIndex - 2).get(CoreAnnotations.TextAnnotation.class).toLowerCase(Locale.ENGLISH));
-  }
-
-  @Override
-  public void extractNPorPRP(CoreMap s, List<Mention> mentions,
-      Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
-    // TODO Auto-generated method stub
-    
   }
 
 //  /** Filter out all spurious mentions 

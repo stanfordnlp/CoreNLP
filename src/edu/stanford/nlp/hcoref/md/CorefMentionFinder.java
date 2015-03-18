@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import edu.stanford.nlp.hcoref.data.Dictionaries;
 import edu.stanford.nlp.hcoref.data.Mention;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.Label;
@@ -384,17 +385,21 @@ public abstract class CorefMentionFinder {
     
   }
   
-  public abstract void extractNPorPRP(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet);
-  
   public void findHead(CoreMap s, List<Mention> mentions) {
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     tree.indexSpans(0);
     for (Mention m : mentions){
-      Tree head = findSyntacticHead(m, tree, sent);
-      m.headIndex = ((CoreLabel) head.label()).get(CoreAnnotations.IndexAnnotation.class)-1;
-      m.headWord = sent.get(m.headIndex);
-      m.headString = m.headWord.get(CoreAnnotations.TextAnnotation.class).toLowerCase(Locale.ENGLISH);
+      
+      if(lang == Locale.CHINESE){
+        findHeadChinese(sent, m);
+      }else{
+        CoreLabel head = (CoreLabel) findSyntacticHead(m, tree, sent).label();
+        m.headIndex = head.get(CoreAnnotations.IndexAnnotation.class)-1;
+        m.headWord = sent.get(m.headIndex);
+        m.headString = m.headWord.get(CoreAnnotations.TextAnnotation.class).toLowerCase(Locale.ENGLISH);
+      }
+      
       int start = m.headIndex - m.startIndex;
       if (start < 0 || start >= m.originalSpan.size()) {
         Redwood.log("Invalid index for head " + start + "=" + m.headIndex + "-" + m.startIndex
@@ -405,6 +410,24 @@ public abstract class CorefMentionFinder {
         m.headString = m.originalSpan.toString();
       }
     }
+  }
+  
+  protected void findHeadChinese(List<CoreLabel> sent, Mention m) {
+    int headPos = m.endIndex - 1;
+    // Skip trailing punctuations
+    while (sent.get(headPos).get(PartOfSpeechAnnotation.class).equals("PU") 
+        && headPos >= m.startIndex) {
+      headPos--;
+    }
+    if (headPos < m.startIndex) {
+      headPos = m.endIndex - 1;
+    }
+    if (sent.get(headPos).originalText().equals("自己") && m.endIndex != m.startIndex) {
+      headPos--;
+    }
+    m.headIndex = headPos;
+    m.headWord = sent.get(headPos);
+    m.headString = m.headWord.get(CoreAnnotations.TextAnnotation.class);
   }
 
   public Tree findSyntacticHead(Mention m, Tree root, List<CoreLabel> tokens) {

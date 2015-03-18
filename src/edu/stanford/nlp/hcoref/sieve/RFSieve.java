@@ -296,9 +296,11 @@ public class RFSieve extends Sieve {
         if(candidate.originalSpan.size()==1 && candidate.headWord.tag().equals("NNS")) features.incrementCount("B-A-BAREPLURAL");
         
         // pleonastic it
-        if(RuleBasedCorefMentionFinder.isPleonastic(m, m.contextParseTree) 
-            || RuleBasedCorefMentionFinder.isPleonastic(candidate, candidate.contextParseTree)) {
-          features.incrementCount("B-PLEONASTICIT");
+        if(CorefProperties.useConstituencyTree(props)) {
+          if(RuleBasedCorefMentionFinder.isPleonastic(m, m.contextParseTree) 
+              || RuleBasedCorefMentionFinder.isPleonastic(candidate, candidate.contextParseTree)) {
+            features.incrementCount("B-PLEONASTICIT");
+          }
         }
         
         // quantRule
