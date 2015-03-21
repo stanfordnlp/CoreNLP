@@ -838,6 +838,8 @@ public class UniversalEnglishGrammaticalRelations {
    * followed by an NP pobj, as happens in the Penn Treebank for adverbial uses
    * of PP like "up 19%")
    */
+  
+  /*
   public static final GrammaticalRelation PREPOSITIONAL_OBJECT =
     new GrammaticalRelation(Language.UniversalEnglish, "nmod2", "nominal modifier 2",
         MODIFIER, "SBARQ|PP(?:-TMP)?|WHPP|PRT|ADVP|WHADVP|XS", tregexCompiler,
@@ -858,6 +860,7 @@ public class UniversalEnglishGrammaticalRelations {
             // to handle "What weapon is Apollo most proficient with?"
             "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP !< NP)) $++ (NP $++ =adj)))");
 
+*/
 
   /**
    * The "adverbial clause modifier" grammatical relation.  An adverbial clause
@@ -1677,7 +1680,6 @@ public class UniversalEnglishGrammaticalRelations {
       DIRECT_OBJECT,
       INDIRECT_OBJECT,
       NOMINAL_MODIFIER,
-      PREPOSITIONAL_OBJECT,
       CLAUSAL_COMPLEMENT,
       XCLAUSAL_COMPLEMENT,
       MARKER,
