@@ -34,6 +34,7 @@ import junit.framework.TestCase;
  *  @author Marie-Catherine de Marneffe (mcdm)
  *  @author Christopher Manning
  *  @author John Bauer
+ *  @author Sebastian Schuster
  */
 public class UniversalEnglishGrammaticalStructureTest extends TestCase {
 
@@ -138,69 +139,69 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
 
     // the expected dependency answers (basic)
     String[] testAnswers = {
-        "nsubj(died-3, Reagan-1)\n" + "aux(died-3, has-2)\n" + "root(ROOT-0, died-3)\n",
-        "nsubjpass(killed-4, Kennedy-1)\n" + "aux(killed-4, has-2)\n" + "auxpass(killed-4, been-3)\n" + "root(ROOT-0, killed-4)\n",
-        "nsubj(man-5, Bill-1)\n" + "cop(man-5, is-2)\n" + "det(man-5, an-3)\n" + "amod(man-5, honest-4)\n" + "root(ROOT-0, man-5)\n",
-        "nsubj(big-3, Bill-1)\n" + "cop(big-3, is-2)\n" + "root(ROOT-0, big-3)\n" + "cc(big-3, and-4)\n" + "conj(big-3, honest-5)\n",
-        "nsubj(defeated-2, Clinton-1)\n" + "root(ROOT-0, defeated-2)\n" + "dobj(defeated-2, Dole-3)\n",
-        "dobj(said-3, What-1)\n" + "nsubj(said-3, she-2)\n" + "csubj(untrue-5, said-3)\n" + "cop(untrue-5, is-4)\n" + "root(ROOT-0, untrue-5)\n",
-        "nsubjpass(defeated-3, Dole-1)\n" + "auxpass(defeated-3, was-2)\n" + "root(ROOT-0, defeated-3)\n" + "case(Clinton-5, by-4)\n" + "nmod(defeated-3, Clinton-5)\n",
-        "mark(lied-3, That-1)\n" + "nsubj(lied-3, she-2)\n" + "csubjpass(suspected-5, lied-3)\n" + "auxpass(suspected-5, was-4)\n" + "root(ROOT-0, suspected-5)\n" + "case(everyone-7, by-6)\n" + "nmod(suspected-5, everyone-7)\n",
-        "nsubj(gave-2, She-1)\n" + "root(ROOT-0, gave-2)\n" + "iobj(gave-2, me-3)\n" + "det(raise-5, a-4)\n" + "dobj(gave-2, raise-5)\n",
-        "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" + "aux(swim-4, to-3)\n" + "xcomp(like-2, swim-4)\n",
-        "nsubj(sat-2, I-1)\n" + "root(ROOT-0, sat-2)\n" + "case(chair-5, on-3)\n" + "det(chair-5, the-4)\n" + "nmod(sat-2, chair-5)\n",
+        "nsubj(died-3, Reagan-1)\n" + "aux(died-3, has-2)\n" + "root(ROOT-0, died-3)\n", //.
+        "nsubjpass(killed-4, Kennedy-1)\n" + "aux(killed-4, has-2)\n" + "auxpass(killed-4, been-3)\n" + "root(ROOT-0, killed-4)\n", //.
+        "nsubj(man-5, Bill-1)\n" + "cop(man-5, is-2)\n" + "det(man-5, an-3)\n" + "amod(man-5, honest-4)\n" + "root(ROOT-0, man-5)\n", //.
+        "nsubj(big-3, Bill-1)\n" + "cop(big-3, is-2)\n" + "root(ROOT-0, big-3)\n" + "cc(big-3, and-4)\n" + "conj(big-3, honest-5)\n", //.
+        "nsubj(defeated-2, Clinton-1)\n" + "root(ROOT-0, defeated-2)\n" + "dobj(defeated-2, Dole-3)\n", //.
+        "dobj(said-3, What-1)\n" + "nsubj(said-3, she-2)\n" + "csubj(untrue-5, said-3)\n" + "cop(untrue-5, is-4)\n" + "root(ROOT-0, untrue-5)\n", //.
+        "nsubjpass(defeated-3, Dole-1)\n" + "auxpass(defeated-3, was-2)\n" + "root(ROOT-0, defeated-3)\n" + "case(Clinton-5, by-4)\n" + "nmod(defeated-3, Clinton-5)\n", //.
+        "mark(lied-3, That-1)\n" + "nsubj(lied-3, she-2)\n" + "csubjpass(suspected-5, lied-3)\n" + "auxpass(suspected-5, was-4)\n" + "root(ROOT-0, suspected-5)\n" + "case(everyone-7, by-6)\n" + "nmod(suspected-5, everyone-7)\n", //.
+        "nsubj(gave-2, She-1)\n" + "root(ROOT-0, gave-2)\n" + "iobj(gave-2, me-3)\n" + "det(raise-5, a-4)\n" + "dobj(gave-2, raise-5)\n", //.
+        "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" + "aux(swim-4, to-3)\n" + "xcomp(like-2, swim-4)\n", //.
+        "nsubj(sat-2, I-1)\n" + "root(ROOT-0, sat-2)\n" + "case(chair-5, on-3)\n" + "det(chair-5, the-4)\n" + "nmod(sat-2, chair-5)\n", //.
         // "nsubj(have-2, We-1)\n" + "root(ROOT-0, have-2)\n" + "neg(information-5, no-3)\n" + "amod(information-5, useful-4)\n" + "dobj(have-2, information-5)\n" + "prep(information-5, on-6)\n" + "mark(are-9, whether-7)\n" + "nsubj(are-9, users-8)\n" + "pcomp(on-6, are-9)\n" + "prep(are-9, at-10)\n" + "pobj(at-10, risk-11)\n",
-        "nsubj(heard-2, They-1)\n" + "root(ROOT-0, heard-2)\n" + "case(asbestos-4, about-3)\n" + "nmod(heard-2, asbestos-4)\n" + "xcomp(heard-2, having-5)\n" + "amod(properties-7, questionable-6)\n" + "dobj(having-5, properties-7)\n",
-        "nsubj(says-2, He-1)\n" + "root(ROOT-0, says-2)\n" + "mark(like-5, that-3)\n" + "nsubj(like-5, you-4)\n" + "ccomp(says-2, like-5)\n" + "aux(swim-7, to-6)\n" + "xcomp(like-5, swim-7)\n",
-        "nsubj(certain-3, I-1)\n" + "cop(certain-3, am-2)\n" + "root(ROOT-0, certain-3)\n" + "mark(did-6, that-4)\n" + "nsubj(did-6, he-5)\n" + "ccomp(certain-3, did-6)\n" + "dobj(did-6, it-7)\n",
-        "nsubj(ready-3, I-1)\n" + "cop(ready-3, am-2)\n" + "root(ROOT-0, ready-3)\n" + "aux(leave-5, to-4)\n" + "xcomp(ready-3, leave-5)\n",
-        "nn(forces-2, U.S.-1)\n" + "nsubjpass(engaged-5, forces-2)\n" + "aux(engaged-5, have-3)\n" + "auxpass(engaged-5, been-4)\n" + "root(ROOT-0, engaged-5)\n" + "case(fighting-8, in-6)\n" + "amod(fighting-8, intense-7)\n" + "nmod(engaged-5, fighting-8)\n" + "mark(launched-11, after-9)\n" + "nsubj(launched-11, insurgents-10)\n" + "advcl(engaged-5, launched-11)\n" + "amod(attacks-13, simultaneous-12)\n" + "dobj(launched-11, attacks-13)\n",
-        "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "dobj(love-7, who-5)\n" + "nsubj(love-7, you-6)\n" + "rcmod(man-4, love-7)\n",
-        "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "poss(wife-6, whose-5)\n" + "dobj(love-8, wife-6)\n" + "nsubj(love-8, you-7)\n" + "rcmod(man-4, love-8)\n",
-        "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "poss(wife-6, whose-5)\n" + "dobj(love-8, wife-6)\n" + "nsubj(love-8, you-7)\n" + "rcmod(man-4, love-8)\n",
-        "expl(is-2, There-1)\n" + "root(ROOT-0, is-2)\n" + "det(statue-4, a-3)\n" + "nsubj(is-2, statue-4)\n" + "case(corner-7, in-5)\n" + "det(corner-7, the-6)\n" + "nmod(statue-4, corner-7)\n",
-        "nsubj(looks-2, She-1)\n" + "root(ROOT-0, looks-2)\n" + "advmod(beautiful-4, very-3)\n" + "acomp(looks-2, beautiful-4)\n",
-        "det(accident-2, The-1)\n" + "nsubj(happened-3, accident-2)\n" + "root(ROOT-0, happened-3)\n" + "mark(falling-8, as-4)\n" + "det(night-6, the-5)\n" + "nsubj(falling-8, night-6)\n" + "aux(falling-8, was-7)\n" + "advcl(happened-3, falling-8)\n",
-        "mark(know-3, If-1)\n" + "nsubj(know-3, you-2)\n" + "advcl(tell-10, know-3)\n" + "nsubj(did-5, who-4)\n" + "ccomp(know-3, did-5)\n" + "dobj(did-5, it-6)\n" + "nsubj(tell-10, you-8)\n" + "aux(tell-10, should-9)\n" + "root(ROOT-0, tell-10)\n" + "det(teacher-12, the-11)\n" + "dobj(tell-10, teacher-12)\n",
-        "amod(night-2, Last-1)\n" + "tmod(swam-5, night-2)\n" + "nsubj(swam-5, I-4)\n" + "root(ROOT-0, swam-5)\n" + "case(pool-8, in-6)\n" + "det(pool-8, the-7)\n" + "nmod(swam-5, pool-8)\n",
-        "nsubj(talked-2, He-1)\n" + "root(ROOT-0, talked-2)\n" + "case(president-5, to-3)\n" + "det(president-5, the-4)\n" + "nmod(talked-2, president-5)\n" + "mark(secure-9, in-6)\n" + "dep(secure-9, order-7)\n" + "aux(secure-9, to-8)\n" + "advcl(talked-2, secure-9)\n" + "det(account-11, the-10)\n" + "dobj(secure-9, account-11)\n",
-        "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(book-4, the-3)\n" + "dobj(saw-2, book-4)\n" + "dobj(bought-7, which-5)\n" + "nsubj(bought-7, you-6)\n" + "rcmod(book-4, bought-7)\n",
-        "nsubj(eats-2, Sam-1)\n" + "root(ROOT-0, eats-2)\n" + "num(sheep-4, 3-3)\n" + "dobj(eats-2, sheep-4)\n",
-        "nsubj(lost-2, I-1)\n" + "root(ROOT-0, lost-2)\n" + "dobj(lost-2, $-3)\n" + "number(billion-5, 3.2-4)\n" + "num($-3, billion-5)\n",
-        "quantmod(200-2, About-1)\n" + "num(people-3, 200-2)\n" + "nsubj(came-4, people-3)\n" + "root(ROOT-0, came-4)\n" + "case(party-7, to-5)\n" + "det(party-7, the-6)\n" + "nmod(came-4, party-7)\n",
-        "nsubj(eats-6, Sam-1)\n" + "poss(brother-4, my-3)\n" + "appos(Sam-1, brother-4)\n" + "root(ROOT-0, eats-6)\n" + "amod(meat-8, red-7)\n" + "dobj(eats-6, meat-8)\n",
-        "det(Corporation-4, The-1)\n" + "amod(Corporation-4, Australian-2)\n" + "nn(Corporation-4, Broadcasting-3)\n" + "root(ROOT-0, Corporation-4)\n" + "appos(Corporation-4, ABC-6)\n",
-        "nsubj(picked-2, Bill-1)\n" + "root(ROOT-0, picked-2)\n" + "dobj(picked-2, Fred-3)\n" + "case(team-6, for-4)\n" + "det(team-6, the-5)\n" + "nmod(picked-2, team-6)\n" + "vmod(team-6, demonstrating-7)\n" + "poss(incompetence-9, his-8)\n" + "dobj(demonstrating-7, incompetence-9)\n",
-        "nsubj(scientist-5, Bill-1)\n" + "cop(scientist-5, is-2)\n" + "neg(scientist-5, not-3)\n" + "det(scientist-5, a-4)\n" + "root(ROOT-0, scientist-5)\n",
-        "nsubj(drive-4, Bill-1)\n" + "aux(drive-4, does-2)\n" + "neg(drive-4, n't-3)\n" + "root(ROOT-0, drive-4)\n",
-        "det(director-2, The-1)\n" + "nsubj(old-6, director-2)\n" + "cop(old-6, is-3)\n" + "num(years-5, 65-4)\n" + "npadvmod(old-6, years-5)\n" + "root(ROOT-0, old-6)\n",
-        "det(man-2, The-1)\n" + "nsubj(is-3, man-2)\n" + "root(ROOT-0, is-3)\n" + "advmod(is-3, here-4)\n",
- //       "case(city-3, In-1)\n" + "det(city-3, which-2)\n" + "nmod(live-6, city-3)\n" + "aux(live-6, do-4)\n" + "nsubj(live-6, you-5)\n" + "root(ROOT-0, live-6)\n",
-        "dobj(invent-5, What-1)\n" + "aux(invent-5, did-2)\n" + "nn(Babbage-4, Charles-3)\n" + "nsubj(invent-5, Babbage-4)\n" + "root(ROOT-0, invent-5)\n",
-//        "pobj(for-6, What-1)\n" + "auxpass(used-5, is-2)\n" + "det(esophagus-4, the-3)\n" + "nsubjpass(used-5, esophagus-4)\n" + "root(ROOT-0, used-5)\n" + "prep(used-5, for-6)\n",
-        "predet(boys-3, All-1)\n" + "det(boys-3, the-2)\n" + "nsubj(are-4, boys-3)\n" + "root(ROOT-0, are-4)\n" + "advmod(are-4, here-5)\n",
-        "preconj(boys-3, Both-1)\n" + "det(boys-3, the-2)\n" + "nsubj(are-7, boys-3)\n" + "cc(boys-3, and-4)\n" + "det(girls-6, the-5)\n" + "conj(boys-3, girls-6)\n" + "root(ROOT-0, are-7)\n" + "advmod(are-7, here-8)\n",
-        "nsubj(shut-2, They-1)\n" + "root(ROOT-0, shut-2)\n" + "prt(shut-2, down-3)\n" + "det(station-5, the-4)\n" + "dobj(shut-2, station-5)\n",
-        "nsubj(tasty-7, Truffles-1)\n" + "vmod(Truffles-1, picked-2)\n" + "case(spring-5, during-3)\n" + "det(spring-5, the-4)\n" + "nmod(picked-2, spring-5)\n" + "cop(tasty-7, are-6)\n" + "root(ROOT-0, tasty-7)\n",
-        "preconj(they-2, Neither-1)\n" + "nsubjpass(reached-8, they-2)\n" + "cc(they-2, nor-3)\n" + "nn(McAlpine-5, Mr.-4)\n" + "conj(they-2, McAlpine-5)\n" + "aux(reached-8, could-6)\n" + "auxpass(reached-8, be-7)\n" + "root(ROOT-0, reached-8)\n" + "case(comment-10, for-9)\n" + "nmod(reached-8, comment-10)\n",
-        "nn(field-2, Xml-1)\n" +
+        "nsubj(heard-2, They-1)\n" + "root(ROOT-0, heard-2)\n" + "case(asbestos-4, about-3)\n" + "nmod(heard-2, asbestos-4)\n" + "xcomp(heard-2, having-5)\n" + "amod(properties-7, questionable-6)\n" + "dobj(having-5, properties-7)\n", //.
+        "nsubj(says-2, He-1)\n" + "root(ROOT-0, says-2)\n" + "mark(like-5, that-3)\n" + "nsubj(like-5, you-4)\n" + "ccomp(says-2, like-5)\n" + "aux(swim-7, to-6)\n" + "xcomp(like-5, swim-7)\n", //.
+        "nsubj(certain-3, I-1)\n" + "cop(certain-3, am-2)\n" + "root(ROOT-0, certain-3)\n" + "mark(did-6, that-4)\n" + "nsubj(did-6, he-5)\n" + "ccomp(certain-3, did-6)\n" + "dobj(did-6, it-7)\n", //.
+        "nsubj(ready-3, I-1)\n" + "cop(ready-3, am-2)\n" + "root(ROOT-0, ready-3)\n" + "aux(leave-5, to-4)\n" + "xcomp(ready-3, leave-5)\n", //.
+        "compound(forces-2, U.S.-1)\n" + "nsubjpass(engaged-5, forces-2)\n" + "aux(engaged-5, have-3)\n" + "auxpass(engaged-5, been-4)\n" + "root(ROOT-0, engaged-5)\n" + "case(fighting-8, in-6)\n" + "amod(fighting-8, intense-7)\n" + "nmod(engaged-5, fighting-8)\n" + "mark(launched-11, after-9)\n" + "nsubj(launched-11, insurgents-10)\n" + "advcl(engaged-5, launched-11)\n" + "amod(attacks-13, simultaneous-12)\n" + "dobj(launched-11, attacks-13)\n", //.
+        "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "dobj(love-7, who-5)\n" + "nsubj(love-7, you-6)\n" + "relcl(man-4, love-7)\n", //.
+        "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "poss(wife-6, whose-5)\n" + "dobj(love-8, wife-6)\n" + "nsubj(love-8, you-7)\n" + "relcl(man-4, love-8)\n", //poss => case??
+        "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "poss(wife-6, whose-5)\n" + "dobj(love-8, wife-6)\n" + "nsubj(love-8, you-7)\n" + "relcl(man-4, love-8)\n", //poss => case??
+        "expl(is-2, There-1)\n" + "root(ROOT-0, is-2)\n" + "det(statue-4, a-3)\n" + "nsubj(is-2, statue-4)\n" + "case(corner-7, in-5)\n" + "det(corner-7, the-6)\n" + "nmod(statue-4, corner-7)\n", //"is" really head, or copula???
+        "nsubj(looks-2, She-1)\n" + "root(ROOT-0, looks-2)\n" + "advmod(beautiful-4, very-3)\n" + "xcomp(looks-2, beautiful-4)\n", //.
+        "det(accident-2, The-1)\n" + "nsubj(happened-3, accident-2)\n" + "root(ROOT-0, happened-3)\n" + "mark(falling-8, as-4)\n" + "det(night-6, the-5)\n" + "nsubj(falling-8, night-6)\n" + "aux(falling-8, was-7)\n" + "advcl(happened-3, falling-8)\n", //.
+        "mark(know-3, If-1)\n" + "nsubj(know-3, you-2)\n" + "advcl(tell-10, know-3)\n" + "nsubj(did-5, who-4)\n" + "ccomp(know-3, did-5)\n" + "dobj(did-5, it-6)\n" + "nsubj(tell-10, you-8)\n" + "aux(tell-10, should-9)\n" + "root(ROOT-0, tell-10)\n" + "det(teacher-12, the-11)\n" + "dobj(tell-10, teacher-12)\n", //why is teacher accusative?
+        "amod(night-2, Last-1)\n" + "tmod(swam-5, night-2)\n" + "nsubj(swam-5, I-4)\n" + "root(ROOT-0, swam-5)\n" + "case(pool-8, in-6)\n" + "det(pool-8, the-7)\n" + "nmod(swam-5, pool-8)\n", //.
+        "nsubj(talked-2, He-1)\n" + "root(ROOT-0, talked-2)\n" + "case(president-5, to-3)\n" + "det(president-5, the-4)\n" + "nmod(talked-2, president-5)\n" + "mark(secure-9, in-6)\n" + "mwe(in-6, order-7)\n" + "aux(secure-9, to-8)\n" + "advcl(talked-2, secure-9)\n" + "det(account-11, the-10)\n" + "dobj(secure-9, account-11)\n", //.
+        "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(book-4, the-3)\n" + "dobj(saw-2, book-4)\n" + "dobj(bought-7, which-5)\n" + "nsubj(bought-7, you-6)\n" + "relcl(book-4, bought-7)\n", //.
+        "nsubj(eats-2, Sam-1)\n" + "root(ROOT-0, eats-2)\n" + "nummod(sheep-4, 3-3)\n" + "dobj(eats-2, sheep-4)\n", //.
+        "nsubj(lost-2, I-1)\n" + "root(ROOT-0, lost-2)\n" + "dobj(lost-2, $-3)\n" + "compound(billion-5, 3.2-4)\n" + "nummod($-3, billion-5)\n", //.
+        "advmod(200-2, About-1)\n" + "nummod(people-3, 200-2)\n" + "nsubj(came-4, people-3)\n" + "root(ROOT-0, came-4)\n" + "case(party-7, to-5)\n" + "det(party-7, the-6)\n" + "nmod(came-4, party-7)\n", //.
+        "nsubj(eats-6, Sam-1)\n" + "poss(brother-4, my-3)\n" + "appos(Sam-1, brother-4)\n" + "root(ROOT-0, eats-6)\n" + "amod(meat-8, red-7)\n" + "dobj(eats-6, meat-8)\n", //.
+        "det(Corporation-4, The-1)\n" + "name(Corporation-4, Australian-2)\n" + "name(Corporation-4, Broadcasting-3)\n" + "root(ROOT-0, Corporation-4)\n" + "appos(Corporation-4, ABC-6)\n", //.
+        "nsubj(picked-2, Bill-1)\n" + "root(ROOT-0, picked-2)\n" + "dobj(picked-2, Fred-3)\n" + "case(team-6, for-4)\n" + "det(team-6, the-5)\n" + "nmod(picked-2, team-6)\n" + "vmod(team-6, demonstrating-7)\n" + "poss(incompetence-9, his-8)\n" + "dobj(demonstrating-7, incompetence-9)\n", //what is vmod?
+        "nsubj(scientist-5, Bill-1)\n" + "cop(scientist-5, is-2)\n" + "neg(scientist-5, not-3)\n" + "det(scientist-5, a-4)\n" + "root(ROOT-0, scientist-5)\n", //.
+        "nsubj(drive-4, Bill-1)\n" + "aux(drive-4, does-2)\n" + "neg(drive-4, n't-3)\n" + "root(ROOT-0, drive-4)\n", //.
+        "det(director-2, The-1)\n" + "nsubj(old-6, director-2)\n" + "cop(old-6, is-3)\n" + "nummod(years-5, 65-4)\n" + "npmod(old-6, years-5)\n" + "root(ROOT-0, old-6)\n", //.
+        "det(man-2, The-1)\n" + "nsubj(is-3, man-2)\n" + "root(ROOT-0, is-3)\n" + "advmod(is-3, here-4)\n", //.
+        "case(city-3, In-1)\n" + "det(city-3, which-2)\n" + "nmod(live-6, city-3)\n" + "aux(live-6, do-4)\n" + "nsubj(live-6, you-5)\n" + "root(ROOT-0, live-6)\n", //case correct here?
+        "dobj(invent-5, What-1)\n" + "aux(invent-5, did-2)\n" + "nsubj(invent-5, Charles-3)\n" + "name(Charles-3, Babbage-4)\n" + "root(ROOT-0, invent-5)\n", //.
+        "dobj(esophagus-6, What-1)\n" + "auxpass(used-5, is-2)\n" + "det(esophagus-4, the-3)\n" + "nsubjpass(used-5, esophagus-4)\n" + "root(ROOT-0, used-5)\n" + "case(what-1, for-6)\n", //correct? - what about: "what is the esophagus used for in humans?"
+        "predet(boys-3, All-1)\n" + "det(boys-3, the-2)\n" + "nsubj(are-4, boys-3)\n" + "root(ROOT-0, are-4)\n" + "advmod(are-4, here-5)\n", //.
+        "preconj(boys-3, Both-1)\n" + "det(boys-3, the-2)\n" + "nsubj(are-7, boys-3)\n" + "cc(boys-3, and-4)\n" + "det(girls-6, the-5)\n" + "conj(boys-3, girls-6)\n" + "root(ROOT-0, are-7)\n" + "advmod(are-7, here-8)\n", //.
+        "nsubj(shut-2, They-1)\n" + "root(ROOT-0, shut-2)\n" + "prt(shut-2, down-3)\n" + "det(station-5, the-4)\n" + "dobj(shut-2, station-5)\n", //.
+        "nsubj(tasty-7, Truffles-1)\n" + "vmod(Truffles-1, picked-2)\n" + "case(spring-5, during-3)\n" + "det(spring-5, the-4)\n" + "nmod(picked-2, spring-5)\n" + "cop(tasty-7, are-6)\n" + "root(ROOT-0, tasty-7)\n", //vmod??
+        "preconj(they-2, Neither-1)\n" + "nsubjpass(reached-8, they-2)\n" + "cc(they-2, nor-3)\n" + "name(McAlpine-5, Mr.-4)\n" + "conj(they-2, McAlpine-5)\n" + "aux(reached-8, could-6)\n" + "auxpass(reached-8, be-7)\n" + "root(ROOT-0, reached-8)\n" + "case(comment-10, for-9)\n" + "nmod(reached-8, comment-10)\n", //Mr. Alpine => name(Alpine, Mr)?
+        "compound(field-2, Xml-1)\n" +
                 "nsubj(include-4, field-2)\n" +
                 "aux(include-4, should-3)\n" + "root(ROOT-0, include-4)\n" +
                 "preconj(id-8, both-5)\n" +
                 "det(id-8, the-6)\n" +
-                "nn(id-8, entity-7)\n" +
+                "compound(id-8, entity-7)\n" +
                 "dobj(include-4, id-8)\n" +
                 "cc(id-8, and-9)\n" +
                 "det(name-12, the-10)\n" +
-                "nn(name-12, entity-11)\n" +
+                "compound(name-12, entity-11)\n" +
                 "conj(id-8, name-12)\n" +
                 "mark(unique-19, since-13)\n" +
                 "det(names-16, the-14)\n" +
-                "nn(names-16, entity-15)\n" +
+                "compound(names-16, entity-15)\n" +
                 "nsubj(unique-19, names-16)\n" +
                 "cop(unique-19, are-17)\n" +
                 "neg(unique-19, not-18)\n" +
-                "advcl(include-4, unique-19)\n",
+                "advcl(include-4, unique-19)\n", //.
         "det(government-2, The-1)\n" +
                 "nsubj(counts-3, government-2)\n" +  "root(ROOT-0, counts-3)\n" +
                 "dobj(counts-3, money-4)\n" +
@@ -214,7 +215,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                 "advmod(awarded-16, when-13)\n" +
                 "nsubjpass(awarded-16, they-14)\n" +
                 "auxpass(awarded-16, are-15)\n" +
-                "advcl(counts-11, awarded-16)\n",
+                "advcl(counts-11, awarded-16)\n", //.
         "cc(deserve-5, But-1)\n" +
                 "nsubj(deserve-5, she-2)\n" +
                 "aux(deserve-5, did-3)\n" +
@@ -225,41 +226,41 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                 "poss(head-9, her-8)\n" +
                 "nsubj(chopped-10, head-9)\n" +
                 "ccomp(have-7, chopped-10)\n" +
-                "prt(chopped-10, off-11)\n",
+                "prt(chopped-10, off-11)\n", //.
             "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" +
                     "dobj(like-2, dogs-3)\n" +
                     "cc(dogs-3, rather-4)\n" +
                     "mwe(rather-4, than-5)\n" +
-                    "conj(dogs-3, cats-6)\n",
+                    "conj(dogs-3, cats-6)\n", //.
         "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" +
                 "dobj(like-2, brandy-3)\n" +
-                "neg(mention-6, not-4)\n" +
-                "aux(mention-6, to-5)\n" +
-                "cc(brandy-3, mention-6)\n" +
-                "conj(brandy-3, cognac-7)\n",
+                "cc(brandy-3, not-4)\n" +
+                "mwe(not-4, to-5)\n" +
+                "mwe(not-4, mention-6)\n" +
+                "conj(brandy-3, cognac-7)\n",  //.
             "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" +
                     "neg(only-4, not-3)\n" +
                     "preconj(cats-5, only-4)\n" +
                     "dobj(like-2, cats-5)\n" +
                     "cc(also-7, but-6)\n" +
                     "cc(cats-5, also-7)\n" +
-                    "conj(cats-5, dogs-8)\n",
+                    "conj(cats-5, dogs-8)\n", //difference between preconjunction and cc?
         "nsubj(knows-2, He-1)\n" + "root(ROOT-0, knows-2)\n" +
                 "det(industry-6, the-3)\n" +
                 "amod(engineering-5, mechanical-4)\n" +
-                "nn(industry-6, engineering-5)\n" +
-                "dobj(knows-2, industry-6)\n",
+                "compound(industry-6, engineering-5)\n" +
+                "dobj(knows-2, industry-6)\n", //.
 
         "det(weapon-2, What-1)\n" +
-                "pobj(proficient-9, weapon-2)\n" +
+                "nmod(proficient-9, weapon-2)\n" +
                 "cop(proficient-9, is-3)\n" +
                 "det(Apollo-7, the-4)\n" +
                 "amod(Apollo-7, mythological-5)\n" +
-                "nn(Apollo-7, character-6)\n" +
+                "compound(Apollo-7, character-6)\n" + //really compound? or appos?
                 "nsubj(proficient-9, Apollo-7)\n" +
                 "advmod(proficient-9, most-8)\n" +
                 "root(ROOT-0, proficient-9)\n" +
-                "prep(proficient-9, with-10)\n",
+                "case(weapon-2, with-10)\n",
 
         "cc(free-4, Nor-1)\n" +
                 "cop(free-4, are-2)\n" +
@@ -267,109 +268,109 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                 "aux(reprint-6, to-5)\n" +
                 "xcomp(free-4, reprint-6)\n" +
                 "amod(material-8, such-7)\n" +
-                "dobj(reprint-6, material-8)\n",
+                "dobj(reprint-6, material-8)\n", //.
         "advmod(many-2, How-1)\n" +
                 "amod(novels-5, many-2)\n" +
                 "nn(novels-5, James-3)\n" +
                 "nn(novels-5, Bond-4)\n" +
                 "nsubj(are-6, novels-5)\n" + "root(ROOT-0, are-6)\n" +
-                "expl(are-6, there-7)\n",
+                "expl(are-6, there-7)\n", //again compounding??
         "nsubjpass(excluded-7, Investments-1)\n" +
-                "prep(Investments-1, in-2)\n" +
-                "nn(Africa-4, South-3)\n" +
-                "pobj(in-2, Africa-4)\n" +
+                "case(Africa-4, in-2)\n" +
+                "name(Africa-4, South-3)\n" +
+                "nmod(Investments-1, Africa-4)\n" +
                 "aux(excluded-7, will-5)\n" +
-                "auxpass(excluded-7, be-6)\n" + "root(ROOT-0, excluded-7)\n",
+                "auxpass(excluded-7, be-6)\n" + "root(ROOT-0, excluded-7)\n", //.
         "advmod(excluded-2, Also-1)\n" + "root(ROOT-0, excluded-2)\n" +
                 "aux(be-4, will-3)\n" +     // should really be aux(excluded-2, will-3) but impossible at present without reconstructing topicalized VP semantic head
                 "auxpass(excluded-2, be-4)\n" +
                 "nsubjpass(excluded-2, investments-5)\n" +
-                "prep(investments-5, in-6)\n" +
-                "nn(Africa-8, South-7)\n" +
-                "pobj(in-6, Africa-8)\n",
+                "case(Africa-8, in-6)\n" +
+                "name(Africa-8, South-7)\n" +
+                "nmod(investments-5, Africa-8)\n", //.
         "root(ROOT-0, Defending-1)\n" + "poss(ramparts-3, their-2)\n" +
                 "dobj(Defending-1, ramparts-3)\n" +
                 "aux(Defending-1, are-4)\n" +
-                "nn(Street-6, Wall-5)\n" +
-                "poss(Guard-9, Street-6)\n" +
-                "possessive(Street-6, 's-7)\n" +
-                "nn(Guard-9, Old-8)\n" +
-                "nsubj(Defending-1, Guard-9)\n",
+                "name(Street-6, Wall-5)\n" +
+                "nmod(Guard-9, Street-6)\n" +
+                "case(Street-6, 's-7)\n" +
+                "name(Guard-9, Old-8)\n" +
+                "nsubj(Defending-1, Guard-9)\n", //.
         "amod(investors-2, Institutional-1)\n" +
                 "nsubj(remained-4, investors-2)\n" +
                 "advmod(remained-4, mostly-3)\n" + "root(ROOT-0, remained-4)\n" +
-                "prep(remained-4, on-5)\n" +
+                "case(sidelines-7, on-5)\n" +
                 "det(sidelines-7, the-6)\n" +
-                "pobj(on-5, sidelines-7)\n" +
-                "tmod(remained-4, Tuesday-8)\n",
+                "nmod(on-5, sidelines-7)\n" +
+                "tmod(remained-4, Tuesday-8)\n", //.
         "cop(future-4, Is-1)\n" +
                 "nsubj(future-4, this-2)\n" +
                 "det(future-4, the-3)\n" + "root(ROOT-0, future-4)\n" +
-                "prep(future-4, of-5)\n" +
-                "nn(music-7, chamber-6)\n" +
-                "pobj(of-5, music-7)\n",
+                "case(music-7, of-5)\n" +
+                "compound(music-7, chamber-6)\n" +
+                "nmod(of-5, music-7)\n", //.
         "root(ROOT-0, Is-1)\n" + "det(trouble-3, the-2)\n" +
                 "nsubj(Is-1, trouble-3)\n" +
-                "advmod(Is-1, over-4)\n",
+                "advmod(Is-1, over-4)\n", //.
         "mark(smart-4, Although-1)\n" +
                 "nsubj(smart-4, Sue-2)\n" +
                 "cop(smart-4, is-3)\n" +
                 "advcl(win-8, smart-4)\n" +
                 "nsubj(win-8, who-6)\n" +
-                "aux(win-8, will-7)\n" + "root(ROOT-0, win-8)\n",
+                "aux(win-8, will-7)\n" + "root(ROOT-0, win-8)\n", //.
         "root(ROOT-0, Xerox-1)\n" +
                 "poss(officer-6, whose-3)\n" +
                 "amod(officer-6, chief-4)\n" +
                 "amod(officer-6, executive-5)\n" +
                 "nsubj(resigned-12, officer-6)\n" +
-                "nn(Gatward-9, James-8)\n" +
+                "name(Gatward-9, James-8)\n" +
                 "appos(officer-6, Gatward-9)\n" +
                 "aux(resigned-12, has-11)\n" +
-                "rcmod(Xerox-1, resigned-12)\n",
+                "relcl(Xerox-1, resigned-12)\n", //.
         "nsubj(gets-2, He-1)\n" +
                 "root(ROOT-0, gets-2)\n" +
                 "dobj(gets-2, me-3)\n" +
                 "det(time-5, every-4)\n" +
-                "advmod(gets-2, time-5)\n",
+                "advmod(gets-2, time-5)\n", //.
         "preconj(Parenteau-3, Both-1)\n" +
-                "nn(Parenteau-3, Mr.-2)\n" +
+                "name(Parenteau-3, Mr.-2)\n" +
                 "nsubj(bleeding-11, Parenteau-3)\n" +
                 "cc(Parenteau-3, and-4)\n" +
-                "nn(Doyon-6, Ms.-5)\n" +
+                "name(Doyon-6, Ms.-5)\n" +
                 "conj(Parenteau-3, Doyon-6)\n" +
                 "advmod(bleeding-11, however-8)\n" +
                 "aux(bleeding-11, were-10)\n" +
                 "root(ROOT-0, bleeding-11)\n" +
-                "advmod(bleeding-11, badly-12)\n",
+                "advmod(bleeding-11, badly-12)\n", // Mr. Parenteau => name?
         "amod(cars-5, Rusted-1)\n" +
                 "prt(Rusted-1, out-2)\n" +
                 "cc(Rusted-1, and-3)\n" +
                 "conj(Rusted-1, unsafe-4)\n" +
-                "root(ROOT-0, cars-5)\n",
+                "root(ROOT-0, cars-5)\n", //.
         "nsubj(holding-3, u-1)\n" +
             "aux(holding-3, r-2)\n" +
             "root(ROOT-0, holding-3)\n" +
             "dobj(holding-3, it-4)\n" +
             "advmod(tight-6, too-5)\n" +
-            "advmod(holding-3, tight-6)\n",
+            "advmod(holding-3, tight-6)\n", //.
         "nsubj(mail-4, You-1)\n" +
             "aux(mail-4, should-2)\n" +
             "goeswith(mail-4, e-3)\n" +
             "root(ROOT-0, mail-4)\n" +
             "dobj(mail-4, her-5)\n" +
-            "advmod(mail-4, sometimes-6)\n",
+            "advmod(mail-4, sometimes-6)\n", //. (though why dobj and not iobj?)
         "nsubj(higher-6, Interest-1)\n" +
             "cop(higher-6, is-2)\n" +
             "det(deal-5, a-3)\n" +
             "amod(deal-5, great-4)\n" +
-            "npadvmod(higher-6, deal-5)\n" +
+            "npmod(higher-6, deal-5)\n" +
             "root(ROOT-0, higher-6)\n" +
             "mark(was-9, than-7)\n" +
             "nsubj(was-9, it-8)\n" +
             "ccomp(higher-6, was-9)\n" +
             "det(year-11, a-10)\n" +
-            "npadvmod(ago-12, year-11)\n" +
-            "advmod(was-9, ago-12)\n",
+            "npmod(ago-12, year-11)\n" +
+            "advmod(was-9, ago-12)\n", //.
         "det(strike-2, The-1)\n" +
             "nsubj(ended-5, strike-2)\n" +
             "aux(ended-5, may-3)\n" +
@@ -378,62 +379,62 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
             "advmod(began-9, almost-6)\n" +
             "mark(began-9, before-7)\n" +
             "nsubj(began-9, it-8)\n" +
-            "advcl(ended-5, began-9)\n",
+            "advcl(ended-5, began-9)\n", //.
         "mark(set-2, Although-1)\n" +
             "advcl(American-11, set-2)\n" +
-            "prep(set-2, in-3)\n" +
-            "pobj(in-3, Japan-4)\n" +
+            "case(Japan-4, in-3)\n" +
+            "nmod(set-2, Japan-4)\n" +
             "det(novel-7, the-6)\n" +
-            "poss(texture-9, novel-7)\n" +
-            "possessive(novel-7, 's-8)\n" +
+            "nmod(texture-9, novel-7)\n" +
+            "case(novel-7, 's-8)\n" +
             "nsubj(American-11, texture-9)\n" +
             "cop(American-11, is-10)\n" +
-            "root(ROOT-0, American-11)\n",
+            "root(ROOT-0, American-11)\n", //.
         "discourse(specify-2, please-1)\n" +
             "root(ROOT-0, specify-2)\n" +
             "det(ship-7, which-3)\n" +
-            "nn(ship-7, royal-4)\n" +
+            "compound(ship-7, royal-4)\n" +
             "cc(royal-4, or-5)\n" +
             "conj(royal-4, carnival-6)\n" +
             "dobj(specify-2, ship-7)\n" +
             "discourse(specify-2, -LRB-:-8)\n",
         "root(ROOT-0, those-1)\n" +
-                "advmod(under-3, still-2)\n" +
-                "rcmod(those-1, under-3)\n" +
-                "nn(rules-5, GASB-4)\n" +
-                "pobj(under-3, rules-5)\n",
+                "advmod(under-3, still-2)\n" + //??
+                "case(rules-5, under-3)\n" + //case or mark??
+                "compound(rules-5, GASB-4)\n" +
+                "relcl(those-1, rules-5)\n",
         "det(house-3, the-1)\n" +
-                "nn(house-3, auction-2)\n" +
+                "compound(house-3, auction-2)\n" +
                 "root(ROOT-0, house-3)\n" +
-                "rcmod(house-3, founded-4)\n" +
-                "prep(founded-4, in-5)\n" +
-                "pobj(in-5, London-6)\n" +
+                "relcl(house-3, founded-4)\n" +
+                "case(London-6, in-5)\n" +
+                "nmod(founded-4, London-6)\n" +
                 "tmod(founded-4, 1744-7)\n" +
                 "cc(founded-4, and-8)\n" +
                 "advmod(under-10, now-9)\n" +
-                "conj(founded-4, under-10)\n" +
+                "case(umbrella-12, under-10)\n" +
                 "det(umbrella-12, the-11)\n" +
-                "pobj(under-10, umbrella-12)\n" +
-                "prep(umbrella-12, of-13)\n" +
-                "poss(Inc.-17, Sotheby-14)\n" +
-                "possessive(Sotheby-14, 's-15)\n" +
-                "nn(Inc.-17, Holdings-16)\n" +
-                "pobj(of-13, Inc.-17)\n",
+                "conj(founded-4, umbrella-12)\n" +
+                "case(Inc.-17, of-13)\n" +
+                "nmod(Inc.-17, Sotheby-14)\n" +
+                "case(Sotheby-14, 's-15)\n" +
+                "compound(Inc.-17, Holdings-16)\n" +
+                "nmod(umbrella-12, Inc.-17)\n", //Sotheby's Holdings Inc. should be a name???
         "nsubj(impossible-4, morcillas-1)\n" +
                 "cop(impossible-4, are-2)\n" +
                 "advmod(impossible-4, basically-3)\n" +
                 "root(ROOT-0, impossible-4)\n" +
                 "aux(find-6, to-5)\n" +
-                "ccomp(impossible-4, find-6)\n" +
-                "prep(find-6, in-7)\n" +
-                "pobj(in-7, California-8)\n",
+                "ccomp(impossible-4, find-6)\n" + //why ccomp? doesn't have a subject, right?
+                "case(California-8, in-7)\n" +
+                "nmod(find-6, California-8)\n",
         "aux(wait-3, Do-1)\n" +
                 "neg(wait-3, n't-2)\n" +
                 "root(ROOT-0, wait-3)\n" +
                 "parataxis(wait-3, act-5)\n" +
-                "advmod(act-5, now-6)\n",
+                "advmod(act-5, now-6)\n", //.
         "det(Council-3, The-1)\n" +
-                "nn(Council-3, Parks-2)\n" +
+                "name(Council-3, Parks-2)\n" +
                 "nsubj(wrote-4, Council-3)\n" +
                 "root(ROOT-0, wrote-4)\n" +
                 "det(BPCA-6, the-5)\n" +
@@ -449,13 +450,13 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                 "amod(garden-23, enclosed-22)\n" +
                 "nsubj(belongs-25, garden-23)\n" +
                 "ccomp(wrote-4, belongs-25)\n" +
-                "prep(belongs-25, in-26)\n" +
+                "case(location-29, in-26)\n" +
                 "advmod(location-29, almost-27)\n" +
                 "det(location-29, any-28)\n" +
-                "pobj(in-26, location-29)\n" +
+                "nmod(belongs-25, location-29)\n" +
                 "cc(location-29, but-30)\n" +
                 "det(waterfront-32, the-31)\n" +
-                "conj(location-29, waterfront-32)\n",
+                "conj(location-29, waterfront-32)\n", //.
         "cc(have-6, And-2)\n" +
                 "nsubj(have-6, you-3)\n" +
                 "aux(have-6, ca-4)\n" +
@@ -463,60 +464,60 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                 "root(ROOT-0, have-6)\n" +
                 "nsubj(hearing-12, taxpayers-7)\n" +
                 "vmod(taxpayers-7, coming-8)\n" +
-                "prep(coming-8, into-9)\n" +
+                "case(audit-11, into-9)\n" +
                 "det(audit-11, an-10)\n" +
-                "pobj(into-9, audit-11)\n" +
+                "nmod(coming-8, audit-11)\n" +
                 "ccomp(have-6, hearing-12)\n" +
                 "dobj(hearing-12, oohs-14)\n" +
                 "cc(oohs-14, and-16)\n" +
-                "conj(oohs-14, ahs-18)\n",
+                "conj(oohs-14, ahs-18)\n", //vmod ??
         "amod(nationalists-3, Freed-1)\n" +
                 "amod(nationalists-3, black-2)\n" +
                 "nsubj(resumed-4, nationalists-3)\n" +
                 "root(ROOT-0, resumed-4)\n" +
                 "amod(activity-6, political-5)\n" +
                 "dobj(resumed-4, activity-6)\n" +
-                "prep(resumed-4, in-7)\n" +
-                "nn(Africa-9, South-8)\n" +
-                "pobj(in-7, Africa-9)\n" +
+                "case(Africa-9, in-7)\n" +
+                "name(Africa-9, South-8)\n" +
+                "nmod(resumed-4, Africa-9)\n" +
                 "cc(resumed-4, and-10)\n" +
                 "conj(resumed-4, vowed-11)\n" +
                 "aux(fight-13, to-12)\n" +
                 "xcomp(vowed-11, fight-13)\n" +
-                "prep(fight-13, against-14)\n" +
-                "pobj(against-14, apartheid-15)\n" +
-                "vmod(resumed-4, raising-17)\n" +
+                "case(apartheid-15, against-14)\n" +
+                "nmod(fight-13, apartheid-15)\n" +
+                "vmod(resumed-4, raising-17)\n" + //vmod?
                 "dobj(raising-17, fears-18)\n" +
-                "prep(fears-18, of-19)\n" +
+                "case(backlash-23, of-19)\n" +
                 "det(backlash-23, a-20)\n" +
                 "amod(backlash-23, possible-21)\n" +
                 "amod(backlash-23, white-22)\n" +
-                "pobj(of-19, backlash-23)\n",
+                "pobj(fears-18, backlash-23)\n",
                 "auxpass(held-2, Being-1)\n" +
                         "csubj(irritates-7, held-2)\n" +
                         "advmod(below-4, well-3)\n" +
-                        "prep(held-2, below-4)\n" +
-                        "pobj(below-4, capacity-5)\n" +
+                        "case(capacity-5, below-4)\n" +
+                        "nmod(held-2, capacity-5)\n" +
                         "advmod(irritates-7, greatly-6)\n" +
                         "root(ROOT-0, irritates-7)\n" +
                         "dobj(irritates-7, them-8)\n" +
                         "cc(irritates-7, and-10)\n" +
                         "aux(led-12, has-11)\n" +
                         "conj(irritates-7, led-12)\n" +
-                        "prep(led-12, to-13)\n" +
+                        "case(cheating-15, to-13)\n" +
                         "amod(cheating-15, widespread-14)\n" +
-                        "pobj(to-13, cheating-15)\n",
+                        "pobj(led-12, cheating-15)\n", //.
         "nsubj(acquired-2, They-1)\n" +
                 "root(ROOT-0, acquired-2)\n" +
                 "dobj(acquired-2, stakes-3)\n" +
-                "prep(stakes-3, in-4)\n" +
+                "case(companies-6, in-4)\n" +
                 "amod(companies-6, bottling-5)\n" +
-                "pobj(in-4, companies-6)\n" +
-                "prep(companies-6, in-7)\n" +
+                "nmod(stakes-3, companies-6)\n" +
+                "prep(U.S.-9, in-7)\n" +
                 "det(U.S.-9, the-8)\n" +
-                "pobj(in-7, U.S.-9)\n" +
-                "cc(in-7, and-10)\n" +
-                "conj(in-7, overseas-11)\n",
+                "pobj(companies-6, U.S.-9)\n" +
+                "cc(U.S.-9, and-10)\n" +
+                "conj(U.S.-9, overseas-11)\n", //.
     };
 
     assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
