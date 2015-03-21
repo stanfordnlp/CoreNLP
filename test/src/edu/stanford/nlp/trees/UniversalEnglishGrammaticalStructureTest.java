@@ -147,20 +147,19 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "case(chair-5, on-3)\n" + 
            "det(chair-5, the-4)\n" + 
            "nmod(sat-2, chair-5)\n"},
-        // {TestType.BASIC,
-        //  "(ROOT (S (NP (PRP We)) (VP (VBP have) (NP (NP (DT no) (JJ useful) (NN information)) (PP (IN on) (SBAR (IN whether) (S (NP (NNS users)) (VP (VBP are) (PP (IN at) (NP (NN risk))))))))) (. .)))",
-        //  "nsubj(have-2, We-1)\n" + 
-        //   "root(ROOT-0, have-2)\n" + 
-        //   "neg(information-5, no-3)\n" + 
-        //   "amod(information-5, useful-4)\n" + 
-        //   "dobj(have-2, information-5)\n" + 
-        //   "prep(information-5, on-6)\n" + 
-        //   "mark(are-9, whether-7)\n" + 
-        //   "nsubj(are-9, users-8)\n" + 
-        //   "pcomp(on-6, are-9)\n" + 
-        //   "prep(are-9, at-10)\n" + 
-        //   "pobj(at-10, risk-11)\n" + 
-        //   ""},
+         {TestType.BASIC,
+          "(ROOT (S (NP (PRP We)) (VP (VBP have) (NP (NP (DT no) (JJ useful) (NN information)) (PP (IN on) (SBAR (IN whether) (S (NP (NNS users)) (VP (VBP are) (PP (IN at) (NP (NN risk))))))))) (. .)))",
+          "nsubj(have-2, We-1)\n" + 
+           "root(ROOT-0, have-2)\n" + 
+           "neg(information-5, no-3)\n" + 
+           "amod(information-5, useful-4)\n" + 
+           "dobj(have-2, information-5)\n" + 
+           "case(are-9, on-6)\n" + 
+           "mark(are-9, whether-7)\n" + 
+           "nsubj(are-9, users-8)\n" + 
+           "acl(information-5, are-9)\n" + 
+           "case(risk-11, at-10)\n" + 
+           "nmod(are-9, risk-11)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PRP They)) (VP (VBD heard) (PP (IN about) (NP (NN asbestos))) (S (VP (VBG having) (NP (JJ questionable) (NNS properties))))) (. .)))",
           "nsubj(heard-2, They-1)\n" + 
@@ -383,15 +382,14 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "nsubj(is-3, man-2)\n" + 
            "root(ROOT-0, is-3)\n" + 
            "advmod(is-3, here-4)\n"},
-         //{TestType.BASIC,
-         // "(ROOT (SBARQ (WHPP (IN In) (WHNP (WDT which) (NN city))) (SQ (VBP do) (NP (PRP you)) (VP (VB live))) (. ?)))",
-         // "case(city-3, In-1)\n" + 
-         //  "det(city-3, which-2)\n" + 
-         //  "nmod(live-6, city-3)\n" + 
-         //  "aux(live-6, do-4)\n" + 
-         //  "nsubj(live-6, you-5)\n" + 
-         //  "root(ROOT-0, live-6)\n" + 
-         //  ""},
+         {TestType.BASIC,
+          "(ROOT (SBARQ (WHPP (IN In) (WHNP (WDT which) (NN city))) (SQ (VBP do) (NP (PRP you)) (VP (VB live))) (. ?)))",
+          "case(city-3, In-1)\n" + 
+           "det(city-3, which-2)\n" + 
+           "nmod(live-6, city-3)\n" + 
+           "aux(live-6, do-4)\n" + 
+           "nsubj(live-6, you-5)\n" + 
+           "root(ROOT-0, live-6)\n"},
          {TestType.BASIC,
           "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBD did) (NP (NNP Charles) (NNP Babbage)) (VP (VB invent))) (? ?)))",
           "dobj(invent-5, What-1)\n" + 
