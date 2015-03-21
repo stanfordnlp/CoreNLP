@@ -861,7 +861,7 @@ public class UniversalEnglishGrammaticalRelations {
             "VP < VP < (TO=target)",
             "SBAR|SBAR-TMP < (IN|DT|MWE=target $++ S|FRAG)",
             "SBAR < (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]",
-            "/^PP(?:-TMP|-ADV)?$/ < (IN|TO|MWE=target $+ SBAR)");
+            "/^PP(?:-TMP|-ADV)?$/ < (IN|TO|MWE=target $+ @SBAR|S)");
 
 
   /**
@@ -1288,8 +1288,8 @@ public class UniversalEnglishGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalEnglish, "case", "case marker",
         MODIFIER, "(?:WH)?(?:PP.*|SBARQ|NP|NML)(?:-TMP|-ADV)?", tregexCompiler,
             //"/(?:WH)?PP(?:-TMP)?/ !$- (@CC|CONJP $- __) < IN|TO|MWE=target",
-            "/(?:WH)?PP(?:-TMP)?/ < (IN|TO|MWE|PCONJP=target !$+ SBAR)",
-            "/(?:WH)?PP(?:-TMP)?/ < (IN|TO|MWE|PCONJP=target !$+ SBAR)",
+            "/(?:WH)?PP(?:-TMP)?/ < (IN|TO|MWE|PCONJP=target !$+ @SBAR [!$+ @S | $+ (S <, (VP <, NN))] )",
+            //"/(?:WH)?PP(?:-TMP)?/ < (IN|TO|MWE|PCONJP=target !$+ @SBAR|S)",
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < POS=target", //'s
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < (VBZ=target < /^'s$/)", //'s
             

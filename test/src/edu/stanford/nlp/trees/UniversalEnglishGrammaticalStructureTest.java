@@ -34,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.GrammaticalStructure.Extras;
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -1192,7 +1193,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "nsubj(wrong-3, What-1)\n" + 
                "cop(wrong-3, is-2)\n" + 
                "root(ROOT-0, wrong-3)\n" + 
-               "case(expecting-5, with-4)\n" + 
+               "mark(expecting-5, with-4)\n" + 
                "advcl(wrong-3, expecting-5)\n" + 
                "dobj(expecting-5, pizza-6)\n"},
              {TestType.NON_COLLAPSED,
@@ -1200,7 +1201,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "nsubj(wrong-3, What-1)\n" + 
                "cop(wrong-3, is-2)\n" + 
                "root(ROOT-0, wrong-3)\n" + 
-               "case(expecting-5, with-4)\n" + 
+               "mark(expecting-5, with-4)\n" + 
                "advcl(wrong-3, expecting-5)\n" + 
                "dobj(expecting-5, pizza-6)\n"},
              {TestType.BASIC,
@@ -2534,9 +2535,6 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "nmod:to(flies-2, France-8)\n" +
               "conj:and(Serbia-6, France-8)\n"},
 
-              
-              
-               
     });
   }
 

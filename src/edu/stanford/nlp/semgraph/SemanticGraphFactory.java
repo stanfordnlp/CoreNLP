@@ -118,23 +118,42 @@ public class SemanticGraphFactory {
    * result in a non-tree
    * @param threadSafe Whether to make sure processing is thread-safe
    * @param filter A filter to exclude certain dependencies; ignored if null
+   * @param originalDependencies generate original Stanford dependencies instead of new
+   * Universal Dependencies
    * @return A SemanticGraph
    */
   public static SemanticGraph makeFromTree(Tree tree,
                                            Mode mode,
                                            GrammaticalStructure.Extras includeExtras,
                                            boolean threadSafe,
-                                           Predicate<TypedDependency> filter) {
-    Predicate<String> tagFilt;
-    if (INCLUDE_PUNCTUATION_DEPENDENCIES) {
-      tagFilt = Filters.acceptFilter();
+                                           Predicate<TypedDependency> filter,
+                                           boolean originalDependencies) {
+    GrammaticalStructure gs;
+    if (originalDependencies) {
+      Predicate<String> wordFilt;
+      if (INCLUDE_PUNCTUATION_DEPENDENCIES) {
+        wordFilt = Filters.acceptFilter();
+      } else {
+        wordFilt = new PennTreebankLanguagePack().punctuationWordRejectFilter();
+      }
+      gs = new EnglishGrammaticalStructure(tree,
+          wordFilt,
+              new SemanticHeadFinder(true),
+              threadSafe);
+            
     } else {
-      tagFilt = new PennTreebankLanguagePack().punctuationTagRejectFilter();
+      Predicate<String> tagFilt;
+      if (INCLUDE_PUNCTUATION_DEPENDENCIES) {
+        tagFilt = Filters.acceptFilter();
+      } else {
+        tagFilt = new PennTreebankLanguagePack().punctuationTagRejectFilter();
+      }
+      gs = new UniversalEnglishGrammaticalStructure(tree,
+              tagFilt,
+              new UniversalSemanticHeadFinder(true),
+              threadSafe);
+      
     }
-    GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree,
-            tagFilt,
-            new UniversalSemanticHeadFinder(true),
-            threadSafe);
     return makeFromTree(gs, mode, includeExtras,
                         threadSafe, filter);
   }
@@ -148,7 +167,7 @@ public class SemanticGraphFactory {
                                            boolean includeExtras,
                                            boolean threadSafe,
                                            Predicate<TypedDependency> filter) {
-    return makeFromTree(tree, mode, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe, filter);
+    return makeFromTree(tree, mode, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe, filter, false);
   }
 
 
@@ -227,7 +246,7 @@ public class SemanticGraphFactory {
                                            Mode mode,
                                            GrammaticalStructure.Extras includeExtras,
                                            Predicate<TypedDependency> filter) {
-    return makeFromTree(tree, mode, includeExtras, false, filter);
+    return makeFromTree(tree, mode, includeExtras, false, filter, false);
   }
 
   /**
@@ -249,7 +268,7 @@ public class SemanticGraphFactory {
                                            Mode mode,
                                            GrammaticalStructure.Extras includeExtras,
                                            boolean threadSafe) {
-    return makeFromTree(tree, mode, includeExtras, threadSafe, null);
+    return makeFromTree(tree, mode, includeExtras, threadSafe, null, false);
   }
 
   /**
@@ -270,7 +289,7 @@ public class SemanticGraphFactory {
    * @param collapse collapse dependencies iff this parameter is true
    */
   public static SemanticGraph makeFromTree(Tree tree, boolean collapse) {
-    return makeFromTree(tree, (collapse) ? Mode.COLLAPSED : Mode.BASIC, GrammaticalStructure.Extras.NONE, false, null);
+    return makeFromTree(tree, (collapse) ? Mode.COLLAPSED : Mode.BASIC, GrammaticalStructure.Extras.NONE, false, null, false);
   }
 
   /**
@@ -278,7 +297,7 @@ public class SemanticGraphFactory {
    * and extra dependencies are not included (convenience method for makeFromTree(Tree tree, boolean collapse))
    */
   public static SemanticGraph makeFromTree(Tree tree) {
-    return makeFromTree(tree, Mode.COLLAPSED, GrammaticalStructure.Extras.NONE, false, null);
+    return makeFromTree(tree, Mode.COLLAPSED, GrammaticalStructure.Extras.NONE, false, null, false);
   }
 
 
