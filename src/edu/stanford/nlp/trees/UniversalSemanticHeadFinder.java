@@ -185,6 +185,11 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
     
     nonTerminalInfo.put("PCONJP", new String[][]{{"left"}});
     
+    nonTerminalInfo.put("ADJP", new String[][]{{"left", "$"}, {"rightdis", "NNS", "NN", "NNP", "JJ", "QP", "VBN", "VBG"}, {"left", "ADJP"}, {"rightdis", "JJP", "JJR", "JJS", "DT", "RB", "RBR", "CD", "IN", "VBD"}, {"left", "ADVP", "NP"}});
+
+    nonTerminalInfo.put("INTJ", new String[][]{{"rightdis", "NNS", "NN", "NNP"}, {"left"}});
+
+    
     //TODO: all but in ADVP
     
     //What about "so as not to???"

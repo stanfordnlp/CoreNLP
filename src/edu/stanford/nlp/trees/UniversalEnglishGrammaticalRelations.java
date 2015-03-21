@@ -183,12 +183,12 @@ public class UniversalEnglishGrammaticalRelations {
         // "Such a great idea this was"
         "SINV <# (NP $++ (NP $++ (VP=target < (/^(?:VB|AUX)/ < " + copularWordRegex + "))))");
 
+  // ect seems to be a common misspelling for etc in the PTB
+  private static final String ETC_PAT = "(FW < /^(?i:(etc|ect))$/)";
+  private static final String ETC_PAT_target = "(FW=target < /^(?i:(etc|ect))$/)";
 
-  private static final String ETC_PAT = "(FW < /^(?i:etc)$/)";
-  private static final String ETC_PAT_target = "(FW=target < /^(?i:etc)$/)";
-
-  private static final String FW_ETC_PAT = "(ADVP|NP <1 (FW < /^(?i:etc)$/))";
-  private static final String FW_ETC_PAT_target = "(ADVP|NP=target <1 (FW < /^(?i:etc)$/))";
+  private static final String FW_ETC_PAT = "(ADVP|NP <1 (FW < /^(?i:(etc|ect))$/))";
+  private static final String FW_ETC_PAT_target = "(ADVP|NP=target <1 (FW < /^(?i:(etc|ect))$/))";
 
   // match "not", "n't", "nt" (for informal writing), or "never" as _complete_ string
   private static final String NOT_PAT = "/^(?i:n[o']?t|never)$/";
@@ -247,7 +247,9 @@ public class UniversalEnglishGrammaticalRelations {
             "/^(?:VP|S|SBAR|SBARQ|SINV|ADJP|PP|QP|(?:WH)?NP(?:-TMP|-ADV)?|ADVP|UCP(?:-TMP|-ADV)?|NX|NML)$/ [ < (CC $++ (CC|CONJP $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target)) | <- " + ETC_PAT_target + " | <- " + FW_ETC_PAT_target + " ]",
             // transformed prepositional conjunction phrase in sentence such as 
             // "Lufthansa flies from and to Serbia."
-            "PCONJP < (CC $+ IN|TO=target)");
+            "PCONJP < (CC $+ IN|TO=target)",
+            //to get conjunctions in phrases such as "big / main" or "man / woman"
+            "/.*/ < (/^(.*)$/#1%x $+ (/,/ < /\\// $+ /^(.*)$/#1%x=target))");
 
 
   /**
@@ -880,8 +882,8 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation ADJECTIVAL_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "amod", "adjectival modifier",
-        MODIFIER, "NP(?:-TMP|-ADV)?|NX|NML|NAC|WHNP|ADJP", tregexCompiler,
-            "/^(?:NP(?:-TMP|-ADV)?|NX|NML|NAC|WHNP)$/ < (ADJP|WHADJP|JJ|JJR|JJS|JJP|VBN|VBG|VBD|IN=target !< (QP !< /^[$]$/) !$- CC)",
+        MODIFIER, "NP(?:-TMP|-ADV)?|NX|NML|NAC|WHNP|ADJP|INTJ", tregexCompiler,
+            "/^(?:NP(?:-TMP|-ADV)?|NX|NML|NAC|WHNP|INTJ)$/ < (ADJP|WHADJP|JJ|JJR|JJS|JJP|VBN|VBG|VBD|IN=target !< (QP !< /^[$]$/) !$- CC)",
             // IN above is needed for "next" in "next week" etc., which is often tagged IN.
             "ADJP !< CC|CONJP < (JJ|NNP $ JJ|NNP=target)",
             // Cover the case of "John, 34, works at Stanford" - similar to an expression for appos
@@ -1170,10 +1172,10 @@ public class UniversalEnglishGrammaticalRelations {
    * <p/>
    * Examples: <br/>
    * "dogs as well as cats" &rarr;
-   * <code>mwe</code>(well, as)<br/>
-   * <code>mwe</code>(well, as)<p/>
+   * <code>mwe</code>(as, well)<br/>
+   * <code>mwe</code>(as, as)<p/>
    * "fewer than 700 bottles" &rarr;
-   * <code>mwe</code>(than, fewer)
+   * <code>mwe</code>(fewer, than)
    * 
    * @see {@link CoordinationTransformer#MWETransform(Tree)}
    * @see <a href="http://universaldependencies.github.io/docs/en/dep/mwe.html">List of multi-word expressions</a>
@@ -1181,7 +1183,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation MULTI_WORD_EXPRESSION =
     new GrammaticalRelation(Language.UniversalEnglish, "mwe", "multi-word expression",
         MODIFIER, "PP|XS|ADVP|CONJP|MWE", tregexCompiler,
-            "MWE < (IN|TO|RB|NP|NN|JJ|VB|CC|VBZ|VBD|ADVP|PP=target)");
+            "MWE < (IN|TO|RB|NP|NN|JJ|VB|CC|VBZ|VBD|ADVP|PP|JJS|RBS=target)");
 
   /**
    * The "determiner" grammatical relation.
@@ -1200,7 +1202,7 @@ public class UniversalEnglishGrammaticalRelations {
                                             "(!< /^(?i:either|neither|both|no)$/ $++ CC $++ /^(?:NN|NX|NML)/) | " +
                                             "(!< /^(?i:no)$/ $++ (/^JJ/ !$+ /^NN/) !$++CC !$+ DT) ] )",
             // "NP|NP-TMP|NP-ADV < (RB=target $++ (/^PDT$/ $+ /^NN/))", // todo: This matches nothing. Was it meant to be a PDT rule for (NP almost/RB no/DT chairs/NNS)?
-            "NP|NP-TMP|NP-ADV <<, PRP <- (NP|DT|RB=target <<- all|both|each)", // we all, them all; various structures
+            "NP|NP-TMP|NP-ADV <<, PRP <- (NP|DT|RB=target <<- /^(?i:all|both|each)$/)", // we all, them all; various structures
             "WHNP < (NP $-- (WHNP=target < WDT))",
             // testing against CC|CONJP avoids conflicts with preconj in
             // phrases such as "both foo and bar"
@@ -1302,8 +1304,11 @@ public class UniversalEnglishGrammaticalRelations {
             //"SBARQ < (WHNP $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP=target !< NP)) $++ (NP $++ =adj)))",
  
             // to handle "Nothing but their scratches"
-            "/(?:WH)?PP(?:-TMP)?/ <1 CC=target <2 NP");
+            "/(?:WH)?PP(?:-TMP)?/ <1 CC=target <2 NP",
             
+            
+            "/(?:WH)?PP(?:-TMP)?/ <, VBG=target !< (@PP < @SBAR|S)");
+  
             
   
             /*
@@ -1355,7 +1360,7 @@ public class UniversalEnglishGrammaticalRelations {
             // "But even if he agrees -- which he won't -- etc etc"
             "S|VP < (/^:$/ $+ /^S/=target) !<, (__ $++ CC|CONJP)",
             // two juxtaposed sentences; common in web materials (but this also matches quite a few wsj things)
-            "@S < (@S|SBARQ $++ @S|SBARQ=target !$++ @CC|CONJP)",
+            "@S < (@S|SBARQ|SQ $++ @S|SBARQ|SQ=target !$++ @CC|CONJP)",
             "@S|VP < (/^:$/ $-- /^V/ $+ @NP=target) !< @CONJP|CC" // sometimes CC cases are right node raising, etc.
     );
 

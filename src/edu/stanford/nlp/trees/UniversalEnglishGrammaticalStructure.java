@@ -772,7 +772,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     list.addAll(sg.typedDependencies());
     
     Collections.sort(list);
-    if (true) {
+    if (DEBUG) {
       printListSorted("After all collapse:", list);
     }
   }

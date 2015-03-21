@@ -139,8 +139,6 @@ public class CoordinationTransformer implements TreeTransformer {
       }
     }
     
-    System.err.println(t.pennString());
-    
     return t;
   }
 
@@ -671,6 +669,10 @@ public class CoordinationTransformer implements TreeTransformer {
     TregexPattern.compile("@ADVP|INTJ < ((NN|DT|RB=node1 < /^(?i)that$/) $+ (VBZ|RB=node2 < /^(?i)is$/))"), //that is
     TregexPattern.compile("@WHADVP < ((WRB=node1 < /^(?i:how)$/) $+ (VB=node2 < /^(?i)come$/))"), //how come
     TregexPattern.compile("@VP < ((VBD=node1 < had|'d) $+ (@PRT|ADVP=node2 <: (RBR < /^(?i)better$/)))"), //had better
+    TregexPattern.compile("@QP|XS < ((JJR|RBR|IN=node1 < /^(?i)(more|less)$/) $+ (IN=node2 < /^(?i)than$/))"), //more/less than
+    TregexPattern.compile("@QP < ((JJR|RBR|IN=node1 < /^(?i)up$/) $+ (IN|TO=node2 < /^(?i)to$/))"), //up to
+    TregexPattern.compile("@ADVP < ((IN|RB=node1 < /^(?i)at$/) $+ (JJS|RBS=node2 < /^(?i)least$/))"), //at least
+
   };
   
   private static TsurgeonPattern MWE_OPERATION = Tsurgeon.parseOperation("[createSubtree MWE node1 node2] [if exists node3 move node3 $- node2]");
