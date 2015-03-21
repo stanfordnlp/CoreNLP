@@ -321,7 +321,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         if ( ! firstWord) {
           sb.append("_");
         }
-        sb.append(cm.word());
+        sb.append(cm.value());
         firstWord = false;
       } else {
         /* Should never happen as there should be never two non-adjacent case markers.
@@ -329,7 +329,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
          */
         GrammaticalRelation reln = getCaseMarkedRelation(edge.getRelation(), sb.toString().toLowerCase());
         sg.addEdge(gov, mod, reln, Double.NEGATIVE_INFINITY, true);
-        sb = new StringBuilder(cm.word());
+        sb = new StringBuilder(cm.value());
         firstWord = true;
       }
       lastCaseMarkerIndex = cm.index();
@@ -795,11 +795,11 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   private static GrammaticalRelation conjValue(IndexedWord cc, SemanticGraph sg) {
     
     int pos = cc.index();
-    String newConj = cc.word().toLowerCase();
+    String newConj = cc.value().toLowerCase();
 
     if (newConj.equals("not")) {
       IndexedWord prevWord = sg.getNodeByIndexSafe(pos - 1);
-      if (prevWord != null && prevWord.word().toLowerCase().equals("but")) {
+      if (prevWord != null && prevWord.value().toLowerCase().equals("but")) {
         return UniversalEnglishGrammaticalRelations.getConj("negcc");
       }
     }
@@ -807,9 +807,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     IndexedWord secondIWord = sg.getNodeByIndexSafe(pos + 1);
     
     if (secondIWord == null) {
-      return UniversalEnglishGrammaticalRelations.getConj(cc.word());
+      return UniversalEnglishGrammaticalRelations.getConj(cc.value());
     }
-    String secondWord = secondIWord.word().toLowerCase();
+    String secondWord = secondIWord.value().toLowerCase();
     if (newConj.equals("but")) {
       if (secondWord.equals("rather")) {
         newConj = "negcc";
@@ -826,7 +826,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       newConj = "and";
     } else if (newConj.equals("not") && secondWord.equals("to")) {
       IndexedWord thirdIWord = sg.getNodeByIndexSafe(pos + 2);
-      String thirdWord = thirdIWord != null ? thirdIWord.word().toLowerCase() : null;
+      String thirdWord = thirdIWord != null ? thirdIWord.value().toLowerCase() : null;
       if (thirdWord != null && thirdWord.equals("mention")) {
         newConj = "and";
       }
@@ -1225,22 +1225,22 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     int numWords = vertexList.size();
     
     for (int i = 1; i < numWords; i++) {
-      String bigram = vertexList.get(i-1).word().toLowerCase() + "_" + vertexList.get(i).word().toLowerCase();
+      String bigram = vertexList.get(i-1).value().toLowerCase() + "_" + vertexList.get(i).value().toLowerCase();
       
       if (bigrams.get(bigram) == null) {
         bigrams.put(bigram, new HashSet<Integer>());
       }
       
-      bigrams.get(bigram).add(i);
+      bigrams.get(bigram).add(vertexList.get(i-1).index());
       
       if (i > 1) {
-        String trigram = vertexList.get(i-2).word().toLowerCase() + "_" + bigram;
+        String trigram = vertexList.get(i-2).value().toLowerCase() + "_" + bigram;
         
         if (trigrams.get(trigram) == null) {
           trigrams.put(trigram, new HashSet<Integer>());
         }
         
-        trigrams.get(trigram).add(i-1);
+        trigrams.get(trigram).add(vertexList.get(i-2).index());
       }
     }
         
@@ -1255,6 +1255,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         
         IndexedWord gov1 = sg.getParent(w1);
         IndexedWord gov2 = sg.getParent(w2);
+        
+        if (gov1 == null || gov2 == null) {
+          continue;
+        }
         
         SemanticGraphEdge edge1 = sg.getEdge(gov1, w1);
         SemanticGraphEdge edge2 = sg.getEdge(gov2, w2);
@@ -1289,6 +1293,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         IndexedWord gov1 = sg.getParent(w1);
         IndexedWord gov2 = sg.getParent(w2);
         IndexedWord gov3 = sg.getParent(w3);
+
+        if (gov1 == null || gov2 == null || gov3 == null) {
+          continue;
+        }
 
         
         SemanticGraphEdge edge1 = sg.getEdge(gov1, w1);

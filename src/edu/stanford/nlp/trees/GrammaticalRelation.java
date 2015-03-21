@@ -603,6 +603,29 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       }
       return rel;
     }
+    case UniversalEnglish:
+      GrammaticalRelation rel = UniversalEnglishGrammaticalRelations.valueOf(toString());
+      if (rel == null) {
+        switch (shortName) {
+          case "conj":
+            return UniversalEnglishGrammaticalRelations.getConj(specific);
+          case "nmod":
+            return UniversalEnglishGrammaticalRelations.getNmod(specific);
+          case "acl":
+            return UniversalEnglishGrammaticalRelations.getAcl(specific);
+          case "advcl":
+            return UniversalEnglishGrammaticalRelations.getAdvcl(specific);
+          default:
+            // TODO: we need to figure out what to do with relations
+            // which were serialized and then deprecated.  Perhaps there
+            // is a good way to make them singletons
+            return this;
+          //throw new RuntimeException("Unknown English relation " + this);
+        }
+      } else {
+        return rel;
+      }
+      
     default: {
       throw new RuntimeException("Unknown language " + language);
     }
