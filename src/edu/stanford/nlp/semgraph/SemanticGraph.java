@@ -1743,6 +1743,15 @@ public class SemanticGraph implements Serializable {
   public List<SemanticGraphEdge> getShortestDirectedPathEdges(IndexedWord source, IndexedWord target) {
     return graph.getShortestPathEdges(source, target, true);
   }
+  
+  public SemanticGraph makeSoftCopy() {
+    SemanticGraph newSg = new SemanticGraph();
+    newSg.setRoot(this.getFirstRoot());
+    for (SemanticGraphEdge edge : this.edgeIterable()) {
+      newSg.addEdge(edge.getSource(), edge.getTarget(), edge.getRelation(), edge.getWeight(), edge.isExtra());
+    }
+    return newSg;
+  }
 
   // ============================================================================
 
