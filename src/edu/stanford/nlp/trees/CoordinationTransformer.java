@@ -33,10 +33,12 @@ import java.util.Properties;
  * <li> Attach RB such as "not" to the next phrase to get the RB headed by the phrase it modifies
  * <li> Turn SBAR to PP if parsed as SBAR in phrases such as "The day after the airline was planning ..."
  * <li> Rearrange "now that" into an SBAR phrase if it was misparsed as ADVP
+ * <li> (Only for universal dependencies) Extracts multi-word expressions and attaches all nodes to a new MWE constituent
  * </ul>
  *
  * @author Marie-Catherine de Marneffe
  * @author John Bauer
+ * @author Sebastian Schuster
  */
 public class CoordinationTransformer implements TreeTransformer {
 
@@ -46,10 +48,23 @@ public class CoordinationTransformer implements TreeTransformer {
   private final TreeTransformer dates = new DateTreeTransformer();    //to flatten date patterns
 
   private final HeadFinder headFinder;
+  private final boolean performMWETransformation;
 
   // default constructor
   public CoordinationTransformer(HeadFinder hf) {
+    this(hf, false);
+  }
+  
+  /**
+   * Constructor
+   * 
+   * @param hf the headfinder
+   * @param performMWETransformation Parameter for backwards compatibility. 
+   * If set to false, multi-word expressions won't be attached to a new "MWE" node
+   */
+  public CoordinationTransformer(HeadFinder hf, boolean performMWETransformation) {
     this.headFinder = hf;
+    this.performMWETransformation = performMWETransformation;
   }
 
   /**
@@ -111,10 +126,12 @@ public class CoordinationTransformer implements TreeTransformer {
     if (VERBOSE) {
       System.err.println("After rearrangeNowThat:           " + t);
     }
-    //TODO: Don't run this for original Stanford Dependencies
-    t = MWETransform(t);
-    if (VERBOSE) {
-      System.err.println("After MWETransform:               " + t);
+
+    if (performMWETransformation) {
+      t = MWETransform(t);
+      if (VERBOSE) {
+        System.err.println("After MWETransform:               " + t);
+      }
     }
     
     return t;
