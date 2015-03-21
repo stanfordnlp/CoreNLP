@@ -41,6 +41,8 @@ public class LexicalizedParserServerITest extends TestCase {
       synchronized(LexicalizedParserServerITest.class) {
         if (lexparser == null) {
           lexparser = LexicalizedParser.loadModel(lexmodel);
+          // TODO: Update tests for universal dependencies, for now, just use original stanford dependencies
+          lexparser.getTLPParams().setGenerateOriginalDependencies(true);
         }
         if (srparser == null) {
           srparser = ShiftReduceParser.loadModel(srmodel, "-preTag", "-taggerSerializedFile", tagger);
