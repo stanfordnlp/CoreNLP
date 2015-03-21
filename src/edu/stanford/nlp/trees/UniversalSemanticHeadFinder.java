@@ -183,6 +183,7 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
     //TODO: USD: do something for MWE "as well", "of course", "so that", "more than", "less than", "up to"
     //"according to", "in order", "at least", "as if", "prior to", "as to", "kind of", "whether or not", 
     //"let alone", "so as to", "in between", "that is", "how come", "had better"..
+    nonTerminalInfo.put("MWE", new String[][]{{"left"}});
     
     //TODO: all but in ADVP
     

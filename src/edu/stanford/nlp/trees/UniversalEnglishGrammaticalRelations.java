@@ -208,7 +208,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation CONJUNCT =
     new GrammaticalRelation(Language.UniversalEnglish, "conj", "conjunct",
         DEPENDENT, "VP|(?:WH)?NP(?:-TMP|-ADV)?|ADJP|PP|QP|ADVP|UCP(?:-TMP|-ADV)?|S|NX|SBAR|SBARQ|SINV|SQ|JJP|NML|RRC", tregexCompiler,
-            "VP|S|SBAR|SBARQ|SINV|SQ|RRC < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB)/ $+ !/^(?:SBAR|PRN|``|''|-[LR]RB-|,|:|\\.)$/=target)",
+            "VP|S|SBAR|SBARQ|SINV|SQ|RRC < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB|MWE)/ $+ !/^(?:SBAR|PRN|``|''|-[LR]RB-|,|:|\\.)$/=target)",
             // This case is separated out from the previous case to
             // avoid conflicts with advcl when you have phrases such as
             // "but only because ..."
@@ -788,15 +788,7 @@ public class UniversalEnglishGrammaticalRelations {
             "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
             "@NP < (@UCP|PRN=target <# @PP)",
             // to handle "What weapon is Apollo most proficient with?"
-            "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP !< NP)) $++ (NP $++ =adj)))",
-
-            //Possession
-            "/^(?:WH)?(?:NP|NML)(?:-.*)?$/ [ < (WHNP|WHNML|NP|NML=target [ < POS | < (VBZ < /^'s$/) ] ) !< (CC|CONJP $++ WHNP|WHNML|NP|NML) |  < (WHNP|WHNML|NP|NML=target < (CC|CONJP $++ WHNP|WHNML|NP|NML) < (WHNP|WHNML|NP|NML [ < POS | < (VBZ < /^'s$/) ] )) ]",
-            // handle a few too flat NPs
-            // note that ' matches both ' and 's
-            "/^(?:WH)?(?:NP|NML|NX)(?:-.*)?$/ < (/^NN|NP/=target $++ (POS=pos < /\'/ $++ /^NN/) !$++ (/^NN|NP/ $++ =pos))");
-
-  
+            "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP !< NP)) $++ (NP $++ =adj)))");
   
             /*
             "/^(?:PP(?:-TMP)?|(?:WH)?(?:PP|ADVP))$/ < (SYM|IN|VBG|VBN|TO|FW|RB|RBR $++ (/^(?:WH)?(?:NP|ADJP)(?:-TMP|-ADV)?$/=target !$- @NP) !< /^(?i:not)$/)",
@@ -876,14 +868,14 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation ADV_CLAUSE_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "advcl", "adverbial clause modifier",
         MODIFIER, "VP|S|SQ|SINV|SBARQ|NP|ADVP|ADJP", tregexCompiler,
-            "VP < (@SBAR=target <= (@SBAR [ < (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (RB|IN < so|now) < (IN < that) | <1 (ADVP < (RB < now)) <2 (IN < that) ] ))",
-            "S|SQ|SINV < (SBAR|SBAR-TMP=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?).*$/ !$+ VP)",
+            "VP < (@SBAR=target <= (@SBAR [ < (IN|MWE !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (RB|IN < so|now) < (IN < that) | <1 (ADVP < (RB < now)) <2 (IN < that) ] ))",
+            "S|SQ|SINV < (SBAR|SBAR-TMP=target <, (IN|MWE !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?).*$/ !$+ VP)",
             // to get "rather than"
-            "S|SQ|SINV < (SBAR|SBAR-TMP=target <2 (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?$).*$/)",
+            //"S|SQ|SINV < (SBAR|SBAR-TMP=target <2 (IN|MWE !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?$).*$/)",
             // this one might just be better, but at any rate license one with quotation marks or a conjunction beforehand
-            "S|SQ|SINV < (SBAR|SBAR-TMP=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$+ @VP $+ /^,$/ $++ @NP)",
+            "S|SQ|SINV < (SBAR|SBAR-TMP=target <, (IN|MWE !< /^(?i:that|whether)$/ !$+ (NN < order)) !$+ @VP $+ /^,$/ $++ @NP)",
             // the last part should probably only be @SQ, but this captures some strays at no cost
-            "SBARQ < (SBAR|SBAR-TMP|SBAR-ADV=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) $+ /^,$/ $++ @SQ|S|SBARQ)",
+            "SBARQ < (SBAR|SBAR-TMP|SBAR-ADV=target <, (IN|MWE !< /^(?i:that|whether)$/ !$+ (NN < order)) $+ /^,$/ $++ @SQ|S|SBARQ)",
             // added the (S < (VP <TO)) part so that "I tell them how to do so" doesn't get a wrong advcl
             // note that we allow adverb phrases to come before the WHADVP, which allows for phrases such as "even when"
             // ":" indicates something that should be a parataxis
@@ -905,7 +897,7 @@ public class UniversalEnglishGrammaticalRelations {
             //   // which contains empties
             //   // Example: "with the way his split-fingered fastball is behaving"
             //   "!($-- @NP|WHNP|NML > @NP|WHNP <: (S !< (VP < TO)))",
-            "NP < (NP $++ (SBAR=target < (IN < /^(?i:than)$/) !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !<: (S !< (VP < TO))) !$++ (CC $++ =target))",
+            "NP < (NP $++ (SBAR=target < (IN|MWE < /^(?i:than)$/) !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO|MWE)))) !<: (S !< (VP < TO))) !$++ (CC $++ =target))",
             // this is for comparative or as ... as complements: sold more quickly [than they had expected]
             // available as long [as they install a crash barrier]
             "ADVP < ADVP < SBAR=target",
@@ -996,7 +988,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation MARKER =
     new GrammaticalRelation(Language.UniversalEnglish, "mark", "marker",
         MODIFIER, "SBAR(?:-TMP)?", tregexCompiler,
-            "SBAR|SBAR-TMP < (IN|DT=target $++ S|FRAG)",
+            "SBAR|SBAR-TMP < (IN|DT|MWE=target $++ S|FRAG)",
             "SBAR < (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]");
 
 
@@ -1383,8 +1375,11 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation MULTI_WORD_EXPRESSION =
     new GrammaticalRelation(Language.UniversalEnglish, "mwe", "multi-word expression",
-        MODIFIER, "PP|XS|ADVP|CONJP", tregexCompiler,
-            "PP|XS|CONJP < (IN|TO < as|of|at|to|in) < (JJ|IN|JJR|JJS|NN|VBN=target < such|because|Because|least|instead|due|Due|addition|to|opposed)",
+        MODIFIER, "PP|XS|ADVP|CONJP|MWE", tregexCompiler,
+            "MWE < (IN|TO|RB|NP|NN|JJ|VB|CC|VBZ|VBD|ADVP|PP=target)"
+            
+            /*
+            "PP|XS|CONJP < (IN|TO < as|of|at|to|in) < (JJ|IN|JJR|JJS|NN|VBN=target < such|because|Because|least|instead|due|Due|addition|opposed)",
             "ADVP < (RB|IN < well) < (IN|RB|JJS=target < as)",
             // TODO: perhaps the phrase "all but" is more like "all" and should have that as the head
             "ADVP < (DT|RB < all) < (CC|RB=target < but)",
@@ -1395,6 +1390,7 @@ public class UniversalEnglishGrammaticalRelations {
             "CONJP < (VBN < opposed) < IN < (TO|IN=target < to)", //"to" of "as opposed to"
             // todo: note inconsistent head finding for "rather than"!
             "XS < JJR|JJS=target" // more than, fewer than, well over -- maybe change some of these?
+            */
     );
 
   /* mihai: this block needs to be uncommented to get the KBP 2010 system to work (due to the cached sentences using old code)
@@ -1489,15 +1485,14 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation POSSESSION_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "nmod:poss", "possession modifier",
         MODIFIER, "(?:WH)?(NP|ADJP|INTJ|PRN|NAC|NX|NML)(?:-.*)?", tregexCompiler,
-            "/^(?:WH)?(?:NP|INTJ|ADJP|PRN|NAC|NX|NML)(?:-.*)?$/ < /^(?:WP\\$|PRP\\$)$/=target"
+            "/^(?:WH)?(?:NP|INTJ|ADJP|PRN|NAC|NX|NML)(?:-.*)?$/ < /^(?:WP\\$|PRP\\$)$/=target",
             // todo: possessive pronoun under ADJP needs more work for one case of (ADJP his or her own)
             // basic NP possessive: we want to allow little conjunctions in head noun (NP (NP ... POS) NN CC NN) but not falsely match when there are conjoined NPs.  See tests.
             
-            //todo: move these to nmod
-            //"/^(?:WH)?(?:NP|NML)(?:-.*)?$/ [ < (WHNP|WHNML|NP|NML=target [ < POS | < (VBZ < /^'s$/) ] ) !< (CC|CONJP $++ WHNP|WHNML|NP|NML) |  < (WHNP|WHNML|NP|NML=target < (CC|CONJP $++ WHNP|WHNML|NP|NML) < (WHNP|WHNML|NP|NML [ < POS | < (VBZ < /^'s$/) ] )) ]",
+            "/^(?:WH)?(?:NP|NML)(?:-.*)?$/ [ < (WHNP|WHNML|NP|NML=target [ < POS | < (VBZ < /^'s$/) ] ) !< (CC|CONJP $++ WHNP|WHNML|NP|NML) |  < (WHNP|WHNML|NP|NML=target < (CC|CONJP $++ WHNP|WHNML|NP|NML) < (WHNP|WHNML|NP|NML [ < POS | < (VBZ < /^'s$/) ] )) ]",
             // handle a few too flat NPs
             // note that ' matches both ' and 's
-            //"/^(?:WH)?(?:NP|NML|NX)(?:-.*)?$/ < (/^NN|NP/=target $++ (POS=pos < /\'/ $++ /^NN/) !$++ (/^NN|NP/ $++ =pos))"
+            "/^(?:WH)?(?:NP|NML|NX)(?:-.*)?$/ < (/^NN|NP/=target $++ (POS=pos < /\'/ $++ /^NN/) !$++ (/^NN|NP/ $++ =pos))"
             );
 
 
@@ -1538,7 +1533,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation CASE_MARKER =
     new GrammaticalRelation(Language.UniversalEnglish, "case", "case marker",
         MODIFIER, "(?:WH)?(?:PP.*|SBARQ|NP|NML)(?:-TMP|-ADV)?", tregexCompiler,
-            "/(?:WH)?PP(?:-TMP)?/ !$- (@CC|CONJP $- __) < IN|TO=target",
+            "/(?:WH)?PP(?:-TMP)?/ !$- (@CC|CONJP $- __) < IN|TO|MWE=target",
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < POS=target", //'s
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < (VBZ=target < /^'s$/)", //'s
             
@@ -1622,7 +1617,6 @@ public class UniversalEnglishGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalEnglish, "goeswith", "goes with",
         MODIFIER, ".*", tregexCompiler,
             "__ < GW=target");
-
 
 
   /**

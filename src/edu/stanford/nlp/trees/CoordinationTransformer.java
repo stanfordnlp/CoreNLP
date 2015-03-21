@@ -111,6 +111,12 @@ public class CoordinationTransformer implements TreeTransformer {
     if (VERBOSE) {
       System.err.println("After rearrangeNowThat:           " + t);
     }
+    //TODO: Don't run this for original Stanford Dependencies
+    t = MWETransform(t);
+    if (VERBOSE) {
+      System.err.println("After MWETransform:               " + t);
+    }
+    
     return t;
   }
 
@@ -613,6 +619,54 @@ public class CoordinationTransformer implements TreeTransformer {
     return null;
   }
 
+  /**
+   * Multi-word expression patterns
+   */
+  private static TregexPattern[] MWE_PATTERNS = {
+    TregexPattern.compile("@CONJP <1 (RB=node1 < as) <2 (RB=node2 < well) <- (IN=node3 < as)"), //as well as
+    TregexPattern.compile("@ADVP|CONJP <1 (RB=node1 < as) <- (IN|RB=node2 < well)"), //as well
+    TregexPattern.compile("@PP < ((JJ=node1 < such) $+ (IN=node2 < as))"), //such as 
+    TregexPattern.compile("@PP < ((JJ|IN=node1 < due) $+ (IN|TO=node2 < to))"), //due to 
+    TregexPattern.compile("@PP|CONJP < ((IN|RB=node1 < because|instead) $+ (IN=node2 < of))"), //because of/instead of 
+    TregexPattern.compile("@ADVP|SBAR < ((IN|RB=node1 < in) $+ (NN=node2 < case))"), //in case
+    TregexPattern.compile("@ADVP|PP < ((IN|RB=node1 < of) $+ (NN|RB=node2 < course))"), //of course
+    TregexPattern.compile("@SBAR|PP < ((IN|RB=node1 < in) $+ (NN|NP|RB=node2 [< order | <: (NN < order)]))"), //in order
+    TregexPattern.compile("@PP|CONJP|SBAR < ((IN|RB=node1 < rather) $+ (IN=node2 < than))"), //rather than
+    TregexPattern.compile("@CONJP < ((IN|RB=node1 < not) $+ (TO=node2 < to $+ (VB|RB=node3 < mention)))"), //not to mention
+    TregexPattern.compile("@PP|SBAR < ((JJ|IN|RB=node1 < so) $+ (IN|TO=node2 < that))"), //so that 
+    TregexPattern.compile("@SBAR < ((IN|RB=node1 < as) $+ (IN=node2 < if))"), //as if
+    TregexPattern.compile("@PP < ((JJ|RB=node1 < prior) $+ (TO|IN=node2 < to))"), //prior to
+    TregexPattern.compile("@PP < ((IN=node1 < as) $+ (TO|IN=node2 < to))"), //as to
+    TregexPattern.compile("@ADVP < ((RB|NN=node1 < kind) $+ (IN|RB=node2 < of))"), //kind of
+    TregexPattern.compile("@SBAR < ((IN|RB=node1 < whether) $+ (CC=node2 < or $+ (RB=node3 < not)))"), //whether or not
+    TregexPattern.compile("@CONJP < ((IN=node1 < as) $+ (VBN=node2 < opposed $+ (TO|IN=node3 < to)))"), //as opposed to
+    TregexPattern.compile("@ADVP|CONJP < ((VB|RB|VBD=node1 < let) $+ (RB|JJ=node2 < alone))"), //let alone
+    //TODO: "so as to"
+    TregexPattern.compile("@ADVP|PP < ((IN|RB=node1 < in) $+ (IN|NP|PP|RB|ADVP=node2 [< between | <: (IN|RB < between)]))"), //in between
+    TregexPattern.compile("@ADVP|QP|ADJP < ((DT|RB=node1 < all) $+ (CC|RB|IN=node2 < but))"), //all but
+    TregexPattern.compile("@ADVP|INTJ < ((NN|DT|RB=node1 < that) $+ (VBZ|RB=node2 < is))"), //that is
+    TregexPattern.compile("@WHADVP < ((WRB=node1 < /^(?i:how)$/) $+ (VB=node2 < come))"), //how come
+    TregexPattern.compile("@VP < ((VBD=node1 < had|'d) $+ (@PRT|ADVP=node2 <: (RBR < better)))"), //had better
+  };
+  
+  private static TsurgeonPattern MWE_OPERATION = Tsurgeon.parseOperation("[createSubtree MWE node1 node2] [if exists node3 move node3 $- node2]");
+  
+  private static TregexPattern ACCORDING_TO_PATTERN = TregexPattern.compile("PP=pp1 < (VBG=node1 < according $+ (PP=pp2 < (TO|IN=node2 < to)))");
+  private static TsurgeonPattern ACCORDING_TO_OPERATION = Tsurgeon.parseOperation("[createSubtree MWE node1] [move node2 $- node1] [excise pp1 pp1]");
+
+  /**
+   * Puts all multi-word expressions below a single constituent labeled "MWE".
+   * Patterns for multi-word expressions are defined in MWE_PATTERNS.
+   */
+  public static Tree MWETransform(Tree t) {
+    for (TregexPattern p: MWE_PATTERNS) {
+      Tsurgeon.processPattern(p, MWE_OPERATION, t);
+    }
+    
+    Tsurgeon.processPattern(ACCORDING_TO_PATTERN, ACCORDING_TO_OPERATION, t);
+    
+    return t;
+  }
 
   public static void main(String[] args) {
 

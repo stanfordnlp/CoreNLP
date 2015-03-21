@@ -154,7 +154,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   @Override
   protected void getExtras(List<TypedDependency> list) {
-    /*addRef(list);
+    addRef(list);
     if (DEBUG) {
       printListSorted("After adding ref:", list);
     }
@@ -167,7 +167,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     addStrandedPobj(list);
     if (DEBUG) {
       printListSorted("After adding stranded pobj:", list);
-    } */
+    }
   }
 
   // Using this makes addStrandedPobj a lot cleaner looking, but it
@@ -195,7 +195,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   // Deal with preposition stranding in relative clauses.
   // For example, "the only thing I'm rooting for"
   // This method will add pobj(for, thing) by connecting using the rcmod and prep
-  /*
   private static void addStrandedPobj(List<TypedDependency> list) {
     List<IndexedWord> depNodes = null;
     List<TypedDependency> newDeps = null;
@@ -217,6 +216,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         }
       }
 
+      //TODO: Find a way to do this with the new direction of prepositions
+      /*
       for (IndexedWord dep : depNodes) {
         for (TypedDependency prep : list) {
           if (!prep.gov().equals(dep) || prep.reln() != PREPOSITIONAL_MODIFIER) {
@@ -239,13 +240,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
           }
         }
       }
-
+    */
     }
     if (newDeps != null) {
       list.addAll(newDeps);
     }
   }
-  */
 
 
   /**
