@@ -143,7 +143,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   @Override
   protected void postProcessDependencies(List<TypedDependency> list) {
-    /*
     if (DEBUG) {
       printListSorted("At postProcessDependencies:", list);
     }
@@ -151,7 +150,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After converting rel:", list);
     }
-    */
   }
 
   @Override
@@ -257,7 +255,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * On the other hand, in the sentence "... which Mr. Bush was
    * fighting for", we should have pobj(for, which).
    */
-  /*
   private static void convertRel(List<TypedDependency> list) {
     List<TypedDependency> newDeps = new ArrayList<TypedDependency>();
     for (TypedDependency rel : list) {
@@ -266,6 +263,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       }
 
       boolean foundPrep = false;
+      
+      /*
+      //TODO: Update once I found a way to handle the non-projective dependencies
       for (TypedDependency prep : list) {
 
         // todo: It would also be good to add a rule here to prefer ccomp nsubj over dobj if there is a ccomp with no subj
@@ -307,6 +307,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
           // break; // only put it in one place (or do we want to allow across-the-board effects?
         }
       }
+      */
       if (!foundPrep) {
         rel.setReln(DIRECT_OBJECT);
       }
@@ -319,7 +320,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
   }
-  */
 
 
   /**
