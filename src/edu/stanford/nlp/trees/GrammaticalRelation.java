@@ -266,7 +266,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   }
 
 
-  public static enum Language { Any, English, Chinese }
+  public static enum Language { Any, English, Chinese, UniversalEnglish }
 
 
   /* Non-static stuff */
