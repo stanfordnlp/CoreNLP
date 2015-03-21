@@ -2,7 +2,6 @@ package edu.stanford.nlp.graph;
 
 import java.util.*;
 
-import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
