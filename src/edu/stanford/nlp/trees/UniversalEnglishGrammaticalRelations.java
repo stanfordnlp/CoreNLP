@@ -734,7 +734,7 @@ public class UniversalEnglishGrammaticalRelations {
         MODIFIER, ".*", tregexCompiler,
             "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target [< @NP|WHNP|NML | < (PP < @NP|WHNP|NML)]) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
             "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (S=target <: WHPP|WHPP-TMP|PP|PP-TMP)",
-            // only allow a PP < PP one if there is not a verb, or other pattern that matches pcomp under it.  Else pcomp
+            // only allow a PP < PP one if there is not a verb, or other pattern that matches acl/advcl under it.  Else acl/advcl
             "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO)",
             "S|SINV < (PP|PP-TMP=target !< SBAR) < VP|S",
             "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
@@ -815,7 +815,7 @@ public class UniversalEnglishGrammaticalRelations {
             "SBARQ < WHNP < (S=target < (VP <1 TO))",
            
             //former pcomp
-            "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) !<: IN|TO !< @CC|CONJP < /^((?!PP).)*$/) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
+            "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) !<: IN|TO !< @CC|CONJP < /^((?!(PP|IN)).)*$/) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
   
   
   /**
@@ -1287,6 +1287,7 @@ public class UniversalEnglishGrammaticalRelations {
         MODIFIER, "(?:WH)?(?:PP.*|SBARQ|NP|NML)(?:-TMP|-ADV)?", tregexCompiler,
             //"/(?:WH)?PP(?:-TMP)?/ !$- (@CC|CONJP $- __) < IN|TO|MWE=target",
             "/(?:WH)?PP(?:-TMP)?/ < (IN|TO|MWE|PCONJP=target !$+ SBAR)",
+            "/(?:WH)?PP(?:-TMP)?/ < (IN|TO|MWE|PCONJP=target !$+ SBAR)",
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < POS=target", //'s
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < (VBZ=target < /^'s$/)", //'s
             
@@ -1597,7 +1598,7 @@ public class UniversalEnglishGrammaticalRelations {
       synchronized(advcls) {
         result = advcls.get(advclString);
         if (result == null) {
-          result = new GrammaticalRelation(Language.UniversalEnglish, "advcl", "advcl_preposition", DEPENDENT, advclString);
+          result = new GrammaticalRelation(Language.UniversalEnglish, "advcl", "advcl_preposition", ADV_CLAUSE_MODIFIER, advclString);
           advcls.put(advclString, result);
           threadSafeAddRelation(result);
         }
@@ -1621,7 +1622,7 @@ public class UniversalEnglishGrammaticalRelations {
       synchronized(acls) {
         result = acls.get(aclString);
         if (result == null) {
-          result = new GrammaticalRelation(Language.UniversalEnglish, "acl", "acl_preposition", DEPENDENT, aclString);
+          result = new GrammaticalRelation(Language.UniversalEnglish, "acl", "acl_preposition", CLAUSAL_MODIFIER, aclString);
           acls.put(aclString, result);
           threadSafeAddRelation(result);
         }

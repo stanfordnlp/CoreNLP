@@ -1808,9 +1808,9 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                 "root(ROOT-0, flies-2)\n" +
                 "conj:and(flies-2, flies-2')\n" +
                 "case(Serbia-6, to-3)\n" +
-                "cc(flies-2, and-4)\n" +
-                "case(Serbia-6', from-5)\n" +
-                "nmod:from(flies-2', Serbia-6')\n" +
+                "cc(to-3, and-4)\n" +
+                "conj:and(to-3, from-5)\n" +
+                "nmod:from(flies-2', Serbia-6)\n" +
                 "nmod:to(flies-2, Serbia-6)\n"},
              {TestType.COLLAPSED,
                 "(ROOT (S (NP (NNP Lufthansa)) (VP (VBZ flies) (PP (TO to) (CC and) (IN from) (NP (NP (NNP Serbia)) (CC and) (NP (NNP France))))) (. .)))",
@@ -1818,14 +1818,12 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                 "root(ROOT-0, flies-2)\n" +
                 "conj:and(flies-2, flies-2')\n" +
                 "case(Serbia-6, to-3)\n" +
-                "cc(flies-2, and-4)\n" +
-                "case(Serbia-6', from-5)\n" +
-                "nmod:from(flies-2', Serbia-6')\n" +
+                "cc(to-3, and-4)\n" +
+                "conj:and(to-3, from-5)\n" +
+                "nmod:from(flies-2', Serbia-6)\n" +
                 "nmod:to(flies-2, Serbia-6)\n" +
                 "cc(Serbia-6, and-7)\n" +
-                "cc(Serbia-6', and-7)\n" + 
-                "conj:and(Serbia-6, France-8)\n" +
-                "conj:and(Serbia-6', France-8)\n"},
+                "conj:and(Serbia-6, France-8)\n"},
             {TestType.COLLAPSED,
               "(ROOT (S (NP (NNP Lufthansa)) (VP (VP (VBZ flies) (PP (IN from) (NP (NNP Serbia)))) (CC and) (VP (VBZ flies) (PP (TO to) (NP (NNP Serbia))))) (. .)))",
               "nsubj(flies-2, Lufthansa-1)\n" +
@@ -2032,10 +2030,10 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "root(ROOT-0, flew-2)\n" + 
                "conj:or(flew-2, flew-2')\n" + 
                "case(Serbia-6, across-3)\n" + 
-               "cc(flew-2, or-4)\n" + 
-               "case(Serbia-6', across-5)\n" + 
+               "cc(across-3, or-4)\n" + 
+               "conj:or(across-3, across-5)\n" + 
                "nmod:across(flew-2, Serbia-6)\n" +
-               "nmod:across(flew-2', Serbia-6')\n"},
+               "nmod:across(flew-2', Serbia-6)\n"},
              {TestType.COLLAPSED,
               "(ROOT (SBARQ (WHPP (IN For) (WHNP (WRB how) (JJ long))) (SQ (VBZ is) (NP (DT an) (NN elephant)) (ADJP (JJ pregnant))) (. ?)))",
               "case(long-3, For-1)\n" + 
@@ -2259,14 +2257,13 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "compound(pickup-11, Chevy-10)\n" +
                "nmod:in(hustles-4, pickup-11)\n" +
                "case(training-15, before-12)\n" +
-               "cc(hustles-4, and-13)\n" +
-               "case(training-15', after-14)\n" +
-               "advcl:after(hustles-4', training-15')\n" +
+               "cc(before-12, and-13)\n" +
+               "conj:and(before-12, after-14)\n" +
+               "advcl:after(hustles-4', training-15)\n" +
                "advcl:before(hustles-4, training-15)\n" +
                "case(Tropics-18, with-16)\n" +
                "det(Tropics-18, the-17)\n" +
-               "nmod:with(training-15, Tropics-18)\n" +
-               "nmod:with(training-15', Tropics-18)\n"},
+               "nmod:with(training-15, Tropics-18)\n"},
              {TestType.CC_PROCESSED,
               "(ROOT (S (NP (NNP Jill)) (VP (VBD walked) (PP (PP (IN out) (NP (DT the) (NN door))) (, ,) (PP (IN over) (NP (DT the) (NN road))) (, ,) (PP (IN across) (NP (DT the) (JJ deserted) (NN block))) (, ,) (PP (IN around) (NP (DT the) (NN corner))) (, ,) (CC and) (PP (IN through) (NP (DT the) (NN park))))) (. .)))",
               "nsubj(walked-2, Jill-1)\n" +
@@ -2528,16 +2525,14 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
               "root(ROOT-0, flies-2)\n" +
               "conj:and(flies-2, flies-2')\n" +
               "case(Serbia-6, to-3)\n" +
-              "cc(flies-2, and-4)\n" +
-              "case(Serbia-6', from-5)\n" +
-              "nmod:from(flies-2', Serbia-6')\n" +
+              "cc(to-3, and-4)\n" +
+              "conj:and(to-3, from-5)\n" +
+              "nmod:from(flies-2', Serbia-6)\n" +
               "nmod:to(flies-2, Serbia-6)\n" +
               "cc(Serbia-6, and-7)\n" +
-              "cc(Serbia-6', and-7)\n" + 
               "nmod:from(flies-2', France-8)\n" +
               "nmod:to(flies-2, France-8)\n" +
-              "conj:and(Serbia-6, France-8)\n" +
-              "conj:and(Serbia-6', France-8)\n"},
+              "conj:and(Serbia-6, France-8)\n"},
 
               
               

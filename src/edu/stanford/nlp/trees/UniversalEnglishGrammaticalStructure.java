@@ -197,8 +197,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   /* Semgrex patterns for prepositional phrases. */
   private static SemgrexPattern PASSIVE_AGENT_PATTERN = SemgrexPattern.compile("{}=gov >nmod=reln ({}=mod >case {word:/^(?i:by)$/}=c1) >auxpass {}");
-  private static SemgrexPattern PREP_MW3_PATTERN = SemgrexPattern.compile("{}=gov   [>/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 >mwe {}=c2 >mwe {}=c3))]");
-  private static SemgrexPattern PREP_MW2_PATTERN = SemgrexPattern.compile("{}=gov   [>/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 >mwe {}=c2)) | >/^(nmod|advcl|acl)$/=reln ({}=mod >case {}=c1 >case ({}=c2 !== {}=c1))]");
+  private static SemgrexPattern PREP_MW3_PATTERN = SemgrexPattern.compile("{}=gov   [>/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 >mwe {}=c2 >mwe ({}=c3 !== {}=c2) ))]");
+  private static SemgrexPattern PREP_MW2_PATTERN = SemgrexPattern.compile("{}=gov >/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 >mwe {}=c2))");
   private static SemgrexPattern PREP_PATTERN = SemgrexPattern.compile("{}=gov   >/^(nmod|advcl|acl)$/=reln ({}=mod >case {}=c1)");
 
   
@@ -241,6 +241,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       
       IndexedWord gov = matcher.getNode("gov");
       IndexedWord mod = matcher.getNode("mod");
+      
       addCaseMarkersToReln(sg, gov, mod, caseMarkers);
       
       oldCaseMarkers = caseMarkers;
@@ -341,16 +342,15 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   
   /**
    * Expands prepositions with conjunctions such as in the sentence
-   * "Bill flies to and from Serbia." by copying both the verb and
-   * the governor of the preposition resulting in the following
-   * relations:
+   * "Bill flies to and from Serbia." by copying the verb resulting 
+   * in the following relations:
    * <p/>
    * <code>conj:and(flies, flies')</code><br/>
    * <code>case(Serbia, to)</code><br/>
-   * <code>cc(flies, and)</code><br/>
-   * <code>case(Serbia, from)</code><br/>
+   * <code>cc(to, and)</code><br/>
+   * <code>conj(to, from)</code><br/>
    * <code>nmod(flies, Serbia)</code><br/>
-   * <code>nmod(flies', Serbia')</code><br/>
+   * <code>nmod(flies', Serbia)</code><br/>
    * <p/>
    * The label of the conjunct relation includes the conjunction type
    * because if the verb has multiple cc relations then it can be impossible
@@ -398,33 +398,38 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     GrammaticalRelation rel = sg.reln(caseGovGov, caseGov);
     List<IndexedWord> newConjDeps = Generics.newLinkedList();
     for (IndexedWord conjDep : conjDeps) {
-      IndexedWord caseGovCopy = caseGov.makeSoftCopy();
+      //IndexedWord caseGovCopy = caseGov.makeSoftCopy();
       IndexedWord caseGovGovCopy = caseGovGov.makeSoftCopy();
       
       /* Change conj(prep-1, prep-2) to case(prep-1-gov-copy, prep-2) */
-      SemanticGraphEdge edge = sg.getEdge(gov, conjDep);
-      sg.removeEdge(edge);
-      sg.addEdge(caseGovCopy, conjDep, CASE_MARKER, Double.NEGATIVE_INFINITY, false);
+      //SemanticGraphEdge edge = sg.getEdge(gov, conjDep);
+      //sg.removeEdge(edge);
+      //sg.addEdge(caseGovCopy, conjDep, CASE_MARKER, Double.NEGATIVE_INFINITY, false);
       
       /* Add relation to copy node. */
-      sg.addEdge(caseGovGovCopy, caseGovCopy, rel, Double.NEGATIVE_INFINITY, false);
+      //sg.addEdge(caseGovGovCopy, caseGovCopy, rel, Double.NEGATIVE_INFINITY, false);
 
       sg.addEdge(conjGov, caseGovGovCopy, CONJUNCT, Double.NEGATIVE_INFINITY, false);
       newConjDeps.add(caseGovGovCopy);
-
       
+      sg.addEdge(caseGovGovCopy, caseGov, rel, Double.NEGATIVE_INFINITY, true);
+
+      List<IndexedWord> caseMarkers = Generics.newArrayList();
+      caseMarkers.add(conjDep);
+      
+      addCaseMarkersToReln(sg, caseGovGovCopy, caseGov, caseMarkers);      
       /* Attach all children except case markers of caseGov to caseGovCopy. */
-      for (SemanticGraphEdge e : sg.outgoingEdgeList(caseGov)) {
-        if (e.getRelation() != CASE_MARKER && ! e.getDependent().equals(ccDep)) {
-          sg.addEdge(caseGovCopy, e.getDependent(), e.getRelation(), Double.NEGATIVE_INFINITY, false);
-        }
-      }
+      //for (SemanticGraphEdge e : sg.outgoingEdgeList(caseGov)) {
+      //  if (e.getRelation() != CASE_MARKER && ! e.getDependent().equals(ccDep)) {
+      //    sg.addEdge(caseGovCopy, e.getDependent(), e.getRelation(), Double.NEGATIVE_INFINITY, false);
+      //  }
+     // }
     }
     
     /* Attach CC node to caseGov */ 
-    SemanticGraphEdge edge = sg.getEdge(gov, ccDep);
-    sg.removeEdge(edge);
-    sg.addEdge(conjGov, ccDep, COORDINATION, Double.NEGATIVE_INFINITY, false);
+    //SemanticGraphEdge edge = sg.getEdge(gov, ccDep);
+    //sg.removeEdge(edge);
+    //sg.addEdge(conjGov, ccDep, COORDINATION, Double.NEGATIVE_INFINITY, false);
     
     /* Add conjunction information for these relations already at this point.
      * It could be that we add several coordinating conjunctions while collapsing
@@ -533,6 +538,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    */
   private static GrammaticalRelation getCaseMarkedRelation(GrammaticalRelation reln, String relationName) {
     GrammaticalRelation newReln = null;
+    
+    if (reln.getSpecific() != null) {
+      reln = reln.getParent();
+    }
     if (reln == NOMINAL_MODIFIER) {
       newReln = UniversalEnglishGrammaticalRelations.getNmod(relationName);
     } else if (reln == ADV_CLAUSE_MODIFIER) {
@@ -563,7 +572,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * @param list mutable list of dependency relations
    */
   private static void addConjInformation(SemanticGraph sg) {
-
+    
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = CONJUNCTION_PATTERN.matcher(sgCopy);
     
@@ -692,9 +701,16 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("collapseDependencies: CCproc: " + CCprocess + " includeExtras: " + includeExtras, sg.typedDependencies());
     }
+    
+    
     correctDependencies(sg);
     if (DEBUG) {
       printListSorted("After correctDependencies:", sg.typedDependencies());
+    }
+
+    processMultiwordPreps(sg);
+    if (DEBUG) {
+      printListSorted("After processMultiwordPreps:", sg.typedDependencies());
     }
 
     
@@ -756,7 +772,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     list.addAll(sg.typedDependencies());
     
     Collections.sort(list);
-    if (DEBUG) {
+    if (true) {
       printListSorted("After all collapse:", list);
     }
   }
@@ -908,8 +924,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
             if (newGov.equals(dep)) {
               continue;
             }
+            
             GrammaticalRelation newRel = edge1.getRelation();
-            if (newRel != ROOT) {
+            //TODO: Do we want to copy case markers here?
+            if (newRel != ROOT && newRel != CASE_MARKER) {
               if (rcmodHeads.contains(gov) && rcmodHeads.contains(dep)) {
                 // to prevent wrong propagation in the case of long dependencies in relative clauses
                 if (newRel != DIRECT_OBJECT && newRel != NOMINAL_SUBJECT) {
@@ -1186,12 +1204,121 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   // used by collapse2WP(), collapseFlatMWP(), collapse2WPbis() KEPT IN
   // ALPHABETICAL ORDER
-  private static final String[][] MULTIWORD_PREPS = { { "according", "to" }, { "across", "from" }, { "ahead", "of" }, { "along", "with" }, { "alongside", "of" }, { "apart", "from" }, { "as", "for" }, { "as", "from" }, { "as", "of" }, { "as", "per" }, { "as", "to" }, { "aside", "from" }, { "away", "from" }, { "based", "on" }, { "because", "of" }, { "close", "by" }, { "close", "to" }, { "contrary", "to" }, { "compared", "to" }, { "compared", "with" }, { "due", "to" }, { "depending", "on" }, { "except", "for" }, { "exclusive", "of" }, { "far", "from" }, { "followed", "by" }, { "inside", "of" }, { "instead", "of" }, { "irrespective", "of" }, { "next", "to" }, { "near", "to" }, { "off", "of" }, { "out", "of" }, { "outside", "of" }, { "owing", "to" }, { "preliminary", "to" },
-      { "preparatory", "to" }, { "previous", "to" }, { "prior", "to" }, { "pursuant", "to" }, { "regardless", "of" }, { "subsequent", "to" }, { "such", "as" }, { "thanks", "to" }, { "together", "with" } };
+  private static final String[] MULTIWORD_PREPS = {  "according_to", "across_from", "ahead_of", "along_with", "alongside_of", "apart_from", "as_for", "as_from", "as_of", "as_per", "as_to", "aside_from", "away_from", "based_on", "because_of", "close_by", "close_to", "contrary_to", "compared_to", "compared_with", "due_to", "depending_on", "except_for", "exclusive_of", "far_from", "followed_by", "inside_of", "instead_of", "irrespective_of", "next_to", "near_to", "off_of", "out_of", "outside_of", "owing_to", "preliminary_to",
+       "preparatory_to", "previous_to", "prior_to", "pursuant_to", "regardless_of", "subsequent_to", "such_as", "thanks_to", "together_with"};
 
   // used by collapse3WP() KEPT IN ALPHABETICAL ORDER
-  private static final String[][] THREEWORD_PREPS = { { "by", "means", "of" }, { "in", "accordance", "with" }, { "in", "addition", "to" }, { "in", "case", "of" }, { "in", "front", "of" }, { "in", "lieu", "of" }, { "in", "place", "of" }, { "in", "spite", "of" }, { "on", "account", "of" }, { "on", "behalf", "of" }, { "on", "top", "of" }, { "with", "regard", "to" }, { "with", "respect", "to" } };
+  private static final String[] THREEWORD_PREPS = { "by_means_of", "in_accordance_with", "in_addition_to", "in_case_of", "in_front_of", "in_lieu_of", "in_place_of", "in_spite_of", "on_account_of", "on_behalf_of", "on_top_of", "with_regard_to", "with_respect_to" };
 
+  
+
+  /* Modifies dependencies such that */
+  
+  
+  private static void processMultiwordPreps(SemanticGraph sg) {
+    
+    HashMap<String, HashSet<Integer>> bigrams = new HashMap<String, HashSet<Integer>>();
+    HashMap<String, HashSet<Integer>> trigrams = new HashMap<String, HashSet<Integer>>();
+
+    
+    List<IndexedWord> vertexList = sg.vertexListSorted();
+    int numWords = vertexList.size();
+    
+    for (int i = 1; i < numWords; i++) {
+      String bigram = vertexList.get(i-1).word().toLowerCase() + "_" + vertexList.get(i).word().toLowerCase();
+      
+      if (bigrams.get(bigram) == null) {
+        bigrams.put(bigram, new HashSet<Integer>());
+      }
+      
+      bigrams.get(bigram).add(i);
+      
+      if (i > 1) {
+        String trigram = vertexList.get(i-2).word().toLowerCase() + "_" + bigram;
+        
+        if (trigrams.get(trigram) == null) {
+          trigrams.put(trigram, new HashSet<Integer>());
+        }
+        
+        trigrams.get(trigram).add(i-1);
+      }
+    }
+        
+    for (String bigram : MULTIWORD_PREPS) {
+      if (bigrams.get(bigram) == null) {
+        continue;
+      }
+      
+      for (Integer i : bigrams.get(bigram)) {
+        IndexedWord w1 = sg.getNodeByIndex(i);
+        IndexedWord w2 = sg.getNodeByIndex(i + 1);
+        
+        IndexedWord gov1 = sg.getParent(w1);
+        IndexedWord gov2 = sg.getParent(w2);
+        
+        SemanticGraphEdge edge1 = sg.getEdge(gov1, w1);
+        SemanticGraphEdge edge2 = sg.getEdge(gov2, w2);
+        
+        GrammaticalRelation reln1 = edge1.getRelation();
+        GrammaticalRelation reln2 = edge2.getRelation();
+        
+        if (reln1 != CASE_MARKER && reln2 != CASE_MARKER) {
+          continue;
+        }
+        
+        IndexedWord caseGov = reln1 == CASE_MARKER ? gov1 : gov2;
+        sg.removeEdge(edge1);
+        sg.removeEdge(edge2);
+        
+        sg.addEdge(caseGov, w1, CASE_MARKER, Double.NEGATIVE_INFINITY, false);
+        sg.addEdge(w1, w2, MULTI_WORD_EXPRESSION, Double.NEGATIVE_INFINITY, false);
+      }
+    }
+      
+    for (String trigram : THREEWORD_PREPS) {
+      if (trigrams.get(trigram) == null) {
+        continue;
+      }
+      
+      for (Integer i : trigrams.get(trigram)) {
+        IndexedWord w1 = sg.getNodeByIndex(i);
+        IndexedWord w2 = sg.getNodeByIndex(i + 1);
+        IndexedWord w3 = sg.getNodeByIndex(i + 2);
+
+        
+        IndexedWord gov1 = sg.getParent(w1);
+        IndexedWord gov2 = sg.getParent(w2);
+        IndexedWord gov3 = sg.getParent(w3);
+
+        
+        SemanticGraphEdge edge1 = sg.getEdge(gov1, w1);
+        SemanticGraphEdge edge2 = sg.getEdge(gov2, w2);
+        SemanticGraphEdge edge3 = sg.getEdge(gov3, w3);
+
+        
+        GrammaticalRelation reln1 = edge1.getRelation();
+        GrammaticalRelation reln3 = edge3.getRelation();
+        
+        if (reln1 != CASE_MARKER && reln3 != CASE_MARKER) {
+          continue;
+        }
+        
+        IndexedWord caseGov = reln3 == CASE_MARKER ? gov3 : gov1;
+        sg.removeEdge(edge1);
+        sg.removeEdge(edge2);
+        sg.removeEdge(edge3);
+        
+        sg.addEdge(caseGov, w1, CASE_MARKER, Double.NEGATIVE_INFINITY, false);
+        sg.addEdge(w1, w2, MULTI_WORD_EXPRESSION, Double.NEGATIVE_INFINITY, false);
+        sg.addEdge(w1, w3, MULTI_WORD_EXPRESSION, Double.NEGATIVE_INFINITY, false);
+      }
+    }
+    
+   
+    
+    
+    
+  }
   
   
   /**
