@@ -240,6 +240,8 @@ public interface TreebankLangParserParams extends TreebankFactory, Serializable 
   boolean supportsBasicDependencies();
   
   void setGenerateOriginalDependencies(boolean originalDependencies);
+  boolean generateOriginalDependencies();
+
 
   /** When run inside StanfordCoreNLP, which flags should be used by default */
   String[] defaultCoreNLPFlags();

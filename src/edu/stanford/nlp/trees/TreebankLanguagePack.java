@@ -429,8 +429,14 @@ public interface TreebankLanguagePack extends Serializable {
   public abstract MorphoFeatureSpecification morphFeatureSpec();
   
   /**
-   * Used for languages where a original Stanford Dependency
+   * Used for languages where an original Stanford Dependency
    * converter and a Universal Dependency converter exists.
    */
   public abstract void setGenerateOriginalDependencies(boolean generateOriginalDependencies);
+
+  /**
+   * Used for languages where an original Stanford Dependency
+   * converter and a Universal Dependency converter exists.
+   */
+  public abstract boolean generateOriginalDependencies();
 }

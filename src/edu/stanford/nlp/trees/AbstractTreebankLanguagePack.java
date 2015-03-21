@@ -652,4 +652,10 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
   public void setGenerateOriginalDependencies(boolean generateOriginalDependencies) {
     this.generateOriginalDependencies = generateOriginalDependencies;
   }
+  
+  @Override
+  public boolean generateOriginalDependencies() {
+    return this.generateOriginalDependencies;
+  }
+
 }

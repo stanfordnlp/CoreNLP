@@ -698,7 +698,10 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
     }
   }
   
-  
+  @Override
+  public boolean generateOriginalDependencies() {
+    return this.generateOriginalDependencies;
+  }
   
   private static final String[] EMPTY_ARGS = new String[0];
 

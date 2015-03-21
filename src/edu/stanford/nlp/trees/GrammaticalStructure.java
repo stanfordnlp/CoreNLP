@@ -1445,11 +1445,12 @@ public abstract class GrammaticalStructure implements Serializable {
       private GrammaticalStructure next;
 
       public GsIterator() {
-        // TODO: this is very english specific
         if (keepPunct) {
           puncFilter = Filters.acceptFilter();
+        } else if (params.generateOriginalDependencies()) {
+          puncFilter = params.treebankLanguagePack().punctuationWordRejectFilter();
         } else {
-          puncFilter = new PennTreebankLanguagePack().punctuationWordRejectFilter();
+          puncFilter = params.treebankLanguagePack().punctuationTagRejectFilter();
         }
         hf = params.typedDependencyHeadFinder();
         primeGs();
@@ -1545,6 +1546,8 @@ public abstract class GrammaticalStructure implements Serializable {
    *  nevertheless make the verb 'to be' the head, not the predicate noun, adjective,
    *  etc. (However, when the verb 'to be' is used as an auxiliary verb, the main
    *  verb is still treated as the head.)
+   * <li> -originalDependencies generate the dependencies using the original converter
+   * instead of the Universal Dependencies converter.
    * </ul>
    * <p>
    * The {@code -conllx} option will output the dependencies in the CoNLL format,
