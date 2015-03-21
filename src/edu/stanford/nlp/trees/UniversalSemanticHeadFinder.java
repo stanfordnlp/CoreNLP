@@ -178,6 +178,8 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
     // TODO: do something about "such as", "due to", "because of", "instead of", "in case of?", "rather than"
     nonTerminalInfo.put("PP", new String[][]{{"left", "NP", "S", "SBAR", "SBARQ", "ADVP", "PP", "VP", "ADJP", "FRAG", "UCP", "PRN"}, {"right"}});
 
+    nonTerminalInfo.put("WHPP", nonTerminalInfo.get("PP"));
+    
     //TODO: USD: do something for MWE "as well", "of course", "so that", "more than", "less than", "up to"
     //"according to", "in order", "at least", "as if", "prior to", "as to", "kind of", "whether or not", 
     //"let alone", "so as to", "in between", "that is", "how come", "had better"..
