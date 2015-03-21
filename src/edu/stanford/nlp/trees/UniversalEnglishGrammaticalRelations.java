@@ -256,8 +256,8 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation COORDINATION =
     new GrammaticalRelation(Language.UniversalEnglish, "cc", "coordination",
         DEPENDENT, ".*", tregexCompiler,
-            "__ [ < (CC=target !< /^(?i:either|neither|both)$/ ) | < (CONJP=target !< (RB < /^(?i:not)$/ $+ (RB|JJ < /^(?i:only|just|merely)$/))) ]");
-
+            "__ ([ < (CC=target !< /^(?i:either|neither|both)$/ ) | < (CONJP=target !< (RB < /^(?i:not)$/ $+ (RB|JJ < /^(?i:only|just|merely)$/))) ] [!> /PP/ | !>2 NP])");
+  
 
   /**
    * The "punctuation" grammatical relation.  This is used for any piece of
@@ -526,7 +526,7 @@ public class UniversalEnglishGrammaticalRelations {
             // excluding DT leaves out phrases such as "My dog ate it all""
             "VP < (NP=target < (NP !< /\\$/ $++ (NP !<: (PRP < " + selfRegex + ") !<: DT !< (/^NN/ < " + timeWordLotRegex + ")) !$ CC|CONJP !$ /^,$/ !$++ /^:$/))");
 
-
+  //todo: integrate into something else for UD
   /**
    * The "prepositional complement" grammatical relation.
    * This is used when the complement of a preposition is a clause or
@@ -671,7 +671,12 @@ public class UniversalEnglishGrammaticalRelations {
             // The old attr relation, used here to recover xcomp relations instead.
             "VP=vp < NP=target <(/^(?:VB|AUX)/ < " + copularWordRegex + " >># =vp) !$ (NP < EX)",
             // "Such a great idea this was" if "was" is the root, eg -makeCopulaHead
-            "SINV <# (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + ") $-- (NP $-- NP=target))");
+            "SINV <# (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + ") $-- (NP $-- NP=target))",
+            
+            //Former acomp expression
+            //TODO: potentially can be combined with existing expression
+            "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]"
+        );
 
 
   /**
@@ -726,12 +731,16 @@ public class UniversalEnglishGrammaticalRelations {
    * "She looks very beautiful" &rarr;
    * <code>acomp</code>(looks, beautiful)
    */
+  /*
+
   public static final GrammaticalRelation ADJECTIVAL_COMPLEMENT =
     new GrammaticalRelation(Language.UniversalEnglish, "acomp", "adjectival complement",
         COMPLEMENT, "VP", tregexCompiler,
             "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]");
 
 
+   */
+  
   /**
    * The "modifier" grammatical relation.  A modifier of a VP is
    * any constituent that serves to modify the meaning of the VP
@@ -771,7 +780,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation NOMINAL_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "nmod", "nominal modifier",
         MODIFIER, ".*", tregexCompiler,
-            "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !$- (@CC|CONJP $- __)) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
+            "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target < @NP|WHNP|NML !$- (@CC|CONJP $- __)) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
             "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (S=target <: WHPP|WHPP-TMP|PP|PP-TMP)",
             // only allow a PP < PP one if there is not a conj, verb, or other pattern that matches pcomp under it.  Else pcomp
             "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO) !< @CC|CONJP",
@@ -779,9 +788,16 @@ public class UniversalEnglishGrammaticalRelations {
             "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
             "@NP < (@UCP|PRN=target <# @PP)",
             // to handle "What weapon is Apollo most proficient with?"
-            "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP !< NP)) $++ (NP $++ =adj)))");
+            "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP !< NP)) $++ (NP $++ =adj)))",
 
+            //Possession
+            "/^(?:WH)?(?:NP|NML)(?:-.*)?$/ [ < (WHNP|WHNML|NP|NML=target [ < POS | < (VBZ < /^'s$/) ] ) !< (CC|CONJP $++ WHNP|WHNML|NP|NML) |  < (WHNP|WHNML|NP|NML=target < (CC|CONJP $++ WHNP|WHNML|NP|NML) < (WHNP|WHNML|NP|NML [ < POS | < (VBZ < /^'s$/) ] )) ]",
+            // handle a few too flat NPs
+            // note that ' matches both ' and 's
+            "/^(?:WH)?(?:NP|NML|NX)(?:-.*)?$/ < (/^NN|NP/=target $++ (POS=pos < /\'/ $++ /^NN/) !$++ (/^NN|NP/ $++ =pos))");
 
+  
+  
             /*
             "/^(?:PP(?:-TMP)?|(?:WH)?(?:PP|ADVP))$/ < (SYM|IN|VBG|VBN|TO|FW|RB|RBR $++ (/^(?:WH)?(?:NP|ADJP)(?:-TMP|-ADV)?$/=target !$- @NP) !< /^(?i:not)$/)",
             // We allow ADVP with NP objects for cases like (ADVP earlier this year)
@@ -856,7 +872,7 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation ADV_CLAUSE_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "advcl", "adverbial clause modifier",
-        MODIFIER, "VP|S|SQ|SINV|SBARQ|NP|ADVP", tregexCompiler,
+        MODIFIER, "VP|S|SQ|SINV|SBARQ|NP|ADVP|ADJP", tregexCompiler,
             "VP < (@SBAR=target <= (@SBAR [ < (IN !< /^(?i:that|whether)$/) | <: (SINV <1 /^(?:VB|MD|AUX)/) | < (RB|IN < so|now) < (IN < that) | <1 (ADVP < (RB < now)) <2 (IN < that) ] ))",
             "S|SQ|SINV < (SBAR|SBAR-TMP=target <, (IN !< /^(?i:that|whether)$/ !$+ (NN < order)) !$-- /^(?!CC|CONJP|``|,|INTJ|PP(-.*)?).*$/ !$+ VP)",
             // to get "rather than"
@@ -889,10 +905,29 @@ public class UniversalEnglishGrammaticalRelations {
             "NP < (NP $++ (SBAR=target < (IN < /^(?i:than)$/) !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !<: (S !< (VP < TO))) !$++ (CC $++ =target))",
             // this is for comparative or as ... as complements: sold more quickly [than they had expected]
             // available as long [as they install a crash barrier]
-            "ADVP < ADVP < SBAR=target"
-);
+            "ADVP < ADVP < SBAR=target",
+            
+            //moved from vmod
+            
+            // to get "John, knowing ..., announced "
+            // allowing both VP=verb and VP <1 VP=verb catches
+            // conjunctions of two VP clauses
+            "S|SINV < (S=target (< VP=verb | < (VP <1 VP=verb)) [ $- (/^,$/ [ $- @NP | $- (@PP $ @NP) ] ) | $+ (/^,$/ $+ @NP) ] ) : (=verb [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ])",
+            "(VP < (@S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]) $- (/^,$/ [$- @NP|VP | $- (@PP $-- @NP ) |$- (@ADVP $-- @NP)])))",
+            // What are you wearing dancing tonight?
+            "(VP < (S=target < (VP < VBG) $-- VBG=ing !$-- (/^[:]$/ $-- =ing)))",
+            // We could use something like this keying off -ADV annotation, but not yet operational, as we don't keep S-ADV, only NP-ADV
+            // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
+            // they wrote asking the SEC to ...
+            "VP < (S=target $-- NP < (VP < TO) !$-- (/^V/ < " + xcompVerbRegex + ") )",
+            "SBARQ < WHNP < (S=target < (VP <1 TO))",
+           
+            //former pcomp
+            "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __)) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
 
+//            "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target < @NP|WHNP|NML !$- (@CC|CONJP $- __)) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
 
+  
   /*
    * The "purpose clause modifier" grammatical relation has been discontinued
    * It is now just seen as a special case of an advcl.  A purpose clause
@@ -922,7 +957,7 @@ public class UniversalEnglishGrammaticalRelations {
    * <code>relcl</code>(book, bought)
    */
   public static final GrammaticalRelation RELATIVE_CLAUSE_MODIFIER =
-    new GrammaticalRelation(Language.UniversalEnglish, "relcl", "relative clause modifier",
+    new GrammaticalRelation(Language.UniversalEnglish, "acl:relcl", "relative clause modifier",
         MODIFIER, "(?:WH)?(?:NP|NML|ADVP)(?:-.*)?", tregexCompiler,
             "@NP|WHNP|NML=np $++ (SBAR=target [ <+(SBAR) WHPP|WHNP | <: (S !< (VP < TO)) ]) !$-- @NP|WHNP|NML !$++ " + ETC_PAT + " !$++ " + FW_ETC_PAT + " > @NP|WHNP : (=np !$++ (CC|CONJP $++ =target))",
             "NP|NML $++ (SBAR=target < (WHADVP < (WRB </^(?i:where|why|when)/))) !$-- NP|NML !$++ " + ETC_PAT + " !$++ " + FW_ETC_PAT + " > @NP",
@@ -998,7 +1033,7 @@ public class UniversalEnglishGrammaticalRelations {
    * <code>num</code>(sheep, 3)
    */
   public static final GrammaticalRelation NUMERIC_MODIFIER =
-    new GrammaticalRelation(Language.UniversalEnglish, "num", "numeric modifier",
+    new GrammaticalRelation(Language.UniversalEnglish, "nummod", "numeric modifier",
         MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX|ADJP|WHADJP|QP", tregexCompiler,
             "/^(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?$/ < (CD|QP=target !$- CC)",
             // $ is so phrases such as "$ 100 million buyout" get amod(buyout, $)
@@ -1020,12 +1055,13 @@ public class UniversalEnglishGrammaticalRelations {
    * "I lost $ 3.2 billion" &rarr;
    * <code>number</code>($, billion)
    */
+ /*
   public static final GrammaticalRelation NUMBER_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "number", "compound number modifier",
         MODIFIER, "QP|ADJP", tregexCompiler,
             "QP|ADJP < (/^(?:CD|$|#)$/=target !$- CC)");
 
-
+*/
   /**
    * The "quantifier phrase modifier" grammatical relation.  A quantifier
    * modifier is an element modifying the head of a QP constituent.
@@ -1034,11 +1070,12 @@ public class UniversalEnglishGrammaticalRelations {
    * "About 200 people came to the party" &rarr;
    * <code>quantmod</code>(200, About)
    */
+  /*
   public static final GrammaticalRelation QUANTIFIER_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "quantmod", "quantifier modifier",
         MODIFIER, "QP", tregexCompiler,
             "QP < IN|RB|RBR|RBS|PDT|DT|JJ|JJR|JJS|XS=target");
-
+   */
 
   //TODO: update documentation
   //TODO: include numbers
@@ -1064,9 +1101,10 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation NOUN_COMPOUND_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "compound", "compound modifier",
-        MODIFIER, "(?:WH)?(?:NP|NX|NAC|NML|ADVP|ADJP)(?:-TMP|-ADV)?", tregexCompiler,
+        MODIFIER, "(?:WH)?(?:NP|NX|NAC|NML|ADVP|ADJP|QP)(?:-TMP|-ADV)?", tregexCompiler,
             "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < (NP|NML|NN|NNS|NNP|NNPS|FW|AFX=target $++ NN|NNS|NNP|NNPS|FW|CD=sister !<<- POS !<<- (VBZ < /^\'s$/) !$- /^,$/ !$++ (POS $++ =sister))",
             "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < JJ|JJR|JJS=sister < (NP|NML|NN|NNS|NNP|NNPS|FW=target !<<- POS !<<- (VBZ < /^\'s$/) $+ =sister) <# NN|NNS|NNP|NNPS !<<- POS !<<- (VBZ < /^\'s$/) ",
+            "QP|ADJP < (/^(?:CD|$|#)$/=target !$- CC)", //number relation in original SD
             // in vitro, in vivo, etc., in Genia
             // matches against "etc etc"
             "ADJP|ADVP < (FW [ $- (FW=target !< /^(?i:etc)$/) | $- (IN=target < in|In) ] )");
@@ -1123,8 +1161,23 @@ public class UniversalEnglishGrammaticalRelations {
             "__ < (NFP=target [ < " + WESTERN_SMILEY + " | < " + ASIAN_SMILEY + " ] )",
             "__ [ < INTJ=target | < (PRN=target <1 /^(?:,|-LRB-)$/ <2 INTJ [ !<3 __ | <3 /^(?:,|-RRB-)$/ ] ) ]");
 
-  //TODO: make advcl or acl
 
+  public static final GrammaticalRelation CLAUSAL_MODIFIER = 
+      new GrammaticalRelation(Language.UniversalEnglish, "acl", "clausal modifier of noun",
+          MODIFIER, "WHNP|WHNP-TMP|WHNP-ADV|NP(?:-[A-Z]+)?|NML|NX", tregexCompiler,
+          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (VP=target < VBG|VBN|VBD $-- @NP|NML|NX)",  // also allow VBD since it quite often occurs in treebank errors and parse errors
+          // to get "MBUSA, headquartered ..."
+          // Allows an adverb to come before the participle
+          "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (/^,$/ $+ (VP=target [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))",
+          
+          //former pcomp
+          "/^(?:(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __)) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
+
+          
+          "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS)",
+          "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS)");
+   
+   
   /**
    * The "verb modifier" grammatical relation.  A verb
    * modifier of an NP, VP, or S is a S/VP[part] that serves to modify
@@ -1140,28 +1193,38 @@ public class UniversalEnglishGrammaticalRelations {
    * "who am i to judge" &rarr;
    * <code>vmod</code>(who, judge) <br>
    */
+  /*
   public static final GrammaticalRelation VERBAL_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "vmod", "verb modifier",
         MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX|VP|S|SINV|SBARQ", tregexCompiler,
             "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (VP=target < VBG|VBN|VBD $-- @NP|NML|NX)",  // also allow VBD since it quite often occurs in treebank errors and parse errors
+            //acl
             // to get "MBUSA, headquartered ..."
             // Allows an adverb to come before the participle
             "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (/^,$/ $+ (VP=target [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))",
+            //acl
             // to get "John, knowing ..., announced "
             // allowing both VP=verb and VP <1 VP=verb catches
             // conjunctions of two VP clauses
             "S|SINV < (S=target (< VP=verb | < (VP <1 VP=verb)) [ $- (/^,$/ [ $- @NP | $- (@PP $ @NP) ] ) | $+ (/^,$/ $+ @NP) ] ) : (=verb [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ])",
+            //advcl
             "(VP < (@S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]) $- (/^,$/ [$- @NP|VP | $- (@PP $-- @NP ) |$- (@ADVP $-- @NP)])))",
+            //advcl
             // What are you wearing dancing tonight?
             "(VP < (S=target < (VP < VBG) $-- VBG=ing !$-- (/^[:]$/ $-- =ing)))",
+            //advcl
             // We could use something like this keying off -ADV annotation, but not yet operational, as we don't keep S-ADV, only NP-ADV
             // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
             // they wrote asking the SEC to ...
             "VP < (S=target $-- NP < (VP < TO) !$-- (/^V/ < " + xcompVerbRegex + ") )",
+            //advcl
             "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS)",
+            //acl
             "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS)",
+            //acl
             "SBARQ < WHNP < (S=target < (VP <1 TO))");
-
+            //advcl
+  */
 
   /**
    * The "adverbial modifier" grammatical relation.  An adverbial
@@ -1177,8 +1240,9 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation ADVERBIAL_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "advmod", "adverbial modifier",
         MODIFIER,
-        "VP|ADJP|WHADJP|ADVP|WHADVP|S|SBAR|SINV|SQ|SBARQ|XS|(?:WH)?(?:PP|NP)(?:-TMP|-ADV)?|RRC|CONJP|JJP", tregexCompiler,
+        "VP|ADJP|WHADJP|ADVP|WHADVP|S|SBAR|SINV|SQ|SBARQ|XS|(?:WH)?(?:PP|NP)(?:-TMP|-ADV)?|RRC|CONJP|JJP|QP", tregexCompiler,
             "/^(?:VP|ADJP|JJP|WHADJP|SQ?|SBARQ?|SINV|XS|RRC|(?:WH)?NP(?:-TMP|-ADV)?)$/ < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + ")",
+            "QP < IN|RB|RBR|RBS|PDT|DT|JJ|JJR|JJS|XS=target", //quantmod relation in original SD
             // avoids adverb conjunctions matching as advmod; added JJ to catch How long
             // "!< no" so we can get neg instead for "no foo" when no is tagged as RB
             // we allow CC|CONJP as long as it is not between the target and the head
@@ -1260,7 +1324,7 @@ public class UniversalEnglishGrammaticalRelations {
    * as a separate relation.
    */
   public static final GrammaticalRelation NP_ADVERBIAL_MODIFIER =
-    new GrammaticalRelation(Language.UniversalEnglish, "npadvmod", "noun phrase adverbial modifier",
+    new GrammaticalRelation(Language.UniversalEnglish, "npmod", "noun phrase adverbial modifier",
         MODIFIER, "VP|(?:WH)?(?:NP|ADJP|ADVP|PP)(?:-TMP|-ADV)?", tregexCompiler,
             "@ADVP|ADJP|WHADJP|WHADVP|PP|WHPP <# (JJ|JJR|IN|RB|RBR !< notwithstanding $- (@NP=target !< NNP|NNPS))",
             // one word nouns like "cost efficient", "ice-free"
@@ -1396,6 +1460,8 @@ public class UniversalEnglishGrammaticalRelations {
    * Example: <br/>
    * "Both the boys and the girls are here" &rarr; <code>preconj</code>(boys,both)
    */
+  //TODO: web_tbk/data/reviews/penntree/122270.xml.tree:
+  // "both of the work.."
   public static final GrammaticalRelation PRECONJUNCT =
     new GrammaticalRelation(Language.UniversalEnglish, "preconj", "preconjunct",
         MODIFIER,
@@ -1419,15 +1485,18 @@ public class UniversalEnglishGrammaticalRelations {
    * {@code poss}(clothes, Bill)
    */
   public static final GrammaticalRelation POSSESSION_MODIFIER =
-    new GrammaticalRelation(Language.UniversalEnglish, "poss", "possession modifier",
+    new GrammaticalRelation(Language.UniversalEnglish, "nmod:poss", "possession modifier",
         MODIFIER, "(?:WH)?(NP|ADJP|INTJ|PRN|NAC|NX|NML)(?:-.*)?", tregexCompiler,
-            "/^(?:WH)?(?:NP|INTJ|ADJP|PRN|NAC|NX|NML)(?:-.*)?$/ < /^(?:WP\\$|PRP\\$)$/=target",
+            "/^(?:WH)?(?:NP|INTJ|ADJP|PRN|NAC|NX|NML)(?:-.*)?$/ < /^(?:WP\\$|PRP\\$)$/=target"
             // todo: possessive pronoun under ADJP needs more work for one case of (ADJP his or her own)
             // basic NP possessive: we want to allow little conjunctions in head noun (NP (NP ... POS) NN CC NN) but not falsely match when there are conjoined NPs.  See tests.
-            "/^(?:WH)?(?:NP|NML)(?:-.*)?$/ [ < (WHNP|WHNML|NP|NML=target [ < POS | < (VBZ < /^'s$/) ] ) !< (CC|CONJP $++ WHNP|WHNML|NP|NML) |  < (WHNP|WHNML|NP|NML=target < (CC|CONJP $++ WHNP|WHNML|NP|NML) < (WHNP|WHNML|NP|NML [ < POS | < (VBZ < /^'s$/) ] )) ]",
+            
+            //todo: move these to nmod
+            //"/^(?:WH)?(?:NP|NML)(?:-.*)?$/ [ < (WHNP|WHNML|NP|NML=target [ < POS | < (VBZ < /^'s$/) ] ) !< (CC|CONJP $++ WHNP|WHNML|NP|NML) |  < (WHNP|WHNML|NP|NML=target < (CC|CONJP $++ WHNP|WHNML|NP|NML) < (WHNP|WHNML|NP|NML [ < POS | < (VBZ < /^'s$/) ] )) ]",
             // handle a few too flat NPs
             // note that ' matches both ' and 's
-            "/^(?:WH)?(?:NP|NML|NX)(?:-.*)?$/ < (/^NN|NP/=target $++ (POS=pos < /\'/ $++ /^NN/) !$++ (/^NN|NP/ $++ =pos))");
+            //"/^(?:WH)?(?:NP|NML|NX)(?:-.*)?$/ < (/^NN|NP/=target $++ (POS=pos < /\'/ $++ /^NN/) !$++ (/^NN|NP/ $++ =pos))"
+            );
 
 
   //TODO: integrate into case
@@ -1448,6 +1517,7 @@ public class UniversalEnglishGrammaticalRelations {
 
    */
 
+  //todo: update documentation
   /**
    * The "prepositional modifier" grammatical relation.  A prepositional
    * modifier of a verb, adjective, or noun is any prepositional phrase that serves to modify
@@ -1469,15 +1539,21 @@ public class UniversalEnglishGrammaticalRelations {
             "/(?:WH)?PP(?:-TMP)?/ !$- (@CC|CONJP $- __) < IN|TO=target",
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < POS=target", //'s
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < (VBZ=target < /^'s$/)", //'s
-            "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (S=target <: WHPP|WHPP-TMP|PP|PP-TMP)",
+            
+
+            //TODO: integrate the following into nmod???
+            //"/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (S=target <: WHPP|WHPP-TMP|PP|PP-TMP)",
             // only allow a PP < PP one if there is not a conj, verb, or other pattern that matches pcomp under it.  Else pcomp
-            "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO) !< @CC|CONJP",
-            "S|SINV < (PP|PP-TMP=target !< SBAR) < VP|S",
-            "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
-            "@NP < (@UCP|PRN=target <# @PP)",
+            //"WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO) !< @CC|CONJP",
+            //"S|SINV < (PP|PP-TMP=target !< SBAR) < VP|S",
+            //"SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
             // to handle "What weapon is Apollo most proficient with?"
-            "SBARQ < (WHNP $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP=target !< NP)) $++ (NP $++ =adj)))");
-          
+            //"SBARQ < (WHNP $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP=target !< NP)) $++ (NP $++ =adj)))",
+ 
+            // to handle "Nothing but their scratches"
+            "/(?:WH)?PP(?:-TMP)?/ <1 CC=target <2 NP");
+            
+            
   
             /*
             "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !$- (@CC|CONJP $- __)) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
@@ -1610,7 +1686,6 @@ public class UniversalEnglishGrammaticalRelations {
       RELATIVE,
       REFERENT,
       EXPLETIVE,
-      ADJECTIVAL_COMPLEMENT,
       MODIFIER,
       ADV_CLAUSE_MODIFIER,
       TEMPORAL_MODIFIER,
@@ -1619,7 +1694,7 @@ public class UniversalEnglishGrammaticalRelations {
       ADJECTIVAL_MODIFIER,
       NOUN_COMPOUND_MODIFIER,
       APPOSITIONAL_MODIFIER,
-      VERBAL_MODIFIER,
+      CLAUSAL_MODIFIER,
       ADVERBIAL_MODIFIER,
       NEGATION_MODIFIER,
       MULTI_WORD_EXPRESSION,
@@ -1631,8 +1706,6 @@ public class UniversalEnglishGrammaticalRelations {
       PHRASAL_VERB_PARTICLE,
       SEMANTIC_DEPENDENT,
       AGENT,
-      NUMBER_MODIFIER,
-      QUANTIFIER_MODIFIER,
       NP_ADVERBIAL_MODIFIER,
       PARATAXIS,
       DISCOURSE_ELEMENT,
