@@ -290,11 +290,11 @@ public class RelationTripleTest extends TestCase {
 
   public void testPossessive() {
     Optional<RelationTriple> extraction = mkExtraction(
-        "1\tUnicredit\t5\tnmod:poss\tNNP\tORGANIZATION\n" +
+        "1\tUnicredit\t0\troot\tNNP\tORGANIZATION\n" +
         "2\t's\t4\tcase\tPOS\tO\n" +
         "3\tBank\t5\tcompound\tNNP\tORGANIZATION\n" +
         "4\tAustria\t5\tcompound\tNNP\tORGANIZATION\n" +
-        "5\tCreditanstalt\t0\troot\tNNP\tORGANIZATION\n"
+        "5\tCreditanstalt\t1\tnmod:poss\tNNP\tORGANIZATION\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tUnicredit\t's\tBank Austria Creditanstalt", extraction.get().toString());
@@ -621,10 +621,10 @@ public class RelationTripleTest extends TestCase {
 
   public void testCompoundPossessive() {
     String conll =
-        "1\tIBM\t4\tnmod:poss\tNNP\tORGANIZATION\n" +
+        "1\tIBM\t0\troot\tNNP\tORGANIZATION\n" +
         "2\t's\t1\tcase\tPOS\tO\n" +
         "3\tCEO\t4\tcompound\tNNP\tTITLE\n" +
-        "4\tRometty\t0\troot\tNNP\tORGANIZATION\n";
+        "4\tRometty\t1\tnmod:poss\tNNP\tORGANIZATION\n";
     Optional<RelationTriple> extraction = mkExtraction(conll, 0);
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tRometty\tis\tCEO", extraction.get().toString());

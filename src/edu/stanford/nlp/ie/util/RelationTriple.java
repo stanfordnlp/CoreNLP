@@ -317,8 +317,6 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/amod|compound/=arc {ner:/..+/}=object"));
     // { Chris Manning of Stanford }
     add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/nmod:.*/=relation {ner:/..+/}=object"));
-    // { Unicredit 's Bank Austria Creditanstalt }
-    add(SemgrexPattern.compile("[ {}=object & !{ner:O}=object ] >/nmod:poss/=relation !{ner:O}=subject "));
   }});
 
   /**
@@ -443,7 +441,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
               relationTokens.add(relNode.backingLabel());
               // (check for aux information)
               String relaux = matcher.getRelnString("relaux");
-              if (relaux != null && relaux.startsWith("nmod:")) {
+              if (relaux != null && relaux.startsWith("nmod:") && !"nmod:poss".equals(relaux)) {
                 relationTokens.add(new CoreLabel() {{
                   setWord(relaux.substring("nmod:".length()));
                   setLemma(relaux.substring("nmod:".length()));
@@ -491,7 +489,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
               // (add an optional prep)
               String rel = matcher.getRelnString("relation");
               String prep = null;
-              if (rel != null && rel.startsWith("nmod:")) {
+              if (rel != null && rel.startsWith("nmod:") && !"nmod:poss".equals(rel)) {
                 prep = rel.substring("nmod:".length());
               } else if (rel != null && (rel.startsWith("acl:") || rel.startsWith("advcl:")) ) {
                 prep = rel.substring(rel.indexOf(":"));
@@ -555,7 +553,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
 
   /** A set of valid arcs denoting an object entity we are interested in */
   public static final Set<String> VALID_OBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod"); add("nsubj"); add("nmod:.*"); add("nmod:poss");
+    add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod"); add("nsubj"); add("nmod:*"); add("nmod:poss");
     add("nmod:tmod"); add("conj:and"); add("advmod"); add("acl"); add("advcl");
   }});
 
@@ -601,8 +599,10 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       chunk.add(root.backingLabel(), -root.index());
       for (SemanticGraphEdge edge : parse.incomingEdgeIterable(root)) {
         if (edge.getDependent() != originalRoot) {
-          if (edge.getRelation().toString().startsWith("nmod:") || edge.getRelation().toString().startsWith("acl:") || edge.getRelation().toString().startsWith("advcl:")) {
-            chunk.add(mockNode(edge.getGovernor().backingLabel(), 1, edge.getRelation().toString().substring(edge.getRelation().toString().indexOf("_") + 1), "PP"), -(((double) edge.getGovernor().index()) + 0.9));
+          String relStr = edge.getRelation().toString();
+          if ((relStr.startsWith("nmod:") && !"nmod:poss".equals(relStr)) ||
+              relStr.startsWith("acl:") || relStr.startsWith("advcl:")) {
+            chunk.add(mockNode(edge.getGovernor().backingLabel(), 1, edge.getRelation().toString().substring(edge.getRelation().toString().indexOf(":") + 1), "PP"), -(((double) edge.getGovernor().index()) + 0.9));
           }
           if (edge.getRelation().getShortName().equals("conj")) {
             chunk.add(mockNode(root.backingLabel(), -1, edge.getRelation().getSpecific(), "CC"), -(((double) root.index()) - 0.9));
@@ -617,7 +617,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
           // noop; ignore nsubj, cop for extractions with copula
         } else if (ignoredArc.isPresent() && ignoredArc.get().equals(name)) {
           // noop; ignore explicitly requested noop arc.
-        } else if (!validArcs.contains(edge.getRelation().getShortName().replaceAll("_.*","_*"))) {
+        } else if (!validArcs.contains(edge.getRelation().getShortName().replaceAll(":.*",":*"))) {
           return Optional.empty();
         } else {
           fringe.add(edge.getDependent());
@@ -682,6 +682,9 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     PATTERN_LOOP: for (SemgrexPattern pattern : VERB_PATTERNS) {  // For every candidate pattern...
       SemgrexMatcher m = pattern.matcher(parse);
       if (m.matches()) {  // ... see if it matches the sentence
+        if ("nmod:poss".equals(m.getRelnString("prepEdge"))) {
+          continue;   // nmod:poss is not a preposition!
+        }
         // some JIT on the pattern ordering
         // note[Gabor]: This actually helps quite a bit; 72->86 sentences per second for the entire OpenIE pipeline.
         VERB_PATTERN_HITS.incrementCount(pattern);

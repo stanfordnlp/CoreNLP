@@ -106,9 +106,8 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     add(SemgrexPattern.compile("{}=pivot >/neg/ {}=quantifier >"+GEN_PREP+" {}=object"));
     // { All of the cats hate dogs. }
     //nmod used to be prep - problem?
-    add(SemgrexPattern.compile("{pos:/V.*/}=pivot >"+GEN_SUBJ+" ( "+QUANTIFIER+" >/^nmod.*/ {}=subject ) >"+GEN_OBJ+" {}=object"));
-    //nmod used to be prep - problem?
-    add(SemgrexPattern.compile("{pos:/V.*/}=pivot > ( "+QUANTIFIER+" >/^nmod.*/ {}=subject ) >"+GEN_SUBJ+" {}=object"));  // as above, but handle a common parse error
+    add(SemgrexPattern.compile("{pos:/V.*/}=pivot >"+GEN_SUBJ+" ( "+QUANTIFIER+" >/nmod.*/ {}=subject ) >"+GEN_OBJ+" {}=object"));
+//    add(SemgrexPattern.compile("{pos:/V.*/}=pivot > ( "+QUANTIFIER+" >/nmod.*/ {}=subject ) >"+GEN_SUBJ+" {}=object"));  // as above, but handle a common parse error
     // { Either cats or dogs have tails. }
     add(SemgrexPattern.compile("{pos:/V.*/}=pivot > {lemma:either}=quantifier >"+GEN_SUBJ+" {}=subject >"+GEN_OBJ+" {}=object"));
     // { There are cats }
@@ -272,6 +271,11 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
       }
       subjSpan = excludeFromSpan(subjectSubtree, quantifierSpan);
       objSpan = excludeFromSpan(includeInSpan(getSubtreeSpan(tree, object), getModifierSubtreeSpan(tree, pivot)), subjectSubtree);
+    }
+
+    // Return scopes
+    if (subjSpan.first < quantifierSpan.second && subjSpan.second > quantifierSpan.second) {
+      subjSpan = Pair.makePair(quantifierSpan.second, subjSpan.second);
     }
     return new OperatorSpec(operator,
         quantifierSpan.first - 1, quantifierSpan.second - 1,
