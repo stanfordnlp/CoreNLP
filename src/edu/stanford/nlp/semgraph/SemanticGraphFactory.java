@@ -125,15 +125,15 @@ public class SemanticGraphFactory {
                                            GrammaticalStructure.Extras includeExtras,
                                            boolean threadSafe,
                                            Predicate<TypedDependency> filter) {
-    Predicate<String> wordFilt;
+    Predicate<String> tagFilt;
     if (INCLUDE_PUNCTUATION_DEPENDENCIES) {
-      wordFilt = Filters.acceptFilter();
+      tagFilt = Filters.acceptFilter();
     } else {
-      wordFilt = new PennTreebankLanguagePack().punctuationWordRejectFilter();
+      tagFilt = new PennTreebankLanguagePack().punctuationTagRejectFilter();
     }
-    GrammaticalStructure gs = new EnglishGrammaticalStructure(tree,
-            wordFilt,
-            new SemanticHeadFinder(true),
+    GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree,
+            tagFilt,
+            new UniversalSemanticHeadFinder(true),
             threadSafe);
     return makeFromTree(gs, mode, includeExtras,
                         threadSafe, filter);

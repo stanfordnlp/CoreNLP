@@ -86,6 +86,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     } else {
       this.gsf = null;
     }
+    
     this.nThreads = 1;
     this.saveBinaryTrees = false;
     this.extraDependencies = GrammaticalStructure.Extras.NONE;
@@ -123,6 +124,8 @@ public class ParserAnnotator extends SentenceAnnotator {
     }
 
     if (this.BUILD_GRAPHS) {
+      boolean generateOriginalDependencies = PropertiesUtils.getBool(props, annotatorName + ".generateOriginalDependencies", false);
+      parser.getTLPParams().setGenerateOriginalDependencies(generateOriginalDependencies);
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
       // TODO: expose keeping punctuation as an option to the user?
       this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
@@ -245,7 +248,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     if (treeMap != null) {
       tree = treeMap.apply(tree);
     }
-
+    
     ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree, extraDependencies);
 
     if (saveBinaryTrees) {

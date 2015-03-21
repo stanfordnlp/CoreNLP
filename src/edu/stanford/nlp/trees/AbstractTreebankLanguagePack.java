@@ -46,6 +46,14 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
 
 
   /**
+   * For languages where a Universal Dependency converter
+   * exists this variable determines whether the original
+   * or the Universal converter will be used.
+   */
+  protected boolean generateOriginalDependencies;
+  
+  
+  /**
    * Gives a handle to the TreebankLanguagePack.
    */
   public AbstractTreebankLanguagePack() {
@@ -638,5 +646,10 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
   @Override
   public MorphoFeatureSpecification morphFeatureSpec() {
     return null;
+  }
+  
+  @Override
+  public void setGenerateOriginalDependencies(boolean generateOriginalDependencies) {
+    this.generateOriginalDependencies = generateOriginalDependencies;
   }
 }

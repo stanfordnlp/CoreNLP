@@ -139,6 +139,8 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
   protected String inputEncoding;
   protected String outputEncoding;
   protected TreebankLanguagePack tlp;
+  protected boolean generateOriginalDependencies;
+
 
   /**
    * Stores the passed-in TreebankLanguagePack and sets up charset encodings.
@@ -149,6 +151,7 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
     this.tlp = tlp;
     inputEncoding = tlp.getEncoding();
     outputEncoding = tlp.getEncoding();
+    generateOriginalDependencies = false;
   }
 
   @Override
@@ -681,6 +684,22 @@ public abstract class AbstractTreebankParserParams implements TreebankLangParser
     return false;
   }
 
+  /**
+   * For languages that have implementations of the 
+   * original Stanford dependencies and Universal 
+   * dependencies, this parameter is used to decide which
+   * implementation should be used.
+   */
+  @Override
+  public void setGenerateOriginalDependencies(boolean originalDependencies) {
+    this.generateOriginalDependencies = originalDependencies;
+    if (this.tlp != null) {
+      this.tlp.setGenerateOriginalDependencies(originalDependencies);
+    }
+  }
+  
+  
+  
   private static final String[] EMPTY_ARGS = new String[0];
 
   @Override
