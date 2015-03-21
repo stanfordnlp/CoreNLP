@@ -1,4 +1,4 @@
-// Stanford Dependencies - Code for producing and using Stanford dependencies.
+// Universal Stanford Dependencies - Code for producing and using Universal Stanford dependencies.
 // Copyright © 2005-2014 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
@@ -40,9 +40,9 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.*;
 
 
 /**
- * <code>EnglishGrammaticalRelations</code> is a
- * set of {@link GrammaticalRelation} objects for the English language.
- * These relations are commonly called Stanford Dependencies (SD).
+ * <code>UniversalEnglishGrammaticalRelations</code> is a
+ * set of {@link GrammaticalRelation} objects according to the Universal
+ * Dependencies standard.
  * <p/>
  * Grammatical relations can either be shown in their basic form, where each
  * input token receives a relation, or "collapsed" which does certain normalizations
@@ -543,13 +543,13 @@ public class UniversalEnglishGrammaticalRelations {
    * It is warmer in Greece than in Italy &arr;
    * <code>pcomp</code>(than, in)
    */
-  public static final GrammaticalRelation PREPOSITIONAL_COMPLEMENT =
+ /* public static final GrammaticalRelation PREPOSITIONAL_COMPLEMENT =
     new GrammaticalRelation(Language.UniversalEnglish, "pcomp", "prepositional complement",
         COMPLEMENT, "(?:WH)?PP(?:-TMP)?", tregexCompiler,
             "@PP|WHPP < (IN|VBG|VBN|TO $+ @SBAR|S|PP|ADVP=target)", // no intervening NP; VBN is for "compared with"
             "@PP|WHPP < (RB $+ @SBAR|S=target)", // RB is for weird tagging like "after/RB adjusting for inflation"
             "@PP|WHPP !< IN|TO < (SBAR=target <, (IN $+ S))");
-
+*/
 
   // /**
   //  * The "attributive" grammatical relation. The attributive is the complement of a
@@ -1282,7 +1282,6 @@ public class UniversalEnglishGrammaticalRelations {
             "ADVP|WHADVP < (RB|RBR|RBS|WRB|ADVP|WHADVP|JJ=target < /^(?i:no)$/) !< CC|CONJP");
 
 
-  //TODO: rename to npmod
   /**
    * The "noun phrase as adverbial modifier" grammatical relation.
    * This relation captures various places where something syntactically a noun
@@ -1324,7 +1323,7 @@ public class UniversalEnglishGrammaticalRelations {
    * as a separate relation.
    */
   public static final GrammaticalRelation NP_ADVERBIAL_MODIFIER =
-    new GrammaticalRelation(Language.UniversalEnglish, "npmod", "noun phrase adverbial modifier",
+    new GrammaticalRelation(Language.UniversalEnglish, "nmod:npmod", "noun phrase adverbial modifier",
         MODIFIER, "VP|(?:WH)?(?:NP|ADJP|ADVP|PP)(?:-TMP|-ADV)?", tregexCompiler,
             "@ADVP|ADJP|WHADJP|WHADVP|PP|WHPP <# (JJ|JJR|IN|RB|RBR !< notwithstanding $- (@NP=target !< NNP|NNPS))",
             // one word nouns like "cost efficient", "ice-free"
@@ -1351,7 +1350,7 @@ public class UniversalEnglishGrammaticalRelations {
    * {@code tmod}(swam, night)
    */
   public static final GrammaticalRelation TEMPORAL_MODIFIER =
-    new GrammaticalRelation(Language.UniversalEnglish, "tmod", "temporal modifier",
+    new GrammaticalRelation(Language.UniversalEnglish, "nmod:tmod", "temporal modifier",
         NP_ADVERBIAL_MODIFIER, "VP|S|ADJP|PP|SBAR|SBARQ|NP|RRC", tregexCompiler,
             "VP|ADJP|RRC [ < NP-TMP=target | < (VP=target <# NP-TMP !$ /^,|CC|CONJP$/) | < (NP=target <# (/^NN/ < " + timeWordRegex + ") !$+ (/^JJ/ < old)) ]",
             // CDM Jan 2010: For constructions like "during the same period last year"
@@ -1447,7 +1446,7 @@ public class UniversalEnglishGrammaticalRelations {
    * "All the boys are here" &rarr; <code>predet</code>(boys,all)
    */
   public static final GrammaticalRelation PREDETERMINER =
-    new GrammaticalRelation(Language.UniversalEnglish, "predet", "predeterminer",
+    new GrammaticalRelation(Language.UniversalEnglish, "det:predet", "predeterminer",
         MODIFIER, "(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?", tregexCompiler,
             "/^(?:(?:WH)?NP(?:-TMP|-ADV)?|NX|NAC|NML)$/ < (PDT|DT=target $+ /^(?:DT|WP\\$|PRP\\$)$/ $++ /^(?:NN|NX|NML)/ !$++ CC)",
             "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PDT|DT=target $+ DT $++ (/^JJ/ !$+ /^NN/)) !$++ CC",
@@ -1463,7 +1462,7 @@ public class UniversalEnglishGrammaticalRelations {
   //TODO: web_tbk/data/reviews/penntree/122270.xml.tree:
   // "both of the work.."
   public static final GrammaticalRelation PRECONJUNCT =
-    new GrammaticalRelation(Language.UniversalEnglish, "preconj", "preconjunct",
+    new GrammaticalRelation(Language.UniversalEnglish, "cc:preconj", "preconjunct",
         MODIFIER,
         "S|VP|ADJP|PP|ADVP|UCP(?:-TMP|-ADV)?|NX|NML|SBAR|NP(?:-TMP|-ADV)?", tregexCompiler,
             "NP|NP-TMP|NP-ADV|NX|NML < (PDT|CC|DT=target < /^(?i:either|neither|both)$/ $++ CC)",
@@ -1575,7 +1574,7 @@ public class UniversalEnglishGrammaticalRelations {
    * <code>prt</code>(shut, down)
    */
   public static final GrammaticalRelation PHRASAL_VERB_PARTICLE =
-    new GrammaticalRelation(Language.UniversalEnglish, "prt", "phrasal verb particle",
+    new GrammaticalRelation(Language.UniversalEnglish, "compound:prt", "phrasal verb particle",
         MODIFIER, "VP|ADJP", tregexCompiler,
             "VP < PRT=target",
             "ADJP < /^VB/ < RP=target");
@@ -1679,7 +1678,6 @@ public class UniversalEnglishGrammaticalRelations {
       INDIRECT_OBJECT,
       NOMINAL_MODIFIER,
       PREPOSITIONAL_OBJECT,
-      PREPOSITIONAL_COMPLEMENT,
       CLAUSAL_COMPLEMENT,
       XCLAUSAL_COMPLEMENT,
       MARKER,

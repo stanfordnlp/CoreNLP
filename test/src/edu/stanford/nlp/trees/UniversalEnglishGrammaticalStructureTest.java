@@ -280,7 +280,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
          {TestType.BASIC,
           "(ROOT (S (NP-TMP (JJ Last) (NN night)) (, ,) (NP (PRP I)) (VP (VBP swam) (PP (IN in) (NP (DT the) (NN pool)))) (. .)))",
           "amod(night-2, Last-1)\n" + 
-           "tmod(swam-5, night-2)\n" + 
+           "nmod:tmod(swam-5, night-2)\n" + 
            "nsubj(swam-5, I-4)\n" + 
            "root(ROOT-0, swam-5)\n" + 
            "case(pool-8, in-6)\n" + 
@@ -375,7 +375,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "nsubj(old-6, director-2)\n" + 
            "cop(old-6, is-3)\n" + 
            "nummod(years-5, 65-4)\n" + 
-           "npmod(old-6, years-5)\n" + 
+           "nmod:npmod(old-6, years-5)\n" + 
            "root(ROOT-0, old-6)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (DT The) (NN man)) (VP (VBZ is) (ADVP (RB here))) (. .)))",
@@ -410,14 +410,14 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
          //  ""},
          {TestType.BASIC,
           "(ROOT (S (NP (PDT All) (DT the) (NNS boys)) (VP (VBP are) (ADVP (RB here))) (. .)))",
-          "predet(boys-3, All-1)\n" + 
+          "det:predet(boys-3, All-1)\n" + 
            "det(boys-3, the-2)\n" + 
            "nsubj(are-4, boys-3)\n" + 
            "root(ROOT-0, are-4)\n" + 
            "advmod(are-4, here-5)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (CC Both) (NP (DT the) (NNS boys)) (CC and) (NP (DT the) (NNS girls))) (VP (VBP are) (ADVP (RB here))) (. .)))",
-          "preconj(boys-3, Both-1)\n" + 
+          "cc:preconj(boys-3, Both-1)\n" + 
            "det(boys-3, the-2)\n" + 
            "nsubj(are-7, boys-3)\n" + 
            "cc(boys-3, and-4)\n" + 
@@ -429,7 +429,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
           "(ROOT (S (NP (PRP They)) (VP (VBD shut) (PRT (RP down)) (NP (DT the) (NN station))) (. .)))",
           "nsubj(shut-2, They-1)\n" + 
            "root(ROOT-0, shut-2)\n" + 
-           "prt(shut-2, down-3)\n" + 
+           "compound:prt(shut-2, down-3)\n" + 
            "det(station-5, the-4)\n" + 
            "dobj(shut-2, station-5)\n"},
          {TestType.BASIC,
@@ -443,7 +443,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "root(ROOT-0, tasty-7)\n"},
          {TestType.BASIC,
           "(ROOT (S  (NP-SBJ-38 (DT Neither) (NP (PRP they) ) (CC nor) (NP (NNP Mr.) (NNP McAlpine) )) (VP (MD could) (VP (VB be) (VP (VBN reached) (NP (-NONE- *-38) ) (PP-PRP (IN for) (NP (NN comment) ))))) (. .) ))",
-          "preconj(they-2, Neither-1)\n" + 
+          "cc:preconj(they-2, Neither-1)\n" + 
            "nsubjpass(reached-8, they-2)\n" + 
            "cc(they-2, nor-3)\n" + 
            "compound(McAlpine-5, Mr.-4)\n" + 
@@ -459,7 +459,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "nsubj(include-4, field-2)\n" + 
            "aux(include-4, should-3)\n" + 
            "root(ROOT-0, include-4)\n" + 
-           "preconj(id-8, both-5)\n" + 
+           "cc:preconj(id-8, both-5)\n" + 
            "det(id-8, the-6)\n" + 
            "compound(id-8, entity-7)\n" + 
            "dobj(include-4, id-8)\n" + 
@@ -503,7 +503,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "nmod:poss(head-9, her-8)\n" + 
            "nsubj(chopped-10, head-9)\n" + 
            "ccomp(have-7, chopped-10)\n" + 
-           "prt(chopped-10, off-11)\n"},
+           "compound:prt(chopped-10, off-11)\n"},
          {TestType.BASIC,
           "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NNS dogs)) (CONJP (RB rather) (IN than)) (NP (NNS cats)))) (. .)))",
           "nsubj(like-2, I-1)\n" + 
@@ -526,7 +526,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
           "nsubj(like-2, I-1)\n" + 
            "root(ROOT-0, like-2)\n" + 
            "neg(only-4, not-3)\n" + 
-           "preconj(cats-5, only-4)\n" + 
+           "cc:preconj(cats-5, only-4)\n" + 
            "dobj(like-2, cats-5)\n" + 
            "cc(also-7, but-6)\n" + 
            "cc(cats-5, also-7)\n" + 
@@ -609,7 +609,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "case(sidelines-7, on-5)\n" + 
            "det(sidelines-7, the-6)\n" + 
            "nmod(remained-4, sidelines-7)\n" + 
-           "tmod(remained-4, Tuesday-8)\n"},
+           "nmod:tmod(remained-4, Tuesday-8)\n"},
          {TestType.BASIC,
           "( (SQ (VBZ Is) (NP-SBJ (DT this)) (NP-PRD (NP (DT the) (NN future)) (PP (IN of) (NP (NN chamber) (NN music)))) (. ?)))",
           "cop(future-4, Is-1)\n" + 
@@ -654,7 +654,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "advmod(gets-2, time-5)\n"},
          {TestType.BASIC,
           "( (S (NP-SBJ (CC Both) (NP (NNP Mr.) (NNP Parenteau)) (CC and) (NP (NNP Ms.) (NNP Doyon))) (, ,) (ADVP (RB however)) (, ,) (VP (VBD were) (VP (VBG bleeding) (ADVP (RB badly)))) (. .)))",
-          "preconj(Parenteau-3, Both-1)\n" + 
+          "cc:preconj(Parenteau-3, Both-1)\n" + 
            "compound(Parenteau-3, Mr.-2)\n" + 
            "nsubj(bleeding-11, Parenteau-3)\n" + 
            "cc(Parenteau-3, and-4)\n" + 
@@ -668,7 +668,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            // This pattern of ADJP < RP without an intervening PRT occurs in the Web Treebank...
           "(NP-SBJ-1 (ADJP (ADJP (VBN Rusted) (RP out)) (CC and) (ADJP (JJ unsafe))) (NNS cars))",
           "amod(cars-5, Rusted-1)\n" + 
-           "prt(Rusted-1, out-2)\n" + 
+           "compound:prt(Rusted-1, out-2)\n" + 
            "cc(Rusted-1, and-3)\n" + 
            "conj(Rusted-1, unsafe-4)\n" + 
            "root(ROOT-0, cars-5)\n"},
@@ -694,13 +694,13 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "cop(higher-6, is-2)\n" + 
            "det(deal-5, a-3)\n" + 
            "amod(deal-5, great-4)\n" + 
-           "npmod(higher-6, deal-5)\n" + 
+           "nmod:npmod(higher-6, deal-5)\n" + 
            "root(ROOT-0, higher-6)\n" + 
            "mark(was-9, than-7)\n" + 
            "nsubj(was-9, it-8)\n" + 
            "ccomp(higher-6, was-9)\n" + 
            "det(year-11, a-10)\n" + 
-           "npmod(ago-12, year-11)\n" + 
+           "nmod:npmod(ago-12, year-11)\n" + 
            "advmod(was-9, ago-12)\n"},
          {TestType.BASIC,
           "( (S (NP-SBJ (DT The) (NN strike)) (VP (MD may) (VP (VB have) (VP (VBN ended) (SBAR-TMP (ADVP (RB almost)) (IN before) (S (NP-SBJ (PRP it)) (VP (VBD began)))))))))",
@@ -750,7 +750,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "acl:relcl(house-3, founded-4)\n" + 
            "case(London-6, in-5)\n" + 
            "nmod(founded-4, London-6)\n" + 
-           "tmod(founded-4, 1744-7)\n" + 
+           "nmod:tmod(founded-4, 1744-7)\n" + 
            "cc(founded-4, and-8)\n" + 
            "advmod(umbrella-12, now-9)\n" + 
            "case(umbrella-12, under-10)\n" + 
@@ -956,7 +956,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
               "amod(pay-17, back-16)\n" + 
               "nmod($-8, pay-17)\n" + 
               "det(decision-20, a-19)\n" + 
-              "npmod(awarded-3, decision-20)\n" + 
+              "nmod:npmod(awarded-3, decision-20)\n" + 
               "nsubj(complicate-23, that-21)\n" + 
               "aux(complicate-23, could-22)\n" + 
               "acl:relcl(decision-20, complicate-23)\n" + 
@@ -1643,7 +1643,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                 "nsubj(is-3, director-2)\n" + 
                 "root(ROOT-0, is-3)\n" + 
                 "nummod(years-5, 65-4)\n" + 
-                "npmod(old-6, years-5)\n" + 
+                "nmod:npmod(old-6, years-5)\n" + 
                 "xcomp(is-3, old-6)\n"},
               {TestType.COPULA_HEAD,
                "(ROOT (S (NP (DT The) (NN man)) (VP (VBZ is) (ADVP (RB here))) (. .)))",
@@ -1657,7 +1657,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                 "nsubj(include-4, field-2)\n" + 
                 "aux(include-4, should-3)\n" + 
                 "root(ROOT-0, include-4)\n" + 
-                "preconj(id-8, both-5)\n" + 
+                "cc:preconj(id-8, both-5)\n" + 
                 "det(id-8, the-6)\n" + 
                 "compound(id-8, entity-7)\n" + 
                 "dobj(include-4, id-8)\n" + 
