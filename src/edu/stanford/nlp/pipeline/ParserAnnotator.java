@@ -124,7 +124,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     }
 
     if (this.BUILD_GRAPHS) {
-      boolean generateOriginalDependencies = PropertiesUtils.getBool(props, annotatorName + ".generateOriginalDependencies", false);
+      boolean generateOriginalDependencies = PropertiesUtils.getBool(props, annotatorName + ".originalDependencies", false);
       parser.getTLPParams().setGenerateOriginalDependencies(generateOriginalDependencies);
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
       // TODO: expose keeping punctuation as an option to the user?
