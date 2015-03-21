@@ -33,6 +33,7 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
 
   private final long maxTime;
   private final int nThreads;
+  private final int maxSentenceLength;
 
   public NERCombinerAnnotator() throws IOException, ClassNotFoundException {
     this(true);
@@ -51,20 +52,26 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
   }
 
   public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose) {
-    this(ner, verbose, 1, 0);
+    this(ner, verbose, 1, 0, Integer.MAX_VALUE);
   }
 
   public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime) {
+    this(ner, verbose, nThreads, maxTime, Integer.MAX_VALUE);
+  }
+
+  public NERCombinerAnnotator(NERClassifierCombiner ner, boolean verbose, int nThreads, long maxTime, int maxSentenceLength) {
     VERBOSE = verbose;
     this.ner = ner;
     this.maxTime = maxTime;
     this.nThreads = nThreads;
+    this.maxSentenceLength = maxSentenceLength;
   }
 
   public NERCombinerAnnotator(String name, Properties properties) {
     this(NERClassifierCombiner.createNERClassifierCombiner(name, properties), false,
          PropertiesUtils.getInt(properties, name + ".nthreads", PropertiesUtils.getInt(properties, "nthreads", 1)),
-         PropertiesUtils.getLong(properties, name + ".maxtime", -1));
+         PropertiesUtils.getLong(properties, name + ".maxtime", -1),
+            PropertiesUtils.getInt(properties, name + ".maxlength", Integer.MAX_VALUE));
   }
 
   @Override
@@ -110,26 +117,49 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
         if (first) { first = false; } else { System.err.print(", "); }
         System.err.print(w.toString());
       }
-      System.err.println(']');
     }
-
-    for (int i = 0; i < tokens.size(); ++i) {
-      // add the named entity tag to each token
-      String neTag = output.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class);
-      String normNeTag = output.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
-      tokens.get(i).setNER(neTag);
-      if(normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
-      NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));
-    }
-
-    if (VERBOSE) {
-      boolean first = true;
-      System.err.print("NERCombinerAnnotator output: [");
-      for (CoreLabel w : tokens) {
-        if (first) { first = false; } else { System.err.print(", "); }
-        System.err.print(w.toShorterString("Word", "NamedEntityTag", "NormalizedNamedEntityTag"));
+    if (output != null) {
+      if (VERBOSE) {
+        boolean first = true;
+        System.err.print("NERCombinerAnnotator direct output: [");
+        for (CoreLabel w : output) {
+          if (first) {
+            first = false;
+          } else {
+            System.err.print(", ");
+          }
+          System.err.print(w.toString());
+        }
+        System.err.println(']');
       }
-      System.err.println(']');
+
+      for (int i = 0; i < tokens.size(); ++i) {
+        // add the named entity tag to each token
+        String neTag = output.get(i).get(CoreAnnotations.NamedEntityTagAnnotation.class);
+        String normNeTag = output.get(i).get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+        tokens.get(i).setNER(neTag);
+        if (normNeTag != null) tokens.get(i).set(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class, normNeTag);
+        NumberSequenceClassifier.transferAnnotations(output.get(i), tokens.get(i));
+      }
+
+      if (VERBOSE) {
+        boolean first = true;
+        System.err.print("NERCombinerAnnotator output: [");
+        for (CoreLabel w : tokens) {
+          if (first) {
+            first = false;
+          } else {
+            System.err.print(", ");
+          }
+          System.err.print(w.toShorterString("Word", "NamedEntityTag", "NormalizedNamedEntityTag"));
+        }
+        System.err.println(']');
+      }
+    } else {
+      for (int i = 0; i < tokens.size(); ++i) {
+        // add the dummy named entity tag to each token
+        tokens.get(i).setNER("O");
+      }
     }
   }
 

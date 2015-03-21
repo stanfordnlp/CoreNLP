@@ -197,15 +197,17 @@ Expression Expression(Env env) : {
   Expression expr;
 } {
   (
-    LOOKAHEAD(4)
+    LOOKAHEAD(5)
     expr = NestedFunctionCallExpression(env) |
-    LOOKAHEAD(4)
+    LOOKAHEAD(5)
     expr = NestedVarExpression(env) |
-    LOOKAHEAD(4)
+    LOOKAHEAD(5)
     expr = ValueExpression(env) |
-    LOOKAHEAD(4)
+    LOOKAHEAD(5)
     expr = ListExpression(env) |
-    LOOKAHEAD(4)
+    LOOKAHEAD(5)
+    expr = ListExpression2(env) |
+    LOOKAHEAD(5)
     expr = CaseExpression(env)
   )
   { return expr; }
@@ -445,6 +447,23 @@ Expression ListExpression(Env env) : {
      { exprs.add(expr); }
    )*
     ")"
+  )
+  { return new Expressions.ListExpression(Expressions.TYPE_LIST, exprs); }
+}
+
+Expression ListExpression2(Env env) : {
+  List<Expression> exprs = new ArrayList<Expression>();
+  Expression expr;
+} {
+  ( "["
+     expr = Expression(env)
+     { exprs.add(expr); }
+   (
+     ","
+     expr = Expression(env)
+     { exprs.add(expr); }
+   )*
+    "]"
   )
   { return new Expressions.ListExpression(Expressions.TYPE_LIST, exprs); }
 }
