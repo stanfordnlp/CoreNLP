@@ -110,7 +110,7 @@ public class StanfordCoreNLPITest extends TestCase {
                     "<POS>NNP</POS>\\s*" +
                     "<NER>PERSON</NER>"));
     Assert.assertTrue("XML dependencies are wrong in " + result,
-            StringUtils.find(result, "<dep type=\"nn\">\\s*<governor idx=\"2\">" +
+            StringUtils.find(result, "<dep type=\"compound\">\\s*<governor idx=\"2\">" +
                     "Ramage</governor>\\s*<dependent idx=\"1\">Dan</dependent>\\s*</dep>"));
   }
 
