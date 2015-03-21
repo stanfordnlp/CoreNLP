@@ -11,6 +11,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MapList;
+import edu.stanford.nlp.util.Pair;
 
 import java.io.StringWriter;
 import java.util.*;
@@ -346,7 +347,20 @@ public class SemanticGraphUtils {
     }
     return vertices.first();
   }
-
+  
+  /**
+   * Returns the vertices that are "leftmost, rightmost"  Note this requires that the IndexedFeatureLabels present actually have
+   * ordering information.
+   * TODO: can be done more efficiently?
+   */
+  public static Pair<IndexedWord, IndexedWord> leftRightMostChildVertices(IndexedWord startNode, SemanticGraph sg) {
+    TreeSet<IndexedWord> vertices = new TreeSet<IndexedWord>();
+    for (IndexedWord vertex : sg.descendants(startNode)) {
+      vertices.add(vertex);
+    }
+    return Pair.makePair(vertices.first(), vertices.last());
+  }
+  
   /**
    * Given a SemanticGraph, and a set of nodes, finds the "blanket" of nodes that are one
    * edge away from the set of nodes passed in.  This is similar to the idea of a Markov
