@@ -403,7 +403,15 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       List<IndexedWord> conjDeps, IndexedWord ccDep)  {
     
     IndexedWord caseGov = sg.getParent(gov);
+    
+    if (caseGov == null) 
+      return;
+    
     IndexedWord caseGovGov = sg.getParent(caseGov);
+    
+    if (caseGovGov == null)
+      return;
+    
     IndexedWord conjGov = caseGovGov.getOriginal() != null ? caseGovGov.getOriginal() : caseGovGov;
     GrammaticalRelation rel = sg.reln(caseGovGov, caseGov);
     List<IndexedWord> newConjDeps = Generics.newLinkedList();
@@ -513,6 +521,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       List<IndexedWord> conjDeps, IndexedWord ccDep) {
     
     IndexedWord nmodGov = sg.getParent(gov);
+    
+    if (nmodGov == null)
+      return;
+    
     IndexedWord conjGov = nmodGov.getOriginal() != null ? nmodGov.getOriginal() : nmodGov;
     GrammaticalRelation rel = sg.reln(nmodGov, gov);  
     List<IndexedWord> newConjDeps = Generics.newLinkedList();
