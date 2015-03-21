@@ -226,8 +226,8 @@ public class SemanticGraphTest extends TestCase {
   public void testIsAncestor() {
     //System.err.println(graph.toString(CoreLabel.VALUE_TAG_INDEX_FORMAT));
     assertEquals(1, graph.isAncestor(graph.getNodeByIndex(42), graph.getNodeByIndex(45)));
-    assertEquals(2, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(38)));
-    assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(37)));
+    assertEquals(2, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(37)));
+    assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(38)));
     assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(40), graph.getNodeByIndex(10)));
     assertEquals(-1, graph.isAncestor(graph.getNodeByIndex(45), graph.getNodeByIndex(42)));
   }
