@@ -1593,6 +1593,23 @@ public class SemanticGraph implements Serializable {
     output.append("}\n");
     return output.toString();
   }
+  
+  public ArrayList<TypedDependency> toArrayList() {
+    ArrayList<TypedDependency> list = Generics.newArrayList(this.size());
+    CoreLabel rootLabel = new CoreLabel();
+    rootLabel.setValue("ROOT");
+    IndexedWord root = new IndexedWord(rootLabel);
+    root.setIndex(0);
+    list.add(new TypedDependency(ROOT, root, getFirstRoot()));
+    for (SemanticGraphEdge edge : this.edgeIterable()) {
+      TypedDependency td = new TypedDependency(edge.getRelation(), edge.getGovernor(), edge.getDependent());
+      if (edge.isExtra()) {
+        td.setExtra();
+      }
+      list.add(td);
+    }
+    return list;
+  }
 
   public SemanticGraphEdge addEdge(IndexedWord s, IndexedWord d, GrammaticalRelation reln, double weight, boolean isExtra) {
     SemanticGraphEdge newEdge = new SemanticGraphEdge(s, d, reln, weight, isExtra);
@@ -1643,6 +1660,7 @@ public class SemanticGraph implements Serializable {
     Set<IndexedWord> vertexes = g.vertexSet();
     for (IndexedWord vertex : vertexes) {
       IndexedWord newVertex = new IndexedWord(vertex);
+      newVertex.setCopyCount(vertex.copyCount());
       addVertex(newVertex);
       prevToNewMap.put(vertex, newVertex);
     }
