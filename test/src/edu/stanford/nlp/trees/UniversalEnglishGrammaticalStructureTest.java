@@ -138,7 +138,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
           "(ROOT (S (NP (PRP I)) (VP (VBP like) (S (VP (TO to) (VP (VB swim))))) (. .)))",
           "nsubj(like-2, I-1)\n" + 
            "root(ROOT-0, like-2)\n" + 
-           "aux(swim-4, to-3)\n" + 
+           "mark(swim-4, to-3)\n" + 
            "xcomp(like-2, swim-4)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBD sat) (PP (IN on) (NP (DT the) (NN chair)))) (. .)))",
@@ -154,12 +154,12 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "neg(information-5, no-3)\n" + 
            "amod(information-5, useful-4)\n" + 
            "dobj(have-2, information-5)\n" + 
-           "case(are-9, on-6)\n" + 
-           "mark(are-9, whether-7)\n" + 
-           "nsubj(are-9, users-8)\n" + 
-           "acl(information-5, are-9)\n" + 
+           "case(risk-11, on-6)\n" + 
+           "mark(risk-11, whether-7)\n" + 
+           "nsubj(risk-11, users-8)\n" + 
+           "cop(risk-11, are-9)\n" + 
            "case(risk-11, at-10)\n" + 
-           "nmod(are-9, risk-11)\n"},
+           "acl(information-5, risk-11)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PRP They)) (VP (VBD heard) (PP (IN about) (NP (NN asbestos))) (S (VP (VBG having) (NP (JJ questionable) (NNS properties))))) (. .)))",
           "nsubj(heard-2, They-1)\n" + 
@@ -176,7 +176,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "mark(like-5, that-3)\n" + 
            "nsubj(like-5, you-4)\n" + 
            "ccomp(says-2, like-5)\n" + 
-           "aux(swim-7, to-6)\n" + 
+           "mark(swim-7, to-6)\n" + 
            "xcomp(like-5, swim-7)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PRP I)) (VP (VBP am) (ADJP (JJ certain) (SBAR (IN that) (S (NP (PRP he)) (VP (VBD did) (NP (PRP it))))))) (. .)))",
@@ -192,7 +192,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
           "nsubj(ready-3, I-1)\n" + 
            "cop(ready-3, am-2)\n" + 
            "root(ROOT-0, ready-3)\n" + 
-           "aux(leave-5, to-4)\n" + 
+           "mark(leave-5, to-4)\n" + 
            "xcomp(ready-3, leave-5)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (NNP U.S.) (NNS forces)) (VP (VBP have) (VP (VBN been) (VP (VBN engaged) (PP (IN in) (NP (JJ intense) (NN fighting))) (SBAR (IN after) (S (NP (NNS insurgents)) (VP (VBD launched) (NP (JJ simultaneous) (NNS attacks)))))))) (. .)))",
@@ -294,7 +294,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "nmod(talked-2, president-5)\n" + 
            "mark(secure-9, in-6)\n" + 
            "mwe(in-6, order-7)\n" + 
-           "aux(secure-9, to-8)\n" + 
+           "mark(secure-9, to-8)\n" + 
            "advcl(talked-2, secure-9)\n" + 
            "det(account-11, the-10)\n" + 
            "dobj(secure-9, account-11)\n"},
@@ -399,12 +399,12 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "root(ROOT-0, invent-5)\n"},
          {TestType.BASIC,
           "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT the) (NN esophagus)) (VP (VBN used) (PP (IN for)))) (? ?)))",
-          "dobj(esophagus-6, What-1)\n" + 
+          "nmod(used-5, What-1)\n" + 
            "auxpass(used-5, is-2)\n" + 
            "det(esophagus-4, the-3)\n" + 
            "nsubjpass(used-5, esophagus-4)\n" + 
            "root(ROOT-0, used-5)\n" + 
-           "case(what-1, for-6)\n"},
+           "case(What-1, for-6)\n"},
          {TestType.BASIC,
           "(ROOT (S (NP (PDT All) (DT the) (NNS boys)) (VP (VBP are) (ADVP (RB here))) (. .)))",
           "det:predet(boys-3, All-1)\n" + 
@@ -495,7 +495,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "aux(deserve-5, did-3)\n" + 
            "neg(deserve-5, n't-4)\n" + 
            "root(ROOT-0, deserve-5)\n" + 
-           "aux(have-7, to-6)\n" + 
+           "mark(have-7, to-6)\n" + 
            "xcomp(deserve-5, have-7)\n" + 
            "nmod:poss(head-9, her-8)\n" + 
            "nsubj(chopped-10, head-9)\n" + 
@@ -554,7 +554,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "cop(free-4, are-2)\n" + 
            "nsubj(free-4, you-3)\n" + 
            "root(ROOT-0, free-4)\n" + 
-           "aux(reprint-6, to-5)\n" + 
+           "mark(reprint-6, to-5)\n" + 
            "xcomp(free-4, reprint-6)\n" + 
            "amod(material-8, such-7)\n" + 
            "dobj(reprint-6, material-8)\n"},
@@ -765,7 +765,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "cop(impossible-4, are-2)\n" + 
            "advmod(impossible-4, basically-3)\n" + 
            "root(ROOT-0, impossible-4)\n" + 
-           "aux(find-6, to-5)\n" + 
+           "mark(find-6, to-5)\n" + 
            "ccomp(impossible-4, find-6)\n" + 
            "case(California-8, in-7)\n" + 
            "nmod(find-6, California-8)\n"},
@@ -833,7 +833,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "nmod(resumed-4, Africa-9)\n" + 
            "cc(resumed-4, and-10)\n" + 
            "conj(resumed-4, vowed-11)\n" + 
-           "aux(fight-13, to-12)\n" + 
+           "mark(fight-13, to-12)\n" + 
            "xcomp(vowed-11, fight-13)\n" + 
            "case(apartheid-15, against-14)\n" + 
            "nmod(fight-13, apartheid-15)\n" + 
@@ -1032,6 +1032,22 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
               "neg(look-7, n't-6)\n" + 
               "advcl(long-2, look-7)\n" + 
               "advmod(look-7, down-8)\n"},
+            {TestType.BASIC,
+              "(ROOT (S (NP (NNP Bill)) (VP (VBZ is) (PP (IN from) (NP (NNP California)))) (. .)))",  
+              "nsubj(California-4, Bill-1)\n" +
+               "cop(California-4, is-2)\n" +
+               "case(California-4, from-3)\n" +
+               "root(ROOT-0, California-4)\n"},
+            {TestType.BASIC,
+              "( (SBARQ (WHNP (WDT What) (NN radio) (NN station)) (SQ (VBD did) (NP (NNP Paul) (NNP Harvey)) (VP (VB work) (PP (IN for)))) (. ?)))",
+              "det(station-3, What-1)\n" +
+               "compound(station-3, radio-2)\n" +
+               "nmod(work-7, station-3)\n" +
+               "aux(work-7, did-4)\n" +
+               "compound(Harvey-6, Paul-5)\n" +
+               "nsubj(work-7, Harvey-6)\n" +
+               "root(ROOT-0, work-7)\n" +
+               "case(station-3, for-8)\n"},
               
             /* Test the various verb "to be" cases in statements, questions, and imperatives. */  
             {TestType.BASIC,
@@ -1097,14 +1113,14 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
               "root(ROOT-0, Who-1)\n" + 
                "cop(Who-1, am-2)\n" + 
                "nsubj(Who-1, I-3)\n" + 
-               "aux(judge-5, to-4)\n" + 
+               "mark(judge-5, to-4)\n" + 
                "advcl(Who-1, judge-5)\n"}, //advcl??
              {TestType.NON_COLLAPSED,
               "(ROOT (SBARQ (WHNP (WP Who)) (SQ (VBP am) (NP (PRP I)) (S (VP (TO to) (VP (VB judge))))) (. ?)))",
               "root(ROOT-0, Who-1)\n" + 
                "cop(Who-1, am-2)\n" + 
                "nsubj(Who-1, I-3)\n" + 
-               "aux(judge-5, to-4)\n" + 
+               "mark(judge-5, to-4)\n" + 
                "advcl(Who-1, judge-5)\n"},
              {TestType.BASIC,
               "(ROOT (S (NP (NNP Bill)) (VP (VBZ is) (NP (DT an) (JJ honest) (NN man))) (. .)))",
@@ -1175,7 +1191,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
               "nsubj(going-3, Who-1)\n" + 
                "aux(going-3, is-2)\n" + 
                "root(ROOT-0, going-3)\n" + 
-               "aux(carry-5, to-4)\n" + 
+               "mark(carry-5, to-4)\n" + 
                "xcomp(going-3, carry-5)\n" + 
                "det(water-7, the-6)\n" + 
                "dobj(carry-5, water-7)\n"},
@@ -1185,7 +1201,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                "nsubj(carry-5, Who-1)\n" + 
                "aux(going-3, is-2)\n" + 
                "root(ROOT-0, going-3)\n" + 
-               "aux(carry-5, to-4)\n" + 
+               "mark(carry-5, to-4)\n" + 
                "xcomp(going-3, carry-5)\n" + 
                "det(water-7, the-6)\n" + 
                "dobj(carry-5, water-7)\n"},
@@ -1385,18 +1401,18 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                "nsubj(are-2, bags-4)\n"},
              {TestType.BASIC,
               "(ROOT (S (NP (PRP He)) (VP (VBZ is) (PP (IN in) (NP (DT the) (NN garden))))))",
-              "nsubj(is-2, He-1)\n" + 
-               "root(ROOT-0, is-2)\n" + 
+              "nsubj(garden-5, He-1)\n" + 
+               "cop(garden-5, is-2)\n" + 
                "case(garden-5, in-3)\n" + 
                "det(garden-5, the-4)\n" + 
-               "nmod(is-2, garden-5)\n"},
+               "root(ROOT-0, garden-5)\n"},
              {TestType.NON_COLLAPSED,
               "(ROOT (S (NP (PRP He)) (VP (VBZ is) (PP (IN in) (NP (DT the) (NN garden))))))",
-              "nsubj(is-2, He-1)\n" + 
-               "root(ROOT-0, is-2)\n" + 
+              "nsubj(garden-5, He-1)\n" + 
+               "cop(garden-5, is-2)\n" + 
                "case(garden-5, in-3)\n" + 
                "det(garden-5, the-4)\n" + 
-               "nmod(is-2, garden-5)\n"},
+               "root(ROOT-0, garden-5)\n"},
              {TestType.BASIC,
               "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ 's) (PP (IN on) (NP (DT the) (NN test)))) (. ?)))",
               "nsubj('s-2, What-1)\n" + 
@@ -1593,7 +1609,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                "(ROOT (S (NP (PRP I)) (VP (VBP like) (S (VP (TO to) (VP (VB swim))))) (. .)))",
                "nsubj(like-2, I-1)\n" + 
                 "root(ROOT-0, like-2)\n" + 
-                "aux(swim-4, to-3)\n" + 
+                "mark(swim-4, to-3)\n" + 
                 "xcomp(like-2, swim-4)\n"},
               {TestType.COPULA_HEAD,
                "(ROOT (S (NP (PRP We)) (VP (VBP have) (NP (NP (DT no) (JJ useful) (NN information)) (PP (IN on) (SBAR (IN whether) (S (NP (NNS users)) (VP (VBP are) (PP (IN at) (NP (NN risk))))))))) (. .)))",
@@ -1622,7 +1638,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                "nsubj(am-2, I-1)\n" + 
                 "root(ROOT-0, am-2)\n" + 
                 "xcomp(am-2, ready-3)\n" + 
-                "aux(leave-5, to-4)\n" + 
+                "mark(leave-5, to-4)\n" + 
                 "xcomp(ready-3, leave-5)\n"},
               {TestType.COPULA_HEAD,
                "(ROOT (S (NP (EX There)) (VP (VBZ is) (NP (NP (DT a) (NN statue)) (PP (IN in) (NP (DT the) (NN corner))))) (. .)))",
@@ -1692,7 +1708,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                "nsubj(like-2, I-1)\n" + 
                 "nsubj(swim-4, I-1)\n" + 
                 "root(ROOT-0, like-2)\n" + 
-                "aux(swim-4, to-3)\n" + 
+                "mark(swim-4, to-3)\n" + 
                 "xcomp(like-2, swim-4)\n"},
               {TestType.NON_COLLAPSED,
                "(ROOT (S (NP (PRP He)) (VP (VBZ says) (SBAR (IN that) (S (NP (PRP you)) (VP (VBP like) (S (VP (TO to) (VP (VB swim)))))))) (. .)))",
@@ -1702,7 +1718,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                 "nsubj(like-5, you-4)\n" + 
                 "nsubj(swim-7, you-4)\n" + 
                 "ccomp(says-2, like-5)\n" + 
-                "aux(swim-7, to-6)\n" + 
+                "mark(swim-7, to-6)\n" + 
                 "xcomp(like-5, swim-7)\n"},
               {TestType.NON_COLLAPSED,
                "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN man)) (SBAR (WHNP (WP who)) (S (NP (PRP you)) (VP (VBP love)))))) (. .)))",
@@ -1762,7 +1778,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
               "(ROOT (S (NP (PRP I)) (VP (VBP like) (S (VP (TO to) (VP (VB swim))))) (. .)))",
               "nsubj(like-2, I-1)\n" +
                   "root(ROOT-0, like-2)\n" +
-                  "aux(swim-4, to-3)\n" +
+                  "mark(swim-4, to-3)\n" +
                   "xcomp(like-2, swim-4)\n" +
                   "======\n" +
                   "nsubj(swim-4, I-1)\n"
@@ -1843,7 +1859,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
               new UniversalSemanticHeadFinder(false));
 
 
-      assertEquals("Unexpected basic dependencies for tree "+ testTree,
+      assertEquals("Unexpected basic dependencies with copula as head for tree "+ testTree,
           testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(), tree, false, false));
   }
 
@@ -1859,7 +1875,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
     Tree tree = Tree.valueOf(testTree, trf);
     GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
-    assertEquals("Unexpected basic dependencies for tree "+ testTree,
+    assertEquals("Unexpected non-collapsed dependencies for tree "+ testTree,
         testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, false));
   }
 

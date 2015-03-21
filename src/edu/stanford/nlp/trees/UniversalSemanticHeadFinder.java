@@ -382,9 +382,9 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
       if (hasVerbalAuxiliary(kids, copulars, false) && ! isExistential(t, parent) && ! isWHQ(t, parent)) {
         String[] how;
         if (motherCat.equals("SQ")) {
-          how = new String[]{"right", "VP", "ADJP", "NP", "WHADJP", "WHNP"};
+          how = new String[]{"right", "VP", "ADJP", "NP", "PP", "WHADJP", "WHNP"};
         } else {
-          how = new String[]{"left", "VP", "ADJP", "NP", "WHADJP", "WHNP"};
+          how = new String[]{"left", "VP", "ADJP", "NP", "PP", "WHADJP", "WHNP"};
         }
         // Avoid undesirable heads by filtering them from the list of potential children
         if (tmpFilteredChildren == null) {

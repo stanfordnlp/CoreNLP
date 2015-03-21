@@ -47,7 +47,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.*;
  * Grammatical relations can either be shown in their basic form, where each
  * input token receives a relation, or "collapsed" which does certain normalizations
  * which group words or turns them into relations. See
- * {@link EnglishGrammaticalStructure}.  What is presented here mainly
+ * {@link UniversalEnglishGrammaticalStructure}.  What is presented here mainly
  * shows the basic form, though there is some mixture. The "collapsed" grammatical
  * relations primarily differ as follows:
  * <ul>
@@ -129,8 +129,13 @@ public class UniversalEnglishGrammaticalRelations {
 
 
   /**
-   * The "auxiliary" grammatical relation.  An auxiliary of a clause is a
-   * non-main verb of the clause.<p>
+   * An auxiliary of a clause is a non-main verb of the clause, 
+   * e.g., a modal auxiliary, or a form of be, do or have in a 
+   * periphrastic tense.<p>
+   * <p />
+   * Contrary to the older SD and arguments of Pullum (1982) and 
+   * following, infinitive to is not analyzed as an auxiliary. 
+   * Instead, it is analyzed as a mark.
    * <p/>
    * Example: <br/>
    * "Reagan has died" &rarr; <code>aux</code>(died, has)
@@ -138,7 +143,6 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation AUX_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "aux", "auxiliary",
         DEPENDENT, "VP|SQ|SINV|CONJP", tregexCompiler,
-        //"VP < VP < (/^(?:TO|MD|VB.*|AUXG?|POS)$/=target)",
         "VP < VP < (/^(?:MD|VB.*|AUXG?|POS)$/=target)",
         "SQ|SINV < (/^(?:VB|MD|AUX)/=target $++ /^(?:VP|ADJP)/)",
         // add handling of tricky VP fronting cases...
@@ -173,7 +177,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation COPULA =
     new GrammaticalRelation(Language.UniversalEnglish, "cop", "copula",
         AUX_MODIFIER, "VP|SQ|SINV|SBARQ", tregexCompiler,
-        "VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (/^(?:ADJP|NP$|WHNP$)/ !< (VBN|VBD !$++ /^N/)) | $++ (S <: (ADJP < JJ)) ] )",
+        "VP < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (/^(?:ADJP|NP$|WHNP$|PP)/ !< (VBN|VBD !$++ /^N/)) | $++ (S <: (ADJP < JJ)) ] )",
         "SQ|SINV < (/^(?:VB|AUX)/=target < " + copularWordRegex + " [ $++ (ADJP !< VBN|VBD) | $++ (NP $++ NP) | $++ (S <: (ADJP < JJ)) ] )",
         // matches (what, is) in "what is that" after the SQ has been flattened out of the tree
         "SBARQ < (/^(?:VB|AUX)/=target < " + copularWordRegex + ") < (WHNP < WP)",
@@ -691,6 +695,20 @@ public class UniversalEnglishGrammaticalRelations {
             "SBAR < (WHNP=target !< WRB) < (S < NP < (VP [ < SBAR | <+(VP) (PP <- IN|TO) | < (S < (VP < TO)) ] ))");
 
   /**
+   * The PREPOSITION grammatical relation is only here as a temporary
+   * relation. It matches prepositions in sentences such as 
+   * "What is the esophagus used for?" which are attached to the 
+   * nominal modifier in a post-processing step.
+   */
+
+  public static final GrammaticalRelation PREPOSITION =
+      new GrammaticalRelation(Language.UniversalEnglish, "prep", "preposition",
+          COMPLEMENT, "VP|ADJP", tregexCompiler,
+              "VP|ADJP < (PP=target <: IN|TO)");
+
+
+  
+  /**
    * The "referent" grammatical relation.  A
    * referent of the Wh-word of a NP is  the relative word introducing the relative clause modifying the NP.
    * <p/>
@@ -788,8 +806,10 @@ public class UniversalEnglishGrammaticalRelations {
             "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
             "@NP < (@UCP|PRN=target <# @PP)",
             // to handle "What weapon is Apollo most proficient with?"
-            "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP !< NP)) $++ (NP $++ =adj)))");
-  
+            "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP !< NP)) $++ (NP $++ =adj)))",
+            //to handle "What is the esophagus used for"? or "What radio station did Paul Harvey work for?"
+            "SBARQ < (WHNP=target [$++ (VP < (PP !< NP)) | $++ (SQ < (VP < (PP !< NP)))])");
+
             /*
             "/^(?:PP(?:-TMP)?|(?:WH)?(?:PP|ADVP))$/ < (SYM|IN|VBG|VBN|TO|FW|RB|RBR $++ (/^(?:WH)?(?:NP|ADJP)(?:-TMP|-ADV)?$/=target !$- @NP) !< /^(?i:not)$/)",
             // We allow ADVP with NP objects for cases like (ADVP earlier this year)
@@ -918,7 +938,7 @@ public class UniversalEnglishGrammaticalRelations {
             "SBARQ < WHNP < (S=target < (VP <1 TO))",
            
             //former pcomp
-            "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __)) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
+            "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) !<: IN|TO) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
 
 //            "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target < @NP|WHNP|NML !$- (@CC|CONJP $- __)) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
 
@@ -988,6 +1008,7 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation MARKER =
     new GrammaticalRelation(Language.UniversalEnglish, "mark", "marker",
         MODIFIER, "SBAR(?:-TMP)?|VP", tregexCompiler,
+            //infinitival to
             "VP < VP < (TO=target)",
             "SBAR|SBAR-TMP < (IN|DT|MWE=target $++ S|FRAG)",
             "SBAR < (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]");
@@ -1705,6 +1726,7 @@ public class UniversalEnglishGrammaticalRelations {
       PARATAXIS,
       DISCOURSE_ELEMENT,
       GOES_WITH,
+      PREPOSITION,
     }));
   // Cache frequently used views of the values list
   private static final List<GrammaticalRelation> unmodifiableValues =

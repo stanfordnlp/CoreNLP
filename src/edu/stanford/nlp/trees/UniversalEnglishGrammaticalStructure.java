@@ -108,7 +108,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   private static class ExtraTreeDepFilter implements Predicate<TypedDependency>, Serializable {
     @Override
     public boolean test(TypedDependency d) {
-      return d != null && d.reln() != RELATIVE;
+      return d != null && d.reln() != RELATIVE && d.reln() != PREPOSITION;
     }
 
     private static final long serialVersionUID = 1L;
@@ -250,69 +250,51 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   /**
    * What we do in this method is look for temporary dependencies of
-   * the type "rel".  These occur in sentences such as "I saw the man
+   * the type "rel" and "prep".  These occur in sentences such as "I saw the man
    * who you love".  In that case, we should produce dobj(love, who).
    * On the other hand, in the sentence "... which Mr. Bush was
-   * fighting for", we should have pobj(for, which).
+   * fighting for", we should have case(which, for).
    */
-  private static void convertRel(List<TypedDependency> list) {
+   private static void convertRel(List<TypedDependency> list) {
     List<TypedDependency> newDeps = new ArrayList<TypedDependency>();
-    for (TypedDependency rel : list) {
-      if (rel.reln() != RELATIVE) {
+    
+    for (TypedDependency prep : list) {
+      if (prep.reln() != PREPOSITION) {
         continue;
       }
 
-      boolean foundPrep = false;
-      
-      /*
-      //TODO: Update once I found a way to handle the non-projective dependencies
-      for (TypedDependency prep : list) {
+      for (TypedDependency nmod : list) {
 
         // todo: It would also be good to add a rule here to prefer ccomp nsubj over dobj if there is a ccomp with no subj
         // then we could get right: Which eco-friendly options do you think there will be on the new Lexus?
 
-        if (prep.reln() != PREPOSITIONAL_MODIFIER) {
+        if (nmod.reln() != NOMINAL_MODIFIER && nmod.reln() != RELATIVE) {
           continue;
         }
-        if (!prep.gov().equals(rel.gov())) {
+        if (!nmod.gov().equals(prep.gov()) || prep.dep().index() < nmod.dep().index()) {
           continue;
         }
 
-        // at this point, we have two dependencies as in the Mr. Bush
-        // example.  it should be rel(fighting, which) and
-        // prep(fighting, for).  We now look to see if there is a
-        // corresponding pobj associated with the dependent of the
-        // prep relation.  If not, we will connect the dep of the prep
-        // relation and the head of the rel relation.  Otherwise, the
-        // original rel relation will become a dobj.
-        boolean foundPobj = false;
-        for (TypedDependency pobj : list) {
-          if (pobj.reln() != PREPOSITIONAL_OBJECT && pobj.reln() != PREPOSITIONAL_COMPLEMENT) {
-            continue;
-          }
-          if (!pobj.gov().equals(prep.dep())) {
-            continue;
-          }
-          // we did find a pobj/pcomp, so it is not necessary to
-          // change this rel.
-          foundPobj = true;
-          break;
+        prep.setReln(CASE_MARKER);
+        prep.setGov(nmod.dep());
+        
+        if (nmod.reln() == RELATIVE) {
+          nmod.setReln(NOMINAL_MODIFIER);
         }
-
-        if (!foundPobj) {
-          foundPrep = true;
-          TypedDependency newDep = new TypedDependency(PREPOSITIONAL_OBJECT, prep.dep(), rel.dep());
-          newDeps.add(newDep);
-          rel.setReln(KILL);
-          // break; // only put it in one place (or do we want to allow across-the-board effects?
-        }
-      }
-      */
-      if (!foundPrep) {
-        rel.setReln(DIRECT_OBJECT);
+        
+        break;
       }
     }
-
+    
+    for (TypedDependency rel : list) {
+      if (rel.reln() != RELATIVE) {
+        continue;
+      }
+      
+      rel.setReln(DIRECT_OBJECT);
+    }
+      
+      
     filterKill(list);
     for (TypedDependency dep : newDeps) {
       if (!list.contains(dep)) {
@@ -851,7 +833,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
           break;
         }
 
-        if (dep.reln() == AUX_MODIFIER && dep.gov().equals(modifier)) {
+        if ((dep.reln() == AUX_MODIFIER || dep.reln() == MARKER) && dep.gov().equals(modifier)) {
           hasAux = true;
         }
 
