@@ -1431,20 +1431,22 @@ public class UniversalEnglishGrammaticalRelations {
 
 
   //TODO: integrate into case
-  /**
+  /*
    * The "possessive" grammatical relation.  This is the relation given to
    * 's (or ' with plurals).<p>
    * </p>
    * Example: <br/>
    * "John's book" &rarr;
    * <code>possessive</code>(John, 's)
-   */
+   
   public static final GrammaticalRelation POSSESSIVE_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "possessive", "possessive modifier",
         MODIFIER, "(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?", tregexCompiler,
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < POS=target",
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < (VBZ=target < /^'s$/)");
 
+
+   */
 
   /**
    * The "prepositional modifier" grammatical relation.  A prepositional
@@ -1461,10 +1463,12 @@ public class UniversalEnglishGrammaticalRelations {
    * "He is responsible for meals" &rarr;
    * <code>case</code>(meals, for)
    */
-  public static final GrammaticalRelation PREPOSITIONAL_MODIFIER =
+  public static final GrammaticalRelation CASE_MARKER =
     new GrammaticalRelation(Language.UniversalEnglish, "case", "case marker",
-        MODIFIER, "(?:WH)?PP.*|SBARQ", tregexCompiler,
+        MODIFIER, "(?:WH)?(?:PP.*|SBARQ|NP|NML)(?:-TMP|-ADV)?", tregexCompiler,
             "/(?:WH)?PP(?:-TMP)?/ !$- (@CC|CONJP $- __) < IN|TO=target",
+            "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < POS=target", //'s
+            "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < (VBZ=target < /^'s$/)", //'s
             "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (S=target <: WHPP|WHPP-TMP|PP|PP-TMP)",
             // only allow a PP < PP one if there is not a conj, verb, or other pattern that matches pcomp under it.  Else pcomp
             "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO) !< @CC|CONJP",
@@ -1473,7 +1477,8 @@ public class UniversalEnglishGrammaticalRelations {
             "@NP < (@UCP|PRN=target <# @PP)",
             // to handle "What weapon is Apollo most proficient with?"
             "SBARQ < (WHNP $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP=target !< NP)) $++ (NP $++ =adj)))");
-
+          
+  
             /*
             "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !$- (@CC|CONJP $- __)) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
             "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (S=target <: WHPP|WHPP-TMP|PP|PP-TMP)",
@@ -1622,8 +1627,7 @@ public class UniversalEnglishGrammaticalRelations {
       PREDETERMINER,
       PRECONJUNCT,
       POSSESSION_MODIFIER,
-      POSSESSIVE_MODIFIER,
-      PREPOSITIONAL_MODIFIER,
+      CASE_MARKER,
       PHRASAL_VERB_PARTICLE,
       SEMANTIC_DEPENDENT,
       AGENT,
@@ -1741,7 +1745,7 @@ public class UniversalEnglishGrammaticalRelations {
       synchronized(preps) {
         result = preps.get(prepositionString);
         if (result == null) {
-          result = new GrammaticalRelation(Language.UniversalEnglish, "prep", "prep_collapsed", PREPOSITIONAL_MODIFIER, prepositionString);
+          result = new GrammaticalRelation(Language.UniversalEnglish, "prep", "prep_collapsed", CASE_MARKER, prepositionString);
           preps.put(prepositionString, result);
           threadSafeAddRelation(result);
         }

@@ -143,6 +143,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   @Override
   protected void postProcessDependencies(List<TypedDependency> list) {
+    /*
     if (DEBUG) {
       printListSorted("At postProcessDependencies:", list);
     }
@@ -150,11 +151,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After converting rel:", list);
     }
+    */
   }
 
   @Override
   protected void getExtras(List<TypedDependency> list) {
-    addRef(list);
+    /*addRef(list);
     if (DEBUG) {
       printListSorted("After adding ref:", list);
     }
@@ -167,7 +169,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     addStrandedPobj(list);
     if (DEBUG) {
       printListSorted("After adding stranded pobj:", list);
-    }
+    } */
   }
 
   // Using this makes addStrandedPobj a lot cleaner looking, but it
@@ -195,6 +197,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   // Deal with preposition stranding in relative clauses.
   // For example, "the only thing I'm rooting for"
   // This method will add pobj(for, thing) by connecting using the rcmod and prep
+  /*
   private static void addStrandedPobj(List<TypedDependency> list) {
     List<IndexedWord> depNodes = null;
     List<TypedDependency> newDeps = null;
@@ -244,6 +247,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       list.addAll(newDeps);
     }
   }
+  */
+
 
   /**
    * What we do in this method is look for temporary dependencies of
@@ -252,6 +257,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * On the other hand, in the sentence "... which Mr. Bush was
    * fighting for", we should have pobj(for, which).
    */
+  /*
   private static void convertRel(List<TypedDependency> list) {
     List<TypedDependency> newDeps = new ArrayList<TypedDependency>();
     for (TypedDependency rel : list) {
@@ -313,6 +319,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
   }
+  */
+
 
   /**
    * Alters a list in place by removing all the KILL relations
@@ -360,6 +368,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    */
   @Override
   protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, Extras includeExtras) {
+    /*
+    
     if (DEBUG) {
       printListSorted("collapseDependencies: CCproc: " + CCprocess + " includeExtras: " + includeExtras, list);
     }
@@ -445,6 +455,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After all collapse:", list);
     }
+    */
   }
 
   @Override
@@ -938,6 +949,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     return false;
   }
 
+  /*
+  
   private static void collapsePrepAndPoss(Collection<TypedDependency> list) {
 
     // Man oh man, how gnarly is the logic of this method....
@@ -1363,11 +1376,13 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     list.addAll(newTypedDeps);
   } // end collapsePrepAndPoss()
 
-
+  */
+  
   /** Work out prep relation name. pc is the dependency whose dep() is the
    *  preposition to do a name for. topPrep may be the same or different.
    *  Among the daughters of its gov is where to look for an auxpass.
    */
+  /*
   private static GrammaticalRelation determinePrepRelation(Map<IndexedWord, ? extends Set<TypedDependency>> map, List<IndexedWord> vmod, TypedDependency pc, TypedDependency topPrep, boolean pobj) {
     // handling the case of an "agent":
     // the governor of a "by" preposition must have an "auxpass" dependency
@@ -1405,6 +1420,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     }
     return reln;
   }
+  
+  */
 
   // used by collapse2WP(), collapseFlatMWP(), collapse2WPbis() KEPT IN
   // ALPHABETICAL ORDER
@@ -1460,6 +1477,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * @param list
    *          list of typedDependencies to work on
    */
+  /*
   private static void collapse2WP(Collection<TypedDependency> list) {
     Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
 
@@ -1479,6 +1497,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       collapseMultiWordPrep(list, newTypedDeps, mwp[0], mwp[1], mwp[1], mwp[0]);
     }
   }
+  */
 
   /**
    * Collapse multiword preposition of the following format:
@@ -1495,6 +1514,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * @param w_mwp0 First part of the multiword preposition that we look for
    * @param w_mwp1 Second part of the multiword preposition that we look for
    */
+  /*
   private static void collapseMultiWordPrep(Collection<TypedDependency> list, Collection<TypedDependency> newTypedDeps, String str_mwp0, String str_mwp1, String w_mwp0, String w_mwp1) {
 
     // first find the multiword_preposition: dep(mpw[0], mwp[1])
@@ -1596,6 +1616,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     list.clear();
     list.addAll(newTypedDeps);
   }
+  */
+
 
   /**
    * Collapse multi-words preposition of the following format: advmod|prt(gov,
@@ -1605,6 +1627,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    *
    * @param list List of typedDependencies to work on
    */
+  /*
   private static void collapse2WPbis(Collection<TypedDependency> list) {
     Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
 
@@ -1699,6 +1722,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     }
   }
 
+  */
+  
   /**
    * Collapse 3-word preposition of the following format: <br/>
    * This will be the case when the preposition is analyzed as a NP <br/>
@@ -1721,6 +1746,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * @param list
    *          List of typedDependencies to work on
    */
+  /*
   private static void collapse3WP(Collection<TypedDependency> list) {
     Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
 
@@ -1922,6 +1948,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
   }
+  */
+
 
   /*
    *
@@ -1963,6 +1991,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * @param list
    *          List of typedDependencies to work on
    */
+  /*
   private static void collapseFlatMWP(Collection<TypedDependency> list) {
     Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
 
@@ -2042,6 +2071,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       list.addAll(newTypedDeps);
     }
   }
+  */
 
   /**
    * This method gets rid of multiwords in conjunctions to avoid having them
