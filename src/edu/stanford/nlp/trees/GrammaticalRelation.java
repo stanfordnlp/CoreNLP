@@ -538,6 +538,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       case Any: return Languages.Language.Unknown;
       case English: return Languages.Language.English;
       case Chinese: return Languages.Language.Chinese;
+      case UniversalEnglish: return Languages.Language.English;
       default:
         throw new IllegalStateException("Unknown language: " + this.language);
     }
