@@ -1,10 +1,14 @@
-trainFile = /u/nlp/data/ner/goodClassifiers/data/muc67.jenny.train
-testFile = /u/nlp/data/ner/goodClassifiers/data/muc67.jenny.test
+trainFileList = /u/nlp/data/ner/column_data/muc6.ptb.train,/u/nlp/data/ner/column_data/muc7.ptb.train
+# testFile = /u/nlp/data/ner/column_data/muc7.ptb.devtest
 serializeTo = english.muc.7class.distsim.crf.ser.gz
+
+type=crf
 
 wordFunction = edu.stanford.nlp.process.AmericanizeFunction
 
 distSimLexicon = /u/nlp/data/pos_tags_are_useless/egw4-reut.512.clusters
+numberEquivalenceDistSim = true
+unknownWordDistSimClass = 0
 useDistSim = true
 
 map = word=0,answer=1
@@ -24,7 +28,6 @@ useNext=true
 useLongSequences=true
 useSequences=true
 usePrevSequences=true
-maxLeft=1
 useTypeSeqs=true
 useTypeSeqs2=true
 useTypeySequences=true
@@ -39,8 +42,7 @@ useDisjunctive=true
 disjunctionWidth=5
 #useDisjunctiveShapeInteraction=true
 
-type=crf
-
+maxLeft=1
 readerAndWriter=edu.stanford.nlp.sequences.ColumnDocumentReaderAndWriter
 
 useObservedSequencesOnly=true

@@ -250,9 +250,9 @@ public class ConcurrentHashIndex<E> extends AbstractCollection<E> implements Ind
   public void clear() {
     lock.lock();
     try {
-      int size = item2Index.size();
       item2Index.clear();
-      Object[] arr = new Object[size];
+      indexSize = 0;
+      Object[] arr = new Object[DEFAULT_INITIAL_CAPACITY];
       index2Item.set(arr);
     } finally {
       lock.unlock();

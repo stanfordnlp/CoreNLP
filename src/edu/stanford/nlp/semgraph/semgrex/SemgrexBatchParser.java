@@ -25,23 +25,27 @@ import edu.stanford.nlp.util.Pair;
 public class SemgrexBatchParser {
   /** Maximum stream size in characters */
   private static final int MAX_STREAM_SIZE = 1024 * 1024;
-  
-	public List<SemgrexPattern> compileStream(InputStream is) throws IOException {
+
+  public List<SemgrexPattern> compileStream(InputStream is) throws IOException {
+    return compileStream(is, null);
+  }
+
+	public List<SemgrexPattern> compileStream(InputStream is, Env env) throws IOException {
 	  BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 	  reader.mark(MAX_STREAM_SIZE);
 	  Map<String, String> macros = preprocess(reader);
 	  reader.reset();
-	  return parse(reader, macros);
+	  return parse(reader, macros, env);
 	}
 	
-	private List<SemgrexPattern> parse(BufferedReader reader, Map<String, String> macros) throws IOException {
+	private List<SemgrexPattern> parse(BufferedReader reader, Map<String, String> macros, Env env) throws IOException {
 	  List<SemgrexPattern> patterns = new ArrayList<SemgrexPattern>();
 	  for(String line; (line = reader.readLine()) != null; ) {
       line = line.trim();
       if(line.length() == 0 || line.startsWith("#")) continue;
       if(line.startsWith("macro ")) continue;
       line = replaceMacros(line, macros);
-      SemgrexPattern pattern = SemgrexPattern.compile(line);
+      SemgrexPattern pattern = SemgrexPattern.compile(line, env);
       patterns.add(pattern);
 	  }
 	  return patterns;

@@ -11,6 +11,7 @@ import edu.stanford.nlp.util.Pair;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.*;
+import java.lang.RuntimeException;
 
 /** Token Manager. */
 class TokenSequenceParserTokenManager implements TokenSequenceParserConstants

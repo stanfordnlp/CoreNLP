@@ -1,4 +1,5 @@
-trainFileList = /u/nlp/data/ner/column_data/all.3class.train.old2,/u/nlp/data/ner/column_data/english.extra.3class.train
+# trainFileList = /u/nlp/data/ner/column_data/all.3class.train.old2,/u/nlp/data/ner/column_data/english.extra.3class.train
+trainFileList = /u/nlp/data/ner/column_data/ace23.3class.train,/u/nlp/data/ner/column_data/muc6.3class.ptb.train,/u/nlp/data/ner/column_data/muc7.3class.ptb.train,/u/nlp/data/ner/column_data/conll.3class.train,/u/nlp/data/ner/column_data/wikiner.3class.train,/u/nlp/data/ner/column_data/ontonotes.3class.train,/u/nlp/data/ner/column_data/english.extra.3class.train
 testFile = /u/nlp/data/ner/column_data/all.3class.test
 serializeTo = english.all.3class.distsim.crf.ser.gz
 
@@ -9,6 +10,9 @@ wordFunction = edu.stanford.nlp.process.AmericanizeFunction
 #distSimLexicon = /u/nlp/data/pos_tags_are_useless/englishGigaword.200.pruned
 #distSimLexicon = /u/nlp/data/pos_tags_are_useless/egw.bnc.200
 distSimLexicon = /u/nlp/data/pos_tags_are_useless/egw4-reut.512.clusters
+# right options for egw4-reut.512 (though effect of having or not is small)
+numberEquivalenceDistSim = true
+unknownWordDistSimClass = 0
 useDistSim = true
 
 map = word=0,answer=1
