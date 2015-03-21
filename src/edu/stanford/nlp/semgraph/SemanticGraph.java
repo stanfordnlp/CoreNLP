@@ -1741,7 +1741,8 @@ public class SemanticGraph implements Serializable {
   
   public SemanticGraph makeSoftCopy() {
     SemanticGraph newSg = new SemanticGraph();
-    newSg.setRoot(this.getFirstRoot());
+    if ( ! this.roots.isEmpty())
+      newSg.setRoot(this.getFirstRoot());
     for (SemanticGraphEdge edge : this.edgeIterable()) {
       newSg.addEdge(edge.getSource(), edge.getTarget(), edge.getRelation(), edge.getWeight(), edge.isExtra());
     }
