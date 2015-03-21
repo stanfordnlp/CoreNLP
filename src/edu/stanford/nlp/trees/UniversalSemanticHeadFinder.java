@@ -156,8 +156,9 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
     // UCP take the first element as head
     nonTerminalInfo.put("UCP", new String[][]{{"left"}});
 
-    // CONJP: we want different heads for "but also" and "but not" and we don't want "not" to be the head in "not to mention"; now make "mention" head of "not to mention"
-    nonTerminalInfo.put("CONJP", new String[][]{{"right", "CC", "VB", "JJ", "RB", "IN" }});
+    // CONJP: We generally want the rightmost adverb or the leftmost conjunction as head
+    //TODO: Fix for "mwe(alone,let)"; mwe(as,well), mwe(as,as)
+    nonTerminalInfo.put("CONJP", new String[][]{{"right", "RB"}, {"left", "CC", "IN"}, {"right", "VB", "JJ" }});
 
     // FRAG: crap rule needs to be change if you want to parse
     // glosses; but it is correct to have ADJP and ADVP before S
@@ -174,8 +175,19 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
     nonTerminalInfo.put("EMBED", new String[][]{{"right", "INTJ"}});
 
     // USD: NP is head of PP
+    // TODO: do something about "such as", "due to", "because of", "instead of", "in case of?", "rather than"
     nonTerminalInfo.put("PP", new String[][]{{"left", "NP", "S", "SBAR", "SBARQ", "ADVP", "PP", "VP", "ADJP", "FRAG", "UCP", "PRN"}, {"right"}});
 
+    //TODO: USD: do something for MWE "as well", "of course", "so that", "more than", "less than", "up to"
+    //"according to", "in order", "at least", "as if", "prior to", "as to", "kind of", "whether or not", 
+    //"let alone", "so as to", "in between", "that is", "how come", "had better"..
+    
+    //TODO: all but in ADVP
+    
+    //What about "so as not to???"
+    
+    
+    
   }
 
 
