@@ -158,10 +158,14 @@ public class ParserAnnotator extends SentenceAnnotator {
             props.getProperty(annotatorName + ".treemap", ""));
     os.append(annotatorName + ".maxtime:" +
             props.getProperty(annotatorName + ".maxtime", "-1"));
+    os.append(annotatorName + ".originalDependencies:" +
+            props.getProperty(annotatorName + ".originalDependencies", "false"));
     os.append(annotatorName + ".buildgraphs:" +
-            props.getProperty(annotatorName + ".buildgraphs", "true"));
+      props.getProperty(annotatorName + ".buildgraphs", "true"));
     os.append(annotatorName + ".nthreads:" +
               props.getProperty(annotatorName + ".nthreads", props.getProperty("nthreads", "")));
+    os.append(annotatorName + ".nosquash:" +
+      props.getProperty(annotatorName + ".nosquash", "false"));
     os.append(annotatorName + ".extradependencies:" +
         props.getProperty(annotatorName + ".extradependences", "NONE").toLowerCase());
     boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);
