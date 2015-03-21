@@ -53,13 +53,11 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.*;
  * <ul>
  * <li>Some multiword conjunctions and prepositions are treated as single
  * words, and then processed as below.</li>
- * <li>Prepositions do not appear as words but are turned into new "prep" or "prepc"
- * grammatical relations, one for each preposition.</li>
- * <li>Conjunctions do not appear as words but are turned into new "conj"
- * grammatical relations, one for each conjunction.</li>
- * <li>The possessive "'s" is deleted, leaving just the relation between the
- * possessor and possessum.</li>
- * <li>Agents of passive sentences are recognized and marked as agent and not as prep_by.</li>
+ * <li>Prepositions are appended to nmod/acl/advcl 
+ * grammatical relations..</li>
+ * <li>Coordination markers are appended to "conj"
+ * grammatical relations.</li>
+ * <li>Agents of passive sentences are recognized and marked as nmod:agent and not as nmod:by.</li>
  * </ul>
  * <p/>
  * This set of English grammatical relations is not intended to be
@@ -97,6 +95,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.*;
  * @see GrammaticalStructure
  * @see GrammaticalRelation
  * @see EnglishGrammaticalStructure
+ * @see <a href="http://universaldependencies.github.io/docs/en/dep/">English grammatical relations documentation</a>
  */
 
 public class UniversalEnglishGrammaticalRelations {
@@ -251,8 +250,6 @@ public class UniversalEnglishGrammaticalRelations {
             "PCONJP < (CC $+ IN|TO=target)");
 
 
-  //TODO: do something with "if not"???
-  //TODO: What to do with "not only" etc.
   /**
    * The "coordination" grammatical relation.  A coordination is the relation
    * between an element and a conjunction.
@@ -533,53 +530,7 @@ public class UniversalEnglishGrammaticalRelations {
             // excluding DT leaves out phrases such as "My dog ate it all""
             "VP < (NP=target < (NP !< /\\$/ $++ (NP !<: (PRP < " + selfRegex + ") !<: DT !< (/^NN/ < " + timeWordLotRegex + ")) !$ CC|CONJP !$ /^,$/ !$++ /^:$/))");
 
-  //todo: integrate into something else for UD
-  /**
-   * The "prepositional complement" grammatical relation.
-   * This is used when the complement of a preposition is a clause or
-   * an adverbial or prepositional phrase.
-   * The prepositional complement of
-   * a preposition is the head of the sentence following the preposition,
-   * or the preposition head of the PP.
-   * <p/>
-   * Examples: <br/>
-   * "We have no useful information on whether users are at risk" &arr;
-   * <code>pcomp</code>(on, are) <br/>
-   * "They heard about you missing classes." &arr;
-   * <code>pcomp</code>(about, missing) <br/>
-   * It is warmer in Greece than in Italy &arr;
-   * <code>pcomp</code>(than, in)
-   */
- /* public static final GrammaticalRelation PREPOSITIONAL_COMPLEMENT =
-    new GrammaticalRelation(Language.UniversalEnglish, "pcomp", "prepositional complement",
-        COMPLEMENT, "(?:WH)?PP(?:-TMP)?", tregexCompiler,
-            "@PP|WHPP < (IN|VBG|VBN|TO $+ @SBAR|S|PP|ADVP=target)", // no intervening NP; VBN is for "compared with"
-            "@PP|WHPP < (RB $+ @SBAR|S=target)", // RB is for weird tagging like "after/RB adjusting for inflation"
-            "@PP|WHPP !< IN|TO < (SBAR=target <, (IN $+ S))");
-*/
-
-  // /**
-  //  * The "attributive" grammatical relation. The attributive is the complement of a
-  //  * verb such as "to be, to seem, to appear".
-  //  * <p>
-  //  * These mainly occur in questions.  Arguably they shouldn't and we should treat the question
-  //  * WHNP and WHADJP as predicates (as we do for ADJP and NP complements (NP-PRD and ADJP-PRD),
-  //  * but we at present don't produce this.
-  //  */
-  // public static final GrammaticalRelation ATTRIBUTIVE =
-  //   new GrammaticalRelation(Language.UniversalEnglish, "attr", "attributive",
-  //       COMPLEMENT, "VP|SBARQ|SQ", tregexCompiler,
-  //       new String[] {
-  //         "VP < NP=target <(/^(?:VB|AUX)/ < " + copularWordRegex + ") !$ (NP < EX)",
-  //         // "What is that?"
-  //         "SBARQ < (WHNP|WHADJP=target $+ (SQ < (/^(?:VB|AUX)/ < " + copularWordRegex + " !$++ VP) !< (VP <- (PP <:IN)) !<- (PP <: IN)))",
-  //         "SBARQ < (WHNP|WHADJP=target !< WRB) <+(SQ|SINV|S|VP) (VP !< (S < (VP < TO)) < (/^(?:VB|AUX)/ < " + copularWordRegex + " $++ (VP < VBN|VBD)) !<- PRT !<- (PP <: IN) $-- (NP !< /^-NONE-$/))",
-
-  //         // "Is he the man?"
-  //         "SQ <, (/^(?:VB|AUX)/ < " + copularWordRegex + ") < (NP=target $-- (NP !< EX))"
-  //       });
-
-
+  
   /**
    * The "clausal complement" grammatical relation.  A clausal complement of
    * a verb or adjective is a dependent clause with an internal subject which
@@ -681,7 +632,6 @@ public class UniversalEnglishGrammaticalRelations {
             "SINV <# (VP < (/^(?:VB|AUX)/ < " + copularWordRegex + ") $-- (NP $-- NP=target))",
             
             //Former acomp expression
-            //TODO: potentially can be combined with existing expression
             "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]"
         );
 
@@ -740,27 +690,6 @@ public class UniversalEnglishGrammaticalRelations {
         DEPENDENT, "S|SQ|SINV", tregexCompiler,
             "S|SQ|SINV < (NP=target <+(NP) EX)");
 
- //TODO: integrate into xcomp
-  /**
-   * The "adjectival complement" grammatical relation.  An
-   * adjectival complement of a VP is an adjectival phrase which
-   * functions as the complement (like an object of the verb); an adjectival
-   * complement of a clause is the adjectival complement of the VP which is
-   * the predicate of that clause.<p>
-   * <p/>
-   * Example: <br/>
-   * "She looks very beautiful" &rarr;
-   * <code>acomp</code>(looks, beautiful)
-   */
-  /*
-
-  public static final GrammaticalRelation ADJECTIVAL_COMPLEMENT =
-    new GrammaticalRelation(Language.UniversalEnglish, "acomp", "adjectival complement",
-        COMPLEMENT, "VP", tregexCompiler,
-            "VP [ < ADJP=target | ( < (/^VB/ [ ( < " + clausalComplementRegex + " $++ VP=target ) | $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S)) ] ) !$-- (/^VB/ < " + copularWordRegex + " )) ]");
-
-
-   */
   
   /**
    * The "modifier" grammatical relation.  A modifier of a VP is
@@ -779,22 +708,24 @@ public class UniversalEnglishGrammaticalRelations {
 
 
   /**
-   * The "prepositional object" grammatical relation.  The object of a
-   * preposition is the head of a noun phrase following the preposition, or
-   * the adverbs "here" and "there".
+   * The "nominal modifier" grammatical relation.  The nmod relation is 
+   * used for nominal modifiers of nouns or clausal predicates. <code>nmod</code>
+   * is a noun functioning as a non-core (oblique) argument or adjunct. 
+   * In English, nmod is used for prepositional complements.
+   * <p/>
    * (The preposition in turn may be modifying a noun, verb, etc.)
    * We here define cases of VBG quasi-prepositions like "including",
    * "concerning", etc. as instances of pobj (unlike the Penn Treebank).
    * <p/>
    * Example: <br/>
    * "I sat on the chair" &rarr;
-   * <code>pobj</code>(on, chair)
+   * <code>nmod</code>(sat, chair)
    * <p/>
    * (The preposition can be called a FW for pace, versus, etc.  It can also
    * be called a CC - but we don't currently handle that and would need to
    * distinguish from conjoined PPs. Jan 2010 update: We now insist that the
    * NP must follow the preposition. This prevents a preceding NP measure
-   * phrase being matched as a pobj.  We do allow a preposition tagged RB
+   * phrase being matched as a nmod.  We do allow a preposition tagged RB
    * followed by an NP pobj, as happens in the Penn Treebank for adverbial uses
    * of PP like "up 19%")
    */
@@ -813,74 +744,17 @@ public class UniversalEnglishGrammaticalRelations {
             //to handle "What is the esophagus used for"? or "What radio station did Paul Harvey work for?"
             "SBARQ < (WHNP=target [$++ (VP < (PP !< NP)) | $++ (SQ < (VP < (PP !< NP)))])");
 
-            /*
-            "/^(?:PP(?:-TMP)?|(?:WH)?(?:PP|ADVP))$/ < (SYM|IN|VBG|VBN|TO|FW|RB|RBR $++ (/^(?:WH)?(?:NP|ADJP)(?:-TMP|-ADV)?$/=target !$- @NP) !< /^(?i:not)$/)",
-            // We allow ADVP with NP objects for cases like (ADVP earlier this year)
-            "/^PP(?:-TMP)?$/ < (/^(?:IN|VBG|VBN|TO)$/ $+ (ADVP=target [ < (RB < /^(?i:here|there)$/) | < (ADVP < /^NP(?:-TMP)?$/) ] ))",
-            // second disjunct is weird ADVP, only matches 1 tree in 2-21
-            // to deal with preposition stranding in questions (e.g., "Which city do you live in?") -- the preposition is sometimes treated as a particle by the parser (works well but doesn't preserve the tree structure!)
-            "PRT >- (VP !< (S < (VP < TO)) >+(SQ|SINV|S|VP) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/))",
-            "(PP <: IN|TO) >- (VP !< (S < (VP < TO)) >+(SQ|SINV|S|VP) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/))",
-            "(PP <: IN|TO) $- (NP $-- (VBZ|VBD) !$++ VP) >+(SQ) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/)",
 
-            "XS|ADVP < (IN < /^(?i:at)$/) < JJS|DT=target", // at least, at most, at best, at worst, at all
-            //"PP < (CC < less) < NP",
-            "@PP < CC  < @NP=target !< @IN|TO|VBG|VBN|RB|RP|PP",  // for cases where "preposition" like "plus", "but", or "versus"
-            // to handle "in and out of government"
-            "@WHPP|PP < (@WHPP|PP $++ (CC|CONJP $++ (@WHPP|PP $+ (NP=target !$+ __))))",
-            // to handle "What weapon is Apollo most proficient with?"
-            "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP !< NP)) $++ (NP $++ =adj)))");
-            */
 
+ 
 
   /**
-   * The "prepositional object" grammatical relation.  The object of a
-   * preposition is the head of a noun phrase following the preposition, or
-   * the adverbs "here" and "there".
-   * (The preposition in turn may be modifying a noun, verb, etc.)
-   * We here define cases of VBG quasi-prepositions like "including",
-   * "concerning", etc. as instances of pobj (unlike the Penn Treebank).
-   * <p/>
-   * Example: <br/>
-   * "I sat on the chair" &rarr;
-   * <code>pobj</code>(on, chair)
-   * <p/>
-   * (The preposition can be called a FW for pace, versus, etc.  It can also
-   * be called a CC - but we don't currently handle that and would need to
-   * distinguish from conjoined PPs. Jan 2010 update: We now insist that the
-   * NP must follow the preposition. This prevents a preceding NP measure
-   * phrase being matched as a pobj.  We do allow a preposition tagged RB
-   * followed by an NP pobj, as happens in the Penn Treebank for adverbial uses
-   * of PP like "up 19%")
-   */
-  
-  /*
-  public static final GrammaticalRelation PREPOSITIONAL_OBJECT =
-    new GrammaticalRelation(Language.UniversalEnglish, "nmod2", "nominal modifier 2",
-        MODIFIER, "SBARQ|PP(?:-TMP)?|WHPP|PRT|ADVP|WHADVP|XS", tregexCompiler,
-            "/^(?:PP(?:-TMP)?|(?:WH)?(?:PP|ADVP))$/ < (SYM|IN|VBG|VBN|TO|FW|RB|RBR $++ (/^(?:WH)?(?:NP|ADJP)(?:-TMP|-ADV)?$/=target !$- @NP) !< /^(?i:not)$/)",
-            // We allow ADVP with NP objects for cases like (ADVP earlier this year)
-            "/^PP(?:-TMP)?$/ < (/^(?:IN|VBG|VBN|TO)$/ $+ (ADVP=target [ < (RB < /^(?i:here|there)$/) | < (ADVP < /^NP(?:-TMP)?$/) ] ))",
-            // second disjunct is weird ADVP, only matches 1 tree in 2-21
-            // to deal with preposition stranding in questions (e.g., "Which city do you live in?") -- the preposition is sometimes treated as a particle by the parser (works well but doesn't preserve the tree structure!)
-            "PRT >- (VP !< (S < (VP < TO)) >+(SQ|SINV|S|VP) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/))",
-            "(PP <: IN|TO) >- (VP !< (S < (VP < TO)) >+(SQ|SINV|S|VP) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/))",
-            "(PP <: IN|TO) $- (NP $-- (VBZ|VBD) !$++ VP) >+(SQ) (SBARQ <, (WHNP=target !< WRB)) $-- (NP !< /^-NONE-$/)",
-
-            "XS|ADVP < (IN < /^(?i:at)$/) < JJS|DT=target", // at least, at most, at best, at worst, at all
-            //"PP < (CC < less) < NP",
-            "@PP < CC  < @NP=target !< @IN|TO|VBG|VBN|RB|RP|PP",  // for cases where "preposition" like "plus", "but", or "versus"
-            // to handle "in and out of government"
-            "@WHPP|PP < (@WHPP|PP $++ (CC|CONJP $++ (@WHPP|PP $+ (NP=target !$+ __))))",
-            // to handle "What weapon is Apollo most proficient with?"
-            "SBARQ < (WHNP=target $++ ((/^(?:VB|AUX)/ < " + copularWordRegex + ") $++ (ADJP=adj < (PP !< NP)) $++ (NP $++ =adj)))");
-
-*/
-
-  /**
-   * The "adverbial clause modifier" grammatical relation.  An adverbial clause
-   * modifier of some predicates, such as a VP or (inverted) sentence is a clause modifying the verb
-   * (temporal clauses, consequences, conditional clauses, etc.).
+   * The "adverbial clause modifier" grammatical relation. An adverbial 
+   * clause modifier is a clause which modifies a verb or other predicate 
+   * (adjective, etc.), as a modifier not as a core complement. This includes 
+   * things such as a temporal clause, consequence, conditional clause, 
+   * purpose clause, etc. The dependent must be clausal (or else it is an 
+   * <code>advmod</code>) and the dependent is the main predicate of the clause.
    * <p/>
    * Examples: <br/>
    * "The accident happened as the night was falling" &rarr;
@@ -942,25 +816,8 @@ public class UniversalEnglishGrammaticalRelations {
            
             //former pcomp
             "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) !<: IN|TO !< @CC|CONJP < /^((?!PP).)*$/) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
-
-//            "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target < @NP|WHNP|NML !$- (@CC|CONJP $- __)) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
-
   
-  /*
-   * The "purpose clause modifier" grammatical relation has been discontinued
-   * It is now just seen as a special case of an advcl.  A purpose clause
-   * modifier of a VP is a clause headed by "(in order) to" specifying a
-   * purpose.  Note: at present we only recognize ones that have
-   * "in order to" or are fronted.  Otherwise we can't use our surface representations to
-   * distinguish these from xcomp's. We can also recognize "to" clauses
-   * introduced by "be VBN".
-   * <p/>
-   * Example: <br/>
-   * "He talked to the president in order to secure the account" &rarr;
-   * <code>purpcl</code>(talked, secure)
-   */
-
-
+  
   /**
    * The "relative clause modifier" grammatical relation.  A relative clause
    * modifier of an NP is a relative clause modifying the NP.  The link
@@ -984,19 +841,6 @@ public class UniversalEnglishGrammaticalRelations {
             "@NP|WHNP < RRC=target <# NP|WHNP|NML|DT|S",
             "@ADVP < (@ADVP < (RB < /where$/)) < @SBAR=target",
             "NP < (NP $++ (SBAR=target !< (IN < /^(?i:than|that|whether)$/) !< (WHPP|WHNP|WHADVP) < (S < (@NP $++ (VP !< (/^(?:VB|AUX)/ < " + copularWordRegex + " !$+ VP)  !<+(VP) (/^(?:VB|AUX)/ < " + copularWordRegex + " $+ (VP < VBN|VBD)) !<+(VP) NP !< SBAR !<+(VP) (PP <- IN|TO)))) !<: (S !< (VP < TO))) !$++ (CC $++ =target))");
-
-
- /*
-  * The "complementizer" grammatical relation is a discontinued grammatical relation. A
-  * A complementizer of a clausal complement was the word introducing it.
-  * It only matched "that" or "whether". We've now merged this in with "mark" which plays a similar
-  * role with other clausal modifiers.
-  * <p/>
-  * <p/>
-  * Example: <br/>
-  * "He says that you like to swim" &rarr;
-  * <code>complm</code>(like, that)
-  */
 
 
   /**
@@ -1051,7 +895,7 @@ public class UniversalEnglishGrammaticalRelations {
    * <p/>
    * Example: <br/>
    * "Sam eats 3 sheep" &rarr;
-   * <code>num</code>(sheep, 3)
+   * <code>nummod</code>(sheep, 3)
    */
   public static final GrammaticalRelation NUMERIC_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "nummod", "numeric modifier",
@@ -1067,42 +911,9 @@ public class UniversalEnglishGrammaticalRelations {
             "QP < QP=target < /^[$]$/");
 
 
-  //TODO: replace with compound
+ 
   /**
-   * The "compound number modifier" grammatical relation.  A compound number
-   * modifier is a part of a number phrase or currency amount.
-   * <p/>
-   * Example: <br/>
-   * "I lost $ 3.2 billion" &rarr;
-   * <code>number</code>($, billion)
-   */
- /*
-  public static final GrammaticalRelation NUMBER_MODIFIER =
-    new GrammaticalRelation(Language.UniversalEnglish, "number", "compound number modifier",
-        MODIFIER, "QP|ADJP", tregexCompiler,
-            "QP|ADJP < (/^(?:CD|$|#)$/=target !$- CC)");
-
-*/
-  /**
-   * The "quantifier phrase modifier" grammatical relation.  A quantifier
-   * modifier is an element modifying the head of a QP constituent.
-   * <p/>
-   * Example: <br/>
-   * "About 200 people came to the party" &rarr;
-   * <code>quantmod</code>(200, About)
-   */
-  /*
-  public static final GrammaticalRelation QUANTIFIER_MODIFIER =
-    new GrammaticalRelation(Language.UniversalEnglish, "quantmod", "quantifier modifier",
-        MODIFIER, "QP", tregexCompiler,
-            "QP < IN|RB|RBR|RBS|PDT|DT|JJ|JJR|JJS|XS=target");
-   */
-
-  //TODO: update documentation
-  //TODO: include numbers
-  //TODO: exclude names
-  /**
-   * The "noun compound modifier" grammatical relation.  A noun compound
+   * The "compound modifier" grammatical relation.  A compound
    * modifier of an NP is any noun that serves to modify the head noun.
    * Note that this has all nouns modify the rightmost a la Penn headship
    * rules.  There is no intelligent noun compound analysis.
@@ -1119,8 +930,15 @@ public class UniversalEnglishGrammaticalRelations {
    * "Oil price futures" &rarr;
    * <code>compound</code>(futures, oil),
    * <code>compound</code>(futures, price) <p/>
+   * 
+   * Numbers consisting of multiple words are also treated as compounds.
+   * <p/>
+   * Example: <br/>
+   * "I have four thousand sheep" &rarr;
+   * <code>compound</code>(thousand, four), <p/>
+   * 
    */
-  public static final GrammaticalRelation NOUN_COMPOUND_MODIFIER =
+  public static final GrammaticalRelation COMPOUND_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "compound", "compound modifier",
         MODIFIER, "(?:WH)?(?:NP|NX|NAC|NML|ADVP|ADJP|QP)(?:-TMP|-ADV)?", tregexCompiler,
             "/^(?:WH)?(?:NP|NX|NAC|NML)(?:-TMP|-ADV)?$/ < (NP|NML|NN|NNS|NNP|NNPS|FW|AFX=target $++ NN|NNS|NNP|NNPS|FW|CD=sister !<<- POS !<<- (VBZ < /^\'s$/) !$- /^,$/ !$++ (POS $++ =sister))",
@@ -1183,6 +1001,16 @@ public class UniversalEnglishGrammaticalRelations {
             "__ [ < INTJ=target | < (PRN=target <1 /^(?:,|-LRB-)$/ <2 INTJ [ !<3 __ | <3 /^(?:,|-RRB-)$/ ] ) ]");
 
 
+  /**
+   * The "clausal modifier of noun" relation. <code>acl</code> is used for
+   * finite and non-finite clauses that modify a noun. Note that in
+   * English relative clauses get assigned a specific relation 
+   * <code>acl:relcl</code>, a subtype of <code>acl</code>.
+   * <p/>
+   * Examples: <br/>
+   * "the issues as he sees them" &rarr;
+   * <code>acl</code>(issues, sees) <br/>
+   */
   public static final GrammaticalRelation CLAUSAL_MODIFIER = 
       new GrammaticalRelation(Language.UniversalEnglish, "acl", "clausal modifier of noun",
           MODIFIER, "WHNP|WHNP-TMP|WHNP-ADV|NP(?:-[A-Z]+)?|NML|NX", tregexCompiler,
@@ -1198,55 +1026,6 @@ public class UniversalEnglishGrammaticalRelations {
           "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS)",
           "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS)");
    
-   
-  /**
-   * The "verb modifier" grammatical relation.  A verb
-   * modifier of an NP, VP, or S is a S/VP[part] that serves to modify
-   * the meaning of the NP or VP.
-   * <p/>
-   * Examples: <br/>
-   * "truffles picked during the spring are tasty" &rarr;
-   * <code>vmod</code>(truffles, picked) <br>
-   * "Bill picked Fred for the team demonstrating his incompetence" &rarr;
-   * <code>vmod</code>(picked, demonstrating) <br>
-   * "points to establish are ..." &rarr;
-   * <code>vmod</code>(points, establish) <br>
-   * "who am i to judge" &rarr;
-   * <code>vmod</code>(who, judge) <br>
-   */
-  /*
-  public static final GrammaticalRelation VERBAL_MODIFIER =
-    new GrammaticalRelation(Language.UniversalEnglish, "vmod", "verb modifier",
-        MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|NML|NX|VP|S|SINV|SBARQ", tregexCompiler,
-            "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (VP=target < VBG|VBN|VBD $-- @NP|NML|NX)",  // also allow VBD since it quite often occurs in treebank errors and parse errors
-            //acl
-            // to get "MBUSA, headquartered ..."
-            // Allows an adverb to come before the participle
-            "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (/^,$/ $+ (VP=target [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))",
-            //acl
-            // to get "John, knowing ..., announced "
-            // allowing both VP=verb and VP <1 VP=verb catches
-            // conjunctions of two VP clauses
-            "S|SINV < (S=target (< VP=verb | < (VP <1 VP=verb)) [ $- (/^,$/ [ $- @NP | $- (@PP $ @NP) ] ) | $+ (/^,$/ $+ @NP) ] ) : (=verb [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ])",
-            //advcl
-            "(VP < (@S=target < (VP [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]) $- (/^,$/ [$- @NP|VP | $- (@PP $-- @NP ) |$- (@ADVP $-- @NP)])))",
-            //advcl
-            // What are you wearing dancing tonight?
-            "(VP < (S=target < (VP < VBG) $-- VBG=ing !$-- (/^[:]$/ $-- =ing)))",
-            //advcl
-            // We could use something like this keying off -ADV annotation, but not yet operational, as we don't keep S-ADV, only NP-ADV
-            // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
-            // they wrote asking the SEC to ...
-            "VP < (S=target $-- NP < (VP < TO) !$-- (/^V/ < " + xcompVerbRegex + ") )",
-            //advcl
-            "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS)",
-            //acl
-            "/^NP(?:-[A-Z]+)?$/ < (SBAR=target < (S < (VP < TO)) $-- NP|NN|NNP|NNS)",
-            //acl
-            "SBARQ < WHNP < (S=target < (VP <1 TO))");
-            //advcl
-  */
-
   /**
    * The "adverbial modifier" grammatical relation.  An adverbial
    * modifier of a word is a (non-clausal) RB or ADVP that serves to modify
@@ -1328,7 +1107,7 @@ public class UniversalEnglishGrammaticalRelations {
    * "IBM earned $ 5 a share" &rarr;
    * <code>npadvmod</code>($, share)
    * </li>
-   * <li>Reflexives
+   * <li>Floating reflexives
    * <p/>
    * Example: <br/>
    * "The silence is itself significant" &rarr;
@@ -1360,19 +1139,17 @@ public class UniversalEnglishGrammaticalRelations {
 
 
   /**
-   * The "temporal modifier" grammatical relation.  A temporal
-   * modifier of a VP or an ADJP is any constituent that serves to modify the
-   * meaning of the VP or the ADJP by specifying a time; a temporal modifier of a
-   * clause is an temporal modifier of the VP which is the
-   * predicate of that clause.<p>
+   * The "temporal modifier" grammatical relation.  A temporal modifier
+   *  is a subtype of the nmod relation: if the modifier is specifying 
+   *  a time, it is labeled as tmod.
    * <p/>
    * Example: <br/>
    * "Last night, I swam in the pool" &rarr;
-   * {@code tmod}(swam, night)
+   * {@code nmod:tmod}(swam, night)
    */
   public static final GrammaticalRelation TEMPORAL_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "nmod:tmod", "temporal modifier",
-        NP_ADVERBIAL_MODIFIER, "VP|S|ADJP|PP|SBAR|SBARQ|NP|RRC", tregexCompiler,
+        NOMINAL_MODIFIER, "VP|S|ADJP|PP|SBAR|SBARQ|NP|RRC", tregexCompiler,
             "VP|ADJP|RRC [ < NP-TMP=target | < (VP=target <# NP-TMP !$ /^,|CC|CONJP$/) | < (NP=target <# (/^NN/ < " + timeWordRegex + ") !$+ (/^JJ/ < old)) ]",
             // CDM Jan 2010: For constructions like "during the same period last year"
             // combining expressions into a single disjunction should improve speed a little
@@ -1384,7 +1161,6 @@ public class UniversalEnglishGrammaticalRelations {
             "SBARQ < (@WHNP=target <# (/^NN/ < " + timeWordRegex + ")) < (SQ < @NP)",
             "NP < NP-TMP=target");
 
- //TODO: update
   /**
    * The "multi-word expression" grammatical relation.
    * This covers various multi-word constructions for which it would
@@ -1398,45 +1174,14 @@ public class UniversalEnglishGrammaticalRelations {
    * <code>mwe</code>(well, as)<p/>
    * "fewer than 700 bottles" &rarr;
    * <code>mwe</code>(than, fewer)
+   * 
+   * @see {@link CoordinationTransformer#MWETransform(Tree)}
+   * @see <a href="http://universaldependencies.github.io/docs/en/dep/mwe.html">List of multi-word expressions</a>
    */
   public static final GrammaticalRelation MULTI_WORD_EXPRESSION =
     new GrammaticalRelation(Language.UniversalEnglish, "mwe", "multi-word expression",
         MODIFIER, "PP|XS|ADVP|CONJP|MWE", tregexCompiler,
-            "MWE < (IN|TO|RB|NP|NN|JJ|VB|CC|VBZ|VBD|ADVP|PP=target)"
-            
-            /*
-            "PP|XS|CONJP < (IN|TO < as|of|at|to|in) < (JJ|IN|JJR|JJS|NN|VBN=target < such|because|Because|least|instead|due|Due|addition|opposed)",
-            "ADVP < (RB|IN < well) < (IN|RB|JJS=target < as)",
-            // TODO: perhaps the phrase "all but" is more like "all" and should have that as the head
-            "ADVP < (DT|RB < all) < (CC|RB=target < but)",
-            "CONJP < (RB < rather|well|instead) < (RB|IN=target < as|than|of)",
-            "CONJP < (IN < in) < (NN|TO=target < addition|to)",
-            "CONJP < RB < TO=target < ( VB < mention)", //"to" of "not to mention"
-            "CONJP < RB < TO < ( VB=target < mention)", //"mention" of "not to mention"
-            "CONJP < (VBN < opposed) < IN < (TO|IN=target < to)", //"to" of "as opposed to"
-            // todo: note inconsistent head finding for "rather than"!
-            "XS < JJR|JJS=target" // more than, fewer than, well over -- maybe change some of these?
-            */
-    );
-
-  /* mihai: this block needs to be uncommented to get the KBP 2010 system to work (due to the cached sentences using old code)
-   * (Note: in 2011, the measure phrase relation was collapsed into the scope of npadvmod, rather than being separated out.)
-   **
-   * The "measure-phrase" grammatical relation. The measure-phrase is the relation between
-   * the head of an ADJP/ADVP and the head of a measure-phrase modifying the ADJP/ADVP.
-   * <p/>
-   * Example: <br/>
-   * "The director is 65 years old" &rarr;
-   * <code>measure</code>(old, years)
-   *
-  public static final GrammaticalRelation MEASURE_PHRASE =
-    new GrammaticalRelation(Language.UniversalEnglish, "measure", "measure-phrase",
-        MODIFIER, "ADJP|ADVP", tregexCompiler,
-        new String[] {
-          "ADJP <- JJ <, (NP=target !< NNP)",
-          "ADVP|ADJP <# (JJ|IN $- NP=target)"
-        });
-  */ // mihai: end block
+            "MWE < (IN|TO|RB|NP|NN|JJ|VB|CC|VBZ|VBD|ADVP|PP=target)");
 
   /**
    * The "determiner" grammatical relation.
@@ -1482,7 +1227,7 @@ public class UniversalEnglishGrammaticalRelations {
    * The "preconjunct" grammatical relation.
    * <p/>
    * Example: <br/>
-   * "Both the boys and the girls are here" &rarr; <code>preconj</code>(boys,both)
+   * "Both the boys and the girls are here" &rarr; <code>cc:preconj</code>(boys,both)
    */
   //TODO: web_tbk/data/reviews/penntree/122270.xml.tree:
   // "both of the work.."
@@ -1520,25 +1265,6 @@ public class UniversalEnglishGrammaticalRelations {
             // note that ' matches both ' and 's
             "/^(?:WH)?(?:NP|NML|NX)(?:-.*)?$/ < (/^NN|NP/=target $++ (POS=pos < /\'/ $++ /^NN/) !$++ (/^NN|NP/ $++ =pos))"
             );
-
-
-  //TODO: integrate into case
-  /*
-   * The "possessive" grammatical relation.  This is the relation given to
-   * 's (or ' with plurals).<p>
-   * </p>
-   * Example: <br/>
-   * "John's book" &rarr;
-   * <code>possessive</code>(John, 's)
-   
-  public static final GrammaticalRelation POSSESSIVE_MODIFIER =
-    new GrammaticalRelation(Language.UniversalEnglish, "possessive", "possessive modifier",
-        MODIFIER, "(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?", tregexCompiler,
-            "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < POS=target",
-            "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < (VBZ=target < /^'s$/)");
-
-
-   */
 
   //todo: update documentation
   /**
@@ -1713,7 +1439,7 @@ public class UniversalEnglishGrammaticalRelations {
       RELATIVE_CLAUSE_MODIFIER,
       NUMERIC_MODIFIER,
       ADJECTIVAL_MODIFIER,
-      NOUN_COMPOUND_MODIFIER,
+      COMPOUND_MODIFIER,
       APPOSITIONAL_MODIFIER,
       CLAUSAL_MODIFIER,
       ADVERBIAL_MODIFIER,
@@ -1792,8 +1518,8 @@ public class UniversalEnglishGrammaticalRelations {
   }
 
   /**
-   * The "conj" grammatical relation. Used to collapse conjunct relations.
-   * They will be turned into conj_word, where "word" is a conjunction.
+   * The "conj" grammatical relation. Used to enhance conjunct relations.
+   * They will be turned into conj:word, where "word" is a conjunction.
    *
    * @param conjunctionString The conjunction to make a GrammaticalRelation out of
    * @return A grammatical relation for this conjunction
@@ -1860,7 +1586,7 @@ public class UniversalEnglishGrammaticalRelations {
   /**
    * The "advcl" grammatical relation. Used to add case marker information
    *  to adverbial clause relations.<p>
-   * They will be turned into advcl_word, where "word" is a preposition.
+   * They will be turned into advcl:word, where "word" is a preposition.
    *
    * @param advclString The preposition to make a GrammaticalRelation out of
    * @return A grammatical relation for this preposition
@@ -1884,7 +1610,7 @@ public class UniversalEnglishGrammaticalRelations {
   /**
    * The "acl" grammatical relation. Used to add case marker information to 
    * adjectival clause relations.<p>
-   * They will be turned into advcl_word, where "word" is a preposition.
+   * They will be turned into acl:word, where "word" is a preposition.
    *
    * @param aclString The preposition to make a GrammaticalRelation out of
    * @return A grammatical relation for this preposition
