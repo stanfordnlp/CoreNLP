@@ -284,16 +284,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   
   /**
    * Appends case marker information to nmod/acl/advcl relations.
-   * 
-   * E.g. if there is a relation nmod(gov, dep) and case(dep, prep), then
-   * the nmod relation is renamed to nmod:prep.
-   * 
-   * If there are multiple case markers that modify dep, then they are 
-   * combined to one label if they are adjacent (for mwes such as "in front of")
-   * or the relation is being copied with an additional preposition in case they 
-   * are not adjacent (e.g. case(Serbia-6, to-3), cc(Serbia-6, and-4), 
-   * case(Serbia-6, from-5), nmod(flies-2, Serbia-6) results in a relation
-   * nmod:from(flies-2, Serbia-6) and nmod:to(flies-2, Serbia-6).
+   * <p>
+   * E.g. if there is a relation <code>nmod(gov, dep)</code> and <code>case(dep, prep)</code>, then
+   * the <code>nmod</nmod> relation is renamed to <code>nmod:prep</code>.
    * 
    * 
    * @param list List<TypedDependency> of current dependency relations
@@ -344,6 +337,25 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   
   private static SemgrexPattern PREP_CONJP_PATTERN = SemgrexPattern.compile("{} >case ({}=gov >cc {}=cc >conj {}=conj)");
   
+  /**
+   * Expands prepositions with conjunctions such as in the sentence
+   * "Bill flies to and from Serbia." by copying both the verb and
+   * the governor of the preposition resulting in the following
+   * relations:
+   * <p>
+   * <code>conj:and(flies, flies')</code><br>
+   * <code>case(Serbia, to)</code><br>
+   * <code>cc(flies, and)</code><br>
+   * <code>case(Serbia, from)</code><br>
+   * <code>nmod(flies, Serbia)</code><br>
+   * <code>nmod(flies', Serbia')</code><br>
+   * <p>
+   * The label of the conjunct relation includes the conjunction type
+   * because if the verb has multiple cc relations then it can be impossible
+   * to infer which coordination marker belongs to which conjuncts.
+   * 
+   * @param list mutable list of dependencies
+   */
   private static void expandPrepConjunctions(List<TypedDependency> list) {
     SemanticGraph sg = new SemanticGraph(list);
     SemgrexMatcher matcher = PREP_CONJP_PATTERN.matcher(sg);
@@ -372,6 +384,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     
   }  
   
+  /*
+   * Used by expandPrepConjunctions.
+   */
   
   private static void expandPrepConjunction(List<TypedDependency> list, IndexedWord gov, 
       List<IndexedWord> conjDeps, IndexedWord ccDep, SemanticGraph sg) {
@@ -433,6 +448,26 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   
   private static SemgrexPattern PP_CONJP_PATTERN = SemgrexPattern.compile("{} >/^(nmod|acl|advcl)$/ (({}=gov >case {}) >cc {}=cc >conj ({}=conj >case {}))");
   
+  
+  /**
+   * Expands PPs with conjunctions such as in the sentence
+   * "Bill flies to France and from Serbia." by copying the verb 
+   * that heads the prepositinal phrase resulting in the following
+   * relations:
+   * <p>
+   * <code>conj:and(flies, flies')</code><br>
+   * <code>case(France, to)</code><br>
+   * <code>cc(flies, and)</code><br>
+   * <code>case(Serbia, from)</code><br>
+   * <code>nmod(flies, France)</code><br>
+   * <code>nmod(flies', Serbia)</code><br>
+   * <p>
+   * The label of the conjunct relation includes the conjunction type
+   * because if the verb has multiple cc relations then it can be impossible
+   * to infer which coordination marker belongs to which conjuncts.
+   * 
+   * @param list mutable list of dependency relations.
+   */
   private static void expandPPConjunctions(List<TypedDependency> list) {
     SemanticGraph sg = new SemanticGraph(list);
     SemgrexMatcher matcher = PP_CONJP_PATTERN.matcher(sg);
@@ -462,7 +497,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     
   }  
   
-  
+  /*
+   * Used by expandPPConjunction.
+   */
   private static void expandPPConjunction(List<TypedDependency> list, IndexedWord gov, 
       List<IndexedWord> conjDeps, IndexedWord ccDep, SemanticGraph sg) {
     
@@ -529,6 +566,22 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   
   private static SemgrexPattern CONJUNCTION_PATTERN = SemgrexPattern.compile("{}=gov >cc {}=cc >conj {}=conj");
   
+  
+  /**
+   * Adds the type of conjunction to all conjunct relations. 
+   * <p>
+   * <code>cc(Marie, and)</code>, <code>conj(Marie, Chris)</code> and <code>conj(Marie, John)</code>
+   * become <code>cc(Marie, and)</code>, <code>conj(Marie, Chris)</code> and <code>conj(Marie, John)</code>.
+   * <p>
+   * In case multiple coordination marker depend on the same governor
+   * the one that precedes the conjunct is appended to the conjunction relation or the
+   * first one if no preceding marker exists.
+   * <p>
+   * Some multi-word coordination markers are collapsed to <code>conj:and</code> or <code>conj:negcc</code>. 
+   * See {@see #conjValue(IndexedWord, SemanticGraph)}.
+   * 
+   * @param list mutable list of dependency relations
+   */
   private static void addConjInformation(List<TypedDependency> list) {
     
         
@@ -558,6 +611,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     
   }
   
+  /*
+   * Used by addConjInformation.
+   */
   private static void addConjToReln(List<TypedDependency> list,
       IndexedWord gov, List<IndexedWord> conjDeps, IndexedWord ccDep, SemanticGraph sg) {
     for (IndexedWord conjDep : conjDeps) {
@@ -635,27 +691,31 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   /**
    * Destructively modifies this {@code Collection<TypedDependency>}
-   * by collapsing several types of transitive pairs of dependencies.
+   * by collapsing several types of transitive pairs of dependencies or
+   * by adding additional information from the dependents to the relation
+   * of the governor.
    * If called with a tree of dependencies and both CCprocess and
    * includeExtras set to false, then the tree structure is preserved.
+   * <p>
+   * 
    * <dl>
-   * <dt>prepositional object dependencies: pobj</dt>
+   * <dt>nominal modifier dependencies: nmod</dt>
    * <dd>
-   * <code>prep(cat, in)</code> and <code>pobj(in, hat)</code> are collapsed to
-   * <code>prep_in(cat, hat)</code></dd>
-   * <dt>prepositional complement dependencies: pcomp</dt>
+   * If there exist the relations <code>case(hat, in)</code> and <code>nmod(in, hat)</code> then
+   * the <code>nmod</code> relation is enhanced to <code>nmod:in(cat, hat)</code>. 
+   * The <code>case(hat, in)</code> relation is preserved.</dd>
+   * <dt>clausal modifier of noun/adverbial clause modifier with case markers: acs/advcl</dt>
    * <dd>
-   * <code>prep(heard, of)</code> and <code>pcomp(of, attacking)</code> are
-   * collapsed to <code>prepc_of(heard, attacking)</code></dd>
+   * If there exist the relations <code>case(attacking, of)</code> and <code>advcl(heard, attacking)</code> then
+   * the <code>nmod</code> relation is enhanced to <code>nmod:of(heard, attacking)</code>. 
+   * The <code>case(attacking, of)</code> relation is preserved.</dd>
    * <dt>conjunct dependencies</dt>
    * <dd>
+   * If there exist the relations 
    * <code>cc(investors, and)</code> and
-   * <code>conj(investors, regulators)</code> are collapsed to
-   * <code>conj_and(investors,regulators)</code></dd>
-   * <dt>possessive dependencies: possessive</dt>
-   * <dd>
-   * <code>possessive(Montezuma, 's)</code> will be erased. This is like a collapsing, but
-   * due to the flatness of NPs, two dependencies are not actually composed.</dd>
+   * <code>conj(investors, regulators)</code>, then the <code>conj</code> relation is
+   * enhanced to 
+   * <code>conj:and(investors, regulators)</code></dd>
    * <dt>For relative clauses, it will collapse referent</dt>
    * <dd>
    * <code>ref(man, that)</code> and <code>dobj(love, that)</code> are collapsed
@@ -968,7 +1028,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
  
   /**
    * This method will collapse a referent relation such as follows. e.g.:
-   * "The man that I love ... " ref(man, that) dobj(love, that) -> dobj(love,
+   * "The man that I love ... " ref(man, that) dobj(love, that) -> ref(man, that) dobj(love,
    * man)
    */
   private static void collapseReferent(Collection<TypedDependency> list) {
