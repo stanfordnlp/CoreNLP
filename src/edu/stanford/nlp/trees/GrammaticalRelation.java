@@ -232,7 +232,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
           depLanguage = Language.Chinese;
           break;
         case English:
-          depLanguage = Language.UniversalEnglish;
+          depLanguage = Language.English;
           break;
         case German:
           break;
@@ -269,7 +269,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   }
 
 
-  public static enum Language { Any, English, Chinese, UniversalEnglish }
+  public static enum Language { Any, English, Chinese }
 
 
   /* Non-static stuff */
@@ -445,8 +445,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     if (specific == null) {
       return shortName;
     } else {
-      char sep = language == Language.UniversalEnglish ? ':' : '_';
-      return shortName + sep + specific;
+      return shortName + '_' + specific;
     }
   }
 
@@ -544,7 +543,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       case Any: return Languages.Language.Unknown;
       case English: return Languages.Language.English;
       case Chinese: return Languages.Language.Chinese;
-      case UniversalEnglish: return Languages.Language.English;
       default:
         throw new IllegalStateException("Unknown language: " + this.language);
     }
@@ -610,29 +608,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       }
       return rel;
     }
-    case UniversalEnglish:
-      GrammaticalRelation rel = UniversalEnglishGrammaticalRelations.valueOf(toString());
-      if (rel == null) {
-        switch (shortName) {
-          case "conj":
-            return UniversalEnglishGrammaticalRelations.getConj(specific);
-          case "nmod":
-            return UniversalEnglishGrammaticalRelations.getNmod(specific);
-          case "acl":
-            return UniversalEnglishGrammaticalRelations.getAcl(specific);
-          case "advcl":
-            return UniversalEnglishGrammaticalRelations.getAdvcl(specific);
-          default:
-            // TODO: we need to figure out what to do with relations
-            // which were serialized and then deprecated.  Perhaps there
-            // is a good way to make them singletons
-            return this;
-          //throw new RuntimeException("Unknown English relation " + this);
-        }
-      } else {
-        return rel;
-      }
-      
     default: {
       throw new RuntimeException("Unknown language " + language);
     }

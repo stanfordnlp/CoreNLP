@@ -29,9 +29,7 @@ package edu.stanford.nlp.parser.lexparser;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.trees.*;
-
 import java.util.function.Predicate;
-
 import edu.stanford.nlp.util.Index;
 
 import java.io.IOException;
@@ -152,12 +150,13 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     super(new PennTreebankLanguagePack());
     headFinder = new ModCollinsHeadFinder(tlp);
   }
-    
+
+
   private HeadFinder headFinder;
 
   private EnglishTrain englishTrain = new EnglishTrain();
 
-  protected EnglishTest englishTest = new EnglishTest();
+  private EnglishTest englishTest = new EnglishTest();
 
   @Override
   public HeadFinder headFinder() {
@@ -166,11 +165,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
 
   @Override
   public HeadFinder typedDependencyHeadFinder() {
-    if (generateOriginalDependencies) {
-      return new SemanticHeadFinder(treebankLanguagePack(), !englishTest.makeCopulaHead);
-    } else {
-      return new UniversalSemanticHeadFinder(treebankLanguagePack(), !englishTest.makeCopulaHead);
-    }
+    return new SemanticHeadFinder(treebankLanguagePack(), !englishTest.makeCopulaHead);
   }
 
 
@@ -2340,13 +2335,8 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     readGrammaticalStructureFromFile(String filename)
   {
     try {
-      if (generateOriginalDependencies) {
-        return EnglishGrammaticalStructure.
-            readCoNLLXGrammaticalStructureCollection(filename);
-      } else {
-        return UniversalEnglishGrammaticalStructure.
-            readCoNLLXGrammaticalStructureCollection(filename);
-      }
+      return EnglishGrammaticalStructure.
+              readCoNLLXGrammaticalStructureCollection(filename);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
@@ -2356,11 +2346,7 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
   public GrammaticalStructure getGrammaticalStructure(Tree t,
                                                       Predicate<String> filter,
                                                       HeadFinder hf) {
-    if (generateOriginalDependencies) {
-      return new EnglishGrammaticalStructure(t, filter, hf);
-    } else {
-      return new UniversalEnglishGrammaticalStructure(t, filter, hf);
-    }
+    return new EnglishGrammaticalStructure(t, filter, hf);
   }
 
   @Override

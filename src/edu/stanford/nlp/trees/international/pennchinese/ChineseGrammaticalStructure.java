@@ -58,7 +58,7 @@ public class ChineseGrammaticalStructure extends GrammaticalStructure {
   }
 
   public ChineseGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf) {
-    super(t, ChineseGrammaticalRelations.values(), hf, puncFilter, Filters.acceptFilter());
+    super(t, ChineseGrammaticalRelations.values(), hf, puncFilter);
   }
 
   /** Used for postprocessing CoNLL X dependencies */

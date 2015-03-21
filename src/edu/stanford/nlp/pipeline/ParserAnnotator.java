@@ -88,7 +88,6 @@ public class ParserAnnotator extends SentenceAnnotator {
     } else {
       this.gsf = null;
     }
-    
     this.nThreads = 1;
     this.saveBinaryTrees = false;
     this.noSquash = false;
@@ -127,8 +126,6 @@ public class ParserAnnotator extends SentenceAnnotator {
     }
 
     if (this.BUILD_GRAPHS) {
-      boolean generateOriginalDependencies = PropertiesUtils.getBool(props, annotatorName + ".originalDependencies", false);
-      parser.getTLPParams().setGenerateOriginalDependencies(generateOriginalDependencies);
       TreebankLanguagePack tlp = parser.getTLPParams().treebankLanguagePack();
       // TODO: expose keeping punctuation as an option to the user?
       this.gsf = tlp.grammaticalStructureFactory(tlp.punctuationWordRejectFilter(), parser.getTLPParams().typedDependencyHeadFinder());
@@ -158,14 +155,10 @@ public class ParserAnnotator extends SentenceAnnotator {
             props.getProperty(annotatorName + ".treemap", ""));
     os.append(annotatorName + ".maxtime:" +
             props.getProperty(annotatorName + ".maxtime", "-1"));
-    os.append(annotatorName + ".originalDependencies:" +
-            props.getProperty(annotatorName + ".originalDependencies", "false"));
     os.append(annotatorName + ".buildgraphs:" +
-      props.getProperty(annotatorName + ".buildgraphs", "true"));
+            props.getProperty(annotatorName + ".buildgraphs", "true"));
     os.append(annotatorName + ".nthreads:" +
               props.getProperty(annotatorName + ".nthreads", props.getProperty("nthreads", "")));
-    os.append(annotatorName + ".nosquash:" +
-      props.getProperty(annotatorName + ".nosquash", "false"));
     os.append(annotatorName + ".extradependencies:" +
         props.getProperty(annotatorName + ".extradependences", "NONE").toLowerCase());
     boolean usesBinary = StanfordCoreNLP.usesBinaryTrees(props);
@@ -262,7 +255,7 @@ public class ParserAnnotator extends SentenceAnnotator {
     if (treeMap != null) {
       tree = treeMap.apply(tree);
     }
-    
+
     ParserAnnotatorUtils.fillInParseAnnotations(VERBOSE, BUILD_GRAPHS, gsf, sentence, tree, extraDependencies);
 
     if (saveBinaryTrees) {

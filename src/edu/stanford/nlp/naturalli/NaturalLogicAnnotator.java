@@ -35,7 +35,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   /**
    * A regex for arcs that act as determiners.
    */
-  private static final String DET = "/det.*|a(dv)?mod|neg|nummod|compound|case/";
+  private static final String DET = "/(pre)?det|a(dv)?mod|neg|num|nn/";
   /**
    * A regex for arcs that we pretend are subject arcs.
    */
@@ -43,7 +43,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   /**
    * A regex for arcs that we pretend are object arcs.
    */
-  private static final String GEN_OBJ = "/[di]obj|xcomp|advcl/";
+  private static final String GEN_OBJ = "/[di]obj|xcomp|advcl|acomp/";
   /**
    * A regex for arcs that we pretend are copula.
    */
@@ -51,11 +51,11 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
   /**
    * A regex for arcs which denote a sub-clause (e.g., "at Stanford" or "who are at Stanford")
    */
-  private static final String GEN_CLAUSE = "/nmod|acl:relcl/";
+  private static final String GEN_CLAUSE = "/prep|rcmod/";
   /**
    * A regex for arcs which denote a preposition
    */
-  private static final String GEN_PREP = "/nmod|advcl|ccomp|advmod/";
+  private static final String GEN_PREP = "/prep|advcl|ccomp|advmod/";
 
   /**
    * A Semgrex fragment for matching a quantifier.
@@ -95,8 +95,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     // { Felix likes cat food }
     add(SemgrexPattern.compile("{}=pivot >"+GEN_SUBJ+" {pos:NNP}=Subject >"+GEN_OBJ+" {}=object"));
     // { Felix has spoken to Fido }
-    //nmod used to be prep - problem?
-    add(SemgrexPattern.compile("{pos:/V.*/}=pivot >"+GEN_SUBJ+" {pos:NNP}=Subject >/nmod|ccomp|[di]obj/ {}=object"));
+    add(SemgrexPattern.compile("{pos:/V.*/}=pivot >"+GEN_SUBJ+" {pos:NNP}=Subject >/prep|ccomp|[di]obj/ {}=object"));
     // { Felix is a cat,
     //   Felix is cute }
     add(SemgrexPattern.compile("{}=object >"+GEN_SUBJ+" {pos:NNP}=Subject >"+GEN_COP+" {}=pivot"));
@@ -105,11 +104,10 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
     // { Obama was not born in Dallas }
     add(SemgrexPattern.compile("{}=pivot >/neg/ {}=quantifier >"+GEN_PREP+" {}=object"));
     // { All of the cats hate dogs. }
-    //nmod used to be prep - problem?
-    add(SemgrexPattern.compile("{pos:/V.*/}=pivot >"+GEN_SUBJ+" ( "+QUANTIFIER+" >/nmod.*/ {}=subject ) >"+GEN_OBJ+" {}=object"));
-//    add(SemgrexPattern.compile("{pos:/V.*/}=pivot > ( "+QUANTIFIER+" >/nmod.*/ {}=subject ) >"+GEN_SUBJ+" {}=object"));  // as above, but handle a common parse error
+    add(SemgrexPattern.compile("{pos:/V.*/}=pivot >"+GEN_SUBJ+" ( "+QUANTIFIER+" >prep {}=subject ) >"+GEN_OBJ+" {}=object"));
+    add(SemgrexPattern.compile("{pos:/V.*/}=pivot >dep ( "+QUANTIFIER+" >prep {}=subject ) >"+GEN_SUBJ+" {}=object"));  // as above, but handle a common parse error
     // { Either cats or dogs have tails. }
-    add(SemgrexPattern.compile("{pos:/V.*/}=pivot > {lemma:either}=quantifier >"+GEN_SUBJ+" {}=subject >"+GEN_OBJ+" {}=object"));
+    add(SemgrexPattern.compile("{pos:/V.*/}=pivot >dep {lemma:either}=quantifier >"+GEN_SUBJ+" {}=subject >"+GEN_OBJ+" {}=object"));
     // { There are cats }
     add(SemgrexPattern.compile("{}=quantifier >"+GEN_SUBJ+" {}=pivot >>expl {}"));
   }});
@@ -154,11 +152,11 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
 
   private static final Set<String> MODIFIER_ARCS = Collections.unmodifiableSet(new HashSet<String>() {{
     add("aux");
-    add("nmod");
+    add("prep");
   }});
 
   private static final Set<String> NOUN_COMPONENT_ARCS = Collections.unmodifiableSet(new HashSet<String>() {{
-    add("compound");
+    add("nn");
   }});
 
   /**
@@ -260,7 +258,7 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
       }
       objSpan = Pair.makePair(subjSpan.second, subjSpan.second);
     } else if (subject == null) {
-      subjSpan = includeInSpan(getSubtreeSpan(tree, object), getGeneralizedSubtreeSpan(tree, pivot, Collections.singleton("nmod")));
+      subjSpan = includeInSpan(getSubtreeSpan(tree, object), getGeneralizedSubtreeSpan(tree, pivot, Collections.singleton("prep")));
       objSpan = Pair.makePair(subjSpan.second, subjSpan.second);
     } else {
       Pair<Integer, Integer> subjectSubtree;
@@ -271,11 +269,6 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
       }
       subjSpan = excludeFromSpan(subjectSubtree, quantifierSpan);
       objSpan = excludeFromSpan(includeInSpan(getSubtreeSpan(tree, object), getModifierSubtreeSpan(tree, pivot)), subjectSubtree);
-    }
-
-    // Return scopes
-    if (subjSpan.first < quantifierSpan.second && subjSpan.second > quantifierSpan.second) {
-      subjSpan = Pair.makePair(quantifierSpan.second, subjSpan.second);
     }
     return new OperatorSpec(operator,
         quantifierSpan.first - 1, quantifierSpan.second - 1,
@@ -376,7 +369,13 @@ public class NaturalLogicAnnotator extends SentenceAnnotator {
         if ("CD".equals(subject == null ? null : subject.tag())) {
           for (SemanticGraphEdge outgoingEdge : tree.outgoingEdgeIterable(subject)) {
             String rel = outgoingEdge.getRelation().toString();
-            if (rel.startsWith("nmod")) {
+            if ("prep".equals(rel)) {
+              for (SemanticGraphEdge pobj : tree.outgoingEdgeIterable(outgoingEdge.getDependent())) {
+                if ("pobj".equals(pobj.getRelation().toString())) {
+                  subject = pobj.getDependent();
+                }
+              }
+            } else if ("prep_of".equals(rel)) {
               subject = outgoingEdge.getDependent();
             }
           }

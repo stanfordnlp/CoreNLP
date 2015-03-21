@@ -274,7 +274,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     // { blue cats play [quietly] with yarn,
     //   Jill blew kisses at Jack,
     //   cats are standing next to dogs }
-    add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/(nmod|acl|advcl):.*/=prepEdge ( {}=object ?>appos {} = appos ) ?>dobj {pos:/N.*/}=relObj"));
+    add(SemgrexPattern.compile("{$}=verb ?>/cop|aux(pass)?/ {}=be >/.subj(pass)?/ {}=subject >/prepc?_.*/=prepEdge ( {}=object ?>appos {} = appos ) ?>dobj {pos:/N.*/}=relObj"));
     // { fish like to swim }
     add(SemgrexPattern.compile("{$}=verb >/.subj(pass)?/ {}=subject >xcomp ( {}=object ?>appos {}=appos )"));
     // { cats have tails }
@@ -283,9 +283,9 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     //   horses are grazing peacefully }
     add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop|aux(pass)?/ {}=verb"));
     // { Tom and Jerry were fighting }
-    add(SemgrexPattern.compile("{$}=verb >nsubjpass ( {}=subject >/conj:and/=subjIgnored {}=object )"));
+    add(SemgrexPattern.compile("{$}=verb >nsubjpass ( {}=subject >conj_and=subjIgnored {}=object )"));
     // { There are dogs in heaven }
-    add(SemgrexPattern.compile("{lemma:be}=verb ?>expl {} >/.subj(pass)?/ ( {}=subject >/(nmod|acl|advcl):.*/=prepEdge ( {}=object ?>appos {} = appos ) ?>dobj {pos:/N.*/}=relObj )"));
+    add(SemgrexPattern.compile("{lemma:be}=verb ?>expl {} >/.subj(pass)?/ ( {}=subject >/prepc?_.*/=prepEdge ( {}=object ?>appos {} = appos ) ?>dobj {pos:/N.*/}=relObj )"));
   }});
 
   /**
@@ -310,13 +310,15 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    */
   private static List<SemgrexPattern> NOUN_DEPENDENCY_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
     // { Durin, son of Thorin }
-    add(SemgrexPattern.compile("{}=subject >appos ( {}=relation >/nmod:.*/=relaux {}=object)"));
+    add(SemgrexPattern.compile("{}=subject >appos ( {}=relation >/prep_.*|poss/=relaux {}=object)"));
     // { Thorin's son, Durin }
-    add(SemgrexPattern.compile("{}=relation >/nmod:.*/=relaux {}=subject >appos {}=object"));
+    add(SemgrexPattern.compile("{}=relation >/prep_*|poss/=relaux {}=subject >appos {}=object"));
     //  { President Obama }
-    add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/amod|compound/=arc {ner:/..+/}=object"));
+    add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/amod|nn/=arc {ner:/..+/}=object"));
     // { Chris Manning of Stanford }
-    add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/nmod:.*/=relation {ner:/..+/}=object"));
+    add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/prep_.*/=relation {ner:/..+/}=object"));
+    // { Unicredit 's Bank Austria Creditanstalt }
+    add(SemgrexPattern.compile("[ {}=object & !{ner:O}=object ] >poss=relation !{ner:O}=subject "));
   }});
 
   /**
@@ -441,10 +443,10 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
               relationTokens.add(relNode.backingLabel());
               // (check for aux information)
               String relaux = matcher.getRelnString("relaux");
-              if (relaux != null && relaux.startsWith("nmod:") && !"nmod:poss".equals(relaux)) {
+              if (relaux != null && relaux.startsWith("prep_")) {
                 relationTokens.add(new CoreLabel() {{
-                  setWord(relaux.substring("nmod:".length()));
-                  setLemma(relaux.substring("nmod:".length()));
+                  setWord(relaux.substring("prep_".length()));
+                  setLemma(relaux.substring("prep_".length()));
                   setTag("PP");
                   setNER("O");
                   setBeginPosition(subjectTokens.get(subjectTokens.size() - 1).endPosition());
@@ -452,7 +454,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
                   setSentIndex(subjectTokens.get(subjectTokens.size() - 1).sentIndex());
                   setIndex(-1);
                 }});
-              } else if (relaux != null && "nmod:poss".equals(relaux)) {
+              } else if (relaux != null && "poss".equals(relaux)) {
                 relationTokens.addFirst(new CoreLabel() {{
                   setWord("'s");
                   setLemma("'s");
@@ -489,11 +491,11 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
               // (add an optional prep)
               String rel = matcher.getRelnString("relation");
               String prep = null;
-              if (rel != null && rel.startsWith("nmod:") && !"nmod:poss".equals(rel)) {
-                prep = rel.substring("nmod:".length());
-              } else if (rel != null && (rel.startsWith("acl:") || rel.startsWith("advcl:")) ) {
-                prep = rel.substring(rel.indexOf(":"));
-              } else if (rel != null && rel.equals("nmod:poss")) {
+              if (rel != null && rel.startsWith("prep_")) {
+                prep = rel.substring("prep_".length());
+              } else if (rel != null && rel.startsWith("prepc_")) {
+                prep = rel.substring("prepc_".length());
+              } else if (rel != null && rel.equals("poss")) {
                 relationTokens.clear();
                 prep = "'s";
               }
@@ -548,18 +550,18 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
 
   /** A set of valid arcs denoting a subject entity we are interested in */
   public static final Set<String> VALID_SUBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod:poss"); add("nmod:tmod"); add("expl");
+    add("amod"); add("nn"); add("aux"); add("num"); add("poss"); add("tmod"); add("expl");
   }});
 
   /** A set of valid arcs denoting an object entity we are interested in */
   public static final Set<String> VALID_OBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod"); add("nsubj"); add("nmod:*"); add("nmod:poss");
-    add("nmod:tmod"); add("conj:and"); add("advmod"); add("acl"); add("advcl");
+    add("amod"); add("nn"); add("aux"); add("num"); add("prep"); add("nsubj"); add("prep_*"); add("poss");
+    add("tmod"); add("conj_and"); add("advmod"); add("partmod");
   }});
 
   /** A set of valid arcs denoting an entity we are interested in */
   public static final Set<String> VALID_ADVERB_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("amod"); add("advmod"); add("conj"); add("cc"); add("conj:and"); add("conj:or"); add("auxpass");
+    add("amod"); add("advmod"); add("conj"); add("cc"); add("conj_and"); add("conj_or"); add("auxpass");
   }});
 
   private static CoreLabel mockNode(CoreLabel toCopy, int offset, String word, String POS) {
@@ -599,10 +601,8 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
       chunk.add(root.backingLabel(), -root.index());
       for (SemanticGraphEdge edge : parse.incomingEdgeIterable(root)) {
         if (edge.getDependent() != originalRoot) {
-          String relStr = edge.getRelation().toString();
-          if ((relStr.startsWith("nmod:") && !"nmod:poss".equals(relStr)) ||
-              relStr.startsWith("acl:") || relStr.startsWith("advcl:")) {
-            chunk.add(mockNode(edge.getGovernor().backingLabel(), 1, edge.getRelation().toString().substring(edge.getRelation().toString().indexOf(":") + 1), "PP"), -(((double) edge.getGovernor().index()) + 0.9));
+          if (edge.getRelation().toString().startsWith("prep_") || edge.getRelation().toString().startsWith("prepc_")) {
+            chunk.add(mockNode(edge.getGovernor().backingLabel(), 1, edge.getRelation().toString().substring(edge.getRelation().toString().indexOf("_") + 1), "PP"), -(((double) edge.getGovernor().index()) + 0.9));
           }
           if (edge.getRelation().getShortName().equals("conj")) {
             chunk.add(mockNode(root.backingLabel(), -1, edge.getRelation().getSpecific(), "CC"), -(((double) root.index()) - 0.9));
@@ -617,7 +617,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
           // noop; ignore nsubj, cop for extractions with copula
         } else if (ignoredArc.isPresent() && ignoredArc.get().equals(name)) {
           // noop; ignore explicitly requested noop arc.
-        } else if (!validArcs.contains(edge.getRelation().getShortName().replaceAll(":.*",":*"))) {
+        } else if (!validArcs.contains(edge.getRelation().getShortName().replaceAll("_.*","_*"))) {
           return Optional.empty();
         } else {
           fringe.add(edge.getDependent());
@@ -682,9 +682,6 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
     PATTERN_LOOP: for (SemgrexPattern pattern : VERB_PATTERNS) {  // For every candidate pattern...
       SemgrexMatcher m = pattern.matcher(parse);
       if (m.matches()) {  // ... see if it matches the sentence
-        if ("nmod:poss".equals(m.getRelnString("prepEdge"))) {
-          continue;   // nmod:poss is not a preposition!
-        }
         // some JIT on the pattern ordering
         // note[Gabor]: This actually helps quite a bit; 72->86 sentences per second for the entire OpenIE pipeline.
         VERB_PATTERN_HITS.incrementCount(pattern);
@@ -722,7 +719,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
               }
             } else if (edge.getDependent().equals(relObj)) {
               // Add additional object to the relation
-              Optional<List<CoreLabel>> relObjSpan = getValidChunk(parse, relObj, Collections.singleton("compound"), Optional.empty());
+              Optional<List<CoreLabel>> relObjSpan = getValidChunk(parse, relObj, Collections.singleton("nn"), Optional.empty());
               if (!relObjSpan.isPresent()) {
                 continue PATTERN_LOOP;
               } else {
@@ -734,21 +731,21 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
             }
           }
           // Special case for possessive with verb
-          if ("nmod:poss".equals(m.getRelnString("verb"))) {
+          if ("poss".equals(m.getRelnString("verb"))) {
             verbChunk.add(mockNode(verb.backingLabel(), -1, "'s", "POS"), ((double) verb.backingLabel().index()) - 0.9);
           }
         } else {
           // Case: an implicit extraction where the 'verb' comes from a relation arc.
           String verbName = m.getRelnString("verb");
-          if ("nmod:poss".equals(verbName)) {
+          if ("poss".equals(verbName)) {
             IndexedWord subject = m.getNode("subject");
             verb = new IndexedWord(mockNode(subject.backingLabel(), 1, "'s", "POS"));
-            objNoopArc = Optional.of("nmod:poss");
-          } else if (verbName != null && verbName.startsWith("nmod:")) {
-            verbName = verbName.substring("nmod:".length()).replace("_", " ");
+            objNoopArc = Optional.of("poss");
+          } else if (verbName != null && verbName.startsWith("prep_")) {
+            verbName = verbName.substring("prep_".length()).replace("_", " ");
             IndexedWord subject = m.getNode("subject");
             verb = new IndexedWord(mockNode(subject.backingLabel(), 1, verbName, "IN"));
-            subjNoopArc = Optional.of("nmod:" + verbName);
+            subjNoopArc = Optional.of("prep_" + verbName);
           } else {
             throw new IllegalStateException("Pattern matched without a verb!");
           }
@@ -779,7 +776,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
         }
         // (add preposition edge)
         if (prepEdge != null) {
-          verbChunk.add(mockNode(verb.backingLabel(), 1, prepEdge.substring(prepEdge.indexOf(":") + 1).replace("_", " "), "PP"), -(verb.index() + 10));
+          verbChunk.add(mockNode(verb.backingLabel(), 1, prepEdge.substring(prepEdge.indexOf("_") + 1).replace("_", " "), "PP"), -(verb.index() + 10));
         }
         // (check for additional edges)
         if (consumeAll && parse.outDegree(verb) > numKnownDependents) {
