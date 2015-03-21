@@ -5,8 +5,10 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
+import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.util.*;
-
 import static edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations.*;
 import static edu.stanford.nlp.trees.GrammaticalRelation.*;
 
@@ -163,13 +165,229 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After adding extra nsubj:", list);
     }
+  }
+  
 
-    addStrandedPobj(list);
-    if (DEBUG) {
-      printListSorted("After adding stranded pobj:", list);
+  /* Semgrex patterns for prepositional phrases. */
+  private static SemgrexPattern PASSIVE_AGENT_PATTERN = SemgrexPattern.compile("{}=gov >nmod=reln ({}=mod >case {word:/^(?i:by)$/}=c1) >auxpass {}");
+  private static SemgrexPattern PREP_MW3_PATTERN = SemgrexPattern.compile("{}=gov   [>/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 > {}=c2 > {}=c3))]");
+  private static SemgrexPattern PREP_MW2_PATTERN = SemgrexPattern.compile("{}=gov   [>/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 > {}=c2)) | >/^(nmod|advcl|acl)$/=reln ({}=mod >case {}=c1 >case ({}=c2 !== {}=c1))]");
+  private static SemgrexPattern PREP_PATTERN = SemgrexPattern.compile("{}=gov   >/^(nmod|advcl|acl)$/=reln ({}=mod >case {}=c1)");
+
+
+  
+  /**
+   * Adds the case marker(s) to all nmod, acl and advcl relations that are 
+   * modified by one or more case markers(s).
+   * 
+   * @see UniversalEnglishGrammaticalStructure#addCaseMarkersToReln
+   */
+  private static void addCaseMarkerInformation(List<TypedDependency> list) {
+    
+    /* 3-word prepositions */
+    SemanticGraph sg = new SemanticGraph(list);
+    SemgrexMatcher matcher = PASSIVE_AGENT_PATTERN.matcher(sg);
+    while (matcher.find()) {
+      IndexedWord caseMarker = matcher.getNode("c1");
+      IndexedWord gov = matcher.getNode("gov");
+      IndexedWord mod = matcher.getNode("mod");
+      addPassiveAgentToReln(list, gov, mod, caseMarker);
+    }    
+    
+    List<IndexedWord> oldCaseMarkers = Generics.newArrayList();
+
+    
+    /* 3-word prepositions */
+    sg = new SemanticGraph(list);
+    matcher = PREP_MW3_PATTERN.matcher(sg);
+    while (matcher.find()) {
+      List<IndexedWord> caseMarkers = Generics.newArrayList(3);
+      caseMarkers.add(matcher.getNode("c1"));
+      caseMarkers.add(matcher.getNode("c2"));
+      caseMarkers.add(matcher.getNode("c3"));
+      
+      Collections.sort(caseMarkers);
+
+      /* We only want to match every case marker once. */
+      if (caseMarkers.equals(oldCaseMarkers))
+        continue;
+
+      
+      IndexedWord gov = matcher.getNode("gov");
+      IndexedWord mod = matcher.getNode("mod");
+      addCaseMarkersToReln(list, gov, mod, caseMarkers);
+      
+      oldCaseMarkers = caseMarkers;
+    }
+    
+    
+    /* 2-word prepositions */
+    sg = new SemanticGraph(list);
+    matcher = PREP_MW2_PATTERN.matcher(sg);
+    while (matcher.find()) {
+      List<IndexedWord> caseMarkers = Generics.newArrayList(2);
+      caseMarkers.add(matcher.getNode("c1"));
+      caseMarkers.add(matcher.getNode("c2"));
+      Collections.sort(caseMarkers);
+
+      /* We only want to match every case marker once. */
+      if (caseMarkers.equals(oldCaseMarkers))
+        continue;
+      
+      IndexedWord gov = matcher.getNode("gov");
+      IndexedWord mod = matcher.getNode("mod");
+      addCaseMarkersToReln(list, gov, mod, caseMarkers);
+      
+      oldCaseMarkers = caseMarkers;
+    }
+    
+    /* Single-word prepositions */
+    sg = new SemanticGraph(list);
+    matcher = PREP_PATTERN.matcher(sg);
+    while (matcher.find()) {
+      List<IndexedWord> caseMarkers = Generics.newArrayList(1);
+      caseMarkers.add(matcher.getNode("c1"));
+      
+      if (caseMarkers.equals(oldCaseMarkers))
+        continue;
+      
+      IndexedWord gov = matcher.getNode("gov");
+      IndexedWord mod = matcher.getNode("mod");
+      addCaseMarkersToReln(list, gov, mod, caseMarkers);
+
+      oldCaseMarkers = caseMarkers;
+    }
+  }
+  
+
+  private static void addPassiveAgentToReln(List<TypedDependency> list,
+      IndexedWord gov, IndexedWord mod, IndexedWord caseMarker) {
+    for (TypedDependency td: list) {
+      if ( ! td.gov().equals(gov) || ! td.dep().equals(mod)) {
+        continue;
+      }
+      td.setReln(UniversalEnglishGrammaticalRelations.getNmod("agent"));
+      break;
     }
   }
 
+  /**
+   * Appends case marker information to nmod/acl/advcl relations.
+   * 
+   * E.g. if there is a relation nmod(gov, dep) and case(dep, prep), then
+   * the nmod relation is renamed to nmod:prep.
+   * 
+   * If there are multiple case markers that modify dep, then they are 
+   * combined to one label if they are adjacent (for mwes such as "in front of")
+   * or the relation is being copied with an additional preposition in case they 
+   * are not adjacent (e.g. case(Serbia-6, to-3), cc(Serbia-6, and-4), 
+   * case(Serbia-6, from-5), nmod(flies-2, Serbia-6) results in a relation
+   * nmod:from(flies-2, Serbia-6) and nmod:to(flies-2, Serbia-6).
+   * 
+   * 
+   * @param list List<TypedDependency> of current dependency relations
+   * @param gov governor of the nmod/acl/advcl relation
+   * @param mod modifier of the nmod/acl/advcl relation
+   * @param caseMarkers List<IndexedWord> of all the case markers that depend on mod
+   */
+  private static void addCaseMarkersToReln(List<TypedDependency> list, IndexedWord gov, IndexedWord mod, List<IndexedWord> caseMarkers) {
+    
+    List<TypedDependency> newDeps = Generics.newLinkedList();
+    
+    for (TypedDependency td: list) {
+      if ( ! td.gov().equals(gov) || ! td.dep().equals(mod)) {
+        continue;
+      }
+      
+      int lastCaseMarkerIndex = 0;
+      StringBuilder sb = new StringBuilder();
+      boolean firstWord = true;
+      for (IndexedWord cm : caseMarkers) {
+        /* check for adjacency */
+        if (lastCaseMarkerIndex == 0 || cm.index() == (lastCaseMarkerIndex + 1)) {
+          if ( ! firstWord) {
+            sb.append("_");
+          }
+          sb.append(cm.word());
+          firstWord = false;
+        } else {
+          GrammaticalRelation reln = getCaseMarkedRelation(td, sb.toString().toLowerCase());
+          /* 
+           * in case of multiple non-adjacent case markers (in sentences such as
+           * "Lufthansa flies to and from Serbia.") create an additional relation
+           * for each case marker. 
+           * This example produces the following two relations:
+           * nmod:to(flies, Serbia) and nmod:from(flies, Serbia)
+           */
+          newDeps.add(new TypedDependency(reln, gov, mod));
+          sb = new StringBuilder(cm.word());
+          firstWord = true;
+        }
+        lastCaseMarkerIndex = cm.index();
+      }
+      GrammaticalRelation reln = getCaseMarkedRelation(td, sb.toString().toLowerCase());
+      td.setReln(reln);
+      break;
+    }
+    
+    for (TypedDependency td : newDeps) {
+      list.add(td);
+    }
+  }
+  
+  /**
+   * 
+   * Returns a GrammaticalRelation which combines the original relation and 
+   * the preposition.
+   * 
+   */
+  private static GrammaticalRelation getCaseMarkedRelation(TypedDependency td, String relationName) {
+    GrammaticalRelation reln = null;
+    if (td.reln() == NOMINAL_MODIFIER) {
+      reln = UniversalEnglishGrammaticalRelations.getNmod(relationName);
+    } else if (td.reln() == ADV_CLAUSE_MODIFIER) {
+      reln = UniversalEnglishGrammaticalRelations.getAdvcl(relationName);
+    } else if (td.reln() == CLAUSAL_MODIFIER) {
+      reln = UniversalEnglishGrammaticalRelations.getAcl(relationName);
+    }
+    return reln;
+  }
+
+  
+  private static SemgrexPattern CONJUNCTION_PATTERN = SemgrexPattern.compile("{}=gov >cc {}=cc >conj {}=conj");
+  
+  private static void addConjInformation(List<TypedDependency> list) {
+    
+    SemanticGraph sg = new SemanticGraph(list);
+    SemgrexMatcher matcher = CONJUNCTION_PATTERN.matcher(sg);
+    
+    while (matcher.find()) {
+      IndexedWord ccDep = matcher.getNode("cc");
+      IndexedWord conjDep = matcher.getNode("conj");
+      IndexedWord gov = matcher.getNode("gov");
+
+      addConjToReln(list, gov, conjDep, ccDep);
+    }    
+        
+  }
+  
+  private static void addConjToReln(List<TypedDependency> list,
+      IndexedWord gov, IndexedWord conjDep, IndexedWord ccDep) {
+    
+    for (TypedDependency td : list) {
+      if ( ! td.gov().equals(gov) || ! td.dep().equals(conjDep)) {
+        continue;
+      }
+      
+      td.setReln(conjValue(ccDep.word()));
+      
+      break;
+    }
+    
+  }
+
+  
+  
   // Using this makes addStrandedPobj a lot cleaner looking, but it
   // makes the converter roughly 2% slower.  Might not be worth it.
   // Similar changes could be made to many of the other complicated
@@ -195,6 +413,11 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   // Deal with preposition stranding in relative clauses.
   // For example, "the only thing I'm rooting for"
   // This method will add pobj(for, thing) by connecting using the rcmod and prep
+  //
+  // No longer needed for Universal dependencies as prepositions are treated differently
+  // and convertRel takes care of these stranded prepositions
+  
+  /*
   private static void addStrandedPobj(List<TypedDependency> list) {
     List<IndexedWord> depNodes = null;
     List<TypedDependency> newDeps = null;
@@ -240,12 +463,13 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
           }
         }
       }
-    */
     }
     if (newDeps != null) {
       list.addAll(newDeps);
     }
   }
+
+*/
 
 
   /**
@@ -286,12 +510,14 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
     
+    /* Rename remaining "rel" and "prep" clauses */
     for (TypedDependency rel : list) {
-      if (rel.reln() != RELATIVE) {
-        continue;
+      if (rel.reln() == RELATIVE) {
+        rel.setReln(DIRECT_OBJECT);
+      } else if (rel.reln() == PREPOSITION) {
+        rel.setReln(CASE_MARKER);
       }
       
-      rel.setReln(DIRECT_OBJECT);
     }
       
       
@@ -350,8 +576,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    */
   @Override
   protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, Extras includeExtras) {
-    /*
-    
     if (DEBUG) {
       printListSorted("collapseDependencies: CCproc: " + CCprocess + " includeExtras: " + includeExtras, list);
     }
@@ -359,12 +583,15 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After correctDependencies:", list);
     }
-
-    eraseMultiConj(list);
+    
+    addCaseMarkerInformation(list);
     if (DEBUG) {
-      printListSorted("After collapse multi conj:", list);
+      System.err.println(list);
+      printListSorted("After addCaseMarkerInformation:", list);
     }
 
+    
+    /*
     collapse2WP(list);
     if (DEBUG) {
       printListSorted("After collapse2WP:", list);
@@ -389,8 +616,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After PrepAndPoss:", list);
     }
+    
+    */
 
-    collapseConj(list);
+    //collapseConj(list);
+    
+    addConjInformation(list);
     if (DEBUG) {
       printListSorted("After conj:", list);
     }
@@ -437,7 +668,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After all collapse:", list);
     }
-    */
   }
 
   @Override
@@ -737,7 +967,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   /**
    * Look for ref rules for a given word.  We look through the
-   * children and grandchildren of the rcmod dependency, and if any
+   * children and grandchildren of the acl:relcl dependency, and if any
    * children or grandchildren depend on a that/what/which/etc word,
    * we take the leftmost that/what/which/etc word as the dependent
    * for the ref TypedDependency.
@@ -763,6 +993,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         }
       }
 
+      System.err.println("leftChild: " + leftChild);
+      
       // TODO: could be made more efficient
       TypedDependency leftGrandchild = null;
       for (TypedDependency child : list) {
@@ -931,10 +1163,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     return false;
   }
 
-  /*
+  
   
   private static void collapsePrepAndPoss(Collection<TypedDependency> list) {
-
+/*
     // Man oh man, how gnarly is the logic of this method....
 
     Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
@@ -1356,9 +1588,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
     list.addAll(newTypedDeps);
-  } // end collapsePrepAndPoss()
-
   */
+  } // end collapsePrepAndPoss()
+  
+
   
   /** Work out prep relation name. pc is the dependency whose dep() is the
    *  preposition to do a name for. topPrep may be the same or different.
@@ -1459,7 +1692,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * @param list
    *          list of typedDependencies to work on
    */
-  /*
   private static void collapse2WP(Collection<TypedDependency> list) {
     Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
 
@@ -1479,7 +1711,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       collapseMultiWordPrep(list, newTypedDeps, mwp[0], mwp[1], mwp[1], mwp[0]);
     }
   }
-  */
 
   /**
    * Collapse multiword preposition of the following format:
@@ -1496,9 +1727,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * @param w_mwp0 First part of the multiword preposition that we look for
    * @param w_mwp1 Second part of the multiword preposition that we look for
    */
-  /*
   private static void collapseMultiWordPrep(Collection<TypedDependency> list, Collection<TypedDependency> newTypedDeps, String str_mwp0, String str_mwp1, String w_mwp0, String w_mwp1) {
-
+/*
     // first find the multiword_preposition: dep(mpw[0], mwp[1])
     // the two words should be next to another in the sentence (difference of
     // indexes = 1)
@@ -1517,12 +1747,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       return;
     }
 
-    // now search for prep|advmod|dep|amod(gov, mwp0)
+    // now search for nmod|advmod|dep|amod(gov, mwp0)
     IndexedWord governor = null;
     TypedDependency prep = null;
     for (TypedDependency td1 : list) {
-      if ((td1.reln() == PREPOSITIONAL_MODIFIER || td1.reln() == ADVERBIAL_MODIFIER || td1.reln() == ADJECTIVAL_MODIFIER || td1.reln() == DEPENDENT || td1.reln() == MULTI_WORD_EXPRESSION) && td1.dep().equals(mwp0)) {
-        // we found prep|advmod|dep|amod(gov, mwp0)
+      if ((td1.reln() == NOMINAL_MODIFIER || td1.reln() == ADVERBIAL_MODIFIER || td1.reln() == ADJECTIVAL_MODIFIER || td1.reln() == DEPENDENT || td1.reln() == MULTI_WORD_EXPRESSION) && td1.dep().equals(mwp0)) {
+        // we found nmod|advmod|dep|amod(gov, mwp0)
         prep = td1;
         governor = prep.gov();
       }
@@ -1597,9 +1827,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     }
     list.clear();
     list.addAll(newTypedDeps);
+    */
   }
-  */
-
 
   /**
    * Collapse multi-words preposition of the following format: advmod|prt(gov,
@@ -2064,6 +2293,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    *
    * @param list List of words to get rid of multiword conjunctions from
    */
+  //We no longer delete any dependencies
+  /*
   private static void eraseMultiConj(Collection<TypedDependency> list) {
     // find typed deps of form cc(gov, x)
     for (TypedDependency td1 : list) {
@@ -2081,7 +2312,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
     filterKill(list);
   }
-
+  */
+  
   /**
    * Remove duplicate relations: it can happen when collapsing stranded
    * prepositions. E.g., "What does CPR stand for?" we get dep(stand, what), and
@@ -2090,6 +2322,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * @param list A list of typed dependencies to check through
    */
   private static void removeDep(Collection<TypedDependency> list) {
+    /*
     Set<GrammaticalRelation> prepRels = Generics.newHashSet(UniversalEnglishGrammaticalRelations.getPreps());
     prepRels.addAll(UniversalEnglishGrammaticalRelations.getPrepsC());
     for (TypedDependency td1 : list) {
@@ -2104,6 +2337,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         }
       }
     }
+    */
 
     // now remove typed dependencies with reln "kill"
     for (Iterator<TypedDependency> iter = list.iterator(); iter.hasNext();) {

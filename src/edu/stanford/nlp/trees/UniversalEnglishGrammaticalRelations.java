@@ -798,10 +798,10 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation NOMINAL_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "nmod", "nominal modifier",
         MODIFIER, ".*", tregexCompiler,
-            "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target < @NP|WHNP|NML !$- (@CC|CONJP $- __)) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
+            "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target [< @NP|WHNP|NML | < (PP < @NP|WHNP|NML)]) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
             "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (S=target <: WHPP|WHPP-TMP|PP|PP-TMP)",
-            // only allow a PP < PP one if there is not a conj, verb, or other pattern that matches pcomp under it.  Else pcomp
-            "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO) !< @CC|CONJP",
+            // only allow a PP < PP one if there is not a verb, or other pattern that matches pcomp under it.  Else pcomp
+            "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO)",
             "S|SINV < (PP|PP-TMP=target !< SBAR) < VP|S",
             "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
             "@NP < (@UCP|PRN=target <# @PP)",
@@ -938,7 +938,7 @@ public class UniversalEnglishGrammaticalRelations {
             "SBARQ < WHNP < (S=target < (VP <1 TO))",
            
             //former pcomp
-            "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) !<: IN|TO) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
+            "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) !<: IN|TO !< @CC|CONJP) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
 
 //            "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target < @NP|WHNP|NML !$- (@CC|CONJP $- __)) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
 
@@ -1555,7 +1555,8 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation CASE_MARKER =
     new GrammaticalRelation(Language.UniversalEnglish, "case", "case marker",
         MODIFIER, "(?:WH)?(?:PP.*|SBARQ|NP|NML)(?:-TMP|-ADV)?", tregexCompiler,
-            "/(?:WH)?PP(?:-TMP)?/ !$- (@CC|CONJP $- __) < IN|TO|MWE=target",
+            //"/(?:WH)?PP(?:-TMP)?/ !$- (@CC|CONJP $- __) < IN|TO|MWE=target",
+            "/(?:WH)?PP(?:-TMP)?/ < IN|TO|MWE=target",
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < POS=target", //'s
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < (VBZ=target < /^'s$/)", //'s
             
@@ -1809,34 +1810,41 @@ public class UniversalEnglishGrammaticalRelations {
   }
 
   // the exhaustive list of preposition relations
-  private static final Map<String, GrammaticalRelation> preps = Generics.newConcurrentHashMap();
-  private static final Map<String, GrammaticalRelation> prepsC = Generics.newConcurrentHashMap();
+  private static final Map<String, GrammaticalRelation> nmods = Generics.newConcurrentHashMap();
+  private static final Map<String, GrammaticalRelation> acls = Generics.newConcurrentHashMap();
+  private static final Map<String, GrammaticalRelation> advcls = Generics.newConcurrentHashMap();
 
 
-  public static Collection<GrammaticalRelation> getPreps() {
-    return preps.values();
+  public static Collection<GrammaticalRelation> getNmods() {
+    return nmods.values();
   }
 
-  public static Collection<GrammaticalRelation> getPrepsC() {
-    return prepsC.values();
+  public static Collection<GrammaticalRelation> getAcls() {
+    return acls.values();
   }
+  
+  public static Collection<GrammaticalRelation> getAdvcls() {
+    return advcls.values();
+  }
+
 
 
   /**
-   * The "prep" grammatical relation. Used to collapse prepositions.<p>
-   * They will be turned into prep_word, where "word" is a preposition.
+   * The "nmod" grammatical relation. Used to add case marker information
+   *  to nominal modifier relations.<p>
+   * They will be turned into nmod:word, where "word" is a preposition.
    *
    * @param prepositionString The preposition to make a GrammaticalRelation out of
    * @return A grammatical relation for this preposition
    */
-  public static GrammaticalRelation getPrep(String prepositionString) {
-    GrammaticalRelation result = preps.get(prepositionString);
+  public static GrammaticalRelation getNmod(String prepositionString) {
+    GrammaticalRelation result = nmods.get(prepositionString);
     if (result == null) {
-      synchronized(preps) {
-        result = preps.get(prepositionString);
+      synchronized(nmods) {
+        result = nmods.get(prepositionString);
         if (result == null) {
-          result = new GrammaticalRelation(Language.UniversalEnglish, "prep", "prep_collapsed", CASE_MARKER, prepositionString);
-          preps.put(prepositionString, result);
+          result = new GrammaticalRelation(Language.UniversalEnglish, "nmod", "nmod_preposition", NOMINAL_MODIFIER, prepositionString);
+          nmods.put(prepositionString, result);
           threadSafeAddRelation(result);
         }
       }
@@ -1846,21 +1854,21 @@ public class UniversalEnglishGrammaticalRelations {
 
 
   /**
-   * The "prepc" grammatical relation. Used to collapse preposition
-   * complements.<p>
-   * They will be turned into prep_word, where "word" is a preposition.
+   * The "advcl" grammatical relation. Used to add case marker information
+   *  to adverbial clause relations.<p>
+   * They will be turned into advcl_word, where "word" is a preposition.
    *
-   * @param prepositionString The preposition to make a GrammaticalRelation out of
+   * @param advclString The preposition to make a GrammaticalRelation out of
    * @return A grammatical relation for this preposition
    */
-  public static GrammaticalRelation getPrepC(String prepositionString) {
-    GrammaticalRelation result = prepsC.get(prepositionString);
+  public static GrammaticalRelation getAdvcl(String advclString) {
+    GrammaticalRelation result = advcls.get(advclString);
     if (result == null) {
-      synchronized(prepsC) {
-        result = prepsC.get(prepositionString);
+      synchronized(advcls) {
+        result = advcls.get(advclString);
         if (result == null) {
-          result = new GrammaticalRelation(Language.UniversalEnglish, "prepc", "prepc_collapsed", DEPENDENT, prepositionString);
-          prepsC.put(prepositionString, result);
+          result = new GrammaticalRelation(Language.UniversalEnglish, "advcl", "advcl_preposition", DEPENDENT, advclString);
+          advcls.put(advclString, result);
           threadSafeAddRelation(result);
         }
       }
@@ -1868,6 +1876,29 @@ public class UniversalEnglishGrammaticalRelations {
     return result;
   }
 
+  
+  /**
+   * The "acl" grammatical relation. Used to add case marker information to 
+   * adjectival clause relations.<p>
+   * They will be turned into advcl_word, where "word" is a preposition.
+   *
+   * @param aclString The preposition to make a GrammaticalRelation out of
+   * @return A grammatical relation for this preposition
+   */
+  public static GrammaticalRelation getAcl(String aclString) {
+    GrammaticalRelation result = acls.get(aclString);
+    if (result == null) {
+      synchronized(acls) {
+        result = acls.get(aclString);
+        if (result == null) {
+          result = new GrammaticalRelation(Language.UniversalEnglish, "acl", "acl_preposition", DEPENDENT, aclString);
+          acls.put(aclString, result);
+          threadSafeAddRelation(result);
+        }
+      }
+    }
+    return result;
+  }
 
   /**
    * Returns the EnglishGrammaticalRelation having the given string

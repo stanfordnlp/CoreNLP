@@ -34,6 +34,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import edu.stanford.nlp.trees.GrammaticalStructure.Extras;
 import junit.framework.TestCase;
 
 
@@ -1048,6 +1049,23 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                "nsubj(work-7, Harvey-6)\n" +
                "root(ROOT-0, work-7)\n" +
                "case(station-3, for-8)\n"},
+            {TestType.BASIC,
+              "((S (NP (NN Media) (NNS reports))(VP (VBP are)(NP (NP (DT a) (JJ poor) (NN approximation)) (PP (IN of) (NP (NN reality)))) (PP (IN because) (IN of) (NP (NP (DT the) (NN lack)) (PP (IN of) (NP (JJ good) (NNS sources)))))) (. .)))",
+              "compound(reports-2, Media-1)\n" +
+              "nsubj(approximation-6, reports-2)\n" +
+              "cop(approximation-6, are-3)\n" +
+              "det(approximation-6, a-4)\n" +
+              "amod(approximation-6, poor-5)\n" +
+              "root(ROOT-0, approximation-6)\n" +
+              "case(reality-8, of-7)\n" +
+              "nmod(approximation-6, reality-8)\n" +
+              "case(lack-12, because-9)\n" +
+              "mwe(because-9, of-10)\n" +
+              "det(lack-12, the-11)\n" +
+              "nmod(approximation-6, lack-12)\n" +
+              "case(sources-15, of-13)\n" +
+              "amod(sources-15, good-14)\n" +
+              "nmod(lack-12, sources-15)\n"},
               
             /* Test the various verb "to be" cases in statements, questions, and imperatives. */  
             {TestType.BASIC,
@@ -1775,14 +1793,273 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
               
              /* Test printing of extra dependencies after basic dependencies. */   
              {TestType.NON_COLLAPSED_SEPARATOR,
+               "(ROOT (S (NP (PRP I)) (VP (VBP like) (S (VP (TO to) (VP (VB swim))))) (. .)))",
+               "nsubj(like-2, I-1)\n" +
+                "root(ROOT-0, like-2)\n" +
+                "mark(swim-4, to-3)\n" +
+                "xcomp(like-2, swim-4)\n" +
+                "======\n" +
+                "nsubj(swim-4, I-1)\n"
+             },
+             
+             /* Test preposition collapsing */
+             {TestType.COLLAPSED,
+               "(ROOT (S (NP (NNP Lufthansa)) (VP (VBZ flies) (PP (TO to) (CC and) (IN from) (NP (NNP Serbia)))) (. .)))",
+               "nsubj(flies-2, Lufthansa-1)\n" +
+                "root(ROOT-0, flies-2)\n" +
+                "case(Serbia-6, to-3)\n" +
+                "cc(Serbia-6, and-4)\n" +
+                "case(Serbia-6, from-5)\n" +
+                "nmod:from(flies-2, Serbia-6)\n" +
+                "nmod:to(flies-2, Serbia-6)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (NNP Dole)) (VP (VBD was) (VP (VBN defeated) (PP (IN by) (NP (NNP Clinton))))) (. .)))",
+              "nsubjpass(defeated-3, Dole-1)\n" + 
+               "auxpass(defeated-3, was-2)\n" + 
+               "root(ROOT-0, defeated-3)\n" + 
+               "case(Clinton-5, by-4)\n" + 
+               "nmod:agent(defeated-3, Clinton-5)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (SBAR (IN That) (S (NP (PRP she)) (VP (VBD lied)))) (VP (VBD was) (VP (VBN suspected) (PP (IN by) (NP (NN everyone))))) (. .)))",
+              "mark(lied-3, That-1)\n" + 
+               "nsubj(lied-3, she-2)\n" + 
+               "csubjpass(suspected-5, lied-3)\n" + 
+               "auxpass(suspected-5, was-4)\n" + 
+               "root(ROOT-0, suspected-5)\n" + 
+               "case(everyone-7, by-6)\n" + 
+               "nmod:agent(suspected-5, everyone-7)\n"},
+             {TestType.COLLAPSED,
               "(ROOT (S (NP (PRP I)) (VP (VBP like) (S (VP (TO to) (VP (VB swim))))) (. .)))",
-              "nsubj(like-2, I-1)\n" +
-                  "root(ROOT-0, like-2)\n" +
-                  "mark(swim-4, to-3)\n" +
-                  "xcomp(like-2, swim-4)\n" +
-                  "======\n" +
-                  "nsubj(swim-4, I-1)\n"
-             }
+              "nsubj(like-2, I-1)\n" + 
+               "nsubj(swim-4, I-1)\n" + 
+               "root(ROOT-0, like-2)\n" + 
+               "mark(swim-4, to-3)\n" + 
+               "xcomp(like-2, swim-4)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (PRP I)) (VP (VBD sat) (PP (IN on) (NP (DT the) (NN chair)))) (. .)))",
+              "nsubj(sat-2, I-1)\n" + 
+               "root(ROOT-0, sat-2)\n" + 
+               "case(chair-5, on-3)\n" + 
+               "det(chair-5, the-4)\n" + 
+               "nmod:on(sat-2, chair-5)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (PRP We)) (VP (VBP have) (NP (NP (DT no) (JJ useful) (NN information)) (PP (IN on) (SBAR (IN whether) (S (NP (NNS users)) (VP (VBP are) (PP (IN at) (NP (NN risk))))))))) (. .)))",
+              "nsubj(have-2, We-1)\n" + 
+               "root(ROOT-0, have-2)\n" + 
+               "neg(information-5, no-3)\n" + 
+               "amod(information-5, useful-4)\n" + 
+               "dobj(have-2, information-5)\n" + 
+               "case(risk-11, on-6)\n" + 
+               "mark(risk-11, whether-7)\n" + 
+               "nsubj(risk-11, users-8)\n" + 
+               "cop(risk-11, are-9)\n" + 
+               "case(risk-11, at-10)\n" +
+               "acl:at(information-5, risk-11)\n" +
+               "acl:on(information-5, risk-11)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (PRP They)) (VP (VBD heard) (PP (IN about) (NP (NN asbestos))) (S (VP (VBG having) (NP (JJ questionable) (NNS properties))))) (. .)))",
+              "nsubj(heard-2, They-1)\n" + 
+               "root(ROOT-0, heard-2)\n" + 
+               "case(asbestos-4, about-3)\n" + 
+               "nmod:about(heard-2, asbestos-4)\n" + 
+               "xcomp(heard-2, having-5)\n" + 
+               "amod(properties-7, questionable-6)\n" + 
+               "dobj(having-5, properties-7)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (PRP He)) (VP (VBZ says) (SBAR (IN that) (S (NP (PRP you)) (VP (VBP like) (S (VP (TO to) (VP (VB swim)))))))) (. .)))",
+              "nsubj(says-2, He-1)\n" + 
+               "root(ROOT-0, says-2)\n" + 
+               "mark(like-5, that-3)\n" + 
+               "nsubj(like-5, you-4)\n" + 
+               "nsubj(swim-7, you-4)\n" + 
+               "ccomp(says-2, like-5)\n" + 
+               "mark(swim-7, to-6)\n" + 
+               "xcomp(like-5, swim-7)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (NNP U.S.) (NNS forces)) (VP (VBP have) (VP (VBN been) (VP (VBN engaged) (PP (IN in) (NP (JJ intense) (NN fighting))) (SBAR (IN after) (S (NP (NNS insurgents)) (VP (VBD launched) (NP (JJ simultaneous) (NNS attacks)))))))) (. .)))",
+              "compound(forces-2, U.S.-1)\n" + 
+               "nsubjpass(engaged-5, forces-2)\n" + 
+               "aux(engaged-5, have-3)\n" + 
+               "auxpass(engaged-5, been-4)\n" + 
+               "root(ROOT-0, engaged-5)\n" + 
+               "case(fighting-8, in-6)\n" + 
+               "amod(fighting-8, intense-7)\n" + 
+               "nmod:in(engaged-5, fighting-8)\n" + 
+               "mark(launched-11, after-9)\n" + 
+               "nsubj(launched-11, insurgents-10)\n" + 
+               "advcl(engaged-5, launched-11)\n" + 
+               "amod(attacks-13, simultaneous-12)\n" + 
+               "dobj(launched-11, attacks-13)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN man)) (SBAR (WHNP (WP who)) (S (NP (PRP you)) (VP (VBP love)))))) (. .)))",
+              "nsubj(saw-2, I-1)\n" + 
+               "root(ROOT-0, saw-2)\n" + 
+               "det(man-4, the-3)\n" + 
+               "dobj(saw-2, man-4)\n" + 
+               "dobj(love-7, man-4)\n" + 
+               "nsubj(love-7, you-6)\n" + 
+               "acl:relcl(man-4, love-7)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN man)) (SBAR (WHNP (WP$ whose) (NP (NN wife))) (S (NP (PRP you)) (VP (VBP love)))))) (. .)))",
+              "nsubj(saw-2, I-1)\n" + 
+               "root(ROOT-0, saw-2)\n" + 
+               "det(man-4, the-3)\n" + 
+               "dobj(saw-2, man-4)\n" + 
+               "nmod:poss(wife-6, man-4)\n" + 
+               "ref(man-4, whose-5)\n" + 
+               "dobj(love-8, wife-6)\n" + 
+               "nsubj(love-8, you-7)\n" + 
+               "acl:relcl(man-4, love-8)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (EX There)) (VP (VBZ is) (NP (NP (DT a) (NN statue)) (PP (IN in) (NP (DT the) (NN corner))))) (. .)))",
+              "expl(is-2, There-1)\n" + 
+               "root(ROOT-0, is-2)\n" + 
+               "det(statue-4, a-3)\n" + 
+               "nsubj(is-2, statue-4)\n" + 
+               "case(corner-7, in-5)\n" + 
+               "det(corner-7, the-6)\n" + 
+               "nmod:in(statue-4, corner-7)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (PRP He)) (VP (VBD talked) (PP (TO to) (NP (DT the) (NN president))) (SBAR (IN in) (NN order) (S (VP (TO to) (VP (VB secure) (NP (DT the) (NN account))))))) (. .)))",
+              "nsubj(talked-2, He-1)\n" + 
+               "nsubj(secure-9, He-1)\n" +  //correct??
+               "root(ROOT-0, talked-2)\n" + 
+               "case(president-5, to-3)\n" + 
+               "det(president-5, the-4)\n" + 
+               "nmod:to(talked-2, president-5)\n" + 
+               "mark(secure-9, in-6)\n" + 
+               "mwe(in-6, order-7)\n" + 
+               "mark(secure-9, to-8)\n" + 
+               "advcl(talked-2, secure-9)\n" + 
+               "det(account-11, the-10)\n" + 
+               "dobj(secure-9, account-11)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN book)) (SBAR (WHNP (WDT which)) (S (NP (PRP you)) (VP (VBD bought)))))) (. .)))",
+              "nsubj(saw-2, I-1)\n" + 
+               "root(ROOT-0, saw-2)\n" + 
+               "det(book-4, the-3)\n" + 
+               "dobj(saw-2, book-4)\n" + 
+               "dobj(bought-7, book-4)\n" + 
+               "nsubj(bought-7, you-6)\n" + 
+               "acl:relcl(book-4, bought-7)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (NNP Bill)) (VP (VBD picked) (NP (NP (NNP Fred)) (PP (IN for) (NP (NP (DT the) (NN team)) (VP (VBG demonstrating) (NP (PRP$ his) (NN incompetence))))))) (. .)))",
+              "nsubj(picked-2, Bill-1)\n" + 
+               "root(ROOT-0, picked-2)\n" + 
+               "dobj(picked-2, Fred-3)\n" + 
+               "case(team-6, for-4)\n" + 
+               "det(team-6, the-5)\n" + 
+               "nmod:for(Fred-3, team-6)\n" + 
+               "acl(team-6, demonstrating-7)\n" + 
+               "nmod:poss(incompetence-9, his-8)\n" + 
+               "dobj(demonstrating-7, incompetence-9)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (SBARQ (WHPP (IN In) (WHNP (WDT which) (NN city))) (SQ (VBP do) (NP (PRP you)) (VP (VB live))) (. ?)))",
+              "case(city-3, In-1)\n" + 
+               "det(city-3, which-2)\n" + 
+               "nmod:in(live-6, city-3)\n" + 
+               "aux(live-6, do-4)\n" + 
+               "nsubj(live-6, you-5)\n" + 
+               "root(ROOT-0, live-6)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT the) (NN esophagus)) (VP (VBN used) (PP (IN for)))) (? ?)))",
+              "nmod:for(used-5, What-1)\n" + 
+               "auxpass(used-5, is-2)\n" + 
+               "det(esophagus-4, the-3)\n" + 
+               "nsubjpass(used-5, esophagus-4)\n" + 
+               "root(ROOT-0, used-5)\n" + 
+               "case(What-1, for-6)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (CC Both) (NP (DT the) (NNS boys)) (CC and) (NP (DT the) (NNS girls))) (VP (VBP are) (ADVP (RB here))) (. .)))",
+              "cc:preconj(boys-3, Both-1)\n" + 
+               "det(boys-3, the-2)\n" + 
+               "nsubj(are-7, boys-3)\n" + 
+               "cc(boys-3, and-4)\n" + 
+               "det(girls-6, the-5)\n" + 
+               "conj:and(boys-3, girls-6)\n" + 
+               "root(ROOT-0, are-7)\n" + 
+               "advmod(are-7, here-8)\n"},
+             {TestType.COLLAPSED,
+              "( (S (NP (NNP Fred)) (VP (VBD flew) (PP (IN across) (CC or) (IN across) (NP (NNP Serbia)))) (. .)))",
+              "nsubj(flew-2, Fred-1)\n" + 
+               "root(ROOT-0, flew-2)\n" + 
+               "case(Serbia-6, across-3)\n" + 
+               "cc(Serbia-6, or-4)\n" + 
+               "case(Serbia-6, across-5)\n" + 
+               "nmod:across(flew-2, Serbia-6)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (SBARQ (WHPP (IN For) (WHNP (WRB how) (JJ long))) (SQ (VBZ is) (NP (DT an) (NN elephant)) (ADJP (JJ pregnant))) (. ?)))",
+              "case(long-3, For-1)\n" + 
+               "advmod(long-3, how-2)\n" + 
+               "nmod:for(pregnant-7, long-3)\n" + 
+               "cop(pregnant-7, is-4)\n" + 
+               "det(elephant-6, an-5)\n" + 
+               "nsubj(pregnant-7, elephant-6)\n" + 
+               "root(ROOT-0, pregnant-7)\n"},
+             {TestType.COLLAPSED,
+              "( (S (NP-SBJ-1 (PRP He)) (VP (VBD achieved) (NP (DT this)) (PP-MNR (PP (IN in) (NP (NN part))) (IN through) (NP (DT an) (JJ uncanny) (NN talent)))) (. .)))",
+              "nsubj(achieved-2, He-1)\n" + 
+               "root(ROOT-0, achieved-2)\n" + 
+               "dobj(achieved-2, this-3)\n" + 
+               "case(part-5, in-4)\n" + 
+               "nmod:in(achieved-2, part-5)\n" + 
+               "case(talent-9, through-6)\n" + 
+               "det(talent-9, an-7)\n" + 
+               "amod(talent-9, uncanny-8)\n" + 
+               "nmod:through(achieved-2, talent-9)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (DT The) (NN turf)) (ADVP (RB recently)) (VP (VBZ has) (VP (VBN ranged) (PP (PP (IN from) (NP (NNP Chile))) (PP (TO to) (NP (NNP Austria))) (PP (TO to) (NP (NNP Portugal)))))) (. .)))",
+              "det(turf-2, The-1)\n" + 
+               "nsubj(ranged-5, turf-2)\n" + 
+               "advmod(ranged-5, recently-3)\n" + 
+               "aux(ranged-5, has-4)\n" + 
+               "root(ROOT-0, ranged-5)\n" + 
+               "case(Chile-7, from-6)\n" + 
+               "nmod:from(ranged-5, Chile-7)\n" + 
+               "case(Austria-9, to-8)\n" + 
+               "nmod:to(ranged-5, Austria-9)\n" + 
+               "case(Portugal-11, to-10)\n" + 
+               "nmod:to(ranged-5, Portugal-11)\n"},
+             {TestType.COLLAPSED,
+              "( (S (CC But) (NP (NP (NNP Ms.) (NNP Poore)) (, ,) (NP (NP (DT the) (NN magazine) (POS 's)) (NN editor) (CC and) (NN publisher)) (, ,)) (VP (VBD resigned)) (. .)))",
+              "cc(resigned-12, But-1)\n" + 
+               "compound(Poore-3, Ms.-2)\n" + 
+               "nsubj(resigned-12, Poore-3)\n" + 
+               "det(magazine-6, the-5)\n" + 
+               "nmod:poss(editor-8, magazine-6)\n" + 
+               "case(magazine-6, 's-7)\n" + 
+               "appos(Poore-3, editor-8)\n" + 
+               "cc(editor-8, and-9)\n" + 
+               "conj:and(editor-8, publisher-10)\n" + 
+               "root(ROOT-0, resigned-12)\n"},
+             {TestType.COLLAPSED,
+              "( (S (NP (EX There)) (VP (VBZ 's) (ADVP (RB never)) (VP (VBN been) (NP (DT an) (NN exception)))) (. .)))",
+              "expl(exception-6, There-1)\n" + 
+               "auxpass(exception-6, 's-2)\n" + 
+               "neg(exception-6, never-3)\n" + 
+               "cop(exception-6, been-4)\n" + 
+               "det(exception-6, an-5)\n" + 
+               "root(ROOT-0, exception-6)\n"},
+             {TestType.COLLAPSED,
+              "( (S (NP (NNP Sotheby) (POS 's)) (PRN (, ,) (S (NP (PRP she)) (VP (VBZ says))) (, ,)) (VP (VBZ is) (VP (`` ``) (VBG wearing) (NP (DT both) (NNS hats)))) (. .) ('' '')))",
+              "nsubj(wearing-9, Sotheby-1)\n" + 
+               "case(Sotheby-1, 's-2)\n" + 
+               "nsubj(says-5, she-4)\n" + 
+               "parataxis(wearing-9, says-5)\n" + 
+               "aux(wearing-9, is-7)\n" + 
+               "root(ROOT-0, wearing-9)\n" + 
+               "det(hats-11, both-10)\n" + 
+               "dobj(wearing-9, hats-11)\n"},
+             {TestType.COLLAPSED,
+              "( (S (NP (NP (JJ Average) (NN maturity)) (PP (IN of) (NP (NP (NML (DT the) (NNS funds)) (POS ')) (NNS investments)))) (VP (VBD lengthened)) (. .)))",
+              "amod(maturity-2, Average-1)\n" + 
+               "nsubj(lengthened-8, maturity-2)\n" + 
+               "case(investments-7, of-3)\n" + 
+               "det(funds-5, the-4)\n" + 
+               "nmod:poss(investments-7, funds-5)\n" + 
+               "nmod:of(maturity-2, investments-7)\n" + 
+               "root(ROOT-0, lengthened-8)\n"},
+
 
     });
   }
@@ -1811,13 +2088,13 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
         //testNonCollapsedSeparator();
         break;
       case COLLAPSED:
-        //testCollapsedRelations();
+        testCollapsedRelation();
         break;
       case CC_PROCESSED:
         //testCCProcessedRelations();
         break;
       case COPY_NODES:
-        testCollapsedRelations();
+        testCollapsedRelation();
         break;
     }
   }
@@ -1898,118 +2175,22 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
   }
 
   
-  //TODO: update these tests and move them
   /**
    * Tests that we can extract the collapsed grammatical relations correctly from
-   * some hard-coded trees.
+   * a hard-coded tree.
    *
    */
-  public void testCollapsedRelations() {
-    // the trees to test
-    String[] testTrees = {
-         "(ROOT (S (NP (NNP Dole)) (VP (VBD was) (VP (VBN defeated) (PP (IN by) (NP (NNP Clinton))))) (. .)))",
-         "(ROOT (S (SBAR (IN That) (S (NP (PRP she)) (VP (VBD lied)))) (VP (VBD was) (VP (VBN suspected) (PP (IN by) (NP (NN everyone))))) (. .)))",
-         "(ROOT (S (NP (PRP I)) (VP (VBP like) (S (VP (TO to) (VP (VB swim))))) (. .)))",
-         "(ROOT (S (NP (PRP I)) (VP (VBD sat) (PP (IN on) (NP (DT the) (NN chair)))) (. .)))",
-         "(ROOT (S (NP (PRP We)) (VP (VBP have) (NP (NP (DT no) (JJ useful) (NN information)) (PP (IN on) (SBAR (IN whether) (S (NP (NNS users)) (VP (VBP are) (PP (IN at) (NP (NN risk))))))))) (. .)))",
-         "(ROOT (S (NP (PRP They)) (VP (VBD heard) (PP (IN about) (NP (NN asbestos))) (S (VP (VBG having) (NP (JJ questionable) (NNS properties))))) (. .)))",
-         "(ROOT (S (NP (PRP He)) (VP (VBZ says) (SBAR (IN that) (S (NP (PRP you)) (VP (VBP like) (S (VP (TO to) (VP (VB swim)))))))) (. .)))",
-         "(ROOT (S (NP (NNP U.S.) (NNS forces)) (VP (VBP have) (VP (VBN been) (VP (VBN engaged) (PP (IN in) (NP (JJ intense) (NN fighting))) (SBAR (IN after) (S (NP (NNS insurgents)) (VP (VBD launched) (NP (JJ simultaneous) (NNS attacks)))))))) (. .)))",
-         "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN man)) (SBAR (WHNP (WP who)) (S (NP (PRP you)) (VP (VBP love)))))) (. .)))",
-         "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN man)) (SBAR (WHNP (WP$ whose) (NP (NN wife))) (S (NP (PRP you)) (VP (VBP love)))))) (. .)))",
-         "(ROOT (S (NP (EX There)) (VP (VBZ is) (NP (NP (DT a) (NN statue)) (PP (IN in) (NP (DT the) (NN corner))))) (. .)))",
-         "(ROOT (S (NP (PRP He)) (VP (VBD talked) (PP (TO to) (NP (DT the) (NN president))) (SBAR (IN in) (NN order) (S (VP (TO to) (VP (VB secure) (NP (DT the) (NN account))))))) (. .)))",
-         "(ROOT (S (NP (PRP I)) (VP (VBD saw) (NP (NP (DT the) (NN book)) (SBAR (WHNP (WDT which)) (S (NP (PRP you)) (VP (VBD bought)))))) (. .)))",
-         "(ROOT (S (NP (NNP Bill)) (VP (VBD picked) (NP (NP (NNP Fred)) (PP (IN for) (NP (NP (DT the) (NN team)) (VP (VBG demonstrating) (NP (PRP$ his) (NN incompetence))))))) (. .)))",
-         "(ROOT (SBARQ (WHPP (IN In) (WHNP (WDT which) (NN city))) (SQ (VBP do) (NP (PRP you)) (VP (VB live))) (. ?)))",
-         "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT the) (NN esophagus)) (VP (VBN used) (PP (IN for)))) (? ?)))",
-         "(ROOT (S (NP (CC Both) (NP (DT the) (NNS boys)) (CC and) (NP (DT the) (NNS girls))) (VP (VBP are) (ADVP (RB here))) (. .)))",
-         "( (S (NP (NNP Fred)) (VP (VBD flew) (PP (IN across) (CC or) (IN across) (NP (NNP Serbia)))) (. .)))", // This is a buggy parse tree, but our parser produces structures like this sometimes, and the collapsing process shouldn't barf on them.
-         "(ROOT (SBARQ (WHPP (IN For) (WHNP (WRB how) (JJ long))) (SQ (VBZ is) (NP (DT an) (NN elephant)) (ADJP (JJ pregnant))) (. ?)))",
-         "( (S (NP-SBJ-1 (PRP He)) (VP (VBD achieved) (NP (DT this)) (PP-MNR (PP (IN in) (NP (NN part))) (IN through) (NP (DT an) (JJ uncanny) (NN talent)))) (. .)))",
-         "(ROOT (S (NP (DT The) (NN turf)) (ADVP (RB recently)) (VP (VBZ has) (VP (VBN ranged) (PP (PP (IN from) (NP (NNP Chile))) (PP (TO to) (NP (NNP Austria))) (PP (TO to) (NP (NNP Portugal)))))) (. .)))",
-         "( (S (CC But) (NP (NP (NNP Ms.) (NNP Poore)) (, ,) (NP (NP (DT the) (NN magazine) (POS 's)) (NN editor) (CC and) (NN publisher)) (, ,)) (VP (VBD resigned)) (. .)))",
-         "( (S (NP (EX There)) (VP (VBZ 's) (ADVP (RB never)) (VP (VBN been) (NP (DT an) (NN exception)))) (. .)))",
-         // this next POS shouldn't disappear in collapsing!
-         "( (S (NP (NNP Sotheby) (POS 's)) (PRN (, ,) (S (NP (PRP she)) (VP (VBZ says))) (, ,)) (VP (VBZ is) (VP (`` ``) (VBG wearing) (NP (DT both) (NNS hats)))) (. .) ('' '')))",
-         "( (S (NP (NP (JJ Average) (NN maturity)) (PP (IN of) (NP (NP (NML (DT the) (NNS funds)) (POS ')) (NNS investments)))) (VP (VBD lengthened)) (. .)))",
-
-    };
-
-    // the expected dependency answers (collapsed)
-    String[] testAnswers = {
-        "nsubjpass(defeated-3, Dole-1)\n" + "auxpass(defeated-3, was-2)\n" + "root(ROOT-0, defeated-3)\n" + "agent(defeated-3, Clinton-5)\n",
-        "mark(lied-3, That-1)\n" + "nsubj(lied-3, she-2)\n" + "csubjpass(suspected-5, lied-3)\n" + "auxpass(suspected-5, was-4)\n" + "root(ROOT-0, suspected-5)\n" + "agent(suspected-5, everyone-7)\n",
-        "nsubj(like-2, I-1)\n" + "nsubj(swim-4, I-1)\n" + "root(ROOT-0, like-2)\n" + "aux(swim-4, to-3)\n" + "xcomp(like-2, swim-4)\n",
-        "nsubj(sat-2, I-1)\n" + "root(ROOT-0, sat-2)\n" + "det(chair-5, the-4)\n" + "prep_on(sat-2, chair-5)\n",
-        "nsubj(have-2, We-1)\n" + "root(ROOT-0, have-2)\n" + "neg(information-5, no-3)\n" + "amod(information-5, useful-4)\n" + "dobj(have-2, information-5)\n" + "mark(are-9, whether-7)\n" + "nsubj(are-9, users-8)\n" + "prepc_on(information-5, are-9)\n" + "prep_at(are-9, risk-11)\n",
-        "nsubj(heard-2, They-1)\n" + "root(ROOT-0, heard-2)\n" + "prep_about(heard-2, asbestos-4)\n" + "xcomp(heard-2, having-5)\n" + "amod(properties-7, questionable-6)\n" + "dobj(having-5, properties-7)\n",
-        "nsubj(says-2, He-1)\n" + "root(ROOT-0, says-2)\n" + "mark(like-5, that-3)\n" + "nsubj(like-5, you-4)\n" + "nsubj(swim-7, you-4)\n" + "ccomp(says-2, like-5)\n" + "aux(swim-7, to-6)\n" + "xcomp(like-5, swim-7)\n",
-        "nn(forces-2, U.S.-1)\n" + "nsubjpass(engaged-5, forces-2)\n" + "aux(engaged-5, have-3)\n" + "auxpass(engaged-5, been-4)\n" + "root(ROOT-0, engaged-5)\n" + "amod(fighting-8, intense-7)\n" + "prep_in(engaged-5, fighting-8)\n" + "mark(launched-11, after-9)\n" + "nsubj(launched-11, insurgents-10)\n" + "advcl(engaged-5, launched-11)\n" + "amod(attacks-13, simultaneous-12)\n" + "dobj(launched-11, attacks-13)\n",
-        "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "dobj(love-7, man-4)\n" + "nsubj(love-7, you-6)\n" + "rcmod(man-4, love-7)\n",
-        "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "poss(wife-6, man-4)\n" + "dobj(love-8, wife-6)\n" + "nsubj(love-8, you-7)\n" + "rcmod(man-4, love-8)\n",
-        "expl(is-2, There-1)\n" + "root(ROOT-0, is-2)\n" + "det(statue-4, a-3)\n" + "nsubj(is-2, statue-4)\n" + "det(corner-7, the-6)\n" + "prep_in(statue-4, corner-7)\n",
-        "nsubj(talked-2, He-1)\n" + "root(ROOT-0, talked-2)\n" + "det(president-5, the-4)\n" + "prep_to(talked-2, president-5)\n" + "mark(secure-9, in-6)\n" + "dep(secure-9, order-7)\n" + "aux(secure-9, to-8)\n" + "advcl(talked-2, secure-9)\n" + "det(account-11, the-10)\n" + "dobj(secure-9, account-11)\n",
-        "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(book-4, the-3)\n" + "dobj(saw-2, book-4)\n" + "dobj(bought-7, book-4)\n" + "nsubj(bought-7, you-6)\n" + "rcmod(book-4, bought-7)\n",
-        "nsubj(picked-2, Bill-1)\n" + "root(ROOT-0, picked-2)\n" + "dobj(picked-2, Fred-3)\n" + "det(team-6, the-5)\n" + "prep_for(Fred-3, team-6)\n" + "vmod(team-6, demonstrating-7)\n" + "nmod:poss(incompetence-9, his-8)\n" + "dobj(demonstrating-7, incompetence-9)\n",
-        "det(city-3, which-2)\n" + "prep_in(live-6, city-3)\n" + "aux(live-6, do-4)\n" + "nsubj(live-6, you-5)\n" + "root(ROOT-0, live-6)\n",
-        "prep_for(used-5, What-1)\n" + "auxpass(used-5, is-2)\n" + "det(esophagus-4, the-3)\n" + "nsubjpass(used-5, esophagus-4)\n" + "root(ROOT-0, used-5)\n",
-        "preconj(boys-3, Both-1)\n" + "det(boys-3, the-2)\n" + "nsubj(are-7, boys-3)\n" + "det(girls-6, the-5)\n" + "conj_and(boys-3, girls-6)\n" + "root(ROOT-0, are-7)\n" + "advmod(are-7, here-8)\n",
-        "nsubj(flew-2, Fred-1)\n" + "root(ROOT-0, flew-2)\n" + "prep_across(flew-2, Serbia-6)\n",
-        "advmod(long-3, how-2)\n" +
-                "prep_for(pregnant-7, long-3)\n" +
-                "cop(pregnant-7, is-4)\n" +
-                "det(elephant-6, an-5)\n" +
-                "nsubj(pregnant-7, elephant-6)\n" + "root(ROOT-0, pregnant-7)\n",
-        "nsubj(achieved-2, He-1)\nroot(ROOT-0, achieved-2)\ndobj(achieved-2, this-3)\nprep_in(achieved-2, part-5)\ndet(talent-9, an-7)\namod(talent-9, uncanny-8)\nprep_through(achieved-2, talent-9)\n",
-                "det(turf-2, The-1)\n" +
-                "nsubj(ranged-5, turf-2)\n" +
-                "advmod(ranged-5, recently-3)\n" +
-                "aux(ranged-5, has-4)\n" + "root(ROOT-0, ranged-5)\n" +
-                "prep_from(ranged-5, Chile-7)\n" +
-                "prep_to(ranged-5, Austria-9)\n" +
-                "prep_to(ranged-5, Portugal-11)\n",
-        "cc(resigned-12, But-1)\n" +
-                "nn(Poore-3, Ms.-2)\n" +
-                "nsubj(resigned-12, Poore-3)\n" +
-                "det(magazine-6, the-5)\n" +
-                "poss(editor-8, magazine-6)\n" +
-                "appos(Poore-3, editor-8)\n" +
-                "conj_and(editor-8, publisher-10)\n" + "root(ROOT-0, resigned-12)\n",
-        "expl(exception-6, There-1)\n" +
-                "auxpass(exception-6, 's-2)\n" +
-                "neg(exception-6, never-3)\n" +
-                "cop(exception-6, been-4)\n" +
-                "det(exception-6, an-5)\n" + "root(ROOT-0, exception-6)\n",
-        "nsubj(wearing-9, Sotheby-1)\n" +
-                "possessive(Sotheby-1, 's-2)\n" +
-                "nsubj(says-5, she-4)\n" +
-                "parataxis(wearing-9, says-5)\n" +
-                "aux(wearing-9, is-7)\n" + "root(ROOT-0, wearing-9)\n" +
-                "det(hats-11, both-10)\n" +
-                "dobj(wearing-9, hats-11)\n",
-        "amod(maturity-2, Average-1)\n" +
-                "nsubj(lengthened-8, maturity-2)\n" +
-                "det(funds-5, the-4)\n" +
-                "poss(investments-7, funds-5)\n" +
-                "prep_of(maturity-2, investments-7)\n" + "root(ROOT-0, lengthened-8)\n",
-    };
-
-    assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
+  public void testCollapsedRelation() {
     TreeReaderFactory trf = new PennTreeReaderFactory();
-    for (int i = 0; i < testTrees.length; i++) {
-      String testTree = testTrees[i];
-      String testAnswer = testAnswers[i];
 
-      // specifying our own TreeReaderFactory is vital so that functional
-      // categories - that is -TMP and -ADV in particular - are not stripped off
-      Tree tree = Tree.valueOf(testTree, trf);
-      GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
+    // specifying our own TreeReaderFactory is vital so that functional
+    // categories - that is -TMP and -ADV in particular - are not stripped off
+    Tree tree = Tree.valueOf(testTree, trf);
+    GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
-      String depString = UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(true), tree, false, false);
-      assertEquals("Unexpected collapsed dependencies for tree "+testTree,
+    String depString = UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(Extras.MAXIMAL), tree, false, false);
+    assertEquals("Unexpected collapsed dependencies for tree " + testTree,
           testAnswer, depString);
-    }
   }
 
   /**
