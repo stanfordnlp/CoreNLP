@@ -82,7 +82,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    */
   public EnglishGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf, boolean threadSafe) {
     // the tree is normalized (for index and functional tag stripping) inside CoordinationTransformer
-    super(t, EnglishGrammaticalRelations.values(threadSafe), threadSafe ? EnglishGrammaticalRelations.valuesLock() : null, new CoordinationTransformer(hf), hf, puncFilter);
+    super(t, EnglishGrammaticalRelations.values(threadSafe), threadSafe ? EnglishGrammaticalRelations.valuesLock() : null, new CoordinationTransformer(hf), hf, puncFilter, Filters.acceptFilter());
   }
 
   /** Used for postprocessing CoNLL X dependencies */
@@ -117,7 +117,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
 
   @Override
-  protected void correctDependencies(Collection<TypedDependency> list) {
+  protected void correctDependencies(List<TypedDependency> list) {
     if (DEBUG) {
       printListSorted("At correctDependencies:", list);
     }

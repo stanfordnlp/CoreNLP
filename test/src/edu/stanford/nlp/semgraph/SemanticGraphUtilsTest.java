@@ -25,7 +25,7 @@ public class SemanticGraphUtilsTest extends TestCase {
 
   public void testCreateSemgrexPattern(){
     try{
-    SemanticGraph graph = SemanticGraph.valueOf("[ate subj:Bill]");
+    SemanticGraph graph = SemanticGraph.valueOf("[ate subj>Bill]");
 
     Function<IndexedWord, String> transformNode = o ->{
       return "{word: " + o.word().toLowerCase() + "; tag: " + o.tag() +"; ner: " + o.ner() + "}";
