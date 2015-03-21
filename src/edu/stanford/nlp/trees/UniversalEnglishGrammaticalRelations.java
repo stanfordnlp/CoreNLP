@@ -616,6 +616,7 @@ public class UniversalEnglishGrammaticalRelations {
             "VP <# (/^(?:VB|AUX)/ $+ (VP=target < VB|VBG))",
             "VP < (SBAR=target < (S !$- (NN < order) < (VP < TO))) !> (VP < (VB|AUX < be)) ",
             "VP < (S=target !$- (NN < order) <: NP) > VP",
+            "VP < (S=target !< VP)",
             "VP < (/^VB/ $+ (@S=target < (@ADJP < /^JJ/ ! $-- @NP|S))) $-- (/^VB/ < " + copularWordRegex + " )",
             // stop eating
             // note that we eliminate parentheticals and clauses that could match a vmod
@@ -971,9 +972,9 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation APPOSITIONAL_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "appos", "appositional modifier",
-        MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?", tregexCompiler,
-            "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (NP=target !<: CD $- /^,$/ $-- /^(?:WH)?NP/) !< CC|CONJP !< " + FW_ETC_PAT + " !< " + ETC_PAT,
-            "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target < (NP < /^(?:NN|CD)/ $-- /^-LRB-$/ $+ /^-RRB-$/))",
+        MODIFIER, "(?:WH)?NP(?:-TMP|-ADV)?|FRAG", tregexCompiler,
+            "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|FRAG < (NP=target !<: CD $- /^,$/ $-- /^(?:WH)?NP/) !< CC|CONJP !< " + FW_ETC_PAT + " !< " + ETC_PAT,
+            "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|FRAG < (PRN=target < (NP < /^(?:NN|CD)/ $-- /^-LRB-$/ $+ /^-RRB-$/))",
             // NP-ADV is a npadvmod, NP-TMP is a tmod
             "@WHNP|NP < (NP=target !<: CD <, /^-LRB-$/ <` /^-RRB-$/ $-- /^(?:WH)?NP/ !$ CC|CONJP)",
             // TODO: next pattern with NNP doesn't work because leftmost NNP is deemed head in a
@@ -984,7 +985,9 @@ public class UniversalEnglishGrammaticalRelations {
             // while not unfoolable, this version produces less false positives and more true positives.
             "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (PRN=target <, /^-LRB-$/ <- /^-RRB-$/ !<< /^(?:POS|(?:WP|PRP)\\$|[,$#]|CC|RB|CD)$/ <+(NP) (NNP|NN < /^(?:[A-Z]\\.?){2,}/) )",
             // Handles cases such as "(NP (Her daughter) Jordan)"
-            "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (NP=target <: NNP $- (/^(?:WH)?NP/ !< POS)) !< CC|CONJP !< " + FW_ETC_PAT + " !< " + ETC_PAT);
+            "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV < (NP=target <: NNP $- (/^(?:WH)?NP/ !< POS)) !< CC|CONJP !< " + FW_ETC_PAT + " !< " + ETC_PAT,
+            // Handle cases in the Web Treebank such as "Subject: ...."
+            "FRAG|NP < (NP $+ (/:/ $+ @SQ|S=target) <: NN|NNS)");
 
 
   /**
@@ -1348,7 +1351,7 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation PARATAXIS =
     new GrammaticalRelation(Language.UniversalEnglish, "parataxis", "parataxis",
-        DEPENDENT, "S|VP", tregexCompiler,
+        DEPENDENT, "S|VP|FRAG|NP", tregexCompiler,
             "VP < (PRN=target < S|SINV|SBAR)", // parenthetical
             "VP $ (PRN=target [ < S|SINV|SBAR | < VP < @NP ] )", // parenthetical
             // The next relation handles a colon between sentences
@@ -1358,10 +1361,11 @@ public class UniversalEnglishGrammaticalRelations {
             // anywhere other than the first child
             // First child can occur in rare circumstances such as
             // "But even if he agrees -- which he won't -- etc etc"
-            "S|VP < (/^:$/ $+ /^S/=target) !<, (__ $++ CC|CONJP)",
+            "S|FRAG|VP < (/^:$/ $+ /^S/=target) !<, (__ $++ CC|CONJP)",
             // two juxtaposed sentences; common in web materials (but this also matches quite a few wsj things)
-            "@S < (@S|SBARQ|SQ $++ @S|SBARQ|SQ=target !$++ @CC|CONJP)",
-            "@S|VP < (/^:$/ $-- /^V/ $+ @NP=target) !< @CONJP|CC" // sometimes CC cases are right node raising, etc.
+            "@S|FRAG < (@S|SBARQ|SQ|FRAG $++ @S|SBARQ|SQ|FRAG=target !$++ @CC|CONJP|MWE !$++ (/:/ < /;/))",
+            "@S|FRAG|VP < (/^:$/ $-- /^V/ $+ @NP=target) !< @CONJP|CC", // sometimes CC cases are right node raising, etc.
+            "FRAG|NP < (NP $+ (/:/ $+ @SQ|S=target) << NNP|NNPS)"
     );
 
   /**
@@ -1378,6 +1382,15 @@ public class UniversalEnglishGrammaticalRelations {
             "__ < GW=target");
 
 
+  /**
+   * The "list" relation.
+   */
+  public static final GrammaticalRelation LIST = 
+      new GrammaticalRelation(Language.UniversalEnglish, "list", "list", 
+          DEPENDENT, "FRAG", tregexCompiler,
+          "FRAG < (NP $+ (/,/ $+ (NP=target $+ (/,/ $+ NP))) !$++ CC|CONJP|MWE)",
+          "FRAG < (NP $+ (/,/ $+ (NP $++ (/,/ $+ NP=target))) !$++ CC|CONJP|MWE)");
+  
   /**
    * The "semantic dependent" grammatical relation has been
    * introduced as a supertype for the controlling subject relation.
@@ -1463,6 +1476,7 @@ public class UniversalEnglishGrammaticalRelations {
       PARATAXIS,
       DISCOURSE_ELEMENT,
       GOES_WITH,
+      LIST,
       PREPOSITION,
     }));
   // Cache frequently used views of the values list

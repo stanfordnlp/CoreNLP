@@ -651,7 +651,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       }
       
       if ( ! changedPrep) {
-        prep.setRelation(CASE_MARKER);
+        prep.setRelation(NOMINAL_MODIFIER);
       }
     }
   

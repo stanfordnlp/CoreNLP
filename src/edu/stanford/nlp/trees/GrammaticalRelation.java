@@ -232,7 +232,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
           depLanguage = Language.Chinese;
           break;
         case English:
-          depLanguage = Language.English;
+          depLanguage = Language.UniversalEnglish;
           break;
         case German:
           break;
