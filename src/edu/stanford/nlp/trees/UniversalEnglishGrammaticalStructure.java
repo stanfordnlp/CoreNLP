@@ -668,27 +668,27 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       printListSorted("collapseDependencies: CCproc: " + CCprocess + " includeExtras: " + includeExtras, list);
     }
     correctDependencies(list);
-    if (true) {
+    if (DEBUG) {
       printListSorted("After correctDependencies:", list);
     }
     
     expandPrepConjunctions(list);
-    if (true) {
+    if (DEBUG) {
       printListSorted("After expandPrepConjunctions:", list);
     }
     
     expandPPConjunctions(list);
-    if (true) {
+    if (DEBUG) {
       printListSorted("After expandPPConjunctions:", list);
     }
     
     addCaseMarkerInformation(list);
-    if (true) {
+    if (DEBUG) {
       printListSorted("After addCaseMarkerInformation:", list);
     }
 
     addConjInformation(list);
-    if (true) {
+    if (DEBUG) {
       printListSorted("After addConjInformation:", list);
     }
     
