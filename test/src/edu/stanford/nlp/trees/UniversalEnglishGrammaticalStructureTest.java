@@ -63,7 +63,6 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
     NON_COLLAPSED_SEPARATOR, //Basic conversion + extra dependencies appended at the end
     COLLAPSED, //Collapsed relations
     CC_PROCESSED, //CCprocessed relations
-    COPY_NODES //Copy nodes
   };
   
   
@@ -2510,6 +2509,38 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
                "case(transformation-18, with-16)\n" + 
                "amod(transformation-18, malignant-17)\n" +
                "nmod:with(associated-15, transformation-18)\n"}, 
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (NNP Bill)) (VP (VBD went) (PP (PP (IN over) (NP (DT the) (NN river))) (CC and) (PP (IN through) (NP (DT the) (NNS woods))))) (. .)))",
+              "nsubj(went-2, Bill-1)\n" + 
+               "root(ROOT-0, went-2)\n" + 
+               "conj:and(went-2, went-2')\n" +
+               "case(river-5, over-3)\n" +
+               "det(river-5, the-4)\n" + 
+               "nmod:over(went-2, river-5)\n" +
+               "cc(went-2, and-6)\n" + 
+               "case(woods-9, through-7)\n" + 
+               "det(woods-9, the-8)\n" + 
+               "nmod:through(went-2', woods-9)\n"},
+             {TestType.CC_PROCESSED,
+              "(ROOT (S (NP (NNP Lufthansa)) (VP (VBZ flies) (PP (TO to) (CC and) (IN from) (NP (NP (NNP Serbia)) (CC and) (NP (NNP France))))) (. .)))",
+              "nsubj(flies-2, Lufthansa-1)\n" +
+              "nsubj(flies-2', Lufthansa-1)\n" +
+              "root(ROOT-0, flies-2)\n" +
+              "conj:and(flies-2, flies-2')\n" +
+              "case(Serbia-6, to-3)\n" +
+              "cc(flies-2, and-4)\n" +
+              "case(Serbia-6', from-5)\n" +
+              "nmod:from(flies-2', Serbia-6')\n" +
+              "nmod:to(flies-2, Serbia-6)\n" +
+              "cc(Serbia-6, and-7)\n" +
+              "cc(Serbia-6', and-7)\n" + 
+              "nmod:from(flies-2', France-8)\n" +
+              "nmod:to(flies-2, France-8)\n" +
+              "conj:and(Serbia-6, France-8)\n" +
+              "conj:and(Serbia-6', France-8)\n"},
+
+              
+              
                
     });
   }
@@ -2535,7 +2566,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
         testNonCollapsedRelation();
         break;
       case NON_COLLAPSED_SEPARATOR:
-        //testNonCollapsedSeparator();
+        testNonCollapsedSeparator();
         break;
       case COLLAPSED:
         testCollapsedRelation();
@@ -2543,9 +2574,8 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
       case CC_PROCESSED:
         testCCProcessedRelation();
         break;
-      case COPY_NODES:
-        testCollapsedRelation();
-        break;
+      default:
+        throw new RuntimeException("No test defined for test type " + this.type);
     }
   }
   
@@ -2645,7 +2675,7 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
 
   /**
    * Tests that we can extract the CCprocessed grammatical relations correctly from
-   * some hard-coded trees.
+   * a hard-coded tree.
    *
    */
   public void testCCProcessedRelation() {
@@ -2660,38 +2690,5 @@ public class UniversalEnglishGrammaticalStructureTest extends Assert{
     assertEquals("Unexpected CC processed dependencies for tree "+testTree,
           testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(Extras.MAXIMAL), tree, false, false));
   }
-
-
-  /**
-   * Tests that the copy nodes are properly handled.
-   */
-  public void testCopyNodes() {
-    // the trees to test
-    String[] testTrees = {
-         "(ROOT (S (NP (NNP Bill)) (VP (VBD went) (PP (PP (IN over) (NP (DT the) (NN river))) (CC and) (PP (IN through) (NP (DT the) (NNS woods))))) (. .)))",
-    };
-
-
-    // the expected dependency answers (collapsed)
-    String[] testAnswers = {
-        "nsubj(went-2, Bill-1)\n" + "root(ROOT-0, went-2)\n" + "conj_and(went-2, went-2')\n" + "det(river-5, the-4)\n" + "prep_over(went-2, river-5)\n" + "det(woods-9, the-8)\n" + "prep_through(went-2', woods-9)\n",
-    };
-
-    assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
-    TreeReaderFactory trf = new PennTreeReaderFactory();
-    for (int i = 0; i < testTrees.length; i++) {
-      String testTree = testTrees[i];
-
-      String testAnswer = testAnswers[i];
-
-      // Specifying our own TreeReaderFactory is vital so that functional
-      // categories - that is -TMP and -ADV in particular - are not stripped off
-      Tree tree = Tree.valueOf(testTree, trf);
-      GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
-
-      assertEquals("Unexpected basic dependencies for tree "+testTree,
-          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(true), tree, false, false));
-    }
-  }
-
+  
 }

@@ -117,7 +117,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
 
   @Override
-  protected void correctDependencies(Collection<TypedDependency> list) {
+  protected void correctDependencies(List<TypedDependency> list) {
     if (DEBUG) {
       printListSorted("At correctDependencies:", list);
     }

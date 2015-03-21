@@ -43,6 +43,8 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
   private int copyCount; // = 0;
   
   private int numCopies = 0;
+  
+  private IndexedWord original = null;
 
   /**
    * Default constructor; uses {@link CoreLabel} default constructor
@@ -111,11 +113,20 @@ public class IndexedWord implements AbstractCoreLabel, Comparable<IndexedWord> {
   public IndexedWord makeSoftCopy(int count) {
     IndexedWord copy = new IndexedWord(label);
     copy.setCopyCount(count);
+    copy.original = this;
     return copy;
   }
   
   public IndexedWord makeSoftCopy() {
-    return makeSoftCopy(++numCopies);
+    if (original != null) {
+      return original.makeSoftCopy();
+    } else {
+      return makeSoftCopy(++numCopies);
+    }
+  }
+  
+  public IndexedWord getOriginal() {
+    return original;
   }
 
   /**

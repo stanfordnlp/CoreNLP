@@ -1594,23 +1594,6 @@ public class SemanticGraph implements Serializable {
     return output.toString();
   }
   
-  public ArrayList<TypedDependency> toArrayList() {
-    ArrayList<TypedDependency> list = Generics.newArrayList(this.size());
-    CoreLabel rootLabel = new CoreLabel();
-    rootLabel.setValue("ROOT");
-    IndexedWord root = new IndexedWord(rootLabel);
-    root.setIndex(0);
-    list.add(new TypedDependency(ROOT, root, getFirstRoot()));
-    for (SemanticGraphEdge edge : this.edgeIterable()) {
-      TypedDependency td = new TypedDependency(edge.getRelation(), edge.getGovernor(), edge.getDependent());
-      if (edge.isExtra()) {
-        td.setExtra();
-      }
-      list.add(td);
-    }
-    return list;
-  }
-
   public SemanticGraphEdge addEdge(IndexedWord s, IndexedWord d, GrammaticalRelation reln, double weight, boolean isExtra) {
     SemanticGraphEdge newEdge = new SemanticGraphEdge(s, d, reln, weight, isExtra);
     graph.add(s, d, newEdge);
@@ -1935,6 +1918,15 @@ public class SemanticGraph implements Serializable {
     }
     return relns;
   }
+  
+  /**
+   * Delete all duplicate edges.
+   *
+   */
+  public void deleteDuplicateEdges() {
+    graph.deleteDuplicateEdges();
+  }
+
 
   /** Returns a list of TypedDependency in the graph.
    *  This method goes through all SemanticGraphEdge and converts them
@@ -1955,10 +1947,14 @@ public class SemanticGraph implements Serializable {
     }
     for (SemanticGraphEdge e : this.edgeIterable()){
       TypedDependency dependency = new TypedDependency(e.getRelation(), e.getGovernor(), e.getDependent());
+      if (e.isExtra()) {
+        dependency.setExtra();
+      }
       dependencies.add(dependency);
     }
     return dependencies;
   }
 
   private static final long serialVersionUID = 1L;
+
 }

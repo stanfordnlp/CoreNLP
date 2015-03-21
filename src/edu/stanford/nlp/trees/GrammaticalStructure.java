@@ -943,7 +943,7 @@ public abstract class GrammaticalStructure implements Serializable {
    * Default is no-op; to be over-ridden in subclasses.
    *
    */
-  protected void correctDependencies(Collection<TypedDependency> list) {
+  protected void correctDependencies(List<TypedDependency> list) {
     // do nothing as default operation
   }
 
