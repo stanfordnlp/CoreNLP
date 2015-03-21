@@ -1280,8 +1280,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       }
       
       for (Integer i : bigrams.get(bigram)) {
-        IndexedWord w1 = sg.getNodeByIndex(i);
-        IndexedWord w2 = sg.getNodeByIndex(i + 1);
+        IndexedWord w1 = sg.getNodeByIndexSafe(i);
+        IndexedWord w2 = sg.getNodeByIndexSafe(i + 1);
+        
+        if (w1 == null || w2 == null) {
+          continue;
+        }
         
         IndexedWord gov1 = sg.getParent(w1);
         IndexedWord gov2 = sg.getParent(w2);
@@ -1315,10 +1319,14 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       }
       
       for (Integer i : trigrams.get(trigram)) {
-        IndexedWord w1 = sg.getNodeByIndex(i);
-        IndexedWord w2 = sg.getNodeByIndex(i + 1);
-        IndexedWord w3 = sg.getNodeByIndex(i + 2);
+        IndexedWord w1 = sg.getNodeByIndexSafe(i);
+        IndexedWord w2 = sg.getNodeByIndexSafe(i + 1);
+        IndexedWord w3 = sg.getNodeByIndexSafe(i + 2);
 
+        if (w1 == null || w2 == null || w3 == null) {
+          continue;
+        }
+        
         
         IndexedWord gov1 = sg.getParent(w1);
         IndexedWord gov2 = sg.getParent(w2);
