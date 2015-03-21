@@ -24,6 +24,7 @@ import static edu.stanford.nlp.trees.GrammaticalRelation.*;
  * @author Daniel Cer (CoNLLX format and alternative user selected dependency
  *         printer/reader interface)
  * @author John Bauer
+ * @author Sebastian Schuster
  */
 public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
@@ -85,7 +86,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   public UniversalEnglishGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf, boolean threadSafe) {
     // the tree is normalized (for index and functional tag stripping) inside CoordinationTransformer
     super(t, UniversalEnglishGrammaticalRelations.values(threadSafe), threadSafe ? UniversalEnglishGrammaticalRelations.valuesLock() : null, 
-          new CoordinationTransformer(hf), hf, puncFilter);
+          new CoordinationTransformer(hf, true), hf, puncFilter);
   }
 
   /** Used for postprocessing CoNLL X dependencies */
@@ -520,8 +521,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       
     }
       
-      
-    filterKill(list);
     for (TypedDependency dep : newDeps) {
       if (!list.contains(dep)) {
         list.add(dep);
@@ -938,7 +937,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       TypedDependency td = iter.next();
       if (td.reln() == REFERENT) {
         refs.add(td);
-        iter.remove();
+        //iter.remove();
       }
     }
 
@@ -992,8 +991,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
           leftChild = child;
         }
       }
-
-      System.err.println("leftChild: " + leftChild);
       
       // TODO: could be made more efficient
       TypedDependency leftGrandchild = null;
