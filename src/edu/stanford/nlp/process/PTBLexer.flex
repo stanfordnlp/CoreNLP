@@ -689,9 +689,8 @@ INSENTP = [,;:\u3001]
 QUOTES = {APOS}|''|[`\u2018\u2019\u201A\u201B\u201C\u201D\u0091\u0092\u0093\u0094\u201E\u201F\u2039\u203A\u00AB\u00BB]{1,2}
 DBLQUOT = \"|&quot;
 /* Cap'n for captain, c'est for french */
-TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est
+TBSPEC = -(RRB|LRB|RCB|LCB|RSB|LSB)-|C\.D\.s|pro-|anti-|S(&|&amp;)P-500|S(&|&amp;)Ls|Cap{APOS}n|c{APOS}est|Yahoo\!
 TBSPEC2 = {APOS}[0-9][0-9]
-BANGWORDS = (E|Yahoo|Jeopardy)\!
 
 /* Smileys (based on Chris Potts' sentiment tutorial, but much more restricted set - e.g., no "8)", "do:" or "):", too ambiguous) and simple Asian smileys */
 SMILEY = [<>]?[:;=][\-o\*']?[\(\)DPdpO\\{@\|\[\]]
@@ -819,7 +818,6 @@ gonna|gotta|lemme|gimme|wanna
                 }
 {FRAC2}                 { return normalizeFractions(yytext()); }
 {TBSPEC}                { return getNormalizedAmpNext(); }
-{BANGWORDS}     { return getNext(); }
 {THING3}                { if (escapeForwardSlashAsterisk) {
                             return getNext(delimit(yytext(), '/'), yytext());
                           } else {
@@ -834,7 +832,7 @@ gonna|gotta|lemme|gimme|wanna
                           }
                         }
 /* Any acronym can be treated as sentence final iff followed by this list of words (pronouns, determiners, and prepositions, etc.). "U.S." is the single big source of errors.  Character classes make this rule case sensitive! (This is needed!!). A one letter acronym candidate like "Z." or "I." in this context usually isn't, and so we return the leter and pushback the period for next time. */
-{ACRONYM}/({SPACENLS})([A]bout|[A]ccording|[A]dditionally|[A]fter|[A]n|[A]|[A]s|[A]t|[B]ut|[D]id|[D]uring|[E]arlier|[H]e|[H]er|[H]ere|[H]ow|[H]owever|[I]f|[I]n|[I]t|[L]ast|[M]any|[M]ore|[M]r\.|[M]s\.|[N]ow|[O]nce|[O]ne|[O]ther|[O]ur|[S]he|[S]ince|[S]o|[S]ome|[S]uch|[T]hat|[T]he|[T]heir|[T]hen|[T]here|[T]hese|[T]hey|[T]his|[W]e|[W]hen|[W]hile|[W]hat|[Y]et|[Y]ou|{SGML}){SPACENL} {
+{ACRONYM}/({SPACENLS})([A]bout|[A]ccording|[A]dditionally|[A]fter|[A]n|[A]|[A]s|[A]t|[B]ut|[D]id|[E]arlier|[H]e|[H]er|[H]ere|[H]ow|[H]owever|[I]f|[I]n|[I]t|[L]ast|[M]any|[M]ore|[M]r\.|[M]s\.|[N]ow|[O]nce|[O]ne|[O]ther|[O]ur|[S]he|[S]ince|[S]o|[S]ome|[S]uch|[T]hat|[T]he|[T]heir|[T]hen|[T]here|[T]hese|[T]hey|[T]his|[W]e|[W]hen|[W]hile|[W]hat|[Y]et|[Y]ou|{SGML}){SPACENL} {
                           // try to work around an apparent jflex bug where it
                           // gets a space at the token end by getting
                           // wrong the length of the trailing context.

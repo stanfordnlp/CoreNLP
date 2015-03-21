@@ -40,24 +40,24 @@ import java.util.Set;
 import java.util.Collection;
 
 /**
- * A Naive Bayes classifier with a fixed number of features.
- * The features are assumed to have integer values even though RVFDatum will return doubles.
- *
  * @author Kristina Toutanova (kristina@cs.stanford.edu)
+ *         A Naive Bayes classifier with a fixed number of features.
+ *         The features are assumed to have integer values even though RVFDatum will return doubles
  * @author Sarah Spikes (sdspikes@cs.stanford.edu) - Templatization.  Not sure what the weights counter
- *         is supposed to hold; given the weights function it seems to hold {@code Pair<Pair<L, F>, Object>}
+ *         is supposed to hold; given the weights function it seems to hold Pair<Pair<L, F>, Object>
  *         but this seems like a strange thing to expect to be passed in.
  */
 public class NaiveBayesClassifier<L, F> implements Classifier<L, F>, RVFClassifier<L, F> {
-
+  /**
+   *
+   */
   private static final long serialVersionUID = 1544820342684024068L;
-
-  private Counter<Pair<Pair<L, F>, Number>> weights; //the keys will be class and feature and value
-  private Counter<L> priors;
-  private Set<F> features; // we need all features to add the weights for zero-valued ones
+  Counter<Pair<Pair<L, F>, Number>> weights; //the keys will be class and feature and value
+  Counter<L> priors;
+  Set<F> features; // we need all features to add the weights for zero-valued ones
   private boolean addZeroValued; // whether to add features as having value 0 if they are not in Datum/RFVDatum
-  private Counter<L> priorZero; //if we need to add the zeros, pre-compute the weight for all zeros for each class
-  private Set<L> labels;
+  Counter<L> priorZero; //if we need to add the zeros, pre-compute the weight for all zeros for each class
+  Set<L> labels;
   private final Integer zero = Integer.valueOf(0);
 
   public Collection<L> labels() {

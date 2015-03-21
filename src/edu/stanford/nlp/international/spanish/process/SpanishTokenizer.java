@@ -29,7 +29,7 @@ import edu.stanford.nlp.international.spanish.SpanishVerbStripper;
 
 /**
  * Tokenizer for raw Spanish text. This tokenization scheme is a derivative
- * of PTB tokenization, but with extra rules for Spanish contractions and
+ * of PTB tokenization, but with extra rules for Spanish contractions and 
  * assimilations. It is based heavily on the FrenchTokenizer.
  * <p>
  * The tokenizer tokenizes according to the modified AnCora corpus tokenization
@@ -127,9 +127,9 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   /**
    * Handles contractions like del and al, marked by the lexer
    *
-   * del =&gt; de + l =&gt; de + el
-   * al =&gt; a + l =&gt; a + el
-   * con[mts]igo =&gt; con + [mts]i
+   * del => de + l => de + el
+   * al => a + l => a + el
+   * con[mts]igo => con + [mts]i
    *
    */
   private CoreLabel processContraction(CoreLabel cl) {
@@ -154,7 +154,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     } else {
       throw new IllegalArgumentException("Invalid contraction provided to processContraction");
     }
-
+   
     compoundBuffer.add(copyCoreLabel(cl, second));
     return copyCoreLabel(cl, first);
   }
@@ -162,9 +162,9 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
   /**
    * Handles verbs with attached suffixes, marked by the lexer:
    *
-   * Escribamosela =&gt; Escribamo + se + la =&gt; escribamos + se + la
-   * Sentaos =&gt; senta + os =&gt; sentad + os
-   * Damelo =&gt; da + me + lo
+   * Escribamosela => Escribamo + se + la => escribamos + se + la
+   * Sentaos => senta + os => sentad + os
+   * Damelo => da + me + lo
    *
    */
   private CoreLabel processVerb(CoreLabel cl) {
@@ -232,7 +232,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
      *
      * @param options a String of options, separated by commas
      * @return A TokenizerFactory that returns the right token types
-     * @param factory a factory for the token type that the tokenizer will return
+     * @oaram factory a factory for the token type that the tokenizer will return
      */
     public static <T extends HasWord> SpanishTokenizerFactory<T> newSpanishTokenizerFactory(
       LexedTokenFactory<T> factory, String options) {
@@ -288,7 +288,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
           } else if (fields[0].equals("splitContractions")) {
             splitContractionOption = true;
           } else {
-            lexerProperties.setProperty(option, "true");
+            lexerProperties.put(option, "true");
           }
 
         } else if (fields.length == 2) {
@@ -303,7 +303,7 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
           } else if (fields[0].equals("splitContractions")) {
             splitContractionOption = Boolean.valueOf(fields[1]);
           } else {
-            lexerProperties.setProperty(fields[0], fields[1]);
+            lexerProperties.put(fields[0], fields[1]);
           }
 
         } else {
@@ -328,14 +328,14 @@ public class SpanishTokenizer<T extends HasWord> extends AbstractTokenizer<T> {
     tf.setOptions(ANCORA_OPTIONS);
     return tf;
   }
-
+  
   /**
    * a factory that vends CoreLabel tokens with default tokenization.
    */
   public static TokenizerFactory<CoreLabel> coreLabelFactory() {
     return SpanishTokenizerFactory.newCoreLabelTokenizerFactory();
   }
-
+  
   public static TokenizerFactory<CoreLabel> factory() {
     return coreLabelFactory();
   }

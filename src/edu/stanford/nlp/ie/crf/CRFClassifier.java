@@ -56,11 +56,11 @@ import java.util.zip.GZIPOutputStream;
  * or testing models, input files are expected to
  * be one token per line with the columns indicating things like the word,
  * POS, chunk, and answer class.  The default for
- * {@code ColumnDocumentReaderAndWriter} training data is 3 column input,
+ * <code>ColumnDocumentReaderAndWriter</code> training data is 3 column input,
  * with the columns containing a word, its POS, and its gold class, but
- * this can be specified via the {@code map} property.
+ * this can be specified via the <code>map</code> property.
  * </p><p>
- * When run on a file with {@code -textFile} or {@code -textFiles},
+ * When run on a file with <code>-textFile</code>,
  * the file is assumed to be plain English text (or perhaps simple HTML/XML),
  * and a reasonable attempt is made at English tokenization by
  * {@link PlainTextDocumentReaderAndWriter}.  The class used to read
@@ -1337,7 +1337,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * Takes a {@link List} of something that extends {@link CoreMap} and prints
    * the likelihood of each possible label at each point.
    *
-   * @param document A {@link List} of something that extends CoreMap.
+   * @param document
+   *          A {@link List} of something that extends CoreMap.
    */
   @Override
   public void printProbsDocument(List<IN> document) {
@@ -1349,17 +1350,19 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     // for (int i = 0; i < factorTables.length; i++) {
     for (int i = 0; i < cliqueTree.length(); i++) {
       IN wi = document.get(i);
-      System.out.print(wi.get(CoreAnnotations.TextAnnotation.class));
-      for (String label : classIndex) {
+      System.out.print(wi.get(CoreAnnotations.TextAnnotation.class) + '\t');
+      for (Iterator<String> iter = classIndex.iterator(); iter.hasNext();) {
+        String label = iter.next();
         int index = classIndex.indexOf(label);
         // double prob = Math.pow(Math.E, factorTables[i].logProbEnd(index));
         double prob = cliqueTree.prob(i, index);
-        System.out.print('\t');
-        System.out.print(label);
-        System.out.print('=');
-        System.out.print(prob);
+        System.out.print(label + '=' + prob);
+        if (iter.hasNext()) {
+          System.out.print("\t");
+        } else {
+          System.out.print("\n");
+        }
       }
-      System.out.println();
     }
   }
 
@@ -1643,7 +1646,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       File featIndexFile = null;
 
       // CRFLogConditionalObjectiveFunction.featureIndex = featureIndex;
-      // int numFeatures = featureIndex.size();
+      int numFeatures = featureIndex.size();
       if (flags.saveFeatureIndexToDisk) {
         try {
           System.err.println("Writing feature index to temporary file.");
@@ -1890,39 +1893,45 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
   public Minimizer<DiffFunction> getMinimizer(int featurePruneIteration, Evaluator[] evaluators) {
     Minimizer<DiffFunction> minimizer = null;
-    QNMinimizer qnMinimizer = null;
-
-    if (flags.useQN || flags.useSGDtoQN) {
-      // share code for creation of QNMinimizer
-      int qnMem;
+    if (flags.useQN) {
+      int QNmem;
       if (featurePruneIteration == 0) {
-        qnMem = flags.QNsize;
+        QNmem = flags.QNsize;
       } else {
-        qnMem = flags.QNsize2;
+        QNmem = flags.QNsize2;
       }
 
       if (flags.interimOutputFreq != 0) {
         Function monitor = new ResultStoringMonitor(flags.interimOutputFreq, flags.serializeTo);
-        qnMinimizer = new QNMinimizer(monitor, qnMem, flags.useRobustQN);
+        minimizer = new QNMinimizer(monitor, QNmem, flags.useRobustQN);
       } else {
-        qnMinimizer = new QNMinimizer(qnMem, flags.useRobustQN);
+        minimizer = new QNMinimizer(QNmem, flags.useRobustQN);
       }
 
-      qnMinimizer.terminateOnMaxItr(flags.maxQNItr);
-      qnMinimizer.terminateOnEvalImprovement(flags.terminateOnEvalImprovement);
-      qnMinimizer.setTerminateOnEvalImprovementNumOfEpoch(flags.terminateOnEvalImprovementNumOfEpoch);
-      qnMinimizer.suppressTestPrompt(flags.suppressTestDebug);
+      ((QNMinimizer) minimizer).terminateOnMaxItr(flags.maxQNItr);
+      ((QNMinimizer) minimizer).terminateOnEvalImprovement(flags.terminateOnEvalImprovement);
+      ((QNMinimizer) minimizer).setTerminateOnEvalImprovementNumOfEpoch(flags.terminateOnEvalImprovementNumOfEpoch);
+      ((QNMinimizer) minimizer).suppressTestPrompt(flags.suppressTestDebug);
       if (flags.useOWLQN) {
-        qnMinimizer.useOWLQN(flags.useOWLQN, flags.priorLambda);
+        ((QNMinimizer) minimizer).useOWLQN(flags.useOWLQN, flags.priorLambda);
       }
-    }
-
-    if (flags.useQN) {
-      minimizer = qnMinimizer;
     } else if (flags.useInPlaceSGD) {
       SGDMinimizer<DiffFunction> sgdMinimizer =
               new SGDMinimizer<DiffFunction>(flags.sigma, flags.SGDPasses, flags.tuneSampleSize, flags.stochasticBatchSize);
       if (flags.useSGDtoQN) {
+        QNMinimizer qnMinimizer;
+        int QNmem;
+        if (featurePruneIteration == 0) {
+          QNmem = flags.QNsize;
+        } else {
+          QNmem = flags.QNsize2;
+        }
+        if (flags.interimOutputFreq != 0) {
+          Function monitor = new ResultStoringMonitor(flags.interimOutputFreq, flags.serializeTo);
+          qnMinimizer = new QNMinimizer(monitor, QNmem, flags.useRobustQN);
+        } else {
+          qnMinimizer = new QNMinimizer(QNmem, flags.useRobustQN);
+        }
         minimizer = new HybridMinimizer(sgdMinimizer, qnMinimizer, flags.SGDPasses);
       } else {
         minimizer = sgdMinimizer;
@@ -1950,8 +1959,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
           flags.scaledSGDMethod);
     } else if (flags.l1reg > 0.0) {
       minimizer = ReflectionLoading.loadByReflection("edu.stanford.nlp.optimization.OWLQNMinimizer", flags.l1reg);
-    } else {
-      throw new RuntimeException("No minimizer assigned!");
     }
 
     if (minimizer instanceof HasEvaluators) {
@@ -1959,6 +1966,9 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         ((QNMinimizer) minimizer).setEvaluators(flags.evaluateIters, flags.startEvaluateIters, evaluators);
       } else
         ((HasEvaluators) minimizer).setEvaluators(flags.evaluateIters, evaluators);
+    }
+    if (minimizer == null) {
+      throw new RuntimeException("No minimizer assigned!");
     }
 
     return minimizer;

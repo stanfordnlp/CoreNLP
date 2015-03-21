@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -44,7 +45,6 @@ import edu.stanford.nlp.util.Generics;
  * @author John Bauer
  */
 public class SentimentPipeline {
-
   private static final NumberFormat NF = new DecimalFormat("0.0000");
 
   static enum Output {
@@ -54,8 +54,6 @@ public class SentimentPipeline {
   static enum Input {
     TEXT, TREES
   }
-
-  private SentimentPipeline() {} // static methods
 
   /**
    * Sets the labels on the tree (except the leaves) to be the integer
@@ -249,7 +247,7 @@ public class SentimentPipeline {
 
     boolean filterUnknown = false;
 
-    List<Output> outputFormats = Collections.singletonList(Output.ROOT);
+    List<Output> outputFormats = Arrays.asList(new Output[] { Output.ROOT });
     Input inputFormat = Input.TEXT;
 
     String tlppClass = DEFAULT_TLPP_CLASS;
@@ -356,27 +354,30 @@ public class SentimentPipeline {
       // for each file.
       for (String file : fileList.split(",")) {
         List<Annotation> annotations = getAnnotations(tokenizer, inputFormat, file, filterUnknown);
-        FileOutputStream fout = new FileOutputStream(file + ".out");
-        PrintStream pout = new PrintStream(fout);
         for (Annotation annotation : annotations) {
           pipeline.annotate(annotation);
 
+          FileOutputStream fout = new FileOutputStream(file + ".out");
+          PrintStream pout = new PrintStream(fout);
           for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
             pout.println(sentence);
             outputTree(pout, sentence, outputFormats);
           }
+          pout.flush();
+          fout.close();
         }
-        pout.flush();
-        fout.close();
       }
     } else {
       // Process stdin.  Each line will be treated as a single sentence.
       System.err.println("Reading in text from stdin.");
       System.err.println("Please enter one sentence per line.");
       System.err.println("Processing will end when EOF is reached.");
-      BufferedReader reader = IOUtils.readerFromStdin("utf-8");
-
-      for (String line; (line = reader.readLine()) != null; ) {
+      BufferedReader reader = new BufferedReader(IOUtils.encodedInputStreamReader(System.in, "utf-8"));
+      while (true) {
+        String line = reader.readLine();
+        if (line == null) {
+          break;
+        }
         line = line.trim();
         if (line.length() > 0) {
           Annotation annotation = tokenizer.process(line);
@@ -393,5 +394,4 @@ public class SentimentPipeline {
 
     }
   }
-
 }

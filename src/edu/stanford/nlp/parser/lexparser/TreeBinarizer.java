@@ -13,7 +13,6 @@ import java.io.Reader;
  * Produces LSTrees with CWT labels.  The input trees have to have CWT labels!
  * Although the binarizer always respects heads, you can get left or right
  * binarization by defining an appropriate HeadFinder.
- * TODO: why not use CoreLabel if the input Tree used CoreLabel?
  *
  * @author Dan Klein
  * @author Teg Grenager
@@ -283,7 +282,7 @@ public class TreeBinarizer implements TreeTransformer {
   }
 
   /**
-   * For a dotted rule VP^S -&gt; RB VP NP PP . where VP is the head
+   * For a dotted rule VP^S -> RB VP NP PP . where VP is the head
    * makes label of the form: @VP^S| [ RB [VP] ... PP ]
    * where the constituent after the @ is the passive that we are building
    * and  the constituent in brackets is the head
@@ -329,8 +328,8 @@ public class TreeBinarizer implements TreeTransformer {
   }
 
   /**
-   * for a dotted rule VP^S -&gt; RB VP NP PP . where VP is the head
-   * makes label of the form: @VP^S| VP_ ... PP&gt; RB[
+   * for a dotted rule VP^S -> RB VP NP PP . where VP is the head
+   * makes label of the form: @VP^S| VP_ ... PP> RB[
    */
   private Label makeSyntheticLabel2(Tree t, int left, int right, int headLoc, int markovOrder) {
     String topCat = t.label().value();

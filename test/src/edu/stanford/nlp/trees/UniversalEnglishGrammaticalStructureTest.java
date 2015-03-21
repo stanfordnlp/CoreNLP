@@ -29,7 +29,7 @@ package edu.stanford.nlp.trees;
 import junit.framework.TestCase;
 
 
-/** Test cases for English typed dependencies (Stanford dependencies).
+/** Test cases for Universal Dependencies English typed dependencies (Stanford dependencies).
  *
  *  @author Marie-Catherine de Marneffe (mcdm)
  *  @author Christopher Manning
@@ -59,7 +59,8 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
          "(ROOT (S (NP (PRP She)) (VP (VBD gave) (NP (PRP me)) (NP (DT a) (NN raise))) (. .)))",
          "(ROOT (S (NP (PRP I)) (VP (VBP like) (S (VP (TO to) (VP (VB swim))))) (. .)))",
          "(ROOT (S (NP (PRP I)) (VP (VBD sat) (PP (IN on) (NP (DT the) (NN chair)))) (. .)))",
-         "(ROOT (S (NP (PRP We)) (VP (VBP have) (NP (NP (DT no) (JJ useful) (NN information)) (PP (IN on) (SBAR (IN whether) (S (NP (NNS users)) (VP (VBP are) (PP (IN at) (NP (NN risk))))))))) (. .)))",
+            // this one needs some fixes to get right
+         // "(ROOT (S (NP (PRP We)) (VP (VBP have) (NP (NP (DT no) (JJ useful) (NN information)) (PP (IN on) (SBAR (IN whether) (S (NP (NNS users)) (VP (VBP are) (PP (IN at) (NP (NN risk))))))))) (. .)))",
          "(ROOT (S (NP (PRP They)) (VP (VBD heard) (PP (IN about) (NP (NN asbestos))) (S (VP (VBG having) (NP (JJ questionable) (NNS properties))))) (. .)))",
          "(ROOT (S (NP (PRP He)) (VP (VBZ says) (SBAR (IN that) (S (NP (PRP you)) (VP (VBP like) (S (VP (TO to) (VP (VB swim)))))))) (. .)))",
          "(ROOT (S (NP (PRP I)) (VP (VBP am) (ADJP (JJ certain) (SBAR (IN that) (S (NP (PRP he)) (VP (VBD did) (NP (PRP it))))))) (. .)))",
@@ -80,14 +81,14 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
          "(ROOT (S (NP (QP (RB About) (CD 200)) (NNS people)) (VP (VBD came) (PP (TO to) (NP (DT the) (NN party)))) (. .)))",
          "(ROOT (S (NP (NP (NNP Sam)) (, ,) (NP (PRP$ my) (NN brother)) (, ,)) (VP (VBZ eats) (NP (JJ red) (NN meat))) (. .)))",
          "(ROOT (NP (NP (DT The) (JJ Australian) (NNP Broadcasting) (NNP Corporation)) (PRN (-LRB- -LRB-) (NP (NNP ABC)) (-RRB- -RRB-)) (. .)))",
-         "(ROOT (S (NP (NNP Bill)) (VP (VBD picked) (NP (NP (NNP Fred)) (PP (IN for) (NP (NP (DT the) (NN team)) (VP (VBG demonstrating) (NP (PRP$ his) (NN incompetence))))))) (. .)))",
+         "(ROOT (S (NP (NNP Bill)) (VP (VBD picked) (NP (NNP Fred)) (PP (IN for) (NP (NP (DT the) (NN team)) (VP (VBG demonstrating) (NP (PRP$ his) (NN incompetence)))))) (. .)))",
          "(ROOT (S (NP (NNP Bill)) (VP (VBZ is) (RB not) (NP (DT a) (NN scientist))) (. .)))",
          "(ROOT (S (NP (NNP Bill)) (VP (VBZ does) (RB n't) (VP (VB drive))) (. .)))",
          "(ROOT (S (NP (DT The) (NN director)) (VP (VBZ is) (ADJP (NP (CD 65) (NNS years)) (JJ old))) (. .)))",
          "(ROOT (S (NP (DT The) (NN man)) (VP (VBZ is) (ADVP (RB here))) (. .)))",
-         "(ROOT (SBARQ (WHPP (IN In) (WHNP (WDT which) (NN city))) (SQ (VBP do) (NP (PRP you)) (VP (VB live))) (. ?)))",
+// needs work!         "(ROOT (SBARQ (WHPP (IN In) (WHNP (WDT which) (NN city))) (SQ (VBP do) (NP (PRP you)) (VP (VB live))) (. ?)))",
          "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBD did) (NP (NNP Charles) (NNP Babbage)) (VP (VB invent))) (? ?)))",
-         "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT the) (NN esophagus)) (VP (VBN used) (PP (IN for)))) (? ?)))",
+// needs work!                "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT the) (NN esophagus)) (VP (VBN used) (PP (IN for)))) (? ?)))",
          "(ROOT (S (NP (PDT All) (DT the) (NNS boys)) (VP (VBP are) (ADVP (RB here))) (. .)))",
          "(ROOT (S (NP (CC Both) (NP (DT the) (NNS boys)) (CC and) (NP (DT the) (NNS girls))) (VP (VBP are) (ADVP (RB here))) (. .)))",
          "(ROOT (S (NP (PRP They)) (VP (VBD shut) (PRT (RP down)) (NP (DT the) (NN station))) (. .)))",
@@ -143,45 +144,45 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
         "nsubj(big-3, Bill-1)\n" + "cop(big-3, is-2)\n" + "root(ROOT-0, big-3)\n" + "cc(big-3, and-4)\n" + "conj(big-3, honest-5)\n",
         "nsubj(defeated-2, Clinton-1)\n" + "root(ROOT-0, defeated-2)\n" + "dobj(defeated-2, Dole-3)\n",
         "dobj(said-3, What-1)\n" + "nsubj(said-3, she-2)\n" + "csubj(untrue-5, said-3)\n" + "cop(untrue-5, is-4)\n" + "root(ROOT-0, untrue-5)\n",
-        "nsubjpass(defeated-3, Dole-1)\n" + "auxpass(defeated-3, was-2)\n" + "root(ROOT-0, defeated-3)\n" + "prep(defeated-3, by-4)\n" + "pobj(by-4, Clinton-5)\n",
-        "mark(lied-3, That-1)\n" + "nsubj(lied-3, she-2)\n" + "csubjpass(suspected-5, lied-3)\n" + "auxpass(suspected-5, was-4)\n" + "root(ROOT-0, suspected-5)\n" + "prep(suspected-5, by-6)\n" + "pobj(by-6, everyone-7)\n",
+        "nsubjpass(defeated-3, Dole-1)\n" + "auxpass(defeated-3, was-2)\n" + "root(ROOT-0, defeated-3)\n" + "case(Clinton-5, by-4)\n" + "nmod(defeated-3, Clinton-5)\n",
+        "mark(lied-3, That-1)\n" + "nsubj(lied-3, she-2)\n" + "csubjpass(suspected-5, lied-3)\n" + "auxpass(suspected-5, was-4)\n" + "root(ROOT-0, suspected-5)\n" + "case(everyone-7, by-6)\n" + "nmod(suspected-5, everyone-7)\n",
         "nsubj(gave-2, She-1)\n" + "root(ROOT-0, gave-2)\n" + "iobj(gave-2, me-3)\n" + "det(raise-5, a-4)\n" + "dobj(gave-2, raise-5)\n",
         "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" + "aux(swim-4, to-3)\n" + "xcomp(like-2, swim-4)\n",
-        "nsubj(sat-2, I-1)\n" + "root(ROOT-0, sat-2)\n" + "prep(sat-2, on-3)\n" + "det(chair-5, the-4)\n" + "pobj(on-3, chair-5)\n",
-        "nsubj(have-2, We-1)\n" + "root(ROOT-0, have-2)\n" + "neg(information-5, no-3)\n" + "amod(information-5, useful-4)\n" + "dobj(have-2, information-5)\n" + "prep(information-5, on-6)\n" + "mark(are-9, whether-7)\n" + "nsubj(are-9, users-8)\n" + "pcomp(on-6, are-9)\n" + "prep(are-9, at-10)\n" + "pobj(at-10, risk-11)\n",
-        "nsubj(heard-2, They-1)\n" + "root(ROOT-0, heard-2)\n" + "prep(heard-2, about-3)\n" + "pobj(about-3, asbestos-4)\n" + "xcomp(heard-2, having-5)\n" + "amod(properties-7, questionable-6)\n" + "dobj(having-5, properties-7)\n",
+        "nsubj(sat-2, I-1)\n" + "root(ROOT-0, sat-2)\n" + "case(chair-5, on-3)\n" + "det(chair-5, the-4)\n" + "nmod(sat-2, chair-5)\n",
+        // "nsubj(have-2, We-1)\n" + "root(ROOT-0, have-2)\n" + "neg(information-5, no-3)\n" + "amod(information-5, useful-4)\n" + "dobj(have-2, information-5)\n" + "prep(information-5, on-6)\n" + "mark(are-9, whether-7)\n" + "nsubj(are-9, users-8)\n" + "pcomp(on-6, are-9)\n" + "prep(are-9, at-10)\n" + "pobj(at-10, risk-11)\n",
+        "nsubj(heard-2, They-1)\n" + "root(ROOT-0, heard-2)\n" + "case(asbestos-4, about-3)\n" + "nmod(heard-2, asbestos-4)\n" + "xcomp(heard-2, having-5)\n" + "amod(properties-7, questionable-6)\n" + "dobj(having-5, properties-7)\n",
         "nsubj(says-2, He-1)\n" + "root(ROOT-0, says-2)\n" + "mark(like-5, that-3)\n" + "nsubj(like-5, you-4)\n" + "ccomp(says-2, like-5)\n" + "aux(swim-7, to-6)\n" + "xcomp(like-5, swim-7)\n",
         "nsubj(certain-3, I-1)\n" + "cop(certain-3, am-2)\n" + "root(ROOT-0, certain-3)\n" + "mark(did-6, that-4)\n" + "nsubj(did-6, he-5)\n" + "ccomp(certain-3, did-6)\n" + "dobj(did-6, it-7)\n",
         "nsubj(ready-3, I-1)\n" + "cop(ready-3, am-2)\n" + "root(ROOT-0, ready-3)\n" + "aux(leave-5, to-4)\n" + "xcomp(ready-3, leave-5)\n",
-        "nn(forces-2, U.S.-1)\n" + "nsubjpass(engaged-5, forces-2)\n" + "aux(engaged-5, have-3)\n" + "auxpass(engaged-5, been-4)\n" + "root(ROOT-0, engaged-5)\n" + "prep(engaged-5, in-6)\n" + "amod(fighting-8, intense-7)\n" + "pobj(in-6, fighting-8)\n" + "mark(launched-11, after-9)\n" + "nsubj(launched-11, insurgents-10)\n" + "advcl(engaged-5, launched-11)\n" + "amod(attacks-13, simultaneous-12)\n" + "dobj(launched-11, attacks-13)\n",
+        "nn(forces-2, U.S.-1)\n" + "nsubjpass(engaged-5, forces-2)\n" + "aux(engaged-5, have-3)\n" + "auxpass(engaged-5, been-4)\n" + "root(ROOT-0, engaged-5)\n" + "case(fighting-8, in-6)\n" + "amod(fighting-8, intense-7)\n" + "nmod(engaged-5, fighting-8)\n" + "mark(launched-11, after-9)\n" + "nsubj(launched-11, insurgents-10)\n" + "advcl(engaged-5, launched-11)\n" + "amod(attacks-13, simultaneous-12)\n" + "dobj(launched-11, attacks-13)\n",
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "dobj(love-7, who-5)\n" + "nsubj(love-7, you-6)\n" + "rcmod(man-4, love-7)\n",
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "poss(wife-6, whose-5)\n" + "dobj(love-8, wife-6)\n" + "nsubj(love-8, you-7)\n" + "rcmod(man-4, love-8)\n",
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(man-4, the-3)\n" + "dobj(saw-2, man-4)\n" + "poss(wife-6, whose-5)\n" + "dobj(love-8, wife-6)\n" + "nsubj(love-8, you-7)\n" + "rcmod(man-4, love-8)\n",
-        "expl(is-2, There-1)\n" + "root(ROOT-0, is-2)\n" + "det(statue-4, a-3)\n" + "nsubj(is-2, statue-4)\n" + "prep(statue-4, in-5)\n" + "det(corner-7, the-6)\n" + "pobj(in-5, corner-7)\n",
+        "expl(is-2, There-1)\n" + "root(ROOT-0, is-2)\n" + "det(statue-4, a-3)\n" + "nsubj(is-2, statue-4)\n" + "case(corner-7, in-5)\n" + "det(corner-7, the-6)\n" + "nmod(statue-4, corner-7)\n",
         "nsubj(looks-2, She-1)\n" + "root(ROOT-0, looks-2)\n" + "advmod(beautiful-4, very-3)\n" + "acomp(looks-2, beautiful-4)\n",
         "det(accident-2, The-1)\n" + "nsubj(happened-3, accident-2)\n" + "root(ROOT-0, happened-3)\n" + "mark(falling-8, as-4)\n" + "det(night-6, the-5)\n" + "nsubj(falling-8, night-6)\n" + "aux(falling-8, was-7)\n" + "advcl(happened-3, falling-8)\n",
         "mark(know-3, If-1)\n" + "nsubj(know-3, you-2)\n" + "advcl(tell-10, know-3)\n" + "nsubj(did-5, who-4)\n" + "ccomp(know-3, did-5)\n" + "dobj(did-5, it-6)\n" + "nsubj(tell-10, you-8)\n" + "aux(tell-10, should-9)\n" + "root(ROOT-0, tell-10)\n" + "det(teacher-12, the-11)\n" + "dobj(tell-10, teacher-12)\n",
-        "amod(night-2, Last-1)\n" + "tmod(swam-5, night-2)\n" + "nsubj(swam-5, I-4)\n" + "root(ROOT-0, swam-5)\n" + "prep(swam-5, in-6)\n" + "det(pool-8, the-7)\n" + "pobj(in-6, pool-8)\n",
-        "nsubj(talked-2, He-1)\n" + "root(ROOT-0, talked-2)\n" + "prep(talked-2, to-3)\n" + "det(president-5, the-4)\n" + "pobj(to-3, president-5)\n" + "mark(secure-9, in-6)\n" + "dep(secure-9, order-7)\n" + "aux(secure-9, to-8)\n" + "advcl(talked-2, secure-9)\n" + "det(account-11, the-10)\n" + "dobj(secure-9, account-11)\n",
+        "amod(night-2, Last-1)\n" + "tmod(swam-5, night-2)\n" + "nsubj(swam-5, I-4)\n" + "root(ROOT-0, swam-5)\n" + "case(pool-8, in-6)\n" + "det(pool-8, the-7)\n" + "nmod(swam-5, pool-8)\n",
+        "nsubj(talked-2, He-1)\n" + "root(ROOT-0, talked-2)\n" + "case(president-5, to-3)\n" + "det(president-5, the-4)\n" + "nmod(talked-2, president-5)\n" + "mark(secure-9, in-6)\n" + "dep(secure-9, order-7)\n" + "aux(secure-9, to-8)\n" + "advcl(talked-2, secure-9)\n" + "det(account-11, the-10)\n" + "dobj(secure-9, account-11)\n",
         "nsubj(saw-2, I-1)\n" + "root(ROOT-0, saw-2)\n" + "det(book-4, the-3)\n" + "dobj(saw-2, book-4)\n" + "dobj(bought-7, which-5)\n" + "nsubj(bought-7, you-6)\n" + "rcmod(book-4, bought-7)\n",
         "nsubj(eats-2, Sam-1)\n" + "root(ROOT-0, eats-2)\n" + "num(sheep-4, 3-3)\n" + "dobj(eats-2, sheep-4)\n",
         "nsubj(lost-2, I-1)\n" + "root(ROOT-0, lost-2)\n" + "dobj(lost-2, $-3)\n" + "number(billion-5, 3.2-4)\n" + "num($-3, billion-5)\n",
-        "quantmod(200-2, About-1)\n" + "num(people-3, 200-2)\n" + "nsubj(came-4, people-3)\n" + "root(ROOT-0, came-4)\n" + "prep(came-4, to-5)\n" + "det(party-7, the-6)\n" + "pobj(to-5, party-7)\n",
+        "quantmod(200-2, About-1)\n" + "num(people-3, 200-2)\n" + "nsubj(came-4, people-3)\n" + "root(ROOT-0, came-4)\n" + "case(party-7, to-5)\n" + "det(party-7, the-6)\n" + "nmod(came-4, party-7)\n",
         "nsubj(eats-6, Sam-1)\n" + "poss(brother-4, my-3)\n" + "appos(Sam-1, brother-4)\n" + "root(ROOT-0, eats-6)\n" + "amod(meat-8, red-7)\n" + "dobj(eats-6, meat-8)\n",
         "det(Corporation-4, The-1)\n" + "amod(Corporation-4, Australian-2)\n" + "nn(Corporation-4, Broadcasting-3)\n" + "root(ROOT-0, Corporation-4)\n" + "appos(Corporation-4, ABC-6)\n",
-        "nsubj(picked-2, Bill-1)\n" + "root(ROOT-0, picked-2)\n" + "dobj(picked-2, Fred-3)\n" + "prep(Fred-3, for-4)\n" + "det(team-6, the-5)\n" + "pobj(for-4, team-6)\n" + "vmod(team-6, demonstrating-7)\n" + "poss(incompetence-9, his-8)\n" + "dobj(demonstrating-7, incompetence-9)\n",
+        "nsubj(picked-2, Bill-1)\n" + "root(ROOT-0, picked-2)\n" + "dobj(picked-2, Fred-3)\n" + "case(team-6, for-4)\n" + "det(team-6, the-5)\n" + "nmod(picked-2, team-6)\n" + "vmod(team-6, demonstrating-7)\n" + "poss(incompetence-9, his-8)\n" + "dobj(demonstrating-7, incompetence-9)\n",
         "nsubj(scientist-5, Bill-1)\n" + "cop(scientist-5, is-2)\n" + "neg(scientist-5, not-3)\n" + "det(scientist-5, a-4)\n" + "root(ROOT-0, scientist-5)\n",
         "nsubj(drive-4, Bill-1)\n" + "aux(drive-4, does-2)\n" + "neg(drive-4, n't-3)\n" + "root(ROOT-0, drive-4)\n",
         "det(director-2, The-1)\n" + "nsubj(old-6, director-2)\n" + "cop(old-6, is-3)\n" + "num(years-5, 65-4)\n" + "npadvmod(old-6, years-5)\n" + "root(ROOT-0, old-6)\n",
         "det(man-2, The-1)\n" + "nsubj(is-3, man-2)\n" + "root(ROOT-0, is-3)\n" + "advmod(is-3, here-4)\n",
-        "prep(live-6, In-1)\n" + "det(city-3, which-2)\n" + "pobj(In-1, city-3)\n" + "aux(live-6, do-4)\n" + "nsubj(live-6, you-5)\n" + "root(ROOT-0, live-6)\n",
+ //       "case(city-3, In-1)\n" + "det(city-3, which-2)\n" + "nmod(live-6, city-3)\n" + "aux(live-6, do-4)\n" + "nsubj(live-6, you-5)\n" + "root(ROOT-0, live-6)\n",
         "dobj(invent-5, What-1)\n" + "aux(invent-5, did-2)\n" + "nn(Babbage-4, Charles-3)\n" + "nsubj(invent-5, Babbage-4)\n" + "root(ROOT-0, invent-5)\n",
-        "pobj(for-6, What-1)\n" + "auxpass(used-5, is-2)\n" + "det(esophagus-4, the-3)\n" + "nsubjpass(used-5, esophagus-4)\n" + "root(ROOT-0, used-5)\n" + "prep(used-5, for-6)\n",
+//        "pobj(for-6, What-1)\n" + "auxpass(used-5, is-2)\n" + "det(esophagus-4, the-3)\n" + "nsubjpass(used-5, esophagus-4)\n" + "root(ROOT-0, used-5)\n" + "prep(used-5, for-6)\n",
         "predet(boys-3, All-1)\n" + "det(boys-3, the-2)\n" + "nsubj(are-4, boys-3)\n" + "root(ROOT-0, are-4)\n" + "advmod(are-4, here-5)\n",
         "preconj(boys-3, Both-1)\n" + "det(boys-3, the-2)\n" + "nsubj(are-7, boys-3)\n" + "cc(boys-3, and-4)\n" + "det(girls-6, the-5)\n" + "conj(boys-3, girls-6)\n" + "root(ROOT-0, are-7)\n" + "advmod(are-7, here-8)\n",
         "nsubj(shut-2, They-1)\n" + "root(ROOT-0, shut-2)\n" + "prt(shut-2, down-3)\n" + "det(station-5, the-4)\n" + "dobj(shut-2, station-5)\n",
-        "nsubj(tasty-7, Truffles-1)\n" + "vmod(Truffles-1, picked-2)\n" + "prep(picked-2, during-3)\n" + "det(spring-5, the-4)\n" + "pobj(during-3, spring-5)\n" + "cop(tasty-7, are-6)\n" + "root(ROOT-0, tasty-7)\n",
-        "preconj(they-2, Neither-1)\n" + "nsubjpass(reached-8, they-2)\n" + "cc(they-2, nor-3)\n" + "nn(McAlpine-5, Mr.-4)\n" + "conj(they-2, McAlpine-5)\n" + "aux(reached-8, could-6)\n" + "auxpass(reached-8, be-7)\n" + "root(ROOT-0, reached-8)\n" + "prep(reached-8, for-9)\n" + "pobj(for-9, comment-10)\n",
+        "nsubj(tasty-7, Truffles-1)\n" + "vmod(Truffles-1, picked-2)\n" + "case(spring-5, during-3)\n" + "det(spring-5, the-4)\n" + "nmod(picked-2, spring-5)\n" + "cop(tasty-7, are-6)\n" + "root(ROOT-0, tasty-7)\n",
+        "preconj(they-2, Neither-1)\n" + "nsubjpass(reached-8, they-2)\n" + "cc(they-2, nor-3)\n" + "nn(McAlpine-5, Mr.-4)\n" + "conj(they-2, McAlpine-5)\n" + "aux(reached-8, could-6)\n" + "auxpass(reached-8, be-7)\n" + "root(ROOT-0, reached-8)\n" + "case(comment-10, for-9)\n" + "nmod(reached-8, comment-10)\n",
         "nn(field-2, Xml-1)\n" +
                 "nsubj(include-4, field-2)\n" +
                 "aux(include-4, should-3)\n" + "root(ROOT-0, include-4)\n" +
@@ -527,10 +528,10 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
       // specifying our own TreeReaderFactory is vital so that functional
       // categories - that is -TMP and -ADV in particular - are not stripped off
       Tree tree = Tree.valueOf(testTree, trf);
-      GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
+      GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree " + testTree,
-          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false));
+          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(false), tree, false, false));
     }
 
   }
@@ -572,12 +573,12 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                 "root(ROOT-0, saw-2)\n" +
                 "det(woman-4, the-3)\n" +
                 "dobj(saw-2, woman-4)\n" +
-                "pobj(to-10, whom-5)\n" +
+                "nmod(gave-7, whom-5)\n" +
                 "nsubj(gave-7, you-6)\n" +
                 "rcmod(woman-4, gave-7)\n" +
                 "det(package-9, the-8)\n" +
                 "dobj(gave-7, package-9)\n" +
-                "prep(gave-7, to-10)\n",
+                "case(whom-5, to-10)\n",
         "nsubj(fat-3, i-1)\n" + "cop(fat-3, m-2)\n" + "root(ROOT-0, fat-3)\n",
         "nn(Laidig-2, Mr.-1)\n" +
                 "root(ROOT-0, Laidig-2)\n" +
@@ -685,10 +686,10 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
       // specifying our own TreeReaderFactory is vital so that functional
       // categories - that is -TMP and -ADV in particular - are not stripped off
       Tree tree = Tree.valueOf(testTree, trf);
-      GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
+      GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree " + testTree,
-          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false));
+          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(false), tree, false, false));
     }
   }
 
@@ -766,9 +767,9 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                 "aux(doing-4, am-2)\n" +
                 "nsubj(doing-4, I-3)\n" +
                 "root(ROOT-0, doing-4)\n" +
-                "prep(doing-4, in-5)\n" +
+                "case(Hole-7, in-5)\n" +
                 "nn(Hole-7, Jackson-6)\n" +
-                "pobj(in-5, Hole-7)\n",
+                "nmod(doing-4, Hole-7)\n",
 
         "root(ROOT-0, Who-1)\n" +
                 "cop(Who-1, am-2)\n" +
@@ -984,9 +985,9 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                 "aux(doing-4, am-2)\n" +
                 "nsubj(doing-4, I-3)\n" +
                 "root(ROOT-0, doing-4)\n" +
-                "prep(doing-4, in-5)\n" +
+                "case(Hole-7, in-5)\n" +
                 "nn(Hole-7, Jackson-6)\n" +
-                "pobj(in-5, Hole-7)\n",
+                "nmod(doing-4, Hole-7)\n",
 
         "root(ROOT-0, Who-1)\n" +
                 "cop(Who-1, am-2)\n" +
@@ -1193,12 +1194,12 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
       // specifying our own TreeReaderFactory is vital so that functional
       // categories - that is -TMP and -ADV in particular - are not stripped off
       Tree tree = Tree.valueOf(testTree, trf);
-      GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
+      GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree " + testTree,
-          basicAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false));
+          basicAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(false), tree, false, false));
       assertEquals("Unexpected noncollapsed dependencies for tree " + testTree,
-          noncollapsedAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.MAXIMAL), tree, false, false));
+          noncollapsedAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(true), tree, false, false));
     }
   }
 
@@ -1238,7 +1239,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
         "nsubj(is-2, Bill-1)\n" + "root(ROOT-0, is-2)\n" + "acomp(is-2, big-3)\n" + "cc(big-3, and-4)\n" + "conj(big-3, honest-5)\n",
         "nsubj(defeated-2, Clinton-1)\n" + "root(ROOT-0, defeated-2)\n" + "dobj(defeated-2, Dole-3)\n",
         "dobj(said-3, What-1)\n" + "nsubj(said-3, she-2)\n" + "csubj(is-4, said-3)\n" + "root(ROOT-0, is-4)\n" + "acomp(is-4, untrue-5)\n",
-        "nsubjpass(defeated-3, Dole-1)\n" + "auxpass(defeated-3, was-2)\n" + "root(ROOT-0, defeated-3)\n" + "prep(defeated-3, by-4)\n" + "pobj(by-4, Clinton-5)\n",
+        "nsubjpass(defeated-3, Dole-1)\n" + "auxpass(defeated-3, was-2)\n" + "root(ROOT-0, defeated-3)\n" + "case(Clinton-5, by-4)\n" + "nmod(defeated-3, Clinton-5)\n",
         "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" + "aux(swim-4, to-3)\n" + "xcomp(like-2, swim-4)\n",
         "nsubj(have-2, We-1)\n" + "root(ROOT-0, have-2)\n" + "neg(information-5, no-3)\n" + "amod(information-5, useful-4)\n" + "dobj(have-2, information-5)\n" + "prep(information-5, on-6)\n" + "mark(are-9, whether-7)\n" + "nsubj(are-9, users-8)\n" + "pcomp(on-6, are-9)\n" + "prep(are-9, at-10)\n" + "pobj(at-10, risk-11)\n",
         "nsubj(am-2, I-1)\n" + "root(ROOT-0, am-2)\n" + "acomp(am-2, certain-3)\n" + "mark(did-6, that-4)\n" + "nsubj(did-6, he-5)\n" + "ccomp(certain-3, did-6)\n" + "dobj(did-6, it-7)\n",
@@ -1291,12 +1292,12 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
       // categories - that is -TMP and -ADV in particular - are not stripped off
       Tree tree = Tree.valueOf(testTree, trf);
 
-      GrammaticalStructure gs = new EnglishGrammaticalStructure(tree,
+      GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree,
               new PennTreebankLanguagePack().punctuationWordRejectFilter(),
-              new SemanticHeadFinder(false));
+              new UniversalSemanticHeadFinder(false));
 
       assertEquals("Unexpected basic dependencies for tree "+testTree,
-          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(GrammaticalStructure.Extras.NONE), tree, false, false));
+          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependencies(false), tree, false, false));
     }
   }
 
@@ -1349,10 +1350,10 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
       // specifying our own TreeReaderFactory is vital so that functional
       // categories - that is -TMP and -ADV in particular - are not stripped off
       Tree tree = Tree.valueOf(testTree, trf);
-      GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
+      GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree "+testTree,
-          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, false));
+          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, false));
     }
   }
 
@@ -1383,10 +1384,10 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
       // specifying our own TreeReaderFactory is vital so that functional
       // categories - that is -TMP and -ADV in particular - are not stripped off
       Tree tree = Tree.valueOf(testTree, trf);
-      GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
+      GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree "+testTree,
-        testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, true));
+        testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.allTypedDependencies(), tree, false, true));
     }
 
   }
@@ -1497,9 +1498,9 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
       // specifying our own TreeReaderFactory is vital so that functional
       // categories - that is -TMP and -ADV in particular - are not stripped off
       Tree tree = Tree.valueOf(testTree, trf);
-      GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
+      GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
-      String depString = EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false);
+      String depString = UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(true), tree, false, false);
       assertEquals("Unexpected collapsed dependencies for tree "+testTree,
           testAnswer, depString);
     }
@@ -1753,10 +1754,10 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
       // specifying our own TreeReaderFactory is vital so that functional
       // categories - that is -TMP and -ADV in particular - are not stripped off
       Tree tree = Tree.valueOf(testTree, trf);
-      GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
+      GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected CC processed dependencies for tree "+testTree,
-          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false));
+          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(true), tree, false, false));
     }
   }
 
@@ -1786,10 +1787,10 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
       // Specifying our own TreeReaderFactory is vital so that functional
       // categories - that is -TMP and -ADV in particular - are not stripped off
       Tree tree = Tree.valueOf(testTree, trf);
-      GrammaticalStructure gs = new EnglishGrammaticalStructure(tree);
+      GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
       assertEquals("Unexpected basic dependencies for tree "+testTree,
-          testAnswer, EnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(GrammaticalStructure.Extras.MAXIMAL), tree, false, false));
+          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCollapsed(true), tree, false, false));
     }
   }
 

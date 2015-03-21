@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.stanford.nlp.patterns.ConstantsAndVariables;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.logging.Redwood;
 
@@ -36,7 +35,7 @@ public class PatternToken implements Serializable {
     this.useTag = useTag;
     this.numWordsCompound = numWordsCompound;
     if (!getCompoundPhrases)
-      this.numWordsCompound = 1;
+      numWordsCompound = 1;
     this.nerTag = nerTag;
     this.useNER = useNER;
     this.useTargetParserParentRestriction = useTargetParserParentRestriction;
@@ -94,12 +93,12 @@ public class PatternToken implements Serializable {
     }
 
     if (useTargetParserParentRestriction) {
-      restrictions.add("{grandparentparsetag:\"" + grandparentParseTag + "\"}");
+      restrictions.add("{grandparentparsetag:" + grandparentParseTag + "}");
     }
 
     if (notAllowedClasses != null && notAllowedClasses.size() > 0) {
       for (String na : notAllowedClasses)
-        restrictions.add("!{" + na + ":" + na +"}");
+        restrictions.add("!{" + na + "}");
     }
     str += "[" + StringUtils.join(restrictions, " & ") + "]{1,"
         + numWordsCompound + "}";
@@ -136,10 +135,5 @@ public class PatternToken implements Serializable {
   @Override
   public int hashCode() {
     return getTokenStr(null).hashCode();
-  }
-
-  public PatternToken copy() {
-    PatternToken t = new PatternToken(tag, useTag, numWordsCompound > 1, numWordsCompound, nerTag, useNER, useTargetParserParentRestriction, grandparentParseTag);
-    return t;
   }
 }

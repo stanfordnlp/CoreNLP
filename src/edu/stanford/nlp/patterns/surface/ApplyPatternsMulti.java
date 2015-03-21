@@ -9,7 +9,6 @@ import edu.stanford.nlp.ling.tokensregex.MultiPatternMatcher;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatchResult;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
-import edu.stanford.nlp.patterns.*;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.CoreMap;
@@ -23,12 +22,12 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
   List<String> sentids;
   boolean removeStopWordsFromSelectedPhrases;
   boolean removePhrasesWithStopWords;
-  ConstantsAndVariables constVars;
+  ConstantsAndVariables<E> constVars;
   //Set<String> ignoreWords;
   MultiPatternMatcher<CoreMap> multiPatternMatcher;
-  Map<String, DataInstance> sents = null;
+  Map<String, List<CoreLabel>> sents = null;
 
-  public ApplyPatternsMulti(Map<String, DataInstance> sents, List<String> sentids, Map<TokenSequencePattern, E> patterns, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
+  public ApplyPatternsMulti(Map<String, List<CoreLabel>> sents, List<String> sentids, Map<TokenSequencePattern, E> patterns, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
     this.sents = sents;
     this.patterns = patterns;
     multiPatternMatcher = TokenSequencePattern.getMultiPatternMatcher(patterns.keySet());
@@ -41,13 +40,13 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
 
   @Override
   public Pair<TwoDimensionalCounter<Pair<String, String>, E>, CollectionValuedMap<E, Triple<String, Integer, Integer>>> call() throws Exception {
-
+    
     //CollectionValuedMap<String, Integer> tokensMatchedPattern = new CollectionValuedMap<String, Integer>();
     CollectionValuedMap<E, Triple<String, Integer, Integer>> matchedTokensByPat = new CollectionValuedMap<E, Triple<String, Integer, Integer>>();
 
     TwoDimensionalCounter<Pair<String, String>, E> allFreq = new TwoDimensionalCounter<Pair<String, String>, E>();
     for (String sentid : sentids) {
-      List<CoreLabel> sent = sents.get(sentid).getTokens();
+      List<CoreLabel> sent = sents.get(sentid);
 
       //FIND_ALL is faster than FIND_NONOVERLAP
       Iterable<SequenceMatchResult<CoreMap>> matched = multiPatternMatcher.find(sent, SequenceMatcher.FindType.FIND_ALL);
@@ -81,7 +80,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
         //to make sure we discard phrases with stopwords in between, but include the ones in which stop words were removed at the ends if removeStopWordsFromSelectedPhrases is true
         boolean[] addedindices = new boolean[e-s];
         Arrays.fill(addedindices, false);
-
+        
         for (int i = s; i < e; i++) {
           CoreLabel l = sent.get(i);
           l.set(PatternsAnnotations.MatchedPattern.class, true);
@@ -103,7 +102,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
             doNotUse = true;
           } else {
             if (!containsStop || !removeStopWordsFromSelectedPhrases) {
-
+              
               if (label == null || l.get(constVars.getAnswerClass().get(label)) == null || !l.get(constVars.getAnswerClass().get(label)).equals(label.toString())) {
                 useWordNotLabeled = true;
               }
@@ -113,14 +112,14 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
             }
           }
         }
-
+        
         for(int i =0; i < addedindices.length; i++){
           if(i > 0 && i < addedindices.length -1 && addedindices[i-1] == true && addedindices[i] == false && addedindices[i+1] == true){
             doNotUse = true;
             break;
           }
         }
-
+        
         if (!doNotUse && useWordNotLabeled) {
           phrase = phrase.trim();
           phraseLemma = phraseLemma.trim();
@@ -128,7 +127,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
           allFreq.incrementCount(new Pair<String, String>(phrase, phraseLemma), matchedPat, 1.0);
         }
       }
-
+      
 //      for (SurfacePattern pat : patterns.keySet()) {
 //        String patternStr = pat.toString();
 //
@@ -162,7 +161,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
 //              doNotUse = true;
 //            } else {
 //              if (!containsStop || !removeStopWordsFromSelectedPhrases) {
-//
+//                
 //                if (label == null || l.get(constVars.answerClass.get(label)) == null || !l.get(constVars.answerClass.get(label)).equals(label.toString())) {
 //                  useWordNotLabeled = true;
 //                }

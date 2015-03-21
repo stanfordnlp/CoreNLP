@@ -1,7 +1,14 @@
 package edu.stanford.nlp.util;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,8 +20,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -27,74 +32,10 @@ import edu.stanford.nlp.io.IOUtils;
  * parsing them and by using the methods of a desperate Perl hacker.
  *
  * @author Teg Grenager
- * @author Grace Muzny
  */
 public class XMLUtils {
 
   private XMLUtils() {} // only static methods
-
-  /**
-   * Returns the text content of all nodes in the given file with the given tag.
-   *
-   * @return List of String text contents of tags.
-   */
-  public static List<String> getTextContentFromTagsFromFile(File f, String tag) {
-    List<String> sents = new ArrayList<>();
-    try {
-      sents = getTextContentFromTagsFromFileSAXException(f, tag);
-    } catch (SAXException e) {
-      System.err.println(e);
-    }
-    return sents;
-  }
-
-  /**
-   * Returns the text content of all nodes in the given file with the given tag.
-   * If the text contents contains embedded tags, strips the embedded tags out
-   * of the returned text. e.g. <s>This is a <s>sentence</s> with embedded tags
-   * </s> would return the list containing ["This is a sentence with embedded
-   * tags", "sentence"].
-   *
-   * @throws SAXException if tag doesn't exist in the file.
-   * @return List of String text contents of tags.
-   */
-  public static List<String> getTextContentFromTagsFromFileSAXException(
-      File f, String tag) throws SAXException {
-    List<String> sents = new ArrayList<>();
-    try {
-      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-      DocumentBuilder db = dbf.newDocumentBuilder();
-      Document doc = db.parse(f);
-      doc.getDocumentElement().normalize();
-
-      NodeList nodeList=doc.getElementsByTagName(tag);
-      for (int i = 0; i < nodeList.getLength(); i++) {
-        // Get element
-        Element element = (Element)nodeList.item(i);
-        String raw = element.getTextContent();
-        String builtUp = "";
-        boolean inTag = false;
-        for(int j = 0; j < raw.length(); j++) {
-          if (raw.charAt(j) == '<') {
-            inTag = true;
-          }
-          if (!inTag) {
-            builtUp += raw.charAt(j);
-          }
-          if (raw.charAt(j) == '>') {
-            inTag = false;
-          }
-        }
-        sents.add(builtUp);
-      }
-    } catch (IOException e) {
-      System.err.println(e);
-    } catch (ParserConfigurationException e) {
-      System.err.println(e);
-    }
-    return sents;
-  }
-
 
   /**
    * Returns a non-validating XML parser. The parser ignores both DTDs and XSDs.

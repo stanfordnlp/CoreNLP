@@ -2,8 +2,8 @@
 # And using iob2 is better for optimal CoNLL performance.
 # Features labeled "chris2009"
 
-trainFile = /u/nlp/data/ner/column_data/conll.4class.train
-# testFile = /u/nlp/data/ner/column_data/conll.4class.testa
+trainFile = /u/nlp/data/ner/goodClassifiers/data/conll.jenny.train
+testFile = /u/nlp/data/ner/goodClassifiers/data/conll.jenny.testa
 serializeTo = english.conll.4class.nodistsim.crf.ser.gz
 
 wordFunction = edu.stanford.nlp.process.AmericanizeFunction

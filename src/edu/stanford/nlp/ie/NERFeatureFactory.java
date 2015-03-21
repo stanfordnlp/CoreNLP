@@ -41,7 +41,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -661,6 +660,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   /**
    * Gazette Stuff.
    */
+
   private static class GazetteInfo implements Serializable {
     final String feature;
     final int loc;
@@ -739,22 +739,6 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   private Set<String> femaleNames; // = null;
 
   private final Pattern titlePattern = Pattern.compile("(?:Mr|Ms|Mrs|Dr|Miss|Sen|Judge|Sir)\\.?"); // todo: should make static final and add more titles
-  private static final Pattern splitSlashHyphenWordsPattern = Pattern.compile("[-/]");
-
-  private void generateSlashHyphenFeatures(String word, Collection<String> featuresC, String fragSuffix, String wordSuffix) {
-    String[] bits = splitSlashHyphenWordsPattern.split(word);
-    for (String bit : bits) {
-      if (flags.slashHyphenTreatment == SeqClassifierFlags.SlashHyphenEnum.WFRAG) {
-        featuresC.add(bit + fragSuffix);
-      } else if (flags.slashHyphenTreatment == SeqClassifierFlags.SlashHyphenEnum.BOTH) {
-        featuresC.add(bit + fragSuffix);
-        featuresC.add(bit + wordSuffix);
-      } else {
-        // option WORD
-        featuresC.add(bit + wordSuffix);
-      }
-    }
-  }
 
 
   protected Collection<String> featuresC(PaddedList<IN> cInfo, int loc) {
@@ -801,17 +785,6 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
       }
     }
 
-    if (flags.slashHyphenTreatment != SeqClassifierFlags.SlashHyphenEnum.NONE) {
-      if (flags.useWord) {
-        generateSlashHyphenFeatures(cWord, featuresC, "-WFRAG", "-WORD");
-      }
-      if (flags.useNext) {
-        generateSlashHyphenFeatures(nWord, featuresC, "-NWFRAG", "-NW");
-      }
-      if (flags.usePrev) {
-        generateSlashHyphenFeatures(nWord, featuresC, "-PWFRAG", "-PW");
-      }
-    }
 
     if (flags.useInternal && flags.useExternal ) {
 
@@ -2268,7 +2241,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         r.close();
       }
     } catch (IOException e) {
-      throw new RuntimeIOException(e);
+      throw new RuntimeException(e);
     }
   }
 

@@ -4,7 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 import java.util.function.Function;
 import edu.stanford.nlp.util.Pair;
@@ -335,7 +340,7 @@ public class CountersTest extends TestCase {
     setUp();
     Counters.pearsonsCorrelationCoefficient(c1, c2);
   }
-
+  
   public void testToTiedRankCounter(){
     setUp();
     c1.setCount("t",1.0);
@@ -346,8 +351,8 @@ public class CountersTest extends TestCase {
     assertEquals(1.5, rank.getCount("z"));
     assertEquals(7.0, rank.getCount("t"));
   }
-
-  public void testTransformWithValuesAdd() {
+  
+  public void testTransformWithValuesAdd(){
     setUp();
     c1.setCount("P",2.0);
     System.out.println(c1);
@@ -361,7 +366,7 @@ public class CountersTest extends TestCase {
 
   }
 
-  public void testEquals() {
+  public void testEquals(){
     setUp();
     c1.clear();
     c2.clear();
@@ -384,51 +389,6 @@ public class CountersTest extends TestCase {
     c2.setCount("2", 3.0 + 8e-5);
     c2.setCount("s", 4.0 + 8e-5);
     assertFalse(Counters.equals(c1, c2, 1e-5));  // fails totalCount() equality check
+
   }
-
-  public void testJensenShannonDivergence() {
-    // borrow from ArrayMathTest
-    Counter<String> a = new ClassicCounter<>();
-    a.setCount("a", 1.0);
-    a.setCount("b", 1.0);
-    a.setCount("c", 7.0);
-    a.setCount("d", 1.0);
-
-    Counter<String> b = new ClassicCounter<>();
-    b.setCount("b", 1.0);
-    b.setCount("c", 1.0);
-    b.setCount("d", 7.0);
-    b.setCount("e", 1.0);
-    b.setCount("f", 0.0);
-
-    assertEquals(0.46514844544032313, Counters.jensenShannonDivergence(a, b), 1e-5);
-
-    Counter<String> c = new ClassicCounter<>(Arrays.asList("A"));
-    Counter<String> d = new ClassicCounter<>(Arrays.asList("B", "C"));
-    assertEquals(1.0, Counters.jensenShannonDivergence(c, d), 1e-5);
-  }
-
-  public void testFlatten() {
-    Map<String, Counter<String>> h = new HashMap<String, Counter<String>>();
-    Counter<String> a = new ClassicCounter<>();
-    a.setCount("a", 1.0);
-    a.setCount("b", 1.0);
-    a.setCount("c", 7.0);
-    a.setCount("d", 1.0);
-
-    Counter<String> b = new ClassicCounter<>();
-    b.setCount("b", 1.0);
-    b.setCount("c", 1.0);
-    b.setCount("d", 7.0);
-    b.setCount("e", 1.0);
-    b.setCount("f", 1.0);
-
-    h.put("first",a);
-    h.put("second", b);
-    Counter<String> flat = Counters.flatten(h);
-    assertEquals(6, flat.size());
-    assertEquals(2.0, flat.getCount("b"));
-  }
-
-
 }

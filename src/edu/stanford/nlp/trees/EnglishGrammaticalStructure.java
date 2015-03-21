@@ -454,7 +454,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   /**
    * Does some hard coding to deal with relation in CONJP. For now we deal with:
    * but not, if not, instead of, rather than, but rather GO TO negcc <br>
-   * as well as, not to mention, but also, &amp; GO TO and.
+   * as well as, not to mention, but also, & GO TO and.
    *
    * @param conj The head dependency of the conjunction marker
    * @return A GrammaticalRelation made from a normalized form of that
@@ -703,8 +703,8 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
   /**
    * This method will collapse a referent relation such as follows. e.g.:
-   * "The man that I love &hellip; " ref(man, that) dobj(love, that) -&gt;
-   * dobj(love, man)
+   * "The man that I love ... " ref(man, that) dobj(love, that) -> dobj(love,
+   * man)
    */
   private static void collapseReferent(Collection<TypedDependency> list) {
     // find typed deps of form ref(gov, dep)
@@ -1451,12 +1451,12 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * prep|advmod|dep|amod(gov, mwp[0]) <br/>
    * dep(mpw[0],mwp[1]) <br/>
    * pobj|pcomp(mwp[1], compl) or pobj|pcomp(mwp[0], compl) <br/>
-   * -&gt; prep_mwp[0]_mwp[1](gov, compl) <br/>
+   * -> prep_mwp[0]_mwp[1](gov, compl) <br/>
    *
    * prep|advmod|dep|amod(gov, mwp[1]) <br/>
    * dep(mpw[1],mwp[0]) <br/>
    * pobj|pcomp(mwp[1], compl) or pobj|pcomp(mwp[0], compl) <br/>
-   * -&gt; prep_mwp[0]_mwp[1](gov, compl)
+   * -> prep_mwp[0]_mwp[1](gov, compl)
    * <p/>
    *
    * The collapsing has to be done at once in order to know exactly which node
@@ -1490,7 +1490,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
   /**
    * Collapse multiword preposition of the following format:
    * prep|advmod|dep|amod(gov, mwp0) dep(mpw0,mwp1) pobj|pcomp(mwp1, compl) or
-   * pobj|pcomp(mwp0, compl) -&gt; prep_mwp0_mwp1(gov, compl)
+   * pobj|pcomp(mwp0, compl) -> prep_mwp0_mwp1(gov, compl)
    * <p/>
    *
    * @param list List of typedDependencies to work on,
@@ -1606,7 +1606,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
 
   /**
    * Collapse multi-words preposition of the following format: advmod|prt(gov,
-   * mwp[0]) prep(gov,mwp[1]) pobj|pcomp(mwp[1], compl) -&gt;
+   * mwp[0]) prep(gov,mwp[1]) pobj|pcomp(mwp[1], compl) ->
    * prep_mwp[0]_mwp[1](gov, compl)
    * <p/>
    *
@@ -1714,7 +1714,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * X(mwp0,mwp1) <br/>
    * X(mwp1,mwp2) <br/>
    * pobj|pcomp(mwp2, compl) <br/>
-   * -&gt; prep_mwp[0]_mwp[1]_mwp[2](gov, compl)
+   * -> prep_mwp[0]_mwp[1]_mwp[2](gov, compl)
    * <p/>
    *
    * It also takes flat annotation into account: <br/>
@@ -1722,7 +1722,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * X(mwp0,mwp1) <br/>
    * X(mwp0,mwp2) <br/>
    * pobj|pcomp(mwp0, compl) <br/>
-   * -&gt; prep_mwp[0]_mwp[1]_mwp[2](gov, compl)
+   * -> prep_mwp[0]_mwp[1]_mwp[2](gov, compl)
    * <p/>
    *
    *
@@ -1965,7 +1965,7 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * flat annotation. This handles e.g., "because of" (PP (IN because) (IN of)
    * ...), "such as" (PP (JJ such) (IN as) ...)
    * <p/>
-   * prep(gov, mwp[1]) dep(mpw[1], mwp[0]) pobj(mwp[1], compl) -&gt;
+   * prep(gov, mwp[1]) dep(mpw[1], mwp[0]) pobj(mwp[1], compl) ->
    * prep_mwp[0]_mwp[1](gov, compl)
    *
    * @param list List of typedDependencies to work on

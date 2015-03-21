@@ -1,4 +1,4 @@
-Stanford Lexicalized Parser v3.5.1 - 2015-01-29
+Stanford Lexicalized Parser v3.5.0 - 2014-10-26
 -----------------------------------------------
 
 Copyright (c) 2002-2012 The Board of Trustees of The Leland Stanford Junior
@@ -32,8 +32,8 @@ Secondly, you should also look at the Parser FAQ on the web:
 
     http://nlp.stanford.edu/software/parser-faq.shtml
 
-This software requires Java 8 (JDK 1.8.0+).  (You must have installed it
-separately. Check that the command "java -version" works and gives 1.8+.)
+This software requires Java 6 (JDK 1.6.0+).  (You must have installed it
+separately. Check that the command "java -version" works and gives 1.6+.)
 
 
 QUICKSTART
@@ -205,9 +205,6 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
-
-2015-01-29    3.5.1     Dependency parser improvements; general 
-                        bugfixes 
 
 2014-10-26    3.5.0     Upgrade to Java 1.8; add neural-network 
                         dependency parser 

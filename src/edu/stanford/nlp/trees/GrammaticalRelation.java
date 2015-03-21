@@ -184,10 +184,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
    *  @return The grammatical relation represented by this String
    */
   public static GrammaticalRelation valueOf(Language language, String s) {
-    GrammaticalRelation reln;
-    synchronized (stringsToRelations) {
-      reln = (stringsToRelations.get(language) != null ? valueOf(s, stringsToRelations.get(language).values()) : null);
-    }
+    GrammaticalRelation reln = (stringsToRelations.get(language) != null ? valueOf(s, stringsToRelations.get(language).values()) : null);
     if (reln == null) {
       // TODO this breaks the hierarchical structure of the classes,
       //      but it makes English relations that much likelier to work.
@@ -322,15 +319,12 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
       }
     }
 
-    GrammaticalRelation previous;
-    synchronized (stringsToRelations) {
-      Map<String, GrammaticalRelation> sToR = stringsToRelations.get(language);
-      if (sToR == null) {
-        sToR = Generics.newHashMap();
-        stringsToRelations.put(language, sToR);
-      }
-      previous = sToR.put(toString(), this);
+    Map<String, GrammaticalRelation> sToR = stringsToRelations.get(language);
+    if (sToR == null) {
+      sToR = Generics.newHashMap();
+      stringsToRelations.put(language, sToR);
     }
+    GrammaticalRelation previous = sToR.put(toString(), this);
     if (previous != null) {
       if (!previous.isFromString() && !isFromString()) {
         throw new IllegalArgumentException("There is already a relation named " + toString() + '!');

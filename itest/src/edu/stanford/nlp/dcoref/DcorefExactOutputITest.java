@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
@@ -39,12 +40,12 @@ import junit.framework.TestCase;
 public class DcorefExactOutputITest extends TestCase {
   static StanfordCoreNLP pipeline = null;
 
-  @Override
   public void setUp() {
     synchronized (DcorefExactOutputITest.class) {
       if (pipeline == null) {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, cleanxml, ssplit, pos, lemma, ner, parse, dcoref");
+	props.setProperty("ssplit.newlineIsSentenceBreak", "never");
         pipeline = new StanfordCoreNLP(props);
       }
     }
@@ -66,14 +67,14 @@ public class DcorefExactOutputITest extends TestCase {
     }
   }
 
-  public static Map<Integer, List<ExpectedMention>> loadExpectedResults(String filename) throws IOException {
+  public Map<Integer, List<ExpectedMention>> loadExpectedResults(String filename) throws IOException {
     Map<Integer, List<ExpectedMention>> results = Generics.newHashMap();
 
     int id = -1;
     List<String> mentionLines = new ArrayList<String>();
     for (String line : IOUtils.readLines(filename)) {
-      if (line.trim().isEmpty()) {
-        if (mentionLines.isEmpty()) {
+      if (line.trim().equals("")) {
+        if (mentionLines.size() == 0) {
           if (id != -1) {
             throw new RuntimeException("Found coref chain without any mentions, id " + id);
           }
@@ -102,7 +103,7 @@ public class DcorefExactOutputITest extends TestCase {
   public static void saveResults(String filename, Map<Integer, CorefChain> chains) throws IOException {
     FileWriter fout = new FileWriter(filename);
     BufferedWriter bout = new BufferedWriter(fout);
-
+    
     List<Integer> keys = new ArrayList<Integer>(chains.keySet());
     Collections.sort(keys);
 
@@ -125,7 +126,7 @@ public class DcorefExactOutputITest extends TestCase {
     bout.newLine();
   }
 
-  public static boolean compareChain(List<ExpectedMention> expectedChain, CorefChain chain) {
+  public boolean compareChain(List<ExpectedMention> expectedChain, CorefChain chain) {
     for (ExpectedMention expectedMention : expectedChain) {
       boolean found = false;
       for (CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
@@ -139,32 +140,32 @@ public class DcorefExactOutputITest extends TestCase {
     return true;
   }
 
-  public static void compareResults(Map<Integer, List<ExpectedMention>> expected, Map<Integer, CorefChain> chains) {
+  public void compareResults(Map<Integer, List<ExpectedMention>> expected, Map<Integer, CorefChain> chains) {
     assertEquals("Unexpected difference in number of chains", expected.size(), chains.size());
-
+    
     // Note that we don't insist on the chain ID numbers being the same
-    for (Map.Entry<Integer, List<ExpectedMention>> mapEntry : expected.entrySet()) {
+    for (Integer key : expected.keySet()) {
       boolean found = false;
-      List<ExpectedMention> expectedChain = mapEntry.getValue();
+      List<ExpectedMention> expectedChain = expected.get(key);
       for (CorefChain chain : chains.values()) {
         if (compareChain(expectedChain, chain)) {
           found = true;
           break;
         }
       }
-      assertTrue("Could not find expected coref chain " + mapEntry.getKey() + " " + expectedChain + " in the results", found);
+      assertTrue("Could not find expected coref chain " + key + " in the results", found);
     }
 
-    for (Map.Entry<Integer, CorefChain> integerCorefChainEntry : chains.entrySet()) {
+    for (Integer key : chains.keySet()) {
       boolean found = false;
-      CorefChain chain = integerCorefChainEntry.getValue();
+      CorefChain chain = chains.get(key);
       for (List<ExpectedMention> expectedChain : expected.values()) {
         if (compareChain(expectedChain, chain)) {
           found = true;
           break;
         }
       }
-      assertTrue("Dcoref produced chain " + chain + " which was not in the expected results", found);
+      assertTrue("Dcoref produced chain " + chain + " which was not in the expeted results", found);
     }
   }
 
@@ -199,5 +200,4 @@ public class DcorefExactOutputITest extends TestCase {
     Map<Integer, CorefChain> chains = annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class);
     saveResults(output, chains);
   }
-
 }

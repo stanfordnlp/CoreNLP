@@ -2,7 +2,6 @@ package edu.stanford.nlp.util;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
-import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasOffset;
 import edu.stanford.nlp.ling.HasWord;
@@ -217,7 +216,7 @@ public class StringUtils {
 
 
   public static String joinWords(Iterable<? extends HasWord> l, String glue) {
-    StringBuilder sb = new StringBuilder(l instanceof Collection ? ((Collection) l).size() : 64);
+    StringBuilder sb = new StringBuilder();
     boolean first = true;
     for (HasWord o : l) {
       if ( ! first) {
@@ -408,28 +407,6 @@ public class StringUtils {
    */
   public static String join(Object[] elements, String glue) {
     return (join(Arrays.asList(elements), glue));
-  }
-
-  /**
-   * Joins an array of elements in a given span.
-   * @param elements The elements to join.
-   * @param start The start index to join from.
-   * @param end The end (non-inclusive) to join until.
-   * @param glue The glue to hold together the elements.
-   * @return The string form of the sub-array, joined on the given glue.
-   */
-  public static String join(Object[] elements, int start, int end, String glue) {
-    StringBuilder b = new StringBuilder(127);
-    boolean isFirst = true;
-    for (int i = start; i < end; ++i) {
-      if (isFirst) {
-        b.append(elements[i].toString());
-        isFirst = false;
-      } else {
-        b.append(glue).append(elements[i].toString());
-      }
-    }
-    return b.toString();
   }
 
   /**
@@ -1662,20 +1639,16 @@ public class StringUtils {
    */
   public static String makeTextTable(Object[][] table, Object[] rowLabels, Object[] colLabels, int padLeft, int padRight, boolean tsv) {
     StringBuilder buff = new StringBuilder();
-    if (colLabels != null) {
-      // top row
-      buff.append(makeAsciiTableCell("", padLeft, padRight, tsv)); // the top left cell
-      for (int j = 0; j < table[0].length; j++) { // assume table is a rectangular matrix
-        buff.append(makeAsciiTableCell(colLabels[j], padLeft, padRight, (j != table[0].length - 1) && tsv));
-      }
-      buff.append('\n');
+    // top row
+    buff.append(makeAsciiTableCell("", padLeft, padRight, tsv)); // the top left cell
+    for (int j = 0; j < table[0].length; j++) { // assume table is a rectangular matrix
+      buff.append(makeAsciiTableCell(colLabels[j], padLeft, padRight, (j != table[0].length - 1) && tsv));
     }
+    buff.append('\n');
     // all other rows
     for (int i = 0; i < table.length; i++) {
       // one row
-      if (rowLabels != null) {
-        buff.append(makeAsciiTableCell(rowLabels[i], padLeft, padRight, tsv));
-      }
+      buff.append(makeAsciiTableCell(rowLabels[i], padLeft, padRight, tsv));
       for (int j = 0; j < table[i].length; j++) {
         buff.append(makeAsciiTableCell(table[i][j], padLeft, padRight, (j != table[0].length - 1) && tsv));
       }
@@ -2135,23 +2108,5 @@ public class StringUtils {
     String d = Normalizer.normalize(s, Normalizer.Form.NFKD);
     d = diacriticalMarksPattern.matcher(d).replaceAll("");
     return Normalizer.normalize(d, Normalizer.Form.NFKC);
-  }
-
-  /**
-   * Convert a list of labels into a string, by simply joining them with spaces.
-   * @param words The words to join.
-   * @return A string representation of the sentence, tokenized by a single space.
-   */
-  public static String toString(List<CoreLabel> words) {
-    return join(words.stream().map(CoreLabel::word), " ");
-  }
-
-  /**
-   * Convert a CoreMap representing a sentence into a string, by simply joining them with spaces.
-   * @param sentence The sentence to stringify.
-   * @return A string representation of the sentence, tokenized by a single space.
-   */
-  public static String toString(CoreMap sentence) {
-    return toString(sentence.get(CoreAnnotations.TokensAnnotation.class));
   }
 }

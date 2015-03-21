@@ -167,45 +167,6 @@ public class CoreAnnotations {
   }
 
   /**
-   * The CoreMap key for getting the quotations contained by an annotation.
-   *
-   * This key is typically set only on document annotations.
-   */
-  public static class QuotationsAnnotation implements CoreAnnotation<List<CoreMap>> {
-    public Class<List<CoreMap>> getType() {
-      return ErasureUtils.uncheckedCast(List.class);
-    }
-  }
-
-  /**
-   * Unique identifier within a document for a given quotation.
-   */
-  public static class QuotationIndexAnnotation implements CoreAnnotation<Integer> {
-    public Class<Integer> getType() {
-      return Integer.class;
-    }
-  }
-
-  /**
-   * The index of the sentence that this annotation begins in.
-   */
-  public static class SentenceBeginAnnotation implements CoreAnnotation<Integer> {
-    public Class<Integer> getType() {
-      return Integer.class;
-    }
-  }
-
-  /**
-   * The index of the sentence that this annotation begins in.
-   */
-  public static class SentenceEndAnnotation implements CoreAnnotation<Integer> {
-    public Class<Integer> getType() {
-      return Integer.class;
-    }
-  }
-
-
-  /**
    * The CoreMap key for getting the paragraphs contained by an annotation.
    *
    * This key is typically set only on document annotations.
