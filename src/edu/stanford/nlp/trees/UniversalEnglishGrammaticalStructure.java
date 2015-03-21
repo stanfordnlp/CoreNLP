@@ -209,7 +209,11 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * @see UniversalEnglishGrammaticalStructure#addCaseMarkersToReln
    */
   private static void addCaseMarkerInformation(SemanticGraph sg) {
-        
+    
+    /* Semgrexes require a graph with a root. */
+    if (sg.getRoots().isEmpty())
+      return;
+    
     /* passive agent */
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = PASSIVE_AGENT_PATTERN.matcher(sgCopy);
@@ -359,6 +363,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * @param list mutable list of dependencies
    */
   private static void expandPrepConjunctions(SemanticGraph sg) {
+    
+    /* Semgrexes require a graph with a root. */
+    if (sg.getRoots().isEmpty())
+      return;
+
+    
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = PREP_CONJP_PATTERN.matcher(sgCopy);
     
@@ -446,7 +456,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   /**
    * Expands PPs with conjunctions such as in the sentence
    * "Bill flies to France and from Serbia." by copying the verb 
-   * that heads the prepositinal phrase resulting in the following
+   * that governs the prepositinal phrase resulting in the following
    * relations:
    * <p/>
    * <code>conj:and(flies, flies')</code><br/>
@@ -464,6 +474,11 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    */
   private static void expandPPConjunctions(SemanticGraph sg) {
 
+    /* Semgrexes require a graph with a root. */
+    if (sg.getRoots().isEmpty())
+      return;
+
+    
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = PP_CONJP_PATTERN.matcher(sgCopy);
     
@@ -572,6 +587,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * @param list mutable list of dependency relations
    */
   private static void addConjInformation(SemanticGraph sg) {
+    
+    /* Semgrexes require a graph with a root. */
+    if (sg.getRoots().isEmpty())
+      return;
     
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = CONJUNCTION_PATTERN.matcher(sgCopy);
@@ -1173,6 +1192,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    */
   private static void correctSubjPass(SemanticGraph sg) {
     
+    /* If the graph doesn't have a root (most likely because
+     * a parsing error, we can't match Semgrexes, so do
+     * nothing. */
+    if (sg.getRoots().isEmpty())
+      return;
+    
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = CORRECT_SUBJPASS_PATTERN.matcher(sgCopy);
 
@@ -1212,10 +1237,15 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   
 
-  /* Modifies dependencies such that */
-  
-  
+  /**
+   * 
+   * @param sg
+   */
   private static void processMultiwordPreps(SemanticGraph sg) {
+    
+    /* Semgrexes require a graph with a root. */
+    if (sg.getRoots().isEmpty())
+      return;
     
     HashMap<String, HashSet<Integer>> bigrams = new HashMap<String, HashSet<Integer>>();
     HashMap<String, HashSet<Integer>> trigrams = new HashMap<String, HashSet<Integer>>();

@@ -534,6 +534,27 @@ public abstract class GrammaticalStructure implements Serializable {
       TypedDependency rootTypedDep = new TypedDependency(ROOT, new IndexedWord(dependencyRoot.label()), new IndexedWord(rootDep.label()));
       if (puncTypedDepFilter.test(rootTypedDep)) {
         basicDep.add(rootTypedDep);
+      } else { // Root is a punctuation character
+        
+        /* Heuristic to find a root for the graph.
+         * Make the first child of the current root the
+         * new root and attach all other children to
+         * the new root. 
+         */
+        
+        IndexedWord root = rootTypedDep.dep();
+        IndexedWord newRoot = null;
+        for (TypedDependency td : basicDep) {
+          if (td.gov().equals(root)) {
+            if (newRoot != null) {
+              td.setGov(newRoot);
+            } else {
+              td.setGov(td.gov());
+              td.setReln(ROOT);
+              newRoot = td.dep();
+            }
+          }
+        }
       }
     }
 
