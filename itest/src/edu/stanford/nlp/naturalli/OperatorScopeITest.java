@@ -261,6 +261,7 @@ public class OperatorScopeITest {
     checkScope(3, 4, annotate("Cats eat some mice")[2]);
   }
 
+ 
   @Test
   public void fracasSentencesWithAll() {
     checkScope("{ All } [ APCOM managers ] [ have company cars ]");
@@ -284,6 +285,7 @@ public class OperatorScopeITest {
     checkScope("{ All } [ residents of the North American continent ] [ can travel freely within Europe ]");
     checkScope("{ All } [ the people who were at the meeting ] [ voted for a new chairman ]");
   }
+  
 
   @Test
   public void fracasSentencesWithEach() {
