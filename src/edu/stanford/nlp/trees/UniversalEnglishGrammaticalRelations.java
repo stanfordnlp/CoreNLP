@@ -138,9 +138,9 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation AUX_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "aux", "auxiliary",
         DEPENDENT, "VP|SQ|SINV|CONJP", tregexCompiler,
-        "VP < VP < (/^(?:TO|MD|VB.*|AUXG?|POS)$/=target)",
+        //"VP < VP < (/^(?:TO|MD|VB.*|AUXG?|POS)$/=target)",
+        "VP < VP < (/^(?:MD|VB.*|AUXG?|POS)$/=target)",
         "SQ|SINV < (/^(?:VB|MD|AUX)/=target $++ /^(?:VP|ADJP)/)",
-        //move to mwe: "CONJP < TO=target < VB", // (CONJP not to mention)
         // add handling of tricky VP fronting cases...
         "SINV < (VP=target < (/^(?:VB|AUX|POS)/ < " + beAuxiliaryRegex + ") $-- (VP < VBG))");
 
@@ -987,7 +987,8 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation MARKER =
     new GrammaticalRelation(Language.UniversalEnglish, "mark", "marker",
-        MODIFIER, "SBAR(?:-TMP)?", tregexCompiler,
+        MODIFIER, "SBAR(?:-TMP)?|VP", tregexCompiler,
+            "VP < VP < (TO=target)",
             "SBAR|SBAR-TMP < (IN|DT|MWE=target $++ S|FRAG)",
             "SBAR < (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]");
 
