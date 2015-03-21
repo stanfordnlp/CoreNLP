@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import java.util.function.Predicate;
 
+import edu.stanford.nlp.graph.DirectedMultiGraph;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
@@ -51,21 +52,21 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * This gets used by GrammaticalStructureFactory (by reflection). DON'T DELETE.
    *
    * @param t Parse tree to make grammatical structure from
-   * @param puncFilter Filter to remove punctuation dependencies
+   * @param tagFilter Filter to remove punctuation dependencies
    */
-  public UniversalEnglishGrammaticalStructure(Tree t, Predicate<String> puncFilter) {
-    this(t, puncFilter, new UniversalSemanticHeadFinder(true), true);
+  public UniversalEnglishGrammaticalStructure(Tree t, Predicate<String> tagFilter) {
+    this(t, tagFilter, new UniversalSemanticHeadFinder(true), true);
   }
 
   /**
    * This gets used by GrammaticalStructureFactory (by reflection). DON'T DELETE.
    *
    * @param t Parse tree to make grammatical structure from
-   * @param puncFilter Filter to remove punctuation dependencies
+   * @param tagFilter Tag filter to remove punctuation dependencies
    * @param hf HeadFinder to use when building it
    */
-  public UniversalEnglishGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf) {
-    this(t, puncFilter, hf, true);
+  public UniversalEnglishGrammaticalStructure(Tree t, Predicate<String> tagFilter, HeadFinder hf) {
+    this(t, tagFilter, hf, true);
   }
 
   /**
@@ -78,15 +79,16 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * relations as it can.
    *
    * @param t Parse tree to make grammatical structure from
-   * @param puncFilter Filter for punctuation words
+   * @param tagFilter Filter for punctuation tags
    * @param hf HeadFinder to use when building it
    * @param threadSafe Whether or not to support simultaneous instances among multiple
    *          threads
    */
-  public UniversalEnglishGrammaticalStructure(Tree t, Predicate<String> puncFilter, HeadFinder hf, boolean threadSafe) {
+  public UniversalEnglishGrammaticalStructure(Tree t, Predicate<String> tagFilter, HeadFinder hf, boolean threadSafe) {
+    
     // the tree is normalized (for index and functional tag stripping) inside CoordinationTransformer
     super(t, UniversalEnglishGrammaticalRelations.values(threadSafe), threadSafe ? UniversalEnglishGrammaticalRelations.valuesLock() : null, 
-          new CoordinationTransformer(hf, true), hf, puncFilter);
+          new CoordinationTransformer(hf, true), hf, Filters.acceptFilter(), tagFilter);
   }
 
   /** Used for postprocessing CoNLL X dependencies */
@@ -119,6 +121,14 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   private static final Predicate<TypedDependency> extraTreeDepFilter = new ExtraTreeDepFilter();
 
+  
+  @Override
+  protected void getTreeDeps(List<TypedDependency> deps,
+      DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> completeGraph,
+      Predicate<TypedDependency> puncTypedDepFilter,
+      Predicate<TypedDependency> extraTreeDepFilter) {
+  //Do nothing
+  }
 
   @Override
   protected void correctDependencies(Collection<TypedDependency> list) {
@@ -171,10 +181,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   /* Semgrex patterns for prepositional phrases. */
   private static SemgrexPattern PASSIVE_AGENT_PATTERN = SemgrexPattern.compile("{}=gov >nmod=reln ({}=mod >case {word:/^(?i:by)$/}=c1) >auxpass {}");
-  private static SemgrexPattern PREP_MW3_PATTERN = SemgrexPattern.compile("{}=gov   [>/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 > {}=c2 > {}=c3))]");
-  private static SemgrexPattern PREP_MW2_PATTERN = SemgrexPattern.compile("{}=gov   [>/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 > {}=c2)) | >/^(nmod|advcl|acl)$/=reln ({}=mod >case {}=c1 >case ({}=c2 !== {}=c1))]");
+  private static SemgrexPattern PREP_MW3_PATTERN = SemgrexPattern.compile("{}=gov   [>/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 >mwe {}=c2 >mwe {}=c3))]");
+  private static SemgrexPattern PREP_MW2_PATTERN = SemgrexPattern.compile("{}=gov   [>/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 >mwe {}=c2)) | >/^(nmod|advcl|acl)$/=reln ({}=mod >case {}=c1 >case ({}=c2 !== {}=c1))]");
   private static SemgrexPattern PREP_PATTERN = SemgrexPattern.compile("{}=gov   >/^(nmod|advcl|acl)$/=reln ({}=mod >case {}=c1)");
-
 
   
   /**
@@ -184,8 +193,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * @see UniversalEnglishGrammaticalStructure#addCaseMarkersToReln
    */
   private static void addCaseMarkerInformation(List<TypedDependency> list) {
-    
-    /* 3-word prepositions */
+        
+    /* passive agent */
     SemanticGraph sg = new SemanticGraph(list);
     SemgrexMatcher matcher = PASSIVE_AGENT_PATTERN.matcher(sg);
     while (matcher.find()) {
@@ -271,7 +280,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       break;
     }
   }
-
+  
+  
   /**
    * Appends case marker information to nmod/acl/advcl relations.
    * 
@@ -312,14 +322,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
           sb.append(cm.word());
           firstWord = false;
         } else {
-          GrammaticalRelation reln = getCaseMarkedRelation(td, sb.toString().toLowerCase());
-          /* 
-           * in case of multiple non-adjacent case markers (in sentences such as
-           * "Lufthansa flies to and from Serbia.") create an additional relation
-           * for each case marker. 
-           * This example produces the following two relations:
-           * nmod:to(flies, Serbia) and nmod:from(flies, Serbia)
+          /* Should never happen as there should be never two non-adjacent case markers.
+           * If it does happen nevertheless create an additional relation.
            */
+          GrammaticalRelation reln = getCaseMarkedRelation(td, sb.toString().toLowerCase());
           newDeps.add(new TypedDependency(reln, gov, mod));
           sb = new StringBuilder(cm.word());
           firstWord = true;
@@ -335,6 +341,172 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       list.add(td);
     }
   }
+  
+  private static SemgrexPattern PREP_CONJP_PATTERN = SemgrexPattern.compile("{} >case ({}=gov >cc {}=cc >conj {}=conj)");
+  
+  private static void expandPrepConjunctions(List<TypedDependency> list) {
+    SemanticGraph sg = new SemanticGraph(list);
+    SemgrexMatcher matcher = PREP_CONJP_PATTERN.matcher(sg);
+    
+    IndexedWord oldGov = null;
+    IndexedWord oldCcDep = null;
+    List<IndexedWord> conjDeps = Generics.newLinkedList();
+    
+    while (matcher.find()) {
+      IndexedWord ccDep = matcher.getNode("cc");
+      IndexedWord conjDep = matcher.getNode("conj");
+      IndexedWord gov = matcher.getNode("gov");
+      if (oldGov != null &&  (! gov.equals(oldGov) || ! ccDep.equals(oldCcDep))) {
+        expandPrepConjunction(list, oldGov, conjDeps, oldCcDep, sg);
+        conjDeps = Generics.newLinkedList();
+      }
+      oldCcDep = ccDep;
+      oldGov = gov;
+      conjDeps.add(conjDep);
+    }
+    
+    if (oldGov != null) {
+      expandPrepConjunction(list, oldGov, conjDeps, oldCcDep, sg);
+    }
+    
+    
+  }  
+  
+  
+  private static void expandPrepConjunction(List<TypedDependency> list, IndexedWord gov, 
+      List<IndexedWord> conjDeps, IndexedWord ccDep, SemanticGraph sg) {
+    
+    
+    IndexedWord caseGov = sg.getParent(gov);
+    IndexedWord caseGovGov = sg.getParent(caseGov);
+    GrammaticalRelation rel = sg.reln(caseGovGov, caseGov);
+    List<IndexedWord> newConjDeps = Generics.newLinkedList();
+    for (IndexedWord conjDep : conjDeps) {
+      IndexedWord caseGovCopy = caseGov.makeSoftCopy();
+      IndexedWord caseGovGovCopy = caseGovGov.makeSoftCopy();
+      
+      /* Change conj(prep-1, prep-2) to case(prep-1-gov, prep-2) */
+      for (TypedDependency td : list) {
+        if ( ! td.dep().equals(conjDep) || ! td.gov().equals(gov)) {
+          continue;
+        }
+        
+        td.setGov(caseGovCopy);
+        td.setReln(CASE_MARKER);
+        break;
+      }
+      
+      /* Add relation to copy node. */
+      list.add(new TypedDependency(rel, caseGovGovCopy, caseGovCopy));
+      list.add(new TypedDependency(CONJUNCT, caseGovGov, caseGovGovCopy));
+      newConjDeps.add(caseGovGovCopy);
+      
+      /* Attach all children except case markers of caseGov to caseGovCopy. */
+      List<TypedDependency> newDeps = Generics.newLinkedList();
+      for (TypedDependency td : list) {
+        if ( ! td.gov().equals(caseGov) || td.reln() == CASE_MARKER) {
+          continue;
+        }
+        newDeps.add(new TypedDependency(td.reln(), caseGovCopy, td.dep()));
+      }
+      
+      list.addAll(newDeps);
+      
+    }
+    
+    /* Attach CC node to caseGov */ 
+    for (TypedDependency td : list) {
+      if ( ! td.dep().equals(ccDep) || ! td.gov().equals(gov)) {
+        continue;
+      }
+      td.setGov(caseGovGov);
+    }
+    
+    /* Add conjunction information for these relations already at this point.
+     * It could be that we add several coordinating conjunctions while collapsing
+     * and we might not know which conjunction belongs to which conjunct at a later
+     * point.
+     */
+    addConjToReln(list, caseGovGov, newConjDeps, ccDep, sg);
+  }
+  
+  
+  private static SemgrexPattern PP_CONJP_PATTERN = SemgrexPattern.compile("{} >/^(nmod|acl|advcl)$/ (({}=gov >case {}) >cc {}=cc >conj ({}=conj >case {}))");
+  
+  private static void expandPPConjunctions(List<TypedDependency> list) {
+    SemanticGraph sg = new SemanticGraph(list);
+    SemgrexMatcher matcher = PP_CONJP_PATTERN.matcher(sg);
+    
+    IndexedWord oldGov = null;
+    IndexedWord oldCcDep = null;
+    List<IndexedWord> conjDeps = Generics.newLinkedList();
+    
+    while (matcher.find()) {
+      IndexedWord conjDep = matcher.getNode("conj");
+      IndexedWord gov = matcher.getNode("gov");
+      IndexedWord ccDep = matcher.getNode("cc");
+
+      if (oldGov != null &&  (! gov.equals(oldGov) || ! ccDep.equals(oldCcDep))) {
+        expandPPConjunction(list, oldGov, conjDeps, oldCcDep, sg);
+        conjDeps = Generics.newLinkedList();
+      }
+      oldCcDep = ccDep;
+      oldGov = gov;
+      conjDeps.add(conjDep);
+    }
+    
+    if (oldGov != null) {
+      expandPPConjunction(list, oldGov, conjDeps, oldCcDep, sg);
+    }
+    
+    
+  }  
+  
+  
+  private static void expandPPConjunction(List<TypedDependency> list, IndexedWord gov, 
+      List<IndexedWord> conjDeps, IndexedWord ccDep, SemanticGraph sg) {
+    
+    
+    IndexedWord nmodGov = sg.getParent(gov);
+    GrammaticalRelation rel = sg.reln(nmodGov, gov);  
+    int copyCount = 1;
+    List<IndexedWord> newConjDeps = Generics.newLinkedList();
+    for (IndexedWord conjDep : conjDeps) {
+      IndexedWord nmodGovCopy = nmodGov.makeSoftCopy(copyCount++);
+      
+      /* Change conj(nmod-1, nmod-2) to nmod(nmod-1-gov, nmod-2) */
+      for (TypedDependency td : list) {
+        if ( ! td.dep().equals(conjDep) || ! td.gov().equals(gov)) {
+          continue;
+        }
+        
+        td.setGov(nmodGovCopy);
+        td.setReln(rel);
+        
+        break;
+      }
+      
+      /* Add relation to copy node. */
+      list.add(new TypedDependency(CONJUNCT, nmodGov, nmodGovCopy));
+      newConjDeps.add(nmodGovCopy);
+    }
+    
+    /* Attach CC node to nmodGov */ 
+    for (TypedDependency td : list) {
+      if ( ! td.dep().equals(ccDep) || ! td.gov().equals(gov)) {
+        continue;
+      }
+      td.setGov(nmodGov);
+    }
+    
+    /* Add conjunction information for these relations already at this point.
+     * It could be that we add several coordinating conjunctions while collapsing
+     * and we might not know which conjunction belongs to which conjunct at a later
+     * point.
+     */
+    addConjToReln(list, nmodGov, newConjDeps, ccDep, sg);
+  }
+  
   
   /**
    * 
@@ -359,118 +531,51 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   
   private static void addConjInformation(List<TypedDependency> list) {
     
+        
     SemanticGraph sg = new SemanticGraph(list);
     SemgrexMatcher matcher = CONJUNCTION_PATTERN.matcher(sg);
     
+    IndexedWord oldGov = null;
+    IndexedWord oldCcDep = null;
+    List<IndexedWord> conjDeps = Generics.newLinkedList();
+    
     while (matcher.find()) {
-      IndexedWord ccDep = matcher.getNode("cc");
       IndexedWord conjDep = matcher.getNode("conj");
       IndexedWord gov = matcher.getNode("gov");
-
-      addConjToReln(list, gov, conjDep, ccDep);
-    }    
-        
+      IndexedWord ccDep = matcher.getNode("cc");
+      if (oldGov != null &&  (! gov.equals(oldGov) || ! ccDep.equals(oldCcDep))) {
+        addConjToReln(list, oldGov, conjDeps, oldCcDep, sg);
+        conjDeps = Generics.newLinkedList();
+      }
+      oldCcDep = ccDep;
+      conjDeps.add(conjDep);
+      oldGov = gov;
+    }
+    
+    if (oldGov != null) {
+      addConjToReln(list, oldGov, conjDeps, oldCcDep, sg);
+    }
+    
   }
   
   private static void addConjToReln(List<TypedDependency> list,
-      IndexedWord gov, IndexedWord conjDep, IndexedWord ccDep) {
-    
-    for (TypedDependency td : list) {
-      if ( ! td.gov().equals(gov) || ! td.dep().equals(conjDep)) {
-        continue;
+      IndexedWord gov, List<IndexedWord> conjDeps, IndexedWord ccDep, SemanticGraph sg) {
+    for (IndexedWord conjDep : conjDeps) {
+      for (TypedDependency td : list) {
+        if ( ! td.gov().equals(gov) || ! td.dep().equals(conjDep)) {
+          continue;
+        }
+        if (td.reln() == CONJUNCT || conjDep.index() > ccDep.index()) {
+          td.setReln(conjValue(ccDep, sg));
+        }
+        break;
       }
-      
-      td.setReln(conjValue(ccDep.word()));
-      
-      break;
     }
     
   }
 
   
-  
-  // Using this makes addStrandedPobj a lot cleaner looking, but it
-  // makes the converter roughly 2% slower.  Might not be worth it.
-  // Similar changes could be made to many of the other complicated
-  // collapsing methods.
-  // static final SemgrexPattern strandedPobjSemgrex = SemgrexPattern.compile("{}=head >rcmod ({} [ == {}=prepgov | >xcomp {}=prepgov | >conj {}=prepgov ]) : {}=prepgov >prep ({}=prepdep !>pcomp {} !> pobj {})");
-  // // Deal with preposition stranding in relative clauses.
-  // // For example, "the only thing I'm rooting for"
-  // // This method will add pobj(for, thing) by connecting using the rcmod and prep
-  // private static void addStrandedPobj(List<TypedDependency> list) {
-  //   SemanticGraph graph = new SemanticGraph(list);
-  //   SemgrexMatcher matcher = strandedPobjSemgrex.matcher(graph);
-  //   while (matcher.find()) {
-  //     IndexedWord gov = matcher.getNode("prepdep");
-  //     IndexedWord dep = matcher.getNode("head");
 
-  //     TypedDependency newDep = new TypedDependency(PREPOSITIONAL_OBJECT, gov, dep);
-  //     newDep.setExtra();
-  //     list.add(newDep);
-  //   }
-  // }
-
-
-  // Deal with preposition stranding in relative clauses.
-  // For example, "the only thing I'm rooting for"
-  // This method will add pobj(for, thing) by connecting using the rcmod and prep
-  //
-  // No longer needed for Universal dependencies as prepositions are treated differently
-  // and convertRel takes care of these stranded prepositions
-  
-  /*
-  private static void addStrandedPobj(List<TypedDependency> list) {
-    List<IndexedWord> depNodes = null;
-    List<TypedDependency> newDeps = null;
-    for (TypedDependency rcmod : list) {
-      if (rcmod.reln() != RELATIVE_CLAUSE_MODIFIER) {
-        continue;
-      }
-
-      IndexedWord head = rcmod.gov();
-      if (depNodes == null) {
-        depNodes = Generics.newArrayList();
-      } else {
-        depNodes.clear();
-      }
-      depNodes.add(rcmod.dep());
-      for (TypedDependency connected : list) {
-        if (connected.gov().equals(rcmod.dep()) && (connected.reln() == XCLAUSAL_COMPLEMENT || connected.reln() == CONJUNCT)) {
-          depNodes.add(connected.dep());
-        }
-      }
-
-      //TODO: Find a way to do this with the new direction of prepositions
-      /*
-      for (IndexedWord dep : depNodes) {
-        for (TypedDependency prep : list) {
-          if (!prep.gov().equals(dep) || prep.reln() != PREPOSITIONAL_MODIFIER) {
-            continue;
-          }
-
-          boolean found = false;
-          for (TypedDependency other : list) {
-            if (other.gov().equals(prep.dep()) && (other.reln() == PREPOSITIONAL_COMPLEMENT || other.reln() == PREPOSITIONAL_OBJECT)) {
-              found = true;
-              break;
-            }
-          }
-          if (!found) {
-            if (newDeps == null) {
-              newDeps = Generics.newArrayList();
-            }
-            TypedDependency newDep = new TypedDependency(PREPOSITIONAL_OBJECT, prep.dep(), head);
-            newDeps.add(newDep);
-          }
-        }
-      }
-    }
-    if (newDeps != null) {
-      list.addAll(newDeps);
-    }
-  }
-
-*/
 
 
   /**
@@ -528,22 +633,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     }
   }
 
-
-  /**
-   * Alters a list in place by removing all the KILL relations
-   */
-  private static void filterKill(Collection<TypedDependency> deps) {
-    List<TypedDependency> filtered = Generics.newArrayList();
-    for (TypedDependency dep : deps) {
-      if (dep.reln() != KILL) {
-        filtered.add(dep);
-      }
-    }
-    deps.clear();
-    deps.addAll(filtered);
-  }
-
-
   /**
    * Destructively modifies this {@code Collection<TypedDependency>}
    * by collapsing several types of transitive pairs of dependencies.
@@ -579,52 +668,30 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       printListSorted("collapseDependencies: CCproc: " + CCprocess + " includeExtras: " + includeExtras, list);
     }
     correctDependencies(list);
-    if (DEBUG) {
+    if (true) {
       printListSorted("After correctDependencies:", list);
     }
     
+    expandPrepConjunctions(list);
+    if (true) {
+      printListSorted("After expandPrepConjunctions:", list);
+    }
+    
+    expandPPConjunctions(list);
+    if (true) {
+      printListSorted("After expandPPConjunctions:", list);
+    }
+    
     addCaseMarkerInformation(list);
-    if (DEBUG) {
-      System.err.println(list);
+    if (true) {
       printListSorted("After addCaseMarkerInformation:", list);
     }
 
-    
-    /*
-    collapse2WP(list);
-    if (DEBUG) {
-      printListSorted("After collapse2WP:", list);
-    }
-
-    collapseFlatMWP(list);
-    if (DEBUG) {
-      printListSorted("After collapseFlatMWP:", list);
-    }
-
-    collapse2WPbis(list);
-    if (DEBUG) {
-      printListSorted("After collapse2WPbis:", list);
-    }
-
-    collapse3WP(list);
-    if (DEBUG) {
-      printListSorted("After collapse3WP:", list);
-    }
-
-    collapsePrepAndPoss(list);
-    if (DEBUG) {
-      printListSorted("After PrepAndPoss:", list);
-    }
-    
-    */
-
-    //collapseConj(list);
-    
     addConjInformation(list);
-    if (DEBUG) {
-      printListSorted("After conj:", list);
+    if (true) {
+      printListSorted("After addConjInformation:", list);
     }
-
+    
     if (includeExtras.doRef) {
       addRef(list);
       if (DEBUG) {
@@ -658,11 +725,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
 
-    removeDep(list);
-    if (DEBUG) {
-      printListSorted("After remove dep:", list);
-    }
-
     Collections.sort(list);
     if (DEBUG) {
       printListSorted("After all collapse:", list);
@@ -679,17 +741,52 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * but not, if not, instead of, rather than, but rather GO TO negcc <br>
    * as well as, not to mention, but also, & GO TO and.
    *
-   * @param conj The head dependency of the conjunction marker
+   * @param cc The head dependency of the conjunction marker
+   * @param sg The complete current semantic graph
    * @return A GrammaticalRelation made from a normalized form of that
    *         conjunction.
    */
-  private static GrammaticalRelation conjValue(String conj) {
-    String newConj = conj.toLowerCase();
-    if (newConj.equals("not") || newConj.equals("instead") || newConj.equals("rather")) {
-      newConj = "negcc";
-    } else if (newConj.equals("mention") || newConj.equals("to") || newConj.equals("also") || newConj.contains("well") || newConj.equals("&")) {
-      newConj = "and";
+  private static GrammaticalRelation conjValue(IndexedWord cc, SemanticGraph sg) {
+    
+    int pos = cc.index();
+    String newConj = cc.word().toLowerCase();
+
+    if (newConj.equals("not")) {
+      IndexedWord prevWord = sg.getNodeByIndexSafe(pos - 1);
+      if (prevWord != null && prevWord.word().toLowerCase().equals("but")) {
+        return UniversalEnglishGrammaticalRelations.getConj("negcc");
+      }
     }
+    
+    IndexedWord secondIWord = sg.getNodeByIndexSafe(pos + 1);
+    
+    if (secondIWord == null) {
+      return UniversalEnglishGrammaticalRelations.getConj(cc.word());
+    }
+    String secondWord = secondIWord.word().toLowerCase();
+    if (newConj.equals("but")) {
+      if (secondWord.equals("rather")) {
+        newConj = "negcc";
+      } else if (secondWord.equals("also")) {
+        newConj = "and";
+      }
+    } else if (newConj.equals("if") && secondWord.equals("not")) {
+      newConj = "negcc";
+    } else if (newConj.equals("instead") && secondWord.equals("of")) {
+      newConj = "negcc";
+    } else if (newConj.equals("rather") && secondWord.equals("than")) {
+      newConj = "negcc";
+    } else if (newConj.equals("as") && secondWord.equals("well")) {
+      newConj = "and";
+    } else if (newConj.equals("not") && secondWord.equals("to")) {
+      IndexedWord thirdIWord = sg.getNodeByIndexSafe(pos + 2);
+      String thirdWord = thirdIWord != null ? thirdIWord.word().toLowerCase() : null;
+      if (thirdWord != null && thirdWord.equals("mention")) {
+        newConj = "and";
+      }
+    }
+    
+  
     return UniversalEnglishGrammaticalRelations.getConj(newConj);
   }
 
@@ -746,7 +843,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       // look for prepc relations: put the dependent of such a relation in the
       // list
       // to avoid wrong propagation of dobj
-      if (typedDep.reln().toString().startsWith("prepc")) {
+      if (typedDep.reln().toString().startsWith("acl:") || typedDep.reln().toString().startsWith("advcl:")) {
         prepcDep.add(typedDep.dep());
       }
     }
@@ -868,62 +965,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   }
 
 
-  /**
-   * This rewrites the "conj" relation to "conj_word" and deletes cases of the
-   * "cc" relation providing this rewrite has occurred (but not if there is only
-   * something like a clause-initial and). For instance, cc(elected-5, and-9)
-   * conj(elected-5, re-elected-11) becomes conj_and(elected-5, re-elected-11)
-   *
-   * @param list List of dependencies.
-   */
-  private static void collapseConj(Collection<TypedDependency> list) {
-    List<IndexedWord> govs = Generics.newArrayList();
-    // find typed deps of form cc(gov, dep)
-    for (TypedDependency td : list) {
-      if (td.reln() == COORDINATION) { // i.e. "cc"
-        IndexedWord gov = td.gov();
-        GrammaticalRelation conj = conjValue(td.dep().value());
-        if (DEBUG) {
-          System.err.println("Set conj to " + conj + " based on " + td);
-        }
-
-        // find other deps of that gov having reln "conj"
-        boolean foundOne = false;
-        for (TypedDependency td1 : list) {
-          if (td1.gov().equals(gov)) {
-            if (td1.reln() == CONJUNCT) { // i.e., "conj"
-              // change "conj" to the actual (lexical) conjunction
-              if (DEBUG) {
-                System.err.println("Changing " + td1 + " to have relation " + conj);
-              }
-              td1.setReln(conj);
-              foundOne = true;
-            } else if (td1.reln() == COORDINATION) {
-              conj = conjValue(td1.dep().value());
-              if (DEBUG) {
-                System.err.println("Set conj to " + conj + " based on " + td1);
-              }
-            }
-          }
-        }
-
-        // register to remove cc from this governor
-        if (foundOne) {
-          govs.add(gov);
-        }
-      }
-    }
-
-    // now remove typed dependencies with reln "cc" if we have successfully
-    // collapsed
-    for (Iterator<TypedDependency> iter = list.iterator(); iter.hasNext();) {
-      TypedDependency td2 = iter.next();
-      if (td2.reln() == COORDINATION && govs.contains(td2.gov())) {
-        iter.remove();
-      }
-    }
-  }
-
+ 
   /**
    * This method will collapse a referent relation such as follows. e.g.:
    * "The man that I love ... " ref(man, that) dobj(love, that) -> dobj(love,
@@ -1151,489 +1193,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     }
   }
 
-  private static boolean inConjDeps(TypedDependency td, List<Triple<TypedDependency, TypedDependency, Boolean>> conjs) {
-    for (Triple<TypedDependency, TypedDependency, Boolean> trip : conjs) {
-      if (td.equals(trip.first())) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   
   
-  private static void collapsePrepAndPoss(Collection<TypedDependency> list) {
-/*
-    // Man oh man, how gnarly is the logic of this method....
-
-    Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
-
-    // Construct a map from tree nodes to the set of typed
-    // dependencies in which the node appears as governor.
-    // cdm: could use CollectionValuedMap here!
-    Map<IndexedWord, SortedSet<TypedDependency>> map = Generics.newHashMap();
-    List<IndexedWord> vmod = Generics.newArrayList();
-
-    for (TypedDependency typedDep : list) {
-      if (!map.containsKey(typedDep.gov())) {
-        map.put(typedDep.gov(), new TreeSet<TypedDependency>());
-      }
-      map.get(typedDep.gov()).add(typedDep);
-
-      if (typedDep.reln() == VERBAL_MODIFIER) {
-        // look for aux deps which indicate this was a to-be verb
-        boolean foundAux = false;
-        for (TypedDependency auxDep : list) {
-          if (auxDep.reln() != AUX_MODIFIER) {
-            continue;
-          }
-          if (!auxDep.gov().equals(typedDep.dep()) || !auxDep.dep().value().equalsIgnoreCase("to")) {
-            continue;
-          }
-          foundAux = true;
-          break;
-        }
-        if (!foundAux) {
-          vmod.add(typedDep.dep());
-        }
-      }
-    }
-    // System.err.println("here's the vmod list: " + vmod);
-
-    // Do preposition conjunction interaction for
-    // governor p NP and p NP case ... a lot of special code cdm jan 2006
-
-    for (TypedDependency td1 : list) {
-      if (td1.reln() != PREPOSITIONAL_MODIFIER) {
-        continue;
-      }
-      if (td1.reln() == KILL) {
-        continue;
-      }
-
-      IndexedWord td1Dep = td1.dep();
-      SortedSet<TypedDependency> possibles = map.get(td1Dep);
-      if (possibles == null) {
-        continue;
-      }
-
-      // look for the "second half"
-
-      // unique: the head prep and whether it should be pobj
-      Pair<TypedDependency, Boolean> prepDep = null;
-      TypedDependency ccDep = null; // treat as unique
-      // list of dep and prepOtherDep and pobj (or  pcomp)
-      List<Triple<TypedDependency, TypedDependency, Boolean>> conjs = new ArrayList<Triple<TypedDependency, TypedDependency, Boolean>>();
-      Set<TypedDependency> otherDtrs = new TreeSet<TypedDependency>();
-
-      // first look for a conj(prep, prep) (there might be several conj relations!!!)
-      boolean samePrepositionInEachConjunct = true;
-      int conjIndex = -1;
-      for (TypedDependency td2 : possibles) {
-        if (td2.reln() == CONJUNCT) {
-          IndexedWord td2Dep = td2.dep();
-          String td2DepPOS = td2Dep.tag();
-          if (td2DepPOS.equals("IN") || td2DepPOS.equals("TO")) {
-            samePrepositionInEachConjunct = samePrepositionInEachConjunct && td2Dep.value().equals(td1Dep.value());
-            Set<TypedDependency> possibles2 = map.get(td2Dep);
-            boolean pobj = true;// default of collapsing preposition is prep_
-            TypedDependency prepOtherDep = null;
-            if (possibles2 != null) {
-              for (TypedDependency td3 : possibles2) {
-                IndexedWord td3Dep = td3.dep();
-                String td3DepPOS = td3Dep.tag();
-                // CDM Mar 2006: I put in disjunction here when I added in
-                // PREPOSITIONAL_OBJECT. If it catches all cases, we should
-                // be able to delete the DEPENDENT disjunct
-                // maybe better to delete the DEPENDENT disjunct - it creates
-                // problem with multiple prep (mcdm)
-                if ((td3.reln() == PREPOSITIONAL_OBJECT || td3.reln() == PREPOSITIONAL_COMPLEMENT) && (!(td3DepPOS.equals("IN") || td3DepPOS.equals("TO"))) && prepOtherDep == null) {
-                  prepOtherDep = td3;
-                  if (td3.reln() == PREPOSITIONAL_COMPLEMENT) {
-                    pobj = false;
-                  }
-                } else {
-                  otherDtrs.add(td3);
-                }
-              }
-            }
-            if (conjIndex < td2Dep.index()) {
-              conjIndex = td2Dep.index();
-            }
-            conjs.add(new Triple<TypedDependency, TypedDependency, Boolean>(td2, prepOtherDep, pobj));
-          }
-        }
-      } // end td2:possibles
-
-      if (conjs.isEmpty()) {
-        continue;
-      }
-
-      // if we have a conj under a preposition dependency, we look for the other
-      // parts
-
-      String td1DepPOS = td1Dep.tag();
-      for (TypedDependency td2 : possibles) {
-        // we look for the cc linked to this conjDep
-        // the cc dep must have an index smaller than the dep of conjDep
-        if (td2.reln() == COORDINATION && td2.dep().index() < conjIndex) {
-          ccDep = td2;
-        } else {
-          IndexedWord td2Dep = td2.dep();
-          String td2DepPOS = td2Dep.tag();
-          // System.err.println("prepDep find: td1.reln: " + td1.reln() +
-          // "; td2.reln: " + td2.reln() + "; td1DepPos: " + td1DepPOS +
-          // "; td2DepPos: " + td2DepPOS + "; index " + index +
-          // "; td2.dep().index(): " + td2.dep().index());
-          if ((td2.reln() == DEPENDENT || td2.reln() == PREPOSITIONAL_OBJECT || td2.reln() == PREPOSITIONAL_COMPLEMENT) && (td1DepPOS.equals("IN") || td1DepPOS.equals("TO") || td1DepPOS.equals("VBG")) && prepDep == null && (!(td2DepPOS.equals("RB") || td2DepPOS.equals("IN") || td2DepPOS.equals("TO")))) {
-            // same index trick, in case we have multiple deps
-            // I deleted this to see if it helped [cdm Jan 2010] &&
-            // td2.dep().index() < index)
-            prepDep = new Pair<TypedDependency, Boolean>(td2, td2.reln() != PREPOSITIONAL_COMPLEMENT);
-          } else if (!inConjDeps(td2, conjs)) {// don't want to add the conjDep
-            // again!
-            otherDtrs.add(td2);
-          }
-        }
-      }
-
-      if (prepDep == null || ccDep == null) {
-        continue; // we can't deal with it in the hairy prep/conj interaction case!
-      }
-
-      if (DEBUG) {
-        // ccDep must be non-null given test above
-        System.err.println("!! Conj and prep case:");
-        System.err.println("  td1 (prep): " + td1);
-        System.err.println("  Kids of td1 are: " + possibles);
-        System.err.println("  prepDep: " + prepDep);
-        System.err.println("  ccDep: " + ccDep);
-        System.err.println("  conjs: " + conjs);
-        System.err.println("  samePrepositionInEachConjunct: " + samePrepositionInEachConjunct);
-        System.err.println("  otherDtrs: " + otherDtrs);
-      }
-
-      // check if we have the same prepositions in the conjunction
-      if (samePrepositionInEachConjunct) { // conjDep != null && prepOtherDep !=
-        // null &&
-        // OK, we have a conjunction over parallel PPs: Fred flew to Greece and
-        // to Serbia.
-        GrammaticalRelation reln = determinePrepRelation(map, vmod, td1, td1, prepDep.second());
-
-        TypedDependency tdNew = new TypedDependency(reln, td1.gov(), prepDep.first().dep());
-        newTypedDeps.add(tdNew);
-        if (DEBUG) {
-          System.err.println("PrepPoss Conj branch (two parallel PPs) adding: " + tdNew);
-          System.err.println("  removing: " + td1 + "  " + prepDep + "  " + ccDep);
-        }
-        td1.setReln(KILL);// remember these are "used up"
-        prepDep.first().setReln(KILL);
-        ccDep.setReln(KILL);
-
-        for (Triple<TypedDependency, TypedDependency, Boolean> trip : conjs) {
-          TypedDependency conjDep = trip.first();
-          TypedDependency prepOtherDep = trip.second();
-          if (prepOtherDep == null) {
-            // CDM July 2010: I think this should only ever happen if there is a
-            // misparse, but it has happened in such circumstances. You have
-            // something like (PP in or in (NP Serbia)), with the two
-            // prepositions the same. We just clean up the mess.
-            if (DEBUG) {
-              System.err.println("  apparent misparse: same P twice with only one NP object (prepOtherDep is null)");
-              System.err.println("  removing: " + conjDep);
-            }
-            ccDep.setReln(KILL);
-          } else {
-            TypedDependency tdNew2 = new TypedDependency(conjValue(ccDep.dep().value()), prepDep.first().dep(), prepOtherDep.dep());
-            newTypedDeps.add(tdNew2);
-            if (DEBUG) {
-              System.err.println("  adding: " + tdNew2);
-              System.err.println("  removing: " + conjDep + "  " + prepOtherDep);
-            }
-            prepOtherDep.setReln(KILL);
-          }
-          conjDep.setReln(KILL);
-        }
-
-        // promote dtrs that would be orphaned
-        for (TypedDependency otd : otherDtrs) {
-          if (DEBUG) {
-            System.err.print("Changed " + otd);
-          }
-          otd.setGov(td1.gov());
-          if (DEBUG) {
-            System.err.println(" to " + otd);
-          }
-        }
-
-        // Now we need to see if there are any TDs that will be "orphaned"
-        // by this collapse. Example: if we have:
-        // dep(drew, on)
-        // dep(on, book)
-        // dep(on, right)
-        // the first two will be collapsed to on(drew, book), but then
-        // the third one will be orphaned, since its governor no
-        // longer appears. So, change its governor to 'drew'.
-        // CDM Feb 2010: This used to not move COORDINATION OR CONJUNCT, but now
-        // it does, since they're not automatically deleted
-        // Some things in possibles may have already been changed, so check gov
-        if (DEBUG) {
-          System.err.println("td1: " + td1 + "; possibles: " + possibles);
-        }
-        for (TypedDependency td2 : possibles) {
-          // if (DEBUG) {
-          // System.err.println("[a] td2.reln " + td2.reln() + " td2.gov " +
-          // td2.gov() + " td1.dep " + td1.dep());
-          // }
-          if (td2.reln() != KILL && td2.gov().equals(td1.dep())) { // && td2.reln()
-            // != COORDINATION
-            // && td2.reln()
-            // != CONJUNCT
-            if (DEBUG) {
-              System.err.println("Changing " + td2 + " to have governor of " + td1 + " [a]");
-            }
-            td2.setGov(td1.gov());
-          }
-        }
-        continue; // This one has been dealt with successfully
-      } // end same prepositions
-
-      // case of "Lufthansa flies to and from Serbia". Make it look like next
-      // case :-)
-      // that is, the prepOtherDep should be the same as prepDep !
-      for (Triple<TypedDependency, TypedDependency, Boolean> trip : conjs) {
-        if (trip.first() != null && trip.second() == null) {
-          trip.setSecond(new TypedDependency(prepDep.first().reln(), trip.first().dep(), prepDep.first().dep()));
-          trip.setThird(prepDep.second());
-        }
-      }
-
-      // we have two different prepositions in the conjunction
-      // in this case we need to add a node
-      // "Bill jumped over the fence and through the hoop"
-      // prep_over(jumped, fence)
-      // conj_and(jumped, jumped)
-      // prep_through(jumped, hoop)
-
-      GrammaticalRelation reln = determinePrepRelation(map, vmod, td1, td1, prepDep.second());
-      TypedDependency tdNew = new TypedDependency(reln, td1.gov(), prepDep.first().dep());
-      newTypedDeps.add(tdNew);
-      if (DEBUG) {
-        System.err.println("ConjPP (different preps) adding: " + tdNew);
-        System.err.println("  deleting: " + td1 + "  " + prepDep.first() + "  " + ccDep);
-      }
-      td1.setReln(KILL);// remember these are "used up"
-      prepDep.first().setReln(KILL);
-      ccDep.setReln(KILL);
-      // so far we added the first prep grammatical relation
-
-      int copyNumber = 1;
-      for (Triple<TypedDependency, TypedDependency, Boolean> trip : conjs) {
-        TypedDependency conjDep = trip.first();
-        TypedDependency prepOtherDep = trip.second();
-        boolean pobj = trip.third();
-        // OK, we have a conjunction over different PPs
-        // we create a new node;
-        // in order to make a distinction between the original node and its copy
-        // we add a "copy" entry in the CoreLabel
-        // existence of copy key is checked at printing (toString method of
-        // TypedDependency)
-        IndexedWord label = td1.gov().makeSoftCopy(copyNumber);
-        copyNumber++;
-
-        // now we add the conjunction relation between td1.gov and the copy
-        // the copy has the same label as td1.gov() but is another TreeGraphNode
-        TypedDependency tdNew2 = new TypedDependency(conjValue(ccDep.dep().value()), td1.gov(), label);
-        newTypedDeps.add(tdNew2);
-
-        // now we still need to add the second prep grammatical relation
-        // between the copy and the dependent of the prepOtherDep node
-        TypedDependency tdNew3;
-
-        GrammaticalRelation reln2 = determinePrepRelation(map, vmod, conjDep, td1, pobj);
-        tdNew3 = new TypedDependency(reln2, label, prepOtherDep.dep());
-        newTypedDeps.add(tdNew3);
-
-        if (DEBUG) {
-          System.err.println("  adding: " + tdNew2 + "  " + tdNew3);
-          System.err.println("  deleting: " + conjDep + "  " + prepOtherDep);
-        }
-        conjDep.setReln(KILL);
-        prepOtherDep.setReln(KILL);
-
-        // promote dtrs that would be orphaned
-        for (TypedDependency otd : otherDtrs) {
-          // special treatment for prepositions: the original relation is
-          // likely to be a "dep" and we want this to be a "prep"
-          if (otd.dep().tag().equals("IN")) {
-            otd.setReln(PREPOSITIONAL_MODIFIER);
-          }
-          otd.setGov(td1.gov());
-        }
-      }
-
-      // Now we need to see if there are any TDs that will be "orphaned" off
-      // the first preposition
-      // by this collapse. Example: if we have:
-      // dep(drew, on)
-      // dep(on, book)
-      // dep(on, right)
-      // the first two will be collapsed to on(drew, book), but then
-      // the third one will be orphaned, since its governor no
-      // longer appears. So, change its governor to 'drew'.
-      // CDM Feb 2010: This used to not move COORDINATION OR CONJUNCT, but now
-      // it does, since they're not automatically deleted
-      for (TypedDependency td2 : possibles) {
-        if (td2.reln() != KILL) { // && td2.reln() != COORDINATION &&
-          // td2.reln() != CONJUNCT) {
-          if (DEBUG) {
-            System.err.println("Changing " + td2 + " to have governor of " + td1 + " [b]");
-          }
-          td2.setGov(td1.gov());
-        }
-      }
-      // end for different prepositions
-    } // for TypedDependency td1 : list
-
-    // below here is the single preposition/possessor basic case!!
-    for (TypedDependency td1 : list) {
-      if (td1.reln() == KILL) {
-        continue;
-      }
-
-      IndexedWord td1Dep = td1.dep();
-      String td1DepPOS = td1Dep.tag();
-      // find all other typedDeps having our dep as gov
-      Set<TypedDependency> possibles = map.get(td1Dep);
-
-      if (possibles != null && (td1.reln() == PREPOSITIONAL_MODIFIER || td1.reln() == POSSESSION_MODIFIER || td1.reln() == CONJUNCT)) {
-
-        // look for the "second half"
-        boolean pobj = true;// default for prep relation is prep_
-        for (TypedDependency td2 : possibles) {
-          if (td2.reln() != COORDINATION && td2.reln() != CONJUNCT) {
-
-            IndexedWord td2Dep = td2.dep();
-            String td2DepPOS = td2Dep.tag();
-            if ((td1.reln() == POSSESSION_MODIFIER || td1.reln() == CONJUNCT)) {
-              if (td2.reln() == POSSESSIVE_MODIFIER) {
-                if ( ! map.containsKey(td2Dep)) {  // if 's has no kids of its own (it shouldn't!)
-                  td2.setReln(KILL);
-                }
-              }
-            } else if ((td2.reln() == PREPOSITIONAL_OBJECT || td2.reln() == PREPOSITIONAL_COMPLEMENT) && (td1DepPOS.equals("IN") || td1DepPOS.equals("TO") || td1DepPOS.equals("VBG")) && (!(td2DepPOS.equals("RB") || td2DepPOS.equals("IN") || td2DepPOS.equals("TO"))) && !isConjWithNoPrep(td2.gov(), possibles)) {
-              // we don't collapse preposition conjoined with a non-preposition
-              // to avoid disconnected constituents
-              // OK, we have a pair td1, td2 to collapse to td3
-              if (DEBUG) {
-                System.err.println("(Single prep/poss base case collapsing " + td1 + " and " + td2);
-              }
-
-              // check whether we are in a pcomp case:
-              if (td2.reln() == PREPOSITIONAL_COMPLEMENT) {
-                pobj = false;
-              }
-
-              GrammaticalRelation reln = determinePrepRelation(map, vmod, td1, td1, pobj);
-              TypedDependency td3 = new TypedDependency(reln, td1.gov(), td2.dep());
-              if (DEBUG) {
-                System.err.println("PP adding: " + td3 + " deleting: " + td1 + ' ' + td2);
-              }
-              // add it to map to deal with recursive cases like "achieved this (PP (PP in part) with talent)"
-              map.get(td3.gov()).add(td3);
-
-              newTypedDeps.add(td3);
-              td1.setReln(KILL);// remember these are "used up"
-              td2.setReln(KILL);// remember these are "used up"
-            }
-          }
-        } // for TypedDependency td2
-      }
-
-      // Now we need to see if there are any TDs that will be "orphaned"
-      // by this collapse. Example: if we have:
-      // dep(drew, on)
-      // dep(on, book)
-      // dep(on, right)
-      // the first two will be collapsed to on(drew, book), but then
-      // the third one will be orphaned, since its governor no
-      // longer appears. So, change its governor to 'drew'.
-      // CDM Feb 2010: This used to not move COORDINATION OR CONJUNCT, but now
-      // it does, since they're not automatically deleted
-      if (possibles != null && td1.reln() == KILL) {
-        for (TypedDependency td2 : possibles) {
-          if (td2.reln() != KILL) { // && td2.reln() != COORDINATION &&
-            // td2.reln() != CONJUNCT) {
-            if (DEBUG) {
-              System.err.println("Changing " + td2 + " to have governor of " + td1 + " [c]");
-            }
-            td2.setGov(td1.gov());
-          }
-        }
-      }
-
-    } // for TypedDependency td1
-
-    // now remove typed dependencies with reln "kill" and add new ones.
-    for (Iterator<TypedDependency> iter = list.iterator(); iter.hasNext();) {
-      TypedDependency td = iter.next();
-      if (td.reln() == KILL) {
-        if (DEBUG) {
-          System.err.println("Removing dep killed in poss/prep (conj) collapse: " + td);
-        }
-        iter.remove();
-      }
-    }
-    list.addAll(newTypedDeps);
-  */
-  } // end collapsePrepAndPoss()
   
 
   
-  /** Work out prep relation name. pc is the dependency whose dep() is the
-   *  preposition to do a name for. topPrep may be the same or different.
-   *  Among the daughters of its gov is where to look for an auxpass.
-   */
-  /*
-  private static GrammaticalRelation determinePrepRelation(Map<IndexedWord, ? extends Set<TypedDependency>> map, List<IndexedWord> vmod, TypedDependency pc, TypedDependency topPrep, boolean pobj) {
-    // handling the case of an "agent":
-    // the governor of a "by" preposition must have an "auxpass" dependency
-    // or be the dependent of a "vmod" relation
-    // if it is the case, the "agent" variable becomes true
-    boolean agent = false;
-    String preposition = pc.dep().value().toLowerCase();
-    if (preposition.equals("by")) {
-      // look if we have an auxpass
-      Set<TypedDependency> aux_pass_poss = map.get(topPrep.gov());
-      if (aux_pass_poss != null) {
-        for (TypedDependency td_pass : aux_pass_poss) {
-          if (td_pass.reln() == AUX_PASSIVE_MODIFIER) {
-            agent = true;
-          }
-        }
-      }
-      // look if we have a vmod
-      if (!vmod.isEmpty() && vmod.contains(topPrep.gov())) {
-        agent = true;
-      }
-    }
-
-    GrammaticalRelation reln;
-    if (agent) {
-      reln = AGENT;
-    } else {
-      // for prepositions, use the preposition
-      // for pobj: we collapse into "prep"; for pcomp: we collapse into "prepc"
-      if (pobj) {
-        reln = UniversalEnglishGrammaticalRelations.getPrep(preposition);
-      } else {
-        reln = UniversalEnglishGrammaticalRelations.getPrepC(preposition);
-      }
-    }
-    return reln;
-  }
-  
-  */
+ 
 
   // used by collapse2WP(), collapseFlatMWP(), collapse2WPbis() KEPT IN
   // ALPHABETICAL ORDER
@@ -1643,711 +1208,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   // used by collapse3WP() KEPT IN ALPHABETICAL ORDER
   private static final String[][] THREEWORD_PREPS = { { "by", "means", "of" }, { "in", "accordance", "with" }, { "in", "addition", "to" }, { "in", "case", "of" }, { "in", "front", "of" }, { "in", "lieu", "of" }, { "in", "place", "of" }, { "in", "spite", "of" }, { "on", "account", "of" }, { "on", "behalf", "of" }, { "on", "top", "of" }, { "with", "regard", "to" }, { "with", "respect", "to" } };
 
-  /**
-   * Given a list of typedDependencies, returns true if the node "node" is the
-   * governor of a conj relation with a dependent which is not a preposition
-   *
-   * @param node
-   *          A node in this GrammaticalStructure
-   * @param list
-   *          A list of typedDependencies
-   * @return true If node is the governor of a conj relation in the list with
-   *         the dep not being a preposition
-   */
-  private static boolean isConjWithNoPrep(IndexedWord node, Collection<TypedDependency> list) {
-    for (TypedDependency td : list) {
-      if (td.gov().equals(node) && td.reln() == CONJUNCT) {
-        // we have a conjunct
-        // check the POS of the dependent
-        String tdDepPOS = td.dep().tag();
-        if (!(tdDepPOS.equals("IN") || tdDepPOS.equals("TO"))) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Collapse multiword preposition of the following format:
-   * prep|advmod|dep|amod(gov, mwp[0]) <br/>
-   * dep(mpw[0],mwp[1]) <br/>
-   * pobj|pcomp(mwp[1], compl) or pobj|pcomp(mwp[0], compl) <br/>
-   * -> prep_mwp[0]_mwp[1](gov, compl) <br/>
-   *
-   * prep|advmod|dep|amod(gov, mwp[1]) <br/>
-   * dep(mpw[1],mwp[0]) <br/>
-   * pobj|pcomp(mwp[1], compl) or pobj|pcomp(mwp[0], compl) <br/>
-   * -> prep_mwp[0]_mwp[1](gov, compl)
-   * <p/>
-   *
-   * The collapsing has to be done at once in order to know exactly which node
-   * is the gov and the dep of the multiword preposition. Otherwise this can
-   * lead to problems: removing a non-multiword "to" preposition for example!!!
-   * This method replaces the old "collapsedMultiWordPreps"
-   *
-   * @param list
-   *          list of typedDependencies to work on
-   */
-  private static void collapse2WP(Collection<TypedDependency> list) {
-    Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
-
-    for (String[] mwp : MULTIWORD_PREPS) {
-      // first look for patterns such as:
-      // X(gov, mwp[0])
-      // Y(mpw[0],mwp[1])
-      // Z(mwp[1], compl) or Z(mwp[0], compl)
-      // -> prep_mwp[0]_mwp[1](gov, compl)
-      collapseMultiWordPrep(list, newTypedDeps, mwp[0], mwp[1], mwp[0], mwp[1]);
-
-      // now look for patterns such as:
-      // X(gov, mwp[1])
-      // Y(mpw[1],mwp[0])
-      // Z(mwp[1], compl) or Z(mwp[0], compl)
-      // -> prep_mwp[0]_mwp[1](gov, compl)
-      collapseMultiWordPrep(list, newTypedDeps, mwp[0], mwp[1], mwp[1], mwp[0]);
-    }
-  }
-
-  /**
-   * Collapse multiword preposition of the following format:
-   * prep|advmod|dep|amod(gov, mwp0) dep(mpw0,mwp1) pobj|pcomp(mwp1, compl) or
-   * pobj|pcomp(mwp0, compl) -> prep_mwp0_mwp1(gov, compl)
-   * <p/>
-   *
-   * @param list List of typedDependencies to work on,
-   * @param newTypedDeps List of typedDependencies that we construct
-   * @param str_mwp0 First part of the multiword preposition to construct the collapsed
-   *          preposition
-   * @param str_mwp1 Second part of the multiword preposition to construct the
-   *          collapsed preposition
-   * @param w_mwp0 First part of the multiword preposition that we look for
-   * @param w_mwp1 Second part of the multiword preposition that we look for
-   */
-  private static void collapseMultiWordPrep(Collection<TypedDependency> list, Collection<TypedDependency> newTypedDeps, String str_mwp0, String str_mwp1, String w_mwp0, String w_mwp1) {
-/*
-    // first find the multiword_preposition: dep(mpw[0], mwp[1])
-    // the two words should be next to another in the sentence (difference of
-    // indexes = 1)
-    IndexedWord mwp0 = null;
-    IndexedWord mwp1 = null;
-    TypedDependency dep = null;
-    for (TypedDependency td : list) {
-      if (td.gov().value().equalsIgnoreCase(w_mwp0) && td.dep().value().equalsIgnoreCase(w_mwp1) && Math.abs(td.gov().index() - td.dep().index()) == 1) {
-        mwp0 = td.gov();
-        mwp1 = td.dep();
-        dep = td;
-      }
-    }
-
-    if (mwp0 == null) {
-      return;
-    }
-
-    // now search for nmod|advmod|dep|amod(gov, mwp0)
-    IndexedWord governor = null;
-    TypedDependency prep = null;
-    for (TypedDependency td1 : list) {
-      if ((td1.reln() == NOMINAL_MODIFIER || td1.reln() == ADVERBIAL_MODIFIER || td1.reln() == ADJECTIVAL_MODIFIER || td1.reln() == DEPENDENT || td1.reln() == MULTI_WORD_EXPRESSION) && td1.dep().equals(mwp0)) {
-        // we found nmod|advmod|dep|amod(gov, mwp0)
-        prep = td1;
-        governor = prep.gov();
-      }
-    }
-
-    if (prep == null) {
-      return;
-    }
-
-    // search for the complement: pobj|pcomp(mwp1,X)
-    // or for pobj|pcomp(mwp0,X)
-    // There may be more than one in weird constructions; if there are several,
-    // take the one with the LOWEST index!
-    TypedDependency pobj = null;
-    TypedDependency newtd = null;
-    for (TypedDependency td2 : list) {
-      if ((td2.reln() == PREPOSITIONAL_OBJECT || td2.reln() == PREPOSITIONAL_COMPLEMENT) && (td2.gov().equals(mwp1) || td2.gov().equals(mwp0))) {
-        if (pobj == null || pobj.dep().index() > td2.dep().index()) {
-          pobj = td2;
-          // create the new gr relation
-          GrammaticalRelation gr;
-          if (td2.reln() == PREPOSITIONAL_COMPLEMENT) {
-            gr = UniversalEnglishGrammaticalRelations.getPrepC(str_mwp0 + '_' + str_mwp1);
-          } else {
-            gr = UniversalEnglishGrammaticalRelations.getPrep(str_mwp0 + '_' + str_mwp1);
-          }
-          if (governor != null) {
-            newtd = new TypedDependency(gr, governor, pobj.dep());
-          }
-        }
-      }
-    }
-
-    if (pobj == null || newtd == null) {
-      return;
-    }
-
-    // only if we found the three parts, set to KILL and remove
-    // and add the new one
-    // Necessarily from the above: prep != null, dep != null, pobj != null, newtd != null
-
-    if (DEBUG) {
-      System.err.println("Removing " + prep + ", " + dep + ", and " + pobj);
-      System.err.println("  and adding " + newtd);
-    }
-    prep.setReln(KILL);
-    dep.setReln(KILL);
-    pobj.setReln(KILL);
-    newTypedDeps.add(newtd);
-
-    // now remove typed dependencies with reln "kill"
-    // and promote possible orphans
-    for (TypedDependency td1 : list) {
-      if (td1.reln() != KILL) {
-        if (td1.gov().equals(mwp0) || td1.gov().equals(mwp1)) {
-          // CDM: Thought of adding this in Jan 2010, but it causes
-          // conflicting relations tmod vs. pobj. Needs more thought
-          // maybe restrict pobj to first NP in PP, and allow tmod for a later
-          // one?
-          if (td1.reln() == TEMPORAL_MODIFIER) {
-            // special case when an extra NP-TMP is buried in a PP for
-            // "during the same period last year"
-            td1.setGov(pobj.dep());
-          } else {
-            td1.setGov(governor);
-          }
-        }
-        if (!newTypedDeps.contains(td1)) {
-          newTypedDeps.add(td1);
-        }
-      }
-    }
-    list.clear();
-    list.addAll(newTypedDeps);
-    */
-  }
-
-  /**
-   * Collapse multi-words preposition of the following format: advmod|prt(gov,
-   * mwp[0]) prep(gov,mwp[1]) pobj|pcomp(mwp[1], compl) ->
-   * prep_mwp[0]_mwp[1](gov, compl)
-   * <p/>
-   *
-   * @param list List of typedDependencies to work on
-   */
-  /*
-  private static void collapse2WPbis(Collection<TypedDependency> list) {
-    Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
-
-    for (String[] mwp : MULTIWORD_PREPS) {
-      newTypedDeps.clear();
-
-      IndexedWord mwp0 = null;
-      IndexedWord mwp1 = null;
-      IndexedWord governor = null;
-
-      TypedDependency prep = null;
-      TypedDependency dep = null;
-      TypedDependency pobj = null;
-      TypedDependency newtd = null;
-
-      // first find the first part of the multi_preposition: advmod|prt(gov, mwp[0])
-
-      for (TypedDependency td : list) {
-        if (td.dep().value().equalsIgnoreCase(mwp[0]) && (td.reln() == PHRASAL_VERB_PARTICLE || td.reln() == ADVERBIAL_MODIFIER || td.reln() == DEPENDENT || td.reln() == MULTI_WORD_EXPRESSION)) {
-          // we found advmod(gov, mwp0) or prt(gov, mwp0)
-          governor = td.gov();
-          mwp0 = td.dep();
-          dep = td;
-        }
-      }
-
-      // now search for the second part: prep(gov, mwp1)
-      // the two words in the mwp should be next to another in the sentence
-      // (difference of indexes = 1)
-
-      if (mwp0 == null || governor == null) {
-        continue;
-      }
-
-      for (TypedDependency td1 : list) {
-        if (td1.reln() == PREPOSITIONAL_MODIFIER && td1.dep().value().equalsIgnoreCase(mwp[1]) && Math.abs(td1.dep().index() - mwp0.index()) == 1 && td1.gov().equals(governor)) {// we
-          // found
-          // prep(gov,
-          // mwp1)
-          mwp1 = td1.dep();
-          prep = td1;
-        }
-      }
-
-      if (mwp1 == null) {
-        continue;
-      }
-
-      // search for the complement: pobj|pcomp(mwp1,X)
-      for (TypedDependency td2 : list) {
-        if (td2.reln() == PREPOSITIONAL_OBJECT && td2.gov().equals(mwp1)) {
-          pobj = td2;
-          // create the new gr relation
-          GrammaticalRelation gr = UniversalEnglishGrammaticalRelations.getPrep(mwp[0] + '_' + mwp[1]);
-          newtd = new TypedDependency(gr, governor, pobj.dep());
-        }
-        if (td2.reln() == PREPOSITIONAL_COMPLEMENT && td2.gov().equals(mwp1)) {
-          pobj = td2;
-          // create the new gr relation
-          GrammaticalRelation gr = UniversalEnglishGrammaticalRelations.getPrepC(mwp[0] + '_' + mwp[1]);
-          newtd = new TypedDependency(gr, governor, pobj.dep());
-        }
-      }
-
-      if (pobj == null) {
-        return;
-      }
-
-      // only if we found the three parts, set to KILL and remove
-      // and add the new one
-      // now prep != null, pobj != null and newtd != null
-
-      prep.setReln(KILL);
-      dep.setReln(KILL);
-      pobj.setReln(KILL);
-      newTypedDeps.add(newtd);
-
-      // now remove typed dependencies with reln "kill"
-      // and promote possible orphans
-      for (TypedDependency td1 : list) {
-        if (td1.reln() != KILL) {
-          if (td1.gov().equals(mwp0) || td1.gov().equals(mwp1)) {
-            td1.setGov(governor);
-          }
-          if (!newTypedDeps.contains(td1)) {
-            newTypedDeps.add(td1);
-          }
-        }
-      }
-      list.clear();
-      list.addAll(newTypedDeps);
-    }
-  }
-
-  */
   
-  /**
-   * Collapse 3-word preposition of the following format: <br/>
-   * This will be the case when the preposition is analyzed as a NP <br/>
-   * prep(gov, mwp0) <br/>
-   * X(mwp0,mwp1) <br/>
-   * X(mwp1,mwp2) <br/>
-   * pobj|pcomp(mwp2, compl) <br/>
-   * -> prep_mwp[0]_mwp[1]_mwp[2](gov, compl)
-   * <p/>
-   *
-   * It also takes flat annotation into account: <br/>
-   * prep(gov,mwp0) <br/>
-   * X(mwp0,mwp1) <br/>
-   * X(mwp0,mwp2) <br/>
-   * pobj|pcomp(mwp0, compl) <br/>
-   * -> prep_mwp[0]_mwp[1]_mwp[2](gov, compl)
-   * <p/>
-   *
-   *
-   * @param list
-   *          List of typedDependencies to work on
-   */
-  /*
-  private static void collapse3WP(Collection<TypedDependency> list) {
-    Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
-
-    // first, loop over the prepositions for NP annotation
-    for (String[] mwp : THREEWORD_PREPS) {
-      newTypedDeps.clear();
-
-      IndexedWord mwp0 = null;
-      IndexedWord mwp1 = null;
-      IndexedWord mwp2 = null;
-
-      TypedDependency dep1 = null;
-      TypedDependency dep2 = null;
-
-      // first find the first part of the 3word preposition: dep(mpw[0], mwp[1])
-      // the two words should be next to another in the sentence (difference of
-      // indexes = 1)
-
-      for (TypedDependency td : list) {
-        if (td.gov().value().equalsIgnoreCase(mwp[0]) && td.dep().value().equalsIgnoreCase(mwp[1]) && Math.abs(td.gov().index() - td.dep().index()) == 1) {
-          mwp0 = td.gov();
-          mwp1 = td.dep();
-          dep1 = td;
-        }
-      }
-
-      // find the second part of the 3word preposition: dep(mpw[1], mwp[2])
-      // the two words should be next to another in the sentence (difference of
-      // indexes = 1)
-
-      for (TypedDependency td : list) {
-        if (td.gov().equals(mwp1) && td.dep().value().equalsIgnoreCase(mwp[2]) && Math.abs(td.gov().index() - td.dep().index()) == 1) {
-          mwp2 = td.dep();
-          dep2 = td;
-        }
-      }
-
-      if (dep1 != null && dep2 != null) {
-
-        // now search for prep(gov, mwp0)
-        IndexedWord governor = null;
-        TypedDependency prep = null;
-        for (TypedDependency td1 : list) {
-          if (td1.reln() == PREPOSITIONAL_MODIFIER && td1.dep().equals(mwp0)) {// we
-            // found
-            // prep(gov,
-            // mwp0)
-            prep = td1;
-            governor = prep.gov();
-          }
-        }
-
-        // search for the complement: pobj|pcomp(mwp2,X)
-
-        TypedDependency pobj = null;
-        TypedDependency newtd = null;
-        for (TypedDependency td2 : list) {
-          if (td2.reln() == PREPOSITIONAL_OBJECT && td2.gov().equals(mwp2)) {
-            pobj = td2;
-            // create the new gr relation
-            GrammaticalRelation gr = UniversalEnglishGrammaticalRelations.getPrep(mwp[0] + '_' + mwp[1] + '_' + mwp[2]);
-            if (governor != null) {
-              newtd = new TypedDependency(gr, governor, pobj.dep());
-            }
-          }
-          if (td2.reln() == PREPOSITIONAL_COMPLEMENT && td2.gov().equals(mwp2)) {
-            pobj = td2;
-            // create the new gr relation
-            GrammaticalRelation gr = UniversalEnglishGrammaticalRelations.getPrepC(mwp[0] + '_' + mwp[1] + '_' + mwp[2]);
-            if (governor != null) {
-              newtd = new TypedDependency(gr, governor, pobj.dep());
-            }
-          }
-        }
-
-        // only if we found the governor and complement parts, set to KILL and
-        // remove
-        // and add the new one
-        if (prep != null && pobj != null && newtd != null) {
-          prep.setReln(KILL);
-          dep1.setReln(KILL);
-          dep2.setReln(KILL);
-          pobj.setReln(KILL);
-          newTypedDeps.add(newtd);
-
-          // now remove typed dependencies with reln "kill"
-          // and promote possible orphans
-          for (TypedDependency td1 : list) {
-            if (td1.reln() != KILL) {
-              if (td1.gov().equals(mwp0) || td1.gov().equals(mwp1) || td1.gov().equals(mwp2)) {
-                td1.setGov(governor);
-              }
-              if (!newTypedDeps.contains(td1)) {
-                newTypedDeps.add(td1);
-              }
-            }
-          }
-          list.clear();
-          list.addAll(newTypedDeps);
-        }
-      }
-    }
-
-    // second, loop again looking at flat annotation
-    for (String[] mwp : THREEWORD_PREPS) {
-      newTypedDeps.clear();
-
-      IndexedWord mwp0 = null;
-      IndexedWord mwp1 = null;
-      IndexedWord mwp2 = null;
-
-      TypedDependency dep1 = null;
-      TypedDependency dep2 = null;
-
-      // first find the first part of the 3word preposition: dep(mpw[0], mwp[1])
-      // the two words should be next to another in the sentence (difference of
-      // indexes = 1)
-      for (TypedDependency td : list) {
-        if (td.gov().value().equalsIgnoreCase(mwp[0]) && td.dep().value().equalsIgnoreCase(mwp[1]) && Math.abs(td.gov().index() - td.dep().index()) == 1) {
-          mwp0 = td.gov();
-          mwp1 = td.dep();
-          dep1 = td;
-        }
-      }
-
-      // find the second part of the 3word preposition: dep(mpw[0], mwp[2])
-      // the two words should be one word apart in the sentence (difference of
-      // indexes = 2)
-      for (TypedDependency td : list) {
-        if (td.gov().equals(mwp0) && td.dep().value().equalsIgnoreCase(mwp[2]) && Math.abs(td.gov().index() - td.dep().index()) == 2) {
-          mwp2 = td.dep();
-          dep2 = td;
-        }
-      }
-
-      if (dep1 != null && dep2 != null) {
-
-        // now search for prep(gov, mwp0)
-        IndexedWord governor = null;
-        TypedDependency prep = null;
-        for (TypedDependency td1 : list) {
-          if (td1.dep().equals(mwp0) && td1.reln() == PREPOSITIONAL_MODIFIER) {// we
-            // found
-            // prep(gov,
-            // mwp0)
-            prep = td1;
-            governor = prep.gov();
-          }
-        }
-
-        // search for the complement: pobj|pcomp(mwp0,X)
-
-        TypedDependency pobj = null;
-        TypedDependency newtd = null;
-        for (TypedDependency td2 : list) {
-          if (td2.gov().equals(mwp0) && td2.reln() == PREPOSITIONAL_OBJECT) {
-            pobj = td2;
-            // create the new gr relation
-            GrammaticalRelation gr = UniversalEnglishGrammaticalRelations.getPrep(mwp[0] + '_' + mwp[1] + '_' + mwp[2]);
-            if (governor != null) {
-              newtd = new TypedDependency(gr, governor, pobj.dep());
-            }
-          }
-          if (td2.gov().equals(mwp0) && td2.reln() == PREPOSITIONAL_COMPLEMENT) {
-            pobj = td2;
-            // create the new gr relation
-            GrammaticalRelation gr = UniversalEnglishGrammaticalRelations.getPrepC(mwp[0] + '_' + mwp[1] + '_' + mwp[2]);
-            if (governor != null) {
-              newtd = new TypedDependency(gr, governor, pobj.dep());
-            }
-          }
-        }
-
-        // only if we found the governor and complement parts, set to KILL and
-        // remove
-        // and add the new one
-        if (prep != null && pobj != null && newtd != null) {
-          prep.setReln(KILL);
-          dep1.setReln(KILL);
-          dep2.setReln(KILL);
-          pobj.setReln(KILL);
-          newTypedDeps.add(newtd);
-
-          // now remove typed dependencies with reln "kill"
-          // and promote possible orphans
-          for (TypedDependency td1 : list) {
-            if (td1.reln() != KILL) {
-              if (td1.gov().equals(mwp0) || td1.gov().equals(mwp1) || td1.gov().equals(mwp2)) {
-                td1.setGov(governor);
-              }
-              if (!newTypedDeps.contains(td1)) {
-                newTypedDeps.add(td1);
-              }
-            }
-          }
-          list.clear();
-          list.addAll(newTypedDeps);
-        }
-      }
-    }
-  }
-  */
-
-
-  /*
-   *
-   * While upgrading, here are some lists of common multiword prepositions which
-   * we might try to cover better. (Also do corpus counts for same?)
-   *
-   * (Prague Dependency Treebank) as per CRIT except for RESTR but for RESTR
-   * apart from RESTR away from RESTR aside from RESTR as from TSIN ahead of
-   * TWHEN back of LOC, DIR3 exclusive of* RESTR instead of SUBS outside of LOC,
-   * DIR3 off of DIR1 upwards of LOC, DIR3 as of TSIN because of CAUS inside of
-   * LOC, DIR3 irrespective of REG out of LOC, DIR1 regardless of REG according
-   * to CRIT due to CAUS next to LOC, RESTR owing to* CAUS preparatory to* TWHEN
-   * prior to* TWHEN subsequent to* TWHEN as to/for REG contrary to* CPR close
-   * to* LOC, EXT (except the case named in the next table) near to LOC, DIR3
-   * nearer to LOC, DIR3 preliminary to* TWHEN previous to* TWHEN pursuant to*
-   * CRIT thanks to CAUS along with ACMP together with ACMP devoid of* ACMP void
-   * of* ACMP
-   *
-   * http://www.keepandshare.com/doc/view.php?u=13166
-   *
-   * according to ahead of as far as as well as by means of due to far from in
-   * addition to in case of in front of in place of in spite of inside of
-   * instead of in to (into) near to next to on account of on behalf of on top
-   * of on to (onto) out of outside of owing to prior to with regards to
-   *
-   * www.eslmonkeys.com/book/learner/prepositions.pdf According to Ahead of
-   * Along with Apart from As for As to Aside from Because of But for Contrary
-   * to Except for Instead of Next to Out of Prior to Thanks to
-   */
-
-  /**
-   * Collapse multi-words preposition of the following format, which comes from
-   * flat annotation. This handles e.g., "because of" (PP (IN because) (IN of)
-   * ...), "such as" (PP (JJ such) (IN as) ...)
-   * <p/>
-   * prep(gov, mwp[1]) dep(mpw[1], mwp[0]) pobj(mwp[1], compl) ->
-   * prep_mwp[0]_mwp[1](gov, compl)
-   *
-   * @param list
-   *          List of typedDependencies to work on
-   */
-  /*
-  private static void collapseFlatMWP(Collection<TypedDependency> list) {
-    Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>();
-
-    for (String[] mwp : MULTIWORD_PREPS) {
-      newTypedDeps.clear();
-
-      IndexedWord mwp1 = null;
-      IndexedWord governor = null;
-
-      TypedDependency prep = null;
-      TypedDependency dep = null;
-      TypedDependency pobj = null;
-
-      // first find the multi_preposition: dep(mpw[1], mwp[0])
-      for (TypedDependency td : list) {
-        if (Math.abs(td.gov().index() - td.dep().index()) == 1 && td.gov().value().equalsIgnoreCase(mwp[1]) && td.dep().value().equalsIgnoreCase(mwp[0])) {
-          mwp1 = td.gov();
-          dep = td;
-        }
-      }
-
-      if (mwp1 == null) {
-        continue;
-      }
-
-      // now search for prep(gov, mwp1)
-      for (TypedDependency td1 : list) {
-        if (td1.dep().equals(mwp1) && td1.reln() == PREPOSITIONAL_MODIFIER) {
-          // we found prep(gov, mwp1)
-          prep = td1;
-          governor = prep.gov();
-        }
-      }
-
-      if (prep == null) {
-        continue;
-      }
-
-      // search for the complement: pobj|pcomp(mwp1,X)
-      for (TypedDependency td2 : list) {
-        if (td2.gov().equals(mwp1) && td2.reln() == PREPOSITIONAL_OBJECT) {
-          pobj = td2;
-          // create the new gr relation
-          GrammaticalRelation gr = UniversalEnglishGrammaticalRelations.getPrep(mwp[0] + '_' + mwp[1]);
-          newTypedDeps.add(new TypedDependency(gr, governor, pobj.dep()));
-        }
-        if (td2.gov().equals(mwp1) && td2.reln() == PREPOSITIONAL_COMPLEMENT) {
-          pobj = td2;
-          // create the new gr relation
-          GrammaticalRelation gr = UniversalEnglishGrammaticalRelations.getPrepC(mwp[0] + '_' + mwp[1]);
-          newTypedDeps.add(new TypedDependency(gr, governor, pobj.dep()));
-        }
-      }
-
-      if (pobj == null) {
-        return;
-      }
-      // only if we found the three parts, set to KILL and remove
-      // we know prep != null && dep != null && dep != null
-      prep.setReln(KILL);
-      dep.setReln(KILL);
-      pobj.setReln(KILL);
-
-      // now remove typed dependencies with reln "kill"
-      // and promote possible orphans
-      for (TypedDependency td1 : list) {
-        if (td1.reln() != KILL) {
-          if (td1.gov().equals(mwp1)) {
-            td1.setGov(governor);
-          }
-          if (!newTypedDeps.contains(td1)) {
-            newTypedDeps.add(td1);
-          }
-        }
-      }
-      list.clear();
-      list.addAll(newTypedDeps);
-    }
-  }
-  */
-
-  /**
-   * This method gets rid of multiwords in conjunctions to avoid having them
-   * creating disconnected constituents e.g.,
-   * "bread-1 as-2 well-3 as-4 cheese-5" will be turned into conj_and(bread,
-   * cheese) and then dep(well-3, as-2) and dep(well-3, as-4) cannot be attached
-   * to the graph, these dependencies are erased
-   *
-   * @param list List of words to get rid of multiword conjunctions from
-   */
-  //We no longer delete any dependencies
-  /*
-  private static void eraseMultiConj(Collection<TypedDependency> list) {
-    // find typed deps of form cc(gov, x)
-    for (TypedDependency td1 : list) {
-      if (td1.reln() == COORDINATION) {
-        IndexedWord x = td1.dep();
-        // find typed deps of form dep(x,y) and kill them
-        for (TypedDependency td2 : list) {
-          if (td2.gov().equals(x) && (td2.reln() == DEPENDENT || td2.reln() == MULTI_WORD_EXPRESSION || td2.reln() == COORDINATION ||
-                  td2.reln() == ADVERBIAL_MODIFIER || td2.reln() == NEGATION_MODIFIER || td2.reln() == AUX_MODIFIER)) {
-            td2.setReln(KILL);
-          }
-        }
-      }
-    }
-
-    filterKill(list);
-  }
-  */
   
-  /**
-   * Remove duplicate relations: it can happen when collapsing stranded
-   * prepositions. E.g., "What does CPR stand for?" we get dep(stand, what), and
-   * after collapsing we also get prep_for(stand, what).
-   *
-   * @param list A list of typed dependencies to check through
-   */
-  private static void removeDep(Collection<TypedDependency> list) {
-    /*
-    Set<GrammaticalRelation> prepRels = Generics.newHashSet(UniversalEnglishGrammaticalRelations.getPreps());
-    prepRels.addAll(UniversalEnglishGrammaticalRelations.getPrepsC());
-    for (TypedDependency td1 : list) {
-      if (prepRels.contains(td1.reln())) { // if we have a prep_ relation
-        IndexedWord gov = td1.gov();
-        IndexedWord dep = td1.dep();
-
-        for (TypedDependency td2 : list) {
-          if (td2.reln() == DEPENDENT && td2.gov().equals(gov) && td2.dep().equals(dep)) {
-            td2.setReln(KILL);
-          }
-        }
-      }
-    }
-    */
-
-    // now remove typed dependencies with reln "kill"
-    for (Iterator<TypedDependency> iter = list.iterator(); iter.hasNext();) {
-      TypedDependency td = iter.next();
-      if (td.reln() == KILL) {
-        if (DEBUG) {
-          System.err.println("Removing duplicate relation: " + td);
-        }
-        iter.remove();
-      }
-    }
-  }
-
   /**
    * Find and remove any exact duplicates from a dependency list.
    * For example, the method that "corrects" nsubj dependencies can

@@ -35,6 +35,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import edu.stanford.nlp.trees.GrammaticalStructure.Extras;
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 
@@ -47,7 +48,7 @@ import junit.framework.TestCase;
  */
 
 @RunWith(Parameterized.class)
-public class UniversalEnglishGrammaticalStructureTest extends TestCase {
+public class UniversalEnglishGrammaticalStructureTest extends Assert{
 
 
   private String testTree;
@@ -155,7 +156,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "neg(information-5, no-3)\n" + 
            "amod(information-5, useful-4)\n" + 
            "dobj(have-2, information-5)\n" + 
-           "case(risk-11, on-6)\n" + 
+           "mark(risk-11, on-6)\n" + 
            "mark(risk-11, whether-7)\n" + 
            "nsubj(risk-11, users-8)\n" + 
            "cop(risk-11, are-9)\n" + 
@@ -392,14 +393,14 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "nsubj(live-6, you-5)\n" + 
            "root(ROOT-0, live-6)\n"},
          {TestType.BASIC,
-          "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBD did) (NP (NNP Charles) (NNP Babbage)) (VP (VB invent))) (? ?)))",
+          "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBD did) (NP (NNP Charles) (NNP Babbage)) (VP (VB invent))) (. ?)))",
           "dobj(invent-5, What-1)\n" + 
            "aux(invent-5, did-2)\n" + 
            "compound(Babbage-4, Charles-3)\n" + 
            "nsubj(invent-5, Babbage-4)\n" + 
            "root(ROOT-0, invent-5)\n"},
          {TestType.BASIC,
-          "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT the) (NN esophagus)) (VP (VBN used) (PP (IN for)))) (? ?)))",
+          "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT the) (NN esophagus)) (VP (VBN used) (PP (IN for)))) (. ?)))",
           "nmod(used-5, What-1)\n" + 
            "auxpass(used-5, is-2)\n" + 
            "det(esophagus-4, the-3)\n" + 
@@ -526,8 +527,8 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
            "neg(only-4, not-3)\n" + 
            "cc:preconj(cats-5, only-4)\n" + 
            "dobj(like-2, cats-5)\n" + 
-           "cc(also-7, but-6)\n" + 
-           "cc(cats-5, also-7)\n" + 
+           "cc(cats-5, but-6)\n" + 
+           "advmod(dogs-8, also-7)\n" + 
            "conj(cats-5, dogs-8)\n"},
          {TestType.BASIC,
           "( (S (NP (PRP He)) (VP (VBZ knows) (NP (DT the) (NML (JJ mechanical) (NN engineering)) (NN industry))) (. .)))",
@@ -930,8 +931,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
              "nsubj(going-4, it-1)\n" + 
               "aux(going-4, wase-2)\n" + 
               "neg(going-4, nt-3)\n" + 
-              "root(ROOT-0, going-4)\n" + 
-              "punct(going-4, ....-5)\n"},
+              "root(ROOT-0, going-4)\n"},
             {TestType.BASIC,
              // Relative clauses used to not be recognized off NP-ADV or NP-TMP
              "( (S (NP-SBJ (DT An) (NN arbitrator) ) (VP (VP (VBD awarded) (NP (NNP Eastern) (NNPS Airlines) (NNS pilots) ) (NP (NP (QP (IN between) ($ $) (CD 60) (CD million) (CC and) ($ $) (CD 100) (CD million) ) (-NONE- *U*) ) (PP (IN in) (NP (JJ back) (NN pay) )))) (, ,) (NP-ADV (NP (DT a) (NN decision) ) (SBAR (WHNP-285 (WDT that) ) (S (NP-SBJ (-NONE- *T*-285) ) (VP (MD could) (VP (VB complicate) (NP (NP (DT the) (NN carrier) (POS 's) ) (NN bankruptcy-law) (NN reorganization) ))))))) (. .) ))",
@@ -1636,7 +1636,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                 "neg(information-5, no-3)\n" + 
                 "amod(information-5, useful-4)\n" + 
                 "dobj(have-2, information-5)\n" + 
-                "case(are-9, on-6)\n" + 
+                "mark(are-9, on-6)\n" + 
                 "mark(are-9, whether-7)\n" + 
                 "nsubj(are-9, users-8)\n" + 
                 "acl(information-5, are-9)\n" + 
@@ -1770,7 +1770,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                 "nsubj(bought-7, you-6)\n" + 
                 "acl:relcl(book-4, bought-7)\n"},
               {TestType.NON_COLLAPSED,
-               "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT the) (NN esophagus)) (VP (VBN used) (PP (IN for)))) (? ?)))",
+               "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT the) (NN esophagus)) (VP (VBN used) (PP (IN for)))) (. ?)))",
                "nmod(used-5, What-1)\n" + 
                 "auxpass(used-5, is-2)\n" + 
                 "det(esophagus-4, the-3)\n" + 
@@ -1807,11 +1807,59 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                "(ROOT (S (NP (NNP Lufthansa)) (VP (VBZ flies) (PP (TO to) (CC and) (IN from) (NP (NNP Serbia)))) (. .)))",
                "nsubj(flies-2, Lufthansa-1)\n" +
                 "root(ROOT-0, flies-2)\n" +
+                "conj:and(flies-2, flies-2')\n" +
                 "case(Serbia-6, to-3)\n" +
-                "cc(Serbia-6, and-4)\n" +
-                "case(Serbia-6, from-5)\n" +
-                "nmod:from(flies-2, Serbia-6)\n" +
+                "cc(flies-2, and-4)\n" +
+                "case(Serbia-6', from-5)\n" +
+                "nmod:from(flies-2', Serbia-6')\n" +
                 "nmod:to(flies-2, Serbia-6)\n"},
+             {TestType.COLLAPSED,
+                "(ROOT (S (NP (NNP Lufthansa)) (VP (VBZ flies) (PP (TO to) (CC and) (IN from) (NP (NP (NNP Serbia)) (CC and) (NP (NNP France))))) (. .)))",
+                "nsubj(flies-2, Lufthansa-1)\n" +
+                "root(ROOT-0, flies-2)\n" +
+                "conj:and(flies-2, flies-2')\n" +
+                "case(Serbia-6, to-3)\n" +
+                "cc(flies-2, and-4)\n" +
+                "case(Serbia-6', from-5)\n" +
+                "nmod:from(flies-2', Serbia-6')\n" +
+                "nmod:to(flies-2, Serbia-6)\n" +
+                "cc(Serbia-6, and-7)\n" +
+                "cc(Serbia-6', and-7)\n" + 
+                "conj:and(Serbia-6, France-8)\n" +
+                "conj:and(Serbia-6', France-8)\n"},
+            {TestType.COLLAPSED,
+              "(ROOT (S (NP (NNP Lufthansa)) (VP (VP (VBZ flies) (PP (IN from) (NP (NNP Serbia)))) (CC and) (VP (VBZ flies) (PP (TO to) (NP (NNP Serbia))))) (. .)))",
+              "nsubj(flies-2, Lufthansa-1)\n" +
+              "root(ROOT-0, flies-2)\n" +
+              "case(Serbia-4, from-3)\n" +
+              "nmod:from(flies-2, Serbia-4)\n" +
+              "cc(flies-2, and-5)\n" +
+              "conj:and(flies-2, flies-6)\n" +
+              "case(Serbia-8, to-7)\n" +
+              "nmod:to(flies-6, Serbia-8)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (NNP Lufthansa)) (VP (VBZ flies) (PP (PP (IN from) (NP (NNP Serbia))) (CC and) (PP (TO to) (NP (NNP France))))) (. .)))",
+              "nsubj(flies-2, Lufthansa-1)\n" +
+              "root(ROOT-0, flies-2)\n" +
+              "conj:and(flies-2, flies-2')\n" +
+              "case(Serbia-4, from-3)\n" +
+              "nmod:from(flies-2, Serbia-4)\n" +
+              "cc(flies-2, and-5)\n" +
+              "case(France-7, to-6)\n" +
+              "nmod:to(flies-2', France-7)\n"},
+             {TestType.COLLAPSED,
+              "(ROOT (S (NP (NNP Lufthansa)) (VP (VBZ flies) (PP (PP (IN from) (NP (NNP Austria))) (, ,) (PP (TO to) (NP (NNP Syria))) (CC and) (PP (IN through) (NP (NNP Serbia))))) (. .)))",
+              "nsubj(flies-2, Lufthansa-1)\n" +
+              "root(ROOT-0, flies-2)\n" +
+              "conj:and(flies-2, flies-2')\n" +
+              "conj:and(flies-2, flies-2'')\n" +
+              "case(Austria-4, from-3)\n" +
+              "nmod:from(flies-2, Austria-4)\n" +
+              "case(Syria-7, to-6)\n" +
+              "nmod:to(flies-2', Syria-7)\n" +              
+              "cc(flies-2, and-8)\n" +
+              "case(Serbia-10, through-9)\n" +
+              "nmod:through(flies-2'', Serbia-10)\n"}, 
              {TestType.COLLAPSED,
               "(ROOT (S (NP (NNP Dole)) (VP (VBD was) (VP (VBN defeated) (PP (IN by) (NP (NNP Clinton))))) (. .)))",
               "nsubjpass(defeated-3, Dole-1)\n" + 
@@ -1849,13 +1897,12 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                "neg(information-5, no-3)\n" + 
                "amod(information-5, useful-4)\n" + 
                "dobj(have-2, information-5)\n" + 
-               "case(risk-11, on-6)\n" + 
+               "mark(risk-11, on-6)\n" + 
                "mark(risk-11, whether-7)\n" + 
                "nsubj(risk-11, users-8)\n" + 
                "cop(risk-11, are-9)\n" + 
                "case(risk-11, at-10)\n" +
-               "acl:at(information-5, risk-11)\n" +
-               "acl:on(information-5, risk-11)\n"},
+               "acl:at(information-5, risk-11)\n"},
              {TestType.COLLAPSED,
               "(ROOT (S (NP (PRP They)) (VP (VBD heard) (PP (IN about) (NP (NN asbestos))) (S (VP (VBG having) (NP (JJ questionable) (NNS properties))))) (. .)))",
               "nsubj(heard-2, They-1)\n" + 
@@ -1896,7 +1943,8 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                "root(ROOT-0, saw-2)\n" + 
                "det(man-4, the-3)\n" + 
                "dobj(saw-2, man-4)\n" + 
-               "dobj(love-7, man-4)\n" + 
+               "dobj(love-7, man-4)\n" +
+               "ref(man-4, who-5)\n" +
                "nsubj(love-7, you-6)\n" + 
                "acl:relcl(man-4, love-7)\n"},
              {TestType.COLLAPSED,
@@ -1922,7 +1970,6 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
              {TestType.COLLAPSED,
               "(ROOT (S (NP (PRP He)) (VP (VBD talked) (PP (TO to) (NP (DT the) (NN president))) (SBAR (IN in) (NN order) (S (VP (TO to) (VP (VB secure) (NP (DT the) (NN account))))))) (. .)))",
               "nsubj(talked-2, He-1)\n" + 
-               "nsubj(secure-9, He-1)\n" +  //correct??
                "root(ROOT-0, talked-2)\n" + 
                "case(president-5, to-3)\n" + 
                "det(president-5, the-4)\n" + 
@@ -1940,6 +1987,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                "det(book-4, the-3)\n" + 
                "dobj(saw-2, book-4)\n" + 
                "dobj(bought-7, book-4)\n" + 
+               "ref(book-4, which-5)\n" + 
                "nsubj(bought-7, you-6)\n" + 
                "acl:relcl(book-4, bought-7)\n"},
              {TestType.COLLAPSED,
@@ -1962,7 +2010,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                "nsubj(live-6, you-5)\n" + 
                "root(ROOT-0, live-6)\n"},
              {TestType.COLLAPSED,
-              "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT the) (NN esophagus)) (VP (VBN used) (PP (IN for)))) (? ?)))",
+              "(ROOT (SBARQ (WHNP (WP What)) (SQ (VBZ is) (NP (DT the) (NN esophagus)) (VP (VBN used) (PP (IN for)))) (. ?)))",
               "nmod:for(used-5, What-1)\n" + 
                "auxpass(used-5, is-2)\n" + 
                "det(esophagus-4, the-3)\n" + 
@@ -1983,10 +2031,12 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
               "( (S (NP (NNP Fred)) (VP (VBD flew) (PP (IN across) (CC or) (IN across) (NP (NNP Serbia)))) (. .)))",
               "nsubj(flew-2, Fred-1)\n" + 
                "root(ROOT-0, flew-2)\n" + 
+               "conj:or(flew-2, flew-2')\n" + 
                "case(Serbia-6, across-3)\n" + 
-               "cc(Serbia-6, or-4)\n" + 
-               "case(Serbia-6, across-5)\n" + 
-               "nmod:across(flew-2, Serbia-6)\n"},
+               "cc(flew-2, or-4)\n" + 
+               "case(Serbia-6', across-5)\n" + 
+               "nmod:across(flew-2, Serbia-6)\n" +
+               "nmod:across(flew-2', Serbia-6')\n"},
              {TestType.COLLAPSED,
               "(ROOT (SBARQ (WHPP (IN For) (WHNP (WRB how) (JJ long))) (SQ (VBZ is) (NP (DT an) (NN elephant)) (ADJP (JJ pregnant))) (. ?)))",
               "case(long-3, For-1)\n" + 
@@ -2002,7 +2052,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                "root(ROOT-0, achieved-2)\n" + 
                "dobj(achieved-2, this-3)\n" + 
                "case(part-5, in-4)\n" + 
-               "nmod:in(achieved-2, part-5)\n" + 
+               "nmod:in(talent-9, part-5)\n" + 
                "case(talent-9, through-6)\n" + 
                "det(talent-9, an-7)\n" + 
                "amod(talent-9, uncanny-8)\n" + 
@@ -2017,9 +2067,9 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                "case(Chile-7, from-6)\n" + 
                "nmod:from(ranged-5, Chile-7)\n" + 
                "case(Austria-9, to-8)\n" + 
-               "nmod:to(ranged-5, Austria-9)\n" + 
+               "nmod:to(Chile-7, Austria-9)\n" + 
                "case(Portugal-11, to-10)\n" + 
-               "nmod:to(ranged-5, Portugal-11)\n"},
+               "nmod:to(Chile-7, Portugal-11)\n"},
              {TestType.COLLAPSED,
               "( (S (CC But) (NP (NP (NNP Ms.) (NNP Poore)) (, ,) (NP (NP (DT the) (NN magazine) (POS 's)) (NN editor) (CC and) (NN publisher)) (, ,)) (VP (VBD resigned)) (. .)))",
               "cc(resigned-12, But-1)\n" + 
@@ -2057,10 +2107,410 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
                "case(investments-7, of-3)\n" + 
                "det(funds-5, the-4)\n" + 
                "nmod:poss(investments-7, funds-5)\n" + 
+               "case(funds-5, '-6)\n" + 
                "nmod:of(maturity-2, investments-7)\n" + 
                "root(ROOT-0, lengthened-8)\n"},
 
 
+             /* Test for CC processing */
+             {TestType.CC_PROCESSED,
+              "(ROOT (S (NP (NNP Bill)) (VP (VBZ is) (ADJP (JJ big) (CC and) (JJ honest))) (. .)))",
+              "nsubj(big-3, Bill-1)\n" +
+               "nsubj(honest-5, Bill-1)\n" +
+               "cop(big-3, is-2)\n" +
+               "root(ROOT-0, big-3)\n" +
+               "cc(big-3, and-4)\n" +
+               "conj:and(big-3, honest-5)\n"},
+             {TestType.CC_PROCESSED,
+              "(ROOT (S (NP (CC Both) (NP (DT the) (NNS boys)) (CC and) (NP (DT the) (NNS girls))) (VP (VBP are) (ADVP (RB here))) (. .)))",
+              "cc:preconj(boys-3, Both-1)\n" +
+               "det(boys-3, the-2)\n" +
+               "nsubj(are-7, boys-3)\n" +
+               "cc(boys-3, and-4)\n" +
+               "det(girls-6, the-5)\n" +
+               "conj:and(boys-3, girls-6)\n" +
+               "nsubj(are-7, girls-6)\n" +
+               "root(ROOT-0, are-7)\n" +
+               "advmod(are-7, here-8)\n"},
+             {TestType.CC_PROCESSED,
+              "(ROOT (S (NP-SBJ-38 (DT Neither) (NP (PRP they) ) (CC nor) (NP (NNP Mr.) (NNP McAlpine) )) (VP (MD could) (VP (VB be) (VP (VBN reached) (NP (-NONE- *-38) ) (PP-PRP (IN for) (NP (NN comment) ))))) (. .) ))",
+              "cc:preconj(they-2, Neither-1)\n" +
+               "nsubjpass(reached-8, they-2)\n" +
+               "cc(they-2, nor-3)\n" +
+               "compound(McAlpine-5, Mr.-4)\n" +
+               "conj:nor(they-2, McAlpine-5)\n" +
+               "nsubjpass(reached-8, McAlpine-5)\n" +
+               "aux(reached-8, could-6)\n" +
+               "auxpass(reached-8, be-7)\n" +
+               "root(ROOT-0, reached-8)\n" +
+               "case(comment-10, for-9)\n" +
+               "nmod:for(reached-8, comment-10)\n"},
+             {TestType.CC_PROCESSED,
+              "(ROOT (S (NP (NNP John)) (VP (VBZ works) (PP (DT both) (PP (IN in) (NP (NNP Zurich))) (CC and) (PP (IN in) (NP (NNP London))))) (. .)))",
+              "nsubj(works-2, John-1)\n" +
+               "nsubj(works-2', John-1)\n" +
+               "root(ROOT-0, works-2)\n" +
+               "conj:and(works-2, works-2')\n" +
+               "cc:preconj(Zurich-5, both-3)\n" +
+               "case(Zurich-5, in-4)\n" +
+               "nmod:in(works-2, Zurich-5)\n" +
+               "cc(works-2, and-6)\n" +
+               "case(London-8, in-7)\n" +
+               "nmod:in(works-2', London-8)\n"},
+             {TestType.CC_PROCESSED,
+              "(ROOT (S (NP (NP (NNS Languages)) (PP (PP (IN with) (NP (NNS alphabets))) (CC and) (PP (IN without) (NP (NNS alphabets))))) (VP (VBP are) (ADJP (JJ difficult))) (. .)))",
+              "conj:and(Languages-1, Languages-1')\n" +
+               "nsubj(difficult-8, Languages-1)\n" +
+               "nsubj(difficult-8, Languages-1')\n" +
+               "case(alphabets-3, with-2)\n" +
+               "nmod:with(Languages-1, alphabets-3)\n" +
+               "cc(Languages-1, and-4)\n" +
+               "case(alphabets-6, without-5)\n" +
+               "nmod:without(Languages-1', alphabets-6)\n" +
+               "cop(difficult-8, are-7)\n" +
+               "root(ROOT-0, difficult-8)\n"},
+             {TestType.CC_PROCESSED,
+              "(ROOT (S (NP (PRP$ His) (NN term)) (VP (VP (VBZ has) (VP (VBN produced) (NP (NP (DT no) (JJ spectacular) (NNS failures)) (PP (PP (IN in) (NP (NNS politics))) (, ,) (PP (IN in) (NP (DT the) (NN economy))) (CC or) (PP (IN on) (NP (DT the) (JJ military) (NN front))))))) (, ,) (CC and) (VP (VBZ has) (VP (VBN chalked) (PRT (RP up)) (NP (DT some) (NNS successes))))) (. .)))",
+              "nmod:poss(term-2, His-1)\n" +
+               "nsubj(produced-4, term-2)\n" +
+               "nsubj(chalked-22, term-2)\n" +
+               "aux(produced-4, has-3)\n" +
+               "root(ROOT-0, produced-4)\n" +
+               "neg(failures-7, no-5)\n" +
+               "amod(failures-7, spectacular-6)\n" +
+               "dobj(produced-4, failures-7)\n" +
+               "dobj(produced-4, failures-7')\n" +
+               "dobj(produced-4, failures-7'')\n" +
+               "conj:or(failures-7, failures-7')\n" +
+               "conj:or(failures-7, failures-7'')\n" +
+               "case(politics-9, in-8)\n" +
+               "nmod:in(failures-7, politics-9)\n" +
+               "case(economy-13, in-11)\n" +
+               "det(economy-13, the-12)\n" +
+               "nmod:in(failures-7'', economy-13)\n" +
+               "cc(failures-7, or-14)\n" +
+               "case(front-18, on-15)\n" +
+               "det(front-18, the-16)\n" +
+               "amod(front-18, military-17)\n" +
+               "nmod:on(failures-7', front-18)\n" +
+               "cc(produced-4, and-20)\n" +
+               "aux(chalked-22, has-21)\n" +
+               "conj:and(produced-4, chalked-22)\n" +
+               "compound:prt(chalked-22, up-23)\n" +
+               "det(successes-25, some-24)\n" +
+               "dobj(chalked-22, successes-25)\n"},
+             {TestType.CC_PROCESSED,
+              "(ROOT (S (NP (NNP Fred)) (VP (VBD walked) (PP (PP (IN out) (NP (DT the) (NN door))) (CC and) (PP (RB right) (IN into) (NP (DT a) (NN trap))))) (. .)))",
+              "nsubj(walked-2, Fred-1)\n" +
+               "nsubj(walked-2', Fred-1)\n" +
+               "root(ROOT-0, walked-2)\n" +
+               "conj:and(walked-2, walked-2')\n" +
+               "case(door-5, out-3)\n" +
+               "det(door-5, the-4)\n" +
+               "nmod:out(walked-2, door-5)\n" +
+               "cc(walked-2, and-6)\n" +
+               "advmod(trap-10, right-7)\n" +
+               "case(trap-10, into-8)\n" +
+               "det(trap-10, a-9)\n" +
+               "nmod:into(walked-2', trap-10)\n"},
+             {TestType.CC_PROCESSED,
+              "(ROOT (S (NP (NNP Fred)) (VP (VBD walked) (PP (PP (IN into) (NP (DT the) (NN house))) (CC and) (PP (RB right) (IN into) (NP (DT a) (NN trap))))) (. .)))",
+              "nsubj(walked-2, Fred-1)\n" +
+               "nsubj(walked-2', Fred-1)\n" +
+               "root(ROOT-0, walked-2)\n" +
+               "conj:and(walked-2, walked-2')\n" +
+               "case(house-5, into-3)\n" +
+               "det(house-5, the-4)\n" +
+               "nmod:into(walked-2, house-5)\n" +
+               "cc(walked-2, and-6)\n" +
+               "advmod(trap-10, right-7)\n" +
+               "case(trap-10, into-8)\n" +
+               "det(trap-10, a-9)\n" +
+               "nmod:into(walked-2', trap-10)\n"},
+             {TestType.CC_PROCESSED,
+              "(ROOT (S (NP (NNP Marie) (CC and) (NNP Chris)) (VP (VP (VBD went) (PRT (RP out))) (, ,) (VP (VBD drank) (NP (NN coffee))) (, ,) (CC and) (VP (VBD talked) (PP (IN about) (NP (NNP Stanford) (NNPS Dependencies))))) (. .)))",
+              "nsubj(went-4, Marie-1)\n" +
+               "nsubj(drank-7, Marie-1)\n" +
+               "nsubj(talked-11, Marie-1)\n" +
+               "cc(Marie-1, and-2)\n" +
+               "conj:and(Marie-1, Chris-3)\n" +
+               "nsubj(went-4, Chris-3)\n" +
+               "root(ROOT-0, went-4)\n" +
+               "compound:prt(went-4, out-5)\n" +
+               "conj:and(went-4, drank-7)\n" +
+               "dobj(drank-7, coffee-8)\n" +
+               "cc(went-4, and-10)\n" +
+               "conj:and(went-4, talked-11)\n" +
+               "case(Dependencies-14, about-12)\n" +
+               "compound(Dependencies-14, Stanford-13)\n" +
+               "nmod:about(talked-11, Dependencies-14)\n"},
+             {TestType.CC_PROCESSED,
+              "(ROOT (S (NP-TMP (DT These) (NNS days)) (NP (PRP he)) (VP (VBZ hustles) (PP (TO to) (NP (JJ house-painting) (NNS jobs))) (PP (IN in) (NP (PRP$ his) (NNP Chevy) (NN pickup))) (PP (IN before) (CC and) (IN after) (S (VP (NN training) (PP (IN with) (NP (DT the) (NNPS Tropics))))))) (. .)))",
+              "det(days-2, These-1)\n" +
+               "nmod:tmod(hustles-4, days-2)\n" +
+               "nsubj(hustles-4, he-3)\n" +
+               "nsubj(hustles-4', he-3)\n" +
+               "root(ROOT-0, hustles-4)\n" +
+               "conj:and(hustles-4, hustles-4')\n" +
+               "case(jobs-7, to-5)\n" +
+               "amod(jobs-7, house-painting-6)\n" +
+               "nmod:to(hustles-4, jobs-7)\n" +
+               "case(pickup-11, in-8)\n" +
+               "nmod:poss(pickup-11, his-9)\n" +
+               "compound(pickup-11, Chevy-10)\n" +
+               "nmod:in(hustles-4, pickup-11)\n" +
+               "case(training-15, before-12)\n" +
+               "cc(hustles-4, and-13)\n" +
+               "case(training-15', after-14)\n" +
+               "advcl:after(hustles-4', training-15')\n" +
+               "advcl:before(hustles-4, training-15)\n" +
+               "case(Tropics-18, with-16)\n" +
+               "det(Tropics-18, the-17)\n" +
+               "nmod:with(training-15, Tropics-18)\n" +
+               "nmod:with(training-15', Tropics-18)\n"},
+             {TestType.CC_PROCESSED,
+              "(ROOT (S (NP (NNP Jill)) (VP (VBD walked) (PP (PP (IN out) (NP (DT the) (NN door))) (, ,) (PP (IN over) (NP (DT the) (NN road))) (, ,) (PP (IN across) (NP (DT the) (JJ deserted) (NN block))) (, ,) (PP (IN around) (NP (DT the) (NN corner))) (, ,) (CC and) (PP (IN through) (NP (DT the) (NN park))))) (. .)))",
+              "nsubj(walked-2, Jill-1)\n" +
+               "nsubj(walked-2', Jill-1)\n" +
+               "nsubj(walked-2'', Jill-1)\n" +
+               "nsubj(walked-2''', Jill-1)\n" +
+               "nsubj(walked-2'''', Jill-1)\n" +
+               "root(ROOT-0, walked-2)\n" +
+               "conj:and(walked-2, walked-2')\n" +
+               "conj:and(walked-2, walked-2'')\n" +
+               "conj:and(walked-2, walked-2''')\n" +
+               "conj:and(walked-2, walked-2'''')\n" +
+               "case(door-5, out-3)\n" +
+               "det(door-5, the-4)\n" +
+               "nmod:out(walked-2, door-5)\n" +
+               "case(road-9, over-7)\n" +
+               "det(road-9, the-8)\n" +
+               "nmod:over(walked-2''', road-9)\n" +
+               "case(block-14, across-11)\n" +
+               "det(block-14, the-12)\n" +
+               "amod(block-14, deserted-13)\n" +
+               "nmod:across(walked-2'''', block-14)\n" +
+               "case(corner-18, around-16)\n" +
+               "det(corner-18, the-17)\n" +
+               "nmod:around(walked-2', corner-18)\n" +
+               "cc(walked-2, and-20)\n" +
+               "case(park-23, through-21)\n" +
+               "det(park-23, the-22)\n" +
+               "nmod:through(walked-2'', park-23)\n"},
+             {TestType.CC_PROCESSED,
+              "(ROOT (S (NP (NNP John)) (VP (VP (VBD noticed) (NP (DT a) (NN cockroach))) (CC and) (VP (VBD departed))) (. .)))",
+              "nsubj(noticed-2, John-1)\n" +
+               "nsubj(departed-6, John-1)\n" +
+               "root(ROOT-0, noticed-2)\n" +
+               "det(cockroach-4, a-3)\n" +
+               "dobj(noticed-2, cockroach-4)\n" +
+               "cc(noticed-2, and-5)\n" +
+               "conj:and(noticed-2, departed-6)\n"},
+             {TestType.CC_PROCESSED,
+              "( (S (S (NP (RBR More) (JJ common) (NN chrysotile) (NNS fibers)) (VP (VP (VBP are) (ADJP (JJ curly))) (CC and) (VP (VBP are) (VP (ADVP (RBR more) (RB easily)) (VBN rejected) (PP (IN by) (NP (DT the) (NN body))))))) (, ,) (NP (NNP Dr.) (NNP Mossman)) (VP (VBD explained)) (. .)))",
+              "advmod(fibers-4, More-1)\n" +
+               "amod(fibers-4, common-2)\n" +
+               "compound(fibers-4, chrysotile-3)\n" +
+               "nsubj(curly-6, fibers-4)\n" +
+               "nsubjpass(rejected-11, fibers-4)\n" +
+               "cop(curly-6, are-5)\n" +
+               "ccomp(explained-18, curly-6)\n" +
+               "cc(curly-6, and-7)\n" +
+               "auxpass(rejected-11, are-8)\n" +
+               "advmod(easily-10, more-9)\n" +
+               "advmod(rejected-11, easily-10)\n" +
+               "conj:and(curly-6, rejected-11)\n" +
+               "ccomp(explained-18, rejected-11)\n" +
+               "case(body-14, by-12)\n" + 
+               "det(body-14, the-13)\n" +
+               "nmod:agent(rejected-11, body-14)\n" +
+               "compound(Mossman-17, Dr.-16)\n" +
+               "nsubj(explained-18, Mossman-17)\n" +
+               "root(ROOT-0, explained-18)\n"},
+             {TestType.CC_PROCESSED,
+              "( (S (NP (NNP John)) (VP (VP (VBD is) (VP (VBN appalled))) (CC and) (VP (MD will) (VP (VB complain)))) (. .)))",
+              "nsubjpass(appalled-3, John-1)\n" +
+               "nsubj(complain-6, John-1)\n" +
+               "auxpass(appalled-3, is-2)\n" +
+               "root(ROOT-0, appalled-3)\n" +
+               "cc(appalled-3, and-4)\n" +
+               "aux(complain-6, will-5)\n" +
+               "conj:and(appalled-3, complain-6)\n"},
+             {TestType.CC_PROCESSED,
+              "( (SBARQ (WHNP (WP What)) (SQ (VP (VBP are) (NP (NP (NP (NP (NNP Christopher) (NNP Marlowe) (POS 's)) (CC and) (NP (NNP Shakespeare) (POS 's))) (JJ literary) (NNS contributions)) (PP (TO to) (NP (JJ English) (NN literature)))))) (. ?)))",
+              "nsubj(contributions-10, What-1)\n" +
+               "cop(contributions-10, are-2)\n" +
+               "compound(Marlowe-4, Christopher-3)\n" +
+               "nmod:poss(contributions-10, Marlowe-4)\n" +
+               "case(Marlowe-4, 's-5)\n" +
+               "cc(Marlowe-4, and-6)\n" +
+               "conj:and(Marlowe-4, Shakespeare-7)\n" +
+               "nmod:poss(contributions-10, Shakespeare-7)\n" +
+               "case(Shakespeare-7, 's-8)\n" +
+               "amod(contributions-10, literary-9)\n" +
+               "root(ROOT-0, contributions-10)\n" +
+               "case(literature-13, to-11)\n" +
+               "amod(literature-13, English-12)\n" +
+               "nmod:to(contributions-10, literature-13)\n"},
+             {TestType.CC_PROCESSED,
+              "( (SBARQ (WHNP (WP What)) (SQ (VP (VBP are) (NP (NP (NP (NP (NP (NNP Christopher) (NNP Marlowe)) (CC and) (NP (NNP Shakespeare))) (POS 's)) (JJ literary) (NNS contributions)) (PP (TO to) (NP (JJ English) (NN literature)))))) (. ?)))",
+              "nsubj(contributions-9, What-1)\n" +
+               "cop(contributions-9, are-2)\n" +
+               "compound(Marlowe-4, Christopher-3)\n" +
+               "nmod:poss(contributions-9, Marlowe-4)\n" +
+               "cc(Marlowe-4, and-5)\n" +
+               "conj:and(Marlowe-4, Shakespeare-6)\n" +
+               "nmod:poss(contributions-9, Shakespeare-6)\n" +
+               "case(Marlowe-4, 's-7)\n" +
+               "amod(contributions-9, literary-8)\n" +
+               "root(ROOT-0, contributions-9)\n" +
+               "case(literature-12, to-10)\n" +
+               "amod(literature-12, English-11)\n" +
+               "nmod:to(contributions-9, literature-12)\n"},
+             {TestType.CC_PROCESSED,
+              "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NNS dogs)) (CONJP (RB as) (RB well) (IN as)) (NP (NNS cats)))) (. .)))",
+              "nsubj(like-2, I-1)\n" +
+               "root(ROOT-0, like-2)\n" +
+               "dobj(like-2, dogs-3)\n" +
+               "cc(dogs-3, as-4)\n" +
+               "mwe(as-4, well-5)\n" +
+               "mwe(as-4, as-6)\n" +
+               "dobj(like-2, cats-7)\n" +
+               "conj:and(dogs-3, cats-7)\n"},
+             {TestType.CC_PROCESSED,
+              "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NNS dogs)) (CONJP (RB rather) (IN than)) (NP (NNS cats)))) (. .)))",
+              "nsubj(like-2, I-1)\n" +
+               "root(ROOT-0, like-2)\n" +
+               "dobj(like-2, dogs-3)\n" +
+               "cc(dogs-3, rather-4)\n" +
+               "mwe(rather-4, than-5)\n" +
+               "dobj(like-2, cats-6)\n" +
+               "conj:negcc(dogs-3, cats-6)\n"},
+             {TestType.CC_PROCESSED,
+              "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NN brandy)) (CONJP (RB not) (TO to) (VB mention)) (NP (NN cognac)))) (. .)))",
+              "nsubj(like-2, I-1)\n" +
+               "root(ROOT-0, like-2)\n" +
+               "dobj(like-2, brandy-3)\n" +
+               "cc(brandy-3, not-4)\n" +
+               "mwe(not-4, to-5)\n" +
+               "mwe(not-4, mention-6)\n" +
+               "dobj(like-2, cognac-7)\n" +
+               "conj:and(brandy-3, cognac-7)\n"},
+             {TestType.CC_PROCESSED,
+              "( (S (NP (PRP I)) (VP (VBP like) (NP (CONJP (RB not) (RB only)) (NP (NNS cats)) (CONJP (CC but) (RB also)) (NP (NN dogs)))) (. .)))",
+              "nsubj(like-2, I-1)\n" +
+               "root(ROOT-0, like-2)\n" +
+               "neg(only-4, not-3)\n" +
+               "cc:preconj(cats-5, only-4)\n" +
+               "dobj(like-2, cats-5)\n" +
+               "cc(cats-5, but-6)\n" +
+               "advmod(dogs-8, also-7)\n" +
+               "dobj(like-2, dogs-8)\n" +
+               "conj:and(cats-5, dogs-8)\n"},
+             {TestType.CC_PROCESSED,
+              "((S (NP (NNP Fred)) (VP (VBD flew) (PP (CONJP (RB not) (JJ only)) (PP (TO to) (NP (NNP Greece))) (CONJP (CC but) (RB also)) (PP (TO to) (NP (NNP Serbia))))) (. .)))",
+              "nsubj(flew-2, Fred-1)\n" +
+               "nsubj(flew-2', Fred-1)\n" +
+               "root(ROOT-0, flew-2)\n" +
+               "conj:and(flew-2, flew-2')\n" +
+               "neg(only-4, not-3)\n" +
+               "cc:preconj(Greece-6, only-4)\n" +
+               "case(Greece-6, to-5)\n" +
+               "nmod:to(flew-2, Greece-6)\n" +
+               "cc(flew-2, but-7)\n" +
+               "advmod(Serbia-10, also-8)\n" +
+               "case(Serbia-10, to-9)\n" +
+               "nmod:to(flew-2', Serbia-10)\n"},
+             {TestType.CC_PROCESSED,
+              "( (SINV (ADVP-TMP (RB Only) (RB recently)) (SINV (VBZ has) (NP (PRP it)) (VP (VBN been) (VP (ADVP-MNR (RB attractively)) (VBN redesigned)))) (CC and) (SINV (NP (PRP$ its) (JJ editorial) (NN product)) (VP (VBN improved))) (. .)))",
+              "advmod(recently-2, Only-1)\n" +
+               "advmod(redesigned-7, recently-2)\n" +
+               "aux(redesigned-7, has-3)\n" +
+               "nsubjpass(redesigned-7, it-4)\n" +
+               "auxpass(redesigned-7, been-5)\n" +
+               "advmod(redesigned-7, attractively-6)\n" +
+               "root(ROOT-0, redesigned-7)\n" +
+               "cc(redesigned-7, and-8)\n" +
+               "nmod:poss(product-11, its-9)\n" +
+               "amod(product-11, editorial-10)\n" +
+               "nsubj(improved-12, product-11)\n" +
+               "conj:and(redesigned-7, improved-12)\n"},
+             {TestType.CC_PROCESSED,
+              "( (S (NP-SBJ (JJP (JJ Political) (CC and) (NN currency)) (NNS gyrations)) (VP (MD can) (VP (VB whipsaw) (NP (DT the) (NNS funds)))) (. .)))",
+              "amod(gyrations-4, Political-1)\n" +
+               "cc(Political-1, and-2)\n" +
+               "conj:and(Political-1, currency-3)\n" +
+               "amod(gyrations-4, currency-3)\n" +
+               "nsubj(whipsaw-6, gyrations-4)\n" +
+               "aux(whipsaw-6, can-5)\n" +
+               "root(ROOT-0, whipsaw-6)\n" +
+               "det(funds-8, the-7)\n" +
+               "dobj(whipsaw-6, funds-8)\n"},
+             {TestType.CC_PROCESSED,
+              "(NP-SBJ (NNS Managers) (CC and) (NNS presenters))",
+              "root(ROOT-0, Managers-1)\n" +
+               "cc(Managers-1, and-2)\n" +
+               "conj:and(Managers-1, presenters-3)\n"},
+             {TestType.CC_PROCESSED,
+              "(NP (NN education) (, ,) (NN science) (CC and) (NN culture))",
+              "root(ROOT-0, education-1)\n" +
+               "conj:and(education-1, science-3)\n" +
+               "cc(education-1, and-4)\n" +
+               "conj:and(education-1, culture-5)\n"},
+             {TestType.CC_PROCESSED,
+              "(NP (NN education) (, ,) (NN science) (, ,) (CC and) (NN culture))",
+              "root(ROOT-0, education-1)\n" +
+                "conj:and(education-1, science-3)\n" +
+                "cc(education-1, and-5)\n" +
+                "conj:and(education-1, culture-6)\n"},
+             {TestType.CC_PROCESSED,
+              "(NP (NNP Digital) (, ,) (NNP Hewlett) (CC and) (NNP Sun) ) ",
+              "root(ROOT-0, Digital-1)\n" +
+               "conj:and(Digital-1, Hewlett-3)\n" +
+               "cc(Digital-1, and-4)\n" +
+               "conj:and(Digital-1, Sun-5)\n"},
+             {TestType.CC_PROCESSED,
+              "(NP (NNP Digital) (, ,) (NNP Hewlett) (, ,) (CC and) (NNP Sun))",
+              "root(ROOT-0, Digital-1)\n" +
+               "conj:and(Digital-1, Hewlett-3)\n" +
+               "cc(Digital-1, and-5)\n" +
+               "conj:and(Digital-1, Sun-6)\n"},
+             {TestType.CC_PROCESSED,
+              "(NP (NP (NNP Home) (NNP Depot) ) (, ,) (NP (NNP Sun) ) (, ,) (CC and) (NP (NNP Coke) ) )",
+              "compound(Depot-2, Home-1)\n" +
+               "root(ROOT-0, Depot-2)\n" +
+               "conj:and(Depot-2, Sun-4)\n" +
+               "cc(Depot-2, and-6)\n" +
+               "conj:and(Depot-2, Coke-7)\n"},
+             {TestType.CC_PROCESSED,
+              "(NP (NP (NNP Home) (NNP Depot) ) (, ,) (NP (NNP Sun) ) (CC and)  (NP (NNP Coke) ) )",
+              "compound(Depot-2, Home-1)\n" +
+               "root(ROOT-0, Depot-2)\n" +
+               "conj:and(Depot-2, Sun-4)\n" +
+               "cc(Depot-2, and-5)\n" +
+               "conj:and(Depot-2, Coke-6)\n"},
+             {TestType.CC_PROCESSED,
+              "(S (NP (NP (NN Activation)) (PP (IN of) (NP (NP (NN Akt)) (, ,) (NP (NN NFkappaB)) (, ,) (CC and) (NP (NN Stat3)) (CONJP (CC but) (RB not)) (NP (NN MAPK) (NNS pathways))))) (VP (VBP are) (NP (NP (NNS characteristics)) (VP (VBN associated) (PP (IN with) (NP (NP (JJ malignant) (NN transformation)) ))))))",
+              "nsubj(characteristics-14, Activation-1)\n" +
+               "case(Akt-3, of-2)\n" +
+               "nmod:of(Activation-1, Akt-3)\n" +
+               "nmod:of(Activation-1, NFkappaB-5)\n" +
+               "conj:and(Akt-3, NFkappaB-5)\n" +
+               "cc(Akt-3, and-7)\n" +
+               "nmod:of(Activation-1, Stat3-8)\n" +
+               "conj:and(Akt-3, Stat3-8)\n" +
+               "cc(not-10, but-9)\n" +
+               "cc(Akt-3, not-10)\n" +
+               "compound(pathways-12, MAPK-11)\n" +
+               "nmod:of(Activation-1, pathways-12)\n" +
+               "conj:negcc(Akt-3, pathways-12)\n" +
+               "cop(characteristics-14, are-13)\n" +
+               "root(ROOT-0, characteristics-14)\n" +
+               "acl(characteristics-14, associated-15)\n" +
+               "case(transformation-18, with-16)\n" + 
+               "amod(transformation-18, malignant-17)\n" +
+               "nmod:with(associated-15, transformation-18)\n"}, 
+               
     });
   }
 
@@ -2091,7 +2541,7 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
         testCollapsedRelation();
         break;
       case CC_PROCESSED:
-        //testCCProcessedRelations();
+        testCCProcessedRelation();
         break;
       case COPY_NODES:
         testCollapsedRelation();
@@ -2198,254 +2648,17 @@ public class UniversalEnglishGrammaticalStructureTest extends TestCase {
    * some hard-coded trees.
    *
    */
-  public void testCCProcessedRelations() {
-    // the trees to test
-    String[] testTrees = {
-         "(ROOT (S (NP (NNP Bill)) (VP (VBZ is) (ADJP (JJ big) (CC and) (JJ honest))) (. .)))",
-         "(ROOT (S (NP (CC Both) (NP (DT the) (NNS boys)) (CC and) (NP (DT the) (NNS girls))) (VP (VBP are) (ADVP (RB here))) (. .)))",
-         "(ROOT (S (NP-SBJ-38 (DT Neither) (NP (PRP they) ) (CC nor) (NP (NNP Mr.) (NNP McAlpine) )) (VP (MD could) (VP (VB be) (VP (VBN reached) (NP (-NONE- *-38) ) (PP-PRP (IN for) (NP (NN comment) ))))) (. .) ))",
-         "(ROOT (S (NP (NNP John)) (VP (VBZ works) (PP (DT both) (PP (IN in) (NP (NNP Zurich))) (CC and) (PP (IN in) (NP (NNP London))))) (. .)))",
-         "(ROOT (S (NP (NP (NNS Languages)) (PP (PP (IN with) (NP (NNS alphabets))) (CC and) (PP (IN without) (NP (NNS alphabets))))) (VP (VBP are) (ADJP (JJ difficult))) (. .)))",
-         "(ROOT (S (NP (PRP$ His) (NN term)) (VP (VP (VBZ has) (VP (VBN produced) (NP (NP (DT no) (JJ spectacular) (NNS failures)) (PP (PP (IN in) (NP (NNS politics))) (, ,) (PP (IN in) (NP (DT the) (NN economy))) (CC or) (PP (IN on) (NP (DT the) (JJ military) (NN front))))))) (, ,) (CC and) (VP (VBZ has) (VP (VBN chalked) (PRT (RP up)) (NP (DT some) (NNS successes))))) (. .)))",
-         "(ROOT (S (NP (NNP Fred)) (VP (VBD walked) (PP (PP (IN out) (NP (DT the) (NN door))) (CC and) (PP (RB right) (IN into) (NP (DT a) (NN trap))))) (. .)))",
-         "(ROOT (S (NP (NNP Fred)) (VP (VBD walked) (PP (PP (IN into) (NP (DT the) (NN house))) (CC and) (PP (RB right) (IN into) (NP (DT a) (NN trap))))) (. .)))",
-         "(ROOT (S (NP (NNP Marie) (CC and) (NNP Chris)) (VP (VP (VBD went) (PRT (RP out))) (, ,) (VP (VBD drank) (NP (NN coffee))) (, ,) (CC and) (VP (VBD talked) (PP (IN about) (NP (NNP Stanford) (NNPS Dependencies))))) (. .)))",
-         "(ROOT (S (NP-TMP (DT These) (NNS days)) (NP (PRP he)) (VP (VBZ hustles) (PP (TO to) (NP (JJ house-painting) (NNS jobs))) (PP (IN in) (NP (PRP$ his) (NNP Chevy) (NN pickup))) (PP (IN before) (CC and) (IN after) (S (VP (NN training) (PP (IN with) (NP (DT the) (NNPS Tropics))))))) (. .)))",
-         "(ROOT (S (NP (NNP Jill)) (VP (VBD walked) (PP (PP (IN out) (NP (DT the) (NN door))) (, ,) (PP (IN over) (NP (DT the) (NN road))) (, ,) (PP (IN across) (NP (DT the) (JJ deserted) (NN block))) (, ,) (PP (IN around) (NP (DT the) (NN corner))) (, ,) (CC and) (PP (IN through) (NP (DT the) (NN park))))) (. .)))",
-         "(ROOT (S (NP (NNP John)) (VP (VP (VBD noticed) (NP (DT a) (NN cockroach))) (CC and) (VP (VBD departed))) (. .)))",
-         "( (S (S (NP (RBR More) (JJ common) (NN chrysotile) (NNS fibers)) (VP (VP (VBP are) (ADJP (JJ curly))) (CC and) (VP (VBP are) (VP (ADVP (RBR more) (RB easily)) (VBN rejected) (PP (IN by) (NP (DT the) (NN body))))))) (, ,) (NP (NNP Dr.) (NNP Mossman)) (VP (VBD explained)) (. .)))",
-         "( (S (NP (NNP John)) (VP (VP (VBD is) (VP (VBN appalled))) (CC and) (VP (MD will) (VP (VB complain)))) (. .)))",
-         "( (SBARQ (WHNP (WP What)) (SQ (VP (VBP are) (NP (NP (NP (NP (NNP Christopher) (NNP Marlowe) (POS 's)) (CC and) (NP (NNP Shakespeare) (POS 's))) (JJ literary) (NNS contributions)) (PP (TO to) (NP (JJ English) (NN literature)))))) (. ?)))",
-         "( (SBARQ (WHNP (WP What)) (SQ (VP (VBP are) (NP (NP (NP (NP (NP (NNP Christopher) (NNP Marlowe)) (CC and) (NP (NNP Shakespeare))) (POS 's)) (JJ literary) (NNS contributions)) (PP (TO to) (NP (JJ English) (NN literature)))))) (. ?)))",
-         "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NNS dogs)) (CONJP (RB as) (RB well) (IN as)) (NP (NNS cats)))) (. .)))",
-         "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NNS dogs)) (CONJP (RB rather) (IN than)) (NP (NNS cats)))) (. .)))",
-         "( (S (NP (PRP I)) (VP (VBP like) (NP (NP (NN brandy)) (CONJP (RB not) (TO to) (VB mention)) (NP (NN cognac)))) (. .)))",
-         "( (S (NP (PRP I)) (VP (VBP like) (NP (CONJP (RB not) (RB only)) (NP (NNS cats)) (CONJP (CC but) (RB also)) (NP (NN dogs)))) (. .)))",
-         "((S (NP (NNP Fred)) (VP (VBD flew) (PP (CONJP (RB not) (JJ only)) (PP (TO to) (NP (NNP Greece))) (CONJP (CC but) (RB also)) (PP (TO to) (NP (NNP Serbia))))) (. .)))",
-         "( (SINV (ADVP-TMP (RB Only) (RB recently)) (SINV (VBZ has) (NP (PRP it)) (VP (VBN been) (VP (ADVP-MNR (RB attractively)) (VBN redesigned)))) (CC and) (SINV (NP (PRP$ its) (JJ editorial) (NN product)) (VP (VBN improved))) (. .)))",
-         "( (S (NP-SBJ (JJP (JJ Political) (CC and) (NN currency)) (NNS gyrations)) (VP (MD can) (VP (VB whipsaw) (NP (DT the) (NNS funds)))) (. .)))",
-         "(NP-SBJ (NNS Managers) (CC and) (NNS presenters))",
-         "(NP (NN education) (, ,) (NN science) (CC and) (NN culture))",
-         "(NP (NN education) (, ,) (NN science) (, ,) (CC and) (NN culture))",
-         "(NP (NNP Digital) (, ,) (NNP Hewlett) (CC and) (NNP Sun) ) ",
-         "(NP (NNP Digital) (, ,) (NNP Hewlett) (, ,) (CC and) (NNP Sun))",
-         "(NP (NP (NNP Home) (NNP Depot) ) (, ,) (NP (NNP Sun) ) (, ,) (CC and) (NP (NNP Coke) ) )",
-         "(NP (NP (NNP Home) (NNP Depot) ) (, ,) (NP (NNP Sun) ) (CC and)  (NP (NNP Coke) ) )",
-         "(S (NP (NP (NN Activation)) (PP (IN of) (NP (NP (NN Akt)) (, ,) (NP (NN NFkappaB)) (, ,) (CC and) (NP (NN Stat3)) (CONJP (CC but) (RB not)) (NP (NN MAPK) (NNS pathways))))) (VP (VBP are) (NP (NP (NNS characteristics)) (VP (VBN associated) (PP (IN with) (NP (NP (JJ malignant) (NN transformation)) ))))))", // test but not -> negcc
-    };
-
-
-    // the expected dependency answers (CCprocessed)
-    String[] testAnswers = {
-        "nsubj(big-3, Bill-1)\n" + "nsubj(honest-5, Bill-1)\n" + "cop(big-3, is-2)\n" + "root(ROOT-0, big-3)\n" + "conj_and(big-3, honest-5)\n",
-        "preconj(boys-3, Both-1)\n" + "det(boys-3, the-2)\n" + "nsubj(are-7, boys-3)\n" + "det(girls-6, the-5)\n" + "conj_and(boys-3, girls-6)\n" + "nsubj(are-7, girls-6)\n" + "root(ROOT-0, are-7)\n" + "advmod(are-7, here-8)\n",
-        "preconj(they-2, Neither-1)\n" + "nsubjpass(reached-8, they-2)\n" + "nn(McAlpine-5, Mr.-4)\n" + "conj_nor(they-2, McAlpine-5)\n" + "nsubjpass(reached-8, McAlpine-5)\n" + "aux(reached-8, could-6)\n" + "auxpass(reached-8, be-7)\n" + "root(ROOT-0, reached-8)\n" + "prep_for(reached-8, comment-10)\n",
-        "nsubj(works-2, John-1)\n" + "root(ROOT-0, works-2)\n" + "preconj(works-2, both-3)\n" + "prep_in(works-2, Zurich-5)\n" + "prep_in(works-2, London-8)\n" + "conj_and(Zurich-5, London-8)\n",
-        "conj_and(Languages-1, Languages-1')\n" + "nsubj(difficult-8, Languages-1)\n" + "nsubj(difficult-8, Languages-1')\n" + "prep_with(Languages-1, alphabets-3)\n" + "prep_without(Languages-1', alphabets-6)\n" + "cop(difficult-8, are-7)\n" + "root(ROOT-0, difficult-8)\n",
-        "nmod:poss(term-2, His-1)\n" +
-                "nsubj(produced-4, term-2)\n" +
-                "nsubj(chalked-22, term-2)\n" +
-                "aux(produced-4, has-3)\n" + "root(ROOT-0, produced-4)\n" +
-                "neg(failures-7, no-5)\n" +
-                "amod(failures-7, spectacular-6)\n" +
-                "dobj(produced-4, failures-7)\n" +
-                "dobj(produced-4, failures-7')\n" +
-                "dobj(produced-4, failures-7'')\n" +
-                "conj_or(failures-7, failures-7')\n" +
-                "conj_or(failures-7, failures-7'')\n" +
-                "prep_in(failures-7, politics-9)\n" +
-                "det(economy-13, the-12)\n" +
-                "prep_in(failures-7', economy-13)\n" +
-                "det(front-18, the-16)\n" +
-                "amod(front-18, military-17)\n" +
-                "prep_on(failures-7'', front-18)\n" +
-                "aux(chalked-22, has-21)\n" +
-                "conj_and(produced-4, chalked-22)\n" +
-                "prt(chalked-22, up-23)\n" +
-                "det(successes-25, some-24)\n" +
-                "dobj(chalked-22, successes-25)\n",
-        "nsubj(walked-2, Fred-1)\n" +
-                "nsubj(walked-2', Fred-1)\n" + "root(ROOT-0, walked-2)\n" +
-                "conj_and(walked-2, walked-2')\n" +
-                "det(door-5, the-4)\n" +
-                "prep_out(walked-2, door-5)\n" +
-                "advmod(walked-2, right-7)\n" +
-                "det(trap-10, a-9)\n" +
-                "prep_into(walked-2', trap-10)\n",
-        "nsubj(walked-2, Fred-1)\n" + "root(ROOT-0, walked-2)\n" +
-                "det(house-5, the-4)\n" +
-                "prep_into(walked-2, house-5)\n" +
-                "advmod(walked-2, right-7)\n" +
-                "det(trap-10, a-9)\n" +
-                "prep_into(walked-2, trap-10)\n" +
-                "conj_and(house-5, trap-10)\n",
-        "nsubj(went-4, Marie-1)\n" +
-                "nsubj(drank-7, Marie-1)\n" +
-                "nsubj(talked-11, Marie-1)\n" +
-                "conj_and(Marie-1, Chris-3)\n" +
-                "nsubj(went-4, Chris-3)\n" + "root(ROOT-0, went-4)\n" +
-                "prt(went-4, out-5)\n" +
-                "conj_and(went-4, drank-7)\n" +
-                "dobj(drank-7, coffee-8)\n" +
-                "conj_and(went-4, talked-11)\n" +
-                "nn(Dependencies-14, Stanford-13)\n" +
-                "prep_about(talked-11, Dependencies-14)\n",
-        "det(days-2, These-1)\n" +
-                "tmod(hustles-4, days-2)\n" +
-                "nsubj(hustles-4, he-3)\n" +
-                "nsubj(hustles-4', he-3)\n" + "root(ROOT-0, hustles-4)\n" +
-                "conj_and(hustles-4, hustles-4')\n" +
-                "amod(jobs-7, house-painting-6)\n" +
-                "prep_to(hustles-4, jobs-7)\n" +
-                "nmod:poss(pickup-11, his-9)\n" +
-                "nn(pickup-11, Chevy-10)\n" +
-                "prep_in(hustles-4, pickup-11)\n" +
-                "prepc_after(hustles-4', training-15)\n" +
-                "prepc_before(hustles-4, training-15)\n" +
-                "det(Tropics-18, the-17)\n" +
-                "prep_with(training-15, Tropics-18)\n",
-        "nsubj(walked-2, Jill-1)\n" + "nsubj(walked-2', Jill-1)\n" + "nsubj(walked-2'', Jill-1)\n" + "nsubj(walked-2''', Jill-1)\n" + "nsubj(walked-2'''', Jill-1)\n" + "root(ROOT-0, walked-2)\n" + "conj_and(walked-2, walked-2')\n" + "conj_and(walked-2, walked-2'')\n" + "conj_and(walked-2, walked-2''')\n" + "conj_and(walked-2, walked-2'''')\n" + "det(door-5, the-4)\n" + "prep_out(walked-2, door-5)\n" + "det(road-9, the-8)\n" + "prep_over(walked-2', road-9)\n" + "det(block-14, the-12)\n" + "amod(block-14, deserted-13)\n" + "prep_across(walked-2'', block-14)\n" + "det(corner-18, the-17)\n" + "prep_around(walked-2''', corner-18)\n" + "det(park-23, the-22)\n" + "prep_through(walked-2'''', park-23)\n",
-        "nsubj(noticed-2, John-1)\n" +
-                "nsubj(departed-6, John-1)\n" + "root(ROOT-0, noticed-2)\n" +
-                "det(cockroach-4, a-3)\n" +
-                "dobj(noticed-2, cockroach-4)\n" +
-                "conj_and(noticed-2, departed-6)\n",
-        "advmod(fibers-4, More-1)\n" +
-                "amod(fibers-4, common-2)\n" +
-                "nn(fibers-4, chrysotile-3)\n" +
-                "nsubj(curly-6, fibers-4)\n" +
-                "nsubjpass(rejected-11, fibers-4)\n" +
-                "cop(curly-6, are-5)\n" +
-                "ccomp(explained-18, curly-6)\n" +
-                "auxpass(rejected-11, are-8)\n" +
-                "advmod(easily-10, more-9)\n" +
-                "advmod(rejected-11, easily-10)\n" +
-                "conj_and(curly-6, rejected-11)\n" +
-                "ccomp(explained-18, rejected-11)\n" +
-                "det(body-14, the-13)\n" +
-                "agent(rejected-11, body-14)\n" +
-                "nn(Mossman-17, Dr.-16)\n" +
-                "nsubj(explained-18, Mossman-17)\n" + "root(ROOT-0, explained-18)\n",
-        "nsubjpass(appalled-3, John-1)\n" +
-                "nsubj(complain-6, John-1)\n" +
-                "auxpass(appalled-3, is-2)\n" + "root(ROOT-0, appalled-3)\n"  +
-                "aux(complain-6, will-5)\n" +
-                "conj_and(appalled-3, complain-6)\n",
-        "nsubj(contributions-10, What-1)\n" +
-                "cop(contributions-10, are-2)\n" +
-                "nn(Marlowe-4, Christopher-3)\n" +
-                "poss(contributions-10, Marlowe-4)\n" +
-                "conj_and(Marlowe-4, Shakespeare-7)\n" +
-                "poss(contributions-10, Shakespeare-7)\n" +
-                "amod(contributions-10, literary-9)\n" + "root(ROOT-0, contributions-10)\n" +
-                "amod(literature-13, English-12)\n" +
-                "prep_to(contributions-10, literature-13)\n",
-        "nsubj(contributions-9, What-1)\n" +
-                "cop(contributions-9, are-2)\n" +
-                "nn(Marlowe-4, Christopher-3)\n" +
-                "poss(contributions-9, Marlowe-4)\n" +
-                "conj_and(Marlowe-4, Shakespeare-6)\n" +
-                "poss(contributions-9, Shakespeare-6)\n" +
-                "amod(contributions-9, literary-8)\n" + "root(ROOT-0, contributions-9)\n" +
-                "amod(literature-12, English-11)\n" +
-                "prep_to(contributions-9, literature-12)\n",
-        "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" +
-                "dobj(like-2, dogs-3)\n" +
-                "dobj(like-2, cats-7)\n" +
-                "conj_and(dogs-3, cats-7)\n",
-        "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" +
-                "dobj(like-2, dogs-3)\n" +
-                "dobj(like-2, cats-6)\n" +
-                "conj_negcc(dogs-3, cats-6)\n",
-            "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" +
-                    "dobj(like-2, brandy-3)\n" +
-                    "dobj(like-2, cognac-7)\n" +
-                    "conj_and(brandy-3, cognac-7)\n",
-        "nsubj(like-2, I-1)\n" + "root(ROOT-0, like-2)\n" +
-                "neg(only-4, not-3)\n" +
-                "preconj(cats-5, only-4)\n" +
-                "dobj(like-2, cats-5)\n" +
-                "dobj(like-2, dogs-8)\n" +
-                "conj_and(cats-5, dogs-8)\n",
-        "nsubj(flew-2, Fred-1)\n" +
-                "root(ROOT-0, flew-2)\n" +
-                "neg(only-4, not-3)\n" +
-                "preconj(flew-2, only-4)\n" +
-                "prep_to(flew-2, Greece-6)\n" +
-                "prep_to(flew-2, Serbia-10)\n" +
-                "conj_and(Greece-6, Serbia-10)\n",
-
-        "advmod(recently-2, Only-1)\n" +
-                "advmod(redesigned-7, recently-2)\n" +
-                "aux(redesigned-7, has-3)\n" +
-                "nsubjpass(redesigned-7, it-4)\n" +
-                "auxpass(redesigned-7, been-5)\n" +
-                "advmod(redesigned-7, attractively-6)\n" +
-                "root(ROOT-0, redesigned-7)\n" +
-                "nmod:poss(product-11, its-9)\n" +
-                "amod(product-11, editorial-10)\n" +
-                "nsubj(improved-12, product-11)\n" +
-                "conj_and(redesigned-7, improved-12)\n",
-        "amod(gyrations-4, Political-1)\n" +
-                "conj_and(Political-1, currency-3)\n" +
-                "amod(gyrations-4, currency-3)\n" +
-                "nsubj(whipsaw-6, gyrations-4)\n" +
-                "aux(whipsaw-6, can-5)\n" +
-                "root(ROOT-0, whipsaw-6)\n" +
-                "det(funds-8, the-7)\n" +
-                "dobj(whipsaw-6, funds-8)\n",
-        "root(ROOT-0, Managers-1)\n" +
-                "conj_and(Managers-1, presenters-3)\n",
-        "root(ROOT-0, education-1)\n" +
-                "conj_and(education-1, science-3)\n" +
-                "conj_and(education-1, culture-5)\n",
-        "root(ROOT-0, education-1)\n" +
-                "conj_and(education-1, science-3)\n" +
-                "conj_and(education-1, culture-6)\n",
-        "root(ROOT-0, Digital-1)\n" +
-                "conj_and(Digital-1, Hewlett-3)\n" +
-                "conj_and(Digital-1, Sun-5)\n",
-        "root(ROOT-0, Digital-1)\n" +
-                "conj_and(Digital-1, Hewlett-3)\n" +
-                "conj_and(Digital-1, Sun-6)\n",
-        "nn(Depot-2, Home-1)\n" +
-                "root(ROOT-0, Depot-2)\n" +
-                "conj_and(Depot-2, Sun-4)\n" +
-                "conj_and(Depot-2, Coke-7)\n",
-        "nn(Depot-2, Home-1)\n" +
-                "root(ROOT-0, Depot-2)\n" +
-                "conj_and(Depot-2, Sun-4)\n" +
-                "conj_and(Depot-2, Coke-6)\n",
-        "nsubj(characteristics-14, Activation-1)\n" +
-                "prep_of(Activation-1, Akt-3)\n" +
-                "prep_of(Activation-1, NFkappaB-5)\n" +
-                "conj_and(Akt-3, NFkappaB-5)\n" +
-                "prep_of(Activation-1, Stat3-8)\n" +
-                "conj_and(Akt-3, Stat3-8)\n" +
-                "nn(pathways-12, MAPK-11)\n" +
-                "prep_of(Activation-1, pathways-12)\n" +
-                "conj_negcc(Akt-3, pathways-12)\n" +
-                "cop(characteristics-14, are-13)\n" +
-                "root(ROOT-0, characteristics-14)\n" +
-                "vmod(characteristics-14, associated-15)\n" +
-                "amod(transformation-18, malignant-17)\n" +
-                "prep_with(associated-15, transformation-18)\n",
-    };
-
-    assertEquals("Test array lengths mismatch!", testTrees.length, testAnswers.length);
+  public void testCCProcessedRelation() {
+    
     TreeReaderFactory trf = new PennTreeReaderFactory();
-    for (int i = 0; i < testTrees.length; i++) {
-      String testTree = testTrees[i];
-      String testAnswer = testAnswers[i];
 
-      // specifying our own TreeReaderFactory is vital so that functional
-      // categories - that is -TMP and -ADV in particular - are not stripped off
-      Tree tree = Tree.valueOf(testTree, trf);
-      GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
+    // specifying our own TreeReaderFactory is vital so that functional
+    // categories - that is -TMP and -ADV in particular - are not stripped off
+    Tree tree = Tree.valueOf(testTree, trf);
+    GrammaticalStructure gs = new UniversalEnglishGrammaticalStructure(tree);
 
-      assertEquals("Unexpected CC processed dependencies for tree "+testTree,
-          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(true), tree, false, false));
-    }
+    assertEquals("Unexpected CC processed dependencies for tree "+testTree,
+          testAnswer, UniversalEnglishGrammaticalStructure.dependenciesToString(gs, gs.typedDependenciesCCprocessed(Extras.MAXIMAL), tree, false, false));
   }
 
 

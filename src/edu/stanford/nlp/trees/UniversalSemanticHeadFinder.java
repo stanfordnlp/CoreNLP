@@ -52,6 +52,7 @@ import edu.stanford.nlp.util.Generics;
  * @author John Rappaport
  * @author Marie-Catherine de Marneffe
  * @author Anna Rafferty
+ * @author Sebastian Schuster
  */
 public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
 
@@ -156,9 +157,9 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
     // UCP take the first element as head
     nonTerminalInfo.put("UCP", new String[][]{{"left"}});
 
-    // CONJP: We generally want the rightmost adverb or the leftmost conjunction as head
-    //TODO: Fix for "mwe(alone,let)"; mwe(as,well), mwe(as,as)
-    nonTerminalInfo.put("CONJP", new String[][]{{"right", "RB"}, {"left", "CC", "IN"}, {"right", "VB", "JJ" }});
+    // CONJP: We generally want the rightmost particle or the leftmost conjunction as head
+    // JJ is for weird tagging of "not only" in PTB
+    nonTerminalInfo.put("CONJP", new String[][]{{"right", "JJ", "RB"}, {"left", "CC", "IN"}, {"right", "VB"}});
 
     // FRAG: crap rule needs to be change if you want to parse
     // glosses; but it is correct to have ADJP and ADVP before S
@@ -175,15 +176,14 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
     nonTerminalInfo.put("EMBED", new String[][]{{"right", "INTJ"}});
 
     // USD: NP is head of PP
-    // TODO: do something about "such as", "due to", "because of", "instead of", "in case of?", "rather than"
     nonTerminalInfo.put("PP", new String[][]{{"left", "NP", "S", "SBAR", "SBARQ", "ADVP", "PP", "VP", "ADJP", "FRAG", "UCP", "PRN"}, {"right"}});
 
     nonTerminalInfo.put("WHPP", nonTerminalInfo.get("PP"));
     
-    //TODO: USD: do something for MWE "as well", "of course", "so that", "more than", "less than", "up to"
-    //"according to", "in order", "at least", "as if", "prior to", "as to", "kind of", "whether or not", 
-    //"let alone", "so as to", "in between", "that is", "how come", "had better"..
+    // Special constituent for multi-word expressions
     nonTerminalInfo.put("MWE", new String[][]{{"left"}});
+    
+    nonTerminalInfo.put("PCONJP", new String[][]{{"left"}});
     
     //TODO: all but in ADVP
     

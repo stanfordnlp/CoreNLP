@@ -132,6 +132,11 @@ public class CoordinationTransformer implements TreeTransformer {
       if (VERBOSE) {
         System.err.println("After MWETransform:               " + t);
       }
+      
+      t = prepCCTransform(t);
+      if (VERBOSE) {
+        System.err.println("After prepCCTransform:               " + t);
+      }
     }
     
     return t;
@@ -671,6 +676,11 @@ public class CoordinationTransformer implements TreeTransformer {
   private static TregexPattern ACCORDING_TO_PATTERN = TregexPattern.compile("PP=pp1 < (VBG=node1 < according $+ (PP=pp2 < (TO|IN=node2 < to)))");
   private static TsurgeonPattern ACCORDING_TO_OPERATION = Tsurgeon.parseOperation("[createSubtree MWE node1] [move node2 $- node1] [excise pp1 pp1]");
 
+  /* "but also" is not a MWE, so break up the CONJP. */ 
+  private static TregexPattern BUT_ALSO_PATTERN = TregexPattern.compile("CONJP=conjp < (CC=cc < but) < (RB=rb < also) $+ __=nextNode");
+  private static TsurgeonPattern BUT_ALSO_OPERATION = Tsurgeon.parseOperation("[move cc $- conjp] [move rb >1 nextNode] [createSubtree ADVP rb] [delete conjp]");
+
+  
   /**
    * Puts all multi-word expressions below a single constituent labeled "MWE".
    * Patterns for multi-word expressions are defined in MWE_PATTERNS.
@@ -681,10 +691,22 @@ public class CoordinationTransformer implements TreeTransformer {
     }
     
     Tsurgeon.processPattern(ACCORDING_TO_PATTERN, ACCORDING_TO_OPERATION, t);
-    
+    Tsurgeon.processPattern(BUT_ALSO_PATTERN, BUT_ALSO_OPERATION, t);
+
     return t;
   }
 
+  
+  private static TregexPattern FLAT_PREP_CC_PATTERN = TregexPattern.compile("PP <, (/^(IN|TO)$/=p1 $+ (CC=cc $+ /^(IN|TO)$/=p2))");
+  private static TsurgeonPattern FLAT_PREP_CC_OPERATION = Tsurgeon.parseOperation("[createSubtree PCONJP p1 cc] [move p2 $- cc]");
+  
+  public static Tree prepCCTransform(Tree t) {
+    
+    Tsurgeon.processPattern(FLAT_PREP_CC_PATTERN, FLAT_PREP_CC_OPERATION, t);
+
+    return t;
+  }
+  
   public static void main(String[] args) {
 
     CoordinationTransformer transformer = new CoordinationTransformer(null);

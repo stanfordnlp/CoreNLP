@@ -211,7 +211,7 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation CONJUNCT =
     new GrammaticalRelation(Language.UniversalEnglish, "conj", "conjunct",
-        DEPENDENT, "VP|(?:WH)?NP(?:-TMP|-ADV)?|ADJP|PP|QP|ADVP|UCP(?:-TMP|-ADV)?|S|NX|SBAR|SBARQ|SINV|SQ|JJP|NML|RRC", tregexCompiler,
+        DEPENDENT, "VP|(?:WH)?NP(?:-TMP|-ADV)?|ADJP|PP|QP|ADVP|UCP(?:-TMP|-ADV)?|S|NX|SBAR|SBARQ|SINV|SQ|JJP|NML|RRC|PCONJP", tregexCompiler,
             "VP|S|SBAR|SBARQ|SINV|SQ|RRC < (CC|CONJP $-- !/^(?:``|-LRB-|PRN|PP|ADVP|RB|MWE)/ $+ !/^(?:SBAR|PRN|``|''|-[LR]RB-|,|:|\\.)$/=target)",
             // This case is separated out from the previous case to
             // avoid conflicts with advcl when you have phrases such as
@@ -245,7 +245,10 @@ public class UniversalEnglishGrammaticalRelations {
             "NX|NML [ < (CC|CONJP $- __) | < " + ETC_PAT + "] < (/^,$/ $- /^(?:A|N|V|PP|PRP|J|W|R|S)/=target)",
             // to take the conjunct in a preconjunct structure "either X or Y"
             // also catches some missing examples of etc as conj
-            "/^(?:VP|S|SBAR|SBARQ|SINV|ADJP|PP|QP|(?:WH)?NP(?:-TMP|-ADV)?|ADVP|UCP(?:-TMP|-ADV)?|NX|NML)$/ [ < (CC $++ (CC|CONJP $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target)) | <- " + ETC_PAT_target + " | <- " + FW_ETC_PAT_target + " ]");
+            "/^(?:VP|S|SBAR|SBARQ|SINV|ADJP|PP|QP|(?:WH)?NP(?:-TMP|-ADV)?|ADVP|UCP(?:-TMP|-ADV)?|NX|NML)$/ [ < (CC $++ (CC|CONJP $+ !/^(?:PRN|``|''|-[LR]RB-|,|:|\\.)$/=target)) | <- " + ETC_PAT_target + " | <- " + FW_ETC_PAT_target + " ]",
+            // transformed prepositional conjunction phrase in sentence such as 
+            // "Lufthansa flies from and to Serbia."
+            "PCONJP < (CC $+ IN|TO=target)");
 
 
   //TODO: do something with "if not"???
@@ -938,7 +941,7 @@ public class UniversalEnglishGrammaticalRelations {
             "SBARQ < WHNP < (S=target < (VP <1 TO))",
            
             //former pcomp
-            "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) !<: IN|TO !< @CC|CONJP) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
+            "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) !<: IN|TO !< @CC|CONJP < /^((?!PP).)*$/) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
 
 //            "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target < @NP|WHNP|NML !$- (@CC|CONJP $- __)) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
 
@@ -1007,11 +1010,12 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation MARKER =
     new GrammaticalRelation(Language.UniversalEnglish, "mark", "marker",
-        MODIFIER, "SBAR(?:-TMP)?|VP", tregexCompiler,
+        MODIFIER, "SBAR(?:-TMP)?|VP|PP(?:-TMP|-ADV)?", tregexCompiler,
             //infinitival to
             "VP < VP < (TO=target)",
             "SBAR|SBAR-TMP < (IN|DT|MWE=target $++ S|FRAG)",
-            "SBAR < (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]");
+            "SBAR < (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]",
+            "/^PP(?:-TMP|-ADV)?$/ < (IN|TO|MWE=target $+ SBAR)");
 
 
   /**
@@ -1188,7 +1192,7 @@ public class UniversalEnglishGrammaticalRelations {
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (/^,$/ $+ (VP=target [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))",
           
           //former pcomp
-          "/^(?:(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __)) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
+          "/^(?:(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) < /^((?!(PP|CC|CONJP|,)).)*$/  ) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
 
           
           "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS)",
@@ -1556,7 +1560,7 @@ public class UniversalEnglishGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalEnglish, "case", "case marker",
         MODIFIER, "(?:WH)?(?:PP.*|SBARQ|NP|NML)(?:-TMP|-ADV)?", tregexCompiler,
             //"/(?:WH)?PP(?:-TMP)?/ !$- (@CC|CONJP $- __) < IN|TO|MWE=target",
-            "/(?:WH)?PP(?:-TMP)?/ < IN|TO|MWE=target",
+            "/(?:WH)?PP(?:-TMP)?/ < (IN|TO|MWE|PCONJP=target !$+ SBAR)",
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < POS=target", //'s
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < (VBZ=target < /^'s$/)", //'s
             
