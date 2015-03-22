@@ -7,15 +7,12 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
 import edu.stanford.nlp.sequences.PlainTextDocumentReaderAndWriter;
-import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.TimeExpressionExtractor;
 import edu.stanford.nlp.time.TimeExpressionExtractorFactory;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PaddedList;
-import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.ObjectInputStream;
@@ -812,8 +809,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   }
 
   @Override
-  public Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<CoreLabel> document) {
-    throw new UnsupportedOperationException();
+  public void printProbsDocument(List<CoreLabel> document) {
   }
 
   @Override
