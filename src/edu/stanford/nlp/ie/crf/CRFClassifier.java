@@ -1343,7 +1343,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * @return If verboseMode is set, a Pair of Counters recording classification decisions, else null.
    */
   @Override
-  public Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
+  public Triple<Counter<Integer>, Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
+    // TODO: Probably this would really be better with 11 bins, with edge ones from 0-0.5 and 0.95-1.0, a bit like 11-point ave precision
     final int numBins = 10;
     boolean verbose = flags.verboseMode;
 
@@ -1351,6 +1352,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     CRFCliqueTree<String> cliqueTree = getCliqueTree(p);
 
     Counter<Integer> calibration = new ClassicCounter<>();
+    Counter<Integer> correctByBin = new ClassicCounter<>();
     TwoDimensionalCounter<Integer,String> calibratedTokens = new TwoDimensionalCounter<>();
 
     // for (int i = 0; i < factorTables.length; i++) {
@@ -1361,10 +1363,15 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       System.out.print(token);
       System.out.print('\t');
       System.out.print(goldAnswer);
+      double maxProb = Double.NEGATIVE_INFINITY;
+      String bestClass = "";
       for (String label : classIndex) {
         int index = classIndex.indexOf(label);
         // double prob = Math.pow(Math.E, factorTables[i].logProbEnd(index));
         double prob = cliqueTree.prob(i, index);
+        if (prob > maxProb) {
+          bestClass = label;
+        }
         System.out.print('\t');
         System.out.print(label);
         System.out.print('=');
@@ -1375,15 +1382,20 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
             binnedProb = numBins - 1;
           }
           calibration.incrementCount(binnedProb);
-          if (label.equals(goldAnswer) && ! label.equals(flags.backgroundSymbol)) {
-            calibratedTokens.incrementCount(binnedProb, token);
+          if (label.equals(goldAnswer)) {
+            if (bestClass.equals(goldAnswer)) {
+              correctByBin.incrementCount(binnedProb);
+            }
+            if ( ! label.equals(flags.backgroundSymbol)) {
+              calibratedTokens.incrementCount(binnedProb, token);
+            }
           }
         }
       }
       System.out.println();
     }
     if (verbose) {
-      return new Pair<>(calibration, calibratedTokens);
+      return new Triple<>(calibration, correctByBin, calibratedTokens);
     } else {
       return null;
     }

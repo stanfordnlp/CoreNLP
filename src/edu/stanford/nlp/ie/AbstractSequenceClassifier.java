@@ -968,39 +968,50 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    */
   public void printProbsDocuments(ObjectBank<List<IN>> documents) {
     Counter<Integer> calibration = new ClassicCounter<>();
+    Counter<Integer> correctByBin = new ClassicCounter<>();
     TwoDimensionalCounter<Integer,String> calibratedTokens = new TwoDimensionalCounter<>();
 
     for (List<IN> doc : documents) {
-      Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> pair = printProbsDocument(doc);
-      if (pair != null) {
-        Counters.addInPlace(calibration, pair.first());
-        calibratedTokens.addAll(pair.second());
+      Triple<Counter<Integer>, Counter<Integer>, TwoDimensionalCounter<Integer,String>> triple = printProbsDocument(doc);
+      if (triple != null) {
+        Counters.addInPlace(calibration, triple.first());
+        Counters.addInPlace(correctByBin, triple.second());
+        calibratedTokens.addAll(triple.third());
       }
       System.out.println();
     }
     if (calibration.size() > 0) {
       // we stored stuff, so print it out
       PrintWriter pw = new PrintWriter(System.err);
-      outputCalibrationInfo(pw, calibration, calibratedTokens);
+      outputCalibrationInfo(pw, calibration, correctByBin, calibratedTokens);
       pw.flush();
     }
   }
 
   public static void outputCalibrationInfo(PrintWriter pw,
                                            Counter<Integer> calibration,
+                                           Counter<Integer> correctByBin,
                                            TwoDimensionalCounter<Integer,String> calibratedTokens) {
     final int numBins = 10;
     pw.println(); // in practice may well be in middle of line when called
     pw.println("----------------------------------------");
-    pw.println("Probability distribution given to tokens (Counts for all class-token pairs; examples are gold entity tokens in bucket)");
+    pw.println("Probability distribution given to tokens (Counts for all class-token pairs; accuracy for this bin; examples are gold entity tokens in bin)");
     pw.println("----------------------------------------");
     for (int i = 0; i < numBins; i++) {
-      pw.printf("[%.1f-%.1f%c: %.1f  %s%n",
+      pw.printf("[%.1f-%.1f%c: %.0f  %.2f%n",
               ((double) i) / numBins,
               ((double) (i+1)) / numBins,
               i == (numBins - 1) ? ']': ')',
               calibration.getCount(i),
-              Counters.toSortedString(calibratedTokens.getCounter(i), 10, "%s=%.1f", ", ", "[%s]"));
+              correctByBin.getCount(i) / calibration.getCount(i));
+    }
+    pw.println("----------------------------------------");
+    for (int i = 0; i < numBins; i++) {
+      pw.printf("[%.1f-%.1f%c: %s%n",
+              ((double) i) / numBins,
+              ((double) (i+1)) / numBins,
+              i == (numBins - 1) ? ']': ')',
+              Counters.toSortedString(calibratedTokens.getCounter(i), 20, "%s=%.0f", ", ", "[%s]"));
     }
     pw.println("----------------------------------------");
   }
@@ -1024,7 +1035,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     }
   }
 
-  public Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
+  public Triple<Counter<Integer>, Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
     throw new UnsupportedOperationException("Not implemented for this class.");
   }
 
