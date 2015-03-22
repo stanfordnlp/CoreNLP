@@ -1,23 +1,26 @@
 package edu.stanford.nlp.ie;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.ner.CMMClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
-import edu.stanford.nlp.stats.Counter;
-import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
-
-import java.io.FileNotFoundException;
-import java.io.ObjectInputStream;
-import java.io.IOException;
-import java.util.*;
 
 /**
  * Merges the outputs of two or more AbstractSequenceClassifiers according to
@@ -394,11 +397,6 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   @Override
   public void train(Collection<List<IN>> docs,
                     DocumentReaderAndWriter<IN> readerAndWriter) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
     throw new UnsupportedOperationException();
   }
 

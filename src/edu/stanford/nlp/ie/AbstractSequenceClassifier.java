@@ -64,14 +64,17 @@ import java.util.zip.GZIPInputStream;
  * in the (deterministic) NumberSequenceClassifier. See implementing classes for
  * more information.
  * <p>
- * A full implementation should implement these 5 abstract methods: <br>
- * {@code List<CoreLabel> classify(List<CoreLabel> document); } <br>
- * {@code void train(Collection<List<CoreLabel>> docs); } <br>
- * {@code printProbsDocument(List<CoreLabel> document); } <br>
+ * An implementation must implement these 5 abstract methods: <br>
+ * {@code List<IN> classify(List<IN> document); } <br>
+ * {@code List<IN> classifyWithGlobalInformation(List<IN> tokenSequence, final CoreMap document, final CoreMap sentence); } <br>
+ * {@code void train(Collection<List<IN>> docs, DocumentReaderAndWriter<IN> readerAndWriter); } <br>
  * {@code void serializeClassifier(String serializePath); } <br>
  * {@code void loadClassifier(ObjectInputStream in, Properties props) throws IOException,
  * ClassCastException, ClassNotFoundException; } <br>
- * but a runtime (or rule-based) implementation can usefully implement just the first.
+ * but a runtime (or rule-based) implementation can usefully implement just the first,
+ * and throw UnsupportedOperationException for the rest. Additionally, this method throws
+ * UnsupportedOperationException by default, but is implemented for some classifiers: <br>
+ * {@code Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<CoreLabel> document); } <br>
  *
  * @author Jenny Finkel
  * @author Dan Klein
@@ -1021,7 +1024,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     }
   }
 
-  public abstract Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document);
+  public Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
+    throw new UnsupportedOperationException("Not implemented for this class.");
+  }
 
   /**
    * Load a test file, run the classifier on it, and then print the answers to
@@ -1419,17 +1424,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * reinitialized from the flags serialized in the classifier. This does not
    * close the InputStream.
    *
-   * @param in
-   *          The InputStream to load the serialized classifier from
-   * @param props
-   *          This Properties object will be used to update the
+   * @param in The InputStream to load the serialized classifier from
+   * @param props This Properties object will be used to update the
    *          SeqClassifierFlags which are read from the serialized classifier
-   * @throws IOException
-   *           If there are problems accessing the input stream
-   * @throws ClassCastException
-   *           If there are problems interpreting the serialized data
-   * @throws ClassNotFoundException
-   *           If there are problems interpreting the serialized data
+   * @throws IOException If there are problems accessing the input stream
+   * @throws ClassCastException If there are problems interpreting the serialized data
+   * @throws ClassNotFoundException If there are problems interpreting the serialized data
    */
   public void loadClassifier(InputStream in, Properties props) throws IOException, ClassCastException,
       ClassNotFoundException {
@@ -1440,17 +1440,12 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    * Load a classifier from the specified input stream. The classifier is
    * reinitialized from the flags serialized in the classifier.
    *
-   * @param in
-   *          The InputStream to load the serialized classifier from
-   * @param props
-   *          This Properties object will be used to update the
+   * @param in The InputStream to load the serialized classifier from
+   * @param props This Properties object will be used to update the
    *          SeqClassifierFlags which are read from the serialized classifier
-   * @throws IOException
-   *           If there are problems accessing the input stream
-   * @throws ClassCastException
-   *           If there are problems interpreting the serialized data
-   * @throws ClassNotFoundException
-   *           If there are problems interpreting the serialized data
+   * @throws IOException If there are problems accessing the input stream
+   * @throws ClassCastException If there are problems interpreting the serialized data
+   * @throws ClassNotFoundException If there are problems interpreting the serialized data
    */
   public abstract void loadClassifier(ObjectInputStream in, Properties props) throws IOException, ClassCastException,
       ClassNotFoundException;
