@@ -44,7 +44,8 @@ public class TokensRegexAnnotator implements Annotator {
   private final boolean verbose;
 
 
-  static class Options {
+  // Make public so can be accessed and set via reflection
+  public static class Options {
     public Class matchedExpressionsAnnotationKey;
     public boolean setTokenOffsets;
     public boolean extractWithTokens;
@@ -73,7 +74,7 @@ public class TokensRegexAnnotator implements Annotator {
     options.flatten = PropertiesUtils.getBool(props, prefix + "flatten", options.flatten);
     String matchedExpressionsAnnotationKeyName = props.getProperty(prefix + "matchedExpressionsAnnotationKey");
     if (matchedExpressionsAnnotationKeyName != null) {
-      options.matchedExpressionsAnnotationKey = EnvLookup.lookupAnnotationKey(env, matchedExpressionsAnnotationKeyName);
+      options.matchedExpressionsAnnotationKey = EnvLookup.lookupAnnotationKeyWithClassname(env, matchedExpressionsAnnotationKeyName);
       if (options.matchedExpressionsAnnotationKey == null) {
         String propName = prefix + "matchedExpressionsAnnotationKey";
         throw new RuntimeException("Cannot determine annotation key for " + propName + "=" + matchedExpressionsAnnotationKeyName);

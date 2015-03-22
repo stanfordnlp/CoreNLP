@@ -22,8 +22,11 @@ import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
 
 /**
  * A sequence classifier that labels tokens with types based on a simple manual mapping from
@@ -357,7 +360,9 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
                     DocumentReaderAndWriter<CoreLabel> readerAndWriter) {}
 
   @Override
-  public void printProbsDocument(List<CoreLabel> document) {}
+  public Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<CoreLabel> document) {
+    throw new UnsupportedOperationException();
+  }
 
   @Override
   public void serializeClassifier(String serializePath) {}

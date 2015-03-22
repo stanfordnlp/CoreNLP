@@ -6,9 +6,12 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
+import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.io.FileNotFoundException;
@@ -395,7 +398,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   }
 
   @Override
-  public void printProbsDocument(List<IN> document) {
+  public Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
     throw new UnsupportedOperationException();
   }
 
