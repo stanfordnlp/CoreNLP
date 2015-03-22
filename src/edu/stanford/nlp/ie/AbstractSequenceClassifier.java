@@ -987,8 +987,9 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
                                            Counter<Integer> calibration,
                                            TwoDimensionalCounter<Integer,String> calibratedTokens) {
     final int numBins = 10;
+    pw.println(); // in practice may well be in middle of line when called
     pw.println("----------------------------------------");
-    pw.println("Probability distribution given to tokens");
+    pw.println("Probability distribution given to tokens (Counts for all class-token pairs; examples are gold entity tokens in bucket)");
     pw.println("----------------------------------------");
     for (int i = 0; i < numBins; i++) {
       pw.printf("[%.1f-%.1f%c: %.1f  %s%n",

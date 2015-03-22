@@ -1370,12 +1370,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
         System.out.print('=');
         System.out.print(prob);
         if (verbose ) {
-          int binnedProb = (int) prob * numBins;
+          int binnedProb = (int) (prob * numBins);
           if (binnedProb > (numBins - 1)) {
             binnedProb = numBins - 1;
           }
           calibration.incrementCount(binnedProb);
-          if (label.equals(goldAnswer)) {
+          if (label.equals(goldAnswer) && ! label.equals(flags.backgroundSymbol)) {
             calibratedTokens.incrementCount(binnedProb, token);
           }
         }
