@@ -943,6 +943,20 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   /**
+   * Takes the files, reads them in, and prints out the likelihood of each possible
+   * label at each point.
+   *
+   * @param testFiles A Collection of files
+   */
+  public void printProbs(Collection<File> testFiles,
+                         DocumentReaderAndWriter<IN> readerWriter) {
+
+    ObjectBank<List<IN>> documents = makeObjectBankFromFiles(testFiles, readerWriter);
+    printProbsDocuments(documents);
+  }
+
+
+  /**
    * Takes a {@link List} of documents and prints the likelihood of each
    * possible label at each point.
    *

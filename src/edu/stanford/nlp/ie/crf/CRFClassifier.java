@@ -2749,6 +2749,40 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return new Pair<double[][], double[][]>(matrix, subMatrix);
   }
 
+  public void writeWeights(PrintStream p) {
+    for (String feature : featureIndex) {
+      int index = featureIndex.indexOf(feature);
+      // line.add(feature+"["+(-p)+"]");
+      // rowHeaders.add(feature + '[' + (-p) + ']');
+      double[] v = weights[index];
+      Index<CRFLabel> l = this.labelIndices.get(0);
+      p.println(feature + "\t\t");
+      for (CRFLabel label : l) {
+        p.print(label.toString(classIndex) + ":" + v[l.indexOf(label)] + "\t");
+      }
+      p.println();
+
+    }
+  }
+
+  public Map<String, Counter<String>> topWeights() {
+    Map<String, Counter<String>> w = new HashMap<String, Counter<String>>();
+    for (String feature : featureIndex) {
+      int index = featureIndex.indexOf(feature);
+      // line.add(feature+"["+(-p)+"]");
+      // rowHeaders.add(feature + '[' + (-p) + ']');
+      double[] v = weights[index];
+      Index<CRFLabel> l = this.labelIndices.get(0);
+      for (CRFLabel label : l) {
+        if(!w.containsKey(label.toString(classIndex)))
+          w.put(label.toString(classIndex), new ClassicCounter<String>());
+        w.get(label.toString(classIndex)).setCount(feature, v[l.indexOf(label)]);
+      }
+    }
+    return w;
+  }
+
+
   /**
    * This is used to load the default supplied classifier stored within the jar
    * file. THIS FUNCTION WILL ONLY WORK IF THE CODE WAS LOADED FROM A JAR FILE
@@ -2967,6 +3001,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
 
     if (testFile != null) {
+      // todo: Change testFile to call testFiles with a singleton list
       DocumentReaderAndWriter<CoreLabel> readerAndWriter = crf.defaultReaderAndWriter();
       if (crf.flags.searchGraphPrefix != null) {
         crf.classifyAndWriteViterbiSearchGraph(testFile, crf.flags.searchGraphPrefix, crf.makeReaderAndWriter());
@@ -2988,7 +3023,11 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
 
     if (testFiles != null) {
       List<File> files = Arrays.asList(testFiles.split(",")).stream().map(File::new).collect(Collectors.toList());
-      crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter(), true);
+      if (crf.flags.printProbs) {
+        crf.printProbs(files, crf.defaultReaderAndWriter());
+      } else {
+        crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter(), true);
+      }
     }
 
     if (textFile != null) {
@@ -3011,39 +3050,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   @Override
   public List<IN> classifyWithGlobalInformation(List<IN> tokenSeq, final CoreMap doc, final CoreMap sent) {
     return classify(tokenSeq);
-  }
-
-  public void writeWeights(PrintStream p) {
-    for (String feature : featureIndex) {
-      int index = featureIndex.indexOf(feature);
-      // line.add(feature+"["+(-p)+"]");
-      // rowHeaders.add(feature + '[' + (-p) + ']');
-      double[] v = weights[index];
-      Index<CRFLabel> l = this.labelIndices.get(0);
-      p.println(feature + "\t\t");
-      for (CRFLabel label : l) {
-        p.print(label.toString(classIndex) + ":" + v[l.indexOf(label)] + "\t");
-      }
-      p.println();
-
-    }
-  }
-
-  public Map<String, Counter<String>> topWeights() {
-    Map<String, Counter<String>> w = new HashMap<String, Counter<String>>();
-    for (String feature : featureIndex) {
-      int index = featureIndex.indexOf(feature);
-      // line.add(feature+"["+(-p)+"]");
-      // rowHeaders.add(feature + '[' + (-p) + ']');
-      double[] v = weights[index];
-      Index<CRFLabel> l = this.labelIndices.get(0);
-      for (CRFLabel label : l) {
-        if(!w.containsKey(label.toString(classIndex)))
-          w.put(label.toString(classIndex), new ClassicCounter<String>());
-        w.get(label.toString(classIndex)).setCount(feature, v[l.indexOf(label)]);
-      }
-    }
-    return w;
   }
 
 } // end class CRFClassifier
