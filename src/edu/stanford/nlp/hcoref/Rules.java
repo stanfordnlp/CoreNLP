@@ -2,7 +2,9 @@ package edu.stanford.nlp.hcoref;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -314,6 +316,54 @@ public class Rules {
       }
     }
     return ! (hasExtraAnt && hasExtraThis);
+  }
+
+  private static <E> boolean attributeSetDisagree(Set<E> s1,Set<E> s2){
+    int minSize = Math.min(s1.size(), s2.size());
+    // intersection being smaller than the smaller set means both sets
+    // have extra elements
+    if (minSize > Sets.intersection(s1, s2).size())
+      return true;
+    return false;
+  }
+  
+  private static <E> void pruneAttributes(Set<E> attrs, Set<E> unknown) {
+    if (attrs.size() > unknown.size())
+      attrs.removeAll(unknown);
+  }
+  
+  private static <E> void pruneAttributes(Set<E> attrs, E unknown) {
+    if (attrs.size() > 1)
+      attrs.remove(unknown);
+  }
+  
+  private static final Set<String> UNKNOWN_NER = new HashSet<>(Arrays.asList("MISC","O"));
+  private static boolean entityAttributesAgreeChinese(CorefCluster mentionCluster, CorefCluster potentialAntecedent){
+    
+    pruneAttributes(mentionCluster.numbers,Number.UNKNOWN);
+    pruneAttributes(mentionCluster.genders,Gender.UNKNOWN);
+    pruneAttributes(mentionCluster.animacies,Animacy.UNKNOWN);
+    pruneAttributes(mentionCluster.nerStrings,UNKNOWN_NER);
+    
+    pruneAttributes(potentialAntecedent.numbers,Number.UNKNOWN);
+    pruneAttributes(potentialAntecedent.genders,Gender.UNKNOWN);
+    pruneAttributes(potentialAntecedent.animacies,Animacy.UNKNOWN);
+    pruneAttributes(potentialAntecedent.nerStrings,UNKNOWN_NER);
+    
+    if(attributeSetDisagree(mentionCluster.numbers,potentialAntecedent.numbers)
+        || attributeSetDisagree(mentionCluster.genders,potentialAntecedent.genders)
+        || attributeSetDisagree(mentionCluster.animacies,potentialAntecedent.animacies)
+        || attributeSetDisagree(mentionCluster.nerStrings,potentialAntecedent.nerStrings))
+      return false;
+
+    return true;
+  }
+  
+  public static boolean entityAttributesAgree(CorefCluster mentionCluster, CorefCluster potentialAntecedent, Locale lang) {
+    if (lang == Locale.CHINESE ) {
+      return entityAttributesAgreeChinese(mentionCluster,potentialAntecedent);
+    }
+    return entityAttributesAgree(mentionCluster, potentialAntecedent);
   }
 
   public static boolean entityRelaxedHeadsAgreeBetweenMentions(CorefCluster mentionCluster, CorefCluster potentialAntecedent, Mention m, Mention ant) {

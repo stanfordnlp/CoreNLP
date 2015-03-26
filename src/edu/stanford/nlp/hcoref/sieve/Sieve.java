@@ -107,6 +107,7 @@ public abstract class Sieve implements Serializable {
       case RULE:
         DeterministicCorefSieve sieve = (DeterministicCorefSieve) Class.forName("edu.stanford.nlp.hcoref.sieve."+sievename).getConstructor().newInstance();
         sieve.props = props;
+        sieve.lang = CorefProperties.getLanguage(props);
         return sieve;
         
       case RF:

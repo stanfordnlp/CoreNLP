@@ -76,7 +76,7 @@ public class CorefDocMaker {
     if(CorefProperties.USE_TRUECASE) {
       annoSb.append(", truecase");
     }   
-    if (!CorefProperties.useGoldNE(props))  {
+    if (!CorefProperties.useGoldNE(props) || CorefProperties.getLanguage(props)==Locale.CHINESE)  {
       annoSb.append(", ner");
     }   
     if (!CorefProperties.useGoldParse(props))  {
