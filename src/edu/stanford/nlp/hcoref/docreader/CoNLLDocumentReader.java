@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
@@ -37,6 +38,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.IntCounter;
+import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.LabeledScoredTreeReaderFactory;
 import edu.stanford.nlp.trees.ModCollinsHeadFinder;
@@ -45,10 +47,13 @@ import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.trees.TreeNormalizer;
 import edu.stanford.nlp.trees.Trees;
+import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure;
+import edu.stanford.nlp.trees.international.pennchinese.ChineseSemanticHeadFinder;
 import edu.stanford.nlp.util.AbstractIterator;
 import edu.stanford.nlp.util.CollectionFactory;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Filters;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
 import edu.stanford.nlp.util.Pair;
@@ -109,6 +114,8 @@ public class CoNLLDocumentReader implements DocReader {
   private final Options options;
 
   public static final Logger logger = Logger.getLogger(CoNLLDocumentReader.class.getName());
+
+  private static final HeadFinder chineseHeadFinder = new ChineseSemanticHeadFinder();
 
   public CoNLLDocumentReader(String filepath)
   {
@@ -202,6 +209,8 @@ public class CoNLLDocumentReader implements DocReader {
 
     public boolean annotateTreeCoref = false;     // Annotate tree with CorefMentionAnnotation
     public boolean annotateTreeNer = false;       // Annotate tree with NamedEntityAnnotation
+    
+    public Locale lang = Locale.ENGLISH;
 
     public String backgroundNerTag = "O";        // Background NER tag
 
@@ -1093,8 +1102,26 @@ public class CoNLLDocumentReader implements DocReader {
       SemanticGraph deps = null;
       SemanticGraph basicDeps = null;
       
-      deps = SemanticGraphFactory.makeFromTree(tree, true);
-      basicDeps = SemanticGraphFactory.makeFromTree(tree, false);
+      if (options.lang == Locale.CHINESE) {
+        final boolean threadSafe = true;
+
+        deps = SemanticGraphFactory.makeFromTree(
+            new ChineseGrammaticalStructure(tree, Filters.acceptFilter(), chineseHeadFinder),
+            SemanticGraphFactory.Mode.COLLAPSED,
+            GrammaticalStructure.Extras.NONE,
+            threadSafe,
+            null);
+        
+        basicDeps = SemanticGraphFactory.makeFromTree(
+            new ChineseGrammaticalStructure(tree, Filters.acceptFilter(), chineseHeadFinder),
+            SemanticGraphFactory.Mode.BASIC,
+            GrammaticalStructure.Extras.NONE,
+            threadSafe,
+            null);
+      } else {
+        deps = SemanticGraphFactory.makeFromTree(tree, true);
+        basicDeps = SemanticGraphFactory.makeFromTree(tree, false);
+      }
       
       sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, basicDeps);
       sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);

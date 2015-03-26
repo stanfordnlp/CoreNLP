@@ -125,7 +125,7 @@ public class CorefProperties {
   private static final Set<String> dcorefSieveNames = new HashSet<String>(Arrays.asList("MarkRole", "DiscourseMatch", 
       "ExactStringMatch", "RelaxedExactStringMatch", "PreciseConstructs", "StrictHeadMatch1", 
       "StrictHeadMatch2", "StrictHeadMatch3", "StrictHeadMatch4", "RelaxedHeadMatch", "PronounMatch", "SpeakerMatch",
-      "ChineseHeadMatch"));
+      "ChineseHeadMatch", "ChinesePreciseConstructs"));
   
   public static boolean doScore(Properties props) {
     return PropertiesUtils.getBool(props, SCORE_PROP, false);

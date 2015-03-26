@@ -356,7 +356,8 @@ public class CorefPrinter {
       for(Mention g : document.goldMentions.get(i)){
         if(!g.hasTwin) {
           sbLog.append("\tmissed gold: ").append(g.spanToString()).append("\tPOS: ").append(g.headWord.tag()).append("\tmentiontype: ").append(g.mentionType).append("\theadword: ").append(g.headString).append("\tnumber: ").append(g.number).append("\tgender: ").append(g.gender).append("\tanimacy: ").append(g.animacy).append("\tperson: ").append(g.person).append("\tNE: ").append(g.nerString).append("\n");
-          if(g.sentenceWords.size() > g.endIndex) sbLog.append("\tnextword: ").append(g.sentenceWords.get(g.endIndex)).append("\t").append(g.sentenceWords.get(g.endIndex).tag()).append("\n");
+          if(g.sentenceWords!=null)
+            if(g.sentenceWords.size() > g.endIndex) sbLog.append("\tnextword: ").append(g.sentenceWords.get(g.endIndex)).append("\t").append(g.sentenceWords.get(g.endIndex).tag()).append("\n");
           if(g.contextParseTree!=null) sbLog.append(g.contextParseTree.pennString()).append("\n\n");
           else sbLog.append("\n\n");
         }

@@ -97,6 +97,7 @@ public class CorefDocMaker {
         CoNLLDocumentReader.Options options = new CoNLLDocumentReader.Options();
         options.annotateTokenCoref = false;
         if (CorefProperties.useCoNLLAuto(props)) options.setFilter(".*_auto_conll$");
+        options.lang = CorefProperties.getLanguage(props);
         return new CoNLLDocumentReader(corpusPath, options);
 
       case ACE:

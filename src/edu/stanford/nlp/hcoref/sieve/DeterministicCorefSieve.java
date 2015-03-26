@@ -140,6 +140,7 @@ public abstract class DeterministicCorefSieve extends Sieve {
           }
           
           int removeID = c1.clusterID;
+//          System.out.println("Merging "+c2.corefMentions+c2.clusterID+" with "+c1.corefMentions+c1.clusterID);
           CorefCluster.mergeClusters(c2, c1);
           document.mergeIncompatibles(c2, c1);
           document.mergeAcronymCache(c2, c1);
@@ -372,7 +373,7 @@ public abstract class DeterministicCorefSieve extends Sieve {
       return true;
     }
 
-    if(flags.USE_ROLEAPPOSITION && lang != Locale.CHINESE && Rules.entityIsRoleAppositive(mentionCluster, potentialAntecedent, mention, ant, dict)){
+    if(flags.USE_ROLEAPPOSITION && Rules.entityIsRoleAppositive(mentionCluster, potentialAntecedent, mention, ant, dict)){
       ret = true;
     }
     if(flags.USE_INCLUSION_HEADMATCH && Rules.entityHeadsAgree(mentionCluster, potentialAntecedent, mention, ant, dict)){
