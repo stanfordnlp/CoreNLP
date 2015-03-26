@@ -155,6 +155,10 @@ public class CorefDocMaker {
     // add missing annotation
     addMissingAnnotation(anno);
     
+    // remove nested NP with same headword except newswire document for chinese
+    if(CorefProperties.getLanguage(props)==Locale.CHINESE) {
+      props.setProperty("removeNested", String.valueOf(!input.conllDoc.documentID.contains("nw")));
+    }
     // mention detection: MD gives following information about mentions: mention start/end index, span, headword
     // rest information will be set in preprocess step
     List<List<Mention>> mentions = md.findMentions(anno, dict, props);
