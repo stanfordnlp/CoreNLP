@@ -28,8 +28,10 @@ import java.util.function.Function;
 
 
 /**
- * To create a lucene inverted index for tokens -> sentence ids (right now not storing all core tokens although some functions might suggest that)
- * Created by Sonal Gupta on 10/14/14.
+ * To create a lucene inverted index from tokens to sentence ids.
+ * (Right now it is not storing all core tokens although some functions might suggest that.)
+ *
+ * @author Sonal Gupta on 10/14/14.
  */
 public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
 
@@ -164,12 +166,13 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
         sentids.add(d.get("sentid"));
         //}
       }
-    } else
-    throw new RuntimeException("how come no documents for " + words + ". Query formed is " + query);
-    //System.out.println("number of sentences for tokens " + words + " are " + sentids);
+    } else {
+      throw new RuntimeException("how come no documents for " + words + ". Query formed is " + query);
+      //System.out.println("number of sentences for tokens " + words + " are " + sentids);
 //    if(!saveTokens){
 //      sents = getSentences(sentids);
 //    }
+    }
     return sentids;
   }
 
@@ -203,9 +206,7 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
       }
       return sents;
     }
-    catch (ParseException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
+    catch (ParseException | IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -369,14 +370,6 @@ public class LuceneSentenceIndex<E extends Pattern> extends SentenceIndex<E> {
     }
   }
 
-  public static void main(String[] args) {
-
-    try{
-
-    }catch(Exception e){
-      e.printStackTrace();
-    }
-  }
 }
 
 
