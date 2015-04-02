@@ -43,7 +43,7 @@ public class DcorefChineseBenchmarkSlowITest extends TestCase {
     String currentDir = System.getProperty("user.dir");
     System.err.println("Current dir using System:" +currentDir);
 
-    String[] corefArgs = { "-props", "edu/stanford/nlp/hcoref/zh-dcoref-conll-itest.properties",
+    String[] corefArgs = { "-props", "edu/stanford/nlp/hcoref/properties/zh-dcoref-conll-no-output.properties",
             '-' + CorefProperties.LOG_PROP, baseLogFile,
             '-' + CorefProperties.PATH_OUTPUT_PROP, WORK_DIR_FILE.toString()+File.separator };
 
