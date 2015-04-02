@@ -71,6 +71,10 @@ public class EnglishPatterns {
 
   public static final Pattern RELATIVIZING_WORD_PATTERN = Pattern.compile(RELATIVIZING_WORD_REGEX);
 
+  // Lemmatata of verbs witht the argument structure NP V S-INF.
+  // Extracted from VerbNet 3.2.
+  public static final String NP_V_S_INF_VERBS_REGEX = "(?i:acquiesce|submit|bow|defer|accede|succumb|yield|capitulate|despise|disdain|dislike|regret|like|love|enjoy|fear|hate|pledge|proceed|begin|start|commence|recommence|resume|undertake|ally|collaborate|collude|conspire|discriminate|legislate|partner|protest|rebel|retaliate|scheme|sin|befriend|continue|broadcast|cable|e-mail|fax|modem|netmail|phone|radio|relay|satellite|semaphore|sign|signal|telecast|telegraph|telephone|telex|wire|wireless|ache|crave|fall|hanker|hope|hunger|itch|long|lust|pine|pray|thirst|wish|yearn|dangle|hanker|lust|thirst|yearn|babble|bark|bawl|bellow|bleat|blubber|boom|bray|burble|bluster|cackle|call|carol|chant|chatter|chirp|chortle|chuckle|cluck|coo|croak|croon|crow|cry|drawl|drone|gabble|gasp|gibber|groan|growl|grumble|grunt|hiss|holler|hoot|howl|jabber|keen|lilt|lisp|mewl|moan|mumble|murmur|mutter|nasal|natter|pant|prattle|purr|quaver|rage|rant|rasp|roar|rumble|scream|screech|shout|shriek|sibilate|simper|sigh|sing|smatter|smile|snap|snarl|snivel|snuffle|splutter|squall|squawk|squeak|squeal|stammer|stemmer|stutter|thunder|tisk|trill|trumpet|twang|twitter|vociferate|wail|warble|wheeze|whimper|whine|whisper|whistle|witter|whoop|yammer|yap|yell|yelp|yodel|blare|gurgle|hum|neglect|fail|forego|forgo|flub|overleap|manage|omit|seem|appear|prove|manage|fail|flub|try|attempt|intend|enjoy|expect|wish|hope|intend|mean|plan|propose|think|aim|dream|imagine|yen)";
+  
   private EnglishPatterns() {} // static constants
 
 }
