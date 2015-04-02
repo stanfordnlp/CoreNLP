@@ -525,7 +525,7 @@ public class CorefPrinter {
     if(!afterPostProcessing) {
       for(String line : lines) {
         if(line.startsWith("Identification of Mentions")) {
-          logger.info(line);
+          Redwood.log(line);
           return;
         }
       }
@@ -537,7 +537,7 @@ public class CorefPrinter {
           sb.append(line).append("\n");
         }
       }
-      logger.info(sb.toString());
+      Redwood.log(sb.toString());
     }
   }
   /** Print average F1 of MUC, B^3, CEAF_E */
