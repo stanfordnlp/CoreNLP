@@ -22,7 +22,6 @@ import edu.stanford.nlp.parser.lexparser.TreebankLangParserParams;
 import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.process.WhitespaceTokenizer;
 import edu.stanford.nlp.util.*;
-
 import static edu.stanford.nlp.trees.GrammaticalRelation.DEPENDENT;
 import static edu.stanford.nlp.trees.GrammaticalRelation.ROOT;
 
@@ -1045,6 +1044,58 @@ public abstract class GrammaticalStructure implements Serializable {
     System.out.println(dependenciesToString(gs, deps, tree, conllx, extraSep));
   }
 
+  
+  /**
+   * Calls dependenciesToCoNLLXString with the list of basic dependencies.
+   * 
+   * (see {@link #dependenciesToCoNLLXString(GrammaticalStructure, Collection, CoreMap)})
+   */
+  public static String dependenciesToCoNLLXString(GrammaticalStructure gs, CoreMap sentence) {
+    return dependenciesToCoNLLXString(gs, gs.typedDependencies(), sentence);
+  }
+  
+  
+  /**
+   *
+   * Returns a dependency tree in CoNNL-X format.
+   * It requires a CoreMap for the sentence with a TokensAnnotation.
+   * Each token has to contain a word and a POS tag.
+   *
+   * @param gs The dependency tree as a GrammaticalStrucuture.
+   * @param deps The list of TypedDependency relations.
+   * @param sentence The corresponding CoreMap for the sentence.
+   * @return Dependency tree in CoNLL-X format.
+   */
+  public static String dependenciesToCoNLLXString(GrammaticalStructure gs, Collection<TypedDependency> deps, CoreMap sentence) {
+    StringBuilder bf = new StringBuilder();
+
+    HashMap<Integer, TypedDependency> indexedDeps = new HashMap<Integer, TypedDependency>(deps.size());
+    for (TypedDependency dep : deps) {
+      indexedDeps.put(dep.dep().index(), dep);
+    }
+
+    List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
+    if (tokens == null) {
+      throw new RuntimeException("dependenciesToCoNLLXString: CoreMap does not have required TokensAnnotation.");
+    }
+    int idx = 1;
+
+    for (CoreLabel token : tokens) {
+      String word = token.value();
+      String pos = token.tag();
+      String cPos = (token.get(CoreAnnotations.CoarseTagAnnotation.class) != null) ?
+          token.get(CoreAnnotations.CoarseTagAnnotation.class) : pos;
+      String lemma = token.lemma() != null ? token.lemma() : "_";
+      Integer gov = indexedDeps.containsKey(idx) ? indexedDeps.get(idx).gov().index() : 0;
+      String reln = indexedDeps.containsKey(idx) ? indexedDeps.get(idx).reln().toString() : "erased";
+      String out = String.format("%d\t%s\t%s\t%s\t%s\t_\t%d\t%s\t_\t_\n", idx, word, lemma, cPos, pos, gov, reln);
+      bf.append(out);
+      idx++;
+    }
+    bf.append("\n");
+    return bf.toString();
+  }
+
   public static String dependenciesToString(GrammaticalStructure gs, Collection<TypedDependency> deps, Tree tree, boolean conllx, boolean extraSep) {
     StringBuilder bf = new StringBuilder();
 
@@ -1061,39 +1112,25 @@ public abstract class GrammaticalStructure implements Serializable {
       List<Tree> leaves = tree.getLeaves();
       Tree uposTree = UniversalPOSMapper.mapTree(tree);
       List<Label> uposLabels = uposTree.preTerminalYield();
-      String[] words = new String[leaves.size()];
-      String[] pos = new String[leaves.size()];
-      String[] upos = new String[leaves.size()];
-
-      String[] relns = new String[leaves.size()];
-      int[] govs = new int[leaves.size()];
 
       int index = 0;
+      CoreMap sentence = new CoreLabel();
+      List<CoreLabel> tokens = new ArrayList<CoreLabel>(leaves.size());
       for (Tree leaf : leaves) {
         index++;
         if (!indexToPos.containsKey(index)) {
           continue;
         }
-        int depPos = indexToPos.get(index) - 1;
-        words[depPos] = leaf.value();
-        pos[depPos] = leaf.parent(tree).value(); // use slow, but safe, parent look up
-        upos[depPos] = uposLabels.get(index - 1).value();
+        CoreLabel token = new CoreLabel();
+        token.setIndex(index);
+        token.setValue(leaf.value());
+        token.setWord(leaf.value());
+        token.setTag(leaf.parent(tree).value());
+        token.set(CoreAnnotations.CoarseTagAnnotation.class, uposLabels.get(index - 1).value());
+        tokens.add(token);
       }
-
-      for (TypedDependency dep : deps) {
-        int depPos = indexToPos.get(dep.dep().index()) - 1;
-        govs[depPos] = indexToPos.get(dep.gov().index());
-        relns[depPos] = dep.reln().toString();
-      }
-
-      for (int i = 0; i < relns.length; i++) {
-        if (words[i] == null) {
-          continue;
-        }
-        String out = String.format("%d\t%s\t_\t%s\t%s\t_\t%d\t%s\t_\t_\n", i + 1, words[i], upos[i], pos[i], govs[i], (relns[i] != null ? relns[i] : "erased"));
-        bf.append(out);
-      }
-
+      sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
+      bf.append(dependenciesToCoNLLXString(gs, deps, sentence));
     } else {
       if (extraSep) {
         List<TypedDependency> extraDeps = new ArrayList<TypedDependency>();
@@ -1608,7 +1645,9 @@ public abstract class GrammaticalStructure implements Serializable {
     // System.out.print("GrammaticalRelations under DEPENDENT:");
     // System.out.println(DEPENDENT.toPrettyString());
 
-    MemoryTreebank tb = new MemoryTreebank(new TreeNormalizer());
+    /* Use a tree normalizer that removes all empty nodes. 
+       This prevents wrong indexing of the nodes in the dependency relations.*/
+    MemoryTreebank tb = new MemoryTreebank(new NPTmpRetainingTreeNormalizer(0, false, 1, false));
     Iterable<Tree> trees = tb;
 
     Iterable<GrammaticalStructure> gsBank = null;
