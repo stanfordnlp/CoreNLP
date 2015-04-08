@@ -1046,12 +1046,13 @@ public abstract class GrammaticalStructure implements Serializable {
 
   
   /**
-   * Calls dependenciesToCoNLLXString with the list of basic dependencies.
+   * Calls dependenciesToCoNLLXString with the basic dependencies 
+   * from a grammatical structure.
    * 
-   * (see {@link #dependenciesToCoNLLXString(GrammaticalStructure, Collection, CoreMap)})
+   * (see {@link #dependenciesToCoNLLXString(Collection, CoreMap)})
    */
   public static String dependenciesToCoNLLXString(GrammaticalStructure gs, CoreMap sentence) {
-    return dependenciesToCoNLLXString(gs, gs.typedDependencies(), sentence);
+    return dependenciesToCoNLLXString(gs.typedDependencies(), sentence);
   }
   
   
@@ -1061,12 +1062,11 @@ public abstract class GrammaticalStructure implements Serializable {
    * It requires a CoreMap for the sentence with a TokensAnnotation.
    * Each token has to contain a word and a POS tag.
    *
-   * @param gs The dependency tree as a GrammaticalStrucuture.
    * @param deps The list of TypedDependency relations.
    * @param sentence The corresponding CoreMap for the sentence.
    * @return Dependency tree in CoNLL-X format.
    */
-  public static String dependenciesToCoNLLXString(GrammaticalStructure gs, Collection<TypedDependency> deps, CoreMap sentence) {
+  public static String dependenciesToCoNLLXString(Collection<TypedDependency> deps, CoreMap sentence) {
     StringBuilder bf = new StringBuilder();
 
     HashMap<Integer, TypedDependency> indexedDeps = new HashMap<Integer, TypedDependency>(deps.size());
@@ -1130,7 +1130,7 @@ public abstract class GrammaticalStructure implements Serializable {
         tokens.add(token);
       }
       sentence.set(CoreAnnotations.TokensAnnotation.class, tokens);
-      bf.append(dependenciesToCoNLLXString(gs, deps, sentence));
+      bf.append(dependenciesToCoNLLXString(deps, sentence));
     } else {
       if (extraSep) {
         List<TypedDependency> extraDeps = new ArrayList<TypedDependency>();
