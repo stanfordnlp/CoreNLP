@@ -233,7 +233,7 @@ public abstract class DeterministicCorefSieve extends Sieve {
     }
 
     // chinese newswire contains coref nested NPs with shared headword  Chen & Ng
-    if(lang != Locale.CHINESE || !document.docInfo.get("DOC_ID").contains("nw")) {
+    if(lang != Locale.CHINESE || document.docInfo == null || !document.docInfo.getOrDefault("DOC_ID","").contains("nw")) {
       if(mention2.insideIn(ant) || ant.insideIn(mention2)) return false;
     }
 

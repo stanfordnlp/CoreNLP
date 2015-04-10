@@ -60,7 +60,7 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
 
       setBarePlural(mentions);
     }
-    removeSpuriousMentions(doc, predictedMentions, dict, Boolean.parseBoolean(props.getProperty("removeNested", "true")), lang);
+    removeSpuriousMentions(doc, predictedMentions, dict, CorefProperties.removeNested(props), lang);
     return predictedMentions;
   }
   
@@ -97,7 +97,7 @@ public class RuleBasedCorefMentionFinder extends CorefMentionFinder {
     }
     
     // mention selection based on document-wise info
-    removeSpuriousMentions(doc, predictedMentions, dict, Boolean.parseBoolean(props.getProperty("removeNested", "true")), lang);
+    removeSpuriousMentions(doc, predictedMentions, dict, CorefProperties.removeNested(props), lang);
 
 //    // assign mention IDs
 //    if(assignIds) assignMentionIDs(predictedMentions, maxID);

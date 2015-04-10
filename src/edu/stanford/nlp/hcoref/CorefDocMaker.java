@@ -157,11 +157,9 @@ public class CorefDocMaker {
     
     // remove nested NP with same headword except newswire document for chinese
     
-    boolean isChineseConllNonNW = input.conllDoc != null 
-          && CorefProperties.getLanguage(props)==Locale.CHINESE 
-          && !input.conllDoc.documentID.contains("nw");
-    if(isChineseConllNonNW)
-      props.setProperty("removeNested", "true");
+    if(input.conllDoc != null && CorefProperties.getLanguage(props)==Locale.CHINESE){
+      CorefProperties.setRemoveNested(props, !input.conllDoc.documentID.contains("nw"));
+    }
     
     // mention detection: MD gives following information about mentions: mention start/end index, span, headword
     // rest information will be set in preprocess step

@@ -69,7 +69,7 @@ public class DependencyCorefMentionFinder extends CorefMentionFinder {
       findHead(sentences.get(i), predictedMentions.get(i));
     }
     // mention selection based on document-wise info
-    removeSpuriousMentions(doc, predictedMentions, dict, Boolean.parseBoolean(props.getProperty("removeNested", "true")), lang);
+    removeSpuriousMentions(doc, predictedMentions, dict, CorefProperties.removeNested(props), lang);
 
     // if this is for MD training, skip classification
     if(!CorefProperties.isMentionDetectionTraining(props)) {
