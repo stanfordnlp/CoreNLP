@@ -32,13 +32,14 @@ import edu.stanford.nlp.util.CoreMap;
  * the parser.  An alternative would be to do the binarization here,
  * which would require at a minimum the HeadFinder used in the parser.
  *
- * @author John Bauer 
+ * @author John Bauer
  */
 public class SentimentAnnotator implements Annotator {
-  static final String DEFAULT_MODEL = "edu/stanford/nlp/models/sentiment/sentiment.ser.gz";
-  String modelPath;
-  SentimentModel model;
-  CollapseUnaryTransformer transformer = new CollapseUnaryTransformer();
+
+  private static final String DEFAULT_MODEL = "edu/stanford/nlp/models/sentiment/sentiment.ser.gz";
+  private final String modelPath;
+  private final SentimentModel model;
+  private final CollapseUnaryTransformer transformer = new CollapseUnaryTransformer();
 
   public SentimentAnnotator(String name, Properties props) {
     this.modelPath = props.getProperty(name + ".model", DEFAULT_MODEL);
@@ -48,14 +49,17 @@ public class SentimentAnnotator implements Annotator {
     this.model = SentimentModel.loadSerialized(modelPath);
   }
 
+  @Override
   public Set<Requirement> requirementsSatisfied() {
     return Collections.emptySet();
   }
 
+  @Override
   public Set<Requirement> requires() {
     return PARSE_TAG_BINARIZED_TREES;
   }
 
+  @Override
   public void annotate(Annotation annotation) {
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       // TODO: parallelize
