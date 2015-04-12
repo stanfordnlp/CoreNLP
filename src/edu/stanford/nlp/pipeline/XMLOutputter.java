@@ -4,9 +4,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import nu.xom.Attribute;
+import nu.xom.Document;
+import nu.xom.Element;
+import nu.xom.ProcessingInstruction;
+import nu.xom.Serializer;
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.machinereading.structure.EntityMention;
@@ -16,22 +22,22 @@ import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
+import edu.stanford.nlp.rnn.RNNCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
+import edu.stanford.nlp.sentiment.SentimentUtils;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.trees.TreePrint;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
-import nu.xom.*;
 
 
 /**
@@ -121,12 +127,17 @@ public class XMLOutputter extends AnnotationOutputter {
         }
         sentCount ++;
 
+        Map<Integer, Integer> sentimentScores = new HashMap<Integer, Integer>(0);
+        Tree sentimentTree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
+        getSentimentScores(sentimentTree, null, sentimentScores);
+        
+        
         // add the word table with all token-level annotations
         Element wordTable = new Element("tokens", NAMESPACE_URI);
         List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);
         for(int j = 0; j < tokens.size(); j ++){
           Element wordInfo = new Element("token", NAMESPACE_URI);
-          addWordInfo(wordInfo, tokens.get(j), j + 1, NAMESPACE_URI);
+          addWordInfo(wordInfo, tokens.get(j), j + 1, NAMESPACE_URI, sentimentScores);
           wordTable.appendChild(wordInfo);
         }
         sentElem.appendChild(wordTable);
@@ -183,12 +194,11 @@ public class XMLOutputter extends AnnotationOutputter {
         /**
          * Adds sentiment as an attribute of this sentence.
          */
-        Tree sentimentTree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
+        
         if (sentimentTree != null) {
           int sentiment = RNNCoreAnnotations.getPredictedClass(sentimentTree);
           sentElem.addAttribute(new Attribute("sentimentValue", Integer.toString(sentiment)));
-          String sentimentClass = sentence.get(SentimentCoreAnnotations.ClassName.class);
-          sentElem.addAttribute(new Attribute("sentiment", sentimentClass.replaceAll(" ", "")));
+          sentElem.addAttribute(new Attribute("sentiment", SentimentUtils.sentimentString(sentiment).replaceAll(" ", "")));
         }
 
 
@@ -216,6 +226,20 @@ public class XMLOutputter extends AnnotationOutputter {
     return xmlDoc;
   }
 
+  
+  private static void getSentimentScores(Tree rootTree, Tree parentTree, Map<Integer, Integer> scores) {
+		if (rootTree.isLeaf() && parentTree != null) {
+			scores.put(scores.size() +1, RNNCoreAnnotations.getPredictedClass(parentTree));
+			return;
+		}
+
+		for (Tree child : rootTree.children()) {
+			getSentimentScores(child, rootTree, scores);
+		}
+
+	}
+  
+  
   /**
    * Generates the XML content for a constituent tree
    */
@@ -371,9 +395,15 @@ public class XMLOutputter extends AnnotationOutputter {
     chainElem.appendChild(mentionElem);
   }
 
-  private static void addWordInfo(Element wordInfo, CoreMap token, int id, String curNS) {
+  private static void addWordInfo(Element wordInfo, CoreMap token, int id, String curNS, Map<Integer, Integer> sentimentScores) {
     // store the position of this word in the sentence
     wordInfo.addAttribute(new Attribute("id", Integer.toString(id)));
+    
+    if (sentimentScores.containsKey(id)) {
+    	wordInfo.addAttribute(new Attribute("sentimentValue", Integer.toString(sentimentScores.get(id))));
+    	wordInfo.addAttribute(new Attribute("sentiment", SentimentUtils.sentimentString(sentimentScores.get(id)).replaceAll(" ", "")));
+    }
+    
 
     setSingleElement(wordInfo, "word", curNS, token.get(CoreAnnotations.TextAnnotation.class));
     setSingleElement(wordInfo, "lemma", curNS, token.get(CoreAnnotations.LemmaAnnotation.class));
@@ -387,6 +417,7 @@ public class XMLOutputter extends AnnotationOutputter {
       setSingleElement(wordInfo, "POS", curNS, token.get(CoreAnnotations.PartOfSpeechAnnotation.class));
     }
 
+    
     if (token.containsKey(CoreAnnotations.NamedEntityTagAnnotation.class)) {
       setSingleElement(wordInfo, "NER", curNS, token.get(CoreAnnotations.NamedEntityTagAnnotation.class));
     }
