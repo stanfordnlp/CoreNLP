@@ -57,6 +57,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
 
   public static final boolean USE_SUTIME_DEFAULT = TimeExpressionExtractorFactory.DEFAULT_EXTRACTOR_PRESENT;
   public static final String USE_SUTIME_PROPERTY = "ner.useSUTime";
+  public static final String USE_SUTIME_PROPERTY_BASE = "useSUTime";
 
   private final TimeExpressionExtractor timexExtractor;
 

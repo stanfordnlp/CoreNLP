@@ -3,6 +3,7 @@ package edu.stanford.nlp.ie;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
 import edu.stanford.nlp.io.RuntimeIOException;
@@ -10,6 +11,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.DefaultPaths;
+import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
@@ -28,6 +30,7 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
   private final boolean applyNumericClassifiers;
   public static final boolean APPLY_NUMERIC_CLASSIFIERS_DEFAULT = true;
   public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY = "ner.applyNumericClassifiers";
+  public static final String APPLY_NUMERIC_CLASSIFIERS_PROPERTY_BASE = "applyNumericClassifiers";
 
   private final boolean useSUTime;
 
@@ -91,20 +94,42 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
     this.nsc = new NumberSequenceClassifier(useSUTime);
   }
 
+  public static final Set<String> DEFAULT_PASS_DOWN_PROPERTIES =
+          CollectionUtils.asSet("encoding", "inputEncoding", "outputEncoding", "maxAdditionalKnownLCWords");
+
   /** This factory method is used to create the NERClassifierCombiner used in NERCombinerAnnotator
    *  (and, thence, in StanfordCoreNLP).
    *
    *  @param name A "x.y" format property name prefix (the "x" part). This is commonly null,
    *              and then "ner" is used.  If it is the empty string, then no property prefix is used.
    *  @param properties Various properties, including a list in "ner.model".
-   *                    The used ones start with name + "."
+   *                    The used ones start with name + "." or are in passDownProperties
    *  @return An NERClassifierCombiner with the given properties
    */
   public static NERClassifierCombiner createNERClassifierCombiner(String name, Properties properties) {
-    String prefix = (name != null)? name + '.' : "ner.";
+    return createNERClassifierCombiner(name, DEFAULT_PASS_DOWN_PROPERTIES, properties);
+  }
+
+  /** This factory method is used to create the NERClassifierCombiner used in NERCombinerAnnotator
+   *  (and, thence, in StanfordCoreNLP).
+   *
+   *  @param name A "x.y" format property name prefix (the "x" part). This is commonly null,
+   *              and then "ner" is used.  If it is the empty string, then no property prefix is used.
+   *  @param passDownProperties Property names for which the property should be passed down
+   *              to the NERClassifierCombiner. The default is not to pass down, but pass down is
+   *              useful for things like charset encoding.
+   *  @param properties Various properties, including a list in "ner.model".
+   *                    The used ones start with name + "." or are in passDownProperties
+   *  @return An NERClassifierCombiner with the given properties
+   */
+  public static NERClassifierCombiner createNERClassifierCombiner(String name,
+                                                                  Set<String> passDownProperties,
+                                                                  Properties properties) {
+    String prefix = (name == null) ? "ner." : name.isEmpty() ? "" : name + '.';
     String modelNames = properties.getProperty(prefix + "model");
     if (modelNames == null) {
-      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + ',' + DefaultPaths.DEFAULT_NER_MUC_MODEL + ',' + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
+      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + ',' + DefaultPaths.DEFAULT_NER_MUC_MODEL + ',' +
+              DefaultPaths.DEFAULT_NER_CONLL_MODEL;
     }
     // but modelNames can still be empty string is set explicitly to be empty!
     String[] models;
@@ -117,18 +142,17 @@ public class NERClassifierCombiner extends ClassifierCombiner<CoreLabel> {
     }
     NERClassifierCombiner nerCombiner;
     try {
-      // TODO: use constants for part after prefix so we can ensure consistent options
       boolean applyNumericClassifiers =
               PropertiesUtils.getBool(properties,
-                      prefix + "applyNumericClassifiers",
+                      prefix + APPLY_NUMERIC_CLASSIFIERS_PROPERTY_BASE,
                       APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
       boolean useSUTime =
               PropertiesUtils.getBool(properties,
-                      prefix + "useSUTime",
+                      prefix + NumberSequenceClassifier.USE_SUTIME_PROPERTY_BASE,
                       NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-      // TODO: properties are passed in as is for number sequence classifiers (don't care about the prefix)
+      Properties combinerProperties = PropertiesUtils.extractSelectedProperties(properties, passDownProperties);
       nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
-              useSUTime, properties, models);
+              useSUTime, combinerProperties, models);
     } catch (IOException e) {
       throw new RuntimeIOException(e);
     }
