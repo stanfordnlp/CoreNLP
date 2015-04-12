@@ -1030,10 +1030,7 @@ public class Redwood {
                 //(run runnable)
                 try{
                   runnable.run();
-                } catch (Exception e){
-                  e.printStackTrace();
-                  System.exit(1);
-                } catch (AssertionError e) {
+                } catch (Exception | AssertionError e){
                   e.printStackTrace();
                   System.exit(1);
                 }
@@ -1101,7 +1098,7 @@ public class Redwood {
       threadAndRun(title,runnables,Runtime.getRuntime().availableProcessors());
     }
     public static void threadAndRun(Iterable<Runnable> runnables, int numThreads){
-      threadAndRun(""+numThreads, runnables, numThreads);
+      threadAndRun(String.valueOf(numThreads), runnables, numThreads);
     }
     public static void threadAndRun(Iterable<Runnable> runnables){
       threadAndRun(runnables, Execution.threads);

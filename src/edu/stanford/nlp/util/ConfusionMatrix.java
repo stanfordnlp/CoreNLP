@@ -308,8 +308,7 @@ public class ConfusionMatrix<U> {
       String placeHolder = getPlaceHolder(guessI, sortedLabels.get(guessI));
       ret.write(StringUtils.padLeft(placeHolder, leftPadSize));
       U guess = sortedLabels.get(guessI);
-      for (int goldI = 0; goldI < sortedLabels.size(); goldI++) {
-        U gold = sortedLabels.get(goldI);
+      for (U gold : sortedLabels) {
         Integer value = get(guess, gold);
         ret.write(StringUtils.padLeft(value.toString(), delimPadSize));
       }
@@ -319,8 +318,7 @@ public class ConfusionMatrix<U> {
 
     // Bottom row, write out marginals over golds
     ret.write(StringUtils.padLeft("Marg. (Gold)", leftPadSize));
-    for (int goldI = 0; goldI < sortedLabels.size(); goldI++) {
-      U gold = sortedLabels.get(goldI);
+    for (U gold : sortedLabels) {
       ret.write(StringUtils.padLeft(goldMarginal(gold).toString(), delimPadSize));
     }
 
