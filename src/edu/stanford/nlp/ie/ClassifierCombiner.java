@@ -54,7 +54,7 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
    * NORMAL means that if one classifier uses PERSON, later classifiers can't also add PERSON, for example. <br>
    * HIGH_RECALL allows later models do set PERSON as long as it doesn't clobber existing annotations.
    */
-  static enum CombinationMode {
+  enum CombinationMode {
     NORMAL, HIGH_RECALL
   }
 
