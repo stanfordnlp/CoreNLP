@@ -1,6 +1,5 @@
 package edu.stanford.nlp.pipeline;
 
-import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.time.TimeAnnotations;
@@ -66,45 +65,40 @@ public class EntityMentionsAnnotator implements Annotator {
     }
   }
 
-  private static final Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = new Function<Pair<CoreLabel, CoreLabel>, Boolean>() {
-    @Override
-    public Boolean apply(Pair<CoreLabel, CoreLabel> in) {
-      // First argument is the current token
-      CoreLabel cur = in.first;
-      // Second argument the previous token
-      CoreLabel prev = in.second;
-      if (cur == null || prev == null) {
-        return false;
-      }
+  private static final Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = in -> {
+    // First argument is the current token
+    CoreLabel cur = in.first;
+    // Second argument the previous token
+    CoreLabel prev = in.second;
 
-      // Get NormalizedNamedEntityTag and say two entities are incompatible if they are different
-      String v1 = cur.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
-      String v2 = prev.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
-      boolean compatible = checkStrings(v1,v2);
-      if (!compatible) return compatible;
-
-      // This duplicates logic in the QuantifiableEntityNormalizer (but maybe we will get rid of that class)
-      String nerTag = cur.get(CoreAnnotations.NamedEntityTagAnnotation.class);
-      if ("NUMBER".equals(nerTag) || "ORDINAL".equals(nerTag)) {
-        // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
-        Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
-        Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
-        compatible = checkNumbers(n1,n2);
-        if (!compatible) return compatible;
-      }
-
-      // Check timex...
-      if ("TIME".equals(nerTag) || "SET".equals(nerTag) || "DATE".equals(nerTag) || "DURATION".equals(nerTag)) {
-        Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
-        Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
-        String tid1 = (timex1 != null)? timex1.tid():null;
-        String tid2 = (timex2 != null)? timex2.tid():null;
-        compatible = checkStrings(tid1,tid2);
-        if (!compatible) return compatible;
-      }
-
-      return compatible;
+    if (cur == null || prev == null) {
+      return false;
     }
+
+    // Get NormalizedNamedEntityTag and say two entities are incompatible if they are different
+    String v1 = cur.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+    String v2 = prev.get(CoreAnnotations.NormalizedNamedEntityTagAnnotation.class);
+    if ( ! checkStrings(v1,v2)) return false;
+
+    // This duplicates logic in the QuantifiableEntityNormalizer (but maybe we will get rid of that class)
+    String nerTag = cur.get(CoreAnnotations.NamedEntityTagAnnotation.class);
+    if ("NUMBER".equals(nerTag) || "ORDINAL".equals(nerTag)) {
+      // Get NumericCompositeValueAnnotation and say two entities are incompatible if they are different
+      Number n1 = cur.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+      Number n2 = prev.get(CoreAnnotations.NumericCompositeValueAnnotation.class);
+      if ( ! checkNumbers(n1,n2)) return false;
+    }
+
+    // Check timex...
+    if ("TIME".equals(nerTag) || "SET".equals(nerTag) || "DATE".equals(nerTag) || "DURATION".equals(nerTag)) {
+      Timex timex1 = cur.get(TimeAnnotations.TimexAnnotation.class);
+      Timex timex2 = prev.get(TimeAnnotations.TimexAnnotation.class);
+      String tid1 = (timex1 != null)? timex1.tid():null;
+      String tid2 = (timex2 != null)? timex2.tid():null;
+      if ( ! checkStrings(tid1,tid2)) return false;
+    }
+
+    return true;
   };
 
   @Override
