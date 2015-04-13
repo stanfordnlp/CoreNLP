@@ -599,7 +599,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   public static LexicalizedParser getParserFromSerializedFile(String serializedFileOrUrl) {
     try {
       Timing tim = new Timing();
-      System.err.print("Loading parser from serialized file " + serializedFileOrUrl + " ...");
+      System.err.print("Loading parser from serialized file " + serializedFileOrUrl + " ... ");
       ObjectInputStream in = IOUtils.readStreamFromString(serializedFileOrUrl);
       LexicalizedParser pd = loadModel(in);
 
