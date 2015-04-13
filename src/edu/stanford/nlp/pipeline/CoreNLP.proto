@@ -95,9 +95,11 @@ message Token {
   optional uint32 corefClusterID    = 23;   // The [primary] cluster id for this token
   optional string answer            = 24;   // A temporary annotation which is occasionally left in
   //  optional string projectedCategory = 25;   // The syntactic category of the maximal constituent headed by the word. Not used anywhere, so deleted.
-  optional uint32 headWordIndex     = 26;   // The index of the head word of this word.
-  optional Operator operator        = 27;   // If this is an operator, which one is it and what is its scope (as per Natural Logic)?
-  optional Polarity polarity        = 28;   // The polarity of this word, according to Natural Logic
+  optional uint32    headWordIndex  = 26;   // The index of the head word of this word.
+  optional Operator  operator       = 27;   // If this is an operator, which one is it and what is its scope (as per Natural Logic)?
+  optional Polarity  polarity       = 28;   // The polarity of this word, according to Natural Logic
+  optional Span      span           = 29;   // The span of a leaf node of a tree
+  optional string    sentiment      = 30;   // The final sentiment of the sentence
 
   // Fields set by other annotators in CoreNLP
   optional string gender          = 51;  // gender annotation (machine reading)
@@ -183,6 +185,14 @@ message CorefChain {
   required int32        chainID        = 1;
   repeated CorefMention mention        = 2;
   required uint32       representative = 3;
+}
+
+//
+// A Span of text
+//
+message Span {
+  required uint32 begin      = 1;
+  required uint32 end        = 2;
 }
 
 //

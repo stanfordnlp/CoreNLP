@@ -119,6 +119,11 @@ import java.util.*;
  * </ol>
  *
  *
+ * TODOs
+ * <ul>
+ *   <li>In CoreNLP, the leaves of a tree are == to the tokens in a sentence. This is not the case for a deserialized proto.</li>
+ * </ul>
+ *
  * @author Gabor Angeli
  */
 public class ProtobufAnnotationSerializer extends AnnotationSerializer {
@@ -291,6 +296,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (coreLabel.containsKey(CorefClusterIdAnnotation.class)) { builder.setCorefClusterID(getAndRegister(coreLabel, keysToSerialize, CorefClusterIdAnnotation.class)); }
     if (coreLabel.containsKey(NaturalLogicAnnotations.OperatorAnnotation.class)) { builder.setOperator(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.OperatorAnnotation.class))); }
     if (coreLabel.containsKey(NaturalLogicAnnotations.PolarityAnnotation.class)) { builder.setPolarity(toProto(getAndRegister(coreLabel, keysToSerialize, NaturalLogicAnnotations.PolarityAnnotation.class))); }
+    if (coreLabel.get(SpanAnnotation.class) != null) {
+      IntPair span = coreLabel.get(SpanAnnotation.class);
+      builder.setSpan(CoreNLPProtos.Span.newBuilder().setBegin(span.getSource()).setEnd(span.getTarget()).build());
+    }
+    if (coreLabel.get(SentimentCoreAnnotations.SentimentClass.class) != null) { builder.setSentiment(coreLabel.get(SentimentCoreAnnotations.SentimentClass.class)); }
     // Non-default annotators
     if (getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class) != null) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }
     if (coreLabel.containsKey(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
@@ -686,6 +696,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasAnswer()) { word.set(AnswerAnnotation.class, proto.getAnswer()); }
     if (proto.hasOperator()) { word.set(NaturalLogicAnnotations.OperatorAnnotation.class, fromProto(proto.getOperator())); }
     if (proto.hasPolarity()) { word.set(NaturalLogicAnnotations.PolarityAnnotation.class, fromProto(proto.getPolarity())); }
+    if (proto.hasSpan()) { word.set(SpanAnnotation.class, new IntPair(proto.getSpan().getBegin(), proto.getSpan().getEnd())); }
+    if (proto.hasSentiment()) { word.set(SentimentCoreAnnotations.SentimentClass.class, proto.getSentiment()); }
     // Non-default annotators
     if (proto.hasGender()) { word.set(GenderAnnotation.class, proto.getGender()); }
     if (proto.hasTrueCase()) { word.set(TrueCaseAnnotation.class, proto.getTrueCase()); }
