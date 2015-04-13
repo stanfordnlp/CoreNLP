@@ -82,16 +82,16 @@ public class CleanXmlAnnotator implements Annotator{
 
   /**
    * A map of document level annotation keys (i.e. docid) along with a pattern
-   *  indicating the tag to match, and the attribute to match
+   *  indicating the tag to match, and the attribute to match.
    */
-  private CollectionValuedMap<Class, Pair<Pattern,Pattern>> docAnnotationPatterns = new CollectionValuedMap<Class, Pair<Pattern, Pattern>>();
+  private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> docAnnotationPatterns = new CollectionValuedMap<>();
   public static final String DEFAULT_DOC_ANNOTATIONS_PATTERNS = "docID=doc[id],doctype=doc[type],docsourcetype=doctype[source]";
 
   /**
    * A map of token level annotation keys (i.e. link, speaker) along with a pattern
-   *  indicating the tag/attribute to match (tokens that belows to the text enclosed in the specified tag witll be annotated)
+   *  indicating the tag/attribute to match (tokens that belong to the text enclosed in the specified tag will be annotated).
    */
-  private CollectionValuedMap<Class, Pair<Pattern,Pattern>> tokenAnnotationPatterns = new CollectionValuedMap<Class, Pair<Pattern, Pattern>>();
+  private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> tokenAnnotationPatterns = new CollectionValuedMap<>();
   public static final String DEFAULT_TOKEN_ANNOTATIONS_PATTERNS = null;
 
   /**
@@ -106,10 +106,10 @@ public class CleanXmlAnnotator implements Annotator{
   private Pattern ssplitDiscardTokensMatcher = null;
 
   /**
-   * A map of section level annotation keys (i.e. docid) along with a pattern i
-   *  indicating the tag to match, and the attribute to match
+   * A map of section level annotation keys (i.e. docid) along with a pattern
+   *  indicating the tag to match, and the attribute to match.
    */
-  private CollectionValuedMap<Class, Pair<Pattern,Pattern>> sectionAnnotationPatterns = new CollectionValuedMap<Class, Pair<Pattern, Pattern>>();
+  private final CollectionValuedMap<Class, Pair<Pattern,Pattern>> sectionAnnotationPatterns = new CollectionValuedMap<>();
   public static final String DEFAULT_SECTION_ANNOTATIONS_PATTERNS = null;
 
   /**
