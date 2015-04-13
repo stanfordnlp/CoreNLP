@@ -350,8 +350,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (sentence.containsKey(CharacterOffsetEndAnnotation.class)) { builder.setCharacterOffsetEnd(getAndRegister(sentence, keysToSerialize, CharacterOffsetEndAnnotation.class)); }
     if (sentence.containsKey(TreeAnnotation.class)) { builder.setParseTree(toProto(getAndRegister(sentence, keysToSerialize, TreeAnnotation.class))); }
     if (sentence.containsKey(BinarizedTreeAnnotation.class)) { builder.setBinarizedParseTree(toProto(getAndRegister(sentence, keysToSerialize, BinarizedTreeAnnotation.class))); }
-    if (sentence.containsKey(SentimentCoreAnnotations.AnnotatedTree.class)) { builder.setAnnotatedParseTree(toProto(getAndRegister(sentence, keysToSerialize, SentimentCoreAnnotations.AnnotatedTree.class))); }
-    if (sentence.containsKey(SentimentCoreAnnotations.ClassName.class)) { builder.setSentiment(getAndRegister(sentence, keysToSerialize, SentimentCoreAnnotations.ClassName.class)); }
+    if (sentence.containsKey(SentimentCoreAnnotations.SentimentAnnotatedTree.class)) { builder.setAnnotatedParseTree(toProto(getAndRegister(sentence, keysToSerialize, SentimentCoreAnnotations.SentimentAnnotatedTree.class))); }
+    if (sentence.containsKey(SentimentCoreAnnotations.SentimentClass.class)) { builder.setSentiment(getAndRegister(sentence, keysToSerialize, SentimentCoreAnnotations.SentimentClass.class)); }
     if (sentence.containsKey(BasicDependenciesAnnotation.class)) { builder.setBasicDependencies(toProto(getAndRegister(sentence, keysToSerialize, BasicDependenciesAnnotation.class))); }
     if (sentence.containsKey(CollapsedDependenciesAnnotation.class)) { builder.setCollapsedDependencies(toProto(getAndRegister(sentence, keysToSerialize, CollapsedDependenciesAnnotation.class))); }
     if (sentence.containsKey(CollapsedCCProcessedDependenciesAnnotation.class)) { builder.setCollapsedCCProcessedDependencies(toProto(getAndRegister(sentence, keysToSerialize, CollapsedCCProcessedDependenciesAnnotation.class))); }
@@ -735,8 +735,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasCharacterOffsetEnd()) { sentence.set(CharacterOffsetEndAnnotation.class, proto.getCharacterOffsetEnd()); }
     if (proto.hasParseTree()) { sentence.set(TreeAnnotation.class, fromProto(proto.getParseTree())); }
     if (proto.hasBinarizedParseTree()) { sentence.set(BinarizedTreeAnnotation.class, fromProto(proto.getBinarizedParseTree())); }
-    if (proto.hasAnnotatedParseTree()) { sentence.set(SentimentCoreAnnotations.AnnotatedTree.class, fromProto(proto.getAnnotatedParseTree())); }
-    if (proto.hasSentiment()) { sentence.set(SentimentCoreAnnotations.ClassName.class, proto.getSentiment()); }
+    if (proto.hasAnnotatedParseTree()) { sentence.set(SentimentCoreAnnotations.SentimentAnnotatedTree.class, fromProto(proto.getAnnotatedParseTree())); }
+    if (proto.hasSentiment()) { sentence.set(SentimentCoreAnnotations.SentimentClass.class, proto.getSentiment()); }
     // Non-default fields
     if (proto.hasHasRelationAnnotations() && proto.getHasRelationAnnotations()) {
       // set entities
@@ -1023,7 +1023,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       if (word.index() < 0 && in.getIndex() >= 0) {
         word.setIndex(in.getIndex());
-      }      
+      }
 
       assert in.getIndex() == word.index();
       nodes.put(in.getIndex(), in.getCopyAnnotation(), word);

@@ -70,10 +70,10 @@ public class JSONOutputter extends AnnotationOutputter {
           l2.set("collapsed-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)));
           l2.set("collapsed-ccprocessed-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class)));
           // (sentiment)
-          Tree sentimentTree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
+          Tree sentimentTree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
           if (sentimentTree != null) {
             int sentiment = RNNCoreAnnotations.getPredictedClass(sentimentTree);
-            String sentimentClass = sentence.get(SentimentCoreAnnotations.ClassName.class);
+            String sentimentClass = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
             l2.set("sentimentValue", Integer.toString(sentiment));
             l2.set("sentiment", sentimentClass.replaceAll(" ", ""));
           }
