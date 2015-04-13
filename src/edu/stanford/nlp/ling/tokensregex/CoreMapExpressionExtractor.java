@@ -182,7 +182,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
             }
           }
         } else {
-          logger.log(Level.INFO, "Ignoring inactive rule: " + aer.name);
+          logger.log(Level.FINE, "Ignoring inactive rule: " + aer.name); // used to be INFO but annoyed Chris/users
         }
       }
     }
