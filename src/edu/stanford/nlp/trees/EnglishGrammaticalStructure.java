@@ -273,6 +273,10 @@ public class EnglishGrammaticalStructure extends GrammaticalStructure {
    * @param sg The Semantic graph to operate on.
    */
   private static void correctWHAttachment(SemanticGraph sg) {
+    /* Semgrexes require a graph with a root. */
+    if (sg.getRoots().isEmpty())
+      return;
+    
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = XCOMP_PATTERN.matcher(sgCopy);
     while (matcher.findNextMatchingNode()) {
