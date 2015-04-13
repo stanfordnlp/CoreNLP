@@ -591,6 +591,8 @@ public class AnnotatorFactories {
   //
   public static AnnotatorFactory openie(Properties properties, final AnnotatorImplementations annotatorImpl) {
     return new AnnotatorFactory(properties, annotatorImpl) {
+      private static final long serialVersionUID = -2525567112379296672L;
+
       @Override
       public Annotator create() {
         return annotatorImpl.openie(properties);
