@@ -94,6 +94,9 @@ public class SentimentAnnotator implements Annotator {
               spanSentiment.put(p, sentStr);
             }
           }
+          if (((CoreLabel) tree.label()).containsKey(CoreAnnotations.SpanAnnotation.class)) {
+            throw new IllegalStateException("This code assumes you don't have SpanAnnotation");
+          }
           tree.setSpans();
           for (Tree t : tree) {
             IntPair p = t.getSpan();
@@ -101,6 +104,7 @@ public class SentimentAnnotator implements Annotator {
             if (str != null) {
               CoreLabel cl = (CoreLabel) t.label();
               cl.set(SentimentCoreAnnotations.SentimentClass.class, str);
+              cl.remove(CoreAnnotations.SpanAnnotation.class);
             }
           }
         }

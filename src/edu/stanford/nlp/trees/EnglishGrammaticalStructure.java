@@ -13,7 +13,6 @@ import edu.stanford.nlp.semgraph.semgrex.SemgrexPattern;
 import edu.stanford.nlp.util.*;
 import static edu.stanford.nlp.trees.EnglishGrammaticalRelations.*;
 import static edu.stanford.nlp.trees.GrammaticalRelation.*;
-import static edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations.DIRECT_OBJECT;
 
 /**
  * A GrammaticalStructure for English. This is the class that produces Stanford Dependencies.

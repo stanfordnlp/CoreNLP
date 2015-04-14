@@ -189,12 +189,9 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
 
     nonTerminalInfo.put("INTJ", new String[][]{{"rightdis", "NNS", "NN", "NNP"}, {"left"}});
 
-    
-    //TODO: all but in ADVP
-    
-    //What about "so as not to???"
-    
-    
+    nonTerminalInfo.put("ADVP", new String[][]{{"rightdis", "RB", "RBR", "RBS", "JJ", "JJR", "JJS"},
+        {"rightdis", "RP", "DT", "NN", "CD", "NP", "VBN", "NNP", "CC", "FW", "NNS", "ADJP", "NML"}, {"left"}});
+
     
   }
 
@@ -385,17 +382,21 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
 
       // looks for copular verbs
       if (hasVerbalAuxiliary(kids, copulars, false) && ! isExistential(t, parent) && ! isWHQ(t, parent)) {
-        String[] how;
+        String[][] how;
+        //TODO: also allow ADVP to be heads
         if (motherCat.equals("SQ")) {
-          how = new String[]{"right", "VP", "ADJP", "NP", "PP", "WHADJP", "WHNP"};
+          how = new String[][]{{"right", "VP", "ADJP", "NP", "PP", "WHADJP", "WHNP"}};
         } else {
-          how = new String[]{"left", "VP", "ADJP", "NP", "PP", "WHADJP", "WHNP"};
+          how = new String[][]{{"left", "VP", "ADJP", "NP", "PP", "WHADJP", "WHNP"}};
         }
         // Avoid undesirable heads by filtering them from the list of potential children
         if (tmpFilteredChildren == null) {
           tmpFilteredChildren = ArrayUtils.filter(kids, REMOVE_TMP_AND_ADV);
         }
-        Tree pti = traverseLocate(tmpFilteredChildren, how, false);
+        Tree pti = null;
+        for (int i = 0; i < how.length && pti == null; i++) {
+          pti = traverseLocate(tmpFilteredChildren, how[i], false);
+        }
         // In SQ, only allow an NP to become head if there is another one to the left (then it's probably predicative)
         if (motherCat.equals("SQ") && pti != null && pti.label() != null && pti.label().value().startsWith("NP")) {
             boolean foundAnotherNp = false;
