@@ -190,7 +190,7 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
     nonTerminalInfo.put("INTJ", new String[][]{{"rightdis", "NNS", "NN", "NNP"}, {"left"}});
 
     nonTerminalInfo.put("ADVP", new String[][]{{"rightdis", "RB", "RBR", "RBS", "JJ", "JJR", "JJS"},
-        {"rightdis", "RP", "DT", "NN", "CD", "NP", "VBN", "NNP", "CC", "FW", "NNS", "ADJP", "NML"}});
+        {"rightdis", "RP", "DT", "NN", "CD", "NP", "VBN", "NNP", "CC", "FW", "NNS", "ADJP", "NML"}, {"left"}});
 
     
   }
@@ -383,10 +383,11 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
       // looks for copular verbs
       if (hasVerbalAuxiliary(kids, copulars, false) && ! isExistential(t, parent) && ! isWHQ(t, parent)) {
         String[][] how;
+        //TODO: also allow ADVP to be heads
         if (motherCat.equals("SQ")) {
-          how = new String[][]{{"right", "VP", "ADJP", "NP"}, {"rightdis", "PP", "ADVP"}, {"right", "WHADJP", "WHNP"}};
+          how = new String[][]{{"right", "VP", "ADJP", "NP", "PP", "WHADJP", "WHNP"}};
         } else {
-          how = new String[][]{{"left", "VP", "ADJP", "NP"}, {"leftdis", "PP", "ADVP"}, {"left", "WHADJP", "WHNP"}};
+          how = new String[][]{{"left", "VP", "ADJP", "NP", "PP", "WHADJP", "WHNP"}};
         }
         // Avoid undesirable heads by filtering them from the list of potential children
         if (tmpFilteredChildren == null) {
