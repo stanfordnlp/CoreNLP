@@ -245,7 +245,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    *
    * @param coreLabel The sentence to save to a protocol buffer
    * @param keysToSerialize A set tracking which keys have been saved. It's important to remove any keys added to the proto
-   *                        from this set, as the code tracks annotations to ensure lossless serialization
+   *                        from this set, as the code tracks annotations to ensure lossless serializationA set tracking which keys have been saved. It's important to remove any keys added to the proto*
+   *                        from this set, as the code tracks annotations to ensure lossless serialization.
    */
   protected CoreNLPProtos.Token.Builder toProtoBuilder(CoreLabel coreLabel, Set<Class<?>> keysToSerialize) {
     CoreNLPProtos.Token.Builder builder = CoreNLPProtos.Token.newBuilder();

@@ -609,7 +609,6 @@ public class UniversalEnglishGrammaticalRelations {
   public static final GrammaticalRelation XCLAUSAL_COMPLEMENT =
     new GrammaticalRelation(Language.UniversalEnglish, "xcomp", "xclausal complement",
         COMPLEMENT, "VP|ADJP|SINV", tregexCompiler,
-            //"VP < (S=target [ !$-- NP $-- (/^V/ < " + xcompNoObjVerbRegex + ") | $-- (/^V/ < " + xcompVerbRegex + ") ] !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
             "VP < (S=target [ !$-- NP | $-- (/^V/ < " + xcompVerbRegex + ") ] !$- (NN < order) < (VP < TO))",    // used to have !> (VP < (VB|AUX < be))
             "ADJP < (S=target <, (VP <, TO))",
             "VP < (S=target !$- (NN < order) < (NP $+ NP|ADJP))",
@@ -740,7 +739,7 @@ public class UniversalEnglishGrammaticalRelations {
             "/^(?:(?:WH)?(?:NP|ADJP|ADVP|NX|NML)(?:-TMP|-ADV)?|VP|NAC|SQ|FRAG|PRN|X|RRC)$/ < (S=target <: WHPP|WHPP-TMP|PP|PP-TMP)",
             // only allow a PP < PP one if there is not a verb, or other pattern that matches acl/advcl under it.  Else acl/advcl
             "WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV < (WHPP|WHPP-TMP|WHPP-ADV|PP|PP-TMP|PP-ADV=target !$- IN|VBG|VBN|TO)",
-            "S|SINV < (PP|PP-TMP=target !< SBAR|S) < VP|S",
+            "S|SINV < (PP|PP-TMP=target !< SBAR) < VP|S",
             "SBAR|SBARQ < /^(?:WH)?PP/=target < S|SQ",
             "@NP < (@UCP|PRN=target <# @PP)",
             // to handle "What weapon is Apollo most proficient with?"
@@ -816,13 +815,10 @@ public class UniversalEnglishGrammaticalRelations {
             // "VP < (/^S-ADV$/=target < (VP <, VBG|VBN) )",
             // they wrote asking the SEC to ...
             "VP < (S=target $-- NP < (VP < TO) !$-- (/^V/ < " + xcompVerbRegex + ") )",
-            //"VP < (S=target < (VP < TO) !$-- (/^V/ < " + xcompNoObjVerbRegex + ") )",
-            
             "SBARQ < WHNP < (S=target < (VP <1 TO))",
            
             //former pcomp
-            "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|SQ|FRAG|PRN|X|RRC|S)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) !<: IN|TO !< @CC|CONJP < /^((?!(PP|IN)).)*$/) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
-            "VP|ADJP < /^PP(?:-TMP|-ADV)?$/=target < (@PP < @SBAR|S $++ CONJP|CC)");
+            "/^(?:(?:WH)?(?:ADJP|ADVP)(?:-TMP|-ADV)?|VP|SQ|FRAG|PRN|X|RRC)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) !<: IN|TO !< @CC|CONJP < /^((?!(PP|IN)).)*$/) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT);
   
   
   /**
@@ -866,7 +862,7 @@ public class UniversalEnglishGrammaticalRelations {
             "VP < VP < (TO=target)",
             "SBAR|SBAR-TMP < (IN|DT|MWE=target $++ S|FRAG)",
             "SBAR < (IN|DT=target < that|whether) [ $-- /^(?:VB|AUX)/ | $- NP|NN|NNS | > ADJP|PP | > (@NP|UCP|SBAR < CC|CONJP $-- /^(?:VB|AUX)/) ]",
-            "/^PP(?:-TMP|-ADV)?$/ < (IN|TO|MWE|PCONJP|VBN=target $+ @SBAR|S)");
+            "/^PP(?:-TMP|-ADV)?$/ < (IN|TO|MWE=target $+ @SBAR|S)");
 
 
   /**
@@ -1050,10 +1046,8 @@ public class UniversalEnglishGrammaticalRelations {
     new GrammaticalRelation(Language.UniversalEnglish, "advmod", "adverbial modifier",
         MODIFIER,
         "VP|ADJP|WHADJP|ADVP|WHADVP|S|SBAR|SINV|SQ|SBARQ|XS|(?:WH)?(?:PP|NP)(?:-TMP|-ADV)?|RRC|CONJP|JJP|QP", tregexCompiler,
-            //last term is to exclude "at least/most..."
-            "/^(?:VP|ADJP|JJP|WHADJP|SQ?|SBARQ?|SINV|XS|RRC|(?:WH)?NP(?:-TMP|-ADV)?)$/ < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + " [!<+(/ADVP/) (@ADVP < (IN < /(?i:at)/)) |  !<+(/ADVP/) (@ADVP < NP)] )",
+            "/^(?:VP|ADJP|JJP|WHADJP|SQ?|SBARQ?|SINV|XS|RRC|(?:WH)?NP(?:-TMP|-ADV)?)$/ < (RB|RBR|RBS|WRB|ADVP|WHADVP=target !< " + NOT_PAT + " !< " + ETC_PAT + ")",
             "QP < IN|RB|RBR|RBS|PDT|DT|JJ|JJR|JJS|XS=target", //quantmod relation in original SD
-            "QP < (MWE=target < (JJR|RBR|IN < /^(?i)(more|less)$/) < (IN < /^(?i)than$/))", //more than / less than
             // avoids adverb conjunctions matching as advmod; added JJ to catch How long
             // "!< no" so we can get neg instead for "no foo" when no is tagged as RB
             // we allow CC|CONJP as long as it is not between the target and the head
@@ -1135,11 +1129,10 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation NP_ADVERBIAL_MODIFIER =
     new GrammaticalRelation(Language.UniversalEnglish, "nmod:npmod", "noun phrase adverbial modifier",
-        MODIFIER, "VP|(?:WH)?(?:NP|ADJP|ADVP|PP|QP)(?:-TMP|-ADV)?", tregexCompiler,
+        MODIFIER, "VP|(?:WH)?(?:NP|ADJP|ADVP|PP)(?:-TMP|-ADV)?", tregexCompiler,
             "@ADVP|ADJP|WHADJP|WHADVP|PP|WHPP <# (JJ|JJR|IN|RB|RBR !< notwithstanding $- (@NP=target !< NNP|NNPS))",
             // one word nouns like "cost efficient", "ice-free"
             "@ADJP < (NN=target $++ /^JJ/) !< CC|CONJP",
-            "@ADVP <# (/^(RB|ADVP)/ $++ @NP=target)", //up 20%, once a week, ...
             "@NP|WHNP < /^NP-ADV/=target",
             // Mr. Bush himself ..., in a couple different parse
             // patterns.  Looking for CC|CONJP leaves out phrases such
@@ -1147,9 +1140,7 @@ public class UniversalEnglishGrammaticalRelations {
             "@NP|WHNP [ < (NP=target <: (PRP < " + selfRegex + ")) | < (PRP=target < " + selfRegex + ") ] : (=target $-- NP|NN|NNS|NNP|NNPS|PRP=noun !$-- (/^,|CC|CONJP$/ $-- =noun))",
             // this next one is for weird financial listings: 4.7% three months
             "@NP <1 (@NP <<# /^%$/) <2 (@NP=target <<# days|month|months) !<3 __",
-            "@VP < /^NP-ADV/=target",
-            "@NP|ADVP|QP <+(/ADVP/) (@ADVP=target < (IN < /(?i:at)/) < NP)" //at least/most/...
-            );
+            "@VP < /^NP-ADV/=target");
 
 
   /**
@@ -1194,7 +1185,7 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation MULTI_WORD_EXPRESSION =
     new GrammaticalRelation(Language.UniversalEnglish, "mwe", "multi-word expression",
-        MODIFIER, "MWE", tregexCompiler,
+        MODIFIER, "PP|XS|ADVP|CONJP|MWE", tregexCompiler,
             "MWE < (IN|TO|RB|NP|NN|JJ|VB|CC|VBZ|VBD|ADVP|PP|JJS|RBS=target)");
 
   /**
@@ -1298,9 +1289,9 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation CASE_MARKER =
     new GrammaticalRelation(Language.UniversalEnglish, "case", "case marker",
-        MODIFIER, "(?:WH)?(?:PP.*|SBARQ|NP|NML|ADVP)(?:-TMP|-ADV)?", tregexCompiler,
+        MODIFIER, "(?:WH)?(?:PP.*|SBARQ|NP|NML)(?:-TMP|-ADV)?", tregexCompiler,
             //"/(?:WH)?PP(?:-TMP)?/ !$- (@CC|CONJP $- __) < IN|TO|MWE=target",
-            "/(?:WH)?PP(?:-TMP)?/ < (IN|TO|MWE|PCONJP|VBN=target !$+ @SBAR [!$+ @S | $+ (S <, (VP <, NN))] )",
+            "/(?:WH)?PP(?:-TMP)?/ < (IN|TO|MWE|PCONJP=target !$+ @SBAR [!$+ @S | $+ (S <, (VP <, NN))] )",
             //"/(?:WH)?PP(?:-TMP)?/ < (IN|TO|MWE|PCONJP=target !$+ @SBAR|S)",
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < POS=target", //'s
             "/^(?:WH)?(?:NP|NML)(?:-TMP|-ADV)?$/ < (VBZ=target < /^'s$/)", //'s
@@ -1319,11 +1310,8 @@ public class UniversalEnglishGrammaticalRelations {
             "/(?:WH)?PP(?:-TMP)?/ <1 CC=target <2 NP",
             
             
-            "/(?:WH)?PP(?:-TMP)?/ <, VBG=target !< (@PP < @SBAR|S)",
- 
-
-            //"at most/at best/..."
-            "@ADVP < IN=target");
+            "/(?:WH)?PP(?:-TMP)?/ <, VBG=target !< (@PP < @SBAR|S)");
+  
             
   
             /*
