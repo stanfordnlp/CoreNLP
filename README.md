@@ -13,5 +13,5 @@ The most recent models associated with the code in the HEAD of this repository c
 
 For information about making contributions to Stanford CoreNLP, see the file `CONTRIBUTING.md`.
 
-Questions about CoreNLP can either be posted on StackOverflow with the tag [http://stackoverflow.com/questions/tagged/stanford-nlp](stanford-nlp), 
-  or on the [http://nlp.stanford.edu/software/corenlp.shtml#Mail](mailing lists).
+Questions about CoreNLP can either be posted on StackOverflow with the tag [stanford-nlp](http://stackoverflow.com/questions/tagged/stanford-nlp), 
+  or on the [mailing lists](http://nlp.stanford.edu/software/corenlp.shtml#Mail).
