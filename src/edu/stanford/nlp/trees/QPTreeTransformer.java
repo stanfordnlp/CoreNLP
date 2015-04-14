@@ -30,6 +30,18 @@ import java.io.IOException;
  */
 public class QPTreeTransformer implements TreeTransformer {
 
+  
+  private boolean universalDependencies = false;
+  
+  public QPTreeTransformer() {
+    this(false);
+  }
+    
+  public QPTreeTransformer(boolean universalDependencies) {
+    this.universalDependencies = universalDependencies;
+  }
+  
+  
   /**
    * Right now (Jan 2013) we only deal with the following QP structures:
    * <ul>
@@ -95,9 +107,10 @@ public class QPTreeTransformer implements TreeTransformer {
    * @param t a tree to be transformed
    * @return t transformed
    */
-  public static Tree QPtransform(Tree t) {
+  public Tree QPtransform(Tree t) {
     t = Tsurgeon.processPattern(flattenNPoverQPTregex, flattenNPoverQPTsurgeon, t);
-    t = Tsurgeon.processPattern(multiwordXSTregex, multiwordXSTsurgeon, t);
+    if ( ! universalDependencies)
+      t = Tsurgeon.processPattern(multiwordXSTregex, multiwordXSTsurgeon, t);
     t = Tsurgeon.processPattern(splitCCTregex, splitCCTsurgeon, t);
     t = Tsurgeon.processPattern(splitMoneyTregex, splitMoneyTsurgeon, t);
     return t;

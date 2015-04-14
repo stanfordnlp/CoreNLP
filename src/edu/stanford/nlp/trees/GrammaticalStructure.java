@@ -1092,7 +1092,6 @@ public abstract class GrammaticalStructure implements Serializable {
       bf.append(out);
       idx++;
     }
-    bf.append("\n");
     return bf.toString();
   }
 

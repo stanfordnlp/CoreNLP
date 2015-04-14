@@ -680,7 +680,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       if (wh.tag().startsWith("W")) {
         boolean reattach = false;
         /* If the control verb already has an object, then
-           we have to reattach th WH-word to the verb in the embedded clause. */
+           we have to reattach the WH-word to the verb in the embedded clause. */
         if (dobj != null) {
           reattach = true;
         } else {
