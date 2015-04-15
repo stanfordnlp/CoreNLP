@@ -53,5 +53,18 @@ public class SemanticGraphCoreAnnotations {
       return SemanticGraph.class;
     }
   }
+  
+  /**
+   * The CoreMap key for storing a semantic graph that was converted using a non-default converter.
+   * Currently only used by the DeterministicCorefAnnotator to store the original Stanford dependencies.
+   *
+   * This key is typically set on sentence annotations.
+   */
+  public static class AlternativeDependenciesAnnotation implements CoreAnnotation<SemanticGraph> {
+    @Override
+    public Class<SemanticGraph> getType() {
+      return SemanticGraph.class;
+    }
+  }
 
 }
