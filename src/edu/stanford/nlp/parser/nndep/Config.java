@@ -50,7 +50,7 @@ public class Config
   /**
    * The language being parsed.
    */
-  public Languages.Language language = Languages.Language.English;
+  public Languages.Language language = Languages.Language.UniversalEnglish;
 
   /**
    * Number of threads to use during training. Also indirectly controls

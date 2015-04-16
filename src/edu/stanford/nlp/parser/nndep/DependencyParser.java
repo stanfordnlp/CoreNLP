@@ -20,6 +20,8 @@ import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.TreeGraphNode;
 import edu.stanford.nlp.trees.TypedDependency;
+import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
+import edu.stanford.nlp.trees.UniversalEnglishGrammaticalStructure;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalStructure;
 import edu.stanford.nlp.util.CoreMap;
@@ -119,6 +121,9 @@ public class DependencyParser {
     switch (config.language) {
       case English:
         language = GrammaticalRelation.Language.English;
+        break;
+      case UniversalEnglish:
+        language = GrammaticalRelation.Language.UniversalEnglish;
         break;
       case Chinese:
         language = GrammaticalRelation.Language.Chinese;
@@ -985,6 +990,11 @@ public class DependencyParser {
         if (stored != null)
           return stored;
         break;
+      case UniversalEnglish:
+        stored = UniversalEnglishGrammaticalRelations.shortNameToGRel.get(label);
+        if (stored != null)
+          return stored;
+        break;
       case Chinese:
         stored = ChineseGrammaticalRelations.shortNameToGRel.get(label);
         if (stored != null)
@@ -998,10 +1008,11 @@ public class DependencyParser {
   private GrammaticalStructure makeGrammaticalStructure(List<TypedDependency> dependencies, TreeGraphNode rootNode) {
     switch (language) {
       case English: return new EnglishGrammaticalStructure(dependencies, rootNode);
+      case UniversalEnglish: return new UniversalEnglishGrammaticalStructure(dependencies, rootNode);
       case Chinese: return new ChineseGrammaticalStructure(dependencies, rootNode);
 
-      // TODO suboptimal: default to EnglishGrammaticalStructure return
-      default: return new EnglishGrammaticalStructure(dependencies, rootNode);
+      // TODO suboptimal: default to UniversalEnglishGrammaticalStructure return
+      default: return new UniversalEnglishGrammaticalStructure(dependencies, rootNode);
     }
   }
 
