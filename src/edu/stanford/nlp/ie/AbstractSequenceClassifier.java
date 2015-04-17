@@ -1399,10 +1399,6 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    */
   public abstract void serializeClassifier(String serializePath);
 
-  /** Serialize a sequence classifier to an object output stream **/
-
-  public abstract void serializeClassifier(ObjectOutputStream oos);
-
   /**
    * Loads a classifier from the given input stream.
    * Any exceptions are rethrown as unchecked exceptions.

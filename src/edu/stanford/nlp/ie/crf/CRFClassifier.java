@@ -27,7 +27,6 @@
 package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.ie.*;
-import java.io.ObjectOutputStream;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -2882,15 +2881,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       ClassNotFoundException {
     CRFClassifier<INN> crf = new CRFClassifier<INN>();
     crf.loadClassifier(in);
-    return crf;
-  }
-
-  // new method for getting a CRFClassifier from an ObjectInputStream
-  public static <INN extends CoreMap> CRFClassifier<INN> getClassifier(ObjectInputStream ois) throws IOException,
-          ClassCastException,
-          ClassNotFoundException {
-    CRFClassifier<INN> crf = new CRFClassifier<INN>();
-    crf.loadClassifier(ois,null);
     return crf;
   }
 

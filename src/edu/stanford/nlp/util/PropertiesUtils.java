@@ -314,14 +314,6 @@ public class PropertiesUtils {
     return results;
   }
 
-  // add ovp's key values to bp, overwrite if necessary , this is a helper
-  public static Properties overWriteProperties(Properties bp, Properties ovp) {
-    for (String propertyName : ovp.stringPropertyNames()) {
-      bp.setProperty(propertyName,ovp.getProperty(propertyName));
-    }
-    return bp;
-  }
-
 
   public static class Property {
 
