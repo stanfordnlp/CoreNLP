@@ -29,6 +29,7 @@ package edu.stanford.nlp.trees;
 import static edu.stanford.nlp.trees.EnglishPatterns.*;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
 import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.international.Language;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

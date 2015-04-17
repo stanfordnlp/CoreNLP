@@ -8,13 +8,15 @@ option java_outer_classname = "CoreNLPProtos";
 //
 enum Language {
   Unknown  = 0;
-  Arabic   = 1;
-  Chinese  = 2;
-  English  = 3;
-  German   = 4;
-  French   = 5;
-  Hebrew   = 6;
-  Spanish  = 7;
+  Any      = 1;
+  Arabic   = 2;
+  Chinese  = 3;
+  English  = 4;
+  German   = 5;
+  French   = 6;
+  Hebrew   = 7;
+  Spanish  = 8;
+  UniversalEnglish = 9;
 }
 
 //
@@ -31,6 +33,8 @@ message Document {
    * serialized without any sentences. Otherwise
    */
   repeated Token      sentencelessToken = 5;
+
+  repeated Quote      quote = 6;
 
   extensions 100 to 255;
 }
@@ -52,6 +56,7 @@ message Sentence {
   optional DependencyGraph basicDependencies                   = 8;
   optional DependencyGraph collapsedDependencies               = 9;
   optional DependencyGraph collapsedCCProcessedDependencies    = 10;
+  optional DependencyGraph alternativeDependencies             = 13;
   optional uint32          paragraph                           = 11;
 
   optional string          text                                = 12;
@@ -100,6 +105,7 @@ message Token {
   optional Polarity  polarity       = 28;   // The polarity of this word, according to Natural Logic
   optional Span      span           = 29;   // The span of a leaf node of a tree
   optional string    sentiment      = 30;   // The final sentiment of the sentence
+  optional int32     quotationIndex = 31;   // The index of the quotation this token refers to
 
   // Fields set by other annotators in CoreNLP
   optional string gender          = 51;  // gender annotation (machine reading)
@@ -125,6 +131,21 @@ enum Sentiment {
   NEUTRAL           = 2;
   WEAK_POSITIVE     = 3;
   STRONG_POSITIVE   = 4;
+}
+
+//
+// A quotation marker in text
+//
+message Quote {
+  optional string text           = 1;
+  optional uint32 begin          = 2;
+  optional uint32 end            = 3;
+  optional uint32 sentenceBegin  = 5;
+  optional uint32 sentenceEnd    = 6;
+  optional uint32 tokenBegin     = 7;
+  optional uint32 tokenEnd       = 8;
+  optional string docid          = 9;
+  optional uint32 index          = 10;
 }
 
 //
@@ -156,7 +177,7 @@ message DependencyGraph {
     optional bool   isExtra    = 4;
     optional uint32 sourceCopy = 5;
     optional uint32 targetCopy = 6;
-    optional Language language = 7;
+    optional Language language = 7 [default=Unknown];
   }
   
   repeated Node     node     = 1;
@@ -175,7 +196,7 @@ message CorefChain {
     optional string number             = 3;
     optional string gender             = 4;
     optional string animacy            = 5;
-    optional uint32 startIndex         = 6;
+    optional uint32 beginIndex         = 6;
     optional uint32 endIndex           = 7;
     optional uint32 headIndex          = 9;
     optional uint32 sentenceIndex      = 10;

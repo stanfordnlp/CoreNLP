@@ -1,5 +1,6 @@
 package edu.stanford.nlp.parser.nndep;
 
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -107,7 +108,7 @@ public class DependencyParser {
    * Language used to generate
    * {@link edu.stanford.nlp.trees.GrammaticalRelation} instances.
    */
-  private final GrammaticalRelation.Language language;
+  private final Language language;
 
   DependencyParser() {
     this(new Properties());
@@ -118,23 +119,7 @@ public class DependencyParser {
 
     // Convert Languages.Language instance to
     // GrammaticalLanguage.Language
-    switch (config.language) {
-      case English:
-        language = GrammaticalRelation.Language.English;
-        break;
-      case UniversalEnglish:
-        language = GrammaticalRelation.Language.UniversalEnglish;
-        break;
-      case Chinese:
-        language = GrammaticalRelation.Language.Chinese;
-        break;
-      case Unknown:
-        language = GrammaticalRelation.Language.Any;
-        break;
-      default:
-        language = GrammaticalRelation.Language.English;  // note[gabor]: This is to conform to the default in the Parser annotator
-        break;
-    }
+    this.language = config.language;
   }
 
   /**

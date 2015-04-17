@@ -3,6 +3,7 @@ package edu.stanford.nlp.naturalli;
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.util.RelationTriple;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -156,12 +157,12 @@ public class OpenIE implements Annotator {
         tree.addRoot(adj);
         tree.addVertex(subj);
         tree.addVertex(be);
-        tree.addEdge(adj, be, GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, "cop"), Double.NEGATIVE_INFINITY, false);
-        tree.addEdge(adj, subj, GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, "nsubj"), Double.NEGATIVE_INFINITY, false);
+        tree.addEdge(adj, be, GrammaticalRelation.valueOf(Language.English, "cop"), Double.NEGATIVE_INFINITY, false);
+        tree.addEdge(adj, subj, GrammaticalRelation.valueOf(Language.English, "nsubj"), Double.NEGATIVE_INFINITY, false);
         // (add pp attachment, if it existed)
         if (pobj != null) {
           assert prep != null;
-          tree.addEdge(adj, pobj, GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, prep), Double.NEGATIVE_INFINITY, false);
+          tree.addEdge(adj, pobj, GrammaticalRelation.valueOf(Language.English, prep), Double.NEGATIVE_INFINITY, false);
         }
         // (add tree)
         adjFragments.add(new SentenceFragment(tree, false));

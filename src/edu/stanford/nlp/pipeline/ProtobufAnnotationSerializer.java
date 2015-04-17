@@ -8,7 +8,7 @@ import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations.*;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
-import edu.stanford.nlp.international.Languages;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -193,15 +193,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   @SuppressWarnings("UnusedDeclaration")
   public Annotation readUndelimited(File in) throws IOException {
-    FileInputStream delimited = new FileInputStream(in);
     FileInputStream undelimited = new FileInputStream(in);
     CoreNLPProtos.Document doc;
-    try {
+    try (FileInputStream delimited = new FileInputStream(in)) {
       doc = CoreNLPProtos.Document.parseFrom(delimited);
     } catch (Exception e) {
       doc = CoreNLPProtos.Document.parseDelimitedFrom(undelimited);
     } finally {
-      delimited.close();
       undelimited.close();
     }
     return fromProto(doc);
@@ -300,6 +298,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       builder.setSpan(CoreNLPProtos.Span.newBuilder().setBegin(span.getSource()).setEnd(span.getTarget()).build());
     }
     if (coreLabel.get(SentimentCoreAnnotations.SentimentClass.class) != null) { builder.setSentiment(getAndRegister(coreLabel, keysToSerialize, SentimentCoreAnnotations.SentimentClass.class)); }
+    if (coreLabel.get(QuotationIndexAnnotation.class) != null) { builder.setQuotationIndex(getAndRegister(coreLabel, keysToSerialize, QuotationIndexAnnotation.class)); }
     // Non-default annotators
     if (getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class) != null) { builder.setGender(getAndRegister(coreLabel, keysToSerialize, GenderAnnotation.class)); }
     if (coreLabel.containsKey(TrueCaseAnnotation.class)) { builder.setTrueCase(getAndRegister(coreLabel, keysToSerialize, TrueCaseAnnotation.class)); }
@@ -364,6 +363,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (sentence.containsKey(BasicDependenciesAnnotation.class)) { builder.setBasicDependencies(toProto(getAndRegister(sentence, keysToSerialize, BasicDependenciesAnnotation.class))); }
     if (sentence.containsKey(CollapsedDependenciesAnnotation.class)) { builder.setCollapsedDependencies(toProto(getAndRegister(sentence, keysToSerialize, CollapsedDependenciesAnnotation.class))); }
     if (sentence.containsKey(CollapsedCCProcessedDependenciesAnnotation.class)) { builder.setCollapsedCCProcessedDependencies(toProto(getAndRegister(sentence, keysToSerialize, CollapsedCCProcessedDependenciesAnnotation.class))); }
+    if (sentence.containsKey(AlternativeDependenciesAnnotation.class)) { builder.setAlternativeDependencies(toProto(getAndRegister(sentence, keysToSerialize, AlternativeDependenciesAnnotation.class))); }
     if (sentence.containsKey(TokensAnnotation.class) && getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).size() > 0 &&
         getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).get(0).containsKey(ParagraphAnnotation.class)) {
       builder.setParagraph(getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).get(0).get(ParagraphAnnotation.class));
@@ -439,6 +439,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       keysToSerialize.remove(CorefChainAnnotation.class);
     }
+    if (doc.containsKey(QuotationsAnnotation.class)) {
+      for (CoreMap quote : doc.get(QuotationsAnnotation.class)) {
+        builder.addQuote(toProtoQuote(quote));
+      }
+      keysToSerialize.remove(QuotationsAnnotation.class);
+    }
     // Return
     return builder;
   }
@@ -509,8 +515,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           .setDep(edge.getRelation().toString())
           .setIsExtra(edge.isExtra())
           .setSourceCopy(edge.getSource().copyCount())
-          .setTargetCopy(edge.getTarget().copyCount()));
-//          .setLanguage(toProto(edge.getRelation().getLanguage())));  // TODO(gabor) uncomment me after KBP release
+          .setTargetCopy(edge.getTarget().copyCount())
+          .setLanguage(toProto(edge.getRelation().getLanguage())));
     }
     // Return
     return builder.build();
@@ -535,7 +541,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
             .setNumber(mention.number.name())
             .setGender(mention.gender.name())
             .setAnimacy(mention.animacy.name())
-            .setStartIndex(mention.startIndex - 1)
+            .setBeginIndex(mention.startIndex - 1)
             .setEndIndex(mention.endIndex - 1)
             .setHeadIndex(mention.headIndex - 1)
             .setSentenceIndex(mention.sentNum - 1)
@@ -612,7 +618,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param lang The language to serialize.
    * @return The language in a Protobuf enum.
    */
-  public static CoreNLPProtos.Language toProto(Languages.Language lang) {
+  public static CoreNLPProtos.Language toProto(Language lang) {
     switch (lang) {
       case Arabic:
         return CoreNLPProtos.Language.Arabic;
@@ -620,6 +626,8 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return CoreNLPProtos.Language.Chinese;
       case English:
         return CoreNLPProtos.Language.English;
+      case UniversalEnglish:
+        return CoreNLPProtos.Language.UniversalEnglish;
       case German:
         return CoreNLPProtos.Language.German;
       case French:
@@ -628,8 +636,10 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         return CoreNLPProtos.Language.Hebrew;
       case Spanish:
         return CoreNLPProtos.Language.Spanish;
-//      case Unknown:
-//        return CoreNLPProtos.Language.Unknown;  // TODO(gabor) uncomment me after KBP is released!
+      case Unknown:
+        return CoreNLPProtos.Language.Unknown;
+      case Any:
+        return CoreNLPProtos.Language.Any;
       default:
         throw new IllegalStateException("Unknown language: " + lang);
     }
@@ -658,6 +668,24 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         .setProjectCover(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.COVER).fixedIndex))
         .setProjectIndependence(CoreNLPProtos.NaturalLogicRelation.valueOf(pol.projectLexicalRelation(NaturalLogicRelation.INDEPENDENCE).fixedIndex))
         .build();
+  }
+
+
+  /**
+   * Convert a quote object to a protocol buffer.
+   */
+  public static CoreNLPProtos.Quote toProtoQuote(CoreMap quote) {
+    CoreNLPProtos.Quote.Builder builder = CoreNLPProtos.Quote.newBuilder();
+    if (quote.get(TextAnnotation.class) != null) { builder.setText(quote.get(TextAnnotation.class)); }
+    if (quote.get(DocIDAnnotation.class) != null) { builder.setDocid(quote.get(DocIDAnnotation.class)); }
+    if (quote.get(CharacterOffsetBeginAnnotation.class) != null) { builder.setBegin(quote.get(CharacterOffsetBeginAnnotation.class)); }
+    if (quote.get(CharacterOffsetEndAnnotation.class) != null) { builder.setEnd(quote.get(CharacterOffsetEndAnnotation.class)); }
+    if (quote.get(SentenceBeginAnnotation.class) != null) { builder.setSentenceBegin(quote.get(SentenceBeginAnnotation.class)); }
+    if (quote.get(SentenceEndAnnotation.class) != null) { builder.setSentenceEnd(quote.get(SentenceEndAnnotation.class)); }
+    if (quote.get(TokenBeginAnnotation.class) != null) { builder.setTokenBegin(quote.get(TokenBeginAnnotation.class)); }
+    if (quote.get(TokenEndAnnotation.class) != null) { builder.setTokenEnd(quote.get(TokenEndAnnotation.class)); }
+    if (quote.get(QuotationIndexAnnotation.class) != null) { builder.setIndex(quote.get(QuotationIndexAnnotation.class)); }
+    return builder.build();
   }
 
   /**
@@ -697,6 +725,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     if (proto.hasPolarity()) { word.set(NaturalLogicAnnotations.PolarityAnnotation.class, fromProto(proto.getPolarity())); }
     if (proto.hasSpan()) { word.set(SpanAnnotation.class, new IntPair(proto.getSpan().getBegin(), proto.getSpan().getEnd())); }
     if (proto.hasSentiment()) { word.set(SentimentCoreAnnotations.SentimentClass.class, proto.getSentiment()); }
+    if (proto.hasQuotationIndex()) { word.set(QuotationIndexAnnotation.class, proto.getQuotationIndex()); }
     // Non-default annotators
     if (proto.hasGender()) { word.set(GenderAnnotation.class, proto.getGender()); }
     if (proto.hasTrueCase()) { word.set(TrueCaseAnnotation.class, proto.getTrueCase()); }
@@ -882,11 +911,23 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       if (sentence.hasCollapsedCCProcessedDependencies()) {
         map.set(CollapsedCCProcessedDependenciesAnnotation.class, fromProto(sentence.getCollapsedCCProcessedDependencies(), sentenceTokens, docid));
       }
+      if (sentence.hasAlternativeDependencies()) {
+        map.set(AlternativeDependenciesAnnotation.class, fromProto(sentence.getAlternativeDependencies(), sentenceTokens, docid));
+      }
       // Redo some light annotation
       if ( map.containsKey(TokensAnnotation.class) &&
           (!sentence.hasHasNumerizedTokensAnnotation() || sentence.getHasNumerizedTokensAnnotation())) {
         map.set(NumerizedTokensAnnotation.class, NumberNormalizer.findAndMergeNumbers(map));
       }
+    }
+
+    // Set quotes
+    List<CoreMap> quotes = new ArrayList<>();
+    for (CoreNLPProtos.Quote quote : proto.getQuoteList()) {
+      quotes.add(fromProto(quote, tokens));
+    }
+    if (!quotes.isEmpty()) {
+      ann.set(QuotationsAnnotation.class, quotes);
     }
 
     // Return
@@ -934,24 +975,28 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
   /**
    * Return a CoreNLP language from a Protobuf language
    */
-  public static Languages.Language fromProto(CoreNLPProtos.Language lang) {
+  public static Language fromProto(CoreNLPProtos.Language lang) {
     switch (lang) {
       case Arabic:
-        return Languages.Language.Arabic;
+        return Language.Arabic;
       case Chinese:
-        return Languages.Language.Chinese;
+        return Language.Chinese;
       case English:
-        return Languages.Language.English;
+        return Language.English;
       case German:
-        return Languages.Language.German;
+        return Language.German;
       case French:
-        return Languages.Language.French;
+        return Language.French;
       case Hebrew:
-        return Languages.Language.Hebrew;
+        return Language.Hebrew;
       case Spanish:
-        return Languages.Language.Spanish;
-//      case Unknown:
-//        return Languages.Language.Unknown;  // TODO(gabor) uncomment me after KBP is released!
+        return Language.Spanish;
+      case UniversalEnglish:
+        return Language.UniversalEnglish;
+      case Unknown:
+        return Language.Unknown;
+      case Any:
+        return Language.Any;
       default:
         throw new IllegalStateException("Unknown language: " + lang);
     }
@@ -1050,14 +1095,13 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       synchronized (globalLock) {
         // this is not thread-safe: there are static fields in GrammaticalRelation
         assert ie.hasDep();
-//        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep(), fromProto(ie.getLanguage()));  // TODO(gabor) uncomment me after KBP release
-        GrammaticalRelation rel = GrammaticalRelation.valueOf(ie.getDep());
+        GrammaticalRelation rel = GrammaticalRelation.valueOf(fromProto(ie.getLanguage()), ie.getDep());
         graph.addEdge(source, target, rel, 1.0, ie.hasIsExtra() && ie.getIsExtra());
       }
     }
 
     if (proto.getRootCount() > 0) {
-      Collection<IndexedWord> roots = new ArrayList<IndexedWord>();
+      Collection<IndexedWord> roots = new ArrayList<>();
       for(int rootI : proto.getRootList()){
         roots.add(nodes.get(rootI, 0)); // copies should never be roots...
       }
@@ -1092,7 +1136,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       // Create mention
       StringBuilder mentionSpan = new StringBuilder();
       List<CoreLabel> sentenceTokens = partialDocument.get(SentencesAnnotation.class).get(mentionProto.getSentenceIndex()).get(TokensAnnotation.class);
-      for (int k = mentionProto.getStartIndex(); k < mentionProto.getEndIndex(); ++k) {
+      for (int k = mentionProto.getBeginIndex(); k < mentionProto.getEndIndex(); ++k) {
         mentionSpan.append(" ").append(sentenceTokens.get(k).word());
       }
       // Set the coref cluster id for the token
@@ -1101,7 +1145,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
           Dictionaries.Number.valueOf(mentionProto.getNumber()),
           Dictionaries.Gender.valueOf(mentionProto.getGender()),
           Dictionaries.Animacy.valueOf(mentionProto.getAnimacy()),
-          mentionProto.getStartIndex() + 1,
+          mentionProto.getBeginIndex() + 1,
           mentionProto.getEndIndex() + 1,
           mentionProto.getHeadIndex() + 1,
           cid,
@@ -1184,6 +1228,30 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       rtn.setArgNames(proto.getArgNameList());
     }
     return rtn;
+  }
+
+  /**
+   * Convert a quote object to a protocol buffer.
+   */
+  private static Annotation fromProto(CoreNLPProtos.Quote quote, List<CoreLabel> tokens) {
+    List<CoreLabel> quotedTokens = null;
+    // note[gabor]: This works, but apparently isn't the behavior of the quote annotator?
+//    if (quote.hasTokenBegin() && quote.hasTokenEnd() && quote.getTokenBegin() >= 0 && quote.getTokenEnd() >= 0) {
+//      quotedTokens = tokens.subList(quote.getTokenBegin(), quote.getTokenEnd());
+//    }
+    Annotation ann = QuoteAnnotator.makeQuote(
+        quote.hasText() ? quote.getText() : null,
+        quote.hasBegin() ? quote.getBegin() : -1,
+        quote.hasEnd() ? quote.getEnd() : -1,
+        quotedTokens,
+        quote.hasTokenBegin() ? quote.getTokenBegin() : -1,
+        quote.hasSentenceBegin() ? quote.getSentenceBegin() : -1,
+        quote.hasSentenceEnd() ? quote.getSentenceEnd() : -1,
+        quote.hasDocid() ? quote.getDocid() : null);
+    if (quote.hasIndex()) { ann.set(QuotationIndexAnnotation.class, quote.getIndex()); }
+    if (quote.hasTokenBegin()) { ann.set(TokenBeginAnnotation.class, quote.getTokenBegin()); }
+    if (quote.hasTokenEnd()) { ann.set(TokenEndAnnotation.class, quote.getTokenEnd()); }
+    return ann;
   }
 
   /**

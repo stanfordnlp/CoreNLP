@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import java.util.function.Function;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -400,7 +401,7 @@ public abstract class GrammaticalStructure implements Serializable {
 
       int childIdx = Integer.parseInt(childArg.substring(childDash+1).replace("'", ""));
 
-      GrammaticalRelation grel = new GrammaticalRelation(GrammaticalRelation.Language.Any, type, null, DEPENDENT);
+      GrammaticalRelation grel = new GrammaticalRelation(Language.Any, type, null, DEPENDENT);
 
       TypedDependency tdep = new TypedDependency(grel, nodeWords.get(parentIdx), nodeWords.get(childIdx));
       tdeps.add(tdep);
