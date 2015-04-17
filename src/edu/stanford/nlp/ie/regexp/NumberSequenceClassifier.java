@@ -17,6 +17,7 @@ import edu.stanford.nlp.util.StringUtils;
 
 import java.io.ObjectInputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -814,6 +815,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     System.err.print("Serializing classifier to " + serializePath + "...");
     System.err.println("done.");
   }
+
+  public void serializeClassifier(ObjectOutputStream oos) {}
 
   @Override
   public void loadClassifier(ObjectInputStream in, Properties props) throws IOException, ClassCastException, ClassNotFoundException {
