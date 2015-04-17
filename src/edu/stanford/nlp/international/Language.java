@@ -15,12 +15,12 @@ public enum Language {
   Any(              new EnglishTreebankParserParams()),
   Arabic(           new ArabicTreebankParserParams()),
   Chinese(          new ChineseTreebankParserParams()),
-  English(          new EnglishTreebankParserParams()),
+  English(          new EnglishTreebankParserParams(){{ setGenerateOriginalDependencies(true); }}),
   German(           new NegraPennTreebankParserParams()),
   French(           new FrenchTreebankParserParams()),
   Hebrew(           new HebrewTreebankParserParams()),
   Spanish(          new SpanishTreebankParserParams()),
-  UniversalEnglish( new EnglishTreebankParserParams(){{ setGenerateOriginalDependencies(false); }}),
+  UniversalEnglish( new EnglishTreebankParserParams()),
   Unknown(          new EnglishTreebankParserParams());
 
   public static final String langList = StringUtils.join(Arrays.asList(Language.values()), " ");

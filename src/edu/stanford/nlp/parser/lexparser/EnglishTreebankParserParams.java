@@ -2226,6 +2226,9 @@ public class EnglishTreebankParserParams extends AbstractTreebankParserParams {
     } else if (args[i].equalsIgnoreCase("-makeCopulaHead")) {
       englishTest.makeCopulaHead = true;
       i += 1;
+    } else if(args[i].equalsIgnoreCase("-originalDependencies")) {
+      setGenerateOriginalDependencies(true);
+      i += 1;
     } else if (args[i].equalsIgnoreCase("-acl03pcfg")) {
       englishTrain.splitIN = 3;
       englishTrain.splitPercent = true;
