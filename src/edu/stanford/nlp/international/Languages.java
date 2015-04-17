@@ -19,7 +19,7 @@ public class Languages {
 
   private Languages() {}
 
-  public static enum Language {Arabic,Chinese,English,German,French,Hebrew,Spanish,Unknown}
+  public static enum Language {Arabic,Chinese,English,German,French,Hebrew,Spanish,UniversalEnglish,Unknown}
   
   private static String langList;
   static {
@@ -65,6 +65,10 @@ public class Languages {
     case Spanish:
       tlpp = new SpanishTreebankParserParams();
       break;
+
+    case UniversalEnglish:
+      tlpp = new EnglishTreebankParserParams();
+      tlpp.setGenerateOriginalDependencies(false);
 
     default:
       tlpp = new EnglishTreebankParserParams();

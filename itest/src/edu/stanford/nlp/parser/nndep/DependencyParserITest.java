@@ -12,9 +12,9 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import edu.stanford.nlp.trees.TypedDependency;
+import edu.stanford.nlp.trees.UniversalEnglishGrammaticalRelations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import junit.framework.TestCase;
@@ -89,7 +89,7 @@ public class DependencyParserITest extends TestCase {
                                             SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
     Collection<TypedDependency> dependencies = ccProcessed.typedDependencies();
 
-    GrammaticalRelation expected = EnglishGrammaticalRelations.getConj("and");
+    GrammaticalRelation expected = UniversalEnglishGrammaticalRelations.getConj("and");
     assertThat(dependencies.stream().map(TypedDependency::reln).collect(toList()),
             hasItem(expected));
   }
