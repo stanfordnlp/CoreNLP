@@ -309,7 +309,8 @@ public class OpenIE implements Annotator {
   /** {@inheritDoc} */
   @Override
   public Set<Requirement> requirementsSatisfied() {
-    return Collections.singleton(Annotator.OPENIE_REQUIREMENT);
+    return Collections.EMPTY_SET; // TODO(Gabor) enable below!
+//    return Collections.singleton(Annotator.OPENIE_REQUIREMENT);
   }
 
   /** {@inheritDoc} */

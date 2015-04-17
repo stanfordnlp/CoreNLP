@@ -586,6 +586,7 @@ public class AnnotatorFactories {
     };
   }
 
+  /*  TODO(gabor) enable me!
   //
   // RelationTriples
   //
@@ -604,6 +605,7 @@ public class AnnotatorFactories {
       }
     };
   }
+  */
 
   //
   // Quote Extractor
