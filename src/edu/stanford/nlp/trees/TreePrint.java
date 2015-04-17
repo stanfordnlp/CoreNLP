@@ -155,19 +155,15 @@ public class TreePrint {
     boolean includePunctuationDependencies;
     includePunctuationDependencies = propertyToBoolean(this.options,
                                                        "includePunctuationDependencies");
-
-    boolean generateOriginalDependencies = tlp.generateOriginalDependencies();
-
-    Predicate<String> puncFilter;
+    Predicate<String> puncWordFilter;
     if (includePunctuationDependencies) {
       dependencyFilter = Filters.acceptFilter();
       dependencyWordFilter = Filters.acceptFilter();
-      puncFilter = Filters.acceptFilter();
+      puncWordFilter = Filters.acceptFilter();
     } else {
       dependencyFilter = new Dependencies.DependentPuncTagRejectFilter<Label, Label, Object>(tlp.punctuationTagRejectFilter());
       dependencyWordFilter = new Dependencies.DependentPuncWordRejectFilter<Label, Label, Object>(tlp.punctuationWordRejectFilter());
-      //Universal dependencies filter punction by tags
-      puncFilter = generateOriginalDependencies ? tlp.punctuationWordRejectFilter() : tlp.punctuationTagRejectFilter();
+      puncWordFilter = tlp.punctuationWordRejectFilter();
     }
     if (propertyToBoolean(this.options, "stem")) {
       stemmer = new WordStemmer();
@@ -177,7 +173,7 @@ public class TreePrint {
     if (formats.containsKey("typedDependenciesCollapsed") ||
         formats.containsKey("typedDependencies") ||
         (formats.containsKey("conll2007") && tlp.supportsGrammaticalStructures())) {
-      gsf = tlp.grammaticalStructureFactory(puncFilter, typedDependencyHF);
+      gsf = tlp.grammaticalStructureFactory(puncWordFilter, typedDependencyHF);
     } else {
       gsf = null;
     }
