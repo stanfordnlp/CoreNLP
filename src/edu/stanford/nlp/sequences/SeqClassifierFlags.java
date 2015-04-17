@@ -1045,6 +1045,13 @@ public class SeqClassifierFlags implements Serializable {
 
   public boolean useTitle2 = false;
 
+  public boolean showNCCInfo;
+  public boolean showCCInfo;
+  public String crfToExamine;
+  public boolean useSUTime;
+  public boolean applyNumericClassifiers;
+  public String combinationMode;
+
   // "ADD VARIABLES ABOVE HERE"
 
   public transient List<String> phraseGazettes = null;
@@ -2568,7 +2575,18 @@ public class SeqClassifierFlags implements Serializable {
         priorModelFactory = val;
       } else if (key.equalsIgnoreCase("maxAdditionalKnownLCWords")) {
         maxAdditionalKnownLCWords = Integer.parseInt(val);
-
+      } else if (key.equalsIgnoreCase("showNCCInfo")) {
+        showNCCInfo = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("showCCInfo")) {
+        showCCInfo = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("crfToExamine")) {
+        crfToExamine = val;
+      } else if (key.equalsIgnoreCase("ner.useSUTime")) {
+        useSUTime = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("ner.applyNumericClassifiers")) {
+        applyNumericClassifiers = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("ner.combinationMode")) {
+        combinationMode = val;
         // ADD VALUE ABOVE HERE
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');
