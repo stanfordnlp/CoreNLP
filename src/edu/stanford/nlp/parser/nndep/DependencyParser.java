@@ -75,7 +75,7 @@ import static java.util.stream.Collectors.toList;
  * @author Jon Gauthier
  */
 public class DependencyParser {
-  public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/english_SD.gz";
+  public static final String DEFAULT_MODEL = "edu/stanford/nlp/models/parser/nndep/english_USD.gz";
 
   /**
    * Words, parts of speech, and dependency relation labels which were
@@ -627,6 +627,8 @@ public class DependencyParser {
         IOUtils.closeIgnoringExceptions(input);
       }
     }
+
+    embeddings = Util.scaling(embeddings, 0, 1.0);
     return embeddings;
   }
 

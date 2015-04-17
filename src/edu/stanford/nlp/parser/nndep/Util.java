@@ -35,6 +35,39 @@ class Util {
 
   private static Random random;
 
+  /**
+   * Normalize word embeddings by setting mean = rMean, std = rStd
+   */
+  public static double[][] scaling(double[][] A, double rMean, double rStd) {
+    int count = 0;
+    double mean = 0.0;
+    double std = 0.0;
+    for (int i = 0; i < A.length; ++ i)
+      for (int j = 0; j < A[i].length; ++ j) {
+        count += 1;
+        mean += A[i][j];
+        std += A[i][j] * A[i][j];
+      }
+    mean = mean / count;
+    std = Math.sqrt(std / count - mean * mean);
+
+    System.err.printf("Scaling word embeddings:");
+    System.err.printf("(mean = %.2f, std = %.2f) -> (mean = %.2f, std = %.2f)", mean, std, rMean, rStd);
+
+    double[][] rA = new double[A.length][A[0].length];
+    for (int i = 0; i < rA.length; ++ i)
+      for (int j = 0; j < rA[i].length; ++ j)
+        rA[i][j] = (A[i][j] - mean) * rStd / std + rMean;
+    return rA;
+  }
+
+  /**
+   *  Normalize word embeddings by setting mean = 0, std = 1
+   */
+  public static double[][] scaling(double[][] A) {
+    return scaling(A, 0.0, 1.0);
+  }
+
   // return strings sorted by frequency, and filter out those with freq. less than cutOff.
 
   /**
