@@ -165,6 +165,8 @@ PERSON	ORGANIZATION	LOCATION
 CHANGES
 --------------------
 
+2015-04-17    3.5.2     trial ner 
+
 2015-04-17    3.5.2     synch standalone and CoreNLP functionality 
 
 2015-04-17    3.5.2     synch standalone and CoreNLP functionality 

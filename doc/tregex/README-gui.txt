@@ -1,4 +1,4 @@
-Tregex GUI v3.5.1 - 2015-01-29
+Tregex GUI v3.5.2 - 2015-04-18
 ----------------------------------------------
 
 Copyright (c) 2003-2012 The Board of Trustees of 
@@ -155,6 +155,12 @@ LICENSE
 ----------------------------
 CHANGES
 ----------------------------
+
+2015-04-18    3.5.2     trial tregex dist 
+
+2015-04-17    3.5.2     trial treg 
+
+2015-04-17    3.4.1     Fix bug by adding matcher object for tsurgeon 
 
 2015-01-29    3.5.1     General bugfixes 
 
