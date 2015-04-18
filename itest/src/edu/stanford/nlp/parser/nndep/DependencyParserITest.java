@@ -46,17 +46,17 @@ public class DependencyParserITest extends TestCase {
   }
 
   // Lower because we're evaluating on PTB + extraDevTest, not just PTB
-  private static final double EnglishUdLas = 84.9873;
+  private static final double EnglishUsdLas = 84.9873;
 
   /**
    * Test that the NN dependency parser performance doesn't change.
    */
-  public void testDependencyParserEnglishUD() {
+  public void testDependencyParserEnglishUSD() {
     DependencyParser parser = new DependencyParser();
-    parser.loadModelFile("/u/nlp/data/depparser/nn/distrib-2015-04-16/english_UD.gz");
+    parser.loadModelFile("/u/nlp/data/depparser/nn/distrib-2015-04-16/english_USD.gz");
     double las = parser.testCoNLL("/u/nlp/data/depparser/nn/data/dependency_treebanks/USD/dev.conll", null);
-    assertEquals(String.format("English UD LAS should be %.2f but was %.2f",
-        EnglishUdLas, las), EnglishUdLas, las, 1e-4);
+    assertEquals(String.format("English USD LAS should be %.2f but was %.2f",
+        EnglishUsdLas, las), EnglishUsdLas, las, 1e-4);
   }
 
   private static final double EnglishConll2008Las = 90.97206578058122;
