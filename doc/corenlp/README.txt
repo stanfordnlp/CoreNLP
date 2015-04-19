@@ -1,7 +1,7 @@
 Stanford CoreNLP - Stanford's Suite of NLP Tools
 ------------------------------------------------
 
-Copyright © 2009-2015 The Board of Trustees of
+Copyright © 2009-2014 The Board of Trustees of
 The Leland Stanford Junior University. All Rights Reserved.
 
 DOCUMENTATION
@@ -14,7 +14,7 @@ LICENSE
 
 //
 // StanfordCoreNLP -- a suite of NLP tools
-// Copyright © 2009-2015 The Board of Trustees of
+// Copyright © 2009-2014 The Board of Trustees of
 // The Leland Stanford Junior University. All Rights Reserved.
 //
 // This program is free software; you can redistribute it and/or
@@ -41,19 +41,6 @@ LICENSE
 ---------------------------------
 CHANGES
 ---------------------------------
-
-2015-04-18    3.5.2     trial core 
-
-2015-04-17    3.5.2     trial core 
-
-2015-04-17    3.5.2     trial core 
-
-2015-04-17    3.5.2     trial core 
-
-2015-04-17    3.5.2     trial core 
-
-2015-04-20    3.5.2     Switch to Universal dependencies, add Chinese
-                        coreference system
 
 2015-01-29    3.5.1     NER, dependency parser, SPIED improvements; 
                         general bugfixes 

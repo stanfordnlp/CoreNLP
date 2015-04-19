@@ -9,13 +9,13 @@ import java.util.logging.Logger;
 import static edu.stanford.nlp.ling.tokensregex.SequenceMatcher.FindType.FIND_NONOVERLAPPING;
 
 /**
- * A generic sequence matcher.
+ * <p>Generic sequence matcher</p>
  *
  * <p>
- * Similar to Java's {@code Matcher} except it matches sequences over an arbitrary type {@code T}
- *   instead of characters.
- * For a type {@code T} to be matchable, it has to have a corresponding {@code NodePattern<T>} that indicates
- *    whether a node is matched or not.
+ * Similar to Java's <code>Matcher</code> except it matches sequences over an arbitrary type <code>T</code>
+ *   instead of characters
+ * For a type <code>T</code> to be matchable, it has to have a corresponding <code>NodePattern<T></code> that indicates
+ *    whether a node is matched or not
  * </p>
  *
  * <p>
@@ -317,7 +317,7 @@ public class SequenceMatcher<T> extends BasicSequenceMatchResult<T> {
    * Reset the matcher and then searches for pattern at the specified start index
    * @param start - Index at which to start the search
    * @return true if a match is found (false otherwise)
-   * @throws IndexOutOfBoundsException if start is {@literal <} 0 or larger then the size of the sequence
+   * @throws IndexOutOfBoundsException if start is < 0 or larger then the size of the sequence
    * @see #find()
    */
   public boolean find(int start)

@@ -134,11 +134,12 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
   /**
    * Returns an Object representing the result for the match for a particular node.
    * (actual Object returned depends on the type T of the nodes.  For instance,
-   *  for a CoreMap, the match result is returned as a {@code Map<Class, Object>}, while
+   *  for a CoreMap, the match result is returned as a Map<Class, Object>, while
    *  for String, the match result is typically a MatchResult.
    *
-   * @param  index The index of the element in the original sequence.
-   * @return The match result associated with the node at the given index.
+   * @param  index
+   *         The index of the element in the original sequence.
+   * @return the match result associated with the node at the given index.
    * @throws  IllegalStateException
    *          If no match has yet been attempted,
    *          or if the previous match operation failed
@@ -150,11 +151,13 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
   /**
    * Returns an Object representing the result for the match for a particular node in a group.
    * (actual Object returned depends on the type T of the nodes.  For instance,
-   *  for a CoreMap, the match result is returned as a {@code Map<Class, Object>}, while
+   *  for a CoreMap, the match result is returned as a Map<Class, Object>, while
    *  for String, the match result is typically a MatchResult.
    *
-   * @param  groupid The index of a capturing group in this matcher's pattern
-   * @param  index The index of the element in the captured subsequence.
+   * @param  groupid
+   *         The index of a capturing group in this matcher's pattern
+   * @param  index
+   *         The index of the element in the captured subsequence.
    * @return the match result associated with the node
    *         at the given index for the captured group.
    * @throws  IllegalStateException
@@ -169,11 +172,13 @@ public interface SequenceMatchResult<T> extends MatchResult, HasInterval<Integer
   /**
    * Returns an Object representing the result for the match for a particular node in a group.
    * (actual Object returned depends on the type T of the nodes.  For instance,
-   *  for a CoreMap, the match result is returned as a {@code Map<Class, Object>}, while
+   *  for a CoreMap, the match result is returned as a Map<Class, Object>, while
    *  for String, the match result is typically a MatchResult.
    *
-   * @param  groupVar The name of the capturing group in this matcher's pattern
-   * @param  index The index of the element in the captured subsequence.
+   * @param  groupVar
+   *         The name of the capturing group in this matcher's pattern
+   * @param  index
+   *         The index of the element in the captured subsequence.
    * @return the match result associated with the node
    *         at the given index for the captured group.
    * @throws  IllegalStateException

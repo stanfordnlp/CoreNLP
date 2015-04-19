@@ -10,7 +10,7 @@ import java.util.function.Function;
  * it uses dense arrays for counts and calculation (but, hey, NB is
  * efficient to estimate).  Each feature is treated as an independent
  * binary variable.
- * <p>
+ * <p/>
  * CDM Jun 2003: I added a dirty trick so that if there is a feature
  * that is always on in input examples, then its weight is turned into
  * a prior feature!  (This will work well iff it is also always on at

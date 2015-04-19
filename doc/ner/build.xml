@@ -55,7 +55,7 @@
 -->
 
   <target name="all" depends="clean,compile"
-    description="Clean build and dist directories, then compile"/>
+   description="Clean build and dist directories, then compile"/>
 
 
 
@@ -84,10 +84,10 @@
 
   <target name="classpath" description="Sets the classpath">
       <path id="compile.classpath">
-        <fileset dir="${basedir}/lib">
+       <!-- <fileset dir="${basedir}/lib">
           <include name="*.jar"/>
           <exclude name="javanlp*"/>
-        </fileset>
+        </fileset> -->
       </path>
   </target>
 
@@ -114,9 +114,8 @@
     <javac srcdir="${src.home}"
           destdir="${build.home}"
             debug="${compile.debug}"
-         encoding="utf-8"
+         encoding="utf-8" 
       deprecation="${compile.deprecation}"
-includeantruntime="false"
          optimize="${compile.optimize}"
 	   source="${compile.source}"
            target="${compile.target}">
@@ -148,25 +147,22 @@ includeantruntime="false"
 -->
 
   <target name="javadoc" depends="compile"
-    description="Create Javadoc API documentation">
+   description="Create Javadoc API documentation">
+
     <mkdir          dir="${javadoc.home}"/>
     <javadoc sourcepath="${src.home}"
                 destdir="${javadoc.home}"
               maxmemory="768m"
                  author="true"
-                 source="${compile.source}"
-               Overview="${src.home}/edu/stanford/nlp/overview.html"
-               Doctitle="Stanford JavaNLP API Documentation"
-            Windowtitle="Stanford JavaNLP API"
+                 source="1.6"
+                Overview="${src.home}/edu/stanford/nlp/overview.html"
+                Doctitle="Stanford JavaNLP API Documentation"
+             Windowtitle="Stanford JavaNLP API"
            packagenames="*">
       <bottom><![CDATA[<FONT SIZE=2><A HREF=\"http://nlp.stanford.edu\">Stanford NLP Group</A></FONT>]]></bottom>
-      <link href="https://docs.oracle.com/javase/8/docs/api/"/>
-      <classpath>
-        <fileset dir="${basedir}/lib">
-          <include name="*.jar"/>
-        </fileset>
-      </classpath>
+      <link href="http://java.sun.com/j2se/1.6.0/docs/api/"/>
     </javadoc>
+
   </target>
 
 
