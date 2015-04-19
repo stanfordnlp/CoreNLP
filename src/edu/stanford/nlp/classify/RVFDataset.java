@@ -390,7 +390,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     }
     return new RVFDatum<L, F>(c, labelIndex.get(labels[index]));
   }
-  
+
   public RVFDatum<L, F> getRVFDatumWithId(int index) {
     RVFDatum<L, F> datum = getRVFDatum(index);
     datum.setID(getRVFDatumId(index));
@@ -534,7 +534,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
   }
 
   /**
-   * Modification of printFullFeatureMatrix to correct bugs & print values
+   * Modification of printFullFeatureMatrix to correct bugs and print values
    * (Rajat). Prints the full feature matrix in tab-delimited form. These can be
    * BIG matrices, so be careful!
    */
@@ -556,7 +556,8 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
         if (feats.containsKey(Integer.valueOf(j))) {
           pw.print(sep + feats.get(Integer.valueOf(j)));
         } else {
-          pw.print(sep + " ");
+          pw.print(sep);
+          pw.print(' ');
         }
       }
       pw.println();
