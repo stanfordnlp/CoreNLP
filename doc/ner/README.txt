@@ -165,7 +165,8 @@ PERSON	ORGANIZATION	LOCATION
 CHANGES
 --------------------
 
-2015-04-20    3.5.2     synch standalone and CoreNLP functionality 
+2015-04-20    3.5.2     add CoreNLP functionality to standalone distribution,
+                        SUTime, combining crf's
 
 2015-01-29    3.5.1     Substantial accuracy improvements 
 
