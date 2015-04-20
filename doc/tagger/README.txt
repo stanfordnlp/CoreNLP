@@ -202,10 +202,6 @@ processing.
 CHANGES
 -----------------------------------------------
 
-2015-04-18    3.5.2     trial tagger 
-
-2015-04-17    3.5.2     trial tagger 
-
 2015-01-29    3.5.1     General bugfixes 
 
 2014-10-26    3.5.0     Upgrade to Java 1.8 

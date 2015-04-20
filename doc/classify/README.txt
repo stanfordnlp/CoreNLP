@@ -76,10 +76,6 @@ LICENSE
 CHANGES
 -------------------------
 
-2015-04-18    3.5.2     trial classifier dist 
-
-2015-04-17    3.5.2     classifier trial 
-
 2015-01-29    3.5.1     New input/output options, support for GloVe 
                         word vectors 
 
