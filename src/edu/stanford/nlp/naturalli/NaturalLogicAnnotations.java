@@ -15,6 +15,7 @@ public class NaturalLogicAnnotations {
   /**
    * An annotation which attaches to a CoreLabel to denote that this is an operator in natural logic,
    * to describe which operator it is, and to give the scope of its argument(s).
+   * This only attaches to tokens which are operators (i.e., the head words of operators).
    */
   public static final class OperatorAnnotation implements CoreAnnotation<OperatorSpec> {
     @Override
