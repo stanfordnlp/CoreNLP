@@ -1,4 +1,4 @@
-Stanford NER - v3.5.2 - 2015-04-19
+Stanford NER - v3.5.2 - 2015-04-20
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named
@@ -134,7 +134,9 @@ will be deactivated.
 To use NERClassifierCombiner at the command-line, the jars in lib
 and stanford-ner.jar must be in the CLASSPATH.  Here is an example command:
 
-java -mx10g edu.stanford.nlp.ie.NERClassifierCombiner -ner.model classifiers/english.conll.4class.distsim.crf.ser.gz,classifiers/english.muc.7class.distsim.crf.ser.gz -ner.useSUTime false -textFile sample-w-time.txt
+java -mx10g edu.stanford.nlp.ie.NERClassifierCombiner -ner.model \
+classifiers/english.conll.4class.distsim.crf.ser.gz,classifiers/english.muc.7class.distsim.crf.ser.gz \
+-ner.useSUTime false -textFile sample-w-time.txt
 
 Let's break this down a bit.  The flag "-ner.model" should be followed by a
 list of CRF's to be combined by the NERClassifierCombiner.  Some serialized
@@ -214,6 +216,8 @@ PERSON	ORGANIZATION	LOCATION
 --------------------
 CHANGES
 --------------------
+
+2015-04-20    3.5.2     synch standalone and CoreNLP functionality 
 
 2015-04-20    3.5.2     add CoreNLP functionality to standalone distribution,
                         SUTime, combining multiple crfs
