@@ -43,7 +43,7 @@ CHANGES
 ---------------------------------
 
 2015-04-20    3.5.2     Switch to Universal dependencies, add Chinese
-                        coreference system
+                        coreference system, improved NER command-line
 
 2015-01-29    3.5.1     NER, dependency parser, SPIED improvements; 
                         general bugfixes 
