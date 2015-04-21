@@ -32,6 +32,10 @@ LICENSE
 CHANGES
 ------------------------------------
 
+2015-04-18    3.5.2     trial segmenter 
+
+2015-04-18    3.5.2     trial seg 
+
 2015-01-29    3.5.1     Update for compatibility 
 
 2014-10-26    3.5.0     Upgrade to Java 1.8 
