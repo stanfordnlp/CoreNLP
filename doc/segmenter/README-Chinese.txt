@@ -1,4 +1,4 @@
-Stanford Chinese Segmenter - v3.5.2 - 2015-04-18
+Stanford Chinese Segmenter - v3.5.2 - 2015-04-20
 --------------------------------------------
 
 (c) 2003-2012  The Board of Trustees of The Leland Stanford Junior University.
