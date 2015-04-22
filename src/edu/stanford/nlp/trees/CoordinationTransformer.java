@@ -87,19 +87,6 @@ public class CoordinationTransformer implements TreeTransformer {
     if (t == null) {
       return t;
     }
-
-    if (performMWETransformation) {
-      t = MWETransform(t);
-      if (VERBOSE) {
-        System.err.println("After MWETransform:               " + t);
-      }
-
-      t = prepCCTransform(t);
-      if (VERBOSE) {
-        System.err.println("After prepCCTransform:               " + t);
-      }
-    }
-
     t = UCPtransform(t);
     if (VERBOSE) {
       System.err.println("After UCPTransformer:             " + t);
@@ -141,6 +128,18 @@ public class CoordinationTransformer implements TreeTransformer {
       System.err.println("After rearrangeNowThat:           " + t);
     }
 
+    if (performMWETransformation) {
+      t = MWETransform(t);
+      if (VERBOSE) {
+        System.err.println("After MWETransform:               " + t);
+      }
+      
+      t = prepCCTransform(t);
+      if (VERBOSE) {
+        System.err.println("After prepCCTransform:               " + t);
+      }
+    }
+    
     return t;
   }
 
@@ -683,8 +682,8 @@ public class CoordinationTransformer implements TreeTransformer {
   private static TsurgeonPattern ACCORDING_TO_OPERATION = Tsurgeon.parseOperation("[createSubtree MWE node1] [move node2 $- node1] [excise pp2 pp2]");
 
   /* "but also" is not a MWE, so break up the CONJP. */ 
-  private static TregexPattern BUT_ALSO_PATTERN = TregexPattern.compile("CONJP=conjp < (CC=cc < but) < (RB=rb < also) ?$+ (__=nextNode < (__ < __))");
-  private static TsurgeonPattern BUT_ALSO_OPERATION = Tsurgeon.parseOperation("[move cc $- conjp] [move rb $- cc] [if exists nextNode move rb >1 nextNode] [createSubtree ADVP rb] [delete conjp]");
+  private static TregexPattern BUT_ALSO_PATTERN = TregexPattern.compile("CONJP=conjp < (CC=cc < but) < (RB=rb < also) $+ __=nextNode");
+  private static TsurgeonPattern BUT_ALSO_OPERATION = Tsurgeon.parseOperation("[move cc $- conjp] [move rb >1 nextNode] [createSubtree ADVP rb] [delete conjp]");
 
   /* at least / at most / at best / at worst / ... should be treated as if "at"
      was a preposition and the RBS was a noun. Assumes that the MWE "at least"
