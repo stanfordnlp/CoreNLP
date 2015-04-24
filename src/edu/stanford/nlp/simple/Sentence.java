@@ -312,7 +312,7 @@ public class Sentence {
 
   /**
    * The named entity tags of the sentence.
-   * @param props The properties to use for the {@link edu.stanford.nlp.pipeline.NERAnnotator}.
+   * @param props The properties to use for the {@link edu.stanford.nlp.pipeline.NERCombinerAnnotator}.
    * @return A list of named entity tags, one for each token in the sentence.
    */
   public List<String> ners(Properties props) {
