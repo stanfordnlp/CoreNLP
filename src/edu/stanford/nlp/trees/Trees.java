@@ -39,6 +39,23 @@ public class Trees {
     }
   }
 
+  /**
+   * Returns the positional index of the left edge of a tree <i>t</i>
+   * within a given root, as defined by the size of the yield of all
+   * material preceding <i>t</i>.
+   * This method returns -1 if no path is found, rather than exceptioning.
+   *
+   * @see Trees#leftEdge(Tree, Tree)
+   */
+  public static int leftEdgeUnsafe(Tree t, Tree root) {
+    MutableInteger i = new MutableInteger(0);
+    if (leftEdge(t, root, i)) {
+      return i.intValue();
+    } else {
+      return -1;
+    }
+  }
+
   static boolean leftEdge(Tree t, Tree t1, MutableInteger i) {
     if (t == t1) {
       return true;
@@ -69,6 +86,24 @@ public class Trees {
     } else {
       throw new RuntimeException("Tree is not a descendant of root.");
 //      return root.yield().size() + 1;
+    }
+  }
+
+  /**
+   * Returns the positional index of the right edge of a tree
+   * <i>t</i> within a given root, as defined by the size of the yield
+   * of all material preceding <i>t</i> plus all the material
+   * contained in <i>t</i>.
+   * This method returns root.yield().size() + 1 if no path is found, rather than exceptioning.
+   *
+   * @see Trees#rightEdge(Tree, Tree)
+   */
+  public static int rightEdgeUnsafe(Tree t, Tree root) {
+    MutableInteger i = new MutableInteger(root.yield().size());
+    if (rightEdge(t, root, i)) {
+      return i.intValue();
+    } else {
+      return root.yield().size() + 1;
     }
   }
 
