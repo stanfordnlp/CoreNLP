@@ -29,6 +29,7 @@ import static edu.stanford.nlp.simple.Document.EMPTY_PROPS;
  *
  * @author Gabor Angeli
  */
+@SuppressWarnings("UnusedDeclaration")
 public class Sentence {
   /** A properties object for creating a document from a single sentence. Used in the constructor {@link Sentence#Sentence(String)} */
   private static Properties SINGLE_SENTENCE_DOCUMENT = new Properties() {{
@@ -614,7 +615,9 @@ public class Sentence {
    *                  For example, you can specify mySentence::posTags, and then posTags will
    *                  be populated.
    */
-  public CoreMap asCoreMap(Supplier<? extends Object>... functions) {
+  @SuppressWarnings("TypeParameterExplicitlyExtendsObject")
+  @SafeVarargs
+  public final CoreMap asCoreMap(Supplier<? extends Object>... functions) {
     for (Supplier<?> function : functions) {
       function.get();
     }
@@ -632,7 +635,9 @@ public class Sentence {
    *                  For example, you can specify mySentence::posTags, and then posTags will
    *                  be populated.
    */
-  public List<CoreLabel> asCoreLabels(Supplier<? extends Object>... functions) {
+  @SuppressWarnings("TypeParameterExplicitlyExtendsObject")
+  @SafeVarargs
+  public final List<CoreLabel> asCoreLabels(Supplier<? extends Object>... functions) {
     for (Supplier<?> function : functions) {
       function.get();
     }
