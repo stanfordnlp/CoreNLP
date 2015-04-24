@@ -11,6 +11,9 @@ useKnownLCWords = false
 
 useDistSim = true
 distSimLexicon = /u/nlp/data/pos_tags_are_useless/egw4-reut.512.clusters
+# right options for egw4-reut.512 (though effect of having or not is small)
+numberEquivalenceDistSim = true
+unknownWordDistSimClass = 0
 
 map = word=0,answer=1
 

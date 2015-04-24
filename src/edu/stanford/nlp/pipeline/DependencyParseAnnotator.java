@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * This class adds dependency parse information to an Annotation.
  *
- * Parse trees are added to each sentence under the annotation
+ * Dependency parses are added to each sentence under the annotation
  * {@link edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.BasicDependenciesAnnotation}.
  *
  * @author Jon Gauthier
@@ -30,10 +30,11 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
    * Maximum parse time (in milliseconds) for a sentence
    */
   private final long maxTime;
-  /**
-   * If true, include the extra arcs in the dependency representaion.
-   */
   private static final long DEFAULT_MAXTIME = Long.MAX_VALUE;
+
+  /**
+   * If true, include the extra arcs in the dependency representation.
+   */
   private final GrammaticalStructure.Extras extraDependencies;
 
   public DependencyParseAnnotator() {
@@ -90,10 +91,8 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
   }
 
   public static String signature(String annotatorName, Properties props) {
-    StringBuilder os = new StringBuilder();
-    os.append(annotatorName).append(".extradependencies:");
-    os.append(props.getProperty(annotatorName + ".extradependencies", "NONE").toLowerCase());
-    return os.toString();
+    return annotatorName +
+            ".extradependencies:" + props.getProperty(annotatorName + ".extradependencies", "NONE").toLowerCase();
   }
 
 }
