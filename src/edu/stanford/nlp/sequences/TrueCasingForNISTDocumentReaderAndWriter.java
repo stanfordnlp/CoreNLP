@@ -1,24 +1,28 @@
 package edu.stanford.nlp.sequences;
 
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.util.StringUtils;
-import java.util.function.Function;
-import edu.stanford.nlp.objectbank.LineIterator;
-import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
-
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * adapt from Jenny's TrueCasingDocumentReaderAndWriter.java
- * @author Pi-Chuan Chang
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.objectbank.LineIterator;
+import edu.stanford.nlp.objectbank.IteratorFromReaderFactory;
+
+// Note: This DocumentReaderAndWriter needs to be in core because it is
+// used in the truecasing Annotator (loaded by reflection).
+
+/** A DocumentReaderAndWriter for truecasing documents.
+ *  Adapted from Jenny's TrueCasingDocumentReaderAndWriter.java.
+ *
+ *  @author Pi-Chuan Chang
  */
 public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderAndWriter<CoreLabel> {
 
@@ -37,8 +41,7 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
     Reader reader = new BufferedReader(new FileReader(args[0]));
     TrueCasingForNISTDocumentReaderAndWriter raw = new TrueCasingForNISTDocumentReaderAndWriter();
     raw.init(null);
-    Iterator<List<CoreLabel>> it = raw.getIterator(reader);
-    while(it.hasNext()) {
+    for (Iterator<List<CoreLabel>> it = raw.getIterator(reader); it.hasNext(); ) {
       List<CoreLabel> l = it.next();
       for (CoreLabel cl : l) {
         System.out.println(cl);
@@ -47,6 +50,7 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
     }
   }
 
+  @Override
   public void init(SeqClassifierFlags flags) {
     verboseForTrueCasing = flags.verboseForTrueCasing;
     factory = LineIterator.getFactory(new LineToTrueCasesParser()); // todo
@@ -58,12 +62,14 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
     return knownWords.contains(s.toLowerCase());
   }
 
+  @Override
   public Iterator<List<CoreLabel>> getIterator(Reader r) {
     return factory.getIterator(r);
   }
 
+  @Override
   public void printAnswers(List<CoreLabel> doc, PrintWriter out) {
-    List<String> sentence = new ArrayList<String>();
+    List<String> sentence = new ArrayList<>();
     int wrong = 0;
 
     for (CoreLabel wi : doc) {
@@ -96,17 +102,18 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
       sentence.add(sb.toString());
     }
     out.print(StringUtils.join(sentence, " "));
-    System.err.printf("> wrong = %d ; total = %d\n", wrong, doc.size());
+    System.err.printf("> wrong = %d ; total = %d%n", wrong, doc.size());
     out.println();
   }
 
   public static class LineToTrueCasesParser implements Function<String,List<CoreLabel>> {
-    private static Pattern allLower = Pattern.compile("[^A-Z]*?[a-z]+[^A-Z]*?");
-    private static Pattern allUpper = Pattern.compile("[^a-z]*?[A-Z]+[^a-z]*?");
-    private static Pattern startUpper = Pattern.compile("[A-Z].*");
+    private static final Pattern allLower = Pattern.compile("[^A-Z]*?[a-z]+[^A-Z]*?");
+    private static final Pattern allUpper = Pattern.compile("[^a-z]*?[A-Z]+[^a-z]*?");
+    private static final Pattern startUpper = Pattern.compile("[A-Z].*");
 
+    @Override
     public List<CoreLabel> apply(String line) {
-      List<CoreLabel> doc = new ArrayList<CoreLabel>();
+      List<CoreLabel> doc = new ArrayList<>();
       int pos = 0;
 
       //line = line.replaceAll(" +"," ");
@@ -148,7 +155,7 @@ public class TrueCasingForNISTDocumentReaderAndWriter implements DocumentReaderA
         }
 
         wi.setWord(word.toLowerCase());
-        wi.set(CoreAnnotations.PositionAnnotation.class, pos + "");
+        wi.set(CoreAnnotations.PositionAnnotation.class, String.valueOf(pos));
         doc.add(wi);
         pos++;
       }
