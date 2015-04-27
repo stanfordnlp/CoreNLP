@@ -72,7 +72,7 @@ public class LineIterator<X> extends AbstractIterator<X> {
    * @return An iterator over the lines of a file
    */
   public static <X> IteratorFromReaderFactory<X> getFactory() {
-    return new LineIteratorFactory<>();
+    return new LineIteratorFactory<X>();
   }
 
   /**
@@ -83,7 +83,7 @@ public class LineIterator<X> extends AbstractIterator<X> {
    * @return An iterator over the lines of a file
    */
   public static <X> IteratorFromReaderFactory<X> getFactory(Function<String,X> op) {
-    return new LineIteratorFactory<>(op);
+    return new LineIteratorFactory<X>(op);
   }
 
 
@@ -92,7 +92,7 @@ public class LineIterator<X> extends AbstractIterator<X> {
     private static final long serialVersionUID = 1L;
 
     @SuppressWarnings({"NonSerializableFieldInSerializableClass"})
-    private final Function<String,X> function;
+    private final Function<String,X> oper;
 
     @SuppressWarnings({"unchecked"})
     public LineIteratorFactory() {
@@ -100,14 +100,23 @@ public class LineIterator<X> extends AbstractIterator<X> {
     }
 
     public LineIteratorFactory(Function<String,X> op) {
-      this.function = op;
+      this.oper = op;
     }
 
-    @Override
     public Iterator<X> getIterator(Reader r) {
-      return new LineIterator<>(r, function);
+      return new LineIterator<X>(r, oper);
     }
 
+  }
+
+  public static void main(String[] args) {
+    String s = "\n\n@@123\nthis\nis\na\nsentence\n\n@@124\nThis\nis\nanother\n.\n\n@125\nThis\nis\nthe\nlast\n";
+    Iterator<String> di = new LineIterator<String>(new StringReader(s), new IdentityFunction<String>());
+    System.out.println("--- start ---");
+    while (di.hasNext()) {
+      System.out.println(di.next());
+    }
+    System.out.println("---- end ----");
   }
 
 }

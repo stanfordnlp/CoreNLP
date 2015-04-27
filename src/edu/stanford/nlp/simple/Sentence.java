@@ -156,6 +156,7 @@ public class Sentence {
    */
   public void serialize(OutputStream out) throws IOException {
     serialize().writeDelimitedTo(out);
+    out.flush();
   }
 
   /**

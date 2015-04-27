@@ -221,13 +221,11 @@ public class AnnotatorImplementations {
   /**
    * Annotate {@link edu.stanford.nlp.ie.util.RelationTriple}s from text.
    */
-  /*
   public Annotator openie(Properties properties) {
     Properties relevantProperties = PropertiesUtils.extractPrefixedProperties(properties,
         Annotator.STANFORD_OPENIE + '.');
     return new OpenIE(relevantProperties);
   }
-  */
 
   /**
    * Annotate quotes and extract them like sentences

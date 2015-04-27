@@ -4,13 +4,12 @@ import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.international.Language;
+import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.Annotator;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -25,9 +24,9 @@ import edu.stanford.nlp.util.Execution;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -45,11 +44,8 @@ public class OpenIE implements Annotator {
    */
   private static SemgrexPattern adjectivePattern = SemgrexPattern.compile("{}=obj >nsubj {}=subj >cop {}=be >det {word:/an?/} >amod {}=adj ?>/prep_.*/=prep {}=pobj");
 
-  @Execution.Option(name="optimizefor", gloss="{General, KB}: Optimize the system for particular tasks (e.g., knowledge base completion tasks -- try to make the subject and object coherent named entities).")
-  private Optimization optimizeFor = Optimization.GENERAL;
-
   @Execution.Option(name="splitter.model", gloss="The location of the clause splitting model.")
-  private String splitterModel = "edu/stanford/nlp/naturalli/clauseSplitterModel.ser.gz";
+  private String splitterModel = DefaultPaths.DEFAULT_OPENIE_CLAUSE_SEARCHER;
 
   @Execution.Option(name="splitter.nomodel", gloss="If true, don't load a clause splitter model. This is primarily useful for training.")
   private boolean noModel = false;
@@ -64,7 +60,7 @@ public class OpenIE implements Annotator {
   private boolean ignoreAffinity = false;
 
   @Execution.Option(name="affinity_models", gloss="The directory (or classpath directory) containing the affinity models for pp/obj attachments.")
-  private String affinityModels = "edu/stanford/nlp/naturalli/";
+  private String affinityModels = DefaultPaths.DEFAULT_NATURALLI_AFFINITIES;
 
   @Execution.Option(name="affinity_probability_cap", gloss="The affinity to consider 1.0")
   private double affinityProbabilityCap = 1.0 / 3.0;
@@ -74,9 +70,11 @@ public class OpenIE implements Annotator {
 
   private final NaturalLogicWeights weights;
 
-  public final Function<SemanticGraph, ClauseSplitterSearchProblem> clauseSplitter;
+  public final ClauseSplitter clauseSplitter;
 
-  public final Function<SemanticGraph, ForwardEntailerSearchProblem> forwardEntailer;
+  public final ForwardEntailer forwardEntailer;
+
+  public RelationTripleSegmenter segmenter;
 
   /** Create a new OpenIE system, with default properties */
   @SuppressWarnings("UnusedDeclaration")
@@ -91,28 +89,29 @@ public class OpenIE implements Annotator {
   public OpenIE(Properties props) {
     // Fill the properties
     Execution.fillOptions(this, props);
-    // Create the components
-    try {
-      this.weights = ignoreAffinity ? new NaturalLogicWeights(affinityProbabilityCap) : new NaturalLogicWeights(affinityModels, affinityProbabilityCap);
-    } catch (IOException e) {
-      throw new RuntimeIOException("Could not load affinity model at " + affinityModels + ": " + e.getMessage());
-    }
+
+    // Create the clause splitter
     try {
       if (noModel) {
         System.err.println("Not loading a splitter model");
-        clauseSplitter = new ClauseSplitter() {
-          @Override
-          public ClauseSplitterSearchProblem apply(SemanticGraph semanticGraph) {
-            return new ClauseSplitterSearchProblem(semanticGraph);
-          }
-        };
+        clauseSplitter = ClauseSplitterSearchProblem::new;
       } else {
         clauseSplitter = ClauseSplitter.load(splitterModel);
       }
     } catch (IOException e) {
       throw new RuntimeIOException("Could not load clause splitter model at " + splitterModel + ": " + e.getMessage());
     }
+
+    // Create the forward entailer
+    try {
+      this.weights = ignoreAffinity ? new NaturalLogicWeights(affinityProbabilityCap) : new NaturalLogicWeights(affinityModels, affinityProbabilityCap);
+    } catch (IOException e) {
+      throw new RuntimeIOException("Could not load affinity model at " + affinityModels + ": " + e.getMessage());
+    }
     forwardEntailer = new ForwardEntailer(entailmentsPerSentence, weights);
+
+    // Create the relation segmenter
+    segmenter = new RelationTripleSegmenter();
   }
 
   public List<SentenceFragment> clausesInSentence(SemanticGraph tree) {
@@ -181,14 +180,7 @@ public class OpenIE implements Annotator {
   }
 
   public Optional<RelationTriple> relationInFragment(SentenceFragment fragment) {
-    return RelationTriple.segment(fragment.parseTree, Optional.of(fragment.score), consumeAll).map(rel -> { switch(optimizeFor) {
-      case GENERAL:
-        return rel;
-      case KB:
-        throw new IllegalStateException("Cannot optimize for KB with this function -- use the annotate() method instead");
-      default:
-        throw new IllegalStateException("Unknown enum constant: " + optimizeFor);
-    }});
+    return segmenter.segment(fragment.parseTree, Optional.of(fragment.score), consumeAll);
   }
 
   public List<RelationTriple> relationsInFragments(Collection<SentenceFragment> fragments) {
@@ -196,16 +188,7 @@ public class OpenIE implements Annotator {
   }
 
   private Optional<RelationTriple> relationInFragment(SentenceFragment fragment, CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
-    return RelationTriple.segment(fragment.parseTree, Optional.of(fragment.score), consumeAll).flatMap(rel -> {
-      switch (optimizeFor) {
-        case GENERAL:
-          return Optional.of(rel);
-        case KB:
-          return RelationTriple.optimizeForKB(rel, Optional.of(sentence), canonicalMentionMap);
-        default:
-          throw new IllegalStateException("Unknown enum constant: " + optimizeFor);
-      }
-    });
+    return segmenter.segment(fragment.parseTree, Optional.of(fragment.score), consumeAll);
   }
 
   private List<RelationTriple> relationsInFragments(Collection<SentenceFragment> fragments, CoreMap sentence, Map<CoreLabel, List<CoreLabel>> canonicalMentionMap) {
@@ -245,7 +228,7 @@ public class OpenIE implements Annotator {
       if (parse == null) {
         throw new IllegalStateException("Cannot run OpenIE without a parse tree!");
       }
-      List<RelationTriple> extractions = RelationTriple.extract(parse, tokens);
+      List<RelationTriple> extractions = segmenter.extract(parse, tokens);
       if (tokens.size() > 63) {
         System.err.println("Very long sentence (>63 tokens); " + this.getClass().getSimpleName() + " is not attempting to extract clauses.");
         sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
@@ -310,8 +293,7 @@ public class OpenIE implements Annotator {
   /** {@inheritDoc} */
   @Override
   public Set<Requirement> requirementsSatisfied() {
-    return Collections.EMPTY_SET; // TODO(Gabor) enable below!
-//    return Collections.singleton(Annotator.OPENIE_REQUIREMENT);
+    return Collections.singleton(Annotator.OPENIE_REQUIREMENT);
   }
 
   /** {@inheritDoc} */
@@ -343,27 +325,82 @@ public class OpenIE implements Annotator {
   }
 
   /**
+   * Process a single file or line of standard in.
+   * @param pipeline The annotation pipeline to run the lines of the input through.
+   * @param docid The docid of the document we are extracting.
+   * @param document the document to annotate.
+   */
+  private static void processDocument(AnnotationPipeline pipeline, String docid, String document) {
+    // Error checks
+    if (document.trim().equals("")) {
+      return;
+    }
+
+    // Annotate the document
+    Annotation ann = new Annotation(document);
+    pipeline.annotate(ann);
+
+    // Get the extractions
+    Collection<RelationTriple> extractions = new ArrayList<>();
+    for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
+      extractions.addAll(sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class));
+    }
+    if (extractions.isEmpty()) {
+      System.err.println("No extractions in: " + ("stdin".equals(docid) ? document : docid));
+    }
+
+    // Print the extractions
+    synchronized (System.out) {
+      extractions.forEach(System.out::println);
+    }
+  }
+
+  /**
    * An entry method for annotating standard in with OpenIE extractions.
    */
-  public static void main(String[] args) {
-    // Initialize prerequisites
+  public static void main(String[] args) throws IOException {
+    // Parse the arguments
     Properties props = StringUtils.argsToProperties(args);
-    props.setProperty("annotators", "tokenize,ssplit,pos,depparse,natlog,openie");
-    props.setProperty("depparse.extradependencies", "ref_only_uncollapsed");
-    props.setProperty("ssplit.isOneSentence", "true");
+
+    // Parse the files to process
+    String[] filesToProcess = props.getProperty("", "").split("\\s+");
+    if ("".equals(filesToProcess[0].trim())) { filesToProcess = new String[0]; }
+
+    // Tweak the arguments
+    if ("".equals(props.getProperty("annotators", ""))) {
+      props.setProperty("annotators", "tokenize,ssplit,pos,depparse,natlog,openie");
+    }
+    if ("".equals(props.getProperty("depparse.extradependencies", ""))) {
+      props.setProperty("depparse.extradependencies", "ref_only_uncollapsed");
+    }
+    if ("".equals(props.getProperty("parse.extradependencies", ""))) {
+      props.setProperty("parse.extradependencies", "ref_only_uncollapsed");
+    }
+    // Tweak properties for console mode.
+    // In particular, in this mode we can assume every line of standard in is a new sentence.
+    if (filesToProcess.length == 0 && "".equals(props.getProperty("ssplit.isOneSentence", ""))) {
+      props.setProperty("ssplit.isOneSentence", "ref_only_uncollapsed");
+    }
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
     // Run extractor
-    Scanner in = new Scanner(System.in);
-    while (in.hasNext()) {
-      String line = in.nextLine();
-      Annotation ann = new Annotation(line);
-      pipeline.annotate(ann);
-      Collection<RelationTriple> extractions = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0).get(NaturalLogicAnnotations.RelationTriplesAnnotation.class);
-      if (extractions.isEmpty()) {
-        System.err.println("No extractions for: " + line);
+    if (filesToProcess.length == 0) {
+      System.err.println("Processing from stdin. Enter one sentence per line.");
+      Scanner scanner = new Scanner(System.in);
+      String line;
+      while ( (line = scanner.nextLine()) != null ) {
+        processDocument(pipeline, "stdin", line);
       }
-      extractions.forEach(System.out::println);
+    } else {
+      for (String file : filesToProcess) {
+        if (!new File(file).exists() || !new File(file).canRead()) {
+          System.err.println("ERROR: Cannot read file (or file does not exist: '" + file + "'");
+        }
+      }
+      for (String file : filesToProcess) {
+        System.err.println("Processing file: " + file);
+        processDocument(pipeline, file, IOUtils.slurpFile(new File(file)));
+      }
     }
   }
 }

@@ -1,8 +1,10 @@
-package edu.stanford.nlp.ie.util;
+package edu.stanford.nlp.naturalli;
 
+import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.naturalli.RelationTripleSegmenter;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import junit.framework.TestCase;
@@ -12,11 +14,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * A test of various functions in {@link RelationTriple}.
+ * A test of various functions in {@link edu.stanford.nlp.ie.util.RelationTriple}.
  *
  * @author Gabor Angeli
  */
-public class RelationTripleTest extends TestCase {
+public class RelationTripleSegmenterTest extends TestCase {
 
   protected CoreLabel mkWord(String gloss, int index) {
     CoreLabel w = new CoreLabel();
@@ -80,11 +82,11 @@ public class RelationTripleTest extends TestCase {
       i += 1;
     }
     // Run extractor
-    Optional<RelationTriple> segmented = RelationTriple.segment(tree, Optional.empty());
+    Optional<RelationTriple> segmented = new RelationTripleSegmenter().segment(tree, Optional.empty());
     if (segmented.isPresent() && listIndex == 0) {
       return segmented;
     }
-    List<RelationTriple> extracted = RelationTriple.extract(tree, sentence);
+    List<RelationTriple> extracted = new RelationTripleSegmenter().extract(tree, sentence);
     if (extracted.size() > listIndex) {
       return Optional.of(extracted.get(listIndex - (segmented.isPresent() ? 1 : 0)));
     }
