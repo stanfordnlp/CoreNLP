@@ -550,8 +550,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     
     /* Attach CC node to conjGov */ 
     SemanticGraphEdge edge = sg.getEdge(gov, ccDep);
-    sg.removeEdge(edge);
-    sg.addEdge(conjGov, ccDep, COORDINATION, Double.NEGATIVE_INFINITY, false);
+    if (edge != null) {
+      sg.removeEdge(edge);
+      sg.addEdge(conjGov, ccDep, COORDINATION, Double.NEGATIVE_INFINITY, false);
+    }
     
     /* Add conjunction information for these relations already at this point.
      * It could be that we add several coordinating conjunctions while collapsing
