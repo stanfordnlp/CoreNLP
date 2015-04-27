@@ -411,10 +411,18 @@ public class OpenIE implements Annotator {
     if (filesToProcess.length == 0 && "".equals(props.getProperty("ssplit.isOneSentence", ""))) {
       props.setProperty("ssplit.isOneSentence", "ref_only_uncollapsed");
     }
+    // Some error checks on the arguments
+    if (!props.getProperty("annotators").toLowerCase().contains("openie")) {
+      System.err.println("ERROR: If you specify custom annotators, you must at least include 'openie'");
+      System.exit(1);
+    }
+
+    // Create the pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
     // Run extractor
     if (filesToProcess.length == 0) {
+      // Running from stdin; one document per line.
       System.err.println("Processing from stdin. Enter one sentence per line.");
       Scanner scanner = new Scanner(System.in);
       String line;
@@ -422,14 +430,19 @@ public class OpenIE implements Annotator {
         processDocument(pipeline, "stdin", line);
       }
     } else {
+      // Running from file parameters.
+      // Make sure we can read all the files in the queue.
+      // This will prevent a nasty surprise 10 hours into a running job...
       for (String file : filesToProcess) {
         if (!new File(file).exists() || !new File(file).canRead()) {
           System.err.println("ERROR: Cannot read file (or file does not exist: '" + file + "'");
         }
       }
+      // Actually process the files.
       for (String file : filesToProcess) {
         System.err.println("Processing file: " + file);
         if (Execution.threads > 1) {
+          // Multi-threaded: submit a job to run
           final String fileToSubmit = file;
           exec.submit(() -> {
             try {
@@ -439,13 +452,18 @@ public class OpenIE implements Annotator {
               exceptionCount.incrementAndGet();
             }
           });
+        } else {
+          // Single-threaded: just run the job
+          processDocument(pipeline, file, IOUtils.slurpFile(new File(file)));
         }
       }
     }
 
     // Exit
     exec.shutdown();
+    System.err.println("All files have been queued; awaiting termination...");
     exec.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+    System.err.println("DONE processing files. " + exceptionCount.get() + " exceptions encountered.");
     System.exit(exceptionCount.get());
   }
 }
