@@ -261,6 +261,38 @@ public class Util {
     return extraEdges;
   }
 
+
+  /**
+   * Strip away case edges, if the incoming edge is a preposition.
+   * This replicates the behavior of the old Stanford dependencies on universal dependencies.
+   * @param tree The tree to modify in place.
+   */
+  public static void stripPrepCases(SemanticGraph tree) {
+    // Find incoming case edges that have an 'nmod' incoming edge
+    List<SemanticGraphEdge> toClean = new ArrayList<>();
+    for (SemanticGraphEdge edge : tree.edgeIterable()) {
+      if ("case".equals(edge.getRelation().toString())) {
+        boolean isPrepTarget = false;
+        for (SemanticGraphEdge incoming : tree.incomingEdgeIterable(edge.getGovernor())) {
+          if ("nmod".equals(incoming.getRelation().getShortName())) {
+            isPrepTarget = true;
+            break;
+          }
+        }
+        if (isPrepTarget && !tree.outgoingEdgeIterator(edge.getDependent()).hasNext()) {
+          toClean.add(edge);
+        }
+      }
+    }
+
+    // Delete these edges
+    for (SemanticGraphEdge edge : toClean) {
+      tree.removeEdge(edge);
+      tree.removeVertex(edge.getDependent());
+      assert isTree(tree);
+    }
+  }
+
   /**
    * A little utility function to make sure a SemanticGraph is a tree.
    * @param tree The tree to check.

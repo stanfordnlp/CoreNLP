@@ -1,8 +1,10 @@
 package edu.stanford.nlp.ie.util;
 
 import edu.stanford.nlp.ie.machinereading.structure.Span;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.naturalli.Util;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.*;
@@ -76,7 +78,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    * This method will additionally strip out punctuation as well.
    */
    public String subjectLemmaGloss() {
-    return StringUtils.join(subject.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(CoreLabel::lemma), " ");
+    return StringUtils.join(subject.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
   }
 
   /** The object of this relation triple, as a String */
@@ -94,7 +96,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    * This method will additionally strip out punctuation as well.
    */
   public String objectLemmaGloss() {
-    return StringUtils.join(object.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(CoreLabel::lemma), " ");
+    return StringUtils.join(object.stream().filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]")).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ");
   }
 
   /**
@@ -110,7 +112,7 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
    */
   public String relationLemmaGloss() {
     return StringUtils.join(relation.stream()
-        .filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]") && !x.lemma().matches("[\\.,;'\"\\?!]")).map(CoreLabel::lemma), " ").toLowerCase();
+        .filter(x -> !x.tag().matches("[\\.\\?,:;'\"!]") && (x.lemma() == null || !x.lemma().matches("[\\.,;'\"\\?!]"))).map(x -> x.lemma() == null ? x.word() : x.lemma()), " ").toLowerCase();
   }
 
   /** A textual representation of the confidence. */
@@ -183,6 +185,27 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
   @Override
   public String toString() {
     return "" + this.confidence + "\t" + subjectGloss() + "\t" + relationGloss() + "\t" + objectGloss();
+  }
+
+  /** Print a description of this triple, formatted like the ReVerb outputs. */
+  public String toReverbString(String docid, CoreMap sentence) {
+    return docid + "\t" +
+        relation.get(0).sentIndex() + "\t" +
+        subjectGloss().replace('\t', ' ') + "\t" +
+        relationGloss().replace('\t', ' ') + "\t" +
+        objectGloss().replace('\t', ' ') + "\t" +
+        (subject.get(0).index() - 1) + "\t" +
+        subject.get(subject.size() - 1).index() + "\t" +
+        (relation.get(0).index() - 1) + "\t" +
+        relation.get(relation.size() - 1).index() + "\t" +
+        (object.get(0).index() - 1) + "\t" +
+        object.get(object.size() - 1).index() + "\t" +
+        confidenceGloss() + "\t" +
+        StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(x -> x.word().replace('\t', ' ').replace(" ", "")), " ") + "\t" +
+        StringUtils.join(sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(CoreLabel::tag), " ") + "\t" +
+        subjectLemmaGloss().replace('\t', ' ') + "\t" +
+        relationLemmaGloss().replace('\t', ' ') + "\t" +
+        objectLemmaGloss().replace('\t', ' ');
   }
 
   @Override

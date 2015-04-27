@@ -436,6 +436,11 @@ public class RelationTripleSegmenter {
    * @return A relation triple, if this sentence matches one of the patterns of a valid relation triple.
    */
   public Optional<RelationTriple> segment(SemanticGraph parse, Optional<Double> confidence, boolean consumeAll) {
+    // Copy and clean the tree
+    parse = new SemanticGraph(parse);
+    Util.stripPrepCases(parse);
+
+    // Run pattern loop
     PATTERN_LOOP: for (SemgrexPattern pattern : VERB_PATTERNS) {  // For every candidate pattern...
       SemgrexMatcher m = pattern.matcher(parse);
       if (m.matches()) {  // ... see if it matches the sentence

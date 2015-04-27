@@ -27,6 +27,10 @@ import edu.stanford.nlp.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -37,13 +41,23 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
 public class OpenIE implements Annotator {
 
-  private static enum Optimization { GENERAL, KB }
+  private static enum OutputFormat { REVERB, OLLIE, DEFAULT }
 
   /**
    * A pattern for rewriting "NN_1 is a JJ NN_2" --> NN_1 is JJ"
    */
   private static SemgrexPattern adjectivePattern = SemgrexPattern.compile("{}=obj >nsubj {}=subj >cop {}=be >det {word:/an?/} >amod {}=adj ?>/prep_.*/=prep {}=pobj");
 
+  //
+  // Static Options (for running standalone)
+  //
+
+  @Execution.Option(name="format", gloss="The format to output the triples in.")
+  private static OutputFormat FORMAT = OutputFormat.DEFAULT;
+
+  //
+  // Annotator Options (for running in the pipeline)
+  //
   @Execution.Option(name="splitter.model", gloss="The location of the clause splitting model.")
   private String splitterModel = DefaultPaths.DEFAULT_OPENIE_CLAUSE_SEARCHER;
 
@@ -236,7 +250,7 @@ public class OpenIE implements Annotator {
       } else {
         List<SentenceFragment> clauses = clausesInSentence(sentence);
         List<SentenceFragment> fragments = entailmentsFromClauses(clauses);
-        fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), false));
+//        fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), false));
         extractions.addAll(relationsInFragments(fragments, sentence, canonicalMentionMap));
         sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
         sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, extractions);
@@ -341,26 +355,42 @@ public class OpenIE implements Annotator {
     pipeline.annotate(ann);
 
     // Get the extractions
-    Collection<RelationTriple> extractions = new ArrayList<>();
-    for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
-      extractions.addAll(sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class));
-    }
-    if (extractions.isEmpty()) {
-      System.err.println("No extractions in: " + ("stdin".equals(docid) ? document : docid));
-    }
-
-    // Print the extractions
+    boolean empty = true;
     synchronized (System.out) {
-      extractions.forEach(System.out::println);
+      for (CoreMap sentence : ann.get(CoreAnnotations.SentencesAnnotation.class)) {
+        for (RelationTriple extraction : sentence.get(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
+          // Print the extractions
+          switch (FORMAT) {
+            case REVERB:
+              System.out.println(extraction.toString());
+              break;
+            case OLLIE:
+              System.out.println(extraction.confidenceGloss() + ": (" + extraction.subjectGloss() + "; " + extraction.relationGloss() + "; " + extraction.objectGloss() + ")");
+              break;
+            case DEFAULT:
+              System.out.println(extraction.toString());
+              break;
+            default:
+              throw new IllegalStateException("Format is not implemented: " + FORMAT);
+          }
+          empty = false;
+        }
+      }
+    }
+    if (empty) {
+      System.err.println("No extractions in: " + ("stdin".equals(docid) ? document : docid));
     }
   }
 
   /**
    * An entry method for annotating standard in with OpenIE extractions.
    */
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, InterruptedException {
     // Parse the arguments
     Properties props = StringUtils.argsToProperties(args);
+    Execution.fillOptions(new Class[]{ OpenIE.class, Execution.class}, props);
+    AtomicInteger exceptionCount = new AtomicInteger(0);
+    ExecutorService exec = Executors.newFixedThreadPool(Execution.threads);
 
     // Parse the files to process
     String[] filesToProcess = props.getProperty("", "").split("\\s+");
@@ -399,8 +429,23 @@ public class OpenIE implements Annotator {
       }
       for (String file : filesToProcess) {
         System.err.println("Processing file: " + file);
-        processDocument(pipeline, file, IOUtils.slurpFile(new File(file)));
+        if (Execution.threads > 1) {
+          final String fileToSubmit = file;
+          exec.submit(() -> {
+            try {
+              processDocument(pipeline, file, IOUtils.slurpFile(new File(fileToSubmit)));
+            } catch (Throwable t) {
+              t.printStackTrace();
+              exceptionCount.incrementAndGet();
+            }
+          });
+        }
       }
     }
+
+    // Exit
+    exec.shutdown();
+    exec.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+    System.exit(exceptionCount.get());
   }
 }
