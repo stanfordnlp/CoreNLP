@@ -159,6 +159,7 @@ public interface Annotator {
   Set<Requirement> TOKENIZE_SSPLIT_PARSE = Collections.unmodifiableSet(new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, PARSE_REQUIREMENT));
   Set<Requirement> TOKENIZE_SSPLIT_PARSE_NER = Collections.unmodifiableSet(new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, PARSE_REQUIREMENT, NER_REQUIREMENT));
   Set<Requirement> TOKENIZE_SSPLIT_POS_LEMMA = Collections.unmodifiableSet(new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, LEMMA_REQUIREMENT));
+  Set<Requirement> TOKENIZE_SSPLIT_POS_DEPPARSE = Collections.unmodifiableSet(new ArraySet<Requirement>(TOKENIZE_REQUIREMENT, SSPLIT_REQUIREMENT, POS_REQUIREMENT, DEPENDENCY_REQUIREMENT));
   Set<Requirement> PARSE_AND_TAG = Collections.unmodifiableSet(new ArraySet<Requirement>(POS_REQUIREMENT, PARSE_REQUIREMENT));
   Set<Requirement> PARSE_TAG_BINARIZED_TREES = Collections.unmodifiableSet(new ArraySet<Requirement>(POS_REQUIREMENT, PARSE_REQUIREMENT, BINARIZED_TREES_REQUIREMENT));
 
