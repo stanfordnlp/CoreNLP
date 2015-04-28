@@ -430,6 +430,12 @@ public class OpenIE implements Annotator {
       System.err.println("ERROR: If you specify custom annotators, you must at least include 'openie'");
       System.exit(1);
     }
+    // Copy properties that are missing the 'openie' prefix
+    for (Object key : new HashSet<>(props.keySet())) {
+      if (!key.toString().startsWith("openie.")) {
+        props.setProperty("openie." + key.toString(), props.getProperty(key.toString()));
+      }
+    }
 
     // Create the pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
