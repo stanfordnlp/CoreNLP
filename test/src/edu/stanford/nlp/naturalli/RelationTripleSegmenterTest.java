@@ -4,7 +4,6 @@ import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.naturalli.RelationTripleSegmenter;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.trees.GrammaticalRelation;
 import junit.framework.TestCase;
@@ -219,6 +218,17 @@ public class RelationTripleSegmenterTest extends TestCase {
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tcats\tare\tcute", extraction.get().toString());
+  }
+
+  public void testPropagateCSubj() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\ttruffles\t2\tnsubj\n" +
+        "2\tpicked\t4\tcsubj\n" +
+        "3\tare\t4\tcop\n" +
+        "4\ttasty\t0\troot\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\ttruffles picked\tare\ttasty", extraction.get().toString());
   }
 
   public void testHeWasInaugurated() {

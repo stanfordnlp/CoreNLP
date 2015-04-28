@@ -306,12 +306,14 @@ public class RelationTripleSegmenter {
   /** A set of valid arcs denoting a subject entity we are interested in */
   private final Set<String> VALID_SUBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod:poss"); add("nmod:tmod"); add("expl");
+    add("nsubj");
   }});
 
   /** A set of valid arcs denoting an object entity we are interested in */
   private final Set<String> VALID_OBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod"); add("nsubj"); add("nmod:*"); add("nmod:poss");
-    add("nmod:tmod"); add("conj:and"); add("advmod"); add("acl"); add("advcl");
+    add("nmod:tmod"); add("conj:and"); add("advmod"); add("acl");
+    // add("advcl"); // Born in Hawaii, Obama is a US citizen; citizen -advcl-> Born.
   }});
 
   /** A set of valid arcs denoting an entity we are interested in */
@@ -561,8 +563,21 @@ public class RelationTripleSegmenter {
           objNoopArc = Optional.ofNullable(m.getRelnString("objIgnored"));
         }
 
+        // Find the subject
+        // By default, this is just the subject node; but, occasionally we want to follow a
+        // csubj clause to find the real subject.
+        IndexedWord subject = m.getNode("subject");
+        /*
+        if (parse.outDegree(subject) == 1) {
+          SemanticGraphEdge edge =  parse.outgoingEdgeIterator(subject).next();
+          if (edge.getRelation().toString().contains("subj")) {
+            subject = edge.getDependent();
+          }
+        }
+        */
+
         // Subject+Object
-        Optional<List<CoreLabel>> subjectSpan = getValidSubjectChunk(parse, m.getNode("subject"), subjNoopArc);
+        Optional<List<CoreLabel>> subjectSpan = getValidSubjectChunk(parse, subject, subjNoopArc);
         Optional<List<CoreLabel>> objectSpan = getValidObjectChunk(parse, object, objNoopArc);
         // Create relation
         if (subjectSpan.isPresent() && objectSpan.isPresent() &&
