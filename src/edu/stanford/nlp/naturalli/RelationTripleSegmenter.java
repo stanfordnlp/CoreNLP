@@ -65,16 +65,43 @@ public class RelationTripleSegmenter {
   /**
    * A set of nominal patterns using dependencies, that don't require being in a coherent clause, but do require NER information.
    */
-  private final List<SemgrexPattern> NOUN_DEPENDENCY_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
-    // { Durin, son of Thorin }
-    add(SemgrexPattern.compile("{}=subject >appos ( {}=relation >/nmod:.*/=relaux {}=object)"));
-    // { Thorin's son, Durin }
-    add(SemgrexPattern.compile("{}=relation >/nmod:.*/=relaux {}=subject >appos {}=object"));
-    //  { President Obama }
-    add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/amod|compound/=arc {ner:/..+/}=object"));
-    // { Chris Manning of Stanford }
-    add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/nmod:.*/=relation {ner:/..+/}=object"));
-  }});
+  private final List<SemgrexPattern> NOUN_DEPENDENCY_PATTERNS;
+
+
+  /**
+   * Create a new relation triple segmenter.
+   *
+   * @param allowNominalsWithoutNER If true, extract all nominal relations and not just those which are warranted based on
+   *                                named entity tags. For most practical applications, this greatly over-produces trivial triples.
+   */
+  public RelationTripleSegmenter(boolean allowNominalsWithoutNER) {
+    NOUN_DEPENDENCY_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
+      // { Durin, son of Thorin }
+      add(SemgrexPattern.compile("{}=subject >appos ( {}=relation >/nmod:.*/=relaux {}=object)"));
+      // { Thorin's son, Durin }
+      add(SemgrexPattern.compile("{}=relation >/nmod:.*/=relaux {}=subject >appos {}=object"));
+      //  { President Obama }
+      if (allowNominalsWithoutNER) {
+        add(SemgrexPattern.compile("{}=subject >/amod/=arc {}=object"));
+      } else {
+        add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/amod|compound/=arc {ner:/..+/}=object"));
+      }
+      // { Chris Manning of Stanford }
+      if (allowNominalsWithoutNER) {
+        add(SemgrexPattern.compile("{}=subject >/nmod:.*/=relation {}=object"));
+      } else {
+        add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/nmod:.*/=relation {ner:/..+/}=object"));
+      }
+    }});
+  }
+
+  /**
+   * @see RelationTripleSegmenter#RelationTripleSegmenter(boolean)
+   */
+  @SuppressWarnings("UnusedDeclaration")
+  public RelationTripleSegmenter() {
+    this(false);
+  }
 
   /**
    * Extract the nominal patterns from this sentence.

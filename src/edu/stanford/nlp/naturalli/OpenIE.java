@@ -67,10 +67,13 @@ public class OpenIE implements Annotator {
   @Execution.Option(name="splitter.threshold", gloss="The minimum threshold for accepting a clause.")
   private double splitterThreshold = 0.1;
 
+  @Execution.Option(name="splitter.disable", gloss="If true, don't run the sentence splitter")
+  private boolean splitterDisable = false;
+
   @Execution.Option(name="max_entailments_per_clause", gloss="The maximum number of entailments allowed per sentence of input.")
   private int entailmentsPerSentence = 100;
 
-  @Execution.Option(name="ignoreaffinity", gloss="If true, don't use the affinity models for dobj and pp attachment.")
+  @Execution.Option(name="ignore_affinity", gloss="If true, don't use the affinity models for dobj and pp attachment.")
   private boolean ignoreAffinity = false;
 
   @Execution.Option(name="affinity_models", gloss="The directory (or classpath directory) containing the affinity models for pp/obj attachments.")
@@ -82,9 +85,12 @@ public class OpenIE implements Annotator {
   @Execution.Option(name="triple.strict", gloss="If true, only generate triples if the entire fragment has been consumed.")
   private boolean consumeAll = true;
 
+  @Execution.Option(name="triple.all_nominals", gloss="If true, generate not only named entity nominal relations.")
+  private boolean allNominals = false;
+
   private final NaturalLogicWeights weights;
 
-  public final ClauseSplitter clauseSplitter;
+  public final Optional<ClauseSplitter> clauseSplitter;
 
   public final ForwardEntailer forwardEntailer;
 
@@ -106,11 +112,15 @@ public class OpenIE implements Annotator {
 
     // Create the clause splitter
     try {
-      if (noModel) {
-        System.err.println("Not loading a splitter model");
-        clauseSplitter = ClauseSplitterSearchProblem::new;
+      if (splitterDisable) {
+        clauseSplitter = Optional.empty();
       } else {
-        clauseSplitter = ClauseSplitter.load(splitterModel);
+        if (noModel) {
+          System.err.println("Not loading a splitter model");
+          clauseSplitter = Optional.of(ClauseSplitterSearchProblem::new);
+        } else {
+          clauseSplitter = Optional.of(ClauseSplitter.load(splitterModel));
+        }
       }
     } catch (IOException e) {
       throw new RuntimeIOException("Could not load clause splitter model at " + splitterModel + ": " + e.getMessage());
@@ -125,12 +135,16 @@ public class OpenIE implements Annotator {
     forwardEntailer = new ForwardEntailer(entailmentsPerSentence, weights);
 
     // Create the relation segmenter
-    segmenter = new RelationTripleSegmenter();
+    segmenter = new RelationTripleSegmenter(allNominals);
   }
 
+  @SuppressWarnings("unchecked")
   public List<SentenceFragment> clausesInSentence(SemanticGraph tree) {
-    return clauseSplitter.apply(tree).topClauses(splitterThreshold);
-
+    if (clauseSplitter.isPresent()) {
+      return clauseSplitter.get().apply(tree).topClauses(splitterThreshold);
+    } else {
+      return Collections.EMPTY_LIST;
+    }
   }
 
   public List<SentenceFragment> clausesInSentence(CoreMap sentence) {

@@ -30,7 +30,16 @@ public class RelationTripleSegmenterTest extends TestCase {
   }
 
   protected Optional<RelationTriple> mkExtraction(String conll) {
-    return mkExtraction(conll, 0);
+    return mkExtraction(conll, 0, false);
+  }
+
+  protected Optional<RelationTriple> mkExtraction(String conll, boolean allNominals) {
+    return mkExtraction(conll, 0, allNominals);
+  }
+
+  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex) {
+    return mkExtraction(conll, listIndex, false);
+
   }
 
   /**
@@ -39,7 +48,7 @@ public class RelationTripleSegmenterTest extends TestCase {
    *   word_index  word  parent_index  incoming_relation
    * </pre>
    */
-  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex) {
+  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex, boolean allNominals) {
     List<CoreLabel> sentence = new ArrayList<>();
     SemanticGraph tree = new SemanticGraph();
     for (String line : conll.split("\n")) {
@@ -81,11 +90,11 @@ public class RelationTripleSegmenterTest extends TestCase {
       i += 1;
     }
     // Run extractor
-    Optional<RelationTriple> segmented = new RelationTripleSegmenter().segment(tree, Optional.empty());
+    Optional<RelationTriple> segmented = new RelationTripleSegmenter(allNominals).segment(tree, Optional.empty());
     if (segmented.isPresent() && listIndex == 0) {
       return segmented;
     }
-    List<RelationTriple> extracted = new RelationTripleSegmenter().extract(tree, sentence);
+    List<RelationTriple> extracted = new RelationTripleSegmenter(allNominals).extract(tree, sentence);
     if (extracted.size() > listIndex) {
       return Optional.of(extracted.get(listIndex - (segmented.isPresent() ? 1 : 0)));
     }
@@ -647,5 +656,22 @@ public class RelationTripleSegmenterTest extends TestCase {
     extraction = mkExtraction(conll, 2);
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tRometty\tis CEO of\tIBM", extraction.get().toString());
+  }
+
+  public void testAllNominals() {
+    String conll =
+        "1\tfierce\t2\tamod\n" +
+        "2\tlions\t0\troot\n" +
+        "3\tof\t4\tcase\n" +
+        "4\tNarnia\t2\tnmod:of\n";
+    // Positive case
+    Optional<RelationTriple> extraction = mkExtraction(conll, 0, true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tlions\tis\tfierce", extraction.get().toString());
+    extraction = mkExtraction(conll, 1, true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tlions\tis of\tNarnia", extraction.get().toString());
+    // Negative case
+    assertFalse(mkExtraction(conll, false).isPresent());
   }
 }
