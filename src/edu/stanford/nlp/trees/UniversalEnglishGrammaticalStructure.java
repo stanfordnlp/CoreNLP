@@ -571,8 +571,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * 
    */
   private static GrammaticalRelation getCaseMarkedRelation(GrammaticalRelation reln, String relationName) {
-    GrammaticalRelation newReln = null;
-    
+    GrammaticalRelation newReln = reln;
+
     if (reln.getSpecific() != null) {
       reln = reln.getParent();
     }
