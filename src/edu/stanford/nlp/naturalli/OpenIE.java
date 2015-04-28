@@ -134,7 +134,7 @@ public class OpenIE implements Annotator {
   }
 
   public List<SentenceFragment> clausesInSentence(CoreMap sentence) {
-    return clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class));
+    return clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class));
   }
 
   @SuppressWarnings("unchecked")
@@ -235,7 +235,7 @@ public class OpenIE implements Annotator {
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_LIST);
     } else {
-      SemanticGraph parse = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+      SemanticGraph parse = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       if (parse == null) {
         parse = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       }
@@ -250,7 +250,7 @@ public class OpenIE implements Annotator {
       } else {
         List<SentenceFragment> clauses = clausesInSentence(sentence);
         List<SentenceFragment> fragments = entailmentsFromClauses(clauses);
-//        fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), false));
+//        fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class), false));
         extractions.addAll(relationsInFragments(fragments, sentence, canonicalMentionMap));
         sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
         sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, extractions);

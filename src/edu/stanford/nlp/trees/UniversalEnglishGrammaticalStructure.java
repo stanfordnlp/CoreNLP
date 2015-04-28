@@ -1378,14 +1378,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         }
         
         IndexedWord caseGov = reln1 == CASE_MARKER ? gov1 : gov2;
-        IndexedWord caseGovGov = sg.getParent(caseGov);
-        
-        
-        /* Prevent cycles. */
-        if (caseGovGov.equals(w1) || caseGovGov.equals(w2)) {
-          continue;
-        }
-        
         sg.removeEdge(edge1);
         sg.removeEdge(edge2);
         
@@ -1431,13 +1423,6 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         }
         
         IndexedWord caseGov = reln3 == CASE_MARKER ? gov3 : gov1;
-        IndexedWord caseGovGov = sg.getParent(caseGov);
-        
-        /* Prevent cycles. */
-        if (caseGovGov.equals(w1) || caseGovGov.equals(w2) || caseGovGov.equals(w3)) {
-          continue;
-        }
-        
         sg.removeEdge(edge1);
         sg.removeEdge(edge2);
         sg.removeEdge(edge3);

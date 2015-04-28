@@ -154,6 +154,8 @@ public class Util {
    * @return A list of extra edges, which are valid but were removed.
    */
   public static List<SemanticGraphEdge> cleanTree(SemanticGraph tree) {
+    assert !isCyclic(tree);
+
     // Clean nodes
     List<IndexedWord> toDelete = new ArrayList<>();
     for (IndexedWord vertex : tree.vertexSet()) {
@@ -293,6 +295,35 @@ public class Util {
     }
   }
 
+
+  /**
+   * Determine if a tree is cyclic.
+   * @param tree The tree to check.
+   * @return True if the tree has at least once cycle in it.
+   */
+  public static boolean isCyclic(SemanticGraph tree) {
+    for (IndexedWord vertex : tree.vertexSet()) {
+      if (tree.getRoots().contains(vertex)) {
+        continue;
+      }
+      IndexedWord node = tree.incomingEdgeIterator(vertex).next().getGovernor();
+      Set<IndexedWord> seen = new HashSet<>();
+      seen.add(vertex);
+      while (node != null) {
+        if (seen.contains(node)) {
+          return true;
+        }
+        seen.add(node);
+        if (tree.incomingEdgeIterator(node).hasNext()) {
+          node = tree.incomingEdgeIterator(node).next().getGovernor();
+        } else {
+          node = null;
+        }
+      }
+    }
+    return false;
+  }
+
   /**
    * A little utility function to make sure a SemanticGraph is a tree.
    * @param tree The tree to check.
@@ -335,6 +366,12 @@ public class Util {
         }
       }
     }
+
+    // Check for cycles
+    if (isCyclic(tree)) {
+      return false;
+    }
+
     // Check topological sort -- sometimes fails?
 //    try {
 //      tree.topologicalSort();
