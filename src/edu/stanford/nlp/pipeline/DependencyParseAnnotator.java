@@ -87,7 +87,7 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
 
   @Override
   public Set<Requirement> requirementsSatisfied() {
-    return new HashSet<>();
+    return Collections.singleton(DEPENDENCY_REQUIREMENT);
   }
 
   public static String signature(String annotatorName, Properties props) {
