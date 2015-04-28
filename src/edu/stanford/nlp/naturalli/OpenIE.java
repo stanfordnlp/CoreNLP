@@ -65,7 +65,7 @@ public class OpenIE implements Annotator {
   private boolean noModel = false;
 
   @Execution.Option(name="splitter.threshold", gloss="The minimum threshold for accepting a clause.")
-  private double splitterThreshold = 0.1;
+  private double splitterThreshold = 0.5;
 
   @Execution.Option(name="max_entailments_per_clause", gloss="The maximum number of entailments allowed per sentence of input.")
   private int entailmentsPerSentence = 100;
