@@ -1382,7 +1382,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         
         
         /* Prevent cycles. */
-        if (caseGovGov != null && (caseGovGov.equals(w1) || caseGovGov.equals(w2))) {
+        if (caseGovGov.equals(w1) || caseGovGov.equals(w2)) {
           continue;
         }
         
@@ -1434,7 +1434,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         IndexedWord caseGovGov = sg.getParent(caseGov);
         
         /* Prevent cycles. */
-        if (caseGovGov != null && (caseGovGov.equals(w1) || caseGovGov.equals(w2) || caseGovGov.equals(w3))) {
+        if (caseGovGov.equals(w1) || caseGovGov.equals(w2) || caseGovGov.equals(w3)) {
           continue;
         }
         
