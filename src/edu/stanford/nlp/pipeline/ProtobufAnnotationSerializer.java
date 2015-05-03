@@ -8,6 +8,7 @@ import edu.stanford.nlp.ie.machinereading.structure.ExtractionObject;
 import edu.stanford.nlp.ie.machinereading.structure.MachineReadingAnnotations.*;
 import edu.stanford.nlp.ie.machinereading.structure.RelationMention;
 import edu.stanford.nlp.ie.machinereading.structure.Span;
+import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -369,6 +370,11 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       builder.setParagraph(getAndRegister(sentence, keysToSerialize, TokensAnnotation.class).get(0).get(ParagraphAnnotation.class));
     }
     if (sentence.containsKey(NumerizedTokensAnnotation.class)) { builder.setHasNumerizedTokensAnnotation(true); } else { builder.setHasNumerizedTokensAnnotation(false); }
+    if (sentence.containsKey(NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
+      for (RelationTriple triple : getAndRegister(sentence, keysToSerialize, NaturalLogicAnnotations.RelationTriplesAnnotation.class)) {
+        builder.addOpenieTriple(toProto(triple));
+      }
+    }
     // Non-default annotators
     if (sentence.containsKey(EntityMentionsAnnotation.class)) {
       builder.setHasRelationAnnotations(true);
@@ -484,7 +490,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param graph The dependency graph to save.
    * @return A protocol buffer message corresponding to this parse.
    */
-  public CoreNLPProtos.DependencyGraph toProto(SemanticGraph graph) {
+  public static CoreNLPProtos.DependencyGraph toProto(SemanticGraph graph) {
     CoreNLPProtos.DependencyGraph.Builder builder = CoreNLPProtos.DependencyGraph.newBuilder();
     // Roots
     Set<Integer> rootSet = new IdentityHashSet<>();
@@ -670,6 +676,25 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
         .build();
   }
 
+  /**
+   * Return a Protobuf OpenIETriple from a RelationTriple.
+   */
+  public static CoreNLPProtos.OpenIETriple toProto(RelationTriple triple) {
+    CoreNLPProtos.OpenIETriple.Builder builder = CoreNLPProtos.OpenIETriple.newBuilder()
+        .setSubject(triple.subjectGloss())
+        .setRelation(triple.relationGloss())
+        .setObject(triple.objectGloss())
+        .setConfidence(triple.confidence)
+        .setSubjectSpan(CoreNLPProtos.Span.newBuilder().setBegin(triple.subjectTokenSpan().first).setEnd(triple.subjectTokenSpan().second).build())
+        .setRelationSpan(CoreNLPProtos.Span.newBuilder().setBegin(triple.relationTokenSpan().first).setEnd(triple.relationTokenSpan().second).build())
+        .setObjectSpan(CoreNLPProtos.Span.newBuilder().setBegin(triple.objectTokenSpan().first).setEnd(triple.objectTokenSpan().second).build());
+    Optional<SemanticGraph> treeOptional = triple.asDependencyTree();
+    if (treeOptional.isPresent()) {
+      builder.setTree(toProto(treeOptional.get()));
+    }
+    return builder.build();
+  }
+
 
   /**
    * Convert a quote object to a protocol buffer.
@@ -744,13 +769,33 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    */
   public CoreMap fromProto(CoreNLPProtos.Sentence proto) {
     CoreMap lossySentence = fromProtoNoTokens(proto);
-    // Add tokens -- missing by default as they're populated as sublists of the
-    // document tokens
+    // Add tokens -- missing by default as they're populated as sublists of the document tokens
     List<CoreLabel> tokens = new ArrayList<CoreLabel>();
     for (CoreNLPProtos.Token token : proto.getTokenList()) {
       tokens.add(fromProto(token));
     }
     lossySentence.set(TokensAnnotation.class, tokens);
+    // Add dependencies
+    if (proto.hasBasicDependencies()) {
+      lossySentence.set(BasicDependenciesAnnotation.class, fromProto(proto.getBasicDependencies(), tokens, null));
+    }
+    if (proto.hasCollapsedDependencies()) {
+      lossySentence.set(CollapsedDependenciesAnnotation.class, fromProto(proto.getCollapsedDependencies(), tokens, null));
+    }
+    if (proto.hasCollapsedCCProcessedDependencies()) {
+      lossySentence.set(CollapsedCCProcessedDependenciesAnnotation.class, fromProto(proto.getCollapsedCCProcessedDependencies(), tokens, null));
+    }
+    if (proto.hasAlternativeDependencies()) {
+      lossySentence.set(AlternativeDependenciesAnnotation.class, fromProto(proto.getAlternativeDependencies(), tokens, null));
+    }
+    // Add relation triples
+    if (proto.getOpenieTripleCount() > 0) {
+      List<RelationTriple> triples = new ArrayList<>();
+      for (CoreNLPProtos.OpenIETriple triple : proto.getOpenieTripleList()) {
+        triples.add(fromProto(triple, tokens, null));
+      }
+      lossySentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, triples);
+    }
     // Add text -- missing by default as it's populated from the Document
     lossySentence.set(TextAnnotation.class, recoverOriginalText(tokens, proto));
     // Return
@@ -896,12 +941,12 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
     }
     if (!corefChains.isEmpty()) { ann.set(CorefChainAnnotation.class, corefChains); }
 
-    // Set dependency graphs
-    // We need to wait until here, since this is the first time we see tokens
+    // Set things in the sentence that need a document context.
     for (int i = 0; i < proto.getSentenceCount(); ++i) {
       CoreNLPProtos.Sentence sentence = proto.getSentenceList().get(i);
       CoreMap map = sentences.get(i);
       List<CoreLabel> sentenceTokens = map.get(TokensAnnotation.class);
+      // Set dependency graphs
       if (sentence.hasBasicDependencies()) {
         map.set(BasicDependenciesAnnotation.class, fromProto(sentence.getBasicDependencies(), sentenceTokens, docid));
       }
@@ -913,6 +958,14 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
       if (sentence.hasAlternativeDependencies()) {
         map.set(AlternativeDependenciesAnnotation.class, fromProto(sentence.getAlternativeDependencies(), sentenceTokens, docid));
+      }
+      // Set relation triples
+      if (sentence.getOpenieTripleCount() > 0) {
+        List<RelationTriple> triples = new ArrayList<>();
+        for (CoreNLPProtos.OpenIETriple triple : sentence.getOpenieTripleList()) {
+          triples.add(fromProto(triple, sentenceTokens, docid));
+        }
+        map.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, triples);
       }
       // Redo some light annotation
       if ( map.containsKey(TokensAnnotation.class) &&
@@ -1045,7 +1098,7 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
    * @param docid A docid must be supplied, as it is not saved by the serialized representation.
    * @return A semantic graph corresponding to the saved object, on the provided sentence.
    */
-  private SemanticGraph fromProto(CoreNLPProtos.DependencyGraph proto, List<CoreLabel> sentence, String docid) {
+  public static SemanticGraph fromProto(CoreNLPProtos.DependencyGraph proto, List<CoreLabel> sentence, String docid) {
     SemanticGraph graph = new SemanticGraph();
 
     // first construct the actual nodes; keep them indexed by their index
@@ -1114,6 +1167,30 @@ public class ProtobufAnnotationSerializer extends AnnotationSerializer {
       }
     }
     return graph;
+  }
+
+
+  /**
+   * Return a  {@link RelationTriple} object from the serialized representation.
+   * This requires a sentence and a docid so that the dependency tree can be accurately rebuilt.
+   *
+   * @param proto The serialized relation triples.
+   * @param sentence The sentence the triples were extracted from.
+   * @param docid The id of the document we are de-serializing.
+   *
+   * @return A relation triple as a Java object, corresponding to the seriaized proto.
+   */
+  public static RelationTriple fromProto(CoreNLPProtos.OpenIETriple proto, List<CoreLabel> sentence, String docid) {
+    List<CoreLabel> subject = sentence.subList(proto.getSubjectSpan().getBegin(), proto.getSubjectSpan().getEnd());
+    List<CoreLabel> relation = sentence.subList(proto.getRelationSpan().getBegin(), proto.getRelationSpan().getEnd());
+    List<CoreLabel> object = sentence.subList(proto.getRelationSpan().getBegin(), proto.getRelationSpan().getEnd());
+    double confidence = proto.getConfidence();
+    if (proto.hasTree()) {
+      SemanticGraph tree = fromProto(proto.getTree(), sentence, docid);
+      return new RelationTriple.WithTree(subject, relation, object, tree, confidence);
+    } else {
+      return new RelationTriple(subject, relation, object, confidence);
+    }
   }
 
   /**

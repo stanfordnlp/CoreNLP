@@ -4,7 +4,6 @@ import edu.stanford.nlp.ie.machinereading.structure.Span;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
-import edu.stanford.nlp.naturalli.Util;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.*;
@@ -132,6 +131,10 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
 
   public Pair<Integer, Integer> subjectTokenSpan() {
     return getSpan(subject, x -> x.index() - 1, x -> x.index() - 1);
+  }
+
+  public Pair<Integer, Integer> relationTokenSpan() {
+    return getSpan(relation, x -> x.index() - 1, x -> x.index() - 1);
   }
 
   public Pair<Integer, Integer> objectTokenSpan() {
