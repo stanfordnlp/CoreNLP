@@ -36,6 +36,7 @@ public class Document {
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
   }};
+
   /**
    * The backend to use for constructing {@link edu.stanford.nlp.pipeline.AnnotatorFactory}s.
    */

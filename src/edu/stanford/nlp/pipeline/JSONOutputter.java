@@ -80,7 +80,7 @@ public class JSONOutputter extends AnnotationOutputter {
 
           // (add tokens)
           if (sentence.get(CoreAnnotations.TokensAnnotation.class) != null) {
-            l2.set("tokens", doc.get(CoreAnnotations.TokensAnnotation.class).stream().map(token -> (Consumer<Writer>) (Writer l3) -> {
+            l2.set("tokens", sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(token -> (Consumer<Writer>) (Writer l3) -> {
               // Add a single token
               l3.set("index", token.index());
               l3.set("word", token.word());
