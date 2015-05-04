@@ -80,10 +80,15 @@ public class SentenceAlgorithms {
     Consumer<Character> updateExpectation = coarseTag -> {
       if (coarseTag == 'N') {
         expectNextTag.clear();
+        expectNextTag.add('N');
         expectNextTag.add('X');
         expectNextLemma.clear();
         expectNextLemma.add("of");
         expectNextLemma.add("'s");
+      } else if (coarseTag == 'G') {
+        expectNextTag.clear();
+        expectNextTag.add('N');  // 'water freezing' is fishy, but 'freezing water' is ok.
+        expectNextLemma.clear();
       } else if (coarseTag == 'X') {
         expectNextTag.clear();
         expectNextTag.add('X');
@@ -128,10 +133,14 @@ public class SentenceAlgorithms {
       } else if (tag.startsWith("POS")) {
         coarseTag = 'Z';
       }
+      // (don't collapse 'ing' nouns)
+      if (coarseTag == 'N' && sentence.word(i).endsWith("ing")) {
+        coarseTag = 'G';
+      }
 
       // Transition
       if (spanBegin < 0 && !sentence.word(i).equals("%") &&
-          (coarseTag == 'N' || coarseTag == 'V' || coarseTag == 'J' || coarseTag == 'X')) {
+          (coarseTag == 'N' || coarseTag == 'V' || coarseTag == 'J' || coarseTag == 'X' || coarseTag == 'G')) {
         // Case: we were not in a span, but we hit a valid start tag.
         spanBegin = i;
         updateExpectation.accept(coarseTag);
@@ -171,7 +180,7 @@ public class SentenceAlgorithms {
           }
           // We may also have started a new span.
           // Check to see if we have started a new span.
-          if (coarseTag == 'N' || coarseTag == 'V' || coarseTag == 'J' || coarseTag == 'X') {
+          if (coarseTag == 'N' || coarseTag == 'V' || coarseTag == 'J' || coarseTag == 'X' || coarseTag == 'G') {
             spanBegin = i;
             updateExpectation.accept(coarseTag);
           } else {
