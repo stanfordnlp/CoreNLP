@@ -102,6 +102,10 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
    */
   public UniversalSemanticHeadFinder(TreebankLanguagePack tlp, boolean noCopulaHead) {
     super(tlp);
+
+    // TODO: reverse the polarity of noCopulaHead
+    this.makeCopulaHead = !noCopulaHead;
+
     ruleChanges();
 
     // make a distinction between auxiliaries and copula verbs to
@@ -115,9 +119,6 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
     if (noCopulaHead) {
       copulars.addAll(Arrays.asList(EnglishPatterns.copularVerbs));
     }
-
-    // TODO: reverse the polarity of noCopulaHead
-    this.makeCopulaHead = !noCopulaHead;
 
     verbalTags = Generics.newHashSet(Arrays.asList(verbTags));
     unambiguousAuxiliaryTags = Generics.newHashSet(Arrays.asList(unambiguousAuxTags));
@@ -151,8 +152,11 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
     nonTerminalInfo.put("SBAR", new String[][]{{"left", "S", "SQ", "SINV", "SBAR", "FRAG", "VP", "WHNP", "WHPP", "WHADVP", "WHADJP", "IN", "DT"}});
     // VP shouldn't be needed in SBAR, but occurs in one buggy tree in PTB3 wsj_1457 and otherwise does no harm
 
-    nonTerminalInfo.put("SQ", new String[][]{{"left", "VP", "SQ", "ADJP", "VB", "VBZ", "VBD", "VBP", "MD", "AUX", "AUXG"}});
-
+    if (makeCopulaHead) {
+      nonTerminalInfo.put("SQ", new String[][]{{"left", "VP", "SQ", "VB", "VBZ", "VBD", "VBP", "MD", "AUX", "AUXG", "ADJP"}});
+    } else {
+      nonTerminalInfo.put("SQ", new String[][]{{"left", "VP", "SQ", "ADJP", "VB", "VBZ", "VBD", "VBP", "MD", "AUX", "AUXG"}});
+    }
 
     // UCP take the first element as head
     nonTerminalInfo.put("UCP", new String[][]{{"left"}});
@@ -179,12 +183,12 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
     nonTerminalInfo.put("PP", new String[][]{{"left", "NP", "S", "SBAR", "SBARQ", "ADVP", "PP", "VP", "ADJP", "FRAG", "UCP", "PRN"}, {"right"}});
 
     nonTerminalInfo.put("WHPP", nonTerminalInfo.get("PP"));
-    
+
     // Special constituent for multi-word expressions
     nonTerminalInfo.put("MWE", new String[][]{{"left"}});
-    
+
     nonTerminalInfo.put("PCONJP", new String[][]{{"left"}});
-    
+
     nonTerminalInfo.put("ADJP", new String[][]{{"left", "$"}, {"rightdis", "NNS", "NN", "NNP", "JJ", "QP", "VBN", "VBG"}, {"left", "ADJP"}, {"rightdis", "JJP", "JJR", "JJS", "DT", "RB", "RBR", "CD", "IN", "VBD"}, {"left", "ADVP", "NP"}});
 
     nonTerminalInfo.put("INTJ", new String[][]{{"rightdis", "NNS", "NN", "NNP"}, {"left"}});
@@ -192,7 +196,7 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
     nonTerminalInfo.put("ADVP", new String[][]{{"rightdis", "RB", "RBR", "RBS", "JJ", "JJR", "JJS"},
         {"rightdis", "RP", "DT", "NN", "CD", "NP", "VBN", "NNP", "CC", "FW", "NNS", "ADJP", "NML"}, {"left"}});
 
-    
+
   }
 
 
