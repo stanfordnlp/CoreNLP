@@ -13,7 +13,11 @@ public class WeightedRVFDataset<L, F> extends RVFDataset<L, F> {
 
   float[] weights = new float[16];
 
-  public WeightedRVFDataset(Index<L> labelIndex, int[] trainLabels, Index<F> featureIndex, int[][] trainData, double[][] trainValues, float[] trainWeights) {
+  public WeightedRVFDataset() {
+    super();
+  }
+
+  protected WeightedRVFDataset(Index<L> labelIndex, int[] trainLabels, Index<F> featureIndex, int[][] trainData, double[][] trainValues, float[] trainWeights) {
     super(labelIndex, trainLabels, featureIndex, trainData, trainValues);
     this.weights = trainWeights;
   }
