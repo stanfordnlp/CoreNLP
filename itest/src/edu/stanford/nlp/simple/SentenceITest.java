@@ -1,17 +1,21 @@
 package edu.stanford.nlp.simple;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.naturalli.Operator;
-import edu.stanford.nlp.naturalli.OperatorSpec;
-import edu.stanford.nlp.naturalli.Polarity;
+import edu.stanford.nlp.naturalli.*;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.StringUtils;
 import org.junit.Test;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 
 import static org.junit.Assert.*;
 
@@ -163,5 +167,23 @@ public class SentenceITest {
     Sentence loaded = Sentence.deserialize(in);
     assertEquals(orig, loaded);
     in.close();
+  }
+
+  @Test
+  public void testFragmentConstructor() {
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties(){{
+      setProperty("annotators", "tokenize,ssplit,pos,depparse,natlog,openie");
+    }});
+    Annotation ann = new Annotation("The blue cat eats mice.");
+    pipeline.annotate(ann);
+    CoreMap map = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+
+    for (SentenceFragment fragment : map.get(NaturalLogicAnnotations.EntailedSentencesAnnotation.class)) {
+      Sentence s = new Sentence(fragment);
+      assertEquals(
+          StringUtils.join(fragment.words.stream().map(CoreLabel::word), " "),
+          StringUtils.join(s.words(), " "));
+    }
+
   }
 }

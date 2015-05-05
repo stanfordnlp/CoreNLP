@@ -649,12 +649,8 @@ public class UniversalEnglishGrammaticalRelations {
    */
   public static final GrammaticalRelation RELATIVE =
     new GrammaticalRelation(Language.UniversalEnglish, "rel", "relative",
-        COMPLEMENT, "SBAR|SBARQ", tregexCompiler,
-            "SBAR < (WHNP=target !< WRB) < (S < NP < (VP [ < SBAR | <+(VP) (PP <- IN|TO) | < (S < (VP < TO)) ] ))",
-
-            // Rule for copular Wh-questions, e.g. "What am I good at?"
-            "SBARQ < (WHNP=target !< WRB !<# (/^NN/ < " + timeWordRegex + ")) <+(SQ|SINV) (/^(?:VB|AUX)/ < " + copularWordRegex + " !$++ VP)");
-
+        COMPLEMENT, "SBAR", tregexCompiler,
+            "SBAR < (WHNP=target !< WRB) < (S < NP < (VP [ < SBAR | <+(VP) (PP <- IN|TO) | < (S < (VP < TO)) ] ))");
 
   /**
    * The PREPOSITION grammatical relation is only here as a temporary

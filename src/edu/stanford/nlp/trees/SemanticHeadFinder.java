@@ -129,10 +129,6 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
    */
   public SemanticHeadFinder(TreebankLanguagePack tlp, boolean noCopulaHead) {
     super(tlp);
-
-    // TODO: reverse the polarity of noCopulaHead
-    this.makeCopulaHead = !noCopulaHead;
-
     ruleChanges();
 
     // make a distinction between auxiliaries and copula verbs to
@@ -146,6 +142,9 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     if (noCopulaHead) {
       copulars.addAll(Arrays.asList(EnglishPatterns.copularVerbs));
     }
+
+    // TODO: reverse the polarity of noCopulaHead
+    this.makeCopulaHead = !noCopulaHead;
 
     verbalTags = Generics.newHashSet(Arrays.asList(verbTags));
     unambiguousAuxiliaryTags = Generics.newHashSet(Arrays.asList(unambiguousAuxTags));
@@ -180,11 +179,8 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
     nonTerminalInfo.put("SBAR", new String[][]{{"left", "S", "SQ", "SINV", "SBAR", "FRAG", "VP", "WHNP", "WHPP", "WHADVP", "WHADJP", "IN", "DT"}});
     // VP shouldn't be needed in SBAR, but occurs in one buggy tree in PTB3 wsj_1457 and otherwise does no harm
 
-    if (makeCopulaHead) {
-      nonTerminalInfo.put("SQ", new String[][]{{"left", "VP", "SQ", "VB", "VBZ", "VBD", "VBP", "MD", "AUX", "AUXG", "ADJP"}});
-    } else {
-      nonTerminalInfo.put("SQ", new String[][]{{"left", "VP", "SQ", "ADJP", "VB", "VBZ", "VBD", "VBP", "MD", "AUX", "AUXG"}});
-    }
+    nonTerminalInfo.put("SQ", new String[][]{{"left", "VP", "SQ", "ADJP", "VB", "VBZ", "VBD", "VBP", "MD", "AUX", "AUXG"}});
+
 
     // UCP take the first element as head
     nonTerminalInfo.put("UCP", new String[][]{{"left"}});

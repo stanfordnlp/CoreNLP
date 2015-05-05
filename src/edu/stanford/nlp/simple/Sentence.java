@@ -5,14 +5,15 @@ import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.naturalli.OperatorSpec;
 import edu.stanford.nlp.naturalli.Polarity;
+import edu.stanford.nlp.naturalli.SentenceFragment;
+import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.Quadruple;
+import edu.stanford.nlp.util.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -134,6 +135,45 @@ public class Sentence {
   protected Sentence(Document doc, CoreMap sentence) {
     this(doc, doc.serializer.toProto(sentence).toBuilder());
     this.impl.setText(sentence.get(CoreAnnotations.TextAnnotation.class));
+  }
+
+  /**
+   * Convert a CoreMap into a simple Sentence object.
+   * Note that this is a copy operation -- the implementing CoreMap will not be updated, and all of its
+   * contents are copied over to the protocol buffer format backing the {@link Sentence} object.
+   *
+   * @param sentence The CoreMap representation of the sentence.
+   */
+  public Sentence(CoreMap sentence) {
+    this(new Document(new Annotation(sentence.get(CoreAnnotations.TextAnnotation.class)) {{
+      set(CoreAnnotations.SentencesAnnotation.class, Collections.singletonList(sentence));
+    }}), sentence);
+  }
+
+  /**
+   * <p>
+   *   Convert a sentence fragment (i.e., entailed sentence) into a simple sentence object.
+   *   Like {@link Sentence#Sentence(CoreMap)}, this copies the information in the fragment into the underlying
+   *   protobuf backed format.
+   * </p>
+   *
+   * @param sentence The sentence fragment to convert.
+   */
+  public Sentence(SentenceFragment sentence) {
+    this(new ArrayCoreMap(32) {{
+      set(CoreAnnotations.TokensAnnotation.class, sentence.words);
+      set(CoreAnnotations.TextAnnotation.class, StringUtils.join(sentence.words.stream().map(CoreLabel::originalText), " "));
+      if (sentence.words.isEmpty()) {
+        set(CoreAnnotations.TokenBeginAnnotation.class, 0);
+        set(CoreAnnotations.TokenEndAnnotation.class, 0);
+      } else {
+        set(CoreAnnotations.TokenBeginAnnotation.class, sentence.words.get(0).get(CoreAnnotations.IndexAnnotation.class));
+        set(CoreAnnotations.TokenEndAnnotation.class, sentence.words.get(sentence.words.size() - 1).get(CoreAnnotations.IndexAnnotation.class) + 1);
+      }
+      set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, sentence.parseTree);
+      set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, sentence.parseTree);
+      set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, sentence.parseTree);
+    }});
   }
 
   /**
