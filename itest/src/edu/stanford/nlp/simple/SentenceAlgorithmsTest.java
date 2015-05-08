@@ -5,8 +5,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -15,7 +13,7 @@ import static org.junit.Assert.*;
  *
  * @author Gabor Angeli
  */
-public class SentenceAlgorithmsITest {
+public class SentenceAlgorithmsTest {
 
   @Test
   public void testKeyphrases() throws IOException {
@@ -102,36 +100,5 @@ public class SentenceAlgorithmsITest {
     assertEquals(1, s.algorithms().headOfSpan(new Span(0, 3)));
     assertEquals(7, s.algorithms().headOfSpan(new Span(5, 8)));
     assertEquals(2, s.algorithms().headOfSpan(new Span(2, 8)));
-  }
-
-  @Test
-  public void testAllSpans() throws IOException {
-    Sentence s = new Sentence("a b c d");
-    Iterator<List<String>> iter = s.algorithms().allSpans(Sentence::words).iterator();
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("a"); add("b"); add("c"); add("d"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("a"); add("b"); add("c"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("b"); add("c"); add("d"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("a"); add("b"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("b"); add("c"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("c"); add("d"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("a"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("b"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("c"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("d"); }}, iter.next());
-    assertFalse(iter.hasNext());
-  }
-
-  @Test
-  public void testAllSpansLimited() throws IOException {
-    Sentence s = new Sentence("a b c d");
-    Iterator<List<String>> iter = s.algorithms().allSpans(Sentence::words, 2).iterator();
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("a"); add("b"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("b"); add("c"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("c"); add("d"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("a"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("b"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("c"); }}, iter.next());
-    assertTrue(iter.hasNext()); assertEquals(new ArrayList<String>(){{add("d"); }}, iter.next());
-    assertFalse(iter.hasNext());
   }
 }

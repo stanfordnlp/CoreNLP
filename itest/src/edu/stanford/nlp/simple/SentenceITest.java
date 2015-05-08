@@ -169,7 +169,6 @@ public class SentenceITest {
     in.close();
   }
 
-  /*
   @Test
   public void testFragmentConstructor() {
     StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties(){{
@@ -185,6 +184,6 @@ public class SentenceITest {
           StringUtils.join(fragment.words.stream().map(CoreLabel::word), " "),
           StringUtils.join(s.words(), " "));
     }
+
   }
-  */
 }
