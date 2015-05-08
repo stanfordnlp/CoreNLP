@@ -257,6 +257,52 @@ public class SentenceAlgorithms {
   }
 
   /**
+   * Return all the spans of a sentence. So, for example, a sentence "a b c" would return:
+   * [a], [b], [c], [a b], [b c], [a b c].
+   *
+   * @param selector The function to apply to each token. For example, {@link Sentence#words}.
+   *                 For that example, you can use <code>allSpans(Sentence::words)</code>.
+   * @param maxLength The maximum length of the spans to extract. The default to extract all spans
+   *                  is to set this to <code>sentence.length()</code>.
+   * @param <E> The type of the element we are getting.
+   *
+   * @return A streaming iterable of spans for this sentence.
+   */
+  public <E> Iterable<List<E>> allSpans(Function<Sentence, List<E>> selector, int maxLength) {
+    return () -> new Iterator<List<E>>() {
+      private int length = maxLength > sentence.length() ? sentence.length() : maxLength;
+      private int start = 0;
+      @Override
+      public boolean hasNext() {
+        return length > 0;
+      }
+      @Override
+      public List<E> next() {
+        // Get the term
+        List<E> rtn = selector.apply(sentence).subList(start, start + length);
+        // Update the state
+        start += 1;
+        if (start + length > sentence.length()) {
+          length -= 1;
+          start = 0;
+        }
+        // Return
+        return rtn;
+      }
+    };
+  }
+
+  /** @see SentenceAlgorithms#allSpans(Function, int) */
+  public <E> Iterable<List<E>> allSpans(Function<Sentence, List<E>> selector) {
+    return allSpans(selector, sentence.length());
+  }
+
+  /** @see SentenceAlgorithms#allSpans(Function, int) */
+  public Iterable<List<String>> allSpans() {
+    return allSpans(Sentence::words, sentence.length());
+  }
+
+  /**
    * Select the most common element of the given type in the given span.
    * This is useful for, e.g., finding the most likely NER span of a given span, or the most
    * likely POS tag of a given span.
