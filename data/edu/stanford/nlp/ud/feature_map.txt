@@ -10,9 +10,6 @@
 *	JJ	Degree=Pos
 *	JJR	Degree=Cmp
 *	JJS	Degree=Sup
-#*	RB	Degree=Pos
-#*	RBR	Degree=Cmp
-#*	RBS	Degree=Sup
 *	CD	NumType=Card
 am	VBP	VerbForm=Fin|Mood=Ind|Tense=Pres|Person=1|Number=Sing
 was	VBD	VerbForm=Fin|Mood=Ind|Tense=Past|Number=Sing
@@ -65,11 +62,9 @@ late	RB	Degree=Pos
 long	RB	Degree=Pos
 high	RB	Degree=Pos
 easy	RB	Degree=Pos
-quickly	RB	Degree=Pos
 early	RB	Degree=Pos
 far	RB	Degree=Pos
 soon	RB	Degree=Pos
-slowly	RB	Degree=Pos
 low	RB	Degree=Pos
 close	RB	Degree=Pos
 well	RB	Degree=Pos
