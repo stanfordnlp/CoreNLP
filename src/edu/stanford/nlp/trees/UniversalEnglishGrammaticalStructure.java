@@ -87,9 +87,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    *          threads
    */
   public UniversalEnglishGrammaticalStructure(Tree t, Predicate<String> tagFilter, HeadFinder hf, boolean threadSafe) {
-    
+
     // the tree is normalized (for index and functional tag stripping) inside CoordinationTransformer
-    super(t, UniversalEnglishGrammaticalRelations.values(threadSafe), threadSafe ? UniversalEnglishGrammaticalRelations.valuesLock() : null, 
+    super(t, UniversalEnglishGrammaticalRelations.values(threadSafe), threadSafe ? UniversalEnglishGrammaticalRelations.valuesLock() : null,
           new CoordinationTransformer(hf, true), hf, Filters.acceptFilter(), tagFilter);
   }
 
@@ -123,7 +123,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   private static final Predicate<TypedDependency> extraTreeDepFilter = new ExtraTreeDepFilter();
 
-  
+
   @Override
   protected void getTreeDeps(List<TypedDependency> deps,
       DirectedMultiGraph<TreeGraphNode, GrammaticalRelation> completeGraph,
@@ -140,7 +140,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     list.addAll(sg.typedDependencies());
     Collections.sort(list);
   }
-  
+
   protected void correctDependencies(SemanticGraph sg) {
     if (DEBUG) {
       printListSorted("At correctDependencies:", sg.typedDependencies());
@@ -194,11 +194,11 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After adding extra nsubj:", sg.typedDependencies());
     }
-    
+
     list.clear();
     list.addAll(sg.typedDependencies());
   }
-  
+
 
   /* Semgrex patterns for prepositional phrases. */
   private static SemgrexPattern PASSIVE_AGENT_PATTERN = SemgrexPattern.compile("{}=gov >nmod=reln ({}=mod >case {word:/^(?i:by)$/}=c1) >auxpass {}");
@@ -206,19 +206,19 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   private static SemgrexPattern PREP_MW2_PATTERN = SemgrexPattern.compile("{}=gov >/^(nmod|advcl|acl)$/=reln ({}=mod >case ({}=c1 >mwe {}=c2))");
   private static SemgrexPattern PREP_PATTERN = SemgrexPattern.compile("{}=gov   >/^(nmod|advcl|acl)$/=reln ({}=mod >case {}=c1)");
 
-  
+
   /**
-   * Adds the case marker(s) to all nmod, acl and advcl relations that are 
+   * Adds the case marker(s) to all nmod, acl and advcl relations that are
    * modified by one or more case markers(s).
-   * 
+   *
    * @see UniversalEnglishGrammaticalStructure#addCaseMarkersToReln
    */
   private static void addCaseMarkerInformation(SemanticGraph sg) {
-    
+
     /* Semgrexes require a graph with a root. */
     if (sg.getRoots().isEmpty())
       return;
-    
+
     /* passive agent */
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = PASSIVE_AGENT_PATTERN.matcher(sgCopy);
@@ -227,11 +227,11 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       IndexedWord gov = matcher.getNode("gov");
       IndexedWord mod = matcher.getNode("mod");
       addPassiveAgentToReln(sg, gov, mod, caseMarker);
-    }    
-    
+    }
+
     List<IndexedWord> oldCaseMarkers = Generics.newArrayList();
 
-    
+
     /* 3-word prepositions */
     sgCopy = sg.makeSoftCopy();
     matcher = PREP_MW3_PATTERN.matcher(sgCopy);
@@ -240,23 +240,23 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       caseMarkers.add(matcher.getNode("c1"));
       caseMarkers.add(matcher.getNode("c2"));
       caseMarkers.add(matcher.getNode("c3"));
-      
+
       Collections.sort(caseMarkers);
 
       /* We only want to match every case marker once. */
       if (caseMarkers.equals(oldCaseMarkers))
         continue;
 
-      
+
       IndexedWord gov = matcher.getNode("gov");
       IndexedWord mod = matcher.getNode("mod");
-      
+
       addCaseMarkersToReln(sg, gov, mod, caseMarkers);
-      
+
       oldCaseMarkers = caseMarkers;
     }
-    
-    
+
+
     /* 2-word prepositions */
     sgCopy = sg.makeSoftCopy();
     matcher = PREP_MW2_PATTERN.matcher(sgCopy);
@@ -269,57 +269,57 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       /* We only want to match every case marker once. */
       if (caseMarkers.equals(oldCaseMarkers))
         continue;
-      
+
       IndexedWord gov = matcher.getNode("gov");
       IndexedWord mod = matcher.getNode("mod");
       addCaseMarkersToReln(sg, gov, mod, caseMarkers);
-      
+
       oldCaseMarkers = caseMarkers;
     }
-    
+
     /* Single-word prepositions */
     sgCopy = sg.makeSoftCopy();
     matcher = PREP_PATTERN.matcher(sgCopy);
     while (matcher.find()) {
       List<IndexedWord> caseMarkers = Generics.newArrayList(1);
       caseMarkers.add(matcher.getNode("c1"));
-      
+
       if (caseMarkers.equals(oldCaseMarkers))
         continue;
-      
+
       IndexedWord gov = matcher.getNode("gov");
       IndexedWord mod = matcher.getNode("mod");
       addCaseMarkersToReln(sg, gov, mod, caseMarkers);
 
       oldCaseMarkers = caseMarkers;
     }
-    
+
   }
-  
+
 
   private static void addPassiveAgentToReln(SemanticGraph sg,
       IndexedWord gov, IndexedWord mod, IndexedWord caseMarker) {
-   
+
     SemanticGraphEdge edge = sg.getEdge(gov, mod);
     GrammaticalRelation reln = UniversalEnglishGrammaticalRelations.getNmod("agent");
     edge.setRelation(reln);
   }
-  
-  
+
+
   /**
    * Appends case marker information to nmod/acl/advcl relations.
    * <p/>
    * E.g. if there is a relation <code>nmod(gov, dep)</code> and <code>case(dep, prep)</code>, then
    * the <code>nmod</nmod> relation is renamed to <code>nmod:prep</code>.
-   * 
-   * 
+   *
+   *
    * @param sg semantic graph
    * @param gov governor of the nmod/acl/advcl relation
    * @param mod modifier of the nmod/acl/advcl relation
    * @param caseMarkers List<IndexedWord> of all the case markers that depend on mod
    */
   private static void addCaseMarkersToReln(SemanticGraph sg, IndexedWord gov, IndexedWord mod, List<IndexedWord> caseMarkers) {
-    
+
     SemanticGraphEdge edge = sg.getEdge(gov, mod);
     int lastCaseMarkerIndex = 0;
     StringBuilder sb = new StringBuilder();
@@ -346,12 +346,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     GrammaticalRelation reln = getCaseMarkedRelation(edge.getRelation(), sb.toString().toLowerCase());
     edge.setRelation(reln);
   }
-  
+
   private static SemgrexPattern PREP_CONJP_PATTERN = SemgrexPattern.compile("{} >case ({}=gov >cc {}=cc >conj {}=conj)");
-  
+
   /**
    * Expands prepositions with conjunctions such as in the sentence
-   * "Bill flies to and from Serbia." by copying the verb resulting 
+   * "Bill flies to and from Serbia." by copying the verb resulting
    * in the following relations:
    * <p/>
    * <code>conj:and(flies, flies')</code><br/>
@@ -364,23 +364,23 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * The label of the conjunct relation includes the conjunction type
    * because if the verb has multiple cc relations then it can be impossible
    * to infer which coordination marker belongs to which conjuncts.
-   * 
+   *
    * @param list mutable list of dependencies
    */
   private static void expandPrepConjunctions(SemanticGraph sg) {
-    
+
     /* Semgrexes require a graph with a root. */
     if (sg.getRoots().isEmpty())
       return;
 
-    
+
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = PREP_CONJP_PATTERN.matcher(sgCopy);
-    
+
     IndexedWord oldGov = null;
     IndexedWord oldCcDep = null;
     List<IndexedWord> conjDeps = Generics.newLinkedList();
-    
+
     while (matcher.find()) {
       IndexedWord ccDep = matcher.getNode("cc");
       IndexedWord conjDep = matcher.getNode("conj");
@@ -393,54 +393,54 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       oldGov = gov;
       conjDeps.add(conjDep);
     }
-    
+
     if (oldGov != null) {
       expandPrepConjunction(sg, oldGov, conjDeps, oldCcDep);
     }
-    
-  }  
-  
+
+  }
+
   /*
    * Used by expandPrepConjunctions.
    */
-  
-  private static void expandPrepConjunction(SemanticGraph sg, IndexedWord gov, 
+
+  private static void expandPrepConjunction(SemanticGraph sg, IndexedWord gov,
       List<IndexedWord> conjDeps, IndexedWord ccDep)  {
-    
+
     IndexedWord caseGov = sg.getParent(gov);
-    
-    if (caseGov == null) 
+
+    if (caseGov == null)
       return;
-    
+
     IndexedWord caseGovGov = sg.getParent(caseGov);
-    
+
     if (caseGovGov == null)
       return;
-    
+
     IndexedWord conjGov = caseGovGov.getOriginal() != null ? caseGovGov.getOriginal() : caseGovGov;
     GrammaticalRelation rel = sg.reln(caseGovGov, caseGov);
     List<IndexedWord> newConjDeps = Generics.newLinkedList();
     for (IndexedWord conjDep : conjDeps) {
       //IndexedWord caseGovCopy = caseGov.makeSoftCopy();
       IndexedWord caseGovGovCopy = caseGovGov.makeSoftCopy();
-      
+
       /* Change conj(prep-1, prep-2) to case(prep-1-gov-copy, prep-2) */
       //SemanticGraphEdge edge = sg.getEdge(gov, conjDep);
       //sg.removeEdge(edge);
       //sg.addEdge(caseGovCopy, conjDep, CASE_MARKER, Double.NEGATIVE_INFINITY, false);
-      
+
       /* Add relation to copy node. */
       //sg.addEdge(caseGovGovCopy, caseGovCopy, rel, Double.NEGATIVE_INFINITY, false);
 
       sg.addEdge(conjGov, caseGovGovCopy, CONJUNCT, Double.NEGATIVE_INFINITY, false);
       newConjDeps.add(caseGovGovCopy);
-      
+
       sg.addEdge(caseGovGovCopy, caseGov, rel, Double.NEGATIVE_INFINITY, true);
 
       List<IndexedWord> caseMarkers = Generics.newArrayList();
       caseMarkers.add(conjDep);
-      
-      addCaseMarkersToReln(sg, caseGovGovCopy, caseGov, caseMarkers);      
+
+      addCaseMarkersToReln(sg, caseGovGovCopy, caseGov, caseMarkers);
       /* Attach all children except case markers of caseGov to caseGovCopy. */
       //for (SemanticGraphEdge e : sg.outgoingEdgeList(caseGov)) {
       //  if (e.getRelation() != CASE_MARKER && ! e.getDependent().equals(ccDep)) {
@@ -448,12 +448,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       //  }
      // }
     }
-    
-    /* Attach CC node to caseGov */ 
+
+    /* Attach CC node to caseGov */
     //SemanticGraphEdge edge = sg.getEdge(gov, ccDep);
     //sg.removeEdge(edge);
     //sg.addEdge(conjGov, ccDep, COORDINATION, Double.NEGATIVE_INFINITY, false);
-    
+
     /* Add conjunction information for these relations already at this point.
      * It could be that we add several coordinating conjunctions while collapsing
      * and we might not know which conjunction belongs to which conjunct at a later
@@ -461,14 +461,14 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
      */
     addConjToReln(sg, conjGov, newConjDeps, ccDep);
   }
-  
-  
+
+
   private static SemgrexPattern PP_CONJP_PATTERN = SemgrexPattern.compile("{} >/^(nmod|acl|advcl)$/ (({}=gov >case {}) >cc {}=cc >conj ({}=conj >case {}))");
-  
-  
+
+
   /**
    * Expands PPs with conjunctions such as in the sentence
-   * "Bill flies to France and from Serbia." by copying the verb 
+   * "Bill flies to France and from Serbia." by copying the verb
    * that governs the prepositinal phrase resulting in the following
    * relations:
    * <p/>
@@ -482,7 +482,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * The label of the conjunct relation includes the conjunction type
    * because if the verb has multiple cc relations then it can be impossible
    * to infer which coordination marker belongs to which conjuncts.
-   * 
+   *
    * @param sg SemanticGraph to operate on.
    */
   private static void expandPPConjunctions(SemanticGraph sg) {
@@ -491,14 +491,14 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (sg.getRoots().isEmpty())
       return;
 
-    
+
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = PP_CONJP_PATTERN.matcher(sgCopy);
-    
+
     IndexedWord oldGov = null;
     IndexedWord oldCcDep = null;
     List<IndexedWord> conjDeps = Generics.newLinkedList();
-    
+
     while (matcher.find()) {
       IndexedWord conjDep = matcher.getNode("conj");
       IndexedWord gov = matcher.getNode("gov");
@@ -512,49 +512,49 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       oldGov = gov;
       conjDeps.add(conjDep);
     }
-    
+
     if (oldGov != null) {
       expandPPConjunction(sg, oldGov, conjDeps, oldCcDep);
     }
-    
-  }  
-  
+
+  }
+
   /*
    * Used by expandPPConjunction.
    */
-  private static void expandPPConjunction(SemanticGraph sg, IndexedWord gov, 
+  private static void expandPPConjunction(SemanticGraph sg, IndexedWord gov,
       List<IndexedWord> conjDeps, IndexedWord ccDep) {
-    
+
     IndexedWord nmodGov = sg.getParent(gov);
-    
+
     if (nmodGov == null)
       return;
-    
+
     IndexedWord conjGov = nmodGov.getOriginal() != null ? nmodGov.getOriginal() : nmodGov;
-    GrammaticalRelation rel = sg.reln(nmodGov, gov);  
+    GrammaticalRelation rel = sg.reln(nmodGov, gov);
     List<IndexedWord> newConjDeps = Generics.newLinkedList();
     for (IndexedWord conjDep : conjDeps) {
       IndexedWord nmodGovCopy = nmodGov.makeSoftCopy();
-      
+
       /* Change conj(nmod-1, nmod-2) to nmod(nmod-1-gov, nmod-2) */
       SemanticGraphEdge edge = sg.getEdge(gov, conjDep);
       if (edge != null) {
         sg.removeEdge(edge);
         sg.addEdge(nmodGovCopy, conjDep, rel, Double.NEGATIVE_INFINITY, false);
       }
-      
+
       /* Add relation to copy node. */
       sg.addEdge(conjGov, nmodGovCopy, CONJUNCT, Double.NEGATIVE_INFINITY, false);
       newConjDeps.add(nmodGovCopy);
     }
-    
-    /* Attach CC node to conjGov */ 
+
+    /* Attach CC node to conjGov */
     SemanticGraphEdge edge = sg.getEdge(gov, ccDep);
     if (edge != null) {
       sg.removeEdge(edge);
       sg.addEdge(conjGov, ccDep, COORDINATION, Double.NEGATIVE_INFINITY, false);
     }
-    
+
     /* Add conjunction information for these relations already at this point.
      * It could be that we add several coordinating conjunctions while collapsing
      * and we might not know which conjunction belongs to which conjunct at a later
@@ -562,13 +562,13 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
      */
     addConjToReln(sg, conjGov, newConjDeps, ccDep);
   }
-  
-  
+
+
   /**
-   * 
-   * Returns a GrammaticalRelation which combines the original relation and 
+   *
+   * Returns a GrammaticalRelation which combines the original relation and
    * the preposition.
-   * 
+   *
    */
   private static GrammaticalRelation getCaseMarkedRelation(GrammaticalRelation reln, String relationName) {
     GrammaticalRelation newReln = reln;
@@ -586,12 +586,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     return newReln;
   }
 
-  
+
   private static SemgrexPattern CONJUNCTION_PATTERN = SemgrexPattern.compile("{}=gov >cc {}=cc >conj {}=conj");
-  
-  
+
+
   /**
-   * Adds the type of conjunction to all conjunct relations. 
+   * Adds the type of conjunction to all conjunct relations.
    * <p/>
    * <code>cc(Marie, and)</code>, <code>conj(Marie, Chris)</code> and <code>conj(Marie, John)</code>
    * become <code>cc(Marie, and)</code>, <code>conj(Marie, Chris)</code> and <code>conj(Marie, John)</code>.
@@ -600,24 +600,24 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * the one that precedes the conjunct is appended to the conjunction relation or the
    * first one if no preceding marker exists.
    * <p/>
-   * Some multi-word coordination markers are collapsed to <code>conj:and</code> or <code>conj:negcc</code>. 
+   * Some multi-word coordination markers are collapsed to <code>conj:and</code> or <code>conj:negcc</code>.
    * See {@link #conjValue(IndexedWord, SemanticGraph)}.
-   * 
+   *
    * @param list mutable list of dependency relations
    */
   private static void addConjInformation(SemanticGraph sg) {
-    
+
     /* Semgrexes require a graph with a root. */
     if (sg.getRoots().isEmpty())
       return;
-    
+
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = CONJUNCTION_PATTERN.matcher(sgCopy);
-    
+
     IndexedWord oldGov = null;
     IndexedWord oldCcDep = null;
     List<IndexedWord> conjDeps = Generics.newLinkedList();
-    
+
     while (matcher.find()) {
       IndexedWord conjDep = matcher.getNode("conj");
       IndexedWord gov = matcher.getNode("gov");
@@ -630,13 +630,13 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       conjDeps.add(conjDep);
       oldGov = gov;
     }
-    
+
     if (oldGov != null) {
       addConjToReln(sg, oldGov, conjDeps, oldCcDep);
     }
-    
+
   }
-  
+
   /*
    * Used by addConjInformation.
    */
@@ -653,23 +653,23 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
   /* Used by correctWHAttachment */
   private static SemgrexPattern XCOMP_PATTERN = SemgrexPattern.compile("{}=root >xcomp {}=embedded >/^(dep|dobj)$/ {}=wh ?>/([di]obj)/ {}=obj");
-  
+
   private static Morphology morphology = new Morphology();
-  
+
   /**
    * Tries to correct complicated cases of WH-movement in
    * sentences such as "What does Mary seem to have?" in
    * which "What" should attach to "have" instead of the
-   * control verb. 
-   * 
+   * control verb.
+   *
    * @param sg The Semantic graph to operate on.
    */
   private static void correctWHAttachment(SemanticGraph sg) {
-    
+
     /* Semgrexes require a graph with a root. */
     if (sg.getRoots().isEmpty())
       return;
-    
+
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = XCOMP_PATTERN.matcher(sgCopy);
     while (matcher.findNextMatchingNode()) {
@@ -677,7 +677,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       IndexedWord embeddedVerb = matcher.getNode("embedded");
       IndexedWord wh = matcher.getNode("wh");
       IndexedWord dobj = matcher.getNode("obj");
-      
+
       /* Check if the object is a WH-word. */
       if (wh.tag().startsWith("W")) {
         boolean reattach = false;
@@ -692,7 +692,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
             reattach = true;
           }
         }
-        
+
         if (reattach) {
           SemanticGraphEdge edge = sg.getEdge(root, wh);
           if (edge != null) {
@@ -703,8 +703,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
   }
-  
-  
+
+
   /**
    * What we do in this method is look for temporary dependencies of
    * the type "rel" and "prep".  These occur in sentences such as "I saw the man
@@ -713,40 +713,40 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * fighting for", we should have case(which, for).
    */
    private static void convertRel(SemanticGraph sg) {
-    
+
     for (SemanticGraphEdge prep : sg.findAllRelns(PREPOSITION)) {
-      
+
       boolean changedPrep = false;
-      
+
       for (SemanticGraphEdge nmod : sg.outgoingEdgeIterable(prep.getGovernor())) {
-        
+
         // todo: It would also be good to add a rule here to prefer ccomp nsubj over dobj if there is a ccomp with no subj
         // then we could get right: Which eco-friendly options do you think there will be on the new Lexus?
         if (nmod.getRelation() != NOMINAL_MODIFIER && nmod.getRelation() != RELATIVE) {
           continue;
         }
-        
+
         if (prep.getDependent().index() < nmod.getDependent().index()) {
           continue;
         }
-        
+
         sg.removeEdge(prep);
         sg.addEdge(nmod.getDependent(), prep.getDependent(), CASE_MARKER, Double.NEGATIVE_INFINITY, false);
-        
+
         changedPrep = true;
-        
+
         if (nmod.getRelation() == RELATIVE) {
           nmod.setRelation(NOMINAL_MODIFIER);
         }
-        
+
         break;
       }
-      
+
       if ( ! changedPrep) {
         prep.setRelation(NOMINAL_MODIFIER);
       }
     }
-  
+
     /* Rename remaining "rel" relations. */
     for (SemanticGraphEdge edge : sg.findAllRelns(RELATIVE)) {
       edge.setRelation(DIRECT_OBJECT);
@@ -761,24 +761,24 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * If called with a tree of dependencies and both CCprocess and
    * includeExtras set to false, then the tree structure is preserved.
    * <p/>
-   * 
+   *
    * <dl>
    * <dt>nominal modifier dependencies: nmod</dt>
    * <dd>
    * If there exist the relations <code>case(hat, in)</code> and <code>nmod(in, hat)</code> then
-   * the <code>nmod</code> relation is enhanced to <code>nmod:in(cat, hat)</code>. 
+   * the <code>nmod</code> relation is enhanced to <code>nmod:in(cat, hat)</code>.
    * The <code>case(hat, in)</code> relation is preserved.</dd>
    * <dt>clausal modifier of noun/adverbial clause modifier with case markers: acs/advcl</dt>
    * <dd>
    * If there exist the relations <code>case(attacking, of)</code> and <code>advcl(heard, attacking)</code> then
-   * the <code>nmod</code> relation is enhanced to <code>nmod:of(heard, attacking)</code>. 
+   * the <code>nmod</code> relation is enhanced to <code>nmod:of(heard, attacking)</code>.
    * The <code>case(attacking, of)</code> relation is preserved.</dd>
    * <dt>conjunct dependencies</dt>
    * <dd>
-   * If there exist the relations 
+   * If there exist the relations
    * <code>cc(investors, and)</code> and
    * <code>conj(investors, regulators)</code>, then the <code>conj</code> relation is
-   * enhanced to 
+   * enhanced to
    * <code>conj:and(investors, regulators)</code></dd>
    * <dt>For relative clauses, it will collapse referent</dt>
    * <dd>
@@ -789,12 +789,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   @Override
   protected void collapseDependencies(List<TypedDependency> list, boolean CCprocess, Extras includeExtras) {
     SemanticGraph sg = new SemanticGraph(list);
-    
+
     if (DEBUG) {
       printListSorted("collapseDependencies: CCproc: " + CCprocess + " includeExtras: " + includeExtras, sg.typedDependencies());
     }
-    
-    
+
+
     correctDependencies(sg);
     if (DEBUG) {
       printListSorted("After correctDependencies:", sg.typedDependencies());
@@ -805,7 +805,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       printListSorted("After processMultiwordPreps:", sg.typedDependencies());
     }
 
-    
+
     expandPPConjunctions(sg);
     if (DEBUG) {
       printListSorted("After expandPPConjunctions:", sg.typedDependencies());
@@ -815,7 +815,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After expandPrepConjunctions:", sg.typedDependencies());
     }
-        
+
     addCaseMarkerInformation(sg);
     if (DEBUG) {
       printListSorted("After addCaseMarkerInformation:", sg.typedDependencies());
@@ -825,7 +825,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     if (DEBUG) {
       printListSorted("After addConjInformation:", sg.typedDependencies());
     }
-    
+
     if (includeExtras.doRef) {
       addRef(sg);
       if (DEBUG) {
@@ -849,7 +849,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
     if (includeExtras.doSubj) {
       addExtraNSubj(sg);
-      
+
       if (DEBUG) {
         printListSorted("After adding extra nsubj:", sg.typedDependencies());
       }
@@ -862,7 +862,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
     list.clear();
     list.addAll(sg.typedDependencies());
-    
+
     Collections.sort(list);
     if (DEBUG) {
       printListSorted("After all collapse:", list);
@@ -885,7 +885,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    *         conjunction.
    */
   private static GrammaticalRelation conjValue(IndexedWord cc, SemanticGraph sg) {
-    
+
     int pos = cc.index();
     String newConj = cc.value().toLowerCase();
 
@@ -895,9 +895,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         return UniversalEnglishGrammaticalRelations.getConj("negcc");
       }
     }
-    
+
     IndexedWord secondIWord = sg.getNodeByIndexSafe(pos + 1);
-    
+
     if (secondIWord == null) {
       return UniversalEnglishGrammaticalRelations.getConj(cc.value());
     }
@@ -922,13 +922,13 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       if (thirdWord != null && thirdWord.equals("mention")) {
         newConj = "and";
       }
-    }  
+    }
     return UniversalEnglishGrammaticalRelations.getConj(newConj);
   }
 
 
   private static void treatCC(SemanticGraph sg) {
-    
+
     // Construct a map from tree nodes to the set of typed
     // dependencies in which the node appears as dependent.
     Map<IndexedWord, Set<SemanticGraphEdge>> map = Generics.newHashMap();
@@ -945,7 +945,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     List<IndexedWord> rcmodHeads = Generics.newArrayList();
     List<IndexedWord> prepcDep = Generics.newArrayList();
 
-    
+
     for (SemanticGraphEdge edge : sg.edgeIterable()) {
       if (!map.containsKey(edge.getDependent())) {
         // NB: Here and in other places below, we use a TreeSet (which extends
@@ -959,8 +959,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       }
 
       // look for subjects
-      if (edge.getRelation().getParent() == NOMINAL_SUBJECT 
-          || edge.getRelation().getParent() == SUBJECT 
+      if (edge.getRelation().getParent() == NOMINAL_SUBJECT
+          || edge.getRelation().getParent() == SUBJECT
           || edge.getRelation().getParent() == CLAUSAL_SUBJECT) {
         if (!subjectMap.containsKey(edge.getGovernor())) {
           subjectMap.put(edge.getGovernor(), edge);
@@ -997,7 +997,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     //Collection<TypedDependency> newTypedDeps = new ArrayList<TypedDependency>(list);
 
     SemanticGraph sgCopy = sg.makeSoftCopy();
-    
+
     // find typed deps of form conj(gov,dep)
     for (SemanticGraphEdge edge: sgCopy.edgeIterable()) {
       if (UniversalEnglishGrammaticalRelations.getConjs().contains(edge.getRelation())) {
@@ -1016,7 +1016,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
             if (newGov.equals(dep)) {
               continue;
             }
-            
+
             GrammaticalRelation newRel = edge1.getRelation();
             //TODO: Do we want to copy case markers here?
             if (newRel != ROOT && newRel != CASE_MARKER) {
@@ -1116,9 +1116,9 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     // find typed deps of form ref(gov, dep)
     // put them in a List for processing
     List<SemanticGraphEdge> refs = new ArrayList<SemanticGraphEdge>(sg.findAllRelns(REFERENT));
-   
+
     SemanticGraph sgCopy = sg.makeSoftCopy();
-    
+
     // now substitute target of referent where possible
     for (SemanticGraphEdge ref : refs) {
       IndexedWord dep = ref.getDependent();// take the relative word
@@ -1138,7 +1138,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       }
     }
   }
-  
+
   /**
    * Look for ref rules for a given word.  We look through the
    * children and grandchildren of the acl:relcl dependency, and if any
@@ -1158,7 +1158,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
           leftChildEdge = childEdge;
         }
       }
-      
+
       SemanticGraphEdge leftGrandchildEdge = null;
       for (SemanticGraphEdge childEdge : sg.outgoingEdgeIterable(modifier)) {
         for (SemanticGraphEdge grandchildEdge : sg.outgoingEdgeIterable(childEdge.getDependent())) {
@@ -1168,11 +1168,11 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
           }
         }
       }
-      
+
       IndexedWord newDep = null;
       if (leftGrandchildEdge != null
           && (leftChildEdge == null || leftGrandchildEdge.getDependent().index() < leftChildEdge.getDependent().index())) {
-        newDep = leftGrandchildEdge.getDependent();  
+        newDep = leftGrandchildEdge.getDependent();
       } else if (leftChildEdge != null) {
         newDep = leftChildEdge.getDependent();
       }
@@ -1196,7 +1196,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * sentences such as "he decided not to" with no following verb.
    */
   private static void addExtraNSubj(SemanticGraph sg) {
-    
+
     for (SemanticGraphEdge xcomp : sg.findAllRelns(XCLAUSAL_COMPLEMENT)) {
       IndexedWord modifier = xcomp.getDependent();
       IndexedWord head = xcomp.getGovernor();
@@ -1256,7 +1256,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   }
 
   private static SemgrexPattern CORRECT_SUBJPASS_PATTERN = SemgrexPattern.compile("{}=gov >auxpass {} >/^(nsubj|csubj)$/ {}=subj");
-  
+
   /**
    * This method corrects subjects of verbs for which we identified an auxpass,
    * but didn't identify the subject as passive.
@@ -1264,13 +1264,13 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * @param sg SemanticGraph to work on
    */
   private static void correctSubjPass(SemanticGraph sg) {
-    
+
     /* If the graph doesn't have a root (most likely because
      * a parsing error, we can't match Semgrexes, so do
      * nothing. */
     if (sg.getRoots().isEmpty())
       return;
-    
+
     SemanticGraph sgCopy = sg.makeSoftCopy();
     SemgrexMatcher matcher = CORRECT_SUBJPASS_PATTERN.matcher(sgCopy);
 
@@ -1278,14 +1278,14 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
       IndexedWord gov = matcher.getNode("gov");
       IndexedWord subj = matcher.getNode("subj");
       SemanticGraphEdge edge = sg.getEdge(gov, subj);
-      
+
       GrammaticalRelation reln = null;
       if (edge.getRelation() == NOMINAL_SUBJECT) {
         reln = NOMINAL_PASSIVE_SUBJECT;
       } else if (edge.getRelation() == CLAUSAL_SUBJECT) {
         reln = CLAUSAL_PASSIVE_SUBJECT;
       }
-      
+
       if (reln != null) {
         sg.removeEdge(edge);
         sg.addEdge(gov, subj, reln, Double.NEGATIVE_INFINITY, false);
@@ -1293,12 +1293,12 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     }
   }
 
-  
-  
-  
 
-  
- 
+
+
+
+
+
 
   // used by collapse2WP(), collapseFlatMWP(), collapse2WPbis() KEPT IN
   // ALPHABETICAL ORDER
@@ -1308,97 +1308,97 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
   // used by collapse3WP() KEPT IN ALPHABETICAL ORDER
   private static final String[] THREEWORD_PREPS = { "by_means_of", "in_accordance_with", "in_addition_to", "in_case_of", "in_front_of", "in_lieu_of", "in_place_of", "in_spite_of", "on_account_of", "on_behalf_of", "on_top_of", "with_regard_to", "with_respect_to" };
 
-  
+
 
   /**
-   * 
+   *
    * @param sg
    */
   private static void processMultiwordPreps(SemanticGraph sg) {
-    
+
     /* Semgrexes require a graph with a root. */
     if (sg.getRoots().isEmpty())
       return;
-    
+
     HashMap<String, HashSet<Integer>> bigrams = new HashMap<String, HashSet<Integer>>();
     HashMap<String, HashSet<Integer>> trigrams = new HashMap<String, HashSet<Integer>>();
 
-    
+
     List<IndexedWord> vertexList = sg.vertexListSorted();
     int numWords = vertexList.size();
-    
+
     for (int i = 1; i < numWords; i++) {
       String bigram = vertexList.get(i-1).value().toLowerCase() + "_" + vertexList.get(i).value().toLowerCase();
-      
+
       if (bigrams.get(bigram) == null) {
         bigrams.put(bigram, new HashSet<Integer>());
       }
-      
+
       bigrams.get(bigram).add(vertexList.get(i-1).index());
-      
+
       if (i > 1) {
         String trigram = vertexList.get(i-2).value().toLowerCase() + "_" + bigram;
-        
+
         if (trigrams.get(trigram) == null) {
           trigrams.put(trigram, new HashSet<Integer>());
         }
-        
+
         trigrams.get(trigram).add(vertexList.get(i-2).index());
       }
     }
-        
+
     for (String bigram : MULTIWORD_PREPS) {
       if (bigrams.get(bigram) == null) {
         continue;
       }
-      
+
       for (Integer i : bigrams.get(bigram)) {
         IndexedWord w1 = sg.getNodeByIndexSafe(i);
         IndexedWord w2 = sg.getNodeByIndexSafe(i + 1);
-        
+
         if (w1 == null || w2 == null) {
           continue;
         }
-        
+
         IndexedWord gov1 = sg.getParent(w1);
         IndexedWord gov2 = sg.getParent(w2);
-        
+
         if (gov1 == null || gov2 == null) {
           continue;
         }
-        
+
         SemanticGraphEdge edge1 = sg.getEdge(gov1, w1);
         SemanticGraphEdge edge2 = sg.getEdge(gov2, w2);
-        
+
         GrammaticalRelation reln1 = edge1.getRelation();
         GrammaticalRelation reln2 = edge2.getRelation();
-        
+
         if (reln1 != CASE_MARKER && reln2 != CASE_MARKER) {
           continue;
         }
-        
+
         IndexedWord caseGov = reln1 == CASE_MARKER ? gov1 : gov2;
         IndexedWord caseGovGov = sg.getParent(caseGov);
-        
-        
+
+
         /* Prevent cycles. */
         if (caseGovGov != null && (caseGovGov.equals(w1) || caseGovGov.equals(w2))) {
           continue;
         }
-        
+
         sg.removeEdge(edge1);
         sg.removeEdge(edge2);
-        
+
         sg.addEdge(caseGov, w1, CASE_MARKER, Double.NEGATIVE_INFINITY, false);
         sg.addEdge(w1, w2, MULTI_WORD_EXPRESSION, Double.NEGATIVE_INFINITY, false);
       }
     }
-      
+
     for (String trigram : THREEWORD_PREPS) {
       if (trigrams.get(trigram) == null) {
         continue;
       }
-      
+
       for (Integer i : trigrams.get(trigram)) {
         IndexedWord w1 = sg.getNodeByIndexSafe(i);
         IndexedWord w2 = sg.getNodeByIndexSafe(i + 1);
@@ -1407,8 +1407,8 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         if (w1 == null || w2 == null || w3 == null) {
           continue;
         }
-        
-        
+
+
         IndexedWord gov1 = sg.getParent(w1);
         IndexedWord gov2 = sg.getParent(w2);
         IndexedWord gov3 = sg.getParent(w3);
@@ -1417,44 +1417,44 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
           continue;
         }
 
-        
+
         SemanticGraphEdge edge1 = sg.getEdge(gov1, w1);
         SemanticGraphEdge edge2 = sg.getEdge(gov2, w2);
         SemanticGraphEdge edge3 = sg.getEdge(gov3, w3);
 
-        
+
         GrammaticalRelation reln1 = edge1.getRelation();
         GrammaticalRelation reln3 = edge3.getRelation();
-        
+
         if (reln1 != CASE_MARKER && reln3 != CASE_MARKER) {
           continue;
         }
-        
+
         IndexedWord caseGov = reln3 == CASE_MARKER ? gov3 : gov1;
         IndexedWord caseGovGov = sg.getParent(caseGov);
-        
+
         /* Prevent cycles. */
         if (caseGovGov != null && (caseGovGov.equals(w1) || caseGovGov.equals(w2) || caseGovGov.equals(w3))) {
           continue;
         }
-        
+
         sg.removeEdge(edge1);
         sg.removeEdge(edge2);
         sg.removeEdge(edge3);
-        
+
         sg.addEdge(caseGov, w1, CASE_MARKER, Double.NEGATIVE_INFINITY, false);
         sg.addEdge(w1, w2, MULTI_WORD_EXPRESSION, Double.NEGATIVE_INFINITY, false);
         sg.addEdge(w1, w3, MULTI_WORD_EXPRESSION, Double.NEGATIVE_INFINITY, false);
       }
     }
-    
-   
-    
-    
-    
+
+
+
+
+
   }
-  
-  
+
+
   /**
    * Find and remove any exact duplicates from a dependency list.
    * For example, the method that "corrects" nsubj dependencies can

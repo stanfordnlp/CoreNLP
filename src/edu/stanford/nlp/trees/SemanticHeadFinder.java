@@ -374,8 +374,15 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
         // String[] how = new String[] {"left", "VP", "ADJP", "NP"};
         // Including NP etc seems okay for copular sentences but is
         // problematic for other auxiliaries, like 'he has an answer'
-        // But maybe doing ADJP is fine!
-        String[] how = { "left", "VP", "ADJP" };
+        String[] how ;
+        if (hasVerbalAuxiliary(kids, copulars, true)) {
+          // Only allow ADJP in copular constructions
+          // In constructions like "It gets cold", "get" should be the head
+          how = new String[]{ "left", "VP", "ADJP" };
+        } else {
+          how = new String[]{ "left", "VP" };
+        }
+
         if (tmpFilteredChildren == null) {
           tmpFilteredChildren = ArrayUtils.filter(kids, REMOVE_TMP_AND_ADV);
         }
@@ -599,7 +606,7 @@ public class SemanticHeadFinder extends ModCollinsHeadFinder {
   }
 
 
-  // now overly complex so it deals with coordinations.  Maybe change this class to use tregrex?
+  // now overly complex so it deals with coordinations.  Maybe change this class to use tregrex?f
   private boolean hasPassiveProgressiveAuxiliary(Tree[] kids) {
     if (DEBUG) {
       System.err.println("Checking for passive/progressive auxiliary");

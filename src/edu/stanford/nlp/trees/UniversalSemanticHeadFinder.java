@@ -365,8 +365,15 @@ public class UniversalSemanticHeadFinder extends ModCollinsHeadFinder {
         // String[] how = new String[] {"left", "VP", "ADJP", "NP"};
         // Including NP etc seems okay for copular sentences but is
         // problematic for other auxiliaries, like 'he has an answer'
-        // But maybe doing ADJP is fine!
-        String[] how = { "left", "VP", "ADJP" };
+        String[] how ;
+        if (hasVerbalAuxiliary(kids, copulars, true)) {
+          // Only allow ADJP in copular constructions
+          // In constructions like "It gets cold", "get" should be the head
+          how = new String[]{ "left", "VP", "ADJP" };
+        } else {
+          how = new String[]{ "left", "VP" };
+        }
+
         if (tmpFilteredChildren == null) {
           tmpFilteredChildren = ArrayUtils.filter(kids, REMOVE_TMP_AND_ADV);
         }
