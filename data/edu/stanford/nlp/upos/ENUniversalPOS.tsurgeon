@@ -49,7 +49,7 @@ relabel target ADP
 relabel target AUX
 
 % VB.* -> AUX (another, rarer case of fronted VPs)
-@SINV < (@VP=target < (@VP < (/^VB/=target <  /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/ )) $-- (@VP < VBD|VBN))
+@SINV < (@VP < (@VP < (/^VB/=target <  /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/ )) $-- (@VP < VBD|VBN)))
 
 relabel target AUX
 
