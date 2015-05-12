@@ -3394,6 +3394,14 @@ public class SUTime {
       this.second = (s != null)? s.intValue():-1;
       this.millis = (ms != null)? ms.intValue():-1;
       this.halfday = (halfday != null)? halfday.intValue():-1;
+      // Some error checks
+      second += millis / 1000;
+      millis = millis % 1000;
+      minute += second / 60;
+      second = second % 60;
+      hour += hour / 60;
+      minute = minute % 60;
+      // Error checks done
       initBase();
     }
 
