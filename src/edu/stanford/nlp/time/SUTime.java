@@ -3385,16 +3385,12 @@ public class SUTime {
       this.millis = ms;
       this.halfday = halfday;
       // Some error checks
-      millis = Math.max(0, millis);
       second += millis / 1000;
       millis = millis % 1000;
-      second = Math.max(0, second);
       minute += second / 60;
       second = second % 60;
-      minute = Math.max(0, minute);
       hour += hour / 60;
       minute = minute % 60;
-      hour = Math.max(0, hour);
       // Error checks done
       initBase();
     }
@@ -3402,11 +3398,11 @@ public class SUTime {
     // TODO: Added for reading types from file
     public IsoTime(Number h, Number m, Number s, Number ms, Number halfday) {
       this(
-          (h != null)? h.intValue():0,
-          (m != null)? m.intValue():0,
-          (s != null)? s.intValue():0,
-          (ms != null)? ms.intValue():0,
-          (halfday != null)? halfday.intValue():0);
+          (h != null)? h.intValue():-1,
+          (m != null)? m.intValue():-1,
+          (s != null)? s.intValue():-1,
+          (ms != null)? ms.intValue():-1,
+          (halfday != null)? halfday.intValue():-1);
     }
 
     public IsoTime(String h, String m, String s) {
