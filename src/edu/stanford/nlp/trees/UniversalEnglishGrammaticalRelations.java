@@ -1605,6 +1605,16 @@ public class UniversalEnglishGrammaticalRelations {
    * @return A grammatical relation for this preposition
    */
   public static GrammaticalRelation getNmod(String prepositionString) {
+
+    /* Check for nmod subtypes which are not stored in the `nmods` map. */
+    if (prepositionString.equals("npmod")) {
+      return NP_ADVERBIAL_MODIFIER;
+    } else if(prepositionString.equals("tmod")) {
+      return TEMPORAL_MODIFIER;
+    } else if(prepositionString.equals("poss")) {
+      return POSSESSION_MODIFIER;
+    }
+
     GrammaticalRelation result = nmods.get(prepositionString);
     if (result == null) {
       synchronized(nmods) {
@@ -1653,6 +1663,12 @@ public class UniversalEnglishGrammaticalRelations {
    * @return A grammatical relation for this preposition
    */
   public static GrammaticalRelation getAcl(String aclString) {
+
+    /* Check for nmod subtypes which are not stored in the `nmods` map. */
+    if (aclString.equals("relcl")) {
+      return RELATIVE_CLAUSE_MODIFIER;
+    }
+
     GrammaticalRelation result = acls.get(aclString);
     if (result == null) {
       synchronized(acls) {
