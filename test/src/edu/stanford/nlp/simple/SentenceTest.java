@@ -6,6 +6,7 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -127,4 +128,20 @@ public class SentenceTest {
     assertEquals("This", s.word(0));
     assertEquals(5, s.length());
   }
+
+  @Test
+  public void testTokenizeWhitespaceSimple() {
+    Sentence s = new Sentence(new ArrayList<String>(){{add("foo"); add("bar");}});
+    assertEquals("foo", s.word(0));
+    assertEquals("bar", s.word(1));
+  }
+
+  @Test
+  public void testTokenizeWhitespaceWithSpaces() {
+    Sentence s = new Sentence(new ArrayList<String>(){{add("foo"); add("with whitespace"); add("baz");}});
+    assertEquals("foo", s.word(0));
+    assertEquals("with whitespace", s.word(1));
+    assertEquals("baz", s.word(2));
+  }
+
 }

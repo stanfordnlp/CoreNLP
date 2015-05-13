@@ -43,6 +43,14 @@ public class Sentence {
     setProperty("tokenize.language", "en");
   }};
 
+  /** A properties object for creating a document from a single tokenized sentence. */
+  private static Properties SINGLE_SENTENCE_TOKENIZED_DOCUMENT = new Properties() {{
+    setProperty("ssplit.isOneSentence", "true");
+    setProperty("tokenize.class", "WhitespaceTokenizer");
+    setProperty("tokenize.language", "en");
+    setProperty("tokenize.whitespace", "true");  // redundant?
+  }};
+
   /**
    * <p>
    *  The protobuf representation of a Sentence.
@@ -89,6 +97,27 @@ public class Sentence {
     this(text, SINGLE_SENTENCE_DOCUMENT);
   }
 
+  /**
+   * Create a new sentence from the given tokenized text, assuming the entire text is just one sentence.
+   * WARNING: This method may in rare cases (mostly when tokens themselves have whitespace in them)
+   *          produce strange results; it's a bit of a hack around the default tokenizer.
+   *
+   * @param tokens The text of the sentence.
+   */
+  public Sentence(List<String> tokens) {
+    this(StringUtils.join(tokens.stream().map(x -> x.replace(' ', 'ߝ' /* some random character */)), " "), SINGLE_SENTENCE_TOKENIZED_DOCUMENT);
+    // Clean up whitespace
+    for (int i = 0; i < impl.getTokenCount(); ++i) {
+      this.impl.getTokenBuilder(i).setWord(this.impl.getTokenBuilder(i).getWord().replace('ߝ', ' '));
+      this.impl.getTokenBuilder(i).setValue(this.impl.getTokenBuilder(i).getValue().replace('ߝ', ' '));
+      this.tokensBuilders.get(i).setWord(this.tokensBuilders.get(i).getWord().replace('ߝ', ' '));
+      this.tokensBuilders.get(i).setValue(this.tokensBuilders.get(i).getValue().replace('ߝ', ' '));
+    }
+  }
+
+  /**
+   * Create a sentence from a saved protocol buffer.
+   */
   public Sentence(CoreNLPProtos.Sentence proto) {
     this.impl = proto.toBuilder();
     // Set tokens
