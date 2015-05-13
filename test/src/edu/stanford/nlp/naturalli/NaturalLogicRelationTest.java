@@ -57,9 +57,9 @@ public class NaturalLogicRelationTest {
 
   @Test
   public void conjOrPeculiarities() {
-    assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj_or"));
-    assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj_or", true));
-    assertEquals(NaturalLogicRelation.REVERSE_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj_or", false));
+    assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj:or"));
+    assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj:or", true));
+    assertEquals(NaturalLogicRelation.REVERSE_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj:or", false));
   }
 
   @Test
