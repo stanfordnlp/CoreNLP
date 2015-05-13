@@ -151,13 +151,13 @@ public enum NaturalLogicRelation {
     put("auxpass", NaturalLogicRelation.INDEPENDENCE);  // some cat adopts -/-> some cat got adopted
     put("ccomp", NaturalLogicRelation.INDEPENDENCE);  // interesting project here... "he said x" -> "x"?
     put("cc", NaturalLogicRelation.REVERSE_ENTAILMENT);  // match dep_conj
-    put("conj_and\\/or", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("conj_and", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("conj_both", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("conj_but", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("conj_nor", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
-    put("conj_or", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
-    put("conj_plus", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("conj:and\\/or", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj:and", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj:both", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj:but", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj:nor", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("conj:or", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("conj:plus", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
     put("conj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // match dep_cc
     put("conj_x", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("cop", NaturalLogicRelation.INDEPENDENCE);  //
@@ -353,9 +353,9 @@ public enum NaturalLogicRelation {
     if (!isSubject) {
       switch (dependencyLabel) {
         // 'or' in the object position behaves as and.
-        case "conj_or":
-        case "conj_nor":
-          return forDependencyInsertion("conj_and", false);
+        case "conj:or":
+        case "conj:nor":
+          return forDependencyInsertion("conj:and", false);
       }
     }
     NaturalLogicRelation rel = insertArcToNaturalLogicRelation.get(dependencyLabel.toLowerCase());
@@ -365,7 +365,7 @@ public enum NaturalLogicRelation {
 //      System.err.println("Unknown dependency arc for NaturalLogicRelation: " + dependencyLabel);
       if (dependencyLabel.startsWith("nmod:")) {
         return NaturalLogicRelation.REVERSE_ENTAILMENT;
-      } else if (dependencyLabel.startsWith("conj_")) {
+      } else if (dependencyLabel.startsWith("conj:")) {
         return NaturalLogicRelation.REVERSE_ENTAILMENT;
       } else {
         return NaturalLogicRelation.INDEPENDENCE;
