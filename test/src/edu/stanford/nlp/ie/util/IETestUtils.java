@@ -18,10 +18,6 @@ import java.util.stream.Collectors;
  */
 public class IETestUtils {
 
-  /**
-   * Create a dummy word, just with a given word at a given index.
-   * Mostly useful for making semantic graphs.
-   */
   public static CoreLabel mkWord(String gloss, int index) {
     CoreLabel w = new CoreLabel();
     w.setWord(gloss);
@@ -32,14 +28,6 @@ public class IETestUtils {
     return w;
   }
 
-  /**
-   * Parse a CoNLL formatted string into a SemanticGraph.
-   * This is useful for tests so that you don't need to load the model (and are robust to
-   * model changes).
-   *
-   * @param conll The CoNLL format for the tree.
-   * @return A semantic graph, as well as the flat tokens of the sentence.
-   */
   public static Pair<SemanticGraph,List<CoreLabel>> parseCoNLL(String conll) {
     List<CoreLabel> sentence = new ArrayList<>();
     SemanticGraph tree = new SemanticGraph();
@@ -86,15 +74,6 @@ public class IETestUtils {
   }
 
 
-  /**
-   * Create a sentence (list of CoreLabels) from a given text.
-   * The resulting labels will have a word, lemma (guessed poorly), and
-   * a part of speech if one is specified on the input.
-   *
-   * @param text The text to parse.
-   *
-   * @return A sentence corresponding to the text.
-   */
   public static List<CoreLabel> parseSentence(String text) {
     return Arrays.asList(text.split("\\s+")).stream().map(w -> {
       CoreLabel token = new CoreLabel();
@@ -107,17 +86,8 @@ public class IETestUtils {
       }
       token.setValue(token.word());
       token.setLemma(token.word());
-      if (token.word().equals("is") || token.word().equals("was") || token.word().equals("are")) {
+      if (token.word().equals("is")) {
         token.setLemma("be");
-      }
-      if (token.word().equals("has")) {
-        token.setLemma("have");
-      }
-      if (token.word().equals("did") | token.word().equals("will") || token.word().equals("does")) {
-        token.setLemma("do");
-      }
-      if (token.word().endsWith("ed")) {
-        token.setLemma(token.word().substring(0, token.word().length() - 1));
       }
       if (token.word().endsWith("ing")) {
         token.setLemma(token.word().substring(0, token.word().length() - 3));
