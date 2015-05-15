@@ -31,9 +31,12 @@ public class DependencyParseAnnotator extends SentenceAnnotator {
    */
   private final long maxTime;
   /**
-   * If true, include the extra arcs in the dependency representaion.
+   * The default maximum parse time.
    */
-  private static final long DEFAULT_MAXTIME = Long.MAX_VALUE;
+  private static final long DEFAULT_MAXTIME = -1;
+  /**
+   * If true, include the extra arcs in the dependency representation.
+   */
   private final GrammaticalStructure.Extras extraDependencies;
 
   public DependencyParseAnnotator() {
