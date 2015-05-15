@@ -424,6 +424,9 @@ public class ProtobufAnnotationSerializerSlowITest {
         int mask = (0x1 << k);
         if ((i & mask) != 0) { annotatorsToConsider.add(possibleAnnotators[k]); }
       }
+      if (annotatorsToConsider.contains("openie")) {
+        continue;  // TODO(gabor) these models don't exist in the distribution yet
+      }
 
       // Sort annotators
       new StanfordCoreNLP();  // construct annotator pool
@@ -452,7 +455,7 @@ public class ProtobufAnnotationSerializerSlowITest {
       if (!annotatorsToConsider.isEmpty()) { continue; }  // continue if we couldn't add all the annotators
 
       // Create pipeline
-      if (!annotators.contains("openie") && !annotators.contains("hcoref") && !annotators.contains("entitymentions")) {  // TODO(gabor) eventually, don't ignore this!
+      if (!annotators.contains("hcoref") && !annotators.contains("entitymentions")) {  // TODO(gabor) eventually, don't ignore this!
         System.err.println(">>TESTING " + StringUtils.join(annotators, ","));
         testAnnotators(StringUtils.join(annotators, ","));
       }
