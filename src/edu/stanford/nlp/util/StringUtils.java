@@ -875,7 +875,7 @@ public class StringUtils {
   /**
    * In this version each flag has zero or one argument. It has one argument
    * if there is a thing following a flag that does not begin with '-'.  See
-   * {@link #argsToProperties(String[], Map)} for full documentation.
+   * {@link #argsToPtroperties(String[], Map)} for full documentation.
    *
    * @param args Command line arguments
    * @return A Properties object representing the arguments.

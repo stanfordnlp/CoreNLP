@@ -1,5 +1,6 @@
-package edu.stanford.nlp.ie.util;
+package edu.stanford.nlp.naturalli;
 
+import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -12,11 +13,11 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * A test of various functions in {@link RelationTriple}.
+ * A test of various functions in {@link edu.stanford.nlp.ie.util.RelationTriple}.
  *
  * @author Gabor Angeli
  */
-public class RelationTripleTest extends TestCase {
+public class RelationTripleSegmenterTest extends TestCase {
 
   protected CoreLabel mkWord(String gloss, int index) {
     CoreLabel w = new CoreLabel();
@@ -29,7 +30,16 @@ public class RelationTripleTest extends TestCase {
   }
 
   protected Optional<RelationTriple> mkExtraction(String conll) {
-    return mkExtraction(conll, 0);
+    return mkExtraction(conll, 0, false);
+  }
+
+  protected Optional<RelationTriple> mkExtraction(String conll, boolean allNominals) {
+    return mkExtraction(conll, 0, allNominals);
+  }
+
+  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex) {
+    return mkExtraction(conll, listIndex, false);
+
   }
 
   /**
@@ -38,7 +48,7 @@ public class RelationTripleTest extends TestCase {
    *   word_index  word  parent_index  incoming_relation
    * </pre>
    */
-  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex) {
+  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex, boolean allNominals) {
     List<CoreLabel> sentence = new ArrayList<>();
     SemanticGraph tree = new SemanticGraph();
     for (String line : conll.split("\n")) {
@@ -80,11 +90,11 @@ public class RelationTripleTest extends TestCase {
       i += 1;
     }
     // Run extractor
-    Optional<RelationTriple> segmented = RelationTriple.segment(tree, Optional.empty());
+    Optional<RelationTriple> segmented = new RelationTripleSegmenter(allNominals).segment(tree, Optional.empty());
     if (segmented.isPresent() && listIndex == 0) {
       return segmented;
     }
-    List<RelationTriple> extracted = RelationTriple.extract(tree, sentence);
+    List<RelationTriple> extracted = new RelationTripleSegmenter(allNominals).extract(tree, sentence);
     if (extracted.size() > listIndex) {
       return Optional.of(extracted.get(listIndex - (segmented.isPresent() ? 1 : 0)));
     }
@@ -217,6 +227,17 @@ public class RelationTripleTest extends TestCase {
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tcats\tare\tcute", extraction.get().toString());
+  }
+
+  public void testPropagateCSubj() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\ttruffles\t2\tnsubj\n" +
+        "2\tpicked\t4\tcsubj\n" +
+        "3\tare\t4\tcop\n" +
+        "4\ttasty\t0\troot\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\ttruffles picked\tare\ttasty", extraction.get().toString());
   }
 
   public void testHeWasInaugurated() {
@@ -635,5 +656,22 @@ public class RelationTripleTest extends TestCase {
     extraction = mkExtraction(conll, 2);
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tRometty\tis CEO of\tIBM", extraction.get().toString());
+  }
+
+  public void testAllNominals() {
+    String conll =
+        "1\tfierce\t2\tamod\n" +
+        "2\tlions\t0\troot\n" +
+        "3\tof\t4\tcase\n" +
+        "4\tNarnia\t2\tnmod:of\n";
+    // Positive case
+    Optional<RelationTriple> extraction = mkExtraction(conll, 0, true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tlions\tis\tfierce", extraction.get().toString());
+    extraction = mkExtraction(conll, 1, true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tlions\tis of\tNarnia", extraction.get().toString());
+    // Negative case
+    assertFalse(mkExtraction(conll, false).isPresent());
   }
 }

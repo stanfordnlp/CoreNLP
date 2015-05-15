@@ -82,8 +82,9 @@ public final class SpanishVerbStripper implements Serializable {
         String[] words = line.trim().split("\\s");
         if(words.length < 3) {
           System.err.printf("SpanishVerbStripper: addings words to dict, missing word, ignoring line%n");
+        } else {
+          dict.put(words[0], words[2]);
         }
-        dict.put(words[0], words[2]);
       }
       IOUtils.closeIgnoringExceptions(br);
     } catch (UnsupportedEncodingException e) {

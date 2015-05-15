@@ -28,7 +28,7 @@ public class NaturalLogicAnnotatorITest {
       setProperty("ssplit.isOneSentence", "true");
       setProperty("tokenize.class", "PTBTokenizer");
       setProperty("tokenize.language", "en");
-      setProperty("enforceRequirements", "true");
+      setProperty("enforceRequirements", "false");
     }});
     Annotation ann = new Annotation("All cats have tails");
     pipeline.annotate(ann);

@@ -1051,6 +1051,7 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useSUTime;
   public boolean applyNumericClassifiers;
   public String combinationMode;
+  public String nerModel;
 
   // "ADD VARIABLES ABOVE HERE"
 
@@ -2587,6 +2588,8 @@ public class SeqClassifierFlags implements Serializable {
         applyNumericClassifiers = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("ner.combinationMode")) {
         combinationMode = val;
+      } else if (key.equalsIgnoreCase("ner.model")) {
+        nerModel = val;
         // ADD VALUE ABOVE HERE
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');

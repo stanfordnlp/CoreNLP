@@ -47,6 +47,11 @@ import java.util.stream.Stream;
  */
 public class ClauseSplitterSearchProblem {
 
+  /**
+   * A specification for clause splits we _always_ want to do. The format is a map from the edge label we are splitting, to
+   * the preference for the type of split we should do. The most prefered is at the front of the list, and then it backs off
+   * to the less and less prefered split types.
+   */
   protected static final Map<String, List<String>> HARD_SPLITS = Collections.unmodifiableMap(new HashMap<String, List<String>>() {{
     put("comp", new ArrayList<String>() {{
       add("simple");
@@ -57,6 +62,10 @@ public class ClauseSplitterSearchProblem {
     put("xcomp", new ArrayList<String>() {{
       add("clone_dobj");
       add("clone_nsubj");
+      add("simple");
+    }});
+    put("csubj", new ArrayList<String>() {{
+      add("clone_dobj");
       add("simple");
     }});
   }});
@@ -379,13 +388,13 @@ public class ClauseSplitterSearchProblem {
 
   /**
    * Stips aux and mark edges when we are splitting into a clause.
-   * @param toModify
+   * @param toModify The tree we are stripping the edges from.
    */
   private void stripAuxMark(SemanticGraph toModify) {
     List<SemanticGraphEdge> toClean = new ArrayList<>();
     for (SemanticGraphEdge edge : toModify.outgoingEdgeIterable(toModify.getFirstRoot())) {
       String rel = edge.getRelation().toString();
-      if ("aux".equals(rel) || "mark".equals(rel) && !toModify.outgoingEdgeIterator(edge.getDependent()).hasNext()) {
+      if (("aux".equals(rel) || "mark".equals(rel)) && !toModify.outgoingEdgeIterator(edge.getDependent()).hasNext()) {
         toClean.add(edge);
       }
     }
@@ -584,6 +593,7 @@ public class ClauseSplitterSearchProblem {
                 simpleClause(toModify, outgoingEdge);
                 addSubtree(toModify, outgoingEdge.getDependent(), "nsubj", tree,
                     subjectOrNull.getDependent(), Collections.singleton(outgoingEdge));
+                assert Util.isTree(toModify);
                 stripAuxMark(toModify);
                 assert Util.isTree(toModify);
               }), false
@@ -617,6 +627,7 @@ public class ClauseSplitterSearchProblem {
                 addSubtree(toModify, outgoingEdge.getDependent(), "nsubj", tree,
                     objectOrNull.getDependent(), Collections.singleton(outgoingEdge));
                 // Strip bits we don't want
+                assert Util.isTree(toModify);
                 stripAuxMark(toModify);
                 assert Util.isTree(toModify);
               }), false

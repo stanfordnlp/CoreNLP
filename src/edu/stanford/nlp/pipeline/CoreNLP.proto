@@ -4,6 +4,12 @@ option java_package = "edu.stanford.nlp.pipeline";
 option java_outer_classname = "CoreNLPProtos";
 
 //
+// From JAVANLP_HOME, you can build me with the command:
+//
+//  protoc -I=projects/core/src/edu/stanford/nlp/pipeline/ --java_out=projects/core/src projects/core/src/edu/stanford/nlp/pipeline/CoreNLP.proto
+//
+
+//
 // An enumeration for the valid languages allowed in CoreNLP
 //
 enum Language {
@@ -57,9 +63,11 @@ message Sentence {
   optional DependencyGraph collapsedDependencies               = 9;
   optional DependencyGraph collapsedCCProcessedDependencies    = 10;
   optional DependencyGraph alternativeDependencies             = 13;
+  repeated OpenIETriple    openieTriple                        = 14;   // The OpenIE triples in the sentence
   optional uint32          paragraph                           = 11;
 
   optional string          text                                = 12;
+
 
   // Fields set by other annotators in CoreNLP
   optional bool            hasRelationAnnotations              = 51;
@@ -319,4 +327,18 @@ message NERMention {
   optional string normalizedNER                 = 5;
   optional string entityType                    = 6;
   optional Timex  timex                         = 7;
+}
+
+//
+// An OpenIE relation triple
+//
+message OpenIETriple {
+  optional string          subject      = 1;  // The surface form of the subject
+  optional string          relation     = 2;  // The surface form of the relation (required)
+  optional string          object       = 3;  // The surface form of the object
+  required double          confidence   = 4;  // The [optional] confidence of the extraction
+  required Span            subjectSpan  = 5;  // The span of the subject in the sentence
+  required Span            relationSpan = 6;  // The span of the relation in the sentence
+  required Span            objectSpan   = 7;  // The span of the object in the sentence
+  optional DependencyGraph tree         = 8;  // The dependency graph fragment for this triple
 }

@@ -42,18 +42,8 @@ LICENSE
 CHANGES
 ---------------------------------
 
-2015-04-18    3.5.2     trial core 
-
-2015-04-17    3.5.2     trial core 
-
-2015-04-17    3.5.2     trial core 
-
-2015-04-17    3.5.2     trial core 
-
-2015-04-17    3.5.2     trial core 
-
-2015-04-20    3.5.2     Switch to Universal dependencies, add Chinese
-                        coreference system
+2015-04-20    3.5.2     Switch to Universal dependencies, add Chinese 
+                        coreference systemCore NLP 
 
 2015-01-29    3.5.1     NER, dependency parser, SPIED improvements; 
                         general bugfixes 

@@ -36,8 +36,6 @@ public enum Language {
    * Mostly here to handle the "Any" language value.
    */
   public boolean compatibleWith(Language other) {
-    if (this == Any) { return true; }
-    if (other == Any) { return true; }
-    return false;
+    return this == other || this == Any || other == Any;
   }
 }

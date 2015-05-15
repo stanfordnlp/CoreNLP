@@ -24,6 +24,7 @@ public class CorefCoreAnnotations {
    * Not used by the new dcoref system.
    */
   public static class CorefAnnotation implements CoreAnnotation<String> {
+    @Override
     public Class<String> getType() {
       return String.class;
     }
@@ -71,7 +72,10 @@ public class CorefCoreAnnotations {
    * Set of all the CoreLabel objects which are coreferent with a
    * CoreLabel.  Note that the list includes the CoreLabel that was
    * annotated which creates a cycle.
+   *
+   * @deprecated This was an original dcoref annotation. You should know use CorefChainAnnotation
    */
+  @Deprecated
   public static class CorefClusterAnnotation implements CoreAnnotation<Set<CoreLabel>> {
     public Class<Set<CoreLabel>> getType() {
       return ErasureUtils.uncheckedCast(Set.class);
