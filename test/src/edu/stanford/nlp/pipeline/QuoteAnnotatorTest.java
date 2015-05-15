@@ -27,8 +27,9 @@ public class QuoteAnnotatorTest extends TestCase {
     synchronized(QuoteAnnotatorTest.class) {
       if (pipeline == null) {
         Properties props = new Properties();
-        props.setProperty("annotators", "tokenize, ssplit, quote");
-        props.setProperty("quote.singleQuotes", "true");
+        props.setProperty("annotators", "tokenize, ssplit, quote1");
+        props.setProperty("customAnnotatorClass.quote1", "edu.stanford.nlp.pipeline.QuoteAnnotator");
+        props.setProperty("singleQuotes", "true");
         pipeline = new StanfordCoreNLP(props);
       }
       if (pipelineNoSingleQuotes == null) {

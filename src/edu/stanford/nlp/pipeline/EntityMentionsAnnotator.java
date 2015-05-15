@@ -15,18 +15,24 @@ import java.util.function.Function;
 
 /**
  * Annotator that marks entity mentions in a document.
- * Entity mentions are
- * - Named entities (identified by NER)
- * - Quantifiable entities
- *   - Times (identified by TimeAnnotator)
- *   - Measurements (identified by ???)
+ * Entity mentions are:
+ * <ul>
+ * <li> Named entities (identified by NER) </li>
+ * <li> Quantifiable entities
+ *   <ul>
+ *   <li> Times (identified by TimeAnnotator) </li>
+ *   <li> Measurements (identified by ???) </li>
+ *   </ul>
+ *   </li>
+ * </ul>
  *
  * Each sentence is annotated with a list of the mentions
- *  (MentionsAnnotation as a list of CoreMap)
+ * (MentionsAnnotation as a list of CoreMap).
  *
  * @author Angel Chang
  */
 public class EntityMentionsAnnotator implements Annotator {
+
   // Currently relies on NER annotations being okay
   // - Replace with calling NER classifiers and timeAnnotator directly
   LabeledChunkIdentifier chunkIdentifier;
@@ -60,7 +66,7 @@ public class EntityMentionsAnnotator implements Annotator {
     }
   }
 
-  private static Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = new Function<Pair<CoreLabel, CoreLabel>, Boolean>() {
+  private static final Function<Pair<CoreLabel,CoreLabel>, Boolean> IS_TOKENS_COMPATIBLE = new Function<Pair<CoreLabel, CoreLabel>, Boolean>() {
     @Override
     public Boolean apply(Pair<CoreLabel, CoreLabel> in) {
       // First argument is the current token
@@ -162,4 +168,5 @@ public class EntityMentionsAnnotator implements Annotator {
     // TODO: figure out what this produces
     return Collections.emptySet();
   }
+
 }
