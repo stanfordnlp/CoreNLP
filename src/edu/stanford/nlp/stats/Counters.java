@@ -1927,10 +1927,10 @@ public class Counters {
    *
    * Note that this method subsumes many of the other toString methods, e.g.:
    *
-   * toString(c, k) and toBiggestValuesFirstString(c, k) => toSortedString(c, k,
+   * toString(c, k) and toBiggestValuesFirstString(c, k) =&gt; toSortedString(c, k,
    * "%s=%f", ", ", "[%s]")
    *
-   * toVerticalString(c, k) => toSortedString(c, k, "%2$g\t%1$s", "\n", "%s\n")
+   * toVerticalString(c, k) =&gt; toSortedString(c, k, "%2$g\t%1$s", "\n", "%s\n")
    *
    * @param counter A Counter.
    * @param k The number of keys to include. Use Integer.MAX_VALUE to include

@@ -41,6 +41,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -2246,7 +2247,7 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         r.close();
       }
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new RuntimeIOException(e);
     }
   }
 

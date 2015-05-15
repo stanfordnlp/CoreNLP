@@ -655,7 +655,7 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
      * hessian through scaling or diagonal update, and then storing of the
      * secant pairs s = x - previousX and y = grad - previousGrad.
      *
-     * Things can go wrong, if any non convex behavior is detected (s^T y < 0)
+     * Things can go wrong, if any non convex behavior is detected (s^T y &lt; 0)
      * or numerical errors are likely the update is skipped.
      *
      */
