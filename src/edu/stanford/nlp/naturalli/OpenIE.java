@@ -129,8 +129,11 @@ public class OpenIE implements Annotator {
       return Collections.EMPTY_LIST;
     } else {
       // Get the forward entailments
-      List<SentenceFragment> list = forwardEntailer.apply(clause.parseTree).search()
-          .stream().map(x -> x.changeScore(x.score * clause.score)).collect(Collectors.toList());
+      List<SentenceFragment> list = new ArrayList<>();
+      if (entailmentsPerSentence > 0) {
+        list.addAll(forwardEntailer.apply(clause.parseTree).search()
+            .stream().map(x -> x.changeScore(x.score * clause.score)).collect(Collectors.toList()));
+      }
       list.add(clause);
 
       // A special case for adjective entailments

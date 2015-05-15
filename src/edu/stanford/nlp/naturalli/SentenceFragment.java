@@ -3,9 +3,12 @@ package edu.stanford.nlp.naturalli;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -88,6 +91,27 @@ public class SentenceFragment {
 
   @Override
   public String toString() {
-    return StringUtils.join(words.stream().map(CoreLabel::word), " ");
+    List<Pair<String, Integer>> glosses = new ArrayList<>();
+    for (CoreLabel word : words) {
+      // Add the word itself
+      glosses.add(Pair.makePair(word.word(), word.index() - 1));
+      String addedConnective = null;
+      // Find additional connectives
+      for (SemanticGraphEdge edge : parseTree.incomingEdgeIterable(new IndexedWord(word))) {
+        String rel = edge.getRelation().toString();
+        if (rel.contains("_")) {
+          addedConnective = rel.substring(rel.indexOf("_") + 1);
+        }
+      }
+      if (addedConnective != null) {
+        // Found a connective (e.g., a preposition or conjunction)
+        Pair<Integer, Integer> yield = parseTree.yieldSpan(new IndexedWord(word));
+        glosses.add(Pair.makePair(addedConnective, yield.first - 1));
+      }
+    }
+    // Sort the sentence
+    Collections.sort(glosses, (a, b) -> a.second - b.second);
+    // Return the sentence
+    return StringUtils.join(glosses.stream().map(Pair::first), " ");
   }
 }
