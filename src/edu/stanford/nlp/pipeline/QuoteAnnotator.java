@@ -34,7 +34,7 @@ public class QuoteAnnotator implements Annotator {
   // vary widely.
   public static final Map<String, String> DIRECTED_QUOTES;
   static {
-    Map<String, String> tmp = new HashMap<>();
+    Map<String, String> tmp = Generics.newHashMap();
     tmp.put("“", "”");  // directed double inward
     tmp.put("‘", "’");  // directed single inward
     tmp.put("«", "»");  // guillemets
@@ -208,6 +208,12 @@ public class QuoteAnnotator implements Annotator {
       List<CoreMap> nextLevel = Generics.newArrayList();
       for (CoreMap quote : level) {
         quote.set(CoreAnnotations.QuotationIndexAnnotation.class, index);
+        List<CoreLabel> quoteTokens = quote.get(CoreAnnotations.TokensAnnotation.class);
+        if (quoteTokens != null) {
+          for (CoreLabel qt : quoteTokens) {
+            qt.set(CoreAnnotations.QuotationIndexAnnotation.class, index);
+          }
+        }
         index++;
         if (quote.get(CoreAnnotations.QuotationsAnnotation.class) != null) {
           nextLevel.addAll(quote.get(CoreAnnotations.QuotationsAnnotation.class));
