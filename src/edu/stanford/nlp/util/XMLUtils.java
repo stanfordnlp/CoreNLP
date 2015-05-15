@@ -39,7 +39,7 @@ public class XMLUtils {
    * @return List of String text contents of tags.
    */
   public static List<String> getTextContentFromTagsFromFile(File f, String tag) {
-    List<String> sents = new ArrayList<>();
+    List<String> sents = Generics.newArrayList();
     try {
       sents = getTextContentFromTagsFromFileSAXException(f, tag);
     } catch (SAXException e) {
@@ -60,7 +60,7 @@ public class XMLUtils {
    */
   public static List<String> getTextContentFromTagsFromFileSAXException(
       File f, String tag) throws SAXException {
-    List<String> sents = new ArrayList<>();
+    List<String> sents = Generics.newArrayList();
     try {
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       DocumentBuilder db = dbf.newDocumentBuilder();
@@ -86,6 +86,55 @@ public class XMLUtils {
           }
         }
         sents.add(builtUp);
+      }
+    } catch (IOException e) {
+      System.err.println(e);
+    } catch (ParserConfigurationException e) {
+      System.err.println(e);
+    }
+    return sents;
+  }
+
+
+  /**
+   * Returns the text content of all nodes in the given file with the given tag.
+   *
+   * @return List of String text contents of tags.
+   */
+  public static List<Element> getTagElementsFromFile(File f, String tag) {
+    List<Element> sents = Generics.newArrayList();
+    try {
+      sents = getTagElementsFromFileSAXException(f, tag);
+    } catch (SAXException e) {
+      System.err.println(e);
+    }
+    return sents;
+  }
+
+  /**
+   * Returns the text content of all nodes in the given file with the given tag.
+   * If the text contents contains embedded tags, strips the embedded tags out
+   * of the returned text. e.g. <s>This is a <s>sentence</s> with embedded tags
+   * </s> would return the list containing ["This is a sentence with embedded
+   * tags", "sentence"].
+   *
+   * @throws SAXException if tag doesn't exist in the file.
+   * @return List of String text contents of tags.
+   */
+  public static List<Element> getTagElementsFromFileSAXException(
+      File f, String tag) throws SAXException {
+    List<Element> sents = Generics.newArrayList();
+    try {
+      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+      DocumentBuilder db = dbf.newDocumentBuilder();
+      Document doc = db.parse(f);
+      doc.getDocumentElement().normalize();
+
+      NodeList nodeList=doc.getElementsByTagName(tag);
+      for (int i = 0; i < nodeList.getLength(); i++) {
+        // Get element
+        Element element = (Element)nodeList.item(i);
+        sents.add(element);
       }
     } catch (IOException e) {
       System.err.println(e);
