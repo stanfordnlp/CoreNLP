@@ -2,13 +2,11 @@ package edu.stanford.nlp.pipeline;
 
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.regexp.NumberSequenceClassifier;
-import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.PropertiesUtils;
 import edu.stanford.nlp.util.RuntimeInterruptedException;
-import edu.stanford.nlp.util.StringUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -64,46 +62,9 @@ public class NERCombinerAnnotator extends SentenceAnnotator {
   }
 
   public NERCombinerAnnotator(String name, Properties properties) {
-    this(createNERClassifierCombiner(name, properties), false,
+    this(NERClassifierCombiner.createNERClassifierCombiner(name, properties), false,
          PropertiesUtils.getInt(properties, name + ".nthreads", PropertiesUtils.getInt(properties, "nthreads", 1)),
          PropertiesUtils.getLong(properties, name + ".maxtime", -1));
-  }
-
-  static NERClassifierCombiner createNERClassifierCombiner(String name, Properties properties) {
-    // TODO: Move function into NERClassifierCombiner?
-    String prefix = (name != null)? name + '.' : "ner.";
-    String modelNames = properties.getProperty(prefix + "model");
-    if (modelNames == null) {
-      modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + ',' + DefaultPaths.DEFAULT_NER_MUC_MODEL + ',' + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
-    }
-    // but modelNames can still be empty string is set explicitly to be empty!
-    String[] models;
-    if ( ! modelNames.isEmpty()) {
-      models  = modelNames.split(",");
-    } else {
-      // Allow for no real NER model - can just use numeric classifiers or SUTime
-      System.err.println("WARNING: no NER models specified");
-      models = StringUtils.EMPTY_STRING_ARRAY;
-    }
-    NERClassifierCombiner nerCombiner;
-    try {
-      // TODO: use constants for part after prefix so we can ensure consistent options
-      boolean applyNumericClassifiers =
-              PropertiesUtils.getBool(properties,
-                      prefix + "applyNumericClassifiers",
-                      NERClassifierCombiner.APPLY_NUMERIC_CLASSIFIERS_DEFAULT);
-      boolean useSUTime =
-              PropertiesUtils.getBool(properties,
-                      prefix + "useSUTime",
-                      NumberSequenceClassifier.USE_SUTIME_DEFAULT);
-      // TODO: properties are passed in as is for number sequence classifiers (don't care about the prefix)
-      nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
-              useSUTime, properties, models);
-    } catch (IOException e) {
-      throw new RuntimeIOException(e);
-    }
-
-    return nerCombiner;
   }
 
   @Override

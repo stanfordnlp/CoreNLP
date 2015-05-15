@@ -240,15 +240,6 @@ public class QuoteAnnotator implements Annotator {
     quote.set(CoreAnnotations.SentenceBeginAnnotation.class, sentenceBeginIndex);
     quote.set(CoreAnnotations.SentenceEndAnnotation.class, sentenceEndIndex);
 
-    if (quoteTokens != null) {
-      int index = 1;
-      for (CoreLabel token : quoteTokens) {
-        token.setIndex(index++);
-        if (docID != null) {
-          token.setDocID(docID);
-        }
-      }
-    }
     return quote;
   }
 
