@@ -44,11 +44,33 @@ public class QuotationAnnotatorTest extends TestCase {
     assertEquals("``how are you doing?''", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
   }
 
-  public void testEmbeddedLatexQuotes() {
-    String text = "``Hello ``how'' are you doing?''";
+  public void testLatexQuotesWithDirectedApostrophes() {
+    String text = "John`s he said, ``how are you doing?''";
     List<CoreMap> quotes = runQuotes(text, 1);
-    assertEquals("``Hello ``how'' are you doing?''", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    assertEmbedded("``how''", text, quotes);
+    assertEquals("``how are you doing?''", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+  }
+
+  public void testEmbeddedLatexQuotes() {
+    String text = "``Hello ``how are you doing?''''";
+    List<CoreMap> quotes = runQuotes(text, 1);
+    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEmbedded("``how are you doing?''", text, quotes);
+  }
+
+  public void testEmbeddedSingleLatexQuotes() {
+    String text = "`Hello `how are you doing?''";
+    List<CoreMap> quotes = runQuotes(text, 1);
+    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEmbedded("`how are you doing?'", text, quotes);
+  }
+
+  public void testEmbeddedLatexQuotesAllEndSamePlace() {
+    String text = "``Hello ``how `are ``you doing?'''''''";
+    List<CoreMap> quotes = runQuotes(text, 1);
+    assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
+    assertEmbedded("``how `are ``you doing?'''''", text, quotes);
+    assertEmbedded("`are ``you doing?'''", "``how `are ``you doing?'''''", quotes);
+    assertEmbedded("``you doing?''", "`are ``you doing?'''", quotes);
   }
 
   public void testTripleEmbeddedLatexQuotes() {
