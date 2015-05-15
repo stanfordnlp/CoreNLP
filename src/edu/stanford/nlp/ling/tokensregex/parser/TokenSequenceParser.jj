@@ -19,36 +19,57 @@ import edu.stanford.nlp.util.Pair;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.*;
+import java.lang.RuntimeException;
 
 public class TokenSequenceParser implements SequencePattern.Parser<CoreMap> {
     public TokenSequenceParser() {}
 
-    public CoreMapExpressionExtractor getExpressionExtractor(Env env, Reader r) throws ParseException {
-        TokenSequenceParser p = new TokenSequenceParser(r);
-        List<SequenceMatchRules.Rule> rules = p.RuleList(env);
-        return new CoreMapExpressionExtractor(env, rules);
+    public CoreMapExpressionExtractor getExpressionExtractor(Env env, Reader r) throws ParseException, TokenSequenceParseException {
+        try{
+            TokenSequenceParser p = new TokenSequenceParser(r);
+            List<SequenceMatchRules.Rule> rules = p.RuleList(env);
+            return new CoreMapExpressionExtractor(env, rules);
+        }catch(TokenMgrError error){
+            throw new TokenSequenceParseException("Parsing failed. Error: " + error);
+        }
     }
 
-    public void updateExpressionExtractor(CoreMapExpressionExtractor extractor, Reader r) throws ParseException {
-        TokenSequenceParser p = new TokenSequenceParser(r);
-        List<SequenceMatchRules.Rule> rules = p.RuleList(extractor.getEnv());
-        extractor.appendRules(rules);
+    public void updateExpressionExtractor(CoreMapExpressionExtractor extractor, Reader r) throws ParseException, TokenSequenceParseException {
+        try{
+            TokenSequenceParser p = new TokenSequenceParser(r);
+            List<SequenceMatchRules.Rule> rules = p.RuleList(extractor.getEnv());
+            extractor.appendRules(rules);
+        }catch(TokenMgrError error){
+            throw new TokenSequenceParseException("Parsing failed. Error: " + error);
+        }
     }
 
-	public SequencePattern.PatternExpr parseSequence(Env env, String s) throws ParseException {
-        TokenSequenceParser p = new TokenSequenceParser(new StringReader(s));
-        return p.SeqRegex(env);
+	public SequencePattern.PatternExpr parseSequence(Env env, String s) throws ParseException, TokenSequenceParseException {
+        try{
+            TokenSequenceParser p = new TokenSequenceParser(new StringReader(s));
+            return p.SeqRegex(env);
+        }catch(TokenMgrError error){
+            throw new TokenSequenceParseException("Parsing failed. Error: " + error);
+        }
   	}
 
-	public Pair<SequencePattern.PatternExpr, SequenceMatchAction<CoreMap>> parseSequenceWithAction(Env env, String s) throws ParseException {
-        TokenSequenceParser p = new TokenSequenceParser(new StringReader(s));
-        return p.SeqRegexWithAction(env);
+	public Pair<SequencePattern.PatternExpr, SequenceMatchAction<CoreMap>> parseSequenceWithAction(Env env, String s) throws ParseException, TokenSequenceParseException {
+        try{
+            TokenSequenceParser p = new TokenSequenceParser(new StringReader(s));
+            return p.SeqRegexWithAction(env);
+        }catch(TokenMgrError error){
+            throw new TokenSequenceParseException("Parsing failed. Error: " + error);
+        }
   	}
 
-	public SequencePattern.PatternExpr parseNode(Env env, String s) throws ParseException {
-        TokenSequenceParser p = new TokenSequenceParser(new StringReader(s));
-        NodePattern n = p.Node(env);
-        return new SequencePattern.NodePatternExpr(n);
+	public SequencePattern.PatternExpr parseNode(Env env, String s) throws ParseException, TokenSequenceParseException {
+        try{
+            TokenSequenceParser p = new TokenSequenceParser(new StringReader(s));
+            NodePattern n = p.Node(env);
+            return new SequencePattern.NodePatternExpr(n);
+        }catch(TokenMgrError error){
+            throw new TokenSequenceParseException("Parsing failed. Error: " + error);
+        }
   	}
 
     private static Integer parseInteger(String str) {

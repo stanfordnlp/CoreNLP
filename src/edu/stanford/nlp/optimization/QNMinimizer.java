@@ -12,6 +12,7 @@ import java.util.Set;
 
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.math.ArrayMath;
+import edu.stanford.nlp.util.CallbackFunction;
 import edu.stanford.nlp.util.Generics;
 
 
@@ -131,6 +132,8 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
   private int startEvaluateIters = 0; // starting evaluation after x iterations
   private Evaluator[] evaluators;  // separate set of evaluators to check how optimization is going
 
+  private transient CallbackFunction iterCallbackFunction = null;
+
   public enum eState {
     TERMINATE_MAXEVALS, TERMINATE_RELATIVENORM, TERMINATE_GRADNORM, TERMINATE_AVERAGEIMPROVE, CONTINUE, TERMINATE_EVALIMPROVE, TERMINATE_MAXITR
   }
@@ -206,6 +209,10 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
     this.evaluateIters = iters;
     this.startEvaluateIters = startEvaluateIters;
     this.evaluators = evaluators;
+  }
+
+  public void setIterationCallbackFunction(CallbackFunction func){
+    iterCallbackFunction = func;
   }
 
   public void terminateOnRelativeNorm(boolean toTerminate) {
@@ -1059,6 +1066,11 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
         // X and writes to output
         rec.add(newValue, newGrad, newX, fevals, evalScore);
 
+        //If you wanna call a function and do whatever with the information
+        if(iterCallbackFunction != null){
+          iterCallbackFunction.callback(newX, its, newValue, newGrad);
+        }
+
         // shift
         value = newValue;
         // double[] temp = x;
@@ -1106,6 +1118,8 @@ public class QNMinimizer implements Minimizer<DiffFunction>, HasEvaluators {
       double evalScore = (useEvalImprovement ? doEvaluation(rec.getBest()) : doEvaluation(x));
       sayln("final evalScore is: " + evalScore);
     }
+
+
 
     //
     // Announce the reason minimization has terminated.

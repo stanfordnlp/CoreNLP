@@ -477,6 +477,13 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name="fuzzyMatch")
   public boolean fuzzyMatch = false;
 
+  /**
+   * Ignore case when matching seed words. It's a map so something like {name->true,place->false}
+   */
+  @Option(name="ignoreCaseSeedMatch")
+  public Map<String, String> ignoreCaseSeedMatch = new HashMap<String, String>();
+
+
   public Set<String> getLabels() {
     return labels;
   }
@@ -535,7 +542,8 @@ public class ConstantsAndVariables implements Serializable {
 
 
   static public class ScorePhraseMeasures implements Comparable {
-    String name;
+
+        String name;
     static int num = 0;
     int numObj;
     static Map<String, ScorePhraseMeasures> createdObjects = new ConcurrentHashMap<String, ScorePhraseMeasures>();
@@ -574,8 +582,9 @@ public class ConstantsAndVariables implements Serializable {
     static final ScorePhraseMeasures WORDVECPOSSIMMAX = new ScorePhraseMeasures("WordVecPosSimMax");
     static final ScorePhraseMeasures WORDVECNEGSIMAVG = new ScorePhraseMeasures("WordVecNegSimAvg");
     static final ScorePhraseMeasures WORDVECNEGSIMMAX = new ScorePhraseMeasures("WordVecNegSimMax");
-
-
+    static final ScorePhraseMeasures ISFIRSTCAPITAL = new ScorePhraseMeasures("IsFirstLetterCapital");
+    static final ScorePhraseMeasures WORDSHAPESTR = new  ScorePhraseMeasures("WordShapeStr");
+    static final ScorePhraseMeasures BOW = new ScorePhraseMeasures("Word");
     @Override
     public int compareTo(Object o) {
       if(!(o instanceof  ScorePhraseMeasures))
@@ -642,8 +651,20 @@ public class ConstantsAndVariables implements Serializable {
   @Option(name = "usePhraseEvalEditDistOther")
   public boolean usePhraseEvalEditDistOther = false;
 
-  @Option(name = "usePhraseEvalWordShape")
+  @Option(name = "usePhraseEvalWordShape", gloss="% of phrases of that label that have the same word shape")
   public boolean usePhraseEvalWordShape = false;
+
+  @Option(name="usePhraseEvalWordShapeStr", gloss="uses the word shape str as a feature")
+  public boolean usePhraseEvalWordShapeStr = false;
+
+  @Option(name="usePhraseEvalFirstCapital", gloss="words starts with a capital letter")
+  public boolean usePhraseEvalFirstCapital;
+
+  /**
+   * use bag of words
+   */
+  @Option(name="usePhraseEvalBOW")
+  public boolean usePhraseEvalBOW = false;
 
   /**
    * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
@@ -658,6 +679,12 @@ public class ConstantsAndVariables implements Serializable {
    */
   @Option(name = "usePatternEvalWordShape")
   public boolean usePatternEvalWordShape = false;
+
+  @Option(name="usePatternEvalWordShapeStr", gloss="uses the word shape str as a feature")
+  public boolean usePatternEvalWordShapeStr = false;
+
+  @Option(name="usePatternEvalFirstCapital", gloss="words starts with a capital letter")
+  public boolean usePatternEvalFirstCapital;
 
   /**
    * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
@@ -676,24 +703,31 @@ public class ConstantsAndVariables implements Serializable {
 
   /**
    * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
-   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
+   * <code>PhEvalInPatLogP</code>. See usePhrase* for meanings.
    */
   @Option(name = "usePatternEvalSemanticOdds")
   public boolean usePatternEvalSemanticOdds = false;
 
   /**
    * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
-   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
+   * <code>PhEvalInPatLogP</code>. See usePhrase* for meanings.
    */
   @Option(name = "usePatternEvalEditDistSame")
   public boolean usePatternEvalEditDistSame = false;
 
   /**
    * Used only if {@link #patternScoring} is <code>PhEvalInPat</code> or
-   * <code>PhEvalInPat</code>. See usePhrase* for meanings.
+   * <code>PhEvalInPatLogP</code>. See usePhrase* for meanings.
    */
   @Option(name = "usePatternEvalEditDistOther")
   public boolean usePatternEvalEditDistOther = false;
+
+  /**
+   * use bag of words
+   */
+  @Option(name="usePatternEvalBOW")
+  public boolean usePatternEvalBOW = false;
+
 
   /**
    * These are used to learn weights for features if using logistic regression.
@@ -837,13 +871,17 @@ public class ConstantsAndVariables implements Serializable {
       return;
     }
 
+    Redwood.log(Redwood.DBG, "Setting up ConstantsAndVariables");
+
     Execution.fillOptions(this, props);
     Execution.fillOptions(PatternFactory.class, props);
     Execution.fillOptions(SurfacePatternFactory.class, props);
     Execution.fillOptions(DepPatternFactory.class, props);
 
-    if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty())
+    if (wordIgnoreRegex != null && !wordIgnoreRegex.isEmpty()) {
+      Redwood.log(Redwood.DBG, "Ignore word regex is " + wordIgnoreRegex);
       PatternFactory.ignoreWordRegex = Pattern.compile(wordIgnoreRegex);
+    }
 
     for (String label : labels) {
       env.put(label, TokenSequencePattern.getNewEnv());
@@ -888,15 +926,14 @@ public class ConstantsAndVariables implements Serializable {
         otherSemanticClassesWords = Collections
             .synchronizedSet(new HashSet<CandidatePhrase>());
       for (String file : otherSemanticClassesFiles.split("[;,]")) {
-        for (String w : IOUtils.linesFromFile(file)) {
-
-          String[] t = w.split("\\s+");
-          if (t.length <= PatternFactory.numWordsCompound)
-            otherSemanticClassesWords.add(CandidatePhrase.createOrGet(w));
-
+        for (File f : listFileIncludingItself(file)) {
+          for (String w : IOUtils.readLines(f)) {
+            String[] t = w.split("\\s+");
+            if (t.length <= PatternFactory.numWordsCompoundMax)
+              otherSemanticClassesWords.add(CandidatePhrase.createOrGet(w));
+          }
         }
       }
-
       System.out.println("Size of othersemantic class variables is "
         + otherSemanticClassesWords.size());
     } else {
@@ -979,6 +1016,14 @@ public class ConstantsAndVariables implements Serializable {
     alreadySetUp = true;
   }
 
+
+  public static Iterable<File> listFileIncludingItself(String file) {
+    File f = new File(file);
+    if(!f.isDirectory())
+      return Arrays.asList(f);
+    else return IOUtils.iterFilesRecursive(f);
+  }
+
   // The format of goldEntitiesEvalFiles is assumed same as
   // seedwordsfiles: label,file;label2,file2;...
   // Each file of gold entities consists of each entity in newline with
@@ -1043,7 +1088,7 @@ public class ConstantsAndVariables implements Serializable {
         }
       }else{
         readInMemory= true;
-        return new Pair<>(Data.sents, new File(""));
+        return new Pair<>(Data.sents, new File(Data.inMemorySaveFileLocation));
       }
     }
   }

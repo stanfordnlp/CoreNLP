@@ -3,6 +3,7 @@ package edu.stanford.nlp.ling.tokensregex;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.tokensregex.parser.ParseException;
+import edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParseException;
 import edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParser;
 import edu.stanford.nlp.ling.tokensregex.types.Expression;
 import edu.stanford.nlp.ling.tokensregex.types.Tags;
@@ -264,7 +265,7 @@ public class CoreMapExpressionExtractor<T extends MatchedExpression> {
    * @param str
    * @throws IOException, ParseException
    */
-  public static CoreMapExpressionExtractor createExtractorFromString(Env env, String str) throws IOException, ParseException {
+  public static CoreMapExpressionExtractor createExtractorFromString(Env env, String str) throws IOException, ParseException, TokenSequenceParseException {
     TokenSequenceParser parser = new TokenSequenceParser();
     CoreMapExpressionExtractor extractor = parser.getExpressionExtractor(env, new StringReader(str));
     return extractor;
