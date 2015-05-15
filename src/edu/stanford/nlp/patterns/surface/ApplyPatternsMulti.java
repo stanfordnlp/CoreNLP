@@ -9,10 +9,7 @@ import edu.stanford.nlp.ling.tokensregex.MultiPatternMatcher;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatchResult;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatcher;
 import edu.stanford.nlp.ling.tokensregex.TokenSequencePattern;
-import edu.stanford.nlp.patterns.ConstantsAndVariables;
-import edu.stanford.nlp.patterns.Pattern;
-import edu.stanford.nlp.patterns.PatternFactory;
-import edu.stanford.nlp.patterns.PatternsAnnotations;
+import edu.stanford.nlp.patterns.*;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CollectionValuedMap;
 import edu.stanford.nlp.util.CoreMap;
@@ -29,9 +26,9 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
   ConstantsAndVariables constVars;
   //Set<String> ignoreWords;
   MultiPatternMatcher<CoreMap> multiPatternMatcher;
-  Map<String, List<CoreLabel>> sents = null;
+  Map<String, DataInstance> sents = null;
 
-  public ApplyPatternsMulti(Map<String, List<CoreLabel>> sents, List<String> sentids, Map<TokenSequencePattern, E> patterns, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
+  public ApplyPatternsMulti(Map<String, DataInstance> sents, List<String> sentids, Map<TokenSequencePattern, E> patterns, String label, boolean removeStopWordsFromSelectedPhrases, boolean removePhrasesWithStopWords, ConstantsAndVariables cv) {
     this.sents = sents;
     this.patterns = patterns;
     multiPatternMatcher = TokenSequencePattern.getMultiPatternMatcher(patterns.keySet());
@@ -50,7 +47,7 @@ public class ApplyPatternsMulti<E extends Pattern> implements Callable<Pair<TwoD
 
     TwoDimensionalCounter<Pair<String, String>, E> allFreq = new TwoDimensionalCounter<Pair<String, String>, E>();
     for (String sentid : sentids) {
-      List<CoreLabel> sent = sents.get(sentid);
+      List<CoreLabel> sent = sents.get(sentid).getTokens();
 
       //FIND_ALL is faster than FIND_NONOVERLAP
       Iterable<SequenceMatchResult<CoreMap>> matched = multiPatternMatcher.find(sent, SequenceMatcher.FindType.FIND_ALL);
