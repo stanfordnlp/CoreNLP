@@ -184,7 +184,8 @@ import edu.stanford.nlp.util.Timing;
  * <tr><td> useWordTag</td><td>boolean</td><td>false</td><td>Include word and tag pair features</td></tr>
  * <tr><td> useLastRealWord</td><td>boolean</td><td>false</td><td>Iff the prev word is of length 3 or less, add an extra feature that combines the word two back and the current word's shape. <i>Weird!</i></td></tr>
  * <tr><td> useNextRealWord</td><td>boolean</td><td>false</td><td>Iff the next word is of length 3 or less, add an extra feature that combines the word after next and the current word's shape. <i>Weird!</i></td></tr>
- * <tr><td> useTitle</td><td>boolean</td><td>false</td><td>Match a word against a list of name titles (Mr, Mrs, etc.)</td></tr>
+ * <tr><td> useTitle</td><td>boolean</td><td>false</td><td>Match a word against a list of name titles (Mr, Mrs, etc.). Doesn't really seem to help.</td></tr>
+ * <tr><td> useTitle2</td><td>boolean</td><td>false</td><td>Match a word against a better list of English name titles (Mr, Mrs, etc.). Still doesn't really seem to help.</td></tr>
  * <tr><td> useDistSim</td><td>boolean</td><td>false</td><td>Load a file of distributional similarity classes (specified by <code>distSimLexicon</code>) and use it for features</td></tr>
  * <tr><td> distSimLexicon</td><td>String</td><td></td><td>The file to be loaded for distsim classes.</td></tr>
  * <tr><td> distSimFileFormat</td><td>String</td><td>alexclark</td><td>Files should be formatted as tab separated rows where each row is a word/class pair.  alexclark=word first, terrykoo=class first</td></tr>
@@ -739,6 +740,8 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
   private Set<String> femaleNames; // = null;
 
   private final Pattern titlePattern = Pattern.compile("(?:Mr|Ms|Mrs|Dr|Miss|Sen|Judge|Sir)\\.?"); // todo: should make static final and add more titles
+  private static final Pattern titlePattern2 = Pattern.compile("(?i:Mr|Mrs|Ms|Miss|Drs?|Profs?|Sens?|Reps?|Attys?|Lt|Col|Gen|Messrs|Govs?|Adm|Rev|Maj|Sgt|Cpl|Pvt|Capt|Ste?|Ave|Pres|Lieut|Hon|Brig|Co?mdr|Pfc|Spc|Supts?|Det|Mt|Ft|Adj|Adv|Asst|Assoc|Ens|Insp|Mlle|Mme|Msgr|Sfc)\\.?"); 
+
   private static final Pattern splitSlashHyphenWordsPattern = Pattern.compile("[-/]");
 
   private void generateSlashHyphenFeatures(String word, Collection<String> featuresC, String fragSuffix, String wordSuffix) {
@@ -800,16 +803,16 @@ public class NERFeatureFactory<IN extends CoreLabel> extends FeatureFactory<IN> 
         featuresC.add("IS_TITLE");
       }
     }
+    else if (flags.useTitle2) {
+      Matcher m = titlePattern2.matcher(cWord);
+      if (m.matches()) {
+        featuresC.add("IS_TITLE");
+      }
+    }
 
     if (flags.slashHyphenTreatment != SeqClassifierFlags.SlashHyphenEnum.NONE) {
       if (flags.useWord) {
         generateSlashHyphenFeatures(cWord, featuresC, "-WFRAG", "-WORD");
-      }
-      if (flags.useNext) {
-        generateSlashHyphenFeatures(nWord, featuresC, "-NWFRAG", "-NW");
-      }
-      if (flags.usePrev) {
-        generateSlashHyphenFeatures(nWord, featuresC, "-PWFRAG", "-PW");
       }
     }
 

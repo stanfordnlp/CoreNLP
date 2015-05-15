@@ -160,7 +160,11 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    */
   @Override
   public GrammaticalStructureFactory grammaticalStructureFactory() {
-    return new EnglishGrammaticalStructureFactory();
+    if (generateOriginalDependencies) {
+      return new EnglishGrammaticalStructureFactory();
+    } else {
+      return new UniversalEnglishGrammaticalStructureFactory();
+    }
   }
 
   /**
@@ -172,12 +176,20 @@ public class PennTreebankLanguagePack extends AbstractTreebankLanguagePack {
    */
   @Override
   public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter) {
-    return new EnglishGrammaticalStructureFactory(puncFilter);
+    if (generateOriginalDependencies) {
+      return new EnglishGrammaticalStructureFactory(puncFilter);
+    } else {
+      return new UniversalEnglishGrammaticalStructureFactory(puncFilter);
+    }  
   }
 
   @Override
   public GrammaticalStructureFactory grammaticalStructureFactory(Predicate<String> puncFilter, HeadFinder hf) {
-    return new EnglishGrammaticalStructureFactory(puncFilter, hf);
+    if (generateOriginalDependencies) {
+      return new EnglishGrammaticalStructureFactory(puncFilter, hf);
+    } else {
+      return new UniversalEnglishGrammaticalStructureFactory(puncFilter, hf);
+    }  
   }
 
   @Override

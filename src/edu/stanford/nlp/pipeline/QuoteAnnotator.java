@@ -8,7 +8,6 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Timing;
 
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -29,6 +28,16 @@ public class QuoteAnnotator implements Annotator {
   private final boolean VERBOSE;
   private final boolean DEBUG = false;
 
+  // whether or not to consider single single quotes as quote-marking
+  public boolean USE_SINGLE = false;
+  // max length to consider for quotes
+  public int MAX_LENGTH = -1;
+  // whether to convert unicode quotes to non-unicode " and '
+  // before processing
+  public boolean ASCII_QUOTES = false;
+
+  // TODO: implement this
+//  public boolean closeUnclosedQuotes = false;
   //TODO: add directed quote/unicode quote understanding capabilities.
   // will need substantial logic, probably, as quotation mark conventions
   // vary widely.
@@ -46,10 +55,21 @@ public class QuoteAnnotator implements Annotator {
     tmp.put("``","''");  // double latex -- single latex quotes don't belong here!
     DIRECTED_QUOTES = Collections.unmodifiableMap(tmp);
   }
-  public static final String[] QUOTES = {"\"", "'", "’"};
 
-  // TODO: implement this
-  public final boolean closeUnclosedQuotes = false;
+  /** Return a QuoteAnnotator that isolates quotes denoted by the
+   * ASCII characters " and '. If an unclosed quote appears, by default,
+   * this quote will not be counted as a quote.
+   *
+   *  @param s String that is ignored but allows for creation of the
+   *           QuoteAnnotator via a customAnnotatorClass
+   *
+   *  @param  props Properties object that contains the customizable properties
+   *                 attributes.
+   *  @return A QuoteAnnotator.
+   */
+  public QuoteAnnotator(String s, Properties props) {
+    this(props, false);
+  }
 
   /** Return a QuoteAnnotator that isolates quotes denoted by the
    * ASCII characters " and '. If an unclosed quote appears, by default,
@@ -73,6 +93,10 @@ public class QuoteAnnotator implements Annotator {
    *  @return A QuoteAnnotator.
    */
   public QuoteAnnotator(Properties props, boolean verbose) {
+    USE_SINGLE = Boolean.parseBoolean(props.getProperty("singleQuotes", "false"));
+    MAX_LENGTH = Integer.parseInt(props.getProperty("maxLength", "-1"));
+    ASCII_QUOTES = Boolean.parseBoolean(props.getProperty("asciiQuotes", "false"));
+
     VERBOSE = verbose;
     Timing timer = null;
     if (VERBOSE) {
@@ -94,7 +118,12 @@ public class QuoteAnnotator implements Annotator {
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
-    List<Pair<Integer, Integer>> overall = getQuotes(text);
+
+    String quotesFrom = text;
+    if (ASCII_QUOTES) {
+      quotesFrom = replaceUnicode(text);
+    }
+    List<Pair<Integer, Integer>> overall = getQuotes(quotesFrom);
 
     String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
 
@@ -103,6 +132,21 @@ public class QuoteAnnotator implements Annotator {
     // add quotes to document
     annotation.set(CoreAnnotations.QuotationsAnnotation.class, cmQuotes);
 
+  }
+
+  // Stolen from PTBLexer
+  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']");
+  private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
+
+  private static String asciiQuotes(String in) {
+    String s1 = in;
+    s1 = asciiSingleQuote.matcher(s1).replaceAll("'");
+    s1 = asciiDoubleQuote.matcher(s1).replaceAll("\"");
+    return s1;
+  }
+
+  public static String replaceUnicode(String text) {
+    return asciiQuotes(text);
   }
 
   public static Comparator<CoreMap> getQuoteComparator() {
@@ -120,7 +164,7 @@ public class QuoteAnnotator implements Annotator {
                                                List<CoreLabel> tokens,
                                                List<CoreMap> sentences,
                                               String text, String docID) {
-    List<CoreMap> cmQuotes = new ArrayList<>();
+    List<CoreMap> cmQuotes = Generics.newArrayList();
     for (Pair<Integer, Integer> p : quotes) {
       int begin = p.first();
       int end = p.second();
@@ -248,11 +292,11 @@ public class QuoteAnnotator implements Annotator {
     return quote;
   }
 
-  public static List<Pair<Integer, Integer>> getQuotes(String text) {
+  public List<Pair<Integer, Integer>> getQuotes(String text) {
     return recursiveQuotes(text, 0, null);
   }
 
-  public static List<Pair<Integer, Integer>> recursiveQuotes(String text, int offset, String prevQuote) {
+  public List<Pair<Integer, Integer>> recursiveQuotes(String text, int offset, String prevQuote) {
     Map<String, List<Pair<Integer, Integer>>> quotesMap = new HashMap<>();
     int start = -1;
     int end = -1;
@@ -291,7 +335,7 @@ public class QuoteAnnotator implements Annotator {
 
       // opening
       if ((start < 0) && !matchesPrevQuote(c, prevQuote) &&
-          (((c.equals("'") || c.equals("`")) && isSingleQuoteStart(text, i)) ||
+          (((isSingleQuoteWithUse(c) || c.equals("`")) && isSingleQuoteStart(text, i)) ||
             (c.equals("\"") || DIRECTED_QUOTES.containsKey(c)))) {
         start = i;
         quote = c;
@@ -323,8 +367,20 @@ public class QuoteAnnotator implements Annotator {
         quote = null;
       }
 
+
       if (c.length() > 1) {
         i += c.length() - 1;
+      }
+
+      // forget about this quote
+      if (MAX_LENGTH > 0 && start >= 0 &&
+          i - start > MAX_LENGTH) {
+        // go back to the right index after start
+        i = start + quote.length();
+
+        start = -1;
+        end = -1;
+        quote = null;
       }
     }
 
@@ -337,7 +393,7 @@ public class QuoteAnnotator implements Annotator {
 //      }
 //      quotesMap.get(quote).add(new Pair(start, text.length()));
 //    } else
-    if (start >= 0) {
+    if (start >= 0 && start < text.length() - 3) {
       String warning = text;
       if (text.length() > 150) {
         warning = text.substring(0, 150) + "...";
@@ -350,12 +406,12 @@ public class QuoteAnnotator implements Annotator {
     List<Pair<Integer, Integer>> quotes = Generics.newArrayList();
     // If I didn't find any quotes, but did find a quote-beginning, try again,
     // but without the part of the text before the single quote
-    if (quotesMap.isEmpty() && start >= 0) {
-      String toPass = text.substring(start + quote.length(), text.length());//  - (quote.length() - 1));
+    if (quotesMap.isEmpty() && start >= 0 && start < text.length() - 3) {
+      String toPass = text.substring(start + quote.length(), text.length());
       List<Pair<Integer, Integer>> embedded = recursiveQuotes(toPass, offset, null);
       for (Pair<Integer, Integer> e : embedded) {
-        quotes.add(new Pair(e.first() + offset + start + quote.length(),
-            e.second() + offset + start + 1));
+        quotes.add(new Pair(e.first() + start + quote.length(),
+            e.second() + start + 1));
       }
     } else {
       for (String qKind : quotesMap.keySet()) {
@@ -378,6 +434,10 @@ public class QuoteAnnotator implements Annotator {
     }
 
     return quotes;
+  }
+
+  private boolean isSingleQuoteWithUse(String c) {
+    return c.equals("'") && USE_SINGLE;
   }
 
   private static boolean matchesPrevQuote(String c, String prev) {
@@ -412,7 +472,7 @@ public class QuoteAnnotator implements Annotator {
   }
 
   public static boolean isSingleQuote(String c) {
-    return c.matches("[']");
+    return c.equals("'");
   }
 
   @Override

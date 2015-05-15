@@ -25,12 +25,14 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.trees.EnglishGrammaticalRelations;
 import edu.stanford.nlp.trees.GrammaticalRelation;
+import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
+import edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.StringUtils;
 
@@ -597,7 +599,8 @@ public class BasicRelationFeatureFactory extends RelationFeatureFactory implemen
         return;
       }
       try {
-        graph = SemanticGraphFactory.generateCollapsedDependencies(tree);
+        graph = SemanticGraphFactory.makeFromTree(tree, Mode.COLLAPSED, GrammaticalStructure.Extras.NONE, true, null, true);
+
       } catch(Exception e){
         System.err.println("WARNING: failed to generate dependencies from tree " + tree.toString());
         e.printStackTrace();

@@ -357,9 +357,6 @@ public class RegexNERSequenceClassifier extends AbstractSequenceClassifier<CoreL
                     DocumentReaderAndWriter<CoreLabel> readerAndWriter) {}
 
   @Override
-  public void printProbsDocument(List<CoreLabel> document) {}
-
-  @Override
   public void serializeClassifier(String serializePath) {}
 
   @Override

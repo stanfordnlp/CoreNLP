@@ -138,9 +138,10 @@ public class EntityMentionsAnnotatorITest extends TestCase {
 
     annotator.annotate(doc);
     List<CoreMap> mentions = doc.get(CoreAnnotations.MentionsAnnotation.class);
-    // TODO: "Duke of Cambridge" should be one mention. Perhaps should get "Prince William" rather than just "William"
-    //       "nearly 5,500 square meters"? "10 million British pounds", "16.14 million U.S. dollars"
-    // TODO: "China Center should be organization, but is currently coming out as location. :(
+    // TODO: "Duke of Cambridge" should be one mention. 
+    // TODO: Not sure if should get "Prince William" rather than just "William", but going with the flow.
+    // TODO: "nearly 5,500 square meters"? "10 million British pounds", "16.14 million U.S. dollars"
+    // TODO: "China Center should definitely be an organization!
     String[] expectedMentions = {
         "[Text=Duke CharacterOffsetBegin=0 CharacterOffsetEnd=4 Tokens=[Duke-1] TokenBegin=0 TokenEnd=1 NamedEntityTag=PERSON EntityType=PERSON SentenceIndex=0]",
         "[Text=Cambridge CharacterOffsetBegin=8 CharacterOffsetEnd=17 Tokens=[Cambridge-3] TokenBegin=2 TokenEnd=3 NamedEntityTag=LOCATION EntityType=LOCATION SentenceIndex=0]",
@@ -161,6 +162,7 @@ public class EntityMentionsAnnotatorITest extends TestCase {
         "[Text=16.14 million CharacterOffsetBegin=393 CharacterOffsetEnd=406 Tokens=[16.14-30, million-31] TokenBegin=76 TokenEnd=78 NamedEntityTag=NUMBER NormalizedNamedEntityTag=1.614E7 EntityType=NUMBER SentenceIndex=2]",
         "[Text=U.S. CharacterOffsetBegin=407 CharacterOffsetEnd=411 Tokens=[U.S.-32] TokenBegin=78 TokenEnd=79 NamedEntityTag=LOCATION EntityType=LOCATION SentenceIndex=2]"
     };
+        
     compareMentions("testNewsText", expectedMentions, mentions);
   }
 }

@@ -118,7 +118,7 @@ public class SemgrexPatternTest extends TestCase {
   }
 
   public void testMacro() throws IOException {
-    SemanticGraph h = SemanticGraph.valueOf("[married/VBN nsubjpass:Hughes/NNP auxpass:was/VBD prep_to:Gracia/NNP]");
+    SemanticGraph h = SemanticGraph.valueOf("[married/VBN nsubjpass>Hughes/NNP auxpass>was/VBD nmod:to>Gracia/NNP]");
     String macro = "macro WORD = married";
     SemgrexBatchParser parser = new SemgrexBatchParser();
     String pattern = "({word:${WORD}}=parent >>nsubjpass {}=node)";
@@ -137,7 +137,7 @@ public class SemgrexPatternTest extends TestCase {
   }
 
   public void testEnv() throws IOException {
-    SemanticGraph h = SemanticGraph.valueOf("[married/VBN nsubjpass:Hughes/NNP auxpass:was/VBD prep_to:Gracia/NNP]");
+    SemanticGraph h = SemanticGraph.valueOf("[married/VBN nsubjpass>Hughes/NNP auxpass>was/VBD nmod:to>Gracia/NNP]");
     h.getFirstRoot().set(PatternsAnnotations.PatternLabel1.class,"YES");
     //SemanticGraph t = SemanticGraph
     //  .valueOf("[loved/VBD\nnsubj:Hughes/NNP\ndobj:[wife/NN poss:his/PRP$ appos:Gracia/NNP]\nconj_and:[obsessed/JJ\ncop:was/VBD\nadvmod:absolutely/RB\nprep_with:[Elicia/NN poss:his/PRP$ amod:little/JJ nn:daughter/NN]]]");

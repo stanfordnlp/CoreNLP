@@ -809,10 +809,6 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
   }
 
   @Override
-  public void printProbsDocument(List<CoreLabel> document) {
-  }
-
-  @Override
   public void serializeClassifier(String serializePath) {
     System.err.print("Serializing classifier to " + serializePath + "...");
     System.err.println("done.");

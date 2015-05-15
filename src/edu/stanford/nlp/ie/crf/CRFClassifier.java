@@ -38,6 +38,7 @@ import edu.stanford.nlp.optimization.Function;
 import edu.stanford.nlp.sequences.*;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.*;
 
 import java.io.*;
@@ -46,6 +47,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.regex.*;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -1337,32 +1339,65 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * Takes a {@link List} of something that extends {@link CoreMap} and prints
    * the likelihood of each possible label at each point.
    *
-   * @param document
-   *          A {@link List} of something that extends CoreMap.
+   * @param document A {@link List} of something that extends CoreMap.
+   * @return If verboseMode is set, a Pair of Counters recording classification decisions, else null.
    */
   @Override
-  public void printProbsDocument(List<IN> document) {
+  public Triple<Counter<Integer>, Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
+    // TODO: Probably this would really be better with 11 bins, with edge ones from 0-0.5 and 0.95-1.0, a bit like 11-point ave precision
+    final int numBins = 10;
+    boolean verbose = flags.verboseMode;
 
     Triple<int[][][], int[], double[][][]> p = documentToDataAndLabels(document);
-
     CRFCliqueTree<String> cliqueTree = getCliqueTree(p);
+
+    Counter<Integer> calibration = new ClassicCounter<>();
+    Counter<Integer> correctByBin = new ClassicCounter<>();
+    TwoDimensionalCounter<Integer,String> calibratedTokens = new TwoDimensionalCounter<>();
 
     // for (int i = 0; i < factorTables.length; i++) {
     for (int i = 0; i < cliqueTree.length(); i++) {
       IN wi = document.get(i);
-      System.out.print(wi.get(CoreAnnotations.TextAnnotation.class) + '\t');
-      for (Iterator<String> iter = classIndex.iterator(); iter.hasNext();) {
-        String label = iter.next();
+      String token = wi.get(CoreAnnotations.TextAnnotation.class);
+      String goldAnswer = wi.get(CoreAnnotations.GoldAnswerAnnotation.class);
+      System.out.print(token);
+      System.out.print('\t');
+      System.out.print(goldAnswer);
+      double maxProb = Double.NEGATIVE_INFINITY;
+      String bestClass = "";
+      for (String label : classIndex) {
         int index = classIndex.indexOf(label);
         // double prob = Math.pow(Math.E, factorTables[i].logProbEnd(index));
         double prob = cliqueTree.prob(i, index);
-        System.out.print(label + '=' + prob);
-        if (iter.hasNext()) {
-          System.out.print("\t");
-        } else {
-          System.out.print("\n");
+        if (prob > maxProb) {
+          bestClass = label;
+        }
+        System.out.print('\t');
+        System.out.print(label);
+        System.out.print('=');
+        System.out.print(prob);
+        if (verbose ) {
+          int binnedProb = (int) (prob * numBins);
+          if (binnedProb > (numBins - 1)) {
+            binnedProb = numBins - 1;
+          }
+          calibration.incrementCount(binnedProb);
+          if (label.equals(goldAnswer)) {
+            if (bestClass.equals(goldAnswer)) {
+              correctByBin.incrementCount(binnedProb);
+            }
+            if ( ! label.equals(flags.backgroundSymbol)) {
+              calibratedTokens.incrementCount(binnedProb, token);
+            }
+          }
         }
       }
+      System.out.println();
+    }
+    if (verbose) {
+      return new Triple<>(calibration, correctByBin, calibratedTokens);
+    } else {
+      return null;
     }
   }
 
@@ -1385,8 +1420,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * Takes a {@link List} of documents and prints the likelihood of each
    * possible label at each point.
    *
-   * @param documents
-   *          A {@link List} of {@link List} of INs.
+   * @param documents A {@link List} of {@link List} of INs.
    */
   public void printFirstOrderProbsDocuments(ObjectBank<List<IN>> documents) {
     for (List<IN> doc : documents) {
@@ -1398,8 +1432,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   /**
    * Takes the file, reads it in, and prints out the factor table at each position.
    *
-   * @param filename
-   *          The path to the specified file
+   * @param filename The path to the specified file
    */
   public void printFactorTable(String filename, DocumentReaderAndWriter<IN> readerAndWriter) {
     // only for the OCR data does this matter
@@ -1413,8 +1446,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * Takes a {@link List} of documents and prints the factor table
    * at each point.
    *
-   * @param documents
-   *          A {@link List} of {@link List} of INs.
+   * @param documents A {@link List} of {@link List} of INs.
    */
   public void printFactorTableDocuments(ObjectBank<List<IN>> documents) {
     for (List<IN> doc : documents) {
@@ -2729,6 +2761,40 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     return new Pair<double[][], double[][]>(matrix, subMatrix);
   }
 
+  public void writeWeights(PrintStream p) {
+    for (String feature : featureIndex) {
+      int index = featureIndex.indexOf(feature);
+      // line.add(feature+"["+(-p)+"]");
+      // rowHeaders.add(feature + '[' + (-p) + ']');
+      double[] v = weights[index];
+      Index<CRFLabel> l = this.labelIndices.get(0);
+      p.println(feature + "\t\t");
+      for (CRFLabel label : l) {
+        p.print(label.toString(classIndex) + ":" + v[l.indexOf(label)] + "\t");
+      }
+      p.println();
+
+    }
+  }
+
+  public Map<String, Counter<String>> topWeights() {
+    Map<String, Counter<String>> w = new HashMap<String, Counter<String>>();
+    for (String feature : featureIndex) {
+      int index = featureIndex.indexOf(feature);
+      // line.add(feature+"["+(-p)+"]");
+      // rowHeaders.add(feature + '[' + (-p) + ']');
+      double[] v = weights[index];
+      Index<CRFLabel> l = this.labelIndices.get(0);
+      for (CRFLabel label : l) {
+        if(!w.containsKey(label.toString(classIndex)))
+          w.put(label.toString(classIndex), new ClassicCounter<String>());
+        w.get(label.toString(classIndex)).setCount(feature, v[l.indexOf(label)]);
+      }
+    }
+    return w;
+  }
+
+
   /**
    * This is used to load the default supplied classifier stored within the jar
    * file. THIS FUNCTION WILL ONLY WORK IF THE CODE WAS LOADED FROM A JAR FILE
@@ -2947,6 +3013,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
 
     if (testFile != null) {
+      // todo: Change testFile to call testFiles with a singleton list
       DocumentReaderAndWriter<CoreLabel> readerAndWriter = crf.defaultReaderAndWriter();
       if (crf.flags.searchGraphPrefix != null) {
         crf.classifyAndWriteViterbiSearchGraph(testFile, crf.flags.searchGraphPrefix, crf.makeReaderAndWriter());
@@ -2967,11 +3034,12 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     }
 
     if (testFiles != null) {
-      List<File> files = new ArrayList<File>();
-      for (String filename : testFiles.split(",")) {
-        files.add(new File(filename));
+      List<File> files = Arrays.asList(testFiles.split(",")).stream().map(File::new).collect(Collectors.toList());
+      if (crf.flags.printProbs) {
+        crf.printProbs(files, crf.defaultReaderAndWriter());
+      } else {
+        crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter(), true);
       }
-      crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter(), true);
     }
 
     if (textFile != null) {
@@ -2994,39 +3062,6 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
   @Override
   public List<IN> classifyWithGlobalInformation(List<IN> tokenSeq, final CoreMap doc, final CoreMap sent) {
     return classify(tokenSeq);
-  }
-
-  public void writeWeights(PrintStream p) {
-    for (String feature : featureIndex) {
-      int index = featureIndex.indexOf(feature);
-      // line.add(feature+"["+(-p)+"]");
-      // rowHeaders.add(feature + '[' + (-p) + ']');
-      double[] v = weights[index];
-      Index<CRFLabel> l = this.labelIndices.get(0);
-      p.println(feature + "\t\t");
-      for (CRFLabel label : l) {
-        p.print(label.toString(classIndex) + ":" + v[l.indexOf(label)] + "\t");
-      }
-      p.println();
-
-    }
-  }
-
-  public Map<String, Counter<String>> topWeights() {
-    Map<String, Counter<String>> w = new HashMap<String, Counter<String>>();
-    for (String feature : featureIndex) {
-      int index = featureIndex.indexOf(feature);
-      // line.add(feature+"["+(-p)+"]");
-      // rowHeaders.add(feature + '[' + (-p) + ']');
-      double[] v = weights[index];
-      Index<CRFLabel> l = this.labelIndices.get(0);
-      for (CRFLabel label : l) {
-        if(!w.containsKey(label.toString(classIndex)))
-          w.put(label.toString(classIndex), new ClassicCounter<String>());
-        w.get(label.toString(classIndex)).setCount(feature, v[l.indexOf(label)]);
-      }
-    }
-    return w;
   }
 
 } // end class CRFClassifier
