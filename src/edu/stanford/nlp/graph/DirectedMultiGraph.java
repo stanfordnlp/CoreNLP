@@ -474,6 +474,28 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
     return ConnectedComponents.getConnectedComponents(this);
   }
 
+  /**
+   * Deletes all duplicate edges.
+   */
+  
+ public void deleteDuplicateEdges() {
+   for (V vertex : getAllVertices()) {
+     for (V vertex2 : outgoingEdges.get(vertex).keySet()) {
+       List<E> data = outgoingEdges.get(vertex).get(vertex2);
+       Set<E> deduplicatedData = new TreeSet<E>(data);
+       data.clear();
+       data.addAll(deduplicatedData);
+     }
+     for (V vertex2 : incomingEdges.get(vertex).keySet()) {
+       List<E> data = incomingEdges.get(vertex).get(vertex2);
+       Set<E> deduplicatedData = new TreeSet<E>(data);
+       data.clear();
+       data.addAll(deduplicatedData);
+     }
+   }
+}
+
+  
   public Iterator<E> incomingEdgeIterator(final V vertex) {
     return new EdgeIterator<V, E>(incomingEdges, vertex);
   }
@@ -497,7 +519,8 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   public Iterable<E> edgeIterable() {
     return () -> new EdgeIterator<V, E>(DirectedMultiGraph.this);
   }
-
+  
+ 
   static class EdgeIterator<V, E> implements Iterator<E> {
     private final Map<V, Map<V, List<E>>> incomingEdges;
     private Iterator<Map<V, List<E>>> vertexIterator;

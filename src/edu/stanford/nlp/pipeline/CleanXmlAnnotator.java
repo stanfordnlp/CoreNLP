@@ -211,7 +211,7 @@ public class CleanXmlAnnotator implements Annotator{
       }
       String annoKeyString = annoPattern[0];
       String pattern = annoPattern[1];
-      Class annoKey = EnvLookup.lookupAnnotationKey(null, annoKeyString);
+      Class annoKey = EnvLookup.lookupAnnotationKeyWithClassname(null, annoKeyString);
       if (annoKey == null) {
         throw new IllegalArgumentException("Cannot resolve annotation key " + annoKeyString);
       }

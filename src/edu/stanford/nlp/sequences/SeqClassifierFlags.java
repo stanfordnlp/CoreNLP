@@ -1045,6 +1045,8 @@ public class SeqClassifierFlags implements Serializable {
 
   public SlashHyphenEnum slashHyphenTreatment = SlashHyphenEnum.NONE;
 
+  public boolean useTitle2 = false;
+
   // "ADD VARIABLES ABOVE HERE"
 
   public transient List<String> phraseGazettes = null;
@@ -1448,6 +1450,8 @@ public class SeqClassifierFlags implements Serializable {
         useDisjShape = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useTitle")) {
         useTitle = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("useTitle2")) {
+        useTitle2 = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("booleanFeatures")) {
         booleanFeatures = Boolean.parseBoolean(val);
       } else if (key.equalsIgnoreCase("useClassFeature")) {

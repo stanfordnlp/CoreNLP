@@ -410,7 +410,7 @@ public abstract class SemgrexPattern implements Serializable {
         treebank.loadPath(treeFile);
         for (Tree tree : treebank) {
           // TODO: allow other languages... this defaults to English
-          SemanticGraph graph = SemanticGraphFactory.makeFromTree(tree, mode, useExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, true, null);
+          SemanticGraph graph = SemanticGraphFactory.makeFromTree(tree, mode, useExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, true);
           graphs.add(graph);
         }
       }

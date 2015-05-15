@@ -71,6 +71,7 @@ import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.sequences.SequenceModel;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
+import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Generics;
@@ -1547,15 +1548,14 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
   /**
    * Takes a {@link List} of {@link CoreLabel}s and prints the likelihood
    * of each possible label at each point.
-   * TODO: Finish or delete this method!
+   * TODO: Write this method!
    *
    * @param document A {@link List} of {@link CoreLabel}s.
    */
   @Override
-  public void printProbsDocument(List<IN> document) {
-
+  public Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
     //ClassicCounter<String> c = scoresOf(document, 0);
-
+    throw new UnsupportedOperationException();
   }
 
   /** Command-line version of the classifier.  See the class

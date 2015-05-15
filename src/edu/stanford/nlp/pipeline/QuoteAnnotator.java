@@ -8,7 +8,6 @@ import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.Timing;
 
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -33,6 +32,9 @@ public class QuoteAnnotator implements Annotator {
   public boolean USE_SINGLE = false;
   // max length to consider for quotes
   public int MAX_LENGTH = -1;
+  // whether to convert unicode quotes to non-unicode " and '
+  // before processing
+  public boolean ASCII_QUOTES = false;
 
   // TODO: implement this
 //  public boolean closeUnclosedQuotes = false;
@@ -93,6 +95,7 @@ public class QuoteAnnotator implements Annotator {
   public QuoteAnnotator(Properties props, boolean verbose) {
     USE_SINGLE = Boolean.parseBoolean(props.getProperty("singleQuotes", "false"));
     MAX_LENGTH = Integer.parseInt(props.getProperty("maxLength", "-1"));
+    ASCII_QUOTES = Boolean.parseBoolean(props.getProperty("asciiQuotes", "false"));
 
     VERBOSE = verbose;
     Timing timer = null;
@@ -115,7 +118,12 @@ public class QuoteAnnotator implements Annotator {
     List<CoreLabel> tokens = annotation.get(CoreAnnotations.TokensAnnotation.class);
     List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
 
-    List<Pair<Integer, Integer>> overall = getQuotes(text);
+
+    String quotesFrom = text;
+    if (ASCII_QUOTES) {
+      quotesFrom = replaceUnicode(text);
+    }
+    List<Pair<Integer, Integer>> overall = getQuotes(quotesFrom);
 
     String docID = annotation.get(CoreAnnotations.DocIDAnnotation.class);
 
@@ -124,6 +132,21 @@ public class QuoteAnnotator implements Annotator {
     // add quotes to document
     annotation.set(CoreAnnotations.QuotationsAnnotation.class, cmQuotes);
 
+  }
+
+  // Stolen from PTBLexer
+  private static final Pattern asciiSingleQuote = Pattern.compile("&apos;|[\u0091\u2018\u0092\u2019\u201A\u201B\u2039\u203A']");
+  private static final Pattern asciiDoubleQuote = Pattern.compile("&quot;|[\u0093\u201C\u0094\u201D\u201E\u00AB\u00BB\"]");
+
+  private static String asciiQuotes(String in) {
+    String s1 = in;
+    s1 = asciiSingleQuote.matcher(s1).replaceAll("'");
+    s1 = asciiDoubleQuote.matcher(s1).replaceAll("\"");
+    return s1;
+  }
+
+  public static String replaceUnicode(String text) {
+    return asciiQuotes(text);
   }
 
   public static Comparator<CoreMap> getQuoteComparator() {

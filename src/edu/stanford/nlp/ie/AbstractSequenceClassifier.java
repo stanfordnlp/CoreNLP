@@ -44,6 +44,7 @@ import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.Counters;
 import edu.stanford.nlp.stats.Sampler;
+import edu.stanford.nlp.stats.TwoDimensionalCounter;
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.util.concurrent.*;
 
@@ -942,6 +943,20 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
   }
 
   /**
+   * Takes the files, reads them in, and prints out the likelihood of each possible
+   * label at each point.
+   *
+   * @param testFiles A Collection of files
+   */
+  public void printProbs(Collection<File> testFiles,
+                         DocumentReaderAndWriter<IN> readerWriter) {
+
+    ObjectBank<List<IN>> documents = makeObjectBankFromFiles(testFiles, readerWriter);
+    printProbsDocuments(documents);
+  }
+
+
+  /**
    * Takes a {@link List} of documents and prints the likelihood of each
    * possible label at each point.
    *
@@ -949,10 +964,41 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
    *          {@link CoreMap}.
    */
   public void printProbsDocuments(ObjectBank<List<IN>> documents) {
+    Counter<Integer> calibration = new ClassicCounter<>();
+    TwoDimensionalCounter<Integer,String> calibratedTokens = new TwoDimensionalCounter<>();
+
     for (List<IN> doc : documents) {
-      printProbsDocument(doc);
+      Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> pair = printProbsDocument(doc);
+      if (pair != null) {
+        Counters.addInPlace(calibration, pair.first());
+        calibratedTokens.addAll(pair.second());
+      }
       System.out.println();
     }
+    if (calibration.size() > 0) {
+      // we stored stuff, so print it out
+      PrintWriter pw = new PrintWriter(System.err);
+      outputCalibrationInfo(pw, calibration, calibratedTokens);
+      pw.flush();
+    }
+  }
+
+  public static void outputCalibrationInfo(PrintWriter pw,
+                                           Counter<Integer> calibration,
+                                           TwoDimensionalCounter<Integer,String> calibratedTokens) {
+    final int numBins = 10;
+    pw.println("----------------------------------------");
+    pw.println("Probability distribution given to tokens");
+    pw.println("----------------------------------------");
+    for (int i = 0; i < numBins; i++) {
+      pw.printf("[%.1f-%.1f%c: %.1f  %s%n",
+              ((double) i) / numBins,
+              ((double) (i+1)) / numBins,
+              i == (numBins - 1) ? ']': ')',
+              calibration.getCount(i),
+              Counters.toSortedString(calibratedTokens.getCounter(i), 10, "%s=%.1f", ", ", "[%s]"));
+    }
+    pw.println("----------------------------------------");
   }
 
   public void classifyStdin()
@@ -974,7 +1020,7 @@ public abstract class AbstractSequenceClassifier<IN extends CoreMap> implements 
     }
   }
 
-  public abstract void printProbsDocument(List<IN> document);
+  public abstract Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document);
 
   /**
    * Load a test file, run the classifier on it, and then print the answers to

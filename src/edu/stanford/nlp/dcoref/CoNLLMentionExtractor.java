@@ -119,9 +119,9 @@ public class CoNLLMentionExtractor extends MentionExtractor {
         // generate the dependency graph
         try {
           SemanticGraph deps = SemanticGraphFactory.makeFromTree(tree,
-              SemanticGraphFactory.Mode.COLLAPSED, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe);
+              SemanticGraphFactory.Mode.COLLAPSED, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe, null, true);
           SemanticGraph basicDeps = SemanticGraphFactory.makeFromTree(tree,
-              SemanticGraphFactory.Mode.BASIC, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe);
+              SemanticGraphFactory.Mode.BASIC, includeExtras ? GrammaticalStructure.Extras.MAXIMAL : GrammaticalStructure.Extras.NONE, threadSafe, null, true);
           sentence.set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, basicDeps);
           sentence.set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, deps);
         } catch(Exception e) {
