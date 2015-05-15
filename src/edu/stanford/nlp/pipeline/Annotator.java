@@ -107,6 +107,7 @@ public interface Annotator {
   public static final String STANFORD_COLUMN_DATA_CLASSIFIER = "cdc";
   public static final String STANFORD_DEPENDENCIES = "depparse";
   public static final String STANFORD_NATLOG = "natlog";
+  public static final String STANFORD_OPENIE = "openie";
   public static final String STANFORD_QUOTE = "quote";
 
 
@@ -124,6 +125,7 @@ public interface Annotator {
   public static final Requirement COREF_REQUIREMENT = new Requirement(STANFORD_COREF);
   public static final Requirement RELATION_EXTRACTOR_REQUIREMENT = new Requirement(STANFORD_RELATION);
   public static final Requirement NATLOG_REQUIREMENT = new Requirement(STANFORD_NATLOG);
+  public static final Requirement OPENIE_REQUIREMENT = new Requirement(STANFORD_OPENIE);
   public static final Requirement QUOTE_REQUIREMENT = new Requirement(STANFORD_QUOTE);
 
   /**

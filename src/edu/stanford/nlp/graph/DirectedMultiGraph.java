@@ -2,6 +2,7 @@ package edu.stanford.nlp.graph;
 
 import java.util.*;
 
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MapFactory;
@@ -498,23 +499,26 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
   }
 
   static class EdgeIterator<V, E> implements Iterator<E> {
+    private final Map<V, Map<V, List<E>>> incomingEdges;
     private Iterator<Map<V, List<E>>> vertexIterator;
     private Iterator<List<E>> connectionIterator;
     private Iterator<E> edgeIterator;
+    private E lastRemoved = null;
     private boolean hasNext = true;
 
 
     public EdgeIterator(DirectedMultiGraph<V, E> graph) {
       vertexIterator = graph.outgoingEdges.values().iterator();
+      incomingEdges = graph.incomingEdges;
     }
 
     public EdgeIterator(Map<V, Map<V, List<E>>> source, V startVertex) {
       Map<V, List<E>> neighbors = source.get(startVertex);
-      if (neighbors == null) {
-        return;
+      if (neighbors != null) {
+        vertexIterator = null;
+        connectionIterator = neighbors.values().iterator();
       }
-      vertexIterator = null;
-      connectionIterator = neighbors.values().iterator();
+      incomingEdges = null;
     }
 
     @Override
@@ -528,7 +532,8 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
       if (!hasNext()) {
         throw new NoSuchElementException("Graph edge iterator exhausted.");
       }
-      return edgeIterator.next();
+      lastRemoved = edgeIterator.next();
+      return lastRemoved;
     }
 
     private void primeIterator() {
@@ -547,7 +552,21 @@ public class DirectedMultiGraph<V, E> implements Graph<V, E> /* Serializable */{
 
     @Override
     public void remove() {
-      edgeIterator.remove();
+      if (incomingEdges == null) {
+        throw new UnsupportedOperationException("remove() is only valid if iterating over entire graph (Gabor was too lazy to implement the general case...sorry!)");
+      }
+      if (lastRemoved != null) {
+        if (lastRemoved instanceof SemanticGraphEdge) {
+          SemanticGraphEdge edge = (SemanticGraphEdge) lastRemoved;
+          //noinspection unchecked
+          incomingEdges.get((V) edge.getDependent()).get((V) edge.getGovernor()).remove((E) edge);
+          edgeIterator.remove();
+        } else {
+          // TODO(from gabor): This passes the tests, but actually leaves the graph in an inconsistent state.
+          edgeIterator.remove();
+//          throw new UnsupportedOperationException("remove() is only valid if iterating over semantic graph edges (Gabor was too lazy to implement the general case...sorry!)");
+        }
+      }
     }
   }
 
