@@ -58,6 +58,10 @@ public class ClauseSplitterSearchProblem {
       add("clone_nsubj");
       add("simple");
     }});
+    put("vmod", new ArrayList<String>() {{
+      add("clone_nsubj");
+      add("simple");
+    }});
   }});
 
   /**
