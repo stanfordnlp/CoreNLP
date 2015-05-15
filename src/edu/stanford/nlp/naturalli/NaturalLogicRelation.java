@@ -186,7 +186,8 @@ public enum NaturalLogicRelation {
     put("pcomp", NaturalLogicRelation.INDEPENDENCE);  // though, not so in collapsed dependencies
     put("pobj", NaturalLogicRelation.INDEPENDENCE);  // must delete whole preposition
     put("possessive", NaturalLogicRelation.INDEPENDENCE);  // see dep_poss
-    put("poss", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("poss", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("nmod:poss", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
     put("preconj", NaturalLogicRelation.INDEPENDENCE);  // forbidden to see this
     put("predet", NaturalLogicRelation.INDEPENDENCE);  // forbidden to see this
     put("prep_aboard", NaturalLogicRelation.REVERSE_ENTAILMENT);  //

@@ -554,12 +554,13 @@ public class RelationTriple implements Comparable<RelationTriple>, Iterable<Core
   /** A set of valid arcs denoting an object entity we are interested in */
   public static final Set<String> VALID_OBJECT_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("compound"); add("aux"); add("nummod"); add("nmod"); add("nsubj"); add("nmod:*"); add("nmod:poss");
-    add("nmod:tmod"); add("conj:and"); add("advmod"); add("acl"); add("advcl");
+    add("nmod:tmod"); add("conj:and"); add("advmod"); add("acl"); add("advcl"); add("poss"); add ("possessive");
   }});
 
   /** A set of valid arcs denoting an entity we are interested in */
   public static final Set<String> VALID_ADVERB_ARCS = Collections.unmodifiableSet(new HashSet<String>(){{
     add("amod"); add("advmod"); add("conj"); add("cc"); add("conj:and"); add("conj:or"); add("auxpass");
+    add("poss"); add ("possessive");
   }});
 
   private static CoreLabel mockNode(CoreLabel toCopy, int offset, String word, String POS) {
