@@ -192,7 +192,9 @@ public class OpenIEServlet extends HttpServlet {
       Set<String> entailments = new HashSet<>();
       Set<String> triples = new LinkedHashSet<>();
       runWithPipeline(pipeline, ann, triples, entailments);  // pipeline must come before backoff
-      runWithPipeline(backoff, ann, triples, entailments);   // backoff must come after pipeline
+      if (triples.size() == 0) {
+        runWithPipeline(backoff, ann, triples, entailments);   // backoff must come after pipeline
+      }
       // Write results
       out.println("{ " +
           "\"ok\":true, " +
