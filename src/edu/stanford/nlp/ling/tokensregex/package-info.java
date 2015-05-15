@@ -1,5 +1,6 @@
 /**
- * This package contains a library, TokensRegex, for matching regular expressions over
+ * <body>
+ * <p>This package contains a library, TokensRegex, for matching regular expressions over
  * tokens.  TokensRegex is incorporated into the
  * {@link edu.stanford.nlp.pipeline.TokensRegexAnnotator}
  * and {@link edu.stanford.nlp.pipeline.TokensRegexNERAnnotator}.
@@ -31,12 +32,12 @@
  * TokensRegex also offers a group of utility classes.
  * <p>
  * {@link edu.stanford.nlp.ling.tokensregex.MultiPatternMatcher} provides utility functions for finding expressions with multiple patterns.
- * For instance, using {@link edu.stanford.nlp.ling.tokensregex.MultiPatternMatcher#findNonOverlapping}
+ * For instance, using {@link edu.stanford.nlp.ling.tokensregex.MultiPatternMatcher.findNonOverlapping}
  * you can find all nonoverlapping subsequences for a given set of patterns.
  * </p>
  * <p>To find character offsets of multiple word expressions in a <code>String</code>,
- * can also use {@link edu.stanford.nlp.ling.tokensregex.MultiWordStringMatcher#findTargetStringOffsets}. </p>
- *
+ * can also use {@link MultiWordStringMatcher.findTargetStringOffsets}. </p>
  * @author Angel Chang (angelx@stanford.edu)
+ * </body>
  */
 package edu.stanford.nlp.ling.tokensregex;

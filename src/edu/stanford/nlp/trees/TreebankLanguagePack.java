@@ -316,7 +316,7 @@ public interface TreebankLanguagePack extends Serializable {
    * Returns a {@link Function Function} object that maps Strings to Strings according
    * to this TreebankLanguagePack's basicCategory method.
    *
-   * @return the String-&gt;String Function object
+   * @return the String->String Function object
    */
   public Function<String,String> getBasicCategoryFunction();
 
@@ -336,7 +336,7 @@ public interface TreebankLanguagePack extends Serializable {
    * Returns a {@link Function Function} object that maps Strings to Strings according
    * to this TreebankLanguagePack's categoryAndFunction method.
    *
-   * @return the String-&gt;String Function object
+   * @return the String->String Function object
    */
   public Function<String,String> getCategoryAndFunctionFunction();
 
@@ -427,16 +427,4 @@ public interface TreebankLanguagePack extends Serializable {
    * @return A language-specific MorphoFeatureSpecification
    */
   public abstract MorphoFeatureSpecification morphFeatureSpec();
-  
-  /**
-   * Used for languages where an original Stanford Dependency
-   * converter and a Universal Dependency converter exists.
-   */
-  public abstract void setGenerateOriginalDependencies(boolean generateOriginalDependencies);
-
-  /**
-   * Used for languages where an original Stanford Dependency
-   * converter and a Universal Dependency converter exists.
-   */
-  public abstract boolean generateOriginalDependencies();
 }

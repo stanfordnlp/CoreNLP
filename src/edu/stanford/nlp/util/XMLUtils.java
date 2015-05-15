@@ -12,6 +12,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -50,10 +51,6 @@ public class XMLUtils {
 
   /**
    * Returns the text content of all nodes in the given file with the given tag.
-   * If the text contents contains embedded tags, strips the embedded tags out
-   * of the returned text. e.g. <s>This is a <s>sentence</s> with embedded tags
-   * </s> would return the list containing ["This is a sentence with embedded
-   * tags", "sentence"].
    *
    * @throws SAXException if tag doesn't exist in the file.
    * @return List of String text contents of tags.
@@ -71,21 +68,7 @@ public class XMLUtils {
       for (int i = 0; i < nodeList.getLength(); i++) {
         // Get element
         Element element = (Element)nodeList.item(i);
-        String raw = element.getTextContent();
-        String builtUp = "";
-        boolean inTag = false;
-        for(int j = 0; j < raw.length(); j++) {
-          if (raw.charAt(j) == '<') {
-            inTag = true;
-          }
-          if (!inTag) {
-            builtUp += raw.charAt(j);
-          }
-          if (raw.charAt(j) == '>') {
-            inTag = false;
-          }
-        }
-        sents.add(builtUp);
+        sents.add(StringEscapeUtils.unescapeXml(element.getTextContent()));
       }
     } catch (IOException e) {
       System.err.println(e);

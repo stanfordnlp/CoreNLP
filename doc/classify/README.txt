@@ -1,4 +1,4 @@
-Stanford Classifier v3.5.2 - 2015-04-20
+Stanford Classifier v3.5.0 - 2014-10-26
 -------------------------------------------------
 
 Copyright (c) 2003-2012 The Board of Trustees of 
@@ -15,7 +15,7 @@ This package contains a maximum entropy classifier.
 
 For more information about the classifier, point a web browser at the included javadoc directory, starting at the Package page for the edu.stanford.nlp.classify package, and looking also at the ColumnDataClassifier class documentation therein.
 
-This software requires Java 8 (JDK 1.8.0+).  (You must have installed it
+This software requires Java 5 (JDK 1.6.0+).  (You must have installed it
 separately. Check the command "java -version".)
 
 
@@ -75,11 +75,6 @@ LICENSE
 -------------------------
 CHANGES
 -------------------------
-
-2015-04-20    3.5.2     Update for compatibility 
-
-2015-01-29    3.5.1     New input/output options, support for GloVe 
-                        word vectors 
 
 2014-10-26    3.5.0     Upgrade to Java 1.8 
 

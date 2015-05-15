@@ -3,14 +3,17 @@ package edu.stanford.nlp.international.spanish.pipeline;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.trees.international.spanish.SpanishSplitTreeNormalizer;
+import edu.stanford.nlp.trees.international.spanish.SpanishTreeNormalizer;
 import edu.stanford.nlp.util.Pair;
 import junit.framework.TestCase;
 
+import java.io.IOException;
+import java.io.StringReader;
 
 public class AnCoraProcessorITest extends TestCase {
 
-  private static final TreeReaderFactory treeReaderFactory = new LabeledScoredTreeReaderFactory(
-        new SpanishSplitTreeNormalizer());
+  private static final TreeFactory treeFactory = new LabeledScoredTreeFactory();
+  private static final TreeNormalizer treeNormalizer = new SpanishSplitTreeNormalizer();
 
   private Tree t1;
   private Tree t1First, t1Second;
@@ -667,7 +670,7 @@ public class AnCoraProcessorITest extends TestCase {
   public void testSplit() {
     Tree temp = t1.deepCopy();
     Tree splitPoint = AnCoraProcessor.findSplitPoint(temp);
-    Pair<Tree, Tree> expectedSplit = new Pair<>(t1First, t1Second);
+    Pair<Tree, Tree> expectedSplit = new Pair<Tree, Tree>(t1First, t1Second);
     Pair<Tree, Tree> split = AnCoraProcessor.split(temp, splitPoint);
 
     // Easier debugging if we separate these assertions
@@ -679,7 +682,7 @@ public class AnCoraProcessorITest extends TestCase {
     // Split into 1, 2+3, then split 2+3 into 2, 3
     Tree temp = t2.deepCopy();
     Tree splitPoint = AnCoraProcessor.findSplitPoint(temp);
-    Pair<Tree, Tree> expectedSplit = new Pair<>(t2First, t2Intermediate);
+    Pair<Tree, Tree> expectedSplit = new Pair<Tree, Tree>(t2First, t2Intermediate);
     Pair<Tree, Tree> split = AnCoraProcessor.split(temp, splitPoint);
 
     assertEquals(expectedSplit.first(), split.first());
@@ -687,7 +690,7 @@ public class AnCoraProcessorITest extends TestCase {
 
     temp = t2Intermediate.deepCopy();
     splitPoint = AnCoraProcessor.findSplitPoint(temp);
-    expectedSplit = new Pair<>(t2Second, t2Third);
+    expectedSplit = new Pair<Tree, Tree>(t2Second, t2Third);
     split = AnCoraProcessor.split(temp, splitPoint);
 
     assertEquals(expectedSplit.first(), split.first());
@@ -698,7 +701,7 @@ public class AnCoraProcessorITest extends TestCase {
   public void testSplitThreeSentencesWithConj() {
     Tree temp = t3.deepCopy();
     Tree splitPoint = AnCoraProcessor.findSplitPoint(temp);
-    Pair<Tree, Tree> expectedSplit = new Pair<>(t3First, t3Intermediate);
+    Pair<Tree, Tree> expectedSplit = new Pair<Tree, Tree>(t3First, t3Intermediate);
     Pair<Tree, Tree> split = AnCoraProcessor.split(temp, splitPoint);
 
     assertEquals(expectedSplit.first(), split.first());
@@ -706,15 +709,21 @@ public class AnCoraProcessorITest extends TestCase {
 
     temp = t3Intermediate.deepCopy();
     splitPoint = AnCoraProcessor.findSplitPoint(temp);
-    expectedSplit = new Pair<>(t3Second, t3Third);
+    expectedSplit = new Pair<Tree, Tree>(t3Second, t3Third);
     split = AnCoraProcessor.split(temp, splitPoint);
 
     assertEquals(expectedSplit.first(), split.first());
     assertEquals(expectedSplit.second(), split.second());
   }
 
-  private static Tree readTree(String treeString) {
-    return Tree.valueOf(treeString, treeReaderFactory);
+  private Tree readTree(String treeString) {
+    try {
+      PennTreeReader ptr = new PennTreeReader(new StringReader(treeString), treeFactory,
+                                              treeNormalizer);
+      return ptr.readTree();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

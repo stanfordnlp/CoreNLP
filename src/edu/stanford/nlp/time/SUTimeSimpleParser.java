@@ -60,32 +60,6 @@ public class SUTimeSimpleParser {
     return pipeline;
   }
 
-  public static Temporal parseOrNull(String str) {
-    Annotation doc = new Annotation(str);
-    pipeline.annotate(doc);
-    if (doc.get(CoreAnnotations.SentencesAnnotation.class) == null) {
-      return null;
-    }
-    if (doc.get(CoreAnnotations.SentencesAnnotation.class).size() == 0) {
-      return null;
-    }
-
-    List<CoreMap> timexAnnotations = doc.get(TimeAnnotations.TimexAnnotations.class);
-    if (timexAnnotations.size() > 1) {
-      return null;
-    } else if (timexAnnotations.size() == 0) {
-      return null;
-    }
-
-    CoreMap timex = timexAnnotations.get(0);
-
-    if (timex.get(TimeExpression.Annotation.class) == null) {
-      return null;
-    } else {
-      return timex.get(TimeExpression.Annotation.class).getTemporal();
-    }
-  }
-
   /**
    * Parse a string with SUTime.
    *

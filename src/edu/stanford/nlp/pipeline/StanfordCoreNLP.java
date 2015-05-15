@@ -87,7 +87,7 @@ public class StanfordCoreNLP extends AnnotationPipeline {
   private static final String PROPS_SUFFIX = ".properties";
   public static final String NEWLINE_SPLITTER_PROPERTY = "ssplit.eolonly";
   public static final String NEWLINE_IS_SENTENCE_BREAK_PROPERTY = "ssplit.newlineIsSentenceBreak";
-  public static final String DEFAULT_NEWLINE_IS_SENTENCE_BREAK = "never";
+  public static final String DEFAULT_NEWLINE_IS_SENTENCE_BREAK = "two";
 
   public static final String DEFAULT_OUTPUT_FORMAT = isXMLOutputPresent() ? "xml" : "text";
 
@@ -349,7 +349,6 @@ public class StanfordCoreNLP extends AnnotationPipeline {
     pool.register(STANFORD_COLUMN_DATA_CLASSIFIER,AnnotatorFactories.columnDataClassifier(properties,annotatorImplementation));
     pool.register(STANFORD_DEPENDENCIES, AnnotatorFactories.dependencies(properties, annotatorImplementation));
     pool.register(STANFORD_NATLOG, AnnotatorFactories.natlog(properties, annotatorImplementation));
-    pool.register(STANFORD_OPENIE, AnnotatorFactories.openie(properties, annotatorImplementation));
     pool.register(STANFORD_QUOTE, AnnotatorFactories.quote(properties, annotatorImplementation));
     // Add more annotators here
 

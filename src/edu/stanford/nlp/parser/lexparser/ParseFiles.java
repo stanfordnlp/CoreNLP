@@ -1,7 +1,9 @@
 package edu.stanford.nlp.parser.lexparser;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
@@ -10,9 +12,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Sentence;
@@ -23,6 +23,7 @@ import edu.stanford.nlp.process.TokenizerFactory;
 import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.process.DocumentPreprocessor.DocType;
 import edu.stanford.nlp.trees.*;
+import java.util.function.Function;
 import edu.stanford.nlp.util.ScoredObject;
 import edu.stanford.nlp.util.Timing;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
@@ -38,38 +39,37 @@ import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
  * @author John Bauer (refactored from existing code)
  */
 public class ParseFiles {
-
-  private final TreebankLanguagePack tlp;
+  final TreebankLanguagePack tlp;
   // todo: perhaps the output streams could be passed in
-  private final PrintWriter pwOut;
-  private final PrintWriter pwErr;
+  final PrintWriter pwOut;
+  final PrintWriter pwErr;
 
-  private int numWords = 0;
-  private int numSents = 0;
-  private int numUnparsable = 0;
-  private int numNoMemory = 0;
-  private int numFallback = 0;
-  private int numSkipped = 0;
+  int numWords = 0;
+  int numSents = 0;
+  int numUnparsable = 0;
+  int numNoMemory = 0;
+  int numFallback = 0;
+  int numSkipped = 0;
 
-  private boolean saidMemMessage = false;
+  boolean saidMemMessage = false;
 
-  private final boolean runningAverages;
-  private final boolean summary;
+  final boolean runningAverages;
+  final boolean summary;
 
-  private final AbstractEval.ScoreEval pcfgLL;
-  private final AbstractEval.ScoreEval depLL;
-  private final AbstractEval.ScoreEval factLL;
+  final AbstractEval.ScoreEval pcfgLL;
+  final AbstractEval.ScoreEval depLL;
+  final AbstractEval.ScoreEval factLL;
 
-  private final Options op;
+  final Options op;
 
-  private final LexicalizedParser pqFactory;
+  final LexicalizedParser pqFactory;
 
-  private final TreePrint treePrint;
+  final TreePrint treePrint;
 
   /** Parse the files with names given in the String array args elements from
    *  index argIndex on.  Convenience method which builds and invokes a ParseFiles object.
    */
-  public static void parseFiles(String[] args, int argIndex, boolean tokenized, TokenizerFactory<? extends HasWord> tokenizerFactory, String elementDelimiter, String sentenceDelimiter, Function<List<HasWord>, List<HasWord>> escaper, String tagDelimiter, Options op, TreePrint treePrint, LexicalizedParser pqFactory) {
+  static void parseFiles(String[] args, int argIndex, boolean tokenized, TokenizerFactory<? extends HasWord> tokenizerFactory, String elementDelimiter, String sentenceDelimiter, Function<List<HasWord>, List<HasWord>> escaper, String tagDelimiter, Options op, TreePrint treePrint, LexicalizedParser pqFactory) {
     ParseFiles pf = new ParseFiles(op, treePrint, pqFactory);
     pf.parseFiles(args, argIndex, tokenized, tokenizerFactory, elementDelimiter, sentenceDelimiter, escaper, tagDelimiter);
   }
@@ -127,7 +127,7 @@ public class ParseFiles {
       final DocumentPreprocessor documentPreprocessor;
       if (filename.equals("-")) {
         try {
-          documentPreprocessor = new DocumentPreprocessor(IOUtils.readerFromStdin(op.tlpParams.getInputEncoding()), docType);
+          documentPreprocessor = new DocumentPreprocessor(new BufferedReader(new InputStreamReader(System.in, op.tlpParams.getInputEncoding())),docType);
         } catch (IOException e) {
           throw new RuntimeIOException(e);
         }
@@ -152,7 +152,7 @@ public class ParseFiles {
       if (op.testOptions.writeOutputFiles) {
         String normalizedName = filename;
         try {
-          new URL(normalizedName); // this will exception if not a URL
+          URL url = new URL(normalizedName); // this will exception if not a URL
           normalizedName = normalizedName.replaceAll("/","_");
         } catch (MalformedURLException e) {
           //It isn't a URL, so silently ignore
@@ -162,7 +162,7 @@ public class ParseFiles {
         String fname = normalizedName + '.' + ext;
         if (op.testOptions.outputFilesDirectory != null && !op.testOptions.outputFilesDirectory.equals("")) {
           String fseparator = System.getProperty("file.separator");
-          if (fseparator == null || fseparator.isEmpty()) {
+          if (fseparator == null || "".equals(fseparator)) {
             fseparator = "/";
           }
           File fnameFile = new File(fname);
@@ -273,14 +273,16 @@ public class ParseFiles {
       pwo.println("(())");
       return;
     }
-    if (pcfgLL != null && parserQuery.getPCFGParser() != null) {
-      pcfgLL.recordScore(parserQuery.getPCFGParser(), pwErr);
-    }
-    if (depLL != null && parserQuery.getDependencyParser() != null) {
-      depLL.recordScore(parserQuery.getDependencyParser(), pwErr);
-    }
-    if (factLL != null && parserQuery.getFactoredParser() != null) {
-      factLL.recordScore(parserQuery.getFactoredParser(), pwErr);
+    if (ansTree != null) {
+      if (pcfgLL != null && parserQuery.getPCFGParser() != null) {
+        pcfgLL.recordScore(parserQuery.getPCFGParser(), pwErr);
+      }
+      if (depLL != null && parserQuery.getDependencyParser() != null) {
+        depLL.recordScore(parserQuery.getDependencyParser(), pwErr);
+      }
+      if (factLL != null && parserQuery.getFactoredParser() != null) {
+        factLL.recordScore(parserQuery.getFactoredParser(), pwErr);
+      }
     }
     try {
       treePrint.printTree(ansTree, Integer.toString(num), pwo);
@@ -307,5 +309,4 @@ public class ParseFiles {
       treePrint.printTrees(trees, Integer.toString(num), pwo);
     }
   }
-
 }

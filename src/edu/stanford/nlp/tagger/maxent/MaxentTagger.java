@@ -161,11 +161,11 @@ import java.text.DecimalFormat;
  * <tr><td>trainFile</td><td>String</td><td>N/A</td><td>Train</td>
      <td>
        Path to the file holding the training data; specifying this option puts the tagger in training mode.  Only one of 'trainFile','testFile','textFile', and 'dump' may be specified.<br>
-       There are three formats possible.  The first is a text file of tagged data. Each line is considered a separate sentence.  In each sentence, words are separated by whitespace.  Each word must have a tag, which is separated from the token using the specified {@code tagSeparator}.  This format, called TEXT, is the default format.<br />
+       There are three formats possible.  The first is a text file of tagged data, Each line is considered a separate sentence.  In each sentence, words are separated by whitespace.  Each word must have a tag, which is separated using the specified tagSeparator.  This format, called TEXT, is the default format.<br />
        The second format is a file of Penn Treebank formatted tree files.  Trees are loaded one at a time and the tagged words in a tree are used as a training sentence.  To specify this format, preface the filename with "{@code format=TREES,}".  <br />
-       The final possible format is TSV files (tab-separated columns).  To specify a TSV file, set {@code trainFile} to "{@code format=TSV,wordColumn=x,tagColumn=y,filename}".  Column numbers are indexed from 0, and sentences are separated with blank lines. The default wordColumn is 0 and default tagColumn is 1.
+       The final possible format is TSV files (tab-separated columns).  To specify a TSV file, set trainFile to "{@code format=TSV,wordColumn=x,tagColumn=y,filename}".  Column numbers are indexed from 0, and sentences are separated with blank lines. The default wordColumn is 0 and default tagColumn is 1.
        <br>
-       A file can be in a different character set encoding than the tagger's default encoding by prefacing the filename with {@code "encoding=ENC"}.
+       A file can be in a different encoding than the tagger's default encoding by prefacing the filename with "encoding=ENC".
        You can specify the tagSeparator character in a TEXT file by prefacing the filename with "tagSeparator=c". <br/>
        Tree files can be fed through TreeTransformers and TreeNormalizers.  To specify a transformer, preface the filename with "treeTransformer=CLASSNAME".  To specify a normalizer, preface the filename with "treeNormalizer=CLASSNAME".
        You can also filter trees using a Filter&lt;Tree&gt;, which can be specified with "treeFilter=CLASSNAME".  A specific range of trees to be used can be specified with treeRange=X-Y.  Multiple parts of the range can be separated by : as opposed to the normal separator of ,.
@@ -183,10 +183,9 @@ import java.text.DecimalFormat;
  * <tr><td>tokenize</td><td>boolean</td><td>true</td><td>Tag,Test</td><td>Whether or not the file needs to be tokenized.  If this is false, the tagger assumes that white space separates words if and only if they should be tagged as separate tokens, and that the input is strictly one sentence per line.</td></tr>
  * <tr><td>tokenizerFactory</td><td>String</td><td>edu.stanford.nlp.<br>process.PTBTokenizer</td><td>Tag,Test</td><td>Fully qualified class name of the tokenizer to use.  edu.stanford.nlp.process.PTBTokenizer does basic English tokenization.</td></tr>
  * <tr><td>tokenizerOptions</td><td>String</td><td></td><td>Tag,Test</td><td>Known options for the particular tokenizer used. A comma-separated list. For PTBTokenizer, options of interest include <code>americanize=false</code> and <code>asciiQuotes</code> (for German). Note that any choice of tokenizer options that conflicts with the tokenization used in the tagger training data will likely degrade tagger performance.</td></tr>
- * <tr><td>sentenceDelimiter</td><td>String</td><td>null</td><td>Tag,Test</td><td>A marker used to separate a text into sentences. If not set (equal to <code>null</code>), sentence breaking is done by content (looking for periods, etc.) Otherwise, it will break on this String, except that if the String is "newline", it breaks on the String "\\n".</td></tr>
  * <tr><td>arch</td><td>String</td><td>generic</td><td>Train</td><td>Architecture of the model, as a comma-separated list of options, some with a parenthesized integer argument written k here: this determines what features are used to build your model.  See {@link ExtractorFrames} and {@link ExtractorFramesRare} for more information.</td></tr>
  * <tr><td>wordFunction</td><td>String</td><td>(none)</td><td>Train</td><td>A function to apply to the text before training or testing.  Must inherit from edu.stanford.nlp.util.Function&lt;String, String&gt;.  Can be blank.</td></tr>
- * <tr><td>lang</td><td>String</td><td>english</td><td>Train</td><td>Language from which the part of speech tags are drawn. This option determines which tags are considered closed-class (only fixed set of words can be tagged with a closed-class tag, such as prepositions). Defined languages are 'english' (Penn tag set), 'polish' (very rudimentary), 'french', 'chinese', 'arabic', 'german', and 'medline'.  </td></tr>
+ * <tr><td>lang</td><td>String</td><td>english</td><td>Train</td><td>Language from which the part of speech tags are drawn. This option determines which tags are considered closed-class (only fixed set of words can be tagged with a closed-class tag, such as prepositions). Defined languages are 'english' (Penn tagset), 'polish' (very rudimentary), 'french', 'chinese', 'arabic', 'german', and 'medline'.  </td></tr>
  * <tr><td>openClassTags</td><td>String</td><td>N/A</td><td>Train</td><td>Space separated list of tags that should be considered open-class.  All tags encountered that are not in this list are considered closed-class.  E.g. format: "NN VB"</td></tr>
  * <tr><td>closedClassTags</td><td>String</td><td>N/A</td><td>Train</td><td>Space separated list of tags that should be considered closed-class.  All tags encountered that are not in this list are considered open-class.</td></tr>
  * <tr><td>learnClosedClassTags</td><td>boolean</td><td>false</td><td>Train</td><td>If true, induce which tags are closed-class by counting as closed-class tags all those tags which have fewer unique word tokens than closedClassTagThreshold. </td></tr>
@@ -1727,15 +1726,15 @@ public class MaxentTagger extends Tagger implements ListProcessor<List<? extends
   /**
    * This method runs the tagger on the provided reader and writer.
    *
-   * It takes input from the given {@code reader}, applies the
+   * It takes into from the given <code>reader</code>, applies the
    * tagger to it one sentence at a time (determined using
    * documentPreprocessor), and writes the output to the given
-   * {@code writer}.
+   * <code>writer</code>.
    *
    * The document is broken into sentences using the sentence
    * processor determined in the tagger's TaggerConfig.
    *
-   * {@code tagInside} makes the tagger run in XML mode.... If set
+   * <code>tagInside</code> makes the tagger run in XML mode... if set
    * to non-empty, instead of processing the document as one large
    * text blob, it considers each region in between the given tag to
    * be a separate text blob.

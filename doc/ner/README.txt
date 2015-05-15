@@ -1,4 +1,4 @@
-Stanford NER - v3.5.2 - 2015-04-20
+Stanford NER - v3.5.0 - 2014-10-26
 ----------------------------------------------
 
 This package provides a high-performance machine learning based named
@@ -68,10 +68,7 @@ The nodistsim versions of the same models may be available on the
 Stanford NER webpage.
 
 Finally, we have models for other languages, include two German models,
-a Chinese model, and a Spanish model.  The files for these models can be
-found at:
-
-http://nlp.stanford.edu/software/CRF-NER.shtml
+a Chinese model, and a Spanish model.
 
 
 QUICKSTART INSTRUCTIONS
@@ -111,74 +108,6 @@ automatically started, and you will also be given the option (under the
 
 java -mx1000m -jar stanford-ner.jar
 
-USING FULL STANFORD CORENLP NER FUNCTIONALITY
-
-This standalone distribution also allows access to the full NER 
-capabilities of the Stanford CoreNLP pipeline.  These capabilities
-can be accessed via the NERClassifierCombiner class.
-
-NERClassifierCombiner allows for multiple CRF's to be layered together,
-and has options for recognizing numeric sequence patterns and time
-patterns with Stanford CoreNLP's SUTime. 
-
-Suppose one combines three CRF's CRF-1,CRF-2, and CRF-3 with the
-NERClassifierCombiner.  When the NERClassiferCombiner runs, it will
-first apply the NER tags of CRF-1 to the text, then it will apply
-CRF-2's NER tags to any tokens not tagged by CRF-1 and so on.  If
-the option ner.combinationMode is set to NORMAL (default), any label
-applied by CRF-1 cannot be applied by subsequent CRF's.  For instance
-if CRF-1 applies the LOCATION tag, no other CRF's LOCATION tag will be
-used.  If ner.combinationMode is set to HIGH_RECALL, this limitation
-will be deactivated.
-
-To use NERClassifierCombiner at the command-line, the jars in lib
-and stanford-ner.jar must be in the CLASSPATH.  Here is an example command:
-
-java -mx2g edu.stanford.nlp.ie.NERClassifierCombiner -ner.model \
-classifiers/english.conll.4class.distsim.crf.ser.gz,classifiers/english.muc.7class.distsim.crf.ser.gz \
--ner.useSUTime false -textFile sample-w-time.txt
-
-Let's break this down a bit.  The flag "-ner.model" should be followed by a
-list of CRF's to be combined by the NERClassifierCombiner.  Some serialized
-CRF's are provided in the classifiers directory.  In this example the CRF's
-trained on the CONLL 4 class data and the MUC 7 class data are being combined.
-
-When the flag "-ner.useSUTime" is followed by "false", SUTime is shut off.  You should 
-note that when the "false" is omitted, the text "4 days ago" suddenly is
-tagged with DATE.  These are the kinds of phrases SUTime can identify.
-
-NERClassifierCombiner can be run on different types of input as well.  Here is
-an example which is run on CONLL style input:
-
-java -mx2g edu.stanford.nlp.ie.NERClassifierCombiner -ner.model \
-classifiers/english.conll.4class.distsim.crf.ser.gz,classifiers/english.muc.7class.distsim.crf.ser.gz \
--map word=0,answer=1 -testFile sample-conll-file.txt
-
-It is crucial to include the "-map word=0,answer=1" , which is specifying that
-the input test file has the words in the first column and the answer labels
-in the second column.
-
-It is also possible to serialize and load an NERClassifierCombiner.
-
-This command loads the three sample crfs with combinationMode=HIGH_RECALL
-and SUTime=false, and dumps them to a file named
-test_serialized_ncc.ncc.ser.gz
-
-java -mx2g edu.stanford.nlp.ie.NERClassifierCombiner -ner.model \
-classifiers/english.conll.4class.distsim.crf.ser.gz,classifiers/english.muc.7class.distsim.crf.ser.gz,\
-classifiers/english.all.3class.distsim.crf.ser.gz -ner.useSUTime false \
--ner.combinationMode HIGH_RECALL -serializeTo test.serialized.ncc.ncc.ser.gz
-
-An example serialized NERClassifierCombiner with these settings is supplied in
-the classifiers directory.  Here is an example of loading that classifier and
-running it on the sample CONLL data:
-
-java -mx2g edu.stanford.nlp.ie.NERClassifierCombiner -loadClassifier \
-classifiers/example.serialized.ncc.ncc.ser.gz -map word=0,answer=1 \
--testFile sample-conll-file.txt
-
-For a more exhaustive description of NERClassifierCombiner go to
-http://nlp.stanford.edu/software/ncc-faq.shtml
 
 PROGRAMMATIC USE
 
@@ -235,10 +164,6 @@ PERSON	ORGANIZATION	LOCATION
 --------------------
 CHANGES
 --------------------
-
-2015-04-20    3.5.2     synch standalone and CoreNLP functionality 
-
-2015-01-29    3.5.1     Substantial accuracy improvements 
 
 2014-10-26    3.5.0     Upgrade to Java 1.8
 

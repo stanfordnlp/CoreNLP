@@ -295,15 +295,15 @@ public class RedwoodConfiguration {
       };
     }
 
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
+    /** @see Handlers#chain(LogRecordHandler[], Thunk) */
     public static Thunk chain(LogRecordHandler handler1, Thunk destination) { return chain(new LogRecordHandler[]{ handler1 }, destination); }
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
+    /** @see Handlers#chain(LogRecordHandler[], Thunk) */
     public static Thunk chain(LogRecordHandler handler1, LogRecordHandler handler2, Thunk destination) { return chain(new LogRecordHandler[]{ handler1, handler2 }, destination); }
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
+    /** @see Handlers#chain(LogRecordHandler[], Thunk) */
     public static Thunk chain(LogRecordHandler handler1, LogRecordHandler handler2, LogRecordHandler handler3, Thunk destination) { return chain(new LogRecordHandler[]{ handler1, handler2, handler3 }, destination); }
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
+    /** @see Handlers#chain(LogRecordHandler[], Thunk) */
     public static Thunk chain(LogRecordHandler handler1, LogRecordHandler handler2, LogRecordHandler handler3, LogRecordHandler handler4, Thunk destination) { return chain(new LogRecordHandler[]{ handler1, handler2, handler3, handler4 }, destination); }
-    /** @see #chain(LogRecordHandler[], RedwoodConfiguration.Thunk) */
+    /** @see Handlers#chain(LogRecordHandler[], Thunk) */
     public static Thunk chain(LogRecordHandler handler1, LogRecordHandler handler2, LogRecordHandler handler3, LogRecordHandler handler4, LogRecordHandler handler5, Thunk destination) { return chain(new LogRecordHandler[]{ handler1, handler2, handler3, handler4, handler5 }, destination); }
 
 

@@ -82,9 +82,8 @@ public final class SpanishVerbStripper implements Serializable {
         String[] words = line.trim().split("\\s");
         if(words.length < 3) {
           System.err.printf("SpanishVerbStripper: addings words to dict, missing word, ignoring line%n");
-        } else {
-          dict.put(words[0], words[2]);
         }
+        dict.put(words[0], words[2]);
       }
       IOUtils.closeIgnoringExceptions(br);
     } catch (UnsupportedEncodingException e) {
@@ -297,10 +296,10 @@ public final class SpanishVerbStripper implements Serializable {
    *
    * Converts e.g.
    *
-   *   - decírmelo -&gt; decir
-   *   - mudarse -&gt; mudar
-   *   - contándolos -&gt; contando
-   *   - hazlo -&gt; haz
+   *   - decírmelo -> decir
+   *   - mudarse -> mudar
+   *   - contándolos -> contando
+   *   - hazlo -> haz
    *
    * @return A verb form stripped of attached pronouns, or <tt>null</tt>
    *           if no pronouns were located / stripped.

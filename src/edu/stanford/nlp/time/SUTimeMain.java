@@ -857,9 +857,7 @@ public class SUTimeMain {
 
     Document annotatedDoc = XMLUtils.createDocument();
     Node newTimemlNode = annotatedDoc.importNode(timemlNode, false);
-    if(docIdNode != null){
-        newTimemlNode.appendChild(annotatedDoc.importNode(docIdNode, true));
-    }
+    newTimemlNode.appendChild(annotatedDoc.importNode(docIdNode, true));
     newTimemlNode.appendChild(annotatedDoc.importNode(dctNode, true));
     if (titleNode != null) {
       newTimemlNode.appendChild(annotatedDoc.importNode(titleNode, true));
@@ -895,7 +893,7 @@ public class SUTimeMain {
     switch (timeAnnotator) {
       case "gutime":
         useGUTime = true;
-        pipeline.addAnnotator(new GUTimeAnnotator("gutime", props));
+        pipeline.addAnnotator(new GUTimeAnnotator());
         break;
       case "heideltime":
         requiredDocDateFormat = "yyyy-MM-dd";

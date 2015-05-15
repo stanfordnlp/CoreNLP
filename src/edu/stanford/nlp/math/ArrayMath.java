@@ -278,14 +278,6 @@ public class ArrayMath {
 
   // OPERATIONS WITH TWO ARRAYS - DESTRUCTIVE
 
-  public static void pairwiseAddInPlace(float[] to, float[] from) {
-    if (to.length != from.length) {
-      throw new RuntimeException("to length:" + to.length + " from length:" + from.length);
-    }
-    for (int i = 0; i < to.length; i++) {
-      to[i] = to[i] + from[i];
-    }
-  }
   public static void pairwiseAddInPlace(double[] to, double[] from) {
     if (to.length != from.length) {
       throw new RuntimeException("to length:" + to.length + " from length:" + from.length);
@@ -640,17 +632,6 @@ public class ArrayMath {
   public static double average(double[] a) {
     double total = ArrayMath.sum(a);
     return total / a.length;
-  }
-
-  /** This version avoids any possibility of overflow. */
-  public static double iterativeAverage(double[] a) {
-    double avg = 0.0;
-    int t = 1;
-    for (double x : a) {
-      avg += (x - avg) / t;
-      t++;
-    }
-    return avg;
   }
 
   /**
@@ -1228,20 +1209,6 @@ public class ArrayMath {
     }
     multiplyInPlace(a, 1.0/total); // divide each value by total
   }
-  public static void L2normalize(double[] a) {
-    double total = L2Norm(a);
-    if (total == 0.0 || Double.isNaN(total)) {
-      if (a.length < 100) {
-        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
-      } else {
-        double[] aTrunc = new double[100];
-        System.arraycopy(a, 0, aTrunc, 0, 100);
-        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(aTrunc) + " ... ");
-      }
-
-    }
-    multiplyInPlace(a, 1.0/total); // divide each value by total
-  }
 
   /**
    * Makes the values in this array sum to 1.0. Does it in place.
@@ -1253,20 +1220,6 @@ public class ArrayMath {
       throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN");
     }
     multiplyInPlace(a, 1.0f/total); // divide each value by total
-  }
-  public static void L2normalize(float[] a) {
-    float total = L2Norm(a);
-    if (total == 0.0 || Float.isNaN(total)) {
-      if (a.length < 100) {
-        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(a));
-      } else {
-        float[] aTrunc = new float[100];
-        System.arraycopy(a, 0, aTrunc, 0, 100);
-        throw new RuntimeException("Can't normalize an array with sum 0.0 or NaN: " + Arrays.toString(aTrunc) + " ... ");
-      }
-
-    }
-    multiplyInPlace(a, 1.0/total); // divide each value by total
   }
 
   /**
@@ -1292,13 +1245,6 @@ public class ArrayMath {
       result += Math.pow(d,2);
     }
     return Math.sqrt(result);
-  }
-  public static float L2Norm(float[] a) {
-    double result = 0;
-    for(float d: a) {
-      result += Math.pow(d,2);
-    }
-    return (float) Math.sqrt(result);
   }
 
   public static double L1Norm(double[] a) {

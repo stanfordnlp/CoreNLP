@@ -88,7 +88,7 @@ public class XMLOutputter extends AnnotationOutputter {
     Element root = new Element("root", NAMESPACE_URI);
     Document xmlDoc = new Document(root);
     ProcessingInstruction pi = new ProcessingInstruction("xml-stylesheet",
-            "href=\"" + STYLESHEET_NAME + "\" type=\"text/xsl\"");
+          "href=\"" + STYLESHEET_NAME + "\" type=\"text/xsl\"");
     xmlDoc.insertChild(pi, 0);
     Element docElem = new Element("document", NAMESPACE_URI);
     root.appendChild(docElem);
@@ -164,7 +164,7 @@ public class XMLOutputter extends AnnotationOutputter {
         // add the MR entities and relations
         List<EntityMention> entities = sentence.get(MachineReadingAnnotations.EntityMentionsAnnotation.class);
         List<RelationMention> relations = sentence.get(MachineReadingAnnotations.RelationMentionsAnnotation.class);
-        if (entities != null && ! entities.isEmpty()){
+        if (entities != null && entities.size() > 0){
           Element mrElem = new Element("MachineReading", NAMESPACE_URI);
           Element entElem = new Element("entities", NAMESPACE_URI);
           addEntities(entities, entElem, NAMESPACE_URI);
@@ -179,16 +179,18 @@ public class XMLOutputter extends AnnotationOutputter {
           sentElem.appendChild(mrElem);
         }
 
+                
         /**
          * Adds sentiment as an attribute of this sentence.
          */
-        Tree sentimentTree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
+        Tree sentimentTree = sentence.get(SentimentCoreAnnotations.AnnotatedTree.class);
         if (sentimentTree != null) {
           int sentiment = RNNCoreAnnotations.getPredictedClass(sentimentTree);
           sentElem.addAttribute(new Attribute("sentimentValue", Integer.toString(sentiment)));
-          String sentimentClass = sentence.get(SentimentCoreAnnotations.SentimentClass.class);
+          String sentimentClass = sentence.get(SentimentCoreAnnotations.ClassName.class);
           sentElem.addAttribute(new Attribute("sentiment", sentimentClass.replaceAll(" ", "")));
         }
+
 
         // add the sentence to the root
         sentencesElem.appendChild(sentElem);
@@ -199,7 +201,7 @@ public class XMLOutputter extends AnnotationOutputter {
     // add the coref graph
     //
     Map<Integer, CorefChain> corefChains =
-            annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class);
+      annotation.get(CorefCoreAnnotations.CorefChainAnnotation.class);
     if (corefChains != null) {
       List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
       Element corefInfo = new Element("coreference", NAMESPACE_URI);
@@ -238,7 +240,7 @@ public class XMLOutputter extends AnnotationOutputter {
         int target = root.index();
         String sourceWord = "ROOT";
         String targetWord = tokens.get(target - 1).word();
-        final boolean isExtra = false;
+        boolean isExtra = false;
 
         addDependencyInfo(depInfo, rel, isExtra, source, sourceWord, null, target, targetWord, null, curNS);
       }
@@ -287,7 +289,7 @@ public class XMLOutputter extends AnnotationOutputter {
   }
 
   /**
-   * Generates the XML content for MachineReading entities.
+   * Generates the XML content for MachineReading entities
    */
   private static void addEntities(List<EntityMention> entities, Element top, String curNS) {
     for (EntityMention e: entities) {
@@ -297,11 +299,11 @@ public class XMLOutputter extends AnnotationOutputter {
   }
 
   /**
-   * Generates the XML content for MachineReading relations.
+   * Generates the XML content for MachineReading relations
    */
   private static void addRelations(List<RelationMention> relations, Element top, String curNS, double beam){
-    for (RelationMention r: relations){
-      if (r.printableObject(beam)) {
+    for(RelationMention r: relations){
+      if(r.printableObject(beam)) {
         Element re = toXML(r, curNS);
         top.appendChild(re);
       }
@@ -309,7 +311,7 @@ public class XMLOutputter extends AnnotationOutputter {
   }
 
   /**
-   * Generates the XML content for the coreference chain object.
+   * Generates the XML content for the coreference chain object
    */
   private static boolean addCorefGraphInfo
     (Options options, Element corefInfo, List<CoreMap> sentences, Map<Integer, CorefChain> corefChains, String curNS)
@@ -417,12 +419,6 @@ public class XMLOutputter extends AnnotationOutputter {
       wordInfo.appendChild(cur);
     }
 
-    if (token.containsKey(SentimentCoreAnnotations.SentimentClass.class)) {
-      Element cur = new Element("sentiment", curNS);
-      cur.appendChild(token.get(SentimentCoreAnnotations.SentimentClass.class));
-      wordInfo.appendChild(cur);
-    }
-
 //    IntTuple corefDest;
 //    if((corefDest = label.get(CorefDestAnnotation.class)) != null){
 //      Element cur = new Element("coref", curNS);
@@ -489,9 +485,9 @@ public class XMLOutputter extends AnnotationOutputter {
       top.appendChild(relation.getSubType());
     }
 
-    List<EntityMention> mentions = relation.getEntityMentionArgs();
+    List<EntityMention> ents = relation.getEntityMentionArgs();
     Element args = new Element("arguments", curNS);
-    for (EntityMention e : mentions) {
+    for (EntityMention e : ents) {
       args.appendChild(toXML(e, curNS));
     }
     top.appendChild(args);
@@ -517,6 +513,8 @@ public class XMLOutputter extends AnnotationOutputter {
     }
     return probs;
   }
+
+
 
 }
 

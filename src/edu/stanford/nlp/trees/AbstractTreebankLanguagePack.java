@@ -46,14 +46,6 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
 
 
   /**
-   * For languages where a Universal Dependency converter
-   * exists this variable determines whether the original
-   * or the Universal converter will be used.
-   */
-  protected boolean generateOriginalDependencies;
-  
-  
-  /**
    * Gives a handle to the TreebankLanguagePack.
    */
   public AbstractTreebankLanguagePack() {
@@ -373,7 +365,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * Returns a {@link Function Function} object that maps Strings to Strings according
    * to this TreebankLanguagePack's basicCategory() method.
    *
-   * @return The String-&gt;String Function object
+   * @return The String->String Function object
    */
   @Override
   public Function<String,String> getBasicCategoryFunction() {
@@ -483,7 +475,7 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
    * Returns a {@link Function Function} object that maps Strings to Strings according
    * to this TreebankLanguagePack's categoryAndFunction() method.
    *
-   * @return The String-&gt;String Function object
+   * @return The String->String Function object
    */
   @Override
   public Function<String,String> getCategoryAndFunctionFunction() {
@@ -647,15 +639,4 @@ public abstract class AbstractTreebankLanguagePack implements TreebankLanguagePa
   public MorphoFeatureSpecification morphFeatureSpec() {
     return null;
   }
-  
-  @Override
-  public void setGenerateOriginalDependencies(boolean generateOriginalDependencies) {
-    this.generateOriginalDependencies = generateOriginalDependencies;
-  }
-  
-  @Override
-  public boolean generateOriginalDependencies() {
-    return this.generateOriginalDependencies;
-  }
-
 }

@@ -21,12 +21,15 @@ import static org.junit.Assert.*;
 public class PolarityITest {
 
   private static final StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties(){{
-    setProperty("annotators", "tokenize,ssplit,pos,lemma,parse,natlog");
+    setProperty("annotators", "tokenize,ssplit,pos,lemma,parse");
     setProperty("ssplit.isOneSentence", "true");
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
-    setProperty("enforceRequirements", "false");
   }});
+
+  static {
+    pipeline.addAnnotator(new NaturalLogicAnnotator());
+  }
 
   @SuppressWarnings("unchecked")
   private Polarity[] annotate(String text) {
@@ -58,15 +61,6 @@ public class PolarityITest {
     assertTrue(p[3].isUpwards());
     assertTrue(p[4].isDownwards());
     assertTrue(p[5].isDownwards());
-  }
-
-  @Test
-  public void complexProperNouns() {
-    Polarity[] p = annotate("Kip , his brothers , and Fletcher also played the Denver area bar scene while calling themselves Colorado .");
-    assertTrue(p[0].isDownwards());
-    for (int i = 1; i < p.length; ++i) {
-      assertTrue(p[i].isUpwards());
-    }
   }
 
 }

@@ -21,7 +21,6 @@ public class StreamGobbler extends Thread {
   public StreamGobbler (InputStream is, Writer outputFileHandle) {
     this.is = is;
     this.outputFileHandle = outputFileHandle;
-    this.setDaemon(true);
   }
 
   public void run() {
@@ -30,14 +29,9 @@ public class StreamGobbler extends Thread {
       InputStreamReader isr = new InputStreamReader (is);
       BufferedReader br = new BufferedReader (isr);
 
-      String s = null;
-      //noinspection ConstantConditions
-      while (s == null) {
-        while ( (s = br.readLine()) != null ) {
-          outputFileHandle.write(s);
-          outputFileHandle.write("\n");
-        }
-        Thread.sleep(1000);
+      for (String s; (s = br.readLine()) != null; ) {
+        outputFileHandle.write(s);
+        outputFileHandle.write("\n");
       }
 
       isr.close();
@@ -49,5 +43,4 @@ public class StreamGobbler extends Thread {
     }
 
   }
-
 }

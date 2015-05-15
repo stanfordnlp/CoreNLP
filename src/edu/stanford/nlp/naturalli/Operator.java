@@ -2,9 +2,9 @@ package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.util.Pair;
 
-import java.util.*;
-
-import static edu.stanford.nlp.naturalli.NaturalLogicRelation.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A collection of quantifiers. This is the exhaustive list of quantifiers our system knows about.
@@ -12,77 +12,74 @@ import static edu.stanford.nlp.naturalli.NaturalLogicRelation.*;
  * @author Gabor Angeli
  */
 public enum Operator {
-
   // "All" quantifiers
-  ALL("all",                                         FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
-  EVERY("every",                                     FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
-  ANY("any",                                         FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
-  EACH("each",                                       FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
-  THE_LOT_OF("the lot of",                           FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
-  ALL_OF("all of",                                   FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
-  EACH_OF("each of",                                 FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
-  FOR_ALL("for all",                                 FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
-  FOR_EVERY("for every",                             FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
-  FOR_EACH("for each",                               FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
-  EVERYONE("everyone",                               FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
-  NUM("--num--",                                     FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),  // TODO check me
-  NUM_NUM("--num-- --num--",                         FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),  // TODO check me
-  NUM_NUM_NUM("--num-- --num-- --num--",             FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),  // TODO check me
-  NUM_NUM_NUM_NUM("--num-- --num-- --num-- --num--", FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),  // TODO check me
-  FEW("few",                                         FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),  // TODO check me
-  IMPLICIT_NAMED_ENTITY("__implicit_named_entity__", FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
+  ALL("all", "anti-additive", "multiplicative"),
+  EVERY("every", "anti-additive", "multiplicative"),
+  ANY("any", "anti-additive", "multiplicative"),
+  EACH("each", "anti-additive", "multiplicative"),
+  THE_LOT_OF("the lot of", "anti-additive", "multiplicative"),
+  ALL_OF("all of", "anti-additive", "multiplicative"),
+  FOR_ALL("for all", "anti-additive", "multiplicative"),
+  FOR_EVERY("for every", "anti-additive", "multiplicative"),
+  FOR_EACH("for each", "anti-additive", "multiplicative"),
+  EVERYONE("everyone", "anti-additive", "multiplicative"),
+  NUM("__num__", "anti-additive", "multiplicative"),  // TODO check me
+  NUM_NUM("__num__ __num__", "anti-additive", "multiplicative"),  // TODO check me
+  NUM_NUM_NUM("__num__ __num__ __num__", "anti-additive", "multiplicative"),  // TODO check me
+  NUM_NUM_NUM_NUM("__num__ __num__ __num__ __num__", "anti-additive", "multiplicative"),  // TODO check me
+  FEW("few", "anti-additive", "multiplicative"),        // TODO check me
+  IMPLICIT_NAMED_ENTITY("__implicit_named_entity__", "anti-additive", "multiplicative"),
 
   // "No" quantifiers
-  NO("no",               INDEPENDENCE, "anti-additive", "anti-additive"),
-  NEITHER("neither",     INDEPENDENCE, "anti-additive", "anti-additive"),
-  NO_ONE("no one",       INDEPENDENCE, "anti-additive", "anti-additive"),
-  NOBODY("nobody",       INDEPENDENCE, "anti-additive", "anti-additive"),
-  UNARY_NO("no",         INDEPENDENCE, "anti-additive"),
-  UNARY_NOT("not",       INDEPENDENCE, "anti-additive"),
-  UNARY_NO_ONE("no one", INDEPENDENCE, "anti-additive"),
-  UNARY_NT("n't",        INDEPENDENCE, "anti-additive"),
+  NO("no", "anti-additive", "anti-additive"),
+  NEITHER("neither", "anti-additive", "anti-additive"),
+  NO_ONE("no one", "anti-additive", "anti-additive"),
+  NOBODY("nobody", "anti-additive", "anti-additive"),
+  UNARY_NO("no", "anti-additive"),
+  UNARY_NOT("not", "anti-additive"),
+  UNARY_NO_ONE("no one", "anti-additive"),
+  UNARY_NT("n't", "anti-additive"),
 
   // "Some" quantifiers
-  SOME("some",                     FORWARD_ENTAILMENT, "additive", "additive"),
-  SEVERAL("several",               FORWARD_ENTAILMENT, "additive", "additive"),
-  EITHER("either",                 FORWARD_ENTAILMENT, "additive", "additive"),
-  A("a",                           FORWARD_ENTAILMENT, "additive", "additive"),
-  THE("the",                       FORWARD_ENTAILMENT, "additive", "additive"),
-  LESS_THAN("less than --num--",   FORWARD_ENTAILMENT, "additive", "additive"),
-  SOME_OF("some of",               FORWARD_ENTAILMENT, "additive", "additive"),
-  ONE_OF("one of",                 FORWARD_ENTAILMENT, "additive", "additive"),
-  AT_LEAST("at least --num--",     FORWARD_ENTAILMENT, "additive", "additive"),
-  A_FEW("a few",                   FORWARD_ENTAILMENT, "additive", "additive"),
-  AT_LEAST_A_FEW("at least a few", FORWARD_ENTAILMENT, "additive", "additive"),
-  THERE_BE("there be",             FORWARD_ENTAILMENT, "additive", "additive"),
-  THERE_BE_A_FEW("there be a few", FORWARD_ENTAILMENT, "additive", "additive"),
-  THERE_EXIST("there exist",       FORWARD_ENTAILMENT, "additive", "additive"),
-  NUM_OF("--num-- of",             FORWARD_ENTAILMENT, "additive", "additive"),
+  SOME("some", "additive", "additive"),
+  SEVERAL("several", "additive", "additive"),
+  EITHER("either", "additive", "additive"),
+  A("a", "additive", "additive"),
+  THE("the", "additive", "additive"),
+  LESS_THAN("less than __num__", "additive", "additive"),
+  SOME_OF("some of", "additive", "additive"),
+  ONE_OF("one of", "additive", "additive"),
+  AT_LEAST("at least __num__", "additive", "additive"),
+  A_FEW("a few", "additive", "additive"),
+  AT_LEAST_A_FEW("at least a few", "additive", "additive"),
+  THERE_BE("there be", "additive", "additive"),
+  THERE_BE_A_FEW("there be a few", "additive", "additive"),
+  THERE_EXIST("there exist", "additive", "additive"),
+  NUM_OF_THE("__num__ of the", "additive", "additive"),
 
   // "Not All" quantifiers
-  NOT_ALL("not all",     INDEPENDENCE, "additive", "anti-multiplicative"),
-  NOT_EVERY("not every", INDEPENDENCE, "additive", "anti-multiplicative"),
+  NOT_ALL("not all", "additive", "anti-multiplicative"),
+  NOT_EVERY("not every", "additive", "anti-multiplicative"),
 
   // "Most" quantifiers
   // TODO(gabor) check these
-  MOST("most",                  FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  MORE("more",                  FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  MANY("many",                  FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  ENOUGH("enough",              FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  MORE_THAN("more than __num_", FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  A_LOT_OF("a lot of",          FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  LOTS_OF("lots of",            FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  PLENTY_OF("plenty of",        FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  HEAPS_OF("heap of",           FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  A_LOAD_OF("a load of",        FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  LOADS_OF("load of",           FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  TONS_OF("ton of",             FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  BOTH("both",                  FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  JUST_NUM("just --num--",      FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
-  ONLY_NUM("only --num--",      FORWARD_ENTAILMENT, "nonmonotone", "multiplicative"),
+  MOST("most", "nonmonotone", "multiplicative"),
+  MANY("many", "nonmonotone", "multiplicative"),
+  ENOUGH("enough", "nonmonotone", "multiplicative"),
+  MORE_THAN("more than __num_", "nonmonotone", "multiplicative"),
+  A_LOT_OF("a lot of", "nonmonotone", "multiplicative"),
+  LOTS_OF("lots of", "nonmonotone", "multiplicative"),
+  PLENTY_OF("plenty of", "nonmonotone", "multiplicative"),
+  HEAPS_OF("heap of", "nonmonotone", "multiplicative"),
+  A_LOAD_OF("a load of", "nonmonotone", "multiplicative"),
+  LOADS_OF("load of", "nonmonotone", "multiplicative"),
+  TONS_OF("ton of", "nonmonotone", "multiplicative"),
+  BOTH("both", "nonmonotone", "multiplicative"),
+  JUST_NUM("just __num__", "nonmonotone", "multiplicative"),
+  ONLY_NUM("only __num__", "nonmonotone", "multiplicative"),
 
   // Strange cases
-  AT_MOST_NUM("at most --num--", FORWARD_ENTAILMENT, "anti-additive", "anti-additive"),
+  AT_MOST_NUM("at most __num__", "anti-additive", "anti-additive"),
   ;
 
   public static final Set<String> GLOSSES = Collections.unmodifiableSet(new HashSet<String>() {{
@@ -91,27 +88,14 @@ public enum Operator {
     }
   }});
 
-  /**
-   * An ordered list of the known operators, by token length (descending). This ensures that we're matching the
-   * widest scoped operator.
-   */
-  public static final List<Operator> valuesByLengthDesc = Collections.unmodifiableList(new ArrayList<Operator>(){{
-    for (Operator op : values()) {
-      add(op);
-    }
-    Collections.sort(this, (a, b) -> b.surfaceForm.split(" ").length - a.surfaceForm.split(" ").length);
-  }});
-
   public final String surfaceForm;
   public final Monotonicity subjMono;
   public final MonotonicityType subjType;
   public final Monotonicity objMono;
   public final MonotonicityType objType;
-  public final NaturalLogicRelation deleteRelation;
 
-  Operator(String surfaceForm, NaturalLogicRelation deleteRelation, String subjMono, String objMono) {
+  Operator(String surfaceForm, String subjMono, String objMono) {
     this.surfaceForm = surfaceForm;
-    this.deleteRelation = deleteRelation;
     Pair<Monotonicity, MonotonicityType> subj = monoFromString(subjMono);
     this.subjMono = subj.first;
     this.subjType = subj.second;
@@ -120,9 +104,8 @@ public enum Operator {
     this.objType = obj.second;
   }
 
-  Operator(String surfaceForm, NaturalLogicRelation deleteRelation, String subjMono) {
+  Operator(String surfaceForm, String subjMono) {
     this.surfaceForm = surfaceForm;
-    this.deleteRelation = deleteRelation;
     Pair<Monotonicity, MonotonicityType> subj = monoFromString(subjMono);
     this.subjMono = subj.first;
     this.subjType = subj.second;
@@ -174,14 +157,4 @@ public enum Operator {
       add(operator.surfaceForm);
     }
   }});
-
-  public static Optional<Operator> fromString(String word) {
-    String wordToLowerCase = word.toLowerCase().replaceAll("[0-9]", "--num-- ").trim();
-    for (Operator candidate : Operator.values()) {
-      if (candidate.surfaceForm.equals(wordToLowerCase)) {
-        return Optional.of(candidate);
-      }
-    }
-    return Optional.empty();
-  }
 }

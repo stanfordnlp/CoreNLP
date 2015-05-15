@@ -39,6 +39,7 @@ public class StanfordCoreNLPITest extends TestCase {
     // create a properties that enables all the annotators
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
+    props.setProperty("ssplit.newlineIsSentenceBreak", "never");
 
     // run an annotation through the pipeline
     String text = "Dan Ramage is working for\nMicrosoft. He's in Seattle! \n";
@@ -110,7 +111,7 @@ public class StanfordCoreNLPITest extends TestCase {
                     "<POS>NNP</POS>\\s*" +
                     "<NER>PERSON</NER>"));
     Assert.assertTrue("XML dependencies are wrong in " + result,
-            StringUtils.find(result, "<dep type=\"compound\">\\s*<governor idx=\"2\">" +
+            StringUtils.find(result, "<dep type=\"nn\">\\s*<governor idx=\"2\">" +
                     "Ramage</governor>\\s*<dependent idx=\"1\">Dan</dependent>\\s*</dep>"));
   }
 

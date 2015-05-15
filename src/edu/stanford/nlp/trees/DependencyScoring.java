@@ -12,8 +12,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.ling.Word;
+import edu.stanford.nlp.trees.GrammaticalRelation.Language;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.stats.ClassicCounter;

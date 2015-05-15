@@ -1,7 +1,5 @@
 package edu.stanford.nlp.optimization;
 
-import edu.stanford.nlp.util.CallbackFunction;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
@@ -31,7 +29,6 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
   private static NumberFormat nf = new DecimalFormat("0.000E0");
 
   private Function monitor; // = null;
-  private transient CallbackFunction iterationCallbackFunction;
 
   private static final int numToPrint = 5;
   private static final boolean simpleGD = false;
@@ -499,7 +496,6 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
         System.err.println("Result is " + fp2 + " after " + iterations);
         System.err.println("Result at " + arrayToString(p2, numToPrint));
       }
-
       //System.err.print(fp2+"|"+(int)(Math.log((fabs(fp2-fp)+1e-100)/(fabs(fp)+fabs(fp2)+1e-100))/Math.log(10)));
       if (!silent) {
         System.err.printf(" %s (delta: %s)\n",
@@ -532,11 +528,6 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
       fp = fp2;
       // find the new gradient
       xi = copyArray(dFunction.derivativeAt(p));
-
-      if(iterationCallbackFunction != null){
-        iterationCallbackFunction.callback(p2, iterations, fp2, xi);
-      }
-
       //System.err.print("mx "+arrayMax(xi)+" mn "+arrayMin(xi));
 
       if (!simpleGDStep && !simpleGD && (iterations % resetFrequency != 0)) {
@@ -622,7 +613,4 @@ public class CGMinimizer implements Minimizer<DiffFunction> {
     this.monitor = monitor;
   }
 
-  public void setIterationCallbackFunction(CallbackFunction func){
-    this.iterationCallbackFunction = func;
-  }
 }

@@ -82,9 +82,6 @@ public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer
       if (constVars.usePhraseEvalWordClass) {
         // calculate dist sim weights
         Integer num = constVars.getWordClassClusters().get(g);
-        if(num == null){
-          num = constVars.getWordClassClusters().get(g.toLowerCase());
-        }
         if (num != null && constVars.distSimWeights.get(label).containsKey(num)) {
           externalFeatWtsNormalized.setCount(gc, constVars.distSimWeights.get(label).getCount(num));
         } else
@@ -169,11 +166,8 @@ public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer
     Counter<CandidatePhrase> phraseScores = new ClassicCounter<CandidatePhrase>();
     for (Entry<CandidatePhrase, Counter<ScorePhraseMeasures>> wEn : scores
         .entrySet()) {
-      Double avgScore = Counters.mean(wEn.getValue());
-      if(!avgScore.isInfinite() && !avgScore.isNaN())
-        phraseScores.setCount(wEn.getKey(), avgScore);
-      else
-        Redwood.log(Redwood.DBG, "Ignoring " + wEn.getKey() + " because score is " + avgScore);
+      double avgScore = Counters.mean(wEn.getValue());
+      phraseScores.setCount(wEn.getKey(), avgScore);
     }
     return phraseScores;
   }

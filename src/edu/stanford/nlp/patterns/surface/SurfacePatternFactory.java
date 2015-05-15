@@ -28,12 +28,6 @@ public class SurfacePatternFactory extends PatternFactory {
   public static boolean usePOS4Pattern = true;
 
   /**
-   * Use first two letters of the POS tag
-   */
-  @Execution.Option(name="useCoarsePOS")
-  public static boolean useCoarsePOS = true;
-
-  /**
    * Add patterns without POS restriction as well: One of this and
    * <code>usePOS4Pattern</code> has to be true.
    */
@@ -102,10 +96,8 @@ public class SurfacePatternFactory extends PatternFactory {
   static Token fw, sw;
 
   public static void setUp(Properties props){
-    Execution.fillOptions(PatternFactory.class, props);
     Execution.fillOptions(SurfacePatternFactory.class, props);
     Execution.fillOptions(SurfacePattern.class, props);
-
     if (!addPatWithoutPOS && !usePOS4Pattern) {
       throw new RuntimeException(
         "addPatWithoutPOS and usePOS4Pattern both cannot be false ");
@@ -134,10 +126,7 @@ public class SurfacePatternFactory extends PatternFactory {
     String tag = null;
     if (usePOS4Pattern) {
       String fulltag = token.tag();
-      if(useCoarsePOS)
-        tag = fulltag.substring(0, Math.min(fulltag.length(), 2));
-      else
-        tag = fulltag;
+      tag = fulltag.substring(0, Math.min(fulltag.length(), 2));
     }
     String nerTag = token.get(CoreAnnotations.NamedEntityTagAnnotation.class);
     for (int maxWin = 1; maxWin <= maxWindow4Pattern; maxWin++) {
@@ -152,17 +141,16 @@ public class SurfacePatternFactory extends PatternFactory {
 
 
       PatternToken twithoutPOS = null;
-      //TODO: right now using numWordsCompoundMax.
       if (addPatWithoutPOS) {
         twithoutPOS = new PatternToken(tag, false,
-          numWordsCompoundMax > 1, numWordsCompoundMax,
+          numWordsCompound > 1, numWordsCompound,
           nerTag, useTargetNERRestriction, useTargetParserParentRestriction, token.get(CoreAnnotations.GrandparentAnnotation.class));
       }
 
       PatternToken twithPOS = null;
       if (usePOS4Pattern) {
         twithPOS = new PatternToken(tag, true,
-          numWordsCompoundMax > 1, numWordsCompoundMax,
+          numWordsCompound > 1, numWordsCompound,
           nerTag, useTargetNERRestriction, useTargetParserParentRestriction, token.get(CoreAnnotations.GrandparentAnnotation.class));
       }
 
