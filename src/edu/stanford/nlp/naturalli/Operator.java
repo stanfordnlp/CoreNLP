@@ -20,7 +20,6 @@ public enum Operator {
   EACH("each",                                       FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
   THE_LOT_OF("the lot of",                           FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
   ALL_OF("all of",                                   FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
-  EACH_OF("each of",                                 FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
   FOR_ALL("for all",                                 FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
   FOR_EVERY("for every",                             FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),
   FOR_EACH("for each",                               FORWARD_ENTAILMENT, "anti-additive", "multiplicative"),

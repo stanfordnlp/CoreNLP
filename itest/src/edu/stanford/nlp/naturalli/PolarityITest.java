@@ -25,7 +25,6 @@ public class PolarityITest {
     setProperty("ssplit.isOneSentence", "true");
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
-    setProperty("enforceRequirements", "false");
   }});
 
   @SuppressWarnings("unchecked")

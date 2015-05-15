@@ -30,7 +30,7 @@ public class NumberAnnotator implements Annotator {
 
   private boolean VERBOSE = true;
   private static final String DEFAULT_BACKGROUND_SYMBOL = "O";
-  private final String BACKGROUND_SYMBOL;
+  private String BACKGROUND_SYMBOL;
 
   public static final String BACKGROUND_SYMBOL_PROPERTY = "background";
 

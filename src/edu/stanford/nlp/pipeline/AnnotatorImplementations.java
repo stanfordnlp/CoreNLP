@@ -71,12 +71,12 @@ public class AnnotatorImplementations {
    */
   public Annotator ner(Properties properties) throws IOException {
 
-    List<String> models = new ArrayList<>();
+    List<String> models = new ArrayList<String>();
     String modelNames = properties.getProperty("ner.model");
     if (modelNames == null) {
       modelNames = DefaultPaths.DEFAULT_NER_THREECLASS_MODEL + "," + DefaultPaths.DEFAULT_NER_MUC_MODEL + "," + DefaultPaths.DEFAULT_NER_CONLL_MODEL;
     }
-    if ( ! modelNames.isEmpty()) {
+    if (modelNames.length() > 0) {
       models.addAll(Arrays.asList(modelNames.split(",")));
     }
     if (models.isEmpty()) {
@@ -98,10 +98,7 @@ public class AnnotatorImplementations {
 
     String[] loadPaths = models.toArray(new String[models.size()]);
 
-    Properties combinerProperties = PropertiesUtils.extractSelectedProperties(properties,
-            NERClassifierCombiner.DEFAULT_PASS_DOWN_PROPERTIES);
-    NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers,
-            useSUTime, combinerProperties, loadPaths);
+    NERClassifierCombiner nerCombiner = new NERClassifierCombiner(applyNumericClassifiers, useSUTime, properties, loadPaths);
 
     int nThreads = PropertiesUtils.getInt(properties, "ner.nthreads", PropertiesUtils.getInt(properties, "nthreads", 1));
     long maxTime = PropertiesUtils.getLong(properties, "ner.maxtime", 0);
@@ -134,8 +131,8 @@ public class AnnotatorImplementations {
   /**
    * Annotate parse trees
    *
-   * @param properties Properties that control the behavior of the parser. It use "parse.x" properties.
-   * @return A ParserAnnotator
+   * @param properties
+   * @return
    */
   public Annotator parse(Properties properties) {
     String parserType = properties.getProperty("parse.type", "stanford");

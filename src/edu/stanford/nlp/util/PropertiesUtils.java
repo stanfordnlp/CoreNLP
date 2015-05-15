@@ -5,17 +5,13 @@ import java.io.PrintStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Map.Entry;
 
-/** Utilities methods for standard (but woeful) Java Properties objects.
- *
- *  @author Sarah Spikes
- *  @author David McClosky
- */
 public class PropertiesUtils {
 
   private PropertiesUtils() {}
@@ -38,8 +34,7 @@ public class PropertiesUtils {
     return ! (value.equals("false") || value.equals("no") || value.equals("off"));
   }
 
-  /** Convert from Properties to String. */
-
+  // Convert from properties to string and from string to properties
   public static String asString(Properties props) {
     try {
       StringWriter sw = new StringWriter();
@@ -50,7 +45,6 @@ public class PropertiesUtils {
     }
   }
 
-  /** Convert from String to Properties. */
   public static Properties fromString(String str) {
     try {
       StringReader sr = new StringReader(str);
@@ -102,7 +96,7 @@ public class PropertiesUtils {
   }
 
   /**
-   * Checks to make sure that all properties specified in {@code properties}
+   * Checks to make sure that all properties specified in <code>properties</code>
    * are known to the program by checking that each simply overrides
    * a default value.
    *
@@ -112,13 +106,15 @@ public class PropertiesUtils {
   @SuppressWarnings("unchecked")
   public static void checkProperties(Properties properties, Properties defaults) {
     Set<String> names = Generics.newHashSet();
-    for (String name : properties.stringPropertyNames()) {
-      names.add(name);
+    for (Enumeration<String> e = (Enumeration<String>) properties.propertyNames();
+         e.hasMoreElements(); ) {
+      names.add(e.nextElement());
     }
-    for (String defaultName : defaults.stringPropertyNames()) {
-      names.remove(defaultName);
+    for (Enumeration<String> e = (Enumeration<String>) defaults.propertyNames();
+         e.hasMoreElements(); ) {
+      names.remove(e.nextElement());
     }
-    if ( ! names.isEmpty()) {
+    if (!names.isEmpty()) {
       if (names.size() == 1) {
         throw new IllegalArgumentException("Unknown property: " + names.iterator().next());
       } else {
@@ -143,32 +139,14 @@ public class PropertiesUtils {
    */
   public static Properties extractPrefixedProperties(Properties properties, String prefix) {
     Properties ret = new Properties();
+    Set<Object> sourceKeys = properties.keySet();
 
-    for (String keyStr : properties.stringPropertyNames()) {
+    for (Object key : sourceKeys) {
+      String keyStr = (String) key;
+
       if (keyStr.startsWith(prefix)) {
         String newStr = keyStr.substring(prefix.length());
         ret.setProperty(newStr, properties.getProperty(keyStr));
-      }
-    }
-
-    return ret;
-  }
-
-  /**
-   * Build a {@code Properties} object containing key-value pairs from
-   * the given properties whose keys are in a list to keep.
-   *
-   * @param properties Key-value data from which to extract pairs
-   * @param keptProperties Key names to keep (by exact match).
-   * @return A Properties object containing those key-value pairs from
-   *         {@code properties} where the key was in keptProperties
-   */
-  public static Properties extractSelectedProperties(Properties properties, Set<String> keptProperties) {
-    Properties ret = new Properties();
-
-    for (String keyStr : properties.stringPropertyNames()) {
-      if (keptProperties.contains(keyStr)) {
-        ret.setProperty(keyStr, properties.getProperty(keyStr));
       }
     }
 
@@ -314,14 +292,6 @@ public class PropertiesUtils {
     return results;
   }
 
-  // add ovp's key values to bp, overwrite if necessary , this is a helper
-  public static Properties overWriteProperties(Properties bp, Properties ovp) {
-    for (String propertyName : ovp.stringPropertyNames()) {
-      bp.setProperty(propertyName,ovp.getProperty(propertyName));
-    }
-    return bp;
-  }
-
 
   public static class Property {
 
@@ -343,13 +313,13 @@ public class PropertiesUtils {
 
 
   public static String getSignature(String name, Properties properties, Property[] supportedProperties) {
-    String prefix = (name != null && !name.isEmpty())? name + '.' : "";
+    String prefix = (name != null && !name.isEmpty())? name + ".":"";
     // keep track of all relevant properties for this annotator here!
     StringBuilder sb = new StringBuilder();
     for (Property p:supportedProperties) {
       String pname = prefix + p.name();
       String pvalue = properties.getProperty(pname, p.defaultValue());
-      sb.append(pname).append(':').append(pvalue);
+      sb.append(pname).append(":").append(pvalue);
     }
     return sb.toString();
   }

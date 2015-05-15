@@ -21,7 +21,7 @@ public class SsurgeonTest {
 	 */
 	@Test
 	public void simpleTest() throws Exception {
-		SemanticGraph sg = SemanticGraph.valueOf("[mixed/VBN nsubj>[Joe/NNP appos>[bartender/NN det>the/DT]]  dobj>[drink/NN det>a/DT]]");
+		SemanticGraph sg = SemanticGraph.valueOf("[mixed/VBN nsubj:[Joe/NNP appos:[bartender/NN det:the/DT]]  dobj:[drink/NN det:a/DT]]");
 		SemgrexPattern semgrexPattern = SemgrexPattern.compile("{}=a1 >appos=e1 {}=a2 <nsubj=e2 {}=a3");
 		SsurgeonPattern pattern = new SsurgeonPattern(semgrexPattern);
 
@@ -56,6 +56,6 @@ public class SsurgeonTest {
 		for (SemanticGraph newSg : newSgs)
 			System.out.println("Modified = "+newSg.toCompactString());
 		String firstGraphString = newSgs.iterator().next().toCompactString().trim();
-		assertEquals(firstGraphString, "[bartender cop>is nsubj>Joe det>the]");
+		assertEquals(firstGraphString, "[bartender cop:is nsubj:Joe det:the]");
 	}
 }

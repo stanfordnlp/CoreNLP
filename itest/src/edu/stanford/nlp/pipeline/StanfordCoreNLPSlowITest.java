@@ -18,8 +18,8 @@ import java.util.Properties;
  * @author John Bauer
  * @author Gabor Angeli (parallelism test)
  */
-public class StanfordCoreNLPSlowITest extends TestCase {
 
+public class StanfordCoreNLPSlowITest extends TestCase {
   static List<File> getFileList() {
     List<File> files = new ArrayList<File>();
     File pathFile = new File("/u/nlp/ACE2005/" +
@@ -45,12 +45,11 @@ public class StanfordCoreNLPSlowITest extends TestCase {
     return files;
   }
 
-  @Override
   public void setUp(){
     StanfordRedwoodConfiguration.minimalSetup();
   }
 
-  private static StanfordCoreNLP buildPipeline() throws IOException {
+  private StanfordCoreNLP buildPipeline() throws IOException {
     List<File> files = getFileList();
     File dir = File.createTempFile("StanfordCoreNLPSlowITest", "");
     dir.delete();
@@ -67,7 +66,9 @@ public class StanfordCoreNLPSlowITest extends TestCase {
     return new StanfordCoreNLP(props);
   }
 
-  public void testNoCrashes() throws IOException {
+  public void testNoCrashes()
+    throws IOException
+  {
     StanfordCoreNLP pipeline = buildPipeline();
     for (File file : getFileList()) {
       try {
@@ -84,5 +85,4 @@ public class StanfordCoreNLPSlowITest extends TestCase {
     StanfordCoreNLP pipeline = buildPipeline();
     pipeline.processFiles(getFileList(), Runtime.getRuntime().availableProcessors());
   }
-
 }

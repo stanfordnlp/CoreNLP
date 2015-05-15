@@ -33,19 +33,11 @@
 % Revised for the Stanford Parser v.\ 3.2 in June 2013
 % Revised for the Stanford Parser v.\ 3.3 in November 2013
 % Revised for the Stanford Parser v.\ 3.3 in December 2013
-%Revised for the Stanford Parser v.\ 3.5.1 in February 2015
-Revised for the Stanford Parser v.\ 3.5.2 in April 2015
+Revised for the Stanford Parser v.\ 3.5.1 in February 2015
 }
 
 \begin{document}
 \maketitle
-
-Please note that this manual describes the original Stanford 
-Dependencies representation. As of version 3.5.2 the default representation
-output by the Stanford Parser and Stanford CoreNLP is the new Universal Dependencies (UD)
-representation. Take a look at the Universal Dependencies documentation 
-at \textsf{http://universaldependencies.github.com/docs/} for a description of UD 
-relations.
 
 \section{Introduction}
 
@@ -1042,14 +1034,11 @@ parser to specify that this has already been done.) The \texttt{penn}
 option will also give you the context-free phrase structure grammar
 representation of the sentences.
 
-\noindent Note that as of version 3.5.2 the default representation is the new Universal Dependencies representation. 
-Use the \texttt{-originalDependencies} option to obtain original Stanford Dependencies.
-
 \bigskip
 
 \noindent Command line example: \\
 {\hangindent=0.4in
-\raggedright\texttt{java -mx200m edu.stanford.nlp.parser.lexparser.LexicalizedParser -retainTmpSubcategories -originalDependencies -outputFormat "penn,typedDependencies" -outputFormatOptions "basicDependencies" englishPCFG.ser.gz file.txt}\\}
+\raggedright\texttt{java -mx200m edu.stanford.nlp.parser.lexparser.LexicalizedParser -retainTmpSubcategories -outputFormat "penn,typedDependencies" -outputFormatOptions "basicDependencies" englishPCFG.ser.gz file.txt}\\}
 
 \begin{quote}
 \hspace*{-0.375in}%
@@ -1058,8 +1047,6 @@ Java example: \\
 \hspace*{1.5in}"edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz",\\
 \hspace*{1.5in}"-maxLength", "80", "-retainTmpSubcategories"); \\
 TreebankLanguagePack tlp = new PennTreebankLanguagePack(); \\
-// Uncomment the following line to obtain original Stanford Dependencies\\
-// tlp.setGenerateOriginalDependencies(true); \\
 GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory();}
 
 \bigskip
@@ -1077,7 +1064,7 @@ If you already have Penn treebank-style trees (whether hand-annotated or as outp
 
 \paragraph{Command-line usage.} Use the \texttt{-treeFile} option as shown in the command line example below. The options to get the different types of representation are as follows:
 \begin{tabbing}
-\hspace{.3cm} \= \texttt{-originalDependencies} \= \hspace{.3cm} \= \kill
+\hspace{.3cm} \= \texttt{-collapsedTree} \= \hspace{.3cm} \= \kill
 \> \texttt{-basic} \>\> basic dependencies\\
 \> \texttt{-collapsed} \>\> collapsed dependencies (not necessarily a tree structure)\\
 \> \texttt{-CCprocessed} \>\> collapsed dependencies with propagation of conjunct \\
@@ -1085,9 +1072,7 @@ If you already have Penn treebank-style trees (whether hand-annotated or as outp
 \> \texttt{-collapsedTree} \>\> collapsed dependencies that preserve a tree structure\\
 \> \texttt{-nonCollapsed} \>\> non-collapsed dependencies: basic dependencies as well as\\
 \> 						 \>\> the extra ones which do not preserve a tree structure\\
-\> \texttt{-conllx} \>\> dependencies printed out in CoNLL X (CoNLL 2006) format \\
-\> \texttt{-originalDependencies} \>\> output the original Stanford Dependencies instead of \\
-\>                                            \>\> the new Universal Dependencies.
+\> \texttt{-conllx} \>\> dependencies printed out in CoNLL X (CoNLL 2006) format
 \end{tabbing}
 
 \noindent If you want the non-collapsed version of the dependencies where the basic ones are separated from the extra ones, add the flag \texttt{-extraSep}. This will print the basic dependencies, a separator (======) and the extra dependencies.
@@ -1152,8 +1137,6 @@ like this:
 \texttt{
 // One time setup \\
 TreebankLanguagePack tlp = new PennTreebankLanguagePack(); \\
-// Uncomment the following line to obtain original Stanford Dependencies\\
-// tlp.setGenerateOriginalDependencies(true); \\
 GrammaticalStructureFactory gsf = tlp.grammaticalStructureFactory(); \\
 // For each Tree \\
 Tree parseTree; // assumed to come from a treebank or parser \\
@@ -1250,9 +1233,10 @@ Dependencies \citep{marneffe14universal}. Further refinement with a
 team of collaborators has led to a new synthesis spanning
 tokenization, morphological features, parts of speech, and
 dependencies, known as Universal Dependencies: 
-\url{http://universaldependencies.github.io/docs/}.  Since version 3.5.2 
-the default representation output by our parser is the Universal Dependencies
-representation.
+\url{http://universaldependencies.github.io/docs/}.  Our medium-term
+plan is to transition our tools from the current Stanford Dependencies
+to Universal Dependencies.
+
 
 \section{Recent changes}
 

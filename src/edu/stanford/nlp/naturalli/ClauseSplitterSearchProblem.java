@@ -1,7 +1,6 @@
 package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.classify.*;
-import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -47,11 +46,6 @@ import java.util.stream.Stream;
  */
 public class ClauseSplitterSearchProblem {
 
-  /**
-   * A specification for clause splits we _always_ want to do. The format is a map from the edge label we are splitting, to
-   * the preference for the type of split we should do. The most prefered is at the front of the list, and then it backs off
-   * to the less and less prefered split types.
-   */
   protected static final Map<String, List<String>> HARD_SPLITS = Collections.unmodifiableMap(new HashMap<String, List<String>>() {{
     put("comp", new ArrayList<String>() {{
       add("simple");
@@ -62,10 +56,6 @@ public class ClauseSplitterSearchProblem {
     put("xcomp", new ArrayList<String>() {{
       add("clone_dobj");
       add("clone_nsubj");
-      add("simple");
-    }});
-    put("csubj", new ArrayList<String>() {{
-      add("clone_dobj");
       add("simple");
     }});
   }});
@@ -263,7 +253,8 @@ public class ClauseSplitterSearchProblem {
    * @param tree The tree to split a clause from.
    * @param toKeep The edge representing the clause to keep.
    */
-  static void splitToChildOfEdge(SemanticGraph tree, SemanticGraphEdge toKeep) {
+  @SuppressWarnings("unchecked")
+  private void simpleClause(SemanticGraph tree, SemanticGraphEdge toKeep) {
     Queue<IndexedWord> fringe = new LinkedList<>();
     List<IndexedWord> nodesToRemove = new ArrayList<>();
     // Find nodes to remove
@@ -290,20 +281,6 @@ public class ClauseSplitterSearchProblem {
     nodesToRemove.forEach(tree::removeVertex);
     // Set new root
     tree.setRoot(toKeep.getDependent());
-
-  }
-
-  /**
-   * The basic method for splitting off a clause of a tree.
-   * This modifies the tree in place.
-   * This method addtionally follows ref edges.
-   *
-   * @param tree The tree to split a clause from.
-   * @param toKeep The edge representing the clause to keep.
-   */
-  @SuppressWarnings("unchecked")
-  private void simpleClause(SemanticGraph tree, SemanticGraphEdge toKeep) {
-    splitToChildOfEdge(tree, toKeep);
 
     // Follow 'ref' edges
     Map<IndexedWord, IndexedWord> refReplaceMap = new HashMap<>();
@@ -340,7 +317,7 @@ public class ClauseSplitterSearchProblem {
   private static void addWord(SemanticGraph toModify, IndexedWord root, String rel, CoreLabel coreLabel) {
     IndexedWord dependent = new IndexedWord(coreLabel);
     toModify.addVertex(dependent);
-    toModify.addEdge(root, dependent, GrammaticalRelation.valueOf(Language.English, rel), Double.NEGATIVE_INFINITY, false);
+    toModify.addEdge(root, dependent, GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, rel), Double.NEGATIVE_INFINITY, false);
   }
 
   /**
@@ -388,7 +365,7 @@ public class ClauseSplitterSearchProblem {
     // Add subtree
     // (add subject)
     toModify.addVertex(subject);
-    toModify.addEdge(root, subject, GrammaticalRelation.valueOf(Language.English, rel), Double.NEGATIVE_INFINITY, false);
+    toModify.addEdge(root, subject, GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, rel), Double.NEGATIVE_INFINITY, false);
 
     // (add nodes)
     wordsToAdd.forEach(toModify::addVertex);
@@ -401,13 +378,13 @@ public class ClauseSplitterSearchProblem {
 
   /**
    * Stips aux and mark edges when we are splitting into a clause.
-   * @param toModify The tree we are stripping the edges from.
+   * @param toModify
    */
   private void stripAuxMark(SemanticGraph toModify) {
     List<SemanticGraphEdge> toClean = new ArrayList<>();
     for (SemanticGraphEdge edge : toModify.outgoingEdgeIterable(toModify.getFirstRoot())) {
       String rel = edge.getRelation().toString();
-      if (("aux".equals(rel) || "mark".equals(rel)) && !toModify.outgoingEdgeIterator(edge.getDependent()).hasNext()) {
+      if ("aux".equals(rel) || "mark".equals(rel) && !toModify.outgoingEdgeIterator(edge.getDependent()).hasNext()) {
         toClean.add(edge);
       }
     }
@@ -606,7 +583,6 @@ public class ClauseSplitterSearchProblem {
                 simpleClause(toModify, outgoingEdge);
                 addSubtree(toModify, outgoingEdge.getDependent(), "nsubj", tree,
                     subjectOrNull.getDependent(), Collections.singleton(outgoingEdge));
-                assert Util.isTree(toModify);
                 stripAuxMark(toModify);
                 assert Util.isTree(toModify);
               }), false
@@ -640,7 +616,6 @@ public class ClauseSplitterSearchProblem {
                 addSubtree(toModify, outgoingEdge.getDependent(), "nsubj", tree,
                     objectOrNull.getDependent(), Collections.singleton(outgoingEdge));
                 // Strip bits we don't want
-                assert Util.isTree(toModify);
                 stripAuxMark(toModify);
                 assert Util.isTree(toModify);
               }), false

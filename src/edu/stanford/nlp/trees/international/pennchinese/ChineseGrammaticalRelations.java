@@ -27,9 +27,9 @@
 package edu.stanford.nlp.trees.international.pennchinese;
 
 import edu.stanford.nlp.trees.GrammaticalRelation;
+import edu.stanford.nlp.trees.GrammaticalRelation.Language;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
-import edu.stanford.nlp.international.Language;
 
 import java.util.Collections;
 import java.util.List;

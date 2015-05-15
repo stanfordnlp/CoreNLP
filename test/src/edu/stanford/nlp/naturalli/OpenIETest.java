@@ -1,7 +1,6 @@
 package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.classify.LinearClassifier;
-import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -69,7 +68,7 @@ public class OpenIETest {
         tree.addEdge(
             new IndexedWord(sentence.get(parent - 1)),
             new IndexedWord(sentence.get(i)),
-            new GrammaticalRelation(Language.English, reln, null, null),
+            new GrammaticalRelation(GrammaticalRelation.Language.English, reln, null, null),
             1.0, false
         );
       }

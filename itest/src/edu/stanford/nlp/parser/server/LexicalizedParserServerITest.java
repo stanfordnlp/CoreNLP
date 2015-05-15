@@ -25,17 +25,10 @@ public class LexicalizedParserServerITest extends TestCase {
   static final String testString = "John Bauer works at Stanford.";
   static final String resultString = "(ROOT (S (NP (NNP John) (NNP Bauer)) (VP (VBZ works) (PP (IN at) (NP (NNP Stanford)))) (. .)))";
   static final String binarizedResultString = "(ROOT (S (NP (NNP John) (NNP Bauer)) (@S (VP (VBZ works) (PP (IN at) (NP (NNP Stanford)))) (. .))))";
-  static final String collapsedTreeStanfordDependenciesString =
-    ("nn(Bauer-2, John-1)\n" +
-     "nsubj(works-3, Bauer-2)\n" +
-     "root(ROOT-0, works-3)\n" +
-     "prep_at(works-3, Stanford-5)");
-  static final String collapsedTreeUniversalDependenciesString =
-    ("compound(Bauer-2, John-1)\n" +
-     "nsubj(works-3, Bauer-2)\n" +
-     "root(ROOT-0, works-3)\n" +
-     "case(Stanford-5, at-4)\n" +
-     "nmod:at(works-3, Stanford-5)");
+  static final String collapsedTreeString = ("nn(Bauer-2, John-1)\n" + 
+                                             "nsubj(works-3, Bauer-2)\n" + 
+                                             "root(ROOT-0, works-3)\n" +
+                                             "prep_at(works-3, Stanford-5)");
   static final String tokenizedString = "John Bauer works at Stanford .";
 
   static final String lemmaTestString = "A man was walking in the rain.";
@@ -56,16 +49,9 @@ public class LexicalizedParserServerITest extends TestCase {
     }
   }
 
-  public Thread startLPServer(int port, boolean daemon)
+  public Thread startLPServer(int port, boolean daemon) 
     throws IOException
   {
-    return startLPServer(port, daemon, lexparser);
-  }
-
-  public Thread startLPServer(int port, boolean daemon, boolean useStanfordDependencies)
-    throws IOException
-  {
-    lexparser.getTLPParams().setGenerateOriginalDependencies(useStanfordDependencies);
     return startLPServer(port, daemon, lexparser);
   }
 
@@ -164,30 +150,17 @@ public class LexicalizedParserServerITest extends TestCase {
     assertEquals(binarizedResultString, tree.trim());
   }
 
-  public void testGetCollapsedTreeStanfordDependencies()
+  public void testGetCollapsedTreeDependencies()
     throws IOException
   {
     int port = Ports.findAvailable(2000, 10000);
-    System.err.println("testGetCollapsedTreeStanfordDependencies: starting on port " + port);
-    startLPServer(port, true, true);
+    System.err.println("testGetCollapsedTreeDependencies: starting on port " + port);
+    startLPServer(port, true);
 
-    LexicalizedParserClient client =
+    LexicalizedParserClient client = 
       new LexicalizedParserClient("localhost", port);
     String result = client.getDependencies(testString, "collapsed_tree");
-    assertEquals(collapsedTreeStanfordDependenciesString, result.trim());
-  }
-
-  public void testGetCollapsedTreeUniversalDependencies()
-    throws IOException
-  {
-    int port = Ports.findAvailable(2000, 10000);
-    System.err.println("testGetCollapsedTreeUniversalDependencies: starting on port " + port);
-    startLPServer(port, true, false);
-
-    LexicalizedParserClient client =
-      new LexicalizedParserClient("localhost", port);
-    String result = client.getDependencies(testString, "collapsed_tree");
-    assertEquals(collapsedTreeUniversalDependenciesString, result.trim());
+    assertEquals(collapsedTreeString, result.trim());
   }
 
   public void testQuit()

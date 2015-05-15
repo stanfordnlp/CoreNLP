@@ -4,6 +4,7 @@ import edu.stanford.nlp.ling.tokensregex.Env;
 import edu.stanford.nlp.ling.tokensregex.EnvLookup;
 import edu.stanford.nlp.ling.tokensregex.SequenceMatchResult;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.util.Pair;
 import edu.stanford.nlp.util.StringUtils;
@@ -18,8 +19,9 @@ import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
 /**
- * Various implementations of the Expression interface, which is
- *   used for specifying an "action" or "result" in TokensRegex extraction rules.
+ * Various implementations of the Expression interface.
+ * <p>
+ *   Expressions (used for specifying "action", "result" in TokensRegex extraction rules).
  *   Expressions are made up of identifiers, literals (numbers, strings "I'm a string", TRUE, FALSE),
  *     function calls ( FUNC(args) ).
  * </p>
@@ -101,7 +103,6 @@ import java.util.regex.Pattern;
  * @author Angel Chang
  */
 public class Expressions {
-
   /** VAR - Variable */
   public static final String TYPE_VAR = "VAR";
   /** FUNCTION - (input) => (output) where input is a list of Values, and output is a single Value */
@@ -132,8 +133,6 @@ public class Expressions {
   public static final Value<Boolean> TRUE = new PrimitiveValue<Boolean>(Expressions.TYPE_BOOLEAN, true);
   public static final Value<Boolean> FALSE = new PrimitiveValue<Boolean>(Expressions.TYPE_BOOLEAN, false);
   public static final Value NIL = new PrimitiveValue("NIL", null);
-
-  private Expressions() { } // static methods and classes
 
   public static Boolean convertValueToBoolean(Value v, boolean keepNull) {
     Boolean res = null;
@@ -203,38 +202,31 @@ public class Expressions {
   }
 
   /**
-   * An expression that is a wrapper around another expression.
+   * An expression that is a wrapper around another expression
    */
   public abstract static class WrappedExpression implements Expression {
-
     protected Expression expr;
 
-    @Override
     public Tags getTags() {
       return expr.getTags();
     }
 
-    @Override
     public void setTags(Tags tags) {
       expr.setTags(tags);
     }
 
-    @Override
     public String getType() {
       return expr.getType();
     }
 
-    @Override
     public Expression simplify(Env env) {
       return expr.simplify(env);
     }
 
-    @Override
     public boolean hasValue() {
       return expr.hasValue();
     }
 
-    @Override
     public Value evaluate(Env env, Object... args) {
       return expr.evaluate(env, args);
     }
@@ -255,11 +247,10 @@ public class Expressions {
     public int hashCode() {
       return expr != null ? expr.hashCode() : 0;
     }
-
   }
 
   /**
-  * An expression with a typename and tags.
+  * An expression with a typename and tags
   */
   public abstract static class TypedExpression implements Expression, Serializable {
     String typename;
@@ -1032,7 +1023,6 @@ public class Expressions {
   }
 
   public static class MethodCallExpression extends Expressions.TypedExpression {
-
     String function;
     Expression object;
     List<Expression> params;
@@ -1045,7 +1035,14 @@ public class Expressions {
     }
 
     public String toString() {
-      return object + "." + function + '(' + StringUtils.join(params, ", ") + ')';
+      StringBuilder sb = new StringBuilder("");
+      sb.append(object);
+      sb.append(".");
+      sb.append(function);
+      sb.append("(");
+      sb.append(StringUtils.join(params, ", "));
+      sb.append(")");
+      return sb.toString();
     }
 
     public Expression simplify(Env env)
@@ -1341,7 +1338,7 @@ public class Expressions {
             default:
               // TODO: support other types
               return new PrimitiveValue(typeName, value.get());
-              //throw new UnsupportedOperationException("Cannot convert type " + typeName);
+            //throw new UnsupportedOperationException("Cannot convert type " + typeName);
           }
         }
       }
@@ -1377,7 +1374,5 @@ public class Expressions {
       disableCaching = !checkValue();
       return new CompositeValue(res, true);
     }
-
-  } // end static class CompositeValue
-
+  }
 }

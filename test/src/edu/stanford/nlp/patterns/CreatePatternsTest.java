@@ -34,7 +34,7 @@ public class CreatePatternsTest {
     CoreMap m = new ArrayCoreMap();
     String text = "We present a paper that focuses on semantic graphs applied to language.";
 
-    String graphString="[present/VBP-2 nsubj>We/PRP-1 dobj>[paper/NN-4 det>a/DT-3] ccomp>[applied/VBN-10 mark>that/IN-5 nsubj>[focuses/NN-6 nmod:on>[graphs/NNS-9 amod>semantic/JJ-8]] nmod:to>language/NN-12]]";
+    String graphString="[present/VBP-2 nsubj:We/PRP-1 dobj:[paper/NN-4 det:a/DT-3] ccomp:[applied/VBN-10 mark:that/IN-5 nsubj:[focuses/NN-6 prep_on:[graphs/NNS-9 amod:semantic/JJ-8]] prep_to:language/NN-12]]";
     SemanticGraph graph = SemanticGraph.valueOf(graphString);
 
     //String phrase = "semantic graphs";

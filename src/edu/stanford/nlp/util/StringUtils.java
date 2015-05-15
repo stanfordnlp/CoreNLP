@@ -875,7 +875,7 @@ public class StringUtils {
   /**
    * In this version each flag has zero or one argument. It has one argument
    * if there is a thing following a flag that does not begin with '-'.  See
-   * {@link #argsToPtroperties(String[], Map)} for full documentation.
+   * {@link #argsToProperties(String[], Map)} for full documentation.
    *
    * @param args Command line arguments
    * @return A Properties object representing the arguments.
@@ -955,10 +955,11 @@ public class StringUtils {
     if (result.containsKey(PROP)) {
       String file = result.getProperty(PROP);
       result.remove(PROP);
-      Properties toAdd = argsToProperties("-prop", file);
-      for (String key : toAdd.stringPropertyNames()) {
+      Properties toAdd = argsToProperties(new String[]{"-prop", file});
+      for (Enumeration<?> e = toAdd.propertyNames(); e.hasMoreElements(); ) {
+        String key = (String) e.nextElement();
         String val = toAdd.getProperty(key);
-        if ( ! result.containsKey(key)) {
+        if (!result.containsKey(key)) {
           result.setProperty(key, val);
         }
       }
@@ -972,7 +973,6 @@ public class StringUtils {
    * This method reads in properties listed in a file in the format prop=value, one property per line.
    * Although <code>Properties.load(InputStream)</code> exists, I implemented this method to trim the lines,
    * something not implemented in the <code>load()</code> method.
-   *
    * @param filename A properties file to read
    * @return The corresponding Properties object
    */
@@ -982,9 +982,9 @@ public class StringUtils {
       InputStream is = new BufferedInputStream(new FileInputStream(filename));
       result.load(is);
       // trim all values
-      for (String propKey : result.stringPropertyNames()){
-        String newVal = result.getProperty(propKey);
-        result.setProperty(propKey,newVal.trim());
+      for (Object propKey : result.keySet()){
+        String newVal = result.getProperty((String)propKey);
+        result.setProperty((String)propKey,newVal.trim());
       }
       is.close();
       return result;

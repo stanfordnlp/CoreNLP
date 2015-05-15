@@ -11,7 +11,7 @@ import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.HasWord;
 
 /**
- * This class implements the {@code TreeReader} interface to read Penn Treebank-style
+ * This class implements the <code>TreeReader</code> interface to read Penn Treebank-style
  * files. The reader is implemented as a push-down automaton (PDA) that parses the Lisp-style
  * format in which the trees are stored. This reader is compatible with both PTB
  * and PATB trees.
@@ -139,7 +139,7 @@ public class PennTreeReader implements TreeReader {
 
       //Setup PDA
       this.currentTree = null;
-      this.stack = new ArrayList<>();
+      this.stack = new ArrayList<Tree>();
 
       try {
         t = getTreeFromInputStream();
@@ -156,9 +156,7 @@ public class PennTreeReader implements TreeReader {
         if (treeNormalizer != null && treeFactory != null) {
           t = treeNormalizer.normalizeWholeTree(t, treeFactory);
         }
-        if (t != null) {
-          t.indexLeaves(true);
-        }
+        t.indexLeaves(true);
       }
     }
 
@@ -207,7 +205,7 @@ public class PennTreeReader implements TreeReader {
           break;
         case rightParen:
           if (stack.isEmpty()) {
-            // Warn that file has too many right parentheses
+            // Warn that file has too many right parens
             System.err.println("PennTreeReader: warning: file has extra non-matching right parenthesis [ignored]");
             break label;
           }

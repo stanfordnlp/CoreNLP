@@ -1,28 +1,31 @@
 package edu.stanford.nlp.ling.tokensregex;
 
-import java.util.*;
-
 import edu.stanford.nlp.ling.tokensregex.parser.TokenSequenceParser;
 import edu.stanford.nlp.util.*;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.*;
 
 /**
  * Token Sequence Pattern for regular expressions over sequences of tokens (each represented as a <code>CoreMap</code>).
  * Sequences over tokens can be matched like strings.
  * <p>
- * To use:
- * </p>
+ * To use
  * <pre><code>
  *   TokenSequencePattern p = TokenSequencePattern.compile("....");
  *   TokenSequenceMatcher m = p.getMatcher(tokens);
  *   while (m.find()) ....
  * </code></pre>
+ * </p>
  *
  * <p>
  * Supports the following:
  * <ul>
  *  <li>Concatenation: <code>X Y</code></li>
  *  <li>Or: <code>X | Y</code></li>
- *  <li>And: {@code X & Y}</li>
+ *  <li>And: <code>X & Y</code></li>
  *  <li>Groups:
  *     <ul>
  *     <li>capturing: <code>(X)</code> (with numeric group id)</li>
@@ -43,29 +46,28 @@ import edu.stanford.nlp.util.*;
  * <li>Greedy Quantifiers:  <code>X+, X?, X*, X{n,m}, X{n}, X{n,}</code></li>
  * <li>Reluctant Quantifiers: <code>X+?, X??, X*?, X{n,m}?, X{n}?, X{n,}?</code></li>
  * <li>Back references: <code>\captureid</code> </li>
- * <li>Value binding for groups: {@code [pattern] => [value]}.
- *   Value for matched expression can be accessed using {@code m.groupValue()}
- *   <br></br>Example: {@code ( one => 1 | two => 2 | three => 3 | ...)}
+ * <li>Value binding for groups: <code>[pattern] => [value]</code>.
+ *   Value for matched expression can be accessed using <code>m.groupValue()</code>
+ *   <br></br>Example: <pre>( one => 1 | two => 2 | three => 3 | ...)</pre>
  * </li>
  * </ul>
  *
  * <p>
  * Individual tokens are marked by <code>"[" TOKEN_EXPR "]" </code>
  * <br>Possible <code>TOKEN_EXPR</code>:
- * </p>
  * <ul>
  * <li> All specified token attributes match:
- * <br> For Strings:
- *     <code> { lemma:/.../; tag:"NNP" } </code> = attributes that need to all match.
+ * <br/> For Strings:
+ *     <code> { lemma:/.../; tag:"NNP" } </code> = attributes that need to all match
  *     If only one attribute, the {} can be dropped.
- * <br> See {@link edu.stanford.nlp.ling.AnnotationLookup AnnotationLookup} for a list of predefined token attribute names.
- * <br> Additional attributes can be bound using the environment (see below).
- * <br> NOTE: <code>/.../</code> used for regular expressions,
+ * <br/> See {@link edu.stanford.nlp.ling.AnnotationLookup AnnotationLookup} for a list of predefined token attribute names.
+ * <br/> Additional attributes can be bound using the environment (see below).
+ * <br/> NOTE: <code>/.../</code> used for regular expressions,
  *            <code>"..."</code> for exact string matches
- * <br> For Numbers:
- *      <code>{ word&gt;=2 }</code>
- * <br> NOTE: Relation can be {@code ">=", "<=", ">", "<",} or {@code "=="}
- * <br> Others:
+ * <br/> For Numbers:
+ *      <code>{ word>=2 }</code>
+ * <br/> NOTE: Relation can be <code>">=", "<=", ">", "<",</code> or <code>"=="</code>
+ * <br/> Others:
  *      <code>{ word::IS_NUM } , { word::IS_NIL } </code> or
  *      <code>{ word::NOT_EXISTS }, { word::NOT_NIL } </code> or <code> { word::EXISTS } </code>
  * </li>
@@ -78,9 +80,10 @@ import edu.stanford.nlp.util.*;
  * </li>
  * <li>
  *  Conjunction or Disjunction:
- *     <code> {...} &amp; {...} </code>   or  <code> {...} | {...} </code>
+ *     <code> {...} & {...} </code>   or  <code> {...} | {...} </code>
  * </li>
- * </ul>
+ * </ui>
+ * </p>
  *
  * <p>
  * Special tokens:
@@ -94,12 +97,11 @@ import edu.stanford.nlp.util.*;
  *
  * <p>
  * Special expressions: indicated by double braces: <code>{{ expr }}</code>
- *   <br> See {@link edu.stanford.nlp.ling.tokensregex.types.Expressions} for syntax.
+ *   <br/> See {@link edu.stanford.nlp.ling.tokensregex.types.Expressions} for syntax.
  * </p>
  *
  * <p>
  * Binding of variables for use in compiling patterns:
- * </p>
  * <ol>
  * <li> Use  {@code Env env = TokenSequencePattern.getNewEnv()} to create a new environment for binding </li>
  * <li> Bind string to attribute key (Class) lookup:
@@ -121,17 +123,18 @@ import edu.stanford.nlp.util.*;
  *   </code></pre>
  * </li>
  * </ol>
+ * </p>
  *
  * <p>
  * Actions (partially implemented)
- * </p>
  * <ul>
- * <li> {@code pattern ==> action} </li>
+ * <li> <code>pattern ==> action</code> </li>
  * <li> Supported action:
- *    <code> &amp;annotate( { ner="DATE" } ) </code> </li>
+ *    <code>&annotate( { ner="DATE" } )</code> </li>
  * <li> Not applied automatically, associated with a pattern.</li>
  * <li> To apply, call <code>pattern.getAction().apply(match, groupid)</code></li>
  * </ul>
+ * </p>
  *
  * @author Angel Chang
  * @see TokenSequenceMatcher
@@ -272,7 +275,7 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
 
 
   /**
-   * Create a multi-pattern matcher for matching across multiple TokensRegex patterns.
+   * Create a multi-pattern matcher for matching across multiple TokensRegex patterns
    * @param patterns Collection of input patterns
    * @return a MultiPatternMatcher
    */
@@ -284,7 +287,7 @@ public class TokenSequencePattern extends SequencePattern<CoreMap> {
   }
 
   /**
-   * Create a multi-pattern matcher for matching across multiple TokensRegex patterns.
+   * Create a multi-pattern matcher for matching across multiple TokensRegex patterns
    * @param patterns input patterns
    * @return a MultiPatternMatcher
    */
