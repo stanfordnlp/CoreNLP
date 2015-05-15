@@ -87,6 +87,16 @@ public class QuotationAnnotatorTest extends TestCase {
     assertEmbedded(second, text, quotes);
   }
 
+  public void testEmbeddedQuotesTwo() {
+    String text = "It was all very well to say 'Drink me,' but the wise little Alice was\n" +
+        "not going to do THAT in a hurry. 'No, I'll \"look\" first,' she said, 'and\n" +
+        "see whether it's marked \"poison\" or not';";
+    List<CoreMap> quotes = runQuotes(text, 3);
+    assertEmbedded("\"poison\"", "'and\n" +
+        "see whether it's marked \"poison\" or not'", quotes);
+    assertEmbedded("\"look\"", "'No, I'll \"look\" first,'", quotes);
+  }
+
   public void testQuotesFollowEachother() {
     String text = "\"Where?\"\n" +
         "\n" +
