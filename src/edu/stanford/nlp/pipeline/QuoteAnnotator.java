@@ -136,6 +136,7 @@ public class QuoteAnnotator implements Annotator {
     }
 
     // embed quotes
+    List<CoreMap> toRemove = new ArrayList<>();
     for (CoreMap cmQuote : cmQuotes) {
       int start = cmQuote.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
       int end = cmQuote.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
@@ -147,9 +148,17 @@ public class QuoteAnnotator implements Annotator {
         if (start < startComp && end >= endComp) {
           // p contains comp
           embeddedQuotes.add(cmQuoteComp);
+          // now we want to remove it from the top-level quote list
+          toRemove.add(cmQuoteComp);
         }
       }
       cmQuote.set(CoreAnnotations.QuotationsAnnotation.class, embeddedQuotes);
+    }
+
+    // Remove all the quotes that we want to.
+    for (CoreMap r : toRemove) {
+      // remove that quote from the overall list
+      cmQuotes.remove(r);
     }
     return cmQuotes;
   }

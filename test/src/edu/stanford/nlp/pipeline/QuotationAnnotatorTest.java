@@ -45,20 +45,16 @@ public class QuotationAnnotatorTest extends TestCase {
 
   public void testDoubleEnclosedInSingle() {
     String text = "'\"Hello,\" he said, \"how are you doing?\"'";
-    List<CoreMap> quotes = runQuotes(text, 3);
+    List<CoreMap> quotes = runQuotes(text, 1);
     assertEquals("'\"Hello,\" he said, \"how are you doing?\"'", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("\"Hello,\"", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("\"how are you doing?\"", quotes.get(2).get(CoreAnnotations.TextAnnotation.class));
     assertEmbedded("\"Hello,\"", text, quotes);
     assertEmbedded("\"how are you doing?\"", text, quotes);
   }
 
   public void testSingleEnclosedInDouble() {
     String text = "\"'Hello,' he said, 'how are you doing?'\"";
-    List<CoreMap> quotes = runQuotes(text, 3);
+    List<CoreMap> quotes = runQuotes(text, 1);
     assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("'Hello,'", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
-    assertEquals("'how are you doing?'", quotes.get(2).get(CoreAnnotations.TextAnnotation.class));
     assertEmbedded("'Hello,'", text, quotes);
     assertEmbedded("'how are you doing?'", text, quotes);
   }
@@ -75,7 +71,7 @@ public class QuotationAnnotatorTest extends TestCase {
         "am afraid I shall find it difficult to procure\n" +
         "\n" +
         "food for you.'\"";
-    List<CoreMap> quotes = runQuotes(text, 3);
+    List<CoreMap> quotes = runQuotes(text, 1);
     assertEmbedded("'Enter,'", text, quotes);
     String second = "'and I will\n" +
         "\n" +
