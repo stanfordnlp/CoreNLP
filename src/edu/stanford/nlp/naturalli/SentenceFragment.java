@@ -99,14 +99,16 @@ public class SentenceFragment {
       // Find additional connectives
       for (SemanticGraphEdge edge : parseTree.incomingEdgeIterable(new IndexedWord(word))) {
         String rel = edge.getRelation().toString();
-        if (rel.contains("_")) {
+        if (rel.contains(":")) {
+          addedConnective = rel.substring(rel.indexOf(":") + 1);
+        } else if (rel.contains("_")) {
           addedConnective = rel.substring(rel.indexOf("_") + 1);
         }
       }
       if (addedConnective != null) {
         // Found a connective (e.g., a preposition or conjunction)
         Pair<Integer, Integer> yield = parseTree.yieldSpan(new IndexedWord(word));
-        glosses.add(Pair.makePair(addedConnective, yield.first - 1));
+        glosses.add(Pair.makePair(addedConnective.replaceAll("_", " "), yield.first - 1));
       }
     }
     // Sort the sentence

@@ -32,6 +32,8 @@ import java.util.stream.Collectors;
 /**
  * A simple OpenIE system based on valid Natural Logic deletions of a sentence.
  *
+ * TODO(gabor): handle lists ("She was the sovereign of Austria, Hungary, Croatia, Bohemia, Mantua, Milan, Lodomeria and Galicia.")
+ *
  * @author Gabor Angeli
  */
 @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
