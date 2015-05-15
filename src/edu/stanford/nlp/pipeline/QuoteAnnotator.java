@@ -259,7 +259,12 @@ public class QuoteAnnotator implements Annotator {
 //      quotesMap.get(quote).add(new Pair(start, text.length()));
 //    } else
     if (start >= 0) {
-      System.err.println("WARNING: unmatched quote of type " + quote + " at end of file!");
+      String warning = text;
+      if (text.length() > 150) {
+        warning = text.substring(0, 150) + "...";
+      }
+      System.err.println("WARNING: unmatched quote of type " +
+          quote + " at end of text segment: " + warning);
     }
 
     // recursively look for embedded quotes in these ones
@@ -269,15 +274,19 @@ public class QuoteAnnotator implements Annotator {
     // but without the part of the text before the single quote
     if (quotesMap.size() < 1 && start >= 0) {
       embedded = recursiveQuotes(text.substring(start, text.length()), start + offset, quote);
-    }
-    for (String qKind : quotesMap.keySet()) {
-      for (Pair<Integer, Integer> q : quotesMap.get(qKind)) {
-        if (q.first() < q.second() - 2) {
-          embedded = recursiveQuotes(text.substring(q.first() + 1, q.second() - 1), q.first() + 1 + offset, qKind);
-        }
-        quotes.add(new Pair(q.first() + offset, q.second() + offset));
-        for (Pair<Integer, Integer> e : embedded) {
-          quotes.add(new Pair(e.first() + offset, e.second() + offset));
+      for (Pair<Integer, Integer> e : embedded) {
+        quotes.add(new Pair(e.first() + offset, e.second() + offset));
+      }
+    } else {
+      for (String qKind : quotesMap.keySet()) {
+        for (Pair<Integer, Integer> q : quotesMap.get(qKind)) {
+          if (q.first() < q.second() - 2) {
+            embedded = recursiveQuotes(text.substring(q.first() + 1, q.second() - 1), q.first() + 1 + offset, qKind);
+          }
+          quotes.add(new Pair(q.first() + offset, q.second() + offset));
+          for (Pair<Integer, Integer> e : embedded) {
+            quotes.add(new Pair(e.first() + offset, e.second() + offset));
+          }
         }
       }
     }
