@@ -35,7 +35,7 @@ public class QuotationAnnotatorTest extends TestCase {
         " myself; how can you be so teasing?\"";
     List<CoreMap> quotes = runQuotes(text, 1);
     assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    assertInnerAnnotationValues(quotes.get(0), 0, 0, 0);
+    assertInnerAnnotationValues(quotes.get(0), 0, 0, 0, 0, 24);
   }
 
   public void testBasicLatexQuotes() {
@@ -43,8 +43,8 @@ public class QuotationAnnotatorTest extends TestCase {
     List<CoreMap> quotes = runQuotes(text, 2);
     assertEquals("`Hello,'", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
     assertEquals("``how are you doing?''", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
-    assertInnerAnnotationValues(quotes.get(0), 0, 0, 0);
-    assertInnerAnnotationValues(quotes.get(1), 1, 0, 0);
+    assertInnerAnnotationValues(quotes.get(0), 0, 0, 0, 0, 3);
+    assertInnerAnnotationValues(quotes.get(1), 1, 0, 0, 7, 13);
   }
 
   public void testLatexQuotesWithDirectedApostrophes() {
@@ -58,7 +58,7 @@ public class QuotationAnnotatorTest extends TestCase {
     List<CoreMap> quotes = runQuotes(text, 1);
     assertEquals(text, quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
     assertEmbedded("``how are you doing?''", text, quotes);
-    assertInnerAnnotationValues(quotes.get(0), 0, 0, 0);
+    assertInnerAnnotationValues(quotes.get(0), 0, 0, 0, 0, 9);
   }
 
   public void testEmbeddedSingleLatexQuotes() {
@@ -176,7 +176,7 @@ public class QuotationAnnotatorTest extends TestCase {
         "\n" +
         "food for you.'";
     assertEmbedded(second, text, quotes);
-    assertInnerAnnotationValues(quotes.get(0), 0, 0, 0);
+    assertInnerAnnotationValues(quotes.get(0), 0, 0, 0, 0, 55);
   }
 
   public void testEmbeddedQuotesTwo() {
@@ -187,8 +187,8 @@ public class QuotationAnnotatorTest extends TestCase {
     assertEmbedded("\"poison\"", "'and\n" +
         "see whether it's marked \"poison\" or not'", quotes);
     assertEmbedded("\"look\"", "'No, I'll \"look\" first,'", quotes);
-    assertInnerAnnotationValues(quotes.get(0), 0, 0, 0);
-    assertInnerAnnotationValues(quotes.get(1), 1, 1, 1);
+    assertInnerAnnotationValues(quotes.get(0), 0, 0, 0, 7, 11);
+    assertInnerAnnotationValues(quotes.get(1), 1, 1, 1, 27, 37);
   }
 
 
@@ -244,8 +244,7 @@ public class QuotationAnnotatorTest extends TestCase {
         " 'I am the second paragraph.\n\n" +
         "'I am the second to last.\n\n" +
         "'see there's more here.'", quotes.get(0).get(CoreAnnotations.TextAnnotation.class));
-    assertInnerAnnotationValues(quotes.get(0), 0, 0, 2);
-
+    assertInnerAnnotationValues(quotes.get(0), 0, 0, 2, 3, 28);
   }
 
   public void testMultiLineQuoteDouble() {
@@ -293,6 +292,12 @@ public class QuotationAnnotatorTest extends TestCase {
     assertEquals("\"My cow is better than any one of Jones' bovines!\"", quotes.get(1).get(CoreAnnotations.TextAnnotation.class));
   }
 
+  public static Annotation getDoc(String text) {
+    Annotation doc = new Annotation(text);
+    pipeline.annotate(doc);
+    return doc;
+  }
+
   public static List<CoreMap> runQuotes(String text, int numQuotes) {
     Annotation doc = new Annotation(text);
     pipeline.annotate(doc);
@@ -314,14 +319,13 @@ public class QuotationAnnotatorTest extends TestCase {
   }
 
   public static void assertInnerAnnotationValues(CoreMap quote, int quoteIndex,
-                                                 int sentenceBegin, int sentenceEnd) {
-//    System.out.println(quote);
-//    System.out.println(quote.get(CoreAnnotations.QuotationIndexAnnotation.class));
-//    System.out.println(quote.get(CoreAnnotations.SentenceBeginAnnotation.class));
-//    System.out.println(quote.get(CoreAnnotations.SentenceEndAnnotation.class));
+                                                 int sentenceBegin, int sentenceEnd,
+                                                 int tokenBegin, int tokenEnd) {
     assertEquals((int) quote.get(CoreAnnotations.QuotationIndexAnnotation.class), quoteIndex);
     assertEquals((int) quote.get(CoreAnnotations.SentenceBeginAnnotation.class), sentenceBegin);
     assertEquals((int) quote.get(CoreAnnotations.SentenceEndAnnotation.class), sentenceEnd);
+    assertEquals((int) quote.get(CoreAnnotations.TokenBeginAnnotation.class), tokenBegin);
+    assertEquals((int) quote.get(CoreAnnotations.TokenEndAnnotation.class), tokenEnd);
   }
 
 
