@@ -4,8 +4,11 @@ import java.util.Locale;
 
 import junit.framework.TestCase;
 
-/**
- * @author Christopher Manning
+/** It seems like because of the way junit parallelizes tests that you just can't
+ *  test timing to any degree of accuracy. So just try to make sure we're not
+ *  off by an order of magnitude.
+ *
+ *  @author Christopher Manning
  */
 public class TimingTest extends TestCase {
 
@@ -23,8 +26,8 @@ public class TimingTest extends TestCase {
     Timing t = new Timing();
     sleepTen();
     long val2 = t.reportNano();
-    assertEquals("Wrong nanosleep", 10_000_000, val2, 10_000_000);
-    // System.err.println(val2);
+    assertTrue(String.format("Wrong nanosleep %d", val2), val2 < 30_000_000);
+    assertTrue(String.format("Wrong nanosleep %d", val2), val2 > 3_000_000);
     sleepTen();
     long val = t.report();
     // System.err.println(val);
