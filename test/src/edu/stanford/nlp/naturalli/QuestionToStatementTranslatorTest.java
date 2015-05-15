@@ -133,4 +133,33 @@ public class QuestionToStatementTranslatorTest {
         "what/WP is/VBZ there/RB to/TO do/VB in/IN montpelier/NNP vt/NNP ?",
         "there is thing to do in montpelier vt");
   }
+
+  @Test
+  public void parseWhereDo() {
+    check(
+        "where/WRB did/VBD saki/NNP live/VB ?",
+        "saki live at location");
+    check(
+        "where/WRB did/VBD dmitri/NNP mendeleev/NNP study/VB science/NN ?",
+        "dmitri mendeleev study science at location");
+    check(
+        "where/WRB did/VBD boston/NNP terriers/NNP come/VBP from/IN ?",
+        "boston terriers come from location");
+    check(
+        "where/WRB did/VBD madoff/NNP live/VP in/IN nyc/NNP ?",
+        "madoff live in location , nyc");
+    check(
+        "where/WRB did/VBD kaiser/NNP wilhelm/NNP fled/VBD to/IN ?",
+        "kaiser wilhelm fled to location");
+  }
+
+  @Test
+  public void parseWhereIs() {
+    check(
+        "where/WRB is/VBD jack/NNP daniels/NNP factory/NN ?",
+        "jack daniels factory is at location");
+    check(
+        "where/WRB is/VBD rome/NNP italy/VB located/VBD on/IN a/DT map/NN ?",
+        "rome italy is at location");
+  }
 }
