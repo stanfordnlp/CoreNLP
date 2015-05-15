@@ -75,6 +75,13 @@ public class ClauseSplitterSearchProblem {
   }});
 
   /**
+   * A set of words which indicate that the complement clause is not factual, or at least not necessarily factual.
+   */
+  protected static final Set<String> INDIRECT_SPEECH_LEMMAS = Collections.unmodifiableSet(new HashSet<String>(){{
+    add("report"); add("say"); add("told"); add("claim"); add("assert"); add("think"); add("believe"); add("suppose");
+  }});
+
+  /**
    * The tree to search over.
    */
   public final SemanticGraph tree;
@@ -770,6 +777,15 @@ public class ClauseSplitterSearchProblem {
       // Iterate over children
       // For each outgoing edge...
       for (SemanticGraphEdge outgoingEdge : tree.outgoingEdgeIterable(rootWord)) {
+        // Prohibit indirect speech verbs from splitting off clauses
+        // (e.g., 'said', 'think')
+        // This fires if the governor is an indirect speech verb, and the outgoing edge is a ccomp
+        if ( outgoingEdge.getRelation().toString().equals("ccomp") &&
+             ( (outgoingEdge.getGovernor().lemma() != null && INDIRECT_SPEECH_LEMMAS.contains(outgoingEdge.getGovernor().lemma())) ||
+                INDIRECT_SPEECH_LEMMAS.contains(outgoingEdge.getGovernor().word())) ) {
+          continue;
+        }
+        // Get some variables
         List<String> forcedArcOrder = hardCodedSplits.get(outgoingEdge.getRelation().toString());
         boolean doneForcedArc = false;
         // For each action...
