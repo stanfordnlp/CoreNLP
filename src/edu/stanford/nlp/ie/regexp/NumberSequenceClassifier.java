@@ -17,6 +17,7 @@ import edu.stanford.nlp.util.StringUtils;
 
 import java.io.ObjectInputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -57,6 +58,7 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
 
   public static final boolean USE_SUTIME_DEFAULT = TimeExpressionExtractorFactory.DEFAULT_EXTRACTOR_PRESENT;
   public static final String USE_SUTIME_PROPERTY = "ner.useSUTime";
+  public static final String USE_SUTIME_PROPERTY_BASE = "useSUTime";
 
   private final TimeExpressionExtractor timexExtractor;
 
@@ -813,6 +815,8 @@ public class NumberSequenceClassifier extends AbstractSequenceClassifier<CoreLab
     System.err.print("Serializing classifier to " + serializePath + "...");
     System.err.println("done.");
   }
+
+  public void serializeClassifier(ObjectOutputStream oos) {}
 
   @Override
   public void loadClassifier(ObjectInputStream in, Properties props) throws IOException, ClassCastException, ClassNotFoundException {

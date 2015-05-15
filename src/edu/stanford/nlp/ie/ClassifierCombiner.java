@@ -1,8 +1,10 @@
 package edu.stanford.nlp.ie;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,17 +12,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import edu.stanford.nlp.io.IOUtils;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ie.ner.CMMClassifier;
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.pipeline.DefaultPaths;
 import edu.stanford.nlp.sequences.DocumentReaderAndWriter;
+import edu.stanford.nlp.sequences.SeqClassifierFlags;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.ErasureUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 /**
  * Merges the outputs of two or more AbstractSequenceClassifiers according to
@@ -54,13 +62,18 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
    * NORMAL means that if one classifier uses PERSON, later classifiers can't also add PERSON, for example. <br>
    * HIGH_RECALL allows later models do set PERSON as long as it doesn't clobber existing annotations.
    */
-  static enum CombinationMode {
+  enum CombinationMode {
     NORMAL, HIGH_RECALL
   }
 
   static final CombinationMode DEFAULT_COMBINATION_MODE = CombinationMode.NORMAL;
   static final String COMBINATION_MODE_PROPERTY = "ner.combinationMode";
   final CombinationMode combinationMode;
+
+  // keep track of properties used to initialize
+  public Properties initProps;
+  // keep track of paths used to load CRFs
+  private List<String> initLoadPaths = new ArrayList<>();
 
   /**
    * @param p Properties File that specifies <code>loadClassifier</code>
@@ -105,6 +118,8 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
       paths.add(DefaultPaths.DEFAULT_NER_MUC_MODEL);
       loadClassifiers(paths);
     }
+    this.initLoadPaths = new ArrayList<>(paths);
+    this.initProps = p;
   }
 
   /** Loads a series of base classifiers from the paths specified using the
@@ -120,6 +135,8 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     this.combinationMode = combinationMode;
     List<String> paths = new ArrayList<>(Arrays.asList(loadPaths));
     loadClassifiers(paths);
+    this.initLoadPaths = new ArrayList<>(paths);
+    this.initProps = props;
   }
 
   /** Loads a series of base classifiers from the paths specified using the
@@ -153,6 +170,60 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     this.combinationMode = DEFAULT_COMBINATION_MODE;
     baseClassifiers = new ArrayList<>(Arrays.asList(classifiers));
     flags.backgroundSymbol = baseClassifiers.get(0).flags.backgroundSymbol;
+    this.initProps = new Properties();
+  }
+
+  // constructor for building a ClassifierCombiner from an ObjectInputStream
+  public ClassifierCombiner(ObjectInputStream ois, Properties props) throws IOException, ClassNotFoundException, ClassCastException {
+    // read the initial Properties out of the ObjectInputStream so you can properly start the AbstractSequenceClassifier
+    // note now we load in props from command line and overwrite any that are given for command line
+    super(PropertiesUtils.overWriteProperties((Properties) ois.readObject(),props));
+    // read another copy of initProps that I have helpfully included
+    // TODO: probably set initProps in AbstractSequenceClassifier to avoid this writing twice thing, its hacky
+    this.initProps = PropertiesUtils.overWriteProperties((Properties) ois.readObject(),props);
+    // read the initLoadPaths
+    this.initLoadPaths = (ArrayList<String>) ois.readObject();
+    // read the combinationMode from the serialized version
+    String cm = (String) ois.readObject();
+    // see if there is a commandline override for the combinationMode, else set newCM to the serialized version
+    CombinationMode newCM;
+    if (props.getProperty("ner.combinationMode") != null) {
+      // there is a possible commandline override, have to see if its valid
+      try {
+        // see if the commandline has a proper value
+        newCM = CombinationMode.valueOf(props.getProperty("ner.combinationMode"));
+      } catch (IllegalArgumentException e) {
+        // the commandline override did not have a proper value, so just use the serialized version
+        newCM = CombinationMode.valueOf(cm);
+      }
+    } else {
+      // there was no commandline override given, so just use the serialized version
+      newCM = CombinationMode.valueOf(cm);
+    }
+    this.combinationMode = newCM;
+    // read in the base classifiers
+    Integer numClassifiers = ois.readInt();
+    // set up the list of base classifiers
+    this.baseClassifiers = new ArrayList<AbstractSequenceClassifier<IN>>();
+    int i = 0;
+    while (i < numClassifiers) {
+      try {
+        System.err.println("loading CRF...");
+        CRFClassifier newCRF = ErasureUtils.uncheckedCast(CRFClassifier.getClassifier(ois));
+        baseClassifiers.add(newCRF);
+        i++;
+      } catch (Exception e) {
+        try {
+          System.err.println("loading CMM...");
+          CMMClassifier newCMM = ErasureUtils.uncheckedCast(CMMClassifier.getClassifier(ois));
+          baseClassifiers.add(newCMM);
+          i++;
+        } catch (Exception ex) {
+          ex.printStackTrace();
+          throw new IOException("Couldn't load classifier!");
+        }
+      }
+    }
   }
 
   /**
@@ -400,9 +471,54 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
     throw new UnsupportedOperationException();
   }
 
+  // write a ClassifierCombiner to disk, this is based on CRFClassifier code
   @Override
   public void serializeClassifier(String serializePath) {
-    throw new UnsupportedOperationException();
+    System.err.print("Serializing classifier to " + serializePath + "...");
+
+    ObjectOutputStream oos = null;
+    try {
+      oos = IOUtils.writeStreamFromString(serializePath);
+      serializeClassifier(oos);
+      System.err.println("done.");
+
+    } catch (Exception e) {
+      throw new RuntimeIOException("Failed to save classifier", e);
+    } finally {
+      IOUtils.closeIgnoringExceptions(oos);
+    }
+  }
+
+  // method for writing a ClassifierCombiner to an ObjectOutputStream
+  public void serializeClassifier(ObjectOutputStream oos) {
+    try {
+      // record the properties used to initialize
+      oos.writeObject(initProps);
+      // this is a bit of a hack, but have to write this twice so you can get it again
+      // after you initialize AbstractSequenceClassifier
+      // basically when this is read from the ObjectInputStream, I read it once to call
+      // super(props) and then I read it again so I can set this.initProps
+      // TODO: probably should have AbstractSequenceClassifier store initProps to get rid of this double writing
+      oos.writeObject(initProps);
+      // record the initial loadPaths
+      oos.writeObject(initLoadPaths);
+      // record the combinationMode
+      String combinationModeString = combinationMode.name();
+      oos.writeObject(combinationModeString);
+      // get the number of classifiers to write to disk
+      Integer numClassifiers = baseClassifiers.size();
+      oos.writeInt(numClassifiers);
+      // go through baseClassifiers and write each one to disk with CRFClassifier's serialize method
+      System.err.println("");
+      for (AbstractSequenceClassifier<IN> asc : baseClassifiers) {
+        // TODO: fix situation so that this doesn't have to just be for crf's
+        //CRFClassifier crfc = (CRFClassifier) asc;
+        //System.err.println("Serializing a base classifier...");
+        asc.serializeClassifier(oos);
+      }
+    } catch (IOException e) {
+      throw new RuntimeIOException(e);
+    }
   }
 
   @Override
@@ -413,6 +529,107 @@ public class ClassifierCombiner<IN extends CoreMap & HasWord> extends AbstractSe
   @Override
   public List<IN> classifyWithGlobalInformation(List<IN> tokenSeq, CoreMap doc, CoreMap sent) {
     return classify(tokenSeq);
+  }
+
+  // static method for getting a ClassifierCombiner from a string path
+  public static ClassifierCombiner getClassifier(String loadPath, Properties props) throws IOException,
+          ClassNotFoundException, ClassCastException {
+    ObjectInputStream ois = IOUtils.readStreamFromString(loadPath);
+    ClassifierCombiner returnCC = getClassifier(ois, props);
+    IOUtils.closeIgnoringExceptions(ois);
+    return returnCC;
+  }
+
+  // static method for getting a ClassifierCombiner from ObjectInputStream
+  public static ClassifierCombiner getClassifier(ObjectInputStream ois, Properties props) throws IOException,
+          ClassCastException, ClassNotFoundException {
+    return new ClassifierCombiner(ois, props);
+  }
+
+  // run a particular CRF of this ClassifierCombiner on a testFile
+  // user can say -crfToExamine 0 to get 1st element or -crfToExamine /edu/stanford/models/muc7.crf.ser.gz
+  // this does not currently support drill down on CMM's
+  public static void examineCRF(ClassifierCombiner cc, String crfNameOrIndex, SeqClassifierFlags flags,
+                                String testFile, String testFiles,
+                                DocumentReaderAndWriter readerAndWriter) throws Exception {
+    CRFClassifier<CoreLabel> crf;
+    // potential index into baseClassifiers
+    int ci;
+    // set ci with the following rules
+    // 1. first see if ci is an index into baseClassifiers
+    // 2. if its not an integer or wrong size, see if its a file name of a loadPath
+    try {
+      ci = Integer.parseInt(crfNameOrIndex);
+      if (ci < 0 || ci >= cc.baseClassifiers.size()) {
+        // ci is not an int corresponding to an element in baseClassifiers, see if name of a crf loadPath
+        ci = cc.initLoadPaths.indexOf(crfNameOrIndex);
+      }
+    } catch (NumberFormatException e) {
+      // cannot interpret crfNameOrIndex as an integer, see if name of a crf loadPath
+      ci = cc.initLoadPaths.indexOf(crfNameOrIndex);
+    }
+    // if ci corresponds to an index in baseClassifiers, get the crf at that index, otherwise set crf to null
+    if (ci >= 0 && ci < cc.baseClassifiers.size()) {
+      // TODO: this will break if baseClassifiers contains something that is not a CRF
+      crf = (CRFClassifier<CoreLabel>) cc.baseClassifiers.get(ci);
+    } else {
+      crf = null;
+    }
+    // if you can get a specific crf, generate the appropriate report, if null do nothing
+    if (crf != null) {
+      // if there is a crf and testFile was set , do the crf stuff for a single testFile
+      if (testFile != null) {
+        if (flags.searchGraphPrefix != null) {
+          crf.classifyAndWriteViterbiSearchGraph(testFile, flags.searchGraphPrefix, crf.makeReaderAndWriter());
+        } else if (flags.printFirstOrderProbs) {
+          crf.printFirstOrderProbs(testFile, readerAndWriter);
+        } else if (flags.printFactorTable) {
+          crf.printFactorTable(testFile, readerAndWriter);
+        } else if (flags.printProbs) {
+          crf.printProbs(testFile, readerAndWriter);
+        } else if (flags.useKBest) {
+          // TO DO: handle if user doesn't provide kBest
+          int k = flags.kBest;
+          crf.classifyAndWriteAnswersKBest(testFile, k, readerAndWriter);
+        } else if (flags.printLabelValue) {
+          crf.printLabelInformation(testFile, readerAndWriter);
+        } else {
+          // no crf test flag provided
+          System.err.println("Warning: no crf test flag was provided, running classify and write answers");
+          crf.classifyAndWriteAnswers(testFile,readerAndWriter,true);
+        }
+      } else if (testFiles != null) {
+        // if there is a crf and testFiles was set , do the crf stuff for testFiles
+        // if testFile was set as well, testFile overrides
+        List<File> files = Arrays.asList(testFiles.split(",")).stream().map(File::new).collect(Collectors.toList());
+        if (flags.printProbs) {
+          // there is a crf and printProbs
+          crf.printProbs(files, crf.defaultReaderAndWriter());
+        } else {
+          System.err.println("Warning: no crf test flag was provided, running classify files and write answers");
+          crf.classifyFilesAndWriteAnswers(files, crf.defaultReaderAndWriter(), true);
+        }
+      }
+    }
+  }
+
+  // show some info about a ClassifierCombiner
+  public static void showCCInfo(ClassifierCombiner cc) {
+    System.err.println("");
+    System.err.println("classifiers used:");
+    System.err.println("");
+    if (cc.initLoadPaths.size() == cc.baseClassifiers.size()) {
+      for (int i = 0 ; i < cc.initLoadPaths.size() ; i++) {
+        System.err.println("baseClassifiers index "+i+" : "+cc.initLoadPaths.get(i));
+      }
+    } else {
+      for (int i = 0 ; i < cc.initLoadPaths.size() ; i++) {
+        System.err.println("baseClassifiers index "+i);
+      }
+    }
+    System.err.println("");
+    System.err.println("combinationMode: "+cc.combinationMode);
+    System.err.println("");
   }
 
   /**

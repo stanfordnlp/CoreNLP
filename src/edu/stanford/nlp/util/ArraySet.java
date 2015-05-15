@@ -11,7 +11,7 @@ import java.util.Iterator;
  */
 public class ArraySet<E> extends AbstractSet<E> implements Serializable {
 
-  private ArrayList<E> backer;
+  private final ArrayList<E> backer;
 
   /**
    * Constructs an ArraySet.

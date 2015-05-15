@@ -1,3 +1,29 @@
+// SemanticHeadFinder -- An implementation of content-word heads.
+// Copyright (c) 2005 - 2014 The Board of Trustees of
+// The Leland Stanford Junior University. All Rights Reserved.
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+// For more information, bug reports, fixes, contact:
+//    Christopher Manning
+//    Dept of Computer Science, Gates 1A
+//    Stanford CA 94305-9010
+//    USA
+//    parser-support@lists.stanford.edu
+//    http://nlp.stanford.edu/software/stanford-dependencies.shtml
+
 package edu.stanford.nlp.trees;
 
 import edu.stanford.nlp.ling.HasCategory;
@@ -16,8 +42,10 @@ import java.util.Set;
 
 
 /**
- * Implements a 'semantic head' variant of the the HeadFinder found
- * in Michael Collins' 1999 thesis.
+ * Implements a 'semantic head' variant of the the English HeadFinder
+ * found in Michael Collins' 1999 thesis.
+ * This use of mainly content words as heads is used for determining
+ * the dependency structure in English Stanford Dependencies (SD).
  * This version chooses the semantic head verb rather than the verb form
  * for cases with verbs.  And it makes similar themed changes to other
  * categories: e.g., in question phrases, like "Which Brazilian game", the

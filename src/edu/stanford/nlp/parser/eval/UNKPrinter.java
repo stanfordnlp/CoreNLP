@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import edu.stanford.nlp.international.Languages;
-import edu.stanford.nlp.international.Languages.Language;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.parser.lexparser.EnglishTreebankParserParams;
 import edu.stanford.nlp.parser.lexparser.Lexicon;
@@ -34,7 +33,7 @@ public class UNKPrinter {
   static {
     usage.append(String.format("Usage: java %s [OPTS] tree_file \n\n",UNKPrinter.class.getName()));
     usage.append("Options:\n");
-    usage.append("  -l lang    : Select language settings from " + Languages.listOfLanguages() + "\n");
+    usage.append("  -l lang    : Select language settings from " + Language.langList + "\n");
     usage.append("  -e enc     : Encoding.\n");
   }
 
@@ -54,7 +53,7 @@ public class UNKPrinter {
         switch (args[i]) {
           case "-l":
             lang = Language.valueOf(args[++i].trim());
-            tlpp = Languages.getLanguageParams(lang);
+            tlpp = lang.params;
 
             break;
           case "-e":

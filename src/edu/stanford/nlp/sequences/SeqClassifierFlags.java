@@ -287,10 +287,8 @@ public class SeqClassifierFlags implements Serializable {
   public boolean useVB = false;
   public boolean subCWGaz = false;
 
-  public String documentReader = "ColumnDocumentReader"; // TODO OBSOLETE:
-  // delete when breaking
-  // serialization
-  // sometime.
+  // TODO OBSOLETE: delete when breaking serialization sometime.
+  public String documentReader = "ColumnDocumentReader";
 
   // public String trainMap = "word=0,tag=1,answer=2";
   // public String testMap = "word=0,tag=1,answer=2";
@@ -1047,6 +1045,14 @@ public class SeqClassifierFlags implements Serializable {
 
   public boolean useTitle2 = false;
 
+  public boolean showNCCInfo;
+  public boolean showCCInfo;
+  public String crfToExamine;
+  public boolean useSUTime;
+  public boolean applyNumericClassifiers;
+  public String combinationMode;
+  public String nerModel;
+
   // "ADD VARIABLES ABOVE HERE"
 
   public transient List<String> phraseGazettes = null;
@@ -1088,8 +1094,7 @@ public class SeqClassifierFlags implements Serializable {
   public void setProperties(Properties props, boolean printProps) {
     this.props = props;
     StringBuilder sb = new StringBuilder(stringRep);
-    for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
-      String key = (String) e.nextElement();
+    for (String key : props.stringPropertyNames()) {
       String val = props.getProperty(key);
       if (!(key.isEmpty() && val.isEmpty())) {
         if (printProps) {
@@ -1577,6 +1582,9 @@ public class SeqClassifierFlags implements Serializable {
       } else if (key.equalsIgnoreCase("inputEncoding")) {
         inputEncoding = val;
       } else if (key.equalsIgnoreCase("outputEncoding")) {
+        outputEncoding = val;
+      } else if (key.equalsIgnoreCase("encoding")) {
+        inputEncoding = val;
         outputEncoding = val;
       } else if (key.equalsIgnoreCase("gazette")) {
         useGazettes = true;
@@ -2568,7 +2576,20 @@ public class SeqClassifierFlags implements Serializable {
         priorModelFactory = val;
       } else if (key.equalsIgnoreCase("maxAdditionalKnownLCWords")) {
         maxAdditionalKnownLCWords = Integer.parseInt(val);
-
+      } else if (key.equalsIgnoreCase("showNCCInfo")) {
+        showNCCInfo = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("showCCInfo")) {
+        showCCInfo = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("crfToExamine")) {
+        crfToExamine = val;
+      } else if (key.equalsIgnoreCase("ner.useSUTime")) {
+        useSUTime = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("ner.applyNumericClassifiers")) {
+        applyNumericClassifiers = Boolean.parseBoolean(val);
+      } else if (key.equalsIgnoreCase("ner.combinationMode")) {
+        combinationMode = val;
+      } else if (key.equalsIgnoreCase("ner.model")) {
+        nerModel = val;
         // ADD VALUE ABOVE HERE
       } else if ( ! key.isEmpty() && ! key.equals("prop")) {
         System.err.println("Unknown property: |" + key + '|');

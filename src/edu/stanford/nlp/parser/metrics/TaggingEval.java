@@ -10,8 +10,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
-import edu.stanford.nlp.international.Languages;
-import edu.stanford.nlp.international.Languages.Language;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasTag;
 import edu.stanford.nlp.ling.Label;
@@ -232,7 +231,7 @@ public class TaggingEval extends AbstractEval {
     usage.append(String.format("Usage: java %s [OPTS] gold guess\n\n",TaggingEval.class.getName()));
     usage.append("Options:\n");
     usage.append("  -v         : Verbose mode.\n");
-    usage.append("  -l lang    : Select language settings from " + Languages.listOfLanguages() + "\n");
+    usage.append("  -l lang    : Select language settings from " + Language.langList + "\n");
     usage.append("  -y num     : Skip gold trees with yields longer than num.\n");
     usage.append("  -c         : Compute LP/LR/F1 by category.\n");
     usage.append("  -e         : Input encoding.\n");
@@ -274,7 +273,7 @@ public class TaggingEval extends AbstractEval {
       if(opt.getKey() == null) continue;
       if(opt.getKey().equals("-l")) {
         Language lang = Language.valueOf(opt.getValue()[0].trim());
-        tlpp = Languages.getLanguageParams(lang);
+        tlpp = lang.params;
 
       } else if(opt.getKey().equals("-y")) {
         maxGoldYield = Integer.parseInt(opt.getValue()[0].trim());

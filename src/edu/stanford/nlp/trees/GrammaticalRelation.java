@@ -26,7 +26,7 @@
 
 package edu.stanford.nlp.trees;
 
-import edu.stanford.nlp.international.Languages;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseGrammaticalRelations;
 import edu.stanford.nlp.trees.tregex.TregexMatcher;
 import edu.stanford.nlp.trees.tregex.TregexPattern;
@@ -37,7 +37,6 @@ import edu.stanford.nlp.util.StringUtils;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.lang.ref.SoftReference;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -232,43 +231,8 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     return reln;
   }
 
-  private static Map<String, SoftReference<GrammaticalRelation>> valueOfCache = new HashMap<String, SoftReference<GrammaticalRelation>>();
-
-  public static GrammaticalRelation valueOf(String s, Languages.Language language) {
-    GrammaticalRelation value = null;
-    SoftReference<GrammaticalRelation> possiblyCachedValue = valueOfCache.get(s);
-    if (possiblyCachedValue != null) { value = possiblyCachedValue.get(); }
-    if (value == null) {  // TODO(gabor) we have the language conversion going on again...
-      Language depLanguage = Language.Any;
-      switch (language) {
-        case Arabic:
-          break;
-        case Chinese:
-          depLanguage = Language.Chinese;
-          break;
-        case English:
-          depLanguage = Language.UniversalEnglish;
-          break;
-        case German:
-          break;
-        case French:
-          break;
-        case Hebrew:
-          break;
-        case Spanish:
-          break;
-        case Unknown:
-          depLanguage = Language.Any;
-          break;
-      }
-      value = valueOf(depLanguage, s);
-      valueOfCache.put(s, new SoftReference<>(value));
-    }
-    return value;
-  }
-
   public static GrammaticalRelation valueOf(String s) {
-    return valueOf(s, Languages.Language.English);
+    return valueOf(Language.Any, s);
   }
 
   /**
@@ -282,10 +246,6 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
   public boolean isFromString() {
     return longName == null;
   }
-
-
-  public static enum Language { Any, English, Chinese, UniversalEnglish }
-
 
   /* Non-static stuff */
   private final Language language;
@@ -520,7 +480,7 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     final GrammaticalRelation gr = (GrammaticalRelation) o;
     // == okay for language as enum!
     // TODO(gabor) perhaps Language.Any shouldn't be equal to any language? This is a bit of a hack around some dependencies caring about language and others not.
-    return (this.language == Language.Any || gr.language == Language.Any || this.language == gr.language) &&
+    return (this.language.compatibleWith(gr.language)) &&
              this.shortName.equals(gr.shortName) &&
              (this.specific == gr.specific ||
               (this.specific != null && this.specific.equals(gr.specific)));
@@ -550,19 +510,11 @@ public class GrammaticalRelation implements Comparable<GrammaticalRelation>, Ser
     return shortName;
   }
 
-  // TODO(gabor) this is nontrivially brittle. I guess in the long term we should only have one "Language" enum?
   /**
    * Get the language of the grammatical relation.
    */
-  public Languages.Language getLanguage() {
-    switch (this.language) {
-      case Any: return Languages.Language.Unknown;
-      case English: return Languages.Language.English;
-      case Chinese: return Languages.Language.Chinese;
-      case UniversalEnglish: return Languages.Language.English;
-      default:
-        throw new IllegalStateException("Unknown language: " + this.language);
-    }
+  public Language getLanguage() {
+    return this.language;
   }
 
   public String getSpecific() {

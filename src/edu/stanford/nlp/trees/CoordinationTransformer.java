@@ -44,8 +44,8 @@ public class CoordinationTransformer implements TreeTransformer {
 
   private static final boolean VERBOSE = System.getProperty("CoordinationTransformer", null) != null;
   private final TreeTransformer tn = new DependencyTreeTransformer(); //to get rid of unwanted nodes and tag
-  private final TreeTransformer qp = new QPTreeTransformer();         //to restructure the QP constituents
   private final TreeTransformer dates = new DateTreeTransformer();    //to flatten date patterns
+  private final TreeTransformer qp;                                   //to restructure the QP constituents
 
   private final HeadFinder headFinder;
   private final boolean performMWETransformation;
@@ -65,6 +65,7 @@ public class CoordinationTransformer implements TreeTransformer {
   public CoordinationTransformer(HeadFinder hf, boolean performMWETransformation) {
     this.headFinder = hf;
     this.performMWETransformation = performMWETransformation;
+    qp = new QPTreeTransformer(performMWETransformation);
   }
 
   /**
@@ -86,6 +87,19 @@ public class CoordinationTransformer implements TreeTransformer {
     if (t == null) {
       return t;
     }
+
+    if (performMWETransformation) {
+      t = MWETransform(t);
+      if (VERBOSE) {
+        System.err.println("After MWETransform:               " + t);
+      }
+
+      t = prepCCTransform(t);
+      if (VERBOSE) {
+        System.err.println("After prepCCTransform:               " + t);
+      }
+    }
+
     t = UCPtransform(t);
     if (VERBOSE) {
       System.err.println("After UCPTransformer:             " + t);
@@ -127,18 +141,6 @@ public class CoordinationTransformer implements TreeTransformer {
       System.err.println("After rearrangeNowThat:           " + t);
     }
 
-    if (performMWETransformation) {
-      t = MWETransform(t);
-      if (VERBOSE) {
-        System.err.println("After MWETransform:               " + t);
-      }
-      
-      t = prepCCTransform(t);
-      if (VERBOSE) {
-        System.err.println("After prepCCTransform:               " + t);
-      }
-    }
-    
     return t;
   }
 
@@ -647,7 +649,7 @@ public class CoordinationTransformer implements TreeTransformer {
   private static TregexPattern[] MWE_PATTERNS = {
     TregexPattern.compile("@CONJP <1 (RB=node1 < /^(?i)as$/) <2 (RB=node2 < /^(?i)well$/) <- (IN=node3 < /^(?i)as$/)"), //as well as
     TregexPattern.compile("@ADVP|CONJP <1 (RB=node1 < /^(?i)as$/) <- (IN|RB=node2 < /^(?i)well$/)"), //as well
-    TregexPattern.compile("@PP < ((JJ=node1 < /^(?i)such$/) $+ (IN=node2 < /^(?i)ad$/))"), //such as 
+    TregexPattern.compile("@PP < ((JJ=node1 < /^(?i)such$/) $+ (IN=node2 < /^(?i)as$/))"), //such as
     TregexPattern.compile("@PP < ((JJ|IN=node1 < /^(?i)due$/) $+ (IN|TO=node2 < /^(?i)to$/))"), //due to 
     TregexPattern.compile("@PP|CONJP < ((IN|RB=node1 < /^(?i)(because|instead)$/) $+ (IN=node2 < of))"), //because of/instead of 
     TregexPattern.compile("@ADVP|SBAR < ((IN|RB=node1 < /^(?i)in$/) $+ (NN=node2 < /^(?i)case$/))"), //in case
@@ -671,7 +673,7 @@ public class CoordinationTransformer implements TreeTransformer {
     TregexPattern.compile("@VP < ((VBD=node1 < had|'d) $+ (@PRT|ADVP=node2 <: (RBR < /^(?i)better$/)))"), //had better
     TregexPattern.compile("@QP|XS < ((JJR|RBR|IN=node1 < /^(?i)(more|less)$/) $+ (IN=node2 < /^(?i)than$/))"), //more/less than
     TregexPattern.compile("@QP < ((JJR|RBR|IN=node1 < /^(?i)up$/) $+ (IN|TO=node2 < /^(?i)to$/))"), //up to
-    TregexPattern.compile("@ADVP < ((IN|RB=node1 < /^(?i)at$/) $+ (JJS|RBS=node2 < /^(?i)least$/))"), //at least
+    TregexPattern.compile("@S|SQ|VP|ADVP|PP < (@ADVP < ((IN|RB=node1 < /^(?i)at$/) $+ (JJS|RBS=node2 < /^(?i)least$/)) !$+ (RB < /(?i)(once|twice)/))"), //at least
 
   };
   
@@ -681,10 +683,19 @@ public class CoordinationTransformer implements TreeTransformer {
   private static TsurgeonPattern ACCORDING_TO_OPERATION = Tsurgeon.parseOperation("[createSubtree MWE node1] [move node2 $- node1] [excise pp2 pp2]");
 
   /* "but also" is not a MWE, so break up the CONJP. */ 
-  private static TregexPattern BUT_ALSO_PATTERN = TregexPattern.compile("CONJP=conjp < (CC=cc < but) < (RB=rb < also) $+ __=nextNode");
-  private static TsurgeonPattern BUT_ALSO_OPERATION = Tsurgeon.parseOperation("[move cc $- conjp] [move rb >1 nextNode] [createSubtree ADVP rb] [delete conjp]");
+  private static TregexPattern BUT_ALSO_PATTERN = TregexPattern.compile("CONJP=conjp < (CC=cc < but) < (RB=rb < also) ?$+ (__=nextNode < (__ < __))");
+  private static TsurgeonPattern BUT_ALSO_OPERATION = Tsurgeon.parseOperation("[move cc $- conjp] [move rb $- cc] [if exists nextNode move rb >1 nextNode] [createSubtree ADVP rb] [delete conjp]");
 
-  
+  /* at least / at most / at best / at worst / ... should be treated as if "at"
+     was a preposition and the RBS was a noun. Assumes that the MWE "at least"
+     has already been extracted. */
+  private static TregexPattern AT_RBS_PATTERN = TregexPattern.compile("@ADVP|QP < ((IN|RB=node1 < /^(?i)at$/) $+ (JJS|RBS=node2))");
+  private static TsurgeonPattern AT_RBS_OPERATION = Tsurgeon.parseOperation("[relabel node1 IN] [createSubtree ADVP node1] [move node2 $- node1] [createSubtree NP node2]");
+
+  /* at all should be treated like a PP. */
+  private static TregexPattern AT_ALL_PATTERN = TregexPattern.compile("@ADVP=head < (RB|IN=node1 < /^(?i)at$/ $+ (RB|DT=node2 < /^(?i)all$/))");
+  private static TsurgeonPattern AT_ALL_OPERATION = Tsurgeon.parseOperation("[relabel head PP] [relabel node1 IN] [createSubtree NP node2]");
+
   /**
    * Puts all multi-word expressions below a single constituent labeled "MWE".
    * Patterns for multi-word expressions are defined in MWE_PATTERNS.
@@ -696,6 +707,8 @@ public class CoordinationTransformer implements TreeTransformer {
     
     Tsurgeon.processPattern(ACCORDING_TO_PATTERN, ACCORDING_TO_OPERATION, t);
     Tsurgeon.processPattern(BUT_ALSO_PATTERN, BUT_ALSO_OPERATION, t);
+    Tsurgeon.processPattern(AT_RBS_PATTERN, AT_RBS_OPERATION, t);
+    Tsurgeon.processPattern(AT_ALL_PATTERN, AT_ALL_OPERATION, t);
 
     return t;
   }

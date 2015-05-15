@@ -1,5 +1,6 @@
 package edu.stanford.nlp.ie.util;
 
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -75,7 +76,7 @@ public class IETestUtils {
         tree.addEdge(
             new IndexedWord(sentence.get(parent - 1)),
             new IndexedWord(sentence.get(i)),
-            new GrammaticalRelation(GrammaticalRelation.Language.UniversalEnglish, reln, null, null),
+            new GrammaticalRelation(Language.UniversalEnglish, reln, null, null),
             1.0, false
         );
       }

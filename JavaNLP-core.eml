@@ -104,19 +104,23 @@
 		<relative-module-src project-related="jar://$PROJECT_DIR$/projects/core/libsrc/javax.json-api-1.0-sources.jar!/"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/javax.json.jar!/"/>
 	</lib>
-	<lib name="lucene-analyzers-common-4.10.3.jar" scope="COMPILE">
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/lucene-analyzers-common-4.10.3.jar!/"/>
-	</lib>
 	<lib name="lucene-core-4.10.3.jar" scope="COMPILE">
+		<srcroot url="file://$MODULE_DIR$/libsrc/lucene-4.10.3-src.tgz"/>
+		<relative-module-src project-related="file://$PROJECT_DIR$/projects/core/libsrc/lucene-4.10.3-src.tgz"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/lucene-core-4.10.3.jar!/"/>
 	</lib>
 	<lib name="lucene-demo-4.10.3.jar" scope="COMPILE">
+		<srcroot url="file://$MODULE_DIR$/libsrc/lucene-4.10.3-src.tgz"/>
+		<relative-module-src project-related="file://$PROJECT_DIR$/projects/core/libsrc/lucene-4.10.3-src.tgz"/>
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/lucene-demo-4.10.3.jar!/"/>
 	</lib>
-	<lib name="lucene-queries-4.10.3.jar" scope="COMPILE">
-		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/lucene-queries-4.10.3.jar!/"/>
+	<lib name="lucene-analyzers-common-4.10.3.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/lucene-analyzers-common-4.10.3.jar!/"/>
 	</lib>
 	<lib name="lucene-queryparser-4.10.3.jar" scope="COMPILE">
 		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/lucene-queryparser-4.10.3.jar!/"/>
+	</lib>
+	<lib name="lucene-queries-4.10.3.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/projects/core/lib/lucene-queries-4.10.3.jar!/"/>
 	</lib>
 </component>

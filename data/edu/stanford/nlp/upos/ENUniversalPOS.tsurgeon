@@ -123,10 +123,10 @@ DT=target <... {/.*/}
 
 relabel target DET
 
-% EX -> DET
+% EX -> PRON
 EX=target <... {/.*/}
 
-relabel target DET
+relabel target PRON
 
 % FW -> X
 FW=target <... {/.*/}

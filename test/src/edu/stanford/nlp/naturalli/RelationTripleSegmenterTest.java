@@ -1,8 +1,12 @@
-package edu.stanford.nlp.ie.util;
+package edu.stanford.nlp.naturalli;
 
+import edu.stanford.nlp.ie.util.IETestUtils;
+import edu.stanford.nlp.ie.util.RelationTriple;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.util.Pair;
+import edu.stanford.nlp.trees.GrammaticalRelation;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
@@ -10,14 +14,23 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * A test of various functions in {@link RelationTriple}.
+ * A test of various functions in {@link edu.stanford.nlp.ie.util.RelationTriple}.
  *
  * @author Gabor Angeli
  */
-public class RelationTripleTest extends TestCase {
+public class RelationTripleSegmenterTest extends TestCase {
 
   protected Optional<RelationTriple> mkExtraction(String conll) {
-    return mkExtraction(conll, 0);
+    return mkExtraction(conll, 0, false);
+  }
+
+  protected Optional<RelationTriple> mkExtraction(String conll, boolean allNominals) {
+    return mkExtraction(conll, 0, allNominals);
+  }
+
+  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex) {
+    return mkExtraction(conll, listIndex, false);
+
   }
 
   /**
@@ -26,14 +39,53 @@ public class RelationTripleTest extends TestCase {
    *   word_index  word  parent_index  incoming_relation
    * </pre>
    */
-  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex) {
-    Pair<SemanticGraph, List<CoreLabel>> pair = IETestUtils.parseCoNLL(conll);
+  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex, boolean allNominals) {
+    List<CoreLabel> sentence = new ArrayList<>();
+    SemanticGraph tree = new SemanticGraph();
+    for (String line : conll.split("\n")) {
+      if (line.trim().equals("")) { continue; }
+      String[] fields = line.trim().split("\\s+");
+      int index = Integer.parseInt(fields[0]);
+      String word = fields[1];
+      CoreLabel label = IETestUtils.mkWord(word, index);
+      sentence.add(label);
+      if (fields[2].equals("0")) {
+        tree.addRoot(new IndexedWord(label));
+      } else {
+        tree.addVertex(new IndexedWord(label));
+      }
+      if (fields.length > 4) {
+        label.setTag(fields[4]);
+      }
+      if (fields.length > 5) {
+        label.setNER(fields[5]);
+      }
+      if (fields.length > 6) {
+        label.setLemma(fields[6]);
+      }
+    }
+    int i = 0;
+    for (String line : conll.split("\n")) {
+      if (line.trim().equals("")) { continue; }
+      String[] fields = line.trim().split("\\s+");
+      int parent = Integer.parseInt(fields[2]);
+      String reln = fields[3];
+      if (parent > 0) {
+        tree.addEdge(
+            new IndexedWord(sentence.get(parent - 1)),
+            new IndexedWord(sentence.get(i)),
+            new GrammaticalRelation(Language.UniversalEnglish, reln, null, null),
+            1.0, false
+        );
+      }
+      i += 1;
+    }
     // Run extractor
-    Optional<RelationTriple> segmented = RelationTriple.segment(pair.first, Optional.empty());
+    Optional<RelationTriple> segmented = new RelationTripleSegmenter(allNominals).segment(tree, Optional.empty());
     if (segmented.isPresent() && listIndex == 0) {
       return segmented;
     }
-    List<RelationTriple> extracted = RelationTriple.extract(pair.first, pair.second);
+    List<RelationTriple> extracted = new RelationTripleSegmenter(allNominals).extract(tree, sentence);
     if (extracted.size() > listIndex) {
       return Optional.of(extracted.get(listIndex - (segmented.isPresent() ? 1 : 0)));
     }
@@ -166,6 +218,17 @@ public class RelationTripleTest extends TestCase {
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tcats\tare\tcute", extraction.get().toString());
+  }
+
+  public void testPropagateCSubj() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\ttruffles\t2\tnsubj\n" +
+        "2\tpicked\t4\tcsubj\n" +
+        "3\tare\t4\tcop\n" +
+        "4\ttasty\t0\troot\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\ttruffles picked\tare\ttasty", extraction.get().toString());
   }
 
   public void testHeWasInaugurated() {
@@ -584,5 +647,22 @@ public class RelationTripleTest extends TestCase {
     extraction = mkExtraction(conll, 2);
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tRometty\tis CEO of\tIBM", extraction.get().toString());
+  }
+
+  public void testAllNominals() {
+    String conll =
+        "1\tfierce\t2\tamod\n" +
+        "2\tlions\t0\troot\n" +
+        "3\tof\t4\tcase\n" +
+        "4\tNarnia\t2\tnmod:of\n";
+    // Positive case
+    Optional<RelationTriple> extraction = mkExtraction(conll, 0, true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tlions\tis\tfierce", extraction.get().toString());
+    extraction = mkExtraction(conll, 1, true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tlions\tis of\tNarnia", extraction.get().toString());
+    // Negative case
+    assertFalse(mkExtraction(conll, false).isPresent());
   }
 }

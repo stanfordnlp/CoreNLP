@@ -3,6 +3,7 @@ package edu.stanford.nlp.ling;
 import edu.stanford.nlp.util.*;
 
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -442,6 +443,33 @@ public class CoreAnnotations {
    * CoNLL dep parsing - the dependency type
    */
   public static class CoNLLDepTypeAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+  
+  /**
+   * CoNLL-U dep parsing - List of secondary dependencies
+   */
+  public static class CoNLLUSecondaryDepsAnnotation implements CoreAnnotation<String> {
+    public Class<String> getType() {
+      return String.class;
+    }
+  }
+  
+  /**
+   * CoNLL-U dep parsing - List of morphological features
+   */
+  public static class CoNLLUFeats implements CoreAnnotation<HashMap<String,String>> {
+    public Class<HashMap<String,String>> getType() {
+      return ErasureUtils.uncheckedCast(HashMap.class);
+    }
+  }
+  
+  /**
+   * CoNLL-U dep parsing - Any other annotation
+   */
+  public static class CoNLLUMisc implements CoreAnnotation<String> {
     public Class<String> getType() {
       return String.class;
     }

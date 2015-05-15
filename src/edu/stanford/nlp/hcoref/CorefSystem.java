@@ -26,6 +26,7 @@ import edu.stanford.nlp.util.StringUtils;
 import edu.stanford.nlp.util.concurrent.MulticoreWrapper;
 import edu.stanford.nlp.util.concurrent.ThreadsafeProcessor;
 import edu.stanford.nlp.util.logging.Redwood;
+import edu.stanford.nlp.util.logging.RedwoodConfiguration;
 
 public class CorefSystem {
   
@@ -68,6 +69,15 @@ public class CorefSystem {
     props.put(CorefProperties.PATH_INPUT_PROP, CorefProperties.getPathEvalData(props));
     
     Logger logger = Logger.getLogger(CorefSystem.class.getName());
+    
+    // set log file path
+    if(props.containsKey(CorefProperties.LOG_PROP)){
+      File logFile = new File(props.getProperty(CorefProperties.LOG_PROP));
+      RedwoodConfiguration.current().handlers(
+      RedwoodConfiguration.Handlers.file(logFile)).apply();
+      Redwood.log("Starting coref log");
+    }
+    
     System.err.println(props.toString());
     
     if(CorefProperties.checkMemory(props)) checkMemoryUsage();

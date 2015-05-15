@@ -1,5 +1,6 @@
 package edu.stanford.nlp.naturalli;
 
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -53,7 +54,7 @@ public class NaturalLogicWeightsITest {
     IndexedWord rootVertex = new IndexedWord(mockWord(root));
     List<SemanticGraphEdge> edges = Arrays.asList(outEdges).stream().map(pair -> new SemanticGraphEdge(rootVertex,
         new IndexedWord(mockWord(pair.second)),
-        GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, pair.first), Double.NEGATIVE_INFINITY, false)).collect(Collectors.toList());
+        GrammaticalRelation.valueOf(Language.English, pair.first), Double.NEGATIVE_INFINITY, false)).collect(Collectors.toList());
     return Pair.makePair(edges.get(0), edges);
   }
 

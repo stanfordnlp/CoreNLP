@@ -36,16 +36,16 @@ public class ArrayHeap<E> extends AbstractSet<E> implements Heap<E> {
    * <code>indexToEntry</code> maps linear array locations (not
    * priorities) to heap entries.
    */
-  private ArrayList<HeapEntry<E>> indexToEntry;
+  private final ArrayList<HeapEntry<E>> indexToEntry;
   /**
    * <code>objectToEntry</code> maps heap objects to their heap
    * entries.
    */
-  private Map<E,HeapEntry<E>> objectToEntry;
+  private final Map<E,HeapEntry<E>> objectToEntry;
   /**
    * <code>cmp</code> is the comparator passed on construction.
    */
-  private Comparator<? super E> cmp;
+  private final Comparator<? super E> cmp;
 
   // Primitive Heap Operations
 

@@ -38,6 +38,7 @@ public class CorefProperties {
   public static final String USE_GOLD_NE_PROP = "hcoref.useGoldNE";
   public static final String USE_GOLD_PARSES_PROP = "hcoref.useGoldParse";
   public static final String USE_GOLD_POS_PROP = "hcoref.useGoldPOS";
+  private static final String REMOVE_NESTED = "removeNested";
   
   // logging & system check & analysis
   public static final String DEBUG_PROP = "hcoref.debug";
@@ -127,6 +128,7 @@ public class CorefProperties {
       "StrictHeadMatch2", "StrictHeadMatch3", "StrictHeadMatch4", "RelaxedHeadMatch", "PronounMatch", "SpeakerMatch",
       "ChineseHeadMatch"));
   
+  
   public static boolean doScore(Properties props) {
     return PropertiesUtils.getBool(props, SCORE_PROP, false);
   }
@@ -193,7 +195,7 @@ public class CorefProperties {
   }
   public static String getPathModel(Properties props, String sievename) {
     return new File(props.getProperty(PATH_SERIALIZED_PROP),
-        props.getProperty(PATH_MODEL_PROP.replace("SIEVENAME", sievename), "TODO")).getAbsolutePath();
+        props.getProperty(PATH_MODEL_PROP.replace("SIEVENAME", sievename), "MISSING_MODEL_FOR_"+sievename)).getAbsolutePath();
   }
   public static boolean debug(Properties props) {
     return PropertiesUtils.getBool(props, DEBUG_PROP, false);
@@ -355,4 +357,11 @@ public class CorefProperties {
   public static boolean isMentionDetectionTraining(Properties props) {
     return PropertiesUtils.getBool(props, CorefProperties.MD_TRAIN_PROP, false);
   }
+  public static void setRemoveNested(Properties props,boolean bool){
+    props.setProperty(REMOVE_NESTED, String.valueOf(bool));
+  }
+  public static boolean removeNested(Properties props){
+    return PropertiesUtils.getBool(props, CorefProperties.REMOVE_NESTED, true);
+  }
+  
 }
