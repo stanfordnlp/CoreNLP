@@ -23,12 +23,12 @@
 % Context-sensitive mappings
 %
 % TO -> PART (in CONJP phrases)
-CONJP < TO=target < VB
+@CONJP < TO=target < VB
 
 relabel target PART
 
 % TO -> PART
-VP < VP < (/^TO$/=target <... {/.*/})
+@VP < @VP < (/^TO$/=target <... {/.*/})
 
 relabel target PART
 
@@ -37,13 +37,22 @@ TO=target <... {/.*/}
 
 relabel target ADP
 
-% delete the next two rules, third one should also cover them
-%
-% VB -> AUX (passive, case 1)
-%VP < (/^VB/=target < /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|get|got|getting|gets|gotten)$/ ) < (VP|ADJP [ < VBN|VBD | < (VP|ADJP < VBN|VBD) < CC ] )
+% Don't do this, we are now treating these as copular constructions
+% VB.* -> AUX (for passives where main verb is part of an ADJP)
+%@VP < (/^VB/=target < /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase|get|got|getting|gets|gotten)$/ ) < (@ADJP [ < VBN|VBD | < (@VP|ADJP < VBN|VBD) < CC ] )
 %
 %relabel target AUX
 %
+% VB.* -> AUX (for cases with fronted main VPs)
+@SINV < (@VP < (/^VB/=target <  /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/ ) $-- (@VP < VBD|VBN))
+
+relabel target AUX
+
+% VB.* -> AUX (another, rarer case of fronted VPs)
+@SINV < (@VP < (@VP < (/^VB/=target <  /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/ )) $-- (@VP < VBD|VBN))
+
+relabel target AUX
+
 % VB.* -> AUX (passive, case 2)
 %SQ|SINV < (/^VB/=target < /^(?i:am|is|are|r|be|being|'s|'re|'m|was|were|been|s|ai|m|art|ar|wase)$/ $++ (VP < VBD|VBN))
 %
@@ -55,7 +64,7 @@ VP < VP < (/^VB.*$/=target <... {/.*/})
 relabel target AUX
 
 % VB -> AUX (active, case 2)
-SQ|SINV < (/^VB/=target $++ /^(?:VP|ADJP)/ <... {/.*/})
+@SQ|SINV < (/^VB/=target $++ /^(?:VP)/ <... {/.*/})
 
 relabel target AUX
 

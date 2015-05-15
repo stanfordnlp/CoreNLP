@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
  */
 public class RelationTripleSegmenter {
 
+  private final boolean allowNominalsWithoutNER;
+
   /** A list of patterns to match relation extractions against */
   private List<SemgrexPattern> VERB_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
     // { blue cats play [quietly] with yarn,
@@ -41,8 +43,6 @@ public class RelationTripleSegmenter {
     add(SemgrexPattern.compile("{$}=object >/.subj(pass)?/ {}=subject >/cop|aux(pass)?/ {}=verb"));
     // { Tom and Jerry were fighting }
     add(SemgrexPattern.compile("{$}=verb >nsubjpass ( {}=subject >/conj:and/=subjIgnored {}=object )"));
-    // { There are dogs in heaven }
-    add(SemgrexPattern.compile("{lemma:be}=verb ?>expl {} >/.subj(pass)?/ ( {}=subject >/(nmod|acl|advcl):.*/=prepEdge ( {}=object ?>appos {} = appos ) ?>dobj {pos:/N.*/}=relObj )"));
   }});
 
   /**
@@ -75,20 +75,21 @@ public class RelationTripleSegmenter {
    *                                named entity tags. For most practical applications, this greatly over-produces trivial triples.
    */
   public RelationTripleSegmenter(boolean allowNominalsWithoutNER) {
+    this.allowNominalsWithoutNER = allowNominalsWithoutNER;
     NOUN_DEPENDENCY_PATTERNS = Collections.unmodifiableList(new ArrayList<SemgrexPattern>() {{
       // { Durin, son of Thorin }
-      add(SemgrexPattern.compile("{}=subject >appos ( {}=relation >/nmod:.*/=relaux {}=object)"));
+      add(SemgrexPattern.compile("{tag:/N.*/}=subject >appos ( {}=relation >/nmod:.*/=relaux {}=object)"));
       // { Thorin's son, Durin }
       add(SemgrexPattern.compile("{}=relation >/nmod:.*/=relaux {}=subject >appos {}=object"));
       //  { President Obama }
       if (allowNominalsWithoutNER) {
-        add(SemgrexPattern.compile("{}=subject >/amod/=arc {}=object"));
+        add(SemgrexPattern.compile("{tag:/N.*/}=subject >/amod/=arc {}=object"));
       } else {
         add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/amod|compound/=arc {ner:/..+/}=object"));
       }
       // { Chris Manning of Stanford }
       if (allowNominalsWithoutNER) {
-        add(SemgrexPattern.compile("{}=subject >/nmod:.*/=relation {}=object"));
+        add(SemgrexPattern.compile("{tag:/N.*/}=subject >/nmod:.*/=relation {}=object"));
       } else {
         add(SemgrexPattern.compile("{ner:/PERSON|ORGANIZATION|LOCATION/}=subject >/nmod:.*/=relation {ner:/..+/}=object"));
       }
@@ -281,6 +282,9 @@ public class RelationTripleSegmenter {
                 relationTokens.clear();
                 prep = "'s";
               }
+              if (allowNominalsWithoutNER && "of".equals(prep)) {
+                continue;  // prohibit things like "conductor of electricity" -> "conductor; be of; electricity"
+              }
               if (prep != null) {
                 final String p = prep;
                 relationTokens.add(new CoreLabel() {{
@@ -366,7 +370,7 @@ public class RelationTripleSegmenter {
    */
   @SuppressWarnings("StatementWithEmptyBody")
   private Optional<List<CoreLabel>> getValidChunk(SemanticGraph parse, IndexedWord originalRoot,
-                                                         Set<String> validArcs, Optional<String> ignoredArc) {
+                                                  Set<String> validArcs, Optional<String> ignoredArc) {
     PriorityQueue<CoreLabel> chunk = new FixedPrioritiesPriorityQueue<>();
     Queue<IndexedWord> fringe = new LinkedList<>();
     IndexedWord root = originalRoot;
@@ -459,16 +463,16 @@ public class RelationTripleSegmenter {
    * (subject, relation, object) triple into these three parts.
    * </p>
    *
+   * <p>
+   *   This method will only run the verb-centric patterns
+   * </p>
+   *
    * @param parse The sentence to process, as a dependency tree.
    * @param confidence An optional confidence to pass on to the relation triple.
    * @param consumeAll if true, force the entire parse to be consumed by the pattern.
    * @return A relation triple, if this sentence matches one of the patterns of a valid relation triple.
    */
-  public Optional<RelationTriple> segment(SemanticGraph parse, Optional<Double> confidence, boolean consumeAll) {
-    // Copy and clean the tree
-    parse = new SemanticGraph(parse);
-    Util.stripPrepCases(parse);
-
+  private Optional<RelationTriple> segmentVerb(SemanticGraph parse, Optional<Double> confidence, boolean consumeAll) {
     // Run pattern loop
     PATTERN_LOOP: for (SemgrexPattern pattern : VERB_PATTERNS) {  // For every candidate pattern...
       SemgrexMatcher m = pattern.matcher(parse);
@@ -618,6 +622,167 @@ public class RelationTripleSegmenter {
     }
     // Failed to match any pattern; return failure
     return Optional.empty();
+  }
+
+  /**
+   * Same as {@link RelationTripleSegmenter#segmentVerb}, but with ACL clauses.
+   * This is a bit out of the ordinary, logic-wise, so it sits in its own function.
+   */
+  private Optional<RelationTriple> segmentACL(SemanticGraph parse, Optional<Double> confidence, boolean consumeAll) {
+    IndexedWord subject = parse.getFirstRoot();
+    Optional<List<CoreLabel>> subjectSpan = getValidSubjectChunk(parse, subject, Optional.of("acl"));
+    if (subjectSpan.isPresent()) {
+      // found a valid subject
+      for (SemanticGraphEdge edgeFromSubj : parse.outgoingEdgeIterable(subject)) {
+        if ("acl".equals(edgeFromSubj.getRelation().toString())) {
+          // found a valid relation
+          IndexedWord relation = edgeFromSubj.getDependent();
+          List<CoreLabel> relationSpan = new ArrayList<>();
+          relationSpan.add(relation.backingLabel());
+          List<CoreLabel> objectSpan = new ArrayList<>();
+          List<CoreLabel> ppSpan = new ArrayList<>();
+          Optional<CoreLabel> pp = Optional.empty();
+
+          // Get other arguments
+          for (SemanticGraphEdge edgeFromRel : parse.outgoingEdgeIterable(relation)) {
+            String rel = edgeFromRel.getRelation().toString();
+            // Collect adverbs
+            if ("advmod".equals(rel)) {
+              Optional<List<CoreLabel>> advSpan = getValidAdverbChunk(parse, edgeFromRel.getDependent(), Optional.empty());
+              if (!advSpan.isPresent()) {
+                return Optional.empty();  // bad adverb span!
+              }
+              relationSpan.addAll(advSpan.get());
+            }
+            // Collect object
+            else if (rel.endsWith("obj")) {
+              if (!objectSpan.isEmpty()) {
+                return Optional.empty();  // duplicate objects!
+              }
+              Optional<List<CoreLabel>> maybeObjSpan = getValidObjectChunk(parse, edgeFromRel.getDependent(), Optional.empty());
+              if (!maybeObjSpan.isPresent()) {
+                return Optional.empty();  // bad object span!
+              }
+              objectSpan.addAll(maybeObjSpan.get());
+            }
+            // Collect pp
+            else if (rel.startsWith("nmod:")) {
+              if (!ppSpan.isEmpty()) {
+                return Optional.empty();  // duplicate objects!
+              }
+              Optional<List<CoreLabel>> maybePPSpan = getValidObjectChunk(parse, edgeFromRel.getDependent(), Optional.of("case"));
+              if (!maybePPSpan.isPresent()) {
+                return Optional.empty();  // bad object span!
+              }
+              ppSpan.addAll(maybePPSpan.get());
+              // Add the actual preposition, if we can find it
+              for (SemanticGraphEdge edge : parse.outgoingEdgeIterable(edgeFromRel.getDependent())) {
+                if ("case".equals(edge.getRelation().toString())) {
+                  pp = Optional.of(edge.getDependent().backingLabel());
+                }
+              }
+              // Add the actual preposition, even if we can't find it.
+              if (!pp.isPresent()) {
+                pp = Optional.of(new CoreLabel() {{
+                  setWord(rel.substring("nmod:".length()));
+                  setLemma(rel.substring("nmod:".length()));
+                  setTag("IN");
+                  setNER("O");
+                  setBeginPosition(0);
+                  setEndPosition(0);
+                  setSentIndex(0);
+                  setIndex(-1);
+                }});
+              }
+            }
+            else if (consumeAll) {
+              return Optional.empty();  // bad edge out of the relation
+            }
+          }
+
+          // Construct a triple
+          // (canonicalize the triple to be subject; relation; object, folding in the PP)
+          if (!ppSpan.isEmpty() && !objectSpan.isEmpty()) {
+            relationSpan.addAll(objectSpan);
+            objectSpan = ppSpan;
+          } else if (!ppSpan.isEmpty()) {
+            objectSpan = ppSpan;
+          }
+          // (last error checks -- shouldn't ever fire)
+          if (!subjectSpan.isPresent() || subjectSpan.get().isEmpty() || relationSpan.isEmpty() || objectSpan.isEmpty()) {
+            return Optional.empty();
+          }
+          // (sort the relation span)
+          Collections.sort(relationSpan, (a, b) -> a.index() - b.index());
+          // (add in the PP node, if it exists)
+          if (pp.isPresent()) {
+            relationSpan.add(pp.get());
+          }
+          // (success!)
+          RelationTriple.WithTree extraction = new RelationTriple.WithTree(subjectSpan.get(), relationSpan, objectSpan, parse, confidence.orElse(1.0));
+          return Optional.of(extraction);
+        }
+      }
+    }
+
+    // Nothing found; return
+    return Optional.empty();
+  }
+
+  /**
+   * <p>
+   * Try to segment this sentence as a relation triple.
+   * This sentence must already match one of a few strict patterns for a valid OpenIE extraction.
+   * If it does not, then no relation triple is created.
+   * That is, this is <b>not</b> a relation extractor; it is just a utility to segment what is already a
+   * (subject, relation, object) triple into these three parts.
+   * </p>
+   *
+   * <p>
+   *   This method will attempt to use both the verb-centric patterns and the ACL-centric patterns.
+   * </p>
+   *
+   * @param parse The sentence to process, as a dependency tree.
+   * @param confidence An optional confidence to pass on to the relation triple.
+   * @param consumeAll if true, force the entire parse to be consumed by the pattern.
+   * @return A relation triple, if this sentence matches one of the patterns of a valid relation triple.
+   */
+  public Optional<RelationTriple> segment(SemanticGraph parse, Optional<Double> confidence, boolean consumeAll) {
+    // Copy and clean the tree
+    parse = new SemanticGraph(parse);
+    Util.stripPrepCases(parse);
+
+    // Special case "there is <something>". Arguably this is a job for the clause splitter, but the <something> is
+    // sometimes not _really_ its own clause
+    IndexedWord root = parse.getFirstRoot();
+    if ( (root.lemma() != null && root.lemma().equalsIgnoreCase("be")) ||
+         (root.lemma() == null && (root.word().equalsIgnoreCase("is") || root.word().equalsIgnoreCase("are") || root.word().equalsIgnoreCase("were") || root.word().equalsIgnoreCase("be")))) {
+      // Check for the "there is" construction
+      boolean foundThere = false;
+      boolean tooMayArcs = false;  // an indicator for there being too much nonsense hanging off of the root
+      Optional<SemanticGraphEdge> newRoot = Optional.empty();
+      for (SemanticGraphEdge edge : parse.outgoingEdgeIterable(root)) {
+        if (edge.getRelation().toString().equals("expl") && edge.getDependent().word().equalsIgnoreCase("there")) {
+          foundThere = true;
+        } else if (edge.getRelation().toString().equals("nsubj")) {
+          newRoot = Optional.of(edge);
+        } else {
+          tooMayArcs = true;
+        }
+      }
+      // Split off "there is")
+      if (foundThere && newRoot.isPresent() && !tooMayArcs) {
+        ClauseSplitterSearchProblem.splitToChildOfEdge(parse, newRoot.get());
+      }
+    }
+
+    // Run the patterns
+    Optional<RelationTriple> verbExtraction = segmentVerb(parse, confidence, consumeAll);
+    if (verbExtraction.isPresent()) {
+      return verbExtraction;
+    } else {
+      return segmentACL(parse, confidence, consumeAll);
+    }
   }
 
   /**

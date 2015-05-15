@@ -267,8 +267,7 @@ public class ClauseSplitterSearchProblem {
    * @param tree The tree to split a clause from.
    * @param toKeep The edge representing the clause to keep.
    */
-  @SuppressWarnings("unchecked")
-  private void simpleClause(SemanticGraph tree, SemanticGraphEdge toKeep) {
+  static void splitToChildOfEdge(SemanticGraph tree, SemanticGraphEdge toKeep) {
     Queue<IndexedWord> fringe = new LinkedList<>();
     List<IndexedWord> nodesToRemove = new ArrayList<>();
     // Find nodes to remove
@@ -295,6 +294,20 @@ public class ClauseSplitterSearchProblem {
     nodesToRemove.forEach(tree::removeVertex);
     // Set new root
     tree.setRoot(toKeep.getDependent());
+
+  }
+
+  /**
+   * The basic method for splitting off a clause of a tree.
+   * This modifies the tree in place.
+   * This method addtionally follows ref edges.
+   *
+   * @param tree The tree to split a clause from.
+   * @param toKeep The edge representing the clause to keep.
+   */
+  @SuppressWarnings("unchecked")
+  private void simpleClause(SemanticGraph tree, SemanticGraphEdge toKeep) {
+    splitToChildOfEdge(tree, toKeep);
 
     // Follow 'ref' edges
     Map<IndexedWord, IndexedWord> refReplaceMap = new HashMap<>();
