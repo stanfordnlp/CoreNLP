@@ -27,6 +27,7 @@
 package edu.stanford.nlp.ie.crf;
 
 import edu.stanford.nlp.ie.*;
+import java.io.ObjectOutputStream;
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -1343,7 +1344,8 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
    * @return If verboseMode is set, a Pair of Counters recording classification decisions, else null.
    */
   @Override
-  public Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
+  public Triple<Counter<Integer>, Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
+    // TODO: Probably this would really be better with 11 bins, with edge ones from 0-0.5 and 0.95-1.0, a bit like 11-point ave precision
     final int numBins = 10;
     boolean verbose = flags.verboseMode;
 
@@ -1351,6 +1353,7 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
     CRFCliqueTree<String> cliqueTree = getCliqueTree(p);
 
     Counter<Integer> calibration = new ClassicCounter<>();
+    Counter<Integer> correctByBin = new ClassicCounter<>();
     TwoDimensionalCounter<Integer,String> calibratedTokens = new TwoDimensionalCounter<>();
 
     // for (int i = 0; i < factorTables.length; i++) {
@@ -1361,29 +1364,39 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       System.out.print(token);
       System.out.print('\t');
       System.out.print(goldAnswer);
+      double maxProb = Double.NEGATIVE_INFINITY;
+      String bestClass = "";
       for (String label : classIndex) {
         int index = classIndex.indexOf(label);
         // double prob = Math.pow(Math.E, factorTables[i].logProbEnd(index));
         double prob = cliqueTree.prob(i, index);
+        if (prob > maxProb) {
+          bestClass = label;
+        }
         System.out.print('\t');
         System.out.print(label);
         System.out.print('=');
         System.out.print(prob);
         if (verbose ) {
-          int binnedProb = (int) prob * numBins;
+          int binnedProb = (int) (prob * numBins);
           if (binnedProb > (numBins - 1)) {
             binnedProb = numBins - 1;
           }
           calibration.incrementCount(binnedProb);
           if (label.equals(goldAnswer)) {
-            calibratedTokens.incrementCount(binnedProb, token);
+            if (bestClass.equals(goldAnswer)) {
+              correctByBin.incrementCount(binnedProb);
+            }
+            if ( ! label.equals(flags.backgroundSymbol)) {
+              calibratedTokens.incrementCount(binnedProb, token);
+            }
           }
         }
       }
       System.out.println();
     }
     if (verbose) {
-      return new Pair<>(calibration, calibratedTokens);
+      return new Triple<>(calibration, correctByBin, calibratedTokens);
     } else {
       return null;
     }
@@ -2869,6 +2882,15 @@ public class CRFClassifier<IN extends CoreMap> extends AbstractSequenceClassifie
       ClassNotFoundException {
     CRFClassifier<INN> crf = new CRFClassifier<INN>();
     crf.loadClassifier(in);
+    return crf;
+  }
+
+  // new method for getting a CRFClassifier from an ObjectInputStream
+  public static <INN extends CoreMap> CRFClassifier<INN> getClassifier(ObjectInputStream ois) throws IOException,
+          ClassCastException,
+          ClassNotFoundException {
+    CRFClassifier<INN> crf = new CRFClassifier<INN>();
+    crf.loadClassifier(ois,null);
     return crf;
   }
 

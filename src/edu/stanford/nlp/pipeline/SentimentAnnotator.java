@@ -2,10 +2,12 @@ package edu.stanford.nlp.pipeline;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.sentiment.CollapseUnaryTransformer;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
@@ -15,6 +17,8 @@ import edu.stanford.nlp.sentiment.SentimentUtils;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Generics;
+import edu.stanford.nlp.util.IntPair;
 
 /**
  * This annotator attaches a binarized tree with sentiment annotations
@@ -23,22 +27,24 @@ import edu.stanford.nlp.util.CoreMap;
  * ParserAnnotator.
  * <br>
  * The tree will be attached to each sentence in the
- * SentencesAnnotation via the SentimentCoreAnnotations.AnnotatedTree
+ * SentencesAnnotation via the SentimentCoreAnnotations.SentimentAnnotatedTree
  * annotation.  The class name for the top level class is also set
- * using the SentimentCoreAnnotations.ClassName annotation.
+ * using the SentimentCoreAnnotations.SentimentClass annotation.
  * <br>
  * The reason the decision was made to do the binarization in the
  * ParserAnnotator is because it may require specific options set in
  * the parser.  An alternative would be to do the binarization here,
  * which would require at a minimum the HeadFinder used in the parser.
  *
- * @author John Bauer 
+ * @author John Bauer
  */
 public class SentimentAnnotator implements Annotator {
-  static final String DEFAULT_MODEL = "edu/stanford/nlp/models/sentiment/sentiment.ser.gz";
-  String modelPath;
-  SentimentModel model;
-  CollapseUnaryTransformer transformer = new CollapseUnaryTransformer();
+
+  private static final String DEFAULT_MODEL = "edu/stanford/nlp/models/sentiment/sentiment.ser.gz";
+
+  private final String modelPath;
+  private final SentimentModel model;
+  private final CollapseUnaryTransformer transformer = new CollapseUnaryTransformer();
 
   public SentimentAnnotator(String name, Properties props) {
     this.modelPath = props.getProperty(name + ".model", DEFAULT_MODEL);
@@ -48,14 +54,17 @@ public class SentimentAnnotator implements Annotator {
     this.model = SentimentModel.loadSerialized(modelPath);
   }
 
+  @Override
   public Set<Requirement> requirementsSatisfied() {
     return Collections.emptySet();
   }
 
+  @Override
   public Set<Requirement> requires() {
     return PARSE_TAG_BINARIZED_TREES;
   }
 
+  @Override
   public void annotate(Annotation annotation) {
     if (annotation.containsKey(CoreAnnotations.SentencesAnnotation.class)) {
       // TODO: parallelize
@@ -68,9 +77,37 @@ public class SentimentAnnotator implements Annotator {
         Tree collapsedUnary = transformer.transformTree(binarized);
         SentimentCostAndGradient scorer = new SentimentCostAndGradient(model, null);
         scorer.forwardPropagateTree(collapsedUnary);
-        sentence.set(SentimentCoreAnnotations.AnnotatedTree.class, collapsedUnary);
+        sentence.set(SentimentCoreAnnotations.SentimentAnnotatedTree.class, collapsedUnary);
         int sentiment = RNNCoreAnnotations.getPredictedClass(collapsedUnary);
-        sentence.set(SentimentCoreAnnotations.ClassName.class, SentimentUtils.sentimentString(model, sentiment));
+        sentence.set(SentimentCoreAnnotations.SentimentClass.class, SentimentUtils.sentimentString(model, sentiment));
+        Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
+        if (tree != null) {
+          collapsedUnary.setSpans();
+          // map the sentiment annotations onto the tree
+          Map<IntPair,String> spanSentiment = Generics.newHashMap();
+          for (Tree bt : collapsedUnary) {
+            IntPair p = bt.getSpan();
+            int sen = RNNCoreAnnotations.getPredictedClass(bt);
+            String sentStr = SentimentUtils.sentimentString(model, sen);
+            if ( ! spanSentiment.containsKey(p)) {
+              // we'll take the first = highest one discovered
+              spanSentiment.put(p, sentStr);
+            }
+          }
+          if (((CoreLabel) tree.label()).containsKey(CoreAnnotations.SpanAnnotation.class)) {
+            throw new IllegalStateException("This code assumes you don't have SpanAnnotation");
+          }
+          tree.setSpans();
+          for (Tree t : tree) {
+            IntPair p = t.getSpan();
+            String str = spanSentiment.get(p);
+            if (str != null) {
+              CoreLabel cl = (CoreLabel) t.label();
+              cl.set(SentimentCoreAnnotations.SentimentClass.class, str);
+              cl.remove(CoreAnnotations.SpanAnnotation.class);
+            }
+          }
+        }
       }
     } else {
       throw new RuntimeException("unable to find sentences in: " + annotation);

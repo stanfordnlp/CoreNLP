@@ -140,6 +140,7 @@ public abstract class DeterministicCorefSieve extends Sieve {
           }
           
           int removeID = c1.clusterID;
+//          System.out.println("Merging ant "+c2+" with "+c1);
           CorefCluster.mergeClusters(c2, c1);
           document.mergeIncompatibles(c2, c1);
           document.mergeAcronymCache(c2, c1);
@@ -232,7 +233,7 @@ public abstract class DeterministicCorefSieve extends Sieve {
     }
 
     // chinese newswire contains coref nested NPs with shared headword  Chen & Ng
-    if(lang != Locale.CHINESE || !document.docInfo.get("DOC_ID").contains("nw")) {
+    if(lang != Locale.CHINESE || document.docInfo == null || !document.docInfo.getOrDefault("DOC_ID","").contains("nw")) {
       if(mention2.insideIn(ant) || ant.insideIn(mention2)) return false;
     }
 
@@ -372,8 +373,12 @@ public abstract class DeterministicCorefSieve extends Sieve {
       return true;
     }
 
-    if(flags.USE_ROLEAPPOSITION && lang != Locale.CHINESE && Rules.entityIsRoleAppositive(mentionCluster, potentialAntecedent, mention, ant, dict)){
-      ret = true;
+    if(flags.USE_ROLEAPPOSITION){
+      if(lang==Locale.CHINESE)
+        ret = false;
+      else
+        if(Rules.entityIsRoleAppositive(mentionCluster, potentialAntecedent, mention, ant, dict))
+          ret = true;
     }
     if(flags.USE_INCLUSION_HEADMATCH && Rules.entityHeadsAgree(mentionCluster, potentialAntecedent, mention, ant, dict)){
       ret = true;
@@ -453,7 +458,9 @@ public abstract class DeterministicCorefSieve extends Sieve {
         m = mention;
       }
 
-      if((m.isPronominal() || dict.allPronouns.contains(m.toString())) && Rules.entityAttributesAgree(mentionCluster, potentialAntecedent)){
+      boolean mIsPronoun = (m.isPronominal() || dict.allPronouns.contains(m.toString()));
+      
+      if(mIsPronoun && Rules.entityAttributesAgree(mentionCluster, potentialAntecedent, lang)){
 
         if(dict.demonymSet.contains(ant.lowercaseNormalizedSpanString()) && dict.notOrganizationPRP.contains(m.headString)){
           document.addIncompatible(m, ant);

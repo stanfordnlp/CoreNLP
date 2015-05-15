@@ -1,6 +1,6 @@
 package edu.stanford.nlp.parser.nndep;
 
-import edu.stanford.nlp.international.Languages;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.TreebankLanguagePack;
@@ -50,7 +50,7 @@ public class Config
   /**
    * The language being parsed.
    */
-  public Languages.Language language = Languages.Language.English;
+  public Language language = Language.UniversalEnglish;
 
   /**
    * Number of threads to use during training. Also indirectly controls
@@ -237,18 +237,18 @@ public class Config
     language = props.containsKey("language")
                ? getLanguage(props.getProperty("language"))
                : language;
-    tlp = Languages.getLanguageParams(language).treebankLanguagePack();
+    tlp = language.params.treebankLanguagePack();
   }
 
   /**
-   * Get the {@link edu.stanford.nlp.international.Languages.Language}
+   * Get the {@link edu.stanford.nlp.international.Language}
    * object corresponding to the given language string.
    *
-   * @return A {@link edu.stanford.nlp.international.Languages.Language}
+   * @return A {@link edu.stanford.nlp.international.Language}
    *         or {@code null} if no instance matches the given string.
    */
-  private Languages.Language getLanguage(String languageStr) {
-    for (Languages.Language l : Languages.Language.values()) {
+  private Language getLanguage(String languageStr) {
+    for (Language l : Language.values()) {
       if (l.name().equalsIgnoreCase(languageStr))
         return l;
     }

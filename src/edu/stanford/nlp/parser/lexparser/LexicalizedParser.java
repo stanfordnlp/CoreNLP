@@ -323,9 +323,11 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    */
   public List<Tree> parseMultiple(final List<? extends List<? extends HasWord>> sentences, final int nthreads) {
     MulticoreWrapper<List<? extends HasWord>, Tree> wrapper = new MulticoreWrapper<List<? extends HasWord>, Tree>(nthreads, new ThreadsafeProcessor<List<? extends HasWord>, Tree>() {
+        @Override
         public Tree process(List<? extends HasWord> sentence) {
           return parse(sentence);
         }
+        @Override
         public ThreadsafeProcessor<List<? extends HasWord>, Tree> newInstance() {
           return this;
         }
@@ -363,6 +365,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     }
   }
 
+  @Override
   public List<Eval> getExtraEvals() {
     if (reranker != null) {
       return reranker.getEvals();
@@ -372,6 +375,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   }
 
 
+  @Override
   public List<ParserQueryEval> getParserQueryEvals() {
     return Collections.emptyList();
   }
@@ -595,7 +599,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   public static LexicalizedParser getParserFromSerializedFile(String serializedFileOrUrl) {
     try {
       Timing tim = new Timing();
-      System.err.print("Loading parser from serialized file " + serializedFileOrUrl + " ...");
+      System.err.print("Loading parser from serialized file " + serializedFileOrUrl + " ... ");
       ObjectInputStream in = IOUtils.readStreamFromString(serializedFileOrUrl);
       LexicalizedParser pd = loadModel(in);
 
@@ -989,6 +993,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
    *              {"-outputFormat", "typedDependencies", "-maxLength", "70"}
    * @throws IllegalArgumentException If an unknown flag is passed in
    */
+  @Override
   public void setOptionFlags(String... flags) {
     op.setOptions(flags);
   }

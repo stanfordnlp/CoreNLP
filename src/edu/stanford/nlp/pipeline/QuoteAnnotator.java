@@ -203,7 +203,7 @@ public class QuoteAnnotator implements Annotator {
       }
 
       // create a quote annotation with text and token offsets
-      Annotation quote = makeQuote(text, begin, end, quoteTokens,
+      Annotation quote = makeQuote(text.substring(begin, end), begin, end, quoteTokens,
           tokenOffset, beginSentence, endSentence, docID);
 
       // add quote in
@@ -267,14 +267,14 @@ public class QuoteAnnotator implements Annotator {
     }
   }
 
-  public static Annotation makeQuote(String text, int begin, int end,
+  public static Annotation makeQuote(String surfaceForm, int begin, int end,
                                      List<CoreLabel> quoteTokens,
                                      int tokenOffset,
                                      int sentenceBeginIndex,
                                      int sentenceEndIndex,
                                      String docID) {
+    Annotation quote = new Annotation(surfaceForm);
     // create a quote annotation with text and token offsets
-    Annotation quote = new Annotation(text.substring(begin, end));
     quote.set(CoreAnnotations.CharacterOffsetBeginAnnotation.class, begin);
     quote.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, end);
     if (docID != null) {

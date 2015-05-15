@@ -1586,8 +1586,7 @@ public class ColumnDataClassifier {
       myFlags[0] = new Flags();  // initialize zero column flags used for global flags; it can't be null
     }
 
-    for (Enumeration<?> e = props.propertyNames(); e.hasMoreElements();) {
-      String key = (String) e.nextElement();
+    for (String key : props.stringPropertyNames()) {
       String val = props.getProperty(key);
 
       int col = 0;  // the default (first after class)

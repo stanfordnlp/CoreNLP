@@ -1,6 +1,7 @@
 package edu.stanford.nlp.naturalli;
 
 import edu.stanford.nlp.classify.*;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
@@ -317,7 +318,7 @@ public class ClauseSplitterSearchProblem {
   private static void addWord(SemanticGraph toModify, IndexedWord root, String rel, CoreLabel coreLabel) {
     IndexedWord dependent = new IndexedWord(coreLabel);
     toModify.addVertex(dependent);
-    toModify.addEdge(root, dependent, GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, rel), Double.NEGATIVE_INFINITY, false);
+    toModify.addEdge(root, dependent, GrammaticalRelation.valueOf(Language.English, rel), Double.NEGATIVE_INFINITY, false);
   }
 
   /**
@@ -365,7 +366,7 @@ public class ClauseSplitterSearchProblem {
     // Add subtree
     // (add subject)
     toModify.addVertex(subject);
-    toModify.addEdge(root, subject, GrammaticalRelation.valueOf(GrammaticalRelation.Language.English, rel), Double.NEGATIVE_INFINITY, false);
+    toModify.addEdge(root, subject, GrammaticalRelation.valueOf(Language.English, rel), Double.NEGATIVE_INFINITY, false);
 
     // (add nodes)
     wordsToAdd.forEach(toModify::addVertex);

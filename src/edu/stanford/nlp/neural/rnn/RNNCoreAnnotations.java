@@ -64,12 +64,18 @@ public class RNNCoreAnnotations {
     }
   }
 
+  /** Return as an int the predicted class. If it is not defined for a node,
+   *  it will return -1
+   *
+   *  @return Either the sentiment level or -1 if none
+   */
   public static int getPredictedClass(Tree tree) {
     Label label = tree.label();
     if (!(label instanceof CoreLabel)) {
       throw new IllegalArgumentException("CoreLabels required to get the attached predicted class");
     }
-    return ((CoreLabel) label).get(PredictedClass.class);
+    Integer val = ((CoreLabel) label).get(PredictedClass.class);
+    return val == null ? -1: val;
   }
 
   /**

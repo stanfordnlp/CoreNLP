@@ -76,7 +76,7 @@ public class CorefDocMaker {
     if(CorefProperties.USE_TRUECASE) {
       annoSb.append(", truecase");
     }   
-    if (!CorefProperties.useGoldNE(props))  {
+    if (!CorefProperties.useGoldNE(props) || CorefProperties.getLanguage(props)==Locale.CHINESE)  {
       annoSb.append(", ner");
     }   
     if (!CorefProperties.useGoldParse(props))  {
@@ -97,6 +97,7 @@ public class CorefDocMaker {
         CoNLLDocumentReader.Options options = new CoNLLDocumentReader.Options();
         options.annotateTokenCoref = false;
         if (CorefProperties.useCoNLLAuto(props)) options.setFilter(".*_auto_conll$");
+        options.lang = CorefProperties.getLanguage(props);
         return new CoNLLDocumentReader(corpusPath, options);
 
       case ACE:
@@ -153,6 +154,12 @@ public class CorefDocMaker {
     
     // add missing annotation
     addMissingAnnotation(anno);
+    
+    // remove nested NP with same headword except newswire document for chinese
+    
+    if(input.conllDoc != null && CorefProperties.getLanguage(props)==Locale.CHINESE){
+      CorefProperties.setRemoveNested(props, !input.conllDoc.documentID.contains("nw"));
+    }
     
     // mention detection: MD gives following information about mentions: mention start/end index, span, headword
     // rest information will be set in preprocess step

@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 
 import edu.stanford.nlp.graph.DirectedMultiGraph;
 import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.process.Morphology;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.semgraph.semgrex.SemgrexMatcher;
@@ -168,6 +169,10 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     SemanticGraph sg = new SemanticGraph(list);
     if (DEBUG) {
       printListSorted("At postProcessDependencies:", sg.typedDependencies());
+    }
+    correctWHAttachment(sg);
+    if (DEBUG) {
+      printListSorted("After corrrecting WH attachment:", sg.typedDependencies());
     }
     convertRel(sg);
     if (DEBUG) {
@@ -644,6 +649,60 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
     }
   }
 
+  /* Used by correctWHAttachment */
+  private static SemgrexPattern XCOMP_PATTERN = SemgrexPattern.compile("{}=root >xcomp {}=embedded >/^(dep|dobj)$/ {}=wh ?>/([di]obj)/ {}=obj");
+  
+  private static Morphology morphology = new Morphology();
+  
+  /**
+   * Tries to correct complicated cases of WH-movement in
+   * sentences such as "What does Mary seem to have?" in
+   * which "What" should attach to "have" instead of the
+   * control verb. 
+   * 
+   * @param sg The Semantic graph to operate on.
+   */
+  private static void correctWHAttachment(SemanticGraph sg) {
+    
+    /* Semgrexes require a graph with a root. */
+    if (sg.getRoots().isEmpty())
+      return;
+    
+    SemanticGraph sgCopy = sg.makeSoftCopy();
+    SemgrexMatcher matcher = XCOMP_PATTERN.matcher(sgCopy);
+    while (matcher.findNextMatchingNode()) {
+      IndexedWord root = matcher.getNode("root");
+      IndexedWord embeddedVerb = matcher.getNode("embedded");
+      IndexedWord wh = matcher.getNode("wh");
+      IndexedWord dobj = matcher.getNode("obj");
+      
+      /* Check if the object is a WH-word. */
+      if (wh.tag().startsWith("W")) {
+        boolean reattach = false;
+        /* If the control verb already has an object, then
+           we have to reattach the WH-word to the verb in the embedded clause. */
+        if (dobj != null) {
+          reattach = true;
+        } else {
+          /* If the control verb can't have an object, we also have to reattach. */
+          String lemma = morphology.lemma(root.value(), root.tag());
+          if (lemma.matches(EnglishPatterns.NP_V_S_INF_VERBS_REGEX)) {
+            reattach = true;
+          }
+        }
+        
+        if (reattach) {
+          SemanticGraphEdge edge = sg.getEdge(root, wh);
+          if (edge != null) {
+            sg.removeEdge(edge);
+            sg.addEdge(embeddedVerb, wh, DIRECT_OBJECT, Double.NEGATIVE_INFINITY, false);
+          }
+        }
+      }
+    }
+  }
+  
+  
   /**
    * What we do in this method is look for temporary dependencies of
    * the type "rel" and "prep".  These occur in sentences such as "I saw the man

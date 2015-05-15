@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import edu.stanford.nlp.io.IOUtils;
 import edu.stanford.nlp.io.EncodingPrintWriter;
+import edu.stanford.nlp.io.RuntimeIOException;
 import edu.stanford.nlp.process.ChineseDocumentToSentenceProcessor;
 import edu.stanford.nlp.trees.international.pennchinese.ChineseUtils;
 import edu.stanford.nlp.util.Generics;
@@ -28,7 +29,7 @@ public class ChineseDictionary {
   private ChineseDocumentToSentenceProcessor cdtos_; // = null;
 
   private void serializeDictionary(String serializePath) {
-    System.err.print("Serializing dictionaries to " + serializePath + "...");
+    System.err.print("Serializing dictionaries to " + serializePath + " ... ");
 
     try {
       ObjectOutputStream oos = IOUtils.writeStreamFromString(serializePath);
@@ -40,7 +41,7 @@ public class ChineseDictionary {
       System.err.println("done.");
     } catch (Exception e) {
       System.err.println("Failed");
-      throw new RuntimeException(e);
+      throw new RuntimeIOException(e);
     }
   }
 
@@ -51,7 +52,7 @@ public class ChineseDictionary {
       dict[i] = Generics.newHashSet();
     }
 
-    System.err.print("loading dictionaries from " + serializePath + "...");
+    // System.err.print("loading dictionaries from " + serializePath + "...");
 
     try {
       // once we read MAX_LEXICON_LENGTH and cdtos as well
@@ -81,9 +82,8 @@ public class ChineseDictionary {
 
   /**
    * The first argument can be one file path, or multiple files separated by
-   * commas
-   *
-   **/
+   * commas.
+   */
   public ChineseDictionary(String serDicts,
                            ChineseDocumentToSentenceProcessor cdtos,
                            boolean expandMidDot) {
@@ -93,13 +93,11 @@ public class ChineseDictionary {
   public ChineseDictionary(String[] dicts,
                            ChineseDocumentToSentenceProcessor cdtos,
                            boolean expandMidDot) {
-    System.err.println("Loading Chinese dictionaries from "
-                       +dicts.length
-                       +" files:");
-    for(String dict : dicts) {
-      System.err.println("  "+dict);
+    System.err.printf("Loading Chinese dictionaries from %d file%s:%n",
+            dicts.length, (dicts.length == 1) ? "" : "s");
+    for (String dict : dicts) {
+      System.err.println("  " + dict);
     }
-    System.err.println();
 
     for (int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
       words_[i] = Generics.newHashSet();
@@ -107,7 +105,7 @@ public class ChineseDictionary {
 
     this.cdtos_ = cdtos;
 
-    for(String dict : dicts) {
+    for (String dict : dicts) {
       if(dict.endsWith("ser.gz")) {
         // TODO: the way this is written would not work if we allow
         // dictionaries to have different settings of MAX_LEXICON_LENGTH
@@ -122,13 +120,13 @@ public class ChineseDictionary {
     }
 
     int total = 0;
-    for(int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
+    for (int i = 0; i <= MAX_LEXICON_LENGTH; i++) {
       total += words_[i].size();
     }
-    System.err.println("Done. Unique words in ChineseDictionary is: " + total);
+    System.err.printf("Done. Unique words in ChineseDictionary is: %d.%n", total);
   }
 
-  private final Pattern midDot = Pattern.compile(ChineseUtils.MID_DOT_REGEX_STR);
+  private static final Pattern midDot = Pattern.compile(ChineseUtils.MID_DOT_REGEX_STR);
 
   private void addDict(String dict, boolean expandMidDot) {
     String content = IOUtils.slurpFileNoExceptions(dict,"utf-8");
@@ -163,13 +161,13 @@ public class ChineseDictionary {
       words_[length].add(item);
     } else {
       // insist on new String as it may save memory
-      String subitem = new String(item.substring(0,MAX_LEXICON_LENGTH));
+      String subItem = new String(item.substring(0,MAX_LEXICON_LENGTH));
       if (cdtos_ != null) {
-        subitem = cdtos_.normalization(subitem);
+        subItem = cdtos_.normalization(subItem);
       }
-      if (DEBUG) EncodingPrintWriter.err.println("DICT: "+subitem, "UTF-8");
+      if (DEBUG) EncodingPrintWriter.err.println("DICT: "+subItem, "UTF-8");
       // length=MAX_LEXICON_LENGTH and MAX_LEXICON_LENGTH+
-      words_[MAX_LEXICON_LENGTH].add(subitem);
+      words_[MAX_LEXICON_LENGTH].add(subItem);
     }
   }
 

@@ -18,8 +18,13 @@ import edu.stanford.nlp.dcoref.SieveCoreferenceSystem;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraphFactory;
+import edu.stanford.nlp.semgraph.SemanticGraphFactory.Mode;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.trees.GrammaticalStructure.Extras;
 import edu.stanford.nlp.util.ArraySet;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
@@ -81,6 +86,10 @@ public class DeterministicCorefAnnotator implements Annotator {
           Tree tree = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
           trees.add(tree);
 
+          SemanticGraph dependencies = SemanticGraphFactory.makeFromTree(tree, Mode.COLLAPSED, Extras.NONE, false, null, true);
+          
+          sentence.set(SemanticGraphCoreAnnotations.AlternativeDependenciesAnnotation.class, dependencies);
+          
           if (!hasSpeakerAnnotations) {
             // check for speaker annotations
             for (CoreLabel t:tokens) {

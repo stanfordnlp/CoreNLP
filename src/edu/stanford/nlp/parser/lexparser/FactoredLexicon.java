@@ -7,8 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import edu.stanford.nlp.international.Languages;
-import edu.stanford.nlp.international.Languages.Language;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.international.arabic.ArabicMorphoFeatureSpecification;
 import edu.stanford.nlp.international.french.FrenchMorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
@@ -451,7 +450,7 @@ public class FactoredLexicon extends BaseLexicon {
     }
     // Command line options
     Language language = Language.valueOf(args[0]);
-    TreebankLangParserParams tlpp = Languages.getLanguageParams(language);
+    TreebankLangParserParams tlpp = language.params;
     Treebank trainTreebank = tlpp.diskTreebank();
     trainTreebank.loadPath(args[2]);
     Treebank devTreebank = tlpp.diskTreebank();

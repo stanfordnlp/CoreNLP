@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.stanford.nlp.international.Languages;
-import edu.stanford.nlp.international.Languages.Language;
+import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.international.arabic.ArabicMorphoFeatureSpecification;
 import edu.stanford.nlp.international.french.FrenchMorphoFeatureSpecification;
 import edu.stanford.nlp.international.morph.MorphoFeatureSpecification;
@@ -50,7 +49,7 @@ public class TreebankFactoredLexiconStats {
     }
 
     Language language = Language.valueOf(args[0]);
-    TreebankLangParserParams tlpp = Languages.getLanguageParams(language);
+    TreebankLangParserParams tlpp = language.params;
     if (language.equals(Language.Arabic)) {
       String[] options = {"-arabicFactored"};
       tlpp.setOptionFlag(options, 0);

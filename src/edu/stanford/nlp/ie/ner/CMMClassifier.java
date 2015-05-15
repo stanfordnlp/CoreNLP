@@ -72,14 +72,7 @@ import edu.stanford.nlp.sequences.SequenceModel;
 import edu.stanford.nlp.stats.ClassicCounter;
 import edu.stanford.nlp.stats.Counter;
 import edu.stanford.nlp.stats.TwoDimensionalCounter;
-import edu.stanford.nlp.util.CoreMap;
-import edu.stanford.nlp.util.ErasureUtils;
-import edu.stanford.nlp.util.Generics;
-import edu.stanford.nlp.util.HashIndex;
-import edu.stanford.nlp.util.Index;
-import edu.stanford.nlp.util.PaddedList;
-import edu.stanford.nlp.util.Pair;
-import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.*;
 
 
 /**
@@ -1030,6 +1023,31 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
     }
   }
 
+  public void serializeClassifier(ObjectOutputStream oos) {
+
+    //System.err.print("Serializing classifier to " + serializePath + "...");
+
+    try {
+      //ObjectOutputStream oos = IOUtils.writeStreamFromString(oos);
+
+      oos.writeObject(classifier);
+      oos.writeObject(flags);
+      oos.writeObject(featureFactories);
+      oos.writeObject(classIndex);
+      oos.writeObject(answerArrays);
+      //oos.writeObject(WordShapeClassifier.getKnownLowerCaseWords());
+
+      oos.writeObject(knownLCWords);
+
+      oos.close();
+      System.err.println("Done.");
+
+    } catch (Exception e) {
+      //System.err.println("Error serializing to " + serializePath);
+      e.printStackTrace();
+    }
+  }
+
 
   /**
    * Used to load the default supplied classifier.  **THIS FUNCTION
@@ -1121,6 +1139,15 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
   public static CMMClassifier<? extends CoreLabel> getClassifierNoExceptions(InputStream in) {
     CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<CoreLabel>();
     cmm.loadClassifierNoExceptions(new BufferedInputStream(in), null);
+    return cmm;
+  }
+
+  // new method for getting a CMM from an ObjectInputStream - by JB
+  public static <INN extends CoreMap> CMMClassifier<? extends CoreLabel> getClassifier(ObjectInputStream ois) throws IOException,
+          ClassCastException,
+          ClassNotFoundException {
+    CMMClassifier<? extends CoreLabel> cmm = new CMMClassifier<CoreLabel>();
+    cmm.loadClassifier(ois, null);
     return cmm;
   }
 
@@ -1553,7 +1580,7 @@ public class CMMClassifier<IN extends CoreLabel> extends AbstractSequenceClassif
    * @param document A {@link List} of {@link CoreLabel}s.
    */
   @Override
-  public Pair<Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
+  public Triple<Counter<Integer>, Counter<Integer>, TwoDimensionalCounter<Integer,String>> printProbsDocument(List<IN> document) {
     //ClassicCounter<String> c = scoresOf(document, 0);
     throw new UnsupportedOperationException();
   }

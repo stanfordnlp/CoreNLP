@@ -195,5 +195,9 @@ public class CorefCluster implements Serializable{
     }
     return false;
   }
+  
+  public String toString(){
+    return corefMentions.toString()+"="+clusterID;
+  }
 
 }

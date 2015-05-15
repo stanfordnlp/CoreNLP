@@ -15,8 +15,8 @@ import java.util.*;
  */
 public class Beam<T> extends AbstractSet<T> {
 
-  protected int maxBeamSize;
-  protected Heap<T> elements;
+  protected final int maxBeamSize;
+  protected final Heap<T> elements;
 
   public int capacity() {
     return maxBeamSize;
