@@ -59,7 +59,7 @@ public class ShiftReduceParserQuery implements ParserQuery {
   // TODO: we are assuming that sentence final punctuation always has
   // either . or PU as the tag.
   private static TregexPattern rearrangeFinalPunctuationTregex =
-    TregexPattern.compile("__ !> __ <- (__=top <- (__ <<- (/[.]|PU/=punc < /[.!?。！？]/ ?> (__=single <: punc))))");
+    TregexPattern.compile("__ !> __ <- (__=top <- (__ <<- (/[.]|PU/=punc < /[.!?。！？]/ ?> (__=single <: =punc))))");
 
   private static TsurgeonPattern rearrangeFinalPunctuationTsurgeon =
     Tsurgeon.parseOperation("[move punc >-1 top] [if exists single prune single]");

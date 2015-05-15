@@ -166,8 +166,11 @@ public class ScorePhrasesAverageFeatures<E extends Pattern> extends PhraseScorer
     Counter<CandidatePhrase> phraseScores = new ClassicCounter<CandidatePhrase>();
     for (Entry<CandidatePhrase, Counter<ScorePhraseMeasures>> wEn : scores
         .entrySet()) {
-      double avgScore = Counters.mean(wEn.getValue());
-      phraseScores.setCount(wEn.getKey(), avgScore);
+      Double avgScore = Counters.mean(wEn.getValue());
+      if(!avgScore.isInfinite() && !avgScore.isNaN())
+        phraseScores.setCount(wEn.getKey(), avgScore);
+      else
+        Redwood.log(Redwood.DBG, "Ignoring " + wEn.getKey() + " because score is " + avgScore);
     }
     return phraseScores;
   }
