@@ -4,27 +4,38 @@ Written by Bill MacCartney <wcmac@cs.stanford.edu> 23 January 2006
 Updated by Daniel Ramage 16 October 2006
 
 This directory is intended to contain only *current and necessary*
-.jar files used with JavaNLP-core.  Each jar file in lib should be without
+.jar files used with JavaNLP-core.  
+
+Our original model was that each jar file in lib should be without
 its version number but include a corresponding source .zip/.jar file
 with a full version number in the libsrc folder.  For example, if
 there is a file  lib/ra.jar there should be a corresponding and
-up-to-date libsrc/ra-0.1.8-src.zip.
+up-to-date libsrc/ra-0.1.8-src.zip. That had some good properties
+but could also be a nuisance in the modern world, so it is also
+fine and more common recently for people to have in lib a
+lib/ra-0.1.8.jar corresponding to a libsrc/ra-0.1.8-src.{zip,jar}.
 
 Outdated or redundant .jar files should NOT be kept here, but can
 be stored instead in /u/nlp/java/liball.  Files in that directory
 can have version numbers in the name.  Example: colt1.0.3.jar.
 
 If you're adding a new .jar to the repository, please:
- - add the jar itself (without version number)
- - add its source zip (with version number)
+ - make sure the jar isn't already somewhere in the repository.
+   If it is, try to converge on one version and promote placement to
+   more if it is used in multiple projects
+ - add the jar itself to the lib directory (with or without version number)
+ - add its source zip with version number to the libsrc directory
  - check to make sure that the jar file doesn't have other libraries
    embedded within it (use jar -tf). if the .jar file has other libraries
-   embedded which overlap with other javanlp libraries, please remove that
+   embedded which overlap with other javanlp libraries, please remove them.
+   Normally we then give the jar a name ending in "x" to show we modified it.
  - update the Eclipse .classpath file to include the jar and a path
-   to its source,
+   to its source -- this is essential to keep things working for 
+   Eclipse/IntelliJ users!
  - also update this file with information about the jar
  - If it will be needed by releases of CoreNLP, also add it to the *2* pom files.
- - If it will be needed by releases of CoreNLP, also document the licensing in LIBRARY-LICENSES.
+ - If it will be needed by releases of CoreNLP, also document the
+   licensing in LIBRARY-LICENSES.
 
 Any .jar files which appear in this directory should be listed in
 this file, with the following information:
