@@ -60,7 +60,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
 
       // for backward compatibility
       if(OLD_FORMAT) annotateOldFormat(result, corefDoc);
-      
+
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -77,21 +77,21 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
       for(CorefMention m1 : s){
         for(CorefMention m2 : s){
           if(comparator.compare(m1, m2)==1) links.add(new Pair<IntTuple, IntTuple>(m1.position, m2.position));
-        }    
-      }    
-    }    
+        }
+      }
+    }
     return links;
   }
 
-  private void annotateOldFormat(Map<Integer, CorefChain> result, Document corefDoc) {
-    
+  private static void annotateOldFormat(Map<Integer, CorefChain> result, Document corefDoc) {
+
     List<Pair<IntTuple, IntTuple>> links = getLinks(result);
     Annotation annotation = corefDoc.annotation;
 
     if(VERBOSE){
-      System.err.printf("Found %d coreference links:\n", links.size());
+      System.err.printf("Found %d coreference links:%n", links.size());
       for(Pair<IntTuple, IntTuple> link: links){
-        System.err.printf("LINK (%d, %d) -> (%d, %d)\n", link.first.get(0), link.first.get(1), link.second.get(0), link.second.get(1));
+        System.err.printf("LINK (%d, %d) -> (%d, %d)%n", link.first.get(0), link.first.get(1), link.second.get(0), link.second.get(1));
       }
     }
 
@@ -135,7 +135,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
     }
   }
 
-  private boolean hasSpeakerAnnotations(Annotation annotation) {
+  private static boolean hasSpeakerAnnotations(Annotation annotation) {
     for (CoreMap sentence : annotation.get(CoreAnnotations.SentencesAnnotation.class)) {
       for (CoreLabel t : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
         if (t.get(CoreAnnotations.SpeakerAnnotation.class) != null) {
@@ -155,14 +155,14 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
   public Set<Requirement> requirementsSatisfied() {
     return Collections.singleton(COREF_REQUIREMENT);
   }
-  
-  private static Annotation testEnglish(){
+
+  private static Annotation testEnglish() {
     String text = "Barack Obama is the president of United States. He visited California last week.";
-    return testAnnoation(text,new String[]{
+    return testAnnoation(text,new String[] {
         "-props", "edu/stanford/nlp/hcoref/properties/coref-default-dep.properties"
     });
   }
-  
+
   private static Annotation testChinese(){
 //    String text = "中国武道太学和中国书道太学成立。新华社北京９月１日电。旨在振兴中华文化于"
 //        + "国际的中国武道太学和中国书道太学今天在北京成立。上述两所太学是在国家体委、"
@@ -175,7 +175,7 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
         "-props", "edu/stanford/nlp/hcoref/properties/zh-dcoref-default.properties"
     });
   }
-  
+
   private static Annotation testAnnoation(String text,String[] args){
     Annotation document = new Annotation(text);
     Properties props = StringUtils.argsToProperties(args);
@@ -185,9 +185,9 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
     hcoref.annotate(document);
     return document;
   }
-  
+
   public static void main(String[] args) {
-    
+
 //    String text = "Since the implementation of the Individual Visit Scheme between Hong Kong and the mainland , more and more mainland tourists are coming to visit Hong Kong. "
 //                  +"From the beginning up till now , more than seven million individual tourists , have come to Hong Kong. "
 //                  +"Well , we now , er , believe more will be coming . "
@@ -199,8 +199,8 @@ public class HybridCorefAnnotator extends TextAnnotationCreator implements Annot
 //                  +"You can go to burn incense and make a vow at the Repulse Bay , where all deities gather . "
 //                  +"You can enjoy the most charming sun - filled sandy beaches in Hong Kong. "
 //                  +"You can ascend Victoria Peak to get a panoramic view of Victoria Harbor 's beautiful scenery . "
-//                  +"Or hop onto a trolley with over a century of history , and feel the city 's blend of the old and the modern in slow motion ."; 
-//    
+//                  +"Or hop onto a trolley with over a century of history , and feel the city 's blend of the old and the modern in slow motion .";
+//
 
     Annotation document = testChinese();
     System.out.println(document.get(CorefChainAnnotation.class));
