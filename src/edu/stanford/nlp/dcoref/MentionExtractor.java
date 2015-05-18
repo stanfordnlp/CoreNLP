@@ -241,11 +241,9 @@ public class MentionExtractor {
   }
 
   /**
-   * Sets the label of the leaf nodes of a Tree to be the CoreLabels in the given sentence.
-   * The original value() of the Tree nodes is preserved, and otherwise the label of tree
-   * leaves becomes the label from the List.
+   * Sets the label of the leaf nodes to be the CoreLabels in the given sentence
+   * The original value() of the Tree nodes is preserved
    */
-  // todo [cdm 2015]: This clearly shouldn't be here! Maybe it's not needed at all now since parsing code does this?
   public static void mergeLabels(Tree tree, List<CoreLabel> sentence) {
     int idx = 0;
     for (Tree t : tree.getLeaves()) {
