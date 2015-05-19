@@ -222,7 +222,7 @@ public class CoreNLPServlet extends HttpServlet {
 
     String escapedXml = StringEscapeUtils.escapeHtml4(output.toString());
     String[] lines = escapedXml.split("\n");
-    out.print("<div>");
+    out.print("<div><pre>");
     for (String line : lines) {
       int numSpaces = 0;
       while (numSpaces < line.length() && line.charAt(numSpaces) == ' ') {
@@ -232,7 +232,7 @@ public class CoreNLPServlet extends HttpServlet {
       out.print(line.substring(numSpaces));
       out.print("<br>\n");
     }
-    out.print("</div>");
+    out.print("</pre></div>");
   }
    
   public void outputXml(PrintWriter out, Annotation annotation) throws IOException {
