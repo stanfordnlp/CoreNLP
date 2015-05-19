@@ -393,7 +393,7 @@ if (pp == null) {
 
 	        <% if (!(parserSelect.equals("Arabic") || parserSelect.equals("Spanish"))) { %>
 
-          <h3>Typed dependencies</h3>
+          <h3>Universal dependencies</h3>
           <div class="parserOutput">
           <pre class="spacingFree"><%
             for (Tree parse : trees) {
@@ -407,7 +407,7 @@ if (pp == null) {
           %></pre>
           </div>
 
-          <h3>Typed dependencies, collapsed</h3>
+          <h3>Universal dependencies, enhanced</h3>
           <div class="parserOutput">
           <pre class="spacingFree"><%
             for (Tree parse : trees) {
