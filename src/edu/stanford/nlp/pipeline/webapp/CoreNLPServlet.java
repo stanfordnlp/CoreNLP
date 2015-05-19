@@ -139,10 +139,10 @@ public class CoreNLPServlet extends HttpServlet {
       nameByAbbrv.put("pos", "Part-of-Speech");
       nameByAbbrv.put("ner", "Named Entity Recognition");
       nameByAbbrv.put("coref", "Coreference");
-      nameByAbbrv.put("basic_dep", "Basic dependencies");
-      nameByAbbrv.put("collapsed_dep", "Collapsed dependencies");
+      nameByAbbrv.put("basic_dep", "Basic Dependencies");
+      //nameByAbbrv.put("collapsed_dep", "Collapsed dependencies");
       nameByAbbrv.put("collapsed_ccproc_dep",
-          "Collapsed CC-processed dependencies");
+          "Enhanced Dependencies");
       for (Map.Entry<String, String> entry : nameByAbbrv.entrySet()) {
         out.println("<h2>" + entry.getValue() + ":</h2>");
         out.println("<div id=\"" + entry.getKey() + "\" style=\"width:"
