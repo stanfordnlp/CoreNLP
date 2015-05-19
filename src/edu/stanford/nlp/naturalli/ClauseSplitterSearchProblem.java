@@ -86,6 +86,10 @@ public class ClauseSplitterSearchProblem {
    */
   public final SemanticGraph tree;
   /**
+   * The assumed truth of the original clause.
+   */
+  public final boolean assumedTruth;
+  /**
    * The length of the sentence, as determined from the tree.
    */
   public final int sentenceLength;
@@ -227,15 +231,17 @@ public class ClauseSplitterSearchProblem {
    * constructor.
    *
    * @param tree               The dependency tree to search over.
+   * @param assumedTruth       The assumed truth of the tree (relevant for natural logic inference). If in doubt, pass in true.
    * @param isClauseClassifier The classifier for whether a given dependency arc should be a new clause. If this is not given, all arcs are treated as clause separators.
    * @param featurizer         The featurizer for the classifier. If no featurizer is given, one should be given in {@link ClauseSplitterSearchProblem#search(java.util.function.Predicate, Classifier, Map, java.util.function.Function, int)}, or else the classifier will be useless.
    * @see ClauseSplitter#load(String)
    */
-  protected ClauseSplitterSearchProblem(SemanticGraph tree,
+  protected ClauseSplitterSearchProblem(SemanticGraph tree, boolean assumedTruth,
                                         Optional<Classifier<ClauseSplitter.ClauseClassifierLabel, String>> isClauseClassifier,
                                         Optional<Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>> featurizer
   ) {
     this.tree = new SemanticGraph(tree);
+    this.assumedTruth = assumedTruth;
     this.isClauseClassifier = isClauseClassifier;
     this.featurizer = featurizer;
     // Index edges
@@ -262,9 +268,10 @@ public class ClauseSplitterSearchProblem {
    * However, it is very useful for training time.
    *
    * @param tree The dependency tree to search over.
+   * @param assumedTruth The truth of the premise. Almost always True.
    */
-  public ClauseSplitterSearchProblem(SemanticGraph tree) {
-    this(tree, Optional.empty(), Optional.empty());
+  public ClauseSplitterSearchProblem(SemanticGraph tree, boolean assumedTruth) {
+    this(tree, assumedTruth, Optional.empty(), Optional.empty());
   }
 
   /**
@@ -756,7 +763,7 @@ public class ClauseSplitterSearchProblem {
               }
             }
           }).accept(copy);
-          return new SentenceFragment(copy, false);
+          return new SentenceFragment(copy, assumedTruth, false);
         }))) {
           break;
         }

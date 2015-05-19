@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
  * A simple OpenIE system based on valid Natural Logic deletions of a sentence.
  *
  * TODO(gabor): handle lists ("She was the sovereign of Austria, Hungary, Croatia, Bohemia, Mantua, Milan, Lodomeria and Galicia.")
+ * TODO(gabor): handle things like "One example of chemical energy is that found in the food that we eat ."
  *
  * @author Gabor Angeli
  */
@@ -141,16 +142,16 @@ public class OpenIE implements Annotator {
   }
 
   @SuppressWarnings("unchecked")
-  public List<SentenceFragment> clausesInSentence(SemanticGraph tree) {
+  public List<SentenceFragment> clausesInSentence(SemanticGraph tree, boolean assumedTruth) {
     if (clauseSplitter.isPresent()) {
-      return clauseSplitter.get().apply(tree).topClauses(splitterThreshold);
+      return clauseSplitter.get().apply(tree, assumedTruth).topClauses(splitterThreshold);
     } else {
       return Collections.EMPTY_LIST;
     }
   }
 
   public List<SentenceFragment> clausesInSentence(CoreMap sentence) {
-    return clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class));
+    return clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), true);
   }
 
   @SuppressWarnings("unchecked")
@@ -161,7 +162,7 @@ public class OpenIE implements Annotator {
       // Get the forward entailments
       List<SentenceFragment> list = new ArrayList<>();
       if (entailmentsPerSentence > 0) {
-        list.addAll(forwardEntailer.apply(clause.parseTree).search()
+        list.addAll(forwardEntailer.apply(clause.parseTree, true).search()
             .stream().map(x -> x.changeScore(x.score * clause.score)).collect(Collectors.toList()));
       }
       list.add(clause);
@@ -197,7 +198,7 @@ public class OpenIE implements Annotator {
           tree.addEdge(adj, pobj, GrammaticalRelation.valueOf(Language.English, prep), Double.NEGATIVE_INFINITY, false);
         }
         // (add tree)
-        adjFragments.add(new SentenceFragment(tree, false));
+        adjFragments.add(new SentenceFragment(tree, clause.assumedTruth, false));
       }
       list.addAll(adjFragments);
       return list;
