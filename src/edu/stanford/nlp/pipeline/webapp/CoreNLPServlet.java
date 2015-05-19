@@ -177,6 +177,10 @@ public class CoreNLPServlet extends HttpServlet {
       out.println("<script type=\"text/javascript\">");
       out.println("// <![CDATA[");
       out.println("    bratLocation = \"" + bratLocation + "\";");
+      out.println("    webFontURLs = [\n" +
+                  "        '"+ bratLocation + "/static/fonts/Astloch-Bold.ttf',\n" +
+                  "        '"+ bratLocation + "/static/fonts/PT_Sans-Caption-Web-Regular.ttf',\n" +
+                  "        '"+ bratLocation + "/static/fonts/Liberation_Sans-Regular.ttf'];");
       out.println("// ]]>");
       out.println("</script>");
       
