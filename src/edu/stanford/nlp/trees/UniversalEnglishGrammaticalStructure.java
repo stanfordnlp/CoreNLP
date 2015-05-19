@@ -594,7 +594,7 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
    * Adds the type of conjunction to all conjunct relations.
    * <p/>
    * <code>cc(Marie, and)</code>, <code>conj(Marie, Chris)</code> and <code>conj(Marie, John)</code>
-   * become <code>cc(Marie, and)</code>, <code>conj(Marie, Chris)</code> and <code>conj(Marie, John)</code>.
+   * become <code>cc(Marie, and)</code>, <code>conj:and(Marie, Chris)</code> and <code>conj:and(Marie, John)</code>.
    * <p/>
    * In case multiple coordination marker depend on the same governor
    * the one that precedes the conjunct is appended to the conjunction relation or the
@@ -1382,6 +1382,11 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
 
 
         /* Prevent cycles. */
+        if ((caseGov.equals(gov1) && caseGov.equals(w2))
+            || (caseGov.equals(gov2) && caseGov.equals(w1))) {
+          continue;
+        }
+
         if (caseGovGov != null && (caseGovGov.equals(w1) || caseGovGov.equals(w2))) {
           continue;
         }
@@ -1434,6 +1439,11 @@ public class UniversalEnglishGrammaticalStructure extends GrammaticalStructure {
         IndexedWord caseGovGov = sg.getParent(caseGov);
 
         /* Prevent cycles. */
+        if ((caseGov.equals(gov1) && (caseGov.equals(w2) || caseGov.equals(w3)))
+            || (caseGov.equals(gov3) && (caseGov.equals(w1) || caseGov.equals(w2)))) {
+          continue;
+        }
+
         if (caseGovGov != null && (caseGovGov.equals(w1) || caseGovGov.equals(w2) || caseGovGov.equals(w3))) {
           continue;
         }
