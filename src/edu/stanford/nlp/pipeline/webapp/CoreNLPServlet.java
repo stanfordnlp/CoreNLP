@@ -230,7 +230,7 @@ public class CoreNLPServlet extends HttpServlet {
         ++numSpaces;
       }
       out.print(line.substring(numSpaces));
-      out.print("<br>\n");
+      out.print("\n");
     }
     out.print("</pre></div>");
   }
