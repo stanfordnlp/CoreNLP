@@ -45,7 +45,7 @@ head.ready(function() {
             if (data[type] && !done[type]) {
                 // Note: Util.embed doesn't have any error handling, once this
                 // exists it should be injected here.
-                Util.embed(type, conf, data[type]);
+                Util.embed(type, conf, data[type], webFontURLs);
                 $('#' + type + '_loading').hide();
                 done[type] = true;
             };
