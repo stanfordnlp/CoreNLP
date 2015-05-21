@@ -32,6 +32,11 @@ relabel target PART
 
 relabel target PART
 
+% TO -> PART
+@VP <: (/^TO$/=target <... {/.*/})
+
+relabel target PART
+
 % TO -> ADP (otherwise)
 TO=target <... {/.*/}
 
