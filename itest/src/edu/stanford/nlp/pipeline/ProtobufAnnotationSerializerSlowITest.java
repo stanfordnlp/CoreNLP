@@ -169,8 +169,6 @@ public class ProtobufAnnotationSerializerSlowITest {
               System.err.println("Graph B:");
               System.err.println("========");
               System.err.println(sentB.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class));
-              System.err.println("========");
-              System.err.println(sentA.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class).equals(sentB.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)));
               assertTrue("Basic graph for sentence " + i + " doesn't match", false);
             } else if (sentA.containsKey(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class) && !sentA.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class).equals(sentB.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class))) {
               assertTrue("Collapsed CC processed graph for sentence " + i + " doesn't match", false);
@@ -407,7 +405,7 @@ public class ProtobufAnnotationSerializerSlowITest {
 
   @Test
   public void testSerializeNatLog() {
-    testAnnotators("tokenize,ssplit,pos,lemma,depparse,natlog");
+    testAnnotators("tokenize,ssplit,pos,lemma,parse,natlog");
   }
 
   /**
@@ -417,15 +415,13 @@ public class ProtobufAnnotationSerializerSlowITest {
   @Test
   public void testAllAnnotatorCombinations() {
     String[] possibleAnnotators = possibleAnnotators();
+    Properties props = new Properties();
     for (int i = 1; i < (0x1 << (possibleAnnotators.length)); ++i) {
       // Get annotators
       Set<String> annotatorsToConsider = new LinkedHashSet<>();
       for (int k = 0; k < possibleAnnotators.length; ++k) {
         int mask = (0x1 << k);
         if ((i & mask) != 0) { annotatorsToConsider.add(possibleAnnotators[k]); }
-      }
-      if (annotatorsToConsider.contains("openie")) {
-        continue;  // TODO(gabor) these models don't exist in the distribution yet
       }
 
       // Sort annotators
@@ -443,7 +439,7 @@ public class ProtobufAnnotationSerializerSlowITest {
             for (Annotator.Requirement requirement : StanfordCoreNLP.getExistingAnnotator(annotator).requires()) {
               if (!annotatorsAdded.contains(requirement.toString())) { valid = false; }
             }
-          } catch (NullPointerException ignored) { }
+          } catch (NullPointerException e) { }
           if (valid) {
             annotators.add(annotator);
             annotatorsAdded.add(annotator);
@@ -455,7 +451,7 @@ public class ProtobufAnnotationSerializerSlowITest {
       if (!annotatorsToConsider.isEmpty()) { continue; }  // continue if we couldn't add all the annotators
 
       // Create pipeline
-      if (!annotators.contains("hcoref") && !annotators.contains("entitymentions")) {  // TODO(gabor) eventually, don't ignore this!
+      if (!annotators.contains("depparse") && !annotators.contains("hcoref") && !annotators.contains("entitymentions")) {  // TODO(gabor) eventually, don't ignore this!
         System.err.println(">>TESTING " + StringUtils.join(annotators, ","));
         testAnnotators(StringUtils.join(annotators, ","));
       }

@@ -28,11 +28,6 @@ public class ForwardEntailerSearchProblem {
   public final SemanticGraph   parseTree;
 
   /**
-   * The truth of the premise -- determines the direction we can mutate the sentences.
-   */
-  public final boolean truthOfPremise;
-
-  /**
    * The maximum number of ticks top search for. Otherwise, the search will be exhaustive.
    */
   public final int maxTicks;
@@ -100,12 +95,10 @@ public class ForwardEntailerSearchProblem {
    * @see edu.stanford.nlp.naturalli.ForwardEntailer
    */
   protected ForwardEntailerSearchProblem(SemanticGraph parseTree,
-                                         boolean truthOfPremise,
                                          int maxResults, int maxTicks,
                                          NaturalLogicWeights weights
                                       ) {
     this.parseTree = parseTree;
-    this.truthOfPremise = truthOfPremise;
     this.maxResults = maxResults;
     this.maxTicks = maxTicks;
     this.weights = weights;
@@ -131,7 +124,7 @@ public class ForwardEntailerSearchProblem {
       return Collections.EMPTY_LIST;
     } else {
       return searchImplementation().stream()
-          .map(x -> new SentenceFragment(x.tree, truthOfPremise, false).changeScore(x.confidence))
+          .map(x -> new SentenceFragment(x.tree, false).changeScore(x.confidence))
           .filter(x -> x.words.size() > 0 )
           .collect(Collectors.toList());
     }
@@ -282,7 +275,7 @@ public class ForwardEntailerSearchProblem {
           }
           NaturalLogicRelation projectedRelation = tokenPolarity.projectLexicalRelation(lexicalRelation);
           // Make sure this is a valid entailment
-          if (!projectedRelation.applyToTruthValue(truthOfPremise).isTrue()) {
+          if (!projectedRelation.isEntailed) {
             canDelete = false;
           }
         }

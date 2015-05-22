@@ -188,34 +188,20 @@ public class Polarity {
 
   /**
    * If true, applying this lexical relation to this word creates a sentence which is entailed by the original sentence,
-   * Note that both this, and {@link Polarity#negatesTruth(NaturalLogicRelation)} can be false. If this is the case, then
+   * Note that both this, and {@link Polarity#introducesNegation(NaturalLogicRelation)} can be false. If this is the case, then
    * natural logic can neither verify nor disprove this mutation.
    */
-  public boolean maintainsTruth(NaturalLogicRelation lexicalRelation) {
-    return projectLexicalRelation(lexicalRelation).maintainsTruth;
+  public boolean maintainsEntailment(NaturalLogicRelation lexicalRelation) {
+    return projectLexicalRelation(lexicalRelation).isEntailed;
   }
 
   /**
    * If true, applying this lexical relation to this word creates a sentence which is negated by the original sentence
-   * Note that both this, and {@link Polarity#maintainsTruth(NaturalLogicRelation)}} can be false. If this is the case, then
+   * Note that both this, and {@link Polarity#maintainsEntailment(NaturalLogicRelation)}} can be false. If this is the case, then
    * natural logic can neither verify nor disprove this mutation.
    */
-   public boolean negatesTruth(NaturalLogicRelation lexicalRelation) {
-    return projectLexicalRelation(lexicalRelation).negatesTruth;
-  }
-
-  /**
-   * @see Polarity#maintainsTruth(NaturalLogicRelation)
-   */
-  public boolean maintainsFalsehood(NaturalLogicRelation lexicalRelation) {
-    return projectLexicalRelation(lexicalRelation).maintainsFalsehood;
-  }
-
-  /**
-   * @see Polarity#negatesTruth(NaturalLogicRelation)
-   */
-  public boolean negatesFalsehood(NaturalLogicRelation lexicalRelation) {
-    return projectLexicalRelation(lexicalRelation).negatesFalsehood;
+   public boolean introducesNegation(NaturalLogicRelation lexicalRelation) {
+    return projectLexicalRelation(lexicalRelation).isNegated;
   }
 
   /**

@@ -23,15 +23,16 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.util.IntPair;
+import edu.stanford.nlp.util.PropertiesUtils;
 
 public class HybridCorefMentionFinder extends CorefMentionFinder {
-
+  
   public MentionDetectionClassifier mdClassifier = null;
 
   public HybridCorefMentionFinder(HeadFinder headFinder, Properties props) throws ClassNotFoundException, IOException {
     this.headFinder = headFinder;
     this.lang = CorefProperties.getLanguage(props);
-    mdClassifier = (CorefProperties.isMentionDetectionTraining(props))?
+    mdClassifier = (CorefProperties.isMentionDetectionTraining(props))? 
         null : IOUtils.readObjectFromFile(CorefProperties.getPathModel(props, "md"));
   }
 
@@ -42,7 +43,7 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
     List<Set<IntPair>> mentionSpanSetList = Generics.newArrayList();
     List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
 //    boolean useNewMD = Boolean.parseBoolean(props.getProperty("useNewMD", "false"));
-
+    
     // extract premarked mentions, NP/PRP, named entity, enumerations
     for (CoreMap s : sentences) {
       List<Mention> mentions = new ArrayList<Mention>();
@@ -54,20 +55,20 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
       extractNamedEntityMentions(s, mentions, mentionSpanSet, namedEntitySpanSet);
       extractNPorPRP(s, mentions, mentionSpanSet, namedEntitySpanSet);
       extractEnumerations(s, mentions, mentionSpanSet, namedEntitySpanSet);
-
+     
       addNamedEntityStrings(s, neStrings, namedEntitySpanSet);
       mentionSpanSetList.add(mentionSpanSet);
     }
     extractNamedEntityModifiers(sentences, mentionSpanSetList, predictedMentions, neStrings);
-
+    
     // find head
     for(int i=0 ; i<sentences.size() ; i++ ) {
       findHead(sentences.get(i), predictedMentions.get(i));
     }
-
+    
     // mention selection based on document-wise info
     removeSpuriousMentions(doc, predictedMentions, dict, CorefProperties.removeNested(props), lang);
-
+    
     // if this is for MD training, skip classification
     if(!CorefProperties.isMentionDetectionTraining(props)) {
       mdClassifier.classifyMentions(predictedMentions, dict, props);
@@ -75,7 +76,7 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
 
     return predictedMentions;
   }
-
+  
   protected static void extractNamedEntityMentions(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     SemanticGraph basicDependency = s.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
@@ -118,45 +119,45 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
       }
     }
   }
-
+  
   /** Filter out all spurious mentions  */
   @Override
   public void removeSpuriousMentionsEn(Annotation doc, List<List<Mention>> predictedMentions, Dictionaries dict) {
-
+    
     List<CoreMap> sentences = doc.get(CoreAnnotations.SentencesAnnotation.class);
-
+    
     for(int i=0 ; i < predictedMentions.size() ; i++) {
       CoreMap s = sentences.get(i);
       List<Mention> mentions = predictedMentions.get(i);
-
+      
       List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
       Set<Mention> remove = Generics.newHashSet();
-
+      
       for(Mention m : mentions){
         String headPOS = m.headWord.get(CoreAnnotations.PartOfSpeechAnnotation.class);
-
+        
         // non word such as 'hmm'
         if(dict.nonWords.contains(m.headString)) remove.add(m);
-
+        
         // adjective form of nations
         // the [American] policy -> not mention
         // speak in [Japanese] -> mention
         // check if the mention is noun and the next word is not noun
         if (dict.isAdjectivalDemonym(m.spanToString())) {
-          if(!headPOS.startsWith("N")
+          if(!headPOS.startsWith("N") 
               || (m.endIndex < sent.size() && sent.get(m.endIndex).tag().startsWith("N")) ) {
             remove.add(m);
           }
         }
-
+        
         // stop list (e.g., U.S., there)
         if (inStopList(m)) remove.add(m);
       }
       mentions.removeAll(remove);
     }
   }
-
-  private static void extractNPorPRP(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
+  
+  public void extractNPorPRP(CoreMap s, List<Mention> mentions, Set<IntPair> mentionSpanSet, Set<IntPair> namedEntitySpanSet) {
     List<CoreLabel> sent = s.get(CoreAnnotations.TokensAnnotation.class);
     Tree tree = s.get(TreeCoreAnnotations.TreeAnnotation.class);
     tree.indexLeaves();
@@ -178,11 +179,11 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
         Mention m = new Mention(dummyMentionId, beginIdx, endIdx, sent, basicDependency, collapsedDependency, new ArrayList<CoreLabel>(sent.subList(beginIdx, endIdx)), t);
         mentions.add(m);
         mentionSpanSet.add(mSpan);
-
+        
         if(m.originalSpan.size() > 1) {
           boolean isNE = true;
           for(CoreLabel cl : m.originalSpan) {
-            if(!cl.tag().startsWith("NNP")) isNE = false;
+            if(!cl.tag().startsWith("NNP")) isNE = false; 
           }
           if(isNE) {
             namedEntitySpanSet.add(mSpan);
@@ -191,5 +192,4 @@ public class HybridCorefMentionFinder extends CorefMentionFinder {
       }
     }
   }
-
 }

@@ -233,9 +233,7 @@ public class CoordinationTransformer implements TreeTransformer {
                           // match against "What is on the test?"
                           " !< (PP $- =verb) " +
                           // match against "is there"
-                          " !<, (/^VB/ < " + EnglishPatterns.copularWordRegex + " $+ (NP < (EX < there)))" +
-                          // match against "good at"
-                          " !< (ADJP < (PP <: IN|TO))))");
+                          " !<, (/^VB/ < " + EnglishPatterns.copularWordRegex + " $+ (NP < (EX < there)))))");
 
   private static TsurgeonPattern flattenSQTsurgeon = Tsurgeon.parseOperation("excise sq sq");
 

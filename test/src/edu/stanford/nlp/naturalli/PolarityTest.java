@@ -99,21 +99,21 @@ public class PolarityTest {
 
   @Test
   public void multiplicativeTruth() {
-    assertEquals(true, multiplicative.maintainsTruth(NaturalLogicRelation.EQUIVALENT));
-    assertEquals(true, multiplicative.maintainsTruth(NaturalLogicRelation.FORWARD_ENTAILMENT));
-    assertEquals(false, multiplicative.maintainsTruth(NaturalLogicRelation.REVERSE_ENTAILMENT));
-    assertEquals(false, multiplicative.maintainsTruth(NaturalLogicRelation.NEGATION));
-    assertEquals(false, multiplicative.maintainsTruth(NaturalLogicRelation.ALTERNATION));
-    assertEquals(false, multiplicative.maintainsTruth(NaturalLogicRelation.COVER));
-    assertEquals(false, multiplicative.maintainsTruth(NaturalLogicRelation.INDEPENDENCE));
+    assertEquals(true, multiplicative.maintainsEntailment(NaturalLogicRelation.EQUIVALENT));
+    assertEquals(true, multiplicative.maintainsEntailment(NaturalLogicRelation.FORWARD_ENTAILMENT));
+    assertEquals(false, multiplicative.maintainsEntailment(NaturalLogicRelation.REVERSE_ENTAILMENT));
+    assertEquals(false, multiplicative.maintainsEntailment(NaturalLogicRelation.NEGATION));
+    assertEquals(false, multiplicative.maintainsEntailment(NaturalLogicRelation.ALTERNATION));
+    assertEquals(false, multiplicative.maintainsEntailment(NaturalLogicRelation.COVER));
+    assertEquals(false, multiplicative.maintainsEntailment(NaturalLogicRelation.INDEPENDENCE));
 
-    assertEquals(false, multiplicative.negatesTruth(NaturalLogicRelation.EQUIVALENT));
-    assertEquals(false, multiplicative.negatesTruth(NaturalLogicRelation.FORWARD_ENTAILMENT));
-    assertEquals(false, multiplicative.negatesTruth(NaturalLogicRelation.REVERSE_ENTAILMENT));
-    assertEquals(true, multiplicative.negatesTruth(NaturalLogicRelation.NEGATION));
-    assertEquals(true, multiplicative.negatesTruth(NaturalLogicRelation.ALTERNATION));
-    assertEquals(false, multiplicative.negatesTruth(NaturalLogicRelation.COVER));
-    assertEquals(false, multiplicative.negatesTruth(NaturalLogicRelation.INDEPENDENCE));
+    assertEquals(false, multiplicative.introducesNegation(NaturalLogicRelation.EQUIVALENT));
+    assertEquals(false, multiplicative.introducesNegation(NaturalLogicRelation.FORWARD_ENTAILMENT));
+    assertEquals(false, multiplicative.introducesNegation(NaturalLogicRelation.REVERSE_ENTAILMENT));
+    assertEquals(true, multiplicative.introducesNegation(NaturalLogicRelation.NEGATION));
+    assertEquals(true, multiplicative.introducesNegation(NaturalLogicRelation.ALTERNATION));
+    assertEquals(false, multiplicative.introducesNegation(NaturalLogicRelation.COVER));
+    assertEquals(false, multiplicative.introducesNegation(NaturalLogicRelation.INDEPENDENCE));
   }
 
   @Test
