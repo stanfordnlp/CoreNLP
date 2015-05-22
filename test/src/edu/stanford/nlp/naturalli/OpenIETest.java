@@ -76,7 +76,7 @@ public class OpenIETest {
       i += 1;
     }
     // Run extractor
-    ClauseSplitterSearchProblem problem = new ClauseSplitterSearchProblem(tree);
+    ClauseSplitterSearchProblem problem = new ClauseSplitterSearchProblem(tree, true);
     Set<String> clauses = new HashSet<>();
     problem.search(
         triple -> {

@@ -1,5 +1,9 @@
 package edu.stanford.nlp.pipeline;
 
+import edu.stanford.nlp.parser.nndep.DependencyParser;
+
+import java.lang.reflect.Field;
+
 /**
  * Default model paths for StanfordCoreNLP
  * All these paths point to files distributed with the model jar file (stanford-corenlp-models-*.jar)
@@ -9,6 +13,9 @@ public class DefaultPaths {
   public static final String DEFAULT_POS_MODEL = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger";
 
   public static final String DEFAULT_PARSER_MODEL = "edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz";
+
+  @SuppressWarnings("UnusedDeclaration") // Used in a script
+  public static final String DEFAULT_DEPENDENCY_PARSER_MODEL = DependencyParser.DEFAULT_MODEL;
 
   public static final String DEFAULT_NER_THREECLASS_MODEL = "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz";
   public static final String DEFAULT_NER_CONLL_MODEL = "edu/stanford/nlp/models/ner/english.conll.4class.distsim.crf.ser.gz";
@@ -42,8 +49,23 @@ public class DefaultPaths {
   
   public static final String DEFAULT_SUP_RELATION_EX_RELATION_MODEL = "edu/stanford/nlp/models/supervised_relation_extractor/roth_relation_model_pipelineNER.ser";
 
+  public static final String DEFAULT_NATURALLI_AFFINITIES = "edu/stanford/nlp/models/naturalli/affinities";  // If you change this key, also change bin/mkopenie.sh
+  public static final String DEFAULT_OPENIE_CLAUSE_SEARCHER = "edu/stanford/nlp/models/naturalli/clauseSearcherModel.ser.gz";  // If you change this key, also change bin/mkopenie.sh
+
 
   private DefaultPaths() {
+  }
+
+  /**
+   * Go through all of the paths via reflection, and print them out in a TSV format.
+   * This is useful for command line scripts.
+   *
+   * @param args Ignored.
+   */
+  public static void main(String[] args) throws IllegalAccessException {
+    for (Field field : DefaultPaths.class.getFields()) {
+      System.out.println(field.getName() + "\t" + field.get(null));
+    }
   }
   
 }

@@ -1,5 +1,7 @@
-package edu.stanford.nlp.ie.util;
+package edu.stanford.nlp.naturalli;
 
+import edu.stanford.nlp.ie.util.IETestUtils;
+import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.international.Language;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -12,24 +14,23 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * A test of various functions in {@link RelationTriple}.
+ * A test of various functions in {@link edu.stanford.nlp.ie.util.RelationTriple}.
  *
  * @author Gabor Angeli
  */
-public class RelationTripleTest extends TestCase {
-
-  protected CoreLabel mkWord(String gloss, int index) {
-    CoreLabel w = new CoreLabel();
-    w.setWord(gloss);
-    w.setValue(gloss);
-    if (index >= 0) {
-      w.setIndex(index);
-    }
-    return w;
-  }
+public class RelationTripleSegmenterTest extends TestCase {
 
   protected Optional<RelationTriple> mkExtraction(String conll) {
-    return mkExtraction(conll, 0);
+    return mkExtraction(conll, 0, false);
+  }
+
+  protected Optional<RelationTriple> mkExtraction(String conll, boolean allNominals) {
+    return mkExtraction(conll, 0, allNominals);
+  }
+
+  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex) {
+    return mkExtraction(conll, listIndex, false);
+
   }
 
   /**
@@ -38,7 +39,7 @@ public class RelationTripleTest extends TestCase {
    *   word_index  word  parent_index  incoming_relation
    * </pre>
    */
-  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex) {
+  protected Optional<RelationTriple> mkExtraction(String conll, int listIndex, boolean allNominals) {
     List<CoreLabel> sentence = new ArrayList<>();
     SemanticGraph tree = new SemanticGraph();
     for (String line : conll.split("\n")) {
@@ -46,7 +47,7 @@ public class RelationTripleTest extends TestCase {
       String[] fields = line.trim().split("\\s+");
       int index = Integer.parseInt(fields[0]);
       String word = fields[1];
-      CoreLabel label = mkWord(word, index);
+      CoreLabel label = IETestUtils.mkWord(word, index);
       sentence.add(label);
       if (fields[2].equals("0")) {
         tree.addRoot(new IndexedWord(label));
@@ -80,11 +81,11 @@ public class RelationTripleTest extends TestCase {
       i += 1;
     }
     // Run extractor
-    Optional<RelationTriple> segmented = RelationTriple.segment(tree, Optional.empty());
+    Optional<RelationTriple> segmented = new RelationTripleSegmenter(allNominals).segment(tree, Optional.empty());
     if (segmented.isPresent() && listIndex == 0) {
       return segmented;
     }
-    List<RelationTriple> extracted = RelationTriple.extract(tree, sentence);
+    List<RelationTriple> extracted = new RelationTripleSegmenter(allNominals).extract(tree, sentence);
     if (extracted.size() > listIndex) {
       return Optional.of(extracted.get(listIndex - (segmented.isPresent() ? 1 : 0)));
     }
@@ -93,31 +94,31 @@ public class RelationTripleTest extends TestCase {
 
   protected RelationTriple blueCatsPlayWithYarnNoIndices() {
     List<CoreLabel> sentence = new ArrayList<>();
-    sentence.add(mkWord("blue", -1));
-    sentence.add(mkWord("cats", -1));
-    sentence.add(mkWord("play", -1));
-    sentence.add(mkWord("with", -1));
-    sentence.add(mkWord("yarn", -1));
+    sentence.add(IETestUtils.mkWord("blue", -1));
+    sentence.add(IETestUtils.mkWord("cats", -1));
+    sentence.add(IETestUtils.mkWord("play", -1));
+    sentence.add(IETestUtils.mkWord("with", -1));
+    sentence.add(IETestUtils.mkWord("yarn", -1));
     return new RelationTriple(sentence.subList(0, 2), sentence.subList(2, 4), sentence.subList(4, 5));
   }
 
   protected RelationTriple blueCatsPlayWithYarn() {
     List<CoreLabel> sentence = new ArrayList<>();
-    sentence.add(mkWord("blue", 0));
-    sentence.add(mkWord("cats", 1));
-    sentence.add(mkWord("play", 2));
-    sentence.add(mkWord("with", 3));
-    sentence.add(mkWord("yarn", 4));
+    sentence.add(IETestUtils.mkWord("blue", 0));
+    sentence.add(IETestUtils.mkWord("cats", 1));
+    sentence.add(IETestUtils.mkWord("play", 2));
+    sentence.add(IETestUtils.mkWord("with", 3));
+    sentence.add(IETestUtils.mkWord("yarn", 4));
     return new RelationTriple(sentence.subList(0, 2), sentence.subList(2, 4), sentence.subList(4, 5));
   }
 
   protected RelationTriple yarnBlueCatsPlayWith() {
     List<CoreLabel> sentence = new ArrayList<>();
-    sentence.add(mkWord("yarn", 0));
-    sentence.add(mkWord("blue", 1));
-    sentence.add(mkWord("cats", 2));
-    sentence.add(mkWord("play", 3));
-    sentence.add(mkWord("with", 4));
+    sentence.add(IETestUtils.mkWord("yarn", 0));
+    sentence.add(IETestUtils.mkWord("blue", 1));
+    sentence.add(IETestUtils.mkWord("cats", 2));
+    sentence.add(IETestUtils.mkWord("play", 3));
+    sentence.add(IETestUtils.mkWord("with", 4));
     return new RelationTriple(sentence.subList(1, 3), sentence.subList(3, 5), sentence.subList(0, 1));
   }
 
@@ -125,31 +126,31 @@ public class RelationTripleTest extends TestCase {
 
   public void testToSentenceNoIndices() {
     assertEquals(new ArrayList<CoreLabel>(){{
-      add(mkWord("blue", -1));
-      add(mkWord("cats", -1));
-      add(mkWord("play", -1));
-      add(mkWord("with", -1));
-      add(mkWord("yarn", -1));
+      add(IETestUtils.mkWord("blue", -1));
+      add(IETestUtils.mkWord("cats", -1));
+      add(IETestUtils.mkWord("play", -1));
+      add(IETestUtils.mkWord("with", -1));
+      add(IETestUtils.mkWord("yarn", -1));
     }}, blueCatsPlayWithYarnNoIndices().asSentence());
   }
 
   public void testToSentenceInOrder() {
     assertEquals(new ArrayList<CoreLabel>(){{
-      add(mkWord("blue", 0));
-      add(mkWord("cats", 1));
-      add(mkWord("play", 2));
-      add(mkWord("with", 3));
-      add(mkWord("yarn", 4));
+      add(IETestUtils.mkWord("blue", 0));
+      add(IETestUtils.mkWord("cats", 1));
+      add(IETestUtils.mkWord("play", 2));
+      add(IETestUtils.mkWord("with", 3));
+      add(IETestUtils.mkWord("yarn", 4));
     }}, blueCatsPlayWithYarn().asSentence());
   }
 
   public void testToSentenceOutOfOrder() {
     assertEquals(new ArrayList<CoreLabel>(){{
-      add(mkWord("yarn", 0));
-      add(mkWord("blue", 1));
-      add(mkWord("cats", 2));
-      add(mkWord("play", 3));
-      add(mkWord("with", 4));
+      add(IETestUtils.mkWord("yarn", 0));
+      add(IETestUtils.mkWord("blue", 1));
+      add(IETestUtils.mkWord("cats", 2));
+      add(IETestUtils.mkWord("play", 3));
+      add(IETestUtils.mkWord("with", 4));
     }}, yarnBlueCatsPlayWith().asSentence());
   }
 
@@ -217,6 +218,17 @@ public class RelationTripleTest extends TestCase {
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tcats\tare\tcute", extraction.get().toString());
+  }
+
+  public void testPropagateCSubj() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\ttruffles\t2\tnsubj\n" +
+        "2\tpicked\t4\tcsubj\n" +
+        "3\tare\t4\tcop\n" +
+        "4\ttasty\t0\troot\n"
+    );
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\ttruffles picked\tare\ttasty", extraction.get().toString());
   }
 
   public void testHeWasInaugurated() {
@@ -324,9 +336,9 @@ public class RelationTripleTest extends TestCase {
 
   public void testApposAsSubj() {
     Optional<RelationTriple> extraction = mkExtraction(
-        "1\tDurin\t0\troot\n" +
-        "2\tson\t1\tappos\n" +
-        "3\tThorin\t2\tnmod:of\n"
+        "1\tDurin\t0\troot\tNNP\n" +
+        "2\tson\t1\tappos\tNN\n" +
+        "3\tThorin\t2\tnmod:of\tNNP\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tDurin\tson of\tThorin", extraction.get().toString());
@@ -413,12 +425,39 @@ public class RelationTripleTest extends TestCase {
   public void testThereAre() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tthere\t2\texpl\n" +
-        "2\tare\t0\troot\tVBG\tO\tbe\n" +
+        "2\tare\t0\troot\tVBP\tO\tbe\n" +
+        "3\tdogs\t2\tnsubj\tNN\n" +
+        "4\theaven\t3\tnmod:in\tNN\n",
+    true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tdogs\tis in\theaven", extraction.get().toString());
+  }
+
+  public void testThereAreVBing() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tthere\t2\texpl\n" +
+        "2\tare\t0\troot\tVBP\tO\tbe\n" +
         "3\tdogs\t2\tnsubj\n" +
-        "4\theaven\t3\tnmod:in\n"
+        "4\tsitting\t3\tacl\n" +
+        "5\theaven\t4\tnmod:in\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
-    assertEquals("1.0\tdogs\tare in\theaven", extraction.get().toString());
+    assertEquals("1.0\tdogs\tsitting in\theaven", extraction.get().toString());
+  }
+
+  public void testDogsInheaven() {
+    Optional<RelationTriple> extraction = mkExtraction(
+        "1\tdogs\t0\troot\tNN\n" +
+        "2\theaven\t1\tnmod:in\tNN\n",
+    true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tdogs\tis in\theaven", extraction.get().toString());
+
+    extraction = mkExtraction(
+        "1\tdogs\t0\troot\tNN\n" +
+        "2\theaven\t1\tnmod:of\tNN\n",
+    true);
+    assertFalse(extraction.isPresent());
   }
 
   public void testAdvObject() {
@@ -635,5 +674,59 @@ public class RelationTripleTest extends TestCase {
     extraction = mkExtraction(conll, 2);
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tRometty\tis CEO of\tIBM", extraction.get().toString());
+  }
+
+  public void testAllNominals() {
+    String conll =
+        "1\tfierce\t2\tamod\tJJ\n" +
+        "2\tlions\t0\troot\tNN\n" +
+        "3\tin\t4\tcase\tIN\n" +
+        "4\tNarnia\t2\tnmod:in\tNNP\n";
+    // Positive case
+    Optional<RelationTriple> extraction = mkExtraction(conll, 0, true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tlions\tis\tfierce", extraction.get().toString());
+    extraction = mkExtraction(conll, 1, true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tlions\tis in\tNarnia", extraction.get().toString());
+    // Negative case
+    assertFalse(mkExtraction(conll, false).isPresent());
+  }
+
+  public void testAcl() {
+    String conll =
+        "1\tman\t0\troot\tNN\n" +
+        "2\tsitting\t1\tacl\tVBG\n" +
+        "3\tin\t4\tcase\tIN\n" +
+        "4\ttree\t2\tnmod:in\tNN\n";
+    // Positive case
+    Optional<RelationTriple> extraction = mkExtraction(conll, true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tman\tsitting in\ttree", extraction.get().toString());
+  }
+
+  public void testAclWithAdverb() {
+    String conll =
+        "1\tman\t0\troot\tNN\n" +
+        "2\tsitting\t1\tacl\tVBG\n" +
+        "3\tvery\t2\tadvmod\tRB\n" +
+        "4\tquietly\t2\tadvmod\tRB\n" +
+        "5\tin\t6\tcase\tIN\n" +
+        "6\ttree\t2\tnmod:in\tNN\n";
+    // Positive case
+    Optional<RelationTriple> extraction = mkExtraction(conll, true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tman\tsitting very quietly in\ttree", extraction.get().toString());
+  }
+
+  public void testAclNoPP() {
+    String conll =
+        "1\tman\t0\troot\tNN\n" +
+        "2\triding\t1\tacl\tVBG\n" +
+        "3\thorse\t2\tdobj\tNN\n";
+    // Positive case
+    Optional<RelationTriple> extraction = mkExtraction(conll, true);
+    assertTrue("No extraction for sentence!", extraction.isPresent());
+    assertEquals("1.0\tman\triding\thorse", extraction.get().toString());
   }
 }

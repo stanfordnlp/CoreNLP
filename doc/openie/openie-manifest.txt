@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Created-By: Stanford JavaNLP
+Main-class: edu.stanford.nlp.naturalli.OpenIE

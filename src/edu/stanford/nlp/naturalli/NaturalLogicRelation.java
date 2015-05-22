@@ -1,5 +1,7 @@
 package edu.stanford.nlp.naturalli;
 
+import edu.stanford.nlp.util.Trilean;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,21 +25,48 @@ import java.util.Map;
  */
 @SuppressWarnings("UnusedDeclaration")
 public enum NaturalLogicRelation {
-  EQUIVALENT(0, true, false),
-  FORWARD_ENTAILMENT(1, true, false),
-  REVERSE_ENTAILMENT(2, false, false),
-  NEGATION(3, false, true),
-  ALTERNATION(4, false, true),
-  COVER(5, false, false),
-  INDEPENDENCE(6, false, false), ;
+  EQUIVALENT         (0, true,  false, true,  false),
+  FORWARD_ENTAILMENT (1, true,  false, false, false),
+  REVERSE_ENTAILMENT (2, false, false, true,  false),
+  NEGATION           (3, false, true,  false, true),
+  ALTERNATION        (4, false, true,  false, false),
+  COVER              (5, false, false, false, true),
+  INDEPENDENCE       (6, false, false, false, false),
+  ;
 
+  /**
+   * A fixed index for this relation, so that it can be serialized more efficiently.
+   * DO NOT CHANGE THIS INDEX or you will break existing serialization, and probably a bunch of other stuff too.
+   * Otherwise, the index is arbitrary.
+   */
   public final int fixedIndex;
-  public final boolean isEntailed, isNegated;
+  /**
+   * Determines whether this relation maintains the truth of a fact in a true context.
+   * So, if the premise is true, and this relation is applied, the conclusion remains true.
+   */
+  public final boolean maintainsTruth;
+  /**
+   * Determines whether this relation negates the truth of a fact in a true context.
+   * So, if the premise is true, and this relation is applied, the conclusion becomes false.
+   */
+  public final boolean negatesTruth;
+  /**
+   * Determines whether this relation maintains the falsehood of a false fact.
+   * So, if the premise is false, and this relation is applied, the conclusion remains false.
+   */
+  public final boolean maintainsFalsehood;
+  /**
+   * Determines whether this relation negates the truth of a fact in a false context.
+   * So, if the premise is false, and this relation is applied, the conclusion becomes true.
+   */
+  public final boolean negatesFalsehood;
 
-  NaturalLogicRelation(int fixedIndex, boolean isEntailed, boolean isNegated) {
+  NaturalLogicRelation(int fixedIndex, boolean maintainsTruth, boolean negatesTruth, boolean maintainsFalsehood, boolean negatesFalsehood) {
     this.fixedIndex = fixedIndex;
-    this.isEntailed = isEntailed;
-    this.isNegated = isNegated;
+    this.maintainsTruth = maintainsTruth;
+    this.negatesTruth = negatesTruth;
+    this.maintainsFalsehood = maintainsFalsehood;
+    this.negatesFalsehood = negatesFalsehood;
   }
 
   protected static NaturalLogicRelation byFixedIndex(int index) {
@@ -140,6 +169,34 @@ public enum NaturalLogicRelation {
     throw new IllegalStateException("[should be impossible]: Incomplete join table for " + this + " joined with " + other);
   }
 
+  /**
+   * Implements the finite state automata of composing the truth value of a sentence with a natural logic relation being
+   * applied.
+   * @param initialTruthValue The truth value of the premise (the original sentence).
+   * @return The truth value of the consequent -- that is, the sentence once it's been modified with this relation.
+   *         A value of {@link Trilean#UNKNOWN} indicates that natural logic cannot either confirm or disprove the truth
+   *         of the consequent.
+   */
+  public Trilean applyToTruthValue(boolean initialTruthValue) {
+    if (initialTruthValue) {
+      if (maintainsTruth) {
+        return Trilean.TRUE;
+      } else if (negatesTruth) {
+        return Trilean.FALSE;
+      } else {
+        return Trilean.UNKNOWN;
+      }
+    } else {
+      if (maintainsFalsehood) {
+        return Trilean.FALSE;
+      } else if (negatesFalsehood) {
+        return Trilean.TRUE;
+      } else {
+        return Trilean.UNKNOWN;
+      }
+    }
+  }
+
   private static final Map<String, NaturalLogicRelation> insertArcToNaturalLogicRelation = Collections.unmodifiableMap(new HashMap<String, NaturalLogicRelation>() {{
     put("acomp", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("advcl", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
@@ -151,13 +208,13 @@ public enum NaturalLogicRelation {
     put("auxpass", NaturalLogicRelation.INDEPENDENCE);  // some cat adopts -/-> some cat got adopted
     put("ccomp", NaturalLogicRelation.INDEPENDENCE);  // interesting project here... "he said x" -> "x"?
     put("cc", NaturalLogicRelation.REVERSE_ENTAILMENT);  // match dep_conj
-    put("conj_and\\/or", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("conj_and", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("conj_both", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("conj_but", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("conj_nor", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
-    put("conj_or", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
-    put("conj_plus", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("conj:and\\/or", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj:and", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj:both", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj:but", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("conj:nor", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("conj:or", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("conj:plus", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
     put("conj", NaturalLogicRelation.REVERSE_ENTAILMENT);  // match dep_cc
     put("conj_x", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("cop", NaturalLogicRelation.INDEPENDENCE);  //
@@ -186,274 +243,141 @@ public enum NaturalLogicRelation {
     put("pcomp", NaturalLogicRelation.INDEPENDENCE);  // though, not so in collapsed dependencies
     put("pobj", NaturalLogicRelation.INDEPENDENCE);  // must delete whole preposition
     put("possessive", NaturalLogicRelation.INDEPENDENCE);  // see dep_poss
-    put("poss", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("poss", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
+    put("nmod:poss", NaturalLogicRelation.FORWARD_ENTAILMENT);  //
     put("preconj", NaturalLogicRelation.INDEPENDENCE);  // forbidden to see this
     put("predet", NaturalLogicRelation.INDEPENDENCE);  // forbidden to see this
-    put("prep_aboard", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_about", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_above", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_according_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_across_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_across", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_after", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_against", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_ahead_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_along", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_alongside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_alongside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_along_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_amid", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_among", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_anti", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_apart_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_around", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_as_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_as_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_aside_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_as_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_as_per", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_as", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_as_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_at", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_away_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_based_on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_because_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_before", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_behind", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_below", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_beneath", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_beside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_besides", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_between", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_beyond", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_but", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_by_means_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_by", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_aboard", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_about", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_above", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_according_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_across_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_across", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_after", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_against", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_ahead_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_along", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_alongside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_along_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_amid", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_among", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_anti", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_apart_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_around", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_as_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_as_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_aside_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_as_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_as_per", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_as", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_as_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_at", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_away_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_based_on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_because_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_before", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_behind", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_below", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_beneath", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_beside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_besides", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_between", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_beyond", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_but", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_by_means_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_by", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_close_by", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_close_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_compared_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_compared_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_concerning", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_considering", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_contrary_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_depending_on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_despite", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_down", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_due_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_during", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_except_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_excepting", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_except", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_excluding", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_exclusive_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_far_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_followed_by", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_following", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_in_accordance_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_in_addition_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_in_case_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_in_front_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_in_lieu_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_in_place_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_in", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_inside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_inside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_in_spite_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_instead_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_into", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_irrespective_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_like", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_close_by", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_close_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_minus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_near", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_near_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_next_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_off_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_off", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_compared_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_compared_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_on_account_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_on_behalf_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_concerning", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_considering", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_on_top_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_onto", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_contrary_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_opposite", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_out_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_outside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_outside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_over", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_owing_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_past", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_per", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_plus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_preliminary_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_preparatory_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_previous_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_prior_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_pursuant_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_regarding", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_regardless_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_round", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_save", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_since", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_subsequent_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_such_as", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_thanks_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_than", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_through", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_together_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_toward", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_towards", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_underneath", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_under", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_unlike", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_until", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_upon", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_up", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_versus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_via", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_within", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_without", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_with_regard_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_with_respect_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prepc_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_depending_on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_dep", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_despite", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_down", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_due_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_during", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_en", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_except_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_excepting", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_except", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_excluding", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_exclusive_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_followed_by", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_following", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_if", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_in_accordance_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_in_addition_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_in_case_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_including", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_in_front_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_in_lieu_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_in_place_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_in", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_inside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_inside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_in_spite_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_instead_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_into", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_irrespective_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_like", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_minus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_near", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_near_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_next_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_off_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_off", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_on_account_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_on_behalf_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_on_top_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_onto", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_opposite", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_out_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_out", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_outside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_outside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_over", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_owing_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_past", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_per", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_plus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_preliminary_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_preparatory_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_previous_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_prior_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_pursuant_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_regarding", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_regardless_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_round", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_save", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_since", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_subsequent_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_such_as", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_thanks_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_than", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_throughout", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_through", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_together_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_toward", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_towards", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_underneath", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_under", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_unlike", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_until", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_upon", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_up", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_versus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_via", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_vs.", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_whether", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_within", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_without", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_with_regard_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_with_respect_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
-    put("prep_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("case", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:aboard", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:about", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:above", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:according_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:across_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:across", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:after", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:against", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:ahead_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:along", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:alongside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:alongside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:along_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:amid", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:among", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:anti", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:apart_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:around", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:as_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:as_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:aside_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:as_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:as_per", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:as", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:as_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:at", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:away_from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:based_on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:because_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:before", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:behind", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:below", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:beneath", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:beside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:besides", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:between", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:beyond", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:but", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:by_means_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:by", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:depending_on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:dep", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:despite", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:down", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:due_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:during", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:en", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:except_for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:excepting", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:except", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:excluding", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:exclusive_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:followed_by", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:following", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:for", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:from", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:if", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:in_accordance_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:in_addition_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:in_case_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:including", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:in_front_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:in_lieu_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:in_place_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:in", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:inside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:inside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:in_spite_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:instead_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:into", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:irrespective_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:like", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:minus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:near", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:near_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:next_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:off_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:off", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:on_account_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:on_behalf_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:on", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:on_top_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:onto", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:opposite", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:out_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:out", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:outside_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:outside", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:over", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:owing_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:past", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:per", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:plus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:preliminary_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:preparatory_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:previous_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:prior_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:pursuant_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:regarding", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:regardless_of", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:round", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:save", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:since", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:subsequent_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:such_as", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:thanks_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:than", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:throughout", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:through", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:together_with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:toward", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:towards", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:underneath", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:under", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:unlike", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:until", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:upon", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:up", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:versus", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:via", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:vs.", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:whether", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:within", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:without", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:with_regard_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:with_respect_to", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
+    put("nmod:with", NaturalLogicRelation.REVERSE_ENTAILMENT);  //
     put("prt", NaturalLogicRelation.INDEPENDENCE);  //
     put("punct", NaturalLogicRelation.EQUIVALENT);  //
     put("purpcl", NaturalLogicRelation.REVERSE_ENTAILMENT);  // deprecated into advmod
@@ -488,9 +412,9 @@ public enum NaturalLogicRelation {
     if (!isSubject) {
       switch (dependencyLabel) {
         // 'or' in the object position behaves as and.
-        case "conj_or":
-        case "conj_nor":
-          return forDependencyInsertion("conj_and", false);
+        case "conj:or":
+        case "conj:nor":
+          return forDependencyInsertion("conj:and", false);
       }
     }
     NaturalLogicRelation rel = insertArcToNaturalLogicRelation.get(dependencyLabel.toLowerCase());
@@ -498,9 +422,9 @@ public enum NaturalLogicRelation {
       return rel;
     } else {
 //      System.err.println("Unknown dependency arc for NaturalLogicRelation: " + dependencyLabel);
-      if (dependencyLabel.startsWith("prep_")) {
+      if (dependencyLabel.startsWith("nmod:")) {
         return NaturalLogicRelation.REVERSE_ENTAILMENT;
-      } else if (dependencyLabel.startsWith("conj_")) {
+      } else if (dependencyLabel.startsWith("conj:")) {
         return NaturalLogicRelation.REVERSE_ENTAILMENT;
       } else {
         return NaturalLogicRelation.INDEPENDENCE;

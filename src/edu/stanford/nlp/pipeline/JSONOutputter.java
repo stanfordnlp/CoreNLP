@@ -12,6 +12,7 @@ import edu.stanford.nlp.time.TimeAnnotations;
 import edu.stanford.nlp.time.Timex;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations;
+import edu.stanford.nlp.trees.TreePrint;
 
 import java.io.*;
 import java.util.Arrays;
@@ -63,8 +64,13 @@ public class JSONOutputter extends AnnotationOutputter {
           l2.set("line", sentence.get(CoreAnnotations.LineNumberAnnotation.class));
           // (constituency tree)
           StringWriter treeStrWriter = new StringWriter();
-          options.constituentTreePrinter.printTree(sentence.get(TreeCoreAnnotations.TreeAnnotation.class), new PrintWriter(treeStrWriter, true));
-          l2.set("parse", treeStrWriter.toString());
+          TreePrint treePrinter = options.constituentTreePrinter;
+          if (treePrinter == AnnotationOutputter.DEFAULT_CONSTITUENT_TREE_PRINTER) {
+            // note the '==' -- we're overwriting the default, but only if it was not explicitly set otherwise
+            treePrinter = new TreePrint("oneline");
+          }
+          treePrinter.printTree(sentence.get(TreeCoreAnnotations.TreeAnnotation.class), new PrintWriter(treeStrWriter, true));
+          l2.set("parse", treeStrWriter.toString().trim());  // strip the trailing newline
           // (dependency trees)
           l2.set("basic-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class)));
           l2.set("collapsed-dependencies", buildDependencyTree(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class)));
@@ -80,7 +86,7 @@ public class JSONOutputter extends AnnotationOutputter {
 
           // (add tokens)
           if (sentence.get(CoreAnnotations.TokensAnnotation.class) != null) {
-            l2.set("tokens", doc.get(CoreAnnotations.TokensAnnotation.class).stream().map(token -> (Consumer<Writer>) (Writer l3) -> {
+            l2.set("tokens", sentence.get(CoreAnnotations.TokensAnnotation.class).stream().map(token -> (Consumer<Writer>) (Writer l3) -> {
               // Add a single token
               l3.set("index", token.index());
               l3.set("word", token.word());

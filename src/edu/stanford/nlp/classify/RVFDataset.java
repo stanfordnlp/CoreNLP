@@ -335,15 +335,33 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     System.arraycopy(labels, 0, trainLabels, 0, start);
     System.arraycopy(labels, end, trainLabels, start, size() - end);
 
-    GeneralDataset<L, F> dev = new RVFDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devValues);
-    GeneralDataset<L, F> train = new RVFDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainValues);
+    if (this instanceof WeightedRVFDataset<?,?>) {
+      float[] trainWeights = new float[trainSize];
+      float[] devWeights = new float[devSize];
 
-    return new Pair<GeneralDataset<L, F>, GeneralDataset<L, F>>(train, dev);
+      WeightedRVFDataset<L, F> w = (WeightedRVFDataset<L, F>)this;
+
+      System.arraycopy(w.weights, start, devWeights, 0, devSize);
+      System.arraycopy(w.weights, 0, trainWeights, 0, start);
+      System.arraycopy(w.weights, end, trainWeights, start, size()-end);
+
+      WeightedRVFDataset<L, F> dev = new WeightedRVFDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devValues, devWeights);
+      WeightedRVFDataset<L, F> train = new WeightedRVFDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainValues, trainWeights);
+
+      return new Pair<>(train, dev);
+    } else {
+
+      GeneralDataset<L, F> dev = new RVFDataset<L, F>(labelIndex, devLabels, featureIndex, devData, devValues);
+      GeneralDataset<L, F> train = new RVFDataset<L, F>(labelIndex, trainLabels, featureIndex, trainData, trainValues);
+
+      return new Pair<>(train, dev);
+    }
 
   }
 
   // TODO: Check that this does what we want for Datum other than RVFDatum
   @Override
+  // If you edit me, also take care of WeightedRVFDataset
   public void add(Datum<L, F> d) {
     if (d instanceof RVFDatum<?, ?>) {
       addLabel(d.label());
@@ -356,6 +374,7 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
     }
   }
 
+  // If you edit me, also take care of WeightedRVFDataset
   public void add(Datum<L, F> d, String src, String id) {
     if (d instanceof RVFDatum<?, ?>) {
       addLabel(d.label());
@@ -407,12 +426,13 @@ public class RVFDataset<L, F> extends GeneralDataset<L, F> { // implements Itera
 
   public void addAllWithSourcesAndIds(RVFDataset<L, F> data) {
     for(int index=0 ; index<data.size ; index++) {
-      add(data.getRVFDatumWithId(index), data.getRVFDatumSource(index), data.getRVFDatumId(index));
+      this.add(data.getRVFDatumWithId(index), data.getRVFDatumSource(index), data.getRVFDatumId(index));
     }
   }
+
   public void addAll(Iterable<? extends Datum<L,F>> data) {
     for (Datum<L, F> d : data) {
-      add(d);
+      this.add(d);
     }
   }
   private void addSourceAndId(String src, String id) {

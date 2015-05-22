@@ -444,7 +444,7 @@ public class AnnotatorFactories {
   //
   // Parser
   //
-  public static AnnotatorFactory parse(Properties properties, final AnnotatorImplementations annotatorImplementation) {
+  public static AnnotatorFactory parse(final Properties properties, final AnnotatorImplementations annotatorImplementation) {
     return new AnnotatorFactory(properties, annotatorImplementation) {
       private static final long serialVersionUID = 1L;
 
@@ -586,7 +586,6 @@ public class AnnotatorFactories {
     };
   }
 
-  /*  TODO(gabor) enable me!
   //
   // RelationTriples
   //
@@ -605,7 +604,6 @@ public class AnnotatorFactories {
       }
     };
   }
-  */
 
   //
   // Quote Extractor
