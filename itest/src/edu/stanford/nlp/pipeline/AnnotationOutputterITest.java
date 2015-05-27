@@ -44,7 +44,7 @@ public class AnnotationOutputterITest extends TestCase {
             "  \"sentences\": [\n" +
             "    {\n" +
             "      \"index\": \"0\",\n" +
-            "      \"parse\": \"(ROOT\\n  (NP (JJ Bad) (NN wolf)))\\n\\n\",\n" +
+            "      \"parse\": \"(ROOT (NP (JJ Bad) (NN wolf)))\",\n" +
             "      \"basic-dependencies\": [\n" +
             "        {\n" +
             "          \"dep\": \"ROOT\",\n" +

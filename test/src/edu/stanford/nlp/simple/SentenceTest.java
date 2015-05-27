@@ -1,8 +1,14 @@
 package edu.stanford.nlp.simple;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.util.CoreMap;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.Assert.*;
 
@@ -95,4 +101,47 @@ public class SentenceTest {
     assertEquals(10, sentences.get(1).sentenceTokenOffsetBegin());
     assertEquals(17, sentences.get(1).sentenceTokenOffsetEnd());
   }
+
+  @Test
+  public void testFromCoreMapCrashCheck() {
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties(){{
+      setProperty("annotators", "tokenize,ssplit");
+    }});
+    Annotation ann = new Annotation("This is a sentence.");
+    pipeline.annotate(ann);
+    CoreMap map = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+
+    new Sentence(map);
+  }
+
+  @Test
+  public void testFromCoreMapCorrectnessCheck() {
+    StanfordCoreNLP pipeline = new StanfordCoreNLP(new Properties(){{
+      setProperty("annotators", "tokenize,ssplit");
+    }});
+    Annotation ann = new Annotation("This is a sentence.");
+    pipeline.annotate(ann);
+    CoreMap map = ann.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+
+    Sentence s = new Sentence(map);
+    assertEquals(ann.get(CoreAnnotations.TextAnnotation.class), s.text());
+    assertEquals("This", s.word(0));
+    assertEquals(5, s.length());
+  }
+
+  @Test
+  public void testTokenizeWhitespaceSimple() {
+    Sentence s = new Sentence(new ArrayList<String>(){{add("foo"); add("bar");}});
+    assertEquals("foo", s.word(0));
+    assertEquals("bar", s.word(1));
+  }
+
+  @Test
+  public void testTokenizeWhitespaceWithSpaces() {
+    Sentence s = new Sentence(new ArrayList<String>(){{add("foo"); add("with whitespace"); add("baz");}});
+    assertEquals("foo", s.word(0));
+    assertEquals("with whitespace", s.word(1));
+    assertEquals("baz", s.word(2));
+  }
+
 }

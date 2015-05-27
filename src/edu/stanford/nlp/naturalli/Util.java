@@ -154,7 +154,7 @@ public class Util {
    * @return A list of extra edges, which are valid but were removed.
    */
   public static List<SemanticGraphEdge> cleanTree(SemanticGraph tree) {
-    assert !isCyclic(tree);
+//    assert !isCyclic(tree);
 
     // Clean nodes
     List<IndexedWord> toDelete = new ArrayList<>();

@@ -138,7 +138,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
    * Class that all "generic" annotations extend.
    * This allows you to read in arbitrary values from a file as features, for example.
    */
-  public static interface GenericAnnotation<T> extends CoreAnnotation<T> {  }
+  public interface GenericAnnotation<T> extends CoreAnnotation<T> {  }
   //Unchecked is below because eclipse can't handle the level of type inference if we correctly parametrize GenericAnnotation with String
   @SuppressWarnings("unchecked")
   public static final Map<String, Class<? extends GenericAnnotation>> genericKeys = Generics.newHashMap();
@@ -326,6 +326,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
     set(CoreAnnotations.TextAnnotation.class, word);
     // Pado feb 09: if you change the word, delete the lemma.
     // Gabor dec 2012: check if there was a real change -- this remove is actually rather expensive if it gets called a lot
+    // todo [cdm 2015]: probably no one now knows why this was even needed, but maybe it should just be removed. It's kind of weird.
     if (word != null && !word.equals(originalWord) && containsKey(CoreAnnotations.LemmaAnnotation.class)) {
       remove(CoreAnnotations.LemmaAnnotation.class);
     }
@@ -550,7 +551,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
 
   public enum OutputFormat {
     VALUE_INDEX, VALUE, VALUE_TAG, VALUE_TAG_INDEX, MAP, VALUE_MAP, VALUE_INDEX_MAP, WORD, WORD_INDEX, ALL
-  };
+  }
 
   public static final OutputFormat DEFAULT_FORMAT = OutputFormat.VALUE_INDEX;
 
@@ -657,7 +658,7 @@ public class CoreLabel extends ArrayCoreMap implements AbstractCoreLabel, HasCat
       break;
     }
     case WORD:
-      // TODO: we should unify word() and value()
+      // TODO: maybe we should unify word() and value(). [cdm 2015] I think not, rather maybe remove value and redefine category.
       buf.append(word());
       break;
     case WORD_INDEX: {
