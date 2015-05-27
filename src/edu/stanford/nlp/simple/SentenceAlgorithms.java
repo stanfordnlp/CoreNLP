@@ -80,15 +80,10 @@ public class SentenceAlgorithms {
     Consumer<Character> updateExpectation = coarseTag -> {
       if (coarseTag == 'N') {
         expectNextTag.clear();
-        expectNextTag.add('N');
         expectNextTag.add('X');
         expectNextLemma.clear();
         expectNextLemma.add("of");
         expectNextLemma.add("'s");
-      } else if (coarseTag == 'G') {
-        expectNextTag.clear();
-        expectNextTag.add('N');  // 'water freezing' is fishy, but 'freezing water' is ok.
-        expectNextLemma.clear();
       } else if (coarseTag == 'X') {
         expectNextTag.clear();
         expectNextTag.add('X');
@@ -133,14 +128,10 @@ public class SentenceAlgorithms {
       } else if (tag.startsWith("POS")) {
         coarseTag = 'Z';
       }
-      // (don't collapse 'ing' nouns)
-      if (coarseTag == 'N' && sentence.word(i).endsWith("ing")) {
-        coarseTag = 'G';
-      }
 
       // Transition
       if (spanBegin < 0 && !sentence.word(i).equals("%") &&
-          (coarseTag == 'N' || coarseTag == 'V' || coarseTag == 'J' || coarseTag == 'X' || coarseTag == 'G')) {
+          (coarseTag == 'N' || coarseTag == 'V' || coarseTag == 'J' || coarseTag == 'X')) {
         // Case: we were not in a span, but we hit a valid start tag.
         spanBegin = i;
         updateExpectation.accept(coarseTag);
@@ -180,7 +171,7 @@ public class SentenceAlgorithms {
           }
           // We may also have started a new span.
           // Check to see if we have started a new span.
-          if (coarseTag == 'N' || coarseTag == 'V' || coarseTag == 'J' || coarseTag == 'X' || coarseTag == 'G') {
+          if (coarseTag == 'N' || coarseTag == 'V' || coarseTag == 'J' || coarseTag == 'X') {
             spanBegin = i;
             updateExpectation.accept(coarseTag);
           } else {
@@ -254,52 +245,6 @@ public class SentenceAlgorithms {
 
     // Return
     return candidate;
-  }
-
-  /**
-   * Return all the spans of a sentence. So, for example, a sentence "a b c" would return:
-   * [a], [b], [c], [a b], [b c], [a b c].
-   *
-   * @param selector The function to apply to each token. For example, {@link Sentence#words}.
-   *                 For that example, you can use <code>allSpans(Sentence::words)</code>.
-   * @param maxLength The maximum length of the spans to extract. The default to extract all spans
-   *                  is to set this to <code>sentence.length()</code>.
-   * @param <E> The type of the element we are getting.
-   *
-   * @return A streaming iterable of spans for this sentence.
-   */
-  public <E> Iterable<List<E>> allSpans(Function<Sentence, List<E>> selector, int maxLength) {
-    return () -> new Iterator<List<E>>() {
-      private int length = maxLength > sentence.length() ? sentence.length() : maxLength;
-      private int start = 0;
-      @Override
-      public boolean hasNext() {
-        return length > 0;
-      }
-      @Override
-      public List<E> next() {
-        // Get the term
-        List<E> rtn = selector.apply(sentence).subList(start, start + length);
-        // Update the state
-        start += 1;
-        if (start + length > sentence.length()) {
-          length -= 1;
-          start = 0;
-        }
-        // Return
-        return rtn;
-      }
-    };
-  }
-
-  /** @see SentenceAlgorithms#allSpans(Function, int) */
-  public <E> Iterable<List<E>> allSpans(Function<Sentence, List<E>> selector) {
-    return allSpans(selector, sentence.length());
-  }
-
-  /** @see SentenceAlgorithms#allSpans(Function, int) */
-  public Iterable<List<String>> allSpans() {
-    return allSpans(Sentence::words, sentence.length());
   }
 
   /**

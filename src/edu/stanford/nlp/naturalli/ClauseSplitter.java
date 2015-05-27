@@ -17,7 +17,6 @@ import edu.stanford.nlp.util.*;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -34,7 +33,7 @@ import static edu.stanford.nlp.util.logging.Redwood.Util.*;
  *
  * @author Gabor Angeli
  */
-public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, ClauseSplitterSearchProblem> {
+public interface ClauseSplitter extends Function<SemanticGraph, ClauseSplitterSearchProblem> {
 
   public enum ClauseClassifierLabel {
     CLAUSE_SPLIT(2),
@@ -117,7 +116,7 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
 //      log(StringUtils.toString(tokens));
 //      log("  -> " + StringUtils.toString(tokens.subList(subjectSpan.start(), subjectSpan.end())) + " :: " + StringUtils.toString(tokens.subList(objectSpan.start(), objectSpan.end())));
       // Create raw clause searcher (no classifier)
-      ClauseSplitterSearchProblem problem = new ClauseSplitterSearchProblem(tree, true);
+      ClauseSplitterSearchProblem problem = new ClauseSplitterSearchProblem(tree);
 
       // Run search
       problem.search(fragmentAndScore -> {
@@ -251,7 +250,7 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
 
 
     // Step 5: return factory
-    return (tree, truth) -> new ClauseSplitterSearchProblem(tree, truth, Optional.of(fullClassifier), Optional.of(featurizer));
+    return tree -> new ClauseSplitterSearchProblem(tree, Optional.of(fullClassifier), Optional.of(featurizer));
   }
 
   /**
@@ -279,7 +278,7 @@ public interface ClauseSplitter extends BiFunction<SemanticGraph, Boolean, Claus
       long start = System.currentTimeMillis();
       System.err.print("Loading clause searcher from " + serializedModel + "...");
       Pair<Classifier<ClauseClassifierLabel,String>, Featurizer> data = IOUtils.readObjectFromURLOrClasspathOrFileSystem(serializedModel);
-      ClauseSplitter rtn =  (tree, truth) -> new ClauseSplitterSearchProblem(tree, truth, Optional.of(data.first), Optional.of(data.second));
+      ClauseSplitter rtn =  tree -> new ClauseSplitterSearchProblem(tree, Optional.of(data.first), Optional.of(data.second));
       System.err.println("done [" + Redwood.formatTimeDifference(System.currentTimeMillis() - start) + "]");
       return rtn;
     } catch (ClassNotFoundException e) {

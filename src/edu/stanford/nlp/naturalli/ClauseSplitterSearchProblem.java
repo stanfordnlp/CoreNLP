@@ -75,20 +75,9 @@ public class ClauseSplitterSearchProblem {
   }});
 
   /**
-   * A set of words which indicate that the complement clause is not factual, or at least not necessarily factual.
-   */
-  protected static final Set<String> INDIRECT_SPEECH_LEMMAS = Collections.unmodifiableSet(new HashSet<String>(){{
-    add("report"); add("say"); add("told"); add("claim"); add("assert"); add("think"); add("believe"); add("suppose");
-  }});
-
-  /**
    * The tree to search over.
    */
   public final SemanticGraph tree;
-  /**
-   * The assumed truth of the original clause.
-   */
-  public final boolean assumedTruth;
   /**
    * The length of the sentence, as determined from the tree.
    */
@@ -231,17 +220,15 @@ public class ClauseSplitterSearchProblem {
    * constructor.
    *
    * @param tree               The dependency tree to search over.
-   * @param assumedTruth       The assumed truth of the tree (relevant for natural logic inference). If in doubt, pass in true.
    * @param isClauseClassifier The classifier for whether a given dependency arc should be a new clause. If this is not given, all arcs are treated as clause separators.
    * @param featurizer         The featurizer for the classifier. If no featurizer is given, one should be given in {@link ClauseSplitterSearchProblem#search(java.util.function.Predicate, Classifier, Map, java.util.function.Function, int)}, or else the classifier will be useless.
    * @see ClauseSplitter#load(String)
    */
-  protected ClauseSplitterSearchProblem(SemanticGraph tree, boolean assumedTruth,
+  protected ClauseSplitterSearchProblem(SemanticGraph tree,
                                         Optional<Classifier<ClauseSplitter.ClauseClassifierLabel, String>> isClauseClassifier,
                                         Optional<Function<Triple<ClauseSplitterSearchProblem.State, ClauseSplitterSearchProblem.Action, ClauseSplitterSearchProblem.State>, Counter<String>>> featurizer
   ) {
     this.tree = new SemanticGraph(tree);
-    this.assumedTruth = assumedTruth;
     this.isClauseClassifier = isClauseClassifier;
     this.featurizer = featurizer;
     // Index edges
@@ -268,10 +255,9 @@ public class ClauseSplitterSearchProblem {
    * However, it is very useful for training time.
    *
    * @param tree The dependency tree to search over.
-   * @param assumedTruth The truth of the premise. Almost always True.
    */
-  public ClauseSplitterSearchProblem(SemanticGraph tree, boolean assumedTruth) {
-    this(tree, assumedTruth, Optional.empty(), Optional.empty());
+  public ClauseSplitterSearchProblem(SemanticGraph tree) {
+    this(tree, Optional.empty(), Optional.empty());
   }
 
   /**
@@ -281,7 +267,8 @@ public class ClauseSplitterSearchProblem {
    * @param tree The tree to split a clause from.
    * @param toKeep The edge representing the clause to keep.
    */
-  static void splitToChildOfEdge(SemanticGraph tree, SemanticGraphEdge toKeep) {
+  @SuppressWarnings("unchecked")
+  private void simpleClause(SemanticGraph tree, SemanticGraphEdge toKeep) {
     Queue<IndexedWord> fringe = new LinkedList<>();
     List<IndexedWord> nodesToRemove = new ArrayList<>();
     // Find nodes to remove
@@ -308,20 +295,6 @@ public class ClauseSplitterSearchProblem {
     nodesToRemove.forEach(tree::removeVertex);
     // Set new root
     tree.setRoot(toKeep.getDependent());
-
-  }
-
-  /**
-   * The basic method for splitting off a clause of a tree.
-   * This modifies the tree in place.
-   * This method addtionally follows ref edges.
-   *
-   * @param tree The tree to split a clause from.
-   * @param toKeep The edge representing the clause to keep.
-   */
-  @SuppressWarnings("unchecked")
-  private void simpleClause(SemanticGraph tree, SemanticGraphEdge toKeep) {
-    splitToChildOfEdge(tree, toKeep);
 
     // Follow 'ref' edges
     Map<IndexedWord, IndexedWord> refReplaceMap = new HashMap<>();
@@ -763,7 +736,7 @@ public class ClauseSplitterSearchProblem {
               }
             }
           }).accept(copy);
-          return new SentenceFragment(copy, assumedTruth, false);
+          return new SentenceFragment(copy, false);
         }))) {
           break;
         }
@@ -784,15 +757,6 @@ public class ClauseSplitterSearchProblem {
       // Iterate over children
       // For each outgoing edge...
       for (SemanticGraphEdge outgoingEdge : tree.outgoingEdgeIterable(rootWord)) {
-        // Prohibit indirect speech verbs from splitting off clauses
-        // (e.g., 'said', 'think')
-        // This fires if the governor is an indirect speech verb, and the outgoing edge is a ccomp
-        if ( outgoingEdge.getRelation().toString().equals("ccomp") &&
-             ( (outgoingEdge.getGovernor().lemma() != null && INDIRECT_SPEECH_LEMMAS.contains(outgoingEdge.getGovernor().lemma())) ||
-                INDIRECT_SPEECH_LEMMAS.contains(outgoingEdge.getGovernor().word())) ) {
-          continue;
-        }
-        // Get some variables
         List<String> forcedArcOrder = hardCodedSplits.get(outgoingEdge.getRelation().toString());
         boolean doneForcedArc = false;
         // For each action...

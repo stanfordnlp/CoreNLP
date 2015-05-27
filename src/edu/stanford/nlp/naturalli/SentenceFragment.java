@@ -27,21 +27,16 @@ public class SentenceFragment {
    */
   public final SemanticGraph parseTree;
   /**
-   * The assumed truth of this fragment; this is relevant for what entailments are supported
-   */
-  public final boolean assumedTruth;
-  /**
    * A score for this fragment. This is 1.0 by default.
    */
   public double score = 1.0;
 
-  public SentenceFragment(SemanticGraph tree, boolean assumedTruth, boolean copy) {
+  public SentenceFragment(SemanticGraph tree, boolean copy) {
     if (copy) {
       this.parseTree = new SemanticGraph(tree);
     } else {
       this.parseTree = tree;
     }
-    this.assumedTruth = assumedTruth;
     words.addAll(this.parseTree.vertexListSorted().stream().map(IndexedWord::backingLabel).collect(Collectors.toList()));
   }
 

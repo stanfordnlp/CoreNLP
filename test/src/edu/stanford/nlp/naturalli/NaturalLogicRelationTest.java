@@ -32,20 +32,20 @@ public class NaturalLogicRelationTest {
 
   @Test
   public void entailmentState() {
-    assertTrue(NaturalLogicRelation.EQUIVALENT.maintainsTruth);
-    assertTrue(NaturalLogicRelation.FORWARD_ENTAILMENT.maintainsTruth);
-    assertTrue(NaturalLogicRelation.NEGATION.negatesTruth);
-    assertTrue(NaturalLogicRelation.ALTERNATION.negatesTruth);
+    assertTrue(NaturalLogicRelation.EQUIVALENT.isEntailed);
+    assertTrue(NaturalLogicRelation.FORWARD_ENTAILMENT.isEntailed);
+    assertTrue(NaturalLogicRelation.NEGATION.isNegated);
+    assertTrue(NaturalLogicRelation.ALTERNATION.isNegated);
 
-    assertFalse(NaturalLogicRelation.EQUIVALENT.negatesTruth);
-    assertFalse(NaturalLogicRelation.FORWARD_ENTAILMENT.negatesTruth);
-    assertFalse(NaturalLogicRelation.NEGATION.maintainsTruth);
-    assertFalse(NaturalLogicRelation.ALTERNATION.maintainsTruth);
+    assertFalse(NaturalLogicRelation.EQUIVALENT.isNegated);
+    assertFalse(NaturalLogicRelation.FORWARD_ENTAILMENT.isNegated);
+    assertFalse(NaturalLogicRelation.NEGATION.isEntailed);
+    assertFalse(NaturalLogicRelation.ALTERNATION.isEntailed);
 
-    assertFalse(NaturalLogicRelation.COVER.maintainsTruth);
-    assertFalse(NaturalLogicRelation.COVER.negatesTruth);
-    assertFalse(NaturalLogicRelation.INDEPENDENCE.maintainsTruth);
-    assertFalse(NaturalLogicRelation.INDEPENDENCE.negatesTruth);
+    assertFalse(NaturalLogicRelation.COVER.isEntailed);
+    assertFalse(NaturalLogicRelation.COVER.isNegated);
+    assertFalse(NaturalLogicRelation.INDEPENDENCE.isEntailed);
+    assertFalse(NaturalLogicRelation.INDEPENDENCE.isNegated);
   }
 
   @Test
@@ -57,9 +57,9 @@ public class NaturalLogicRelationTest {
 
   @Test
   public void conjOrPeculiarities() {
-    assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj:or"));
-    assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj:or", true));
-    assertEquals(NaturalLogicRelation.REVERSE_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj:or", false));
+    assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj_or"));
+    assertEquals(NaturalLogicRelation.FORWARD_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj_or", true));
+    assertEquals(NaturalLogicRelation.REVERSE_ENTAILMENT, NaturalLogicRelation.forDependencyInsertion("conj_or", false));
   }
 
   @Test

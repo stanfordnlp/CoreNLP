@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
  * A simple OpenIE system based on valid Natural Logic deletions of a sentence.
  *
  * TODO(gabor): handle lists ("She was the sovereign of Austria, Hungary, Croatia, Bohemia, Mantua, Milan, Lodomeria and Galicia.")
- * TODO(gabor): handle things like "One example of chemical energy is that found in the food that we eat ."
  *
  * @author Gabor Angeli
  */
@@ -142,16 +141,16 @@ public class OpenIE implements Annotator {
   }
 
   @SuppressWarnings("unchecked")
-  public List<SentenceFragment> clausesInSentence(SemanticGraph tree, boolean assumedTruth) {
+  public List<SentenceFragment> clausesInSentence(SemanticGraph tree) {
     if (clauseSplitter.isPresent()) {
-      return clauseSplitter.get().apply(tree, assumedTruth).topClauses(splitterThreshold);
+      return clauseSplitter.get().apply(tree).topClauses(splitterThreshold);
     } else {
       return Collections.EMPTY_LIST;
     }
   }
 
   public List<SentenceFragment> clausesInSentence(CoreMap sentence) {
-    return clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), true);
+    return clausesInSentence(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class));
   }
 
   @SuppressWarnings("unchecked")
@@ -162,7 +161,7 @@ public class OpenIE implements Annotator {
       // Get the forward entailments
       List<SentenceFragment> list = new ArrayList<>();
       if (entailmentsPerSentence > 0) {
-        list.addAll(forwardEntailer.apply(clause.parseTree, true).search()
+        list.addAll(forwardEntailer.apply(clause.parseTree).search()
             .stream().map(x -> x.changeScore(x.score * clause.score)).collect(Collectors.toList()));
       }
       list.add(clause);
@@ -198,7 +197,7 @@ public class OpenIE implements Annotator {
           tree.addEdge(adj, pobj, GrammaticalRelation.valueOf(Language.English, prep), Double.NEGATIVE_INFINITY, false);
         }
         // (add tree)
-        adjFragments.add(new SentenceFragment(tree, clause.assumedTruth, false));
+        adjFragments.add(new SentenceFragment(tree, false));
       }
       list.addAll(adjFragments);
       return list;
@@ -255,7 +254,7 @@ public class OpenIE implements Annotator {
       sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, Collections.EMPTY_LIST);
       sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, Collections.EMPTY_LIST);
     } else {
-      SemanticGraph parse = sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class);
+      SemanticGraph parse = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       if (parse == null) {
         parse = sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
       }
@@ -270,7 +269,7 @@ public class OpenIE implements Annotator {
       } else {
         List<SentenceFragment> clauses = clausesInSentence(sentence);
         List<SentenceFragment> fragments = entailmentsFromClauses(clauses);
-//        fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), false));
+//        fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class), false));
         extractions.addAll(relationsInFragments(fragments, sentence, canonicalMentionMap));
         sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
         sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, extractions);

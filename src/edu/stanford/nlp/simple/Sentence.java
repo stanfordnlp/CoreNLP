@@ -1,19 +1,15 @@
 package edu.stanford.nlp.simple;
 
-import edu.stanford.nlp.ie.util.RelationTriple;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.naturalli.OperatorSpec;
 import edu.stanford.nlp.naturalli.Polarity;
-import edu.stanford.nlp.naturalli.SentenceFragment;
-import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.CoreNLPProtos;
 import edu.stanford.nlp.pipeline.ProtobufAnnotationSerializer;
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphFactory;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.util.Pair;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +19,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static edu.stanford.nlp.simple.Document.EMPTY_PROPS;
 
@@ -41,14 +36,6 @@ public class Sentence {
     setProperty("ssplit.isOneSentence", "true");
     setProperty("tokenize.class", "PTBTokenizer");
     setProperty("tokenize.language", "en");
-  }};
-
-  /** A properties object for creating a document from a single tokenized sentence. */
-  private static Properties SINGLE_SENTENCE_TOKENIZED_DOCUMENT = new Properties() {{
-    setProperty("ssplit.isOneSentence", "true");
-    setProperty("tokenize.class", "WhitespaceTokenizer");
-    setProperty("tokenize.language", "en");
-    setProperty("tokenize.whitespace", "true");  // redundant?
   }};
 
   /**
@@ -97,27 +84,6 @@ public class Sentence {
     this(text, SINGLE_SENTENCE_DOCUMENT);
   }
 
-  /**
-   * Create a new sentence from the given tokenized text, assuming the entire text is just one sentence.
-   * WARNING: This method may in rare cases (mostly when tokens themselves have whitespace in them)
-   *          produce strange results; it's a bit of a hack around the default tokenizer.
-   *
-   * @param tokens The text of the sentence.
-   */
-  public Sentence(List<String> tokens) {
-    this(StringUtils.join(tokens.stream().map(x -> x.replace(' ', 'ߝ' /* some random character */)), " "), SINGLE_SENTENCE_TOKENIZED_DOCUMENT);
-    // Clean up whitespace
-    for (int i = 0; i < impl.getTokenCount(); ++i) {
-      this.impl.getTokenBuilder(i).setWord(this.impl.getTokenBuilder(i).getWord().replace('ߝ', ' '));
-      this.impl.getTokenBuilder(i).setValue(this.impl.getTokenBuilder(i).getValue().replace('ߝ', ' '));
-      this.tokensBuilders.get(i).setWord(this.tokensBuilders.get(i).getWord().replace('ߝ', ' '));
-      this.tokensBuilders.get(i).setValue(this.tokensBuilders.get(i).getValue().replace('ߝ', ' '));
-    }
-  }
-
-  /**
-   * Create a sentence from a saved protocol buffer.
-   */
   public Sentence(CoreNLPProtos.Sentence proto) {
     this.impl = proto.toBuilder();
     // Set tokens
@@ -164,45 +130,6 @@ public class Sentence {
   protected Sentence(Document doc, CoreMap sentence) {
     this(doc, doc.serializer.toProto(sentence).toBuilder());
     this.impl.setText(sentence.get(CoreAnnotations.TextAnnotation.class));
-  }
-
-  /**
-   * Convert a CoreMap into a simple Sentence object.
-   * Note that this is a copy operation -- the implementing CoreMap will not be updated, and all of its
-   * contents are copied over to the protocol buffer format backing the {@link Sentence} object.
-   *
-   * @param sentence The CoreMap representation of the sentence.
-   */
-  public Sentence(CoreMap sentence) {
-    this(new Document(new Annotation(sentence.get(CoreAnnotations.TextAnnotation.class)) {{
-      set(CoreAnnotations.SentencesAnnotation.class, Collections.singletonList(sentence));
-    }}), sentence);
-  }
-
-  /**
-   * <p>
-   *   Convert a sentence fragment (i.e., entailed sentence) into a simple sentence object.
-   *   Like {@link Sentence#Sentence(CoreMap)}, this copies the information in the fragment into the underlying
-   *   protobuf backed format.
-   * </p>
-   *
-   * @param sentence The sentence fragment to convert.
-   */
-  public Sentence(SentenceFragment sentence) {
-    this(new ArrayCoreMap(32) {{
-      set(CoreAnnotations.TokensAnnotation.class, sentence.words);
-      set(CoreAnnotations.TextAnnotation.class, StringUtils.join(sentence.words.stream().map(CoreLabel::originalText), " "));
-      if (sentence.words.isEmpty()) {
-        set(CoreAnnotations.TokenBeginAnnotation.class, 0);
-        set(CoreAnnotations.TokenEndAnnotation.class, 0);
-      } else {
-        set(CoreAnnotations.TokenBeginAnnotation.class, sentence.words.get(0).get(CoreAnnotations.IndexAnnotation.class));
-        set(CoreAnnotations.TokenEndAnnotation.class, sentence.words.get(sentence.words.size() - 1).get(CoreAnnotations.IndexAnnotation.class) + 1);
-      }
-      set(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class, sentence.parseTree);
-      set(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class, sentence.parseTree);
-      set(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class, sentence.parseTree);
-    }});
   }
 
   /**
@@ -583,37 +510,6 @@ public class Sentence {
     return incomingDependencyLabels(EMPTY_PROPS, SemanticGraphFactory.Mode.BASIC);
   }
 
-
-  /**
-   * Returns the dependency graph of the sentence, as a raw {@link SemanticGraph} object.
-   * Note that this method is slower than you may expect, as it has to convert the underlying protocol
-   * buffer back into a list of CoreLabels with which to populate the {@link SemanticGraph}.
-   *
-   * @param props The properties to use for running the dependency parser annotator.
-   * @param mode The type of graph to return (e.g., basic, collapsed, etc).
-   *
-   * @return The dependency graph of the sentence.
-   */
-  public SemanticGraph dependencyGraph(Properties props, SemanticGraphFactory.Mode mode) {
-    document.runDepparse(props);
-    return ProtobufAnnotationSerializer.fromProto(dependencies(mode), asCoreLabels(), document.docid().orElse(null));
-  }
-
-  /** @see Sentence#dependencyGraph(Properties, SemanticGraphFactory.Mode) */
-  public SemanticGraph dependencyGraph(Properties props) {
-    return dependencyGraph(props, SemanticGraphFactory.Mode.BASIC);
-  }
-
-  /** @see Sentence#dependencyGraph(Properties, SemanticGraphFactory.Mode) */
-  public SemanticGraph dependencyGraph() {
-    return dependencyGraph(EMPTY_PROPS, SemanticGraphFactory.Mode.BASIC);
-  }
-
-  /** @see Sentence#dependencyGraph(Properties, SemanticGraphFactory.Mode) */
-  public SemanticGraph dependencyGraph(SemanticGraphFactory.Mode mode) {
-    return dependencyGraph(EMPTY_PROPS, mode);
-  }
-
   /** The length of the sentence, in tokens */
   public int length() {
     return impl.getTokenCount();
@@ -705,45 +601,6 @@ public class Sentence {
     return natlogPolarity(EMPTY_PROPS, index);
   }
 
-
-  /**
-   * Get the OpenIE triples associated with this sentence.
-   * Note that this function may be slower than you would expect, as it has to
-   * convert the underlying Protobuf representation back into {@link CoreLabel}s.
-   *
-   * @param props The properties to use for the OpenIE annotator.
-   * @return A collection of {@link RelationTriple} objects representing the OpenIE triples in the sentence.
-   */
-  public Collection<RelationTriple> openieTriples(Properties props) {
-    document.runOpenie(props);
-    synchronized (impl) {
-      List<CoreLabel> tokens = asCoreLabels();
-      return impl.getOpenieTripleList().stream().map(x -> ProtobufAnnotationSerializer.fromProto(x, tokens, document.docid().orElse(null))).collect(Collectors.toList());
-    }
-  }
-
-  /** @see Sentence@openieTriples(Properties) */
-  public Collection<RelationTriple> openieTriples() {
-    return openieTriples(EMPTY_PROPS);
-  }
-
-  /**
-   * Get a list of Open IE triples as flat (subject, relation, object, confidence) quadruples.
-   * This is substantially faster than returning {@link RelationTriple} objects, as it doesn't
-   * require converting the underlying representation into {@link CoreLabel}s; but, it also contains
-   * significantly less information about the sentence.
-   *
-   * @see Sentence@openieTriples(Properties)
-   */
-  public Collection<Quadruple<String, String, String, Double>> openie() {
-    return impl.getOpenieTripleList().stream()
-        .filter(proto -> proto.hasSubject() && proto.hasRelation() && proto.hasObject())
-        .map(proto -> Quadruple.makeQuadruple(proto.getSubject(), proto.getRelation(), proto.getObject(),
-            proto.hasConfidence() ? proto.getConfidence() : 1.0))
-        .collect(Collectors.toList());
-  }
-
-
   //
   // Helpers for CoreNLP interoperability
   //
@@ -793,13 +650,6 @@ public class Sentence {
   // HELPERS FROM DOCUMENT
   //
 
-  /**
-   * Update each token in the sentence with the given information.
-   * @param tokens The CoreNLP tokens returned by the {@link edu.stanford.nlp.pipeline.Annotator}.
-   * @param setter The function to set a Protobuf object with the given field.
-   * @param getter The function to get the given field from the {@link CoreLabel}.
-   * @param <E> The type of the given field we are setting in the protocol buffer and reading from the {@link CoreLabel}.
-   */
   protected <E> void updateTokens(List<CoreLabel> tokens,
                               Consumer<Pair<CoreNLPProtos.Token.Builder, E>> setter,
                               Function<CoreLabel, E> getter) {
@@ -813,23 +663,12 @@ public class Sentence {
     }
   }
 
-  /**
-   * Update the parse tree for this sentence.
-   * @param parse The parse tree to update.
-   */
   protected void updateParse(CoreNLPProtos.ParseTree parse) {
     synchronized (this.impl) {
       this.impl.setParseTree(parse);
     }
   }
 
-  /**
-   * Update the dependencies of the sentence.
-   *
-   * @param basic The basic dependencies to update.
-   * @param collapsed The collapsed dependencies to update.
-   * @param ccProcessed The CC processed dependencies to update.
-   */
   protected void updateDependencies(CoreNLPProtos.DependencyGraph basic,
                                     CoreNLPProtos.DependencyGraph collapsed,
                                     CoreNLPProtos.DependencyGraph ccProcessed) {
@@ -840,18 +679,6 @@ public class Sentence {
     }
   }
 
-  /**
-   * Update the Open IE relation triples for this sentence.
-   *
-   * @param triples The stream of relation triples to add to the sentence.
-   */
-  protected void updateTriples(Stream<CoreNLPProtos.OpenIETriple> triples) {
-    synchronized (this.impl) {
-      triples.forEach(this.impl::addOpenieTriple);
-    }
-  }
-
-  /** {@inheritDoc} */
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -877,7 +704,6 @@ public class Sentence {
     return true;
   }
 
-  /** {@inheritDoc} */
   @Override
   public int hashCode() {
     if (this.impl.hasText()) {
@@ -887,7 +713,6 @@ public class Sentence {
     }
   }
 
-  /** {@inheritDoc} */
   @Override
   public String toString() {
     return impl.getText();

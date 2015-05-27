@@ -336,9 +336,9 @@ public class RelationTripleSegmenterTest extends TestCase {
 
   public void testApposAsSubj() {
     Optional<RelationTriple> extraction = mkExtraction(
-        "1\tDurin\t0\troot\tNNP\n" +
-        "2\tson\t1\tappos\tNN\n" +
-        "3\tThorin\t2\tnmod:of\tNNP\n"
+        "1\tDurin\t0\troot\n" +
+        "2\tson\t1\tappos\n" +
+        "3\tThorin\t2\tnmod:of\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tDurin\tson of\tThorin", extraction.get().toString());
@@ -425,39 +425,12 @@ public class RelationTripleSegmenterTest extends TestCase {
   public void testThereAre() {
     Optional<RelationTriple> extraction = mkExtraction(
         "1\tthere\t2\texpl\n" +
-        "2\tare\t0\troot\tVBP\tO\tbe\n" +
-        "3\tdogs\t2\tnsubj\tNN\n" +
-        "4\theaven\t3\tnmod:in\tNN\n",
-    true);
-    assertTrue("No extraction for sentence!", extraction.isPresent());
-    assertEquals("1.0\tdogs\tis in\theaven", extraction.get().toString());
-  }
-
-  public void testThereAreVBing() {
-    Optional<RelationTriple> extraction = mkExtraction(
-        "1\tthere\t2\texpl\n" +
-        "2\tare\t0\troot\tVBP\tO\tbe\n" +
+        "2\tare\t0\troot\tVBG\tO\tbe\n" +
         "3\tdogs\t2\tnsubj\n" +
-        "4\tsitting\t3\tacl\n" +
-        "5\theaven\t4\tnmod:in\n"
+        "4\theaven\t3\tnmod:in\n"
     );
     assertTrue("No extraction for sentence!", extraction.isPresent());
-    assertEquals("1.0\tdogs\tsitting in\theaven", extraction.get().toString());
-  }
-
-  public void testDogsInheaven() {
-    Optional<RelationTriple> extraction = mkExtraction(
-        "1\tdogs\t0\troot\tNN\n" +
-        "2\theaven\t1\tnmod:in\tNN\n",
-    true);
-    assertTrue("No extraction for sentence!", extraction.isPresent());
-    assertEquals("1.0\tdogs\tis in\theaven", extraction.get().toString());
-
-    extraction = mkExtraction(
-        "1\tdogs\t0\troot\tNN\n" +
-        "2\theaven\t1\tnmod:of\tNN\n",
-    true);
-    assertFalse(extraction.isPresent());
+    assertEquals("1.0\tdogs\tare in\theaven", extraction.get().toString());
   }
 
   public void testAdvObject() {
@@ -678,55 +651,18 @@ public class RelationTripleSegmenterTest extends TestCase {
 
   public void testAllNominals() {
     String conll =
-        "1\tfierce\t2\tamod\tJJ\n" +
-        "2\tlions\t0\troot\tNN\n" +
-        "3\tin\t4\tcase\tIN\n" +
-        "4\tNarnia\t2\tnmod:in\tNNP\n";
+        "1\tfierce\t2\tamod\n" +
+        "2\tlions\t0\troot\n" +
+        "3\tof\t4\tcase\n" +
+        "4\tNarnia\t2\tnmod:of\n";
     // Positive case
     Optional<RelationTriple> extraction = mkExtraction(conll, 0, true);
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tlions\tis\tfierce", extraction.get().toString());
     extraction = mkExtraction(conll, 1, true);
     assertTrue("No extraction for sentence!", extraction.isPresent());
-    assertEquals("1.0\tlions\tis in\tNarnia", extraction.get().toString());
+    assertEquals("1.0\tlions\tis of\tNarnia", extraction.get().toString());
     // Negative case
     assertFalse(mkExtraction(conll, false).isPresent());
-  }
-
-  public void testAcl() {
-    String conll =
-        "1\tman\t0\troot\tNN\n" +
-        "2\tsitting\t1\tacl\tVBG\n" +
-        "3\tin\t4\tcase\tIN\n" +
-        "4\ttree\t2\tnmod:in\tNN\n";
-    // Positive case
-    Optional<RelationTriple> extraction = mkExtraction(conll, true);
-    assertTrue("No extraction for sentence!", extraction.isPresent());
-    assertEquals("1.0\tman\tsitting in\ttree", extraction.get().toString());
-  }
-
-  public void testAclWithAdverb() {
-    String conll =
-        "1\tman\t0\troot\tNN\n" +
-        "2\tsitting\t1\tacl\tVBG\n" +
-        "3\tvery\t2\tadvmod\tRB\n" +
-        "4\tquietly\t2\tadvmod\tRB\n" +
-        "5\tin\t6\tcase\tIN\n" +
-        "6\ttree\t2\tnmod:in\tNN\n";
-    // Positive case
-    Optional<RelationTriple> extraction = mkExtraction(conll, true);
-    assertTrue("No extraction for sentence!", extraction.isPresent());
-    assertEquals("1.0\tman\tsitting very quietly in\ttree", extraction.get().toString());
-  }
-
-  public void testAclNoPP() {
-    String conll =
-        "1\tman\t0\troot\tNN\n" +
-        "2\triding\t1\tacl\tVBG\n" +
-        "3\thorse\t2\tdobj\tNN\n";
-    // Positive case
-    Optional<RelationTriple> extraction = mkExtraction(conll, true);
-    assertTrue("No extraction for sentence!", extraction.isPresent());
-    assertEquals("1.0\tman\triding\thorse", extraction.get().toString());
   }
 }

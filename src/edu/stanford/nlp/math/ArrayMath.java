@@ -642,17 +642,6 @@ public class ArrayMath {
     return total / a.length;
   }
 
-  /** This version avoids any possibility of overflow. */
-  public static double iterativeAverage(double[] a) {
-    double avg = 0.0;
-    int t = 1;
-    for (double x : a) {
-      avg += (x - avg) / t;
-      t++;
-    }
-    return avg;
-  }
-
   /**
    * Computes inf-norm of vector.
    * This is just the largest absolute value of an element.

@@ -23,7 +23,8 @@ head.js(
 );
 head.ready(function() {
     // Short-hands for our visualisation types.
-    vis_types = ['pos', 'ner', 'coref', 'basic_dep', 'collapsed_ccproc_dep'];
+    vis_types = ['pos', 'ner', 'coref', 'basic_dep', 'collapsed_dep',
+        'collapsed_ccproc_dep'];
     // Data storage and state variables.
     var data = {};
     var conf = false;
