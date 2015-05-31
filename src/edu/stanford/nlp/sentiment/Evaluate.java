@@ -1,10 +1,14 @@
 package edu.stanford.nlp.sentiment; 
 import edu.stanford.nlp.util.logging.Redwood;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
+import edu.stanford.nlp.ling.Label;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.Generics;
+
 
 /** @author John Bauer */
 public class Evaluate extends AbstractEvaluate  {
@@ -15,10 +19,70 @@ public class Evaluate extends AbstractEvaluate  {
   final SentimentCostAndGradient cag;
   final SentimentModel model;
 
+  // Count how many trees are unknown to the model
+  // The alternate version, ExternalEvaluate, has no concept of
+  // unknown, so this is exclusive to the evaluate which uses a model
+  int treesWithUnks;
+  int treesWithUnksCorrect;
+
   public Evaluate(SentimentModel model) {
     super(model.op);
     this.model = model;
     this.cag = new SentimentCostAndGradient(model, null);
+  }
+
+  @Override
+  public void reset() {
+    super.reset();
+
+    treesWithUnks = 0;
+    treesWithUnksCorrect = 0;
+  }
+
+  @Override
+  public void eval(Tree tree) {
+    super.eval(tree);
+
+    countUnks(tree);
+  }
+
+  /**
+   * Keep track of how many trees have at least one unknown, and how
+   * many of those have the top level annotation correct.
+   */
+  protected void countUnks(Tree tree) {
+    List<Label> labels = tree.yield();
+    boolean hasUnk = false;
+    for (Label label : labels) {
+      if (!model.wordVectors.containsKey(label.value())) {
+        hasUnk = true;
+        break;
+      }
+    }
+
+    if (hasUnk) {
+      int gold = RNNCoreAnnotations.getGoldClass(tree);
+      int guess = RNNCoreAnnotations.getPredictedClass(tree);
+
+      treesWithUnks += 1;
+      if (gold == guess)
+        treesWithUnksCorrect += 1;
+    }
+  }
+
+  private static final String FORMAT = "#.##";
+  protected DecimalFormat format = new DecimalFormat(FORMAT);
+
+  @Override
+  public void printSummary() {
+    super.printSummary();
+
+    log.info("Saw " + treesWithUnks + " trees with at least one unknown token.");
+    if (treesWithUnks > 0) {
+      double percent = (float) treesWithUnksCorrect / treesWithUnks * 100.0;
+      log.info(treesWithUnksCorrect + " / " + treesWithUnks + " trees (" + format.format(percent) +
+               "%) with at least one unknown token were classified correctly at the top level.");
+    }
   }
 
   @Override
