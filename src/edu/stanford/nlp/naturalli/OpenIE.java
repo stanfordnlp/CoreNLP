@@ -273,7 +273,8 @@ public class OpenIE implements Annotator {
 //        fragments.add(new SentenceFragment(sentence.get(SemanticGraphCoreAnnotations.CollapsedDependenciesAnnotation.class), false));
         extractions.addAll(relationsInFragments(fragments, sentence, canonicalMentionMap));
         sentence.set(NaturalLogicAnnotations.EntailedSentencesAnnotation.class, fragments);
-        sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class, extractions);
+        sentence.set(NaturalLogicAnnotations.RelationTriplesAnnotation.class,
+            new ArrayList<>(new HashSet<>(extractions)));  // uniq the extractions
       }
     }
   }

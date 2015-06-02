@@ -187,6 +187,7 @@ public class ForwardEntailerSearchProblem {
       if (incomingEdges.hasNext()) {
         edge = incomingEdges.next();
       }
+      int numIters = 0;
       while (edge != null) {
         if (edge.getRelation().toString().endsWith("subj")) {
           isSubject[vertex.index() - 1] = true;
@@ -197,6 +198,11 @@ public class ForwardEntailerSearchProblem {
           edge = incomingEdges.next();
         } else {
           edge = null;
+        }
+        numIters += 1;
+        if (numIters > 100) {
+          System.err.println("ERROR: tree has apparent depth > 100");
+          return Collections.EMPTY_LIST;
         }
       }
     }
@@ -249,6 +255,7 @@ public class ForwardEntailerSearchProblem {
 
       // Push the case where we don't delete
       int nextIndex = state.currentIndex + 1;
+      int numIters = 0;
       while (nextIndex < topologicalVertices.size()) {
         IndexedWord nextWord = topologicalVertices.get(nextIndex);
         if (  ((state.deletionMask >>> (indexToMaskIndex[nextWord.index() - 1])) & 0x1l) == 0) {
@@ -256,6 +263,11 @@ public class ForwardEntailerSearchProblem {
           break;
         } else {
           nextIndex += 1;
+        }
+        numIters += 1;
+        if (numIters > 10000) {
+          System.err.println("ERROR: logic error (apparent infinite loop); returning");
+          return results;
         }
       }
 
@@ -320,6 +332,7 @@ public class ForwardEntailerSearchProblem {
 
           // Push the state with this subtree deleted
           nextIndex = state.currentIndex + 1;
+          numIters = 0;
           while (nextIndex < topologicalVertices.size()) {
             IndexedWord nextWord = topologicalVertices.get(nextIndex);
             long newMask = treeWithDeletionsAndNewMask.get().second;
@@ -330,6 +343,11 @@ public class ForwardEntailerSearchProblem {
               break;
             } else {
               nextIndex += 1;
+            }
+            numIters += 1;
+            if (numIters > 10000) {
+              System.err.println("ERROR: logic error (apparent infinite loop); returning");
+              return results;
             }
           }
         }
