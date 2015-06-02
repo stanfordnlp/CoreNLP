@@ -729,16 +729,4 @@ public class RelationTripleSegmenterTest extends TestCase {
     assertTrue("No extraction for sentence!", extraction.isPresent());
     assertEquals("1.0\tman\triding\thorse", extraction.get().toString());
   }
-
-  public void testAclWithPP() {
-    String conll =
-        "1\tweeds\t0\troot\tNN\n" +
-        "2\tgrowing\t1\tacl\tVBG\n" +
-        "3\taround\t4\tcase\tIN\n" +
-        "4\tplant\t2\tnmod:around\tNN\n";
-    // Positive case
-    Optional<RelationTriple> extraction = mkExtraction(conll, true);
-    assertTrue("No extraction for sentence!", extraction.isPresent());
-    assertEquals("1.0\tweeds\tgrowing around\tplant", extraction.get().toString());
-  }
 }
