@@ -28,7 +28,6 @@ package edu.stanford.nlp.trees;
 
 import static edu.stanford.nlp.trees.EnglishPatterns.*;
 import edu.stanford.nlp.trees.tregex.TregexPatternCompiler;
-import edu.stanford.nlp.util.CollectionUtils;
 import edu.stanford.nlp.util.Generics;
 import edu.stanford.nlp.international.Language;
 
@@ -1035,7 +1034,7 @@ public class UniversalEnglishGrammaticalRelations {
           "WHNP|WHNP-TMP|WHNP-ADV|NP|NP-TMP|NP-ADV|NML|NX < (/^,$/ $+ (VP=target [ <1 VBG|VBN | <2 (VBG|VBN $-- ADVP) ]))",
 
           //former pcomp
-          "/^(?:(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) < /^((?!(PP|CC|CONJP|,)).)*$/  !< (@PP <1 IN|RB|MWE|PCONJP|VBN|JJ <2 @NP))  !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
+          "/^(?:(?:WH)?(?:NP|NX|NML)(?:-TMP|-ADV)?)$/ < (WHPP|WHPP-TMP|PP|PP-TMP=target !< @NP|WHNP|NML !$- (@CC|CONJP $- __) < /^((?!(PP|CC|CONJP|,)).)*$/  ) !<- " + ETC_PAT + " !<- " + FW_ETC_PAT,
 
 
           "/^NP(?:-[A-Z]+)?$/ < (S=target < (VP < TO) $-- NP|NN|NNP|NNS)",
@@ -1505,19 +1504,6 @@ public class UniversalEnglishGrammaticalRelations {
   private static final List<GrammaticalRelation> unmodifiableSynchronizedValues =
     Collections.unmodifiableList(values);
   public static final ReadWriteLock valuesLock = new ReentrantReadWriteLock();
-  //Relations that can connect two clauses.
-  public static final Set<GrammaticalRelation> clauseRelations =
-      Collections.unmodifiableSet(CollectionUtils.asSet(new GrammaticalRelation[] {
-          CONJUNCT,
-          XCLAUSAL_COMPLEMENT,
-          CLAUSAL_COMPLEMENT,
-          CLAUSAL_MODIFIER,
-          ADV_CLAUSE_MODIFIER,
-          RELATIVE_CLAUSE_MODIFIER,
-          PARATAXIS,
-          APPOSITIONAL_MODIFIER,
-          LIST
-      }));
 
   // Map from English GrammaticalRelation short names to their corresponding
   // GrammaticalRelation objects
