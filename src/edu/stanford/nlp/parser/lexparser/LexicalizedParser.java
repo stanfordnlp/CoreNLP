@@ -650,6 +650,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
     return buildTrainTransformer(op, binarizer);
   }
 
+  // todo [cdm2015]: This method should be used in TreeAnnotatorAndBinarizer#getAnnotatedBinaryTreebankFromTreebank and moved to that class
   public static CompositeTreeTransformer buildTrainTransformer(Options op, TreeAnnotatorAndBinarizer binarizer) {
     TreebankLangParserParams tlpParams = op.tlpParams;
     TreebankLanguagePack tlp = tlpParams.treebankLanguagePack();
@@ -677,6 +678,7 @@ public class LexicalizedParser extends ParserGrammar implements Serializable {
   /** @return A triple of binaryTrainTreebank, binarySecondaryTrainTreebank, binaryTuneTreebank.
    */
   @SuppressWarnings("UnusedDeclaration")
+  // todo [cdm2015]: This method should be difference-resolved with TreeAnnotatorAndBinarizer#getAnnotatedBinaryTreebankFromTreebank and then deleted
   public static Triple<Treebank, Treebank, Treebank> getAnnotatedBinaryTreebankFromTreebank(Treebank trainTreebank,
       Treebank secondaryTreebank,
       Treebank tuneTreebank,
