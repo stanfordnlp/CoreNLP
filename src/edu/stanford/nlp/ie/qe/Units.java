@@ -79,16 +79,14 @@ public class Units {
   }
 
   public static class Currencies {
-    public static final Unit DOLLAR = new MoneyUnit("dollar", "$");
-    public static final Unit CENT = new MoneyUnit("cent", "¢", DOLLAR, 0.01);
-    public static final Unit POUND = new MoneyUnit("pound", "\u00A3");
-    public static final Unit PENNY = new MoneyUnit("penny", "¢", DOLLAR, 0.01);
-    public static final Unit EURO = new MoneyUnit("euro", "\u00AC");
-    public static final Unit YEN = new MoneyUnit("yen", "\u00A5");
-    public static final Unit YUAN = new MoneyUnit("yuan", "\u5143");
-    public static final Unit WON = new MoneyUnit("won", "\u20A9");
-
-    private Currencies() {} // constant holder class
+    public static Unit DOLLAR = new MoneyUnit("dollar", "$");
+    public static Unit CENT = new MoneyUnit("cent", "¢", DOLLAR, 0.01);
+    public static Unit POUND = new MoneyUnit("pound", "\u00A3");
+    public static Unit PENNY = new MoneyUnit("penny", "¢", DOLLAR, 0.01);
+    public static Unit EURO = new MoneyUnit("euro", "\u00AC");
+    public static Unit YEN = new MoneyUnit("yen", "\u00A5");
+    public static Unit YUAN = new MoneyUnit("yuan", "\u5143");
+    public static Unit WON = new MoneyUnit("won", "\u20A9");
   }
 
   public static void registerUnits(Env env, String filename) throws IOException {
@@ -157,5 +155,4 @@ public class Units {
     br.close();
     return list;
   }
-
 }
